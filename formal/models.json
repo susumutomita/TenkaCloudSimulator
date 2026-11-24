@@ -3501,7 +3501,7 @@
    "id": "SakuraStartupAdmission",
    "model": "formal/SakuraStartupAdmission.tla",
    "config": "formal/SakuraStartupAdmission.cfg",
-   "bounds": "One startup, four immutable named scope-presence/validity slots (valid subset of present), enabled/unsafe Boolean modes; parsed validation followed by listener/database/provider/token success stages. No loops beyond stuttering.",
+   "bounds": "One startup, four immutable named scope-presence/validity slots (valid subset of present), enabled/unsafe/Server opt-in/allow-remote Booleans and three abstract address classes; Sakura validation followed by listener/database/provider/token success stages. Stuttering only.",
    "properties": [
     "TypeOK",
     "NoEffectsOnRefusal",
@@ -3515,7 +3515,7 @@
     "TokenOnlyAuthenticated",
     "StartupComplete"
    ],
-   "limits": "Pure parsed-flag admission and startup order abstraction only. Absent fields have empty invalid defaults; explicit empty values count as supplied. Default disabled may create general host DB/listener/token (token skipped when unsafe) but no Sakura schema/provider. Assumes later infrastructure steps succeed; does not prove full constructor atomicity, listener/database/token syscalls, failures/cleanup, flag parser or regex/UTF8 refinement, host authentication, token cryptography, DB lease, SDK/HTTP/UI or Go implementation refinement. Shared server.go scope covers only optional provider setup/registration under validated scope; other providers/auth/routing and all failure rollback are excluded.",
+   "limits": "Bounded parsed-flag Sakura admission and pre-effect order only. Default-disabled Server mode adds no new startup constraint. Enabled Server opt-in requires valid enabled Sakura scope, unsafe and allow-remote off, and parsed numeric loopback. Generic listener rules and other providers are outside this model. Later startup stages assume success. Does not prove real authentication, token handling/cryptography, IP parsing or socket binding, proxy or tunnel exposure, constructor atomicity, syscall failures/cleanup, SDK/HTTP/browser behavior, or Go refinement. Shared server.go scope covers only Sakura provider construction and configuration.",
    "source_scope": [
     "cmd/simulator/sakura_flags.go",
     "cmd/simulator/main.go",
@@ -3665,6 +3665,61 @@
       }
      ],
      "expect_invariant": "TokenOnlyAuthenticated"
+    },
+    {
+     "id": "OptInWithoutScope",
+     "edits": [
+      {
+       "old": "ConsoleReady == ~optIn \\/ (enabled /\\ ~unsafe /\\ ~allowRemote\n                            /\\ address=\"numeric-loopback\")",
+       "new": "ConsoleReady == ~optIn \\/ (~unsafe /\\ ~allowRemote /\\ address=\"numeric-loopback\")",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "AcceptedConfigExact"
+    },
+    {
+     "id": "OptInWithRemote",
+     "edits": [
+      {
+       "old": "ConsoleReady == ~optIn \\/ (enabled /\\ ~unsafe /\\ ~allowRemote\n                            /\\ address=\"numeric-loopback\")",
+       "new": "ConsoleReady == ~optIn \\/ (enabled /\\ ~unsafe /\\ address=\"numeric-loopback\")",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "AcceptedConfigExact"
+    },
+    {
+     "id": "OptInWithNonNumeric",
+     "edits": [
+      {
+       "old": "ConsoleReady == ~optIn \\/ (enabled /\\ ~unsafe /\\ ~allowRemote\n                            /\\ address=\"numeric-loopback\")",
+       "new": "ConsoleReady == ~optIn \\/ (enabled /\\ ~unsafe /\\ ~allowRemote /\\ address#\"numeric-nonloopback\")",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "AcceptedConfigExact"
+    },
+    {
+     "id": "OptInWithNonLoopback",
+     "edits": [
+      {
+       "old": "ConsoleReady == ~optIn \\/ (enabled /\\ ~unsafe /\\ ~allowRemote\n                            /\\ address=\"numeric-loopback\")",
+       "new": "ConsoleReady == ~optIn \\/ (enabled /\\ ~unsafe /\\ ~allowRemote /\\ address#\"non-numeric\")",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "AcceptedConfigExact"
+    },
+    {
+     "id": "RejectValidOptIn",
+     "edits": [
+      {
+       "old": "ConsoleReady == ~optIn \\/ (enabled /\\ ~unsafe /\\ ~allowRemote\n                            /\\ address=\"numeric-loopback\")",
+       "new": "ConsoleReady == ~optIn",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "ValidAdmissionAvailable"
     }
    ]
   },
@@ -18971,7 +19026,7 @@
     "OnlyCurrentResult",
     "NoDifferentServer"
    ],
-   "limits": "Finite read-only presentation projection. Production Server capability is default-off; enabled states are counterfactual for validating the guarded view. Models descriptor/disabled/handoff admission, abstract context and list/detail request revision, and matching detail identity. No native backend behavior, authentication refinement, React/DOM/HTTP behavior, full response-schema validation, pagination, mutations, runtime availability, SDK or Terraform claim. Generated bundle binding applies only to changed Server-view code.",
+   "limits": "Finite read-only presentation projection. Production Server capability is default-off; enabled states represent the explicitly guarded local operator opt-in after capability projection. Models descriptor/disabled/handoff admission, abstract context and list/detail request revision, and matching detail identity. Does not prove CLI validation or binding, proxy exposure, real authentication or browser authority, React/DOM/HTTP behavior, response schemas, pagination, mutations, runtime availability, SDK or Terraform. Generated bundle binding applies only to changed Server-view code.",
    "source_scope": [
     "internal/server/sakura_provider.go",
     "internal/server/web/app.js",

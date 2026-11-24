@@ -3,6 +3,47 @@
   "base_sha": "9652f0344ab9d7e57aa30595fab5c3ed52c57cd8",
   "changes": [
     {
+      "path": "cmd/simulator/main.go",
+      "sha256": "5d55fad5e885f60dbb9234d72b5f3d91866848ce0f7e16d13fabc8eac1a75554",
+      "disposition": "modeled",
+      "reason": "Scope and opt-in are validated before listener or state setup; only abstract Sakura path ordering is modeled.",
+      "models": [
+        {
+          "id": "SakuraStartupAdmission",
+          "properties": [
+            "AcceptedConfigExact",
+            "ValidAdmissionAvailable",
+            "NoEffectsOnRefusal",
+            "ValidationPrecedesEffects"
+          ],
+          "limits": "Bounded parsed-flag Sakura admission and pre-effect order only. Default-disabled Server mode adds no new startup constraint. Enabled Server opt-in requires valid enabled Sakura scope, unsafe and allow-remote off, and parsed numeric loopback. Generic listener rules and other providers are outside this model. Later startup stages assume success. Does not prove real authentication, token handling/cryptography, IP parsing or socket binding, proxy or tunnel exposure, constructor atomicity, syscall failures/cleanup, SDK/HTTP/browser behavior, or Go refinement. Shared server.go scope covers only Sakura provider construction and configuration."
+        }
+      ]
+    },
+    {
+      "path": "cmd/simulator/sakura_flags.go",
+      "sha256": "cf08af1ee2439bf1681d33ad0e3d4ab868c9937949c41168a1516c53e8a39d82",
+      "disposition": "modeled",
+      "reason": "Parsed Server Console flag, scope prerequisite and classified local-only guard; no address parser or authentication proof.",
+      "models": [
+        {
+          "id": "SakuraStartupAdmission",
+          "properties": [
+            "AcceptedConfigExact",
+            "ValidAdmissionAvailable"
+          ],
+          "limits": "Bounded parsed-flag Sakura admission and pre-effect order only. Default-disabled Server mode adds no new startup constraint. Enabled Server opt-in requires valid enabled Sakura scope, unsafe and allow-remote off, and parsed numeric loopback. Generic listener rules and other providers are outside this model. Later startup stages assume success. Does not prove real authentication, token handling/cryptography, IP parsing or socket binding, proxy or tunnel exposure, constructor atomicity, syscall failures/cleanup, SDK/HTTP/browser behavior, or Go refinement. Shared server.go scope covers only Sakura provider construction and configuration."
+        }
+      ]
+    },
+    {
+      "path": "cmd/simulator/sakura_flags_test.go",
+      "sha256": "183ce7d9cb250d76ce00de72dc1e69a198bb00e2df25f437a559dbbcf7f8ae7a",
+      "disposition": "test-support",
+      "reason": "In-process startup guard negative fixtures; no successful socket or live launch.",
+      "models": []
+    },
+    {
       "path": "docs/formal-sakura-server.md",
       "sha256": "54e8a9f6d094b1f693bf78eff428e238053d637e3cf3ec277704e861447bb8e6",
       "disposition": "documentation",
@@ -72,7 +113,7 @@
             "OnlyCurrentResult",
             "NoDifferentServer"
           ],
-          "limits": "Finite read-only presentation projection. Production Server capability is default-off; enabled states are counterfactual for validating the guarded view. Models descriptor/disabled/handoff admission, abstract context and list/detail request revision, and matching detail identity. No native backend behavior, authentication refinement, React/DOM/HTTP behavior, full response-schema validation, pagination, mutations, runtime availability, SDK or Terraform claim. Generated bundle binding applies only to changed Server-view code."
+          "limits": "Finite read-only presentation projection. Production Server capability is default-off; enabled states represent the explicitly guarded local operator opt-in after capability projection. Models descriptor/disabled/handoff admission, abstract context and list/detail request revision, and matching detail identity. Does not prove CLI validation or binding, proxy exposure, real authentication or browser authority, React/DOM/HTTP behavior, response schemas, pagination, mutations, runtime availability, SDK or Terraform. Generated bundle binding applies only to changed Server-view code."
         }
       ]
     },
@@ -89,15 +130,33 @@
             "OnlyCurrentResult",
             "NoDifferentServer"
           ],
-          "limits": "Finite read-only presentation projection. Production Server capability is default-off; enabled states are counterfactual for validating the guarded view. Models descriptor/disabled/handoff admission, abstract context and list/detail request revision, and matching detail identity. No native backend behavior, authentication refinement, React/DOM/HTTP behavior, full response-schema validation, pagination, mutations, runtime availability, SDK or Terraform claim. Generated bundle binding applies only to changed Server-view code."
+          "limits": "Finite read-only presentation projection. Production Server capability is default-off; enabled states represent the explicitly guarded local operator opt-in after capability projection. Models descriptor/disabled/handoff admission, abstract context and list/detail request revision, and matching detail identity. Does not prove CLI validation or binding, proxy exposure, real authentication or browser authority, React/DOM/HTTP behavior, response schemas, pagination, mutations, runtime availability, SDK or Terraform. Generated bundle binding applies only to changed Server-view code."
+        }
+      ]
+    },
+    {
+      "path": "formal/SakuraStartupAdmission.tla",
+      "sha256": "eba3453a9f3886743249c010a1537df16b8f69719e08543848b6756709cf58e2",
+      "disposition": "modeled",
+      "reason": "Extends startup admission abstraction with explicit local Server Console opt-in before effects.",
+      "models": [
+        {
+          "id": "SakuraStartupAdmission",
+          "properties": [
+            "AcceptedConfigExact",
+            "ValidAdmissionAvailable",
+            "NoEffectsOnRefusal",
+            "ValidationPrecedesEffects"
+          ],
+          "limits": "Bounded parsed-flag Sakura admission and pre-effect order only. Default-disabled Server mode adds no new startup constraint. Enabled Server opt-in requires valid enabled Sakura scope, unsafe and allow-remote off, and parsed numeric loopback. Generic listener rules and other providers are outside this model. Later startup stages assume success. Does not prove real authentication, token handling/cryptography, IP parsing or socket binding, proxy or tunnel exposure, constructor atomicity, syscall failures/cleanup, SDK/HTTP/browser behavior, or Go refinement. Shared server.go scope covers only Sakura provider construction and configuration."
         }
       ]
     },
     {
       "path": "formal/models.json",
-      "sha256": "fdea1009ccead57b4057929c899fa673c689ab1d9f767494eb7c906e24f2e0f1",
+      "sha256": "d94961ae25ea5a3240f26994b99faa57ec6666e6650912bdd793e61d36459f6b",
       "disposition": "formal-infrastructure",
-      "reason": "Adds exact SakuraServerMetadata registration and preserves all 113 previously registered main models. Also retains the scoped console read-selection model and its six controls.",
+      "reason": "Preserves existing models and controls; updates the Sakura startup abstraction scope prose and adds five mutation controls, plus bounded read-epoch wording.",
       "models": []
     },
     {
@@ -196,25 +255,51 @@
     },
     {
       "path": "internal/server/sakura_provider.go",
-      "sha256": "44bc02a59ea8d465d101001295940fb2f6913e746da713fce4e0f527fe44e765",
+      "sha256": "b66c9a67d62a0ffb592bc1af8b6e706faec05d271eb06848303d3aea36ad740e",
       "disposition": "modeled",
-      "reason": "Advertises a separate Server List/Get descriptor but explicitly keeps console false and availability unreported; preserves existing Disk descriptor.",
+      "reason": "Only modeled Sakura configuration and bounded Server capability admission; trusted Actor/handoff rules are not proven.",
       "models": [
+        {
+          "id": "SakuraStartupAdmission",
+          "properties": [
+            "DisabledNoSakura",
+            "RegistrationRequiresSchema"
+          ],
+          "limits": "Bounded parsed-flag Sakura admission and pre-effect order only. Default-disabled Server mode adds no new startup constraint. Enabled Server opt-in requires valid enabled Sakura scope, unsafe and allow-remote off, and parsed numeric loopback. Generic listener rules and other providers are outside this model. Later startup stages assume success. Does not prove real authentication, token handling/cryptography, IP parsing or socket binding, proxy or tunnel exposure, constructor atomicity, syscall failures/cleanup, SDK/HTTP/browser behavior, or Go refinement. Shared server.go scope covers only Sakura provider construction and configuration."
+        },
         {
           "id": "SakuraServerReadEpoch",
           "properties": [
             "NoUnadvertisedMount"
           ],
-          "limits": "Finite read-only presentation projection. Production Server capability is default-off; enabled states are counterfactual for validating the guarded view. Models descriptor/disabled/handoff admission, abstract context and list/detail request revision, and matching detail identity. No native backend behavior, authentication refinement, React/DOM/HTTP behavior, full response-schema validation, pagination, mutations, runtime availability, SDK or Terraform claim. Generated bundle binding applies only to changed Server-view code."
+          "limits": "Finite read-only presentation projection. Production Server capability is default-off; enabled states represent the explicitly guarded local operator opt-in after capability projection. Models descriptor/disabled/handoff admission, abstract context and list/detail request revision, and matching detail identity. Does not prove CLI validation or binding, proxy exposure, real authentication or browser authority, React/DOM/HTTP behavior, response schemas, pagination, mutations, runtime availability, SDK or Terraform. Generated bundle binding applies only to changed Server-view code."
         }
       ]
     },
     {
       "path": "internal/server/sakura_provider_test.go",
-      "sha256": "c93b85f14ecbfefd27beab5ae36819de940add9db4605f42454ceaebed259a51",
+      "sha256": "cf1a879b11a498c155a01b381bee7b0ff7f689b4714f9c8d11307f7c0edf3f66",
       "disposition": "test-support",
-      "reason": "Tests separate default-off descriptor, absence without configuration and unchanged Disk behavior.",
+      "reason": "In-process capability and missing-provider refusal fixtures; no live browser or provider.",
       "models": []
+    },
+    {
+      "path": "internal/server/server.go",
+      "sha256": "25ea364de4c91bd0757ac64435d426f2eddb30d02462c715dbb12fc3c9725474",
+      "disposition": "modeled",
+      "reason": "Only changed Sakura provider composition and scoped publication path; other provider logic and authentication are not modeled.",
+      "models": [
+        {
+          "id": "SakuraStartupAdmission",
+          "properties": [
+            "NoEffectsOnRefusal",
+            "ValidationPrecedesEffects",
+            "SchemaRequiresDatabase",
+            "RegistrationRequiresSchema"
+          ],
+          "limits": "Bounded parsed-flag Sakura admission and pre-effect order only. Default-disabled Server mode adds no new startup constraint. Enabled Server opt-in requires valid enabled Sakura scope, unsafe and allow-remote off, and parsed numeric loopback. Generic listener rules and other providers are outside this model. Later startup stages assume success. Does not prove real authentication, token handling/cryptography, IP parsing or socket binding, proxy or tunnel exposure, constructor atomicity, syscall failures/cleanup, SDK/HTTP/browser behavior, or Go refinement. Shared server.go scope covers only Sakura provider construction and configuration."
+        }
+      ]
     },
     {
       "path": "internal/server/web/app.js",
@@ -229,7 +314,7 @@
             "OnlyCurrentResult",
             "NoDifferentServer"
           ],
-          "limits": "Finite read-only presentation projection. Production Server capability is default-off; enabled states are counterfactual for validating the guarded view. Models descriptor/disabled/handoff admission, abstract context and list/detail request revision, and matching detail identity. No native backend behavior, authentication refinement, React/DOM/HTTP behavior, full response-schema validation, pagination, mutations, runtime availability, SDK or Terraform claim. Generated bundle binding applies only to changed Server-view code."
+          "limits": "Finite read-only presentation projection. Production Server capability is default-off; enabled states represent the explicitly guarded local operator opt-in after capability projection. Models descriptor/disabled/handoff admission, abstract context and list/detail request revision, and matching detail identity. Does not prove CLI validation or binding, proxy exposure, real authentication or browser authority, React/DOM/HTTP behavior, response schemas, pagination, mutations, runtime availability, SDK or Terraform. Generated bundle binding applies only to changed Server-view code."
         }
       ]
     },
@@ -249,10 +334,10 @@
     },
     {
       "path": "scripts/formal_model_gate.py",
+      "sha256": "5ebfb2601e6db37308bd12f2c3912334e138db7cb0c9fbbf2ab8e49f5495def9",
       "disposition": "formal-infrastructure",
-      "reason": "Pins the Sakura Server model, its reviewed invariant names, exact leaf scope and two negative controls without changing existing pins. Also retains the scoped console read-selection model and its six controls.",
-      "models": [],
-      "sha256": "1e79aba89625952f157674ff835c237c7bd3c279341566d154cddd53851b42a6"
+      "reason": "Makes the five additional Sakura startup mutation controls mandatory in the exact inventory. Does not alter runtime.",
+      "models": []
     },
     {
       "path": "scripts/test-factory-acceptance.py",
@@ -280,6 +365,13 @@
       "sha256": "127df9f7b85035c6d767ebc2eadf9863123961ebf5c105a4ed9162c1c5b72b8c",
       "disposition": "test-support",
       "reason": "Adds opt-in owned-loopback Server metadata fixture; existing default Disk run and runner remain unchanged.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/sakura_server_console_gui.py",
+      "sha256": "97daf7f4f68db5bf4ee032754d62be8ff7091908a56f879e4efa2978e7651dcf",
+      "disposition": "test-support",
+      "reason": "Opt-in real browser test source; no socket, browser or simulator run in this packet.",
       "models": []
     },
     {
@@ -342,7 +434,7 @@
           "properties": [
             "NoUnadvertisedMount"
           ],
-          "limits": "Finite read-only presentation projection. Production Server capability is default-off; enabled states are counterfactual for validating the guarded view. Models descriptor/disabled/handoff admission, abstract context and list/detail request revision, and matching detail identity. No native backend behavior, authentication refinement, React/DOM/HTTP behavior, full response-schema validation, pagination, mutations, runtime availability, SDK or Terraform claim. Generated bundle binding applies only to changed Server-view code."
+          "limits": "Finite read-only presentation projection. Production Server capability is default-off; enabled states represent the explicitly guarded local operator opt-in after capability projection. Models descriptor/disabled/handoff admission, abstract context and list/detail request revision, and matching detail identity. Does not prove CLI validation or binding, proxy exposure, real authentication or browser authority, React/DOM/HTTP behavior, response schemas, pagination, mutations, runtime availability, SDK or Terraform. Generated bundle binding applies only to changed Server-view code."
         }
       ]
     },
@@ -358,7 +450,7 @@
             "NoUnadvertisedMount",
             "OnlyCurrentResult"
           ],
-          "limits": "Finite read-only presentation projection. Production Server capability is default-off; enabled states are counterfactual for validating the guarded view. Models descriptor/disabled/handoff admission, abstract context and list/detail request revision, and matching detail identity. No native backend behavior, authentication refinement, React/DOM/HTTP behavior, full response-schema validation, pagination, mutations, runtime availability, SDK or Terraform claim. Generated bundle binding applies only to changed Server-view code."
+          "limits": "Finite read-only presentation projection. Production Server capability is default-off; enabled states represent the explicitly guarded local operator opt-in after capability projection. Models descriptor/disabled/handoff admission, abstract context and list/detail request revision, and matching detail identity. Does not prove CLI validation or binding, proxy exposure, real authentication or browser authority, React/DOM/HTTP behavior, response schemas, pagination, mutations, runtime availability, SDK or Terraform. Generated bundle binding applies only to changed Server-view code."
         }
       ]
     },
@@ -373,7 +465,7 @@
           "properties": [
             "OnlyCurrentResult"
           ],
-          "limits": "Finite read-only presentation projection. Production Server capability is default-off; enabled states are counterfactual for validating the guarded view. Models descriptor/disabled/handoff admission, abstract context and list/detail request revision, and matching detail identity. No native backend behavior, authentication refinement, React/DOM/HTTP behavior, full response-schema validation, pagination, mutations, runtime availability, SDK or Terraform claim. Generated bundle binding applies only to changed Server-view code."
+          "limits": "Finite read-only presentation projection. Production Server capability is default-off; enabled states represent the explicitly guarded local operator opt-in after capability projection. Models descriptor/disabled/handoff admission, abstract context and list/detail request revision, and matching detail identity. Does not prove CLI validation or binding, proxy exposure, real authentication or browser authority, React/DOM/HTTP behavior, response schemas, pagination, mutations, runtime availability, SDK or Terraform. Generated bundle binding applies only to changed Server-view code."
         }
       ]
     },
@@ -389,7 +481,7 @@
             "NoUnadvertisedMount",
             "NoDifferentServer"
           ],
-          "limits": "Finite read-only presentation projection. Production Server capability is default-off; enabled states are counterfactual for validating the guarded view. Models descriptor/disabled/handoff admission, abstract context and list/detail request revision, and matching detail identity. No native backend behavior, authentication refinement, React/DOM/HTTP behavior, full response-schema validation, pagination, mutations, runtime availability, SDK or Terraform claim. Generated bundle binding applies only to changed Server-view code."
+          "limits": "Finite read-only presentation projection. Production Server capability is default-off; enabled states represent the explicitly guarded local operator opt-in after capability projection. Models descriptor/disabled/handoff admission, abstract context and list/detail request revision, and matching detail identity. Does not prove CLI validation or binding, proxy exposure, real authentication or browser authority, React/DOM/HTTP behavior, response schemas, pagination, mutations, runtime availability, SDK or Terraform. Generated bundle binding applies only to changed Server-view code."
         }
       ]
     },
@@ -411,7 +503,7 @@
           "properties": [
             "OnlyCurrentResult"
           ],
-          "limits": "Finite read-only presentation projection. Production Server capability is default-off; enabled states are counterfactual for validating the guarded view. Models descriptor/disabled/handoff admission, abstract context and list/detail request revision, and matching detail identity. No native backend behavior, authentication refinement, React/DOM/HTTP behavior, full response-schema validation, pagination, mutations, runtime availability, SDK or Terraform claim. Generated bundle binding applies only to changed Server-view code."
+          "limits": "Finite read-only presentation projection. Production Server capability is default-off; enabled states represent the explicitly guarded local operator opt-in after capability projection. Models descriptor/disabled/handoff admission, abstract context and list/detail request revision, and matching detail identity. Does not prove CLI validation or binding, proxy exposure, real authentication or browser authority, React/DOM/HTTP behavior, response schemas, pagination, mutations, runtime availability, SDK or Terraform. Generated bundle binding applies only to changed Server-view code."
         }
       ]
     },
