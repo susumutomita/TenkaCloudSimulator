@@ -1,55 +1,73 @@
-"""Opt-in served Scalar ListDomains Send against a pinned local simulator binary.
+"""Opt-in served Scalar ListDomains and DomainMetadata Send against a pinned local binary.
 
 Run from exact checkout with Playwright's pinned Chromium:
 SIMULATOR_BINARY=/path/to/binary SIMULATOR_BINARY_SHA256=<verified> \
   python test/e2e/simpledb_scalar_reference_live.py
-No mocked HTTP response, substituted spec, custom fetch or live cloud.
+No mocked HTTP response, substituted spec, custom fetch or live cloud. The
+expected digest must come from independently approved exact-source binary provenance.
 """
 import hashlib
 import json
 import os
 import re
-import uuid
 from pathlib import Path
 from urllib.parse import parse_qsl
 from xml.etree import ElementTree
 
 FORM = 'application/x-www-form-urlencoded'
 VERSION = '2009-04-15'
+EXAMPLE_DOMAIN = 'scalar-practice-domain'
+LIST_FIELDS = {'Action': 'ListDomains', 'Version': VERSION}
+METADATA_FIELDS = {'Action': 'DomainMetadata', 'Version': VERSION, 'DomainName': EXAMPLE_DOMAIN}
+STATS = ('ItemCount', 'ItemNamesSizeBytes', 'AttributeNameCount',
+         'AttributeNamesSizeBytes', 'AttributeValueCount', 'AttributeValuesSizeBytes')
 NS = '{http://sdb.amazonaws.com/doc/2009-04-15/}'
 FORBIDDEN_SEND_HEADERS = (
     'authorization', 'x-simulator-principal', 'x-simulator-token', 'x-amz-target',
 )
 
 
-def checked_wire(headers, payload):
+def checked_wire(headers, payload, fields):
     assert headers['content-type'].split(';', 1)[0].strip().lower() == FORM
     assert headers.get('x-simulator-service') == 'sdb'
     assert headers.get('x-simulator-region', 'us-east-1') == 'us-east-1'
     assert set(headers).isdisjoint(FORBIDDEN_SEND_HEADERS), 'unexpected Send header'
     assert headers.get('cookie'), 'expected browser cookie'
     pairs = parse_qsl(payload, strict_parsing=True, keep_blank_values=True)
-    assert len(pairs) == 2 and dict(pairs) == {'Action': 'ListDomains', 'Version': VERSION}
+    assert len(pairs) == len(fields) and dict(pairs) == fields
 
 
-def checked_send(endpoint, requests, response):
+def checked_send(endpoint, requests, response, fields):
     assert len(requests) == 1, 'expected exactly one native POST'
     request = requests[0]
     assert response.request is request, 'response did not match captured Send request'
     assert request.method == 'POST' and request.url == response.url == endpoint + '/'
     assert request.redirected_from is None and request.redirected_to is None, 'unexpected redirect'
     assert response.status == 200
-    checked_wire(request.all_headers(), request.post_data)
+    checked_wire(request.all_headers(), request.post_data, fields)
 
 
-def listed_domains(body):
+def query_result(body, action):
     root = ElementTree.fromstring(body)
-    assert root.tag == NS + 'ListDomainsResponse'
-    results = root.findall(NS + 'ListDomainsResult')
+    assert root.tag == NS + action + 'Response'
+    results = root.findall(NS + action + 'Result')
     assert len(results) == 1
     request_id = root.findtext(NS + 'ResponseMetadata/' + NS + 'RequestId')
     assert request_id and re.fullmatch('[a-f0-9]{32}', request_id)
-    return [row.text for row in results[0].findall(NS + 'DomainName')]
+    return results[0]
+
+
+def listed_domains(body):
+    return [row.text for row in query_result(body, 'ListDomains').findall(NS + 'DomainName')]
+
+
+def empty_metadata_timestamp(body):
+    result = query_result(body, 'DomainMetadata')
+    assert sorted(child.tag for child in result) == sorted(NS + name for name in (*STATS, 'Timestamp'))
+    assert all(result.findtext(NS + name) == '0' for name in STATS)
+    timestamp = result.findtext(NS + 'Timestamp')
+    assert timestamp and timestamp.isascii() and timestamp.isdecimal() and int(timestamp) > 0
+    return timestamp
 
 
 def run():
@@ -68,11 +86,13 @@ def run():
         native = p.request.new_context(extra_http_headers={
             'X-Simulator-Token': operator, 'X-Simulator-Service': 'sdb',
         })
-        domain = 'scalar-live-' + uuid.uuid4().hex
+        domain = EXAMPLE_DOMAIN  # Private new process and empty ephemeral store below.
         def query(action, **fields):
             return native.post(endpoint + '/', form={'Action': action, 'Version': VERSION, **fields},
                                max_redirects=0, timeout=10000)
         try:
+            before = query('ListDomains')
+            assert before.status == 200 and listed_domains(before.body()) == []
             create = query('CreateDomain', DomainName=domain)
             assert create.status == 200
             try:
@@ -100,8 +120,9 @@ def run():
                             page.goto(endpoint + '/_simulator/docs/')
                         spec = served.value.json()
                         root = spec['paths']['/']['post']
-                        preset = root['requestBody']['content'][FORM]['examples']['ListDomains']
-                        assert preset['value'] == {'Action': 'ListDomains', 'Version': VERSION}
+                        presets = root['requestBody']['content'][FORM]['examples']
+                        assert presets['ListDomains']['value'] == LIST_FIELDS
+                        assert presets['DomainMetadata']['value'] == METADATA_FIELDS
                         page.get_by_role('button', name='Test Request (post /)', exact=True).click()
                         client = page.get_by_role('dialog').filter(
                             has=page.get_by_role('button', name='Close Client', exact=True))
@@ -116,7 +137,7 @@ def run():
                         picker = client.get_by_test_id('example-picker')
                         expect(picker).to_have_count(1)
                         picker.click()
-                        page.get_by_role('option', name=preset['summary'], exact=True).click()
+                        page.get_by_role('option', name=presets['ListDomains']['summary'], exact=True).click()
                         client.get_by_role('button', name='Headers', exact=True).click()
                         header = client.get_by_label('X-Simulator-Service Value', exact=True)
                         expect(header).to_have_count(1)
@@ -139,7 +160,7 @@ def run():
                                                   and response.url == endpoint + '/') as capture:
                             client.get_by_role('button', name=re.compile(r'^Send post request to ')).click()
                         response = capture.value
-                        checked_send(endpoint, sends, response)
+                        checked_send(endpoint, sends, response, LIST_FIELDS)
                         assert response.headers['content-type'].split(';', 1)[0] == 'text/xml'
                         assert listed_domains(response.body()) == [domain]
                         panel = client.locator('.response-section-content-body').filter(
@@ -147,7 +168,28 @@ def run():
                         expect(panel).to_have_count(1)
                         expect(panel).to_contain_text(domain)
                         # Recheck after render to catch any additional root POST or redirect.
-                        checked_send(endpoint, sends, response)
+                        checked_send(endpoint, sends, response, LIST_FIELDS)
+                        # Reopen Body and select the second served preset. No manual
+                        # request substitution: the test domain is the example.
+                        client.get_by_role('button', name='Body', exact=True).click()
+                        picker.click()
+                        page.get_by_role('option', name=presets['DomainMetadata']['summary'], exact=True).click()
+                        assert len(sends) == 1, 'the metadata preset sent a request before Send'
+                        with page.expect_response(lambda response: response.request.method == 'POST'
+                                                  and response.url == endpoint + '/') as capture:
+                            client.get_by_role('button', name=re.compile(r'^Send post request to ')).click()
+                        metadata = capture.value
+                        assert len(sends) == 2
+                        checked_send(endpoint, sends[1:], metadata, METADATA_FIELDS)
+                        assert metadata.headers['content-type'].split(';', 1)[0] == 'text/xml'
+                        timestamp = empty_metadata_timestamp(metadata.body())
+                        expect(panel).to_have_count(1)
+                        expect(panel).to_contain_text('DomainMetadataResult')
+                        expect(panel).to_contain_text('ItemCount')
+                        expect(panel).to_contain_text(timestamp)
+                        assert len(sends) == 2
+                        checked_send(endpoint, sends[:1], response, LIST_FIELDS)
+                        checked_send(endpoint, sends[1:], metadata, METADATA_FIELDS)
                         assert not outside and not errors
                     finally:
                         context.close()
@@ -162,8 +204,9 @@ def run():
             native.dispose()
     # Emit success only after real response, domain removal and standalone shutdown.
     (REPORTS / 'simpledb-scalar-reference-live.json').write_text(json.dumps({
-        'binary_sha256': expected, 'servedPreset': 'ListDomains', 'nativeStatus': 200,
-        'exactForm': True, 'canonicalService': 'sdb', 'oneMatchedSendNoRedirect': True,
+        'binary_sha256': expected, 'servedPresets': ['ListDomains', 'DomainMetadata'],
+        'nativeStatuses': {'ListDomains': 200, 'DomainMetadata': 200},
+        'exactForm': True, 'canonicalService': 'sdb', 'oneMatchedSendPerPresetNoRedirect': True,
         'requestCookiePresent': True, 'forbiddenSendHeadersAbsent': list(FORBIDDEN_SEND_HEADERS),
         'liveXml': True, 'freshDomainDeleted': True,
     }, indent=2) + '\n')

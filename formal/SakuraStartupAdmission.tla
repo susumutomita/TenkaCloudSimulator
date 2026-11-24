@@ -1,55 +1,66 @@
 ---------------------- MODULE SakuraStartupAdmission ----------------------
 EXTENDS FiniteSets
 
-VARIABLES enabled, present, valid, unsafe, phase, decision,
+VARIABLES enabled, present, valid, unsafe, optIn, allowRemote, address, phase, decision,
           listener, database, schema, registered, token
-vars == <<enabled,present,valid,unsafe,phase,decision,
+vars == <<enabled,present,valid,unsafe,optIn,allowRemote,address,phase,decision,
           listener,database,schema,registered,token>>
 Fields == {"environment","project","zone","owner"}
 Phases == {"parsed","listener","database","provider","token","done","refused"}
 Decisions == {"unchecked","accepted","refused"}
+Addresses == {"numeric-loopback","numeric-nonloopback","non-numeric"}
+Inputs == <<enabled,present,valid,unsafe,optIn,allowRemote,address>>
 
 (* A field absent from parsed CLI flags has the empty default, never a valid
    implicit realm. Explicit empty/invalid values are present but not valid.
    Inputs are immutable. Validity is abstract, not a Go regexp/UTF8 proof. *)
 Init == /\ enabled \in BOOLEAN /\ unsafe \in BOOLEAN
+        /\ optIn \in BOOLEAN /\ allowRemote \in BOOLEAN /\ address \in Addresses
         /\ present \in SUBSET Fields /\ valid \in SUBSET present
         /\ phase="parsed" /\ decision="unchecked"
         /\ listener=FALSE /\ database=FALSE /\ schema=FALSE
         /\ registered=FALSE /\ token=FALSE
 
-(* ExpectedAdmission is the independent safety oracle. Ready is the concrete
-   validation branch projection and the sole guard mutated by admission tests. *)
-ExpectedAdmission == IF enabled THEN ~unsafe /\ valid=Fields
-                     ELSE present={}
+(* Refusal is modeled for the Sakura guards, not the general listener policy.
+   The expected predicate is independent of the implementation projections. *)
+ExpectedSakura == IF enabled THEN ~unsafe /\ valid=Fields ELSE present={}
+ExpectedAdmission == ExpectedSakura
+                     /\ (optIn => enabled /\ ~unsafe /\ ~allowRemote
+                                      /\ address="numeric-loopback")
 Ready == IF enabled THEN ~unsafe /\ valid=Fields
          ELSE present={}
-Check == /\ phase="parsed"
+ConsoleReady == ~optIn \/ (enabled /\ ~unsafe /\ ~allowRemote
+                            /\ address="numeric-loopback")
+Check == /\ phase="parsed" /\ ConsoleReady
          /\ decision'=(IF Ready THEN "accepted" ELSE "refused")
          /\ phase'=(IF Ready THEN "listener" ELSE "refused")
          /\ UNCHANGED <<listener,database,schema,registered,token>>
-         /\ UNCHANGED <<enabled,present,valid,unsafe>>
+         /\ UNCHANGED Inputs
+RejectConsole == /\ phase="parsed" /\ ~ConsoleReady
+                 /\ decision'="refused" /\ phase'="refused"
+                 /\ UNCHANGED <<Inputs,listener,database,schema,registered,token>>
 OpenListener == /\ phase="listener" /\ decision="accepted"
                 /\ listener'=TRUE /\ phase'="database"
-                /\ UNCHANGED <<enabled,present,valid,unsafe,decision,
+                /\ UNCHANGED <<Inputs,decision,
                                 database,schema,registered,token>>
 OpenDatabase == /\ phase="database" /\ decision="accepted"
                 /\ database'=TRUE /\ phase'="provider"
-                /\ UNCHANGED <<enabled,present,valid,unsafe,decision,
+                /\ UNCHANGED <<Inputs,decision,
                                 listener,schema,registered,token>>
 ConstructProvider == /\ phase="provider" /\ decision="accepted"
                      /\ schema'=enabled /\ registered'=enabled
                      /\ phase'="token"
-                     /\ UNCHANGED <<enabled,present,valid,unsafe,decision,
+                     /\ UNCHANGED <<Inputs,decision,
                                      listener,database,token>>
 TokenSetup == /\ phase="token" /\ decision="accepted"
               /\ token' = ~unsafe /\ phase'="done"
-              /\ UNCHANGED <<enabled,present,valid,unsafe,decision,
+              /\ UNCHANGED <<Inputs,decision,
                               listener,database,schema,registered>>
-Next == Check \/ OpenListener \/ OpenDatabase \/ ConstructProvider \/ TokenSetup
+Next == Check \/ RejectConsole \/ OpenListener \/ OpenDatabase \/ ConstructProvider \/ TokenSetup
         \/ UNCHANGED vars
 
 TypeOK == /\ enabled \in BOOLEAN /\ unsafe \in BOOLEAN
+          /\ optIn \in BOOLEAN /\ allowRemote \in BOOLEAN /\ address \in Addresses
           /\ present \subseteq Fields /\ valid \subseteq present
           /\ phase \in Phases /\ decision \in Decisions
           /\ listener \in BOOLEAN /\ database \in BOOLEAN

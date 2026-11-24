@@ -149,8 +149,10 @@ func TestSakuraServerDefaultDisabledPreservesLegacyProviderSet(t *testing.T) {
 	if !reflect.DeepEqual(caps["providers"], []any{"aws", "azure", "azure-arm", "gcp"}) {
 		t.Fatal("default provider set changed")
 	}
-	if _, ok := caps["sakura"]; ok {
-		t.Fatal("disabled provider advertised")
+	for _, capability := range []string{"sakura", "sakuraServer"} {
+		if _, ok := caps[capability]; ok {
+			t.Fatalf("disabled provider advertised %s", capability)
+		}
 	}
 	storage := caps["cloudStorage"].(map[string]any)
 	if len(storage) != 2 || storage["gcp"] == nil || storage["azure"] == nil {
@@ -213,6 +215,66 @@ func TestSakuraServerOptInUsesRegistryAuthenticationAndCopiedScope(t *testing.T)
 		t.Fatal("HTTP/SQLite state diverged", e)
 	}
 }
+func TestSakuraServerListAndDetailCapability(t *testing.T) {
+	scope := sakuraServerScope
+	options := server.DefaultProviderConfig()
+	options.SakuraDisks = &scope
+	h, closeState, err := server.NewWithProviders(filepath.Join(t.TempDir(), "state.db"), options)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer closeState()
+	access, err := server.NewAccess(h, strings.Repeat("s", 64), false)
+	if err != nil {
+		t.Fatal(err)
+	}
+	scope.Zone = "tk1a"
+	caps := sakuraServerRequest(t, access, "GET", "/_simulator/v1/capabilities", "", true, 200)
+	cap, ok := caps["sakuraServer"].(map[string]any)
+	if !ok {
+		t.Fatal("Server List/Get capability is absent")
+	}
+	endpoint, ok := cap["endpoint"].(string)
+	if !ok || endpoint != strings.TrimSuffix(sakuraServerPath, "/disk")+"/server" || cap["zone"] != "is1a" {
+		t.Fatal("Server endpoint or copied zone is incorrect")
+	}
+	if !reflect.DeepEqual(cap["operations"], []any{"GET /server", "GET /server/{id}"}) ||
+		cap["console"] != false || cap["sdkVerified"] != false || cap["availabilityReported"] != false {
+		t.Fatal("Server capability overstates its supported surface")
+	}
+	for _, private := range []string{"owner", "environment", "project"} {
+		if _, ok := cap[private]; ok {
+			t.Fatalf("Server capability disclosed %s", private)
+		}
+	}
+	sakuraServerRequest(t, access, "GET", endpoint, "", false, 401)
+	sakuraServerRequest(t, access, "GET", strings.Replace(endpoint, "is1a", "tk1a", 1), "", true, 404)
+	created := sakuraServerRequest(t, access, "POST", endpoint, `{"Server":{"Name":"listed-local","ServerPlan":{"CPU":2,"MemoryMB":4096}}}`, true, 201)
+	want, ok := created["Server"].(map[string]any)
+	if !ok || want["Name"] != "listed-local" {
+		t.Fatal("failed to create local server metadata")
+	}
+	id, ok := want["ID"].(string)
+	if !ok || id == "" {
+		t.Fatal("missing server ID")
+	}
+	listed := sakuraServerRequest(t, access, "GET", endpoint+"?%7B%22From%22%3A0%2C%22Count%22%3A1%7D", "", true, 200)
+	detail := sakuraServerRequest(t, access, "GET", endpoint+"/"+id, "", true, 200)
+	if !reflect.DeepEqual(listed["Servers"], []any{want}) || listed["Total"] != float64(1) ||
+		!reflect.DeepEqual(detail["Server"], want) || detail["is_ok"] != true {
+		t.Fatal("advertised List and Get disagree with the stored metadata")
+	}
+	for _, unsupported := range []string{"Availability", "Instance", "Disks", "Interfaces"} {
+		if _, ok := want[unsupported]; ok {
+			t.Fatalf("invented server runtime field %s", unsupported)
+		}
+	}
+	disks := sakuraServerRequest(t, access, "GET", sakuraServerPath, "", true, 200)
+	if !reflect.DeepEqual(disks["Disks"], []any{}) || disks["Total"] != float64(0) {
+		t.Fatal("Server metadata flowed into Disk state")
+	}
+}
+
 func TestSakuraServerConstructorFailurePreservesStateAndAllowsRepair(t *testing.T) {
 	dir := t.TempDir()
 	missingPath := filepath.Join(dir, "not-created", "state.db")
@@ -279,5 +341,81 @@ func TestSakuraServerConstructorFailurePreservesStateAndAllowsRepair(t *testing.
 	value := sakuraServerRequest(t, authenticated, "GET", sakuraServerPath+"/1", "", true, 200)
 	if fmt.Sprint(value["Disk"].(map[string]any)["Name"]) != "retained" {
 		t.Fatal("repair lost saved resource")
+	}
+}
+
+func TestSakuraServerConsoleConditionalVisibility(t *testing.T) {
+	scope := sakuraServerScope
+	for _, enabled := range []bool{false, true} {
+		options := server.DefaultProviderConfig()
+		options.SakuraDisks = &scope
+		options.SakuraServerConsole = enabled
+		h, closeState, err := server.NewWithProviders(":memory:", options)
+		if err != nil {
+			t.Fatal(err)
+		}
+		defer closeState()
+		access, err := server.NewAccess(h, strings.Repeat("s", 64), false)
+		if err != nil {
+			t.Fatal(err)
+		}
+		for _, tc := range []struct {
+			test, peer, principal  string
+			wrapped, authenticated bool
+			status                 int
+			visible                bool
+		}{
+			{"typed local owner", "127.0.0.1:41123", scope.Owner, true, true, 200, enabled},
+			{"typed wrong owner", "127.0.0.1:41123", "different", true, true, 200, false},
+			{"typed remote owner", "192.0.2.10:41123", scope.Owner, true, true, 200, false},
+			{"ipv6 local owner", "[::1]:41123", scope.Owner, true, true, 200, enabled},
+			{"header-only owner", "127.0.0.1:41123", scope.Owner, false, false, 200, false},
+			{"no credential", "127.0.0.1:41123", scope.Owner, true, false, 401, false},
+		} {
+			t.Run(tc.test, func(t *testing.T) {
+				selected := h
+				if tc.wrapped {
+					selected = access
+				}
+				r := httptest.NewRequest("GET", "http://localhost/_simulator/v1/capabilities", nil)
+				r.RemoteAddr = tc.peer
+				r.Header.Set("X-Simulator-Principal", tc.principal)
+				if tc.authenticated {
+					r.Header.Set("X-Simulator-Token", strings.Repeat("s", 64))
+				}
+				w := httptest.NewRecorder()
+				selected.ServeHTTP(w, r)
+				if w.Code != tc.status {
+					t.Fatalf("status %d want %d", w.Code, tc.status)
+				}
+				if w.Code != 200 {
+					return
+				}
+				var out map[string]any
+				if err := json.Unmarshal(w.Body.Bytes(), &out); err != nil {
+					t.Fatal(err)
+				}
+				cap, ok := out["sakuraServer"].(map[string]any)
+				if !ok || cap["console"] != tc.visible || cap["availabilityReported"] != false || cap["sdkVerified"] != false ||
+					!reflect.DeepEqual(cap["operations"], []any{"GET /server", "GET /server/{id}"}) {
+					t.Fatalf("unexpected server capability: %v", cap)
+				}
+				if disk, ok := out["sakura"].(map[string]any); !ok || disk["console"] != true || disk["endpoint"] != sakuraServerPath {
+					t.Fatal("Disk capability changed")
+				}
+			})
+		}
+	}
+}
+
+func TestSakuraServerConsoleRejectsMissingProviderBeforeState(t *testing.T) {
+	options := server.DefaultProviderConfig()
+	options.SakuraServerConsole = true
+	path := filepath.Join(t.TempDir(), "not-created.db")
+	if handler, closer, err := server.NewWithProviders(path, options); handler != nil || closer != nil || err == nil {
+		t.Fatal("Server console opened without any trusted Sakura scope")
+	}
+	if _, err := os.Stat(path); !os.IsNotExist(err) {
+		t.Fatalf("preflight changed state path: %v", err)
 	}
 }

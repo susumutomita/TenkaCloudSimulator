@@ -178,6 +178,36 @@ class AcceptanceTests(unittest.TestCase):
             with self.assertRaises(ValueError):
                 gate.verdict(result, suite, 0)
 
+    def test_sakura_receipt_binds_oracle_hash_and_all_tests(self):
+        suite = 'sakura-server-metadata'
+        spec = gate.SUITES[suite]
+        oracle = self.root / spec['oracle']
+        oracle.parent.mkdir(parents=True)
+        oracle.write_bytes((gate.ROOT/spec['oracle']).read_bytes())
+        self.git('add','.'); self.git('commit','-qm','reviewed Sakura oracle')
+        head = self.git('rev-parse','HEAD')
+        events = [dict(Action=action,Package=spec['package'],Test=test)
+                  for test in spec['tests'] for action in ('run','pass')]
+        events.append(dict(Action='pass',Package=spec['package']))
+        log = ('\n'.join(json.dumps(e) for e in events)+'\n').encode()
+        self.logpath.write_bytes(log)
+        entry = {'status':'passed','argv':spec['argv'],'executed_argv':gate.executable_command(spec['argv']),
+                 'returncode':0,'log':self.logpath.name,'log_sha256':gate.digest(log),
+                 'oracle_sha256':spec['oracle_sha256']}
+        report = {'version':1,'head':head,'source_sha256':gate.source_hash(self.root),
+                  'status':'passed','checks':{suite:entry}}
+        self.path.write_text(json.dumps(report))
+        gate.verify(self.path,head,[suite],self.root)
+        for invalid in (None, 'changed'):
+            entry['oracle_sha256'] = invalid
+            self.path.write_text(json.dumps(report))
+            with self.assertRaises(ValueError): gate.verify(self.path,head,[suite],self.root)
+        entry['oracle_sha256'] = spec['oracle_sha256']
+        self.path.write_text(json.dumps(report))
+        oracle.write_text('changed'); self.git('add','.'); self.git('commit','-qm','altered oracle')
+        report['head'] = self.git('rev-parse','HEAD'); self.path.write_text(json.dumps(report))
+        with self.assertRaises(ValueError): gate.verify(self.path,report['head'],[suite],self.root)
+
 class CloudDNSFactoryRegistrationTests(unittest.TestCase):
     suite = 'gcp-dns-atomic-lifecycle'
     paths = {
@@ -282,6 +312,88 @@ class CloudDNSFactoryRegistrationTests(unittest.TestCase):
                 finally:
                     data[path] = before
 
+class SakuraRegistrationTests(unittest.TestCase):
+    suite = 'sakura-server-metadata'
+
+    def events(self):
+        spec = gate.SUITES[self.suite]
+        return ([dict(Action=action, Package=spec['package'], Test=test)
+                 for test in spec['tests'] for action in ('run', 'pass')]
+                + [dict(Action='pass', Package=spec['package'])])
+
+    def verdict(self, events, code=0):
+        gate.verdict(('\n'.join(json.dumps(e) for e in events)).encode(), self.suite, code)
+
+    def test_exact_command_names_path_and_default(self):
+        spec = gate.SUITES[self.suite]
+        self.assertEqual(gate.DEFAULT_SUITES, ('sqs-lifecycle', 'ec2-describe-subnets'))
+        self.assertEqual(set(gate.SUITES), {'sqs-lifecycle', 'ec2-describe-subnets', 'gcp-dns-atomic-lifecycle', self.suite, *gate.SIMPLEDB_SUITES})
+        self.assertEqual(spec['tests'], ['TestSakuraServerMetadataAcceptanceCRUD',
+            'TestSakuraServerMetadataAcceptanceRefusals', 'TestSakuraServerMetadataComparatorControls'])
+        self.assertEqual(spec['argv'], ['go', 'test', '-json', '-count=1', '-run',
+            '^TestSakuraServerMetadata(AcceptanceCRUD|AcceptanceRefusals|ComparatorControls)$', './internal/sakura'])
+        self.assertEqual(spec['oracle'], 'internal/sakura/server_metadata_acceptance_test.go')
+        self.assertEqual(spec['operations'], ['CreateServer', 'ReadServer', 'FindServers', 'UpdateServer', 'DeleteServer'])
+        self.assertEqual(gate.oracle_hash(gate.ROOT, self.suite), spec['oracle_sha256'])
+        self.assertEqual(gate.SUITES['sqs-lifecycle']['argv'], ['go','test','-json','-count=1','-run','^TestSQSFactoryFidelityLifecycle$','./internal/aws'])
+
+    def test_every_named_test_must_run_and_pass_once(self):
+        events = self.events()
+        self.verdict(events)
+        for index in range(len(events)):
+            with self.assertRaises(ValueError): self.verdict(events[:index]+events[index+1:])
+        for index in range(len(events)-1):
+            with self.assertRaises(ValueError): self.verdict(events+[events[index]])
+
+    def test_wrong_package_skip_fail_and_nonzero_rejected(self):
+        for action in ('skip', 'fail'):
+            with self.assertRaises(ValueError): self.verdict(self.events()+[dict(Action=action)])
+        for code in (1, -1):
+            with self.assertRaises(ValueError): self.verdict(self.events(), code)
+        events = self.events()
+        for event in events: event['Package'] = 'foreign'
+        with self.assertRaises(ValueError): self.verdict(events)
+        with self.assertRaises(ValueError): self.verdict(self.events()[-1:])
+
+    def test_leaf_paths_only_and_no_cross_suite_borrowing(self):
+        allowed = {'internal/sakura/iaas/server_store.go','internal/sakura/iaas/server_store_test.go',
+                   'internal/sakura/iaas/server_http.go','internal/sakura/iaas/server_http_test.go'}
+        self.assertEqual(gate.SAKURA_SERVER_PATHS, allowed)
+        for op in gate.SUITES[self.suite]['operations']:
+            gate.validate_scope([self.suite], 'sakura', op, sorted(allowed))
+        forbidden = ['internal/sakura/provider.go','internal/sakura/server_metadata_acceptance_test.go',
+            'internal/sakura/iaas/disk_store.go','internal/server/sakura_provider.go','formal/applicability.json',
+            'scripts/factory_acceptance.py','internal/aws/sqs_store.go','internal/aws/simpledb.go',
+            'internal/azure/queue/store.go','internal/gcp/dns/store.go','internal/sakura/iaas/../iaas/server_store.go']
+        for suites in ([self.suite], [self.suite,'sqs-lifecycle','ec2-describe-subnets']):
+            for path in forbidden:
+                with self.assertRaises(ValueError): gate.validate_scope(suites,'sakura','CreateServer',[path])
+        for provider, op, path in [('aws','DeleteMessage',next(iter(allowed))),
+                                   ('aws','DescribeSubnets',next(iter(allowed))),
+                                   ('sakura','CreateServer','internal/aws/ec2_vpc.go'),
+                                   ('sakura','PowerOnServer',next(iter(allowed))),
+                                   ('sakura','CreateServer','internal/aws/sqs_store.go')]:
+            with self.assertRaises(ValueError): gate.validate_scope([self.suite,'sqs-lifecycle','ec2-describe-subnets'],provider,op,[path])
+        gate.validate_scope(['sqs-lifecycle'],'aws','DeleteMessage',['formal/applicability.json'])
+
+    def test_missing_altered_or_symlink_oracle_rejected(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            path = root / gate.SUITES[self.suite]['oracle']
+            path.parent.mkdir(parents=True)
+            with self.assertRaises(OSError): gate.oracle_hash(root,self.suite)
+            path.write_text('changed')
+            with self.assertRaises(ValueError): gate.oracle_hash(root,self.suite)
+            path.unlink(); path.symlink_to(gate.ROOT / gate.SUITES[self.suite]['oracle'])
+            with self.assertRaises(ValueError): gate.oracle_hash(root,self.suite)
+
+    def test_opt_in_default_cli_selection(self):
+        with patch.object(sys,'argv',['factory_acceptance.py']), patch.object(gate,'run') as run:
+            gate.main()
+            self.assertEqual(run.call_args.args[2], ['sqs-lifecycle', 'ec2-describe-subnets'])
+        with patch.object(sys,'argv',['factory_acceptance.py','--suite',self.suite]), patch.object(gate,'run') as run:
+            gate.main()
+            self.assertEqual(run.call_args.args[2], [self.suite])
 
 
 # Keep the additive registration detector suite in the ordinary existing gate.

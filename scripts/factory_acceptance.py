@@ -52,6 +52,18 @@ SUITES = {
              'b9271b011769868f03da4753733b9e92b1c57fec1779ccdc19adad495d72b0e8'),
         ),
     },
+    'sakura-server-metadata': {
+        'argv': ['go', 'test', '-json', '-count=1', '-run', '^TestSakuraServerMetadata(AcceptanceCRUD|AcceptanceRefusals|ComparatorControls)$', './internal/sakura'],
+        'tests': ['TestSakuraServerMetadataAcceptanceCRUD',
+                  'TestSakuraServerMetadataAcceptanceRefusals',
+                  'TestSakuraServerMetadataComparatorControls'],
+        'oracle': 'internal/sakura/server_metadata_acceptance_test.go',
+        'oracle_sha256': '83b23d83b80bfb5def2104d9a6eb2fb73e1edff3f1eea0db2eeee9d292915e9a',
+        'provider': 'sakura',
+        'operations': ['CreateServer', 'ReadServer', 'FindServers', 'UpdateServer', 'DeleteServer'],
+        'package': 'github.com/susumutomita/TenkaCloudSimulator/internal/sakura',
+        'scope': 'Opt-in in-process Server metadata oracle; simulator-only 2 CPU/4096 MB; not VM, host auth, SDK or real Sakura acceptance',
+    },
 }
 
 # Keep existing no-argument SQS and DescribeSubnets checks; DNS is explicit.
@@ -66,9 +78,16 @@ GCP_DNS_LEAF_PATHS = frozenset({
 })
 
 
+# Sakura is opt-in; retain the existing default SQS and EC2 order.
+SAKURA_SERVER_PATHS = frozenset({
+    'internal/sakura/iaas/server_store.go',
+    'internal/sakura/iaas/server_store_test.go',
+    'internal/sakura/iaas/server_http.go',
+    'internal/sakura/iaas/server_http_test.go',
+})
+
 # Registration is distinct from activation. Preserve main's existing default;
 # SimpleDB acceptance remains explicit-only; registration is not activation.
-DEFAULT_SUITES = ('sqs-lifecycle', 'ec2-describe-subnets')
 SIMPLEDB_SUITES = ('simpledb-first-oracle', 'simpledb-first-native',
                   'simpledb-first-sdk-wire', 'simpledb-first-sdk-harness-controls')
 SIMPLEDB_OPERATIONS = ['CreateDomain', 'ListDomains', 'DeleteDomain', 'PutAttributes', 'GetAttributes']
@@ -162,6 +181,8 @@ def validate_scope(suites, provider, operation, paths):
             require(subnet_covered, 'DescribeSubnets pilot does not cover claimed path: ' + path)
         if 'gcp-dns-atomic-lifecycle' in matching:
             require(path in GCP_DNS_LEAF_PATHS, 'Cloud DNS leaf suite does not cover claimed path: ' + path)
+        if 'sakura-server-metadata' in matching:
+            require(path in SAKURA_SERVER_PATHS, 'Sakura Server pilot does not cover claimed path: ' + path)
 
 
 def candidate_paths(base, head, root=ROOT):
@@ -194,6 +215,9 @@ def verify_suite_oracles(root, suites):
     for suite in suites:
         spec = SUITES[suite]
         oracle = spec.get('oracle')
+        if isinstance(oracle, str):
+            oracle_hash(root, suite)
+            oracle = None
         pinned_oracles = (() if oracle is None else (oracle,)) + spec.get('support_oracles', ())
         for name, pinned in pinned_oracles:
             path = root / name
@@ -254,6 +278,17 @@ def verdict(log, suite, returncode, head=None):
     require(any(e.get('Package') == package and not e.get('Test') and e.get('Action') == 'pass' for e in events), 'package completion missing')
 
 
+def oracle_hash(root, suite):
+    spec = SUITES[suite]
+    if 'oracle_sha256' not in spec:
+        return None
+    path = root / spec['oracle']
+    require(not path.is_symlink(), 'oracle must not be a symlink')
+    value = digest(path.read_bytes())
+    require(value == spec['oracle_sha256'], 'reviewed suite oracle changed')
+    return value
+
+
 def execution_environment():
     # A build overlay / alternate workspace can make a clean Git HEAD test other
     # code. Ignore ambient Go configuration as well as cloud/profile/proxy vars.
@@ -291,6 +326,7 @@ def run(root, output, suites, timeout=300):
     output.parent.mkdir(parents=True, exist_ok=True)
     try:
         for suite in suites:
+            oracle = oracle_hash(root, suite)
             command = SUITES[suite]['argv']
             effective_command = executable_command(command)
             env = execution_environment()
@@ -322,6 +358,8 @@ def run(root, output, suites, timeout=300):
             logpath.write_bytes(log); errpath.write_bytes(errors)
             entry = {'status':'failed', 'argv':command, 'executed_argv':effective_command, 'returncode':returncode, 'log':logpath.name,
                      'log_sha256':digest(log), 'scope':SUITES[suite]['scope']}
+            if oracle is not None:
+                entry['oracle_sha256'] = oracle
             report['checks'][suite] = entry
             verdict(log, suite, returncode, head)
             entry['status'] = 'passed'
@@ -345,6 +383,9 @@ def verify(path, head, suites, root=ROOT):
     require(set(report.get('checks', {})) == set(suites), 'acceptance suite set differs')
     for suite in suites:
         entry = report['checks'][suite]
+        oracle = oracle_hash(root, suite)
+        if oracle is not None:
+            require(entry.get('oracle_sha256') == oracle, 'suite oracle receipt differs')
         require(entry.get('status') == 'passed' and entry.get('argv') == SUITES[suite]['argv'], 'acceptance command/status differs')
         require(entry.get('executed_argv') == executable_command(SUITES[suite]['argv']), 'acceptance toolchain command differs; rerun on reviewer executor')
         name = entry['log']

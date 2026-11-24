@@ -81,6 +81,9 @@ func run(ctx context.Context, args []string, output io.Writer) (result error) {
 		return err
 	}
 	ip := net.ParseIP(host)
+	if err := validateSakuraServerConsole(sakuraOptions.serverConsole, sakuraScope, *unsafe, *remote, ip); err != nil {
+		return err
+	}
 	if !*remote && (ip == nil || !ip.IsLoopback()) {
 		return fmt.Errorf("non-loopback binding requires --allow-remote; use a trusted authenticated host proxy")
 	}
@@ -119,7 +122,7 @@ func run(ctx context.Context, args []string, output io.Writer) (result error) {
 	}
 	var handler http.Handler
 	var closeState func() error
-	options := server.ProviderConfig{CloudStorage: cloudConfig, SakuraDisks: sakuraScope, BedrockRuntime: bedrockRuntime}
+	options := server.ProviderConfig{CloudStorage: cloudConfig, SakuraDisks: sakuraScope, SakuraServerConsole: sakuraOptions.serverConsole, BedrockRuntime: bedrockRuntime}
 	if *battleRuntime != "" {
 		handler, closeState, err = newBattleServer(ctx, *battleRuntime, "http://"+l.Addr().String(), *statePath, options, ownedClock)
 	} else {

@@ -34,6 +34,17 @@ def operations(spec):
 
 
 
+def project_simpledb_domain_metadata(spec):
+    """Validate and remove the exact additive read-only metadata preset."""
+    form = spec['paths']['/']['post']['requestBody']['content']['application/x-www-form-urlencoded']
+    props = form['schema']['properties']
+    actions = props['Action']['enum']
+    assert actions.count('DomainMetadata') == 1 and actions[-1] == 'DomainMetadata', 'SimpleDB metadata action changed'
+    actions.pop()
+    assert digest(props.pop('DomainName', None)) == 'd83344e74f00a68db4243541dc1c653b379c0dfcc964f9c6d932fc72a69bfe44', 'SimpleDB metadata domain input changed'
+    assert digest(form['examples'].pop('DomainMetadata', None)) == 'd5fbab8045e59efb874fa56f007e41554cbc01660f44b57f34bc7e3637191c69', 'SimpleDB metadata example changed'
+
+
 def project_simpledb_list_domains(spec):
     """Validate then remove only the reviewed root POST reference additions."""
     post = spec['paths']['/']['post']
@@ -52,9 +63,31 @@ def project_simpledb_list_domains(spec):
     assert digest(response) == '11a7932f16b348011034c0f82be5a858922db9d92fcec924d3190612c5c6bc09', 'SimpleDB XML media/example changed'
 
 
-def preserved(spec):
+SERVER_COLLECTION = '/_simulator/providers/sakura/cloud/zone/{zone}/api/cloud/1.1/server'
+
+
+def project_server_list(spec):
     spec = copy.deepcopy(spec)
+    tag = {'name': 'Sakura Server metadata',
+           'description': 'Read saved Server metadata in the configured local zone; no VM or network state.'}
+    declared = [entry for entry in spec['tags'] if entry['name'] == tag['name']]
+    grouped = [group for group in spec['x-tagGroups'] if tag['name'] in group['tags']]
+    assert declared == [tag], 'Server List tag missing or changed'
+    assert len(grouped) == 1 and grouped[0]['name'] == 'Sakura Cloud', 'Server List tag misgrouped'
+    assert grouped[0]['tags'].count(tag['name']) == 1, 'Server List tag duplicated'
+    spec['tags'].remove(tag)
+    grouped[0]['tags'].remove(tag['name'])
+    server = spec['paths'].pop(SERVER_COLLECTION, None)
+    assert digest(server) == '81203e3d7065de93e30b5941964ba52f94a11c12888f61b85dbe7c542dc9a521', 'Server List reference changed'
+    project_simpledb_domain_metadata(spec)
     project_simpledb_list_domains(spec)
+    assert digest(spec['paths']) == '1dce93acc032ee7c312d7a8bd9e7442368953b59403f494e5fb3ab8e20d2ede8', 'Pre-existing reference paths changed'
+    assert digest(spec) == '62dc82bc8496d80e92364df28c940012d22498553e779929dd10fa431a0a57c6', 'Pre-existing reference spec changed'
+    return spec
+
+
+def preserved(spec):
+    spec = project_server_list(spec)
     spec = project_before_route53(spec)
     # Validate the three reviewed DeleteLogStream additions exactly, then remove
     # only those additions from a copy. Every pre-existing digest below is kept
@@ -131,6 +164,38 @@ class SakuraReference(unittest.TestCase):
     def setUpClass(cls):
         cls.spec=json.loads((ROOT/'internal/server/apidocs/openapi.json').read_text())
 
+    def test_single_server_list_preserves_every_old_path(self):
+        server = self.spec['paths'][SERVER_COLLECTION]
+        assert set(server) == {'parameters', 'get'}
+        assert server['get']['operationId'] == 'SakuraListServers'
+        for change in (
+            lambda paths: paths.pop(SERVER_COLLECTION),
+            lambda paths: paths[SERVER_COLLECTION].update(post={}),
+            lambda paths: paths[COLLECTION]['get'].update(summary='mutated Disk'),
+            lambda paths: paths.update({'/unrelated-new': {}}),
+        ):
+            broken = copy.deepcopy(self.spec)
+            change(broken['paths'])
+            with self.assertRaises(AssertionError):
+                project_server_list(broken)
+        project_server_list(self.spec)
+
+    def test_server_list_navigation_rejects_missing_and_misgrouped_tag(self):
+        for change in ('declaration', 'missing-group', 'wrong-group', 'duplicate'):
+            broken = copy.deepcopy(self.spec)
+            tag = 'Sakura Server metadata'
+            owner = next(group for group in broken['x-tagGroups'] if group['name'] == 'Sakura Cloud')
+            if change == 'declaration':
+                broken['tags'] = [entry for entry in broken['tags'] if entry['name'] != tag]
+            elif change == 'duplicate':
+                owner['tags'].append(tag)
+            else:
+                owner['tags'].remove(tag)
+                if change == 'wrong-group':
+                    next(group for group in broken['x-tagGroups'] if group is not owner)['tags'].append(tag)
+            with self.subTest(change=change), self.assertRaises(AssertionError):
+                project_server_list(broken)
+
     def test_all_existing_operations_components_and_28_templates_are_exact(self):
         preserved(self.spec)
 
@@ -155,6 +220,13 @@ class SakuraReference(unittest.TestCase):
             ('missing action', lambda spec: form(spec)['schema']['properties']['Action']['enum'].remove('ListDomains')),
             ('wrong query version', lambda spec: form(spec)['schema']['properties']['Version']['enum'].__setitem__(-1, '2020-01-01')),
             ('missing form example', lambda spec: form(spec)['examples'].pop('ListDomains')),
+            ('missing metadata action', lambda spec: form(spec)['schema']['properties']['Action']['enum'].pop()),
+            ('missing metadata field', lambda spec: form(spec)['schema']['properties'].pop('DomainName')),
+            ('wrong metadata domain field shape', lambda spec: form(spec)['schema']['properties']['DomainName'].update(type='integer')),
+            ('missing metadata example', lambda spec: form(spec)['examples'].pop('DomainMetadata')),
+            ('changed metadata action', lambda spec: form(spec)['examples']['DomainMetadata']['value'].update(Action='ListDomains')),
+            ('extra metadata form field', lambda spec: form(spec)['examples']['DomainMetadata']['value'].update(Unexpected='bad')),
+            ('changed metadata permission note', lambda spec: form(spec)['examples']['DomainMetadata'].update(description='changed')),
             ('extra form field', lambda spec: form(spec)['examples']['ListDomains']['value'].update(Unexpected='bad')),
             ('changed access note', lambda spec: form(spec)['examples']['ListDomains'].update(description='changed')),
             ('missing XML media', lambda spec: response(spec).pop('text/xml')),
@@ -162,8 +234,10 @@ class SakuraReference(unittest.TestCase):
                 Unexpected={'value': '<unexpected/>'})),
             ('inherited CloudFormation example changed', lambda spec: form(spec)['examples']['DescribeStacks']['value'].update(
                 StackName='unexpected')),
+            # Keep the batch projection's required union structurally valid so
+            # the inherited digest rejects the change as an assertion.
             ('inherited JSON media changed', lambda spec: response(spec)['application/x-amz-json-1.0'].update(
-                schema={'type': 'string'})),
+                description='unreviewed media description')),
             ('inherited non-root path changed', lambda spec: spec['paths']['/{bucket}']['put'].update(
                 summary='unreviewed description')),
         ):

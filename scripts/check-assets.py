@@ -20,7 +20,8 @@ expected_legacy={'S3MultipartUpload','Capabilities','CreateBucket','CreateFuncti
 expected_rest={'CreateRestApi','GetRestApis','GetRestApi','DeleteRestApi','GetResources','CreateResource','GetResource','DeleteResource','PutMethod','GetMethod','PutIntegration','CreateDeployment','GetDeployment','CreateStage','GetStage','DeleteStage','InvokeLocalRESTProxyGet','InvokeLocalRESTProxyPost','AddPermission','GetPolicy','RemovePermission'}
 expected_multicloud={'GCPDownloadObject', 'AzureGetContainerProperties', 'GCPUploadObject', 'AzureDeleteContainer', 'AzureDeleteBlob', 'GCPListObjects', 'GCPDeleteBucket', 'GCPGetBucket', 'GCPGetObject', 'AzureCreateContainer', 'AzureListBlobs', 'GCPCreateBucket', 'AzureGetBlobProperties', 'GCPDeleteObject', 'AzureListContainers', 'GCPListBuckets', 'AzurePutBlob', 'AzureGetBlob'}
 expected_sakura={'SakuraListDisks', 'SakuraCreateDisk', 'SakuraGetDisk', 'SakuraUpdateDisk', 'SakuraDeleteDisk'}
-assert len(operations)==len(set(operations)) and set(operations)==expected_legacy|expected_rest|expected_multicloud|expected_sakura
+expected_sakura_server={'SakuraListServers'}
+assert len(operations)==len(set(operations)) and set(operations)==expected_legacy|expected_rest|expected_multicloud|expected_sakura|expected_sakura_server
 lambda_operations={v['operationId'] for path,p in spec['paths'].items() if path.startswith('/2015-03-31/functions') for k,v in p.items() if k in ['get','post','put','delete']}
 assert lambda_operations=={'CreateFunction','ListFunctions','GetFunctionConfiguration','UpdateFunctionCode','Invoke','DeleteFunction','AddPermission','GetPolicy','RemovePermission'}
 init=Path('internal/server/apidocs/init.js').read_text()

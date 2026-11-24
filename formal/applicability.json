@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "base_sha": "8d49004ecac8bc5e731c338c85b6a19c741c7fcc",
+  "base_sha": "3cd779798ba13d1b712e050f5ad0953072b54342",
   "changes": [
     {
       "path": "docs/contributing/simpledb-factory-registration.md",
@@ -180,9 +180,9 @@
     },
     {
       "path": "formal/models.json",
-      "sha256": "c840e54c7bdf14072362db14f2ba61ce7fd743c0f3d82ef372287c1cfd0133f4",
+      "sha256": "da7cbd2d62103dd688e785f493b97d3916f65da515c8f2684d10755f4fb1fc58",
       "disposition": "formal-infrastructure",
-      "reason": "Adds the three reviewed SimpleDB registrations and preserves all 113 current main models. Adds the bounded DomainMetadata model and checks its applicability limits.",
+      "reason": "Adds the four reviewed SimpleDB safety models to the latest 118-model registry; preserves every Sakura, Cloud DNS and existing model object.",
       "models": []
     },
     {
@@ -946,14 +946,14 @@
     },
     {
       "path": "internal/server/apidocs/openapi.json",
-      "sha256": "16239665ffd3a742f95bcd7b1f108bd1410b19c775979b3a6f5c087cbadbab35",
+      "sha256": "9b3be575cdd009297560a32c5072c59db74405928f76cfdb9a9626231693fb98",
       "disposition": "presentation",
-      "reason": "Adds the read-only SimpleDB ListDomains API-reference example and explicit local routing instructions; no runtime or authorization change.",
+      "reason": "Adds the read-only SimpleDB ListDomains and DomainMetadata root POST references and their local routing instructions; preserves the exact current Sakura and other OpenAPI operations and authorization.",
       "models": []
     },
     {
       "path": "internal/server/server.go",
-      "sha256": "326ccd11ff9bd084d8e3ffa495b51a13ad42f65d1537aea574d117941a07c1fd",
+      "sha256": "f44b6ecb75ab49ecb4963395ea38166a9414711e6770d135535767623403fa17",
       "disposition": "modeled",
       "reason": "Adds the SimpleDB store constructor and configured Gateway fields. Existing modeled contracts remain; startup/cleanup and SimpleDB dependency wiring are not covered by these models.",
       "models": [
@@ -1398,9 +1398,9 @@
     },
     {
       "path": "scripts/factory_acceptance.py",
-      "sha256": "3060fe55e198bf4da2157ee5223b48b0ff86272e75a902cc9808c22545f22b90",
+      "sha256": "ffaec5112ce7f31b4fc2b29b694ce600cdc395592411240596733bb41dfe50df",
       "disposition": "validation-tooling",
-      "reason": "Reconciles opt-in SimpleDB acceptance with SQS and EC2 default suites and keeps scoped receipt validation.",
+      "reason": "Keeps independent opt-in SimpleDB, Sakura Server and Cloud DNS registrations together, preserving default SQS/EC2 and scoped receipts and oracle verification.",
       "models": []
     },
     {
@@ -1408,11 +1408,11 @@
       "disposition": "formal-infrastructure",
       "reason": "Pins the three SimpleDB models, checked properties, exact source scopes and six sensitivity controls; existing pins preserved. Adds the associated DomainMetadata registry controls.",
       "models": [],
-      "sha256": "1b1cfe9338035dc0a1b55da9598c17040cde769618148370ac9c4dcec757669f"
+      "sha256": "bd42d651c01581e9aa3968e9d1bd1b794fb7ae8126f3c6928ea2b881fbf25f27"
     },
     {
       "path": "scripts/test-factory-acceptance.py",
-      "sha256": "ac1e3e1722dac9352cfc61d449b391cedf72cc7e79f1dca2fa1ebef266e113bb",
+      "sha256": "8ebd5e52147ad08052e94a3ddf80fd6e95972a4b0b2ef954f87f11d0d9b5ae9e",
       "disposition": "test-support",
       "reason": "Fixtures, assertions or registration contracts; not production runtime or execution evidence.",
       "models": []
@@ -1422,11 +1422,11 @@
       "disposition": "formal-infrastructure",
       "reason": "Adds specific isolated SimpleDB registration removal checks and exact inventory coverage without changing existing assertions. Adds the associated DomainMetadata registry controls.",
       "models": [],
-      "sha256": "a5ffbb22d73fba4fc8c6e8897612682c9738876f1eb5a07a0d26d64cfbc09dae"
+      "sha256": "8e12c9aa4273cf85e738398b31db31760937607eb91a98e1e4a6ad4d2409132c"
     },
     {
       "path": "scripts/test-simpledb-factory-registration.py",
-      "sha256": "e30de01ffb24d446621e2f117b2e0339701b387de8ef31efc728a4284487530a",
+      "sha256": "42d77c51d4ed7cebc099987a663b3db98568137cadee79a11388490efb53bef2",
       "disposition": "test-support",
       "reason": "Fixtures, assertions or registration contracts; not production runtime or execution evidence.",
       "models": []
@@ -1440,9 +1440,9 @@
     },
     {
       "path": "test/e2e/simpledb_scalar_reference_live.py",
-      "sha256": "fcf0fa95cae87d45b025555251a3289976df92917085d73a144975e7b36d3432",
+      "sha256": "852751e6030761f41ced17992dcdc3e8cd113821873e87a581aafcb45a80adc6",
       "disposition": "test-support",
-      "reason": "Opt-in served Scalar ListDomains Send acceptance fixture only; no simulator runtime, authorization, or shared runner change.",
+      "reason": "Opt-in real served Scalar ListDomains and DomainMetadata Send fixture with exact positive wire and response assertions; no runtime, authority, or shared runner change.",
       "models": []
     },
     {
@@ -1454,7 +1454,7 @@
     },
     {
       "path": "test/e2e/test_sakura_openapi.py",
-      "sha256": "6c93afd7214cc8956077f19cfe095cbe9629e53caef0fc328231c0ce5eef7012",
+      "sha256": "4a3d8fde924f40a33919ea30f1f91f70ff4d6d20bab914e3eaf0c84d163d06b0",
       "disposition": "test-support",
       "reason": "Validates and projects only the reviewed SimpleDB reference additions before inherited hashes and tests both intentional and unrelated drift.",
       "models": []

@@ -35,9 +35,11 @@ class SimpleDBRegistrationTests(unittest.TestCase):
     def sdk(self):return {'factory_sdk_v1':True,'head':self.head,'status':'PASS','passed_cases':['sdk-domain-items','sdk-restart-cascade','sdk-list-pages','sdk-negative-cases'],'sdk_pins':{'boto3':'1.42.0','botocore':'1.41.6'},'binary_sha256':'a'*64,'python':gate.executable_command(['python3'])[0],'go':gate.executable_command(['go'])[0]}
     def test_union_and_default_activation(self):
         dns = 'gcp-dns-atomic-lifecycle'
-        self.assertEqual({'sqs-lifecycle', 'ec2-describe-subnets', dns, *gate.SIMPLEDB_SUITES},
+        sakura = 'sakura-server-metadata'
+        self.assertEqual({'sqs-lifecycle', 'ec2-describe-subnets', dns, sakura, *gate.SIMPLEDB_SUITES},
                          set(gate.SUITES))
         self.assertEqual(gate.SUITES[dns]['provider'], 'gcp-dns')
+        self.assertEqual(gate.SUITES[sakura]['provider'], 'sakura')
         self.assertNotIn('azure-queue-lifecycle', gate.SUITES)
         self.assertEqual(gate.DEFAULT_SUITES,('sqs-lifecycle','ec2-describe-subnets'))
         self.assertFalse((self.root/'internal/azure/queue').exists())
