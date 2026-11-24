@@ -1,359 +1,304 @@
 {
   "version": 1,
-  "base_sha": "9652f0344ab9d7e57aa30595fab5c3ed52c57cd8",
+  "base_sha": "8d49004ecac8bc5e731c338c85b6a19c741c7fcc",
   "changes": [
     {
-      "path": "docs/acceptance/gcp-cloud-dns.md",
-      "sha256": "c24bbdb5727ec2e36711985c0f9eed14ae1d934184680f8ddadfffa83b1244ab",
-      "disposition": "documentation",
-      "reason": "Documents supported DNS scope, source correspondence, development acceptance and limitations; no runtime behavior.",
+      "path": "cmd/simulator/main.go",
+      "sha256": "5d55fad5e885f60dbb9234d72b5f3d91866848ce0f7e16d13fabc8eac1a75554",
+      "disposition": "modeled",
+      "reason": "Scope and opt-in are validated before listener or state setup; only abstract Sakura path ordering is modeled.",
+      "models": [
+        {
+          "id": "SakuraStartupAdmission",
+          "properties": [
+            "AcceptedConfigExact",
+            "ValidAdmissionAvailable",
+            "NoEffectsOnRefusal",
+            "ValidationPrecedesEffects"
+          ],
+          "limits": "Bounded parsed-flag Sakura admission and pre-effect order only. Default-disabled Server mode adds no new startup constraint. Enabled Server opt-in requires valid enabled Sakura scope, unsafe and allow-remote off, and parsed numeric loopback. Generic listener rules and other providers are outside this model. Later startup stages assume success. Does not prove real authentication, token handling/cryptography, IP parsing or socket binding, proxy or tunnel exposure, constructor atomicity, syscall failures/cleanup, SDK/HTTP/browser behavior, or Go refinement. Shared server.go scope covers only Sakura provider construction and configuration."
+        }
+      ]
+    },
+    {
+      "path": "cmd/simulator/sakura_flags.go",
+      "sha256": "cf08af1ee2439bf1681d33ad0e3d4ab868c9937949c41168a1516c53e8a39d82",
+      "disposition": "modeled",
+      "reason": "Parsed Server Console flag, scope prerequisite and classified local-only guard; no address parser or authentication proof.",
+      "models": [
+        {
+          "id": "SakuraStartupAdmission",
+          "properties": [
+            "AcceptedConfigExact",
+            "ValidAdmissionAvailable"
+          ],
+          "limits": "Bounded parsed-flag Sakura admission and pre-effect order only. Default-disabled Server mode adds no new startup constraint. Enabled Server opt-in requires valid enabled Sakura scope, unsafe and allow-remote off, and parsed numeric loopback. Generic listener rules and other providers are outside this model. Later startup stages assume success. Does not prove real authentication, token handling/cryptography, IP parsing or socket binding, proxy or tunnel exposure, constructor atomicity, syscall failures/cleanup, SDK/HTTP/browser behavior, or Go refinement. Shared server.go scope covers only Sakura provider construction and configuration."
+        }
+      ]
+    },
+    {
+      "path": "cmd/simulator/sakura_flags_test.go",
+      "sha256": "183ce7d9cb250d76ce00de72dc1e69a198bb00e2df25f437a559dbbcf7f8ae7a",
+      "disposition": "test-support",
+      "reason": "In-process startup guard negative fixtures; no successful socket or live launch.",
       "models": []
     },
     {
-      "path": "docs/contributing/software-factory.md",
-      "sha256": "2e735b0a6fdec2b3c059ff01eb5a1431c5e46eb56b97467731376ca07235d8f2",
+      "path": "docs/formal-sakura-server.md",
+      "sha256": "54e8a9f6d094b1f693bf78eff428e238053d637e3cf3ec277704e861447bb8e6",
       "disposition": "documentation",
-      "reason": "Documents supported DNS scope, source correspondence, development acceptance and limitations; no runtime behavior.",
+      "reason": "Describes exact abstract bounds and separately measured and pending model checks.",
       "models": []
     },
     {
-      "path": "docs/formal-gcp-dns.md",
-      "sha256": "5ca2317732cb05cc3ad65acbb473d319d700914458041de3286b13e411507742",
-      "disposition": "documentation",
-      "reason": "Documents supported DNS scope, source correspondence, development acceptance and limitations; no runtime behavior.",
-      "models": []
-    },
-    {
-      "path": "docs/work/gcp-dns-acceptance-343.md",
-      "sha256": "d8063eeba47d9fee3e4a57ffb6a1a5f3572546adad953609aabc8bbfc5ce5c09",
-      "disposition": "documentation",
-      "reason": "Documents supported DNS scope, source correspondence, development acceptance and limitations; no runtime behavior.",
-      "models": []
-    },
-    {
-      "path": "formal/CloudDNSAtomicChange.cfg",
-      "sha256": "f50dcc4f21eed874026bf90e5eb2c3b9c213710077773ec05d6aa23b89441ee3",
+      "path": "formal/SakuraServerMetadata.cfg",
+      "sha256": "6224a10280768312f3f812d532ba04f7f4da49e432272638245360507c207e58",
       "disposition": "modeled",
-      "reason": "Defines the bounded staged/written/observed/verified/commit or abort fixture and selected invariants for DNS state.",
+      "reason": "Finite Server metadata reference and configuration for the listed invariant and sensitivity obligations.",
       "models": [
         {
-          "id": "CloudDNSAtomicChange",
+          "id": "SakuraServerMetadata",
           "properties": [
-            "PendingInvisible",
-            "CommittedStateMatchesIntent",
-            "ReceiptSequenceExact"
+            "TypeOK",
+            "FrozenScope",
+            "OnlyOwnerRealmLookup",
+            "ReopenBinding",
+            "FailureFrame",
+            "PeerFrame",
+            "ReadAndReopenSnapshot",
+            "FreshCommittedID",
+            "AllocatorOnlyCreate",
+            "CommitExact",
+            "StoredIDsAndQuota"
           ],
-          "limits": "Unexecuted candidate baseline and exact mutation outcomes pending. Paired fixture and Abort-specific unchanged property; no Go refinement or real SQL proof."
+          "limits": "Abstract trusted-leaf metadata admission and atomic stores only. Realm equality is opaque; mount comparison is separate from HTTP marker. Not HTTP dispatch/parsing, host authentication, actual SQL/locking/crash or Go refinement, generation randomness, combined patches, collection list/query, SDK, Terraform, or real VM behavior."
         }
       ]
     },
     {
-      "path": "formal/CloudDNSAtomicChange.tla",
-      "sha256": "0283bea5554017cb28bd6a7a091ca0642f7ad381d95072c9107019c0533420ef",
+      "path": "formal/SakuraServerMetadata.tla",
+      "sha256": "211a15e9bb81c10d57829974e5ca405f0d57b3a8793dce580b9609076da1b0cd",
       "disposition": "modeled",
-      "reason": "Defines the bounded staged/written/observed/verified/commit or abort fixture and selected invariants for DNS state.",
+      "reason": "Finite Server metadata reference and configuration for the listed invariant and sensitivity obligations.",
       "models": [
         {
-          "id": "CloudDNSAtomicChange",
+          "id": "SakuraServerMetadata",
           "properties": [
-            "PendingInvisible",
-            "CommittedStateMatchesIntent",
-            "ReceiptSequenceExact"
+            "TypeOK",
+            "FrozenScope",
+            "OnlyOwnerRealmLookup",
+            "ReopenBinding",
+            "FailureFrame",
+            "PeerFrame",
+            "ReadAndReopenSnapshot",
+            "FreshCommittedID",
+            "AllocatorOnlyCreate",
+            "CommitExact",
+            "StoredIDsAndQuota"
           ],
-          "limits": "Unexecuted candidate baseline and exact mutation outcomes pending. Paired fixture and Abort-specific unchanged property; no Go refinement or real SQL proof."
+          "limits": "Abstract trusted-leaf metadata admission and atomic stores only. Realm equality is opaque; mount comparison is separate from HTTP marker. Not HTTP dispatch/parsing, host authentication, actual SQL/locking/crash or Go refinement, generation randomness, combined patches, collection list/query, SDK, Terraform, or real VM behavior."
         }
       ]
     },
     {
-      "path": "formal/CloudDNSChildToken.cfg",
-      "sha256": "da8f3c213fc8c0dcb0fea52140268f75f8c421241b0075acad18162f78c65305",
+      "path": "formal/SakuraServerReadEpoch.cfg",
+      "sha256": "2f66c3b6288ee4d0fb88d8b35039e66c58c93f061f2702a50fa885e4dbea22c7",
       "disposition": "modeled",
-      "reason": "Separates bounded child page-token ownership and generation observations; no runtime change.",
+      "reason": "Configures the finite Server view read-selection abstraction.",
       "models": [
         {
-          "id": "CloudDNSChildToken",
+          "id": "SakuraServerReadEpoch",
           "properties": [
-            "NoOldGenerationReuse"
+            "NoUnadvertisedMount",
+            "OnlyCurrentResult",
+            "NoDifferentServer"
           ],
-          "limits": "Child collection only; no route, HMAC, encoding, filtering or Terraform behavior. Token trace model overapproximates storage guards."
+          "limits": "Finite read-only presentation projection. Production Server capability is default-off; enabled states represent the explicitly guarded local operator opt-in after capability projection. Models descriptor/disabled/handoff admission, abstract context and list/detail request revision, and matching detail identity. Does not prove CLI validation or binding, proxy exposure, real authentication or browser authority, React/DOM/HTTP behavior, response schemas, pagination, mutations, runtime availability, SDK or Terraform. Generated bundle binding applies only to changed Server-view code."
         }
       ]
     },
     {
-      "path": "formal/CloudDNSChildToken.tla",
-      "sha256": "7ba1d0e6ce7869405e2dfb6601ee9fe78f5fe5104a37b531fb35cc515d450313",
+      "path": "formal/SakuraServerReadEpoch.tla",
+      "sha256": "4af0d5d95f370fe5b9f99d090bd8c4301bb637874454c0e709dcf232f51b46c0",
       "disposition": "modeled",
-      "reason": "Separates bounded child page-token ownership and generation observations; no runtime change.",
+      "reason": "Models default-off disclosure, current read ownership and exact detail-resource acceptance.",
       "models": [
         {
-          "id": "CloudDNSChildToken",
+          "id": "SakuraServerReadEpoch",
           "properties": [
-            "NoOldGenerationReuse"
+            "NoUnadvertisedMount",
+            "OnlyCurrentResult",
+            "NoDifferentServer"
           ],
-          "limits": "Child collection only; no route, HMAC, encoding, filtering or Terraform behavior. Token trace model overapproximates storage guards."
+          "limits": "Finite read-only presentation projection. Production Server capability is default-off; enabled states represent the explicitly guarded local operator opt-in after capability projection. Models descriptor/disabled/handoff admission, abstract context and list/detail request revision, and matching detail identity. Does not prove CLI validation or binding, proxy exposure, real authentication or browser authority, React/DOM/HTTP behavior, response schemas, pagination, mutations, runtime availability, SDK or Terraform. Generated bundle binding applies only to changed Server-view code."
         }
       ]
     },
     {
-      "path": "formal/CloudDNSConsoleScope.cfg",
-      "sha256": "206f6a008b8c6f2c8d7bb18c5f3d5bced8a8018bb1dd4fba4ce182b201921c22",
+      "path": "formal/SakuraStartupAdmission.tla",
+      "sha256": "eba3453a9f3886743249c010a1537df16b8f69719e08543848b6756709cf58e2",
       "disposition": "modeled",
-      "reason": "Declares checked invariants of the finite Cloud DNS console admission and scope projection.",
+      "reason": "Extends startup admission abstraction with explicit local Server Console opt-in before effects.",
       "models": [
         {
-          "id": "CloudDNSConsoleScope",
+          "id": "SakuraStartupAdmission",
           "properties": [
-            "CapabilityAuthorized",
-            "OnlyCurrentDiscovery",
-            "OnlyCurrentReadVisible",
-            "NoStaleContinuation"
+            "AcceptedConfigExact",
+            "ValidAdmissionAvailable",
+            "NoEffectsOnRefusal",
+            "ValidationPrecedesEffects"
           ],
-          "limits": "Finite presentation and admission projection: backend oracle abstracts authenticated identity and existing AWS handoff, and frontend models capability epochs, read replacement and continuation. Assumes same-origin transport and effective local actor; does not execute middleware, React, DOM, HTTP, RRset data/state updates, SDK, Terraform or establish implementation refinement. Generated app.js binding is limited to this changed Cloud DNS projection."
-        }
-      ]
-    },
-    {
-      "path": "formal/CloudDNSConsoleScope.tla",
-      "sha256": "697a85ff3e7c15ae9abbfcc1b9375822971f673f41567fba57fabf6d17ee9427",
-      "disposition": "modeled",
-      "reason": "Models owner-only discovery, delayed identity replies, and read ticket visibility/continuation.",
-      "models": [
-        {
-          "id": "CloudDNSConsoleScope",
-          "properties": [
-            "CapabilityAuthorized",
-            "OnlyCurrentDiscovery",
-            "OnlyCurrentReadVisible",
-            "NoStaleContinuation"
-          ],
-          "limits": "Finite presentation and admission projection: backend oracle abstracts authenticated identity and existing AWS handoff, and frontend models capability epochs, read replacement and continuation. Assumes same-origin transport and effective local actor; does not execute middleware, React, DOM, HTTP, RRset data/state updates, SDK, Terraform or establish implementation refinement. Generated app.js binding is limited to this changed Cloud DNS projection."
+          "limits": "Bounded parsed-flag Sakura admission and pre-effect order only. Default-disabled Server mode adds no new startup constraint. Enabled Server opt-in requires valid enabled Sakura scope, unsafe and allow-remote off, and parsed numeric loopback. Generic listener rules and other providers are outside this model. Later startup stages assume success. Does not prove real authentication, token handling/cryptography, IP parsing or socket binding, proxy or tunnel exposure, constructor atomicity, syscall failures/cleanup, SDK/HTTP/browser behavior, or Go refinement. Shared server.go scope covers only Sakura provider construction and configuration."
         }
       ]
     },
     {
       "path": "formal/models.json",
-      "sha256": "020ee1f084c94f9e20002ecf3b9666b0656abc7c8cd029a3004a91198354d3c2",
+      "sha256": "487c38061c6548bd23e7d2d78686f2d01f14f381e068b66aaa1dae8072414eec",
       "disposition": "formal-infrastructure",
-      "reason": "Adds the two reviewed Cloud DNS registrations and preserves all 113 previously registered main models. Also includes the scoped DNS console projection and its removal guards.",
+      "reason": "Preserves existing models and controls; updates the Sakura startup abstraction scope prose and adds five mutation controls, plus bounded read-epoch wording. Existing Cloud DNS: Adds the two reviewed Cloud DNS registrations and preserves all 113 previously registered main models. Also includes the scoped DNS console projection and its removal guards.",
       "models": []
     },
     {
-      "path": "internal/gcp/dns/dns_test.go",
-      "sha256": "98bfb3b888944f417d2e8b1e8bd25fee7bb8e9af10f081c6a77c43e340dfd368",
+      "path": "internal/sakura/iaas/server_contract_regression_test.go",
+      "sha256": "d247092e3c16eb63f5fefb3f857957c65c8e494ae82d692a98e1abb3c5b3b9ab",
       "disposition": "test-support",
-      "reason": "Native or developer-only test oracle and controls; not a runtime input or proof of the formal model.",
+      "reason": "In-process Server metadata wire and durable-store contract regressions only; no simulator runtime behavior.",
       "models": []
     },
     {
-      "path": "internal/gcp/dns/engine.go",
-      "sha256": "f70475f21d3dd1ffd4dcdde6dfbe0f1b05c69fd9c7de8fb60a63bb475daa7f26",
+      "path": "internal/sakura/iaas/server_http.go",
+      "sha256": "2b67534a26721d5da42f1db3330d1fbee12a163da7701047d1594ebd6e5575ff",
       "disposition": "modeled",
-      "reason": "Fixed configured owner gate and transaction visibility boundary correspond to the model owner map, Commit and Abort.",
+      "reason": "Trusted subject/realm and local marker before handling modeled metadata operations; rejection and peer frames.",
       "models": [
         {
-          "id": "CloudDNSAtomicChange",
+          "id": "SakuraServerMetadata",
           "properties": [
-            "OnlyOwnerCommits",
-            "PendingInvisible",
-            "DeniedStateUnchanged"
+            "OnlyOwnerRealmLookup",
+            "FailureFrame",
+            "PeerFrame",
+            "ReadAndReopenSnapshot"
           ],
-          "limits": "Does not model HTTP syntax, request body/route parsing, authentication middleware, real SQLite commit/crash, migration or byte limits."
+          "limits": "Models only the trusted leaf tuple/marker decision and allowed metadata action frames. Does not verify actual HTTP parsing or shared provider routing."
         }
       ]
     },
     {
-      "path": "internal/gcp/dns/factory_lifecycle_test.go",
-      "sha256": "dfd5becd421b289cd942e388579e82c656fad37fb2096f609ebf547f1c961d7e",
+      "path": "internal/sakura/iaas/server_http_test.go",
+      "sha256": "fc956f65b5ac80eeb4a95d020002b46c0ef5de7b49188ddcba370cbe55980f14",
       "disposition": "test-support",
-      "reason": "Native or developer-only test oracle and controls; not a runtime input or proof of the formal model.",
+      "reason": "Test-only artifact supporting exact local Server behavior and compatibility; no operational API or state interface introduced here.",
       "models": []
     },
     {
-      "path": "internal/gcp/dns/factory_observation_test.go",
-      "sha256": "7a3ce38d150e7bc6cb6f0148b8446359e963c55c03e5750a81fa2f7924dfee00",
-      "disposition": "test-support",
-      "reason": "Native or developer-only test oracle and controls; not a runtime input or proof of the formal model.",
-      "models": []
-    },
-    {
-      "path": "internal/gcp/dns/factory_sqlfault_test.go",
-      "sha256": "b9271b011769868f03da4753733b9e92b1c57fec1779ccdc19adad495d72b0e8",
-      "disposition": "test-support",
-      "reason": "Native or developer-only test oracle and controls; not a runtime input or proof of the formal model.",
-      "models": []
-    },
-    {
-      "path": "internal/gcp/dns/model.go",
-      "sha256": "5159fbb4e257edfc64204b0b415a39764df7b60e94ec526ef85c4786ff73d3df",
+      "path": "internal/sakura/iaas/server_store.go",
+      "sha256": "38cc26c7020adb5bd17fef024ce27493c0b57a67e6eb0f93396b23071e6c7552",
       "disposition": "modeled",
-      "reason": "Declared route operations select the bounded create/delete/change and child listing transitions.",
+      "reason": "Separate persisted binding, read/reopen observation, exact atomic operation and bounds, allocation retained across delete.",
       "models": [
         {
-          "id": "CloudDNSAtomicChange",
+          "id": "SakuraServerMetadata",
           "properties": [
-            "OnlyOwnerCommits",
-            "NonemptyDeletionRefused"
+            "FrozenScope",
+            "ReopenBinding",
+            "FailureFrame",
+            "PeerFrame",
+            "ReadAndReopenSnapshot",
+            "FreshCommittedID",
+            "AllocatorOnlyCreate",
+            "CommitExact",
+            "StoredIDsAndQuota"
           ],
-          "limits": "Operation correspondence only; route resolution and provider API descriptor are not formalized."
+          "limits": "The model covers admitted metadata action snapshots and finite abstract state, not actual SQL, HTTP parsing, list/query, auth tokens, timestamps, or VMs."
+        }
+      ]
+    },
+    {
+      "path": "internal/sakura/iaas/server_store_test.go",
+      "sha256": "c8cd4d45bd12e7e629d7a62e72f92c40b395954b900ee0a7c9596cfba07b26b5",
+      "disposition": "test-support",
+      "reason": "Test-only artifact supporting exact local Server behavior and compatibility; no operational API or state interface introduced here.",
+      "models": []
+    },
+    {
+      "path": "internal/sakura/provider.go",
+      "sha256": "3af3432234713b73a3e32d1b5e916c4f81f567e69805db526ea991362691df50",
+      "disposition": "modeled",
+      "reason": "Existing provider Actor extraction now reused for Server and Disk. Retain the existing Disk mapping model; routing and Server mount startup require native evidence.",
+      "models": [
+        {
+          "id": "SakuraDiskAdmission",
+          "properties": [
+            "MappedSubjectUsesExerciseIdentity",
+            "MappedRealmUsesCopiedHostConfig",
+            "NoDefaultActorOnExtractionFailure",
+            "WireHeadersDoNotMapAuthority"
+          ],
+          "limits": "Existing copied host-config and exercise identity mapping only. Neither actual dispatch, Server path selection, constructor atomicity nor host authentication is proved by this binding."
+        }
+      ]
+    },
+    {
+      "path": "internal/sakura/server_metadata_acceptance_test.go",
+      "sha256": "83b23d83b80bfb5def2104d9a6eb2fb73e1edff3f1eea0db2eeee9d292915e9a",
+      "disposition": "test-support",
+      "reason": "Test-only artifact supporting exact local Server behavior and compatibility; no operational API or state interface introduced here.",
+      "models": []
+    },
+    {
+      "path": "internal/server/apidocs/openapi.json",
+      "sha256": "d008baffa67bc57853eb2e3021e56d9db962899a702788b9e146bb6ec9146bd9",
+      "disposition": "presentation",
+      "reason": "Adds only read-only Sakura Server List reference and existing navigation group placement. No runtime or authorization changes.",
+      "models": []
+    },
+    {
+      "path": "internal/server/sakura_provider.go",
+      "sha256": "b66c9a67d62a0ffb592bc1af8b6e706faec05d271eb06848303d3aea36ad740e",
+      "disposition": "modeled",
+      "reason": "Only modeled Sakura configuration and bounded Server capability admission; trusted Actor/handoff rules are not proven.",
+      "models": [
+        {
+          "id": "SakuraStartupAdmission",
+          "properties": [
+            "DisabledNoSakura",
+            "RegistrationRequiresSchema"
+          ],
+          "limits": "Bounded parsed-flag Sakura admission and pre-effect order only. Default-disabled Server mode adds no new startup constraint. Enabled Server opt-in requires valid enabled Sakura scope, unsafe and allow-remote off, and parsed numeric loopback. Generic listener rules and other providers are outside this model. Later startup stages assume success. Does not prove real authentication, token handling/cryptography, IP parsing or socket binding, proxy or tunnel exposure, constructor atomicity, syscall failures/cleanup, SDK/HTTP/browser behavior, or Go refinement. Shared server.go scope covers only Sakura provider construction and configuration."
         },
         {
-          "id": "CloudDNSChildToken",
+          "id": "SakuraServerReadEpoch",
           "properties": [
-            "NoOldGenerationReuse"
+            "NoUnadvertisedMount"
           ],
-          "limits": "Child collection only; no route, HMAC, encoding, filtering or Terraform behavior. Token trace model overapproximates storage guards."
+          "limits": "Finite read-only presentation projection. Production Server capability is default-off; enabled states represent the explicitly guarded local operator opt-in after capability projection. Models descriptor/disabled/handoff admission, abstract context and list/detail request revision, and matching detail identity. Does not prove CLI validation or binding, proxy exposure, real authentication or browser authority, React/DOM/HTTP behavior, response schemas, pagination, mutations, runtime availability, SDK or Terraform. Generated bundle binding applies only to changed Server-view code."
         }
       ]
     },
     {
-      "path": "internal/gcp/dns/operations.go",
-      "sha256": "1f4d64baca0594229704f0d234860d1ea34439292a985c06cc2e3eb870bc3acf",
-      "disposition": "modeled",
-      "reason": "Zone lifecycle and exact compare-and-delete, planned writes and receipt append correspond to Stage/Write and the model commit conditions.",
-      "models": [
-        {
-          "id": "CloudDNSAtomicChange",
-          "properties": [
-            "ExactDeletionRequired",
-            "ApexPreserved",
-            "CommittedStateMatchesIntent",
-            "HistoryPrefixPreserved",
-            "NonemptyDeletionRefused",
-            "CleanupAdmissibleAtQuota"
-          ],
-          "limits": "Two paired abstract keys and small history bounds are fixture-only; no arbitrary RRset graph, SQL, HTTP or actual quota refinement."
-        }
-      ]
-    },
-    {
-      "path": "internal/gcp/dns/pagination.go",
-      "sha256": "0693b0bd02903a2c035cc278afd9719c8762740167b36e484468850d9591a7f0",
-      "disposition": "modeled",
-      "reason": "Project, zone child collection and generation correspond to bounded scoped issuance and reuse.",
-      "models": [
-        {
-          "id": "CloudDNSChildToken",
-          "properties": [
-            "NoOldGenerationReuse"
-          ],
-          "limits": "Child collection only; no route, HMAC, encoding, filtering or Terraform behavior. Token trace model overapproximates storage guards."
-        }
-      ]
-    },
-    {
-      "path": "internal/gcp/dns/records.go",
-      "sha256": "32362747ff6fb1dabe55ee579864d65494f593850eab724090bb330401763c6d",
-      "disposition": "modeled",
-      "reason": "Exact deletion compare and abstract values cover TTL and data equality; zone-owned synthetic records correspond to protected apex.",
-      "models": [
-        {
-          "id": "CloudDNSAtomicChange",
-          "properties": [
-            "ExactDeletionRequired",
-            "ApexPreserved"
-          ],
-          "limits": "Abstract binary values; no parser/validation refinement, complete RR syntax or external DNS serving."
-        }
-      ]
-    },
-    {
-      "path": "internal/gcp/dns/sql_faults_test.go",
-      "sha256": "4649e8fea498881160462111bc2648d75086a4cf4841fe3016e59e3ea3838b41",
+      "path": "internal/server/sakura_provider_test.go",
+      "sha256": "cf1a879b11a498c155a01b381bee7b0ff7f689b4714f9c8d11307f7c0edf3f66",
       "disposition": "test-support",
-      "reason": "Native or developer-only test oracle and controls; not a runtime input or proof of the formal model.",
-      "models": []
-    },
-    {
-      "path": "internal/gcp/dns/store.go",
-      "sha256": "4467834db9e8633af4079e5f59ca49eae5a5037a779679ff3c0cda834e0ed8b1",
-      "disposition": "modeled",
-      "reason": "Full RRset and receipt history comparison before commit corresponds to Verify and stored scope frame.",
-      "models": [
-        {
-          "id": "CloudDNSAtomicChange",
-          "properties": [
-            "CommittedStateMatchesIntent",
-            "HistoryPrefixPreserved",
-            "ReceiptSequenceExact",
-            "OtherProjectUnchanged",
-            "NoOrphanRecords"
-          ],
-          "limits": "Bounded state only: no SQL triggers, real transaction ordering, database open/schema migration or crash consistency proof."
-        }
-      ]
-    },
-    {
-      "path": "internal/server/apidocs/gcp-catalog.html",
-      "sha256": "37f89cd2b84ac5b42561017f7f9a3f51c2822c92068c10f6caff7f0c237ad8ba",
-      "disposition": "presentation",
-      "reason": "Static navigation to the existing same-origin Google Cloud DNS API reference; no simulator operation or authority change.",
-      "models": []
-    },
-    {
-      "path": "internal/server/apidocs/gcp-dns-init.js",
-      "sha256": "865dcb55e1f2f502c35a2eec2e13a1aed7e85adddc29af6c26a1ba8862f0e9d5",
-      "disposition": "presentation",
-      "reason": "Scalar presentation bootstraps one authenticated and origin-bound existing DNS list operation with the configured project; no provider state, auth configuration, or write operation change.",
-      "models": []
-    },
-    {
-      "path": "internal/server/apidocs/gcp-dns.html",
-      "sha256": "223edacfdad19f13f7e2881123602db0601ea39d99a22787f3c067997919808e",
-      "disposition": "presentation",
-      "reason": "Static Scalar presentation frame for the existing read-only Cloud DNS list endpoint; no provider state or access policy change.",
-      "models": []
-    },
-    {
-      "path": "internal/server/apidocs/gcp-dns/dns.v1.json",
-      "sha256": "fef314d51169f83658fed72b2de59b2a0d552cbae2ca5d6753858a8d85a07dc7",
-      "disposition": "presentation",
-      "reason": "OpenAPI presentation for the existing same-origin DNS List managed zones GET only; no new API operation or state transition.",
-      "models": []
-    },
-    {
-      "path": "internal/server/cloud_storage.go",
-      "sha256": "fd42554c210182f4c3faa395c0c82c985498944c86672f005a2feb8c304115b7",
-      "disposition": "modeled",
-      "reason": "DNS is wired to the existing configured project and owner and takes the trusted exercise actor from the same provider context; existing catalog, App Engine and Azure branches are unchanged. The added HTTP prefix match and DNS dispatch are residual and covered by native request/recorder controls, not these models.",
-      "models": [
-        {
-          "id": "ProviderActor",
-          "properties": [
-            "AuthenticatedRequestsAttach",
-            "CredentialIdentityPreserved"
-          ],
-          "limits": "Existing trusted identity handoff boundary only; no DNS path matching, HTTP transport or DNS role policy proof."
-        },
-        {
-          "id": "ProjectAuthority",
-          "properties": [
-            "FixedHostConfiguration",
-            "OnlyActualOwnerAuthorized"
-          ],
-          "limits": "Existing configured project-owner authority abstraction only; DNS DB initialization, literal path prefix and handler composition tested natively, not proved."
-        }
-      ]
-    },
-    {
-      "path": "internal/server/gcp_dns_handler_test.go",
-      "sha256": "fa970ecb1382797b3129ce5537aa224db5e12d0777b8756c1a0219d1463df81e",
-      "disposition": "test-support",
-      "reason": "Tests concrete NewAccess capability discovery and DNS list using existing local handler fixtures.",
-      "models": []
-    },
-    {
-      "path": "internal/server/gcp_dns_test.go",
-      "sha256": "e05d375acff115def7f056debd761c8bdd88374861edb6bc5c8328d9ac0a70b4",
-      "disposition": "test-support",
-      "reason": "Native or developer-only test oracle and controls; not a runtime input or proof of the formal model.",
+      "reason": "In-process capability and missing-provider refusal fixtures; no live browser or provider.",
       "models": []
     },
     {
       "path": "internal/server/server.go",
-      "sha256": "d824be4831fb25758d93ca2d119ae490f7a42b43d452d62be25dc5a2edd93c38",
+      "sha256": "f9e32c094dea5cefe2b1cc01becf1964674ec28a45b2eb5e5b740e35a52c901b",
       "disposition": "modeled",
-      "reason": "Publishes the Cloud DNS console capability only for the trusted local owner outside scoped handoffs.",
+      "reason": "Only changed Sakura provider composition and scoped publication path; other provider logic and authentication are not modeled. Existing Cloud DNS: Publishes the Cloud DNS console capability only for the trusted local owner outside scoped handoffs.",
       "models": [
+        {
+          "id": "SakuraStartupAdmission",
+          "properties": [
+            "NoEffectsOnRefusal",
+            "ValidationPrecedesEffects",
+            "SchemaRequiresDatabase",
+            "RegistrationRequiresSchema"
+          ],
+          "limits": "Bounded parsed-flag Sakura admission and pre-effect order only. Default-disabled Server mode adds no new startup constraint. Enabled Server opt-in requires valid enabled Sakura scope, unsafe and allow-remote off, and parsed numeric loopback. Generic listener rules and other providers are outside this model. Later startup stages assume success. Does not prove real authentication, token handling/cryptography, IP parsing or socket binding, proxy or tunnel exposure, constructor atomicity, syscall failures/cleanup, SDK/HTTP/browser behavior, or Go refinement. Shared server.go scope covers only Sakura provider construction and configuration."
+        },
         {
           "id": "CloudDNSConsoleScope",
           "properties": [
@@ -365,10 +310,19 @@
     },
     {
       "path": "internal/server/web/app.js",
-      "sha256": "b28e4274f9523ea914c6e1fb0e09432ab79e8441d952f76a88c253d9cc8bc4cc",
+      "sha256": "240a3efbf1dfe8f542c0614ed8c14464b1aed1d26c91d4d76e4521c0821c1f0d",
       "disposition": "modeled",
-      "reason": "Rebuilt console embeds the scoped DNS visibility and local request-cancellation behavior in the bound UI changes.",
+      "reason": "Embedded bundle includes the exact guarded Server view and current-context response projection. Existing Cloud DNS: Rebuilt console embeds the scoped DNS visibility and local request-cancellation behavior in the bound UI changes.",
       "models": [
+        {
+          "id": "SakuraServerReadEpoch",
+          "properties": [
+            "NoUnadvertisedMount",
+            "OnlyCurrentResult",
+            "NoDifferentServer"
+          ],
+          "limits": "Finite read-only presentation projection. Production Server capability is default-off; enabled states represent the explicitly guarded local operator opt-in after capability projection. Models descriptor/disabled/handoff admission, abstract context and list/detail request revision, and matching detail identity. Does not prove CLI validation or binding, proxy exposure, real authentication or browser authority, React/DOM/HTTP behavior, response schemas, pagination, mutations, runtime availability, SDK or Terraform. Generated bundle binding applies only to changed Server-view code."
+        },
         {
           "id": "CloudDNSConsoleScope",
           "properties": [
@@ -381,125 +335,127 @@
       ]
     },
     {
-      "path": "scripts/factory_acceptance.py",
-      "sha256": "44c6dfc249a6e5bd2071df5ae80ee377bea87f6e3437ed538db4d93d15b3310b",
+      "path": "scripts/check-assets.py",
+      "sha256": "86b9be166951970b736656a8076b5042a0b26d49e53ca7c75660a1854a12e81e",
       "disposition": "validation-tooling",
-      "reason": "Registers opt-in Cloud DNS acceptance, retaining existing SQS and DescribeSubnets defaults, oracle and scope checks.",
+      "reason": "Retains exact API reference inventory and admits only the reviewed Sakura Server List operation. No provider state or authority change.",
+      "models": []
+    },
+    {
+      "path": "scripts/factory_acceptance.py",
+      "sha256": "272723ee144d849767521b773dfc180cb6bfd10705a919d7b4181e69ee7e1aec",
+      "disposition": "validation-tooling",
+      "reason": "Adds opt-in Sakura Server metadata acceptance with a pinned oracle, leaving the existing SQS and DescribeSubnets defaults unchanged. Existing Cloud DNS: Registers opt-in Cloud DNS acceptance, retaining existing SQS and DescribeSubnets defaults, oracle and scope checks.",
       "models": []
     },
     {
       "path": "scripts/formal_model_gate.py",
+      "sha256": "1235543f01717c50c8bd062e15130948e341079c95aef509808f2ef7601add4a",
       "disposition": "formal-infrastructure",
-      "reason": "Pins both reviewed Cloud DNS models, their checked properties, exact source scopes and three sensitivity controls, preserving all existing pins. Also includes the scoped DNS console projection and its removal guards.",
-      "models": [],
-      "sha256": "064417caccd6ba5ee668970e3687cc6b886d184f873a53f4222b14bbfcaaff87"
+      "reason": "Makes the five additional Sakura startup mutation controls mandatory in the exact inventory. Does not alter runtime. Existing Cloud DNS: Pins both reviewed Cloud DNS models, their checked properties, exact source scopes and three sensitivity controls, preserving all existing pins. Also includes the scoped DNS console projection and its removal guards.",
+      "models": []
     },
     {
       "path": "scripts/test-factory-acceptance.py",
-      "sha256": "d6e1e69e2d944ef1435f2d3374da6596c2e500a10603016aae2e30e4231d043d",
+      "sha256": "293f739e78c9f271e6d9545c6ec8ed7f832b68f231b4144e868214c9d46bf42d",
       "disposition": "test-support",
-      "reason": "Native or developer-only test oracle and controls; not a runtime input or proof of the formal model.",
+      "reason": "Test-only artifact supporting exact local Server behavior and compatibility; no operational API or state interface introduced here. Existing Cloud DNS: Native or developer-only test oracle and controls; not a runtime input or proof of the formal model.",
       "models": []
     },
     {
       "path": "scripts/test-formal-gate.py",
       "disposition": "formal-infrastructure",
-      "reason": "Checks exact model inventory and rejects removal of Cloud DNS scope, properties or registered controls with isolated fixtures. Also includes the scoped DNS console projection and its removal guards.",
+      "reason": "Checks preservation of required registration and rejects removed Sakura scope, properties or controls with an isolated model fixture. Also retains the scoped console read-selection model and its six controls. Existing Cloud DNS: Checks exact model inventory and rejects removal of Cloud DNS scope, properties or registered controls with isolated fixtures. Also includes the scoped DNS console projection and its removal guards.",
       "models": [],
-      "sha256": "d1571d0da9378ca1cbbdcacebe5b3a4b7810fa5a09769f8a40d4503068d93523"
+      "sha256": "cc0a7db3e6791c3bdca31f1fdfd108972ead2a0dfb1245198068e065eee51ce2"
     },
     {
-      "path": "test/e2e/gcp_dns_console_gui.py",
-      "sha256": "a7be1e625fb2dd0ee1791945d1d838f95b109b631879d567fcabb5cbb9d9e46c",
+      "path": "scripts/test-native-provenance.py",
+      "sha256": "bfdb3c500bf880a9c094af0b4a38cdfbcbba4717f9213a03962ce31d2b9ddc97",
       "disposition": "test-support",
-      "reason": "Opt-in actual Chromium acceptance for local authorized Cloud DNS console List/Create/Details, validated isolated runner, native reads and owned cleanup.",
+      "reason": "Pins the separate Sakura Server List reference singleton and closed-union operand while retaining the original exact native provenance normalization and historical digest. Tests only.",
       "models": []
     },
     {
-      "path": "test/e2e/gcp_dns_scalar_send.py",
-      "sha256": "1cbef3428e9f22c8639054f1b25ce1cc2027bbe247d29b717781ea7d2444552d",
+      "path": "test/e2e/sakura_sdk.py",
+      "sha256": "127df9f7b85035c6d767ebc2eadf9863123961ebf5c105a4ed9162c1c5b72b8c",
       "disposition": "test-support",
-      "reason": "Adds opt-in real-browser Cloud DNS List Send coverage against the existing authenticated same-origin reference. No runtime, runner or workflow changes.",
+      "reason": "Adds opt-in owned-loopback Server metadata fixture; existing default Disk run and runner remain unchanged.",
       "models": []
     },
     {
-      "path": "test/e2e/gcp_dns_sdk.py",
-      "sha256": "bf8b53d1281401069830a23ee51899d44026d062d61a0e8dea4defdf37064e67",
+      "path": "test/e2e/sakura_server_console_gui.py",
+      "sha256": "97daf7f4f68db5bf4ee032754d62be8ff7091908a56f879e4efa2978e7651dcf",
       "disposition": "test-support",
-      "reason": "Adds opt-in pinned official discovery-client DNS lifecycle against a privately owned numeric loopback, with configured actor and cleanup. No runtime, package pin, runner or workflow changes.",
+      "reason": "Opt-in real browser test source; no socket, browser or simulator run in this packet.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/sakura_server_scalar_send.py",
+      "sha256": "0c0ccd35c2e6f0af688e9d71866552148f3927a70c9382ab0f754b2dc3b4c0a1",
+      "disposition": "test-support",
+      "reason": "Adds an opt-in browser fixture for local Sakura Server List Scalar Send against a saved row; test-only, with no runtime, existing-test, or workflow changes.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/test_openapi_parameters.py",
+      "sha256": "4e8cd48bfb4263e6052142e7bdbd695d77dcc38f6e21b8c2276e9f1013b3e970",
+      "disposition": "test-support",
+      "reason": "Adds only SakuraListServers to the projected exact operation inventory.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/test_sakura_openapi.py",
+      "sha256": "4625ddc310544ef07fdcb5fa67c602148fd9854a8af490c2a0a85bbceac667f6",
+      "disposition": "test-support",
+      "reason": "Pins the Server List schema and tag and verifies complete preservation of earlier reference content.",
+      "models": []
+    },
+    {
+      "path": "test/sdk/sakura/main.go",
+      "sha256": "61167c6a1d8c9afecaa58ac5e9bafd30b333a479415e03a8eb3a5ed596207dce",
+      "disposition": "test-support",
+      "reason": "Adds optional Server metadata acceptance to the existing development-only pinned Sakura SDK client; default Disk calls and simulator runtime are unchanged.",
+      "models": []
+    },
+    {
+      "path": "test/sdk/sakura/server_inprocess_test.go",
+      "sha256": "e459ed4d20e554df5ae2fce31a893d7da4dd6e1c39274022fbb8a228ccadc112",
+      "disposition": "test-support",
+      "reason": "Test-only artifact supporting exact local Server behavior and compatibility; no operational API or state interface introduced here.",
       "models": []
     },
     {
       "path": "tools/console/bundle-digests.json",
-      "sha256": "bdde72ff99e5bce2306e4c1ae1845eb88248dfeed0640eda50cf9e8dab0fbb5b",
+      "sha256": "6e47f6912774937fa3597550a41a75f4128c65b49017c5c862d16ceb0783d31e",
       "disposition": "presentation",
-      "reason": "Generated digest indexes of embedded console assets, not program behavior.",
+      "reason": "Generated package digest index, not program behavior. Existing Cloud DNS: Generated digest indexes of embedded console assets, not program behavior.",
       "models": []
     },
     {
       "path": "tools/console/bundle-inputs.json",
-      "sha256": "b8cf6711a05d937a88ce1b15e2c11d7ff3ac159da96ae95c224d67a0a8fe71db",
+      "sha256": "b714262026a6a7a647ef5d14a7ea77ff0a001c6d79fa2738c0320d1f400b2ccd",
       "disposition": "presentation",
-      "reason": "Generated console input provenance, not program behavior.",
+      "reason": "Generated bundle input provenance, not program behavior. Existing Cloud DNS: Generated console input provenance, not program behavior.",
       "models": []
     },
     {
       "path": "tools/console/src/console-navigation.mjs",
-      "sha256": "57859dbacd0f846588ec54fba07bdc7459d45e2e34b15ee24be789749ef51589",
+      "sha256": "491578eb618b604460b6236812bb561fad3ca29305961cda3830941fe01694b4",
       "disposition": "modeled",
-      "reason": "Projects DNS availability from the exact capability and the active discovery principal and epoch.",
+      "reason": "Uses explicit enabled Server capability and does not infer permission or readiness from Disk or region. Existing Cloud DNS: Projects DNS availability from the exact capability and the active discovery principal and epoch.",
       "models": [
+        {
+          "id": "SakuraServerReadEpoch",
+          "properties": [
+            "NoUnadvertisedMount"
+          ],
+          "limits": "Finite read-only presentation projection. Production Server capability is default-off; enabled states represent the explicitly guarded local operator opt-in after capability projection. Models descriptor/disabled/handoff admission, abstract context and list/detail request revision, and matching detail identity. Does not prove CLI validation or binding, proxy exposure, real authentication or browser authority, React/DOM/HTTP behavior, response schemas, pagination, mutations, runtime availability, SDK or Terraform. Generated bundle binding applies only to changed Server-view code."
+        },
         {
           "id": "CloudDNSConsoleScope",
           "properties": [
             "OnlyCurrentDiscovery"
-          ],
-          "limits": "Finite presentation and admission projection: backend oracle abstracts authenticated identity and existing AWS handoff, and frontend models capability epochs, read replacement and continuation. Assumes same-origin transport and effective local actor; does not execute middleware, React, DOM, HTTP, RRset data/state updates, SDK, Terraform or establish implementation refinement. Generated app.js binding is limited to this changed Cloud DNS projection."
-        }
-      ]
-    },
-    {
-      "path": "tools/console/src/gcp-console-shell.jsx",
-      "sha256": "4854c6cc6fdd925d19059232d29e1a020a511f8ab68127f07f2aeff5361b9162",
-      "disposition": "modeled",
-      "reason": "The supported Zones rail action issues a fresh list operation, replacing any currently displayed details.",
-      "models": [
-        {
-          "id": "CloudDNSConsoleScope",
-          "properties": [
-            "OnlyCurrentReadVisible",
-            "NoStaleContinuation"
-          ],
-          "limits": "Finite presentation and admission projection: backend oracle abstracts authenticated identity and existing AWS handoff, and frontend models capability epochs, read replacement and continuation. Assumes same-origin transport and effective local actor; does not execute middleware, React, DOM, HTTP, RRset data/state updates, SDK, Terraform or establish implementation refinement. Generated app.js binding is limited to this changed Cloud DNS projection."
-        }
-      ]
-    },
-    {
-      "path": "tools/console/src/gcp-dns-requests.mjs",
-      "sha256": "42f68d363a8cd0477ec42a1f99e4f5ad80f7eadbac854e7d0eb4122c5b8f485a",
-      "disposition": "modeled",
-      "reason": "Checks cancellation before starting each next page. Exact request paths and request/response types are exercised by separate regression tests.",
-      "models": [
-        {
-          "id": "CloudDNSConsoleScope",
-          "properties": [
-            "NoStaleContinuation"
-          ],
-          "limits": "Finite presentation and admission projection: backend oracle abstracts authenticated identity and existing AWS handoff, and frontend models capability epochs, read replacement and continuation. Assumes same-origin transport and effective local actor; does not execute middleware, React, DOM, HTTP, RRset data/state updates, SDK, Terraform or establish implementation refinement. Generated app.js binding is limited to this changed Cloud DNS projection."
-        }
-      ]
-    },
-    {
-      "path": "tools/console/src/gcp-dns.jsx",
-      "sha256": "34663a1017625fe83aee2b7292dd46fdfb25e0e5901d97c7f3d4f72567c6df97",
-      "disposition": "modeled",
-      "reason": "Zone list/detail operations discard superseded read replies and cancel pending reads when the operation is replaced.",
-      "models": [
-        {
-          "id": "CloudDNSConsoleScope",
-          "properties": [
-            "OnlyCurrentReadVisible",
-            "NoStaleContinuation"
           ],
           "limits": "Finite presentation and admission projection: backend oracle abstracts authenticated identity and existing AWS handoff, and frontend models capability epochs, read replacement and continuation. Assumes same-origin transport and effective local actor; does not execute middleware, React, DOM, HTTP, RRset data/state updates, SDK, Terraform or establish implementation refinement. Generated app.js binding is limited to this changed Cloud DNS projection."
         }
@@ -507,10 +463,18 @@
     },
     {
       "path": "tools/console/src/main.jsx",
-      "sha256": "b8fc0207c53eb06abb46293484c21e5515c53153dbe61705bbe7b7a2009fc9b5",
+      "sha256": "9b3673f056b72b0815c4fe735341509c2041ba41ab3da1002cf1e239114da013",
       "disposition": "modeled",
-      "reason": "Combines fresh backend discovery and effective principal/epoch before mounting DNS, preventing reuse after returning to the same principal.",
+      "reason": "Does not mount the Server view unless its own capability is enabled and valid; binds session to the Sakura context. Existing Cloud DNS: Combines fresh backend discovery and effective principal/epoch before mounting DNS, preventing reuse after returning to the same principal.",
       "models": [
+        {
+          "id": "SakuraServerReadEpoch",
+          "properties": [
+            "NoUnadvertisedMount",
+            "OnlyCurrentResult"
+          ],
+          "limits": "Finite read-only presentation projection. Production Server capability is default-off; enabled states represent the explicitly guarded local operator opt-in after capability projection. Models descriptor/disabled/handoff admission, abstract context and list/detail request revision, and matching detail identity. Does not prove CLI validation or binding, proxy exposure, real authentication or browser authority, React/DOM/HTTP behavior, response schemas, pagination, mutations, runtime availability, SDK or Terraform. Generated bundle binding applies only to changed Server-view code."
+        },
         {
           "id": "CloudDNSConsoleScope",
           "properties": [
@@ -521,17 +485,63 @@
       ]
     },
     {
-      "path": "tools/console/test/gcp-dns-navigation.test.mjs",
-      "sha256": "00512ed0564ab57345f239e2e99919721a3cad4f9955586fb953db3ab7252987",
+      "path": "tools/console/src/sakura-console.jsx",
+      "sha256": "11a4c9be3a91e0495290d403410ca856740779a02136d9771bb4545e71357df9",
+      "disposition": "modeled",
+      "reason": "The Server navigation returns to the current context list with a fresh revision, not the previous details.",
+      "models": [
+        {
+          "id": "SakuraServerReadEpoch",
+          "properties": [
+            "OnlyCurrentResult"
+          ],
+          "limits": "Finite read-only presentation projection. Production Server capability is default-off; enabled states represent the explicitly guarded local operator opt-in after capability projection. Models descriptor/disabled/handoff admission, abstract context and list/detail request revision, and matching detail identity. Does not prove CLI validation or binding, proxy exposure, real authentication or browser authority, React/DOM/HTTP behavior, response schemas, pagination, mutations, runtime availability, SDK or Terraform. Generated bundle binding applies only to changed Server-view code."
+        }
+      ]
+    },
+    {
+      "path": "tools/console/src/sakura-server-read.mjs",
+      "sha256": "c192d5ad699603eab75988b85858868971be7c0765b41aa1975bfd5b5bf93034",
+      "disposition": "modeled",
+      "reason": "Rejects malformed descriptor and nonmatching detail identity before allowing client projection.",
+      "models": [
+        {
+          "id": "SakuraServerReadEpoch",
+          "properties": [
+            "NoUnadvertisedMount",
+            "NoDifferentServer"
+          ],
+          "limits": "Finite read-only presentation projection. Production Server capability is default-off; enabled states represent the explicitly guarded local operator opt-in after capability projection. Models descriptor/disabled/handoff admission, abstract context and list/detail request revision, and matching detail identity. Does not prove CLI validation or binding, proxy exposure, real authentication or browser authority, React/DOM/HTTP behavior, response schemas, pagination, mutations, runtime availability, SDK or Terraform. Generated bundle binding applies only to changed Server-view code."
+        }
+      ]
+    },
+    {
+      "path": "tools/console/src/sakura-server-read.test.mjs",
+      "sha256": "280c80ae03cc4cd353bdb75e842cb861c2e7f1437960c3b640950c17fd5fecfa",
       "disposition": "presentation",
-      "reason": "Console navigation source unit tests only; current gate classifies console-side test paths as presentation.",
+      "reason": "Console-side test fixture; uses the console-path classification and does not modify runtime.",
       "models": []
     },
     {
-      "path": "tools/console/test/gcp-dns-requests.test.mjs",
-      "sha256": "059d396e53d81476fdc145277d5fa06144e074c20fe5fa3046f7d2e973c0af4b",
+      "path": "tools/console/src/sakura-servers.jsx",
+      "sha256": "e16fc1abece0caa3dc0a471117e9f4ed4e5882a310d76e34cc6f8af9a59f6168",
+      "disposition": "modeled",
+      "reason": "Uses context and request revision to keep stale list/detail responses from becoming visible.",
+      "models": [
+        {
+          "id": "SakuraServerReadEpoch",
+          "properties": [
+            "OnlyCurrentResult"
+          ],
+          "limits": "Finite read-only presentation projection. Production Server capability is default-off; enabled states represent the explicitly guarded local operator opt-in after capability projection. Models descriptor/disabled/handoff admission, abstract context and list/detail request revision, and matching detail identity. Does not prove CLI validation or binding, proxy exposure, real authentication or browser authority, React/DOM/HTTP behavior, response schemas, pagination, mutations, runtime availability, SDK or Terraform. Generated bundle binding applies only to changed Server-view code."
+        }
+      ]
+    },
+    {
+      "path": "tools/console/test/sakura-server-navigation.test.mjs",
+      "sha256": "27d582825eeb5608905b3f382a2442ed8c6de19170d21d17ff9674dd6fac0a7f",
       "disposition": "presentation",
-      "reason": "Console source unit tests only; current gate classifies console-side test paths as presentation.",
+      "reason": "Console navigation test only; uses the console-path classification.",
       "models": []
     }
   ]

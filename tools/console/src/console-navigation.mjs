@@ -1,3 +1,5 @@
+import {sakuraServerEndpoint} from './sakura-server-read.mjs';
+
 // Console discovery only: this catalog never grants API or exercise authority.
 export const PROVIDERS = Object.freeze([
   {id: 'aws', label: 'AWS', defaultService: 'home'},
@@ -28,6 +30,7 @@ export const SERVICES = Object.freeze([
   {id: 'gcp-appengine', provider: 'gcp', label: 'App Engine', route: '/gcp-appengine', keywords: 'google app engine appengine gae application version traffic split firewall python wsgi アプリ アプリケーション バージョン トラフィック ファイアウォール'},
   {id: 'azure-blob', provider: 'azure', label: 'Blob Storage', route: '/azure-blob', keywords: 'container blob コンテナー コンテナ ブロブ ストレージ ブロブストレージ'},
   {id: 'azure-arm', provider: 'azure', label: 'Resource Manager', route: '/azure-arm', keywords: 'arm resource group subscription リソース グループ リソースグループ サブスクリプション リソースマネージャー'},
+  {id: 'sakura-servers', provider: 'sakura', label: 'Servers', route: '/sakura-servers', keywords: 'sakura cloud server metadata さくらのクラウド サーバ メタデータ'},
   {id: 'sakura-disks', provider: 'sakura', label: 'Disks', route: '/sakura-disks', keywords: 'sakura cloud disk configuration storage さくらのクラウド さくら ディスク 構成 ストレージ'},
 ]);
 export function serviceDescriptor(id) { return SERVICES.find(service => service.id === id); }
@@ -59,6 +62,13 @@ export function dnsCapabilitiesForPrincipal(session, epoch, principal, discovere
   if (!session || epoch === 0) return session;
   return {...session, gcpDns: discovered?.epoch === epoch && discovered.principal === principal ? discovered.value : undefined};
 }
+export function sakuraServerConfiguration(capabilities) {
+  const scope = capabilities?.sakuraServer;
+  if (!Array.isArray(capabilities?.providers) || !capabilities.providers.includes('sakura')
+      || capabilities.consoleScope || scope?.console !== true || scope.availabilityReported !== false
+      || !sakuraServerEndpoint(scope)) return null;
+  return scope;
+}
 export function serviceAvailable(id, capabilities) {
   if (id === 'home') return !!capabilities;
   const service = serviceDescriptor(id);
@@ -74,6 +84,7 @@ export function serviceAvailable(id, capabilities) {
     return ec2?.console === true && Array.isArray(ec2.operations) && ['DescribeInstances','DescribeVpcs'].every(op=>ec2.operations.includes(op));
   }
   if (service.provider === 'aws') return !!capabilities.services?.[service.capability];
+  if (id === 'sakura-servers') return sakuraServerConfiguration(capabilities) !== null;
   if (service.provider === 'sakura') return sakuraConfiguration(capabilities) !== null;
   if (service.id === 'gcp-appengine') return typeof capabilities.gcpAppEngine?.endpoint === 'string' && typeof capabilities.gcpAppEngine.project === 'string'
     && capabilities.gcpAppEngine.project.length > 0 && typeof capabilities.gcpAppEngine.dataPlane === 'string';
