@@ -4,7 +4,7 @@
   "changes": [
     {
       "path": "docs/aws-catalog-services.md",
-      "sha256": "235bd5ced4afa169590ebdd2b3253fd191bed66ab40559ccceb16bf91bc6beb9",
+      "sha256": "63f584ed56e6939b93cb28f1edc272decdb00881bf87dde2840291724fb344a2",
       "disposition": "documentation",
       "reason": "Generated service table listing the newly added services with their bound operations and bounds.",
       "models": []
@@ -42,6 +42,13 @@
       "sha256": "671930c9a45c50bf42949fba59f5cd112e7bc2e90a40ce0390a5981ccdfea5d7",
       "disposition": "test-support",
       "reason": "Cost Category month-start and Data Exports SELECT boundary regression, including no partial mutation.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/catalog/braket_device_contract_test.go",
+      "sha256": "9686cca429b2e47fdbc1e9afdc72cc495d835b973a51110e94d906adb04341a0",
+      "disposition": "test-support",
+      "reason": "Braket spending limit device ARN boundary and refusal without storage mutation.",
       "models": []
     },
     {
@@ -1460,7 +1467,7 @@
     },
     {
       "path": "internal/aws/catalog/services_ops2.go",
-      "sha256": "894bf484dbb5089403a65a6b6324f9d0ece1cfb3e1ead38e78e12b3b9b302039",
+      "sha256": "e2d12bbb3a387f8bb9a1bd532655391de32dd663b02a05e9954e953013479f7a",
       "disposition": "modeled",
       "reason": "Reviewed specifications for newly added services: stored configuration and configuration records with unique names and per-Region limits.",
       "models": [
@@ -1478,7 +1485,7 @@
     },
     {
       "path": "internal/aws/catalog/services_ops2_test.go",
-      "sha256": "cb39926e86a505ac35af78be5f4253356c4f48cdf8c53f9c936bfc155c7666ac",
+      "sha256": "38b5c8b6aea1523709755023436bedb88ad22e2d9bb540ee138a42d13ae5a994",
       "disposition": "test-support",
       "reason": "Native tests of the newly added specifications: lifecycles, documented rules, faults and refusals.",
       "models": []
@@ -1575,7 +1582,7 @@
     },
     {
       "path": "internal/server/apidocs/catalog/braket.json",
-      "sha256": "a3a5764619e90edb6060283a2c2b4b977d48b1387fc6ce4c13c186a4abb4bed7",
+      "sha256": "bf89f0381598aa72290ab3dcac7b79aedc5dbe008d70ceaebb1ab287ce624592",
       "disposition": "presentation",
       "reason": "Generated braket reference.",
       "models": []
@@ -2054,7 +2061,7 @@
     },
     {
       "path": "test/e2e/catalog_fixtures/braket.json",
-      "sha256": "55d3cf66364ea489a379d39b1ae6df6dce80292d5a744b572027acf59dd450b0",
+      "sha256": "412a4a8b45de20fd16ed8a10a3846a07cf3d27d7f3d0aa4424b6a2022f3273ac",
       "disposition": "test-support",
       "reason": "boto3 lifecycle fixture for braket.",
       "models": []

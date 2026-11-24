@@ -549,7 +549,7 @@ func bcmExportReplace(document, supplied map[string]any) error {
 	return nil
 }
 
-var braketDevice = regexp.MustCompile(`^arn:[a-z-]+:braket:[a-z0-9-]*:[0-9]{0,12}:device/(qpu|quantum-simulator)/.+$`)
+var braketQPUDevice = regexp.MustCompile(`^arn:aws(?:-[a-z0-9]+)*:braket:(?:[a-z0-9]+-)+[0-9]+::device/qpu/[a-z0-9]+(?:-[a-z0-9]+)*/[A-Za-z0-9][A-Za-z0-9._-]*$`)
 
 var braket = &Service{
 	Model: "braket", Title: "Amazon Braket", IAMPrefix: "braket", Issues: []int{250},
@@ -570,14 +570,14 @@ var braket = &Service{
 	},
 	Bounds: []string{
 		"Spending limits are stored records and are never enforced: no quantum task, hybrid job, device or simulator exists, nothing is run or billed, so queuedSpend and totalSpend stay 0. CreateQuantumTask, CreateJob, GetDevice, SearchDevices and every other official operation not listed here return UnknownOperationException with HTTP 501; the catalog of devices is AWS-owned data.",
-		"deviceArn must look like a Braket device ARN but is not looked up, so retired or unknown devices are accepted. spendingLimit must be a non-negative decimal number of US dollars and endAt must follow startAt. GetSpendingLimit does not exist in the official API: spending limits are read only through SearchSpendingLimits, which returns every stored limit; its filters member is refused. Create client tokens are stored with the idempotent create, update client tokens are accepted and not recorded.",
+		"deviceArn must have the documented ARN shape of a regional Braket QPU, including provider and device ID; simulator ARNs are refused. No device catalog lookup is performed, so a matching ARN is not proof of availability. spendingLimit must be a non-negative decimal number of US dollars and endAt must follow startAt. GetSpendingLimit does not exist in the official API: spending limits are read only through SearchSpendingLimits, which returns every stored limit; its filters member is refused. Create client tokens are stored with the idempotent create, update client tokens are accepted and not recorded.",
 	},
 }
 
 // braketLimit checks the documented members of a spending limit.
 func braketLimit(input map[string]any) error {
-	if arn, ok := input["deviceArn"].(string); ok && !braketDevice.MatchString(arn) {
-		return invalid("deviceArn must be the ARN of a Braket device.")
+	if arn, ok := input["deviceArn"].(string); ok && !braketQPUDevice.MatchString(arn) {
+		return invalid("deviceArn must identify a physical Braket QPU, not a simulator.")
 	}
 	if amount, ok := input["spendingLimit"].(string); ok {
 		if value, err := strconv.ParseFloat(amount, 64); err != nil || value < 0 || math.IsInf(value, 0) || math.IsNaN(value) {

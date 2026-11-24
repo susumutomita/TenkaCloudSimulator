@@ -417,7 +417,7 @@ func escape(arn string) string { return strings.NewReplacer(":", "%3A", "/", "%2
 
 func TestBraketSpendingLimits(t *testing.T) {
 	h := newHarness(t, braket)
-	device := "arn:aws:braket:::device/quantum-simulator/amazon/sv1"
+	device := "arn:aws:braket:us-east-1::device/qpu/ionq/Forte-1"
 	body := func(mutate func(map[string]any)) map[string]any {
 		b := map[string]any{"clientToken": "token-1", "deviceArn": device, "spendingLimit": "25.50",
 			"timePeriod": map[string]any{"startAt": 1700000000, "endAt": 1800000000}, "tags": map[string]any{"team": "a"}}
