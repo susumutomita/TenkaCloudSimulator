@@ -1,19 +1,19 @@
 {
   "version": 1,
-  "base_sha": "e1c83bc1ffe8062b6c15f2a1b941f49d1ec81433",
+  "base_sha": "342b42cd1ac200ab8701f08d073e339e1d744b43",
   "changes": [
     {
       "path": "internal/aws/ec2_describe_subnets_contract_test.go",
       "sha256": "6443bc90b6fec1c7b8bf277cc090b00f6dd431fac3481d120fdefa0ccb09b2d9",
       "disposition": "test-support",
-      "reason": "Frozen independent in-process contract for region-owned subnet readback, empty response, unsupported options, role and instance-session refusal, and inconsistent ownership. No real cloud or VM.",
+      "reason": "Keeps the frozen independent offline gateway and SQLite contract for subnet response, regional ownership, refusal and consistency.",
       "models": []
     },
     {
       "path": "internal/aws/ec2_read.go",
-      "sha256": "7c8bb8a20d459db4c9ccf102e9cfef46757f9f8b6242959a2a5697315750040f",
+      "sha256": "0521e026c98cb3eed764e619379ab1fa830d2a2e110d908eac95cce05214dc2c",
       "disposition": "modeled",
-      "reason": "DescribeSubnets reuses the existing atomic EC2 discovery transaction, IAM allow check, request-region ownership namespace, saved stack region and network row kind/owner match. Instance-only console still rejects all actions except DescribeInstances. This is the same admission/returned identity abstraction as EC2ReadDiscovery; new subnet XML projection is separately checked by the frozen native oracle.",
+      "reason": "DescribeSubnets uses existing IAM admission and an atomic read of regional CloudFormation ownership, requiring identical stack and network resource ownership.",
       "models": [
         {
           "id": "EC2ReadDiscovery",
@@ -22,22 +22,38 @@
             "RegionBound",
             "OwnedRead"
           ],
-          "limits": "Finite atomic admission and identity only, not individual EC2 action names, HTTP/XML, SQL snapshots/failure semantics, bounds, tags, CIDR/state projection or Go refinement. Native contract and existing EC2Read regressions remain required; no VM readiness claim."
+          "limits": "Finite admission and identity only; not SQL or Go refinement, IAM parsing, HTTP/XML, subnet projection or VM liveness."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/ec2_vpc.go",
+      "sha256": "ae89751880a3b6d6e37fd44187e61d4707b3534bd700d63600d270e455f94e23",
+      "disposition": "modeled",
+      "reason": "Adds DescribeSubnets to the query action table only. Native VPC storage, ownership, listing and deletion are unchanged.",
+      "models": [
+        {
+          "id": "EC2VPCOwnership",
+          "properties": [
+            "DescribeExact",
+            "NativeNeverDeletesStackVPC"
+          ],
+          "limits": "Preservation of existing abstract VPC properties only; the model describes VPCs, not subnet admission, request parsing or Go refinement."
         }
       ]
     },
     {
       "path": "scripts/factory_acceptance.py",
-      "sha256": "5dffccbf7a1d4c3bd57580fd4a63f5aff756f2572bcb2b3cb50ef307b5c1da06",
+      "sha256": "7792674cfc792bffed67e530bcc1abde8b153e2e40c71e11259c3fd0a95abe64",
       "disposition": "validation-tooling",
-      "reason": "Reviewed offline acceptance registration pins the frozen oracle, fixed command and scoped paths, preserving SQS. No simulator runtime behavior.",
+      "reason": "Registers and pins the fixed DescribeSubnets contract and narrowly permits its dispatch file without changing SQS or admitting VPC mutations.",
       "models": []
     },
     {
       "path": "scripts/test-factory-acceptance.py",
-      "sha256": "3c78a5c7f9f8381c6b8765f8a4f9c9ff0488d12a3944f153cc4343df711e498f",
+      "sha256": "188e98bafa1404bff98bb49cc3c5b334e0e56bb61d33f5867a7ea3a74865575d",
       "disposition": "test-support",
-      "reason": "Independent developer-only detector tests for oracle immutability, scope and retained SQS registration.",
+      "reason": "Detects wrong scope, forbidden write/SQS cases, substituted oracle and invalid named results without executing a VM.",
       "models": []
     }
   ]

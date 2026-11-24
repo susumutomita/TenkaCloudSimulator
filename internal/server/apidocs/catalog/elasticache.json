@@ -1,0 +1,2466 @@
+{
+ "components": {
+  "schemas": {
+   "AddTagsToResourceRequest": {
+    "additionalProperties": false,
+    "description": "Required list or structure members: Tags.",
+    "patternProperties": {
+     "^Tags\\.Tag\\.[1-9][0-9]*\\.Key$": {
+      "type": "string"
+     },
+     "^Tags\\.Tag\\.[1-9][0-9]*\\.Value$": {
+      "type": "string"
+     }
+    },
+    "properties": {
+     "Action": {
+      "const": "AddTagsToResource",
+      "type": "string"
+     },
+     "ResourceName": {
+      "type": "string"
+     },
+     "Tags": {
+      "const": "",
+      "description": "An empty list.",
+      "type": "string"
+     },
+     "Version": {
+      "const": "2015-02-02",
+      "type": "string"
+     }
+    },
+    "required": [
+     "Action",
+     "Version",
+     "ResourceName"
+    ],
+    "title": "AddTagsToResource",
+    "type": "object"
+   },
+   "AddTagsToResourceResponse": {
+    "properties": {
+     "AddTagsToResourceResult": {
+      "$ref": "#/components/schemas/TagListMessage",
+      "xml": {
+       "name": "AddTagsToResourceResult"
+      }
+     },
+     "ResponseMetadata": {
+      "$ref": "#/components/schemas/ResponseMetadata"
+     }
+    },
+    "title": "AddTagsToResourceResponse",
+    "type": "object",
+    "xml": {
+     "name": "AddTagsToResourceResponse",
+     "namespace": "http://elasticache.amazonaws.com/doc/2015-02-02/"
+    }
+   },
+   "Authentication": {
+    "additionalProperties": false,
+    "properties": {
+     "PasswordCount": {
+      "type": "integer"
+     },
+     "Type": {
+      "enum": [
+       "password",
+       "no-password",
+       "iam"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "AvailabilityZone": {
+    "additionalProperties": false,
+    "properties": {
+     "Name": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "CacheParameterGroup": {
+    "additionalProperties": false,
+    "properties": {
+     "ARN": {
+      "type": "string"
+     },
+     "CacheParameterGroupFamily": {
+      "type": "string"
+     },
+     "CacheParameterGroupName": {
+      "type": "string"
+     },
+     "Description": {
+      "type": "string"
+     },
+     "IsGlobal": {
+      "type": "boolean"
+     }
+    },
+    "type": "object"
+   },
+   "CacheParameterGroupsMessage": {
+    "additionalProperties": false,
+    "properties": {
+     "CacheParameterGroups": {
+      "items": {
+       "$ref": "#/components/schemas/CacheParameterGroup",
+       "xml": {
+        "name": "CacheParameterGroup"
+       }
+      },
+      "type": "array",
+      "xml": {
+       "wrapped": true
+      }
+     },
+     "Marker": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "CacheSubnetGroup": {
+    "additionalProperties": false,
+    "properties": {
+     "ARN": {
+      "type": "string"
+     },
+     "CacheSubnetGroupDescription": {
+      "type": "string"
+     },
+     "CacheSubnetGroupName": {
+      "type": "string"
+     },
+     "Subnets": {
+      "items": {
+       "$ref": "#/components/schemas/Subnet",
+       "xml": {
+        "name": "Subnet"
+       }
+      },
+      "type": "array",
+      "xml": {
+       "wrapped": true
+      }
+     },
+     "SupportedNetworkTypes": {
+      "items": {
+       "enum": [
+        "ipv4",
+        "ipv6",
+        "dual_stack"
+       ],
+       "type": "string",
+       "xml": {
+        "name": "member"
+       }
+      },
+      "type": "array",
+      "xml": {
+       "wrapped": true
+      }
+     },
+     "VpcId": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "CacheSubnetGroupMessage": {
+    "additionalProperties": false,
+    "properties": {
+     "CacheSubnetGroups": {
+      "items": {
+       "$ref": "#/components/schemas/CacheSubnetGroup",
+       "xml": {
+        "name": "CacheSubnetGroup"
+       }
+      },
+      "type": "array",
+      "xml": {
+       "wrapped": true
+      }
+     },
+     "Marker": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "CreateCacheParameterGroupRequest": {
+    "additionalProperties": false,
+    "patternProperties": {
+     "^Tags\\.Tag\\.[1-9][0-9]*\\.Key$": {
+      "type": "string"
+     },
+     "^Tags\\.Tag\\.[1-9][0-9]*\\.Value$": {
+      "type": "string"
+     }
+    },
+    "properties": {
+     "Action": {
+      "const": "CreateCacheParameterGroup",
+      "type": "string"
+     },
+     "CacheParameterGroupFamily": {
+      "type": "string"
+     },
+     "CacheParameterGroupName": {
+      "type": "string"
+     },
+     "Description": {
+      "type": "string"
+     },
+     "Tags": {
+      "const": "",
+      "description": "An empty list.",
+      "type": "string"
+     },
+     "Version": {
+      "const": "2015-02-02",
+      "type": "string"
+     }
+    },
+    "required": [
+     "Action",
+     "Version",
+     "CacheParameterGroupFamily",
+     "CacheParameterGroupName",
+     "Description"
+    ],
+    "title": "CreateCacheParameterGroup",
+    "type": "object"
+   },
+   "CreateCacheParameterGroupResponse": {
+    "properties": {
+     "CreateCacheParameterGroupResult": {
+      "$ref": "#/components/schemas/CreateCacheParameterGroupResult",
+      "xml": {
+       "name": "CreateCacheParameterGroupResult"
+      }
+     },
+     "ResponseMetadata": {
+      "$ref": "#/components/schemas/ResponseMetadata"
+     }
+    },
+    "title": "CreateCacheParameterGroupResponse",
+    "type": "object",
+    "xml": {
+     "name": "CreateCacheParameterGroupResponse",
+     "namespace": "http://elasticache.amazonaws.com/doc/2015-02-02/"
+    }
+   },
+   "CreateCacheParameterGroupResult": {
+    "additionalProperties": false,
+    "properties": {
+     "CacheParameterGroup": {
+      "$ref": "#/components/schemas/CacheParameterGroup"
+     }
+    },
+    "type": "object"
+   },
+   "CreateCacheSubnetGroupRequest": {
+    "additionalProperties": false,
+    "description": "Required list or structure members: SubnetIds.",
+    "patternProperties": {
+     "^SubnetIds\\.SubnetIdentifier\\.[1-9][0-9]*$": {
+      "type": "string"
+     },
+     "^Tags\\.Tag\\.[1-9][0-9]*\\.Key$": {
+      "type": "string"
+     },
+     "^Tags\\.Tag\\.[1-9][0-9]*\\.Value$": {
+      "type": "string"
+     }
+    },
+    "properties": {
+     "Action": {
+      "const": "CreateCacheSubnetGroup",
+      "type": "string"
+     },
+     "CacheSubnetGroupDescription": {
+      "type": "string"
+     },
+     "CacheSubnetGroupName": {
+      "type": "string"
+     },
+     "SubnetIds": {
+      "const": "",
+      "description": "An empty list.",
+      "type": "string"
+     },
+     "Tags": {
+      "const": "",
+      "description": "An empty list.",
+      "type": "string"
+     },
+     "Version": {
+      "const": "2015-02-02",
+      "type": "string"
+     }
+    },
+    "required": [
+     "Action",
+     "Version",
+     "CacheSubnetGroupDescription",
+     "CacheSubnetGroupName"
+    ],
+    "title": "CreateCacheSubnetGroup",
+    "type": "object"
+   },
+   "CreateCacheSubnetGroupResponse": {
+    "properties": {
+     "CreateCacheSubnetGroupResult": {
+      "$ref": "#/components/schemas/CreateCacheSubnetGroupResult",
+      "xml": {
+       "name": "CreateCacheSubnetGroupResult"
+      }
+     },
+     "ResponseMetadata": {
+      "$ref": "#/components/schemas/ResponseMetadata"
+     }
+    },
+    "title": "CreateCacheSubnetGroupResponse",
+    "type": "object",
+    "xml": {
+     "name": "CreateCacheSubnetGroupResponse",
+     "namespace": "http://elasticache.amazonaws.com/doc/2015-02-02/"
+    }
+   },
+   "CreateCacheSubnetGroupResult": {
+    "additionalProperties": false,
+    "properties": {
+     "CacheSubnetGroup": {
+      "$ref": "#/components/schemas/CacheSubnetGroup"
+     }
+    },
+    "type": "object"
+   },
+   "CreateUserRequest": {
+    "additionalProperties": false,
+    "patternProperties": {
+     "^AuthenticationMode\\.Passwords\\.member\\.[1-9][0-9]*$": {
+      "type": "string"
+     },
+     "^Passwords\\.member\\.[1-9][0-9]*$": {
+      "type": "string"
+     },
+     "^Tags\\.Tag\\.[1-9][0-9]*\\.Key$": {
+      "type": "string"
+     },
+     "^Tags\\.Tag\\.[1-9][0-9]*\\.Value$": {
+      "type": "string"
+     }
+    },
+    "properties": {
+     "AccessString": {
+      "type": "string"
+     },
+     "Action": {
+      "const": "CreateUser",
+      "type": "string"
+     },
+     "AuthenticationMode.Passwords": {
+      "const": "",
+      "description": "An empty list.",
+      "type": "string"
+     },
+     "AuthenticationMode.Type": {
+      "enum": [
+       "password",
+       "no-password-required",
+       "iam"
+      ],
+      "type": "string"
+     },
+     "Engine": {
+      "type": "string"
+     },
+     "NoPasswordRequired": {
+      "type": "boolean"
+     },
+     "Passwords": {
+      "const": "",
+      "description": "An empty list.",
+      "type": "string"
+     },
+     "Tags": {
+      "const": "",
+      "description": "An empty list.",
+      "type": "string"
+     },
+     "UserId": {
+      "minLength": 1,
+      "type": "string"
+     },
+     "UserName": {
+      "minLength": 1,
+      "type": "string"
+     },
+     "Version": {
+      "const": "2015-02-02",
+      "type": "string"
+     }
+    },
+    "required": [
+     "Action",
+     "Version",
+     "AccessString",
+     "Engine",
+     "UserId",
+     "UserName"
+    ],
+    "title": "CreateUser",
+    "type": "object"
+   },
+   "CreateUserResponse": {
+    "properties": {
+     "CreateUserResult": {
+      "$ref": "#/components/schemas/User",
+      "xml": {
+       "name": "CreateUserResult"
+      }
+     },
+     "ResponseMetadata": {
+      "$ref": "#/components/schemas/ResponseMetadata"
+     }
+    },
+    "title": "CreateUserResponse",
+    "type": "object",
+    "xml": {
+     "name": "CreateUserResponse",
+     "namespace": "http://elasticache.amazonaws.com/doc/2015-02-02/"
+    }
+   },
+   "DeleteCacheParameterGroupRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "Action": {
+      "const": "DeleteCacheParameterGroup",
+      "type": "string"
+     },
+     "CacheParameterGroupName": {
+      "type": "string"
+     },
+     "Version": {
+      "const": "2015-02-02",
+      "type": "string"
+     }
+    },
+    "required": [
+     "Action",
+     "Version",
+     "CacheParameterGroupName"
+    ],
+    "title": "DeleteCacheParameterGroup",
+    "type": "object"
+   },
+   "DeleteCacheParameterGroupResponse": {
+    "properties": {
+     "ResponseMetadata": {
+      "$ref": "#/components/schemas/ResponseMetadata"
+     }
+    },
+    "title": "DeleteCacheParameterGroupResponse",
+    "type": "object",
+    "xml": {
+     "name": "DeleteCacheParameterGroupResponse",
+     "namespace": "http://elasticache.amazonaws.com/doc/2015-02-02/"
+    }
+   },
+   "DeleteCacheSubnetGroupRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "Action": {
+      "const": "DeleteCacheSubnetGroup",
+      "type": "string"
+     },
+     "CacheSubnetGroupName": {
+      "type": "string"
+     },
+     "Version": {
+      "const": "2015-02-02",
+      "type": "string"
+     }
+    },
+    "required": [
+     "Action",
+     "Version",
+     "CacheSubnetGroupName"
+    ],
+    "title": "DeleteCacheSubnetGroup",
+    "type": "object"
+   },
+   "DeleteCacheSubnetGroupResponse": {
+    "properties": {
+     "ResponseMetadata": {
+      "$ref": "#/components/schemas/ResponseMetadata"
+     }
+    },
+    "title": "DeleteCacheSubnetGroupResponse",
+    "type": "object",
+    "xml": {
+     "name": "DeleteCacheSubnetGroupResponse",
+     "namespace": "http://elasticache.amazonaws.com/doc/2015-02-02/"
+    }
+   },
+   "DeleteUserRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "Action": {
+      "const": "DeleteUser",
+      "type": "string"
+     },
+     "UserId": {
+      "minLength": 1,
+      "type": "string"
+     },
+     "Version": {
+      "const": "2015-02-02",
+      "type": "string"
+     }
+    },
+    "required": [
+     "Action",
+     "Version",
+     "UserId"
+    ],
+    "title": "DeleteUser",
+    "type": "object"
+   },
+   "DeleteUserResponse": {
+    "properties": {
+     "DeleteUserResult": {
+      "$ref": "#/components/schemas/User",
+      "xml": {
+       "name": "DeleteUserResult"
+      }
+     },
+     "ResponseMetadata": {
+      "$ref": "#/components/schemas/ResponseMetadata"
+     }
+    },
+    "title": "DeleteUserResponse",
+    "type": "object",
+    "xml": {
+     "name": "DeleteUserResponse",
+     "namespace": "http://elasticache.amazonaws.com/doc/2015-02-02/"
+    }
+   },
+   "DescribeCacheParameterGroupsRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "Action": {
+      "const": "DescribeCacheParameterGroups",
+      "type": "string"
+     },
+     "CacheParameterGroupName": {
+      "type": "string"
+     },
+     "Marker": {
+      "type": "string"
+     },
+     "MaxRecords": {
+      "type": "integer"
+     },
+     "Version": {
+      "const": "2015-02-02",
+      "type": "string"
+     }
+    },
+    "required": [
+     "Action",
+     "Version"
+    ],
+    "title": "DescribeCacheParameterGroups",
+    "type": "object"
+   },
+   "DescribeCacheParameterGroupsResponse": {
+    "properties": {
+     "DescribeCacheParameterGroupsResult": {
+      "$ref": "#/components/schemas/CacheParameterGroupsMessage",
+      "xml": {
+       "name": "DescribeCacheParameterGroupsResult"
+      }
+     },
+     "ResponseMetadata": {
+      "$ref": "#/components/schemas/ResponseMetadata"
+     }
+    },
+    "title": "DescribeCacheParameterGroupsResponse",
+    "type": "object",
+    "xml": {
+     "name": "DescribeCacheParameterGroupsResponse",
+     "namespace": "http://elasticache.amazonaws.com/doc/2015-02-02/"
+    }
+   },
+   "DescribeCacheSubnetGroupsRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "Action": {
+      "const": "DescribeCacheSubnetGroups",
+      "type": "string"
+     },
+     "CacheSubnetGroupName": {
+      "type": "string"
+     },
+     "Marker": {
+      "type": "string"
+     },
+     "MaxRecords": {
+      "type": "integer"
+     },
+     "Version": {
+      "const": "2015-02-02",
+      "type": "string"
+     }
+    },
+    "required": [
+     "Action",
+     "Version"
+    ],
+    "title": "DescribeCacheSubnetGroups",
+    "type": "object"
+   },
+   "DescribeCacheSubnetGroupsResponse": {
+    "properties": {
+     "DescribeCacheSubnetGroupsResult": {
+      "$ref": "#/components/schemas/CacheSubnetGroupMessage",
+      "xml": {
+       "name": "DescribeCacheSubnetGroupsResult"
+      }
+     },
+     "ResponseMetadata": {
+      "$ref": "#/components/schemas/ResponseMetadata"
+     }
+    },
+    "title": "DescribeCacheSubnetGroupsResponse",
+    "type": "object",
+    "xml": {
+     "name": "DescribeCacheSubnetGroupsResponse",
+     "namespace": "http://elasticache.amazonaws.com/doc/2015-02-02/"
+    }
+   },
+   "DescribeUsersRequest": {
+    "additionalProperties": false,
+    "patternProperties": {
+     "^Filters\\.member\\.[1-9][0-9]*\\.Name$": {
+      "type": "string"
+     },
+     "^Filters\\.member\\.[1-9][0-9]*\\.Values$": {
+      "const": "",
+      "description": "An empty list.",
+      "type": "string"
+     },
+     "^Filters\\.member\\.[1-9][0-9]*\\.Values\\.member\\.[1-9][0-9]*$": {
+      "type": "string"
+     }
+    },
+    "properties": {
+     "Action": {
+      "const": "DescribeUsers",
+      "type": "string"
+     },
+     "Engine": {
+      "type": "string"
+     },
+     "Filters": {
+      "const": "",
+      "description": "An empty list.",
+      "type": "string"
+     },
+     "Marker": {
+      "type": "string"
+     },
+     "MaxRecords": {
+      "type": "integer"
+     },
+     "UserId": {
+      "minLength": 1,
+      "type": "string"
+     },
+     "Version": {
+      "const": "2015-02-02",
+      "type": "string"
+     }
+    },
+    "required": [
+     "Action",
+     "Version"
+    ],
+    "title": "DescribeUsers",
+    "type": "object"
+   },
+   "DescribeUsersResponse": {
+    "properties": {
+     "DescribeUsersResult": {
+      "$ref": "#/components/schemas/DescribeUsersResult",
+      "xml": {
+       "name": "DescribeUsersResult"
+      }
+     },
+     "ResponseMetadata": {
+      "$ref": "#/components/schemas/ResponseMetadata"
+     }
+    },
+    "title": "DescribeUsersResponse",
+    "type": "object",
+    "xml": {
+     "name": "DescribeUsersResponse",
+     "namespace": "http://elasticache.amazonaws.com/doc/2015-02-02/"
+    }
+   },
+   "DescribeUsersResult": {
+    "additionalProperties": false,
+    "properties": {
+     "Marker": {
+      "type": "string"
+     },
+     "Users": {
+      "items": {
+       "$ref": "#/components/schemas/User",
+       "xml": {
+        "name": "member"
+       }
+      },
+      "type": "array",
+      "xml": {
+       "wrapped": true
+      }
+     }
+    },
+    "type": "object"
+   },
+   "ErrorResponse": {
+    "properties": {
+     "Error": {
+      "properties": {
+       "Code": {
+        "type": "string"
+       },
+       "Message": {
+        "type": "string"
+       },
+       "Type": {
+        "enum": [
+         "Sender",
+         "Receiver"
+        ],
+        "type": "string"
+       }
+      },
+      "type": "object"
+     },
+     "RequestId": {
+      "type": "string"
+     }
+    },
+    "type": "object",
+    "xml": {
+     "name": "ErrorResponse",
+     "namespace": "http://elasticache.amazonaws.com/doc/2015-02-02/"
+    }
+   },
+   "ListTagsForResourceRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "Action": {
+      "const": "ListTagsForResource",
+      "type": "string"
+     },
+     "ResourceName": {
+      "type": "string"
+     },
+     "Version": {
+      "const": "2015-02-02",
+      "type": "string"
+     }
+    },
+    "required": [
+     "Action",
+     "Version",
+     "ResourceName"
+    ],
+    "title": "ListTagsForResource",
+    "type": "object"
+   },
+   "ListTagsForResourceResponse": {
+    "properties": {
+     "ListTagsForResourceResult": {
+      "$ref": "#/components/schemas/TagListMessage",
+      "xml": {
+       "name": "ListTagsForResourceResult"
+      }
+     },
+     "ResponseMetadata": {
+      "$ref": "#/components/schemas/ResponseMetadata"
+     }
+    },
+    "title": "ListTagsForResourceResponse",
+    "type": "object",
+    "xml": {
+     "name": "ListTagsForResourceResponse",
+     "namespace": "http://elasticache.amazonaws.com/doc/2015-02-02/"
+    }
+   },
+   "ModifyCacheSubnetGroupRequest": {
+    "additionalProperties": false,
+    "patternProperties": {
+     "^SubnetIds\\.SubnetIdentifier\\.[1-9][0-9]*$": {
+      "type": "string"
+     }
+    },
+    "properties": {
+     "Action": {
+      "const": "ModifyCacheSubnetGroup",
+      "type": "string"
+     },
+     "CacheSubnetGroupDescription": {
+      "type": "string"
+     },
+     "CacheSubnetGroupName": {
+      "type": "string"
+     },
+     "SubnetIds": {
+      "const": "",
+      "description": "An empty list.",
+      "type": "string"
+     },
+     "Version": {
+      "const": "2015-02-02",
+      "type": "string"
+     }
+    },
+    "required": [
+     "Action",
+     "Version",
+     "CacheSubnetGroupName"
+    ],
+    "title": "ModifyCacheSubnetGroup",
+    "type": "object"
+   },
+   "ModifyCacheSubnetGroupResponse": {
+    "properties": {
+     "ModifyCacheSubnetGroupResult": {
+      "$ref": "#/components/schemas/ModifyCacheSubnetGroupResult",
+      "xml": {
+       "name": "ModifyCacheSubnetGroupResult"
+      }
+     },
+     "ResponseMetadata": {
+      "$ref": "#/components/schemas/ResponseMetadata"
+     }
+    },
+    "title": "ModifyCacheSubnetGroupResponse",
+    "type": "object",
+    "xml": {
+     "name": "ModifyCacheSubnetGroupResponse",
+     "namespace": "http://elasticache.amazonaws.com/doc/2015-02-02/"
+    }
+   },
+   "ModifyCacheSubnetGroupResult": {
+    "additionalProperties": false,
+    "properties": {
+     "CacheSubnetGroup": {
+      "$ref": "#/components/schemas/CacheSubnetGroup"
+     }
+    },
+    "type": "object"
+   },
+   "ModifyUserRequest": {
+    "additionalProperties": false,
+    "patternProperties": {
+     "^AuthenticationMode\\.Passwords\\.member\\.[1-9][0-9]*$": {
+      "type": "string"
+     },
+     "^Passwords\\.member\\.[1-9][0-9]*$": {
+      "type": "string"
+     }
+    },
+    "properties": {
+     "AccessString": {
+      "type": "string"
+     },
+     "Action": {
+      "const": "ModifyUser",
+      "type": "string"
+     },
+     "AppendAccessString": {
+      "type": "string"
+     },
+     "AuthenticationMode.Passwords": {
+      "const": "",
+      "description": "An empty list.",
+      "type": "string"
+     },
+     "AuthenticationMode.Type": {
+      "enum": [
+       "password",
+       "no-password-required",
+       "iam"
+      ],
+      "type": "string"
+     },
+     "Engine": {
+      "type": "string"
+     },
+     "NoPasswordRequired": {
+      "type": "boolean"
+     },
+     "Passwords": {
+      "const": "",
+      "description": "An empty list.",
+      "type": "string"
+     },
+     "UserId": {
+      "minLength": 1,
+      "type": "string"
+     },
+     "Version": {
+      "const": "2015-02-02",
+      "type": "string"
+     }
+    },
+    "required": [
+     "Action",
+     "Version",
+     "UserId"
+    ],
+    "title": "ModifyUser",
+    "type": "object"
+   },
+   "ModifyUserResponse": {
+    "properties": {
+     "ModifyUserResult": {
+      "$ref": "#/components/schemas/User",
+      "xml": {
+       "name": "ModifyUserResult"
+      }
+     },
+     "ResponseMetadata": {
+      "$ref": "#/components/schemas/ResponseMetadata"
+     }
+    },
+    "title": "ModifyUserResponse",
+    "type": "object",
+    "xml": {
+     "name": "ModifyUserResponse",
+     "namespace": "http://elasticache.amazonaws.com/doc/2015-02-02/"
+    }
+   },
+   "RemoveTagsFromResourceRequest": {
+    "additionalProperties": false,
+    "description": "Required list or structure members: TagKeys.",
+    "patternProperties": {
+     "^TagKeys\\.member\\.[1-9][0-9]*$": {
+      "type": "string"
+     }
+    },
+    "properties": {
+     "Action": {
+      "const": "RemoveTagsFromResource",
+      "type": "string"
+     },
+     "ResourceName": {
+      "type": "string"
+     },
+     "TagKeys": {
+      "const": "",
+      "description": "An empty list.",
+      "type": "string"
+     },
+     "Version": {
+      "const": "2015-02-02",
+      "type": "string"
+     }
+    },
+    "required": [
+     "Action",
+     "Version",
+     "ResourceName"
+    ],
+    "title": "RemoveTagsFromResource",
+    "type": "object"
+   },
+   "RemoveTagsFromResourceResponse": {
+    "properties": {
+     "RemoveTagsFromResourceResult": {
+      "$ref": "#/components/schemas/TagListMessage",
+      "xml": {
+       "name": "RemoveTagsFromResourceResult"
+      }
+     },
+     "ResponseMetadata": {
+      "$ref": "#/components/schemas/ResponseMetadata"
+     }
+    },
+    "title": "RemoveTagsFromResourceResponse",
+    "type": "object",
+    "xml": {
+     "name": "RemoveTagsFromResourceResponse",
+     "namespace": "http://elasticache.amazonaws.com/doc/2015-02-02/"
+    }
+   },
+   "ResponseMetadata": {
+    "properties": {
+     "RequestId": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "Subnet": {
+    "additionalProperties": false,
+    "properties": {
+     "SubnetAvailabilityZone": {
+      "$ref": "#/components/schemas/AvailabilityZone"
+     },
+     "SubnetIdentifier": {
+      "type": "string"
+     },
+     "SubnetOutpost": {
+      "$ref": "#/components/schemas/SubnetOutpost"
+     },
+     "SupportedNetworkTypes": {
+      "items": {
+       "enum": [
+        "ipv4",
+        "ipv6",
+        "dual_stack"
+       ],
+       "type": "string",
+       "xml": {
+        "name": "member"
+       }
+      },
+      "type": "array",
+      "xml": {
+       "wrapped": true
+      }
+     }
+    },
+    "type": "object"
+   },
+   "SubnetOutpost": {
+    "additionalProperties": false,
+    "properties": {
+     "SubnetOutpostArn": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "Tag": {
+    "additionalProperties": false,
+    "properties": {
+     "Key": {
+      "type": "string"
+     },
+     "Value": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "TagListMessage": {
+    "additionalProperties": false,
+    "properties": {
+     "TagList": {
+      "items": {
+       "$ref": "#/components/schemas/Tag",
+       "xml": {
+        "name": "Tag"
+       }
+      },
+      "type": "array",
+      "xml": {
+       "wrapped": true
+      }
+     }
+    },
+    "type": "object"
+   },
+   "User": {
+    "additionalProperties": false,
+    "properties": {
+     "ARN": {
+      "type": "string"
+     },
+     "AccessString": {
+      "type": "string"
+     },
+     "Authentication": {
+      "$ref": "#/components/schemas/Authentication"
+     },
+     "Engine": {
+      "type": "string"
+     },
+     "MinimumEngineVersion": {
+      "type": "string"
+     },
+     "Status": {
+      "type": "string"
+     },
+     "UserGroupIds": {
+      "items": {
+       "minLength": 1,
+       "type": "string",
+       "xml": {
+        "name": "member"
+       }
+      },
+      "type": "array",
+      "xml": {
+       "wrapped": true
+      }
+     },
+     "UserId": {
+      "type": "string"
+     },
+     "UserName": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "Bounded simulator subset of the official Amazon ElastiCache API (2015-02-02). Every other official operation returns HTTP 501 UnknownOperationException. Cache parameter groups, cache subnet groups and IAM-authenticated users are stored configuration served over the Query protocol: no cache cluster, replication group, serverless cache, global datastore, snapshot, security group or reserved node exists, and CreateCacheCluster, CreateReplicationGroup, CreateServerlessCache, CreateSnapshot and every other official operation return UnknownOperationException with HTTP 501. User groups are not implemented: a group references users, requires the account's default user and must drop a deleted user, none of which the stored model expresses, so CreateUserGroup, ModifyUserGroup, DescribeUserGroups and DeleteUserGroup return UnknownOperationException with HTTP 501 and users always report no UserGroupIds. Users must use iam authentication and the engine valkey or redis: passwords and NoPasswordRequired are refused so no password is stored, the user name must equal the user ID (the ElastiCache rule for IAM-enabled users), and the default user is refused and not pre-created. Access strings are stored without parsing, and AppendAccessString is not implemented. MinimumEngineVersion is 6.0 for redis and 7.2 for valkey as documented; DeleteUser returns the user with status deleting. Parameter values are not modeled: ModifyCacheParameterGroup, ResetCacheParameterGroup, DescribeCacheParameters, DescribeEngineDefaultParameters and DescribeCacheEngineVersions are not implemented, and default parameter groups and the default cache subnet group are not pre-created. A parameter group family must be one of the documented values and is not checked against engine versions; names are stored as given and IsGlobal is always false. A cache subnet group needs 1 to 20 distinct subnet-xxxxxxxx or subnet-xxxxxxxxxxxxxxxxx IDs that are not resolved, so it reports no VPC, Availability Zone, Outpost or supported network type, and the CacheSubnetQuotaExceededFault limit of 20 is a local limit. Cache subnet group names are 1 to 255 letters, digits or hyphens and are stored in lowercase. Describe operations refuse Marker values that were not issued for the request, accept MaxRecords from 20 to 100 for parameter and subnet groups and fail with the operation's not-found fault for an unknown name; DescribeUsers refuses Filters and a MaxRecords below 1. Resource counts per Region (50 parameter groups, 50 subnet groups, 100 users) are local limits. Tags apply to the three resource kinds by ARN (arn:aws:elasticache:region:account:parametergroup:name, subnetgroup:name and user:id). Tag keys are required and must not start with aws:. AddTagsToResource and RemoveTagsFromResource return an empty TagList, removing a missing key succeeds instead of failing with TagNotFound, and a well-formed ARN of an unknown resource fails with CacheClusterNotFound, the first not-found fault the official tag operations model; a malformed ARN fails with InvalidARN. More than 50 tags in one request fail with TagQuotaPerResourceExceeded, but adding tags that bring the total beyond 50 fails with InvalidParameterValue.",
+  "title": "Amazon ElastiCache (simulator catalog)",
+  "version": "2015-02-02"
+ },
+ "openapi": "3.1.0",
+ "paths": {
+  "/#Action=AddTagsToResource": {
+   "post": {
+    "description": "POST / with a form-encoded body (the #Action fragment only names this entry and is not sent). Form fields follow the official Query serialization: structure members joined with \".\", list elements numbered from 1 under their element name (for example Tags.Tag.1.Key), map entries as entry.N.key and entry.N.value, and an empty list as an empty field. The response is an XML AddTagsToResourceResponse holding the AddTagsToResourceResult element and ResponseMetadata/RequestId; errors are ErrorResponse/Error/Code with the official error code.",
+    "operationId": "elasticacheAddTagsToResource",
+    "parameters": [
+     {
+      "description": "Routes this unsigned first-party request to Amazon ElastiCache; without it an unsigned form POST is not routed here. SDKs use the SigV4 credential scope instead.",
+      "example": "elasticache",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": true,
+      "schema": {
+       "default": "elasticache",
+       "enum": [
+        "elasticache"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/x-www-form-urlencoded": {
+       "example": {
+        "Action": "AddTagsToResource",
+        "ResourceName": "example",
+        "Version": "2015-02-02"
+       },
+       "schema": {
+        "$ref": "#/components/schemas/AddTagsToResourceRequest"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/AddTagsToResourceResponse"
+        }
+       }
+      },
+      "description": "XML AddTagsToResourceResponse with the projected official output shape."
+     },
+     "400": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "Modeled fault or common Query error (InvalidParameterValue, InvalidAction, MissingAction, MissingParameter, MalformedQueryString)."
+     },
+     "403": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "AccessDenied from local identity policy evaluation."
+     },
+     "404": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "Modeled not-found fault."
+     },
+     "501": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "UnknownOperationException: official operation not implemented by the simulator."
+     }
+    },
+    "summary": "AddTagsToResource",
+    "tags": [
+     "Amazon ElastiCache"
+    ]
+   }
+  },
+  "/#Action=CreateCacheParameterGroup": {
+   "post": {
+    "description": "POST / with a form-encoded body (the #Action fragment only names this entry and is not sent). Form fields follow the official Query serialization: structure members joined with \".\", list elements numbered from 1 under their element name (for example Tags.Tag.1.Key), map entries as entry.N.key and entry.N.value, and an empty list as an empty field. The response is an XML CreateCacheParameterGroupResponse holding the CreateCacheParameterGroupResult element and ResponseMetadata/RequestId; errors are ErrorResponse/Error/Code with the official error code.",
+    "operationId": "elasticacheCreateCacheParameterGroup",
+    "parameters": [
+     {
+      "description": "Routes this unsigned first-party request to Amazon ElastiCache; without it an unsigned form POST is not routed here. SDKs use the SigV4 credential scope instead.",
+      "example": "elasticache",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": true,
+      "schema": {
+       "default": "elasticache",
+       "enum": [
+        "elasticache"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/x-www-form-urlencoded": {
+       "example": {
+        "Action": "CreateCacheParameterGroup",
+        "CacheParameterGroupFamily": "example",
+        "CacheParameterGroupName": "example",
+        "Description": "example",
+        "Version": "2015-02-02"
+       },
+       "schema": {
+        "$ref": "#/components/schemas/CreateCacheParameterGroupRequest"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/CreateCacheParameterGroupResponse"
+        }
+       }
+      },
+      "description": "XML CreateCacheParameterGroupResponse with the projected official output shape."
+     },
+     "400": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "Modeled fault or common Query error (InvalidParameterValue, InvalidAction, MissingAction, MissingParameter, MalformedQueryString)."
+     },
+     "403": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "AccessDenied from local identity policy evaluation."
+     },
+     "404": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "Modeled not-found fault."
+     },
+     "501": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "UnknownOperationException: official operation not implemented by the simulator."
+     }
+    },
+    "summary": "CreateCacheParameterGroup",
+    "tags": [
+     "Amazon ElastiCache"
+    ]
+   }
+  },
+  "/#Action=CreateCacheSubnetGroup": {
+   "post": {
+    "description": "POST / with a form-encoded body (the #Action fragment only names this entry and is not sent). Form fields follow the official Query serialization: structure members joined with \".\", list elements numbered from 1 under their element name (for example Tags.Tag.1.Key), map entries as entry.N.key and entry.N.value, and an empty list as an empty field. The response is an XML CreateCacheSubnetGroupResponse holding the CreateCacheSubnetGroupResult element and ResponseMetadata/RequestId; errors are ErrorResponse/Error/Code with the official error code.",
+    "operationId": "elasticacheCreateCacheSubnetGroup",
+    "parameters": [
+     {
+      "description": "Routes this unsigned first-party request to Amazon ElastiCache; without it an unsigned form POST is not routed here. SDKs use the SigV4 credential scope instead.",
+      "example": "elasticache",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": true,
+      "schema": {
+       "default": "elasticache",
+       "enum": [
+        "elasticache"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/x-www-form-urlencoded": {
+       "example": {
+        "Action": "CreateCacheSubnetGroup",
+        "CacheSubnetGroupDescription": "example",
+        "CacheSubnetGroupName": "example",
+        "Version": "2015-02-02"
+       },
+       "schema": {
+        "$ref": "#/components/schemas/CreateCacheSubnetGroupRequest"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/CreateCacheSubnetGroupResponse"
+        }
+       }
+      },
+      "description": "XML CreateCacheSubnetGroupResponse with the projected official output shape."
+     },
+     "400": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "Modeled fault or common Query error (InvalidParameterValue, InvalidAction, MissingAction, MissingParameter, MalformedQueryString)."
+     },
+     "403": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "AccessDenied from local identity policy evaluation."
+     },
+     "404": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "Modeled not-found fault."
+     },
+     "501": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "UnknownOperationException: official operation not implemented by the simulator."
+     }
+    },
+    "summary": "CreateCacheSubnetGroup",
+    "tags": [
+     "Amazon ElastiCache"
+    ]
+   }
+  },
+  "/#Action=CreateUser": {
+   "post": {
+    "description": "POST / with a form-encoded body (the #Action fragment only names this entry and is not sent). Form fields follow the official Query serialization: structure members joined with \".\", list elements numbered from 1 under their element name (for example Tags.Tag.1.Key), map entries as entry.N.key and entry.N.value, and an empty list as an empty field. The response is an XML CreateUserResponse holding the CreateUserResult element and ResponseMetadata/RequestId; errors are ErrorResponse/Error/Code with the official error code.",
+    "operationId": "elasticacheCreateUser",
+    "parameters": [
+     {
+      "description": "Routes this unsigned first-party request to Amazon ElastiCache; without it an unsigned form POST is not routed here. SDKs use the SigV4 credential scope instead.",
+      "example": "elasticache",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": true,
+      "schema": {
+       "default": "elasticache",
+       "enum": [
+        "elasticache"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/x-www-form-urlencoded": {
+       "example": {
+        "AccessString": "example",
+        "Action": "CreateUser",
+        "Engine": "example",
+        "UserId": "example",
+        "UserName": "example",
+        "Version": "2015-02-02"
+       },
+       "schema": {
+        "$ref": "#/components/schemas/CreateUserRequest"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/CreateUserResponse"
+        }
+       }
+      },
+      "description": "XML CreateUserResponse with the projected official output shape."
+     },
+     "400": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "Modeled fault or common Query error (InvalidParameterValue, InvalidAction, MissingAction, MissingParameter, MalformedQueryString)."
+     },
+     "403": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "AccessDenied from local identity policy evaluation."
+     },
+     "404": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "Modeled not-found fault."
+     },
+     "501": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "UnknownOperationException: official operation not implemented by the simulator."
+     }
+    },
+    "summary": "CreateUser",
+    "tags": [
+     "Amazon ElastiCache"
+    ]
+   }
+  },
+  "/#Action=DeleteCacheParameterGroup": {
+   "post": {
+    "description": "POST / with a form-encoded body (the #Action fragment only names this entry and is not sent). Form fields follow the official Query serialization: structure members joined with \".\", list elements numbered from 1 under their element name (for example Tags.Tag.1.Key), map entries as entry.N.key and entry.N.value, and an empty list as an empty field. The response is an XML DeleteCacheParameterGroupResponse holding ResponseMetadata/RequestId; errors are ErrorResponse/Error/Code with the official error code.",
+    "operationId": "elasticacheDeleteCacheParameterGroup",
+    "parameters": [
+     {
+      "description": "Routes this unsigned first-party request to Amazon ElastiCache; without it an unsigned form POST is not routed here. SDKs use the SigV4 credential scope instead.",
+      "example": "elasticache",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": true,
+      "schema": {
+       "default": "elasticache",
+       "enum": [
+        "elasticache"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/x-www-form-urlencoded": {
+       "example": {
+        "Action": "DeleteCacheParameterGroup",
+        "CacheParameterGroupName": "example",
+        "Version": "2015-02-02"
+       },
+       "schema": {
+        "$ref": "#/components/schemas/DeleteCacheParameterGroupRequest"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/DeleteCacheParameterGroupResponse"
+        }
+       }
+      },
+      "description": "XML DeleteCacheParameterGroupResponse with the projected official output shape."
+     },
+     "400": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "Modeled fault or common Query error (InvalidParameterValue, InvalidAction, MissingAction, MissingParameter, MalformedQueryString)."
+     },
+     "403": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "AccessDenied from local identity policy evaluation."
+     },
+     "404": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "Modeled not-found fault."
+     },
+     "501": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "UnknownOperationException: official operation not implemented by the simulator."
+     }
+    },
+    "summary": "DeleteCacheParameterGroup",
+    "tags": [
+     "Amazon ElastiCache"
+    ]
+   }
+  },
+  "/#Action=DeleteCacheSubnetGroup": {
+   "post": {
+    "description": "POST / with a form-encoded body (the #Action fragment only names this entry and is not sent). Form fields follow the official Query serialization: structure members joined with \".\", list elements numbered from 1 under their element name (for example Tags.Tag.1.Key), map entries as entry.N.key and entry.N.value, and an empty list as an empty field. The response is an XML DeleteCacheSubnetGroupResponse holding ResponseMetadata/RequestId; errors are ErrorResponse/Error/Code with the official error code.",
+    "operationId": "elasticacheDeleteCacheSubnetGroup",
+    "parameters": [
+     {
+      "description": "Routes this unsigned first-party request to Amazon ElastiCache; without it an unsigned form POST is not routed here. SDKs use the SigV4 credential scope instead.",
+      "example": "elasticache",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": true,
+      "schema": {
+       "default": "elasticache",
+       "enum": [
+        "elasticache"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/x-www-form-urlencoded": {
+       "example": {
+        "Action": "DeleteCacheSubnetGroup",
+        "CacheSubnetGroupName": "example",
+        "Version": "2015-02-02"
+       },
+       "schema": {
+        "$ref": "#/components/schemas/DeleteCacheSubnetGroupRequest"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/DeleteCacheSubnetGroupResponse"
+        }
+       }
+      },
+      "description": "XML DeleteCacheSubnetGroupResponse with the projected official output shape."
+     },
+     "400": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "Modeled fault or common Query error (InvalidParameterValue, InvalidAction, MissingAction, MissingParameter, MalformedQueryString)."
+     },
+     "403": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "AccessDenied from local identity policy evaluation."
+     },
+     "404": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "Modeled not-found fault."
+     },
+     "501": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "UnknownOperationException: official operation not implemented by the simulator."
+     }
+    },
+    "summary": "DeleteCacheSubnetGroup",
+    "tags": [
+     "Amazon ElastiCache"
+    ]
+   }
+  },
+  "/#Action=DeleteUser": {
+   "post": {
+    "description": "POST / with a form-encoded body (the #Action fragment only names this entry and is not sent). Form fields follow the official Query serialization: structure members joined with \".\", list elements numbered from 1 under their element name (for example Tags.Tag.1.Key), map entries as entry.N.key and entry.N.value, and an empty list as an empty field. The response is an XML DeleteUserResponse holding the DeleteUserResult element and ResponseMetadata/RequestId; errors are ErrorResponse/Error/Code with the official error code.",
+    "operationId": "elasticacheDeleteUser",
+    "parameters": [
+     {
+      "description": "Routes this unsigned first-party request to Amazon ElastiCache; without it an unsigned form POST is not routed here. SDKs use the SigV4 credential scope instead.",
+      "example": "elasticache",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": true,
+      "schema": {
+       "default": "elasticache",
+       "enum": [
+        "elasticache"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/x-www-form-urlencoded": {
+       "example": {
+        "Action": "DeleteUser",
+        "UserId": "example",
+        "Version": "2015-02-02"
+       },
+       "schema": {
+        "$ref": "#/components/schemas/DeleteUserRequest"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/DeleteUserResponse"
+        }
+       }
+      },
+      "description": "XML DeleteUserResponse with the projected official output shape."
+     },
+     "400": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "Modeled fault or common Query error (InvalidParameterValue, InvalidAction, MissingAction, MissingParameter, MalformedQueryString)."
+     },
+     "403": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "AccessDenied from local identity policy evaluation."
+     },
+     "404": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "Modeled not-found fault."
+     },
+     "501": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "UnknownOperationException: official operation not implemented by the simulator."
+     }
+    },
+    "summary": "DeleteUser",
+    "tags": [
+     "Amazon ElastiCache"
+    ]
+   }
+  },
+  "/#Action=DescribeCacheParameterGroups": {
+   "post": {
+    "description": "POST / with a form-encoded body (the #Action fragment only names this entry and is not sent). Form fields follow the official Query serialization: structure members joined with \".\", list elements numbered from 1 under their element name (for example Tags.Tag.1.Key), map entries as entry.N.key and entry.N.value, and an empty list as an empty field. The response is an XML DescribeCacheParameterGroupsResponse holding the DescribeCacheParameterGroupsResult element and ResponseMetadata/RequestId; errors are ErrorResponse/Error/Code with the official error code.",
+    "operationId": "elasticacheDescribeCacheParameterGroups",
+    "parameters": [
+     {
+      "description": "Routes this unsigned first-party request to Amazon ElastiCache; without it an unsigned form POST is not routed here. SDKs use the SigV4 credential scope instead.",
+      "example": "elasticache",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": true,
+      "schema": {
+       "default": "elasticache",
+       "enum": [
+        "elasticache"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/x-www-form-urlencoded": {
+       "example": {
+        "Action": "DescribeCacheParameterGroups",
+        "Version": "2015-02-02"
+       },
+       "schema": {
+        "$ref": "#/components/schemas/DescribeCacheParameterGroupsRequest"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/DescribeCacheParameterGroupsResponse"
+        }
+       }
+      },
+      "description": "XML DescribeCacheParameterGroupsResponse with the projected official output shape."
+     },
+     "400": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "Modeled fault or common Query error (InvalidParameterValue, InvalidAction, MissingAction, MissingParameter, MalformedQueryString)."
+     },
+     "403": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "AccessDenied from local identity policy evaluation."
+     },
+     "404": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "Modeled not-found fault."
+     },
+     "501": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "UnknownOperationException: official operation not implemented by the simulator."
+     }
+    },
+    "summary": "DescribeCacheParameterGroups",
+    "tags": [
+     "Amazon ElastiCache"
+    ]
+   }
+  },
+  "/#Action=DescribeCacheSubnetGroups": {
+   "post": {
+    "description": "POST / with a form-encoded body (the #Action fragment only names this entry and is not sent). Form fields follow the official Query serialization: structure members joined with \".\", list elements numbered from 1 under their element name (for example Tags.Tag.1.Key), map entries as entry.N.key and entry.N.value, and an empty list as an empty field. The response is an XML DescribeCacheSubnetGroupsResponse holding the DescribeCacheSubnetGroupsResult element and ResponseMetadata/RequestId; errors are ErrorResponse/Error/Code with the official error code.",
+    "operationId": "elasticacheDescribeCacheSubnetGroups",
+    "parameters": [
+     {
+      "description": "Routes this unsigned first-party request to Amazon ElastiCache; without it an unsigned form POST is not routed here. SDKs use the SigV4 credential scope instead.",
+      "example": "elasticache",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": true,
+      "schema": {
+       "default": "elasticache",
+       "enum": [
+        "elasticache"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/x-www-form-urlencoded": {
+       "example": {
+        "Action": "DescribeCacheSubnetGroups",
+        "Version": "2015-02-02"
+       },
+       "schema": {
+        "$ref": "#/components/schemas/DescribeCacheSubnetGroupsRequest"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/DescribeCacheSubnetGroupsResponse"
+        }
+       }
+      },
+      "description": "XML DescribeCacheSubnetGroupsResponse with the projected official output shape."
+     },
+     "400": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "Modeled fault or common Query error (InvalidParameterValue, InvalidAction, MissingAction, MissingParameter, MalformedQueryString)."
+     },
+     "403": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "AccessDenied from local identity policy evaluation."
+     },
+     "404": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "Modeled not-found fault."
+     },
+     "501": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "UnknownOperationException: official operation not implemented by the simulator."
+     }
+    },
+    "summary": "DescribeCacheSubnetGroups",
+    "tags": [
+     "Amazon ElastiCache"
+    ]
+   }
+  },
+  "/#Action=DescribeUsers": {
+   "post": {
+    "description": "POST / with a form-encoded body (the #Action fragment only names this entry and is not sent). Form fields follow the official Query serialization: structure members joined with \".\", list elements numbered from 1 under their element name (for example Tags.Tag.1.Key), map entries as entry.N.key and entry.N.value, and an empty list as an empty field. The response is an XML DescribeUsersResponse holding the DescribeUsersResult element and ResponseMetadata/RequestId; errors are ErrorResponse/Error/Code with the official error code.",
+    "operationId": "elasticacheDescribeUsers",
+    "parameters": [
+     {
+      "description": "Routes this unsigned first-party request to Amazon ElastiCache; without it an unsigned form POST is not routed here. SDKs use the SigV4 credential scope instead.",
+      "example": "elasticache",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": true,
+      "schema": {
+       "default": "elasticache",
+       "enum": [
+        "elasticache"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/x-www-form-urlencoded": {
+       "example": {
+        "Action": "DescribeUsers",
+        "Version": "2015-02-02"
+       },
+       "schema": {
+        "$ref": "#/components/schemas/DescribeUsersRequest"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/DescribeUsersResponse"
+        }
+       }
+      },
+      "description": "XML DescribeUsersResponse with the projected official output shape."
+     },
+     "400": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "Modeled fault or common Query error (InvalidParameterValue, InvalidAction, MissingAction, MissingParameter, MalformedQueryString)."
+     },
+     "403": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "AccessDenied from local identity policy evaluation."
+     },
+     "404": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "Modeled not-found fault."
+     },
+     "501": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "UnknownOperationException: official operation not implemented by the simulator."
+     }
+    },
+    "summary": "DescribeUsers",
+    "tags": [
+     "Amazon ElastiCache"
+    ]
+   }
+  },
+  "/#Action=ListTagsForResource": {
+   "post": {
+    "description": "POST / with a form-encoded body (the #Action fragment only names this entry and is not sent). Form fields follow the official Query serialization: structure members joined with \".\", list elements numbered from 1 under their element name (for example Tags.Tag.1.Key), map entries as entry.N.key and entry.N.value, and an empty list as an empty field. The response is an XML ListTagsForResourceResponse holding the ListTagsForResourceResult element and ResponseMetadata/RequestId; errors are ErrorResponse/Error/Code with the official error code.",
+    "operationId": "elasticacheListTagsForResource",
+    "parameters": [
+     {
+      "description": "Routes this unsigned first-party request to Amazon ElastiCache; without it an unsigned form POST is not routed here. SDKs use the SigV4 credential scope instead.",
+      "example": "elasticache",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": true,
+      "schema": {
+       "default": "elasticache",
+       "enum": [
+        "elasticache"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/x-www-form-urlencoded": {
+       "example": {
+        "Action": "ListTagsForResource",
+        "ResourceName": "example",
+        "Version": "2015-02-02"
+       },
+       "schema": {
+        "$ref": "#/components/schemas/ListTagsForResourceRequest"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ListTagsForResourceResponse"
+        }
+       }
+      },
+      "description": "XML ListTagsForResourceResponse with the projected official output shape."
+     },
+     "400": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "Modeled fault or common Query error (InvalidParameterValue, InvalidAction, MissingAction, MissingParameter, MalformedQueryString)."
+     },
+     "403": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "AccessDenied from local identity policy evaluation."
+     },
+     "404": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "Modeled not-found fault."
+     },
+     "501": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "UnknownOperationException: official operation not implemented by the simulator."
+     }
+    },
+    "summary": "ListTagsForResource",
+    "tags": [
+     "Amazon ElastiCache"
+    ]
+   }
+  },
+  "/#Action=ModifyCacheSubnetGroup": {
+   "post": {
+    "description": "POST / with a form-encoded body (the #Action fragment only names this entry and is not sent). Form fields follow the official Query serialization: structure members joined with \".\", list elements numbered from 1 under their element name (for example Tags.Tag.1.Key), map entries as entry.N.key and entry.N.value, and an empty list as an empty field. The response is an XML ModifyCacheSubnetGroupResponse holding the ModifyCacheSubnetGroupResult element and ResponseMetadata/RequestId; errors are ErrorResponse/Error/Code with the official error code.",
+    "operationId": "elasticacheModifyCacheSubnetGroup",
+    "parameters": [
+     {
+      "description": "Routes this unsigned first-party request to Amazon ElastiCache; without it an unsigned form POST is not routed here. SDKs use the SigV4 credential scope instead.",
+      "example": "elasticache",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": true,
+      "schema": {
+       "default": "elasticache",
+       "enum": [
+        "elasticache"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/x-www-form-urlencoded": {
+       "example": {
+        "Action": "ModifyCacheSubnetGroup",
+        "CacheSubnetGroupName": "example",
+        "Version": "2015-02-02"
+       },
+       "schema": {
+        "$ref": "#/components/schemas/ModifyCacheSubnetGroupRequest"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ModifyCacheSubnetGroupResponse"
+        }
+       }
+      },
+      "description": "XML ModifyCacheSubnetGroupResponse with the projected official output shape."
+     },
+     "400": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "Modeled fault or common Query error (InvalidParameterValue, InvalidAction, MissingAction, MissingParameter, MalformedQueryString)."
+     },
+     "403": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "AccessDenied from local identity policy evaluation."
+     },
+     "404": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "Modeled not-found fault."
+     },
+     "501": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "UnknownOperationException: official operation not implemented by the simulator."
+     }
+    },
+    "summary": "ModifyCacheSubnetGroup",
+    "tags": [
+     "Amazon ElastiCache"
+    ]
+   }
+  },
+  "/#Action=ModifyUser": {
+   "post": {
+    "description": "POST / with a form-encoded body (the #Action fragment only names this entry and is not sent). Form fields follow the official Query serialization: structure members joined with \".\", list elements numbered from 1 under their element name (for example Tags.Tag.1.Key), map entries as entry.N.key and entry.N.value, and an empty list as an empty field. The response is an XML ModifyUserResponse holding the ModifyUserResult element and ResponseMetadata/RequestId; errors are ErrorResponse/Error/Code with the official error code.",
+    "operationId": "elasticacheModifyUser",
+    "parameters": [
+     {
+      "description": "Routes this unsigned first-party request to Amazon ElastiCache; without it an unsigned form POST is not routed here. SDKs use the SigV4 credential scope instead.",
+      "example": "elasticache",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": true,
+      "schema": {
+       "default": "elasticache",
+       "enum": [
+        "elasticache"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/x-www-form-urlencoded": {
+       "example": {
+        "Action": "ModifyUser",
+        "UserId": "example",
+        "Version": "2015-02-02"
+       },
+       "schema": {
+        "$ref": "#/components/schemas/ModifyUserRequest"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ModifyUserResponse"
+        }
+       }
+      },
+      "description": "XML ModifyUserResponse with the projected official output shape."
+     },
+     "400": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "Modeled fault or common Query error (InvalidParameterValue, InvalidAction, MissingAction, MissingParameter, MalformedQueryString)."
+     },
+     "403": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "AccessDenied from local identity policy evaluation."
+     },
+     "404": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "Modeled not-found fault."
+     },
+     "501": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "UnknownOperationException: official operation not implemented by the simulator."
+     }
+    },
+    "summary": "ModifyUser",
+    "tags": [
+     "Amazon ElastiCache"
+    ]
+   }
+  },
+  "/#Action=RemoveTagsFromResource": {
+   "post": {
+    "description": "POST / with a form-encoded body (the #Action fragment only names this entry and is not sent). Form fields follow the official Query serialization: structure members joined with \".\", list elements numbered from 1 under their element name (for example Tags.Tag.1.Key), map entries as entry.N.key and entry.N.value, and an empty list as an empty field. The response is an XML RemoveTagsFromResourceResponse holding the RemoveTagsFromResourceResult element and ResponseMetadata/RequestId; errors are ErrorResponse/Error/Code with the official error code.",
+    "operationId": "elasticacheRemoveTagsFromResource",
+    "parameters": [
+     {
+      "description": "Routes this unsigned first-party request to Amazon ElastiCache; without it an unsigned form POST is not routed here. SDKs use the SigV4 credential scope instead.",
+      "example": "elasticache",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": true,
+      "schema": {
+       "default": "elasticache",
+       "enum": [
+        "elasticache"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/x-www-form-urlencoded": {
+       "example": {
+        "Action": "RemoveTagsFromResource",
+        "ResourceName": "example",
+        "Version": "2015-02-02"
+       },
+       "schema": {
+        "$ref": "#/components/schemas/RemoveTagsFromResourceRequest"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/RemoveTagsFromResourceResponse"
+        }
+       }
+      },
+      "description": "XML RemoveTagsFromResourceResponse with the projected official output shape."
+     },
+     "400": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "Modeled fault or common Query error (InvalidParameterValue, InvalidAction, MissingAction, MissingParameter, MalformedQueryString)."
+     },
+     "403": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "AccessDenied from local identity policy evaluation."
+     },
+     "404": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "Modeled not-found fault."
+     },
+     "501": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "UnknownOperationException: official operation not implemented by the simulator."
+     }
+    },
+    "summary": "RemoveTagsFromResource",
+    "tags": [
+     "Amazon ElastiCache"
+    ]
+   }
+  }
+ },
+ "servers": [
+  {
+   "description": "This simulator only",
+   "url": "/"
+  }
+ ],
+ "tags": [
+  {
+   "description": "Bounded simulator subset of the official Amazon ElastiCache API (2015-02-02). Every other official operation returns HTTP 501 UnknownOperationException. Cache parameter groups, cache subnet groups and IAM-authenticated users are stored configuration served over the Query protocol: no cache cluster, replication group, serverless cache, global datastore, snapshot, security group or reserved node exists, and CreateCacheCluster, CreateReplicationGroup, CreateServerlessCache, CreateSnapshot and every other official operation return UnknownOperationException with HTTP 501. User groups are not implemented: a group references users, requires the account's default user and must drop a deleted user, none of which the stored model expresses, so CreateUserGroup, ModifyUserGroup, DescribeUserGroups and DeleteUserGroup return UnknownOperationException with HTTP 501 and users always report no UserGroupIds. Users must use iam authentication and the engine valkey or redis: passwords and NoPasswordRequired are refused so no password is stored, the user name must equal the user ID (the ElastiCache rule for IAM-enabled users), and the default user is refused and not pre-created. Access strings are stored without parsing, and AppendAccessString is not implemented. MinimumEngineVersion is 6.0 for redis and 7.2 for valkey as documented; DeleteUser returns the user with status deleting. Parameter values are not modeled: ModifyCacheParameterGroup, ResetCacheParameterGroup, DescribeCacheParameters, DescribeEngineDefaultParameters and DescribeCacheEngineVersions are not implemented, and default parameter groups and the default cache subnet group are not pre-created. A parameter group family must be one of the documented values and is not checked against engine versions; names are stored as given and IsGlobal is always false. A cache subnet group needs 1 to 20 distinct subnet-xxxxxxxx or subnet-xxxxxxxxxxxxxxxxx IDs that are not resolved, so it reports no VPC, Availability Zone, Outpost or supported network type, and the CacheSubnetQuotaExceededFault limit of 20 is a local limit. Cache subnet group names are 1 to 255 letters, digits or hyphens and are stored in lowercase. Describe operations refuse Marker values that were not issued for the request, accept MaxRecords from 20 to 100 for parameter and subnet groups and fail with the operation's not-found fault for an unknown name; DescribeUsers refuses Filters and a MaxRecords below 1. Resource counts per Region (50 parameter groups, 50 subnet groups, 100 users) are local limits. Tags apply to the three resource kinds by ARN (arn:aws:elasticache:region:account:parametergroup:name, subnetgroup:name and user:id). Tag keys are required and must not start with aws:. AddTagsToResource and RemoveTagsFromResource return an empty TagList, removing a missing key succeeds instead of failing with TagNotFound, and a well-formed ARN of an unknown resource fails with CacheClusterNotFound, the first not-found fault the official tag operations model; a malformed ARN fails with InvalidARN. More than 50 tags in one request fail with TagQuotaPerResourceExceeded, but adding tags that bring the total beyond 50 fails with InvalidParameterValue.",
+   "name": "Amazon ElastiCache"
+  }
+ ],
+ "x-simulator-source": {
+  "package": "botocore",
+  "version": "1.41.6",
+  "file": "botocore/data/elasticache/2015-02-02/service-2.json",
+  "sha256": "5698cce11f244ad4eebd85d527665123e98095d322df66118c481486db97e62d",
+  "license": "Apache-2.0"
+ }
+}

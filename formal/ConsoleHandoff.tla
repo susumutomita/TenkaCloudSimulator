@@ -36,7 +36,7 @@ Redeem(ttl) ==
  /\ LET ok == available /\ now < handoffDeadline (* RedeemExpiry *)
               /\ LiveParent (* RedeemParent *)
     IN /\ redeemAccepted' = ok
-       /\ redeemWitness' = [EmptyWitness EXCEPT !.live=available,
+       /\ redeemWitness' = IF ~ok THEN EmptyWitness ELSE [EmptyWitness EXCEPT !.live=available,
                   !.time=now, !.deadline=handoffDeadline, !.parent=parent, !.gen=generation]
        /\ available' = FALSE (* ConsumeEveryAttempt *)
        /\ attempts' = attempts + 1
@@ -46,13 +46,14 @@ Redeem(ttl) ==
  /\ UNCHANGED <<aux,now,parent,generation,permission,issued,origin,handoffDeadline,
                  sdk,loggedOut,accepted,witness>>
 Use(p,r,a) ==
- /\ accepted' = ("self" \in active (* CookieLive *) /\ now < browserDeadline (* BrowserExpiry *)
+ /\ LET ok == ("self" \in active (* CookieLive *) /\ now < browserDeadline (* BrowserExpiry *)
                  /\ LiveParent (* UseParent *) /\ permission (* FreshPolicy *)
                  /\ p = "own" (* ExactParameter *) /\ r = "east" (* ExactRegion *)
                  /\ ((kind = "parameter" /\ a \in {"Get","Put"})
                      \/ (kind = "instance" /\ a \in {"Describe","Terminal"})) (* ExactAction *)
                  /\ (a # "Terminal" \/ relay) (* RelayReady *))
- /\ witness' = [kind |-> kind, relay |-> relay, live |-> "self" \in active, time |-> now, deadline |-> browserDeadline,
+    IN /\ accepted' = ok
+       /\ witness' = IF ~ok THEN EmptyWitness ELSE [kind |-> kind, relay |-> relay, live |-> "self" \in active, time |-> now, deadline |-> browserDeadline,
                  parent |-> parent, gen |-> generation, policy |-> permission,
                  parameter |-> p, region |-> r, action |-> a]
  /\ UNCHANGED <<aux,now,parent,generation,permission,issued,origin,available,handoffDeadline,

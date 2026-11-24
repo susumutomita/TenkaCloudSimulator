@@ -1,0 +1,39 @@
+{
+ "client": "elasticache",
+ "denied": "AccessDenied",
+ "steps": [
+  {"op": "create_cache_parameter_group", "args": {"CacheParameterGroupName": "fixture-params", "CacheParameterGroupFamily": "valkey8", "Description": "fixture parameter group"}, "save": {"pgArn": "CacheParameterGroup.ARN"}, "expect": {"CacheParameterGroup.IsGlobal": false}},
+  {"op": "describe_cache_parameter_groups", "args": {"CacheParameterGroupName": "fixture-params"}, "expect": {"CacheParameterGroups#count": 1, "CacheParameterGroups[0].CacheParameterGroupFamily": "valkey8"}},
+  {"op": "create_cache_subnet_group", "args": {"CacheSubnetGroupName": "Fixture-Subnets", "CacheSubnetGroupDescription": "fixture subnets", "SubnetIds": ["subnet-0a1b2c3d", "subnet-4e5f6a7b"]}, "save": {"sgArn": "CacheSubnetGroup.ARN"}, "expect": {"CacheSubnetGroup.CacheSubnetGroupName": "fixture-subnets", "CacheSubnetGroup.Subnets#count": 2}},
+  {"op": "describe_cache_subnet_groups", "args": {"CacheSubnetGroupName": "fixture-subnets"}, "expect": {"CacheSubnetGroups#count": 1}},
+  {"op": "modify_cache_subnet_group", "args": {"CacheSubnetGroupName": "fixture-subnets", "CacheSubnetGroupDescription": "three subnets", "SubnetIds": ["subnet-0a1b2c3d", "subnet-4e5f6a7b", "subnet-0123456789abcdef0"]}, "expect": {"CacheSubnetGroup.CacheSubnetGroupDescription": "three subnets", "CacheSubnetGroup.Subnets#count": 3}},
+  {"op": "create_user", "args": {"UserId": "fixture-user", "UserName": "fixture-user", "Engine": "valkey", "AccessString": "on ~app:* +get", "AuthenticationMode": {"Type": "iam"}, "Tags": [{"Key": "team", "Value": "a"}]}, "save": {"userArn": "ARN"}, "expect": {"Status": "active", "MinimumEngineVersion": "7.2", "Authentication.Type": "iam"}},
+  {"op": "describe_users", "args": {"UserId": "fixture-user"}, "expect": {"Users#count": 1}},
+  {"op": "describe_users", "args": {"Engine": "redis"}, "expect": {"Users#count": 0}},
+  {"op": "modify_user", "args": {"UserId": "fixture-user", "AccessString": "on ~* +@read"}, "expect": {"AccessString": "on ~* +@read"}},
+  {"op": "add_tags_to_resource", "args": {"ResourceName": "${pgArn}", "Tags": [{"Key": "stage", "Value": "dev"}]}},
+  {"op": "remove_tags_from_resource", "args": {"ResourceName": "${pgArn}", "TagKeys": ["stage"]}},
+  {"op": "list_tags_for_resource", "args": {"ResourceName": "${userArn}"}, "expect": {"TagList#count": 1, "TagList[0].Key": "team"}},
+  {"op": "create_user", "args": {"UserId": "pw-user", "UserName": "pw-user", "Engine": "redis", "AccessString": "on", "Passwords": ["not-stored-password"]}, "error": "InvalidParameterValue", "status": 400},
+  {"op": "create_cache_subnet_group", "args": {"CacheSubnetGroupName": "fixture-subnets", "CacheSubnetGroupDescription": "again", "SubnetIds": ["subnet-0a1b2c3d"]}, "error": "CacheSubnetGroupAlreadyExists", "status": 400},
+  {"op": "describe_cache_parameter_groups", "args": {"CacheParameterGroupName": "missing-params"}, "error": "CacheParameterGroupNotFound", "status": 404},
+  {"op": "create_cache_cluster", "args": {"CacheClusterId": "fixture-cache"}, "error": "UnknownOperationException", "status": 501}
+ ],
+ "isolation": [
+  {"op": "describe_cache_parameter_groups", "args": {}, "expect": {"CacheParameterGroups#count": 0}},
+  {"op": "describe_cache_subnet_groups", "args": {}, "expect": {"CacheSubnetGroups#count": 0}},
+  {"op": "describe_users", "args": {}, "expect": {"Users#count": 0}}
+ ],
+ "after_restart": [
+  {"op": "describe_cache_subnet_groups", "args": {"CacheSubnetGroupName": "fixture-subnets"}, "expect": {"CacheSubnetGroups[0].CacheSubnetGroupDescription": "three subnets", "CacheSubnetGroups[0].Subnets#count": 3}},
+  {"op": "describe_users", "args": {"UserId": "fixture-user"}, "expect": {"Users[0].AccessString": "on ~* +@read"}}
+ ],
+ "cleanup": [
+  {"op": "delete_user", "args": {"UserId": "fixture-user"}, "expect": {"Status": "deleting"}},
+  {"op": "delete_cache_subnet_group", "args": {"CacheSubnetGroupName": "fixture-subnets"}},
+  {"op": "delete_cache_parameter_group", "args": {"CacheParameterGroupName": "fixture-params"}},
+  {"op": "describe_cache_parameter_groups", "args": {}, "expect": {"CacheParameterGroups#count": 0}},
+  {"op": "describe_cache_subnet_groups", "args": {}, "expect": {"CacheSubnetGroups#count": 0}},
+  {"op": "describe_users", "args": {}, "expect": {"Users#count": 0}}
+ ]
+}

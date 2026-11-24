@@ -136,8 +136,13 @@ class AcceptanceTests(unittest.TestCase):
         spec = gate.SUITES[suite]
         self.assertEqual(spec['argv'], ['go', 'test', '-json', '-count=1', '-run',
                                        '^TestEC2DescribeSubnetsContract$', './internal/aws'])
-        gate.validate_scope([suite], 'aws', 'DescribeSubnets', ['internal/aws/ec2_read.go'])
-        for operation, path in (('CreateSubnet', 'internal/aws/ec2_read.go'),
+        vpc_dispatch = 'internal/aws/ec2_vpc.go'
+        gate.validate_scope([suite], 'aws', 'DescribeSubnets',
+                            ['internal/aws/ec2_read.go', vpc_dispatch])
+        for operation, path in (('CreateVpc', vpc_dispatch),
+                                ('DeleteVpc', vpc_dispatch),
+                                ('DeleteMessage', vpc_dispatch),
+                                ('CreateSubnet', 'internal/aws/ec2_read.go'),
                                 ('DescribeSubnets', 'internal/aws/sqs_store.go'),
                                 ('DeleteMessage', 'internal/aws/ec2_read.go'),
                                 ('DescribeSubnets', 'internal/server/server.go')):

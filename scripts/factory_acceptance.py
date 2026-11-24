@@ -63,7 +63,8 @@ def validate_scope(suites, provider, operation, paths):
         sqs_covered = path in ('internal/aws/sqs.go', 'internal/aws/sqs_store.go', 'formal/applicability.json') or (
             p.parent.as_posix() == 'internal/aws' and p.name.startswith('sqs_') and p.name.endswith('_test.go'))
         subnet_covered = path in (
-            'internal/aws/ec2_read.go', 'internal/aws/ec2_describe_subnets_contract_test.go',
+            'internal/aws/ec2_read.go', 'internal/aws/ec2_vpc.go',
+            'internal/aws/ec2_describe_subnets_contract_test.go',
             'formal/applicability.json', 'scripts/factory_acceptance.py', 'scripts/test-factory-acceptance.py',
         )
         if 'sqs-lifecycle' in matching:

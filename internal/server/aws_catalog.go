@@ -38,8 +38,8 @@ func catalogCapabilities(engine *catalog.Engine) map[string]any {
 	return map[string]any{
 		"services":     summaries,
 		"descriptors":  catalogDescriptorsPath,
-		"protocols":    []string{"JSON 1.0", "JSON 1.1", "REST-JSON"},
-		"routing":      "X-Amz-Target prefix for JSON protocols; SigV4 credential-scope service for REST-JSON. Signatures are not verified; use dummy TCSIM credentials.",
+		"protocols":    []string{"JSON 1.0", "JSON 1.1", "REST-JSON", "Query"},
+		"routing":      "X-Amz-Target prefix for JSON protocols; SigV4 credential-scope service for REST-JSON and Query (form POST to / with Action and Version, XML responses). Signatures are not verified; use dummy TCSIM credentials.",
 		"state":        "configuration metadata in provider-owned SQLite; no workload, data plane, network, OAuth or real AWS call",
 		"reference":    "/_simulator/docs/catalog.html",
 		"model":        "documentation-free subsets of the pinned official botocore 1.41.6 service models (Apache-2.0)",

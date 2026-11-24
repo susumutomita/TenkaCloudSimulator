@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import {serviceAvailable,servicesForProvider,serviceFromHash} from '../src/console-navigation.mjs';
+import {serviceAvailable,servicesForProvider,serviceFromHash,vpcLifecycleAvailable} from '../src/console-navigation.mjs';
 const caps={services:{ec2:{console:true,operations:['DescribeInstances','DescribeVpcs']}}};
 test('EC2 and VPC require the exact readonly capability, never mere truthiness',()=>{
  for(const id of ['ec2','vpc']){
@@ -13,4 +13,10 @@ test('discover and deep-link the independent EC2 and VPC views',()=>{
  assert.equal(serviceFromHash('#/ec2'),'ec2');assert.equal(serviceFromHash('#/vpc'),'vpc');
  assert.deepEqual(servicesForProvider('aws',caps,'インスタンス').map(s=>s.id),['ec2']);
  assert.deepEqual(servicesForProvider('aws',caps,'ネットワーク').map(s=>s.id),['vpc']);
+});
+test('VPC create and delete controls need both advertised operations and no handoff scope',()=>{
+ const lifecycle={services:{ec2:{console:true,operations:['DescribeInstances','DescribeVpcs','CreateVpc','DeleteVpc']}}};
+ assert.equal(vpcLifecycleAvailable(lifecycle),true);
+ assert.equal(serviceAvailable('vpc',lifecycle),true);
+ for(const value of [caps,null,{},{services:{ec2:{operations:['CreateVpc']}}},{services:{ec2:{operations:'CreateVpc,DeleteVpc'}}},{...lifecycle,consoleScope:{instanceId:'i-1'}}])assert.equal(vpcLifecycleAvailable(value),false);
 });
