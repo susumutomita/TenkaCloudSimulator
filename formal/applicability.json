@@ -1333,6 +1333,31 @@
       "models": []
     },
     {
+      "path": "internal/aws/catalog/services_edge.go",
+      "sha256": "b4d57de134e9db60a4a137412358ca58d3244d5ac308da1f33eebb287145e873",
+      "disposition": "modeled",
+      "reason": "Bounded AppStream configuration validates the documented packaging constraint before storing an app block.",
+      "models": [
+        {
+          "id": "CatalogResourceLifecycle",
+          "properties": [
+            "AuthorizationFirst",
+            "FailureFrame",
+            "QuotaBound",
+            "UniqueNames"
+          ],
+          "limits": "Finite store-level model of catalog resources: authorization order, replay, quotas, names, generations, child guards and pagination tokens. Wire decoding and encoding, descriptor projection, reference generation and the service-specific rules in specification check hooks are outside the model and are checked by native tests and the boto3 end-to-end fixtures."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/catalog/services_edge_test.go",
+      "sha256": "49e7eb7ca9037e37554df2053cf0aeb1ad60b668c4d1f87d65d8877fd44d4786",
+      "disposition": "test-support",
+      "reason": "Native regression for permitted APPSTREAM2 and rejected CUSTOM PostSetupScriptDetails, including the default packaging case.",
+      "models": []
+    },
+    {
       "path": "internal/aws/catalog/services_engine2.go",
       "sha256": "c3783a62df95c6e6a723674feb4ff7d283c1f7b109eeffc8b58b384079f4fe6d",
       "disposition": "modeled",
