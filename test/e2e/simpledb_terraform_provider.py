@@ -139,6 +139,39 @@ def verify_unauthenticated_metadata(port, domain):
     need(refused == 401, "unauthenticated local metadata probe did not return HTTP 401")
 
 
+def verify_terraform_state(payload, *, domain):
+    """Verify the state of this single fixed resource, never print the state."""
+    def unique(pairs):
+        value = dict(pairs)
+        need(len(value) == len(pairs), "duplicate Terraform state fields")
+        return value
+    try:
+        state = json.loads(payload, object_pairs_hook=unique)
+    except (ValueError, UnicodeError) as err:
+        raise RuntimeError("invalid Terraform state JSON") from err
+    need(type(state) is dict and state.get("format_version") == "1.0",
+         "unexpected Terraform state JSON format")
+    if domain is None:
+        # Terraform 1.11.4 jsonstate returns only the format for empty state.
+        need(set(state) == {"format_version"}, "Terraform state is not empty after destroy")
+        return
+    need(state.get("terraform_version") == TF, "unexpected Terraform state writer version")
+    values = state.get("values")
+    module = values.get("root_module") if type(values) is dict else None
+    need(type(module) is dict and not module.get("child_modules"), "unexpected Terraform state module")
+    entries = module.get("resources")
+    need(type(entries) is list and len(entries) == 1 and type(entries[0]) is dict,
+         "Terraform state must contain exactly one fixture resource")
+    resource = entries[0]
+    need(all(resource.get(key) == value for key, value in {
+         "address": "aws_simpledb_domain.fixture", "mode": "managed",
+         "type": "aws_simpledb_domain", "name": "fixture",
+         "provider_name": "registry.terraform.io/hashicorp/aws",
+         "values": {"id": domain, "name": domain},
+         }.items()) and not any(key in resource for key in ("index", "tainted", "deposed_key")),
+         "Terraform state does not match the live fixture domain")
+
+
 def approved_simulator_digest():
     """Bind bytes to a separately reviewed receipt, never infer provenance from a hash."""
     expected_receipt_sha = os.environ.get("TCSIM_APPROVED_SIMULATOR_RECEIPT_SHA256", "")
@@ -265,12 +298,16 @@ def run():
             (root / "main.tf.json").write_text(json.dumps(fixture(bridge, domain)))
             terraform("init", "-input=false", "-no-color")
             terraform("apply", "-input=false", "-auto-approve", "-no-color")
+            need((root / "terraform.tfstate").is_file(), "apply did not persist local Terraform state")
+            verify_terraform_state(terraform("show", "-json", "terraform.tfstate"), domain=domain)
             need(("CreateDomain", 200) in calls and not errors, "fixture create not observed")
             before = len(calls)
             terraform("plan", "-input=false", "-detailed-exitcode", "-no-color")
             need(("DomainMetadata", 200) in calls[before:] and not errors, "provider metadata read not observed")
             before = len(calls)
             terraform("destroy", "-input=false", "-auto-approve", "-no-color")
+            need((root / "terraform.tfstate").is_file(), "destroy did not persist local Terraform state")
+            verify_terraform_state(terraform("show", "-json", "terraform.tfstate"), domain=None)
             need(("DeleteDomain", 200) in calls[before:] and not errors, "fixture delete not observed")
             code, xml = native(port, token, data=urlencode(
                 {"Action": "DomainMetadata", "Version": VERSION, "DomainName": domain}).encode("ascii"))
@@ -278,7 +315,7 @@ def run():
             need(code == 400 and any(x.text == "NoSuchDomain" for x in body.iter()
                                      if x.tag.rsplit("}", 1)[-1] == "Code"),
                  "metadata did not confirm deletion")
-    print("SimpleDB official provider apply/metadata refresh/destroy observed on loopback")
+    print("SimpleDB official provider apply/metadata refresh/destroy and persisted state observed on loopback")
 
 
 if __name__ == "__main__":

@@ -1,3 +1,4 @@
+from copy import deepcopy
 from hashlib import sha256
 from pathlib import Path
 import json
@@ -8,7 +9,7 @@ from urllib.parse import urlencode
 
 from simpledb_terraform_provider import (
     BASE, TF, PROVIDER, VERSION, approved_simulator_digest, decode_request, fixture, native, run,
-    verify_copy, verify_unauthenticated_metadata,
+    verify_copy, verify_terraform_state, verify_unauthenticated_metadata,
 )
 
 
@@ -111,6 +112,35 @@ class AcceptanceBoundaries(unittest.TestCase):
                            return_value=[(1, "lo"), (2, "eth0")]):
                     with self.assertRaisesRegex(RuntimeError, "loopback-only"):
                         run()
+
+    def test_state_proves_exact_managed_resource_and_empty_destroy(self):
+        resource = {"address": "aws_simpledb_domain.fixture", "mode": "managed",
+                    "type": "aws_simpledb_domain", "name": "fixture",
+                    "provider_name": "registry.terraform.io/hashicorp/aws",
+                    "values": {"id": self.domain, "name": self.domain}}
+        created = {"format_version": "1.0", "terraform_version": TF,
+                   "values": {"root_module": {"resources": [resource]}}}
+        empty = {"format_version": "1.0"}
+        verify_terraform_state(json.dumps(created), domain=self.domain)
+        verify_terraform_state(json.dumps(empty), domain=None)
+        for key, wrong in (
+            ("address", "aws_simpledb_domain.other"),
+            ("provider_name", "terraform.io/builtin/terraform"),
+            ("mode", "data"), ("values", {"name": self.domain, "id": "some-other-domain"}),
+            ("tainted", True), ("deposed_key", "stale"), ("index", 0),
+        ):
+            impostor = deepcopy(created)
+            impostor["values"]["root_module"]["resources"][0][key] = wrong
+            with self.subTest(key=key), self.assertRaises(RuntimeError):
+                verify_terraform_state(json.dumps(impostor), domain=self.domain)
+        for state, claim in (
+            (b'{"format_version":"1.0","format_version":"1.0"}', None),
+            (b'{"values":{}}', None), (b"Apply complete!", self.domain),
+            (json.dumps(empty), self.domain), (json.dumps(created), None),
+            (json.dumps(dict(created, terraform_version="1.12.0")), self.domain),
+        ):
+            with self.subTest(state=state, claim=claim), self.assertRaises(RuntimeError):
+                verify_terraform_state(state, domain=claim)
 
     def test_artifact_and_fixture_pins(self):
         d = fixture(51723, self.domain)
