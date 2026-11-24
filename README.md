@@ -87,7 +87,8 @@ console, CloudFormation adapter or Challenge integration.
   [SQS](docs/sqs.md), [SNS](docs/sns.md), [CloudWatch Logs](docs/cloudwatch-logs.md).
 - **Identity and secrets:** [IAM](docs/iam.md), [native SDK / STS](docs/sts-native.md),
   [Secrets Manager](docs/secrets-manager.md), [KMS](docs/kms.md), [WAFv2](docs/wafv2.md).
-- **Networking:** [Elastic Load Balancing](docs/elb.md) (Lambda targets),
+- **Networking:** [EC2/VPC discovery and VPC create/delete](docs/ec2-read-discovery.md),
+  [Elastic Load Balancing](docs/elb.md) (Lambda targets),
   [CloudFront VPC origins](docs/cloudfront-vpc-origin.md), [Route 53](docs/route53.md).
 - **Scaling:** [Auto Scaling plans for local DynamoDB tables](docs/autoscaling-plans.md).
 - **Infrastructure:** [CloudFormation](docs/cloudformation-rest.md),
