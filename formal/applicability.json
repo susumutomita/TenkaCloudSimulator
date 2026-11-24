@@ -64,6 +64,20 @@
       ]
     },
     {
+      "path": "scripts/formal_model_gate.py",
+      "sha256": "0f71dc8239800991ae423792c8e9170f0b8c51f4ba0f1831fa16bb44936fee99",
+      "disposition": "formal-infrastructure",
+      "reason": "Pins the ListParts paging model, its five invariants, exact mutation edits and expected invariants, and its exact three source files without changing prior model pins.",
+      "models": []
+    },
+    {
+      "path": "scripts/test-formal-gate.py",
+      "sha256": "641f4afe5d0fe671a5a2a1c854879fee8fd084e6985ff2f7be135500895761bd",
+      "disposition": "formal-infrastructure",
+      "reason": "Adds ListParts paging to the explicit inventory and detects removed model artifacts, changed invariants/scopes, and same-ID mutation substitutions; shared tests detect removed controls.",
+      "models": []
+    },
+    {
       "path": "tools/console/bundle-digests.json",
       "sha256": "cf2936fb30d03c0b63097c904a1e45dc166ef854e679cc7dfa82fd96d047a82f",
       "disposition": "presentation",

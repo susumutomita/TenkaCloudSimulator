@@ -971,7 +971,7 @@ class FormalGateTests(unittest.TestCase):
         registry = load_registry(self.root)
         # Keep this inventory independent of the implementation's required set.
         # A newly registered model must be reviewed and named here explicitly.
-        self.assertEqual({model['id'] for model in registry['models']}, {'EC2VPCOwnership', 'CFNParameterRuleAdmission', 'ECSTaskRevisionLifecycle', 'VpcOriginReferenceLifecycle', 'ARPTrustedReply', 'PersistentIngressPolicy', 'AppEngineTraffic', 'AutoScalingPlanTargets', 'AzureBlobState', 'AzurePropertiesEpoch', 'AzurePropertiesTarget', 'BedrockRuntimeAdmission', 'BlobRange', 'BrowserSessions', 'CFNConditionAdmission', 'CFNConditionMemoDepth', 'CFNEventHistory', 'CFNFinalCleanupACK', 'CFNNativeIAMTransaction', 'CFNParameterSnapshot', 'CFNPhysicalResourceACK', 'CanonicalVMComposition', 'CatalogConsoleEpoch', 'CatalogResourceLifecycle', 'CloudWatchLogsLifecycle', 'CloudWatchLogsViewEpoch', 'CommandDispatchLifecycle', 'ConsoleHandoff', 'DurableGuestLease', 'DynamoDBAdmission', 'DynamoDBConsoleEpoch', 'DynamoDBLifecycle', 'EC2GuestAttachmentLifecycle', 'EC2ReadDiscovery', 'ELBTargetLifecycle', 'EngineLifecycle', 'FrameCodecLifecycle', 'GCPStorageState', 'GuestCommandLifecycle', 'HTTPObservationLifecycle', 'IAMBuiltinPinTransaction', 'IAMConditionEvaluation', 'IAMInstanceProfiles', 'IAMManagedPolicies', 'InstanceMetadataTokens', 'KMSAliasCatalog', 'KMSAliasCrypto', 'KMSAliasesViewEpoch', 'KMSBootstrapTransaction', 'KMSKeyState', 'KMSProtocolAdmission', 'LambdaExecutionRoleBridge', 'LambdaSourceEdit', 'MacPreparationAdmission', 'MacProbeLifecycle', 'LambdaLogTailDisclosure', 'LandingAccessAdmission', 'LandingTopologyState', 'ListenerLifecycle', 'LoginInputIntent', 'NICSessionBookkeeping', 'NativeCommandIssuer', 'NativeIAMOwnership', 'NativeWireProjection', 'ObjectStore', 'OwnedClockQualification', 'OwnedProbeAttachmentLifecycle', 'OwnedProbeDispatchPolicy', 'OwnedProbeSessionLifecycle', 'PacketAdmission', 'ParticipantSessionLifecycle', 'PassiveServiceBoundary', 'PersistentTransportLifecycle', 'ProbeOperationLifecycle', 'ProjectAuthority', 'ProviderActor', 'ProviderPath', 'RESTDeploymentSnapshot', 'RESTProxyEventBoundary', 'RESTRouteMatching', 'Route53AtomicBatch', 'S3MultipartState', 'S3Versions', 'SNSAdmission', 'SNSLifecycle', 'SNSQueueFanout', 'SQSBatchDeletion', 'SQSConsoleEpoch', 'SQSLifecycle', 'SQSStorageBudget', 'SSMBatchDeletion', 'SSMDocumentState', 'SSMDurableCommands', 'SSMParameterState', 'STSSessionLifecycle', 'SakuraDiskAdmission', 'SakuraDiskMetadata', 'SakuraDisksViewEpoch', 'SakuraStartupAdmission', 'SecretDescriptionWorkflow', 'SecretMetadataUpdate', 'SecretMetadataViewEpoch', 'SecretVersionListing', 'SecretsDisclosureChannels', 'SecretsMutationRefresh', 'SecretsRevealEpoch', 'SecretsVersionLifecycle', 'StackOwnership', 'StartupTokenVisibility', 'TCPRouteClassification', 'TerminalClientEpoch', 'WAFAssociationAuthorization', 'WAFRequestEvaluation'})
+        self.assertEqual({model['id'] for model in registry['models']}, {'EC2VPCOwnership', 'CFNParameterRuleAdmission', 'ECSTaskRevisionLifecycle', 'VpcOriginReferenceLifecycle', 'ARPTrustedReply', 'PersistentIngressPolicy', 'AppEngineTraffic', 'AutoScalingPlanTargets', 'AzureBlobState', 'AzurePropertiesEpoch', 'AzurePropertiesTarget', 'BedrockRuntimeAdmission', 'BlobRange', 'BrowserSessions', 'CFNConditionAdmission', 'CFNConditionMemoDepth', 'CFNEventHistory', 'CFNFinalCleanupACK', 'CFNNativeIAMTransaction', 'CFNParameterSnapshot', 'CFNPhysicalResourceACK', 'CanonicalVMComposition', 'CatalogConsoleEpoch', 'CatalogResourceLifecycle', 'CloudWatchLogsLifecycle', 'CloudWatchLogsViewEpoch', 'CommandDispatchLifecycle', 'ConsoleHandoff', 'DurableGuestLease', 'DynamoDBAdmission', 'DynamoDBConsoleEpoch', 'DynamoDBLifecycle', 'EC2GuestAttachmentLifecycle', 'EC2ReadDiscovery', 'ELBTargetLifecycle', 'EngineLifecycle', 'FrameCodecLifecycle', 'GCPStorageState', 'GuestCommandLifecycle', 'HTTPObservationLifecycle', 'IAMBuiltinPinTransaction', 'IAMConditionEvaluation', 'IAMInstanceProfiles', 'IAMManagedPolicies', 'InstanceMetadataTokens', 'KMSAliasCatalog', 'KMSAliasCrypto', 'KMSAliasesViewEpoch', 'KMSBootstrapTransaction', 'KMSKeyState', 'KMSProtocolAdmission', 'LambdaExecutionRoleBridge', 'LambdaSourceEdit', 'MacPreparationAdmission', 'MacProbeLifecycle', 'LambdaLogTailDisclosure', 'LandingAccessAdmission', 'LandingTopologyState', 'ListenerLifecycle', 'LoginInputIntent', 'NICSessionBookkeeping', 'NativeCommandIssuer', 'NativeIAMOwnership', 'NativeWireProjection', 'ObjectStore', 'OwnedClockQualification', 'OwnedProbeAttachmentLifecycle', 'OwnedProbeDispatchPolicy', 'OwnedProbeSessionLifecycle', 'PacketAdmission', 'ParticipantSessionLifecycle', 'PassiveServiceBoundary', 'PersistentTransportLifecycle', 'ProbeOperationLifecycle', 'ProjectAuthority', 'ProviderActor', 'ProviderPath', 'RESTDeploymentSnapshot', 'RESTProxyEventBoundary', 'RESTRouteMatching', 'Route53AtomicBatch', 'S3MultipartConsolePaging', 'S3MultipartState', 'S3Versions', 'SNSAdmission', 'SNSLifecycle', 'SNSQueueFanout', 'SQSBatchDeletion', 'SQSConsoleEpoch', 'SQSLifecycle', 'SQSStorageBudget', 'SSMBatchDeletion', 'SSMDocumentState', 'SSMDurableCommands', 'SSMParameterState', 'STSSessionLifecycle', 'SakuraDiskAdmission', 'SakuraDiskMetadata', 'SakuraDisksViewEpoch', 'SakuraStartupAdmission', 'SecretDescriptionWorkflow', 'SecretMetadataUpdate', 'SecretMetadataViewEpoch', 'SecretVersionListing', 'SecretsDisclosureChannels', 'SecretsMutationRefresh', 'SecretsRevealEpoch', 'SecretsVersionLifecycle', 'StackOwnership', 'StartupTokenVisibility', 'TCPRouteClassification', 'TerminalClientEpoch', 'WAFAssociationAuthorization', 'WAFRequestEvaluation'})
 
         for model in registry['models']:
             source = (self.root / model['model']).read_text()
@@ -979,6 +979,97 @@ class FormalGateTests(unittest.TestCase):
                 name, mutated = apply_mutant(source, model['id'], mutant)
                 self.assertNotEqual(mutated, source)
                 self.assertIn('MODULE ' + name, mutated)
+
+    def test_s3_listparts_paging_inventory_properties_and_scope_are_required(self):
+        path = self.root / 'formal/models.json'
+        original = path.read_bytes()
+        model_id = 'S3MultipartConsolePaging'
+        expected_properties = {'TypeOK', 'OnlyCanonicalRows', 'OnlyProgressingCursor',
+                               'OnlyCompleteListing', 'NoReadAfterStop'}
+        expected_scope = {'internal/server/web/app.js', 'tools/console/src/s3-multipart-parts.mjs',
+                          'tools/console/src/s3-multipart.jsx'}
+        registered = load_registry(self.root)
+        model = next(m for m in registered['models'] if m['id'] == model_id)
+        self.assertEqual(set(model['properties']), expected_properties)
+        self.assertEqual(set(model['source_scope']), expected_scope)
+        cfg = self.root / model['config']
+        source = self.root / model['model']
+        cfg_bytes = cfg.read_bytes()
+        source_bytes = source.read_bytes()
+        try:
+            missing = json.loads(original)
+            missing['models'] = [m for m in missing['models'] if m['id'] != model_id]
+            path.write_text(json.dumps(missing))
+            cfg.unlink()
+            source.unlink()
+            with self.assertRaisesRegex(GateError, 'required existing model was removed'):
+                load_registry(self.root)
+        finally:
+            path.write_bytes(original)
+            cfg.write_bytes(cfg_bytes)
+            source.write_bytes(source_bytes)
+
+        for prop in sorted(expected_properties):
+            with self.subTest(removed_property=prop):
+                altered = json.loads(original)
+                candidate = next(m for m in altered['models'] if m['id'] == model_id)
+                candidate['properties'].remove(prop)
+                candidate['mutants'] = [m for m in candidate['mutants'] if m['expect_invariant'] != prop]
+                parts = cfg_bytes.decode().splitlines()
+                self.assertEqual(sum(prop in ln.split()[1:] for ln in parts if ln.startswith('INVARIANT')), 1)
+                cfg.write_text('\n'.join(' '.join(p for p in ln.split() if p != prop)
+                                         if ln.startswith('INVARIANT') else ln for ln in parts) + '\n')
+                path.write_text(json.dumps(altered))
+                try:
+                    with self.assertRaisesRegex(GateError, 'existing required invariant was removed'):
+                        load_registry(self.root)
+                finally:
+                    cfg.write_bytes(cfg_bytes)
+                    path.write_bytes(original)
+
+        for scope in [expected_scope - {p} for p in sorted(expected_scope)] + [expected_scope | {'internal/core/store.go'}]:
+            with self.subTest(modified_scope=sorted(scope)):
+                altered = json.loads(original)
+                candidate = next(m for m in altered['models'] if m['id'] == model_id)
+                candidate['source_scope'] = sorted(scope)
+                path.write_text(json.dumps(altered))
+                try:
+                    with self.assertRaisesRegex(GateError, 'required exact source scope changed'):
+                        load_registry(self.root)
+                finally:
+                    path.write_bytes(original)
+
+    def test_s3_listparts_same_id_semantic_substitutions_are_rejected(self):
+        path = self.root / 'formal/models.json'
+        original = path.read_bytes()
+        baseline = load_registry(self.root)
+        model = next(m for m in baseline['models'] if m['id'] == 'S3MultipartConsolePaging')
+        by_id = {item['id']: item for item in model['mutants']}
+        self.assertEqual(set(by_id), {'BypassRowOrder', 'BypassCursor', 'AcceptUnknownFlag',
+                                      'ReturnPartial', 'ContinueAfterStop'})
+        source = (self.root / model['model']).read_text()
+        replacement = by_id['ContinueAfterStop']
+        for mutant_id, control in by_id.items():
+            alternate = replacement if mutant_id != replacement['id'] else by_id['BypassRowOrder']
+            distinct_oracle = alternate['expect_invariant']
+            self.assertNotEqual(control['expect_invariant'], distinct_oracle)
+            for field_set in (('edits',), ('expect_invariant',), ('edits', 'expect_invariant')):
+                with self.subTest(mutant=mutant_id, replaced=field_set):
+                    altered = json.loads(original)
+                    target = next(m for m in altered['models'] if m['id'] == model['id'])
+                    damaged = next(m for m in target['mutants'] if m['id'] == mutant_id)
+                    for field in field_set:
+                        damaged[field] = alternate[field]
+                    # Same ID and a valid literal edit: don't count a malformed edit
+                    # or unregistered expected invariant as semantic enforcement.
+                    apply_mutant(source, model['id'], damaged)
+                    self.assertIn(damaged['expect_invariant'], model['properties'])
+                    path.write_text(json.dumps(altered))
+                    try:
+                        with self.assertRaisesRegex(GateError, 'ListParts paging mutation controls changed'):
+                            load_registry(self.root)
+                    finally:
+                        path.write_bytes(original)
 
     def test_sakura_metadata_admission_and_startup_inventory_and_properties_are_required(self):
         path = self.root / 'formal/models.json'

@@ -2934,6 +2934,43 @@ REQUIRED_SOURCE_SCOPES['EC2VPCOwnership'] = {
 }
 
 
+BASE_MODELS.add('S3MultipartConsolePaging')
+BASE_INVARIANTS['S3MultipartConsolePaging'] = {
+    'TypeOK',
+    'OnlyCanonicalRows',
+    'OnlyProgressingCursor',
+    'OnlyCompleteListing',
+    'NoReadAfterStop',
+}
+S3_LISTPARTS_MUTATIONS = [{'id': 'BypassRowOrder',
+  'edits': [{'old': 'RowsOK(rows, prior) == CanonicalRows(rows, prior)',
+             'new': 'RowsOK(rows, prior) == TRUE',
+             'count': 1}],
+  'expect_invariant': 'OnlyCanonicalRows'},
+ {'id': 'BypassCursor',
+  'edits': [{'old': 'CursorOK(rows, prior, cursor) == CanonicalCursor(rows, prior, cursor)',
+             'new': 'CursorOK(rows, prior, cursor) == TRUE',
+             'count': 1}],
+  'expect_invariant': 'OnlyProgressingCursor'},
+ {'id': 'AcceptUnknownFlag',
+  'edits': [{'old': 'FinalFlag(flag) == flag = "final"',
+             'new': 'FinalFlag(flag) == flag /= "more"',
+             'count': 1}],
+  'expect_invariant': 'OnlyCompleteListing'},
+ {'id': 'ReturnPartial',
+  'edits': [{'old': 'ExposeOnContinue == FALSE', 'new': 'ExposeOnContinue == TRUE', 'count': 1}],
+  'expect_invariant': 'OnlyCompleteListing'},
+ {'id': 'ContinueAfterStop',
+  'edits': [{'old': 'ActiveOK == ~stopped', 'new': 'ActiveOK == TRUE', 'count': 1}],
+  'expect_invariant': 'NoReadAfterStop'}]
+REQUIRED_MUTANTS['S3MultipartConsolePaging'] = {control['id'] for control in S3_LISTPARTS_MUTATIONS}
+REQUIRED_SOURCE_SCOPES['S3MultipartConsolePaging'] = {
+    'internal/server/web/app.js',
+    'tools/console/src/s3-multipart-parts.mjs',
+    'tools/console/src/s3-multipart.jsx',
+}
+
+
 def load_registry(root, relative='formal/models.json'):
     root = Path(root)
     registry_path = asset(root, relative)
@@ -2991,6 +3028,8 @@ def load_registry(root, relative='formal/models.json'):
         require(REQUIRED_MUTANTS.get(name, set()) <= mutant_ids, 'a required mutation control was removed')
         if name in BATTLE_INTEGRATION_MUTATIONS:
             require(model['mutants'] == BATTLE_INTEGRATION_MUTATIONS[name], 'Battle integration mutation controls changed')
+        if name == 'S3MultipartConsolePaging':
+            require(model['mutants'] == S3_LISTPARTS_MUTATIONS, 'ListParts paging mutation controls changed')
     require(BASE_MODELS <= ids, 'a required existing model was removed')
     actual = {p.relative_to(root).as_posix() for suffix in ('*.tla', '*.cfg') for p in (root / 'formal').glob(suffix)}
     require(actual == files, 'unregistered or missing model/config artifact')
