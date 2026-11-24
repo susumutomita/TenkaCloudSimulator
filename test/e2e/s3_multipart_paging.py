@@ -41,6 +41,7 @@ KEY = '1001-part-fixture'
 PART_COUNT = 1001
 ORIGINAL = b'p'
 REPLACEMENT = b'changed-final-part'
+BROWSER_REPLACEMENT = b'browser-uploaded-final-part'
 
 
 def require(condition, reason):
@@ -147,7 +148,8 @@ def run():
             team.stop()
     print(json.dumps({'binarySha256': checksum, 'nativeBrowserListMarkers': inspect,
                       'parts': PART_COUNT, 'staleReviewNoPost': True, 'completePostIncludesAllParts': True,
-                      'nativeSizeRefusalPreservedUpload': True, 'nativeAbortAndDelete': True,
+                      'nativeSizeRefusalPreservedUpload': True, 'nativeBrowserPartSave': True,
+                      'visibleFinalPartRefresh': True, 'nativeAbortAndDelete': True,
                       'realAWS': False}))
 
 
@@ -253,7 +255,18 @@ def run_s3(team, chromium):
                 require(observed == [0, 1000], 'Browser did not fetch exactly both native pages')
                 return observed
 
+            # Check just beyond the page boundary, and scope to the row so a
+            # receipt or equally sized earlier part cannot satisfy the check.
+            last_row = page.get_by_role('row').filter(
+                has=page.get_by_role('cell', name=str(PART_COUNT), exact=True))
+
+            def check_visible_tail(size, etag):
+                expect(last_row).to_have_count(1)
+                expect(last_row.get_by_role('cell', name=f'{size} B', exact=True)).to_be_visible()
+                expect(last_row.get_by_role('cell', name=etag, exact=True)).to_be_visible()
+
             first = check_pages(0)
+            check_visible_tail(len(ORIGINAL), original[-1][1])
             changed_etag = client.upload_part(**target, PartNumber=PART_COUNT, Body=REPLACEMENT)['ETag']
             require(changed_etag != original[-1][1], 'Late part replacement did not change ETag')
             current = original[:-1] + [(PART_COUNT, changed_etag)]
@@ -264,6 +277,7 @@ def run_s3(team, chromium):
                                     exact=True)).to_be_visible()
             expect(confirm).to_have_value('')
             refreshed = check_pages(index)
+            check_visible_tail(len(REPLACEMENT), changed_etag)
             require(not completions, 'Stale preview caused a completion POST')
             require(snapshot() == current, 'Stale review altered local multipart state')
             index = len(parts_requests)
@@ -279,6 +293,27 @@ def run_s3(team, chromium):
             require(completions == [current], 'Completion payload did not contain all 1001 reviewed parts')
             require(snapshot() == current, 'Native size refusal altered multipart state')
             expect_aws_error('NoSuchKey', client.get_object, Bucket=BUCKET, Key=KEY)
+            index = len(parts_requests)
+            page.get_by_label('Part number', exact=True).fill(str(PART_COUNT))
+            page.get_by_label('Part file', exact=True).set_input_files(
+                {'name': 'replacement.bin', 'mimeType': 'application/octet-stream',
+                 'buffer': BROWSER_REPLACEMENT})
+            with page.expect_response(lambda r: r.request.method == 'PUT'
+                                      and request_kind(r.request).get('partNumber') == [str(PART_COUNT)]) as saved:
+                page.get_by_role('button', name='Save part', exact=True).click()
+            put = saved.value
+            require(put.status == 200, 'Native browser UploadPart failed')
+            browser_etag = put.headers.get('etag')
+            # The exact native UploadPart derives a quoted MD5 ETag from the
+            # received bytes; check these bytes without browser body capture.
+            expected_etag = '"' + hashlib.md5(BROWSER_REPLACEMENT, usedforsecurity=False).hexdigest() + '"'
+            require(browser_etag == expected_etag and browser_etag != changed_etag,
+                    'Native browser replacement did not store the selected bytes')
+            expect(page.get_by_text('Part saved.', exact=True)).to_be_visible()
+            after_save = check_pages(index)
+            check_visible_tail(len(BROWSER_REPLACEMENT), browser_etag)
+            require(snapshot() == current[:-1] + [(PART_COUNT, browser_etag)],
+                    'Browser replacement did not persist in native multipart state')
             confirm.fill('abort')
             page.get_by_role('button', name='Abort upload', exact=True).click()
             expect(page.get_by_text('Upload aborted and parts removed.', exact=True)).to_be_visible()
@@ -289,7 +324,7 @@ def run_s3(team, chromium):
             require(not foreign and not errors and not redirected, 'Unexpected browser errors, redirects, or off-origin traffic')
         finally:
             browser.close()
-    return [first, refreshed, on_retry]
+    return [first, refreshed, on_retry, after_save]
 
 
 if __name__ == '__main__':
