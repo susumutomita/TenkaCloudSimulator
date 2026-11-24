@@ -1,6 +1,8 @@
 import React,{useEffect,useMemo,useRef,useState} from 'react';
 import {useLocale} from './i18n.jsx';
 import AppStreamAppBlockForm from './appstream-app-block.jsx';
+import KinesisVideoRetention from './kinesis-video-retention.jsx';
+import {isKinesisVideoRetention,kinesisRetentionEdit,kinesisRetentionUpdate} from './kinesis-video-retention.mjs';
 import {appStreamAppBlockDetailInput,isAppStreamAppBlock} from './appstream-app-block.mjs';
 import {decodeQuery,queryBody} from './catalog-query.mjs';
 import {example,fromWire,parseComplex,parseTagLines,tagPairs,tagShape,tagValue,toWire} from './catalog-input.mjs';
@@ -315,9 +317,16 @@ export default function CatalogView({region,request,catalog,onSaving}){
  }
  const updateOp=resource?.operations.update;
  const updateFields=updateOp?fieldOrder(formMembers(updateOp,new Set([...skipped(updateOp),updateOp.lookup,updateOp.token,...(updateOp.lookupAlt||[])])).filter(m=>!updateOp.editable||updateOp.editable.includes(m.name)),resource):[];
+ const retentionEdit=isKinesisVideoRetention(service,resource,updateOp);
+ const canEdit=updateOp&&(retentionEdit||updateFields.length>0);
  const missingEditToken=()=>t('The service did not return the current version. Reopen Edit to read the resource again.','現在のバージョンを取得できませんでした。編集を開き直してください。');
  function startEdit(value=detail,token){
   if(catalogUpdateInput(updateOp,{},{},token)===null){setError(missingEditToken());return}
+  if(retentionEdit){
+   const retention=kinesisRetentionEdit(value,token);
+   if(!retention){setError(t('Current stream name, version, or retention could not be read.','現在のストリーム名、バージョン、または保持期間を取得できませんでした。'));return}
+   setNotice('');setError('');setFieldErrors({});setEditing({retention});setPage('edit');return;
+  }
   const values=Object.fromEntries(updateFields.map(m=>[m.name,fieldText(service,m,value?.[m.locationName||m.name])]));
   setNotice('');setError('');setFieldErrors({});setEditing({values,initial:values,token});setPage('edit');
  }
@@ -325,7 +334,17 @@ export default function CatalogView({region,request,catalog,onSaving}){
  // its current description.
  async function editFromList(item){const snapshot=await inspect(item);if(snapshot?.value&&alive.current)startEdit(snapshot.value,snapshot.token)}
  async function saveUpdate(){
-  const op=updateOp;const {input,problems,changed}=readFields(updateFields,editing.values,editing.initial);
+  const op=updateOp;
+  if(retentionEdit){
+   const next=kinesisRetentionUpdate(editing.retention);
+   if(next.problem==='hours'){setError('');setFieldErrors({retention:t('Enter a whole number from 1 to 87,600.','1 ～ 87,600 の整数を入力してください。')});return}
+   if(next.problem==='snapshot'){setError(missingEditToken());return}
+   if(next.problem==='unchanged'){setError(t('Choose a different data retention period.','別のデータ保持期間を指定してください。'));return}
+   const ok=await writeDetail(op,next.input,t('Data retention period updated.','データ保持期間を更新しました。'));
+   if(ok&&alive.current)setEditing(null);
+   return;
+  }
+  const {input,problems,changed}=readFields(updateFields,editing.values,editing.initial);
   setFieldErrors(problems);
   if(Object.keys(problems).length){setError('');return}
   if(!changed){setError(t('Change at least one field.','少なくとも 1 つの項目を変更してください。'));return}
@@ -412,7 +431,9 @@ export default function CatalogView({region,request,catalog,onSaving}){
    <form onSubmit={e=>{e.preventDefault();saveUpdate()}}><Form errorText={error||undefined} errorIconAriaLabel={t('Error','エラー')}
      actions={<SpaceBetween direction="horizontal" size="xs"><Button formAction="none" variant="link" disabled={busy} onClick={()=>{setError('');setFieldErrors({});setEditing(null);setPage('detail')}}>{t('Cancel','キャンセル')}</Button><Button variant="primary" formAction="submit" loading={busy}>{t('Save changes','変更を保存')}</Button></SpaceBetween>}>
     <Container header={<Header variant="h2">{t('Settings','設定')}</Header>}>
-     <SpaceBetween size="l">{updateFields.map(member=>field(member,editing.values,values=>setEditing(current=>current&&{...current,values:values(current.values)})))}</SpaceBetween>
+     {retentionEdit&&editing.retention?<KinesisVideoRetention edit={editing.retention} busy={busy} error={fieldErrors.retention} t={t}
+      onChange={fields=>{setError('');setFieldErrors({});setEditing(current=>current?.retention&&{...current,retention:{...current.retention,...fields}})}}/>:
+      <SpaceBetween size="l">{updateFields.map(member=>field(member,editing.values,values=>setEditing(current=>current&&{...current,values:values(current.values)})))}</SpaceBetween>}
     </Container></Form></form>
   </ContentLayout>;
  }
@@ -432,7 +453,7 @@ export default function CatalogView({region,request,catalog,onSaving}){
   const pairs=tagPairs(tags);
   return <ContentLayout header={<SpaceBetween size="s">{crumbs(name)}<Header variant="h1" description={singular}
     actions={<SpaceBetween direction="horizontal" size="xs">
-     {updateOp&&updateFields.length>0&&<Button disabled={busy||loading||!detail} onClick={()=>updateOp.token?editFromList(selected):startEdit()}>{t('Edit','編集')}</Button>}
+     {canEdit&&<Button disabled={busy||loading||!detail} onClick={()=>updateOp.token?editFromList(selected):startEdit()}>{t('Edit','編集')}</Button>}
      {resource.operations.delete&&<Button disabled={busy||loading} onClick={()=>setConfirm(selected)}>{t('Delete','削除')}</Button>}</SpaceBetween>}>{name}</Header></SpaceBetween>}>
    <SpaceBetween size="l">
     {alerts}
@@ -479,7 +500,7 @@ export default function CatalogView({region,request,catalog,onSaving}){
      actions={<SpaceBetween direction="horizontal" size="xs">
       <Button iconName="refresh" ariaLabel={t('Refresh','更新')} disabled={busy||loading} onClick={()=>load(pager.tokens[pager.index])}/>
       <Button disabled={!pick||busy} onClick={()=>inspect(pick)}>{t('View details','詳細を表示')}</Button>
-      {updateOp&&updateFields.length>0&&<Button disabled={!pick||busy} onClick={()=>editFromList(pick)}>{t('Edit','編集')}</Button>}
+      {canEdit&&<Button disabled={!pick||busy} onClick={()=>editFromList(pick)}>{t('Edit','編集')}</Button>}
       {resource.operations.delete&&<Button disabled={!pick||busy} onClick={()=>setConfirm(pick)}>{t('Delete','削除')}</Button>}
       {createButton}</SpaceBetween>}>{many}</Header>}
     filter={<TextFilter filteringText={filter} filteringPlaceholder={t('Find ','検索: ')+phrase(many)} filteringAriaLabel={t('Filter loaded ','読み込んだ項目を絞り込む: ')+phrase(many)}

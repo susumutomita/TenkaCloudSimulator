@@ -24,6 +24,42 @@
       "models": []
     },
     {
+      "path": "formal/SARPolicyAuthorizationTarget.cfg",
+      "sha256": "1301d22587f6728e93ed3e41690cd077ef3ab3c9552fa917e2c48a8a6e7aa2cb",
+      "disposition": "modeled",
+      "reason": "The finite SAR application-policy target and refusal/legitimate effects check.",
+      "models": [
+        {
+          "id": "SARPolicyAuthorizationTarget",
+          "properties": [
+            "ResolvedParentTarget",
+            "NoUnpermittedEffects",
+            "PermittedBehavior",
+            "ReadPreservesStoredPolicy"
+          ],
+          "limits": "Finite receipt for one SAR Get/Put of saved local application-policy metadata. Existing parent ARN and private stored policy identity are symbolic distinct targets; decision assumes the existing identity-policy evaluator and a resolved application's ARN. Verifies the abstract selection, read/write refusal frames and legitimate permitted effects, not actual ARN parsing, resolution/native engine ordering, sibling or process concurrency, absence wire error distinctions, IAM evaluation, resource-sharing policies, API transport, database failures, SDK or concrete Go refinement. Native in-process tests separately observe exact Go IAM action/resource calls and unchanged state on refusal."
+        }
+      ]
+    },
+    {
+      "path": "formal/SARPolicyAuthorizationTarget.tla",
+      "sha256": "7d0e81e7cec63fa3e0be763501141c0580c6b3db7218df5d50241b9e2e5b7bcd",
+      "disposition": "modeled",
+      "reason": "The finite SAR application-policy target and refusal/legitimate effects check.",
+      "models": [
+        {
+          "id": "SARPolicyAuthorizationTarget",
+          "properties": [
+            "ResolvedParentTarget",
+            "NoUnpermittedEffects",
+            "PermittedBehavior",
+            "ReadPreservesStoredPolicy"
+          ],
+          "limits": "Finite receipt for one SAR Get/Put of saved local application-policy metadata. Existing parent ARN and private stored policy identity are symbolic distinct targets; decision assumes the existing identity-policy evaluator and a resolved application's ARN. Verifies the abstract selection, read/write refusal frames and legitimate permitted effects, not actual ARN parsing, resolution/native engine ordering, sibling or process concurrency, absence wire error distinctions, IAM evaluation, resource-sharing policies, API transport, database failures, SDK or concrete Go refinement. Native in-process tests separately observe exact Go IAM action/resource calls and unchanged state on refusal."
+        }
+      ]
+    },
+    {
       "path": "formal/models.json",
       "sha256": "9941a1a6f019d39ba1ac3ba71c650bfa757f7244d8ceb318b7a6a9f2f18245f2",
       "disposition": "formal-infrastructure",
@@ -1194,6 +1230,13 @@
       ]
     },
     {
+      "path": "internal/aws/catalog/serverlessrepo_policy_authorization_test.go",
+      "sha256": "b49d3d2ad7fb4cd82c0fdf8c0bb75cb4f1448cf45d12426522fc9bfba7e82196",
+      "disposition": "test-support",
+      "reason": "Asserts the resolved application IAM target for both actions in a synthetic owned fixture, positive grants, typed refusals, and unchanged metadata.",
+      "models": []
+    },
+    {
       "path": "internal/aws/catalog/services.go",
       "sha256": "271d3d71a91017d020cfe84cb78591fb364319bd47e27dea22ddf50cca8f9a7a",
       "disposition": "modeled",
@@ -2089,7 +2132,7 @@
     {
       "path": "internal/server/web/app.js",
       "disposition": "modeled",
-      "reason": "Catalog Edit binds the version and body from the accepted current read to a single user-initiated update; the bundled change is limited to the Catalog UI. Includes the AppStream App blocks view, which uses the existing single-write and epoch guards for native create, exact ARN describe and delete.",
+      "reason": "Catalog Edit binds the version and body from the accepted current read to a single user-initiated update; the bundled change is limited to the Catalog UI. Includes the AppStream App blocks view, which uses the existing single-write and epoch guards for native create, exact ARN describe and delete. Also covers the existing epoch and single-write boundaries used by the native Kinesis Video data retention edit.",
       "models": [
         {
           "id": "CatalogConsoleEpoch",
@@ -2098,10 +2141,24 @@
             "SingleWriter",
             "FailureVisible"
           ],
-          "limits": "Finite UI model covers epochs, single writes and error visibility, not concrete response projection, optimistic token shape, or browser behavior (covered separately by runtime tests). The model does not cover AppStream packaging form validation, S3 URI decomposition or actual browser/API interaction."
+          "limits": "Finite UI model covers epochs, single writes and error visibility, not concrete response projection, optimistic token shape, or browser behavior (covered separately by runtime tests). The model does not cover AppStream packaging form validation, S3 URI decomposition or actual browser/API interaction. The Kinesis UI composition reuses these abstract epoch/write guards; the model does not prove integer conversion, directional retention deltas, pinned AWS API parity, actual browser interaction or other SDK/Terraform behavior."
         }
       ],
-      "sha256": "100aff41a573627a492cece8a689358870601b3f812d88c66f7dd33f1e7ce839"
+      "sha256": "b65df437a37b66c1ca15f7b0cd25d3ef25d770e9827e424ce91ef0dfe5103ac8"
+    },
+    {
+      "path": "scripts/formal_model_gate.py",
+      "sha256": "37643da400ab99d1ca93dadcdeb7a66b1241a7e9f9986962e8666befe82749d2",
+      "disposition": "formal-infrastructure",
+      "reason": "Require the exact SAR target model, property inventory, source scope and sensitivity controls.",
+      "models": []
+    },
+    {
+      "path": "scripts/test-formal-gate.py",
+      "sha256": "b139445a686707d84207ad47070ffd41ef41d1e0c6d281acbc037a51e29df4a7",
+      "disposition": "formal-infrastructure",
+      "reason": "Independently require the SAR target model in the complete reviewed registry inventory.",
+      "models": []
     },
     {
       "path": "test/e2e/aws_catalog_console.py",
@@ -2575,16 +2632,16 @@
     {
       "path": "tools/console/bundle-digests.json",
       "disposition": "presentation",
-      "reason": "Generated console asset digests for the bounded AppStream App blocks console and retained prior services.",
+      "reason": "Generated asset digests from combined current Sakura, DNS, AppStream, and Kinesis console inputs.",
       "models": [],
-      "sha256": "e306219b87204219be40ecdde75800abfd9f9c35a404e6be26b111377818a350"
+      "sha256": "01ee29987f8aba40f0f0e226aa63b47bc006d3acedaeace2a17fcb16d070e8a1"
     },
     {
       "path": "tools/console/bundle-inputs.json",
       "disposition": "presentation",
-      "reason": "Generated console input graph for the bounded AppStream App blocks console and retained prior services.",
+      "reason": "Generated input graph from combined current Sakura, DNS, AppStream, and Kinesis console source.",
       "models": [],
-      "sha256": "613d43702bc6a20a94d8e9afe6c269ee5a4bdb7bb81b9ae4a509e275273fe9cb"
+      "sha256": "4bc1259e8a2042835ac696d7d3114c346646814e2ff41acc06eba58755117ea2"
     },
     {
       "path": "tools/console/src/appstream-app-block.jsx",
@@ -2602,9 +2659,9 @@
     },
     {
       "path": "tools/console/src/catalog.jsx",
-      "sha256": "b0b993900d45fb6f6f2381b7eba643decdd87f4a60d4b770c20799c1f5f0525a",
+      "sha256": "589691ecd2efd8d36d58f800754a3165ffd0424aa06fcdca8027ab526eddbf92",
       "disposition": "modeled",
-      "reason": "Catalog Edit binds the version and body from the accepted current read to a single user-initiated update; the bundled change is limited to the Catalog UI. Includes the AppStream App blocks view, which uses the existing single-write and epoch guards for native create, exact ARN describe and delete.",
+      "reason": "Catalog Edit binds the version and body from the accepted current read to a single user-initiated update; the bundled change is limited to the Catalog UI. Includes the AppStream App blocks view, which uses the existing single-write and epoch guards for native create, exact ARN describe and delete. Also covers the existing epoch and single-write boundaries used by the native Kinesis Video data retention edit.",
       "models": [
         {
           "id": "CatalogConsoleEpoch",
@@ -2613,9 +2670,23 @@
             "SingleWriter",
             "FailureVisible"
           ],
-          "limits": "Finite UI model covers epochs, single writes and error visibility, not concrete response projection, optimistic token shape, or browser behavior (covered separately by runtime tests). The model does not cover AppStream packaging form validation, S3 URI decomposition or actual browser/API interaction."
+          "limits": "Finite UI model covers epochs, single writes and error visibility, not concrete response projection, optimistic token shape, or browser behavior (covered separately by runtime tests). The model does not cover AppStream packaging form validation, S3 URI decomposition or actual browser/API interaction. The Kinesis UI composition reuses these abstract epoch/write guards; the model does not prove integer conversion, directional retention deltas, pinned AWS API parity, actual browser interaction or other SDK/Terraform behavior."
         }
       ]
+    },
+    {
+      "path": "tools/console/src/kinesis-video-retention.jsx",
+      "disposition": "presentation",
+      "reason": "Presents the Kinesis Video Streams absolute retention controls; stateful edits and native authority remain in the Catalog view and gateway.",
+      "models": [],
+      "sha256": "a055ce0b310f6255ccdb87ff4a3153d1067189f7b24583f0d5f64b1c5471dfd1"
+    },
+    {
+      "path": "tools/console/src/kinesis-video-retention.mjs",
+      "disposition": "presentation",
+      "reason": "Pure conversion from desired retention and the read snapshot to the descriptor-native direction and delta; no networking or storage.",
+      "models": [],
+      "sha256": "620ac0e26df8b2d4bfa008705dc71873389ca93848fa6870635afef7f69b48fe"
     },
     {
       "path": "tools/console/test/appstream-app-block.test.mjs",
@@ -2634,9 +2705,9 @@
     {
       "path": "tools/console/tests/catalog-input.test.mjs",
       "disposition": "presentation",
-      "reason": "Existing Catalog view harness resolves the new form conversion helper; existing API-contract assertions are unchanged.",
+      "reason": "The existing generic compatibility harness resolves the new bounded Kinesis helper and keeps prior AppStream and RDS assertions.",
       "models": [],
-      "sha256": "f1a741efb47f79646ad7ae0cab0de6b3b6d19d7406f8d9cfeac1ea50b1e51fd5"
+      "sha256": "37b00d84bf7c1efc5ca63207414489df62c0ab85e8d2d7fd29ccbb539389be27"
     },
     {
       "path": "tools/console/tests/fixtures/catalog-descriptors.json",
@@ -2646,61 +2717,11 @@
       "models": []
     },
     {
-      "path": "formal/SARPolicyAuthorizationTarget.tla",
-      "sha256": "7d0e81e7cec63fa3e0be763501141c0580c6b3db7218df5d50241b9e2e5b7bcd",
-      "disposition": "modeled",
-      "reason": "The finite SAR application-policy target and refusal/legitimate effects check.",
-      "models": [
-        {
-          "id": "SARPolicyAuthorizationTarget",
-          "properties": [
-            "ResolvedParentTarget",
-            "NoUnpermittedEffects",
-            "PermittedBehavior",
-            "ReadPreservesStoredPolicy"
-          ],
-          "limits": "Finite receipt for one SAR Get/Put of saved local application-policy metadata. Existing parent ARN and private stored policy identity are symbolic distinct targets; decision assumes the existing identity-policy evaluator and a resolved application's ARN. Verifies the abstract selection, read/write refusal frames and legitimate permitted effects, not actual ARN parsing, resolution/native engine ordering, sibling or process concurrency, absence wire error distinctions, IAM evaluation, resource-sharing policies, API transport, database failures, SDK or concrete Go refinement. Native in-process tests separately observe exact Go IAM action/resource calls and unchanged state on refusal."
-        }
-      ]
-    },
-    {
-      "path": "formal/SARPolicyAuthorizationTarget.cfg",
-      "sha256": "1301d22587f6728e93ed3e41690cd077ef3ab3c9552fa917e2c48a8a6e7aa2cb",
-      "disposition": "modeled",
-      "reason": "The finite SAR application-policy target and refusal/legitimate effects check.",
-      "models": [
-        {
-          "id": "SARPolicyAuthorizationTarget",
-          "properties": [
-            "ResolvedParentTarget",
-            "NoUnpermittedEffects",
-            "PermittedBehavior",
-            "ReadPreservesStoredPolicy"
-          ],
-          "limits": "Finite receipt for one SAR Get/Put of saved local application-policy metadata. Existing parent ARN and private stored policy identity are symbolic distinct targets; decision assumes the existing identity-policy evaluator and a resolved application's ARN. Verifies the abstract selection, read/write refusal frames and legitimate permitted effects, not actual ARN parsing, resolution/native engine ordering, sibling or process concurrency, absence wire error distinctions, IAM evaluation, resource-sharing policies, API transport, database failures, SDK or concrete Go refinement. Native in-process tests separately observe exact Go IAM action/resource calls and unchanged state on refusal."
-        }
-      ]
-    },
-    {
-      "path": "scripts/formal_model_gate.py",
-      "sha256": "37643da400ab99d1ca93dadcdeb7a66b1241a7e9f9986962e8666befe82749d2",
-      "disposition": "formal-infrastructure",
-      "reason": "Require the exact SAR target model, property inventory, source scope and sensitivity controls.",
-      "models": []
-    },
-    {
-      "path": "scripts/test-formal-gate.py",
-      "sha256": "b139445a686707d84207ad47070ffd41ef41d1e0c6d281acbc037a51e29df4a7",
-      "disposition": "formal-infrastructure",
-      "reason": "Independently require the SAR target model in the complete reviewed registry inventory.",
-      "models": []
-    },
-    {
-      "path": "internal/aws/catalog/serverlessrepo_policy_authorization_test.go",
-      "sha256": "b49d3d2ad7fb4cd82c0fdf8c0bb75cb4f1448cf45d12426522fc9bfba7e82196",
-      "disposition": "test-support",
-      "reason": "Asserts the resolved application IAM target for both actions in a synthetic owned fixture, positive grants, typed refusals, and unchanged metadata.",
-      "models": []
+      "path": "tools/console/tests/kinesis-video-retention.test.mjs",
+      "disposition": "presentation",
+      "reason": "Offline regression for local retention conversion, absolute boundaries and a captured stream version; not browser or live API evidence.",
+      "models": [],
+      "sha256": "1d645d88d96bbc6cccccf18ad3c0e726d5d9e2cc758244f537d2990b71a5cf04"
     }
   ]
 }
