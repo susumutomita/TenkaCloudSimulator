@@ -32,7 +32,7 @@ func TestMainframeApplicationLifecycle(t *testing.T) {
 	}
 	list := h.rest("m2", "GET", "/applications", nil)
 	expect(t, list, 200, "")
-	if items := list.body["applications"].([]any); len(items) != 1 || items[0].(map[string]any)["versionStatus"] != "Available" {
+	if items := list.body["applications"].([]any); len(items) != 1 || items[0].(map[string]any)["versionStatus"] != "Available" || items[0].(map[string]any)["applicationId"] != id {
 		t.Fatalf("list %v", list.body)
 	}
 	if items := h.rest("m2", "GET", "/applications?environmentId=env1", nil).body["applications"].([]any); len(items) != 0 {
@@ -491,5 +491,29 @@ func assertStagingAreaTags(t *testing.T, body map[string]any) {
 	tags, _ := body["tags"].(map[string]any)
 	if len(staging) != 1 || staging["purpose"] != "staging" || len(tags) != 1 || tags["team"] != "a" {
 		t.Fatalf("stagingAreaTags %v tags %v", body["stagingAreaTags"], body["tags"])
+	}
+}
+
+func TestMainframeApplicationSelectorsMatchStoredID(t *testing.T) {
+	remaining := map[string]bool{"GetApplication": true, "UpdateApplication": true, "DeleteApplication": true}
+	for _, op := range mainframeModernization.Ops {
+		if !remaining[op.Name] {
+			continue
+		}
+		delete(remaining, op.Name)
+		t.Run(op.Name, func(t *testing.T) {
+			stored := row{ID: "9s8t7u6v5w", Name: "fixture-label", Document: map[string]any{"applicationId": "9s8t7u6v5w"}}
+			q := request{op: &op, input: map[string]any{"applicationId": stored.ID}}
+			if op.Lookup != "applicationId" || !q.matches(stored) {
+				t.Fatal("assigned application ID must match")
+			}
+			q.input["applicationId"] = stored.Name
+			if q.matches(stored) {
+				t.Fatal("display name must not match the application ID contract")
+			}
+		})
+	}
+	if len(remaining) != 0 {
+		t.Fatalf("unexamined M2 operation definitions: %v", remaining)
 	}
 }
