@@ -880,6 +880,13 @@
       ]
     },
     {
+      "path": "internal/server/apidocs/openapi.json",
+      "sha256": "16239665ffd3a742f95bcd7b1f108bd1410b19c775979b3a6f5c087cbadbab35",
+      "disposition": "presentation",
+      "reason": "Adds the read-only SimpleDB ListDomains API-reference example and explicit local routing instructions; no runtime or authorization change.",
+      "models": []
+    },
+    {
       "path": "internal/server/server.go",
       "sha256": "f5bd1e76cb388650cd978cdf7481958d2901e071450f7a0cd1e27639a6356833",
       "disposition": "modeled",
@@ -1364,6 +1371,13 @@
       "sha256": "22483a0b54c312057ced926f6e50ca92a72eb1b70ebafc1fc1abb3fcd81792c7",
       "disposition": "test-support",
       "reason": "Fixtures, assertions or registration contracts; not production runtime or execution evidence.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/test_sakura_openapi.py",
+      "sha256": "6c93afd7214cc8956077f19cfe095cbe9629e53caef0fc328231c0ce5eef7012",
+      "disposition": "test-support",
+      "reason": "Validates and projects only the reviewed SimpleDB reference additions before inherited hashes and tests both intentional and unrelated drift.",
       "models": []
     },
     {

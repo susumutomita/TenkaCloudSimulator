@@ -34,7 +34,27 @@ def operations(spec):
 
 
 
+def project_simpledb_list_domains(spec):
+    """Validate then remove only the reviewed root POST reference additions."""
+    post = spec['paths']['/']['post']
+    services = [p for p in post['parameters'] if p.get('name') == 'X-Simulator-Service']
+    assert len(services) == 1, 'SimpleDB service selector changed'
+    form = post['requestBody']['content']['application/x-www-form-urlencoded']
+    props = form['schema']['properties']
+    for values, choice in ((services[0]['schema']['enum'], 'sdb'),
+                           (props['Action']['enum'], 'ListDomains'),
+                           (props['Version']['enum'], '2009-04-15')):
+        assert values.count(choice) == 1 and values[-1] == choice, 'SimpleDB option changed: ' + choice
+        values.pop()
+    example = form['examples'].pop('ListDomains', None)
+    assert digest(example) == '46fb6adf3e85a3be1ce01bfb2aedf045387aae365b8715f1fe7b127d1ee536ef', 'SimpleDB ListDomains example changed'
+    response = post['responses']['200']['content'].pop('text/xml', None)
+    assert digest(response) == '11a7932f16b348011034c0f82be5a858922db9d92fcec924d3190612c5c6bc09', 'SimpleDB XML media/example changed'
+
+
 def preserved(spec):
+    spec = copy.deepcopy(spec)
+    project_simpledb_list_domains(spec)
     spec = project_before_route53(spec)
     # Validate the three reviewed DeleteLogStream additions exactly, then remove
     # only those additions from a copy. Every pre-existing digest below is kept
@@ -113,6 +133,44 @@ class SakuraReference(unittest.TestCase):
 
     def test_all_existing_operations_components_and_28_templates_are_exact(self):
         preserved(self.spec)
+
+    def test_simpledb_projection_cannot_hide_missing_changed_or_inherited_contracts(self):
+        def post(spec):
+            return spec['paths']['/']['post']
+
+        def service(spec):
+            return next(p for p in post(spec)['parameters'] if p.get('name') == 'X-Simulator-Service')
+
+        def form(spec):
+            return post(spec)['requestBody']['content']['application/x-www-form-urlencoded']
+
+        def response(spec):
+            return post(spec)['responses']['200']['content']
+
+        for label, change in (
+            ('missing selector', lambda spec: service(spec)['schema']['enum'].remove('sdb')),
+            ('duplicate selector', lambda spec: service(spec)['schema']['enum'].append('sdb')),
+            ('selector promoted to default', lambda spec: service(spec)['schema']['enum'].insert(
+                0, service(spec)['schema']['enum'].pop())),
+            ('missing action', lambda spec: form(spec)['schema']['properties']['Action']['enum'].remove('ListDomains')),
+            ('wrong query version', lambda spec: form(spec)['schema']['properties']['Version']['enum'].__setitem__(-1, '2020-01-01')),
+            ('missing form example', lambda spec: form(spec)['examples'].pop('ListDomains')),
+            ('extra form field', lambda spec: form(spec)['examples']['ListDomains']['value'].update(Unexpected='bad')),
+            ('changed access note', lambda spec: form(spec)['examples']['ListDomains'].update(description='changed')),
+            ('missing XML media', lambda spec: response(spec).pop('text/xml')),
+            ('unreviewed XML addition', lambda spec: response(spec)['text/xml']['examples'].update(
+                Unexpected={'value': '<unexpected/>'})),
+            ('inherited CloudFormation example changed', lambda spec: form(spec)['examples']['DescribeStacks']['value'].update(
+                StackName='unexpected')),
+            ('inherited JSON media changed', lambda spec: response(spec)['application/x-amz-json-1.0'].update(
+                schema={'type': 'string'})),
+            ('inherited non-root path changed', lambda spec: spec['paths']['/{bucket}']['put'].update(
+                summary='unreviewed description')),
+        ):
+            broken = copy.deepcopy(self.spec)
+            change(broken)
+            with self.subTest(change=label), self.assertRaises(AssertionError):
+                preserved(broken)
 
     def test_sqs_batch_projection_cannot_hide_contract_or_inherited_drift(self):
         def media(spec):

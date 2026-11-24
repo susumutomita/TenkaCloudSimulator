@@ -116,7 +116,8 @@
                 "sqs",
                 "logs",
                 "secretsmanager",
-                "dynamodb"
+                "dynamodb",
+                "sdb"
               ]
             },
             "description": "Optional native service hint; when supplied it must match the selected service target. iam selects IAM Query; cloudformation selects CloudFormation Query. SSM/Logs/KMS/Secrets Manager use JSON 1.1; SQS/DynamoDB use JSON 1.0. This routing hint grants no access."
@@ -679,14 +680,16 @@
                       "DeleteInstanceProfile",
                       "AddRoleToInstanceProfile",
                       "RemoveRoleFromInstanceProfile",
-                      "ListInstanceProfilesForRole"
+                      "ListInstanceProfilesForRole",
+                      "ListDomains"
                     ]
                   },
                   "Version": {
                     "type": "string",
                     "enum": [
                       "2010-05-15",
-                      "2010-05-08"
+                      "2010-05-08",
+                      "2009-04-15"
                     ]
                   },
                   "StackName": {
@@ -1011,6 +1014,14 @@
                     "Action": "ListInstanceProfilesForRole",
                     "Version": "2010-05-08",
                     "RoleName": "practice-executor"
+                  }
+                },
+                "ListDomains": {
+                  "summary": "SimpleDB ListDomains (read-only Query)",
+                  "description": "Select the application/x-www-form-urlencoded body and set X-Simulator-Service to sdb. Use us-east-1 or leave X-Simulator-Region unset, clear X-Amz-Target and remove any fields left from another example. Send using your existing local sign-in or simulator access token with sdb:ListDomains permission. The result lists your configured local scope and returns XML.",
+                  "value": {
+                    "Action": "ListDomains",
+                    "Version": "2009-04-15"
                   }
                 }
               }
@@ -1667,6 +1678,17 @@
                   "AutoScalingDeleteScalingPlan": {
                     "summary": "DeleteScalingPlan local response",
                     "value": {}
+                  }
+                }
+              },
+              "text/xml": {
+                "schema": {
+                  "type": "string"
+                },
+                "examples": {
+                  "SimpleDBListDomains": {
+                    "summary": "Static SimpleDB XML example, not saved state",
+                    "value": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<ListDomainsResponse xmlns=\"http://sdb.amazonaws.com/doc/2009-04-15/\"><ListDomainsResult><DomainName>reference-example</DomainName></ListDomainsResult><ResponseMetadata><RequestId>00000000000000000000000000000000</RequestId></ResponseMetadata></ListDomainsResponse>"
                   }
                 }
               }
