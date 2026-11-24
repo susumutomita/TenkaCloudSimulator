@@ -2934,6 +2934,35 @@ REQUIRED_SOURCE_SCOPES['EC2VPCOwnership'] = {
 }
 
 
+BASE_MODELS.add('AzureConditionalCRCRead')
+BASE_INVARIANTS['AzureConditionalCRCRead'] = {
+    'TypeOK',
+    'DeniedBeforeOptions',
+    'OptionsBeforeLookup',
+    'MissingBeforeDate',
+    'CacheHitHasNoPartialOutput',
+    'EligibleSelectedCRC',
+    'CRCRejectsOversize',
+    'CRCEmitsOnlyWhenRequested',
+}
+REQUIRED_MUTANTS['AzureConditionalCRCRead'] = {
+    'OptionsBeforeOwner',
+    'LookupBeforeOptions',
+    'CacheBeforeExistence',
+    'EmitCRCOnCacheHit',
+    'OmitCap',
+}
+REQUIRED_SOURCE_SCOPES['AzureConditionalCRCRead'] = {
+    'internal/azure/blob/http.go',
+    'internal/azure/blob/range.go',
+    'internal/azure/blob/store.go',
+    'internal/azure/blob/types.go',
+    'internal/azure/blob/range_crc64_test.go',
+    'internal/azure/blob/read_time_condition_test.go',
+    'internal/azure/blob/read_time_range_checksum_test.go',
+}
+
+
 def load_registry(root, relative='formal/models.json'):
     root = Path(root)
     registry_path = asset(root, relative)

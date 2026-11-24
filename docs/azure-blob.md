@@ -87,8 +87,10 @@ PUT replaces the full body and metadata; it does not append. Every successful wr
 gets a fresh opaque ETag even for the same body. Blob conditions support a single
 strong If-Match/If-None-Match tag or wildcard, one condition at a time. Failed
 write conditions return412 without mutation; a matching read If-None-Match
-returns304. Lists/date conditions and conditional container operations are not
-implemented. Staged blocks, PageBlob/AppendBlob, snapshots/versions, leases,
+returns304. Blob GET and HEAD also accept a single If-Modified-Since
+without an ETag condition, returning304 when Last-Modified is not later.
+Compound conditions, other date conditions and conditional container/list
+operations are not implemented. Staged blocks, PageBlob/AppendBlob, snapshots/versions, leases,
 copy, soft deletion, encryption/tiers and access-policy operations fail explicitly.
 
 Delete Container removes its contained blobs atomically. Local cleanup is
@@ -248,13 +250,15 @@ and exact Content-Range/Content-Length; an end beyond the object is clamped,
 and a start at/beyond the end returns416. Suffix and multiple ranges are rejected
 with400, as are unsupported date conditions and range headers on other operations.
 The entire bounded blob is verified before selecting response bytes; this is not
-streaming unbounded storage. Strong ETag conditions and authorization execute
+streaming unbounded storage. Supported read conditions and authorization execute
 before range selection. Invalid/denied reads do not change stored state.
 
 A partial response omits whole-blob Content-MD5. Explicit
 `x-ms-range-get-content-md5: true` returns the selected bytes' MD5 only for a
 specified range of at most4MiB; absent range, unsupported Boolean values or a
-larger selection return400. CRC64 range checksums remain unsupported. Full GET
+larger selection return400. A caller can instead request CRC64 for the same bounded
+range with `x-ms-range-get-content-crc64: true`; the result is the Azure Storage
+CRC64 value in `x-ms-content-crc64`. Requests selecting both algorithms return400. Full GET
 retains its whole-blob MD5. Accept-Ranges is bytes; version remains pinned to
 2023-11-03. Existing bounded TLA transitions do not model HTTP range parsing,
 checksums or these response headers; native boundary tests are separate evidence.

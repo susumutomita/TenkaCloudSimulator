@@ -18959,6 +18959,89 @@
      "expect_invariant": "DescribeExact"
     }
    ]
+  },
+  {
+   "id": "AzureConditionalCRCRead",
+   "model": "formal/AzureConditionalCRCRead.tla",
+   "config": "formal/AzureConditionalCRCRead.cfg",
+   "bounds": "256 normalized requests: Boolean owner admission and blob existence, four date relations, four range classes and four flag classes; one read decision then terminal stutter. Short and Long represent selected lengths at most and above 4 MiB.",
+   "properties": [
+    "TypeOK",
+    "DeniedBeforeOptions",
+    "OptionsBeforeLookup",
+    "MissingBeforeDate",
+    "CacheHitHasNoPartialOutput",
+    "EligibleSelectedCRC",
+    "CRCRejectsOversize",
+    "CRCEmitsOnlyWhenRequested"
+   ],
+   "limits": "Finite normalized conditional GET and transactional CRC64 response-selection model, not Go or SQLite refinement. It abstracts authenticated owner admission, blob presence, date relation and valid range normalization, not real authorization, HTTP/header parsing, ETag condition combinations, HEAD, corrupt storage, SQL atomicity or snapshots. Payload and validators are symbolic; it does not prove exact CRC64/MD5 bytes, wire header encoding, byte-cap arithmetic, SDK compatibility, concurrency, crash recovery or liveness.",
+   "source_scope": [
+    "internal/azure/blob/http.go",
+    "internal/azure/blob/range.go",
+    "internal/azure/blob/store.go",
+    "internal/azure/blob/types.go",
+    "internal/azure/blob/range_crc64_test.go",
+    "internal/azure/blob/read_time_condition_test.go",
+    "internal/azure/blob/read_time_range_checksum_test.go"
+   ],
+   "mutants": [
+    {
+     "id": "OptionsBeforeOwner",
+     "edits": [
+      {
+       "old": "IF ~q.allowed THEN 403\n ELSE IF RejectedFlag(q) THEN 400",
+       "new": "IF RejectedFlag(q) THEN 400\n ELSE IF ~q.allowed THEN 403",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "DeniedBeforeOptions"
+    },
+    {
+     "id": "LookupBeforeOptions",
+     "edits": [
+      {
+       "old": "ELSE IF RejectedFlag(q) THEN 400\n ELSE IF ~q.exists THEN 404",
+       "new": "ELSE IF ~q.exists THEN 404\n ELSE IF RejectedFlag(q) THEN 400",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "OptionsBeforeLookup"
+    },
+    {
+     "id": "CacheBeforeExistence",
+     "edits": [
+      {
+       "old": "ELSE IF ~q.exists THEN 404\n ELSE IF NotModified(q) THEN 304",
+       "new": "ELSE IF NotModified(q) THEN 304\n ELSE IF ~q.exists THEN 404",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "MissingBeforeDate"
+    },
+    {
+     "id": "EmitCRCOnCacheHit",
+     "edits": [
+      {
+       "old": "crc64 |-> status=206 /\\ q.flag=\"CRC64\"",
+       "new": "crc64 |-> status \\in {206,304} /\\ q.flag=\"CRC64\"",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "CacheHitHasNoPartialOutput"
+    },
+    {
+     "id": "OmitCap",
+     "edits": [
+      {
+       "old": "ELSE IF q.flag=\"CRC64\" /\\ q.range=\"Long\" THEN 400\n ",
+       "new": "",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "CRCRejectsOversize"
+    }
+   ]
   }
  ]
 }

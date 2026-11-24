@@ -55,7 +55,7 @@ func (s *Service) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		defer cancel()
 		r = r.WithContext(ctx)
 	}
-	allowedMS := map[string]bool{"x-ms-version": true, "x-ms-date": true, "x-ms-client-request-id": true, "x-ms-blob-type": true, "x-ms-blob-content-type": true, "x-ms-blob-content-md5": true, "x-ms-range": true, "x-ms-range-get-content-md5": true}
+	allowedMS := map[string]bool{"x-ms-version": true, "x-ms-date": true, "x-ms-client-request-id": true, "x-ms-blob-type": true, "x-ms-blob-content-type": true, "x-ms-blob-content-md5": true, "x-ms-range": true, "x-ms-range-get-content-md5": true, "x-ms-range-get-content-crc64": true}
 	for name, values := range r.Header {
 		lower := strings.ToLower(name)
 		if len(values) != 1 && (strings.HasPrefix(lower, "x-ms-") || strings.HasPrefix(lower, "if-") || lower == "range") {
@@ -74,8 +74,8 @@ func (s *Service) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 		w.Header().Set("x-ms-client-request-id", id)
 	}
-	if r.Header.Get("If-Modified-Since") != "" || r.Header.Get("If-Unmodified-Since") != "" || r.Header.Get("Content-Encoding") != "" {
-		finish(fail(400, "UnsupportedHeader", "Date conditions and encoded bodies are unsupported."))
+	if len(r.Header.Values("If-Unmodified-Since")) > 0 || r.Header.Get("Content-Encoding") != "" {
+		finish(fail(400, "UnsupportedHeader", "If-Unmodified-Since and encoded bodies are unsupported."))
 		return
 	}
 	account, container, key, hasKey, err := route(r.URL)
@@ -119,7 +119,7 @@ func (s *Service) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			op = DeleteBlob
 		}
 	}
-	if op != GetBlob && (len(r.Header.Values("Range")) > 0 || len(r.Header.Values("x-ms-range")) > 0 || len(r.Header.Values("x-ms-range-get-content-md5")) > 0) {
+	if op != GetBlob && (len(r.Header.Values("Range")) > 0 || len(r.Header.Values("x-ms-range")) > 0 || len(r.Header.Values("x-ms-range-get-content-md5")) > 0 || len(r.Header.Values("x-ms-range-get-content-crc64")) > 0) {
 		finish(fail(400, "UnsupportedHeader", "Range headers are supported only for GET Blob."))
 		return
 	}
@@ -135,6 +135,10 @@ func (s *Service) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 		}
+	}
+	if !cond.ModifiedSince.IsZero() && op != GetBlob && op != GetBlobProperties {
+		finish(fail(400, "UnsupportedHeader", "If-Modified-Since is supported only for blob reads."))
+		return
 	}
 	if !hasKey && (cond.Match != "" || cond.None != "") {
 		finish(fail(400, "UnsupportedHeader", "Conditional container/list operations are unsupported."))
@@ -257,7 +261,7 @@ func (s *Service) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 	}
-	result, e := s.object(r.Context(), op, container, key, cond, data, meta, contentType)
+	result, e := s.object(r.Context(), op, container, key, cond, data, meta, contentType, validateRangeCRC64Header(r.Header))
 	if e != nil {
 		var native *failure
 		if errors.As(e, &native) && native.Status == 304 {
@@ -266,9 +270,10 @@ func (s *Service) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		finish(e)
 		return
 	}
-	contentRange := ""
+	contentRange, rangeCRC64 := "", ""
+	wholeBlobMD5 := result.MD5
 	if op == GetBlob {
-		result, contentRange, e = applyDownloadRange(r, result)
+		result, contentRange, rangeCRC64, e = applyDownloadRange(r, result)
 		if e != nil {
 			finish(e)
 			return
@@ -289,6 +294,12 @@ func (s *Service) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("x-ms-blob-type", "BlockBlob")
 		w.Header().Set("Accept-Ranges", "bytes")
 		if contentRange != "" {
+			if rangeCRC64 != "" {
+				w.Header().Set("x-ms-content-crc64", rangeCRC64)
+			}
+			if wholeBlobMD5 != "" {
+				w.Header().Set("x-ms-blob-content-md5", wholeBlobMD5)
+			}
 			w.Header().Set("Content-Range", contentRange)
 			w.WriteHeader(206)
 		} else {
@@ -342,7 +353,17 @@ func visibleASCII(s string) bool {
 	return true
 }
 func conditions(h http.Header) (condition, error) {
-	c := condition{h.Get("If-Match"), h.Get("If-None-Match")}
+	c := condition{Match: h.Get("If-Match"), None: h.Get("If-None-Match")}
+	if date := h.Values("If-Modified-Since"); len(date) != 0 {
+		if len(date) != 1 || len(h.Values("If-Match")) > 0 || len(h.Values("If-None-Match")) > 0 {
+			return c, fail(400, "InvalidHeaderValue", "If-Modified-Since must be sent alone.")
+		}
+		t, err := http.ParseTime(date[0])
+		if err != nil || t.IsZero() {
+			return c, fail(400, "InvalidHeaderValue", "Invalid If-Modified-Since date.")
+		}
+		c.ModifiedSince = t
+	}
 	invalid := fail(400, "InvalidHeaderValue", "Only one strong ETag or wildcard condition is supported.")
 	if c.Match != "" && c.None != "" {
 		return c, invalid
