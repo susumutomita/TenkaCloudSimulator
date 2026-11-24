@@ -1,101 +1,20 @@
 {
   "version": 1,
-  "base_sha": "1d13f77db1ec44abcf72ee0c02609ad7cb19bf53",
+  "base_sha": "342b42cd1ac200ab8701f08d073e339e1d744b43",
   "changes": [
     {
-      "path": "README.ja.md",
-      "sha256": "4c92b5145d5b797cacdd67ac7194be6bdf94f7d5056bf9fac1ed6247b4655fb7",
-      "disposition": "documentation",
-      "reason": "Links the new EC2/VPC discovery and VPC create/delete guide from the Japanese service guide list.",
-      "models": []
-    },
-    {
-      "path": "README.md",
-      "sha256": "c5db90b83be97aee707f31fd9313c3c1eb65b7149b67c291bd4e213c2eb45d92",
-      "disposition": "documentation",
-      "reason": "Links the new EC2/VPC discovery and VPC create/delete guide from the service guide list.",
-      "models": []
-    },
-    {
-      "path": "docs/console.md",
-      "sha256": "b9ff6d716fcd4fff33fcd3b8a36277c8aae9c3a65bcfada4ecf056eb628f71b5",
-      "disposition": "documentation",
-      "reason": "Describes the VPC view's Create VPC and Delete VPC controls, their capability gate, disabled CloudFormation deletion and unchanged read-only EC2 instances.",
-      "models": []
-    },
-    {
-      "path": "docs/ec2-read-discovery.md",
-      "sha256": "a72bd10c9919473a9d37eab796a77d408e8fce7625a3f7654db3ffc3fc1807dd",
-      "disposition": "documentation",
-      "reason": "Documents the native CreateVpc/DeleteVpc subset, errors, IAM actions, ownership separation and the simulatorManagedBy extension.",
-      "models": []
-    },
-    {
-      "path": "formal/EC2VPCOwnership.cfg",
-      "sha256": "b7c40c1d0a218a1b53c899b1fb8d776fbd61c9d88a44f4cbd045c8b8a61ca45a",
-      "disposition": "modeled",
-      "reason": "Finite configuration for the new native VPC ownership model: two regions, two stacks, three IDs and a shared limit of two rows.",
-      "models": [
-        {
-          "id": "EC2VPCOwnership",
-          "properties": [
-            "NoAdoption",
-            "FailureRollsBack",
-            "NativeNeverDeletesStackVPC",
-            "NativeDeleteExact",
-            "NativeCreateOwned",
-            "StackDeleteSparesNative",
-            "QuotaBound",
-            "DescribeExact"
-          ],
-          "limits": "Atomic store-level ownership, authorization order, quota and DescribeVpcs owner labels only; not SQL transactions, HTTP/XML parsing, IAM policy evaluation, CIDR or tag validation, random ID collision, console rendering or a Go refinement proof. Native Go tests, the boto3 lifecycle and the browser end-to-end flow establish those implementation properties."
-        }
-      ]
-    },
-    {
-      "path": "formal/EC2VPCOwnership.tla",
-      "sha256": "90d3e773b34d1b43a112abd6689504822b38da290672bb4389f2a07b39e16c03",
-      "disposition": "modeled",
-      "reason": "New finite model of native CreateVpc/DeleteVpc beside CloudFormation stack VPCs and children, with DescribeVpcs owner labels; ten mutations each produce their expected counterexample.",
-      "models": [
-        {
-          "id": "EC2VPCOwnership",
-          "properties": [
-            "NoAdoption",
-            "FailureRollsBack",
-            "NativeNeverDeletesStackVPC",
-            "NativeDeleteExact",
-            "NativeCreateOwned",
-            "StackDeleteSparesNative",
-            "QuotaBound",
-            "DescribeExact"
-          ],
-          "limits": "Atomic store-level ownership, authorization order, quota and DescribeVpcs owner labels only; not SQL transactions, HTTP/XML parsing, IAM policy evaluation, CIDR or tag validation, random ID collision, console rendering or a Go refinement proof. Native Go tests, the boto3 lifecycle and the browser end-to-end flow establish those implementation properties."
-        }
-      ]
-    },
-    {
-      "path": "formal/models.json",
-      "sha256": "a15ea735beeec850f2b949d4d3c2b970fc39536ad22a4f99945e093d0997f4d5",
-      "disposition": "formal-infrastructure",
-      "reason": "Registers the EC2VPCOwnership model with its bounds, invariants, limits, exact source scope and mutation controls. Existing entries are unchanged.",
+      "path": "internal/aws/ec2_describe_subnets_contract_test.go",
+      "sha256": "6443bc90b6fec1c7b8bf277cc090b00f6dd431fac3481d120fdefa0ccb09b2d9",
+      "disposition": "test-support",
+      "reason": "Keeps the frozen independent offline gateway and SQLite contract for subnet response, regional ownership, refusal and consistency.",
       "models": []
     },
     {
       "path": "internal/aws/ec2_read.go",
-      "sha256": "26db357f3685c81902bd19423341928db0e1a2a765056265e51c868afb7a6475",
+      "sha256": "0521e026c98cb3eed764e619379ab1fa830d2a2e110d908eac95cce05214dc2c",
       "disposition": "modeled",
-      "reason": "Dispatches CreateVpc and DeleteVpc through the existing EC2 Query admission: headers, region, request bound and per-action identity authorization run before any state is read. DescribeVpcs now also returns EC2-owned VPCs, ordered by ID with an owner label, and fails closed on inconsistent ownership. DescribeInstances is unchanged.",
+      "reason": "DescribeSubnets uses existing IAM admission and an atomic read of regional CloudFormation ownership, requiring identical stack and network resource ownership.",
       "models": [
-        {
-          "id": "EC2VPCOwnership",
-          "properties": [
-            "FailureRollsBack",
-            "DescribeExact",
-            "NativeNeverDeletesStackVPC"
-          ],
-          "limits": "Atomic store-level ownership, authorization order, quota and DescribeVpcs owner labels only; not SQL transactions, HTTP/XML parsing, IAM policy evaluation, CIDR or tag validation, random ID collision, console rendering or a Go refinement proof. Native Go tests, the boto3 lifecycle and the browser end-to-end flow establish those implementation properties."
-        },
         {
           "id": "EC2ReadDiscovery",
           "properties": [
@@ -103,229 +22,38 @@
             "RegionBound",
             "OwnedRead"
           ],
-          "limits": "Atomic read admission and returned identity only; not SQL snapshot implementation, HTTP/XML, IAM parsing, VM liveness, quotas or a Go refinement proof. Tests must independently establish these implementation properties."
-        },
-        {
-          "id": "ConsoleHandoff",
-          "properties": [
-            "ExactDestination"
-          ],
-          "limits": "Finite abstract handoff lifecycle only; the new CreateVpc and DeleteVpc actions reach the existing instance-boundary refusal unchanged. Not Go/HTTP/SQL refinement; the Go test drives both mutations through an instance-bound context and observes 403 with no state change."
+          "limits": "Finite admission and identity only; not SQL or Go refinement, IAM parsing, HTTP/XML, subnet projection or VM liveness."
         }
       ]
-    },
-    {
-      "path": "internal/aws/ec2_read_boundaries_test.go",
-      "sha256": "46e04089152d415e26e08f87a1d0558ae3fb1302b15a52cc755b22eaee2ff4be",
-      "disposition": "test-support",
-      "reason": "Updates the expected message for an unavailable EC2 store.",
-      "models": []
-    },
-    {
-      "path": "internal/aws/ec2_read_test.go",
-      "sha256": "b29e037d4fc6c81cf482dfddaef83b7d1c1380658dfe4b04dcd7d3686c6b54bf",
-      "disposition": "test-support",
-      "reason": "Keeps the oversize-request case above the new 64 KiB EC2 Query bound.",
-      "models": []
     },
     {
       "path": "internal/aws/ec2_vpc.go",
-      "sha256": "9b5df4bb3f35d3efdd36c3c1100d624ea1698967b1241e3d78c059ab385e4f0c",
+      "sha256": "ae89751880a3b6d6e37fd44187e61d4707b3534bd700d63600d270e455f94e23",
       "disposition": "modeled",
-      "reason": "Adds the native VPC lifecycle: per-action field admission, AWS error codes, EC2-owned rows under an owner that is never a stack ARN, one-transaction create with quota check and delete limited to EC2-owned VPCs in the request region without dependents; stack-claimed native rows fail closed.",
+      "reason": "Adds DescribeSubnets to the query action table only. Native VPC storage, ownership, listing and deletion are unchanged.",
       "models": [
         {
           "id": "EC2VPCOwnership",
           "properties": [
-            "NoAdoption",
-            "FailureRollsBack",
-            "NativeNeverDeletesStackVPC",
-            "NativeDeleteExact",
-            "NativeCreateOwned",
-            "QuotaBound",
-            "DescribeExact"
-          ],
-          "limits": "Atomic store-level ownership, authorization order, quota and DescribeVpcs owner labels only; not SQL transactions, HTTP/XML parsing, IAM policy evaluation, CIDR or tag validation, random ID collision, console rendering or a Go refinement proof. Native Go tests, the boto3 lifecycle and the browser end-to-end flow establish those implementation properties."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/ec2_vpc_test.go",
-      "sha256": "52fe92337c64ac93a290f98e8ff0f8bb8d1f2adbbd52b11409d728c7bdec73c0",
-      "disposition": "test-support",
-      "reason": "Go tests for native create/describe/delete beside a CloudFormation VPC, validation and unsupported members, IAM and instance-bound refusals, non-adoption, dependents, inconsistent claims, quota and storage failure.",
-      "models": []
-    },
-    {
-      "path": "internal/aws/ssm.go",
-      "sha256": "bed98cba62718caaffcd8ca2e8774cb2564b019a3398d7829c14950f763379b3",
-      "disposition": "modeled",
-      "reason": "Renames the EC2 routing predicate and handler now that EC2 Query also carries VPC mutations; the routing order and claim condition are unchanged.",
-      "models": [
-        {
-          "id": "EC2VPCOwnership",
-          "properties": [
-            "FailureRollsBack"
-          ],
-          "limits": "Atomic store-level ownership, authorization order, quota and DescribeVpcs owner labels only; not SQL transactions, HTTP/XML parsing, IAM policy evaluation, CIDR or tag validation, random ID collision, console rendering or a Go refinement proof. Native Go tests, the boto3 lifecycle and the browser end-to-end flow establish those implementation properties."
-        },
-        {
-          "id": "EC2ReadDiscovery",
-          "properties": [
-            "AuthorizedRead",
-            "RegionBound"
-          ],
-          "limits": "Atomic read admission and returned identity only; not SQL snapshot implementation, HTTP/XML, IAM parsing, VM liveness, quotas or a Go refinement proof. Tests must independently establish these implementation properties."
-        }
-      ]
-    },
-    {
-      "path": "internal/server/ec2_read_access_test.go",
-      "sha256": "94225045ca85b658e2de65257379ade580305066ef1d267d99a760ce74af1536",
-      "disposition": "test-support",
-      "reason": "Checks the advertised EC2 operations and that unauthenticated, forged-admin and policy-less participant CreateVpc requests are refused through the real Access composition.",
-      "models": []
-    },
-    {
-      "path": "internal/server/server.go",
-      "sha256": "c497108e815ba6fce69021420e2e6fafa1ed9c83c176fccbc4f2ecf290d86332",
-      "disposition": "modeled",
-      "reason": "The capability document advertises CreateVpc and DeleteVpc with the supported VPC subset and marks the EC2 service as no longer read-only. Composition and authentication are unchanged.",
-      "models": [
-        {
-          "id": "EC2VPCOwnership",
-          "properties": [
-            "FailureRollsBack",
+            "DescribeExact",
             "NativeNeverDeletesStackVPC"
           ],
-          "limits": "Atomic store-level ownership, authorization order, quota and DescribeVpcs owner labels only; not SQL transactions, HTTP/XML parsing, IAM policy evaluation, CIDR or tag validation, random ID collision, console rendering or a Go refinement proof. Native Go tests, the boto3 lifecycle and the browser end-to-end flow establish those implementation properties."
-        },
-        {
-          "id": "EC2ReadDiscovery",
-          "properties": [
-            "AuthorizedRead"
-          ],
-          "limits": "Atomic read admission and returned identity only; not SQL snapshot implementation, HTTP/XML, IAM parsing, VM liveness, quotas or a Go refinement proof. Tests must independently establish these implementation properties."
+          "limits": "Preservation of existing abstract VPC properties only; the model describes VPCs, not subnet admission, request parsing or Go refinement."
         }
       ]
     },
     {
-      "path": "internal/server/web/app.js",
-      "sha256": "2177347bda59379577d76ed4343539b11443254a6795b521b35bd4c1af3305f5",
-      "disposition": "modeled",
-      "reason": "Regenerated console bundle containing the VPC create and delete controls; every other view is byte-for-byte rebuilt from unchanged sources.",
-      "models": [
-        {
-          "id": "CatalogConsoleEpoch",
-          "properties": [
-            "NoUnmountedAcceptance",
-            "OnlyCurrentReplies",
-            "SingleWriter",
-            "FailureVisible"
-          ],
-          "limits": "The catalog view model is the closest finite abstraction of the shared shell rules this change relies on: views remount on region or principal changes and the saving flag blocks navigation while one write is in flight. The VPC view itself, React scheduling, DOM rendering and accessibility are not modeled; console unit tests and the browser end-to-end flow cover them."
-        }
-      ]
-    },
-    {
-      "path": "scripts/formal_model_gate.py",
-      "sha256": "a41199471b9461a37980c8d5db4cd0458a7daac26e503e4b1de8bd7fd474f766",
-      "disposition": "formal-infrastructure",
-      "reason": "Pins the EC2VPCOwnership model, invariants, mutations and exact source scope independently of the mutable registry. No runtime change.",
+      "path": "scripts/factory_acceptance.py",
+      "sha256": "7792674cfc792bffed67e530bcc1abde8b153e2e40c71e11259c3fd0a95abe64",
+      "disposition": "validation-tooling",
+      "reason": "Registers and pins the fixed DescribeSubnets contract and narrowly permits its dispatch file without changing SQS or admitting VPC mutations.",
       "models": []
     },
     {
-      "path": "scripts/test-formal-gate.py",
-      "sha256": "4e6b4ae8c764cc97d475e0424d93c0e5c142d2e132394b89cc70189a4e7327bb",
-      "disposition": "formal-infrastructure",
-      "reason": "Adds EC2VPCOwnership to the independent registered-model inventory.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/ec2_native_vpc.py",
-      "sha256": "6a853830232c763e1e0206955695cf2fa7a062e743f35eae0fe32099794c0121",
+      "path": "scripts/test-factory-acceptance.py",
+      "sha256": "188e98bafa1404bff98bb49cc3c5b334e0e56bb61d33f5867a7ea3a74865575d",
       "disposition": "test-support",
-      "reason": "boto3 lifecycle against the real binary: create with tags, describe, region-bound delete, rejected invalid and unsupported members, unauthenticated refusal and CloudFormation/native ownership separation.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/ec2_readonly_console.py",
-      "sha256": "621efd1128c486c68c3f7140c12471fa9ae5c9f116d4013c88cb9b90f39ed758",
-      "disposition": "test-support",
-      "reason": "Browser flow now creates a VPC from the console, shows a server validation error, deletes with typed confirmation and checks the CloudFormation VPC cannot be deleted; Japanese and 390 px reflow include the create form.",
-      "models": []
-    },
-    {
-      "path": "test/platform/sdk-lifecycle.py",
-      "sha256": "b5b54e4345e240aefbe8c3018c9f951775e71084f2d44ef78ce0a62586f0eed8",
-      "disposition": "test-support",
-      "reason": "Registers the native VPC SDK lifecycle in the existing platform runner used by the required PR job.",
-      "models": []
-    },
-    {
-      "path": "tools/console/bundle-digests.json",
-      "sha256": "57d100a55ccbbc84dd96d6cc0a0662cb68d8e2c2b8e08e8036946ad31c0a16c0",
-      "disposition": "presentation",
-      "reason": "Digest of the rebuilt console bundle.",
-      "models": []
-    },
-    {
-      "path": "tools/console/bundle-inputs.json",
-      "sha256": "e1f06d7360b7a4f01c7fbb976753ba53da32f82ab4440bb8f28a32f9568246ec",
-      "disposition": "presentation",
-      "reason": "Bundle input graph and byte counts for the rebuilt console, including the form components the VPC view now imports.",
-      "models": []
-    },
-    {
-      "path": "tools/console/src/console-navigation.mjs",
-      "sha256": "274492636b9ae9247230e92de4fa5488b1784415ebe9414abccc4085b50a5089",
-      "disposition": "presentation",
-      "reason": "Adds the capability check for the VPC create/delete controls; a handoff scope never shows them. The server still authorizes every request.",
-      "models": []
-    },
-    {
-      "path": "tools/console/src/ec2-readonly.jsx",
-      "sha256": "c99fd31af9654e5b19c69403f076c098dca57cdcea4bdafef33470f0189f0564",
-      "disposition": "presentation",
-      "reason": "VPC view gains Create VPC and Delete VPC when advertised; server errors stay visible and nothing is shown as success unless the response parses. EC2 instances stay read-only.",
-      "models": []
-    },
-    {
-      "path": "tools/console/src/ec2-response.mjs",
-      "sha256": "88bc0fb7da422ab06df9d2eeb502195f72bb4f1b8bb6ccdaaf7fa26d3364b5d7",
-      "disposition": "presentation",
-      "reason": "Strict parsers for CreateVpc, DeleteVpc and EC2 error documents, the owner label, and the CreateVpc form encoding.",
-      "models": []
-    },
-    {
-      "path": "tools/console/src/main.jsx",
-      "sha256": "a9a68dabf3d7cd26472cd694763c98fc79a1ee83f7d56af36ecdd585a128a3ad",
-      "disposition": "modeled",
-      "reason": "Passes the existing saving guard and the VPC lifecycle capability to the region/principal-keyed EC2 view; no other view or shell rule changes.",
-      "models": [
-        {
-          "id": "CatalogConsoleEpoch",
-          "properties": [
-            "NoUnmountedAcceptance",
-            "OnlyCurrentReplies",
-            "SingleWriter"
-          ],
-          "limits": "The catalog view model is the closest finite abstraction of the shared shell rules this change relies on: views remount on region or principal changes and the saving flag blocks navigation while one write is in flight. The VPC view itself, React scheduling, DOM rendering and accessibility are not modeled; console unit tests and the browser end-to-end flow cover them."
-        }
-      ]
-    },
-    {
-      "path": "tools/console/test/ec2-readonly.test.mjs",
-      "sha256": "4d976edeaf6d41310c817b0d004eb4c5608794a85bdd40f9427be91b6b1a9450",
-      "disposition": "presentation",
-      "reason": "Unit test for the VPC lifecycle capability check.",
-      "models": []
-    },
-    {
-      "path": "tools/console/test/ec2-response.test.mjs",
-      "sha256": "294c2a2d3152a52c955f2ca4cd3e80df47243dafad37a1a4c885c8e150507f1e",
-      "disposition": "presentation",
-      "reason": "Unit tests for the owner label, CreateVpc encoding, strict mutation responses and error parsing.",
+      "reason": "Detects wrong scope, forbidden write/SQS cases, substituted oracle and invalid named results without executing a VM.",
       "models": []
     }
   ]

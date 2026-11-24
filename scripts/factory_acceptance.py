@@ -24,6 +24,16 @@ SUITES = {
         'package': 'github.com/susumutomita/TenkaCloudSimulator/internal/aws',
         'scope': 'Go gateway/SQLite; not SDK, UI, VM, real AWS or whole-service compatibility',
     },
+    'ec2-describe-subnets': {
+        'argv': ['go', 'test', '-json', '-count=1', '-run', '^TestEC2DescribeSubnetsContract$', './internal/aws'],
+        'test': 'TestEC2DescribeSubnetsContract',
+        'provider': 'aws',
+        'operations': ['DescribeSubnets'],
+        'package': 'github.com/susumutomita/TenkaCloudSimulator/internal/aws',
+        'scope': 'Go gateway/SQLite CFN-owned subnet discovery; not SDK, UI, VM, real AWS or whole-service compatibility',
+        'oracle': ('internal/aws/ec2_describe_subnets_contract_test.go',
+                   '6443bc90b6fec1c7b8bf277cc090b00f6dd431fac3481d120fdefa0ccb09b2d9'),
+    },
 }
 
 
@@ -46,15 +56,21 @@ def git(root, *args):
 
 def validate_scope(suites, provider, operation, paths):
     require(suites and set(suites) <= set(SUITES), 'registered acceptance suites required')
-    require(any(SUITES[s]['provider'] == provider and operation in SUITES[s]['operations'] for s in suites),
-            'acceptance suite does not cover this provider/operation')
-    # Pilot covers only SQS handlers/store and their adjacent tests. Cross-service,
-    # UI/docs and shared-core fixes need independently registered broader suites.
+    matching = {suite for suite in suites if SUITES[suite]['provider'] == provider and operation in SUITES[suite]['operations']}
+    require(matching, 'acceptance suite does not cover this provider/operation')
     for path in paths:
         p = Path(path)
-        covered = path in ('internal/aws/sqs.go', 'internal/aws/sqs_store.go', 'formal/applicability.json') or (
+        sqs_covered = path in ('internal/aws/sqs.go', 'internal/aws/sqs_store.go', 'formal/applicability.json') or (
             p.parent.as_posix() == 'internal/aws' and p.name.startswith('sqs_') and p.name.endswith('_test.go'))
-        require(covered, 'SQS pilot does not cover claimed path: ' + path)
+        subnet_covered = path in (
+            'internal/aws/ec2_read.go', 'internal/aws/ec2_vpc.go',
+            'internal/aws/ec2_describe_subnets_contract_test.go',
+            'formal/applicability.json', 'scripts/factory_acceptance.py', 'scripts/test-factory-acceptance.py',
+        )
+        if 'sqs-lifecycle' in matching:
+            require(sqs_covered, 'SQS pilot does not cover claimed path: ' + path)
+        if 'ec2-describe-subnets' in matching:
+            require(subnet_covered, 'DescribeSubnets pilot does not cover claimed path: ' + path)
 
 
 def candidate_paths(base, head, root=ROOT):
@@ -81,6 +97,16 @@ def source_hash(root):
         blob = hashlib.sha1(b'blob ' + str(len(data)).encode() + b'\0' + data).hexdigest()
         require(blob == item['git_blob'], 'upstream Git blob mismatch')
     return digest(raw)
+
+
+def verify_suite_oracles(root, suites):
+    for suite in suites:
+        oracle = SUITES[suite].get('oracle')
+        if oracle is not None:
+            name, pinned = oracle
+            path = root / name
+            require(path.is_file() and not path.is_symlink() and digest(path.read_bytes()) == pinned,
+                    'registered suite oracle changed or missing: ' + name)
 
 
 def verdict(log, suite, returncode):
@@ -120,6 +146,7 @@ def executable_command(command):
 def run(root, output, suites, timeout=300):
     require(suites and len(suites) == len(set(suites)) and set(suites) <= set(SUITES), 'unknown/duplicate/empty acceptance suites')
     head = clean_head(root)
+    verify_suite_oracles(root, suites)
     pin = source_hash(root)
     report = {'version': 1, 'head': head, 'source_sha256': pin, 'checks': {}, 'status': 'failed'}
     output = output.resolve()
@@ -166,6 +193,7 @@ def verify(path, head, suites, root=ROOT):
     require(report.get('version') == 1 and report.get('head') == head and report.get('status') == 'passed', 'acceptance is not passed at candidate HEAD')
     require(clean_head(root) == head, 'review checkout is not clean candidate HEAD')
     require(report.get('source_sha256') == source_hash(root), 'acceptance oracle changed')
+    verify_suite_oracles(root, suites)
     require(set(report.get('checks', {})) == set(suites), 'acceptance suite set differs')
     for suite in suites:
         entry = report['checks'][suite]
