@@ -26,7 +26,7 @@ const (
 	ec2ManagedByCloudFormation = "cloudformation"
 )
 
-var ec2Operations = []string{"DescribeInstances", "DescribeVpcs", "CreateVpc", "DeleteVpc"}
+var ec2Operations = []string{"DescribeInstances", "DescribeVpcs", "DescribeSubnets", "CreateVpc", "DeleteVpc"}
 
 var (
 	ec2VPCIDPattern  = regexp.MustCompile(`^vpc-[0-9a-f]{8,17}$`)
