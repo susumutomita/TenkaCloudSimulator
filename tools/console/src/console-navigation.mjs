@@ -24,6 +24,7 @@ export const SERVICES = Object.freeze([
   {id: 'catalog', provider: 'aws', label: 'Service catalog', capability: 'catalog', route: '/catalog', keywords: 'catalog metadata control plane カタログ サービス メタデータ'},
   {id: 'gcp-storage', provider: 'gcp', label: 'Cloud Storage', route: '/gcp-storage', keywords: 'google bucket object バケット オブジェクト ストレージ クラウドストレージ'},
   {id: 'gcp-catalog', provider: 'gcp', label: 'Service catalog', route: '/gcp-catalog', keywords: 'google catalog api metadata カタログ サービス'},
+  {id: 'gcp-dns', provider: 'gcp', label: 'Cloud DNS', route: '/gcp-dns', keywords: 'google cloud dns managed zones records ゾーン レコード'},
   {id: 'gcp-appengine', provider: 'gcp', label: 'App Engine', route: '/gcp-appengine', keywords: 'google app engine appengine gae application version traffic split firewall python wsgi アプリ アプリケーション バージョン トラフィック ファイアウォール'},
   {id: 'azure-blob', provider: 'azure', label: 'Blob Storage', route: '/azure-blob', keywords: 'container blob コンテナー コンテナ ブロブ ストレージ ブロブストレージ'},
   {id: 'azure-arm', provider: 'azure', label: 'Resource Manager', route: '/azure-arm', keywords: 'arm resource group subscription リソース グループ リソースグループ サブスクリプション リソースマネージャー'},
@@ -46,6 +47,18 @@ export function sakuraConfiguration(capabilities) {
       || !expected.every(operation => scope.operations.includes(operation))) return null;
   return {endpoint: scope.endpoint, zone: match[1]};
 }
+const dnsOperations = ['managedZones.list', 'managedZones.create', 'managedZones.get', 'resourceRecordSets.list'];
+function dnsConfigured(cap) {
+  return cap?.console === true && cap.api === 'dns.v1'
+    && typeof cap.project === 'string' && /^[a-z](?:[a-z0-9-]{0,61}[a-z0-9])?$/.test(cap.project)
+    && cap.endpoint === '/_simulator/providers/gcp/dns/v1/projects/' + cap.project + '/managedZones'
+    && Array.isArray(cap.operations) && cap.operations.length === dnsOperations.length
+    && dnsOperations.every(op => cap.operations.includes(op));
+}
+export function dnsCapabilitiesForPrincipal(session, epoch, principal, discovered) {
+  if (!session || epoch === 0) return session;
+  return {...session, gcpDns: discovered?.epoch === epoch && discovered.principal === principal ? discovered.value : undefined};
+}
 export function serviceAvailable(id, capabilities) {
   if (id === 'home') return !!capabilities;
   const service = serviceDescriptor(id);
@@ -64,6 +77,7 @@ export function serviceAvailable(id, capabilities) {
   if (service.provider === 'sakura') return sakuraConfiguration(capabilities) !== null;
   if (service.id === 'gcp-appengine') return typeof capabilities.gcpAppEngine?.endpoint === 'string' && typeof capabilities.gcpAppEngine.project === 'string'
     && capabilities.gcpAppEngine.project.length > 0 && typeof capabilities.gcpAppEngine.dataPlane === 'string';
+  if (service.id === 'gcp-dns') return dnsConfigured(capabilities.gcpDns);
   if (service.id === 'gcp-catalog') return Array.isArray(capabilities.gcpCatalog?.apis) && capabilities.gcpCatalog.apis.length > 0;
   if (service.id === 'azure-arm') return Array.isArray(capabilities.azureCatalog?.providers) && capabilities.azureCatalog.providers.length > 0
     && typeof capabilities.azureCatalog.descriptors === 'string';
