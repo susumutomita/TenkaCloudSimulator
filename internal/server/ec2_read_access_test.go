@@ -69,6 +69,30 @@ func TestEC2ReadAccessBoundary(t *testing.T) {
 			}
 		})
 	}
+	// Mutations pass the same token boundary; participants never gain admin.
+	create := func(token, principal string) *httptest.ResponseRecorder {
+		return request("POST", "/", "Action=CreateVpc&Version=2016-11-15&CidrBlock=10.9.0.0%2F16", token, map[string]string{
+			"Content-Type": "application/x-www-form-urlencoded", "X-Simulator-Service": "ec2", "X-Simulator-Region": "us-east-1", "X-Simulator-Principal": principal,
+		})
+	}
+	for _, tc := range []struct {
+		name, token, principal string
+		status                 int
+	}{
+		{"unauthenticated create", "", "", 401},
+		{"participant admin forgery create", participant.AccessToken, "simulator-admin", 403},
+		{"participant missing policy create", participant.AccessToken, "", 403},
+	} {
+		if w := create(tc.token, tc.principal); w.Code != tc.status {
+			t.Fatalf("%s: got %d want %d: %s", tc.name, w.Code, tc.status, w.Body.String())
+		}
+	}
+	if w := request("POST", "/", "Action=DescribeVpcs&Version=2016-11-15", operator, map[string]string{"Content-Type": "application/x-www-form-urlencoded", "X-Simulator-Service": "ec2"}); w.Code != 200 || strings.Contains(w.Body.String(), "<vpcId>") {
+		t.Fatalf("refused creates changed state: %d %s", w.Code, w.Body.String())
+	}
+	if w := create(operator, ""); w.Code != 200 || !strings.Contains(w.Body.String(), "<simulatorManagedBy>ec2</simulatorManagedBy>") {
+		t.Fatalf("operator CreateVpc failed: %d %s", w.Code, w.Body.String())
+	}
 	// A native temporary credential attempt must not fall back to operator access.
 	w := request("POST", "/", "Action=DescribeVpcs&Version=2016-11-15", "", map[string]string{
 		"Content-Type": "application/x-www-form-urlencoded", "X-Simulator-Service": "ec2",
@@ -91,7 +115,7 @@ func TestEC2ReadAccessBoundary(t *testing.T) {
 		t.Fatal("capabilities unavailable", w.Code)
 	}
 	ec2, exists := caps.Services["ec2"]
-	if !exists || !ec2.Console || !ec2.ReadOnly || ec2.SessionCredentials || !reflect.DeepEqual(ec2.Operations, []string{"DescribeInstances", "DescribeVpcs"}) {
+	if !exists || !ec2.Console || ec2.ReadOnly || ec2.SessionCredentials || !reflect.DeepEqual(ec2.Operations, []string{"DescribeInstances", "DescribeVpcs", "CreateVpc", "DeleteVpc"}) {
 		t.Fatalf("unexpected EC2 capabilities: %+v", ec2)
 	}
 }

@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
-      - uses: actions/checkout@v4.3.1
+      - uses: actions/checkout@v7.0.1
         with:
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
           fetch-depth: 0
@@ -38,7 +38,7 @@ jobs:
       matrix:
         shard: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
     steps:
-      - uses: actions/checkout@v4.3.1
+      - uses: actions/checkout@v7.0.1
         with:
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
           persist-credentials: false
@@ -52,7 +52,7 @@ jobs:
           TLA_JAR=/tmp/tla2tools.jar python3 scripts/check-formal.py --merge-gate --shard "$SHARD/10" --reports "reports/formal/shard-$SHARD"
       - name: Retain this shard's formal evidence
         if: always()
-        uses: actions/upload-artifact@v4.6.2
+        uses: actions/upload-artifact@v7.0.2
         with:
           name: formal-shard-${{ matrix.shard }}-${{ github.event.pull_request.head.sha || github.sha }}
           path: reports/formal/shard-${{ matrix.shard }}/
@@ -68,7 +68,7 @@ jobs:
       # Pull requests and main pushes check applicability only; releases and manual runs also run TLC.
       FULL: ${{ startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch' }}
     steps:
-      - uses: actions/checkout@v4.3.1
+      - uses: actions/checkout@v7.0.1
         with:
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
           fetch-depth: 0
@@ -88,7 +88,7 @@ jobs:
           echo "gate-tests=$GATE_TESTS tlc=$TLC"
           test "$GATE_TESTS" = success && test "$TLC" = success
       - if: env.FULL == 'true'
-        uses: actions/download-artifact@v4.3.0
+        uses: actions/download-artifact@v8.0.2
         with:
           pattern: formal-shard-*-${{ github.event.pull_request.head.sha || github.sha }}
           path: reports/formal/shards
@@ -99,7 +99,7 @@ jobs:
         run: python3 scripts/check-formal.py --combine reports/formal/shards/*/evidence.json --reports reports/formal/combined
       - name: Retain exact formal evidence
         if: always()
-        uses: actions/upload-artifact@v4.6.2
+        uses: actions/upload-artifact@v7.0.2
         with:
           name: formal-${{ github.event.pull_request.head.sha || github.sha }}
           path: reports/formal/

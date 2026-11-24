@@ -1,6 +1,6 @@
-// Parse only the bounded readonly EC2 response. Missing state is not empty success.
+// Parse only the bounded EC2 responses. Missing state is not empty success.
 const namespace='http://ec2.amazonaws.com/doc/2016-11-15/';
-const invalid=()=>{throw Error('Invalid or incomplete EC2 discovery response.');};
+const invalid=()=>{throw Error('Invalid or incomplete EC2 response.');};
 function nodes(node,name){
   const found=[...(node?.children??[])].filter(n=>n.localName===name);
   if(found.some(n=>n.namespaceURI!==namespace))invalid();
@@ -22,6 +22,9 @@ function nameTag(node){
   if(names.length>1)invalid();
   return names.length?value(names[0],'value'):'';
 }
+// managedBy is the simulator extension: 'ec2' VPCs can be deleted natively,
+// 'cloudformation' VPCs only with their stack; absent means unconfirmed.
+function vpcRow(n){return {id:value(n,'vpcId'),name:nameTag(n),cidr:value(n,'cidrBlock'),managedBy:value(n,'simulatorManagedBy')};}
 export function parseEC2Document(document,kind){
   if(kind!=='ec2'&&kind!=='vpc')invalid();
   const instance=kind==='ec2',root=document?.documentElement;
@@ -29,7 +32,38 @@ export function parseEC2Document(document,kind){
   if(value(root,'nextToken'))invalid();
   const records=instance?nodes(one(root,'reservationSet',true),'item').flatMap(r=>nodes(one(r,'instancesSet',true),'item')):nodes(one(root,'vpcSet',true),'item');
   if(records.length>1000)invalid();
-  const rows=records.map(n=>instance?{id:value(n,'instanceId'),name:nameTag(n),state:value(n,'simulatorRuntimeState'),type:value(n,'instanceType'),image:value(n,'imageId'),vpc:value(n,'vpcId'),subnet:value(n,'subnetId')}:{id:value(n,'vpcId'),name:nameTag(n),cidr:value(n,'cidrBlock')});
+  const rows=records.map(n=>instance?{id:value(n,'instanceId'),name:nameTag(n),state:value(n,'simulatorRuntimeState'),type:value(n,'instanceType'),image:value(n,'imageId'),vpc:value(n,'vpcId'),subnet:value(n,'subnetId')}:vpcRow(n));
   if(rows.some(row=>!row.id)||new Set(rows.map(row=>row.id)).size!==rows.length)invalid();
   return rows;
+}
+
+export const VPC_NAME_LIMIT=256;
+// One optional Name tag; the server validates the CIDR and tag bounds.
+export function createVpcParameters({name='',cidr=''}){
+  const params=new URLSearchParams({Action:'CreateVpc',Version:'2016-11-15',CidrBlock:cidr.trim()});
+  if(name.length>VPC_NAME_LIMIT)throw Error('The Name tag can have up to 256 characters.');
+  if(name)for(const [key,v] of [['ResourceType','vpc'],['Tag.1.Key','Name'],['Tag.1.Value',name]])params.set('TagSpecification.1.'+key,v);
+  return params;
+}
+function root(document,name){
+  const node=document?.documentElement;
+  if(node?.namespaceURI!==namespace||node.localName!==name)invalid();
+  return node;
+}
+export function parseCreateVpc(document){
+  const row=vpcRow(one(root(document,'CreateVpcResponse'),'vpc',true));
+  if(!row.id)invalid();
+  return row;
+}
+export function parseDeleteVpc(document){
+  if(value(root(document,'DeleteVpcResponse'),'return')!=='true')invalid();
+  return true;
+}
+// EC2 Query errors are <Response><Errors><Error><Code/><Message/>. Anything else is null.
+export function parseEC2Error(document){
+  const node=document?.documentElement;
+  if(node?.localName!=='Response')return null;
+  const child=(parent,name)=>[...(parent?.children??[])].find(n=>n.localName===name);
+  const error=child(child(node,'Errors'),'Error'),code=child(error,'Code')?.textContent??'';
+  return code?{code,message:child(error,'Message')?.textContent??''}:null;
 }

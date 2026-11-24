@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "base_sha": "cca160ef6d925479da9c1de2071eb6b60f6e99f4",
+  "base_sha": "9652f0344ab9d7e57aa30595fab5c3ed52c57cd8",
   "changes": [
     {
       "path": "docs/formal-sakura-server.md",
@@ -61,9 +61,9 @@
     },
     {
       "path": "formal/models.json",
-      "sha256": "45b4f49f4c1218c325bfc9bb86e92352ccabacd44fac762c8981a71b91e57e07",
+      "sha256": "aa35d186c329adc73844561a0fc306ca713be452fb047cc6561ecc4c4c1e6c8a",
       "disposition": "formal-infrastructure",
-      "reason": "Adds one Server-only registry entry and two modeled failed-control checks; all prior entries and pins are preserved.",
+      "reason": "Adds exact SakuraServerMetadata registration and preserves all 113 previously registered main models.",
       "models": []
     },
     {
@@ -155,17 +155,31 @@
     },
     {
       "path": "scripts/factory_acceptance.py",
-      "sha256": "ad4816ed844f14901e2dace9fcaf57d5fa094a623525513221274c21c7d7d6af",
+      "sha256": "c674a558f5cf9491757b2127542c06a9ebfc23829eede1f3aca7afe8391a5863",
       "disposition": "validation-tooling",
-      "reason": "Adds scoped development-only acceptance registration; no simulator behavior.",
+      "reason": "Adds opt-in Sakura Server metadata acceptance with a pinned oracle, leaving the existing SQS and DescribeSubnets defaults unchanged.",
       "models": []
     },
     {
+      "path": "scripts/formal_model_gate.py",
+      "disposition": "formal-infrastructure",
+      "reason": "Pins the Sakura Server model, its reviewed invariant names, exact leaf scope and two negative controls without changing existing pins.",
+      "models": [],
+      "sha256": "84ebd2b62477d867e64e606cb0c564807442a44c79ae58f28c5961b7a5c473e4"
+    },
+    {
       "path": "scripts/test-factory-acceptance.py",
-      "sha256": "0015e44beab92b7f142d22d8f589098b15ecfa07af64e60903b4b2d6fd13c476",
+      "sha256": "cd39d888756e83b6215cf3766a6a1aed506e3c20c6b0bbfd0a3c1394c16f9e69",
       "disposition": "test-support",
       "reason": "Test-only artifact supporting exact local Server behavior and compatibility; no operational API or state interface introduced here.",
       "models": []
+    },
+    {
+      "path": "scripts/test-formal-gate.py",
+      "disposition": "formal-infrastructure",
+      "reason": "Checks preservation of required registration and rejects removed Sakura scope, properties or controls with an isolated model fixture.",
+      "models": [],
+      "sha256": "441daf8268f4a3dc21fcce44a00d1158fa70395ea3a0e1589f79bbf22f28ddc9"
     },
     {
       "path": "test/sdk/sakura/server_inprocess_test.go",

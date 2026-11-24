@@ -2900,6 +2900,63 @@ REQUIRED_SOURCE_SCOPES['CFNParameterRuleAdmission'] = {
 }
 
 
+BASE_MODELS.add('EC2VPCOwnership')
+BASE_INVARIANTS['EC2VPCOwnership'] = {
+    'NoAdoption',
+    'FailureRollsBack',
+    'NativeNeverDeletesStackVPC',
+    'NativeDeleteExact',
+    'NativeCreateOwned',
+    'StackDeleteSparesNative',
+    'QuotaBound',
+    'DescribeExact',
+    'TypeOK',
+}
+REQUIRED_MUTANTS['EC2VPCOwnership'] = {
+    'SkipCreateAuthorization',
+    'SkipDeleteAuthorization',
+    'DeleteStackVPC',
+    'DeleteOtherRegion',
+    'OverwriteExistingVPC',
+    'AdoptOtherOwnerVPC',
+    'StackDeleteRemovesNative',
+    'IgnoreNativeQuota',
+    'MislabelStackVPC',
+    'DescribeOtherRegion',
+}
+REQUIRED_SOURCE_SCOPES['EC2VPCOwnership'] = {
+    'internal/aws/ec2_vpc.go',
+    'internal/aws/ec2_read.go',
+    'internal/aws/ec2_network.go',
+    'internal/aws/ec2_network_cloudformation.go',
+    'internal/aws/ssm.go',
+    'internal/server/server.go',
+}
+
+
+BASE_MODELS.add('SakuraServerMetadata')
+BASE_INVARIANTS['SakuraServerMetadata'] = {
+    'TypeOK',
+    'FrozenScope',
+    'OnlyOwnerRealmLookup',
+    'ReopenBinding',
+    'FailureFrame',
+    'PeerFrame',
+    'ReadAndReopenSnapshot',
+    'FreshCommittedID',
+    'AllocatorOnlyCreate',
+    'CommitExact',
+    'StoredIDsAndQuota',
+}
+REQUIRED_MUTANTS['SakuraServerMetadata'] = {
+    'AcceptWrongServerRealm',
+    'ReuseDeletedServerID',
+}
+REQUIRED_SOURCE_SCOPES['SakuraServerMetadata'] = {
+    'internal/sakura/iaas/server_http.go',
+    'internal/sakura/iaas/server_store.go',
+}
+
 def load_registry(root, relative='formal/models.json'):
     root = Path(root)
     registry_path = asset(root, relative)

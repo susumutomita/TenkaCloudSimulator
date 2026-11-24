@@ -32,6 +32,69 @@ PROBE_BOUNDS = 'Three nonzero keys plus invalid zero; two opaque scope-owner lab
 PROBE_SEEDS = 'SeedTargets == <<EmptyState, Sealed, One, ScopedOne, Worker, Routed, Dispatched,\n TimedOut, Ended, Published, Settled, Rejected, FailedEnded, FailedSettled,\n WireSuccess, WireFailure, PoisonedSuccess, ExpiredSuccess, FullRetired, BusySecond, ExpiredRetained,\n ScopedRetired>>\n'
 
 
+class SakuraServerRegistryControlTests(unittest.TestCase):
+    def test_required_scope_invariants_and_controls_fail_closed_on_removal(self):
+        model_id = 'SakuraServerMetadata'
+        scopes = {'internal/sakura/iaas/server_http.go', 'internal/sakura/iaas/server_store.go'}
+        controls = {'AcceptWrongServerRealm', 'ReuseDeletedServerID'}
+        properties = {'TypeOK', 'FrozenScope', 'OnlyOwnerRealmLookup', 'ReopenBinding',
+                      'FailureFrame', 'PeerFrame', 'ReadAndReopenSnapshot', 'FreshCommittedID',
+                      'AllocatorOnlyCreate', 'CommitExact', 'StoredIDsAndQuota'}
+        saved = json.loads((ROOT / 'formal/models.json').read_text())
+        model = next(m for m in saved['models'] if m['id'] == model_id)
+        self.assertEqual(set(model['source_scope']), scopes)
+        self.assertEqual(set(model['properties']), properties)
+        self.assertEqual({m['id'] for m in model['mutants']}, controls)
+        pristine = {**saved, 'models': [model]}
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            for relative in (model['model'], model['config']):
+                target = root / relative
+                target.parent.mkdir(parents=True, exist_ok=True)
+                shutil.copyfile(ROOT / relative, target)
+            checksum = root / saved['tool']['checksum_file']
+            checksum.parent.mkdir(parents=True, exist_ok=True)
+            checksum.write_text('0' * 64 + '  tla2tools.jar\n')
+            for relative in scopes:
+                target = root / relative
+                target.parent.mkdir(parents=True, exist_ok=True)
+                target.write_text('package iaas\n')
+            record = root / 'formal/models.json'
+            cfg = root / model['config']
+            config = cfg.read_text()
+            def write(item):
+                record.write_text(json.dumps(item))
+            # Only the set of other required models is narrowed for this
+            # fixture. Sakura's production properties/scopes/controls run unchanged.
+            with patch('formal_model_gate.BASE_MODELS', {model_id}):
+                write(pristine)
+                self.assertEqual(load_registry(root)['models'], [model])
+                write({**pristine, 'models': []})
+                with self.assertRaisesRegex(GateError, 'empty model registry'):
+                    load_registry(root)
+                for field, names, message in (
+                    ('source_scope', scopes, 'required exact source scope changed'),
+                    ('properties', properties, 'required invariant was removed'),
+                    ('mutants', controls, 'required mutation control was removed'),
+                ):
+                    for name in sorted(names):
+                        with self.subTest(field=field, name=name):
+                            changed = json.loads(json.dumps(pristine))
+                            changed_model = changed['models'][0]
+                            changed_model[field] = [v for v in changed_model[field]
+                                if (v['id'] if field == 'mutants' else v) != name]
+                            write(changed)
+                            if field == 'properties':
+                                cfg.write_text(config.replace(' ' + name + ' ', ' ', 1)
+                                               if not config.endswith(' ' + name + '\n')
+                                               else config.removesuffix(' ' + name + '\n') + '\n')
+                            try:
+                                with self.assertRaisesRegex(GateError, message):
+                                    load_registry(root)
+                            finally:
+                                cfg.write_text(config)
+
+
 class FormalGateTests(unittest.TestCase):
     def setUp(self):
         self.output_capture = contextlib.redirect_stdout(io.StringIO())
@@ -971,7 +1034,7 @@ class FormalGateTests(unittest.TestCase):
         registry = load_registry(self.root)
         # Keep this inventory independent of the implementation's required set.
         # A newly registered model must be reviewed and named here explicitly.
-        self.assertEqual({model['id'] for model in registry['models']}, {'CFNParameterRuleAdmission', 'ECSTaskRevisionLifecycle', 'VpcOriginReferenceLifecycle', 'ARPTrustedReply', 'PersistentIngressPolicy', 'AppEngineTraffic', 'AutoScalingPlanTargets', 'AzureBlobState', 'AzurePropertiesEpoch', 'AzurePropertiesTarget', 'BedrockRuntimeAdmission', 'BlobRange', 'BrowserSessions', 'CFNConditionAdmission', 'CFNConditionMemoDepth', 'CFNEventHistory', 'CFNFinalCleanupACK', 'CFNNativeIAMTransaction', 'CFNParameterSnapshot', 'CFNPhysicalResourceACK', 'CanonicalVMComposition', 'CatalogConsoleEpoch', 'CatalogResourceLifecycle', 'CloudWatchLogsLifecycle', 'CloudWatchLogsViewEpoch', 'CommandDispatchLifecycle', 'ConsoleHandoff', 'DurableGuestLease', 'DynamoDBAdmission', 'DynamoDBConsoleEpoch', 'DynamoDBLifecycle', 'EC2GuestAttachmentLifecycle', 'EC2ReadDiscovery', 'ELBTargetLifecycle', 'EngineLifecycle', 'FrameCodecLifecycle', 'GCPStorageState', 'GuestCommandLifecycle', 'HTTPObservationLifecycle', 'IAMBuiltinPinTransaction', 'IAMConditionEvaluation', 'IAMInstanceProfiles', 'IAMManagedPolicies', 'InstanceMetadataTokens', 'KMSAliasCatalog', 'KMSAliasCrypto', 'KMSAliasesViewEpoch', 'KMSBootstrapTransaction', 'KMSKeyState', 'KMSProtocolAdmission', 'LambdaExecutionRoleBridge', 'LambdaSourceEdit', 'MacPreparationAdmission', 'MacProbeLifecycle', 'LambdaLogTailDisclosure', 'LandingAccessAdmission', 'LandingTopologyState', 'ListenerLifecycle', 'LoginInputIntent', 'NICSessionBookkeeping', 'NativeCommandIssuer', 'NativeIAMOwnership', 'NativeWireProjection', 'ObjectStore', 'OwnedClockQualification', 'OwnedProbeAttachmentLifecycle', 'OwnedProbeDispatchPolicy', 'OwnedProbeSessionLifecycle', 'PacketAdmission', 'ParticipantSessionLifecycle', 'PassiveServiceBoundary', 'PersistentTransportLifecycle', 'ProbeOperationLifecycle', 'ProjectAuthority', 'ProviderActor', 'ProviderPath', 'RESTDeploymentSnapshot', 'RESTProxyEventBoundary', 'RESTRouteMatching', 'Route53AtomicBatch', 'S3MultipartState', 'S3Versions', 'SNSAdmission', 'SNSLifecycle', 'SNSQueueFanout', 'SQSBatchDeletion', 'SQSConsoleEpoch', 'SQSLifecycle', 'SQSStorageBudget', 'SSMBatchDeletion', 'SSMDocumentState', 'SSMDurableCommands', 'SSMParameterState', 'STSSessionLifecycle', 'SakuraDiskAdmission', 'SakuraDiskMetadata', 'SakuraDisksViewEpoch', 'SakuraStartupAdmission', 'SecretDescriptionWorkflow', 'SecretMetadataUpdate', 'SecretMetadataViewEpoch', 'SecretVersionListing', 'SecretsDisclosureChannels', 'SecretsMutationRefresh', 'SecretsRevealEpoch', 'SecretsVersionLifecycle', 'StackOwnership', 'StartupTokenVisibility', 'TCPRouteClassification', 'TerminalClientEpoch', 'WAFAssociationAuthorization', 'WAFRequestEvaluation'})
+        self.assertEqual({model['id'] for model in registry['models']}, {'EC2VPCOwnership', 'SakuraServerMetadata', 'CFNParameterRuleAdmission', 'ECSTaskRevisionLifecycle', 'VpcOriginReferenceLifecycle', 'ARPTrustedReply', 'PersistentIngressPolicy', 'AppEngineTraffic', 'AutoScalingPlanTargets', 'AzureBlobState', 'AzurePropertiesEpoch', 'AzurePropertiesTarget', 'BedrockRuntimeAdmission', 'BlobRange', 'BrowserSessions', 'CFNConditionAdmission', 'CFNConditionMemoDepth', 'CFNEventHistory', 'CFNFinalCleanupACK', 'CFNNativeIAMTransaction', 'CFNParameterSnapshot', 'CFNPhysicalResourceACK', 'CanonicalVMComposition', 'CatalogConsoleEpoch', 'CatalogResourceLifecycle', 'CloudWatchLogsLifecycle', 'CloudWatchLogsViewEpoch', 'CommandDispatchLifecycle', 'ConsoleHandoff', 'DurableGuestLease', 'DynamoDBAdmission', 'DynamoDBConsoleEpoch', 'DynamoDBLifecycle', 'EC2GuestAttachmentLifecycle', 'EC2ReadDiscovery', 'ELBTargetLifecycle', 'EngineLifecycle', 'FrameCodecLifecycle', 'GCPStorageState', 'GuestCommandLifecycle', 'HTTPObservationLifecycle', 'IAMBuiltinPinTransaction', 'IAMConditionEvaluation', 'IAMInstanceProfiles', 'IAMManagedPolicies', 'InstanceMetadataTokens', 'KMSAliasCatalog', 'KMSAliasCrypto', 'KMSAliasesViewEpoch', 'KMSBootstrapTransaction', 'KMSKeyState', 'KMSProtocolAdmission', 'LambdaExecutionRoleBridge', 'LambdaSourceEdit', 'MacPreparationAdmission', 'MacProbeLifecycle', 'LambdaLogTailDisclosure', 'LandingAccessAdmission', 'LandingTopologyState', 'ListenerLifecycle', 'LoginInputIntent', 'NICSessionBookkeeping', 'NativeCommandIssuer', 'NativeIAMOwnership', 'NativeWireProjection', 'ObjectStore', 'OwnedClockQualification', 'OwnedProbeAttachmentLifecycle', 'OwnedProbeDispatchPolicy', 'OwnedProbeSessionLifecycle', 'PacketAdmission', 'ParticipantSessionLifecycle', 'PassiveServiceBoundary', 'PersistentTransportLifecycle', 'ProbeOperationLifecycle', 'ProjectAuthority', 'ProviderActor', 'ProviderPath', 'RESTDeploymentSnapshot', 'RESTProxyEventBoundary', 'RESTRouteMatching', 'Route53AtomicBatch', 'S3MultipartState', 'S3Versions', 'SNSAdmission', 'SNSLifecycle', 'SNSQueueFanout', 'SQSBatchDeletion', 'SQSConsoleEpoch', 'SQSLifecycle', 'SQSStorageBudget', 'SSMBatchDeletion', 'SSMDocumentState', 'SSMDurableCommands', 'SSMParameterState', 'STSSessionLifecycle', 'SakuraDiskAdmission', 'SakuraDiskMetadata', 'SakuraDisksViewEpoch', 'SakuraStartupAdmission', 'SecretDescriptionWorkflow', 'SecretMetadataUpdate', 'SecretMetadataViewEpoch', 'SecretVersionListing', 'SecretsDisclosureChannels', 'SecretsMutationRefresh', 'SecretsRevealEpoch', 'SecretsVersionLifecycle', 'StackOwnership', 'StartupTokenVisibility', 'TCPRouteClassification', 'TerminalClientEpoch', 'WAFAssociationAuthorization', 'WAFRequestEvaluation'})
 
         for model in registry['models']:
             source = (self.root / model['model']).read_text()

@@ -15,15 +15,16 @@ import (
 	"strings"
 )
 
-// Read-only discovery of actual CloudFormation-owned local resources. No VM
+// EC2 Query/XML: discovery of CloudFormation-owned and EC2-owned local
+// resources, plus the bounded native VPC lifecycle in ec2_vpc.go. No VM
 // liveness is inferred from a saved plan or a successful stack creation.
-func isEC2Read(r *http.Request) bool {
+func isEC2(r *http.Request) bool {
 	if s := r.Header.Get("X-Simulator-Service"); s != "" {
 		return s == "ec2"
 	}
 	return elbSigningService(r.Header.Get("Authorization")) == "ec2"
 }
-func ec2ReadError(w http.ResponseWriter, code, message string, status int) {
+func ec2Error(w http.ResponseWriter, code, message string, status int) {
 	w.Header().Set("Content-Type", "text/xml")
 	w.WriteHeader(status)
 	_ = xml.NewEncoder(w).Encode(struct {
@@ -32,8 +33,12 @@ func ec2ReadError(w http.ResponseWriter, code, message string, status int) {
 		Message string   `xml:"Errors>Error>Message"`
 	}{Code: code, Message: message})
 }
-func (g *Gateway) serveEC2Read(w http.ResponseWriter, r *http.Request) {
-	fail := func(code, msg string, status int) { ec2ReadError(w, code, msg, status) }
+
+// ec2QueryBytes bounds one Query request. It admits 50 maximum-length tags.
+const ec2QueryBytes = 64 << 10
+
+func (g *Gateway) serveEC2(w http.ResponseWriter, r *http.Request) {
+	fail := func(code, msg string, status int) { ec2Error(w, code, msg, status) }
 	for _, h := range []string{"Authorization", "X-Simulator-Service", "X-Simulator-Region", "X-Simulator-Principal", "X-Amz-Security-Token", "X-Amz-Target"} {
 		if len(r.Header.Values(h)) > 1 {
 			fail("InvalidParameterValue", "Duplicate headers are unsupported.", 400)
@@ -46,7 +51,7 @@ func (g *Gateway) serveEC2Read(w http.ResponseWriter, r *http.Request) {
 	}
 	region := r.Header.Get("X-Simulator-Region")
 	if r.Header.Get("X-Amz-Security-Token") != "" {
-		fail("UnsupportedOperation", "Session credentials are unsupported by local EC2 discovery.", 400)
+		fail("UnsupportedOperation", "Session credentials are unsupported by local EC2.", 400)
 		return
 	}
 	if auth := r.Header.Get("Authorization"); auth != "" {
@@ -70,7 +75,7 @@ func (g *Gateway) serveEC2Read(w http.ResponseWriter, r *http.Request) {
 		fail("InvalidParameterValue", "Unsupported region.", 400)
 		return
 	}
-	raw, err := io.ReadAll(http.MaxBytesReader(w, r.Body, 8192))
+	raw, err := io.ReadAll(http.MaxBytesReader(w, r.Body, ec2QueryBytes))
 	if err != nil {
 		fail("InvalidRequest", "Query exceeds local bound or could not be read.", 400)
 		return
@@ -80,19 +85,18 @@ func (g *Gateway) serveEC2Read(w http.ResponseWriter, r *http.Request) {
 		fail("InvalidParameterValue", "Malformed Query.", 400)
 		return
 	}
-	for key, values := range fields {
-		if len(values) != 1 || (key != "Action" && key != "Version") {
-			fail("UnsupportedOperation", "Only Action and Version are supported; filters and pagination are not implemented.", 400)
-			return
-		}
-	}
 	action := fields.Get("Action")
-	if fields.Get("Version") != "2016-11-15" || (action != "DescribeInstances" && action != "DescribeVpcs") {
-		fail("UnsupportedOperation", "Only DescribeInstances and DescribeVpcs version 2016-11-15 are supported.", 400)
+	if len(fields["Action"]) != 1 || len(fields["Version"]) != 1 || fields.Get("Version") != "2016-11-15" || !slices.Contains(ec2Operations, action) {
+		fail("UnsupportedOperation", "Only DescribeInstances, DescribeVpcs, DescribeSubnets, CreateVpc and DeleteVpc version 2016-11-15 are supported.", 400)
+		return
+	}
+	request, failure := parseEC2Request(action, fields)
+	if failure != nil {
+		fail(failure.code, failure.message, failure.status)
 		return
 	}
 	if g.Stacks == nil || g.Identities == nil {
-		fail("InternalError", "Discovery stores are unavailable.", 500)
+		fail("InternalError", "EC2 stores are unavailable.", 500)
 		return
 	}
 	principal := r.Header.Get("X-Simulator-Principal")
@@ -112,22 +116,41 @@ func (g *Gateway) serveEC2Read(w http.ResponseWriter, r *http.Request) {
 			fail("InternalError", "Identity state unavailable.", 500)
 			return
 		}
-		if !found || core.Evaluate(policy, "ec2:"+action, "*") != "allowed" {
-			fail("UnauthorizedOperation", "EC2 discovery is not authorized.", 403)
-			return
+		for _, check := range request.permissions(action, region) {
+			if !found || core.Evaluate(policy, check[0], check[1]) != "allowed" {
+				fail("UnauthorizedOperation", "You are not authorized to perform "+check[0]+" on "+check[1]+".", 403)
+				return
+			}
 		}
 	}
-	out, err := g.Stacks.ec2Read(r.Context(), region, action)
-	if err != nil {
-		fail("InternalError", "Local discovery state is inconsistent or exceeds the 1000-resource bound.", 500)
-		return
+	var out any
+	switch action {
+	case "CreateVpc":
+		vpc, e := g.Stacks.createNativeVPC(r.Context(), region, request.cidr, request.tags)
+		if e != nil {
+			g.failEC2Mutation(w, e)
+			return
+		}
+		out = &ec2CreateVpcResponse{VPC: ec2VPCRecord(vpc)}
+	case "DeleteVpc":
+		if e := g.Stacks.deleteNativeVPC(r.Context(), region, request.vpcID); e != nil {
+			g.failEC2Mutation(w, e)
+			return
+		}
+		out = &ec2DeleteVpcResponse{Return: true}
+	default:
+		read, e := g.Stacks.ec2Read(r.Context(), region, action)
+		if e != nil {
+			fail("InternalError", "Local discovery state is inconsistent or exceeds the 1000-resource bound.", 500)
+			return
+		}
+		if instanceScoped {
+			read.Reservations = onlyInstance(read.Reservations, boundary.instance)
+		}
+		read.XMLName = xml.Name{Local: action + "Response"}
+		out = &read
 	}
-	if instanceScoped {
-		out.Reservations = onlyInstance(out.Reservations, boundary.instance)
-	}
-	out.XMLName = xml.Name{Local: action + "Response"}
-	out.XMLNS = "http://ec2.amazonaws.com/doc/2016-11-15/"
-	out.RequestID = fmt.Sprintf("ec2-local-%016x", sequence.Add(1))
+	stampEC2Response(out)
 	w.Header().Set("Content-Type", "text/xml")
 	_ = xml.NewEncoder(w).Encode(out)
 }
@@ -153,12 +176,27 @@ type ec2ReservationRead struct {
 	Owner     string            `xml:"ownerId"`
 	Instances []ec2InstanceRead `xml:"instancesSet>item"`
 }
+
+// ManagedBy is a local extension: "ec2" VPCs come from CreateVpc and can be
+// deleted with DeleteVpc; "cloudformation" VPCs are deleted with their stack.
 type ec2VPCRead struct {
-	ID   string   `xml:"vpcId"`
-	CIDR string   `xml:"cidrBlock"`
-	Tags []ec2Tag `xml:"tagSet>item"`
+	ID        string   `xml:"vpcId"`
+	CIDR      string   `xml:"cidrBlock"`
+	Tags      []ec2Tag `xml:"tagSet>item"`
+	ManagedBy string   `xml:"simulatorManagedBy"`
+}
+type ec2SubnetRead struct {
+	ID    string   `xml:"subnetId"`
+	VPC   string   `xml:"vpcId"`
+	CIDR  string   `xml:"cidrBlock"`
+	State string   `xml:"state"`
+	Tags  []ec2Tag `xml:"tagSet>item"`
+}
+type ec2SubnetSet struct {
+	Items []ec2SubnetRead `xml:"item"`
 }
 type ec2ReadResponse struct {
+	Subnets      *ec2SubnetSet `xml:"subnetSet,omitempty"`
 	XMLName      xml.Name
 	XMLNS        string               `xml:"xmlns,attr"`
 	RequestID    string               `xml:"requestId"`
@@ -188,6 +226,9 @@ func (s *StackStore) ec2Read(ctx context.Context, region, action string) (ec2Rea
 	kind := "AWS::EC2::VPC"
 	if action == "DescribeInstances" {
 		kind = "AWS::EC2::Instance"
+	} else if action == "DescribeSubnets" {
+		kind = "AWS::EC2::Subnet"
+		out.Subnets = &ec2SubnetSet{}
 	}
 	rows, e := tx.QueryContext(ctx, `SELECT o.physical_id,o.stack_id,s.document FROM aws_cfn_ownership o JOIN aws_cfn_stacks s ON s.id=o.stack_id WHERE o.namespace=? AND o.kind=? AND s.region=? ORDER BY o.physical_id LIMIT 1001`, stackResourceNamespace(region, kind), kind, region)
 	if e != nil {
@@ -229,12 +270,16 @@ func (s *StackStore) ec2Read(ctx context.Context, region, action string) (ec2Rea
 		if resource == nil {
 			return out, fmt.Errorf("missing resource")
 		}
-		if kind == "AWS::EC2::VPC" {
+		if kind == "AWS::EC2::VPC" || kind == "AWS::EC2::Subnet" {
 			v, e := networkRead(ctx, tx, region, item.id)
 			if e != nil || v.StackID != item.stack || v.Kind != kind {
 				return out, fmt.Errorf("network identity")
 			}
-			out.VPCs = append(out.VPCs, ec2VPCRead{v.ID, v.CIDR, ec2ReadTags(v.Tags)})
+			if kind == "AWS::EC2::Subnet" {
+				out.Subnets.Items = append(out.Subnets.Items, ec2SubnetRead{v.ID, v.VPCID, v.CIDR, "available", ec2ReadTags(v.Tags)})
+			} else {
+				out.VPCs = append(out.VPCs, ec2VPCRead{v.ID, v.CIDR, ec2ReadTags(v.Tags), ec2ManagedByCloudFormation})
+			}
 			continue
 		}
 		props := resource.Properties
@@ -278,6 +323,19 @@ func (s *StackStore) ec2Read(ctx context.Context, region, action string) (ec2Rea
 			}
 		}
 		out.Reservations = append(out.Reservations, ec2ReservationRead{Owner: "000000000000", Instances: []ec2InstanceRead{instance}})
+	}
+	if kind == "AWS::EC2::VPC" {
+		native, e := nativeVPCs(ctx, tx, region)
+		if e != nil {
+			return out, e
+		}
+		for _, v := range native {
+			out.VPCs = append(out.VPCs, ec2VPCRecord(v))
+		}
+		if len(out.VPCs) > 1000 {
+			return out, fmt.Errorf("resource bound")
+		}
+		sort.Slice(out.VPCs, func(i, j int) bool { return out.VPCs[i].ID < out.VPCs[j].ID })
 	}
 	return out, tx.Commit()
 }
