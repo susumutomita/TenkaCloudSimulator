@@ -32572,7 +32572,7 @@
       "imports": []
     },
     "src/sakura-console.jsx": {
-      "bytes": 2529,
+      "bytes": 3322,
       "imports": [
         {
           "path": "node_modules/react/index.js",
@@ -32609,6 +32609,37 @@
           "path": "src/sakura-console.jsx",
           "kind": "import-statement",
           "original": "./sakura-console.jsx"
+        }
+      ],
+      "format": "esm"
+    },
+    "src/sakura-server-read.mjs": {
+      "bytes": 2850,
+      "imports": [],
+      "format": "esm"
+    },
+    "src/sakura-servers.jsx": {
+      "bytes": 5362,
+      "imports": [
+        {
+          "path": "node_modules/react/index.js",
+          "kind": "import-statement",
+          "original": "react"
+        },
+        {
+          "path": "src/i18n.jsx",
+          "kind": "import-statement",
+          "original": "./i18n.jsx"
+        },
+        {
+          "path": "src/sakura-console.jsx",
+          "kind": "import-statement",
+          "original": "./sakura-console.jsx"
+        },
+        {
+          "path": "src/sakura-server-read.mjs",
+          "kind": "import-statement",
+          "original": "./sakura-server-read.mjs"
         }
       ],
       "format": "esm"
@@ -33115,8 +33146,14 @@
       "format": "esm"
     },
     "src/console-navigation.mjs": {
-      "bytes": 10093,
-      "imports": [],
+      "bytes": 10794,
+      "imports": [
+        {
+          "path": "src/sakura-server-read.mjs",
+          "kind": "import-statement",
+          "original": "./sakura-server-read.mjs"
+        }
+      ],
       "format": "esm"
     },
     "src/console-home.jsx": {
@@ -33503,7 +33540,7 @@
       "format": "esm"
     },
     "src/main.jsx": {
-      "bytes": 49669,
+      "bytes": 50367,
       "imports": [
         {
           "path": "src/ssm-terminal.jsx",
@@ -33779,6 +33816,11 @@
           "path": "src/sakura-disks.jsx",
           "kind": "import-statement",
           "original": "./sakura-disks.jsx"
+        },
+        {
+          "path": "src/sakura-servers.jsx",
+          "kind": "import-statement",
+          "original": "./sakura-servers.jsx"
         },
         {
           "path": "src/global-navigation.jsx",
@@ -34479,7 +34521,7 @@
           "bytesInOutput": 0
         },
         "src/main.jsx": {
-          "bytesInOutput": 45760
+          "bytesInOutput": 46098
         },
         "node_modules/@cloudscape-design/global-styles/index.css": {
           "bytesInOutput": 0
@@ -36477,7 +36519,7 @@
           "bytesInOutput": 2333
         },
         "node_modules/@codemirror/state/dist/index.js": {
-          "bytesInOutput": 47262
+          "bytesInOutput": 47277
         },
         "node_modules/style-mod/src/style-mod.js": {
           "bytesInOutput": 2232
@@ -36798,13 +36840,19 @@
           "bytesInOutput": 0
         },
         "src/sakura-console.jsx": {
-          "bytesInOutput": 2568
+          "bytesInOutput": 3286
         },
         "src/sakura-console.css": {
           "bytesInOutput": 0
         },
         "src/sakura-disks.jsx": {
           "bytesInOutput": 15588
+        },
+        "src/sakura-servers.jsx": {
+          "bytesInOutput": 5421
+        },
+        "src/sakura-server-read.mjs": {
+          "bytesInOutput": 1780
         },
         "src/global-navigation.jsx": {
           "bytesInOutput": 14043
@@ -36861,7 +36909,7 @@
           "bytesInOutput": 64
         },
         "src/console-navigation.mjs": {
-          "bytesInOutput": 8557
+          "bytesInOutput": 9002
         },
         "src/console-home.jsx": {
           "bytesInOutput": 9688
@@ -36897,7 +36945,7 @@
           "bytesInOutput": 0
         }
       },
-      "bytes": 2411125
+      "bytes": 2419842
     },
     "../../internal/server/web/app.css.LEGAL.txt": {
       "imports": [],

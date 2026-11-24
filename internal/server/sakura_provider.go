@@ -8,7 +8,7 @@ import (
 )
 
 // ProviderConfig preserves the existing cloud storage configuration and enables
-// Sakura Disk metadata only with an explicit nonnil, fully specified scope.
+// Sakura IaaS metadata only with an explicit nonnil, fully specified scope.
 type ProviderConfig struct {
 	configureInstances func(*sql.DB, *aws.StackStore) error
 	closeInstances     func() error
@@ -49,6 +49,20 @@ func addSakuraCapabilities(base map[string]any, scope *sakura.Config) map[string
 		"availabilityReported": false, "console": true, "sdkVerified": false,
 		"limits":      map[string]any{"activeDisks": 100, "sizeMB": 20480, "planID": 4, "connection": "virtio", "requestBytes": 65536, "queryBytes": 8192},
 		"unsupported": []string{"VM/boot/block I/O", "copies/snapshots/archives", "encryption/KMS", "tags/icons/placement except neutral empty markers", "disk attachment/resize/config/monitor", "Sakura IAM/real credentials", "AppRun", "Object Storage control or S3 compatibility", "SDK verification"},
+	}
+	// A separate read surface lets a Server view discover the native endpoint
+	// without treating the legacy Sakura Disk capability as a Server contract.
+	base["sakuraServer"] = map[string]any{
+		"service":              "IaaS Server configuration",
+		"apiVersion":           "1.1",
+		"zone":                 scope.Zone,
+		"endpoint":             "/_simulator/providers/sakura/cloud/zone/" + scope.Zone + "/api/cloud/1.1/server",
+		"operations":           []string{"GET /server", "GET /server/{id}"},
+		"authorization":        "Explicit local configured owner through authenticated typed context; fixed local Basic marker is not authentication",
+		"storage":              "SQLite configuration metadata only; no VM",
+		"availabilityReported": false,
+		"console":              false,
+		"sdkVerified":          false,
 	}
 	return base
 }

@@ -18961,6 +18961,96 @@
    ]
   },
   {
+   "id": "SakuraServerReadEpoch",
+   "model": "formal/SakuraServerReadEpoch.tla",
+   "config": "formal/SakuraServerReadEpoch.cfg",
+   "bounds": "Two contexts, Boolean capability/scope flags, two Server identities and list target, two read revisions per context, asynchronous reply ordering.",
+   "properties": [
+    "TypeOK",
+    "NoUnadvertisedMount",
+    "OnlyCurrentResult",
+    "NoDifferentServer"
+   ],
+   "limits": "Finite read-only presentation projection. Production Server capability is default-off; enabled states are counterfactual for validating the guarded view. Models descriptor/disabled/handoff admission, abstract context and list/detail request revision, and matching detail identity. No native backend behavior, authentication refinement, React/DOM/HTTP behavior, full response-schema validation, pagination, mutations, runtime availability, SDK or Terraform claim. Generated bundle binding applies only to changed Server-view code.",
+   "source_scope": [
+    "internal/server/sakura_provider.go",
+    "internal/server/web/app.js",
+    "tools/console/src/console-navigation.mjs",
+    "tools/console/src/main.jsx",
+    "tools/console/src/sakura-console.jsx",
+    "tools/console/src/sakura-server-read.mjs",
+    "tools/console/src/sakura-servers.jsx"
+   ],
+   "mutants": [
+    {
+     "id": "IgnoreDisabled",
+     "edits": [
+      {
+       "old": "config.enabled /\\ config.valid /\\ ~config.handoff",
+       "new": "config.valid /\\ ~config.handoff",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "NoUnadvertisedMount"
+    },
+    {
+     "id": "IgnoreMalformed",
+     "edits": [
+      {
+       "old": "config.enabled /\\ config.valid /\\ ~config.handoff",
+       "new": "config.enabled /\\ ~config.handoff",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "NoUnadvertisedMount"
+    },
+    {
+     "id": "IgnoreHandoff",
+     "edits": [
+      {
+       "old": "config.enabled /\\ config.valid /\\ ~config.handoff",
+       "new": "config.enabled /\\ config.valid",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "NoUnadvertisedMount"
+    },
+    {
+     "id": "IgnoreContext",
+     "edits": [
+      {
+       "old": "BoundContext(r) == r.context = context.sequence",
+       "new": "BoundContext(r) == TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "OnlyCurrentResult"
+    },
+    {
+     "id": "IgnoreRevision",
+     "edits": [
+      {
+       "old": "BoundRevision(r) == r.revision = revision",
+       "new": "BoundRevision(r) == TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "OnlyCurrentResult"
+    },
+    {
+     "id": "AcceptWrongServer",
+     "edits": [
+      {
+       "old": "ProjectionOK(r, actual) == r.target = actual",
+       "new": "ProjectionOK(r, actual) == TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "NoDifferentServer"
+    }
+   ]
+  },
+  {
   "id": "SakuraServerMetadata",
   "model": "formal/SakuraServerMetadata.tla",
   "config": "formal/SakuraServerMetadata.cfg",
