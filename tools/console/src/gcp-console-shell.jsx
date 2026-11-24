@@ -4,7 +4,7 @@ import './gcp-storage.css';
 
 // Presentation-only coordination: neither scope nor navigation grants authority.
 export const GCPConsoleContext = createContext(null);
-export default function GCPConsoleShell({children, controls, product = 'Cloud Storage', resource}) {
+export default function GCPConsoleShell({children, controls, product = 'Cloud Storage', resource, resourceNavigable = false, resourceDisabled = false}) {
   const {t} = useLocale();
   const [project, setProject] = useState(''), [expanded, setExpanded] = useState(false);
   const navigate = useRef(null);
@@ -25,7 +25,7 @@ export default function GCPConsoleShell({children, controls, product = 'Cloud St
         <aside className="gcp-console-rail" aria-label={product === 'Cloud Storage' ? t('Cloud Storage navigation', 'Cloud Storage ナビゲーション') : product}>
           <div className="gcp-console-product"><strong>{product}</strong><button type="button" className="gcp-console-mobile-toggle" aria-expanded={expanded} aria-controls="gcp-console-resource-nav" onClick={() => setExpanded(value => !value)}>{t('Navigation', 'ナビゲーション')}</button></div>
           {resource ? <nav id="gcp-console-resource-nav" className={expanded ? 'gcp-console-resource-nav is-open' : 'gcp-console-resource-nav'} aria-label={product}>
-            <button type="button" aria-current="page">{resource}</button>
+            <button type="button" aria-current="page" onClick={resourceNavigable ? buckets : undefined} disabled={resourceDisabled}>{resource}</button>
           </nav> : <nav id="gcp-console-resource-nav" className={expanded ? 'gcp-console-resource-nav is-open' : 'gcp-console-resource-nav'} aria-label={t('Cloud Storage resources', 'Cloud Storage リソース')}>
             <button type="button" aria-current="page" onClick={buckets}>{t('Buckets', 'バケット')}</button>
             <p>{t('Only implemented Cloud Storage operations appear here.', '実装済みの Cloud Storage 操作のみ表示します。')}</p>

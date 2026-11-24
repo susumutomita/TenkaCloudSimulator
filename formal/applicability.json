@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "base_sha": "9652f0344ab9d7e57aa30595fab5c3ed52c57cd8",
+  "base_sha": "8d49004ecac8bc5e731c338c85b6a19c741c7fcc",
   "changes": [
     {
       "path": "docs/contributing/simpledb-factory-registration.md",
@@ -180,7 +180,7 @@
     },
     {
       "path": "formal/models.json",
-      "sha256": "7ff22d61e166c7e09aae047b1321f8e7fd8ce1faca65414f7ef7fc07c4b77267",
+      "sha256": "c840e54c7bdf14072362db14f2ba61ce7fd743c0f3d82ef372287c1cfd0133f4",
       "disposition": "formal-infrastructure",
       "reason": "Adds the three reviewed SimpleDB registrations and preserves all 113 current main models. Adds the bounded DomainMetadata model and checks its applicability limits.",
       "models": []
@@ -953,7 +953,7 @@
     },
     {
       "path": "internal/server/server.go",
-      "sha256": "f5bd1e76cb388650cd978cdf7481958d2901e071450f7a0cd1e27639a6356833",
+      "sha256": "326ccd11ff9bd084d8e3ffa495b51a13ad42f65d1537aea574d117941a07c1fd",
       "disposition": "modeled",
       "reason": "Adds the SimpleDB store constructor and configured Gateway fields. Existing modeled contracts remain; startup/cleanup and SimpleDB dependency wiring are not covered by these models.",
       "models": [
@@ -1398,7 +1398,7 @@
     },
     {
       "path": "scripts/factory_acceptance.py",
-      "sha256": "a0e1ad5700c1cc905a5e0ec75f87eb5fb4b3a194e1a9f3c36f3b9666ff8b7972",
+      "sha256": "3060fe55e198bf4da2157ee5223b48b0ff86272e75a902cc9808c22545f22b90",
       "disposition": "validation-tooling",
       "reason": "Reconciles opt-in SimpleDB acceptance with SQS and EC2 default suites and keeps scoped receipt validation.",
       "models": []
@@ -1408,11 +1408,11 @@
       "disposition": "formal-infrastructure",
       "reason": "Pins the three SimpleDB models, checked properties, exact source scopes and six sensitivity controls; existing pins preserved. Adds the associated DomainMetadata registry controls.",
       "models": [],
-      "sha256": "0aec81ff5a5a5d2bfbcad427a96af7b67bd94d314a22dd1569d71d8b019ee25c"
+      "sha256": "1b1cfe9338035dc0a1b55da9598c17040cde769618148370ac9c4dcec757669f"
     },
     {
       "path": "scripts/test-factory-acceptance.py",
-      "sha256": "afed48d2fab0227cdea6056c2738df7c21ea69c868f6c248c5025463c5d04dcd",
+      "sha256": "ac1e3e1722dac9352cfc61d449b391cedf72cc7e79f1dca2fa1ebef266e113bb",
       "disposition": "test-support",
       "reason": "Fixtures, assertions or registration contracts; not production runtime or execution evidence.",
       "models": []
@@ -1422,11 +1422,11 @@
       "disposition": "formal-infrastructure",
       "reason": "Adds specific isolated SimpleDB registration removal checks and exact inventory coverage without changing existing assertions. Adds the associated DomainMetadata registry controls.",
       "models": [],
-      "sha256": "37bbbef78594ac5e7e6595009f749ecfdf077975732f0f1193a11d0cf038fc7e"
+      "sha256": "a5ffbb22d73fba4fc8c6e8897612682c9738876f1eb5a07a0d26d64cfbc09dae"
     },
     {
       "path": "scripts/test-simpledb-factory-registration.py",
-      "sha256": "8c60d4a3bfef7f416dd18dbed893674affc229fb471a8523b4dd945b58de71f1",
+      "sha256": "e30de01ffb24d446621e2f117b2e0339701b387de8ef31efc728a4284487530a",
       "disposition": "test-support",
       "reason": "Fixtures, assertions or registration contracts; not production runtime or execution evidence.",
       "models": []
