@@ -309,7 +309,8 @@ func TestApplicationMigrationApplicationsAndWaves(t *testing.T) {
 	}
 	list := h.rest("mgn", "POST", "/ListApplications", map[string]any{})
 	expect(t, list, 200, "")
-	if items := list.body["items"].([]any); len(items) != 1 || items[0].(map[string]any)["isArchived"] != true {
+	if items := list.body["items"].([]any); len(items) != 1 || items[0].(map[string]any)["isArchived"] != true || items[0].(map[string]any)["applicationID"] != appID ||
+		items[0].(map[string]any)["arn"] != app.body["arn"] {
 		t.Fatalf("applications %v", list.body)
 	}
 	expect(t, h.rest("mgn", "POST", "/ListApplications", map[string]any{"filters": map[string]any{"isArchived": true}}), 400, "")
@@ -515,5 +516,29 @@ func TestMainframeApplicationSelectorsMatchStoredID(t *testing.T) {
 	}
 	if len(remaining) != 0 {
 		t.Fatalf("unexamined M2 operation definitions: %v", remaining)
+	}
+}
+
+func TestApplicationMigrationApplicationSelectorsMatchStoredID(t *testing.T) {
+	remaining := map[string]bool{"UpdateApplication": true, "ArchiveApplication": true, "UnarchiveApplication": true, "DeleteApplication": true}
+	for _, op := range applicationMigration.Ops {
+		if !remaining[op.Name] {
+			continue
+		}
+		delete(remaining, op.Name)
+		t.Run(op.Name, func(t *testing.T) {
+			stored := row{ID: "app-00000000000000001", Name: "app-00000000000000002", Document: map[string]any{"applicationID": "app-00000000000000001"}}
+			q := request{op: &op, input: map[string]any{"applicationID": stored.ID}}
+			if op.Lookup != "applicationID" || !q.matches(stored) {
+				t.Fatal("assigned application ID must match")
+			}
+			q.input["applicationID"] = stored.Name
+			if q.matches(stored) {
+				t.Fatal("display name must not match the application ID contract")
+			}
+		})
+	}
+	if len(remaining) != 0 {
+		t.Fatalf("unexamined MGN application operation definitions: %v", remaining)
 	}
 }
