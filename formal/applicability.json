@@ -52,17 +52,57 @@
       ]
     },
     {
+      "path": "formal/AzureStructuredReadAdmission.cfg",
+      "sha256": "14efddf687d54dab5383d487b30813477e1814f305b9af9d28681a2eadff095a",
+      "disposition": "modeled",
+      "reason": "Bounded state-based check for native structured read framing and isolation from legacy dispatch.",
+      "models": [
+        {
+          "id": "AzureStructuredReadAdmission",
+          "properties": [
+            "ExactNegotiation",
+            "LegacyIsUnchanged",
+            "DeniedOrConditionalIsQuiet",
+            "LargeReadsAreQuiet",
+            "FullHasNoRangeMetadata",
+            "RangeHasRangeMetadata"
+          ],
+          "limits": "Bounded structured transport admission and response-frame abstraction for the local 2025-01-05 explicit Get Blob profile. Legacy dispatch is opaque; prior conditional CRC64 model covers its declared subset. Abstract admitted native outcomes, relative size and stored-MD5 header eligibility (assuming the digest exists), not real actor authorization or conditions, physical lengths, HTTP/error XML serialization, byte exact CRC64/MD5, storage atomicity, Go refinement, SDK or browser execution, full API parity, concurrency or multi-segment streams. Quiet means no encoded blob body or structured/range response headers, not no native error XML."
+        }
+      ]
+    },
+    {
+      "path": "formal/AzureStructuredReadAdmission.tla",
+      "sha256": "488f0c8c271b411c4a228110ec7af5d674c36a7a6941c50bd1b0d372319aad0a",
+      "disposition": "modeled",
+      "reason": "Bounded state-based check for native structured read framing and isolation from legacy dispatch.",
+      "models": [
+        {
+          "id": "AzureStructuredReadAdmission",
+          "properties": [
+            "ExactNegotiation",
+            "LegacyIsUnchanged",
+            "DeniedOrConditionalIsQuiet",
+            "LargeReadsAreQuiet",
+            "FullHasNoRangeMetadata",
+            "RangeHasRangeMetadata"
+          ],
+          "limits": "Bounded structured transport admission and response-frame abstraction for the local 2025-01-05 explicit Get Blob profile. Legacy dispatch is opaque; prior conditional CRC64 model covers its declared subset. Abstract admitted native outcomes, relative size and stored-MD5 header eligibility (assuming the digest exists), not real actor authorization or conditions, physical lengths, HTTP/error XML serialization, byte exact CRC64/MD5, storage atomicity, Go refinement, SDK or browser execution, full API parity, concurrency or multi-segment streams. Quiet means no encoded blob body or structured/range response headers, not no native error XML."
+        }
+      ]
+    },
+    {
       "path": "formal/models.json",
-      "sha256": "b10bff79c598527e0037a9139573e100d5f3d7fbe609300a6800e4b0506fa334",
+      "sha256": "ece61e927a61b4800be29f0b9ec4944149b53b0dcacca54782bbc95c221e3b17",
       "disposition": "formal-infrastructure",
-      "reason": "Append only AzureConditionalCRCRead and preserve all prior model entries, properties and controls.",
+      "reason": "Registers or pins the bounded XSM checks and preserves the existing exact model/control inventory.",
       "models": []
     },
     {
       "path": "internal/azure/blob/http.go",
-      "sha256": "9c59b623b7830abb51946611ff1338c54ba87371c121e67d9a2ddc8389fab0b3",
+      "sha256": "6eca4fe7981af860977e9a2afa86f9665fa11de154d6a36324cd871528db5f60",
       "disposition": "modeled",
-      "reason": "Owner admission precedes normalized checksum option validation; cache status maps to a response without partial payload or checksum headers.",
+      "reason": "Owner admission precedes normalized checksum option validation; cache status maps to a response without partial payload or checksum headers. Structured transport is an additional opt-in only, with separate scoped bindings.",
       "models": [
         {
           "id": "AzureConditionalCRCRead",
@@ -74,6 +114,18 @@
             "CRCEmitsOnlyWhenRequested"
           ],
           "limits": "Only bounded admitted GET sequencing and symbolic output. Header parsing, transport authentication, response bytes and other operations are not modeled."
+        },
+        {
+          "id": "AzureStructuredReadAdmission",
+          "properties": [
+            "ExactNegotiation",
+            "LegacyIsUnchanged",
+            "DeniedOrConditionalIsQuiet",
+            "LargeReadsAreQuiet",
+            "FullHasNoRangeMetadata",
+            "RangeHasRangeMetadata"
+          ],
+          "limits": "Bounded structured transport admission and response-frame abstraction for the local 2025-01-05 explicit Get Blob profile. Legacy dispatch is opaque; prior conditional CRC64 model covers its declared subset. Abstract admitted native outcomes, relative size and stored-MD5 header eligibility (assuming the digest exists), not real actor authorization or conditions, physical lengths, HTTP/error XML serialization, byte exact CRC64/MD5, storage atomicity, Go refinement, SDK or browser execution, full API parity, concurrency or multi-segment streams. Quiet means no encoded blob body or structured/range response headers, not no native error XML."
         }
       ]
     },
@@ -196,6 +248,37 @@
       ]
     },
     {
+      "path": "internal/azure/blob/structured_crc64.go",
+      "sha256": "c57fbb377300edf6cfbedb2083bd2fb492f1ce72f0c9ee092bc07489be071233",
+      "disposition": "modeled",
+      "reason": "Only bounded one-segment output and absence on refusals are abstracted; CRC arithmetic and wire bytes are verified separately by focused Go tests.",
+      "models": [
+        {
+          "id": "AzureStructuredReadAdmission",
+          "properties": [
+            "LargeReadsAreQuiet",
+            "FullHasNoRangeMetadata",
+            "RangeHasRangeMetadata"
+          ],
+          "limits": "Bounded structured transport admission and response-frame abstraction for the local 2025-01-05 explicit Get Blob profile. Legacy dispatch is opaque; prior conditional CRC64 model covers its declared subset. Abstract admitted native outcomes, relative size and stored-MD5 header eligibility (assuming the digest exists), not real actor authorization or conditions, physical lengths, HTTP/error XML serialization, byte exact CRC64/MD5, storage atomicity, Go refinement, SDK or browser execution, full API parity, concurrency or multi-segment streams. Quiet means no encoded blob body or structured/range response headers, not no native error XML."
+        }
+      ]
+    },
+    {
+      "path": "internal/azure/blob/structured_crc64_http_test.go",
+      "sha256": "1739f978fbab72652fb95dcd557da6e466372e208d423edc16dc567041082bf4",
+      "disposition": "test-support",
+      "reason": "Focused, no-socket in-process proof support fixture with immutable values; no real SDK or product claim.",
+      "models": []
+    },
+    {
+      "path": "internal/azure/blob/structured_crc64_test.go",
+      "sha256": "db0494e4fa591f733f495ea0045c6b3415ca868533b0d321a36196ebcc7d77e6",
+      "disposition": "test-support",
+      "reason": "Focused, no-socket in-process proof support fixture with immutable values; no real SDK or product claim.",
+      "models": []
+    },
+    {
       "path": "internal/azure/blob/types.go",
       "sha256": "ea0ae25e566cc2326c87d5f02b0e4aad5fc9a10b5a1f46aaeb670c7eb7d4540a",
       "disposition": "modeled",
@@ -219,16 +302,16 @@
     },
     {
       "path": "scripts/formal_model_gate.py",
-      "sha256": "4d5c768a43beb57cf360903b0ca17457ab5f0a927ec37fd53ab6e67167c97a42",
+      "sha256": "b549bcbf591bcc09bd5d0c4b4e5c38d9220509faae46302044f333fa319641e8",
       "disposition": "formal-infrastructure",
-      "reason": "Makes the new registration, declared invariants, named mutation controls and exact source correspondence required by the existing loader.",
+      "reason": "Registers or pins the bounded XSM checks and preserves the existing exact model/control inventory.",
       "models": []
     },
     {
       "path": "scripts/test-formal-gate.py",
-      "sha256": "5b88c8efd98f0682c74be133d73c31228e77c2a52da7c779a1a964b5f9d9f710",
+      "sha256": "b7885759798ce036f0c188b812fadcd5344bd4650f65c2015de8d1338f3b90e5",
       "disposition": "formal-infrastructure",
-      "reason": "Adds independent positive registration assertions and exact negative detectors for removal/widening.",
+      "reason": "Registers or pins the bounded XSM checks and preserves the existing exact model/control inventory.",
       "models": []
     }
   ]

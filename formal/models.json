@@ -19042,6 +19042,127 @@
      "expect_invariant": "CRCRejectsOversize"
     }
    ]
+  },
+  {
+   "id": "AzureStructuredReadAdmission",
+   "model": "formal/AzureStructuredReadAdmission.tla",
+   "config": "formal/AzureStructuredReadAdmission.cfg",
+   "bounds": "288 normalized requests: three versions, three markers, two operations, Boolean conflicting legacy checksum, eight native read/size outcomes; one terminal read decision and stuttering.",
+   "properties": [
+    "TypeOK",
+    "ExactNegotiation",
+    "LegacyIsUnchanged",
+    "DeniedOrConditionalIsQuiet",
+    "LargeReadsAreQuiet",
+    "FullHasNoRangeMetadata",
+    "RangeHasRangeMetadata"
+   ],
+   "limits": "Bounded structured transport admission and response-frame abstraction for the local 2025-01-05 explicit Get Blob profile. Legacy dispatch is opaque; prior conditional CRC64 model covers its declared subset. Abstract admitted native outcomes, relative size and stored-MD5 header eligibility (assuming the digest exists), not real actor authorization or conditions, physical lengths, HTTP/error XML serialization, byte exact CRC64/MD5, storage atomicity, Go refinement, SDK or browser execution, full API parity, concurrency or multi-segment streams. Quiet means no encoded blob body or structured/range response headers, not no native error XML.",
+   "source_scope": [
+    "internal/azure/blob/http.go",
+    "internal/azure/blob/structured_crc64.go"
+   ],
+   "mutants": [
+    {
+     "id": "WidenVersion",
+     "edits": [
+      {
+       "old": "VersionOK(q) == q.version=\"XSM\"",
+       "new": "VersionOK(q) == q.version#\"Legacy\"",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "ExactNegotiation"
+    },
+    {
+     "id": "IgnoreMarker",
+     "edits": [
+      {
+       "old": "MarkerOK(q) == q.marker=\"CRC\"",
+       "new": "MarkerOK(q) == TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "ExactNegotiation"
+    },
+    {
+     "id": "AllowNonGet",
+     "edits": [
+      {
+       "old": "OperationOK(q) == q.operation=\"GetBlob\"",
+       "new": "OperationOK(q) == TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "ExactNegotiation"
+    },
+    {
+     "id": "AllowConflict",
+     "edits": [
+      {
+       "old": "TransportOK(q) == ~q.plainChecksum",
+       "new": "TransportOK(q) == TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "ExactNegotiation"
+    },
+    {
+     "id": "LegacyIntoXSM",
+     "edits": [
+      {
+       "old": "THEN IF q.marker=\"None\" THEN Reply(\"Legacy\",\"Legacy\",FALSE,FALSE,FALSE) ELSE Quiet(\"400\")",
+       "new": "THEN IF q.marker=\"None\" THEN Structured(q) ELSE Quiet(\"400\")",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "LegacyIsUnchanged"
+    },
+    {
+     "id": "FrameOnNotModified",
+     "edits": [
+      {
+       "old": "[] OTHER -> Quiet(status)",
+       "new": "[] OTHER -> IF status=\"304\" THEN Reply(status,\"FullXSM\",TRUE,FALSE,FALSE) ELSE Quiet(status)",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "DeniedOrConditionalIsQuiet"
+    },
+    {
+     "id": "SkipSizeCap",
+     "edits": [
+      {
+       "old": "q.nativeRead \\in {\"LargeWhole\",\"LargeRange\"} -> \"400\"",
+       "new": "q.nativeRead \\in {\"LargeWhole\",\"LargeRange\"} -> \"200\"",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "LargeReadsAreQuiet"
+    },
+    {
+     "id": "WholeHasStoredMD5",
+     "edits": [
+      {
+       "old": "status=\"200\" -> Reply(status,\"FullXSM\",TRUE,FALSE,FALSE)",
+       "new": "status=\"200\" -> Reply(status,\"FullXSM\",TRUE,FALSE,TRUE)",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "FullHasNoRangeMetadata"
+    },
+    {
+     "id": "RangeLosesStoredMD5",
+     "edits": [
+      {
+       "old": "status=\"206\" -> Reply(status,\"RangedXSM\",TRUE,TRUE,TRUE)",
+       "new": "status=\"206\" -> Reply(status,\"RangedXSM\",TRUE,TRUE,FALSE)",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "RangeHasRangeMetadata"
+    }
+   ]
   }
  ]
 }

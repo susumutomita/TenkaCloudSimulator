@@ -16,15 +16,29 @@ import (
 	"time"
 )
 
+const structuredReadVersion = "2025-01-05"
+const structuredBodyHeader = "x-ms-structured-body"
+const structuredContentLengthHeader = "x-ms-structured-content-length"
+const structuredCRC64Marker = "XSM/1.0; properties=crc64"
+
 // ServeHTTP must be invoked directly, without a path-cleaning ServeMux. The
 // host authenticates first and installs a trusted Azure Actor into the context.
 func (s *Service) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("x-ms-version", APIVersion)
 	w.Header().Set("x-ms-request-id", fmt.Sprintf("%016x", s.requests.Add(1)))
 	finish := func(err error) { writeError(w, r, err) }
-	if r.Header.Get("x-ms-version") != APIVersion {
+	version := r.Header.Get("x-ms-version")
+	structured := version == structuredReadVersion
+	if version != APIVersion && !structured {
 		finish(fail(400, "InvalidHeaderValue", "Only the documented local x-ms-version is supported."))
 		return
+	}
+	if structured {
+		versions, values := r.Header.Values("x-ms-version"), r.Header.Values(structuredBodyHeader)
+		if len(versions) != 1 || len(values) != 1 || values[0] != structuredCRC64Marker {
+			finish(fail(400, "InvalidHeaderValue", "This local version requires an explicit XSM/1.0 CRC64 Get Blob request."))
+			return
+		}
 	}
 	if len(r.URL.RawQuery) > 16<<10 {
 		finish(fail(400, "InvalidQueryParameterValue", "Query is too large."))
@@ -56,6 +70,9 @@ func (s *Service) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		r = r.WithContext(ctx)
 	}
 	allowedMS := map[string]bool{"x-ms-version": true, "x-ms-date": true, "x-ms-client-request-id": true, "x-ms-blob-type": true, "x-ms-blob-content-type": true, "x-ms-blob-content-md5": true, "x-ms-range": true, "x-ms-range-get-content-md5": true, "x-ms-range-get-content-crc64": true}
+	if structured {
+		allowedMS[structuredBodyHeader] = true
+	}
 	for name, values := range r.Header {
 		lower := strings.ToLower(name)
 		if len(values) != 1 && (strings.HasPrefix(lower, "x-ms-") || strings.HasPrefix(lower, "if-") || lower == "range") {
@@ -118,6 +135,17 @@ func (s *Service) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		case "DELETE":
 			op = DeleteBlob
 		}
+	}
+	if structured {
+		if op != GetBlob {
+			finish(fail(400, "UnsupportedHeader", "Structured responses are only supported for Get Blob."))
+			return
+		}
+		if len(r.Header.Values("x-ms-range-get-content-md5")) != 0 || len(r.Header.Values("x-ms-range-get-content-crc64")) != 0 {
+			finish(fail(400, "InvalidHeaderValue", "Structured CRC64 cannot be combined with a range checksum header."))
+			return
+		}
+		w.Header().Set("x-ms-version", version)
 	}
 	if op != GetBlob && (len(r.Header.Values("Range")) > 0 || len(r.Header.Values("x-ms-range")) > 0 || len(r.Header.Values("x-ms-range-get-content-md5")) > 0 || len(r.Header.Values("x-ms-range-get-content-crc64")) > 0) {
 		finish(fail(400, "UnsupportedHeader", "Range headers are supported only for GET Blob."))
@@ -271,12 +299,22 @@ func (s *Service) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	contentRange, rangeCRC64 := "", ""
+	var structuredWire []byte
 	wholeBlobMD5 := result.MD5
 	if op == GetBlob {
 		result, contentRange, rangeCRC64, e = applyDownloadRange(r, result)
 		if e != nil {
 			finish(e)
 			return
+		}
+		if structured {
+			var ok bool
+			structuredWire, ok = encodeStructuredCRC64Slice(result.Body)
+			if !ok {
+				finish(fail(400, "OutOfRangeInput", "A local structured response is limited to one four MiB segment."))
+				return
+			}
+			result.MD5 = "" // The stored blob MD5 is not a checksum of the wire body.
 		}
 	}
 	entityHeaders(w, result)
@@ -287,7 +325,13 @@ func (s *Service) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(202)
 	case GetBlob, GetBlobProperties:
 		w.Header().Set("Content-Type", result.ContentType)
-		w.Header().Set("Content-Length", strconv.FormatInt(result.Length, 10))
+		if structured {
+			w.Header().Set("Content-Length", strconv.Itoa(len(structuredWire)))
+			w.Header().Set(structuredBodyHeader, structuredCRC64Marker)
+			w.Header().Set(structuredContentLengthHeader, strconv.FormatInt(result.Length, 10))
+		} else {
+			w.Header().Set("Content-Length", strconv.FormatInt(result.Length, 10))
+		}
 		w.Header().Set("Content-Disposition", "attachment")
 		w.Header().Set("Content-Security-Policy", "default-src 'none'; sandbox; frame-ancestors 'none'")
 		w.Header().Set("X-Content-Type-Options", "nosniff")
@@ -306,7 +350,11 @@ func (s *Service) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(200)
 		}
 		if op == GetBlob {
-			_, _ = w.Write(result.Body)
+			if structured {
+				_, _ = w.Write(structuredWire)
+			} else {
+				_, _ = w.Write(result.Body)
+			}
 		}
 	}
 }

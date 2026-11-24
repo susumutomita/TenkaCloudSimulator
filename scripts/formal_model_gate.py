@@ -2963,6 +2963,13 @@ REQUIRED_SOURCE_SCOPES['AzureConditionalCRCRead'] = {
 }
 
 
+BASE_MODELS.add('AzureStructuredReadAdmission')
+BASE_INVARIANTS['AzureStructuredReadAdmission'] = {'FullHasNoRangeMetadata', 'LargeReadsAreQuiet', 'RangeHasRangeMetadata', 'LegacyIsUnchanged', 'DeniedOrConditionalIsQuiet', 'TypeOK', 'ExactNegotiation'}
+REQUIRED_MUTANTS['AzureStructuredReadAdmission'] = {'IgnoreMarker', 'AllowNonGet', 'FrameOnNotModified', 'SkipSizeCap', 'WholeHasStoredMD5', 'LegacyIntoXSM', 'RangeLosesStoredMD5', 'AllowConflict', 'WidenVersion'}
+REQUIRED_SOURCE_SCOPES['AzureStructuredReadAdmission'] = {'internal/azure/blob/structured_crc64.go', 'internal/azure/blob/http.go'}
+AZURE_STRUCTURED_READ_MUTATIONS = [{'id': 'WidenVersion', 'edits': [{'old': 'VersionOK(q) == q.version="XSM"', 'new': 'VersionOK(q) == q.version#"Legacy"', 'count': 1}], 'expect_invariant': 'ExactNegotiation'}, {'id': 'IgnoreMarker', 'edits': [{'old': 'MarkerOK(q) == q.marker="CRC"', 'new': 'MarkerOK(q) == TRUE', 'count': 1}], 'expect_invariant': 'ExactNegotiation'}, {'id': 'AllowNonGet', 'edits': [{'old': 'OperationOK(q) == q.operation="GetBlob"', 'new': 'OperationOK(q) == TRUE', 'count': 1}], 'expect_invariant': 'ExactNegotiation'}, {'id': 'AllowConflict', 'edits': [{'old': 'TransportOK(q) == ~q.plainChecksum', 'new': 'TransportOK(q) == TRUE', 'count': 1}], 'expect_invariant': 'ExactNegotiation'}, {'id': 'LegacyIntoXSM', 'edits': [{'old': 'THEN IF q.marker="None" THEN Reply("Legacy","Legacy",FALSE,FALSE,FALSE) ELSE Quiet("400")', 'new': 'THEN IF q.marker="None" THEN Structured(q) ELSE Quiet("400")', 'count': 1}], 'expect_invariant': 'LegacyIsUnchanged'}, {'id': 'FrameOnNotModified', 'edits': [{'old': '[] OTHER -> Quiet(status)', 'new': '[] OTHER -> IF status="304" THEN Reply(status,"FullXSM",TRUE,FALSE,FALSE) ELSE Quiet(status)', 'count': 1}], 'expect_invariant': 'DeniedOrConditionalIsQuiet'}, {'id': 'SkipSizeCap', 'edits': [{'old': 'q.nativeRead \\in {"LargeWhole","LargeRange"} -> "400"', 'new': 'q.nativeRead \\in {"LargeWhole","LargeRange"} -> "200"', 'count': 1}], 'expect_invariant': 'LargeReadsAreQuiet'}, {'id': 'WholeHasStoredMD5', 'edits': [{'old': 'status="200" -> Reply(status,"FullXSM",TRUE,FALSE,FALSE)', 'new': 'status="200" -> Reply(status,"FullXSM",TRUE,FALSE,TRUE)', 'count': 1}], 'expect_invariant': 'FullHasNoRangeMetadata'}, {'id': 'RangeLosesStoredMD5', 'edits': [{'old': 'status="206" -> Reply(status,"RangedXSM",TRUE,TRUE,TRUE)', 'new': 'status="206" -> Reply(status,"RangedXSM",TRUE,TRUE,FALSE)', 'count': 1}], 'expect_invariant': 'RangeHasRangeMetadata'}]
+
+
 def load_registry(root, relative='formal/models.json'):
     root = Path(root)
     registry_path = asset(root, relative)
@@ -3018,6 +3025,8 @@ def load_registry(root, relative='formal/models.json'):
             require(mutant['expect_invariant'] in model['properties'], 'mutant expects unchecked invariant')
             apply_mutant(source, name, mutant)
         require(REQUIRED_MUTANTS.get(name, set()) <= mutant_ids, 'a required mutation control was removed')
+        if name == 'AzureStructuredReadAdmission':
+            require(model['mutants'] == AZURE_STRUCTURED_READ_MUTATIONS, 'Azure structured read mutation controls changed')
         if name in BATTLE_INTEGRATION_MUTATIONS:
             require(model['mutants'] == BATTLE_INTEGRATION_MUTATIONS[name], 'Battle integration mutation controls changed')
     require(BASE_MODELS <= ids, 'a required existing model was removed')
