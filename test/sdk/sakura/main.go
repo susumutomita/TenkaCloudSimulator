@@ -18,8 +18,9 @@ import (
 )
 
 type config struct {
-	Origin string
-	Token  string
+	Origin         string
+	Token          string
+	ServerMetadata bool
 }
 
 // This terminal middleware never pulls the SDK's stock credential/HTTP chain.
@@ -41,7 +42,13 @@ func localTransport(c config) (saclient.Middleware, func(), error) {
 		ResponseHeaderTimeout: 5 * time.Second,
 	}
 	return func(req *http.Request, _ func() (saclient.Middleware, bool)) (*http.Response, error) {
-		const path = "/cloud/zone/is1a/api/cloud/1.1/disk"
+		path := "/cloud/zone/is1a/api/cloud/1.1/disk"
+		if c.ServerMetadata {
+			path = "/cloud/zone/is1a/api/cloud/1.1/server"
+			if !serverMetadataRoute(req, path) {
+				return nil, errors.New("unexpected Server metadata route refused")
+			}
+		}
 		if req.URL.Scheme != "https" || req.URL.Host != "secure.sakura.ad.jp" || (req.URL.Path != path && !strings.HasPrefix(req.URL.Path, path+"/")) {
 			return nil, errors.New("unexpected SDK route refused")
 		}
@@ -54,8 +61,65 @@ func localTransport(c config) (saclient.Middleware, func(), error) {
 		clone.Header.Set("X-Simulator-Principal", "learner")
 		clone.Header.Set("Content-Type", "application/json")
 		// RoundTrip does not follow redirects; no ambient proxy or DNS is used.
-		return transport.RoundTrip(clone)
+		response, err := transport.RoundTrip(clone)
+		if c.ServerMetadata && err == nil && response.StatusCode >= 300 && response.StatusCode < 400 {
+			response.Body.Close()
+			return nil, errors.New("Server metadata redirect refused")
+		}
+		return response, err
 	}, transport.CloseIdleConnections, nil
+}
+
+func serverMetadataRoute(req *http.Request, base string) bool {
+	u := req.URL
+	if u.User != nil || u.Fragment != "" || u.EscapedPath() != u.Path {
+		return false
+	}
+	if u.Path == base {
+		return (req.Method == "GET" || req.Method == "POST") && (u.RawQuery == "" || req.Method == "GET")
+	}
+	id, ok := strings.CutPrefix(u.Path, base+"/")
+	if !ok || id == "" || id[0] == '0' || u.RawQuery != "" {
+		return false
+	}
+	for _, c := range id {
+		if c < '0' || c > '9' {
+			return false
+		}
+	}
+	return req.Method == "GET" || req.Method == "PUT" || req.Method == "DELETE"
+}
+
+func serverMetadata(ctx context.Context, client *saclient.Client) {
+	servers := iaas.NewServerOp(iaas.NewClientFromSaclient(client))
+	check := func(v *iaas.Server, name, description string) bool {
+		return v != nil && v.ID > 0 && v.Name == name && v.Description == description && v.CPU == 2 && v.MemoryMB == 4096 && v.Availability == ""
+	}
+	v, err := servers.Create(ctx, "is1a", &iaas.ServerCreateRequest{CPU: 2, MemoryMB: 4096, Name: "sdk-server", Description: "original"})
+	require(err == nil && check(v, "sdk-server", "original"), "Server create metadata")
+	id := v.ID
+	removed := false
+	defer func() {
+		if !removed {
+			cleanup, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+			defer cancel()
+			_ = servers.Delete(cleanup, "is1a", id)
+		}
+	}()
+	v, err = servers.Read(ctx, "is1a", id)
+	require(err == nil && check(v, "sdk-server", "original") && v.ID == id, "Server read")
+	page, err := servers.Find(ctx, "is1a", &iaas.FindCondition{Count: 10, From: 0})
+	require(err == nil && page != nil && page.Total == 1 && page.Count == 1 && len(page.Servers) == 1 && check(page.Servers[0], "sdk-server", "original") && page.Servers[0].ID == id, "Server list identity")
+	v, err = servers.Update(ctx, "is1a", id, &iaas.ServerUpdateRequest{Name: "updated", Description: ""})
+	require(err == nil && check(v, "updated", "") && v.ID == id, "Server update")
+	v, err = servers.Read(ctx, "is1a", id)
+	require(err == nil && check(v, "updated", "") && v.ID == id, "Server persisted metadata")
+	require(servers.Delete(ctx, "is1a", id) == nil, "Server delete")
+	removed = true
+	_, err = servers.Read(ctx, "is1a", id)
+	require(iaas.IsNotFoundError(err), "Server deleted 404 decoder")
+	page, err = servers.Find(ctx, "is1a", nil)
+	require(err == nil && page != nil && page.Total == 0 && page.Count == 0 && len(page.Servers) == 0, "Server empty after cleanup")
 }
 
 func require(ok bool, phase string) {
@@ -71,9 +135,13 @@ func run(c config) {
 	var sa saclient.Client
 	require(sa.SetEnviron([]string{}) == nil, "empty SDK environment")
 	require(sa.SetWith(saclient.WithoutProfile(), saclient.WithoutRetry(), saclient.WithoutAPIRequestRateLimit(), saclient.WithMiddleware(middleware)) == nil, "SDK configuration")
-	disks := iaas.NewDiskOp(iaas.NewClientFromSaclient(&sa))
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
+	if c.ServerMetadata {
+		serverMetadata(ctx, &sa)
+		return
+	}
+	disks := iaas.NewDiskOp(iaas.NewClientFromSaclient(&sa))
 	created, err := disks.Create(ctx, "is1a", &iaas.DiskCreateRequest{DiskPlanID: 4, SizeMB: 20480, Name: "sdk-created", Description: "saved"}, nil, 0)
 	require(err == nil && created != nil && created.ID > 0 && created.Name == "sdk-created" && created.SizeMB == 20480, "SDK create / neutral Icon")
 	read, err := disks.Read(ctx, "is1a", created.ID)
@@ -105,5 +173,9 @@ func main() {
 	var c config
 	require(json.NewDecoder(os.Stdin).Decode(&c) == nil, "input")
 	run(c)
+	if c.ServerMetadata {
+		fmt.Println("Sakura SDK: 8 real Server metadata calls passed")
+		return
+	}
 	fmt.Println("Sakura SDK: 9 real Disk calls passed")
 }
