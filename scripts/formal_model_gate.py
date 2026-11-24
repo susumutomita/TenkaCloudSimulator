@@ -805,9 +805,14 @@ REQUIRED_MUTANTS = {'BedrockRuntimeAdmission': {'FallbackBackend', 'OmitMapping'
                             'IgnoreOrphanScope',
                             'OpenDatabaseBeforeCheck',
                             'OpenListenerBeforeCheck',
+                            'OptInWithNonLoopback',
+                            'OptInWithNonNumeric',
+                            'OptInWithRemote',
+                            'OptInWithoutScope',
                             'PermitUnsafeEnabled',
                             'RegisterDisabled',
                             'RejectValidEnabled',
+                            'RejectValidOptIn',
                             'SkipEnabledRegistration',
                             'SkipEnabledSchema'},
  'SecretMetadataViewEpoch': {'AppendPreviousPage',
@@ -3006,6 +3011,55 @@ REQUIRED_SOURCE_SCOPES['CloudDNSConsoleScope'] = {
     'tools/console/src/main.jsx',
 }
 
+BASE_MODELS.add('SakuraServerMetadata')
+BASE_INVARIANTS['SakuraServerMetadata'] = {
+    'TypeOK',
+    'FrozenScope',
+    'OnlyOwnerRealmLookup',
+    'ReopenBinding',
+    'FailureFrame',
+    'PeerFrame',
+    'ReadAndReopenSnapshot',
+    'FreshCommittedID',
+    'AllocatorOnlyCreate',
+    'CommitExact',
+    'StoredIDsAndQuota',
+}
+REQUIRED_MUTANTS['SakuraServerMetadata'] = {
+    'AcceptWrongServerRealm',
+    'ReuseDeletedServerID',
+}
+REQUIRED_SOURCE_SCOPES['SakuraServerMetadata'] = {
+    'internal/sakura/iaas/server_http.go',
+    'internal/sakura/iaas/server_store.go',
+}
+
+BASE_MODELS.add('SakuraServerReadEpoch')
+BASE_INVARIANTS['SakuraServerReadEpoch'] = {
+    'TypeOK',
+    'NoUnadvertisedMount',
+    'OnlyCurrentResult',
+    'NoDifferentServer',
+}
+REQUIRED_MUTANTS['SakuraServerReadEpoch'] = {
+    'IgnoreDisabled',
+    'IgnoreMalformed',
+    'IgnoreHandoff',
+    'IgnoreContext',
+    'IgnoreRevision',
+    'AcceptWrongServer',
+}
+REQUIRED_SOURCE_SCOPES['SakuraServerReadEpoch'] = {
+    'internal/server/sakura_provider.go',
+    'internal/server/web/app.js',
+    'tools/console/src/console-navigation.mjs',
+    'tools/console/src/main.jsx',
+    'tools/console/src/sakura-console.jsx',
+    'tools/console/src/sakura-server-read.mjs',
+    'tools/console/src/sakura-servers.jsx',
+}
+SAKURA_SERVER_READ_EPOCH_MUTATIONS = [{'id': 'IgnoreDisabled', 'edits': [{'old': 'config.enabled /\\ config.valid /\\ ~config.handoff', 'new': 'config.valid /\\ ~config.handoff', 'count': 1}], 'expect_invariant': 'NoUnadvertisedMount'}, {'id': 'IgnoreMalformed', 'edits': [{'old': 'config.enabled /\\ config.valid /\\ ~config.handoff', 'new': 'config.enabled /\\ ~config.handoff', 'count': 1}], 'expect_invariant': 'NoUnadvertisedMount'}, {'id': 'IgnoreHandoff', 'edits': [{'old': 'config.enabled /\\ config.valid /\\ ~config.handoff', 'new': 'config.enabled /\\ config.valid', 'count': 1}], 'expect_invariant': 'NoUnadvertisedMount'}, {'id': 'IgnoreContext', 'edits': [{'old': 'BoundContext(r) == r.context = context.sequence', 'new': 'BoundContext(r) == TRUE', 'count': 1}], 'expect_invariant': 'OnlyCurrentResult'}, {'id': 'IgnoreRevision', 'edits': [{'old': 'BoundRevision(r) == r.revision = revision', 'new': 'BoundRevision(r) == TRUE', 'count': 1}], 'expect_invariant': 'OnlyCurrentResult'}, {'id': 'AcceptWrongServer', 'edits': [{'old': 'ProjectionOK(r, actual) == r.target = actual', 'new': 'ProjectionOK(r, actual) == TRUE', 'count': 1}], 'expect_invariant': 'NoDifferentServer'}]
+
 
 def load_registry(root, relative='formal/models.json'):
     root = Path(root)
@@ -3062,6 +3116,8 @@ def load_registry(root, relative='formal/models.json'):
             require(mutant['expect_invariant'] in model['properties'], 'mutant expects unchecked invariant')
             apply_mutant(source, name, mutant)
         require(REQUIRED_MUTANTS.get(name, set()) <= mutant_ids, 'a required mutation control was removed')
+        if name == 'SakuraServerReadEpoch':
+            require(model['mutants'] == SAKURA_SERVER_READ_EPOCH_MUTATIONS, 'Sakura Server read-epoch mutation controls changed')
         if name in BATTLE_INTEGRATION_MUTATIONS:
             require(model['mutants'] == BATTLE_INTEGRATION_MUTATIONS[name], 'Battle integration mutation controls changed')
     require(BASE_MODELS <= ids, 'a required existing model was removed')

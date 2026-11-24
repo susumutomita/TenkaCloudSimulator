@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"io"
+	"net"
 	"os"
 	"path/filepath"
 	"strings"
@@ -150,5 +151,32 @@ func TestSakuraFlagsValidationDoesNotTouchStateOrTokenFiles(t *testing.T) {
 	}
 	if values, e := registerSakuraFlags(nil); values != nil || e == nil {
 		t.Fatal("nil flag set accepted")
+	}
+}
+
+func TestSakuraServerConsoleStartupBoundary(t *testing.T) {
+	loopback := net.ParseIP("127.0.0.1")
+	args := append(enabledSakuraArgs(), "--enable-sakura-server-console")
+	values := parsedSakuraFlags(t, args...)
+	scope, err := validateSakuraFlags(values, false)
+	if err != nil || !values.serverConsole || validateSakuraServerConsole(values.serverConsole, scope, false, false, loopback) != nil {
+		t.Fatal("explicit local console was not accepted", err)
+	}
+	if parsedSakuraFlags(t, enabledSakuraArgs()...).serverConsole {
+		t.Fatal("console did not stay off when omitted")
+	}
+	for _, tc := range []struct {
+		scope          *sakura.Config
+		unsafe, remote bool
+		ip             net.IP
+	}{
+		{nil, false, false, loopback}, {scope, true, false, loopback}, {scope, false, true, loopback}, {scope, false, false, net.ParseIP("192.0.2.1")}, {scope, false, false, nil},
+	} {
+		if validateSakuraServerConsole(true, tc.scope, tc.unsafe, tc.remote, tc.ip) == nil {
+			t.Fatal("invalid authorization/listening combination was accepted")
+		}
+	}
+	if validateSakuraServerConsole(true, scope, false, false, net.ParseIP("::1")) != nil {
+		t.Fatal("numeric IPv6 loopback was refused")
 	}
 }
