@@ -34,7 +34,29 @@ def operations(spec):
 
 
 
+SERVER_COLLECTION = '/_simulator/providers/sakura/cloud/zone/{zone}/api/cloud/1.1/server'
+
+
+def project_server_list(spec):
+    spec = copy.deepcopy(spec)
+    tag = {'name': 'Sakura Server metadata',
+           'description': 'Read saved Server metadata in the configured local zone; no VM or network state.'}
+    declared = [entry for entry in spec['tags'] if entry['name'] == tag['name']]
+    grouped = [group for group in spec['x-tagGroups'] if tag['name'] in group['tags']]
+    assert declared == [tag], 'Server List tag missing or changed'
+    assert len(grouped) == 1 and grouped[0]['name'] == 'Sakura Cloud', 'Server List tag misgrouped'
+    assert grouped[0]['tags'].count(tag['name']) == 1, 'Server List tag duplicated'
+    spec['tags'].remove(tag)
+    grouped[0]['tags'].remove(tag['name'])
+    server = spec['paths'].pop(SERVER_COLLECTION, None)
+    assert digest(server) == '81203e3d7065de93e30b5941964ba52f94a11c12888f61b85dbe7c542dc9a521', 'Server List reference changed'
+    assert digest(spec['paths']) == '1dce93acc032ee7c312d7a8bd9e7442368953b59403f494e5fb3ab8e20d2ede8', 'Pre-existing reference paths changed'
+    assert digest(spec) == '62dc82bc8496d80e92364df28c940012d22498553e779929dd10fa431a0a57c6', 'Pre-existing reference spec changed'
+    return spec
+
+
 def preserved(spec):
+    spec = project_server_list(spec)
     spec = project_before_route53(spec)
     # Validate the three reviewed DeleteLogStream additions exactly, then remove
     # only those additions from a copy. Every pre-existing digest below is kept
@@ -110,6 +132,38 @@ class SakuraReference(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.spec=json.loads((ROOT/'internal/server/apidocs/openapi.json').read_text())
+
+    def test_single_server_list_preserves_every_old_path(self):
+        server = self.spec['paths'][SERVER_COLLECTION]
+        assert set(server) == {'parameters', 'get'}
+        assert server['get']['operationId'] == 'SakuraListServers'
+        for change in (
+            lambda paths: paths.pop(SERVER_COLLECTION),
+            lambda paths: paths[SERVER_COLLECTION].update(post={}),
+            lambda paths: paths[COLLECTION]['get'].update(summary='mutated Disk'),
+            lambda paths: paths.update({'/unrelated-new': {}}),
+        ):
+            broken = copy.deepcopy(self.spec)
+            change(broken['paths'])
+            with self.assertRaises(AssertionError):
+                project_server_list(broken)
+        project_server_list(self.spec)
+
+    def test_server_list_navigation_rejects_missing_and_misgrouped_tag(self):
+        for change in ('declaration', 'missing-group', 'wrong-group', 'duplicate'):
+            broken = copy.deepcopy(self.spec)
+            tag = 'Sakura Server metadata'
+            owner = next(group for group in broken['x-tagGroups'] if group['name'] == 'Sakura Cloud')
+            if change == 'declaration':
+                broken['tags'] = [entry for entry in broken['tags'] if entry['name'] != tag]
+            elif change == 'duplicate':
+                owner['tags'].append(tag)
+            else:
+                owner['tags'].remove(tag)
+                if change == 'wrong-group':
+                    next(group for group in broken['x-tagGroups'] if group is not owner)['tags'].append(tag)
+            with self.subTest(change=change), self.assertRaises(AssertionError):
+                project_server_list(broken)
 
     def test_all_existing_operations_components_and_28_templates_are_exact(self):
         preserved(self.spec)

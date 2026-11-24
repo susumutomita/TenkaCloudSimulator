@@ -12568,6 +12568,169 @@
         }
       }
     },
+    "/_simulator/providers/sakura/cloud/zone/{zone}/api/cloud/1.1/server": {
+      "parameters": [
+        {
+          "name": "zone",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9-]{0,31}$",
+            "default": "is1a"
+          },
+          "description": "Exact zone fixed by host startup; is1a is only a static tutorial example. This parameter cannot switch the configured zone; wrong literal zone404, encoded syntax400."
+        }
+      ],
+      "get": {
+        "operationId": "SakuraListServers",
+        "summary": "List saved Server metadata",
+        "tags": [
+          "Sakura Server metadata"
+        ],
+        "description": "Read local Server configuration metadata only. This provider is disabled by default. Enable it on the simulator host, use the host-configured zone and owner identity, and use the simulator session or token. The fixed local dummy Basic marker TCSIMSAKURA / dummy-local-only is also required; it grants no authority. Never supply real Sakura credentials. Use Test Request → Send with no query to list saved metadata. Responses do not describe running VMs, network attachments or billing.",
+        "security": [
+          {
+            "SakuraDummyProtocolMarker": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SimulatorToken"
+          },
+          {
+            "$ref": "#/components/parameters/SakuraExerciseIdentity"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Saved local Server metadata only.",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "const": "no-store"
+                },
+                "description": "Leaf response is not cacheable."
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "From",
+                    "Count",
+                    "Total",
+                    "Servers",
+                    "is_ok"
+                  ],
+                  "additionalProperties": false,
+                  "properties": {
+                    "From": {
+                      "type": "integer",
+                      "minimum": 0
+                    },
+                    "Count": {
+                      "type": "integer",
+                      "minimum": 0
+                    },
+                    "Total": {
+                      "type": "integer",
+                      "minimum": 0
+                    },
+                    "Servers": {
+                      "type": "array",
+                      "maxItems": 100,
+                      "items": {
+                        "type": "object",
+                        "required": [
+                          "ID",
+                          "Name",
+                          "Description",
+                          "ServerPlan",
+                          "CreatedAt",
+                          "ModifiedAt"
+                        ],
+                        "additionalProperties": false,
+                        "properties": {
+                          "ID": {
+                            "type": "string",
+                            "pattern": "^[1-9][0-9]*$"
+                          },
+                          "Name": {
+                            "type": "string"
+                          },
+                          "Description": {
+                            "type": "string"
+                          },
+                          "ServerPlan": {
+                            "type": "object",
+                            "required": [
+                              "CPU",
+                              "MemoryMB"
+                            ],
+                            "additionalProperties": false,
+                            "properties": {
+                              "CPU": {
+                                "type": "integer"
+                              },
+                              "MemoryMB": {
+                                "type": "integer"
+                              }
+                            }
+                          },
+                          "CreatedAt": {
+                            "type": "string",
+                            "format": "date-time"
+                          },
+                          "ModifiedAt": {
+                            "type": "string",
+                            "format": "date-time"
+                          }
+                        }
+                      }
+                    },
+                    "is_ok": {
+                      "const": true
+                    }
+                  }
+                },
+                "examples": {
+                  "Empty": {
+                    "summary": "Static empty response example",
+                    "value": {
+                      "From": 0,
+                      "Count": 0,
+                      "Total": 0,
+                      "Servers": [],
+                      "is_ok": true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid literal route or unsupported list query."
+          },
+          "401": {
+            "description": "Host authorization or fixed local dummy Basic marker missing."
+          },
+          "403": {
+            "description": "Host or configured owner authorization denied."
+          },
+          "404": {
+            "description": "Provider disabled or configured zone does not match."
+          },
+          "413": {
+            "description": "List query exceeds the local bound."
+          },
+          "500": {
+            "description": "Local state read failed."
+          }
+        }
+      }
+    },
     "/_simulator/providers/sakura/cloud/zone/{zone}/api/cloud/1.1/disk": {
       "parameters": [
         {
@@ -19196,6 +19359,10 @@
       "description": "Optional Disk configuration API only, disabled by default. The five operations below require explicit host opt-in, fixed local scope and host owner authentication; an unregistered provider returns plain-text404. Console availability is a separate capability; this native reference does not claim console workflow/fidelity, real VM/block storage, Object Storage/AppRun or general service coverage. Community SDK serializer/decoder compatibility uses a separately tested terminal local middleware, not stock authentication/retry certification."
     },
     {
+      "name": "Sakura Server metadata",
+      "description": "Read saved Server metadata in the configured local zone; no VM or network state."
+    },
+    {
       "name": "Sakura Disk configuration",
       "description": "Five actual local API1.1 Disk metadata operations. **Static examples, not saved state.** Enable the provider on the host first; use real returned Disk IDs. The Basic Auth fields take public TCSIMSAKURA / dummy-local-only only; host cookie or X-Simulator-Token remains independently required. Exact subset/deviations: docs/sakura.md; primary public Disk API https://manual.sakura.ad.jp/cloud-api/1.1/disk/ ."
     },
@@ -19244,7 +19411,8 @@
       "name": "Sakura Cloud",
       "tags": [
         "Sakura Cloud status",
-        "Sakura Disk configuration"
+        "Sakura Disk configuration",
+        "Sakura Server metadata"
       ]
     },
     {
