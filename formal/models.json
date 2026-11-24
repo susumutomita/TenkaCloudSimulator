@@ -7165,6 +7165,82 @@
    ]
   },
   {
+   "id": "S3MultipartConsolePaging",
+   "model": "formal/S3MultipartConsolePaging.tla",
+   "config": "formal/S3MultipartConsolePaging.cfg",
+   "bounds": "Part numbers 1..4; initial or invalid marker 0; at most two returned rows per page, four fetches; explicit invalid flag and a stop between pages.",
+   "properties": [
+    "TypeOK",
+    "OnlyCanonicalRows",
+    "OnlyProgressingCursor",
+    "OnlyCompleteListing",
+    "NoReadAfterStop"
+   ],
+   "limits": "Finite read-only console listing abstraction; models ascending unique part numbers, cursor progress, result visibility and stop semantics. Does not execute XML parsing, DOM, React scheduling, HTTP, storage, IAM, writes or AWS; does not establish implementation refinement or cover unrelated portions of the embedded bundle.",
+   "source_scope": [
+    "internal/server/web/app.js",
+    "tools/console/src/s3-multipart-parts.mjs",
+    "tools/console/src/s3-multipart.jsx"
+   ],
+   "mutants": [
+    {
+     "id": "BypassRowOrder",
+     "edits": [
+      {
+       "old": "RowsOK(rows, prior) == CanonicalRows(rows, prior)",
+       "new": "RowsOK(rows, prior) == TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "OnlyCanonicalRows"
+    },
+    {
+     "id": "BypassCursor",
+     "edits": [
+      {
+       "old": "CursorOK(rows, prior, cursor) == CanonicalCursor(rows, prior, cursor)",
+       "new": "CursorOK(rows, prior, cursor) == TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "OnlyProgressingCursor"
+    },
+    {
+     "id": "AcceptUnknownFlag",
+     "edits": [
+      {
+       "old": "FinalFlag(flag) == flag = \"final\"",
+       "new": "FinalFlag(flag) == flag /= \"more\"",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "OnlyCompleteListing"
+    },
+    {
+     "id": "ReturnPartial",
+     "edits": [
+      {
+       "old": "ExposeOnContinue == FALSE",
+       "new": "ExposeOnContinue == TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "OnlyCompleteListing"
+    },
+    {
+     "id": "ContinueAfterStop",
+     "edits": [
+      {
+       "old": "ActiveOK == ~stopped",
+       "new": "ActiveOK == TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "NoReadAfterStop"
+    }
+   ]
+  },
+  {
    "id": "S3MultipartState",
    "model": "formal/S3MultipartState.tla",
    "config": "formal/S3MultipartState.cfg",

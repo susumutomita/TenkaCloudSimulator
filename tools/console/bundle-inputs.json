@@ -32379,8 +32379,13 @@
       ],
       "format": "esm"
     },
+    "src/s3-multipart-parts.mjs": {
+      "bytes": 1073,
+      "imports": [],
+      "format": "esm"
+    },
     "src/s3-multipart.jsx": {
-      "bytes": 12084,
+      "bytes": 12025,
       "imports": [
         {
           "path": "node_modules/react/index.js",
@@ -32436,6 +32441,11 @@
           "path": "src/i18n.jsx",
           "kind": "import-statement",
           "original": "./i18n.jsx"
+        },
+        {
+          "path": "src/s3-multipart-parts.mjs",
+          "kind": "import-statement",
+          "original": "./s3-multipart-parts.mjs"
         }
       ],
       "format": "esm"
@@ -36771,7 +36781,10 @@
           "bytesInOutput": 1001
         },
         "src/s3-multipart.jsx": {
-          "bytesInOutput": 11483
+          "bytesInOutput": 11390
+        },
+        "src/s3-multipart-parts.mjs": {
+          "bytesInOutput": 443
         },
         "src/gcp-storage.jsx": {
           "bytesInOutput": 27755
@@ -36897,7 +36910,7 @@
           "bytesInOutput": 0
         }
       },
-      "bytes": 2411125
+      "bytes": 2411475
     },
     "../../internal/server/web/app.css.LEGAL.txt": {
       "imports": [],

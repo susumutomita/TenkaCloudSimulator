@@ -1,59 +1,123 @@
 {
   "version": 1,
-  "base_sha": "342b42cd1ac200ab8701f08d073e339e1d744b43",
+  "base_sha": "9652f0344ab9d7e57aa30595fab5c3ed52c57cd8",
   "changes": [
     {
-      "path": "internal/aws/ec2_describe_subnets_contract_test.go",
-      "sha256": "6443bc90b6fec1c7b8bf277cc090b00f6dd431fac3481d120fdefa0ccb09b2d9",
-      "disposition": "test-support",
-      "reason": "Keeps the frozen independent offline gateway and SQLite contract for subnet response, regional ownership, refusal and consistency.",
-      "models": []
-    },
-    {
-      "path": "internal/aws/ec2_read.go",
-      "sha256": "0521e026c98cb3eed764e619379ab1fa830d2a2e110d908eac95cce05214dc2c",
+      "path": "formal/S3MultipartConsolePaging.cfg",
+      "sha256": "0ed8ca55ba02cda84d397df5bb2ac37d3a5f78b1c41663003d1d6ea320b27978",
       "disposition": "modeled",
-      "reason": "DescribeSubnets uses existing IAM admission and an atomic read of regional CloudFormation ownership, requiring identical stack and network resource ownership.",
+      "reason": "Pins the finite S3 console ListParts pagination model scenarios and checked safety invariants.",
       "models": [
         {
-          "id": "EC2ReadDiscovery",
+          "id": "S3MultipartConsolePaging",
           "properties": [
-            "AuthorizedRead",
-            "RegionBound",
-            "OwnedRead"
+            "OnlyCanonicalRows",
+            "OnlyProgressingCursor",
+            "OnlyCompleteListing",
+            "NoReadAfterStop"
           ],
-          "limits": "Finite admission and identity only; not SQL or Go refinement, IAM parsing, HTTP/XML, subnet projection or VM liveness."
+          "limits": "Finite read-only console listing abstraction; models ascending unique part numbers, cursor progress, result visibility and stop semantics. Does not execute XML parsing, DOM, React scheduling, HTTP, storage, IAM, writes or AWS; does not establish implementation refinement or cover unrelated portions of the embedded bundle."
         }
       ]
     },
     {
-      "path": "internal/aws/ec2_vpc.go",
-      "sha256": "ae89751880a3b6d6e37fd44187e61d4707b3534bd700d63600d270e455f94e23",
+      "path": "formal/S3MultipartConsolePaging.tla",
+      "sha256": "f7392dfaae0ec1410b9fff3cc986704ec6e0957899a4d614d5afb9de11ab7023",
       "disposition": "modeled",
-      "reason": "Adds DescribeSubnets to the query action table only. Native VPC storage, ownership, listing and deletion are unchanged.",
+      "reason": "Models strict part order, cursor advancement, final-only visibility, and stopping during the finite read-only listing.",
       "models": [
         {
-          "id": "EC2VPCOwnership",
+          "id": "S3MultipartConsolePaging",
           "properties": [
-            "DescribeExact",
-            "NativeNeverDeletesStackVPC"
+            "OnlyCanonicalRows",
+            "OnlyProgressingCursor",
+            "OnlyCompleteListing",
+            "NoReadAfterStop"
           ],
-          "limits": "Preservation of existing abstract VPC properties only; the model describes VPCs, not subnet admission, request parsing or Go refinement."
+          "limits": "Finite read-only console listing abstraction; models ascending unique part numbers, cursor progress, result visibility and stop semantics. Does not execute XML parsing, DOM, React scheduling, HTTP, storage, IAM, writes or AWS; does not establish implementation refinement or cover unrelated portions of the embedded bundle."
         }
       ]
     },
     {
-      "path": "scripts/factory_acceptance.py",
-      "sha256": "7792674cfc792bffed67e530bcc1abde8b153e2e40c71e11259c3fd0a95abe64",
-      "disposition": "validation-tooling",
-      "reason": "Registers and pins the fixed DescribeSubnets contract and narrowly permits its dispatch file without changing SQS or admitting VPC mutations.",
+      "path": "formal/models.json",
+      "sha256": "1135ef99376986befde3b6dc1559810a2a59eb4ee401e42f50369f5a779c40d9",
+      "disposition": "formal-infrastructure",
+      "reason": "Registers the ListParts paging model and five sensitivity controls without changing any of the 113 existing entries.",
       "models": []
     },
     {
-      "path": "scripts/test-factory-acceptance.py",
-      "sha256": "188e98bafa1404bff98bb49cc3c5b334e0e56bb61d33f5867a7ea3a74865575d",
-      "disposition": "test-support",
-      "reason": "Detects wrong scope, forbidden write/SQS cases, substituted oracle and invalid named results without executing a VM.",
+      "path": "internal/server/web/app.js",
+      "sha256": "a51fb07182fab0df5b070d33ea0b01d6bf89ae19d4540dd17e7834c8544270a0",
+      "disposition": "modeled",
+      "reason": "Rebuilt embedded client includes exact ListParts helper and view changes. The binding covers only the changed S3 listing logic, not unrelated bundle code.",
+      "models": [
+        {
+          "id": "S3MultipartConsolePaging",
+          "properties": [
+            "OnlyCanonicalRows",
+            "OnlyProgressingCursor",
+            "OnlyCompleteListing",
+            "NoReadAfterStop"
+          ],
+          "limits": "Finite read-only console listing abstraction; models ascending unique part numbers, cursor progress, result visibility and stop semantics. Does not execute XML parsing, DOM, React scheduling, HTTP, storage, IAM, writes or AWS; does not establish implementation refinement or cover unrelated portions of the embedded bundle."
+        }
+      ]
+    },
+    {
+      "path": "tools/console/bundle-digests.json",
+      "sha256": "cf2936fb30d03c0b63097c904a1e45dc166ef854e679cc7dfa82fd96d047a82f",
+      "disposition": "presentation",
+      "reason": "Generated hash manifest records the rebuilt embedded console bundle; it does not change control flow.",
+      "models": []
+    },
+    {
+      "path": "tools/console/bundle-inputs.json",
+      "sha256": "173e1a29a8a4b4efa81ac82b30035c37e7e5b74f6aaaaef252d43ba7fc5020af",
+      "disposition": "presentation",
+      "reason": "Generated provenance records the S3 listing helper and view in the app.js input graph; it does not change control flow.",
+      "models": []
+    },
+    {
+      "path": "tools/console/src/s3-multipart-parts.mjs",
+      "sha256": "6ec4b0f1b69481fb6a14c559acabd0330ca99416ca4c9ebafdbdb8502ed15901",
+      "disposition": "modeled",
+      "reason": "Checks canonical ascending rows, validated progressing markers and terminal flags across page fetches.",
+      "models": [
+        {
+          "id": "S3MultipartConsolePaging",
+          "properties": [
+            "OnlyCanonicalRows",
+            "OnlyProgressingCursor",
+            "OnlyCompleteListing",
+            "NoReadAfterStop"
+          ],
+          "limits": "Finite read-only console listing abstraction; models ascending unique part numbers, cursor progress, result visibility and stop semantics. Does not execute XML parsing, DOM, React scheduling, HTTP, storage, IAM, writes or AWS; does not establish implementation refinement or cover unrelated portions of the embedded bundle."
+        }
+      ]
+    },
+    {
+      "path": "tools/console/src/s3-multipart.jsx",
+      "sha256": "9ad3c43e0fcd3d15e90721d1b9e975958abfbdcb44e10523f8c380aed5070fc2",
+      "disposition": "modeled",
+      "reason": "Consumes the read-only pager and displays only a completed listing from the current view operation.",
+      "models": [
+        {
+          "id": "S3MultipartConsolePaging",
+          "properties": [
+            "OnlyCanonicalRows",
+            "OnlyProgressingCursor",
+            "OnlyCompleteListing",
+            "NoReadAfterStop"
+          ],
+          "limits": "Finite read-only console listing abstraction; models ascending unique part numbers, cursor progress, result visibility and stop semantics. Does not execute XML parsing, DOM, React scheduling, HTTP, storage, IAM, writes or AWS; does not establish implementation refinement or cover unrelated portions of the embedded bundle."
+        }
+      ]
+    },
+    {
+      "path": "tools/console/tests/s3-multipart-parts.test.mjs",
+      "sha256": "9a66032b1ca0078552ae11e7527aa6c9c2e473b1fb75e6d86ff0eb824cdaf073",
+      "disposition": "presentation",
+      "reason": "Console-only Node regression inputs and assertions. No runtime behavior; console test paths are classified as presentation by the current applicability gate.",
       "models": []
     }
   ]
