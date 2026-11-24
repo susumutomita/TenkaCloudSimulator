@@ -339,6 +339,13 @@
       "reason": "Checks exact model inventory and rejects removal of Cloud DNS scope, properties or registered controls with isolated fixtures.",
       "models": [],
       "sha256": "2a1787b057d8ece9dd71a33677732fc70e3eb1d0910d484405a490c9d2b8af6d"
+    },
+    {
+      "path": "test/e2e/gcp_dns_scalar_send.py",
+      "sha256": "1cbef3428e9f22c8639054f1b25ce1cc2027bbe247d29b717781ea7d2444552d",
+      "disposition": "test-support",
+      "reason": "Adds opt-in real-browser Cloud DNS List Send coverage against the existing authenticated same-origin reference. No runtime, runner or workflow changes.",
+      "models": []
     }
   ]
 }
