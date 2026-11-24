@@ -261,11 +261,18 @@ var ivs = &Service{
 	},
 }
 
-// ivsRecording requires the S3 destination the official model offers.
+// ivsRecording checks the S3 destination and custom rendition selection.
 func ivsRecording(input map[string]any) error {
 	destination, _ := input["destinationConfiguration"].(map[string]any)
 	if _, ok := destination["s3"]; !ok {
 		return Failure("ValidationException", "destinationConfiguration must name an S3 bucket.")
+	}
+	rendition, _ := input["renditionConfiguration"].(map[string]any)
+	if rendition["renditionSelection"] == "CUSTOM" {
+		selected, _ := rendition["renditions"].([]any)
+		if len(selected) == 0 {
+			return Failure("ValidationException", "renditions must not be empty when renditionSelection is CUSTOM.")
+		}
 	}
 	return nil
 }

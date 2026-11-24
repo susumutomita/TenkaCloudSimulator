@@ -114,6 +114,13 @@
       ]
     },
     {
+      "path": "internal/aws/catalog/ivs_rendition_contract_test.go",
+      "sha256": "4c94ace23a69378e27131ed46bbef1b0eddb436ce340ea745ce81696d3d44699",
+      "disposition": "test-support",
+      "reason": "IVS CUSTOM rendition selection requires a nonempty rendition list and must refuse invalid writes without persistence.",
+      "models": []
+    },
+    {
       "path": "internal/aws/catalog/media_ipv4_contract_test.go",
       "sha256": "35b12681b9f11df5f99798df7c00ca74ac4f81c6ebff6957595dc7f00bd95e2c",
       "disposition": "test-support",
@@ -1395,7 +1402,7 @@
     },
     {
       "path": "internal/aws/catalog/services_media2.go",
-      "sha256": "14130c570f6332c5aaf2e72655daa731f9309417ff1758b11b4e369a2999bcd9",
+      "sha256": "d21357668401845fa5fe198d0bfdd05ac27eecfe3d726414adbe4797681050f7",
       "disposition": "modeled",
       "reason": "Reviewed specifications for newly added services: stored configuration and configuration records with unique names and per-Region limits.",
       "models": [
