@@ -131,4 +131,51 @@ class AcceptanceTests(unittest.TestCase):
     def test_empty_duplicate_suites_refused(self):
         for suites in [[],['sqs-lifecycle']*2]:
             with self.assertRaises(ValueError):gate.verify(self.path,self.head,suites,self.root)
+    def test_subnet_registration_binds_fixed_command_and_scope(self):
+        suite = 'ec2-describe-subnets'
+        spec = gate.SUITES[suite]
+        self.assertEqual(spec['argv'], ['go', 'test', '-json', '-count=1', '-run',
+                                       '^TestEC2DescribeSubnetsContract$', './internal/aws'])
+        vpc_dispatch = 'internal/aws/ec2_vpc.go'
+        gate.validate_scope([suite], 'aws', 'DescribeSubnets',
+                            ['internal/aws/ec2_read.go', vpc_dispatch])
+        for operation, path in (('CreateVpc', vpc_dispatch),
+                                ('DeleteVpc', vpc_dispatch),
+                                ('DeleteMessage', vpc_dispatch),
+                                ('CreateSubnet', 'internal/aws/ec2_read.go'),
+                                ('DescribeSubnets', 'internal/aws/sqs_store.go'),
+                                ('DeleteMessage', 'internal/aws/ec2_read.go'),
+                                ('DescribeSubnets', 'internal/server/server.go')):
+            with self.subTest(operation=operation, path=path), self.assertRaises(ValueError):
+                gate.validate_scope([suite, 'sqs-lifecycle'], 'aws', operation, [path])
+
+    def test_subnet_oracle_and_named_result_cannot_be_substituted(self):
+        suite = 'ec2-describe-subnets'
+        spec = dict(gate.SUITES[suite])
+        name, pinned = spec['oracle']
+        self.assertEqual(pinned, '6443bc90b6fec1c7b8bf277cc090b00f6dd431fac3481d120fdefa0ccb09b2d9')
+        spec['oracle'] = name, gate.digest(b'fixed fixture')
+        oracle = self.root / name
+        oracle.parent.mkdir(parents=True, exist_ok=True)
+        with patch.dict(gate.SUITES, {suite: spec}):
+            for data in (None, b'changed fixture', b'fixed fixture'):
+                if data is not None:
+                    oracle.write_bytes(data)
+                if data == b'fixed fixture':
+                    gate.verify_suite_oracles(self.root, [suite])
+                else:
+                    with self.assertRaisesRegex(ValueError, 'oracle changed or missing'):
+                        gate.verify_suite_oracles(self.root, [suite])
+        package = spec['package']
+        def log(test, outcome):
+            return b'\n'.join(json.dumps(event).encode() for event in (
+                {'Action': 'run', 'Package': package, 'Test': test},
+                {'Action': outcome, 'Package': package, 'Test': test},
+                {'Action': 'pass', 'Package': package},
+            ))
+        gate.verdict(log(spec['test'], 'pass'), suite, 0)
+        for result in (log('OtherTest', 'pass'), log(spec['test'], 'skip'), log(spec['test'], 'fail')):
+            with self.assertRaises(ValueError):
+                gate.verdict(result, suite, 0)
+
 if __name__=='__main__':unittest.main()

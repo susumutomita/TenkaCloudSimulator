@@ -35,7 +35,7 @@ func TestEC2ReadStoreAndHeaderFailures(t *testing.T) {
 			}
 		})
 	}
-	if w := ec2ReadBoundaryCall(&Gateway{}, "DescribeVpcs"); w.Code != 500 || !strings.Contains(w.Body.String(), "Discovery stores are unavailable") {
+	if w := ec2ReadBoundaryCall(&Gateway{}, "DescribeVpcs"); w.Code != 500 || !strings.Contains(w.Body.String(), "EC2 stores are unavailable") {
 		t.Fatalf("%d %s", w.Code, w.Body.String())
 	}
 	store, _ := s3TestState(t)

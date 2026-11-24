@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "base_sha": "b4824cc071427b8ff04c16f1bc78a34910dcec9e",
+  "base_sha": "9652f0344ab9d7e57aa30595fab5c3ed52c57cd8",
   "changes": [
     {
       "path": "docs/aws-catalog-services.md",
@@ -25,7 +25,7 @@
     },
     {
       "path": "formal/models.json",
-      "sha256": "df15bfe2681ea6cc36eb520dd349c502b84a3f65b35aa91f0549938ca9ccd01b",
+      "sha256": "6cce7584cc867fefae7a8e349e04ba429242460b3f4c97280792f894d751ff72",
       "disposition": "formal-infrastructure",
       "reason": "Adds the new specification files and service model files to the catalog lifecycle model source scope.",
       "models": []
@@ -1946,7 +1946,6 @@
     },
     {
       "path": "internal/server/web/app.js",
-      "sha256": "e52406ccceb659e868080c948dc9882cd4facb49f264abeed50c23be404b4612",
       "disposition": "modeled",
       "reason": "Catalog Edit binds the version and body from the accepted current read to a single user-initiated update; the bundled change is limited to the Catalog UI.",
       "models": [
@@ -1959,7 +1958,8 @@
           ],
           "limits": "Finite UI model covers epochs, single writes and error visibility, not concrete response projection, optimistic token shape, or browser behavior (covered separately by runtime tests)."
         }
-      ]
+      ],
+      "sha256": "1b6544aa99fdc887609ec41ecc66c04c3f0ca2e962ca5ce863b4ac48674df472"
     },
     {
       "path": "test/e2e/aws_catalog_console.py",
@@ -2432,17 +2432,17 @@
     },
     {
       "path": "tools/console/bundle-digests.json",
-      "sha256": "db1c0baab690a0b8f81375c07dc32e7780fe882ad96deb30b2ff02c8adc6166b",
       "disposition": "presentation",
       "reason": "Generated Cloudscape bundle input and output digests for the catalog Edit source change.",
-      "models": []
+      "models": [],
+      "sha256": "05d34712ebe1fbd6d26463f46746e364c893f0039f94579b93f2653ac0f03e28"
     },
     {
       "path": "tools/console/bundle-inputs.json",
-      "sha256": "5579a63af4e1b03f7e1cf96f382c41e4b61ca636bbf858c5524be44e001026a6",
       "disposition": "presentation",
       "reason": "Generated Cloudscape bundle input and output digests for the catalog Edit source change.",
-      "models": []
+      "models": [],
+      "sha256": "4c2a1f9881cb7799d11f63de35ad5eede27938d8ea2d5f32a14a69eb9227f32d"
     },
     {
       "path": "tools/console/src/catalog.jsx",
