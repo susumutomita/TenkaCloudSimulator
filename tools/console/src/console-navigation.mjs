@@ -71,6 +71,12 @@ export function serviceAvailable(id, capabilities) {
   return service.provider === 'gcp' ? typeof scope?.project === 'string' && scope.project.length > 0
     : typeof scope?.account === 'string' && scope.account.length > 0;
 }
+// The VPC create/delete controls need both native operations; a handoff scope
+// never shows VPC at all. The server still authorizes every request.
+export function vpcLifecycleAvailable(capabilities) {
+  const operations = capabilities?.services?.ec2?.operations;
+  return !capabilities?.consoleScope && Array.isArray(operations) && ['CreateVpc', 'DeleteVpc'].every(op => operations.includes(op));
+}
 // Catalog service titles come from capabilities so search finds each one.
 function searchText(service, capabilities) {
   const titles = service.id === 'catalog' && Array.isArray(capabilities?.services?.catalog?.services)
