@@ -247,6 +247,34 @@
       ]
     },
     {
+      "path": "internal/server/apidocs/gcp-catalog.html",
+      "sha256": "37f89cd2b84ac5b42561017f7f9a3f51c2822c92068c10f6caff7f0c237ad8ba",
+      "disposition": "presentation",
+      "reason": "Static navigation to the existing same-origin Google Cloud DNS API reference; no simulator operation or authority change.",
+      "models": []
+    },
+    {
+      "path": "internal/server/apidocs/gcp-dns-init.js",
+      "sha256": "865dcb55e1f2f502c35a2eec2e13a1aed7e85adddc29af6c26a1ba8862f0e9d5",
+      "disposition": "presentation",
+      "reason": "Scalar presentation bootstraps one authenticated and origin-bound existing DNS list operation with the configured project; no provider state, auth configuration, or write operation change.",
+      "models": []
+    },
+    {
+      "path": "internal/server/apidocs/gcp-dns.html",
+      "sha256": "223edacfdad19f13f7e2881123602db0601ea39d99a22787f3c067997919808e",
+      "disposition": "presentation",
+      "reason": "Static Scalar presentation frame for the existing read-only Cloud DNS list endpoint; no provider state or access policy change.",
+      "models": []
+    },
+    {
+      "path": "internal/server/apidocs/gcp-dns/dns.v1.json",
+      "sha256": "fef314d51169f83658fed72b2de59b2a0d552cbae2ca5d6753858a8d85a07dc7",
+      "disposition": "presentation",
+      "reason": "OpenAPI presentation for the existing same-origin DNS List managed zones GET only; no new API operation or state transition.",
+      "models": []
+    },
+    {
       "path": "internal/server/cloud_storage.go",
       "sha256": "fd42554c210182f4c3faa395c0c82c985498944c86672f005a2feb8c304115b7",
       "disposition": "modeled",

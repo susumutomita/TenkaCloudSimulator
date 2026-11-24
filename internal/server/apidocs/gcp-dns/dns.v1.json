@@ -1,0 +1,84 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Cloud DNS (simulator)",
+    "version": "v1",
+    "description": "Read-only API reference for listing managed zones in the configured local project. Requires an authenticated simulator browser session for the configured owner. This is local metadata, not Google IAM, DNS serving, or propagation."
+  },
+  "servers": [
+    {
+      "url": "/_simulator/providers/gcp/dns/v1"
+    }
+  ],
+  "paths": {
+    "/projects/{project}/managedZones": {
+      "get": {
+        "operationId": "dns.managedZones.list",
+        "summary": "List managed zones",
+        "externalDocs": {
+          "url": "https://docs.cloud.google.com/dns/docs/reference/rest/v1/managedZones/list"
+        },
+        "parameters": [
+          {
+            "name": "project",
+            "in": "path",
+            "required": true,
+            "description": "The host-configured local project ID.",
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-z](?:[a-z0-9-]{0,61}[a-z0-9])?$"
+            }
+          },
+          {
+            "name": "maxResults",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100
+            }
+          },
+          {
+            "name": "pageToken",
+            "in": "query",
+            "description": "Opaque token from a previous response in this collection.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Managed zones in the local project.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["managedZones"],
+                  "properties": {
+                    "managedZones": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {"type": "string"},
+                          "name": {"type": "string"},
+                          "dnsName": {"type": "string"},
+                          "description": {"type": "string"}
+                        }
+                      }
+                    },
+                    "nextPageToken": {"type": "string"}
+                  }
+                }
+              }
+            }
+          },
+          "400": {"description": "Invalid query or page token."},
+          "401": {"description": "Local authentication required."},
+          "403": {"description": "Not permitted for this local project."}
+        }
+      }
+    }
+  }
+}
