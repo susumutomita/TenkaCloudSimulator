@@ -162,7 +162,7 @@
     },
     {
       "path": "scripts/check-assets.py",
-      "sha256": "f5cf8b231655ccc3884bbf11008cf32d5ade2e18653ce683a8ea0c80a077a43b",
+      "sha256": "86b9be166951970b736656a8076b5042a0b26d49e53ca7c75660a1854a12e81e",
       "disposition": "validation-tooling",
       "reason": "Retains exact API reference inventory and admits only the reviewed Sakura Server List operation. No provider state or authority change.",
       "models": []
@@ -194,6 +194,13 @@
       "reason": "Checks preservation of required registration and rejects removed Sakura scope, properties or controls with an isolated model fixture.",
       "models": [],
       "sha256": "441daf8268f4a3dc21fcce44a00d1158fa70395ea3a0e1589f79bbf22f28ddc9"
+    },
+    {
+      "path": "scripts/test-native-provenance.py",
+      "sha256": "bfdb3c500bf880a9c094af0b4a38cdfbcbba4717f9213a03962ce31d2b9ddc97",
+      "disposition": "test-support",
+      "reason": "Pins the separate Sakura Server List reference singleton and closed-union operand while retaining the original exact native provenance normalization and historical digest. Tests only.",
+      "models": []
     },
     {
       "path": "test/e2e/test_openapi_parameters.py",
