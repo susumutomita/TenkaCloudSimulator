@@ -380,8 +380,8 @@ var serverlessRepo = &Service{
 		{Name: "UpdateApplication", Kind: Update, Resource: "application", Lookup: "ApplicationId",
 			Fields: []string{"Author", "Description", "HomePageUrl", "Labels"}, Check: serverlessRepoMembers},
 		{Name: "DeleteApplication", Kind: Delete, Resource: "application", Lookup: "ApplicationId"},
-		{Name: "PutApplicationPolicy", Kind: Put, Resource: "policy", Parent: "ApplicationId", Lookup: "ApplicationId", Check: serverlessRepoPolicy},
-		{Name: "GetApplicationPolicy", Kind: Read, Resource: "policy", Parent: "ApplicationId", Lookup: "ApplicationId"},
+		{Name: "PutApplicationPolicy", Kind: Put, Resource: "policy", Parent: "ApplicationId", AuthorizeParent: true, Lookup: "ApplicationId", Check: serverlessRepoPolicy},
+		{Name: "GetApplicationPolicy", Kind: Read, Resource: "policy", Parent: "ApplicationId", AuthorizeParent: true, Lookup: "ApplicationId"},
 	},
 	Bounds: []string{
 		"Applications and their sharing policies are stored records: no SAM template, source archive, readme, license text or application version is stored, nothing is deployed, and no S3 object or CloudFormation change set exists. Application versions (CreateApplicationVersion, ListApplicationVersions), CreateCloudFormationChangeSet, CreateCloudFormationTemplate, GetCloudFormationTemplate, ListApplicationDependencies and UnshareApplication return UnknownOperationException with HTTP 501.",

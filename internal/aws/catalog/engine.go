@@ -194,6 +194,13 @@ func bindModel(spec *Service, model *Model) (*binding, error) {
 		if res := spec.resource(op.Resource); res != nil && res.Parent != "" && op.Parent == "" {
 			return nil, fmt.Errorf("catalog %s operation %s needs the parent identifier member", spec.Model, op.Name)
 		}
+		if op.AuthorizeParent {
+			res := spec.resource(op.Resource)
+			if (op.Kind != Read && op.Kind != Put) || res == nil || op.Parent == "" ||
+				res.Parent == "" || spec.resource(res.Parent) == nil {
+				return nil, fmt.Errorf("catalog %s operation %s needs a modeled parent for Read or Put authorization", spec.Model, op.Name)
+			}
+		}
 		b.ops[op.Name] = op
 	}
 	for name := range model.Operations {

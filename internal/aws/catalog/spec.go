@@ -45,6 +45,10 @@ type Op struct {
 	Fields    []string
 	Filters   map[string]string
 	ListValue string
+
+	// AuthorizeParent binds a child Read/Put to its resolved parent's ARN.
+	// The child ARN remains an internal storage identity, not an IAM target.
+	AuthorizeParent bool
 	// Touch lists stored members set to the current time by this operation.
 	Touch []string
 	// Set assigns fixed values to stored members after a successful mutation,

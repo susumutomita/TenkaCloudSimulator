@@ -25,9 +25,9 @@
     },
     {
       "path": "formal/models.json",
-      "sha256": "93d705178daa12aa75cb557579b3deb87c057951d3e4ca89aca326de29d0ecaf",
+      "sha256": "9941a1a6f019d39ba1ac3ba71c650bfa757f7244d8ceb318b7a6a9f2f18245f2",
       "disposition": "formal-infrastructure",
-      "reason": "Adds the new specification files and service model files to the catalog lifecycle model source scope.",
+      "reason": "Adds the new specification files and service model files to the catalog lifecycle model source scope. Registers the narrow SAR authorization target model without changing existing lifecycle model limits.",
       "models": []
     },
     {
@@ -98,9 +98,9 @@
     },
     {
       "path": "internal/aws/catalog/engine.go",
-      "sha256": "d9dafeaaee8fdf92caaf8c901965099707f9030a58677f15ea61e037ddd13996",
+      "sha256": "04c703b4cc3a33214eb7f3c95979ce490f9277d482e73596d66966a31b3a104c",
       "disposition": "modeled",
-      "reason": "Catalog engine vocabulary extended for the newly served services; requests still pass through the shared validated execution path and refusals leave state unchanged.",
+      "reason": "Catalog engine vocabulary extended for the newly served services; requests still pass through the shared validated execution path and refusals leave state unchanged. The exact parent authorization option is restricted to Read/Put with a declared parent and parent input.",
       "models": [
         {
           "id": "CatalogResourceLifecycle",
@@ -110,6 +110,16 @@
             "PeerFrame"
           ],
           "limits": "Finite store-level model of catalog resources: authorization order, replay, quotas, names, generations, child guards and pagination tokens. Wire decoding and encoding, descriptor projection, reference generation and the service-specific rules in specification check hooks are outside the model and are checked by native tests and the boto3 end-to-end fixtures."
+        },
+        {
+          "id": "SARPolicyAuthorizationTarget",
+          "properties": [
+            "ResolvedParentTarget",
+            "NoUnpermittedEffects",
+            "PermittedBehavior",
+            "ReadPreservesStoredPolicy"
+          ],
+          "limits": "Finite receipt for one SAR Get/Put of saved local application-policy metadata. Existing parent ARN and private stored policy identity are symbolic distinct targets; decision assumes the existing identity-policy evaluator and a resolved application's ARN. Verifies the abstract selection, read/write refusal frames and legitimate permitted effects, not actual ARN parsing, resolution/native engine ordering, sibling or process concurrency, absence wire error distinctions, IAM evaluation, resource-sharing policies, API transport, database failures, SDK or concrete Go refinement. Native in-process tests separately observe exact Go IAM action/resource calls and unchanged state on refusal."
         }
       ]
     },
@@ -1158,9 +1168,9 @@
     },
     {
       "path": "internal/aws/catalog/semantics.go",
-      "sha256": "f1147a07468a090fb8485d00d36ec8723353bab0b59945bda8088be88fa1a380",
+      "sha256": "c56e1a1a26525329bef2f449005ac35b144bc4fb7d16673af9051f07267ac79d",
       "disposition": "modeled",
-      "reason": "Catalog engine vocabulary extended for the newly served services; requests still pass through the shared validated execution path and refusals leave state unchanged.",
+      "reason": "Catalog engine vocabulary extended for the newly served services; requests still pass through the shared validated execution path and refusals leave state unchanged. The policy read/replace and first write use the resolved application ARN, not the internal policy row key.",
       "models": [
         {
           "id": "CatalogResourceLifecycle",
@@ -1170,6 +1180,16 @@
             "PeerFrame"
           ],
           "limits": "Finite store-level model of catalog resources: authorization order, replay, quotas, names, generations, child guards and pagination tokens. Wire decoding and encoding, descriptor projection, reference generation and the service-specific rules in specification check hooks are outside the model and are checked by native tests and the boto3 end-to-end fixtures."
+        },
+        {
+          "id": "SARPolicyAuthorizationTarget",
+          "properties": [
+            "ResolvedParentTarget",
+            "NoUnpermittedEffects",
+            "PermittedBehavior",
+            "ReadPreservesStoredPolicy"
+          ],
+          "limits": "Finite receipt for one SAR Get/Put of saved local application-policy metadata. Existing parent ARN and private stored policy identity are symbolic distinct targets; decision assumes the existing identity-policy evaluator and a resolved application's ARN. Verifies the abstract selection, read/write refusal frames and legitimate permitted effects, not actual ARN parsing, resolution/native engine ordering, sibling or process concurrency, absence wire error distinctions, IAM evaluation, resource-sharing policies, API transport, database failures, SDK or concrete Go refinement. Native in-process tests separately observe exact Go IAM action/resource calls and unchanged state on refusal."
         }
       ]
     },
@@ -1266,9 +1286,9 @@
     },
     {
       "path": "internal/aws/catalog/services_compute3.go",
-      "sha256": "c506f0c6a9dc7f6b2fc0ab1b3203fc21134fe902d50226a1f82c14164854c013",
+      "sha256": "6f3cdff61330baf1ee174980a541ce67082d2bf69522fcce15b4a1f534456428",
       "disposition": "modeled",
-      "reason": "Reviewed specifications for newly added services: stored configuration and configuration records with unique names and per-Region limits.",
+      "reason": "Reviewed specifications for newly added services: stored configuration and configuration records with unique names and per-Region limits. Only the two SAR application-policy actions opt into resolved parent authorization.",
       "models": [
         {
           "id": "CatalogResourceLifecycle",
@@ -1279,6 +1299,16 @@
             "UniqueNames"
           ],
           "limits": "Finite store-level model of catalog resources: authorization order, replay, quotas, names, generations, child guards and pagination tokens. Wire decoding and encoding, descriptor projection, reference generation and the service-specific rules in specification check hooks are outside the model and are checked by native tests and the boto3 end-to-end fixtures."
+        },
+        {
+          "id": "SARPolicyAuthorizationTarget",
+          "properties": [
+            "ResolvedParentTarget",
+            "NoUnpermittedEffects",
+            "PermittedBehavior",
+            "ReadPreservesStoredPolicy"
+          ],
+          "limits": "Finite receipt for one SAR Get/Put of saved local application-policy metadata. Existing parent ARN and private stored policy identity are symbolic distinct targets; decision assumes the existing identity-policy evaluator and a resolved application's ARN. Verifies the abstract selection, read/write refusal frames and legitimate permitted effects, not actual ARN parsing, resolution/native engine ordering, sibling or process concurrency, absence wire error distinctions, IAM evaluation, resource-sharing policies, API transport, database failures, SDK or concrete Go refinement. Native in-process tests separately observe exact Go IAM action/resource calls and unchanged state on refusal."
         }
       ]
     },
@@ -1566,9 +1596,9 @@
     },
     {
       "path": "internal/aws/catalog/spec.go",
-      "sha256": "24a12f207a94d2b733b8266c0ccb841d704782849d47b4b3cb21f24eacdf3ed2",
+      "sha256": "c89a86e5bce48d0e9ff1b712f43ab01508394ae3c7d21bea06b40641772a185f",
       "disposition": "modeled",
-      "reason": "Catalog engine vocabulary extended for the newly served services; requests still pass through the shared validated execution path and refusals leave state unchanged.",
+      "reason": "Catalog engine vocabulary extended for the newly served services; requests still pass through the shared validated execution path and refusals leave state unchanged. Defines the small configuration field selecting application ARN for the two reviewed SAR policy operations.",
       "models": [
         {
           "id": "CatalogResourceLifecycle",
@@ -1578,6 +1608,16 @@
             "PeerFrame"
           ],
           "limits": "Finite store-level model of catalog resources: authorization order, replay, quotas, names, generations, child guards and pagination tokens. Wire decoding and encoding, descriptor projection, reference generation and the service-specific rules in specification check hooks are outside the model and are checked by native tests and the boto3 end-to-end fixtures."
+        },
+        {
+          "id": "SARPolicyAuthorizationTarget",
+          "properties": [
+            "ResolvedParentTarget",
+            "NoUnpermittedEffects",
+            "PermittedBehavior",
+            "ReadPreservesStoredPolicy"
+          ],
+          "limits": "Finite receipt for one SAR Get/Put of saved local application-policy metadata. Existing parent ARN and private stored policy identity are symbolic distinct targets; decision assumes the existing identity-policy evaluator and a resolved application's ARN. Verifies the abstract selection, read/write refusal frames and legitimate permitted effects, not actual ARN parsing, resolution/native engine ordering, sibling or process concurrency, absence wire error distinctions, IAM evaluation, resource-sharing policies, API transport, database failures, SDK or concrete Go refinement. Native in-process tests separately observe exact Go IAM action/resource calls and unchanged state on refusal."
         }
       ]
     },
@@ -2603,6 +2643,63 @@
       "sha256": "db96c9291fde8f8eb32eb83ba729883cdb547ae6f524b9398b995e2b0cfe0c0a",
       "disposition": "presentation",
       "reason": "Descriptor fixture regenerated by the Go catalog tests after specification changes.",
+      "models": []
+    },
+    {
+      "path": "formal/SARPolicyAuthorizationTarget.tla",
+      "sha256": "7d0e81e7cec63fa3e0be763501141c0580c6b3db7218df5d50241b9e2e5b7bcd",
+      "disposition": "modeled",
+      "reason": "The finite SAR application-policy target and refusal/legitimate effects check.",
+      "models": [
+        {
+          "id": "SARPolicyAuthorizationTarget",
+          "properties": [
+            "ResolvedParentTarget",
+            "NoUnpermittedEffects",
+            "PermittedBehavior",
+            "ReadPreservesStoredPolicy"
+          ],
+          "limits": "Finite receipt for one SAR Get/Put of saved local application-policy metadata. Existing parent ARN and private stored policy identity are symbolic distinct targets; decision assumes the existing identity-policy evaluator and a resolved application's ARN. Verifies the abstract selection, read/write refusal frames and legitimate permitted effects, not actual ARN parsing, resolution/native engine ordering, sibling or process concurrency, absence wire error distinctions, IAM evaluation, resource-sharing policies, API transport, database failures, SDK or concrete Go refinement. Native in-process tests separately observe exact Go IAM action/resource calls and unchanged state on refusal."
+        }
+      ]
+    },
+    {
+      "path": "formal/SARPolicyAuthorizationTarget.cfg",
+      "sha256": "1301d22587f6728e93ed3e41690cd077ef3ab3c9552fa917e2c48a8a6e7aa2cb",
+      "disposition": "modeled",
+      "reason": "The finite SAR application-policy target and refusal/legitimate effects check.",
+      "models": [
+        {
+          "id": "SARPolicyAuthorizationTarget",
+          "properties": [
+            "ResolvedParentTarget",
+            "NoUnpermittedEffects",
+            "PermittedBehavior",
+            "ReadPreservesStoredPolicy"
+          ],
+          "limits": "Finite receipt for one SAR Get/Put of saved local application-policy metadata. Existing parent ARN and private stored policy identity are symbolic distinct targets; decision assumes the existing identity-policy evaluator and a resolved application's ARN. Verifies the abstract selection, read/write refusal frames and legitimate permitted effects, not actual ARN parsing, resolution/native engine ordering, sibling or process concurrency, absence wire error distinctions, IAM evaluation, resource-sharing policies, API transport, database failures, SDK or concrete Go refinement. Native in-process tests separately observe exact Go IAM action/resource calls and unchanged state on refusal."
+        }
+      ]
+    },
+    {
+      "path": "scripts/formal_model_gate.py",
+      "sha256": "37643da400ab99d1ca93dadcdeb7a66b1241a7e9f9986962e8666befe82749d2",
+      "disposition": "formal-infrastructure",
+      "reason": "Require the exact SAR target model, property inventory, source scope and sensitivity controls.",
+      "models": []
+    },
+    {
+      "path": "scripts/test-formal-gate.py",
+      "sha256": "b139445a686707d84207ad47070ffd41ef41d1e0c6d281acbc037a51e29df4a7",
+      "disposition": "formal-infrastructure",
+      "reason": "Independently require the SAR target model in the complete reviewed registry inventory.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/catalog/serverlessrepo_policy_authorization_test.go",
+      "sha256": "b49d3d2ad7fb4cd82c0fdf8c0bb75cb4f1448cf45d12426522fc9bfba7e82196",
+      "disposition": "test-support",
+      "reason": "Asserts the resolved application IAM target for both actions in a synthetic owned fixture, positive grants, typed refusals, and unchanged metadata.",
       "models": []
     }
   ]

@@ -19399,6 +19399,72 @@
     "expect_invariant": "FreshCommittedID"
    }
   ]
- }
+ },
+  {
+   "id": "SARPolicyAuthorizationTarget",
+   "model": "formal/SARPolicyAuthorizationTarget.tla",
+   "config": "formal/SARPolicyAuthorizationTarget.cfg",
+   "bounds": "One request, two modeled operations, boolean application presence, four subsets of two identity permission targets, policy absent or present before the request, natural-number policy version 0..2.",
+   "properties": [
+    "TypeOK",
+    "ResolvedParentTarget",
+    "NoUnpermittedEffects",
+    "PermittedBehavior",
+    "ReadPreservesStoredPolicy"
+   ],
+   "limits": "Finite receipt for one SAR Get/Put of saved local application-policy metadata. Existing parent ARN and private stored policy identity are symbolic distinct targets; decision assumes the existing identity-policy evaluator and a resolved application's ARN. Verifies the abstract selection, read/write refusal frames and legitimate permitted effects, not actual ARN parsing, resolution/native engine ordering, sibling or process concurrency, absence wire error distinctions, IAM evaluation, resource-sharing policies, API transport, database failures, SDK or concrete Go refinement. Native in-process tests separately observe exact Go IAM action/resource calls and unchanged state on refusal.",
+   "source_scope": [
+    "internal/aws/catalog/engine.go",
+    "internal/aws/catalog/semantics.go",
+    "internal/aws/catalog/services_compute3.go",
+    "internal/aws/catalog/spec.go"
+   ],
+   "mutants": [
+    {
+     "id": "UseStorageTarget",
+     "edits": [
+      {
+       "old": "IF hasParent THEN \"ParentArn\" ELSE \"Unresolved\"",
+       "new": "IF hasParent THEN \"StorageIdentity\" ELSE \"Unresolved\"",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "ResolvedParentTarget"
+    },
+    {
+     "id": "IgnoreApplicationGrant",
+     "edits": [
+      {
+       "old": "target = \"ParentArn\" /\\ target \\in grants",
+       "new": "target = \"ParentArn\"",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "NoUnpermittedEffects"
+    },
+    {
+     "id": "RejectPermitted",
+     "edits": [
+      {
+       "old": "target = \"ParentArn\" /\\ target \\in grants",
+       "new": "FALSE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "PermittedBehavior"
+    },
+    {
+     "id": "MutateOnRead",
+     "edits": [
+      {
+       "old": "IF state = \"Written\" THEN before + 1 ELSE before",
+       "new": "IF state \\in {\"Written\", \"Read\"} THEN before + 1 ELSE before",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "ReadPreservesStoredPolicy"
+    }
+   ]
+  }
  ]
 }

@@ -104,7 +104,7 @@ func (q *request) put() (map[string]any, error) {
 	if err != nil {
 		return nil, err
 	}
-	if err := q.authorize(found.ARN); err != nil {
+	if err := q.authorizeTarget(found.ARN, parent); err != nil {
 		return nil, err
 	}
 	if err := q.checkToken(res, found); err != nil {
@@ -311,6 +311,18 @@ func (q *request) authorize(resource string) error {
 	return q.authorizeAction(q.b.spec.IAMPrefix+":"+q.op.action(), resource)
 }
 
+// authorizeTarget separates an identity policy's resource from the
+// private catalog row key only when the reviewed operation requires it.
+func (q *request) authorizeTarget(resource string, parent *row) error {
+	if q.op.AuthorizeParent {
+		if parent == nil || parent.ARN == "" {
+			return fmt.Errorf("catalog %s/%s lacks a resolved authorization parent", q.b.spec.Model, q.op.Name)
+		}
+		resource = parent.ARN
+	}
+	return q.authorize(resource)
+}
+
 func (q *request) authorizeAction(action, resource string) error {
 	decision, err := q.e.cfg.Authorize(q.ctx, q.principal, action, resource)
 	if err != nil {
@@ -402,7 +414,7 @@ func (q *request) lookup() (row, *row, error) {
 	if errors.Is(err, sql.ErrNoRows) && res.Singleton {
 		r := row{Service: q.b.spec.Model, Region: q.region, Kind: res.Kind, ID: "default", Name: "default", Tags: map[string]string{}, Document: map[string]any{}}
 		r.ARN = q.formatARN(res, r.ID, r.Name, parent)
-		if err := q.authorize(r.ARN); err != nil {
+		if err := q.authorizeTarget(r.ARN, parent); err != nil {
 			return row{}, nil, err
 		}
 		for key, value := range res.Generate {
@@ -422,7 +434,7 @@ func (q *request) lookup() (row, *row, error) {
 		if !strings.HasPrefix(identifier, "arn:") {
 			guess = q.formatARN(res, identifier, identifier, parent)
 		}
-		if err := q.authorize(guess); err != nil {
+		if err := q.authorizeTarget(guess, parent); err != nil {
 			return row{}, nil, err
 		}
 		return row{}, nil, &fault{kind: "notfound", message: fmt.Sprintf("The %s %s does not exist.", res.Kind, identifier)}
@@ -430,7 +442,7 @@ func (q *request) lookup() (row, *row, error) {
 	if err != nil {
 		return row{}, nil, err
 	}
-	if err := q.authorize(found.ARN); err != nil {
+	if err := q.authorizeTarget(found.ARN, parent); err != nil {
 		return row{}, nil, err
 	}
 	return found, parent, nil
@@ -744,7 +756,7 @@ func (q *request) create(ecsRevision int) (map[string]any, error) {
 	}
 	res := q.resource()
 	tokenMember := idempotencyMember(q.b.model.shape(q.official.Input))
-	if err := q.authorize(r.ARN); err != nil {
+	if err := q.authorizeTarget(r.ARN, parent); err != nil {
 		return nil, err
 	}
 	if ecsRevision > 0 {

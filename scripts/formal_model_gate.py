@@ -3061,6 +3061,38 @@ REQUIRED_SOURCE_SCOPES['SakuraServerReadEpoch'] = {
 SAKURA_SERVER_READ_EPOCH_MUTATIONS = [{'id': 'IgnoreDisabled', 'edits': [{'old': 'config.enabled /\\ config.valid /\\ ~config.handoff', 'new': 'config.valid /\\ ~config.handoff', 'count': 1}], 'expect_invariant': 'NoUnadvertisedMount'}, {'id': 'IgnoreMalformed', 'edits': [{'old': 'config.enabled /\\ config.valid /\\ ~config.handoff', 'new': 'config.enabled /\\ ~config.handoff', 'count': 1}], 'expect_invariant': 'NoUnadvertisedMount'}, {'id': 'IgnoreHandoff', 'edits': [{'old': 'config.enabled /\\ config.valid /\\ ~config.handoff', 'new': 'config.enabled /\\ config.valid', 'count': 1}], 'expect_invariant': 'NoUnadvertisedMount'}, {'id': 'IgnoreContext', 'edits': [{'old': 'BoundContext(r) == r.context = context.sequence', 'new': 'BoundContext(r) == TRUE', 'count': 1}], 'expect_invariant': 'OnlyCurrentResult'}, {'id': 'IgnoreRevision', 'edits': [{'old': 'BoundRevision(r) == r.revision = revision', 'new': 'BoundRevision(r) == TRUE', 'count': 1}], 'expect_invariant': 'OnlyCurrentResult'}, {'id': 'AcceptWrongServer', 'edits': [{'old': 'ProjectionOK(r, actual) == r.target = actual', 'new': 'ProjectionOK(r, actual) == TRUE', 'count': 1}], 'expect_invariant': 'NoDifferentServer'}]
 
 
+BASE_MODELS.add('SARPolicyAuthorizationTarget')
+BASE_INVARIANTS['SARPolicyAuthorizationTarget'] = {
+    'TypeOK', 'ResolvedParentTarget', 'NoUnpermittedEffects',
+    'PermittedBehavior', 'ReadPreservesStoredPolicy',
+}
+SAR_POLICY_TARGET_MUTATIONS = [{'id': 'UseStorageTarget',
+  'edits': [{'old': 'IF hasParent THEN "ParentArn" ELSE "Unresolved"',
+             'new': 'IF hasParent THEN "StorageIdentity" ELSE "Unresolved"',
+             'count': 1}],
+  'expect_invariant': 'ResolvedParentTarget'},
+ {'id': 'IgnoreApplicationGrant',
+  'edits': [{'old': 'target = "ParentArn" /\\ target \\in grants', 'new': 'target = "ParentArn"', 'count': 1}],
+  'expect_invariant': 'NoUnpermittedEffects'},
+ {'id': 'RejectPermitted',
+  'edits': [{'old': 'target = "ParentArn" /\\ target \\in grants', 'new': 'FALSE', 'count': 1}],
+  'expect_invariant': 'PermittedBehavior'},
+ {'id': 'MutateOnRead',
+  'edits': [{'old': 'IF state = "Written" THEN before + 1 ELSE before',
+             'new': 'IF state \\in {"Written", "Read"} THEN before + 1 ELSE before',
+             'count': 1}],
+  'expect_invariant': 'ReadPreservesStoredPolicy'}]
+REQUIRED_MUTANTS['SARPolicyAuthorizationTarget'] = {
+    control['id'] for control in SAR_POLICY_TARGET_MUTATIONS
+}
+REQUIRED_SOURCE_SCOPES['SARPolicyAuthorizationTarget'] = {
+    'internal/aws/catalog/engine.go',
+    'internal/aws/catalog/semantics.go',
+    'internal/aws/catalog/services_compute3.go',
+    'internal/aws/catalog/spec.go',
+}
+
+
 def load_registry(root, relative='formal/models.json'):
     root = Path(root)
     registry_path = asset(root, relative)
@@ -3116,6 +3148,8 @@ def load_registry(root, relative='formal/models.json'):
             require(mutant['expect_invariant'] in model['properties'], 'mutant expects unchecked invariant')
             apply_mutant(source, name, mutant)
         require(REQUIRED_MUTANTS.get(name, set()) <= mutant_ids, 'a required mutation control was removed')
+        if name == 'SARPolicyAuthorizationTarget':
+            require(model['mutants'] == SAR_POLICY_TARGET_MUTATIONS, 'SAR policy target controls changed')
         if name == 'SakuraServerReadEpoch':
             require(model['mutants'] == SAKURA_SERVER_READ_EPOCH_MUTATIONS, 'Sakura Server read-epoch mutation controls changed')
         if name in BATTLE_INTEGRATION_MUTATIONS:
