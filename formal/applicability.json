@@ -95,10 +95,46 @@
       ]
     },
     {
+      "path": "formal/CloudDNSConsoleScope.cfg",
+      "sha256": "206f6a008b8c6f2c8d7bb18c5f3d5bced8a8018bb1dd4fba4ce182b201921c22",
+      "disposition": "modeled",
+      "reason": "Declares checked invariants of the finite Cloud DNS console admission and scope projection.",
+      "models": [
+        {
+          "id": "CloudDNSConsoleScope",
+          "properties": [
+            "CapabilityAuthorized",
+            "OnlyCurrentDiscovery",
+            "OnlyCurrentReadVisible",
+            "NoStaleContinuation"
+          ],
+          "limits": "Finite presentation and admission projection: backend oracle abstracts authenticated identity and existing AWS handoff, and frontend models capability epochs, read replacement and continuation. Assumes same-origin transport and effective local actor; does not execute middleware, React, DOM, HTTP, RRset data/state updates, SDK, Terraform or establish implementation refinement. Generated app.js binding is limited to this changed Cloud DNS projection."
+        }
+      ]
+    },
+    {
+      "path": "formal/CloudDNSConsoleScope.tla",
+      "sha256": "697a85ff3e7c15ae9abbfcc1b9375822971f673f41567fba57fabf6d17ee9427",
+      "disposition": "modeled",
+      "reason": "Models owner-only discovery, delayed identity replies, and read ticket visibility/continuation.",
+      "models": [
+        {
+          "id": "CloudDNSConsoleScope",
+          "properties": [
+            "CapabilityAuthorized",
+            "OnlyCurrentDiscovery",
+            "OnlyCurrentReadVisible",
+            "NoStaleContinuation"
+          ],
+          "limits": "Finite presentation and admission projection: backend oracle abstracts authenticated identity and existing AWS handoff, and frontend models capability epochs, read replacement and continuation. Assumes same-origin transport and effective local actor; does not execute middleware, React, DOM, HTTP, RRset data/state updates, SDK, Terraform or establish implementation refinement. Generated app.js binding is limited to this changed Cloud DNS projection."
+        }
+      ]
+    },
+    {
       "path": "formal/models.json",
-      "sha256": "68aa547dbb001bcc4040a7a670b7719c3e683e897c692dd0069e9cad4059daf1",
+      "sha256": "020ee1f084c94f9e20002ecf3b9666b0656abc7c8cd029a3004a91198354d3c2",
       "disposition": "formal-infrastructure",
-      "reason": "Adds the two reviewed Cloud DNS registrations and preserves all 113 previously registered main models.",
+      "reason": "Adds the two reviewed Cloud DNS registrations and preserves all 113 previously registered main models. Also includes the scoped DNS console projection and its removal guards.",
       "models": []
     },
     {
@@ -300,9 +336,9 @@
     },
     {
       "path": "internal/server/gcp_dns_handler_test.go",
-      "sha256": "565f1a694ccee91f55b2bc06ce4eacee6716b3db002c0c9707fc27fb5be6fe1a",
+      "sha256": "fa970ecb1382797b3129ce5537aa224db5e12d0777b8756c1a0219d1463df81e",
       "disposition": "test-support",
-      "reason": "Native or developer-only test oracle and controls; not a runtime input or proof of the formal model.",
+      "reason": "Tests concrete NewAccess capability discovery and DNS list using existing local handler fixtures.",
       "models": []
     },
     {
@@ -311,6 +347,38 @@
       "disposition": "test-support",
       "reason": "Native or developer-only test oracle and controls; not a runtime input or proof of the formal model.",
       "models": []
+    },
+    {
+      "path": "internal/server/server.go",
+      "sha256": "d824be4831fb25758d93ca2d119ae490f7a42b43d452d62be25dc5a2edd93c38",
+      "disposition": "modeled",
+      "reason": "Publishes the Cloud DNS console capability only for the trusted local owner outside scoped handoffs.",
+      "models": [
+        {
+          "id": "CloudDNSConsoleScope",
+          "properties": [
+            "CapabilityAuthorized"
+          ],
+          "limits": "Finite presentation and admission projection: backend oracle abstracts authenticated identity and existing AWS handoff, and frontend models capability epochs, read replacement and continuation. Assumes same-origin transport and effective local actor; does not execute middleware, React, DOM, HTTP, RRset data/state updates, SDK, Terraform or establish implementation refinement. Generated app.js binding is limited to this changed Cloud DNS projection."
+        }
+      ]
+    },
+    {
+      "path": "internal/server/web/app.js",
+      "sha256": "b28e4274f9523ea914c6e1fb0e09432ab79e8441d952f76a88c253d9cc8bc4cc",
+      "disposition": "modeled",
+      "reason": "Rebuilt console embeds the scoped DNS visibility and local request-cancellation behavior in the bound UI changes.",
+      "models": [
+        {
+          "id": "CloudDNSConsoleScope",
+          "properties": [
+            "OnlyCurrentDiscovery",
+            "OnlyCurrentReadVisible",
+            "NoStaleContinuation"
+          ],
+          "limits": "Finite presentation and admission projection: backend oracle abstracts authenticated identity and existing AWS handoff, and frontend models capability epochs, read replacement and continuation. Assumes same-origin transport and effective local actor; does not execute middleware, React, DOM, HTTP, RRset data/state updates, SDK, Terraform or establish implementation refinement. Generated app.js binding is limited to this changed Cloud DNS projection."
+        }
+      ]
     },
     {
       "path": "scripts/factory_acceptance.py",
@@ -322,9 +390,9 @@
     {
       "path": "scripts/formal_model_gate.py",
       "disposition": "formal-infrastructure",
-      "reason": "Pins both reviewed Cloud DNS models, their checked properties, exact source scopes and three sensitivity controls, preserving all existing pins.",
+      "reason": "Pins both reviewed Cloud DNS models, their checked properties, exact source scopes and three sensitivity controls, preserving all existing pins. Also includes the scoped DNS console projection and its removal guards.",
       "models": [],
-      "sha256": "580bbaa84b81a57947ec7abf9c6c5be671f10983e6aef949624b0a553bb8f092"
+      "sha256": "064417caccd6ba5ee668970e3687cc6b886d184f873a53f4222b14bbfcaaff87"
     },
     {
       "path": "scripts/test-factory-acceptance.py",
@@ -336,9 +404,9 @@
     {
       "path": "scripts/test-formal-gate.py",
       "disposition": "formal-infrastructure",
-      "reason": "Checks exact model inventory and rejects removal of Cloud DNS scope, properties or registered controls with isolated fixtures.",
+      "reason": "Checks exact model inventory and rejects removal of Cloud DNS scope, properties or registered controls with isolated fixtures. Also includes the scoped DNS console projection and its removal guards.",
       "models": [],
-      "sha256": "2a1787b057d8ece9dd71a33677732fc70e3eb1d0910d484405a490c9d2b8af6d"
+      "sha256": "d1571d0da9378ca1cbbdcacebe5b3a4b7810fa5a09769f8a40d4503068d93523"
     },
     {
       "path": "test/e2e/gcp_dns_scalar_send.py",
@@ -352,6 +420,111 @@
       "sha256": "bf8b53d1281401069830a23ee51899d44026d062d61a0e8dea4defdf37064e67",
       "disposition": "test-support",
       "reason": "Adds opt-in pinned official discovery-client DNS lifecycle against a privately owned numeric loopback, with configured actor and cleanup. No runtime, package pin, runner or workflow changes.",
+      "models": []
+    },
+    {
+      "path": "tools/console/bundle-digests.json",
+      "sha256": "bdde72ff99e5bce2306e4c1ae1845eb88248dfeed0640eda50cf9e8dab0fbb5b",
+      "disposition": "presentation",
+      "reason": "Generated digest indexes of embedded console assets, not program behavior.",
+      "models": []
+    },
+    {
+      "path": "tools/console/bundle-inputs.json",
+      "sha256": "b8cf6711a05d937a88ce1b15e2c11d7ff3ac159da96ae95c224d67a0a8fe71db",
+      "disposition": "presentation",
+      "reason": "Generated console input provenance, not program behavior.",
+      "models": []
+    },
+    {
+      "path": "tools/console/src/console-navigation.mjs",
+      "sha256": "57859dbacd0f846588ec54fba07bdc7459d45e2e34b15ee24be789749ef51589",
+      "disposition": "modeled",
+      "reason": "Projects DNS availability from the exact capability and the active discovery principal and epoch.",
+      "models": [
+        {
+          "id": "CloudDNSConsoleScope",
+          "properties": [
+            "OnlyCurrentDiscovery"
+          ],
+          "limits": "Finite presentation and admission projection: backend oracle abstracts authenticated identity and existing AWS handoff, and frontend models capability epochs, read replacement and continuation. Assumes same-origin transport and effective local actor; does not execute middleware, React, DOM, HTTP, RRset data/state updates, SDK, Terraform or establish implementation refinement. Generated app.js binding is limited to this changed Cloud DNS projection."
+        }
+      ]
+    },
+    {
+      "path": "tools/console/src/gcp-console-shell.jsx",
+      "sha256": "4854c6cc6fdd925d19059232d29e1a020a511f8ab68127f07f2aeff5361b9162",
+      "disposition": "modeled",
+      "reason": "The supported Zones rail action issues a fresh list operation, replacing any currently displayed details.",
+      "models": [
+        {
+          "id": "CloudDNSConsoleScope",
+          "properties": [
+            "OnlyCurrentReadVisible",
+            "NoStaleContinuation"
+          ],
+          "limits": "Finite presentation and admission projection: backend oracle abstracts authenticated identity and existing AWS handoff, and frontend models capability epochs, read replacement and continuation. Assumes same-origin transport and effective local actor; does not execute middleware, React, DOM, HTTP, RRset data/state updates, SDK, Terraform or establish implementation refinement. Generated app.js binding is limited to this changed Cloud DNS projection."
+        }
+      ]
+    },
+    {
+      "path": "tools/console/src/gcp-dns-requests.mjs",
+      "sha256": "42f68d363a8cd0477ec42a1f99e4f5ad80f7eadbac854e7d0eb4122c5b8f485a",
+      "disposition": "modeled",
+      "reason": "Checks cancellation before starting each next page. Exact request paths and request/response types are exercised by separate regression tests.",
+      "models": [
+        {
+          "id": "CloudDNSConsoleScope",
+          "properties": [
+            "NoStaleContinuation"
+          ],
+          "limits": "Finite presentation and admission projection: backend oracle abstracts authenticated identity and existing AWS handoff, and frontend models capability epochs, read replacement and continuation. Assumes same-origin transport and effective local actor; does not execute middleware, React, DOM, HTTP, RRset data/state updates, SDK, Terraform or establish implementation refinement. Generated app.js binding is limited to this changed Cloud DNS projection."
+        }
+      ]
+    },
+    {
+      "path": "tools/console/src/gcp-dns.jsx",
+      "sha256": "34663a1017625fe83aee2b7292dd46fdfb25e0e5901d97c7f3d4f72567c6df97",
+      "disposition": "modeled",
+      "reason": "Zone list/detail operations discard superseded read replies and cancel pending reads when the operation is replaced.",
+      "models": [
+        {
+          "id": "CloudDNSConsoleScope",
+          "properties": [
+            "OnlyCurrentReadVisible",
+            "NoStaleContinuation"
+          ],
+          "limits": "Finite presentation and admission projection: backend oracle abstracts authenticated identity and existing AWS handoff, and frontend models capability epochs, read replacement and continuation. Assumes same-origin transport and effective local actor; does not execute middleware, React, DOM, HTTP, RRset data/state updates, SDK, Terraform or establish implementation refinement. Generated app.js binding is limited to this changed Cloud DNS projection."
+        }
+      ]
+    },
+    {
+      "path": "tools/console/src/main.jsx",
+      "sha256": "b8fc0207c53eb06abb46293484c21e5515c53153dbe61705bbe7b7a2009fc9b5",
+      "disposition": "modeled",
+      "reason": "Combines fresh backend discovery and effective principal/epoch before mounting DNS, preventing reuse after returning to the same principal.",
+      "models": [
+        {
+          "id": "CloudDNSConsoleScope",
+          "properties": [
+            "OnlyCurrentDiscovery"
+          ],
+          "limits": "Finite presentation and admission projection: backend oracle abstracts authenticated identity and existing AWS handoff, and frontend models capability epochs, read replacement and continuation. Assumes same-origin transport and effective local actor; does not execute middleware, React, DOM, HTTP, RRset data/state updates, SDK, Terraform or establish implementation refinement. Generated app.js binding is limited to this changed Cloud DNS projection."
+        }
+      ]
+    },
+    {
+      "path": "tools/console/test/gcp-dns-navigation.test.mjs",
+      "sha256": "00512ed0564ab57345f239e2e99919721a3cad4f9955586fb953db3ab7252987",
+      "disposition": "presentation",
+      "reason": "Console navigation source unit tests only; current gate classifies console-side test paths as presentation.",
+      "models": []
+    },
+    {
+      "path": "tools/console/test/gcp-dns-requests.test.mjs",
+      "sha256": "059d396e53d81476fdc145277d5fa06144e074c20fe5fa3046f7d2e973c0af4b",
+      "disposition": "presentation",
+      "reason": "Console source unit tests only; current gate classifies console-side test paths as presentation.",
       "models": []
     }
   ]

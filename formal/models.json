@@ -18961,6 +18961,97 @@
    ]
   },
   {
+   "id": "CloudDNSConsoleScope",
+   "model": "formal/CloudDNSConsoleScope.tla",
+   "config": "formal/CloudDNSConsoleScope.cfg",
+   "bounds": "Two principals, initial scope and two switches, two pending discovery replies and at most two read tickets per scope; nondeterministic out-of-order delivery.",
+   "properties": [
+    "TypeOK",
+    "CapabilityAuthorized",
+    "OnlyCurrentDiscovery",
+    "OnlyCurrentReadVisible",
+    "NoStaleContinuation"
+   ],
+   "limits": "Finite presentation and admission projection: backend oracle abstracts authenticated identity and existing AWS handoff, and frontend models capability epochs, read replacement and continuation. Assumes same-origin transport and effective local actor; does not execute middleware, React, DOM, HTTP, RRset data/state updates, SDK, Terraform or establish implementation refinement. Generated app.js binding is limited to this changed Cloud DNS projection.",
+   "source_scope": [
+    "internal/server/server.go",
+    "internal/server/web/app.js",
+    "tools/console/src/console-navigation.mjs",
+    "tools/console/src/gcp-console-shell.jsx",
+    "tools/console/src/gcp-dns-requests.mjs",
+    "tools/console/src/gcp-dns.jsx",
+    "tools/console/src/main.jsx"
+   ],
+   "mutants": [
+    {
+     "id": "AllowUntrusted",
+     "edits": [
+      {
+       "old": "    trusted /\\ principal = \"owner\" /\\ ~handoff\nReadAllowed",
+       "new": "    principal = \"owner\" /\\ ~handoff\nReadAllowed",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "CapabilityAuthorized"
+    },
+    {
+     "id": "AllowHandoff",
+     "edits": [
+      {
+       "old": "    trusted /\\ principal = \"owner\" /\\ ~handoff\nReadAllowed",
+       "new": "    trusted /\\ principal = \"owner\"\nReadAllowed",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "CapabilityAuthorized"
+    },
+    {
+     "id": "AllowNonOwner",
+     "edits": [
+      {
+       "old": "    trusted /\\ principal = \"owner\" /\\ ~handoff\nReadAllowed",
+       "new": "    trusted /\\ ~handoff\nReadAllowed",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "CapabilityAuthorized"
+    },
+    {
+     "id": "ReuseSamePrincipal",
+     "edits": [
+      {
+       "old": "SameEpoch(value) == value.epoch = scope.epoch",
+       "new": "SameEpoch(value) == TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "OnlyCurrentDiscovery"
+    },
+    {
+     "id": "ExposeStaleRead",
+     "edits": [
+      {
+       "old": "PublishActive(id) == id = ticket",
+       "new": "PublishActive(id) == TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "OnlyCurrentReadVisible"
+    },
+    {
+     "id": "ContinueStaleRead",
+     "edits": [
+      {
+       "old": "ContinueActive(id) == id = ticket",
+       "new": "ContinueActive(id) == TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "NoStaleContinuation"
+    }
+   ]
+  },
+  {
    "id": "CloudDNSAtomicChange",
    "model": "formal/CloudDNSAtomicChange.tla",
    "config": "formal/CloudDNSAtomicChange.cfg",

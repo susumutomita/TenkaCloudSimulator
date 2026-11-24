@@ -4,12 +4,15 @@ package server
 // Every request enters production NewAccess -> server -> provider registry;
 // no actor injection, leaf direct call, fake DNS handler or socket is used.
 import (
+	"context"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"path/filepath"
 	"strings"
 	"testing"
+
+	"github.com/susumutomita/TenkaCloudSimulator/internal/provider"
 )
 
 type dnsHandlerHost struct {
@@ -212,5 +215,82 @@ func TestGCPDNSHandlerExistingGCPRoutes(t *testing.T) {
 	locations, ok := app["locations"].([]any)
 	if !ok || len(locations) == 0 {
 		t.Fatal("App Engine route lost", app)
+	}
+}
+
+// The capability must be useful to the same authenticated principal who can
+// use DNS. The existing provider inventory and unrelated capability shapes
+// remain available to other authenticated clients.
+func TestGCPDNSHandlerConsoleCapability(t *testing.T) {
+	h := dnsHandlerStart(t, "project-one", "a")
+	const path = "/_simulator/v1/capabilities"
+	owner, outsider := h.mint(t, "learner"), h.mint(t, "other")
+	want := map[string]any{
+		"console":    true,
+		"api":        "dns.v1",
+		"project":    h.project,
+		"endpoint":   h.root(),
+		"operations": []string{"managedZones.list", "managedZones.create", "managedZones.get", "resourceRecordSets.list"},
+	}
+	for _, tc := range []struct {
+		name, token, selected string
+		visible               bool
+	}{
+		{"owner participant", owner, "", true},
+		{"operator selected owner", h.token, "learner", true},
+		{"operator default non-owner", h.token, "", false},
+		{"non-owner participant", outsider, "", false},
+		{"non-owner selects owner", outsider, "learner", false},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			caps := h.call(t, http.MethodGet, path, tc.token, tc.selected, nil, http.StatusOK)
+			value, present := caps["gcpDns"]
+			if present != tc.visible {
+				t.Fatalf("gcpDns visibility: got %v want %v", present, tc.visible)
+			}
+			if caps["cloudStorage"] == nil || caps["gcpCatalog"] == nil || caps["gcpAppEngine"] == nil {
+				t.Fatal("existing GCP capability missing")
+			}
+			if present {
+				if dnsCompositionJSON(value) != dnsCompositionJSON(want) {
+					t.Fatalf("wrong gcpDns descriptor: %v", value)
+				}
+				out := h.call(t, http.MethodGet, want["endpoint"].(string), tc.token, tc.selected, nil, http.StatusOK)
+				if dnsCompositionJSON(out["managedZones"]) != "[]" {
+					t.Fatalf("advertised endpoint did not list zones: %v", out)
+				}
+			}
+		})
+	}
+	h.call(t, http.MethodGet, path, "", "learner", nil, http.StatusUnauthorized)
+}
+
+func TestGCPDNSConsoleCapabilityTrustedContext(t *testing.T) {
+	r := httptest.NewRequest(http.MethodGet, "/_simulator/v1/capabilities", nil)
+	r.Header.Set("X-Simulator-Principal", "learner")
+	actor := provider.Actor{
+		CredentialIdentity: "learner",
+		ExerciseIdentity:   "learner",
+		CredentialRole:     provider.CredentialParticipant,
+	}
+	trusted := provider.WithActor(r.Context(), actor)
+	for _, tc := range []struct {
+		name    string
+		ctx     context.Context
+		project string
+		visible bool
+	}{
+		{"header only", r.Context(), "project-one", false},
+		{"trusted owner", trusted, "project-one", true},
+		{"scoped console", context.WithValue(trusted, consoleScopeKey{}, consoleScope{ParameterName: "/example"}), "project-one", false},
+		{"unconfigured", trusted, "", false},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			caps := map[string]any{"sentinel": true}
+			addGCPDNSConsoleCapability(r.WithContext(tc.ctx), caps, CloudStorageConfig{GCPOwner: "learner", GCPProject: tc.project})
+			if _, present := caps["gcpDns"]; present != tc.visible || caps["sentinel"] != true {
+				t.Fatalf("unexpected capability projection: %v", caps)
+			}
+		})
 	}
 }

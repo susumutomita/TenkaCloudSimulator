@@ -2980,6 +2980,33 @@ REQUIRED_SOURCE_SCOPES['CloudDNSChildToken'] = {
 }
 
 
+BASE_MODELS.add('CloudDNSConsoleScope')
+BASE_INVARIANTS['CloudDNSConsoleScope'] = {
+    'TypeOK',
+    'CapabilityAuthorized',
+    'OnlyCurrentDiscovery',
+    'OnlyCurrentReadVisible',
+    'NoStaleContinuation',
+}
+REQUIRED_MUTANTS['CloudDNSConsoleScope'] = {
+    'AllowUntrusted',
+    'AllowHandoff',
+    'AllowNonOwner',
+    'ReuseSamePrincipal',
+    'ExposeStaleRead',
+    'ContinueStaleRead',
+}
+REQUIRED_SOURCE_SCOPES['CloudDNSConsoleScope'] = {
+    'internal/server/server.go',
+    'internal/server/web/app.js',
+    'tools/console/src/console-navigation.mjs',
+    'tools/console/src/gcp-console-shell.jsx',
+    'tools/console/src/gcp-dns-requests.mjs',
+    'tools/console/src/gcp-dns.jsx',
+    'tools/console/src/main.jsx',
+}
+
+
 def load_registry(root, relative='formal/models.json'):
     root = Path(root)
     registry_path = asset(root, relative)
