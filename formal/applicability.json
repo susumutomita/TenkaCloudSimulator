@@ -1,6 +1,6 @@
 {
+  "base_sha": "3cd779798ba13d1b712e050f5ad0953072b54342",
   "version": 1,
-  "base_sha": "8d49004ecac8bc5e731c338c85b6a19c741c7fcc",
   "changes": [
     {
       "path": "docs/azure-blob.md",
@@ -8,6 +8,40 @@
       "disposition": "documentation",
       "reason": "Updates the supported conditional GET and transactional checksum contract; prose only, not a proof or runnable input.",
       "models": []
+    },
+    {
+      "path": "formal/AzureBlobRowDownload.cfg",
+      "sha256": "be0a52279be40930d52a23c57f45adc9eb3254c8f3a93da661f305b213f7e9b8",
+      "disposition": "modeled",
+      "reason": "Model binds only the changed Azure row target, retirement epoch and successful payload publication.",
+      "models": [
+        {
+          "id": "AzureBlobRowDownload",
+          "properties": [
+            "RowIsRequestTarget",
+            "CurrentDownloadOnly",
+            "SuccessfulBytesOnly"
+          ],
+          "limits": "Models explicit row identity versus toolbar selection, one in-flight operation, a bounded two-request epoch and view retirement, and only bounded successful abstract HTTP bytes may emit a download. Does not execute DNS, React/focus, the browser/anchor, URL/path mapping, authentication, HTTP or Blob bytes and does not establish implementation refinement. Generated app.js binding covers only Azure row download behavior introduced by this change."
+        }
+      ]
+    },
+    {
+      "path": "formal/AzureBlobRowDownload.tla",
+      "sha256": "61b0e7a64b5fee66ebee36d1394075739beccf7637ae02e1ceb93f4fe826c22f",
+      "disposition": "modeled",
+      "reason": "Model binds only the changed Azure row target, retirement epoch and successful payload publication.",
+      "models": [
+        {
+          "id": "AzureBlobRowDownload",
+          "properties": [
+            "RowIsRequestTarget",
+            "CurrentDownloadOnly",
+            "SuccessfulBytesOnly"
+          ],
+          "limits": "Models explicit row identity versus toolbar selection, one in-flight operation, a bounded two-request epoch and view retirement, and only bounded successful abstract HTTP bytes may emit a download. Does not execute DNS, React/focus, the browser/anchor, URL/path mapping, authentication, HTTP or Blob bytes and does not establish implementation refinement. Generated app.js binding covers only Azure row download behavior introduced by this change."
+        }
+      ]
     },
     {
       "path": "formal/AzureConditionalCRCRead.cfg",
@@ -93,9 +127,9 @@
     },
     {
       "path": "formal/models.json",
-      "sha256": "3f503d1725f7fecf6a09051b5875186f785c831ca07069dfc7af7e206cfc89a1",
+      "sha256": "83204983c1bf6ba7b85d44d59c9a830537debe87e76149ed2239ffd7a657cd18",
       "disposition": "formal-infrastructure",
-      "reason": "Registers or pins the bounded XSM checks and preserves the existing exact model/control inventory.",
+      "reason": "Registers or pins the bounded XSM checks and preserves the existing exact model/control inventory. Adds independently scoped Azure Blob row download model.",
       "models": []
     },
     {
@@ -301,15 +335,39 @@
       "models": []
     },
     {
+      "path": "internal/server/web/app.css",
+      "sha256": "33ee98152999874800918838ff9f5cacbeecbe8c482edd922fcfef6140fc520a",
+      "disposition": "presentation",
+      "reason": "Azure console presentation or generated asset metadata; unrelated provider styles and signed runtime policy unchanged.",
+      "models": []
+    },
+    {
+      "path": "internal/server/web/app.js",
+      "sha256": "230f221ee73981220dbe10808ec70961a0e58b9b0eb9f115cb3f3a329885bf36",
+      "disposition": "modeled",
+      "reason": "Model binds only the changed Azure row target, retirement epoch and successful payload publication. Exact bundle additionally retains already merged Cloud DNS and Sakura Server console inputs.",
+      "models": [
+        {
+          "id": "AzureBlobRowDownload",
+          "properties": [
+            "RowIsRequestTarget",
+            "CurrentDownloadOnly",
+            "SuccessfulBytesOnly"
+          ],
+          "limits": "Models explicit row identity versus toolbar selection, one in-flight operation, a bounded two-request epoch and view retirement, and only bounded successful abstract HTTP bytes may emit a download. Does not execute DNS, React/focus, the browser/anchor, URL/path mapping, authentication, HTTP or Blob bytes and does not establish implementation refinement. Generated app.js binding covers only Azure row download behavior introduced by this change."
+        }
+      ]
+    },
+    {
       "path": "scripts/formal_model_gate.py",
-      "sha256": "9ff0dfa8a69987ee2caba2057e5832f6760a2268db65b904e61bc33eb800b863",
+      "sha256": "b4f9a2e2b0ed47685617c60a2e457bdb9f7d63087b275c5d3a0c5e668a372600",
       "disposition": "formal-infrastructure",
       "reason": "Registers or pins the bounded XSM checks and preserves the existing exact model/control inventory.",
       "models": []
     },
     {
       "path": "scripts/test-formal-gate.py",
-      "sha256": "446bbddf2429c53a58394f9a99b55161846351d1197d6c7b3e1654189531f4aa",
+      "sha256": "c5440f588d6ce110b11b79d5f152eabb0e2d6f0ec25ae3c0d4e20741982951a2",
       "disposition": "formal-infrastructure",
       "reason": "Registers or pins the bounded XSM checks and preserves the existing exact model/control inventory.",
       "models": []
@@ -320,6 +378,51 @@
       "disposition": "test-support",
       "reason": "Opt-in official Azure Python SDK structured CRC64 read verification and native cleanup, with an independently approved local binary, wheel manifest and loopback-only runner.",
       "models": []
+    },
+    {
+      "path": "test/e2e/crossprovider_console.py",
+      "sha256": "eef3975cca5b7c753bb1f18bbe45c37e91fa74bf7eaf75a72fa18796d9bf4030",
+      "disposition": "test-support",
+      "reason": "Opt-in browser fixture checks actual uploaded bytes and row interaction; no live run claimed.",
+      "models": []
+    },
+    {
+      "path": "tools/console/bundle-digests.json",
+      "sha256": "963d60d57613e120e10edd706aeb5768ab72bd255cf565e4641210f80490fe0d",
+      "disposition": "presentation",
+      "reason": "Azure console presentation or generated asset metadata; unrelated provider styles and signed runtime policy unchanged.",
+      "models": []
+    },
+    {
+      "path": "tools/console/bundle-inputs.json",
+      "sha256": "dd1a77abe2b8f17a32cda330d9a457ed7f6ad4d656818c34faf96ee4c66905c1",
+      "disposition": "presentation",
+      "reason": "Azure console presentation or generated asset metadata; unrelated provider styles and signed runtime policy unchanged.",
+      "models": []
+    },
+    {
+      "path": "tools/console/src/azure-blob.css",
+      "sha256": "32f1ad1c48cfb8b39de62160337413b2c8afb1c57a182283748d272bcab81bb6",
+      "disposition": "presentation",
+      "reason": "Azure console presentation or generated asset metadata; unrelated provider styles and signed runtime policy unchanged.",
+      "models": []
+    },
+    {
+      "path": "tools/console/src/azure-blob.jsx",
+      "sha256": "a749fab1b4a00e0266e19e585643463930cf8ea7477bd17b59f40aad2ee860ab",
+      "disposition": "modeled",
+      "reason": "Model binds only the changed Azure row target, retirement epoch and successful payload publication.",
+      "models": [
+        {
+          "id": "AzureBlobRowDownload",
+          "properties": [
+            "RowIsRequestTarget",
+            "CurrentDownloadOnly",
+            "SuccessfulBytesOnly"
+          ],
+          "limits": "Models explicit row identity versus toolbar selection, one in-flight operation, a bounded two-request epoch and view retirement, and only bounded successful abstract HTTP bytes may emit a download. Does not execute DNS, React/focus, the browser/anchor, URL/path mapping, authentication, HTTP or Blob bytes and does not establish implementation refinement. Generated app.js binding covers only Azure row download behavior introduced by this change."
+        }
+      ]
     }
   ]
 }

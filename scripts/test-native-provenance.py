@@ -245,6 +245,12 @@ class NativeProvenanceTests(unittest.TestCase):
         for approved, original in self._route53_asset_adapters():
             self.assertEqual(prefix.count(approved), 1, "Exact approved Route53 adapter is required once")
             prefix = prefix.replace(approved, original, 1)
+        # Project only the separately reviewed singleton and its exact closed-union operand.
+        server_extension = "expected_sakura_server={'SakuraListServers'}\n"
+        server_assert = extended_assert + "|expected_sakura_server\n"
+        self.assertEqual(prefix.count(server_extension), 1, "Exact approved Sakura Server extension is required once")
+        self.assertEqual(prefix.count(server_assert), 1, "Exact approved Sakura Server closed union is required once")
+        prefix = prefix.replace(server_extension, "", 1).replace(server_assert, extended_assert + "\n", 1)
         self.assertEqual(prefix.count(extension), 1, "Exact approved five-ID extension is required once")
         self.assertEqual(prefix.count(extended_assert), 1, "Exact approved closed union is required once")
         prefix = prefix.replace(extension, "", 1).replace(extended_assert, original_assert, 1)
@@ -277,6 +283,21 @@ class NativeProvenanceTests(unittest.TestCase):
                     replacement = approved.replace("runpy", "runpy2", 1)
                 with self.subTest(adapter=approved, mutation=label), self.assertRaises(AssertionError):
                     self._assert_original_asset_prefix(source.replace(approved, replacement, 1))
+
+    def test_asset_prefix_rejects_unreviewed_sakura_server_extension(self):
+        source = (REPO / "scripts/check-assets.py").read_text()
+        approved = "expected_sakura_server={'SakuraListServers'}\n"
+        operand = "|expected_sakura_server\n"
+        for case, modified in (
+            ("missing", source.replace(approved, "", 1)),
+            ("duplicate", source.replace(approved, approved + approved, 1)),
+            ("renamed operation", source.replace("'SakuraListServers'", "'SakuraStartServer'", 1)),
+            ("unused extension", source.replace(operand, "\n", 1)),
+            ("duplicate operand", source.replace(operand, "|expected_sakura_server" + operand, 1)),
+            ("weakened unrelated guard", source.replace("len(operations)==len(set(operations))", "True", 1)),
+        ):
+            with self.subTest(case=case), self.assertRaises(AssertionError):
+                self._assert_original_asset_prefix(modified)
 
     def test_asset_prefix_rejects_changed_duplicate_or_missing_multipart_extension(self):
         source = (REPO / "scripts/check-assets.py").read_text()

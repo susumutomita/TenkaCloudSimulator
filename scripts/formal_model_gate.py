@@ -805,9 +805,14 @@ REQUIRED_MUTANTS = {'BedrockRuntimeAdmission': {'FallbackBackend', 'OmitMapping'
                             'IgnoreOrphanScope',
                             'OpenDatabaseBeforeCheck',
                             'OpenListenerBeforeCheck',
+                            'OptInWithNonLoopback',
+                            'OptInWithNonNumeric',
+                            'OptInWithRemote',
+                            'OptInWithoutScope',
                             'PermitUnsafeEnabled',
                             'RegisterDisabled',
                             'RejectValidEnabled',
+                            'RejectValidOptIn',
                             'SkipEnabledRegistration',
                             'SkipEnabledSchema'},
  'SecretMetadataViewEpoch': {'AppendPreviousPage',
@@ -3041,6 +3046,76 @@ REQUIRED_SOURCE_SCOPES['AzureStructuredReadAdmission'] = {'internal/azure/blob/s
 AZURE_STRUCTURED_READ_MUTATIONS = [{'id': 'WidenVersion', 'edits': [{'old': 'VersionOK(q) == q.version="XSM"', 'new': 'VersionOK(q) == q.version#"Legacy"', 'count': 1}], 'expect_invariant': 'ExactNegotiation'}, {'id': 'IgnoreMarker', 'edits': [{'old': 'MarkerOK(q) == q.marker="CRC"', 'new': 'MarkerOK(q) == TRUE', 'count': 1}], 'expect_invariant': 'ExactNegotiation'}, {'id': 'AllowNonGet', 'edits': [{'old': 'OperationOK(q) == q.operation="GetBlob"', 'new': 'OperationOK(q) == TRUE', 'count': 1}], 'expect_invariant': 'ExactNegotiation'}, {'id': 'AllowConflict', 'edits': [{'old': 'TransportOK(q) == ~q.plainChecksum', 'new': 'TransportOK(q) == TRUE', 'count': 1}], 'expect_invariant': 'ExactNegotiation'}, {'id': 'LegacyIntoXSM', 'edits': [{'old': 'THEN IF q.marker="None" THEN Reply("Legacy","Legacy",FALSE,FALSE,FALSE) ELSE Quiet("400")', 'new': 'THEN IF q.marker="None" THEN Structured(q) ELSE Quiet("400")', 'count': 1}], 'expect_invariant': 'LegacyIsUnchanged'}, {'id': 'FrameOnNotModified', 'edits': [{'old': '[] OTHER -> Quiet(status)', 'new': '[] OTHER -> IF status="304" THEN Reply(status,"FullXSM",TRUE,FALSE,FALSE) ELSE Quiet(status)', 'count': 1}], 'expect_invariant': 'DeniedOrConditionalIsQuiet'}, {'id': 'SkipSizeCap', 'edits': [{'old': 'q.nativeRead \\in {"LargeWhole","LargeRange"} -> "400"', 'new': 'q.nativeRead \\in {"LargeWhole","LargeRange"} -> "200"', 'count': 1}], 'expect_invariant': 'LargeReadsAreQuiet'}, {'id': 'WholeHasStoredMD5', 'edits': [{'old': 'status="200" -> Reply(status,"FullXSM",TRUE,FALSE,FALSE)', 'new': 'status="200" -> Reply(status,"FullXSM",TRUE,FALSE,TRUE)', 'count': 1}], 'expect_invariant': 'FullHasNoRangeMetadata'}, {'id': 'RangeLosesStoredMD5', 'edits': [{'old': 'status="206" -> Reply(status,"RangedXSM",TRUE,TRUE,TRUE)', 'new': 'status="206" -> Reply(status,"RangedXSM",TRUE,TRUE,FALSE)', 'count': 1}], 'expect_invariant': 'RangeHasRangeMetadata'}]
 
 
+BASE_MODELS.add('AzureBlobRowDownload')
+BASE_INVARIANTS['AzureBlobRowDownload'] = set(['TypeOK', 'RowIsRequestTarget', 'CurrentDownloadOnly', 'SuccessfulBytesOnly'])
+REQUIRED_SOURCE_SCOPES['AzureBlobRowDownload'] = set(['internal/server/web/app.js', 'tools/console/src/azure-blob.jsx'])
+AZURE_BLOB_ROW_DOWNLOAD_CONTROLS = [{'id': 'UseToolbarSelection',
+  'edits': [{'old': 'RequestTarget(row) == row',
+             'new': 'RequestTarget(row) == selected',
+             'count': 1}],
+  'expect_invariant': 'RowIsRequestTarget'},
+ {'id': 'AllowRetiredCompletion',
+  'edits': [{'old': 'StillCurrent == active /\\ pending.epoch = epoch',
+             'new': 'StillCurrent == TRUE',
+             'count': 1}],
+  'expect_invariant': 'CurrentDownloadOnly'},
+ {'id': 'AllowBadPayload',
+  'edits': [{'old': 'HasBytes(result) == result = "ok"',
+             'new': 'HasBytes(result) == TRUE',
+             'count': 1}],
+  'expect_invariant': 'SuccessfulBytesOnly'}]
+REQUIRED_MUTANTS['AzureBlobRowDownload'] = {m['id'] for m in AZURE_BLOB_ROW_DOWNLOAD_CONTROLS}
+
+BASE_MODELS.add('SakuraServerMetadata')
+BASE_INVARIANTS['SakuraServerMetadata'] = {
+    'TypeOK',
+    'FrozenScope',
+    'OnlyOwnerRealmLookup',
+    'ReopenBinding',
+    'FailureFrame',
+    'PeerFrame',
+    'ReadAndReopenSnapshot',
+    'FreshCommittedID',
+    'AllocatorOnlyCreate',
+    'CommitExact',
+    'StoredIDsAndQuota',
+}
+REQUIRED_MUTANTS['SakuraServerMetadata'] = {
+    'AcceptWrongServerRealm',
+    'ReuseDeletedServerID',
+}
+REQUIRED_SOURCE_SCOPES['SakuraServerMetadata'] = {
+    'internal/sakura/iaas/server_http.go',
+    'internal/sakura/iaas/server_store.go',
+}
+
+BASE_MODELS.add('SakuraServerReadEpoch')
+BASE_INVARIANTS['SakuraServerReadEpoch'] = {
+    'TypeOK',
+    'NoUnadvertisedMount',
+    'OnlyCurrentResult',
+    'NoDifferentServer',
+}
+REQUIRED_MUTANTS['SakuraServerReadEpoch'] = {
+    'IgnoreDisabled',
+    'IgnoreMalformed',
+    'IgnoreHandoff',
+    'IgnoreContext',
+    'IgnoreRevision',
+    'AcceptWrongServer',
+}
+REQUIRED_SOURCE_SCOPES['SakuraServerReadEpoch'] = {
+    'internal/server/sakura_provider.go',
+    'internal/server/web/app.js',
+    'tools/console/src/console-navigation.mjs',
+    'tools/console/src/main.jsx',
+    'tools/console/src/sakura-console.jsx',
+    'tools/console/src/sakura-server-read.mjs',
+    'tools/console/src/sakura-servers.jsx',
+}
+SAKURA_SERVER_READ_EPOCH_MUTATIONS = [{'id': 'IgnoreDisabled', 'edits': [{'old': 'config.enabled /\\ config.valid /\\ ~config.handoff', 'new': 'config.valid /\\ ~config.handoff', 'count': 1}], 'expect_invariant': 'NoUnadvertisedMount'}, {'id': 'IgnoreMalformed', 'edits': [{'old': 'config.enabled /\\ config.valid /\\ ~config.handoff', 'new': 'config.enabled /\\ ~config.handoff', 'count': 1}], 'expect_invariant': 'NoUnadvertisedMount'}, {'id': 'IgnoreHandoff', 'edits': [{'old': 'config.enabled /\\ config.valid /\\ ~config.handoff', 'new': 'config.enabled /\\ config.valid', 'count': 1}], 'expect_invariant': 'NoUnadvertisedMount'}, {'id': 'IgnoreContext', 'edits': [{'old': 'BoundContext(r) == r.context = context.sequence', 'new': 'BoundContext(r) == TRUE', 'count': 1}], 'expect_invariant': 'OnlyCurrentResult'}, {'id': 'IgnoreRevision', 'edits': [{'old': 'BoundRevision(r) == r.revision = revision', 'new': 'BoundRevision(r) == TRUE', 'count': 1}], 'expect_invariant': 'OnlyCurrentResult'}, {'id': 'AcceptWrongServer', 'edits': [{'old': 'ProjectionOK(r, actual) == r.target = actual', 'new': 'ProjectionOK(r, actual) == TRUE', 'count': 1}], 'expect_invariant': 'NoDifferentServer'}]
+
+
 def load_registry(root, relative='formal/models.json'):
     root = Path(root)
     registry_path = asset(root, relative)
@@ -3096,10 +3171,15 @@ def load_registry(root, relative='formal/models.json'):
             require(mutant['expect_invariant'] in model['properties'], 'mutant expects unchecked invariant')
             apply_mutant(source, name, mutant)
         require(REQUIRED_MUTANTS.get(name, set()) <= mutant_ids, 'a required mutation control was removed')
+        if name == 'SakuraServerReadEpoch':
+            require(model['mutants'] == SAKURA_SERVER_READ_EPOCH_MUTATIONS, 'Sakura Server read-epoch mutation controls changed')
         if name == 'AzureStructuredReadAdmission':
             require(model['mutants'] == AZURE_STRUCTURED_READ_MUTATIONS, 'Azure structured read mutation controls changed')
         if name in BATTLE_INTEGRATION_MUTATIONS:
             require(model['mutants'] == BATTLE_INTEGRATION_MUTATIONS[name], 'Battle integration mutation controls changed')
+        if name == 'AzureBlobRowDownload':
+            require(model['mutants'] == AZURE_BLOB_ROW_DOWNLOAD_CONTROLS,
+                    'Azure Blob row download mutation controls changed')
     require(BASE_MODELS <= ids, 'a required existing model was removed')
     actual = {p.relative_to(root).as_posix() for suffix in ('*.tla', '*.cfg') for p in (root / 'formal').glob(suffix)}
     require(actual == files, 'unregistered or missing model/config artifact')
