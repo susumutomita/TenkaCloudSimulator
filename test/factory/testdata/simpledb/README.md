@@ -1,0 +1,32 @@
+# SimpleDB first acceptance — TestWriter draft
+
+Base: `a53131cd61030c8d238823478ec96917b19e95ef`. This is a test-writer-only snapshot for a local commit, not registered factory acceptance, a claim, runtime implementation, or evidence of service support. Shared executor/ledger work belongs to Azure #502. No shared registration file is edited.
+
+The existing #300 service plan remains. This first increment covers exactly CreateDomain, ListDomains, DeleteDomain, PutAttributes, GetAttributes; domain idempotence, multivalue union/duplicate/Replace/filter behavior, SQLite restart persistence, domain cascade/recreate without old item state, and ListDomains page limits/default/termination. DomainMetadata, DeleteAttributes, Select and conditional-write semantics need subsequent separately registered acceptance. No UI/reference-send, real AWS, cloud signature authority, or full-service claim follows.
+
+## Independent oracle
+
+`oracle/oracle.json` pins official operation URLs, actual retrieval timestamps and SHA256 of local-only source snapshots. Expectations are original specification-derived assertions, not imported upstream test code or observed AWS results. `oracle/fixtures.json` fixes input values and twelve negative cases. `files.sha256.json` binds all test, helper, fixture and proposal bytes without a self-referential hash. These bytes must receive independent review before registration; a future Fixer cannot adjust expected results merely to fit runtime behavior.
+
+No list/attribute ordering is assumed. Stable-data paging must have <=1 domain per requested size-1 page, no duplicates/missing domains, progressing opaque tokens and termination. A separate 101-domain case distinguishes default/max100 from an unbounded list by requiring 100+1 pages. Delete/recreate must not resurrect values. Each rejected input must leave known existing attributes unchanged. Token scope/concurrent mutation, domain quotas and conditional writes are later acceptance increments, not certified here.
+
+## Separate surfaces and commands
+
+Use the same fixed Go toolchain as CI (1.26.11) with command-scoped GOROOT, GOENV=off, GOTOOLCHAIN=local, GOWORK=off, GOFLAGS empty, GOPROXY=off and GOSUMDB=off. No persistent tool configuration change is required.
+
+- Pure oracle: `go test -json -count=1 ./test/factory/testdata/simpledb/oracle`. This checks immutable fixture/source binding, not product compatibility.
+- SDK harness pure controls: `python3 test/factory/testdata/simpledb/test_sdk_harness.py`; mocked process/transport controls detect malformed response classification, loss of primary errors during cleanup and any other SDK origin. These are not SDK/product execution evidence.
+- Native: `go test -p=1 -json -count=1 -timeout=60s ./test/factory/testdata/simpledb/native`. Uses real `server.New` + `NewAccess`, HTTP recorder and actual SQLite. No socket/SDK/CLI. All six named tests are required; readiness alone cannot pass acceptance.
+- SDK wire: `python3 test/factory/testdata/simpledb/sdk_wire.py --binary /absolute/owned/CLI --binary-sha256 ACTUAL_SHA256 --report /absolute/local/report.json`. Requires pinned boto3 1.42.0 and botocore 1.41.6 from existing test requirements; does not install them. The SDK retains its default SimpleDB SigV2 serializer, uses dummy credentials plus existing local-token/service/region headers, and refuses any before-send origin except the owned numeric-loopback port. Runtime CLI runs with authentication enabled and isolated temporary state/token authorities. Real SDK responses, restart and cleanup must execute all four required cases.
+
+The SDK suite currently checks domain/idempotence, Put/Get duplicate and escaped values plus Replace/filter, restart/cascade/recreate, paging and server-side ListDomains boundaries/NoSuchDomain. Native tests additionally check the real 101-domain default/max boundary and all twelve raw-wire malformed inputs. Missing SDK required parameters may be rejected client-side; those raw-wire server-validation assertions stay in native acceptance rather than being mislabeled SDK wire execution.
+
+SDK exit 0 with `PASS` requires every named case. Exit 1 `PRODUCT_CONTRACT_RED` means an unexpected typed product response/assertion or malformed wire after readiness. Exit 2 `HARNESS_ERROR` includes unavailable/mismatched SDK, invalid binary hash, startup, dependency, unresolved transport or cleanup failure. `--preflight-only` is explicitly not acceptance, even when successful. When cleanup also fails, its errors are stored separately, the primary product failure is retained, and exit 2 prevents acceptance. No skip status exists.
+
+Native setup/fixture/health/auth/cleanup errors have `HARNESS_ERROR`; wrong service status/envelope/results have `PRODUCT_CONTRACT`. Compiler failure or absent Go test identity is a harness failure, never product RED. Baseline here passes readiness but CreateDomain reaches the existing CloudFormation fallback and returns HTTP501 NotImplemented; five product tests fail before their later assertions. The mixed valid-then-invalid attribute vector rejects partial writes, and every rejected request rechecks the complete domain list to reject ghost domains. Those later assertions are prepared, not observed passing or individually reproduced.
+
+## Required owner handoff
+
+See `registration-proposal.json`. Registry entries must bind exact test identities, all file hashes, package/argv, operation set, base and explicitly allowed candidate paths. SDK evidence needs a reviewed executor path with fixed command and required-case report validation; the SQS-only executor at this base cannot register it as-is; integration must preserve every existing SQS/Azure/GCP union entry. Do not borrow an SQS receipt, accept readiness-only/preflight, weaken path matching, or default-run these intentionally RED tests before staged registration is defined. `testdata` is explicitly runnable but excluded from ordinary `go test ./...`; final implementation candidates must require the registered suite before merge.
+
+A local test-writer commit fixes immutable test bytes but does not issue a passing factory receipt. Shared registration is pending, native product tests remain RED, and actual SDK wire acceptance is blocked. After authorized registration, bind the exact clean commit and rerun independent acceptance. All existing AGENTS gates remain required; no claim or runtime implementation is authorized by this snapshot.

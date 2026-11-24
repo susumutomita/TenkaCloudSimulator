@@ -327,7 +327,7 @@ class SakuraRegistrationTests(unittest.TestCase):
     def test_exact_command_names_path_and_default(self):
         spec = gate.SUITES[self.suite]
         self.assertEqual(gate.DEFAULT_SUITES, ('sqs-lifecycle', 'ec2-describe-subnets'))
-        self.assertEqual(set(gate.SUITES), {'sqs-lifecycle', 'ec2-describe-subnets', 'gcp-dns-atomic-lifecycle', self.suite})
+        self.assertEqual(set(gate.SUITES), {'sqs-lifecycle', 'ec2-describe-subnets', 'gcp-dns-atomic-lifecycle', self.suite, *gate.SIMPLEDB_SUITES})
         self.assertEqual(spec['tests'], ['TestSakuraServerMetadataAcceptanceCRUD',
             'TestSakuraServerMetadataAcceptanceRefusals', 'TestSakuraServerMetadataComparatorControls'])
         self.assertEqual(spec['argv'], ['go', 'test', '-json', '-count=1', '-run',
@@ -394,5 +394,13 @@ class SakuraRegistrationTests(unittest.TestCase):
         with patch.object(sys,'argv',['factory_acceptance.py','--suite',self.suite]), patch.object(gate,'run') as run:
             gate.main()
             self.assertEqual(run.call_args.args[2], [self.suite])
+
+
+# Keep the additive registration detector suite in the ordinary existing gate.
+import importlib.util
+_simpledb_spec = importlib.util.spec_from_file_location('simpledb_registration_tests', Path(__file__).with_name('test-simpledb-factory-registration.py'))
+_simpledb_tests = importlib.util.module_from_spec(_simpledb_spec)
+_simpledb_spec.loader.exec_module(_simpledb_tests)
+SimpleDBRegistrationTests = _simpledb_tests.SimpleDBRegistrationTests
 
 if __name__=='__main__':unittest.main()

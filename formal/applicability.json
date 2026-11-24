@@ -1,547 +1,1616 @@
 {
   "version": 1,
-  "base_sha": "8d49004ecac8bc5e731c338c85b6a19c741c7fcc",
+  "base_sha": "3cd779798ba13d1b712e050f5ad0953072b54342",
   "changes": [
     {
-      "path": "cmd/simulator/main.go",
-      "sha256": "5d55fad5e885f60dbb9234d72b5f3d91866848ce0f7e16d13fabc8eac1a75554",
-      "disposition": "modeled",
-      "reason": "Scope and opt-in are validated before listener or state setup; only abstract Sakura path ordering is modeled.",
-      "models": [
-        {
-          "id": "SakuraStartupAdmission",
-          "properties": [
-            "AcceptedConfigExact",
-            "ValidAdmissionAvailable",
-            "NoEffectsOnRefusal",
-            "ValidationPrecedesEffects"
-          ],
-          "limits": "Bounded parsed-flag Sakura admission and pre-effect order only. Default-disabled Server mode adds no new startup constraint. Enabled Server opt-in requires valid enabled Sakura scope, unsafe and allow-remote off, and parsed numeric loopback. Generic listener rules and other providers are outside this model. Later startup stages assume success. Does not prove real authentication, token handling/cryptography, IP parsing or socket binding, proxy or tunnel exposure, constructor atomicity, syscall failures/cleanup, SDK/HTTP/browser behavior, or Go refinement. Shared server.go scope covers only Sakura provider construction and configuration."
-        }
-      ]
-    },
-    {
-      "path": "cmd/simulator/sakura_flags.go",
-      "sha256": "cf08af1ee2439bf1681d33ad0e3d4ab868c9937949c41168a1516c53e8a39d82",
-      "disposition": "modeled",
-      "reason": "Parsed Server Console flag, scope prerequisite and classified local-only guard; no address parser or authentication proof.",
-      "models": [
-        {
-          "id": "SakuraStartupAdmission",
-          "properties": [
-            "AcceptedConfigExact",
-            "ValidAdmissionAvailable"
-          ],
-          "limits": "Bounded parsed-flag Sakura admission and pre-effect order only. Default-disabled Server mode adds no new startup constraint. Enabled Server opt-in requires valid enabled Sakura scope, unsafe and allow-remote off, and parsed numeric loopback. Generic listener rules and other providers are outside this model. Later startup stages assume success. Does not prove real authentication, token handling/cryptography, IP parsing or socket binding, proxy or tunnel exposure, constructor atomicity, syscall failures/cleanup, SDK/HTTP/browser behavior, or Go refinement. Shared server.go scope covers only Sakura provider construction and configuration."
-        }
-      ]
-    },
-    {
-      "path": "cmd/simulator/sakura_flags_test.go",
-      "sha256": "183ce7d9cb250d76ce00de72dc1e69a198bb00e2df25f437a559dbbcf7f8ae7a",
-      "disposition": "test-support",
-      "reason": "In-process startup guard negative fixtures; no successful socket or live launch.",
-      "models": []
-    },
-    {
-      "path": "docs/formal-sakura-server.md",
-      "sha256": "54e8a9f6d094b1f693bf78eff428e238053d637e3cf3ec277704e861447bb8e6",
+      "path": "docs/contributing/simpledb-factory-registration.md",
+      "sha256": "d3f1cbaa3c459b80c7e390f901a167ba436c411fb6f5f7c6b6046df62746c00f",
       "disposition": "documentation",
-      "reason": "Describes exact abstract bounds and separately measured and pending model checks.",
+      "reason": "Documents SimpleDB scope and outstanding validation; no runtime behavior.",
       "models": []
     },
     {
-      "path": "formal/SakuraServerMetadata.cfg",
-      "sha256": "6224a10280768312f3f812d532ba04f7f4da49e432272638245360507c207e58",
+      "path": "docs/contributing/simpledb-formal.md",
+      "sha256": "ae18b875bf27142dba479b6498fbe0ab1b2b444669498e555db1b6d2900e30dc",
+      "disposition": "documentation",
+      "reason": "Documents SimpleDB scope and outstanding validation; no runtime behavior.",
+      "models": []
+    },
+    {
+      "path": "formal/SimpleDBDomainMetadata.cfg",
+      "sha256": "a0f12725650dd6b0e5a217ba75cf62a6a6a05c4b5d10375b00a4289fe96a224c",
       "disposition": "modeled",
-      "reason": "Finite Server metadata reference and configuration for the listed invariant and sensitivity obligations.",
+      "reason": "Pins metadata aggregate, typed admission, and result invariants for the bounded model.",
       "models": [
         {
-          "id": "SakuraServerMetadata",
+          "id": "SimpleDBDomainMetadata",
           "properties": [
             "TypeOK",
-            "FrozenScope",
-            "OnlyOwnerRealmLookup",
-            "ReopenBinding",
-            "FailureFrame",
-            "PeerFrame",
-            "ReadAndReopenSnapshot",
-            "FreshCommittedID",
-            "AllocatorOnlyCreate",
-            "CommitExact",
-            "StoredIDsAndQuota"
+            "ReadRequiresDomainAuthority",
+            "ExactCommittedTotals"
           ],
-          "limits": "Abstract trusted-leaf metadata admission and atomic stores only. Realm equality is opaque; mount comparison is separate from HTTP marker. Not HTTP dispatch/parsing, host authentication, actual SQL/locking/crash or Go refinement, generation randomness, combined patches, collection list/query, SDK, Terraform, or real VM behavior."
+          "limits": "One already-selected immutable local snapshot, symbolic byte weights and typed admission; no SQL snapshot isolation, cancellation, wall clock, raw Query/XML, IAM policy evaluation, SDK or Go refinement."
         }
       ]
     },
     {
-      "path": "formal/SakuraServerMetadata.tla",
-      "sha256": "211a15e9bb81c10d57829974e5ca405f0d57b3a8793dce580b9609076da1b0cd",
+      "path": "formal/SimpleDBDomainMetadata.tla",
+      "sha256": "b435d5d85b5e55d50a6ec6181ebe5cf40abaac838425b2bb83fff081f40bd21c",
       "disposition": "modeled",
-      "reason": "Finite Server metadata reference and configuration for the listed invariant and sensitivity obligations.",
+      "reason": "Bounded abstract committed-row metadata aggregation; no claim of Go or SQLite refinement.",
       "models": [
         {
-          "id": "SakuraServerMetadata",
+          "id": "SimpleDBDomainMetadata",
           "properties": [
             "TypeOK",
-            "FrozenScope",
-            "OnlyOwnerRealmLookup",
-            "ReopenBinding",
-            "FailureFrame",
+            "ReadRequiresDomainAuthority",
+            "ExactCommittedTotals"
+          ],
+          "limits": "One already-selected immutable local snapshot, symbolic byte weights and typed admission; no SQL snapshot isolation, cancellation, wall clock, raw Query/XML, IAM policy evaluation, SDK or Go refinement."
+        }
+      ]
+    },
+    {
+      "path": "formal/SimpleDBLifecycle.cfg",
+      "sha256": "7c6a28ef2f406143a25710feadbe550dce86c16e4f521311b9fca2be66e4f5f4",
+      "disposition": "modeled",
+      "reason": "Registers the bounded SimpleDB model artifact or exact invariant configuration; no implementation equivalence.",
+      "models": [
+        {
+          "id": "SimpleDBLifecycle",
+          "properties": [
+            "TypeOK",
+            "NoOrphans",
+            "PendingInvisible",
+            "RefusalUnchanged",
+            "AuthorizedCommit",
             "PeerFrame",
-            "ReadAndReopenSnapshot",
-            "FreshCommittedID",
-            "AllocatorOnlyCreate",
-            "CommitExact",
-            "StoredIDsAndQuota"
+            "CommittedExact",
+            "DurableAck",
+            "RestartExact",
+            "DeleteEmpty",
+            "CreateIdempotent",
+            "PutSetExact"
           ],
-          "limits": "Abstract trusted-leaf metadata admission and atomic stores only. Realm equality is opaque; mount comparison is separate from HTTP marker. Not HTTP dispatch/parsing, host authentication, actual SQL/locking/crash or Go refinement, generation randomness, combined patches, collection list/query, SDK, Terraform, or real VM behavior."
+          "limits": "Abstract admitted mutations and stage/commit/failure/reopen only; no SQL, HTTP/SDK, pagination, arbitrary concurrency, IAM evaluation or Go refinement."
         }
       ]
     },
     {
-      "path": "formal/SakuraServerReadEpoch.cfg",
-      "sha256": "2f66c3b6288ee4d0fb88d8b35039e66c58c93f061f2702a50fa885e4dbea22c7",
+      "path": "formal/SimpleDBLifecycle.tla",
+      "sha256": "8f4f5efd07b77ee2c6898199e8a2425a77fc224d96dd21f853dfb72387f04d5d",
       "disposition": "modeled",
-      "reason": "Configures the finite Server view read-selection abstraction.",
+      "reason": "Registers the bounded SimpleDB model artifact or exact invariant configuration; no implementation equivalence.",
       "models": [
         {
-          "id": "SakuraServerReadEpoch",
+          "id": "SimpleDBLifecycle",
           "properties": [
-            "NoUnadvertisedMount",
-            "OnlyCurrentResult",
-            "NoDifferentServer"
+            "TypeOK",
+            "NoOrphans",
+            "PendingInvisible",
+            "RefusalUnchanged",
+            "AuthorizedCommit",
+            "PeerFrame",
+            "CommittedExact",
+            "DurableAck",
+            "RestartExact",
+            "DeleteEmpty",
+            "CreateIdempotent",
+            "PutSetExact"
           ],
-          "limits": "Finite read-only presentation projection. Production Server capability is default-off; enabled states represent the explicitly guarded local operator opt-in after capability projection. Models descriptor/disabled/handoff admission, abstract context and list/detail request revision, and matching detail identity. Does not prove CLI validation or binding, proxy exposure, real authentication or browser authority, React/DOM/HTTP behavior, response schemas, pagination, mutations, runtime availability, SDK or Terraform. Generated bundle binding applies only to changed Server-view code."
+          "limits": "Abstract admitted mutations and stage/commit/failure/reopen only; no SQL, HTTP/SDK, pagination, arbitrary concurrency, IAM evaluation or Go refinement."
         }
       ]
     },
     {
-      "path": "formal/SakuraServerReadEpoch.tla",
-      "sha256": "4af0d5d95f370fe5b9f99d090bd8c4301bb637874454c0e709dcf232f51b46c0",
+      "path": "formal/SimpleDBPageCursor.cfg",
+      "sha256": "1f6d568a80c4cc287d6c47a955023a61f63ebf49d722959f745c42e117fdbc67",
       "disposition": "modeled",
-      "reason": "Models default-off disclosure, current read ownership and exact detail-resource acceptance.",
+      "reason": "Registers the bounded SimpleDB model artifact or exact invariant configuration; no implementation equivalence.",
       "models": [
         {
-          "id": "SakuraServerReadEpoch",
+          "id": "SimpleDBPageCursor",
           "properties": [
-            "NoUnadvertisedMount",
-            "OnlyCurrentResult",
-            "NoDifferentServer"
+            "TypeOK",
+            "CursorBinding",
+            "ExactPage",
+            "ReadOnly"
           ],
-          "limits": "Finite read-only presentation projection. Production Server capability is default-off; enabled states represent the explicitly guarded local operator opt-in after capability projection. Models descriptor/disabled/handoff admission, abstract context and list/detail request revision, and matching detail identity. Does not prove CLI validation or binding, proxy exposure, real authentication or browser authority, React/DOM/HTTP behavior, response schemas, pagination, mutations, runtime availability, SDK or Terraform. Generated bundle binding applies only to changed Server-view code."
+          "limits": "Current rows only; no snapshot, token syntax/crypto, cancellation, errors not represented, SQL, SDK or Go refinement."
         }
       ]
     },
     {
-      "path": "formal/SakuraStartupAdmission.tla",
-      "sha256": "eba3453a9f3886743249c010a1537df16b8f69719e08543848b6756709cf58e2",
+      "path": "formal/SimpleDBPageCursor.tla",
+      "sha256": "4ec31c84a1857325a85326b297fdbc188401a373f56bb25ad33fc96e49922f5f",
       "disposition": "modeled",
-      "reason": "Extends startup admission abstraction with explicit local Server Console opt-in before effects.",
+      "reason": "Registers the bounded SimpleDB model artifact or exact invariant configuration; no implementation equivalence.",
       "models": [
         {
-          "id": "SakuraStartupAdmission",
+          "id": "SimpleDBPageCursor",
           "properties": [
-            "AcceptedConfigExact",
-            "ValidAdmissionAvailable",
-            "NoEffectsOnRefusal",
-            "ValidationPrecedesEffects"
+            "TypeOK",
+            "CursorBinding",
+            "ExactPage",
+            "ReadOnly"
           ],
-          "limits": "Bounded parsed-flag Sakura admission and pre-effect order only. Default-disabled Server mode adds no new startup constraint. Enabled Server opt-in requires valid enabled Sakura scope, unsafe and allow-remote off, and parsed numeric loopback. Generic listener rules and other providers are outside this model. Later startup stages assume success. Does not prove real authentication, token handling/cryptography, IP parsing or socket binding, proxy or tunnel exposure, constructor atomicity, syscall failures/cleanup, SDK/HTTP/browser behavior, or Go refinement. Shared server.go scope covers only Sakura provider construction and configuration."
+          "limits": "Current rows only; no snapshot, token syntax/crypto, cancellation, errors not represented, SQL, SDK or Go refinement."
+        }
+      ]
+    },
+    {
+      "path": "formal/SimpleDBQueryAdmission.cfg",
+      "sha256": "8fb0df7a3230c23f3d0763dfc30d76a10f2debac3bdd82d1ab158954dbae4729",
+      "disposition": "modeled",
+      "reason": "Registers the bounded SimpleDB model artifact or exact invariant configuration; no implementation equivalence.",
+      "models": [
+        {
+          "id": "SimpleDBQueryAdmission",
+          "properties": [
+            "TypeOK",
+            "OneDispatch",
+            "MalformedNeverDispatches",
+            "TrustedAdmissionBeforeDispatch",
+            "ConfiguredScopeBinding",
+            "EnvelopeMatchesOutcome"
+          ],
+          "limits": "Abstract typed guards and response categories only; no raw parser/XML/signing, IAM evaluator, routing precedence, initializer wiring, exact status/codes, pagination, SQL, SDK or Go refinement."
+        }
+      ]
+    },
+    {
+      "path": "formal/SimpleDBQueryAdmission.tla",
+      "sha256": "2ecfedffe04ddd8ec3b50a8fd8b16b46c9c8bbd31c4b63f80f631727219a1bdf",
+      "disposition": "modeled",
+      "reason": "Registers the bounded SimpleDB model artifact or exact invariant configuration; no implementation equivalence.",
+      "models": [
+        {
+          "id": "SimpleDBQueryAdmission",
+          "properties": [
+            "TypeOK",
+            "OneDispatch",
+            "MalformedNeverDispatches",
+            "TrustedAdmissionBeforeDispatch",
+            "ConfiguredScopeBinding",
+            "EnvelopeMatchesOutcome"
+          ],
+          "limits": "Abstract typed guards and response categories only; no raw parser/XML/signing, IAM evaluator, routing precedence, initializer wiring, exact status/codes, pagination, SQL, SDK or Go refinement."
         }
       ]
     },
     {
       "path": "formal/models.json",
-      "sha256": "487c38061c6548bd23e7d2d78686f2d01f14f381e068b66aaa1dae8072414eec",
+      "sha256": "da7cbd2d62103dd688e785f493b97d3916f65da515c8f2684d10755f4fb1fc58",
       "disposition": "formal-infrastructure",
-      "reason": "Preserves existing models and controls; updates the Sakura startup abstraction scope prose and adds five mutation controls, plus bounded read-epoch wording. Existing Cloud DNS: Adds the two reviewed Cloud DNS registrations and preserves all 113 previously registered main models. Also includes the scoped DNS console projection and its removal guards.",
+      "reason": "Adds the four reviewed SimpleDB safety models to the latest 118-model registry; preserves every Sakura, Cloud DNS and existing model object.",
       "models": []
     },
     {
-      "path": "internal/sakura/iaas/server_contract_regression_test.go",
-      "sha256": "d247092e3c16eb63f5fefb3f857957c65c8e494ae82d692a98e1abb3c5b3b9ab",
-      "disposition": "test-support",
-      "reason": "In-process Server metadata wire and durable-store contract regressions only; no simulator runtime behavior.",
-      "models": []
-    },
-    {
-      "path": "internal/sakura/iaas/server_http.go",
-      "sha256": "2b67534a26721d5da42f1db3330d1fbee12a163da7701047d1594ebd6e5575ff",
+      "path": "internal/aws/s3.go",
+      "sha256": "a9b29b54d57f58c8f0e6410629e7ca78239683337e93d3d37dc2d633fb5be8c6",
       "disposition": "modeled",
-      "reason": "Trusted subject/realm and local marker before handling modeled metadata operations; rejection and peer frames.",
+      "reason": "Adds only fields to the shared Gateway carrier. Existing modeled contracts remain; the new field registration and DI are not covered by inherited models.",
       "models": [
         {
-          "id": "SakuraServerMetadata",
+          "id": "ObjectStore",
           "properties": [
-            "OnlyOwnerRealmLookup",
+            "TypeOK",
+            "NoOrphans",
+            "NoUnauthorizedMutation",
+            "DenyWins"
+          ],
+          "limits": "Abstract authorization and atomic transitions only; not IAM parsing/ARN matching, SQL, HTTP, quotas, crashes or a Go refinement proof. Adds only fields to the shared Gateway carrier. Existing modeled contracts remain; the new field registration and DI are not covered by inherited models."
+        },
+        {
+          "id": "SQSLifecycle",
+          "properties": [
+            "TypeOK",
+            "NoOrphans",
+            "AuthorizedMutations",
+            "ScopedMutation",
+            "FailedMutationAtomic",
+            "IdempotentCreateUnchanged",
+            "ReceiveOnlyEligible",
+            "FreshReceipt",
+            "ReceiptMutationCurrent",
+            "ChangeOnlyInflight"
+          ],
+          "limits": "Atomic transition abstraction after the native parent/expiry/rollback repair. Scopes abstract separately configured database/region/queue targets, not selected IAM principals. Receipt freshness assumes collision-free opaque IDs. No SQL/Go refinement, cryptographic proof, restart/file durability, wall-clock or long-poll liveness, batch/multiple-message atomicity, FIFO/exactly-once/distributed replica behavior, Unicode/size/checksum correctness or full URL validation. Queue name reuse beyond one lifetime is outside the bound; native regression tests separately cover actual storage failures and persistence. Adds only fields to the shared Gateway carrier. Existing modeled contracts remain; the new field registration and DI are not covered by inherited models."
+        },
+        {
+          "id": "KMSProtocolAdmission",
+          "properties": [
+            "TypeOK",
+            "NoCrossServiceFallback",
+            "InfraNotDeny",
+            "MissingIdentityDenied",
+            "NoSuccessWithoutKMSTarget",
+            "NoAuthorityFromWireMetadata"
+          ],
+          "limits": "Normalized protocol/identity-policy admission abstraction after trusted outer exercise identity selection; not raw HTTP/SigV4 parsing or signature authentication, local token/Access or tenant-isolation proof, full IAM semantics, byte bodies/AES, real DB faults/transactions, Go refinement, timing/concurrency/crash proof or other-service authorization. Other route is only handoff, not modeled S3 success. Body-read-barrier native tests and nine actual Gateway metadata cases independently exercise the intended bridge; new tests and this model are initially UNRUN. Shared Gateway/server/SSM applicability is ONLY the new configured KMS route/module declaration, not unchanged AWS branches, nil-module/constructor behavior or whole provider wiring. Native tests are separate and initially unrun. Adds only fields to the shared Gateway carrier. Existing modeled contracts remain; the new field registration and DI are not covered by inherited models."
+        },
+        {
+          "id": "CloudWatchLogsLifecycle",
+          "properties": [
+            "TypeOK",
+            "NoOrphans",
+            "OnlyAcceptedWrites",
+            "TokenAuthority"
+          ],
+          "limits": "Finite safety only; no liveness or implementation refinement. Models transaction atomicity and database identity as abstract steps, not SQLite faults, HMAC cryptography or OS process isolation. Byte/time limits, sorting, page convergence, expiry and real IAM documents require native/SDK tests. Captured read receipts preserve the authorization context when later resource generations change. Shared source scope covers only the added Logs field/dispatch/construction seam; not all other service dispatch or server lifecycle/authentication. Stream deletion and later recreation are included: the abstract incarnation advances at deletion, while native code assigns a fresh random generation at recreation. Reads are disallowed while absent; native regressions verify cursor rejection and SQL failure rollback. Adds only fields to the shared Gateway carrier. Existing modeled contracts remain; the new field registration and DI are not covered by inherited models."
+        },
+        {
+          "id": "SecretsVersionLifecycle",
+          "properties": [
+            "TypeOK",
+            "ImmutableVersions",
+            "NoOrphans",
+            "UniqueLabels",
+            "SeparateCurrentPrevious",
+            "ActiveHasCurrent",
+            "AuthorizedVersions",
+            "AuthorizedDisclosure"
+          ],
+          "limits": "Finite lifecycle/authority abstraction, not SQL transaction, cryptography, OS authentication, formatter redaction or Go implementation refinement. A team models one secret name and two never-reused ARN incarnations; process/token isolation and cursor bindings require actual native SDK tests. History contains abstract dummy values solely to detect an attempted immutable-version overwrite; runtime force deletion does not retain secret values. IAM is represented by a pure Boolean decision for the resolved resource; policy loading/error ordering and actual IAM rules require concrete Go tests. Shared Gateway/dispatch/server paths bind only Secrets composition into the native SQLite/immutable-policy authority path, not unrelated S3/SSM behavior or a proof of HTTP routing. Cursor signatures, quotas and restart persistence require concrete tests. Adds only fields to the shared Gateway carrier. Existing modeled contracts remain; the new field registration and DI are not covered by inherited models."
+        },
+        {
+          "id": "DynamoDBAdmission",
+          "properties": [
+            "TypeOK",
+            "InitializedBeforeMutation",
+            "DeniedFrame",
+            "ValidKeysOnly",
+            "CanonicalKeys",
+            "SemanticBytes",
+            "CommittedBytes",
+            "CreateCommitted",
+            "AcknowledgedRemoval",
+            "ActiveTableRequired",
+            "TableBudget",
+            "ItemBudget",
+            "ItemCountBudget",
+            "StatisticsExact",
+            "PeerFrame",
+            "NoOrphans",
+            "RefusalFrame",
+            "AdmissionExact",
+            "TableAdmissionExact",
+            "RemovalAdmissionExact",
+            "StartupAdmission",
+            "StartupRefusedFrame"
+          ],
+          "limits": "Finite normalized admission, acknowledgement/row-effect, canonical-key and semantic-byte fixtures with independent literal oracle functions. Actual Go literal/SQL IGNORE tests are separate evidence. No full decimal grammar/UTF8/base64/JSON or 400KiB exhaustive arithmetic proof, SQL/driver/Go refinement/durability, arbitrary persisted-data import, live external writers, IAM/token/HTTP parsing, host or multi-process authentication proof. startupValid abstracts constructor success/orphan-refusal, not discovery/validation of arbitrary SQL. Scopes are fixed region/table namespaces inside one selected DB, not row tenants or two authenticated teams. Shared factory/dispatch/Gateway-field files are narrow call-contract seams for initialized-store and preflight denial only; their other routes/authority are not modeled. Lifecycle generations/conditional races are the separate unchanged DynamoDBLifecycle model. Targeted finite-model receipts are separate from exact-HEAD whole-registry merge checking and actual Go/native/integration execution. Adds only fields to the shared Gateway carrier. Existing modeled contracts remain; the new field registration and DI are not covered by inherited models."
+        },
+        {
+          "id": "CatalogResourceLifecycle",
+          "properties": [
+            "TypeOK",
+            "AuthorizationFirst",
+            "ReplayNoDuplicate",
             "FailureFrame",
             "PeerFrame",
-            "ReadAndReopenSnapshot"
+            "QuotaBound",
+            "UniqueNames",
+            "FreshIDs",
+            "StaleWriteRejected",
+            "GenerationAdvances",
+            "ChildGuard",
+            "TokenBinding",
+            "TokenOnce"
           ],
-          "limits": "Models only the trusted leaf tuple/marker decision and allowed metadata action frames. Does not verify actual HTTP parsing or shared provider routing."
+          "limits": "Atomic catalog store projection only, shared by the AWS catalog and the Google API catalog (configured project owner as authorization, etag as generation, requestId as client token, force as cascade): authorization-before-commit, typed refusal frames, quota, optional name uniqueness, fresh identifiers, generation-guarded update/delete, child reference integrity with refuse or cascade deletion, and client-token replay. Official shape validation, wire projection, pagination tokens, tag maps, ARN formatting, SQL/locking/crash behavior, JSON encoding and Go refinement are verified by native tests, not this model. A three-step bound is not an API cap. Adds only fields to the shared Gateway carrier. Existing modeled contracts remain; the new field registration and DI are not covered by inherited models."
+        },
+        {
+          "id": "SNSAdmission",
+          "properties": [
+            "TypeOK",
+            "NoUnauthorizedEffect",
+            "NoFIFOPublish",
+            "NoRegionMismatch",
+            "NoSuccessOnRefusal",
+            "NoRejectedMutation"
+          ],
+          "limits": "Boolean admission witnesses abstract actual Go parsing/attributes/Subject/UTF-8/body sizes/signature syntax, IAM matching and region/resource lookup. Validated dispatch permits metadata writes; no initialization, credential, SQL, real SDK or Go refinement proof. Shared Gateway/server file bindings cover SNS registration/admission only, preserving all other providers/services. Actual malformed Query and immutable-state/region/SDK/SQL regressions remain separate evidence. Adds only fields to the shared Gateway carrier. Existing modeled contracts remain; the new field registration and DI are not covered by inherited models."
+        },
+        {
+          "id": "S3MultipartState",
+          "properties": [
+            "TypeOK",
+            "Budget",
+            "NoOrphans",
+            "Cleanup",
+            "RefusalAtomic"
+          ],
+          "limits": "Finite atomic transaction abstraction only; does not execute Go/SQLite/HTTP/React, prove refinement, MD5 integrity, IAM parsing, version selection, ordering/minimum sizes, timestamps, random IDs, OS isolation, or real AWS parity. Scope labels abstract bucket/key/upload binding. Actual Go fault, SDK, persistence and browser tests cover those boundaries. Adds only fields to the shared Gateway carrier. Existing modeled contracts remain; the new field registration and DI are not covered by inherited models."
+        },
+        {
+          "id": "WAFRequestEvaluation",
+          "properties": [
+            "TypeOK",
+            "NoAssociationOrphans",
+            "CountContinues",
+            "FirstTerminatingRuleWins",
+            "UnassociatedAllows"
+          ],
+          "limits": "Abstract ordered evaluation and atomic association guards only; not SQLi detection, byte transforms, IAM parsing, SQL concurrency, browser behavior or implementation refinement. Adds only fields to the shared Gateway carrier. Existing modeled contracts remain; the new field registration and DI are not covered by inherited models."
+        },
+        {
+          "id": "Route53AtomicBatch",
+          "properties": [
+            "TypeOK",
+            "AtomicPair",
+            "PreserveSentinel",
+            "OnlyAuthorizedValid",
+            "OtherTeamUnchanged",
+            "PendingInvisible"
+          ],
+          "limits": "Atomic batch/authority/team frame abstraction only; no Go/SQL/XML/DNS, receipt retention, quota, pagination, crash or liveness proof. Native and SDK tests independently cover implementation boundaries. Adds only fields to the shared Gateway carrier. Existing modeled contracts remain; the new field registration and DI are not covered by inherited models."
+        },
+        {
+          "id": "SSMDocumentState",
+          "properties": [
+            "TypeOK",
+            "DeniedPreserves",
+            "RefusalPreserves",
+            "AddressIsolation",
+            "HistoryImmutable",
+            "DefaultPreserved",
+            "DeleteCleanup",
+            "LatestPrecondition",
+            "CreateOnlyAbsent"
+          ],
+          "limits": "Definition management only. Atomic abstract transitions assume transaction commit/rollback; no SQL refinement, parser, IAM evaluation, byte quota, wire, persistence, concurrency or execution proof. Adds only fields to the shared Gateway carrier. Existing modeled contracts remain; the new field registration and DI are not covered by inherited models."
+        },
+        {
+          "id": "ELBTargetLifecycle",
+          "properties": [
+            "TypeOK",
+            "ListenerReferencesExist",
+            "TargetNeedsGroup",
+            "HealthCurrent",
+            "ReportedHealthInUse",
+            "OnlyAuthorizedChanges",
+            "OtherTeamUnchanged"
+          ],
+          "limits": "Reference/cascade, authorization-before-persistence, team frame and epoch-guarded health-result abstraction only; consecutive thresholds, matcher codes, timeouts, pagination, idempotent replay, quotas, resource-policy evaluation, Lambda execution, SQL/Go refinement, crashes and liveness are not modeled. Native, server and SDK tests cover them independently. Adds only fields to the shared Gateway carrier. Existing modeled contracts remain; the new field registration and DI are not covered by inherited models."
+        },
+        {
+          "id": "BedrockRuntimeAdmission",
+          "properties": [
+            "TypeOK",
+            "BackendOnlyAfterAdmission",
+            "AuthorizationFirst",
+            "NoCallAfterClose",
+            "ConcurrencyBound",
+            "SuccessOnlyFromBackend",
+            "NoFallback",
+            "TruthfulFailure",
+            "NoPersistence"
+          ],
+          "limits": "Finite admission/result abstraction of the opt-in local Bedrock Runtime only. Assumes the authenticated exercise identity, IAM decision, strict body validation and Ollama transport pins are computed correctly; the shutdown and canceled responses are distinct kinds here but share ServiceUnavailableException on the wire. No Go/HTTP/JSON refinement, real Ollama or model behavior, deadline arithmetic, listener deadlines, token counts, streaming, tool use, concrete Apple hardware/API availability, native pipe/process execution, OS service lifetime, Claude Code or liveness proof. Native, CLI and SDK tests independently cover implementation boundaries. Adds only fields to the shared Gateway carrier. Existing modeled contracts remain; the new field registration and DI are not covered by inherited models."
+        },
+        {
+          "id": "AutoScalingPlanTargets",
+          "properties": [
+            "TypeOK",
+            "BoundedWhileOwned",
+            "OnlyAuthorizedValid",
+            "NoOwnershipSteal",
+            "DeleteKeepsCapacity",
+            "RejectionFrame",
+            "OtherTeamUnchanged",
+            "PendingInvisible"
+          ],
+          "limits": "Capacity-bound/ownership/authority/rollback/team-frame abstraction only; no Go/SQL/JSON parsing, IAM matching, pagination, status derivation text, quotas, crash recovery, target tracking evaluation or liveness proof. Native Go, composed-server and SDK tests provide separate implementation evidence. Adds only fields to the shared Gateway carrier. Existing modeled contracts remain; the new field registration and DI are not covered by inherited models."
+        },
+        {
+          "id": "VpcOriginReferenceLifecycle",
+          "properties": [
+            "PrivateALBRequired",
+            "RejectStaleMutation",
+            "FailureRollsBack",
+            "GenerationAdvances",
+            "DeleteExact",
+            "TypeOK"
+          ],
+          "limits": "Models linearizable metadata and rollback, with one ALB and one logical origin. It does not simulate CloudFront traffic, network reachability, HTTP parsing, ALB changes or cryptographic ETag generation. Adds only fields to the shared Gateway carrier. Existing modeled contracts remain; the new field registration and DI are not covered by inherited models."
         }
       ]
     },
     {
-      "path": "internal/sakura/iaas/server_http_test.go",
-      "sha256": "fc956f65b5ac80eeb4a95d020002b46c0ef5de7b49188ddcba370cbe55980f14",
+      "path": "internal/aws/simpledb/domain.go",
+      "sha256": "f8592533cba40cc9627e0ec090c391425cd99c4768d312afa4981f386152287e",
+      "disposition": "modeled",
+      "reason": "Abstract domain creation and deletion, including isolation and cleanup.",
+      "models": [
+        {
+          "id": "SimpleDBLifecycle",
+          "properties": [
+            "TypeOK",
+            "NoOrphans",
+            "PendingInvisible",
+            "RefusalUnchanged",
+            "AuthorizedCommit",
+            "PeerFrame",
+            "CommittedExact",
+            "DurableAck",
+            "RestartExact",
+            "DeleteEmpty",
+            "CreateIdempotent",
+            "PutSetExact"
+          ],
+          "limits": "Abstract admitted mutations and stage/commit/failure/reopen only; no SQL, HTTP/SDK, pagination, arbitrary concurrency, IAM evaluation or Go refinement."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/simpledb/http.go",
+      "sha256": "b8284b3621e80c3b3a81b6e215ad15f6bcbc040bb43244515206dd8ddeb22089",
+      "disposition": "modeled",
+      "reason": "Abstract admission, one dispatch and response categories for the original five operations; separate DomainMetadata typed admission and results, not raw protocol/status.",
+      "models": [
+        {
+          "id": "SimpleDBQueryAdmission",
+          "properties": [
+            "TypeOK",
+            "OneDispatch",
+            "MalformedNeverDispatches",
+            "TrustedAdmissionBeforeDispatch",
+            "ConfiguredScopeBinding",
+            "EnvelopeMatchesOutcome"
+          ],
+          "limits": "Abstract typed guards and response categories only; no raw parser/XML/signing, IAM evaluator, routing precedence, initializer wiring, exact status/codes, pagination, SQL, SDK or Go refinement."
+        },
+        {
+          "id": "SimpleDBDomainMetadata",
+          "properties": [
+            "ReadRequiresDomainAuthority"
+          ],
+          "limits": "One already-selected immutable local snapshot, symbolic byte weights and typed admission; no SQL snapshot isolation, cancellation, wall clock, raw Query/XML, IAM policy evaluation, SDK or Go refinement."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/simpledb/http_test.go",
+      "sha256": "253f66cdd40082767e53fe7865755adcb43bfc0add72068e1ac52807488ac974",
       "disposition": "test-support",
-      "reason": "Test-only artifact supporting exact local Server behavior and compatibility; no operational API or state interface introduced here.",
+      "reason": "Fixtures, assertions or registration contracts; not production runtime or execution evidence.",
       "models": []
     },
     {
-      "path": "internal/sakura/iaas/server_store.go",
-      "sha256": "38cc26c7020adb5bd17fef024ce27493c0b57a67e6eb0f93396b23071e6c7552",
+      "path": "internal/aws/simpledb/item.go",
+      "sha256": "cbf71ae3ea3bd0f0763e2c6d87f013fd9ea4aab90dd4a9e7848788a1b389de04",
       "disposition": "modeled",
-      "reason": "Separate persisted binding, read/reopen observation, exact atomic operation and bounds, allocation retained across delete.",
+      "reason": "Abstract mutation, append/replace set semantics and scope isolation; Get is not covered.",
       "models": [
         {
-          "id": "SakuraServerMetadata",
+          "id": "SimpleDBLifecycle",
           "properties": [
-            "FrozenScope",
-            "ReopenBinding",
+            "TypeOK",
+            "NoOrphans",
+            "PendingInvisible",
+            "RefusalUnchanged",
+            "AuthorizedCommit",
+            "PeerFrame",
+            "CommittedExact",
+            "DurableAck",
+            "RestartExact",
+            "DeleteEmpty",
+            "CreateIdempotent",
+            "PutSetExact"
+          ],
+          "limits": "Abstract admitted mutations and stage/commit/failure/reopen only; no SQL, HTTP/SDK, pagination, arbitrary concurrency, IAM evaluation or Go refinement."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/simpledb/metadata.go",
+      "sha256": "cf342630088a75c1cbd8e46833cf8599e1335671c0ff70314db9d6be0fbd6c57",
+      "disposition": "modeled",
+      "reason": "Abstract admitted DomainMetadata fold: item count/bytes, unique attribute name count/bytes, and value-pair count/bytes. SQLite isolation and timestamps remain runtime evidence.",
+      "models": [
+        {
+          "id": "SimpleDBDomainMetadata",
+          "properties": [
+            "TypeOK",
+            "ReadRequiresDomainAuthority",
+            "ExactCommittedTotals"
+          ],
+          "limits": "One already-selected immutable local snapshot, symbolic byte weights and typed admission; no SQL snapshot isolation, cancellation, wall clock, raw Query/XML, IAM policy evaluation, SDK or Go refinement."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/simpledb/metadata_test.go",
+      "sha256": "997a23ba0f5137a22cf9de998eef4df6aa069d617316e535072ac708d8f6351d",
+      "disposition": "test-support",
+      "reason": "Exercises metadata wire fields, empty/recreated domains, scoped replacement and refusal through real SQLite; not a formal proof.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/simpledb/pagination.go",
+      "sha256": "a27d70cecc2833a93c9c202261e59ecd4a82e3efb091506dd11afaee7d90bf90",
+      "disposition": "modeled",
+      "reason": "Abstract strict current-row cursor pagination and binding to account, region and key epoch.",
+      "models": [
+        {
+          "id": "SimpleDBPageCursor",
+          "properties": [
+            "TypeOK",
+            "CursorBinding",
+            "ExactPage",
+            "ReadOnly"
+          ],
+          "limits": "Current rows only; no snapshot, token syntax/crypto, cancellation, errors not represented, SQL, SDK or Go refinement."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/simpledb/resilience_test.go",
+      "sha256": "7240d8dcd51fb86e7f56ef43c3234a1ec1d6cc99f0fd82b1f7cf67467be5fc4e",
+      "disposition": "test-support",
+      "reason": "Adds operator-local SimpleDB persistence, cancellation, pagination and Query error regression tests; no production runtime behavior.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/simpledb/store.go",
+      "sha256": "bf1ade5638cbb6229eed1f62829f195c9a2cc9ed5e0044fa794a3e6262b8620d",
+      "disposition": "modeled",
+      "reason": "Abstract durable state/frames plus ephemeral cursor key lifetime, not SQL schema/transactions or random key generation.",
+      "models": [
+        {
+          "id": "SimpleDBLifecycle",
+          "properties": [
+            "TypeOK",
+            "NoOrphans",
+            "PendingInvisible",
+            "RefusalUnchanged",
+            "AuthorizedCommit",
+            "PeerFrame",
+            "CommittedExact",
+            "DurableAck",
+            "RestartExact",
+            "DeleteEmpty",
+            "CreateIdempotent",
+            "PutSetExact"
+          ],
+          "limits": "Abstract admitted mutations and stage/commit/failure/reopen only; no SQL, HTTP/SDK, pagination, arbitrary concurrency, IAM evaluation or Go refinement."
+        },
+        {
+          "id": "SimpleDBPageCursor",
+          "properties": [
+            "TypeOK",
+            "CursorBinding",
+            "ExactPage",
+            "ReadOnly"
+          ],
+          "limits": "Current rows only; no snapshot, token syntax/crypto, cancellation, errors not represented, SQL, SDK or Go refinement."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/simpledb/store_test.go",
+      "sha256": "ed9e1a032963ee03b6a91766bab2b612d4f15d4e9de224e63c2e3271d2e2f7be",
+      "disposition": "test-support",
+      "reason": "Fixtures, assertions or registration contracts; not production runtime or execution evidence.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/simpledb/validation.go",
+      "sha256": "73c0c97aacc9a8eecd7356d27ef1f8ca526a4429bdf4fd6b564402a35ca77c22",
+      "disposition": "modeled",
+      "reason": "Abstract typed scope/domain/item rejection categories, not concrete validation and encoding limits.",
+      "models": [
+        {
+          "id": "SimpleDBQueryAdmission",
+          "properties": [
+            "TypeOK",
+            "OneDispatch",
+            "MalformedNeverDispatches",
+            "TrustedAdmissionBeforeDispatch",
+            "ConfiguredScopeBinding",
+            "EnvelopeMatchesOutcome"
+          ],
+          "limits": "Abstract typed guards and response categories only; no raw parser/XML/signing, IAM evaluator, routing precedence, initializer wiring, exact status/codes, pagination, SQL, SDK or Go refinement."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/simpledb_gateway.go",
+      "sha256": "914f19ec38557c9d76545f4ae56c82d2fae9313dde1be8e753aab7cb03ddfb3f",
+      "disposition": "modeled",
+      "reason": "Abstract trusted context actor, affirmative policy decision and fixed configured scope; not complete gateway or IAM implementation.",
+      "models": [
+        {
+          "id": "SimpleDBQueryAdmission",
+          "properties": [
+            "TypeOK",
+            "OneDispatch",
+            "MalformedNeverDispatches",
+            "TrustedAdmissionBeforeDispatch",
+            "ConfiguredScopeBinding",
+            "EnvelopeMatchesOutcome"
+          ],
+          "limits": "Abstract typed guards and response categories only; no raw parser/XML/signing, IAM evaluator, routing precedence, initializer wiring, exact status/codes, pagination, SQL, SDK or Go refinement."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/simpledb_gateway_test.go",
+      "sha256": "604fd873078e69b331632e3ab95c95bf3c64f3ce52d88b4c239a2105c3511141",
+      "disposition": "test-support",
+      "reason": "Fixtures, assertions or registration contracts; not production runtime or execution evidence.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/ssm.go",
+      "sha256": "4e73843980f04de9f22e0b3fb9753e2bc201c800039d36f137dd22db0111cd76",
+      "disposition": "modeled",
+      "reason": "Adds the SimpleDB branch before generic form fallback. Existing shared router models remain; SimpleDB selector priority and cross-protocol routing are not covered.",
+      "models": [
+        {
+          "id": "SSMParameterState",
+          "properties": [
+            "TypeOK",
+            "DeniedPreservesState",
+            "OverwriteRefusal",
+            "PutVersion",
+            "DeleteEffect",
+            "OtherKeysUnchanged",
+            "ReadIsolation"
+          ],
+          "limits": "Atomic accepted operations and abstract allow/explicit-deny only; no IAM parser/ARN matching, HTTP syntax, type/description/time fields, pagination/path queries, SQLite crash/interleaving proof, version history/selectors/labels, AWS recreation delay, live AWS differential run or Go refinement proof. Adds the SimpleDB branch before generic form fallback. Existing shared router models remain; SimpleDB selector priority and cross-protocol routing are not covered."
+        },
+        {
+          "id": "SQSLifecycle",
+          "properties": [
+            "TypeOK",
+            "NoOrphans",
+            "AuthorizedMutations",
+            "ScopedMutation",
+            "FailedMutationAtomic",
+            "IdempotentCreateUnchanged",
+            "ReceiveOnlyEligible",
+            "FreshReceipt",
+            "ReceiptMutationCurrent",
+            "ChangeOnlyInflight"
+          ],
+          "limits": "Atomic transition abstraction after the native parent/expiry/rollback repair. Scopes abstract separately configured database/region/queue targets, not selected IAM principals. Receipt freshness assumes collision-free opaque IDs. No SQL/Go refinement, cryptographic proof, restart/file durability, wall-clock or long-poll liveness, batch/multiple-message atomicity, FIFO/exactly-once/distributed replica behavior, Unicode/size/checksum correctness or full URL validation. Queue name reuse beyond one lifetime is outside the bound; native regression tests separately cover actual storage failures and persistence. Adds the SimpleDB branch before generic form fallback. Existing shared router models remain; SimpleDB selector priority and cross-protocol routing are not covered."
+        },
+        {
+          "id": "KMSProtocolAdmission",
+          "properties": [
+            "TypeOK",
+            "NoCrossServiceFallback",
+            "InfraNotDeny",
+            "MissingIdentityDenied",
+            "NoSuccessWithoutKMSTarget",
+            "NoAuthorityFromWireMetadata"
+          ],
+          "limits": "Normalized protocol/identity-policy admission abstraction after trusted outer exercise identity selection; not raw HTTP/SigV4 parsing or signature authentication, local token/Access or tenant-isolation proof, full IAM semantics, byte bodies/AES, real DB faults/transactions, Go refinement, timing/concurrency/crash proof or other-service authorization. Other route is only handoff, not modeled S3 success. Body-read-barrier native tests and nine actual Gateway metadata cases independently exercise the intended bridge; new tests and this model are initially UNRUN. Shared Gateway/server/SSM applicability is ONLY the new configured KMS route/module declaration, not unchanged AWS branches, nil-module/constructor behavior or whole provider wiring. Native tests are separate and initially unrun. Adds the SimpleDB branch before generic form fallback. Existing shared router models remain; SimpleDB selector priority and cross-protocol routing are not covered."
+        },
+        {
+          "id": "CloudWatchLogsLifecycle",
+          "properties": [
+            "TypeOK",
+            "NoOrphans",
+            "OnlyAcceptedWrites",
+            "TokenAuthority"
+          ],
+          "limits": "Finite safety only; no liveness or implementation refinement. Models transaction atomicity and database identity as abstract steps, not SQLite faults, HMAC cryptography or OS process isolation. Byte/time limits, sorting, page convergence, expiry and real IAM documents require native/SDK tests. Captured read receipts preserve the authorization context when later resource generations change. Shared source scope covers only the added Logs field/dispatch/construction seam; not all other service dispatch or server lifecycle/authentication. Stream deletion and later recreation are included: the abstract incarnation advances at deletion, while native code assigns a fresh random generation at recreation. Reads are disallowed while absent; native regressions verify cursor rejection and SQL failure rollback. Adds the SimpleDB branch before generic form fallback. Existing shared router models remain; SimpleDB selector priority and cross-protocol routing are not covered."
+        },
+        {
+          "id": "SecretsVersionLifecycle",
+          "properties": [
+            "TypeOK",
+            "ImmutableVersions",
+            "NoOrphans",
+            "UniqueLabels",
+            "SeparateCurrentPrevious",
+            "ActiveHasCurrent",
+            "AuthorizedVersions",
+            "AuthorizedDisclosure"
+          ],
+          "limits": "Finite lifecycle/authority abstraction, not SQL transaction, cryptography, OS authentication, formatter redaction or Go implementation refinement. A team models one secret name and two never-reused ARN incarnations; process/token isolation and cursor bindings require actual native SDK tests. History contains abstract dummy values solely to detect an attempted immutable-version overwrite; runtime force deletion does not retain secret values. IAM is represented by a pure Boolean decision for the resolved resource; policy loading/error ordering and actual IAM rules require concrete Go tests. Shared Gateway/dispatch/server paths bind only Secrets composition into the native SQLite/immutable-policy authority path, not unrelated S3/SSM behavior or a proof of HTTP routing. Cursor signatures, quotas and restart persistence require concrete tests. Adds the SimpleDB branch before generic form fallback. Existing shared router models remain; SimpleDB selector priority and cross-protocol routing are not covered."
+        },
+        {
+          "id": "DynamoDBAdmission",
+          "properties": [
+            "TypeOK",
+            "InitializedBeforeMutation",
+            "DeniedFrame",
+            "ValidKeysOnly",
+            "CanonicalKeys",
+            "SemanticBytes",
+            "CommittedBytes",
+            "CreateCommitted",
+            "AcknowledgedRemoval",
+            "ActiveTableRequired",
+            "TableBudget",
+            "ItemBudget",
+            "ItemCountBudget",
+            "StatisticsExact",
+            "PeerFrame",
+            "NoOrphans",
+            "RefusalFrame",
+            "AdmissionExact",
+            "TableAdmissionExact",
+            "RemovalAdmissionExact",
+            "StartupAdmission",
+            "StartupRefusedFrame"
+          ],
+          "limits": "Finite normalized admission, acknowledgement/row-effect, canonical-key and semantic-byte fixtures with independent literal oracle functions. Actual Go literal/SQL IGNORE tests are separate evidence. No full decimal grammar/UTF8/base64/JSON or 400KiB exhaustive arithmetic proof, SQL/driver/Go refinement/durability, arbitrary persisted-data import, live external writers, IAM/token/HTTP parsing, host or multi-process authentication proof. startupValid abstracts constructor success/orphan-refusal, not discovery/validation of arbitrary SQL. Scopes are fixed region/table namespaces inside one selected DB, not row tenants or two authenticated teams. Shared factory/dispatch/Gateway-field files are narrow call-contract seams for initialized-store and preflight denial only; their other routes/authority are not modeled. Lifecycle generations/conditional races are the separate unchanged DynamoDBLifecycle model. Targeted finite-model receipts are separate from exact-HEAD whole-registry merge checking and actual Go/native/integration execution. Adds the SimpleDB branch before generic form fallback. Existing shared router models remain; SimpleDB selector priority and cross-protocol routing are not covered."
+        },
+        {
+          "id": "CatalogResourceLifecycle",
+          "properties": [
+            "TypeOK",
+            "AuthorizationFirst",
+            "ReplayNoDuplicate",
             "FailureFrame",
             "PeerFrame",
-            "ReadAndReopenSnapshot",
-            "FreshCommittedID",
-            "AllocatorOnlyCreate",
-            "CommitExact",
-            "StoredIDsAndQuota"
+            "QuotaBound",
+            "UniqueNames",
+            "FreshIDs",
+            "StaleWriteRejected",
+            "GenerationAdvances",
+            "ChildGuard",
+            "TokenBinding",
+            "TokenOnce"
           ],
-          "limits": "The model covers admitted metadata action snapshots and finite abstract state, not actual SQL, HTTP parsing, list/query, auth tokens, timestamps, or VMs."
-        }
-      ]
-    },
-    {
-      "path": "internal/sakura/iaas/server_store_test.go",
-      "sha256": "c8cd4d45bd12e7e629d7a62e72f92c40b395954b900ee0a7c9596cfba07b26b5",
-      "disposition": "test-support",
-      "reason": "Test-only artifact supporting exact local Server behavior and compatibility; no operational API or state interface introduced here.",
-      "models": []
-    },
-    {
-      "path": "internal/sakura/provider.go",
-      "sha256": "3af3432234713b73a3e32d1b5e916c4f81f567e69805db526ea991362691df50",
-      "disposition": "modeled",
-      "reason": "Existing provider Actor extraction now reused for Server and Disk. Retain the existing Disk mapping model; routing and Server mount startup require native evidence.",
-      "models": [
+          "limits": "Atomic catalog store projection only, shared by the AWS catalog and the Google API catalog (configured project owner as authorization, etag as generation, requestId as client token, force as cascade): authorization-before-commit, typed refusal frames, quota, optional name uniqueness, fresh identifiers, generation-guarded update/delete, child reference integrity with refuse or cascade deletion, and client-token replay. Official shape validation, wire projection, pagination tokens, tag maps, ARN formatting, SQL/locking/crash behavior, JSON encoding and Go refinement are verified by native tests, not this model. A three-step bound is not an API cap. Adds the SimpleDB branch before generic form fallback. Existing shared router models remain; SimpleDB selector priority and cross-protocol routing are not covered."
+        },
         {
-          "id": "SakuraDiskAdmission",
+          "id": "SNSAdmission",
           "properties": [
-            "MappedSubjectUsesExerciseIdentity",
-            "MappedRealmUsesCopiedHostConfig",
-            "NoDefaultActorOnExtractionFailure",
-            "WireHeadersDoNotMapAuthority"
+            "TypeOK",
+            "NoUnauthorizedEffect",
+            "NoFIFOPublish",
+            "NoRegionMismatch",
+            "NoSuccessOnRefusal",
+            "NoRejectedMutation"
           ],
-          "limits": "Existing copied host-config and exercise identity mapping only. Neither actual dispatch, Server path selection, constructor atomicity nor host authentication is proved by this binding."
+          "limits": "Boolean admission witnesses abstract actual Go parsing/attributes/Subject/UTF-8/body sizes/signature syntax, IAM matching and region/resource lookup. Validated dispatch permits metadata writes; no initialization, credential, SQL, real SDK or Go refinement proof. Shared Gateway/server file bindings cover SNS registration/admission only, preserving all other providers/services. Actual malformed Query and immutable-state/region/SDK/SQL regressions remain separate evidence. Adds the SimpleDB branch before generic form fallback. Existing shared router models remain; SimpleDB selector priority and cross-protocol routing are not covered."
+        },
+        {
+          "id": "STSSessionLifecycle",
+          "properties": [
+            "TypeOK",
+            "IssueRequiresAllGuards",
+            "UseRequiresAllGuards"
+          ],
+          "limits": "Finite abstract guard/state correspondence only. Assumes coherent generation-and-policy authorization snapshot at use; SQL single-statement snapshots, Go concurrency, parser details, cryptographic SigV4, HTTP dispatch, real time, cross-process isolation and randomness require independent implementation tests. No liveness or Go refinement proof. Restart clears issued state; symbolic token slots may be reused after restart, not evidence of real credential uniqueness. Scoped baseline plus eight config-guard variants previously passed; source-edit registry variants need fresh exact-HEAD gate evidence. Adds the SimpleDB branch before generic form fallback. Existing shared router models remain; SimpleDB selector priority and cross-protocol routing are not covered."
+        },
+        {
+          "id": "ConsoleHandoff",
+          "properties": [
+            "TypeOK",
+            "OperatorRefused",
+            "ParentLifetimeBound",
+            "OneTimeRedemption",
+            "AttemptConsumesCode",
+            "RedeemRequiresFreshParent",
+            "UseRequiresFreshAuthority",
+            "ExactDestination",
+            "TerminalRequiresRelay",
+            "LogoutRejectsReplay",
+            "UnrelatedSessionsPreserved",
+            "SDKAuthorityPreserved"
+          ],
+          "limits": "Finite abstract lifecycle only, not Go/HTTP/SQL/crypto/refinement or liveness proof. Assumes opaque unique credentials and coherent fresh role/policy observation at request authorization. No quotas, parser/cookie/CSRF/origin/header correctness, in-flight logout linearization, policy-update atomicity, arbitrary histories or GUI/SDK execution proof. Existing BrowserSessions and STSSessionLifecycle retain independent scopes. Adds the SimpleDB branch before generic form fallback. Existing shared router models remain; SimpleDB selector priority and cross-protocol routing are not covered."
+        },
+        {
+          "id": "WAFRequestEvaluation",
+          "properties": [
+            "TypeOK",
+            "NoAssociationOrphans",
+            "CountContinues",
+            "FirstTerminatingRuleWins",
+            "UnassociatedAllows"
+          ],
+          "limits": "Abstract ordered evaluation and atomic association guards only; not SQLi detection, byte transforms, IAM parsing, SQL concurrency, browser behavior or implementation refinement. Adds the SimpleDB branch before generic form fallback. Existing shared router models remain; SimpleDB selector priority and cross-protocol routing are not covered."
+        },
+        {
+          "id": "SSMBatchDeletion",
+          "properties": [
+            "TypeOK",
+            "AdmissionBeforeMutation",
+            "PendingInvisible",
+            "NoEarlyResponse",
+            "CanceledPreservesState",
+            "FailureAtomic",
+            "DurableAck",
+            "PeerFrame",
+            "ExactDeletion",
+            "SuccessfulResultsExact",
+            "MissingIsNotFailure"
+          ],
+          "limits": "Bounded contract checking only. Raw 1..10 count and first-occurrence duplicate handling are the simulator policy; response order is not claimed as an AWS guarantee. Shape/name validity and immutable IAM decisions are abstract inputs, not parser/ARN/policy proofs. A single serial transaction stages writes privately; the model does not prove Go/SQL refinement, actual commit/cancellation races, snapshot acquisition, physical crash recovery, concurrent requests, all possible record contents, live AWS parity, or code coverage. Cancellation after committed success cannot undo a commit. Adds the SimpleDB branch before generic form fallback. Existing shared router models remain; SimpleDB selector priority and cross-protocol routing are not covered."
+        },
+        {
+          "id": "Route53AtomicBatch",
+          "properties": [
+            "TypeOK",
+            "AtomicPair",
+            "PreserveSentinel",
+            "OnlyAuthorizedValid",
+            "OtherTeamUnchanged",
+            "PendingInvisible"
+          ],
+          "limits": "Atomic batch/authority/team frame abstraction only; no Go/SQL/XML/DNS, receipt retention, quota, pagination, crash or liveness proof. Native and SDK tests independently cover implementation boundaries. Adds the SimpleDB branch before generic form fallback. Existing shared router models remain; SimpleDB selector priority and cross-protocol routing are not covered."
+        },
+        {
+          "id": "SSMDocumentState",
+          "properties": [
+            "TypeOK",
+            "DeniedPreserves",
+            "RefusalPreserves",
+            "AddressIsolation",
+            "HistoryImmutable",
+            "DefaultPreserved",
+            "DeleteCleanup",
+            "LatestPrecondition",
+            "CreateOnlyAbsent"
+          ],
+          "limits": "Definition management only. Atomic abstract transitions assume transaction commit/rollback; no SQL refinement, parser, IAM evaluation, byte quota, wire, persistence, concurrency or execution proof. Adds the SimpleDB branch before generic form fallback. Existing shared router models remain; SimpleDB selector priority and cross-protocol routing are not covered."
+        },
+        {
+          "id": "ParticipantSessionLifecycle",
+          "properties": [
+            "TypeOK",
+            "PreparedEvidence",
+            "PreparationOptIn",
+            "PackageEvidence",
+            "BoundAdmission",
+            "CurrentAdmission",
+            "ChannelTokenBinding",
+            "HandoffExpiry",
+            "SingleUse",
+            "HelloEvidence",
+            "ReadyEvidence",
+            "NoPostRevokeOutput",
+            "ResumeKeepsDriver",
+            "NoResurrection",
+            "GuestDrainEvidence",
+            "TerminalEvidence",
+            "FreshEvidence",
+            "RevokeIsNotExit"
+          ],
+          "limits": "Bounded authority/lifecycle composition only; assumes trusted immutable auth/policy decisions, atomic DB CAS/one-use claims, authentic correlated protocol evidence, reliable owned runtime witnesses, bundle hash validation and exclusive packaging filesystem inputs. Does not prove Go/SQL/JSON/WebSocket/cryptography/OS/PTY/systemd refinement or real process cleanup, full ConsoleHandoff/BrowserSessions subcontracts, numeric timeout/quotas or liveness. Adds the SimpleDB branch before generic form fallback. Existing shared router models remain; SimpleDB selector priority and cross-protocol routing are not covered."
+        },
+        {
+          "id": "ELBTargetLifecycle",
+          "properties": [
+            "TypeOK",
+            "ListenerReferencesExist",
+            "TargetNeedsGroup",
+            "HealthCurrent",
+            "ReportedHealthInUse",
+            "OnlyAuthorizedChanges",
+            "OtherTeamUnchanged"
+          ],
+          "limits": "Reference/cascade, authorization-before-persistence, team frame and epoch-guarded health-result abstraction only; consecutive thresholds, matcher codes, timeouts, pagination, idempotent replay, quotas, resource-policy evaluation, Lambda execution, SQL/Go refinement, crashes and liveness are not modeled. Native, server and SDK tests cover them independently. Adds the SimpleDB branch before generic form fallback. Existing shared router models remain; SimpleDB selector priority and cross-protocol routing are not covered."
+        },
+        {
+          "id": "BedrockRuntimeAdmission",
+          "properties": [
+            "TypeOK",
+            "BackendOnlyAfterAdmission",
+            "AuthorizationFirst",
+            "NoCallAfterClose",
+            "ConcurrencyBound",
+            "SuccessOnlyFromBackend",
+            "NoFallback",
+            "TruthfulFailure",
+            "NoPersistence"
+          ],
+          "limits": "Finite admission/result abstraction of the opt-in local Bedrock Runtime only. Assumes the authenticated exercise identity, IAM decision, strict body validation and Ollama transport pins are computed correctly; the shutdown and canceled responses are distinct kinds here but share ServiceUnavailableException on the wire. No Go/HTTP/JSON refinement, real Ollama or model behavior, deadline arithmetic, listener deadlines, token counts, streaming, tool use, concrete Apple hardware/API availability, native pipe/process execution, OS service lifetime, Claude Code or liveness proof. Native, CLI and SDK tests independently cover implementation boundaries. Adds the SimpleDB branch before generic form fallback. Existing shared router models remain; SimpleDB selector priority and cross-protocol routing are not covered."
+        },
+        {
+          "id": "AutoScalingPlanTargets",
+          "properties": [
+            "TypeOK",
+            "BoundedWhileOwned",
+            "OnlyAuthorizedValid",
+            "NoOwnershipSteal",
+            "DeleteKeepsCapacity",
+            "RejectionFrame",
+            "OtherTeamUnchanged",
+            "PendingInvisible"
+          ],
+          "limits": "Capacity-bound/ownership/authority/rollback/team-frame abstraction only; no Go/SQL/JSON parsing, IAM matching, pagination, status derivation text, quotas, crash recovery, target tracking evaluation or liveness proof. Native Go, composed-server and SDK tests provide separate implementation evidence. Adds the SimpleDB branch before generic form fallback. Existing shared router models remain; SimpleDB selector priority and cross-protocol routing are not covered."
+        },
+        {
+          "id": "EC2ReadDiscovery",
+          "properties": [
+            "TypeOK",
+            "AuthorizedRead",
+            "RegionBound",
+            "OwnedRead"
+          ],
+          "limits": "Atomic read admission and returned identity only; not SQL snapshot implementation, HTTP/XML, IAM parsing, VM liveness, quotas or a Go refinement proof. Tests must independently establish these implementation properties. Adds the SimpleDB branch before generic form fallback. Existing shared router models remain; SimpleDB selector priority and cross-protocol routing are not covered."
+        },
+        {
+          "id": "VpcOriginReferenceLifecycle",
+          "properties": [
+            "PrivateALBRequired",
+            "RejectStaleMutation",
+            "FailureRollsBack",
+            "GenerationAdvances",
+            "DeleteExact",
+            "TypeOK"
+          ],
+          "limits": "Models linearizable metadata and rollback, with one ALB and one logical origin. It does not simulate CloudFront traffic, network reachability, HTTP parsing, ALB changes or cryptographic ETag generation. Adds the SimpleDB branch before generic form fallback. Existing shared router models remain; SimpleDB selector priority and cross-protocol routing are not covered."
         }
       ]
-    },
-    {
-      "path": "internal/sakura/server_metadata_acceptance_test.go",
-      "sha256": "83b23d83b80bfb5def2104d9a6eb2fb73e1edff3f1eea0db2eeee9d292915e9a",
-      "disposition": "test-support",
-      "reason": "Test-only artifact supporting exact local Server behavior and compatibility; no operational API or state interface introduced here.",
-      "models": []
     },
     {
       "path": "internal/server/apidocs/openapi.json",
-      "sha256": "d008baffa67bc57853eb2e3021e56d9db962899a702788b9e146bb6ec9146bd9",
+      "sha256": "9b3be575cdd009297560a32c5072c59db74405928f76cfdb9a9626231693fb98",
       "disposition": "presentation",
-      "reason": "Adds only read-only Sakura Server List reference and existing navigation group placement. No runtime or authorization changes.",
-      "models": []
-    },
-    {
-      "path": "internal/server/sakura_provider.go",
-      "sha256": "b66c9a67d62a0ffb592bc1af8b6e706faec05d271eb06848303d3aea36ad740e",
-      "disposition": "modeled",
-      "reason": "Only modeled Sakura configuration and bounded Server capability admission; trusted Actor/handoff rules are not proven.",
-      "models": [
-        {
-          "id": "SakuraStartupAdmission",
-          "properties": [
-            "DisabledNoSakura",
-            "RegistrationRequiresSchema"
-          ],
-          "limits": "Bounded parsed-flag Sakura admission and pre-effect order only. Default-disabled Server mode adds no new startup constraint. Enabled Server opt-in requires valid enabled Sakura scope, unsafe and allow-remote off, and parsed numeric loopback. Generic listener rules and other providers are outside this model. Later startup stages assume success. Does not prove real authentication, token handling/cryptography, IP parsing or socket binding, proxy or tunnel exposure, constructor atomicity, syscall failures/cleanup, SDK/HTTP/browser behavior, or Go refinement. Shared server.go scope covers only Sakura provider construction and configuration."
-        },
-        {
-          "id": "SakuraServerReadEpoch",
-          "properties": [
-            "NoUnadvertisedMount"
-          ],
-          "limits": "Finite read-only presentation projection. Production Server capability is default-off; enabled states represent the explicitly guarded local operator opt-in after capability projection. Models descriptor/disabled/handoff admission, abstract context and list/detail request revision, and matching detail identity. Does not prove CLI validation or binding, proxy exposure, real authentication or browser authority, React/DOM/HTTP behavior, response schemas, pagination, mutations, runtime availability, SDK or Terraform. Generated bundle binding applies only to changed Server-view code."
-        }
-      ]
-    },
-    {
-      "path": "internal/server/sakura_provider_test.go",
-      "sha256": "cf1a879b11a498c155a01b381bee7b0ff7f689b4714f9c8d11307f7c0edf3f66",
-      "disposition": "test-support",
-      "reason": "In-process capability and missing-provider refusal fixtures; no live browser or provider.",
+      "reason": "Adds the read-only SimpleDB ListDomains and DomainMetadata root POST references and their local routing instructions; preserves the exact current Sakura and other OpenAPI operations and authorization.",
       "models": []
     },
     {
       "path": "internal/server/server.go",
-      "sha256": "f9e32c094dea5cefe2b1cc01becf1964674ec28a45b2eb5e5b740e35a52c901b",
+      "sha256": "f44b6ecb75ab49ecb4963395ea38166a9414711e6770d135535767623403fa17",
       "disposition": "modeled",
-      "reason": "Only changed Sakura provider composition and scoped publication path; other provider logic and authentication are not modeled. Existing Cloud DNS: Publishes the Cloud DNS console capability only for the trusted local owner outside scoped handoffs.",
+      "reason": "Adds the SimpleDB store constructor and configured Gateway fields. Existing modeled contracts remain; startup/cleanup and SimpleDB dependency wiring are not covered by these models.",
       "models": [
+        {
+          "id": "SQSLifecycle",
+          "properties": [
+            "TypeOK",
+            "NoOrphans",
+            "AuthorizedMutations",
+            "ScopedMutation",
+            "FailedMutationAtomic",
+            "IdempotentCreateUnchanged",
+            "ReceiveOnlyEligible",
+            "FreshReceipt",
+            "ReceiptMutationCurrent",
+            "ChangeOnlyInflight"
+          ],
+          "limits": "Atomic transition abstraction after the native parent/expiry/rollback repair. Scopes abstract separately configured database/region/queue targets, not selected IAM principals. Receipt freshness assumes collision-free opaque IDs. No SQL/Go refinement, cryptographic proof, restart/file durability, wall-clock or long-poll liveness, batch/multiple-message atomicity, FIFO/exactly-once/distributed replica behavior, Unicode/size/checksum correctness or full URL validation. Queue name reuse beyond one lifetime is outside the bound; native regression tests separately cover actual storage failures and persistence. Adds the SimpleDB store constructor and configured Gateway fields. Existing modeled contracts remain; startup/cleanup and SimpleDB dependency wiring are not covered by these models."
+        },
+        {
+          "id": "ProjectAuthority",
+          "properties": [
+            "TypeOK",
+            "FixedHostConfiguration",
+            "OwnerBindingFrozen",
+            "ConstructorRefusalFrame",
+            "NoUnboundAdoption",
+            "InitializationBindsConfigured",
+            "DeniedFrame",
+            "FinitePermissions",
+            "ActorUsesPersistedProject",
+            "OnlyActualOwnerAuthorized"
+          ],
+          "limits": "GCP owner-only factory and actual-bucket-project authorization abstraction after a trusted subject extractor; not Google IAM/OAuth, credential validation/extraction, operator/control roles, Azure authorization, HTTP/path/generation semantics, SQLite/Go refinement, concurrency/crash proof, byte budgets, project-number parsing, growing configured project roster or actual SDK execution. One bucket stands for an existing resource; policy Allowed is not an HTTP success for every permission. Root source binding is limited to NewWithCloudStorage calling registerCloudStorage and the fixed GCP Environment/Project/Number/Owner argument construction for NewProjectHandler. This is an abstract constructor/admission contract, not a proof of core DB opening, registration rollback across providers, server dispatch order, capabilities metadata, HTTP or constructor SQL atomicity. CLI binding covers only trusted fixed GCP owner configuration and constructor refusal correspondence; argument grammar, startup I/O, Azure initialization, tokens and absence of AWS policy grants are checked natively, not proved by this model. Adds the SimpleDB store constructor and configured Gateway fields. Existing modeled contracts remain; startup/cleanup and SimpleDB dependency wiring are not covered by these models."
+        },
+        {
+          "id": "KMSProtocolAdmission",
+          "properties": [
+            "TypeOK",
+            "NoCrossServiceFallback",
+            "InfraNotDeny",
+            "MissingIdentityDenied",
+            "NoSuccessWithoutKMSTarget",
+            "NoAuthorityFromWireMetadata"
+          ],
+          "limits": "Normalized protocol/identity-policy admission abstraction after trusted outer exercise identity selection; not raw HTTP/SigV4 parsing or signature authentication, local token/Access or tenant-isolation proof, full IAM semantics, byte bodies/AES, real DB faults/transactions, Go refinement, timing/concurrency/crash proof or other-service authorization. Other route is only handoff, not modeled S3 success. Body-read-barrier native tests and nine actual Gateway metadata cases independently exercise the intended bridge; new tests and this model are initially UNRUN. Shared Gateway/server/SSM applicability is ONLY the new configured KMS route/module declaration, not unchanged AWS branches, nil-module/constructor behavior or whole provider wiring. Native tests are separate and initially unrun. Adds the SimpleDB store constructor and configured Gateway fields. Existing modeled contracts remain; startup/cleanup and SimpleDB dependency wiring are not covered by these models."
+        },
+        {
+          "id": "CloudWatchLogsLifecycle",
+          "properties": [
+            "TypeOK",
+            "NoOrphans",
+            "OnlyAcceptedWrites",
+            "TokenAuthority"
+          ],
+          "limits": "Finite safety only; no liveness or implementation refinement. Models transaction atomicity and database identity as abstract steps, not SQLite faults, HMAC cryptography or OS process isolation. Byte/time limits, sorting, page convergence, expiry and real IAM documents require native/SDK tests. Captured read receipts preserve the authorization context when later resource generations change. Shared source scope covers only the added Logs field/dispatch/construction seam; not all other service dispatch or server lifecycle/authentication. Stream deletion and later recreation are included: the abstract incarnation advances at deletion, while native code assigns a fresh random generation at recreation. Reads are disallowed while absent; native regressions verify cursor rejection and SQL failure rollback. Adds the SimpleDB store constructor and configured Gateway fields. Existing modeled contracts remain; startup/cleanup and SimpleDB dependency wiring are not covered by these models."
+        },
+        {
+          "id": "SecretsVersionLifecycle",
+          "properties": [
+            "TypeOK",
+            "ImmutableVersions",
+            "NoOrphans",
+            "UniqueLabels",
+            "SeparateCurrentPrevious",
+            "ActiveHasCurrent",
+            "AuthorizedVersions",
+            "AuthorizedDisclosure"
+          ],
+          "limits": "Finite lifecycle/authority abstraction, not SQL transaction, cryptography, OS authentication, formatter redaction or Go implementation refinement. A team models one secret name and two never-reused ARN incarnations; process/token isolation and cursor bindings require actual native SDK tests. History contains abstract dummy values solely to detect an attempted immutable-version overwrite; runtime force deletion does not retain secret values. IAM is represented by a pure Boolean decision for the resolved resource; policy loading/error ordering and actual IAM rules require concrete Go tests. Shared Gateway/dispatch/server paths bind only Secrets composition into the native SQLite/immutable-policy authority path, not unrelated S3/SSM behavior or a proof of HTTP routing. Cursor signatures, quotas and restart persistence require concrete tests. Adds the SimpleDB store constructor and configured Gateway fields. Existing modeled contracts remain; startup/cleanup and SimpleDB dependency wiring are not covered by these models."
+        },
+        {
+          "id": "DynamoDBAdmission",
+          "properties": [
+            "TypeOK",
+            "InitializedBeforeMutation",
+            "DeniedFrame",
+            "ValidKeysOnly",
+            "CanonicalKeys",
+            "SemanticBytes",
+            "CommittedBytes",
+            "CreateCommitted",
+            "AcknowledgedRemoval",
+            "ActiveTableRequired",
+            "TableBudget",
+            "ItemBudget",
+            "ItemCountBudget",
+            "StatisticsExact",
+            "PeerFrame",
+            "NoOrphans",
+            "RefusalFrame",
+            "AdmissionExact",
+            "TableAdmissionExact",
+            "RemovalAdmissionExact",
+            "StartupAdmission",
+            "StartupRefusedFrame"
+          ],
+          "limits": "Finite normalized admission, acknowledgement/row-effect, canonical-key and semantic-byte fixtures with independent literal oracle functions. Actual Go literal/SQL IGNORE tests are separate evidence. No full decimal grammar/UTF8/base64/JSON or 400KiB exhaustive arithmetic proof, SQL/driver/Go refinement/durability, arbitrary persisted-data import, live external writers, IAM/token/HTTP parsing, host or multi-process authentication proof. startupValid abstracts constructor success/orphan-refusal, not discovery/validation of arbitrary SQL. Scopes are fixed region/table namespaces inside one selected DB, not row tenants or two authenticated teams. Shared factory/dispatch/Gateway-field files are narrow call-contract seams for initialized-store and preflight denial only; their other routes/authority are not modeled. Lifecycle generations/conditional races are the separate unchanged DynamoDBLifecycle model. Targeted finite-model receipts are separate from exact-HEAD whole-registry merge checking and actual Go/native/integration execution. Adds the SimpleDB store constructor and configured Gateway fields. Existing modeled contracts remain; startup/cleanup and SimpleDB dependency wiring are not covered by these models."
+        },
+        {
+          "id": "IAMManagedPolicies",
+          "properties": [
+            "TypeOK",
+            "FailureFrame",
+            "DeleteDependencies",
+            "VersionIDsMonotonic",
+            "FreshIncarnations",
+            "VersionCap",
+            "DefaultExists",
+            "AttachmentAuthority",
+            "ExplicitDenyWins",
+            "AggregateBudget",
+            "RoleViewsExact",
+            "PeerFrame",
+            "ImmutableVersions"
+          ],
+          "limits": "New boundedscenario scope, not bisimilar/equivalent to original4requestcandidate which remainsUNPASSED. No Go/SQL/parser/trust/crypto/HTTP/refinement/liveness or unboundedhistory proof. Fixedaction/resource; concretequotas/hostisolation testedseparately; failedrequestidentitydiagnosticnormalized. Existing29models/gates unchanged. Native Query routing/validation, caller snapshot and RoleID admission, concrete SQL rollback/quotas and server capability metadata require real-code tests. This model abstracts authorized/storage outcomes and persisted role/policy generations, not the HTTP authorization race or UI. Two-request/four-seed scope is narrower than the unsuccessful four-request exploratory candidate. Adds the SimpleDB store constructor and configured Gateway fields. Existing modeled contracts remain; startup/cleanup and SimpleDB dependency wiring are not covered by these models."
+        },
         {
           "id": "SakuraStartupAdmission",
           "properties": [
+            "TypeOK",
             "NoEffectsOnRefusal",
             "ValidationPrecedesEffects",
+            "AcceptedConfigExact",
+            "ValidAdmissionAvailable",
+            "DisabledNoSakura",
+            "EnabledOnlyAuthenticated",
             "SchemaRequiresDatabase",
-            "RegistrationRequiresSchema"
+            "RegistrationRequiresSchema",
+            "TokenOnlyAuthenticated",
+            "StartupComplete"
           ],
-          "limits": "Bounded parsed-flag Sakura admission and pre-effect order only. Default-disabled Server mode adds no new startup constraint. Enabled Server opt-in requires valid enabled Sakura scope, unsafe and allow-remote off, and parsed numeric loopback. Generic listener rules and other providers are outside this model. Later startup stages assume success. Does not prove real authentication, token handling/cryptography, IP parsing or socket binding, proxy or tunnel exposure, constructor atomicity, syscall failures/cleanup, SDK/HTTP/browser behavior, or Go refinement. Shared server.go scope covers only Sakura provider construction and configuration."
+          "limits": "Pure parsed-flag admission and startup order abstraction only. Absent fields have empty invalid defaults; explicit empty values count as supplied. Default disabled may create general host DB/listener/token (token skipped when unsafe) but no Sakura schema/provider. Assumes later infrastructure steps succeed; does not prove full constructor atomicity, listener/database/token syscalls, failures/cleanup, flag parser or regex/UTF8 refinement, host authentication, token cryptography, DB lease, SDK/HTTP/UI or Go implementation refinement. Shared server.go scope covers only optional provider setup/registration under validated scope; other providers/auth/routing and all failure rollback are excluded. Adds the SimpleDB store constructor and configured Gateway fields. Existing modeled contracts remain; startup/cleanup and SimpleDB dependency wiring are not covered by these models."
         },
         {
-          "id": "CloudDNSConsoleScope",
+          "id": "LandingAccessAdmission",
           "properties": [
-            "CapabilityAuthorized"
+            "TypeOK",
+            "ExternalBoundary",
+            "PublicResponse",
+            "TokenBoundary",
+            "UnknownNeverStatic"
           ],
-          "limits": "Finite presentation and admission projection: backend oracle abstracts authenticated identity and existing AWS handoff, and frontend models capability epochs, read replacement and continuation. Assumes same-origin transport and effective local actor; does not execute middleware, React, DOM, HTTP, RRset data/state updates, SDK, Terraform or establish implementation refinement. Generated app.js binding is limited to this changed Cloud DNS projection."
-        }
-      ]
-    },
-    {
-      "path": "internal/server/web/app.js",
-      "sha256": "240a3efbf1dfe8f542c0614ed8c14464b1aed1d26c91d4d76e4521c0821c1f0d",
-      "disposition": "modeled",
-      "reason": "Embedded bundle includes the exact guarded Server view and current-context response projection. Existing Cloud DNS: Rebuilt console embeds the scoped DNS visibility and local request-cancellation behavior in the bound UI changes.",
-      "models": [
-        {
-          "id": "SakuraServerReadEpoch",
-          "properties": [
-            "NoUnadvertisedMount",
-            "OnlyCurrentResult",
-            "NoDifferentServer"
-          ],
-          "limits": "Finite read-only presentation projection. Production Server capability is default-off; enabled states represent the explicitly guarded local operator opt-in after capability projection. Models descriptor/disabled/handoff admission, abstract context and list/detail request revision, and matching detail identity. Does not prove CLI validation or binding, proxy exposure, real authentication or browser authority, React/DOM/HTTP behavior, response schemas, pagination, mutations, runtime availability, SDK or Terraform. Generated bundle binding applies only to changed Server-view code."
+          "limits": "Original finite admission contract only. Host/origin and authentication results are trusted inputs from existing middleware; no token, browser session, DNS, URL decoding, HTTP parser, ServeMux canonicalization, filesystem, SQLite, rendering, JavaScript, or Chrome feature proof. Exact HTTP composition and negative path cases are separate Go tests. Only fixed static product assets are public; no service credentials or exercise state are represented. Adds the SimpleDB store constructor and configured Gateway fields. Existing modeled contracts remain; startup/cleanup and SimpleDB dependency wiring are not covered by these models."
         },
         {
-          "id": "CloudDNSConsoleScope",
+          "id": "CatalogResourceLifecycle",
           "properties": [
-            "OnlyCurrentDiscovery",
-            "OnlyCurrentReadVisible",
-            "NoStaleContinuation"
+            "TypeOK",
+            "AuthorizationFirst",
+            "ReplayNoDuplicate",
+            "FailureFrame",
+            "PeerFrame",
+            "QuotaBound",
+            "UniqueNames",
+            "FreshIDs",
+            "StaleWriteRejected",
+            "GenerationAdvances",
+            "ChildGuard",
+            "TokenBinding",
+            "TokenOnce"
           ],
-          "limits": "Finite presentation and admission projection: backend oracle abstracts authenticated identity and existing AWS handoff, and frontend models capability epochs, read replacement and continuation. Assumes same-origin transport and effective local actor; does not execute middleware, React, DOM, HTTP, RRset data/state updates, SDK, Terraform or establish implementation refinement. Generated app.js binding is limited to this changed Cloud DNS projection."
+          "limits": "Atomic catalog store projection only, shared by the AWS catalog and the Google API catalog (configured project owner as authorization, etag as generation, requestId as client token, force as cascade): authorization-before-commit, typed refusal frames, quota, optional name uniqueness, fresh identifiers, generation-guarded update/delete, child reference integrity with refuse or cascade deletion, and client-token replay. Official shape validation, wire projection, pagination tokens, tag maps, ARN formatting, SQL/locking/crash behavior, JSON encoding and Go refinement are verified by native tests, not this model. A three-step bound is not an API cap. Adds the SimpleDB store constructor and configured Gateway fields. Existing modeled contracts remain; startup/cleanup and SimpleDB dependency wiring are not covered by these models."
+        },
+        {
+          "id": "SNSLifecycle",
+          "properties": [
+            "TypeOK",
+            "NoOrphans",
+            "MessageCountBounded",
+            "ByteBudgetBounded",
+            "DeliveryBudgetBounded",
+            "DurableAck",
+            "PublishRecipientsExact",
+            "PeerFrame",
+            "NoDanglingDeliveredMessage",
+            "DeleteAckEmpty",
+            "DeleteRetryAcknowledged"
+          ],
+          "limits": "Atomic state transitions assume transaction rollback and model validated existing state. Captured post-operation ACK and frozen-delete ownership, globally bounded count/abstract byte/delivery budgets and target/peer frames only. Not SQL/driver/crash/Go refinement, UUID allocation, schema migration, UTF-8 byte calculation, quotas at real cardinality, IAM or outbound delivery. Delivery audit may outlive Unsubscribe, but not its stored message or topic. Ignored/vanishing/late-reinsert native SQLite faults and two-host SDK checks are separate executable obligations. Adds the SimpleDB store constructor and configured Gateway fields. Existing modeled contracts remain; startup/cleanup and SimpleDB dependency wiring are not covered by these models."
+        },
+        {
+          "id": "SNSAdmission",
+          "properties": [
+            "TypeOK",
+            "NoUnauthorizedEffect",
+            "NoFIFOPublish",
+            "NoRegionMismatch",
+            "NoSuccessOnRefusal",
+            "NoRejectedMutation"
+          ],
+          "limits": "Boolean admission witnesses abstract actual Go parsing/attributes/Subject/UTF-8/body sizes/signature syntax, IAM matching and region/resource lookup. Validated dispatch permits metadata writes; no initialization, credential, SQL, real SDK or Go refinement proof. Shared Gateway/server file bindings cover SNS registration/admission only, preserving all other providers/services. Actual malformed Query and immutable-state/region/SDK/SQL regressions remain separate evidence. Adds the SimpleDB store constructor and configured Gateway fields. Existing modeled contracts remain; startup/cleanup and SimpleDB dependency wiring are not covered by these models."
+        },
+        {
+          "id": "S3MultipartState",
+          "properties": [
+            "TypeOK",
+            "Budget",
+            "NoOrphans",
+            "Cleanup",
+            "RefusalAtomic"
+          ],
+          "limits": "Finite atomic transaction abstraction only; does not execute Go/SQLite/HTTP/React, prove refinement, MD5 integrity, IAM parsing, version selection, ordering/minimum sizes, timestamps, random IDs, OS isolation, or real AWS parity. Scope labels abstract bucket/key/upload binding. Actual Go fault, SDK, persistence and browser tests cover those boundaries. Adds the SimpleDB store constructor and configured Gateway fields. Existing modeled contracts remain; startup/cleanup and SimpleDB dependency wiring are not covered by these models."
+        },
+        {
+          "id": "ConsoleHandoff",
+          "properties": [
+            "TypeOK",
+            "OperatorRefused",
+            "ParentLifetimeBound",
+            "OneTimeRedemption",
+            "AttemptConsumesCode",
+            "RedeemRequiresFreshParent",
+            "UseRequiresFreshAuthority",
+            "ExactDestination",
+            "TerminalRequiresRelay",
+            "LogoutRejectsReplay",
+            "UnrelatedSessionsPreserved",
+            "SDKAuthorityPreserved"
+          ],
+          "limits": "Finite abstract lifecycle only, not Go/HTTP/SQL/crypto/refinement or liveness proof. Assumes opaque unique credentials and coherent fresh role/policy observation at request authorization. No quotas, parser/cookie/CSRF/origin/header correctness, in-flight logout linearization, policy-update atomicity, arbitrary histories or GUI/SDK execution proof. Existing BrowserSessions and STSSessionLifecycle retain independent scopes. Adds the SimpleDB store constructor and configured Gateway fields. Existing modeled contracts remain; startup/cleanup and SimpleDB dependency wiring are not covered by these models."
+        },
+        {
+          "id": "WAFRequestEvaluation",
+          "properties": [
+            "TypeOK",
+            "NoAssociationOrphans",
+            "CountContinues",
+            "FirstTerminatingRuleWins",
+            "UnassociatedAllows"
+          ],
+          "limits": "Abstract ordered evaluation and atomic association guards only; not SQLi detection, byte transforms, IAM parsing, SQL concurrency, browser behavior or implementation refinement. Adds the SimpleDB store constructor and configured Gateway fields. Existing modeled contracts remain; startup/cleanup and SimpleDB dependency wiring are not covered by these models."
+        },
+        {
+          "id": "IAMInstanceProfiles",
+          "properties": [
+            "TypeOK",
+            "AuthorizationRequired",
+            "PassRoleRequired",
+            "ProfileGenerationGuard",
+            "RoleGenerationGuard",
+            "FailureFrame",
+            "SingleRole",
+            "AttachmentAuthority",
+            "FreshProfileIdentity",
+            "PeerFrame",
+            "RemovalExact"
+          ],
+          "limits": "Finite lifecycle and admission abstraction only. Not Go/SQLite refinement, IAM parsing or concrete ARN/permission evaluation, HTTP concurrency, random ID uniqueness, pagination, disk/VM isolation, EC2 execution, IMDS credentials, Session Manager, liveness or unbounded history. Adds the SimpleDB store constructor and configured Gateway fields. Existing modeled contracts remain; startup/cleanup and SimpleDB dependency wiring are not covered by these models."
+        },
+        {
+          "id": "LambdaLogTailDisclosure",
+          "properties": [
+            "TypeOK",
+            "ResponseOptIn",
+            "ResponseSync",
+            "ResponseAuthorized",
+            "TailBound",
+            "DisplayCurrent",
+            "DisplayHasResponse"
+          ],
+          "limits": "Finite response admission and view invalidation abstraction only. Context changes invalidate the request epoch; no extra implementation context comparison is assumed. Does not prove parsers, exact byte slicing, frame filtering, base64/UTF-8 decoding, React scheduling, authentication/IAM evaluation, WASI containment, Go/JS refinement, CloudWatch delivery or AWS equivalence. Actual native/runtime/console tests remain required. Shared app.js scope is limited to the compiled Lambda invocation/reveal view; other services retain their existing model scopes. server.go scope covers only Tail capability metadata, not native authorization correctness. Adds the SimpleDB store constructor and configured Gateway fields. Existing modeled contracts remain; startup/cleanup and SimpleDB dependency wiring are not covered by these models."
+        },
+        {
+          "id": "SNSQueueFanout",
+          "properties": [
+            "TypeOK",
+            "Authorized",
+            "ParentPresent",
+            "DestinationsExist",
+            "CountBounded",
+            "BytesBounded",
+            "DurableAck",
+            "AuditExact",
+            "RecipientsExact",
+            "RefusalUnchanged"
+          ],
+          "limits": "Single-request abstraction of atomic SNS audit and native SQS fanout. Assumes one fixed subscription set, one immutable authorization snapshot and one SQLite transaction. Does not prove Go/SQL refinement, actual policy reads, queue generation, parser/ARN validation, UTF-8/envelope sizing, retention time, random IDs, network delivery or AWS service-trust policies. Native fault injection and real SDK restart/isolation checks remain independent obligations. Adds the SimpleDB store constructor and configured Gateway fields. Existing modeled contracts remain; startup/cleanup and SimpleDB dependency wiring are not covered by these models."
+        },
+        {
+          "id": "Route53AtomicBatch",
+          "properties": [
+            "TypeOK",
+            "AtomicPair",
+            "PreserveSentinel",
+            "OnlyAuthorizedValid",
+            "OtherTeamUnchanged",
+            "PendingInvisible"
+          ],
+          "limits": "Atomic batch/authority/team frame abstraction only; no Go/SQL/XML/DNS, receipt retention, quota, pagination, crash or liveness proof. Native and SDK tests independently cover implementation boundaries. Adds the SimpleDB store constructor and configured Gateway fields. Existing modeled contracts remain; startup/cleanup and SimpleDB dependency wiring are not covered by these models."
+        },
+        {
+          "id": "SSMDocumentState",
+          "properties": [
+            "TypeOK",
+            "DeniedPreserves",
+            "RefusalPreserves",
+            "AddressIsolation",
+            "HistoryImmutable",
+            "DefaultPreserved",
+            "DeleteCleanup",
+            "LatestPrecondition",
+            "CreateOnlyAbsent"
+          ],
+          "limits": "Definition management only. Atomic abstract transitions assume transaction commit/rollback; no SQL refinement, parser, IAM evaluation, byte quota, wire, persistence, concurrency or execution proof. Adds the SimpleDB store constructor and configured Gateway fields. Existing modeled contracts remain; startup/cleanup and SimpleDB dependency wiring are not covered by these models."
+        },
+        {
+          "id": "CanonicalVMComposition",
+          "properties": [
+            "TypeOK",
+            "PinnedPlan",
+            "JournalBeforeLaunch",
+            "PreparedIdentity",
+            "PausedExactControl",
+            "ExactAttachment",
+            "AttachBeforeActivation",
+            "PrivateAgentReadiness",
+            "PublicationAdmission",
+            "IndependentCleanup",
+            "ObservedContainment",
+            "ReleaseAfterContainment",
+            "NetworkOwnership",
+            "FrozenNetwork",
+            "AuthorizedDelete",
+            "CreatorAdmission",
+            "NoReconstruction",
+            "UncertainDebtRetained",
+            "ConfigurationAdmission",
+            "ConfiguredIsNotReady",
+            "TypedProvider",
+            "SavedAssociation",
+            "NoRebinding",
+            "SavedOperationAuthority"
+          ],
+          "limits": "Companion to unchanged EC2GuestAttachmentLifecycle, not a replacement. Checks ordering of pinned planning, durable readback, captured paused QMP ownership, attachment/activation, private QGA readiness, generation publication, teardown, network ownership and child admission. Equality/validity predicates abstract byte validation and SQL/OS APIs; no proof of parser correctness, actual networking, cryptography, PID/FD identity, resource quota cardinality, packet routing, real image execution, liveness or Go refinement. Separate modes do not prove arbitrary cross-mode interference. Restart cannot recover physical authority. Successful checking is not physical Battle acceptance. Adds the SimpleDB store constructor and configured Gateway fields. Existing modeled contracts remain; startup/cleanup and SimpleDB dependency wiring are not covered by these models."
+        },
+        {
+          "id": "ParticipantSessionLifecycle",
+          "properties": [
+            "TypeOK",
+            "PreparedEvidence",
+            "PreparationOptIn",
+            "PackageEvidence",
+            "BoundAdmission",
+            "CurrentAdmission",
+            "ChannelTokenBinding",
+            "HandoffExpiry",
+            "SingleUse",
+            "HelloEvidence",
+            "ReadyEvidence",
+            "NoPostRevokeOutput",
+            "ResumeKeepsDriver",
+            "NoResurrection",
+            "GuestDrainEvidence",
+            "TerminalEvidence",
+            "FreshEvidence",
+            "RevokeIsNotExit"
+          ],
+          "limits": "Bounded authority/lifecycle composition only; assumes trusted immutable auth/policy decisions, atomic DB CAS/one-use claims, authentic correlated protocol evidence, reliable owned runtime witnesses, bundle hash validation and exclusive packaging filesystem inputs. Does not prove Go/SQL/JSON/WebSocket/cryptography/OS/PTY/systemd refinement or real process cleanup, full ConsoleHandoff/BrowserSessions subcontracts, numeric timeout/quotas or liveness. Adds the SimpleDB store constructor and configured Gateway fields. Existing modeled contracts remain; startup/cleanup and SimpleDB dependency wiring are not covered by these models."
+        },
+        {
+          "id": "AppEngineTraffic",
+          "properties": [
+            "TypeOK",
+            "AllocationsReferenceVersions",
+            "SplitComplete",
+            "DefaultFirst",
+            "ApplicationParent",
+            "DenialAtomic",
+            "OtherTeamUnchanged",
+            "ApplicationPermanent",
+            "ServedThroughRouteAndFirewall"
+          ],
+          "limits": "Admin-plane ownership, traffic-split, deletion-order and request-routing abstraction only; no Go, SQL, HTTP, Python sandbox, Cloud Storage copy, pagination, operations, quotas, IP or cookie sharding, crash or liveness proof. Native Go and official-client tests independently cover implementation boundaries. Adds the SimpleDB store constructor and configured Gateway fields. Existing modeled contracts remain; startup/cleanup and SimpleDB dependency wiring are not covered by these models."
+        },
+        {
+          "id": "ELBTargetLifecycle",
+          "properties": [
+            "TypeOK",
+            "ListenerReferencesExist",
+            "TargetNeedsGroup",
+            "HealthCurrent",
+            "ReportedHealthInUse",
+            "OnlyAuthorizedChanges",
+            "OtherTeamUnchanged"
+          ],
+          "limits": "Reference/cascade, authorization-before-persistence, team frame and epoch-guarded health-result abstraction only; consecutive thresholds, matcher codes, timeouts, pagination, idempotent replay, quotas, resource-policy evaluation, Lambda execution, SQL/Go refinement, crashes and liveness are not modeled. Native, server and SDK tests cover them independently. Adds the SimpleDB store constructor and configured Gateway fields. Existing modeled contracts remain; startup/cleanup and SimpleDB dependency wiring are not covered by these models."
+        },
+        {
+          "id": "BedrockRuntimeAdmission",
+          "properties": [
+            "TypeOK",
+            "BackendOnlyAfterAdmission",
+            "AuthorizationFirst",
+            "NoCallAfterClose",
+            "ConcurrencyBound",
+            "SuccessOnlyFromBackend",
+            "NoFallback",
+            "TruthfulFailure",
+            "NoPersistence"
+          ],
+          "limits": "Finite admission/result abstraction of the opt-in local Bedrock Runtime only. Assumes the authenticated exercise identity, IAM decision, strict body validation and Ollama transport pins are computed correctly; the shutdown and canceled responses are distinct kinds here but share ServiceUnavailableException on the wire. No Go/HTTP/JSON refinement, real Ollama or model behavior, deadline arithmetic, listener deadlines, token counts, streaming, tool use, concrete Apple hardware/API availability, native pipe/process execution, OS service lifetime, Claude Code or liveness proof. Native, CLI and SDK tests independently cover implementation boundaries. Adds the SimpleDB store constructor and configured Gateway fields. Existing modeled contracts remain; startup/cleanup and SimpleDB dependency wiring are not covered by these models."
+        },
+        {
+          "id": "AutoScalingPlanTargets",
+          "properties": [
+            "TypeOK",
+            "BoundedWhileOwned",
+            "OnlyAuthorizedValid",
+            "NoOwnershipSteal",
+            "DeleteKeepsCapacity",
+            "RejectionFrame",
+            "OtherTeamUnchanged",
+            "PendingInvisible"
+          ],
+          "limits": "Capacity-bound/ownership/authority/rollback/team-frame abstraction only; no Go/SQL/JSON parsing, IAM matching, pagination, status derivation text, quotas, crash recovery, target tracking evaluation or liveness proof. Native Go, composed-server and SDK tests provide separate implementation evidence. Adds the SimpleDB store constructor and configured Gateway fields. Existing modeled contracts remain; startup/cleanup and SimpleDB dependency wiring are not covered by these models."
+        },
+        {
+          "id": "EC2ReadDiscovery",
+          "properties": [
+            "TypeOK",
+            "AuthorizedRead",
+            "RegionBound",
+            "OwnedRead"
+          ],
+          "limits": "Atomic read admission and returned identity only; not SQL snapshot implementation, HTTP/XML, IAM parsing, VM liveness, quotas or a Go refinement proof. Tests must independently establish these implementation properties. Adds the SimpleDB store constructor and configured Gateway fields. Existing modeled contracts remain; startup/cleanup and SimpleDB dependency wiring are not covered by these models."
+        },
+        {
+          "id": "VpcOriginReferenceLifecycle",
+          "properties": [
+            "PrivateALBRequired",
+            "RejectStaleMutation",
+            "FailureRollsBack",
+            "GenerationAdvances",
+            "DeleteExact",
+            "TypeOK"
+          ],
+          "limits": "Models linearizable metadata and rollback, with one ALB and one logical origin. It does not simulate CloudFront traffic, network reachability, HTTP parsing, ALB changes or cryptographic ETag generation. Adds the SimpleDB store constructor and configured Gateway fields. Existing modeled contracts remain; startup/cleanup and SimpleDB dependency wiring are not covered by these models."
         }
       ]
-    },
-    {
-      "path": "scripts/check-assets.py",
-      "sha256": "86b9be166951970b736656a8076b5042a0b26d49e53ca7c75660a1854a12e81e",
-      "disposition": "validation-tooling",
-      "reason": "Retains exact API reference inventory and admits only the reviewed Sakura Server List operation. No provider state or authority change.",
-      "models": []
     },
     {
       "path": "scripts/factory_acceptance.py",
-      "sha256": "272723ee144d849767521b773dfc180cb6bfd10705a919d7b4181e69ee7e1aec",
+      "sha256": "ffaec5112ce7f31b4fc2b29b694ce600cdc395592411240596733bb41dfe50df",
       "disposition": "validation-tooling",
-      "reason": "Adds opt-in Sakura Server metadata acceptance with a pinned oracle, leaving the existing SQS and DescribeSubnets defaults unchanged. Existing Cloud DNS: Registers opt-in Cloud DNS acceptance, retaining existing SQS and DescribeSubnets defaults, oracle and scope checks.",
+      "reason": "Keeps independent opt-in SimpleDB, Sakura Server and Cloud DNS registrations together, preserving default SQS/EC2 and scoped receipts and oracle verification.",
       "models": []
     },
     {
       "path": "scripts/formal_model_gate.py",
-      "sha256": "1235543f01717c50c8bd062e15130948e341079c95aef509808f2ef7601add4a",
       "disposition": "formal-infrastructure",
-      "reason": "Makes the five additional Sakura startup mutation controls mandatory in the exact inventory. Does not alter runtime. Existing Cloud DNS: Pins both reviewed Cloud DNS models, their checked properties, exact source scopes and three sensitivity controls, preserving all existing pins. Also includes the scoped DNS console projection and its removal guards.",
-      "models": []
+      "reason": "Pins the three SimpleDB models, checked properties, exact source scopes and six sensitivity controls; existing pins preserved. Adds the associated DomainMetadata registry controls.",
+      "models": [],
+      "sha256": "bd42d651c01581e9aa3968e9d1bd1b794fb7ae8126f3c6928ea2b881fbf25f27"
     },
     {
       "path": "scripts/test-factory-acceptance.py",
-      "sha256": "293f739e78c9f271e6d9545c6ec8ed7f832b68f231b4144e868214c9d46bf42d",
+      "sha256": "8ebd5e52147ad08052e94a3ddf80fd6e95972a4b0b2ef954f87f11d0d9b5ae9e",
       "disposition": "test-support",
-      "reason": "Test-only artifact supporting exact local Server behavior and compatibility; no operational API or state interface introduced here. Existing Cloud DNS: Native or developer-only test oracle and controls; not a runtime input or proof of the formal model.",
+      "reason": "Fixtures, assertions or registration contracts; not production runtime or execution evidence.",
       "models": []
     },
     {
       "path": "scripts/test-formal-gate.py",
       "disposition": "formal-infrastructure",
-      "reason": "Checks preservation of required registration and rejects removed Sakura scope, properties or controls with an isolated model fixture. Also retains the scoped console read-selection model and its six controls. Existing Cloud DNS: Checks exact model inventory and rejects removal of Cloud DNS scope, properties or registered controls with isolated fixtures. Also includes the scoped DNS console projection and its removal guards.",
+      "reason": "Adds specific isolated SimpleDB registration removal checks and exact inventory coverage without changing existing assertions. Adds the associated DomainMetadata registry controls.",
       "models": [],
-      "sha256": "cc0a7db3e6791c3bdca31f1fdfd108972ead2a0dfb1245198068e065eee51ce2"
+      "sha256": "8e12c9aa4273cf85e738398b31db31760937607eb91a98e1e4a6ad4d2409132c"
     },
     {
-      "path": "scripts/test-native-provenance.py",
-      "sha256": "bfdb3c500bf880a9c094af0b4a38cdfbcbba4717f9213a03962ce31d2b9ddc97",
+      "path": "scripts/test-simpledb-factory-registration.py",
+      "sha256": "42d77c51d4ed7cebc099987a663b3db98568137cadee79a11388490efb53bef2",
       "disposition": "test-support",
-      "reason": "Pins the separate Sakura Server List reference singleton and closed-union operand while retaining the original exact native provenance normalization and historical digest. Tests only.",
+      "reason": "Fixtures, assertions or registration contracts; not production runtime or execution evidence.",
       "models": []
     },
     {
-      "path": "test/e2e/sakura_sdk.py",
-      "sha256": "127df9f7b85035c6d767ebc2eadf9863123961ebf5c105a4ed9162c1c5b72b8c",
+      "path": "scripts/test-simpledb-factory-sdk.py",
+      "sha256": "22483a0b54c312057ced926f6e50ca92a72eb1b70ebafc1fc1abb3fcd81792c7",
       "disposition": "test-support",
-      "reason": "Adds opt-in owned-loopback Server metadata fixture; existing default Disk run and runner remain unchanged.",
+      "reason": "Fixtures, assertions or registration contracts; not production runtime or execution evidence.",
       "models": []
     },
     {
-      "path": "test/e2e/sakura_server_console_gui.py",
-      "sha256": "97daf7f4f68db5bf4ee032754d62be8ff7091908a56f879e4efa2978e7651dcf",
+      "path": "test/e2e/simpledb_scalar_reference_live.py",
+      "sha256": "852751e6030761f41ced17992dcdc3e8cd113821873e87a581aafcb45a80adc6",
       "disposition": "test-support",
-      "reason": "Opt-in real browser test source; no socket, browser or simulator run in this packet.",
+      "reason": "Opt-in real served Scalar ListDomains and DomainMetadata Send fixture with exact positive wire and response assertions; no runtime, authority, or shared runner change.",
       "models": []
     },
     {
-      "path": "test/e2e/sakura_server_scalar_send.py",
-      "sha256": "0c0ccd35c2e6f0af688e9d71866552148f3927a70c9382ab0f754b2dc3b4c0a1",
+      "path": "test/e2e/simpledb_terraform_provider.py",
+      "sha256": "fb8fcdb79759e2e7cc9ce5c3c1d530b7c887ab7db8c5f1f494b81193c5111800",
       "disposition": "test-support",
-      "reason": "Adds an opt-in browser fixture for local Sakura Server List Scalar Send against a saved row; test-only, with no runtime, existing-test, or workflow changes.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/test_openapi_parameters.py",
-      "sha256": "4e8cd48bfb4263e6052142e7bdbd695d77dcc38f6e21b8c2276e9f1013b3e970",
-      "disposition": "test-support",
-      "reason": "Adds only SakuraListServers to the projected exact operation inventory.",
+      "reason": "Opt-in fixed official Terraform and AWS provider acceptance, using exact approved local binary and loopback-only authenticated adapter, no live AWS.",
       "models": []
     },
     {
       "path": "test/e2e/test_sakura_openapi.py",
-      "sha256": "4625ddc310544ef07fdcb5fa67c602148fd9854a8af490c2a0a85bbceac667f6",
+      "sha256": "4a3d8fde924f40a33919ea30f1f91f70ff4d6d20bab914e3eaf0c84d163d06b0",
       "disposition": "test-support",
-      "reason": "Pins the Server List schema and tag and verifies complete preservation of earlier reference content.",
+      "reason": "Validates and projects only the reviewed SimpleDB reference additions before inherited hashes and tests both intentional and unrelated drift.",
       "models": []
     },
     {
-      "path": "test/sdk/sakura/main.go",
-      "sha256": "61167c6a1d8c9afecaa58ac5e9bafd30b333a479415e03a8eb3a5ed596207dce",
+      "path": "test/e2e/test_simpledb_terraform_provider.py",
+      "sha256": "9f5bd0983c55b101f1e07fce179423ea1a83fee81194f49f6182238170e1a965",
       "disposition": "test-support",
-      "reason": "Adds optional Server metadata acceptance to the existing development-only pinned Sakura SDK client; default Disk calls and simulator runtime are unchanged.",
+      "reason": "Offline boundary and local-runner provenance checks for opt-in SimpleDB Terraform acceptance.",
       "models": []
     },
     {
-      "path": "test/sdk/sakura/server_inprocess_test.go",
-      "sha256": "e459ed4d20e554df5ae2fce31a893d7da4dd6e1c39274022fbb8a228ccadc112",
+      "path": "test/factory/simpledb-registration.json",
+      "sha256": "914e9b750c127673fffc9dc3da7a85fc552da5572067aa391be0963239f1ab1f",
       "disposition": "test-support",
-      "reason": "Test-only artifact supporting exact local Server behavior and compatibility; no operational API or state interface introduced here.",
+      "reason": "Fixtures, assertions or registration contracts; not production runtime or execution evidence.",
       "models": []
     },
     {
-      "path": "tools/console/bundle-digests.json",
-      "sha256": "6e47f6912774937fa3597550a41a75f4128c65b49017c5c862d16ceb0783d31e",
-      "disposition": "presentation",
-      "reason": "Generated package digest index, not program behavior. Existing Cloud DNS: Generated digest indexes of embedded console assets, not program behavior.",
+      "path": "test/factory/testdata/simpledb-leaf/README.md",
+      "sha256": "7370326499b6dc95c00419f228fc42481ba1d3ec5bcdbeda5f29ab076a8c4f3e",
+      "disposition": "test-support",
+      "reason": "Fixtures, assertions or registration contracts; not production runtime or execution evidence.",
       "models": []
     },
     {
-      "path": "tools/console/bundle-inputs.json",
-      "sha256": "b714262026a6a7a647ef5d14a7ea77ff0a001c6d79fa2738c0320d1f400b2ccd",
-      "disposition": "presentation",
-      "reason": "Generated bundle input provenance, not program behavior. Existing Cloud DNS: Generated console input provenance, not program behavior.",
+      "path": "test/factory/testdata/simpledb-leaf/binding/subject_test.go",
+      "sha256": "995009edd480520f98e9f30c86861294e7fc6e3072ecabf08337220e8a373948",
+      "disposition": "test-support",
+      "reason": "Fixtures, assertions or registration contracts; not production runtime or execution evidence.",
       "models": []
     },
     {
-      "path": "tools/console/src/console-navigation.mjs",
-      "sha256": "491578eb618b604460b6236812bb561fad3ca29305961cda3830941fe01694b4",
-      "disposition": "modeled",
-      "reason": "Uses explicit enabled Server capability and does not infer permission or readiness from Disk or region. Existing Cloud DNS: Projects DNS availability from the exact capability and the active discovery principal and epoch.",
-      "models": [
-        {
-          "id": "SakuraServerReadEpoch",
-          "properties": [
-            "NoUnadvertisedMount"
-          ],
-          "limits": "Finite read-only presentation projection. Production Server capability is default-off; enabled states represent the explicitly guarded local operator opt-in after capability projection. Models descriptor/disabled/handoff admission, abstract context and list/detail request revision, and matching detail identity. Does not prove CLI validation or binding, proxy exposure, real authentication or browser authority, React/DOM/HTTP behavior, response schemas, pagination, mutations, runtime availability, SDK or Terraform. Generated bundle binding applies only to changed Server-view code."
-        },
-        {
-          "id": "CloudDNSConsoleScope",
-          "properties": [
-            "OnlyCurrentDiscovery"
-          ],
-          "limits": "Finite presentation and admission projection: backend oracle abstracts authenticated identity and existing AWS handoff, and frontend models capability epochs, read replacement and continuation. Assumes same-origin transport and effective local actor; does not execute middleware, React, DOM, HTTP, RRset data/state updates, SDK, Terraform or establish implementation refinement. Generated app.js binding is limited to this changed Cloud DNS projection."
-        }
-      ]
-    },
-    {
-      "path": "tools/console/src/main.jsx",
-      "sha256": "9b3673f056b72b0815c4fe735341509c2041ba41ab3da1002cf1e239114da013",
-      "disposition": "modeled",
-      "reason": "Does not mount the Server view unless its own capability is enabled and valid; binds session to the Sakura context. Existing Cloud DNS: Combines fresh backend discovery and effective principal/epoch before mounting DNS, preventing reuse after returning to the same principal.",
-      "models": [
-        {
-          "id": "SakuraServerReadEpoch",
-          "properties": [
-            "NoUnadvertisedMount",
-            "OnlyCurrentResult"
-          ],
-          "limits": "Finite read-only presentation projection. Production Server capability is default-off; enabled states represent the explicitly guarded local operator opt-in after capability projection. Models descriptor/disabled/handoff admission, abstract context and list/detail request revision, and matching detail identity. Does not prove CLI validation or binding, proxy exposure, real authentication or browser authority, React/DOM/HTTP behavior, response schemas, pagination, mutations, runtime availability, SDK or Terraform. Generated bundle binding applies only to changed Server-view code."
-        },
-        {
-          "id": "CloudDNSConsoleScope",
-          "properties": [
-            "OnlyCurrentDiscovery"
-          ],
-          "limits": "Finite presentation and admission projection: backend oracle abstracts authenticated identity and existing AWS handoff, and frontend models capability epochs, read replacement and continuation. Assumes same-origin transport and effective local actor; does not execute middleware, React, DOM, HTTP, RRset data/state updates, SDK, Terraform or establish implementation refinement. Generated app.js binding is limited to this changed Cloud DNS projection."
-        }
-      ]
-    },
-    {
-      "path": "tools/console/src/sakura-console.jsx",
-      "sha256": "11a4c9be3a91e0495290d403410ca856740779a02136d9771bb4545e71357df9",
-      "disposition": "modeled",
-      "reason": "The Server navigation returns to the current context list with a fresh revision, not the previous details.",
-      "models": [
-        {
-          "id": "SakuraServerReadEpoch",
-          "properties": [
-            "OnlyCurrentResult"
-          ],
-          "limits": "Finite read-only presentation projection. Production Server capability is default-off; enabled states represent the explicitly guarded local operator opt-in after capability projection. Models descriptor/disabled/handoff admission, abstract context and list/detail request revision, and matching detail identity. Does not prove CLI validation or binding, proxy exposure, real authentication or browser authority, React/DOM/HTTP behavior, response schemas, pagination, mutations, runtime availability, SDK or Terraform. Generated bundle binding applies only to changed Server-view code."
-        }
-      ]
-    },
-    {
-      "path": "tools/console/src/sakura-server-read.mjs",
-      "sha256": "c192d5ad699603eab75988b85858868971be7c0765b41aa1975bfd5b5bf93034",
-      "disposition": "modeled",
-      "reason": "Rejects malformed descriptor and nonmatching detail identity before allowing client projection.",
-      "models": [
-        {
-          "id": "SakuraServerReadEpoch",
-          "properties": [
-            "NoUnadvertisedMount",
-            "NoDifferentServer"
-          ],
-          "limits": "Finite read-only presentation projection. Production Server capability is default-off; enabled states represent the explicitly guarded local operator opt-in after capability projection. Models descriptor/disabled/handoff admission, abstract context and list/detail request revision, and matching detail identity. Does not prove CLI validation or binding, proxy exposure, real authentication or browser authority, React/DOM/HTTP behavior, response schemas, pagination, mutations, runtime availability, SDK or Terraform. Generated bundle binding applies only to changed Server-view code."
-        }
-      ]
-    },
-    {
-      "path": "tools/console/src/sakura-server-read.test.mjs",
-      "sha256": "280c80ae03cc4cd353bdb75e842cb861c2e7f1437960c3b640950c17fd5fecfa",
-      "disposition": "presentation",
-      "reason": "Console-side test fixture; uses the console-path classification and does not modify runtime.",
+      "path": "test/factory/testdata/simpledb-leaf/contract/contract.go",
+      "sha256": "e0ec78ee31f1f15dbca37f24aa4999c39c9c49b9a648f56005d7ddfc928dbf16",
+      "disposition": "test-support",
+      "reason": "Fixtures, assertions or registration contracts; not production runtime or execution evidence.",
       "models": []
     },
     {
-      "path": "tools/console/src/sakura-servers.jsx",
-      "sha256": "e16fc1abece0caa3dc0a471117e9f4ed4e5882a310d76e34cc6f8af9a59f6168",
-      "disposition": "modeled",
-      "reason": "Uses context and request revision to keep stale list/detail responses from becoming visible.",
-      "models": [
-        {
-          "id": "SakuraServerReadEpoch",
-          "properties": [
-            "OnlyCurrentResult"
-          ],
-          "limits": "Finite read-only presentation projection. Production Server capability is default-off; enabled states represent the explicitly guarded local operator opt-in after capability projection. Models descriptor/disabled/handoff admission, abstract context and list/detail request revision, and matching detail identity. Does not prove CLI validation or binding, proxy exposure, real authentication or browser authority, React/DOM/HTTP behavior, response schemas, pagination, mutations, runtime availability, SDK or Terraform. Generated bundle binding applies only to changed Server-view code."
-        }
-      ]
+      "path": "test/factory/testdata/simpledb-leaf/contract/control_test.go",
+      "sha256": "5b2997c208f076ac0e5e4b8afdb0bdfa68589d8b42e15e75586b6e2c3be8de26",
+      "disposition": "test-support",
+      "reason": "Fixtures, assertions or registration contracts; not production runtime or execution evidence.",
+      "models": []
     },
     {
-      "path": "tools/console/test/sakura-server-navigation.test.mjs",
-      "sha256": "27d582825eeb5608905b3f382a2442ed8c6de19170d21d17ff9674dd6fac0a7f",
-      "disposition": "presentation",
-      "reason": "Console navigation test only; uses the console-path classification.",
+      "path": "test/factory/testdata/simpledb-leaf/contract/vectors.json",
+      "sha256": "b5cbf4147eb5ed9b08ad82b0769099fb03c1ab0483f5bfb0a2f689f5fa23ab6a",
+      "disposition": "test-support",
+      "reason": "Fixtures, assertions or registration contracts; not production runtime or execution evidence.",
+      "models": []
+    },
+    {
+      "path": "test/factory/testdata/simpledb-leaf/files.sha256.json",
+      "sha256": "e20f91bb554ad0fe2d91484c021caa9e45d340efb64761055a152354b10dedb6",
+      "disposition": "test-support",
+      "reason": "Fixtures, assertions or registration contracts; not production runtime or execution evidence.",
+      "models": []
+    },
+    {
+      "path": "test/factory/testdata/simpledb-leaf/oracle.json",
+      "sha256": "4a7dfa12cb3cdadbcf5ab9e99dd73ce87eb12576e61819990c40785d45ba1770",
+      "disposition": "test-support",
+      "reason": "Fixtures, assertions or registration contracts; not production runtime or execution evidence.",
+      "models": []
+    },
+    {
+      "path": "test/factory/testdata/simpledb-leaf/registration-proposal.json",
+      "sha256": "6ac65a01231d3e1de19d7a00f963fd1b67d6556f3f347c834425ad71156710d9",
+      "disposition": "test-support",
+      "reason": "Fixtures, assertions or registration contracts; not production runtime or execution evidence.",
+      "models": []
+    },
+    {
+      "path": "test/factory/testdata/simpledb-leaf/root-adapter-negative.json",
+      "sha256": "b72dc668b0e4f6ab79e7619d41b48fe0a02bb63acafd5877d31fc9d701de85a2",
+      "disposition": "test-support",
+      "reason": "Fixtures, assertions or registration contracts; not production runtime or execution evidence.",
+      "models": []
+    },
+    {
+      "path": "test/factory/testdata/simpledb-leaf/runner.py",
+      "sha256": "ddba38dafb6c36b8344fd34aef26f12402de5eee9e1a3b6ba35f36f9cf92e1f3",
+      "disposition": "test-support",
+      "reason": "Fixtures, assertions or registration contracts; not production runtime or execution evidence.",
+      "models": []
+    },
+    {
+      "path": "test/factory/testdata/simpledb-leaf/test_runner.py",
+      "sha256": "11b7b0f3d1120b732e811b0177f54825de10e00848cb796e9fc38fe1e85e1cf8",
+      "disposition": "test-support",
+      "reason": "Fixtures, assertions or registration contracts; not production runtime or execution evidence.",
+      "models": []
+    },
+    {
+      "path": "test/factory/testdata/simpledb/README.md",
+      "sha256": "2cd72983ffd7f3a9dcd6b9cd601cdb5f154f981361303ab4a5ae7fabeb9ac3e8",
+      "disposition": "test-support",
+      "reason": "Fixtures, assertions or registration contracts; not production runtime or execution evidence.",
+      "models": []
+    },
+    {
+      "path": "test/factory/testdata/simpledb/files.sha256.json",
+      "sha256": "4d7545fa28562f08b3956eb05c5f58dc01a242b2013a7f7ee89fd5d423792df8",
+      "disposition": "test-support",
+      "reason": "Fixtures, assertions or registration contracts; not production runtime or execution evidence.",
+      "models": []
+    },
+    {
+      "path": "test/factory/testdata/simpledb/native/acceptance_test.go",
+      "sha256": "71c314fa45e83a0897996a561f15fd8261c8233e956137a3b4d8dddec4424966",
+      "disposition": "test-support",
+      "reason": "Fixtures, assertions or registration contracts; not production runtime or execution evidence.",
+      "models": []
+    },
+    {
+      "path": "test/factory/testdata/simpledb/oracle/fixture_test.go",
+      "sha256": "b1c7677d7a03e0315ac08be453fce27f6f06859e2148c4c5112d2cc1bde96412",
+      "disposition": "test-support",
+      "reason": "Fixtures, assertions or registration contracts; not production runtime or execution evidence.",
+      "models": []
+    },
+    {
+      "path": "test/factory/testdata/simpledb/oracle/fixtures.json",
+      "sha256": "169b5ee49e3b537bcbd4bb408fc8edd63a937162530194d5985407f7f3216a91",
+      "disposition": "test-support",
+      "reason": "Fixtures, assertions or registration contracts; not production runtime or execution evidence.",
+      "models": []
+    },
+    {
+      "path": "test/factory/testdata/simpledb/oracle/oracle.json",
+      "sha256": "3b8c5cdf9b1fd1133878086ac7f8671eb55646ad98e3a2f3dd8cd6fe9a501e25",
+      "disposition": "test-support",
+      "reason": "Fixtures, assertions or registration contracts; not production runtime or execution evidence.",
+      "models": []
+    },
+    {
+      "path": "test/factory/testdata/simpledb/registration-proposal.json",
+      "sha256": "1122cd294b7b3c9a407d97752ea09ce8e00991ee68d861627f544c605c3f062f",
+      "disposition": "test-support",
+      "reason": "Fixtures, assertions or registration contracts; not production runtime or execution evidence.",
+      "models": []
+    },
+    {
+      "path": "test/factory/testdata/simpledb/sdk_wire.py",
+      "sha256": "36b3413e4502e2d6f3ef6fd97056e152c64cafa2f14f6aed12177dc025c657ed",
+      "disposition": "test-support",
+      "reason": "Fixtures, assertions or registration contracts; not production runtime or execution evidence.",
+      "models": []
+    },
+    {
+      "path": "test/factory/testdata/simpledb/test_sdk_harness.py",
+      "sha256": "14ce90776d79582ae84febf25763fe07a153a13aa2e207224fcd4bcf93b78255",
+      "disposition": "test-support",
+      "reason": "Fixtures, assertions or registration contracts; not production runtime or execution evidence.",
       "models": []
     }
   ]
