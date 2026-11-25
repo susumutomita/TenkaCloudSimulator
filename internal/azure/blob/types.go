@@ -6,8 +6,10 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"net/http"
 	"regexp"
 	"strings"
+	"time"
 	"unicode/utf8"
 )
 
@@ -133,9 +135,21 @@ func validBlob(s string) bool {
 	return true
 }
 
-type condition struct{ Match, None string }
+type condition struct {
+	Match, None   string
+	ModifiedSince time.Time
+}
 
-func (c condition) check(tag string, exists, read bool) error {
+func (c condition) check(tag, modified string, exists, read bool) error {
+	if !c.ModifiedSince.IsZero() && read && exists {
+		last, err := http.ParseTime(modified)
+		if err != nil {
+			return errInternal
+		}
+		if !last.After(c.ModifiedSince) {
+			return fail(304, "NotModified", "")
+		}
+	}
 	if c.Match != "" && (!exists || c.Match != "*" && c.Match != tag) {
 		return fail(412, "ConditionNotMet", "The condition was not met.")
 	}
