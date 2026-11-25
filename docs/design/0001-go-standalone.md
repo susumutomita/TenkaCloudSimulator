@@ -18,7 +18,7 @@ AWS カタログの AppFlow は S3 間のフロー設定のみを保持する。
 
 AWS Batch のジョブキューは、先頭ジョブのタイムアウト設定のみを保存する。設定できる時間は 600～86,400 秒で、コンテナ系では `CANCEL`、SageMaker Training では `TERMINATE` を受け付ける。更新時は変更後のキュー種別とアクションの組み合わせを検証し、拒否された要求で既存設定は変わらない。タイマーやジョブの実行・終了処理は実装しない。
 
-SimpleDB の `PutAttributes` は AWS SDK の標準形式の `Expected` 条件を 1 件だけ受け付ける。属性の単一値との比較、または属性が存在しないことの確認を更新と同じ SQLite トランザクションで行う。条件を満たさない場合は他の属性も変更しない。番号付きの条件形式、バッチ書き込み、`DeleteAttributes`、`Select` は対応しない。
+SimpleDB の `PutAttributes` は AWS SDK の標準形式の `Expected` 条件を 1 件だけ受け付ける。属性の単一値との比較、または属性が存在しないことの確認を更新と同じ SQLite トランザクションで行う。条件を満たさない場合は他の属性も変更しない。番号付きの条件形式、バッチ書き込み、`DeleteAttributes`、`Select` は対応しない。新しい値の組が追加されるときは同じ書き込みトランザクションで最大256組を検証し、超過時は他の属性も変更しない。[既存超過データの扱い](../simpledb-item-limits.md)。
 
 Azure Queue は Blob と独立したプロバイダールートを持ち、固定 account・owner・environment に結びつくローカル SQLite にメッセージを保存する。受信と更新は表示予約と pop receipt を更新し、削除は現在の receipt を要求する。Console と API リファレンスは同じ所有者境界とデータプレーンを使う。アカウント全体のキュー一覧や Azure RBAC は模倣しない。[操作範囲と検証条件](../acceptance/azure-queue.md)。
 
