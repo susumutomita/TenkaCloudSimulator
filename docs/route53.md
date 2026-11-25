@@ -85,6 +85,31 @@ Session tokens and conflicting service selectors are rejected. No runtime
 AWS SDK dependency is added. SDK clients use the simulator endpoint and its
 X-Simulator-Token header; these requests never contact AWS or external DNS.
 
+## Console: browse public zones and create one PTR
+
+In the normal signed-in simulator console, open **AWS → Route 53**. Choose an
+existing public hosted zone, view its record sets, and create one PTR record
+with a fully qualified name inside that zone, one ASCII DNS target, and TTL
+between 0 and 2147483647 seconds. An existing record is not overwritten: the
+console sends one native `CREATE` and shows success only after an `INSYNC`
+receipt and a fresh read of the exact name, type, TTL, and value. A rejected or
+unconfirmed write is not retried automatically. The console region display uses
+`us-east-1`; the local Route 53 state is global within this simulator instance.
+
+This is the same SQLite state as the SDK, and the same native authorization.
+The console requires `route53:ListHostedZones` on `*` for discovery, and the
+selected zone requires `route53:GetHostedZone`, `route53:ListResourceRecordSets`,
+and for creation `route53:ChangeResourceRecordSets` on its hosted-zone ARN.
+A listed zone is not permission to read its records or create one. There is no
+new wildcard write permission or policy editor. Narrow AWS console handoff
+sessions are excluded. For teams, separate simulator processes, databases and
+token authorities are still required.
+
+Use the native API or SDK to create zones, replace or delete records, and run a
+local TestDNSAnswer. This console neither contacts external DNS nor exposes
+private zones, alias/routing policies or a zone mutator. Google Cloud DNS and
+its independent SRV console are unrelated.
+
 ## References
 
 - [CreateHostedZone](https://docs.aws.amazon.com/Route53/latest/APIReference/API_CreateHostedZone.html): public defaults, CallerReference and ec2 prerequisite.

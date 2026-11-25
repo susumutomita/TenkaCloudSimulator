@@ -96,7 +96,7 @@ console, CloudFormation adapter or Challenge integration.
 - **Networking:** [EC2/VPC discovery and VPC create/delete](docs/ec2-read-discovery.md),
   [VPC and one subnet in the Console](docs/ec2-read-discovery.md#console-vpc-and-one-subnet),
   [Elastic Load Balancing](docs/elb.md) (Lambda targets),
-  [CloudFront VPC origins](docs/cloudfront-vpc-origin.md), [Route 53 public zones, including PTR reverse lookups](docs/route53.md).
+  [CloudFront VPC origins](docs/cloudfront-vpc-origin.md), [Route 53 public zones and one-PTR Console](docs/route53.md#console-browse-public-zones-and-create-one-ptr).
 - **Scaling:** [Auto Scaling plans for local DynamoDB tables](docs/autoscaling-plans.md).
 - **Infrastructure:** [CloudFormation](docs/cloudformation-rest.md),
   [SSM value parameters](docs/cloudformation-ssm-parameters.md),
