@@ -256,7 +256,7 @@ func NewWithProviders(path string, options ProviderConfig) (http.Handler, func()
 		addEC2SecurityGroupsConsoleCapability(w, r, capabilities)
 		capabilities["services"].(map[string]any)["simpledb"] = map[string]any{
 			"console": true, "region": gateway.SimpleDBScope.Region, "protocol": "Query/XML 2009-04-15",
-			"operations":     []string{"CreateDomain", "ListDomains", "DeleteDomain", "DomainMetadata", "GetAttributes", "PutAttributes"},
+			"operations":     []string{"CreateDomain", "ListDomains", "DeleteDomain", "DomainMetadata", "GetAttributes", "PutAttributes", "DeleteAttributes"},
 			"conditionalPut": true,
 		}
 		addAzureQueueConsoleCapability(r, capabilities, cloudConfig)

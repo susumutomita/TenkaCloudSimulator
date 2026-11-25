@@ -21149,6 +21149,48 @@
           "expect_invariant": "ConfigurationOnly"
         }
       ]
+    },
+    {
+      "id": "SimpleDBAttributeDelete",
+      "model": "formal/SimpleDBAttributeDelete.tla",
+      "config": "formal/SimpleDBAttributeDelete.cfg",
+      "bounds": "One already resolved domain, one item, two attribute names and values, three deletion modes and one optional predicate.",
+      "properties": [
+        "NoPhantomItem",
+        "NoUnacknowledgedChange",
+        "OnlyEligibleMayAck",
+        "ExactSurvivors"
+      ],
+      "limits": "One atomic transition, one removal selector and abstract permission only. Multiple selectors, concurrent SQLite transactions, Query encoding, SDK and Go refinement are not modeled.",
+      "source_scope": [
+        "internal/aws/simpledb/delete.go",
+        "internal/aws/simpledb/http.go",
+        "internal/aws/simpledb/item.go"
+      ],
+      "mutants": [
+        {
+          "id": "LoseUnselectedValues",
+          "edits": [
+            {
+              "old": "[] OTHER -> {<<name,value>>}",
+              "new": "[] OTHER -> {name} \\X Values",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExactSurvivors"
+        },
+        {
+          "id": "DropCondition",
+          "edits": [
+            {
+              "old": "[] OTHER -> At(before,expectedName) = {expectedValue}",
+              "new": "[] OTHER -> TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "OnlyEligibleMayAck"
+        }
+      ]
     }
   ]
 }

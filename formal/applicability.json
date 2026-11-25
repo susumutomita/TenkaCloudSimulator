@@ -1,237 +1,276 @@
 {
   "version": 1,
-  "base_sha": "51f7564bb8424c902f2db6e8a4039c57d601fd34",
+  "base_sha": "49ecb555d405d31d868fc3d73139b0b0a42e4b75",
   "changes": [
     {
-      "path": ".github/workflows/ci.yml",
-      "sha256": "4b723df4fb73e3d7b9098a240b2b5622b33c1581baf97c0d172bc1cd7be7b3cf",
-      "disposition": "formal-infrastructure",
-      "reason": "Pins the selected-VPC model and checks or runs the focused readback contract; no simulator runtime change.",
-      "models": []
-    },
-    {
       "path": "README.md",
-      "sha256": "c9e8e5a56c901e100bd88dc0d2d377c0b0202a03c21fffa660e58bb5e203dbc7",
+      "sha256": "1fd2785225a417c3457045cc10f2f3740e403c6a69a2ae9d6e7c0ae4bfd22b50",
       "disposition": "documentation",
-      "reason": "Documents the existing authenticated native group read from the selected VPC details; no writes or packet proof.",
+      "reason": "Document the actual bounded native and console deletion semantics, permissions, and explicit exclusions.",
       "models": []
     },
     {
       "path": "docs/design/0001-go-standalone.md",
-      "sha256": "91e9c07efab42dde2c2eed17714edb42672b19a63e5d9060ed53d25ac2159a58",
+      "sha256": "9e1d92f44a75943c109f001d0f09a8ccb31460b262811b3aedfe99c8872de80c",
       "disposition": "documentation",
-      "reason": "Documents the existing authenticated native group read from the selected VPC details; no writes or packet proof.",
+      "reason": "Document the actual bounded native and console deletion semantics, permissions, and explicit exclusions.",
       "models": []
     },
     {
-      "path": "docs/ec2-read-discovery.md",
-      "sha256": "f0ae121aed204772eea415aa9d4b2e10ba8a746df4ccc2033d5fce4b12abf113",
+      "path": "docs/simpledb-console.md",
+      "sha256": "81d03a410a775d45854bd290fd9911d61d594acd96439aaae17a0946939915a3",
       "disposition": "documentation",
-      "reason": "Documents the existing authenticated native group read from the selected VPC details; no writes or packet proof.",
+      "reason": "Document the actual bounded native and console deletion semantics, permissions, and explicit exclusions.",
       "models": []
     },
     {
-      "path": "formal/EC2SecurityGroupConsoleEpoch.cfg",
-      "sha256": "60336afe1828b2c7a85420bb43723aba5d83cf70a8cd8107b16893f4efe83eb4",
+      "path": "docs/simpledb-item-limits.md",
+      "sha256": "ed9f507f3b8220117fca0808297200ecb867068c191d9708f2ce1fd74f81901b",
+      "disposition": "documentation",
+      "reason": "Document the actual bounded native and console deletion semantics, permissions, and explicit exclusions.",
+      "models": []
+    },
+    {
+      "path": "formal/SimpleDBAttributeDelete.cfg",
+      "sha256": "2936aa43c2fc6e8e4f5a28df9a45ce67370404f01be95fcea6dba35878a195b9",
       "disposition": "modeled",
-      "reason": "Adds the finite selected-VPC presentation model and checked invariants.",
+      "reason": "Bind exact changed operation or client presentation to its bounded abstract contract.",
       "models": [
         {
-          "id": "EC2SecurityGroupConsoleEpoch",
+          "id": "SimpleDBAttributeDelete",
           "properties": [
-            "EligibleRequest",
-            "ReadOnlyOperation",
-            "OnlyCurrentScope",
-            "OnlySelectedVPC",
-            "FailuresNeverEmpty"
+            "ExactSurvivors",
+            "NoPhantomItem",
+            "NoUnacknowledgedChange",
+            "OnlyEligibleMayAck"
           ],
-          "limits": "Model only covers the declared finite presentation projection, not real Access/IAM, XML/DOM, abort transport, request delivery, concurrency, packet paths, SQL, or Go/React refinement."
+          "limits": "One authorized symbolic operation on one item only. Not raw Query, concurrency, SQL, SDK or Go implementation evidence."
         }
       ]
     },
     {
-      "path": "formal/EC2SecurityGroupConsoleEpoch.tla",
-      "sha256": "6feb19bb654e28e048932d0472072789f1f7ff350b61d0ea9e50590d6c0f1d70",
+      "path": "formal/SimpleDBAttributeDelete.tla",
+      "sha256": "673fdfa8df9bab71f00a77f821276f118412e9a0f89e3a20f2683027d679f00f",
       "disposition": "modeled",
-      "reason": "Adds the finite selected-VPC presentation model and checked invariants.",
+      "reason": "Bind exact changed operation or client presentation to its bounded abstract contract.",
       "models": [
         {
-          "id": "EC2SecurityGroupConsoleEpoch",
+          "id": "SimpleDBAttributeDelete",
           "properties": [
-            "EligibleRequest",
-            "ReadOnlyOperation",
-            "OnlyCurrentScope",
-            "OnlySelectedVPC",
-            "FailuresNeverEmpty"
+            "ExactSurvivors",
+            "NoPhantomItem",
+            "NoUnacknowledgedChange",
+            "OnlyEligibleMayAck"
           ],
-          "limits": "Model only covers the declared finite presentation projection, not real Access/IAM, XML/DOM, abort transport, request delivery, concurrency, packet paths, SQL, or Go/React refinement."
+          "limits": "One authorized symbolic operation on one item only. Not raw Query, concurrency, SQL, SDK or Go implementation evidence."
         }
       ]
     },
     {
       "path": "formal/models.json",
-      "sha256": "41d251f9f070ec1987d83aaa51e712c830894b89617987885edef5fbaf0ac9eb",
+      "sha256": "c622a8cc870495768cb6371d3cac80de663915253bfd3bed72c0d7fdcfe35da6",
       "disposition": "formal-infrastructure",
-      "reason": "Pins the selected-VPC model and checks or runs the focused readback contract; no simulator runtime change.",
+      "reason": "Register finite deletion state contract and two independent mutation controls; preserve inherited models.",
       "models": []
     },
     {
-      "path": "internal/server/ec2_security_groups_console_test.go",
-      "sha256": "38d8adb1351245d2592fd75fa20e49a74b9037fcf704e710d920bb8c4dc41c72",
+      "path": "internal/aws/simpledb/delete.go",
+      "sha256": "289319074d90e3e24e04ca77d8b4773ade8b621638d18cdbf37dfbadb0458696",
+      "disposition": "modeled",
+      "reason": "Bind exact changed operation or client presentation to its bounded abstract contract.",
+      "models": [
+        {
+          "id": "SimpleDBAttributeDelete",
+          "properties": [
+            "ExactSurvivors",
+            "NoPhantomItem",
+            "NoUnacknowledgedChange",
+            "OnlyEligibleMayAck"
+          ],
+          "limits": "One authorized symbolic operation on one item only. Not raw Query, concurrency, SQL, SDK or Go implementation evidence."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/simpledb/delete_test.go",
+      "sha256": "fd4674c84b836794e075920fa3aa76eba49e59eb0e08fe3b180527b642d47d85",
       "disposition": "test-support",
-      "reason": "Verifies this bounded presentation and signed-in native read through focused tests; no application-runtime change.",
+      "reason": "Exercise protocol, access, atomicity, or conditional client fields; no runtime action added by this test.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/simpledb/http.go",
+      "sha256": "9af99a3ece18a01a70c6b7aaff6490cea5ac13576f46b1de5ed2dfeff9d4e8c9",
+      "disposition": "modeled",
+      "reason": "Bind exact changed operation or client presentation to its bounded abstract contract.",
+      "models": [
+        {
+          "id": "SimpleDBAttributeDelete",
+          "properties": [
+            "ExactSurvivors",
+            "NoPhantomItem",
+            "NoUnacknowledgedChange",
+            "OnlyEligibleMayAck"
+          ],
+          "limits": "One authorized symbolic operation on one item only. Not raw Query, concurrency, SQL, SDK or Go implementation evidence."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/simpledb/item.go",
+      "sha256": "ed49787c4f0556d82b9cf446105a77677dacc975f7e3187366a70f8ea7323a88",
+      "disposition": "modeled",
+      "reason": "Bind exact changed operation or client presentation to its bounded abstract contract.",
+      "models": [
+        {
+          "id": "SimpleDBAttributeDelete",
+          "properties": [
+            "ExactSurvivors",
+            "NoPhantomItem",
+            "NoUnacknowledgedChange",
+            "OnlyEligibleMayAck"
+          ],
+          "limits": "One authorized symbolic operation on one item only. Not raw Query, concurrency, SQL, SDK or Go implementation evidence."
+        }
+      ]
+    },
+    {
+      "path": "internal/server/apidocs/openapi.json",
+      "sha256": "c72e0dd709fef200d80a962bca2f54e8469f6efa42e0d1692c96829d000714ba",
+      "disposition": "presentation",
+      "reason": "Track a non-default, conditional reference example or deterministic console build inventory, not a new independent backend.",
       "models": []
     },
     {
       "path": "internal/server/server.go",
-      "sha256": "835d538b84f9137068cfe158bc33d1a3d5b023a20e490ee360b0a33dfefdab66",
+      "sha256": "56ac7b8a48570f5619c0f986b296fa51c0507d69497e05c5f0214edcd650e686",
       "disposition": "modeled",
-      "reason": "Advertises a read-only pane only for an ordinary trusted authenticated session; native IAM unchanged.",
+      "reason": "Bind exact changed operation or client presentation to its bounded abstract contract.",
       "models": [
         {
-          "id": "EC2SecurityGroupConsoleEpoch",
+          "id": "SimpleDBConsoleEpoch",
           "properties": [
-            "EligibleRequest"
+            "OnlyCurrentScopeVisible",
+            "ReadbackOnlyAfterAck",
+            "SingleCurrentChain",
+            "WriteNoticeRequiresAck"
           ],
-          "limits": "Model only covers the declared finite presentation projection, not real Access/IAM, XML/DOM, abort transport, request delivery, concurrency, packet paths, SQL, or Go/React refinement."
+          "limits": "Only scope, pending chains, acknowledgment and readback order are abstracted. No claims for exact operation, DOM, authorization implementation or SQLite."
         }
       ]
     },
     {
       "path": "internal/server/web/app.js",
-      "sha256": "341bc8f8192eeffc00f68904787bccdc700047d35ae5aad9d2c540a95baf26fc",
+      "sha256": "b4688bbee0c5e5b55c6c2889e513346205ab8872284648fca49fb91bff46ab11",
       "disposition": "modeled",
-      "reason": "Rebuilt bundled equivalent of the selected-VPC console workflow; no other endpoint permissions changed.",
+      "reason": "Bind exact changed operation or client presentation to its bounded abstract contract.",
       "models": [
         {
-          "id": "EC2SecurityGroupConsoleEpoch",
+          "id": "SimpleDBConsoleEpoch",
           "properties": [
-            "EligibleRequest",
-            "ReadOnlyOperation",
-            "OnlyCurrentScope",
-            "OnlySelectedVPC",
-            "FailuresNeverEmpty"
+            "OnlyCurrentScopeVisible",
+            "ReadbackOnlyAfterAck",
+            "SingleCurrentChain",
+            "WriteNoticeRequiresAck"
           ],
-          "limits": "Model only covers the declared finite presentation projection, not real Access/IAM, XML/DOM, abort transport, request delivery, concurrency, packet paths, SQL, or Go/React refinement."
+          "limits": "Only scope, pending chains, acknowledgment and readback order are abstracted. No claims for exact operation, DOM, authorization implementation or SQLite."
         }
       ]
     },
     {
       "path": "scripts/formal_model_gate.py",
-      "sha256": "9aeb535b0f35b019aad1d41e9f7900e2a33437e4b73e45af48c5e96e591927a2",
+      "sha256": "e9a8527a5a7918187e2494c8caec14c1db07a7473451c08d53fbdfe4f0247746",
       "disposition": "formal-infrastructure",
-      "reason": "Pins the selected-VPC model and checks or runs the focused readback contract; no simulator runtime change.",
+      "reason": "Pin the newly registered deletion model and verify that its exact guards cannot be dropped; retain the complete existing inventory.",
       "models": []
     },
     {
       "path": "scripts/test-formal-gate.py",
-      "sha256": "8ccdaeaf1257953f518aaab9e00b83028653cbe624a54d5aff2cbd63da7f3e7d",
+      "sha256": "6f6e7f73803bfa2aacd17e110297b5efffbc861b0666f62d9ac336bceeb4b645",
       "disposition": "formal-infrastructure",
-      "reason": "Pins the selected-VPC model and checks or runs the focused readback contract; no simulator runtime change.",
+      "reason": "Pin the newly registered deletion model and verify that its exact guards cannot be dropped; retain the complete existing inventory.",
+      "models": []
+    },
+    {
+      "path": "scripts/test-simpledb-delete-sdk.py",
+      "sha256": "427ada116d01a0f3bd569520c79f9d311120962eaa08d8f1f1ded5b9066434ab",
+      "disposition": "test-support",
+      "reason": "Exercise protocol, access, atomicity, or conditional client fields; no runtime action added by this test.",
       "models": []
     },
     {
       "path": "tools/console/bundle-digests.json",
-      "sha256": "ed3d5a6a7ff1da1e24e1f8c40dac36f5dadb42ca642c8566ebc88f04dc10ccc0",
+      "sha256": "3042dafa42c8f78fbfe5711d6b8f3ec7bea7d05431ed4a352a1c5a2771735e40",
       "disposition": "presentation",
-      "reason": "Records the pinned Console bundle inputs and output digests; no backend authority change.",
+      "reason": "Track a non-default, conditional reference example or deterministic console build inventory, not a new independent backend.",
       "models": []
     },
     {
       "path": "tools/console/bundle-inputs.json",
-      "sha256": "7d276ccc246e30c6bba7b1edc406993f2134323eb965aba93fdfa2066b29a2a3",
+      "sha256": "a2987d3e85790c97233cc63d2317de32aa321cf4e7f65c21fcc4e42b53f38064",
       "disposition": "presentation",
-      "reason": "Records the pinned Console bundle inputs and output digests; no backend authority change.",
+      "reason": "Track a non-default, conditional reference example or deterministic console build inventory, not a new independent backend.",
       "models": []
     },
     {
-      "path": "tools/console/src/ec2-readonly.jsx",
-      "sha256": "a409c7342d83a800e8e861064736408c5e3ad21452a7dd3e83928071912135be",
-      "disposition": "modeled",
-      "reason": "Mounts the pane only for the active selected VPC and scoping key.",
-      "models": [
-        {
-          "id": "EC2SecurityGroupConsoleEpoch",
-          "properties": [
-            "EligibleRequest",
-            "OnlyCurrentScope"
-          ],
-          "limits": "Model only covers the declared finite presentation projection, not real Access/IAM, XML/DOM, abort transport, request delivery, concurrency, packet paths, SQL, or Go/React refinement."
-        }
-      ]
-    },
-    {
-      "path": "tools/console/src/ec2-response.mjs",
-      "sha256": "da6581342340afd19ba29d140418616d5a2713d474788fb69af1434360d76dd2",
-      "disposition": "modeled",
-      "reason": "Validates the native bounded read and retains records for exactly the selected VPC.",
-      "models": [
-        {
-          "id": "EC2SecurityGroupConsoleEpoch",
-          "properties": [
-            "OnlySelectedVPC",
-            "FailuresNeverEmpty"
-          ],
-          "limits": "Model only covers the declared finite presentation projection, not real Access/IAM, XML/DOM, abort transport, request delivery, concurrency, packet paths, SQL, or Go/React refinement."
-        }
-      ]
-    },
-    {
-      "path": "tools/console/src/ec2-security-groups.mjs",
-      "sha256": "2e5a759af1c4dc4b800863b1f5832892c7844c3b76b0cf67c6c3bca5114d284f",
-      "disposition": "modeled",
-      "reason": "Requires the advertised signed-in scope and sends only the regional native read, suppressing aborted responses.",
-      "models": [
-        {
-          "id": "EC2SecurityGroupConsoleEpoch",
-          "properties": [
-            "EligibleRequest",
-            "ReadOnlyOperation",
-            "OnlyCurrentScope"
-          ],
-          "limits": "Model only covers the declared finite presentation projection, not real Access/IAM, XML/DOM, abort transport, request delivery, concurrency, packet paths, SQL, or Go/React refinement."
-        }
-      ]
-    },
-    {
-      "path": "tools/console/src/ec2-vpc-security-groups.jsx",
-      "sha256": "f7b7714e06899987696ca9227a9f2b0084ada9f892b924004d567746f372d494",
-      "disposition": "modeled",
-      "reason": "Shows current selection only and distinguishes denied, failed and valid empty reads.",
-      "models": [
-        {
-          "id": "EC2SecurityGroupConsoleEpoch",
-          "properties": [
-            "EligibleRequest",
-            "OnlyCurrentScope",
-            "OnlySelectedVPC",
-            "FailuresNeverEmpty"
-          ],
-          "limits": "Model only covers the declared finite presentation projection, not real Access/IAM, XML/DOM, abort transport, request delivery, concurrency, packet paths, SQL, or Go/React refinement."
-        }
-      ]
-    },
-    {
       "path": "tools/console/src/main.jsx",
-      "sha256": "a7fb97640d97631f00b9fd21e489213d0ced91a6472d201688402158992e877a",
+      "sha256": "1d3218247ba169dd2ff0ba497afa1782738fed04efba16350657a58b2be37121",
       "disposition": "modeled",
-      "reason": "Wires the exact authenticated capability into the VPC route and remounts on identity or region changes.",
+      "reason": "Bind exact changed operation or client presentation to its bounded abstract contract.",
       "models": [
         {
-          "id": "EC2SecurityGroupConsoleEpoch",
+          "id": "SimpleDBConsoleEpoch",
           "properties": [
-            "EligibleRequest",
-            "OnlyCurrentScope"
+            "OnlyCurrentScopeVisible",
+            "ReadbackOnlyAfterAck",
+            "SingleCurrentChain",
+            "WriteNoticeRequiresAck"
           ],
-          "limits": "Model only covers the declared finite presentation projection, not real Access/IAM, XML/DOM, abort transport, request delivery, concurrency, packet paths, SQL, or Go/React refinement."
+          "limits": "Only scope, pending chains, acknowledgment and readback order are abstracted. No claims for exact operation, DOM, authorization implementation or SQLite."
         }
       ]
     },
     {
-      "path": "tools/console/test/ec2-security-groups.test.mjs",
-      "sha256": "8afa4995141aa470e61a2e2442e8ea65b1a27022bd5c93b16894b134159a3d7f",
+      "path": "tools/console/src/simpledb-client.mjs",
+      "sha256": "ade8a1b34531cfb5d9783b757a601d7f32a0a8264e2002a4f4398f1252bbea4f",
+      "disposition": "modeled",
+      "reason": "Bind exact changed operation or client presentation to its bounded abstract contract.",
+      "models": [
+        {
+          "id": "SimpleDBConsoleEpoch",
+          "properties": [
+            "OnlyCurrentScopeVisible",
+            "ReadbackOnlyAfterAck",
+            "SingleCurrentChain",
+            "WriteNoticeRequiresAck"
+          ],
+          "limits": "Only scope, pending chains, acknowledgment and readback order are abstracted. No claims for exact operation, DOM, authorization implementation or SQLite."
+        }
+      ]
+    },
+    {
+      "path": "tools/console/src/simpledb.jsx",
+      "sha256": "0a78f3dd45d8245b65a207c28efeb5b7c3d73a2762bd6824af1221a101d18252",
+      "disposition": "modeled",
+      "reason": "Bind exact changed operation or client presentation to its bounded abstract contract.",
+      "models": [
+        {
+          "id": "SimpleDBConsoleEpoch",
+          "properties": [
+            "OnlyCurrentScopeVisible",
+            "ReadbackOnlyAfterAck",
+            "SingleCurrentChain",
+            "WriteNoticeRequiresAck"
+          ],
+          "limits": "Only scope, pending chains, acknowledgment and readback order are abstracted. No claims for exact operation, DOM, authorization implementation or SQLite."
+        }
+      ]
+    },
+    {
+      "path": "tools/console/test/simpledb-client.test.mjs",
+      "sha256": "6f1a958e2e0f673d7f421ad44e27470fded80920d826bbe05af5d78ddd909268",
       "disposition": "presentation",
-      "reason": "Records the pinned Console bundle inputs and output digests; no backend authority change.",
+      "reason": "Exercise protocol, access, atomicity, or conditional client fields; no runtime action added by this test.",
       "models": []
     }
   ]

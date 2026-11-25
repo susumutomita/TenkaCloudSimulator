@@ -112,12 +112,12 @@ console, CloudFormation adapter or Challenge integration.
   [Google Cloud console](docs/gcp-console.md), [Azure console](docs/azure-console.md),
   [Azure Queue Storage (bounded named-queue operations)](docs/acceptance/azure-queue.md),
   [opt-in Sakura Disk metadata](docs/sakura.md).
-- **SimpleDB:** One optional SDK-style `Expected` condition on `PutAttributes`
-  can compare a single value or require that an attribute be absent. The check
-  and write share one transaction; batch writes, `DeleteAttributes` and `Select`
-  are not supported. A write that exceeds the [256-pair item limit](docs/simpledb-item-limits.md)
+- **SimpleDB:** Native `PutAttributes` and `DeleteAttributes` accept one SDK-style `Expected` condition. It
+  can compare a single value or require that an attribute be absent. The check and
+  change share one transaction. Delete individual values, entire attributes or the item;
+  repeat unconditional deletion safely. Batch operations and `Select` are not supported. A write that exceeds the [256-pair item limit](docs/simpledb-item-limits.md)
   is rejected atomically. In the [SimpleDB console](docs/simpledb-console.md),
-  select a local domain, read a known item, and conditionally replace one attribute.
+  select a local domain, read a known item, and conditionally replace or delete a single attribute.
 - **Configuration-only catalogs:** [AWS](docs/aws-catalog.md),
   [Google Cloud](docs/gcp-catalog.md), [Azure Resource Manager](docs/azure-catalog.md).
   `--rds-private-postgres-topology` optionally validates private standalone
