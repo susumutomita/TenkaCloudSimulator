@@ -9,7 +9,9 @@ export const PROVIDERS = Object.freeze([
 ]);
 export const SERVICES = Object.freeze([
   {id: 'ec2', provider: 'aws', label: 'EC2', capability: 'ec2', route: '/ec2', keywords: 'instance compute インスタンス コンピューティング'},
-  {id: 'vpc', provider: 'aws', label: 'VPC', capability: 'ec2', route: '/vpc', keywords: 'network virtual private cloud ネットワーク 仮想プライベートクラウド'},
+  {id: 'vpc', provider: 'aws', label: 'VPC', capability: 'ec2', route: '/vpc', keywords: 'network virtual private cloud subnet ネットワーク 仮想プライベートクラウド サブネット'},
+  // A page of VPC with its own route. `parent` keeps it out of service lists.
+  {id: 'subnets', provider: 'aws', label: 'VPC', capability: 'ec2', route: '/subnets', parent: 'vpc', keywords: ''},
   {id: 's3', provider: 'aws', label: 'S3', capability: 's3', route: '/s3', keywords: 'bucket object バケット オブジェクト ストレージ'},
   {id: 'ssm', provider: 'aws', label: 'Systems Manager', capability: 'ssm', route: '/parameters', keywords: 'parameter store パラメータ 設定 システムマネージャー パラメータストア'},
   {id: 'ssm-session', provider: 'aws', label: 'Session Manager', capability: 'ssm', route: '/session-manager', keywords: 'systems manager session shell terminal connect セッションマネージャー セッション ターミナル 接続 システムマネージャー'},
@@ -79,9 +81,9 @@ export function serviceAvailable(id, capabilities) {
   const handoff = capabilities.consoleScope;
   if (id === 'ssm-session') return typeof handoff?.instanceId === 'string' && !!capabilities.services?.ssm;
   if (handoff && (typeof handoff.instanceId === 'string' ? id !== 'ec2' : id !== 'ssm')) return false;
-  if (id === 'ec2' || id === 'vpc') {
+  if (id === 'ec2' || id === 'vpc' || id === 'subnets') {
     const ec2=capabilities.services?.ec2;
-    return ec2?.console === true && Array.isArray(ec2.operations) && ['DescribeInstances','DescribeVpcs'].every(op=>ec2.operations.includes(op));
+    return ec2?.console === true && Array.isArray(ec2.operations) && ['DescribeInstances','DescribeVpcs',...(id === 'subnets' ? ['DescribeSubnets'] : [])].every(op=>ec2.operations.includes(op));
   }
   if (service.provider === 'aws') return !!capabilities.services?.[service.capability];
   if (id === 'sakura-servers') return sakuraServerConfiguration(capabilities) !== null;
@@ -98,10 +100,15 @@ export function serviceAvailable(id, capabilities) {
 }
 // The VPC create/delete controls need both native operations; a handoff scope
 // never shows VPC at all. The server still authorizes every request.
-export function vpcLifecycleAvailable(capabilities) {
+function ec2Lifecycle(capabilities, required) {
   const operations = capabilities?.services?.ec2?.operations;
-  return !capabilities?.consoleScope && Array.isArray(operations) && ['CreateVpc', 'DeleteVpc'].every(op => operations.includes(op));
+  return !capabilities?.consoleScope && Array.isArray(operations) && required.every(op => operations.includes(op));
 }
+export function vpcLifecycleAvailable(capabilities) { return ec2Lifecycle(capabilities, ['CreateVpc', 'DeleteVpc']); }
+// Subnet and instance controls follow the same rule. The launch form also
+// lists VPCs and subnets, so it needs both discovery operations.
+export function subnetLifecycleAvailable(capabilities) { return ec2Lifecycle(capabilities, ['DescribeSubnets', 'CreateSubnet', 'DeleteSubnet']); }
+export function instanceLifecycleAvailable(capabilities) { return ec2Lifecycle(capabilities, ['DescribeVpcs', 'DescribeSubnets', 'RunInstances', 'TerminateInstances']); }
 // Catalog service titles come from capabilities so search finds each one.
 function searchText(service, capabilities) {
   const titles = service.id === 'catalog' && Array.isArray(capabilities?.services?.catalog?.services)
@@ -115,7 +122,7 @@ function searchText(service, capabilities) {
 }
 export function servicesForProvider(provider, capabilities, query = '') {
   const search = String(query).normalize('NFKC').trim().toLocaleLowerCase('en');
-  return SERVICES.filter(service => service.provider === provider && serviceAvailable(service.id, capabilities)
+  return SERVICES.filter(service => service.provider === provider && !service.parent && serviceAvailable(service.id, capabilities)
     && searchText(service, capabilities).includes(search));
 }
 export function serviceFromHash(hash) {

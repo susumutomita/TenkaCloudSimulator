@@ -251,7 +251,11 @@ alias and unchanged bounded UserData. It does not download AMIs or launch AWS.
 IAM admission checks the concrete image, instance, subnet, security groups and
 implicit local NIC/root-disk resource identities, plus the profile's actual role
 via `iam:PassRole`; tags require `ec2:CreateTags`. Implicit NIC/disk identities do
-not expose independent EC2 management APIs.
+not expose independent EC2 management APIs. `SubnetId` and `SecurityGroupIds`
+must name a subnet and security groups created by the same stack, in one VPC. A
+missing ID, another stack's resource or a subnet created with the native
+`CreateSubnet` is rejected with `ValidationError` inside the create transaction,
+before the stack is stored or a guest launch starts.
 
 Creation first commits `CREATE_IN_PROGRESS`, then obtains actual backend readiness
 outside SQL. Only the same still-live stack incarnation may become

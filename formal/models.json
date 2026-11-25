@@ -19651,6 +19651,247 @@
      "expect_invariant": "ReadRequiresDomainAuthority"
     }
    ]
+  },
+  {
+   "id": "EC2LaunchRecordOwnership",
+   "model": "formal/EC2LaunchRecordOwnership.tla",
+   "config": "formal/EC2LaunchRecordOwnership.cfg",
+   "bounds": "One region, one stack owner, two VPC IDs, two subnet IDs, three instance IDs, a limit of two launch records and one client token. Native VPC, subnet and launch-record create and delete with Boolean authorization; stack VPC, subnet and instance creation and stack deletion. All finite schedules, no depth cutoff.",
+   "properties": [
+    "TypeOK",
+    "NoAdoption",
+    "FailureRollsBack",
+    "IdentityDisjoint",
+    "NativeNeverChangesStackState",
+    "RunExact",
+    "TerminateExact",
+    "TokenUnique",
+    "StackDeleteSparesNative",
+    "QuotaBound"
+   ],
+   "limits": "Atomic store-level ownership of EC2-owned VPCs, subnets and launch records beside stack-owned networks and instance claims, authorization order, the single-writer client token, dependent protection and the record quota only. One region: the per-region token scope and the database-wide quota are not distinguished. A token replay and a token mismatch are both a refused write: which record is returned and the parameter hash are not modeled. Stack deletion is one step that always succeeds. Not SQL transactions or the foreign key, HTTP/XML parsing, IAM policy evaluation, CIDR containment or overlap, security-group placement, tag or image validation, random ID collision, discovery labels, console rendering, guest execution or a Go refinement proof. Native Go tests, the boto3 lifecycle, the browser end-to-end flow and the Scalar Send flow establish those implementation properties.",
+   "source_scope": [
+    "internal/aws/ec2_instance.go",
+    "internal/aws/ec2_subnet.go",
+    "internal/aws/ec2_instance_cloudformation.go",
+    "internal/aws/cloudformation.go",
+    "internal/aws/ec2_vpc.go",
+    "internal/aws/ec2_read.go",
+    "internal/aws/ec2_network.go",
+    "internal/aws/ec2_network_cloudformation.go",
+    "internal/server/server.go"
+   ],
+   "mutants": [
+    {
+     "id": "SkipRunAuthorization",
+     "edits": [
+      {
+       "old": "IF /\\ allow /\\ (q = \"none\" \\/ Tokened = {})",
+       "new": "IF /\\ (q = \"none\" \\/ Tokened = {})",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "FailureRollsBack"
+    },
+    {
+     "id": "SkipTerminateAuthorization",
+     "edits": [
+      {
+       "old": "IF allow /\\ record[i] # NoRecord THEN",
+       "new": "IF record[i] # NoRecord THEN",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "FailureRollsBack"
+    },
+    {
+     "id": "SkipSubnetAuthorization",
+     "edits": [
+      {
+       "old": "IF allow /\\ subnet[n] = NoSubnet /\\ vpc[v] = \"ec2\"",
+       "new": "IF subnet[n] = NoSubnet /\\ vpc[v] = \"ec2\"",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "FailureRollsBack"
+    },
+    {
+     "id": "SubnetInStackVpc",
+     "edits": [
+      {
+       "old": "IF allow /\\ subnet[n] = NoSubnet /\\ vpc[v] = \"ec2\"",
+       "new": "IF allow /\\ subnet[n] = NoSubnet /\\ vpc[v] # \"none\"",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "NoAdoption"
+    },
+    {
+     "id": "RunInStackSubnet",
+     "edits": [
+      {
+       "old": "/\\ subnet[n].owner = \"ec2\" /\\ record[i] = NoRecord",
+       "new": "/\\ subnet[n] # NoSubnet /\\ record[i] = NoRecord",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "NoAdoption"
+    },
+    {
+     "id": "DeleteVpcWithSubnets",
+     "edits": [
+      {
+       "old": "IF allow /\\ vpc[v] = \"ec2\" /\\ ~\\E n \\in Subnets : subnet[n].vpc = v",
+       "new": "IF allow /\\ vpc[v] = \"ec2\"",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "NoAdoption"
+    },
+    {
+     "id": "DeleteSubnetWithRecords",
+     "edits": [
+      {
+       "old": "IF allow /\\ subnet[n].owner = \"ec2\" /\\ ~\\E i \\in Instances : record[i].subnet = n",
+       "new": "IF allow /\\ subnet[n].owner = \"ec2\"",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "NoAdoption"
+    },
+    {
+     "id": "DeleteStackSubnet",
+     "edits": [
+      {
+       "old": "IF allow /\\ subnet[n].owner = \"ec2\" /\\ ~\\E i \\in Instances : record[i].subnet = n",
+       "new": "IF allow /\\ subnet[n] # NoSubnet /\\ ~\\E i \\in Instances : record[i].subnet = n",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "NativeNeverChangesStackState"
+    },
+    {
+     "id": "DeleteStackVpc",
+     "edits": [
+      {
+       "old": "IF allow /\\ vpc[v] = \"ec2\" /\\ ~\\E n \\in Subnets : subnet[n].vpc = v",
+       "new": "IF allow /\\ vpc[v] # \"none\" /\\ ~\\E n \\in Subnets : subnet[n].vpc = v",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "NativeNeverChangesStackState"
+    },
+    {
+     "id": "TerminateRemovesStackClaim",
+     "edits": [
+      {
+       "old": "claim' = claim /\\ UNCHANGED <<vpc, subnet>>",
+       "new": "claim' = (IF allow THEN {c \\in claim : c.id # i} ELSE claim) /\\ UNCHANGED <<vpc, subnet>>",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "NativeNeverChangesStackState"
+    },
+    {
+     "id": "StackSubnetInNativeVpc",
+     "edits": [
+      {
+       "old": "IF subnet[n] = NoSubnet /\\ vpc[v] = s",
+       "new": "IF subnet[n] = NoSubnet /\\ vpc[v] # \"none\"",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "NoAdoption"
+    },
+    {
+     "id": "StackInstanceInNativeSubnet",
+     "edits": [
+      {
+       "old": "claim' = IF subnet[n].owner = s /\\ record[i] = NoRecord",
+       "new": "claim' = IF subnet[n] # NoSubnet /\\ record[i] = NoRecord",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "NoAdoption"
+    },
+    {
+     "id": "DuplicateTokenRecord",
+     "edits": [
+      {
+       "old": "IF /\\ allow /\\ (q = \"none\" \\/ Tokened = {})",
+       "new": "IF /\\ allow",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "TokenUnique"
+    },
+    {
+     "id": "IgnoreRecordQuota",
+     "edits": [
+      {
+       "old": "/\\ Cardinality(Records) < Limit",
+       "new": "/\\ TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "QuotaBound"
+    },
+    {
+     "id": "OverwriteExistingRecord",
+     "edits": [
+      {
+       "old": "/\\ subnet[n].owner = \"ec2\" /\\ record[i] = NoRecord",
+       "new": "/\\ subnet[n].owner = \"ec2\"",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "RunExact"
+    },
+    {
+     "id": "RunClaimedIdentity",
+     "edits": [
+      {
+       "old": "/\\ i \\notin {c.id : c \\in claim}",
+       "new": "/\\ TRUE",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "IdentityDisjoint"
+    },
+    {
+     "id": "StackClaimsRecordIdentity",
+     "edits": [
+      {
+       "old": "/\\ record[i] = NoRecord /\\ ~\\E c \\in claim : c.id = i",
+       "new": "/\\ ~\\E c \\in claim : c.id = i",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "IdentityDisjoint"
+    },
+    {
+     "id": "TerminateEveryRecord",
+     "edits": [
+      {
+       "old": "THEN [record EXCEPT ![i] = NoRecord] ELSE record",
+       "new": "THEN [j \\in Instances |-> NoRecord] ELSE record",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "TerminateExact"
+    },
+    {
+     "id": "StackDeleteRemovesNative",
+     "edits": [
+      {
+       "old": "IF subnet[n].owner = s THEN NoSubnet",
+       "new": "IF subnet[n].owner \\in {s, \"ec2\"} THEN NoSubnet",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "StackDeleteSparesNative"
+    }
+   ]
   }
  ]
 }

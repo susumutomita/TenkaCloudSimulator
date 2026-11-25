@@ -16,8 +16,9 @@ import (
 )
 
 // EC2 Query/XML: discovery of CloudFormation-owned and EC2-owned local
-// resources, plus the bounded native VPC lifecycle in ec2_vpc.go. No VM
-// liveness is inferred from a saved plan or a successful stack creation.
+// resources, plus the bounded native VPC, subnet and instance lifecycles in
+// ec2_vpc.go, ec2_subnet.go and ec2_instance.go. No VM liveness is inferred
+// from a saved plan, a launch record or a successful stack creation.
 func isEC2(r *http.Request) bool {
 	if s := r.Header.Get("X-Simulator-Service"); s != "" {
 		return s == "ec2"
@@ -86,8 +87,8 @@ func (g *Gateway) serveEC2(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	action := fields.Get("Action")
-	if len(fields["Action"]) != 1 || len(fields["Version"]) != 1 || fields.Get("Version") != "2016-11-15" || !slices.Contains(ec2Operations, action) {
-		fail("UnsupportedOperation", "Only DescribeInstances, DescribeVpcs, DescribeSubnets, CreateVpc and DeleteVpc version 2016-11-15 are supported.", 400)
+	if len(fields["Action"]) != 1 || len(fields["Version"]) != 1 || fields.Get("Version") != "2016-11-15" || !slices.Contains(EC2Operations, action) {
+		fail("UnsupportedOperation", "Only "+strings.Join(EC2Operations, ", ")+" version 2016-11-15 are supported.", 400)
 		return
 	}
 	request, failure := parseEC2Request(action, fields)
@@ -137,7 +138,33 @@ func (g *Gateway) serveEC2(w http.ResponseWriter, r *http.Request) {
 			g.failEC2Mutation(w, e)
 			return
 		}
-		out = &ec2DeleteVpcResponse{Return: true}
+		out = &ec2ReturnResponse{XMLName: xml.Name{Local: "DeleteVpcResponse"}, Return: true}
+	case "CreateSubnet":
+		subnet, e := g.Stacks.createNativeSubnet(r.Context(), region, request)
+		if e != nil {
+			g.failEC2Mutation(w, e)
+			return
+		}
+		out = &ec2CreateSubnetResponse{Subnet: ec2SubnetRecord(subnet, ec2ManagedByEC2)}
+	case "DeleteSubnet":
+		if e := g.Stacks.deleteNativeSubnet(r.Context(), region, request.subnetID); e != nil {
+			g.failEC2Mutation(w, e)
+			return
+		}
+		out = &ec2ReturnResponse{XMLName: xml.Name{Local: "DeleteSubnetResponse"}, Return: true}
+	case "RunInstances":
+		instance, e := g.Stacks.runNativeInstance(r.Context(), region, request)
+		if e != nil {
+			g.failEC2Mutation(w, e)
+			return
+		}
+		out = &ec2RunInstancesResponse{Owner: "000000000000", Instances: []ec2InstanceRead{ec2NativeInstanceRecord(instance)}}
+	case "TerminateInstances":
+		if e := g.Stacks.terminateNativeInstance(r.Context(), region, request.instanceID); e != nil {
+			g.failEC2Mutation(w, e)
+			return
+		}
+		out = &ec2TerminateInstancesResponse{Instances: []ec2InstanceStateChange{{ID: request.instanceID, Current: ec2InstanceState{Code: 48, Name: "terminated"}}}}
 	default:
 		read, e := g.Stacks.ec2Read(r.Context(), region, action)
 		if e != nil {
@@ -162,23 +189,26 @@ type ec2Tag struct {
 type ec2Group struct {
 	ID string `xml:"groupId"`
 }
+
+// ManagedBy is a local extension on every resource: "ec2" resources come from
+// the native create actions and are removed with the native delete actions;
+// "cloudformation" resources are deleted with their stack. Runtime is
+// "not_launched" for an EC2-owned launch record, which has no guest.
 type ec2InstanceRead struct {
-	ID      string     `xml:"instanceId"`
-	Image   string     `xml:"imageId"`
-	Type    string     `xml:"instanceType"`
-	Subnet  string     `xml:"subnetId"`
-	VPC     string     `xml:"vpcId"`
-	Runtime string     `xml:"simulatorRuntimeState"`
-	Groups  []ec2Group `xml:"groupSet>item"`
-	Tags    []ec2Tag   `xml:"tagSet>item"`
+	ID        string     `xml:"instanceId"`
+	Image     string     `xml:"imageId"`
+	Type      string     `xml:"instanceType"`
+	Subnet    string     `xml:"subnetId"`
+	VPC       string     `xml:"vpcId"`
+	Runtime   string     `xml:"simulatorRuntimeState"`
+	Groups    []ec2Group `xml:"groupSet>item"`
+	Tags      []ec2Tag   `xml:"tagSet>item"`
+	ManagedBy string     `xml:"simulatorManagedBy"`
 }
 type ec2ReservationRead struct {
 	Owner     string            `xml:"ownerId"`
 	Instances []ec2InstanceRead `xml:"instancesSet>item"`
 }
-
-// ManagedBy is a local extension: "ec2" VPCs come from CreateVpc and can be
-// deleted with DeleteVpc; "cloudformation" VPCs are deleted with their stack.
 type ec2VPCRead struct {
 	ID        string   `xml:"vpcId"`
 	CIDR      string   `xml:"cidrBlock"`
@@ -186,15 +216,25 @@ type ec2VPCRead struct {
 	ManagedBy string   `xml:"simulatorManagedBy"`
 }
 type ec2SubnetRead struct {
-	ID    string   `xml:"subnetId"`
-	VPC   string   `xml:"vpcId"`
-	CIDR  string   `xml:"cidrBlock"`
-	State string   `xml:"state"`
-	Tags  []ec2Tag `xml:"tagSet>item"`
+	ID        string   `xml:"subnetId"`
+	VPC       string   `xml:"vpcId"`
+	CIDR      string   `xml:"cidrBlock"`
+	State     string   `xml:"state"`
+	Zone      string   `xml:"availabilityZone,omitempty"`
+	Tags      []ec2Tag `xml:"tagSet>item"`
+	ManagedBy string   `xml:"simulatorManagedBy"`
 }
 type ec2SubnetSet struct {
 	Items []ec2SubnetRead `xml:"item"`
 }
+
+func (s *ec2SubnetSet) items() []ec2SubnetRead {
+	if s == nil {
+		return nil
+	}
+	return s.Items
+}
+
 type ec2ReadResponse struct {
 	Subnets      *ec2SubnetSet `xml:"subnetSet,omitempty"`
 	XMLName      xml.Name
@@ -276,7 +316,7 @@ func (s *StackStore) ec2Read(ctx context.Context, region, action string) (ec2Rea
 				return out, fmt.Errorf("network identity")
 			}
 			if kind == "AWS::EC2::Subnet" {
-				out.Subnets.Items = append(out.Subnets.Items, ec2SubnetRead{v.ID, v.VPCID, v.CIDR, "available", ec2ReadTags(v.Tags)})
+				out.Subnets.Items = append(out.Subnets.Items, ec2SubnetRecord(v, ec2ManagedByCloudFormation))
 			} else {
 				out.VPCs = append(out.VPCs, ec2VPCRead{v.ID, v.CIDR, ec2ReadTags(v.Tags), ec2ManagedByCloudFormation})
 			}
@@ -291,7 +331,7 @@ func (s *StackStore) ec2Read(ctx context.Context, region, action string) (ec2Rea
 		if e != nil {
 			return out, e
 		}
-		instance := ec2InstanceRead{ID: item.id, Image: stringValue(props["ImageId"]), Type: stringValue(props["InstanceType"]), Subnet: subnet.ID, VPC: subnet.VPCID, Runtime: "unknown", Tags: ec2ReadTags(tags)}
+		instance := ec2InstanceRead{ID: item.id, Image: stringValue(props["ImageId"]), Type: stringValue(props["InstanceType"]), Subnet: subnet.ID, VPC: subnet.VPCID, Runtime: "unknown", Tags: ec2ReadTags(tags), ManagedBy: ec2ManagedByCloudFormation}
 		groups, ok := props["SecurityGroupIds"].([]any)
 		if !ok {
 			return out, fmt.Errorf("groups")
@@ -324,30 +364,52 @@ func (s *StackStore) ec2Read(ctx context.Context, region, action string) (ec2Rea
 		}
 		out.Reservations = append(out.Reservations, ec2ReservationRead{Owner: "000000000000", Instances: []ec2InstanceRead{instance}})
 	}
-	if kind == "AWS::EC2::VPC" {
-		native, e := nativeVPCs(ctx, tx, region)
+	// EC2-owned resources are merged below the same 1000-resource bound.
+	switch kind {
+	case "AWS::EC2::Instance":
+		native, e := nativeInstances(ctx, tx, region)
 		if e != nil {
 			return out, e
 		}
 		for _, v := range native {
-			out.VPCs = append(out.VPCs, ec2VPCRecord(v))
+			out.Reservations = append(out.Reservations, ec2ReservationRead{Owner: "000000000000", Instances: []ec2InstanceRead{ec2NativeInstanceRecord(v)}})
 		}
-		if len(out.VPCs) > 1000 {
+		if len(out.Reservations) > 1000 {
 			return out, fmt.Errorf("resource bound")
 		}
-		sort.Slice(out.VPCs, func(i, j int) bool { return out.VPCs[i].ID < out.VPCs[j].ID })
+		sort.Slice(out.Reservations, func(i, j int) bool { return out.Reservations[i].Instances[0].ID < out.Reservations[j].Instances[0].ID })
+	default:
+		vpcs, subnets, e := nativeNetworks(ctx, tx, region)
+		if e != nil {
+			return out, e
+		}
+		if kind == "AWS::EC2::VPC" {
+			for _, v := range vpcs {
+				out.VPCs = append(out.VPCs, ec2VPCRecord(v))
+			}
+			sort.Slice(out.VPCs, func(i, j int) bool { return out.VPCs[i].ID < out.VPCs[j].ID })
+		} else {
+			for _, v := range subnets {
+				out.Subnets.Items = append(out.Subnets.Items, ec2SubnetRecord(v, ec2ManagedByEC2))
+			}
+			sort.Slice(out.Subnets.Items, func(i, j int) bool { return out.Subnets.Items[i].ID < out.Subnets.Items[j].ID })
+		}
+		if len(out.VPCs) > 1000 || len(out.Subnets.items()) > 1000 {
+			return out, fmt.Errorf("resource bound")
+		}
 	}
 	return out, tx.Commit()
 }
 
-// onlyInstance keeps the one bound instance; every other resource is dropped
-// before serialization.
+// onlyInstance keeps the one bound stack instance; every other resource is
+// dropped before serialization. A launch record has no guest to connect to, so
+// a session bound to its ID sees nothing.
 func onlyInstance(reservations []ec2ReservationRead, id string) []ec2ReservationRead {
 	kept := []ec2ReservationRead{}
 	for _, reservation := range reservations {
 		instances := []ec2InstanceRead{}
 		for _, instance := range reservation.Instances {
-			if instance.ID == id {
+			if instance.ID == id && instance.ManagedBy == ec2ManagedByCloudFormation {
 				instances = append(instances, instance)
 			}
 		}

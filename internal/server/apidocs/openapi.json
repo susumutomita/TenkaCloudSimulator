@@ -117,7 +117,8 @@
                 "logs",
                 "secretsmanager",
                 "dynamodb",
-                "sdb"
+                "sdb",
+                "ec2"
               ]
             },
             "description": "Optional native service hint; when supplied it must match the selected service target. iam selects IAM Query; cloudformation selects CloudFormation Query. SSM/Logs/KMS/Secrets Manager use JSON 1.1; SQS/DynamoDB use JSON 1.0. This routing hint grants no access."
@@ -682,7 +683,16 @@
                       "RemoveRoleFromInstanceProfile",
                       "ListInstanceProfilesForRole",
                       "ListDomains",
-                      "DomainMetadata"
+                      "DomainMetadata",
+                      "DescribeInstances",
+                      "DescribeVpcs",
+                      "DescribeSubnets",
+                      "CreateVpc",
+                      "DeleteVpc",
+                      "CreateSubnet",
+                      "DeleteSubnet",
+                      "RunInstances",
+                      "TerminateInstances"
                     ]
                   },
                   "Version": {
@@ -690,7 +700,8 @@
                     "enum": [
                       "2010-05-15",
                       "2010-05-08",
-                      "2009-04-15"
+                      "2009-04-15",
+                      "2016-11-15"
                     ]
                   },
                   "StackName": {
@@ -761,6 +772,52 @@
                     "maxLength": 255,
                     "pattern": "^[A-Za-z0-9_.-]+$",
                     "description": "Existing local SimpleDB domain name, required for DomainMetadata only in these presets."
+                  },
+                  "CidrBlock": {
+                    "type": "string",
+                    "description": "CreateVpc and CreateSubnet: IPv4 CIDR from /16 to /28. EC2 action-specific field; unsupported fields fail explicitly."
+                  },
+                  "VpcId": {
+                    "type": "string",
+                    "description": "CreateSubnet and DeleteVpc: an EC2-owned VPC ID. EC2 action-specific field; unsupported fields fail explicitly."
+                  },
+                  "AvailabilityZone": {
+                    "type": "string",
+                    "description": "CreateSubnet, optional: the region name followed by a, b or c. EC2 action-specific field; unsupported fields fail explicitly."
+                  },
+                  "SubnetId": {
+                    "type": "string",
+                    "description": "RunInstances and DeleteSubnet: an EC2-owned subnet ID. EC2 action-specific field; unsupported fields fail explicitly."
+                  },
+                  "ImageId": {
+                    "type": "string",
+                    "description": "RunInstances: ami- followed by 8 or 17 hexadecimal characters; only the format is checked. EC2 action-specific field; unsupported fields fail explicitly."
+                  },
+                  "InstanceType": {
+                    "type": "string",
+                    "enum": [
+                      "t3.micro",
+                      "t3.small"
+                    ],
+                    "description": "RunInstances. EC2 action-specific field; unsupported fields fail explicitly."
+                  },
+                  "MinCount": {
+                    "type": "string",
+                    "enum": [
+                      "1"
+                    ],
+                    "description": "RunInstances: exactly one launch record. EC2 action-specific field; unsupported fields fail explicitly."
+                  },
+                  "MaxCount": {
+                    "type": "string",
+                    "enum": [
+                      "1"
+                    ],
+                    "description": "RunInstances: exactly one launch record. EC2 action-specific field; unsupported fields fail explicitly."
+                  },
+                  "InstanceId.1": {
+                    "type": "string",
+                    "description": "TerminateInstances: one EC2-owned launch record. EC2 action-specific field; unsupported fields fail explicitly."
                   }
                 }
               },
@@ -1039,6 +1096,89 @@
                     "Action": "DomainMetadata",
                     "Version": "2009-04-15",
                     "DomainName": "scalar-practice-domain"
+                  }
+                },
+                "EC2DescribeInstances": {
+                  "summary": "EC2 DescribeInstances (X-Simulator-Service: ec2)",
+                  "description": "Select the application/x-www-form-urlencoded body, set X-Simulator-Service to ec2, choose X-Simulator-Region and clear X-Amz-Target. Remove any fields left from another example: unknown fields are refused, never ignored. Lists CloudFormation-owned instances and EC2-owned launch records of the region. No instanceState is returned; simulatorRuntimeState is not_launched for a launch record.",
+                  "value": {
+                    "Action": "DescribeInstances",
+                    "Version": "2016-11-15"
+                  }
+                },
+                "EC2DescribeVpcs": {
+                  "summary": "EC2 DescribeVpcs (X-Simulator-Service: ec2)",
+                  "description": "Select the application/x-www-form-urlencoded body, set X-Simulator-Service to ec2, choose X-Simulator-Region and clear X-Amz-Target. Remove any fields left from another example: unknown fields are refused, never ignored. Lists the region's VPCs of both owners with simulatorManagedBy.",
+                  "value": {
+                    "Action": "DescribeVpcs",
+                    "Version": "2016-11-15"
+                  }
+                },
+                "EC2DescribeSubnets": {
+                  "summary": "EC2 DescribeSubnets (X-Simulator-Service: ec2)",
+                  "description": "Select the application/x-www-form-urlencoded body, set X-Simulator-Service to ec2, choose X-Simulator-Region and clear X-Amz-Target. Remove any fields left from another example: unknown fields are refused, never ignored. Lists the region's subnets of both owners with simulatorManagedBy.",
+                  "value": {
+                    "Action": "DescribeSubnets",
+                    "Version": "2016-11-15"
+                  }
+                },
+                "EC2CreateVpc": {
+                  "summary": "EC2 CreateVpc (X-Simulator-Service: ec2)",
+                  "description": "Select the application/x-www-form-urlencoded body, set X-Simulator-Service to ec2, choose X-Simulator-Region and clear X-Amz-Target. Remove any fields left from another example: unknown fields are refused, never ignored. Creates an EC2-owned VPC. Copy vpcId from the XML response for CreateSubnet.",
+                  "value": {
+                    "Action": "CreateVpc",
+                    "Version": "2016-11-15",
+                    "CidrBlock": "10.0.0.0/16"
+                  }
+                },
+                "EC2CreateSubnet": {
+                  "summary": "EC2 CreateSubnet (X-Simulator-Service: ec2)",
+                  "description": "Select the application/x-www-form-urlencoded body, set X-Simulator-Service to ec2, choose X-Simulator-Region and clear X-Amz-Target. Remove any fields left from another example: unknown fields are refused, never ignored. STATIC TEMPLATE, not live state. Replace __VPC_ID__ with the vpcId of an EC2-owned VPC from CreateVpc or DescribeVpcs. The CIDR must lie inside the VPC CIDR.",
+                  "value": {
+                    "Action": "CreateSubnet",
+                    "Version": "2016-11-15",
+                    "VpcId": "__VPC_ID__",
+                    "CidrBlock": "10.0.1.0/24"
+                  }
+                },
+                "EC2RunInstances": {
+                  "summary": "EC2 RunInstances (X-Simulator-Service: ec2)",
+                  "description": "Select the application/x-www-form-urlencoded body, set X-Simulator-Service to ec2, choose X-Simulator-Region and clear X-Amz-Target. Remove any fields left from another example: unknown fields are refused, never ignored. STATIC TEMPLATE, not live state. Replace __SUBNET_ID__ with the subnetId of an EC2-owned subnet. Saves one launch record: no guest, address or disk is created and it never becomes running. The image ID is only checked for its format.",
+                  "value": {
+                    "Action": "RunInstances",
+                    "Version": "2016-11-15",
+                    "ImageId": "ami-0123456789abcdef0",
+                    "InstanceType": "t3.micro",
+                    "MinCount": "1",
+                    "MaxCount": "1",
+                    "SubnetId": "__SUBNET_ID__"
+                  }
+                },
+                "EC2TerminateInstances": {
+                  "summary": "EC2 TerminateInstances (X-Simulator-Service: ec2)",
+                  "description": "Select the application/x-www-form-urlencoded body, set X-Simulator-Service to ec2, choose X-Simulator-Region and clear X-Amz-Target. Remove any fields left from another example: unknown fields are refused, never ignored. STATIC TEMPLATE, not live state. Replace __INSTANCE_ID__ with the instanceId of an EC2-owned launch record. The record is removed; CloudFormation-owned instances are refused.",
+                  "value": {
+                    "Action": "TerminateInstances",
+                    "Version": "2016-11-15",
+                    "InstanceId.1": "__INSTANCE_ID__"
+                  }
+                },
+                "EC2DeleteSubnet": {
+                  "summary": "EC2 DeleteSubnet (X-Simulator-Service: ec2)",
+                  "description": "Select the application/x-www-form-urlencoded body, set X-Simulator-Service to ec2, choose X-Simulator-Region and clear X-Amz-Target. Remove any fields left from another example: unknown fields are refused, never ignored. STATIC TEMPLATE, not live state. Replace __SUBNET_ID__ with an EC2-owned subnet that holds no launch record.",
+                  "value": {
+                    "Action": "DeleteSubnet",
+                    "Version": "2016-11-15",
+                    "SubnetId": "__SUBNET_ID__"
+                  }
+                },
+                "EC2DeleteVpc": {
+                  "summary": "EC2 DeleteVpc (X-Simulator-Service: ec2)",
+                  "description": "Select the application/x-www-form-urlencoded body, set X-Simulator-Service to ec2, choose X-Simulator-Region and clear X-Amz-Target. Remove any fields left from another example: unknown fields are refused, never ignored. STATIC TEMPLATE, not live state. Replace __VPC_ID__ with an EC2-owned VPC that has no subnet.",
+                  "value": {
+                    "Action": "DeleteVpc",
+                    "Version": "2016-11-15",
+                    "VpcId": "__VPC_ID__"
                   }
                 }
               }

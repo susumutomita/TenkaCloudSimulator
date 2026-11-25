@@ -3166,6 +3166,53 @@ REQUIRED_SOURCE_SCOPES['SARPolicyAuthorizationTarget'] = {
 }
 
 
+BASE_MODELS.add('EC2LaunchRecordOwnership')
+BASE_INVARIANTS['EC2LaunchRecordOwnership'] = {
+    'NoAdoption',
+    'FailureRollsBack',
+    'IdentityDisjoint',
+    'NativeNeverChangesStackState',
+    'RunExact',
+    'TerminateExact',
+    'TokenUnique',
+    'StackDeleteSparesNative',
+    'QuotaBound',
+    'TypeOK',
+}
+REQUIRED_MUTANTS['EC2LaunchRecordOwnership'] = {
+    'SkipRunAuthorization',
+    'SkipTerminateAuthorization',
+    'SkipSubnetAuthorization',
+    'SubnetInStackVpc',
+    'RunInStackSubnet',
+    'DeleteVpcWithSubnets',
+    'DeleteSubnetWithRecords',
+    'DeleteStackSubnet',
+    'DeleteStackVpc',
+    'TerminateRemovesStackClaim',
+    'StackSubnetInNativeVpc',
+    'StackInstanceInNativeSubnet',
+    'DuplicateTokenRecord',
+    'IgnoreRecordQuota',
+    'OverwriteExistingRecord',
+    'RunClaimedIdentity',
+    'StackClaimsRecordIdentity',
+    'TerminateEveryRecord',
+    'StackDeleteRemovesNative',
+}
+REQUIRED_SOURCE_SCOPES['EC2LaunchRecordOwnership'] = {
+    'internal/aws/ec2_instance.go',
+    'internal/aws/ec2_subnet.go',
+    'internal/aws/ec2_instance_cloudformation.go',
+    'internal/aws/cloudformation.go',
+    'internal/aws/ec2_vpc.go',
+    'internal/aws/ec2_read.go',
+    'internal/aws/ec2_network.go',
+    'internal/aws/ec2_network_cloudformation.go',
+    'internal/server/server.go',
+}
+
+
 def load_registry(root, relative='formal/models.json'):
     root = Path(root)
     registry_path = asset(root, relative)

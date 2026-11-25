@@ -191,13 +191,15 @@ discovery; stars never grant API permission or change the session.
 
 ### EC2 and VPC views
 
-The EC2 and VPC views list the local resources returned by `DescribeInstances` and
-`DescribeVpcs` in the selected region. Discovery must advertise both read
-operations and `console: true` before these views appear. EC2 instances stay
-read-only: there is no instance launch/start/stop or network edit. The recorded
-simulator runtime state is not an AWS instance-state claim or a probe of guest
-health; absent/unknown state is shown as unconfirmed. UserData, runtime plans,
-credentials and internal connection details are never displayed.
+The EC2, VPC and Subnets views list the local resources returned by
+`DescribeInstances`, `DescribeVpcs` and `DescribeSubnets` in the selected region.
+Discovery must advertise the read operations and `console: true` before these
+views appear; Subnets is a page of VPC (**VPC → Subnets**), not a separate
+service. Every list shows a **Managed by** column: EC2 or CloudFormation. The
+recorded simulator runtime state is not an AWS instance-state claim or a probe of
+guest health; absent/unknown state is shown as unconfirmed. UserData, runtime
+plans, credentials and internal connection details are never displayed. There is
+no instance start/stop or network edit.
 
 When discovery also advertises `CreateVpc` and `DeleteVpc`, the VPC view adds
 **Create VPC** and **Delete VPC**. **Create VPC** follows the AWS "VPC only" form:
@@ -207,7 +209,32 @@ a refusal such as `InvalidVpc.Range` stays on the form as an error and creates
 nothing. A created VPC is selected in the refreshed list. **Delete VPC** is enabled
 only for a VPC whose **Managed by** column says EC2, and requires typing `delete`.
 CloudFormation-managed VPCs show why deletion is disabled: delete their stack.
-Subnets, route tables, gateways and VPC attribute edits are not available.
+
+When discovery advertises `CreateSubnet` and `DeleteSubnet`, the Subnets view adds
+**Create subnet** and **Delete subnet**. **Create subnet** follows the AWS form:
+VPC ID, an optional subnet name, Availability Zone ("No preference" or the region's
+`a`/`b`/`c`), the VPC CIDR for reference and the IPv4 subnet CIDR. Only EC2-managed
+VPCs are offered, because the server refuses CloudFormation-managed ones. A refusal
+such as `InvalidSubnet.Range` or `InvalidSubnet.Conflict` stays on the form.
+**Delete subnet** requires typing `delete`; a subnet that still holds a launch
+record shows the server's `DependencyViolation` in the dialog.
+
+When discovery advertises `RunInstances` and `TerminateInstances`, the EC2 view adds
+**Launch instances** and **Terminate (delete) instance**. **Launch an instance**
+follows the AWS sections: Name and tags, Application and OS Images (an AMI ID typed
+by hand, since there is no image catalog), Instance type (`t3.micro` or
+`t3.small`), Key pair ("Proceed without a key pair" only), Network settings (an
+EC2-managed VPC and one of its subnets) and a Summary fixed at one instance. Key
+pair creation, security groups, storage, user data and instance profiles are shown
+as unavailable. The form states that it saves a **launch record**, not a running
+server: no guest, address or disk is created. The list shows such a record as
+*No guest (launch record only)* and never as pending or running. When no
+EC2-managed VPC or subnet exists yet, the form says so and links to where to create
+one. The form sends a client token, so resubmitting an unchanged form after a lost
+response returns the record that was already saved. **Terminate (delete) instance**
+is enabled only for EC2-managed records and asks for confirmation;
+CloudFormation-managed instances show why it is disabled: delete their stack.
+Route tables, gateways, security groups and attribute edits are not available.
 
 Lists are bounded by the API and must fail rather than silently truncate. A read
 failure clears previous data and is shown as an error, not an empty-success

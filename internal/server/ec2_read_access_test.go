@@ -90,8 +90,61 @@ func TestEC2ReadAccessBoundary(t *testing.T) {
 	if w := request("POST", "/", "Action=DescribeVpcs&Version=2016-11-15", operator, map[string]string{"Content-Type": "application/x-www-form-urlencoded", "X-Simulator-Service": "ec2"}); w.Code != 200 || strings.Contains(w.Body.String(), "<vpcId>") {
 		t.Fatalf("refused creates changed state: %d %s", w.Code, w.Body.String())
 	}
-	if w := create(operator, ""); w.Code != 200 || !strings.Contains(w.Body.String(), "<simulatorManagedBy>ec2</simulatorManagedBy>") {
-		t.Fatalf("operator CreateVpc failed: %d %s", w.Code, w.Body.String())
+	created := create(operator, "")
+	if created.Code != 200 || !strings.Contains(created.Body.String(), "<simulatorManagedBy>ec2</simulatorManagedBy>") {
+		t.Fatalf("operator CreateVpc failed: %d %s", created.Code, created.Body.String())
+	}
+	// Subnets and launch records pass the same boundary through the real server.
+	mutate := func(token, principal, body string) *httptest.ResponseRecorder {
+		return request("POST", "/", body+"&Version=2016-11-15", token, map[string]string{
+			"Content-Type": "application/x-www-form-urlencoded", "X-Simulator-Service": "ec2", "X-Simulator-Region": "us-east-1", "X-Simulator-Principal": principal,
+		})
+	}
+	field := func(w *httptest.ResponseRecorder, name string) string {
+		_, rest, _ := strings.Cut(w.Body.String(), "<"+name+">")
+		value, _, _ := strings.Cut(rest, "</"+name+">")
+		return value
+	}
+	subnetRequest := "Action=CreateSubnet&CidrBlock=10.9.1.0%2F24&VpcId=" + field(created, "vpcId")
+	for _, tc := range []struct {
+		name, token, principal string
+		status                 int
+	}{
+		{"unauthenticated subnet", "", "", 401},
+		{"participant admin forgery subnet", participant.AccessToken, "simulator-admin", 403},
+		{"participant missing policy subnet", participant.AccessToken, "", 403},
+	} {
+		if w := mutate(tc.token, tc.principal, subnetRequest); w.Code != tc.status {
+			t.Fatalf("%s: got %d want %d: %s", tc.name, w.Code, tc.status, w.Body.String())
+		}
+	}
+	subnet := mutate(operator, "", subnetRequest)
+	if subnet.Code != 200 || !strings.Contains(subnet.Body.String(), "<simulatorManagedBy>ec2</simulatorManagedBy>") {
+		t.Fatalf("operator CreateSubnet failed: %d %s", subnet.Code, subnet.Body.String())
+	}
+	launchRequest := "Action=RunInstances&ImageId=ami-0123456789abcdef0&InstanceType=t3.micro&MinCount=1&MaxCount=1&SubnetId=" + field(subnet, "subnetId")
+	if w := mutate("", "", launchRequest); w.Code != 401 {
+		t.Fatalf("unauthenticated RunInstances: %d %s", w.Code, w.Body.String())
+	}
+	if w := mutate(participant.AccessToken, "", launchRequest); w.Code != 403 {
+		t.Fatalf("participant RunInstances without policy: %d %s", w.Code, w.Body.String())
+	}
+	launched := mutate(operator, "", launchRequest)
+	instance := field(launched, "instanceId")
+	if launched.Code != 200 || instance == "" || field(launched, "simulatorRuntimeState") != "not_launched" || strings.Contains(launched.Body.String(), "instanceState") {
+		t.Fatalf("operator RunInstances failed or claimed a runtime state: %d %s", launched.Code, launched.Body.String())
+	}
+	if w := mutate(participant.AccessToken, "", "Action=TerminateInstances&InstanceId.1="+instance); w.Code != 403 {
+		t.Fatalf("participant TerminateInstances without policy: %d %s", w.Code, w.Body.String())
+	}
+	if w := mutate(operator, "", "Action=DescribeInstances"); w.Code != 200 || !strings.Contains(w.Body.String(), "<instanceId>"+instance+"</instanceId>") {
+		t.Fatalf("launch record is not listed: %d %s", w.Code, w.Body.String())
+	}
+	if w := mutate(operator, "", "Action=TerminateInstances&InstanceId.1="+instance); w.Code != 200 || field(w, "name") != "terminated" {
+		t.Fatalf("operator TerminateInstances failed: %d %s", w.Code, w.Body.String())
+	}
+	if w := mutate(operator, "", "Action=DeleteSubnet&SubnetId="+field(subnet, "subnetId")); w.Code != 200 || field(w, "return") != "true" {
+		t.Fatalf("operator DeleteSubnet failed: %d %s", w.Code, w.Body.String())
 	}
 	// A native temporary credential attempt must not fall back to operator access.
 	w := request("POST", "/", "Action=DescribeVpcs&Version=2016-11-15", "", map[string]string{
@@ -115,7 +168,7 @@ func TestEC2ReadAccessBoundary(t *testing.T) {
 		t.Fatal("capabilities unavailable", w.Code)
 	}
 	ec2, exists := caps.Services["ec2"]
-	if !exists || !ec2.Console || ec2.ReadOnly || ec2.SessionCredentials || !reflect.DeepEqual(ec2.Operations, []string{"DescribeInstances", "DescribeVpcs", "CreateVpc", "DeleteVpc"}) {
+	if !exists || !ec2.Console || ec2.ReadOnly || ec2.SessionCredentials || !reflect.DeepEqual(ec2.Operations, []string{"DescribeInstances", "DescribeVpcs", "DescribeSubnets", "CreateVpc", "DeleteVpc", "CreateSubnet", "DeleteSubnet", "RunInstances", "TerminateInstances"}) {
 		t.Fatalf("unexpected EC2 capabilities: %+v", ec2)
 	}
 }

@@ -34,6 +34,36 @@ def operations(spec):
 
 
 
+EC2_ACTIONS = ['DescribeInstances', 'DescribeVpcs', 'DescribeSubnets', 'CreateVpc', 'DeleteVpc',
+               'CreateSubnet', 'DeleteSubnet', 'RunInstances', 'TerminateInstances']
+EC2_FIELDS = ['CidrBlock', 'VpcId', 'AvailabilityZone', 'SubnetId', 'ImageId', 'InstanceType', 'MinCount', 'MaxCount', 'InstanceId.1']
+EC2_EXAMPLES = ['EC2DescribeInstances', 'EC2DescribeVpcs', 'EC2DescribeSubnets', 'EC2CreateVpc', 'EC2CreateSubnet',
+                'EC2RunInstances', 'EC2TerminateInstances', 'EC2DeleteSubnet', 'EC2DeleteVpc']
+
+
+def project_ec2_query(spec):
+    """Validate then remove the exact additive EC2 Query selector, actions and presets."""
+    post = spec['paths']['/']['post']
+    services = [p for p in post['parameters'] if p.get('name') == 'X-Simulator-Service']
+    assert len(services) == 1, 'EC2 service selector changed'
+    form = post['requestBody']['content']['application/x-www-form-urlencoded']
+    props = form['schema']['properties']
+    for values, added in ((services[0]['schema']['enum'], ['ec2']),
+                          (props['Action']['enum'], EC2_ACTIONS),
+                          (props['Version']['enum'], ['2016-11-15'])):
+        assert values[-len(added):] == added and all(values.count(choice) == 1 for choice in added), 'EC2 option changed'
+        del values[-len(added):]
+    assert list(props)[-len(EC2_FIELDS):] == EC2_FIELDS, 'EC2 fields missing or reordered'
+    fields = {name: props.pop(name) for name in EC2_FIELDS}
+    assert digest(fields) == '248c94eef28ea6078e13ec1c0c28dc25dfca12888d50f9e998e2fc73f641ae53', 'EC2 fields changed'
+    assert list(form['examples'])[-len(EC2_EXAMPLES):] == EC2_EXAMPLES, 'EC2 examples missing or reordered'
+    examples = {name: form['examples'].pop(name) for name in EC2_EXAMPLES}
+    assert digest(examples) == '2c3216488a34102570e1487e14064b4f2e1dd55572e13a9f10a6b25a7c936dfd', 'EC2 examples changed'
+    # A launch record has no guest: no preset may claim or request a runtime state.
+    text = json.dumps(examples, ensure_ascii=False)
+    assert 'instanceState' in text and all(word not in text for word in ('"pending"', '"running"', 'UserData', 'KeyName'))
+
+
 def project_simpledb_domain_metadata(spec):
     """Validate and remove the exact additive read-only metadata preset."""
     form = spec['paths']['/']['post']['requestBody']['content']['application/x-www-form-urlencoded']
@@ -79,6 +109,7 @@ def project_server_list(spec):
     grouped[0]['tags'].remove(tag['name'])
     server = spec['paths'].pop(SERVER_COLLECTION, None)
     assert digest(server) == '81203e3d7065de93e30b5941964ba52f94a11c12888f61b85dbe7c542dc9a521', 'Server List reference changed'
+    project_ec2_query(spec)
     project_simpledb_domain_metadata(spec)
     project_simpledb_list_domains(spec)
     assert digest(spec['paths']) == '1dce93acc032ee7c312d7a8bd9e7442368953b59403f494e5fb3ab8e20d2ede8', 'Pre-existing reference paths changed'
@@ -199,6 +230,41 @@ class SakuraReference(unittest.TestCase):
     def test_all_existing_operations_components_and_28_templates_are_exact(self):
         preserved(self.spec)
 
+    def test_ec2_projection_cannot_hide_missing_changed_or_fabricated_presets(self):
+        def post(spec):
+            return spec['paths']['/']['post']
+
+        def service(spec):
+            return next(p for p in post(spec)['parameters'] if p.get('name') == 'X-Simulator-Service')['schema']['enum']
+
+        def form(spec):
+            return post(spec)['requestBody']['content']['application/x-www-form-urlencoded']
+
+        def actions(spec):
+            return form(spec)['schema']['properties']['Action']['enum']
+
+        for label, change in (
+            ('missing selector', lambda spec: service(spec).remove('ec2')),
+            ('duplicate selector', lambda spec: service(spec).append('ec2')),
+            ('missing action', lambda spec: actions(spec).remove('RunInstances')),
+            ('reordered actions', lambda spec: actions(spec).append(actions(spec).pop(-2))),
+            ('unreviewed action', lambda spec: actions(spec).append('StartInstances')),
+            ('missing query version', lambda spec: form(spec)['schema']['properties']['Version']['enum'].remove('2016-11-15')),
+            ('missing field', lambda spec: form(spec)['schema']['properties'].pop('SubnetId')),
+            ('unreviewed field', lambda spec: form(spec)['schema']['properties'].update(UserData={'type': 'string'})),
+            ('second instance allowed', lambda spec: form(spec)['schema']['properties']['MaxCount']['enum'].append('2')),
+            ('missing example', lambda spec: form(spec)['examples'].pop('EC2TerminateInstances')),
+            ('unreviewed example', lambda spec: form(spec)['examples'].update(EC2StartInstances={'value': {'Action': 'StartInstances'}})),
+            ('two instances', lambda spec: form(spec)['examples']['EC2RunInstances']['value'].update(MaxCount='2')),
+            ('user data', lambda spec: form(spec)['examples']['EC2RunInstances']['value'].update(UserData='IyEvYmluL3No')),
+            ('claimed running guest', lambda spec: form(spec)['examples']['EC2RunInstances'].update(description='Starts a running server.')),
+            ('wrong service note', lambda spec: form(spec)['examples']['EC2DescribeInstances'].update(summary='DescribeInstances')),
+        ):
+            broken = copy.deepcopy(self.spec)
+            change(broken)
+            with self.subTest(change=label), self.assertRaises(AssertionError):
+                preserved(broken)
+
     def test_simpledb_projection_cannot_hide_missing_changed_or_inherited_contracts(self):
         def post(spec):
             return spec['paths']['/']['post']
@@ -215,12 +281,13 @@ class SakuraReference(unittest.TestCase):
         for label, change in (
             ('missing selector', lambda spec: service(spec)['schema']['enum'].remove('sdb')),
             ('duplicate selector', lambda spec: service(spec)['schema']['enum'].append('sdb')),
-            ('selector promoted to default', lambda spec: service(spec)['schema']['enum'].insert(
-                0, service(spec)['schema']['enum'].pop())),
+            ('selector promoted to default', lambda spec: (service(spec)['schema']['enum'].remove('sdb'),
+                service(spec)['schema']['enum'].insert(0, 'sdb'))),
             ('missing action', lambda spec: form(spec)['schema']['properties']['Action']['enum'].remove('ListDomains')),
-            ('wrong query version', lambda spec: form(spec)['schema']['properties']['Version']['enum'].__setitem__(-1, '2020-01-01')),
+            ('wrong query version', lambda spec: form(spec)['schema']['properties']['Version']['enum'].__setitem__(
+                form(spec)['schema']['properties']['Version']['enum'].index('2009-04-15'), '2020-01-01')),
             ('missing form example', lambda spec: form(spec)['examples'].pop('ListDomains')),
-            ('missing metadata action', lambda spec: form(spec)['schema']['properties']['Action']['enum'].pop()),
+            ('missing metadata action', lambda spec: form(spec)['schema']['properties']['Action']['enum'].remove('DomainMetadata')),
             ('missing metadata field', lambda spec: form(spec)['schema']['properties'].pop('DomainName')),
             ('wrong metadata domain field shape', lambda spec: form(spec)['schema']['properties']['DomainName'].update(type='integer')),
             ('missing metadata example', lambda spec: form(spec)['examples'].pop('DomainMetadata')),

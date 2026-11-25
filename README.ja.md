@@ -76,7 +76,7 @@ Python 3.12のみ、ゲストメモリ128 MiB、タイムアウト1〜30秒で�
   [SQS](docs/sqs.md)、[SNS](docs/sns.md)、[CloudWatch Logs](docs/cloudwatch-logs.md)。
 - **認可・シークレット：** [IAM](docs/iam.md)、[native SDK / STS](docs/sts-native.md)、
   [Secrets Manager](docs/secrets-manager.md)、[KMS](docs/kms.md)。
-- **ネットワーク：** [EC2/VPC の一覧と VPC の作成・削除](docs/ec2-read-discovery.md)、
+- **ネットワークとコンピューティング：** [EC2/VPC の一覧、VPC・サブネットの作成・削除、ゲストを起動しないインスタンスの起動記録](docs/ec2-read-discovery.md)、
   [Elastic Load Balancing](docs/elb.md)（Lambda ターゲット）、
   [Route 53](docs/route53.md)。
 - **スケーリング：** [ローカルDynamoDBテーブル向けAuto Scaling plans](docs/autoscaling-plans.md)。

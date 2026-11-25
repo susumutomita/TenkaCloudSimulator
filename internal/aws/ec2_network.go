@@ -35,6 +35,10 @@ func NewEC2NetworkStore(db *sql.DB) (*EC2NetworkStore, error) {
 	if e != nil {
 		return nil, e
 	}
+	// Native launch records reference their EC2-owned subnet (ec2_instance.go).
+	if _, e = db.Exec(ec2NativeInstanceSchema); e != nil {
+		return nil, e
+	}
 	return &EC2NetworkStore{db}, nil
 }
 func networkRead(ctx context.Context, tx *sql.Tx, region, id string) (EC2NetworkResource, error) {
