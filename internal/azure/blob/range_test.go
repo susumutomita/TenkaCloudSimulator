@@ -17,6 +17,8 @@ func TestAzureBlobSingleRangeDownloadMatchesDocumentedSubset(t *testing.T) {
 	tag := put(t, s, "box", "data", "0123456789", nil, 201).Header().Get("ETag")
 	put(t, s, "box", "empty", "", nil, 201)
 	before := persistedRows(t, s)
+	whole := md5.Sum([]byte("0123456789"))
+	wantWholeMD5 := base64.StdEncoding.EncodeToString(whole[:])
 	cases := []struct {
 		name               string
 		headers            map[string]string
@@ -46,6 +48,9 @@ func TestAzureBlobSingleRangeDownloadMatchesDocumentedSubset(t *testing.T) {
 				if w.Body.String() != c.body || w.Header().Get("Content-Range") != c.contentRange || w.Header().Get("ETag") != tag || w.Header().Get("Accept-Ranges") != "bytes" {
 					t.Fatal("range response mismatch", w.Header(), w.Body.String())
 				}
+				if w.Header().Get("x-ms-blob-content-md5") != wantWholeMD5 {
+					t.Fatal("partial response did not advertise the whole-object checksum separately")
+				}
 				wantMD5 := ""
 				if c.headers["x-ms-range-get-content-md5"] == "true" {
 					sum := md5.Sum([]byte(c.body))
@@ -54,7 +59,7 @@ func TestAzureBlobSingleRangeDownloadMatchesDocumentedSubset(t *testing.T) {
 				if w.Header().Get("Content-MD5") != wantMD5 {
 					t.Fatal("range advertised whole-blob or incorrect MD5")
 				}
-			} else if w.Header().Get("Content-Range") != "" || w.Header().Get("ETag") != "" || w.Header().Get("Content-MD5") != "" {
+			} else if w.Header().Get("Content-Range") != "" || w.Header().Get("ETag") != "" || w.Header().Get("Content-MD5") != "" || w.Header().Get("x-ms-blob-content-md5") != "" {
 				t.Fatal("range failure published object headers", w.Header())
 			}
 		})
@@ -62,12 +67,11 @@ func TestAzureBlobSingleRangeDownloadMatchesDocumentedSubset(t *testing.T) {
 	request(t, s, "GET", "/accountone/box/empty", nil, map[string]string{"Range": "bytes=0-"}, learner(), 416)
 	request(t, s, "GET", "/accountone/box/data", nil, map[string]string{"Range": "bytes=2-5", "If-Match": `"wrong"`}, learner(), 412)
 	w := request(t, s, "GET", "/accountone/box/data", nil, map[string]string{"Range": "bytes=2-5", "If-None-Match": tag}, learner(), 304)
-	if w.Body.Len() != 0 {
-		t.Fatal("conditional304 returned range body")
+	if w.Body.Len() != 0 || w.Header().Get("x-ms-blob-content-md5") != "" {
+		t.Fatal("conditional304 returned range payload metadata")
 	}
 	full := request(t, s, "GET", "/accountone/box/data", nil, nil, learner(), 200)
-	sum := md5.Sum([]byte("0123456789"))
-	if full.Header().Get("Content-MD5") != base64.StdEncoding.EncodeToString(sum[:]) {
+	if full.Header().Get("Content-MD5") != wantWholeMD5 || full.Header().Get("x-ms-blob-content-md5") != "" {
 		t.Fatal("whole object MD5 lost")
 	}
 	for _, method := range []string{"HEAD", "PUT", "DELETE"} {
@@ -107,7 +111,7 @@ func TestAzureBlobRangeMD5BoundAndAuthorizationPrecedence(t *testing.T) {
 	for _, path := range []string{"large", "missing"} {
 		for _, headers := range []map[string]string{{"Range": "bytes=99999999-"}, {"Range": "bytes=-1"}, {"x-ms-range-get-content-md5": "true"}, {"Range": "bytes=0-1", "If-None-Match": tag}} {
 			w := request(t, s, "GET", "/accountone/box/"+path, nil, headers, learner(), 403)
-			if w.Header().Get("ETag") != "" || w.Header().Get("Content-Range") != "" || w.Header().Get("Content-MD5") != "" {
+			if w.Header().Get("ETag") != "" || w.Header().Get("Content-Range") != "" || w.Header().Get("Content-MD5") != "" || w.Header().Get("x-ms-blob-content-md5") != "" {
 				t.Fatal("denied range disclosed object identity/size")
 			}
 		}

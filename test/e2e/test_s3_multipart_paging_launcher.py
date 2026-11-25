@@ -25,12 +25,14 @@ def valid_context():
 
 def entrypoints(workflow, aggregate, fixture):
     console = workflow.split('  console-acceptance:\n', 1)[1].split('  checks:\n', 1)[0]
-    assert console.count('/tmp/simulator-tests/bin/python test/e2e/run_s3_multipart_paging.py') == 1
-    assert '> reports/s3-multipart-paging.json' in console
-    assert '            reports/s3-multipart-paging.json\n' in console
+    offline = '/tmp/simulator-tests/bin/python test/e2e/test_s3_multipart_paging_launcher.py'
+    assert console.count(offline) == 1
+    assert 'test/e2e/run_s3_multipart_paging.py' not in console
+    assert 'test/e2e/s3_multipart_paging.py' not in console
+    assert 'reports/s3-multipart-paging.json' not in console
     assert 'continue-on-error:' not in console and 'sudo' not in console and 'sysctl' not in console
-    step = console.split('      - name: Check authenticated S3 multipart pagination in an isolated browser\n', 1)[1].split('      - name:', 1)[0]
-    assert 'if:' not in step
+    step = console.split('      - name: Check S3 multipart launcher refusals offline\n', 1)[1].split('      - name:', 1)[0]
+    assert 'if:' not in step and 'run: ' + offline in step
     assert 'needs: [console-acceptance, checks, go-test, platform-audit]' in workflow
     tree = ast.parse(aggregate)
     conformance = next(node for node in tree.body if isinstance(node, ast.ClassDef) and node.name == 'Conformance')
@@ -38,7 +40,7 @@ def entrypoints(workflow, aggregate, fixture):
                   node.name == 'test_s3_multipart_paging_authenticated_browser')
     assert not method.decorator_list
     constants = [node.value for node in ast.walk(method) if isinstance(node, ast.Constant)]
-    assert 'run_s3_multipart_paging.py' in constants and '--binary' in constants
+    assert {'test_s3_multipart_paging_launcher.py', 'run_s3_multipart_paging.py', '--binary'} <= set(constants)
     calls = [node for node in ast.walk(method) if isinstance(node, ast.Call) and
              isinstance(node.func, ast.Attribute) and node.func.attr == 'run' and
              any(isinstance(child, ast.Constant) and child.value == 'run_s3_multipart_paging.py'
@@ -129,8 +131,11 @@ class LauncherTests(unittest.TestCase):
             digest = hashlib.sha256(binary.read_bytes()).hexdigest()
             args = argparse.Namespace(uid=1001, parent_net=101, parent_user=201, binary=str(binary),
                                       binary_sha256=digest, chromium='/tmp/pinned-chromium')
-            with patch.object(launcher, 'validate_inside_context'), \
-                    patch.object(launcher, 'namespace_inode', return_value=999), \
+            with patch.object(launcher.os, 'getuid', return_value=1001), \
+                    patch.object(launcher.os, 'geteuid', return_value=1001), \
+                    patch.object(launcher, 'namespace_inode', side_effect={'net': 102, 'user': 202}.__getitem__), \
+                    patch.object(launcher.Path, 'read_text', return_value=valid_context()['status']), \
+                    patch.object(launcher.socket, 'if_nameindex', return_value=[(1, 'lo')]), \
                     patch.object(launcher, 'loopback_up', return_value=True), \
                     patch.object(launcher, 'pinned_chromium', return_value=Path(args.chromium)), \
                     patch.object(launcher.os, 'execv') as execute, patch.dict(launcher.os.environ):
@@ -150,16 +155,23 @@ class LauncherTests(unittest.TestCase):
                         launcher.inside(args)
                 execute.assert_not_called()
 
-    def test_live_ci_aggregate_and_fixture_entrypoint_guards_are_required(self):
+    def test_console_ci_offline_and_opt_in_aggregate_keep_fixture_guards(self):
         workflow = (ROOT / '.github/workflows/ci.yml').read_text()
         aggregate = (HERE / 'check.py').read_text()
         fixture = (HERE / 's3_multipart_paging.py').read_text()
         entrypoints(workflow, aggregate, fixture)
         changes = [
-            (workflow.replace('python test/e2e/run_s3_multipart_paging.py', 'python test/e2e/another.py'), aggregate, fixture),
+            (workflow.replace('python test/e2e/test_s3_multipart_paging_launcher.py',
+                              'python test/e2e/another.py'), aggregate, fixture),
+            (workflow.replace('      - name: Check native discovery',
+                              '      - run: python test/e2e/run_s3_multipart_paging.py\n      - name: Check native discovery'),
+             aggregate, fixture),
+            (workflow.replace('      - name: Check native discovery',
+                              '      - run: python test/e2e/s3_multipart_paging.py\n      - name: Check native discovery'),
+             aggregate, fixture),
             (workflow.replace('needs: [console-acceptance, checks, go-test, platform-audit]', 'needs: [checks]'), aggregate, fixture),
-            (workflow.replace('      - name: Check authenticated S3 multipart pagination in an isolated browser\n',
-                              '      - name: Check authenticated S3 multipart pagination in an isolated browser\n        if: false\n'), aggregate, fixture),
+            (workflow.replace('      - name: Check S3 multipart launcher refusals offline\n',
+                              '      - name: Check S3 multipart launcher refusals offline\n        if: false\n'), aggregate, fixture),
             (workflow, aggregate.replace("'run_s3_multipart_paging.py'", "'another.py'"), fixture),
             (workflow, aggregate.replace(' def test_s3_multipart_paging_authenticated_browser(self):',
                                          ' @unittest.skip("fixture")\n def test_s3_multipart_paging_authenticated_browser(self):'), fixture),

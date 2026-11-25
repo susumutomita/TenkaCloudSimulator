@@ -191,12 +191,14 @@ Cloudscapeを使う独立Simulatorの画面であり、認証済み実AWSコン�
 
 `test/e2e/run_s3_multipart_paging.py` は、ビルド済みbinaryと既存の
 `scripts/requirements-test.txt` で固定されたPlaywright/Chromiumを使う開発用入口である。
-CIの既存console jobと `make e2e` のConformanceは同じlauncherを呼ぶ。
+通常のPR CIのconsole jobでは、このlauncherのオフライン拒否テストだけを実行する。
+実ブラウザー検証は `make e2e` を明示的に実行するか、隔離条件を満たすLinuxで
+launcherに `--binary` とビルド済みbinaryのパスを渡して単独実行する。
 launcherはbinaryのSHA-256とPlaywrightのChromiumパスを取得し、現在の非root UIDを
 維持した新しいuser/network namespaceを作る。private namespace内のloopbackだけを上げ、
 capabilitiesを落としてからUID・namespace identity・capabilities・interfaceを再確認し、
 固定の `s3_multipart_paging.py` を実行する。fixture自身のloopback-only検査と
-Chromium sandboxは維持する。既存CI artifactに `reports/s3-multipart-paging.json` を残す。
+Chromium sandboxは維持する。`make e2e` のConformanceは `reports/s3-multipart-paging.json` に結果を書く。
 
 fixtureの操作範囲は、使い捨ての認証済みローカルprocess/SQLite上でbucketとuploadを作り、
 SDKで1001個の小さいpartを保存し、実画面から2ページを読み出すこと、最後のpartの変更後に
@@ -206,7 +208,7 @@ SDKで1001個の小さいpartを保存し、実画面から2ページを読み�
 Scalar SendやTerraform、正常なmultipart完成、S3全体の互換性をこのfixtureで検証したとは扱わない。
 
 この入口にはunprivileged namespace作成と、sandboxを保持したChromium実行を許すLinuxが必要である。
-namespace作成、capability drop、Chromium sandboxが拒否された場合は必須checkを失敗させる。
+実行時にnamespace作成、capability drop、Chromium sandboxが拒否された場合、その検証は失敗となる。
 skip、sudo、sysctl/AppArmor変更、外部networkや `--no-sandbox` へのfallbackはない。
 offlineのlauncher拒否テストはこれらの検査と入口の配線を確かめるが、namespaceや実ブラウザーの
 実機成功の証拠ではない。結果はそのcandidateの実行ログとCIで別途確認する。

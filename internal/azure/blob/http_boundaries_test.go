@@ -103,7 +103,7 @@ func TestAzureBlobNativeValidationRefusesWithoutChangingEitherContainer(t *testi
 		{"client-id", "GET", "/accountone/box/saved", "", http.Header{"X-Ms-Client-Request-Id": {strings.Repeat("x", 1025)}}, "InvalidHeaderValue", 400},
 		{"client-control", "GET", "/accountone/box/saved", "", http.Header{"X-Ms-Client-Request-Id": {"bad\tvalue"}}, "InvalidHeaderValue", 400},
 		{"encoding", "GET", "/accountone/box/saved", "", http.Header{"Content-Encoding": {"gzip"}}, "UnsupportedHeader", 400},
-		{"date", "GET", "/accountone/box/saved", "", http.Header{"If-Modified-Since": {"Wed, 04 Nov 2026 00:00:00 GMT"}}, "UnsupportedHeader", 400},
+		{"unmodified-since", "GET", "/accountone/box/saved", "", http.Header{"If-Unmodified-Since": {"Wed, 04 Nov 2026 00:00:00 GMT"}}, "UnsupportedHeader", 400},
 		{"listing-only-query", "GET", "/accountone/box/saved?prefix=x", "", nil, "UnsupportedQueryParameter", 400},
 		{"container-condition", "DELETE", "/accountone/box?restype=container", "", http.Header{"If-Match": {"*"}}, "UnsupportedHeader", 400},
 		{"upload-header-on-read", "GET", "/accountone/box/saved", "", http.Header{"X-Ms-Blob-Type": {"BlockBlob"}}, "UnsupportedHeader", 400},
