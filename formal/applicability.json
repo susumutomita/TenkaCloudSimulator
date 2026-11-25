@@ -1,158 +1,184 @@
 {
   "version": 1,
-  "base_sha": "957b2351b43d3e249e76370e72e5924b31138a64",
+  "base_sha": "61cbd3d207be3009bb7e36f542209e9dd150c65c",
   "changes": [
     {
       "path": "README.md",
-      "sha256": "7f73820470e28497b0e85ed7b1398968b34a59fe4ad83252558ee07d7f7b008a",
+      "sha256": "ff2be026875adf6cce87388f7e745709d62340c40fe0e6631a36245b95cdc718",
       "disposition": "documentation",
-      "reason": "Document the bounded read contract, ownership boundary and unsupported mutations or packet behavior.",
+      "reason": "Document bounded native Select, ordering, cursor contract and unsupported surfaces; no implemented Console/Scalar or unbounded SQL is implied.",
       "models": []
     },
     {
       "path": "docs/design/0001-go-standalone.md",
-      "sha256": "f4a1f6c1f891048887f563110cc00b6084905e8df4fc3e02db962d234dba6317",
+      "sha256": "043fe298d1dc3dde24583feda144282a2e1a18dc5de90504bccd008412f5962a",
       "disposition": "documentation",
-      "reason": "Document the bounded read contract, ownership boundary and unsupported mutations or packet behavior.",
+      "reason": "Document bounded native Select, ordering, cursor contract and unsupported surfaces; no implemented Console/Scalar or unbounded SQL is implied.",
       "models": []
     },
     {
-      "path": "docs/ec2-read-discovery.md",
-      "sha256": "f5b3bffe4ecb0c012bdae8b4d8a549e9520a0b6043db0e8a7b7d7cc18ad9cf86",
+      "path": "docs/simpledb-select.md",
+      "sha256": "8369a46ea6e9d138a3249c737817a64f1a8c907c6ba8216a9dc79679495749ec",
       "disposition": "documentation",
-      "reason": "Document the bounded read contract, ownership boundary and unsupported mutations or packet behavior.",
+      "reason": "Document bounded native Select, ordering, cursor contract and unsupported surfaces; no implemented Console/Scalar or unbounded SQL is implied.",
       "models": []
     },
     {
-      "path": "formal/EC2RouteTableRead.cfg",
-      "sha256": "ed7350eb2a7ea4c20a6baf51437f8235e5fc931228348fb61c60ae66363c98fd",
+      "path": "formal/SimpleDBSelectPage.cfg",
+      "sha256": "8daf3716ba4346da7673424120a2e97242947d40584f1fe359deda55bad28a43",
       "disposition": "modeled",
-      "reason": "Bind the new read-only route-table projection and its selected EC2 dispatch to the finite read witnesses.",
+      "reason": "Independently compare the finite stepwise scan with the maximum admissible prefix of the current checkpoint, and exercise denied and misbound resumption.",
       "models": [
         {
-          "id": "EC2RouteTableRead",
+          "id": "SimpleDBSelectPage",
           "properties": [
-            "Admission",
-            "BoundSnapshot",
-            "SameVPC",
-            "TypedDefault",
-            "ExplicitOnly",
-            "CurrentDefault"
+            "AdmissionBeforeRead",
+            "CursorScopeBound",
+            "ExactCurrentPage",
+            "ExactConsumedCursor"
           ],
-          "limits": "One table/association/default per observation; two VPCs, one invalid admission or identity witness at a time. Not Go refinement, transaction or HTTP/XML proof, policy evaluation, pagination, concurrency, creation, or packet forwarding. Undiscoverable tables that lose every row and typed claim are not modeled."
+          "limits": "Three symbolic item names and a single committed change between two pages; a query identity represents exact expression bytes (including spelling, domain and order). The scan overapproximates matches in either order; checks scan and result count, not XML/raw byte budgets, timeouts, parser completeness, ACLs, cryptography, byte collation, physical SQL transactions, CLI, Console or Scalar. Not a Go refinement."
         }
       ]
     },
     {
-      "path": "formal/EC2RouteTableRead.tla",
-      "sha256": "45ed5c6873767bdd5df2f3a6cdd1ecf42b5ed0b318481a15b8cdcb4c2db1a2aa",
+      "path": "formal/SimpleDBSelectPage.tla",
+      "sha256": "15a94454e41be32e1b055d78c96e215e5545fa0ed19a476cd807586ec0079b44",
       "disposition": "modeled",
-      "reason": "Bind the new read-only route-table projection and its selected EC2 dispatch to the finite read witnesses.",
+      "reason": "Independently compare the finite stepwise scan with the maximum admissible prefix of the current checkpoint, and exercise denied and misbound resumption.",
       "models": [
         {
-          "id": "EC2RouteTableRead",
+          "id": "SimpleDBSelectPage",
           "properties": [
-            "Admission",
-            "BoundSnapshot",
-            "SameVPC",
-            "TypedDefault",
-            "ExplicitOnly",
-            "CurrentDefault"
+            "AdmissionBeforeRead",
+            "CursorScopeBound",
+            "ExactCurrentPage",
+            "ExactConsumedCursor"
           ],
-          "limits": "One table/association/default per observation; two VPCs, one invalid admission or identity witness at a time. Not Go refinement, transaction or HTTP/XML proof, policy evaluation, pagination, concurrency, creation, or packet forwarding. Undiscoverable tables that lose every row and typed claim are not modeled."
+          "limits": "Three symbolic item names and a single committed change between two pages; a query identity represents exact expression bytes (including spelling, domain and order). The scan overapproximates matches in either order; checks scan and result count, not XML/raw byte budgets, timeouts, parser completeness, ACLs, cryptography, byte collation, physical SQL transactions, CLI, Console or Scalar. Not a Go refinement."
         }
       ]
     },
     {
       "path": "formal/models.json",
-      "sha256": "2880609c7f0cb91cbbf8cf02f2361ece10932841e12d5d54c6eadc020306b213",
+      "sha256": "f1c1e86d7be9d21410995fe909d471871e0db468b2b75e9802fa959e2acd332f",
       "disposition": "formal-infrastructure",
-      "reason": "Register and independently require the exact route-table model, source scopes, properties and sensitivity controls.",
+      "reason": "Preserve existing models; register and independently pin the new Select model, invariant, mutation and declared source-scope inventory.",
       "models": []
     },
     {
-      "path": "internal/aws/ec2_read.go",
-      "sha256": "7421764fff9ce850f2f3419ff11a276b5e7b8205700981479731a0ba322a673b",
+      "path": "internal/aws/simpledb/http.go",
+      "sha256": "b79c2236522c1f07a05271100aa3c2bef6f2c418e2c6935614e8892820a59b85",
       "disposition": "modeled",
-      "reason": "Bind the new read-only route-table projection and its selected EC2 dispatch to the finite read witnesses.",
+      "reason": "Parse Select before deriving the domain and check domain IAM on every page before reading the store. The model abstracts parsing and authorization decisions.",
       "models": [
         {
-          "id": "EC2RouteTableRead",
+          "id": "SimpleDBSelectPage",
           "properties": [
-            "Admission",
-            "BoundSnapshot"
+            "AdmissionBeforeRead",
+            "CursorScopeBound"
           ],
-          "limits": "One table/association/default per observation; two VPCs, one invalid admission or identity witness at a time. Not Go refinement, transaction or HTTP/XML proof, policy evaluation, pagination, concurrency, creation, or packet forwarding. Undiscoverable tables that lose every row and typed claim are not modeled."
+          "limits": "Three symbolic item names and a single committed change between two pages; a query identity represents exact expression bytes (including spelling, domain and order). The scan overapproximates matches in either order; checks scan and result count, not XML/raw byte budgets, timeouts, parser completeness, ACLs, cryptography, byte collation, physical SQL transactions, CLI, Console or Scalar. Not a Go refinement."
         }
       ]
     },
     {
-      "path": "internal/aws/ec2_route_tables_consistency_test.go",
-      "sha256": "cc9c6b577b135bc3f7f1a325037566a69980e8409e9aa46a4ace87d1af548bfb",
-      "disposition": "test-support",
-      "reason": "Exercise the real EC2 handler, canonical storage, denial, isolation, restart, route disable/enable and stack removal.",
-      "models": []
-    },
-    {
-      "path": "internal/aws/ec2_route_tables_read.go",
-      "sha256": "f49e96028217f4a75b0f803ce3ea64ef154cc5656db342f51c77998de8415f7e",
+      "path": "internal/aws/simpledb/pagination.go",
+      "sha256": "4a0c0a4e3db92c1307eaede49f484c5f02ce45f871f3b5100d7593b936f4d08e",
       "disposition": "modeled",
-      "reason": "Bind the new read-only route-table projection and its selected EC2 dispatch to the finite read witnesses.",
+      "reason": "Use authenticated cursor envelopes with a dedicated Select token purpose and current store key; the model uses validity and scope, not HMAC proof.",
       "models": [
         {
-          "id": "EC2RouteTableRead",
+          "id": "SimpleDBSelectPage",
           "properties": [
-            "BoundSnapshot",
-            "SameVPC",
-            "TypedDefault",
-            "ExplicitOnly",
-            "CurrentDefault"
+            "CursorScopeBound"
           ],
-          "limits": "One table/association/default per observation; two VPCs, one invalid admission or identity witness at a time. Not Go refinement, transaction or HTTP/XML proof, policy evaluation, pagination, concurrency, creation, or packet forwarding. Undiscoverable tables that lose every row and typed claim are not modeled."
+          "limits": "Three symbolic item names and a single committed change between two pages; a query identity represents exact expression bytes (including spelling, domain and order). The scan overapproximates matches in either order; checks scan and result count, not XML/raw byte budgets, timeouts, parser completeness, ACLs, cryptography, byte collation, physical SQL transactions, CLI, Console or Scalar. Not a Go refinement."
         }
       ]
     },
     {
-      "path": "internal/aws/ec2_route_tables_read_test.go",
-      "sha256": "882b0c14682a2716d4cff3468e6bf47ffa2ccb020cd3005600889b64ad3f5e2f",
+      "path": "internal/aws/simpledb/select.go",
+      "sha256": "a0e7a488940c5ff9d4ba720a90023b2a6ead1de05bd4b946073d51e7f0050ac7",
+      "disposition": "modeled",
+      "reason": "Bind exact query/scope and scan a current per-page snapshot in key order, resuming after the last consumed candidate even on an empty page.",
+      "models": [
+        {
+          "id": "SimpleDBSelectPage",
+          "properties": [
+            "CursorScopeBound",
+            "ExactCurrentPage",
+            "ExactConsumedCursor"
+          ],
+          "limits": "Three symbolic item names and a single committed change between two pages; a query identity represents exact expression bytes (including spelling, domain and order). The scan overapproximates matches in either order; checks scan and result count, not XML/raw byte budgets, timeouts, parser completeness, ACLs, cryptography, byte collation, physical SQL transactions, CLI, Console or Scalar. Not a Go refinement."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/simpledb/select_contract_test.go",
+      "sha256": "392355e67647b7b13ce5d2e210cca6e8ff4055586f30b9649f702fb13406de1b",
       "disposition": "test-support",
-      "reason": "Exercise the real EC2 handler, canonical storage, denial, isolation, restart, route disable/enable and stack removal.",
+      "reason": "Exercise native Select lexical and byte bounds, descending continuations, five-second query timeout and all-or-error reads on malformed SQLite data.",
       "models": []
     },
     {
-      "path": "internal/aws/ec2_vpc.go",
-      "sha256": "2735d84d7b9d9865484b1baa3fcac6dade6dd13a6e073e7a0d7edc98e9dc207d",
+      "path": "internal/aws/simpledb/select_grammar.go",
+      "sha256": "50f37dc4c01bfb01056acefeb5dab02eaddc990806984269a413f2d6f4cfef7e",
       "disposition": "modeled",
-      "reason": "Bind the new read-only route-table projection and its selected EC2 dispatch to the finite read witnesses.",
+      "reason": "Only the accepted grammar can dispatch. Syntax, direction, limit and exact query identity are abstract inputs; the language parser itself is not proven.",
       "models": [
         {
-          "id": "EC2RouteTableRead",
+          "id": "SimpleDBSelectPage",
           "properties": [
-            "Admission"
+            "AdmissionBeforeRead",
+            "ExactCurrentPage"
           ],
-          "limits": "One table/association/default per observation; two VPCs, one invalid admission or identity witness at a time. Not Go refinement, transaction or HTTP/XML proof, policy evaluation, pagination, concurrency, creation, or packet forwarding. Undiscoverable tables that lose every row and typed claim are not modeled."
+          "limits": "Three symbolic item names and a single committed change between two pages; a query identity represents exact expression bytes (including spelling, domain and order). The scan overapproximates matches in either order; checks scan and result count, not XML/raw byte budgets, timeouts, parser completeness, ACLs, cryptography, byte collation, physical SQL transactions, CLI, Console or Scalar. Not a Go refinement."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/simpledb/select_test.go",
+      "sha256": "ca7174c54c16cf6d47c0645e284b3984d670a64f1ff41cf363aa12ac069d69ca",
+      "disposition": "test-support",
+      "reason": "Exercise bounded query parsing, real SQLite handler reads, per-page policy, errors, keyset paging, cross-scope tokens, restart, scan limits and XML encodings.",
+      "models": []
+    },
+    {
+      "path": "internal/server/server.go",
+      "sha256": "21ef4787a0d546dd8fd3420a8f6ab01acaf8e785a36cd95d380fa16fb79c5f53",
+      "disposition": "modeled",
+      "reason": "The only modified discovery metadata advertises the native Select operation whose acceptance and paging contract are modeled; the model does not verify UI, JSON discovery contents or server wiring.",
+      "models": [
+        {
+          "id": "SimpleDBSelectPage",
+          "properties": [
+            "AdmissionBeforeRead",
+            "ExactCurrentPage"
+          ],
+          "limits": "Three symbolic item names and a single committed change between two pages; a query identity represents exact expression bytes (including spelling, domain and order). The scan overapproximates matches in either order; checks scan and result count, not XML/raw byte budgets, timeouts, parser completeness, ACLs, cryptography, byte collation, physical SQL transactions, CLI, Console or Scalar. Not a Go refinement."
         }
       ]
     },
     {
       "path": "scripts/formal_model_gate.py",
-      "sha256": "f95628fa20751913db89eee9df9f40f49d336c870b8aa8fdb6b933d7e5302e5f",
+      "sha256": "ce9e800adfdbdf43632efdab50bc8a70d8388bd969616238b3640380eb23a8c0",
       "disposition": "formal-infrastructure",
-      "reason": "Register and independently require the exact route-table model, source scopes, properties and sensitivity controls.",
+      "reason": "Preserve existing models; register and independently pin the new Select model, invariant, mutation and declared source-scope inventory.",
       "models": []
     },
     {
       "path": "scripts/test-formal-gate.py",
-      "sha256": "9f7b1b8ab42add0bf95a3797b3191725add99f5121764104be6fdf5a25f6d42c",
+      "sha256": "fd06056d2bab48995a25ae966abaa4062eee583bd07756bda1081267c8643f61",
       "disposition": "formal-infrastructure",
-      "reason": "Register and independently require the exact route-table model, source scopes, properties and sensitivity controls.",
+      "reason": "Preserve existing models; register and independently pin the new Select model, invariant, mutation and declared source-scope inventory.",
       "models": []
     },
     {
-      "path": "test/e2e/ec2_network_contract.py",
-      "sha256": "111b236206585071894b17aa104442afaa9499659d85909b1f48838dc972656a",
+      "path": "scripts/test-simpledb-select-sdk.py",
+      "sha256": "a4d839f9ef6fa4354cfa1b4a64e1b976f30b61e6bcf65ff8f0e1eaa03e6099a8",
       "disposition": "test-support",
-      "reason": "Verify the bounded boto3 route-table projection for explicit and empty configurations while preserving native mutation refusals and unchanged snapshots.",
+      "reason": "Optional pinned SDK client exercises the supported native operation across two local processes and checks cleanup. A checked-in client is not evidence of running the full simulator.",
       "models": []
     }
   ]

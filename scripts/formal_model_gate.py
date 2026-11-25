@@ -3196,6 +3196,28 @@ REQUIRED_SOURCE_SCOPES['SimpleDBQueryAdmission'] = {
 }
 
 
+BASE_MODELS.add('SimpleDBSelectPage')
+BASE_INVARIANTS['SimpleDBSelectPage'] = {
+    'TypeOK', 'AdmissionBeforeRead',
+    'CursorScopeBound', 'ExactCurrentPage',
+    'ExactConsumedCursor',
+}
+REQUIRED_MUTANTS['SimpleDBSelectPage'] = {
+    'SkipSyntax', 'SkipPageAuthorization',
+    'InspectDeniedRows', 'InspectInvalidCursorRows',
+    'AcceptForeignAccount', 'AcceptForeignRegion',
+    'IgnoreExactExpression', 'IgnoreConsistency',
+    'AcceptRetiredStore', 'AdmitSiblingOperation',
+    'AdmitTamperedCursor', 'ReplayIssuanceImage',
+    'RepeatCursorItem', 'ResumeAfterLastMatch',
+    'SkipFirstDeferred', 'DropMatches',
+}
+REQUIRED_SOURCE_SCOPES['SimpleDBSelectPage'] = {
+    'internal/aws/simpledb/http.go', 'internal/aws/simpledb/pagination.go',
+    'internal/aws/simpledb/select.go', 'internal/aws/simpledb/select_grammar.go',
+    'internal/server/server.go',
+}
+
 BASE_MODELS.add('SimpleDBAttributeDelete')
 BASE_INVARIANTS['SimpleDBAttributeDelete'] = {
     'NoPhantomItem', 'NoUnacknowledgedChange', 'OnlyEligibleMayAck', 'ExactSurvivors',
