@@ -20,6 +20,7 @@ import {useLocale} from './i18n.jsx';
 import VPCSubnetFields from './ec2-vpc-subnet-fields.jsx';
 import {createVpcWithSubnet,vpcSubnetInputError} from './ec2-vpc-subnet.mjs';
 import EC2InstanceMetadata from './ec2-instance-metadata.jsx';
+import VPCSecurityGroups from './ec2-vpc-security-groups.jsx';
 
 import {parseEC2Document,parseCreateVpc,parseDeleteVpc,parseEC2Error,createVpcParameters,VPC_NAME_LIMIT} from './ec2-response.mjs';
 
@@ -29,7 +30,7 @@ const blankVpc={name:'',cidr:'',mode:'vpc-only',stackName:'',subnetCIDR:''};
 // Instances stay read-only. VPCs gain CreateVpc/DeleteVpc only when the server
 // advertises them, and only EC2-owned VPCs can be deleted here. Never infer
 // live guest health from stack metadata.
-export default function EC2Readonly({kind,region,request,sessionInstance,onSession,vpcLifecycle=false,vpcSubnet=false,onSaving=()=>{}}) {
+export default function EC2Readonly({kind,region,request,sessionInstance,onSession,vpcLifecycle=false,vpcSubnet=false,vpcSecurityGroups=false,onSaving=()=>{}}) {
   const {t}=useLocale();
   const instance=kind==='ec2',manage=!instance&&vpcLifecycle;
   const [items,setItems]=useState([]),[loading,setLoading]=useState(false),[error,setError]=useState('');
@@ -149,7 +150,8 @@ export default function EC2Readonly({kind,region,request,sessionInstance,onSessi
       pagination={<Pagination currentPageIndex={page} pagesCount={Math.max(1,Math.ceil(filtered.length/20))} onChange={({detail})=>setPage(detail.currentPageIndex)} ariaLabels={{nextPageLabel:t('Next page','次のページ'),previousPageLabel:t('Previous page','前のページ'),pageLabel:n=>String(n)}}/>}
       empty={<SpaceBetween size="s"><span>{error?t('Resources are unavailable. Retry with Refresh.','リソースを取得できません。「更新」で再試行してください。'):items.length?t('No resources match your filter.','検索条件に一致するリソースがありません。'):t('No resources found in this region.','このリージョンには該当するリソースがありません。')}</span>{items.length>0&&<Button onClick={()=>{setFilter('');setPage(1);}}>{t('Clear filter','絞り込みを解除')}</Button>}</SpaceBetween>}/>
     {detail&&<Container header={<Header variant="h2" actions={<Button onClick={()=>setSelected([])}>{t('Close details','詳細を閉じる')}</Button>}>{t('Resource details','リソースの詳細')}</Header>}>
-      {instance?<SpaceBetween size="l">{detailFields}<EC2InstanceMetadata groupIds={detail.groupIds} tags={detail.tags}/></SpaceBetween>:detailFields}
+      <SpaceBetween size="l">{detailFields}{instance?<EC2InstanceMetadata groupIds={detail.groupIds} tags={detail.tags}/>
+        :vpcSecurityGroups&&<VPCSecurityGroups key={region+'|'+detail.id} vpc={detail} region={region} request={request}/>}</SpaceBetween>
     </Container>}
     {manage&&<Modal visible={!!deleting} onDismiss={()=>{if(!busy)setDeleting(null);}} header={t('Delete VPC','VPC を削除')} closeAriaLabel={t('Close dialog','ダイアログを閉じる')}>
       <form onSubmit={remove}><Form errorText={deleteError} actions={<SpaceBetween direction="horizontal" size="xs"><Button formAction="none" disabled={busy} onClick={()=>setDeleting(null)}>{t('Cancel','キャンセル')}</Button><Button variant="primary" formAction="submit" loading={busy} disabled={confirmation!=='delete'}>{t('Delete','削除')}</Button></SpaceBetween>}>

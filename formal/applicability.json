@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "base_sha": "51f7564bb8424c902f2db6e8a4039c57d601fd34",
+  "base_sha": "49ecb555d405d31d868fc3d73139b0b0a42e4b75",
   "changes": [
     {
       "path": "docs/design/rds-owned-generation.md",
@@ -96,7 +96,7 @@
     },
     {
       "path": "formal/models.json",
-      "sha256": "e9fccb7383f68221447ae16dbe15dc63a0fb9101f15ea33a0913eccdba56c429",
+      "sha256": "a4980a893e9a5ffe76f4912b7ee9d0b93a447f106f9e60a81877a3596fdc1356",
       "disposition": "formal-infrastructure",
       "reason": "Registers the bounded native process model and its separate canonical generation fence model, with negative controls, without changing the gate.",
       "models": []
@@ -116,6 +116,13 @@
           "limits": "The model treats optional trusted ownership as part of launch eligibility, not a proof of constructor or production CLI wiring."
         }
       ]
+    },
+    {
+      "path": "internal/aws/catalog/rds_owned_controls_linux_amd64_test.go",
+      "sha256": "391087e0d9f1d84358cdcf826221f23277f26daa8419b6fd94eadb2249fdaf10",
+      "disposition": "test-support",
+      "reason": "Default offline SQLite fixture verifies lease identity, denied mutation, non-adoption, generation release and sticky failed acquisition without supplying a native workload.",
+      "models": []
     },
     {
       "path": "internal/aws/catalog/rds_owned_runtime_linux_amd64.go",
@@ -195,6 +202,13 @@
       ]
     },
     {
+      "path": "internal/rdsruntime/lifecycle_controls_linux_amd64_test.go",
+      "sha256": "46cbfc3880fdb0a1bf311b62304da00c485e77fd24200ad5e9f45e7e81185d7f",
+      "disposition": "test-support",
+      "reason": "Default native unit tests verify private postmaster lock parsing, cancellation, reaped process status, credential-file scope, teardown and retained cleanup debt; they do not assert PostgreSQL service readiness.",
+      "models": []
+    },
+    {
       "path": "internal/rdsruntime/runtime_linux_amd64.go",
       "sha256": "d1e4f6649b9208108e1b66e8d7b5ca145069231ea85c0c606801a40f250f00a4",
       "disposition": "modeled",
@@ -229,8 +243,15 @@
       "models": []
     },
     {
+      "path": "internal/rdsruntime/seal_controls_linux_amd64_test.go",
+      "sha256": "59fa0eec33d53ef6a8a1e9a0cd8d97425c37a8fbf9d9c4ba5a685058a70d7fb6",
+      "disposition": "test-support",
+      "reason": "Default native tests verify pinned layout, inode identity, ELF format, workspace admission and cancellation using inert header data, never executing substitute database binaries.",
+      "models": []
+    },
+    {
       "path": "scripts/test-formal-gate.py",
-      "sha256": "6857fef045142bb170930f8be7879379b69ea1270a6c879ce6fef8a544bd9225",
+      "sha256": "3cefe16541cafee609869ef6fde59b706c04851f3f673d2ca570c2af0382362a",
       "disposition": "formal-infrastructure",
       "reason": "Name the two new owned PostgreSQL models in the independent exact registry assertion without changing existing names or weakening equality.",
       "models": []
