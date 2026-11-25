@@ -8,7 +8,9 @@
   {"op": "describe_cluster_subnet_groups", "args": {"ClusterSubnetGroupName": "fixture-subnets"}, "expect": {"ClusterSubnetGroups#count": 1}},
   {"op": "modify_cluster_subnet_group", "args": {"ClusterSubnetGroupName": "fixture-subnets", "Description": "three subnets", "SubnetIds": ["subnet-0a1b2c3d", "subnet-4e5f6a7b", "subnet-0123456789abcdef0"]}, "expect": {"ClusterSubnetGroup.Description": "three subnets", "ClusterSubnetGroup.Subnets#count": 3}},
   {"op": "create_tags", "args": {"ResourceName": "arn:aws:redshift:us-east-1:000000000000:subnetgroup:fixture-subnets", "Tags": [{"Key": "stage", "Value": "dev"}, {"Key": "drop", "Value": "me"}]}},
+  {"op": "describe_tags", "args": {"ResourceName": "arn:aws:redshift:us-east-1:000000000000:subnetgroup:fixture-subnets", "TagKeys": ["stage", "drop"], "TagValues": ["dev"]}, "expect": {"TaggedResources#count": 1, "TaggedResources[0].ResourceName": "arn:aws:redshift:us-east-1:000000000000:subnetgroup:fixture-subnets", "TaggedResources[0].ResourceType": "subnetgroup", "TaggedResources[0].Tag": {"Key": "stage", "Value": "dev"}}},
   {"op": "delete_tags", "args": {"ResourceName": "arn:aws:redshift:us-east-1:000000000000:subnetgroup:fixture-subnets", "TagKeys": ["drop"]}},
+  {"op": "describe_tags", "args": {"ResourceName": "arn:aws:redshift:us-east-1:000000000000:subnetgroup:fixture-subnets", "TagKeys": ["drop"]}, "expect": {"TaggedResources#count": 0}},
   {"op": "describe_cluster_subnet_groups", "args": {}, "expect": {"ClusterSubnetGroups[0].Tags#count": 1, "ClusterSubnetGroups[0].Tags[0].Key": "stage"}},
   {"op": "create_cluster_subnet_group", "args": {"ClusterSubnetGroupName": "default", "Description": "reserved", "SubnetIds": ["subnet-0a1b2c3d"]}, "error": "InvalidParameterValue", "status": 400},
   {"op": "create_cluster_parameter_group", "args": {"ParameterGroupName": "fixture-params", "ParameterGroupFamily": "redshift-1.0", "Description": "again"}, "error": "ClusterParameterGroupAlreadyExists", "status": 400},
@@ -19,6 +21,8 @@
   {"op": "modify_cluster", "args": {"ClusterIdentifier": "fixture-wh", "NodeType": "ra3.4xlarge", "NumberOfNodes": 3, "ClusterType": "multi-node", "AutomatedSnapshotRetentionPeriod": 3}, "expect": {"Cluster.NodeType": "ra3.4xlarge", "Cluster.NumberOfNodes": 3}},
   {"op": "create_tags", "args": {"ResourceName": "arn:aws:redshift:us-east-1:000000000000:cluster:fixture-wh", "Tags": [{"Key": "stage", "Value": "dev"}]}},
   {"op": "describe_clusters", "args": {"ClusterIdentifier": "fixture-wh"}, "expect": {"Clusters[0].Tags#count": 2}},
+  {"op": "describe_tags", "args": {"ResourceName": "arn:aws:redshift:us-east-1:000000000000:cluster:fixture-wh"}, "expect": {"TaggedResources#count": 2, "TaggedResources[0].ResourceType": "cluster", "TaggedResources[0].Tag.Key": "stage", "TaggedResources[1].Tag.Key": "team"}},
+  {"op": "describe_tags", "args": {"ResourceName": "arn:aws:redshift:us-east-1:000000000000:cluster:fixture-wh", "MaxRecords": 10}, "error": "InvalidParameterValue", "status": 400},
   {"op": "create_cluster", "args": {"ClusterIdentifier": "fixture-wh", "NodeType": "ra3.xlplus", "MasterUsername": "dbadmin"}, "error": "ClusterAlreadyExists", "status": 400},
   {"op": "create_cluster", "args": {"ClusterIdentifier": "fixture-port", "NodeType": "ra3.xlplus", "MasterUsername": "dbadmin", "Port": 5439}, "error": "InvalidParameterValue", "status": 400},
   {"op": "describe_clusters", "args": {"ClusterIdentifier": "fixture-missing"}, "error": "ClusterNotFound", "status": 404},
@@ -28,17 +32,20 @@
   {"op": "create_cluster_snapshot", "args": {"SnapshotIdentifier": "fixture-snap", "ClusterIdentifier": "fixture-wh"}, "error": "UnknownOperationException", "status": 501}
  ],
  "isolation": [
+  {"op": "describe_tags", "args": {"ResourceName": "arn:aws:redshift:us-east-1:000000000000:cluster:fixture-wh"}, "error": "ResourceNotFoundFault", "status": 404},
   {"op": "describe_cluster_parameter_groups", "args": {}, "expect": {"ParameterGroups#count": 0}},
   {"op": "describe_cluster_subnet_groups", "args": {}, "expect": {"ClusterSubnetGroups#count": 0}},
   {"op": "describe_clusters", "args": {}, "expect": {"Clusters#count": 0}}
  ],
  "after_restart": [
+  {"op": "describe_tags", "args": {"ResourceName": "arn:aws:redshift:us-east-1:000000000000:parametergroup:fixture-params", "TagValues": ["a"]}, "expect": {"TaggedResources#count": 1, "TaggedResources[0].ResourceType": "parametergroup", "TaggedResources[0].Tag": {"Key": "team", "Value": "a"}}},
   {"op": "describe_cluster_subnet_groups", "args": {"ClusterSubnetGroupName": "fixture-subnets"}, "expect": {"ClusterSubnetGroups[0].Description": "three subnets", "ClusterSubnetGroups[0].Subnets#count": 3, "ClusterSubnetGroups[0].Tags[0].Value": "dev"}},
   {"op": "describe_cluster_parameter_groups", "args": {"ParameterGroupName": "fixture-params"}, "expect": {"ParameterGroups[0].Tags[0].Value": "a"}},
   {"op": "describe_clusters", "args": {"ClusterIdentifier": "fixture-wh"}, "expect": {"Clusters[0].NumberOfNodes": 3, "Clusters[0].Tags#count": 2}}
  ],
  "cleanup": [
   {"op": "delete_cluster", "args": {"ClusterIdentifier": "fixture-wh", "SkipFinalClusterSnapshot": true}, "expect": {"Cluster.ClusterStatus": "deleting"}},
+  {"op": "describe_tags", "args": {"ResourceName": "arn:aws:redshift:us-east-1:000000000000:cluster:fixture-wh"}, "error": "ResourceNotFoundFault", "status": 404},
   {"op": "delete_cluster_subnet_group", "args": {"ClusterSubnetGroupName": "fixture-subnets"}},
   {"op": "delete_cluster_parameter_group", "args": {"ParameterGroupName": "fixture-params"}},
   {"op": "describe_cluster_parameter_groups", "args": {}, "expect": {"ParameterGroups#count": 0}},

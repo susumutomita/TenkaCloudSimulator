@@ -1079,6 +1079,9 @@ func TestDescriptorsPublishEditTagAndComplexInputs(t *testing.T) {
 	if group.ARNTemplate != "arn:{partition}:redshift:{region}:{account}:parametergroup:{name}" || group.TagsWire != "Tags" || byModel["redshift"].Tagging["list-tags"].Name != "" {
 		t.Fatalf("redshift tagging %+v", group)
 	}
+	if !slices.Contains(byModel["redshift"].Operations, "DescribeTags") {
+		t.Fatal("the native DescribeTags operation is missing from Redshift capabilities")
+	}
 	if resource("rds", "dbSubnetGroup").ARNTemplate != "" || resource("rds", "dbSubnetGroup").TagsWire != "" {
 		t.Fatal("a resource with an ARN member and list-tags needs no template")
 	}

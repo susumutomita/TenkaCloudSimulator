@@ -645,7 +645,7 @@ func TestRedshiftRecordsLeaveRunningWarehouseOperationsUnbound(t *testing.T) {
 	h := newHarness(t, redshift)
 	for _, action := range []string{"RebootCluster", "PauseCluster", "ResumeCluster", "ResizeCluster", "FailoverPrimaryCompute", "CreateClusterSnapshot", "RestoreFromClusterSnapshot",
 		"RestoreTableFromClusterSnapshot", "CopyClusterSnapshot", "CreateAuthenticationProfile", "AuthorizeDataShare", "DescribeClusterVersions",
-		"DescribeOrderableClusterOptions", "GetClusterCredentials", "EnableSnapshotCopy", "ModifyClusterIamRoles", "DescribeTags"} {
+		"DescribeOrderableClusterOptions", "GetClusterCredentials", "EnableSnapshotCopy", "ModifyClusterIamRoles"} {
 		expectFault(t, h.warehouse(action, "ClusterIdentifier", "wh1"), 501, "UnknownOperationException")
 	}
 }

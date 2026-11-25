@@ -1,99 +1,224 @@
 {
   "version": 1,
-  "base_sha": "23b2d664de4c2a75bfee38465f702798a6e78550",
+  "base_sha": "c9380719aebf75030450e7defe9a45f23bd118f0",
   "changes": [
     {
       "path": "README.md",
-      "sha256": "705dc0ba56cb3438fb271859fab9ccdb0432fff2abaf0ac55e50e37222bcce9b",
+      "sha256": "e4e5842cf8b398ffbd233b6d58008e811b1081bff95f681fc8cd97aa0ce96542",
       "disposition": "documentation",
-      "reason": "Clarifies when an existing opt-in Battle resolve can return a capability; it does not promise readiness polling or guest execution.",
+      "reason": "Documents the scoped Redshift tag read without SQL or account-wide enumeration.",
+      "models": []
+    },
+    {
+      "path": "docs/aws-catalog-services.md",
+      "sha256": "67b2f545763d95837568f500b51e322464730cd0e537de78e3ba640362fcd982",
+      "disposition": "documentation",
+      "reason": "Updates the bounded Redshift native contract reference or focused regression evidence, not SQL execution.",
       "models": []
     },
     {
       "path": "docs/design/0001-go-standalone.md",
-      "sha256": "ff5ba9a9922f7c99ed676e2debe601e786b86a494429e861fe101b1b0c875e66",
+      "sha256": "ab5f49c862d74112f33fb349fa0ad10ce5007b6f95621d0f583b1b34d2f50988",
       "disposition": "documentation",
-      "reason": "Documents the completed-generation guard, early 409, unchanged seal and absence of a new transport.",
+      "reason": "Documents the scoped Redshift tag read without SQL or account-wide enumeration.",
       "models": []
     },
     {
       "path": "formal/models.json",
-      "sha256": "006387c2a274bff97fe223dd9959bac057f9a935f40ae2cbc65a80b324acdbd6",
+      "sha256": "ca0e4471c0921b83308011e98b63dbfad7aee275688171580f527b38d88957a7",
       "disposition": "formal-infrastructure",
-      "reason": "Adds one exact implementation path to the existing CanonicalVMComposition ownership scope; leaves models, bounds, checked invariants and sensitivity controls unchanged.",
+      "reason": "Registers two bounded Redshift code paths with the existing catalog model; no model or invariant changes.",
       "models": []
     },
     {
-      "path": "internal/aws/ec2_completed_guest_linux_test.go",
-      "sha256": "9ed792f655cbe44d52cfa68d1b4eeca77a1ba8c3fbe4de5b792a7068818c0009",
+      "path": "internal/aws/catalog/describe.go",
+      "sha256": "8d4ea6aaa43b441a9a5f8ed20c112e312abe259bf09ee5f61e380cc197e39651",
+      "disposition": "modeled",
+      "reason": "Binds exact Redshift native, descriptor or reference code to the existing catalog trust boundary.",
+      "models": [
+        {
+          "id": "CatalogResourceLifecycle",
+          "properties": [
+            "AuthorizationFirst",
+            "PeerFrame"
+          ],
+          "limits": "Finite abstract catalog ownership and peer-state projection; not tag filtering, Query XML, generated reference/example data, IAM evaluation or Go refinement."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/catalog/models/redshift.json",
+      "sha256": "3960d283655c8942d6c5f29efd4c9faed3ac9a05ece25a12f50cacf91a81849c",
+      "disposition": "modeled",
+      "reason": "Binds exact Redshift native, descriptor or reference code to the existing catalog trust boundary.",
+      "models": [
+        {
+          "id": "CatalogResourceLifecycle",
+          "properties": [
+            "AuthorizationFirst",
+            "PeerFrame"
+          ],
+          "limits": "Finite abstract catalog ownership and peer-state projection; not tag filtering, Query XML, generated reference/example data, IAM evaluation or Go refinement."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/catalog/openapi.go",
+      "sha256": "4b3f6d9bd0d75821ecc00878d94468e1e6ef843c452c5d539e3cb404d6e87d29",
+      "disposition": "modeled",
+      "reason": "Binds exact Redshift native, descriptor or reference code to the existing catalog trust boundary.",
+      "models": [
+        {
+          "id": "CatalogResourceLifecycle",
+          "properties": [
+            "AuthorizationFirst",
+            "PeerFrame"
+          ],
+          "limits": "Finite abstract catalog ownership and peer-state projection; not tag filtering, Query XML, generated reference/example data, IAM evaluation or Go refinement."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/catalog/query_test.go",
+      "sha256": "c03c0b9fe7410c162e588d92e1847064c02f23e7808e4348547405fe9b607d61",
       "disposition": "test-support",
-      "reason": "Tests native stack persistence and retained ownership plus both readiness orderings at the existing inert VM boundary, not real guest or SQL behavior.",
+      "reason": "Updates the bounded Redshift native contract reference or focused regression evidence, not SQL execution.",
       "models": []
     },
     {
-      "path": "internal/aws/ec2_completed_guest_unix.go",
-      "sha256": "9874818ec6a0486bdebea0d065824aee010cdc76867951c5772291b65618dc40",
+      "path": "internal/aws/catalog/redshift_tags.go",
+      "sha256": "c7830919366bf87ec48c73db57a9bcb49981ebc62114c37bd8f1acf8bc2380b6",
       "disposition": "modeled",
-      "reason": "Only the authoritative exact saved instance/stack/retained-provider association maps onto the registry's SavedAssociation condition. The new durable readiness join has separate native tests.",
+      "reason": "Binds exact Redshift native, descriptor or reference code to the existing catalog trust boundary.",
       "models": [
         {
-          "id": "CanonicalVMComposition",
+          "id": "CatalogResourceLifecycle",
           "properties": [
-            "SavedAssociation"
+            "AuthorizationFirst",
+            "PeerFrame"
           ],
-          "limits": "SavedAssociation checks symbolic equality for the already-registered provider in the registry mode. It does not compose the launch and registry modes or check the actual SQLite CREATE_COMPLETE + ready/held join, Go/HTTP publication or teardown races, later I/O authority, VM/guest, networking or RDS."
+          "limits": "Finite abstract catalog ownership and peer-state projection; not tag filtering, Query XML, generated reference/example data, IAM evaluation or Go refinement."
         }
       ]
     },
     {
-      "path": "internal/server/battle_capabilities_unix.go",
-      "sha256": "cc06f2903cf1c29c25cbc5e6d73c1d87751a284e1cdf8c5f3357850c6f2000d4",
+      "path": "internal/aws/catalog/redshift_tags_reference.go",
+      "sha256": "708532b4d80375b19cdf6a314872455ec34372056a42123a28ae3fcd75708bd0",
       "disposition": "modeled",
-      "reason": "Opt-in resolve selects only the saved typed provider and refuses an owner/binding that the canonical store cannot match; the modeled part is the exact saved association, not the response's timing.",
+      "reason": "Binds exact Redshift native, descriptor or reference code to the existing catalog trust boundary.",
       "models": [
         {
-          "id": "CanonicalVMComposition",
+          "id": "CatalogResourceLifecycle",
           "properties": [
-            "SavedAssociation"
+            "AuthorizationFirst",
+            "PeerFrame"
           ],
-          "limits": "SavedAssociation checks symbolic equality for the already-registered provider in the registry mode. It does not compose the launch and registry modes or check the actual SQLite CREATE_COMPLETE + ready/held join, Go/HTTP publication or teardown races, later I/O authority, VM/guest, networking or RDS."
+          "limits": "Finite abstract catalog ownership and peer-state projection; not tag filtering, Query XML, generated reference/example data, IAM evaluation or Go refinement."
         }
       ]
     },
     {
-      "path": "internal/server/battle_completed_guest_linux_test.go",
-      "sha256": "52a904e11b706a029d8fc13cc22c169b40a3b9ef9c2bc48c4139d36f3aedbe3e",
+      "path": "internal/aws/catalog/redshift_tags_reference_test.go",
+      "sha256": "bef441c9cf0b0203fdcf5c2f9cf27cb12c3344dd874cbd6adbfd33ab7c31f9ff",
       "disposition": "test-support",
-      "reason": "Checks existing HTTP resolve and seal handlers with fixture-only state. No physical VM assertion.",
+      "reason": "Updates the bounded Redshift native contract reference or focused regression evidence, not SQL execution.",
       "models": []
     },
     {
-      "path": "internal/server/battle_runtime_unix.go",
-      "sha256": "61900112a05b100d5f4925b1e9f65dab76fa9824620d69a8cbe467453af7f86b",
+      "path": "internal/aws/catalog/redshift_tags_test.go",
+      "sha256": "9d6083f38210ba78682a3b9d40e5d7e128cd6afbd16f77660e52a4c4d877f56e",
+      "disposition": "test-support",
+      "reason": "Updates the bounded Redshift native contract reference or focused regression evidence, not SQL execution.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/catalog/selection.json",
+      "sha256": "327f2b3f74d0e03e98b71c2bceb9b47c8308d001d58f94b729e61e256e3e60b6",
       "disposition": "modeled",
-      "reason": "Supplies the existing registry with the StackStore belonging to its configured provider, keeping the lookup tied to the saved association instead of a requester-provided store.",
+      "reason": "Binds exact Redshift native, descriptor or reference code to the existing catalog trust boundary.",
       "models": [
         {
-          "id": "CanonicalVMComposition",
+          "id": "CatalogResourceLifecycle",
           "properties": [
-            "SavedAssociation"
+            "AuthorizationFirst",
+            "PeerFrame"
           ],
-          "limits": "SavedAssociation checks symbolic equality for the already-registered provider in the registry mode. It does not compose the launch and registry modes or check the actual SQLite CREATE_COMPLETE + ready/held join, Go/HTTP publication or teardown races, later I/O authority, VM/guest, networking or RDS."
+          "limits": "Finite abstract catalog ownership and peer-state projection; not tag filtering, Query XML, generated reference/example data, IAM evaluation or Go refinement."
         }
       ]
     },
     {
-      "path": "scripts/formal_model_gate.py",
-      "sha256": "03390e66f99b6f9b1375e42059a753ab4ec740940411988dd8bce4d03d20f02e",
-      "disposition": "formal-infrastructure",
-      "reason": "Synchronizes one existing required exact-source pin with the registry. No gate, certification rule, bounds or execution change.",
+      "path": "internal/aws/catalog/semantics.go",
+      "sha256": "f4d1fcd1845f5ae79726e6ba3ce70693848d6b8b7bef499d9f5cd2a407c4c780",
+      "disposition": "modeled",
+      "reason": "Binds exact Redshift native, descriptor or reference code to the existing catalog trust boundary.",
+      "models": [
+        {
+          "id": "CatalogResourceLifecycle",
+          "properties": [
+            "AuthorizationFirst",
+            "PeerFrame"
+          ],
+          "limits": "Finite abstract catalog ownership and peer-state projection; not tag filtering, Query XML, generated reference/example data, IAM evaluation or Go refinement."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/catalog/services_data2.go",
+      "sha256": "d51a138ca089d68ee74f2b7172716531c433bd2bdb056d4f420c1e57ee5dfb8e",
+      "disposition": "modeled",
+      "reason": "Binds exact Redshift native, descriptor or reference code to the existing catalog trust boundary.",
+      "models": [
+        {
+          "id": "CatalogResourceLifecycle",
+          "properties": [
+            "AuthorizationFirst",
+            "PeerFrame"
+          ],
+          "limits": "Finite abstract catalog ownership and peer-state projection; not tag filtering, Query XML, generated reference/example data, IAM evaluation or Go refinement."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/catalog/services_data2_test.go",
+      "sha256": "9150c2b44d2045f2e6bd162345c990a8993057159fc0f724e6db343cdccc87e5",
+      "disposition": "test-support",
+      "reason": "Updates the bounded Redshift native contract reference or focused regression evidence, not SQL execution.",
       "models": []
     },
     {
-      "path": "scripts/test-formal-gate.py",
-      "sha256": "2feed998896c2481331e4f8d90065eb66cb4ef4d902bb7ac84481ba0dd0b8663",
-      "disposition": "formal-infrastructure",
-      "reason": "Updates the existing exact scope fixture to detect omission of the newly named implementation file; all original checks remain.",
+      "path": "internal/aws/catalog/services_records_test.go",
+      "sha256": "a5f77bb73f9673bf56fa5295a7db1b34ac8c191d0d249cc7ded495774f3d1826",
+      "disposition": "test-support",
+      "reason": "Updates the bounded Redshift native contract reference or focused regression evidence, not SQL execution.",
+      "models": []
+    },
+    {
+      "path": "internal/server/apidocs/catalog/index.json",
+      "sha256": "881e5ef3f59a1f112c79ff4a4c52bca97c8fc5725fc693d1d6d1a9d432de34fa",
+      "disposition": "presentation",
+      "reason": "Updates the bounded Redshift native contract reference or focused regression evidence, not SQL execution.",
+      "models": []
+    },
+    {
+      "path": "internal/server/apidocs/catalog/redshift.json",
+      "sha256": "bf09c893b015d250b7bb7b03ae070fe9c8fde00076e245cae4b3f9f0be91354a",
+      "disposition": "presentation",
+      "reason": "Updates the bounded Redshift native contract reference or focused regression evidence, not SQL execution.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/catalog_fixtures/redshift.json",
+      "sha256": "2dc88936318196c6e16adb288ad1aa17431c556e58b27244eeff607a60702396",
+      "disposition": "test-support",
+      "reason": "Updates the bounded Redshift native contract reference or focused regression evidence, not SQL execution.",
+      "models": []
+    },
+    {
+      "path": "tools/console/tests/fixtures/catalog-descriptors.json",
+      "sha256": "ebc780eb23e279eef457c040b237ef920d083998e5cf7b0570cda148153247dd",
+      "disposition": "presentation",
+      "reason": "Updates the bounded Redshift native contract reference or focused regression evidence, not SQL execution.",
       "models": []
     }
   ]

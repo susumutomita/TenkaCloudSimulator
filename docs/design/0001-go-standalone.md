@@ -22,6 +22,8 @@ SimpleDB の `PutAttributes` は AWS SDK の標準形式の `Expected` 条件を
 
 [SimpleDB コンソール](../simpledb-console.md)は既存の認可とローカル Query API を使い、選択したドメインで既知の項目を読み取って、1属性だけを条件付きで置換する。書き込みの成功応答を受けてから属性を読み直す。項目の一覧検索や削除はコンソールでは扱わない。
 
+Redshift の `DescribeTags` は既存のローカル ARN 1件に限り、同じ認可でタグのキーと値を読む。全体検索や SQL は扱わない。
+
 Azure Queue は Blob と独立したプロバイダールートを持ち、固定 account・owner・environment に結びつくローカル SQLite にメッセージを保存する。受信と更新は表示予約と pop receipt を更新し、削除は現在の receipt を要求する。Console と API リファレンスは同じ所有者境界とデータプレーンを使う。アカウント全体のキュー一覧や Azure RBAC は模倣しない。[操作範囲と検証条件](../acceptance/azure-queue.md)。
 
 CLI token authorityはoperatorと15分participantを区別し、participant identity header上書きを拒否する。主催ホストはチームごとに別プロセス/DB/tokenを管理し、ログイン済み利用者とチームを認可する。単一プロセス内のidentity選択でチーム分離しない。library compositionのserver.Newは認証を自動追加しない。

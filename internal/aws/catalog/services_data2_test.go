@@ -282,7 +282,7 @@ func TestRedshiftRefusesWhatItCannotStoreHonestly(t *testing.T) {
 	expectFault(t, create("wide", subnetPairs("SubnetIds", ids...)...), 400, "ClusterSubnetQuotaExceededFault")
 	create("one", one...).result(t, "CreateClusterSubnetGroup")
 	expectFault(t, h.warehouse("ModifyClusterSubnetGroup", append([]string{"ClusterSubnetGroupName", "one"}, subnetPairs("SubnetIds", ids...)...)...), 400, "ClusterSubnetQuotaExceededFault")
-	for _, action := range []string{"RebootCluster", "CreateClusterSnapshot", "CreateSnapshotSchedule", "CreateEventSubscription", "DescribeTags", "ModifyClusterParameterGroup", "CreateUsageLimit"} {
+	for _, action := range []string{"RebootCluster", "CreateClusterSnapshot", "CreateSnapshotSchedule", "CreateEventSubscription", "ModifyClusterParameterGroup", "CreateUsageLimit"} {
 		expectFault(t, h.warehouse(action), 501, "UnknownOperationException")
 	}
 	for i := 0; i < 50; i++ {

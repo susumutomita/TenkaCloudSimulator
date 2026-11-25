@@ -9,7 +9,7 @@ import (
 )
 
 // OpenAPI renders one service's implemented operations as an OpenAPI 3.1
-// document derived only from the embedded official shapes. JSON protocol
+// document derived from the embedded official shapes and reviewed local bounds. JSON protocol
 // operations share POST / and are distinguished by the X-Amz-Target header;
 // Query protocol operations share a form-encoded POST / distinguished by
 // Action and answer in XML.
@@ -291,7 +291,12 @@ func (b *binding) queryPaths(ops []Op, schemas map[string]any, tag string) map[s
 	paths := map[string]map[string]any{}
 	for _, op := range ops {
 		official := m.Operations[op.Name]
-		schemas[op.Name+"Request"] = b.formSchema(op.Name, official)
+		form, example := b.formSchema(op.Name, official), b.formExample(op.Name, official)
+		var localHelp string
+		if b.spec.Model == "redshift" && op.Name == "DescribeTags" {
+			localHelp = redshiftDescribeTagsReference(form, example)
+		}
+		schemas[op.Name+"Request"] = form
 		properties := map[string]any{"ResponseMetadata": map[string]any{"$ref": "#/components/schemas/ResponseMetadata"}}
 		response := map[string]any{"type": "object", "title": op.Name + "Response", "properties": properties,
 			"xml": map[string]any{"name": op.Name + "Response", "namespace": namespace}}
@@ -313,12 +318,12 @@ func (b *binding) queryPaths(ops []Op, schemas map[string]any, tag string) map[s
 		paths["/#Action="+op.Name] = map[string]any{"post": map[string]any{
 			"operationId": b.spec.Model + op.Name, "tags": []any{tag}, "summary": op.Name,
 			"description": "POST / with a form-encoded body (the #Action fragment only names this entry and is not sent). Form fields follow the official Query serialization: structure members joined with \".\", list elements numbered from 1 under their element name (for example Tags.Tag.1.Key), map entries as entry.N.key and entry.N.value, and an empty list as an empty field. " +
-				"The response is an XML " + op.Name + "Response holding " + holds + "; errors are ErrorResponse/Error/Code with the official error code.",
+				"The response is an XML " + op.Name + "Response holding " + holds + "; errors are ErrorResponse/Error/Code with the official error code." + localHelp,
 			"parameters": []any{map[string]any{"name": "X-Simulator-Service", "in": "header", "required": true,
 				"description": "Routes this unsigned first-party request to " + b.spec.Title + "; without it an unsigned form POST is not routed here. SDKs use the SigV4 credential scope instead.",
 				"schema":      map[string]any{"type": "string", "enum": []any{service}, "default": service}, "example": service}},
 			"requestBody": map[string]any{"required": true, "content": map[string]any{"application/x-www-form-urlencoded": map[string]any{
-				"schema": map[string]any{"$ref": "#/components/schemas/" + op.Name + "Request"}, "example": b.formExample(op.Name, official)}}},
+				"schema": map[string]any{"$ref": "#/components/schemas/" + op.Name + "Request"}, "example": example}}},
 			"responses": map[string]any{
 				"200": map[string]any{"description": "XML " + op.Name + "Response with the projected official output shape.", "content": map[string]any{"text/xml": map[string]any{"schema": map[string]any{"$ref": "#/components/schemas/" + op.Name + "Response"}}}},
 				"400": failure("Modeled fault or common Query error (InvalidParameterValue, InvalidAction, MissingAction, MissingParameter, MalformedQueryString)."),

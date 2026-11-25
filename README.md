@@ -125,6 +125,8 @@ console, CloudFormation adapter or Challenge integration.
   schedule expression. AppFlow does not start jobs or move objects.
   AWS Batch validates job-queue time-limit actions against the queue family
   and allows time limits from 600 to 86,400 seconds; it does not execute them.
+  Redshift can read tags on one existing stored resource ARN; it does not
+  enumerate account-wide tags or execute SQL.
 
 After signing in, open <http://127.0.0.1:4566/_simulator/docs/> for the API reference.
 Examples are static; **Test Request → Send** makes a live local request.
