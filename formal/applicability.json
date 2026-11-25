@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "base_sha": "3cd779798ba13d1b712e050f5ad0953072b54342",
+  "base_sha": "142888be7812c841f440f4d6b7f6c727f2adc0f8",
   "changes": [
     {
       "path": "docs/aws-catalog-services.md",
@@ -61,9 +61,9 @@
     },
     {
       "path": "formal/models.json",
-      "sha256": "9941a1a6f019d39ba1ac3ba71c650bfa757f7244d8ceb318b7a6a9f2f18245f2",
+      "sha256": "3f37fd38e4f6c5a0a41e62e42ff03ee5ab54ec2bc78623a0ad183ba109e27d03",
       "disposition": "formal-infrastructure",
-      "reason": "Adds the new specification files and service model files to the catalog lifecycle model source scope. Registers the narrow SAR authorization target model without changing existing lifecycle model limits.",
+      "reason": "Preserves all main model registrations including the four SimpleDB models; adds catalog source paths and the bounded SAR policy authorization target model without changing existing lifecycle model limits.",
       "models": []
     },
     {
@@ -2148,16 +2148,16 @@
     },
     {
       "path": "scripts/formal_model_gate.py",
-      "sha256": "37643da400ab99d1ca93dadcdeb7a66b1241a7e9f9986962e8666befe82749d2",
+      "sha256": "a10d6acf7042feb2fbf2e8a6f4eacdd5eeaaab3a93d1513716bdf723aa9d32df",
       "disposition": "formal-infrastructure",
       "reason": "Require the exact SAR target model, property inventory, source scope and sensitivity controls.",
       "models": []
     },
     {
       "path": "scripts/test-formal-gate.py",
-      "sha256": "b139445a686707d84207ad47070ffd41ef41d1e0c6d281acbc037a51e29df4a7",
+      "sha256": "2d71d0c7401d1fdf45688082a75b9699caba8d50dcea9755bdedaf368111d33f",
       "disposition": "formal-infrastructure",
-      "reason": "Independently require the SAR target model in the complete reviewed registry inventory.",
+      "reason": "Preserves main SimpleDB policy detector tests and explicit inventory while adding the existing SAR policy authorization model inventory and detector tests.",
       "models": []
     },
     {

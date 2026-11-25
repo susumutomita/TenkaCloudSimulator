@@ -1,0 +1,29 @@
+{
+  "status": "root-reserved fixtures only; not executed",
+  "cases": [
+    {
+      "id": "missing-token",
+      "expect": "deny before store call; unchanged state"
+    },
+    {
+      "id": "denied-principal",
+      "expect": "existing authorization denial; unchanged state"
+    },
+    {
+      "id": "untrusted-scope-header",
+      "expect": "cannot replace trusted actor/scope"
+    },
+    {
+      "id": "other-service-action",
+      "expect": "SQS/CFN dispatch unchanged; no SDB store call"
+    },
+    {
+      "id": "explicit-wire-limit-zero",
+      "expect": "InvalidParameterValue HTTP400, not internal default sentinel"
+    },
+    {
+      "id": "unsupported-version",
+      "expect": "explicit error without mutation"
+    }
+  ]
+}

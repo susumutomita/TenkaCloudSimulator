@@ -1,0 +1,161 @@
+{
+  "schema": 1,
+  "api_version": "2009-04-15",
+  "namespace": "http://sdb.amazonaws.com/doc/2009-04-15/",
+  "domain": "factory-domain",
+  "item": "item-&-日本語",
+  "domains": [
+    "factory-three",
+    "factory-one",
+    "factory-two"
+  ],
+  "attributes": [
+    {
+      "Name": "colour",
+      "Value": "blue"
+    },
+    {
+      "Name": "colour",
+      "Value": "green"
+    },
+    {
+      "Name": "label",
+      "Value": "<&日本語>\""
+    }
+  ],
+  "replaced_attributes": [
+    {
+      "Name": "colour",
+      "Value": "red"
+    },
+    {
+      "Name": "label",
+      "Value": "<&日本語>\""
+    }
+  ],
+  "negative_cases": [
+    {
+      "id": "create-missing-name",
+      "action": "CreateDomain",
+      "parameters": {},
+      "status": 400,
+      "code": "MissingParameter"
+    },
+    {
+      "id": "create-short-name",
+      "action": "CreateDomain",
+      "parameters": {
+        "DomainName": "ab"
+      },
+      "status": 400,
+      "code": "InvalidParameterValue"
+    },
+    {
+      "id": "create-space-name",
+      "action": "CreateDomain",
+      "parameters": {
+        "DomainName": "bad name"
+      },
+      "status": 400,
+      "code": "InvalidParameterValue"
+    },
+    {
+      "id": "list-zero",
+      "action": "ListDomains",
+      "parameters": {
+        "MaxNumberOfDomains": "0"
+      },
+      "status": 400,
+      "code": "InvalidParameterValue"
+    },
+    {
+      "id": "list-over-limit",
+      "action": "ListDomains",
+      "parameters": {
+        "MaxNumberOfDomains": "101"
+      },
+      "status": 400,
+      "code": "InvalidParameterValue"
+    },
+    {
+      "id": "list-invalid-token",
+      "action": "ListDomains",
+      "parameters": {
+        "NextToken": "not-a-issued-token"
+      },
+      "status": 400,
+      "code": "InvalidNextToken"
+    },
+    {
+      "id": "put-missing-item",
+      "action": "PutAttributes",
+      "parameters": {
+        "DomainName": "factory-domain",
+        "Attribute.1.Name": "colour",
+        "Attribute.1.Value": "must-not-commit"
+      },
+      "status": 400,
+      "code": "MissingParameter"
+    },
+    {
+      "id": "put-missing-value",
+      "action": "PutAttributes",
+      "parameters": {
+        "DomainName": "factory-domain",
+        "ItemName": "item-&-日本語",
+        "Attribute.1.Name": "colour",
+        "Attribute.1.Replace": "true"
+      },
+      "status": 400,
+      "code": "MissingParameter"
+    },
+    {
+      "id": "put-empty-attribute",
+      "action": "PutAttributes",
+      "parameters": {
+        "DomainName": "factory-domain",
+        "ItemName": "item-&-日本語",
+        "Attribute.1.Name": "",
+        "Attribute.1.Value": "must-not-commit"
+      },
+      "status": 400,
+      "code": "InvalidParameterValue"
+    },
+    {
+      "id": "get-missing-domain",
+      "action": "GetAttributes",
+      "parameters": {
+        "DomainName": "factory-absent",
+        "ItemName": "item"
+      },
+      "status": 400,
+      "code": "NoSuchDomain"
+    },
+    {
+      "id": "get-invalid-consistency",
+      "action": "GetAttributes",
+      "parameters": {
+        "DomainName": "factory-domain",
+        "ItemName": "item-&-日本語",
+        "ConsistentRead": "invalid"
+      },
+      "status": 400,
+      "code": "InvalidParameterValue"
+    },
+    {
+      "id": "put-partial-valid-then-missing",
+      "action": "PutAttributes",
+      "parameters": {
+        "DomainName": "factory-domain",
+        "ItemName": "item-&-日本語",
+        "Attribute.1.Name": "colour",
+        "Attribute.1.Value": "must-not-commit",
+        "Attribute.1.Replace": "true",
+        "Attribute.2.Name": "label"
+      },
+      "status": 400,
+      "code": "MissingParameter"
+    }
+  ],
+  "boundary_domain_count": 101
+}
