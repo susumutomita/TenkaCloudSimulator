@@ -1,32 +1,47 @@
-# TenkaCloudSimulator working contract
+# TenkaCloudSimulator agent contract
 
-This repository owns an independent Go single-binary multi-cloud simulator. AWS is the first provider, with S3 basics/version history/bucket settings, Standard SSM parameters, bounded Python Lambda execution/inline CloudFormation provisioning and a deliberately limited CloudFormation subset. Static console, local Scalar API reference, SQLite and the fixed CPython/WASI interpreter are embedded; runtime must not require host Python, Node, Docker, an external DB, or real cloud access.
+Normative rules for every agent, subagent, and reviewer. Read this file at the working base and any applicable nested AGENTS.md before edits. Keys below are acceptance criteria, not executable configuration.
 
-- `internal/core/` owns provider-neutral relational object storage and the currently supported identity-policy matching primitive. Do not introduce cloud-specific protocol dispatch or problem IDs here.
-- `internal/provider/` registers separate cloud protocol handlers. Preserve the ability to run several providers at once. New providers keep their own authorization semantics, resource model, namespace, and UI rather than inheriting AWS behavior.
-- `internal/aws/` owns S3 REST/XML, SSM JSON 1.1, Lambda REST/JSON, CloudFormation Query/XML and its provider-specific tables (including atomic S3 bucket provisioning/ownership, tags and caller action preflight), and maps requests to documented IAM actions/ARNs. Native IAM role management is bounded Query/XML with service trust and inline-policy aggregation. Legacy identities retain a separate JSON control API; native/legacy ownership and mutation must be atomic and reject cross-adoption.
-- `internal/server/` composes providers, local token access control and official Cloudscape/Scalar embedded assets. The console and API reference must use the same actual HTTP APIs and SQLite state as SDK clients.
-- TenkaCloudChallenge owns problems, scenarios, grading, and required capabilities; TenkaCloud owns platform compatibility and integration. Do not add problem-specific logic here.
-- `internal/inference/` owns provider-neutral bounded local text generation (opt-in Ollama or an explicitly selected optional Apple native helper). Ollama dials only the operator's numeric-loopback endpoint; Apple invokes only the operator's absolute helper path. Backends never fall back to another backend, cloud or synthetic answer, and store or log no prompt/response. AWS owns the Bedrock Runtime wire shapes, `bedrock:InvokeModel` evaluation and operator model mapping.
-- internal/workload/ owns provider-neutral bounded language execution. Never grant guest code host filesystem/environment/process/network access or add problem IDs/scoring. Generic bounded capability callbacks and readonly module files are supplied only by trusted providers; guests cannot select their authority. AWS owns function state, ARN/IAM and the restricted execution-role SDK bridge. Preserve pinned runtime rights/provenance and all containment negative tests.
-
-Read README and docs/design/0001-go-standalone.md before changing public contracts. Search for related capabilities, handlers, and tests. Preserve Git history and unrelated/uncommitted work. Never read/write `.env`, credentials, or secret directories. Do not perform release, deployment, cloud provisioning, push, or PR without the relevant authorization.
-
-For authorized parallel work, follow [parallel development rules](docs/contributing/parallel-development.md). Confirm current ownership and use separate worktrees for independent changes. Delegate when it helps the task, not to fill a fixed number of roles. Routine work does not require a new plan, roster, progress report, or tracking file.
-
-Complete the requested scope and verify it. Diagnose ordinary errors and retry only operations that are safe to repeat; check uncertain outcomes first. Respect deliberate access restrictions and leave blocked actions stopped while continuing independent authorized work. Ask only for missing decisions or authorization. Existing approval covers its stated scope, not unrelated changes.
-
-Do not silently simulate success for unsupported operations. Unsupported policy fields must be rejected. IAM principal selection is exercise context, not authentication or tenant isolation. The CLI must require local access tokens by default; hosts allocate separate processes/SQLite/token authorities per team. Participant tokens bind an identity and cannot select admin. Keep default numeric loopback binding, no outbound cloud calls, payload limits, and SQLite transaction/foreign-key invariants.
-
-Before completing a change run `make before-commit`; for protocol, persistence, console, or documentation-UI changes also run `make e2e`. For model changes run `TLA_JAR=... make formal`. Cross-platform execution is not implied by successful cross-compilation. Summarize the outcome, verification, compatibility impact, and remaining risks in the final response or existing review discussion. Distinguish passed, failed, and unrun checks. Do not overstate bounded TLA+ checking as a proof of implementation.
-
-Skills under `.claude/skills/` and agents under `.claude/agents/` are optional task-specific aids, not mandatory gates. Use the current Go Makefile gates; do not reintroduce removed TypeScript harness commands. Do not weaken regression tests to get green checks; adjust stale tooling only with evidence and matching detector coverage.
-
-For Finder/Fixer work, acceptance is executable, not a prose assertion. Before
-claiming a task, register its test suite and expected behavior independently of
-the fix. `make test` runs the offline factory acceptance gate on committed, clean
-HEAD; skips, missing expected tests, failed cleanup/tests, stale HEAD and altered
-logs cannot satisfy that gate. Independent review must include its exact-HEAD
-report. Read docs/contributing/software-factory.md for the current pilot scope.
-This contract applies equally to Codex, Claude Code and other authorized tools;
-optional role prompts do not replace the gate or authorize external agent access.
+```yaml
+start:
+  reconcile: [current main, code, tests, open/closed issues and PRs, live ownership]
+  handoff_transport: agent-to-agent only; no routine human handoff or review; ask the owner only for missing scope or authorization
+  handoff_required: [issue, base_sha, scoped_operations, owned_paths, acceptance_checks]
+  public_contract_change_requires: [README.md, docs/design/0001-go-standalone.md]
+  parallel_rules: docs/contributing/parallel-development.md
+  parallel: independent worktrees; one active writer per shared file; fill available authorized capacity without duplicates or resource overcommit
+  continue: consume results and start the next executable stage immediately; block only the affected work, record cause and resume condition, then advance other work
+  progress_excludes: [polling, assignment alone, status reports]
+  integrity: preserve history and unrelated changes; inspect uncertain outcomes before safe retry; never bypass access restrictions or read/write secret files
+  authorization: PR, push, merge, release, deploy, and cloud operations each require existing scoped approval
+architecture:
+  artifact: standalone Go binary; embedded console, Scalar, SQLite, and pinned CPython/WASI; no host Python/Node/Docker, external DB, or real cloud runtime dependency
+  core: provider-neutral storage and policy primitives; no provider dispatch or exercise IDs
+  providers: concurrent, distinct protocols, models, namespaces, authorization, and UI; do not inherit AWS semantics
+  aws: own IAM actions/ARNs and protocol/state; native and legacy ownership/mutation remain atomic; reject cross-adoption
+  state: shared actual HTTP API and SQLite state across console/Scalar/SDK; preserve atomicity, foreign keys, and input bounds
+  unsupported: reject unsupported operations and policy fields; no fake success or runtime claims for catalog metadata, stubs, mocks, or placeholder UI
+  perimeter: numeric loopback and local token auth by default; no outbound cloud calls; distinct authenticated and selected exercise identities; participants cannot select admin
+  tenant: one process, SQLite database, and token authority per team
+  guest: deny host FS/env/process/network; maintain pinned provenance and negative containment tests; only trusted providers supply bounded capabilities and read-only modules; guests never select authority
+  inference: only opt-in numeric-loopback Ollama or explicitly selected absolute-path Apple helper; no backend/cloud/synthetic fallback or prompt/response retention
+  bedrock: AWS owns wire shapes, bedrock:InvokeModel evaluation, and operator model mapping
+  boundary: TenkaCloudChallenge owns questions/scenarios/scoring/required capabilities; TenkaCloud owns platform integration; no problem-specific simulator logic
+done:
+  define_before_edit: official spec + issue -> operations, inputs, observable state, errors, cleanup, applicable entry points; evidence in existing issue, PR, or tests
+  environment: actual simulator built from one candidate SHA; approved isolated hosted runner; no owner's Mac or live cloud
+  console: real browser + provider-equivalent entry/sequence/inputs -> actual API, persisted state/read-back, errors, cleanup
+  api_reference: actual Scalar Send -> same simulator API, response and state
+  terraform: pinned official provider -> apply, read-back, destroy, verify removal
+  surface_gate: every applicable operation and entry point must pass; no substitution; justify not applicable
+  checks:
+    always: make before-commit
+    protocol_persistence_console_docs_ui: make e2e
+    model: TLA_JAR=... make formal
+    finder_fixer: docs/contributing/software-factory.md; register independent acceptance before fix; run make test on clean exact HEAD and include acceptance report in independent review
+    invalid_evidence: [required check failed or not run, required test skipped or missing, failed cleanup, stale SHA, altered log, weakened regression]
+  claims: cross-build != cross-platform execution; bounded model checking != implementation proof; optional skills/role prompts != gates
+  worker_receipt: [candidate_sha, operations, compatibility, commands_and_evidence, passed_failed_not_run_not_applicable_with_reason, blockers, next_step]
+  merge: integration owner verifies independent agent review of exact SHA + required CI, then normal authorized merge per service or agreed scope
+  after_merge: verify remote merge and main; repeat impacted checks if tested source changed; only then report done; no service-wide claims from partial coverage
+```
