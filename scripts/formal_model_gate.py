@@ -3258,6 +3258,50 @@ REQUIRED_SOURCE_SCOPES['SARPolicyAuthorizationTarget'] = {
 }
 
 
+BASE_MODELS.add('AzureQueueLifecycle')
+BASE_INVARIANTS['AzureQueueLifecycle'] = {'TypeOK', 'Isolation', 'ReadRollbackDurable', 'Rotation', 'ReceiptRequired', 'ExpiryGuard', 'ExpiryRemoval', 'VisibilityAdvance', 'EarlyReceiveBlocked', 'UpdateReceipt', 'InvalidUpdate'}
+REQUIRED_MUTANTS['AzureQueueLifecycle'] = {'NoReceiveVisibilityAdvance', 'EarlyReceiveAllowed', 'StaleUpdateAllowed', 'NoUpdateRotation', 'StaleDeleteAllowed', 'RestartLosesState', 'CrossOwnerWrite', 'ExpiredPeekAllowed'}
+REQUIRED_SOURCE_SCOPES['AzureQueueLifecycle'] = {'internal/azure/queue/handler.go', 'internal/azure/queue/protocol.go', 'internal/azure/queue/store.go', 'internal/azure/queue/handler_test.go', 'internal/azure/queue/store_test.go', 'internal/azure/queue/expiry_quota_test.go', 'internal/server/cloud_storage.go', 'internal/server/azure_queue_test.go'}
+
+
+BASE_MODELS.add('AzureQueueOwnerAccess')
+BASE_INVARIANTS['AzureQueueOwnerAccess'] = {
+    'TypeOK',
+    'FixedParticipant',
+    'OnlyCurrentDiscovery',
+    'NewestObservationRetained',
+    'DiscoveryAuthority',
+    'PresentationOwnerOnly',
+    'ReferenceGetAuthorized',
+    'ReferenceAccountIsConfigured',
+    'NativePermissionBoundary',
+}
+REQUIRED_MUTANTS['AzureQueueOwnerAccess'] = {
+    'SwitchFixedIdentity',
+    'IgnoreDiscoveryEpoch',
+    'PermitLateObservationOverwrite',
+    'DiscoverWithoutOwner',
+    'DiscoverForHandoff',
+    'ReferenceAllowsNonGet',
+    'ReferenceAllowsHandoff',
+    'ReferenceUsesRequestHint',
+    'ReferenceSubstitutesPrincipal',
+    'NativeAllowsOtherAccount',
+    'NativeRequiresVisibleConsole',
+    'NativeAllowsAwsHandoff',
+}
+REQUIRED_SOURCE_SCOPES['AzureQueueOwnerAccess'] = {
+    'internal/server/azure_queue_reference.go',
+    'internal/azure/queue/openapi.go',
+    'tools/console/src/console-navigation.mjs',
+    'tools/console/src/main.jsx',
+    'internal/server/server.go',
+    'internal/server/cloud_storage.go',
+    'internal/azure/queue/handler.go',
+    'internal/server/web/app.js',
+}
+
+
 def load_registry(root, relative='formal/models.json'):
     root = Path(root)
     registry_path = asset(root, relative)
