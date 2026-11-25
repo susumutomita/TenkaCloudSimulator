@@ -1,17 +1,17 @@
 {
   "version": 1,
-  "base_sha": "957b2351b43d3e249e76370e72e5924b31138a64",
+  "base_sha": "61cbd3d207be3009bb7e36f542209e9dd150c65c",
   "changes": [
     {
       "path": "README.md",
-      "sha256": "68f7c01da5a7f200fae2e7957da88c7c1cd39ba7f61ce925b11ee7b60c5dc5b3",
+      "sha256": "ff2be026875adf6cce87388f7e745709d62340c40fe0e6631a36245b95cdc718",
       "disposition": "documentation",
       "reason": "Document bounded native Select, ordering, cursor contract and unsupported surfaces; no implemented Console/Scalar or unbounded SQL is implied.",
       "models": []
     },
     {
       "path": "docs/design/0001-go-standalone.md",
-      "sha256": "e5a9f5cf89678e7f148dcbdf7d3202eb86581c4a664de7726c70ea1ca290d72d",
+      "sha256": "043fe298d1dc3dde24583feda144282a2e1a18dc5de90504bccd008412f5962a",
       "disposition": "documentation",
       "reason": "Document bounded native Select, ordering, cursor contract and unsupported surfaces; no implemented Console/Scalar or unbounded SQL is implied.",
       "models": []
@@ -61,7 +61,7 @@
     },
     {
       "path": "formal/models.json",
-      "sha256": "2c8f7b543e1c3c0a4c0347d26593019392c95b80eac186efb605824c0d83e6cf",
+      "sha256": "f1c1e86d7be9d21410995fe909d471871e0db468b2b75e9802fa959e2acd332f",
       "disposition": "formal-infrastructure",
       "reason": "Preserve existing models; register and independently pin the new Select model, invariant, mutation and declared source-scope inventory.",
       "models": []
@@ -115,6 +115,13 @@
       ]
     },
     {
+      "path": "internal/aws/simpledb/select_contract_test.go",
+      "sha256": "392355e67647b7b13ce5d2e210cca6e8ff4055586f30b9649f702fb13406de1b",
+      "disposition": "test-support",
+      "reason": "Exercise native Select lexical and byte bounds, descending continuations, five-second query timeout and all-or-error reads on malformed SQLite data.",
+      "models": []
+    },
+    {
       "path": "internal/aws/simpledb/select_grammar.go",
       "sha256": "50f37dc4c01bfb01056acefeb5dab02eaddc990806984269a413f2d6f4cfef7e",
       "disposition": "modeled",
@@ -155,14 +162,14 @@
     },
     {
       "path": "scripts/formal_model_gate.py",
-      "sha256": "fef8d3ebe9988dc8fc548826daa222c740f4123710832b6b0a73bf354983d517",
+      "sha256": "ce9e800adfdbdf43632efdab50bc8a70d8388bd969616238b3640380eb23a8c0",
       "disposition": "formal-infrastructure",
       "reason": "Preserve existing models; register and independently pin the new Select model, invariant, mutation and declared source-scope inventory.",
       "models": []
     },
     {
       "path": "scripts/test-formal-gate.py",
-      "sha256": "67e382061e1c087de47e3d73bf3fa51005e66860f60b3562811ecacf413f10b9",
+      "sha256": "fd06056d2bab48995a25ae966abaa4062eee583bd07756bda1081267c8643f61",
       "disposition": "formal-infrastructure",
       "reason": "Preserve existing models; register and independently pin the new Select model, invariant, mutation and declared source-scope inventory.",
       "models": []

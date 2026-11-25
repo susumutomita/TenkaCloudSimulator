@@ -18386,6 +18386,183 @@
       ]
     },
     {
+      "id": "EC2RouteTableRead",
+      "model": "formal/EC2RouteTableRead.tla",
+      "config": "formal/EC2RouteTableRead.cfg",
+      "bounds": "One atomic observation of a discovered table, two VPCs, independent subnet/gateway bindings, explicit or absent association, absent/removed/enabled default route, ten input witnesses.",
+      "properties": [
+        "TypeOK",
+        "Admission",
+        "BoundSnapshot",
+        "SameVPC",
+        "TypedDefault",
+        "ExplicitOnly",
+        "CurrentDefault"
+      ],
+      "limits": "One table/association/default per observation; two VPCs, one invalid admission or identity witness at a time. Not Go refinement, transaction or HTTP/XML proof, policy evaluation, pagination, concurrency, creation, or packet forwarding. Undiscoverable tables that lose every row and typed claim are not modeled.",
+      "source_scope": [
+        "internal/aws/ec2_read.go",
+        "internal/aws/ec2_route_tables_read.go",
+        "internal/aws/ec2_vpc.go"
+      ],
+      "mutants": [
+        {
+          "id": "AllowUnknownAction",
+          "edits": [
+            {
+              "old": "/\\ f.op = \"DescribeRouteTables\"",
+              "new": "/\\ TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "Admission"
+        },
+        {
+          "id": "SkipIAM",
+          "edits": [
+            {
+              "old": "/\\ f.allowed /\\ ~f.scoped /\\ f.local",
+              "new": "/\\ TRUE /\\ ~f.scoped /\\ f.local",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "Admission"
+        },
+        {
+          "id": "AllowInstanceScope",
+          "edits": [
+            {
+              "old": "/\\ f.allowed /\\ ~f.scoped /\\ f.local",
+              "new": "/\\ f.allowed /\\ TRUE /\\ f.local",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "Admission"
+        },
+        {
+          "id": "SkipRegion",
+          "edits": [
+            {
+              "old": "/\\ f.allowed /\\ ~f.scoped /\\ f.local",
+              "new": "/\\ f.allowed /\\ ~f.scoped /\\ TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "Admission"
+        },
+        {
+          "id": "DropDeclaration",
+          "edits": [
+            {
+              "old": "/\\ f.declared /\\ f.claimed /\\ f.rows /\\ f.faithful",
+              "new": "/\\ TRUE /\\ f.claimed /\\ f.rows /\\ f.faithful",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "BoundSnapshot"
+        },
+        {
+          "id": "DropOwnership",
+          "edits": [
+            {
+              "old": "/\\ f.declared /\\ f.claimed /\\ f.rows /\\ f.faithful",
+              "new": "/\\ f.declared /\\ TRUE /\\ f.rows /\\ f.faithful",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "BoundSnapshot"
+        },
+        {
+          "id": "DropStoredRows",
+          "edits": [
+            {
+              "old": "/\\ f.declared /\\ f.claimed /\\ f.rows /\\ f.faithful",
+              "new": "/\\ f.declared /\\ f.claimed /\\ TRUE /\\ f.faithful",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "BoundSnapshot"
+        },
+        {
+          "id": "AllowLossyXML",
+          "edits": [
+            {
+              "old": "/\\ f.declared /\\ f.claimed /\\ f.rows /\\ f.faithful",
+              "new": "/\\ f.declared /\\ f.claimed /\\ f.rows /\\ TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "BoundSnapshot"
+        },
+        {
+          "id": "CrossVPCSubnet",
+          "edits": [
+            {
+              "old": "/\\ (~explicit \\/ subnetVPC = tableVPC)",
+              "new": "/\\ TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "SameVPC"
+        },
+        {
+          "id": "CrossVPCGateway",
+          "edits": [
+            {
+              "old": "/\\ (savedRoute = \"absent\" \\/ gatewayVPC = tableVPC)",
+              "new": "/\\ TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "SameVPC"
+        },
+        {
+          "id": "InventAssociation",
+          "edits": [
+            {
+              "old": "associated |-> explicit",
+              "new": "associated |-> TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExplicitOnly"
+        },
+        {
+          "id": "InventMain",
+          "edits": [
+            {
+              "old": "main |-> FALSE",
+              "new": "main |-> TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExplicitOnly"
+        },
+        {
+          "id": "ShowRemovedRoute",
+          "edits": [
+            {
+              "old": "routed |-> (savedRoute = \"enabled\")",
+              "new": "routed |-> (savedRoute # \"absent\")",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CurrentDefault"
+        },
+        {
+          "id": "IgnoreMalformedFlag",
+          "edits": [
+            {
+              "old": "/\\ (savedRoute = \"absent\" \\/ f.typedFlag)",
+              "new": "/\\ TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "TypedDefault"
+        }
+      ]
+    },
+    {
       "id": "EC2SecurityGroupRead",
       "model": "formal/EC2SecurityGroupRead.tla",
       "config": "formal/EC2SecurityGroupRead.cfg",
