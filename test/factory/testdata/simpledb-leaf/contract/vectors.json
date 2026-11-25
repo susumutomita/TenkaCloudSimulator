@@ -1,0 +1,36 @@
+{
+  "version": 1,
+  "account": "000000000000",
+  "region": "us-east-1",
+  "domain": "leaf-domain",
+  "item": "item-&-日本語",
+  "initial": {
+    "colour": [
+      "blue",
+      "green",
+      "blue"
+    ],
+    "label": [
+      "<&日本語>\""
+    ]
+  },
+  "expected": {
+    "colour": [
+      "blue",
+      "green"
+    ],
+    "label": [
+      "<&日本語>\""
+    ]
+  },
+  "cases": [
+    "domain-lifecycle",
+    "item-workflow",
+    "restart-cascade",
+    "list-boundaries",
+    "rejected-write-atomicity",
+    "scope-isolation",
+    "cancelled-write"
+  ],
+  "page_fixture_count": 101
+}

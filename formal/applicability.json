@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "base_sha": "3cd779798ba13d1b712e050f5ad0953072b54342",
+  "base_sha": "142888be7812c841f440f4d6b7f6c727f2adc0f8",
   "changes": [
     {
       "path": "formal/S3MultipartConsolePaging.cfg",
@@ -40,9 +40,9 @@
     },
     {
       "path": "formal/models.json",
-      "sha256": "076097d2e03370ade85edeac0f18f84b1769cf730fc54a4bc25be8f70abda65b",
+      "sha256": "bcd97cf5167219c12d27241b3bbb3c88861147ec0e4ddfaf7398e36d36d57376",
       "disposition": "formal-infrastructure",
-      "reason": "Registers the ListParts paging model and five sensitivity controls without changing any of the 118 existing entries.",
+      "reason": "Registers the S3 ListParts paging model and its five sensitivity controls while retaining all current main entries, including the four SimpleDB models.",
       "models": []
     },
     {
@@ -65,16 +65,16 @@
     },
     {
       "path": "scripts/formal_model_gate.py",
-      "sha256": "230c62e6fe576595ee15ea650995113d3b0d420b3accd8276c03ecee804b375d",
+      "sha256": "467782849907b4f008326646bdcad35e98845a8ae45c8cc9ce66e9950dcc88c4",
       "disposition": "formal-infrastructure",
       "reason": "Pins the ListParts paging model, its five invariants, exact mutation edits and expected invariants, and its exact three source files without changing prior model pins.",
       "models": []
     },
     {
       "path": "scripts/test-formal-gate.py",
-      "sha256": "d9f3f00699bbf11cab9863ecaf53b14da40dd8bbd10b307c9ee1d5714040921d",
+      "sha256": "c9870a6d3bd41dff4e88dab8daaea3eced17b5982f0e7c7226aa975fa38762b0",
       "disposition": "formal-infrastructure",
-      "reason": "Adds ListParts paging to the explicit inventory and detects removed model artifacts, changed invariants/scopes, and same-ID mutation substitutions; shared tests detect removed controls.",
+      "reason": "Preserves the four SimpleDB inventory and detector tests from main and adds ListParts paging inventory, scope and exact mutation substitution detection.",
       "models": []
     },
     {
