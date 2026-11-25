@@ -1,167 +1,158 @@
 {
   "version": 1,
-  "base_sha": "509a189915cc6076bb91c6c318a4ecc766ac9749",
+  "base_sha": "957b2351b43d3e249e76370e72e5924b31138a64",
   "changes": [
     {
-      "path": "docs/design/rds-owned-generation.md",
-      "sha256": "b40a6ecd37c5087dcd03b11098c2d0c76a376067f187e58124c670aa1741ae93",
+      "path": "README.md",
+      "sha256": "7f73820470e28497b0e85ed7b1398968b34a59fe4ad83252558ee07d7f7b008a",
       "disposition": "documentation",
-      "reason": "Documents the internal preflight, its nontransferable host-only result, and the outstanding guest-side SQL work.",
+      "reason": "Document the bounded read contract, ownership boundary and unsupported mutations or packet behavior.",
       "models": []
     },
     {
-      "path": "formal/RDSGuestPeerPreflight.cfg",
-      "sha256": "370e2ddebc5ba8088f026379f10c7f4c575f71579eabccd1b828469cd6f3cc19",
+      "path": "docs/design/0001-go-standalone.md",
+      "sha256": "f4a1f6c1f891048887f563110cc00b6084905e8df4fc3e02db962d234dba6317",
+      "disposition": "documentation",
+      "reason": "Document the bounded read contract, ownership boundary and unsupported mutations or packet behavior.",
+      "models": []
+    },
+    {
+      "path": "docs/ec2-read-discovery.md",
+      "sha256": "f5b3bffe4ecb0c012bdae8b4d8a549e9520a0b6043db0e8a7b7d7cc18ad9cf86",
+      "disposition": "documentation",
+      "reason": "Document the bounded read contract, ownership boundary and unsupported mutations or packet behavior.",
+      "models": []
+    },
+    {
+      "path": "formal/EC2RouteTableRead.cfg",
+      "sha256": "ed7350eb2a7ea4c20a6baf51437f8235e5fc931228348fb61c60ae66363c98fd",
       "disposition": "modeled",
-      "reason": "Enables the bounded peer observation and its success, denial, time-of-return and no-ticket properties.",
+      "reason": "Bind the new read-only route-table projection and its selected EC2 dispatch to the finite read witnesses.",
       "models": [
         {
-          "id": "RDSGuestPeerPreflight",
+          "id": "EC2RouteTableRead",
           "properties": [
-            "CanonicalGuest",
-            "SameProviderOwner",
-            "CurrentPrivateGeneration",
-            "DestinationIngress",
-            "SnapshotClosedBeforeHost",
-            "HostAuthenticated",
-            "LiveAtReturn",
-            "ObservationOnly",
-            "DenialDoesNotRetireOwner",
-            "HealthyObservation"
+            "Admission",
+            "BoundSnapshot",
+            "SameVPC",
+            "TypedDefault",
+            "ExplicitOnly",
+            "CurrentDefault"
           ],
-          "limits": "One call with one independently bad static fact at a time; NIC pre-seal and command retirement may additionally interleave. Not Go refinement, database isolation, lock correctness, actual networking, guest SQL, authenticated protocol verification, public API behavior, or permission for later I/O."
+          "limits": "One table/association/default per observation; two VPCs, one invalid admission or identity witness at a time. Not Go refinement, transaction or HTTP/XML proof, policy evaluation, pagination, concurrency, creation, or packet forwarding. Undiscoverable tables that lose every row and typed claim are not modeled."
         }
       ]
     },
     {
-      "path": "formal/RDSGuestPeerPreflight.tla",
-      "sha256": "a171a01f4aa6c421cbbab7f3606ff2a18b6c66513dd3a1bf94649568f461b3c2",
+      "path": "formal/EC2RouteTableRead.tla",
+      "sha256": "45ed5c6873767bdd5df2f3a6cdd1ecf42b5ed0b318481a15b8cdcb4c2db1a2aa",
       "disposition": "modeled",
-      "reason": "Exercises canonical admission, snapshot join, authenticated host observation, and independent revocation before return; never hands out a route.",
+      "reason": "Bind the new read-only route-table projection and its selected EC2 dispatch to the finite read witnesses.",
       "models": [
         {
-          "id": "RDSGuestPeerPreflight",
+          "id": "EC2RouteTableRead",
           "properties": [
-            "CanonicalGuest",
-            "SameProviderOwner",
-            "CurrentPrivateGeneration",
-            "DestinationIngress",
-            "SnapshotClosedBeforeHost",
-            "HostAuthenticated",
-            "LiveAtReturn",
-            "ObservationOnly",
-            "DenialDoesNotRetireOwner",
-            "HealthyObservation"
+            "Admission",
+            "BoundSnapshot",
+            "SameVPC",
+            "TypedDefault",
+            "ExplicitOnly",
+            "CurrentDefault"
           ],
-          "limits": "One call with one independently bad static fact at a time; NIC pre-seal and command retirement may additionally interleave. Not Go refinement, database isolation, lock correctness, actual networking, guest SQL, authenticated protocol verification, public API behavior, or permission for later I/O."
+          "limits": "One table/association/default per observation; two VPCs, one invalid admission or identity witness at a time. Not Go refinement, transaction or HTTP/XML proof, policy evaluation, pagination, concurrency, creation, or packet forwarding. Undiscoverable tables that lose every row and typed claim are not modeled."
         }
       ]
     },
     {
       "path": "formal/models.json",
-      "sha256": "cfd9251394ddf3314e999ca86ceec67edd806a9715136c77c1a2a25ac4416595",
+      "sha256": "2880609c7f0cb91cbbf8cf02f2361ece10932841e12d5d54c6eadc020306b213",
       "disposition": "formal-infrastructure",
-      "reason": "Registers the finite model and independently requires its model, sources, property and sensitivity-control inventory.",
+      "reason": "Register and independently require the exact route-table model, source scopes, properties and sensitivity controls.",
       "models": []
     },
     {
-      "path": "internal/aws/catalog/rds_guest_peer_controls_linux_amd64_test.go",
-      "sha256": "3babb63324cd5add023149b3ebc5f365efd961dac8c96923dd18c0b23370a2f4",
+      "path": "internal/aws/ec2_read.go",
+      "sha256": "7421764fff9ce850f2f3419ff11a276b5e7b8205700981479731a0ba322a673b",
+      "disposition": "modeled",
+      "reason": "Bind the new read-only route-table projection and its selected EC2 dispatch to the finite read witnesses.",
+      "models": [
+        {
+          "id": "EC2RouteTableRead",
+          "properties": [
+            "Admission",
+            "BoundSnapshot"
+          ],
+          "limits": "One table/association/default per observation; two VPCs, one invalid admission or identity witness at a time. Not Go refinement, transaction or HTTP/XML proof, policy evaluation, pagination, concurrency, creation, or packet forwarding. Undiscoverable tables that lose every row and typed claim are not modeled."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/ec2_route_tables_consistency_test.go",
+      "sha256": "cc9c6b577b135bc3f7f1a325037566a69980e8409e9aa46a4ace87d1af548bfb",
       "disposition": "test-support",
-      "reason": "Exercises the canonical provider's focused generation, native ownership or private destination-policy controls and declares the optional host-runtime check; not a guest SQL test.",
+      "reason": "Exercise the real EC2 handler, canonical storage, denial, isolation, restart, route disable/enable and stack removal.",
       "models": []
     },
     {
-      "path": "internal/aws/catalog/rds_guest_peer_linux_amd64.go",
-      "sha256": "5580d6187b3e06ffedb82cfc1f37429a6e5df93d771733c73ada30480a1f35c7",
+      "path": "internal/aws/ec2_route_tables_read.go",
+      "sha256": "f49e96028217f4a75b0f803ce3ea64ef154cc5656db342f51c77998de8415f7e",
       "disposition": "modeled",
-      "reason": "Binds the current provider and database owner, fail-fast lease, finished snapshot and fixed host probe; a peer denial is not retirement.",
+      "reason": "Bind the new read-only route-table projection and its selected EC2 dispatch to the finite read witnesses.",
       "models": [
         {
-          "id": "RDSGuestPeerPreflight",
+          "id": "EC2RouteTableRead",
           "properties": [
-            "SameProviderOwner",
-            "CurrentPrivateGeneration",
-            "SnapshotClosedBeforeHost",
-            "HostAuthenticated",
-            "DenialDoesNotRetireOwner",
-            "ObservationOnly"
+            "BoundSnapshot",
+            "SameVPC",
+            "TypedDefault",
+            "ExplicitOnly",
+            "CurrentDefault"
           ],
-          "limits": "One call with one independently bad static fact at a time; NIC pre-seal and command retirement may additionally interleave. Not Go refinement, database isolation, lock correctness, actual networking, guest SQL, authenticated protocol verification, public API behavior, or permission for later I/O."
+          "limits": "One table/association/default per observation; two VPCs, one invalid admission or identity witness at a time. Not Go refinement, transaction or HTTP/XML proof, policy evaluation, pagination, concurrency, creation, or packet forwarding. Undiscoverable tables that lose every row and typed claim are not modeled."
         }
       ]
     },
     {
-      "path": "internal/aws/catalog/rds_owned_runtime_linux_amd64.go",
-      "sha256": "30ea16fc7a3078b94aa7c7518ff6f366997a23b31ea5374e005bbe4d5c525d6a",
-      "disposition": "modeled",
-      "reason": "Joins the optional peer inspection inside the same generation/ownership and dependency read transaction and requires a successful commit.",
-      "models": [
-        {
-          "id": "RDSGuestPeerPreflight",
-          "properties": [
-            "CurrentPrivateGeneration",
-            "SnapshotClosedBeforeHost",
-            "DestinationIngress"
-          ],
-          "limits": "One call with one independently bad static fact at a time; NIC pre-seal and command retirement may additionally interleave. Not Go refinement, database isolation, lock correctness, actual networking, guest SQL, authenticated protocol verification, public API behavior, or permission for later I/O."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/ec2_completed_guest_unix.go",
-      "sha256": "38871a8faf58e8eb88609aeeea157543529ab494b7785ab522600fa77967ea53",
-      "disposition": "modeled",
-      "reason": "Uses an exact completed guest receipt, canonical NIC peer and live lease; after the callback, rechecks the receipt and command ownership.",
-      "models": [
-        {
-          "id": "RDSGuestPeerPreflight",
-          "properties": [
-            "CanonicalGuest",
-            "LiveAtReturn",
-            "ObservationOnly"
-          ],
-          "limits": "One call with one independently bad static fact at a time; NIC pre-seal and command retirement may additionally interleave. Not Go refinement, database isolation, lock correctness, actual networking, guest SQL, authenticated protocol verification, public API behavior, or permission for later I/O."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/rds_guest_peer_linux_amd64.go",
-      "sha256": "cafa01b30335b8b77a1bf31eea19298a33ce7a026f446d9c89de4ad1fc349097",
-      "disposition": "modeled",
-      "reason": "Combines provider-owned observations; verifies private declared and reserved same-VPC dependencies and destination SG ingress for the NIC peer and TCP/5432.",
-      "models": [
-        {
-          "id": "RDSGuestPeerPreflight",
-          "properties": [
-            "SameProviderOwner",
-            "CurrentPrivateGeneration",
-            "DestinationIngress",
-            "ObservationOnly"
-          ],
-          "limits": "One call with one independently bad static fact at a time; NIC pre-seal and command retirement may additionally interleave. Not Go refinement, database isolation, lock correctness, actual networking, guest SQL, authenticated protocol verification, public API behavior, or permission for later I/O."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/rds_guest_peer_linux_amd64_test.go",
-      "sha256": "6fd7e836f0d13ef20ca0b1087384615497e13c09eb9ad93bc29cdf82f28d297d",
+      "path": "internal/aws/ec2_route_tables_read_test.go",
+      "sha256": "882b0c14682a2716d4cff3468e6bf47ffa2ccb020cd3005600889b64ad3f5e2f",
       "disposition": "test-support",
-      "reason": "Exercises the canonical provider's focused generation, native ownership or private destination-policy controls and declares the optional host-runtime check; not a guest SQL test.",
+      "reason": "Exercise the real EC2 handler, canonical storage, denial, isolation, restart, route disable/enable and stack removal.",
       "models": []
+    },
+    {
+      "path": "internal/aws/ec2_vpc.go",
+      "sha256": "2735d84d7b9d9865484b1baa3fcac6dade6dd13a6e073e7a0d7edc98e9dc207d",
+      "disposition": "modeled",
+      "reason": "Bind the new read-only route-table projection and its selected EC2 dispatch to the finite read witnesses.",
+      "models": [
+        {
+          "id": "EC2RouteTableRead",
+          "properties": [
+            "Admission"
+          ],
+          "limits": "One table/association/default per observation; two VPCs, one invalid admission or identity witness at a time. Not Go refinement, transaction or HTTP/XML proof, policy evaluation, pagination, concurrency, creation, or packet forwarding. Undiscoverable tables that lose every row and typed claim are not modeled."
+        }
+      ]
     },
     {
       "path": "scripts/formal_model_gate.py",
-      "sha256": "206ced0342bc5ba4715340396874bb90d56e673eaafc9d26ac473c356e19a27b",
+      "sha256": "f95628fa20751913db89eee9df9f40f49d336c870b8aa8fdb6b933d7e5302e5f",
       "disposition": "formal-infrastructure",
-      "reason": "Registers the finite model and independently requires its model, sources, property and sensitivity-control inventory.",
+      "reason": "Register and independently require the exact route-table model, source scopes, properties and sensitivity controls.",
       "models": []
     },
     {
       "path": "scripts/test-formal-gate.py",
-      "sha256": "3abd2f183e1e5f6acf3c1018ec9b5bb07c36a4eb79c1116c74c2d1cb7d6ea654",
+      "sha256": "9f7b1b8ab42add0bf95a3797b3191725add99f5121764104be6fdf5a25f6d42c",
       "disposition": "formal-infrastructure",
-      "reason": "Registers the finite model and independently requires its model, sources, property and sensitivity-control inventory.",
+      "reason": "Register and independently require the exact route-table model, source scopes, properties and sensitivity controls.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/ec2_network_contract.py",
+      "sha256": "111b236206585071894b17aa104442afaa9499659d85909b1f48838dc972656a",
+      "disposition": "test-support",
+      "reason": "Verify the bounded boto3 route-table projection for explicit and empty configurations while preserving native mutation refusals and unchanged snapshots.",
       "models": []
     }
   ]

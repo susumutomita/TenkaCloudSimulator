@@ -124,18 +124,45 @@ class NetworkContract(unittest.TestCase):
         # Reuse a rejected name: no hidden stack/name claim may remain.
         self.create('invalid-absent-table')
 
-    def test_unsupported_native_routes_never_report_success_or_mutate(self):
+    def test_native_route_table_read_and_rejected_mutations(self):
+        # Bind the read to the physical gateway created by the existing CFN fixture.
+        self.template['Outputs']['Gateway'] = {'Value': {'Ref': 'Gateway'}}
         selected = self.create('network-selected')
         outputs = self.outputs(selected)
+        tables = self.ec2.describe_route_tables()['RouteTables']
+        self.assertEqual([t['RouteTableId'] for t in tables], [outputs['Table']])
+        table = tables[0]
+        self.assertEqual(table['VpcId'], outputs['Vpc'])
+        self.assertEqual([(r['DestinationCidrBlock'], r['GatewayId'], r['Origin'], r['State'])
+                          for r in table['Routes']],
+                         [('0.0.0.0/0', outputs['Gateway'], 'CreateRoute', 'active')])
+        self.assertEqual([(a['RouteTableAssociationId'], a['RouteTableId'], a['SubnetId'], a['Main'])
+                          for a in table['Associations']],
+                         [(outputs['Association'], outputs['Table'], outputs['Subnet'], False)])
         before = self.state()
         for operation, args in [
             (self.ec2.create_route, {'RouteTableId': outputs['Table'], 'DestinationCidrBlock': '0.0.0.0/0', 'GatewayId': 'igw-00000000000000001'}),
             (self.ec2.create_route, {'RouteTableId': outputs['Table'], 'DestinationCidrBlock': '0.0.0.0/0', 'GatewayId': 'igw-00000000000000001', 'DryRun': True}),
-            (self.ec2.describe_route_tables, {}),
         ]:
             with self.subTest(operation=operation.__name__, args=args):
                 self.rejected(operation, 'UnsupportedOperation', **args)
                 self.assertEqual(self.state(), before)
+                self.assertEqual(self.ec2.describe_route_tables()['RouteTables'], tables)
+
+    def test_native_vpc_has_no_implicit_table_and_bare_table_has_no_children(self):
+        self.assertEqual(self.ec2.describe_route_tables()['RouteTables'], [])
+        vpc_id = self.ec2.create_vpc(CidrBlock='10.68.0.0/16')['Vpc']['VpcId']
+        self.addCleanup(self.ec2.delete_vpc, VpcId=vpc_id)
+        self.assertEqual(self.ec2.describe_route_tables()['RouteTables'], [])
+
+        bare = {section: {key: self.template[section][key] for key in ('Vpc', 'Table')}
+                for section in ('Resources', 'Outputs')}
+        outputs = self.outputs(self.create('network-bare-table', bare))
+        tables = self.ec2.describe_route_tables()['RouteTables']
+        self.assertEqual([t['RouteTableId'] for t in tables], [outputs['Table']])
+        self.assertEqual(tables[0]['VpcId'], outputs['Vpc'])
+        self.assertEqual(tables[0]['Routes'], [])
+        self.assertEqual(tables[0]['Associations'], [])
 
     def test_missing_local_token_cannot_create_network(self):
         before = self.state()

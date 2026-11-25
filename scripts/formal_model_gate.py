@@ -1335,6 +1335,11 @@ BASE_MODELS.add('EC2SecurityGroupConsoleEpoch')
 BASE_INVARIANTS['EC2SecurityGroupConsoleEpoch'] = {'TypeOK', 'EligibleRequest', 'ReadOnlyOperation', 'OnlyCurrentScope', 'OnlySelectedVPC', 'FailuresNeverEmpty'}
 REQUIRED_MUTANTS['EC2SecurityGroupConsoleEpoch'] = {'UnsignedRequest', 'UnadvertisedRequest', 'HandoffRequest', 'NativeVPCRequest', 'WrongOperation', 'LateReply', 'OldRowsPersist', 'WrongVPC', 'RefusalAsEmpty'}
 REQUIRED_SOURCE_SCOPES['EC2SecurityGroupConsoleEpoch'] = {'internal/server/server.go', 'internal/server/web/app.js', 'tools/console/src/ec2-readonly.jsx', 'tools/console/src/ec2-response.mjs', 'tools/console/src/ec2-security-groups.mjs', 'tools/console/src/ec2-vpc-security-groups.jsx', 'tools/console/src/main.jsx'}
+BASE_MODELS.add('EC2RouteTableRead')
+BASE_INVARIANTS['EC2RouteTableRead'] = {'TypeOK', 'Admission', 'BoundSnapshot', 'SameVPC', 'TypedDefault', 'ExplicitOnly', 'CurrentDefault'}
+REQUIRED_MUTANTS['EC2RouteTableRead'] = {'AllowUnknownAction', 'SkipIAM', 'AllowInstanceScope', 'SkipRegion', 'DropDeclaration', 'DropOwnership', 'DropStoredRows', 'AllowLossyXML', 'CrossVPCSubnet', 'CrossVPCGateway', 'InventAssociation', 'InventMain', 'ShowRemovedRoute', 'IgnoreMalformedFlag'}
+REQUIRED_SOURCE_SCOPES['EC2RouteTableRead'] = {'internal/aws/ec2_read.go', 'internal/aws/ec2_route_tables_read.go', 'internal/aws/ec2_vpc.go'}
+
 BASE_MODELS.add('EC2SecurityGroupRead')
 BASE_INVARIANTS['EC2SecurityGroupRead'] = {'OperationAdmission', 'CanonicalGroup', 'TypeOK', 'AuthorizedRegionalRead', 'CurrentIngress', 'FaithfulXML', 'CanonicalParent'}
 REQUIRED_MUTANTS['EC2SecurityGroupRead'] = {'AllowInstanceHandoff', 'MissingParentDeclaration', 'AllowUnknownOperation', 'MissingAuthorization', 'MissingParentRow', 'MissingRegion', 'MissingGroupBinding', 'MissingParentClaim', 'AllowLossyXML', 'UseStaleTemplateIngress'}

@@ -26,7 +26,7 @@ const (
 	ec2ManagedByCloudFormation = "cloudformation"
 )
 
-var ec2Operations = []string{"DescribeInstances", "DescribeVpcs", "DescribeSubnets", "DescribeSecurityGroups", "CreateVpc", "DeleteVpc"}
+var ec2Operations = []string{"DescribeInstances", "DescribeVpcs", "DescribeSubnets", "DescribeSecurityGroups", "DescribeRouteTables", "CreateVpc", "DeleteVpc"}
 
 var (
 	ec2VPCIDPattern  = regexp.MustCompile(`^vpc-[0-9a-f]{8,17}$`)
@@ -196,6 +196,8 @@ func stampEC2Response(out any) {
 	const ns = "http://ec2.amazonaws.com/doc/2016-11-15/"
 	switch v := out.(type) {
 	case *ec2ReadResponse:
+		v.XMLNS, v.RequestID = ns, id
+	case *ec2DescribeRouteTablesResponse:
 		v.XMLNS, v.RequestID = ns, id
 	case *ec2DescribeSecurityGroupsResponse:
 		v.XMLNS, v.RequestID = ns, id

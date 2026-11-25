@@ -87,7 +87,7 @@ func (g *Gateway) serveEC2(w http.ResponseWriter, r *http.Request) {
 	}
 	action := fields.Get("Action")
 	if len(fields["Action"]) != 1 || len(fields["Version"]) != 1 || fields.Get("Version") != "2016-11-15" || !slices.Contains(ec2Operations, action) {
-		fail("UnsupportedOperation", "Only DescribeInstances, DescribeVpcs, DescribeSubnets, DescribeSecurityGroups, CreateVpc and DeleteVpc version 2016-11-15 are supported.", 400)
+		fail("UnsupportedOperation", "Only DescribeInstances, DescribeVpcs, DescribeSubnets, DescribeSecurityGroups, DescribeRouteTables, CreateVpc and DeleteVpc version 2016-11-15 are supported.", 400)
 		return
 	}
 	request, failure := parseEC2Request(action, fields)
@@ -125,6 +125,13 @@ func (g *Gateway) serveEC2(w http.ResponseWriter, r *http.Request) {
 	}
 	var out any
 	switch action {
+	case "DescribeRouteTables":
+		tables, err := g.Stacks.describeEC2RouteTables(r.Context(), region)
+		if err != nil {
+			fail("InternalError", "Local route-table ownership or state is inconsistent or exceeds the local bound.", 500)
+			return
+		}
+		out = &ec2DescribeRouteTablesResponse{Tables: tables}
 	case "CreateVpc":
 		vpc, e := g.Stacks.createNativeVPC(r.Context(), region, request.cidr, request.tags)
 		if e != nil {
