@@ -44,7 +44,7 @@ def run_crossprovider_console():
     with tempfile.TemporaryDirectory(prefix='crossprovider-browser-') as directory:
         directory = Path(directory)
         with running(db=directory/'team-a.sqlite', authenticated=True) as (a, operator), running(db=directory/'team-b.sqlite', authenticated=True) as (b, other), sync_playwright() as p:
-            browser = p.chromium.launch(executable_path=os.environ.get('CHROMIUM_EXECUTABLE') or shutil.which('chromium'), args=['--no-sandbox'])
+            browser = p.chromium.launch(executable_path=os.environ.get('CHROMIUM_EXECUTABLE') or shutil.which('chromium'), chromium_sandbox=True)
             contexts = []
             try:
                 def page_for(endpoint, width=1440):

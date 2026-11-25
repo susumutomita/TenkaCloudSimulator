@@ -3,6 +3,13 @@
   "version": 1,
   "changes": [
     {
+      "path": "docs/acceptance/crossprovider-console.md",
+      "sha256": "5c32b7bc1255c0e21ed7d83f5aefc737195433203905c30ad5d7f7aa8a366510",
+      "disposition": "documentation",
+      "reason": "Documents mandatory Chromium sandbox and distinguishes existing loopback guards from externally provisioned isolation and actual browser/SDK acceptance.",
+      "models": []
+    },
+    {
       "path": "docs/azure-blob.md",
       "sha256": "5ab4e49e7b2499eecc9f063a9e3b64cd3fc4c1260e51d20fbaa02fe64ea1c6de",
       "disposition": "documentation",
@@ -380,10 +387,24 @@
       "models": []
     },
     {
-      "path": "test/e2e/crossprovider_console.py",
-      "sha256": "eef3975cca5b7c753bb1f18bbe45c37e91fa74bf7eaf75a72fa18796d9bf4030",
+      "path": "test/e2e/check.py",
+      "sha256": "0fb6baeb56b11bfc93802d2e4632e6151a1d550930af2c676cace69ecc41f556",
       "disposition": "test-support",
-      "reason": "Opt-in browser fixture checks actual uploaded bytes and row interaction; no live run claimed.",
+      "reason": "Runs the sandbox source guard before the existing mandatory cross-provider real-browser fixture; no skip or failure conversion.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/crossprovider_console.py",
+      "sha256": "50fb69fc38bb57fb05d2a5c5e1660a44fec32521db5a70b1c0fdbc42a39274ed",
+      "disposition": "test-support",
+      "reason": "Requires Chromium sandbox in the existing two-CLI GCP/Azure console fixture while preserving local process/authentication, native state readback, request guard and cleanup operations.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/test_crossprovider_browser_sandbox.py",
+      "sha256": "760604ba7202715984a8b66cbb0a9fbbbf4d0dec0b9f20a8655efd5c09cda724",
+      "disposition": "test-support",
+      "reason": "Offline guards reject missing/default/false sandbox settings and disabled sandbox layers, and require detector plus real fixture in aggregate Conformance.",
       "models": []
     },
     {
