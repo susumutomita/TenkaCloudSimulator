@@ -21191,6 +21191,173 @@
           "expect_invariant": "OnlyEligibleMayAck"
         }
       ]
+    },
+    {
+      "id": "RDSOwnedPostgresRuntime",
+      "model": "formal/RDSOwnedPostgresRuntime.tla",
+      "config": "formal/RDSOwnedPostgresRuntime.cfg",
+      "bounds": "One runtime slot, one active fixed probe, Boolean independently approved pin, handshake verdict and confirmed shutdown, and known/unknown acquisition.",
+      "properties": [
+        "TypeOK",
+        "NoWorkWithoutPin",
+        "ReadyNeedsOwnedSCRAM",
+        "NoProofAfterRevocation",
+        "CleanupAfterDrain",
+        "UncertaintyRetainsWorkspace"
+      ],
+      "limits": "Symbolic trusted pin, owned acquisition, authenticated proof, revocation and cleanup only; not a Go refinement, ELF/path/security validation, TCP/SCRAM, PID, OS shutdown, actual unbounded concurrency, crash recovery, or guest proof.",
+      "source_scope": [
+        "internal/rdsruntime/bundle_linux_amd64.go",
+        "internal/rdsruntime/runtime_linux_amd64.go"
+      ],
+      "mutants": [
+        {
+          "id": "UnpinnedWorkspace",
+          "edits": [
+            {
+              "old": "CanStart == s.pin",
+              "new": "CanStart == TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "NoWorkWithoutPin"
+        },
+        {
+          "id": "ReadyBeforeProof",
+          "edits": [
+            {
+              "old": "CanPublish == s.owned /\\ s.proof",
+              "new": "CanPublish == s.owned",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadyNeedsOwnedSCRAM"
+        },
+        {
+          "id": "ReplyAfterRevocation",
+          "edits": [
+            {
+              "old": "CanAcknowledge == ~s.revoked",
+              "new": "CanAcknowledge == TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "NoProofAfterRevocation"
+        },
+        {
+          "id": "CleanBeforeDrain",
+          "edits": [
+            {
+              "old": "CanStop == ~s.active",
+              "new": "CanStop == TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CleanupAfterDrain"
+        },
+        {
+          "id": "DiscardUnknownAcquisition",
+          "edits": [
+            {
+              "old": "!.phase=IF s.acquire=\"known\" THEN \"checking\" ELSE \"debt\"",
+              "new": "!.phase=IF s.acquire=\"known\" THEN \"checking\" ELSE \"debt\", !.workspace=s.acquire=\"known\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "UncertaintyRetainsWorkspace"
+        }
+      ]
+    },
+    {
+      "id": "RDSOwnedGenerationFence",
+      "model": "formal/RDSOwnedGenerationFence.tla",
+      "config": "formal/RDSOwnedGenerationFence.cfg",
+      "bounds": "One selected DB generation, one concurrent mutation attempt, symbolic IAM, private topology, post-proof freshness, confirmed cleanup and lost owner. One host retirement or valid/invalid Modify preflight intent.",
+      "properties": [
+        "TypeOK",
+        "LaunchNeedsCommittedAuthority",
+        "AttachNeedsCurrent",
+        "FencedGenerationCannotChange",
+        "UncertainCleanupRemainsFenced",
+        "NoPublishedEndpoint",
+        "InvalidModifyKeepsOwner"
+      ],
+      "limits": "Symbolic local generation fence and lifecycle only. Not Go refinement, IAM/SQLite/WAL concurrency proof, launch implementation or PID/authentication verification, crash recovery, actual networking or guest SQL.",
+      "source_scope": [
+        "internal/aws/catalog/engine.go",
+        "internal/aws/catalog/rds_owned_runtime_linux_amd64.go",
+        "internal/aws/catalog/rds_private_postgres_topology.go",
+        "internal/aws/catalog/semantics.go",
+        "internal/rdsruntime/runtime_linux_amd64.go"
+      ],
+      "mutants": [
+        {
+          "id": "ReserveWithoutAuthority",
+          "edits": [
+            {
+              "old": "Reserve == s.auth /\\ s.private",
+              "new": "Reserve == s.private",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "LaunchNeedsCommittedAuthority"
+        },
+        {
+          "id": "AttachStale",
+          "edits": [
+            {
+              "old": "StillCurrent == s.current",
+              "new": "StillCurrent == TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AttachNeedsCurrent"
+        },
+        {
+          "id": "MutateThroughFence",
+          "edits": [
+            {
+              "old": "MayChange == ~s.fence",
+              "new": "MayChange == TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "FencedGenerationCannotChange"
+        },
+        {
+          "id": "ReleaseOnUncertainCleanup",
+          "edits": [
+            {
+              "old": "!.drained=s.clean, !.fence=KeepFence",
+              "new": "!.drained=s.clean, !.fence=FALSE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "UncertainCleanupRemainsFenced"
+        },
+        {
+          "id": "PublishNetwork",
+          "edits": [
+            {
+              "old": "!.endpoint=FALSE]",
+              "new": "!.endpoint=TRUE]",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "NoPublishedEndpoint"
+        },
+        {
+          "id": "RetireInvalidModify",
+          "edits": [
+            {
+              "old": "MayRetire == s.intent # \"invalid-modify\"",
+              "new": "MayRetire == TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "InvalidModifyKeepsOwner"
+        }
+      ]
     }
   ]
 }

@@ -1,276 +1,259 @@
 {
   "version": 1,
-  "base_sha": "49ecb555d405d31d868fc3d73139b0b0a42e4b75",
+  "base_sha": "7064f99ef0d0fbb8dc4556f743f774ac85f3916c",
   "changes": [
     {
-      "path": "README.md",
-      "sha256": "1fd2785225a417c3457045cc10f2f3740e403c6a69a2ae9d6e7c0ae4bfd22b50",
+      "path": "docs/design/rds-owned-generation.md",
+      "sha256": "1cb94a0787f6220a6ef161c9c6b18224e4fa0f004d31ff53fcab6c7a9e366dbd",
       "disposition": "documentation",
-      "reason": "Document the actual bounded native and console deletion semantics, permissions, and explicit exclusions.",
+      "reason": "Documents the explicitly opted-in runtime scope, committed Create result, direct teardown, durable debt and actual test limitations.",
       "models": []
     },
     {
-      "path": "docs/design/0001-go-standalone.md",
-      "sha256": "9e1d92f44a75943c109f001d0f09a8ccb31460b262811b3aedfe99c8872de80c",
+      "path": "docs/design/rds-owned-workload.md",
+      "sha256": "7374268bee8bcd12e9ac1998c4ade1d66d296f371c9f5994130f0877057d6406",
       "disposition": "documentation",
-      "reason": "Document the actual bounded native and console deletion semantics, permissions, and explicit exclusions.",
+      "reason": "Documents explicit optional provider-internal scope, provenance requirements, teardown debt and how to run the focused actual test.",
       "models": []
     },
     {
-      "path": "docs/simpledb-console.md",
-      "sha256": "81d03a410a775d45854bd290fd9911d61d594acd96439aaae17a0946939915a3",
-      "disposition": "documentation",
-      "reason": "Document the actual bounded native and console deletion semantics, permissions, and explicit exclusions.",
-      "models": []
-    },
-    {
-      "path": "docs/simpledb-item-limits.md",
-      "sha256": "ed9f507f3b8220117fca0808297200ecb867068c191d9708f2ce1fd74f81901b",
-      "disposition": "documentation",
-      "reason": "Document the actual bounded native and console deletion semantics, permissions, and explicit exclusions.",
-      "models": []
-    },
-    {
-      "path": "formal/SimpleDBAttributeDelete.cfg",
-      "sha256": "2936aa43c2fc6e8e4f5a28df9a45ce67370404f01be95fcea6dba35878a195b9",
+      "path": "formal/RDSOwnedGenerationFence.cfg",
+      "sha256": "ab6c41c90db27088da813a1222bec64444bb7ccadf8dd72e261b122950566031",
       "disposition": "modeled",
-      "reason": "Bind exact changed operation or client presentation to its bounded abstract contract.",
+      "reason": "Enables the bounded sequence and its five checked safety predicates. Validates a merged Modify proposal before shutting down the owned generation.",
       "models": [
         {
-          "id": "SimpleDBAttributeDelete",
+          "id": "RDSOwnedGenerationFence",
           "properties": [
-            "ExactSurvivors",
-            "NoPhantomItem",
-            "NoUnacknowledgedChange",
-            "OnlyEligibleMayAck"
+            "LaunchNeedsCommittedAuthority",
+            "AttachNeedsCurrent",
+            "FencedGenerationCannotChange",
+            "UncertainCleanupRemainsFenced",
+            "NoPublishedEndpoint",
+            "InvalidModifyKeepsOwner"
           ],
-          "limits": "One authorized symbolic operation on one item only. Not raw Query, concurrency, SQL, SDK or Go implementation evidence."
+          "limits": "Symbolic one-generation lease and lifecycle only. No Go refinement, SQL engine/concurrency or crash-recovery proof, topology lookup, process control, wire authentication or guest networking."
         }
       ]
     },
     {
-      "path": "formal/SimpleDBAttributeDelete.tla",
-      "sha256": "673fdfa8df9bab71f00a77f821276f118412e9a0f89e3a20f2683027d679f00f",
+      "path": "formal/RDSOwnedGenerationFence.tla",
+      "sha256": "8d905d7ee88f0978ae320c845495fc5bf3636e19697d72db88a4acffc063dd3f",
       "disposition": "modeled",
-      "reason": "Bind exact changed operation or client presentation to its bounded abstract contract.",
+      "reason": "Models accepted Create, observed current proof, fencing, retirement, confirmed teardown and retained debt. Validates a merged Modify proposal before shutting down the owned generation.",
       "models": [
         {
-          "id": "SimpleDBAttributeDelete",
+          "id": "RDSOwnedGenerationFence",
           "properties": [
-            "ExactSurvivors",
-            "NoPhantomItem",
-            "NoUnacknowledgedChange",
-            "OnlyEligibleMayAck"
+            "LaunchNeedsCommittedAuthority",
+            "AttachNeedsCurrent",
+            "FencedGenerationCannotChange",
+            "UncertainCleanupRemainsFenced",
+            "NoPublishedEndpoint",
+            "InvalidModifyKeepsOwner"
           ],
-          "limits": "One authorized symbolic operation on one item only. Not raw Query, concurrency, SQL, SDK or Go implementation evidence."
+          "limits": "Symbolic one-generation lease and lifecycle only. No Go refinement, SQL engine/concurrency or crash-recovery proof, topology lookup, process control, wire authentication or guest networking."
+        }
+      ]
+    },
+    {
+      "path": "formal/RDSOwnedPostgresRuntime.cfg",
+      "sha256": "86bde7bed7875df4ea742a870e6fe425d3924b8022ae480e644ee67bde568580",
+      "disposition": "modeled",
+      "reason": "Runs the one-slot one-probe model and checks the named admission and cleanup properties.",
+      "models": [
+        {
+          "id": "RDSOwnedPostgresRuntime",
+          "properties": [
+            "NoWorkWithoutPin",
+            "ReadyNeedsOwnedSCRAM",
+            "NoProofAfterRevocation",
+            "CleanupAfterDrain",
+            "UncertaintyRetainsWorkspace"
+          ],
+          "limits": "Bounded symbolic lifecycle only; no Go refinement, authenticated wire proof, ELF validation, OS reaping, unbounded concurrency, guest proof or crash recovery."
+        }
+      ]
+    },
+    {
+      "path": "formal/RDSOwnedPostgresRuntime.tla",
+      "sha256": "fd99eba9e28701c95387e55348b3dab88631d1a188d407309ceae389f3b54192",
+      "disposition": "modeled",
+      "reason": "Enumerates approved/unapproved launch, exact proof, one in-flight probe, revocation and confirmed or unknown termination.",
+      "models": [
+        {
+          "id": "RDSOwnedPostgresRuntime",
+          "properties": [
+            "NoWorkWithoutPin",
+            "ReadyNeedsOwnedSCRAM",
+            "NoProofAfterRevocation",
+            "CleanupAfterDrain",
+            "UncertaintyRetainsWorkspace"
+          ],
+          "limits": "Bounded symbolic lifecycle only; no Go refinement, authenticated wire proof, ELF validation, OS reaping, unbounded concurrency, guest proof or crash recovery."
         }
       ]
     },
     {
       "path": "formal/models.json",
-      "sha256": "c622a8cc870495768cb6371d3cac80de663915253bfd3bed72c0d7fdcfe35da6",
+      "sha256": "33a3e4a7d2ae099bbff01309822aed3150e9ed5011d4c921208f8ba6ca60e551",
       "disposition": "formal-infrastructure",
-      "reason": "Register finite deletion state contract and two independent mutation controls; preserve inherited models.",
+      "reason": "Registers the bounded native process model and its separate canonical generation fence model, with negative controls, without changing the gate.",
       "models": []
     },
     {
-      "path": "internal/aws/simpledb/delete.go",
-      "sha256": "289319074d90e3e24e04ca77d8b4773ade8b621638d18cdbf37dfbadb0458696",
+      "path": "internal/aws/catalog/engine.go",
+      "sha256": "b38415aa7279d62907074160a1d5da1be9f79c9cf2b4d02c9af190e5331879f4",
       "disposition": "modeled",
-      "reason": "Bind exact changed operation or client presentation to its bounded abstract contract.",
+      "reason": "Holds an optional trusted canonical instance lifetime owner; never installed by ordinary New.",
       "models": [
         {
-          "id": "SimpleDBAttributeDelete",
+          "id": "RDSOwnedGenerationFence",
           "properties": [
-            "ExactSurvivors",
-            "NoPhantomItem",
-            "NoUnacknowledgedChange",
-            "OnlyEligibleMayAck"
+            "LaunchNeedsCommittedAuthority",
+            "NoPublishedEndpoint"
           ],
-          "limits": "One authorized symbolic operation on one item only. Not raw Query, concurrency, SQL, SDK or Go implementation evidence."
+          "limits": "The model treats optional trusted ownership as part of launch eligibility, not a proof of constructor or production CLI wiring."
         }
       ]
     },
     {
-      "path": "internal/aws/simpledb/delete_test.go",
-      "sha256": "fd4674c84b836794e075920fa3aa76eba49e59eb0e08fe3b180527b642d47d85",
+      "path": "internal/aws/catalog/rds_owned_controls_linux_amd64_test.go",
+      "sha256": "d473969937961dadb441a3b827793f14ad45ec06790ecf211f161a28c7252ddc",
       "disposition": "test-support",
-      "reason": "Exercise protocol, access, atomicity, or conditional client fields; no runtime action added by this test.",
+      "reason": "Default offline SQLite fixture verifies lease identity, denied mutation, non-adoption, generation release and sticky failed acquisition without supplying a native workload. Checks that foreign-region mutators cannot consult mutable lifecycle state, including concurrent owner updates.",
       "models": []
     },
     {
-      "path": "internal/aws/simpledb/http.go",
-      "sha256": "9af99a3ece18a01a70c6b7aaff6490cea5ac13576f46b1de5ed2dfeff9d4e8c9",
+      "path": "internal/aws/catalog/rds_owned_runtime_linux_amd64.go",
+      "sha256": "3a6ee308c7719c9e45f6771658766c44bfd05719b82353197b87b5adaa090329",
       "disposition": "modeled",
-      "reason": "Bind exact changed operation or client presentation to its bounded abstract contract.",
+      "reason": "Installs and commits an exact SQLite fence with an authorized row, starts only after commit, verifies current authority before/after readiness, and releases only on confirmed teardown. Validates a merged Modify proposal before shutting down the owned generation. Foreign-target mutations bypass mutable owner state; only nominated regional mutators consult it under the lock.",
       "models": [
         {
-          "id": "SimpleDBAttributeDelete",
+          "id": "RDSOwnedGenerationFence",
           "properties": [
-            "ExactSurvivors",
-            "NoPhantomItem",
-            "NoUnacknowledgedChange",
-            "OnlyEligibleMayAck"
+            "LaunchNeedsCommittedAuthority",
+            "AttachNeedsCurrent",
+            "FencedGenerationCannotChange",
+            "UncertainCleanupRemainsFenced",
+            "NoPublishedEndpoint",
+            "InvalidModifyKeepsOwner"
           ],
-          "limits": "One authorized symbolic operation on one item only. Not raw Query, concurrency, SQL, SDK or Go implementation evidence."
+          "limits": "Symbolic one-generation lease and lifecycle only. No Go refinement, SQL engine/concurrency or crash-recovery proof, topology lookup, process control, wire authentication or guest networking."
         }
       ]
     },
     {
-      "path": "internal/aws/simpledb/item.go",
-      "sha256": "ed49787c4f0556d82b9cf446105a77677dacc975f7e3187366a70f8ea7323a88",
+      "path": "internal/aws/catalog/rds_private_postgres_topology.go",
+      "sha256": "89a294ece3ad977237c0226f40c3d1ace5b613d903ff5a52d4a9c2e192a7811f",
       "disposition": "modeled",
-      "reason": "Bind exact changed operation or client presentation to its bounded abstract contract.",
+      "reason": "Uses the same private topology resolution before catalog mutation and again in the concrete owner, without changing callback authorizations.",
       "models": [
         {
-          "id": "SimpleDBAttributeDelete",
+          "id": "RDSOwnedGenerationFence",
           "properties": [
-            "ExactSurvivors",
-            "NoPhantomItem",
-            "NoUnacknowledgedChange",
-            "OnlyEligibleMayAck"
+            "LaunchNeedsCommittedAuthority",
+            "AttachNeedsCurrent"
           ],
-          "limits": "One authorized symbolic operation on one item only. Not raw Query, concurrency, SQL, SDK or Go implementation evidence."
+          "limits": "The model uses a symbolic proof of topology, not a proof of concrete field decoding, database lookup, or network reachability."
         }
       ]
     },
     {
-      "path": "internal/server/apidocs/openapi.json",
-      "sha256": "c72e0dd709fef200d80a962bca2f54e8469f6efa42e0d1692c96829d000714ba",
-      "disposition": "presentation",
-      "reason": "Track a non-default, conditional reference example or deterministic console build inventory, not a new independent backend.",
+      "path": "internal/aws/catalog/semantics.go",
+      "sha256": "18cd880b0ceef48e58bcf8378e85b3df5a5dac527d9d24a8cdc6b508cdb1b139",
+      "disposition": "modeled",
+      "reason": "Reserves in the authorized create transaction and starts only after commit; before authorized update/delete/tag generation writes, retires the exact active owner. Validates a merged Modify proposal before shutting down the owned generation.",
+      "models": [
+        {
+          "id": "RDSOwnedGenerationFence",
+          "properties": [
+            "LaunchNeedsCommittedAuthority",
+            "FencedGenerationCannotChange",
+            "UncertainCleanupRemainsFenced",
+            "NoPublishedEndpoint",
+            "InvalidModifyKeepsOwner"
+          ],
+          "limits": "Symbolic one-generation lease and lifecycle only. No Go refinement, SQL engine/concurrency or crash-recovery proof, topology lookup, process control, wire authentication or guest networking."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/rds_owned_runtime_linux_amd64_test.go",
+      "sha256": "ddc31a59b1a87d76ee1051f1fc521f062237c60652e9c3eff905b834710d4720",
+      "disposition": "test-support",
+      "reason": "Actual AWS Query/SQLite and opted-in PostgreSQL lifecycle fixture tests authoritative negatives, race fencing, teardown, substitution/drift, and unconfirmed debt. Runs invalid and valid Modify against the real workload.",
       "models": []
     },
     {
-      "path": "internal/server/server.go",
-      "sha256": "56ac7b8a48570f5619c0f986b296fa51c0507d69497e05c5f0214edcd650e686",
+      "path": "internal/rdsruntime/bundle_linux_amd64.go",
+      "sha256": "ba2b71aec19276b8d1c4bccd167de4738175cd114c428d41d34fea48a5344494",
       "disposition": "modeled",
-      "reason": "Bind exact changed operation or client presentation to its bounded abstract contract.",
+      "reason": "Makes the optional trusted bundle a prerequisite to starting a workspace or process.",
       "models": [
         {
-          "id": "SimpleDBConsoleEpoch",
+          "id": "RDSOwnedPostgresRuntime",
           "properties": [
-            "OnlyCurrentScopeVisible",
-            "ReadbackOnlyAfterAck",
-            "SingleCurrentChain",
-            "WriteNoticeRequiresAck"
+            "NoWorkWithoutPin"
           ],
-          "limits": "Only scope, pending chains, acknowledgment and readback order are abstracted. No claims for exact operation, DOM, authorization implementation or SQLite."
+          "limits": "Bundle validation is represented by a Boolean independently approved pin, not a proof of rooted file lookup, hashing, ELF, platform dynamic linking, or file identity."
         }
       ]
     },
     {
-      "path": "internal/server/web/app.js",
-      "sha256": "b4688bbee0c5e5b55c6c2889e513346205ab8872284648fca49fb91bff46ab11",
+      "path": "internal/rdsruntime/lifecycle_controls_linux_amd64_test.go",
+      "sha256": "46cbfc3880fdb0a1bf311b62304da00c485e77fd24200ad5e9f45e7e81185d7f",
+      "disposition": "test-support",
+      "reason": "Default native unit tests verify private postmaster lock parsing, cancellation, reaped process status, credential-file scope, teardown and retained cleanup debt; they do not assert PostgreSQL service readiness.",
+      "models": []
+    },
+    {
+      "path": "internal/rdsruntime/runtime_linux_amd64.go",
+      "sha256": "d1e4f6649b9208108e1b66e8d7b5ca145069231ea85c0c606801a40f250f00a4",
       "disposition": "modeled",
-      "reason": "Bind exact changed operation or client presentation to its bounded abstract contract.",
+      "reason": "Claims one workspace only after opt-in, withholds the internal handle until native child and authentication match, revokes then drains before exact close, and refuses cleanup on ambiguity.",
       "models": [
         {
-          "id": "SimpleDBConsoleEpoch",
+          "id": "RDSOwnedPostgresRuntime",
           "properties": [
-            "OnlyCurrentScopeVisible",
-            "ReadbackOnlyAfterAck",
-            "SingleCurrentChain",
-            "WriteNoticeRequiresAck"
+            "NoWorkWithoutPin",
+            "ReadyNeedsOwnedSCRAM",
+            "NoProofAfterRevocation",
+            "CleanupAfterDrain",
+            "UncertaintyRetainsWorkspace"
           ],
-          "limits": "Only scope, pending chains, acknowledgment and readback order are abstracted. No claims for exact operation, DOM, authorization implementation or SQLite."
+          "limits": "Bounded symbolic lifecycle only; no Go refinement, authenticated wire proof, ELF validation, OS reaping, unbounded concurrency, guest proof or crash recovery."
+        },
+        {
+          "id": "RDSOwnedGenerationFence",
+          "properties": [
+            "AttachNeedsCurrent",
+            "UncertainCleanupRemainsFenced"
+          ],
+          "limits": "Symbolic one-generation lease and lifecycle only. No Go refinement, SQL engine/concurrency or crash-recovery proof, topology lookup, process control, wire authentication or guest networking."
         }
       ]
     },
     {
-      "path": "scripts/formal_model_gate.py",
-      "sha256": "e9a8527a5a7918187e2494c8caec14c1db07a7473451c08d53fbdfe4f0247746",
-      "disposition": "formal-infrastructure",
-      "reason": "Pin the newly registered deletion model and verify that its exact guards cannot be dropped; retain the complete existing inventory.",
+      "path": "internal/rdsruntime/runtime_linux_amd64_test.go",
+      "sha256": "21d538b836c09495edd7d6aa0d65a79b832f7f1dcb0ebefc5222dacddb2f21e8",
+      "disposition": "test-support",
+      "reason": "Offline guards and independently opted-in measured PostgreSQL 15.20 test cover pin, SCRAM, one-slot collision, stale probe, child shutdown and private workspace removal.",
+      "models": []
+    },
+    {
+      "path": "internal/rdsruntime/seal_controls_linux_amd64_test.go",
+      "sha256": "59fa0eec33d53ef6a8a1e9a0cd8d97425c37a8fbf9d9c4ba5a685058a70d7fb6",
+      "disposition": "test-support",
+      "reason": "Default native tests verify pinned layout, inode identity, ELF format, workspace admission and cancellation using inert header data, never executing substitute database binaries.",
       "models": []
     },
     {
       "path": "scripts/test-formal-gate.py",
-      "sha256": "6f6e7f73803bfa2aacd17e110297b5efffbc861b0666f62d9ac336bceeb4b645",
+      "sha256": "6260359e57c8be9bb522372f9d0cd658d725e425af6acddedfa9fb49924b67a6",
       "disposition": "formal-infrastructure",
-      "reason": "Pin the newly registered deletion model and verify that its exact guards cannot be dropped; retain the complete existing inventory.",
-      "models": []
-    },
-    {
-      "path": "scripts/test-simpledb-delete-sdk.py",
-      "sha256": "427ada116d01a0f3bd569520c79f9d311120962eaa08d8f1f1ded5b9066434ab",
-      "disposition": "test-support",
-      "reason": "Exercise protocol, access, atomicity, or conditional client fields; no runtime action added by this test.",
-      "models": []
-    },
-    {
-      "path": "tools/console/bundle-digests.json",
-      "sha256": "3042dafa42c8f78fbfe5711d6b8f3ec7bea7d05431ed4a352a1c5a2771735e40",
-      "disposition": "presentation",
-      "reason": "Track a non-default, conditional reference example or deterministic console build inventory, not a new independent backend.",
-      "models": []
-    },
-    {
-      "path": "tools/console/bundle-inputs.json",
-      "sha256": "a2987d3e85790c97233cc63d2317de32aa321cf4e7f65c21fcc4e42b53f38064",
-      "disposition": "presentation",
-      "reason": "Track a non-default, conditional reference example or deterministic console build inventory, not a new independent backend.",
-      "models": []
-    },
-    {
-      "path": "tools/console/src/main.jsx",
-      "sha256": "1d3218247ba169dd2ff0ba497afa1782738fed04efba16350657a58b2be37121",
-      "disposition": "modeled",
-      "reason": "Bind exact changed operation or client presentation to its bounded abstract contract.",
-      "models": [
-        {
-          "id": "SimpleDBConsoleEpoch",
-          "properties": [
-            "OnlyCurrentScopeVisible",
-            "ReadbackOnlyAfterAck",
-            "SingleCurrentChain",
-            "WriteNoticeRequiresAck"
-          ],
-          "limits": "Only scope, pending chains, acknowledgment and readback order are abstracted. No claims for exact operation, DOM, authorization implementation or SQLite."
-        }
-      ]
-    },
-    {
-      "path": "tools/console/src/simpledb-client.mjs",
-      "sha256": "ade8a1b34531cfb5d9783b757a601d7f32a0a8264e2002a4f4398f1252bbea4f",
-      "disposition": "modeled",
-      "reason": "Bind exact changed operation or client presentation to its bounded abstract contract.",
-      "models": [
-        {
-          "id": "SimpleDBConsoleEpoch",
-          "properties": [
-            "OnlyCurrentScopeVisible",
-            "ReadbackOnlyAfterAck",
-            "SingleCurrentChain",
-            "WriteNoticeRequiresAck"
-          ],
-          "limits": "Only scope, pending chains, acknowledgment and readback order are abstracted. No claims for exact operation, DOM, authorization implementation or SQLite."
-        }
-      ]
-    },
-    {
-      "path": "tools/console/src/simpledb.jsx",
-      "sha256": "0a78f3dd45d8245b65a207c28efeb5b7c3d73a2762bd6824af1221a101d18252",
-      "disposition": "modeled",
-      "reason": "Bind exact changed operation or client presentation to its bounded abstract contract.",
-      "models": [
-        {
-          "id": "SimpleDBConsoleEpoch",
-          "properties": [
-            "OnlyCurrentScopeVisible",
-            "ReadbackOnlyAfterAck",
-            "SingleCurrentChain",
-            "WriteNoticeRequiresAck"
-          ],
-          "limits": "Only scope, pending chains, acknowledgment and readback order are abstracted. No claims for exact operation, DOM, authorization implementation or SQLite."
-        }
-      ]
-    },
-    {
-      "path": "tools/console/test/simpledb-client.test.mjs",
-      "sha256": "6f1a958e2e0f673d7f421ad44e27470fded80920d826bbe05af5d78ddd909268",
-      "disposition": "presentation",
-      "reason": "Exercise protocol, access, atomicity, or conditional client fields; no runtime action added by this test.",
+      "reason": "Name the two new owned PostgreSQL models in the independent exact registry assertion without changing existing names or weakening equality.",
       "models": []
     }
   ]

@@ -1,6 +1,7 @@
 package catalog
 
 import (
+	"context"
 	"database/sql"
 	"errors"
 	"regexp"
@@ -15,20 +16,40 @@ type RDSPrivatePostgresRefs struct {
 	SubnetIDs, SecurityGroupIDs []string
 }
 
+// Only the concrete Linux/amd64 provider composition implements this
+// package-private contract. There is no request-selectable callback or target.
+type privateRDSLifecycle interface {
+	lock(region string, kind Kind) func()
+	reserve(tx *sql.Tx, r row) (bool, error)
+	startCommitted(ctx context.Context, r row)
+	preflightModify(q *request, proposed row) error
+	retire(r row) error
+}
+
+func (q *request) retireOwnedPrivateRDS(r row) error {
+	if q.e.ownedPrivateRDS == nil || r.Service != "rds" || r.Kind != "dbInstance" {
+		return nil
+	}
+	return q.e.ownedPrivateRDS.retire(r)
+}
+
 func (q *request) checkRDSPrivatePostgresTopology(tx *sql.Tx, r row) error {
 	validate := q.e.cfg.ValidateRDSPrivatePostgres
-	if validate == nil || r.Service != "rds" || r.Kind != "dbInstance" ||
+	if validate == nil || !privatePostgresShape(r) ||
 		(q.op.Name != "CreateDBInstance" && q.op.Name != "ModifyDBInstance") {
 		return nil
 	}
-	// Omission is not explicit private intent. Other existing configuration
-	// records stay outside this optional slice, without making a runtime claim.
+	return validatePrivatePostgresRefs(q.ctx, tx, r, validate)
+}
+
+func privatePostgresShape(r row) bool {
 	engine, _ := r.Document["Engine"].(string)
 	public, specified := r.Document["PubliclyAccessible"].(bool)
 	_, inCluster := r.Document["DBClusterIdentifier"]
-	if engine != "postgres" || !specified || public || inCluster {
-		return nil
-	}
+	return r.Service == "rds" && r.Kind == "dbInstance" && engine == "postgres" && specified && !public && !inCluster
+}
+
+func validatePrivatePostgresRefs(ctx context.Context, tx *sql.Tx, r row, validate func(context.Context, *sql.Tx, RDSPrivatePostgresRefs) error) error {
 	ref, _ := r.Document["DBSubnetGroup"].(map[string]any)
 	name, _ := ref["DBSubnetGroupName"].(string)
 	groups, groupOK := exactTopologyIDs(r.Document["VpcSecurityGroups"], "VpcSecurityGroupId", rdsSecurityPattern, 1, 5)
@@ -46,7 +67,7 @@ func (q *request) checkRDSPrivatePostgresTopology(tx *sql.Tx, r row) error {
 	if !subnetOK || storedGroup.ID != name || storedGroup.Name != name || storedGroup.Seq <= 0 || storedGroup.Generation <= 0 {
 		return Failure("InvalidVPCNetworkStateFault", "The stored private PostgreSQL DB subnet group cannot be resolved.")
 	}
-	return validate(q.ctx, tx, RDSPrivatePostgresRefs{Region: r.Region, SubnetIDs: subnets, SecurityGroupIDs: groups})
+	return validate(ctx, tx, RDSPrivatePostgresRefs{Region: r.Region, SubnetIDs: subnets, SecurityGroupIDs: groups})
 }
 
 func exactTopologyIDs(value any, field string, pattern *regexp.Regexp, min, max int) ([]string, bool) {
