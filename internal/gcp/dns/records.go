@@ -17,7 +17,7 @@ const (
 )
 
 // Local validation is intentionally a subset: lowercase absolute ASCII domains,
-// A/AAAA/CNAME/NS/PTR/MX and one plain quoted TXT string per rdata. Wildcards,
+// A/AAAA/CNAME/NS/PTR/MX/SRV and one plain quoted TXT string per rdata. Wildcards,
 // DNSSEC signatures, routing policies and other types are explicitly refused.
 type record struct {
 	Kind string   `json:"kind,omitempty"`
@@ -46,10 +46,16 @@ func validDomain(s string) bool {
 }
 func knownType(s string) bool {
 	switch s {
-	case "A", "AAAA", "CNAME", "NS", "SOA", "PTR", "MX", "TXT":
+	case "A", "AAAA", "CNAME", "NS", "SOA", "PTR", "MX", "SRV", "TXT":
 		return true
 	}
 	return false
+}
+
+// MX and SRV use canonical decimal 16-bit unsigned fields in this local subset.
+func canonicalUint16(s string) bool {
+	n, err := strconv.ParseUint(s, 10, 16)
+	return err == nil && strconv.FormatUint(n, 10) == s
 }
 func (r record) key() string { return r.Name + "/" + r.Type }
 func (r *record) validate() error {
@@ -77,10 +83,13 @@ func (r *record) validate() error {
 			good = validDomain(s)
 		case "MX":
 			parts := strings.Split(s, " ")
-			if len(parts) == 2 {
-				n, err := strconv.ParseUint(parts[0], 10, 16)
-				good = err == nil && strconv.FormatUint(n, 10) == parts[0] && validDomain(parts[1])
-			}
+			good = len(parts) == 2 && canonicalUint16(parts[0]) && validDomain(parts[1])
+		case "SRV":
+			// RFC 2782: priority weight port target. Store the service advertisement;
+			// do not resolve its target or interpret its ordering/weight.
+			parts := strings.Split(s, " ")
+			good = len(parts) == 4 && canonicalUint16(parts[0]) && canonicalUint16(parts[1]) &&
+				canonicalUint16(parts[2]) && (parts[3] == "." || validDomain(parts[3]))
 		case "TXT":
 			if len(s) >= 2 && len(s) <= 257 && s[0] == '"' && s[len(s)-1] == '"' {
 				good = true

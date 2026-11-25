@@ -12,13 +12,15 @@ Consoleは公式Cloudscape/Reactを開発時にbundleし、fonts/assets/licenses
 
 SSM の [ドキュメント履歴](../ssm-documents.md) はリージョンとドキュメント名で検索し、1 回の SQLite 読み取りで番号順のスナップショットを返す。ページごとに IAM を評価し、続きは対象・呼出者・スナップショットに結び付く。一覧に定義本文は含めず、Console の本文比較には別の GetDocument 権限が必要。ドキュメントは実行しない。
 
+SNS の HTTP/HTTPS コンソールは native Query を呼び出し、通知先 URL をローカル SQLite に記録するだけで外部に接続しない。購読属性を読む際は ARN から親トピックを特定して IAM を先に評価し、購読と親の存在およびリージョンの一致を同じ読み取りで確認する。専用 Scalar は us-east-1 固定で通常のログインセッションを使い、コンソールの演習用 ID 選択を引き継がない。[対応範囲](../sns.md)。
+
 Azure Queue は Blob と独立したプロバイダールートを持ち、固定 account・owner・environment に結びつくローカル SQLite にメッセージを保存する。受信と更新は表示予約と pop receipt を更新し、削除は現在の receipt を要求する。Console と API リファレンスは同じ所有者境界とデータプレーンを使う。アカウント全体のキュー一覧や Azure RBAC は模倣しない。[操作範囲と検証条件](../acceptance/azure-queue.md)。
 
 CLI token authorityはoperatorと15分participantを区別し、participant identity header上書きを拒否する。主催ホストはチームごとに別プロセス/DB/tokenを管理し、ログイン済み利用者とチームを認可する。単一プロセス内のidentity選択でチーム分離しない。library compositionのserver.Newは認証を自動追加しない。
 
 SQLiteは既存のncruces SQLite/Wasm engineをGo process内で実行する。外部SQLite実行ファイルやWasm runtimeサービスは不要。有限quotaと接続数制限を維持し、実AWSの整合性/リージョン/アカウント/クォータ全体を再現しない。
 
-Protocol/API subsetと制限は[README](../../README.md)。限定的なGoogle Cloud Storage/Azure Blob Storageを独立providerとして接続し、認証済みActorから固定project/account所有者へ写像する。AWS IAMの権限を継承せず、owner-onlyローカル認可と公式SDKの検証範囲は[マルチクラウドストレージ](../multicloud-storage.md)に記す。旧Python world/deploy/grading protocolは復活させず、必要なSSM/CFNの知識だけGoへ移行。問題取り込み・採点はTenkaCloud/Challenge責務とする。
+Protocol/API subsetと制限は[README](../../README.md)。限定的なGoogle Cloud Storage/Azure Blob Storageを独立providerとして接続し、認証済みActorから固定project/account所有者へ写像する。[Cloud DNS](../acceptance/gcp-cloud-dns.md) は同じproject所有者の範囲でSRVを含むRRsetの変更と参照を提供する。SRVの優先度・重み・ポートは保存するが、名前解決や接続先の選択は行わない。AWS IAMの権限を継承せず、owner-onlyローカル認可と公式SDKの検証範囲は[マルチクラウドストレージ](../multicloud-storage.md)に記す。旧Python world/deploy/grading protocolは復活させず、必要なSSM/CFNの知識だけGoへ移行。問題取り込み・採点はTenkaCloud/Challenge責務とする。
 
 Azure Blobの通常APIは `2023-11-03` に固定する。BlobのGET/HEADでは単一の `If-Modified-Since` を扱い、通常のGETには有界の単一範囲CRC64がある。明示的にネゴシエートした `2025-01-05` のGet Blobだけで、最大4 MiBの単一セグメントを構造化CRC64として返す。共通のローカル所有者・読み取り条件を適用し、通常の範囲チェックサムヘッダーと併用しない。それ以外の同バージョン操作やSDK全体の互換性は対象外。[Azure Blobの条件付き読み取りとチェックサムの詳細](../azure-blob.md#single-range-download-subset)。
 

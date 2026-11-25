@@ -87,7 +87,8 @@ console, CloudFormation adapter or Challenge integration.
   List versions through the native read-only API or compare saved definitions in the console.
   This does not execute the documents.
 - **Functions and messaging:** [Lambda](docs/lambda.md), [API Gateway](docs/apigateway.md),
-  [SQS](docs/sqs.md), [SNS](docs/sns.md), [CloudWatch Logs](docs/cloudwatch-logs.md).
+  [SQS](docs/sqs.md), [SNS](docs/sns.md) (local HTTP/HTTPS subscription Console and reference; no external delivery),
+  [CloudWatch Logs](docs/cloudwatch-logs.md).
 - **Identity and secrets:** [IAM](docs/iam.md), [native SDK / STS](docs/sts-native.md),
   [Secrets Manager](docs/secrets-manager.md), [KMS](docs/kms.md), [WAFv2](docs/wafv2.md).
 - **Networking:** [EC2/VPC discovery and VPC create/delete](docs/ec2-read-discovery.md),
@@ -103,6 +104,7 @@ console, CloudFormation adapter or Challenge integration.
 - **Other clouds:** [Google Cloud Storage / Azure Blob Storage](docs/multicloud-storage.md),
   [Azure Blob conditional and CRC64 read limits](docs/azure-blob.md#single-range-download-subset),
   [App Engine (Python 3.12 WSGI versions, traffic splits, firewall)](docs/gcp-appengine.md),
+  [Cloud DNS (bounded zone and record changes, including SRV)](docs/acceptance/gcp-cloud-dns.md),
   [Google Cloud console](docs/gcp-console.md), [Azure console](docs/azure-console.md),
   [Azure Queue Storage (bounded named-queue operations)](docs/acceptance/azure-queue.md),
   [opt-in Sakura Disk metadata](docs/sakura.md).

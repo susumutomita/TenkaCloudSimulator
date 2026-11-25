@@ -1,17 +1,17 @@
 {
   "version": 1,
-  "base_sha": "0f215f10081716ee5afaef90afa03d69a00c350d",
+  "base_sha": "303557016299a289b43293fb5b1bbf4ec39372ed",
   "changes": [
     {
       "path": "README.md",
-      "sha256": "cc7e40ef77760e2e92efd4352b349f80b26f0e86ea5a448e9d3f1080e1f03f4b",
+      "sha256": "80a8075be4d35cfd710c59a905c344bc1e9b44ee02a5b6a30e357e1d7dfa97f3",
       "disposition": "documentation",
       "reason": "Documents exact SSM version-read scope, limitations, or related license notices without adding runtime authority.",
       "models": []
     },
     {
       "path": "docs/design/0001-go-standalone.md",
-      "sha256": "09162ffa82a08f7ff5aafcd21d92c7a2da93b26534b7950a0e46c7efbbe15218",
+      "sha256": "37dbbfa17cbc145d7441f6acf71dc91250ad575c744406a002987f820e600669",
       "disposition": "documentation",
       "reason": "Documents exact SSM version-read scope, limitations, or related license notices without adding runtime authority.",
       "models": []
@@ -67,7 +67,7 @@
     },
     {
       "path": "formal/models.json",
-      "sha256": "6044330a11d0c230491f2a5882810824d8784ee51c8b784b2ef28b4881f0fc2a",
+      "sha256": "d76e1b430ab97bad6a937b66168c5dbf0fac7da70776c6d755413e57ed45abe6",
       "disposition": "formal-infrastructure",
       "reason": "Registers the new bounded SSM readback model without dropping inherited model obligations.",
       "models": []
@@ -139,9 +139,9 @@
     },
     {
       "path": "internal/server/server.go",
-      "sha256": "9a4d83af2b2de4c483ba0691678bc7ba7adf9962878d024cb5610aa9cf72c593",
+      "sha256": "e92fb492c3a48a3febe16935e41fabeabfce0e40a22caa646e26f8c72beabe01",
       "disposition": "modeled",
-      "reason": "Advertises the implemented SSM definition-only operation in the existing capability response, without changing the Queue route, identity or runtime admission. The inherited model addresses Queue only.",
+      "reason": "Advertises the implemented SSM definition-only operation in the existing capability response, without changing the SNS or Queue route, identity or runtime admission. Inherited models address SNS and Queue, not the new readback.",
       "models": [
         {
           "id": "AzureQueueOwnerAccess",
@@ -150,21 +150,29 @@
             "ReferenceGetAuthorized"
           ],
           "limits": "Existing route and auth middleware remain outside this bounded model. Models only normalized owner/actor decisions, selected discovery epoch and matching principal, configured account projection in the dynamic spec enum/default, and native admission independent of UI visibility. Does not prove token handling, actual Go/React/SQLite refinement, URL parsing, whole schema, SDK, browser, route transport, runtime or liveness. Embedded bundle binding is the generated projection of the exact source guards, not a model of the build system or JavaScript event delivery."
+        },
+        {
+          "id": "SNSAdmission",
+          "properties": [
+            "NoSuccessOnRefusal",
+            "NoUnauthorizedEffect"
+          ],
+          "limits": "Limited registration/admission context; not proof of advertised UI auth, middleware or transport. Boolean admission witnesses abstract actual Go parsing/attributes/Subject/UTF-8/body sizes/signature syntax, IAM matching and region/resource lookup. Validated dispatch permits metadata writes; no initialization, credential, SQL, real SDK or Go refinement proof. Shared Gateway/server file bindings cover SNS registration/admission only, preserving all other providers/services. Actual malformed Query and immutable-state/region/SDK/SQL regressions remain separate evidence."
         }
       ]
     },
     {
       "path": "internal/server/web/app.css",
-      "sha256": "5832b6a729600530e939b4f7b9991a0c7bd778b99ff31e4567f0e1dd239fb48e",
+      "sha256": "8d6fe33457da819c0ad2b996d7d39d0ccb9363cf50e063da88d1d9a308c57e0a",
       "disposition": "presentation",
       "reason": "Read-only Console, reference, frontend tests or generated build metadata; the existing API is authoritative.",
       "models": []
     },
     {
       "path": "internal/server/web/app.js",
-      "sha256": "93ca74d843f0455bf0c3a31ef5294d475e987af7b79061898d8d98cfe72d4d12",
+      "sha256": "8f2137d4007a8ffef782b8deff1fa11d1dc1c9c4b09231d7166c5915bfdeaeb1",
       "disposition": "modeled",
-      "reason": "Rebuilds the embedded console from the combined exact source, preserving Azure Queue, Azure Blob and S3 multipart model scope. The added SSM view code is not covered by those inherited finite models.",
+      "reason": "Rebuilds the embedded console from the combined exact source, preserving SNS, Azure Queue, Azure Blob and S3 multipart model scope. The added SSM view code is not covered by those inherited finite models.",
       "models": [
         {
           "id": "AzureBlobRowDownload",
@@ -193,26 +201,30 @@
             "PresentationOwnerOnly"
           ],
           "limits": "Only the Queue capability and matching identity epoch are modeled; no all-service or JavaScript timing claim. Models only normalized owner/actor decisions, selected discovery epoch and matching principal, configured account projection in the dynamic spec enum/default, and native admission independent of UI visibility. Does not prove token handling, actual Go/React/SQLite refinement, URL parsing, whole schema, SDK, browser, route transport, runtime or liveness. Embedded bundle binding is the generated projection of the exact source guards, not a model of the build system or JavaScript event delivery."
+        },
+        {
+          "id": "SNSConsoleResponseAdmission",
+          "properties": [
+            "MountRequiresCapabilityAndNoHandoff",
+            "KeyedOwnerMatchesScope",
+            "OnlyOneCurrentFlight",
+            "NoLateVisibleEffect",
+            "OnlyCurrentTopicUpdates"
+          ],
+          "limits": "Only modeled SNS boundary and source projection; component/browser scheduling, parser/requests, Scalar and shared auth redirect are separate. Bound only visible SNS console hook state, projected typed capability and valid per-topic selection labels. Instance and topic revision are ghost labels, not invented callback-generation checks. No theorem about React or JS scheduling/code refinement, backend AWS IAM, parser/wire, final remote write outcome, shared 401 redirect/onSaving side effects, capability refresh, actual browser/keyboard, or build correctness. Scalar is signed-in session and fixed us-east-1, not Console principal/region parity; it is not modeled."
         }
       ]
     },
     {
-      "path": "internal/server/web/app.js.LEGAL.txt",
-      "sha256": "07f02f51b4c922a2242d21ce8c3929067b724bed04f42bce3a17c11159a1b0aa",
-      "disposition": "presentation",
-      "reason": "Read-only Console, reference, frontend tests or generated build metadata; the existing API is authoritative.",
-      "models": []
-    },
-    {
       "path": "scripts/formal_model_gate.py",
-      "sha256": "5eb3eec1b265ebf6ad9fa326e2d04de4a215cf95dc8e3ed572566916a6eb3fa9",
+      "sha256": "cb0ae4df415138da401ad881325d234818c66b2f9a4be41b7f663ccb02526ccf",
       "disposition": "formal-infrastructure",
       "reason": "Registers the new bounded SSM readback model without dropping inherited model obligations.",
       "models": []
     },
     {
       "path": "scripts/test-formal-gate.py",
-      "sha256": "0ba00c337d4028c534a9b060793e8a109322c8a967ffb09c47f349fb909f1d51",
+      "sha256": "d44829e3d34b611a9845323014a283c3ccfed5cbee7146f29f7b12202a0fcd04",
       "disposition": "formal-infrastructure",
       "reason": "Registers the new bounded SSM readback model without dropping inherited model obligations.",
       "models": []
@@ -261,23 +273,23 @@
     },
     {
       "path": "tools/console/bundle-digests.json",
-      "sha256": "fbc988e5bb14f33289940fca9ef3bf03eec43b69a122d34e7d1893fa2cf26e8a",
+      "sha256": "3c3e04b41a49e0fa5ee444f6040efacfeaf5601dcebc09982aa886a583f5b8b4",
       "disposition": "presentation",
       "reason": "Read-only Console, reference, frontend tests or generated build metadata; the existing API is authoritative.",
       "models": []
     },
     {
       "path": "tools/console/bundle-inputs.json",
-      "sha256": "8cbfd9ba8054566521f244af016c776a93225ef8e78d76b723257cabe62a9834",
+      "sha256": "c4bd1431dd98cfb79fdc9db511aafb9c8866fbe5a1c29f12fde79190a76f4c5f",
       "disposition": "presentation",
       "reason": "Read-only Console, reference, frontend tests or generated build metadata; the existing API is authoritative.",
       "models": []
     },
     {
       "path": "tools/console/src/console-navigation.mjs",
-      "sha256": "15e30291890a7ed3f39dfaf3dd49fd8510e09dc711c527bce9f486331a17bc47",
+      "sha256": "2ca108257a9a35cd4291bf0b1bfb74ccaaac5a7c3cffb4f7820e6da0b441c98d",
       "disposition": "modeled",
-      "reason": "Adds an SSM route requiring the three listed definition API operations and excludes bound handoff scopes; does not change owner-only Queue discovery. The inherited model only addresses Queue.",
+      "reason": "Adds an SSM route requiring the three listed definition API operations and excludes bound handoff scopes; does not change SNS or owner-only Queue discovery. Inherited models only address SNS and Queue.",
       "models": [
         {
           "id": "AzureQueueOwnerAccess",
@@ -287,14 +299,25 @@
             "PresentationOwnerOnly"
           ],
           "limits": "Only the Queue capability and matching identity epoch are modeled; no all-service or JavaScript timing claim. Models only normalized owner/actor decisions, selected discovery epoch and matching principal, configured account projection in the dynamic spec enum/default, and native admission independent of UI visibility. Does not prove token handling, actual Go/React/SQLite refinement, URL parsing, whole schema, SDK, browser, route transport, runtime or liveness. Embedded bundle binding is the generated projection of the exact source guards, not a model of the build system or JavaScript event delivery."
+        },
+        {
+          "id": "SNSConsoleResponseAdmission",
+          "properties": [
+            "MountRequiresCapabilityAndNoHandoff",
+            "KeyedOwnerMatchesScope",
+            "OnlyOneCurrentFlight",
+            "NoLateVisibleEffect",
+            "OnlyCurrentTopicUpdates"
+          ],
+          "limits": "Only modeled SNS boundary and source projection; component/browser scheduling, parser/requests, Scalar and shared auth redirect are separate. Bound only visible SNS console hook state, projected typed capability and valid per-topic selection labels. Instance and topic revision are ghost labels, not invented callback-generation checks. No theorem about React or JS scheduling/code refinement, backend AWS IAM, parser/wire, final remote write outcome, shared 401 redirect/onSaving side effects, capability refresh, actual browser/keyboard, or build correctness. Scalar is signed-in session and fixed us-east-1, not Console principal/region parity; it is not modeled."
         }
       ]
     },
     {
       "path": "tools/console/src/main.jsx",
-      "sha256": "15e1f4a28d255942e13b42e20b57c76cc46dd639566e1c806519d154b0e38c69",
+      "sha256": "3ff99fa20851f92b146607d8e5d22dac4c737d64326ce35cd79368db0a6ce720",
       "disposition": "modeled",
-      "reason": "Mounts read-only SSM documents by selected region, identity and navigation epoch; Azure Queue selection is retained unchanged. The SSM React/browser behavior is not part of the inherited Queue model.",
+      "reason": "Mounts read-only SSM documents by selected region, identity and navigation epoch; SNS and Azure Queue selection are retained unchanged. The SSM React/browser behavior is not part of the inherited Queue model.",
       "models": [
         {
           "id": "AzureQueueOwnerAccess",
@@ -304,6 +327,17 @@
             "PresentationOwnerOnly"
           ],
           "limits": "Only the Queue capability and matching identity epoch are modeled; no all-service or JavaScript timing claim. Models only normalized owner/actor decisions, selected discovery epoch and matching principal, configured account projection in the dynamic spec enum/default, and native admission independent of UI visibility. Does not prove token handling, actual Go/React/SQLite refinement, URL parsing, whole schema, SDK, browser, route transport, runtime or liveness. Embedded bundle binding is the generated projection of the exact source guards, not a model of the build system or JavaScript event delivery."
+        },
+        {
+          "id": "SNSConsoleResponseAdmission",
+          "properties": [
+            "MountRequiresCapabilityAndNoHandoff",
+            "KeyedOwnerMatchesScope",
+            "OnlyOneCurrentFlight",
+            "NoLateVisibleEffect",
+            "OnlyCurrentTopicUpdates"
+          ],
+          "limits": "Only modeled SNS boundary and source projection; component/browser scheduling, parser/requests, Scalar and shared auth redirect are separate. Bound only visible SNS console hook state, projected typed capability and valid per-topic selection labels. Instance and topic revision are ghost labels, not invented callback-generation checks. No theorem about React or JS scheduling/code refinement, backend AWS IAM, parser/wire, final remote write outcome, shared 401 redirect/onSaving side effects, capability refresh, actual browser/keyboard, or build correctness. Scalar is signed-in session and fixed us-east-1, not Console principal/region parity; it is not modeled."
         }
       ]
     },

@@ -20267,6 +20267,367 @@
       ]
     },
     {
+      "id": "SNSSubscriptionReadback",
+      "model": "formal/SNSSubscriptionReadback.tla",
+      "config": "formal/SNSSubscriptionReadback.cfg",
+      "bounds": "Three topic ARNs (two east/one west), two subscription IDs, two request regions, all eight captured per-topic IAM grant sets, parse success/failure and SQL read success/failure. Eight retained/absent/history/defensive store seeds per request: 3072 starts, one request, zero or more monotone interleaved unsubscribes/topic deletions; no pruning. Baseline 48000 distinct states, depth 9.",
+      "properties": [
+        "TypeOK",
+        "ReadDoesNotChangeStore",
+        "AuthorizationTargetsParent",
+        "LookupRequiresAuthorization",
+        "NoAuditResurrection",
+        "RetainedJoinIsExact",
+        "TypedShortCircuit",
+        "ReplyMatchesSnapshot",
+        "OnlySuccessReturnsAttributes"
+      ],
+      "limits": "Models only GetSubscriptionAttributes after common Query/session admission and successful IAM policy snapshot. ARN grammar/account, IAM eval/time, SQLite isolation/refinement, XML serialization, retry/crash/new-writer behavior and real cloud/SDK compatibility are not proved. Delete/unsubscribe are bounded environment witnesses; inconsistent storage seeds are defensive, not healthy reachability claims. No HTTP(S) admission, publish, external delivery or liveness claim.",
+      "source_scope": [
+        "internal/aws/sns.go",
+        "internal/aws/sns_store.go",
+        "internal/aws/sns_sqs_fanout.go",
+        "internal/aws/sns_subscription_attributes_test.go",
+        "test/e2e/sns_subscription_readback.py"
+      ],
+      "mutants": [
+        {
+          "id": "SkipRequestRegion",
+          "edits": [
+            {
+              "old": "IF req.region = RegionOf(Parent(req.arn))",
+              "new": "IF TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AuthorizationTargetsParent"
+        },
+        {
+          "id": "AuthorizePeerTopic",
+          "edits": [
+            {
+              "old": "LET subject == Parent(req.arn)",
+              "new": "LET subject == Neighbor(Parent(req.arn))",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AuthorizationTargetsParent"
+        },
+        {
+          "id": "LookupBeforeAuthorization",
+          "edits": [
+            {
+              "old": "Lookup == /\\ phase = \"lookup\"",
+              "new": "Lookup == /\\ phase \\in {\"iam\", \"lookup\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "LookupRequiresAuthorization"
+        },
+        {
+          "id": "JoinIgnoresSubscriptionArn",
+          "edits": [
+            {
+              "old": "/\\ r.arn = arn\n",
+              "new": "/\\ TRUE\n",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "RetainedJoinIsExact"
+        },
+        {
+          "id": "JoinIgnoresStoredParent",
+          "edits": [
+            {
+              "old": "/\\ r.topic = topic\n",
+              "new": "/\\ TRUE\n",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "RetainedJoinIsExact"
+        },
+        {
+          "id": "JoinIgnoresStoredRegion",
+          "edits": [
+            {
+              "old": "/\\ <<r.topic, region>> \\in db.topics}",
+              "new": "/\\ \\E storedRegion \\in Regions : <<r.topic, storedRegion>> \\in db.topics}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "RetainedJoinIsExact"
+        },
+        {
+          "id": "RecoverFromDeliveryHistory",
+          "edits": [
+            {
+              "old": "{r \\in db.subs :",
+              "new": "{r \\in (db.subs \\cup db.history) :",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "NoAuditResurrection"
+        },
+        {
+          "id": "InvalidArnAsNotFound",
+          "edits": [
+            {
+              "old": "phase' = \"done\" /\\ code' = \"InvalidParameter\"",
+              "new": "phase' = \"done\" /\\ code' = \"NotFound\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "TypedShortCircuit"
+        },
+        {
+          "id": "DenialAsNotFound",
+          "edits": [
+            {
+              "old": "phase' = \"done\" /\\ code' = \"AuthorizationError\"",
+              "new": "phase' = \"done\" /\\ code' = \"NotFound\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "TypedShortCircuit"
+        },
+        {
+          "id": "MissingRowAsParameterError",
+          "edits": [
+            {
+              "old": "ELSE IF row = Absent THEN \"NotFound\" ELSE \"OK\"",
+              "new": "ELSE IF row = Absent THEN \"InvalidParameter\" ELSE \"OK\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReplyMatchesSnapshot"
+        },
+        {
+          "id": "ReadFailureAsNotFound",
+          "edits": [
+            {
+              "old": "code' = IF ~req.readOK THEN \"InternalError\"",
+              "new": "code' = IF ~req.readOK THEN \"NotFound\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReplyMatchesSnapshot"
+        },
+        {
+          "id": "ReadDeletesHistory",
+          "edits": [
+            {
+              "old": "/\\ UNCHANGED <<req, store, iamTopic, allowed, code, result>>",
+              "new": "/\\ store' = [store EXCEPT !.history = {}]\n          /\\ UNCHANGED <<req, iamTopic, allowed, code, result>>",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadDoesNotChangeStore"
+        },
+        {
+          "id": "ReplyUsesLaterStore",
+          "edits": [
+            {
+              "old": "LET row == observation.row",
+              "new": "LET row == IF req.readOK THEN Pick(SQLRows(store, req.arn, iamTopic, req.region)) ELSE Absent",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReplyMatchesSnapshot"
+        },
+        {
+          "id": "HardcodeReturnedDescriptor",
+          "edits": [
+            {
+              "old": "Protocol |-> row.protocol, Endpoint |-> row.endpoint,",
+              "new": "Protocol |-> \"https\", Endpoint |-> Endpoint1,",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReplyMatchesSnapshot"
+        },
+        {
+          "id": "ReturnAttributesOnError",
+          "edits": [
+            {
+              "old": "IF row = Absent THEN Absent ELSE WireAttributes(row)",
+              "new": "IF row = Absent THEN WireAttributes(SubRow(req.arn, Parent(req.arn), \"https\", Endpoint1)) ELSE WireAttributes(row)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "OnlySuccessReturnsAttributes"
+        },
+        {
+          "id": "EmitRawDeliveryTrue",
+          "edits": [
+            {
+              "old": "PendingConfirmation |-> \"false\", RawMessageDelivery |-> \"false\",",
+              "new": "PendingConfirmation |-> \"false\", RawMessageDelivery |-> \"true\",",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReplyMatchesSnapshot"
+        }
+      ]
+    },
+    {
+      "id": "SNSConsoleResponseAdmission",
+      "model": "formal/SNSConsoleResponseAdmission.tla",
+      "config": "formal/SNSConsoleResponseAdmission.cfg",
+      "bounds": "768 admission inputs across readiness, exact console flag and array shape, none/parameter/instance handoff and subsets of the four required actions plus one harmless extra. For admitted inputs two regions, two selected principals, two topics, at most two scope/remount changes and two outstanding/completed requests total per run; one current flight, delayed old completions and cleanup. Baseline 20698 distinct states, depth 9; no state constraints.",
+      "properties": [
+        "TypeOK",
+        "MountRequiresCapabilityAndNoHandoff",
+        "KeyedOwnerMatchesScope",
+        "OnlyOneCurrentFlight",
+        "NoLateVisibleEffect",
+        "AbortInhibitsCallback",
+        "OnlyCurrentTopicUpdates",
+        "OnlyCurrentTopicChoices"
+      ],
+      "limits": "Bound only visible SNS console hook state, projected typed capability and valid per-topic selection labels. Instance and topic revision are ghost labels, not invented callback-generation checks. No theorem about React or JS scheduling/code refinement, backend AWS IAM, parser/wire, final remote write outcome, shared 401 redirect/onSaving side effects, capability refresh, actual browser/keyboard, or build correctness. Scalar is signed-in session and fixed us-east-1, not Console principal/region parity; it is not modeled.",
+      "source_scope": [
+        "tools/console/src/main.jsx",
+        "tools/console/src/console-navigation.mjs",
+        "tools/console/src/sns.jsx",
+        "tools/console/src/sns-client.mjs",
+        "internal/server/web/app.js"
+      ],
+      "mutants": [
+        {
+          "id": "AdmitBoundHandoff",
+          "edits": [
+            {
+              "old": "/\\ c.ready /\\ c.handoff = \"none\"",
+              "new": "/\\ c.ready",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "MountRequiresCapabilityAndNoHandoff"
+        },
+        {
+          "id": "IgnoreMissingUnsubscribe",
+          "edits": [
+            {
+              "old": "Required \\subseteq c.operations",
+              "new": "(Required \\ {\"Unsubscribe\"}) \\subseteq c.operations",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "MountRequiresCapabilityAndNoHandoff"
+        },
+        {
+          "id": "RequireExactlyFourActions",
+          "edits": [
+            {
+              "old": "Required \\subseteq c.operations",
+              "new": "Required = c.operations",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "MountRequiresCapabilityAndNoHandoff"
+        },
+        {
+          "id": "AdmitBeforeBootstrap",
+          "edits": [
+            {
+              "old": "/\\ c.ready /\\ c.handoff = \"none\"",
+              "new": "/\\ c.handoff = \"none\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "MountRequiresCapabilityAndNoHandoff"
+        },
+        {
+          "id": "IgnoreOperationsArrayShape",
+          "edits": [
+            {
+              "old": "/\\ c.console /\\ c.array /\\ Required",
+              "new": "/\\ c.console /\\ Required",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "MountRequiresCapabilityAndNoHandoff"
+        },
+        {
+          "id": "OmitRegionFromKey",
+          "edits": [
+            {
+              "old": "Key(s) == <<s.region, s.principal, s.navigation>>",
+              "new": "Key(s) == <<s.principal, s.navigation>>",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "KeyedOwnerMatchesScope"
+        },
+        {
+          "id": "OmitPrincipalFromKey",
+          "edits": [
+            {
+              "old": "Key(s) == <<s.region, s.principal, s.navigation>>",
+              "new": "Key(s) == <<s.region, s.navigation>>",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "KeyedOwnerMatchesScope"
+        },
+        {
+          "id": "OmitNavigationFromKey",
+          "edits": [
+            {
+              "old": "Key(s) == <<s.region, s.principal, s.navigation>>",
+              "new": "Key(s) == <<s.region, s.principal>>",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "KeyedOwnerMatchesScope"
+        },
+        {
+          "id": "AllowOverlappingTopicRequests",
+          "edits": [
+            {
+              "old": "MayStart == v.phase = \"sns\" /\\ v.active = Absent /\\ v.issued < RequestLimit",
+              "new": "MayStart == v.phase = \"sns\" /\\ v.issued < RequestLimit",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "OnlyOneCurrentFlight"
+        },
+        {
+          "id": "RouteLateResponseToMatchingKey",
+          "edits": [
+            {
+              "old": "TargetsVisibleView(op) == CurrentOwner(op)",
+              "new": "TargetsVisibleView(op) == v.phase = \"sns\" /\\ Key(op.scope) = Key(v.scope)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "NoLateVisibleEffect"
+        },
+        {
+          "id": "IgnoreAbortedSignal",
+          "edits": [
+            {
+              "old": "UnabortedCallback(op) == ~Aborted(op)",
+              "new": "UnabortedCallback(op) == TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AbortInhibitsCallback"
+        },
+        {
+          "id": "LateFinallyClearsCurrentFlight",
+          "edits": [
+            {
+              "old": "releases == CurrentOwner(op) /\\ ActiveCallback(op)",
+              "new": "releases == v.phase = \"sns\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "OnlyOneCurrentFlight"
+        }
+      ]
+    },
+    {
       "id": "SSMDocumentVersionPage",
       "model": "formal/SSMDocumentVersionPage.tla",
       "config": "formal/SSMDocumentVersionPage.cfg",
