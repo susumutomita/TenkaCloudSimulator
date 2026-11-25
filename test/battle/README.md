@@ -12,6 +12,30 @@ a guest image that are not in this repository. The `battle-hosts` workflow build
 both and runs it on GitHub's macOS (Apple silicon and Intel) and Linux arm64
 runners for changes to the VM runtime; Linux/amd64 is the original rehearsal host.
 
+## Check the Host bootstrap without a guest
+
+To check just the prerequisite for a Host-managed Battle, build the Simulator
+and use a local TenkaCloud checkout at
+[`5e360d56`](https://github.com/susumutomita/TenkaCloud/blob/5e360d563e03e23ea431470559399dfc33ff2cca/scripts/local-host/simulator-bootstrap.ts)
+with its Bun dependencies already installed. Pass a Simulator binary and a
+checkout with installed dependencies you trust: this check executes the
+binary and loads those dependencies. The fixture pin covers only the Host's
+bootstrap source and generated template.
+
+```sh
+make build
+bun --no-env-file --no-install test/battle/host-bootstrap.mjs "$PWD/dist/tenkacloud-simulator" /abs/TenkaCloud
+```
+
+This command verifies the Host source and its generated template against the
+[pinned fixture](../../internal/aws/testdata/host-battle-bootstrap/provenance.json).
+On a fresh authenticated loopback Simulator, it calls the Host's own bootstrap
+to create a normal stack, upgrade it to the two Battle roles, and reuse that
+stack. It assumes both roles through STS and deletes the test stack. Each SDK
+request has a five-second deadline. Setting the bootstrap's Battle option
+here tests **only role provisioning**. It does not
+enable a VM runtime, start the Host/Portal, run probes, or award points.
+
 ## Quick start
 
 ```sh
@@ -49,9 +73,8 @@ On macOS each emulator also runs under a private supervisor process (the
 simulator executable re-entered by `guestprocess`); the cleanup checks require that
 no supervisor remains either. QEMU's seccomp `-sandbox` exists only on Linux.
 
-It does **not** show TenkaCloud host or Portal support: the host keeps this
-Battle disabled in simulator mode, so this script stands in for the host. It
-computes points itself from `metadata.json` (`uptime-flat`, +100 / −100); the
+It does **not** test the [Host Battle integration](https://github.com/susumutomita/TenkaCloud/blob/5e360d563e03e23ea431470559399dfc33ff2cca/scripts/local-host/integration/simulator-battle.ts)
+or Portal. This rehearsal stands in for the Host and computes points itself from `metadata.json` (`uptime-flat`, +100 / −100); the
 Simulator never calculates points. The probe deadline uses the same machine's
 wall clock for both sides, which is not the independent Host clock qualification
 a real event needs. The 600-second automatic revert is a host timer and is not
