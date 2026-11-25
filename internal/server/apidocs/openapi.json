@@ -1042,6 +1042,20 @@
                     "Version": "2009-04-15"
                   }
                 },
+                "DeleteAttributes": {
+                  "summary": "SimpleDB DeleteAttributes (single value, conditional write)",
+                  "description": "Use a disposable local item that you own. Replace DomainName, ItemName, the attribute name, and BOTH copies of its current single value before choosing Send. Set X-Simulator-Service to sdb, clear X-Amz-Target, and use the existing local identity with sdb:DeleteAttributes on the domain. This example deletes only the matching value; deleting the last value removes the item. A stale value does not change data. Use GetAttributes to read back.",
+                  "value": {
+                    "Action": "DeleteAttributes",
+                    "Version": "2009-04-15",
+                    "DomainName": "example-domain",
+                    "ItemName": "example-item",
+                    "Attribute.1.Name": "example-attribute",
+                    "Attribute.1.Value": "replace-with-current-value",
+                    "Expected.Name": "example-attribute",
+                    "Expected.Value": "replace-with-current-value"
+                  }
+                },
                 "DomainMetadata": {
                   "summary": "SimpleDB DomainMetadata (read-only Query)",
                   "description": "Set X-Simulator-Service to sdb, use us-east-1 or leave X-Simulator-Region unset, and clear X-Amz-Target. Replace the example DomainName with an existing domain in your configured local scope. Send using your existing local sign-in or simulator access token with sdb:DomainMetadata permission. The XML result gives committed local domain statistics; this request does not create or change the domain.",

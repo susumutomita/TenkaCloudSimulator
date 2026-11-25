@@ -102,6 +102,15 @@ export function simpleDBClient(request, parse = text => new DOMParser().parseFro
         return {id: index, name, value};
       });
     },
+    async deleteAttribute(domain, item, {name, value}, signal) {
+      if (!validText(name) || !validText(value, true)) throw new Error('Enter a valid attribute to delete.');
+      // Never issue a whole-item/unconditional delete from a table row, even
+      // for an empty value. Require the single value that the user actually saw.
+      await query('DeleteAttributes', {
+        ...itemFields(domain, item), 'Attribute.1.Name': name, 'Attribute.1.Value': value,
+        'Expected.Name': name, 'Expected.Value': value,
+      }, signal);
+    },
     async putAttribute(domain, item, {name, value, mode, expected}, signal) {
       if (!validText(name) || !validText(value, true) || !['absent', 'equal'].includes(mode)
           || (mode === 'equal' && !validText(expected, true))) throw new Error('Enter a valid conditional attribute update.');

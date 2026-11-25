@@ -32,12 +32,12 @@ func (s *Store) Put(ctx context.Context, a, r, d, i string, values map[string][]
 	return s.put(ctx, a, r, d, i, values, replace, nil)
 }
 
-type putCondition struct {
+type writeCondition struct {
 	name, value string
 	absent      bool
 }
 
-func (c *putCondition) check(current map[string][]string) error {
+func (c *writeCondition) check(current map[string][]string) error {
 	if c == nil {
 		return nil
 	}
@@ -60,7 +60,7 @@ func (c *putCondition) check(current map[string][]string) error {
 	return nil
 }
 
-func (s *Store) put(ctx context.Context, a, r, d, i string, values map[string][]string, replace map[string]bool, condition *putCondition) error {
+func (s *Store) put(ctx context.Context, a, r, d, i string, values map[string][]string, replace map[string]bool, condition *writeCondition) error {
 	if ctx.Err() != nil {
 		return storeError("Cancelled")
 	}
@@ -130,23 +130,30 @@ func (s *Store) put(ctx context.Context, a, r, d, i string, values map[string][]
 		if pairCount > maxItemAttributePairs && pairCount > previousCount {
 			return storeError("NumberItemAttributesExceeded")
 		}
-		encoded, err := json.Marshal(current)
-		if err != nil {
-			return err
-		}
-		if _, err = tx.ExecContext(ctx, `INSERT INTO aws_simpledb_items(account,region,domain,name,attributes) VALUES(?,?,?,?,?) ON CONFLICT(account,region,domain,name) DO UPDATE SET attributes=excluded.attributes`, a, r, d, i, string(encoded)); err != nil {
-			return err
-		}
-		var saved string
-		if err = tx.QueryRowContext(ctx, `SELECT attributes FROM aws_simpledb_items WHERE account=? AND region=? AND domain=? AND name=?`, a, r, d, i).Scan(&saved); err != nil {
-			return err
-		}
-		if saved != string(encoded) {
-			return errors.New("SimpleDB write did not persist")
-		}
-		return nil
+		return saveAttributes(ctx, tx, a, r, d, i, current)
 	})
 }
+
+// saveAttributes persists a complete nonempty item and checks the stored row
+// before the caller commits. Shared by PutAttributes and partial deletion.
+func saveAttributes(ctx context.Context, tx *sql.Tx, a, r, d, i string, current map[string][]string) error {
+	encoded, err := json.Marshal(current)
+	if err != nil {
+		return err
+	}
+	if _, err = tx.ExecContext(ctx, `INSERT INTO aws_simpledb_items(account,region,domain,name,attributes) VALUES(?,?,?,?,?) ON CONFLICT(account,region,domain,name) DO UPDATE SET attributes=excluded.attributes`, a, r, d, i, string(encoded)); err != nil {
+		return err
+	}
+	var saved string
+	if err = tx.QueryRowContext(ctx, `SELECT attributes FROM aws_simpledb_items WHERE account=? AND region=? AND domain=? AND name=?`, a, r, d, i).Scan(&saved); err != nil {
+		return err
+	}
+	if saved != string(encoded) {
+		return errors.New("SimpleDB write did not persist")
+	}
+	return nil
+}
+
 func (s *Store) Get(ctx context.Context, a, r, d, i string, names []string) (map[string][]string, error) {
 	if ctx.Err() != nil {
 		return nil, storeError("Cancelled")

@@ -78,3 +78,19 @@ test('navigation is available only for the exact bounded local capability, never
     assert.equal(serviceAvailable('simpledb', {services: {simpledb: {...simpledb, ...missing}}}), false);
   }
 });
+
+test('row deletion requires the exact observed single value and never sends a whole-item delete', async () => {
+  const calls = [];
+  const api = simpleDBClient(async (url, options) => {
+    calls.push([url, Object.fromEntries(options.body), options.headers]);
+    return response();
+  }, () => ({documentElement: root('DeleteAttributes')}));
+  await api.deleteAttribute('versions', ' row ', {name:'revision', value:''}, signal());
+  assert.deepEqual(calls[0][1], {Action:'DeleteAttributes', Version:'2009-04-15', DomainName:'versions',
+    ItemName:' row ', 'Attribute.1.Name':'revision', 'Attribute.1.Value':'', 'Expected.Name':'revision', 'Expected.Value':''});
+  assert.equal(calls[0][0], '/');
+  assert.equal(calls[0][2]['X-Simulator-Service'], 'sdb');
+  await assert.rejects(api.deleteAttribute('versions', 'row', {name:'revision'}, signal()), /valid attribute/);
+  await assert.rejects(api.deleteAttribute('versions', 'row', {name:'',value:'x'}, signal()), /valid attribute/);
+  assert.equal(calls.length, 1);
+});

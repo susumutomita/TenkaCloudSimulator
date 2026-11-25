@@ -88,11 +88,11 @@ function Domains({api, choose, returning}) {
   </SpaceBetween>;
 }
 
-function Item({api, domain, goBack}) {
+function Item({api, domain, goBack, canDelete}) {
   const {t} = useLocale();
   const {busy, error, run, clearError} = useRequestChain();
   const [item, setItem] = useState(''), [attrs, setAttrs] = useState(null), [notice, setNotice] = useState('');
-  const [editor, showEditor] = useState(false);
+  const [editor, showEditor] = useState(false), [deleting, setDeleting] = useState(null);
   const itemInput = useRef(null), attributeInput = useRef(null), status = useRef(null), completion = useRef(null);
   useLayoutEffect(() => {itemInput.current?.focus();}, []);
   useLayoutEffect(() => {
@@ -115,9 +115,10 @@ function Item({api, domain, goBack}) {
     AccessDenied: t('Your local identity is not allowed to perform this operation.','現在の演習IDにはこの操作の権限がありません。'),
   };
   function editItem(next) {
-    clearError(); setItem(next); setAttrs(null); showEditor(false); setNotice(''); setName(''); setValue(''); setExpected(''); setMode('absent');
+    clearError(); setDeleting(null); setItem(next); setAttrs(null); showEditor(false); setNotice(''); setName(''); setValue(''); setExpected(''); setMode('absent');
   }
   function read() {
+    setDeleting(null);
     run(async signal => {
       completion.current = {origin: document.activeElement, target: 'attributes'};
       setNotice(''); setAttrs(null);
@@ -125,19 +126,33 @@ function Item({api, domain, goBack}) {
       showEditor(true);
     });
   }
-  function save() {
+  function change(apply, result) {
+    setDeleting(null);
     run(async signal => {
       completion.current = {origin: document.activeElement, target: 'status'};
       setNotice(''); setAttrs(null);
-      await api.putAttribute(domain, item, {name, value, expected, mode}, signal);
-      setNotice('saved');
+      await apply(signal);
+      setNotice(result);
       try {
         setAttrs(await api.getAttributes(domain, item, signal));
       } catch {
-        if (!signal.aborted) setNotice('saved-no-readback');
+        if (!signal.aborted) setNotice(result + '-no-readback');
       }
     });
   }
+  function save() {
+    change(signal => api.putAttribute(domain, item, {name, value, expected, mode}, signal), 'saved');
+  }
+  function remove() {
+    if (!canDelete || !deleting || !attrs?.includes(deleting)) return;
+    change(signal => api.deleteAttribute(domain, item, deleting, signal), 'deleted');
+  }
+  const notices = {
+    saved: t('Attribute saved.','属性を保存しました。'),
+    'saved-no-readback': t('Attribute saved, but current values could not be loaded. Use Read attributes to refresh.','属性は保存済みですが現在の値を取得できませんでした。「属性を読み込む」で更新してください。'),
+    deleted: t('Attribute deleted.','属性を削除しました。'),
+    'deleted-no-readback': t('Attribute deleted, but current values could not be loaded. Read the item again.','属性は削除済みですが現在の値を取得できませんでした。項目を読み直してください。'),
+  };
   const display = value => {
     if (value === '') return <em>{t('Empty string','空文字列')}</em>;
     const visible = !value.trim() || /[\p{Cc}\p{Cf}]/u.test(value) ?
@@ -150,9 +165,7 @@ function Item({api, domain, goBack}) {
     <Button disabled={busy} onClick={goBack}>{t('Back to domains','ドメイン一覧に戻る')}</Button>
     {(error || notice) && <div ref={status} tabIndex={-1} role="region" aria-label={t('SimpleDB action status','SimpleDB 操作の状態')}>
       {error && <Alert type="error" header={errorCode}>{Object.hasOwn(refusal, errorCode) ? refusal[errorCode] : t('The request did not complete as expected. Read again before repeating a write.','要求が正常に完了しませんでした。書き込みをやり直す前に読み直してください。')}</Alert>}
-      {notice && <Alert type={notice === 'saved' ? 'success' : 'warning'}>{notice === 'saved' ?
-        t('Attribute saved.','属性を保存しました。') :
-        t('Attribute saved, but current values could not be loaded. Use Read attributes to refresh.','属性は保存済みですが現在の値を取得できませんでした。「属性を読み込む」で更新してください。')}</Alert>}
+      {notice && <Alert type={notice.endsWith('no-readback') ? 'warning' : 'success'}>{notices[notice]}</Alert>}
     </div>}
     <Container header={<Header variant="h2" description={<span className="resource-identifier">{domain}</span>}>{t('Look up an item','項目を取得')}</Header>}>
       <SpaceBetween size="s">
@@ -164,9 +177,18 @@ function Item({api, domain, goBack}) {
     </Container>
     {attrs !== null && <Table ariaLabels={{tableLabel: t('Saved attributes','保存された属性')}} items={attrs} trackBy="id"
         columnDefinitions={[{id:'name', header:t('Attribute name','属性名'), cell:x => display(x.name)},
-          {id:'value', header:t('Value','値'), cell:x => display(x.value)}]}
+          {id:'value', header:t('Value','値'), cell:x => display(x.value)},
+          ...(canDelete ? [{id:'delete', header:t('Action','操作'), cell:x =>
+            <Button disabled={busy || attrs.some(a => a !== x && a.name === x.name)}
+              onClick={() => {clearError(); setNotice(''); setDeleting(x);}}>{t('Delete attribute','属性を削除')}</Button>}] : [])]}
         header={<Header variant="h2">{t('Saved attributes','保存された属性')}</Header>}
         empty={<Box textAlign="center">{t('This item has no attributes.','この項目に属性はありません。')}</Box>}/>}
+    {deleting && canDelete && <Alert type="warning" header={t('Delete this attribute value?','この属性値を削除しますか？')}>
+      <SpaceBetween size="s"><span>{display(deleting.name)}: {display(deleting.value)}</span>
+        <span>{t('Only the value shown is deleted. If this is the last attribute, the item is removed.','表示中の値だけを削除します。最後の属性を削除すると項目も削除されます。')}</span>
+        <SpaceBetween size="xs" direction="horizontal"><Button disabled={busy} onClick={() => setDeleting(null)}>{t('Cancel','キャンセル')}</Button>
+          <Button disabled={busy} onClick={remove}>{t('Confirm deletion','削除を確定')}</Button></SpaceBetween>
+      </SpaceBetween></Alert>}
     {editor && <Container header={<Header variant="h2" description={t('Replace one attribute only if it is absent or its single value equals your expectation.','対象の属性が存在しないか、単一の値が期待値と一致した場合だけ、その属性を置き換えます。')}>{t('Save with a condition','条件付き保存')}</Header>}>
         <SpaceBetween size="s">
           <FormField label={t('Attribute to change','更新する属性')} constraintText={t('Maximum 1024 UTF-8 bytes.','最大1024 UTF-8バイト。')}>
@@ -187,12 +209,12 @@ function Item({api, domain, goBack}) {
   </SpaceBetween>;
 }
 
-export default function SimpleDBView({request}) {
+export default function SimpleDBView({request, canDelete = false}) {
   const {t} = useLocale();
   const api = useMemo(() => simpleDBClient(request), [request]);
   const [domain, setDomain] = useState(''), [returning, setReturning] = useState(false);
   function goBack() {setReturning(true); setDomain('');}
-  return <ContentLayout header={<Header variant="h1" description={t('Local us-east-1 only. Read a named item and conditionally update one attribute. Item search and deletion are not available here.','ローカルの us-east-1 のみ。名前を指定して項目を読み込み、属性を条件付きで1件更新します。項目検索と削除はこの画面では利用できません。')}>Amazon SimpleDB</Header>}>
-    {domain ? <Item key={domain} api={api} domain={domain} goBack={goBack}/> : <Domains api={api} choose={setDomain} returning={returning}/>}
+  return <ContentLayout header={<Header variant="h1" description={t('Local us-east-1 only. Read a named item and conditionally update one attribute. Item search is not available here.','ローカルの us-east-1 のみ。名前を指定して項目を読み込み、属性を条件付きで1件更新します。項目検索はこの画面では利用できません。')}>Amazon SimpleDB</Header>}>
+    {domain ? <Item key={domain} api={api} domain={domain} goBack={goBack} canDelete={canDelete}/> : <Domains api={api} choose={setDomain} returning={returning}/>}
   </ContentLayout>;
 }

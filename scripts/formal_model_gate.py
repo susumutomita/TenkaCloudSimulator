@@ -3191,6 +3191,16 @@ REQUIRED_SOURCE_SCOPES['SimpleDBQueryAdmission'] = {
 }
 
 
+BASE_MODELS.add('SimpleDBAttributeDelete')
+BASE_INVARIANTS['SimpleDBAttributeDelete'] = {
+    'NoPhantomItem', 'NoUnacknowledgedChange', 'OnlyEligibleMayAck', 'ExactSurvivors',
+}
+REQUIRED_MUTANTS['SimpleDBAttributeDelete'] = {'LoseUnselectedValues', 'DropCondition'}
+REQUIRED_SOURCE_SCOPES['SimpleDBAttributeDelete'] = {
+    'internal/aws/simpledb/delete.go', 'internal/aws/simpledb/http.go', 'internal/aws/simpledb/item.go',
+}
+
+
 BASE_MODELS.add('SimpleDBDomainMetadata')
 BASE_INVARIANTS['SimpleDBDomainMetadata'] = {
     'TypeOK', 'ReadRequiresDomainAuthority', 'ExactCommittedTotals',
