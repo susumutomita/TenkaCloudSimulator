@@ -1,59 +1,117 @@
 {
   "version": 1,
-  "base_sha": "527d089485694f1506bca842fc57a277bdf2bfb0",
+  "base_sha": "27010d3660036036b6fdbd420c1a566f73794e87",
   "changes": [
     {
       "path": "README.md",
-      "sha256": "1dd4826a207d92332a0d054ceaab5d43130c900a350cd71fffc23837860f5230",
+      "sha256": "7680f230aa500173879e752f1fa6d5d792f7fbcbb1f6f995320c26ce54609ab8",
       "disposition": "documentation",
-      "reason": "Documents bounded canonical conditional writes without claiming full SimpleDB.",
+      "reason": "Documents local saved PTR names and reverse-lookup boundaries.",
       "models": []
     },
     {
       "path": "docs/design/0001-go-standalone.md",
-      "sha256": "d51709f4d8572b6345c4711400d8104d23896fc99bb3176efe711eca7a47297f",
+      "sha256": "fc60b0c3e4cb94ca316b612b0796c9a9cfcb2d5cd9cc5bfaa2b870bcf17135cc",
       "disposition": "documentation",
-      "reason": "Documents bounded canonical conditional writes without claiming full SimpleDB.",
+      "reason": "Documents local saved PTR names and reverse-lookup boundaries.",
       "models": []
     },
     {
-      "path": "internal/aws/simpledb/conditional_put_test.go",
-      "sha256": "7ea85b521e2a5912e47b9e9704f6a36c77037db3a6f5b1cff5cbf138b54047c4",
+      "path": "docs/route53.md",
+      "sha256": "1a4ba2b81e02638b045d7725528069fa030beb7a38940a516b2fc12d7f17686f",
+      "disposition": "documentation",
+      "reason": "Documents local saved PTR names and reverse-lookup boundaries.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/route53_http.go",
+      "sha256": "3cb6c3f0e22324c44fbdbf1ff4e52a9318e2fad4121460af86c3407f8478a791",
+      "disposition": "modeled",
+      "reason": "PTR uses existing saved-name validation and authorized transactional record storage; the newly admitted record type does not change the transaction, authority or team boundary.",
+      "models": [
+        {
+          "id": "Route53AtomicBatch",
+          "properties": [
+            "AtomicPair",
+            "OnlyAuthorizedValid",
+            "OtherTeamUnchanged"
+          ],
+          "limits": "The finite pair model covers abstract admission and isolation, not PTR syntax, DNS type ordering, XML or Go/SQLite refinement; targeted native and SDK tests cover those implementation boundaries."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/route53_ptr_test.go",
+      "sha256": "e43d897b2c67dd05251942262d6f6909573978f6a6bc68f5a649dd0bf9932a0d",
       "disposition": "test-support",
-      "reason": "Focused SimpleDB native conditional write checks, not production implementation.",
+      "reason": "Focused PTR acceptance or exact additive API description checks; does not change runtime.",
       "models": []
     },
     {
-      "path": "internal/aws/simpledb/http.go",
-      "sha256": "365b8bede78ac75dda90fef56dce8dab0b9aa5667eeabf2f88b6e2deda3f20e5",
+      "path": "internal/aws/route53_store.go",
+      "sha256": "af3834c964f3b8426b741cdd8e90aa5e8b6c2b5ed5827347ffd68c5d89be2f86",
       "disposition": "modeled",
-      "reason": "The new SimpleDB conditional path reuses existing admissibility and transactional rollback/commit boundaries.",
+      "reason": "PTR uses existing saved-name validation and authorized transactional record storage; the newly admitted record type does not change the transaction, authority or team boundary.",
       "models": [
         {
-          "id": "SimpleDBQueryAdmission",
+          "id": "Route53AtomicBatch",
           "properties": [
-            "MalformedNeverDispatches",
-            "EnvelopeMatchesOutcome"
+            "AtomicPair",
+            "OnlyAuthorizedValid",
+            "OtherTeamUnchanged"
           ],
-          "limits": "Abstract request guards and response categories only. The model does not represent the Expected syntax, exact error code/status, or Go HTTP or SQLite semantics."
+          "limits": "The finite pair model covers abstract admission and isolation, not PTR syntax, DNS type ordering, XML or Go/SQLite refinement; targeted native and SDK tests cover those implementation boundaries."
         }
       ]
     },
     {
-      "path": "internal/aws/simpledb/item.go",
-      "sha256": "637fd395ab5e7c2aefd7b195d749e96c056ca825d9f1245a59ca55c546580c89",
-      "disposition": "modeled",
-      "reason": "The new SimpleDB conditional path reuses existing admissibility and transactional rollback/commit boundaries.",
-      "models": [
-        {
-          "id": "SimpleDBLifecycle",
-          "properties": [
-            "RefusalUnchanged",
-            "CommittedExact"
-          ],
-          "limits": "Abstract stage, commit and refusal only. It does not model compare-and-set, multi-value semantics, concurrent writers, SQL isolation or Go refinement. The focused native regressions exercise those concrete behaviors."
-        }
-      ]
+      "path": "internal/server/apidocs/openapi.json",
+      "sha256": "1b4386f3102441a87e2339b94ee80a8c3ac355e53fd300833e400c6971190bce",
+      "disposition": "presentation",
+      "reason": "Embedded API reference lists the newly admitted simple PTR record type.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/autoscaling_plans_openapi.py",
+      "sha256": "5845f59d71a0c3c98393a88e02ee6c426fb9ccb48e78017e5f61da17691316f7",
+      "disposition": "test-support",
+      "reason": "Focused PTR acceptance or exact additive API description checks; does not change runtime.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/route53.py",
+      "sha256": "2cf7408c092cab8880b767571134eb88641cff4f3acd5f983f919c36df8300ca",
+      "disposition": "test-support",
+      "reason": "Focused PTR acceptance or exact additive API description checks; does not change runtime.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/route53_openapi.py",
+      "sha256": "8a6630e6d8ad099944cb3e2113a544cb3b0607c1451a9dd3dae45ec07ebfed97",
+      "disposition": "test-support",
+      "reason": "Focused PTR acceptance or exact additive API description checks; does not change runtime.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/route53_ptr_reference.py",
+      "sha256": "1b5e9cd125ba529124c68d946adceb353a5804ffd610c1df4735757c2a3231dc",
+      "disposition": "test-support",
+      "reason": "Focused PTR acceptance or exact additive API description checks; does not change runtime.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/test_route53_openapi.py",
+      "sha256": "1daaee9399804b1017b100cb598eaf409cdf616f29b4526e14808e1ca59b0982",
+      "disposition": "test-support",
+      "reason": "Focused PTR acceptance or exact additive API description checks; does not change runtime.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/test_sakura_openapi.py",
+      "sha256": "8575f9f42ed9fa27cd80e469c79ec3cedcea31731e0c1601e86ccb063cf74e04",
+      "disposition": "test-support",
+      "reason": "Focused PTR acceptance or exact additive API description checks; does not change runtime.",
+      "models": []
     }
   ]
 }

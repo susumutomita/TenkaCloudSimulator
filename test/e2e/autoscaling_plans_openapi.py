@@ -7,6 +7,10 @@ inherited digest keeps detecting drift in the shared AWS root.
 import copy
 import hashlib
 import json
+import runpy
+from pathlib import Path
+
+project_before_ptr = runpy.run_path(str(Path(__file__).with_name("route53_ptr_reference.py")))["project_before_ptr"]
 
 JSON11 = 'application/x-amz-json-1.1'
 TARGET = 'AnyScaleScalingPlannerFrontendService.'
@@ -71,6 +75,7 @@ def validate_autoscaling_plans(spec):
 def project_before_autoscaling_plans(spec):
     validate_autoscaling_plans(spec)
     projected = copy.deepcopy(spec)
+    project_before_ptr(projected['paths'])
     root = projected['paths']['/']['post']
     request = root['requestBody']['content'][JSON11]
     response = root['responses']['200']['content'][JSON11]
