@@ -8,6 +8,8 @@ import (
 	"sort"
 )
 
+const maxItemAttributePairs = 256
+
 func attributes(ctx context.Context, tx *sql.Tx, a, r, d, i string) (map[string][]string, error) {
 	var raw string
 	err := tx.QueryRowContext(ctx, `SELECT attributes FROM aws_simpledb_items WHERE account=? AND region=? AND domain=? AND name=?`, a, r, d, i).Scan(&raw)
@@ -27,6 +29,38 @@ func attributes(ctx context.Context, tx *sql.Tx, a, r, d, i string) (map[string]
 	return out, nil
 }
 func (s *Store) Put(ctx context.Context, a, r, d, i string, values map[string][]string, replace map[string]bool) error {
+	return s.put(ctx, a, r, d, i, values, replace, nil)
+}
+
+type putCondition struct {
+	name, value string
+	absent      bool
+}
+
+func (c *putCondition) check(current map[string][]string) error {
+	if c == nil {
+		return nil
+	}
+	values := current[c.name]
+	if len(values) > 1 {
+		return storeError("MultiValuedAttribute")
+	}
+	if c.absent {
+		if len(values) > 0 {
+			return storeError("ConditionalCheckFailed")
+		}
+		return nil
+	}
+	if len(values) == 0 {
+		return storeError("AttributeDoesNotExist")
+	}
+	if values[0] != c.value {
+		return storeError("ConditionalCheckFailed")
+	}
+	return nil
+}
+
+func (s *Store) put(ctx context.Context, a, r, d, i string, values map[string][]string, replace map[string]bool, condition *putCondition) error {
 	if ctx.Err() != nil {
 		return storeError("Cancelled")
 	}
@@ -64,6 +98,15 @@ func (s *Store) Put(ctx context.Context, a, r, d, i string, values map[string][]
 		if err != nil {
 			return err
 		}
+		// Evaluate in the same transaction as the update, never via a prior Get.
+		if err := condition.check(current); err != nil {
+			return err
+		}
+		previousCount := 0
+		for _, values := range current {
+			previousCount += len(values)
+		}
+		pairCount := previousCount
 		for name, vs := range input {
 			set := map[string]bool{}
 			if !repl[name] {
@@ -79,7 +122,13 @@ func (s *Store) Put(ctx context.Context, a, r, d, i string, values map[string][]
 				merged = append(merged, v)
 			}
 			sort.Strings(merged)
+			pairCount += len(merged) - len(current[name])
 			current[name] = merged
+		}
+		// Validate the resulting set while holding the write transaction. Old
+		// databases may already exceed the limit; permit repair but not growth.
+		if pairCount > maxItemAttributePairs && pairCount > previousCount {
+			return storeError("NumberItemAttributesExceeded")
 		}
 		encoded, err := json.Marshal(current)
 		if err != nil {

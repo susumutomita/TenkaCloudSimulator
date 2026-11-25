@@ -10621,6 +10621,7 @@
     "DescribeClusterParameterGroups",
     "DescribeClusterSubnetGroups",
     "DescribeClusters",
+    "DescribeTags",
     "ModifyCluster",
     "ModifyClusterSubnetGroup"
    ],
@@ -11626,8 +11627,8 @@
     "Snapshot schedules, scheduled actions, usage limits, event subscriptions, HSM certificates and configurations, snapshot copy grants, authentication profiles and cluster security groups are not implemented: they need a cluster, a topic, a key, an IAM role or a schedule grammar the stored model cannot evaluate, so their APIs return UnknownOperationException with HTTP 501.",
     "Parameter values are not modeled: ModifyClusterParameterGroup, ResetClusterParameterGroup, DescribeClusterParameters and DescribeDefaultClusterParameters are not implemented, and default parameter groups and the default subnet group are not pre-created. A parameter group family is stored without checking that it exists. Parameter group names are 1 to 255 letters, digits or hyphens, start with a letter, contain no trailing or consecutive hyphens and are stored in lowercase.",
     "A subnet group needs 1 to 20 distinct subnet-xxxxxxxx or subnet-xxxxxxxxxxxxxxxxx IDs that are not resolved, so it reports no VPC, Availability Zone, subnet status, group status or supported IP address type; the 20-subnet limit is returned as ClusterSubnetQuotaExceededFault. Subnet group names are 1 to 255 letters, digits or hyphens, are stored in lowercase and must not be Default.",
-    "Describe operations refuse TagKeys, TagValues and Marker values that were not issued for the request, accept MaxRecords from 20 to 100 and fail with the operation's not-found fault for an unknown name. Resource counts per Region (50 parameter groups, 50 subnet groups and 20 clusters) are local limits.",
-    "CreateTags and DeleteTags apply to the three resource kinds by ARN (arn:aws:redshift:region:account:parametergroup:name, subnetgroup:name and cluster:id) and fail with ResourceNotFoundFault for any other ARN; tags appear on the group and cluster descriptions. Tag keys are required and must not start with aws:. Removing a missing key succeeds, and DescribeTags is not implemented."
+    "DescribeClusters, DescribeClusterParameterGroups and DescribeClusterSubnetGroups refuse TagKeys, TagValues and Marker values that were not issued for the request, accept MaxRecords from 20 to 100 and fail with the operation's not-found fault for an unknown name. Resource counts per Region (50 parameter groups, 50 subnet groups and 20 clusters) are local limits.",
+    "CreateTags, DeleteTags and DescribeTags apply to the three stored resource kinds by ARN (arn:aws:redshift:region:account:parametergroup:name, subnetgroup:name and cluster:id) and fail with ResourceNotFoundFault for a missing or out-of-region resource. DescribeTags requires one ResourceName ARN and filters its tags by TagKeys and TagValues; ResourceType, MaxRecords, Marker and account-wide tag enumeration are not supported. Tags also appear on group and cluster descriptions. Tag keys for writes are required and must not start with aws:. Removing a missing key succeeds."
    ],
    "source": {
     "package": "botocore",
@@ -12783,6 +12784,49 @@
       "element": "Tag",
       "shape": "Tag"
      }
+    },
+    "TaggedResource": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "ResourceName",
+       "element": "ResourceName",
+       "shape": "String"
+      },
+      {
+       "name": "ResourceType",
+       "element": "ResourceType",
+       "shape": "String"
+      },
+      {
+       "name": "Tag",
+       "element": "Tag",
+       "shape": "Tag"
+      }
+     ]
+    },
+    "TaggedResourceList": {
+     "type": "list",
+     "item": {
+      "name": "",
+      "element": "TaggedResource",
+      "shape": "TaggedResource"
+     }
+    },
+    "TaggedResourceListMessage": {
+     "type": "structure",
+     "members": [
+      {
+       "name": "Marker",
+       "element": "Marker",
+       "shape": "String"
+      },
+      {
+       "name": "TaggedResources",
+       "element": "TaggedResources",
+       "shape": "TaggedResourceList"
+      }
+     ]
     },
     "ValueStringList": {
      "type": "list",

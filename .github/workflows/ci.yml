@@ -81,6 +81,7 @@ jobs:
         run: |
           npm ci --prefix tools/console --ignore-scripts --no-audit --no-fund
           node tools/console/build.mjs
+          node --test tools/console/test/gcp-dns*.test.mjs tools/console/test/simpledb-client.test.mjs
           git diff --exit-code -- internal/server/web internal/legal/assets/CONSOLE-NOTICES.txt third_party/CONSOLE-NOTICES.txt third_party/console-packages.json tools/console/bundle-inputs.json tools/console/bundle-digests.json
           npm audit --prefix tools/console --audit-level=high
       - name: Check secret description console and preserved disclosure contracts
@@ -93,8 +94,10 @@ jobs:
         run: python3 test/ci/release_pipeline.py
       - name: Check bounded SNS Console and reference request contracts
         run: node --test test/console/sns-subscriptions.test.mjs test/console/sns-http-reference.test.mjs
-      - name: Check native token input regression cases
-        run: node --test test/console/login-native-input.test.mjs test/console/api-reference-json.test.mjs
+      - name: Check native input and read-only EC2 console regressions
+        run: >-
+          node --test test/console/login-native-input.test.mjs test/console/api-reference-json.test.mjs
+          tools/console/test/ec2-readonly.test.mjs tools/console/test/ec2-response.test.mjs
       - name: Check Go format, vet, modules, embedded assets and script gates
         run: |
           make format-check vet verify-assets test-scripts

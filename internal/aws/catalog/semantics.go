@@ -1373,6 +1373,9 @@ func (q *request) listTags() (map[string]any, error) {
 	if err != nil {
 		return nil, err
 	}
+	if q.b.spec.Model == "redshift" && q.op.Name == "DescribeTags" {
+		return q.redshiftTaggedResources(r)
+	}
 	for key := range q.input {
 		if key != q.op.Lookup {
 			return nil, &fault{kind: "unsupported", message: fmt.Sprintf("Member %s of %s is not supported by the simulator.", key, q.op.Name)}

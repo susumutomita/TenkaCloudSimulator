@@ -14443,7 +14443,7 @@
         "tags": [
           "Route53 public hosted zones"
         ],
-        "description": "Requires route53:ChangeResourceRecordSets on selected hostedzone ARN. Atomic batch, 1..100 CREATE/UPSERT/DELETE changes; simple A/AAAA/CNAME/TXT/MX only, TTL required. DELETE exactly matches canonical saved RRset. Host token/session authentication is required. Global state uses us-east-1 signing scope and dummy TCSIM credentials only. Unsupported fields fail explicitly.",
+        "description": "Requires route53:ChangeResourceRecordSets on selected hostedzone ARN. Atomic batch, 1..100 CREATE/UPSERT/DELETE changes; simple A/AAAA/CNAME/TXT/MX/PTR only, TTL required. DELETE exactly matches canonical saved RRset. Host token/session authentication is required. Global state uses us-east-1 signing scope and dummy TCSIM credentials only. Unsupported fields fail explicitly.",
         "parameters": [
           {
             "name": "Id",

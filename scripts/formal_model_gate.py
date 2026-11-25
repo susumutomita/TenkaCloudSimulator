@@ -1566,6 +1566,7 @@ BATTLE_INTEGRATION_EXPECTED = {'CanonicalVMComposition': {'bounds': 'Five disjoi
                                            'SavedOperationAuthority'],
                             'source_scope': ['internal/aws/ec2_cloudformation_adapter_unix.go',
                                              'internal/aws/ec2_cloudformation_runtime_unix.go',
+                                             'internal/aws/ec2_completed_guest_unix.go',
                                              'internal/aws/ec2_vm_backend_unix.go',
                                              'internal/aws/ec2_vm_nic_guard.go',
                                              'internal/aws/ec2_vm_nic_unix.go',

@@ -18,17 +18,29 @@ AWS カタログの AppFlow は S3 間のフロー設定のみを保持する。
 
 AWS Batch のジョブキューは、先頭ジョブのタイムアウト設定のみを保存する。設定できる時間は 600～86,400 秒で、コンテナ系では `CANCEL`、SageMaker Training では `TERMINATE` を受け付ける。更新時は変更後のキュー種別とアクションの組み合わせを検証し、拒否された要求で既存設定は変わらない。タイマーやジョブの実行・終了処理は実装しない。
 
+SimpleDB の `PutAttributes` は AWS SDK の標準形式の `Expected` 条件を 1 件だけ受け付ける。属性の単一値との比較、または属性が存在しないことの確認を更新と同じ SQLite トランザクションで行う。条件を満たさない場合は他の属性も変更しない。番号付きの条件形式、バッチ書き込み、`DeleteAttributes`、`Select` は対応しない。新しい値の組が追加されるときは同じ書き込みトランザクションで最大256組を検証し、超過時は他の属性も変更しない。[既存超過データの扱い](../simpledb-item-limits.md)。
+
+[SimpleDB コンソール](../simpledb-console.md)は既存の認可とローカル Query API を使い、選択したドメインで既知の項目を読み取って、1属性だけを条件付きで置換する。書き込みの成功応答を受けてから属性を読み直す。項目の一覧検索や削除はコンソールでは扱わない。
+
+Redshift の `DescribeTags` は既存のローカル ARN 1件に限り、同じ認可でタグのキーと値を読む。全体検索や SQL は扱わない。
+
 Azure Queue は Blob と独立したプロバイダールートを持ち、固定 account・owner・environment に結びつくローカル SQLite にメッセージを保存する。受信と更新は表示予約と pop receipt を更新し、削除は現在の receipt を要求する。Console と API リファレンスは同じ所有者境界とデータプレーンを使う。アカウント全体のキュー一覧や Azure RBAC は模倣しない。[操作範囲と検証条件](../acceptance/azure-queue.md)。
 
 CLI token authorityはoperatorと15分participantを区別し、participant identity header上書きを拒否する。主催ホストはチームごとに別プロセス/DB/tokenを管理し、ログイン済み利用者とチームを認可する。単一プロセス内のidentity選択でチーム分離しない。library compositionのserver.Newは認証を自動追加しない。
 
 SQLiteは既存のncruces SQLite/Wasm engineをGo process内で実行する。外部SQLite実行ファイルやWasm runtimeサービスは不要。有限quotaと接続数制限を維持し、実AWSの整合性/リージョン/アカウント/クォータ全体を再現しない。
 
-Protocol/API subsetと制限は[README](../../README.md)。限定的なGoogle Cloud Storage/Azure Blob Storageを独立providerとして接続し、認証済みActorから固定project/account所有者へ写像する。[Cloud DNS](../acceptance/gcp-cloud-dns.md) は同じproject所有者の範囲でSRVを含むRRsetの変更と参照を提供する。SRVの優先度・重み・ポートは保存するが、名前解決や接続先の選択は行わない。AWS IAMの権限を継承せず、owner-onlyローカル認可と公式SDKの検証範囲は[マルチクラウドストレージ](../multicloud-storage.md)に記す。旧Python world/deploy/grading protocolは復活させず、必要なSSM/CFNの知識だけGoへ移行。問題取り込み・採点はTenkaCloud/Challenge責務とする。
+[Route 53のPTRレコード](../route53.md)は、公開ゾーンのSQLiteに保存した名前をTestDNSAnswerで返す。外部DNSへの問い合わせや実IPアドレスの逆引き設定は行わない。
+
+VPC コンソールの「VPC とサブネット1つ」は、認証済みのシミュレーター管理者だけが CloudFormation に固定テンプレートを送る。参加者ブラウザーにはスタック出力が開示されないため、この選択肢を表示しない。新規スタックが両方を所有し、作成受領証の正確なスタック ID で再取得できたときだけ成功を表示する。ネイティブ EC2 所有 VPC への追加や、実ネットワークの作成は行わない。[対応範囲](../ec2-read-discovery.md#console-vpc-and-one-subnet)。
+
+Protocol/API subsetと制限は[README](../../README.md)。限定的なGoogle Cloud Storage/Azure Blob Storageを独立providerとして接続し、認証済みActorから固定project/account所有者へ写像する。[Cloud DNS](../acceptance/gcp-cloud-dns.md) は同じproject所有者の範囲でSRVを含むRRsetの変更と参照を提供する。所有者コンソールではSRVの追加・置換・削除を変更受領証と再読で確認する。SRVの優先度・重み・ポートは保存するが、名前解決や接続先の選択は行わない。AWS IAMの権限を継承せず、owner-onlyローカル認可と公式SDKの検証範囲は[マルチクラウドストレージ](../multicloud-storage.md)に記す。旧Python world/deploy/grading protocolは復活させず、必要なSSM/CFNの知識だけGoへ移行。問題取り込み・採点はTenkaCloud/Challenge責務とする。
 
 Azure Blobの通常APIは `2023-11-03` に固定する。BlobのGET/HEADでは単一の `If-Modified-Since` を扱い、通常のGETには有界の単一範囲CRC64がある。明示的にネゴシエートした `2025-01-05` のGet Blobだけで、最大4 MiBの単一セグメントを構造化CRC64として返す。共通のローカル所有者・読み取り条件を適用し、通常の範囲チェックサムヘッダーと併用しない。それ以外の同バージョン操作やSDK全体の互換性は対象外。[Azure Blobの条件付き読み取りとチェックサムの詳細](../azure-blob.md#single-range-download-subset)。
 
 CloudFormationのRef/GetAtt/Subはresource dependency graphを先にtopological sortし、forward referenceとcycleを識別する。リソースの論理名の辞書順に依存させない。DeleteStackはimmediate transactionを取得してからstack documentとownershipを読み、同じtransactionで削除する。遅延した旧stack IDの削除が、再利用された物理名の別stackを壊さない。
+
+任意の Battle VM 実行環境で、既存の capability resolve はチームの正規 DB に保存された `CREATE_COMPLETE` の Stack ID と EC2 所有権を、起動時の保持済みレシート・ready 記録・lease と照合する。起動コールバックは CloudFormation の確定を待たない。先に到達した resolve は 409 になり、後から再試行できる。seal と既存の NIC 認可は変わらない。この照合は新しい通信経路や RDS の動作を保証しない。
 
 CloudFormationのIAM判定は要求開始時のpolicy snapshotを使い、Createは生成対象ID（冪等retryは既存ID）、named Describe/Deleteは実際のStack ARNを評価する。DeleteのID解決と認可は同じwrite transaction内。全stackのDescribeにはglobal許可に加え各ARNの明示Denyも評価し、拒否時に部分Outputsを返さない。
 

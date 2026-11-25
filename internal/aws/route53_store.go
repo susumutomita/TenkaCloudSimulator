@@ -108,8 +108,8 @@ func r53validateRecord(r Route53Record, zone string) (Route53Record, error) {
 	if r.Name != zone && !strings.HasSuffix(r.Name, "."+zone) {
 		return r, r53invalid("Record name must be inside the selected zone.")
 	}
-	if !slices.Contains([]string{"A", "AAAA", "CNAME", "TXT", "MX"}, r.Type) {
-		return r, r53invalid("Only simple A, AAAA, CNAME, TXT and MX changes are supported.")
+	if !slices.Contains([]string{"A", "AAAA", "CNAME", "TXT", "MX", "PTR"}, r.Type) {
+		return r, r53invalid("Only simple A, AAAA, CNAME, TXT, MX and PTR changes are supported.")
 	}
 	if r.TTL == nil || *r.TTL < 0 || *r.TTL > 2147483647 || len(r.Values) < 1 || len(r.Values) > 100 {
 		return r, r53invalid("TTL and 1 to 100 resource records are required.")
@@ -129,7 +129,7 @@ func r53validateRecord(r Route53Record, zone string) (Route53Record, error) {
 				return r, r53invalid("Address does not match record type.")
 			}
 			v = ip.String()
-		case "CNAME":
+		case "CNAME", "PTR":
 			v, e = r53name(v)
 			if e != nil {
 				return r, e

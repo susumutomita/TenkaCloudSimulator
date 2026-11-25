@@ -11,8 +11,8 @@ function one(node,name,required=false){
   if(found.length>1||(required&&found.length!==1))invalid();
   return found[0];
 }
-function value(node,name){
-  const found=one(node,name);
+function value(node,name,required=false){
+  const found=one(node,name,required);
   if(found?.children?.length)invalid();
   return found?.textContent??'';
 }
@@ -25,6 +25,18 @@ function nameTag(node){
 // managedBy is the simulator extension: 'ec2' VPCs can be deleted natively,
 // 'cloudformation' VPCs only with their stack; absent means unconfirmed.
 function vpcRow(n){return {id:value(n,'vpcId'),name:nameTag(n),cidr:value(n,'cidrBlock'),managedBy:value(n,'simulatorManagedBy')};}
+function instanceRow(n){
+  const groups=nodes(one(n,'groupSet'),'item');
+  const tagItems=nodes(one(n,'tagSet'),'item');
+  if(groups.length>5||tagItems.length>50)invalid();
+  const groupIds=groups.map(group=>value(group,'groupId',true));
+  const tags=tagItems.map(tag=>({key:value(tag,'key',true),value:value(tag,'value',true)}));
+  if(groupIds.some(id=>!id)||new Set(groupIds).size!==groupIds.length||
+     tags.some(tag=>!tag.key)||new Set(tags.map(tag=>tag.key)).size!==tags.length)invalid();
+  return {id:value(n,'instanceId'),name:tags.find(tag=>tag.key==='Name')?.value??'',
+    state:value(n,'simulatorRuntimeState'),type:value(n,'instanceType'),image:value(n,'imageId'),
+    vpc:value(n,'vpcId'),subnet:value(n,'subnetId'),groupIds,tags};
+}
 export function parseEC2Document(document,kind){
   if(kind!=='ec2'&&kind!=='vpc')invalid();
   const instance=kind==='ec2',root=document?.documentElement;
@@ -32,7 +44,7 @@ export function parseEC2Document(document,kind){
   if(value(root,'nextToken'))invalid();
   const records=instance?nodes(one(root,'reservationSet',true),'item').flatMap(r=>nodes(one(r,'instancesSet',true),'item')):nodes(one(root,'vpcSet',true),'item');
   if(records.length>1000)invalid();
-  const rows=records.map(n=>instance?{id:value(n,'instanceId'),name:nameTag(n),state:value(n,'simulatorRuntimeState'),type:value(n,'instanceType'),image:value(n,'imageId'),vpc:value(n,'vpcId'),subnet:value(n,'subnetId')}:vpcRow(n));
+  const rows=records.map(instance?instanceRow:vpcRow);
   if(rows.some(row=>!row.id)||new Set(rows.map(row=>row.id)).size!==rows.length)invalid();
   return rows;
 }

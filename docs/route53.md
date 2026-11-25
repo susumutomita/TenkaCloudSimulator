@@ -20,7 +20,7 @@ They are local exercise records, not usable resolvers. AWS supplies four name
 servers and asynchronous propagation; this simulator supplies one and commits
 immediately with INSYNC. Persisted change receipts survive zone deletion.
 
-Changes support simple A/AAAA/CNAME/TXT/MX only. TTL is required (0..2147483647).
+Changes support simple A/AAAA/CNAME/TXT/MX/PTR only. TTL is required (0..2147483647).
 A/AAAA addresses are type-checked/canonicalized; scoped/mapped IPv6 is rejected.
 TXT is one quoted printable-ASCII string of at most 255 bytes, without escaping.
 MX is a 0..65535 preference and DNS name. CNAME has one target, cannot be apex,
@@ -29,6 +29,12 @@ records and receipt commit in one transaction. DELETE must match the entire
 canonical RRset, including TTL and sorted values. Unknown actions/fields,
 weighted/geographic/failover/multivalue policies, aliases, health checks and
 mutable NS/SOA are rejected, never ignored.
+
+A PTR value is an ASCII domain name, normalized to lowercase with a trailing
+dot. For example, a PTR at `7.2.0.192.in-addr.arpa.` in a local reverse zone
+can return `web.example.test.` from TestDNSAnswer. The answer is saved record
+data; the simulator does not resolve the target, create a matching A/AAAA
+record or configure reverse DNS for any real IP address.
 
 Limits: 100 zones/database, 1000 RRsets/zone (including default NS/SOA),
 100 changes/batch, 100 values/RRset, 1024 bytes/value, 1 MiB XML transport,
@@ -86,4 +92,5 @@ X-Simulator-Token header; these requests never contact AWS or external DNS.
 - [ChangeResourceRecordSets](https://docs.aws.amazon.com/Route53/latest/APIReference/API_ChangeResourceRecordSets.html): transaction and exact DELETE contract.
 - [TestDNSAnswer](https://docs.aws.amazon.com/Route53/latest/APIReference/API_TestDNSAnswer.html): public-zone test operation.
 - [Route53 IAM actions/resources](https://docs.aws.amazon.com/service-authorization/latest/reference/list_route53.html): wildcard TestDNSAnswer versus zone/change ARNs.
+- [PTR record type](https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/ResourceRecordTypes.html#PTRFormat): domain-name value and reverse lookups.
 - [ResourceRecordSet](https://docs.aws.amazon.com/Route53/latest/APIReference/API_ResourceRecordSet.html): type/TTL/routing fields.

@@ -1,0 +1,3 @@
+/* A valid SRV name or target can have 63-character labels. Keep the
+   confirmation inside its container without truncating any record data. */
+.gcp-dns-srv-form fieldset { min-inline-size: 0; overflow-wrap: anywhere; }
