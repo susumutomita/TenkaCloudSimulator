@@ -1,48 +1,116 @@
 {
   "version": 1,
-  "base_sha": "e9b286f7d4972b086b13ebcd6f9dcadc012ad736",
+  "base_sha": "6ac9cf77a85d262bf599cd42a1e0f7c45b6ce2cc",
   "changes": [
     {
       "path": "README.md",
-      "sha256": "12eb64e3bef5717ad66fca67cf50cd2ac802d7bf9443ce890608814a4df0bc1a",
+      "sha256": "d0d26e4c8c479410a70313798c8a971cd3b3533049f98fafbdeeffb68af81770",
       "disposition": "documentation",
-      "reason": "Documents bounded trigger validation and no runtime execution.",
+      "reason": "Documents local saved PTR names and reverse-lookup boundaries.",
       "models": []
     },
     {
       "path": "docs/design/0001-go-standalone.md",
-      "sha256": "ac98311ea9089018be000b4e27b8f136f33a6d3736326857bb86b9ab1aec85b8",
+      "sha256": "c647c0ebbb1f33c479b6f5ecbe2414799b0206ac6ec270349f6d48c7527b8a74",
       "disposition": "documentation",
-      "reason": "Documents bounded trigger validation and no runtime execution.",
+      "reason": "Documents local saved PTR names and reverse-lookup boundaries.",
       "models": []
     },
     {
-      "path": "internal/aws/catalog/appflow_trigger_contract_test.go",
-      "sha256": "12cd6c433ffef0e8ae2f4b22b95d4a33c1731a734aec065432d5147a5e8a6991",
-      "disposition": "test-support",
-      "reason": "Focused AppFlow regression, not runtime implementation.",
+      "path": "docs/route53.md",
+      "sha256": "1a4ba2b81e02638b045d7725528069fa030beb7a38940a516b2fc12d7f17686f",
+      "disposition": "documentation",
+      "reason": "Documents local saved PTR names and reverse-lookup boundaries.",
       "models": []
     },
     {
-      "path": "internal/aws/catalog/services_analytics2.go",
-      "sha256": "9e777b025eabd9180e17c2488fec3411656ec9c14f73a0ea34a346aa7145aa45",
+      "path": "internal/aws/route53_http.go",
+      "sha256": "3cb6c3f0e22324c44fbdbf1ff4e52a9318e2fad4121460af86c3407f8478a791",
       "disposition": "modeled",
-      "reason": "AppFlow CreateFlow and UpdateFlow reject incompatible trigger settings in the existing pre-write check without changing routing, IAM, execution, storage, or the transaction model.",
+      "reason": "PTR uses existing saved-name validation and authorized transactional record storage; the newly admitted record type does not change the transaction, authority or team boundary.",
       "models": [
         {
-          "id": "CatalogResourceLifecycle",
+          "id": "Route53AtomicBatch",
           "properties": [
-            "FailureFrame"
+            "AtomicPair",
+            "OnlyAuthorizedValid",
+            "OtherTeamUnchanged"
           ],
-          "limits": "The finite catalog model checks the unchanged store on abstract rejected operations. It does not model AppFlow trigger fields or error ordering, verify Go refinement, parse schedule expressions, or prove any SDK or job behavior. Runtime regressions cover input validation and stored read-back."
+          "limits": "The finite pair model covers abstract admission and isolation, not PTR syntax, DNS type ordering, XML or Go/SQLite refinement; targeted native and SDK tests cover those implementation boundaries."
         }
       ]
     },
     {
-      "path": "test/e2e/catalog_fixtures/appflow.json",
-      "sha256": "dbf88d7a4866d2efdff663005b1fcbfbdb889962a1c6e1ef18e300ee6f481042",
+      "path": "internal/aws/route53_ptr_test.go",
+      "sha256": "e43d897b2c67dd05251942262d6f6909573978f6a6bc68f5a649dd0bf9932a0d",
       "disposition": "test-support",
-      "reason": "Focused AppFlow regression, not runtime implementation.",
+      "reason": "Focused PTR acceptance or exact additive API description checks; does not change runtime.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/route53_store.go",
+      "sha256": "af3834c964f3b8426b741cdd8e90aa5e8b6c2b5ed5827347ffd68c5d89be2f86",
+      "disposition": "modeled",
+      "reason": "PTR uses existing saved-name validation and authorized transactional record storage; the newly admitted record type does not change the transaction, authority or team boundary.",
+      "models": [
+        {
+          "id": "Route53AtomicBatch",
+          "properties": [
+            "AtomicPair",
+            "OnlyAuthorizedValid",
+            "OtherTeamUnchanged"
+          ],
+          "limits": "The finite pair model covers abstract admission and isolation, not PTR syntax, DNS type ordering, XML or Go/SQLite refinement; targeted native and SDK tests cover those implementation boundaries."
+        }
+      ]
+    },
+    {
+      "path": "internal/server/apidocs/openapi.json",
+      "sha256": "1b4386f3102441a87e2339b94ee80a8c3ac355e53fd300833e400c6971190bce",
+      "disposition": "presentation",
+      "reason": "Embedded API reference lists the newly admitted simple PTR record type.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/autoscaling_plans_openapi.py",
+      "sha256": "5845f59d71a0c3c98393a88e02ee6c426fb9ccb48e78017e5f61da17691316f7",
+      "disposition": "test-support",
+      "reason": "Focused PTR acceptance or exact additive API description checks; does not change runtime.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/route53.py",
+      "sha256": "2cf7408c092cab8880b767571134eb88641cff4f3acd5f983f919c36df8300ca",
+      "disposition": "test-support",
+      "reason": "Focused PTR acceptance or exact additive API description checks; does not change runtime.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/route53_openapi.py",
+      "sha256": "8a6630e6d8ad099944cb3e2113a544cb3b0607c1451a9dd3dae45ec07ebfed97",
+      "disposition": "test-support",
+      "reason": "Focused PTR acceptance or exact additive API description checks; does not change runtime.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/route53_ptr_reference.py",
+      "sha256": "1b5e9cd125ba529124c68d946adceb353a5804ffd610c1df4735757c2a3231dc",
+      "disposition": "test-support",
+      "reason": "Focused PTR acceptance or exact additive API description checks; does not change runtime.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/test_route53_openapi.py",
+      "sha256": "1daaee9399804b1017b100cb598eaf409cdf616f29b4526e14808e1ca59b0982",
+      "disposition": "test-support",
+      "reason": "Focused PTR acceptance or exact additive API description checks; does not change runtime.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/test_sakura_openapi.py",
+      "sha256": "8575f9f42ed9fa27cd80e469c79ec3cedcea31731e0c1601e86ccb063cf74e04",
+      "disposition": "test-support",
+      "reason": "Focused PTR acceptance or exact additive API description checks; does not change runtime.",
       "models": []
     }
   ]
