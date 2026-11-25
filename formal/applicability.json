@@ -1,49 +1,59 @@
 {
   "version": 1,
-  "base_sha": "e9b286f7d4972b086b13ebcd6f9dcadc012ad736",
+  "base_sha": "6ac9cf77a85d262bf599cd42a1e0f7c45b6ce2cc",
   "changes": [
     {
       "path": "README.md",
-      "sha256": "12eb64e3bef5717ad66fca67cf50cd2ac802d7bf9443ce890608814a4df0bc1a",
+      "sha256": "0efad3e189e548ca2ecad25664f8705ce3baf8c61d2129e1b875b224c4058ee1",
       "disposition": "documentation",
-      "reason": "Documents bounded trigger validation and no runtime execution.",
+      "reason": "Documents bounded canonical conditional writes without claiming full SimpleDB.",
       "models": []
     },
     {
       "path": "docs/design/0001-go-standalone.md",
-      "sha256": "ac98311ea9089018be000b4e27b8f136f33a6d3736326857bb86b9ab1aec85b8",
+      "sha256": "a6f4e53a76a67f5d9c702ef28ec8598c7f7c5ce0e130e9d7913969b9525362cd",
       "disposition": "documentation",
-      "reason": "Documents bounded trigger validation and no runtime execution.",
+      "reason": "Documents bounded canonical conditional writes without claiming full SimpleDB.",
       "models": []
     },
     {
-      "path": "internal/aws/catalog/appflow_trigger_contract_test.go",
-      "sha256": "12cd6c433ffef0e8ae2f4b22b95d4a33c1731a734aec065432d5147a5e8a6991",
+      "path": "internal/aws/simpledb/conditional_put_test.go",
+      "sha256": "7ea85b521e2a5912e47b9e9704f6a36c77037db3a6f5b1cff5cbf138b54047c4",
       "disposition": "test-support",
-      "reason": "Focused AppFlow regression, not runtime implementation.",
+      "reason": "Focused SimpleDB native conditional write checks, not production implementation.",
       "models": []
     },
     {
-      "path": "internal/aws/catalog/services_analytics2.go",
-      "sha256": "9e777b025eabd9180e17c2488fec3411656ec9c14f73a0ea34a346aa7145aa45",
+      "path": "internal/aws/simpledb/http.go",
+      "sha256": "365b8bede78ac75dda90fef56dce8dab0b9aa5667eeabf2f88b6e2deda3f20e5",
       "disposition": "modeled",
-      "reason": "AppFlow CreateFlow and UpdateFlow reject incompatible trigger settings in the existing pre-write check without changing routing, IAM, execution, storage, or the transaction model.",
+      "reason": "The new SimpleDB conditional path reuses existing admissibility and transactional rollback/commit boundaries.",
       "models": [
         {
-          "id": "CatalogResourceLifecycle",
+          "id": "SimpleDBQueryAdmission",
           "properties": [
-            "FailureFrame"
+            "MalformedNeverDispatches",
+            "EnvelopeMatchesOutcome"
           ],
-          "limits": "The finite catalog model checks the unchanged store on abstract rejected operations. It does not model AppFlow trigger fields or error ordering, verify Go refinement, parse schedule expressions, or prove any SDK or job behavior. Runtime regressions cover input validation and stored read-back."
+          "limits": "Abstract request guards and response categories only. The model does not represent the Expected syntax, exact error code/status, or Go HTTP or SQLite semantics."
         }
       ]
     },
     {
-      "path": "test/e2e/catalog_fixtures/appflow.json",
-      "sha256": "dbf88d7a4866d2efdff663005b1fcbfbdb889962a1c6e1ef18e300ee6f481042",
-      "disposition": "test-support",
-      "reason": "Focused AppFlow regression, not runtime implementation.",
-      "models": []
+      "path": "internal/aws/simpledb/item.go",
+      "sha256": "637fd395ab5e7c2aefd7b195d749e96c056ca825d9f1245a59ca55c546580c89",
+      "disposition": "modeled",
+      "reason": "The new SimpleDB conditional path reuses existing admissibility and transactional rollback/commit boundaries.",
+      "models": [
+        {
+          "id": "SimpleDBLifecycle",
+          "properties": [
+            "RefusalUnchanged",
+            "CommittedExact"
+          ],
+          "limits": "Abstract stage, commit and refusal only. It does not model compare-and-set, multi-value semantics, concurrent writers, SQL isolation or Go refinement. The focused native regressions exercise those concrete behaviors."
+        }
+      ]
     }
   ]
 }
