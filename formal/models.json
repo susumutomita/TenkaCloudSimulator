@@ -18261,6 +18261,139 @@
       "limits": "Classification abstraction of persistentNIC.unhandled/receive on the persistent VM NIC only. Byte parsing, checksum and TCP option validation, ARP field validation, registry routing internals, queueing, budgets other than not charging dropped frames, ordinary single-exchange transports, liveness and full Go refinement are not modeled. Dropping grants no capability; it is not proof that a guest cannot exhaust host CPU by flooding."
     },
     {
+      "id": "EC2SecurityGroupRead",
+      "model": "formal/EC2SecurityGroupRead.tla",
+      "config": "formal/EC2SecurityGroupRead.cfg",
+      "bounds": "One read observation; exact or unsupported action, independent Boolean admission and row-binding witnesses, two abstract saved and template ingress sets.",
+      "properties": [
+        "TypeOK",
+        "OperationAdmission",
+        "AuthorizedRegionalRead",
+        "CanonicalGroup",
+        "CanonicalParent",
+        "CurrentIngress",
+        "FaithfulXML"
+      ],
+      "limits": "Finite projection of one native EC2 read, not a Go refinement. Actual IAM, SQL transactions and row schemas, quotas, XML encoding and validation, batch result construction, failure responses, concurrency and packet filtering are not proven. Current/template values model provenance, not TCP semantics.",
+      "source_scope": [
+        "internal/aws/ec2_read.go",
+        "internal/aws/ec2_security_groups_read.go",
+        "internal/aws/ec2_vpc.go"
+      ],
+      "mutants": [
+        {
+          "id": "AllowUnknownOperation",
+          "edits": [
+            {
+              "old": "/\\ f.operation = \"DescribeSecurityGroups\"",
+              "new": "/\\ TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "OperationAdmission"
+        },
+        {
+          "id": "MissingAuthorization",
+          "edits": [
+            {
+              "old": "/\\ f.authorized /\\ f.localRegion /\\ ~f.instanceOnly",
+              "new": "/\\ TRUE /\\ f.localRegion /\\ ~f.instanceOnly",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AuthorizedRegionalRead"
+        },
+        {
+          "id": "MissingRegion",
+          "edits": [
+            {
+              "old": "/\\ f.authorized /\\ f.localRegion /\\ ~f.instanceOnly",
+              "new": "/\\ f.authorized /\\ TRUE /\\ ~f.instanceOnly",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AuthorizedRegionalRead"
+        },
+        {
+          "id": "AllowInstanceHandoff",
+          "edits": [
+            {
+              "old": "/\\ f.authorized /\\ f.localRegion /\\ ~f.instanceOnly",
+              "new": "/\\ f.authorized /\\ f.localRegion /\\ TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AuthorizedRegionalRead"
+        },
+        {
+          "id": "MissingGroupBinding",
+          "edits": [
+            {
+              "old": "/\\ f.canonicalGroup\n",
+              "new": "/\\ TRUE\n",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CanonicalGroup"
+        },
+        {
+          "id": "MissingParentRow",
+          "edits": [
+            {
+              "old": "/\\ f.storedParent /\\ f.parentClaim /\\ f.parentDeclared",
+              "new": "/\\ TRUE /\\ f.parentClaim /\\ f.parentDeclared",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CanonicalParent"
+        },
+        {
+          "id": "MissingParentClaim",
+          "edits": [
+            {
+              "old": "/\\ f.storedParent /\\ f.parentClaim /\\ f.parentDeclared",
+              "new": "/\\ f.storedParent /\\ TRUE /\\ f.parentDeclared",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CanonicalParent"
+        },
+        {
+          "id": "MissingParentDeclaration",
+          "edits": [
+            {
+              "old": "/\\ f.storedParent /\\ f.parentClaim /\\ f.parentDeclared",
+              "new": "/\\ f.storedParent /\\ f.parentClaim /\\ TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CanonicalParent"
+        },
+        {
+          "id": "UseStaleTemplateIngress",
+          "edits": [
+            {
+              "old": "returned |-> current",
+              "new": "returned |-> template",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CurrentIngress"
+        },
+        {
+          "id": "AllowLossyXML",
+          "edits": [
+            {
+              "old": "/\\ f.faithfulXML\n",
+              "new": "/\\ TRUE\n",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "FaithfulXML"
+        }
+      ]
+    },
+    {
       "id": "EC2ReadDiscovery",
       "model": "formal/EC2ReadDiscovery.tla",
       "config": "formal/EC2ReadDiscovery.cfg",

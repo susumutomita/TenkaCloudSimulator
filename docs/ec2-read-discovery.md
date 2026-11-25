@@ -3,9 +3,10 @@
 `POST /`, `Content-Type: application/x-www-form-urlencoded`,
 `X-Simulator-Service: ec2` and `X-Simulator-Region` select the native Query/XML
 subset. Supply `Version=2016-11-15` and `Action=DescribeInstances`,
-`Action=DescribeVpcs`, `Action=DescribeSubnets`, `Action=CreateVpc` or `Action=DeleteVpc`.
-Discovery responses use the EC2 namespace and lower-camel-case
-`reservationSet/instancesSet/item`, `vpcSet/item` and `subnetSet/item` fields.
+`Action=DescribeVpcs`, `Action=DescribeSubnets`, `Action=DescribeSecurityGroups`,
+`Action=CreateVpc` or `Action=DeleteVpc`. Discovery uses the EC2 namespace and
+lower-camel-case `reservationSet/instancesSet/item`, `vpcSet/item`,
+`subnetSet/item` and `securityGroupInfo/item` fields.
 A request body is bounded to 64 KiB.
 
 ## Discovery
@@ -14,8 +15,8 @@ Discovery reads CloudFormation-owned resources from the same local SQLite databa
 checking saved resource, region, stack ownership and network identity consistency.
 It does not create resources or make cloud calls. The host's existing local token
 and browser session authentication still applies. Selected exercise identities
-need the matching `ec2:DescribeInstances`, `ec2:DescribeVpcs` or
-`ec2:DescribeSubnets` action on `*`.
+need the matching `ec2:DescribeInstances`, `ec2:DescribeVpcs`,
+`ec2:DescribeSubnets` or `ec2:DescribeSecurityGroups` action on `*`.
 One database/token authority per team is still required; exercise identities are
 not tenant isolation. Native STS session credentials are not supported here.
 
@@ -40,6 +41,26 @@ results; inconsistent surviving ownership fails closed.
 VPC ID. Each item carries the local extension `simulatorManagedBy`:
 `cloudformation` (delete it by deleting its stack) or `ec2` (created by
 `CreateVpc`, deletable with `DeleteVpc`). SDKs ignore the extension.
+
+### Security-group readback
+
+`DescribeSecurityGroups` lists CloudFormation-owned groups in the selected
+region, ordered by group ID. EC2-owned standalone VPCs do not acquire groups.
+Each item reports the local account ID, group ID, description, VPC ID, optional
+saved tags and current ingress rules (TCP ports and canonical IPv4 CIDRs).
+The group and its VPC must be typed members of the same stack. The query
+reads persisted rules, not the template, and does not change state. A
+single-instance scoped session cannot list security groups.
+
+An empty region returns an empty list. Inconsistent persisted ownership or
+text that cannot round-trip through XML 1.0 fails the whole request with
+`InternalError`, leaving existing data unchanged. Valid Unicode, tab,
+line feed, and carriage return are preserved. This read does not support
+group filters/ID selectors, paging, group names, egress, IPv6, referenced
+groups, or rule mutation. It adds no Console control or packet filtering.
+
+[EC2 API reference: DescribeSecurityGroups](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_DescribeSecurityGroups.html).
+Focused check: `go test ./internal/aws -run '^TestEC2DescribeSecurityGroupsContract$' -count=1`.
 
 ## Native VPC lifecycle
 

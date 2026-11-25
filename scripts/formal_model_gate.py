@@ -1331,6 +1331,10 @@ REQUIRED_SOURCE_SCOPES['AutoScalingPlanTargets'] = {'internal/aws/autoscalingpla
 
 # Independent EC2 read-only discovery admission contract. These fixed sets must
 # not be derived from the mutable registry, which this gate validates.
+BASE_MODELS.add('EC2SecurityGroupRead')
+BASE_INVARIANTS['EC2SecurityGroupRead'] = {'OperationAdmission', 'CanonicalGroup', 'TypeOK', 'AuthorizedRegionalRead', 'CurrentIngress', 'FaithfulXML', 'CanonicalParent'}
+REQUIRED_MUTANTS['EC2SecurityGroupRead'] = {'AllowInstanceHandoff', 'MissingParentDeclaration', 'AllowUnknownOperation', 'MissingAuthorization', 'MissingParentRow', 'MissingRegion', 'MissingGroupBinding', 'MissingParentClaim', 'AllowLossyXML', 'UseStaleTemplateIngress'}
+REQUIRED_SOURCE_SCOPES['EC2SecurityGroupRead'] = {'internal/aws/ec2_read.go', 'internal/aws/ec2_security_groups_read.go', 'internal/aws/ec2_vpc.go'}
 BASE_MODELS.add('EC2ReadDiscovery')
 BASE_INVARIANTS['EC2ReadDiscovery'] = {'TypeOK', 'AuthorizedRead', 'RegionBound', 'OwnedRead'}
 REQUIRED_MUTANTS['EC2ReadDiscovery'] = {'MissingAllow', 'MissingDeny', 'MissingRegion', 'MissingOwner'}
