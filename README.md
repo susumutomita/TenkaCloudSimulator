@@ -101,6 +101,7 @@ console, CloudFormation adapter or Challenge integration.
 - **Other clouds:** [Google Cloud Storage / Azure Blob Storage](docs/multicloud-storage.md),
   [Azure Blob conditional and CRC64 read limits](docs/azure-blob.md#single-range-download-subset),
   [App Engine (Python 3.12 WSGI versions, traffic splits, firewall)](docs/gcp-appengine.md),
+  [Cloud DNS (bounded zone and record changes, including SRV)](docs/acceptance/gcp-cloud-dns.md),
   [Google Cloud console](docs/gcp-console.md), [Azure console](docs/azure-console.md),
   [Azure Queue Storage (bounded named-queue operations)](docs/acceptance/azure-queue.md),
   [opt-in Sakura Disk metadata](docs/sakura.md).
