@@ -26,19 +26,26 @@ func TestActualHostBattleBootstrapContract(t *testing.T) {
 		t.Fatal(err)
 	}
 	sum := sha256.Sum256(raw)
-	if hex.EncodeToString(sum[:]) != "25ca1739723a2dcab11477835fcdb07aee1be4516b55c9b2d46554ccfaab0bf7" {
+	if hex.EncodeToString(sum[:]) != "4809767a7bd85d5fbeac39fae38553d86e86f216b06d06ca459ad3497c56abf3" {
 		t.Fatal("Host fixture bytes changed without provenance review")
 	}
 	var provenance struct {
-		TemplateSHA256 string            `json:"templateSHA256"`
-		SourceFiles    map[string]string `json:"sourceFiles"`
+		SourceRepository string            `json:"sourceRepository"`
+		SourceCommit     string            `json:"sourceCommit"`
+		TemplateSHA256   string            `json:"templateSHA256"`
+		SourceFiles      map[string]string `json:"sourceFiles"`
 	}
 	metadata, err := os.ReadFile("testdata/host-battle-bootstrap/provenance.json")
 	if err != nil {
 		t.Fatal(err)
 	}
-	if err = json.Unmarshal(metadata, &provenance); err != nil || provenance.TemplateSHA256 != hex.EncodeToString(sum[:]) || len(provenance.SourceFiles) != 2 {
-		t.Fatal("missing exact Host provenance", err)
+	if err = json.Unmarshal(metadata, &provenance); err != nil {
+		t.Fatal(err)
+	}
+	if provenance.TemplateSHA256 != hex.EncodeToString(sum[:]) ||
+		provenance.SourceRepository != "susumutomita/TenkaCloud" || provenance.SourceCommit != "5e360d563e03e23ea431470559399dfc33ff2cca" ||
+		len(provenance.SourceFiles) != 1 || provenance.SourceFiles["scripts/local-host/simulator-bootstrap.ts"] != "e9a5f7a1e5cf05316deaf079faccdfa2db9daec9c068f3ad7076e6be9fbc3c54" {
+		t.Fatal("fixture provenance differs from reviewed Host revision")
 	}
 	db, err := core.New(":memory:")
 	if err != nil {
