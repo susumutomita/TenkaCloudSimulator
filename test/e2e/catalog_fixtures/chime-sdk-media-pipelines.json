@@ -1,0 +1,21 @@
+{
+ "client": "chime-sdk-media-pipelines",
+ "steps": [
+  {"op": "create_media_insights_pipeline_configuration", "args": {"MediaInsightsPipelineConfigurationName": "fixture-calls", "ResourceAccessRoleArn": "arn:aws:iam::000000000000:role/fixture-media", "Elements": [{"Type": "LambdaFunctionSink", "LambdaFunctionSinkConfiguration": {"InsightsTarget": "arn:aws:lambda:us-east-1:000000000000:function:fixture-sink"}}]}, "save": {"config": "MediaInsightsPipelineConfiguration.MediaInsightsPipelineConfigurationId"}},
+  {"op": "get_media_insights_pipeline_configuration", "args": {"Identifier": "fixture-calls"}, "expect": {"MediaInsightsPipelineConfiguration.MediaInsightsPipelineConfigurationName": "fixture-calls"}},
+  {"op": "update_media_insights_pipeline_configuration", "args": {"Identifier": "fixture-calls", "ResourceAccessRoleArn": "arn:aws:iam::000000000000:role/fixture-media-2", "Elements": [{"Type": "LambdaFunctionSink", "LambdaFunctionSinkConfiguration": {"InsightsTarget": "arn:aws:lambda:us-east-1:000000000000:function:fixture-sink"}}]}, "expect": {"MediaInsightsPipelineConfiguration.ResourceAccessRoleArn": "arn:aws:iam::000000000000:role/fixture-media-2"}},
+  {"op": "list_media_insights_pipeline_configurations", "args": {}, "expect": {"MediaInsightsPipelineConfigurations#count": 1}},
+  {"op": "create_media_insights_pipeline_configuration", "args": {"MediaInsightsPipelineConfigurationName": "fixture-calls", "ResourceAccessRoleArn": "arn:aws:iam::000000000000:role/fixture-media", "Elements": []}, "error": "BadRequestException"},
+  {"op": "get_media_insights_pipeline_configuration", "args": {"Identifier": "missing"}, "error": "NotFoundException", "status": 404}
+ ],
+ "isolation": [
+  {"op": "list_media_insights_pipeline_configurations", "args": {}, "expect": {"MediaInsightsPipelineConfigurations#count": 0}}
+ ],
+ "after_restart": [
+  {"op": "get_media_insights_pipeline_configuration", "args": {"Identifier": "${config}"}, "expect": {"MediaInsightsPipelineConfiguration.MediaInsightsPipelineConfigurationName": "fixture-calls"}}
+ ],
+ "cleanup": [
+  {"op": "delete_media_insights_pipeline_configuration", "args": {"Identifier": "fixture-calls"}},
+  {"op": "list_media_insights_pipeline_configurations", "args": {}, "expect": {"MediaInsightsPipelineConfigurations#count": 0}}
+ ]
+}

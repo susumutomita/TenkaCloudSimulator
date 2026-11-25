@@ -1,0 +1,29 @@
+{
+ "client": "ivs-realtime",
+ "steps": [
+  {"op": "create_encoder_configuration", "args": {"name": "fixture-hd", "video": {"bitrate": 2500000, "framerate": 30, "height": 720, "width": 1280}, "tags": {"team": "a"}}, "save": {"encoder": "encoderConfiguration.arn"}, "expect": {"encoderConfiguration.video.height": 720}},
+  {"op": "get_encoder_configuration", "args": {"arn": "${encoder}"}, "expect": {"encoderConfiguration.name": "fixture-hd"}},
+  {"op": "list_encoder_configurations", "args": {}, "expect": {"encoderConfigurations#count": 1}},
+  {"op": "create_storage_configuration", "args": {"name": "fixture-rec", "s3": {"bucketName": "fixture-recordings"}}, "save": {"storage": "storageConfiguration.arn"}},
+  {"op": "get_storage_configuration", "args": {"arn": "${storage}"}, "expect": {"storageConfiguration.s3.bucketName": "fixture-recordings"}},
+  {"op": "list_storage_configurations", "args": {}, "expect": {"storageConfigurations#count": 1}},
+  {"op": "create_stage", "args": {"name": "fixture-stage", "tags": {"team": "a"}}, "save": {"stage": "stage.arn"}, "expect": {"stage.name": "fixture-stage", "stage.tags": {"team": "a"}}},
+  {"op": "get_stage", "args": {"arn": "${stage}"}, "expect": {"stage.name": "fixture-stage"}},
+  {"op": "list_stages", "args": {}, "expect": {"stages#count": 1}},
+  {"op": "update_stage", "args": {"arn": "${stage}", "name": "fixture-stage-2", "autoParticipantRecordingConfiguration": {"storageConfigurationArn": "${storage}"}}, "expect": {"stage.name": "fixture-stage-2"}},
+  {"op": "create_stage", "args": {"participantTokenConfigurations": [{"userId": "u"}]}, "error": "ValidationException"},
+  {"op": "get_stage", "args": {"arn": "arn:aws:ivs:us-east-1:000000000000:stage/missing"}, "error": "ResourceNotFoundException", "status": 404}
+ ],
+ "isolation": [
+  {"op": "list_stages", "args": {}, "expect": {"stages#count": 0}}
+ ],
+ "after_restart": [
+  {"op": "get_stage", "args": {"arn": "${stage}"}, "expect": {"stage.name": "fixture-stage-2"}}
+ ],
+ "cleanup": [
+  {"op": "delete_stage", "args": {"arn": "${stage}"}},
+  {"op": "delete_storage_configuration", "args": {"arn": "${storage}"}},
+  {"op": "delete_encoder_configuration", "args": {"arn": "${encoder}"}},
+  {"op": "list_stages", "args": {}, "expect": {"stages#count": 0}}
+ ]
+}

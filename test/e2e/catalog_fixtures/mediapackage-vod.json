@@ -1,0 +1,25 @@
+{
+ "client": "mediapackage-vod",
+ "steps": [
+  {"op": "create_packaging_group", "args": {"Id": "fixture-group", "Tags": {"team": "a"}, "Authorization": {"CdnIdentifierSecret": "arn:aws:secretsmanager:us-east-1:000000000000:secret:fixture-cdn", "SecretsRoleArn": "arn:aws:iam::000000000000:role/fixture-packager"}}, "save": {"arn": "Arn"}, "expect": {"Id": "fixture-group"}},
+  {"op": "describe_packaging_group", "args": {"Id": "fixture-group"}, "expect": {"Arn": "${arn}", "ApproximateAssetCount": 0, "Authorization.SecretsRoleArn": "arn:aws:iam::000000000000:role/fixture-packager"}},
+  {"op": "list_packaging_groups", "args": {}, "expect": {"PackagingGroups#count": 1, "PackagingGroups[0].Id": "fixture-group"}},
+  {"op": "update_packaging_group", "args": {"Id": "fixture-group", "Authorization": {"CdnIdentifierSecret": "arn:aws:secretsmanager:us-east-1:000000000000:secret:fixture-cdn", "SecretsRoleArn": "arn:aws:iam::000000000000:role/fixture-other"}}, "expect": {"Authorization.SecretsRoleArn": "arn:aws:iam::000000000000:role/fixture-other"}},
+  {"op": "tag_resource", "args": {"ResourceArn": "${arn}", "Tags": {"k": "v"}}},
+  {"op": "untag_resource", "args": {"ResourceArn": "${arn}", "TagKeys": ["k"]}},
+  {"op": "list_tags_for_resource", "args": {"ResourceArn": "${arn}"}, "expect": {"Tags": {"team": "a"}}},
+  {"op": "create_packaging_group", "args": {"Id": "fixture-group"}, "error": "ConflictException", "status": 409},
+  {"op": "create_packaging_group", "args": {"Id": "fixture-bad", "Authorization": {"CdnIdentifierSecret": "not-an-arn", "SecretsRoleArn": "arn:aws:iam::000000000000:role/fixture-packager"}}, "error": "ValidationException", "status": 400},
+  {"op": "describe_packaging_group", "args": {"Id": "fixture-missing"}, "error": "NotFoundException", "status": 404}
+ ],
+ "isolation": [
+  {"op": "list_packaging_groups", "args": {}, "expect": {"PackagingGroups#count": 0}}
+ ],
+ "after_restart": [
+  {"op": "describe_packaging_group", "args": {"Id": "fixture-group"}, "expect": {"Authorization.SecretsRoleArn": "arn:aws:iam::000000000000:role/fixture-other"}}
+ ],
+ "cleanup": [
+  {"op": "delete_packaging_group", "args": {"Id": "fixture-group"}},
+  {"op": "list_packaging_groups", "args": {}, "expect": {"PackagingGroups#count": 0}}
+ ]
+}

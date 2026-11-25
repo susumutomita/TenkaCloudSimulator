@@ -1,0 +1,612 @@
+{
+ "components": {
+  "schemas": {
+   "CreateFHIRDatastoreRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "ClientToken": {
+      "maxLength": 64,
+      "minLength": 1,
+      "type": "string"
+     },
+     "DatastoreName": {
+      "maxLength": 256,
+      "minLength": 1,
+      "type": "string"
+     },
+     "DatastoreTypeVersion": {
+      "enum": [
+       "R4"
+      ],
+      "type": "string"
+     },
+     "IdentityProviderConfiguration": {
+      "$ref": "#/components/schemas/IdentityProviderConfiguration"
+     },
+     "PreloadDataConfig": {
+      "$ref": "#/components/schemas/PreloadDataConfig"
+     },
+     "SseConfiguration": {
+      "$ref": "#/components/schemas/SseConfiguration"
+     },
+     "Tags": {
+      "items": {
+       "$ref": "#/components/schemas/Tag"
+      },
+      "maxItems": 200,
+      "minItems": 0,
+      "type": "array"
+     }
+    },
+    "required": [
+     "DatastoreTypeVersion"
+    ],
+    "type": "object"
+   },
+   "CreateFHIRDatastoreResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "DatastoreArn": {
+      "type": "string"
+     },
+     "DatastoreEndpoint": {
+      "maxLength": 5000,
+      "minLength": 1,
+      "type": "string"
+     },
+     "DatastoreId": {
+      "maxLength": 32,
+      "minLength": 1,
+      "type": "string"
+     },
+     "DatastoreStatus": {
+      "enum": [
+       "CREATING",
+       "ACTIVE",
+       "DELETING",
+       "DELETED",
+       "CREATE_FAILED"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "DatastoreId",
+     "DatastoreArn",
+     "DatastoreStatus",
+     "DatastoreEndpoint"
+    ],
+    "type": "object"
+   },
+   "DatastoreFilter": {
+    "additionalProperties": false,
+    "properties": {
+     "CreatedAfter": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "CreatedBefore": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "DatastoreName": {
+      "maxLength": 256,
+      "minLength": 1,
+      "type": "string"
+     },
+     "DatastoreStatus": {
+      "enum": [
+       "CREATING",
+       "ACTIVE",
+       "DELETING",
+       "DELETED",
+       "CREATE_FAILED"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "DatastoreProperties": {
+    "additionalProperties": false,
+    "properties": {
+     "CreatedAt": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "DatastoreArn": {
+      "type": "string"
+     },
+     "DatastoreEndpoint": {
+      "maxLength": 10000,
+      "type": "string"
+     },
+     "DatastoreId": {
+      "maxLength": 32,
+      "minLength": 1,
+      "type": "string"
+     },
+     "DatastoreName": {
+      "maxLength": 256,
+      "minLength": 1,
+      "type": "string"
+     },
+     "DatastoreStatus": {
+      "enum": [
+       "CREATING",
+       "ACTIVE",
+       "DELETING",
+       "DELETED",
+       "CREATE_FAILED"
+      ],
+      "type": "string"
+     },
+     "DatastoreTypeVersion": {
+      "enum": [
+       "R4"
+      ],
+      "type": "string"
+     },
+     "ErrorCause": {
+      "$ref": "#/components/schemas/ErrorCause"
+     },
+     "IdentityProviderConfiguration": {
+      "$ref": "#/components/schemas/IdentityProviderConfiguration"
+     },
+     "PreloadDataConfig": {
+      "$ref": "#/components/schemas/PreloadDataConfig"
+     },
+     "SseConfiguration": {
+      "$ref": "#/components/schemas/SseConfiguration"
+     }
+    },
+    "required": [
+     "DatastoreId",
+     "DatastoreArn",
+     "DatastoreStatus",
+     "DatastoreTypeVersion",
+     "DatastoreEndpoint"
+    ],
+    "type": "object"
+   },
+   "DeleteFHIRDatastoreRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "DatastoreId": {
+      "maxLength": 32,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "DatastoreId"
+    ],
+    "type": "object"
+   },
+   "DeleteFHIRDatastoreResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "DatastoreArn": {
+      "type": "string"
+     },
+     "DatastoreEndpoint": {
+      "maxLength": 5000,
+      "minLength": 1,
+      "type": "string"
+     },
+     "DatastoreId": {
+      "maxLength": 32,
+      "minLength": 1,
+      "type": "string"
+     },
+     "DatastoreStatus": {
+      "enum": [
+       "CREATING",
+       "ACTIVE",
+       "DELETING",
+       "DELETED",
+       "CREATE_FAILED"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "DatastoreId",
+     "DatastoreArn",
+     "DatastoreStatus",
+     "DatastoreEndpoint"
+    ],
+    "type": "object"
+   },
+   "DescribeFHIRDatastoreRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "DatastoreId": {
+      "maxLength": 32,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "DatastoreId"
+    ],
+    "type": "object"
+   },
+   "DescribeFHIRDatastoreResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "DatastoreProperties": {
+      "$ref": "#/components/schemas/DatastoreProperties"
+     }
+    },
+    "required": [
+     "DatastoreProperties"
+    ],
+    "type": "object"
+   },
+   "ErrorCause": {
+    "additionalProperties": false,
+    "properties": {
+     "ErrorCategory": {
+      "enum": [
+       "RETRYABLE_ERROR",
+       "NON_RETRYABLE_ERROR"
+      ],
+      "type": "string"
+     },
+     "ErrorMessage": {
+      "maxLength": 4096,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "IdentityProviderConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "AuthorizationStrategy": {
+      "enum": [
+       "SMART_ON_FHIR_V1",
+       "SMART_ON_FHIR",
+       "AWS_AUTH"
+      ],
+      "type": "string"
+     },
+     "FineGrainedAuthorizationEnabled": {
+      "type": "boolean"
+     },
+     "IdpLambdaArn": {
+      "maxLength": 256,
+      "minLength": 49,
+      "type": "string"
+     },
+     "Metadata": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "AuthorizationStrategy"
+    ],
+    "type": "object"
+   },
+   "KmsEncryptionConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "CmkType": {
+      "enum": [
+       "CUSTOMER_MANAGED_KMS_KEY",
+       "AWS_OWNED_KMS_KEY"
+      ],
+      "type": "string"
+     },
+     "KmsKeyId": {
+      "maxLength": 400,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "CmkType"
+    ],
+    "type": "object"
+   },
+   "ListFHIRDatastoresRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "Filter": {
+      "$ref": "#/components/schemas/DatastoreFilter"
+     },
+     "MaxResults": {
+      "maximum": 500,
+      "minimum": 1,
+      "type": "integer"
+     },
+     "NextToken": {
+      "maxLength": 8192,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ListFHIRDatastoresResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "DatastorePropertiesList": {
+      "items": {
+       "$ref": "#/components/schemas/DatastoreProperties"
+      },
+      "type": "array"
+     },
+     "NextToken": {
+      "maxLength": 8192,
+      "type": "string"
+     }
+    },
+    "required": [
+     "DatastorePropertiesList"
+    ],
+    "type": "object"
+   },
+   "ListTagsForResourceRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "ResourceARN": {
+      "maxLength": 1011,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "ResourceARN"
+    ],
+    "type": "object"
+   },
+   "ListTagsForResourceResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "Tags": {
+      "items": {
+       "$ref": "#/components/schemas/Tag"
+      },
+      "maxItems": 200,
+      "minItems": 0,
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "PreloadDataConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "PreloadDataType": {
+      "enum": [
+       "SYNTHEA"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "PreloadDataType"
+    ],
+    "type": "object"
+   },
+   "SseConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "KmsEncryptionConfig": {
+      "$ref": "#/components/schemas/KmsEncryptionConfig"
+     }
+    },
+    "required": [
+     "KmsEncryptionConfig"
+    ],
+    "type": "object"
+   },
+   "Tag": {
+    "additionalProperties": false,
+    "properties": {
+     "Key": {
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string"
+     },
+     "Value": {
+      "maxLength": 256,
+      "minLength": 0,
+      "type": "string"
+     }
+    },
+    "required": [
+     "Key",
+     "Value"
+    ],
+    "type": "object"
+   },
+   "TagResourceRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "ResourceARN": {
+      "maxLength": 1011,
+      "minLength": 1,
+      "type": "string"
+     },
+     "Tags": {
+      "items": {
+       "$ref": "#/components/schemas/Tag"
+      },
+      "maxItems": 200,
+      "minItems": 0,
+      "type": "array"
+     }
+    },
+    "required": [
+     "ResourceARN",
+     "Tags"
+    ],
+    "type": "object"
+   },
+   "TagResourceResponse": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "UntagResourceRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "ResourceARN": {
+      "maxLength": 1011,
+      "minLength": 1,
+      "type": "string"
+     },
+     "TagKeys": {
+      "items": {
+       "maxLength": 128,
+       "minLength": 1,
+       "type": "string"
+      },
+      "maxItems": 200,
+      "minItems": 0,
+      "type": "array"
+     }
+    },
+    "required": [
+     "ResourceARN",
+     "TagKeys"
+    ],
+    "type": "object"
+   },
+   "UntagResourceResponse": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "Bounded simulator subset of the official Amazon HealthLake API (2017-07-01). Every other official operation returns HTTP 501 UnknownOperationException. FHIR data stores are stored configuration records that stay CREATING: no FHIR store, endpoint or data plane exists, DatastoreEndpoint is never returned, and StartFHIRImportJob, DescribeFHIRImportJob, ListFHIRImportJobs, StartFHIRExportJob, DescribeFHIRExportJob and ListFHIRExportJobs return UnknownOperationException with HTTP 501. No import, export or FHIR request is ever processed. PreloadDataConfig is refused because the Synthea sample data it loads is AWS-owned data the simulator does not hold. Without SseConfiguration the record reports the AWS_OWNED_KMS_KEY type; a customer managed key needs its KmsKeyId, which is stored without contacting KMS and is refused with the AWS owned type. IdentityProviderConfiguration is stored but never consulted: AWS_AUTH takes no metadata, Lambda function or fine-grained flag, SMART_ON_FHIR strategies accept Metadata only as a JSON object whose grant_types_supported lists authorization_code or client_credentials and whose code_challenge_methods_supported includes S256, and IdpLambdaArn is not invoked. ListFHIRDatastores accepts the Filter members DatastoreName and DatastoreStatus as equality filters on the stored values and refuses CreatedBefore and CreatedAfter. Data store names need not be unique and are optional. DeleteFHIRDatastore returns the identifier, ARN and status DELETING and removes the record, even though AWS refuses to delete a data store that is not ACTIVE. Quota failures use the operation's ValidationException because the official operations model no quota exception; resource counts per Region (10 data stores) are local limits.",
+  "title": "Amazon HealthLake (simulator catalog)",
+  "version": "2017-07-01"
+ },
+ "openapi": "3.1.0",
+ "paths": {
+  "/": {
+   "post": {
+    "description": "Choose the X-Amz-Target of one implemented operation. Request and response members follow the linked official input/output schemas.",
+    "operationId": "healthlakeJSONOperation",
+    "parameters": [
+     {
+      "in": "header",
+      "name": "X-Amz-Target",
+      "required": true,
+      "schema": {
+       "enum": [
+        "HealthLake.CreateFHIRDatastore",
+        "HealthLake.DeleteFHIRDatastore",
+        "HealthLake.DescribeFHIRDatastore",
+        "HealthLake.ListFHIRDatastores",
+        "HealthLake.ListTagsForResource",
+        "HealthLake.TagResource",
+        "HealthLake.UntagResource"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/x-amz-json-1.0": {
+       "examples": {
+        "CreateFHIRDatastore": {
+         "summary": "X-Amz-Target: HealthLake.CreateFHIRDatastore",
+         "value": {}
+        },
+        "DeleteFHIRDatastore": {
+         "summary": "X-Amz-Target: HealthLake.DeleteFHIRDatastore",
+         "value": {}
+        },
+        "DescribeFHIRDatastore": {
+         "summary": "X-Amz-Target: HealthLake.DescribeFHIRDatastore",
+         "value": {}
+        },
+        "ListFHIRDatastores": {
+         "summary": "X-Amz-Target: HealthLake.ListFHIRDatastores",
+         "value": {}
+        },
+        "ListTagsForResource": {
+         "summary": "X-Amz-Target: HealthLake.ListTagsForResource",
+         "value": {}
+        },
+        "TagResource": {
+         "summary": "X-Amz-Target: HealthLake.TagResource",
+         "value": {}
+        },
+        "UntagResource": {
+         "summary": "X-Amz-Target: HealthLake.UntagResource",
+         "value": {}
+        }
+       },
+       "schema": {
+        "type": "object"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/x-amz-json-1.0": {
+        "schema": {
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception in __type."
+     },
+     "403": {
+      "description": "AccessDeniedException from local identity policy evaluation."
+     },
+     "501": {
+      "description": "Official operation not implemented by the simulator."
+     }
+    },
+    "summary": "Amazon HealthLake JSON 1.0 operations",
+    "tags": [
+     "Amazon HealthLake"
+    ]
+   }
+  }
+ },
+ "servers": [
+  {
+   "description": "This simulator only",
+   "url": "/"
+  }
+ ],
+ "tags": [
+  {
+   "description": "Bounded simulator subset of the official Amazon HealthLake API (2017-07-01). Every other official operation returns HTTP 501 UnknownOperationException. FHIR data stores are stored configuration records that stay CREATING: no FHIR store, endpoint or data plane exists, DatastoreEndpoint is never returned, and StartFHIRImportJob, DescribeFHIRImportJob, ListFHIRImportJobs, StartFHIRExportJob, DescribeFHIRExportJob and ListFHIRExportJobs return UnknownOperationException with HTTP 501. No import, export or FHIR request is ever processed. PreloadDataConfig is refused because the Synthea sample data it loads is AWS-owned data the simulator does not hold. Without SseConfiguration the record reports the AWS_OWNED_KMS_KEY type; a customer managed key needs its KmsKeyId, which is stored without contacting KMS and is refused with the AWS owned type. IdentityProviderConfiguration is stored but never consulted: AWS_AUTH takes no metadata, Lambda function or fine-grained flag, SMART_ON_FHIR strategies accept Metadata only as a JSON object whose grant_types_supported lists authorization_code or client_credentials and whose code_challenge_methods_supported includes S256, and IdpLambdaArn is not invoked. ListFHIRDatastores accepts the Filter members DatastoreName and DatastoreStatus as equality filters on the stored values and refuses CreatedBefore and CreatedAfter. Data store names need not be unique and are optional. DeleteFHIRDatastore returns the identifier, ARN and status DELETING and removes the record, even though AWS refuses to delete a data store that is not ACTIVE. Quota failures use the operation's ValidationException because the official operations model no quota exception; resource counts per Region (10 data stores) are local limits.",
+   "name": "Amazon HealthLake"
+  }
+ ],
+ "x-simulator-source": {
+  "package": "botocore",
+  "version": "1.41.6",
+  "file": "botocore/data/healthlake/2017-07-01/service-2.json",
+  "sha256": "8b8630660d3b5f87aff0b0b144f481b8e1d493858f34b901d6117fa104fceca3",
+  "license": "Apache-2.0"
+ }
+}

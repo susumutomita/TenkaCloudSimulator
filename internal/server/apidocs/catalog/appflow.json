@@ -1,0 +1,2494 @@
+{
+ "components": {
+  "schemas": {
+   "AggregationConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "aggregationType": {
+      "enum": [
+       "None",
+       "SingleFile"
+      ],
+      "type": "string"
+     },
+     "targetFileSize": {
+      "type": "integer"
+     }
+    },
+    "type": "object"
+   },
+   "AmplitudeSourceProperties": {
+    "additionalProperties": false,
+    "properties": {
+     "object": {
+      "maxLength": 512,
+      "type": "string"
+     }
+    },
+    "required": [
+     "object"
+    ],
+    "type": "object"
+   },
+   "ConnectorOperator": {
+    "additionalProperties": false,
+    "properties": {
+     "Amplitude": {
+      "enum": [
+       "BETWEEN"
+      ],
+      "type": "string"
+     },
+     "CustomConnector": {
+      "enum": [
+       "PROJECTION",
+       "LESS_THAN",
+       "GREATER_THAN",
+       "CONTAINS",
+       "BETWEEN",
+       "LESS_THAN_OR_EQUAL_TO",
+       "GREATER_THAN_OR_EQUAL_TO",
+       "EQUAL_TO",
+       "NOT_EQUAL_TO",
+       "ADDITION",
+       "MULTIPLICATION",
+       "DIVISION",
+       "SUBTRACTION",
+       "MASK_ALL",
+       "MASK_FIRST_N",
+       "MASK_LAST_N",
+       "VALIDATE_NON_NULL",
+       "VALIDATE_NON_ZERO",
+       "VALIDATE_NON_NEGATIVE",
+       "VALIDATE_NUMERIC",
+       "NO_OP"
+      ],
+      "type": "string"
+     },
+     "Datadog": {
+      "enum": [
+       "PROJECTION",
+       "BETWEEN",
+       "EQUAL_TO",
+       "ADDITION",
+       "MULTIPLICATION",
+       "DIVISION",
+       "SUBTRACTION",
+       "MASK_ALL",
+       "MASK_FIRST_N",
+       "MASK_LAST_N",
+       "VALIDATE_NON_NULL",
+       "VALIDATE_NON_ZERO",
+       "VALIDATE_NON_NEGATIVE",
+       "VALIDATE_NUMERIC",
+       "NO_OP"
+      ],
+      "type": "string"
+     },
+     "Dynatrace": {
+      "enum": [
+       "PROJECTION",
+       "BETWEEN",
+       "EQUAL_TO",
+       "ADDITION",
+       "MULTIPLICATION",
+       "DIVISION",
+       "SUBTRACTION",
+       "MASK_ALL",
+       "MASK_FIRST_N",
+       "MASK_LAST_N",
+       "VALIDATE_NON_NULL",
+       "VALIDATE_NON_ZERO",
+       "VALIDATE_NON_NEGATIVE",
+       "VALIDATE_NUMERIC",
+       "NO_OP"
+      ],
+      "type": "string"
+     },
+     "GoogleAnalytics": {
+      "enum": [
+       "PROJECTION",
+       "BETWEEN"
+      ],
+      "type": "string"
+     },
+     "InforNexus": {
+      "enum": [
+       "PROJECTION",
+       "BETWEEN",
+       "EQUAL_TO",
+       "ADDITION",
+       "MULTIPLICATION",
+       "DIVISION",
+       "SUBTRACTION",
+       "MASK_ALL",
+       "MASK_FIRST_N",
+       "MASK_LAST_N",
+       "VALIDATE_NON_NULL",
+       "VALIDATE_NON_ZERO",
+       "VALIDATE_NON_NEGATIVE",
+       "VALIDATE_NUMERIC",
+       "NO_OP"
+      ],
+      "type": "string"
+     },
+     "Marketo": {
+      "enum": [
+       "PROJECTION",
+       "LESS_THAN",
+       "GREATER_THAN",
+       "BETWEEN",
+       "ADDITION",
+       "MULTIPLICATION",
+       "DIVISION",
+       "SUBTRACTION",
+       "MASK_ALL",
+       "MASK_FIRST_N",
+       "MASK_LAST_N",
+       "VALIDATE_NON_NULL",
+       "VALIDATE_NON_ZERO",
+       "VALIDATE_NON_NEGATIVE",
+       "VALIDATE_NUMERIC",
+       "NO_OP"
+      ],
+      "type": "string"
+     },
+     "Pardot": {
+      "enum": [
+       "PROJECTION",
+       "EQUAL_TO",
+       "NO_OP",
+       "ADDITION",
+       "MULTIPLICATION",
+       "DIVISION",
+       "SUBTRACTION",
+       "MASK_ALL",
+       "MASK_FIRST_N",
+       "MASK_LAST_N",
+       "VALIDATE_NON_NULL",
+       "VALIDATE_NON_ZERO",
+       "VALIDATE_NON_NEGATIVE",
+       "VALIDATE_NUMERIC"
+      ],
+      "type": "string"
+     },
+     "S3": {
+      "enum": [
+       "PROJECTION",
+       "LESS_THAN",
+       "GREATER_THAN",
+       "BETWEEN",
+       "LESS_THAN_OR_EQUAL_TO",
+       "GREATER_THAN_OR_EQUAL_TO",
+       "EQUAL_TO",
+       "NOT_EQUAL_TO",
+       "ADDITION",
+       "MULTIPLICATION",
+       "DIVISION",
+       "SUBTRACTION",
+       "MASK_ALL",
+       "MASK_FIRST_N",
+       "MASK_LAST_N",
+       "VALIDATE_NON_NULL",
+       "VALIDATE_NON_ZERO",
+       "VALIDATE_NON_NEGATIVE",
+       "VALIDATE_NUMERIC",
+       "NO_OP"
+      ],
+      "type": "string"
+     },
+     "SAPOData": {
+      "enum": [
+       "PROJECTION",
+       "LESS_THAN",
+       "CONTAINS",
+       "GREATER_THAN",
+       "BETWEEN",
+       "LESS_THAN_OR_EQUAL_TO",
+       "GREATER_THAN_OR_EQUAL_TO",
+       "EQUAL_TO",
+       "NOT_EQUAL_TO",
+       "ADDITION",
+       "MULTIPLICATION",
+       "DIVISION",
+       "SUBTRACTION",
+       "MASK_ALL",
+       "MASK_FIRST_N",
+       "MASK_LAST_N",
+       "VALIDATE_NON_NULL",
+       "VALIDATE_NON_ZERO",
+       "VALIDATE_NON_NEGATIVE",
+       "VALIDATE_NUMERIC",
+       "NO_OP"
+      ],
+      "type": "string"
+     },
+     "Salesforce": {
+      "enum": [
+       "PROJECTION",
+       "LESS_THAN",
+       "CONTAINS",
+       "GREATER_THAN",
+       "BETWEEN",
+       "LESS_THAN_OR_EQUAL_TO",
+       "GREATER_THAN_OR_EQUAL_TO",
+       "EQUAL_TO",
+       "NOT_EQUAL_TO",
+       "ADDITION",
+       "MULTIPLICATION",
+       "DIVISION",
+       "SUBTRACTION",
+       "MASK_ALL",
+       "MASK_FIRST_N",
+       "MASK_LAST_N",
+       "VALIDATE_NON_NULL",
+       "VALIDATE_NON_ZERO",
+       "VALIDATE_NON_NEGATIVE",
+       "VALIDATE_NUMERIC",
+       "NO_OP"
+      ],
+      "type": "string"
+     },
+     "ServiceNow": {
+      "enum": [
+       "PROJECTION",
+       "CONTAINS",
+       "LESS_THAN",
+       "GREATER_THAN",
+       "BETWEEN",
+       "LESS_THAN_OR_EQUAL_TO",
+       "GREATER_THAN_OR_EQUAL_TO",
+       "EQUAL_TO",
+       "NOT_EQUAL_TO",
+       "ADDITION",
+       "MULTIPLICATION",
+       "DIVISION",
+       "SUBTRACTION",
+       "MASK_ALL",
+       "MASK_FIRST_N",
+       "MASK_LAST_N",
+       "VALIDATE_NON_NULL",
+       "VALIDATE_NON_ZERO",
+       "VALIDATE_NON_NEGATIVE",
+       "VALIDATE_NUMERIC",
+       "NO_OP"
+      ],
+      "type": "string"
+     },
+     "Singular": {
+      "enum": [
+       "PROJECTION",
+       "EQUAL_TO",
+       "ADDITION",
+       "MULTIPLICATION",
+       "DIVISION",
+       "SUBTRACTION",
+       "MASK_ALL",
+       "MASK_FIRST_N",
+       "MASK_LAST_N",
+       "VALIDATE_NON_NULL",
+       "VALIDATE_NON_ZERO",
+       "VALIDATE_NON_NEGATIVE",
+       "VALIDATE_NUMERIC",
+       "NO_OP"
+      ],
+      "type": "string"
+     },
+     "Slack": {
+      "enum": [
+       "PROJECTION",
+       "LESS_THAN",
+       "GREATER_THAN",
+       "BETWEEN",
+       "LESS_THAN_OR_EQUAL_TO",
+       "GREATER_THAN_OR_EQUAL_TO",
+       "EQUAL_TO",
+       "ADDITION",
+       "MULTIPLICATION",
+       "DIVISION",
+       "SUBTRACTION",
+       "MASK_ALL",
+       "MASK_FIRST_N",
+       "MASK_LAST_N",
+       "VALIDATE_NON_NULL",
+       "VALIDATE_NON_ZERO",
+       "VALIDATE_NON_NEGATIVE",
+       "VALIDATE_NUMERIC",
+       "NO_OP"
+      ],
+      "type": "string"
+     },
+     "Trendmicro": {
+      "enum": [
+       "PROJECTION",
+       "EQUAL_TO",
+       "ADDITION",
+       "MULTIPLICATION",
+       "DIVISION",
+       "SUBTRACTION",
+       "MASK_ALL",
+       "MASK_FIRST_N",
+       "MASK_LAST_N",
+       "VALIDATE_NON_NULL",
+       "VALIDATE_NON_ZERO",
+       "VALIDATE_NON_NEGATIVE",
+       "VALIDATE_NUMERIC",
+       "NO_OP"
+      ],
+      "type": "string"
+     },
+     "Veeva": {
+      "enum": [
+       "PROJECTION",
+       "LESS_THAN",
+       "GREATER_THAN",
+       "CONTAINS",
+       "BETWEEN",
+       "LESS_THAN_OR_EQUAL_TO",
+       "GREATER_THAN_OR_EQUAL_TO",
+       "EQUAL_TO",
+       "NOT_EQUAL_TO",
+       "ADDITION",
+       "MULTIPLICATION",
+       "DIVISION",
+       "SUBTRACTION",
+       "MASK_ALL",
+       "MASK_FIRST_N",
+       "MASK_LAST_N",
+       "VALIDATE_NON_NULL",
+       "VALIDATE_NON_ZERO",
+       "VALIDATE_NON_NEGATIVE",
+       "VALIDATE_NUMERIC",
+       "NO_OP"
+      ],
+      "type": "string"
+     },
+     "Zendesk": {
+      "enum": [
+       "PROJECTION",
+       "GREATER_THAN",
+       "ADDITION",
+       "MULTIPLICATION",
+       "DIVISION",
+       "SUBTRACTION",
+       "MASK_ALL",
+       "MASK_FIRST_N",
+       "MASK_LAST_N",
+       "VALIDATE_NON_NULL",
+       "VALIDATE_NON_ZERO",
+       "VALIDATE_NON_NEGATIVE",
+       "VALIDATE_NUMERIC",
+       "NO_OP"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "CustomConnectorDestinationProperties": {
+    "additionalProperties": false,
+    "properties": {
+     "customProperties": {
+      "additionalProperties": {
+       "maxLength": 2048,
+       "type": "string"
+      },
+      "maxProperties": 50,
+      "minProperties": 0,
+      "type": "object"
+     },
+     "entityName": {
+      "maxLength": 1024,
+      "type": "string"
+     },
+     "errorHandlingConfig": {
+      "$ref": "#/components/schemas/ErrorHandlingConfig"
+     },
+     "idFieldNames": {
+      "items": {
+       "maxLength": 128,
+       "type": "string"
+      },
+      "minItems": 0,
+      "type": "array"
+     },
+     "writeOperationType": {
+      "enum": [
+       "INSERT",
+       "UPSERT",
+       "UPDATE",
+       "DELETE"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "entityName"
+    ],
+    "type": "object"
+   },
+   "CustomConnectorSourceProperties": {
+    "additionalProperties": false,
+    "properties": {
+     "customProperties": {
+      "additionalProperties": {
+       "maxLength": 2048,
+       "type": "string"
+      },
+      "maxProperties": 50,
+      "minProperties": 0,
+      "type": "object"
+     },
+     "dataTransferApi": {
+      "$ref": "#/components/schemas/DataTransferApi"
+     },
+     "entityName": {
+      "maxLength": 1024,
+      "type": "string"
+     }
+    },
+    "required": [
+     "entityName"
+    ],
+    "type": "object"
+   },
+   "CustomerProfilesDestinationProperties": {
+    "additionalProperties": false,
+    "properties": {
+     "domainName": {
+      "maxLength": 64,
+      "type": "string"
+     },
+     "objectTypeName": {
+      "maxLength": 255,
+      "type": "string"
+     }
+    },
+    "required": [
+     "domainName"
+    ],
+    "type": "object"
+   },
+   "DataTransferApi": {
+    "additionalProperties": false,
+    "properties": {
+     "Name": {
+      "maxLength": 64,
+      "type": "string"
+     },
+     "Type": {
+      "enum": [
+       "SYNC",
+       "ASYNC",
+       "AUTOMATIC"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "DatadogSourceProperties": {
+    "additionalProperties": false,
+    "properties": {
+     "object": {
+      "maxLength": 512,
+      "type": "string"
+     }
+    },
+    "required": [
+     "object"
+    ],
+    "type": "object"
+   },
+   "DestinationConnectorProperties": {
+    "additionalProperties": false,
+    "properties": {
+     "CustomConnector": {
+      "$ref": "#/components/schemas/CustomConnectorDestinationProperties"
+     },
+     "CustomerProfiles": {
+      "$ref": "#/components/schemas/CustomerProfilesDestinationProperties"
+     },
+     "EventBridge": {
+      "$ref": "#/components/schemas/EventBridgeDestinationProperties"
+     },
+     "Honeycode": {
+      "$ref": "#/components/schemas/HoneycodeDestinationProperties"
+     },
+     "LookoutMetrics": {
+      "$ref": "#/components/schemas/LookoutMetricsDestinationProperties"
+     },
+     "Marketo": {
+      "$ref": "#/components/schemas/MarketoDestinationProperties"
+     },
+     "Redshift": {
+      "$ref": "#/components/schemas/RedshiftDestinationProperties"
+     },
+     "S3": {
+      "$ref": "#/components/schemas/S3DestinationProperties"
+     },
+     "SAPOData": {
+      "$ref": "#/components/schemas/SAPODataDestinationProperties"
+     },
+     "Salesforce": {
+      "$ref": "#/components/schemas/SalesforceDestinationProperties"
+     },
+     "Snowflake": {
+      "$ref": "#/components/schemas/SnowflakeDestinationProperties"
+     },
+     "Upsolver": {
+      "$ref": "#/components/schemas/UpsolverDestinationProperties"
+     },
+     "Zendesk": {
+      "$ref": "#/components/schemas/ZendeskDestinationProperties"
+     }
+    },
+    "type": "object"
+   },
+   "DestinationFlowConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "apiVersion": {
+      "maxLength": 256,
+      "type": "string"
+     },
+     "connectorProfileName": {
+      "maxLength": 256,
+      "type": "string"
+     },
+     "connectorType": {
+      "enum": [
+       "Salesforce",
+       "Singular",
+       "Slack",
+       "Redshift",
+       "S3",
+       "Marketo",
+       "Googleanalytics",
+       "Zendesk",
+       "Servicenow",
+       "Datadog",
+       "Trendmicro",
+       "Snowflake",
+       "Dynatrace",
+       "Infornexus",
+       "Amplitude",
+       "Veeva",
+       "EventBridge",
+       "LookoutMetrics",
+       "Upsolver",
+       "Honeycode",
+       "CustomerProfiles",
+       "SAPOData",
+       "CustomConnector",
+       "Pardot"
+      ],
+      "type": "string"
+     },
+     "destinationConnectorProperties": {
+      "$ref": "#/components/schemas/DestinationConnectorProperties"
+     }
+    },
+    "required": [
+     "connectorType",
+     "destinationConnectorProperties"
+    ],
+    "type": "object"
+   },
+   "DynatraceSourceProperties": {
+    "additionalProperties": false,
+    "properties": {
+     "object": {
+      "maxLength": 512,
+      "type": "string"
+     }
+    },
+    "required": [
+     "object"
+    ],
+    "type": "object"
+   },
+   "ErrorHandlingConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "bucketName": {
+      "maxLength": 63,
+      "minLength": 3,
+      "type": "string"
+     },
+     "bucketPrefix": {
+      "maxLength": 512,
+      "type": "string"
+     },
+     "failOnFirstDestinationError": {
+      "type": "boolean"
+     }
+    },
+    "type": "object"
+   },
+   "EventBridgeDestinationProperties": {
+    "additionalProperties": false,
+    "properties": {
+     "errorHandlingConfig": {
+      "$ref": "#/components/schemas/ErrorHandlingConfig"
+     },
+     "object": {
+      "maxLength": 512,
+      "type": "string"
+     }
+    },
+    "required": [
+     "object"
+    ],
+    "type": "object"
+   },
+   "ExecutionDetails": {
+    "additionalProperties": false,
+    "properties": {
+     "mostRecentExecutionMessage": {
+      "maxLength": 2048,
+      "type": "string"
+     },
+     "mostRecentExecutionStatus": {
+      "enum": [
+       "InProgress",
+       "Successful",
+       "Error",
+       "CancelStarted",
+       "Canceled"
+      ],
+      "type": "string"
+     },
+     "mostRecentExecutionTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     }
+    },
+    "type": "object"
+   },
+   "FlowDefinition": {
+    "additionalProperties": false,
+    "properties": {
+     "createdAt": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "createdBy": {
+      "maxLength": 256,
+      "type": "string"
+     },
+     "description": {
+      "maxLength": 2048,
+      "type": "string"
+     },
+     "destinationConnectorLabel": {
+      "maxLength": 256,
+      "type": "string"
+     },
+     "destinationConnectorType": {
+      "enum": [
+       "Salesforce",
+       "Singular",
+       "Slack",
+       "Redshift",
+       "S3",
+       "Marketo",
+       "Googleanalytics",
+       "Zendesk",
+       "Servicenow",
+       "Datadog",
+       "Trendmicro",
+       "Snowflake",
+       "Dynatrace",
+       "Infornexus",
+       "Amplitude",
+       "Veeva",
+       "EventBridge",
+       "LookoutMetrics",
+       "Upsolver",
+       "Honeycode",
+       "CustomerProfiles",
+       "SAPOData",
+       "CustomConnector",
+       "Pardot"
+      ],
+      "type": "string"
+     },
+     "flowArn": {
+      "maxLength": 512,
+      "type": "string"
+     },
+     "flowName": {
+      "maxLength": 256,
+      "type": "string"
+     },
+     "flowStatus": {
+      "enum": [
+       "Active",
+       "Deprecated",
+       "Deleted",
+       "Draft",
+       "Errored",
+       "Suspended"
+      ],
+      "type": "string"
+     },
+     "lastRunExecutionDetails": {
+      "$ref": "#/components/schemas/ExecutionDetails"
+     },
+     "lastUpdatedAt": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "lastUpdatedBy": {
+      "maxLength": 256,
+      "type": "string"
+     },
+     "sourceConnectorLabel": {
+      "maxLength": 256,
+      "type": "string"
+     },
+     "sourceConnectorType": {
+      "enum": [
+       "Salesforce",
+       "Singular",
+       "Slack",
+       "Redshift",
+       "S3",
+       "Marketo",
+       "Googleanalytics",
+       "Zendesk",
+       "Servicenow",
+       "Datadog",
+       "Trendmicro",
+       "Snowflake",
+       "Dynatrace",
+       "Infornexus",
+       "Amplitude",
+       "Veeva",
+       "EventBridge",
+       "LookoutMetrics",
+       "Upsolver",
+       "Honeycode",
+       "CustomerProfiles",
+       "SAPOData",
+       "CustomConnector",
+       "Pardot"
+      ],
+      "type": "string"
+     },
+     "tags": {
+      "additionalProperties": {
+       "maxLength": 256,
+       "type": "string"
+      },
+      "maxProperties": 50,
+      "minProperties": 0,
+      "type": "object"
+     },
+     "triggerType": {
+      "enum": [
+       "Scheduled",
+       "Event",
+       "OnDemand"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "GlueDataCatalogConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "databaseName": {
+      "maxLength": 255,
+      "type": "string"
+     },
+     "roleArn": {
+      "maxLength": 512,
+      "type": "string"
+     },
+     "tablePrefix": {
+      "maxLength": 128,
+      "type": "string"
+     }
+    },
+    "required": [
+     "roleArn",
+     "databaseName",
+     "tablePrefix"
+    ],
+    "type": "object"
+   },
+   "GoogleAnalyticsSourceProperties": {
+    "additionalProperties": false,
+    "properties": {
+     "object": {
+      "maxLength": 512,
+      "type": "string"
+     }
+    },
+    "required": [
+     "object"
+    ],
+    "type": "object"
+   },
+   "HoneycodeDestinationProperties": {
+    "additionalProperties": false,
+    "properties": {
+     "errorHandlingConfig": {
+      "$ref": "#/components/schemas/ErrorHandlingConfig"
+     },
+     "object": {
+      "maxLength": 512,
+      "type": "string"
+     }
+    },
+    "required": [
+     "object"
+    ],
+    "type": "object"
+   },
+   "IncrementalPullConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "datetimeTypeFieldName": {
+      "maxLength": 256,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "InforNexusSourceProperties": {
+    "additionalProperties": false,
+    "properties": {
+     "object": {
+      "maxLength": 512,
+      "type": "string"
+     }
+    },
+    "required": [
+     "object"
+    ],
+    "type": "object"
+   },
+   "LookoutMetricsDestinationProperties": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "MarketoDestinationProperties": {
+    "additionalProperties": false,
+    "properties": {
+     "errorHandlingConfig": {
+      "$ref": "#/components/schemas/ErrorHandlingConfig"
+     },
+     "object": {
+      "maxLength": 512,
+      "type": "string"
+     }
+    },
+    "required": [
+     "object"
+    ],
+    "type": "object"
+   },
+   "MarketoSourceProperties": {
+    "additionalProperties": false,
+    "properties": {
+     "object": {
+      "maxLength": 512,
+      "type": "string"
+     }
+    },
+    "required": [
+     "object"
+    ],
+    "type": "object"
+   },
+   "MetadataCatalogConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "glueDataCatalog": {
+      "$ref": "#/components/schemas/GlueDataCatalogConfig"
+     }
+    },
+    "type": "object"
+   },
+   "MetadataCatalogDetail": {
+    "additionalProperties": false,
+    "properties": {
+     "catalogType": {
+      "enum": [
+       "GLUE"
+      ],
+      "type": "string"
+     },
+     "partitionRegistrationOutput": {
+      "$ref": "#/components/schemas/RegistrationOutput"
+     },
+     "tableName": {
+      "maxLength": 2048,
+      "type": "string"
+     },
+     "tableRegistrationOutput": {
+      "$ref": "#/components/schemas/RegistrationOutput"
+     }
+    },
+    "type": "object"
+   },
+   "PardotSourceProperties": {
+    "additionalProperties": false,
+    "properties": {
+     "object": {
+      "maxLength": 512,
+      "type": "string"
+     }
+    },
+    "required": [
+     "object"
+    ],
+    "type": "object"
+   },
+   "PrefixConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "pathPrefixHierarchy": {
+      "items": {
+       "enum": [
+        "EXECUTION_ID",
+        "SCHEMA_VERSION"
+       ],
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "prefixFormat": {
+      "enum": [
+       "YEAR",
+       "MONTH",
+       "DAY",
+       "HOUR",
+       "MINUTE"
+      ],
+      "type": "string"
+     },
+     "prefixType": {
+      "enum": [
+       "FILENAME",
+       "PATH",
+       "PATH_AND_FILENAME"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "RedshiftDestinationProperties": {
+    "additionalProperties": false,
+    "properties": {
+     "bucketPrefix": {
+      "maxLength": 512,
+      "type": "string"
+     },
+     "errorHandlingConfig": {
+      "$ref": "#/components/schemas/ErrorHandlingConfig"
+     },
+     "intermediateBucketName": {
+      "maxLength": 63,
+      "minLength": 3,
+      "type": "string"
+     },
+     "object": {
+      "maxLength": 512,
+      "type": "string"
+     }
+    },
+    "required": [
+     "object",
+     "intermediateBucketName"
+    ],
+    "type": "object"
+   },
+   "RegistrationOutput": {
+    "additionalProperties": false,
+    "properties": {
+     "message": {
+      "maxLength": 2048,
+      "type": "string"
+     },
+     "result": {
+      "maxLength": 2048,
+      "type": "string"
+     },
+     "status": {
+      "enum": [
+       "InProgress",
+       "Successful",
+       "Error",
+       "CancelStarted",
+       "Canceled"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "S3DestinationProperties": {
+    "additionalProperties": false,
+    "properties": {
+     "bucketName": {
+      "maxLength": 63,
+      "minLength": 3,
+      "type": "string"
+     },
+     "bucketPrefix": {
+      "maxLength": 512,
+      "type": "string"
+     },
+     "s3OutputFormatConfig": {
+      "$ref": "#/components/schemas/S3OutputFormatConfig"
+     }
+    },
+    "required": [
+     "bucketName"
+    ],
+    "type": "object"
+   },
+   "S3InputFormatConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "s3InputFileType": {
+      "enum": [
+       "CSV",
+       "JSON"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "S3OutputFormatConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "aggregationConfig": {
+      "$ref": "#/components/schemas/AggregationConfig"
+     },
+     "fileType": {
+      "enum": [
+       "CSV",
+       "JSON",
+       "PARQUET"
+      ],
+      "type": "string"
+     },
+     "prefixConfig": {
+      "$ref": "#/components/schemas/PrefixConfig"
+     },
+     "preserveSourceDataTyping": {
+      "type": "boolean"
+     }
+    },
+    "type": "object"
+   },
+   "S3SourceProperties": {
+    "additionalProperties": false,
+    "properties": {
+     "bucketName": {
+      "maxLength": 63,
+      "minLength": 3,
+      "type": "string"
+     },
+     "bucketPrefix": {
+      "maxLength": 512,
+      "type": "string"
+     },
+     "s3InputFormatConfig": {
+      "$ref": "#/components/schemas/S3InputFormatConfig"
+     }
+    },
+    "required": [
+     "bucketName"
+    ],
+    "type": "object"
+   },
+   "SAPODataDestinationProperties": {
+    "additionalProperties": false,
+    "properties": {
+     "errorHandlingConfig": {
+      "$ref": "#/components/schemas/ErrorHandlingConfig"
+     },
+     "idFieldNames": {
+      "items": {
+       "maxLength": 128,
+       "type": "string"
+      },
+      "minItems": 0,
+      "type": "array"
+     },
+     "objectPath": {
+      "maxLength": 512,
+      "type": "string"
+     },
+     "successResponseHandlingConfig": {
+      "$ref": "#/components/schemas/SuccessResponseHandlingConfig"
+     },
+     "writeOperationType": {
+      "enum": [
+       "INSERT",
+       "UPSERT",
+       "UPDATE",
+       "DELETE"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "objectPath"
+    ],
+    "type": "object"
+   },
+   "SAPODataPaginationConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "maxPageSize": {
+      "maximum": 10000,
+      "minimum": 1,
+      "type": "integer"
+     }
+    },
+    "required": [
+     "maxPageSize"
+    ],
+    "type": "object"
+   },
+   "SAPODataParallelismConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "maxParallelism": {
+      "maximum": 10,
+      "minimum": 1,
+      "type": "integer"
+     }
+    },
+    "required": [
+     "maxParallelism"
+    ],
+    "type": "object"
+   },
+   "SAPODataSourceProperties": {
+    "additionalProperties": false,
+    "properties": {
+     "objectPath": {
+      "maxLength": 512,
+      "type": "string"
+     },
+     "paginationConfig": {
+      "$ref": "#/components/schemas/SAPODataPaginationConfig"
+     },
+     "parallelismConfig": {
+      "$ref": "#/components/schemas/SAPODataParallelismConfig"
+     }
+    },
+    "type": "object"
+   },
+   "SalesforceDestinationProperties": {
+    "additionalProperties": false,
+    "properties": {
+     "dataTransferApi": {
+      "enum": [
+       "AUTOMATIC",
+       "BULKV2",
+       "REST_SYNC"
+      ],
+      "type": "string"
+     },
+     "errorHandlingConfig": {
+      "$ref": "#/components/schemas/ErrorHandlingConfig"
+     },
+     "idFieldNames": {
+      "items": {
+       "maxLength": 128,
+       "type": "string"
+      },
+      "minItems": 0,
+      "type": "array"
+     },
+     "object": {
+      "maxLength": 512,
+      "type": "string"
+     },
+     "writeOperationType": {
+      "enum": [
+       "INSERT",
+       "UPSERT",
+       "UPDATE",
+       "DELETE"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "object"
+    ],
+    "type": "object"
+   },
+   "SalesforceSourceProperties": {
+    "additionalProperties": false,
+    "properties": {
+     "dataTransferApi": {
+      "enum": [
+       "AUTOMATIC",
+       "BULKV2",
+       "REST_SYNC"
+      ],
+      "type": "string"
+     },
+     "enableDynamicFieldUpdate": {
+      "type": "boolean"
+     },
+     "includeDeletedRecords": {
+      "type": "boolean"
+     },
+     "object": {
+      "maxLength": 512,
+      "type": "string"
+     }
+    },
+    "required": [
+     "object"
+    ],
+    "type": "object"
+   },
+   "ScheduledTriggerProperties": {
+    "additionalProperties": false,
+    "properties": {
+     "dataPullMode": {
+      "enum": [
+       "Incremental",
+       "Complete"
+      ],
+      "type": "string"
+     },
+     "firstExecutionFrom": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "flowErrorDeactivationThreshold": {
+      "maximum": 100,
+      "minimum": 1,
+      "type": "integer"
+     },
+     "scheduleEndTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "scheduleExpression": {
+      "maxLength": 256,
+      "type": "string"
+     },
+     "scheduleOffset": {
+      "maximum": 36000,
+      "minimum": 0,
+      "type": "integer"
+     },
+     "scheduleStartTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "timezone": {
+      "maxLength": 256,
+      "type": "string"
+     }
+    },
+    "required": [
+     "scheduleExpression"
+    ],
+    "type": "object"
+   },
+   "ServiceNowSourceProperties": {
+    "additionalProperties": false,
+    "properties": {
+     "object": {
+      "maxLength": 512,
+      "type": "string"
+     }
+    },
+    "required": [
+     "object"
+    ],
+    "type": "object"
+   },
+   "SingularSourceProperties": {
+    "additionalProperties": false,
+    "properties": {
+     "object": {
+      "maxLength": 512,
+      "type": "string"
+     }
+    },
+    "required": [
+     "object"
+    ],
+    "type": "object"
+   },
+   "SlackSourceProperties": {
+    "additionalProperties": false,
+    "properties": {
+     "object": {
+      "maxLength": 512,
+      "type": "string"
+     }
+    },
+    "required": [
+     "object"
+    ],
+    "type": "object"
+   },
+   "SnowflakeDestinationProperties": {
+    "additionalProperties": false,
+    "properties": {
+     "bucketPrefix": {
+      "maxLength": 512,
+      "type": "string"
+     },
+     "errorHandlingConfig": {
+      "$ref": "#/components/schemas/ErrorHandlingConfig"
+     },
+     "intermediateBucketName": {
+      "maxLength": 63,
+      "minLength": 3,
+      "type": "string"
+     },
+     "object": {
+      "maxLength": 512,
+      "type": "string"
+     }
+    },
+    "required": [
+     "object",
+     "intermediateBucketName"
+    ],
+    "type": "object"
+   },
+   "SourceConnectorProperties": {
+    "additionalProperties": false,
+    "properties": {
+     "Amplitude": {
+      "$ref": "#/components/schemas/AmplitudeSourceProperties"
+     },
+     "CustomConnector": {
+      "$ref": "#/components/schemas/CustomConnectorSourceProperties"
+     },
+     "Datadog": {
+      "$ref": "#/components/schemas/DatadogSourceProperties"
+     },
+     "Dynatrace": {
+      "$ref": "#/components/schemas/DynatraceSourceProperties"
+     },
+     "GoogleAnalytics": {
+      "$ref": "#/components/schemas/GoogleAnalyticsSourceProperties"
+     },
+     "InforNexus": {
+      "$ref": "#/components/schemas/InforNexusSourceProperties"
+     },
+     "Marketo": {
+      "$ref": "#/components/schemas/MarketoSourceProperties"
+     },
+     "Pardot": {
+      "$ref": "#/components/schemas/PardotSourceProperties"
+     },
+     "S3": {
+      "$ref": "#/components/schemas/S3SourceProperties"
+     },
+     "SAPOData": {
+      "$ref": "#/components/schemas/SAPODataSourceProperties"
+     },
+     "Salesforce": {
+      "$ref": "#/components/schemas/SalesforceSourceProperties"
+     },
+     "ServiceNow": {
+      "$ref": "#/components/schemas/ServiceNowSourceProperties"
+     },
+     "Singular": {
+      "$ref": "#/components/schemas/SingularSourceProperties"
+     },
+     "Slack": {
+      "$ref": "#/components/schemas/SlackSourceProperties"
+     },
+     "Trendmicro": {
+      "$ref": "#/components/schemas/TrendmicroSourceProperties"
+     },
+     "Veeva": {
+      "$ref": "#/components/schemas/VeevaSourceProperties"
+     },
+     "Zendesk": {
+      "$ref": "#/components/schemas/ZendeskSourceProperties"
+     }
+    },
+    "type": "object"
+   },
+   "SourceFlowConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "apiVersion": {
+      "maxLength": 256,
+      "type": "string"
+     },
+     "connectorProfileName": {
+      "maxLength": 256,
+      "type": "string"
+     },
+     "connectorType": {
+      "enum": [
+       "Salesforce",
+       "Singular",
+       "Slack",
+       "Redshift",
+       "S3",
+       "Marketo",
+       "Googleanalytics",
+       "Zendesk",
+       "Servicenow",
+       "Datadog",
+       "Trendmicro",
+       "Snowflake",
+       "Dynatrace",
+       "Infornexus",
+       "Amplitude",
+       "Veeva",
+       "EventBridge",
+       "LookoutMetrics",
+       "Upsolver",
+       "Honeycode",
+       "CustomerProfiles",
+       "SAPOData",
+       "CustomConnector",
+       "Pardot"
+      ],
+      "type": "string"
+     },
+     "incrementalPullConfig": {
+      "$ref": "#/components/schemas/IncrementalPullConfig"
+     },
+     "sourceConnectorProperties": {
+      "$ref": "#/components/schemas/SourceConnectorProperties"
+     }
+    },
+    "required": [
+     "connectorType",
+     "sourceConnectorProperties"
+    ],
+    "type": "object"
+   },
+   "SuccessResponseHandlingConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "bucketName": {
+      "maxLength": 63,
+      "minLength": 3,
+      "type": "string"
+     },
+     "bucketPrefix": {
+      "maxLength": 512,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "Task": {
+    "additionalProperties": false,
+    "properties": {
+     "connectorOperator": {
+      "$ref": "#/components/schemas/ConnectorOperator"
+     },
+     "destinationField": {
+      "maxLength": 256,
+      "type": "string"
+     },
+     "sourceFields": {
+      "items": {
+       "maxLength": 2048,
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "taskProperties": {
+      "additionalProperties": {
+       "maxLength": 2048,
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "taskType": {
+      "enum": [
+       "Arithmetic",
+       "Filter",
+       "Map",
+       "Map_all",
+       "Mask",
+       "Merge",
+       "Passthrough",
+       "Truncate",
+       "Validate",
+       "Partition"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "sourceFields",
+     "taskType"
+    ],
+    "type": "object"
+   },
+   "TrendmicroSourceProperties": {
+    "additionalProperties": false,
+    "properties": {
+     "object": {
+      "maxLength": 512,
+      "type": "string"
+     }
+    },
+    "required": [
+     "object"
+    ],
+    "type": "object"
+   },
+   "TriggerConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "triggerProperties": {
+      "$ref": "#/components/schemas/TriggerProperties"
+     },
+     "triggerType": {
+      "enum": [
+       "Scheduled",
+       "Event",
+       "OnDemand"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "triggerType"
+    ],
+    "type": "object"
+   },
+   "TriggerProperties": {
+    "additionalProperties": false,
+    "properties": {
+     "Scheduled": {
+      "$ref": "#/components/schemas/ScheduledTriggerProperties"
+     }
+    },
+    "type": "object"
+   },
+   "UpsolverDestinationProperties": {
+    "additionalProperties": false,
+    "properties": {
+     "bucketName": {
+      "maxLength": 63,
+      "minLength": 16,
+      "type": "string"
+     },
+     "bucketPrefix": {
+      "maxLength": 512,
+      "type": "string"
+     },
+     "s3OutputFormatConfig": {
+      "$ref": "#/components/schemas/UpsolverS3OutputFormatConfig"
+     }
+    },
+    "required": [
+     "bucketName",
+     "s3OutputFormatConfig"
+    ],
+    "type": "object"
+   },
+   "UpsolverS3OutputFormatConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "aggregationConfig": {
+      "$ref": "#/components/schemas/AggregationConfig"
+     },
+     "fileType": {
+      "enum": [
+       "CSV",
+       "JSON",
+       "PARQUET"
+      ],
+      "type": "string"
+     },
+     "prefixConfig": {
+      "$ref": "#/components/schemas/PrefixConfig"
+     }
+    },
+    "required": [
+     "prefixConfig"
+    ],
+    "type": "object"
+   },
+   "VeevaSourceProperties": {
+    "additionalProperties": false,
+    "properties": {
+     "documentType": {
+      "maxLength": 512,
+      "type": "string"
+     },
+     "includeAllVersions": {
+      "type": "boolean"
+     },
+     "includeRenditions": {
+      "type": "boolean"
+     },
+     "includeSourceFiles": {
+      "type": "boolean"
+     },
+     "object": {
+      "maxLength": 512,
+      "type": "string"
+     }
+    },
+    "required": [
+     "object"
+    ],
+    "type": "object"
+   },
+   "ZendeskDestinationProperties": {
+    "additionalProperties": false,
+    "properties": {
+     "errorHandlingConfig": {
+      "$ref": "#/components/schemas/ErrorHandlingConfig"
+     },
+     "idFieldNames": {
+      "items": {
+       "maxLength": 128,
+       "type": "string"
+      },
+      "minItems": 0,
+      "type": "array"
+     },
+     "object": {
+      "maxLength": 512,
+      "type": "string"
+     },
+     "writeOperationType": {
+      "enum": [
+       "INSERT",
+       "UPSERT",
+       "UPDATE",
+       "DELETE"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "object"
+    ],
+    "type": "object"
+   },
+   "ZendeskSourceProperties": {
+    "additionalProperties": false,
+    "properties": {
+     "object": {
+      "maxLength": 512,
+      "type": "string"
+     }
+    },
+    "required": [
+     "object"
+    ],
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "Bounded simulator subset of the official Amazon Appflow API (2020-08-23). Every other official operation returns HTTP 501 UnknownOperationException. Flows are stored definitions: nothing is ever transferred, so no flow runs, no execution or run history exists, lastRunExecutionDetails is never reported and a flow is Active at once. StartFlow, StopFlow, CancelFlowExecutions, DescribeFlowExecutionRecords, RegisterConnector and every other official operation return UnknownOperationException with HTTP 501. Connector profiles hold third-party credentials and are not implemented, so no connector profile name is accepted: the source and every destination must be an Amazon S3 location (connectorType S3) without connectorProfileName, exactly one destination is allowed, and an Event trigger is refused because no event source exists. Tasks, bucket names, schedules and the KMS key are stored without being resolved or checked against Amazon S3. UpdateFlow replaces the supplied members and keeps those it omits, including description and metadataCatalogConfig, and a flow is deleted whether or not forceDelete is sent. ListFlows summaries carry no sourceConnectorType, destinationConnectorType or triggerType, because the stored model has no member to hold them. Tags are stored from CreateFlow and by TagResource on the flow ARN. The limit of 100 flows per Region is local.",
+  "title": "Amazon AppFlow (simulator catalog)",
+  "version": "2020-08-23"
+ },
+ "openapi": "3.1.0",
+ "paths": {
+  "/create-flow": {
+   "post": {
+    "operationId": "appflowCreateFlow",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "appflow"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "clientToken": {
+          "maxLength": 256,
+          "minLength": 1,
+          "type": "string"
+         },
+         "description": {
+          "maxLength": 2048,
+          "type": "string"
+         },
+         "destinationFlowConfigList": {
+          "items": {
+           "$ref": "#/components/schemas/DestinationFlowConfig"
+          },
+          "type": "array"
+         },
+         "flowName": {
+          "maxLength": 256,
+          "type": "string"
+         },
+         "kmsArn": {
+          "maxLength": 2048,
+          "minLength": 20,
+          "type": "string"
+         },
+         "metadataCatalogConfig": {
+          "$ref": "#/components/schemas/MetadataCatalogConfig"
+         },
+         "sourceFlowConfig": {
+          "$ref": "#/components/schemas/SourceFlowConfig"
+         },
+         "tags": {
+          "additionalProperties": {
+           "maxLength": 256,
+           "type": "string"
+          },
+          "maxProperties": 50,
+          "minProperties": 0,
+          "type": "object"
+         },
+         "tasks": {
+          "items": {
+           "$ref": "#/components/schemas/Task"
+          },
+          "type": "array"
+         },
+         "triggerConfig": {
+          "$ref": "#/components/schemas/TriggerConfig"
+         }
+        },
+        "required": [
+         "destinationFlowConfigList",
+         "flowName",
+         "sourceFlowConfig",
+         "tasks",
+         "triggerConfig"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "flowArn": {
+           "maxLength": 512,
+           "type": "string"
+          },
+          "flowStatus": {
+           "enum": [
+            "Active",
+            "Deprecated",
+            "Deleted",
+            "Draft",
+            "Errored",
+            "Suspended"
+           ],
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateFlow",
+    "tags": [
+     "Amazon AppFlow"
+    ]
+   }
+  },
+  "/delete-flow": {
+   "post": {
+    "operationId": "appflowDeleteFlow",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "appflow"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "flowName": {
+          "maxLength": 256,
+          "type": "string"
+         },
+         "forceDelete": {
+          "type": "boolean"
+         }
+        },
+        "required": [
+         "flowName"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteFlow",
+    "tags": [
+     "Amazon AppFlow"
+    ]
+   }
+  },
+  "/describe-flow": {
+   "post": {
+    "operationId": "appflowDescribeFlow",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "appflow"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "flowName": {
+          "maxLength": 256,
+          "type": "string"
+         }
+        },
+        "required": [
+         "flowName"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "createdAt": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "createdBy": {
+           "maxLength": 256,
+           "type": "string"
+          },
+          "description": {
+           "maxLength": 2048,
+           "type": "string"
+          },
+          "destinationFlowConfigList": {
+           "items": {
+            "$ref": "#/components/schemas/DestinationFlowConfig"
+           },
+           "type": "array"
+          },
+          "flowArn": {
+           "maxLength": 512,
+           "type": "string"
+          },
+          "flowName": {
+           "maxLength": 256,
+           "type": "string"
+          },
+          "flowStatus": {
+           "enum": [
+            "Active",
+            "Deprecated",
+            "Deleted",
+            "Draft",
+            "Errored",
+            "Suspended"
+           ],
+           "type": "string"
+          },
+          "flowStatusMessage": {
+           "maxLength": 2048,
+           "type": "string"
+          },
+          "kmsArn": {
+           "maxLength": 2048,
+           "minLength": 20,
+           "type": "string"
+          },
+          "lastRunExecutionDetails": {
+           "$ref": "#/components/schemas/ExecutionDetails"
+          },
+          "lastRunMetadataCatalogDetails": {
+           "items": {
+            "$ref": "#/components/schemas/MetadataCatalogDetail"
+           },
+           "type": "array"
+          },
+          "lastUpdatedAt": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "lastUpdatedBy": {
+           "maxLength": 256,
+           "type": "string"
+          },
+          "metadataCatalogConfig": {
+           "$ref": "#/components/schemas/MetadataCatalogConfig"
+          },
+          "schemaVersion": {
+           "type": "integer"
+          },
+          "sourceFlowConfig": {
+           "$ref": "#/components/schemas/SourceFlowConfig"
+          },
+          "tags": {
+           "additionalProperties": {
+            "maxLength": 256,
+            "type": "string"
+           },
+           "maxProperties": 50,
+           "minProperties": 0,
+           "type": "object"
+          },
+          "tasks": {
+           "items": {
+            "$ref": "#/components/schemas/Task"
+           },
+           "type": "array"
+          },
+          "triggerConfig": {
+           "$ref": "#/components/schemas/TriggerConfig"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DescribeFlow",
+    "tags": [
+     "Amazon AppFlow"
+    ]
+   }
+  },
+  "/list-flows": {
+   "post": {
+    "operationId": "appflowListFlows",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "appflow"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "maxResults": {
+          "maximum": 100,
+          "minimum": 1,
+          "type": "integer"
+         },
+         "nextToken": {
+          "maxLength": 2048,
+          "type": "string"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "flows": {
+           "items": {
+            "$ref": "#/components/schemas/FlowDefinition"
+           },
+           "type": "array"
+          },
+          "nextToken": {
+           "maxLength": 2048,
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListFlows",
+    "tags": [
+     "Amazon AppFlow"
+    ]
+   }
+  },
+  "/tags/{resourceArn}": {
+   "delete": {
+    "operationId": "appflowUntagResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "appflow"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceArn",
+      "required": true,
+      "schema": {
+       "maxLength": 512,
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "tagKeys",
+      "schema": {
+       "items": {
+        "maxLength": 128,
+        "minLength": 1,
+        "type": "string"
+       },
+       "maxItems": 50,
+       "minItems": 0,
+       "type": "array"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UntagResource",
+    "tags": [
+     "Amazon AppFlow"
+    ]
+   },
+   "get": {
+    "operationId": "appflowListTagsForResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "appflow"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceArn",
+      "required": true,
+      "schema": {
+       "maxLength": 512,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "tags": {
+           "additionalProperties": {
+            "maxLength": 256,
+            "type": "string"
+           },
+           "maxProperties": 50,
+           "minProperties": 0,
+           "type": "object"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListTagsForResource",
+    "tags": [
+     "Amazon AppFlow"
+    ]
+   },
+   "post": {
+    "operationId": "appflowTagResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "appflow"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceArn",
+      "required": true,
+      "schema": {
+       "maxLength": 512,
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "tags": {
+          "additionalProperties": {
+           "maxLength": 256,
+           "type": "string"
+          },
+          "maxProperties": 50,
+          "minProperties": 0,
+          "type": "object"
+         }
+        },
+        "required": [
+         "tags"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "TagResource",
+    "tags": [
+     "Amazon AppFlow"
+    ]
+   }
+  },
+  "/update-flow": {
+   "post": {
+    "operationId": "appflowUpdateFlow",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "appflow"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "clientToken": {
+          "maxLength": 256,
+          "minLength": 1,
+          "type": "string"
+         },
+         "description": {
+          "maxLength": 2048,
+          "type": "string"
+         },
+         "destinationFlowConfigList": {
+          "items": {
+           "$ref": "#/components/schemas/DestinationFlowConfig"
+          },
+          "type": "array"
+         },
+         "flowName": {
+          "maxLength": 256,
+          "type": "string"
+         },
+         "metadataCatalogConfig": {
+          "$ref": "#/components/schemas/MetadataCatalogConfig"
+         },
+         "sourceFlowConfig": {
+          "$ref": "#/components/schemas/SourceFlowConfig"
+         },
+         "tasks": {
+          "items": {
+           "$ref": "#/components/schemas/Task"
+          },
+          "type": "array"
+         },
+         "triggerConfig": {
+          "$ref": "#/components/schemas/TriggerConfig"
+         }
+        },
+        "required": [
+         "destinationFlowConfigList",
+         "flowName",
+         "sourceFlowConfig",
+         "tasks",
+         "triggerConfig"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "flowStatus": {
+           "enum": [
+            "Active",
+            "Deprecated",
+            "Deleted",
+            "Draft",
+            "Errored",
+            "Suspended"
+           ],
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UpdateFlow",
+    "tags": [
+     "Amazon AppFlow"
+    ]
+   }
+  }
+ },
+ "servers": [
+  {
+   "description": "This simulator only",
+   "url": "/"
+  }
+ ],
+ "tags": [
+  {
+   "description": "Bounded simulator subset of the official Amazon Appflow API (2020-08-23). Every other official operation returns HTTP 501 UnknownOperationException. Flows are stored definitions: nothing is ever transferred, so no flow runs, no execution or run history exists, lastRunExecutionDetails is never reported and a flow is Active at once. StartFlow, StopFlow, CancelFlowExecutions, DescribeFlowExecutionRecords, RegisterConnector and every other official operation return UnknownOperationException with HTTP 501. Connector profiles hold third-party credentials and are not implemented, so no connector profile name is accepted: the source and every destination must be an Amazon S3 location (connectorType S3) without connectorProfileName, exactly one destination is allowed, and an Event trigger is refused because no event source exists. Tasks, bucket names, schedules and the KMS key are stored without being resolved or checked against Amazon S3. UpdateFlow replaces the supplied members and keeps those it omits, including description and metadataCatalogConfig, and a flow is deleted whether or not forceDelete is sent. ListFlows summaries carry no sourceConnectorType, destinationConnectorType or triggerType, because the stored model has no member to hold them. Tags are stored from CreateFlow and by TagResource on the flow ARN. The limit of 100 flows per Region is local.",
+   "name": "Amazon AppFlow"
+  }
+ ],
+ "x-simulator-source": {
+  "package": "botocore",
+  "version": "1.41.6",
+  "file": "botocore/data/appflow/2020-08-23/service-2.json",
+  "sha256": "efb18084cb95f31c82a4073b6c7536c218dd49334632f455ae038974d40cd820",
+  "license": "Apache-2.0"
+ }
+}

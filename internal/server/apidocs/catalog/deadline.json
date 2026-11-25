@@ -1,0 +1,4185 @@
+{
+ "components": {
+  "schemas": {
+   "AcceleratorCapabilities": {
+    "additionalProperties": false,
+    "properties": {
+     "count": {
+      "$ref": "#/components/schemas/AcceleratorCountRange"
+     },
+     "selections": {
+      "items": {
+       "$ref": "#/components/schemas/AcceleratorSelection"
+      },
+      "type": "array"
+     }
+    },
+    "required": [
+     "selections"
+    ],
+    "type": "object"
+   },
+   "AcceleratorCountRange": {
+    "additionalProperties": false,
+    "properties": {
+     "max": {
+      "maximum": 2147483647,
+      "minimum": 0,
+      "type": "integer"
+     },
+     "min": {
+      "maximum": 2147483647,
+      "minimum": 0,
+      "type": "integer"
+     }
+    },
+    "required": [
+     "min"
+    ],
+    "type": "object"
+   },
+   "AcceleratorSelection": {
+    "additionalProperties": false,
+    "properties": {
+     "name": {
+      "enum": [
+       "t4",
+       "a10g",
+       "l4",
+       "l40s"
+      ],
+      "type": "string"
+     },
+     "runtime": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "name"
+    ],
+    "type": "object"
+   },
+   "AcceleratorTotalMemoryMiBRange": {
+    "additionalProperties": false,
+    "properties": {
+     "max": {
+      "maximum": 2147483647,
+      "minimum": 0,
+      "type": "integer"
+     },
+     "min": {
+      "maximum": 2147483647,
+      "minimum": 0,
+      "type": "integer"
+     }
+    },
+    "required": [
+     "min"
+    ],
+    "type": "object"
+   },
+   "BudgetActionToAdd": {
+    "additionalProperties": false,
+    "properties": {
+     "description": {
+      "maxLength": 100,
+      "minLength": 0,
+      "type": "string"
+     },
+     "thresholdPercentage": {
+      "maximum": 100,
+      "minimum": 0,
+      "type": "number"
+     },
+     "type": {
+      "enum": [
+       "STOP_SCHEDULING_AND_COMPLETE_TASKS",
+       "STOP_SCHEDULING_AND_CANCEL_TASKS"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "type",
+     "thresholdPercentage"
+    ],
+    "type": "object"
+   },
+   "BudgetActionToRemove": {
+    "additionalProperties": false,
+    "properties": {
+     "thresholdPercentage": {
+      "maximum": 100,
+      "minimum": 0,
+      "type": "number"
+     },
+     "type": {
+      "enum": [
+       "STOP_SCHEDULING_AND_COMPLETE_TASKS",
+       "STOP_SCHEDULING_AND_CANCEL_TASKS"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "type",
+     "thresholdPercentage"
+    ],
+    "type": "object"
+   },
+   "BudgetSchedule": {
+    "additionalProperties": false,
+    "maxProperties": 1,
+    "minProperties": 1,
+    "properties": {
+     "fixed": {
+      "$ref": "#/components/schemas/FixedBudgetSchedule"
+     }
+    },
+    "type": "object"
+   },
+   "BudgetSummary": {
+    "additionalProperties": false,
+    "properties": {
+     "approximateDollarLimit": {
+      "minimum": 0.01,
+      "type": "number"
+     },
+     "budgetId": {
+      "type": "string"
+     },
+     "createdAt": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "createdBy": {
+      "type": "string"
+     },
+     "description": {
+      "maxLength": 100,
+      "minLength": 0,
+      "type": "string"
+     },
+     "displayName": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+     },
+     "status": {
+      "enum": [
+       "ACTIVE",
+       "INACTIVE"
+      ],
+      "type": "string"
+     },
+     "updatedAt": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "updatedBy": {
+      "type": "string"
+     },
+     "usageTrackingResource": {
+      "$ref": "#/components/schemas/UsageTrackingResource"
+     },
+     "usages": {
+      "$ref": "#/components/schemas/ConsumedUsages"
+     }
+    },
+    "required": [
+     "budgetId",
+     "usageTrackingResource",
+     "status",
+     "displayName",
+     "approximateDollarLimit",
+     "usages",
+     "createdBy",
+     "createdAt"
+    ],
+    "type": "object"
+   },
+   "ConsumedUsages": {
+    "additionalProperties": false,
+    "properties": {
+     "approximateDollarUsage": {
+      "type": "number"
+     }
+    },
+    "required": [
+     "approximateDollarUsage"
+    ],
+    "type": "object"
+   },
+   "CustomerManagedFleetConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "mode": {
+      "enum": [
+       "NO_SCALING",
+       "EVENT_BASED_AUTO_SCALING"
+      ],
+      "type": "string"
+     },
+     "storageProfileId": {
+      "type": "string"
+     },
+     "tagPropagationMode": {
+      "enum": [
+       "NO_PROPAGATION",
+       "PROPAGATE_TAGS_TO_WORKERS_AT_LAUNCH"
+      ],
+      "type": "string"
+     },
+     "workerCapabilities": {
+      "$ref": "#/components/schemas/CustomerManagedWorkerCapabilities"
+     }
+    },
+    "required": [
+     "mode",
+     "workerCapabilities"
+    ],
+    "type": "object"
+   },
+   "CustomerManagedWorkerCapabilities": {
+    "additionalProperties": false,
+    "properties": {
+     "acceleratorCount": {
+      "$ref": "#/components/schemas/AcceleratorCountRange"
+     },
+     "acceleratorTotalMemoryMiB": {
+      "$ref": "#/components/schemas/AcceleratorTotalMemoryMiBRange"
+     },
+     "acceleratorTypes": {
+      "items": {
+       "enum": [
+        "gpu"
+       ],
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "cpuArchitectureType": {
+      "enum": [
+       "x86_64",
+       "arm64"
+      ],
+      "type": "string"
+     },
+     "customAmounts": {
+      "items": {
+       "$ref": "#/components/schemas/FleetAmountCapability"
+      },
+      "maxItems": 15,
+      "minItems": 1,
+      "type": "array"
+     },
+     "customAttributes": {
+      "items": {
+       "$ref": "#/components/schemas/FleetAttributeCapability"
+      },
+      "maxItems": 15,
+      "minItems": 1,
+      "type": "array"
+     },
+     "memoryMiB": {
+      "$ref": "#/components/schemas/MemoryMiBRange"
+     },
+     "osFamily": {
+      "enum": [
+       "WINDOWS",
+       "LINUX",
+       "MACOS"
+      ],
+      "type": "string"
+     },
+     "vCpuCount": {
+      "$ref": "#/components/schemas/VCpuCountRange"
+     }
+    },
+    "required": [
+     "vCpuCount",
+     "memoryMiB",
+     "osFamily",
+     "cpuArchitectureType"
+    ],
+    "type": "object"
+   },
+   "Ec2EbsVolume": {
+    "additionalProperties": false,
+    "properties": {
+     "iops": {
+      "maximum": 16000,
+      "minimum": 3000,
+      "type": "integer"
+     },
+     "sizeGiB": {
+      "type": "integer"
+     },
+     "throughputMiB": {
+      "maximum": 1000,
+      "minimum": 125,
+      "type": "integer"
+     }
+    },
+    "type": "object"
+   },
+   "FarmSummary": {
+    "additionalProperties": false,
+    "properties": {
+     "createdAt": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "createdBy": {
+      "type": "string"
+     },
+     "displayName": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+     },
+     "farmId": {
+      "type": "string"
+     },
+     "kmsKeyArn": {
+      "type": "string"
+     },
+     "updatedAt": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "updatedBy": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "farmId",
+     "displayName",
+     "createdAt",
+     "createdBy"
+    ],
+    "type": "object"
+   },
+   "FileSystemLocation": {
+    "additionalProperties": false,
+    "properties": {
+     "name": {
+      "maxLength": 64,
+      "minLength": 1,
+      "type": "string"
+     },
+     "path": {
+      "maxLength": 1024,
+      "minLength": 0,
+      "type": "string"
+     },
+     "type": {
+      "enum": [
+       "SHARED",
+       "LOCAL"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "name",
+     "path",
+     "type"
+    ],
+    "type": "object"
+   },
+   "FixedBudgetSchedule": {
+    "additionalProperties": false,
+    "properties": {
+     "endTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "startTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     }
+    },
+    "required": [
+     "startTime",
+     "endTime"
+    ],
+    "type": "object"
+   },
+   "FleetAmountCapability": {
+    "additionalProperties": false,
+    "properties": {
+     "max": {
+      "type": "number"
+     },
+     "min": {
+      "type": "number"
+     },
+     "name": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "name",
+     "min"
+    ],
+    "type": "object"
+   },
+   "FleetAttributeCapability": {
+    "additionalProperties": false,
+    "properties": {
+     "name": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+     },
+     "values": {
+      "items": {
+       "maxLength": 100,
+       "minLength": 1,
+       "type": "string"
+      },
+      "maxItems": 10,
+      "minItems": 1,
+      "type": "array"
+     }
+    },
+    "required": [
+     "name",
+     "values"
+    ],
+    "type": "object"
+   },
+   "FleetCapabilities": {
+    "additionalProperties": false,
+    "properties": {
+     "amounts": {
+      "items": {
+       "$ref": "#/components/schemas/FleetAmountCapability"
+      },
+      "maxItems": 25,
+      "minItems": 1,
+      "type": "array"
+     },
+     "attributes": {
+      "items": {
+       "$ref": "#/components/schemas/FleetAttributeCapability"
+      },
+      "maxItems": 25,
+      "minItems": 1,
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "FleetConfiguration": {
+    "additionalProperties": false,
+    "maxProperties": 1,
+    "minProperties": 1,
+    "properties": {
+     "customerManaged": {
+      "$ref": "#/components/schemas/CustomerManagedFleetConfiguration"
+     },
+     "serviceManagedEc2": {
+      "$ref": "#/components/schemas/ServiceManagedEc2FleetConfiguration"
+     }
+    },
+    "type": "object"
+   },
+   "FleetSummary": {
+    "additionalProperties": false,
+    "properties": {
+     "autoScalingStatus": {
+      "enum": [
+       "GROWING",
+       "STEADY",
+       "SHRINKING"
+      ],
+      "type": "string"
+     },
+     "configuration": {
+      "$ref": "#/components/schemas/FleetConfiguration"
+     },
+     "createdAt": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "createdBy": {
+      "type": "string"
+     },
+     "displayName": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+     },
+     "farmId": {
+      "type": "string"
+     },
+     "fleetId": {
+      "type": "string"
+     },
+     "maxWorkerCount": {
+      "maximum": 2147483647,
+      "minimum": 0,
+      "type": "integer"
+     },
+     "minWorkerCount": {
+      "maximum": 2147483647,
+      "minimum": 0,
+      "type": "integer"
+     },
+     "status": {
+      "enum": [
+       "ACTIVE",
+       "CREATE_IN_PROGRESS",
+       "UPDATE_IN_PROGRESS",
+       "CREATE_FAILED",
+       "UPDATE_FAILED",
+       "SUSPENDED"
+      ],
+      "type": "string"
+     },
+     "statusMessage": {
+      "type": "string"
+     },
+     "targetWorkerCount": {
+      "type": "integer"
+     },
+     "updatedAt": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "updatedBy": {
+      "type": "string"
+     },
+     "workerCount": {
+      "type": "integer"
+     }
+    },
+    "required": [
+     "fleetId",
+     "farmId",
+     "displayName",
+     "status",
+     "workerCount",
+     "minWorkerCount",
+     "maxWorkerCount",
+     "configuration",
+     "createdAt",
+     "createdBy"
+    ],
+    "type": "object"
+   },
+   "HostConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "scriptBody": {
+      "maxLength": 15000,
+      "minLength": 0,
+      "type": "string"
+     },
+     "scriptTimeoutSeconds": {
+      "maximum": 3600,
+      "minimum": 300,
+      "type": "integer"
+     }
+    },
+    "required": [
+     "scriptBody"
+    ],
+    "type": "object"
+   },
+   "JobAttachmentSettings": {
+    "additionalProperties": false,
+    "properties": {
+     "rootPrefix": {
+      "maxLength": 63,
+      "minLength": 1,
+      "type": "string"
+     },
+     "s3BucketName": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "s3BucketName",
+     "rootPrefix"
+    ],
+    "type": "object"
+   },
+   "JobRunAsUser": {
+    "additionalProperties": false,
+    "properties": {
+     "posix": {
+      "$ref": "#/components/schemas/PosixUser"
+     },
+     "runAs": {
+      "enum": [
+       "QUEUE_CONFIGURED_USER",
+       "WORKER_AGENT_USER"
+      ],
+      "type": "string"
+     },
+     "windows": {
+      "$ref": "#/components/schemas/WindowsUser"
+     }
+    },
+    "required": [
+     "runAs"
+    ],
+    "type": "object"
+   },
+   "LimitSummary": {
+    "additionalProperties": false,
+    "properties": {
+     "amountRequirementName": {
+      "maxLength": 1024,
+      "minLength": 0,
+      "type": "string"
+     },
+     "createdAt": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "createdBy": {
+      "type": "string"
+     },
+     "currentCount": {
+      "maximum": 2147483647,
+      "minimum": 0,
+      "type": "integer"
+     },
+     "displayName": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+     },
+     "farmId": {
+      "type": "string"
+     },
+     "limitId": {
+      "type": "string"
+     },
+     "maxCount": {
+      "maximum": 2147483647,
+      "minimum": -1,
+      "type": "integer"
+     },
+     "updatedAt": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "updatedBy": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "displayName",
+     "amountRequirementName",
+     "maxCount",
+     "createdAt",
+     "createdBy",
+     "farmId",
+     "limitId",
+     "currentCount"
+    ],
+    "type": "object"
+   },
+   "MemoryMiBRange": {
+    "additionalProperties": false,
+    "properties": {
+     "max": {
+      "maximum": 2147483647,
+      "minimum": 512,
+      "type": "integer"
+     },
+     "min": {
+      "maximum": 2147483647,
+      "minimum": 512,
+      "type": "integer"
+     }
+    },
+    "required": [
+     "min"
+    ],
+    "type": "object"
+   },
+   "PosixUser": {
+    "additionalProperties": false,
+    "properties": {
+     "group": {
+      "maxLength": 31,
+      "minLength": 0,
+      "type": "string"
+     },
+     "user": {
+      "maxLength": 31,
+      "minLength": 0,
+      "type": "string"
+     }
+    },
+    "required": [
+     "user",
+     "group"
+    ],
+    "type": "object"
+   },
+   "QueueSummary": {
+    "additionalProperties": false,
+    "properties": {
+     "blockedReason": {
+      "enum": [
+       "NO_BUDGET_CONFIGURED",
+       "BUDGET_THRESHOLD_REACHED"
+      ],
+      "type": "string"
+     },
+     "createdAt": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "createdBy": {
+      "type": "string"
+     },
+     "defaultBudgetAction": {
+      "enum": [
+       "NONE",
+       "STOP_SCHEDULING_AND_COMPLETE_TASKS",
+       "STOP_SCHEDULING_AND_CANCEL_TASKS"
+      ],
+      "type": "string"
+     },
+     "displayName": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+     },
+     "farmId": {
+      "type": "string"
+     },
+     "queueId": {
+      "type": "string"
+     },
+     "status": {
+      "enum": [
+       "IDLE",
+       "SCHEDULING",
+       "SCHEDULING_BLOCKED"
+      ],
+      "type": "string"
+     },
+     "updatedAt": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "updatedBy": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "farmId",
+     "queueId",
+     "displayName",
+     "status",
+     "defaultBudgetAction",
+     "createdAt",
+     "createdBy"
+    ],
+    "type": "object"
+   },
+   "ResponseBudgetAction": {
+    "additionalProperties": false,
+    "properties": {
+     "description": {
+      "maxLength": 100,
+      "minLength": 0,
+      "type": "string"
+     },
+     "thresholdPercentage": {
+      "maximum": 100,
+      "minimum": 0,
+      "type": "number"
+     },
+     "type": {
+      "enum": [
+       "STOP_SCHEDULING_AND_COMPLETE_TASKS",
+       "STOP_SCHEDULING_AND_CANCEL_TASKS"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "type",
+     "thresholdPercentage"
+    ],
+    "type": "object"
+   },
+   "ServiceManagedEc2FleetConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "instanceCapabilities": {
+      "$ref": "#/components/schemas/ServiceManagedEc2InstanceCapabilities"
+     },
+     "instanceMarketOptions": {
+      "$ref": "#/components/schemas/ServiceManagedEc2InstanceMarketOptions"
+     },
+     "storageProfileId": {
+      "type": "string"
+     },
+     "vpcConfiguration": {
+      "$ref": "#/components/schemas/VpcConfiguration"
+     }
+    },
+    "required": [
+     "instanceCapabilities",
+     "instanceMarketOptions"
+    ],
+    "type": "object"
+   },
+   "ServiceManagedEc2InstanceCapabilities": {
+    "additionalProperties": false,
+    "properties": {
+     "acceleratorCapabilities": {
+      "$ref": "#/components/schemas/AcceleratorCapabilities"
+     },
+     "allowedInstanceTypes": {
+      "items": {
+       "type": "string"
+      },
+      "maxItems": 100,
+      "minItems": 1,
+      "type": "array"
+     },
+     "cpuArchitectureType": {
+      "enum": [
+       "x86_64",
+       "arm64"
+      ],
+      "type": "string"
+     },
+     "customAmounts": {
+      "items": {
+       "$ref": "#/components/schemas/FleetAmountCapability"
+      },
+      "maxItems": 15,
+      "minItems": 1,
+      "type": "array"
+     },
+     "customAttributes": {
+      "items": {
+       "$ref": "#/components/schemas/FleetAttributeCapability"
+      },
+      "maxItems": 15,
+      "minItems": 1,
+      "type": "array"
+     },
+     "excludedInstanceTypes": {
+      "items": {
+       "type": "string"
+      },
+      "maxItems": 100,
+      "minItems": 1,
+      "type": "array"
+     },
+     "memoryMiB": {
+      "$ref": "#/components/schemas/MemoryMiBRange"
+     },
+     "osFamily": {
+      "enum": [
+       "WINDOWS",
+       "LINUX"
+      ],
+      "type": "string"
+     },
+     "rootEbsVolume": {
+      "$ref": "#/components/schemas/Ec2EbsVolume"
+     },
+     "vCpuCount": {
+      "$ref": "#/components/schemas/VCpuCountRange"
+     }
+    },
+    "required": [
+     "vCpuCount",
+     "memoryMiB",
+     "osFamily",
+     "cpuArchitectureType"
+    ],
+    "type": "object"
+   },
+   "ServiceManagedEc2InstanceMarketOptions": {
+    "additionalProperties": false,
+    "properties": {
+     "type": {
+      "enum": [
+       "on-demand",
+       "spot",
+       "wait-and-save"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "type"
+    ],
+    "type": "object"
+   },
+   "StorageProfileSummary": {
+    "additionalProperties": false,
+    "properties": {
+     "displayName": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+     },
+     "osFamily": {
+      "enum": [
+       "WINDOWS",
+       "LINUX",
+       "MACOS"
+      ],
+      "type": "string"
+     },
+     "storageProfileId": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "storageProfileId",
+     "displayName",
+     "osFamily"
+    ],
+    "type": "object"
+   },
+   "UsageTrackingResource": {
+    "additionalProperties": false,
+    "maxProperties": 1,
+    "minProperties": 1,
+    "properties": {
+     "queueId": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "VCpuCountRange": {
+    "additionalProperties": false,
+    "properties": {
+     "max": {
+      "maximum": 10000,
+      "minimum": 1,
+      "type": "integer"
+     },
+     "min": {
+      "maximum": 10000,
+      "minimum": 1,
+      "type": "integer"
+     }
+    },
+    "required": [
+     "min"
+    ],
+    "type": "object"
+   },
+   "VpcConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "resourceConfigurationArns": {
+      "items": {
+       "maxLength": 2048,
+       "minLength": 1,
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "WindowsUser": {
+    "additionalProperties": false,
+    "properties": {
+     "passwordArn": {
+      "maxLength": 2048,
+      "minLength": 20,
+      "type": "string"
+     },
+     "user": {
+      "maxLength": 111,
+      "minLength": 0,
+      "type": "string"
+     }
+    },
+    "required": [
+     "user",
+     "passwordArn"
+    ],
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "Bounded simulator subset of the official AWSDeadlineCloud API (2023-10-12). Every other official operation returns HTTP 501 UnknownOperationException. Farms, queues, fleets, storage profiles, limits and budgets are stored records: no job, step, task, session, worker, license endpoint, metered product or monitor exists, nothing is rendered or scheduled, no capacity is provisioned and no worker joins a fleet. CreateJob, CreateWorker, CreateMonitor, CreateLicenseEndpoint, the Assume*Role operations and every other official operation not listed here return UnknownOperationException with HTTP 501. A fleet is a record that is ACTIVE at once with workerCount and targetWorkerCount 0 and never reports capabilities; its worker scripts and host configuration are stored and never run. A queue stays IDLE, a limit reports currentCount 0 and a budget reports no consumed usage and stays ACTIVE until updated; no budget action is ever applied. createdBy reports the account ID instead of a user identity, and updatedBy is not reported. Queue-fleet associations, queue-limit associations, queue environments and farm, queue, fleet and job membership are not implemented, so a queue never schedules on a fleet and a limit never throttles. The add and remove list members of UpdateQueue, UpdateStorageProfile and UpdateBudget (for example allowedStorageProfileIdsToAdd) and the member filter principalId of the list operations are refused instead of being ignored. Referenced IDs (allowed storage profiles, the budget's queue), roles and the KMS key are not resolved. Tags are accepted at creation and by TagResource, UntagResource and ListTagsForResource for farms, queues and fleets only; the ARN of any other resource fails with ValidationException. A farm reports no kmsKeyArn unless one was supplied, and KMS is never called. Display names are not unique. Resource counts per farm and per Region are local limits, not Service Quotas. Deleting a farm that still has queues, fleets, storage profiles, limits or budgets is refused with ValidationException, because DeleteFarm models no conflict error.",
+  "title": "AWS Deadline Cloud (simulator catalog)",
+  "version": "2023-10-12"
+ },
+ "openapi": "3.1.0",
+ "paths": {
+  "/2023-10-12/farms": {
+   "get": {
+    "operationId": "deadlineListFarms",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "deadline"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "maxResults",
+      "schema": {
+       "maximum": 100,
+       "minimum": 1,
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "nextToken",
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "principalId",
+      "schema": {
+       "maxLength": 47,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "farms": {
+           "items": {
+            "$ref": "#/components/schemas/FarmSummary"
+           },
+           "type": "array"
+          },
+          "nextToken": {
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListFarms",
+    "tags": [
+     "AWS Deadline Cloud"
+    ]
+   },
+   "post": {
+    "operationId": "deadlineCreateFarm",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "deadline"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "header",
+      "name": "X-Amz-Client-Token",
+      "schema": {
+       "maxLength": 64,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "description": {
+          "maxLength": 100,
+          "minLength": 0,
+          "type": "string"
+         },
+         "displayName": {
+          "maxLength": 100,
+          "minLength": 1,
+          "type": "string"
+         },
+         "kmsKeyArn": {
+          "type": "string"
+         },
+         "tags": {
+          "additionalProperties": {
+           "type": "string"
+          },
+          "type": "object"
+         }
+        },
+        "required": [
+         "displayName"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "farmId": {
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateFarm",
+    "tags": [
+     "AWS Deadline Cloud"
+    ]
+   }
+  },
+  "/2023-10-12/farms/{farmId}": {
+   "delete": {
+    "operationId": "deadlineDeleteFarm",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "deadline"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "farmId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteFarm",
+    "tags": [
+     "AWS Deadline Cloud"
+    ]
+   },
+   "get": {
+    "operationId": "deadlineGetFarm",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "deadline"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "farmId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "createdAt": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "createdBy": {
+           "type": "string"
+          },
+          "description": {
+           "maxLength": 100,
+           "minLength": 0,
+           "type": "string"
+          },
+          "displayName": {
+           "maxLength": 100,
+           "minLength": 1,
+           "type": "string"
+          },
+          "farmId": {
+           "type": "string"
+          },
+          "kmsKeyArn": {
+           "type": "string"
+          },
+          "updatedAt": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "updatedBy": {
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "GetFarm",
+    "tags": [
+     "AWS Deadline Cloud"
+    ]
+   },
+   "patch": {
+    "operationId": "deadlineUpdateFarm",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "deadline"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "farmId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "description": {
+          "maxLength": 100,
+          "minLength": 0,
+          "type": "string"
+         },
+         "displayName": {
+          "maxLength": 100,
+          "minLength": 1,
+          "type": "string"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UpdateFarm",
+    "tags": [
+     "AWS Deadline Cloud"
+    ]
+   }
+  },
+  "/2023-10-12/farms/{farmId}/budgets": {
+   "get": {
+    "operationId": "deadlineListBudgets",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "deadline"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "farmId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "maxResults",
+      "schema": {
+       "maximum": 100,
+       "minimum": 1,
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "nextToken",
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "status",
+      "schema": {
+       "enum": [
+        "ACTIVE",
+        "INACTIVE"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "budgets": {
+           "items": {
+            "$ref": "#/components/schemas/BudgetSummary"
+           },
+           "type": "array"
+          },
+          "nextToken": {
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListBudgets",
+    "tags": [
+     "AWS Deadline Cloud"
+    ]
+   },
+   "post": {
+    "operationId": "deadlineCreateBudget",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "deadline"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "header",
+      "name": "X-Amz-Client-Token",
+      "schema": {
+       "maxLength": 64,
+       "minLength": 1,
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "farmId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "actions": {
+          "items": {
+           "$ref": "#/components/schemas/BudgetActionToAdd"
+          },
+          "maxItems": 10,
+          "minItems": 0,
+          "type": "array"
+         },
+         "approximateDollarLimit": {
+          "minimum": 0.01,
+          "type": "number"
+         },
+         "description": {
+          "maxLength": 100,
+          "minLength": 0,
+          "type": "string"
+         },
+         "displayName": {
+          "maxLength": 100,
+          "minLength": 1,
+          "type": "string"
+         },
+         "schedule": {
+          "$ref": "#/components/schemas/BudgetSchedule"
+         },
+         "usageTrackingResource": {
+          "$ref": "#/components/schemas/UsageTrackingResource"
+         }
+        },
+        "required": [
+         "actions",
+         "approximateDollarLimit",
+         "displayName",
+         "schedule",
+         "usageTrackingResource"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "budgetId": {
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateBudget",
+    "tags": [
+     "AWS Deadline Cloud"
+    ]
+   }
+  },
+  "/2023-10-12/farms/{farmId}/budgets/{budgetId}": {
+   "delete": {
+    "operationId": "deadlineDeleteBudget",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "deadline"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "budgetId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "farmId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteBudget",
+    "tags": [
+     "AWS Deadline Cloud"
+    ]
+   },
+   "get": {
+    "operationId": "deadlineGetBudget",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "deadline"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "budgetId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "farmId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "actions": {
+           "items": {
+            "$ref": "#/components/schemas/ResponseBudgetAction"
+           },
+           "maxItems": 10,
+           "minItems": 0,
+           "type": "array"
+          },
+          "approximateDollarLimit": {
+           "minimum": 0.01,
+           "type": "number"
+          },
+          "budgetId": {
+           "type": "string"
+          },
+          "createdAt": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "createdBy": {
+           "type": "string"
+          },
+          "description": {
+           "maxLength": 100,
+           "minLength": 0,
+           "type": "string"
+          },
+          "displayName": {
+           "maxLength": 100,
+           "minLength": 1,
+           "type": "string"
+          },
+          "queueStoppedAt": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "schedule": {
+           "$ref": "#/components/schemas/BudgetSchedule"
+          },
+          "status": {
+           "enum": [
+            "ACTIVE",
+            "INACTIVE"
+           ],
+           "type": "string"
+          },
+          "updatedAt": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "updatedBy": {
+           "type": "string"
+          },
+          "usageTrackingResource": {
+           "$ref": "#/components/schemas/UsageTrackingResource"
+          },
+          "usages": {
+           "$ref": "#/components/schemas/ConsumedUsages"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "GetBudget",
+    "tags": [
+     "AWS Deadline Cloud"
+    ]
+   },
+   "patch": {
+    "operationId": "deadlineUpdateBudget",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "deadline"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "budgetId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "header",
+      "name": "X-Amz-Client-Token",
+      "schema": {
+       "maxLength": 64,
+       "minLength": 1,
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "farmId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "actionsToAdd": {
+          "items": {
+           "$ref": "#/components/schemas/BudgetActionToAdd"
+          },
+          "maxItems": 10,
+          "minItems": 0,
+          "type": "array"
+         },
+         "actionsToRemove": {
+          "items": {
+           "$ref": "#/components/schemas/BudgetActionToRemove"
+          },
+          "maxItems": 10,
+          "minItems": 0,
+          "type": "array"
+         },
+         "approximateDollarLimit": {
+          "minimum": 0.01,
+          "type": "number"
+         },
+         "description": {
+          "maxLength": 100,
+          "minLength": 0,
+          "type": "string"
+         },
+         "displayName": {
+          "maxLength": 100,
+          "minLength": 1,
+          "type": "string"
+         },
+         "schedule": {
+          "$ref": "#/components/schemas/BudgetSchedule"
+         },
+         "status": {
+          "enum": [
+           "ACTIVE",
+           "INACTIVE"
+          ],
+          "type": "string"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UpdateBudget",
+    "tags": [
+     "AWS Deadline Cloud"
+    ]
+   }
+  },
+  "/2023-10-12/farms/{farmId}/fleets": {
+   "get": {
+    "operationId": "deadlineListFleets",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "deadline"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "displayName",
+      "schema": {
+       "maxLength": 100,
+       "minLength": 1,
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "farmId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "maxResults",
+      "schema": {
+       "maximum": 100,
+       "minimum": 1,
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "nextToken",
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "principalId",
+      "schema": {
+       "maxLength": 47,
+       "minLength": 1,
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "status",
+      "schema": {
+       "enum": [
+        "ACTIVE",
+        "CREATE_IN_PROGRESS",
+        "UPDATE_IN_PROGRESS",
+        "CREATE_FAILED",
+        "UPDATE_FAILED",
+        "SUSPENDED"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "fleets": {
+           "items": {
+            "$ref": "#/components/schemas/FleetSummary"
+           },
+           "type": "array"
+          },
+          "nextToken": {
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListFleets",
+    "tags": [
+     "AWS Deadline Cloud"
+    ]
+   },
+   "post": {
+    "operationId": "deadlineCreateFleet",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "deadline"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "header",
+      "name": "X-Amz-Client-Token",
+      "schema": {
+       "maxLength": 64,
+       "minLength": 1,
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "farmId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "configuration": {
+          "$ref": "#/components/schemas/FleetConfiguration"
+         },
+         "description": {
+          "maxLength": 100,
+          "minLength": 0,
+          "type": "string"
+         },
+         "displayName": {
+          "maxLength": 100,
+          "minLength": 1,
+          "type": "string"
+         },
+         "hostConfiguration": {
+          "$ref": "#/components/schemas/HostConfiguration"
+         },
+         "maxWorkerCount": {
+          "maximum": 2147483647,
+          "minimum": 0,
+          "type": "integer"
+         },
+         "minWorkerCount": {
+          "maximum": 2147483647,
+          "minimum": 0,
+          "type": "integer"
+         },
+         "roleArn": {
+          "type": "string"
+         },
+         "tags": {
+          "additionalProperties": {
+           "type": "string"
+          },
+          "type": "object"
+         }
+        },
+        "required": [
+         "configuration",
+         "displayName",
+         "maxWorkerCount",
+         "roleArn"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "fleetId": {
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateFleet",
+    "tags": [
+     "AWS Deadline Cloud"
+    ]
+   }
+  },
+  "/2023-10-12/farms/{farmId}/fleets/{fleetId}": {
+   "delete": {
+    "operationId": "deadlineDeleteFleet",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "deadline"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "header",
+      "name": "X-Amz-Client-Token",
+      "schema": {
+       "maxLength": 64,
+       "minLength": 1,
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "farmId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "fleetId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteFleet",
+    "tags": [
+     "AWS Deadline Cloud"
+    ]
+   },
+   "get": {
+    "operationId": "deadlineGetFleet",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "deadline"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "farmId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "fleetId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "autoScalingStatus": {
+           "enum": [
+            "GROWING",
+            "STEADY",
+            "SHRINKING"
+           ],
+           "type": "string"
+          },
+          "capabilities": {
+           "$ref": "#/components/schemas/FleetCapabilities"
+          },
+          "configuration": {
+           "$ref": "#/components/schemas/FleetConfiguration"
+          },
+          "createdAt": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "createdBy": {
+           "type": "string"
+          },
+          "description": {
+           "maxLength": 100,
+           "minLength": 0,
+           "type": "string"
+          },
+          "displayName": {
+           "maxLength": 100,
+           "minLength": 1,
+           "type": "string"
+          },
+          "farmId": {
+           "type": "string"
+          },
+          "fleetId": {
+           "type": "string"
+          },
+          "hostConfiguration": {
+           "$ref": "#/components/schemas/HostConfiguration"
+          },
+          "maxWorkerCount": {
+           "maximum": 2147483647,
+           "minimum": 0,
+           "type": "integer"
+          },
+          "minWorkerCount": {
+           "maximum": 2147483647,
+           "minimum": 0,
+           "type": "integer"
+          },
+          "roleArn": {
+           "type": "string"
+          },
+          "status": {
+           "enum": [
+            "ACTIVE",
+            "CREATE_IN_PROGRESS",
+            "UPDATE_IN_PROGRESS",
+            "CREATE_FAILED",
+            "UPDATE_FAILED",
+            "SUSPENDED"
+           ],
+           "type": "string"
+          },
+          "statusMessage": {
+           "type": "string"
+          },
+          "targetWorkerCount": {
+           "type": "integer"
+          },
+          "updatedAt": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "updatedBy": {
+           "type": "string"
+          },
+          "workerCount": {
+           "type": "integer"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "GetFleet",
+    "tags": [
+     "AWS Deadline Cloud"
+    ]
+   },
+   "patch": {
+    "operationId": "deadlineUpdateFleet",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "deadline"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "header",
+      "name": "X-Amz-Client-Token",
+      "schema": {
+       "maxLength": 64,
+       "minLength": 1,
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "farmId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "fleetId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "configuration": {
+          "$ref": "#/components/schemas/FleetConfiguration"
+         },
+         "description": {
+          "maxLength": 100,
+          "minLength": 0,
+          "type": "string"
+         },
+         "displayName": {
+          "maxLength": 100,
+          "minLength": 1,
+          "type": "string"
+         },
+         "hostConfiguration": {
+          "$ref": "#/components/schemas/HostConfiguration"
+         },
+         "maxWorkerCount": {
+          "maximum": 2147483647,
+          "minimum": 0,
+          "type": "integer"
+         },
+         "minWorkerCount": {
+          "maximum": 2147483647,
+          "minimum": 0,
+          "type": "integer"
+         },
+         "roleArn": {
+          "type": "string"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UpdateFleet",
+    "tags": [
+     "AWS Deadline Cloud"
+    ]
+   }
+  },
+  "/2023-10-12/farms/{farmId}/limits": {
+   "get": {
+    "operationId": "deadlineListLimits",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "deadline"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "farmId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "maxResults",
+      "schema": {
+       "maximum": 100,
+       "minimum": 1,
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "nextToken",
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "limits": {
+           "items": {
+            "$ref": "#/components/schemas/LimitSummary"
+           },
+           "type": "array"
+          },
+          "nextToken": {
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListLimits",
+    "tags": [
+     "AWS Deadline Cloud"
+    ]
+   },
+   "post": {
+    "operationId": "deadlineCreateLimit",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "deadline"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "header",
+      "name": "X-Amz-Client-Token",
+      "schema": {
+       "maxLength": 64,
+       "minLength": 1,
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "farmId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "amountRequirementName": {
+          "maxLength": 1024,
+          "minLength": 0,
+          "type": "string"
+         },
+         "description": {
+          "maxLength": 100,
+          "minLength": 0,
+          "type": "string"
+         },
+         "displayName": {
+          "maxLength": 100,
+          "minLength": 1,
+          "type": "string"
+         },
+         "maxCount": {
+          "maximum": 2147483647,
+          "minimum": -1,
+          "type": "integer"
+         }
+        },
+        "required": [
+         "amountRequirementName",
+         "displayName",
+         "maxCount"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "limitId": {
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateLimit",
+    "tags": [
+     "AWS Deadline Cloud"
+    ]
+   }
+  },
+  "/2023-10-12/farms/{farmId}/limits/{limitId}": {
+   "delete": {
+    "operationId": "deadlineDeleteLimit",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "deadline"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "farmId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "limitId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteLimit",
+    "tags": [
+     "AWS Deadline Cloud"
+    ]
+   },
+   "get": {
+    "operationId": "deadlineGetLimit",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "deadline"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "farmId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "limitId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "amountRequirementName": {
+           "maxLength": 1024,
+           "minLength": 0,
+           "type": "string"
+          },
+          "createdAt": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "createdBy": {
+           "type": "string"
+          },
+          "currentCount": {
+           "maximum": 2147483647,
+           "minimum": 0,
+           "type": "integer"
+          },
+          "description": {
+           "maxLength": 100,
+           "minLength": 0,
+           "type": "string"
+          },
+          "displayName": {
+           "maxLength": 100,
+           "minLength": 1,
+           "type": "string"
+          },
+          "farmId": {
+           "type": "string"
+          },
+          "limitId": {
+           "type": "string"
+          },
+          "maxCount": {
+           "maximum": 2147483647,
+           "minimum": -1,
+           "type": "integer"
+          },
+          "updatedAt": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "updatedBy": {
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "GetLimit",
+    "tags": [
+     "AWS Deadline Cloud"
+    ]
+   },
+   "patch": {
+    "operationId": "deadlineUpdateLimit",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "deadline"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "farmId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "limitId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "description": {
+          "maxLength": 100,
+          "minLength": 0,
+          "type": "string"
+         },
+         "displayName": {
+          "maxLength": 100,
+          "minLength": 1,
+          "type": "string"
+         },
+         "maxCount": {
+          "maximum": 2147483647,
+          "minimum": -1,
+          "type": "integer"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UpdateLimit",
+    "tags": [
+     "AWS Deadline Cloud"
+    ]
+   }
+  },
+  "/2023-10-12/farms/{farmId}/queues": {
+   "get": {
+    "operationId": "deadlineListQueues",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "deadline"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "farmId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "maxResults",
+      "schema": {
+       "maximum": 100,
+       "minimum": 1,
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "nextToken",
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "principalId",
+      "schema": {
+       "maxLength": 47,
+       "minLength": 1,
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "status",
+      "schema": {
+       "enum": [
+        "IDLE",
+        "SCHEDULING",
+        "SCHEDULING_BLOCKED"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "nextToken": {
+           "type": "string"
+          },
+          "queues": {
+           "items": {
+            "$ref": "#/components/schemas/QueueSummary"
+           },
+           "type": "array"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListQueues",
+    "tags": [
+     "AWS Deadline Cloud"
+    ]
+   },
+   "post": {
+    "operationId": "deadlineCreateQueue",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "deadline"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "header",
+      "name": "X-Amz-Client-Token",
+      "schema": {
+       "maxLength": 64,
+       "minLength": 1,
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "farmId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "allowedStorageProfileIds": {
+          "items": {
+           "type": "string"
+          },
+          "maxItems": 20,
+          "minItems": 0,
+          "type": "array"
+         },
+         "defaultBudgetAction": {
+          "enum": [
+           "NONE",
+           "STOP_SCHEDULING_AND_COMPLETE_TASKS",
+           "STOP_SCHEDULING_AND_CANCEL_TASKS"
+          ],
+          "type": "string"
+         },
+         "description": {
+          "maxLength": 100,
+          "minLength": 0,
+          "type": "string"
+         },
+         "displayName": {
+          "maxLength": 100,
+          "minLength": 1,
+          "type": "string"
+         },
+         "jobAttachmentSettings": {
+          "$ref": "#/components/schemas/JobAttachmentSettings"
+         },
+         "jobRunAsUser": {
+          "$ref": "#/components/schemas/JobRunAsUser"
+         },
+         "requiredFileSystemLocationNames": {
+          "items": {
+           "maxLength": 64,
+           "minLength": 1,
+           "type": "string"
+          },
+          "maxItems": 20,
+          "minItems": 0,
+          "type": "array"
+         },
+         "roleArn": {
+          "type": "string"
+         },
+         "tags": {
+          "additionalProperties": {
+           "type": "string"
+          },
+          "type": "object"
+         }
+        },
+        "required": [
+         "displayName"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "queueId": {
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateQueue",
+    "tags": [
+     "AWS Deadline Cloud"
+    ]
+   }
+  },
+  "/2023-10-12/farms/{farmId}/queues/{queueId}": {
+   "delete": {
+    "operationId": "deadlineDeleteQueue",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "deadline"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "farmId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "queueId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteQueue",
+    "tags": [
+     "AWS Deadline Cloud"
+    ]
+   },
+   "get": {
+    "operationId": "deadlineGetQueue",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "deadline"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "farmId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "queueId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "allowedStorageProfileIds": {
+           "items": {
+            "type": "string"
+           },
+           "maxItems": 20,
+           "minItems": 0,
+           "type": "array"
+          },
+          "blockedReason": {
+           "enum": [
+            "NO_BUDGET_CONFIGURED",
+            "BUDGET_THRESHOLD_REACHED"
+           ],
+           "type": "string"
+          },
+          "createdAt": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "createdBy": {
+           "type": "string"
+          },
+          "defaultBudgetAction": {
+           "enum": [
+            "NONE",
+            "STOP_SCHEDULING_AND_COMPLETE_TASKS",
+            "STOP_SCHEDULING_AND_CANCEL_TASKS"
+           ],
+           "type": "string"
+          },
+          "description": {
+           "maxLength": 100,
+           "minLength": 0,
+           "type": "string"
+          },
+          "displayName": {
+           "maxLength": 100,
+           "minLength": 1,
+           "type": "string"
+          },
+          "farmId": {
+           "type": "string"
+          },
+          "jobAttachmentSettings": {
+           "$ref": "#/components/schemas/JobAttachmentSettings"
+          },
+          "jobRunAsUser": {
+           "$ref": "#/components/schemas/JobRunAsUser"
+          },
+          "queueId": {
+           "type": "string"
+          },
+          "requiredFileSystemLocationNames": {
+           "items": {
+            "maxLength": 64,
+            "minLength": 1,
+            "type": "string"
+           },
+           "maxItems": 20,
+           "minItems": 0,
+           "type": "array"
+          },
+          "roleArn": {
+           "type": "string"
+          },
+          "status": {
+           "enum": [
+            "IDLE",
+            "SCHEDULING",
+            "SCHEDULING_BLOCKED"
+           ],
+           "type": "string"
+          },
+          "updatedAt": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "updatedBy": {
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "GetQueue",
+    "tags": [
+     "AWS Deadline Cloud"
+    ]
+   },
+   "patch": {
+    "operationId": "deadlineUpdateQueue",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "deadline"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "header",
+      "name": "X-Amz-Client-Token",
+      "schema": {
+       "maxLength": 64,
+       "minLength": 1,
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "farmId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "queueId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "allowedStorageProfileIdsToAdd": {
+          "items": {
+           "type": "string"
+          },
+          "maxItems": 20,
+          "minItems": 0,
+          "type": "array"
+         },
+         "allowedStorageProfileIdsToRemove": {
+          "items": {
+           "type": "string"
+          },
+          "maxItems": 20,
+          "minItems": 0,
+          "type": "array"
+         },
+         "defaultBudgetAction": {
+          "enum": [
+           "NONE",
+           "STOP_SCHEDULING_AND_COMPLETE_TASKS",
+           "STOP_SCHEDULING_AND_CANCEL_TASKS"
+          ],
+          "type": "string"
+         },
+         "description": {
+          "maxLength": 100,
+          "minLength": 0,
+          "type": "string"
+         },
+         "displayName": {
+          "maxLength": 100,
+          "minLength": 1,
+          "type": "string"
+         },
+         "jobAttachmentSettings": {
+          "$ref": "#/components/schemas/JobAttachmentSettings"
+         },
+         "jobRunAsUser": {
+          "$ref": "#/components/schemas/JobRunAsUser"
+         },
+         "requiredFileSystemLocationNamesToAdd": {
+          "items": {
+           "maxLength": 64,
+           "minLength": 1,
+           "type": "string"
+          },
+          "maxItems": 20,
+          "minItems": 0,
+          "type": "array"
+         },
+         "requiredFileSystemLocationNamesToRemove": {
+          "items": {
+           "maxLength": 64,
+           "minLength": 1,
+           "type": "string"
+          },
+          "maxItems": 20,
+          "minItems": 0,
+          "type": "array"
+         },
+         "roleArn": {
+          "type": "string"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UpdateQueue",
+    "tags": [
+     "AWS Deadline Cloud"
+    ]
+   }
+  },
+  "/2023-10-12/farms/{farmId}/storage-profiles": {
+   "get": {
+    "operationId": "deadlineListStorageProfiles",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "deadline"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "farmId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "maxResults",
+      "schema": {
+       "maximum": 100,
+       "minimum": 1,
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "nextToken",
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "nextToken": {
+           "type": "string"
+          },
+          "storageProfiles": {
+           "items": {
+            "$ref": "#/components/schemas/StorageProfileSummary"
+           },
+           "type": "array"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListStorageProfiles",
+    "tags": [
+     "AWS Deadline Cloud"
+    ]
+   },
+   "post": {
+    "operationId": "deadlineCreateStorageProfile",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "deadline"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "header",
+      "name": "X-Amz-Client-Token",
+      "schema": {
+       "maxLength": 64,
+       "minLength": 1,
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "farmId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "displayName": {
+          "maxLength": 100,
+          "minLength": 1,
+          "type": "string"
+         },
+         "fileSystemLocations": {
+          "items": {
+           "$ref": "#/components/schemas/FileSystemLocation"
+          },
+          "maxItems": 20,
+          "minItems": 0,
+          "type": "array"
+         },
+         "osFamily": {
+          "enum": [
+           "WINDOWS",
+           "LINUX",
+           "MACOS"
+          ],
+          "type": "string"
+         }
+        },
+        "required": [
+         "displayName",
+         "osFamily"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "storageProfileId": {
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateStorageProfile",
+    "tags": [
+     "AWS Deadline Cloud"
+    ]
+   }
+  },
+  "/2023-10-12/farms/{farmId}/storage-profiles/{storageProfileId}": {
+   "delete": {
+    "operationId": "deadlineDeleteStorageProfile",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "deadline"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "farmId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "storageProfileId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteStorageProfile",
+    "tags": [
+     "AWS Deadline Cloud"
+    ]
+   },
+   "get": {
+    "operationId": "deadlineGetStorageProfile",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "deadline"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "farmId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "storageProfileId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "createdAt": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "createdBy": {
+           "type": "string"
+          },
+          "displayName": {
+           "maxLength": 100,
+           "minLength": 1,
+           "type": "string"
+          },
+          "fileSystemLocations": {
+           "items": {
+            "$ref": "#/components/schemas/FileSystemLocation"
+           },
+           "maxItems": 20,
+           "minItems": 0,
+           "type": "array"
+          },
+          "osFamily": {
+           "enum": [
+            "WINDOWS",
+            "LINUX",
+            "MACOS"
+           ],
+           "type": "string"
+          },
+          "storageProfileId": {
+           "type": "string"
+          },
+          "updatedAt": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "updatedBy": {
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "GetStorageProfile",
+    "tags": [
+     "AWS Deadline Cloud"
+    ]
+   },
+   "patch": {
+    "operationId": "deadlineUpdateStorageProfile",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "deadline"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "header",
+      "name": "X-Amz-Client-Token",
+      "schema": {
+       "maxLength": 64,
+       "minLength": 1,
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "farmId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "storageProfileId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "displayName": {
+          "maxLength": 100,
+          "minLength": 1,
+          "type": "string"
+         },
+         "fileSystemLocationsToAdd": {
+          "items": {
+           "$ref": "#/components/schemas/FileSystemLocation"
+          },
+          "maxItems": 20,
+          "minItems": 0,
+          "type": "array"
+         },
+         "fileSystemLocationsToRemove": {
+          "items": {
+           "$ref": "#/components/schemas/FileSystemLocation"
+          },
+          "maxItems": 20,
+          "minItems": 0,
+          "type": "array"
+         },
+         "osFamily": {
+          "enum": [
+           "WINDOWS",
+           "LINUX",
+           "MACOS"
+          ],
+          "type": "string"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UpdateStorageProfile",
+    "tags": [
+     "AWS Deadline Cloud"
+    ]
+   }
+  },
+  "/2023-10-12/tags/{resourceArn}": {
+   "delete": {
+    "operationId": "deadlineUntagResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "deadline"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceArn",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "tagKeys",
+      "schema": {
+       "items": {
+        "type": "string"
+       },
+       "type": "array"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UntagResource",
+    "tags": [
+     "AWS Deadline Cloud"
+    ]
+   },
+   "get": {
+    "operationId": "deadlineListTagsForResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "deadline"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceArn",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "tags": {
+           "additionalProperties": {
+            "type": "string"
+           },
+           "type": "object"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListTagsForResource",
+    "tags": [
+     "AWS Deadline Cloud"
+    ]
+   },
+   "post": {
+    "operationId": "deadlineTagResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "deadline"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceArn",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "tags": {
+          "additionalProperties": {
+           "type": "string"
+          },
+          "type": "object"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "TagResource",
+    "tags": [
+     "AWS Deadline Cloud"
+    ]
+   }
+  }
+ },
+ "servers": [
+  {
+   "description": "This simulator only",
+   "url": "/"
+  }
+ ],
+ "tags": [
+  {
+   "description": "Bounded simulator subset of the official AWSDeadlineCloud API (2023-10-12). Every other official operation returns HTTP 501 UnknownOperationException. Farms, queues, fleets, storage profiles, limits and budgets are stored records: no job, step, task, session, worker, license endpoint, metered product or monitor exists, nothing is rendered or scheduled, no capacity is provisioned and no worker joins a fleet. CreateJob, CreateWorker, CreateMonitor, CreateLicenseEndpoint, the Assume*Role operations and every other official operation not listed here return UnknownOperationException with HTTP 501. A fleet is a record that is ACTIVE at once with workerCount and targetWorkerCount 0 and never reports capabilities; its worker scripts and host configuration are stored and never run. A queue stays IDLE, a limit reports currentCount 0 and a budget reports no consumed usage and stays ACTIVE until updated; no budget action is ever applied. createdBy reports the account ID instead of a user identity, and updatedBy is not reported. Queue-fleet associations, queue-limit associations, queue environments and farm, queue, fleet and job membership are not implemented, so a queue never schedules on a fleet and a limit never throttles. The add and remove list members of UpdateQueue, UpdateStorageProfile and UpdateBudget (for example allowedStorageProfileIdsToAdd) and the member filter principalId of the list operations are refused instead of being ignored. Referenced IDs (allowed storage profiles, the budget's queue), roles and the KMS key are not resolved. Tags are accepted at creation and by TagResource, UntagResource and ListTagsForResource for farms, queues and fleets only; the ARN of any other resource fails with ValidationException. A farm reports no kmsKeyArn unless one was supplied, and KMS is never called. Display names are not unique. Resource counts per farm and per Region are local limits, not Service Quotas. Deleting a farm that still has queues, fleets, storage profiles, limits or budgets is refused with ValidationException, because DeleteFarm models no conflict error.",
+   "name": "AWS Deadline Cloud"
+  }
+ ],
+ "x-simulator-source": {
+  "package": "botocore",
+  "version": "1.41.6",
+  "file": "botocore/data/deadline/2023-10-12/service-2.json",
+  "sha256": "cf9aaccdc11ed24ab603b1c7c318d848a635483ea23b12a4249fe880f5ab44a7",
+  "license": "Apache-2.0"
+ }
+}

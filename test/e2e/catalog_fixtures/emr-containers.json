@@ -1,0 +1,30 @@
+{
+ "client": "emr-containers",
+ "steps": [
+  {"op": "create_virtual_cluster", "args": {"name": "fixture-analytics", "containerProvider": {"type": "EKS", "id": "fixture-eks", "info": {"eksInfo": {"namespace": "spark"}}}, "tags": {"team": "a"}}, "save": {"vc": "id", "arn": "arn"}, "expect": {"name": "fixture-analytics"}},
+  {"op": "describe_virtual_cluster", "args": {"id": "${vc}"}, "expect": {"virtualCluster.state": "RUNNING", "virtualCluster.containerProvider.id": "fixture-eks"}},
+  {"op": "list_virtual_clusters", "args": {}, "expect": {"virtualClusters#count": 1}},
+  {"op": "create_job_template", "args": {"name": "fixture-nightly", "jobTemplateData": {"executionRoleArn": "arn:aws:iam::000000000000:role/fixture-emr", "releaseLabel": "emr-6.9.0-latest", "jobDriver": {"sparkSubmitJobDriver": {"entryPoint": "s3://fixture-code/job.py"}}}}, "save": {"tpl": "id"}, "expect": {"name": "fixture-nightly"}},
+  {"op": "describe_job_template", "args": {"id": "${tpl}"}, "expect": {"jobTemplate.name": "fixture-nightly"}},
+  {"op": "list_job_templates", "args": {}, "expect": {"templates#count": 1}},
+  {"op": "create_security_configuration", "args": {"name": "fixture-sec", "securityConfigurationData": {"authorizationConfiguration": {"lakeFormationConfiguration": {"queryEngineRoleArn": "arn:aws:iam::000000000000:role/fixture-q"}}}}, "save": {"sec": "id"}, "expect": {"name": "fixture-sec"}},
+  {"op": "describe_security_configuration", "args": {"id": "${sec}"}, "expect": {"securityConfiguration.name": "fixture-sec"}},
+  {"op": "list_security_configurations", "args": {}, "expect": {"securityConfigurations#count": 1}},
+  {"op": "tag_resource", "args": {"resourceArn": "${arn}", "tags": {"k": "v"}}},
+  {"op": "untag_resource", "args": {"resourceArn": "${arn}", "tagKeys": ["k"]}},
+  {"op": "list_tags_for_resource", "args": {"resourceArn": "${arn}"}, "expect": {"tags": {"team": "a"}}},
+  {"op": "create_virtual_cluster", "args": {"name": "fixture-ecs", "containerProvider": {"type": "ECS", "id": "x"}}, "error": "ValidationException"},
+  {"op": "describe_virtual_cluster", "args": {"id": "missing"}, "error": "ResourceNotFoundException"}
+ ],
+ "isolation": [
+  {"op": "list_virtual_clusters", "args": {}, "expect": {"virtualClusters#count": 0}}
+ ],
+ "after_restart": [
+  {"op": "describe_virtual_cluster", "args": {"id": "${vc}"}, "expect": {"virtualCluster.name": "fixture-analytics"}}
+ ],
+ "cleanup": [
+  {"op": "delete_virtual_cluster", "args": {"id": "${vc}"}},
+  {"op": "delete_job_template", "args": {"id": "${tpl}"}},
+  {"op": "list_virtual_clusters", "args": {}, "expect": {"virtualClusters#count": 0}}
+ ]
+}

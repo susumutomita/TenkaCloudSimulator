@@ -1,0 +1,36 @@
+{
+ "client": "pcs",
+ "steps": [
+  {"op": "create_cluster", "args": {"clusterName": "fixture-hpc", "scheduler": {"type": "SLURM", "version": "24.11"}, "size": "SMALL", "networking": {"subnetIds": ["subnet-0a1b2c3d"]}, "tags": {"team": "a"}}, "save": {"cluster": "cluster.id", "clusterArn": "cluster.arn"}},
+  {"op": "get_cluster", "args": {"clusterIdentifier": "fixture-hpc"}, "expect": {"cluster.id": "${cluster}", "cluster.status": "CREATING", "cluster.size": "SMALL"}},
+  {"op": "list_clusters", "args": {}, "expect": {"clusters#count": 1, "clusters[0].name": "fixture-hpc"}},
+  {"op": "create_cluster", "args": {"clusterName": "fixture-hpc", "scheduler": {"type": "SLURM", "version": "24.11"}, "size": "SMALL", "networking": {"subnetIds": ["subnet-0a1b2c3d"]}}, "error": "ConflictException", "status": 400},
+  {"op": "create_compute_node_group", "args": {"clusterIdentifier": "${cluster}", "computeNodeGroupName": "fixture-nodes", "subnetIds": ["subnet-0a1b2c3d"], "customLaunchTemplate": {"id": "lt-0123456789abcdef0", "version": "1"}, "iamInstanceProfileArn": "arn:aws:iam::000000000000:instance-profile/pcs-fixture", "scalingConfiguration": {"minInstanceCount": 0, "maxInstanceCount": 4}, "instanceConfigs": [{"instanceType": "c6i.large"}]}, "save": {"group": "computeNodeGroup.id"}},
+  {"op": "get_compute_node_group", "args": {"clusterIdentifier": "fixture-hpc", "computeNodeGroupIdentifier": "fixture-nodes"}, "expect": {"computeNodeGroup.id": "${group}", "computeNodeGroup.clusterId": "${cluster}", "computeNodeGroup.purchaseOption": "ONDEMAND"}},
+  {"op": "list_compute_node_groups", "args": {"clusterIdentifier": "${cluster}"}, "expect": {"computeNodeGroups#count": 1}},
+  {"op": "update_compute_node_group", "args": {"clusterIdentifier": "${cluster}", "computeNodeGroupIdentifier": "${group}", "scalingConfiguration": {"minInstanceCount": 1, "maxInstanceCount": 8}}},
+  {"op": "update_compute_node_group", "args": {"clusterIdentifier": "${cluster}", "computeNodeGroupIdentifier": "${group}", "scalingConfiguration": {"minInstanceCount": 9, "maxInstanceCount": 8}}, "error": "ValidationException", "status": 400},
+  {"op": "create_queue", "args": {"clusterIdentifier": "${cluster}", "queueName": "fixture-queue", "computeNodeGroupConfigurations": [{"computeNodeGroupId": "${group}"}]}, "save": {"queue": "queue.id", "queueArn": "queue.arn"}},
+  {"op": "get_queue", "args": {"clusterIdentifier": "${cluster}", "queueIdentifier": "fixture-queue"}, "expect": {"queue.id": "${queue}", "queue.status": "CREATING"}},
+  {"op": "list_queues", "args": {"clusterIdentifier": "${cluster}"}, "expect": {"queues#count": 1}},
+  {"op": "update_queue", "args": {"clusterIdentifier": "${cluster}", "queueIdentifier": "${queue}", "computeNodeGroupConfigurations": []}},
+  {"op": "tag_resource", "args": {"resourceArn": "${queueArn}", "tags": {"k": "v"}}},
+  {"op": "untag_resource", "args": {"resourceArn": "${queueArn}", "tagKeys": ["k"]}},
+  {"op": "list_tags_for_resource", "args": {"resourceArn": "${clusterArn}"}, "expect": {"tags": {"team": "a"}}},
+  {"op": "delete_cluster", "args": {"clusterIdentifier": "${cluster}"}, "error": "ConflictException", "status": 400},
+  {"op": "get_cluster", "args": {"clusterIdentifier": "pcs_missing"}, "error": "ResourceNotFoundException", "status": 400}
+ ],
+ "isolation": [
+  {"op": "list_clusters", "args": {}, "expect": {"clusters#count": 0}}
+ ],
+ "after_restart": [
+  {"op": "get_queue", "args": {"clusterIdentifier": "${cluster}", "queueIdentifier": "${queue}"}, "expect": {"queue.computeNodeGroupConfigurations#count": 0}},
+  {"op": "get_compute_node_group", "args": {"clusterIdentifier": "${cluster}", "computeNodeGroupIdentifier": "${group}"}, "expect": {"computeNodeGroup.scalingConfiguration.maxInstanceCount": 8}}
+ ],
+ "cleanup": [
+  {"op": "delete_queue", "args": {"clusterIdentifier": "${cluster}", "queueIdentifier": "${queue}"}},
+  {"op": "delete_compute_node_group", "args": {"clusterIdentifier": "${cluster}", "computeNodeGroupIdentifier": "${group}"}},
+  {"op": "delete_cluster", "args": {"clusterIdentifier": "${cluster}"}},
+  {"op": "list_clusters", "args": {}, "expect": {"clusters#count": 0}}
+ ]
+}

@@ -1,0 +1,31 @@
+{
+ "client": "datazone",
+ "steps": [
+  {"op": "create_domain", "args": {"name": "fixture-analytics", "domainExecutionRole": "arn:aws:iam::000000000000:role/fixture-datazone", "description": "fixture domain", "tags": {"team": "a"}}, "save": {"domain": "id", "arn": "arn"}, "expect": {"status": "AVAILABLE"}},
+  {"op": "get_domain", "args": {"identifier": "${domain}"}, "expect": {"name": "fixture-analytics", "tags": {"team": "a"}}},
+  {"op": "list_domains", "args": {"status": "AVAILABLE"}, "expect": {"items#count": 1, "items[0].id": "${domain}"}},
+  {"op": "update_domain", "args": {"identifier": "${domain}", "description": "fixture changed"}, "expect": {"description": "fixture changed"}},
+  {"op": "create_project", "args": {"domainIdentifier": "${domain}", "name": "fixture-sales", "description": "fixture project"}, "save": {"project": "id"}, "expect": {"projectStatus": "ACTIVE"}},
+  {"op": "get_project", "args": {"domainIdentifier": "${domain}", "identifier": "${project}"}, "expect": {"name": "fixture-sales", "domainId": "${domain}"}},
+  {"op": "list_projects", "args": {"domainIdentifier": "${domain}"}, "expect": {"items#count": 1}},
+  {"op": "update_project", "args": {"domainIdentifier": "${domain}", "identifier": "${project}", "description": "fixture project changed"}, "expect": {"description": "fixture project changed"}},
+  {"op": "tag_resource", "args": {"resourceArn": "${arn}", "tags": {"k": "v"}}},
+  {"op": "untag_resource", "args": {"resourceArn": "${arn}", "tagKeys": ["k"]}},
+  {"op": "list_tags_for_resource", "args": {"resourceArn": "${arn}"}, "expect": {"tags": {"team": "a"}}},
+  {"op": "create_project", "args": {"domainIdentifier": "${domain}", "name": "fixture-sales"}, "error": "ConflictException", "status": 409},
+  {"op": "create_project", "args": {"domainIdentifier": "${domain}", "name": "fixture-profiled", "projectProfileId": "profile"}, "error": "ValidationException"},
+  {"op": "delete_domain", "args": {"identifier": "${domain}"}, "error": "ConflictException", "status": 409},
+  {"op": "get_domain", "args": {"identifier": "dzd_missing"}, "error": "ResourceNotFoundException", "status": 404}
+ ],
+ "isolation": [
+  {"op": "list_domains", "args": {}, "expect": {"items#count": 0}}
+ ],
+ "after_restart": [
+  {"op": "get_project", "args": {"domainIdentifier": "${domain}", "identifier": "${project}"}, "expect": {"description": "fixture project changed"}}
+ ],
+ "cleanup": [
+  {"op": "delete_project", "args": {"domainIdentifier": "${domain}", "identifier": "${project}"}},
+  {"op": "delete_domain", "args": {"identifier": "${domain}"}, "expect": {"status": "DELETING"}},
+  {"op": "list_domains", "args": {}, "expect": {"items#count": 0}}
+ ]
+}

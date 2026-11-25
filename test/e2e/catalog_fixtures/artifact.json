@@ -1,0 +1,17 @@
+{
+ "client": "artifact",
+ "steps": [
+  {"op": "get_account_settings", "args": {}, "expect": {"accountSettings.notificationSubscriptionStatus": "NOT_SUBSCRIBED"}},
+  {"op": "put_account_settings", "args": {"notificationSubscriptionStatus": "SUBSCRIBED"}, "expect": {"accountSettings.notificationSubscriptionStatus": "SUBSCRIBED"}},
+  {"op": "get_account_settings", "args": {}, "expect": {"accountSettings.notificationSubscriptionStatus": "SUBSCRIBED"}}
+ ],
+ "isolation": [
+  {"op": "get_account_settings", "args": {}, "expect": {"accountSettings.notificationSubscriptionStatus": "NOT_SUBSCRIBED"}}
+ ],
+ "after_restart": [
+  {"op": "get_account_settings", "args": {}, "expect": {"accountSettings.notificationSubscriptionStatus": "SUBSCRIBED"}}
+ ],
+ "cleanup": [
+  {"op": "put_account_settings", "args": {"notificationSubscriptionStatus": "NOT_SUBSCRIBED"}}
+ ]
+}

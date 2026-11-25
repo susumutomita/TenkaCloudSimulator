@@ -1,0 +1,27 @@
+{
+ "client": "aiops",
+ "steps": [
+  {"op": "create_investigation_group", "args": {"name": "fixture-group", "roleArn": "arn:aws:iam::000000000000:role/FixtureInvestigations", "tags": {"team": "a"}, "chatbotNotificationChannel": {"arn:aws:sns:us-east-1:000000000000:fixture-alerts": ["arn:aws:chatbot::000000000000:chat-configuration/slack-channel/fixture"]}}, "save": {"group": "arn"}},
+  {"op": "get_investigation_group", "args": {"identifier": "fixture-group"}, "expect": {"retentionInDays": 90, "isCloudTrailEventHistoryEnabled": true, "arn": "${group}"}},
+  {"op": "update_investigation_group", "args": {"identifier": "fixture-group", "isCloudTrailEventHistoryEnabled": false}},
+  {"op": "list_investigation_groups", "args": {}, "expect": {"investigationGroups#count": 1, "investigationGroups[0].name": "fixture-group"}},
+  {"op": "put_investigation_group_policy", "args": {"identifier": "fixture-group", "policy": "{\"Version\":\"2012-10-17\",\"Statement\":[]}"}, "expect": {"investigationGroupArn": "${group}"}},
+  {"op": "get_investigation_group_policy", "args": {"identifier": "fixture-group"}, "expect": {"policy": "{\"Version\":\"2012-10-17\",\"Statement\":[]}"}},
+  {"op": "tag_resource", "args": {"resourceArn": "${group}", "tags": {"extra": "1"}}},
+  {"op": "list_tags_for_resource", "args": {"resourceArn": "${group}"}, "expect": {"tags": {"team": "a", "extra": "1"}}},
+  {"op": "untag_resource", "args": {"resourceArn": "${group}", "tagKeys": ["extra"]}},
+  {"op": "put_investigation_group_policy", "args": {"identifier": "fixture-group", "policy": "not json"}, "error": "ValidationException"},
+  {"op": "get_investigation_group", "args": {"identifier": "missing"}, "error": "ResourceNotFoundException", "status": 404}
+ ],
+ "isolation": [
+  {"op": "list_investigation_groups", "args": {}, "expect": {"investigationGroups#count": 0}}
+ ],
+ "after_restart": [
+  {"op": "get_investigation_group", "args": {"identifier": "fixture-group"}, "expect": {"isCloudTrailEventHistoryEnabled": false}}
+ ],
+ "cleanup": [
+  {"op": "delete_investigation_group_policy", "args": {"identifier": "fixture-group"}},
+  {"op": "delete_investigation_group", "args": {"identifier": "fixture-group"}},
+  {"op": "list_investigation_groups", "args": {}, "expect": {"investigationGroups#count": 0}}
+ ]
+}

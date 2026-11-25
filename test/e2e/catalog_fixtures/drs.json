@@ -1,0 +1,31 @@
+{
+ "client": "drs",
+ "steps": [
+  {"op": "create_launch_configuration_template", "args": {"launchDisposition": "STARTED", "copyTags": true, "postLaunchEnabled": true, "tags": {"team": "a"}}, "save": {"launch": "launchConfigurationTemplate.launchConfigurationTemplateID", "arn": "launchConfigurationTemplate.arn"}},
+  {"op": "update_launch_configuration_template", "args": {"launchConfigurationTemplateID": "${launch}", "launchDisposition": "STOPPED"}, "expect": {"launchConfigurationTemplate.launchDisposition": "STOPPED"}},
+  {"op": "describe_launch_configuration_templates", "args": {"launchConfigurationTemplateIDs": ["${launch}"]}, "expect": {"items#count": 1, "items[0].launchDisposition": "STOPPED"}},
+  {"op": "create_replication_configuration_template", "args": {"associateDefaultSecurityGroup": true, "bandwidthThrottling": 0, "createPublicIP": false, "dataPlaneRouting": "PRIVATE_IP", "defaultLargeStagingDiskType": "AUTO", "ebsEncryption": "DEFAULT", "replicationServerInstanceType": "t3.small", "replicationServersSecurityGroupsIDs": ["sg-0123456789abcdef0"], "stagingAreaSubnetId": "subnet-0a1b2c3d4e5f60718", "stagingAreaTags": {"purpose": "staging"}, "useDedicatedReplicationServer": false, "tags": {"team": "a"}, "pitPolicy": [{"enabled": true, "interval": 10, "retentionDuration": 60, "units": "MINUTE"}]}, "expect": {"stagingAreaTags.purpose": "staging", "tags.team": "a"}, "save": {"replication": "replicationConfigurationTemplateID"}},
+  {"op": "update_replication_configuration_template", "args": {"replicationConfigurationTemplateID": "${replication}", "autoReplicateNewDisks": false}, "expect": {"autoReplicateNewDisks": false, "stagingAreaTags.purpose": "staging", "tags.team": "a"}},
+  {"op": "describe_replication_configuration_templates", "args": {}, "expect": {"items#count": 1, "items[0].stagingAreaSubnetId": "subnet-0a1b2c3d4e5f60718"}},
+  {"op": "put_launch_action", "args": {"resourceId": "${launch}", "actionId": "6c2e4a7a-1f6f-4d4c-9d2a-0a1b2c3d4e5f", "actionCode": "AWS-RunShellScript", "actionVersion": "$LATEST", "active": true, "category": "CONFIGURATION", "description": "configure", "name": "configure host", "optional": true, "order": 3, "parameters": {"commands": {"type": "SSM_STORE", "value": "migration.commands"}}}, "expect": {"resourceId": "${launch}", "name": "configure host"}},
+  {"op": "put_launch_action", "args": {"resourceId": "${launch}", "actionId": "6c2e4a7a-1f6f-4d4c-9d2a-0a1b2c3d4e5f", "actionCode": "AWS-RunShellScript", "actionVersion": "$LATEST", "active": false, "category": "CONFIGURATION", "description": "reconfigured", "name": "configure host", "optional": true, "order": 3}},
+  {"op": "list_launch_actions", "args": {"resourceId": "${launch}"}, "expect": {"items#count": 1, "items[0].description": "reconfigured", "items[0].active": false}},
+  {"op": "put_launch_action", "args": {"resourceId": "s-0123456789abcdef0", "actionId": "6c2e4a7a-1f6f-4d4c-9d2a-0a1b2c3d4e5f", "actionCode": "AWS-RunShellScript", "actionVersion": "$LATEST", "active": true, "category": "CONFIGURATION", "description": "configure", "name": "configure host", "optional": true, "order": 3}, "error": "ResourceNotFoundException", "status": 404},
+  {"op": "tag_resource", "args": {"resourceArn": "${arn}", "tags": {"k": "v"}}},
+  {"op": "untag_resource", "args": {"resourceArn": "${arn}", "tagKeys": ["k"]}},
+  {"op": "list_tags_for_resource", "args": {"resourceArn": "${arn}"}, "expect": {"tags": {"team": "a"}}},
+  {"op": "describe_launch_configuration_templates", "args": {"launchConfigurationTemplateIDs": ["lct-00000000000000000"]}, "error": "ResourceNotFoundException", "status": 404}
+ ],
+ "isolation": [
+  {"op": "describe_launch_configuration_templates", "args": {}, "expect": {"items#count": 0}}
+ ],
+ "after_restart": [
+  {"op": "list_launch_actions", "args": {"resourceId": "${launch}"}, "expect": {"items#count": 1, "items[0].description": "reconfigured"}}
+ ],
+ "cleanup": [
+  {"op": "delete_launch_action", "args": {"resourceId": "${launch}", "actionId": "6c2e4a7a-1f6f-4d4c-9d2a-0a1b2c3d4e5f"}},
+  {"op": "delete_launch_configuration_template", "args": {"launchConfigurationTemplateID": "${launch}"}},
+  {"op": "delete_replication_configuration_template", "args": {"replicationConfigurationTemplateID": "${replication}"}},
+  {"op": "describe_launch_configuration_templates", "args": {}, "expect": {"items#count": 0}}
+ ]
+}

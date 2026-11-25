@@ -1,0 +1,3738 @@
+{
+ "components": {
+  "schemas": {
+   "Application": {
+    "additionalProperties": false,
+    "properties": {
+     "applicationAggregatedStatus": {
+      "$ref": "#/components/schemas/ApplicationAggregatedStatus"
+     },
+     "applicationID": {
+      "maxLength": 21,
+      "minLength": 21,
+      "type": "string"
+     },
+     "arn": {
+      "maxLength": 2048,
+      "minLength": 20,
+      "type": "string"
+     },
+     "creationDateTime": {
+      "maxLength": 32,
+      "minLength": 19,
+      "type": "string"
+     },
+     "description": {
+      "maxLength": 600,
+      "minLength": 0,
+      "type": "string"
+     },
+     "isArchived": {
+      "type": "boolean"
+     },
+     "lastModifiedDateTime": {
+      "maxLength": 32,
+      "minLength": 19,
+      "type": "string"
+     },
+     "name": {
+      "maxLength": 256,
+      "minLength": 1,
+      "type": "string"
+     },
+     "tags": {
+      "additionalProperties": {
+       "maxLength": 256,
+       "minLength": 0,
+       "type": "string"
+      },
+      "maxProperties": 50,
+      "minProperties": 0,
+      "type": "object"
+     },
+     "waveID": {
+      "maxLength": 22,
+      "minLength": 22,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ApplicationAggregatedStatus": {
+    "additionalProperties": false,
+    "properties": {
+     "healthStatus": {
+      "enum": [
+       "HEALTHY",
+       "LAGGING",
+       "ERROR"
+      ],
+      "type": "string"
+     },
+     "lastUpdateDateTime": {
+      "maxLength": 32,
+      "minLength": 19,
+      "type": "string"
+     },
+     "progressStatus": {
+      "enum": [
+       "NOT_STARTED",
+       "IN_PROGRESS",
+       "COMPLETED"
+      ],
+      "type": "string"
+     },
+     "totalSourceServers": {
+      "minimum": 0,
+      "type": "integer"
+     }
+    },
+    "type": "object"
+   },
+   "Connector": {
+    "additionalProperties": false,
+    "properties": {
+     "arn": {
+      "maxLength": 2048,
+      "minLength": 20,
+      "type": "string"
+     },
+     "connectorID": {
+      "maxLength": 27,
+      "minLength": 27,
+      "type": "string"
+     },
+     "name": {
+      "maxLength": 256,
+      "minLength": 1,
+      "type": "string"
+     },
+     "ssmCommandConfig": {
+      "$ref": "#/components/schemas/ConnectorSsmCommandConfig"
+     },
+     "ssmInstanceID": {
+      "maxLength": 20,
+      "minLength": 19,
+      "type": "string"
+     },
+     "tags": {
+      "additionalProperties": {
+       "maxLength": 256,
+       "minLength": 0,
+       "type": "string"
+      },
+      "maxProperties": 50,
+      "minProperties": 0,
+      "type": "object"
+     }
+    },
+    "type": "object"
+   },
+   "ConnectorSsmCommandConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "cloudWatchLogGroupName": {
+      "maxLength": 512,
+      "minLength": 1,
+      "type": "string"
+     },
+     "cloudWatchOutputEnabled": {
+      "type": "boolean"
+     },
+     "outputS3BucketName": {
+      "type": "string"
+     },
+     "s3OutputEnabled": {
+      "type": "boolean"
+     }
+    },
+    "required": [
+     "cloudWatchOutputEnabled",
+     "s3OutputEnabled"
+    ],
+    "type": "object"
+   },
+   "LaunchConfigurationTemplate": {
+    "additionalProperties": false,
+    "properties": {
+     "arn": {
+      "maxLength": 2048,
+      "minLength": 20,
+      "type": "string"
+     },
+     "associatePublicIpAddress": {
+      "type": "boolean"
+     },
+     "bootMode": {
+      "enum": [
+       "LEGACY_BIOS",
+       "UEFI",
+       "USE_SOURCE"
+      ],
+      "type": "string"
+     },
+     "copyPrivateIp": {
+      "type": "boolean"
+     },
+     "copyTags": {
+      "type": "boolean"
+     },
+     "ec2LaunchTemplateID": {
+      "maxLength": 20,
+      "minLength": 20,
+      "type": "string"
+     },
+     "enableMapAutoTagging": {
+      "type": "boolean"
+     },
+     "largeVolumeConf": {
+      "$ref": "#/components/schemas/LaunchTemplateDiskConf"
+     },
+     "launchConfigurationTemplateID": {
+      "maxLength": 21,
+      "minLength": 21,
+      "type": "string"
+     },
+     "launchDisposition": {
+      "enum": [
+       "STOPPED",
+       "STARTED"
+      ],
+      "type": "string"
+     },
+     "licensing": {
+      "$ref": "#/components/schemas/Licensing"
+     },
+     "mapAutoTaggingMpeID": {
+      "maxLength": 256,
+      "minLength": 0,
+      "type": "string"
+     },
+     "postLaunchActions": {
+      "$ref": "#/components/schemas/PostLaunchActions"
+     },
+     "smallVolumeConf": {
+      "$ref": "#/components/schemas/LaunchTemplateDiskConf"
+     },
+     "smallVolumeMaxSize": {
+      "minimum": 0,
+      "type": "integer"
+     },
+     "tags": {
+      "additionalProperties": {
+       "maxLength": 256,
+       "minLength": 0,
+       "type": "string"
+      },
+      "maxProperties": 50,
+      "minProperties": 0,
+      "type": "object"
+     },
+     "targetInstanceTypeRightSizingMethod": {
+      "enum": [
+       "NONE",
+       "BASIC"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "launchConfigurationTemplateID"
+    ],
+    "type": "object"
+   },
+   "LaunchTemplateDiskConf": {
+    "additionalProperties": false,
+    "properties": {
+     "iops": {
+      "maximum": 64000,
+      "minimum": 100,
+      "type": "integer"
+     },
+     "throughput": {
+      "maximum": 1000,
+      "minimum": 125,
+      "type": "integer"
+     },
+     "volumeType": {
+      "enum": [
+       "io1",
+       "io2",
+       "gp3",
+       "gp2",
+       "st1",
+       "sc1",
+       "standard"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "Licensing": {
+    "additionalProperties": false,
+    "properties": {
+     "osByol": {
+      "type": "boolean"
+     }
+    },
+    "type": "object"
+   },
+   "ListApplicationsRequestFilters": {
+    "additionalProperties": false,
+    "properties": {
+     "applicationIDs": {
+      "items": {
+       "maxLength": 21,
+       "minLength": 21,
+       "type": "string"
+      },
+      "maxItems": 200,
+      "minItems": 0,
+      "type": "array"
+     },
+     "isArchived": {
+      "type": "boolean"
+     },
+     "waveIDs": {
+      "items": {
+       "maxLength": 22,
+       "minLength": 22,
+       "type": "string"
+      },
+      "maxItems": 200,
+      "minItems": 0,
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "ListConnectorsRequestFilters": {
+    "additionalProperties": false,
+    "properties": {
+     "connectorIDs": {
+      "items": {
+       "maxLength": 27,
+       "minLength": 27,
+       "type": "string"
+      },
+      "maxItems": 20,
+      "minItems": 0,
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "ListWavesRequestFilters": {
+    "additionalProperties": false,
+    "properties": {
+     "isArchived": {
+      "type": "boolean"
+     },
+     "waveIDs": {
+      "items": {
+       "maxLength": 22,
+       "minLength": 22,
+       "type": "string"
+      },
+      "maxItems": 200,
+      "minItems": 0,
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "PostLaunchActions": {
+    "additionalProperties": false,
+    "properties": {
+     "cloudWatchLogGroupName": {
+      "maxLength": 512,
+      "minLength": 1,
+      "type": "string"
+     },
+     "deployment": {
+      "enum": [
+       "TEST_AND_CUTOVER",
+       "CUTOVER_ONLY",
+       "TEST_ONLY"
+      ],
+      "type": "string"
+     },
+     "s3LogBucket": {
+      "maxLength": 63,
+      "minLength": 3,
+      "type": "string"
+     },
+     "s3OutputKeyPrefix": {
+      "maxLength": 256,
+      "minLength": 0,
+      "type": "string"
+     },
+     "ssmDocuments": {
+      "items": {
+       "$ref": "#/components/schemas/SsmDocument"
+      },
+      "maxItems": 10,
+      "minItems": 0,
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "ReplicationConfigurationTemplate": {
+    "additionalProperties": false,
+    "properties": {
+     "arn": {
+      "maxLength": 2048,
+      "minLength": 20,
+      "type": "string"
+     },
+     "associateDefaultSecurityGroup": {
+      "type": "boolean"
+     },
+     "bandwidthThrottling": {
+      "maximum": 10000,
+      "minimum": 0,
+      "type": "integer"
+     },
+     "createPublicIP": {
+      "type": "boolean"
+     },
+     "dataPlaneRouting": {
+      "enum": [
+       "PRIVATE_IP",
+       "PUBLIC_IP"
+      ],
+      "type": "string"
+     },
+     "defaultLargeStagingDiskType": {
+      "enum": [
+       "GP2",
+       "ST1",
+       "GP3"
+      ],
+      "type": "string"
+     },
+     "ebsEncryption": {
+      "enum": [
+       "DEFAULT",
+       "CUSTOM"
+      ],
+      "type": "string"
+     },
+     "ebsEncryptionKeyArn": {
+      "maxLength": 2048,
+      "minLength": 20,
+      "type": "string"
+     },
+     "replicationConfigurationTemplateID": {
+      "maxLength": 21,
+      "minLength": 21,
+      "type": "string"
+     },
+     "replicationServerInstanceType": {
+      "maxLength": 255,
+      "minLength": 0,
+      "type": "string"
+     },
+     "replicationServersSecurityGroupsIDs": {
+      "items": {
+       "maxLength": 255,
+       "minLength": 0,
+       "type": "string"
+      },
+      "maxItems": 32,
+      "minItems": 0,
+      "type": "array"
+     },
+     "stagingAreaSubnetId": {
+      "maxLength": 255,
+      "minLength": 0,
+      "type": "string"
+     },
+     "stagingAreaTags": {
+      "additionalProperties": {
+       "maxLength": 256,
+       "minLength": 0,
+       "type": "string"
+      },
+      "maxProperties": 50,
+      "minProperties": 0,
+      "type": "object"
+     },
+     "tags": {
+      "additionalProperties": {
+       "maxLength": 256,
+       "minLength": 0,
+       "type": "string"
+      },
+      "maxProperties": 50,
+      "minProperties": 0,
+      "type": "object"
+     },
+     "useDedicatedReplicationServer": {
+      "type": "boolean"
+     },
+     "useFipsEndpoint": {
+      "type": "boolean"
+     }
+    },
+    "required": [
+     "replicationConfigurationTemplateID"
+    ],
+    "type": "object"
+   },
+   "SsmDocument": {
+    "additionalProperties": false,
+    "properties": {
+     "actionName": {
+      "maxLength": 256,
+      "minLength": 0,
+      "type": "string"
+     },
+     "externalParameters": {
+      "additionalProperties": {
+       "$ref": "#/components/schemas/SsmExternalParameter"
+      },
+      "maxProperties": 20,
+      "minProperties": 0,
+      "type": "object"
+     },
+     "mustSucceedForCutover": {
+      "type": "boolean"
+     },
+     "parameters": {
+      "additionalProperties": {
+       "items": {
+        "$ref": "#/components/schemas/SsmParameterStoreParameter"
+       },
+       "maxItems": 10,
+       "minItems": 0,
+       "type": "array"
+      },
+      "maxProperties": 20,
+      "minProperties": 0,
+      "type": "object"
+     },
+     "ssmDocumentName": {
+      "maxLength": 172,
+      "minLength": 3,
+      "type": "string"
+     },
+     "timeoutSeconds": {
+      "minimum": 1,
+      "type": "integer"
+     }
+    },
+    "required": [
+     "actionName",
+     "ssmDocumentName"
+    ],
+    "type": "object"
+   },
+   "SsmExternalParameter": {
+    "additionalProperties": false,
+    "maxProperties": 1,
+    "minProperties": 1,
+    "properties": {
+     "dynamicPath": {
+      "maxLength": 1011,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "SsmParameterStoreParameter": {
+    "additionalProperties": false,
+    "properties": {
+     "parameterName": {
+      "maxLength": 1011,
+      "minLength": 1,
+      "type": "string"
+     },
+     "parameterType": {
+      "enum": [
+       "STRING"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "parameterName",
+     "parameterType"
+    ],
+    "type": "object"
+   },
+   "Wave": {
+    "additionalProperties": false,
+    "properties": {
+     "arn": {
+      "maxLength": 2048,
+      "minLength": 20,
+      "type": "string"
+     },
+     "creationDateTime": {
+      "maxLength": 32,
+      "minLength": 19,
+      "type": "string"
+     },
+     "description": {
+      "maxLength": 600,
+      "minLength": 0,
+      "type": "string"
+     },
+     "isArchived": {
+      "type": "boolean"
+     },
+     "lastModifiedDateTime": {
+      "maxLength": 32,
+      "minLength": 19,
+      "type": "string"
+     },
+     "name": {
+      "maxLength": 256,
+      "minLength": 1,
+      "type": "string"
+     },
+     "tags": {
+      "additionalProperties": {
+       "maxLength": 256,
+       "minLength": 0,
+       "type": "string"
+      },
+      "maxProperties": 50,
+      "minProperties": 0,
+      "type": "object"
+     },
+     "waveAggregatedStatus": {
+      "$ref": "#/components/schemas/WaveAggregatedStatus"
+     },
+     "waveID": {
+      "maxLength": 22,
+      "minLength": 22,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "WaveAggregatedStatus": {
+    "additionalProperties": false,
+    "properties": {
+     "healthStatus": {
+      "enum": [
+       "HEALTHY",
+       "LAGGING",
+       "ERROR"
+      ],
+      "type": "string"
+     },
+     "lastUpdateDateTime": {
+      "maxLength": 32,
+      "minLength": 19,
+      "type": "string"
+     },
+     "progressStatus": {
+      "enum": [
+       "NOT_STARTED",
+       "IN_PROGRESS",
+       "COMPLETED"
+      ],
+      "type": "string"
+     },
+     "replicationStartedDateTime": {
+      "maxLength": 32,
+      "minLength": 19,
+      "type": "string"
+     },
+     "totalApplications": {
+      "minimum": 0,
+      "type": "integer"
+     }
+    },
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "Bounded simulator subset of the official Application Migration Service API (2020-02-26). Every other official operation returns HTTP 501 UnknownOperationException. Applications, waves, connectors and the launch and replication configuration templates are stored configuration: no source server, replication agent, staging area, replication server, job, test or cutover instance exists, nothing replicates, and StartReplication, StartTest, StartCutover, FinalizeCutover, TerminateTargetInstances, imports, exports, every source server, job, vCenter, action and post-launch operation, InitializeService and the other official operations return UnknownOperationException with HTTP 501. UninitializedAccountException is never returned because no service-linked role is needed. Applications, waves and connectors have no read operation, so they are read through their List operations. The filters member of the List operations is refused instead of being ignored, AssociateApplications and DisassociateApplications are not implemented so waveID and the aggregated status members are never reported, and names are not required to be unique. Archive and Unarchive only set isArchived. Template members that are not supplied are not defaulted, and no EC2 launch template exists, so ec2LaunchTemplateID is never reported. Subnet, security group, KMS key, S3 bucket, IAM and SSM references in templates and connectors are stored as given and never resolved. The ARN forms application/{id}, wave/{id}, connector/{id}, launch-configuration-template/{id} and replication-configuration-template/{id} are the simulator's reading of the authorization reference. At most 50 applications, 50 waves, 20 connectors and 20 templates of each kind exist per Region as local limits.",
+  "title": "Application Migration Service (simulator catalog)",
+  "version": "2020-02-26"
+ },
+ "openapi": "3.1.0",
+ "paths": {
+  "/ArchiveApplication": {
+   "post": {
+    "operationId": "mgnArchiveApplication",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "mgn"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "accountID": {
+          "maxLength": 12,
+          "minLength": 12,
+          "type": "string"
+         },
+         "applicationID": {
+          "maxLength": 21,
+          "minLength": 21,
+          "type": "string"
+         }
+        },
+        "required": [
+         "applicationID"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "applicationAggregatedStatus": {
+           "$ref": "#/components/schemas/ApplicationAggregatedStatus"
+          },
+          "applicationID": {
+           "maxLength": 21,
+           "minLength": 21,
+           "type": "string"
+          },
+          "arn": {
+           "maxLength": 2048,
+           "minLength": 20,
+           "type": "string"
+          },
+          "creationDateTime": {
+           "maxLength": 32,
+           "minLength": 19,
+           "type": "string"
+          },
+          "description": {
+           "maxLength": 600,
+           "minLength": 0,
+           "type": "string"
+          },
+          "isArchived": {
+           "type": "boolean"
+          },
+          "lastModifiedDateTime": {
+           "maxLength": 32,
+           "minLength": 19,
+           "type": "string"
+          },
+          "name": {
+           "maxLength": 256,
+           "minLength": 1,
+           "type": "string"
+          },
+          "tags": {
+           "additionalProperties": {
+            "maxLength": 256,
+            "minLength": 0,
+            "type": "string"
+           },
+           "maxProperties": 50,
+           "minProperties": 0,
+           "type": "object"
+          },
+          "waveID": {
+           "maxLength": 22,
+           "minLength": 22,
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ArchiveApplication",
+    "tags": [
+     "Application Migration Service"
+    ]
+   }
+  },
+  "/ArchiveWave": {
+   "post": {
+    "operationId": "mgnArchiveWave",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "mgn"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "accountID": {
+          "maxLength": 12,
+          "minLength": 12,
+          "type": "string"
+         },
+         "waveID": {
+          "maxLength": 22,
+          "minLength": 22,
+          "type": "string"
+         }
+        },
+        "required": [
+         "waveID"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "arn": {
+           "maxLength": 2048,
+           "minLength": 20,
+           "type": "string"
+          },
+          "creationDateTime": {
+           "maxLength": 32,
+           "minLength": 19,
+           "type": "string"
+          },
+          "description": {
+           "maxLength": 600,
+           "minLength": 0,
+           "type": "string"
+          },
+          "isArchived": {
+           "type": "boolean"
+          },
+          "lastModifiedDateTime": {
+           "maxLength": 32,
+           "minLength": 19,
+           "type": "string"
+          },
+          "name": {
+           "maxLength": 256,
+           "minLength": 1,
+           "type": "string"
+          },
+          "tags": {
+           "additionalProperties": {
+            "maxLength": 256,
+            "minLength": 0,
+            "type": "string"
+           },
+           "maxProperties": 50,
+           "minProperties": 0,
+           "type": "object"
+          },
+          "waveAggregatedStatus": {
+           "$ref": "#/components/schemas/WaveAggregatedStatus"
+          },
+          "waveID": {
+           "maxLength": 22,
+           "minLength": 22,
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ArchiveWave",
+    "tags": [
+     "Application Migration Service"
+    ]
+   }
+  },
+  "/CreateApplication": {
+   "post": {
+    "operationId": "mgnCreateApplication",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "mgn"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "accountID": {
+          "maxLength": 12,
+          "minLength": 12,
+          "type": "string"
+         },
+         "description": {
+          "maxLength": 600,
+          "minLength": 0,
+          "type": "string"
+         },
+         "name": {
+          "maxLength": 256,
+          "minLength": 1,
+          "type": "string"
+         },
+         "tags": {
+          "additionalProperties": {
+           "maxLength": 256,
+           "minLength": 0,
+           "type": "string"
+          },
+          "maxProperties": 50,
+          "minProperties": 0,
+          "type": "object"
+         }
+        },
+        "required": [
+         "name"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "applicationAggregatedStatus": {
+           "$ref": "#/components/schemas/ApplicationAggregatedStatus"
+          },
+          "applicationID": {
+           "maxLength": 21,
+           "minLength": 21,
+           "type": "string"
+          },
+          "arn": {
+           "maxLength": 2048,
+           "minLength": 20,
+           "type": "string"
+          },
+          "creationDateTime": {
+           "maxLength": 32,
+           "minLength": 19,
+           "type": "string"
+          },
+          "description": {
+           "maxLength": 600,
+           "minLength": 0,
+           "type": "string"
+          },
+          "isArchived": {
+           "type": "boolean"
+          },
+          "lastModifiedDateTime": {
+           "maxLength": 32,
+           "minLength": 19,
+           "type": "string"
+          },
+          "name": {
+           "maxLength": 256,
+           "minLength": 1,
+           "type": "string"
+          },
+          "tags": {
+           "additionalProperties": {
+            "maxLength": 256,
+            "minLength": 0,
+            "type": "string"
+           },
+           "maxProperties": 50,
+           "minProperties": 0,
+           "type": "object"
+          },
+          "waveID": {
+           "maxLength": 22,
+           "minLength": 22,
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateApplication",
+    "tags": [
+     "Application Migration Service"
+    ]
+   }
+  },
+  "/CreateConnector": {
+   "post": {
+    "operationId": "mgnCreateConnector",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "mgn"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "name": {
+          "maxLength": 256,
+          "minLength": 1,
+          "type": "string"
+         },
+         "ssmCommandConfig": {
+          "$ref": "#/components/schemas/ConnectorSsmCommandConfig"
+         },
+         "ssmInstanceID": {
+          "maxLength": 20,
+          "minLength": 19,
+          "type": "string"
+         },
+         "tags": {
+          "additionalProperties": {
+           "maxLength": 256,
+           "minLength": 0,
+           "type": "string"
+          },
+          "maxProperties": 50,
+          "minProperties": 0,
+          "type": "object"
+         }
+        },
+        "required": [
+         "name",
+         "ssmInstanceID"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "arn": {
+           "maxLength": 2048,
+           "minLength": 20,
+           "type": "string"
+          },
+          "connectorID": {
+           "maxLength": 27,
+           "minLength": 27,
+           "type": "string"
+          },
+          "name": {
+           "maxLength": 256,
+           "minLength": 1,
+           "type": "string"
+          },
+          "ssmCommandConfig": {
+           "$ref": "#/components/schemas/ConnectorSsmCommandConfig"
+          },
+          "ssmInstanceID": {
+           "maxLength": 20,
+           "minLength": 19,
+           "type": "string"
+          },
+          "tags": {
+           "additionalProperties": {
+            "maxLength": 256,
+            "minLength": 0,
+            "type": "string"
+           },
+           "maxProperties": 50,
+           "minProperties": 0,
+           "type": "object"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateConnector",
+    "tags": [
+     "Application Migration Service"
+    ]
+   }
+  },
+  "/CreateLaunchConfigurationTemplate": {
+   "post": {
+    "operationId": "mgnCreateLaunchConfigurationTemplate",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "mgn"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "associatePublicIpAddress": {
+          "type": "boolean"
+         },
+         "bootMode": {
+          "enum": [
+           "LEGACY_BIOS",
+           "UEFI",
+           "USE_SOURCE"
+          ],
+          "type": "string"
+         },
+         "copyPrivateIp": {
+          "type": "boolean"
+         },
+         "copyTags": {
+          "type": "boolean"
+         },
+         "enableMapAutoTagging": {
+          "type": "boolean"
+         },
+         "largeVolumeConf": {
+          "$ref": "#/components/schemas/LaunchTemplateDiskConf"
+         },
+         "launchDisposition": {
+          "enum": [
+           "STOPPED",
+           "STARTED"
+          ],
+          "type": "string"
+         },
+         "licensing": {
+          "$ref": "#/components/schemas/Licensing"
+         },
+         "mapAutoTaggingMpeID": {
+          "maxLength": 256,
+          "minLength": 0,
+          "type": "string"
+         },
+         "postLaunchActions": {
+          "$ref": "#/components/schemas/PostLaunchActions"
+         },
+         "smallVolumeConf": {
+          "$ref": "#/components/schemas/LaunchTemplateDiskConf"
+         },
+         "smallVolumeMaxSize": {
+          "minimum": 0,
+          "type": "integer"
+         },
+         "tags": {
+          "additionalProperties": {
+           "maxLength": 256,
+           "minLength": 0,
+           "type": "string"
+          },
+          "maxProperties": 50,
+          "minProperties": 0,
+          "type": "object"
+         },
+         "targetInstanceTypeRightSizingMethod": {
+          "enum": [
+           "NONE",
+           "BASIC"
+          ],
+          "type": "string"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "arn": {
+           "maxLength": 2048,
+           "minLength": 20,
+           "type": "string"
+          },
+          "associatePublicIpAddress": {
+           "type": "boolean"
+          },
+          "bootMode": {
+           "enum": [
+            "LEGACY_BIOS",
+            "UEFI",
+            "USE_SOURCE"
+           ],
+           "type": "string"
+          },
+          "copyPrivateIp": {
+           "type": "boolean"
+          },
+          "copyTags": {
+           "type": "boolean"
+          },
+          "ec2LaunchTemplateID": {
+           "maxLength": 20,
+           "minLength": 20,
+           "type": "string"
+          },
+          "enableMapAutoTagging": {
+           "type": "boolean"
+          },
+          "largeVolumeConf": {
+           "$ref": "#/components/schemas/LaunchTemplateDiskConf"
+          },
+          "launchConfigurationTemplateID": {
+           "maxLength": 21,
+           "minLength": 21,
+           "type": "string"
+          },
+          "launchDisposition": {
+           "enum": [
+            "STOPPED",
+            "STARTED"
+           ],
+           "type": "string"
+          },
+          "licensing": {
+           "$ref": "#/components/schemas/Licensing"
+          },
+          "mapAutoTaggingMpeID": {
+           "maxLength": 256,
+           "minLength": 0,
+           "type": "string"
+          },
+          "postLaunchActions": {
+           "$ref": "#/components/schemas/PostLaunchActions"
+          },
+          "smallVolumeConf": {
+           "$ref": "#/components/schemas/LaunchTemplateDiskConf"
+          },
+          "smallVolumeMaxSize": {
+           "minimum": 0,
+           "type": "integer"
+          },
+          "tags": {
+           "additionalProperties": {
+            "maxLength": 256,
+            "minLength": 0,
+            "type": "string"
+           },
+           "maxProperties": 50,
+           "minProperties": 0,
+           "type": "object"
+          },
+          "targetInstanceTypeRightSizingMethod": {
+           "enum": [
+            "NONE",
+            "BASIC"
+           ],
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateLaunchConfigurationTemplate",
+    "tags": [
+     "Application Migration Service"
+    ]
+   }
+  },
+  "/CreateReplicationConfigurationTemplate": {
+   "post": {
+    "operationId": "mgnCreateReplicationConfigurationTemplate",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "mgn"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "associateDefaultSecurityGroup": {
+          "type": "boolean"
+         },
+         "bandwidthThrottling": {
+          "maximum": 10000,
+          "minimum": 0,
+          "type": "integer"
+         },
+         "createPublicIP": {
+          "type": "boolean"
+         },
+         "dataPlaneRouting": {
+          "enum": [
+           "PRIVATE_IP",
+           "PUBLIC_IP"
+          ],
+          "type": "string"
+         },
+         "defaultLargeStagingDiskType": {
+          "enum": [
+           "GP2",
+           "ST1",
+           "GP3"
+          ],
+          "type": "string"
+         },
+         "ebsEncryption": {
+          "enum": [
+           "DEFAULT",
+           "CUSTOM"
+          ],
+          "type": "string"
+         },
+         "ebsEncryptionKeyArn": {
+          "maxLength": 2048,
+          "minLength": 20,
+          "type": "string"
+         },
+         "replicationServerInstanceType": {
+          "maxLength": 255,
+          "minLength": 0,
+          "type": "string"
+         },
+         "replicationServersSecurityGroupsIDs": {
+          "items": {
+           "maxLength": 255,
+           "minLength": 0,
+           "type": "string"
+          },
+          "maxItems": 32,
+          "minItems": 0,
+          "type": "array"
+         },
+         "stagingAreaSubnetId": {
+          "maxLength": 255,
+          "minLength": 0,
+          "type": "string"
+         },
+         "stagingAreaTags": {
+          "additionalProperties": {
+           "maxLength": 256,
+           "minLength": 0,
+           "type": "string"
+          },
+          "maxProperties": 50,
+          "minProperties": 0,
+          "type": "object"
+         },
+         "tags": {
+          "additionalProperties": {
+           "maxLength": 256,
+           "minLength": 0,
+           "type": "string"
+          },
+          "maxProperties": 50,
+          "minProperties": 0,
+          "type": "object"
+         },
+         "useDedicatedReplicationServer": {
+          "type": "boolean"
+         },
+         "useFipsEndpoint": {
+          "type": "boolean"
+         }
+        },
+        "required": [
+         "associateDefaultSecurityGroup",
+         "bandwidthThrottling",
+         "createPublicIP",
+         "dataPlaneRouting",
+         "defaultLargeStagingDiskType",
+         "ebsEncryption",
+         "replicationServerInstanceType",
+         "replicationServersSecurityGroupsIDs",
+         "stagingAreaSubnetId",
+         "stagingAreaTags",
+         "useDedicatedReplicationServer"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "arn": {
+           "maxLength": 2048,
+           "minLength": 20,
+           "type": "string"
+          },
+          "associateDefaultSecurityGroup": {
+           "type": "boolean"
+          },
+          "bandwidthThrottling": {
+           "maximum": 10000,
+           "minimum": 0,
+           "type": "integer"
+          },
+          "createPublicIP": {
+           "type": "boolean"
+          },
+          "dataPlaneRouting": {
+           "enum": [
+            "PRIVATE_IP",
+            "PUBLIC_IP"
+           ],
+           "type": "string"
+          },
+          "defaultLargeStagingDiskType": {
+           "enum": [
+            "GP2",
+            "ST1",
+            "GP3"
+           ],
+           "type": "string"
+          },
+          "ebsEncryption": {
+           "enum": [
+            "DEFAULT",
+            "CUSTOM"
+           ],
+           "type": "string"
+          },
+          "ebsEncryptionKeyArn": {
+           "maxLength": 2048,
+           "minLength": 20,
+           "type": "string"
+          },
+          "replicationConfigurationTemplateID": {
+           "maxLength": 21,
+           "minLength": 21,
+           "type": "string"
+          },
+          "replicationServerInstanceType": {
+           "maxLength": 255,
+           "minLength": 0,
+           "type": "string"
+          },
+          "replicationServersSecurityGroupsIDs": {
+           "items": {
+            "maxLength": 255,
+            "minLength": 0,
+            "type": "string"
+           },
+           "maxItems": 32,
+           "minItems": 0,
+           "type": "array"
+          },
+          "stagingAreaSubnetId": {
+           "maxLength": 255,
+           "minLength": 0,
+           "type": "string"
+          },
+          "stagingAreaTags": {
+           "additionalProperties": {
+            "maxLength": 256,
+            "minLength": 0,
+            "type": "string"
+           },
+           "maxProperties": 50,
+           "minProperties": 0,
+           "type": "object"
+          },
+          "tags": {
+           "additionalProperties": {
+            "maxLength": 256,
+            "minLength": 0,
+            "type": "string"
+           },
+           "maxProperties": 50,
+           "minProperties": 0,
+           "type": "object"
+          },
+          "useDedicatedReplicationServer": {
+           "type": "boolean"
+          },
+          "useFipsEndpoint": {
+           "type": "boolean"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateReplicationConfigurationTemplate",
+    "tags": [
+     "Application Migration Service"
+    ]
+   }
+  },
+  "/CreateWave": {
+   "post": {
+    "operationId": "mgnCreateWave",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "mgn"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "accountID": {
+          "maxLength": 12,
+          "minLength": 12,
+          "type": "string"
+         },
+         "description": {
+          "maxLength": 600,
+          "minLength": 0,
+          "type": "string"
+         },
+         "name": {
+          "maxLength": 256,
+          "minLength": 1,
+          "type": "string"
+         },
+         "tags": {
+          "additionalProperties": {
+           "maxLength": 256,
+           "minLength": 0,
+           "type": "string"
+          },
+          "maxProperties": 50,
+          "minProperties": 0,
+          "type": "object"
+         }
+        },
+        "required": [
+         "name"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "arn": {
+           "maxLength": 2048,
+           "minLength": 20,
+           "type": "string"
+          },
+          "creationDateTime": {
+           "maxLength": 32,
+           "minLength": 19,
+           "type": "string"
+          },
+          "description": {
+           "maxLength": 600,
+           "minLength": 0,
+           "type": "string"
+          },
+          "isArchived": {
+           "type": "boolean"
+          },
+          "lastModifiedDateTime": {
+           "maxLength": 32,
+           "minLength": 19,
+           "type": "string"
+          },
+          "name": {
+           "maxLength": 256,
+           "minLength": 1,
+           "type": "string"
+          },
+          "tags": {
+           "additionalProperties": {
+            "maxLength": 256,
+            "minLength": 0,
+            "type": "string"
+           },
+           "maxProperties": 50,
+           "minProperties": 0,
+           "type": "object"
+          },
+          "waveAggregatedStatus": {
+           "$ref": "#/components/schemas/WaveAggregatedStatus"
+          },
+          "waveID": {
+           "maxLength": 22,
+           "minLength": 22,
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateWave",
+    "tags": [
+     "Application Migration Service"
+    ]
+   }
+  },
+  "/DeleteApplication": {
+   "post": {
+    "operationId": "mgnDeleteApplication",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "mgn"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "accountID": {
+          "maxLength": 12,
+          "minLength": 12,
+          "type": "string"
+         },
+         "applicationID": {
+          "maxLength": 21,
+          "minLength": 21,
+          "type": "string"
+         }
+        },
+        "required": [
+         "applicationID"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteApplication",
+    "tags": [
+     "Application Migration Service"
+    ]
+   }
+  },
+  "/DeleteConnector": {
+   "post": {
+    "operationId": "mgnDeleteConnector",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "mgn"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "connectorID": {
+          "maxLength": 27,
+          "minLength": 27,
+          "type": "string"
+         }
+        },
+        "required": [
+         "connectorID"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteConnector",
+    "tags": [
+     "Application Migration Service"
+    ]
+   }
+  },
+  "/DeleteLaunchConfigurationTemplate": {
+   "post": {
+    "operationId": "mgnDeleteLaunchConfigurationTemplate",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "mgn"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "launchConfigurationTemplateID": {
+          "maxLength": 21,
+          "minLength": 21,
+          "type": "string"
+         }
+        },
+        "required": [
+         "launchConfigurationTemplateID"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteLaunchConfigurationTemplate",
+    "tags": [
+     "Application Migration Service"
+    ]
+   }
+  },
+  "/DeleteReplicationConfigurationTemplate": {
+   "post": {
+    "operationId": "mgnDeleteReplicationConfigurationTemplate",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "mgn"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "replicationConfigurationTemplateID": {
+          "maxLength": 21,
+          "minLength": 21,
+          "type": "string"
+         }
+        },
+        "required": [
+         "replicationConfigurationTemplateID"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteReplicationConfigurationTemplate",
+    "tags": [
+     "Application Migration Service"
+    ]
+   }
+  },
+  "/DeleteWave": {
+   "post": {
+    "operationId": "mgnDeleteWave",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "mgn"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "accountID": {
+          "maxLength": 12,
+          "minLength": 12,
+          "type": "string"
+         },
+         "waveID": {
+          "maxLength": 22,
+          "minLength": 22,
+          "type": "string"
+         }
+        },
+        "required": [
+         "waveID"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteWave",
+    "tags": [
+     "Application Migration Service"
+    ]
+   }
+  },
+  "/DescribeLaunchConfigurationTemplates": {
+   "post": {
+    "operationId": "mgnDescribeLaunchConfigurationTemplates",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "mgn"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "launchConfigurationTemplateIDs": {
+          "items": {
+           "maxLength": 21,
+           "minLength": 21,
+           "type": "string"
+          },
+          "maxItems": 200,
+          "minItems": 0,
+          "type": "array"
+         },
+         "maxResults": {
+          "maximum": 1000,
+          "minimum": 1,
+          "type": "integer"
+         },
+         "nextToken": {
+          "maxLength": 2048,
+          "minLength": 0,
+          "type": "string"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "items": {
+           "items": {
+            "$ref": "#/components/schemas/LaunchConfigurationTemplate"
+           },
+           "maxItems": 200,
+           "minItems": 0,
+           "type": "array"
+          },
+          "nextToken": {
+           "maxLength": 2048,
+           "minLength": 0,
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DescribeLaunchConfigurationTemplates",
+    "tags": [
+     "Application Migration Service"
+    ]
+   }
+  },
+  "/DescribeReplicationConfigurationTemplates": {
+   "post": {
+    "operationId": "mgnDescribeReplicationConfigurationTemplates",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "mgn"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "maxResults": {
+          "maximum": 1000,
+          "minimum": 1,
+          "type": "integer"
+         },
+         "nextToken": {
+          "maxLength": 2048,
+          "minLength": 0,
+          "type": "string"
+         },
+         "replicationConfigurationTemplateIDs": {
+          "items": {
+           "maxLength": 21,
+           "minLength": 21,
+           "type": "string"
+          },
+          "maxItems": 200,
+          "minItems": 0,
+          "type": "array"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "items": {
+           "items": {
+            "$ref": "#/components/schemas/ReplicationConfigurationTemplate"
+           },
+           "type": "array"
+          },
+          "nextToken": {
+           "maxLength": 2048,
+           "minLength": 0,
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DescribeReplicationConfigurationTemplates",
+    "tags": [
+     "Application Migration Service"
+    ]
+   }
+  },
+  "/ListApplications": {
+   "post": {
+    "operationId": "mgnListApplications",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "mgn"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "accountID": {
+          "maxLength": 12,
+          "minLength": 12,
+          "type": "string"
+         },
+         "filters": {
+          "$ref": "#/components/schemas/ListApplicationsRequestFilters"
+         },
+         "maxResults": {
+          "maximum": 1000,
+          "minimum": 1,
+          "type": "integer"
+         },
+         "nextToken": {
+          "maxLength": 2048,
+          "minLength": 0,
+          "type": "string"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "items": {
+           "items": {
+            "$ref": "#/components/schemas/Application"
+           },
+           "type": "array"
+          },
+          "nextToken": {
+           "maxLength": 2048,
+           "minLength": 0,
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListApplications",
+    "tags": [
+     "Application Migration Service"
+    ]
+   }
+  },
+  "/ListConnectors": {
+   "post": {
+    "operationId": "mgnListConnectors",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "mgn"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "filters": {
+          "$ref": "#/components/schemas/ListConnectorsRequestFilters"
+         },
+         "maxResults": {
+          "maximum": 1000,
+          "minimum": 1,
+          "type": "integer"
+         },
+         "nextToken": {
+          "maxLength": 2048,
+          "minLength": 0,
+          "type": "string"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "items": {
+           "items": {
+            "$ref": "#/components/schemas/Connector"
+           },
+           "type": "array"
+          },
+          "nextToken": {
+           "maxLength": 2048,
+           "minLength": 0,
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListConnectors",
+    "tags": [
+     "Application Migration Service"
+    ]
+   }
+  },
+  "/ListWaves": {
+   "post": {
+    "operationId": "mgnListWaves",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "mgn"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "accountID": {
+          "maxLength": 12,
+          "minLength": 12,
+          "type": "string"
+         },
+         "filters": {
+          "$ref": "#/components/schemas/ListWavesRequestFilters"
+         },
+         "maxResults": {
+          "maximum": 1000,
+          "minimum": 1,
+          "type": "integer"
+         },
+         "nextToken": {
+          "maxLength": 2048,
+          "minLength": 0,
+          "type": "string"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "items": {
+           "items": {
+            "$ref": "#/components/schemas/Wave"
+           },
+           "type": "array"
+          },
+          "nextToken": {
+           "maxLength": 2048,
+           "minLength": 0,
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListWaves",
+    "tags": [
+     "Application Migration Service"
+    ]
+   }
+  },
+  "/UnarchiveApplication": {
+   "post": {
+    "operationId": "mgnUnarchiveApplication",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "mgn"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "accountID": {
+          "maxLength": 12,
+          "minLength": 12,
+          "type": "string"
+         },
+         "applicationID": {
+          "maxLength": 21,
+          "minLength": 21,
+          "type": "string"
+         }
+        },
+        "required": [
+         "applicationID"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "applicationAggregatedStatus": {
+           "$ref": "#/components/schemas/ApplicationAggregatedStatus"
+          },
+          "applicationID": {
+           "maxLength": 21,
+           "minLength": 21,
+           "type": "string"
+          },
+          "arn": {
+           "maxLength": 2048,
+           "minLength": 20,
+           "type": "string"
+          },
+          "creationDateTime": {
+           "maxLength": 32,
+           "minLength": 19,
+           "type": "string"
+          },
+          "description": {
+           "maxLength": 600,
+           "minLength": 0,
+           "type": "string"
+          },
+          "isArchived": {
+           "type": "boolean"
+          },
+          "lastModifiedDateTime": {
+           "maxLength": 32,
+           "minLength": 19,
+           "type": "string"
+          },
+          "name": {
+           "maxLength": 256,
+           "minLength": 1,
+           "type": "string"
+          },
+          "tags": {
+           "additionalProperties": {
+            "maxLength": 256,
+            "minLength": 0,
+            "type": "string"
+           },
+           "maxProperties": 50,
+           "minProperties": 0,
+           "type": "object"
+          },
+          "waveID": {
+           "maxLength": 22,
+           "minLength": 22,
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UnarchiveApplication",
+    "tags": [
+     "Application Migration Service"
+    ]
+   }
+  },
+  "/UnarchiveWave": {
+   "post": {
+    "operationId": "mgnUnarchiveWave",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "mgn"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "accountID": {
+          "maxLength": 12,
+          "minLength": 12,
+          "type": "string"
+         },
+         "waveID": {
+          "maxLength": 22,
+          "minLength": 22,
+          "type": "string"
+         }
+        },
+        "required": [
+         "waveID"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "arn": {
+           "maxLength": 2048,
+           "minLength": 20,
+           "type": "string"
+          },
+          "creationDateTime": {
+           "maxLength": 32,
+           "minLength": 19,
+           "type": "string"
+          },
+          "description": {
+           "maxLength": 600,
+           "minLength": 0,
+           "type": "string"
+          },
+          "isArchived": {
+           "type": "boolean"
+          },
+          "lastModifiedDateTime": {
+           "maxLength": 32,
+           "minLength": 19,
+           "type": "string"
+          },
+          "name": {
+           "maxLength": 256,
+           "minLength": 1,
+           "type": "string"
+          },
+          "tags": {
+           "additionalProperties": {
+            "maxLength": 256,
+            "minLength": 0,
+            "type": "string"
+           },
+           "maxProperties": 50,
+           "minProperties": 0,
+           "type": "object"
+          },
+          "waveAggregatedStatus": {
+           "$ref": "#/components/schemas/WaveAggregatedStatus"
+          },
+          "waveID": {
+           "maxLength": 22,
+           "minLength": 22,
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UnarchiveWave",
+    "tags": [
+     "Application Migration Service"
+    ]
+   }
+  },
+  "/UpdateApplication": {
+   "post": {
+    "operationId": "mgnUpdateApplication",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "mgn"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "accountID": {
+          "maxLength": 12,
+          "minLength": 12,
+          "type": "string"
+         },
+         "applicationID": {
+          "maxLength": 21,
+          "minLength": 21,
+          "type": "string"
+         },
+         "description": {
+          "maxLength": 600,
+          "minLength": 0,
+          "type": "string"
+         },
+         "name": {
+          "maxLength": 256,
+          "minLength": 1,
+          "type": "string"
+         }
+        },
+        "required": [
+         "applicationID"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "applicationAggregatedStatus": {
+           "$ref": "#/components/schemas/ApplicationAggregatedStatus"
+          },
+          "applicationID": {
+           "maxLength": 21,
+           "minLength": 21,
+           "type": "string"
+          },
+          "arn": {
+           "maxLength": 2048,
+           "minLength": 20,
+           "type": "string"
+          },
+          "creationDateTime": {
+           "maxLength": 32,
+           "minLength": 19,
+           "type": "string"
+          },
+          "description": {
+           "maxLength": 600,
+           "minLength": 0,
+           "type": "string"
+          },
+          "isArchived": {
+           "type": "boolean"
+          },
+          "lastModifiedDateTime": {
+           "maxLength": 32,
+           "minLength": 19,
+           "type": "string"
+          },
+          "name": {
+           "maxLength": 256,
+           "minLength": 1,
+           "type": "string"
+          },
+          "tags": {
+           "additionalProperties": {
+            "maxLength": 256,
+            "minLength": 0,
+            "type": "string"
+           },
+           "maxProperties": 50,
+           "minProperties": 0,
+           "type": "object"
+          },
+          "waveID": {
+           "maxLength": 22,
+           "minLength": 22,
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UpdateApplication",
+    "tags": [
+     "Application Migration Service"
+    ]
+   }
+  },
+  "/UpdateConnector": {
+   "post": {
+    "operationId": "mgnUpdateConnector",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "mgn"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "connectorID": {
+          "maxLength": 27,
+          "minLength": 27,
+          "type": "string"
+         },
+         "name": {
+          "maxLength": 256,
+          "minLength": 1,
+          "type": "string"
+         },
+         "ssmCommandConfig": {
+          "$ref": "#/components/schemas/ConnectorSsmCommandConfig"
+         }
+        },
+        "required": [
+         "connectorID"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "arn": {
+           "maxLength": 2048,
+           "minLength": 20,
+           "type": "string"
+          },
+          "connectorID": {
+           "maxLength": 27,
+           "minLength": 27,
+           "type": "string"
+          },
+          "name": {
+           "maxLength": 256,
+           "minLength": 1,
+           "type": "string"
+          },
+          "ssmCommandConfig": {
+           "$ref": "#/components/schemas/ConnectorSsmCommandConfig"
+          },
+          "ssmInstanceID": {
+           "maxLength": 20,
+           "minLength": 19,
+           "type": "string"
+          },
+          "tags": {
+           "additionalProperties": {
+            "maxLength": 256,
+            "minLength": 0,
+            "type": "string"
+           },
+           "maxProperties": 50,
+           "minProperties": 0,
+           "type": "object"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UpdateConnector",
+    "tags": [
+     "Application Migration Service"
+    ]
+   }
+  },
+  "/UpdateLaunchConfigurationTemplate": {
+   "post": {
+    "operationId": "mgnUpdateLaunchConfigurationTemplate",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "mgn"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "associatePublicIpAddress": {
+          "type": "boolean"
+         },
+         "bootMode": {
+          "enum": [
+           "LEGACY_BIOS",
+           "UEFI",
+           "USE_SOURCE"
+          ],
+          "type": "string"
+         },
+         "copyPrivateIp": {
+          "type": "boolean"
+         },
+         "copyTags": {
+          "type": "boolean"
+         },
+         "enableMapAutoTagging": {
+          "type": "boolean"
+         },
+         "largeVolumeConf": {
+          "$ref": "#/components/schemas/LaunchTemplateDiskConf"
+         },
+         "launchConfigurationTemplateID": {
+          "maxLength": 21,
+          "minLength": 21,
+          "type": "string"
+         },
+         "launchDisposition": {
+          "enum": [
+           "STOPPED",
+           "STARTED"
+          ],
+          "type": "string"
+         },
+         "licensing": {
+          "$ref": "#/components/schemas/Licensing"
+         },
+         "mapAutoTaggingMpeID": {
+          "maxLength": 256,
+          "minLength": 0,
+          "type": "string"
+         },
+         "postLaunchActions": {
+          "$ref": "#/components/schemas/PostLaunchActions"
+         },
+         "smallVolumeConf": {
+          "$ref": "#/components/schemas/LaunchTemplateDiskConf"
+         },
+         "smallVolumeMaxSize": {
+          "minimum": 0,
+          "type": "integer"
+         },
+         "targetInstanceTypeRightSizingMethod": {
+          "enum": [
+           "NONE",
+           "BASIC"
+          ],
+          "type": "string"
+         }
+        },
+        "required": [
+         "launchConfigurationTemplateID"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "arn": {
+           "maxLength": 2048,
+           "minLength": 20,
+           "type": "string"
+          },
+          "associatePublicIpAddress": {
+           "type": "boolean"
+          },
+          "bootMode": {
+           "enum": [
+            "LEGACY_BIOS",
+            "UEFI",
+            "USE_SOURCE"
+           ],
+           "type": "string"
+          },
+          "copyPrivateIp": {
+           "type": "boolean"
+          },
+          "copyTags": {
+           "type": "boolean"
+          },
+          "ec2LaunchTemplateID": {
+           "maxLength": 20,
+           "minLength": 20,
+           "type": "string"
+          },
+          "enableMapAutoTagging": {
+           "type": "boolean"
+          },
+          "largeVolumeConf": {
+           "$ref": "#/components/schemas/LaunchTemplateDiskConf"
+          },
+          "launchConfigurationTemplateID": {
+           "maxLength": 21,
+           "minLength": 21,
+           "type": "string"
+          },
+          "launchDisposition": {
+           "enum": [
+            "STOPPED",
+            "STARTED"
+           ],
+           "type": "string"
+          },
+          "licensing": {
+           "$ref": "#/components/schemas/Licensing"
+          },
+          "mapAutoTaggingMpeID": {
+           "maxLength": 256,
+           "minLength": 0,
+           "type": "string"
+          },
+          "postLaunchActions": {
+           "$ref": "#/components/schemas/PostLaunchActions"
+          },
+          "smallVolumeConf": {
+           "$ref": "#/components/schemas/LaunchTemplateDiskConf"
+          },
+          "smallVolumeMaxSize": {
+           "minimum": 0,
+           "type": "integer"
+          },
+          "tags": {
+           "additionalProperties": {
+            "maxLength": 256,
+            "minLength": 0,
+            "type": "string"
+           },
+           "maxProperties": 50,
+           "minProperties": 0,
+           "type": "object"
+          },
+          "targetInstanceTypeRightSizingMethod": {
+           "enum": [
+            "NONE",
+            "BASIC"
+           ],
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UpdateLaunchConfigurationTemplate",
+    "tags": [
+     "Application Migration Service"
+    ]
+   }
+  },
+  "/UpdateReplicationConfigurationTemplate": {
+   "post": {
+    "operationId": "mgnUpdateReplicationConfigurationTemplate",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "mgn"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "arn": {
+          "maxLength": 2048,
+          "minLength": 20,
+          "type": "string"
+         },
+         "associateDefaultSecurityGroup": {
+          "type": "boolean"
+         },
+         "bandwidthThrottling": {
+          "maximum": 10000,
+          "minimum": 0,
+          "type": "integer"
+         },
+         "createPublicIP": {
+          "type": "boolean"
+         },
+         "dataPlaneRouting": {
+          "enum": [
+           "PRIVATE_IP",
+           "PUBLIC_IP"
+          ],
+          "type": "string"
+         },
+         "defaultLargeStagingDiskType": {
+          "enum": [
+           "GP2",
+           "ST1",
+           "GP3"
+          ],
+          "type": "string"
+         },
+         "ebsEncryption": {
+          "enum": [
+           "DEFAULT",
+           "CUSTOM"
+          ],
+          "type": "string"
+         },
+         "ebsEncryptionKeyArn": {
+          "maxLength": 2048,
+          "minLength": 20,
+          "type": "string"
+         },
+         "replicationConfigurationTemplateID": {
+          "maxLength": 21,
+          "minLength": 21,
+          "type": "string"
+         },
+         "replicationServerInstanceType": {
+          "maxLength": 255,
+          "minLength": 0,
+          "type": "string"
+         },
+         "replicationServersSecurityGroupsIDs": {
+          "items": {
+           "maxLength": 255,
+           "minLength": 0,
+           "type": "string"
+          },
+          "maxItems": 32,
+          "minItems": 0,
+          "type": "array"
+         },
+         "stagingAreaSubnetId": {
+          "maxLength": 255,
+          "minLength": 0,
+          "type": "string"
+         },
+         "stagingAreaTags": {
+          "additionalProperties": {
+           "maxLength": 256,
+           "minLength": 0,
+           "type": "string"
+          },
+          "maxProperties": 50,
+          "minProperties": 0,
+          "type": "object"
+         },
+         "useDedicatedReplicationServer": {
+          "type": "boolean"
+         },
+         "useFipsEndpoint": {
+          "type": "boolean"
+         }
+        },
+        "required": [
+         "replicationConfigurationTemplateID"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "arn": {
+           "maxLength": 2048,
+           "minLength": 20,
+           "type": "string"
+          },
+          "associateDefaultSecurityGroup": {
+           "type": "boolean"
+          },
+          "bandwidthThrottling": {
+           "maximum": 10000,
+           "minimum": 0,
+           "type": "integer"
+          },
+          "createPublicIP": {
+           "type": "boolean"
+          },
+          "dataPlaneRouting": {
+           "enum": [
+            "PRIVATE_IP",
+            "PUBLIC_IP"
+           ],
+           "type": "string"
+          },
+          "defaultLargeStagingDiskType": {
+           "enum": [
+            "GP2",
+            "ST1",
+            "GP3"
+           ],
+           "type": "string"
+          },
+          "ebsEncryption": {
+           "enum": [
+            "DEFAULT",
+            "CUSTOM"
+           ],
+           "type": "string"
+          },
+          "ebsEncryptionKeyArn": {
+           "maxLength": 2048,
+           "minLength": 20,
+           "type": "string"
+          },
+          "replicationConfigurationTemplateID": {
+           "maxLength": 21,
+           "minLength": 21,
+           "type": "string"
+          },
+          "replicationServerInstanceType": {
+           "maxLength": 255,
+           "minLength": 0,
+           "type": "string"
+          },
+          "replicationServersSecurityGroupsIDs": {
+           "items": {
+            "maxLength": 255,
+            "minLength": 0,
+            "type": "string"
+           },
+           "maxItems": 32,
+           "minItems": 0,
+           "type": "array"
+          },
+          "stagingAreaSubnetId": {
+           "maxLength": 255,
+           "minLength": 0,
+           "type": "string"
+          },
+          "stagingAreaTags": {
+           "additionalProperties": {
+            "maxLength": 256,
+            "minLength": 0,
+            "type": "string"
+           },
+           "maxProperties": 50,
+           "minProperties": 0,
+           "type": "object"
+          },
+          "tags": {
+           "additionalProperties": {
+            "maxLength": 256,
+            "minLength": 0,
+            "type": "string"
+           },
+           "maxProperties": 50,
+           "minProperties": 0,
+           "type": "object"
+          },
+          "useDedicatedReplicationServer": {
+           "type": "boolean"
+          },
+          "useFipsEndpoint": {
+           "type": "boolean"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UpdateReplicationConfigurationTemplate",
+    "tags": [
+     "Application Migration Service"
+    ]
+   }
+  },
+  "/UpdateWave": {
+   "post": {
+    "operationId": "mgnUpdateWave",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "mgn"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "accountID": {
+          "maxLength": 12,
+          "minLength": 12,
+          "type": "string"
+         },
+         "description": {
+          "maxLength": 600,
+          "minLength": 0,
+          "type": "string"
+         },
+         "name": {
+          "maxLength": 256,
+          "minLength": 1,
+          "type": "string"
+         },
+         "waveID": {
+          "maxLength": 22,
+          "minLength": 22,
+          "type": "string"
+         }
+        },
+        "required": [
+         "waveID"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "arn": {
+           "maxLength": 2048,
+           "minLength": 20,
+           "type": "string"
+          },
+          "creationDateTime": {
+           "maxLength": 32,
+           "minLength": 19,
+           "type": "string"
+          },
+          "description": {
+           "maxLength": 600,
+           "minLength": 0,
+           "type": "string"
+          },
+          "isArchived": {
+           "type": "boolean"
+          },
+          "lastModifiedDateTime": {
+           "maxLength": 32,
+           "minLength": 19,
+           "type": "string"
+          },
+          "name": {
+           "maxLength": 256,
+           "minLength": 1,
+           "type": "string"
+          },
+          "tags": {
+           "additionalProperties": {
+            "maxLength": 256,
+            "minLength": 0,
+            "type": "string"
+           },
+           "maxProperties": 50,
+           "minProperties": 0,
+           "type": "object"
+          },
+          "waveAggregatedStatus": {
+           "$ref": "#/components/schemas/WaveAggregatedStatus"
+          },
+          "waveID": {
+           "maxLength": 22,
+           "minLength": 22,
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UpdateWave",
+    "tags": [
+     "Application Migration Service"
+    ]
+   }
+  },
+  "/tags/{resourceArn}": {
+   "delete": {
+    "operationId": "mgnUntagResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "mgn"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceArn",
+      "required": true,
+      "schema": {
+       "maxLength": 2048,
+       "minLength": 20,
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "tagKeys",
+      "schema": {
+       "items": {
+        "maxLength": 256,
+        "minLength": 0,
+        "type": "string"
+       },
+       "type": "array"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UntagResource",
+    "tags": [
+     "Application Migration Service"
+    ]
+   },
+   "get": {
+    "operationId": "mgnListTagsForResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "mgn"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceArn",
+      "required": true,
+      "schema": {
+       "maxLength": 2048,
+       "minLength": 20,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "tags": {
+           "additionalProperties": {
+            "maxLength": 256,
+            "minLength": 0,
+            "type": "string"
+           },
+           "maxProperties": 50,
+           "minProperties": 0,
+           "type": "object"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListTagsForResource",
+    "tags": [
+     "Application Migration Service"
+    ]
+   },
+   "post": {
+    "operationId": "mgnTagResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "mgn"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceArn",
+      "required": true,
+      "schema": {
+       "maxLength": 2048,
+       "minLength": 20,
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "tags": {
+          "additionalProperties": {
+           "maxLength": 256,
+           "minLength": 0,
+           "type": "string"
+          },
+          "maxProperties": 50,
+          "minProperties": 0,
+          "type": "object"
+         }
+        },
+        "required": [
+         "tags"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "TagResource",
+    "tags": [
+     "Application Migration Service"
+    ]
+   }
+  }
+ },
+ "servers": [
+  {
+   "description": "This simulator only",
+   "url": "/"
+  }
+ ],
+ "tags": [
+  {
+   "description": "Bounded simulator subset of the official Application Migration Service API (2020-02-26). Every other official operation returns HTTP 501 UnknownOperationException. Applications, waves, connectors and the launch and replication configuration templates are stored configuration: no source server, replication agent, staging area, replication server, job, test or cutover instance exists, nothing replicates, and StartReplication, StartTest, StartCutover, FinalizeCutover, TerminateTargetInstances, imports, exports, every source server, job, vCenter, action and post-launch operation, InitializeService and the other official operations return UnknownOperationException with HTTP 501. UninitializedAccountException is never returned because no service-linked role is needed. Applications, waves and connectors have no read operation, so they are read through their List operations. The filters member of the List operations is refused instead of being ignored, AssociateApplications and DisassociateApplications are not implemented so waveID and the aggregated status members are never reported, and names are not required to be unique. Archive and Unarchive only set isArchived. Template members that are not supplied are not defaulted, and no EC2 launch template exists, so ec2LaunchTemplateID is never reported. Subnet, security group, KMS key, S3 bucket, IAM and SSM references in templates and connectors are stored as given and never resolved. The ARN forms application/{id}, wave/{id}, connector/{id}, launch-configuration-template/{id} and replication-configuration-template/{id} are the simulator's reading of the authorization reference. At most 50 applications, 50 waves, 20 connectors and 20 templates of each kind exist per Region as local limits.",
+   "name": "Application Migration Service"
+  }
+ ],
+ "x-simulator-source": {
+  "package": "botocore",
+  "version": "1.41.6",
+  "file": "botocore/data/mgn/2020-02-26/service-2.json",
+  "sha256": "332aabde7362e589069d45ff48654eb5e9cf99886e6b6d1688b95a74aeacd599",
+  "license": "Apache-2.0"
+ }
+}

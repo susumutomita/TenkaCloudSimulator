@@ -1,0 +1,3998 @@
+{
+ "components": {
+  "schemas": {
+   "AccessConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "AccessType": {
+      "enum": [
+       "S3_SIGV4",
+       "SECRETS_MANAGER_ACCESS_TOKEN",
+       "AUTODETECT_SIGV4"
+      ],
+      "type": "string"
+     },
+     "SecretsManagerAccessTokenConfiguration": {
+      "$ref": "#/components/schemas/SecretsManagerAccessTokenConfiguration"
+     }
+    },
+    "type": "object"
+   },
+   "AdBreakOpportunity": {
+    "additionalProperties": false,
+    "properties": {
+     "OffsetMillis": {
+      "type": "integer"
+     }
+    },
+    "required": [
+     "OffsetMillis"
+    ],
+    "type": "object"
+   },
+   "AdConditioningConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "StreamingMediaFileConditioning": {
+      "enum": [
+       "TRANSCODE",
+       "NONE"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "StreamingMediaFileConditioning"
+    ],
+    "type": "object"
+   },
+   "AdMarkerPassthrough": {
+    "additionalProperties": false,
+    "properties": {
+     "Enabled": {
+      "type": "boolean"
+     }
+    },
+    "type": "object"
+   },
+   "AdsInteractionLog": {
+    "additionalProperties": false,
+    "properties": {
+     "ExcludeEventTypes": {
+      "items": {
+       "enum": [
+        "AD_MARKER_FOUND",
+        "NON_AD_MARKER_FOUND",
+        "MAKING_ADS_REQUEST",
+        "MODIFIED_TARGET_URL",
+        "VAST_REDIRECT",
+        "EMPTY_VAST_RESPONSE",
+        "EMPTY_VMAP_RESPONSE",
+        "VAST_RESPONSE",
+        "REDIRECTED_VAST_RESPONSE",
+        "FILLED_AVAIL",
+        "FILLED_OVERLAY_AVAIL",
+        "BEACON_FIRED",
+        "WARNING_NO_ADVERTISEMENTS",
+        "WARNING_VPAID_AD_DROPPED",
+        "WARNING_URL_VARIABLE_SUBSTITUTION_FAILED",
+        "ERROR_UNKNOWN",
+        "ERROR_UNKNOWN_HOST",
+        "ERROR_DISALLOWED_HOST",
+        "ERROR_ADS_IO",
+        "ERROR_ADS_TIMEOUT",
+        "ERROR_ADS_RESPONSE_PARSE",
+        "ERROR_ADS_RESPONSE_UNKNOWN_ROOT_ELEMENT",
+        "ERROR_ADS_INVALID_RESPONSE",
+        "ERROR_VAST_REDIRECT_EMPTY_RESPONSE",
+        "ERROR_VAST_REDIRECT_MULTIPLE_VAST",
+        "ERROR_VAST_REDIRECT_FAILED",
+        "ERROR_VAST_MISSING_MEDIAFILES",
+        "ERROR_VAST_MISSING_CREATIVES",
+        "ERROR_VAST_MISSING_OVERLAYS",
+        "ERROR_VAST_MISSING_IMPRESSION",
+        "ERROR_VAST_INVALID_VAST_AD_TAG_URI",
+        "ERROR_VAST_MULTIPLE_TRACKING_EVENTS",
+        "ERROR_VAST_MULTIPLE_LINEAR",
+        "ERROR_VAST_INVALID_MEDIA_FILE",
+        "ERROR_FIRING_BEACON_FAILED",
+        "ERROR_PERSONALIZATION_DISABLED",
+        "VOD_TIME_BASED_AVAIL_PLAN_VAST_RESPONSE_FOR_OFFSET",
+        "VOD_TIME_BASED_AVAIL_PLAN_SUCCESS",
+        "VOD_TIME_BASED_AVAIL_PLAN_WARNING_NO_ADVERTISEMENTS",
+        "INTERSTITIAL_VOD_SUCCESS",
+        "INTERSTITIAL_VOD_FAILURE"
+       ],
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "PublishOptInEventTypes": {
+      "items": {
+       "enum": [
+        "RAW_ADS_RESPONSE"
+       ],
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "AvailMatchingCriteria": {
+    "additionalProperties": false,
+    "properties": {
+     "DynamicVariable": {
+      "type": "string"
+     },
+     "Operator": {
+      "enum": [
+       "EQUALS"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "DynamicVariable",
+     "Operator"
+    ],
+    "type": "object"
+   },
+   "AvailSuppression": {
+    "additionalProperties": false,
+    "properties": {
+     "FillPolicy": {
+      "enum": [
+       "FULL_AVAIL_ONLY",
+       "PARTIAL_AVAIL"
+      ],
+      "type": "string"
+     },
+     "Mode": {
+      "enum": [
+       "OFF",
+       "BEHIND_LIVE_EDGE",
+       "AFTER_LIVE_EDGE"
+      ],
+      "type": "string"
+     },
+     "Value": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "Bumper": {
+    "additionalProperties": false,
+    "properties": {
+     "EndUrl": {
+      "type": "string"
+     },
+     "StartUrl": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "CdnConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "AdSegmentUrlPrefix": {
+      "type": "string"
+     },
+     "ContentSegmentUrlPrefix": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "Channel": {
+    "additionalProperties": false,
+    "properties": {
+     "Arn": {
+      "type": "string"
+     },
+     "Audiences": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "ChannelName": {
+      "type": "string"
+     },
+     "ChannelState": {
+      "type": "string"
+     },
+     "CreationTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "FillerSlate": {
+      "$ref": "#/components/schemas/SlateSource"
+     },
+     "LastModifiedTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "LogConfiguration": {
+      "$ref": "#/components/schemas/LogConfigurationForChannel"
+     },
+     "Outputs": {
+      "items": {
+       "$ref": "#/components/schemas/ResponseOutputItem"
+      },
+      "type": "array"
+     },
+     "PlaybackMode": {
+      "type": "string"
+     },
+     "Tier": {
+      "type": "string"
+     },
+     "tags": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     }
+    },
+    "required": [
+     "Arn",
+     "ChannelName",
+     "ChannelState",
+     "Outputs",
+     "PlaybackMode",
+     "Tier",
+     "LogConfiguration"
+    ],
+    "type": "object"
+   },
+   "DashConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "ManifestEndpointPrefix": {
+      "type": "string"
+     },
+     "MpdLocation": {
+      "type": "string"
+     },
+     "OriginManifestType": {
+      "enum": [
+       "SINGLE_PERIOD",
+       "MULTI_PERIOD"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "DashConfigurationForPut": {
+    "additionalProperties": false,
+    "properties": {
+     "MpdLocation": {
+      "type": "string"
+     },
+     "OriginManifestType": {
+      "enum": [
+       "SINGLE_PERIOD",
+       "MULTI_PERIOD"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "DashPlaylistSettings": {
+    "additionalProperties": false,
+    "properties": {
+     "ManifestWindowSeconds": {
+      "type": "integer"
+     },
+     "MinBufferTimeSeconds": {
+      "type": "integer"
+     },
+     "MinUpdatePeriodSeconds": {
+      "type": "integer"
+     },
+     "SuggestedPresentationDelaySeconds": {
+      "type": "integer"
+     }
+    },
+    "type": "object"
+   },
+   "DefaultSegmentDeliveryConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "BaseUrl": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "HlsConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "ManifestEndpointPrefix": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "HlsPlaylistSettings": {
+    "additionalProperties": false,
+    "properties": {
+     "AdMarkupType": {
+      "items": {
+       "enum": [
+        "DATERANGE",
+        "SCTE35_ENHANCED"
+       ],
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "ManifestWindowSeconds": {
+      "type": "integer"
+     }
+    },
+    "type": "object"
+   },
+   "HttpConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "BaseUrl": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "BaseUrl"
+    ],
+    "type": "object"
+   },
+   "HttpPackageConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "Path": {
+      "type": "string"
+     },
+     "SourceGroup": {
+      "type": "string"
+     },
+     "Type": {
+      "enum": [
+       "DASH",
+       "HLS"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "Path",
+     "SourceGroup",
+     "Type"
+    ],
+    "type": "object"
+   },
+   "LivePreRollConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "AdDecisionServerUrl": {
+      "type": "string"
+     },
+     "MaxDurationSeconds": {
+      "type": "integer"
+     }
+    },
+    "type": "object"
+   },
+   "LiveSource": {
+    "additionalProperties": false,
+    "properties": {
+     "Arn": {
+      "type": "string"
+     },
+     "CreationTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "HttpPackageConfigurations": {
+      "items": {
+       "$ref": "#/components/schemas/HttpPackageConfiguration"
+      },
+      "type": "array"
+     },
+     "LastModifiedTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "LiveSourceName": {
+      "type": "string"
+     },
+     "SourceLocationName": {
+      "type": "string"
+     },
+     "tags": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     }
+    },
+    "required": [
+     "Arn",
+     "HttpPackageConfigurations",
+     "LiveSourceName",
+     "SourceLocationName"
+    ],
+    "type": "object"
+   },
+   "LogConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "AdsInteractionLog": {
+      "$ref": "#/components/schemas/AdsInteractionLog"
+     },
+     "EnabledLoggingStrategies": {
+      "items": {
+       "enum": [
+        "VENDED_LOGS",
+        "LEGACY_CLOUDWATCH"
+       ],
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "ManifestServiceInteractionLog": {
+      "$ref": "#/components/schemas/ManifestServiceInteractionLog"
+     },
+     "PercentEnabled": {
+      "type": "integer"
+     }
+    },
+    "required": [
+     "PercentEnabled",
+     "EnabledLoggingStrategies"
+    ],
+    "type": "object"
+   },
+   "LogConfigurationForChannel": {
+    "additionalProperties": false,
+    "properties": {
+     "LogTypes": {
+      "items": {
+       "enum": [
+        "AS_RUN"
+       ],
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "ManifestProcessingRules": {
+    "additionalProperties": false,
+    "properties": {
+     "AdMarkerPassthrough": {
+      "$ref": "#/components/schemas/AdMarkerPassthrough"
+     }
+    },
+    "type": "object"
+   },
+   "ManifestServiceInteractionLog": {
+    "additionalProperties": false,
+    "properties": {
+     "ExcludeEventTypes": {
+      "items": {
+       "enum": [
+        "GENERATED_MANIFEST",
+        "ORIGIN_MANIFEST",
+        "SESSION_INITIALIZED",
+        "TRACKING_RESPONSE",
+        "CONFIG_SYNTAX_ERROR",
+        "CONFIG_SECURITY_ERROR",
+        "UNKNOWN_HOST",
+        "TIMEOUT_ERROR",
+        "CONNECTION_ERROR",
+        "IO_ERROR",
+        "UNKNOWN_ERROR",
+        "HOST_DISALLOWED",
+        "PARSING_ERROR",
+        "MANIFEST_ERROR",
+        "NO_MASTER_OR_MEDIA_PLAYLIST",
+        "NO_MASTER_PLAYLIST",
+        "NO_MEDIA_PLAYLIST",
+        "INCOMPATIBLE_HLS_VERSION",
+        "SCTE35_PARSING_ERROR",
+        "INVALID_SINGLE_PERIOD_DASH_MANIFEST",
+        "UNSUPPORTED_SINGLE_PERIOD_DASH_MANIFEST",
+        "LAST_PERIOD_MISSING_AUDIO",
+        "LAST_PERIOD_MISSING_AUDIO_WARNING",
+        "ERROR_ORIGIN_PREFIX_INTERPOLATION",
+        "ERROR_ADS_INTERPOLATION",
+        "ERROR_LIVE_PRE_ROLL_ADS_INTERPOLATION",
+        "ERROR_CDN_AD_SEGMENT_INTERPOLATION",
+        "ERROR_CDN_CONTENT_SEGMENT_INTERPOLATION",
+        "ERROR_SLATE_AD_URL_INTERPOLATION",
+        "ERROR_PROFILE_NAME_INTERPOLATION",
+        "ERROR_BUMPER_START_INTERPOLATION",
+        "ERROR_BUMPER_END_INTERPOLATION"
+       ],
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "PlaybackConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "AdConditioningConfiguration": {
+      "$ref": "#/components/schemas/AdConditioningConfiguration"
+     },
+     "AdDecisionServerUrl": {
+      "type": "string"
+     },
+     "AvailSuppression": {
+      "$ref": "#/components/schemas/AvailSuppression"
+     },
+     "Bumper": {
+      "$ref": "#/components/schemas/Bumper"
+     },
+     "CdnConfiguration": {
+      "$ref": "#/components/schemas/CdnConfiguration"
+     },
+     "ConfigurationAliases": {
+      "additionalProperties": {
+       "additionalProperties": {
+        "type": "string"
+       },
+       "type": "object"
+      },
+      "type": "object"
+     },
+     "DashConfiguration": {
+      "$ref": "#/components/schemas/DashConfiguration"
+     },
+     "HlsConfiguration": {
+      "$ref": "#/components/schemas/HlsConfiguration"
+     },
+     "InsertionMode": {
+      "enum": [
+       "STITCHED_ONLY",
+       "PLAYER_SELECT"
+      ],
+      "type": "string"
+     },
+     "LivePreRollConfiguration": {
+      "$ref": "#/components/schemas/LivePreRollConfiguration"
+     },
+     "LogConfiguration": {
+      "$ref": "#/components/schemas/LogConfiguration"
+     },
+     "ManifestProcessingRules": {
+      "$ref": "#/components/schemas/ManifestProcessingRules"
+     },
+     "Name": {
+      "type": "string"
+     },
+     "PersonalizationThresholdSeconds": {
+      "minimum": 1,
+      "type": "integer"
+     },
+     "PlaybackConfigurationArn": {
+      "type": "string"
+     },
+     "PlaybackEndpointPrefix": {
+      "type": "string"
+     },
+     "SessionInitializationEndpointPrefix": {
+      "type": "string"
+     },
+     "SlateAdUrl": {
+      "type": "string"
+     },
+     "TranscodeProfileName": {
+      "type": "string"
+     },
+     "VideoContentSourceUrl": {
+      "type": "string"
+     },
+     "tags": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     }
+    },
+    "type": "object"
+   },
+   "PrefetchConsumption": {
+    "additionalProperties": false,
+    "properties": {
+     "AvailMatchingCriteria": {
+      "items": {
+       "$ref": "#/components/schemas/AvailMatchingCriteria"
+      },
+      "type": "array"
+     },
+     "EndTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "StartTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     }
+    },
+    "required": [
+     "EndTime"
+    ],
+    "type": "object"
+   },
+   "PrefetchRetrieval": {
+    "additionalProperties": false,
+    "properties": {
+     "DynamicVariables": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "EndTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "StartTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "TrafficShapingRetrievalWindow": {
+      "$ref": "#/components/schemas/TrafficShapingRetrievalWindow"
+     },
+     "TrafficShapingTpsConfiguration": {
+      "$ref": "#/components/schemas/TrafficShapingTpsConfiguration"
+     },
+     "TrafficShapingType": {
+      "enum": [
+       "RETRIEVAL_WINDOW",
+       "TPS"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "EndTime"
+    ],
+    "type": "object"
+   },
+   "PrefetchSchedule": {
+    "additionalProperties": false,
+    "properties": {
+     "Arn": {
+      "type": "string"
+     },
+     "Consumption": {
+      "$ref": "#/components/schemas/PrefetchConsumption"
+     },
+     "Name": {
+      "type": "string"
+     },
+     "PlaybackConfigurationName": {
+      "type": "string"
+     },
+     "RecurringPrefetchConfiguration": {
+      "$ref": "#/components/schemas/RecurringPrefetchConfiguration"
+     },
+     "Retrieval": {
+      "$ref": "#/components/schemas/PrefetchRetrieval"
+     },
+     "ScheduleType": {
+      "enum": [
+       "SINGLE",
+       "RECURRING"
+      ],
+      "type": "string"
+     },
+     "StreamId": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "Arn",
+     "Name",
+     "PlaybackConfigurationName"
+    ],
+    "type": "object"
+   },
+   "RecurringConsumption": {
+    "additionalProperties": false,
+    "properties": {
+     "AvailMatchingCriteria": {
+      "items": {
+       "$ref": "#/components/schemas/AvailMatchingCriteria"
+      },
+      "type": "array"
+     },
+     "RetrievedAdExpirationSeconds": {
+      "type": "integer"
+     }
+    },
+    "type": "object"
+   },
+   "RecurringPrefetchConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "EndTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "RecurringConsumption": {
+      "$ref": "#/components/schemas/RecurringConsumption"
+     },
+     "RecurringRetrieval": {
+      "$ref": "#/components/schemas/RecurringRetrieval"
+     },
+     "StartTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     }
+    },
+    "required": [
+     "EndTime",
+     "RecurringConsumption",
+     "RecurringRetrieval"
+    ],
+    "type": "object"
+   },
+   "RecurringRetrieval": {
+    "additionalProperties": false,
+    "properties": {
+     "DelayAfterAvailEndSeconds": {
+      "type": "integer"
+     },
+     "DynamicVariables": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "TrafficShapingRetrievalWindow": {
+      "$ref": "#/components/schemas/TrafficShapingRetrievalWindow"
+     },
+     "TrafficShapingTpsConfiguration": {
+      "$ref": "#/components/schemas/TrafficShapingTpsConfiguration"
+     },
+     "TrafficShapingType": {
+      "enum": [
+       "RETRIEVAL_WINDOW",
+       "TPS"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "RequestOutputItem": {
+    "additionalProperties": false,
+    "properties": {
+     "DashPlaylistSettings": {
+      "$ref": "#/components/schemas/DashPlaylistSettings"
+     },
+     "HlsPlaylistSettings": {
+      "$ref": "#/components/schemas/HlsPlaylistSettings"
+     },
+     "ManifestName": {
+      "type": "string"
+     },
+     "SourceGroup": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "ManifestName",
+     "SourceGroup"
+    ],
+    "type": "object"
+   },
+   "ResponseOutputItem": {
+    "additionalProperties": false,
+    "properties": {
+     "DashPlaylistSettings": {
+      "$ref": "#/components/schemas/DashPlaylistSettings"
+     },
+     "HlsPlaylistSettings": {
+      "$ref": "#/components/schemas/HlsPlaylistSettings"
+     },
+     "ManifestName": {
+      "type": "string"
+     },
+     "PlaybackUrl": {
+      "type": "string"
+     },
+     "SourceGroup": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "ManifestName",
+     "PlaybackUrl",
+     "SourceGroup"
+    ],
+    "type": "object"
+   },
+   "SecretsManagerAccessTokenConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "HeaderName": {
+      "type": "string"
+     },
+     "SecretArn": {
+      "type": "string"
+     },
+     "SecretStringKey": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "SegmentDeliveryConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "BaseUrl": {
+      "type": "string"
+     },
+     "Name": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "SlateSource": {
+    "additionalProperties": false,
+    "properties": {
+     "SourceLocationName": {
+      "type": "string"
+     },
+     "VodSourceName": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "SourceLocation": {
+    "additionalProperties": false,
+    "properties": {
+     "AccessConfiguration": {
+      "$ref": "#/components/schemas/AccessConfiguration"
+     },
+     "Arn": {
+      "type": "string"
+     },
+     "CreationTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "DefaultSegmentDeliveryConfiguration": {
+      "$ref": "#/components/schemas/DefaultSegmentDeliveryConfiguration"
+     },
+     "HttpConfiguration": {
+      "$ref": "#/components/schemas/HttpConfiguration"
+     },
+     "LastModifiedTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "SegmentDeliveryConfigurations": {
+      "items": {
+       "$ref": "#/components/schemas/SegmentDeliveryConfiguration"
+      },
+      "type": "array"
+     },
+     "SourceLocationName": {
+      "type": "string"
+     },
+     "tags": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     }
+    },
+    "required": [
+     "Arn",
+     "HttpConfiguration",
+     "SourceLocationName"
+    ],
+    "type": "object"
+   },
+   "TimeShiftConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "MaxTimeDelaySeconds": {
+      "type": "integer"
+     }
+    },
+    "required": [
+     "MaxTimeDelaySeconds"
+    ],
+    "type": "object"
+   },
+   "TrafficShapingRetrievalWindow": {
+    "additionalProperties": false,
+    "properties": {
+     "RetrievalWindowDurationSeconds": {
+      "type": "integer"
+     }
+    },
+    "type": "object"
+   },
+   "TrafficShapingTpsConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "PeakConcurrentUsers": {
+      "type": "integer"
+     },
+     "PeakTps": {
+      "type": "integer"
+     }
+    },
+    "type": "object"
+   },
+   "VodSource": {
+    "additionalProperties": false,
+    "properties": {
+     "Arn": {
+      "type": "string"
+     },
+     "CreationTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "HttpPackageConfigurations": {
+      "items": {
+       "$ref": "#/components/schemas/HttpPackageConfiguration"
+      },
+      "type": "array"
+     },
+     "LastModifiedTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "SourceLocationName": {
+      "type": "string"
+     },
+     "VodSourceName": {
+      "type": "string"
+     },
+     "tags": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     }
+    },
+    "required": [
+     "Arn",
+     "HttpPackageConfigurations",
+     "SourceLocationName",
+     "VodSourceName"
+    ],
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "Bounded simulator subset of the official AWS MediaTailor API (2018-04-23). Every other official operation returns HTTP 501 UnknownOperationException. Playback configurations, prefetch schedules, source locations, VOD and live sources and channels are stored records: no manifest is stitched, no ad decision server, origin or Secrets Manager secret is contacted, no ad is prefetched and no playback or session endpoint is issued, so HlsConfiguration, PlaybackEndpointPrefix, SessionInitializationEndpointPrefix and DashConfiguration ManifestEndpointPrefix are never returned, and output PlaybackUrl is omitted. Channels stay STOPPED and StartChannel and StopChannel return UnknownOperationException with HTTP 501, as do programs (which refer to source locations and sources by name, which the catalog cannot check), the channel policy operations, ConfigureLogsForChannel, ConfigureLogsForPlaybackConfiguration, GetChannelSchedule and ListAlerts. PutPlaybackConfiguration replaces only the members it supplies instead of the whole configuration. A playback configuration with prefetch schedules, and a source location with VOD or live sources, cannot be deleted. Slate and FillerSlate references, TranscodeProfileName, secret ARNs and the VOD source group names are stored without being resolved. LINEAR channels require FillerSlate and LOOP channels refuse it; Tier is returned only when supplied; PlaybackMode and Tier cannot change; Outputs are stored without a PlaybackUrl, and LogConfiguration reports no log types. The official operations model no exceptions, so failures answer with the generic names ValidationException (HTTP 400), ResourceNotFoundException (HTTP 404) and ConflictException (HTTP 409), where AWS answers BadRequestException. The simulator allows 100 of each resource kind per scope, which is not an AWS quota.",
+  "title": "AWS Elemental MediaTailor (simulator catalog)",
+  "version": "2018-04-23"
+ },
+ "openapi": "3.1.0",
+ "paths": {
+  "/channel/{ChannelName}": {
+   "delete": {
+    "operationId": "mediatailorDeleteChannel",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "mediatailor"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "ChannelName",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteChannel",
+    "tags": [
+     "AWS Elemental MediaTailor"
+    ]
+   },
+   "get": {
+    "operationId": "mediatailorDescribeChannel",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "mediatailor"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "ChannelName",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "Arn": {
+           "type": "string"
+          },
+          "Audiences": {
+           "items": {
+            "type": "string"
+           },
+           "type": "array"
+          },
+          "ChannelName": {
+           "type": "string"
+          },
+          "ChannelState": {
+           "enum": [
+            "RUNNING",
+            "STOPPED"
+           ],
+           "type": "string"
+          },
+          "CreationTime": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "FillerSlate": {
+           "$ref": "#/components/schemas/SlateSource"
+          },
+          "LastModifiedTime": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "LogConfiguration": {
+           "$ref": "#/components/schemas/LogConfigurationForChannel"
+          },
+          "Outputs": {
+           "items": {
+            "$ref": "#/components/schemas/ResponseOutputItem"
+           },
+           "type": "array"
+          },
+          "PlaybackMode": {
+           "type": "string"
+          },
+          "Tier": {
+           "type": "string"
+          },
+          "TimeShiftConfiguration": {
+           "$ref": "#/components/schemas/TimeShiftConfiguration"
+          },
+          "tags": {
+           "additionalProperties": {
+            "type": "string"
+           },
+           "type": "object"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DescribeChannel",
+    "tags": [
+     "AWS Elemental MediaTailor"
+    ]
+   },
+   "post": {
+    "operationId": "mediatailorCreateChannel",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "mediatailor"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "ChannelName",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "Audiences": {
+          "items": {
+           "type": "string"
+          },
+          "type": "array"
+         },
+         "FillerSlate": {
+          "$ref": "#/components/schemas/SlateSource"
+         },
+         "Outputs": {
+          "items": {
+           "$ref": "#/components/schemas/RequestOutputItem"
+          },
+          "type": "array"
+         },
+         "PlaybackMode": {
+          "enum": [
+           "LOOP",
+           "LINEAR"
+          ],
+          "type": "string"
+         },
+         "Tier": {
+          "enum": [
+           "BASIC",
+           "STANDARD"
+          ],
+          "type": "string"
+         },
+         "TimeShiftConfiguration": {
+          "$ref": "#/components/schemas/TimeShiftConfiguration"
+         },
+         "tags": {
+          "additionalProperties": {
+           "type": "string"
+          },
+          "type": "object"
+         }
+        },
+        "required": [
+         "Outputs",
+         "PlaybackMode"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "Arn": {
+           "type": "string"
+          },
+          "Audiences": {
+           "items": {
+            "type": "string"
+           },
+           "type": "array"
+          },
+          "ChannelName": {
+           "type": "string"
+          },
+          "ChannelState": {
+           "enum": [
+            "RUNNING",
+            "STOPPED"
+           ],
+           "type": "string"
+          },
+          "CreationTime": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "FillerSlate": {
+           "$ref": "#/components/schemas/SlateSource"
+          },
+          "LastModifiedTime": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "Outputs": {
+           "items": {
+            "$ref": "#/components/schemas/ResponseOutputItem"
+           },
+           "type": "array"
+          },
+          "PlaybackMode": {
+           "type": "string"
+          },
+          "Tier": {
+           "type": "string"
+          },
+          "TimeShiftConfiguration": {
+           "$ref": "#/components/schemas/TimeShiftConfiguration"
+          },
+          "tags": {
+           "additionalProperties": {
+            "type": "string"
+           },
+           "type": "object"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateChannel",
+    "tags": [
+     "AWS Elemental MediaTailor"
+    ]
+   },
+   "put": {
+    "operationId": "mediatailorUpdateChannel",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "mediatailor"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "ChannelName",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "Audiences": {
+          "items": {
+           "type": "string"
+          },
+          "type": "array"
+         },
+         "FillerSlate": {
+          "$ref": "#/components/schemas/SlateSource"
+         },
+         "Outputs": {
+          "items": {
+           "$ref": "#/components/schemas/RequestOutputItem"
+          },
+          "type": "array"
+         },
+         "TimeShiftConfiguration": {
+          "$ref": "#/components/schemas/TimeShiftConfiguration"
+         }
+        },
+        "required": [
+         "Outputs"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "Arn": {
+           "type": "string"
+          },
+          "Audiences": {
+           "items": {
+            "type": "string"
+           },
+           "type": "array"
+          },
+          "ChannelName": {
+           "type": "string"
+          },
+          "ChannelState": {
+           "enum": [
+            "RUNNING",
+            "STOPPED"
+           ],
+           "type": "string"
+          },
+          "CreationTime": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "FillerSlate": {
+           "$ref": "#/components/schemas/SlateSource"
+          },
+          "LastModifiedTime": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "Outputs": {
+           "items": {
+            "$ref": "#/components/schemas/ResponseOutputItem"
+           },
+           "type": "array"
+          },
+          "PlaybackMode": {
+           "type": "string"
+          },
+          "Tier": {
+           "type": "string"
+          },
+          "TimeShiftConfiguration": {
+           "$ref": "#/components/schemas/TimeShiftConfiguration"
+          },
+          "tags": {
+           "additionalProperties": {
+            "type": "string"
+           },
+           "type": "object"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UpdateChannel",
+    "tags": [
+     "AWS Elemental MediaTailor"
+    ]
+   }
+  },
+  "/channels": {
+   "get": {
+    "operationId": "mediatailorListChannels",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "mediatailor"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "maxResults",
+      "schema": {
+       "maximum": 100,
+       "minimum": 1,
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "nextToken",
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "Items": {
+           "items": {
+            "$ref": "#/components/schemas/Channel"
+           },
+           "type": "array"
+          },
+          "NextToken": {
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListChannels",
+    "tags": [
+     "AWS Elemental MediaTailor"
+    ]
+   }
+  },
+  "/playbackConfiguration": {
+   "put": {
+    "operationId": "mediatailorPutPlaybackConfiguration",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "mediatailor"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "AdConditioningConfiguration": {
+          "$ref": "#/components/schemas/AdConditioningConfiguration"
+         },
+         "AdDecisionServerUrl": {
+          "type": "string"
+         },
+         "AvailSuppression": {
+          "$ref": "#/components/schemas/AvailSuppression"
+         },
+         "Bumper": {
+          "$ref": "#/components/schemas/Bumper"
+         },
+         "CdnConfiguration": {
+          "$ref": "#/components/schemas/CdnConfiguration"
+         },
+         "ConfigurationAliases": {
+          "additionalProperties": {
+           "additionalProperties": {
+            "type": "string"
+           },
+           "type": "object"
+          },
+          "type": "object"
+         },
+         "DashConfiguration": {
+          "$ref": "#/components/schemas/DashConfigurationForPut"
+         },
+         "InsertionMode": {
+          "enum": [
+           "STITCHED_ONLY",
+           "PLAYER_SELECT"
+          ],
+          "type": "string"
+         },
+         "LivePreRollConfiguration": {
+          "$ref": "#/components/schemas/LivePreRollConfiguration"
+         },
+         "ManifestProcessingRules": {
+          "$ref": "#/components/schemas/ManifestProcessingRules"
+         },
+         "Name": {
+          "type": "string"
+         },
+         "PersonalizationThresholdSeconds": {
+          "minimum": 1,
+          "type": "integer"
+         },
+         "SlateAdUrl": {
+          "type": "string"
+         },
+         "TranscodeProfileName": {
+          "type": "string"
+         },
+         "VideoContentSourceUrl": {
+          "type": "string"
+         },
+         "tags": {
+          "additionalProperties": {
+           "type": "string"
+          },
+          "type": "object"
+         }
+        },
+        "required": [
+         "Name"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "AdConditioningConfiguration": {
+           "$ref": "#/components/schemas/AdConditioningConfiguration"
+          },
+          "AdDecisionServerUrl": {
+           "type": "string"
+          },
+          "AvailSuppression": {
+           "$ref": "#/components/schemas/AvailSuppression"
+          },
+          "Bumper": {
+           "$ref": "#/components/schemas/Bumper"
+          },
+          "CdnConfiguration": {
+           "$ref": "#/components/schemas/CdnConfiguration"
+          },
+          "ConfigurationAliases": {
+           "additionalProperties": {
+            "additionalProperties": {
+             "type": "string"
+            },
+            "type": "object"
+           },
+           "type": "object"
+          },
+          "DashConfiguration": {
+           "$ref": "#/components/schemas/DashConfiguration"
+          },
+          "HlsConfiguration": {
+           "$ref": "#/components/schemas/HlsConfiguration"
+          },
+          "InsertionMode": {
+           "enum": [
+            "STITCHED_ONLY",
+            "PLAYER_SELECT"
+           ],
+           "type": "string"
+          },
+          "LivePreRollConfiguration": {
+           "$ref": "#/components/schemas/LivePreRollConfiguration"
+          },
+          "LogConfiguration": {
+           "$ref": "#/components/schemas/LogConfiguration"
+          },
+          "ManifestProcessingRules": {
+           "$ref": "#/components/schemas/ManifestProcessingRules"
+          },
+          "Name": {
+           "type": "string"
+          },
+          "PersonalizationThresholdSeconds": {
+           "minimum": 1,
+           "type": "integer"
+          },
+          "PlaybackConfigurationArn": {
+           "type": "string"
+          },
+          "PlaybackEndpointPrefix": {
+           "type": "string"
+          },
+          "SessionInitializationEndpointPrefix": {
+           "type": "string"
+          },
+          "SlateAdUrl": {
+           "type": "string"
+          },
+          "TranscodeProfileName": {
+           "type": "string"
+          },
+          "VideoContentSourceUrl": {
+           "type": "string"
+          },
+          "tags": {
+           "additionalProperties": {
+            "type": "string"
+           },
+           "type": "object"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "PutPlaybackConfiguration",
+    "tags": [
+     "AWS Elemental MediaTailor"
+    ]
+   }
+  },
+  "/playbackConfiguration/{Name}": {
+   "delete": {
+    "operationId": "mediatailorDeletePlaybackConfiguration",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "mediatailor"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "Name",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeletePlaybackConfiguration",
+    "tags": [
+     "AWS Elemental MediaTailor"
+    ]
+   },
+   "get": {
+    "operationId": "mediatailorGetPlaybackConfiguration",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "mediatailor"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "Name",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "AdConditioningConfiguration": {
+           "$ref": "#/components/schemas/AdConditioningConfiguration"
+          },
+          "AdDecisionServerUrl": {
+           "type": "string"
+          },
+          "AvailSuppression": {
+           "$ref": "#/components/schemas/AvailSuppression"
+          },
+          "Bumper": {
+           "$ref": "#/components/schemas/Bumper"
+          },
+          "CdnConfiguration": {
+           "$ref": "#/components/schemas/CdnConfiguration"
+          },
+          "ConfigurationAliases": {
+           "additionalProperties": {
+            "additionalProperties": {
+             "type": "string"
+            },
+            "type": "object"
+           },
+           "type": "object"
+          },
+          "DashConfiguration": {
+           "$ref": "#/components/schemas/DashConfiguration"
+          },
+          "HlsConfiguration": {
+           "$ref": "#/components/schemas/HlsConfiguration"
+          },
+          "InsertionMode": {
+           "enum": [
+            "STITCHED_ONLY",
+            "PLAYER_SELECT"
+           ],
+           "type": "string"
+          },
+          "LivePreRollConfiguration": {
+           "$ref": "#/components/schemas/LivePreRollConfiguration"
+          },
+          "LogConfiguration": {
+           "$ref": "#/components/schemas/LogConfiguration"
+          },
+          "ManifestProcessingRules": {
+           "$ref": "#/components/schemas/ManifestProcessingRules"
+          },
+          "Name": {
+           "type": "string"
+          },
+          "PersonalizationThresholdSeconds": {
+           "minimum": 1,
+           "type": "integer"
+          },
+          "PlaybackConfigurationArn": {
+           "type": "string"
+          },
+          "PlaybackEndpointPrefix": {
+           "type": "string"
+          },
+          "SessionInitializationEndpointPrefix": {
+           "type": "string"
+          },
+          "SlateAdUrl": {
+           "type": "string"
+          },
+          "TranscodeProfileName": {
+           "type": "string"
+          },
+          "VideoContentSourceUrl": {
+           "type": "string"
+          },
+          "tags": {
+           "additionalProperties": {
+            "type": "string"
+           },
+           "type": "object"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "GetPlaybackConfiguration",
+    "tags": [
+     "AWS Elemental MediaTailor"
+    ]
+   }
+  },
+  "/playbackConfigurations": {
+   "get": {
+    "operationId": "mediatailorListPlaybackConfigurations",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "mediatailor"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "MaxResults",
+      "schema": {
+       "maximum": 100,
+       "minimum": 1,
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "NextToken",
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "Items": {
+           "items": {
+            "$ref": "#/components/schemas/PlaybackConfiguration"
+           },
+           "type": "array"
+          },
+          "NextToken": {
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListPlaybackConfigurations",
+    "tags": [
+     "AWS Elemental MediaTailor"
+    ]
+   }
+  },
+  "/prefetchSchedule/{PlaybackConfigurationName}": {
+   "post": {
+    "operationId": "mediatailorListPrefetchSchedules",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "mediatailor"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "PlaybackConfigurationName",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "MaxResults": {
+          "maximum": 100,
+          "minimum": 1,
+          "type": "integer"
+         },
+         "NextToken": {
+          "type": "string"
+         },
+         "ScheduleType": {
+          "enum": [
+           "SINGLE",
+           "RECURRING",
+           "ALL"
+          ],
+          "type": "string"
+         },
+         "StreamId": {
+          "type": "string"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "Items": {
+           "items": {
+            "$ref": "#/components/schemas/PrefetchSchedule"
+           },
+           "type": "array"
+          },
+          "NextToken": {
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListPrefetchSchedules",
+    "tags": [
+     "AWS Elemental MediaTailor"
+    ]
+   }
+  },
+  "/prefetchSchedule/{PlaybackConfigurationName}/{Name}": {
+   "delete": {
+    "operationId": "mediatailorDeletePrefetchSchedule",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "mediatailor"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "Name",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "PlaybackConfigurationName",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeletePrefetchSchedule",
+    "tags": [
+     "AWS Elemental MediaTailor"
+    ]
+   },
+   "get": {
+    "operationId": "mediatailorGetPrefetchSchedule",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "mediatailor"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "Name",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "PlaybackConfigurationName",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "Arn": {
+           "type": "string"
+          },
+          "Consumption": {
+           "$ref": "#/components/schemas/PrefetchConsumption"
+          },
+          "Name": {
+           "type": "string"
+          },
+          "PlaybackConfigurationName": {
+           "type": "string"
+          },
+          "RecurringPrefetchConfiguration": {
+           "$ref": "#/components/schemas/RecurringPrefetchConfiguration"
+          },
+          "Retrieval": {
+           "$ref": "#/components/schemas/PrefetchRetrieval"
+          },
+          "ScheduleType": {
+           "enum": [
+            "SINGLE",
+            "RECURRING"
+           ],
+           "type": "string"
+          },
+          "StreamId": {
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "GetPrefetchSchedule",
+    "tags": [
+     "AWS Elemental MediaTailor"
+    ]
+   },
+   "post": {
+    "operationId": "mediatailorCreatePrefetchSchedule",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "mediatailor"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "Name",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "PlaybackConfigurationName",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "Consumption": {
+          "$ref": "#/components/schemas/PrefetchConsumption"
+         },
+         "RecurringPrefetchConfiguration": {
+          "$ref": "#/components/schemas/RecurringPrefetchConfiguration"
+         },
+         "Retrieval": {
+          "$ref": "#/components/schemas/PrefetchRetrieval"
+         },
+         "ScheduleType": {
+          "enum": [
+           "SINGLE",
+           "RECURRING"
+          ],
+          "type": "string"
+         },
+         "StreamId": {
+          "type": "string"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "Arn": {
+           "type": "string"
+          },
+          "Consumption": {
+           "$ref": "#/components/schemas/PrefetchConsumption"
+          },
+          "Name": {
+           "type": "string"
+          },
+          "PlaybackConfigurationName": {
+           "type": "string"
+          },
+          "RecurringPrefetchConfiguration": {
+           "$ref": "#/components/schemas/RecurringPrefetchConfiguration"
+          },
+          "Retrieval": {
+           "$ref": "#/components/schemas/PrefetchRetrieval"
+          },
+          "ScheduleType": {
+           "enum": [
+            "SINGLE",
+            "RECURRING"
+           ],
+           "type": "string"
+          },
+          "StreamId": {
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreatePrefetchSchedule",
+    "tags": [
+     "AWS Elemental MediaTailor"
+    ]
+   }
+  },
+  "/sourceLocation/{SourceLocationName}": {
+   "delete": {
+    "operationId": "mediatailorDeleteSourceLocation",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "mediatailor"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "SourceLocationName",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteSourceLocation",
+    "tags": [
+     "AWS Elemental MediaTailor"
+    ]
+   },
+   "get": {
+    "operationId": "mediatailorDescribeSourceLocation",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "mediatailor"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "SourceLocationName",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "AccessConfiguration": {
+           "$ref": "#/components/schemas/AccessConfiguration"
+          },
+          "Arn": {
+           "type": "string"
+          },
+          "CreationTime": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "DefaultSegmentDeliveryConfiguration": {
+           "$ref": "#/components/schemas/DefaultSegmentDeliveryConfiguration"
+          },
+          "HttpConfiguration": {
+           "$ref": "#/components/schemas/HttpConfiguration"
+          },
+          "LastModifiedTime": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "SegmentDeliveryConfigurations": {
+           "items": {
+            "$ref": "#/components/schemas/SegmentDeliveryConfiguration"
+           },
+           "type": "array"
+          },
+          "SourceLocationName": {
+           "type": "string"
+          },
+          "tags": {
+           "additionalProperties": {
+            "type": "string"
+           },
+           "type": "object"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DescribeSourceLocation",
+    "tags": [
+     "AWS Elemental MediaTailor"
+    ]
+   },
+   "post": {
+    "operationId": "mediatailorCreateSourceLocation",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "mediatailor"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "SourceLocationName",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "AccessConfiguration": {
+          "$ref": "#/components/schemas/AccessConfiguration"
+         },
+         "DefaultSegmentDeliveryConfiguration": {
+          "$ref": "#/components/schemas/DefaultSegmentDeliveryConfiguration"
+         },
+         "HttpConfiguration": {
+          "$ref": "#/components/schemas/HttpConfiguration"
+         },
+         "SegmentDeliveryConfigurations": {
+          "items": {
+           "$ref": "#/components/schemas/SegmentDeliveryConfiguration"
+          },
+          "type": "array"
+         },
+         "tags": {
+          "additionalProperties": {
+           "type": "string"
+          },
+          "type": "object"
+         }
+        },
+        "required": [
+         "HttpConfiguration"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "AccessConfiguration": {
+           "$ref": "#/components/schemas/AccessConfiguration"
+          },
+          "Arn": {
+           "type": "string"
+          },
+          "CreationTime": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "DefaultSegmentDeliveryConfiguration": {
+           "$ref": "#/components/schemas/DefaultSegmentDeliveryConfiguration"
+          },
+          "HttpConfiguration": {
+           "$ref": "#/components/schemas/HttpConfiguration"
+          },
+          "LastModifiedTime": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "SegmentDeliveryConfigurations": {
+           "items": {
+            "$ref": "#/components/schemas/SegmentDeliveryConfiguration"
+           },
+           "type": "array"
+          },
+          "SourceLocationName": {
+           "type": "string"
+          },
+          "tags": {
+           "additionalProperties": {
+            "type": "string"
+           },
+           "type": "object"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateSourceLocation",
+    "tags": [
+     "AWS Elemental MediaTailor"
+    ]
+   },
+   "put": {
+    "operationId": "mediatailorUpdateSourceLocation",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "mediatailor"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "SourceLocationName",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "AccessConfiguration": {
+          "$ref": "#/components/schemas/AccessConfiguration"
+         },
+         "DefaultSegmentDeliveryConfiguration": {
+          "$ref": "#/components/schemas/DefaultSegmentDeliveryConfiguration"
+         },
+         "HttpConfiguration": {
+          "$ref": "#/components/schemas/HttpConfiguration"
+         },
+         "SegmentDeliveryConfigurations": {
+          "items": {
+           "$ref": "#/components/schemas/SegmentDeliveryConfiguration"
+          },
+          "type": "array"
+         }
+        },
+        "required": [
+         "HttpConfiguration"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "AccessConfiguration": {
+           "$ref": "#/components/schemas/AccessConfiguration"
+          },
+          "Arn": {
+           "type": "string"
+          },
+          "CreationTime": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "DefaultSegmentDeliveryConfiguration": {
+           "$ref": "#/components/schemas/DefaultSegmentDeliveryConfiguration"
+          },
+          "HttpConfiguration": {
+           "$ref": "#/components/schemas/HttpConfiguration"
+          },
+          "LastModifiedTime": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "SegmentDeliveryConfigurations": {
+           "items": {
+            "$ref": "#/components/schemas/SegmentDeliveryConfiguration"
+           },
+           "type": "array"
+          },
+          "SourceLocationName": {
+           "type": "string"
+          },
+          "tags": {
+           "additionalProperties": {
+            "type": "string"
+           },
+           "type": "object"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UpdateSourceLocation",
+    "tags": [
+     "AWS Elemental MediaTailor"
+    ]
+   }
+  },
+  "/sourceLocation/{SourceLocationName}/liveSource/{LiveSourceName}": {
+   "delete": {
+    "operationId": "mediatailorDeleteLiveSource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "mediatailor"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "LiveSourceName",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "SourceLocationName",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteLiveSource",
+    "tags": [
+     "AWS Elemental MediaTailor"
+    ]
+   },
+   "get": {
+    "operationId": "mediatailorDescribeLiveSource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "mediatailor"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "LiveSourceName",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "SourceLocationName",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "Arn": {
+           "type": "string"
+          },
+          "CreationTime": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "HttpPackageConfigurations": {
+           "items": {
+            "$ref": "#/components/schemas/HttpPackageConfiguration"
+           },
+           "type": "array"
+          },
+          "LastModifiedTime": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "LiveSourceName": {
+           "type": "string"
+          },
+          "SourceLocationName": {
+           "type": "string"
+          },
+          "tags": {
+           "additionalProperties": {
+            "type": "string"
+           },
+           "type": "object"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DescribeLiveSource",
+    "tags": [
+     "AWS Elemental MediaTailor"
+    ]
+   },
+   "post": {
+    "operationId": "mediatailorCreateLiveSource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "mediatailor"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "LiveSourceName",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "SourceLocationName",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "HttpPackageConfigurations": {
+          "items": {
+           "$ref": "#/components/schemas/HttpPackageConfiguration"
+          },
+          "type": "array"
+         },
+         "tags": {
+          "additionalProperties": {
+           "type": "string"
+          },
+          "type": "object"
+         }
+        },
+        "required": [
+         "HttpPackageConfigurations"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "Arn": {
+           "type": "string"
+          },
+          "CreationTime": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "HttpPackageConfigurations": {
+           "items": {
+            "$ref": "#/components/schemas/HttpPackageConfiguration"
+           },
+           "type": "array"
+          },
+          "LastModifiedTime": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "LiveSourceName": {
+           "type": "string"
+          },
+          "SourceLocationName": {
+           "type": "string"
+          },
+          "tags": {
+           "additionalProperties": {
+            "type": "string"
+           },
+           "type": "object"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateLiveSource",
+    "tags": [
+     "AWS Elemental MediaTailor"
+    ]
+   },
+   "put": {
+    "operationId": "mediatailorUpdateLiveSource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "mediatailor"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "LiveSourceName",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "SourceLocationName",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "HttpPackageConfigurations": {
+          "items": {
+           "$ref": "#/components/schemas/HttpPackageConfiguration"
+          },
+          "type": "array"
+         }
+        },
+        "required": [
+         "HttpPackageConfigurations"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "Arn": {
+           "type": "string"
+          },
+          "CreationTime": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "HttpPackageConfigurations": {
+           "items": {
+            "$ref": "#/components/schemas/HttpPackageConfiguration"
+           },
+           "type": "array"
+          },
+          "LastModifiedTime": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "LiveSourceName": {
+           "type": "string"
+          },
+          "SourceLocationName": {
+           "type": "string"
+          },
+          "tags": {
+           "additionalProperties": {
+            "type": "string"
+           },
+           "type": "object"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UpdateLiveSource",
+    "tags": [
+     "AWS Elemental MediaTailor"
+    ]
+   }
+  },
+  "/sourceLocation/{SourceLocationName}/liveSources": {
+   "get": {
+    "operationId": "mediatailorListLiveSources",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "mediatailor"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "maxResults",
+      "schema": {
+       "maximum": 100,
+       "minimum": 1,
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "nextToken",
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "SourceLocationName",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "Items": {
+           "items": {
+            "$ref": "#/components/schemas/LiveSource"
+           },
+           "type": "array"
+          },
+          "NextToken": {
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListLiveSources",
+    "tags": [
+     "AWS Elemental MediaTailor"
+    ]
+   }
+  },
+  "/sourceLocation/{SourceLocationName}/vodSource/{VodSourceName}": {
+   "delete": {
+    "operationId": "mediatailorDeleteVodSource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "mediatailor"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "SourceLocationName",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "VodSourceName",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteVodSource",
+    "tags": [
+     "AWS Elemental MediaTailor"
+    ]
+   },
+   "get": {
+    "operationId": "mediatailorDescribeVodSource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "mediatailor"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "SourceLocationName",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "VodSourceName",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "AdBreakOpportunities": {
+           "items": {
+            "$ref": "#/components/schemas/AdBreakOpportunity"
+           },
+           "type": "array"
+          },
+          "Arn": {
+           "type": "string"
+          },
+          "CreationTime": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "HttpPackageConfigurations": {
+           "items": {
+            "$ref": "#/components/schemas/HttpPackageConfiguration"
+           },
+           "type": "array"
+          },
+          "LastModifiedTime": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "SourceLocationName": {
+           "type": "string"
+          },
+          "VodSourceName": {
+           "type": "string"
+          },
+          "tags": {
+           "additionalProperties": {
+            "type": "string"
+           },
+           "type": "object"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DescribeVodSource",
+    "tags": [
+     "AWS Elemental MediaTailor"
+    ]
+   },
+   "post": {
+    "operationId": "mediatailorCreateVodSource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "mediatailor"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "SourceLocationName",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "VodSourceName",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "HttpPackageConfigurations": {
+          "items": {
+           "$ref": "#/components/schemas/HttpPackageConfiguration"
+          },
+          "type": "array"
+         },
+         "tags": {
+          "additionalProperties": {
+           "type": "string"
+          },
+          "type": "object"
+         }
+        },
+        "required": [
+         "HttpPackageConfigurations"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "Arn": {
+           "type": "string"
+          },
+          "CreationTime": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "HttpPackageConfigurations": {
+           "items": {
+            "$ref": "#/components/schemas/HttpPackageConfiguration"
+           },
+           "type": "array"
+          },
+          "LastModifiedTime": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "SourceLocationName": {
+           "type": "string"
+          },
+          "VodSourceName": {
+           "type": "string"
+          },
+          "tags": {
+           "additionalProperties": {
+            "type": "string"
+           },
+           "type": "object"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateVodSource",
+    "tags": [
+     "AWS Elemental MediaTailor"
+    ]
+   },
+   "put": {
+    "operationId": "mediatailorUpdateVodSource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "mediatailor"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "SourceLocationName",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "VodSourceName",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "HttpPackageConfigurations": {
+          "items": {
+           "$ref": "#/components/schemas/HttpPackageConfiguration"
+          },
+          "type": "array"
+         }
+        },
+        "required": [
+         "HttpPackageConfigurations"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "Arn": {
+           "type": "string"
+          },
+          "CreationTime": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "HttpPackageConfigurations": {
+           "items": {
+            "$ref": "#/components/schemas/HttpPackageConfiguration"
+           },
+           "type": "array"
+          },
+          "LastModifiedTime": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "SourceLocationName": {
+           "type": "string"
+          },
+          "VodSourceName": {
+           "type": "string"
+          },
+          "tags": {
+           "additionalProperties": {
+            "type": "string"
+           },
+           "type": "object"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UpdateVodSource",
+    "tags": [
+     "AWS Elemental MediaTailor"
+    ]
+   }
+  },
+  "/sourceLocation/{SourceLocationName}/vodSources": {
+   "get": {
+    "operationId": "mediatailorListVodSources",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "mediatailor"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "maxResults",
+      "schema": {
+       "maximum": 100,
+       "minimum": 1,
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "nextToken",
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "SourceLocationName",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "Items": {
+           "items": {
+            "$ref": "#/components/schemas/VodSource"
+           },
+           "type": "array"
+          },
+          "NextToken": {
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListVodSources",
+    "tags": [
+     "AWS Elemental MediaTailor"
+    ]
+   }
+  },
+  "/sourceLocations": {
+   "get": {
+    "operationId": "mediatailorListSourceLocations",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "mediatailor"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "maxResults",
+      "schema": {
+       "maximum": 100,
+       "minimum": 1,
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "nextToken",
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "Items": {
+           "items": {
+            "$ref": "#/components/schemas/SourceLocation"
+           },
+           "type": "array"
+          },
+          "NextToken": {
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListSourceLocations",
+    "tags": [
+     "AWS Elemental MediaTailor"
+    ]
+   }
+  },
+  "/tags/{ResourceArn}": {
+   "delete": {
+    "operationId": "mediatailorUntagResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "mediatailor"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "ResourceArn",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "tagKeys",
+      "schema": {
+       "items": {
+        "type": "string"
+       },
+       "type": "array"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UntagResource",
+    "tags": [
+     "AWS Elemental MediaTailor"
+    ]
+   },
+   "get": {
+    "operationId": "mediatailorListTagsForResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "mediatailor"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "ResourceArn",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "tags": {
+           "additionalProperties": {
+            "type": "string"
+           },
+           "type": "object"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListTagsForResource",
+    "tags": [
+     "AWS Elemental MediaTailor"
+    ]
+   },
+   "post": {
+    "operationId": "mediatailorTagResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "mediatailor"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "ResourceArn",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "tags": {
+          "additionalProperties": {
+           "type": "string"
+          },
+          "type": "object"
+         }
+        },
+        "required": [
+         "tags"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "TagResource",
+    "tags": [
+     "AWS Elemental MediaTailor"
+    ]
+   }
+  }
+ },
+ "servers": [
+  {
+   "description": "This simulator only",
+   "url": "/"
+  }
+ ],
+ "tags": [
+  {
+   "description": "Bounded simulator subset of the official AWS MediaTailor API (2018-04-23). Every other official operation returns HTTP 501 UnknownOperationException. Playback configurations, prefetch schedules, source locations, VOD and live sources and channels are stored records: no manifest is stitched, no ad decision server, origin or Secrets Manager secret is contacted, no ad is prefetched and no playback or session endpoint is issued, so HlsConfiguration, PlaybackEndpointPrefix, SessionInitializationEndpointPrefix and DashConfiguration ManifestEndpointPrefix are never returned, and output PlaybackUrl is omitted. Channels stay STOPPED and StartChannel and StopChannel return UnknownOperationException with HTTP 501, as do programs (which refer to source locations and sources by name, which the catalog cannot check), the channel policy operations, ConfigureLogsForChannel, ConfigureLogsForPlaybackConfiguration, GetChannelSchedule and ListAlerts. PutPlaybackConfiguration replaces only the members it supplies instead of the whole configuration. A playback configuration with prefetch schedules, and a source location with VOD or live sources, cannot be deleted. Slate and FillerSlate references, TranscodeProfileName, secret ARNs and the VOD source group names are stored without being resolved. LINEAR channels require FillerSlate and LOOP channels refuse it; Tier is returned only when supplied; PlaybackMode and Tier cannot change; Outputs are stored without a PlaybackUrl, and LogConfiguration reports no log types. The official operations model no exceptions, so failures answer with the generic names ValidationException (HTTP 400), ResourceNotFoundException (HTTP 404) and ConflictException (HTTP 409), where AWS answers BadRequestException. The simulator allows 100 of each resource kind per scope, which is not an AWS quota.",
+   "name": "AWS Elemental MediaTailor"
+  }
+ ],
+ "x-simulator-source": {
+  "package": "botocore",
+  "version": "1.41.6",
+  "file": "botocore/data/mediatailor/2018-04-23/service-2.json",
+  "sha256": "0290fff58587753157dfd3b71c8f4b6109199532d24503d5f147775e51a5dcdb",
+  "license": "Apache-2.0"
+ }
+}

@@ -1,0 +1,42 @@
+{
+ "client": "medialive",
+ "steps": [
+  {"op": "create_input_security_group", "args": {"WhitelistRules": [{"Cidr": "10.0.0.0/8"}], "Tags": {"team": "a"}}, "save": {"group": "SecurityGroup.Id", "grouparn": "SecurityGroup.Arn"}, "expect": {"SecurityGroup.State": "IDLE", "SecurityGroup.Tags": {"team": "a"}}},
+  {"op": "describe_input_security_group", "args": {"InputSecurityGroupId": "${group}"}, "expect": {"WhitelistRules[0].Cidr": "10.0.0.0/8"}},
+  {"op": "list_input_security_groups", "args": {}, "expect": {"InputSecurityGroups#count": 1}},
+  {"op": "update_input_security_group", "args": {"InputSecurityGroupId": "${group}", "WhitelistRules": [{"Cidr": "192.0.2.0/24"}]}, "expect": {"SecurityGroup.WhitelistRules[0].Cidr": "192.0.2.0/24"}},
+  {"op": "create_network", "args": {"Name": "fixture-site", "IpPools": [{"Cidr": "10.0.0.0/24"}], "Routes": [{"Cidr": "10.9.0.0/24", "Gateway": "10.0.0.1"}]}, "save": {"network": "Id"}, "expect": {"State": "IDLE", "AssociatedClusterIds#count": 0}},
+  {"op": "describe_network", "args": {"NetworkId": "${network}"}, "expect": {"Name": "fixture-site"}},
+  {"op": "list_networks", "args": {}, "expect": {"Networks#count": 1}},
+  {"op": "update_network", "args": {"NetworkId": "${network}", "Name": "fixture-site-2"}, "expect": {"Name": "fixture-site-2"}},
+  {"op": "create_sdi_source", "args": {"Name": "fixture-card", "Mode": "QUADRANT", "Type": "QUAD"}, "save": {"sdi": "SdiSource.Id"}, "expect": {"SdiSource.State": "IDLE"}},
+  {"op": "describe_sdi_source", "args": {"SdiSourceId": "${sdi}"}, "expect": {"SdiSource.Mode": "QUADRANT"}},
+  {"op": "list_sdi_sources", "args": {}, "expect": {"SdiSources#count": 1}},
+  {"op": "update_sdi_source", "args": {"SdiSourceId": "${sdi}", "Mode": "INTERLEAVE"}, "expect": {"SdiSource.Mode": "INTERLEAVE"}},
+  {"op": "create_channel", "args": {"Name": "fixture-channel", "RoleArn": "arn:aws:iam::000000000000:role/MediaLiveAccessRole", "EncoderSettings": {"AudioDescriptions": [], "OutputGroups": [], "TimecodeConfig": {"Source": "EMBEDDED"}, "VideoDescriptions": []}, "Tags": {"team": "a"}}, "save": {"channel": "Channel.Id", "channelarn": "Channel.Arn"}, "expect": {"Channel.State": "IDLE", "Channel.PipelinesRunningCount": 0}},
+  {"op": "describe_channel", "args": {"ChannelId": "${channel}"}, "expect": {"Name": "fixture-channel", "State": "IDLE"}},
+  {"op": "list_channels", "args": {}, "expect": {"Channels#count": 1}},
+  {"op": "update_channel", "args": {"ChannelId": "${channel}", "LogLevel": "ERROR"}, "expect": {"Channel.LogLevel": "ERROR"}},
+  {"op": "create_tags", "args": {"ResourceArn": "${channelarn}", "Tags": {"env": "dev"}}},
+  {"op": "list_tags_for_resource", "args": {"ResourceArn": "${channelarn}"}, "expect": {"Tags": {"team": "a", "env": "dev"}}},
+  {"op": "delete_tags", "args": {"ResourceArn": "${channelarn}", "TagKeys": ["env"]}},
+  {"op": "list_tags_for_resource", "args": {"ResourceArn": "${channelarn}"}, "expect": {"Tags": {"team": "a"}}},
+  {"op": "create_input_security_group", "args": {"WhitelistRules": [{"Cidr": "anywhere"}]}, "error": "BadRequestException"},
+  {"op": "create_channel", "args": {"Name": "attached", "InputAttachments": [{"InputId": "1234567"}]}, "error": "BadRequestException"},
+  {"op": "describe_channel", "args": {"ChannelId": "0000000"}, "error": "NotFoundException", "status": 404}
+ ],
+ "isolation": [
+  {"op": "list_channels", "args": {}, "expect": {"Channels#count": 0}},
+  {"op": "list_input_security_groups", "args": {}, "expect": {"InputSecurityGroups#count": 0}}
+ ],
+ "after_restart": [
+  {"op": "describe_channel", "args": {"ChannelId": "${channel}"}, "expect": {"LogLevel": "ERROR"}}
+ ],
+ "cleanup": [
+  {"op": "delete_channel", "args": {"ChannelId": "${channel}"}},
+  {"op": "delete_sdi_source", "args": {"SdiSourceId": "${sdi}"}},
+  {"op": "delete_network", "args": {"NetworkId": "${network}"}},
+  {"op": "delete_input_security_group", "args": {"InputSecurityGroupId": "${group}"}},
+  {"op": "list_channels", "args": {}, "expect": {"Channels#count": 0}}
+ ]
+}

@@ -1,0 +1,30 @@
+{
+ "client": "mediapackagev2",
+ "steps": [
+  {"op": "create_channel_group", "args": {"ChannelGroupName": "fixture-group", "Description": "fixture group", "Tags": {"team": "a"}}, "save": {"group_arn": "Arn"}, "expect": {"ChannelGroupName": "fixture-group"}},
+  {"op": "get_channel_group", "args": {"ChannelGroupName": "fixture-group"}, "expect": {"Arn": "${group_arn}", "Description": "fixture group", "Tags": {"team": "a"}}},
+  {"op": "list_channel_groups", "args": {}, "expect": {"Items#count": 1, "Items[0].ChannelGroupName": "fixture-group"}},
+  {"op": "update_channel_group", "args": {"ChannelGroupName": "fixture-group", "Description": "fixture renamed"}, "expect": {"Description": "fixture renamed"}},
+  {"op": "create_channel", "args": {"ChannelGroupName": "fixture-group", "ChannelName": "fixture-channel", "InputType": "CMAF", "Description": "fixture feed"}, "save": {"channel_arn": "Arn"}, "expect": {"ChannelGroupName": "fixture-group", "InputType": "CMAF"}},
+  {"op": "get_channel", "args": {"ChannelGroupName": "fixture-group", "ChannelName": "fixture-channel"}, "expect": {"Arn": "${channel_arn}", "Description": "fixture feed"}},
+  {"op": "list_channels", "args": {"ChannelGroupName": "fixture-group"}, "expect": {"Items#count": 1, "Items[0].ChannelName": "fixture-channel"}},
+  {"op": "update_channel", "args": {"ChannelGroupName": "fixture-group", "ChannelName": "fixture-channel", "Description": "fixture feed two", "InputSwitchConfiguration": {"MQCSInputSwitching": true, "PreferredInput": 2}}, "expect": {"Description": "fixture feed two", "InputSwitchConfiguration.PreferredInput": 2}},
+  {"op": "tag_resource", "args": {"ResourceArn": "${channel_arn}", "Tags": {"k": "v"}}},
+  {"op": "untag_resource", "args": {"ResourceArn": "${channel_arn}", "TagKeys": ["k"]}},
+  {"op": "list_tags_for_resource", "args": {"ResourceArn": "${group_arn}"}, "expect": {"Tags": {"team": "a"}}},
+  {"op": "delete_channel_group", "args": {"ChannelGroupName": "fixture-group"}, "error": "ConflictException", "status": 409},
+  {"op": "create_channel", "args": {"ChannelGroupName": "fixture-group", "ChannelName": "fixture-hls", "InputSwitchConfiguration": {"MQCSInputSwitching": true}}, "error": "ValidationException", "status": 400},
+  {"op": "get_channel", "args": {"ChannelGroupName": "fixture-group", "ChannelName": "fixture-missing"}, "error": "ResourceNotFoundException", "status": 404}
+ ],
+ "isolation": [
+  {"op": "list_channel_groups", "args": {}, "expect": {"Items#count": 0}}
+ ],
+ "after_restart": [
+  {"op": "get_channel", "args": {"ChannelGroupName": "fixture-group", "ChannelName": "fixture-channel"}, "expect": {"Description": "fixture feed two"}}
+ ],
+ "cleanup": [
+  {"op": "delete_channel", "args": {"ChannelGroupName": "fixture-group", "ChannelName": "fixture-channel"}},
+  {"op": "delete_channel_group", "args": {"ChannelGroupName": "fixture-group"}},
+  {"op": "list_channel_groups", "args": {}, "expect": {"Items#count": 0}}
+ ]
+}

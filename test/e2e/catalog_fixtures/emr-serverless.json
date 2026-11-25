@@ -1,0 +1,23 @@
+{
+ "client": "emr-serverless",
+ "steps": [
+  {"op": "create_application", "args": {"name": "fixture-etl", "releaseLabel": "emr-7.5.0", "type": "SPARK", "tags": {"team": "a"}}, "save": {"app": "applicationId", "arn": "arn"}, "expect": {"name": "fixture-etl"}},
+  {"op": "get_application", "args": {"applicationId": "${app}"}, "expect": {"application.state": "CREATED", "application.releaseLabel": "emr-7.5.0", "application.tags": {"team": "a"}}},
+  {"op": "list_applications", "args": {}, "expect": {"applications#count": 1, "applications[0].id": "${app}"}},
+  {"op": "update_application", "args": {"applicationId": "${app}", "architecture": "ARM64"}, "expect": {"application.architecture": "ARM64", "application.name": "fixture-etl"}},
+  {"op": "tag_resource", "args": {"resourceArn": "${arn}", "tags": {"k": "v"}}},
+  {"op": "untag_resource", "args": {"resourceArn": "${arn}", "tagKeys": ["k"]}},
+  {"op": "list_tags_for_resource", "args": {"resourceArn": "${arn}"}, "expect": {"tags": {"team": "a"}}},
+  {"op": "get_application", "args": {"applicationId": "missing"}, "error": "ResourceNotFoundException", "status": 404}
+ ],
+ "isolation": [
+  {"op": "list_applications", "args": {}, "expect": {"applications#count": 0}}
+ ],
+ "after_restart": [
+  {"op": "get_application", "args": {"applicationId": "${app}"}, "expect": {"application.architecture": "ARM64"}}
+ ],
+ "cleanup": [
+  {"op": "delete_application", "args": {"applicationId": "${app}"}},
+  {"op": "list_applications", "args": {}, "expect": {"applications#count": 0}}
+ ]
+}

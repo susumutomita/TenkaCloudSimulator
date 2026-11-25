@@ -1,0 +1,33 @@
+{
+ "client": "ce",
+ "steps": [
+  {"op": "create_cost_category_definition", "args": {"Name": "fixture-teams", "RuleVersion": "CostCategoryExpression.v1", "Rules": [{"Type": "REGULAR", "Value": "a", "Rule": {"Dimensions": {"Key": "LINKED_ACCOUNT", "Values": ["000000000000"]}}}], "DefaultValue": "other", "ResourceTags": [{"Key": "team", "Value": "a"}]}, "save": {"category": "CostCategoryArn"}},
+  {"op": "describe_cost_category_definition", "args": {"CostCategoryArn": "${category}"}, "expect": {"CostCategory.Name": "fixture-teams", "CostCategory.DefaultValue": "other"}},
+  {"op": "list_cost_category_definitions", "args": {}, "expect": {"CostCategoryReferences#count": 1}},
+  {"op": "update_cost_category_definition", "args": {"CostCategoryArn": "${category}", "RuleVersion": "CostCategoryExpression.v1", "Rules": [{"Type": "REGULAR", "Value": "b", "Rule": {"Dimensions": {"Key": "LINKED_ACCOUNT", "Values": ["000000000000"]}}}]}},
+  {"op": "create_anomaly_monitor", "args": {"AnomalyMonitor": {"MonitorName": "fixture-services", "MonitorType": "DIMENSIONAL", "MonitorDimension": "SERVICE"}}, "save": {"monitor": "MonitorArn"}},
+  {"op": "update_anomaly_monitor", "args": {"MonitorArn": "${monitor}", "MonitorName": "fixture-renamed"}},
+  {"op": "get_anomaly_monitors", "args": {"MonitorArnList": ["${monitor}"]}, "expect": {"AnomalyMonitors#count": 1, "AnomalyMonitors[0].MonitorName": "fixture-renamed"}},
+  {"op": "create_anomaly_subscription", "args": {"AnomalySubscription": {"SubscriptionName": "fixture-alerts", "Frequency": "DAILY", "MonitorArnList": ["${monitor}"], "Subscribers": [{"Type": "EMAIL", "Address": "ops@example.invalid"}], "ThresholdExpression": {"Dimensions": {"Key": "ANOMALY_TOTAL_IMPACT_ABSOLUTE", "Values": ["100"]}}}}, "save": {"subscription": "SubscriptionArn"}},
+  {"op": "update_anomaly_subscription", "args": {"SubscriptionArn": "${subscription}", "Frequency": "WEEKLY"}},
+  {"op": "get_anomaly_subscriptions", "args": {"SubscriptionArnList": ["${subscription}"]}, "expect": {"AnomalySubscriptions#count": 1, "AnomalySubscriptions[0].Frequency": "WEEKLY"}},
+  {"op": "tag_resource", "args": {"ResourceArn": "${category}", "ResourceTags": [{"Key": "extra", "Value": "1"}]}},
+  {"op": "list_tags_for_resource", "args": {"ResourceArn": "${category}"}, "expect": {"ResourceTags#count": 2}},
+  {"op": "untag_resource", "args": {"ResourceArn": "${category}", "ResourceTagKeys": ["extra"]}},
+  {"op": "create_cost_category_definition", "args": {"Name": "fixture-empty", "RuleVersion": "CostCategoryExpression.v1", "Rules": [{"Type": "REGULAR"}]}, "error": "ValidationException"},
+  {"op": "create_anomaly_monitor", "args": {"AnomalyMonitor": {"MonitorName": "bad", "MonitorType": "DIMENSIONAL"}}, "error": "ValidationException"},
+  {"op": "describe_cost_category_definition", "args": {"CostCategoryArn": "arn:aws:ce::000000000000:costcategory/00000000-0000-4000-8000-000000000000"}, "error": "ResourceNotFoundException"}
+ ],
+ "isolation": [
+  {"op": "list_cost_category_definitions", "args": {}, "expect": {"CostCategoryReferences#count": 0}}
+ ],
+ "after_restart": [
+  {"op": "get_anomaly_subscriptions", "args": {"SubscriptionArnList": ["${subscription}"]}, "expect": {"AnomalySubscriptions[0].Frequency": "WEEKLY"}}
+ ],
+ "cleanup": [
+  {"op": "delete_anomaly_subscription", "args": {"SubscriptionArn": "${subscription}"}},
+  {"op": "delete_anomaly_monitor", "args": {"MonitorArn": "${monitor}"}},
+  {"op": "delete_cost_category_definition", "args": {"CostCategoryArn": "${category}"}},
+  {"op": "list_cost_category_definitions", "args": {}, "expect": {"CostCategoryReferences#count": 0}}
+ ]
+}

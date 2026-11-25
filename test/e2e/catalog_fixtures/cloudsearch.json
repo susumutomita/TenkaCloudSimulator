@@ -1,0 +1,21 @@
+{
+ "client": "cloudsearch",
+ "denied": "AccessDenied",
+ "steps": [
+  {"op": "create_domain", "args": {"DomainName": "fixture-movies"}, "expect": {"DomainStatus.DomainName": "fixture-movies", "DomainStatus.Created": true, "DomainStatus.Deleted": false}},
+  {"op": "describe_domains", "args": {}, "expect": {"DomainStatusList#count": 1, "DomainStatusList[0].DomainName": "fixture-movies"}},
+  {"op": "describe_domains", "args": {"DomainNames": ["fixture-movies"]}, "expect": {"DomainStatusList#count": 1}},
+  {"op": "create_domain", "args": {"DomainName": "fixture-movies"}, "error": "ResourceAlreadyExists", "status": 409},
+  {"op": "describe_domains", "args": {"DomainNames": ["fixture-missing"]}, "error": "InvalidParameterValue", "status": 400}
+ ],
+ "isolation": [
+  {"op": "describe_domains", "args": {}, "expect": {"DomainStatusList#count": 0}}
+ ],
+ "after_restart": [
+  {"op": "describe_domains", "args": {}, "expect": {"DomainStatusList#count": 1}}
+ ],
+ "cleanup": [
+  {"op": "delete_domain", "args": {"DomainName": "fixture-movies"}, "expect": {"DomainStatus.Deleted": true}},
+  {"op": "describe_domains", "args": {}, "expect": {"DomainStatusList#count": 0}}
+ ]
+}

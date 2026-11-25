@@ -1,0 +1,683 @@
+{
+ "components": {
+  "schemas": {
+   "Channel": {
+    "additionalProperties": false,
+    "properties": {
+     "arn": {
+      "type": "string"
+     },
+     "createdAt": {
+      "type": "string"
+     },
+     "description": {
+      "type": "string"
+     },
+     "egressAccessLogs": {
+      "$ref": "#/components/schemas/EgressAccessLogs"
+     },
+     "hlsIngest": {
+      "$ref": "#/components/schemas/HlsIngest"
+     },
+     "id": {
+      "type": "string"
+     },
+     "ingressAccessLogs": {
+      "$ref": "#/components/schemas/IngressAccessLogs"
+     },
+     "tags": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     }
+    },
+    "type": "object"
+   },
+   "EgressAccessLogs": {
+    "additionalProperties": false,
+    "properties": {
+     "logGroupName": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "HlsIngest": {
+    "additionalProperties": false,
+    "properties": {
+     "ingestEndpoints": {
+      "items": {
+       "$ref": "#/components/schemas/IngestEndpoint"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "IngestEndpoint": {
+    "additionalProperties": false,
+    "properties": {
+     "id": {
+      "type": "string"
+     },
+     "password": {
+      "type": "string"
+     },
+     "url": {
+      "type": "string"
+     },
+     "username": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "IngressAccessLogs": {
+    "additionalProperties": false,
+    "properties": {
+     "logGroupName": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "Bounded simulator subset of the official AWS Elemental MediaPackage API (2017-10-12). Every other official operation returns HTTP 501 UnknownOperationException. Channels are stored records: nothing is ingested, packaged or delivered, no HLS ingest endpoint, ingest URL, username or password is issued, so HlsIngest is never returned, and no access log is written. Origin endpoints are not served because DescribeOriginEndpoint, UpdateOriginEndpoint and DeleteOriginEndpoint identify an endpoint without naming its channel, which the catalog cannot check against a live channel; CreateOriginEndpoint, DescribeOriginEndpoint, ListOriginEndpoints, UpdateOriginEndpoint and DeleteOriginEndpoint return UnknownOperationException with HTTP 501, as do ConfigureLogs, RotateChannelCredentials, RotateIngestEndpointCredentials and the harvest job operations (which would copy content to Amazon S3). Channel IDs are unique per Region and cannot change; Description is the only editable member. The official model gives no ID pattern, so none is enforced. A duplicate ID answers ConflictException (HTTP 409) and invalid input answers ValidationException (HTTP 400), neither of which the official operations model; AWS answers UnprocessableEntityException (HTTP 422). CreatedAt is an RFC 3339 time. The simulator allows 100 channels per Region, which is not an AWS quota.",
+  "title": "AWS Elemental MediaPackage (simulator catalog)",
+  "version": "2017-10-12"
+ },
+ "openapi": "3.1.0",
+ "paths": {
+  "/channels": {
+   "get": {
+    "operationId": "mediapackageListChannels",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "mediapackage"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "maxResults",
+      "schema": {
+       "maximum": 1000,
+       "minimum": 1,
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "nextToken",
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "channels": {
+           "items": {
+            "$ref": "#/components/schemas/Channel"
+           },
+           "type": "array"
+          },
+          "nextToken": {
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListChannels",
+    "tags": [
+     "AWS Elemental MediaPackage"
+    ]
+   },
+   "post": {
+    "operationId": "mediapackageCreateChannel",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "mediapackage"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "description": {
+          "type": "string"
+         },
+         "id": {
+          "type": "string"
+         },
+         "tags": {
+          "additionalProperties": {
+           "type": "string"
+          },
+          "type": "object"
+         }
+        },
+        "required": [
+         "id"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "arn": {
+           "type": "string"
+          },
+          "createdAt": {
+           "type": "string"
+          },
+          "description": {
+           "type": "string"
+          },
+          "egressAccessLogs": {
+           "$ref": "#/components/schemas/EgressAccessLogs"
+          },
+          "hlsIngest": {
+           "$ref": "#/components/schemas/HlsIngest"
+          },
+          "id": {
+           "type": "string"
+          },
+          "ingressAccessLogs": {
+           "$ref": "#/components/schemas/IngressAccessLogs"
+          },
+          "tags": {
+           "additionalProperties": {
+            "type": "string"
+           },
+           "type": "object"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateChannel",
+    "tags": [
+     "AWS Elemental MediaPackage"
+    ]
+   }
+  },
+  "/channels/{id}": {
+   "delete": {
+    "operationId": "mediapackageDeleteChannel",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "mediapackage"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "id",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteChannel",
+    "tags": [
+     "AWS Elemental MediaPackage"
+    ]
+   },
+   "get": {
+    "operationId": "mediapackageDescribeChannel",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "mediapackage"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "id",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "arn": {
+           "type": "string"
+          },
+          "createdAt": {
+           "type": "string"
+          },
+          "description": {
+           "type": "string"
+          },
+          "egressAccessLogs": {
+           "$ref": "#/components/schemas/EgressAccessLogs"
+          },
+          "hlsIngest": {
+           "$ref": "#/components/schemas/HlsIngest"
+          },
+          "id": {
+           "type": "string"
+          },
+          "ingressAccessLogs": {
+           "$ref": "#/components/schemas/IngressAccessLogs"
+          },
+          "tags": {
+           "additionalProperties": {
+            "type": "string"
+           },
+           "type": "object"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DescribeChannel",
+    "tags": [
+     "AWS Elemental MediaPackage"
+    ]
+   },
+   "put": {
+    "operationId": "mediapackageUpdateChannel",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "mediapackage"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "id",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "description": {
+          "type": "string"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "arn": {
+           "type": "string"
+          },
+          "createdAt": {
+           "type": "string"
+          },
+          "description": {
+           "type": "string"
+          },
+          "egressAccessLogs": {
+           "$ref": "#/components/schemas/EgressAccessLogs"
+          },
+          "hlsIngest": {
+           "$ref": "#/components/schemas/HlsIngest"
+          },
+          "id": {
+           "type": "string"
+          },
+          "ingressAccessLogs": {
+           "$ref": "#/components/schemas/IngressAccessLogs"
+          },
+          "tags": {
+           "additionalProperties": {
+            "type": "string"
+           },
+           "type": "object"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UpdateChannel",
+    "tags": [
+     "AWS Elemental MediaPackage"
+    ]
+   }
+  },
+  "/tags/{resource-arn}": {
+   "delete": {
+    "operationId": "mediapackageUntagResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "mediapackage"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resource-arn",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "tagKeys",
+      "schema": {
+       "items": {
+        "type": "string"
+       },
+       "type": "array"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UntagResource",
+    "tags": [
+     "AWS Elemental MediaPackage"
+    ]
+   },
+   "get": {
+    "operationId": "mediapackageListTagsForResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "mediapackage"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resource-arn",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "tags": {
+           "additionalProperties": {
+            "type": "string"
+           },
+           "type": "object"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListTagsForResource",
+    "tags": [
+     "AWS Elemental MediaPackage"
+    ]
+   },
+   "post": {
+    "operationId": "mediapackageTagResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "mediapackage"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resource-arn",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "tags": {
+          "additionalProperties": {
+           "type": "string"
+          },
+          "type": "object"
+         }
+        },
+        "required": [
+         "tags"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "TagResource",
+    "tags": [
+     "AWS Elemental MediaPackage"
+    ]
+   }
+  }
+ },
+ "servers": [
+  {
+   "description": "This simulator only",
+   "url": "/"
+  }
+ ],
+ "tags": [
+  {
+   "description": "Bounded simulator subset of the official AWS Elemental MediaPackage API (2017-10-12). Every other official operation returns HTTP 501 UnknownOperationException. Channels are stored records: nothing is ingested, packaged or delivered, no HLS ingest endpoint, ingest URL, username or password is issued, so HlsIngest is never returned, and no access log is written. Origin endpoints are not served because DescribeOriginEndpoint, UpdateOriginEndpoint and DeleteOriginEndpoint identify an endpoint without naming its channel, which the catalog cannot check against a live channel; CreateOriginEndpoint, DescribeOriginEndpoint, ListOriginEndpoints, UpdateOriginEndpoint and DeleteOriginEndpoint return UnknownOperationException with HTTP 501, as do ConfigureLogs, RotateChannelCredentials, RotateIngestEndpointCredentials and the harvest job operations (which would copy content to Amazon S3). Channel IDs are unique per Region and cannot change; Description is the only editable member. The official model gives no ID pattern, so none is enforced. A duplicate ID answers ConflictException (HTTP 409) and invalid input answers ValidationException (HTTP 400), neither of which the official operations model; AWS answers UnprocessableEntityException (HTTP 422). CreatedAt is an RFC 3339 time. The simulator allows 100 channels per Region, which is not an AWS quota.",
+   "name": "AWS Elemental MediaPackage"
+  }
+ ],
+ "x-simulator-source": {
+  "package": "botocore",
+  "version": "1.41.6",
+  "file": "botocore/data/mediapackage/2017-10-12/service-2.json",
+  "sha256": "cd653e9492a78d6a840b132bbad500f7ca614b78398ebc33925956b5e4e31e06",
+  "license": "Apache-2.0"
+ }
+}

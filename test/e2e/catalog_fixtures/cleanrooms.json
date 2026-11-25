@@ -1,0 +1,32 @@
+{
+ "client": "cleanrooms",
+ "steps": [
+  {"op": "create_configured_table", "args": {"name": "fixture-orders", "description": "fixture orders", "analysisMethod": "DIRECT_QUERY", "tableReference": {"glue": {"databaseName": "sales", "tableName": "orders"}}, "allowedColumns": ["order_id", "region"], "tags": {"team": "a"}}, "save": {"table": "configuredTable.id", "tableArn": "configuredTable.arn"}, "expect": {"configuredTable.analysisRuleTypes#count": 0}},
+  {"op": "get_configured_table", "args": {"configuredTableIdentifier": "${table}"}, "expect": {"configuredTable.name": "fixture-orders", "configuredTable.tableReference.glue.tableName": "orders"}},
+  {"op": "list_configured_tables", "args": {}, "expect": {"configuredTableSummaries#count": 1, "configuredTableSummaries[0].id": "${table}"}},
+  {"op": "update_configured_table", "args": {"configuredTableIdentifier": "${table}", "description": "fixture changed", "allowedColumns": ["order_id"]}, "expect": {"configuredTable.description": "fixture changed", "configuredTable.allowedColumns#count": 1}},
+  {"op": "create_collaboration", "args": {"name": "fixture-study", "description": "fixture joint analysis", "members": [], "creatorMemberAbilities": ["CAN_QUERY"], "creatorDisplayName": "Creator", "queryLogStatus": "DISABLED", "tags": {"team": "a"}}, "save": {"collaboration": "collaboration.id", "collaborationArn": "collaboration.arn"}, "expect": {"collaboration.memberStatus": "ACTIVE"}},
+  {"op": "get_collaboration", "args": {"collaborationIdentifier": "${collaboration}"}, "expect": {"collaboration.name": "fixture-study", "collaboration.creatorDisplayName": "Creator"}},
+  {"op": "list_collaborations", "args": {"memberStatus": "ACTIVE"}, "expect": {"collaborationList#count": 1}},
+  {"op": "update_collaboration", "args": {"collaborationIdentifier": "${collaboration}", "name": "fixture-renamed", "analyticsEngine": "SPARK"}, "expect": {"collaboration.name": "fixture-renamed", "collaboration.analyticsEngine": "SPARK"}},
+  {"op": "tag_resource", "args": {"resourceArn": "${tableArn}", "tags": {"k": "v"}}},
+  {"op": "untag_resource", "args": {"resourceArn": "${tableArn}", "tagKeys": ["k"]}},
+  {"op": "list_tags_for_resource", "args": {"resourceArn": "${tableArn}"}, "expect": {"tags": {"team": "a"}}},
+  {"op": "create_collaboration", "args": {"name": "fixture-invite", "description": "fixture invite", "members": [{"accountId": "111122223333", "memberAbilities": ["CAN_QUERY"], "displayName": "Partner"}], "creatorMemberAbilities": ["CAN_QUERY"], "creatorDisplayName": "Creator", "queryLogStatus": "DISABLED"}, "error": "ValidationException"},
+  {"op": "update_configured_table", "args": {"configuredTableIdentifier": "${table}", "selectedAnalysisMethods": ["DIRECT_JOB"]}, "error": "ValidationException"},
+  {"op": "get_configured_table", "args": {"configuredTableIdentifier": "00000000-0000-4000-8000-000000000000"}, "error": "ResourceNotFoundException", "status": 404}
+ ],
+ "isolation": [
+  {"op": "list_configured_tables", "args": {}, "expect": {"configuredTableSummaries#count": 0}},
+  {"op": "list_collaborations", "args": {}, "expect": {"collaborationList#count": 0}}
+ ],
+ "after_restart": [
+  {"op": "get_configured_table", "args": {"configuredTableIdentifier": "${table}"}, "expect": {"configuredTable.description": "fixture changed"}},
+  {"op": "get_collaboration", "args": {"collaborationIdentifier": "${collaboration}"}, "expect": {"collaboration.name": "fixture-renamed"}}
+ ],
+ "cleanup": [
+  {"op": "delete_configured_table", "args": {"configuredTableIdentifier": "${table}"}},
+  {"op": "delete_collaboration", "args": {"collaborationIdentifier": "${collaboration}"}},
+  {"op": "list_configured_tables", "args": {}, "expect": {"configuredTableSummaries#count": 0}}
+ ]
+}

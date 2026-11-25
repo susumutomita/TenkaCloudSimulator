@@ -1,0 +1,1832 @@
+{
+ "components": {
+  "schemas": {
+   "AccessControlRule": {
+    "additionalProperties": false,
+    "properties": {
+     "Actions": {
+      "items": {
+       "maxLength": 64,
+       "minLength": 1,
+       "type": "string"
+      },
+      "maxItems": 10,
+      "minItems": 0,
+      "type": "array"
+     },
+     "DateCreated": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "DateModified": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "Description": {
+      "maxLength": 255,
+      "minLength": 0,
+      "type": "string"
+     },
+     "Effect": {
+      "enum": [
+       "ALLOW",
+       "DENY"
+      ],
+      "type": "string"
+     },
+     "ImpersonationRoleIds": {
+      "items": {
+       "maxLength": 64,
+       "minLength": 1,
+       "type": "string"
+      },
+      "maxItems": 10,
+      "minItems": 0,
+      "type": "array"
+     },
+     "IpRanges": {
+      "items": {
+       "maxLength": 18,
+       "minLength": 1,
+       "type": "string"
+      },
+      "maxItems": 1024,
+      "minItems": 0,
+      "type": "array"
+     },
+     "Name": {
+      "maxLength": 64,
+      "minLength": 1,
+      "type": "string"
+     },
+     "NotActions": {
+      "items": {
+       "maxLength": 64,
+       "minLength": 1,
+       "type": "string"
+      },
+      "maxItems": 10,
+      "minItems": 0,
+      "type": "array"
+     },
+     "NotImpersonationRoleIds": {
+      "items": {
+       "maxLength": 64,
+       "minLength": 1,
+       "type": "string"
+      },
+      "maxItems": 10,
+      "minItems": 0,
+      "type": "array"
+     },
+     "NotIpRanges": {
+      "items": {
+       "maxLength": 18,
+       "minLength": 1,
+       "type": "string"
+      },
+      "maxItems": 1024,
+      "minItems": 0,
+      "type": "array"
+     },
+     "NotUserIds": {
+      "items": {
+       "maxLength": 256,
+       "minLength": 12,
+       "type": "string"
+      },
+      "maxItems": 10,
+      "minItems": 0,
+      "type": "array"
+     },
+     "UserIds": {
+      "items": {
+       "maxLength": 256,
+       "minLength": 12,
+       "type": "string"
+      },
+      "maxItems": 10,
+      "minItems": 0,
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "AvailabilityConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "DateCreated": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "DateModified": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "DomainName": {
+      "maxLength": 255,
+      "minLength": 3,
+      "type": "string"
+     },
+     "EwsProvider": {
+      "$ref": "#/components/schemas/RedactedEwsAvailabilityProvider"
+     },
+     "LambdaProvider": {
+      "$ref": "#/components/schemas/LambdaAvailabilityProvider"
+     },
+     "ProviderType": {
+      "enum": [
+       "EWS",
+       "LAMBDA"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "CreateAvailabilityConfigurationRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "ClientToken": {
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string"
+     },
+     "DomainName": {
+      "maxLength": 255,
+      "minLength": 3,
+      "type": "string"
+     },
+     "EwsProvider": {
+      "$ref": "#/components/schemas/EwsAvailabilityProvider"
+     },
+     "LambdaProvider": {
+      "$ref": "#/components/schemas/LambdaAvailabilityProvider"
+     },
+     "OrganizationId": {
+      "maxLength": 34,
+      "minLength": 34,
+      "type": "string"
+     }
+    },
+    "required": [
+     "OrganizationId",
+     "DomainName"
+    ],
+    "type": "object"
+   },
+   "CreateAvailabilityConfigurationResponse": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "CreateImpersonationRoleRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "ClientToken": {
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string"
+     },
+     "Description": {
+      "maxLength": 256,
+      "minLength": 1,
+      "type": "string"
+     },
+     "Name": {
+      "maxLength": 64,
+      "minLength": 1,
+      "type": "string"
+     },
+     "OrganizationId": {
+      "maxLength": 34,
+      "minLength": 34,
+      "type": "string"
+     },
+     "Rules": {
+      "items": {
+       "$ref": "#/components/schemas/ImpersonationRule"
+      },
+      "maxItems": 10,
+      "minItems": 0,
+      "type": "array"
+     },
+     "Type": {
+      "enum": [
+       "FULL_ACCESS",
+       "READ_ONLY"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "OrganizationId",
+     "Name",
+     "Type",
+     "Rules"
+    ],
+    "type": "object"
+   },
+   "CreateImpersonationRoleResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "ImpersonationRoleId": {
+      "maxLength": 64,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "CreateMobileDeviceAccessRuleRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "ClientToken": {
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string"
+     },
+     "Description": {
+      "maxLength": 256,
+      "minLength": 1,
+      "type": "string"
+     },
+     "DeviceModels": {
+      "items": {
+       "maxLength": 256,
+       "minLength": 1,
+       "type": "string"
+      },
+      "maxItems": 10,
+      "minItems": 1,
+      "type": "array"
+     },
+     "DeviceOperatingSystems": {
+      "items": {
+       "maxLength": 256,
+       "minLength": 1,
+       "type": "string"
+      },
+      "maxItems": 10,
+      "minItems": 1,
+      "type": "array"
+     },
+     "DeviceTypes": {
+      "items": {
+       "maxLength": 256,
+       "minLength": 1,
+       "type": "string"
+      },
+      "maxItems": 10,
+      "minItems": 1,
+      "type": "array"
+     },
+     "DeviceUserAgents": {
+      "items": {
+       "maxLength": 256,
+       "minLength": 1,
+       "type": "string"
+      },
+      "maxItems": 10,
+      "minItems": 1,
+      "type": "array"
+     },
+     "Effect": {
+      "enum": [
+       "ALLOW",
+       "DENY"
+      ],
+      "type": "string"
+     },
+     "Name": {
+      "maxLength": 64,
+      "minLength": 1,
+      "type": "string"
+     },
+     "NotDeviceModels": {
+      "items": {
+       "maxLength": 256,
+       "minLength": 1,
+       "type": "string"
+      },
+      "maxItems": 10,
+      "minItems": 1,
+      "type": "array"
+     },
+     "NotDeviceOperatingSystems": {
+      "items": {
+       "maxLength": 256,
+       "minLength": 1,
+       "type": "string"
+      },
+      "maxItems": 10,
+      "minItems": 1,
+      "type": "array"
+     },
+     "NotDeviceTypes": {
+      "items": {
+       "maxLength": 256,
+       "minLength": 1,
+       "type": "string"
+      },
+      "maxItems": 10,
+      "minItems": 1,
+      "type": "array"
+     },
+     "NotDeviceUserAgents": {
+      "items": {
+       "maxLength": 256,
+       "minLength": 1,
+       "type": "string"
+      },
+      "maxItems": 10,
+      "minItems": 1,
+      "type": "array"
+     },
+     "OrganizationId": {
+      "maxLength": 34,
+      "minLength": 34,
+      "type": "string"
+     }
+    },
+    "required": [
+     "OrganizationId",
+     "Name",
+     "Effect"
+    ],
+    "type": "object"
+   },
+   "CreateMobileDeviceAccessRuleResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "MobileDeviceAccessRuleId": {
+      "maxLength": 64,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "CreateOrganizationRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "Alias": {
+      "maxLength": 62,
+      "minLength": 1,
+      "type": "string"
+     },
+     "ClientToken": {
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string"
+     },
+     "DirectoryId": {
+      "maxLength": 12,
+      "minLength": 12,
+      "type": "string"
+     },
+     "Domains": {
+      "items": {
+       "$ref": "#/components/schemas/Domain"
+      },
+      "maxItems": 5,
+      "minItems": 0,
+      "type": "array"
+     },
+     "EnableInteroperability": {
+      "type": "boolean"
+     },
+     "KmsKeyArn": {
+      "maxLength": 2048,
+      "minLength": 20,
+      "type": "string"
+     }
+    },
+    "required": [
+     "Alias"
+    ],
+    "type": "object"
+   },
+   "CreateOrganizationResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "OrganizationId": {
+      "maxLength": 34,
+      "minLength": 34,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "DeleteAccessControlRuleRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "Name": {
+      "maxLength": 64,
+      "minLength": 1,
+      "type": "string"
+     },
+     "OrganizationId": {
+      "maxLength": 34,
+      "minLength": 34,
+      "type": "string"
+     }
+    },
+    "required": [
+     "OrganizationId",
+     "Name"
+    ],
+    "type": "object"
+   },
+   "DeleteAccessControlRuleResponse": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "DeleteAvailabilityConfigurationRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "DomainName": {
+      "maxLength": 255,
+      "minLength": 3,
+      "type": "string"
+     },
+     "OrganizationId": {
+      "maxLength": 34,
+      "minLength": 34,
+      "type": "string"
+     }
+    },
+    "required": [
+     "OrganizationId",
+     "DomainName"
+    ],
+    "type": "object"
+   },
+   "DeleteAvailabilityConfigurationResponse": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "DeleteImpersonationRoleRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "ImpersonationRoleId": {
+      "maxLength": 64,
+      "minLength": 1,
+      "type": "string"
+     },
+     "OrganizationId": {
+      "maxLength": 34,
+      "minLength": 34,
+      "type": "string"
+     }
+    },
+    "required": [
+     "OrganizationId",
+     "ImpersonationRoleId"
+    ],
+    "type": "object"
+   },
+   "DeleteImpersonationRoleResponse": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "DeleteMobileDeviceAccessRuleRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "MobileDeviceAccessRuleId": {
+      "maxLength": 64,
+      "minLength": 1,
+      "type": "string"
+     },
+     "OrganizationId": {
+      "maxLength": 34,
+      "minLength": 34,
+      "type": "string"
+     }
+    },
+    "required": [
+     "OrganizationId",
+     "MobileDeviceAccessRuleId"
+    ],
+    "type": "object"
+   },
+   "DeleteMobileDeviceAccessRuleResponse": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "DeleteOrganizationRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "ClientToken": {
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string"
+     },
+     "DeleteDirectory": {
+      "type": "boolean"
+     },
+     "DeleteIdentityCenterApplication": {
+      "type": "boolean"
+     },
+     "ForceDelete": {
+      "type": "boolean"
+     },
+     "OrganizationId": {
+      "maxLength": 34,
+      "minLength": 34,
+      "type": "string"
+     }
+    },
+    "required": [
+     "OrganizationId",
+     "DeleteDirectory"
+    ],
+    "type": "object"
+   },
+   "DeleteOrganizationResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "OrganizationId": {
+      "maxLength": 34,
+      "minLength": 34,
+      "type": "string"
+     },
+     "State": {
+      "maxLength": 256,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "DescribeOrganizationRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "OrganizationId": {
+      "maxLength": 34,
+      "minLength": 34,
+      "type": "string"
+     }
+    },
+    "required": [
+     "OrganizationId"
+    ],
+    "type": "object"
+   },
+   "DescribeOrganizationResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "ARN": {
+      "maxLength": 1011,
+      "minLength": 1,
+      "type": "string"
+     },
+     "Alias": {
+      "maxLength": 62,
+      "minLength": 1,
+      "type": "string"
+     },
+     "CompletedDate": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "DefaultMailDomain": {
+      "maxLength": 256,
+      "type": "string"
+     },
+     "DirectoryId": {
+      "maxLength": 256,
+      "type": "string"
+     },
+     "DirectoryType": {
+      "maxLength": 256,
+      "type": "string"
+     },
+     "ErrorMessage": {
+      "maxLength": 256,
+      "type": "string"
+     },
+     "InteroperabilityEnabled": {
+      "type": "boolean"
+     },
+     "MigrationAdmin": {
+      "maxLength": 256,
+      "minLength": 12,
+      "type": "string"
+     },
+     "OrganizationId": {
+      "maxLength": 34,
+      "minLength": 34,
+      "type": "string"
+     },
+     "State": {
+      "maxLength": 256,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "Domain": {
+    "additionalProperties": false,
+    "properties": {
+     "DomainName": {
+      "maxLength": 255,
+      "minLength": 3,
+      "type": "string"
+     },
+     "HostedZoneId": {
+      "maxLength": 32,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "DomainName"
+    ],
+    "type": "object"
+   },
+   "EwsAvailabilityProvider": {
+    "additionalProperties": false,
+    "properties": {
+     "EwsEndpoint": {
+      "maxLength": 256,
+      "type": "string"
+     },
+     "EwsPassword": {
+      "maxLength": 256,
+      "type": "string"
+     },
+     "EwsUsername": {
+      "maxLength": 256,
+      "type": "string"
+     }
+    },
+    "required": [
+     "EwsEndpoint",
+     "EwsUsername",
+     "EwsPassword"
+    ],
+    "type": "object"
+   },
+   "GetImpersonationRoleRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "ImpersonationRoleId": {
+      "maxLength": 64,
+      "minLength": 1,
+      "type": "string"
+     },
+     "OrganizationId": {
+      "maxLength": 34,
+      "minLength": 34,
+      "type": "string"
+     }
+    },
+    "required": [
+     "OrganizationId",
+     "ImpersonationRoleId"
+    ],
+    "type": "object"
+   },
+   "GetImpersonationRoleResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "DateCreated": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "DateModified": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "Description": {
+      "maxLength": 256,
+      "minLength": 1,
+      "type": "string"
+     },
+     "ImpersonationRoleId": {
+      "maxLength": 64,
+      "minLength": 1,
+      "type": "string"
+     },
+     "Name": {
+      "maxLength": 64,
+      "minLength": 1,
+      "type": "string"
+     },
+     "Rules": {
+      "items": {
+       "$ref": "#/components/schemas/ImpersonationRule"
+      },
+      "maxItems": 10,
+      "minItems": 0,
+      "type": "array"
+     },
+     "Type": {
+      "enum": [
+       "FULL_ACCESS",
+       "READ_ONLY"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ImpersonationRole": {
+    "additionalProperties": false,
+    "properties": {
+     "DateCreated": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "DateModified": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "ImpersonationRoleId": {
+      "maxLength": 64,
+      "minLength": 1,
+      "type": "string"
+     },
+     "Name": {
+      "maxLength": 64,
+      "minLength": 1,
+      "type": "string"
+     },
+     "Type": {
+      "enum": [
+       "FULL_ACCESS",
+       "READ_ONLY"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ImpersonationRule": {
+    "additionalProperties": false,
+    "properties": {
+     "Description": {
+      "maxLength": 256,
+      "minLength": 1,
+      "type": "string"
+     },
+     "Effect": {
+      "enum": [
+       "ALLOW",
+       "DENY"
+      ],
+      "type": "string"
+     },
+     "ImpersonationRuleId": {
+      "maxLength": 64,
+      "minLength": 1,
+      "type": "string"
+     },
+     "Name": {
+      "maxLength": 64,
+      "minLength": 1,
+      "type": "string"
+     },
+     "NotTargetUsers": {
+      "items": {
+       "maxLength": 256,
+       "minLength": 1,
+       "type": "string"
+      },
+      "maxItems": 10,
+      "minItems": 1,
+      "type": "array"
+     },
+     "TargetUsers": {
+      "items": {
+       "maxLength": 256,
+       "minLength": 1,
+       "type": "string"
+      },
+      "maxItems": 10,
+      "minItems": 1,
+      "type": "array"
+     }
+    },
+    "required": [
+     "ImpersonationRuleId",
+     "Effect"
+    ],
+    "type": "object"
+   },
+   "LambdaAvailabilityProvider": {
+    "additionalProperties": false,
+    "properties": {
+     "LambdaArn": {
+      "maxLength": 256,
+      "minLength": 49,
+      "type": "string"
+     }
+    },
+    "required": [
+     "LambdaArn"
+    ],
+    "type": "object"
+   },
+   "ListAccessControlRulesRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "OrganizationId": {
+      "maxLength": 34,
+      "minLength": 34,
+      "type": "string"
+     }
+    },
+    "required": [
+     "OrganizationId"
+    ],
+    "type": "object"
+   },
+   "ListAccessControlRulesResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "Rules": {
+      "items": {
+       "$ref": "#/components/schemas/AccessControlRule"
+      },
+      "maxItems": 10,
+      "minItems": 0,
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "ListAvailabilityConfigurationsRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "MaxResults": {
+      "maximum": 100,
+      "minimum": 1,
+      "type": "integer"
+     },
+     "NextToken": {
+      "maxLength": 1024,
+      "minLength": 1,
+      "type": "string"
+     },
+     "OrganizationId": {
+      "maxLength": 34,
+      "minLength": 34,
+      "type": "string"
+     }
+    },
+    "required": [
+     "OrganizationId"
+    ],
+    "type": "object"
+   },
+   "ListAvailabilityConfigurationsResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "AvailabilityConfigurations": {
+      "items": {
+       "$ref": "#/components/schemas/AvailabilityConfiguration"
+      },
+      "type": "array"
+     },
+     "NextToken": {
+      "maxLength": 1024,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ListImpersonationRolesRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "MaxResults": {
+      "maximum": 100,
+      "minimum": 1,
+      "type": "integer"
+     },
+     "NextToken": {
+      "maxLength": 1024,
+      "minLength": 1,
+      "type": "string"
+     },
+     "OrganizationId": {
+      "maxLength": 34,
+      "minLength": 34,
+      "type": "string"
+     }
+    },
+    "required": [
+     "OrganizationId"
+    ],
+    "type": "object"
+   },
+   "ListImpersonationRolesResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "NextToken": {
+      "maxLength": 1024,
+      "minLength": 1,
+      "type": "string"
+     },
+     "Roles": {
+      "items": {
+       "$ref": "#/components/schemas/ImpersonationRole"
+      },
+      "maxItems": 20,
+      "minItems": 0,
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "ListMobileDeviceAccessRulesRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "OrganizationId": {
+      "maxLength": 34,
+      "minLength": 34,
+      "type": "string"
+     }
+    },
+    "required": [
+     "OrganizationId"
+    ],
+    "type": "object"
+   },
+   "ListMobileDeviceAccessRulesResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "Rules": {
+      "items": {
+       "$ref": "#/components/schemas/MobileDeviceAccessRule"
+      },
+      "maxItems": 10,
+      "minItems": 0,
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "ListOrganizationsRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "MaxResults": {
+      "maximum": 100,
+      "minimum": 1,
+      "type": "integer"
+     },
+     "NextToken": {
+      "maxLength": 1024,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ListOrganizationsResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "NextToken": {
+      "maxLength": 1024,
+      "minLength": 1,
+      "type": "string"
+     },
+     "OrganizationSummaries": {
+      "items": {
+       "$ref": "#/components/schemas/OrganizationSummary"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "ListTagsForResourceRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "ResourceARN": {
+      "maxLength": 1011,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "ResourceARN"
+    ],
+    "type": "object"
+   },
+   "ListTagsForResourceResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "Tags": {
+      "items": {
+       "$ref": "#/components/schemas/Tag"
+      },
+      "maxItems": 50,
+      "minItems": 0,
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "MobileDeviceAccessRule": {
+    "additionalProperties": false,
+    "properties": {
+     "DateCreated": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "DateModified": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "Description": {
+      "maxLength": 256,
+      "minLength": 1,
+      "type": "string"
+     },
+     "DeviceModels": {
+      "items": {
+       "maxLength": 256,
+       "minLength": 1,
+       "type": "string"
+      },
+      "maxItems": 10,
+      "minItems": 1,
+      "type": "array"
+     },
+     "DeviceOperatingSystems": {
+      "items": {
+       "maxLength": 256,
+       "minLength": 1,
+       "type": "string"
+      },
+      "maxItems": 10,
+      "minItems": 1,
+      "type": "array"
+     },
+     "DeviceTypes": {
+      "items": {
+       "maxLength": 256,
+       "minLength": 1,
+       "type": "string"
+      },
+      "maxItems": 10,
+      "minItems": 1,
+      "type": "array"
+     },
+     "DeviceUserAgents": {
+      "items": {
+       "maxLength": 256,
+       "minLength": 1,
+       "type": "string"
+      },
+      "maxItems": 10,
+      "minItems": 1,
+      "type": "array"
+     },
+     "Effect": {
+      "enum": [
+       "ALLOW",
+       "DENY"
+      ],
+      "type": "string"
+     },
+     "MobileDeviceAccessRuleId": {
+      "maxLength": 64,
+      "minLength": 1,
+      "type": "string"
+     },
+     "Name": {
+      "maxLength": 64,
+      "minLength": 1,
+      "type": "string"
+     },
+     "NotDeviceModels": {
+      "items": {
+       "maxLength": 256,
+       "minLength": 1,
+       "type": "string"
+      },
+      "maxItems": 10,
+      "minItems": 1,
+      "type": "array"
+     },
+     "NotDeviceOperatingSystems": {
+      "items": {
+       "maxLength": 256,
+       "minLength": 1,
+       "type": "string"
+      },
+      "maxItems": 10,
+      "minItems": 1,
+      "type": "array"
+     },
+     "NotDeviceTypes": {
+      "items": {
+       "maxLength": 256,
+       "minLength": 1,
+       "type": "string"
+      },
+      "maxItems": 10,
+      "minItems": 1,
+      "type": "array"
+     },
+     "NotDeviceUserAgents": {
+      "items": {
+       "maxLength": 256,
+       "minLength": 1,
+       "type": "string"
+      },
+      "maxItems": 10,
+      "minItems": 1,
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "OrganizationSummary": {
+    "additionalProperties": false,
+    "properties": {
+     "Alias": {
+      "maxLength": 62,
+      "minLength": 1,
+      "type": "string"
+     },
+     "DefaultMailDomain": {
+      "maxLength": 255,
+      "minLength": 3,
+      "type": "string"
+     },
+     "ErrorMessage": {
+      "maxLength": 256,
+      "type": "string"
+     },
+     "OrganizationId": {
+      "maxLength": 34,
+      "minLength": 34,
+      "type": "string"
+     },
+     "State": {
+      "maxLength": 256,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "PutAccessControlRuleRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "Actions": {
+      "items": {
+       "maxLength": 64,
+       "minLength": 1,
+       "type": "string"
+      },
+      "maxItems": 10,
+      "minItems": 0,
+      "type": "array"
+     },
+     "Description": {
+      "maxLength": 255,
+      "minLength": 0,
+      "type": "string"
+     },
+     "Effect": {
+      "enum": [
+       "ALLOW",
+       "DENY"
+      ],
+      "type": "string"
+     },
+     "ImpersonationRoleIds": {
+      "items": {
+       "maxLength": 64,
+       "minLength": 1,
+       "type": "string"
+      },
+      "maxItems": 10,
+      "minItems": 0,
+      "type": "array"
+     },
+     "IpRanges": {
+      "items": {
+       "maxLength": 18,
+       "minLength": 1,
+       "type": "string"
+      },
+      "maxItems": 1024,
+      "minItems": 0,
+      "type": "array"
+     },
+     "Name": {
+      "maxLength": 64,
+      "minLength": 1,
+      "type": "string"
+     },
+     "NotActions": {
+      "items": {
+       "maxLength": 64,
+       "minLength": 1,
+       "type": "string"
+      },
+      "maxItems": 10,
+      "minItems": 0,
+      "type": "array"
+     },
+     "NotImpersonationRoleIds": {
+      "items": {
+       "maxLength": 64,
+       "minLength": 1,
+       "type": "string"
+      },
+      "maxItems": 10,
+      "minItems": 0,
+      "type": "array"
+     },
+     "NotIpRanges": {
+      "items": {
+       "maxLength": 18,
+       "minLength": 1,
+       "type": "string"
+      },
+      "maxItems": 1024,
+      "minItems": 0,
+      "type": "array"
+     },
+     "NotUserIds": {
+      "items": {
+       "maxLength": 256,
+       "minLength": 12,
+       "type": "string"
+      },
+      "maxItems": 10,
+      "minItems": 0,
+      "type": "array"
+     },
+     "OrganizationId": {
+      "maxLength": 34,
+      "minLength": 34,
+      "type": "string"
+     },
+     "UserIds": {
+      "items": {
+       "maxLength": 256,
+       "minLength": 12,
+       "type": "string"
+      },
+      "maxItems": 10,
+      "minItems": 0,
+      "type": "array"
+     }
+    },
+    "required": [
+     "Name",
+     "Effect",
+     "Description",
+     "OrganizationId"
+    ],
+    "type": "object"
+   },
+   "PutAccessControlRuleResponse": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "RedactedEwsAvailabilityProvider": {
+    "additionalProperties": false,
+    "properties": {
+     "EwsEndpoint": {
+      "maxLength": 256,
+      "type": "string"
+     },
+     "EwsUsername": {
+      "maxLength": 256,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "Tag": {
+    "additionalProperties": false,
+    "properties": {
+     "Key": {
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string"
+     },
+     "Value": {
+      "maxLength": 256,
+      "minLength": 0,
+      "type": "string"
+     }
+    },
+    "required": [
+     "Key",
+     "Value"
+    ],
+    "type": "object"
+   },
+   "TagResourceRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "ResourceARN": {
+      "maxLength": 1011,
+      "minLength": 1,
+      "type": "string"
+     },
+     "Tags": {
+      "items": {
+       "$ref": "#/components/schemas/Tag"
+      },
+      "maxItems": 50,
+      "minItems": 0,
+      "type": "array"
+     }
+    },
+    "required": [
+     "ResourceARN",
+     "Tags"
+    ],
+    "type": "object"
+   },
+   "TagResourceResponse": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "UntagResourceRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "ResourceARN": {
+      "maxLength": 1011,
+      "minLength": 1,
+      "type": "string"
+     },
+     "TagKeys": {
+      "items": {
+       "maxLength": 128,
+       "minLength": 1,
+       "type": "string"
+      },
+      "maxItems": 50,
+      "minItems": 0,
+      "type": "array"
+     }
+    },
+    "required": [
+     "ResourceARN",
+     "TagKeys"
+    ],
+    "type": "object"
+   },
+   "UntagResourceResponse": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "UpdateAvailabilityConfigurationRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "DomainName": {
+      "maxLength": 255,
+      "minLength": 3,
+      "type": "string"
+     },
+     "EwsProvider": {
+      "$ref": "#/components/schemas/EwsAvailabilityProvider"
+     },
+     "LambdaProvider": {
+      "$ref": "#/components/schemas/LambdaAvailabilityProvider"
+     },
+     "OrganizationId": {
+      "maxLength": 34,
+      "minLength": 34,
+      "type": "string"
+     }
+    },
+    "required": [
+     "OrganizationId",
+     "DomainName"
+    ],
+    "type": "object"
+   },
+   "UpdateAvailabilityConfigurationResponse": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "UpdateImpersonationRoleRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "Description": {
+      "maxLength": 256,
+      "minLength": 1,
+      "type": "string"
+     },
+     "ImpersonationRoleId": {
+      "maxLength": 64,
+      "minLength": 1,
+      "type": "string"
+     },
+     "Name": {
+      "maxLength": 64,
+      "minLength": 1,
+      "type": "string"
+     },
+     "OrganizationId": {
+      "maxLength": 34,
+      "minLength": 34,
+      "type": "string"
+     },
+     "Rules": {
+      "items": {
+       "$ref": "#/components/schemas/ImpersonationRule"
+      },
+      "maxItems": 10,
+      "minItems": 0,
+      "type": "array"
+     },
+     "Type": {
+      "enum": [
+       "FULL_ACCESS",
+       "READ_ONLY"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "OrganizationId",
+     "ImpersonationRoleId",
+     "Name",
+     "Type",
+     "Rules"
+    ],
+    "type": "object"
+   },
+   "UpdateImpersonationRoleResponse": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "UpdateMobileDeviceAccessRuleRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "Description": {
+      "maxLength": 256,
+      "minLength": 1,
+      "type": "string"
+     },
+     "DeviceModels": {
+      "items": {
+       "maxLength": 256,
+       "minLength": 1,
+       "type": "string"
+      },
+      "maxItems": 10,
+      "minItems": 1,
+      "type": "array"
+     },
+     "DeviceOperatingSystems": {
+      "items": {
+       "maxLength": 256,
+       "minLength": 1,
+       "type": "string"
+      },
+      "maxItems": 10,
+      "minItems": 1,
+      "type": "array"
+     },
+     "DeviceTypes": {
+      "items": {
+       "maxLength": 256,
+       "minLength": 1,
+       "type": "string"
+      },
+      "maxItems": 10,
+      "minItems": 1,
+      "type": "array"
+     },
+     "DeviceUserAgents": {
+      "items": {
+       "maxLength": 256,
+       "minLength": 1,
+       "type": "string"
+      },
+      "maxItems": 10,
+      "minItems": 1,
+      "type": "array"
+     },
+     "Effect": {
+      "enum": [
+       "ALLOW",
+       "DENY"
+      ],
+      "type": "string"
+     },
+     "MobileDeviceAccessRuleId": {
+      "maxLength": 64,
+      "minLength": 1,
+      "type": "string"
+     },
+     "Name": {
+      "maxLength": 64,
+      "minLength": 1,
+      "type": "string"
+     },
+     "NotDeviceModels": {
+      "items": {
+       "maxLength": 256,
+       "minLength": 1,
+       "type": "string"
+      },
+      "maxItems": 10,
+      "minItems": 1,
+      "type": "array"
+     },
+     "NotDeviceOperatingSystems": {
+      "items": {
+       "maxLength": 256,
+       "minLength": 1,
+       "type": "string"
+      },
+      "maxItems": 10,
+      "minItems": 1,
+      "type": "array"
+     },
+     "NotDeviceTypes": {
+      "items": {
+       "maxLength": 256,
+       "minLength": 1,
+       "type": "string"
+      },
+      "maxItems": 10,
+      "minItems": 1,
+      "type": "array"
+     },
+     "NotDeviceUserAgents": {
+      "items": {
+       "maxLength": 256,
+       "minLength": 1,
+       "type": "string"
+      },
+      "maxItems": 10,
+      "minItems": 1,
+      "type": "array"
+     },
+     "OrganizationId": {
+      "maxLength": 34,
+      "minLength": 34,
+      "type": "string"
+     }
+    },
+    "required": [
+     "OrganizationId",
+     "MobileDeviceAccessRuleId",
+     "Name",
+     "Effect"
+    ],
+    "type": "object"
+   },
+   "UpdateMobileDeviceAccessRuleResponse": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "Bounded simulator subset of the official Amazon WorkMail API (2017-10-01). Every other official operation returns HTTP 501 UnknownOperationException. Organizations, impersonation roles, mobile device access rules, access control rules and availability configurations are stored records: no mail is received, stored, sent or delivered, no SMTP, IMAP, EWS or ActiveSync endpoint exists, and rules are stored without being evaluated. Users, groups, resources, aliases, mailbox permissions and exports, delegates, mail domains, retention policies, passwords and personal access tokens, identity provider and Identity Center configuration, the effect and test operations and every other official operation return UnknownOperationException with HTTP 501. An organization stays in state Creating, as the other provisioned records of this catalog do, and reports no DirectoryId, DirectoryType, DefaultMailDomain or MigrationAdmin because no directory or mail domain exists. CreateOrganization refuses DirectoryId, Domains and KmsKeyArn, which name a directory, mail domains or a key that would have to exist; Alias is the unique organization name; EnableInteroperability is stored as InteroperabilityEnabled. DeleteOrganization returns state Deleted, accepts but ignores DeleteDirectory, ForceDelete and DeleteIdentityCenterApplication, and deletes everything the organization owns, a cascade the official operation does not document. At most 5 organizations per Region exist as a simulator limit. Impersonation roles, mobile device access rules, access control rules and availability configurations are scoped to an organization; 30 roles, 10 mobile device access rules, 10 access control rules and 10 availability configurations per organization are simulator limits. Mobile device access rule names are unique per organization; PutAccessControlRule replaces a rule of the same name as documented. The user IDs, impersonation role IDs, Lambda ARN and domain name that rules and configurations mention are stored without being resolved. Availability configurations accept only a LambdaProvider: the EwsProvider carries an Exchange user name and password and is refused, so no password is stored. They report ProviderType LAMBDA. The organization, role, rule and configuration ID forms (m-, 20 character IDs) are inferred, and the child ARNs used for IAM evaluation are not defined by AWS. Tags apply to organizations only, by ARN (arn:aws:workmail:region:account:organization/id); the ARNs of the stored child records are refused.",
+  "title": "Amazon WorkMail (simulator catalog)",
+  "version": "2017-10-01"
+ },
+ "openapi": "3.1.0",
+ "paths": {
+  "/": {
+   "post": {
+    "description": "Choose the X-Amz-Target of one implemented operation. Request and response members follow the linked official input/output schemas.",
+    "operationId": "workmailJSONOperation",
+    "parameters": [
+     {
+      "in": "header",
+      "name": "X-Amz-Target",
+      "required": true,
+      "schema": {
+       "enum": [
+        "WorkMailService.CreateAvailabilityConfiguration",
+        "WorkMailService.CreateImpersonationRole",
+        "WorkMailService.CreateMobileDeviceAccessRule",
+        "WorkMailService.CreateOrganization",
+        "WorkMailService.DeleteAccessControlRule",
+        "WorkMailService.DeleteAvailabilityConfiguration",
+        "WorkMailService.DeleteImpersonationRole",
+        "WorkMailService.DeleteMobileDeviceAccessRule",
+        "WorkMailService.DeleteOrganization",
+        "WorkMailService.DescribeOrganization",
+        "WorkMailService.GetImpersonationRole",
+        "WorkMailService.ListAccessControlRules",
+        "WorkMailService.ListAvailabilityConfigurations",
+        "WorkMailService.ListImpersonationRoles",
+        "WorkMailService.ListMobileDeviceAccessRules",
+        "WorkMailService.ListOrganizations",
+        "WorkMailService.ListTagsForResource",
+        "WorkMailService.PutAccessControlRule",
+        "WorkMailService.TagResource",
+        "WorkMailService.UntagResource",
+        "WorkMailService.UpdateAvailabilityConfiguration",
+        "WorkMailService.UpdateImpersonationRole",
+        "WorkMailService.UpdateMobileDeviceAccessRule"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/x-amz-json-1.1": {
+       "examples": {
+        "CreateAvailabilityConfiguration": {
+         "summary": "X-Amz-Target: WorkMailService.CreateAvailabilityConfiguration",
+         "value": {}
+        },
+        "CreateImpersonationRole": {
+         "summary": "X-Amz-Target: WorkMailService.CreateImpersonationRole",
+         "value": {}
+        },
+        "CreateMobileDeviceAccessRule": {
+         "summary": "X-Amz-Target: WorkMailService.CreateMobileDeviceAccessRule",
+         "value": {}
+        },
+        "CreateOrganization": {
+         "summary": "X-Amz-Target: WorkMailService.CreateOrganization",
+         "value": {}
+        },
+        "DeleteAccessControlRule": {
+         "summary": "X-Amz-Target: WorkMailService.DeleteAccessControlRule",
+         "value": {}
+        },
+        "DeleteAvailabilityConfiguration": {
+         "summary": "X-Amz-Target: WorkMailService.DeleteAvailabilityConfiguration",
+         "value": {}
+        },
+        "DeleteImpersonationRole": {
+         "summary": "X-Amz-Target: WorkMailService.DeleteImpersonationRole",
+         "value": {}
+        },
+        "DeleteMobileDeviceAccessRule": {
+         "summary": "X-Amz-Target: WorkMailService.DeleteMobileDeviceAccessRule",
+         "value": {}
+        },
+        "DeleteOrganization": {
+         "summary": "X-Amz-Target: WorkMailService.DeleteOrganization",
+         "value": {}
+        },
+        "DescribeOrganization": {
+         "summary": "X-Amz-Target: WorkMailService.DescribeOrganization",
+         "value": {}
+        },
+        "GetImpersonationRole": {
+         "summary": "X-Amz-Target: WorkMailService.GetImpersonationRole",
+         "value": {}
+        },
+        "ListAccessControlRules": {
+         "summary": "X-Amz-Target: WorkMailService.ListAccessControlRules",
+         "value": {}
+        },
+        "ListAvailabilityConfigurations": {
+         "summary": "X-Amz-Target: WorkMailService.ListAvailabilityConfigurations",
+         "value": {}
+        },
+        "ListImpersonationRoles": {
+         "summary": "X-Amz-Target: WorkMailService.ListImpersonationRoles",
+         "value": {}
+        },
+        "ListMobileDeviceAccessRules": {
+         "summary": "X-Amz-Target: WorkMailService.ListMobileDeviceAccessRules",
+         "value": {}
+        },
+        "ListOrganizations": {
+         "summary": "X-Amz-Target: WorkMailService.ListOrganizations",
+         "value": {}
+        },
+        "ListTagsForResource": {
+         "summary": "X-Amz-Target: WorkMailService.ListTagsForResource",
+         "value": {}
+        },
+        "PutAccessControlRule": {
+         "summary": "X-Amz-Target: WorkMailService.PutAccessControlRule",
+         "value": {}
+        },
+        "TagResource": {
+         "summary": "X-Amz-Target: WorkMailService.TagResource",
+         "value": {}
+        },
+        "UntagResource": {
+         "summary": "X-Amz-Target: WorkMailService.UntagResource",
+         "value": {}
+        },
+        "UpdateAvailabilityConfiguration": {
+         "summary": "X-Amz-Target: WorkMailService.UpdateAvailabilityConfiguration",
+         "value": {}
+        },
+        "UpdateImpersonationRole": {
+         "summary": "X-Amz-Target: WorkMailService.UpdateImpersonationRole",
+         "value": {}
+        },
+        "UpdateMobileDeviceAccessRule": {
+         "summary": "X-Amz-Target: WorkMailService.UpdateMobileDeviceAccessRule",
+         "value": {}
+        }
+       },
+       "schema": {
+        "type": "object"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/x-amz-json-1.1": {
+        "schema": {
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception in __type."
+     },
+     "403": {
+      "description": "AccessDeniedException from local identity policy evaluation."
+     },
+     "501": {
+      "description": "Official operation not implemented by the simulator."
+     }
+    },
+    "summary": "Amazon WorkMail JSON 1.1 operations",
+    "tags": [
+     "Amazon WorkMail"
+    ]
+   }
+  }
+ },
+ "servers": [
+  {
+   "description": "This simulator only",
+   "url": "/"
+  }
+ ],
+ "tags": [
+  {
+   "description": "Bounded simulator subset of the official Amazon WorkMail API (2017-10-01). Every other official operation returns HTTP 501 UnknownOperationException. Organizations, impersonation roles, mobile device access rules, access control rules and availability configurations are stored records: no mail is received, stored, sent or delivered, no SMTP, IMAP, EWS or ActiveSync endpoint exists, and rules are stored without being evaluated. Users, groups, resources, aliases, mailbox permissions and exports, delegates, mail domains, retention policies, passwords and personal access tokens, identity provider and Identity Center configuration, the effect and test operations and every other official operation return UnknownOperationException with HTTP 501. An organization stays in state Creating, as the other provisioned records of this catalog do, and reports no DirectoryId, DirectoryType, DefaultMailDomain or MigrationAdmin because no directory or mail domain exists. CreateOrganization refuses DirectoryId, Domains and KmsKeyArn, which name a directory, mail domains or a key that would have to exist; Alias is the unique organization name; EnableInteroperability is stored as InteroperabilityEnabled. DeleteOrganization returns state Deleted, accepts but ignores DeleteDirectory, ForceDelete and DeleteIdentityCenterApplication, and deletes everything the organization owns, a cascade the official operation does not document. At most 5 organizations per Region exist as a simulator limit. Impersonation roles, mobile device access rules, access control rules and availability configurations are scoped to an organization; 30 roles, 10 mobile device access rules, 10 access control rules and 10 availability configurations per organization are simulator limits. Mobile device access rule names are unique per organization; PutAccessControlRule replaces a rule of the same name as documented. The user IDs, impersonation role IDs, Lambda ARN and domain name that rules and configurations mention are stored without being resolved. Availability configurations accept only a LambdaProvider: the EwsProvider carries an Exchange user name and password and is refused, so no password is stored. They report ProviderType LAMBDA. The organization, role, rule and configuration ID forms (m-, 20 character IDs) are inferred, and the child ARNs used for IAM evaluation are not defined by AWS. Tags apply to organizations only, by ARN (arn:aws:workmail:region:account:organization/id); the ARNs of the stored child records are refused.",
+   "name": "Amazon WorkMail"
+  }
+ ],
+ "x-simulator-source": {
+  "package": "botocore",
+  "version": "1.41.6",
+  "file": "botocore/data/workmail/2017-10-01/service-2.json",
+  "sha256": "b61d00ebdef54420946c38632e4560773365092f4d4ea673a7c7a68c0feb85d2",
+  "license": "Apache-2.0"
+ }
+}

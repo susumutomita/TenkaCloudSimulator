@@ -10,7 +10,7 @@ func Services() []*Service {
 		// Application integration and messaging.
 		appFabric, eventBridge, managedBlockchain, mwaa, pinpoint, sesV2, smsVoice,
 		// Compute, containers and developer tools.
-		appRunner, codeArtifact, codeBuild, codeCommit, codeDeploy, codePipeline, ecs, eks, imageBuilder,
+		appRunner, autoScaling, codeArtifact, codeBuild, codeCommit, codeDeploy, codePipeline, ecs, eks, elasticBeanstalk, imageBuilder,
 		// Management and governance.
 		appConfig, awsConfig, cloudTrail, dataLifecycleManager, managedPrometheus, resourceGroups, serviceCatalog,
 		// Security, identity and compliance.
@@ -29,5 +29,16 @@ func Services() []*Service {
 		// Operations, governance, billing configuration and resilience.
 		accountManagement, billingConductor, budgets, chatbot, cloud9, costUsageReports, faultInjection, incidentManager, licenseManager,
 		proton, resilienceHub, resourceExplorer, telcoNetworkBuilder, userNotifications, wellArchitected, xray,
+		// Further services from the per-service backlog.
+		directConnect, groundStation, kinesisVideo, forecast, fraudDetector, personalize, codeGuruProfiler,
+		mainframeModernization, migrationHub, transferFamily, applicationMigration, elasticDisasterRecovery,
+		mediaConvert, mediaPackage, mediaPackageV2, mediaPackageVOD, mediaTailor,
+		mediaConnect, mediaLive, ivs, ivsChat, ivsRealtime,
+		appFlow, cleanRooms, cleanRoomsML, cloudSearch, dataZone, emr, emrServerless, emrContainers, lakeFormation, quickSight,
+		deadlineCloud, databaseMigration, costExplorer, bcmDataExports, braket, artifact, aiopsGroup,
+		batch, outposts, pcs, serverlessRepo,
+		healthImaging, healthLake, omics, keyspaces, grafana,
+		b2bi, qBusiness, connect, chimeVoice, chimeIdentity, chimeMediaPipelines, workMail, rePostPrivate,
+		networkFirewall,
 	}
 }

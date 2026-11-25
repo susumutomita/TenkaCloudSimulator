@@ -1,0 +1,1513 @@
+{
+ "components": {
+  "schemas": {
+   "DataLakePrincipal": {
+    "additionalProperties": false,
+    "properties": {
+     "DataLakePrincipalIdentifier": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "DataLakeSettings": {
+    "additionalProperties": false,
+    "properties": {
+     "AllowExternalDataFiltering": {
+      "type": "boolean"
+     },
+     "AllowFullTableExternalDataAccess": {
+      "type": "boolean"
+     },
+     "AuthorizedSessionTagValueList": {
+      "items": {
+       "maxLength": 255,
+       "minLength": 1,
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "CreateDatabaseDefaultPermissions": {
+      "items": {
+       "$ref": "#/components/schemas/PrincipalPermissions"
+      },
+      "type": "array"
+     },
+     "CreateTableDefaultPermissions": {
+      "items": {
+       "$ref": "#/components/schemas/PrincipalPermissions"
+      },
+      "type": "array"
+     },
+     "DataLakeAdmins": {
+      "items": {
+       "$ref": "#/components/schemas/DataLakePrincipal"
+      },
+      "maxItems": 30,
+      "minItems": 0,
+      "type": "array"
+     },
+     "ExternalDataFilteringAllowList": {
+      "items": {
+       "$ref": "#/components/schemas/DataLakePrincipal"
+      },
+      "maxItems": 30,
+      "minItems": 0,
+      "type": "array"
+     },
+     "Parameters": {
+      "additionalProperties": {
+       "maxLength": 512000,
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "ReadOnlyAdmins": {
+      "items": {
+       "$ref": "#/components/schemas/DataLakePrincipal"
+      },
+      "maxItems": 30,
+      "minItems": 0,
+      "type": "array"
+     },
+     "TrustedResourceOwners": {
+      "items": {
+       "maxLength": 255,
+       "minLength": 1,
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "FilterCondition": {
+    "additionalProperties": false,
+    "properties": {
+     "ComparisonOperator": {
+      "enum": [
+       "EQ",
+       "NE",
+       "LE",
+       "LT",
+       "GE",
+       "GT",
+       "CONTAINS",
+       "NOT_CONTAINS",
+       "BEGINS_WITH",
+       "IN",
+       "BETWEEN"
+      ],
+      "type": "string"
+     },
+     "Field": {
+      "enum": [
+       "RESOURCE_ARN",
+       "ROLE_ARN",
+       "LAST_MODIFIED"
+      ],
+      "type": "string"
+     },
+     "StringValueList": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "LFTag": {
+    "additionalProperties": false,
+    "properties": {
+     "TagKey": {
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string"
+     },
+     "TagValues": {
+      "items": {
+       "maxLength": 256,
+       "minLength": 0,
+       "type": "string"
+      },
+      "maxItems": 50,
+      "minItems": 1,
+      "type": "array"
+     }
+    },
+    "required": [
+     "TagKey",
+     "TagValues"
+    ],
+    "type": "object"
+   },
+   "LFTagExpression": {
+    "additionalProperties": false,
+    "properties": {
+     "CatalogId": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "Description": {
+      "maxLength": 2048,
+      "minLength": 0,
+      "type": "string"
+     },
+     "Expression": {
+      "items": {
+       "$ref": "#/components/schemas/LFTag"
+      },
+      "type": "array"
+     },
+     "Name": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "LFTagPair": {
+    "additionalProperties": false,
+    "properties": {
+     "CatalogId": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "TagKey": {
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string"
+     },
+     "TagValues": {
+      "items": {
+       "maxLength": 256,
+       "minLength": 0,
+       "type": "string"
+      },
+      "maxItems": 50,
+      "minItems": 1,
+      "type": "array"
+     }
+    },
+    "required": [
+     "TagKey",
+     "TagValues"
+    ],
+    "type": "object"
+   },
+   "PrincipalPermissions": {
+    "additionalProperties": false,
+    "properties": {
+     "Permissions": {
+      "items": {
+       "enum": [
+        "ALL",
+        "SELECT",
+        "ALTER",
+        "DROP",
+        "DELETE",
+        "INSERT",
+        "DESCRIBE",
+        "CREATE_DATABASE",
+        "CREATE_TABLE",
+        "DATA_LOCATION_ACCESS",
+        "CREATE_LF_TAG",
+        "ASSOCIATE",
+        "GRANT_WITH_LF_TAG_EXPRESSION",
+        "CREATE_LF_TAG_EXPRESSION",
+        "CREATE_CATALOG",
+        "SUPER_USER"
+       ],
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "Principal": {
+      "$ref": "#/components/schemas/DataLakePrincipal"
+     }
+    },
+    "type": "object"
+   },
+   "ResourceInfo": {
+    "additionalProperties": false,
+    "properties": {
+     "HybridAccessEnabled": {
+      "type": "boolean"
+     },
+     "LastModified": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "ResourceArn": {
+      "type": "string"
+     },
+     "RoleArn": {
+      "type": "string"
+     },
+     "WithFederation": {
+      "type": "boolean"
+     },
+     "WithPrivilegedAccess": {
+      "type": "boolean"
+     }
+    },
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "Bounded simulator subset of the official AWS Lake Formation API (2017-03-31). Every other official operation returns HTTP 501 UnknownOperationException. LF-tags, LF-tag expressions, the Regional data lake settings and registered Amazon S3 locations are stored records, and Lake Formation permissions are not evaluated: GrantPermissions, RevokePermissions, ListPermissions, LF-tag assignment to resources, data cells filters, opt-ins, transactions, query planning, temporary credentials and every other official operation return UnknownOperationException with HTTP 501. Data lake administrators, default permissions and tags therefore change what no principal may do. An LF-tag holds 1 to 50 values that cannot change after creation: UpdateLFTag is not implemented because the stored model cannot apply TagValuesToAdd and TagValuesToDelete to the values already held, so a tag is deleted and created again to change them. An LF-tag expression is stored without checking that the LF-tags it names exist, and ListLFTags does not support the ResourceShareType filter because no tag is shared. LF-tags and expressions have no ARN in AWS: the ARN used for authorization is a simulator form. A duplicate LF-tag or expression fails with InvalidInputException (HTTP 400) because the official operations model no already-exists exception, and the missing-resource and already-registered failures use the modeled EntityNotFoundException and AlreadyExistsException. Data lake settings start as AWS documents them for an account that never changed them: no administrators and IAM_ALLOWED_PRINCIPALS holding ALL on new databases and tables. PutDataLakeSettings replaces the whole document, accepts at most 30 administrators and 30 read-only administrators, and stores everything else without resolving principals. RegisterResource stores an Amazon S3 location and its IAM role without reading the location or assuming the role: ResourceArn must be an Amazon S3 ARN, and either RoleArn or UseServiceLinkedRole true must be given, the latter being stored as the Lake Formation service-linked role ARN. WithFederation, HybridAccessEnabled and WithPrivilegedAccess are stored as flags with no effect, and registering a location nested inside or around a registered one is allowed although AWS refuses it. CatalogId, when sent, must be the simulator account. The limits of 1000 LF-tags, 1000 expressions and 100 registered locations per Region are local.",
+  "title": "AWS Lake Formation (simulator catalog)",
+  "version": "2017-03-31"
+ },
+ "openapi": "3.1.0",
+ "paths": {
+  "/CreateLFTag": {
+   "post": {
+    "operationId": "lakeformationCreateLFTag",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "lakeformation"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "CatalogId": {
+          "maxLength": 255,
+          "minLength": 1,
+          "type": "string"
+         },
+         "TagKey": {
+          "maxLength": 128,
+          "minLength": 1,
+          "type": "string"
+         },
+         "TagValues": {
+          "items": {
+           "maxLength": 256,
+           "minLength": 0,
+           "type": "string"
+          },
+          "maxItems": 50,
+          "minItems": 1,
+          "type": "array"
+         }
+        },
+        "required": [
+         "TagKey",
+         "TagValues"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateLFTag",
+    "tags": [
+     "AWS Lake Formation"
+    ]
+   }
+  },
+  "/CreateLFTagExpression": {
+   "post": {
+    "operationId": "lakeformationCreateLFTagExpression",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "lakeformation"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "CatalogId": {
+          "maxLength": 255,
+          "minLength": 1,
+          "type": "string"
+         },
+         "Description": {
+          "maxLength": 2048,
+          "minLength": 0,
+          "type": "string"
+         },
+         "Expression": {
+          "items": {
+           "$ref": "#/components/schemas/LFTag"
+          },
+          "type": "array"
+         },
+         "Name": {
+          "maxLength": 255,
+          "minLength": 1,
+          "type": "string"
+         }
+        },
+        "required": [
+         "Expression",
+         "Name"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateLFTagExpression",
+    "tags": [
+     "AWS Lake Formation"
+    ]
+   }
+  },
+  "/DeleteLFTag": {
+   "post": {
+    "operationId": "lakeformationDeleteLFTag",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "lakeformation"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "CatalogId": {
+          "maxLength": 255,
+          "minLength": 1,
+          "type": "string"
+         },
+         "TagKey": {
+          "maxLength": 128,
+          "minLength": 1,
+          "type": "string"
+         }
+        },
+        "required": [
+         "TagKey"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteLFTag",
+    "tags": [
+     "AWS Lake Formation"
+    ]
+   }
+  },
+  "/DeleteLFTagExpression": {
+   "post": {
+    "operationId": "lakeformationDeleteLFTagExpression",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "lakeformation"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "CatalogId": {
+          "maxLength": 255,
+          "minLength": 1,
+          "type": "string"
+         },
+         "Name": {
+          "maxLength": 255,
+          "minLength": 1,
+          "type": "string"
+         }
+        },
+        "required": [
+         "Name"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteLFTagExpression",
+    "tags": [
+     "AWS Lake Formation"
+    ]
+   }
+  },
+  "/DeregisterResource": {
+   "post": {
+    "operationId": "lakeformationDeregisterResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "lakeformation"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "ResourceArn": {
+          "type": "string"
+         }
+        },
+        "required": [
+         "ResourceArn"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeregisterResource",
+    "tags": [
+     "AWS Lake Formation"
+    ]
+   }
+  },
+  "/DescribeResource": {
+   "post": {
+    "operationId": "lakeformationDescribeResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "lakeformation"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "ResourceArn": {
+          "type": "string"
+         }
+        },
+        "required": [
+         "ResourceArn"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "ResourceInfo": {
+           "$ref": "#/components/schemas/ResourceInfo"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DescribeResource",
+    "tags": [
+     "AWS Lake Formation"
+    ]
+   }
+  },
+  "/GetDataLakeSettings": {
+   "post": {
+    "operationId": "lakeformationGetDataLakeSettings",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "lakeformation"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "CatalogId": {
+          "maxLength": 255,
+          "minLength": 1,
+          "type": "string"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "DataLakeSettings": {
+           "$ref": "#/components/schemas/DataLakeSettings"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "GetDataLakeSettings",
+    "tags": [
+     "AWS Lake Formation"
+    ]
+   }
+  },
+  "/GetLFTag": {
+   "post": {
+    "operationId": "lakeformationGetLFTag",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "lakeformation"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "CatalogId": {
+          "maxLength": 255,
+          "minLength": 1,
+          "type": "string"
+         },
+         "TagKey": {
+          "maxLength": 128,
+          "minLength": 1,
+          "type": "string"
+         }
+        },
+        "required": [
+         "TagKey"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "CatalogId": {
+           "maxLength": 255,
+           "minLength": 1,
+           "type": "string"
+          },
+          "TagKey": {
+           "maxLength": 128,
+           "minLength": 1,
+           "type": "string"
+          },
+          "TagValues": {
+           "items": {
+            "maxLength": 256,
+            "minLength": 0,
+            "type": "string"
+           },
+           "maxItems": 50,
+           "minItems": 1,
+           "type": "array"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "GetLFTag",
+    "tags": [
+     "AWS Lake Formation"
+    ]
+   }
+  },
+  "/GetLFTagExpression": {
+   "post": {
+    "operationId": "lakeformationGetLFTagExpression",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "lakeformation"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "CatalogId": {
+          "maxLength": 255,
+          "minLength": 1,
+          "type": "string"
+         },
+         "Name": {
+          "maxLength": 255,
+          "minLength": 1,
+          "type": "string"
+         }
+        },
+        "required": [
+         "Name"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "CatalogId": {
+           "maxLength": 255,
+           "minLength": 1,
+           "type": "string"
+          },
+          "Description": {
+           "maxLength": 2048,
+           "minLength": 0,
+           "type": "string"
+          },
+          "Expression": {
+           "items": {
+            "$ref": "#/components/schemas/LFTag"
+           },
+           "type": "array"
+          },
+          "Name": {
+           "maxLength": 255,
+           "minLength": 1,
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "GetLFTagExpression",
+    "tags": [
+     "AWS Lake Formation"
+    ]
+   }
+  },
+  "/ListLFTagExpressions": {
+   "post": {
+    "operationId": "lakeformationListLFTagExpressions",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "lakeformation"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "CatalogId": {
+          "maxLength": 255,
+          "minLength": 1,
+          "type": "string"
+         },
+         "MaxResults": {
+          "maximum": 1000,
+          "minimum": 1,
+          "type": "integer"
+         },
+         "NextToken": {
+          "type": "string"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "LFTagExpressions": {
+           "items": {
+            "$ref": "#/components/schemas/LFTagExpression"
+           },
+           "type": "array"
+          },
+          "NextToken": {
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListLFTagExpressions",
+    "tags": [
+     "AWS Lake Formation"
+    ]
+   }
+  },
+  "/ListLFTags": {
+   "post": {
+    "operationId": "lakeformationListLFTags",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "lakeformation"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "CatalogId": {
+          "maxLength": 255,
+          "minLength": 1,
+          "type": "string"
+         },
+         "MaxResults": {
+          "maximum": 1000,
+          "minimum": 1,
+          "type": "integer"
+         },
+         "NextToken": {
+          "type": "string"
+         },
+         "ResourceShareType": {
+          "enum": [
+           "FOREIGN",
+           "ALL"
+          ],
+          "type": "string"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "LFTags": {
+           "items": {
+            "$ref": "#/components/schemas/LFTagPair"
+           },
+           "maxItems": 50,
+           "minItems": 1,
+           "type": "array"
+          },
+          "NextToken": {
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListLFTags",
+    "tags": [
+     "AWS Lake Formation"
+    ]
+   }
+  },
+  "/ListResources": {
+   "post": {
+    "operationId": "lakeformationListResources",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "lakeformation"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "FilterConditionList": {
+          "items": {
+           "$ref": "#/components/schemas/FilterCondition"
+          },
+          "maxItems": 20,
+          "minItems": 1,
+          "type": "array"
+         },
+         "MaxResults": {
+          "maximum": 1000,
+          "minimum": 1,
+          "type": "integer"
+         },
+         "NextToken": {
+          "type": "string"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "NextToken": {
+           "type": "string"
+          },
+          "ResourceInfoList": {
+           "items": {
+            "$ref": "#/components/schemas/ResourceInfo"
+           },
+           "type": "array"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListResources",
+    "tags": [
+     "AWS Lake Formation"
+    ]
+   }
+  },
+  "/PutDataLakeSettings": {
+   "post": {
+    "operationId": "lakeformationPutDataLakeSettings",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "lakeformation"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "CatalogId": {
+          "maxLength": 255,
+          "minLength": 1,
+          "type": "string"
+         },
+         "DataLakeSettings": {
+          "$ref": "#/components/schemas/DataLakeSettings"
+         }
+        },
+        "required": [
+         "DataLakeSettings"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "PutDataLakeSettings",
+    "tags": [
+     "AWS Lake Formation"
+    ]
+   }
+  },
+  "/RegisterResource": {
+   "post": {
+    "operationId": "lakeformationRegisterResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "lakeformation"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "HybridAccessEnabled": {
+          "type": "boolean"
+         },
+         "ResourceArn": {
+          "type": "string"
+         },
+         "RoleArn": {
+          "type": "string"
+         },
+         "UseServiceLinkedRole": {
+          "type": "boolean"
+         },
+         "WithFederation": {
+          "type": "boolean"
+         },
+         "WithPrivilegedAccess": {
+          "type": "boolean"
+         }
+        },
+        "required": [
+         "ResourceArn"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "RegisterResource",
+    "tags": [
+     "AWS Lake Formation"
+    ]
+   }
+  },
+  "/UpdateLFTagExpression": {
+   "post": {
+    "operationId": "lakeformationUpdateLFTagExpression",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "lakeformation"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "CatalogId": {
+          "maxLength": 255,
+          "minLength": 1,
+          "type": "string"
+         },
+         "Description": {
+          "maxLength": 2048,
+          "minLength": 0,
+          "type": "string"
+         },
+         "Expression": {
+          "items": {
+           "$ref": "#/components/schemas/LFTag"
+          },
+          "type": "array"
+         },
+         "Name": {
+          "maxLength": 255,
+          "minLength": 1,
+          "type": "string"
+         }
+        },
+        "required": [
+         "Expression",
+         "Name"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UpdateLFTagExpression",
+    "tags": [
+     "AWS Lake Formation"
+    ]
+   }
+  },
+  "/UpdateResource": {
+   "post": {
+    "operationId": "lakeformationUpdateResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "lakeformation"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "HybridAccessEnabled": {
+          "type": "boolean"
+         },
+         "ResourceArn": {
+          "type": "string"
+         },
+         "RoleArn": {
+          "type": "string"
+         },
+         "WithFederation": {
+          "type": "boolean"
+         }
+        },
+        "required": [
+         "ResourceArn",
+         "RoleArn"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UpdateResource",
+    "tags": [
+     "AWS Lake Formation"
+    ]
+   }
+  }
+ },
+ "servers": [
+  {
+   "description": "This simulator only",
+   "url": "/"
+  }
+ ],
+ "tags": [
+  {
+   "description": "Bounded simulator subset of the official AWS Lake Formation API (2017-03-31). Every other official operation returns HTTP 501 UnknownOperationException. LF-tags, LF-tag expressions, the Regional data lake settings and registered Amazon S3 locations are stored records, and Lake Formation permissions are not evaluated: GrantPermissions, RevokePermissions, ListPermissions, LF-tag assignment to resources, data cells filters, opt-ins, transactions, query planning, temporary credentials and every other official operation return UnknownOperationException with HTTP 501. Data lake administrators, default permissions and tags therefore change what no principal may do. An LF-tag holds 1 to 50 values that cannot change after creation: UpdateLFTag is not implemented because the stored model cannot apply TagValuesToAdd and TagValuesToDelete to the values already held, so a tag is deleted and created again to change them. An LF-tag expression is stored without checking that the LF-tags it names exist, and ListLFTags does not support the ResourceShareType filter because no tag is shared. LF-tags and expressions have no ARN in AWS: the ARN used for authorization is a simulator form. A duplicate LF-tag or expression fails with InvalidInputException (HTTP 400) because the official operations model no already-exists exception, and the missing-resource and already-registered failures use the modeled EntityNotFoundException and AlreadyExistsException. Data lake settings start as AWS documents them for an account that never changed them: no administrators and IAM_ALLOWED_PRINCIPALS holding ALL on new databases and tables. PutDataLakeSettings replaces the whole document, accepts at most 30 administrators and 30 read-only administrators, and stores everything else without resolving principals. RegisterResource stores an Amazon S3 location and its IAM role without reading the location or assuming the role: ResourceArn must be an Amazon S3 ARN, and either RoleArn or UseServiceLinkedRole true must be given, the latter being stored as the Lake Formation service-linked role ARN. WithFederation, HybridAccessEnabled and WithPrivilegedAccess are stored as flags with no effect, and registering a location nested inside or around a registered one is allowed although AWS refuses it. CatalogId, when sent, must be the simulator account. The limits of 1000 LF-tags, 1000 expressions and 100 registered locations per Region are local.",
+   "name": "AWS Lake Formation"
+  }
+ ],
+ "x-simulator-source": {
+  "package": "botocore",
+  "version": "1.41.6",
+  "file": "botocore/data/lakeformation/2017-03-31/service-2.json",
+  "sha256": "8a1fddfbfcf58a74627936704f0f0b5fb0fc1d0a36225ab4fd43e17ef05c826f",
+  "license": "Apache-2.0"
+ }
+}

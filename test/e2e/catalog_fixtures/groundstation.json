@@ -1,0 +1,40 @@
+{
+ "client": "groundstation",
+ "steps": [
+  {"op": "create_config", "args": {"name": "fixture-tracking", "configData": {"trackingConfig": {"autotrack": "PREFERRED"}}, "tags": {"team": "a"}}, "save": {"tracking": "configId", "trackingArn": "configArn"}, "expect": {"configType": "tracking"}},
+  {"op": "create_config", "args": {"name": "fixture-downlink", "configData": {"antennaDownlinkConfig": {"spectrumConfig": {"centerFrequency": {"value": 8000, "units": "MHz"}, "bandwidth": {"value": 40, "units": "MHz"}, "polarization": "RIGHT_HAND"}}}}, "save": {"downlink": "configId", "downlinkArn": "configArn"}, "expect": {"configType": "antenna-downlink"}},
+  {"op": "get_config", "args": {"configId": "${tracking}", "configType": "tracking"}, "expect": {"name": "fixture-tracking", "configArn": "${trackingArn}", "tags": {"team": "a"}, "configData.trackingConfig.autotrack": "PREFERRED"}},
+  {"op": "list_configs", "args": {}, "expect": {"configList#count": 2}},
+  {"op": "update_config", "args": {"configId": "${tracking}", "configType": "tracking", "name": "fixture-tracking", "configData": {"trackingConfig": {"autotrack": "REQUIRED"}}}, "expect": {"configId": "${tracking}"}},
+  {"op": "get_config", "args": {"configId": "${tracking}", "configType": "tracking"}, "expect": {"configData.trackingConfig.autotrack": "REQUIRED"}},
+  {"op": "create_mission_profile", "args": {"name": "fixture-profile", "minimumViableContactDurationSeconds": 180, "trackingConfigArn": "${trackingArn}", "dataflowEdges": [["${downlinkArn}", "${trackingArn}"]], "tags": {"team": "a"}}, "save": {"profile": "missionProfileId"}},
+  {"op": "get_mission_profile", "args": {"missionProfileId": "${profile}"}, "save": {"profileArn": "missionProfileArn"}, "expect": {"name": "fixture-profile", "region": "us-east-1", "trackingConfigArn": "${trackingArn}", "tags": {"team": "a"}}},
+  {"op": "list_mission_profiles", "args": {}, "expect": {"missionProfileList#count": 1}},
+  {"op": "update_mission_profile", "args": {"missionProfileId": "${profile}", "name": "fixture-profile-long", "minimumViableContactDurationSeconds": 240}},
+  {"op": "get_mission_profile", "args": {"missionProfileId": "${profile}"}, "expect": {"name": "fixture-profile-long", "minimumViableContactDurationSeconds": 240}},
+  {"op": "tag_resource", "args": {"resourceArn": "${profileArn}", "tags": {"k": "v"}}},
+  {"op": "untag_resource", "args": {"resourceArn": "${profileArn}", "tagKeys": ["k"]}},
+  {"op": "list_tags_for_resource", "args": {"resourceArn": "${profileArn}"}, "expect": {"tags": {"team": "a"}}},
+  {"op": "create_config", "args": {"name": "fixture-out-of-band", "configData": {"antennaDownlinkConfig": {"spectrumConfig": {"centerFrequency": {"value": 5000, "units": "MHz"}, "bandwidth": {"value": 40, "units": "MHz"}}}}}, "error": "InvalidParameterException", "status": 431},
+  {"op": "update_config", "args": {"configId": "${tracking}", "configType": "antenna-downlink", "name": "fixture-tracking", "configData": {"trackingConfig": {"autotrack": "REQUIRED"}}}, "error": "InvalidParameterException", "status": 431},
+  {"op": "create_mission_profile", "args": {"name": "fixture-wrong-tracking", "minimumViableContactDurationSeconds": 60, "trackingConfigArn": "${downlinkArn}", "dataflowEdges": []}, "error": "InvalidParameterException", "status": 431},
+  {"op": "get_mission_profile", "args": {"missionProfileId": "0f1e2d3c-aaaa-4bbb-8ccc-111122223333"}, "error": "ResourceNotFoundException", "status": 434},
+  {"op": "reserve_contact", "args": {"missionProfileArn": "${profileArn}", "satelliteArn": "arn:aws:groundstation::000000000000:satellite/0f1e2d3c-aaaa-4bbb-8ccc-111122223333", "startTime": 1893456000, "endTime": 1893457000, "groundStation": "Ohio 1"}, "error": "UnknownOperationException", "status": 501}
+ ],
+ "isolation": [
+  {"op": "list_configs", "args": {}, "expect": {"configList#count": 0}},
+  {"op": "list_mission_profiles", "args": {}, "expect": {"missionProfileList#count": 0}}
+ ],
+ "after_restart": [
+  {"op": "get_mission_profile", "args": {"missionProfileId": "${profile}"}, "expect": {"name": "fixture-profile-long"}},
+  {"op": "get_config", "args": {"configId": "${tracking}", "configType": "tracking"}, "expect": {"configData.trackingConfig.autotrack": "REQUIRED"}}
+ ],
+ "cleanup": [
+  {"op": "delete_config", "args": {"configId": "${tracking}", "configType": "tracking"}, "error": "InvalidParameterException", "status": 431},
+  {"op": "get_config", "args": {"configId": "${tracking}", "configType": "antenna-downlink"}, "error": "ResourceNotFoundException", "status": 434},
+  {"op": "delete_mission_profile", "args": {"missionProfileId": "${profile}"}},
+  {"op": "delete_config", "args": {"configId": "${tracking}", "configType": "tracking"}},
+  {"op": "delete_config", "args": {"configId": "${downlink}", "configType": "antenna-downlink"}},
+  {"op": "list_configs", "args": {}, "expect": {"configList#count": 0}}
+ ]
+}
