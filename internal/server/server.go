@@ -166,7 +166,11 @@ func NewWithProviders(path string, options ProviderConfig) (http.Handler, func()
 		_ = store.Close()
 		return nil, nil, err
 	}
-	catalogEngine, err := catalog.New(store.Database(), catalog.Config{Regions: aws.Regions, Account: "000000000000", DefaultPrincipal: core.Administrator, Authorize: identities.DecisionContext}, catalog.Services())
+	catalogConfig := catalog.Config{Regions: aws.Regions, Account: "000000000000", DefaultPrincipal: core.Administrator, Authorize: identities.DecisionContext}
+	if options.RDSPrivatePostgresTopology {
+		catalogConfig.ValidateRDSPrivatePostgres = aws.ValidateRDSPrivatePostgresTopology
+	}
+	catalogEngine, err := catalog.New(store.Database(), catalogConfig, catalog.Services())
 	if err != nil {
 		_ = lambdas.Close()
 		_ = store.Close()

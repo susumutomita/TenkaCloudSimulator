@@ -20798,6 +20798,99 @@
           "expect_invariant": "ReadbackOnlyAfterAck"
         }
       ]
+    },
+    {
+      "id": "RDSPrivatePostgresTopology",
+      "model": "formal/RDSPrivatePostgresTopology.tla",
+      "config": "formal/RDSPrivatePostgresTopology.cfg",
+      "bounds": "One Create/Modify-like attempt, 2 initial metadata revisions, and enumerated Boolean opt-in, authenticated numeric loopback, IAM authorization, qualifying document and current owned native topology verdicts.",
+      "properties": [
+        "TypeOK",
+        "LocalStartupRequired",
+        "AuthorityBeforeNative",
+        "LegacyConfigurationPreserved",
+        "OwnedTopologyBeforeWrite",
+        "AtomicRefusal",
+        "ConfigurationOnly"
+      ],
+      "limits": "Symbolic admission and metadata effects only. CLI Scope is trusted composition; Web access handling, query/SQLite implementations, VPC/AZ/ref resolution, region identities, transactions/concurrency, actual packets and SQL are not modeled.",
+      "source_scope": [
+        "cmd/simulator/main.go",
+        "internal/aws/catalog/engine.go",
+        "internal/aws/catalog/rds_private_postgres_topology.go",
+        "internal/aws/catalog/semantics.go",
+        "internal/aws/rds_private_postgres_topology.go",
+        "internal/server/sakura_provider.go",
+        "internal/server/server.go"
+      ],
+      "mutants": [
+        {
+          "id": "AllowUntrustedStartup",
+          "edits": [
+            {
+              "old": "StartupAllowed == ~s.optIn \\/ s.localAuth",
+              "new": "StartupAllowed == TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "LocalStartupRequired"
+        },
+        {
+          "id": "ReadBeforeAuthority",
+          "edits": [
+            {
+              "old": "ReadNative == StartupAllowed /\\ s.authorized /\\ NeedsNative",
+              "new": "ReadNative == StartupAllowed /\\ NeedsNative",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AuthorityBeforeNative"
+        },
+        {
+          "id": "RequireTopologyByDefault",
+          "edits": [
+            {
+              "old": "NeedsNative == s.optIn /\\ s.qualifies",
+              "new": "NeedsNative == s.qualifies",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "LegacyConfigurationPreserved"
+        },
+        {
+          "id": "IgnoreTopology",
+          "edits": [
+            {
+              "old": "Accept == StartupAllowed /\\ s.authorized /\\ (~NeedsNative \\/ s.ownedTopology)",
+              "new": "Accept == StartupAllowed /\\ s.authorized",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "OwnedTopologyBeforeWrite"
+        },
+        {
+          "id": "PersistRefusedUpdate",
+          "edits": [
+            {
+              "old": "!.revision = IF Accept THEN @ + 1 ELSE @",
+              "new": "!.revision = @ + 1",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AtomicRefusal"
+        },
+        {
+          "id": "AdvertiseEndpoint",
+          "edits": [
+            {
+              "old": "!.endpoint = FALSE",
+              "new": "!.endpoint = Accept",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ConfigurationOnly"
+        }
+      ]
     }
   ]
 }

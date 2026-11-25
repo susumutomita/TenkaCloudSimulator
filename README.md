@@ -119,6 +119,9 @@ console, CloudFormation adapter or Challenge integration.
   select a local domain, read a known item, and conditionally replace one attribute.
 - **Configuration-only catalogs:** [AWS](docs/aws-catalog.md),
   [Google Cloud](docs/gcp-catalog.md), [Azure Resource Manager](docs/azure-catalog.md).
+  `--rds-private-postgres-topology` optionally validates private standalone
+  PostgreSQL configuration against native EC2 on authenticated loopback. It
+  starts no database and returns no endpoint.
   These do not run workloads, provide data planes or provision real cloud resources.
   AppFlow stores S3-to-S3 flow definitions only. An `OnDemand` definition
   rejects schedule settings; a `Scheduled` definition requires a nonblank
