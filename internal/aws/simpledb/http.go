@@ -86,6 +86,8 @@ func NewHTTPHandler(s *Store, sc Scope, authorize Authorize) http.Handler {
 		switch action {
 		case "CreateDomain", "DeleteDomain", "DomainMetadata":
 			allowed["DomainName"] = true
+		case "Select":
+			allowed["SelectExpression"], allowed["NextToken"], allowed["ConsistentRead"] = true, true, true
 		case "ListDomains":
 			allowed["MaxNumberOfDomains"] = true
 			allowed["NextToken"] = true
@@ -132,7 +134,19 @@ func NewHTTPHandler(s *Store, sc Scope, authorize Authorize) http.Handler {
 			}
 		}
 		domain := p.Get("DomainName")
-		if action != "ListDomains" {
+		var plan selectPlan
+		if action == "Select" {
+			if !p.Has("SelectExpression") {
+				fail(400, "MissingParameter")
+				return
+			}
+			var code string
+			if plan, code = parseSelect(p.Get("SelectExpression")); code != "" {
+				fail(400, code)
+				return
+			}
+			domain = plan.domain
+		} else if action != "ListDomains" {
 			if _, ok := p["DomainName"]; !ok {
 				fail(400, "MissingParameter")
 				return
@@ -250,6 +264,12 @@ func NewHTTPHandler(s *Store, sc Scope, authorize Authorize) http.Handler {
 			var stats DomainStats
 			stats, err = s.DomainMetadata(r.Context(), sc.Account, sc.Region, domain)
 			out.Domain = &stats
+		case "Select":
+			if p.Has("NextToken") && p.Get("NextToken") == "" {
+				fail(400, "InvalidNextToken")
+				return
+			}
+			out.Select, err = s.selectItems(r.Context(), sc, plan, p.Get("SelectExpression"), p.Get("ConsistentRead") == "true", p.Get("NextToken"))
 		case "ListDomains":
 			var ds []string
 			var next string
@@ -262,18 +282,7 @@ func NewHTTPHandler(s *Store, sc Scope, authorize Authorize) http.Handler {
 		case "GetAttributes":
 			var attrs map[string][]string
 			attrs, err = s.Get(r.Context(), sc.Account, sc.Region, domain, item, names)
-			out.Get = &queryGet{}
-			keys := make([]string, 0, len(attrs))
-			for k := range attrs {
-				keys = append(keys, k)
-			}
-			sort.Strings(keys)
-			for _, k := range keys {
-				sort.Strings(attrs[k])
-				for _, v := range attrs[k] {
-					out.Get.Attributes = append(out.Get.Attributes, queryAttribute{k, v})
-				}
-			}
+			out.Get = &queryGet{Attributes: wireAttributes(attrs)}
 		}
 		if err != nil {
 			var coded interface{ Code() string }
@@ -285,7 +294,10 @@ func NewHTTPHandler(s *Store, sc Scope, authorize Authorize) http.Handler {
 				case "ConditionalCheckFailed", "MultiValuedAttribute", "NumberItemAttributesExceeded":
 					fail(409, coded.Code())
 					return
-				case "InvalidParameterValue", "InvalidNextToken", "NoSuchDomain":
+				case "QueryTimeout":
+					fail(408, coded.Code())
+					return
+				case "ItemTooLargeForSelect", "InvalidParameterValue", "InvalidNextToken", "NoSuchDomain":
 					fail(400, coded.Code())
 					return
 				}
@@ -339,23 +351,40 @@ func queryIndex(s string) bool {
 
 type queryAttribute struct{ Name, Value string }
 
-func (a queryAttribute) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
-	type field struct {
-		Encoding string `xml:"encoding,attr,omitempty"`
-		Text     string `xml:",chardata"`
+func wireAttributes(attrs map[string][]string) []queryAttribute {
+	var out []queryAttribute
+	keys := make([]string, 0, len(attrs))
+	for k := range attrs {
+		keys = append(keys, k)
 	}
-	encode := func(s string) field {
-		for _, c := range s {
-			// XML 1.1 RestrictedChar, NUL and Unicode noncharacters.
-			if c == 0 || (c >= 1 && c <= 8) || c == 11 || c == 12 || (c >= 14 && c <= 31) ||
-				(c >= 0x7f && c <= 0x84) || (c >= 0x86 && c <= 0x9f) ||
-				(c >= 0xfdd0 && c <= 0xfdef) || c&0xffff == 0xfffe || c&0xffff == 0xffff {
-				return field{"base64", base64.StdEncoding.EncodeToString([]byte(s))}
-			}
+	sort.Strings(keys)
+	for _, k := range keys {
+		sort.Strings(attrs[k])
+		for _, v := range attrs[k] {
+			out = append(out, queryAttribute{k, v})
 		}
-		return field{Text: s}
 	}
-	return e.EncodeElement(struct{ Name, Value field }{encode(a.Name), encode(a.Value)}, start)
+	return out
+}
+
+type queryText struct {
+	Encoding string `xml:"encoding,attr,omitempty"`
+	Text     string `xml:",chardata"`
+}
+
+func xmlText(s string) queryText {
+	for _, c := range s {
+		// XML 1.1 RestrictedChar, NUL and Unicode noncharacters.
+		if c == 0 || (c >= 1 && c <= 8) || c == 11 || c == 12 || (c >= 14 && c <= 31) ||
+			(c >= 0x7f && c <= 0x84) || (c >= 0x86 && c <= 0x9f) ||
+			(c >= 0xfdd0 && c <= 0xfdef) || c&0xffff == 0xfffe || c&0xffff == 0xffff {
+			return queryText{"base64", base64.StdEncoding.EncodeToString([]byte(s))}
+		}
+	}
+	return queryText{Text: s}
+}
+func (a queryAttribute) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
+	return e.EncodeElement(struct{ Name, Value queryText }{xmlText(a.Name), xmlText(a.Value)}, start)
 }
 
 type queryGet struct {
@@ -369,11 +398,12 @@ type queryError struct{ Code, Message string }
 type queryErrors struct{ Error queryError }
 type queryResponse struct {
 	XMLName   xml.Name
-	Namespace string       `xml:"xmlns,attr"`
-	List      *queryList   `xml:"ListDomainsResult,omitempty"`
-	Get       *queryGet    `xml:"GetAttributesResult,omitempty"`
-	Domain    *DomainStats `xml:"DomainMetadataResult,omitempty"`
-	Errors    *queryErrors `xml:"Errors,omitempty"`
+	Namespace string             `xml:"xmlns,attr"`
+	Select    *querySelectResult `xml:"SelectResult,omitempty"`
+	List      *queryList         `xml:"ListDomainsResult,omitempty"`
+	Get       *queryGet          `xml:"GetAttributesResult,omitempty"`
+	Domain    *DomainStats       `xml:"DomainMetadataResult,omitempty"`
+	Errors    *queryErrors       `xml:"Errors,omitempty"`
 	Metadata  struct {
 		ID string `xml:"RequestId"`
 	} `xml:"ResponseMetadata"`

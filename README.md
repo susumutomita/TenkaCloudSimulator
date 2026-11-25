@@ -115,7 +115,8 @@ console, CloudFormation adapter or Challenge integration.
 - **SimpleDB:** Native `PutAttributes` and `DeleteAttributes` accept one SDK-style `Expected` condition. It
   can compare a single value or require that an attribute be absent. The check and
   change share one transaction. Delete individual values, entire attributes or the item;
-  repeat unconditional deletion safely. Batch operations and `Select` are not supported. A write that exceeds the [256-pair item limit](docs/simpledb-item-limits.md)
+  repeat unconditional deletion safely. [Native `Select`](docs/simpledb-select.md) reads matching items or their names
+  with a single predicate and paged results. Batch operations are not supported. A write that exceeds the [256-pair item limit](docs/simpledb-item-limits.md)
   is rejected atomically. In the [SimpleDB console](docs/simpledb-console.md),
   select a local domain, read a known item, and conditionally replace or delete a single attribute.
 - **Configuration-only catalogs:** [AWS](docs/aws-catalog.md),

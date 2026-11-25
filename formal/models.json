@@ -21358,6 +21358,205 @@
           "expect_invariant": "InvalidModifyKeepsOwner"
         }
       ]
+    },
+    {
+      "id": "SimpleDBSelectPage",
+      "model": "formal/SimpleDBSelectPage.tla",
+      "config": "formal/SimpleDBSelectPage.cfg",
+      "bounds": "Three ordered item names, each absent, nonmatching, or matching; two directions; page limits 1 or 2, scan budget 2; at most one intervening change and one retained cursor, with individual scope, epoch, purpose and admission challenges.",
+      "properties": [
+        "TypeOK",
+        "AdmissionBeforeRead",
+        "CursorScopeBound",
+        "ExactCurrentPage",
+        "ExactConsumedCursor"
+      ],
+      "limits": "Three symbolic item names and a single committed change between two pages; a query identity represents exact expression bytes (including spelling, domain and order). The scan overapproximates matches in either order; checks scan and result count, not XML/raw byte budgets, timeouts, parser completeness, ACLs, cryptography, byte collation, physical SQL transactions, CLI, Console or Scalar. Not a Go refinement.",
+      "source_scope": [
+        "internal/aws/simpledb/http.go",
+        "internal/aws/simpledb/pagination.go",
+        "internal/aws/simpledb/select.go",
+        "internal/aws/simpledb/select_grammar.go",
+        "internal/server/server.go"
+      ],
+      "mutants": [
+        {
+          "id": "SkipSyntax",
+          "edits": [
+            {
+              "old": "IF ~r.valid THEN \"syntax\"",
+              "new": "IF FALSE THEN \"syntax\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AdmissionBeforeRead"
+        },
+        {
+          "id": "SkipPageAuthorization",
+          "edits": [
+            {
+              "old": "ELSE IF ~r.allowed THEN \"denied\"",
+              "new": "ELSE IF FALSE THEN \"denied\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AdmissionBeforeRead"
+        },
+        {
+          "id": "InspectDeniedRows",
+          "edits": [
+            {
+              "old": "THEN Reply(status,Result(<<>>,0),FALSE,<<>>)",
+              "new": "THEN Reply(status,Result(<<>>,0),status = \"denied\",<<>>)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AdmissionBeforeRead"
+        },
+        {
+          "id": "InspectInvalidCursorRows",
+          "edits": [
+            {
+              "old": "THEN Reply(status,Result(<<>>,0),FALSE,<<>>)",
+              "new": "THEN Reply(status,Result(<<>>,0),status = \"invalid\",<<>>)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CursorScopeBound"
+        },
+        {
+          "id": "AcceptForeignAccount",
+          "edits": [
+            {
+              "old": "/\\ r.account /\\ r.region",
+              "new": "/\\ TRUE /\\ r.region",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CursorScopeBound"
+        },
+        {
+          "id": "AcceptForeignRegion",
+          "edits": [
+            {
+              "old": "/\\ r.account /\\ r.region",
+              "new": "/\\ r.account /\\ TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CursorScopeBound"
+        },
+        {
+          "id": "IgnoreExactExpression",
+          "edits": [
+            {
+              "old": "/\\ r.expr /\\ r.consistent",
+              "new": "/\\ TRUE /\\ r.consistent",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CursorScopeBound"
+        },
+        {
+          "id": "IgnoreConsistency",
+          "edits": [
+            {
+              "old": "/\\ r.expr /\\ r.consistent",
+              "new": "/\\ r.expr /\\ TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CursorScopeBound"
+        },
+        {
+          "id": "AcceptRetiredStore",
+          "edits": [
+            {
+              "old": "/\\ r.epoch /\\ r.purpose /\\ r.intact",
+              "new": "/\\ TRUE /\\ r.purpose /\\ r.intact",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CursorScopeBound"
+        },
+        {
+          "id": "AdmitSiblingOperation",
+          "edits": [
+            {
+              "old": "/\\ r.epoch /\\ r.purpose /\\ r.intact",
+              "new": "/\\ r.epoch /\\ TRUE /\\ r.intact",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CursorScopeBound"
+        },
+        {
+          "id": "AdmitTamperedCursor",
+          "edits": [
+            {
+              "old": "/\\ r.epoch /\\ r.purpose /\\ r.intact",
+              "new": "/\\ r.epoch /\\ r.purpose /\\ TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CursorScopeBound"
+        },
+        {
+          "id": "ReplayIssuanceImage",
+          "edits": [
+            {
+              "old": "ReadImage(issued,current) == current",
+              "new": "ReadImage(issued,current) == issued",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExactCurrentPage"
+        },
+        {
+          "id": "RepeatCursorItem",
+          "edits": [
+            {
+              "old": "view[n] # 0 /\\ After(n,a,dir)",
+              "new": "(view[n] # 0 /\\ After(n,a,dir)) \\/ (n = a /\\ view[n] = 2)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExactCurrentPage"
+        },
+        {
+          "id": "ResumeAfterLastMatch",
+          "edits": [
+            {
+              "old": "THEN Result(out,last)",
+              "new": "THEN Result(out,IF Len(out) = 0 THEN 0 ELSE out[Len(out)])",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExactConsumedCursor"
+        },
+        {
+          "id": "SkipFirstDeferred",
+          "edits": [
+            {
+              "old": "THEN Result(out,last)",
+              "new": "THEN Result(out,n)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExactConsumedCursor"
+        },
+        {
+          "id": "DropMatches",
+          "edits": [
+            {
+              "old": "IF rows[n] = 2 THEN Append(out,n) ELSE out",
+              "new": "IF FALSE THEN Append(out,n) ELSE out",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExactCurrentPage"
+        }
+      ]
     }
   ]
 }

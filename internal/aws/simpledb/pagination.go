@@ -13,37 +13,51 @@ type cursor struct{ Account, Region, After string }
 
 func (s *Store) encodeCursor(c cursor) string {
 	b, _ := json.Marshal(c)
+	return s.signCursor(b, "")
+}
+func (s *Store) signCursor(b []byte, purpose string) string {
 	m := hmac.New(sha256.New, s.tokenKey[:])
+	m.Write([]byte(purpose))
 	m.Write(b)
 	return base64.RawURLEncoding.EncodeToString(b) + "." + base64.RawURLEncoding.EncodeToString(m.Sum(nil))
 }
 func (s *Store) decodeCursor(token, a, r string) (string, error) {
+	b, e := s.openCursor(token, "")
+	if e != nil {
+		return "", e
+	}
 	bad := storeError("InvalidNextToken")
-	if len(token) > 8192 {
-		return "", bad
-	}
-	p := strings.Split(token, ".")
-	if len(p) != 2 {
-		return "", bad
-	}
-	b, e := base64.RawURLEncoding.DecodeString(p[0])
-	if e != nil {
-		return "", bad
-	}
-	sig, e := base64.RawURLEncoding.DecodeString(p[1])
-	if e != nil {
-		return "", bad
-	}
-	m := hmac.New(sha256.New, s.tokenKey[:])
-	m.Write(b)
-	if !hmac.Equal(sig, m.Sum(nil)) {
-		return "", bad
-	}
 	var c cursor
 	if json.Unmarshal(b, &c) != nil || c.Account != a || c.Region != r || !domainName.MatchString(c.After) {
 		return "", bad
 	}
 	return c.After, nil
+}
+
+func (s *Store) openCursor(token, purpose string) ([]byte, error) {
+	bad := storeError("InvalidNextToken")
+	if len(token) > 8192 || strings.ContainsAny(token, "\r\n") {
+		return nil, bad
+	}
+	p := strings.Split(token, ".")
+	if len(p) != 2 {
+		return nil, bad
+	}
+	b, e := base64.RawURLEncoding.Strict().DecodeString(p[0])
+	if e != nil {
+		return nil, bad
+	}
+	sig, e := base64.RawURLEncoding.Strict().DecodeString(p[1])
+	if e != nil {
+		return nil, bad
+	}
+	m := hmac.New(sha256.New, s.tokenKey[:])
+	m.Write([]byte(purpose))
+	m.Write(b)
+	if !hmac.Equal(sig, m.Sum(nil)) {
+		return nil, bad
+	}
+	return b, nil
 }
 
 // Tokens are opaque and scoped to this Store instance. Stable-state traversal

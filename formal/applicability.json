@@ -1,259 +1,177 @@
 {
   "version": 1,
-  "base_sha": "7064f99ef0d0fbb8dc4556f743f774ac85f3916c",
+  "base_sha": "509a189915cc6076bb91c6c318a4ecc766ac9749",
   "changes": [
     {
-      "path": "docs/design/rds-owned-generation.md",
-      "sha256": "1cb94a0787f6220a6ef161c9c6b18224e4fa0f004d31ff53fcab6c7a9e366dbd",
+      "path": "README.md",
+      "sha256": "68f7c01da5a7f200fae2e7957da88c7c1cd39ba7f61ce925b11ee7b60c5dc5b3",
       "disposition": "documentation",
-      "reason": "Documents the explicitly opted-in runtime scope, committed Create result, direct teardown, durable debt and actual test limitations.",
+      "reason": "Document bounded native Select, ordering, cursor contract and unsupported surfaces; no implemented Console/Scalar or unbounded SQL is implied.",
       "models": []
     },
     {
-      "path": "docs/design/rds-owned-workload.md",
-      "sha256": "7374268bee8bcd12e9ac1998c4ade1d66d296f371c9f5994130f0877057d6406",
+      "path": "docs/design/0001-go-standalone.md",
+      "sha256": "e5a9f5cf89678e7f148dcbdf7d3202eb86581c4a664de7726c70ea1ca290d72d",
       "disposition": "documentation",
-      "reason": "Documents explicit optional provider-internal scope, provenance requirements, teardown debt and how to run the focused actual test.",
+      "reason": "Document bounded native Select, ordering, cursor contract and unsupported surfaces; no implemented Console/Scalar or unbounded SQL is implied.",
       "models": []
     },
     {
-      "path": "formal/RDSOwnedGenerationFence.cfg",
-      "sha256": "ab6c41c90db27088da813a1222bec64444bb7ccadf8dd72e261b122950566031",
+      "path": "docs/simpledb-select.md",
+      "sha256": "8369a46ea6e9d138a3249c737817a64f1a8c907c6ba8216a9dc79679495749ec",
+      "disposition": "documentation",
+      "reason": "Document bounded native Select, ordering, cursor contract and unsupported surfaces; no implemented Console/Scalar or unbounded SQL is implied.",
+      "models": []
+    },
+    {
+      "path": "formal/SimpleDBSelectPage.cfg",
+      "sha256": "8daf3716ba4346da7673424120a2e97242947d40584f1fe359deda55bad28a43",
       "disposition": "modeled",
-      "reason": "Enables the bounded sequence and its five checked safety predicates. Validates a merged Modify proposal before shutting down the owned generation.",
+      "reason": "Independently compare the finite stepwise scan with the maximum admissible prefix of the current checkpoint, and exercise denied and misbound resumption.",
       "models": [
         {
-          "id": "RDSOwnedGenerationFence",
+          "id": "SimpleDBSelectPage",
           "properties": [
-            "LaunchNeedsCommittedAuthority",
-            "AttachNeedsCurrent",
-            "FencedGenerationCannotChange",
-            "UncertainCleanupRemainsFenced",
-            "NoPublishedEndpoint",
-            "InvalidModifyKeepsOwner"
+            "AdmissionBeforeRead",
+            "CursorScopeBound",
+            "ExactCurrentPage",
+            "ExactConsumedCursor"
           ],
-          "limits": "Symbolic one-generation lease and lifecycle only. No Go refinement, SQL engine/concurrency or crash-recovery proof, topology lookup, process control, wire authentication or guest networking."
+          "limits": "Three symbolic item names and a single committed change between two pages; a query identity represents exact expression bytes (including spelling, domain and order). The scan overapproximates matches in either order; checks scan and result count, not XML/raw byte budgets, timeouts, parser completeness, ACLs, cryptography, byte collation, physical SQL transactions, CLI, Console or Scalar. Not a Go refinement."
         }
       ]
     },
     {
-      "path": "formal/RDSOwnedGenerationFence.tla",
-      "sha256": "8d905d7ee88f0978ae320c845495fc5bf3636e19697d72db88a4acffc063dd3f",
+      "path": "formal/SimpleDBSelectPage.tla",
+      "sha256": "15a94454e41be32e1b055d78c96e215e5545fa0ed19a476cd807586ec0079b44",
       "disposition": "modeled",
-      "reason": "Models accepted Create, observed current proof, fencing, retirement, confirmed teardown and retained debt. Validates a merged Modify proposal before shutting down the owned generation.",
+      "reason": "Independently compare the finite stepwise scan with the maximum admissible prefix of the current checkpoint, and exercise denied and misbound resumption.",
       "models": [
         {
-          "id": "RDSOwnedGenerationFence",
+          "id": "SimpleDBSelectPage",
           "properties": [
-            "LaunchNeedsCommittedAuthority",
-            "AttachNeedsCurrent",
-            "FencedGenerationCannotChange",
-            "UncertainCleanupRemainsFenced",
-            "NoPublishedEndpoint",
-            "InvalidModifyKeepsOwner"
+            "AdmissionBeforeRead",
+            "CursorScopeBound",
+            "ExactCurrentPage",
+            "ExactConsumedCursor"
           ],
-          "limits": "Symbolic one-generation lease and lifecycle only. No Go refinement, SQL engine/concurrency or crash-recovery proof, topology lookup, process control, wire authentication or guest networking."
-        }
-      ]
-    },
-    {
-      "path": "formal/RDSOwnedPostgresRuntime.cfg",
-      "sha256": "86bde7bed7875df4ea742a870e6fe425d3924b8022ae480e644ee67bde568580",
-      "disposition": "modeled",
-      "reason": "Runs the one-slot one-probe model and checks the named admission and cleanup properties.",
-      "models": [
-        {
-          "id": "RDSOwnedPostgresRuntime",
-          "properties": [
-            "NoWorkWithoutPin",
-            "ReadyNeedsOwnedSCRAM",
-            "NoProofAfterRevocation",
-            "CleanupAfterDrain",
-            "UncertaintyRetainsWorkspace"
-          ],
-          "limits": "Bounded symbolic lifecycle only; no Go refinement, authenticated wire proof, ELF validation, OS reaping, unbounded concurrency, guest proof or crash recovery."
-        }
-      ]
-    },
-    {
-      "path": "formal/RDSOwnedPostgresRuntime.tla",
-      "sha256": "fd99eba9e28701c95387e55348b3dab88631d1a188d407309ceae389f3b54192",
-      "disposition": "modeled",
-      "reason": "Enumerates approved/unapproved launch, exact proof, one in-flight probe, revocation and confirmed or unknown termination.",
-      "models": [
-        {
-          "id": "RDSOwnedPostgresRuntime",
-          "properties": [
-            "NoWorkWithoutPin",
-            "ReadyNeedsOwnedSCRAM",
-            "NoProofAfterRevocation",
-            "CleanupAfterDrain",
-            "UncertaintyRetainsWorkspace"
-          ],
-          "limits": "Bounded symbolic lifecycle only; no Go refinement, authenticated wire proof, ELF validation, OS reaping, unbounded concurrency, guest proof or crash recovery."
+          "limits": "Three symbolic item names and a single committed change between two pages; a query identity represents exact expression bytes (including spelling, domain and order). The scan overapproximates matches in either order; checks scan and result count, not XML/raw byte budgets, timeouts, parser completeness, ACLs, cryptography, byte collation, physical SQL transactions, CLI, Console or Scalar. Not a Go refinement."
         }
       ]
     },
     {
       "path": "formal/models.json",
-      "sha256": "33a3e4a7d2ae099bbff01309822aed3150e9ed5011d4c921208f8ba6ca60e551",
+      "sha256": "45e7f3cf6e05aa5cb4b72e7cdb4a735e834b0801d0ce2fc5d201dee69f81d55d",
       "disposition": "formal-infrastructure",
-      "reason": "Registers the bounded native process model and its separate canonical generation fence model, with negative controls, without changing the gate.",
+      "reason": "Preserve existing models; register and independently pin the new Select model, invariant, mutation and declared source-scope inventory.",
       "models": []
     },
     {
-      "path": "internal/aws/catalog/engine.go",
-      "sha256": "b38415aa7279d62907074160a1d5da1be9f79c9cf2b4d02c9af190e5331879f4",
+      "path": "internal/aws/simpledb/http.go",
+      "sha256": "b79c2236522c1f07a05271100aa3c2bef6f2c418e2c6935614e8892820a59b85",
       "disposition": "modeled",
-      "reason": "Holds an optional trusted canonical instance lifetime owner; never installed by ordinary New.",
+      "reason": "Parse Select before deriving the domain and check domain IAM on every page before reading the store. The model abstracts parsing and authorization decisions.",
       "models": [
         {
-          "id": "RDSOwnedGenerationFence",
+          "id": "SimpleDBSelectPage",
           "properties": [
-            "LaunchNeedsCommittedAuthority",
-            "NoPublishedEndpoint"
+            "AdmissionBeforeRead",
+            "CursorScopeBound"
           ],
-          "limits": "The model treats optional trusted ownership as part of launch eligibility, not a proof of constructor or production CLI wiring."
+          "limits": "Three symbolic item names and a single committed change between two pages; a query identity represents exact expression bytes (including spelling, domain and order). The scan overapproximates matches in either order; checks scan and result count, not XML/raw byte budgets, timeouts, parser completeness, ACLs, cryptography, byte collation, physical SQL transactions, CLI, Console or Scalar. Not a Go refinement."
         }
       ]
     },
     {
-      "path": "internal/aws/catalog/rds_owned_controls_linux_amd64_test.go",
-      "sha256": "d473969937961dadb441a3b827793f14ad45ec06790ecf211f161a28c7252ddc",
+      "path": "internal/aws/simpledb/pagination.go",
+      "sha256": "4a0c0a4e3db92c1307eaede49f484c5f02ce45f871f3b5100d7593b936f4d08e",
+      "disposition": "modeled",
+      "reason": "Use authenticated cursor envelopes with a dedicated Select token purpose and current store key; the model uses validity and scope, not HMAC proof.",
+      "models": [
+        {
+          "id": "SimpleDBSelectPage",
+          "properties": [
+            "CursorScopeBound"
+          ],
+          "limits": "Three symbolic item names and a single committed change between two pages; a query identity represents exact expression bytes (including spelling, domain and order). The scan overapproximates matches in either order; checks scan and result count, not XML/raw byte budgets, timeouts, parser completeness, ACLs, cryptography, byte collation, physical SQL transactions, CLI, Console or Scalar. Not a Go refinement."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/simpledb/select.go",
+      "sha256": "a0e7a488940c5ff9d4ba720a90023b2a6ead1de05bd4b946073d51e7f0050ac7",
+      "disposition": "modeled",
+      "reason": "Bind exact query/scope and scan a current per-page snapshot in key order, resuming after the last consumed candidate even on an empty page.",
+      "models": [
+        {
+          "id": "SimpleDBSelectPage",
+          "properties": [
+            "CursorScopeBound",
+            "ExactCurrentPage",
+            "ExactConsumedCursor"
+          ],
+          "limits": "Three symbolic item names and a single committed change between two pages; a query identity represents exact expression bytes (including spelling, domain and order). The scan overapproximates matches in either order; checks scan and result count, not XML/raw byte budgets, timeouts, parser completeness, ACLs, cryptography, byte collation, physical SQL transactions, CLI, Console or Scalar. Not a Go refinement."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/simpledb/select_grammar.go",
+      "sha256": "50f37dc4c01bfb01056acefeb5dab02eaddc990806984269a413f2d6f4cfef7e",
+      "disposition": "modeled",
+      "reason": "Only the accepted grammar can dispatch. Syntax, direction, limit and exact query identity are abstract inputs; the language parser itself is not proven.",
+      "models": [
+        {
+          "id": "SimpleDBSelectPage",
+          "properties": [
+            "AdmissionBeforeRead",
+            "ExactCurrentPage"
+          ],
+          "limits": "Three symbolic item names and a single committed change between two pages; a query identity represents exact expression bytes (including spelling, domain and order). The scan overapproximates matches in either order; checks scan and result count, not XML/raw byte budgets, timeouts, parser completeness, ACLs, cryptography, byte collation, physical SQL transactions, CLI, Console or Scalar. Not a Go refinement."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/simpledb/select_test.go",
+      "sha256": "ca7174c54c16cf6d47c0645e284b3984d670a64f1ff41cf363aa12ac069d69ca",
       "disposition": "test-support",
-      "reason": "Default offline SQLite fixture verifies lease identity, denied mutation, non-adoption, generation release and sticky failed acquisition without supplying a native workload. Checks that foreign-region mutators cannot consult mutable lifecycle state, including concurrent owner updates.",
+      "reason": "Exercise bounded query parsing, real SQLite handler reads, per-page policy, errors, keyset paging, cross-scope tokens, restart, scan limits and XML encodings.",
       "models": []
     },
     {
-      "path": "internal/aws/catalog/rds_owned_runtime_linux_amd64.go",
-      "sha256": "3a6ee308c7719c9e45f6771658766c44bfd05719b82353197b87b5adaa090329",
+      "path": "internal/server/server.go",
+      "sha256": "21ef4787a0d546dd8fd3420a8f6ab01acaf8e785a36cd95d380fa16fb79c5f53",
       "disposition": "modeled",
-      "reason": "Installs and commits an exact SQLite fence with an authorized row, starts only after commit, verifies current authority before/after readiness, and releases only on confirmed teardown. Validates a merged Modify proposal before shutting down the owned generation. Foreign-target mutations bypass mutable owner state; only nominated regional mutators consult it under the lock.",
+      "reason": "The only modified discovery metadata advertises the native Select operation whose acceptance and paging contract are modeled; the model does not verify UI, JSON discovery contents or server wiring.",
       "models": [
         {
-          "id": "RDSOwnedGenerationFence",
+          "id": "SimpleDBSelectPage",
           "properties": [
-            "LaunchNeedsCommittedAuthority",
-            "AttachNeedsCurrent",
-            "FencedGenerationCannotChange",
-            "UncertainCleanupRemainsFenced",
-            "NoPublishedEndpoint",
-            "InvalidModifyKeepsOwner"
+            "AdmissionBeforeRead",
+            "ExactCurrentPage"
           ],
-          "limits": "Symbolic one-generation lease and lifecycle only. No Go refinement, SQL engine/concurrency or crash-recovery proof, topology lookup, process control, wire authentication or guest networking."
+          "limits": "Three symbolic item names and a single committed change between two pages; a query identity represents exact expression bytes (including spelling, domain and order). The scan overapproximates matches in either order; checks scan and result count, not XML/raw byte budgets, timeouts, parser completeness, ACLs, cryptography, byte collation, physical SQL transactions, CLI, Console or Scalar. Not a Go refinement."
         }
       ]
     },
     {
-      "path": "internal/aws/catalog/rds_private_postgres_topology.go",
-      "sha256": "89a294ece3ad977237c0226f40c3d1ace5b613d903ff5a52d4a9c2e192a7811f",
-      "disposition": "modeled",
-      "reason": "Uses the same private topology resolution before catalog mutation and again in the concrete owner, without changing callback authorizations.",
-      "models": [
-        {
-          "id": "RDSOwnedGenerationFence",
-          "properties": [
-            "LaunchNeedsCommittedAuthority",
-            "AttachNeedsCurrent"
-          ],
-          "limits": "The model uses a symbolic proof of topology, not a proof of concrete field decoding, database lookup, or network reachability."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/catalog/semantics.go",
-      "sha256": "18cd880b0ceef48e58bcf8378e85b3df5a5dac527d9d24a8cdc6b508cdb1b139",
-      "disposition": "modeled",
-      "reason": "Reserves in the authorized create transaction and starts only after commit; before authorized update/delete/tag generation writes, retires the exact active owner. Validates a merged Modify proposal before shutting down the owned generation.",
-      "models": [
-        {
-          "id": "RDSOwnedGenerationFence",
-          "properties": [
-            "LaunchNeedsCommittedAuthority",
-            "FencedGenerationCannotChange",
-            "UncertainCleanupRemainsFenced",
-            "NoPublishedEndpoint",
-            "InvalidModifyKeepsOwner"
-          ],
-          "limits": "Symbolic one-generation lease and lifecycle only. No Go refinement, SQL engine/concurrency or crash-recovery proof, topology lookup, process control, wire authentication or guest networking."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/rds_owned_runtime_linux_amd64_test.go",
-      "sha256": "ddc31a59b1a87d76ee1051f1fc521f062237c60652e9c3eff905b834710d4720",
-      "disposition": "test-support",
-      "reason": "Actual AWS Query/SQLite and opted-in PostgreSQL lifecycle fixture tests authoritative negatives, race fencing, teardown, substitution/drift, and unconfirmed debt. Runs invalid and valid Modify against the real workload.",
-      "models": []
-    },
-    {
-      "path": "internal/rdsruntime/bundle_linux_amd64.go",
-      "sha256": "ba2b71aec19276b8d1c4bccd167de4738175cd114c428d41d34fea48a5344494",
-      "disposition": "modeled",
-      "reason": "Makes the optional trusted bundle a prerequisite to starting a workspace or process.",
-      "models": [
-        {
-          "id": "RDSOwnedPostgresRuntime",
-          "properties": [
-            "NoWorkWithoutPin"
-          ],
-          "limits": "Bundle validation is represented by a Boolean independently approved pin, not a proof of rooted file lookup, hashing, ELF, platform dynamic linking, or file identity."
-        }
-      ]
-    },
-    {
-      "path": "internal/rdsruntime/lifecycle_controls_linux_amd64_test.go",
-      "sha256": "46cbfc3880fdb0a1bf311b62304da00c485e77fd24200ad5e9f45e7e81185d7f",
-      "disposition": "test-support",
-      "reason": "Default native unit tests verify private postmaster lock parsing, cancellation, reaped process status, credential-file scope, teardown and retained cleanup debt; they do not assert PostgreSQL service readiness.",
-      "models": []
-    },
-    {
-      "path": "internal/rdsruntime/runtime_linux_amd64.go",
-      "sha256": "d1e4f6649b9208108e1b66e8d7b5ca145069231ea85c0c606801a40f250f00a4",
-      "disposition": "modeled",
-      "reason": "Claims one workspace only after opt-in, withholds the internal handle until native child and authentication match, revokes then drains before exact close, and refuses cleanup on ambiguity.",
-      "models": [
-        {
-          "id": "RDSOwnedPostgresRuntime",
-          "properties": [
-            "NoWorkWithoutPin",
-            "ReadyNeedsOwnedSCRAM",
-            "NoProofAfterRevocation",
-            "CleanupAfterDrain",
-            "UncertaintyRetainsWorkspace"
-          ],
-          "limits": "Bounded symbolic lifecycle only; no Go refinement, authenticated wire proof, ELF validation, OS reaping, unbounded concurrency, guest proof or crash recovery."
-        },
-        {
-          "id": "RDSOwnedGenerationFence",
-          "properties": [
-            "AttachNeedsCurrent",
-            "UncertainCleanupRemainsFenced"
-          ],
-          "limits": "Symbolic one-generation lease and lifecycle only. No Go refinement, SQL engine/concurrency or crash-recovery proof, topology lookup, process control, wire authentication or guest networking."
-        }
-      ]
-    },
-    {
-      "path": "internal/rdsruntime/runtime_linux_amd64_test.go",
-      "sha256": "21d538b836c09495edd7d6aa0d65a79b832f7f1dcb0ebefc5222dacddb2f21e8",
-      "disposition": "test-support",
-      "reason": "Offline guards and independently opted-in measured PostgreSQL 15.20 test cover pin, SCRAM, one-slot collision, stale probe, child shutdown and private workspace removal.",
-      "models": []
-    },
-    {
-      "path": "internal/rdsruntime/seal_controls_linux_amd64_test.go",
-      "sha256": "59fa0eec33d53ef6a8a1e9a0cd8d97425c37a8fbf9d9c4ba5a685058a70d7fb6",
-      "disposition": "test-support",
-      "reason": "Default native tests verify pinned layout, inode identity, ELF format, workspace admission and cancellation using inert header data, never executing substitute database binaries.",
+      "path": "scripts/formal_model_gate.py",
+      "sha256": "2aed4c3cca308306706b91100da1ebdb8343189fcc11f4da82f91b062801dcf5",
+      "disposition": "formal-infrastructure",
+      "reason": "Preserve existing models; register and independently pin the new Select model, invariant, mutation and declared source-scope inventory.",
       "models": []
     },
     {
       "path": "scripts/test-formal-gate.py",
-      "sha256": "6260359e57c8be9bb522372f9d0cd658d725e425af6acddedfa9fb49924b67a6",
+      "sha256": "8c442750fc886b0eb1c14a95a4bd60bc6bb42bee216deeddaebd8cd65790d6a7",
       "disposition": "formal-infrastructure",
-      "reason": "Name the two new owned PostgreSQL models in the independent exact registry assertion without changing existing names or weakening equality.",
+      "reason": "Preserve existing models; register and independently pin the new Select model, invariant, mutation and declared source-scope inventory.",
+      "models": []
+    },
+    {
+      "path": "scripts/test-simpledb-select-sdk.py",
+      "sha256": "a4d839f9ef6fa4354cfa1b4a64e1b976f30b61e6bcf65ff8f0e1eaa03e6099a8",
+      "disposition": "test-support",
+      "reason": "Optional pinned SDK client exercises the supported native operation across two local processes and checks cleanup. A checked-in client is not evidence of running the full simulator.",
       "models": []
     }
   ]
