@@ -111,6 +111,9 @@ console, CloudFormation adapter or Challenge integration.
 - **Configuration-only catalogs:** [AWS](docs/aws-catalog.md),
   [Google Cloud](docs/gcp-catalog.md), [Azure Resource Manager](docs/azure-catalog.md).
   These do not run workloads, provide data planes or provision real cloud resources.
+  AppFlow stores S3-to-S3 flow definitions only. An `OnDemand` definition
+  rejects schedule settings; a `Scheduled` definition requires a nonblank
+  schedule expression. AppFlow does not start jobs or move objects.
 
 After signing in, open <http://127.0.0.1:4566/_simulator/docs/> for the API reference.
 Examples are static; **Test Request → Send** makes a live local request.
