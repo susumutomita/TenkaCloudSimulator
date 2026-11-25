@@ -75,8 +75,15 @@ DNS name or `.` for service unavailable. For example, an addition may contain
 `{"name":"_submission._tcp.example.test.","type":"SRV","ttl":300,"rrdatas":["0 1 587 mail.example.test."]}`.
 To replace or remove the record set, submit its exact previous TTL and values
 in `deletions`. No target lookup, alias verification, endpoint selection or
-DNS serving is performed. The existing console can list the stored record;
-this slice does not add a dedicated SRV editor or Scalar write controls.
+DNS serving is performed. In the owner Console, open **Cloud DNS → Zones** and
+select a zone. **Add SRV record** accepts one or more priority, weight, port
+and target rows; **Edit** and **Delete** apply to the entire selected SRV
+record set. Edits send one change with the previously displayed TTL and values
+in `deletions`, not a delete followed by a create. The Console confirms an
+exact change receipt and re-reads the zone before reporting success. If a
+write is uncertain or the record has changed, refresh before trying again.
+Legacy capability descriptors without `changes.create` keep record sets
+read-only. This is local metadata; there are no Scalar write controls.
 
 State is held in provider-owned SQLite tables. Final RRsets and complete receipt
 sequence/documents are checked inside the transaction before commit; divergence

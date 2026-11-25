@@ -20760,6 +20760,42 @@
           "expect_invariant": "ContinuationEnd"
         }
       ]
+    },
+    {
+      "id": "SimpleDBConsoleEpoch",
+      "model": "formal/SimpleDBConsoleEpoch.tla",
+      "config": "formal/SimpleDBConsoleEpoch.cfg",
+      "bounds": "Two principal identities, two domain and item names, two view moves, three requested chains plus acknowledged read-back; four required operation flags.",
+      "properties": [
+        "TypeOK",
+        "VisibleRequiresCapability",
+        "OnlyCurrentScopeVisible",
+        "SingleCurrentChain",
+        "ReadbackOnlyAfterAck",
+        "WriteNoticeRequiresAck"
+      ],
+      "limits": "Symbolic local capability, React view ownership, native acknowledgements and publication only. No Go/JavaScript refinement, DOM focus, CSS/reflow, XML parsing or HTTP decoding, native IAM, transaction/SQLite proof, actual cancellation of server writes, or complete SimpleDB semantics.",
+      "source_scope": [
+        "internal/server/server.go",
+        "internal/server/web/app.js",
+        "tools/console/src/console-navigation.mjs",
+        "tools/console/src/main.jsx",
+        "tools/console/src/simpledb-client.mjs",
+        "tools/console/src/simpledb.jsx"
+      ],
+      "mutants": [
+        {
+          "id": "ReadBackAfterRejectedPut",
+          "edits": [
+            {
+              "old": "Follow(status) == status = \"ack\"",
+              "new": "Follow(status) == TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadbackOnlyAfterAck"
+        }
+      ]
     }
   ]
 }
