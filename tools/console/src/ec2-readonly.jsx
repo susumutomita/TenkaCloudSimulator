@@ -19,6 +19,7 @@ import Box from '@cloudscape-design/components/box';
 import {useLocale} from './i18n.jsx';
 import VPCSubnetFields from './ec2-vpc-subnet-fields.jsx';
 import {createVpcWithSubnet,vpcSubnetInputError} from './ec2-vpc-subnet.mjs';
+import EC2InstanceMetadata from './ec2-instance-metadata.jsx';
 
 import {parseEC2Document,parseCreateVpc,parseDeleteVpc,parseEC2Error,createVpcParameters,VPC_NAME_LIMIT} from './ec2-response.mjs';
 
@@ -112,8 +113,10 @@ export default function EC2Readonly({kind,region,request,sessionInstance,onSessi
   const managedLabel=value=>value==='ec2'?'EC2':value==='cloudformation'?'CloudFormation':t('Unconfirmed','未確認');
   const fields=instance?[['id','Instance ID','インスタンスID'],['name','Name','名前'],['state','Recorded runtime state','記録されたランタイム状態'],['type','Instance type','インスタンスタイプ'],['vpc','VPC ID','VPC ID'],['subnet','Subnet ID','サブネットID'],['image','Image ID','イメージID']]:[['id','VPC ID','VPC ID'],['name','Name','名前'],['cidr','IPv4 CIDR','IPv4 CIDR'],['managedBy','Managed by','管理元']];
   const display=(key,item)=>key==='state'&&(!item[key]||item[key]==='unknown')?t('Unconfirmed','未確認'):key==='managedBy'?managedLabel(item[key]):item[key];
-  const filtered=items.filter(item=>Object.values(item).some(v=>String(v).toLocaleLowerCase().includes(filter.toLocaleLowerCase())));
+  const query=filter.toLocaleLowerCase();
+  const filtered=items.filter(item=>fields.some(([field])=>item[field].toLocaleLowerCase().includes(query)));
   const detail=selected[0];
+  const detailFields=detail&&<KeyValuePairs columns={2} items={fields.map(([key,en,ja])=>({label:t(en,ja),value:idCell(display(key,detail))}))}/>;
   const unavailable=t('Not available in this simulator.','このシミュレーターでは利用できません。');
   if(manage&&view==='create')return <ContentLayout header={<div ref={heading} tabIndex={-1}><Header variant="h1" description={t('Create an isolated virtual network with an IPv4 CIDR block. It is saved in this local simulator only.','IPv4 CIDR ブロックを持つ、分離された仮想ネットワークを作成します。このローカルシミュレーターにのみ保存されます。')}>{t('Create VPC','VPC を作成')}</Header></div>}>
     <form onSubmit={create}><Form errorText={formError} actions={<SpaceBetween direction="horizontal" size="xs"><Button formAction="none" disabled={busy} onClick={()=>{changeView('list');setFormError('');}}>{t('Cancel','キャンセル')}</Button><Button variant="primary" formAction="submit" loading={busy}>{t('Create VPC','VPC を作成')}</Button></SpaceBetween>}>
@@ -145,7 +148,9 @@ export default function EC2Readonly({kind,region,request,sessionInstance,onSessi
       filter={<TextFilter filteringText={filter} onChange={({detail})=>{setFilter(detail.filteringText);setPage(1);setSelected([]);}} filteringAriaLabel={t('Filter resources','リソースを絞り込む')} filteringPlaceholder={t('Find resources','リソースを検索')}/>}
       pagination={<Pagination currentPageIndex={page} pagesCount={Math.max(1,Math.ceil(filtered.length/20))} onChange={({detail})=>setPage(detail.currentPageIndex)} ariaLabels={{nextPageLabel:t('Next page','次のページ'),previousPageLabel:t('Previous page','前のページ'),pageLabel:n=>String(n)}}/>}
       empty={<SpaceBetween size="s"><span>{error?t('Resources are unavailable. Retry with Refresh.','リソースを取得できません。「更新」で再試行してください。'):items.length?t('No resources match your filter.','検索条件に一致するリソースがありません。'):t('No resources found in this region.','このリージョンには該当するリソースがありません。')}</span>{items.length>0&&<Button onClick={()=>{setFilter('');setPage(1);}}>{t('Clear filter','絞り込みを解除')}</Button>}</SpaceBetween>}/>
-    {detail&&<Container header={<Header variant="h2" actions={<Button onClick={()=>setSelected([])}>{t('Close details','詳細を閉じる')}</Button>}>{t('Resource details','リソースの詳細')}</Header>}><KeyValuePairs columns={2} items={fields.map(([key,en,ja])=>({label:t(en,ja),value:idCell(display(key,detail))}))}/></Container>}
+    {detail&&<Container header={<Header variant="h2" actions={<Button onClick={()=>setSelected([])}>{t('Close details','詳細を閉じる')}</Button>}>{t('Resource details','リソースの詳細')}</Header>}>
+      {instance?<SpaceBetween size="l">{detailFields}<EC2InstanceMetadata groupIds={detail.groupIds} tags={detail.tags}/></SpaceBetween>:detailFields}
+    </Container>}
     {manage&&<Modal visible={!!deleting} onDismiss={()=>{if(!busy)setDeleting(null);}} header={t('Delete VPC','VPC を削除')} closeAriaLabel={t('Close dialog','ダイアログを閉じる')}>
       <form onSubmit={remove}><Form errorText={deleteError} actions={<SpaceBetween direction="horizontal" size="xs"><Button formAction="none" disabled={busy} onClick={()=>setDeleting(null)}>{t('Cancel','キャンセル')}</Button><Button variant="primary" formAction="submit" loading={busy} disabled={confirmation!=='delete'}>{t('Delete','削除')}</Button></SpaceBetween>}>
         <SpaceBetween size="m"><Box>{t('Delete this VPC? This cannot be undone.','この VPC を削除しますか? この操作は元に戻せません。')}</Box><Box>{idCell(deleting?.id)}{deleting?.name?' ('+deleting.name+')':''}</Box>

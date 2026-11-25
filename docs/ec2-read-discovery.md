@@ -24,6 +24,10 @@ Unsupported fields are rejected, not silently ignored. More than 1000 matching
 resources fails the whole request, rather than returning a truncated list.
 
 Instances expose only IDs, image/type, subnet/VPC, security-group IDs and tags.
+Select an instance in the console's **EC2 instances** list to see its saved
+security-group IDs and tags, including intentionally empty tag values. These
+come from the existing [DescribeInstances instance fields](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_Instance.html);
+the console does not attach security groups, edit tags or create an instance.
 UserData, runtime plans and internal access information are never returned.
 `instanceState` is deliberately absent: successful provisioning or a saved
 `ready` journal entry does not prove a live running VM. The extension
