@@ -38,7 +38,42 @@ test('EC2 reader preserves recorded state, never invents running, and ignores pr
     const input = instanceDocument([instance('i-one', state, [element('UserData', 'SECRET'), element('plan', 'PRIVATE'),
       element('tagSet', [tag('Name', 'Sample')])])]);
     assert.deepEqual(parseEC2Document(input, 'ec2'), [{id: 'i-one', name: 'Sample', state,
-      type: 't3.micro', image: 'ami-local', vpc: 'vpc-one', subnet: 'subnet-one'}]);
+      type: 't3.micro', image: 'ami-local', vpc: 'vpc-one', subnet: 'subnet-one',
+      groupIds: [], tags: [{key:'Name',value:'Sample'}]}]);
+  }
+});
+
+const group = id => element('item', [element('groupId', id)]);
+const metadata = (groups, tags) => [element('groupSet', groups), element('tagSet', tags)];
+
+test('instance details retain their attached groups and all tags without leaking other instance fields', () => {
+  const rows = parseEC2Document(instanceDocument([
+    instance('i-one', 'unknown', [...metadata([group('sg-first'), group('sg-second')],
+      [tag('Name','学習用'), tag('Course', '<lab> & 教材'), tag('Empty','')]),
+      element('UserData','DO-NOT-EXPOSE'), element('plan','PRIVATE')]),
+    instance('i-two', 'ready', metadata([group('sg-other')], [tag('Course','Different')])),
+  ]), 'ec2');
+  assert.deepEqual(rows.map(({name, groupIds, tags})=>({name, groupIds, tags})), [
+    {name:'学習用',groupIds:['sg-first','sg-second'],tags:[{key:'Name',value:'学習用'},{key:'Course',value:'<lab> & 教材'},{key:'Empty',value:''}]},
+    {name:'',groupIds:['sg-other'],tags:[{key:'Course',value:'Different'}]},
+  ]);
+  assert.equal(JSON.stringify(rows).includes('DO-NOT-EXPOSE'),false);
+  assert.equal(JSON.stringify(rows).includes('PRIVATE'),false);
+});
+
+test('instance metadata is bounded and malformed sets fail closed', () => {
+  const groups=Array.from({length:5},(_,i)=>group('sg-'+i));
+  const tags=Array.from({length:50},(_,i)=>tag('tag-'+i,''));
+  const parse = extra=>parseEC2Document(instanceDocument([instance('i-one','unknown',extra)]),'ec2')[0];
+  assert.equal(parse(metadata(groups,tags)).groupIds.length,5);
+  assert.equal(parse(metadata(groups,tags)).tags.length,50);
+  for(const malformed of [metadata([...groups,group('sg-over')],tags), metadata(groups,[...tags,tag('tag-over','')]),
+    metadata([group('sg-1'),group('sg-1')],[]),metadata([group('')],[]),
+    metadata([element('item',[element('groupId','sg-1','urn:wrong')])],[]),
+    metadata([],[tag('Course','a'),tag('Course','b')]),metadata([],[tag('','value')]),
+    metadata([],[element('item',[element('key','Course')])]),
+    [element('groupSet'),element('groupSet')], [element('tagSet'),element('tagSet')]]) {
+    assert.throws(()=>parse(malformed),/Invalid or incomplete EC2 response/);
   }
 });
 

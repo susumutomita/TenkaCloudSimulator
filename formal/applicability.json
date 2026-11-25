@@ -1,109 +1,90 @@
 {
   "version": 1,
-  "base_sha": "848b081e508bdfc843da7877908ed68e990d2e50",
+  "base_sha": "79d1e1c6f779a32f22de801affbf677bbb357d26",
   "changes": [
     {
-      "path": "README.md",
-      "sha256": "6f057490106423b32aac82db5316e76be01159f9bfc96eddf1f08a0a565f18f0",
-      "disposition": "documentation",
-      "reason": "Documents the local jointly owned VPC/subnet creation path and its limits.",
-      "models": []
-    },
-    {
-      "path": "docs/design/0001-go-standalone.md",
-      "sha256": "015b3bdf0707592d088336892aaf050f95de3b5b7fce3d2a1350ea2447cc511e",
-      "disposition": "documentation",
-      "reason": "Documents the local jointly owned VPC/subnet creation path and its limits.",
+      "path": ".github/workflows/ci.yml",
+      "sha256": "680e7736d0a07fbb412f770db86ca7495a7c830c5b9add972a55572fdc543673",
+      "disposition": "formal-infrastructure",
+      "reason": "Adds the existing inexpensive EC2 parser and navigation unit files to a Node command within the existing static checks job. No new job, branch gate, browser harness, privilege, or deployment.",
       "models": []
     },
     {
       "path": "docs/ec2-read-discovery.md",
-      "sha256": "b51befd1db7f21b608318b5477c7edf78d8eff214253ef025ea3f1589a8c4a23",
+      "sha256": "84e0ff0fc2660047ce17cd57a9b17707f8c3419600e69c1ede68c0f920d809df",
       "disposition": "documentation",
-      "reason": "Documents the local jointly owned VPC/subnet creation path and its limits.",
+      "reason": "Documents selecting an EC2 row to inspect its saved security-group IDs and tag values and keeps the read-only limitation explicit.",
       "models": []
     },
     {
       "path": "internal/server/web/app.js",
-      "sha256": "6345e8743efbfca09e0d2cd5eb11ca561de09957674e2b05890db9e6b728ad9b",
+      "sha256": "4603e2e4a3c4fedf7f15648513fc76074a08eff97fcb4bb5e88ef1fa8ee59c2a",
       "disposition": "modeled",
-      "reason": "Mounts the VPC screen with an authenticated administrator-only CloudFormation form; one submission and post-acknowledgment list focus remain local.",
+      "reason": "Deterministic combined bundle. The catalog reply ownership, existing VPC submission flow and SimpleDB bounded request/acknowledgment paths are preserved. The EC2 delta displays records already accepted by the unchanged scoped DescribeInstances request path; only synchronous formatting/filter exclusion of newly displayed collections changes.",
       "models": [
         {
           "id": "CatalogConsoleEpoch",
           "properties": [
             "NoUnmountedAcceptance",
-            "SingleWriter",
-            "ReloadOnlyAfterAck"
+            "OnlyCurrentReplies",
+            "ReloadOnlyAfterAck",
+            "SingleWriter"
           ],
-          "limits": "The catalog model is a finite analogue for single submission, suppression after unmount, and refreshing only after confirmed output. It does not model administrator capability admission, VPC template, CloudFormation credentials/state, actual DOM focus or Go refinement."
+          "limits": "Existing finite catalog-view reply acceptance and VPC form subgraph analogues only: current/mounted responses, one submission, and reloading after acknowledged outputs. No registered EC2 selection model; not a proof of this EC2 parsing/display, DOM focus, administrator admission, native CloudFormation/VM/network behavior, or JavaScript refinement."
+        },
+        {
+          "id": "SimpleDBConsoleEpoch",
+          "properties": [
+            "VisibleRequiresCapability",
+            "OnlyCurrentScopeVisible",
+            "SingleCurrentChain",
+            "ReadbackOnlyAfterAck",
+            "WriteNoticeRequiresAck"
+          ],
+          "limits": "Symbolic local capability, React view ownership, native acknowledgements and publication only. No Go/JavaScript refinement, DOM focus, CSS/reflow, XML parsing or HTTP decoding, native IAM, transaction/SQLite proof, actual cancellation of server writes, or complete SimpleDB semantics."
         }
       ]
     },
     {
-      "path": "test/console/ec2_vpc_subnet_native.py",
-      "sha256": "4d89744195a94b2bb4aff5baddab4be4fd84b60b4ea52afb3eb3e90d8f998fde",
-      "disposition": "test-support",
-      "reason": "Focused local native VPC console request and readback check; no runtime change.",
-      "models": []
-    },
-    {
       "path": "tools/console/bundle-digests.json",
-      "sha256": "216defc892a9bc9df3bc388b06fb9a7688395615aa161982b2d47d5d51360f8c",
+      "sha256": "44ab08f95f259568405659e5c16feb264f85cf2acbe5025952cb9748e177c048",
       "disposition": "presentation",
-      "reason": "Bounded VPC form, request translation, build data or presentation tests. Existing CloudFormation runtime retains native authorization, validation and atomic ownership.",
+      "reason": "Reproducible console asset digests; does not implement request dispatch or resource lifecycle.",
       "models": []
     },
     {
       "path": "tools/console/bundle-inputs.json",
-      "sha256": "8371b6d2d7867892d7e74cf6840d62a833438071441d619eae1a21de240c4ca9",
+      "sha256": "af489f5ad42d238864c7a0a1c3ac37a577ec98cce1ba7599ee15be4f021d7ebd",
       "disposition": "presentation",
-      "reason": "Bounded VPC form, request translation, build data or presentation tests. Existing CloudFormation runtime retains native authorization, validation and atomic ownership.",
+      "reason": "Generated esbuild input and output provenance for the console projection; unchanged locked dependency versions.",
+      "models": []
+    },
+    {
+      "path": "tools/console/src/ec2-instance-metadata.jsx",
+      "sha256": "df4741f94931d837028fb8c49cec055926c127b8ecdc2450f92aa9e6f8d09690",
+      "disposition": "presentation",
+      "reason": "Renders only the selected instance's already-parsed security-group IDs and tag text. No requests, persistence, authorization, or VM control.",
       "models": []
     },
     {
       "path": "tools/console/src/ec2-readonly.jsx",
-      "sha256": "7f3c76feacea06954079c41daaa603a9392a7289f1ae254cc3218c75b7041f67",
+      "sha256": "51832338521714485503d8c38719a5c90c7083ec8976ed17a28d190707f60e8b",
       "disposition": "presentation",
-      "reason": "Bounded VPC form, request translation, build data or presentation tests. Existing CloudFormation runtime retains native authorization, validation and atomic ownership.",
+      "reason": "Synchronous projection of existing selected-instance metadata. Filter searches existing scalar columns, not new collections. Existing mount/epoch, session binding and all prospective VPC permissions, forms and request/response behavior stay intact.",
       "models": []
     },
     {
-      "path": "tools/console/src/ec2-vpc-subnet-fields.jsx",
-      "sha256": "360f07020a200cd8addef2b10e08b8e691ccba22ec713c75ba28786d1b5ec33f",
+      "path": "tools/console/src/ec2-response.mjs",
+      "sha256": "7fc58f1b8ecbacb61e605c363406a1a3788b9068ea63e4cf1312f5e6b4cb23e2",
       "disposition": "presentation",
-      "reason": "Bounded VPC form, request translation, build data or presentation tests. Existing CloudFormation runtime retains native authorization, validation and atomic ownership.",
+      "reason": "Bounds and decodes security-group IDs and tags from the existing EC2 XML response in the console. It changes no protocol, network admission, ownership, or server-side resource state.",
       "models": []
     },
     {
-      "path": "tools/console/src/ec2-vpc-subnet.mjs",
-      "sha256": "7b950be9f18751ae58900f50c1d9b047fb913a6e4d8fcc5d610b5559574b7b49",
+      "path": "tools/console/test/ec2-response.test.mjs",
+      "sha256": "3bb26598f602dadccc9c047a410b1b6394f9d2e62076f5b247dea78a89c74516",
       "disposition": "presentation",
-      "reason": "Bounded VPC form, request translation, build data or presentation tests. Existing CloudFormation runtime retains native authorization, validation and atomic ownership.",
-      "models": []
-    },
-    {
-      "path": "tools/console/src/main.jsx",
-      "sha256": "c6941b261c8b61d69a60d1ded152e137a02b8ba9e9418236eb1ec25de2526c08",
-      "disposition": "modeled",
-      "reason": "Mounts the VPC screen with an authenticated administrator-only CloudFormation form; one submission and post-acknowledgment list focus remain local.",
-      "models": [
-        {
-          "id": "CatalogConsoleEpoch",
-          "properties": [
-            "NoUnmountedAcceptance",
-            "SingleWriter",
-            "ReloadOnlyAfterAck"
-          ],
-          "limits": "The catalog model is a finite analogue for single submission, suppression after unmount, and refreshing only after confirmed output. It does not model administrator capability admission, VPC template, CloudFormation credentials/state, actual DOM focus or Go refinement."
-        }
-      ]
-    },
-    {
-      "path": "tools/console/test/ec2-vpc-subnet.test.mjs",
-      "sha256": "7aaa7d8f539b64b960e503af5e27e40a0c41d7e98a6f9b1197b40e4a68351d9a",
-      "disposition": "presentation",
-      "reason": "Bounded VPC form, request translation, build data or presentation tests. Existing CloudFormation runtime retains native authorization, validation and atomic ownership.",
+      "reason": "Node-only console regression suite within the presentation tree: binds exact selected-instance metadata shape, bounds and malformed input refusals. No production behavior.",
       "models": []
     }
   ]
