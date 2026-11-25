@@ -144,6 +144,10 @@ func (g *Gateway) serveEC2(w http.ResponseWriter, r *http.Request) {
 			fail("InternalError", "Local discovery state is inconsistent or exceeds the 1000-resource bound.", 500)
 			return
 		}
+		if action == "DescribeSecurityGroups" {
+			out = &ec2DescribeSecurityGroupsResponse{Groups: ec2SecurityGroupSet{Items: read.securityGroups}}
+			break
+		}
 		if instanceScoped {
 			read.Reservations = onlyInstance(read.Reservations, boundary.instance)
 		}
@@ -196,13 +200,14 @@ type ec2SubnetSet struct {
 	Items []ec2SubnetRead `xml:"item"`
 }
 type ec2ReadResponse struct {
-	Subnets        *ec2SubnetSet `xml:"subnetSet,omitempty"`
-	XMLName        xml.Name
-	XMLNS          string               `xml:"xmlns,attr"`
-	RequestID      string               `xml:"requestId"`
-	Reservations   []ec2ReservationRead `xml:"reservationSet>item,omitempty"`
-	VPCs           []ec2VPCRead         `xml:"vpcSet>item,omitempty"`
-	SecurityGroups *ec2SecurityGroupSet `xml:"securityGroupInfo,omitempty"`
+	Subnets      *ec2SubnetSet `xml:"subnetSet,omitempty"`
+	XMLName      xml.Name
+	XMLNS        string               `xml:"xmlns,attr"`
+	RequestID    string               `xml:"requestId"`
+	Reservations []ec2ReservationRead `xml:"reservationSet>item,omitempty"`
+	VPCs         []ec2VPCRead         `xml:"vpcSet>item,omitempty"`
+
+	securityGroups []ec2SecurityGroupRead // Only serialized by ec2DescribeSecurityGroupsResponse.
 }
 
 func ec2ReadTags(tags map[string]string) []ec2Tag {
@@ -232,7 +237,6 @@ func (s *StackStore) ec2Read(ctx context.Context, region, action string) (ec2Rea
 		out.Subnets = &ec2SubnetSet{}
 	} else if action == "DescribeSecurityGroups" {
 		kind = ec2SecurityGroupKind
-		out.SecurityGroups = &ec2SecurityGroupSet{}
 	}
 	rows, e := tx.QueryContext(ctx, `SELECT o.physical_id,o.stack_id,s.document FROM aws_cfn_ownership o JOIN aws_cfn_stacks s ON s.id=o.stack_id WHERE o.namespace=? AND o.kind=? AND s.region=? ORDER BY o.physical_id LIMIT 1001`, stackResourceNamespace(region, kind), kind, region)
 	if e != nil {
@@ -279,7 +283,7 @@ func (s *StackStore) ec2Read(ctx context.Context, region, action string) (ec2Rea
 			if err != nil {
 				return out, err
 			}
-			out.SecurityGroups.Items = append(out.SecurityGroups.Items, group)
+			out.securityGroups = append(out.securityGroups, group)
 			continue
 		}
 		if kind == "AWS::EC2::VPC" || kind == "AWS::EC2::Subnet" {

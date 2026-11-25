@@ -3,6 +3,7 @@ package aws
 import (
 	"context"
 	"database/sql"
+	"encoding/xml"
 	"fmt"
 	"net/netip"
 	"unicode/utf8"
@@ -32,6 +33,15 @@ type ec2SecurityGroupRead struct {
 
 type ec2SecurityGroupSet struct {
 	Items []ec2SecurityGroupRead `xml:"item"`
+}
+
+// Grouped element tags in the shared legacy envelope can emit empty sibling
+// collections even for nil slices. The Query operation has only this set.
+type ec2DescribeSecurityGroupsResponse struct {
+	XMLName   xml.Name            `xml:"DescribeSecurityGroupsResponse"`
+	XMLNS     string              `xml:"xmlns,attr"`
+	RequestID string              `xml:"requestId"`
+	Groups    ec2SecurityGroupSet `xml:"securityGroupInfo"`
 }
 
 // encoding/xml silently replaces characters outside the XML 1.0 Char

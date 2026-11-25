@@ -197,6 +197,8 @@ func stampEC2Response(out any) {
 	switch v := out.(type) {
 	case *ec2ReadResponse:
 		v.XMLNS, v.RequestID = ns, id
+	case *ec2DescribeSecurityGroupsResponse:
+		v.XMLNS, v.RequestID = ns, id
 	case *ec2CreateVpcResponse:
 		v.XMLNS, v.RequestID = ns, id
 	case *ec2DeleteVpcResponse:

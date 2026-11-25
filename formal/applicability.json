@@ -79,7 +79,7 @@
     },
     {
       "path": "internal/aws/ec2_read.go",
-      "sha256": "a577187645fa11a87035f1e316719774b28eb9f6a0d799c35c7149a0c1f61154",
+      "sha256": "6aabb85eaa53f50ba6de36440db74f1c4ab804e146c9820065d98b819d2b122c",
       "disposition": "modeled",
       "reason": "Apply existing request scope and bound the regional selection to typed stack ownership before returning the projection.",
       "models": [
@@ -96,7 +96,7 @@
     },
     {
       "path": "internal/aws/ec2_security_groups_read.go",
-      "sha256": "f57c7c5baaf7000e42dd3079bd3e2821fe1c08931d996c71957b4466c90ebd85",
+      "sha256": "f86cbe77cd29750afe9fcae83746ebef9c1d0c6e6fc7d9043c568195e6756c14",
       "disposition": "modeled",
       "reason": "Validate canonical parent/group storage and project only current valid TCP/IPv4 ingress and losslessly representable metadata.",
       "models": [
@@ -114,7 +114,7 @@
     },
     {
       "path": "internal/aws/ec2_vpc.go",
-      "sha256": "164e9a96ba800e68e2afca6de2e416eb94dcb655e3e9b371bd963d1f10e5dc0c",
+      "sha256": "0253a17b7862107b8af0897bebb67537e2f461039342bc7dada9deba84df6a2a",
       "disposition": "modeled",
       "reason": "Register the read action with the existing EC2 admission and IAM action lookup; no mutation capability added.",
       "models": [
