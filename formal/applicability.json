@@ -1,57 +1,379 @@
 {
   "version": 1,
-  "base_sha": "a83c57e2d81847e37af9616714192effcab87539",
+  "base_sha": "303557016299a289b43293fb5b1bbf4ec39372ed",
   "changes": [
     {
       "path": "README.md",
-      "sha256": "4849bfd465164c6876cbbaa79160490c8dc0f6c09806fe9a9cafada7f05b6e05",
+      "sha256": "80a8075be4d35cfd710c59a905c344bc1e9b44ee02a5b6a30e357e1d7dfa97f3",
       "disposition": "documentation",
-      "reason": "Links the bounded native SRV contract while retaining existing Azure Queue, Azure Blob and other provider descriptions.",
-      "models": []
-    },
-    {
-      "path": "docs/acceptance/gcp-cloud-dns.md",
-      "sha256": "3ddf7c46b65770cfc2b5c466e0adb7b0d2da19c23729249215d5a6528f7887b2",
-      "disposition": "documentation",
-      "reason": "Explains the SRV value subset and existing Changes/readback operations; does not claim a new console editor, real DNS, or cloud compatibility.",
+      "reason": "Documents exact SSM version-read scope, limitations, or related license notices without adding runtime authority.",
       "models": []
     },
     {
       "path": "docs/design/0001-go-standalone.md",
-      "sha256": "68090402f3b4fa366d46534c27ba03f5987ff72b5f7c1ebd058093f1afe8899d",
+      "sha256": "37dbbfa17cbc145d7441f6acf71dc91250ad575c744406a002987f820e600669",
       "disposition": "documentation",
-      "reason": "Describes the owner-scoped SRV metadata boundary and explicit absence of DNS serving or endpoint selection.",
+      "reason": "Documents exact SSM version-read scope, limitations, or related license notices without adding runtime authority.",
       "models": []
     },
     {
-      "path": "internal/gcp/dns/dns_test.go",
-      "sha256": "35ff56e13247be4cc913d201a46e96ad9d0a05a9c4cb238db673022e1ec57b6c",
-      "disposition": "test-support",
-      "reason": "Retains a concrete unsupported-record-type control; SRV now has independent success and failure coverage.",
+      "path": "docs/ssm-documents.md",
+      "sha256": "4161b2a61749186d31daec93ed590b0f4041f3a205adcd2c07e879fbce9a3284",
+      "disposition": "documentation",
+      "reason": "Documents exact SSM version-read scope, limitations, or related license notices without adding runtime authority.",
       "models": []
     },
     {
-      "path": "internal/gcp/dns/records.go",
-      "sha256": "983bd9e3eced38390bedfb1830781479cfc117a5da2888fbd1ec108699f13dcc",
+      "path": "formal/SSMDocumentVersionPage.cfg",
+      "sha256": "11e88f9d6e5eb0b50908e54bcba10229bdee5df061643291b1d092b6e4a23d52",
       "disposition": "modeled",
-      "reason": "SRV uses the existing verified Changes transition; exact prior RRset removal and intended state are checked in the finite storage model, while wire syntax is tested separately.",
+      "reason": "Follows the bounded readback contract: document-scoped request, normalized cursor and numeric metadata only; state writes are outside this model.",
       "models": [
         {
-          "id": "CloudDNSAtomicChange",
+          "id": "SSMDocumentVersionPage",
           "properties": [
-            "ExactDeletionRequired",
-            "CommittedStateMatchesIntent",
-            "DeniedStateUnchanged"
+            "DeniedHasNoHistory",
+            "MissingHasNoHistory",
+            "ContinuationScope",
+            "AdmittedHasPage",
+            "MetadataOnly",
+            "NumericWindow",
+            "ContinuationEnd"
           ],
-          "limits": "The existing model abstracts accepted record values and TTL and checks the unchanged storage change/receipt transition. It does not model SRV priority, weight, port, targets, numeric parsing, DNS lookup, or prove refinement to Go/SQLite."
+          "limits": "One abstract, already-normalized request and a committed snapshot, two addresses, two subjects, at most two numeric versions, sizes one/two and two opaque stamps. Snapshot stamp equality is an assumption, not a proof of fingerprint uniqueness, token integrity, SQL/parser/IAM refinement or real AWS behavior. No model of process restart, transport, tool or browser action; no writes or command execution."
         }
       ]
     },
     {
-      "path": "internal/gcp/dns/srv_test.go",
-      "sha256": "66d9b0b4430cf73bd4002b288c6c4f83d40900d56e14493fe1c5ac3fd42576d1",
+      "path": "formal/SSMDocumentVersionPage.tla",
+      "sha256": "c75fed461ec047bcf5466a714bc152eb0fbe1255dc6e82eb7fbc55a889a29a0a",
+      "disposition": "modeled",
+      "reason": "Follows the bounded readback contract: document-scoped request, normalized cursor and numeric metadata only; state writes are outside this model.",
+      "models": [
+        {
+          "id": "SSMDocumentVersionPage",
+          "properties": [
+            "DeniedHasNoHistory",
+            "MissingHasNoHistory",
+            "ContinuationScope",
+            "AdmittedHasPage",
+            "MetadataOnly",
+            "NumericWindow",
+            "ContinuationEnd"
+          ],
+          "limits": "One abstract, already-normalized request and a committed snapshot, two addresses, two subjects, at most two numeric versions, sizes one/two and two opaque stamps. Snapshot stamp equality is an assumption, not a proof of fingerprint uniqueness, token integrity, SQL/parser/IAM refinement or real AWS behavior. No model of process restart, transport, tool or browser action; no writes or command execution."
+        }
+      ]
+    },
+    {
+      "path": "formal/models.json",
+      "sha256": "d76e1b430ab97bad6a937b66168c5dbf0fac7da70776c6d755413e57ed45abe6",
+      "disposition": "formal-infrastructure",
+      "reason": "Registers the new bounded SSM readback model without dropping inherited model obligations.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/ssm_document_versions.go",
+      "sha256": "0d8f4bdb7dce97440547fc69ec467ae465acf29a06601962b76bb12567654bc6",
+      "disposition": "modeled",
+      "reason": "Follows the bounded readback contract: document-scoped request, normalized cursor and numeric metadata only; state writes are outside this model.",
+      "models": [
+        {
+          "id": "SSMDocumentVersionPage",
+          "properties": [
+            "DeniedHasNoHistory",
+            "MissingHasNoHistory",
+            "ContinuationScope",
+            "AdmittedHasPage",
+            "MetadataOnly",
+            "NumericWindow",
+            "ContinuationEnd"
+          ],
+          "limits": "One abstract, already-normalized request and a committed snapshot, two addresses, two subjects, at most two numeric versions, sizes one/two and two opaque stamps. Snapshot stamp equality is an assumption, not a proof of fingerprint uniqueness, token integrity, SQL/parser/IAM refinement or real AWS behavior. No model of process restart, transport, tool or browser action; no writes or command execution."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/ssm_document_versions_test.go",
+      "sha256": "9f7811c530ff896372ede4efe2fbedaad8a64604377b24a4ce282b038ef6314b",
       "disposition": "test-support",
-      "reason": "Native Go tests for the finite SRV grammar plus authenticated owner-scoped Changes, readback, stale deletion rollback, restart and cleanup; no model or runtime hook.",
+      "reason": "Focused SSM or registration test, not production execution or an independent completed runtime stamp.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/ssm_documents_api.go",
+      "sha256": "42a515411b55d5c1562e465bfad8c1e31decfdbc0680296519425d5dd6e35eb5",
+      "disposition": "modeled",
+      "reason": "Keeps existing definition writes/erasure and adds the independent ListDocumentVersions dispatch. The bounded read model assumes already-normalized permission and cursor inputs.",
+      "models": [
+        {
+          "id": "SSMDocumentState",
+          "properties": [
+            "HistoryImmutable",
+            "DefaultPreserved",
+            "DeleteCleanup"
+          ],
+          "limits": "Definition management only. Atomic abstract transitions assume transaction commit/rollback; no SQL refinement, parser, IAM evaluation, byte quota, wire, persistence, concurrency or execution proof."
+        },
+        {
+          "id": "SSMDocumentVersionPage",
+          "properties": [
+            "DeniedHasNoHistory",
+            "MissingHasNoHistory",
+            "ContinuationScope",
+            "AdmittedHasPage",
+            "MetadataOnly",
+            "NumericWindow",
+            "ContinuationEnd"
+          ],
+          "limits": "One abstract, already-normalized request and a committed snapshot, two addresses, two subjects, at most two numeric versions, sizes one/two and two opaque stamps. Snapshot stamp equality is an assumption, not a proof of fingerprint uniqueness, token integrity, SQL/parser/IAM refinement or real AWS behavior. No model of process restart, transport, tool or browser action; no writes or command execution."
+        }
+      ]
+    },
+    {
+      "path": "internal/server/apidocs/openapi.json",
+      "sha256": "d3db845b2679e23606fc0bfe18859d9fe3ed3a6a79f4395374ced986fb6313cb",
+      "disposition": "presentation",
+      "reason": "Read-only Console, reference, frontend tests or generated build metadata; the existing API is authoritative.",
+      "models": []
+    },
+    {
+      "path": "internal/server/server.go",
+      "sha256": "e92fb492c3a48a3febe16935e41fabeabfce0e40a22caa646e26f8c72beabe01",
+      "disposition": "modeled",
+      "reason": "Advertises the implemented SSM definition-only operation in the existing capability response, without changing the SNS or Queue route, identity or runtime admission. Inherited models address SNS and Queue, not the new readback.",
+      "models": [
+        {
+          "id": "AzureQueueOwnerAccess",
+          "properties": [
+            "DiscoveryAuthority",
+            "ReferenceGetAuthorized"
+          ],
+          "limits": "Existing route and auth middleware remain outside this bounded model. Models only normalized owner/actor decisions, selected discovery epoch and matching principal, configured account projection in the dynamic spec enum/default, and native admission independent of UI visibility. Does not prove token handling, actual Go/React/SQLite refinement, URL parsing, whole schema, SDK, browser, route transport, runtime or liveness. Embedded bundle binding is the generated projection of the exact source guards, not a model of the build system or JavaScript event delivery."
+        },
+        {
+          "id": "SNSAdmission",
+          "properties": [
+            "NoSuccessOnRefusal",
+            "NoUnauthorizedEffect"
+          ],
+          "limits": "Limited registration/admission context; not proof of advertised UI auth, middleware or transport. Boolean admission witnesses abstract actual Go parsing/attributes/Subject/UTF-8/body sizes/signature syntax, IAM matching and region/resource lookup. Validated dispatch permits metadata writes; no initialization, credential, SQL, real SDK or Go refinement proof. Shared Gateway/server file bindings cover SNS registration/admission only, preserving all other providers/services. Actual malformed Query and immutable-state/region/SDK/SQL regressions remain separate evidence."
+        }
+      ]
+    },
+    {
+      "path": "internal/server/web/app.css",
+      "sha256": "8d6fe33457da819c0ad2b996d7d39d0ccb9363cf50e063da88d1d9a308c57e0a",
+      "disposition": "presentation",
+      "reason": "Read-only Console, reference, frontend tests or generated build metadata; the existing API is authoritative.",
+      "models": []
+    },
+    {
+      "path": "internal/server/web/app.js",
+      "sha256": "8f2137d4007a8ffef782b8deff1fa11d1dc1c9c4b09231d7166c5915bfdeaeb1",
+      "disposition": "modeled",
+      "reason": "Rebuilds the embedded console from the combined exact source, preserving SNS, Azure Queue, Azure Blob and S3 multipart model scope. The added SSM view code is not covered by those inherited finite models.",
+      "models": [
+        {
+          "id": "AzureBlobRowDownload",
+          "properties": [
+            "RowIsRequestTarget",
+            "CurrentDownloadOnly",
+            "SuccessfulBytesOnly"
+          ],
+          "limits": "Models explicit row identity versus toolbar selection, one in-flight operation, a bounded two-request epoch and view retirement, and only bounded successful abstract HTTP bytes may emit a download. Does not execute DNS, React/focus, the browser/anchor, URL/path mapping, authentication, HTTP or Blob bytes and does not establish implementation refinement. Generated app.js binding covers only Azure row download behavior introduced by this change."
+        },
+        {
+          "id": "S3MultipartConsolePaging",
+          "properties": [
+            "OnlyCanonicalRows",
+            "OnlyProgressingCursor",
+            "OnlyCompleteListing",
+            "NoReadAfterStop"
+          ],
+          "limits": "Finite read-only console listing abstraction; models ascending unique part numbers, cursor progress, result visibility and stop semantics. Does not execute XML parsing, DOM, React scheduling, HTTP, storage, IAM, writes or AWS; does not establish implementation refinement or cover unrelated portions of the embedded bundle."
+        },
+        {
+          "id": "AzureQueueOwnerAccess",
+          "properties": [
+            "OnlyCurrentDiscovery",
+            "NewestObservationRetained",
+            "PresentationOwnerOnly"
+          ],
+          "limits": "Only the Queue capability and matching identity epoch are modeled; no all-service or JavaScript timing claim. Models only normalized owner/actor decisions, selected discovery epoch and matching principal, configured account projection in the dynamic spec enum/default, and native admission independent of UI visibility. Does not prove token handling, actual Go/React/SQLite refinement, URL parsing, whole schema, SDK, browser, route transport, runtime or liveness. Embedded bundle binding is the generated projection of the exact source guards, not a model of the build system or JavaScript event delivery."
+        },
+        {
+          "id": "SNSConsoleResponseAdmission",
+          "properties": [
+            "MountRequiresCapabilityAndNoHandoff",
+            "KeyedOwnerMatchesScope",
+            "OnlyOneCurrentFlight",
+            "NoLateVisibleEffect",
+            "OnlyCurrentTopicUpdates"
+          ],
+          "limits": "Only modeled SNS boundary and source projection; component/browser scheduling, parser/requests, Scalar and shared auth redirect are separate. Bound only visible SNS console hook state, projected typed capability and valid per-topic selection labels. Instance and topic revision are ghost labels, not invented callback-generation checks. No theorem about React or JS scheduling/code refinement, backend AWS IAM, parser/wire, final remote write outcome, shared 401 redirect/onSaving side effects, capability refresh, actual browser/keyboard, or build correctness. Scalar is signed-in session and fixed us-east-1, not Console principal/region parity; it is not modeled."
+        }
+      ]
+    },
+    {
+      "path": "scripts/formal_model_gate.py",
+      "sha256": "cb0ae4df415138da401ad881325d234818c66b2f9a4be41b7f663ccb02526ccf",
+      "disposition": "formal-infrastructure",
+      "reason": "Registers the new bounded SSM readback model without dropping inherited model obligations.",
+      "models": []
+    },
+    {
+      "path": "scripts/test-formal-gate.py",
+      "sha256": "d44829e3d34b611a9845323014a283c3ccfed5cbee7146f29f7b12202a0fcd04",
+      "disposition": "formal-infrastructure",
+      "reason": "Registers the new bounded SSM readback model without dropping inherited model obligations.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/check.py",
+      "sha256": "0460b6f03375f15cc8b7822e38809eb36cb6ca64d93682580888dad5c75d5b17",
+      "disposition": "test-support",
+      "reason": "Focused SSM or registration test, not production execution or an independent completed runtime stamp.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/ssm_document_reference.py",
+      "sha256": "ab85abb554eaed93a3458498d545acdd536a91378a3c7105dde0ebbe2cb30d71",
+      "disposition": "test-support",
+      "reason": "Focused SSM or registration test, not production execution or an independent completed runtime stamp.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/ssm_document_versions_scalar.py",
+      "sha256": "c29ce6f4591ecbf4f69f2dc51c2d7c7d04d59011567d00d8af33e255c24ab088",
+      "disposition": "test-support",
+      "reason": "Focused SSM or registration test, not production execution or an independent completed runtime stamp.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/ssm_documents.py",
+      "sha256": "845b3133520719d00ad821d21f1e63881427c4338fe99187f3d01708f9fa78ef",
+      "disposition": "test-support",
+      "reason": "Focused SSM or registration test, not production execution or an independent completed runtime stamp.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/ssm_documents_console.py",
+      "sha256": "222d7fd1a90bd376ed1dae9db77c524abe5dc6a8c7d62d8238f4ea1e17e409bc",
+      "disposition": "test-support",
+      "reason": "Focused SSM or registration test, not production execution or an independent completed runtime stamp.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/ssm_documents_sdk.py",
+      "sha256": "115f6ca0947a69392d0174ac4ebad49ee241f2b33182a6fe179b590c88087b34",
+      "disposition": "test-support",
+      "reason": "Focused SSM or registration test, not production execution or an independent completed runtime stamp.",
+      "models": []
+    },
+    {
+      "path": "tools/console/bundle-digests.json",
+      "sha256": "3c3e04b41a49e0fa5ee444f6040efacfeaf5601dcebc09982aa886a583f5b8b4",
+      "disposition": "presentation",
+      "reason": "Read-only Console, reference, frontend tests or generated build metadata; the existing API is authoritative.",
+      "models": []
+    },
+    {
+      "path": "tools/console/bundle-inputs.json",
+      "sha256": "c4bd1431dd98cfb79fdc9db511aafb9c8866fbe5a1c29f12fde79190a76f4c5f",
+      "disposition": "presentation",
+      "reason": "Read-only Console, reference, frontend tests or generated build metadata; the existing API is authoritative.",
+      "models": []
+    },
+    {
+      "path": "tools/console/src/console-navigation.mjs",
+      "sha256": "2ca108257a9a35cd4291bf0b1bfb74ccaaac5a7c3cffb4f7820e6da0b441c98d",
+      "disposition": "modeled",
+      "reason": "Adds an SSM route requiring the three listed definition API operations and excludes bound handoff scopes; does not change SNS or owner-only Queue discovery. Inherited models only address SNS and Queue.",
+      "models": [
+        {
+          "id": "AzureQueueOwnerAccess",
+          "properties": [
+            "OnlyCurrentDiscovery",
+            "NewestObservationRetained",
+            "PresentationOwnerOnly"
+          ],
+          "limits": "Only the Queue capability and matching identity epoch are modeled; no all-service or JavaScript timing claim. Models only normalized owner/actor decisions, selected discovery epoch and matching principal, configured account projection in the dynamic spec enum/default, and native admission independent of UI visibility. Does not prove token handling, actual Go/React/SQLite refinement, URL parsing, whole schema, SDK, browser, route transport, runtime or liveness. Embedded bundle binding is the generated projection of the exact source guards, not a model of the build system or JavaScript event delivery."
+        },
+        {
+          "id": "SNSConsoleResponseAdmission",
+          "properties": [
+            "MountRequiresCapabilityAndNoHandoff",
+            "KeyedOwnerMatchesScope",
+            "OnlyOneCurrentFlight",
+            "NoLateVisibleEffect",
+            "OnlyCurrentTopicUpdates"
+          ],
+          "limits": "Only modeled SNS boundary and source projection; component/browser scheduling, parser/requests, Scalar and shared auth redirect are separate. Bound only visible SNS console hook state, projected typed capability and valid per-topic selection labels. Instance and topic revision are ghost labels, not invented callback-generation checks. No theorem about React or JS scheduling/code refinement, backend AWS IAM, parser/wire, final remote write outcome, shared 401 redirect/onSaving side effects, capability refresh, actual browser/keyboard, or build correctness. Scalar is signed-in session and fixed us-east-1, not Console principal/region parity; it is not modeled."
+        }
+      ]
+    },
+    {
+      "path": "tools/console/src/main.jsx",
+      "sha256": "3ff99fa20851f92b146607d8e5d22dac4c737d64326ce35cd79368db0a6ce720",
+      "disposition": "modeled",
+      "reason": "Mounts read-only SSM documents by selected region, identity and navigation epoch; SNS and Azure Queue selection are retained unchanged. The SSM React/browser behavior is not part of the inherited Queue model.",
+      "models": [
+        {
+          "id": "AzureQueueOwnerAccess",
+          "properties": [
+            "OnlyCurrentDiscovery",
+            "NewestObservationRetained",
+            "PresentationOwnerOnly"
+          ],
+          "limits": "Only the Queue capability and matching identity epoch are modeled; no all-service or JavaScript timing claim. Models only normalized owner/actor decisions, selected discovery epoch and matching principal, configured account projection in the dynamic spec enum/default, and native admission independent of UI visibility. Does not prove token handling, actual Go/React/SQLite refinement, URL parsing, whole schema, SDK, browser, route transport, runtime or liveness. Embedded bundle binding is the generated projection of the exact source guards, not a model of the build system or JavaScript event delivery."
+        },
+        {
+          "id": "SNSConsoleResponseAdmission",
+          "properties": [
+            "MountRequiresCapabilityAndNoHandoff",
+            "KeyedOwnerMatchesScope",
+            "OnlyOneCurrentFlight",
+            "NoLateVisibleEffect",
+            "OnlyCurrentTopicUpdates"
+          ],
+          "limits": "Only modeled SNS boundary and source projection; component/browser scheduling, parser/requests, Scalar and shared auth redirect are separate. Bound only visible SNS console hook state, projected typed capability and valid per-topic selection labels. Instance and topic revision are ghost labels, not invented callback-generation checks. No theorem about React or JS scheduling/code refinement, backend AWS IAM, parser/wire, final remote write outcome, shared 401 redirect/onSaving side effects, capability refresh, actual browser/keyboard, or build correctness. Scalar is signed-in session and fixed us-east-1, not Console principal/region parity; it is not modeled."
+        }
+      ]
+    },
+    {
+      "path": "tools/console/src/ssm-document-client.mjs",
+      "sha256": "2b8368289f15691ade75749d31562268bdce81cf1b6baaf470972c3218cc8a9a",
+      "disposition": "presentation",
+      "reason": "Read-only Console, reference, frontend tests or generated build metadata; the existing API is authoritative.",
+      "models": []
+    },
+    {
+      "path": "tools/console/src/ssm-documents.css",
+      "sha256": "edd4fade90bedd21431977685602e38f3f3abc72df38b43f08640be8bfaae8f4",
+      "disposition": "presentation",
+      "reason": "Read-only Console, reference, frontend tests or generated build metadata; the existing API is authoritative.",
+      "models": []
+    },
+    {
+      "path": "tools/console/src/ssm-documents.jsx",
+      "sha256": "1adf76c2316f8f02ad806437c2a0f06b18ce8682b980f760e3cdb9cacf8318df",
+      "disposition": "presentation",
+      "reason": "Read-only Console, reference, frontend tests or generated build metadata; the existing API is authoritative.",
+      "models": []
+    },
+    {
+      "path": "tools/console/test/ssm-document-client.test.mjs",
+      "sha256": "62ba8e91dce82786e0eac80cbeab3e248d684e5948ce464c4d8371afb005788b",
+      "disposition": "presentation",
+      "reason": "Read-only Console, reference, frontend tests or generated build metadata; the existing API is authoritative.",
+      "models": []
+    },
+    {
+      "path": "tools/console/test/ssm-document-navigation.test.mjs",
+      "sha256": "2eccbe0c70034b07d61577a6c1be42454cd17762099ca5da4fd52434efe23e0c",
+      "disposition": "presentation",
+      "reason": "Read-only Console, reference, frontend tests or generated build metadata; the existing API is authoritative.",
       "models": []
     }
   ]

@@ -17,12 +17,13 @@ def client(url, token, region='us-east-1'):
     return c
 
 def absent(c):
-    try:
-        c.get_document(Name='local-persisted')
-    except ClientError as e:
-        assert e.response['Error']['Code'] == 'InvalidDocument'
-    else:
-        raise AssertionError('Foreign definition unexpectedly visible')
+    for read in (c.get_document, c.list_document_versions):
+        try:
+            read(Name='local-persisted')
+        except ClientError as e:
+            assert e.response['Error']['Code'] == 'InvalidDocument'
+        else:
+            raise AssertionError('Foreign definition or version history unexpectedly visible')
 
 def main():
     with tempfile.TemporaryDirectory(prefix='ssm-document-sdk-') as directory:
@@ -32,12 +33,22 @@ def main():
             with urllib.request.urlopen(urllib.request.Request(url+'/_simulator/docs/openapi.json',headers={'X-Simulator-Token':token})) as response:
                 validate(json.load(response))
             c=client(url,token);c.create_document(Name='local-persisted',Content=CONTENT)
+            updated = json.loads(CONTENT)
+            updated['description'] = 'immutable history after restart'
+            c.update_document(Name='local-persisted', DocumentVersion='1', Content=json.dumps(updated))
+            page = c.list_document_versions(Name='local-persisted', MaxResults=1)
+            assert page['DocumentVersions'][0]['DocumentVersion'] == '1'
+            cursor = page['NextToken']
             absent(client(peer,peer_token));absent(client(url,token,'us-west-2'))
             assert client(peer,peer_token).list_documents()['DocumentIdentifiers']==[]
         with running(db, authenticated=True) as (url, token):
             c=client(url,token)
             assert c.get_document(Name='local-persisted')['Content']==CONTENT
+            page = c.list_document_versions(Name='local-persisted', MaxResults=1, NextToken=cursor)
+            assert [item['DocumentVersion'] for item in page['DocumentVersions']] == ['2']
+            assert page['DocumentVersions'][0]['IsDefaultVersion'] is False
+            assert not page.get('NextToken')
             c.delete_document(Name='local-persisted');absent(c)
-    print('SSM documents: six SDK operations, authenticated process/region isolation and restart passed; no document execution')
+    print('SSM documents: seven SDK operations, authenticated process/region isolation and restart passed; no document execution')
 
 if __name__=='__main__':main()

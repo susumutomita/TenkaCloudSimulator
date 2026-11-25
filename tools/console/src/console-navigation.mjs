@@ -12,6 +12,7 @@ export const SERVICES = Object.freeze([
   {id: 'vpc', provider: 'aws', label: 'VPC', capability: 'ec2', route: '/vpc', keywords: 'network virtual private cloud ネットワーク 仮想プライベートクラウド'},
   {id: 's3', provider: 'aws', label: 'S3', capability: 's3', route: '/s3', keywords: 'bucket object バケット オブジェクト ストレージ'},
   {id: 'ssm', provider: 'aws', label: 'Systems Manager', capability: 'ssm', route: '/parameters', keywords: 'parameter store パラメータ 設定 システムマネージャー パラメータストア'},
+  {id: 'ssm-documents', provider: 'aws', label: 'SSM Documents', capability: 'ssm', route: '/ssm-documents', keywords: 'systems manager documents versions compare ドキュメント バージョン'},
   {id: 'ssm-session', provider: 'aws', label: 'Session Manager', capability: 'ssm', route: '/session-manager', keywords: 'systems manager session shell terminal connect セッションマネージャー セッション ターミナル 接続 システムマネージャー'},
   {id: 'lambda', provider: 'aws', label: 'Lambda', capability: 'lambda', route: '/lambda', keywords: 'function 関数 ラムダ'},
   {id: 'iam', provider: 'aws', label: 'IAM', capability: 'iam', route: '/iam', keywords: 'role identity ロール 権限 アイアム アクセス管理'},
@@ -101,6 +102,12 @@ export function serviceAvailable(id, capabilities) {
     const scope = capabilities.services?.sns;
     return scope?.console === true && Array.isArray(scope.operations)
       && ['ListTopics', 'ListSubscriptionsByTopic', 'Subscribe', 'Unsubscribe'].every(op => scope.operations.includes(op));
+  }
+  if (id === 'ssm-documents') {
+    const documents = capabilities.services?.ssm?.documentManagement;
+    return documents?.definitionOnly === true && documents.execution === false
+      && Array.isArray(documents.operations)
+      && ['ListDocuments', 'ListDocumentVersions', 'GetDocument'].every(op => documents.operations.includes(op));
   }
   if (service.provider === 'aws') return !!capabilities.services?.[service.capability];
   if (id === 'sakura-servers') return sakuraServerConfiguration(capabilities) !== null;

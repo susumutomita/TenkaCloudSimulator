@@ -20,6 +20,7 @@ underlying principal has ssm:* permission.
 | [GetDocument](https://docs.aws.amazon.com/systems-manager/latest/APIReference/API_GetDocument.html) | Name; optional DocumentVersion, DocumentFormat=JSON | document ARN, ssm:GetDocument |
 | [DescribeDocument](https://docs.aws.amazon.com/systems-manager/latest/APIReference/API_DescribeDocument.html) | Name; optional DocumentVersion | document ARN, ssm:DescribeDocument |
 | [ListDocuments](https://docs.aws.amazon.com/systems-manager/latest/APIReference/API_ListDocuments.html) | optional MaxResults=1..50, NextToken | *, ssm:ListDocuments |
+| [ListDocumentVersions](https://docs.aws.amazon.com/systems-manager/latest/APIReference/API_ListDocumentVersions.html) | Name; optional MaxResults=1..50, NextToken | document ARN, ssm:ListDocumentVersions |
 | [UpdateDocument](https://docs.aws.amazon.com/systems-manager/latest/APIReference/API_UpdateDocument.html) | Name, Content, DocumentVersion; optional DocumentFormat=JSON | document ARN, ssm:UpdateDocument **and ssm:GetDocument** |
 | [DeleteDocument](https://docs.aws.amazon.com/systems-manager/latest/APIReference/API_DeleteDocument.html) | Name only, removes all versions | document ARN, ssm:DeleteDocument |
 
@@ -67,6 +68,15 @@ InvalidNextToken rather than silently switching snapshots. Tokens are not
 credentials; every page rechecks ListDocuments permission. This is a deliberately
 stricter local pagination contract, not an AWS snapshot guarantee.
 
+ListDocumentVersions reads the immutable version history of a single local
+document in numeric order, in pages of 1..50 (default 50). Rows expose name,
+version, creation time, JSON format, default flag and Active definition status,
+never content. As with ListDocuments, each page is authorized again and tied
+to its query and snapshot. Updating that document invalidates its outstanding
+cursor; changing an unrelated document does not. Missing documents return
+InvalidDocument. ARN names, shared documents and version labels remain outside
+the local subset. See the [AWS version-info shape](https://docs.aws.amazon.com/systems-manager/latest/APIReference/API_DocumentVersionInfo.html).
+
 Save, quota checks, latest pointer and version insertion share one immediate
 SQLite transaction. Delete and cascading version cleanup are one transaction.
 Errors before commit do not acknowledge success; an HTTP disconnect after commit
@@ -75,9 +85,28 @@ The internal store itself grants no IAM authority. Host isolation continues to
 require separate process/database/token authorities per team.
 
 Not included: execution, inventory, sessions, YAML/TEXT, automation, associations,
-shared/AWS-owned documents, tags, attachments, CloudFormation, console and runtime
-permission grants. SDK compatibility and full repository acceptance require the
-integrated endpoint's tests; direct adapter/store tests are not that evidence.
+shared/AWS-owned documents, tags, attachments, CloudFormation, console mutations,
+and runtime permission grants.
+
+## Read-only entry points
+
+The Systems Manager Documents comparison uses the
+[AWS sequence](https://docs.aws.amazon.com/systems-manager/latest/userguide/comparing-versions.html):
+Documents, select an owned document, then Content and Compare versions. The
+version chooser reads only metadata. Opening or comparing content makes
+separately authorized GetDocument calls for the selected versions. The local
+view shows two stored definitions side by side instead of the AWS inline diff.
+The regional list needs ListDocuments permission; a parameter-bound console
+handoff must not expose this view. No console action runs a definition.
+
+For this read-only operation there is no Terraform entry point in the pinned
+AWS provider v5.100.0. Its
+[document resource](https://github.com/hashicorp/terraform-provider-aws/blob/v5.100.0/internal/service/ssm/document.go)
+and [data source](https://github.com/hashicorp/terraform-provider-aws/blob/v5.100.0/internal/service/ssm/document_data_source.go)
+do not call ListDocumentVersions. The resource read requires
+DescribeDocumentPermission and updates require UpdateDocumentDefaultVersion,
+neither of which is supported by the local definition subset. This is not a
+Terraform compatibility claim for SSM documents generally.
 
 ## Finite model boundary
 
@@ -90,3 +119,11 @@ The model does not prove JSON/IAM parsing, SQL transactions, quotas in bytes,
 pagination, concurrency, restart, disk durability or actual execution. These
 need separate native tests. The registered mutation controls exercise these finite claims; they do not
 establish implementation refinement.
+
+`SSMDocumentVersionPage` separately checks bounded, normalized read decisions:
+only an authorized request can return metadata; a continuation must match the
+address, caller, snapshot and page size; positions/counts/default flag are
+exact; the last page does not promise another; rows have no definition content.
+The abstract stamp only represents snapshot equality. The model does not
+establish cursor hash uniqueness, wire validation, SQL behavior, authorization
+implementation, process durability or console behavior.

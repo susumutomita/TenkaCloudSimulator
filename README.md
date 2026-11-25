@@ -83,6 +83,9 @@ console, CloudFormation adapter or Challenge integration.
 
 - **Storage and data:** [S3](docs/s3.md) ([multipart](docs/s3-multipart.md)),
   [DynamoDB](docs/dynamodb.md), [Parameter Store](docs/ssm-parameters.md).
+- **Systems Manager documents:** [definition and version history](docs/ssm-documents.md).
+  List versions through the native read-only API or compare saved definitions in the console.
+  This does not execute the documents.
 - **Functions and messaging:** [Lambda](docs/lambda.md), [API Gateway](docs/apigateway.md),
   [SQS](docs/sqs.md), [SNS](docs/sns.md) (local HTTP/HTTPS subscription Console and reference; no external delivery),
   [CloudWatch Logs](docs/cloudwatch-logs.md).
