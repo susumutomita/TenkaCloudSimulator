@@ -98,6 +98,7 @@ func newWithBattleRuntime(path string, options ProviderConfig, origin string, cl
 		}
 		registry.mu.Lock()
 		registry.driver = runtime
+		registry.stacks = stacks
 		registry.mu.Unlock()
 		return nil
 	}

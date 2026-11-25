@@ -1,90 +1,99 @@
 {
   "version": 1,
-  "base_sha": "2630c04e3b717cdcd3e8918655783d317611991c",
+  "base_sha": "23b2d664de4c2a75bfee38465f702798a6e78550",
   "changes": [
     {
-      "path": ".github/workflows/ci.yml",
-      "sha256": "680e7736d0a07fbb412f770db86ca7495a7c830c5b9add972a55572fdc543673",
-      "disposition": "formal-infrastructure",
-      "reason": "Adds the existing inexpensive EC2 parser and navigation unit files to a Node command within the existing static checks job. No new job, branch gate, browser harness, privilege, or deployment.",
-      "models": []
-    },
-    {
-      "path": "docs/ec2-read-discovery.md",
-      "sha256": "84e0ff0fc2660047ce17cd57a9b17707f8c3419600e69c1ede68c0f920d809df",
+      "path": "README.md",
+      "sha256": "705dc0ba56cb3438fb271859fab9ccdb0432fff2abaf0ac55e50e37222bcce9b",
       "disposition": "documentation",
-      "reason": "Documents selecting an EC2 row to inspect its saved security-group IDs and tag values and keeps the read-only limitation explicit.",
+      "reason": "Clarifies when an existing opt-in Battle resolve can return a capability; it does not promise readiness polling or guest execution.",
       "models": []
     },
     {
-      "path": "internal/server/web/app.js",
-      "sha256": "4603e2e4a3c4fedf7f15648513fc76074a08eff97fcb4bb5e88ef1fa8ee59c2a",
+      "path": "docs/design/0001-go-standalone.md",
+      "sha256": "ff5ba9a9922f7c99ed676e2debe601e786b86a494429e861fe101b1b0c875e66",
+      "disposition": "documentation",
+      "reason": "Documents the completed-generation guard, early 409, unchanged seal and absence of a new transport.",
+      "models": []
+    },
+    {
+      "path": "formal/models.json",
+      "sha256": "006387c2a274bff97fe223dd9959bac057f9a935f40ae2cbc65a80b324acdbd6",
+      "disposition": "formal-infrastructure",
+      "reason": "Adds one exact implementation path to the existing CanonicalVMComposition ownership scope; leaves models, bounds, checked invariants and sensitivity controls unchanged.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/ec2_completed_guest_linux_test.go",
+      "sha256": "9ed792f655cbe44d52cfa68d1b4eeca77a1ba8c3fbe4de5b792a7068818c0009",
+      "disposition": "test-support",
+      "reason": "Tests native stack persistence and retained ownership plus both readiness orderings at the existing inert VM boundary, not real guest or SQL behavior.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/ec2_completed_guest_unix.go",
+      "sha256": "9874818ec6a0486bdebea0d065824aee010cdc76867951c5772291b65618dc40",
       "disposition": "modeled",
-      "reason": "Deterministic combined bundle. The catalog reply ownership, existing VPC submission flow and SimpleDB bounded request/acknowledgment paths are preserved. The EC2 delta displays records already accepted by the unchanged scoped DescribeInstances request path; only synchronous formatting/filter exclusion of newly displayed collections changes.",
+      "reason": "Only the authoritative exact saved instance/stack/retained-provider association maps onto the registry's SavedAssociation condition. The new durable readiness join has separate native tests.",
       "models": [
         {
-          "id": "CatalogConsoleEpoch",
+          "id": "CanonicalVMComposition",
           "properties": [
-            "NoUnmountedAcceptance",
-            "OnlyCurrentReplies",
-            "ReloadOnlyAfterAck",
-            "SingleWriter"
+            "SavedAssociation"
           ],
-          "limits": "Existing finite catalog-view reply acceptance and VPC form subgraph analogues only: current/mounted responses, one submission, and reloading after acknowledged outputs. No registered EC2 selection model; not a proof of this EC2 parsing/display, DOM focus, administrator admission, native CloudFormation/VM/network behavior, or JavaScript refinement."
-        },
-        {
-          "id": "SimpleDBConsoleEpoch",
-          "properties": [
-            "VisibleRequiresCapability",
-            "OnlyCurrentScopeVisible",
-            "SingleCurrentChain",
-            "ReadbackOnlyAfterAck",
-            "WriteNoticeRequiresAck"
-          ],
-          "limits": "Symbolic local capability, React view ownership, native acknowledgements and publication only. No Go/JavaScript refinement, DOM focus, CSS/reflow, XML parsing or HTTP decoding, native IAM, transaction/SQLite proof, actual cancellation of server writes, or complete SimpleDB semantics."
+          "limits": "SavedAssociation checks symbolic equality for the already-registered provider in the registry mode. It does not compose the launch and registry modes or check the actual SQLite CREATE_COMPLETE + ready/held join, Go/HTTP publication or teardown races, later I/O authority, VM/guest, networking or RDS."
         }
       ]
     },
     {
-      "path": "tools/console/bundle-digests.json",
-      "sha256": "44ab08f95f259568405659e5c16feb264f85cf2acbe5025952cb9748e177c048",
-      "disposition": "presentation",
-      "reason": "Reproducible console asset digests; does not implement request dispatch or resource lifecycle.",
+      "path": "internal/server/battle_capabilities_unix.go",
+      "sha256": "cc06f2903cf1c29c25cbc5e6d73c1d87751a284e1cdf8c5f3357850c6f2000d4",
+      "disposition": "modeled",
+      "reason": "Opt-in resolve selects only the saved typed provider and refuses an owner/binding that the canonical store cannot match; the modeled part is the exact saved association, not the response's timing.",
+      "models": [
+        {
+          "id": "CanonicalVMComposition",
+          "properties": [
+            "SavedAssociation"
+          ],
+          "limits": "SavedAssociation checks symbolic equality for the already-registered provider in the registry mode. It does not compose the launch and registry modes or check the actual SQLite CREATE_COMPLETE + ready/held join, Go/HTTP publication or teardown races, later I/O authority, VM/guest, networking or RDS."
+        }
+      ]
+    },
+    {
+      "path": "internal/server/battle_completed_guest_linux_test.go",
+      "sha256": "52a904e11b706a029d8fc13cc22c169b40a3b9ef9c2bc48c4139d36f3aedbe3e",
+      "disposition": "test-support",
+      "reason": "Checks existing HTTP resolve and seal handlers with fixture-only state. No physical VM assertion.",
       "models": []
     },
     {
-      "path": "tools/console/bundle-inputs.json",
-      "sha256": "af489f5ad42d238864c7a0a1c3ac37a577ec98cce1ba7599ee15be4f021d7ebd",
-      "disposition": "presentation",
-      "reason": "Generated esbuild input and output provenance for the console projection; unchanged locked dependency versions.",
+      "path": "internal/server/battle_runtime_unix.go",
+      "sha256": "61900112a05b100d5f4925b1e9f65dab76fa9824620d69a8cbe467453af7f86b",
+      "disposition": "modeled",
+      "reason": "Supplies the existing registry with the StackStore belonging to its configured provider, keeping the lookup tied to the saved association instead of a requester-provided store.",
+      "models": [
+        {
+          "id": "CanonicalVMComposition",
+          "properties": [
+            "SavedAssociation"
+          ],
+          "limits": "SavedAssociation checks symbolic equality for the already-registered provider in the registry mode. It does not compose the launch and registry modes or check the actual SQLite CREATE_COMPLETE + ready/held join, Go/HTTP publication or teardown races, later I/O authority, VM/guest, networking or RDS."
+        }
+      ]
+    },
+    {
+      "path": "scripts/formal_model_gate.py",
+      "sha256": "03390e66f99b6f9b1375e42059a753ab4ec740940411988dd8bce4d03d20f02e",
+      "disposition": "formal-infrastructure",
+      "reason": "Synchronizes one existing required exact-source pin with the registry. No gate, certification rule, bounds or execution change.",
       "models": []
     },
     {
-      "path": "tools/console/src/ec2-instance-metadata.jsx",
-      "sha256": "df4741f94931d837028fb8c49cec055926c127b8ecdc2450f92aa9e6f8d09690",
-      "disposition": "presentation",
-      "reason": "Renders only the selected instance's already-parsed security-group IDs and tag text. No requests, persistence, authorization, or VM control.",
-      "models": []
-    },
-    {
-      "path": "tools/console/src/ec2-readonly.jsx",
-      "sha256": "51832338521714485503d8c38719a5c90c7083ec8976ed17a28d190707f60e8b",
-      "disposition": "presentation",
-      "reason": "Synchronous projection of existing selected-instance metadata. Filter searches existing scalar columns, not new collections. Existing mount/epoch, session binding and all prospective VPC permissions, forms and request/response behavior stay intact.",
-      "models": []
-    },
-    {
-      "path": "tools/console/src/ec2-response.mjs",
-      "sha256": "7fc58f1b8ecbacb61e605c363406a1a3788b9068ea63e4cf1312f5e6b4cb23e2",
-      "disposition": "presentation",
-      "reason": "Bounds and decodes security-group IDs and tags from the existing EC2 XML response in the console. It changes no protocol, network admission, ownership, or server-side resource state.",
-      "models": []
-    },
-    {
-      "path": "tools/console/test/ec2-response.test.mjs",
-      "sha256": "3bb26598f602dadccc9c047a410b1b6394f9d2e62076f5b247dea78a89c74516",
-      "disposition": "presentation",
-      "reason": "Node-only console regression suite within the presentation tree: binds exact selected-instance metadata shape, bounds and malformed input refusals. No production behavior.",
+      "path": "scripts/test-formal-gate.py",
+      "sha256": "2feed998896c2481331e4f8d90065eb66cb4ef4d902bb7ac84481ba0dd0b8663",
+      "disposition": "formal-infrastructure",
+      "reason": "Updates the existing exact scope fixture to detect omission of the newly named implementation file; all original checks remain.",
       "models": []
     }
   ]
