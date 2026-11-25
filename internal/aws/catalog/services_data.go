@@ -798,10 +798,11 @@ func odbNetwork(input map[string]any) error {
 	return nil
 }
 
-// rds serves RDS configuration groups over the Query protocol. Nothing that
-// provisions or runs a database is bound.
+// rds serves RDS configuration groups and, as configuration records, DB
+// instances and DB clusters over the Query protocol. Nothing that acts on a
+// running database is bound.
 var rds = &Service{
-	Model: "rds", Title: "Amazon Relational Database Service", IAMPrefix: "rds", Issues: []int{130},
+	Model: "rds", Title: "Amazon Relational Database Service", IAMPrefix: "rds", Issues: []int{122, 124, 128, 130},
 	Resources: []*Resource{
 		{Kind: "dbSubnetGroup", Shape: "DBSubnetGroup", ID: "name", ARN: "arn:{partition}:rds:{region}:{account}:subgrp:{name}",
 			ARNMember: "DBSubnetGroupArn", NameMember: "DBSubnetGroupName", Unique: true, Limit: 50},
@@ -811,6 +812,12 @@ var rds = &Service{
 			ARNMember: "DBClusterParameterGroupArn", NameMember: "DBClusterParameterGroupName", Unique: true, Limit: 50},
 		{Kind: "optionGroup", Shape: "OptionGroup", ID: "name", ARN: "arn:{partition}:rds:{region}:{account}:og:{name}",
 			ARNMember: "OptionGroupArn", NameMember: "OptionGroupName", Unique: true, Limit: 20, Generate: map[string]any{"Options": []any{}}},
+		{Kind: "dbInstance", Shape: "DBInstance", ID: "name", ARN: "arn:{partition}:rds:{region}:{account}:db:{name}",
+			ARNMember: "DBInstanceArn", NameMember: "DBInstanceIdentifier", Unique: true, Limit: 40, Aliases: rdsInstanceAliases,
+			Generate: map[string]any{"DBInstanceStatus": "creating", "InstanceCreateTime": "$now"}},
+		{Kind: "dbCluster", Shape: "DBCluster", ID: "name", ARN: "arn:{partition}:rds:{region}:{account}:cluster:{name}",
+			ARNMember: "DBClusterArn", NameMember: "DBClusterIdentifier", Unique: true, Limit: 40, Aliases: rdsClusterAliases,
+			Generate: map[string]any{"Status": "creating", "ClusterCreateTime": "$now"}},
 	},
 	Ops: []Op{
 		{Name: "CreateDBSubnetGroup", Kind: Create, Resource: "dbSubnetGroup", Check: rdsCreateSubnetGroup},
@@ -827,15 +834,32 @@ var rds = &Service{
 		{Name: "DescribeOptionGroups", Kind: List, Resource: "optionGroup", Names: "OptionGroupName",
 			Filters: map[string]string{"EngineName": "EngineName", "MajorEngineVersion": "MajorEngineVersion"}, Check: rdsDescribeOptionGroups},
 		{Name: "DeleteOptionGroup", Kind: Delete, Resource: "optionGroup", Lookup: "OptionGroupName"},
+		{Name: "CreateDBInstance", Kind: Create, Resource: "dbInstance", Check: rdsCreateInstance},
+		{Name: "DescribeDBInstances", Kind: List, Resource: "dbInstance", Names: "DBInstanceIdentifier", Check: rdsDescribe("DBInstanceIdentifier")},
+		{Name: "ModifyDBInstance", Kind: Update, Resource: "dbInstance", Lookup: "DBInstanceIdentifier", Accept: []string{"ApplyImmediately", "AllowMajorVersionUpgrade"},
+			Fields: rdsInstanceFields, Check: rdsModifyInstance},
+		{Name: "DeleteDBInstance", Kind: Delete, Resource: "dbInstance", Lookup: "DBInstanceIdentifier", Accept: []string{"SkipFinalSnapshot", "DeleteAutomatedBackups"},
+			Check: rdsDeleteRecord("DBInstanceIdentifier", false), Set: map[string]any{"DBInstanceStatus": "deleting"}},
+		{Name: "CreateDBCluster", Kind: Create, Resource: "dbCluster", Check: rdsCreateCluster},
+		{Name: "DescribeDBClusters", Kind: List, Resource: "dbCluster", Names: "DBClusterIdentifier", Check: rdsDescribe("DBClusterIdentifier")},
+		{Name: "ModifyDBCluster", Kind: Update, Resource: "dbCluster", Lookup: "DBClusterIdentifier", Accept: []string{"ApplyImmediately", "AllowMajorVersionUpgrade"},
+			Fields: rdsClusterFields, Check: rdsModifyCluster},
+		{Name: "DeleteDBCluster", Kind: Delete, Resource: "dbCluster", Lookup: "DBClusterIdentifier", Accept: []string{"SkipFinalSnapshot", "DeleteAutomatedBackups"},
+			Check: rdsDeleteRecord("DBClusterIdentifier", true), Set: map[string]any{"Status": "deleting"}},
 		{Name: "AddTagsToResource", Kind: Tag, Lookup: "ResourceName", Check: rdsTags},
 		{Name: "RemoveTagsFromResource", Kind: Untag, Lookup: "ResourceName"},
 		{Name: "ListTagsForResource", Kind: ListTags, Lookup: "ResourceName", Check: rdsNoFilters},
 	},
 	Bounds: []string{
-		"DB subnet groups, DB parameter groups, DB cluster parameter groups and option groups are stored configuration served over the Query protocol: no DB instance, cluster, proxy, snapshot, event subscription, network or database engine exists, and CreateDBInstance, CreateDBCluster, CreateDBSnapshot and every other official operation return UnknownOperationException with HTTP 501.",
+		"DB instances and DB clusters are stored configuration records that stay in the creating state: no database engine, storage, endpoint, address, port, listener, network interface, backup or monitoring exists, no endpoint, address or port is ever returned, and no SQL, Gremlin, SPARQL, openCypher or MongoDB data plane exists. DB subnet groups, DB parameter groups, DB cluster parameter groups and option groups are stored configuration too. Operations that act on a running database (RebootDBInstance, FailoverDBCluster, StartDBInstance, StopDBInstance, snapshots, restores, point-in-time restores, read replicas, promotion, switchover, backtrack, cluster activity streams, proxies, global clusters, blue/green deployments, event subscriptions) and every other official operation return UnknownOperationException with HTTP 501.",
+		"The simulator stores no credentials: MasterUserPassword, TdeCredentialPassword, TdeCredentialArn, ManageMasterUserPassword, RotateMasterUserPassword, MasterUserSecretKmsKeyId, DomainAuthSecretArn and PreSignedUrl are refused with InvalidParameterValue instead of being accepted and discarded, so a record is created with MasterUsername and no password (AWS would require a password or a managed secret). Port and DBPortNumber are refused because no listener exists; Active Directory (Domain*), EC2-Classic DBSecurityGroups, renaming (NewDBInstanceIdentifier, NewDBClusterIdentifier), replication sources, global clusters, CloudwatchLogsExportConfiguration (use EnableCloudwatchLogsExports at creation) and deletion protection set to true (it is not enforced) are refused, and so is every member the official DB instance or DB cluster description does not hold.",
+		"A record keeps exactly the settings it was given: the engine, version, instance class, storage, backup and maintenance windows, Availability Zone, encryption, monitoring and similar settings are stored without checking them against AWS offerings (no engine version, instance class or Region availability is validated) and no default is filled in. DBInstanceStatus and Status are creating from creation until deletion; ModifyDBInstance and ModifyDBCluster are accepted in any state and apply immediately (ApplyImmediately is accepted, no pending values exist), and Delete returns the record with status deleting. DB instance and DB cluster identifiers are 1 to 63 letters, digits or hyphens that start with a letter and neither end with a hyphen nor contain two consecutive hyphens, and are stored in lowercase; Engine must be a documented value (DB instances: aurora-mysql, aurora-postgresql, db2-ae, db2-se, docdb, mariadb, mysql, neptune, the oracle and sqlserver editions, postgres; DB clusters: aurora-mysql, aurora-postgresql, docdb, mysql, neptune, postgres); BackupRetentionPeriod is 0 to 35, PromotionTier 0 to 15 and MonitoringInterval one of 0, 1, 5, 10, 15, 30 or 60. At most 40 DB instances and 40 DB clusters exist per Region (local limits).",
+		"No snapshot can be taken, so deleting a DB instance or DB cluster refuses FinalDBSnapshotIdentifier and a SkipFinalSnapshot of false with InvalidParameterValue, and a DB cluster delete must also state SkipFinalSnapshot true. A DB instance delete may leave it out (the DocumentDB model has no such member, and AWS would otherwise demand a final snapshot name), which skips the snapshot. Neither the instances of a DB cluster nor the other direction is tracked: the records are independent, a DB instance may name a DBClusterIdentifier that does not exist, and a cluster is deletable while instances name it.",
+		"References to configuration groups are stored by name and not checked, because the engine cannot resolve a name held inside a nested member: the DB parameter group, option group, DB subnet group and VPC security group of a DB instance and the DB cluster parameter group, DB subnet group, option group and VPC security groups of a DB cluster need not exist, a group in use can be deleted, and a DB instance reports each with only its name (parameter and option groups with the status in-sync, security groups active) and no VPC, subnets or Availability Zones. DB parameter group, option group and DB subnet group names given to an instance or cluster may also contain periods, so default.mysql8.0 is accepted.",
 		"Parameter and option values are not modeled: ModifyDBParameterGroup, ResetDBParameterGroup, DescribeDBParameters, the cluster equivalents, CopyDBParameterGroup, ModifyOptionGroup and DescribeOptionGroupOptions are not implemented. Default parameter, option and subnet groups are not pre-created, and parameter group families, major engine versions and subnet IDs are stored without checking that they exist.",
 		"A subnet group needs 2 to 20 distinct subnet-xxxxxxxx or subnet-xxxxxxxxxxxxxxxxx IDs and is not checked for Availability Zone coverage; it reports no VPC, Availability Zone, Outpost, status or network type. DB subnet group and DB (cluster) parameter group names are stored in lowercase as documented, \"default\" subnet groups are refused, and option groups accept only the documented EngineName values.",
 		"Describe operations and ListTagsForResource refuse a non-empty Filters list (an empty one means no filter), Describe operations accept MaxRecords from 20 to 100 and fail with the operation's not-found fault for an unknown name, and DescribeOptionGroups refuses OptionGroupName together with EngineName or MajorEngineVersion. Tag keys are 1 to 128 and values at most 256 characters of letters, digits, spaces and _.:/=+-@, and neither may start with aws: or rds:. Tag operations on an unknown ARN fail with DBInstanceNotFound, the first not-found fault the official tag operations model.",
+		"Amazon Aurora, Amazon Neptune and Amazon DocumentDB are managed through this same RDS API (Version 2014-10-31, signing name rds, rds: IAM actions, rds ARNs), and the boto3 neptune and docdb clients and the rds client with Aurora engines were run against these operations. Only configuration and records are served, not the products: no Aurora, Neptune or DocumentDB database, endpoint, snapshot or global cluster exists, no DB cluster or DB instance of those engines runs, and no SQL, Gremlin, SPARQL, openCypher or MongoDB data plane exists. The neptune client can use 21 of the 24 operations and the docdb client 18: neither model has option groups, and DocumentDB has no DB parameter groups. Parameter group families such as aurora-mysql8.0, neptune1.3 and docdb5.0 are stored without being checked. Responses omit SubnetOutpost, which the neptune and docdb models lack, and SupportedNetworkTypes, which the neptune model lacks. The RDS rules apply to every client: a non-empty Filters list is refused although those models define it, subnet group names must start with a letter although the neptune and docdb models do not say so, and tag keys and values may contain : and @, which the neptune and docdb models do not list.",
 	},
 }
 
@@ -1015,4 +1039,272 @@ func rdsTagText(text string, least, most int) bool {
 	lower := strings.ToLower(text)
 	n := utf8.RuneCountInString(text)
 	return n >= least && n <= most && rdsTagPattern.MatchString(text) && !strings.HasPrefix(lower, "aws:") && !strings.HasPrefix(lower, "rds:")
+}
+
+// DB instance and DB cluster records. They hold the settings a request names
+// and nothing that a running database would report.
+
+var (
+	// rdsIdentifierPattern is the documented DB instance and DB cluster
+	// identifier rule: 1 to 63 letters, digits or hyphens, first a letter.
+	rdsIdentifierPattern = regexp.MustCompile(`^[A-Za-z][A-Za-z0-9-]{0,62}$`)
+	// rdsReferencePattern admits periods so that default.mysql8.0 and default:mysql-8-0 style names
+	// of groups that are not pre-created can still be referenced.
+	rdsReferencePattern = regexp.MustCompile(`^[A-Za-z][A-Za-z0-9.:-]{0,254}$`)
+	rdsSecurityPattern  = regexp.MustCompile(`^sg-(?:[0-9a-f]{8}|[0-9a-f]{17})$`)
+
+	rdsInstanceEngines = []string{"aurora-mysql", "aurora-postgresql", "db2-ae", "db2-se", "docdb", "mariadb", "mysql", "neptune", "oracle-ee", "oracle-ee-cdb",
+		"oracle-se2", "oracle-se2-cdb", "postgres", "sqlserver-ee", "sqlserver-ex", "sqlserver-se", "sqlserver-web"}
+	rdsClusterEngines = []string{"aurora-mysql", "aurora-postgresql", "docdb", "mysql", "neptune", "postgres"}
+	rdsEngineModes    = []string{"global", "multimaster", "parallelquery", "provisioned", "serverless"}
+
+	// rdsInstanceAliases and rdsClusterAliases map request members onto the
+	// differently named members of the official descriptions.
+	rdsInstanceAliases = map[string]string{
+		"EnableIAMDatabaseAuthentication": "IAMDatabaseAuthenticationEnabled",
+		"EnablePerformanceInsights":       "PerformanceInsightsEnabled",
+		"EnableCloudwatchLogsExports":     "EnabledCloudwatchLogsExports",
+		"EnableCustomerOwnedIp":           "CustomerOwnedIpEnabled",
+	}
+	rdsClusterAliases = map[string]string{
+		"DBClusterParameterGroupName":     "DBClusterParameterGroup",
+		"DBSubnetGroupName":               "DBSubnetGroup",
+		"EnableIAMDatabaseAuthentication": "IAMDatabaseAuthenticationEnabled",
+		"EnableCloudwatchLogsExports":     "EnabledCloudwatchLogsExports",
+		"EnableHttpEndpoint":              "HttpEndpointEnabled",
+		"EnablePerformanceInsights":       "PerformanceInsightsEnabled",
+		"ScalingConfiguration":            "ScalingConfigurationInfo",
+	}
+
+	// rdsInstanceFields and rdsClusterFields are the members a modification
+	// may change, named as the modify request names them after Check has
+	// turned group names into the official membership members.
+	rdsInstanceFields = []string{"AllocatedStorage", "DBInstanceClass", "DBSubnetGroup", "VpcSecurityGroups", "DBParameterGroups", "BackupRetentionPeriod",
+		"PreferredBackupWindow", "PreferredMaintenanceWindow", "MultiAZ", "EngineVersion", "AutoMinorVersionUpgrade", "LicenseModel", "Iops", "StorageThroughput",
+		"OptionGroupMemberships", "StorageType", "CACertificateIdentifier", "CopyTagsToSnapshot", "MonitoringInterval", "PubliclyAccessible", "MonitoringRoleArn",
+		"PromotionTier", "EnableIAMDatabaseAuthentication", "DatabaseInsightsMode", "EnablePerformanceInsights", "PerformanceInsightsKMSKeyId",
+		"PerformanceInsightsRetentionPeriod", "ProcessorFeatures", "DeletionProtection", "MaxAllocatedStorage", "EnableCustomerOwnedIp", "NetworkType",
+		"MultiTenant", "DedicatedLogVolume"}
+	rdsClusterFields = []string{"BackupRetentionPeriod", "DBClusterParameterGroupName", "VpcSecurityGroups", "DBClusterOptionGroupMemberships", "PreferredBackupWindow",
+		"PreferredMaintenanceWindow", "EnableIAMDatabaseAuthentication", "BacktrackWindow", "EngineVersion", "DeletionProtection", "EnableHttpEndpoint",
+		"CopyTagsToSnapshot", "DBClusterInstanceClass", "AllocatedStorage", "StorageType", "Iops", "AutoMinorVersionUpgrade", "NetworkType",
+		"ServerlessV2ScalingConfiguration", "ScalingConfiguration", "MonitoringInterval", "MonitoringRoleArn", "DatabaseInsightsMode", "EnablePerformanceInsights",
+		"PerformanceInsightsKMSKeyId", "PerformanceInsightsRetentionPeriod"}
+
+	rdsCredentialMembers = []string{"MasterUserPassword", "TdeCredentialPassword", "TdeCredentialArn", "ManageMasterUserPassword", "RotateMasterUserPassword",
+		"MasterUserSecretKmsKeyId", "DomainAuthSecretArn", "PreSignedUrl"}
+	rdsListenerMembers   = []string{"Port", "DBPortNumber"}
+	rdsUnsimulatedMember = []string{"Domain", "DomainFqdn", "DomainOu", "DomainDnsIps", "DomainIAMRoleName", "DisableDomain", "DBSecurityGroups",
+		"NewDBInstanceIdentifier", "NewDBClusterIdentifier", "ReplicationSourceIdentifier", "GlobalClusterIdentifier", "CloudwatchLogsExportConfiguration",
+		"RdsCustomClusterConfiguration", "EnableGlobalWriteForwarding", "EnableLocalWriteForwarding", "EnableLimitlessDatabase", "ReplicaMode", "AutomationMode"}
+)
+
+// rdsRefuseMembers rejects members the bounded records cannot honour. A
+// credential is refused rather than accepted and dropped, so nothing the
+// caller believes is stored is lost silently.
+func rdsRefuseMembers(input map[string]any) error {
+	for _, member := range rdsCredentialMembers {
+		if _, ok := input[member]; ok {
+			return invalid("The simulator never stores passwords, tokens or secrets: omit %s and create the record without one.", member)
+		}
+	}
+	for _, member := range rdsListenerMembers {
+		if _, ok := input[member]; ok {
+			return invalid("%s configures a network listener. No listener exists in the simulator, so no port is stored.", member)
+		}
+	}
+	for _, member := range rdsUnsimulatedMember {
+		if _, ok := input[member]; ok {
+			return invalid("%s is not supported by the simulator: it needs a resource or behavior the stored record does not provide.", member)
+		}
+	}
+	if protected, _ := input["DeletionProtection"].(bool); protected {
+		return invalid("Deletion protection is not enforced by the simulator.")
+	}
+	return nil
+}
+
+func rdsIdentifier(input map[string]any, member string) error {
+	name, _ := input[member].(string)
+	if !rdsIdentifierPattern.MatchString(name) || strings.HasSuffix(name, "-") || strings.Contains(name, "--") {
+		return invalid("%s must be 1 to 63 letters, digits or hyphens, start with a letter and neither end with a hyphen nor contain two consecutive hyphens.", member)
+	}
+	lowerMember(input, member)
+	return nil
+}
+
+func rdsEngine(input map[string]any, allowed []string) error {
+	if engine, ok := input["Engine"].(string); ok && !slices.Contains(allowed, engine) {
+		return invalid("Engine must be one of %s.", strings.Join(allowed, ", "))
+	}
+	return nil
+}
+
+// rdsSettings applies the documented ranges of settings both records hold.
+func rdsSettings(input map[string]any) error {
+	for member, bounds := range map[string][2]int64{"BackupRetentionPeriod": {0, 35}, "PromotionTier": {0, 15}} {
+		if n, ok := input[member].(int64); ok && (n < bounds[0] || n > bounds[1]) {
+			return invalid("%s must be from %d to %d.", member, bounds[0], bounds[1])
+		}
+	}
+	if n, ok := input["MonitoringInterval"].(int64); ok && !slices.Contains([]int64{0, 1, 5, 10, 15, 30, 60}, n) {
+		return invalid("MonitoringInterval must be 0, 1, 5, 10, 15, 30 or 60.")
+	}
+	if mode, ok := input["EngineMode"].(string); ok && !slices.Contains(rdsEngineModes, mode) {
+		return invalid("EngineMode must be one of %s.", strings.Join(rdsEngineModes, ", "))
+	}
+	return nil
+}
+
+// rdsReference turns a group name into the lowercase stored form.
+func rdsReference(input map[string]any, member string, pattern *regexp.Regexp) (string, bool, error) {
+	name, ok := input[member].(string)
+	if !ok {
+		return "", false, nil
+	}
+	if !pattern.MatchString(name) {
+		return "", true, invalid("%s is not a valid group name.", member)
+	}
+	return strings.ToLower(name), true, nil
+}
+
+// rdsSecurityGroups stores VpcSecurityGroupIds as the official memberships.
+func rdsSecurityGroups(input map[string]any) error {
+	ids, ok := input["VpcSecurityGroupIds"].([]any)
+	if !ok {
+		return nil
+	}
+	memberships := make([]any, 0, len(ids))
+	for _, value := range ids {
+		id, _ := value.(string)
+		if !rdsSecurityPattern.MatchString(id) {
+			return invalid("Security group IDs look like sg-0123456789abcdef0.")
+		}
+		memberships = append(memberships, map[string]any{"VpcSecurityGroupId": id, "Status": "active"})
+	}
+	delete(input, "VpcSecurityGroupIds")
+	input["VpcSecurityGroups"] = memberships
+	return nil
+}
+
+// rdsInstanceReferences stores the group names of a DB instance as the
+// official membership members of the DB instance description.
+func rdsInstanceReferences(input map[string]any) error {
+	if name, ok, err := rdsReference(input, "DBParameterGroupName", rdsReferencePattern); err != nil {
+		return err
+	} else if ok {
+		delete(input, "DBParameterGroupName")
+		input["DBParameterGroups"] = []any{map[string]any{"DBParameterGroupName": name, "ParameterApplyStatus": "in-sync"}}
+	}
+	if name, ok, err := rdsReference(input, "OptionGroupName", rdsReferencePattern); err != nil {
+		return err
+	} else if ok {
+		delete(input, "OptionGroupName")
+		input["OptionGroupMemberships"] = []any{map[string]any{"OptionGroupName": name, "Status": "in-sync"}}
+	}
+	if name, ok, err := rdsReference(input, "DBSubnetGroupName", rdsReferencePattern); err != nil {
+		return err
+	} else if ok {
+		delete(input, "DBSubnetGroupName")
+		input["DBSubnetGroup"] = map[string]any{"DBSubnetGroupName": name}
+	}
+	return rdsSecurityGroups(input)
+}
+
+// rdsClusterReferences stores the option group and security groups of a DB
+// cluster as memberships; the two group names it also holds are aliased.
+func rdsClusterReferences(input map[string]any) error {
+	for _, member := range []string{"DBClusterParameterGroupName", "DBSubnetGroupName"} {
+		if name, ok, err := rdsReference(input, member, rdsReferencePattern); err != nil {
+			return err
+		} else if ok {
+			input[member] = name
+		}
+	}
+	if name, ok, err := rdsReference(input, "OptionGroupName", rdsReferencePattern); err != nil {
+		return err
+	} else if ok {
+		delete(input, "OptionGroupName")
+		input["DBClusterOptionGroupMemberships"] = []any{map[string]any{"DBClusterOptionGroupName": name, "Status": "in-sync"}}
+	}
+	return rdsSecurityGroups(input)
+}
+
+func rdsCreateInstance(input map[string]any) error {
+	if err := rdsRefuseMembers(input); err != nil {
+		return err
+	}
+	if err := rdsIdentifier(input, "DBInstanceIdentifier"); err != nil {
+		return err
+	}
+	lowerMember(input, "DBClusterIdentifier")
+	if err := rdsEngine(input, rdsInstanceEngines); err != nil {
+		return err
+	}
+	if err := rdsSettings(input); err != nil {
+		return err
+	}
+	if err := rdsInstanceReferences(input); err != nil {
+		return err
+	}
+	return rdsTags(input)
+}
+
+func rdsModifyInstance(input map[string]any) error {
+	if err := rdsRefuseMembers(input); err != nil {
+		return err
+	}
+	lowerMember(input, "DBInstanceIdentifier")
+	if err := rdsSettings(input); err != nil {
+		return err
+	}
+	return rdsInstanceReferences(input)
+}
+
+func rdsCreateCluster(input map[string]any) error {
+	if err := rdsRefuseMembers(input); err != nil {
+		return err
+	}
+	if err := rdsIdentifier(input, "DBClusterIdentifier"); err != nil {
+		return err
+	}
+	if err := rdsEngine(input, rdsClusterEngines); err != nil {
+		return err
+	}
+	if err := rdsSettings(input); err != nil {
+		return err
+	}
+	if err := rdsClusterReferences(input); err != nil {
+		return err
+	}
+	return rdsTags(input)
+}
+
+func rdsModifyCluster(input map[string]any) error {
+	if err := rdsRefuseMembers(input); err != nil {
+		return err
+	}
+	lowerMember(input, "DBClusterIdentifier")
+	if err := rdsSettings(input); err != nil {
+		return err
+	}
+	return rdsClusterReferences(input)
+}
+
+// rdsDeleteRecord refuses the final snapshot a delete would otherwise take:
+// no snapshot can exist, so the caller must skip it explicitly. A DB instance
+// delete may leave SkipFinalSnapshot out because the DocumentDB model has no
+// such member; an explicit false is still refused.
+func rdsDeleteRecord(member string, required bool) func(map[string]any) error {
+	return func(input map[string]any) error {
+		lowerMember(input, member)
+		if _, ok := input["FinalDBSnapshotIdentifier"]; ok {
+			return invalid("No snapshot can be taken because the simulator has no snapshots: omit FinalDBSnapshotIdentifier and set SkipFinalSnapshot to true.")
+		}
+		skip, given := input["SkipFinalSnapshot"].(bool)
+		if given && !skip || !given && required {
+			return invalid("SkipFinalSnapshot must be true: the simulator cannot take a final snapshot.")
+		}
+		return nil
+	}
 }

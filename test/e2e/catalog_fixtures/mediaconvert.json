@@ -1,0 +1,40 @@
+{
+ "client": "mediaconvert",
+ "steps": [
+  {"op": "create_queue", "args": {"Name": "fixture-queue", "Description": "fixture batch", "ConcurrentJobs": 2}, "save": {"queue_arn": "Queue.Arn"}, "expect": {"Queue.Status": "ACTIVE", "Queue.PricingPlan": "ON_DEMAND", "Queue.Type": "CUSTOM"}},
+  {"op": "get_queue", "args": {"Name": "fixture-queue"}, "expect": {"Queue.Arn": "${queue_arn}", "Queue.Description": "fixture batch", "Queue.ConcurrentJobs": 2}},
+  {"op": "list_queues", "args": {}, "expect": {"Queues#count": 1, "Queues[0].Name": "fixture-queue"}},
+  {"op": "update_queue", "args": {"Name": "fixture-queue", "Status": "PAUSED", "ConcurrentJobs": 4}, "expect": {"Queue.Status": "PAUSED", "Queue.ConcurrentJobs": 4}},
+  {"op": "create_job_template", "args": {"Name": "fixture-template", "Category": "fixture", "Queue": "${queue_arn}", "Priority": 5, "Settings": {"OutputGroups": []}}, "expect": {"JobTemplate.Type": "CUSTOM", "JobTemplate.Queue": "${queue_arn}"}},
+  {"op": "get_job_template", "args": {"Name": "fixture-template"}, "expect": {"JobTemplate.Category": "fixture", "JobTemplate.Priority": 5}},
+  {"op": "list_job_templates", "args": {"Category": "fixture"}, "expect": {"JobTemplates#count": 1}},
+  {"op": "list_job_templates", "args": {"Category": "other"}, "expect": {"JobTemplates#count": 0}},
+  {"op": "update_job_template", "args": {"Name": "fixture-template", "Description": "fixture changed", "Priority": 7}, "expect": {"JobTemplate.Description": "fixture changed", "JobTemplate.Priority": 7}},
+  {"op": "create_preset", "args": {"Name": "fixture-preset", "Category": "fixture", "Settings": {}}, "expect": {"Preset.Type": "CUSTOM"}},
+  {"op": "get_preset", "args": {"Name": "fixture-preset"}, "expect": {"Preset.Category": "fixture"}},
+  {"op": "list_presets", "args": {}, "expect": {"Presets#count": 1}},
+  {"op": "update_preset", "args": {"Name": "fixture-preset", "Description": "fixture web"}, "expect": {"Preset.Description": "fixture web"}},
+  {"op": "put_policy", "args": {"Policy": {"HttpInputs": "DISALLOWED", "S3Inputs": "ALLOWED"}}, "expect": {"Policy.HttpInputs": "DISALLOWED"}},
+  {"op": "get_policy", "args": {}, "expect": {"Policy.HttpInputs": "DISALLOWED", "Policy.S3Inputs": "ALLOWED"}},
+  {"op": "create_queue", "args": {"Name": "fixture-reserved", "PricingPlan": "RESERVED"}, "error": "BadRequestException", "status": 400},
+  {"op": "create_queue", "args": {"Name": "fixture-queue"}, "error": "ConflictException", "status": 409},
+  {"op": "create_job_template", "args": {"Name": "fixture-orphan", "Queue": "arn:aws:mediaconvert:us-east-1:000000000000:queues/missing", "Settings": {"OutputGroups": []}}, "error": "NotFoundException", "status": 404},
+  {"op": "get_queue", "args": {"Name": "fixture-missing"}, "error": "NotFoundException", "status": 404}
+ ],
+ "isolation": [
+  {"op": "list_queues", "args": {}, "expect": {"Queues#count": 0}},
+  {"op": "list_presets", "args": {}, "expect": {"Presets#count": 0}}
+ ],
+ "after_restart": [
+  {"op": "get_queue", "args": {"Name": "fixture-queue"}, "expect": {"Queue.Status": "PAUSED"}},
+  {"op": "get_job_template", "args": {"Name": "fixture-template"}, "expect": {"JobTemplate.Description": "fixture changed"}},
+  {"op": "get_policy", "args": {}, "expect": {"Policy.HttpInputs": "DISALLOWED"}}
+ ],
+ "cleanup": [
+  {"op": "delete_policy", "args": {}},
+  {"op": "delete_preset", "args": {"Name": "fixture-preset"}},
+  {"op": "delete_job_template", "args": {"Name": "fixture-template"}},
+  {"op": "delete_queue", "args": {"Name": "fixture-queue"}},
+  {"op": "list_queues", "args": {}, "expect": {"Queues#count": 0}}
+ ]
+}

@@ -1,0 +1,1589 @@
+{
+ "components": {
+  "schemas": {
+   "AvailabilityZone": {
+    "additionalProperties": false,
+    "properties": {
+     "Name": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "CreateDataProviderMessage": {
+    "additionalProperties": false,
+    "properties": {
+     "DataProviderName": {
+      "type": "string"
+     },
+     "Description": {
+      "type": "string"
+     },
+     "Engine": {
+      "type": "string"
+     },
+     "Settings": {
+      "$ref": "#/components/schemas/DataProviderSettings"
+     },
+     "Tags": {
+      "items": {
+       "$ref": "#/components/schemas/Tag"
+      },
+      "type": "array"
+     },
+     "Virtual": {
+      "type": "boolean"
+     }
+    },
+    "required": [
+     "Engine",
+     "Settings"
+    ],
+    "type": "object"
+   },
+   "CreateDataProviderResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "DataProvider": {
+      "$ref": "#/components/schemas/DataProvider"
+     }
+    },
+    "type": "object"
+   },
+   "CreateEventSubscriptionMessage": {
+    "additionalProperties": false,
+    "properties": {
+     "Enabled": {
+      "type": "boolean"
+     },
+     "EventCategories": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "SnsTopicArn": {
+      "type": "string"
+     },
+     "SourceIds": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "SourceType": {
+      "type": "string"
+     },
+     "SubscriptionName": {
+      "type": "string"
+     },
+     "Tags": {
+      "items": {
+       "$ref": "#/components/schemas/Tag"
+      },
+      "type": "array"
+     }
+    },
+    "required": [
+     "SubscriptionName",
+     "SnsTopicArn"
+    ],
+    "type": "object"
+   },
+   "CreateEventSubscriptionResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "EventSubscription": {
+      "$ref": "#/components/schemas/EventSubscription"
+     }
+    },
+    "type": "object"
+   },
+   "CreateInstanceProfileMessage": {
+    "additionalProperties": false,
+    "properties": {
+     "AvailabilityZone": {
+      "type": "string"
+     },
+     "Description": {
+      "type": "string"
+     },
+     "InstanceProfileName": {
+      "type": "string"
+     },
+     "KmsKeyArn": {
+      "type": "string"
+     },
+     "NetworkType": {
+      "type": "string"
+     },
+     "PubliclyAccessible": {
+      "type": "boolean"
+     },
+     "SubnetGroupIdentifier": {
+      "type": "string"
+     },
+     "Tags": {
+      "items": {
+       "$ref": "#/components/schemas/Tag"
+      },
+      "type": "array"
+     },
+     "VpcSecurityGroups": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "CreateInstanceProfileResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "InstanceProfile": {
+      "$ref": "#/components/schemas/InstanceProfile"
+     }
+    },
+    "type": "object"
+   },
+   "CreateMigrationProjectMessage": {
+    "additionalProperties": false,
+    "properties": {
+     "Description": {
+      "type": "string"
+     },
+     "InstanceProfileIdentifier": {
+      "type": "string"
+     },
+     "MigrationProjectName": {
+      "type": "string"
+     },
+     "SchemaConversionApplicationAttributes": {
+      "$ref": "#/components/schemas/SCApplicationAttributes"
+     },
+     "SourceDataProviderDescriptors": {
+      "items": {
+       "$ref": "#/components/schemas/DataProviderDescriptorDefinition"
+      },
+      "type": "array"
+     },
+     "Tags": {
+      "items": {
+       "$ref": "#/components/schemas/Tag"
+      },
+      "type": "array"
+     },
+     "TargetDataProviderDescriptors": {
+      "items": {
+       "$ref": "#/components/schemas/DataProviderDescriptorDefinition"
+      },
+      "type": "array"
+     },
+     "TransformationRules": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "SourceDataProviderDescriptors",
+     "TargetDataProviderDescriptors",
+     "InstanceProfileIdentifier"
+    ],
+    "type": "object"
+   },
+   "CreateMigrationProjectResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "MigrationProject": {
+      "$ref": "#/components/schemas/MigrationProject"
+     }
+    },
+    "type": "object"
+   },
+   "CreateReplicationSubnetGroupMessage": {
+    "additionalProperties": false,
+    "properties": {
+     "ReplicationSubnetGroupDescription": {
+      "type": "string"
+     },
+     "ReplicationSubnetGroupIdentifier": {
+      "type": "string"
+     },
+     "SubnetIds": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "Tags": {
+      "items": {
+       "$ref": "#/components/schemas/Tag"
+      },
+      "type": "array"
+     }
+    },
+    "required": [
+     "ReplicationSubnetGroupIdentifier",
+     "ReplicationSubnetGroupDescription",
+     "SubnetIds"
+    ],
+    "type": "object"
+   },
+   "CreateReplicationSubnetGroupResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "ReplicationSubnetGroup": {
+      "$ref": "#/components/schemas/ReplicationSubnetGroup"
+     }
+    },
+    "type": "object"
+   },
+   "DataProvider": {
+    "additionalProperties": false,
+    "properties": {
+     "DataProviderArn": {
+      "type": "string"
+     },
+     "DataProviderCreationTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "DataProviderName": {
+      "type": "string"
+     },
+     "Description": {
+      "type": "string"
+     },
+     "Engine": {
+      "type": "string"
+     },
+     "Settings": {
+      "$ref": "#/components/schemas/DataProviderSettings"
+     },
+     "Virtual": {
+      "type": "boolean"
+     }
+    },
+    "type": "object"
+   },
+   "DataProviderDescriptor": {
+    "additionalProperties": false,
+    "properties": {
+     "DataProviderArn": {
+      "type": "string"
+     },
+     "DataProviderName": {
+      "type": "string"
+     },
+     "SecretsManagerAccessRoleArn": {
+      "type": "string"
+     },
+     "SecretsManagerSecretId": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "DataProviderDescriptorDefinition": {
+    "additionalProperties": false,
+    "properties": {
+     "DataProviderIdentifier": {
+      "type": "string"
+     },
+     "SecretsManagerAccessRoleArn": {
+      "type": "string"
+     },
+     "SecretsManagerSecretId": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "DataProviderIdentifier"
+    ],
+    "type": "object"
+   },
+   "DataProviderSettings": {
+    "additionalProperties": false,
+    "maxProperties": 1,
+    "minProperties": 1,
+    "properties": {
+     "DocDbSettings": {
+      "$ref": "#/components/schemas/DocDbDataProviderSettings"
+     },
+     "IbmDb2LuwSettings": {
+      "$ref": "#/components/schemas/IbmDb2LuwDataProviderSettings"
+     },
+     "IbmDb2zOsSettings": {
+      "$ref": "#/components/schemas/IbmDb2zOsDataProviderSettings"
+     },
+     "MariaDbSettings": {
+      "$ref": "#/components/schemas/MariaDbDataProviderSettings"
+     },
+     "MicrosoftSqlServerSettings": {
+      "$ref": "#/components/schemas/MicrosoftSqlServerDataProviderSettings"
+     },
+     "MongoDbSettings": {
+      "$ref": "#/components/schemas/MongoDbDataProviderSettings"
+     },
+     "MySqlSettings": {
+      "$ref": "#/components/schemas/MySqlDataProviderSettings"
+     },
+     "OracleSettings": {
+      "$ref": "#/components/schemas/OracleDataProviderSettings"
+     },
+     "PostgreSqlSettings": {
+      "$ref": "#/components/schemas/PostgreSqlDataProviderSettings"
+     },
+     "RedshiftSettings": {
+      "$ref": "#/components/schemas/RedshiftDataProviderSettings"
+     },
+     "SybaseAseSettings": {
+      "$ref": "#/components/schemas/SybaseAseDataProviderSettings"
+     }
+    },
+    "type": "object"
+   },
+   "DeleteDataProviderMessage": {
+    "additionalProperties": false,
+    "properties": {
+     "DataProviderIdentifier": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "DataProviderIdentifier"
+    ],
+    "type": "object"
+   },
+   "DeleteDataProviderResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "DataProvider": {
+      "$ref": "#/components/schemas/DataProvider"
+     }
+    },
+    "type": "object"
+   },
+   "DeleteEventSubscriptionMessage": {
+    "additionalProperties": false,
+    "properties": {
+     "SubscriptionName": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "SubscriptionName"
+    ],
+    "type": "object"
+   },
+   "DeleteEventSubscriptionResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "EventSubscription": {
+      "$ref": "#/components/schemas/EventSubscription"
+     }
+    },
+    "type": "object"
+   },
+   "DeleteInstanceProfileMessage": {
+    "additionalProperties": false,
+    "properties": {
+     "InstanceProfileIdentifier": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "InstanceProfileIdentifier"
+    ],
+    "type": "object"
+   },
+   "DeleteInstanceProfileResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "InstanceProfile": {
+      "$ref": "#/components/schemas/InstanceProfile"
+     }
+    },
+    "type": "object"
+   },
+   "DeleteMigrationProjectMessage": {
+    "additionalProperties": false,
+    "properties": {
+     "MigrationProjectIdentifier": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "MigrationProjectIdentifier"
+    ],
+    "type": "object"
+   },
+   "DeleteMigrationProjectResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "MigrationProject": {
+      "$ref": "#/components/schemas/MigrationProject"
+     }
+    },
+    "type": "object"
+   },
+   "DeleteReplicationSubnetGroupMessage": {
+    "additionalProperties": false,
+    "properties": {
+     "ReplicationSubnetGroupIdentifier": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "ReplicationSubnetGroupIdentifier"
+    ],
+    "type": "object"
+   },
+   "DeleteReplicationSubnetGroupResponse": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "DescribeDataProvidersMessage": {
+    "additionalProperties": false,
+    "properties": {
+     "Filters": {
+      "items": {
+       "$ref": "#/components/schemas/Filter"
+      },
+      "type": "array"
+     },
+     "Marker": {
+      "type": "string"
+     },
+     "MaxRecords": {
+      "type": "integer"
+     }
+    },
+    "type": "object"
+   },
+   "DescribeDataProvidersResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "DataProviders": {
+      "items": {
+       "$ref": "#/components/schemas/DataProvider"
+      },
+      "type": "array"
+     },
+     "Marker": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "DescribeEventSubscriptionsMessage": {
+    "additionalProperties": false,
+    "properties": {
+     "Filters": {
+      "items": {
+       "$ref": "#/components/schemas/Filter"
+      },
+      "type": "array"
+     },
+     "Marker": {
+      "type": "string"
+     },
+     "MaxRecords": {
+      "type": "integer"
+     },
+     "SubscriptionName": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "DescribeEventSubscriptionsResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "EventSubscriptionsList": {
+      "items": {
+       "$ref": "#/components/schemas/EventSubscription"
+      },
+      "type": "array"
+     },
+     "Marker": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "DescribeInstanceProfilesMessage": {
+    "additionalProperties": false,
+    "properties": {
+     "Filters": {
+      "items": {
+       "$ref": "#/components/schemas/Filter"
+      },
+      "type": "array"
+     },
+     "Marker": {
+      "type": "string"
+     },
+     "MaxRecords": {
+      "type": "integer"
+     }
+    },
+    "type": "object"
+   },
+   "DescribeInstanceProfilesResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "InstanceProfiles": {
+      "items": {
+       "$ref": "#/components/schemas/InstanceProfile"
+      },
+      "type": "array"
+     },
+     "Marker": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "DescribeMigrationProjectsMessage": {
+    "additionalProperties": false,
+    "properties": {
+     "Filters": {
+      "items": {
+       "$ref": "#/components/schemas/Filter"
+      },
+      "type": "array"
+     },
+     "Marker": {
+      "type": "string"
+     },
+     "MaxRecords": {
+      "type": "integer"
+     }
+    },
+    "type": "object"
+   },
+   "DescribeMigrationProjectsResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "Marker": {
+      "type": "string"
+     },
+     "MigrationProjects": {
+      "items": {
+       "$ref": "#/components/schemas/MigrationProject"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "DescribeReplicationSubnetGroupsMessage": {
+    "additionalProperties": false,
+    "properties": {
+     "Filters": {
+      "items": {
+       "$ref": "#/components/schemas/Filter"
+      },
+      "type": "array"
+     },
+     "Marker": {
+      "type": "string"
+     },
+     "MaxRecords": {
+      "type": "integer"
+     }
+    },
+    "type": "object"
+   },
+   "DescribeReplicationSubnetGroupsResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "Marker": {
+      "type": "string"
+     },
+     "ReplicationSubnetGroups": {
+      "items": {
+       "$ref": "#/components/schemas/ReplicationSubnetGroup"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "DocDbDataProviderSettings": {
+    "additionalProperties": false,
+    "properties": {
+     "CertificateArn": {
+      "type": "string"
+     },
+     "DatabaseName": {
+      "type": "string"
+     },
+     "Port": {
+      "type": "integer"
+     },
+     "ServerName": {
+      "type": "string"
+     },
+     "SslMode": {
+      "enum": [
+       "none",
+       "require",
+       "verify-ca",
+       "verify-full"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "EventSubscription": {
+    "additionalProperties": false,
+    "properties": {
+     "CustSubscriptionId": {
+      "type": "string"
+     },
+     "CustomerAwsId": {
+      "type": "string"
+     },
+     "Enabled": {
+      "type": "boolean"
+     },
+     "EventCategoriesList": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "SnsTopicArn": {
+      "type": "string"
+     },
+     "SourceIdsList": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "SourceType": {
+      "type": "string"
+     },
+     "Status": {
+      "type": "string"
+     },
+     "SubscriptionCreationTime": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "Filter": {
+    "additionalProperties": false,
+    "properties": {
+     "Name": {
+      "type": "string"
+     },
+     "Values": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "required": [
+     "Name",
+     "Values"
+    ],
+    "type": "object"
+   },
+   "IbmDb2LuwDataProviderSettings": {
+    "additionalProperties": false,
+    "properties": {
+     "CertificateArn": {
+      "type": "string"
+     },
+     "DatabaseName": {
+      "type": "string"
+     },
+     "Port": {
+      "type": "integer"
+     },
+     "S3AccessRoleArn": {
+      "type": "string"
+     },
+     "S3Path": {
+      "type": "string"
+     },
+     "ServerName": {
+      "type": "string"
+     },
+     "SslMode": {
+      "enum": [
+       "none",
+       "require",
+       "verify-ca",
+       "verify-full"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "IbmDb2zOsDataProviderSettings": {
+    "additionalProperties": false,
+    "properties": {
+     "CertificateArn": {
+      "type": "string"
+     },
+     "DatabaseName": {
+      "type": "string"
+     },
+     "Port": {
+      "type": "integer"
+     },
+     "S3AccessRoleArn": {
+      "type": "string"
+     },
+     "S3Path": {
+      "type": "string"
+     },
+     "ServerName": {
+      "type": "string"
+     },
+     "SslMode": {
+      "enum": [
+       "none",
+       "require",
+       "verify-ca",
+       "verify-full"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "InstanceProfile": {
+    "additionalProperties": false,
+    "properties": {
+     "AvailabilityZone": {
+      "type": "string"
+     },
+     "Description": {
+      "type": "string"
+     },
+     "InstanceProfileArn": {
+      "type": "string"
+     },
+     "InstanceProfileCreationTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "InstanceProfileName": {
+      "type": "string"
+     },
+     "KmsKeyArn": {
+      "type": "string"
+     },
+     "NetworkType": {
+      "type": "string"
+     },
+     "PubliclyAccessible": {
+      "type": "boolean"
+     },
+     "SubnetGroupIdentifier": {
+      "type": "string"
+     },
+     "VpcSecurityGroups": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "MariaDbDataProviderSettings": {
+    "additionalProperties": false,
+    "properties": {
+     "CertificateArn": {
+      "type": "string"
+     },
+     "Port": {
+      "type": "integer"
+     },
+     "S3AccessRoleArn": {
+      "type": "string"
+     },
+     "S3Path": {
+      "type": "string"
+     },
+     "ServerName": {
+      "type": "string"
+     },
+     "SslMode": {
+      "enum": [
+       "none",
+       "require",
+       "verify-ca",
+       "verify-full"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "MicrosoftSqlServerDataProviderSettings": {
+    "additionalProperties": false,
+    "properties": {
+     "CertificateArn": {
+      "type": "string"
+     },
+     "DatabaseName": {
+      "type": "string"
+     },
+     "Port": {
+      "type": "integer"
+     },
+     "S3AccessRoleArn": {
+      "type": "string"
+     },
+     "S3Path": {
+      "type": "string"
+     },
+     "ServerName": {
+      "type": "string"
+     },
+     "SslMode": {
+      "enum": [
+       "none",
+       "require",
+       "verify-ca",
+       "verify-full"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "MigrationProject": {
+    "additionalProperties": false,
+    "properties": {
+     "Description": {
+      "type": "string"
+     },
+     "InstanceProfileArn": {
+      "type": "string"
+     },
+     "InstanceProfileName": {
+      "type": "string"
+     },
+     "MigrationProjectArn": {
+      "type": "string"
+     },
+     "MigrationProjectCreationTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "MigrationProjectName": {
+      "type": "string"
+     },
+     "SchemaConversionApplicationAttributes": {
+      "$ref": "#/components/schemas/SCApplicationAttributes"
+     },
+     "SourceDataProviderDescriptors": {
+      "items": {
+       "$ref": "#/components/schemas/DataProviderDescriptor"
+      },
+      "type": "array"
+     },
+     "TargetDataProviderDescriptors": {
+      "items": {
+       "$ref": "#/components/schemas/DataProviderDescriptor"
+      },
+      "type": "array"
+     },
+     "TransformationRules": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ModifyDataProviderMessage": {
+    "additionalProperties": false,
+    "properties": {
+     "DataProviderIdentifier": {
+      "type": "string"
+     },
+     "DataProviderName": {
+      "type": "string"
+     },
+     "Description": {
+      "type": "string"
+     },
+     "Engine": {
+      "type": "string"
+     },
+     "ExactSettings": {
+      "type": "boolean"
+     },
+     "Settings": {
+      "$ref": "#/components/schemas/DataProviderSettings"
+     },
+     "Virtual": {
+      "type": "boolean"
+     }
+    },
+    "required": [
+     "DataProviderIdentifier"
+    ],
+    "type": "object"
+   },
+   "ModifyDataProviderResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "DataProvider": {
+      "$ref": "#/components/schemas/DataProvider"
+     }
+    },
+    "type": "object"
+   },
+   "ModifyEventSubscriptionMessage": {
+    "additionalProperties": false,
+    "properties": {
+     "Enabled": {
+      "type": "boolean"
+     },
+     "EventCategories": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "SnsTopicArn": {
+      "type": "string"
+     },
+     "SourceType": {
+      "type": "string"
+     },
+     "SubscriptionName": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "SubscriptionName"
+    ],
+    "type": "object"
+   },
+   "ModifyEventSubscriptionResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "EventSubscription": {
+      "$ref": "#/components/schemas/EventSubscription"
+     }
+    },
+    "type": "object"
+   },
+   "ModifyInstanceProfileMessage": {
+    "additionalProperties": false,
+    "properties": {
+     "AvailabilityZone": {
+      "type": "string"
+     },
+     "Description": {
+      "type": "string"
+     },
+     "InstanceProfileIdentifier": {
+      "type": "string"
+     },
+     "InstanceProfileName": {
+      "type": "string"
+     },
+     "KmsKeyArn": {
+      "type": "string"
+     },
+     "NetworkType": {
+      "type": "string"
+     },
+     "PubliclyAccessible": {
+      "type": "boolean"
+     },
+     "SubnetGroupIdentifier": {
+      "type": "string"
+     },
+     "VpcSecurityGroups": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "required": [
+     "InstanceProfileIdentifier"
+    ],
+    "type": "object"
+   },
+   "ModifyInstanceProfileResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "InstanceProfile": {
+      "$ref": "#/components/schemas/InstanceProfile"
+     }
+    },
+    "type": "object"
+   },
+   "ModifyMigrationProjectMessage": {
+    "additionalProperties": false,
+    "properties": {
+     "Description": {
+      "type": "string"
+     },
+     "InstanceProfileIdentifier": {
+      "type": "string"
+     },
+     "MigrationProjectIdentifier": {
+      "type": "string"
+     },
+     "MigrationProjectName": {
+      "type": "string"
+     },
+     "SchemaConversionApplicationAttributes": {
+      "$ref": "#/components/schemas/SCApplicationAttributes"
+     },
+     "SourceDataProviderDescriptors": {
+      "items": {
+       "$ref": "#/components/schemas/DataProviderDescriptorDefinition"
+      },
+      "type": "array"
+     },
+     "TargetDataProviderDescriptors": {
+      "items": {
+       "$ref": "#/components/schemas/DataProviderDescriptorDefinition"
+      },
+      "type": "array"
+     },
+     "TransformationRules": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "MigrationProjectIdentifier"
+    ],
+    "type": "object"
+   },
+   "ModifyMigrationProjectResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "MigrationProject": {
+      "$ref": "#/components/schemas/MigrationProject"
+     }
+    },
+    "type": "object"
+   },
+   "ModifyReplicationSubnetGroupMessage": {
+    "additionalProperties": false,
+    "properties": {
+     "ReplicationSubnetGroupDescription": {
+      "type": "string"
+     },
+     "ReplicationSubnetGroupIdentifier": {
+      "type": "string"
+     },
+     "SubnetIds": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "required": [
+     "ReplicationSubnetGroupIdentifier",
+     "SubnetIds"
+    ],
+    "type": "object"
+   },
+   "ModifyReplicationSubnetGroupResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "ReplicationSubnetGroup": {
+      "$ref": "#/components/schemas/ReplicationSubnetGroup"
+     }
+    },
+    "type": "object"
+   },
+   "MongoDbDataProviderSettings": {
+    "additionalProperties": false,
+    "properties": {
+     "AuthMechanism": {
+      "enum": [
+       "default",
+       "mongodb_cr",
+       "scram_sha_1"
+      ],
+      "type": "string"
+     },
+     "AuthSource": {
+      "type": "string"
+     },
+     "AuthType": {
+      "enum": [
+       "no",
+       "password"
+      ],
+      "type": "string"
+     },
+     "CertificateArn": {
+      "type": "string"
+     },
+     "DatabaseName": {
+      "type": "string"
+     },
+     "Port": {
+      "type": "integer"
+     },
+     "ServerName": {
+      "type": "string"
+     },
+     "SslMode": {
+      "enum": [
+       "none",
+       "require",
+       "verify-ca",
+       "verify-full"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "MySqlDataProviderSettings": {
+    "additionalProperties": false,
+    "properties": {
+     "CertificateArn": {
+      "type": "string"
+     },
+     "Port": {
+      "type": "integer"
+     },
+     "S3AccessRoleArn": {
+      "type": "string"
+     },
+     "S3Path": {
+      "type": "string"
+     },
+     "ServerName": {
+      "type": "string"
+     },
+     "SslMode": {
+      "enum": [
+       "none",
+       "require",
+       "verify-ca",
+       "verify-full"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "OracleDataProviderSettings": {
+    "additionalProperties": false,
+    "properties": {
+     "AsmServer": {
+      "type": "string"
+     },
+     "CertificateArn": {
+      "type": "string"
+     },
+     "DatabaseName": {
+      "type": "string"
+     },
+     "Port": {
+      "type": "integer"
+     },
+     "S3AccessRoleArn": {
+      "type": "string"
+     },
+     "S3Path": {
+      "type": "string"
+     },
+     "SecretsManagerOracleAsmAccessRoleArn": {
+      "type": "string"
+     },
+     "SecretsManagerOracleAsmSecretId": {
+      "type": "string"
+     },
+     "SecretsManagerSecurityDbEncryptionAccessRoleArn": {
+      "type": "string"
+     },
+     "SecretsManagerSecurityDbEncryptionSecretId": {
+      "type": "string"
+     },
+     "ServerName": {
+      "type": "string"
+     },
+     "SslMode": {
+      "enum": [
+       "none",
+       "require",
+       "verify-ca",
+       "verify-full"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "PostgreSqlDataProviderSettings": {
+    "additionalProperties": false,
+    "properties": {
+     "CertificateArn": {
+      "type": "string"
+     },
+     "DatabaseName": {
+      "type": "string"
+     },
+     "Port": {
+      "type": "integer"
+     },
+     "S3AccessRoleArn": {
+      "type": "string"
+     },
+     "S3Path": {
+      "type": "string"
+     },
+     "ServerName": {
+      "type": "string"
+     },
+     "SslMode": {
+      "enum": [
+       "none",
+       "require",
+       "verify-ca",
+       "verify-full"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "RedshiftDataProviderSettings": {
+    "additionalProperties": false,
+    "properties": {
+     "DatabaseName": {
+      "type": "string"
+     },
+     "Port": {
+      "type": "integer"
+     },
+     "S3AccessRoleArn": {
+      "type": "string"
+     },
+     "S3Path": {
+      "type": "string"
+     },
+     "ServerName": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ReplicationSubnetGroup": {
+    "additionalProperties": false,
+    "properties": {
+     "IsReadOnly": {
+      "type": "boolean"
+     },
+     "ReplicationSubnetGroupDescription": {
+      "type": "string"
+     },
+     "ReplicationSubnetGroupIdentifier": {
+      "type": "string"
+     },
+     "SubnetGroupStatus": {
+      "type": "string"
+     },
+     "Subnets": {
+      "items": {
+       "$ref": "#/components/schemas/Subnet"
+      },
+      "type": "array"
+     },
+     "SupportedNetworkTypes": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "VpcId": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "SCApplicationAttributes": {
+    "additionalProperties": false,
+    "properties": {
+     "S3BucketPath": {
+      "type": "string"
+     },
+     "S3BucketRoleArn": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "Subnet": {
+    "additionalProperties": false,
+    "properties": {
+     "SubnetAvailabilityZone": {
+      "$ref": "#/components/schemas/AvailabilityZone"
+     },
+     "SubnetIdentifier": {
+      "type": "string"
+     },
+     "SubnetStatus": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "SybaseAseDataProviderSettings": {
+    "additionalProperties": false,
+    "properties": {
+     "CertificateArn": {
+      "type": "string"
+     },
+     "DatabaseName": {
+      "type": "string"
+     },
+     "EncryptPassword": {
+      "type": "boolean"
+     },
+     "Port": {
+      "type": "integer"
+     },
+     "ServerName": {
+      "type": "string"
+     },
+     "SslMode": {
+      "enum": [
+       "none",
+       "require",
+       "verify-ca",
+       "verify-full"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "Tag": {
+    "additionalProperties": false,
+    "properties": {
+     "Key": {
+      "type": "string"
+     },
+     "ResourceArn": {
+      "type": "string"
+     },
+     "Value": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "Bounded simulator subset of the official AWS Database Migration Service API (2016-01-01). Every other official operation returns HTTP 501 UnknownOperationException. Replication subnet groups, event subscriptions, data providers, instance profiles and migration projects are stored configuration records: no replication instance, replication task, endpoint, connection, assessment, schema conversion or migration exists, and nothing connects to any database. Endpoints (which carry database credentials), certificates, tagging (AddTagsToResource, RemoveTagsFromResource and ListTagsForResource), replication instances and tasks, serverless replication configurations, Fleet Advisor, metadata models, recommendations and every Start, Stop, Reload, Refresh, Test and Apply operation return UnknownOperationException with HTTP 501. The Filters member of the Describe operations is refused except DescribeEventSubscriptions SubscriptionName; Describe operations return every stored record, and an unknown SubscriptionName returns an empty list instead of a not-found fault. Event subscription categories, source identifiers and SNS topics, subnet IDs, security groups, KMS keys, roles and Availability Zones are stored without being checked, and no notification is sent. A replication subnet group needs two or more subnet IDs and reports no VpcId; the Availability Zone coverage of the subnets is not checked. Data provider settings hold the server name, port, database name and SSL mode as supplied and are never contacted; ModifyDataProvider accepts Settings only with ExactSettings set to true, which replaces the stored settings, because the merge form is not implemented. Instance profiles report no network address. A migration project must name its instance profile by ARN, and the profile must exist; its source and target data provider descriptors must name data providers by ARN and are not resolved, so the descriptors report DataProviderArn without DataProviderName, and the project reports InstanceProfileArn without InstanceProfileName. SecretsManagerSecretId values are stored as references and never read. Deleting an instance profile or data provider does not check the projects that use it. Tags are not stored: the official DMS tag structure carries a third ResourceArn member that the catalog tag model cannot represent, so the Tags member of the create operations is refused. Record counts are local limits, not Service Quotas.",
+  "title": "AWS Database Migration Service (simulator catalog)",
+  "version": "2016-01-01"
+ },
+ "openapi": "3.1.0",
+ "paths": {
+  "/": {
+   "post": {
+    "description": "Choose the X-Amz-Target of one implemented operation. Request and response members follow the linked official input/output schemas.",
+    "operationId": "dmsJSONOperation",
+    "parameters": [
+     {
+      "in": "header",
+      "name": "X-Amz-Target",
+      "required": true,
+      "schema": {
+       "enum": [
+        "AmazonDMSv20160101.CreateDataProvider",
+        "AmazonDMSv20160101.CreateEventSubscription",
+        "AmazonDMSv20160101.CreateInstanceProfile",
+        "AmazonDMSv20160101.CreateMigrationProject",
+        "AmazonDMSv20160101.CreateReplicationSubnetGroup",
+        "AmazonDMSv20160101.DeleteDataProvider",
+        "AmazonDMSv20160101.DeleteEventSubscription",
+        "AmazonDMSv20160101.DeleteInstanceProfile",
+        "AmazonDMSv20160101.DeleteMigrationProject",
+        "AmazonDMSv20160101.DeleteReplicationSubnetGroup",
+        "AmazonDMSv20160101.DescribeDataProviders",
+        "AmazonDMSv20160101.DescribeEventSubscriptions",
+        "AmazonDMSv20160101.DescribeInstanceProfiles",
+        "AmazonDMSv20160101.DescribeMigrationProjects",
+        "AmazonDMSv20160101.DescribeReplicationSubnetGroups",
+        "AmazonDMSv20160101.ModifyDataProvider",
+        "AmazonDMSv20160101.ModifyEventSubscription",
+        "AmazonDMSv20160101.ModifyInstanceProfile",
+        "AmazonDMSv20160101.ModifyMigrationProject",
+        "AmazonDMSv20160101.ModifyReplicationSubnetGroup"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/x-amz-json-1.1": {
+       "examples": {
+        "CreateDataProvider": {
+         "summary": "X-Amz-Target: AmazonDMSv20160101.CreateDataProvider",
+         "value": {}
+        },
+        "CreateEventSubscription": {
+         "summary": "X-Amz-Target: AmazonDMSv20160101.CreateEventSubscription",
+         "value": {}
+        },
+        "CreateInstanceProfile": {
+         "summary": "X-Amz-Target: AmazonDMSv20160101.CreateInstanceProfile",
+         "value": {}
+        },
+        "CreateMigrationProject": {
+         "summary": "X-Amz-Target: AmazonDMSv20160101.CreateMigrationProject",
+         "value": {}
+        },
+        "CreateReplicationSubnetGroup": {
+         "summary": "X-Amz-Target: AmazonDMSv20160101.CreateReplicationSubnetGroup",
+         "value": {}
+        },
+        "DeleteDataProvider": {
+         "summary": "X-Amz-Target: AmazonDMSv20160101.DeleteDataProvider",
+         "value": {}
+        },
+        "DeleteEventSubscription": {
+         "summary": "X-Amz-Target: AmazonDMSv20160101.DeleteEventSubscription",
+         "value": {}
+        },
+        "DeleteInstanceProfile": {
+         "summary": "X-Amz-Target: AmazonDMSv20160101.DeleteInstanceProfile",
+         "value": {}
+        },
+        "DeleteMigrationProject": {
+         "summary": "X-Amz-Target: AmazonDMSv20160101.DeleteMigrationProject",
+         "value": {}
+        },
+        "DeleteReplicationSubnetGroup": {
+         "summary": "X-Amz-Target: AmazonDMSv20160101.DeleteReplicationSubnetGroup",
+         "value": {}
+        },
+        "DescribeDataProviders": {
+         "summary": "X-Amz-Target: AmazonDMSv20160101.DescribeDataProviders",
+         "value": {}
+        },
+        "DescribeEventSubscriptions": {
+         "summary": "X-Amz-Target: AmazonDMSv20160101.DescribeEventSubscriptions",
+         "value": {}
+        },
+        "DescribeInstanceProfiles": {
+         "summary": "X-Amz-Target: AmazonDMSv20160101.DescribeInstanceProfiles",
+         "value": {}
+        },
+        "DescribeMigrationProjects": {
+         "summary": "X-Amz-Target: AmazonDMSv20160101.DescribeMigrationProjects",
+         "value": {}
+        },
+        "DescribeReplicationSubnetGroups": {
+         "summary": "X-Amz-Target: AmazonDMSv20160101.DescribeReplicationSubnetGroups",
+         "value": {}
+        },
+        "ModifyDataProvider": {
+         "summary": "X-Amz-Target: AmazonDMSv20160101.ModifyDataProvider",
+         "value": {}
+        },
+        "ModifyEventSubscription": {
+         "summary": "X-Amz-Target: AmazonDMSv20160101.ModifyEventSubscription",
+         "value": {}
+        },
+        "ModifyInstanceProfile": {
+         "summary": "X-Amz-Target: AmazonDMSv20160101.ModifyInstanceProfile",
+         "value": {}
+        },
+        "ModifyMigrationProject": {
+         "summary": "X-Amz-Target: AmazonDMSv20160101.ModifyMigrationProject",
+         "value": {}
+        },
+        "ModifyReplicationSubnetGroup": {
+         "summary": "X-Amz-Target: AmazonDMSv20160101.ModifyReplicationSubnetGroup",
+         "value": {}
+        }
+       },
+       "schema": {
+        "type": "object"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/x-amz-json-1.1": {
+        "schema": {
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception in __type."
+     },
+     "403": {
+      "description": "AccessDeniedException from local identity policy evaluation."
+     },
+     "501": {
+      "description": "Official operation not implemented by the simulator."
+     }
+    },
+    "summary": "AWS Database Migration Service JSON 1.1 operations",
+    "tags": [
+     "AWS Database Migration Service"
+    ]
+   }
+  }
+ },
+ "servers": [
+  {
+   "description": "This simulator only",
+   "url": "/"
+  }
+ ],
+ "tags": [
+  {
+   "description": "Bounded simulator subset of the official AWS Database Migration Service API (2016-01-01). Every other official operation returns HTTP 501 UnknownOperationException. Replication subnet groups, event subscriptions, data providers, instance profiles and migration projects are stored configuration records: no replication instance, replication task, endpoint, connection, assessment, schema conversion or migration exists, and nothing connects to any database. Endpoints (which carry database credentials), certificates, tagging (AddTagsToResource, RemoveTagsFromResource and ListTagsForResource), replication instances and tasks, serverless replication configurations, Fleet Advisor, metadata models, recommendations and every Start, Stop, Reload, Refresh, Test and Apply operation return UnknownOperationException with HTTP 501. The Filters member of the Describe operations is refused except DescribeEventSubscriptions SubscriptionName; Describe operations return every stored record, and an unknown SubscriptionName returns an empty list instead of a not-found fault. Event subscription categories, source identifiers and SNS topics, subnet IDs, security groups, KMS keys, roles and Availability Zones are stored without being checked, and no notification is sent. A replication subnet group needs two or more subnet IDs and reports no VpcId; the Availability Zone coverage of the subnets is not checked. Data provider settings hold the server name, port, database name and SSL mode as supplied and are never contacted; ModifyDataProvider accepts Settings only with ExactSettings set to true, which replaces the stored settings, because the merge form is not implemented. Instance profiles report no network address. A migration project must name its instance profile by ARN, and the profile must exist; its source and target data provider descriptors must name data providers by ARN and are not resolved, so the descriptors report DataProviderArn without DataProviderName, and the project reports InstanceProfileArn without InstanceProfileName. SecretsManagerSecretId values are stored as references and never read. Deleting an instance profile or data provider does not check the projects that use it. Tags are not stored: the official DMS tag structure carries a third ResourceArn member that the catalog tag model cannot represent, so the Tags member of the create operations is refused. Record counts are local limits, not Service Quotas.",
+   "name": "AWS Database Migration Service"
+  }
+ ],
+ "x-simulator-source": {
+  "package": "botocore",
+  "version": "1.41.6",
+  "file": "botocore/data/dms/2016-01-01/service-2.json",
+  "sha256": "b8639162538a61ccbbb26ca72a70627652e06c67e5829c468772c58cb16f4bb2",
+  "license": "Apache-2.0"
+ }
+}

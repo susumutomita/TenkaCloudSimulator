@@ -10,6 +10,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"regexp"
 	"slices"
 	"sort"
 	"strconv"
@@ -103,7 +104,10 @@ func (q *request) put() (map[string]any, error) {
 	if err != nil {
 		return nil, err
 	}
-	if err := q.authorize(found.ARN); err != nil {
+	if err := q.authorizeTarget(found.ARN, parent); err != nil {
+		return nil, err
+	}
+	if err := q.checkToken(res, found); err != nil {
 		return nil, err
 	}
 	resourceShape := q.b.model.shape(res.Shape)
@@ -116,7 +120,7 @@ func (q *request) put() (map[string]any, error) {
 		if alias, ok := res.Aliases[key]; ok {
 			target = alias
 		}
-		if _, ok := resourceShape.Members[target]; !ok {
+		if !res.storable(resourceShape, target) {
 			return nil, &fault{kind: "unsupported", message: fmt.Sprintf("Member %s of %s is not supported by the simulator.", key, q.op.Name)}
 		}
 		found.Document[target] = stored(value)
@@ -135,10 +139,18 @@ func (q *request) put() (map[string]any, error) {
 	for key, value := range q.op.Set {
 		found.Document[key] = q.generated(value, found, parent)
 	}
+	if err := q.rotateToken(res, found.Document); err != nil {
+		return nil, err
+	}
 	if err := q.checkRefs(res, found.Document); err != nil {
 		return nil, err
 	}
-	if err := q.commit(func(tx *sql.Tx) error { return updateRow(tx, found) }); err != nil {
+	if err := q.commit(func(tx *sql.Tx) error {
+		if err := q.checkRefsIn(tx, res, found.Document); err != nil {
+			return err
+		}
+		return updateRow(tx, found)
+	}); err != nil {
 		return nil, err
 	}
 	return q.output(found, parent), nil
@@ -162,7 +174,7 @@ func (q *request) members() map[string]any {
 
 // passive reports input members that carry no state change of their own.
 func (q *request) passive(key string) bool {
-	if key == q.op.Lookup || key == q.op.Parent || key == q.op.Names || key == strings.Split(q.op.Lookup, ".")[0] {
+	if key == q.op.Lookup || key == q.op.Parent || key == q.op.Names || key == q.op.Token || key == strings.Split(q.op.Lookup, ".")[0] {
 		return true
 	}
 	for _, member := range q.op.LookupAlt {
@@ -174,6 +186,9 @@ func (q *request) passive(key string) bool {
 		if key == member {
 			return true
 		}
+	}
+	if slices.Contains(q.op.Match, key) {
+		return true
 	}
 	for _, member := range q.b.spec.AccountMembers {
 		if key == member {
@@ -198,19 +213,95 @@ func (q *request) rejectUnconsumed(consumed map[string]bool) error {
 	return nil
 }
 
-// checkRefs requires every referenced ARN to name an existing resource.
+// checkRefs requires every referenced ARN to name an existing resource of
+// the declared kind. A reference path may reach into structures and lists.
 func (q *request) checkRefs(res *Resource, document map[string]any) error {
-	for member, kind := range res.Refs {
-		arn, ok := document[member].(string)
-		if !ok {
+	return q.checkRefsIn(q.e.store.db, res, document)
+}
+
+func (q *request) checkRefsIn(db querier, res *Resource, document map[string]any) error {
+	paths := make([]string, 0, len(res.Refs))
+	for path := range res.Refs {
+		paths = append(paths, path)
+	}
+	sort.Strings(paths)
+	for _, path := range paths {
+		kind := res.Refs[path]
+		for _, arn := range refValues(document, path) {
+			found, err := findARN(db, q.b.spec.Model, arn)
+			if errors.Is(err, sql.ErrNoRows) || err == nil && found.Kind != kind {
+				return &fault{kind: "notfound", message: fmt.Sprintf("The referenced %s %s does not exist.", kind, arn)}
+			}
+			if err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
+
+// refValues returns the strings a reference path names in a document: a
+// member, a dotted path into structures, and [] after a segment for each
+// element of a list (dataflowEdges[][] reaches every string of a list of
+// lists).
+func refValues(document map[string]any, path string) []string {
+	current := []any{document}
+	for _, segment := range strings.Split(path, ".") {
+		name := strings.TrimRight(segment, "[]")
+		depth := (len(segment) - len(name)) / 2
+		next := []any{}
+		for _, value := range current {
+			if object, ok := value.(map[string]any); ok && object[name] != nil {
+				next = append(next, object[name])
+			}
+		}
+		for ; depth > 0; depth-- {
+			var items []any
+			for _, value := range next {
+				if list, ok := value.([]any); ok {
+					items = append(items, list...)
+				}
+			}
+			next = items
+		}
+		current = next
+	}
+	out := []string{}
+	for _, value := range current {
+		if text, ok := value.(string); ok {
+			out = append(out, text)
+		}
+	}
+	return out
+}
+
+// referenced refuses deleting a resource whose kind declares InUse while a
+// reference of another live resource of the service names it; it runs in
+// the deleting transaction so a concurrent reference cannot slip past.
+func (q *request) referenced(tx *sql.Tx, res *Resource, r row) error {
+	if res.InUse == "" {
+		return nil
+	}
+	for _, other := range q.b.spec.Resources {
+		var paths []string
+		for path, kind := range other.Refs {
+			if kind == res.Kind {
+				paths = append(paths, path)
+			}
+		}
+		if len(paths) == 0 {
 			continue
 		}
-		found, err := findARN(q.e.store.db, q.b.spec.Model, arn)
-		if errors.Is(err, sql.ErrNoRows) || err == nil && found.Kind != kind {
-			return &fault{kind: "notfound", message: fmt.Sprintf("The referenced %s %s does not exist.", kind, arn)}
-		}
+		rows, err := listKind(tx, r.Service, other.Kind)
 		if err != nil {
 			return err
+		}
+		for _, candidate := range rows {
+			for _, path := range paths {
+				if slices.Contains(refValues(candidate.Document, path), r.ARN) {
+					return &fault{kind: "dependents", code: res.InUse, message: fmt.Sprintf("The %s %s is still referenced by the %s %s.", res.Kind, r.Name, other.Kind, candidate.Name)}
+				}
+			}
 		}
 	}
 	return nil
@@ -218,6 +309,18 @@ func (q *request) checkRefs(res *Resource, document map[string]any) error {
 
 func (q *request) authorize(resource string) error {
 	return q.authorizeAction(q.b.spec.IAMPrefix+":"+q.op.action(), resource)
+}
+
+// authorizeTarget separates an identity policy's resource from the
+// private catalog row key only when the reviewed operation requires it.
+func (q *request) authorizeTarget(resource string, parent *row) error {
+	if q.op.AuthorizeParent {
+		if parent == nil || parent.ARN == "" {
+			return fmt.Errorf("catalog %s/%s lacks a resolved authorization parent", q.b.spec.Model, q.op.Name)
+		}
+		resource = parent.ARN
+	}
+	return q.authorize(resource)
 }
 
 func (q *request) authorizeAction(action, resource string) error {
@@ -251,6 +354,15 @@ func (q *request) arnRegion() string {
 
 func (q *request) formatARN(res *Resource, id, name string, parent *row) string {
 	replacer := []string{"{partition}", "aws", "{region}", q.arnRegion(), "{account}", q.e.cfg.Account, "{id}", id, "{name}", name}
+	for _, match := range arnMember.FindAllStringSubmatch(res.ARN, -1) {
+		value, ok := q.input[match[2]].(string)
+		if !ok || value == "" {
+			value = "*"
+		} else if match[1] == "lower" {
+			value = strings.ToLower(value)
+		}
+		replacer = append(replacer, match[0], value)
+	}
 	if parent != nil {
 		replacer = append(replacer, "{parent}", parent.ID, "{parentName}", parent.Name)
 	} else {
@@ -302,7 +414,7 @@ func (q *request) lookup() (row, *row, error) {
 	if errors.Is(err, sql.ErrNoRows) && res.Singleton {
 		r := row{Service: q.b.spec.Model, Region: q.region, Kind: res.Kind, ID: "default", Name: "default", Tags: map[string]string{}, Document: map[string]any{}}
 		r.ARN = q.formatARN(res, r.ID, r.Name, parent)
-		if err := q.authorize(r.ARN); err != nil {
+		if err := q.authorizeTarget(r.ARN, parent); err != nil {
 			return row{}, nil, err
 		}
 		for key, value := range res.Generate {
@@ -312,12 +424,17 @@ func (q *request) lookup() (row, *row, error) {
 		}
 		return r, parent, nil
 	}
+	if err == nil && !q.matches(found) {
+		// A Match mismatch is a missing resource: answer before the stored ARN
+		// is authorized, so a denied caller cannot learn that it exists.
+		err = sql.ErrNoRows
+	}
 	if errors.Is(err, sql.ErrNoRows) {
 		guess := identifier
 		if !strings.HasPrefix(identifier, "arn:") {
 			guess = q.formatARN(res, identifier, identifier, parent)
 		}
-		if err := q.authorize(guess); err != nil {
+		if err := q.authorizeTarget(guess, parent); err != nil {
 			return row{}, nil, err
 		}
 		return row{}, nil, &fault{kind: "notfound", message: fmt.Sprintf("The %s %s does not exist.", res.Kind, identifier)}
@@ -325,10 +442,20 @@ func (q *request) lookup() (row, *row, error) {
 	if err != nil {
 		return row{}, nil, err
 	}
-	if err := q.authorize(found.ARN); err != nil {
+	if err := q.authorizeTarget(found.ARN, parent); err != nil {
 		return row{}, nil, err
 	}
 	return found, parent, nil
+}
+
+// matches reports whether every supplied Match member equals the stored value.
+func (q *request) matches(found row) bool {
+	for _, member := range q.op.Match {
+		if value, ok := q.input[member]; ok && fmt.Sprint(value) != fmt.Sprint(found.Document[member]) {
+			return false
+		}
+	}
+	return true
 }
 
 func newID(generator, name string) (string, error) {
@@ -549,7 +676,7 @@ func (q *request) prepareCreate(ecsRevision int) (row, *row, error) {
 		if alias, ok := res.Aliases[key]; ok {
 			target = alias
 		}
-		if _, ok := resourceShape.Members[target]; !ok {
+		if !res.storable(resourceShape, target) {
 			return row{}, nil, &fault{kind: "unsupported", message: fmt.Sprintf("Member %s of %s is not supported by the simulator.", key, q.op.Name)}
 		}
 		document[target] = stored(value)
@@ -615,6 +742,9 @@ func (q *request) prepareCreate(ecsRevision int) (row, *row, error) {
 	for key, value := range q.op.Set {
 		document[key] = q.generated(value, r, parent)
 	}
+	if err := q.rotateToken(res, document); err != nil {
+		return row{}, nil, err
+	}
 	r.Document = document
 	return r, parent, nil
 }
@@ -626,7 +756,7 @@ func (q *request) create(ecsRevision int) (map[string]any, error) {
 	}
 	res := q.resource()
 	tokenMember := idempotencyMember(q.b.model.shape(q.official.Input))
-	if err := q.authorize(r.ARN); err != nil {
+	if err := q.authorizeTarget(r.ARN, parent); err != nil {
 		return nil, err
 	}
 	if ecsRevision > 0 {
@@ -660,6 +790,9 @@ func (q *request) create(ecsRevision int) (map[string]any, error) {
 		if !errors.Is(err, sql.ErrNoRows) {
 			return nil, err
 		}
+	}
+	if err := q.checkRefsIn(tx, res, r.Document); err != nil {
+		return nil, err
 	}
 	if err := insertNewResource(tx, res, &r, parent); err != nil {
 		return nil, err
@@ -735,6 +868,9 @@ func (q *request) update() (map[string]any, error) {
 		return nil, err
 	}
 	res := q.resource()
+	if err := q.checkToken(res, r); err != nil {
+		return nil, err
+	}
 	resourceShape := q.b.model.shape(res.Shape)
 	allowed := map[string]bool{}
 	for _, f := range q.op.Fields {
@@ -749,7 +885,7 @@ func (q *request) update() (map[string]any, error) {
 		if alias, ok := res.Aliases[key]; ok {
 			target = alias
 		}
-		if _, ok := resourceShape.Members[target]; !ok || !allowed[key] {
+		if !res.storable(resourceShape, target) || !allowed[key] {
 			return nil, &fault{kind: "unsupported", message: fmt.Sprintf("Member %s of %s is not supported by the simulator.", key, q.op.Name)}
 		}
 		r.Document[target] = stored(value)
@@ -765,10 +901,16 @@ func (q *request) update() (map[string]any, error) {
 			return nil, err
 		}
 	}
+	if err := q.rotateToken(res, r.Document); err != nil {
+		return nil, err
+	}
 	if err := q.checkRefs(res, r.Document); err != nil {
 		return nil, err
 	}
 	if err := q.commit(func(tx *sql.Tx) error {
+		if err := q.checkRefsIn(tx, res, r.Document); err != nil {
+			return err
+		}
 		if r.Seq == 0 {
 			// A singleton that was never stored is created by its first update.
 			seq, err := nextSeq(tx)
@@ -777,6 +919,19 @@ func (q *request) update() (map[string]any, error) {
 			}
 			r.Seq = seq
 			return insertRow(tx, r)
+		}
+		if q.op.CheckReplacement != nil {
+			previous, err := findARN(tx, r.Service, r.ARN)
+			if err != nil && !errors.Is(err, sql.ErrNoRows) {
+				return err
+			}
+			// A concurrent update/delete/recreation still receives the existing
+			// CAS failure from updateRow; never validate against a new generation.
+			if err == nil && previous.Seq == r.Seq && previous.Generation == r.Generation {
+				if err := q.op.CheckReplacement(previous.Document, r.Document); err != nil {
+					return err
+				}
+			}
 		}
 		return updateRow(tx, r)
 	}); err != nil {
@@ -831,8 +986,14 @@ func (q *request) remove() (map[string]any, error) {
 		return nil, &fault{kind: "notfound", message: fmt.Sprintf("The %s has no stored configuration.", q.resource().Kind)}
 	}
 	res := q.resource()
+	if err := q.checkToken(res, r); err != nil {
+		return nil, err
+	}
 	kinds := q.children(res)
 	err = q.commit(func(tx *sql.Tx) error {
+		if err := q.referenced(tx, res, r); err != nil {
+			return err
+		}
 		if len(kinds) > 0 {
 			n, err := countChildren(tx, r.Service, r.Region, r.ID, kinds)
 			if err != nil {
@@ -1104,6 +1265,9 @@ func (q *request) output(r row, parent *row) map[string]any {
 	res := q.b.spec.resource(r.Kind)
 	shape := q.b.model.shape(q.official.Output)
 	enc := &encoder{model: q.b.model, protocol: q.b.model.Metadata.Protocol}
+	// Only the output's own tags member carries the resource's tags; any other
+	// tag-shaped member (for example stagingAreaTags) is a stored value.
+	tagsMember := q.tagMember(q.official.Output)
 	for _, name := range shape.sortedMembers() {
 		member := shape.Members[name]
 		if member.Location == "statusCode" {
@@ -1114,7 +1278,7 @@ func (q *request) output(r row, parent *row) map[string]any {
 		switch {
 		case member.Shape == res.Shape || member.Shape == res.Summary:
 			value, ok = enc.project(member.Shape, q.withTags(r, member.Shape), 0)
-		case q.b.model.isTagShape(member.Shape) && strings.Contains(strings.ToLower(name), "tag"):
+		case name == tagsMember:
 			value, ok = enc.project(member.Shape, q.renderTags(member.Shape, r.Tags), 0)
 		default:
 			if stored, present := r.Document[name]; present {
@@ -1227,3 +1391,56 @@ func (q *request) listTags() (map[string]any, error) {
 	}
 	return out, nil
 }
+
+// storable reports whether a member is stored with the resource: a member
+// of its official shape or one the specification keeps beside it.
+func (res *Resource) storable(shape *Shape, member string) bool {
+	_, ok := shape.Members[member]
+	return ok || slices.Contains(res.Beside, member)
+}
+
+// checkToken refuses an operation whose supplied concurrency token differs
+// from the stored one. It runs after authorization, and the generation
+// guard of the following write keeps the comparison atomic.
+func (q *request) checkToken(res *Resource, r row) error {
+	supplied, ok := q.input[q.op.Token]
+	if q.op.Token == "" || !ok {
+		return nil
+	}
+	current := r.Document[res.Token]
+	if a, isNumber := Number(supplied); isNumber {
+		if b, stored := Number(current); stored && a == b {
+			return nil
+		}
+	} else if text, isText := supplied.(string); isText && current == text {
+		return nil
+	}
+	return &fault{kind: "stale", message: fmt.Sprintf("The %s %s does not match the current version of the %s; read it again before retrying.", q.op.Token, fmt.Sprint(supplied), res.Kind)}
+}
+
+// rotateToken gives a created or changed resource its next concurrency
+// token: a fresh identifier, or the next value of a counter.
+func (q *request) rotateToken(res *Resource, document map[string]any) error {
+	if res.Token == "" {
+		return nil
+	}
+	if res.TokenID == "counter" {
+		current, _ := Number(document[res.Token])
+		document[res.Token] = int64(current) + 1
+		return nil
+	}
+	generator := res.TokenID
+	if generator == "" {
+		generator = "uuid"
+	}
+	token, err := newID(generator, "")
+	if err != nil {
+		return err
+	}
+	document[res.Token] = token
+	return nil
+}
+
+// arnMember matches the {member:Name} and {lower:Name} ARN placeholders,
+// replaced by the request's string member Name (lowercased for lower).
+var arnMember = regexp.MustCompile(`\{(member|lower):([A-Za-z0-9]+)\}`)

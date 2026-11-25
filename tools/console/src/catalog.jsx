@@ -1,5 +1,9 @@
 import React,{useEffect,useMemo,useRef,useState} from 'react';
 import {useLocale} from './i18n.jsx';
+import AppStreamAppBlockForm from './appstream-app-block.jsx';
+import KinesisVideoRetention from './kinesis-video-retention.jsx';
+import {isKinesisVideoRetention,kinesisRetentionEdit,kinesisRetentionUpdate} from './kinesis-video-retention.mjs';
+import {appStreamAppBlockDetailInput,isAppStreamAppBlock} from './appstream-app-block.mjs';
 import {decodeQuery,queryBody} from './catalog-query.mjs';
 import {example,fromWire,parseComplex,parseTagLines,tagPairs,tagShape,tagValue,toWire} from './catalog-input.mjs';
 import {humanize,matches,phrase,pickColumns,plural,tableShape} from './catalog-names.mjs';
@@ -49,6 +53,29 @@ export function buildCatalogRequest(service,op,input,region){
  const search=query.toString();const hasBody=Object.keys(body).length>0;
  if(hasBody)headers['Content-Type']='application/json';
  return {path:path+(search?'?'+search:''),options:{method:op.method,headers,...(hasBody?{body:JSON.stringify(body)}:{})}};
+}
+
+// A read can return editable members beside its resource wrapper, including
+// the body of a Network Firewall policy. Keep its token separately so it is
+// never an editable field. Kinesis Video returns the version inside its wrapper.
+export function catalogReadSnapshot(read,resource,out){
+ const value=read.wrapper?out[read.wrapper]:out;
+ if(!value||!resource.tokenWire)return {value};
+ const token=value[resource.tokenWire]??out[resource.tokenWire];
+ if(!read.wrapper)return {value,token};
+ const editable=resource.operations.update?.editable||[];
+ const siblings=Object.fromEntries(editable.filter(key=>key!==resource.tokenWire&&!(key in value)&&Object.hasOwn(out,key)).map(key=>[key,out[key]]));
+ return {value:{...value,...siblings},token};
+}
+
+// Use exactly the version read when this editor opened. Never fetch a new
+// version on Save or retry with it: that would overwrite a newer change.
+export function catalogUpdateInput(op,identity,changes,token){
+ if(!op.token)return {...identity,...changes};
+ const member=op.members?.find(m=>m.name===op.token);
+ const valid=member?.type==='string'?typeof token==='string'&&token.trim()!==''
+  :['integer','long'].includes(member?.type)&&Number.isSafeInteger(token);
+ return valid?{...identity,...changes,[op.token]:token}:null;
 }
 
 // Form members: scalars, string lists, and complex members whose official
@@ -132,7 +159,8 @@ export default function CatalogView({region,request,catalog,onSaving}){
  const [chosen,setChosen]=useState([]),[filter,setFilter]=useState(''),[pager,setPager]=useState({tokens:[''],index:0}),[scope,setScope]=useState({});
  const revision=useRef(0),alive=useRef(true);
  const service=(services||[]).find(s=>s.model===model);
- const resource=service?.resources.find(r=>r.kind===kind)||service?.resources[0];
+ const resource=service?.resources.find(r=>r.kind===(kind||(service?.model==='appstream'?'appBlock':'')))||service?.resources[0];
+ const appBlock=isAppStreamAppBlock(service,resource);
  const parentResource=resource?.parent?service.resources.find(r=>r.kind===resource.parent):null;
  // Required list members other than the parent and page token select what
  // the official list returns (ListControls controlType, GetResourceShares
@@ -214,16 +242,23 @@ export default function CatalogView({region,request,catalog,onSaving}){
   // the details; otherwise the listed projection is the detail view.
   try{
    setLoading(true);setDetail(null);
-   let value=item;
-   if(read){const out=await call(read,{...parentInput(read),[read.lookup]:lookupValue(item,read)});if(!valid(epoch))return null;value=read.wrapper?out[read.wrapper]:out}
+   let value=item,token;
+   if(read){const out=await call(read,{...parentInput(read),[read.lookup]:lookupValue(item,read)});if(!valid(epoch))return null;({value,token}=catalogReadSnapshot(read,resource,out))}
    else{
     const describe=resource.operations.describe,list=resource.operations.list;
     // A describe operation whose names member is one string (RDS
     // DescribeDBSubnetGroups DBSubnetGroupName) reads one resource by name.
-    if(describe&&(describe.members||[]).some(m=>m.name===describe.names&&m.type==='string')){const page=await call(describe,{...parentInput(describe),[describe.names]:identity(item)});if(!valid(epoch))return null;value=(page[describe.items]||[])[0]||item}
+    if(appBlock){
+     const input=appStreamAppBlockDetailInput(resource,item);
+     if(!input)throw Error(t('App block ARN is unavailable. Reload the list.','App Block ARN がありません。一覧を更新してください。'));
+     const out=await call(list,input);if(!valid(epoch))return null;
+     value=(out[list.items]||[]).find(row=>row.Arn===item.Arn);
+     if(!value)throw Error(t('App block is no longer listed.','App Block が一覧にありません。'));
+    }
+    else if(describe&&(describe.members||[]).some(m=>m.name===describe.names&&m.type==='string')){const page=await call(describe,{...parentInput(describe),[describe.names]:identity(item)});if(!valid(epoch))return null;value=(page[describe.items]||[])[0]||item}
     else if(describe&&list?.valueItems){const page=await call(describe,{...parentInput(describe),[describe.names]:[item[list.valueMember]]});if(!valid(epoch))return null;value=(page[describe.items]||[])[0]||item}
    }
-   setDetail(value);await loadTags(epoch,value);return valid(epoch)?value:null;
+   setDetail(value);await loadTags(epoch,value);return valid(epoch)?{value,token}:null;
   }catch(e){if(valid(epoch))setError(e.message);return null}finally{if(valid(epoch))setLoading(false)}
  }
  async function loadTags(epoch,value){
@@ -253,8 +288,8 @@ export default function CatalogView({region,request,catalog,onSaving}){
  const createOp=resource?.operations.create;
  const fields=useMemo(()=>fieldOrder(formMembers(createOp,skipped(createOp)),resource),[createOp]);
  function openCreate(){setForm({});setFieldErrors({});setError('');setNotice('');setPage('create')}
- async function create(){
-  const op=createOp;const {input,problems}=readFields(fields,form);
+ async function create(nativeInput){
+  const op=createOp;const {input,problems}=nativeInput?{input:nativeInput,problems:{}}:readFields(fields,form);
   setFieldErrors(problems);if(Object.keys(problems).length){setError('');return}
   fresh();setBusy(true);onSaving(true);setError('');setNotice('');
   let created=false;
@@ -281,20 +316,41 @@ export default function CatalogView({region,request,catalog,onSaving}){
   return written;
  }
  const updateOp=resource?.operations.update;
- const updateFields=updateOp?fieldOrder(formMembers(updateOp,new Set([...skipped(updateOp),updateOp.lookup,...(updateOp.lookupAlt||[])])).filter(m=>!updateOp.editable||updateOp.editable.includes(m.name)),resource):[];
- function startEdit(value=detail){
+ const updateFields=updateOp?fieldOrder(formMembers(updateOp,new Set([...skipped(updateOp),updateOp.lookup,updateOp.token,...(updateOp.lookupAlt||[])])).filter(m=>!updateOp.editable||updateOp.editable.includes(m.name)),resource):[];
+ const retentionEdit=isKinesisVideoRetention(service,resource,updateOp);
+ const canEdit=updateOp&&(retentionEdit||updateFields.length>0);
+ const missingEditToken=()=>t('The service did not return the current version. Reopen Edit to read the resource again.','現在のバージョンを取得できませんでした。編集を開き直してください。');
+ function startEdit(value=detail,token){
+  if(catalogUpdateInput(updateOp,{},{},token)===null){setError(missingEditToken());return}
+  if(retentionEdit){
+   const retention=kinesisRetentionEdit(value,token);
+   if(!retention){setError(t('Current stream name, version, or retention could not be read.','現在のストリーム名、バージョン、または保持期間を取得できませんでした。'));return}
+   setNotice('');setError('');setFieldErrors({});setEditing({retention});setPage('edit');return;
+  }
   const values=Object.fromEntries(updateFields.map(m=>[m.name,fieldText(service,m,value?.[m.locationName||m.name])]));
-  setNotice('');setError('');setFieldErrors({});setEditing({values,initial:values});setPage('edit');
+  setNotice('');setError('');setFieldErrors({});setEditing({values,initial:values,token});setPage('edit');
  }
  // Editing from the list reads the resource first, so the form starts from
  // its current description.
- async function editFromList(item){const value=await inspect(item);if(value&&alive.current)startEdit(value)}
+ async function editFromList(item){const snapshot=await inspect(item);if(snapshot?.value&&alive.current)startEdit(snapshot.value,snapshot.token)}
  async function saveUpdate(){
-  const op=updateOp;const {input,problems,changed}=readFields(updateFields,editing.values,editing.initial);
+  const op=updateOp;
+  if(retentionEdit){
+   const next=kinesisRetentionUpdate(editing.retention);
+   if(next.problem==='hours'){setError('');setFieldErrors({retention:t('Enter a whole number from 1 to 87,600.','1 ～ 87,600 の整数を入力してください。')});return}
+   if(next.problem==='snapshot'){setError(missingEditToken());return}
+   if(next.problem==='unchanged'){setError(t('Choose a different data retention period.','別のデータ保持期間を指定してください。'));return}
+   const ok=await writeDetail(op,next.input,t('Data retention period updated.','データ保持期間を更新しました。'));
+   if(ok&&alive.current)setEditing(null);
+   return;
+  }
+  const {input,problems,changed}=readFields(updateFields,editing.values,editing.initial);
   setFieldErrors(problems);
   if(Object.keys(problems).length){setError('');return}
   if(!changed){setError(t('Change at least one field.','少なくとも 1 つの項目を変更してください。'));return}
-  const ok=await writeDetail(op,{...parentInput(op),[op.lookup]:lookupValue(selected,op),...input},t('Resource updated.','リソースを更新しました。'));
+  const update=catalogUpdateInput(op,{...parentInput(op),[op.lookup]:lookupValue(selected,op)},input,editing.token);
+  if(update===null){setError(missingEditToken());return}
+  const ok=await writeDetail(op,update,t('Resource updated.','リソースを更新しました。'));
   if(ok&&alive.current)setEditing(null);
  }
  // Tag operations take the resource's ARN, or the identity their lookup
@@ -340,18 +396,23 @@ export default function CatalogView({region,request,catalog,onSaving}){
  if(descriptorError)return <Alert type="error">{descriptorError}</Alert>;
  if(services===null)return <Box>{t('Loading','読み込み中')}</Box>;
  if(!services.length)return <Alert type="info">{t('No catalog services are enabled.','有効なカタログサービスはありません。')}</Alert>;
- const singular=kindName(resource),many=plural(singular);
- const createLabel=t('Create ','作成: ')+phrase(singular);
+ const singular=kindName(resource),many=appBlock?t('App blocks','App Block'):plural(singular);
+ const createLabel=appBlock?t('Create app block','App Block を作成'):t('Create ','作成: ')+phrase(singular);
  const pick=chosen[0];
  const toList=e=>{e?.preventDefault?.();if(!busy)load()};
  const crumbs=last=><BreadcrumbGroup ariaLabel={t('Catalog location','カタログ内の位置')} onFollow={e=>{e.preventDefault();if(e.detail.href==='#list')toList()}}
-   items={[{text:service.title,href:'#list'},{text:many,href:'#list'},...(last?[{text:last,href:'#here'}]:[])]}/>;
+   items={[{text:service.title,href:'#list'},...(appBlock?[{text:t('Applications Manager','Applications Manager'),href:'#list'}]:[]),{text:many,href:'#list'},...(last?[{text:last,href:'#here'}]:[])]}/>;
  const alerts=<>{error&&<Alert type="error" header={t('Request failed','リクエストに失敗しました')}>{error}</Alert>}
   {notice&&<Alert type="success" dismissible onDismiss={()=>setNotice('')}>{notice}</Alert>}</>;
  const confirmModal=<Modal visible={!!confirm} onDismiss={()=>setConfirm(null)} header={t('Delete ','削除: ')+phrase(singular)}
    footer={<Box float="right"><SpaceBetween direction="horizontal" size="xs"><Button onClick={()=>setConfirm(null)}>{t('Cancel','キャンセル')}</Button><Button variant="primary" onClick={()=>remove(confirm)}>{t('Delete','削除')}</Button></SpaceBetween></Box>}>
    {t('Delete','削除')} <strong>{identity(confirm||{})}</strong>? {t('This sends ','次の操作を送信します: ')}<code>{resource.operations.delete?.name}</code>.
   </Modal>;
+ if(page==='create'&&createOp&&appBlock){
+  return <ContentLayout header={<SpaceBetween size="s">{crumbs(createLabel)}<Header variant="h1">{createLabel}</Header></SpaceBetween>}>
+    <AppStreamAppBlockForm busy={busy} error={error} onCancel={()=>{setError('');setPage('list')}} onCreate={create}/>
+   </ContentLayout>;
+ }
  if(page==='create'&&createOp){
   return <ContentLayout header={<SpaceBetween size="s">{crumbs(t('Create','作成'))}<Header variant="h1" description={<>{t('Sends ','送信する操作: ')}<code>{createOp.name}</code>{t(' to the simulator. Unlisted official members are available through SDKs.','。一覧にない公式メンバーは SDK から利用できます。')}</>}>{createLabel}</Header></SpaceBetween>}>
    <form onSubmit={e=>{e.preventDefault();create()}}><Form errorText={error||undefined} errorIconAriaLabel={t('Error','エラー')}
@@ -370,7 +431,9 @@ export default function CatalogView({region,request,catalog,onSaving}){
    <form onSubmit={e=>{e.preventDefault();saveUpdate()}}><Form errorText={error||undefined} errorIconAriaLabel={t('Error','エラー')}
      actions={<SpaceBetween direction="horizontal" size="xs"><Button formAction="none" variant="link" disabled={busy} onClick={()=>{setError('');setFieldErrors({});setEditing(null);setPage('detail')}}>{t('Cancel','キャンセル')}</Button><Button variant="primary" formAction="submit" loading={busy}>{t('Save changes','変更を保存')}</Button></SpaceBetween>}>
     <Container header={<Header variant="h2">{t('Settings','設定')}</Header>}>
-     <SpaceBetween size="l">{updateFields.map(member=>field(member,editing.values,values=>setEditing(current=>current&&{...current,values:values(current.values)})))}</SpaceBetween>
+     {retentionEdit&&editing.retention?<KinesisVideoRetention edit={editing.retention} busy={busy} error={fieldErrors.retention} t={t}
+      onChange={fields=>{setError('');setFieldErrors({});setEditing(current=>current?.retention&&{...current,retention:{...current.retention,...fields}})}}/>:
+      <SpaceBetween size="l">{updateFields.map(member=>field(member,editing.values,values=>setEditing(current=>current&&{...current,values:values(current.values)})))}</SpaceBetween>}
     </Container></Form></form>
   </ContentLayout>;
  }
@@ -390,7 +453,7 @@ export default function CatalogView({region,request,catalog,onSaving}){
   const pairs=tagPairs(tags);
   return <ContentLayout header={<SpaceBetween size="s">{crumbs(name)}<Header variant="h1" description={singular}
     actions={<SpaceBetween direction="horizontal" size="xs">
-     {updateOp&&updateFields.length>0&&<Button disabled={busy||loading||!detail} onClick={()=>startEdit()}>{t('Edit','編集')}</Button>}
+     {canEdit&&<Button disabled={busy||loading||!detail} onClick={()=>updateOp.token?editFromList(selected):startEdit()}>{t('Edit','編集')}</Button>}
      {resource.operations.delete&&<Button disabled={busy||loading} onClick={()=>setConfirm(selected)}>{t('Delete','削除')}</Button>}</SpaceBetween>}>{name}</Header></SpaceBetween>}>
    <SpaceBetween size="l">
     {alerts}
@@ -423,6 +486,7 @@ export default function CatalogView({region,request,catalog,onSaving}){
     <ul className="catalog-bounds">{service.bounds.map(b=><li key={b}>{b}</li>)}</ul>
    </ExpandableSection>
    {alerts}
+   {appBlock&&crumbs()}
    <Tabs activeTabId={resource.kind} onChange={e=>{if(!busy){setKind(e.detail.activeTabId);setParent('')}}} tabs={service.resources.map(r=>({id:r.kind,label:plural(kindName(r))}))}/>
    {parentResource&&<FormField label={humanize(parentResource.kind)}><Select selectedOption={parent?{value:parent,label:parent}:null} placeholder={t('Create a parent resource first','先に親リソースを作成してください')} disabled={busy||!parents.length}
      onChange={e=>{const value=e.detail.selectedOption.value;setParent(value);load('',value)}} options={parents.map(p=>{const pk=rowKeys(parentResource);const v=p[pk.id]||p[pk.name]||p[pk.arn];return {value:v,label:p[pk.name]||v}})}/></FormField>}
@@ -436,7 +500,7 @@ export default function CatalogView({region,request,catalog,onSaving}){
      actions={<SpaceBetween direction="horizontal" size="xs">
       <Button iconName="refresh" ariaLabel={t('Refresh','更新')} disabled={busy||loading} onClick={()=>load(pager.tokens[pager.index])}/>
       <Button disabled={!pick||busy} onClick={()=>inspect(pick)}>{t('View details','詳細を表示')}</Button>
-      {updateOp&&updateFields.length>0&&<Button disabled={!pick||busy} onClick={()=>editFromList(pick)}>{t('Edit','編集')}</Button>}
+      {canEdit&&<Button disabled={!pick||busy} onClick={()=>editFromList(pick)}>{t('Edit','編集')}</Button>}
       {resource.operations.delete&&<Button disabled={!pick||busy} onClick={()=>setConfirm(pick)}>{t('Delete','削除')}</Button>}
       {createButton}</SpaceBetween>}>{many}</Header>}
     filter={<TextFilter filteringText={filter} filteringPlaceholder={t('Find ','検索: ')+phrase(many)} filteringAriaLabel={t('Filter loaded ','読み込んだ項目を絞り込む: ')+phrase(many)}

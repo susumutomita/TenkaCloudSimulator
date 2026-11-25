@@ -1,0 +1,1373 @@
+{
+ "components": {
+  "schemas": {
+   "SipMediaApplication": {
+    "additionalProperties": false,
+    "properties": {
+     "AwsRegion": {
+      "type": "string"
+     },
+     "CreatedTimestamp": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "Endpoints": {
+      "items": {
+       "$ref": "#/components/schemas/SipMediaApplicationEndpoint"
+      },
+      "maxItems": 1,
+      "minItems": 1,
+      "type": "array"
+     },
+     "Name": {
+      "maxLength": 256,
+      "minLength": 1,
+      "type": "string"
+     },
+     "SipMediaApplicationArn": {
+      "type": "string"
+     },
+     "SipMediaApplicationId": {
+      "type": "string"
+     },
+     "UpdatedTimestamp": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     }
+    },
+    "type": "object"
+   },
+   "SipMediaApplicationEndpoint": {
+    "additionalProperties": false,
+    "properties": {
+     "LambdaArn": {
+      "maxLength": 10000,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "Tag": {
+    "additionalProperties": false,
+    "properties": {
+     "Key": {
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string"
+     },
+     "Value": {
+      "maxLength": 256,
+      "minLength": 0,
+      "type": "string"
+     }
+    },
+    "required": [
+     "Key",
+     "Value"
+    ],
+    "type": "object"
+   },
+   "VoiceConnector": {
+    "additionalProperties": false,
+    "properties": {
+     "AwsRegion": {
+      "enum": [
+       "us-east-1",
+       "us-west-2",
+       "ca-central-1",
+       "eu-central-1",
+       "eu-west-1",
+       "eu-west-2",
+       "ap-northeast-2",
+       "ap-northeast-1",
+       "ap-southeast-1",
+       "ap-southeast-2"
+      ],
+      "type": "string"
+     },
+     "CreatedTimestamp": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "IntegrationType": {
+      "enum": [
+       "CONNECT_CALL_TRANSFER_CONNECTOR",
+       "CONNECT_ANALYTICS_CONNECTOR"
+      ],
+      "type": "string"
+     },
+     "Name": {
+      "maxLength": 256,
+      "minLength": 1,
+      "type": "string"
+     },
+     "NetworkType": {
+      "enum": [
+       "IPV4_ONLY",
+       "DUAL_STACK"
+      ],
+      "type": "string"
+     },
+     "OutboundHostName": {
+      "type": "string"
+     },
+     "RequireEncryption": {
+      "type": "boolean"
+     },
+     "UpdatedTimestamp": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "VoiceConnectorArn": {
+      "type": "string"
+     },
+     "VoiceConnectorId": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "VoiceConnectorGroup": {
+    "additionalProperties": false,
+    "properties": {
+     "CreatedTimestamp": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "Name": {
+      "maxLength": 256,
+      "minLength": 1,
+      "type": "string"
+     },
+     "UpdatedTimestamp": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "VoiceConnectorGroupArn": {
+      "type": "string"
+     },
+     "VoiceConnectorGroupId": {
+      "type": "string"
+     },
+     "VoiceConnectorItems": {
+      "items": {
+       "$ref": "#/components/schemas/VoiceConnectorItem"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "VoiceConnectorItem": {
+    "additionalProperties": false,
+    "properties": {
+     "Priority": {
+      "maximum": 99,
+      "minimum": 1,
+      "type": "integer"
+     },
+     "VoiceConnectorId": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "VoiceConnectorId",
+     "Priority"
+    ],
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "Bounded simulator subset of the official Amazon Chime SDK Voice API (2022-08-03). Every other official operation returns HTTP 501 UnknownOperationException. Voice Connectors, Voice Connector groups and SIP media applications are stored records: no call is placed, received or routed, no SIP signaling or media exists, and no Lambda function is invoked. A Voice Connector reports no OutboundHostName. Phone numbers and orders, SIP rules (which name a claimed number or a host name), proxy sessions, the termination, origination, streaming, logging and emergency calling settings of a Voice Connector, voice profiles and domains, speaker search and voice tone tasks, and the global settings return UnknownOperationException with HTTP 501. A Voice Connector defaults to AwsRegion us-east-1 and NetworkType IPV4_ONLY; the Voice Connector IDs named by a group (priority 1 to 99 as modeled) and the Lambda ARN of a SIP media application endpoint (exactly one, as modeled) are stored without being resolved. Counts per Region (50 Voice Connectors, 50 groups and 25 SIP media applications) are simulator limits, and the ID and ARN forms (vc/, vcg/ and sma/) are inferred. All Amazon Chime SDK models sign as chime and share the POST /tags?operation=tag-resource, POST /tags?operation=untag-resource and GET /tags routes, which the engine cannot tell apart by model. Only this model binds the tag operations, so it applies to Voice Connectors and SIP media applications by ARN and must be registered before the other chime models; the identity and media pipelines models refuse Tags on creation, and the messaging model is not served.",
+  "title": "Amazon Chime SDK Voice (simulator catalog)",
+  "version": "2022-08-03"
+ },
+ "openapi": "3.1.0",
+ "paths": {
+  "/sip-media-applications": {
+   "get": {
+    "operationId": "chime-sdk-voiceListSipMediaApplications",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "chime"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "max-results",
+      "schema": {
+       "maximum": 100,
+       "minimum": 1,
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "next-token",
+      "schema": {
+       "maxLength": 65535,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "NextToken": {
+           "maxLength": 65535,
+           "type": "string"
+          },
+          "SipMediaApplications": {
+           "items": {
+            "$ref": "#/components/schemas/SipMediaApplication"
+           },
+           "type": "array"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListSipMediaApplications",
+    "tags": [
+     "Amazon Chime SDK Voice"
+    ]
+   },
+   "post": {
+    "operationId": "chime-sdk-voiceCreateSipMediaApplication",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "chime"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "AwsRegion": {
+          "type": "string"
+         },
+         "Endpoints": {
+          "items": {
+           "$ref": "#/components/schemas/SipMediaApplicationEndpoint"
+          },
+          "maxItems": 1,
+          "minItems": 1,
+          "type": "array"
+         },
+         "Name": {
+          "maxLength": 256,
+          "minLength": 1,
+          "type": "string"
+         },
+         "Tags": {
+          "items": {
+           "$ref": "#/components/schemas/Tag"
+          },
+          "maxItems": 50,
+          "minItems": 1,
+          "type": "array"
+         }
+        },
+        "required": [
+         "AwsRegion",
+         "Endpoints",
+         "Name"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "SipMediaApplication": {
+           "$ref": "#/components/schemas/SipMediaApplication"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateSipMediaApplication",
+    "tags": [
+     "Amazon Chime SDK Voice"
+    ]
+   }
+  },
+  "/sip-media-applications/{sipMediaApplicationId}": {
+   "delete": {
+    "operationId": "chime-sdk-voiceDeleteSipMediaApplication",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "chime"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "sipMediaApplicationId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteSipMediaApplication",
+    "tags": [
+     "Amazon Chime SDK Voice"
+    ]
+   },
+   "get": {
+    "operationId": "chime-sdk-voiceGetSipMediaApplication",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "chime"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "sipMediaApplicationId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "SipMediaApplication": {
+           "$ref": "#/components/schemas/SipMediaApplication"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "GetSipMediaApplication",
+    "tags": [
+     "Amazon Chime SDK Voice"
+    ]
+   },
+   "put": {
+    "operationId": "chime-sdk-voiceUpdateSipMediaApplication",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "chime"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "sipMediaApplicationId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "Endpoints": {
+          "items": {
+           "$ref": "#/components/schemas/SipMediaApplicationEndpoint"
+          },
+          "maxItems": 1,
+          "minItems": 1,
+          "type": "array"
+         },
+         "Name": {
+          "maxLength": 256,
+          "minLength": 1,
+          "type": "string"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "SipMediaApplication": {
+           "$ref": "#/components/schemas/SipMediaApplication"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UpdateSipMediaApplication",
+    "tags": [
+     "Amazon Chime SDK Voice"
+    ]
+   }
+  },
+  "/tags": {
+   "get": {
+    "operationId": "chime-sdk-voiceListTagsForResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "chime"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "arn",
+      "schema": {
+       "maxLength": 1024,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "Tags": {
+           "items": {
+            "$ref": "#/components/schemas/Tag"
+           },
+           "maxItems": 50,
+           "minItems": 1,
+           "type": "array"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListTagsForResource",
+    "tags": [
+     "Amazon Chime SDK Voice"
+    ]
+   },
+   "post": {
+    "operationId": "chime-sdk-voiceUntagResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "chime"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "ResourceARN": {
+          "maxLength": 1024,
+          "minLength": 1,
+          "type": "string"
+         },
+         "TagKeys": {
+          "items": {
+           "maxLength": 128,
+           "minLength": 1,
+           "type": "string"
+          },
+          "maxItems": 50,
+          "minItems": 1,
+          "type": "array"
+         }
+        },
+        "required": [
+         "ResourceARN",
+         "TagKeys"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UntagResource",
+    "tags": [
+     "Amazon Chime SDK Voice"
+    ]
+   }
+  },
+  "/voice-connector-groups": {
+   "get": {
+    "operationId": "chime-sdk-voiceListVoiceConnectorGroups",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "chime"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "max-results",
+      "schema": {
+       "maximum": 100,
+       "minimum": 1,
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "next-token",
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "NextToken": {
+           "type": "string"
+          },
+          "VoiceConnectorGroups": {
+           "items": {
+            "$ref": "#/components/schemas/VoiceConnectorGroup"
+           },
+           "type": "array"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListVoiceConnectorGroups",
+    "tags": [
+     "Amazon Chime SDK Voice"
+    ]
+   },
+   "post": {
+    "operationId": "chime-sdk-voiceCreateVoiceConnectorGroup",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "chime"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "Name": {
+          "maxLength": 256,
+          "minLength": 1,
+          "type": "string"
+         },
+         "VoiceConnectorItems": {
+          "items": {
+           "$ref": "#/components/schemas/VoiceConnectorItem"
+          },
+          "type": "array"
+         }
+        },
+        "required": [
+         "Name"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "VoiceConnectorGroup": {
+           "$ref": "#/components/schemas/VoiceConnectorGroup"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateVoiceConnectorGroup",
+    "tags": [
+     "Amazon Chime SDK Voice"
+    ]
+   }
+  },
+  "/voice-connector-groups/{voiceConnectorGroupId}": {
+   "delete": {
+    "operationId": "chime-sdk-voiceDeleteVoiceConnectorGroup",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "chime"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "voiceConnectorGroupId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteVoiceConnectorGroup",
+    "tags": [
+     "Amazon Chime SDK Voice"
+    ]
+   },
+   "get": {
+    "operationId": "chime-sdk-voiceGetVoiceConnectorGroup",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "chime"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "voiceConnectorGroupId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "VoiceConnectorGroup": {
+           "$ref": "#/components/schemas/VoiceConnectorGroup"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "GetVoiceConnectorGroup",
+    "tags": [
+     "Amazon Chime SDK Voice"
+    ]
+   },
+   "put": {
+    "operationId": "chime-sdk-voiceUpdateVoiceConnectorGroup",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "chime"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "voiceConnectorGroupId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "Name": {
+          "maxLength": 256,
+          "minLength": 1,
+          "type": "string"
+         },
+         "VoiceConnectorItems": {
+          "items": {
+           "$ref": "#/components/schemas/VoiceConnectorItem"
+          },
+          "type": "array"
+         }
+        },
+        "required": [
+         "Name",
+         "VoiceConnectorItems"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "VoiceConnectorGroup": {
+           "$ref": "#/components/schemas/VoiceConnectorGroup"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UpdateVoiceConnectorGroup",
+    "tags": [
+     "Amazon Chime SDK Voice"
+    ]
+   }
+  },
+  "/voice-connectors": {
+   "get": {
+    "operationId": "chime-sdk-voiceListVoiceConnectors",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "chime"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "max-results",
+      "schema": {
+       "maximum": 100,
+       "minimum": 1,
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "next-token",
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "NextToken": {
+           "type": "string"
+          },
+          "VoiceConnectors": {
+           "items": {
+            "$ref": "#/components/schemas/VoiceConnector"
+           },
+           "type": "array"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListVoiceConnectors",
+    "tags": [
+     "Amazon Chime SDK Voice"
+    ]
+   },
+   "post": {
+    "operationId": "chime-sdk-voiceCreateVoiceConnector",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "chime"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "AwsRegion": {
+          "enum": [
+           "us-east-1",
+           "us-west-2",
+           "ca-central-1",
+           "eu-central-1",
+           "eu-west-1",
+           "eu-west-2",
+           "ap-northeast-2",
+           "ap-northeast-1",
+           "ap-southeast-1",
+           "ap-southeast-2"
+          ],
+          "type": "string"
+         },
+         "IntegrationType": {
+          "enum": [
+           "CONNECT_CALL_TRANSFER_CONNECTOR",
+           "CONNECT_ANALYTICS_CONNECTOR"
+          ],
+          "type": "string"
+         },
+         "Name": {
+          "maxLength": 256,
+          "minLength": 1,
+          "type": "string"
+         },
+         "NetworkType": {
+          "enum": [
+           "IPV4_ONLY",
+           "DUAL_STACK"
+          ],
+          "type": "string"
+         },
+         "RequireEncryption": {
+          "type": "boolean"
+         },
+         "Tags": {
+          "items": {
+           "$ref": "#/components/schemas/Tag"
+          },
+          "maxItems": 50,
+          "minItems": 1,
+          "type": "array"
+         }
+        },
+        "required": [
+         "Name",
+         "RequireEncryption"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "VoiceConnector": {
+           "$ref": "#/components/schemas/VoiceConnector"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateVoiceConnector",
+    "tags": [
+     "Amazon Chime SDK Voice"
+    ]
+   }
+  },
+  "/voice-connectors/{voiceConnectorId}": {
+   "delete": {
+    "operationId": "chime-sdk-voiceDeleteVoiceConnector",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "chime"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "voiceConnectorId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteVoiceConnector",
+    "tags": [
+     "Amazon Chime SDK Voice"
+    ]
+   },
+   "get": {
+    "operationId": "chime-sdk-voiceGetVoiceConnector",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "chime"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "voiceConnectorId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "VoiceConnector": {
+           "$ref": "#/components/schemas/VoiceConnector"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "GetVoiceConnector",
+    "tags": [
+     "Amazon Chime SDK Voice"
+    ]
+   },
+   "put": {
+    "operationId": "chime-sdk-voiceUpdateVoiceConnector",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "chime"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "voiceConnectorId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "Name": {
+          "maxLength": 256,
+          "minLength": 1,
+          "type": "string"
+         },
+         "RequireEncryption": {
+          "type": "boolean"
+         }
+        },
+        "required": [
+         "Name",
+         "RequireEncryption"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "VoiceConnector": {
+           "$ref": "#/components/schemas/VoiceConnector"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UpdateVoiceConnector",
+    "tags": [
+     "Amazon Chime SDK Voice"
+    ]
+   }
+  }
+ },
+ "servers": [
+  {
+   "description": "This simulator only",
+   "url": "/"
+  }
+ ],
+ "tags": [
+  {
+   "description": "Bounded simulator subset of the official Amazon Chime SDK Voice API (2022-08-03). Every other official operation returns HTTP 501 UnknownOperationException. Voice Connectors, Voice Connector groups and SIP media applications are stored records: no call is placed, received or routed, no SIP signaling or media exists, and no Lambda function is invoked. A Voice Connector reports no OutboundHostName. Phone numbers and orders, SIP rules (which name a claimed number or a host name), proxy sessions, the termination, origination, streaming, logging and emergency calling settings of a Voice Connector, voice profiles and domains, speaker search and voice tone tasks, and the global settings return UnknownOperationException with HTTP 501. A Voice Connector defaults to AwsRegion us-east-1 and NetworkType IPV4_ONLY; the Voice Connector IDs named by a group (priority 1 to 99 as modeled) and the Lambda ARN of a SIP media application endpoint (exactly one, as modeled) are stored without being resolved. Counts per Region (50 Voice Connectors, 50 groups and 25 SIP media applications) are simulator limits, and the ID and ARN forms (vc/, vcg/ and sma/) are inferred. All Amazon Chime SDK models sign as chime and share the POST /tags?operation=tag-resource, POST /tags?operation=untag-resource and GET /tags routes, which the engine cannot tell apart by model. Only this model binds the tag operations, so it applies to Voice Connectors and SIP media applications by ARN and must be registered before the other chime models; the identity and media pipelines models refuse Tags on creation, and the messaging model is not served.",
+   "name": "Amazon Chime SDK Voice"
+  }
+ ],
+ "x-simulator-source": {
+  "package": "botocore",
+  "version": "1.41.6",
+  "file": "botocore/data/chime-sdk-voice/2022-08-03/service-2.json",
+  "sha256": "5718aff022469b1528271cc458030fcc1244a8b449213fb4a27e7347faebbb52",
+  "license": "Apache-2.0"
+ }
+}

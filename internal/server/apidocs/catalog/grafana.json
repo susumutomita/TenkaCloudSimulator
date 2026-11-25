@@ -1,0 +1,1092 @@
+{
+ "components": {
+  "schemas": {
+   "AuthenticationSummary": {
+    "additionalProperties": false,
+    "properties": {
+     "providers": {
+      "items": {
+       "enum": [
+        "AWS_SSO",
+        "SAML"
+       ],
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "samlConfigurationStatus": {
+      "enum": [
+       "CONFIGURED",
+       "NOT_CONFIGURED"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "providers"
+    ],
+    "type": "object"
+   },
+   "NetworkAccessConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "prefixListIds": {
+      "items": {
+       "maxLength": 100,
+       "minLength": 1,
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "vpceIds": {
+      "items": {
+       "maxLength": 100,
+       "minLength": 1,
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "required": [
+     "prefixListIds",
+     "vpceIds"
+    ],
+    "type": "object"
+   },
+   "VpcConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "securityGroupIds": {
+      "items": {
+       "maxLength": 255,
+       "minLength": 0,
+       "type": "string"
+      },
+      "maxItems": 5,
+      "minItems": 1,
+      "type": "array"
+     },
+     "subnetIds": {
+      "items": {
+       "maxLength": 255,
+       "minLength": 0,
+       "type": "string"
+      },
+      "maxItems": 6,
+      "minItems": 2,
+      "type": "array"
+     }
+    },
+    "required": [
+     "securityGroupIds",
+     "subnetIds"
+    ],
+    "type": "object"
+   },
+   "WorkspaceDescription": {
+    "additionalProperties": false,
+    "properties": {
+     "accountAccessType": {
+      "enum": [
+       "CURRENT_ACCOUNT",
+       "ORGANIZATION"
+      ],
+      "type": "string"
+     },
+     "authentication": {
+      "$ref": "#/components/schemas/AuthenticationSummary"
+     },
+     "created": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "dataSources": {
+      "items": {
+       "enum": [
+        "AMAZON_OPENSEARCH_SERVICE",
+        "CLOUDWATCH",
+        "PROMETHEUS",
+        "XRAY",
+        "TIMESTREAM",
+        "SITEWISE",
+        "ATHENA",
+        "REDSHIFT",
+        "TWINMAKER"
+       ],
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "description": {
+      "maxLength": 2048,
+      "minLength": 0,
+      "type": "string"
+     },
+     "endpoint": {
+      "maxLength": 2048,
+      "minLength": 1,
+      "type": "string"
+     },
+     "freeTrialConsumed": {
+      "type": "boolean"
+     },
+     "freeTrialExpiration": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "grafanaToken": {
+      "maxLength": 36,
+      "minLength": 1,
+      "type": "string"
+     },
+     "grafanaVersion": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "id": {
+      "type": "string"
+     },
+     "licenseExpiration": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "licenseType": {
+      "enum": [
+       "ENTERPRISE",
+       "ENTERPRISE_FREE_TRIAL"
+      ],
+      "type": "string"
+     },
+     "modified": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "name": {
+      "type": "string"
+     },
+     "networkAccessControl": {
+      "$ref": "#/components/schemas/NetworkAccessConfiguration"
+     },
+     "notificationDestinations": {
+      "items": {
+       "enum": [
+        "SNS"
+       ],
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "organizationRoleName": {
+      "maxLength": 2048,
+      "minLength": 1,
+      "type": "string"
+     },
+     "organizationalUnits": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "permissionType": {
+      "enum": [
+       "CUSTOMER_MANAGED",
+       "SERVICE_MANAGED"
+      ],
+      "type": "string"
+     },
+     "stackSetName": {
+      "type": "string"
+     },
+     "status": {
+      "enum": [
+       "ACTIVE",
+       "CREATING",
+       "DELETING",
+       "FAILED",
+       "UPDATING",
+       "UPGRADING",
+       "DELETION_FAILED",
+       "CREATION_FAILED",
+       "UPDATE_FAILED",
+       "UPGRADE_FAILED",
+       "LICENSE_REMOVAL_FAILED",
+       "VERSION_UPDATING",
+       "VERSION_UPDATE_FAILED"
+      ],
+      "type": "string"
+     },
+     "tags": {
+      "additionalProperties": {
+       "maxLength": 256,
+       "minLength": 0,
+       "type": "string"
+      },
+      "maxProperties": 50,
+      "minProperties": 0,
+      "type": "object"
+     },
+     "vpcConfiguration": {
+      "$ref": "#/components/schemas/VpcConfiguration"
+     },
+     "workspaceRoleArn": {
+      "maxLength": 2048,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "authentication",
+     "created",
+     "dataSources",
+     "endpoint",
+     "grafanaVersion",
+     "id",
+     "modified",
+     "status"
+    ],
+    "type": "object"
+   },
+   "WorkspaceSummary": {
+    "additionalProperties": false,
+    "properties": {
+     "authentication": {
+      "$ref": "#/components/schemas/AuthenticationSummary"
+     },
+     "created": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "description": {
+      "maxLength": 2048,
+      "minLength": 0,
+      "type": "string"
+     },
+     "endpoint": {
+      "maxLength": 2048,
+      "minLength": 1,
+      "type": "string"
+     },
+     "grafanaToken": {
+      "maxLength": 36,
+      "minLength": 1,
+      "type": "string"
+     },
+     "grafanaVersion": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "id": {
+      "type": "string"
+     },
+     "licenseType": {
+      "enum": [
+       "ENTERPRISE",
+       "ENTERPRISE_FREE_TRIAL"
+      ],
+      "type": "string"
+     },
+     "modified": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "name": {
+      "type": "string"
+     },
+     "notificationDestinations": {
+      "items": {
+       "enum": [
+        "SNS"
+       ],
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "status": {
+      "enum": [
+       "ACTIVE",
+       "CREATING",
+       "DELETING",
+       "FAILED",
+       "UPDATING",
+       "UPGRADING",
+       "DELETION_FAILED",
+       "CREATION_FAILED",
+       "UPDATE_FAILED",
+       "UPGRADE_FAILED",
+       "LICENSE_REMOVAL_FAILED",
+       "VERSION_UPDATING",
+       "VERSION_UPDATE_FAILED"
+      ],
+      "type": "string"
+     },
+     "tags": {
+      "additionalProperties": {
+       "maxLength": 256,
+       "minLength": 0,
+       "type": "string"
+      },
+      "maxProperties": 50,
+      "minProperties": 0,
+      "type": "object"
+     }
+    },
+    "required": [
+     "authentication",
+     "created",
+     "endpoint",
+     "grafanaVersion",
+     "id",
+     "modified",
+     "status"
+    ],
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "Bounded simulator subset of the official Amazon Managed Grafana API (2020-08-18). Every other official operation returns HTTP 501 UnknownOperationException. Workspaces are stored configuration records that are ACTIVE at once: no Grafana server, workspace URL, dashboard, data source connection, notification channel or license exists, endpoint is never returned, and the Grafana API, console and every other official operation return UnknownOperationException with HTTP 501. No VPC endpoint, network interface or IAM role is created or checked. Workspace authentication, configuration and permissions are not implemented: DescribeWorkspaceAuthentication, UpdateWorkspaceAuthentication, DescribeWorkspaceConfiguration, UpdateWorkspaceConfiguration, ListPermissions, UpdatePermissions, ListVersions and the license operations return HTTP 501, and the configuration member of CreateWorkspace is refused. API keys, service accounts and their tokens are secrets that Amazon Managed Grafana generates, so CreateWorkspaceApiKey, DeleteWorkspaceApiKey and the service account and token operations return HTTP 501 and no key or token is ever stored or returned. CreateWorkspace stores authenticationProviders as the authentication summary, with samlConfigurationStatus NOT_CONFIGURED when SAML is listed because SAML cannot be configured. Only CUSTOMER_MANAGED permissions are accepted, as the documentation prescribes for the API, and they need a workspaceRoleArn (an IAM role ARN stored without checking that the role exists); ORGANIZATION account access needs workspaceOrganizationalUnits. grafanaVersion is stored as given when it looks like 10.4 and defaults to 10.4, the example the documentation gives for the latest version; it is never upgraded and no version list is served. networkAccessControl prefix list IDs must look like pl-1a2b3c4d and VPC configurations need 2 to 6 distinct subnet IDs and 1 to 5 distinct security group IDs, none of which are resolved. UpdateWorkspace keeps omitted settings, removeVpcConfiguration and removeNetworkAccessConfiguration clear a stored setting and are refused together with a replacement, and the merged workspace must still satisfy the rules above. Workspace names need not be unique, ARNs are arn:aws:grafana:region:account:/workspaces/id, and 10 workspaces per Region is a local limit. Deleting a workspace removes the record and returns it with status DELETING.",
+  "title": "Amazon Managed Grafana (simulator catalog)",
+  "version": "2020-08-18"
+ },
+ "openapi": "3.1.0",
+ "paths": {
+  "/tags/{resourceArn}": {
+   "delete": {
+    "operationId": "grafanaUntagResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "grafana"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceArn",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "tagKeys",
+      "schema": {
+       "items": {
+        "maxLength": 128,
+        "minLength": 1,
+        "type": "string"
+       },
+       "type": "array"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UntagResource",
+    "tags": [
+     "Amazon Managed Grafana"
+    ]
+   },
+   "get": {
+    "operationId": "grafanaListTagsForResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "grafana"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceArn",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "tags": {
+           "additionalProperties": {
+            "maxLength": 256,
+            "minLength": 0,
+            "type": "string"
+           },
+           "maxProperties": 50,
+           "minProperties": 0,
+           "type": "object"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListTagsForResource",
+    "tags": [
+     "Amazon Managed Grafana"
+    ]
+   },
+   "post": {
+    "operationId": "grafanaTagResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "grafana"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceArn",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "tags": {
+          "additionalProperties": {
+           "maxLength": 256,
+           "minLength": 0,
+           "type": "string"
+          },
+          "maxProperties": 50,
+          "minProperties": 0,
+          "type": "object"
+         }
+        },
+        "required": [
+         "tags"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "TagResource",
+    "tags": [
+     "Amazon Managed Grafana"
+    ]
+   }
+  },
+  "/workspaces": {
+   "get": {
+    "operationId": "grafanaListWorkspaces",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "grafana"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "maxResults",
+      "schema": {
+       "maximum": 100,
+       "minimum": 1,
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "nextToken",
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "nextToken": {
+           "type": "string"
+          },
+          "workspaces": {
+           "items": {
+            "$ref": "#/components/schemas/WorkspaceSummary"
+           },
+           "type": "array"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListWorkspaces",
+    "tags": [
+     "Amazon Managed Grafana"
+    ]
+   },
+   "post": {
+    "operationId": "grafanaCreateWorkspace",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "grafana"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "accountAccessType": {
+          "enum": [
+           "CURRENT_ACCOUNT",
+           "ORGANIZATION"
+          ],
+          "type": "string"
+         },
+         "authenticationProviders": {
+          "items": {
+           "enum": [
+            "AWS_SSO",
+            "SAML"
+           ],
+           "type": "string"
+          },
+          "type": "array"
+         },
+         "clientToken": {
+          "type": "string"
+         },
+         "configuration": {
+          "maxLength": 65536,
+          "minLength": 2,
+          "type": "string"
+         },
+         "grafanaVersion": {
+          "maxLength": 255,
+          "minLength": 1,
+          "type": "string"
+         },
+         "networkAccessControl": {
+          "$ref": "#/components/schemas/NetworkAccessConfiguration"
+         },
+         "organizationRoleName": {
+          "maxLength": 2048,
+          "minLength": 1,
+          "type": "string"
+         },
+         "permissionType": {
+          "enum": [
+           "CUSTOMER_MANAGED",
+           "SERVICE_MANAGED"
+          ],
+          "type": "string"
+         },
+         "stackSetName": {
+          "type": "string"
+         },
+         "tags": {
+          "additionalProperties": {
+           "maxLength": 256,
+           "minLength": 0,
+           "type": "string"
+          },
+          "maxProperties": 50,
+          "minProperties": 0,
+          "type": "object"
+         },
+         "vpcConfiguration": {
+          "$ref": "#/components/schemas/VpcConfiguration"
+         },
+         "workspaceDataSources": {
+          "items": {
+           "enum": [
+            "AMAZON_OPENSEARCH_SERVICE",
+            "CLOUDWATCH",
+            "PROMETHEUS",
+            "XRAY",
+            "TIMESTREAM",
+            "SITEWISE",
+            "ATHENA",
+            "REDSHIFT",
+            "TWINMAKER"
+           ],
+           "type": "string"
+          },
+          "type": "array"
+         },
+         "workspaceDescription": {
+          "maxLength": 2048,
+          "minLength": 0,
+          "type": "string"
+         },
+         "workspaceName": {
+          "type": "string"
+         },
+         "workspaceNotificationDestinations": {
+          "items": {
+           "enum": [
+            "SNS"
+           ],
+           "type": "string"
+          },
+          "type": "array"
+         },
+         "workspaceOrganizationalUnits": {
+          "items": {
+           "type": "string"
+          },
+          "type": "array"
+         },
+         "workspaceRoleArn": {
+          "maxLength": 2048,
+          "minLength": 1,
+          "type": "string"
+         }
+        },
+        "required": [
+         "accountAccessType",
+         "authenticationProviders",
+         "permissionType"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "workspace": {
+           "$ref": "#/components/schemas/WorkspaceDescription"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateWorkspace",
+    "tags": [
+     "Amazon Managed Grafana"
+    ]
+   }
+  },
+  "/workspaces/{workspaceId}": {
+   "delete": {
+    "operationId": "grafanaDeleteWorkspace",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "grafana"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "workspaceId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "workspace": {
+           "$ref": "#/components/schemas/WorkspaceDescription"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteWorkspace",
+    "tags": [
+     "Amazon Managed Grafana"
+    ]
+   },
+   "get": {
+    "operationId": "grafanaDescribeWorkspace",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "grafana"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "workspaceId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "workspace": {
+           "$ref": "#/components/schemas/WorkspaceDescription"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DescribeWorkspace",
+    "tags": [
+     "Amazon Managed Grafana"
+    ]
+   },
+   "put": {
+    "operationId": "grafanaUpdateWorkspace",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "grafana"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "workspaceId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "accountAccessType": {
+          "enum": [
+           "CURRENT_ACCOUNT",
+           "ORGANIZATION"
+          ],
+          "type": "string"
+         },
+         "networkAccessControl": {
+          "$ref": "#/components/schemas/NetworkAccessConfiguration"
+         },
+         "organizationRoleName": {
+          "maxLength": 2048,
+          "minLength": 1,
+          "type": "string"
+         },
+         "permissionType": {
+          "enum": [
+           "CUSTOMER_MANAGED",
+           "SERVICE_MANAGED"
+          ],
+          "type": "string"
+         },
+         "removeNetworkAccessConfiguration": {
+          "type": "boolean"
+         },
+         "removeVpcConfiguration": {
+          "type": "boolean"
+         },
+         "stackSetName": {
+          "type": "string"
+         },
+         "vpcConfiguration": {
+          "$ref": "#/components/schemas/VpcConfiguration"
+         },
+         "workspaceDataSources": {
+          "items": {
+           "enum": [
+            "AMAZON_OPENSEARCH_SERVICE",
+            "CLOUDWATCH",
+            "PROMETHEUS",
+            "XRAY",
+            "TIMESTREAM",
+            "SITEWISE",
+            "ATHENA",
+            "REDSHIFT",
+            "TWINMAKER"
+           ],
+           "type": "string"
+          },
+          "type": "array"
+         },
+         "workspaceDescription": {
+          "maxLength": 2048,
+          "minLength": 0,
+          "type": "string"
+         },
+         "workspaceName": {
+          "type": "string"
+         },
+         "workspaceNotificationDestinations": {
+          "items": {
+           "enum": [
+            "SNS"
+           ],
+           "type": "string"
+          },
+          "type": "array"
+         },
+         "workspaceOrganizationalUnits": {
+          "items": {
+           "type": "string"
+          },
+          "type": "array"
+         },
+         "workspaceRoleArn": {
+          "maxLength": 2048,
+          "minLength": 1,
+          "type": "string"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "workspace": {
+           "$ref": "#/components/schemas/WorkspaceDescription"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UpdateWorkspace",
+    "tags": [
+     "Amazon Managed Grafana"
+    ]
+   }
+  }
+ },
+ "servers": [
+  {
+   "description": "This simulator only",
+   "url": "/"
+  }
+ ],
+ "tags": [
+  {
+   "description": "Bounded simulator subset of the official Amazon Managed Grafana API (2020-08-18). Every other official operation returns HTTP 501 UnknownOperationException. Workspaces are stored configuration records that are ACTIVE at once: no Grafana server, workspace URL, dashboard, data source connection, notification channel or license exists, endpoint is never returned, and the Grafana API, console and every other official operation return UnknownOperationException with HTTP 501. No VPC endpoint, network interface or IAM role is created or checked. Workspace authentication, configuration and permissions are not implemented: DescribeWorkspaceAuthentication, UpdateWorkspaceAuthentication, DescribeWorkspaceConfiguration, UpdateWorkspaceConfiguration, ListPermissions, UpdatePermissions, ListVersions and the license operations return HTTP 501, and the configuration member of CreateWorkspace is refused. API keys, service accounts and their tokens are secrets that Amazon Managed Grafana generates, so CreateWorkspaceApiKey, DeleteWorkspaceApiKey and the service account and token operations return HTTP 501 and no key or token is ever stored or returned. CreateWorkspace stores authenticationProviders as the authentication summary, with samlConfigurationStatus NOT_CONFIGURED when SAML is listed because SAML cannot be configured. Only CUSTOMER_MANAGED permissions are accepted, as the documentation prescribes for the API, and they need a workspaceRoleArn (an IAM role ARN stored without checking that the role exists); ORGANIZATION account access needs workspaceOrganizationalUnits. grafanaVersion is stored as given when it looks like 10.4 and defaults to 10.4, the example the documentation gives for the latest version; it is never upgraded and no version list is served. networkAccessControl prefix list IDs must look like pl-1a2b3c4d and VPC configurations need 2 to 6 distinct subnet IDs and 1 to 5 distinct security group IDs, none of which are resolved. UpdateWorkspace keeps omitted settings, removeVpcConfiguration and removeNetworkAccessConfiguration clear a stored setting and are refused together with a replacement, and the merged workspace must still satisfy the rules above. Workspace names need not be unique, ARNs are arn:aws:grafana:region:account:/workspaces/id, and 10 workspaces per Region is a local limit. Deleting a workspace removes the record and returns it with status DELETING.",
+   "name": "Amazon Managed Grafana"
+  }
+ ],
+ "x-simulator-source": {
+  "package": "botocore",
+  "version": "1.41.6",
+  "file": "botocore/data/grafana/2020-08-18/service-2.json",
+  "sha256": "b90a2398c9a7039d08cf3a5349f14648f027a39b924cac14bd9076a7679942d9",
+  "license": "Apache-2.0"
+ }
+}

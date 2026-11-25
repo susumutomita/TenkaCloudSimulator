@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "base_sha": "142888be7812c841f440f4d6b7f6c727f2adc0f8",
+  "base_sha": "b55d5345a9ef292b12d1d52900cbc033c3828ccd",
   "changes": [
     {
       "path": "formal/S3MultipartConsolePaging.cfg",
@@ -40,14 +40,14 @@
     },
     {
       "path": "formal/models.json",
-      "sha256": "bcd97cf5167219c12d27241b3bbb3c88861147ec0e4ddfaf7398e36d36d57376",
+      "sha256": "3e6be3365e4ebfaa5246ae4ccedf0a89b17ce2008e24249dfc0b3791e9d77c0e",
       "disposition": "formal-infrastructure",
-      "reason": "Registers the S3 ListParts paging model and its five sensitivity controls while retaining all current main entries, including the four SimpleDB models.",
+      "reason": "Retains all current main registrations including SimpleDB and merged catalog/SAR coverage, and adds only the bounded S3 console ListParts pagination model and its sensitivity controls.",
       "models": []
     },
     {
       "path": "internal/server/web/app.js",
-      "sha256": "22b8f417ea8eb52778e5f8c3cf07b988c57fb908bfe780ba8d08d0df61a87a4a",
+      "sha256": "79a7dc7bdfe22e39c763b8503196c36711610eac248a38a58bd3cd45721f64ee",
       "disposition": "modeled",
       "reason": "Rebuilt embedded client includes exact ListParts helper and view changes. The binding covers only the changed S3 listing logic, not unrelated bundle code.",
       "models": [
@@ -65,16 +65,16 @@
     },
     {
       "path": "scripts/formal_model_gate.py",
-      "sha256": "467782849907b4f008326646bdcad35e98845a8ae45c8cc9ce66e9950dcc88c4",
+      "sha256": "7e390c4fcd58f4e3730a124592878e36a60f8b4ee58f53a8f1516fbc429fa8bb",
       "disposition": "formal-infrastructure",
-      "reason": "Pins the ListParts paging model, its five invariants, exact mutation edits and expected invariants, and its exact three source files without changing prior model pins.",
+      "reason": "Retains all current main policy pins including SimpleDB and SAR, while keeping exact source scope, invariants, mutation edits and expected outcomes for the S3 console ListParts model.",
       "models": []
     },
     {
       "path": "scripts/test-formal-gate.py",
-      "sha256": "c9870a6d3bd41dff4e88dab8daaea3eced17b5982f0e7c7226aa975fa38762b0",
+      "sha256": "5e0cbdd6689dddb93f1d4f4095e92b28d862b98b7deab2714954d61bd5f95343",
       "disposition": "formal-infrastructure",
-      "reason": "Preserves the four SimpleDB inventory and detector tests from main and adds ListParts paging inventory, scope and exact mutation substitution detection.",
+      "reason": "Retains main SimpleDB and SAR policy detector tests and explicit inventory, plus the existing S3 pagination model source/property and exact mutation substitution detectors.",
       "models": []
     },
     {
@@ -86,14 +86,14 @@
     },
     {
       "path": "tools/console/bundle-digests.json",
-      "sha256": "c3921d5be05a54f9018204d04c5a1cdcaf8e4f9415dd742b59df6337b986464e",
+      "sha256": "8efd00b119504a6eef5abe52226f8e8ffaee3309d7c230c9e7337860d8a12520",
       "disposition": "presentation",
       "reason": "Generated hash manifest records the rebuilt embedded console bundle; it does not change control flow.",
       "models": []
     },
     {
       "path": "tools/console/bundle-inputs.json",
-      "sha256": "c4670a9b38db1842e56e3cb17ccbde7ff515e640090867b3b9652429344c525e",
+      "sha256": "ff51259e9b16ba813a1dbad5e79025eb139842e9737ab9e3a60284874e19de36",
       "disposition": "presentation",
       "reason": "Generated provenance records the S3 listing helper and view in the app.js input graph; it does not change control flow.",
       "models": []

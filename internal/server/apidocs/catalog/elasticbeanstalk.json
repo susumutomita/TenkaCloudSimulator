@@ -1,0 +1,1942 @@
+{
+ "components": {
+  "schemas": {
+   "ApplicationDescription": {
+    "additionalProperties": false,
+    "properties": {
+     "ApplicationArn": {
+      "type": "string"
+     },
+     "ApplicationName": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+     },
+     "ConfigurationTemplates": {
+      "items": {
+       "maxLength": 100,
+       "minLength": 1,
+       "type": "string",
+       "xml": {
+        "name": "member"
+       }
+      },
+      "type": "array",
+      "xml": {
+       "wrapped": true
+      }
+     },
+     "DateCreated": {
+      "format": "date-time",
+      "type": "string"
+     },
+     "DateUpdated": {
+      "format": "date-time",
+      "type": "string"
+     },
+     "Description": {
+      "maxLength": 200,
+      "type": "string"
+     },
+     "ResourceLifecycleConfig": {
+      "$ref": "#/components/schemas/ApplicationResourceLifecycleConfig"
+     },
+     "Versions": {
+      "items": {
+       "maxLength": 100,
+       "minLength": 1,
+       "type": "string",
+       "xml": {
+        "name": "member"
+       }
+      },
+      "type": "array",
+      "xml": {
+       "wrapped": true
+      }
+     }
+    },
+    "type": "object"
+   },
+   "ApplicationDescriptionMessage": {
+    "additionalProperties": false,
+    "properties": {
+     "Application": {
+      "$ref": "#/components/schemas/ApplicationDescription"
+     }
+    },
+    "type": "object"
+   },
+   "ApplicationDescriptionsMessage": {
+    "additionalProperties": false,
+    "properties": {
+     "Applications": {
+      "items": {
+       "$ref": "#/components/schemas/ApplicationDescription",
+       "xml": {
+        "name": "member"
+       }
+      },
+      "type": "array",
+      "xml": {
+       "wrapped": true
+      }
+     }
+    },
+    "type": "object"
+   },
+   "ApplicationResourceLifecycleConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "ServiceRole": {
+      "type": "string"
+     },
+     "VersionLifecycleConfig": {
+      "$ref": "#/components/schemas/ApplicationVersionLifecycleConfig"
+     }
+    },
+    "type": "object"
+   },
+   "ApplicationResourceLifecycleDescriptionMessage": {
+    "additionalProperties": false,
+    "properties": {
+     "ApplicationName": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+     },
+     "ResourceLifecycleConfig": {
+      "$ref": "#/components/schemas/ApplicationResourceLifecycleConfig"
+     }
+    },
+    "type": "object"
+   },
+   "ApplicationVersionDescription": {
+    "additionalProperties": false,
+    "properties": {
+     "ApplicationName": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+     },
+     "ApplicationVersionArn": {
+      "type": "string"
+     },
+     "BuildArn": {
+      "type": "string"
+     },
+     "DateCreated": {
+      "format": "date-time",
+      "type": "string"
+     },
+     "DateUpdated": {
+      "format": "date-time",
+      "type": "string"
+     },
+     "Description": {
+      "maxLength": 200,
+      "type": "string"
+     },
+     "SourceBuildInformation": {
+      "$ref": "#/components/schemas/SourceBuildInformation"
+     },
+     "SourceBundle": {
+      "$ref": "#/components/schemas/S3Location"
+     },
+     "Status": {
+      "enum": [
+       "Processed",
+       "Unprocessed",
+       "Failed",
+       "Processing",
+       "Building"
+      ],
+      "type": "string"
+     },
+     "VersionLabel": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ApplicationVersionDescriptionMessage": {
+    "additionalProperties": false,
+    "properties": {
+     "ApplicationVersion": {
+      "$ref": "#/components/schemas/ApplicationVersionDescription"
+     }
+    },
+    "type": "object"
+   },
+   "ApplicationVersionDescriptionsMessage": {
+    "additionalProperties": false,
+    "properties": {
+     "ApplicationVersions": {
+      "items": {
+       "$ref": "#/components/schemas/ApplicationVersionDescription",
+       "xml": {
+        "name": "member"
+       }
+      },
+      "type": "array",
+      "xml": {
+       "wrapped": true
+      }
+     },
+     "NextToken": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ApplicationVersionLifecycleConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "MaxAgeRule": {
+      "$ref": "#/components/schemas/MaxAgeRule"
+     },
+     "MaxCountRule": {
+      "$ref": "#/components/schemas/MaxCountRule"
+     }
+    },
+    "type": "object"
+   },
+   "CreateApplicationRequest": {
+    "additionalProperties": false,
+    "patternProperties": {
+     "^Tags\\.member\\.[1-9][0-9]*\\.Key$": {
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string"
+     },
+     "^Tags\\.member\\.[1-9][0-9]*\\.Value$": {
+      "maxLength": 256,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "properties": {
+     "Action": {
+      "const": "CreateApplication",
+      "type": "string"
+     },
+     "ApplicationName": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+     },
+     "Description": {
+      "maxLength": 200,
+      "type": "string"
+     },
+     "ResourceLifecycleConfig.ServiceRole": {
+      "type": "string"
+     },
+     "ResourceLifecycleConfig.VersionLifecycleConfig.MaxAgeRule.DeleteSourceFromS3": {
+      "type": "boolean"
+     },
+     "ResourceLifecycleConfig.VersionLifecycleConfig.MaxAgeRule.Enabled": {
+      "type": "boolean"
+     },
+     "ResourceLifecycleConfig.VersionLifecycleConfig.MaxAgeRule.MaxAgeInDays": {
+      "type": "integer"
+     },
+     "ResourceLifecycleConfig.VersionLifecycleConfig.MaxCountRule.DeleteSourceFromS3": {
+      "type": "boolean"
+     },
+     "ResourceLifecycleConfig.VersionLifecycleConfig.MaxCountRule.Enabled": {
+      "type": "boolean"
+     },
+     "ResourceLifecycleConfig.VersionLifecycleConfig.MaxCountRule.MaxCount": {
+      "type": "integer"
+     },
+     "Tags": {
+      "const": "",
+      "description": "An empty list.",
+      "type": "string"
+     },
+     "Version": {
+      "const": "2010-12-01",
+      "type": "string"
+     }
+    },
+    "required": [
+     "Action",
+     "Version",
+     "ApplicationName"
+    ],
+    "title": "CreateApplication",
+    "type": "object"
+   },
+   "CreateApplicationResponse": {
+    "properties": {
+     "CreateApplicationResult": {
+      "$ref": "#/components/schemas/ApplicationDescriptionMessage",
+      "xml": {
+       "name": "CreateApplicationResult"
+      }
+     },
+     "ResponseMetadata": {
+      "$ref": "#/components/schemas/ResponseMetadata"
+     }
+    },
+    "title": "CreateApplicationResponse",
+    "type": "object",
+    "xml": {
+     "name": "CreateApplicationResponse",
+     "namespace": "http://elasticbeanstalk.amazonaws.com/docs/2010-12-01/"
+    }
+   },
+   "CreateApplicationVersionRequest": {
+    "additionalProperties": false,
+    "patternProperties": {
+     "^Tags\\.member\\.[1-9][0-9]*\\.Key$": {
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string"
+     },
+     "^Tags\\.member\\.[1-9][0-9]*\\.Value$": {
+      "maxLength": 256,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "properties": {
+     "Action": {
+      "const": "CreateApplicationVersion",
+      "type": "string"
+     },
+     "ApplicationName": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+     },
+     "AutoCreateApplication": {
+      "type": "boolean"
+     },
+     "BuildConfiguration.ArtifactName": {
+      "type": "string"
+     },
+     "BuildConfiguration.CodeBuildServiceRole": {
+      "type": "string"
+     },
+     "BuildConfiguration.ComputeType": {
+      "enum": [
+       "BUILD_GENERAL1_SMALL",
+       "BUILD_GENERAL1_MEDIUM",
+       "BUILD_GENERAL1_LARGE"
+      ],
+      "type": "string"
+     },
+     "BuildConfiguration.Image": {
+      "type": "string"
+     },
+     "BuildConfiguration.TimeoutInMinutes": {
+      "type": "integer"
+     },
+     "Description": {
+      "maxLength": 200,
+      "type": "string"
+     },
+     "Process": {
+      "type": "boolean"
+     },
+     "SourceBuildInformation.SourceLocation": {
+      "maxLength": 255,
+      "minLength": 3,
+      "type": "string"
+     },
+     "SourceBuildInformation.SourceRepository": {
+      "enum": [
+       "CodeCommit",
+       "S3"
+      ],
+      "type": "string"
+     },
+     "SourceBuildInformation.SourceType": {
+      "enum": [
+       "Git",
+       "Zip"
+      ],
+      "type": "string"
+     },
+     "SourceBundle.S3Bucket": {
+      "maxLength": 255,
+      "type": "string"
+     },
+     "SourceBundle.S3Key": {
+      "maxLength": 1024,
+      "type": "string"
+     },
+     "Tags": {
+      "const": "",
+      "description": "An empty list.",
+      "type": "string"
+     },
+     "Version": {
+      "const": "2010-12-01",
+      "type": "string"
+     },
+     "VersionLabel": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "Action",
+     "Version",
+     "ApplicationName",
+     "VersionLabel"
+    ],
+    "title": "CreateApplicationVersion",
+    "type": "object"
+   },
+   "CreateApplicationVersionResponse": {
+    "properties": {
+     "CreateApplicationVersionResult": {
+      "$ref": "#/components/schemas/ApplicationVersionDescriptionMessage",
+      "xml": {
+       "name": "CreateApplicationVersionResult"
+      }
+     },
+     "ResponseMetadata": {
+      "$ref": "#/components/schemas/ResponseMetadata"
+     }
+    },
+    "title": "CreateApplicationVersionResponse",
+    "type": "object",
+    "xml": {
+     "name": "CreateApplicationVersionResponse",
+     "namespace": "http://elasticbeanstalk.amazonaws.com/docs/2010-12-01/"
+    }
+   },
+   "DeleteApplicationRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "Action": {
+      "const": "DeleteApplication",
+      "type": "string"
+     },
+     "ApplicationName": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+     },
+     "TerminateEnvByForce": {
+      "type": "boolean"
+     },
+     "Version": {
+      "const": "2010-12-01",
+      "type": "string"
+     }
+    },
+    "required": [
+     "Action",
+     "Version",
+     "ApplicationName"
+    ],
+    "title": "DeleteApplication",
+    "type": "object"
+   },
+   "DeleteApplicationResponse": {
+    "properties": {
+     "ResponseMetadata": {
+      "$ref": "#/components/schemas/ResponseMetadata"
+     }
+    },
+    "title": "DeleteApplicationResponse",
+    "type": "object",
+    "xml": {
+     "name": "DeleteApplicationResponse",
+     "namespace": "http://elasticbeanstalk.amazonaws.com/docs/2010-12-01/"
+    }
+   },
+   "DeleteApplicationVersionRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "Action": {
+      "const": "DeleteApplicationVersion",
+      "type": "string"
+     },
+     "ApplicationName": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+     },
+     "DeleteSourceBundle": {
+      "type": "boolean"
+     },
+     "Version": {
+      "const": "2010-12-01",
+      "type": "string"
+     },
+     "VersionLabel": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "Action",
+     "Version",
+     "ApplicationName",
+     "VersionLabel"
+    ],
+    "title": "DeleteApplicationVersion",
+    "type": "object"
+   },
+   "DeleteApplicationVersionResponse": {
+    "properties": {
+     "ResponseMetadata": {
+      "$ref": "#/components/schemas/ResponseMetadata"
+     }
+    },
+    "title": "DeleteApplicationVersionResponse",
+    "type": "object",
+    "xml": {
+     "name": "DeleteApplicationVersionResponse",
+     "namespace": "http://elasticbeanstalk.amazonaws.com/docs/2010-12-01/"
+    }
+   },
+   "DescribeApplicationVersionsRequest": {
+    "additionalProperties": false,
+    "patternProperties": {
+     "^VersionLabels\\.member\\.[1-9][0-9]*$": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "properties": {
+     "Action": {
+      "const": "DescribeApplicationVersions",
+      "type": "string"
+     },
+     "ApplicationName": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+     },
+     "MaxRecords": {
+      "maximum": 1000,
+      "minimum": 1,
+      "type": "integer"
+     },
+     "NextToken": {
+      "type": "string"
+     },
+     "Version": {
+      "const": "2010-12-01",
+      "type": "string"
+     },
+     "VersionLabels": {
+      "const": "",
+      "description": "An empty list.",
+      "type": "string"
+     }
+    },
+    "required": [
+     "Action",
+     "Version"
+    ],
+    "title": "DescribeApplicationVersions",
+    "type": "object"
+   },
+   "DescribeApplicationVersionsResponse": {
+    "properties": {
+     "DescribeApplicationVersionsResult": {
+      "$ref": "#/components/schemas/ApplicationVersionDescriptionsMessage",
+      "xml": {
+       "name": "DescribeApplicationVersionsResult"
+      }
+     },
+     "ResponseMetadata": {
+      "$ref": "#/components/schemas/ResponseMetadata"
+     }
+    },
+    "title": "DescribeApplicationVersionsResponse",
+    "type": "object",
+    "xml": {
+     "name": "DescribeApplicationVersionsResponse",
+     "namespace": "http://elasticbeanstalk.amazonaws.com/docs/2010-12-01/"
+    }
+   },
+   "DescribeApplicationsRequest": {
+    "additionalProperties": false,
+    "patternProperties": {
+     "^ApplicationNames\\.member\\.[1-9][0-9]*$": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "properties": {
+     "Action": {
+      "const": "DescribeApplications",
+      "type": "string"
+     },
+     "ApplicationNames": {
+      "const": "",
+      "description": "An empty list.",
+      "type": "string"
+     },
+     "Version": {
+      "const": "2010-12-01",
+      "type": "string"
+     }
+    },
+    "required": [
+     "Action",
+     "Version"
+    ],
+    "title": "DescribeApplications",
+    "type": "object"
+   },
+   "DescribeApplicationsResponse": {
+    "properties": {
+     "DescribeApplicationsResult": {
+      "$ref": "#/components/schemas/ApplicationDescriptionsMessage",
+      "xml": {
+       "name": "DescribeApplicationsResult"
+      }
+     },
+     "ResponseMetadata": {
+      "$ref": "#/components/schemas/ResponseMetadata"
+     }
+    },
+    "title": "DescribeApplicationsResponse",
+    "type": "object",
+    "xml": {
+     "name": "DescribeApplicationsResponse",
+     "namespace": "http://elasticbeanstalk.amazonaws.com/docs/2010-12-01/"
+    }
+   },
+   "ErrorResponse": {
+    "properties": {
+     "Error": {
+      "properties": {
+       "Code": {
+        "type": "string"
+       },
+       "Message": {
+        "type": "string"
+       },
+       "Type": {
+        "enum": [
+         "Sender",
+         "Receiver"
+        ],
+        "type": "string"
+       }
+      },
+      "type": "object"
+     },
+     "RequestId": {
+      "type": "string"
+     }
+    },
+    "type": "object",
+    "xml": {
+     "name": "ErrorResponse",
+     "namespace": "http://elasticbeanstalk.amazonaws.com/docs/2010-12-01/"
+    }
+   },
+   "ListTagsForResourceRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "Action": {
+      "const": "ListTagsForResource",
+      "type": "string"
+     },
+     "ResourceArn": {
+      "type": "string"
+     },
+     "Version": {
+      "const": "2010-12-01",
+      "type": "string"
+     }
+    },
+    "required": [
+     "Action",
+     "Version",
+     "ResourceArn"
+    ],
+    "title": "ListTagsForResource",
+    "type": "object"
+   },
+   "ListTagsForResourceResponse": {
+    "properties": {
+     "ListTagsForResourceResult": {
+      "$ref": "#/components/schemas/ResourceTagsDescriptionMessage",
+      "xml": {
+       "name": "ListTagsForResourceResult"
+      }
+     },
+     "ResponseMetadata": {
+      "$ref": "#/components/schemas/ResponseMetadata"
+     }
+    },
+    "title": "ListTagsForResourceResponse",
+    "type": "object",
+    "xml": {
+     "name": "ListTagsForResourceResponse",
+     "namespace": "http://elasticbeanstalk.amazonaws.com/docs/2010-12-01/"
+    }
+   },
+   "MaxAgeRule": {
+    "additionalProperties": false,
+    "properties": {
+     "DeleteSourceFromS3": {
+      "type": "boolean"
+     },
+     "Enabled": {
+      "type": "boolean"
+     },
+     "MaxAgeInDays": {
+      "type": "integer"
+     }
+    },
+    "required": [
+     "Enabled"
+    ],
+    "type": "object"
+   },
+   "MaxCountRule": {
+    "additionalProperties": false,
+    "properties": {
+     "DeleteSourceFromS3": {
+      "type": "boolean"
+     },
+     "Enabled": {
+      "type": "boolean"
+     },
+     "MaxCount": {
+      "type": "integer"
+     }
+    },
+    "required": [
+     "Enabled"
+    ],
+    "type": "object"
+   },
+   "ResourceTagsDescriptionMessage": {
+    "additionalProperties": false,
+    "properties": {
+     "ResourceArn": {
+      "type": "string"
+     },
+     "ResourceTags": {
+      "items": {
+       "$ref": "#/components/schemas/Tag",
+       "xml": {
+        "name": "member"
+       }
+      },
+      "type": "array",
+      "xml": {
+       "wrapped": true
+      }
+     }
+    },
+    "type": "object"
+   },
+   "ResponseMetadata": {
+    "properties": {
+     "RequestId": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "S3Location": {
+    "additionalProperties": false,
+    "properties": {
+     "S3Bucket": {
+      "maxLength": 255,
+      "type": "string"
+     },
+     "S3Key": {
+      "maxLength": 1024,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "SourceBuildInformation": {
+    "additionalProperties": false,
+    "properties": {
+     "SourceLocation": {
+      "maxLength": 255,
+      "minLength": 3,
+      "type": "string"
+     },
+     "SourceRepository": {
+      "enum": [
+       "CodeCommit",
+       "S3"
+      ],
+      "type": "string"
+     },
+     "SourceType": {
+      "enum": [
+       "Git",
+       "Zip"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "SourceType",
+     "SourceRepository",
+     "SourceLocation"
+    ],
+    "type": "object"
+   },
+   "Tag": {
+    "additionalProperties": false,
+    "properties": {
+     "Key": {
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string"
+     },
+     "Value": {
+      "maxLength": 256,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "UpdateApplicationRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "Action": {
+      "const": "UpdateApplication",
+      "type": "string"
+     },
+     "ApplicationName": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+     },
+     "Description": {
+      "maxLength": 200,
+      "type": "string"
+     },
+     "Version": {
+      "const": "2010-12-01",
+      "type": "string"
+     }
+    },
+    "required": [
+     "Action",
+     "Version",
+     "ApplicationName"
+    ],
+    "title": "UpdateApplication",
+    "type": "object"
+   },
+   "UpdateApplicationResourceLifecycleRequest": {
+    "additionalProperties": false,
+    "description": "Required list or structure members: ResourceLifecycleConfig.",
+    "properties": {
+     "Action": {
+      "const": "UpdateApplicationResourceLifecycle",
+      "type": "string"
+     },
+     "ApplicationName": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+     },
+     "ResourceLifecycleConfig.ServiceRole": {
+      "type": "string"
+     },
+     "ResourceLifecycleConfig.VersionLifecycleConfig.MaxAgeRule.DeleteSourceFromS3": {
+      "type": "boolean"
+     },
+     "ResourceLifecycleConfig.VersionLifecycleConfig.MaxAgeRule.Enabled": {
+      "type": "boolean"
+     },
+     "ResourceLifecycleConfig.VersionLifecycleConfig.MaxAgeRule.MaxAgeInDays": {
+      "type": "integer"
+     },
+     "ResourceLifecycleConfig.VersionLifecycleConfig.MaxCountRule.DeleteSourceFromS3": {
+      "type": "boolean"
+     },
+     "ResourceLifecycleConfig.VersionLifecycleConfig.MaxCountRule.Enabled": {
+      "type": "boolean"
+     },
+     "ResourceLifecycleConfig.VersionLifecycleConfig.MaxCountRule.MaxCount": {
+      "type": "integer"
+     },
+     "Version": {
+      "const": "2010-12-01",
+      "type": "string"
+     }
+    },
+    "required": [
+     "Action",
+     "Version",
+     "ApplicationName"
+    ],
+    "title": "UpdateApplicationResourceLifecycle",
+    "type": "object"
+   },
+   "UpdateApplicationResourceLifecycleResponse": {
+    "properties": {
+     "ResponseMetadata": {
+      "$ref": "#/components/schemas/ResponseMetadata"
+     },
+     "UpdateApplicationResourceLifecycleResult": {
+      "$ref": "#/components/schemas/ApplicationResourceLifecycleDescriptionMessage",
+      "xml": {
+       "name": "UpdateApplicationResourceLifecycleResult"
+      }
+     }
+    },
+    "title": "UpdateApplicationResourceLifecycleResponse",
+    "type": "object",
+    "xml": {
+     "name": "UpdateApplicationResourceLifecycleResponse",
+     "namespace": "http://elasticbeanstalk.amazonaws.com/docs/2010-12-01/"
+    }
+   },
+   "UpdateApplicationResponse": {
+    "properties": {
+     "ResponseMetadata": {
+      "$ref": "#/components/schemas/ResponseMetadata"
+     },
+     "UpdateApplicationResult": {
+      "$ref": "#/components/schemas/ApplicationDescriptionMessage",
+      "xml": {
+       "name": "UpdateApplicationResult"
+      }
+     }
+    },
+    "title": "UpdateApplicationResponse",
+    "type": "object",
+    "xml": {
+     "name": "UpdateApplicationResponse",
+     "namespace": "http://elasticbeanstalk.amazonaws.com/docs/2010-12-01/"
+    }
+   },
+   "UpdateApplicationVersionRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "Action": {
+      "const": "UpdateApplicationVersion",
+      "type": "string"
+     },
+     "ApplicationName": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+     },
+     "Description": {
+      "maxLength": 200,
+      "type": "string"
+     },
+     "Version": {
+      "const": "2010-12-01",
+      "type": "string"
+     },
+     "VersionLabel": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "Action",
+     "Version",
+     "ApplicationName",
+     "VersionLabel"
+    ],
+    "title": "UpdateApplicationVersion",
+    "type": "object"
+   },
+   "UpdateApplicationVersionResponse": {
+    "properties": {
+     "ResponseMetadata": {
+      "$ref": "#/components/schemas/ResponseMetadata"
+     },
+     "UpdateApplicationVersionResult": {
+      "$ref": "#/components/schemas/ApplicationVersionDescriptionMessage",
+      "xml": {
+       "name": "UpdateApplicationVersionResult"
+      }
+     }
+    },
+    "title": "UpdateApplicationVersionResponse",
+    "type": "object",
+    "xml": {
+     "name": "UpdateApplicationVersionResponse",
+     "namespace": "http://elasticbeanstalk.amazonaws.com/docs/2010-12-01/"
+    }
+   }
+  }
+ },
+ "info": {
+  "description": "Bounded simulator subset of the official AWS Elastic Beanstalk API (2010-12-01). Every other official operation returns HTTP 501 UnknownOperationException. Applications and application versions are stored configuration served over the Query protocol: no environment, configuration template, platform version, instance, load balancer, managed action, event or health record exists, and CreateEnvironment, CreateConfigurationTemplate, CreatePlatformVersion, DescribeEnvironments, DescribeEvents, ListAvailableSolutionStacks and every other official operation return UnknownOperationException with HTTP 501. Nothing is deployed. An application version is created without a source: SourceBundle, SourceBuildInformation, BuildConfiguration, Process=true and AutoCreateApplication=true are refused, because the simulator never reads, builds or validates an S3, CodeCommit or CodeBuild source, and the version is the sample application the official operation documents for a request without a source. Versions report no Status, SourceBundle or BuildArn. DeleteApplicationVersion accepts DeleteSourceBundle because no bundle exists to delete. DescribeApplications reports no Versions or ConfigurationTemplates; read versions with DescribeApplicationVersions, which requires ApplicationName (the official operation also lists every application's versions). An unknown name in ApplicationNames, VersionLabels or a lookup fails with InvalidParameterValue, as UpdateApplication documents, instead of being skipped. Application names and version labels are 1 to 100 characters and must not contain a forward slash, which the ARNs arn:aws:elasticbeanstalk:region:account:application/name and applicationversion/application/label would make ambiguous. DeleteApplication removes its versions, accepts TerminateEnvByForce because no environment exists, and does not delete anything from S3. ResourceLifecycleConfig is stored and returned but never applied: no version is deleted by a MaxCountRule or MaxAgeRule, the service role is checked only for the form arn:aws:iam::account:role/name and is never assumed, and rule members are validated only against the official shape. ServiceRole must accompany every VersionLifecycleConfig, in CreateApplication and in each UpdateApplicationResourceLifecycle call, where the official service persists it after the first one. Tags are accepted at CreateApplication and CreateApplicationVersion and read with ListTagsForResource by the ARN of an application or an application version; the response omits ResourceArn. UpdateTagsForResource is not implemented because one request both adds and removes tags, which the catalog's tag operations cannot express, so tags cannot change after creation. An unknown ARN fails with ResourceNotFoundException. Applications are limited to 75 and versions to 100 per application locally; exceeding them, like more than 50 tags in one request or a name that already exists, fails with InvalidParameterValue because TooManyApplicationsException, TooManyApplicationVersionsException and TooManyTagsException are not selectable for those faults.",
+  "title": "AWS Elastic Beanstalk (simulator catalog)",
+  "version": "2010-12-01"
+ },
+ "openapi": "3.1.0",
+ "paths": {
+  "/#Action=CreateApplication": {
+   "post": {
+    "description": "POST / with a form-encoded body (the #Action fragment only names this entry and is not sent). Form fields follow the official Query serialization: structure members joined with \".\", list elements numbered from 1 under their element name (for example Tags.Tag.1.Key), map entries as entry.N.key and entry.N.value, and an empty list as an empty field. The response is an XML CreateApplicationResponse holding the CreateApplicationResult element and ResponseMetadata/RequestId; errors are ErrorResponse/Error/Code with the official error code.",
+    "operationId": "elasticbeanstalkCreateApplication",
+    "parameters": [
+     {
+      "description": "Routes this unsigned first-party request to AWS Elastic Beanstalk; without it an unsigned form POST is not routed here. SDKs use the SigV4 credential scope instead.",
+      "example": "elasticbeanstalk",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": true,
+      "schema": {
+       "default": "elasticbeanstalk",
+       "enum": [
+        "elasticbeanstalk"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/x-www-form-urlencoded": {
+       "example": {
+        "Action": "CreateApplication",
+        "ApplicationName": "example",
+        "Version": "2010-12-01"
+       },
+       "schema": {
+        "$ref": "#/components/schemas/CreateApplicationRequest"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/CreateApplicationResponse"
+        }
+       }
+      },
+      "description": "XML CreateApplicationResponse with the projected official output shape."
+     },
+     "400": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "Modeled fault or common Query error (InvalidParameterValue, InvalidAction, MissingAction, MissingParameter, MalformedQueryString)."
+     },
+     "403": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "AccessDenied from local identity policy evaluation."
+     },
+     "404": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "Modeled not-found fault."
+     },
+     "501": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "UnknownOperationException: official operation not implemented by the simulator."
+     }
+    },
+    "summary": "CreateApplication",
+    "tags": [
+     "AWS Elastic Beanstalk"
+    ]
+   }
+  },
+  "/#Action=CreateApplicationVersion": {
+   "post": {
+    "description": "POST / with a form-encoded body (the #Action fragment only names this entry and is not sent). Form fields follow the official Query serialization: structure members joined with \".\", list elements numbered from 1 under their element name (for example Tags.Tag.1.Key), map entries as entry.N.key and entry.N.value, and an empty list as an empty field. The response is an XML CreateApplicationVersionResponse holding the CreateApplicationVersionResult element and ResponseMetadata/RequestId; errors are ErrorResponse/Error/Code with the official error code.",
+    "operationId": "elasticbeanstalkCreateApplicationVersion",
+    "parameters": [
+     {
+      "description": "Routes this unsigned first-party request to AWS Elastic Beanstalk; without it an unsigned form POST is not routed here. SDKs use the SigV4 credential scope instead.",
+      "example": "elasticbeanstalk",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": true,
+      "schema": {
+       "default": "elasticbeanstalk",
+       "enum": [
+        "elasticbeanstalk"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/x-www-form-urlencoded": {
+       "example": {
+        "Action": "CreateApplicationVersion",
+        "ApplicationName": "example",
+        "Version": "2010-12-01",
+        "VersionLabel": "example"
+       },
+       "schema": {
+        "$ref": "#/components/schemas/CreateApplicationVersionRequest"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/CreateApplicationVersionResponse"
+        }
+       }
+      },
+      "description": "XML CreateApplicationVersionResponse with the projected official output shape."
+     },
+     "400": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "Modeled fault or common Query error (InvalidParameterValue, InvalidAction, MissingAction, MissingParameter, MalformedQueryString)."
+     },
+     "403": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "AccessDenied from local identity policy evaluation."
+     },
+     "404": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "Modeled not-found fault."
+     },
+     "501": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "UnknownOperationException: official operation not implemented by the simulator."
+     }
+    },
+    "summary": "CreateApplicationVersion",
+    "tags": [
+     "AWS Elastic Beanstalk"
+    ]
+   }
+  },
+  "/#Action=DeleteApplication": {
+   "post": {
+    "description": "POST / with a form-encoded body (the #Action fragment only names this entry and is not sent). Form fields follow the official Query serialization: structure members joined with \".\", list elements numbered from 1 under their element name (for example Tags.Tag.1.Key), map entries as entry.N.key and entry.N.value, and an empty list as an empty field. The response is an XML DeleteApplicationResponse holding ResponseMetadata/RequestId; errors are ErrorResponse/Error/Code with the official error code.",
+    "operationId": "elasticbeanstalkDeleteApplication",
+    "parameters": [
+     {
+      "description": "Routes this unsigned first-party request to AWS Elastic Beanstalk; without it an unsigned form POST is not routed here. SDKs use the SigV4 credential scope instead.",
+      "example": "elasticbeanstalk",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": true,
+      "schema": {
+       "default": "elasticbeanstalk",
+       "enum": [
+        "elasticbeanstalk"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/x-www-form-urlencoded": {
+       "example": {
+        "Action": "DeleteApplication",
+        "ApplicationName": "example",
+        "Version": "2010-12-01"
+       },
+       "schema": {
+        "$ref": "#/components/schemas/DeleteApplicationRequest"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/DeleteApplicationResponse"
+        }
+       }
+      },
+      "description": "XML DeleteApplicationResponse with the projected official output shape."
+     },
+     "400": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "Modeled fault or common Query error (InvalidParameterValue, InvalidAction, MissingAction, MissingParameter, MalformedQueryString)."
+     },
+     "403": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "AccessDenied from local identity policy evaluation."
+     },
+     "404": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "Modeled not-found fault."
+     },
+     "501": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "UnknownOperationException: official operation not implemented by the simulator."
+     }
+    },
+    "summary": "DeleteApplication",
+    "tags": [
+     "AWS Elastic Beanstalk"
+    ]
+   }
+  },
+  "/#Action=DeleteApplicationVersion": {
+   "post": {
+    "description": "POST / with a form-encoded body (the #Action fragment only names this entry and is not sent). Form fields follow the official Query serialization: structure members joined with \".\", list elements numbered from 1 under their element name (for example Tags.Tag.1.Key), map entries as entry.N.key and entry.N.value, and an empty list as an empty field. The response is an XML DeleteApplicationVersionResponse holding ResponseMetadata/RequestId; errors are ErrorResponse/Error/Code with the official error code.",
+    "operationId": "elasticbeanstalkDeleteApplicationVersion",
+    "parameters": [
+     {
+      "description": "Routes this unsigned first-party request to AWS Elastic Beanstalk; without it an unsigned form POST is not routed here. SDKs use the SigV4 credential scope instead.",
+      "example": "elasticbeanstalk",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": true,
+      "schema": {
+       "default": "elasticbeanstalk",
+       "enum": [
+        "elasticbeanstalk"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/x-www-form-urlencoded": {
+       "example": {
+        "Action": "DeleteApplicationVersion",
+        "ApplicationName": "example",
+        "Version": "2010-12-01",
+        "VersionLabel": "example"
+       },
+       "schema": {
+        "$ref": "#/components/schemas/DeleteApplicationVersionRequest"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/DeleteApplicationVersionResponse"
+        }
+       }
+      },
+      "description": "XML DeleteApplicationVersionResponse with the projected official output shape."
+     },
+     "400": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "Modeled fault or common Query error (InvalidParameterValue, InvalidAction, MissingAction, MissingParameter, MalformedQueryString)."
+     },
+     "403": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "AccessDenied from local identity policy evaluation."
+     },
+     "404": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "Modeled not-found fault."
+     },
+     "501": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "UnknownOperationException: official operation not implemented by the simulator."
+     }
+    },
+    "summary": "DeleteApplicationVersion",
+    "tags": [
+     "AWS Elastic Beanstalk"
+    ]
+   }
+  },
+  "/#Action=DescribeApplicationVersions": {
+   "post": {
+    "description": "POST / with a form-encoded body (the #Action fragment only names this entry and is not sent). Form fields follow the official Query serialization: structure members joined with \".\", list elements numbered from 1 under their element name (for example Tags.Tag.1.Key), map entries as entry.N.key and entry.N.value, and an empty list as an empty field. The response is an XML DescribeApplicationVersionsResponse holding the DescribeApplicationVersionsResult element and ResponseMetadata/RequestId; errors are ErrorResponse/Error/Code with the official error code.",
+    "operationId": "elasticbeanstalkDescribeApplicationVersions",
+    "parameters": [
+     {
+      "description": "Routes this unsigned first-party request to AWS Elastic Beanstalk; without it an unsigned form POST is not routed here. SDKs use the SigV4 credential scope instead.",
+      "example": "elasticbeanstalk",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": true,
+      "schema": {
+       "default": "elasticbeanstalk",
+       "enum": [
+        "elasticbeanstalk"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/x-www-form-urlencoded": {
+       "example": {
+        "Action": "DescribeApplicationVersions",
+        "Version": "2010-12-01"
+       },
+       "schema": {
+        "$ref": "#/components/schemas/DescribeApplicationVersionsRequest"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/DescribeApplicationVersionsResponse"
+        }
+       }
+      },
+      "description": "XML DescribeApplicationVersionsResponse with the projected official output shape."
+     },
+     "400": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "Modeled fault or common Query error (InvalidParameterValue, InvalidAction, MissingAction, MissingParameter, MalformedQueryString)."
+     },
+     "403": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "AccessDenied from local identity policy evaluation."
+     },
+     "404": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "Modeled not-found fault."
+     },
+     "501": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "UnknownOperationException: official operation not implemented by the simulator."
+     }
+    },
+    "summary": "DescribeApplicationVersions",
+    "tags": [
+     "AWS Elastic Beanstalk"
+    ]
+   }
+  },
+  "/#Action=DescribeApplications": {
+   "post": {
+    "description": "POST / with a form-encoded body (the #Action fragment only names this entry and is not sent). Form fields follow the official Query serialization: structure members joined with \".\", list elements numbered from 1 under their element name (for example Tags.Tag.1.Key), map entries as entry.N.key and entry.N.value, and an empty list as an empty field. The response is an XML DescribeApplicationsResponse holding the DescribeApplicationsResult element and ResponseMetadata/RequestId; errors are ErrorResponse/Error/Code with the official error code.",
+    "operationId": "elasticbeanstalkDescribeApplications",
+    "parameters": [
+     {
+      "description": "Routes this unsigned first-party request to AWS Elastic Beanstalk; without it an unsigned form POST is not routed here. SDKs use the SigV4 credential scope instead.",
+      "example": "elasticbeanstalk",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": true,
+      "schema": {
+       "default": "elasticbeanstalk",
+       "enum": [
+        "elasticbeanstalk"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/x-www-form-urlencoded": {
+       "example": {
+        "Action": "DescribeApplications",
+        "Version": "2010-12-01"
+       },
+       "schema": {
+        "$ref": "#/components/schemas/DescribeApplicationsRequest"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/DescribeApplicationsResponse"
+        }
+       }
+      },
+      "description": "XML DescribeApplicationsResponse with the projected official output shape."
+     },
+     "400": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "Modeled fault or common Query error (InvalidParameterValue, InvalidAction, MissingAction, MissingParameter, MalformedQueryString)."
+     },
+     "403": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "AccessDenied from local identity policy evaluation."
+     },
+     "404": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "Modeled not-found fault."
+     },
+     "501": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "UnknownOperationException: official operation not implemented by the simulator."
+     }
+    },
+    "summary": "DescribeApplications",
+    "tags": [
+     "AWS Elastic Beanstalk"
+    ]
+   }
+  },
+  "/#Action=ListTagsForResource": {
+   "post": {
+    "description": "POST / with a form-encoded body (the #Action fragment only names this entry and is not sent). Form fields follow the official Query serialization: structure members joined with \".\", list elements numbered from 1 under their element name (for example Tags.Tag.1.Key), map entries as entry.N.key and entry.N.value, and an empty list as an empty field. The response is an XML ListTagsForResourceResponse holding the ListTagsForResourceResult element and ResponseMetadata/RequestId; errors are ErrorResponse/Error/Code with the official error code.",
+    "operationId": "elasticbeanstalkListTagsForResource",
+    "parameters": [
+     {
+      "description": "Routes this unsigned first-party request to AWS Elastic Beanstalk; without it an unsigned form POST is not routed here. SDKs use the SigV4 credential scope instead.",
+      "example": "elasticbeanstalk",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": true,
+      "schema": {
+       "default": "elasticbeanstalk",
+       "enum": [
+        "elasticbeanstalk"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/x-www-form-urlencoded": {
+       "example": {
+        "Action": "ListTagsForResource",
+        "ResourceArn": "example",
+        "Version": "2010-12-01"
+       },
+       "schema": {
+        "$ref": "#/components/schemas/ListTagsForResourceRequest"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ListTagsForResourceResponse"
+        }
+       }
+      },
+      "description": "XML ListTagsForResourceResponse with the projected official output shape."
+     },
+     "400": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "Modeled fault or common Query error (InvalidParameterValue, InvalidAction, MissingAction, MissingParameter, MalformedQueryString)."
+     },
+     "403": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "AccessDenied from local identity policy evaluation."
+     },
+     "404": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "Modeled not-found fault."
+     },
+     "501": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "UnknownOperationException: official operation not implemented by the simulator."
+     }
+    },
+    "summary": "ListTagsForResource",
+    "tags": [
+     "AWS Elastic Beanstalk"
+    ]
+   }
+  },
+  "/#Action=UpdateApplication": {
+   "post": {
+    "description": "POST / with a form-encoded body (the #Action fragment only names this entry and is not sent). Form fields follow the official Query serialization: structure members joined with \".\", list elements numbered from 1 under their element name (for example Tags.Tag.1.Key), map entries as entry.N.key and entry.N.value, and an empty list as an empty field. The response is an XML UpdateApplicationResponse holding the UpdateApplicationResult element and ResponseMetadata/RequestId; errors are ErrorResponse/Error/Code with the official error code.",
+    "operationId": "elasticbeanstalkUpdateApplication",
+    "parameters": [
+     {
+      "description": "Routes this unsigned first-party request to AWS Elastic Beanstalk; without it an unsigned form POST is not routed here. SDKs use the SigV4 credential scope instead.",
+      "example": "elasticbeanstalk",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": true,
+      "schema": {
+       "default": "elasticbeanstalk",
+       "enum": [
+        "elasticbeanstalk"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/x-www-form-urlencoded": {
+       "example": {
+        "Action": "UpdateApplication",
+        "ApplicationName": "example",
+        "Version": "2010-12-01"
+       },
+       "schema": {
+        "$ref": "#/components/schemas/UpdateApplicationRequest"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/UpdateApplicationResponse"
+        }
+       }
+      },
+      "description": "XML UpdateApplicationResponse with the projected official output shape."
+     },
+     "400": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "Modeled fault or common Query error (InvalidParameterValue, InvalidAction, MissingAction, MissingParameter, MalformedQueryString)."
+     },
+     "403": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "AccessDenied from local identity policy evaluation."
+     },
+     "404": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "Modeled not-found fault."
+     },
+     "501": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "UnknownOperationException: official operation not implemented by the simulator."
+     }
+    },
+    "summary": "UpdateApplication",
+    "tags": [
+     "AWS Elastic Beanstalk"
+    ]
+   }
+  },
+  "/#Action=UpdateApplicationResourceLifecycle": {
+   "post": {
+    "description": "POST / with a form-encoded body (the #Action fragment only names this entry and is not sent). Form fields follow the official Query serialization: structure members joined with \".\", list elements numbered from 1 under their element name (for example Tags.Tag.1.Key), map entries as entry.N.key and entry.N.value, and an empty list as an empty field. The response is an XML UpdateApplicationResourceLifecycleResponse holding the UpdateApplicationResourceLifecycleResult element and ResponseMetadata/RequestId; errors are ErrorResponse/Error/Code with the official error code.",
+    "operationId": "elasticbeanstalkUpdateApplicationResourceLifecycle",
+    "parameters": [
+     {
+      "description": "Routes this unsigned first-party request to AWS Elastic Beanstalk; without it an unsigned form POST is not routed here. SDKs use the SigV4 credential scope instead.",
+      "example": "elasticbeanstalk",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": true,
+      "schema": {
+       "default": "elasticbeanstalk",
+       "enum": [
+        "elasticbeanstalk"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/x-www-form-urlencoded": {
+       "example": {
+        "Action": "UpdateApplicationResourceLifecycle",
+        "ApplicationName": "example",
+        "Version": "2010-12-01"
+       },
+       "schema": {
+        "$ref": "#/components/schemas/UpdateApplicationResourceLifecycleRequest"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/UpdateApplicationResourceLifecycleResponse"
+        }
+       }
+      },
+      "description": "XML UpdateApplicationResourceLifecycleResponse with the projected official output shape."
+     },
+     "400": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "Modeled fault or common Query error (InvalidParameterValue, InvalidAction, MissingAction, MissingParameter, MalformedQueryString)."
+     },
+     "403": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "AccessDenied from local identity policy evaluation."
+     },
+     "404": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "Modeled not-found fault."
+     },
+     "501": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "UnknownOperationException: official operation not implemented by the simulator."
+     }
+    },
+    "summary": "UpdateApplicationResourceLifecycle",
+    "tags": [
+     "AWS Elastic Beanstalk"
+    ]
+   }
+  },
+  "/#Action=UpdateApplicationVersion": {
+   "post": {
+    "description": "POST / with a form-encoded body (the #Action fragment only names this entry and is not sent). Form fields follow the official Query serialization: structure members joined with \".\", list elements numbered from 1 under their element name (for example Tags.Tag.1.Key), map entries as entry.N.key and entry.N.value, and an empty list as an empty field. The response is an XML UpdateApplicationVersionResponse holding the UpdateApplicationVersionResult element and ResponseMetadata/RequestId; errors are ErrorResponse/Error/Code with the official error code.",
+    "operationId": "elasticbeanstalkUpdateApplicationVersion",
+    "parameters": [
+     {
+      "description": "Routes this unsigned first-party request to AWS Elastic Beanstalk; without it an unsigned form POST is not routed here. SDKs use the SigV4 credential scope instead.",
+      "example": "elasticbeanstalk",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": true,
+      "schema": {
+       "default": "elasticbeanstalk",
+       "enum": [
+        "elasticbeanstalk"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/x-www-form-urlencoded": {
+       "example": {
+        "Action": "UpdateApplicationVersion",
+        "ApplicationName": "example",
+        "Version": "2010-12-01",
+        "VersionLabel": "example"
+       },
+       "schema": {
+        "$ref": "#/components/schemas/UpdateApplicationVersionRequest"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/UpdateApplicationVersionResponse"
+        }
+       }
+      },
+      "description": "XML UpdateApplicationVersionResponse with the projected official output shape."
+     },
+     "400": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "Modeled fault or common Query error (InvalidParameterValue, InvalidAction, MissingAction, MissingParameter, MalformedQueryString)."
+     },
+     "403": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "AccessDenied from local identity policy evaluation."
+     },
+     "404": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "Modeled not-found fault."
+     },
+     "501": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "UnknownOperationException: official operation not implemented by the simulator."
+     }
+    },
+    "summary": "UpdateApplicationVersion",
+    "tags": [
+     "AWS Elastic Beanstalk"
+    ]
+   }
+  }
+ },
+ "servers": [
+  {
+   "description": "This simulator only",
+   "url": "/"
+  }
+ ],
+ "tags": [
+  {
+   "description": "Bounded simulator subset of the official AWS Elastic Beanstalk API (2010-12-01). Every other official operation returns HTTP 501 UnknownOperationException. Applications and application versions are stored configuration served over the Query protocol: no environment, configuration template, platform version, instance, load balancer, managed action, event or health record exists, and CreateEnvironment, CreateConfigurationTemplate, CreatePlatformVersion, DescribeEnvironments, DescribeEvents, ListAvailableSolutionStacks and every other official operation return UnknownOperationException with HTTP 501. Nothing is deployed. An application version is created without a source: SourceBundle, SourceBuildInformation, BuildConfiguration, Process=true and AutoCreateApplication=true are refused, because the simulator never reads, builds or validates an S3, CodeCommit or CodeBuild source, and the version is the sample application the official operation documents for a request without a source. Versions report no Status, SourceBundle or BuildArn. DeleteApplicationVersion accepts DeleteSourceBundle because no bundle exists to delete. DescribeApplications reports no Versions or ConfigurationTemplates; read versions with DescribeApplicationVersions, which requires ApplicationName (the official operation also lists every application's versions). An unknown name in ApplicationNames, VersionLabels or a lookup fails with InvalidParameterValue, as UpdateApplication documents, instead of being skipped. Application names and version labels are 1 to 100 characters and must not contain a forward slash, which the ARNs arn:aws:elasticbeanstalk:region:account:application/name and applicationversion/application/label would make ambiguous. DeleteApplication removes its versions, accepts TerminateEnvByForce because no environment exists, and does not delete anything from S3. ResourceLifecycleConfig is stored and returned but never applied: no version is deleted by a MaxCountRule or MaxAgeRule, the service role is checked only for the form arn:aws:iam::account:role/name and is never assumed, and rule members are validated only against the official shape. ServiceRole must accompany every VersionLifecycleConfig, in CreateApplication and in each UpdateApplicationResourceLifecycle call, where the official service persists it after the first one. Tags are accepted at CreateApplication and CreateApplicationVersion and read with ListTagsForResource by the ARN of an application or an application version; the response omits ResourceArn. UpdateTagsForResource is not implemented because one request both adds and removes tags, which the catalog's tag operations cannot express, so tags cannot change after creation. An unknown ARN fails with ResourceNotFoundException. Applications are limited to 75 and versions to 100 per application locally; exceeding them, like more than 50 tags in one request or a name that already exists, fails with InvalidParameterValue because TooManyApplicationsException, TooManyApplicationVersionsException and TooManyTagsException are not selectable for those faults.",
+   "name": "AWS Elastic Beanstalk"
+  }
+ ],
+ "x-simulator-source": {
+  "package": "botocore",
+  "version": "1.41.6",
+  "file": "botocore/data/elasticbeanstalk/2010-12-01/service-2.json",
+  "sha256": "c2a09569b3d3aafc85145ceb9156175869a348c47d956e511d263f841130a2ec",
+  "license": "Apache-2.0"
+ }
+}

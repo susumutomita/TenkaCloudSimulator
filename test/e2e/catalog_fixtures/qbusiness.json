@@ -1,0 +1,34 @@
+{
+ "client": "qbusiness",
+ "steps": [
+  {"op": "create_application", "args": {"displayName": "fixture-app", "identityType": "ANONYMOUS", "description": "fixture application", "tags": [{"key": "team", "value": "a"}]}, "save": {"app": "applicationId", "app_arn": "applicationArn"}},
+  {"op": "get_application", "args": {"applicationId": "${app}"}, "expect": {"displayName": "fixture-app", "identityType": "ANONYMOUS", "status": "CREATING"}},
+  {"op": "update_application", "args": {"applicationId": "${app}", "displayName": "fixture-app-2", "description": "renamed"}},
+  {"op": "list_applications", "args": {}, "expect": {"applications#count": 1, "applications[0].displayName": "fixture-app-2"}},
+  {"op": "create_index", "args": {"applicationId": "${app}", "displayName": "fixture-index", "capacityConfiguration": {"units": 1}}, "save": {"index": "indexId"}},
+  {"op": "get_index", "args": {"applicationId": "${app}", "indexId": "${index}"}, "expect": {"displayName": "fixture-index", "type": "ENTERPRISE"}},
+  {"op": "update_index", "args": {"applicationId": "${app}", "indexId": "${index}", "description": "index description"}},
+  {"op": "list_indices", "args": {"applicationId": "${app}"}, "expect": {"indices#count": 1}},
+  {"op": "create_retriever", "args": {"applicationId": "${app}", "type": "NATIVE_INDEX", "displayName": "fixture-retriever", "configuration": {"nativeIndexConfiguration": {"indexId": "${index}"}}}, "save": {"retriever": "retrieverId"}},
+  {"op": "get_retriever", "args": {"applicationId": "${app}", "retrieverId": "${retriever}"}, "expect": {"type": "NATIVE_INDEX", "status": "ACTIVE"}},
+  {"op": "update_retriever", "args": {"applicationId": "${app}", "retrieverId": "${retriever}", "displayName": "fixture-retriever-2"}},
+  {"op": "list_retrievers", "args": {"applicationId": "${app}"}, "expect": {"retrievers#count": 1, "retrievers[0].displayName": "fixture-retriever-2"}},
+  {"op": "tag_resource", "args": {"resourceARN": "${app_arn}", "tags": [{"key": "k", "value": "v"}]}},
+  {"op": "untag_resource", "args": {"resourceARN": "${app_arn}", "tagKeys": ["k"]}},
+  {"op": "list_tags_for_resource", "args": {"resourceARN": "${app_arn}"}, "expect": {"tags#count": 1}},
+  {"op": "create_application", "args": {"displayName": "fixture-idc", "identityType": "AWS_IAM_IDC"}, "error": "ValidationException"},
+  {"op": "get_application", "args": {"applicationId": "00000000-0000-4000-8000-000000000000"}, "error": "ResourceNotFoundException", "status": 404}
+ ],
+ "isolation": [
+  {"op": "list_applications", "args": {}, "expect": {"applications#count": 0}}
+ ],
+ "after_restart": [
+  {"op": "get_retriever", "args": {"applicationId": "${app}", "retrieverId": "${retriever}"}, "expect": {"displayName": "fixture-retriever-2"}}
+ ],
+ "cleanup": [
+  {"op": "delete_retriever", "args": {"applicationId": "${app}", "retrieverId": "${retriever}"}},
+  {"op": "delete_index", "args": {"applicationId": "${app}", "indexId": "${index}"}},
+  {"op": "delete_application", "args": {"applicationId": "${app}"}},
+  {"op": "list_applications", "args": {}, "expect": {"applications#count": 0}}
+ ]
+}

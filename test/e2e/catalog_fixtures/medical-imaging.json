@@ -1,0 +1,25 @@
+{
+ "client": "medical-imaging",
+ "steps": [
+  {"op": "create_datastore", "args": {"datastoreName": "fixture-scans", "tags": {"team": "a"}, "kmsKeyArn": "arn:aws:kms:us-east-1:000000000000:key/1234abcd-12ab-34cd-56ef-1234567890ab", "losslessStorageFormat": "HTJ2K"}, "save": {"store": "datastoreId"}, "expect": {"datastoreStatus": "CREATING"}},
+  {"op": "get_datastore", "args": {"datastoreId": "${store}"}, "save": {"arn": "datastoreProperties.datastoreArn"}, "expect": {"datastoreProperties.datastoreName": "fixture-scans", "datastoreProperties.datastoreStatus": "CREATING", "datastoreProperties.losslessStorageFormat": "HTJ2K"}},
+  {"op": "list_datastores", "args": {}, "expect": {"datastoreSummaries#count": 1, "datastoreSummaries[0].datastoreId": "${store}"}},
+  {"op": "list_datastores", "args": {"datastoreStatus": "ACTIVE"}, "expect": {"datastoreSummaries#count": 0}},
+  {"op": "tag_resource", "args": {"resourceArn": "${arn}", "tags": {"stage": "dev"}}},
+  {"op": "untag_resource", "args": {"resourceArn": "${arn}", "tagKeys": ["stage"]}},
+  {"op": "list_tags_for_resource", "args": {"resourceArn": "${arn}"}, "expect": {"tags": {"team": "a"}}},
+  {"op": "get_datastore", "args": {"datastoreId": "abcdefghijklmnopqrstuvwxyz012345"}, "error": "ResourceNotFoundException", "status": 404},
+  {"op": "create_datastore", "args": {"datastoreName": "bad name!"}, "error": "ValidationException", "status": 400},
+  {"op": "list_dicom_import_jobs", "args": {"datastoreId": "${store}"}, "error": "UnknownOperationException", "status": 501}
+ ],
+ "isolation": [
+  {"op": "list_datastores", "args": {}, "expect": {"datastoreSummaries#count": 0}}
+ ],
+ "after_restart": [
+  {"op": "get_datastore", "args": {"datastoreId": "${store}"}, "expect": {"datastoreProperties.datastoreArn": "${arn}", "datastoreProperties.datastoreName": "fixture-scans"}}
+ ],
+ "cleanup": [
+  {"op": "delete_datastore", "args": {"datastoreId": "${store}"}, "expect": {"datastoreStatus": "DELETING"}},
+  {"op": "list_datastores", "args": {}, "expect": {"datastoreSummaries#count": 0}}
+ ]
+}

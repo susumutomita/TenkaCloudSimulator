@@ -1,0 +1,24 @@
+{
+ "client": "braket",
+ "steps": [
+  {"op": "create_spending_limit", "args": {"deviceArn": "arn:aws:braket:us-east-1::device/qpu/ionq/Forte-1", "spendingLimit": "25.50", "timePeriod": {"startAt": 1700000000, "endAt": 1800000000}, "tags": {"team": "a"}}, "save": {"limit": "spendingLimitArn"}},
+  {"op": "update_spending_limit", "args": {"spendingLimitArn": "${limit}", "spendingLimit": "40"}},
+  {"op": "search_spending_limits", "args": {}, "expect": {"spendingLimits#count": 1, "spendingLimits[0].spendingLimit": "40", "spendingLimits[0].totalSpend": "0"}},
+  {"op": "tag_resource", "args": {"resourceArn": "${limit}", "tags": {"extra": "1"}}},
+  {"op": "list_tags_for_resource", "args": {"resourceArn": "${limit}"}, "expect": {"tags": {"team": "a", "extra": "1"}}},
+  {"op": "untag_resource", "args": {"resourceArn": "${limit}", "tagKeys": ["extra"]}},
+  {"op": "create_spending_limit", "args": {"deviceArn": "arn:aws:braket:::device/quantum-simulator/amazon/sv1", "spendingLimit": "1"}, "error": "ValidationException"},
+  {"op": "create_spending_limit", "args": {"deviceArn": "device", "spendingLimit": "1", "timePeriod": {"startAt": 1700000000, "endAt": 1800000000}}, "error": "ValidationException"},
+  {"op": "delete_spending_limit", "args": {"spendingLimitArn": "arn:aws:braket:us-east-1:000000000000:spending-limit/00000000-0000-4000-8000-000000000000"}, "error": "ResourceNotFoundException", "status": 404}
+ ],
+ "isolation": [
+  {"op": "search_spending_limits", "args": {}, "expect": {"spendingLimits#count": 0}}
+ ],
+ "after_restart": [
+  {"op": "search_spending_limits", "args": {}, "expect": {"spendingLimits[0].spendingLimit": "40"}}
+ ],
+ "cleanup": [
+  {"op": "delete_spending_limit", "args": {"spendingLimitArn": "${limit}"}},
+  {"op": "search_spending_limits", "args": {}, "expect": {"spendingLimits#count": 0}}
+ ]
+}

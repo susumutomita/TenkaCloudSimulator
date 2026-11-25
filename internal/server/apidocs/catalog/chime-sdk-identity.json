@@ -1,0 +1,459 @@
+{
+ "components": {
+  "schemas": {
+   "AppInstance": {
+    "additionalProperties": false,
+    "properties": {
+     "AppInstanceArn": {
+      "maxLength": 1600,
+      "minLength": 5,
+      "type": "string"
+     },
+     "CreatedTimestamp": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "LastUpdatedTimestamp": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "Metadata": {
+      "maxLength": 1024,
+      "minLength": 0,
+      "type": "string"
+     },
+     "Name": {
+      "maxLength": 256,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "AppInstanceSummary": {
+    "additionalProperties": false,
+    "properties": {
+     "AppInstanceArn": {
+      "maxLength": 1600,
+      "minLength": 5,
+      "type": "string"
+     },
+     "Metadata": {
+      "maxLength": 1024,
+      "minLength": 0,
+      "type": "string"
+     },
+     "Name": {
+      "maxLength": 256,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "Tag": {
+    "additionalProperties": false,
+    "properties": {
+     "Key": {
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string"
+     },
+     "Value": {
+      "maxLength": 256,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "Key",
+     "Value"
+    ],
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "Bounded simulator subset of the official Amazon Chime SDK Identity API (2021-04-20). Every other official operation returns HTTP 501 UnknownOperationException. App instances are stored records: no messaging identity can sign in and no channel, message or push endpoint exists. Admins, bots, users and their endpoints, retention settings and expiration settings return UnknownOperationException with HTTP 501, because each is keyed by an app instance ARN that the stored model cannot attach a child to. The tag operations are not bound here: all Amazon Chime SDK models share the same tag routes and the engine serves them from the voice model only (see the chime-sdk-voice bounds), so CreateAppInstance refuses Tags. At most 25 app instances per Region exist as a simulator limit, and the ARN form app-instance/id is inferred.",
+  "title": "Amazon Chime SDK Identity (simulator catalog)",
+  "version": "2021-04-20"
+ },
+ "openapi": "3.1.0",
+ "paths": {
+  "/app-instances": {
+   "get": {
+    "operationId": "chime-sdk-identityListAppInstances",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "chime"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "max-results",
+      "schema": {
+       "maximum": 50,
+       "minimum": 1,
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "next-token",
+      "schema": {
+       "maxLength": 2048,
+       "minLength": 0,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "AppInstances": {
+           "items": {
+            "$ref": "#/components/schemas/AppInstanceSummary"
+           },
+           "type": "array"
+          },
+          "NextToken": {
+           "maxLength": 2048,
+           "minLength": 0,
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListAppInstances",
+    "tags": [
+     "Amazon Chime SDK Identity"
+    ]
+   },
+   "post": {
+    "operationId": "chime-sdk-identityCreateAppInstance",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "chime"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "ClientRequestToken": {
+          "maxLength": 64,
+          "minLength": 2,
+          "type": "string"
+         },
+         "Metadata": {
+          "maxLength": 1024,
+          "minLength": 0,
+          "type": "string"
+         },
+         "Name": {
+          "maxLength": 256,
+          "minLength": 1,
+          "type": "string"
+         },
+         "Tags": {
+          "items": {
+           "$ref": "#/components/schemas/Tag"
+          },
+          "maxItems": 50,
+          "minItems": 1,
+          "type": "array"
+         }
+        },
+        "required": [
+         "ClientRequestToken",
+         "Name"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "AppInstanceArn": {
+           "maxLength": 1600,
+           "minLength": 5,
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateAppInstance",
+    "tags": [
+     "Amazon Chime SDK Identity"
+    ]
+   }
+  },
+  "/app-instances/{appInstanceArn}": {
+   "delete": {
+    "operationId": "chime-sdk-identityDeleteAppInstance",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "chime"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "appInstanceArn",
+      "required": true,
+      "schema": {
+       "maxLength": 1600,
+       "minLength": 5,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteAppInstance",
+    "tags": [
+     "Amazon Chime SDK Identity"
+    ]
+   },
+   "get": {
+    "operationId": "chime-sdk-identityDescribeAppInstance",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "chime"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "appInstanceArn",
+      "required": true,
+      "schema": {
+       "maxLength": 1600,
+       "minLength": 5,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "AppInstance": {
+           "$ref": "#/components/schemas/AppInstance"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DescribeAppInstance",
+    "tags": [
+     "Amazon Chime SDK Identity"
+    ]
+   },
+   "put": {
+    "operationId": "chime-sdk-identityUpdateAppInstance",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "chime"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "appInstanceArn",
+      "required": true,
+      "schema": {
+       "maxLength": 1600,
+       "minLength": 5,
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "Metadata": {
+          "maxLength": 1024,
+          "minLength": 0,
+          "type": "string"
+         },
+         "Name": {
+          "maxLength": 256,
+          "minLength": 1,
+          "type": "string"
+         }
+        },
+        "required": [
+         "Metadata",
+         "Name"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "AppInstanceArn": {
+           "maxLength": 1600,
+           "minLength": 5,
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UpdateAppInstance",
+    "tags": [
+     "Amazon Chime SDK Identity"
+    ]
+   }
+  }
+ },
+ "servers": [
+  {
+   "description": "This simulator only",
+   "url": "/"
+  }
+ ],
+ "tags": [
+  {
+   "description": "Bounded simulator subset of the official Amazon Chime SDK Identity API (2021-04-20). Every other official operation returns HTTP 501 UnknownOperationException. App instances are stored records: no messaging identity can sign in and no channel, message or push endpoint exists. Admins, bots, users and their endpoints, retention settings and expiration settings return UnknownOperationException with HTTP 501, because each is keyed by an app instance ARN that the stored model cannot attach a child to. The tag operations are not bound here: all Amazon Chime SDK models share the same tag routes and the engine serves them from the voice model only (see the chime-sdk-voice bounds), so CreateAppInstance refuses Tags. At most 25 app instances per Region exist as a simulator limit, and the ARN form app-instance/id is inferred.",
+   "name": "Amazon Chime SDK Identity"
+  }
+ ],
+ "x-simulator-source": {
+  "package": "botocore",
+  "version": "1.41.6",
+  "file": "botocore/data/chime-sdk-identity/2021-04-20/service-2.json",
+  "sha256": "98546b10a1ae5d9c38e337726f970717d758a4862eaf210c67c214c0cc269676",
+  "license": "Apache-2.0"
+ }
+}

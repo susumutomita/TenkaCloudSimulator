@@ -22,6 +22,90 @@ REPORTS = Path(os.environ.get('SIMULATOR_REPORTS', 'reports')).resolve()
 SHOTS = os.environ.get('CATALOG_SHOTS')
 
 
+def check_versioned_edits(page, team, field, back):
+    """A real native read sets the version used by exactly one edited record."""
+    aws = team.client('network-firewall')
+    name = 'catalog-edit-policy'
+    policy = {'StatelessDefaultActions': ['aws:pass'], 'StatelessFragmentDefaultActions': ['aws:pass']}
+    aws.create_firewall_policy(FirewallPolicyName=name, FirewallPolicy=policy, Description='initial description')
+
+    def select_service(title):
+        page.get_by_role('button', name=re.compile('^Catalog service')).click()
+        page.get_by_role('option', name=re.compile('^' + re.escape(title))).click()
+
+    def target(operation):
+        return lambda response: response.request.headers.get('x-amz-target', '').endswith('.' + operation)
+
+    def save_when(predicate):
+        with page.expect_response(predicate) as pending:
+            page.get_by_role('button', name='Save changes', exact=True).click()
+        return pending.value
+
+    try:
+        select_service('AWS Network Firewall')
+        page.get_by_role('link', name=name, exact=True).click()
+        expect(page.get_by_text('initial description', exact=True)).to_be_visible()
+        with page.expect_response(target('DescribeFirewallPolicy')) as first_read:
+            page.get_by_role('button', name='Edit', exact=True).click()
+        saved_description = field('Description')
+        expect(saved_description).to_have_value('initial description')
+        assert json.loads(field('FirewallPolicy').input_value()) == policy
+        first_version = first_read.value.json()['UpdateToken']
+
+        # Another authorized writer changes the record after Edit opened.
+        # The browser must not silently re-read and overwrite that change.
+        external = aws.update_firewall_policy(FirewallPolicyName=name, FirewallPolicy=policy,
+                                              UpdateToken=first_version, Description='changed by SDK')
+        next_version = external['UpdateToken']
+        assert first_version != next_version
+        saved_description.fill('stale browser edit')
+        stale = save_when(target('UpdateFirewallPolicy'))
+        assert stale.status == 400, stale.text()
+        assert stale.request.post_data_json['UpdateToken'] == first_version
+        expect(saved_description).to_have_value('stale browser edit')
+        expect(page.get_by_text(re.compile('read it again before retrying')).first).to_be_visible()
+        assert aws.describe_firewall_policy(FirewallPolicyName=name)['FirewallPolicyResponse']['Description'] == 'changed by SDK'
+
+        page.get_by_role('button', name='Cancel', exact=True).click()
+        page.get_by_role('button', name='Edit', exact=True).click()
+        expect(saved_description).to_have_value('changed by SDK')
+        saved_description.fill('current browser edit')
+        current = save_when(target('UpdateFirewallPolicy'))
+        assert current.ok, current.text()
+        assert current.request.post_data_json['UpdateToken'] == next_version
+        assert current.request.post_data_json['FirewallPolicy'] == policy
+        expect(page.get_by_text('Resource updated.', exact=True)).to_be_visible()
+        expect(page.get_by_text('current browser edit', exact=True)).to_be_visible()
+        described = aws.describe_firewall_policy(FirewallPolicyName=name)
+        assert described['FirewallPolicyResponse']['Description'] == 'current browser edit'
+        assert described['FirewallPolicy'] == policy and described['UpdateToken'] != next_version
+        back()
+    finally:
+        aws.delete_firewall_policy(FirewallPolicyName=name)
+
+    video = team.client('kinesisvideo')
+    name = 'catalog-edit-stream'
+    arn = video.create_stream(StreamName=name, MediaType='video/h264')['StreamARN']
+    try:
+        select_service('Amazon Kinesis Video Streams')
+        page.get_by_role('link', name=name, exact=True).click()
+        expect(page.get_by_text('video/h264', exact=True)).to_be_visible()
+        with page.expect_response(lambda response: urlsplit(response.url).path == '/describeStream') as read:
+            page.get_by_role('button', name='Edit', exact=True).click()
+        token = read.value.json()['StreamInfo']['Version']
+        field('MediaType').fill('video/h265')
+        written = save_when(lambda response: urlsplit(response.url).path == '/updateStream')
+        assert written.ok, written.text()
+        assert written.request.post_data_json['CurrentVersion'] == token
+        expect(page.get_by_text('Resource updated.', exact=True)).to_be_visible()
+        expect(page.get_by_text('video/h265', exact=True)).to_be_visible()
+        current = video.describe_stream(StreamARN=arn)['StreamInfo']
+        assert current['MediaType'] == 'video/h265' and current['Version'] != token
+        back()
+    finally:
+        video.delete_stream(StreamARN=arn)
+
+
 def run():
     REPORTS.mkdir(parents=True, exist_ok=True)
     axe_path = Path(os.environ['AXE_SCRIPT'])
@@ -141,6 +225,7 @@ def run():
                 assert sorted(c['Name'] for c in configurations) == ['console-config', 'sdk-config'], configurations
                 for configuration in configurations:
                     broker.delete_configuration(ConfigurationId=configuration['Id'])
+                check_versioned_edits(page, team, field, back)
                 # Identifier-only lists: ECS ListClusters and ListTaskDefinitions
                 # return ARNs; each opens through its describe operation.
                 containers = team.client('ecs')

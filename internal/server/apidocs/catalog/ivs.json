@@ -1,0 +1,996 @@
+{
+ "components": {
+  "schemas": {
+   "DestinationConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "s3": {
+      "$ref": "#/components/schemas/S3DestinationConfiguration"
+     }
+    },
+    "type": "object"
+   },
+   "PlaybackRestrictionPolicy": {
+    "additionalProperties": false,
+    "properties": {
+     "allowedCountries": {
+      "items": {
+       "maxLength": 2,
+       "minLength": 2,
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "allowedOrigins": {
+      "items": {
+       "maxLength": 128,
+       "minLength": 0,
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "arn": {
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string"
+     },
+     "enableStrictOriginEnforcement": {
+      "type": "boolean"
+     },
+     "name": {
+      "maxLength": 128,
+      "minLength": 0,
+      "type": "string"
+     },
+     "tags": {
+      "additionalProperties": {
+       "maxLength": 256,
+       "minLength": 0,
+       "type": "string"
+      },
+      "maxProperties": 50,
+      "minProperties": 0,
+      "type": "object"
+     }
+    },
+    "required": [
+     "allowedCountries",
+     "allowedOrigins",
+     "arn"
+    ],
+    "type": "object"
+   },
+   "PlaybackRestrictionPolicySummary": {
+    "additionalProperties": false,
+    "properties": {
+     "allowedCountries": {
+      "items": {
+       "maxLength": 2,
+       "minLength": 2,
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "allowedOrigins": {
+      "items": {
+       "maxLength": 128,
+       "minLength": 0,
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "arn": {
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string"
+     },
+     "enableStrictOriginEnforcement": {
+      "type": "boolean"
+     },
+     "name": {
+      "maxLength": 128,
+      "minLength": 0,
+      "type": "string"
+     },
+     "tags": {
+      "additionalProperties": {
+       "maxLength": 256,
+       "minLength": 0,
+       "type": "string"
+      },
+      "maxProperties": 50,
+      "minProperties": 0,
+      "type": "object"
+     }
+    },
+    "required": [
+     "allowedCountries",
+     "allowedOrigins",
+     "arn"
+    ],
+    "type": "object"
+   },
+   "RecordingConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "arn": {
+      "maxLength": 128,
+      "minLength": 0,
+      "type": "string"
+     },
+     "destinationConfiguration": {
+      "$ref": "#/components/schemas/DestinationConfiguration"
+     },
+     "name": {
+      "maxLength": 128,
+      "minLength": 0,
+      "type": "string"
+     },
+     "recordingReconnectWindowSeconds": {
+      "maximum": 300,
+      "minimum": 0,
+      "type": "integer"
+     },
+     "renditionConfiguration": {
+      "$ref": "#/components/schemas/RenditionConfiguration"
+     },
+     "state": {
+      "enum": [
+       "CREATING",
+       "CREATE_FAILED",
+       "ACTIVE"
+      ],
+      "type": "string"
+     },
+     "tags": {
+      "additionalProperties": {
+       "maxLength": 256,
+       "minLength": 0,
+       "type": "string"
+      },
+      "maxProperties": 50,
+      "minProperties": 0,
+      "type": "object"
+     },
+     "thumbnailConfiguration": {
+      "$ref": "#/components/schemas/ThumbnailConfiguration"
+     }
+    },
+    "required": [
+     "arn",
+     "destinationConfiguration",
+     "state"
+    ],
+    "type": "object"
+   },
+   "RecordingConfigurationSummary": {
+    "additionalProperties": false,
+    "properties": {
+     "arn": {
+      "maxLength": 128,
+      "minLength": 0,
+      "type": "string"
+     },
+     "destinationConfiguration": {
+      "$ref": "#/components/schemas/DestinationConfiguration"
+     },
+     "name": {
+      "maxLength": 128,
+      "minLength": 0,
+      "type": "string"
+     },
+     "state": {
+      "enum": [
+       "CREATING",
+       "CREATE_FAILED",
+       "ACTIVE"
+      ],
+      "type": "string"
+     },
+     "tags": {
+      "additionalProperties": {
+       "maxLength": 256,
+       "minLength": 0,
+       "type": "string"
+      },
+      "maxProperties": 50,
+      "minProperties": 0,
+      "type": "object"
+     }
+    },
+    "required": [
+     "arn",
+     "destinationConfiguration",
+     "state"
+    ],
+    "type": "object"
+   },
+   "RenditionConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "renditionSelection": {
+      "enum": [
+       "ALL",
+       "NONE",
+       "CUSTOM"
+      ],
+      "type": "string"
+     },
+     "renditions": {
+      "items": {
+       "enum": [
+        "SD",
+        "HD",
+        "FULL_HD",
+        "LOWEST_RESOLUTION"
+       ],
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "S3DestinationConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "bucketName": {
+      "maxLength": 63,
+      "minLength": 3,
+      "type": "string"
+     }
+    },
+    "required": [
+     "bucketName"
+    ],
+    "type": "object"
+   },
+   "ThumbnailConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "recordingMode": {
+      "enum": [
+       "DISABLED",
+       "INTERVAL"
+      ],
+      "type": "string"
+     },
+     "resolution": {
+      "enum": [
+       "SD",
+       "HD",
+       "FULL_HD",
+       "LOWEST_RESOLUTION"
+      ],
+      "type": "string"
+     },
+     "storage": {
+      "items": {
+       "enum": [
+        "SEQUENTIAL",
+        "LATEST"
+       ],
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "targetIntervalSeconds": {
+      "maximum": 60,
+      "minimum": 1,
+      "type": "integer"
+     }
+    },
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "Bounded simulator subset of the official Amazon Interactive Video Service API (2020-07-14). Every other official operation returns HTTP 501 UnknownOperationException. Playback restriction policies and recording configurations are stored records: no channel, stream key, stream, stream session or recording exists, no ingest or playback endpoint is created, nothing is written to Amazon S3, and a recording configuration is ACTIVE at once. CreateChannel and the other channel and stream key operations are not bound because the official CreateChannel output carries a stream key, a secret the catalog never generates; ImportPlaybackKeyPair and the playback key pair operations are not bound because they store key material. GetStream, GetStreamSession, ListStreams, ListStreamSessions, StopStream, PutMetadata and the viewer session revocation operations return UnknownOperationException with HTTP 501. A recording configuration needs an S3 destination; the bucket is stored by name and is not looked up or written to, and an in-use configuration is never refused deletion because no channel can reference it. Rendition and thumbnail settings are stored without producing renditions or thumbnails. Update operations replace the supplied members whole; limits per Region are simulator limits, not AWS quotas. TagResource, UntagResource and ListTagsForResource are not bound: the official resourceArn pattern admits only a one-character resource type, so no real IVS ARN passes the catalog's input validation. Tags can be set at creation and read from the resource.",
+  "title": "Amazon Interactive Video Service (simulator catalog)",
+  "version": "2020-07-14"
+ },
+ "openapi": "3.1.0",
+ "paths": {
+  "/CreatePlaybackRestrictionPolicy": {
+   "post": {
+    "operationId": "ivsCreatePlaybackRestrictionPolicy",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "ivs"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "allowedCountries": {
+          "items": {
+           "maxLength": 2,
+           "minLength": 2,
+           "type": "string"
+          },
+          "type": "array"
+         },
+         "allowedOrigins": {
+          "items": {
+           "maxLength": 128,
+           "minLength": 0,
+           "type": "string"
+          },
+          "type": "array"
+         },
+         "enableStrictOriginEnforcement": {
+          "type": "boolean"
+         },
+         "name": {
+          "maxLength": 128,
+          "minLength": 0,
+          "type": "string"
+         },
+         "tags": {
+          "additionalProperties": {
+           "maxLength": 256,
+           "minLength": 0,
+           "type": "string"
+          },
+          "maxProperties": 50,
+          "minProperties": 0,
+          "type": "object"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "playbackRestrictionPolicy": {
+           "$ref": "#/components/schemas/PlaybackRestrictionPolicy"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreatePlaybackRestrictionPolicy",
+    "tags": [
+     "Amazon Interactive Video Service"
+    ]
+   }
+  },
+  "/CreateRecordingConfiguration": {
+   "post": {
+    "operationId": "ivsCreateRecordingConfiguration",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "ivs"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "destinationConfiguration": {
+          "$ref": "#/components/schemas/DestinationConfiguration"
+         },
+         "name": {
+          "maxLength": 128,
+          "minLength": 0,
+          "type": "string"
+         },
+         "recordingReconnectWindowSeconds": {
+          "maximum": 300,
+          "minimum": 0,
+          "type": "integer"
+         },
+         "renditionConfiguration": {
+          "$ref": "#/components/schemas/RenditionConfiguration"
+         },
+         "tags": {
+          "additionalProperties": {
+           "maxLength": 256,
+           "minLength": 0,
+           "type": "string"
+          },
+          "maxProperties": 50,
+          "minProperties": 0,
+          "type": "object"
+         },
+         "thumbnailConfiguration": {
+          "$ref": "#/components/schemas/ThumbnailConfiguration"
+         }
+        },
+        "required": [
+         "destinationConfiguration"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "recordingConfiguration": {
+           "$ref": "#/components/schemas/RecordingConfiguration"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateRecordingConfiguration",
+    "tags": [
+     "Amazon Interactive Video Service"
+    ]
+   }
+  },
+  "/DeletePlaybackRestrictionPolicy": {
+   "post": {
+    "operationId": "ivsDeletePlaybackRestrictionPolicy",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "ivs"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "arn": {
+          "maxLength": 128,
+          "minLength": 1,
+          "type": "string"
+         }
+        },
+        "required": [
+         "arn"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeletePlaybackRestrictionPolicy",
+    "tags": [
+     "Amazon Interactive Video Service"
+    ]
+   }
+  },
+  "/DeleteRecordingConfiguration": {
+   "post": {
+    "operationId": "ivsDeleteRecordingConfiguration",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "ivs"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "arn": {
+          "maxLength": 128,
+          "minLength": 0,
+          "type": "string"
+         }
+        },
+        "required": [
+         "arn"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteRecordingConfiguration",
+    "tags": [
+     "Amazon Interactive Video Service"
+    ]
+   }
+  },
+  "/GetPlaybackRestrictionPolicy": {
+   "post": {
+    "operationId": "ivsGetPlaybackRestrictionPolicy",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "ivs"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "arn": {
+          "maxLength": 128,
+          "minLength": 1,
+          "type": "string"
+         }
+        },
+        "required": [
+         "arn"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "playbackRestrictionPolicy": {
+           "$ref": "#/components/schemas/PlaybackRestrictionPolicy"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "GetPlaybackRestrictionPolicy",
+    "tags": [
+     "Amazon Interactive Video Service"
+    ]
+   }
+  },
+  "/GetRecordingConfiguration": {
+   "post": {
+    "operationId": "ivsGetRecordingConfiguration",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "ivs"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "arn": {
+          "maxLength": 128,
+          "minLength": 0,
+          "type": "string"
+         }
+        },
+        "required": [
+         "arn"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "recordingConfiguration": {
+           "$ref": "#/components/schemas/RecordingConfiguration"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "GetRecordingConfiguration",
+    "tags": [
+     "Amazon Interactive Video Service"
+    ]
+   }
+  },
+  "/ListPlaybackRestrictionPolicies": {
+   "post": {
+    "operationId": "ivsListPlaybackRestrictionPolicies",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "ivs"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "maxResults": {
+          "maximum": 100,
+          "minimum": 1,
+          "type": "integer"
+         },
+         "nextToken": {
+          "maxLength": 1024,
+          "minLength": 0,
+          "type": "string"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "nextToken": {
+           "maxLength": 1024,
+           "minLength": 0,
+           "type": "string"
+          },
+          "playbackRestrictionPolicies": {
+           "items": {
+            "$ref": "#/components/schemas/PlaybackRestrictionPolicySummary"
+           },
+           "type": "array"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListPlaybackRestrictionPolicies",
+    "tags": [
+     "Amazon Interactive Video Service"
+    ]
+   }
+  },
+  "/ListRecordingConfigurations": {
+   "post": {
+    "operationId": "ivsListRecordingConfigurations",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "ivs"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "maxResults": {
+          "maximum": 100,
+          "minimum": 1,
+          "type": "integer"
+         },
+         "nextToken": {
+          "maxLength": 1024,
+          "minLength": 0,
+          "type": "string"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "nextToken": {
+           "maxLength": 1024,
+           "minLength": 0,
+           "type": "string"
+          },
+          "recordingConfigurations": {
+           "items": {
+            "$ref": "#/components/schemas/RecordingConfigurationSummary"
+           },
+           "type": "array"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListRecordingConfigurations",
+    "tags": [
+     "Amazon Interactive Video Service"
+    ]
+   }
+  },
+  "/UpdatePlaybackRestrictionPolicy": {
+   "post": {
+    "operationId": "ivsUpdatePlaybackRestrictionPolicy",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "ivs"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "allowedCountries": {
+          "items": {
+           "maxLength": 2,
+           "minLength": 2,
+           "type": "string"
+          },
+          "type": "array"
+         },
+         "allowedOrigins": {
+          "items": {
+           "maxLength": 128,
+           "minLength": 0,
+           "type": "string"
+          },
+          "type": "array"
+         },
+         "arn": {
+          "maxLength": 128,
+          "minLength": 1,
+          "type": "string"
+         },
+         "enableStrictOriginEnforcement": {
+          "type": "boolean"
+         },
+         "name": {
+          "maxLength": 128,
+          "minLength": 0,
+          "type": "string"
+         }
+        },
+        "required": [
+         "arn"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "playbackRestrictionPolicy": {
+           "$ref": "#/components/schemas/PlaybackRestrictionPolicy"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UpdatePlaybackRestrictionPolicy",
+    "tags": [
+     "Amazon Interactive Video Service"
+    ]
+   }
+  }
+ },
+ "servers": [
+  {
+   "description": "This simulator only",
+   "url": "/"
+  }
+ ],
+ "tags": [
+  {
+   "description": "Bounded simulator subset of the official Amazon Interactive Video Service API (2020-07-14). Every other official operation returns HTTP 501 UnknownOperationException. Playback restriction policies and recording configurations are stored records: no channel, stream key, stream, stream session or recording exists, no ingest or playback endpoint is created, nothing is written to Amazon S3, and a recording configuration is ACTIVE at once. CreateChannel and the other channel and stream key operations are not bound because the official CreateChannel output carries a stream key, a secret the catalog never generates; ImportPlaybackKeyPair and the playback key pair operations are not bound because they store key material. GetStream, GetStreamSession, ListStreams, ListStreamSessions, StopStream, PutMetadata and the viewer session revocation operations return UnknownOperationException with HTTP 501. A recording configuration needs an S3 destination; the bucket is stored by name and is not looked up or written to, and an in-use configuration is never refused deletion because no channel can reference it. Rendition and thumbnail settings are stored without producing renditions or thumbnails. Update operations replace the supplied members whole; limits per Region are simulator limits, not AWS quotas. TagResource, UntagResource and ListTagsForResource are not bound: the official resourceArn pattern admits only a one-character resource type, so no real IVS ARN passes the catalog's input validation. Tags can be set at creation and read from the resource.",
+   "name": "Amazon Interactive Video Service"
+  }
+ ],
+ "x-simulator-source": {
+  "package": "botocore",
+  "version": "1.41.6",
+  "file": "botocore/data/ivs/2020-07-14/service-2.json",
+  "sha256": "1c20b9083dea73d737d2b537048b5b7828a039fc65c9e0bccda71f650a2c10cc",
+  "license": "Apache-2.0"
+ }
+}

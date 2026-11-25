@@ -1,0 +1,1285 @@
+{
+ "components": {
+  "schemas": {
+   "ChannelData": {
+    "additionalProperties": false,
+    "properties": {
+     "channelDescription": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "channelId": {
+      "maxLength": 24,
+      "minLength": 24,
+      "type": "string"
+     },
+     "channelName": {
+      "maxLength": 64,
+      "minLength": 1,
+      "type": "string"
+     },
+     "channelStatus": {
+      "enum": [
+       "CREATED",
+       "CREATING",
+       "CREATE_FAILED",
+       "DELETED",
+       "DELETING",
+       "DELETE_FAILED"
+      ],
+      "type": "string"
+     },
+     "createDateTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "deleteDateTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "groupCount": {
+      "type": "integer"
+     },
+     "spaceId": {
+      "type": "string"
+     },
+     "userCount": {
+      "type": "integer"
+     }
+    },
+    "required": [
+     "spaceId",
+     "channelId",
+     "channelName",
+     "createDateTime",
+     "channelStatus",
+     "userCount",
+     "groupCount"
+    ],
+    "type": "object"
+   },
+   "SpaceData": {
+    "additionalProperties": false,
+    "properties": {
+     "arn": {
+      "maxLength": 2048,
+      "minLength": 20,
+      "type": "string"
+     },
+     "configurationStatus": {
+      "enum": [
+       "CONFIGURED",
+       "UNCONFIGURED"
+      ],
+      "type": "string"
+     },
+     "contentSize": {
+      "type": "integer"
+     },
+     "createDateTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "deleteDateTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "description": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "name": {
+      "maxLength": 30,
+      "minLength": 1,
+      "type": "string"
+     },
+     "randomDomain": {
+      "type": "string"
+     },
+     "spaceId": {
+      "type": "string"
+     },
+     "status": {
+      "maxLength": 30,
+      "minLength": 1,
+      "type": "string"
+     },
+     "storageLimit": {
+      "type": "integer"
+     },
+     "supportedEmailDomains": {
+      "$ref": "#/components/schemas/SupportedEmailDomainsStatus"
+     },
+     "tier": {
+      "enum": [
+       "BASIC",
+       "STANDARD"
+      ],
+      "type": "string"
+     },
+     "userCount": {
+      "type": "integer"
+     },
+     "userKMSKey": {
+      "type": "string"
+     },
+     "vanityDomain": {
+      "type": "string"
+     },
+     "vanityDomainStatus": {
+      "enum": [
+       "PENDING",
+       "APPROVED",
+       "UNAPPROVED"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "spaceId",
+     "arn",
+     "name",
+     "status",
+     "configurationStatus",
+     "vanityDomainStatus",
+     "vanityDomain",
+     "randomDomain",
+     "tier",
+     "storageLimit",
+     "createDateTime"
+    ],
+    "type": "object"
+   },
+   "SupportedEmailDomainsParameters": {
+    "additionalProperties": false,
+    "properties": {
+     "allowedDomains": {
+      "items": {
+       "maxLength": 255,
+       "minLength": 1,
+       "type": "string"
+      },
+      "maxItems": 10,
+      "minItems": 1,
+      "type": "array"
+     },
+     "enabled": {
+      "enum": [
+       "ENABLED",
+       "DISABLED"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "SupportedEmailDomainsStatus": {
+    "additionalProperties": false,
+    "properties": {
+     "allowedDomains": {
+      "items": {
+       "maxLength": 255,
+       "minLength": 1,
+       "type": "string"
+      },
+      "maxItems": 10,
+      "minItems": 1,
+      "type": "array"
+     },
+     "enabled": {
+      "enum": [
+       "ENABLED",
+       "DISABLED",
+       "NOT_ALLOWED"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "Bounded simulator subset of the official AWS re:Post Private API (2022-05-13). Every other official operation returns HTTP 501 UnknownOperationException. Spaces and channels are stored records: no private re:Post site, vanity or random domain, sign-in, IAM Identity Center application, question or answer exists, and a space never leaves status CREATING with configurationStatus UNCONFIGURED, as the other provisioned records of this catalog do. A space reports no vanityDomain, randomDomain, vanityDomainStatus, clientId, identityStoreId, applicationArn, storageLimit or administrators. RegisterAdmin, DeregisterAdmin, BatchAddRole, BatchRemoveRole, BatchAddChannelRoleToAccessors, BatchRemoveChannelRoleFromAccessors and SendInvites (which sends email) return UnknownOperationException with HTTP 501. CreateSpace validates the subdomain against the official shape but does not store it, because no domain exists to hold it; userKMSKey, the IAM role (reported as customerRoleArn) and supportedEmailDomains are stored without being resolved or used. Space names are unique per Region as the official documentation states, channel names are unique per space, and at most 5 spaces per Region and 20 channels per space exist as simulator limits. Channels report status CREATED, and there is no DeleteChannel operation, so deleting a space deletes its channels, a cascade the official operation does not document. Tags apply to spaces only, by ARN (arn:aws:repostspace:region:account:space/id); a channel ARN is refused. Channels have an ARN of the form space/id/channel/id for IAM evaluation only, which AWS does not define.",
+  "title": "AWS re:Post Private (simulator catalog)",
+  "version": "2022-05-13"
+ },
+ "openapi": "3.1.0",
+ "paths": {
+  "/spaces": {
+   "get": {
+    "operationId": "repostspaceListSpaces",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "repostspace"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "maxResults",
+      "schema": {
+       "maximum": 100,
+       "minimum": 1,
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "nextToken",
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "nextToken": {
+           "type": "string"
+          },
+          "spaces": {
+           "items": {
+            "$ref": "#/components/schemas/SpaceData"
+           },
+           "type": "array"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListSpaces",
+    "tags": [
+     "AWS re:Post Private"
+    ]
+   },
+   "post": {
+    "operationId": "repostspaceCreateSpace",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "repostspace"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "description": {
+          "maxLength": 255,
+          "minLength": 1,
+          "type": "string"
+         },
+         "name": {
+          "maxLength": 30,
+          "minLength": 1,
+          "type": "string"
+         },
+         "roleArn": {
+          "maxLength": 2048,
+          "minLength": 20,
+          "type": "string"
+         },
+         "subdomain": {
+          "maxLength": 63,
+          "minLength": 1,
+          "type": "string"
+         },
+         "supportedEmailDomains": {
+          "$ref": "#/components/schemas/SupportedEmailDomainsParameters"
+         },
+         "tags": {
+          "additionalProperties": {
+           "maxLength": 256,
+           "minLength": 1,
+           "type": "string"
+          },
+          "type": "object"
+         },
+         "tier": {
+          "enum": [
+           "BASIC",
+           "STANDARD"
+          ],
+          "type": "string"
+         },
+         "userKMSKey": {
+          "type": "string"
+         }
+        },
+        "required": [
+         "name",
+         "subdomain",
+         "tier"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "spaceId": {
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateSpace",
+    "tags": [
+     "AWS re:Post Private"
+    ]
+   }
+  },
+  "/spaces/{spaceId}": {
+   "delete": {
+    "operationId": "repostspaceDeleteSpace",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "repostspace"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "spaceId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteSpace",
+    "tags": [
+     "AWS re:Post Private"
+    ]
+   },
+   "get": {
+    "operationId": "repostspaceGetSpace",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "repostspace"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "spaceId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "applicationArn": {
+           "maxLength": 2048,
+           "minLength": 20,
+           "type": "string"
+          },
+          "arn": {
+           "maxLength": 2048,
+           "minLength": 20,
+           "type": "string"
+          },
+          "clientId": {
+           "type": "string"
+          },
+          "configurationStatus": {
+           "enum": [
+            "CONFIGURED",
+            "UNCONFIGURED"
+           ],
+           "type": "string"
+          },
+          "contentSize": {
+           "type": "integer"
+          },
+          "createDateTime": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "customerRoleArn": {
+           "maxLength": 2048,
+           "minLength": 20,
+           "type": "string"
+          },
+          "deleteDateTime": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "description": {
+           "maxLength": 255,
+           "minLength": 1,
+           "type": "string"
+          },
+          "groupAdmins": {
+           "items": {
+            "type": "string"
+           },
+           "type": "array"
+          },
+          "identityStoreId": {
+           "type": "string"
+          },
+          "name": {
+           "maxLength": 30,
+           "minLength": 1,
+           "type": "string"
+          },
+          "randomDomain": {
+           "type": "string"
+          },
+          "roles": {
+           "additionalProperties": {
+            "items": {
+             "enum": [
+              "EXPERT",
+              "MODERATOR",
+              "ADMINISTRATOR",
+              "SUPPORTREQUESTOR"
+             ],
+             "type": "string"
+            },
+            "type": "array"
+           },
+           "type": "object"
+          },
+          "spaceId": {
+           "type": "string"
+          },
+          "status": {
+           "maxLength": 30,
+           "minLength": 1,
+           "type": "string"
+          },
+          "storageLimit": {
+           "type": "integer"
+          },
+          "supportedEmailDomains": {
+           "$ref": "#/components/schemas/SupportedEmailDomainsStatus"
+          },
+          "tier": {
+           "enum": [
+            "BASIC",
+            "STANDARD"
+           ],
+           "type": "string"
+          },
+          "userAdmins": {
+           "items": {
+            "type": "string"
+           },
+           "type": "array"
+          },
+          "userCount": {
+           "type": "integer"
+          },
+          "userKMSKey": {
+           "type": "string"
+          },
+          "vanityDomain": {
+           "type": "string"
+          },
+          "vanityDomainStatus": {
+           "enum": [
+            "PENDING",
+            "APPROVED",
+            "UNAPPROVED"
+           ],
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "GetSpace",
+    "tags": [
+     "AWS re:Post Private"
+    ]
+   },
+   "put": {
+    "operationId": "repostspaceUpdateSpace",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "repostspace"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "spaceId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "description": {
+          "maxLength": 255,
+          "minLength": 1,
+          "type": "string"
+         },
+         "roleArn": {
+          "maxLength": 2048,
+          "minLength": 20,
+          "type": "string"
+         },
+         "supportedEmailDomains": {
+          "$ref": "#/components/schemas/SupportedEmailDomainsParameters"
+         },
+         "tier": {
+          "enum": [
+           "BASIC",
+           "STANDARD"
+          ],
+          "type": "string"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UpdateSpace",
+    "tags": [
+     "AWS re:Post Private"
+    ]
+   }
+  },
+  "/spaces/{spaceId}/channels": {
+   "get": {
+    "operationId": "repostspaceListChannels",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "repostspace"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "maxResults",
+      "schema": {
+       "maximum": 100,
+       "minimum": 1,
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "nextToken",
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "spaceId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "channels": {
+           "items": {
+            "$ref": "#/components/schemas/ChannelData"
+           },
+           "type": "array"
+          },
+          "nextToken": {
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListChannels",
+    "tags": [
+     "AWS re:Post Private"
+    ]
+   },
+   "post": {
+    "operationId": "repostspaceCreateChannel",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "repostspace"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "spaceId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "channelDescription": {
+          "maxLength": 255,
+          "minLength": 1,
+          "type": "string"
+         },
+         "channelName": {
+          "maxLength": 64,
+          "minLength": 1,
+          "type": "string"
+         }
+        },
+        "required": [
+         "channelName"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "channelId": {
+           "maxLength": 24,
+           "minLength": 24,
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateChannel",
+    "tags": [
+     "AWS re:Post Private"
+    ]
+   }
+  },
+  "/spaces/{spaceId}/channels/{channelId}": {
+   "get": {
+    "operationId": "repostspaceGetChannel",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "repostspace"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "channelId",
+      "required": true,
+      "schema": {
+       "maxLength": 24,
+       "minLength": 24,
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "spaceId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "channelDescription": {
+           "maxLength": 255,
+           "minLength": 1,
+           "type": "string"
+          },
+          "channelId": {
+           "maxLength": 24,
+           "minLength": 24,
+           "type": "string"
+          },
+          "channelName": {
+           "maxLength": 64,
+           "minLength": 1,
+           "type": "string"
+          },
+          "channelRoles": {
+           "additionalProperties": {
+            "items": {
+             "enum": [
+              "ASKER",
+              "EXPERT",
+              "MODERATOR",
+              "SUPPORTREQUESTOR"
+             ],
+             "type": "string"
+            },
+            "type": "array"
+           },
+           "type": "object"
+          },
+          "channelStatus": {
+           "enum": [
+            "CREATED",
+            "CREATING",
+            "CREATE_FAILED",
+            "DELETED",
+            "DELETING",
+            "DELETE_FAILED"
+           ],
+           "type": "string"
+          },
+          "createDateTime": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "deleteDateTime": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "spaceId": {
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "GetChannel",
+    "tags": [
+     "AWS re:Post Private"
+    ]
+   },
+   "put": {
+    "operationId": "repostspaceUpdateChannel",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "repostspace"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "channelId",
+      "required": true,
+      "schema": {
+       "maxLength": 24,
+       "minLength": 24,
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "spaceId",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "channelDescription": {
+          "maxLength": 255,
+          "minLength": 1,
+          "type": "string"
+         },
+         "channelName": {
+          "maxLength": 64,
+          "minLength": 1,
+          "type": "string"
+         }
+        },
+        "required": [
+         "channelName"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UpdateChannel",
+    "tags": [
+     "AWS re:Post Private"
+    ]
+   }
+  },
+  "/tags/{resourceArn}": {
+   "delete": {
+    "operationId": "repostspaceUntagResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "repostspace"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceArn",
+      "required": true,
+      "schema": {
+       "maxLength": 2048,
+       "minLength": 20,
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "tagKeys",
+      "schema": {
+       "items": {
+        "maxLength": 128,
+        "minLength": 1,
+        "type": "string"
+       },
+       "maxItems": 50,
+       "minItems": 1,
+       "type": "array"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UntagResource",
+    "tags": [
+     "AWS re:Post Private"
+    ]
+   },
+   "get": {
+    "operationId": "repostspaceListTagsForResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "repostspace"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceArn",
+      "required": true,
+      "schema": {
+       "maxLength": 2048,
+       "minLength": 20,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "tags": {
+           "additionalProperties": {
+            "maxLength": 256,
+            "minLength": 1,
+            "type": "string"
+           },
+           "type": "object"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListTagsForResource",
+    "tags": [
+     "AWS re:Post Private"
+    ]
+   },
+   "post": {
+    "operationId": "repostspaceTagResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "repostspace"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceArn",
+      "required": true,
+      "schema": {
+       "maxLength": 2048,
+       "minLength": 20,
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "tags": {
+          "additionalProperties": {
+           "maxLength": 256,
+           "minLength": 1,
+           "type": "string"
+          },
+          "type": "object"
+         }
+        },
+        "required": [
+         "tags"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "TagResource",
+    "tags": [
+     "AWS re:Post Private"
+    ]
+   }
+  }
+ },
+ "servers": [
+  {
+   "description": "This simulator only",
+   "url": "/"
+  }
+ ],
+ "tags": [
+  {
+   "description": "Bounded simulator subset of the official AWS re:Post Private API (2022-05-13). Every other official operation returns HTTP 501 UnknownOperationException. Spaces and channels are stored records: no private re:Post site, vanity or random domain, sign-in, IAM Identity Center application, question or answer exists, and a space never leaves status CREATING with configurationStatus UNCONFIGURED, as the other provisioned records of this catalog do. A space reports no vanityDomain, randomDomain, vanityDomainStatus, clientId, identityStoreId, applicationArn, storageLimit or administrators. RegisterAdmin, DeregisterAdmin, BatchAddRole, BatchRemoveRole, BatchAddChannelRoleToAccessors, BatchRemoveChannelRoleFromAccessors and SendInvites (which sends email) return UnknownOperationException with HTTP 501. CreateSpace validates the subdomain against the official shape but does not store it, because no domain exists to hold it; userKMSKey, the IAM role (reported as customerRoleArn) and supportedEmailDomains are stored without being resolved or used. Space names are unique per Region as the official documentation states, channel names are unique per space, and at most 5 spaces per Region and 20 channels per space exist as simulator limits. Channels report status CREATED, and there is no DeleteChannel operation, so deleting a space deletes its channels, a cascade the official operation does not document. Tags apply to spaces only, by ARN (arn:aws:repostspace:region:account:space/id); a channel ARN is refused. Channels have an ARN of the form space/id/channel/id for IAM evaluation only, which AWS does not define.",
+   "name": "AWS re:Post Private"
+  }
+ ],
+ "x-simulator-source": {
+  "package": "botocore",
+  "version": "1.41.6",
+  "file": "botocore/data/repostspace/2022-05-13/service-2.json",
+  "sha256": "88a268288cd532125902aae01205c00026d970b6e2517f78421b987a3edb1ab4",
+  "license": "Apache-2.0"
+ }
+}

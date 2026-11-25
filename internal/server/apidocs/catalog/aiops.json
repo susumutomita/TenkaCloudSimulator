@@ -1,0 +1,926 @@
+{
+ "components": {
+  "schemas": {
+   "CrossAccountConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "sourceRoleArn": {
+      "maxLength": 2048,
+      "minLength": 20,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "EncryptionConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "kmsKeyId": {
+      "maxLength": 256,
+      "minLength": 1,
+      "type": "string"
+     },
+     "type": {
+      "enum": [
+       "AWS_OWNED_KEY",
+       "CUSTOMER_MANAGED_KMS_KEY"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ListInvestigationGroupsModel": {
+    "additionalProperties": false,
+    "properties": {
+     "arn": {
+      "type": "string"
+     },
+     "name": {
+      "maxLength": 512,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "Bounded simulator subset of the official AWS AI Ops API (2018-05-10). Every other official operation returns HTTP 501 UnknownOperationException. The investigation group and its resource policy are stored configuration: no investigation, investigation event or finding exists, nothing is scanned or analyzed, no role is assumed, no chat message is sent and no CloudWatch alarm can start an investigation. The policy is stored as text and is not evaluated, so it grants no access. One investigation group is allowed per Region, as in AWS. createdAt and lastModifiedAt are not reported, createdBy and lastModifiedBy report the account ID, and the retention default of 90 days, the AWS-owned key and CloudTrail event history enabled are stored as the documented defaults. The role, the KMS key, the SNS topic, chat application configurations and cross-account roles are stored without being resolved. UpdateInvestigationGroup cannot change the name or retention, as the official operation offers neither. A group that has no policy reports only its ARN from GetInvestigationGroupPolicy instead of failing. Deleting a group deletes its policy.",
+  "title": "Amazon CloudWatch investigations (simulator catalog)",
+  "version": "2018-05-10"
+ },
+ "openapi": "3.1.0",
+ "paths": {
+  "/investigationGroups": {
+   "get": {
+    "operationId": "aiopsListInvestigationGroups",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "aiops"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "maxResults",
+      "schema": {
+       "maximum": 50,
+       "minimum": 1,
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "nextToken",
+      "schema": {
+       "maxLength": 2048,
+       "minLength": 0,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "investigationGroups": {
+           "items": {
+            "$ref": "#/components/schemas/ListInvestigationGroupsModel"
+           },
+           "type": "array"
+          },
+          "nextToken": {
+           "maxLength": 2048,
+           "minLength": 0,
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListInvestigationGroups",
+    "tags": [
+     "Amazon CloudWatch investigations"
+    ]
+   },
+   "post": {
+    "operationId": "aiopsCreateInvestigationGroup",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "aiops"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "chatbotNotificationChannel": {
+          "additionalProperties": {
+           "items": {
+            "maxLength": 2048,
+            "minLength": 20,
+            "type": "string"
+           },
+           "maxItems": 5,
+           "minItems": 1,
+           "type": "array"
+          },
+          "type": "object"
+         },
+         "crossAccountConfigurations": {
+          "items": {
+           "$ref": "#/components/schemas/CrossAccountConfiguration"
+          },
+          "maxItems": 25,
+          "minItems": 0,
+          "type": "array"
+         },
+         "encryptionConfiguration": {
+          "$ref": "#/components/schemas/EncryptionConfiguration"
+         },
+         "isCloudTrailEventHistoryEnabled": {
+          "type": "boolean"
+         },
+         "name": {
+          "maxLength": 512,
+          "minLength": 1,
+          "type": "string"
+         },
+         "retentionInDays": {
+          "maximum": 90,
+          "minimum": 7,
+          "type": "integer"
+         },
+         "roleArn": {
+          "maxLength": 2048,
+          "minLength": 20,
+          "type": "string"
+         },
+         "tagKeyBoundaries": {
+          "items": {
+           "maxLength": 128,
+           "minLength": 1,
+           "type": "string"
+          },
+          "type": "array"
+         },
+         "tags": {
+          "additionalProperties": {
+           "maxLength": 256,
+           "minLength": 1,
+           "type": "string"
+          },
+          "type": "object"
+         }
+        },
+        "required": [
+         "name",
+         "roleArn"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "arn": {
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateInvestigationGroup",
+    "tags": [
+     "Amazon CloudWatch investigations"
+    ]
+   }
+  },
+  "/investigationGroups/{identifier}": {
+   "delete": {
+    "operationId": "aiopsDeleteInvestigationGroup",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "aiops"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "identifier",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteInvestigationGroup",
+    "tags": [
+     "Amazon CloudWatch investigations"
+    ]
+   },
+   "get": {
+    "operationId": "aiopsGetInvestigationGroup",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "aiops"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "identifier",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "arn": {
+           "type": "string"
+          },
+          "chatbotNotificationChannel": {
+           "additionalProperties": {
+            "items": {
+             "maxLength": 2048,
+             "minLength": 20,
+             "type": "string"
+            },
+            "maxItems": 5,
+            "minItems": 1,
+            "type": "array"
+           },
+           "type": "object"
+          },
+          "createdAt": {
+           "type": "integer"
+          },
+          "createdBy": {
+           "maxLength": 512,
+           "minLength": 1,
+           "type": "string"
+          },
+          "crossAccountConfigurations": {
+           "items": {
+            "$ref": "#/components/schemas/CrossAccountConfiguration"
+           },
+           "maxItems": 25,
+           "minItems": 0,
+           "type": "array"
+          },
+          "encryptionConfiguration": {
+           "$ref": "#/components/schemas/EncryptionConfiguration"
+          },
+          "isCloudTrailEventHistoryEnabled": {
+           "type": "boolean"
+          },
+          "lastModifiedAt": {
+           "type": "integer"
+          },
+          "lastModifiedBy": {
+           "maxLength": 512,
+           "minLength": 1,
+           "type": "string"
+          },
+          "name": {
+           "maxLength": 512,
+           "minLength": 1,
+           "type": "string"
+          },
+          "retentionInDays": {
+           "maximum": 90,
+           "minimum": 7,
+           "type": "integer"
+          },
+          "roleArn": {
+           "maxLength": 2048,
+           "minLength": 20,
+           "type": "string"
+          },
+          "tagKeyBoundaries": {
+           "items": {
+            "maxLength": 128,
+            "minLength": 1,
+            "type": "string"
+           },
+           "type": "array"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "GetInvestigationGroup",
+    "tags": [
+     "Amazon CloudWatch investigations"
+    ]
+   },
+   "patch": {
+    "operationId": "aiopsUpdateInvestigationGroup",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "aiops"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "identifier",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "chatbotNotificationChannel": {
+          "additionalProperties": {
+           "items": {
+            "maxLength": 2048,
+            "minLength": 20,
+            "type": "string"
+           },
+           "maxItems": 5,
+           "minItems": 1,
+           "type": "array"
+          },
+          "type": "object"
+         },
+         "crossAccountConfigurations": {
+          "items": {
+           "$ref": "#/components/schemas/CrossAccountConfiguration"
+          },
+          "maxItems": 25,
+          "minItems": 0,
+          "type": "array"
+         },
+         "encryptionConfiguration": {
+          "$ref": "#/components/schemas/EncryptionConfiguration"
+         },
+         "isCloudTrailEventHistoryEnabled": {
+          "type": "boolean"
+         },
+         "roleArn": {
+          "maxLength": 2048,
+          "minLength": 20,
+          "type": "string"
+         },
+         "tagKeyBoundaries": {
+          "items": {
+           "maxLength": 128,
+           "minLength": 1,
+           "type": "string"
+          },
+          "type": "array"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UpdateInvestigationGroup",
+    "tags": [
+     "Amazon CloudWatch investigations"
+    ]
+   }
+  },
+  "/investigationGroups/{identifier}/policy": {
+   "delete": {
+    "operationId": "aiopsDeleteInvestigationGroupPolicy",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "aiops"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "identifier",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteInvestigationGroupPolicy",
+    "tags": [
+     "Amazon CloudWatch investigations"
+    ]
+   },
+   "get": {
+    "operationId": "aiopsGetInvestigationGroupPolicy",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "aiops"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "identifier",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "investigationGroupArn": {
+           "type": "string"
+          },
+          "policy": {
+           "maxLength": 32768,
+           "minLength": 1,
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "GetInvestigationGroupPolicy",
+    "tags": [
+     "Amazon CloudWatch investigations"
+    ]
+   },
+   "post": {
+    "operationId": "aiopsPutInvestigationGroupPolicy",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "aiops"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "identifier",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "policy": {
+          "maxLength": 32768,
+          "minLength": 1,
+          "type": "string"
+         }
+        },
+        "required": [
+         "policy"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "investigationGroupArn": {
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "PutInvestigationGroupPolicy",
+    "tags": [
+     "Amazon CloudWatch investigations"
+    ]
+   }
+  },
+  "/tags/{resourceArn}": {
+   "delete": {
+    "operationId": "aiopsUntagResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "aiops"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceArn",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "tagKeys",
+      "schema": {
+       "items": {
+        "maxLength": 128,
+        "minLength": 1,
+        "type": "string"
+       },
+       "maxItems": 50,
+       "minItems": 0,
+       "type": "array"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UntagResource",
+    "tags": [
+     "Amazon CloudWatch investigations"
+    ]
+   },
+   "get": {
+    "operationId": "aiopsListTagsForResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "aiops"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceArn",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "tags": {
+           "additionalProperties": {
+            "maxLength": 256,
+            "minLength": 1,
+            "type": "string"
+           },
+           "type": "object"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListTagsForResource",
+    "tags": [
+     "Amazon CloudWatch investigations"
+    ]
+   },
+   "post": {
+    "operationId": "aiopsTagResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "aiops"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceArn",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "tags": {
+          "additionalProperties": {
+           "maxLength": 256,
+           "minLength": 1,
+           "type": "string"
+          },
+          "type": "object"
+         }
+        },
+        "required": [
+         "tags"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "TagResource",
+    "tags": [
+     "Amazon CloudWatch investigations"
+    ]
+   }
+  }
+ },
+ "servers": [
+  {
+   "description": "This simulator only",
+   "url": "/"
+  }
+ ],
+ "tags": [
+  {
+   "description": "Bounded simulator subset of the official AWS AI Ops API (2018-05-10). Every other official operation returns HTTP 501 UnknownOperationException. The investigation group and its resource policy are stored configuration: no investigation, investigation event or finding exists, nothing is scanned or analyzed, no role is assumed, no chat message is sent and no CloudWatch alarm can start an investigation. The policy is stored as text and is not evaluated, so it grants no access. One investigation group is allowed per Region, as in AWS. createdAt and lastModifiedAt are not reported, createdBy and lastModifiedBy report the account ID, and the retention default of 90 days, the AWS-owned key and CloudTrail event history enabled are stored as the documented defaults. The role, the KMS key, the SNS topic, chat application configurations and cross-account roles are stored without being resolved. UpdateInvestigationGroup cannot change the name or retention, as the official operation offers neither. A group that has no policy reports only its ARN from GetInvestigationGroupPolicy instead of failing. Deleting a group deletes its policy.",
+   "name": "Amazon CloudWatch investigations"
+  }
+ ],
+ "x-simulator-source": {
+  "package": "botocore",
+  "version": "1.41.6",
+  "file": "botocore/data/aiops/2018-05-10/service-2.json",
+  "sha256": "b0dcb453c8443f0799c1e6c87719499268650d2ad9bd163c9757db298e9fe245",
+  "license": "Apache-2.0"
+ }
+}

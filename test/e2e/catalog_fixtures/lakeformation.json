@@ -1,0 +1,35 @@
+{
+ "client": "lakeformation",
+ "steps": [
+  {"op": "create_lf_tag", "args": {"TagKey": "fixture-tier", "TagValues": ["gold", "silver"]}},
+  {"op": "get_lf_tag", "args": {"TagKey": "fixture-tier"}, "expect": {"TagKey": "fixture-tier", "TagValues#count": 2}},
+  {"op": "list_lf_tags", "args": {}, "expect": {"LFTags#count": 1, "LFTags[0].TagKey": "fixture-tier"}},
+  {"op": "create_lf_tag_expression", "args": {"Name": "fixture-golden", "Description": "gold only", "Expression": [{"TagKey": "fixture-tier", "TagValues": ["gold"]}]}},
+  {"op": "get_lf_tag_expression", "args": {"Name": "fixture-golden"}, "expect": {"Description": "gold only"}},
+  {"op": "list_lf_tag_expressions", "args": {}, "expect": {"LFTagExpressions#count": 1}},
+  {"op": "update_lf_tag_expression", "args": {"Name": "fixture-golden", "Description": "gold changed", "Expression": [{"TagKey": "fixture-tier", "TagValues": ["gold"]}]}},
+  {"op": "get_data_lake_settings", "args": {}, "expect": {"DataLakeSettings.DataLakeAdmins#count": 0}},
+  {"op": "put_data_lake_settings", "args": {"DataLakeSettings": {"DataLakeAdmins": [{"DataLakePrincipalIdentifier": "arn:aws:iam::000000000000:user/fixture-admin"}], "CreateTableDefaultPermissions": []}}},
+  {"op": "get_data_lake_settings", "args": {}, "expect": {"DataLakeSettings.DataLakeAdmins#count": 1}},
+  {"op": "register_resource", "args": {"ResourceArn": "arn:aws:s3:::fixture-lake/data", "RoleArn": "arn:aws:iam::000000000000:role/fixture-lake"}},
+  {"op": "describe_resource", "args": {"ResourceArn": "arn:aws:s3:::fixture-lake/data"}, "expect": {"ResourceInfo.RoleArn": "arn:aws:iam::000000000000:role/fixture-lake"}},
+  {"op": "list_resources", "args": {}, "expect": {"ResourceInfoList#count": 1}},
+  {"op": "update_resource", "args": {"ResourceArn": "arn:aws:s3:::fixture-lake/data", "RoleArn": "arn:aws:iam::000000000000:role/fixture-other", "HybridAccessEnabled": true}},
+  {"op": "describe_resource", "args": {"ResourceArn": "arn:aws:s3:::fixture-lake/data"}, "expect": {"ResourceInfo.HybridAccessEnabled": true}},
+  {"op": "register_resource", "args": {"ResourceArn": "arn:aws:s3:::fixture-lake/data", "RoleArn": "arn:aws:iam::000000000000:role/fixture-lake"}, "error": "AlreadyExistsException"},
+  {"op": "register_resource", "args": {"ResourceArn": "arn:aws:ec2:us-east-1:000000000000:instance/i-0", "RoleArn": "arn:aws:iam::000000000000:role/fixture-lake"}, "error": "InvalidInputException"},
+  {"op": "get_lf_tag", "args": {"TagKey": "fixture-missing"}, "error": "EntityNotFoundException"}
+ ],
+ "isolation": [
+  {"op": "list_lf_tags", "args": {}, "expect": {"LFTags#count": 0}}
+ ],
+ "after_restart": [
+  {"op": "get_lf_tag_expression", "args": {"Name": "fixture-golden"}, "expect": {"Description": "gold changed"}}
+ ],
+ "cleanup": [
+  {"op": "deregister_resource", "args": {"ResourceArn": "arn:aws:s3:::fixture-lake/data"}},
+  {"op": "delete_lf_tag_expression", "args": {"Name": "fixture-golden"}},
+  {"op": "delete_lf_tag", "args": {"TagKey": "fixture-tier"}},
+  {"op": "list_resources", "args": {}, "expect": {"ResourceInfoList#count": 0}}
+ ]
+}

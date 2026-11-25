@@ -1,0 +1,877 @@
+{
+ "components": {
+  "schemas": {
+   "BlockDeviceMapping": {
+    "additionalProperties": false,
+    "properties": {
+     "DeviceName": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "Ebs": {
+      "$ref": "#/components/schemas/Ebs"
+     },
+     "NoDevice": {
+      "type": "boolean"
+     },
+     "VirtualName": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "DeviceName"
+    ],
+    "type": "object"
+   },
+   "CreateLaunchConfigurationRequest": {
+    "additionalProperties": false,
+    "patternProperties": {
+     "^BlockDeviceMappings\\.member\\.[1-9][0-9]*\\.DeviceName$": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "^BlockDeviceMappings\\.member\\.[1-9][0-9]*\\.Ebs\\.DeleteOnTermination$": {
+      "type": "boolean"
+     },
+     "^BlockDeviceMappings\\.member\\.[1-9][0-9]*\\.Ebs\\.Encrypted$": {
+      "type": "boolean"
+     },
+     "^BlockDeviceMappings\\.member\\.[1-9][0-9]*\\.Ebs\\.Iops$": {
+      "maximum": 20000,
+      "minimum": 100,
+      "type": "integer"
+     },
+     "^BlockDeviceMappings\\.member\\.[1-9][0-9]*\\.Ebs\\.SnapshotId$": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "^BlockDeviceMappings\\.member\\.[1-9][0-9]*\\.Ebs\\.Throughput$": {
+      "maximum": 1000,
+      "minimum": 125,
+      "type": "integer"
+     },
+     "^BlockDeviceMappings\\.member\\.[1-9][0-9]*\\.Ebs\\.VolumeSize$": {
+      "maximum": 16384,
+      "minimum": 1,
+      "type": "integer"
+     },
+     "^BlockDeviceMappings\\.member\\.[1-9][0-9]*\\.Ebs\\.VolumeType$": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "^BlockDeviceMappings\\.member\\.[1-9][0-9]*\\.NoDevice$": {
+      "type": "boolean"
+     },
+     "^BlockDeviceMappings\\.member\\.[1-9][0-9]*\\.VirtualName$": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "^ClassicLinkVPCSecurityGroups\\.member\\.[1-9][0-9]*$": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "^SecurityGroups\\.member\\.[1-9][0-9]*$": {
+      "type": "string"
+     }
+    },
+    "properties": {
+     "Action": {
+      "const": "CreateLaunchConfiguration",
+      "type": "string"
+     },
+     "AssociatePublicIpAddress": {
+      "type": "boolean"
+     },
+     "BlockDeviceMappings": {
+      "const": "",
+      "description": "An empty list.",
+      "type": "string"
+     },
+     "ClassicLinkVPCId": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "ClassicLinkVPCSecurityGroups": {
+      "const": "",
+      "description": "An empty list.",
+      "type": "string"
+     },
+     "EbsOptimized": {
+      "type": "boolean"
+     },
+     "IamInstanceProfile": {
+      "maxLength": 1600,
+      "minLength": 1,
+      "type": "string"
+     },
+     "ImageId": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "InstanceId": {
+      "maxLength": 19,
+      "minLength": 1,
+      "type": "string"
+     },
+     "InstanceMonitoring.Enabled": {
+      "type": "boolean"
+     },
+     "InstanceType": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "KernelId": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "KeyName": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "LaunchConfigurationName": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "MetadataOptions.HttpEndpoint": {
+      "enum": [
+       "disabled",
+       "enabled"
+      ],
+      "type": "string"
+     },
+     "MetadataOptions.HttpPutResponseHopLimit": {
+      "maximum": 64,
+      "minimum": 1,
+      "type": "integer"
+     },
+     "MetadataOptions.HttpTokens": {
+      "enum": [
+       "optional",
+       "required"
+      ],
+      "type": "string"
+     },
+     "PlacementTenancy": {
+      "maxLength": 64,
+      "minLength": 1,
+      "type": "string"
+     },
+     "RamdiskId": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "SecurityGroups": {
+      "const": "",
+      "description": "An empty list.",
+      "type": "string"
+     },
+     "SpotPrice": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "UserData": {
+      "maxLength": 21847,
+      "type": "string"
+     },
+     "Version": {
+      "const": "2011-01-01",
+      "type": "string"
+     }
+    },
+    "required": [
+     "Action",
+     "Version",
+     "LaunchConfigurationName"
+    ],
+    "title": "CreateLaunchConfiguration",
+    "type": "object"
+   },
+   "CreateLaunchConfigurationResponse": {
+    "properties": {
+     "ResponseMetadata": {
+      "$ref": "#/components/schemas/ResponseMetadata"
+     }
+    },
+    "title": "CreateLaunchConfigurationResponse",
+    "type": "object",
+    "xml": {
+     "name": "CreateLaunchConfigurationResponse",
+     "namespace": "http://autoscaling.amazonaws.com/doc/2011-01-01/"
+    }
+   },
+   "DeleteLaunchConfigurationRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "Action": {
+      "const": "DeleteLaunchConfiguration",
+      "type": "string"
+     },
+     "LaunchConfigurationName": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "Version": {
+      "const": "2011-01-01",
+      "type": "string"
+     }
+    },
+    "required": [
+     "Action",
+     "Version",
+     "LaunchConfigurationName"
+    ],
+    "title": "DeleteLaunchConfiguration",
+    "type": "object"
+   },
+   "DeleteLaunchConfigurationResponse": {
+    "properties": {
+     "ResponseMetadata": {
+      "$ref": "#/components/schemas/ResponseMetadata"
+     }
+    },
+    "title": "DeleteLaunchConfigurationResponse",
+    "type": "object",
+    "xml": {
+     "name": "DeleteLaunchConfigurationResponse",
+     "namespace": "http://autoscaling.amazonaws.com/doc/2011-01-01/"
+    }
+   },
+   "DescribeLaunchConfigurationsRequest": {
+    "additionalProperties": false,
+    "patternProperties": {
+     "^LaunchConfigurationNames\\.member\\.[1-9][0-9]*$": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "properties": {
+     "Action": {
+      "const": "DescribeLaunchConfigurations",
+      "type": "string"
+     },
+     "LaunchConfigurationNames": {
+      "const": "",
+      "description": "An empty list.",
+      "type": "string"
+     },
+     "MaxRecords": {
+      "type": "integer"
+     },
+     "NextToken": {
+      "type": "string"
+     },
+     "Version": {
+      "const": "2011-01-01",
+      "type": "string"
+     }
+    },
+    "required": [
+     "Action",
+     "Version"
+    ],
+    "title": "DescribeLaunchConfigurations",
+    "type": "object"
+   },
+   "DescribeLaunchConfigurationsResponse": {
+    "properties": {
+     "DescribeLaunchConfigurationsResult": {
+      "$ref": "#/components/schemas/LaunchConfigurationsType",
+      "xml": {
+       "name": "DescribeLaunchConfigurationsResult"
+      }
+     },
+     "ResponseMetadata": {
+      "$ref": "#/components/schemas/ResponseMetadata"
+     }
+    },
+    "title": "DescribeLaunchConfigurationsResponse",
+    "type": "object",
+    "xml": {
+     "name": "DescribeLaunchConfigurationsResponse",
+     "namespace": "http://autoscaling.amazonaws.com/doc/2011-01-01/"
+    }
+   },
+   "Ebs": {
+    "additionalProperties": false,
+    "properties": {
+     "DeleteOnTermination": {
+      "type": "boolean"
+     },
+     "Encrypted": {
+      "type": "boolean"
+     },
+     "Iops": {
+      "maximum": 20000,
+      "minimum": 100,
+      "type": "integer"
+     },
+     "SnapshotId": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "Throughput": {
+      "maximum": 1000,
+      "minimum": 125,
+      "type": "integer"
+     },
+     "VolumeSize": {
+      "maximum": 16384,
+      "minimum": 1,
+      "type": "integer"
+     },
+     "VolumeType": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ErrorResponse": {
+    "properties": {
+     "Error": {
+      "properties": {
+       "Code": {
+        "type": "string"
+       },
+       "Message": {
+        "type": "string"
+       },
+       "Type": {
+        "enum": [
+         "Sender",
+         "Receiver"
+        ],
+        "type": "string"
+       }
+      },
+      "type": "object"
+     },
+     "RequestId": {
+      "type": "string"
+     }
+    },
+    "type": "object",
+    "xml": {
+     "name": "ErrorResponse",
+     "namespace": "http://autoscaling.amazonaws.com/doc/2011-01-01/"
+    }
+   },
+   "InstanceMetadataOptions": {
+    "additionalProperties": false,
+    "properties": {
+     "HttpEndpoint": {
+      "enum": [
+       "disabled",
+       "enabled"
+      ],
+      "type": "string"
+     },
+     "HttpPutResponseHopLimit": {
+      "maximum": 64,
+      "minimum": 1,
+      "type": "integer"
+     },
+     "HttpTokens": {
+      "enum": [
+       "optional",
+       "required"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "InstanceMonitoring": {
+    "additionalProperties": false,
+    "properties": {
+     "Enabled": {
+      "type": "boolean"
+     }
+    },
+    "type": "object"
+   },
+   "LaunchConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "AssociatePublicIpAddress": {
+      "type": "boolean"
+     },
+     "BlockDeviceMappings": {
+      "items": {
+       "$ref": "#/components/schemas/BlockDeviceMapping",
+       "xml": {
+        "name": "member"
+       }
+      },
+      "type": "array",
+      "xml": {
+       "wrapped": true
+      }
+     },
+     "ClassicLinkVPCId": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "ClassicLinkVPCSecurityGroups": {
+      "items": {
+       "maxLength": 255,
+       "minLength": 1,
+       "type": "string",
+       "xml": {
+        "name": "member"
+       }
+      },
+      "type": "array",
+      "xml": {
+       "wrapped": true
+      }
+     },
+     "CreatedTime": {
+      "format": "date-time",
+      "type": "string"
+     },
+     "EbsOptimized": {
+      "type": "boolean"
+     },
+     "IamInstanceProfile": {
+      "maxLength": 1600,
+      "minLength": 1,
+      "type": "string"
+     },
+     "ImageId": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "InstanceMonitoring": {
+      "$ref": "#/components/schemas/InstanceMonitoring"
+     },
+     "InstanceType": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "KernelId": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "KeyName": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "LaunchConfigurationARN": {
+      "maxLength": 1600,
+      "minLength": 1,
+      "type": "string"
+     },
+     "LaunchConfigurationName": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "MetadataOptions": {
+      "$ref": "#/components/schemas/InstanceMetadataOptions"
+     },
+     "PlacementTenancy": {
+      "maxLength": 64,
+      "minLength": 1,
+      "type": "string"
+     },
+     "RamdiskId": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "SecurityGroups": {
+      "items": {
+       "type": "string",
+       "xml": {
+        "name": "member"
+       }
+      },
+      "type": "array",
+      "xml": {
+       "wrapped": true
+      }
+     },
+     "SpotPrice": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "UserData": {
+      "maxLength": 21847,
+      "type": "string"
+     }
+    },
+    "required": [
+     "LaunchConfigurationName",
+     "ImageId",
+     "InstanceType",
+     "CreatedTime"
+    ],
+    "type": "object"
+   },
+   "LaunchConfigurationsType": {
+    "additionalProperties": false,
+    "properties": {
+     "LaunchConfigurations": {
+      "items": {
+       "$ref": "#/components/schemas/LaunchConfiguration",
+       "xml": {
+        "name": "member"
+       }
+      },
+      "type": "array",
+      "xml": {
+       "wrapped": true
+      }
+     },
+     "NextToken": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "LaunchConfigurations"
+    ],
+    "type": "object"
+   },
+   "ResponseMetadata": {
+    "properties": {
+     "RequestId": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "Bounded simulator subset of the official Auto Scaling API (2011-01-01). Every other official operation returns HTTP 501 UnknownOperationException. Launch configurations are stored configuration served over the Query protocol: image IDs, instance types, key pairs, security groups, instance profiles, kernel and RAM disk IDs and block device mappings are stored as given and never resolved against EC2, EBS or IAM, and no instance is ever launched. No Auto Scaling group exists, so CreateAutoScalingGroup, scaling policies, scheduled actions, lifecycle hooks, notification configurations, warm pools, instance refreshes, traffic sources, tags (which apply to groups), metrics collection and every other official operation return UnknownOperationException with HTTP 501. A launch configuration must name ImageId and InstanceType: InstanceId, which derives them from a running instance, is refused. PlacementTenancy must be default or dedicated, SpotPrice at least 0.001, and UserData valid base64 of at most 16 KB, as documented. Block device mappings must set the device name and exactly one of Ebs, NoDevice or VirtualName (ephemeralN), an Ebs volume needs SnapshotId or VolumeSize, the volume type one of standard, io1, gp2, st1, sc1 or gp3 with the documented size and Iops ranges (Iops required for io1, accepted only for io1 and gp3), and Throughput only for gp3. Whether a snapshot, key pair, security group or instance profile exists is not checked, and an unset InstanceMonitoring reports detailed monitoring enabled as documented. Launch configuration names are 1 to 255 characters and unique per Region; at most 200 may exist, a local limit that fails with LimitExceeded. Describe returns 50 launch configurations per page by default and accepts MaxRecords from 1 to 100 and at most 50 names. The official operation silently skips a name that does not exist; the simulator instead fails the request, with InvalidParameterValue because the model has no not-found fault, and DeleteLaunchConfiguration of an unknown name fails the same way. ResourceInUse cannot occur because no group can use a launch configuration. Failures the official model does not define (invalid input, unknown name) use the common Query code InvalidParameterValue with HTTP 400; the real service reports ValidationError for these. The launch configuration ARN has the documented form arn:aws:autoscaling:region:account:launchConfiguration:uuid:launchConfigurationName/name, and ClassicLink members are stored without any EC2-Classic behavior.",
+  "title": "Amazon EC2 Auto Scaling (simulator catalog)",
+  "version": "2011-01-01"
+ },
+ "openapi": "3.1.0",
+ "paths": {
+  "/#Action=CreateLaunchConfiguration": {
+   "post": {
+    "description": "POST / with a form-encoded body (the #Action fragment only names this entry and is not sent). Form fields follow the official Query serialization: structure members joined with \".\", list elements numbered from 1 under their element name (for example Tags.Tag.1.Key), map entries as entry.N.key and entry.N.value, and an empty list as an empty field. The response is an XML CreateLaunchConfigurationResponse holding ResponseMetadata/RequestId; errors are ErrorResponse/Error/Code with the official error code.",
+    "operationId": "autoscalingCreateLaunchConfiguration",
+    "parameters": [
+     {
+      "description": "Routes this unsigned first-party request to Amazon EC2 Auto Scaling; without it an unsigned form POST is not routed here. SDKs use the SigV4 credential scope instead.",
+      "example": "autoscaling",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": true,
+      "schema": {
+       "default": "autoscaling",
+       "enum": [
+        "autoscaling"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/x-www-form-urlencoded": {
+       "example": {
+        "Action": "CreateLaunchConfiguration",
+        "LaunchConfigurationName": "example",
+        "Version": "2011-01-01"
+       },
+       "schema": {
+        "$ref": "#/components/schemas/CreateLaunchConfigurationRequest"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/CreateLaunchConfigurationResponse"
+        }
+       }
+      },
+      "description": "XML CreateLaunchConfigurationResponse with the projected official output shape."
+     },
+     "400": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "Modeled fault or common Query error (InvalidParameterValue, InvalidAction, MissingAction, MissingParameter, MalformedQueryString)."
+     },
+     "403": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "AccessDenied from local identity policy evaluation."
+     },
+     "404": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "Modeled not-found fault."
+     },
+     "501": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "UnknownOperationException: official operation not implemented by the simulator."
+     }
+    },
+    "summary": "CreateLaunchConfiguration",
+    "tags": [
+     "Amazon EC2 Auto Scaling"
+    ]
+   }
+  },
+  "/#Action=DeleteLaunchConfiguration": {
+   "post": {
+    "description": "POST / with a form-encoded body (the #Action fragment only names this entry and is not sent). Form fields follow the official Query serialization: structure members joined with \".\", list elements numbered from 1 under their element name (for example Tags.Tag.1.Key), map entries as entry.N.key and entry.N.value, and an empty list as an empty field. The response is an XML DeleteLaunchConfigurationResponse holding ResponseMetadata/RequestId; errors are ErrorResponse/Error/Code with the official error code.",
+    "operationId": "autoscalingDeleteLaunchConfiguration",
+    "parameters": [
+     {
+      "description": "Routes this unsigned first-party request to Amazon EC2 Auto Scaling; without it an unsigned form POST is not routed here. SDKs use the SigV4 credential scope instead.",
+      "example": "autoscaling",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": true,
+      "schema": {
+       "default": "autoscaling",
+       "enum": [
+        "autoscaling"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/x-www-form-urlencoded": {
+       "example": {
+        "Action": "DeleteLaunchConfiguration",
+        "LaunchConfigurationName": "example",
+        "Version": "2011-01-01"
+       },
+       "schema": {
+        "$ref": "#/components/schemas/DeleteLaunchConfigurationRequest"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/DeleteLaunchConfigurationResponse"
+        }
+       }
+      },
+      "description": "XML DeleteLaunchConfigurationResponse with the projected official output shape."
+     },
+     "400": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "Modeled fault or common Query error (InvalidParameterValue, InvalidAction, MissingAction, MissingParameter, MalformedQueryString)."
+     },
+     "403": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "AccessDenied from local identity policy evaluation."
+     },
+     "404": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "Modeled not-found fault."
+     },
+     "501": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "UnknownOperationException: official operation not implemented by the simulator."
+     }
+    },
+    "summary": "DeleteLaunchConfiguration",
+    "tags": [
+     "Amazon EC2 Auto Scaling"
+    ]
+   }
+  },
+  "/#Action=DescribeLaunchConfigurations": {
+   "post": {
+    "description": "POST / with a form-encoded body (the #Action fragment only names this entry and is not sent). Form fields follow the official Query serialization: structure members joined with \".\", list elements numbered from 1 under their element name (for example Tags.Tag.1.Key), map entries as entry.N.key and entry.N.value, and an empty list as an empty field. The response is an XML DescribeLaunchConfigurationsResponse holding the DescribeLaunchConfigurationsResult element and ResponseMetadata/RequestId; errors are ErrorResponse/Error/Code with the official error code.",
+    "operationId": "autoscalingDescribeLaunchConfigurations",
+    "parameters": [
+     {
+      "description": "Routes this unsigned first-party request to Amazon EC2 Auto Scaling; without it an unsigned form POST is not routed here. SDKs use the SigV4 credential scope instead.",
+      "example": "autoscaling",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": true,
+      "schema": {
+       "default": "autoscaling",
+       "enum": [
+        "autoscaling"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/x-www-form-urlencoded": {
+       "example": {
+        "Action": "DescribeLaunchConfigurations",
+        "Version": "2011-01-01"
+       },
+       "schema": {
+        "$ref": "#/components/schemas/DescribeLaunchConfigurationsRequest"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/DescribeLaunchConfigurationsResponse"
+        }
+       }
+      },
+      "description": "XML DescribeLaunchConfigurationsResponse with the projected official output shape."
+     },
+     "400": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "Modeled fault or common Query error (InvalidParameterValue, InvalidAction, MissingAction, MissingParameter, MalformedQueryString)."
+     },
+     "403": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "AccessDenied from local identity policy evaluation."
+     },
+     "404": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "Modeled not-found fault."
+     },
+     "501": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "UnknownOperationException: official operation not implemented by the simulator."
+     }
+    },
+    "summary": "DescribeLaunchConfigurations",
+    "tags": [
+     "Amazon EC2 Auto Scaling"
+    ]
+   }
+  }
+ },
+ "servers": [
+  {
+   "description": "This simulator only",
+   "url": "/"
+  }
+ ],
+ "tags": [
+  {
+   "description": "Bounded simulator subset of the official Auto Scaling API (2011-01-01). Every other official operation returns HTTP 501 UnknownOperationException. Launch configurations are stored configuration served over the Query protocol: image IDs, instance types, key pairs, security groups, instance profiles, kernel and RAM disk IDs and block device mappings are stored as given and never resolved against EC2, EBS or IAM, and no instance is ever launched. No Auto Scaling group exists, so CreateAutoScalingGroup, scaling policies, scheduled actions, lifecycle hooks, notification configurations, warm pools, instance refreshes, traffic sources, tags (which apply to groups), metrics collection and every other official operation return UnknownOperationException with HTTP 501. A launch configuration must name ImageId and InstanceType: InstanceId, which derives them from a running instance, is refused. PlacementTenancy must be default or dedicated, SpotPrice at least 0.001, and UserData valid base64 of at most 16 KB, as documented. Block device mappings must set the device name and exactly one of Ebs, NoDevice or VirtualName (ephemeralN), an Ebs volume needs SnapshotId or VolumeSize, the volume type one of standard, io1, gp2, st1, sc1 or gp3 with the documented size and Iops ranges (Iops required for io1, accepted only for io1 and gp3), and Throughput only for gp3. Whether a snapshot, key pair, security group or instance profile exists is not checked, and an unset InstanceMonitoring reports detailed monitoring enabled as documented. Launch configuration names are 1 to 255 characters and unique per Region; at most 200 may exist, a local limit that fails with LimitExceeded. Describe returns 50 launch configurations per page by default and accepts MaxRecords from 1 to 100 and at most 50 names. The official operation silently skips a name that does not exist; the simulator instead fails the request, with InvalidParameterValue because the model has no not-found fault, and DeleteLaunchConfiguration of an unknown name fails the same way. ResourceInUse cannot occur because no group can use a launch configuration. Failures the official model does not define (invalid input, unknown name) use the common Query code InvalidParameterValue with HTTP 400; the real service reports ValidationError for these. The launch configuration ARN has the documented form arn:aws:autoscaling:region:account:launchConfiguration:uuid:launchConfigurationName/name, and ClassicLink members are stored without any EC2-Classic behavior.",
+   "name": "Amazon EC2 Auto Scaling"
+  }
+ ],
+ "x-simulator-source": {
+  "package": "botocore",
+  "version": "1.41.6",
+  "file": "botocore/data/autoscaling/2011-01-01/service-2.json",
+  "sha256": "7d18f05874c5b13e58d4c6e166b3e7e9f9d8cf6f50fc449199a931f32aefa302",
+  "license": "Apache-2.0"
+ }
+}

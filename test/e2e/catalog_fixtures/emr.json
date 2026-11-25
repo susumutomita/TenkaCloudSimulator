@@ -1,0 +1,23 @@
+{
+ "client": "emr",
+ "steps": [
+  {"op": "create_security_configuration", "args": {"Name": "fixture-plain", "SecurityConfiguration": "{\"EncryptionConfiguration\":{\"EnableInTransitEncryption\":false,\"EnableAtRestEncryption\":false}}"}, "expect": {"Name": "fixture-plain"}},
+  {"op": "describe_security_configuration", "args": {"Name": "fixture-plain"}, "expect": {"Name": "fixture-plain"}},
+  {"op": "list_security_configurations", "args": {}, "expect": {"SecurityConfigurations#count": 1, "SecurityConfigurations[0].Name": "fixture-plain"}},
+  {"op": "get_block_public_access_configuration", "args": {}, "expect": {"BlockPublicAccessConfiguration.BlockPublicSecurityGroupRules": true}},
+  {"op": "put_block_public_access_configuration", "args": {"BlockPublicAccessConfiguration": {"BlockPublicSecurityGroupRules": true, "PermittedPublicSecurityGroupRuleRanges": [{"MinRange": 22, "MaxRange": 22}, {"MinRange": 443}]}}},
+  {"op": "get_block_public_access_configuration", "args": {}, "expect": {"BlockPublicAccessConfiguration.PermittedPublicSecurityGroupRuleRanges#count": 2}},
+  {"op": "create_security_configuration", "args": {"Name": "fixture-bad", "SecurityConfiguration": "not json"}, "error": "InvalidRequestException"},
+  {"op": "describe_security_configuration", "args": {"Name": "fixture-missing"}, "error": "InvalidRequestException"}
+ ],
+ "isolation": [
+  {"op": "list_security_configurations", "args": {}, "expect": {"SecurityConfigurations#count": 0}}
+ ],
+ "after_restart": [
+  {"op": "describe_security_configuration", "args": {"Name": "fixture-plain"}, "expect": {"Name": "fixture-plain"}}
+ ],
+ "cleanup": [
+  {"op": "delete_security_configuration", "args": {"Name": "fixture-plain"}},
+  {"op": "list_security_configurations", "args": {}, "expect": {"SecurityConfigurations#count": 0}}
+ ]
+}

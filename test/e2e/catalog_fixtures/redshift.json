@@ -14,20 +14,35 @@
   {"op": "create_cluster_parameter_group", "args": {"ParameterGroupName": "fixture-params", "ParameterGroupFamily": "redshift-1.0", "Description": "again"}, "error": "ClusterParameterGroupAlreadyExists", "status": 400},
   {"op": "describe_cluster_parameter_groups", "args": {"ParameterGroupName": "missing-params"}, "error": "ClusterParameterGroupNotFound", "status": 404},
   {"op": "create_tags", "args": {"ResourceName": "arn:aws:redshift:us-east-1:000000000000:cluster:missing", "Tags": [{"Key": "a", "Value": "b"}]}, "error": "ResourceNotFoundFault", "status": 404},
-  {"op": "create_cluster", "args": {"ClusterIdentifier": "fixture-cluster", "NodeType": "ra3.xlplus", "MasterUsername": "admin"}, "error": "UnknownOperationException", "status": 501}
+  {"op": "create_cluster", "args": {"ClusterIdentifier": "fixture-wh", "NodeType": "ra3.xlplus", "MasterUsername": "dbadmin", "ClusterType": "multi-node", "NumberOfNodes": 2, "ClusterParameterGroupName": "fixture-params", "ClusterSubnetGroupName": "fixture-subnets", "Tags": [{"Key": "team", "Value": "a"}]}, "expect": {"Cluster.ClusterIdentifier": "fixture-wh", "Cluster.ClusterStatus": "creating", "Cluster.NumberOfNodes": 2, "Cluster.DBName": "dev", "Cluster.ClusterParameterGroups[0].ParameterGroupName": "fixture-params"}},
+  {"op": "describe_clusters", "args": {"ClusterIdentifier": "fixture-wh"}, "expect": {"Clusters#count": 1, "Clusters[0].ClusterStatus": "creating", "Clusters[0].Tags[0].Key": "team"}},
+  {"op": "modify_cluster", "args": {"ClusterIdentifier": "fixture-wh", "NodeType": "ra3.4xlarge", "NumberOfNodes": 3, "ClusterType": "multi-node", "AutomatedSnapshotRetentionPeriod": 3}, "expect": {"Cluster.NodeType": "ra3.4xlarge", "Cluster.NumberOfNodes": 3}},
+  {"op": "create_tags", "args": {"ResourceName": "arn:aws:redshift:us-east-1:000000000000:cluster:fixture-wh", "Tags": [{"Key": "stage", "Value": "dev"}]}},
+  {"op": "describe_clusters", "args": {"ClusterIdentifier": "fixture-wh"}, "expect": {"Clusters[0].Tags#count": 2}},
+  {"op": "create_cluster", "args": {"ClusterIdentifier": "fixture-wh", "NodeType": "ra3.xlplus", "MasterUsername": "dbadmin"}, "error": "ClusterAlreadyExists", "status": 400},
+  {"op": "create_cluster", "args": {"ClusterIdentifier": "fixture-port", "NodeType": "ra3.xlplus", "MasterUsername": "dbadmin", "Port": 5439}, "error": "InvalidParameterValue", "status": 400},
+  {"op": "describe_clusters", "args": {"ClusterIdentifier": "fixture-missing"}, "error": "ClusterNotFound", "status": 404},
+  {"op": "delete_cluster", "args": {"ClusterIdentifier": "fixture-wh"}, "error": "InvalidParameterValue", "status": 400},
+  {"op": "reboot_cluster", "args": {"ClusterIdentifier": "fixture-wh"}, "error": "UnknownOperationException", "status": 501},
+  {"op": "pause_cluster", "args": {"ClusterIdentifier": "fixture-wh"}, "error": "UnknownOperationException", "status": 501},
+  {"op": "create_cluster_snapshot", "args": {"SnapshotIdentifier": "fixture-snap", "ClusterIdentifier": "fixture-wh"}, "error": "UnknownOperationException", "status": 501}
  ],
  "isolation": [
   {"op": "describe_cluster_parameter_groups", "args": {}, "expect": {"ParameterGroups#count": 0}},
-  {"op": "describe_cluster_subnet_groups", "args": {}, "expect": {"ClusterSubnetGroups#count": 0}}
+  {"op": "describe_cluster_subnet_groups", "args": {}, "expect": {"ClusterSubnetGroups#count": 0}},
+  {"op": "describe_clusters", "args": {}, "expect": {"Clusters#count": 0}}
  ],
  "after_restart": [
   {"op": "describe_cluster_subnet_groups", "args": {"ClusterSubnetGroupName": "fixture-subnets"}, "expect": {"ClusterSubnetGroups[0].Description": "three subnets", "ClusterSubnetGroups[0].Subnets#count": 3, "ClusterSubnetGroups[0].Tags[0].Value": "dev"}},
-  {"op": "describe_cluster_parameter_groups", "args": {"ParameterGroupName": "fixture-params"}, "expect": {"ParameterGroups[0].Tags[0].Value": "a"}}
+  {"op": "describe_cluster_parameter_groups", "args": {"ParameterGroupName": "fixture-params"}, "expect": {"ParameterGroups[0].Tags[0].Value": "a"}},
+  {"op": "describe_clusters", "args": {"ClusterIdentifier": "fixture-wh"}, "expect": {"Clusters[0].NumberOfNodes": 3, "Clusters[0].Tags#count": 2}}
  ],
  "cleanup": [
+  {"op": "delete_cluster", "args": {"ClusterIdentifier": "fixture-wh", "SkipFinalClusterSnapshot": true}, "expect": {"Cluster.ClusterStatus": "deleting"}},
   {"op": "delete_cluster_subnet_group", "args": {"ClusterSubnetGroupName": "fixture-subnets"}},
   {"op": "delete_cluster_parameter_group", "args": {"ParameterGroupName": "fixture-params"}},
   {"op": "describe_cluster_parameter_groups", "args": {}, "expect": {"ParameterGroups#count": 0}},
-  {"op": "describe_cluster_subnet_groups", "args": {}, "expect": {"ClusterSubnetGroups#count": 0}}
+  {"op": "describe_cluster_subnet_groups", "args": {}, "expect": {"ClusterSubnetGroups#count": 0}},
+  {"op": "describe_clusters", "args": {}, "expect": {"Clusters#count": 0}}
  ]
 }

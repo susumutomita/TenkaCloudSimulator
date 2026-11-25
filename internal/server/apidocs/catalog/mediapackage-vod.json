@@ -1,0 +1,660 @@
+{
+ "components": {
+  "schemas": {
+   "Authorization": {
+    "additionalProperties": false,
+    "properties": {
+     "cdnIdentifierSecret": {
+      "type": "string"
+     },
+     "secretsRoleArn": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "secretsRoleArn",
+     "cdnIdentifierSecret"
+    ],
+    "type": "object"
+   },
+   "EgressAccessLogs": {
+    "additionalProperties": false,
+    "properties": {
+     "logGroupName": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "PackagingGroup": {
+    "additionalProperties": false,
+    "properties": {
+     "approximateAssetCount": {
+      "type": "integer"
+     },
+     "arn": {
+      "type": "string"
+     },
+     "authorization": {
+      "$ref": "#/components/schemas/Authorization"
+     },
+     "createdAt": {
+      "type": "string"
+     },
+     "domainName": {
+      "type": "string"
+     },
+     "egressAccessLogs": {
+      "$ref": "#/components/schemas/EgressAccessLogs"
+     },
+     "id": {
+      "type": "string"
+     },
+     "tags": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     }
+    },
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "Bounded simulator subset of the official AWS Elemental MediaPackage VOD API (2018-11-07). Every other official operation returns HTTP 501 UnknownOperationException. Packaging groups are stored records: no asset is ingested or packaged and no domain name is issued, so DomainName is never returned and ApproximateAssetCount stays 0. Packaging configurations are not served because DescribePackagingConfiguration and DeletePackagingConfiguration identify one without naming its group, which the catalog cannot check against a live group; CreatePackagingConfiguration, DescribePackagingConfiguration, ListPackagingConfigurations and DeletePackagingConfiguration return UnknownOperationException with HTTP 501, as do the asset operations (CreateAsset ingests content from Amazon S3, and an asset needs a packaging group and configuration) and ConfigureLogs. Authorization is stored without reading the secret or assuming the role: CdnIdentifierSecret must be a Secrets Manager secret ARN and SecretsRoleArn an IAM role ARN. Only Authorization can change after creation. Group IDs are unique per Region; a duplicate ID answers ConflictException (HTTP 409) and invalid input ValidationException (HTTP 400), neither of which the official operations model. EgressAccessLogs names a log group that is never written. The simulator allows 100 packaging groups per Region, which is not an AWS quota.",
+  "title": "AWS Elemental MediaPackage VOD (simulator catalog)",
+  "version": "2018-11-07"
+ },
+ "openapi": "3.1.0",
+ "paths": {
+  "/packaging_groups": {
+   "get": {
+    "operationId": "mediapackage-vodListPackagingGroups",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "mediapackage-vod"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "maxResults",
+      "schema": {
+       "maximum": 1000,
+       "minimum": 1,
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "nextToken",
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "nextToken": {
+           "type": "string"
+          },
+          "packagingGroups": {
+           "items": {
+            "$ref": "#/components/schemas/PackagingGroup"
+           },
+           "type": "array"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListPackagingGroups",
+    "tags": [
+     "AWS Elemental MediaPackage VOD"
+    ]
+   },
+   "post": {
+    "operationId": "mediapackage-vodCreatePackagingGroup",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "mediapackage-vod"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "authorization": {
+          "$ref": "#/components/schemas/Authorization"
+         },
+         "egressAccessLogs": {
+          "$ref": "#/components/schemas/EgressAccessLogs"
+         },
+         "id": {
+          "type": "string"
+         },
+         "tags": {
+          "additionalProperties": {
+           "type": "string"
+          },
+          "type": "object"
+         }
+        },
+        "required": [
+         "id"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "arn": {
+           "type": "string"
+          },
+          "authorization": {
+           "$ref": "#/components/schemas/Authorization"
+          },
+          "createdAt": {
+           "type": "string"
+          },
+          "domainName": {
+           "type": "string"
+          },
+          "egressAccessLogs": {
+           "$ref": "#/components/schemas/EgressAccessLogs"
+          },
+          "id": {
+           "type": "string"
+          },
+          "tags": {
+           "additionalProperties": {
+            "type": "string"
+           },
+           "type": "object"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreatePackagingGroup",
+    "tags": [
+     "AWS Elemental MediaPackage VOD"
+    ]
+   }
+  },
+  "/packaging_groups/{id}": {
+   "delete": {
+    "operationId": "mediapackage-vodDeletePackagingGroup",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "mediapackage-vod"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "id",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeletePackagingGroup",
+    "tags": [
+     "AWS Elemental MediaPackage VOD"
+    ]
+   },
+   "get": {
+    "operationId": "mediapackage-vodDescribePackagingGroup",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "mediapackage-vod"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "id",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "approximateAssetCount": {
+           "type": "integer"
+          },
+          "arn": {
+           "type": "string"
+          },
+          "authorization": {
+           "$ref": "#/components/schemas/Authorization"
+          },
+          "createdAt": {
+           "type": "string"
+          },
+          "domainName": {
+           "type": "string"
+          },
+          "egressAccessLogs": {
+           "$ref": "#/components/schemas/EgressAccessLogs"
+          },
+          "id": {
+           "type": "string"
+          },
+          "tags": {
+           "additionalProperties": {
+            "type": "string"
+           },
+           "type": "object"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DescribePackagingGroup",
+    "tags": [
+     "AWS Elemental MediaPackage VOD"
+    ]
+   },
+   "put": {
+    "operationId": "mediapackage-vodUpdatePackagingGroup",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "mediapackage-vod"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "id",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "authorization": {
+          "$ref": "#/components/schemas/Authorization"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "approximateAssetCount": {
+           "type": "integer"
+          },
+          "arn": {
+           "type": "string"
+          },
+          "authorization": {
+           "$ref": "#/components/schemas/Authorization"
+          },
+          "createdAt": {
+           "type": "string"
+          },
+          "domainName": {
+           "type": "string"
+          },
+          "egressAccessLogs": {
+           "$ref": "#/components/schemas/EgressAccessLogs"
+          },
+          "id": {
+           "type": "string"
+          },
+          "tags": {
+           "additionalProperties": {
+            "type": "string"
+           },
+           "type": "object"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UpdatePackagingGroup",
+    "tags": [
+     "AWS Elemental MediaPackage VOD"
+    ]
+   }
+  },
+  "/tags/{resource-arn}": {
+   "delete": {
+    "operationId": "mediapackage-vodUntagResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "mediapackage-vod"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resource-arn",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "tagKeys",
+      "schema": {
+       "items": {
+        "type": "string"
+       },
+       "type": "array"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UntagResource",
+    "tags": [
+     "AWS Elemental MediaPackage VOD"
+    ]
+   },
+   "get": {
+    "operationId": "mediapackage-vodListTagsForResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "mediapackage-vod"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resource-arn",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "tags": {
+           "additionalProperties": {
+            "type": "string"
+           },
+           "type": "object"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListTagsForResource",
+    "tags": [
+     "AWS Elemental MediaPackage VOD"
+    ]
+   },
+   "post": {
+    "operationId": "mediapackage-vodTagResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "mediapackage-vod"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resource-arn",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "tags": {
+          "additionalProperties": {
+           "type": "string"
+          },
+          "type": "object"
+         }
+        },
+        "required": [
+         "tags"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "TagResource",
+    "tags": [
+     "AWS Elemental MediaPackage VOD"
+    ]
+   }
+  }
+ },
+ "servers": [
+  {
+   "description": "This simulator only",
+   "url": "/"
+  }
+ ],
+ "tags": [
+  {
+   "description": "Bounded simulator subset of the official AWS Elemental MediaPackage VOD API (2018-11-07). Every other official operation returns HTTP 501 UnknownOperationException. Packaging groups are stored records: no asset is ingested or packaged and no domain name is issued, so DomainName is never returned and ApproximateAssetCount stays 0. Packaging configurations are not served because DescribePackagingConfiguration and DeletePackagingConfiguration identify one without naming its group, which the catalog cannot check against a live group; CreatePackagingConfiguration, DescribePackagingConfiguration, ListPackagingConfigurations and DeletePackagingConfiguration return UnknownOperationException with HTTP 501, as do the asset operations (CreateAsset ingests content from Amazon S3, and an asset needs a packaging group and configuration) and ConfigureLogs. Authorization is stored without reading the secret or assuming the role: CdnIdentifierSecret must be a Secrets Manager secret ARN and SecretsRoleArn an IAM role ARN. Only Authorization can change after creation. Group IDs are unique per Region; a duplicate ID answers ConflictException (HTTP 409) and invalid input ValidationException (HTTP 400), neither of which the official operations model. EgressAccessLogs names a log group that is never written. The simulator allows 100 packaging groups per Region, which is not an AWS quota.",
+   "name": "AWS Elemental MediaPackage VOD"
+  }
+ ],
+ "x-simulator-source": {
+  "package": "botocore",
+  "version": "1.41.6",
+  "file": "botocore/data/mediapackage-vod/2018-11-07/service-2.json",
+  "sha256": "f816a5e78918be75ba649c8287e622f5bcd95da820a336b8c6568be043a070fe",
+  "license": "Apache-2.0"
+ }
+}

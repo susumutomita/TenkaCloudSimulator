@@ -221,3 +221,40 @@ func TestWorkSpacesIPGroupsUseOfficialMemberNames(t *testing.T) {
 	expect(t, h.json1("workspaces", "DescribeIpGroups", map[string]any{"GroupIds": []any{"wsipg-missing00"}}), 400, "InvalidParameterValuesException")
 	expect(t, h.json1("workspaces", "CreateIpGroup", map[string]any{"GroupName": "office"}), 400, "ResourceAlreadyExistsException")
 }
+
+// AWS permits PostSetupScriptDetails only with the APPSTREAM2 packaging type.
+// Rejected app blocks must not enter the local configuration store.
+func TestAppStreamPostSetupRequiresAppStream2Packaging(t *testing.T) {
+	h := newHarness(t, appStream)
+	location := map[string]any{"S3Bucket": "sample-config", "S3Key": "sample.txt"}
+	script := map[string]any{
+		"ScriptS3Location": location, "ExecutablePath": "fixture.cmd", "TimeoutInSeconds": 30,
+	}
+	for _, packaging := range []string{"CUSTOM", ""} {
+		input := map[string]any{"Name": "fixture-block", "SourceS3Location": location,
+			"SetupScriptDetails": script, "PostSetupScriptDetails": script}
+		if packaging != "" {
+			input["PackagingType"] = packaging
+		}
+		r := h.json1("appstream", "CreateAppBlock", input)
+		expect(t, r, 400, "ValidationException")
+		if !strings.Contains(str(r.body["message"]), "PostSetupScriptDetails") {
+			t.Fatalf("unexpected validation diagnostic: %v", r.body)
+		}
+	}
+	input := map[string]any{"Name": "fixture-block", "PackagingType": "APPSTREAM2",
+		"SourceS3Location": location, "PostSetupScriptDetails": script}
+	created := h.json1("appstream", "CreateAppBlock", input)
+	expect(t, created, 200, "")
+	listed := h.json1("appstream", "DescribeAppBlocks", map[string]any{})
+	expect(t, listed, 200, "")
+	blocks := listed.body["AppBlocks"].([]any)
+	if len(blocks) != 1 {
+		t.Fatalf("got %d app blocks, want one", len(blocks))
+	}
+	got := blocks[0].(map[string]any)
+	if got["Name"] != "fixture-block" || got["PackagingType"] != "APPSTREAM2" ||
+		got["PostSetupScriptDetails"].(map[string]any)["ExecutablePath"] != "fixture.cmd" {
+		t.Fatalf("unexpected app block: %v", got)
+	}
+}

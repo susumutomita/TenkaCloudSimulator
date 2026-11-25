@@ -1,0 +1,1176 @@
+{
+ "components": {
+  "schemas": {
+   "ColumnSchema": {
+    "additionalProperties": false,
+    "properties": {
+     "columnName": {
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string"
+     },
+     "columnTypes": {
+      "items": {
+       "enum": [
+        "USER_ID",
+        "ITEM_ID",
+        "TIMESTAMP",
+        "CATEGORICAL_FEATURE",
+        "NUMERICAL_FEATURE"
+       ],
+       "type": "string"
+      },
+      "maxItems": 1,
+      "minItems": 1,
+      "type": "array"
+     }
+    },
+    "required": [
+     "columnName",
+     "columnTypes"
+    ],
+    "type": "object"
+   },
+   "ConfiguredModelAlgorithmSummary": {
+    "additionalProperties": false,
+    "properties": {
+     "configuredModelAlgorithmArn": {
+      "maxLength": 2048,
+      "minLength": 20,
+      "type": "string"
+     },
+     "createTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "description": {
+      "maxLength": 255,
+      "minLength": 0,
+      "type": "string"
+     },
+     "name": {
+      "maxLength": 63,
+      "minLength": 1,
+      "type": "string"
+     },
+     "updateTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     }
+    },
+    "required": [
+     "createTime",
+     "updateTime",
+     "configuredModelAlgorithmArn",
+     "name"
+    ],
+    "type": "object"
+   },
+   "ContainerConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "arguments": {
+      "items": {
+       "maxLength": 256,
+       "minLength": 1,
+       "type": "string"
+      },
+      "maxItems": 100,
+      "minItems": 1,
+      "type": "array"
+     },
+     "entrypoint": {
+      "items": {
+       "maxLength": 256,
+       "minLength": 1,
+       "type": "string"
+      },
+      "maxItems": 100,
+      "minItems": 1,
+      "type": "array"
+     },
+     "imageUri": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "metricDefinitions": {
+      "items": {
+       "$ref": "#/components/schemas/MetricDefinition"
+      },
+      "maxItems": 40,
+      "minItems": 0,
+      "type": "array"
+     }
+    },
+    "required": [
+     "imageUri"
+    ],
+    "type": "object"
+   },
+   "DataSource": {
+    "additionalProperties": false,
+    "properties": {
+     "glueDataSource": {
+      "$ref": "#/components/schemas/GlueDataSource"
+     }
+    },
+    "required": [
+     "glueDataSource"
+    ],
+    "type": "object"
+   },
+   "Dataset": {
+    "additionalProperties": false,
+    "properties": {
+     "inputConfig": {
+      "$ref": "#/components/schemas/DatasetInputConfig"
+     },
+     "type": {
+      "enum": [
+       "INTERACTIONS"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "type",
+     "inputConfig"
+    ],
+    "type": "object"
+   },
+   "DatasetInputConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "dataSource": {
+      "$ref": "#/components/schemas/DataSource"
+     },
+     "schema": {
+      "items": {
+       "$ref": "#/components/schemas/ColumnSchema"
+      },
+      "maxItems": 100,
+      "minItems": 1,
+      "type": "array"
+     }
+    },
+    "required": [
+     "schema",
+     "dataSource"
+    ],
+    "type": "object"
+   },
+   "GlueDataSource": {
+    "additionalProperties": false,
+    "properties": {
+     "catalogId": {
+      "maxLength": 12,
+      "minLength": 12,
+      "type": "string"
+     },
+     "databaseName": {
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string"
+     },
+     "tableName": {
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "tableName",
+     "databaseName"
+    ],
+    "type": "object"
+   },
+   "InferenceContainerConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "imageUri": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "imageUri"
+    ],
+    "type": "object"
+   },
+   "MetricDefinition": {
+    "additionalProperties": false,
+    "properties": {
+     "name": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "regex": {
+      "maxLength": 500,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "name",
+     "regex"
+    ],
+    "type": "object"
+   },
+   "TrainingDatasetSummary": {
+    "additionalProperties": false,
+    "properties": {
+     "createTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "description": {
+      "maxLength": 255,
+      "minLength": 0,
+      "type": "string"
+     },
+     "name": {
+      "maxLength": 63,
+      "minLength": 1,
+      "type": "string"
+     },
+     "status": {
+      "enum": [
+       "ACTIVE"
+      ],
+      "type": "string"
+     },
+     "trainingDatasetArn": {
+      "maxLength": 2048,
+      "minLength": 20,
+      "type": "string"
+     },
+     "updateTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     }
+    },
+    "required": [
+     "createTime",
+     "updateTime",
+     "trainingDatasetArn",
+     "name",
+     "status"
+    ],
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "Bounded simulator subset of the official AWS Clean Rooms ML API (2023-09-06). Every other official operation returns HTTP 501 UnknownOperationException. Training datasets and configured model algorithms are stored records: no data is read, no container image is pulled or run, no model is trained, no audience is generated and no inference runs. CreateTrainedModel, CreateAudienceModel, StartTrainedModelInferenceJob, StartAudienceGenerationJob, ML configurations, input channels and every other official operation return UnknownOperationException with HTTP 501. The IAM role, the AWS Glue references, the container image URI and the KMS key are stored without being resolved, assumed or checked, a training dataset is ACTIVE at once and the service offers no update operation for either resource. The limit of 50 of each kind per Region is local, and tags are stored from the create operations and by TagResource on the ARN.",
+  "title": "AWS Clean Rooms ML (simulator catalog)",
+  "version": "2023-09-06"
+ },
+ "openapi": "3.1.0",
+ "paths": {
+  "/configured-model-algorithms": {
+   "get": {
+    "operationId": "cleanroomsmlListConfiguredModelAlgorithms",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "cleanrooms-ml"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "maxResults",
+      "schema": {
+       "maximum": 100,
+       "minimum": 1,
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "nextToken",
+      "schema": {
+       "maxLength": 10240,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "configuredModelAlgorithms": {
+           "items": {
+            "$ref": "#/components/schemas/ConfiguredModelAlgorithmSummary"
+           },
+           "type": "array"
+          },
+          "nextToken": {
+           "maxLength": 10240,
+           "minLength": 1,
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListConfiguredModelAlgorithms",
+    "tags": [
+     "AWS Clean Rooms ML"
+    ]
+   },
+   "post": {
+    "operationId": "cleanroomsmlCreateConfiguredModelAlgorithm",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "cleanrooms-ml"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "description": {
+          "maxLength": 255,
+          "minLength": 0,
+          "type": "string"
+         },
+         "inferenceContainerConfig": {
+          "$ref": "#/components/schemas/InferenceContainerConfig"
+         },
+         "kmsKeyArn": {
+          "maxLength": 2048,
+          "minLength": 20,
+          "type": "string"
+         },
+         "name": {
+          "maxLength": 63,
+          "minLength": 1,
+          "type": "string"
+         },
+         "roleArn": {
+          "maxLength": 2048,
+          "minLength": 20,
+          "type": "string"
+         },
+         "tags": {
+          "additionalProperties": {
+           "maxLength": 256,
+           "minLength": 0,
+           "type": "string"
+          },
+          "maxProperties": 200,
+          "minProperties": 0,
+          "type": "object"
+         },
+         "trainingContainerConfig": {
+          "$ref": "#/components/schemas/ContainerConfig"
+         }
+        },
+        "required": [
+         "name",
+         "roleArn"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "configuredModelAlgorithmArn": {
+           "maxLength": 2048,
+           "minLength": 20,
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateConfiguredModelAlgorithm",
+    "tags": [
+     "AWS Clean Rooms ML"
+    ]
+   }
+  },
+  "/configured-model-algorithms/{configuredModelAlgorithmArn}": {
+   "delete": {
+    "operationId": "cleanroomsmlDeleteConfiguredModelAlgorithm",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "cleanrooms-ml"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "configuredModelAlgorithmArn",
+      "required": true,
+      "schema": {
+       "maxLength": 2048,
+       "minLength": 20,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteConfiguredModelAlgorithm",
+    "tags": [
+     "AWS Clean Rooms ML"
+    ]
+   },
+   "get": {
+    "operationId": "cleanroomsmlGetConfiguredModelAlgorithm",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "cleanrooms-ml"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "configuredModelAlgorithmArn",
+      "required": true,
+      "schema": {
+       "maxLength": 2048,
+       "minLength": 20,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "configuredModelAlgorithmArn": {
+           "maxLength": 2048,
+           "minLength": 20,
+           "type": "string"
+          },
+          "createTime": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "description": {
+           "maxLength": 255,
+           "minLength": 0,
+           "type": "string"
+          },
+          "inferenceContainerConfig": {
+           "$ref": "#/components/schemas/InferenceContainerConfig"
+          },
+          "kmsKeyArn": {
+           "maxLength": 2048,
+           "minLength": 20,
+           "type": "string"
+          },
+          "name": {
+           "maxLength": 63,
+           "minLength": 1,
+           "type": "string"
+          },
+          "roleArn": {
+           "maxLength": 2048,
+           "minLength": 20,
+           "type": "string"
+          },
+          "tags": {
+           "additionalProperties": {
+            "maxLength": 256,
+            "minLength": 0,
+            "type": "string"
+           },
+           "maxProperties": 200,
+           "minProperties": 0,
+           "type": "object"
+          },
+          "trainingContainerConfig": {
+           "$ref": "#/components/schemas/ContainerConfig"
+          },
+          "updateTime": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "GetConfiguredModelAlgorithm",
+    "tags": [
+     "AWS Clean Rooms ML"
+    ]
+   }
+  },
+  "/tags/{resourceArn}": {
+   "delete": {
+    "operationId": "cleanroomsmlUntagResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "cleanrooms-ml"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceArn",
+      "required": true,
+      "schema": {
+       "maxLength": 2048,
+       "minLength": 20,
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "tagKeys",
+      "schema": {
+       "items": {
+        "maxLength": 128,
+        "minLength": 1,
+        "type": "string"
+       },
+       "maxItems": 200,
+       "minItems": 0,
+       "type": "array"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UntagResource",
+    "tags": [
+     "AWS Clean Rooms ML"
+    ]
+   },
+   "get": {
+    "operationId": "cleanroomsmlListTagsForResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "cleanrooms-ml"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceArn",
+      "required": true,
+      "schema": {
+       "maxLength": 2048,
+       "minLength": 20,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "tags": {
+           "additionalProperties": {
+            "maxLength": 256,
+            "minLength": 0,
+            "type": "string"
+           },
+           "maxProperties": 200,
+           "minProperties": 0,
+           "type": "object"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListTagsForResource",
+    "tags": [
+     "AWS Clean Rooms ML"
+    ]
+   },
+   "post": {
+    "operationId": "cleanroomsmlTagResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "cleanrooms-ml"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceArn",
+      "required": true,
+      "schema": {
+       "maxLength": 2048,
+       "minLength": 20,
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "tags": {
+          "additionalProperties": {
+           "maxLength": 256,
+           "minLength": 0,
+           "type": "string"
+          },
+          "maxProperties": 200,
+          "minProperties": 0,
+          "type": "object"
+         }
+        },
+        "required": [
+         "tags"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "TagResource",
+    "tags": [
+     "AWS Clean Rooms ML"
+    ]
+   }
+  },
+  "/training-dataset": {
+   "get": {
+    "operationId": "cleanroomsmlListTrainingDatasets",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "cleanrooms-ml"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "maxResults",
+      "schema": {
+       "maximum": 100,
+       "minimum": 1,
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "nextToken",
+      "schema": {
+       "maxLength": 10240,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "nextToken": {
+           "maxLength": 10240,
+           "minLength": 1,
+           "type": "string"
+          },
+          "trainingDatasets": {
+           "items": {
+            "$ref": "#/components/schemas/TrainingDatasetSummary"
+           },
+           "type": "array"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListTrainingDatasets",
+    "tags": [
+     "AWS Clean Rooms ML"
+    ]
+   },
+   "post": {
+    "operationId": "cleanroomsmlCreateTrainingDataset",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "cleanrooms-ml"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "description": {
+          "maxLength": 255,
+          "minLength": 0,
+          "type": "string"
+         },
+         "name": {
+          "maxLength": 63,
+          "minLength": 1,
+          "type": "string"
+         },
+         "roleArn": {
+          "maxLength": 2048,
+          "minLength": 20,
+          "type": "string"
+         },
+         "tags": {
+          "additionalProperties": {
+           "maxLength": 256,
+           "minLength": 0,
+           "type": "string"
+          },
+          "maxProperties": 200,
+          "minProperties": 0,
+          "type": "object"
+         },
+         "trainingData": {
+          "items": {
+           "$ref": "#/components/schemas/Dataset"
+          },
+          "maxItems": 1,
+          "minItems": 1,
+          "type": "array"
+         }
+        },
+        "required": [
+         "name",
+         "roleArn",
+         "trainingData"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "trainingDatasetArn": {
+           "maxLength": 2048,
+           "minLength": 20,
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateTrainingDataset",
+    "tags": [
+     "AWS Clean Rooms ML"
+    ]
+   }
+  },
+  "/training-dataset/{trainingDatasetArn}": {
+   "delete": {
+    "operationId": "cleanroomsmlDeleteTrainingDataset",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "cleanrooms-ml"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "trainingDatasetArn",
+      "required": true,
+      "schema": {
+       "maxLength": 2048,
+       "minLength": 20,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteTrainingDataset",
+    "tags": [
+     "AWS Clean Rooms ML"
+    ]
+   },
+   "get": {
+    "operationId": "cleanroomsmlGetTrainingDataset",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "cleanrooms-ml"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "trainingDatasetArn",
+      "required": true,
+      "schema": {
+       "maxLength": 2048,
+       "minLength": 20,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "createTime": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "description": {
+           "maxLength": 255,
+           "minLength": 0,
+           "type": "string"
+          },
+          "name": {
+           "maxLength": 63,
+           "minLength": 1,
+           "type": "string"
+          },
+          "roleArn": {
+           "maxLength": 2048,
+           "minLength": 20,
+           "type": "string"
+          },
+          "status": {
+           "enum": [
+            "ACTIVE"
+           ],
+           "type": "string"
+          },
+          "tags": {
+           "additionalProperties": {
+            "maxLength": 256,
+            "minLength": 0,
+            "type": "string"
+           },
+           "maxProperties": 200,
+           "minProperties": 0,
+           "type": "object"
+          },
+          "trainingData": {
+           "items": {
+            "$ref": "#/components/schemas/Dataset"
+           },
+           "type": "array"
+          },
+          "trainingDatasetArn": {
+           "maxLength": 2048,
+           "minLength": 20,
+           "type": "string"
+          },
+          "updateTime": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "GetTrainingDataset",
+    "tags": [
+     "AWS Clean Rooms ML"
+    ]
+   }
+  }
+ },
+ "servers": [
+  {
+   "description": "This simulator only",
+   "url": "/"
+  }
+ ],
+ "tags": [
+  {
+   "description": "Bounded simulator subset of the official AWS Clean Rooms ML API (2023-09-06). Every other official operation returns HTTP 501 UnknownOperationException. Training datasets and configured model algorithms are stored records: no data is read, no container image is pulled or run, no model is trained, no audience is generated and no inference runs. CreateTrainedModel, CreateAudienceModel, StartTrainedModelInferenceJob, StartAudienceGenerationJob, ML configurations, input channels and every other official operation return UnknownOperationException with HTTP 501. The IAM role, the AWS Glue references, the container image URI and the KMS key are stored without being resolved, assumed or checked, a training dataset is ACTIVE at once and the service offers no update operation for either resource. The limit of 50 of each kind per Region is local, and tags are stored from the create operations and by TagResource on the ARN.",
+   "name": "AWS Clean Rooms ML"
+  }
+ ],
+ "x-simulator-source": {
+  "package": "botocore",
+  "version": "1.41.6",
+  "file": "botocore/data/cleanroomsml/2023-09-06/service-2.json",
+  "sha256": "89ea94de0e425bb815c182f1f43de8f8d6b71b38b3d1cd640aef32f844f82ca6",
+  "license": "Apache-2.0"
+ }
+}

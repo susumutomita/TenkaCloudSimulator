@@ -1,0 +1,1020 @@
+{
+ "components": {
+  "schemas": {
+   "AllowDenyList": {
+    "additionalProperties": false,
+    "properties": {
+     "arn": {
+      "maxLength": 256,
+      "minLength": 1,
+      "type": "string"
+     },
+     "createdTime": {
+      "maxLength": 30,
+      "minLength": 11,
+      "type": "string"
+     },
+     "description": {
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string"
+     },
+     "name": {
+      "maxLength": 64,
+      "minLength": 1,
+      "type": "string"
+     },
+     "updatedTime": {
+      "maxLength": 30,
+      "minLength": 11,
+      "type": "string"
+     },
+     "variableType": {
+      "maxLength": 64,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "name"
+    ],
+    "type": "object"
+   },
+   "CreateListRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "description": {
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string"
+     },
+     "elements": {
+      "items": {
+       "maxLength": 320,
+       "minLength": 1,
+       "type": "string"
+      },
+      "maxItems": 100000,
+      "minItems": 0,
+      "type": "array"
+     },
+     "name": {
+      "maxLength": 64,
+      "minLength": 1,
+      "type": "string"
+     },
+     "tags": {
+      "items": {
+       "$ref": "#/components/schemas/Tag"
+      },
+      "maxItems": 200,
+      "minItems": 0,
+      "type": "array"
+     },
+     "variableType": {
+      "maxLength": 64,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "name"
+    ],
+    "type": "object"
+   },
+   "CreateListResult": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "CreateVariableRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "dataSource": {
+      "enum": [
+       "EVENT",
+       "MODEL_SCORE",
+       "EXTERNAL_MODEL_SCORE"
+      ],
+      "type": "string"
+     },
+     "dataType": {
+      "enum": [
+       "STRING",
+       "INTEGER",
+       "FLOAT",
+       "BOOLEAN",
+       "DATETIME"
+      ],
+      "type": "string"
+     },
+     "defaultValue": {
+      "type": "string"
+     },
+     "description": {
+      "type": "string"
+     },
+     "name": {
+      "type": "string"
+     },
+     "tags": {
+      "items": {
+       "$ref": "#/components/schemas/Tag"
+      },
+      "maxItems": 200,
+      "minItems": 0,
+      "type": "array"
+     },
+     "variableType": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "name",
+     "dataType",
+     "dataSource",
+     "defaultValue"
+    ],
+    "type": "object"
+   },
+   "CreateVariableResult": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "DeleteEntityTypeRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "name": {
+      "maxLength": 64,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "name"
+    ],
+    "type": "object"
+   },
+   "DeleteEntityTypeResult": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "DeleteLabelRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "name": {
+      "maxLength": 64,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "name"
+    ],
+    "type": "object"
+   },
+   "DeleteLabelResult": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "DeleteListRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "name": {
+      "maxLength": 64,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "name"
+    ],
+    "type": "object"
+   },
+   "DeleteListResult": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "DeleteOutcomeRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "name": {
+      "maxLength": 64,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "name"
+    ],
+    "type": "object"
+   },
+   "DeleteOutcomeResult": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "DeleteVariableRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "name": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "name"
+    ],
+    "type": "object"
+   },
+   "DeleteVariableResult": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "EntityType": {
+    "additionalProperties": false,
+    "properties": {
+     "arn": {
+      "maxLength": 256,
+      "minLength": 1,
+      "type": "string"
+     },
+     "createdTime": {
+      "maxLength": 30,
+      "minLength": 11,
+      "type": "string"
+     },
+     "description": {
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string"
+     },
+     "lastUpdatedTime": {
+      "maxLength": 30,
+      "minLength": 11,
+      "type": "string"
+     },
+     "name": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "GetEntityTypesRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "maxResults": {
+      "maximum": 10,
+      "minimum": 5,
+      "type": "integer"
+     },
+     "name": {
+      "maxLength": 64,
+      "minLength": 1,
+      "type": "string"
+     },
+     "nextToken": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "GetEntityTypesResult": {
+    "additionalProperties": false,
+    "properties": {
+     "entityTypes": {
+      "items": {
+       "$ref": "#/components/schemas/EntityType"
+      },
+      "type": "array"
+     },
+     "nextToken": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "GetLabelsRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "maxResults": {
+      "maximum": 50,
+      "minimum": 10,
+      "type": "integer"
+     },
+     "name": {
+      "maxLength": 64,
+      "minLength": 1,
+      "type": "string"
+     },
+     "nextToken": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "GetLabelsResult": {
+    "additionalProperties": false,
+    "properties": {
+     "labels": {
+      "items": {
+       "$ref": "#/components/schemas/Label"
+      },
+      "type": "array"
+     },
+     "nextToken": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "GetListsMetadataRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "maxResults": {
+      "maximum": 50,
+      "minimum": 5,
+      "type": "integer"
+     },
+     "name": {
+      "maxLength": 64,
+      "minLength": 1,
+      "type": "string"
+     },
+     "nextToken": {
+      "maxLength": 8192,
+      "minLength": 0,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "GetListsMetadataResult": {
+    "additionalProperties": false,
+    "properties": {
+     "lists": {
+      "items": {
+       "$ref": "#/components/schemas/AllowDenyList"
+      },
+      "type": "array"
+     },
+     "nextToken": {
+      "maxLength": 8192,
+      "minLength": 0,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "GetOutcomesRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "maxResults": {
+      "maximum": 100,
+      "minimum": 50,
+      "type": "integer"
+     },
+     "name": {
+      "maxLength": 64,
+      "minLength": 1,
+      "type": "string"
+     },
+     "nextToken": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "GetOutcomesResult": {
+    "additionalProperties": false,
+    "properties": {
+     "nextToken": {
+      "type": "string"
+     },
+     "outcomes": {
+      "items": {
+       "$ref": "#/components/schemas/Outcome"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "GetVariablesRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "maxResults": {
+      "maximum": 100,
+      "minimum": 50,
+      "type": "integer"
+     },
+     "name": {
+      "type": "string"
+     },
+     "nextToken": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "GetVariablesResult": {
+    "additionalProperties": false,
+    "properties": {
+     "nextToken": {
+      "type": "string"
+     },
+     "variables": {
+      "items": {
+       "$ref": "#/components/schemas/Variable"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "Label": {
+    "additionalProperties": false,
+    "properties": {
+     "arn": {
+      "maxLength": 256,
+      "minLength": 1,
+      "type": "string"
+     },
+     "createdTime": {
+      "maxLength": 30,
+      "minLength": 11,
+      "type": "string"
+     },
+     "description": {
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string"
+     },
+     "lastUpdatedTime": {
+      "maxLength": 30,
+      "minLength": 11,
+      "type": "string"
+     },
+     "name": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ListTagsForResourceRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "maxResults": {
+      "maximum": 50,
+      "minimum": 50,
+      "type": "integer"
+     },
+     "nextToken": {
+      "type": "string"
+     },
+     "resourceARN": {
+      "maxLength": 256,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "resourceARN"
+    ],
+    "type": "object"
+   },
+   "ListTagsForResourceResult": {
+    "additionalProperties": false,
+    "properties": {
+     "nextToken": {
+      "type": "string"
+     },
+     "tags": {
+      "items": {
+       "$ref": "#/components/schemas/Tag"
+      },
+      "maxItems": 200,
+      "minItems": 0,
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "Outcome": {
+    "additionalProperties": false,
+    "properties": {
+     "arn": {
+      "maxLength": 256,
+      "minLength": 1,
+      "type": "string"
+     },
+     "createdTime": {
+      "maxLength": 30,
+      "minLength": 11,
+      "type": "string"
+     },
+     "description": {
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string"
+     },
+     "lastUpdatedTime": {
+      "maxLength": 30,
+      "minLength": 11,
+      "type": "string"
+     },
+     "name": {
+      "maxLength": 64,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "PutEntityTypeRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "description": {
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string"
+     },
+     "name": {
+      "maxLength": 64,
+      "minLength": 1,
+      "type": "string"
+     },
+     "tags": {
+      "items": {
+       "$ref": "#/components/schemas/Tag"
+      },
+      "maxItems": 200,
+      "minItems": 0,
+      "type": "array"
+     }
+    },
+    "required": [
+     "name"
+    ],
+    "type": "object"
+   },
+   "PutEntityTypeResult": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "PutLabelRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "description": {
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string"
+     },
+     "name": {
+      "maxLength": 64,
+      "minLength": 1,
+      "type": "string"
+     },
+     "tags": {
+      "items": {
+       "$ref": "#/components/schemas/Tag"
+      },
+      "maxItems": 200,
+      "minItems": 0,
+      "type": "array"
+     }
+    },
+    "required": [
+     "name"
+    ],
+    "type": "object"
+   },
+   "PutLabelResult": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "PutOutcomeRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "description": {
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string"
+     },
+     "name": {
+      "maxLength": 64,
+      "minLength": 1,
+      "type": "string"
+     },
+     "tags": {
+      "items": {
+       "$ref": "#/components/schemas/Tag"
+      },
+      "maxItems": 200,
+      "minItems": 0,
+      "type": "array"
+     }
+    },
+    "required": [
+     "name"
+    ],
+    "type": "object"
+   },
+   "PutOutcomeResult": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "Tag": {
+    "additionalProperties": false,
+    "properties": {
+     "key": {
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string"
+     },
+     "value": {
+      "maxLength": 256,
+      "minLength": 0,
+      "type": "string"
+     }
+    },
+    "required": [
+     "key",
+     "value"
+    ],
+    "type": "object"
+   },
+   "TagResourceRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "resourceARN": {
+      "maxLength": 256,
+      "minLength": 1,
+      "type": "string"
+     },
+     "tags": {
+      "items": {
+       "$ref": "#/components/schemas/Tag"
+      },
+      "maxItems": 200,
+      "minItems": 0,
+      "type": "array"
+     }
+    },
+    "required": [
+     "resourceARN",
+     "tags"
+    ],
+    "type": "object"
+   },
+   "TagResourceResult": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "UntagResourceRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "resourceARN": {
+      "maxLength": 256,
+      "minLength": 1,
+      "type": "string"
+     },
+     "tagKeys": {
+      "items": {
+       "maxLength": 128,
+       "minLength": 1,
+       "type": "string"
+      },
+      "maxItems": 50,
+      "minItems": 0,
+      "type": "array"
+     }
+    },
+    "required": [
+     "resourceARN",
+     "tagKeys"
+    ],
+    "type": "object"
+   },
+   "UntagResourceResult": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "UpdateListRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "description": {
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string"
+     },
+     "elements": {
+      "items": {
+       "maxLength": 320,
+       "minLength": 1,
+       "type": "string"
+      },
+      "maxItems": 100000,
+      "minItems": 0,
+      "type": "array"
+     },
+     "name": {
+      "maxLength": 64,
+      "minLength": 1,
+      "type": "string"
+     },
+     "updateMode": {
+      "enum": [
+       "REPLACE",
+       "APPEND",
+       "REMOVE"
+      ],
+      "type": "string"
+     },
+     "variableType": {
+      "maxLength": 64,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "name"
+    ],
+    "type": "object"
+   },
+   "UpdateListResult": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "UpdateVariableRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "defaultValue": {
+      "type": "string"
+     },
+     "description": {
+      "type": "string"
+     },
+     "name": {
+      "type": "string"
+     },
+     "variableType": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "name"
+    ],
+    "type": "object"
+   },
+   "UpdateVariableResult": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "Variable": {
+    "additionalProperties": false,
+    "properties": {
+     "arn": {
+      "maxLength": 256,
+      "minLength": 1,
+      "type": "string"
+     },
+     "createdTime": {
+      "maxLength": 30,
+      "minLength": 11,
+      "type": "string"
+     },
+     "dataSource": {
+      "enum": [
+       "EVENT",
+       "MODEL_SCORE",
+       "EXTERNAL_MODEL_SCORE"
+      ],
+      "type": "string"
+     },
+     "dataType": {
+      "enum": [
+       "STRING",
+       "INTEGER",
+       "FLOAT",
+       "BOOLEAN",
+       "DATETIME"
+      ],
+      "type": "string"
+     },
+     "defaultValue": {
+      "type": "string"
+     },
+     "description": {
+      "type": "string"
+     },
+     "lastUpdatedTime": {
+      "maxLength": 30,
+      "minLength": 11,
+      "type": "string"
+     },
+     "name": {
+      "type": "string"
+     },
+     "variableType": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "Bounded simulator subset of the official Amazon Fraud Detector API (2019-11-15). Every other official operation returns HTTP 501 UnknownOperationException. Entity types, labels, outcomes, variables and list metadata are stored configuration records: nothing is trained, no event is received, scored or stored, and no rule or detector version is evaluated. Models, model versions, external models, batch import and prediction jobs, GetEventPrediction, SendEvent, GetEvent and every other data-plane operation return UnknownOperationException with HTTP 501. Event types, detectors, rules, detector versions and the KMS encryption key are not implemented. An event type and a detector reference variables, labels, entity types and event types by name, not by ARN, so the stored model can neither check that they exist nor refuse the deletion of one that is in use (ConflictException in AWS); because none of them can reference a record, deleting an entity type, label, outcome, variable or list never fails with ConflictException. Entity types, labels and outcomes are written with PutEntityType, PutLabel and PutOutcome, which create the record or replace its description and add tags, and are read with the matching Get operation, which returns one record by name or all of them. Names are 1 to 64 lowercase letters, digits, underscores or hyphens as the official shapes state; a Get with an unknown name fails with ResourceNotFoundException, and a Delete of a missing record fails with ValidationException because the delete operations model no not-found fault. Resource counts per Region (100 of each kind) are local limits. Variables must use the EVENT data source because model output variables are created by models, which do not exist here; the data type is checked against the documented enumeration and the default value is stored as a string without checking it against the data type. The variable type must be one of the documented values. UpdateVariable changes the default value, description and variable type; a variable is never reported as used by an event type. Lists are stored as metadata only: CreateList and UpdateList accept no elements (an empty list is ignored, so UpdateList with REPLACE and no elements clears nothing because nothing is stored), GetListElements is not implemented and a list is never used in a rule. A list variable type is assigned only by CreateList, because UpdateList cannot compare it with the stored one and is limited to the description. Tags apply to the five resource kinds by ARN (arn:aws:frauddetector:region:account:entity-type/name, label/name, outcome/name, variable/name and list/name). ListTagsForResource returns all tags without pagination, and tags given to a Put of an existing record are added to its tags.",
+  "title": "Amazon Fraud Detector (simulator catalog)",
+  "version": "2019-11-15"
+ },
+ "openapi": "3.1.0",
+ "paths": {
+  "/": {
+   "post": {
+    "description": "Choose the X-Amz-Target of one implemented operation. Request and response members follow the linked official input/output schemas.",
+    "operationId": "frauddetectorJSONOperation",
+    "parameters": [
+     {
+      "in": "header",
+      "name": "X-Amz-Target",
+      "required": true,
+      "schema": {
+       "enum": [
+        "AWSHawksNestServiceFacade.CreateList",
+        "AWSHawksNestServiceFacade.CreateVariable",
+        "AWSHawksNestServiceFacade.DeleteEntityType",
+        "AWSHawksNestServiceFacade.DeleteLabel",
+        "AWSHawksNestServiceFacade.DeleteList",
+        "AWSHawksNestServiceFacade.DeleteOutcome",
+        "AWSHawksNestServiceFacade.DeleteVariable",
+        "AWSHawksNestServiceFacade.GetEntityTypes",
+        "AWSHawksNestServiceFacade.GetLabels",
+        "AWSHawksNestServiceFacade.GetListsMetadata",
+        "AWSHawksNestServiceFacade.GetOutcomes",
+        "AWSHawksNestServiceFacade.GetVariables",
+        "AWSHawksNestServiceFacade.ListTagsForResource",
+        "AWSHawksNestServiceFacade.PutEntityType",
+        "AWSHawksNestServiceFacade.PutLabel",
+        "AWSHawksNestServiceFacade.PutOutcome",
+        "AWSHawksNestServiceFacade.TagResource",
+        "AWSHawksNestServiceFacade.UntagResource",
+        "AWSHawksNestServiceFacade.UpdateList",
+        "AWSHawksNestServiceFacade.UpdateVariable"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/x-amz-json-1.1": {
+       "examples": {
+        "CreateList": {
+         "summary": "X-Amz-Target: AWSHawksNestServiceFacade.CreateList",
+         "value": {}
+        },
+        "CreateVariable": {
+         "summary": "X-Amz-Target: AWSHawksNestServiceFacade.CreateVariable",
+         "value": {}
+        },
+        "DeleteEntityType": {
+         "summary": "X-Amz-Target: AWSHawksNestServiceFacade.DeleteEntityType",
+         "value": {}
+        },
+        "DeleteLabel": {
+         "summary": "X-Amz-Target: AWSHawksNestServiceFacade.DeleteLabel",
+         "value": {}
+        },
+        "DeleteList": {
+         "summary": "X-Amz-Target: AWSHawksNestServiceFacade.DeleteList",
+         "value": {}
+        },
+        "DeleteOutcome": {
+         "summary": "X-Amz-Target: AWSHawksNestServiceFacade.DeleteOutcome",
+         "value": {}
+        },
+        "DeleteVariable": {
+         "summary": "X-Amz-Target: AWSHawksNestServiceFacade.DeleteVariable",
+         "value": {}
+        },
+        "GetEntityTypes": {
+         "summary": "X-Amz-Target: AWSHawksNestServiceFacade.GetEntityTypes",
+         "value": {}
+        },
+        "GetLabels": {
+         "summary": "X-Amz-Target: AWSHawksNestServiceFacade.GetLabels",
+         "value": {}
+        },
+        "GetListsMetadata": {
+         "summary": "X-Amz-Target: AWSHawksNestServiceFacade.GetListsMetadata",
+         "value": {}
+        },
+        "GetOutcomes": {
+         "summary": "X-Amz-Target: AWSHawksNestServiceFacade.GetOutcomes",
+         "value": {}
+        },
+        "GetVariables": {
+         "summary": "X-Amz-Target: AWSHawksNestServiceFacade.GetVariables",
+         "value": {}
+        },
+        "ListTagsForResource": {
+         "summary": "X-Amz-Target: AWSHawksNestServiceFacade.ListTagsForResource",
+         "value": {}
+        },
+        "PutEntityType": {
+         "summary": "X-Amz-Target: AWSHawksNestServiceFacade.PutEntityType",
+         "value": {}
+        },
+        "PutLabel": {
+         "summary": "X-Amz-Target: AWSHawksNestServiceFacade.PutLabel",
+         "value": {}
+        },
+        "PutOutcome": {
+         "summary": "X-Amz-Target: AWSHawksNestServiceFacade.PutOutcome",
+         "value": {}
+        },
+        "TagResource": {
+         "summary": "X-Amz-Target: AWSHawksNestServiceFacade.TagResource",
+         "value": {}
+        },
+        "UntagResource": {
+         "summary": "X-Amz-Target: AWSHawksNestServiceFacade.UntagResource",
+         "value": {}
+        },
+        "UpdateList": {
+         "summary": "X-Amz-Target: AWSHawksNestServiceFacade.UpdateList",
+         "value": {}
+        },
+        "UpdateVariable": {
+         "summary": "X-Amz-Target: AWSHawksNestServiceFacade.UpdateVariable",
+         "value": {}
+        }
+       },
+       "schema": {
+        "type": "object"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/x-amz-json-1.1": {
+        "schema": {
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception in __type."
+     },
+     "403": {
+      "description": "AccessDeniedException from local identity policy evaluation."
+     },
+     "501": {
+      "description": "Official operation not implemented by the simulator."
+     }
+    },
+    "summary": "Amazon Fraud Detector JSON 1.1 operations",
+    "tags": [
+     "Amazon Fraud Detector"
+    ]
+   }
+  }
+ },
+ "servers": [
+  {
+   "description": "This simulator only",
+   "url": "/"
+  }
+ ],
+ "tags": [
+  {
+   "description": "Bounded simulator subset of the official Amazon Fraud Detector API (2019-11-15). Every other official operation returns HTTP 501 UnknownOperationException. Entity types, labels, outcomes, variables and list metadata are stored configuration records: nothing is trained, no event is received, scored or stored, and no rule or detector version is evaluated. Models, model versions, external models, batch import and prediction jobs, GetEventPrediction, SendEvent, GetEvent and every other data-plane operation return UnknownOperationException with HTTP 501. Event types, detectors, rules, detector versions and the KMS encryption key are not implemented. An event type and a detector reference variables, labels, entity types and event types by name, not by ARN, so the stored model can neither check that they exist nor refuse the deletion of one that is in use (ConflictException in AWS); because none of them can reference a record, deleting an entity type, label, outcome, variable or list never fails with ConflictException. Entity types, labels and outcomes are written with PutEntityType, PutLabel and PutOutcome, which create the record or replace its description and add tags, and are read with the matching Get operation, which returns one record by name or all of them. Names are 1 to 64 lowercase letters, digits, underscores or hyphens as the official shapes state; a Get with an unknown name fails with ResourceNotFoundException, and a Delete of a missing record fails with ValidationException because the delete operations model no not-found fault. Resource counts per Region (100 of each kind) are local limits. Variables must use the EVENT data source because model output variables are created by models, which do not exist here; the data type is checked against the documented enumeration and the default value is stored as a string without checking it against the data type. The variable type must be one of the documented values. UpdateVariable changes the default value, description and variable type; a variable is never reported as used by an event type. Lists are stored as metadata only: CreateList and UpdateList accept no elements (an empty list is ignored, so UpdateList with REPLACE and no elements clears nothing because nothing is stored), GetListElements is not implemented and a list is never used in a rule. A list variable type is assigned only by CreateList, because UpdateList cannot compare it with the stored one and is limited to the description. Tags apply to the five resource kinds by ARN (arn:aws:frauddetector:region:account:entity-type/name, label/name, outcome/name, variable/name and list/name). ListTagsForResource returns all tags without pagination, and tags given to a Put of an existing record are added to its tags.",
+   "name": "Amazon Fraud Detector"
+  }
+ ],
+ "x-simulator-source": {
+  "package": "botocore",
+  "version": "1.41.6",
+  "file": "botocore/data/frauddetector/2019-11-15/service-2.json",
+  "sha256": "bf10355c6bf54df3d1fd53799e8ab332c80c0bf22fa5e7768a47a7925d52c7cc",
+  "license": "Apache-2.0"
+ }
+}

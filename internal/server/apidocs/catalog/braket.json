@@ -1,0 +1,647 @@
+{
+ "components": {
+  "schemas": {
+   "SearchSpendingLimitsFilter": {
+    "additionalProperties": false,
+    "properties": {
+     "name": {
+      "maxLength": 64,
+      "minLength": 1,
+      "type": "string"
+     },
+     "operator": {
+      "enum": [
+       "EQUAL"
+      ],
+      "type": "string"
+     },
+     "values": {
+      "items": {
+       "maxLength": 256,
+       "minLength": 1,
+       "type": "string"
+      },
+      "maxItems": 10,
+      "minItems": 1,
+      "type": "array"
+     }
+    },
+    "required": [
+     "name",
+     "values",
+     "operator"
+    ],
+    "type": "object"
+   },
+   "SpendingLimitSummary": {
+    "additionalProperties": false,
+    "properties": {
+     "createdAt": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "deviceArn": {
+      "maxLength": 256,
+      "minLength": 1,
+      "type": "string"
+     },
+     "queuedSpend": {
+      "type": "string"
+     },
+     "spendingLimit": {
+      "type": "string"
+     },
+     "spendingLimitArn": {
+      "maxLength": 256,
+      "minLength": 0,
+      "type": "string"
+     },
+     "tags": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "timePeriod": {
+      "$ref": "#/components/schemas/TimePeriod"
+     },
+     "totalSpend": {
+      "type": "string"
+     },
+     "updatedAt": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     }
+    },
+    "required": [
+     "spendingLimitArn",
+     "deviceArn",
+     "timePeriod",
+     "spendingLimit",
+     "queuedSpend",
+     "totalSpend",
+     "createdAt",
+     "updatedAt"
+    ],
+    "type": "object"
+   },
+   "TimePeriod": {
+    "additionalProperties": false,
+    "properties": {
+     "endAt": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "startAt": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     }
+    },
+    "required": [
+     "startAt",
+     "endAt"
+    ],
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "Bounded simulator subset of the official Braket API (2019-09-01). Every other official operation returns HTTP 501 UnknownOperationException. Spending limits are stored records and are never enforced: no quantum task, hybrid job, device or simulator exists, nothing is run or billed, so queuedSpend and totalSpend stay 0. CreateQuantumTask, CreateJob, GetDevice, SearchDevices and every other official operation not listed here return UnknownOperationException with HTTP 501; the catalog of devices is AWS-owned data. deviceArn must have the documented ARN shape of a regional Braket QPU, including provider and device ID; simulator ARNs are refused. No device catalog lookup is performed, so a matching ARN is not proof of availability. spendingLimit must be a non-negative decimal number of US dollars and endAt must follow startAt. GetSpendingLimit does not exist in the official API: spending limits are read only through SearchSpendingLimits, which returns every stored limit; its filters member is refused. Create client tokens are stored with the idempotent create, update client tokens are accepted and not recorded.",
+  "title": "Amazon Braket (simulator catalog)",
+  "version": "2019-09-01"
+ },
+ "openapi": "3.1.0",
+ "paths": {
+  "/spending-limit": {
+   "post": {
+    "operationId": "braketCreateSpendingLimit",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "braket"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "clientToken": {
+          "maxLength": 64,
+          "minLength": 1,
+          "type": "string"
+         },
+         "deviceArn": {
+          "maxLength": 256,
+          "minLength": 1,
+          "type": "string"
+         },
+         "spendingLimit": {
+          "minLength": 1,
+          "type": "string"
+         },
+         "tags": {
+          "additionalProperties": {
+           "type": "string"
+          },
+          "type": "object"
+         },
+         "timePeriod": {
+          "$ref": "#/components/schemas/TimePeriod"
+         }
+        },
+        "required": [
+         "clientToken",
+         "deviceArn",
+         "spendingLimit"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "spendingLimitArn": {
+           "maxLength": 256,
+           "minLength": 0,
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateSpendingLimit",
+    "tags": [
+     "Amazon Braket"
+    ]
+   }
+  },
+  "/spending-limit/{spendingLimitArn}/delete": {
+   "delete": {
+    "operationId": "braketDeleteSpendingLimit",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "braket"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "spendingLimitArn",
+      "required": true,
+      "schema": {
+       "maxLength": 256,
+       "minLength": 0,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteSpendingLimit",
+    "tags": [
+     "Amazon Braket"
+    ]
+   }
+  },
+  "/spending-limit/{spendingLimitArn}/update": {
+   "patch": {
+    "operationId": "braketUpdateSpendingLimit",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "braket"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "spendingLimitArn",
+      "required": true,
+      "schema": {
+       "maxLength": 256,
+       "minLength": 0,
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "clientToken": {
+          "maxLength": 64,
+          "minLength": 1,
+          "type": "string"
+         },
+         "spendingLimit": {
+          "minLength": 1,
+          "type": "string"
+         },
+         "timePeriod": {
+          "$ref": "#/components/schemas/TimePeriod"
+         }
+        },
+        "required": [
+         "clientToken"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UpdateSpendingLimit",
+    "tags": [
+     "Amazon Braket"
+    ]
+   }
+  },
+  "/spending-limits": {
+   "post": {
+    "operationId": "braketSearchSpendingLimits",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "braket"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "filters": {
+          "items": {
+           "$ref": "#/components/schemas/SearchSpendingLimitsFilter"
+          },
+          "maxItems": 10,
+          "minItems": 0,
+          "type": "array"
+         },
+         "maxResults": {
+          "maximum": 100,
+          "minimum": 1,
+          "type": "integer"
+         },
+         "nextToken": {
+          "type": "string"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "nextToken": {
+           "type": "string"
+          },
+          "spendingLimits": {
+           "items": {
+            "$ref": "#/components/schemas/SpendingLimitSummary"
+           },
+           "type": "array"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "SearchSpendingLimits",
+    "tags": [
+     "Amazon Braket"
+    ]
+   }
+  },
+  "/tags/{resourceArn}": {
+   "delete": {
+    "operationId": "braketUntagResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "braket"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceArn",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "tagKeys",
+      "schema": {
+       "items": {
+        "type": "string"
+       },
+       "type": "array"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UntagResource",
+    "tags": [
+     "Amazon Braket"
+    ]
+   },
+   "get": {
+    "operationId": "braketListTagsForResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "braket"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceArn",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "tags": {
+           "additionalProperties": {
+            "type": "string"
+           },
+           "type": "object"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListTagsForResource",
+    "tags": [
+     "Amazon Braket"
+    ]
+   },
+   "post": {
+    "operationId": "braketTagResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "braket"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceArn",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "tags": {
+          "additionalProperties": {
+           "type": "string"
+          },
+          "type": "object"
+         }
+        },
+        "required": [
+         "tags"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "TagResource",
+    "tags": [
+     "Amazon Braket"
+    ]
+   }
+  }
+ },
+ "servers": [
+  {
+   "description": "This simulator only",
+   "url": "/"
+  }
+ ],
+ "tags": [
+  {
+   "description": "Bounded simulator subset of the official Braket API (2019-09-01). Every other official operation returns HTTP 501 UnknownOperationException. Spending limits are stored records and are never enforced: no quantum task, hybrid job, device or simulator exists, nothing is run or billed, so queuedSpend and totalSpend stay 0. CreateQuantumTask, CreateJob, GetDevice, SearchDevices and every other official operation not listed here return UnknownOperationException with HTTP 501; the catalog of devices is AWS-owned data. deviceArn must have the documented ARN shape of a regional Braket QPU, including provider and device ID; simulator ARNs are refused. No device catalog lookup is performed, so a matching ARN is not proof of availability. spendingLimit must be a non-negative decimal number of US dollars and endAt must follow startAt. GetSpendingLimit does not exist in the official API: spending limits are read only through SearchSpendingLimits, which returns every stored limit; its filters member is refused. Create client tokens are stored with the idempotent create, update client tokens are accepted and not recorded.",
+   "name": "Amazon Braket"
+  }
+ ],
+ "x-simulator-source": {
+  "package": "botocore",
+  "version": "1.41.6",
+  "file": "botocore/data/braket/2019-09-01/service-2.json",
+  "sha256": "fe1f64647b3e20451817abd0316b01d287d08f3fea3c2b7f4abbaa8b079a1078",
+  "license": "Apache-2.0"
+ }
+}

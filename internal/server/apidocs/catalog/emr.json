@@ -1,0 +1,351 @@
+{
+ "components": {
+  "schemas": {
+   "BlockPublicAccessConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "BlockPublicSecurityGroupRules": {
+      "type": "boolean"
+     },
+     "PermittedPublicSecurityGroupRuleRanges": {
+      "items": {
+       "$ref": "#/components/schemas/PortRange"
+      },
+      "type": "array"
+     }
+    },
+    "required": [
+     "BlockPublicSecurityGroupRules"
+    ],
+    "type": "object"
+   },
+   "BlockPublicAccessConfigurationMetadata": {
+    "additionalProperties": false,
+    "properties": {
+     "CreatedByArn": {
+      "maxLength": 2048,
+      "minLength": 20,
+      "type": "string"
+     },
+     "CreationDateTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     }
+    },
+    "required": [
+     "CreationDateTime",
+     "CreatedByArn"
+    ],
+    "type": "object"
+   },
+   "CreateSecurityConfigurationInput": {
+    "additionalProperties": false,
+    "properties": {
+     "Name": {
+      "maxLength": 10280,
+      "minLength": 0,
+      "type": "string"
+     },
+     "SecurityConfiguration": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "Name",
+     "SecurityConfiguration"
+    ],
+    "type": "object"
+   },
+   "CreateSecurityConfigurationOutput": {
+    "additionalProperties": false,
+    "properties": {
+     "CreationDateTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "Name": {
+      "maxLength": 10280,
+      "minLength": 0,
+      "type": "string"
+     }
+    },
+    "required": [
+     "Name",
+     "CreationDateTime"
+    ],
+    "type": "object"
+   },
+   "DeleteSecurityConfigurationInput": {
+    "additionalProperties": false,
+    "properties": {
+     "Name": {
+      "maxLength": 10280,
+      "minLength": 0,
+      "type": "string"
+     }
+    },
+    "required": [
+     "Name"
+    ],
+    "type": "object"
+   },
+   "DeleteSecurityConfigurationOutput": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "DescribeSecurityConfigurationInput": {
+    "additionalProperties": false,
+    "properties": {
+     "Name": {
+      "maxLength": 10280,
+      "minLength": 0,
+      "type": "string"
+     }
+    },
+    "required": [
+     "Name"
+    ],
+    "type": "object"
+   },
+   "DescribeSecurityConfigurationOutput": {
+    "additionalProperties": false,
+    "properties": {
+     "CreationDateTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "Name": {
+      "maxLength": 10280,
+      "minLength": 0,
+      "type": "string"
+     },
+     "SecurityConfiguration": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "GetBlockPublicAccessConfigurationInput": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "GetBlockPublicAccessConfigurationOutput": {
+    "additionalProperties": false,
+    "properties": {
+     "BlockPublicAccessConfiguration": {
+      "$ref": "#/components/schemas/BlockPublicAccessConfiguration"
+     },
+     "BlockPublicAccessConfigurationMetadata": {
+      "$ref": "#/components/schemas/BlockPublicAccessConfigurationMetadata"
+     }
+    },
+    "required": [
+     "BlockPublicAccessConfiguration",
+     "BlockPublicAccessConfigurationMetadata"
+    ],
+    "type": "object"
+   },
+   "ListSecurityConfigurationsInput": {
+    "additionalProperties": false,
+    "properties": {
+     "Marker": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ListSecurityConfigurationsOutput": {
+    "additionalProperties": false,
+    "properties": {
+     "Marker": {
+      "type": "string"
+     },
+     "SecurityConfigurations": {
+      "items": {
+       "$ref": "#/components/schemas/SecurityConfigurationSummary"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "PortRange": {
+    "additionalProperties": false,
+    "properties": {
+     "MaxRange": {
+      "maximum": 65535,
+      "minimum": -1,
+      "type": "integer"
+     },
+     "MinRange": {
+      "maximum": 65535,
+      "minimum": -1,
+      "type": "integer"
+     }
+    },
+    "required": [
+     "MinRange"
+    ],
+    "type": "object"
+   },
+   "PutBlockPublicAccessConfigurationInput": {
+    "additionalProperties": false,
+    "properties": {
+     "BlockPublicAccessConfiguration": {
+      "$ref": "#/components/schemas/BlockPublicAccessConfiguration"
+     }
+    },
+    "required": [
+     "BlockPublicAccessConfiguration"
+    ],
+    "type": "object"
+   },
+   "PutBlockPublicAccessConfigurationOutput": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "SecurityConfigurationSummary": {
+    "additionalProperties": false,
+    "properties": {
+     "CreationDateTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "Name": {
+      "maxLength": 10280,
+      "minLength": 0,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "Bounded simulator subset of the official Amazon EMR API (2009-03-31). Every other official operation returns HTTP 501 UnknownOperationException. Security configurations and the Regional block public access setting are stored records: no cluster, instance group, step, notebook, studio or session exists, nothing is launched and no security group rule is checked or changed. RunJobFlow and every other official operation return UnknownOperationException with HTTP 501, including Studio operations because a Studio returns a web address. A security configuration is a JSON document that must parse as an object; its contents are stored without being checked against EMR's encryption, authentication and authorization schema, and no certificate, key or role it names is resolved. It cannot be updated and has no tags, and its ARN is a simulator form used only for authorization, because AWS gives security configurations none. The block public access setting defaults to blocking public security group rules with port 22 permitted, as AWS does. After PutBlockPublicAccessConfiguration, the metadata reports the time of the change and the account root ARN as the creator because the simulator does not authenticate callers, and the default reports a creation time of 0. Port ranges must have MinRange not above MaxRange and must not repeat. The limit of 100 security configurations per Region is local.",
+  "title": "Amazon EMR (simulator catalog)",
+  "version": "2009-03-31"
+ },
+ "openapi": "3.1.0",
+ "paths": {
+  "/": {
+   "post": {
+    "description": "Choose the X-Amz-Target of one implemented operation. Request and response members follow the linked official input/output schemas.",
+    "operationId": "emrJSONOperation",
+    "parameters": [
+     {
+      "in": "header",
+      "name": "X-Amz-Target",
+      "required": true,
+      "schema": {
+       "enum": [
+        "ElasticMapReduce.CreateSecurityConfiguration",
+        "ElasticMapReduce.DeleteSecurityConfiguration",
+        "ElasticMapReduce.DescribeSecurityConfiguration",
+        "ElasticMapReduce.GetBlockPublicAccessConfiguration",
+        "ElasticMapReduce.ListSecurityConfigurations",
+        "ElasticMapReduce.PutBlockPublicAccessConfiguration"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/x-amz-json-1.1": {
+       "examples": {
+        "CreateSecurityConfiguration": {
+         "summary": "X-Amz-Target: ElasticMapReduce.CreateSecurityConfiguration",
+         "value": {}
+        },
+        "DeleteSecurityConfiguration": {
+         "summary": "X-Amz-Target: ElasticMapReduce.DeleteSecurityConfiguration",
+         "value": {}
+        },
+        "DescribeSecurityConfiguration": {
+         "summary": "X-Amz-Target: ElasticMapReduce.DescribeSecurityConfiguration",
+         "value": {}
+        },
+        "GetBlockPublicAccessConfiguration": {
+         "summary": "X-Amz-Target: ElasticMapReduce.GetBlockPublicAccessConfiguration",
+         "value": {}
+        },
+        "ListSecurityConfigurations": {
+         "summary": "X-Amz-Target: ElasticMapReduce.ListSecurityConfigurations",
+         "value": {}
+        },
+        "PutBlockPublicAccessConfiguration": {
+         "summary": "X-Amz-Target: ElasticMapReduce.PutBlockPublicAccessConfiguration",
+         "value": {}
+        }
+       },
+       "schema": {
+        "type": "object"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/x-amz-json-1.1": {
+        "schema": {
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception in __type."
+     },
+     "403": {
+      "description": "AccessDeniedException from local identity policy evaluation."
+     },
+     "501": {
+      "description": "Official operation not implemented by the simulator."
+     }
+    },
+    "summary": "Amazon EMR JSON 1.1 operations",
+    "tags": [
+     "Amazon EMR"
+    ]
+   }
+  }
+ },
+ "servers": [
+  {
+   "description": "This simulator only",
+   "url": "/"
+  }
+ ],
+ "tags": [
+  {
+   "description": "Bounded simulator subset of the official Amazon EMR API (2009-03-31). Every other official operation returns HTTP 501 UnknownOperationException. Security configurations and the Regional block public access setting are stored records: no cluster, instance group, step, notebook, studio or session exists, nothing is launched and no security group rule is checked or changed. RunJobFlow and every other official operation return UnknownOperationException with HTTP 501, including Studio operations because a Studio returns a web address. A security configuration is a JSON document that must parse as an object; its contents are stored without being checked against EMR's encryption, authentication and authorization schema, and no certificate, key or role it names is resolved. It cannot be updated and has no tags, and its ARN is a simulator form used only for authorization, because AWS gives security configurations none. The block public access setting defaults to blocking public security group rules with port 22 permitted, as AWS does. After PutBlockPublicAccessConfiguration, the metadata reports the time of the change and the account root ARN as the creator because the simulator does not authenticate callers, and the default reports a creation time of 0. Port ranges must have MinRange not above MaxRange and must not repeat. The limit of 100 security configurations per Region is local.",
+   "name": "Amazon EMR"
+  }
+ ],
+ "x-simulator-source": {
+  "package": "botocore",
+  "version": "1.41.6",
+  "file": "botocore/data/emr/2009-03-31/service-2.json",
+  "sha256": "6e03eb76ae5e5e2af4ad3da1924854aaf08d3fb2b1af2ddea53b1730d1789c00",
+  "license": "Apache-2.0"
+ }
+}
