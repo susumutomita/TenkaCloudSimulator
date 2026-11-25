@@ -12,6 +12,7 @@ import unittest
 from jsonschema import ValidationError
 from openapi_json10 import validator
 from route53_openapi import project_before_route53
+from route53_ptr_reference import project_before_ptr
 from batch_reference_projection import project_batches
 from secret_reference_projection import project_secret_description
 
@@ -81,8 +82,10 @@ def project_server_list(spec):
     assert digest(server) == '81203e3d7065de93e30b5941964ba52f94a11c12888f61b85dbe7c542dc9a521', 'Server List reference changed'
     project_simpledb_domain_metadata(spec)
     project_simpledb_list_domains(spec)
-    assert digest(spec['paths']) == '1dce93acc032ee7c312d7a8bd9e7442368953b59403f494e5fb3ab8e20d2ede8', 'Pre-existing reference paths changed'
-    assert digest(spec) == '62dc82bc8496d80e92364df28c940012d22498553e779929dd10fa431a0a57c6', 'Pre-existing reference spec changed'
+    inherited = copy.deepcopy(spec)
+    project_before_ptr(inherited['paths'])
+    assert digest(inherited['paths']) == '1dce93acc032ee7c312d7a8bd9e7442368953b59403f494e5fb3ab8e20d2ede8', 'Pre-existing reference paths changed'
+    assert digest(inherited) == '62dc82bc8496d80e92364df28c940012d22498553e779929dd10fa431a0a57c6', 'Pre-existing reference spec changed'
     return spec
 
 

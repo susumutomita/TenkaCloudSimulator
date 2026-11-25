@@ -102,6 +102,14 @@ with tempfile.TemporaryDirectory(prefix="route53-sdk-") as directory:
         assert exc.code == 401
     else:
         raise AssertionError("Token crossed team authorities")
+    reverse = c.create_hosted_zone(Name="2.0.192.in-addr.arpa", CallerReference="reverse")["HostedZone"]["Id"]
+    ptr = {"Name": "7.2.0.192.in-addr.arpa", "Type": "PTR", "TTL": 60,
+           "ResourceRecords": [{"Value": "WEB.Example.test"}]}
+    batch = {"Changes": [{"Action": "CREATE", "ResourceRecordSet": ptr}]}
+    error("AccessDenied", lambda: limited.change_resource_record_sets(HostedZoneId=reverse, ChangeBatch=batch))
+    assert c.test_dns_answer(HostedZoneId=reverse, RecordName=ptr["Name"], RecordType="PTR")["ResponseCode"] == "NXDOMAIN"
+    c.change_resource_record_sets(HostedZoneId=reverse, ChangeBatch=batch)
+    error("NoSuchHostedZone", lambda: other.test_dns_answer(HostedZoneId=reverse, RecordName=ptr["Name"], RecordType="PTR"))
     limited.close()
     c.close()
     other.close()
@@ -110,6 +118,10 @@ with tempfile.TemporaryDirectory(prefix="route53-sdk-") as directory:
     assert c.test_dns_answer(HostedZoneId=saved,RecordName="www.restart.test",RecordType="A")["RecordData"] == ["192.0.2.9"]
     c.change_resource_record_sets(HostedZoneId=saved,ChangeBatch={"Changes":[{"Action":"DELETE","ResourceRecordSet":rr}]})
     c.delete_hosted_zone(Id=saved)
+    answer = c.test_dns_answer(HostedZoneId=reverse, RecordName=ptr["Name"], RecordType="PTR")
+    assert answer["ResponseCode"] == "NOERROR" and answer["RecordData"] == ["web.example.test."]
+    c.change_resource_record_sets(HostedZoneId=reverse, ChangeBatch={"Changes": [{"Action": "DELETE", "ResourceRecordSet": ptr}]})
+    c.delete_hosted_zone(Id=reverse)
     assert c.list_hosted_zones()["HostedZones"] == []
     c.close()
  print(json.dumps({"route53NativeSDK": True, "atomicSavedStateAnswers": True,

@@ -20,10 +20,16 @@ class Route53Reference(unittest.TestCase):
         projected=project_before_route53(self.spec)
         self.assertEqual(set(self.spec['paths'])-set(projected['paths']),ROUTE53_PATHS)
 
+    @staticmethod
+    def remove_ptr_descriptor(spec):
+        changes = spec['paths']['/2013-04-01/hostedzone/{Id}/rrset']['post']
+        changes['description'] = changes['description'].replace('/PTR only', ' only')
+
     def test_contract_detector_rejects_missing_and_changed_details(self):
         collection='/2013-04-01/hostedzone'
         mutations = [
             ('missing path',lambda s:s['paths'].pop(collection)),
+            ('missing PTR descriptor', lambda s: self.remove_ptr_descriptor(s)),
             ('missing operation',lambda s:s['paths'][collection].pop('post')),
             ('changed operation',lambda s:s['paths'][collection]['post'].update(operationId='InventedCreate')),
             ('missing schema',lambda s:s['paths'][collection]['post']['requestBody']['content']['application/xml'].pop('schema')),

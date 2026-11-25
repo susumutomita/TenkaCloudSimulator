@@ -49,8 +49,21 @@ func NewHTTPHandler(s *Store, sc Scope, authorize Authorize) http.Handler {
 			fail(400, "InvalidParameterValue")
 			return
 		}
-		for _, vs := range p {
+		for key, vs := range p {
 			if len(vs) != 1 {
+				if p.Get("Action") == "PutAttributes" {
+					switch key {
+					case "Expected.Name":
+						fail(400, "MultipleExpectedNames")
+						return
+					case "Expected.Value":
+						fail(400, "MultipleExpectedValues")
+						return
+					case "Expected.Exists":
+						fail(400, "MultipleExistsConditions")
+						return
+					}
+				}
 				fail(400, "InvalidParameterValue")
 				return
 			}
@@ -76,6 +89,9 @@ func NewHTTPHandler(s *Store, sc Scope, authorize Authorize) http.Handler {
 			allowed["MaxNumberOfDomains"] = true
 			allowed["NextToken"] = true
 		case "PutAttributes":
+			allowed["Expected.Name"] = true
+			allowed["Expected.Value"] = true
+			allowed["Expected.Exists"] = true
 			allowed["DomainName"] = true
 			allowed["ItemName"] = true
 		case "GetAttributes":
@@ -202,6 +218,14 @@ func NewHTTPHandler(s *Store, sc Scope, authorize Authorize) http.Handler {
 				return
 			}
 		}
+		var condition *putCondition
+		if action == "PutAttributes" {
+			var code string
+			if condition, code = parsePutCondition(p); code != "" {
+				fail(400, code)
+				return
+			}
+		}
 		resource := "*"
 		if action != "ListDomains" {
 			resource = "arn:aws:sdb:" + sc.Region + ":" + sc.Account + ":domain/" + domain
@@ -226,7 +250,7 @@ func NewHTTPHandler(s *Store, sc Scope, authorize Authorize) http.Handler {
 			ds, next, err = s.ListDomains(r.Context(), sc.Account, sc.Region, limit, p.Get("NextToken"))
 			out.List = &queryList{ds, next}
 		case "PutAttributes":
-			err = s.Put(r.Context(), sc.Account, sc.Region, domain, item, values, replace)
+			err = s.put(r.Context(), sc.Account, sc.Region, domain, item, values, replace, condition)
 		case "GetAttributes":
 			var attrs map[string][]string
 			attrs, err = s.Get(r.Context(), sc.Account, sc.Region, domain, item, names)
@@ -247,6 +271,12 @@ func NewHTTPHandler(s *Store, sc Scope, authorize Authorize) http.Handler {
 			var coded interface{ Code() string }
 			if errors.As(err, &coded) {
 				switch coded.Code() {
+				case "AttributeDoesNotExist":
+					fail(404, coded.Code())
+					return
+				case "ConditionalCheckFailed", "MultiValuedAttribute", "NumberItemAttributesExceeded":
+					fail(409, coded.Code())
+					return
 				case "InvalidParameterValue", "InvalidNextToken", "NoSuchDomain":
 					fail(400, coded.Code())
 					return
@@ -257,6 +287,32 @@ func NewHTTPHandler(s *Store, sc Scope, authorize Authorize) http.Handler {
 		}
 		writeQuery(w, 200, out)
 	})
+}
+
+// parsePutCondition handles the canonical Query fields emitted by the AWS SDK.
+// Presence is distinct from an empty expected value, which is valid.
+func parsePutCondition(p url.Values) (*putCondition, string) {
+	haveName, haveValue, haveExists := p.Has("Expected.Name"), p.Has("Expected.Value"), p.Has("Expected.Exists")
+	if !haveName && !haveValue && !haveExists {
+		return nil, ""
+	}
+	if !haveName {
+		return nil, "MissingParameter"
+	}
+	name, value, exists := p.Get("Expected.Name"), p.Get("Expected.Value"), p.Get("Expected.Exists")
+	if !validText(name, false) || (haveValue && !validText(value, true)) || (haveExists && exists != "true" && exists != "false") {
+		return nil, "InvalidParameterValue"
+	}
+	if exists == "false" {
+		if haveValue {
+			return nil, "ExistsAndExpectedValue"
+		}
+		return &putCondition{name: name, absent: true}, ""
+	}
+	if !haveValue {
+		return nil, "IncompleteExpectedExpression"
+	}
+	return &putCondition{name: name, value: value}, ""
 }
 
 // Canonical decimal labels avoid aliases without imposing machine-int limits.

@@ -13,9 +13,12 @@ test('Cloud DNS requires its exact owner-only native capability and bounded path
     {project: 'project-one'}, {...dns, console: false}, {...dns, project: ''}, {...dns, project: 'x/other'},
     {...dns, api: 'other'}, {...dns, endpoint: 'https://example.com/'}, {...dns, operations: dns.operations.slice(1)},
     {...dns, operations: [...dns.operations, 'managedZones.delete']},
+    {...dns, operations: [...dns.operations, 'changes.create', 'changes.create']},
+    {...dns, operations: [...dns.operations.slice(1), 'changes.create', 'changes.create']},
   ]) assert.equal(serviceAvailable('gcp-dns', {gcpDns: invalid}), false);
   assert.equal(serviceAvailable('gcp-dns', {gcpDns: dns, consoleScope: {instanceId: 'x'}}), false);
-  assert.equal(serviceAvailable('gcp-dns', {gcpDns: dns}), true);
+  assert.equal(serviceAvailable('gcp-dns', {gcpDns: dns}), true); // Legacy owner: read-only record sets.
+  assert.equal(serviceAvailable('gcp-dns', {gcpDns: {...dns, operations: [...dns.operations, 'changes.create']}}), true);
   assert.equal(serviceAvailable('gcp-storage', {cloudStorage: {gcp: {project: 'p'}}}), true);
 });
 
