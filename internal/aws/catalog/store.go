@@ -141,6 +141,24 @@ func list(q querier, service, region, kind, parent string) ([]row, error) {
 	return out, rows.Err()
 }
 
+// listKind lists every resource of a kind, whatever its Region and parent.
+func listKind(q querier, service, kind string) ([]row, error) {
+	rows, err := q.Query("SELECT "+columns+" FROM aws_catalog_resources WHERE service=? AND kind=? ORDER BY seq", service, kind)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	out := []row{}
+	for rows.Next() {
+		r, err := scanRow(rows)
+		if err != nil {
+			return nil, err
+		}
+		out = append(out, r)
+	}
+	return out, rows.Err()
+}
+
 func encodeRow(r row) (string, string, error) {
 	document, err := json.Marshal(r.Document)
 	if err != nil {

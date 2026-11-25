@@ -1,0 +1,2413 @@
+{
+ "components": {
+  "schemas": {
+   "ReferenceStoreDetail": {
+    "additionalProperties": false,
+    "properties": {
+     "arn": {
+      "maxLength": 127,
+      "minLength": 1,
+      "type": "string"
+     },
+     "creationTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "description": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "id": {
+      "maxLength": 36,
+      "minLength": 10,
+      "type": "string"
+     },
+     "name": {
+      "maxLength": 127,
+      "minLength": 1,
+      "type": "string"
+     },
+     "sseConfig": {
+      "$ref": "#/components/schemas/SseConfig"
+     }
+    },
+    "required": [
+     "arn",
+     "id",
+     "creationTime"
+    ],
+    "type": "object"
+   },
+   "ReferenceStoreFilter": {
+    "additionalProperties": false,
+    "properties": {
+     "createdAfter": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "createdBefore": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "name": {
+      "maxLength": 127,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "RunCacheListItem": {
+    "additionalProperties": false,
+    "properties": {
+     "arn": {
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string"
+     },
+     "cacheBehavior": {
+      "enum": [
+       "CACHE_ON_FAILURE",
+       "CACHE_ALWAYS"
+      ],
+      "maxLength": 64,
+      "minLength": 1,
+      "type": "string"
+     },
+     "cacheS3Uri": {
+      "type": "string"
+     },
+     "creationTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "id": {
+      "maxLength": 18,
+      "minLength": 1,
+      "type": "string"
+     },
+     "name": {
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string"
+     },
+     "status": {
+      "enum": [
+       "ACTIVE",
+       "DELETED",
+       "FAILED"
+      ],
+      "maxLength": 64,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "RunGroupListItem": {
+    "additionalProperties": false,
+    "properties": {
+     "arn": {
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string"
+     },
+     "creationTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "id": {
+      "maxLength": 18,
+      "minLength": 1,
+      "type": "string"
+     },
+     "maxCpus": {
+      "maximum": 100000,
+      "minimum": 1,
+      "type": "integer"
+     },
+     "maxDuration": {
+      "maximum": 100000,
+      "minimum": 1,
+      "type": "integer"
+     },
+     "maxGpus": {
+      "maximum": 100000,
+      "minimum": 1,
+      "type": "integer"
+     },
+     "maxRuns": {
+      "maximum": 100000,
+      "minimum": 1,
+      "type": "integer"
+     },
+     "name": {
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "S3AccessConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "accessLogLocation": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "SequenceStoreDetail": {
+    "additionalProperties": false,
+    "properties": {
+     "arn": {
+      "maxLength": 127,
+      "minLength": 1,
+      "type": "string"
+     },
+     "creationTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "description": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "eTagAlgorithmFamily": {
+      "enum": [
+       "MD5up",
+       "SHA256up",
+       "SHA512up"
+      ],
+      "type": "string"
+     },
+     "fallbackLocation": {
+      "type": "string"
+     },
+     "id": {
+      "maxLength": 36,
+      "minLength": 10,
+      "type": "string"
+     },
+     "name": {
+      "maxLength": 127,
+      "minLength": 1,
+      "type": "string"
+     },
+     "sseConfig": {
+      "$ref": "#/components/schemas/SseConfig"
+     },
+     "status": {
+      "enum": [
+       "CREATING",
+       "ACTIVE",
+       "UPDATING",
+       "DELETING",
+       "FAILED"
+      ],
+      "type": "string"
+     },
+     "statusMessage": {
+      "maxLength": 127,
+      "minLength": 1,
+      "type": "string"
+     },
+     "updateTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     }
+    },
+    "required": [
+     "arn",
+     "id",
+     "creationTime"
+    ],
+    "type": "object"
+   },
+   "SequenceStoreFilter": {
+    "additionalProperties": false,
+    "properties": {
+     "createdAfter": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "createdBefore": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "name": {
+      "maxLength": 127,
+      "minLength": 1,
+      "type": "string"
+     },
+     "status": {
+      "enum": [
+       "CREATING",
+       "ACTIVE",
+       "UPDATING",
+       "DELETING",
+       "FAILED"
+      ],
+      "type": "string"
+     },
+     "updatedAfter": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "updatedBefore": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     }
+    },
+    "type": "object"
+   },
+   "SequenceStoreS3Access": {
+    "additionalProperties": false,
+    "properties": {
+     "accessLogLocation": {
+      "type": "string"
+     },
+     "s3AccessPointArn": {
+      "maxLength": 1024,
+      "minLength": 1,
+      "type": "string"
+     },
+     "s3Uri": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "SseConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "keyArn": {
+      "maxLength": 2048,
+      "minLength": 20,
+      "type": "string"
+     },
+     "type": {
+      "enum": [
+       "KMS"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "type"
+    ],
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "Bounded simulator subset of the official Amazon Omics API (2022-11-28). Every other official operation returns HTTP 501 UnknownOperationException. Run groups, run caches, sequence stores and reference stores are stored configuration records: no workflow runs, no run task, cache entry, read set, reference genome or S3 access point exists, nothing is imported, exported, activated or uploaded, and every other official operation returns UnknownOperationException with HTTP 501. A sequence store stays CREATING and holds no sequence data; run caches are ACTIVE records whose S3 location is stored without being read or written. Workflows and workflow versions are not implemented: their definitions are ZIP archives or repository references whose content the official output only returns as presigned URLs, which the simulator does not hold. Annotation stores, variant stores and their versions are not implemented: a store needs a reference genome that only an import job can create. Shares, S3 access policies, multipart read set uploads and every start, cancel and job operation are not implemented either. Identifiers are numeric as the official patterns require (10 digits). When the request carries its idempotency token (requestId, clientToken) the identifier is derived from the token and operation, so replaying the same request returns the same record and reusing a token with different parameters fails with ConflictException; a token reused after its 24-hour replay window can recreate an identifier. CreateReferenceStore models no idempotency token: its clientToken is accepted but not recorded. Names need not be unique. Resource counts per Region (25 run groups, 25 run caches, 15 sequence stores, 5 reference stores) are local limits. s3AccessConfig of a sequence store is refused because it would create an S3 access point. sseConfig, fallbackLocation, propagatedSetLevelTags and eTagAlgorithmFamily (MD5up when omitted, as documented) are stored without contacting KMS or S3, and S3 locations (cacheS3Location, fallbackLocation) must be s3://bucket with an optional prefix, which the official pattern states but RE2 cannot enforce. ListSequenceStores filters by name and status and ListReferenceStores by name, with the created and updated time bounds refused. Deleting a store or a run group deletes the record without a read set, reference or run check because none can exist.",
+  "title": "AWS HealthOmics (simulator catalog)",
+  "version": "2022-11-28"
+ },
+ "openapi": "3.1.0",
+ "paths": {
+  "/referencestore": {
+   "post": {
+    "operationId": "omicsCreateReferenceStore",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "omics"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "clientToken": {
+          "maxLength": 127,
+          "minLength": 1,
+          "type": "string"
+         },
+         "description": {
+          "maxLength": 255,
+          "minLength": 1,
+          "type": "string"
+         },
+         "name": {
+          "maxLength": 127,
+          "minLength": 1,
+          "type": "string"
+         },
+         "sseConfig": {
+          "$ref": "#/components/schemas/SseConfig"
+         },
+         "tags": {
+          "additionalProperties": {
+           "maxLength": 256,
+           "minLength": 0,
+           "type": "string"
+          },
+          "type": "object"
+         }
+        },
+        "required": [
+         "name"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "arn": {
+           "maxLength": 127,
+           "minLength": 1,
+           "type": "string"
+          },
+          "creationTime": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "description": {
+           "maxLength": 255,
+           "minLength": 1,
+           "type": "string"
+          },
+          "id": {
+           "maxLength": 36,
+           "minLength": 10,
+           "type": "string"
+          },
+          "name": {
+           "maxLength": 127,
+           "minLength": 1,
+           "type": "string"
+          },
+          "sseConfig": {
+           "$ref": "#/components/schemas/SseConfig"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateReferenceStore",
+    "tags": [
+     "AWS HealthOmics"
+    ]
+   }
+  },
+  "/referencestore/{id}": {
+   "delete": {
+    "operationId": "omicsDeleteReferenceStore",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "omics"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "id",
+      "required": true,
+      "schema": {
+       "maxLength": 36,
+       "minLength": 10,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteReferenceStore",
+    "tags": [
+     "AWS HealthOmics"
+    ]
+   },
+   "get": {
+    "operationId": "omicsGetReferenceStore",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "omics"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "id",
+      "required": true,
+      "schema": {
+       "maxLength": 36,
+       "minLength": 10,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "arn": {
+           "maxLength": 127,
+           "minLength": 1,
+           "type": "string"
+          },
+          "creationTime": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "description": {
+           "maxLength": 255,
+           "minLength": 1,
+           "type": "string"
+          },
+          "id": {
+           "maxLength": 36,
+           "minLength": 10,
+           "type": "string"
+          },
+          "name": {
+           "maxLength": 127,
+           "minLength": 1,
+           "type": "string"
+          },
+          "sseConfig": {
+           "$ref": "#/components/schemas/SseConfig"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "GetReferenceStore",
+    "tags": [
+     "AWS HealthOmics"
+    ]
+   }
+  },
+  "/referencestores": {
+   "post": {
+    "operationId": "omicsListReferenceStores",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "omics"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "maxResults",
+      "schema": {
+       "maximum": 100,
+       "minimum": 1,
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "nextToken",
+      "schema": {
+       "maxLength": 6144,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "filter": {
+          "$ref": "#/components/schemas/ReferenceStoreFilter"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "nextToken": {
+           "maxLength": 6144,
+           "minLength": 1,
+           "type": "string"
+          },
+          "referenceStores": {
+           "items": {
+            "$ref": "#/components/schemas/ReferenceStoreDetail"
+           },
+           "type": "array"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListReferenceStores",
+    "tags": [
+     "AWS HealthOmics"
+    ]
+   }
+  },
+  "/runCache": {
+   "get": {
+    "operationId": "omicsListRunCaches",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "omics"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "maxResults",
+      "schema": {
+       "maximum": 100,
+       "minimum": 1,
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "startingToken",
+      "schema": {
+       "maxLength": 128,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "items": {
+           "items": {
+            "$ref": "#/components/schemas/RunCacheListItem"
+           },
+           "type": "array"
+          },
+          "nextToken": {
+           "maxLength": 128,
+           "minLength": 1,
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListRunCaches",
+    "tags": [
+     "AWS HealthOmics"
+    ]
+   },
+   "post": {
+    "operationId": "omicsCreateRunCache",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "omics"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "cacheBehavior": {
+          "enum": [
+           "CACHE_ON_FAILURE",
+           "CACHE_ALWAYS"
+          ],
+          "maxLength": 64,
+          "minLength": 1,
+          "type": "string"
+         },
+         "cacheBucketOwnerId": {
+          "maxLength": 12,
+          "minLength": 12,
+          "type": "string"
+         },
+         "cacheS3Location": {
+          "type": "string"
+         },
+         "description": {
+          "maxLength": 256,
+          "minLength": 1,
+          "type": "string"
+         },
+         "name": {
+          "maxLength": 128,
+          "minLength": 1,
+          "type": "string"
+         },
+         "requestId": {
+          "maxLength": 128,
+          "minLength": 1,
+          "type": "string"
+         },
+         "tags": {
+          "additionalProperties": {
+           "maxLength": 256,
+           "minLength": 0,
+           "type": "string"
+          },
+          "type": "object"
+         }
+        },
+        "required": [
+         "cacheS3Location",
+         "requestId"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "arn": {
+           "maxLength": 128,
+           "minLength": 1,
+           "type": "string"
+          },
+          "id": {
+           "maxLength": 18,
+           "minLength": 1,
+           "type": "string"
+          },
+          "status": {
+           "enum": [
+            "ACTIVE",
+            "DELETED",
+            "FAILED"
+           ],
+           "maxLength": 64,
+           "minLength": 1,
+           "type": "string"
+          },
+          "tags": {
+           "additionalProperties": {
+            "maxLength": 256,
+            "minLength": 0,
+            "type": "string"
+           },
+           "type": "object"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateRunCache",
+    "tags": [
+     "AWS HealthOmics"
+    ]
+   }
+  },
+  "/runCache/{id}": {
+   "delete": {
+    "operationId": "omicsDeleteRunCache",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "omics"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "id",
+      "required": true,
+      "schema": {
+       "maxLength": 18,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteRunCache",
+    "tags": [
+     "AWS HealthOmics"
+    ]
+   },
+   "get": {
+    "operationId": "omicsGetRunCache",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "omics"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "id",
+      "required": true,
+      "schema": {
+       "maxLength": 18,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "arn": {
+           "maxLength": 128,
+           "minLength": 1,
+           "type": "string"
+          },
+          "cacheBehavior": {
+           "enum": [
+            "CACHE_ON_FAILURE",
+            "CACHE_ALWAYS"
+           ],
+           "maxLength": 64,
+           "minLength": 1,
+           "type": "string"
+          },
+          "cacheBucketOwnerId": {
+           "maxLength": 12,
+           "minLength": 12,
+           "type": "string"
+          },
+          "cacheS3Uri": {
+           "type": "string"
+          },
+          "creationTime": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "description": {
+           "maxLength": 256,
+           "minLength": 1,
+           "type": "string"
+          },
+          "id": {
+           "maxLength": 18,
+           "minLength": 1,
+           "type": "string"
+          },
+          "name": {
+           "maxLength": 128,
+           "minLength": 1,
+           "type": "string"
+          },
+          "status": {
+           "enum": [
+            "ACTIVE",
+            "DELETED",
+            "FAILED"
+           ],
+           "maxLength": 64,
+           "minLength": 1,
+           "type": "string"
+          },
+          "tags": {
+           "additionalProperties": {
+            "maxLength": 256,
+            "minLength": 0,
+            "type": "string"
+           },
+           "type": "object"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "GetRunCache",
+    "tags": [
+     "AWS HealthOmics"
+    ]
+   },
+   "post": {
+    "operationId": "omicsUpdateRunCache",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "omics"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "id",
+      "required": true,
+      "schema": {
+       "maxLength": 18,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "cacheBehavior": {
+          "enum": [
+           "CACHE_ON_FAILURE",
+           "CACHE_ALWAYS"
+          ],
+          "maxLength": 64,
+          "minLength": 1,
+          "type": "string"
+         },
+         "description": {
+          "maxLength": 256,
+          "minLength": 1,
+          "type": "string"
+         },
+         "name": {
+          "maxLength": 128,
+          "minLength": 1,
+          "type": "string"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UpdateRunCache",
+    "tags": [
+     "AWS HealthOmics"
+    ]
+   }
+  },
+  "/runGroup": {
+   "get": {
+    "operationId": "omicsListRunGroups",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "omics"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "maxResults",
+      "schema": {
+       "maximum": 100,
+       "minimum": 1,
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "name",
+      "schema": {
+       "maxLength": 128,
+       "minLength": 1,
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "startingToken",
+      "schema": {
+       "maxLength": 128,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "items": {
+           "items": {
+            "$ref": "#/components/schemas/RunGroupListItem"
+           },
+           "type": "array"
+          },
+          "nextToken": {
+           "maxLength": 128,
+           "minLength": 1,
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListRunGroups",
+    "tags": [
+     "AWS HealthOmics"
+    ]
+   },
+   "post": {
+    "operationId": "omicsCreateRunGroup",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "omics"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "maxCpus": {
+          "maximum": 100000,
+          "minimum": 1,
+          "type": "integer"
+         },
+         "maxDuration": {
+          "maximum": 100000,
+          "minimum": 1,
+          "type": "integer"
+         },
+         "maxGpus": {
+          "maximum": 100000,
+          "minimum": 1,
+          "type": "integer"
+         },
+         "maxRuns": {
+          "maximum": 100000,
+          "minimum": 1,
+          "type": "integer"
+         },
+         "name": {
+          "maxLength": 128,
+          "minLength": 1,
+          "type": "string"
+         },
+         "requestId": {
+          "maxLength": 128,
+          "minLength": 1,
+          "type": "string"
+         },
+         "tags": {
+          "additionalProperties": {
+           "maxLength": 256,
+           "minLength": 0,
+           "type": "string"
+          },
+          "type": "object"
+         }
+        },
+        "required": [
+         "requestId"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "arn": {
+           "maxLength": 128,
+           "minLength": 1,
+           "type": "string"
+          },
+          "id": {
+           "maxLength": 18,
+           "minLength": 1,
+           "type": "string"
+          },
+          "tags": {
+           "additionalProperties": {
+            "maxLength": 256,
+            "minLength": 0,
+            "type": "string"
+           },
+           "type": "object"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateRunGroup",
+    "tags": [
+     "AWS HealthOmics"
+    ]
+   }
+  },
+  "/runGroup/{id}": {
+   "delete": {
+    "operationId": "omicsDeleteRunGroup",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "omics"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "id",
+      "required": true,
+      "schema": {
+       "maxLength": 18,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteRunGroup",
+    "tags": [
+     "AWS HealthOmics"
+    ]
+   },
+   "get": {
+    "operationId": "omicsGetRunGroup",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "omics"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "id",
+      "required": true,
+      "schema": {
+       "maxLength": 18,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "arn": {
+           "maxLength": 128,
+           "minLength": 1,
+           "type": "string"
+          },
+          "creationTime": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "id": {
+           "maxLength": 18,
+           "minLength": 1,
+           "type": "string"
+          },
+          "maxCpus": {
+           "maximum": 100000,
+           "minimum": 1,
+           "type": "integer"
+          },
+          "maxDuration": {
+           "maximum": 100000,
+           "minimum": 1,
+           "type": "integer"
+          },
+          "maxGpus": {
+           "maximum": 100000,
+           "minimum": 1,
+           "type": "integer"
+          },
+          "maxRuns": {
+           "maximum": 100000,
+           "minimum": 1,
+           "type": "integer"
+          },
+          "name": {
+           "maxLength": 128,
+           "minLength": 1,
+           "type": "string"
+          },
+          "tags": {
+           "additionalProperties": {
+            "maxLength": 256,
+            "minLength": 0,
+            "type": "string"
+           },
+           "type": "object"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "GetRunGroup",
+    "tags": [
+     "AWS HealthOmics"
+    ]
+   },
+   "post": {
+    "operationId": "omicsUpdateRunGroup",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "omics"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "id",
+      "required": true,
+      "schema": {
+       "maxLength": 18,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "maxCpus": {
+          "maximum": 100000,
+          "minimum": 1,
+          "type": "integer"
+         },
+         "maxDuration": {
+          "maximum": 100000,
+          "minimum": 1,
+          "type": "integer"
+         },
+         "maxGpus": {
+          "maximum": 100000,
+          "minimum": 1,
+          "type": "integer"
+         },
+         "maxRuns": {
+          "maximum": 100000,
+          "minimum": 1,
+          "type": "integer"
+         },
+         "name": {
+          "maxLength": 128,
+          "minLength": 1,
+          "type": "string"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UpdateRunGroup",
+    "tags": [
+     "AWS HealthOmics"
+    ]
+   }
+  },
+  "/sequencestore": {
+   "post": {
+    "operationId": "omicsCreateSequenceStore",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "omics"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "clientToken": {
+          "maxLength": 127,
+          "minLength": 1,
+          "type": "string"
+         },
+         "description": {
+          "maxLength": 255,
+          "minLength": 1,
+          "type": "string"
+         },
+         "eTagAlgorithmFamily": {
+          "enum": [
+           "MD5up",
+           "SHA256up",
+           "SHA512up"
+          ],
+          "type": "string"
+         },
+         "fallbackLocation": {
+          "type": "string"
+         },
+         "name": {
+          "maxLength": 127,
+          "minLength": 1,
+          "type": "string"
+         },
+         "propagatedSetLevelTags": {
+          "items": {
+           "maxLength": 128,
+           "minLength": 1,
+           "type": "string"
+          },
+          "maxItems": 50,
+          "minItems": 0,
+          "type": "array"
+         },
+         "s3AccessConfig": {
+          "$ref": "#/components/schemas/S3AccessConfig"
+         },
+         "sseConfig": {
+          "$ref": "#/components/schemas/SseConfig"
+         },
+         "tags": {
+          "additionalProperties": {
+           "maxLength": 256,
+           "minLength": 0,
+           "type": "string"
+          },
+          "type": "object"
+         }
+        },
+        "required": [
+         "name"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "arn": {
+           "maxLength": 127,
+           "minLength": 1,
+           "type": "string"
+          },
+          "creationTime": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "description": {
+           "maxLength": 255,
+           "minLength": 1,
+           "type": "string"
+          },
+          "eTagAlgorithmFamily": {
+           "enum": [
+            "MD5up",
+            "SHA256up",
+            "SHA512up"
+           ],
+           "type": "string"
+          },
+          "fallbackLocation": {
+           "type": "string"
+          },
+          "id": {
+           "maxLength": 36,
+           "minLength": 10,
+           "type": "string"
+          },
+          "name": {
+           "maxLength": 127,
+           "minLength": 1,
+           "type": "string"
+          },
+          "propagatedSetLevelTags": {
+           "items": {
+            "maxLength": 128,
+            "minLength": 1,
+            "type": "string"
+           },
+           "maxItems": 50,
+           "minItems": 0,
+           "type": "array"
+          },
+          "s3Access": {
+           "$ref": "#/components/schemas/SequenceStoreS3Access"
+          },
+          "sseConfig": {
+           "$ref": "#/components/schemas/SseConfig"
+          },
+          "status": {
+           "enum": [
+            "CREATING",
+            "ACTIVE",
+            "UPDATING",
+            "DELETING",
+            "FAILED"
+           ],
+           "type": "string"
+          },
+          "statusMessage": {
+           "maxLength": 127,
+           "minLength": 1,
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateSequenceStore",
+    "tags": [
+     "AWS HealthOmics"
+    ]
+   }
+  },
+  "/sequencestore/{id}": {
+   "delete": {
+    "operationId": "omicsDeleteSequenceStore",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "omics"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "id",
+      "required": true,
+      "schema": {
+       "maxLength": 36,
+       "minLength": 10,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteSequenceStore",
+    "tags": [
+     "AWS HealthOmics"
+    ]
+   },
+   "get": {
+    "operationId": "omicsGetSequenceStore",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "omics"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "id",
+      "required": true,
+      "schema": {
+       "maxLength": 36,
+       "minLength": 10,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "arn": {
+           "maxLength": 127,
+           "minLength": 1,
+           "type": "string"
+          },
+          "creationTime": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "description": {
+           "maxLength": 255,
+           "minLength": 1,
+           "type": "string"
+          },
+          "eTagAlgorithmFamily": {
+           "enum": [
+            "MD5up",
+            "SHA256up",
+            "SHA512up"
+           ],
+           "type": "string"
+          },
+          "fallbackLocation": {
+           "type": "string"
+          },
+          "id": {
+           "maxLength": 36,
+           "minLength": 10,
+           "type": "string"
+          },
+          "name": {
+           "maxLength": 127,
+           "minLength": 1,
+           "type": "string"
+          },
+          "propagatedSetLevelTags": {
+           "items": {
+            "maxLength": 128,
+            "minLength": 1,
+            "type": "string"
+           },
+           "maxItems": 50,
+           "minItems": 0,
+           "type": "array"
+          },
+          "s3Access": {
+           "$ref": "#/components/schemas/SequenceStoreS3Access"
+          },
+          "sseConfig": {
+           "$ref": "#/components/schemas/SseConfig"
+          },
+          "status": {
+           "enum": [
+            "CREATING",
+            "ACTIVE",
+            "UPDATING",
+            "DELETING",
+            "FAILED"
+           ],
+           "type": "string"
+          },
+          "statusMessage": {
+           "maxLength": 127,
+           "minLength": 1,
+           "type": "string"
+          },
+          "updateTime": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "GetSequenceStore",
+    "tags": [
+     "AWS HealthOmics"
+    ]
+   },
+   "patch": {
+    "operationId": "omicsUpdateSequenceStore",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "omics"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "id",
+      "required": true,
+      "schema": {
+       "maxLength": 36,
+       "minLength": 10,
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "clientToken": {
+          "maxLength": 127,
+          "minLength": 1,
+          "type": "string"
+         },
+         "description": {
+          "maxLength": 255,
+          "minLength": 1,
+          "type": "string"
+         },
+         "fallbackLocation": {
+          "type": "string"
+         },
+         "name": {
+          "maxLength": 127,
+          "minLength": 1,
+          "type": "string"
+         },
+         "propagatedSetLevelTags": {
+          "items": {
+           "maxLength": 128,
+           "minLength": 1,
+           "type": "string"
+          },
+          "maxItems": 50,
+          "minItems": 0,
+          "type": "array"
+         },
+         "s3AccessConfig": {
+          "$ref": "#/components/schemas/S3AccessConfig"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "arn": {
+           "maxLength": 127,
+           "minLength": 1,
+           "type": "string"
+          },
+          "creationTime": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "description": {
+           "maxLength": 255,
+           "minLength": 1,
+           "type": "string"
+          },
+          "eTagAlgorithmFamily": {
+           "enum": [
+            "MD5up",
+            "SHA256up",
+            "SHA512up"
+           ],
+           "type": "string"
+          },
+          "fallbackLocation": {
+           "type": "string"
+          },
+          "id": {
+           "maxLength": 36,
+           "minLength": 10,
+           "type": "string"
+          },
+          "name": {
+           "maxLength": 127,
+           "minLength": 1,
+           "type": "string"
+          },
+          "propagatedSetLevelTags": {
+           "items": {
+            "maxLength": 128,
+            "minLength": 1,
+            "type": "string"
+           },
+           "maxItems": 50,
+           "minItems": 0,
+           "type": "array"
+          },
+          "s3Access": {
+           "$ref": "#/components/schemas/SequenceStoreS3Access"
+          },
+          "sseConfig": {
+           "$ref": "#/components/schemas/SseConfig"
+          },
+          "status": {
+           "enum": [
+            "CREATING",
+            "ACTIVE",
+            "UPDATING",
+            "DELETING",
+            "FAILED"
+           ],
+           "type": "string"
+          },
+          "statusMessage": {
+           "maxLength": 127,
+           "minLength": 1,
+           "type": "string"
+          },
+          "updateTime": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UpdateSequenceStore",
+    "tags": [
+     "AWS HealthOmics"
+    ]
+   }
+  },
+  "/sequencestores": {
+   "post": {
+    "operationId": "omicsListSequenceStores",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "omics"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "maxResults",
+      "schema": {
+       "maximum": 100,
+       "minimum": 1,
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "nextToken",
+      "schema": {
+       "maxLength": 6144,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "filter": {
+          "$ref": "#/components/schemas/SequenceStoreFilter"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "nextToken": {
+           "maxLength": 6144,
+           "minLength": 1,
+           "type": "string"
+          },
+          "sequenceStores": {
+           "items": {
+            "$ref": "#/components/schemas/SequenceStoreDetail"
+           },
+           "type": "array"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListSequenceStores",
+    "tags": [
+     "AWS HealthOmics"
+    ]
+   }
+  },
+  "/tags/{resourceArn}": {
+   "delete": {
+    "operationId": "omicsUntagResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "omics"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceArn",
+      "required": true,
+      "schema": {
+       "maxLength": 150,
+       "minLength": 1,
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "tagKeys",
+      "schema": {
+       "items": {
+        "maxLength": 128,
+        "minLength": 1,
+        "type": "string"
+       },
+       "maxItems": 50,
+       "minItems": 0,
+       "type": "array"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UntagResource",
+    "tags": [
+     "AWS HealthOmics"
+    ]
+   },
+   "get": {
+    "operationId": "omicsListTagsForResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "omics"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceArn",
+      "required": true,
+      "schema": {
+       "maxLength": 150,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "tags": {
+           "additionalProperties": {
+            "maxLength": 256,
+            "minLength": 0,
+            "type": "string"
+           },
+           "type": "object"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListTagsForResource",
+    "tags": [
+     "AWS HealthOmics"
+    ]
+   },
+   "post": {
+    "operationId": "omicsTagResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "omics"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceArn",
+      "required": true,
+      "schema": {
+       "maxLength": 150,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "tags": {
+          "additionalProperties": {
+           "maxLength": 256,
+           "minLength": 0,
+           "type": "string"
+          },
+          "maxProperties": 50,
+          "minProperties": 0,
+          "type": "object"
+         }
+        },
+        "required": [
+         "tags"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "TagResource",
+    "tags": [
+     "AWS HealthOmics"
+    ]
+   }
+  }
+ },
+ "servers": [
+  {
+   "description": "This simulator only",
+   "url": "/"
+  }
+ ],
+ "tags": [
+  {
+   "description": "Bounded simulator subset of the official Amazon Omics API (2022-11-28). Every other official operation returns HTTP 501 UnknownOperationException. Run groups, run caches, sequence stores and reference stores are stored configuration records: no workflow runs, no run task, cache entry, read set, reference genome or S3 access point exists, nothing is imported, exported, activated or uploaded, and every other official operation returns UnknownOperationException with HTTP 501. A sequence store stays CREATING and holds no sequence data; run caches are ACTIVE records whose S3 location is stored without being read or written. Workflows and workflow versions are not implemented: their definitions are ZIP archives or repository references whose content the official output only returns as presigned URLs, which the simulator does not hold. Annotation stores, variant stores and their versions are not implemented: a store needs a reference genome that only an import job can create. Shares, S3 access policies, multipart read set uploads and every start, cancel and job operation are not implemented either. Identifiers are numeric as the official patterns require (10 digits). When the request carries its idempotency token (requestId, clientToken) the identifier is derived from the token and operation, so replaying the same request returns the same record and reusing a token with different parameters fails with ConflictException; a token reused after its 24-hour replay window can recreate an identifier. CreateReferenceStore models no idempotency token: its clientToken is accepted but not recorded. Names need not be unique. Resource counts per Region (25 run groups, 25 run caches, 15 sequence stores, 5 reference stores) are local limits. s3AccessConfig of a sequence store is refused because it would create an S3 access point. sseConfig, fallbackLocation, propagatedSetLevelTags and eTagAlgorithmFamily (MD5up when omitted, as documented) are stored without contacting KMS or S3, and S3 locations (cacheS3Location, fallbackLocation) must be s3://bucket with an optional prefix, which the official pattern states but RE2 cannot enforce. ListSequenceStores filters by name and status and ListReferenceStores by name, with the created and updated time bounds refused. Deleting a store or a run group deletes the record without a read set, reference or run check because none can exist.",
+   "name": "AWS HealthOmics"
+  }
+ ],
+ "x-simulator-source": {
+  "package": "botocore",
+  "version": "1.41.6",
+  "file": "botocore/data/omics/2022-11-28/service-2.json",
+  "sha256": "0ee9734d92778e3af4abfe909c4ff131ff66ab47cc712124827bfb97583a7191",
+  "license": "Apache-2.0"
+ }
+}

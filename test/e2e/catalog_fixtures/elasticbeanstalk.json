@@ -1,0 +1,39 @@
+{
+ "client": "elasticbeanstalk",
+ "denied": "AccessDenied",
+ "steps": [
+  {"op": "create_application", "args": {"ApplicationName": "fixture-shop", "Description": "storefront", "ResourceLifecycleConfig": {"ServiceRole": "arn:aws:iam::000000000000:role/fixture-service", "VersionLifecycleConfig": {"MaxCountRule": {"Enabled": true, "MaxCount": 5, "DeleteSourceFromS3": false}}}, "Tags": [{"Key": "team", "Value": "a"}]}, "expect": {"Application.ApplicationName": "fixture-shop", "Application.ApplicationArn": "arn:aws:elasticbeanstalk:us-east-1:000000000000:application/fixture-shop", "Application.ResourceLifecycleConfig.VersionLifecycleConfig.MaxCountRule.MaxCount": 5}},
+  {"op": "create_application", "args": {"ApplicationName": "fixture-blog"}},
+  {"op": "describe_applications", "args": {}, "expect": {"Applications#count": 2}},
+  {"op": "describe_applications", "args": {"ApplicationNames": ["fixture-blog"]}, "expect": {"Applications#count": 1, "Applications[0].ApplicationName": "fixture-blog"}},
+  {"op": "update_application", "args": {"ApplicationName": "fixture-blog", "Description": "writing"}, "expect": {"Application.Description": "writing"}},
+  {"op": "update_application_resource_lifecycle", "args": {"ApplicationName": "fixture-blog", "ResourceLifecycleConfig": {"ServiceRole": "arn:aws:iam::000000000000:role/fixture-service", "VersionLifecycleConfig": {"MaxAgeRule": {"Enabled": true, "MaxAgeInDays": 30}}}}, "expect": {"ApplicationName": "fixture-blog", "ResourceLifecycleConfig.VersionLifecycleConfig.MaxAgeRule.MaxAgeInDays": 30}},
+  {"op": "create_application_version", "args": {"ApplicationName": "fixture-shop", "VersionLabel": "v1", "Description": "first", "Tags": [{"Key": "stage", "Value": "dev"}]}, "expect": {"ApplicationVersion.VersionLabel": "v1", "ApplicationVersion.ApplicationVersionArn": "arn:aws:elasticbeanstalk:us-east-1:000000000000:applicationversion/fixture-shop/v1"}},
+  {"op": "create_application_version", "args": {"ApplicationName": "fixture-shop", "VersionLabel": "v2", "Process": false, "AutoCreateApplication": false}},
+  {"op": "describe_application_versions", "args": {"ApplicationName": "fixture-shop"}, "expect": {"ApplicationVersions#count": 2}},
+  {"op": "describe_application_versions", "args": {"ApplicationName": "fixture-shop", "VersionLabels": ["v2"]}, "expect": {"ApplicationVersions#count": 1, "ApplicationVersions[0].VersionLabel": "v2"}},
+  {"op": "describe_application_versions", "args": {"ApplicationName": "fixture-shop", "MaxRecords": 1}, "expect": {"ApplicationVersions#count": 1}},
+  {"op": "update_application_version", "args": {"ApplicationName": "fixture-shop", "VersionLabel": "v2", "Description": "second"}, "expect": {"ApplicationVersion.Description": "second"}},
+  {"op": "list_tags_for_resource", "args": {"ResourceArn": "arn:aws:elasticbeanstalk:us-east-1:000000000000:application/fixture-shop"}, "expect": {"ResourceTags#count": 1, "ResourceTags[0].Key": "team"}},
+  {"op": "list_tags_for_resource", "args": {"ResourceArn": "arn:aws:elasticbeanstalk:us-east-1:000000000000:applicationversion/fixture-shop/v1"}, "expect": {"ResourceTags[0].Value": "dev"}},
+  {"op": "create_application", "args": {"ApplicationName": "fixture-shop"}, "error": "InvalidParameterValue", "status": 400},
+  {"op": "create_application_version", "args": {"ApplicationName": "fixture-shop", "VersionLabel": "v3", "SourceBundle": {"S3Bucket": "bundles", "S3Key": "shop.zip"}}, "error": "InvalidParameterValue", "status": 400},
+  {"op": "create_application_version", "args": {"ApplicationName": "fixture-missing", "VersionLabel": "v1"}, "error": "InvalidParameterValue", "status": 400},
+  {"op": "describe_application_versions", "args": {}, "error": "InvalidParameterValue", "status": 400},
+  {"op": "list_tags_for_resource", "args": {"ResourceArn": "arn:aws:elasticbeanstalk:us-east-1:000000000000:application/fixture-missing"}, "error": "ResourceNotFoundException", "status": 400},
+  {"op": "create_environment", "args": {"ApplicationName": "fixture-shop", "EnvironmentName": "fixture-env"}, "error": "UnknownOperationException", "status": 501}
+ ],
+ "isolation": [
+  {"op": "describe_applications", "args": {}, "expect": {"Applications#count": 0}}
+ ],
+ "after_restart": [
+  {"op": "describe_application_versions", "args": {"ApplicationName": "fixture-shop", "VersionLabels": ["v2"]}, "expect": {"ApplicationVersions[0].Description": "second"}},
+  {"op": "describe_applications", "args": {"ApplicationNames": ["fixture-blog"]}, "expect": {"Applications[0].ResourceLifecycleConfig.VersionLifecycleConfig.MaxAgeRule.MaxAgeInDays": 30}}
+ ],
+ "cleanup": [
+  {"op": "delete_application_version", "args": {"ApplicationName": "fixture-shop", "VersionLabel": "v2", "DeleteSourceBundle": false}},
+  {"op": "delete_application", "args": {"ApplicationName": "fixture-shop", "TerminateEnvByForce": true}},
+  {"op": "delete_application", "args": {"ApplicationName": "fixture-blog"}},
+  {"op": "describe_applications", "args": {}, "expect": {"Applications#count": 0}}
+ ]
+}

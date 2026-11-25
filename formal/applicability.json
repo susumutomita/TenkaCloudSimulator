@@ -1,5 +1,5 @@
 {
-  "base_sha": "142888be7812c841f440f4d6b7f6c727f2adc0f8",
+  "base_sha": "b55d5345a9ef292b12d1d52900cbc033c3828ccd",
   "version": 1,
   "changes": [
     {
@@ -127,9 +127,9 @@
     },
     {
       "path": "formal/models.json",
-      "sha256": "d599d14ec9490f53580da805891ac87453b4dbdcb1a57fb0d2dab94593f8b83e",
+      "sha256": "350e84e2801cd7acbce3af5c90fe716046258393b40ab444e94ab9ac665d0965",
       "disposition": "formal-infrastructure",
-      "reason": "Preserves all main model registrations including the four SimpleDB models and retains the existing bounded Azure read admission, CRC64 conditional read and row-download models.",
+      "reason": "Preserves all current main registrations including SimpleDB and merged catalog/SAR coverage, and retains the three bounded Azure read admission, CRC64 conditional read and row-download models.",
       "models": []
     },
     {
@@ -343,7 +343,7 @@
     },
     {
       "path": "internal/server/web/app.js",
-      "sha256": "230f221ee73981220dbe10808ec70961a0e58b9b0eb9f115cb3f3a329885bf36",
+      "sha256": "2d9f6d15289c437921972bbd6c084dd42623358a8271a71aa6d6c72f34c6c86f",
       "disposition": "modeled",
       "reason": "Model binds only the changed Azure row target, retirement epoch and successful payload publication. Exact bundle additionally retains already merged Cloud DNS and Sakura Server console inputs.",
       "models": [
@@ -360,16 +360,16 @@
     },
     {
       "path": "scripts/formal_model_gate.py",
-      "sha256": "3d6bc3806e6cc47be3216793c65918f50adb391a69b85a67c3c78080d134fec8",
+      "sha256": "03c7c6c7fb514b90d9be98dd87760af523e2324d42a7ce15a7e69e8ae4c2837c",
       "disposition": "formal-infrastructure",
       "reason": "Registers or pins the bounded XSM checks and preserves the existing exact model/control inventory.",
       "models": []
     },
     {
       "path": "scripts/test-formal-gate.py",
-      "sha256": "c20c9518c313e50b0126a8923a4643097db46e71c18a6fa89bbf2bd34404afc0",
+      "sha256": "3b6795532b660d7dd3555723f1270f124c4b5e93624f180536b9a2f569539d68",
       "disposition": "formal-infrastructure",
-      "reason": "Preserves main SimpleDB policy detector tests and explicit inventory while retaining the existing three bounded Azure read model inventory and detector tests.",
+      "reason": "Preserves current main SimpleDB and merged catalog/SAR policy detector tests and inventory while retaining the existing three Azure read model detector tests.",
       "models": []
     },
     {
@@ -388,14 +388,14 @@
     },
     {
       "path": "tools/console/bundle-digests.json",
-      "sha256": "963d60d57613e120e10edd706aeb5768ab72bd255cf565e4641210f80490fe0d",
+      "sha256": "110c96fd22c6acbe2bea7fd69068bebadb2903925e1e51002491301de869684f",
       "disposition": "presentation",
       "reason": "Azure console presentation or generated asset metadata; unrelated provider styles and signed runtime policy unchanged.",
       "models": []
     },
     {
       "path": "tools/console/bundle-inputs.json",
-      "sha256": "dd1a77abe2b8f17a32cda330d9a457ed7f6ad4d656818c34faf96ee4c66905c1",
+      "sha256": "26243a7fee5fd894464ceabbc3f8af567e653d07d45e625963d57b0842f9b70c",
       "disposition": "presentation",
       "reason": "Azure console presentation or generated asset metadata; unrelated provider styles and signed runtime policy unchanged.",
       "models": []

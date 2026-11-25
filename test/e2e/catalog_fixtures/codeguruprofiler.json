@@ -1,0 +1,24 @@
+{
+ "client": "codeguruprofiler",
+ "steps": [
+  {"op": "create_profiling_group", "args": {"profilingGroupName": "fixture-service", "agentOrchestrationConfig": {"profilingEnabled": true}, "tags": {"team": "a"}}, "save": {"arn": "profilingGroup.arn"}, "expect": {"profilingGroup.computePlatform": "Default"}},
+  {"op": "describe_profiling_group", "args": {"profilingGroupName": "fixture-service"}, "expect": {"profilingGroup.name": "fixture-service", "profilingGroup.agentOrchestrationConfig.profilingEnabled": true, "profilingGroup.tags.team": "a"}},
+  {"op": "list_profiling_groups", "args": {"includeDescription": true}, "expect": {"profilingGroupNames#count": 1, "profilingGroups#count": 1}},
+  {"op": "update_profiling_group", "args": {"profilingGroupName": "fixture-service", "agentOrchestrationConfig": {"profilingEnabled": false}}, "expect": {"profilingGroup.agentOrchestrationConfig.profilingEnabled": false}},
+  {"op": "tag_resource", "args": {"resourceArn": "${arn}", "tags": {"env": "dev"}}},
+  {"op": "untag_resource", "args": {"resourceArn": "${arn}", "tagKeys": ["env"]}},
+  {"op": "list_tags_for_resource", "args": {"resourceArn": "${arn}"}, "expect": {"tags.team": "a"}},
+  {"op": "create_profiling_group", "args": {"profilingGroupName": "fixture-service"}, "error": "ConflictException", "status": 409},
+  {"op": "describe_profiling_group", "args": {"profilingGroupName": "fixture-missing"}, "error": "ResourceNotFoundException", "status": 404}
+ ],
+ "isolation": [
+  {"op": "list_profiling_groups", "args": {}, "expect": {"profilingGroupNames#count": 0}}
+ ],
+ "after_restart": [
+  {"op": "describe_profiling_group", "args": {"profilingGroupName": "fixture-service"}, "expect": {"profilingGroup.agentOrchestrationConfig.profilingEnabled": false}}
+ ],
+ "cleanup": [
+  {"op": "delete_profiling_group", "args": {"profilingGroupName": "fixture-service"}},
+  {"op": "list_profiling_groups", "args": {}, "expect": {"profilingGroupNames#count": 0}}
+ ]
+}

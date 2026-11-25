@@ -1,0 +1,24 @@
+{
+ "client": "bcm-data-exports",
+ "steps": [
+  {"op": "create_export", "args": {"Export": {"Name": "fixture-costs", "Description": "fixture", "RefreshCadence": {"Frequency": "SYNCHRONOUS"}, "DataQuery": {"QueryStatement": "SELECT identity_line_item_id FROM COST_AND_USAGE_REPORT"}, "DestinationConfigurations": {"S3Destination": {"S3Bucket": "fixture-bucket", "S3Prefix": "p", "S3Region": "us-east-1", "S3OutputConfigurations": {"Compression": "GZIP", "Format": "TEXT_OR_CSV", "OutputType": "CUSTOM", "Overwrite": "OVERWRITE_REPORT"}}}}, "ResourceTags": [{"Key": "team", "Value": "a"}]}, "save": {"export": "ExportArn"}},
+  {"op": "get_export", "args": {"ExportArn": "${export}"}, "expect": {"Export.Name": "fixture-costs"}},
+  {"op": "update_export", "args": {"ExportArn": "${export}", "Export": {"Name": "fixture-costs2", "Description": "fixture", "RefreshCadence": {"Frequency": "SYNCHRONOUS"}, "DataQuery": {"QueryStatement": "SELECT 2"}, "DestinationConfigurations": {"S3Destination": {"S3Bucket": "fixture-bucket", "S3Prefix": "p", "S3Region": "us-east-1", "S3OutputConfigurations": {"Compression": "GZIP", "Format": "TEXT_OR_CSV", "OutputType": "CUSTOM", "Overwrite": "OVERWRITE_REPORT"}}}}}},
+  {"op": "list_exports", "args": {}, "expect": {"Exports#count": 1, "Exports[0].ExportName": "fixture-costs2"}},
+  {"op": "tag_resource", "args": {"ResourceArn": "${export}", "ResourceTags": [{"Key": "extra", "Value": "1"}]}},
+  {"op": "list_tags_for_resource", "args": {"ResourceArn": "${export}"}, "expect": {"ResourceTags#count": 2}},
+  {"op": "untag_resource", "args": {"ResourceArn": "${export}", "ResourceTagKeys": ["extra"]}},
+  {"op": "create_export", "args": {"Export": {"Name": "fixture-bad", "Description": "fixture", "RefreshCadence": {"Frequency": "SYNCHRONOUS"}, "DataQuery": {"QueryStatement": "DROP TABLE x"}, "DestinationConfigurations": {"S3Destination": {"S3Bucket": "fixture-bucket", "S3Prefix": "p", "S3Region": "us-east-1", "S3OutputConfigurations": {"Compression": "GZIP", "Format": "TEXT_OR_CSV", "OutputType": "CUSTOM", "Overwrite": "OVERWRITE_REPORT"}}}}}, "error": "ValidationException"},
+  {"op": "get_export", "args": {"ExportArn": "arn:aws:bcm-data-exports:us-east-1:000000000000:export/missing"}, "error": "ResourceNotFoundException"}
+ ],
+ "isolation": [
+  {"op": "list_exports", "args": {}, "expect": {"Exports#count": 0}}
+ ],
+ "after_restart": [
+  {"op": "get_export", "args": {"ExportArn": "${export}"}, "expect": {"Export.Name": "fixture-costs2"}}
+ ],
+ "cleanup": [
+  {"op": "delete_export", "args": {"ExportArn": "${export}"}},
+  {"op": "list_exports", "args": {}, "expect": {"Exports#count": 0}}
+ ]
+}

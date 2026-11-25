@@ -1,0 +1,54 @@
+{
+ "client": "docdb",
+ "model": "rds",
+ "denied": "AccessDenied",
+ "steps": [
+  {"op": "create_db_subnet_group", "args": {"DBSubnetGroupName": "Fixture-doc-Subnets", "DBSubnetGroupDescription": "fixture", "SubnetIds": ["subnet-0a1b2c3d", "subnet-4e5f6a7b"], "Tags": [{"Key": "team", "Value": "a"}]}, "save": {"subnets": "DBSubnetGroup.DBSubnetGroupArn"}, "expect": {"DBSubnetGroup.DBSubnetGroupName": "fixture-doc-subnets", "DBSubnetGroup.Subnets#count": 2}},
+  {"op": "describe_db_subnet_groups", "args": {"DBSubnetGroupName": "fixture-doc-subnets"}, "expect": {"DBSubnetGroups#count": 1, "DBSubnetGroups[0].DBSubnetGroupDescription": "fixture"}},
+  {"op": "modify_db_subnet_group", "args": {"DBSubnetGroupName": "fixture-doc-subnets", "DBSubnetGroupDescription": "three", "SubnetIds": ["subnet-0a1b2c3d", "subnet-4e5f6a7b", "subnet-0123456789abcdef0"]}, "expect": {"DBSubnetGroup.Subnets#count": 3, "DBSubnetGroup.DBSubnetGroupDescription": "three"}},
+  {"op": "create_db_cluster_parameter_group", "args": {"DBClusterParameterGroupName": "Fixture-doc-Cluster", "DBParameterGroupFamily": "docdb5.0", "Description": "fixture"}, "save": {"cluster": "DBClusterParameterGroup.DBClusterParameterGroupArn"}, "expect": {"DBClusterParameterGroup.DBClusterParameterGroupName": "fixture-doc-cluster", "DBClusterParameterGroup.DBParameterGroupFamily": "docdb5.0", "DBClusterParameterGroup.DBClusterParameterGroupArn": "arn:aws:rds:us-east-1:000000000000:cluster-pg:fixture-doc-cluster"}},
+  {"op": "describe_db_cluster_parameter_groups", "args": {"DBClusterParameterGroupName": "fixture-doc-cluster"}, "expect": {"DBClusterParameterGroups#count": 1}},
+  {"op": "add_tags_to_resource", "args": {"ResourceName": "${cluster}", "Tags": [{"Key": "stage", "Value": "dev"}, {"Key": "drop", "Value": "me"}]}},
+  {"op": "remove_tags_from_resource", "args": {"ResourceName": "${cluster}", "TagKeys": ["drop"]}},
+  {"op": "list_tags_for_resource", "args": {"ResourceName": "${cluster}"}, "expect": {"TagList": [{"Key": "stage", "Value": "dev"}]}},
+  {"op": "list_tags_for_resource", "args": {"ResourceName": "${subnets}"}, "expect": {"TagList[0].Key": "team"}},
+  {"op": "create_db_subnet_group", "args": {"DBSubnetGroupName": "fixture-doc-subnets", "DBSubnetGroupDescription": "again", "SubnetIds": ["subnet-0a1b2c3d", "subnet-4e5f6a7b"]}, "error": "DBSubnetGroupAlreadyExists", "status": 400},
+  {"op": "describe_db_subnet_groups", "args": {"DBSubnetGroupName": "fixture-missing"}, "error": "DBSubnetGroupNotFoundFault", "status": 404},
+  {"op": "describe_db_cluster_parameter_groups", "args": {"DBClusterParameterGroupName": "fixture-missing"}, "error": "DBParameterGroupNotFound", "status": 404},
+  {"op": "describe_db_subnet_groups", "args": {"Filters": [{"Name": "engine", "Values": ["doc"]}]}, "error": "InvalidParameterValue", "status": 400},
+  {"op": "create_db_cluster", "args": {"DBClusterIdentifier": "fixture-doc", "Engine": "docdb", "MasterUsername": "dbadmin", "DBSubnetGroupName": "fixture-doc-subnets", "DBClusterParameterGroupName": "fixture-doc-cluster", "Tags": [{"Key": "team", "Value": "b"}]}, "save": {"dbcluster": "DBCluster.DBClusterArn"}, "expect": {"DBCluster.DBClusterIdentifier": "fixture-doc", "DBCluster.Status": "creating", "DBCluster.Engine": "docdb"}},
+  {"op": "describe_db_clusters", "args": {"DBClusterIdentifier": "fixture-doc"}, "expect": {"DBClusters#count": 1, "DBClusters[0].Status": "creating"}},
+  {"op": "modify_db_cluster", "args": {"DBClusterIdentifier": "fixture-doc", "ApplyImmediately": true, "BackupRetentionPeriod": 3}, "expect": {"DBCluster.BackupRetentionPeriod": 3}},
+  {"op": "create_db_instance", "args": {"DBInstanceIdentifier": "fixture-doc-1", "DBInstanceClass": "db.r5.large", "Engine": "docdb", "DBClusterIdentifier": "fixture-doc"}, "save": {"dbinstance": "DBInstance.DBInstanceArn"}, "expect": {"DBInstance.DBInstanceStatus": "creating", "DBInstance.DBClusterIdentifier": "fixture-doc"}},
+  {"op": "describe_db_instances", "args": {"DBInstanceIdentifier": "fixture-doc-1"}, "expect": {"DBInstances#count": 1}},
+  {"op": "modify_db_instance", "args": {"DBInstanceIdentifier": "fixture-doc-1", "ApplyImmediately": true, "PromotionTier": 2}, "expect": {"DBInstance.PromotionTier": 2}},
+  {"op": "add_tags_to_resource", "args": {"ResourceName": "${dbinstance}", "Tags": [{"Key": "stage", "Value": "dev"}]}},
+  {"op": "create_db_cluster", "args": {"DBClusterIdentifier": "fixture-doc", "Engine": "docdb"}, "error": "DBClusterAlreadyExistsFault", "status": 400},
+  {"op": "describe_db_clusters", "args": {"DBClusterIdentifier": "fixture-missing"}, "error": "DBClusterNotFoundFault", "status": 404},
+  {"op": "delete_db_cluster", "args": {"DBClusterIdentifier": "fixture-doc"}, "error": "InvalidParameterValue", "status": 400},
+  {"op": "failover_db_cluster", "args": {"DBClusterIdentifier": "fixture-doc"}, "error": "UnknownOperationException", "status": 501},
+  {"op": "reboot_db_instance", "args": {"DBInstanceIdentifier": "fixture-doc-1"}, "error": "UnknownOperationException", "status": 501}
+ ],
+ "isolation": [
+  {"op": "describe_db_subnet_groups", "args": {}, "expect": {"DBSubnetGroups#count": 0}},
+  {"op": "describe_db_cluster_parameter_groups", "args": {}, "expect": {"DBClusterParameterGroups#count": 0}},
+  {"op": "describe_db_clusters", "args": {}, "expect": {"DBClusters#count": 0}},
+  {"op": "describe_db_instances", "args": {}, "expect": {"DBInstances#count": 0}}
+ ],
+ "after_restart": [
+  {"op": "describe_db_subnet_groups", "args": {"DBSubnetGroupName": "fixture-doc-subnets"}, "expect": {"DBSubnetGroups[0].Subnets#count": 3}},
+  {"op": "list_tags_for_resource", "args": {"ResourceName": "${cluster}"}, "expect": {"TagList": [{"Key": "stage", "Value": "dev"}]}},
+  {"op": "describe_db_clusters", "args": {"DBClusterIdentifier": "fixture-doc"}, "expect": {"DBClusters[0].BackupRetentionPeriod": 3}},
+  {"op": "list_tags_for_resource", "args": {"ResourceName": "${dbinstance}"}, "expect": {"TagList": [{"Key": "stage", "Value": "dev"}]}}
+ ],
+ "cleanup": [
+  {"op": "delete_db_instance", "args": {"DBInstanceIdentifier": "fixture-doc-1"}, "expect": {"DBInstance.DBInstanceStatus": "deleting"}},
+  {"op": "delete_db_cluster", "args": {"DBClusterIdentifier": "fixture-doc", "SkipFinalSnapshot": true}, "expect": {"DBCluster.Status": "deleting"}},
+  {"op": "delete_db_subnet_group", "args": {"DBSubnetGroupName": "fixture-doc-subnets"}},
+  {"op": "delete_db_cluster_parameter_group", "args": {"DBClusterParameterGroupName": "fixture-doc-cluster"}},
+  {"op": "describe_db_subnet_groups", "args": {"DBSubnetGroupName": "fixture-doc-subnets"}, "error": "DBSubnetGroupNotFoundFault", "status": 404},
+  {"op": "describe_db_cluster_parameter_groups", "args": {"DBClusterParameterGroupName": "fixture-doc-cluster"}, "error": "DBParameterGroupNotFound", "status": 404},
+  {"op": "describe_db_clusters", "args": {"DBClusterIdentifier": "fixture-doc"}, "error": "DBClusterNotFoundFault", "status": 404},
+  {"op": "describe_db_instances", "args": {"DBInstanceIdentifier": "fixture-doc-1"}, "error": "DBInstanceNotFound", "status": 404}
+ ]
+}

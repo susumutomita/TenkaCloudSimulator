@@ -111,11 +111,17 @@ var appStream = &Service{
 	},
 }
 
-// appStreamSetupScript applies the documented rule that CUSTOM app blocks,
-// the default packaging type, need setup script details.
+// appStreamSetupScript enforces the documented script constraints for the
+// packaging type. Omitted PackagingType uses the CUSTOM rules.
 func appStreamSetupScript(input map[string]any) error {
-	if _, ok := input["SetupScriptDetails"]; !ok && input["PackagingType"] != "APPSTREAM2" {
+	if input["PackagingType"] == "APPSTREAM2" {
+		return nil
+	}
+	if _, ok := input["SetupScriptDetails"]; !ok {
 		return Failure("InvalidParameterCombinationException", "SetupScriptDetails must be provided for the CUSTOM packaging type.")
+	}
+	if _, ok := input["PostSetupScriptDetails"]; ok {
+		return Failure("ValidationException", "PostSetupScriptDetails requires the APPSTREAM2 packaging type.")
 	}
 	return nil
 }

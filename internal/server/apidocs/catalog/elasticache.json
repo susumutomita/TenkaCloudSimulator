@@ -83,6 +83,214 @@
     },
     "type": "object"
    },
+   "CacheCluster": {
+    "additionalProperties": false,
+    "properties": {
+     "ARN": {
+      "type": "string"
+     },
+     "AtRestEncryptionEnabled": {
+      "type": "boolean"
+     },
+     "AuthTokenEnabled": {
+      "type": "boolean"
+     },
+     "AuthTokenLastModifiedDate": {
+      "format": "date-time",
+      "type": "string"
+     },
+     "AutoMinorVersionUpgrade": {
+      "type": "boolean"
+     },
+     "CacheClusterCreateTime": {
+      "format": "date-time",
+      "type": "string"
+     },
+     "CacheClusterId": {
+      "type": "string"
+     },
+     "CacheClusterStatus": {
+      "type": "string"
+     },
+     "CacheNodeType": {
+      "type": "string"
+     },
+     "CacheNodes": {
+      "items": {
+       "$ref": "#/components/schemas/CacheNode",
+       "xml": {
+        "name": "CacheNode"
+       }
+      },
+      "type": "array",
+      "xml": {
+       "wrapped": true
+      }
+     },
+     "CacheParameterGroup": {
+      "$ref": "#/components/schemas/CacheParameterGroupStatus"
+     },
+     "CacheSecurityGroups": {
+      "items": {
+       "$ref": "#/components/schemas/CacheSecurityGroupMembership",
+       "xml": {
+        "name": "CacheSecurityGroup"
+       }
+      },
+      "type": "array",
+      "xml": {
+       "wrapped": true
+      }
+     },
+     "CacheSubnetGroupName": {
+      "type": "string"
+     },
+     "ClientDownloadLandingPage": {
+      "type": "string"
+     },
+     "ConfigurationEndpoint": {
+      "$ref": "#/components/schemas/Endpoint"
+     },
+     "Engine": {
+      "type": "string"
+     },
+     "EngineVersion": {
+      "type": "string"
+     },
+     "IpDiscovery": {
+      "enum": [
+       "ipv4",
+       "ipv6"
+      ],
+      "type": "string"
+     },
+     "LogDeliveryConfigurations": {
+      "items": {
+       "$ref": "#/components/schemas/LogDeliveryConfiguration",
+       "xml": {
+        "name": "LogDeliveryConfiguration"
+       }
+      },
+      "type": "array",
+      "xml": {
+       "wrapped": true
+      }
+     },
+     "NetworkType": {
+      "enum": [
+       "ipv4",
+       "ipv6",
+       "dual_stack"
+      ],
+      "type": "string"
+     },
+     "NotificationConfiguration": {
+      "$ref": "#/components/schemas/NotificationConfiguration"
+     },
+     "NumCacheNodes": {
+      "type": "integer"
+     },
+     "PendingModifiedValues": {
+      "$ref": "#/components/schemas/PendingModifiedValues"
+     },
+     "PreferredAvailabilityZone": {
+      "type": "string"
+     },
+     "PreferredMaintenanceWindow": {
+      "type": "string"
+     },
+     "PreferredOutpostArn": {
+      "type": "string"
+     },
+     "ReplicationGroupId": {
+      "type": "string"
+     },
+     "ReplicationGroupLogDeliveryEnabled": {
+      "type": "boolean"
+     },
+     "SecurityGroups": {
+      "items": {
+       "$ref": "#/components/schemas/SecurityGroupMembership",
+       "xml": {
+        "name": "member"
+       }
+      },
+      "type": "array",
+      "xml": {
+       "wrapped": true
+      }
+     },
+     "SnapshotRetentionLimit": {
+      "type": "integer"
+     },
+     "SnapshotWindow": {
+      "type": "string"
+     },
+     "TransitEncryptionEnabled": {
+      "type": "boolean"
+     },
+     "TransitEncryptionMode": {
+      "enum": [
+       "preferred",
+       "required"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "CacheClusterMessage": {
+    "additionalProperties": false,
+    "properties": {
+     "CacheClusters": {
+      "items": {
+       "$ref": "#/components/schemas/CacheCluster",
+       "xml": {
+        "name": "CacheCluster"
+       }
+      },
+      "type": "array",
+      "xml": {
+       "wrapped": true
+      }
+     },
+     "Marker": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "CacheNode": {
+    "additionalProperties": false,
+    "properties": {
+     "CacheNodeCreateTime": {
+      "format": "date-time",
+      "type": "string"
+     },
+     "CacheNodeId": {
+      "type": "string"
+     },
+     "CacheNodeStatus": {
+      "type": "string"
+     },
+     "CustomerAvailabilityZone": {
+      "type": "string"
+     },
+     "CustomerOutpostArn": {
+      "type": "string"
+     },
+     "Endpoint": {
+      "$ref": "#/components/schemas/Endpoint"
+     },
+     "ParameterGroupStatus": {
+      "type": "string"
+     },
+     "SourceCacheNodeId": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
    "CacheParameterGroup": {
     "additionalProperties": false,
     "properties": {
@@ -104,6 +312,30 @@
     },
     "type": "object"
    },
+   "CacheParameterGroupStatus": {
+    "additionalProperties": false,
+    "properties": {
+     "CacheNodeIdsToReboot": {
+      "items": {
+       "type": "string",
+       "xml": {
+        "name": "CacheNodeId"
+       }
+      },
+      "type": "array",
+      "xml": {
+       "wrapped": true
+      }
+     },
+     "CacheParameterGroupName": {
+      "type": "string"
+     },
+     "ParameterApplyStatus": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
    "CacheParameterGroupsMessage": {
     "additionalProperties": false,
     "properties": {
@@ -120,6 +352,18 @@
       }
      },
      "Marker": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "CacheSecurityGroupMembership": {
+    "additionalProperties": false,
+    "properties": {
+     "CacheSecurityGroupName": {
+      "type": "string"
+     },
+     "Status": {
       "type": "string"
      }
     },
@@ -189,6 +433,249 @@
      },
      "Marker": {
       "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "CacheUsageLimits": {
+    "additionalProperties": false,
+    "properties": {
+     "DataStorage": {
+      "$ref": "#/components/schemas/DataStorage"
+     },
+     "ECPUPerSecond": {
+      "$ref": "#/components/schemas/ECPUPerSecond"
+     }
+    },
+    "type": "object"
+   },
+   "CloudWatchLogsDestinationDetails": {
+    "additionalProperties": false,
+    "properties": {
+     "LogGroup": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "CreateCacheClusterRequest": {
+    "additionalProperties": false,
+    "patternProperties": {
+     "^CacheSecurityGroupNames\\.CacheSecurityGroupName\\.[1-9][0-9]*$": {
+      "type": "string"
+     },
+     "^LogDeliveryConfigurations\\.LogDeliveryConfigurationRequest\\.[1-9][0-9]*\\.DestinationDetails\\.CloudWatchLogsDetails\\.LogGroup$": {
+      "type": "string"
+     },
+     "^LogDeliveryConfigurations\\.LogDeliveryConfigurationRequest\\.[1-9][0-9]*\\.DestinationDetails\\.KinesisFirehoseDetails\\.DeliveryStream$": {
+      "type": "string"
+     },
+     "^LogDeliveryConfigurations\\.LogDeliveryConfigurationRequest\\.[1-9][0-9]*\\.DestinationType$": {
+      "enum": [
+       "cloudwatch-logs",
+       "kinesis-firehose"
+      ],
+      "type": "string"
+     },
+     "^LogDeliveryConfigurations\\.LogDeliveryConfigurationRequest\\.[1-9][0-9]*\\.Enabled$": {
+      "type": "boolean"
+     },
+     "^LogDeliveryConfigurations\\.LogDeliveryConfigurationRequest\\.[1-9][0-9]*\\.LogFormat$": {
+      "enum": [
+       "text",
+       "json"
+      ],
+      "type": "string"
+     },
+     "^LogDeliveryConfigurations\\.LogDeliveryConfigurationRequest\\.[1-9][0-9]*\\.LogType$": {
+      "enum": [
+       "slow-log",
+       "engine-log"
+      ],
+      "type": "string"
+     },
+     "^PreferredAvailabilityZones\\.PreferredAvailabilityZone\\.[1-9][0-9]*$": {
+      "type": "string"
+     },
+     "^PreferredOutpostArns\\.PreferredOutpostArn\\.[1-9][0-9]*$": {
+      "type": "string"
+     },
+     "^SecurityGroupIds\\.SecurityGroupId\\.[1-9][0-9]*$": {
+      "type": "string"
+     },
+     "^SnapshotArns\\.SnapshotArn\\.[1-9][0-9]*$": {
+      "type": "string"
+     },
+     "^Tags\\.Tag\\.[1-9][0-9]*\\.Key$": {
+      "type": "string"
+     },
+     "^Tags\\.Tag\\.[1-9][0-9]*\\.Value$": {
+      "type": "string"
+     }
+    },
+    "properties": {
+     "AZMode": {
+      "enum": [
+       "single-az",
+       "cross-az"
+      ],
+      "type": "string"
+     },
+     "Action": {
+      "const": "CreateCacheCluster",
+      "type": "string"
+     },
+     "AuthToken": {
+      "type": "string"
+     },
+     "AutoMinorVersionUpgrade": {
+      "type": "boolean"
+     },
+     "CacheClusterId": {
+      "type": "string"
+     },
+     "CacheNodeType": {
+      "type": "string"
+     },
+     "CacheParameterGroupName": {
+      "type": "string"
+     },
+     "CacheSecurityGroupNames": {
+      "const": "",
+      "description": "An empty list.",
+      "type": "string"
+     },
+     "CacheSubnetGroupName": {
+      "type": "string"
+     },
+     "Engine": {
+      "type": "string"
+     },
+     "EngineVersion": {
+      "type": "string"
+     },
+     "IpDiscovery": {
+      "enum": [
+       "ipv4",
+       "ipv6"
+      ],
+      "type": "string"
+     },
+     "LogDeliveryConfigurations": {
+      "const": "",
+      "description": "An empty list.",
+      "type": "string"
+     },
+     "NetworkType": {
+      "enum": [
+       "ipv4",
+       "ipv6",
+       "dual_stack"
+      ],
+      "type": "string"
+     },
+     "NotificationTopicArn": {
+      "type": "string"
+     },
+     "NumCacheNodes": {
+      "type": "integer"
+     },
+     "OutpostMode": {
+      "enum": [
+       "single-outpost",
+       "cross-outpost"
+      ],
+      "type": "string"
+     },
+     "Port": {
+      "type": "integer"
+     },
+     "PreferredAvailabilityZone": {
+      "type": "string"
+     },
+     "PreferredAvailabilityZones": {
+      "const": "",
+      "description": "An empty list.",
+      "type": "string"
+     },
+     "PreferredMaintenanceWindow": {
+      "type": "string"
+     },
+     "PreferredOutpostArn": {
+      "type": "string"
+     },
+     "PreferredOutpostArns": {
+      "const": "",
+      "description": "An empty list.",
+      "type": "string"
+     },
+     "ReplicationGroupId": {
+      "type": "string"
+     },
+     "SecurityGroupIds": {
+      "const": "",
+      "description": "An empty list.",
+      "type": "string"
+     },
+     "SnapshotArns": {
+      "const": "",
+      "description": "An empty list.",
+      "type": "string"
+     },
+     "SnapshotName": {
+      "type": "string"
+     },
+     "SnapshotRetentionLimit": {
+      "type": "integer"
+     },
+     "SnapshotWindow": {
+      "type": "string"
+     },
+     "Tags": {
+      "const": "",
+      "description": "An empty list.",
+      "type": "string"
+     },
+     "TransitEncryptionEnabled": {
+      "type": "boolean"
+     },
+     "Version": {
+      "const": "2015-02-02",
+      "type": "string"
+     }
+    },
+    "required": [
+     "Action",
+     "Version",
+     "CacheClusterId"
+    ],
+    "title": "CreateCacheCluster",
+    "type": "object"
+   },
+   "CreateCacheClusterResponse": {
+    "properties": {
+     "CreateCacheClusterResult": {
+      "$ref": "#/components/schemas/CreateCacheClusterResult",
+      "xml": {
+       "name": "CreateCacheClusterResult"
+      }
+     },
+     "ResponseMetadata": {
+      "$ref": "#/components/schemas/ResponseMetadata"
+     }
+    },
+    "title": "CreateCacheClusterResponse",
+    "type": "object",
+    "xml": {
+     "name": "CreateCacheClusterResponse",
+     "namespace": "http://elasticache.amazonaws.com/doc/2015-02-02/"
+    }
+   },
+   "CreateCacheClusterResult": {
+    "additionalProperties": false,
+    "properties": {
+     "CacheCluster": {
+      "$ref": "#/components/schemas/CacheCluster"
      }
     },
     "type": "object"
@@ -342,6 +829,412 @@
     },
     "type": "object"
    },
+   "CreateReplicationGroupRequest": {
+    "additionalProperties": false,
+    "patternProperties": {
+     "^CacheSecurityGroupNames\\.CacheSecurityGroupName\\.[1-9][0-9]*$": {
+      "type": "string"
+     },
+     "^LogDeliveryConfigurations\\.LogDeliveryConfigurationRequest\\.[1-9][0-9]*\\.DestinationDetails\\.CloudWatchLogsDetails\\.LogGroup$": {
+      "type": "string"
+     },
+     "^LogDeliveryConfigurations\\.LogDeliveryConfigurationRequest\\.[1-9][0-9]*\\.DestinationDetails\\.KinesisFirehoseDetails\\.DeliveryStream$": {
+      "type": "string"
+     },
+     "^LogDeliveryConfigurations\\.LogDeliveryConfigurationRequest\\.[1-9][0-9]*\\.DestinationType$": {
+      "enum": [
+       "cloudwatch-logs",
+       "kinesis-firehose"
+      ],
+      "type": "string"
+     },
+     "^LogDeliveryConfigurations\\.LogDeliveryConfigurationRequest\\.[1-9][0-9]*\\.Enabled$": {
+      "type": "boolean"
+     },
+     "^LogDeliveryConfigurations\\.LogDeliveryConfigurationRequest\\.[1-9][0-9]*\\.LogFormat$": {
+      "enum": [
+       "text",
+       "json"
+      ],
+      "type": "string"
+     },
+     "^LogDeliveryConfigurations\\.LogDeliveryConfigurationRequest\\.[1-9][0-9]*\\.LogType$": {
+      "enum": [
+       "slow-log",
+       "engine-log"
+      ],
+      "type": "string"
+     },
+     "^NodeGroupConfiguration\\.NodeGroupConfiguration\\.[1-9][0-9]*\\.NodeGroupId$": {
+      "maxLength": 4,
+      "minLength": 1,
+      "type": "string"
+     },
+     "^NodeGroupConfiguration\\.NodeGroupConfiguration\\.[1-9][0-9]*\\.PrimaryAvailabilityZone$": {
+      "type": "string"
+     },
+     "^NodeGroupConfiguration\\.NodeGroupConfiguration\\.[1-9][0-9]*\\.PrimaryOutpostArn$": {
+      "type": "string"
+     },
+     "^NodeGroupConfiguration\\.NodeGroupConfiguration\\.[1-9][0-9]*\\.ReplicaAvailabilityZones$": {
+      "const": "",
+      "description": "An empty list.",
+      "type": "string"
+     },
+     "^NodeGroupConfiguration\\.NodeGroupConfiguration\\.[1-9][0-9]*\\.ReplicaAvailabilityZones\\.AvailabilityZone\\.[1-9][0-9]*$": {
+      "type": "string"
+     },
+     "^NodeGroupConfiguration\\.NodeGroupConfiguration\\.[1-9][0-9]*\\.ReplicaCount$": {
+      "type": "integer"
+     },
+     "^NodeGroupConfiguration\\.NodeGroupConfiguration\\.[1-9][0-9]*\\.ReplicaOutpostArns$": {
+      "const": "",
+      "description": "An empty list.",
+      "type": "string"
+     },
+     "^NodeGroupConfiguration\\.NodeGroupConfiguration\\.[1-9][0-9]*\\.ReplicaOutpostArns\\.OutpostArn\\.[1-9][0-9]*$": {
+      "type": "string"
+     },
+     "^NodeGroupConfiguration\\.NodeGroupConfiguration\\.[1-9][0-9]*\\.Slots$": {
+      "type": "string"
+     },
+     "^PreferredCacheClusterAZs\\.AvailabilityZone\\.[1-9][0-9]*$": {
+      "type": "string"
+     },
+     "^SecurityGroupIds\\.SecurityGroupId\\.[1-9][0-9]*$": {
+      "type": "string"
+     },
+     "^SnapshotArns\\.SnapshotArn\\.[1-9][0-9]*$": {
+      "type": "string"
+     },
+     "^Tags\\.Tag\\.[1-9][0-9]*\\.Key$": {
+      "type": "string"
+     },
+     "^Tags\\.Tag\\.[1-9][0-9]*\\.Value$": {
+      "type": "string"
+     },
+     "^UserGroupIds\\.member\\.[1-9][0-9]*$": {
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "properties": {
+     "Action": {
+      "const": "CreateReplicationGroup",
+      "type": "string"
+     },
+     "AtRestEncryptionEnabled": {
+      "type": "boolean"
+     },
+     "AuthToken": {
+      "type": "string"
+     },
+     "AutoMinorVersionUpgrade": {
+      "type": "boolean"
+     },
+     "AutomaticFailoverEnabled": {
+      "type": "boolean"
+     },
+     "CacheNodeType": {
+      "type": "string"
+     },
+     "CacheParameterGroupName": {
+      "type": "string"
+     },
+     "CacheSecurityGroupNames": {
+      "const": "",
+      "description": "An empty list.",
+      "type": "string"
+     },
+     "CacheSubnetGroupName": {
+      "type": "string"
+     },
+     "ClusterMode": {
+      "enum": [
+       "enabled",
+       "disabled",
+       "compatible"
+      ],
+      "type": "string"
+     },
+     "DataTieringEnabled": {
+      "type": "boolean"
+     },
+     "Engine": {
+      "type": "string"
+     },
+     "EngineVersion": {
+      "type": "string"
+     },
+     "GlobalReplicationGroupId": {
+      "type": "string"
+     },
+     "IpDiscovery": {
+      "enum": [
+       "ipv4",
+       "ipv6"
+      ],
+      "type": "string"
+     },
+     "KmsKeyId": {
+      "type": "string"
+     },
+     "LogDeliveryConfigurations": {
+      "const": "",
+      "description": "An empty list.",
+      "type": "string"
+     },
+     "MultiAZEnabled": {
+      "type": "boolean"
+     },
+     "NetworkType": {
+      "enum": [
+       "ipv4",
+       "ipv6",
+       "dual_stack"
+      ],
+      "type": "string"
+     },
+     "NodeGroupConfiguration": {
+      "const": "",
+      "description": "An empty list.",
+      "type": "string"
+     },
+     "NotificationTopicArn": {
+      "type": "string"
+     },
+     "NumCacheClusters": {
+      "type": "integer"
+     },
+     "NumNodeGroups": {
+      "type": "integer"
+     },
+     "Port": {
+      "type": "integer"
+     },
+     "PreferredCacheClusterAZs": {
+      "const": "",
+      "description": "An empty list.",
+      "type": "string"
+     },
+     "PreferredMaintenanceWindow": {
+      "type": "string"
+     },
+     "PrimaryClusterId": {
+      "type": "string"
+     },
+     "ReplicasPerNodeGroup": {
+      "type": "integer"
+     },
+     "ReplicationGroupDescription": {
+      "type": "string"
+     },
+     "ReplicationGroupId": {
+      "type": "string"
+     },
+     "SecurityGroupIds": {
+      "const": "",
+      "description": "An empty list.",
+      "type": "string"
+     },
+     "ServerlessCacheSnapshotName": {
+      "type": "string"
+     },
+     "SnapshotArns": {
+      "const": "",
+      "description": "An empty list.",
+      "type": "string"
+     },
+     "SnapshotName": {
+      "type": "string"
+     },
+     "SnapshotRetentionLimit": {
+      "type": "integer"
+     },
+     "SnapshotWindow": {
+      "type": "string"
+     },
+     "Tags": {
+      "const": "",
+      "description": "An empty list.",
+      "type": "string"
+     },
+     "TransitEncryptionEnabled": {
+      "type": "boolean"
+     },
+     "TransitEncryptionMode": {
+      "enum": [
+       "preferred",
+       "required"
+      ],
+      "type": "string"
+     },
+     "UserGroupIds": {
+      "const": "",
+      "description": "An empty list.",
+      "type": "string"
+     },
+     "Version": {
+      "const": "2015-02-02",
+      "type": "string"
+     }
+    },
+    "required": [
+     "Action",
+     "Version",
+     "ReplicationGroupDescription",
+     "ReplicationGroupId"
+    ],
+    "title": "CreateReplicationGroup",
+    "type": "object"
+   },
+   "CreateReplicationGroupResponse": {
+    "properties": {
+     "CreateReplicationGroupResult": {
+      "$ref": "#/components/schemas/CreateReplicationGroupResult",
+      "xml": {
+       "name": "CreateReplicationGroupResult"
+      }
+     },
+     "ResponseMetadata": {
+      "$ref": "#/components/schemas/ResponseMetadata"
+     }
+    },
+    "title": "CreateReplicationGroupResponse",
+    "type": "object",
+    "xml": {
+     "name": "CreateReplicationGroupResponse",
+     "namespace": "http://elasticache.amazonaws.com/doc/2015-02-02/"
+    }
+   },
+   "CreateReplicationGroupResult": {
+    "additionalProperties": false,
+    "properties": {
+     "ReplicationGroup": {
+      "$ref": "#/components/schemas/ReplicationGroup"
+     }
+    },
+    "type": "object"
+   },
+   "CreateServerlessCacheRequest": {
+    "additionalProperties": false,
+    "patternProperties": {
+     "^SecurityGroupIds\\.SecurityGroupId\\.[1-9][0-9]*$": {
+      "type": "string"
+     },
+     "^SnapshotArnsToRestore\\.SnapshotArn\\.[1-9][0-9]*$": {
+      "type": "string"
+     },
+     "^SubnetIds\\.SubnetId\\.[1-9][0-9]*$": {
+      "type": "string"
+     },
+     "^Tags\\.Tag\\.[1-9][0-9]*\\.Key$": {
+      "type": "string"
+     },
+     "^Tags\\.Tag\\.[1-9][0-9]*\\.Value$": {
+      "type": "string"
+     }
+    },
+    "properties": {
+     "Action": {
+      "const": "CreateServerlessCache",
+      "type": "string"
+     },
+     "CacheUsageLimits.DataStorage.Maximum": {
+      "type": "integer"
+     },
+     "CacheUsageLimits.DataStorage.Minimum": {
+      "type": "integer"
+     },
+     "CacheUsageLimits.DataStorage.Unit": {
+      "enum": [
+       "GB"
+      ],
+      "type": "string"
+     },
+     "CacheUsageLimits.ECPUPerSecond.Maximum": {
+      "type": "integer"
+     },
+     "CacheUsageLimits.ECPUPerSecond.Minimum": {
+      "type": "integer"
+     },
+     "DailySnapshotTime": {
+      "type": "string"
+     },
+     "Description": {
+      "type": "string"
+     },
+     "Engine": {
+      "type": "string"
+     },
+     "KmsKeyId": {
+      "type": "string"
+     },
+     "MajorEngineVersion": {
+      "type": "string"
+     },
+     "SecurityGroupIds": {
+      "const": "",
+      "description": "An empty list.",
+      "type": "string"
+     },
+     "ServerlessCacheName": {
+      "type": "string"
+     },
+     "SnapshotArnsToRestore": {
+      "const": "",
+      "description": "An empty list.",
+      "type": "string"
+     },
+     "SnapshotRetentionLimit": {
+      "type": "integer"
+     },
+     "SubnetIds": {
+      "const": "",
+      "description": "An empty list.",
+      "type": "string"
+     },
+     "Tags": {
+      "const": "",
+      "description": "An empty list.",
+      "type": "string"
+     },
+     "UserGroupId": {
+      "type": "string"
+     },
+     "Version": {
+      "const": "2015-02-02",
+      "type": "string"
+     }
+    },
+    "required": [
+     "Action",
+     "Version",
+     "Engine",
+     "ServerlessCacheName"
+    ],
+    "title": "CreateServerlessCache",
+    "type": "object"
+   },
+   "CreateServerlessCacheResponse": {
+    "properties": {
+     "CreateServerlessCacheResult": {
+      "$ref": "#/components/schemas/CreateServerlessCacheResponse",
+      "xml": {
+       "name": "CreateServerlessCacheResult"
+      }
+     },
+     "ResponseMetadata": {
+      "$ref": "#/components/schemas/ResponseMetadata"
+     }
+    },
+    "title": "CreateServerlessCacheResponse",
+    "type": "object",
+    "xml": {
+     "name": "CreateServerlessCacheResponse",
+     "namespace": "http://elasticache.amazonaws.com/doc/2015-02-02/"
+    }
+   },
    "CreateUserRequest": {
     "additionalProperties": false,
     "patternProperties": {
@@ -438,6 +1331,81 @@
      "namespace": "http://elasticache.amazonaws.com/doc/2015-02-02/"
     }
    },
+   "DataStorage": {
+    "additionalProperties": false,
+    "properties": {
+     "Maximum": {
+      "type": "integer"
+     },
+     "Minimum": {
+      "type": "integer"
+     },
+     "Unit": {
+      "enum": [
+       "GB"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "Unit"
+    ],
+    "type": "object"
+   },
+   "DeleteCacheClusterRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "Action": {
+      "const": "DeleteCacheCluster",
+      "type": "string"
+     },
+     "CacheClusterId": {
+      "type": "string"
+     },
+     "FinalSnapshotIdentifier": {
+      "type": "string"
+     },
+     "Version": {
+      "const": "2015-02-02",
+      "type": "string"
+     }
+    },
+    "required": [
+     "Action",
+     "Version",
+     "CacheClusterId"
+    ],
+    "title": "DeleteCacheCluster",
+    "type": "object"
+   },
+   "DeleteCacheClusterResponse": {
+    "properties": {
+     "DeleteCacheClusterResult": {
+      "$ref": "#/components/schemas/DeleteCacheClusterResult",
+      "xml": {
+       "name": "DeleteCacheClusterResult"
+      }
+     },
+     "ResponseMetadata": {
+      "$ref": "#/components/schemas/ResponseMetadata"
+     }
+    },
+    "title": "DeleteCacheClusterResponse",
+    "type": "object",
+    "xml": {
+     "name": "DeleteCacheClusterResponse",
+     "namespace": "http://elasticache.amazonaws.com/doc/2015-02-02/"
+    }
+   },
+   "DeleteCacheClusterResult": {
+    "additionalProperties": false,
+    "properties": {
+     "CacheCluster": {
+      "$ref": "#/components/schemas/CacheCluster"
+     }
+    },
+    "type": "object"
+   },
    "DeleteCacheParameterGroupRequest": {
     "additionalProperties": false,
     "properties": {
@@ -510,6 +1478,108 @@
      "namespace": "http://elasticache.amazonaws.com/doc/2015-02-02/"
     }
    },
+   "DeleteReplicationGroupRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "Action": {
+      "const": "DeleteReplicationGroup",
+      "type": "string"
+     },
+     "FinalSnapshotIdentifier": {
+      "type": "string"
+     },
+     "ReplicationGroupId": {
+      "type": "string"
+     },
+     "RetainPrimaryCluster": {
+      "type": "boolean"
+     },
+     "Version": {
+      "const": "2015-02-02",
+      "type": "string"
+     }
+    },
+    "required": [
+     "Action",
+     "Version",
+     "ReplicationGroupId"
+    ],
+    "title": "DeleteReplicationGroup",
+    "type": "object"
+   },
+   "DeleteReplicationGroupResponse": {
+    "properties": {
+     "DeleteReplicationGroupResult": {
+      "$ref": "#/components/schemas/DeleteReplicationGroupResult",
+      "xml": {
+       "name": "DeleteReplicationGroupResult"
+      }
+     },
+     "ResponseMetadata": {
+      "$ref": "#/components/schemas/ResponseMetadata"
+     }
+    },
+    "title": "DeleteReplicationGroupResponse",
+    "type": "object",
+    "xml": {
+     "name": "DeleteReplicationGroupResponse",
+     "namespace": "http://elasticache.amazonaws.com/doc/2015-02-02/"
+    }
+   },
+   "DeleteReplicationGroupResult": {
+    "additionalProperties": false,
+    "properties": {
+     "ReplicationGroup": {
+      "$ref": "#/components/schemas/ReplicationGroup"
+     }
+    },
+    "type": "object"
+   },
+   "DeleteServerlessCacheRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "Action": {
+      "const": "DeleteServerlessCache",
+      "type": "string"
+     },
+     "FinalSnapshotName": {
+      "type": "string"
+     },
+     "ServerlessCacheName": {
+      "type": "string"
+     },
+     "Version": {
+      "const": "2015-02-02",
+      "type": "string"
+     }
+    },
+    "required": [
+     "Action",
+     "Version",
+     "ServerlessCacheName"
+    ],
+    "title": "DeleteServerlessCache",
+    "type": "object"
+   },
+   "DeleteServerlessCacheResponse": {
+    "properties": {
+     "DeleteServerlessCacheResult": {
+      "$ref": "#/components/schemas/DeleteServerlessCacheResponse",
+      "xml": {
+       "name": "DeleteServerlessCacheResult"
+      }
+     },
+     "ResponseMetadata": {
+      "$ref": "#/components/schemas/ResponseMetadata"
+     }
+    },
+    "title": "DeleteServerlessCacheResponse",
+    "type": "object",
+    "xml": {
+     "name": "DeleteServerlessCacheResponse",
+     "namespace": "http://elasticache.amazonaws.com/doc/2015-02-02/"
+    }
+   },
    "DeleteUserRequest": {
     "additionalProperties": false,
     "properties": {
@@ -550,6 +1620,59 @@
     "type": "object",
     "xml": {
      "name": "DeleteUserResponse",
+     "namespace": "http://elasticache.amazonaws.com/doc/2015-02-02/"
+    }
+   },
+   "DescribeCacheClustersRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "Action": {
+      "const": "DescribeCacheClusters",
+      "type": "string"
+     },
+     "CacheClusterId": {
+      "type": "string"
+     },
+     "Marker": {
+      "type": "string"
+     },
+     "MaxRecords": {
+      "type": "integer"
+     },
+     "ShowCacheClustersNotInReplicationGroups": {
+      "type": "boolean"
+     },
+     "ShowCacheNodeInfo": {
+      "type": "boolean"
+     },
+     "Version": {
+      "const": "2015-02-02",
+      "type": "string"
+     }
+    },
+    "required": [
+     "Action",
+     "Version"
+    ],
+    "title": "DescribeCacheClusters",
+    "type": "object"
+   },
+   "DescribeCacheClustersResponse": {
+    "properties": {
+     "DescribeCacheClustersResult": {
+      "$ref": "#/components/schemas/CacheClusterMessage",
+      "xml": {
+       "name": "DescribeCacheClustersResult"
+      }
+     },
+     "ResponseMetadata": {
+      "$ref": "#/components/schemas/ResponseMetadata"
+     }
+    },
+    "title": "DescribeCacheClustersResponse",
+    "type": "object",
+    "xml": {
+     "name": "DescribeCacheClustersResponse",
      "namespace": "http://elasticache.amazonaws.com/doc/2015-02-02/"
     }
    },
@@ -647,6 +1770,100 @@
      "namespace": "http://elasticache.amazonaws.com/doc/2015-02-02/"
     }
    },
+   "DescribeReplicationGroupsRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "Action": {
+      "const": "DescribeReplicationGroups",
+      "type": "string"
+     },
+     "Marker": {
+      "type": "string"
+     },
+     "MaxRecords": {
+      "type": "integer"
+     },
+     "ReplicationGroupId": {
+      "type": "string"
+     },
+     "Version": {
+      "const": "2015-02-02",
+      "type": "string"
+     }
+    },
+    "required": [
+     "Action",
+     "Version"
+    ],
+    "title": "DescribeReplicationGroups",
+    "type": "object"
+   },
+   "DescribeReplicationGroupsResponse": {
+    "properties": {
+     "DescribeReplicationGroupsResult": {
+      "$ref": "#/components/schemas/ReplicationGroupMessage",
+      "xml": {
+       "name": "DescribeReplicationGroupsResult"
+      }
+     },
+     "ResponseMetadata": {
+      "$ref": "#/components/schemas/ResponseMetadata"
+     }
+    },
+    "title": "DescribeReplicationGroupsResponse",
+    "type": "object",
+    "xml": {
+     "name": "DescribeReplicationGroupsResponse",
+     "namespace": "http://elasticache.amazonaws.com/doc/2015-02-02/"
+    }
+   },
+   "DescribeServerlessCachesRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "Action": {
+      "const": "DescribeServerlessCaches",
+      "type": "string"
+     },
+     "MaxResults": {
+      "type": "integer"
+     },
+     "NextToken": {
+      "type": "string"
+     },
+     "ServerlessCacheName": {
+      "type": "string"
+     },
+     "Version": {
+      "const": "2015-02-02",
+      "type": "string"
+     }
+    },
+    "required": [
+     "Action",
+     "Version"
+    ],
+    "title": "DescribeServerlessCaches",
+    "type": "object"
+   },
+   "DescribeServerlessCachesResponse": {
+    "properties": {
+     "DescribeServerlessCachesResult": {
+      "$ref": "#/components/schemas/DescribeServerlessCachesResponse",
+      "xml": {
+       "name": "DescribeServerlessCachesResult"
+      }
+     },
+     "ResponseMetadata": {
+      "$ref": "#/components/schemas/ResponseMetadata"
+     }
+    },
+    "title": "DescribeServerlessCachesResponse",
+    "type": "object",
+    "xml": {
+     "name": "DescribeServerlessCachesResponse",
+     "namespace": "http://elasticache.amazonaws.com/doc/2015-02-02/"
+    }
+   },
    "DescribeUsersRequest": {
     "additionalProperties": false,
     "patternProperties": {
@@ -737,6 +1954,42 @@
     },
     "type": "object"
    },
+   "DestinationDetails": {
+    "additionalProperties": false,
+    "properties": {
+     "CloudWatchLogsDetails": {
+      "$ref": "#/components/schemas/CloudWatchLogsDestinationDetails"
+     },
+     "KinesisFirehoseDetails": {
+      "$ref": "#/components/schemas/KinesisFirehoseDestinationDetails"
+     }
+    },
+    "type": "object"
+   },
+   "ECPUPerSecond": {
+    "additionalProperties": false,
+    "properties": {
+     "Maximum": {
+      "type": "integer"
+     },
+     "Minimum": {
+      "type": "integer"
+     }
+    },
+    "type": "object"
+   },
+   "Endpoint": {
+    "additionalProperties": false,
+    "properties": {
+     "Address": {
+      "type": "string"
+     },
+     "Port": {
+      "type": "integer"
+     }
+    },
+    "type": "object"
+   },
    "ErrorResponse": {
     "properties": {
      "Error": {
@@ -766,6 +2019,27 @@
      "name": "ErrorResponse",
      "namespace": "http://elasticache.amazonaws.com/doc/2015-02-02/"
     }
+   },
+   "GlobalReplicationGroupInfo": {
+    "additionalProperties": false,
+    "properties": {
+     "GlobalReplicationGroupId": {
+      "type": "string"
+     },
+     "GlobalReplicationGroupMemberRole": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "KinesisFirehoseDestinationDetails": {
+    "additionalProperties": false,
+    "properties": {
+     "DeliveryStream": {
+      "type": "string"
+     }
+    },
+    "type": "object"
    },
    "ListTagsForResourceRequest": {
     "additionalProperties": false,
@@ -808,6 +2082,236 @@
      "name": "ListTagsForResourceResponse",
      "namespace": "http://elasticache.amazonaws.com/doc/2015-02-02/"
     }
+   },
+   "LogDeliveryConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "DestinationDetails": {
+      "$ref": "#/components/schemas/DestinationDetails"
+     },
+     "DestinationType": {
+      "enum": [
+       "cloudwatch-logs",
+       "kinesis-firehose"
+      ],
+      "type": "string"
+     },
+     "LogFormat": {
+      "enum": [
+       "text",
+       "json"
+      ],
+      "type": "string"
+     },
+     "LogType": {
+      "enum": [
+       "slow-log",
+       "engine-log"
+      ],
+      "type": "string"
+     },
+     "Message": {
+      "type": "string"
+     },
+     "Status": {
+      "enum": [
+       "active",
+       "enabling",
+       "modifying",
+       "disabling",
+       "error"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ModifyCacheClusterRequest": {
+    "additionalProperties": false,
+    "patternProperties": {
+     "^CacheNodeIdsToRemove\\.CacheNodeId\\.[1-9][0-9]*$": {
+      "type": "string"
+     },
+     "^CacheSecurityGroupNames\\.CacheSecurityGroupName\\.[1-9][0-9]*$": {
+      "type": "string"
+     },
+     "^LogDeliveryConfigurations\\.LogDeliveryConfigurationRequest\\.[1-9][0-9]*\\.DestinationDetails\\.CloudWatchLogsDetails\\.LogGroup$": {
+      "type": "string"
+     },
+     "^LogDeliveryConfigurations\\.LogDeliveryConfigurationRequest\\.[1-9][0-9]*\\.DestinationDetails\\.KinesisFirehoseDetails\\.DeliveryStream$": {
+      "type": "string"
+     },
+     "^LogDeliveryConfigurations\\.LogDeliveryConfigurationRequest\\.[1-9][0-9]*\\.DestinationType$": {
+      "enum": [
+       "cloudwatch-logs",
+       "kinesis-firehose"
+      ],
+      "type": "string"
+     },
+     "^LogDeliveryConfigurations\\.LogDeliveryConfigurationRequest\\.[1-9][0-9]*\\.Enabled$": {
+      "type": "boolean"
+     },
+     "^LogDeliveryConfigurations\\.LogDeliveryConfigurationRequest\\.[1-9][0-9]*\\.LogFormat$": {
+      "enum": [
+       "text",
+       "json"
+      ],
+      "type": "string"
+     },
+     "^LogDeliveryConfigurations\\.LogDeliveryConfigurationRequest\\.[1-9][0-9]*\\.LogType$": {
+      "enum": [
+       "slow-log",
+       "engine-log"
+      ],
+      "type": "string"
+     },
+     "^NewAvailabilityZones\\.PreferredAvailabilityZone\\.[1-9][0-9]*$": {
+      "type": "string"
+     },
+     "^SecurityGroupIds\\.SecurityGroupId\\.[1-9][0-9]*$": {
+      "type": "string"
+     }
+    },
+    "properties": {
+     "AZMode": {
+      "enum": [
+       "single-az",
+       "cross-az"
+      ],
+      "type": "string"
+     },
+     "Action": {
+      "const": "ModifyCacheCluster",
+      "type": "string"
+     },
+     "ApplyImmediately": {
+      "type": "boolean"
+     },
+     "AuthToken": {
+      "type": "string"
+     },
+     "AuthTokenUpdateStrategy": {
+      "enum": [
+       "SET",
+       "ROTATE",
+       "DELETE"
+      ],
+      "type": "string"
+     },
+     "AutoMinorVersionUpgrade": {
+      "type": "boolean"
+     },
+     "CacheClusterId": {
+      "type": "string"
+     },
+     "CacheNodeIdsToRemove": {
+      "const": "",
+      "description": "An empty list.",
+      "type": "string"
+     },
+     "CacheNodeType": {
+      "type": "string"
+     },
+     "CacheParameterGroupName": {
+      "type": "string"
+     },
+     "CacheSecurityGroupNames": {
+      "const": "",
+      "description": "An empty list.",
+      "type": "string"
+     },
+     "Engine": {
+      "type": "string"
+     },
+     "EngineVersion": {
+      "type": "string"
+     },
+     "IpDiscovery": {
+      "enum": [
+       "ipv4",
+       "ipv6"
+      ],
+      "type": "string"
+     },
+     "LogDeliveryConfigurations": {
+      "const": "",
+      "description": "An empty list.",
+      "type": "string"
+     },
+     "NewAvailabilityZones": {
+      "const": "",
+      "description": "An empty list.",
+      "type": "string"
+     },
+     "NotificationTopicArn": {
+      "type": "string"
+     },
+     "NotificationTopicStatus": {
+      "type": "string"
+     },
+     "NumCacheNodes": {
+      "type": "integer"
+     },
+     "PreferredMaintenanceWindow": {
+      "type": "string"
+     },
+     "ScaleConfig.ScaleIntervalMinutes": {
+      "type": "integer"
+     },
+     "ScaleConfig.ScalePercentage": {
+      "type": "integer"
+     },
+     "SecurityGroupIds": {
+      "const": "",
+      "description": "An empty list.",
+      "type": "string"
+     },
+     "SnapshotRetentionLimit": {
+      "type": "integer"
+     },
+     "SnapshotWindow": {
+      "type": "string"
+     },
+     "Version": {
+      "const": "2015-02-02",
+      "type": "string"
+     }
+    },
+    "required": [
+     "Action",
+     "Version",
+     "CacheClusterId"
+    ],
+    "title": "ModifyCacheCluster",
+    "type": "object"
+   },
+   "ModifyCacheClusterResponse": {
+    "properties": {
+     "ModifyCacheClusterResult": {
+      "$ref": "#/components/schemas/ModifyCacheClusterResult",
+      "xml": {
+       "name": "ModifyCacheClusterResult"
+      }
+     },
+     "ResponseMetadata": {
+      "$ref": "#/components/schemas/ResponseMetadata"
+     }
+    },
+    "title": "ModifyCacheClusterResponse",
+    "type": "object",
+    "xml": {
+     "name": "ModifyCacheClusterResponse",
+     "namespace": "http://elasticache.amazonaws.com/doc/2015-02-02/"
+    }
+   },
+   "ModifyCacheClusterResult": {
+    "additionalProperties": false,
+    "properties": {
+     "CacheCluster": {
+      "$ref": "#/components/schemas/CacheCluster"
+     }
+    },
+    "type": "object"
    },
    "ModifyCacheSubnetGroupRequest": {
     "additionalProperties": false,
@@ -872,6 +2376,309 @@
      }
     },
     "type": "object"
+   },
+   "ModifyReplicationGroupRequest": {
+    "additionalProperties": false,
+    "patternProperties": {
+     "^CacheSecurityGroupNames\\.CacheSecurityGroupName\\.[1-9][0-9]*$": {
+      "type": "string"
+     },
+     "^LogDeliveryConfigurations\\.LogDeliveryConfigurationRequest\\.[1-9][0-9]*\\.DestinationDetails\\.CloudWatchLogsDetails\\.LogGroup$": {
+      "type": "string"
+     },
+     "^LogDeliveryConfigurations\\.LogDeliveryConfigurationRequest\\.[1-9][0-9]*\\.DestinationDetails\\.KinesisFirehoseDetails\\.DeliveryStream$": {
+      "type": "string"
+     },
+     "^LogDeliveryConfigurations\\.LogDeliveryConfigurationRequest\\.[1-9][0-9]*\\.DestinationType$": {
+      "enum": [
+       "cloudwatch-logs",
+       "kinesis-firehose"
+      ],
+      "type": "string"
+     },
+     "^LogDeliveryConfigurations\\.LogDeliveryConfigurationRequest\\.[1-9][0-9]*\\.Enabled$": {
+      "type": "boolean"
+     },
+     "^LogDeliveryConfigurations\\.LogDeliveryConfigurationRequest\\.[1-9][0-9]*\\.LogFormat$": {
+      "enum": [
+       "text",
+       "json"
+      ],
+      "type": "string"
+     },
+     "^LogDeliveryConfigurations\\.LogDeliveryConfigurationRequest\\.[1-9][0-9]*\\.LogType$": {
+      "enum": [
+       "slow-log",
+       "engine-log"
+      ],
+      "type": "string"
+     },
+     "^SecurityGroupIds\\.SecurityGroupId\\.[1-9][0-9]*$": {
+      "type": "string"
+     },
+     "^UserGroupIdsToAdd\\.member\\.[1-9][0-9]*$": {
+      "minLength": 1,
+      "type": "string"
+     },
+     "^UserGroupIdsToRemove\\.member\\.[1-9][0-9]*$": {
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "properties": {
+     "Action": {
+      "const": "ModifyReplicationGroup",
+      "type": "string"
+     },
+     "ApplyImmediately": {
+      "type": "boolean"
+     },
+     "AuthToken": {
+      "type": "string"
+     },
+     "AuthTokenUpdateStrategy": {
+      "enum": [
+       "SET",
+       "ROTATE",
+       "DELETE"
+      ],
+      "type": "string"
+     },
+     "AutoMinorVersionUpgrade": {
+      "type": "boolean"
+     },
+     "AutomaticFailoverEnabled": {
+      "type": "boolean"
+     },
+     "CacheNodeType": {
+      "type": "string"
+     },
+     "CacheParameterGroupName": {
+      "type": "string"
+     },
+     "CacheSecurityGroupNames": {
+      "const": "",
+      "description": "An empty list.",
+      "type": "string"
+     },
+     "ClusterMode": {
+      "enum": [
+       "enabled",
+       "disabled",
+       "compatible"
+      ],
+      "type": "string"
+     },
+     "Engine": {
+      "type": "string"
+     },
+     "EngineVersion": {
+      "type": "string"
+     },
+     "IpDiscovery": {
+      "enum": [
+       "ipv4",
+       "ipv6"
+      ],
+      "type": "string"
+     },
+     "LogDeliveryConfigurations": {
+      "const": "",
+      "description": "An empty list.",
+      "type": "string"
+     },
+     "MultiAZEnabled": {
+      "type": "boolean"
+     },
+     "NodeGroupId": {
+      "type": "string"
+     },
+     "NotificationTopicArn": {
+      "type": "string"
+     },
+     "NotificationTopicStatus": {
+      "type": "string"
+     },
+     "PreferredMaintenanceWindow": {
+      "type": "string"
+     },
+     "PrimaryClusterId": {
+      "type": "string"
+     },
+     "RemoveUserGroups": {
+      "type": "boolean"
+     },
+     "ReplicationGroupDescription": {
+      "type": "string"
+     },
+     "ReplicationGroupId": {
+      "type": "string"
+     },
+     "SecurityGroupIds": {
+      "const": "",
+      "description": "An empty list.",
+      "type": "string"
+     },
+     "SnapshotRetentionLimit": {
+      "type": "integer"
+     },
+     "SnapshotWindow": {
+      "type": "string"
+     },
+     "SnapshottingClusterId": {
+      "type": "string"
+     },
+     "TransitEncryptionEnabled": {
+      "type": "boolean"
+     },
+     "TransitEncryptionMode": {
+      "enum": [
+       "preferred",
+       "required"
+      ],
+      "type": "string"
+     },
+     "UserGroupIdsToAdd": {
+      "const": "",
+      "description": "An empty list.",
+      "type": "string"
+     },
+     "UserGroupIdsToRemove": {
+      "const": "",
+      "description": "An empty list.",
+      "type": "string"
+     },
+     "Version": {
+      "const": "2015-02-02",
+      "type": "string"
+     }
+    },
+    "required": [
+     "Action",
+     "Version",
+     "ReplicationGroupId"
+    ],
+    "title": "ModifyReplicationGroup",
+    "type": "object"
+   },
+   "ModifyReplicationGroupResponse": {
+    "properties": {
+     "ModifyReplicationGroupResult": {
+      "$ref": "#/components/schemas/ModifyReplicationGroupResult",
+      "xml": {
+       "name": "ModifyReplicationGroupResult"
+      }
+     },
+     "ResponseMetadata": {
+      "$ref": "#/components/schemas/ResponseMetadata"
+     }
+    },
+    "title": "ModifyReplicationGroupResponse",
+    "type": "object",
+    "xml": {
+     "name": "ModifyReplicationGroupResponse",
+     "namespace": "http://elasticache.amazonaws.com/doc/2015-02-02/"
+    }
+   },
+   "ModifyReplicationGroupResult": {
+    "additionalProperties": false,
+    "properties": {
+     "ReplicationGroup": {
+      "$ref": "#/components/schemas/ReplicationGroup"
+     }
+    },
+    "type": "object"
+   },
+   "ModifyServerlessCacheRequest": {
+    "additionalProperties": false,
+    "patternProperties": {
+     "^SecurityGroupIds\\.SecurityGroupId\\.[1-9][0-9]*$": {
+      "type": "string"
+     }
+    },
+    "properties": {
+     "Action": {
+      "const": "ModifyServerlessCache",
+      "type": "string"
+     },
+     "CacheUsageLimits.DataStorage.Maximum": {
+      "type": "integer"
+     },
+     "CacheUsageLimits.DataStorage.Minimum": {
+      "type": "integer"
+     },
+     "CacheUsageLimits.DataStorage.Unit": {
+      "enum": [
+       "GB"
+      ],
+      "type": "string"
+     },
+     "CacheUsageLimits.ECPUPerSecond.Maximum": {
+      "type": "integer"
+     },
+     "CacheUsageLimits.ECPUPerSecond.Minimum": {
+      "type": "integer"
+     },
+     "DailySnapshotTime": {
+      "type": "string"
+     },
+     "Description": {
+      "type": "string"
+     },
+     "Engine": {
+      "type": "string"
+     },
+     "MajorEngineVersion": {
+      "type": "string"
+     },
+     "RemoveUserGroup": {
+      "type": "boolean"
+     },
+     "SecurityGroupIds": {
+      "const": "",
+      "description": "An empty list.",
+      "type": "string"
+     },
+     "ServerlessCacheName": {
+      "type": "string"
+     },
+     "SnapshotRetentionLimit": {
+      "type": "integer"
+     },
+     "UserGroupId": {
+      "type": "string"
+     },
+     "Version": {
+      "const": "2015-02-02",
+      "type": "string"
+     }
+    },
+    "required": [
+     "Action",
+     "Version",
+     "ServerlessCacheName"
+    ],
+    "title": "ModifyServerlessCache",
+    "type": "object"
+   },
+   "ModifyServerlessCacheResponse": {
+    "properties": {
+     "ModifyServerlessCacheResult": {
+      "$ref": "#/components/schemas/ModifyServerlessCacheResponse",
+      "xml": {
+       "name": "ModifyServerlessCacheResult"
+      }
+     },
+     "ResponseMetadata": {
+      "$ref": "#/components/schemas/ResponseMetadata"
+     }
+    },
+    "title": "ModifyServerlessCacheResponse",
+    "type": "object",
+    "xml": {
+     "name": "ModifyServerlessCacheResponse",
+     "namespace": "http://elasticache.amazonaws.com/doc/2015-02-02/"
+    }
    },
    "ModifyUserRequest": {
     "additionalProperties": false,
@@ -954,6 +2761,164 @@
      "namespace": "http://elasticache.amazonaws.com/doc/2015-02-02/"
     }
    },
+   "NodeGroup": {
+    "additionalProperties": false,
+    "properties": {
+     "NodeGroupId": {
+      "type": "string"
+     },
+     "NodeGroupMembers": {
+      "items": {
+       "$ref": "#/components/schemas/NodeGroupMember",
+       "xml": {
+        "name": "NodeGroupMember"
+       }
+      },
+      "type": "array",
+      "xml": {
+       "wrapped": true
+      }
+     },
+     "PrimaryEndpoint": {
+      "$ref": "#/components/schemas/Endpoint"
+     },
+     "ReaderEndpoint": {
+      "$ref": "#/components/schemas/Endpoint"
+     },
+     "Slots": {
+      "type": "string"
+     },
+     "Status": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "NodeGroupMember": {
+    "additionalProperties": false,
+    "properties": {
+     "CacheClusterId": {
+      "type": "string"
+     },
+     "CacheNodeId": {
+      "type": "string"
+     },
+     "CurrentRole": {
+      "type": "string"
+     },
+     "PreferredAvailabilityZone": {
+      "type": "string"
+     },
+     "PreferredOutpostArn": {
+      "type": "string"
+     },
+     "ReadEndpoint": {
+      "$ref": "#/components/schemas/Endpoint"
+     }
+    },
+    "type": "object"
+   },
+   "NotificationConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "TopicArn": {
+      "type": "string"
+     },
+     "TopicStatus": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "PendingLogDeliveryConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "DestinationDetails": {
+      "$ref": "#/components/schemas/DestinationDetails"
+     },
+     "DestinationType": {
+      "enum": [
+       "cloudwatch-logs",
+       "kinesis-firehose"
+      ],
+      "type": "string"
+     },
+     "LogFormat": {
+      "enum": [
+       "text",
+       "json"
+      ],
+      "type": "string"
+     },
+     "LogType": {
+      "enum": [
+       "slow-log",
+       "engine-log"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "PendingModifiedValues": {
+    "additionalProperties": false,
+    "properties": {
+     "AuthTokenStatus": {
+      "enum": [
+       "SETTING",
+       "ROTATING"
+      ],
+      "type": "string"
+     },
+     "CacheNodeIdsToRemove": {
+      "items": {
+       "type": "string",
+       "xml": {
+        "name": "CacheNodeId"
+       }
+      },
+      "type": "array",
+      "xml": {
+       "wrapped": true
+      }
+     },
+     "CacheNodeType": {
+      "type": "string"
+     },
+     "EngineVersion": {
+      "type": "string"
+     },
+     "NumCacheNodes": {
+      "type": "integer"
+     },
+     "PendingLogDeliveryConfiguration": {
+      "items": {
+       "$ref": "#/components/schemas/PendingLogDeliveryConfiguration",
+       "xml": {
+        "name": "member"
+       }
+      },
+      "type": "array",
+      "xml": {
+       "wrapped": true
+      }
+     },
+     "ScaleConfig": {
+      "$ref": "#/components/schemas/ScaleConfig"
+     },
+     "TransitEncryptionEnabled": {
+      "type": "boolean"
+     },
+     "TransitEncryptionMode": {
+      "enum": [
+       "preferred",
+       "required"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
    "RemoveTagsFromResourceRequest": {
     "additionalProperties": false,
     "description": "Required list or structure members: TagKeys.",
@@ -1007,10 +2972,390 @@
      "namespace": "http://elasticache.amazonaws.com/doc/2015-02-02/"
     }
    },
+   "ReplicationGroup": {
+    "additionalProperties": false,
+    "properties": {
+     "ARN": {
+      "type": "string"
+     },
+     "AtRestEncryptionEnabled": {
+      "type": "boolean"
+     },
+     "AuthTokenEnabled": {
+      "type": "boolean"
+     },
+     "AuthTokenLastModifiedDate": {
+      "format": "date-time",
+      "type": "string"
+     },
+     "AutoMinorVersionUpgrade": {
+      "type": "boolean"
+     },
+     "AutomaticFailover": {
+      "enum": [
+       "enabled",
+       "disabled",
+       "enabling",
+       "disabling"
+      ],
+      "type": "string"
+     },
+     "CacheNodeType": {
+      "type": "string"
+     },
+     "ClusterEnabled": {
+      "type": "boolean"
+     },
+     "ClusterMode": {
+      "enum": [
+       "enabled",
+       "disabled",
+       "compatible"
+      ],
+      "type": "string"
+     },
+     "ConfigurationEndpoint": {
+      "$ref": "#/components/schemas/Endpoint"
+     },
+     "DataTiering": {
+      "enum": [
+       "enabled",
+       "disabled"
+      ],
+      "type": "string"
+     },
+     "Description": {
+      "type": "string"
+     },
+     "Engine": {
+      "type": "string"
+     },
+     "GlobalReplicationGroupInfo": {
+      "$ref": "#/components/schemas/GlobalReplicationGroupInfo"
+     },
+     "IpDiscovery": {
+      "enum": [
+       "ipv4",
+       "ipv6"
+      ],
+      "type": "string"
+     },
+     "KmsKeyId": {
+      "type": "string"
+     },
+     "LogDeliveryConfigurations": {
+      "items": {
+       "$ref": "#/components/schemas/LogDeliveryConfiguration",
+       "xml": {
+        "name": "LogDeliveryConfiguration"
+       }
+      },
+      "type": "array",
+      "xml": {
+       "wrapped": true
+      }
+     },
+     "MemberClusters": {
+      "items": {
+       "type": "string",
+       "xml": {
+        "name": "ClusterId"
+       }
+      },
+      "type": "array",
+      "xml": {
+       "wrapped": true
+      }
+     },
+     "MemberClustersOutpostArns": {
+      "items": {
+       "type": "string",
+       "xml": {
+        "name": "ReplicationGroupOutpostArn"
+       }
+      },
+      "type": "array",
+      "xml": {
+       "wrapped": true
+      }
+     },
+     "MultiAZ": {
+      "enum": [
+       "enabled",
+       "disabled"
+      ],
+      "type": "string"
+     },
+     "NetworkType": {
+      "enum": [
+       "ipv4",
+       "ipv6",
+       "dual_stack"
+      ],
+      "type": "string"
+     },
+     "NodeGroups": {
+      "items": {
+       "$ref": "#/components/schemas/NodeGroup",
+       "xml": {
+        "name": "NodeGroup"
+       }
+      },
+      "type": "array",
+      "xml": {
+       "wrapped": true
+      }
+     },
+     "PendingModifiedValues": {
+      "$ref": "#/components/schemas/ReplicationGroupPendingModifiedValues"
+     },
+     "ReplicationGroupCreateTime": {
+      "format": "date-time",
+      "type": "string"
+     },
+     "ReplicationGroupId": {
+      "type": "string"
+     },
+     "SnapshotRetentionLimit": {
+      "type": "integer"
+     },
+     "SnapshotWindow": {
+      "type": "string"
+     },
+     "SnapshottingClusterId": {
+      "type": "string"
+     },
+     "Status": {
+      "type": "string"
+     },
+     "TransitEncryptionEnabled": {
+      "type": "boolean"
+     },
+     "TransitEncryptionMode": {
+      "enum": [
+       "preferred",
+       "required"
+      ],
+      "type": "string"
+     },
+     "UserGroupIds": {
+      "items": {
+       "minLength": 1,
+       "type": "string",
+       "xml": {
+        "name": "member"
+       }
+      },
+      "type": "array",
+      "xml": {
+       "wrapped": true
+      }
+     }
+    },
+    "type": "object"
+   },
+   "ReplicationGroupMessage": {
+    "additionalProperties": false,
+    "properties": {
+     "Marker": {
+      "type": "string"
+     },
+     "ReplicationGroups": {
+      "items": {
+       "$ref": "#/components/schemas/ReplicationGroup",
+       "xml": {
+        "name": "ReplicationGroup"
+       }
+      },
+      "type": "array",
+      "xml": {
+       "wrapped": true
+      }
+     }
+    },
+    "type": "object"
+   },
+   "ReplicationGroupPendingModifiedValues": {
+    "additionalProperties": false,
+    "properties": {
+     "AuthTokenStatus": {
+      "enum": [
+       "SETTING",
+       "ROTATING"
+      ],
+      "type": "string"
+     },
+     "AutomaticFailoverStatus": {
+      "enum": [
+       "enabled",
+       "disabled"
+      ],
+      "type": "string"
+     },
+     "ClusterMode": {
+      "enum": [
+       "enabled",
+       "disabled",
+       "compatible"
+      ],
+      "type": "string"
+     },
+     "PendingLogDeliveryConfiguration": {
+      "items": {
+       "$ref": "#/components/schemas/PendingLogDeliveryConfiguration",
+       "xml": {
+        "name": "member"
+       }
+      },
+      "type": "array",
+      "xml": {
+       "wrapped": true
+      }
+     },
+     "PrimaryClusterId": {
+      "type": "string"
+     },
+     "Resharding": {
+      "$ref": "#/components/schemas/ReshardingStatus"
+     },
+     "TransitEncryptionEnabled": {
+      "type": "boolean"
+     },
+     "TransitEncryptionMode": {
+      "enum": [
+       "preferred",
+       "required"
+      ],
+      "type": "string"
+     },
+     "UserGroups": {
+      "$ref": "#/components/schemas/UserGroupsUpdateStatus"
+     }
+    },
+    "type": "object"
+   },
+   "ReshardingStatus": {
+    "additionalProperties": false,
+    "properties": {
+     "SlotMigration": {
+      "$ref": "#/components/schemas/SlotMigration"
+     }
+    },
+    "type": "object"
+   },
    "ResponseMetadata": {
     "properties": {
      "RequestId": {
       "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ScaleConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "ScaleIntervalMinutes": {
+      "type": "integer"
+     },
+     "ScalePercentage": {
+      "type": "integer"
+     }
+    },
+    "type": "object"
+   },
+   "SecurityGroupMembership": {
+    "additionalProperties": false,
+    "properties": {
+     "SecurityGroupId": {
+      "type": "string"
+     },
+     "Status": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ServerlessCache": {
+    "additionalProperties": false,
+    "properties": {
+     "ARN": {
+      "type": "string"
+     },
+     "CacheUsageLimits": {
+      "$ref": "#/components/schemas/CacheUsageLimits"
+     },
+     "CreateTime": {
+      "format": "date-time",
+      "type": "string"
+     },
+     "DailySnapshotTime": {
+      "type": "string"
+     },
+     "Description": {
+      "type": "string"
+     },
+     "Endpoint": {
+      "$ref": "#/components/schemas/Endpoint"
+     },
+     "Engine": {
+      "type": "string"
+     },
+     "FullEngineVersion": {
+      "type": "string"
+     },
+     "KmsKeyId": {
+      "type": "string"
+     },
+     "MajorEngineVersion": {
+      "type": "string"
+     },
+     "ReaderEndpoint": {
+      "$ref": "#/components/schemas/Endpoint"
+     },
+     "SecurityGroupIds": {
+      "items": {
+       "type": "string",
+       "xml": {
+        "name": "SecurityGroupId"
+       }
+      },
+      "type": "array",
+      "xml": {
+       "wrapped": true
+      }
+     },
+     "ServerlessCacheName": {
+      "type": "string"
+     },
+     "SnapshotRetentionLimit": {
+      "type": "integer"
+     },
+     "Status": {
+      "type": "string"
+     },
+     "SubnetIds": {
+      "items": {
+       "type": "string",
+       "xml": {
+        "name": "SubnetId"
+       }
+      },
+      "type": "array",
+      "xml": {
+       "wrapped": true
+      }
+     },
+     "UserGroupId": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "SlotMigration": {
+    "additionalProperties": false,
+    "properties": {
+     "ProgressPercentage": {
+      "type": "number"
      }
     },
     "type": "object"
@@ -1128,11 +3473,43 @@
      }
     },
     "type": "object"
+   },
+   "UserGroupsUpdateStatus": {
+    "additionalProperties": false,
+    "properties": {
+     "UserGroupIdsToAdd": {
+      "items": {
+       "minLength": 1,
+       "type": "string",
+       "xml": {
+        "name": "member"
+       }
+      },
+      "type": "array",
+      "xml": {
+       "wrapped": true
+      }
+     },
+     "UserGroupIdsToRemove": {
+      "items": {
+       "minLength": 1,
+       "type": "string",
+       "xml": {
+        "name": "member"
+       }
+      },
+      "type": "array",
+      "xml": {
+       "wrapped": true
+      }
+     }
+    },
+    "type": "object"
    }
   }
  },
  "info": {
-  "description": "Bounded simulator subset of the official Amazon ElastiCache API (2015-02-02). Every other official operation returns HTTP 501 UnknownOperationException. Cache parameter groups, cache subnet groups and IAM-authenticated users are stored configuration served over the Query protocol: no cache cluster, replication group, serverless cache, global datastore, snapshot, security group or reserved node exists, and CreateCacheCluster, CreateReplicationGroup, CreateServerlessCache, CreateSnapshot and every other official operation return UnknownOperationException with HTTP 501. User groups are not implemented: a group references users, requires the account's default user and must drop a deleted user, none of which the stored model expresses, so CreateUserGroup, ModifyUserGroup, DescribeUserGroups and DeleteUserGroup return UnknownOperationException with HTTP 501 and users always report no UserGroupIds. Users must use iam authentication and the engine valkey or redis: passwords and NoPasswordRequired are refused so no password is stored, the user name must equal the user ID (the ElastiCache rule for IAM-enabled users), and the default user is refused and not pre-created. Access strings are stored without parsing, and AppendAccessString is not implemented. MinimumEngineVersion is 6.0 for redis and 7.2 for valkey as documented; DeleteUser returns the user with status deleting. Parameter values are not modeled: ModifyCacheParameterGroup, ResetCacheParameterGroup, DescribeCacheParameters, DescribeEngineDefaultParameters and DescribeCacheEngineVersions are not implemented, and default parameter groups and the default cache subnet group are not pre-created. A parameter group family must be one of the documented values and is not checked against engine versions; names are stored as given and IsGlobal is always false. A cache subnet group needs 1 to 20 distinct subnet-xxxxxxxx or subnet-xxxxxxxxxxxxxxxxx IDs that are not resolved, so it reports no VPC, Availability Zone, Outpost or supported network type, and the CacheSubnetQuotaExceededFault limit of 20 is a local limit. Cache subnet group names are 1 to 255 letters, digits or hyphens and are stored in lowercase. Describe operations refuse Marker values that were not issued for the request, accept MaxRecords from 20 to 100 for parameter and subnet groups and fail with the operation's not-found fault for an unknown name; DescribeUsers refuses Filters and a MaxRecords below 1. Resource counts per Region (50 parameter groups, 50 subnet groups, 100 users) are local limits. Tags apply to the three resource kinds by ARN (arn:aws:elasticache:region:account:parametergroup:name, subnetgroup:name and user:id). Tag keys are required and must not start with aws:. AddTagsToResource and RemoveTagsFromResource return an empty TagList, removing a missing key succeeds instead of failing with TagNotFound, and a well-formed ARN of an unknown resource fails with CacheClusterNotFound, the first not-found fault the official tag operations model; a malformed ARN fails with InvalidARN. More than 50 tags in one request fail with TagQuotaPerResourceExceeded, but adding tags that bring the total beyond 50 fails with InvalidParameterValue.",
+  "description": "Bounded simulator subset of the official Amazon ElastiCache API (2015-02-02). Every other official operation returns HTTP 501 UnknownOperationException. Cache clusters, replication groups and serverless caches are stored configuration records that stay in the creating state: no cache engine, node, shard, replica, endpoint, address or port exists, no endpoint, address, port, node list or node group is ever returned, and no key is stored or read. Cache parameter groups, cache subnet groups and IAM-authenticated users are stored configuration too. Operations that act on a running cache (RebootCacheCluster, IncreaseReplicaCount, DecreaseReplicaCount, TestFailover, TestMigration, StartMigration, CompleteMigration, snapshots, copies and restores, global datastores, security groups, reserved nodes, service updates) and every other official operation return UnknownOperationException with HTTP 501. The simulator stores no credentials: AuthToken and AuthTokenUpdateStrategy are refused with InvalidParameterValue instead of being accepted and discarded, so a record is created without an auth token (and, like a user, without a password); Port is refused because no listener exists. SnapshotArns, SnapshotName and ServerlessCacheSnapshotName (restores), CacheSecurityGroupNames (EC2-Classic), UserGroupId and UserGroupIds, LogDeliveryConfigurations (the request and description shapes differ), outposts, global replication groups, a cache cluster's ReplicationGroupId and every member the official description does not hold are refused as well. A replication group description holds no engine version, maintenance window, notification topic, parameter group, subnet group, security group, node count or node group, so EngineVersion, CacheParameterGroupName, CacheSubnetGroupName, SecurityGroupIds, PreferredMaintenanceWindow, NotificationTopicArn, NumCacheClusters, NumNodeGroups, ReplicasPerNodeGroup, PreferredCacheClusterAZs and NodeGroupConfiguration are refused for replication groups, which therefore have no MemberClusters. User groups are not implemented: a group references users by ID (a member the engine cannot check against existing users), requires the account's default user, which is not modeled, and must drop a deleted user and keep ReplicationGroups and ServerlessCaches in step, none of which the stored model expresses, so CreateUserGroup, ModifyUserGroup, DescribeUserGroups and DeleteUserGroup return UnknownOperationException with HTTP 501, users always report no UserGroupIds, and records cannot name user groups. A record keeps exactly the settings it was given: engine versions, node types, maintenance and snapshot windows and similar settings are stored without checking them against ElastiCache offerings and no default is filled in. CacheClusterStatus and Status are creating from creation until deletion; Modify operations are accepted in any state and apply immediately (ApplyImmediately is accepted, no pending values exist), and Delete returns the record with status deleting and refuses FinalSnapshotIdentifier and FinalSnapshotName because no snapshot can be taken (RetainPrimaryCluster is accepted and has no effect because a replication group has no member clusters). Identifiers are letters, digits and hyphens that start with a letter and neither end with a hyphen nor contain two consecutive hyphens (1 to 50 characters for cache clusters, 40 for replication groups and serverless caches) and are stored in lowercase; Engine is memcached, redis or valkey (redis or valkey for replication groups); NumCacheNodes is 1 for redis and valkey and 1 to 40 for memcached and for a record that names no engine (the official model does not require Engine, so the widest documented range applies, on create and on modify); AutomaticFailoverEnabled, MultiAZEnabled and DataTieringEnabled are reported as enabled or disabled. At most 50 cache clusters, 50 replication groups and 40 serverless caches exist per Region (local limits); exceeding them answers InvalidParameterValue for cache clusters and serverless caches and NodeGroupsPerReplicationGroupQuotaExceeded, the modeled quota fault the engine selects, for replication groups. A cache cluster reports its parameter group (status in-sync), notification topic (not checked, status active) and security groups (status active) by ID or name only, and names its cache subnet group, which, like the parameter group, need not exist and can be deleted while in use. DescribeCacheClusters refuses ShowCacheNodeInfo true because no node exists, and treats ShowCacheClustersNotInReplicationGroups as having no effect because no cluster belongs to a replication group. Users must use iam authentication and the engine valkey or redis: passwords and NoPasswordRequired are refused so no password is stored, the user name must equal the user ID (the ElastiCache rule for IAM-enabled users), and the default user is refused and not pre-created. Access strings are stored without parsing, and AppendAccessString is not implemented. MinimumEngineVersion is 6.0 for redis and 7.2 for valkey as documented; DeleteUser returns the user with status deleting. Parameter values are not modeled: ModifyCacheParameterGroup, ResetCacheParameterGroup, DescribeCacheParameters, DescribeEngineDefaultParameters and DescribeCacheEngineVersions are not implemented, and default parameter groups and the default cache subnet group are not pre-created. A parameter group family must be one of the documented values and is not checked against engine versions; names are stored as given and IsGlobal is always false. A cache subnet group needs 1 to 20 distinct subnet-xxxxxxxx or subnet-xxxxxxxxxxxxxxxxx IDs that are not resolved, so it reports no VPC, Availability Zone, Outpost or supported network type, and the CacheSubnetQuotaExceededFault limit of 20 is a local limit. Cache subnet group names are 1 to 255 letters, digits or hyphens and are stored in lowercase. Describe operations refuse Marker values that were not issued for the request, accept MaxRecords from 20 to 100 for parameter groups, subnet groups, cache clusters and replication groups (DescribeServerlessCaches takes the official MaxResults) and fail with the operation's not-found fault for an unknown name; DescribeUsers refuses Filters and a MaxRecords below 1. Resource counts per Region (50 parameter groups, 50 subnet groups, 100 users) are local limits. Tags apply to the six resource kinds by ARN (arn:aws:elasticache:region:account:parametergroup:name, subnetgroup:name, user:id, cluster:id, replicationgroup:id and serverlesscache:name). Tag keys are required and must not start with aws:. AddTagsToResource and RemoveTagsFromResource return an empty TagList, removing a missing key succeeds instead of failing with TagNotFound, and a well-formed ARN of an unknown resource fails with CacheClusterNotFound, the first not-found fault the official tag operations model; a malformed ARN fails with InvalidARN. More than 50 tags in one request fail with TagQuotaPerResourceExceeded, but adding tags that bring the total beyond 50 fails with InvalidParameterValue.",
   "title": "Amazon ElastiCache (simulator catalog)",
   "version": "2015-02-02"
  },
@@ -1226,6 +3603,99 @@
      }
     },
     "summary": "AddTagsToResource",
+    "tags": [
+     "Amazon ElastiCache"
+    ]
+   }
+  },
+  "/#Action=CreateCacheCluster": {
+   "post": {
+    "description": "POST / with a form-encoded body (the #Action fragment only names this entry and is not sent). Form fields follow the official Query serialization: structure members joined with \".\", list elements numbered from 1 under their element name (for example Tags.Tag.1.Key), map entries as entry.N.key and entry.N.value, and an empty list as an empty field. The response is an XML CreateCacheClusterResponse holding the CreateCacheClusterResult element and ResponseMetadata/RequestId; errors are ErrorResponse/Error/Code with the official error code.",
+    "operationId": "elasticacheCreateCacheCluster",
+    "parameters": [
+     {
+      "description": "Routes this unsigned first-party request to Amazon ElastiCache; without it an unsigned form POST is not routed here. SDKs use the SigV4 credential scope instead.",
+      "example": "elasticache",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": true,
+      "schema": {
+       "default": "elasticache",
+       "enum": [
+        "elasticache"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/x-www-form-urlencoded": {
+       "example": {
+        "Action": "CreateCacheCluster",
+        "CacheClusterId": "example",
+        "Version": "2015-02-02"
+       },
+       "schema": {
+        "$ref": "#/components/schemas/CreateCacheClusterRequest"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/CreateCacheClusterResponse"
+        }
+       }
+      },
+      "description": "XML CreateCacheClusterResponse with the projected official output shape."
+     },
+     "400": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "Modeled fault or common Query error (InvalidParameterValue, InvalidAction, MissingAction, MissingParameter, MalformedQueryString)."
+     },
+     "403": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "AccessDenied from local identity policy evaluation."
+     },
+     "404": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "Modeled not-found fault."
+     },
+     "501": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "UnknownOperationException: official operation not implemented by the simulator."
+     }
+    },
+    "summary": "CreateCacheCluster",
     "tags": [
      "Amazon ElastiCache"
     ]
@@ -1420,6 +3890,194 @@
     ]
    }
   },
+  "/#Action=CreateReplicationGroup": {
+   "post": {
+    "description": "POST / with a form-encoded body (the #Action fragment only names this entry and is not sent). Form fields follow the official Query serialization: structure members joined with \".\", list elements numbered from 1 under their element name (for example Tags.Tag.1.Key), map entries as entry.N.key and entry.N.value, and an empty list as an empty field. The response is an XML CreateReplicationGroupResponse holding the CreateReplicationGroupResult element and ResponseMetadata/RequestId; errors are ErrorResponse/Error/Code with the official error code.",
+    "operationId": "elasticacheCreateReplicationGroup",
+    "parameters": [
+     {
+      "description": "Routes this unsigned first-party request to Amazon ElastiCache; without it an unsigned form POST is not routed here. SDKs use the SigV4 credential scope instead.",
+      "example": "elasticache",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": true,
+      "schema": {
+       "default": "elasticache",
+       "enum": [
+        "elasticache"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/x-www-form-urlencoded": {
+       "example": {
+        "Action": "CreateReplicationGroup",
+        "ReplicationGroupDescription": "example",
+        "ReplicationGroupId": "example",
+        "Version": "2015-02-02"
+       },
+       "schema": {
+        "$ref": "#/components/schemas/CreateReplicationGroupRequest"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/CreateReplicationGroupResponse"
+        }
+       }
+      },
+      "description": "XML CreateReplicationGroupResponse with the projected official output shape."
+     },
+     "400": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "Modeled fault or common Query error (InvalidParameterValue, InvalidAction, MissingAction, MissingParameter, MalformedQueryString)."
+     },
+     "403": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "AccessDenied from local identity policy evaluation."
+     },
+     "404": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "Modeled not-found fault."
+     },
+     "501": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "UnknownOperationException: official operation not implemented by the simulator."
+     }
+    },
+    "summary": "CreateReplicationGroup",
+    "tags": [
+     "Amazon ElastiCache"
+    ]
+   }
+  },
+  "/#Action=CreateServerlessCache": {
+   "post": {
+    "description": "POST / with a form-encoded body (the #Action fragment only names this entry and is not sent). Form fields follow the official Query serialization: structure members joined with \".\", list elements numbered from 1 under their element name (for example Tags.Tag.1.Key), map entries as entry.N.key and entry.N.value, and an empty list as an empty field. The response is an XML CreateServerlessCacheResponse holding the CreateServerlessCacheResult element and ResponseMetadata/RequestId; errors are ErrorResponse/Error/Code with the official error code.",
+    "operationId": "elasticacheCreateServerlessCache",
+    "parameters": [
+     {
+      "description": "Routes this unsigned first-party request to Amazon ElastiCache; without it an unsigned form POST is not routed here. SDKs use the SigV4 credential scope instead.",
+      "example": "elasticache",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": true,
+      "schema": {
+       "default": "elasticache",
+       "enum": [
+        "elasticache"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/x-www-form-urlencoded": {
+       "example": {
+        "Action": "CreateServerlessCache",
+        "Engine": "example",
+        "ServerlessCacheName": "example",
+        "Version": "2015-02-02"
+       },
+       "schema": {
+        "$ref": "#/components/schemas/CreateServerlessCacheRequest"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/CreateServerlessCacheResponse"
+        }
+       }
+      },
+      "description": "XML CreateServerlessCacheResponse with the projected official output shape."
+     },
+     "400": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "Modeled fault or common Query error (InvalidParameterValue, InvalidAction, MissingAction, MissingParameter, MalformedQueryString)."
+     },
+     "403": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "AccessDenied from local identity policy evaluation."
+     },
+     "404": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "Modeled not-found fault."
+     },
+     "501": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "UnknownOperationException: official operation not implemented by the simulator."
+     }
+    },
+    "summary": "CreateServerlessCache",
+    "tags": [
+     "Amazon ElastiCache"
+    ]
+   }
+  },
   "/#Action=CreateUser": {
    "post": {
     "description": "POST / with a form-encoded body (the #Action fragment only names this entry and is not sent). Form fields follow the official Query serialization: structure members joined with \".\", list elements numbered from 1 under their element name (for example Tags.Tag.1.Key), map entries as entry.N.key and entry.N.value, and an empty list as an empty field. The response is an XML CreateUserResponse holding the CreateUserResult element and ResponseMetadata/RequestId; errors are ErrorResponse/Error/Code with the official error code.",
@@ -1511,6 +4169,99 @@
      }
     },
     "summary": "CreateUser",
+    "tags": [
+     "Amazon ElastiCache"
+    ]
+   }
+  },
+  "/#Action=DeleteCacheCluster": {
+   "post": {
+    "description": "POST / with a form-encoded body (the #Action fragment only names this entry and is not sent). Form fields follow the official Query serialization: structure members joined with \".\", list elements numbered from 1 under their element name (for example Tags.Tag.1.Key), map entries as entry.N.key and entry.N.value, and an empty list as an empty field. The response is an XML DeleteCacheClusterResponse holding the DeleteCacheClusterResult element and ResponseMetadata/RequestId; errors are ErrorResponse/Error/Code with the official error code.",
+    "operationId": "elasticacheDeleteCacheCluster",
+    "parameters": [
+     {
+      "description": "Routes this unsigned first-party request to Amazon ElastiCache; without it an unsigned form POST is not routed here. SDKs use the SigV4 credential scope instead.",
+      "example": "elasticache",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": true,
+      "schema": {
+       "default": "elasticache",
+       "enum": [
+        "elasticache"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/x-www-form-urlencoded": {
+       "example": {
+        "Action": "DeleteCacheCluster",
+        "CacheClusterId": "example",
+        "Version": "2015-02-02"
+       },
+       "schema": {
+        "$ref": "#/components/schemas/DeleteCacheClusterRequest"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/DeleteCacheClusterResponse"
+        }
+       }
+      },
+      "description": "XML DeleteCacheClusterResponse with the projected official output shape."
+     },
+     "400": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "Modeled fault or common Query error (InvalidParameterValue, InvalidAction, MissingAction, MissingParameter, MalformedQueryString)."
+     },
+     "403": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "AccessDenied from local identity policy evaluation."
+     },
+     "404": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "Modeled not-found fault."
+     },
+     "501": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "UnknownOperationException: official operation not implemented by the simulator."
+     }
+    },
+    "summary": "DeleteCacheCluster",
     "tags": [
      "Amazon ElastiCache"
     ]
@@ -1702,6 +4453,192 @@
     ]
    }
   },
+  "/#Action=DeleteReplicationGroup": {
+   "post": {
+    "description": "POST / with a form-encoded body (the #Action fragment only names this entry and is not sent). Form fields follow the official Query serialization: structure members joined with \".\", list elements numbered from 1 under their element name (for example Tags.Tag.1.Key), map entries as entry.N.key and entry.N.value, and an empty list as an empty field. The response is an XML DeleteReplicationGroupResponse holding the DeleteReplicationGroupResult element and ResponseMetadata/RequestId; errors are ErrorResponse/Error/Code with the official error code.",
+    "operationId": "elasticacheDeleteReplicationGroup",
+    "parameters": [
+     {
+      "description": "Routes this unsigned first-party request to Amazon ElastiCache; without it an unsigned form POST is not routed here. SDKs use the SigV4 credential scope instead.",
+      "example": "elasticache",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": true,
+      "schema": {
+       "default": "elasticache",
+       "enum": [
+        "elasticache"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/x-www-form-urlencoded": {
+       "example": {
+        "Action": "DeleteReplicationGroup",
+        "ReplicationGroupId": "example",
+        "Version": "2015-02-02"
+       },
+       "schema": {
+        "$ref": "#/components/schemas/DeleteReplicationGroupRequest"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/DeleteReplicationGroupResponse"
+        }
+       }
+      },
+      "description": "XML DeleteReplicationGroupResponse with the projected official output shape."
+     },
+     "400": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "Modeled fault or common Query error (InvalidParameterValue, InvalidAction, MissingAction, MissingParameter, MalformedQueryString)."
+     },
+     "403": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "AccessDenied from local identity policy evaluation."
+     },
+     "404": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "Modeled not-found fault."
+     },
+     "501": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "UnknownOperationException: official operation not implemented by the simulator."
+     }
+    },
+    "summary": "DeleteReplicationGroup",
+    "tags": [
+     "Amazon ElastiCache"
+    ]
+   }
+  },
+  "/#Action=DeleteServerlessCache": {
+   "post": {
+    "description": "POST / with a form-encoded body (the #Action fragment only names this entry and is not sent). Form fields follow the official Query serialization: structure members joined with \".\", list elements numbered from 1 under their element name (for example Tags.Tag.1.Key), map entries as entry.N.key and entry.N.value, and an empty list as an empty field. The response is an XML DeleteServerlessCacheResponse holding the DeleteServerlessCacheResult element and ResponseMetadata/RequestId; errors are ErrorResponse/Error/Code with the official error code.",
+    "operationId": "elasticacheDeleteServerlessCache",
+    "parameters": [
+     {
+      "description": "Routes this unsigned first-party request to Amazon ElastiCache; without it an unsigned form POST is not routed here. SDKs use the SigV4 credential scope instead.",
+      "example": "elasticache",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": true,
+      "schema": {
+       "default": "elasticache",
+       "enum": [
+        "elasticache"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/x-www-form-urlencoded": {
+       "example": {
+        "Action": "DeleteServerlessCache",
+        "ServerlessCacheName": "example",
+        "Version": "2015-02-02"
+       },
+       "schema": {
+        "$ref": "#/components/schemas/DeleteServerlessCacheRequest"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/DeleteServerlessCacheResponse"
+        }
+       }
+      },
+      "description": "XML DeleteServerlessCacheResponse with the projected official output shape."
+     },
+     "400": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "Modeled fault or common Query error (InvalidParameterValue, InvalidAction, MissingAction, MissingParameter, MalformedQueryString)."
+     },
+     "403": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "AccessDenied from local identity policy evaluation."
+     },
+     "404": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "Modeled not-found fault."
+     },
+     "501": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "UnknownOperationException: official operation not implemented by the simulator."
+     }
+    },
+    "summary": "DeleteServerlessCache",
+    "tags": [
+     "Amazon ElastiCache"
+    ]
+   }
+  },
   "/#Action=DeleteUser": {
    "post": {
     "description": "POST / with a form-encoded body (the #Action fragment only names this entry and is not sent). Form fields follow the official Query serialization: structure members joined with \".\", list elements numbered from 1 under their element name (for example Tags.Tag.1.Key), map entries as entry.N.key and entry.N.value, and an empty list as an empty field. The response is an XML DeleteUserResponse holding the DeleteUserResult element and ResponseMetadata/RequestId; errors are ErrorResponse/Error/Code with the official error code.",
@@ -1790,6 +4727,98 @@
      }
     },
     "summary": "DeleteUser",
+    "tags": [
+     "Amazon ElastiCache"
+    ]
+   }
+  },
+  "/#Action=DescribeCacheClusters": {
+   "post": {
+    "description": "POST / with a form-encoded body (the #Action fragment only names this entry and is not sent). Form fields follow the official Query serialization: structure members joined with \".\", list elements numbered from 1 under their element name (for example Tags.Tag.1.Key), map entries as entry.N.key and entry.N.value, and an empty list as an empty field. The response is an XML DescribeCacheClustersResponse holding the DescribeCacheClustersResult element and ResponseMetadata/RequestId; errors are ErrorResponse/Error/Code with the official error code.",
+    "operationId": "elasticacheDescribeCacheClusters",
+    "parameters": [
+     {
+      "description": "Routes this unsigned first-party request to Amazon ElastiCache; without it an unsigned form POST is not routed here. SDKs use the SigV4 credential scope instead.",
+      "example": "elasticache",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": true,
+      "schema": {
+       "default": "elasticache",
+       "enum": [
+        "elasticache"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/x-www-form-urlencoded": {
+       "example": {
+        "Action": "DescribeCacheClusters",
+        "Version": "2015-02-02"
+       },
+       "schema": {
+        "$ref": "#/components/schemas/DescribeCacheClustersRequest"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/DescribeCacheClustersResponse"
+        }
+       }
+      },
+      "description": "XML DescribeCacheClustersResponse with the projected official output shape."
+     },
+     "400": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "Modeled fault or common Query error (InvalidParameterValue, InvalidAction, MissingAction, MissingParameter, MalformedQueryString)."
+     },
+     "403": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "AccessDenied from local identity policy evaluation."
+     },
+     "404": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "Modeled not-found fault."
+     },
+     "501": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "UnknownOperationException: official operation not implemented by the simulator."
+     }
+    },
+    "summary": "DescribeCacheClusters",
     "tags": [
      "Amazon ElastiCache"
     ]
@@ -1974,6 +5003,190 @@
      }
     },
     "summary": "DescribeCacheSubnetGroups",
+    "tags": [
+     "Amazon ElastiCache"
+    ]
+   }
+  },
+  "/#Action=DescribeReplicationGroups": {
+   "post": {
+    "description": "POST / with a form-encoded body (the #Action fragment only names this entry and is not sent). Form fields follow the official Query serialization: structure members joined with \".\", list elements numbered from 1 under their element name (for example Tags.Tag.1.Key), map entries as entry.N.key and entry.N.value, and an empty list as an empty field. The response is an XML DescribeReplicationGroupsResponse holding the DescribeReplicationGroupsResult element and ResponseMetadata/RequestId; errors are ErrorResponse/Error/Code with the official error code.",
+    "operationId": "elasticacheDescribeReplicationGroups",
+    "parameters": [
+     {
+      "description": "Routes this unsigned first-party request to Amazon ElastiCache; without it an unsigned form POST is not routed here. SDKs use the SigV4 credential scope instead.",
+      "example": "elasticache",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": true,
+      "schema": {
+       "default": "elasticache",
+       "enum": [
+        "elasticache"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/x-www-form-urlencoded": {
+       "example": {
+        "Action": "DescribeReplicationGroups",
+        "Version": "2015-02-02"
+       },
+       "schema": {
+        "$ref": "#/components/schemas/DescribeReplicationGroupsRequest"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/DescribeReplicationGroupsResponse"
+        }
+       }
+      },
+      "description": "XML DescribeReplicationGroupsResponse with the projected official output shape."
+     },
+     "400": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "Modeled fault or common Query error (InvalidParameterValue, InvalidAction, MissingAction, MissingParameter, MalformedQueryString)."
+     },
+     "403": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "AccessDenied from local identity policy evaluation."
+     },
+     "404": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "Modeled not-found fault."
+     },
+     "501": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "UnknownOperationException: official operation not implemented by the simulator."
+     }
+    },
+    "summary": "DescribeReplicationGroups",
+    "tags": [
+     "Amazon ElastiCache"
+    ]
+   }
+  },
+  "/#Action=DescribeServerlessCaches": {
+   "post": {
+    "description": "POST / with a form-encoded body (the #Action fragment only names this entry and is not sent). Form fields follow the official Query serialization: structure members joined with \".\", list elements numbered from 1 under their element name (for example Tags.Tag.1.Key), map entries as entry.N.key and entry.N.value, and an empty list as an empty field. The response is an XML DescribeServerlessCachesResponse holding the DescribeServerlessCachesResult element and ResponseMetadata/RequestId; errors are ErrorResponse/Error/Code with the official error code.",
+    "operationId": "elasticacheDescribeServerlessCaches",
+    "parameters": [
+     {
+      "description": "Routes this unsigned first-party request to Amazon ElastiCache; without it an unsigned form POST is not routed here. SDKs use the SigV4 credential scope instead.",
+      "example": "elasticache",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": true,
+      "schema": {
+       "default": "elasticache",
+       "enum": [
+        "elasticache"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/x-www-form-urlencoded": {
+       "example": {
+        "Action": "DescribeServerlessCaches",
+        "Version": "2015-02-02"
+       },
+       "schema": {
+        "$ref": "#/components/schemas/DescribeServerlessCachesRequest"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/DescribeServerlessCachesResponse"
+        }
+       }
+      },
+      "description": "XML DescribeServerlessCachesResponse with the projected official output shape."
+     },
+     "400": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "Modeled fault or common Query error (InvalidParameterValue, InvalidAction, MissingAction, MissingParameter, MalformedQueryString)."
+     },
+     "403": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "AccessDenied from local identity policy evaluation."
+     },
+     "404": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "Modeled not-found fault."
+     },
+     "501": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "UnknownOperationException: official operation not implemented by the simulator."
+     }
+    },
+    "summary": "DescribeServerlessCaches",
     "tags": [
      "Amazon ElastiCache"
     ]
@@ -2164,6 +5377,99 @@
     ]
    }
   },
+  "/#Action=ModifyCacheCluster": {
+   "post": {
+    "description": "POST / with a form-encoded body (the #Action fragment only names this entry and is not sent). Form fields follow the official Query serialization: structure members joined with \".\", list elements numbered from 1 under their element name (for example Tags.Tag.1.Key), map entries as entry.N.key and entry.N.value, and an empty list as an empty field. The response is an XML ModifyCacheClusterResponse holding the ModifyCacheClusterResult element and ResponseMetadata/RequestId; errors are ErrorResponse/Error/Code with the official error code.",
+    "operationId": "elasticacheModifyCacheCluster",
+    "parameters": [
+     {
+      "description": "Routes this unsigned first-party request to Amazon ElastiCache; without it an unsigned form POST is not routed here. SDKs use the SigV4 credential scope instead.",
+      "example": "elasticache",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": true,
+      "schema": {
+       "default": "elasticache",
+       "enum": [
+        "elasticache"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/x-www-form-urlencoded": {
+       "example": {
+        "Action": "ModifyCacheCluster",
+        "CacheClusterId": "example",
+        "Version": "2015-02-02"
+       },
+       "schema": {
+        "$ref": "#/components/schemas/ModifyCacheClusterRequest"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ModifyCacheClusterResponse"
+        }
+       }
+      },
+      "description": "XML ModifyCacheClusterResponse with the projected official output shape."
+     },
+     "400": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "Modeled fault or common Query error (InvalidParameterValue, InvalidAction, MissingAction, MissingParameter, MalformedQueryString)."
+     },
+     "403": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "AccessDenied from local identity policy evaluation."
+     },
+     "404": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "Modeled not-found fault."
+     },
+     "501": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "UnknownOperationException: official operation not implemented by the simulator."
+     }
+    },
+    "summary": "ModifyCacheCluster",
+    "tags": [
+     "Amazon ElastiCache"
+    ]
+   }
+  },
   "/#Action=ModifyCacheSubnetGroup": {
    "post": {
     "description": "POST / with a form-encoded body (the #Action fragment only names this entry and is not sent). Form fields follow the official Query serialization: structure members joined with \".\", list elements numbered from 1 under their element name (for example Tags.Tag.1.Key), map entries as entry.N.key and entry.N.value, and an empty list as an empty field. The response is an XML ModifyCacheSubnetGroupResponse holding the ModifyCacheSubnetGroupResult element and ResponseMetadata/RequestId; errors are ErrorResponse/Error/Code with the official error code.",
@@ -2252,6 +5558,192 @@
      }
     },
     "summary": "ModifyCacheSubnetGroup",
+    "tags": [
+     "Amazon ElastiCache"
+    ]
+   }
+  },
+  "/#Action=ModifyReplicationGroup": {
+   "post": {
+    "description": "POST / with a form-encoded body (the #Action fragment only names this entry and is not sent). Form fields follow the official Query serialization: structure members joined with \".\", list elements numbered from 1 under their element name (for example Tags.Tag.1.Key), map entries as entry.N.key and entry.N.value, and an empty list as an empty field. The response is an XML ModifyReplicationGroupResponse holding the ModifyReplicationGroupResult element and ResponseMetadata/RequestId; errors are ErrorResponse/Error/Code with the official error code.",
+    "operationId": "elasticacheModifyReplicationGroup",
+    "parameters": [
+     {
+      "description": "Routes this unsigned first-party request to Amazon ElastiCache; without it an unsigned form POST is not routed here. SDKs use the SigV4 credential scope instead.",
+      "example": "elasticache",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": true,
+      "schema": {
+       "default": "elasticache",
+       "enum": [
+        "elasticache"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/x-www-form-urlencoded": {
+       "example": {
+        "Action": "ModifyReplicationGroup",
+        "ReplicationGroupId": "example",
+        "Version": "2015-02-02"
+       },
+       "schema": {
+        "$ref": "#/components/schemas/ModifyReplicationGroupRequest"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ModifyReplicationGroupResponse"
+        }
+       }
+      },
+      "description": "XML ModifyReplicationGroupResponse with the projected official output shape."
+     },
+     "400": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "Modeled fault or common Query error (InvalidParameterValue, InvalidAction, MissingAction, MissingParameter, MalformedQueryString)."
+     },
+     "403": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "AccessDenied from local identity policy evaluation."
+     },
+     "404": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "Modeled not-found fault."
+     },
+     "501": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "UnknownOperationException: official operation not implemented by the simulator."
+     }
+    },
+    "summary": "ModifyReplicationGroup",
+    "tags": [
+     "Amazon ElastiCache"
+    ]
+   }
+  },
+  "/#Action=ModifyServerlessCache": {
+   "post": {
+    "description": "POST / with a form-encoded body (the #Action fragment only names this entry and is not sent). Form fields follow the official Query serialization: structure members joined with \".\", list elements numbered from 1 under their element name (for example Tags.Tag.1.Key), map entries as entry.N.key and entry.N.value, and an empty list as an empty field. The response is an XML ModifyServerlessCacheResponse holding the ModifyServerlessCacheResult element and ResponseMetadata/RequestId; errors are ErrorResponse/Error/Code with the official error code.",
+    "operationId": "elasticacheModifyServerlessCache",
+    "parameters": [
+     {
+      "description": "Routes this unsigned first-party request to Amazon ElastiCache; without it an unsigned form POST is not routed here. SDKs use the SigV4 credential scope instead.",
+      "example": "elasticache",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": true,
+      "schema": {
+       "default": "elasticache",
+       "enum": [
+        "elasticache"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/x-www-form-urlencoded": {
+       "example": {
+        "Action": "ModifyServerlessCache",
+        "ServerlessCacheName": "example",
+        "Version": "2015-02-02"
+       },
+       "schema": {
+        "$ref": "#/components/schemas/ModifyServerlessCacheRequest"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ModifyServerlessCacheResponse"
+        }
+       }
+      },
+      "description": "XML ModifyServerlessCacheResponse with the projected official output shape."
+     },
+     "400": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "Modeled fault or common Query error (InvalidParameterValue, InvalidAction, MissingAction, MissingParameter, MalformedQueryString)."
+     },
+     "403": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "AccessDenied from local identity policy evaluation."
+     },
+     "404": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "Modeled not-found fault."
+     },
+     "501": {
+      "content": {
+       "text/xml": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      },
+      "description": "UnknownOperationException: official operation not implemented by the simulator."
+     }
+    },
+    "summary": "ModifyServerlessCache",
     "tags": [
      "Amazon ElastiCache"
     ]
@@ -2452,7 +5944,7 @@
  ],
  "tags": [
   {
-   "description": "Bounded simulator subset of the official Amazon ElastiCache API (2015-02-02). Every other official operation returns HTTP 501 UnknownOperationException. Cache parameter groups, cache subnet groups and IAM-authenticated users are stored configuration served over the Query protocol: no cache cluster, replication group, serverless cache, global datastore, snapshot, security group or reserved node exists, and CreateCacheCluster, CreateReplicationGroup, CreateServerlessCache, CreateSnapshot and every other official operation return UnknownOperationException with HTTP 501. User groups are not implemented: a group references users, requires the account's default user and must drop a deleted user, none of which the stored model expresses, so CreateUserGroup, ModifyUserGroup, DescribeUserGroups and DeleteUserGroup return UnknownOperationException with HTTP 501 and users always report no UserGroupIds. Users must use iam authentication and the engine valkey or redis: passwords and NoPasswordRequired are refused so no password is stored, the user name must equal the user ID (the ElastiCache rule for IAM-enabled users), and the default user is refused and not pre-created. Access strings are stored without parsing, and AppendAccessString is not implemented. MinimumEngineVersion is 6.0 for redis and 7.2 for valkey as documented; DeleteUser returns the user with status deleting. Parameter values are not modeled: ModifyCacheParameterGroup, ResetCacheParameterGroup, DescribeCacheParameters, DescribeEngineDefaultParameters and DescribeCacheEngineVersions are not implemented, and default parameter groups and the default cache subnet group are not pre-created. A parameter group family must be one of the documented values and is not checked against engine versions; names are stored as given and IsGlobal is always false. A cache subnet group needs 1 to 20 distinct subnet-xxxxxxxx or subnet-xxxxxxxxxxxxxxxxx IDs that are not resolved, so it reports no VPC, Availability Zone, Outpost or supported network type, and the CacheSubnetQuotaExceededFault limit of 20 is a local limit. Cache subnet group names are 1 to 255 letters, digits or hyphens and are stored in lowercase. Describe operations refuse Marker values that were not issued for the request, accept MaxRecords from 20 to 100 for parameter and subnet groups and fail with the operation's not-found fault for an unknown name; DescribeUsers refuses Filters and a MaxRecords below 1. Resource counts per Region (50 parameter groups, 50 subnet groups, 100 users) are local limits. Tags apply to the three resource kinds by ARN (arn:aws:elasticache:region:account:parametergroup:name, subnetgroup:name and user:id). Tag keys are required and must not start with aws:. AddTagsToResource and RemoveTagsFromResource return an empty TagList, removing a missing key succeeds instead of failing with TagNotFound, and a well-formed ARN of an unknown resource fails with CacheClusterNotFound, the first not-found fault the official tag operations model; a malformed ARN fails with InvalidARN. More than 50 tags in one request fail with TagQuotaPerResourceExceeded, but adding tags that bring the total beyond 50 fails with InvalidParameterValue.",
+   "description": "Bounded simulator subset of the official Amazon ElastiCache API (2015-02-02). Every other official operation returns HTTP 501 UnknownOperationException. Cache clusters, replication groups and serverless caches are stored configuration records that stay in the creating state: no cache engine, node, shard, replica, endpoint, address or port exists, no endpoint, address, port, node list or node group is ever returned, and no key is stored or read. Cache parameter groups, cache subnet groups and IAM-authenticated users are stored configuration too. Operations that act on a running cache (RebootCacheCluster, IncreaseReplicaCount, DecreaseReplicaCount, TestFailover, TestMigration, StartMigration, CompleteMigration, snapshots, copies and restores, global datastores, security groups, reserved nodes, service updates) and every other official operation return UnknownOperationException with HTTP 501. The simulator stores no credentials: AuthToken and AuthTokenUpdateStrategy are refused with InvalidParameterValue instead of being accepted and discarded, so a record is created without an auth token (and, like a user, without a password); Port is refused because no listener exists. SnapshotArns, SnapshotName and ServerlessCacheSnapshotName (restores), CacheSecurityGroupNames (EC2-Classic), UserGroupId and UserGroupIds, LogDeliveryConfigurations (the request and description shapes differ), outposts, global replication groups, a cache cluster's ReplicationGroupId and every member the official description does not hold are refused as well. A replication group description holds no engine version, maintenance window, notification topic, parameter group, subnet group, security group, node count or node group, so EngineVersion, CacheParameterGroupName, CacheSubnetGroupName, SecurityGroupIds, PreferredMaintenanceWindow, NotificationTopicArn, NumCacheClusters, NumNodeGroups, ReplicasPerNodeGroup, PreferredCacheClusterAZs and NodeGroupConfiguration are refused for replication groups, which therefore have no MemberClusters. User groups are not implemented: a group references users by ID (a member the engine cannot check against existing users), requires the account's default user, which is not modeled, and must drop a deleted user and keep ReplicationGroups and ServerlessCaches in step, none of which the stored model expresses, so CreateUserGroup, ModifyUserGroup, DescribeUserGroups and DeleteUserGroup return UnknownOperationException with HTTP 501, users always report no UserGroupIds, and records cannot name user groups. A record keeps exactly the settings it was given: engine versions, node types, maintenance and snapshot windows and similar settings are stored without checking them against ElastiCache offerings and no default is filled in. CacheClusterStatus and Status are creating from creation until deletion; Modify operations are accepted in any state and apply immediately (ApplyImmediately is accepted, no pending values exist), and Delete returns the record with status deleting and refuses FinalSnapshotIdentifier and FinalSnapshotName because no snapshot can be taken (RetainPrimaryCluster is accepted and has no effect because a replication group has no member clusters). Identifiers are letters, digits and hyphens that start with a letter and neither end with a hyphen nor contain two consecutive hyphens (1 to 50 characters for cache clusters, 40 for replication groups and serverless caches) and are stored in lowercase; Engine is memcached, redis or valkey (redis or valkey for replication groups); NumCacheNodes is 1 for redis and valkey and 1 to 40 for memcached and for a record that names no engine (the official model does not require Engine, so the widest documented range applies, on create and on modify); AutomaticFailoverEnabled, MultiAZEnabled and DataTieringEnabled are reported as enabled or disabled. At most 50 cache clusters, 50 replication groups and 40 serverless caches exist per Region (local limits); exceeding them answers InvalidParameterValue for cache clusters and serverless caches and NodeGroupsPerReplicationGroupQuotaExceeded, the modeled quota fault the engine selects, for replication groups. A cache cluster reports its parameter group (status in-sync), notification topic (not checked, status active) and security groups (status active) by ID or name only, and names its cache subnet group, which, like the parameter group, need not exist and can be deleted while in use. DescribeCacheClusters refuses ShowCacheNodeInfo true because no node exists, and treats ShowCacheClustersNotInReplicationGroups as having no effect because no cluster belongs to a replication group. Users must use iam authentication and the engine valkey or redis: passwords and NoPasswordRequired are refused so no password is stored, the user name must equal the user ID (the ElastiCache rule for IAM-enabled users), and the default user is refused and not pre-created. Access strings are stored without parsing, and AppendAccessString is not implemented. MinimumEngineVersion is 6.0 for redis and 7.2 for valkey as documented; DeleteUser returns the user with status deleting. Parameter values are not modeled: ModifyCacheParameterGroup, ResetCacheParameterGroup, DescribeCacheParameters, DescribeEngineDefaultParameters and DescribeCacheEngineVersions are not implemented, and default parameter groups and the default cache subnet group are not pre-created. A parameter group family must be one of the documented values and is not checked against engine versions; names are stored as given and IsGlobal is always false. A cache subnet group needs 1 to 20 distinct subnet-xxxxxxxx or subnet-xxxxxxxxxxxxxxxxx IDs that are not resolved, so it reports no VPC, Availability Zone, Outpost or supported network type, and the CacheSubnetQuotaExceededFault limit of 20 is a local limit. Cache subnet group names are 1 to 255 letters, digits or hyphens and are stored in lowercase. Describe operations refuse Marker values that were not issued for the request, accept MaxRecords from 20 to 100 for parameter groups, subnet groups, cache clusters and replication groups (DescribeServerlessCaches takes the official MaxResults) and fail with the operation's not-found fault for an unknown name; DescribeUsers refuses Filters and a MaxRecords below 1. Resource counts per Region (50 parameter groups, 50 subnet groups, 100 users) are local limits. Tags apply to the six resource kinds by ARN (arn:aws:elasticache:region:account:parametergroup:name, subnetgroup:name, user:id, cluster:id, replicationgroup:id and serverlesscache:name). Tag keys are required and must not start with aws:. AddTagsToResource and RemoveTagsFromResource return an empty TagList, removing a missing key succeeds instead of failing with TagNotFound, and a well-formed ARN of an unknown resource fails with CacheClusterNotFound, the first not-found fault the official tag operations model; a malformed ARN fails with InvalidARN. More than 50 tags in one request fail with TagQuotaPerResourceExceeded, but adding tags that bring the total beyond 50 fails with InvalidParameterValue.",
    "name": "Amazon ElastiCache"
   }
  ],

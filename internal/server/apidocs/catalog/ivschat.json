@@ -1,0 +1,1316 @@
+{
+ "components": {
+  "schemas": {
+   "CloudWatchLogsDestinationConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "logGroupName": {
+      "maxLength": 512,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "logGroupName"
+    ],
+    "type": "object"
+   },
+   "DestinationConfiguration": {
+    "additionalProperties": false,
+    "maxProperties": 1,
+    "minProperties": 1,
+    "properties": {
+     "cloudWatchLogs": {
+      "$ref": "#/components/schemas/CloudWatchLogsDestinationConfiguration"
+     },
+     "firehose": {
+      "$ref": "#/components/schemas/FirehoseDestinationConfiguration"
+     },
+     "s3": {
+      "$ref": "#/components/schemas/S3DestinationConfiguration"
+     }
+    },
+    "type": "object"
+   },
+   "FirehoseDestinationConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "deliveryStreamName": {
+      "maxLength": 64,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "deliveryStreamName"
+    ],
+    "type": "object"
+   },
+   "LoggingConfigurationSummary": {
+    "additionalProperties": false,
+    "properties": {
+     "arn": {
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string"
+     },
+     "createTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "destinationConfiguration": {
+      "$ref": "#/components/schemas/DestinationConfiguration"
+     },
+     "id": {
+      "maxLength": 12,
+      "minLength": 12,
+      "type": "string"
+     },
+     "name": {
+      "maxLength": 128,
+      "minLength": 0,
+      "type": "string"
+     },
+     "state": {
+      "enum": [
+       "CREATING",
+       "CREATE_FAILED",
+       "DELETING",
+       "DELETE_FAILED",
+       "UPDATING",
+       "UPDATE_FAILED",
+       "ACTIVE"
+      ],
+      "type": "string"
+     },
+     "tags": {
+      "additionalProperties": {
+       "maxLength": 256,
+       "minLength": 0,
+       "type": "string"
+      },
+      "maxProperties": 50,
+      "minProperties": 0,
+      "type": "object"
+     },
+     "updateTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     }
+    },
+    "type": "object"
+   },
+   "MessageReviewHandler": {
+    "additionalProperties": false,
+    "properties": {
+     "fallbackResult": {
+      "enum": [
+       "ALLOW",
+       "DENY"
+      ],
+      "type": "string"
+     },
+     "uri": {
+      "maxLength": 170,
+      "minLength": 0,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "RoomSummary": {
+    "additionalProperties": false,
+    "properties": {
+     "arn": {
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string"
+     },
+     "createTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "id": {
+      "maxLength": 12,
+      "minLength": 12,
+      "type": "string"
+     },
+     "loggingConfigurationIdentifiers": {
+      "items": {
+       "maxLength": 128,
+       "minLength": 1,
+       "type": "string"
+      },
+      "maxItems": 3,
+      "minItems": 0,
+      "type": "array"
+     },
+     "messageReviewHandler": {
+      "$ref": "#/components/schemas/MessageReviewHandler"
+     },
+     "name": {
+      "maxLength": 128,
+      "minLength": 0,
+      "type": "string"
+     },
+     "tags": {
+      "additionalProperties": {
+       "maxLength": 256,
+       "minLength": 0,
+       "type": "string"
+      },
+      "maxProperties": 50,
+      "minProperties": 0,
+      "type": "object"
+     },
+     "updateTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     }
+    },
+    "type": "object"
+   },
+   "S3DestinationConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "bucketName": {
+      "maxLength": 63,
+      "minLength": 3,
+      "type": "string"
+     }
+    },
+    "required": [
+     "bucketName"
+    ],
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "Bounded simulator subset of the official Amazon Interactive Video Service Chat API (2020-07-14). Every other official operation returns HTTP 501 UnknownOperationException. Chat rooms and logging configurations are stored records: no chat connection, message or user exists and no message is logged to the destination. CreateChatToken (which mints a credential), SendEvent, DeleteMessage and DisconnectUser return UnknownOperationException with HTTP 501. A logging configuration is ACTIVE at once and its CloudWatch Logs, Firehose or S3 destination is stored by name without being looked up. loggingConfigurationIdentifiers of a room are stored without checking that the configurations exist, and deleting a logging configuration does not check the rooms that name it. The message review handler Lambda function is stored without being invoked. TagResource, UntagResource and ListTagsForResource are not bound because the official resourceArn pattern admits no real ARN; tags are set at creation only. ListRooms filters only by name; messageReviewHandlerUri and loggingConfigurationIdentifier filters are refused. Limits per Region are simulator limits, not AWS quotas.",
+  "title": "Amazon Interactive Video Service Chat (simulator catalog)",
+  "version": "2020-07-14"
+ },
+ "openapi": "3.1.0",
+ "paths": {
+  "/CreateLoggingConfiguration": {
+   "post": {
+    "operationId": "ivschatCreateLoggingConfiguration",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "ivschat"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "destinationConfiguration": {
+          "$ref": "#/components/schemas/DestinationConfiguration"
+         },
+         "name": {
+          "maxLength": 128,
+          "minLength": 0,
+          "type": "string"
+         },
+         "tags": {
+          "additionalProperties": {
+           "maxLength": 256,
+           "minLength": 0,
+           "type": "string"
+          },
+          "maxProperties": 50,
+          "minProperties": 0,
+          "type": "object"
+         }
+        },
+        "required": [
+         "destinationConfiguration"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "arn": {
+           "maxLength": 128,
+           "minLength": 1,
+           "type": "string"
+          },
+          "createTime": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "destinationConfiguration": {
+           "$ref": "#/components/schemas/DestinationConfiguration"
+          },
+          "id": {
+           "maxLength": 12,
+           "minLength": 12,
+           "type": "string"
+          },
+          "name": {
+           "maxLength": 128,
+           "minLength": 0,
+           "type": "string"
+          },
+          "state": {
+           "enum": [
+            "ACTIVE"
+           ],
+           "type": "string"
+          },
+          "tags": {
+           "additionalProperties": {
+            "maxLength": 256,
+            "minLength": 0,
+            "type": "string"
+           },
+           "maxProperties": 50,
+           "minProperties": 0,
+           "type": "object"
+          },
+          "updateTime": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateLoggingConfiguration",
+    "tags": [
+     "Amazon Interactive Video Service Chat"
+    ]
+   }
+  },
+  "/CreateRoom": {
+   "post": {
+    "operationId": "ivschatCreateRoom",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "ivschat"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "loggingConfigurationIdentifiers": {
+          "items": {
+           "maxLength": 128,
+           "minLength": 1,
+           "type": "string"
+          },
+          "maxItems": 3,
+          "minItems": 0,
+          "type": "array"
+         },
+         "maximumMessageLength": {
+          "maximum": 500,
+          "minimum": 1,
+          "type": "integer"
+         },
+         "maximumMessageRatePerSecond": {
+          "maximum": 100,
+          "minimum": 1,
+          "type": "integer"
+         },
+         "messageReviewHandler": {
+          "$ref": "#/components/schemas/MessageReviewHandler"
+         },
+         "name": {
+          "maxLength": 128,
+          "minLength": 0,
+          "type": "string"
+         },
+         "tags": {
+          "additionalProperties": {
+           "maxLength": 256,
+           "minLength": 0,
+           "type": "string"
+          },
+          "maxProperties": 50,
+          "minProperties": 0,
+          "type": "object"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "arn": {
+           "maxLength": 128,
+           "minLength": 1,
+           "type": "string"
+          },
+          "createTime": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "id": {
+           "maxLength": 12,
+           "minLength": 12,
+           "type": "string"
+          },
+          "loggingConfigurationIdentifiers": {
+           "items": {
+            "maxLength": 128,
+            "minLength": 1,
+            "type": "string"
+           },
+           "maxItems": 3,
+           "minItems": 0,
+           "type": "array"
+          },
+          "maximumMessageLength": {
+           "maximum": 500,
+           "minimum": 1,
+           "type": "integer"
+          },
+          "maximumMessageRatePerSecond": {
+           "maximum": 100,
+           "minimum": 1,
+           "type": "integer"
+          },
+          "messageReviewHandler": {
+           "$ref": "#/components/schemas/MessageReviewHandler"
+          },
+          "name": {
+           "maxLength": 128,
+           "minLength": 0,
+           "type": "string"
+          },
+          "tags": {
+           "additionalProperties": {
+            "maxLength": 256,
+            "minLength": 0,
+            "type": "string"
+           },
+           "maxProperties": 50,
+           "minProperties": 0,
+           "type": "object"
+          },
+          "updateTime": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateRoom",
+    "tags": [
+     "Amazon Interactive Video Service Chat"
+    ]
+   }
+  },
+  "/DeleteLoggingConfiguration": {
+   "post": {
+    "operationId": "ivschatDeleteLoggingConfiguration",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "ivschat"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "identifier": {
+          "maxLength": 128,
+          "minLength": 1,
+          "type": "string"
+         }
+        },
+        "required": [
+         "identifier"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteLoggingConfiguration",
+    "tags": [
+     "Amazon Interactive Video Service Chat"
+    ]
+   }
+  },
+  "/DeleteRoom": {
+   "post": {
+    "operationId": "ivschatDeleteRoom",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "ivschat"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "identifier": {
+          "maxLength": 128,
+          "minLength": 1,
+          "type": "string"
+         }
+        },
+        "required": [
+         "identifier"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteRoom",
+    "tags": [
+     "Amazon Interactive Video Service Chat"
+    ]
+   }
+  },
+  "/GetLoggingConfiguration": {
+   "post": {
+    "operationId": "ivschatGetLoggingConfiguration",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "ivschat"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "identifier": {
+          "maxLength": 128,
+          "minLength": 1,
+          "type": "string"
+         }
+        },
+        "required": [
+         "identifier"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "arn": {
+           "maxLength": 128,
+           "minLength": 1,
+           "type": "string"
+          },
+          "createTime": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "destinationConfiguration": {
+           "$ref": "#/components/schemas/DestinationConfiguration"
+          },
+          "id": {
+           "maxLength": 12,
+           "minLength": 12,
+           "type": "string"
+          },
+          "name": {
+           "maxLength": 128,
+           "minLength": 0,
+           "type": "string"
+          },
+          "state": {
+           "enum": [
+            "CREATING",
+            "CREATE_FAILED",
+            "DELETING",
+            "DELETE_FAILED",
+            "UPDATING",
+            "UPDATE_FAILED",
+            "ACTIVE"
+           ],
+           "type": "string"
+          },
+          "tags": {
+           "additionalProperties": {
+            "maxLength": 256,
+            "minLength": 0,
+            "type": "string"
+           },
+           "maxProperties": 50,
+           "minProperties": 0,
+           "type": "object"
+          },
+          "updateTime": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "GetLoggingConfiguration",
+    "tags": [
+     "Amazon Interactive Video Service Chat"
+    ]
+   }
+  },
+  "/GetRoom": {
+   "post": {
+    "operationId": "ivschatGetRoom",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "ivschat"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "identifier": {
+          "maxLength": 128,
+          "minLength": 1,
+          "type": "string"
+         }
+        },
+        "required": [
+         "identifier"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "arn": {
+           "maxLength": 128,
+           "minLength": 1,
+           "type": "string"
+          },
+          "createTime": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "id": {
+           "maxLength": 12,
+           "minLength": 12,
+           "type": "string"
+          },
+          "loggingConfigurationIdentifiers": {
+           "items": {
+            "maxLength": 128,
+            "minLength": 1,
+            "type": "string"
+           },
+           "maxItems": 3,
+           "minItems": 0,
+           "type": "array"
+          },
+          "maximumMessageLength": {
+           "maximum": 500,
+           "minimum": 1,
+           "type": "integer"
+          },
+          "maximumMessageRatePerSecond": {
+           "maximum": 100,
+           "minimum": 1,
+           "type": "integer"
+          },
+          "messageReviewHandler": {
+           "$ref": "#/components/schemas/MessageReviewHandler"
+          },
+          "name": {
+           "maxLength": 128,
+           "minLength": 0,
+           "type": "string"
+          },
+          "tags": {
+           "additionalProperties": {
+            "maxLength": 256,
+            "minLength": 0,
+            "type": "string"
+           },
+           "maxProperties": 50,
+           "minProperties": 0,
+           "type": "object"
+          },
+          "updateTime": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "GetRoom",
+    "tags": [
+     "Amazon Interactive Video Service Chat"
+    ]
+   }
+  },
+  "/ListLoggingConfigurations": {
+   "post": {
+    "operationId": "ivschatListLoggingConfigurations",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "ivschat"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "maxResults": {
+          "maximum": 50,
+          "minimum": 1,
+          "type": "integer"
+         },
+         "nextToken": {
+          "maxLength": 1024,
+          "minLength": 0,
+          "type": "string"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "loggingConfigurations": {
+           "items": {
+            "$ref": "#/components/schemas/LoggingConfigurationSummary"
+           },
+           "type": "array"
+          },
+          "nextToken": {
+           "maxLength": 1024,
+           "minLength": 0,
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListLoggingConfigurations",
+    "tags": [
+     "Amazon Interactive Video Service Chat"
+    ]
+   }
+  },
+  "/ListRooms": {
+   "post": {
+    "operationId": "ivschatListRooms",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "ivschat"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "loggingConfigurationIdentifier": {
+          "maxLength": 128,
+          "minLength": 1,
+          "type": "string"
+         },
+         "maxResults": {
+          "maximum": 50,
+          "minimum": 1,
+          "type": "integer"
+         },
+         "messageReviewHandlerUri": {
+          "maxLength": 170,
+          "minLength": 0,
+          "type": "string"
+         },
+         "name": {
+          "maxLength": 128,
+          "minLength": 0,
+          "type": "string"
+         },
+         "nextToken": {
+          "maxLength": 1024,
+          "minLength": 0,
+          "type": "string"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "nextToken": {
+           "maxLength": 1024,
+           "minLength": 0,
+           "type": "string"
+          },
+          "rooms": {
+           "items": {
+            "$ref": "#/components/schemas/RoomSummary"
+           },
+           "type": "array"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListRooms",
+    "tags": [
+     "Amazon Interactive Video Service Chat"
+    ]
+   }
+  },
+  "/UpdateLoggingConfiguration": {
+   "post": {
+    "operationId": "ivschatUpdateLoggingConfiguration",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "ivschat"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "destinationConfiguration": {
+          "$ref": "#/components/schemas/DestinationConfiguration"
+         },
+         "identifier": {
+          "maxLength": 128,
+          "minLength": 1,
+          "type": "string"
+         },
+         "name": {
+          "maxLength": 128,
+          "minLength": 0,
+          "type": "string"
+         }
+        },
+        "required": [
+         "identifier"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "arn": {
+           "maxLength": 128,
+           "minLength": 1,
+           "type": "string"
+          },
+          "createTime": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "destinationConfiguration": {
+           "$ref": "#/components/schemas/DestinationConfiguration"
+          },
+          "id": {
+           "maxLength": 12,
+           "minLength": 12,
+           "type": "string"
+          },
+          "name": {
+           "maxLength": 128,
+           "minLength": 0,
+           "type": "string"
+          },
+          "state": {
+           "enum": [
+            "ACTIVE"
+           ],
+           "type": "string"
+          },
+          "tags": {
+           "additionalProperties": {
+            "maxLength": 256,
+            "minLength": 0,
+            "type": "string"
+           },
+           "maxProperties": 50,
+           "minProperties": 0,
+           "type": "object"
+          },
+          "updateTime": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UpdateLoggingConfiguration",
+    "tags": [
+     "Amazon Interactive Video Service Chat"
+    ]
+   }
+  },
+  "/UpdateRoom": {
+   "post": {
+    "operationId": "ivschatUpdateRoom",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "ivschat"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "identifier": {
+          "maxLength": 128,
+          "minLength": 1,
+          "type": "string"
+         },
+         "loggingConfigurationIdentifiers": {
+          "items": {
+           "maxLength": 128,
+           "minLength": 1,
+           "type": "string"
+          },
+          "maxItems": 3,
+          "minItems": 0,
+          "type": "array"
+         },
+         "maximumMessageLength": {
+          "maximum": 500,
+          "minimum": 1,
+          "type": "integer"
+         },
+         "maximumMessageRatePerSecond": {
+          "maximum": 100,
+          "minimum": 1,
+          "type": "integer"
+         },
+         "messageReviewHandler": {
+          "$ref": "#/components/schemas/MessageReviewHandler"
+         },
+         "name": {
+          "maxLength": 128,
+          "minLength": 0,
+          "type": "string"
+         }
+        },
+        "required": [
+         "identifier"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "arn": {
+           "maxLength": 128,
+           "minLength": 1,
+           "type": "string"
+          },
+          "createTime": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "id": {
+           "maxLength": 12,
+           "minLength": 12,
+           "type": "string"
+          },
+          "loggingConfigurationIdentifiers": {
+           "items": {
+            "maxLength": 128,
+            "minLength": 1,
+            "type": "string"
+           },
+           "maxItems": 3,
+           "minItems": 0,
+           "type": "array"
+          },
+          "maximumMessageLength": {
+           "maximum": 500,
+           "minimum": 1,
+           "type": "integer"
+          },
+          "maximumMessageRatePerSecond": {
+           "maximum": 100,
+           "minimum": 1,
+           "type": "integer"
+          },
+          "messageReviewHandler": {
+           "$ref": "#/components/schemas/MessageReviewHandler"
+          },
+          "name": {
+           "maxLength": 128,
+           "minLength": 0,
+           "type": "string"
+          },
+          "tags": {
+           "additionalProperties": {
+            "maxLength": 256,
+            "minLength": 0,
+            "type": "string"
+           },
+           "maxProperties": 50,
+           "minProperties": 0,
+           "type": "object"
+          },
+          "updateTime": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UpdateRoom",
+    "tags": [
+     "Amazon Interactive Video Service Chat"
+    ]
+   }
+  }
+ },
+ "servers": [
+  {
+   "description": "This simulator only",
+   "url": "/"
+  }
+ ],
+ "tags": [
+  {
+   "description": "Bounded simulator subset of the official Amazon Interactive Video Service Chat API (2020-07-14). Every other official operation returns HTTP 501 UnknownOperationException. Chat rooms and logging configurations are stored records: no chat connection, message or user exists and no message is logged to the destination. CreateChatToken (which mints a credential), SendEvent, DeleteMessage and DisconnectUser return UnknownOperationException with HTTP 501. A logging configuration is ACTIVE at once and its CloudWatch Logs, Firehose or S3 destination is stored by name without being looked up. loggingConfigurationIdentifiers of a room are stored without checking that the configurations exist, and deleting a logging configuration does not check the rooms that name it. The message review handler Lambda function is stored without being invoked. TagResource, UntagResource and ListTagsForResource are not bound because the official resourceArn pattern admits no real ARN; tags are set at creation only. ListRooms filters only by name; messageReviewHandlerUri and loggingConfigurationIdentifier filters are refused. Limits per Region are simulator limits, not AWS quotas.",
+   "name": "Amazon Interactive Video Service Chat"
+  }
+ ],
+ "x-simulator-source": {
+  "package": "botocore",
+  "version": "1.41.6",
+  "file": "botocore/data/ivschat/2020-07-14/service-2.json",
+  "sha256": "1c6608e560edff3fe831a5bc26de5b6408b429b121df5ca0db0788c110555226",
+  "license": "Apache-2.0"
+ }
+}

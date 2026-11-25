@@ -1,0 +1,34 @@
+{
+ "client": "forecast",
+ "steps": [
+  {"op": "create_dataset", "args": {"DatasetName": "fixture_sales", "Domain": "RETAIL", "DatasetType": "TARGET_TIME_SERIES", "Schema": {"Attributes": [{"AttributeName": "timestamp", "AttributeType": "timestamp"}, {"AttributeName": "item_id", "AttributeType": "string"}, {"AttributeName": "demand", "AttributeType": "float"}]}, "Tags": [{"Key": "team", "Value": "a"}]}, "save": {"dataset": "DatasetArn"}},
+  {"op": "describe_dataset", "args": {"DatasetArn": "${dataset}"}, "expect": {"Status": "ACTIVE", "Domain": "RETAIL", "DatasetType": "TARGET_TIME_SERIES", "Schema.Attributes#count": 3}},
+  {"op": "create_dataset", "args": {"DatasetName": "fixture_related", "Domain": "RETAIL", "DatasetType": "RELATED_TIME_SERIES", "DataFrequency": "15min", "Schema": {"Attributes": [{"AttributeName": "timestamp", "AttributeType": "timestamp"}, {"AttributeName": "item_id", "AttributeType": "string"}, {"AttributeName": "price", "AttributeType": "float"}]}}, "save": {"related": "DatasetArn"}},
+  {"op": "describe_dataset", "args": {"DatasetArn": "${related}"}, "expect": {"DataFrequency": "15min"}},
+  {"op": "list_datasets", "args": {}, "expect": {"Datasets#count": 2}},
+  {"op": "create_dataset_group", "args": {"DatasetGroupName": "fixture_group", "Domain": "RETAIL", "Tags": [{"Key": "team", "Value": "a"}]}, "save": {"group": "DatasetGroupArn"}},
+  {"op": "describe_dataset_group", "args": {"DatasetGroupArn": "${group}"}, "expect": {"Status": "ACTIVE", "DatasetGroupName": "fixture_group"}},
+  {"op": "list_dataset_groups", "args": {}, "expect": {"DatasetGroups#count": 1}},
+  {"op": "tag_resource", "args": {"ResourceArn": "${dataset}", "Tags": [{"Key": "env", "Value": "dev"}]}},
+  {"op": "untag_resource", "args": {"ResourceArn": "${dataset}", "TagKeys": ["env"]}},
+  {"op": "list_tags_for_resource", "args": {"ResourceArn": "${dataset}"}, "expect": {"Tags#count": 1}},
+  {"op": "create_dataset", "args": {"DatasetName": "fixture_sales", "Domain": "RETAIL", "DatasetType": "TARGET_TIME_SERIES", "Schema": {"Attributes": [{"AttributeName": "timestamp", "AttributeType": "timestamp"}]}}, "error": "ResourceAlreadyExistsException"},
+  {"op": "create_dataset_group", "args": {"DatasetGroupName": "fixture_other", "Domain": "RETAIL", "DatasetArns": ["${dataset}"]}, "error": "InvalidInputException"},
+  {"op": "tag_resource", "args": {"ResourceArn": "${dataset}", "Tags": [{"Key": "aws:reserved", "Value": "x"}]}, "error": "InvalidInputException"},
+  {"op": "describe_dataset", "args": {"DatasetArn": "arn:aws:forecast:us-east-1:000000000000:dataset/missing"}, "error": "ResourceNotFoundException", "status": 400}
+ ],
+ "isolation": [
+  {"op": "list_datasets", "args": {}, "expect": {"Datasets#count": 0}},
+  {"op": "list_dataset_groups", "args": {}, "expect": {"DatasetGroups#count": 0}}
+ ],
+ "after_restart": [
+  {"op": "describe_dataset", "args": {"DatasetArn": "${dataset}"}, "expect": {"Status": "ACTIVE"}},
+  {"op": "describe_dataset_group", "args": {"DatasetGroupArn": "${group}"}, "expect": {"DatasetGroupName": "fixture_group"}}
+ ],
+ "cleanup": [
+  {"op": "delete_dataset_group", "args": {"DatasetGroupArn": "${group}"}},
+  {"op": "delete_dataset", "args": {"DatasetArn": "${related}"}},
+  {"op": "delete_dataset", "args": {"DatasetArn": "${dataset}"}},
+  {"op": "list_datasets", "args": {}, "expect": {"Datasets#count": 0}}
+ ]
+}

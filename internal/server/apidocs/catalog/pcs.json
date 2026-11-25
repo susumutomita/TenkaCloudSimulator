@@ -1,0 +1,1711 @@
+{
+ "components": {
+  "schemas": {
+   "Accounting": {
+    "additionalProperties": false,
+    "properties": {
+     "defaultPurgeTimeInDays": {
+      "maximum": 10000,
+      "minimum": -1,
+      "type": "integer"
+     },
+     "mode": {
+      "enum": [
+       "STANDARD",
+       "NONE"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "mode"
+    ],
+    "type": "object"
+   },
+   "AccountingRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "defaultPurgeTimeInDays": {
+      "maximum": 10000,
+      "minimum": -1,
+      "type": "integer"
+     },
+     "mode": {
+      "enum": [
+       "STANDARD",
+       "NONE"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "mode"
+    ],
+    "type": "object"
+   },
+   "Cluster": {
+    "additionalProperties": false,
+    "properties": {
+     "arn": {
+      "type": "string"
+     },
+     "createdAt": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "endpoints": {
+      "items": {
+       "$ref": "#/components/schemas/Endpoint"
+      },
+      "type": "array"
+     },
+     "errorInfo": {
+      "items": {
+       "$ref": "#/components/schemas/ErrorInfo"
+      },
+      "type": "array"
+     },
+     "id": {
+      "type": "string"
+     },
+     "modifiedAt": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "name": {
+      "type": "string"
+     },
+     "networking": {
+      "$ref": "#/components/schemas/Networking"
+     },
+     "scheduler": {
+      "$ref": "#/components/schemas/Scheduler"
+     },
+     "size": {
+      "enum": [
+       "SMALL",
+       "MEDIUM",
+       "LARGE"
+      ],
+      "type": "string"
+     },
+     "slurmConfiguration": {
+      "$ref": "#/components/schemas/ClusterSlurmConfiguration"
+     },
+     "status": {
+      "enum": [
+       "CREATING",
+       "ACTIVE",
+       "UPDATING",
+       "DELETING",
+       "CREATE_FAILED",
+       "DELETE_FAILED",
+       "UPDATE_FAILED",
+       "SUSPENDING",
+       "SUSPENDED"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "name",
+     "id",
+     "arn",
+     "status",
+     "createdAt",
+     "modifiedAt",
+     "scheduler",
+     "size",
+     "networking"
+    ],
+    "type": "object"
+   },
+   "ClusterSlurmConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "accounting": {
+      "$ref": "#/components/schemas/Accounting"
+     },
+     "authKey": {
+      "$ref": "#/components/schemas/SlurmAuthKey"
+     },
+     "jwtAuth": {
+      "$ref": "#/components/schemas/JwtAuth"
+     },
+     "scaleDownIdleTimeInSeconds": {
+      "maximum": 10000000,
+      "minimum": 1,
+      "type": "integer"
+     },
+     "slurmCustomSettings": {
+      "items": {
+       "$ref": "#/components/schemas/SlurmCustomSetting"
+      },
+      "type": "array"
+     },
+     "slurmRest": {
+      "$ref": "#/components/schemas/SlurmRest"
+     }
+    },
+    "type": "object"
+   },
+   "ClusterSlurmConfigurationRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "accounting": {
+      "$ref": "#/components/schemas/AccountingRequest"
+     },
+     "scaleDownIdleTimeInSeconds": {
+      "maximum": 10000000,
+      "minimum": 1,
+      "type": "integer"
+     },
+     "slurmCustomSettings": {
+      "items": {
+       "$ref": "#/components/schemas/SlurmCustomSetting"
+      },
+      "type": "array"
+     },
+     "slurmRest": {
+      "$ref": "#/components/schemas/SlurmRestRequest"
+     }
+    },
+    "type": "object"
+   },
+   "ClusterSummary": {
+    "additionalProperties": false,
+    "properties": {
+     "arn": {
+      "type": "string"
+     },
+     "createdAt": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "id": {
+      "type": "string"
+     },
+     "modifiedAt": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "name": {
+      "type": "string"
+     },
+     "status": {
+      "enum": [
+       "CREATING",
+       "ACTIVE",
+       "UPDATING",
+       "DELETING",
+       "CREATE_FAILED",
+       "DELETE_FAILED",
+       "UPDATE_FAILED",
+       "SUSPENDING",
+       "SUSPENDED"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "name",
+     "id",
+     "arn",
+     "createdAt",
+     "modifiedAt",
+     "status"
+    ],
+    "type": "object"
+   },
+   "ComputeNodeGroup": {
+    "additionalProperties": false,
+    "properties": {
+     "amiId": {
+      "type": "string"
+     },
+     "arn": {
+      "type": "string"
+     },
+     "clusterId": {
+      "type": "string"
+     },
+     "createdAt": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "customLaunchTemplate": {
+      "$ref": "#/components/schemas/CustomLaunchTemplate"
+     },
+     "errorInfo": {
+      "items": {
+       "$ref": "#/components/schemas/ErrorInfo"
+      },
+      "type": "array"
+     },
+     "iamInstanceProfileArn": {
+      "type": "string"
+     },
+     "id": {
+      "type": "string"
+     },
+     "instanceConfigs": {
+      "items": {
+       "$ref": "#/components/schemas/InstanceConfig"
+      },
+      "type": "array"
+     },
+     "modifiedAt": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "name": {
+      "maxLength": 25,
+      "minLength": 3,
+      "type": "string"
+     },
+     "purchaseOption": {
+      "enum": [
+       "ONDEMAND",
+       "SPOT",
+       "CAPACITY_BLOCK"
+      ],
+      "type": "string"
+     },
+     "scalingConfiguration": {
+      "$ref": "#/components/schemas/ScalingConfiguration"
+     },
+     "slurmConfiguration": {
+      "$ref": "#/components/schemas/ComputeNodeGroupSlurmConfiguration"
+     },
+     "spotOptions": {
+      "$ref": "#/components/schemas/SpotOptions"
+     },
+     "status": {
+      "enum": [
+       "CREATING",
+       "ACTIVE",
+       "UPDATING",
+       "DELETING",
+       "CREATE_FAILED",
+       "DELETE_FAILED",
+       "UPDATE_FAILED",
+       "DELETED",
+       "SUSPENDING",
+       "SUSPENDED"
+      ],
+      "type": "string"
+     },
+     "subnetIds": {
+      "items": {
+       "type": "string"
+      },
+      "minItems": 1,
+      "type": "array"
+     }
+    },
+    "required": [
+     "name",
+     "id",
+     "arn",
+     "clusterId",
+     "createdAt",
+     "modifiedAt",
+     "status",
+     "subnetIds",
+     "customLaunchTemplate",
+     "iamInstanceProfileArn",
+     "scalingConfiguration",
+     "instanceConfigs"
+    ],
+    "type": "object"
+   },
+   "ComputeNodeGroupConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "computeNodeGroupId": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ComputeNodeGroupSlurmConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "slurmCustomSettings": {
+      "items": {
+       "$ref": "#/components/schemas/SlurmCustomSetting"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "ComputeNodeGroupSlurmConfigurationRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "slurmCustomSettings": {
+      "items": {
+       "$ref": "#/components/schemas/SlurmCustomSetting"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "ComputeNodeGroupSummary": {
+    "additionalProperties": false,
+    "properties": {
+     "arn": {
+      "type": "string"
+     },
+     "clusterId": {
+      "type": "string"
+     },
+     "createdAt": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "id": {
+      "type": "string"
+     },
+     "modifiedAt": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "name": {
+      "maxLength": 25,
+      "minLength": 3,
+      "type": "string"
+     },
+     "status": {
+      "enum": [
+       "CREATING",
+       "ACTIVE",
+       "UPDATING",
+       "DELETING",
+       "CREATE_FAILED",
+       "DELETE_FAILED",
+       "UPDATE_FAILED",
+       "DELETED",
+       "SUSPENDING",
+       "SUSPENDED"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "name",
+     "id",
+     "arn",
+     "clusterId",
+     "createdAt",
+     "modifiedAt",
+     "status"
+    ],
+    "type": "object"
+   },
+   "CreateClusterRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "clientToken": {
+      "maxLength": 100,
+      "minLength": 8,
+      "type": "string"
+     },
+     "clusterName": {
+      "maxLength": 40,
+      "minLength": 3,
+      "type": "string"
+     },
+     "networking": {
+      "$ref": "#/components/schemas/NetworkingRequest"
+     },
+     "scheduler": {
+      "$ref": "#/components/schemas/SchedulerRequest"
+     },
+     "size": {
+      "enum": [
+       "SMALL",
+       "MEDIUM",
+       "LARGE"
+      ],
+      "type": "string"
+     },
+     "slurmConfiguration": {
+      "$ref": "#/components/schemas/ClusterSlurmConfigurationRequest"
+     },
+     "tags": {
+      "additionalProperties": {
+       "maxLength": 256,
+       "minLength": 0,
+       "type": "string"
+      },
+      "maxProperties": 200,
+      "minProperties": 1,
+      "type": "object"
+     }
+    },
+    "required": [
+     "clusterName",
+     "scheduler",
+     "size",
+     "networking"
+    ],
+    "type": "object"
+   },
+   "CreateClusterResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "cluster": {
+      "$ref": "#/components/schemas/Cluster"
+     }
+    },
+    "type": "object"
+   },
+   "CreateComputeNodeGroupRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "amiId": {
+      "type": "string"
+     },
+     "clientToken": {
+      "maxLength": 100,
+      "minLength": 8,
+      "type": "string"
+     },
+     "clusterIdentifier": {
+      "type": "string"
+     },
+     "computeNodeGroupName": {
+      "maxLength": 25,
+      "minLength": 3,
+      "type": "string"
+     },
+     "customLaunchTemplate": {
+      "$ref": "#/components/schemas/CustomLaunchTemplate"
+     },
+     "iamInstanceProfileArn": {
+      "type": "string"
+     },
+     "instanceConfigs": {
+      "items": {
+       "$ref": "#/components/schemas/InstanceConfig"
+      },
+      "type": "array"
+     },
+     "purchaseOption": {
+      "enum": [
+       "ONDEMAND",
+       "SPOT",
+       "CAPACITY_BLOCK"
+      ],
+      "type": "string"
+     },
+     "scalingConfiguration": {
+      "$ref": "#/components/schemas/ScalingConfigurationRequest"
+     },
+     "slurmConfiguration": {
+      "$ref": "#/components/schemas/ComputeNodeGroupSlurmConfigurationRequest"
+     },
+     "spotOptions": {
+      "$ref": "#/components/schemas/SpotOptions"
+     },
+     "subnetIds": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "tags": {
+      "additionalProperties": {
+       "maxLength": 256,
+       "minLength": 0,
+       "type": "string"
+      },
+      "maxProperties": 200,
+      "minProperties": 1,
+      "type": "object"
+     }
+    },
+    "required": [
+     "clusterIdentifier",
+     "computeNodeGroupName",
+     "subnetIds",
+     "customLaunchTemplate",
+     "iamInstanceProfileArn",
+     "scalingConfiguration",
+     "instanceConfigs"
+    ],
+    "type": "object"
+   },
+   "CreateComputeNodeGroupResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "computeNodeGroup": {
+      "$ref": "#/components/schemas/ComputeNodeGroup"
+     }
+    },
+    "type": "object"
+   },
+   "CreateQueueRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "clientToken": {
+      "maxLength": 100,
+      "minLength": 8,
+      "type": "string"
+     },
+     "clusterIdentifier": {
+      "type": "string"
+     },
+     "computeNodeGroupConfigurations": {
+      "items": {
+       "$ref": "#/components/schemas/ComputeNodeGroupConfiguration"
+      },
+      "type": "array"
+     },
+     "queueName": {
+      "maxLength": 25,
+      "minLength": 3,
+      "type": "string"
+     },
+     "slurmConfiguration": {
+      "$ref": "#/components/schemas/QueueSlurmConfigurationRequest"
+     },
+     "tags": {
+      "additionalProperties": {
+       "maxLength": 256,
+       "minLength": 0,
+       "type": "string"
+      },
+      "maxProperties": 200,
+      "minProperties": 1,
+      "type": "object"
+     }
+    },
+    "required": [
+     "clusterIdentifier",
+     "queueName"
+    ],
+    "type": "object"
+   },
+   "CreateQueueResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "queue": {
+      "$ref": "#/components/schemas/Queue"
+     }
+    },
+    "type": "object"
+   },
+   "CustomLaunchTemplate": {
+    "additionalProperties": false,
+    "properties": {
+     "id": {
+      "type": "string"
+     },
+     "version": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "id",
+     "version"
+    ],
+    "type": "object"
+   },
+   "DeleteClusterRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "clientToken": {
+      "maxLength": 100,
+      "minLength": 8,
+      "type": "string"
+     },
+     "clusterIdentifier": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "clusterIdentifier"
+    ],
+    "type": "object"
+   },
+   "DeleteClusterResponse": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "DeleteComputeNodeGroupRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "clientToken": {
+      "maxLength": 100,
+      "minLength": 8,
+      "type": "string"
+     },
+     "clusterIdentifier": {
+      "type": "string"
+     },
+     "computeNodeGroupIdentifier": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "clusterIdentifier",
+     "computeNodeGroupIdentifier"
+    ],
+    "type": "object"
+   },
+   "DeleteComputeNodeGroupResponse": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "DeleteQueueRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "clientToken": {
+      "maxLength": 100,
+      "minLength": 8,
+      "type": "string"
+     },
+     "clusterIdentifier": {
+      "type": "string"
+     },
+     "queueIdentifier": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "clusterIdentifier",
+     "queueIdentifier"
+    ],
+    "type": "object"
+   },
+   "DeleteQueueResponse": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "Endpoint": {
+    "additionalProperties": false,
+    "properties": {
+     "ipv6Address": {
+      "type": "string"
+     },
+     "port": {
+      "type": "string"
+     },
+     "privateIpAddress": {
+      "type": "string"
+     },
+     "publicIpAddress": {
+      "type": "string"
+     },
+     "type": {
+      "enum": [
+       "SLURMCTLD",
+       "SLURMDBD",
+       "SLURMRESTD"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "type",
+     "privateIpAddress",
+     "port"
+    ],
+    "type": "object"
+   },
+   "ErrorInfo": {
+    "additionalProperties": false,
+    "properties": {
+     "code": {
+      "type": "string"
+     },
+     "message": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "GetClusterRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "clusterIdentifier": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "clusterIdentifier"
+    ],
+    "type": "object"
+   },
+   "GetClusterResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "cluster": {
+      "$ref": "#/components/schemas/Cluster"
+     }
+    },
+    "type": "object"
+   },
+   "GetComputeNodeGroupRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "clusterIdentifier": {
+      "type": "string"
+     },
+     "computeNodeGroupIdentifier": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "clusterIdentifier",
+     "computeNodeGroupIdentifier"
+    ],
+    "type": "object"
+   },
+   "GetComputeNodeGroupResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "computeNodeGroup": {
+      "$ref": "#/components/schemas/ComputeNodeGroup"
+     }
+    },
+    "type": "object"
+   },
+   "GetQueueRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "clusterIdentifier": {
+      "type": "string"
+     },
+     "queueIdentifier": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "clusterIdentifier",
+     "queueIdentifier"
+    ],
+    "type": "object"
+   },
+   "GetQueueResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "queue": {
+      "$ref": "#/components/schemas/Queue"
+     }
+    },
+    "type": "object"
+   },
+   "InstanceConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "instanceType": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "JwtAuth": {
+    "additionalProperties": false,
+    "properties": {
+     "jwtKey": {
+      "$ref": "#/components/schemas/JwtKey"
+     }
+    },
+    "type": "object"
+   },
+   "JwtKey": {
+    "additionalProperties": false,
+    "properties": {
+     "secretArn": {
+      "type": "string"
+     },
+     "secretVersion": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "secretArn",
+     "secretVersion"
+    ],
+    "type": "object"
+   },
+   "ListClustersRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "maxResults": {
+      "maximum": 100,
+      "minimum": 1,
+      "type": "integer"
+     },
+     "nextToken": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ListClustersResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "clusters": {
+      "items": {
+       "$ref": "#/components/schemas/ClusterSummary"
+      },
+      "type": "array"
+     },
+     "nextToken": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "clusters"
+    ],
+    "type": "object"
+   },
+   "ListComputeNodeGroupsRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "clusterIdentifier": {
+      "type": "string"
+     },
+     "maxResults": {
+      "maximum": 100,
+      "minimum": 1,
+      "type": "integer"
+     },
+     "nextToken": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "clusterIdentifier"
+    ],
+    "type": "object"
+   },
+   "ListComputeNodeGroupsResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "computeNodeGroups": {
+      "items": {
+       "$ref": "#/components/schemas/ComputeNodeGroupSummary"
+      },
+      "type": "array"
+     },
+     "nextToken": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "computeNodeGroups"
+    ],
+    "type": "object"
+   },
+   "ListQueuesRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "clusterIdentifier": {
+      "type": "string"
+     },
+     "maxResults": {
+      "maximum": 100,
+      "minimum": 1,
+      "type": "integer"
+     },
+     "nextToken": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "clusterIdentifier"
+    ],
+    "type": "object"
+   },
+   "ListQueuesResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "nextToken": {
+      "type": "string"
+     },
+     "queues": {
+      "items": {
+       "$ref": "#/components/schemas/QueueSummary"
+      },
+      "type": "array"
+     }
+    },
+    "required": [
+     "queues"
+    ],
+    "type": "object"
+   },
+   "ListTagsForResourceRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "resourceArn": {
+      "maxLength": 1011,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "resourceArn"
+    ],
+    "type": "object"
+   },
+   "ListTagsForResourceResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "tags": {
+      "additionalProperties": {
+       "maxLength": 256,
+       "minLength": 0,
+       "type": "string"
+      },
+      "type": "object"
+     }
+    },
+    "type": "object"
+   },
+   "Networking": {
+    "additionalProperties": false,
+    "properties": {
+     "networkType": {
+      "enum": [
+       "IPV4",
+       "IPV6"
+      ],
+      "type": "string"
+     },
+     "securityGroupIds": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "subnetIds": {
+      "items": {
+       "type": "string"
+      },
+      "minItems": 1,
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "NetworkingRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "networkType": {
+      "enum": [
+       "IPV4",
+       "IPV6"
+      ],
+      "type": "string"
+     },
+     "securityGroupIds": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "subnetIds": {
+      "items": {
+       "type": "string"
+      },
+      "minItems": 1,
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "Queue": {
+    "additionalProperties": false,
+    "properties": {
+     "arn": {
+      "type": "string"
+     },
+     "clusterId": {
+      "type": "string"
+     },
+     "computeNodeGroupConfigurations": {
+      "items": {
+       "$ref": "#/components/schemas/ComputeNodeGroupConfiguration"
+      },
+      "type": "array"
+     },
+     "createdAt": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "errorInfo": {
+      "items": {
+       "$ref": "#/components/schemas/ErrorInfo"
+      },
+      "type": "array"
+     },
+     "id": {
+      "type": "string"
+     },
+     "modifiedAt": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "name": {
+      "maxLength": 25,
+      "minLength": 3,
+      "type": "string"
+     },
+     "slurmConfiguration": {
+      "$ref": "#/components/schemas/QueueSlurmConfiguration"
+     },
+     "status": {
+      "enum": [
+       "CREATING",
+       "ACTIVE",
+       "UPDATING",
+       "DELETING",
+       "CREATE_FAILED",
+       "DELETE_FAILED",
+       "UPDATE_FAILED",
+       "SUSPENDING",
+       "SUSPENDED"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "name",
+     "id",
+     "arn",
+     "clusterId",
+     "createdAt",
+     "modifiedAt",
+     "status",
+     "computeNodeGroupConfigurations"
+    ],
+    "type": "object"
+   },
+   "QueueSlurmConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "slurmCustomSettings": {
+      "items": {
+       "$ref": "#/components/schemas/SlurmCustomSetting"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "QueueSlurmConfigurationRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "slurmCustomSettings": {
+      "items": {
+       "$ref": "#/components/schemas/SlurmCustomSetting"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "QueueSummary": {
+    "additionalProperties": false,
+    "properties": {
+     "arn": {
+      "type": "string"
+     },
+     "clusterId": {
+      "type": "string"
+     },
+     "createdAt": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "id": {
+      "type": "string"
+     },
+     "modifiedAt": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "name": {
+      "maxLength": 25,
+      "minLength": 3,
+      "type": "string"
+     },
+     "status": {
+      "enum": [
+       "CREATING",
+       "ACTIVE",
+       "UPDATING",
+       "DELETING",
+       "CREATE_FAILED",
+       "DELETE_FAILED",
+       "UPDATE_FAILED",
+       "SUSPENDING",
+       "SUSPENDED"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "name",
+     "id",
+     "arn",
+     "clusterId",
+     "createdAt",
+     "modifiedAt",
+     "status"
+    ],
+    "type": "object"
+   },
+   "ScalingConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "maxInstanceCount": {
+      "minimum": 0,
+      "type": "integer"
+     },
+     "minInstanceCount": {
+      "minimum": 0,
+      "type": "integer"
+     }
+    },
+    "required": [
+     "minInstanceCount",
+     "maxInstanceCount"
+    ],
+    "type": "object"
+   },
+   "ScalingConfigurationRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "maxInstanceCount": {
+      "minimum": 0,
+      "type": "integer"
+     },
+     "minInstanceCount": {
+      "minimum": 0,
+      "type": "integer"
+     }
+    },
+    "required": [
+     "minInstanceCount",
+     "maxInstanceCount"
+    ],
+    "type": "object"
+   },
+   "Scheduler": {
+    "additionalProperties": false,
+    "properties": {
+     "type": {
+      "enum": [
+       "SLURM"
+      ],
+      "type": "string"
+     },
+     "version": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "type",
+     "version"
+    ],
+    "type": "object"
+   },
+   "SchedulerRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "type": {
+      "enum": [
+       "SLURM"
+      ],
+      "type": "string"
+     },
+     "version": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "type",
+     "version"
+    ],
+    "type": "object"
+   },
+   "SlurmAuthKey": {
+    "additionalProperties": false,
+    "properties": {
+     "secretArn": {
+      "type": "string"
+     },
+     "secretVersion": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "secretArn",
+     "secretVersion"
+    ],
+    "type": "object"
+   },
+   "SlurmCustomSetting": {
+    "additionalProperties": false,
+    "properties": {
+     "parameterName": {
+      "type": "string"
+     },
+     "parameterValue": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "parameterName",
+     "parameterValue"
+    ],
+    "type": "object"
+   },
+   "SlurmRest": {
+    "additionalProperties": false,
+    "properties": {
+     "mode": {
+      "enum": [
+       "STANDARD",
+       "NONE"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "mode"
+    ],
+    "type": "object"
+   },
+   "SlurmRestRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "mode": {
+      "enum": [
+       "STANDARD",
+       "NONE"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "mode"
+    ],
+    "type": "object"
+   },
+   "SpotOptions": {
+    "additionalProperties": false,
+    "properties": {
+     "allocationStrategy": {
+      "enum": [
+       "lowest-price",
+       "capacity-optimized",
+       "price-capacity-optimized"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "TagResourceRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "resourceArn": {
+      "maxLength": 1011,
+      "minLength": 1,
+      "type": "string"
+     },
+     "tags": {
+      "additionalProperties": {
+       "maxLength": 256,
+       "minLength": 0,
+       "type": "string"
+      },
+      "maxProperties": 200,
+      "minProperties": 1,
+      "type": "object"
+     }
+    },
+    "required": [
+     "resourceArn",
+     "tags"
+    ],
+    "type": "object"
+   },
+   "TagResourceResponse": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "UntagResourceRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "resourceArn": {
+      "maxLength": 1011,
+      "minLength": 1,
+      "type": "string"
+     },
+     "tagKeys": {
+      "items": {
+       "maxLength": 128,
+       "minLength": 1,
+       "type": "string"
+      },
+      "maxItems": 200,
+      "minItems": 1,
+      "type": "array"
+     }
+    },
+    "required": [
+     "resourceArn",
+     "tagKeys"
+    ],
+    "type": "object"
+   },
+   "UntagResourceResponse": {
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object"
+   },
+   "UpdateComputeNodeGroupRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "amiId": {
+      "type": "string"
+     },
+     "clientToken": {
+      "maxLength": 100,
+      "minLength": 8,
+      "type": "string"
+     },
+     "clusterIdentifier": {
+      "type": "string"
+     },
+     "computeNodeGroupIdentifier": {
+      "type": "string"
+     },
+     "customLaunchTemplate": {
+      "$ref": "#/components/schemas/CustomLaunchTemplate"
+     },
+     "iamInstanceProfileArn": {
+      "type": "string"
+     },
+     "purchaseOption": {
+      "enum": [
+       "ONDEMAND",
+       "SPOT",
+       "CAPACITY_BLOCK"
+      ],
+      "type": "string"
+     },
+     "scalingConfiguration": {
+      "$ref": "#/components/schemas/ScalingConfigurationRequest"
+     },
+     "slurmConfiguration": {
+      "$ref": "#/components/schemas/UpdateComputeNodeGroupSlurmConfigurationRequest"
+     },
+     "spotOptions": {
+      "$ref": "#/components/schemas/SpotOptions"
+     },
+     "subnetIds": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "required": [
+     "clusterIdentifier",
+     "computeNodeGroupIdentifier"
+    ],
+    "type": "object"
+   },
+   "UpdateComputeNodeGroupResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "computeNodeGroup": {
+      "$ref": "#/components/schemas/ComputeNodeGroup"
+     }
+    },
+    "type": "object"
+   },
+   "UpdateComputeNodeGroupSlurmConfigurationRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "slurmCustomSettings": {
+      "items": {
+       "$ref": "#/components/schemas/SlurmCustomSetting"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "UpdateQueueRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "clientToken": {
+      "maxLength": 100,
+      "minLength": 8,
+      "type": "string"
+     },
+     "clusterIdentifier": {
+      "type": "string"
+     },
+     "computeNodeGroupConfigurations": {
+      "items": {
+       "$ref": "#/components/schemas/ComputeNodeGroupConfiguration"
+      },
+      "type": "array"
+     },
+     "queueIdentifier": {
+      "type": "string"
+     },
+     "slurmConfiguration": {
+      "$ref": "#/components/schemas/UpdateQueueSlurmConfigurationRequest"
+     }
+    },
+    "required": [
+     "clusterIdentifier",
+     "queueIdentifier"
+    ],
+    "type": "object"
+   },
+   "UpdateQueueResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "queue": {
+      "$ref": "#/components/schemas/Queue"
+     }
+    },
+    "type": "object"
+   },
+   "UpdateQueueSlurmConfigurationRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "slurmCustomSettings": {
+      "items": {
+       "$ref": "#/components/schemas/SlurmCustomSetting"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "Bounded simulator subset of the official AWS Parallel Computing Service API (2023-02-10). Every other official operation returns HTTP 501 UnknownOperationException. Clusters, compute node groups and queues are stored configuration records that stay CREATING: no Slurm controller, accounting database, REST endpoint, compute instance, launch or network interface exists, a cluster reports no endpoints or authKey, and no job can be submitted. RegisterComputeNodeGroupInstance, which PCS itself calls for the nodes it launches, and UpdateCluster return UnknownOperationException with HTTP 501. UpdateCluster is not implemented because its slurmConfiguration is a partial update of nested settings (scale-down time, custom settings, accounting, Slurm REST) that the stored model would replace as a whole. Compute node group and queue updates replace each supplied member as a whole, and the cluster name or ID of a child operation may be either, as the official identifier pattern allows. CreateQueue requires one or more computeNodeGroupConfigurations entries. UpdateQueue retains its separate replacement semantics. Subnets, security groups, launch templates, AMIs, instance profiles, instance types and the compute node groups a queue names are stored without being resolved: nothing checks that they exist, that subnets share a VPC with the cluster, or that a queue's compute node groups belong to its cluster. A compute node group's scaling minimum must not exceed its maximum, and a SPOT purchase option is the only one that accepts spotOptions. Deleting a cluster that still has compute node groups or queues, and deleting a compute node group that a queue names, behave as stored dependents: the first is refused with ConflictException, the second is not checked. Names are 3 to 40 characters for clusters and 3 to 25 for compute node groups and queues, begin with a letter and hold letters, digits and hyphens; the official pattern's pcs_ exclusion is implied by that rule. The scheduler type is SLURM with a version stored as given. ARN shapes (cluster/pcs_id, computenodegroup/pcs_id, queue/pcs_id) are inferred. Resource counts per Region (20 clusters, 50 compute node groups and 50 queues per cluster) are local limits.",
+  "title": "AWS Parallel Computing Service (simulator catalog)",
+  "version": "2023-02-10"
+ },
+ "openapi": "3.1.0",
+ "paths": {
+  "/": {
+   "post": {
+    "description": "Choose the X-Amz-Target of one implemented operation. Request and response members follow the linked official input/output schemas.",
+    "operationId": "pcsJSONOperation",
+    "parameters": [
+     {
+      "in": "header",
+      "name": "X-Amz-Target",
+      "required": true,
+      "schema": {
+       "enum": [
+        "AWSParallelComputingService.CreateCluster",
+        "AWSParallelComputingService.CreateComputeNodeGroup",
+        "AWSParallelComputingService.CreateQueue",
+        "AWSParallelComputingService.DeleteCluster",
+        "AWSParallelComputingService.DeleteComputeNodeGroup",
+        "AWSParallelComputingService.DeleteQueue",
+        "AWSParallelComputingService.GetCluster",
+        "AWSParallelComputingService.GetComputeNodeGroup",
+        "AWSParallelComputingService.GetQueue",
+        "AWSParallelComputingService.ListClusters",
+        "AWSParallelComputingService.ListComputeNodeGroups",
+        "AWSParallelComputingService.ListQueues",
+        "AWSParallelComputingService.ListTagsForResource",
+        "AWSParallelComputingService.TagResource",
+        "AWSParallelComputingService.UntagResource",
+        "AWSParallelComputingService.UpdateComputeNodeGroup",
+        "AWSParallelComputingService.UpdateQueue"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/x-amz-json-1.0": {
+       "examples": {
+        "CreateCluster": {
+         "summary": "X-Amz-Target: AWSParallelComputingService.CreateCluster",
+         "value": {}
+        },
+        "CreateComputeNodeGroup": {
+         "summary": "X-Amz-Target: AWSParallelComputingService.CreateComputeNodeGroup",
+         "value": {}
+        },
+        "CreateQueue": {
+         "summary": "X-Amz-Target: AWSParallelComputingService.CreateQueue",
+         "value": {}
+        },
+        "DeleteCluster": {
+         "summary": "X-Amz-Target: AWSParallelComputingService.DeleteCluster",
+         "value": {}
+        },
+        "DeleteComputeNodeGroup": {
+         "summary": "X-Amz-Target: AWSParallelComputingService.DeleteComputeNodeGroup",
+         "value": {}
+        },
+        "DeleteQueue": {
+         "summary": "X-Amz-Target: AWSParallelComputingService.DeleteQueue",
+         "value": {}
+        },
+        "GetCluster": {
+         "summary": "X-Amz-Target: AWSParallelComputingService.GetCluster",
+         "value": {}
+        },
+        "GetComputeNodeGroup": {
+         "summary": "X-Amz-Target: AWSParallelComputingService.GetComputeNodeGroup",
+         "value": {}
+        },
+        "GetQueue": {
+         "summary": "X-Amz-Target: AWSParallelComputingService.GetQueue",
+         "value": {}
+        },
+        "ListClusters": {
+         "summary": "X-Amz-Target: AWSParallelComputingService.ListClusters",
+         "value": {}
+        },
+        "ListComputeNodeGroups": {
+         "summary": "X-Amz-Target: AWSParallelComputingService.ListComputeNodeGroups",
+         "value": {}
+        },
+        "ListQueues": {
+         "summary": "X-Amz-Target: AWSParallelComputingService.ListQueues",
+         "value": {}
+        },
+        "ListTagsForResource": {
+         "summary": "X-Amz-Target: AWSParallelComputingService.ListTagsForResource",
+         "value": {}
+        },
+        "TagResource": {
+         "summary": "X-Amz-Target: AWSParallelComputingService.TagResource",
+         "value": {}
+        },
+        "UntagResource": {
+         "summary": "X-Amz-Target: AWSParallelComputingService.UntagResource",
+         "value": {}
+        },
+        "UpdateComputeNodeGroup": {
+         "summary": "X-Amz-Target: AWSParallelComputingService.UpdateComputeNodeGroup",
+         "value": {}
+        },
+        "UpdateQueue": {
+         "summary": "X-Amz-Target: AWSParallelComputingService.UpdateQueue",
+         "value": {}
+        }
+       },
+       "schema": {
+        "type": "object"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/x-amz-json-1.0": {
+        "schema": {
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception in __type."
+     },
+     "403": {
+      "description": "AccessDeniedException from local identity policy evaluation."
+     },
+     "501": {
+      "description": "Official operation not implemented by the simulator."
+     }
+    },
+    "summary": "AWS Parallel Computing Service JSON 1.0 operations",
+    "tags": [
+     "AWS Parallel Computing Service"
+    ]
+   }
+  }
+ },
+ "servers": [
+  {
+   "description": "This simulator only",
+   "url": "/"
+  }
+ ],
+ "tags": [
+  {
+   "description": "Bounded simulator subset of the official AWS Parallel Computing Service API (2023-02-10). Every other official operation returns HTTP 501 UnknownOperationException. Clusters, compute node groups and queues are stored configuration records that stay CREATING: no Slurm controller, accounting database, REST endpoint, compute instance, launch or network interface exists, a cluster reports no endpoints or authKey, and no job can be submitted. RegisterComputeNodeGroupInstance, which PCS itself calls for the nodes it launches, and UpdateCluster return UnknownOperationException with HTTP 501. UpdateCluster is not implemented because its slurmConfiguration is a partial update of nested settings (scale-down time, custom settings, accounting, Slurm REST) that the stored model would replace as a whole. Compute node group and queue updates replace each supplied member as a whole, and the cluster name or ID of a child operation may be either, as the official identifier pattern allows. CreateQueue requires one or more computeNodeGroupConfigurations entries. UpdateQueue retains its separate replacement semantics. Subnets, security groups, launch templates, AMIs, instance profiles, instance types and the compute node groups a queue names are stored without being resolved: nothing checks that they exist, that subnets share a VPC with the cluster, or that a queue's compute node groups belong to its cluster. A compute node group's scaling minimum must not exceed its maximum, and a SPOT purchase option is the only one that accepts spotOptions. Deleting a cluster that still has compute node groups or queues, and deleting a compute node group that a queue names, behave as stored dependents: the first is refused with ConflictException, the second is not checked. Names are 3 to 40 characters for clusters and 3 to 25 for compute node groups and queues, begin with a letter and hold letters, digits and hyphens; the official pattern's pcs_ exclusion is implied by that rule. The scheduler type is SLURM with a version stored as given. ARN shapes (cluster/pcs_id, computenodegroup/pcs_id, queue/pcs_id) are inferred. Resource counts per Region (20 clusters, 50 compute node groups and 50 queues per cluster) are local limits.",
+   "name": "AWS Parallel Computing Service"
+  }
+ ],
+ "x-simulator-source": {
+  "package": "botocore",
+  "version": "1.41.6",
+  "file": "botocore/data/pcs/2023-02-10/service-2.json",
+  "sha256": "ef3f1e1eb997d8103b1489515502be5ec77852be91e1dd31e1d3a3800ca76ca6",
+  "license": "Apache-2.0"
+ }
+}

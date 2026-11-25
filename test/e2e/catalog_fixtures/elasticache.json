@@ -17,23 +17,54 @@
   {"op": "create_user", "args": {"UserId": "pw-user", "UserName": "pw-user", "Engine": "redis", "AccessString": "on", "Passwords": ["not-stored-password"]}, "error": "InvalidParameterValue", "status": 400},
   {"op": "create_cache_subnet_group", "args": {"CacheSubnetGroupName": "fixture-subnets", "CacheSubnetGroupDescription": "again", "SubnetIds": ["subnet-0a1b2c3d"]}, "error": "CacheSubnetGroupAlreadyExists", "status": 400},
   {"op": "describe_cache_parameter_groups", "args": {"CacheParameterGroupName": "missing-params"}, "error": "CacheParameterGroupNotFound", "status": 404},
-  {"op": "create_cache_cluster", "args": {"CacheClusterId": "fixture-cache"}, "error": "UnknownOperationException", "status": 501}
+  {"op": "create_cache_cluster", "args": {"CacheClusterId": "Fixture-Cache", "Engine": "redis", "CacheNodeType": "cache.t3.micro", "NumCacheNodes": 1, "CacheParameterGroupName": "fixture-params", "CacheSubnetGroupName": "fixture-subnets", "Tags": [{"Key": "team", "Value": "a"}]}, "save": {"cluster": "CacheCluster.ARN"}, "expect": {"CacheCluster.CacheClusterId": "fixture-cache", "CacheCluster.CacheClusterStatus": "creating", "CacheCluster.CacheParameterGroup.CacheParameterGroupName": "fixture-params", "CacheCluster.ARN": "arn:aws:elasticache:us-east-1:000000000000:cluster:fixture-cache"}},
+  {"op": "describe_cache_clusters", "args": {"CacheClusterId": "fixture-cache"}, "expect": {"CacheClusters#count": 1, "CacheClusters[0].CacheClusterStatus": "creating"}},
+  {"op": "modify_cache_cluster", "args": {"CacheClusterId": "fixture-cache", "ApplyImmediately": true, "CacheNodeType": "cache.t3.small", "SnapshotRetentionLimit": 3}, "expect": {"CacheCluster.CacheNodeType": "cache.t3.small", "CacheCluster.SnapshotRetentionLimit": 3}},
+  {"op": "add_tags_to_resource", "args": {"ResourceName": "${cluster}", "Tags": [{"Key": "stage", "Value": "dev"}]}},
+  {"op": "create_replication_group", "args": {"ReplicationGroupId": "Fixture-Group", "ReplicationGroupDescription": "fixture", "Engine": "valkey", "CacheNodeType": "cache.t3.micro", "AutomaticFailoverEnabled": true, "Tags": [{"Key": "team", "Value": "a"}]}, "save": {"group": "ReplicationGroup.ARN"}, "expect": {"ReplicationGroup.ReplicationGroupId": "fixture-group", "ReplicationGroup.Status": "creating", "ReplicationGroup.AutomaticFailover": "enabled", "ReplicationGroup.Description": "fixture"}},
+  {"op": "describe_replication_groups", "args": {"ReplicationGroupId": "fixture-group"}, "expect": {"ReplicationGroups#count": 1}},
+  {"op": "modify_replication_group", "args": {"ReplicationGroupId": "fixture-group", "ApplyImmediately": true, "ReplicationGroupDescription": "changed", "MultiAZEnabled": true}, "expect": {"ReplicationGroup.Description": "changed", "ReplicationGroup.MultiAZ": "enabled"}},
+  {"op": "create_serverless_cache", "args": {"ServerlessCacheName": "Fixture-Serverless", "Engine": "valkey", "Description": "fixture", "SubnetIds": ["subnet-0a1b2c3d"], "SnapshotRetentionLimit": 1, "Tags": [{"Key": "team", "Value": "a"}]}, "save": {"serverless": "ServerlessCache.ARN"}, "expect": {"ServerlessCache.ServerlessCacheName": "fixture-serverless", "ServerlessCache.Status": "creating"}},
+  {"op": "describe_serverless_caches", "args": {"ServerlessCacheName": "fixture-serverless"}, "expect": {"ServerlessCaches#count": 1}},
+  {"op": "modify_serverless_cache", "args": {"ServerlessCacheName": "fixture-serverless", "Description": "changed", "SnapshotRetentionLimit": 2}, "expect": {"ServerlessCache.Description": "changed", "ServerlessCache.SnapshotRetentionLimit": 2}},
+  {"op": "list_tags_for_resource", "args": {"ResourceName": "${serverless}"}, "expect": {"TagList[0].Key": "team"}},
+  {"op": "create_cache_cluster", "args": {"CacheClusterId": "fixture-cache", "Engine": "redis"}, "error": "CacheClusterAlreadyExists", "status": 400},
+  {"op": "create_cache_cluster", "args": {"CacheClusterId": "fixture-port", "Engine": "redis", "Port": 6379}, "error": "InvalidParameterValue", "status": 400},
+  {"op": "describe_cache_clusters", "args": {"CacheClusterId": "fixture-missing"}, "error": "CacheClusterNotFound", "status": 404},
+  {"op": "describe_replication_groups", "args": {"ReplicationGroupId": "fixture-missing"}, "error": "ReplicationGroupNotFoundFault", "status": 404},
+  {"op": "describe_serverless_caches", "args": {"ServerlessCacheName": "fixture-missing"}, "error": "ServerlessCacheNotFoundFault", "status": 404},
+  {"op": "delete_cache_cluster", "args": {"CacheClusterId": "fixture-cache", "FinalSnapshotIdentifier": "fixture-final"}, "error": "InvalidParameterValue", "status": 400},
+  {"op": "reboot_cache_cluster", "args": {"CacheClusterId": "fixture-cache", "CacheNodeIdsToReboot": ["0001"]}, "error": "UnknownOperationException", "status": 501},
+  {"op": "test_failover", "args": {"ReplicationGroupId": "fixture-group", "NodeGroupId": "0001"}, "error": "UnknownOperationException", "status": 501},
+  {"op": "create_user_group", "args": {"UserGroupId": "fixture-users", "Engine": "redis", "UserIds": ["default"]}, "error": "UnknownOperationException", "status": 501}
  ],
  "isolation": [
   {"op": "describe_cache_parameter_groups", "args": {}, "expect": {"CacheParameterGroups#count": 0}},
   {"op": "describe_cache_subnet_groups", "args": {}, "expect": {"CacheSubnetGroups#count": 0}},
-  {"op": "describe_users", "args": {}, "expect": {"Users#count": 0}}
+  {"op": "describe_users", "args": {}, "expect": {"Users#count": 0}},
+  {"op": "describe_cache_clusters", "args": {}, "expect": {"CacheClusters#count": 0}},
+  {"op": "describe_replication_groups", "args": {}, "expect": {"ReplicationGroups#count": 0}},
+  {"op": "describe_serverless_caches", "args": {}, "expect": {"ServerlessCaches#count": 0}}
  ],
  "after_restart": [
   {"op": "describe_cache_subnet_groups", "args": {"CacheSubnetGroupName": "fixture-subnets"}, "expect": {"CacheSubnetGroups[0].CacheSubnetGroupDescription": "three subnets", "CacheSubnetGroups[0].Subnets#count": 3}},
-  {"op": "describe_users", "args": {"UserId": "fixture-user"}, "expect": {"Users[0].AccessString": "on ~* +@read"}}
+  {"op": "describe_users", "args": {"UserId": "fixture-user"}, "expect": {"Users[0].AccessString": "on ~* +@read"}},
+  {"op": "describe_cache_clusters", "args": {"CacheClusterId": "fixture-cache"}, "expect": {"CacheClusters[0].CacheNodeType": "cache.t3.small"}},
+  {"op": "describe_replication_groups", "args": {}, "expect": {"ReplicationGroups[0].MultiAZ": "enabled"}},
+  {"op": "list_tags_for_resource", "args": {"ResourceName": "${cluster}"}, "expect": {"TagList#count": 2}}
  ],
  "cleanup": [
+  {"op": "delete_cache_cluster", "args": {"CacheClusterId": "fixture-cache"}, "expect": {"CacheCluster.CacheClusterStatus": "deleting"}},
+  {"op": "delete_replication_group", "args": {"ReplicationGroupId": "fixture-group"}, "expect": {"ReplicationGroup.Status": "deleting"}},
+  {"op": "delete_serverless_cache", "args": {"ServerlessCacheName": "fixture-serverless"}, "expect": {"ServerlessCache.Status": "deleting"}},
   {"op": "delete_user", "args": {"UserId": "fixture-user"}, "expect": {"Status": "deleting"}},
   {"op": "delete_cache_subnet_group", "args": {"CacheSubnetGroupName": "fixture-subnets"}},
   {"op": "delete_cache_parameter_group", "args": {"CacheParameterGroupName": "fixture-params"}},
   {"op": "describe_cache_parameter_groups", "args": {}, "expect": {"CacheParameterGroups#count": 0}},
   {"op": "describe_cache_subnet_groups", "args": {}, "expect": {"CacheSubnetGroups#count": 0}},
-  {"op": "describe_users", "args": {}, "expect": {"Users#count": 0}}
+  {"op": "describe_users", "args": {}, "expect": {"Users#count": 0}},
+  {"op": "describe_cache_clusters", "args": {}, "expect": {"CacheClusters#count": 0}},
+  {"op": "describe_replication_groups", "args": {}, "expect": {"ReplicationGroups#count": 0}},
+  {"op": "describe_serverless_caches", "args": {}, "expect": {"ServerlessCaches#count": 0}}
  ]
 }

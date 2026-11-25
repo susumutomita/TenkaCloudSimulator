@@ -1,0 +1,55 @@
+{
+ "client": "mediatailor",
+ "steps": [
+  {"op": "put_playback_configuration", "args": {"Name": "fixture-ads", "AdDecisionServerUrl": "https://ads.example.com/vast", "VideoContentSourceUrl": "https://origin.example.com/", "Tags": {"team": "a"}}, "save": {"config_arn": "PlaybackConfigurationArn"}, "expect": {"Name": "fixture-ads"}},
+  {"op": "put_playback_configuration", "args": {"Name": "fixture-ads", "SlateAdUrl": "https://origin.example.com/slate.mp4"}, "expect": {"AdDecisionServerUrl": "https://ads.example.com/vast", "SlateAdUrl": "https://origin.example.com/slate.mp4"}},
+  {"op": "get_playback_configuration", "args": {"Name": "fixture-ads"}, "expect": {"PlaybackConfigurationArn": "${config_arn}", "Tags": {"team": "a"}}},
+  {"op": "list_playback_configurations", "args": {}, "expect": {"Items#count": 1, "Items[0].Name": "fixture-ads"}},
+  {"op": "create_prefetch_schedule", "args": {"PlaybackConfigurationName": "fixture-ads", "Name": "fixture-morning", "StreamId": "s1", "Consumption": {"EndTime": "2026-12-01T00:00:00Z"}, "Retrieval": {"EndTime": "2026-11-30T00:00:00Z"}}, "expect": {"PlaybackConfigurationName": "fixture-ads"}},
+  {"op": "get_prefetch_schedule", "args": {"PlaybackConfigurationName": "fixture-ads", "Name": "fixture-morning"}, "expect": {"StreamId": "s1", "ScheduleType": "SINGLE"}},
+  {"op": "list_prefetch_schedules", "args": {"PlaybackConfigurationName": "fixture-ads", "StreamId": "s1"}, "expect": {"Items#count": 1}},
+  {"op": "list_prefetch_schedules", "args": {"PlaybackConfigurationName": "fixture-ads", "ScheduleType": "ALL"}, "expect": {"Items#count": 1}},
+  {"op": "list_prefetch_schedules", "args": {"PlaybackConfigurationName": "fixture-ads", "ScheduleType": "SINGLE"}, "expect": {"Items#count": 1}},
+  {"op": "create_source_location", "args": {"SourceLocationName": "fixture-origin", "HttpConfiguration": {"BaseUrl": "https://origin.example.com"}, "Tags": {"team": "a"}}, "save": {"location_arn": "Arn"}, "expect": {"SourceLocationName": "fixture-origin"}},
+  {"op": "describe_source_location", "args": {"SourceLocationName": "fixture-origin"}, "expect": {"Arn": "${location_arn}"}},
+  {"op": "list_source_locations", "args": {}, "expect": {"Items#count": 1}},
+  {"op": "update_source_location", "args": {"SourceLocationName": "fixture-origin", "HttpConfiguration": {"BaseUrl": "https://origin2.example.com"}}, "expect": {"HttpConfiguration.BaseUrl": "https://origin2.example.com"}},
+  {"op": "create_vod_source", "args": {"SourceLocationName": "fixture-origin", "VodSourceName": "fixture-movie", "HttpPackageConfigurations": [{"Path": "/main.m3u8", "SourceGroup": "hls", "Type": "HLS"}]}, "expect": {"VodSourceName": "fixture-movie", "SourceLocationName": "fixture-origin"}},
+  {"op": "describe_vod_source", "args": {"SourceLocationName": "fixture-origin", "VodSourceName": "fixture-movie"}, "expect": {"HttpPackageConfigurations[0].Type": "HLS"}},
+  {"op": "list_vod_sources", "args": {"SourceLocationName": "fixture-origin"}, "expect": {"Items#count": 1}},
+  {"op": "update_vod_source", "args": {"SourceLocationName": "fixture-origin", "VodSourceName": "fixture-movie", "HttpPackageConfigurations": [{"Path": "/main.mpd", "SourceGroup": "dash", "Type": "DASH"}]}, "expect": {"HttpPackageConfigurations[0].Type": "DASH"}},
+  {"op": "create_live_source", "args": {"SourceLocationName": "fixture-origin", "LiveSourceName": "fixture-match", "HttpPackageConfigurations": [{"Path": "/live.m3u8", "SourceGroup": "hls", "Type": "HLS"}]}, "expect": {"LiveSourceName": "fixture-match"}},
+  {"op": "describe_live_source", "args": {"SourceLocationName": "fixture-origin", "LiveSourceName": "fixture-match"}, "expect": {"HttpPackageConfigurations[0].Path": "/live.m3u8"}},
+  {"op": "list_live_sources", "args": {"SourceLocationName": "fixture-origin"}, "expect": {"Items#count": 1}},
+  {"op": "update_live_source", "args": {"SourceLocationName": "fixture-origin", "LiveSourceName": "fixture-match", "HttpPackageConfigurations": [{"Path": "/live2.m3u8", "SourceGroup": "hls", "Type": "HLS"}]}, "expect": {"HttpPackageConfigurations[0].Path": "/live2.m3u8"}},
+  {"op": "create_channel", "args": {"ChannelName": "fixture-channel", "PlaybackMode": "LINEAR", "Tier": "STANDARD", "Outputs": [{"ManifestName": "main", "SourceGroup": "hls", "HlsPlaylistSettings": {"ManifestWindowSeconds": 60}}], "FillerSlate": {"SourceLocationName": "fixture-origin", "VodSourceName": "fixture-movie"}, "Tags": {"team": "a"}}, "save": {"channel_arn": "Arn"}, "expect": {"ChannelState": "STOPPED"}},
+  {"op": "describe_channel", "args": {"ChannelName": "fixture-channel"}, "expect": {"Arn": "${channel_arn}", "PlaybackMode": "LINEAR", "Tier": "STANDARD"}},
+  {"op": "list_channels", "args": {}, "expect": {"Items#count": 1, "Items[0].ChannelName": "fixture-channel"}},
+  {"op": "update_channel", "args": {"ChannelName": "fixture-channel", "Outputs": [{"ManifestName": "main", "SourceGroup": "hls", "HlsPlaylistSettings": {"ManifestWindowSeconds": 120}}], "TimeShiftConfiguration": {"MaxTimeDelaySeconds": 60}}, "expect": {"TimeShiftConfiguration.MaxTimeDelaySeconds": 60}},
+  {"op": "tag_resource", "args": {"ResourceArn": "${channel_arn}", "Tags": {"k": "v"}}},
+  {"op": "untag_resource", "args": {"ResourceArn": "${channel_arn}", "TagKeys": ["k"]}},
+  {"op": "list_tags_for_resource", "args": {"ResourceArn": "${channel_arn}"}, "expect": {"Tags": {"team": "a"}}},
+  {"op": "create_channel", "args": {"ChannelName": "fixture-linear", "PlaybackMode": "LINEAR", "Outputs": [{"ManifestName": "main", "SourceGroup": "hls"}]}, "error": "ValidationException", "status": 400},
+  {"op": "create_source_location", "args": {"SourceLocationName": "fixture-bad", "HttpConfiguration": {"BaseUrl": "origin.example.com"}}, "error": "ValidationException", "status": 400},
+  {"op": "delete_source_location", "args": {"SourceLocationName": "fixture-origin"}, "error": "ConflictException", "status": 409},
+  {"op": "delete_playback_configuration", "args": {"Name": "fixture-ads"}, "error": "ConflictException", "status": 409},
+  {"op": "describe_channel", "args": {"ChannelName": "fixture-missing"}, "error": "ResourceNotFoundException", "status": 404}
+ ],
+ "isolation": [
+  {"op": "list_channels", "args": {}, "expect": {"Items#count": 0}},
+  {"op": "list_playback_configurations", "args": {}, "expect": {"Items#count": 0}}
+ ],
+ "after_restart": [
+  {"op": "describe_channel", "args": {"ChannelName": "fixture-channel"}, "expect": {"TimeShiftConfiguration.MaxTimeDelaySeconds": 60}},
+  {"op": "get_playback_configuration", "args": {"Name": "fixture-ads"}, "expect": {"SlateAdUrl": "https://origin.example.com/slate.mp4"}}
+ ],
+ "cleanup": [
+  {"op": "delete_channel", "args": {"ChannelName": "fixture-channel"}},
+  {"op": "delete_vod_source", "args": {"SourceLocationName": "fixture-origin", "VodSourceName": "fixture-movie"}},
+  {"op": "delete_live_source", "args": {"SourceLocationName": "fixture-origin", "LiveSourceName": "fixture-match"}},
+  {"op": "delete_source_location", "args": {"SourceLocationName": "fixture-origin"}},
+  {"op": "delete_prefetch_schedule", "args": {"PlaybackConfigurationName": "fixture-ads", "Name": "fixture-morning"}},
+  {"op": "delete_playback_configuration", "args": {"Name": "fixture-ads"}},
+  {"op": "list_playback_configurations", "args": {}, "expect": {"Items#count": 0}}
+ ]
+}

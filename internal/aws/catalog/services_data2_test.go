@@ -184,7 +184,7 @@ func TestElastiCacheRefusesWhatItCannotStoreHonestly(t *testing.T) {
 	one.result(t, "CreateCacheSubnetGroup")
 	expectFault(t, h.cache("ModifyCacheSubnetGroup", append([]string{"CacheSubnetGroupName", "one"}, subnetPairs("SubnetIds", ids...)...)...), 400, "CacheSubnetQuotaExceededFault")
 	// Operations that provision or run a cache stay unbound.
-	expectFault(t, h.cache("CreateCacheCluster", "CacheClusterId", "c"), 501, "UnknownOperationException")
+	expectFault(t, h.cache("RebootCacheCluster", "CacheClusterId", "c"), 501, "UnknownOperationException")
 	expectFault(t, h.cache("CreateUserGroup", "UserGroupId", "g", "Engine", "redis"), 501, "UnknownOperationException")
 	expectFault(t, h.cache("ModifyCacheParameterGroup", "CacheParameterGroupName", "g"), 501, "UnknownOperationException")
 	// Resource limits are local and per Region.
@@ -282,7 +282,7 @@ func TestRedshiftRefusesWhatItCannotStoreHonestly(t *testing.T) {
 	expectFault(t, create("wide", subnetPairs("SubnetIds", ids...)...), 400, "ClusterSubnetQuotaExceededFault")
 	create("one", one...).result(t, "CreateClusterSubnetGroup")
 	expectFault(t, h.warehouse("ModifyClusterSubnetGroup", append([]string{"ClusterSubnetGroupName", "one"}, subnetPairs("SubnetIds", ids...)...)...), 400, "ClusterSubnetQuotaExceededFault")
-	for _, action := range []string{"CreateCluster", "CreateClusterSnapshot", "CreateSnapshotSchedule", "CreateEventSubscription", "DescribeTags", "ModifyClusterParameterGroup", "CreateUsageLimit"} {
+	for _, action := range []string{"RebootCluster", "CreateClusterSnapshot", "CreateSnapshotSchedule", "CreateEventSubscription", "DescribeTags", "ModifyClusterParameterGroup", "CreateUsageLimit"} {
 		expectFault(t, h.warehouse(action), 501, "UnknownOperationException")
 	}
 	for i := 0; i < 50; i++ {

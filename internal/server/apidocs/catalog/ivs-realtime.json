@@ -1,0 +1,1420 @@
+{
+ "components": {
+  "schemas": {
+   "AutoParticipantRecordingConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "hlsConfiguration": {
+      "$ref": "#/components/schemas/ParticipantRecordingHlsConfiguration"
+     },
+     "mediaTypes": {
+      "items": {
+       "enum": [
+        "AUDIO_VIDEO",
+        "AUDIO_ONLY",
+        "NONE"
+       ],
+       "type": "string"
+      },
+      "maxItems": 1,
+      "minItems": 0,
+      "type": "array"
+     },
+     "recordParticipantReplicas": {
+      "type": "boolean"
+     },
+     "recordingReconnectWindowSeconds": {
+      "maximum": 300,
+      "minimum": 0,
+      "type": "integer"
+     },
+     "storageConfigurationArn": {
+      "maxLength": 128,
+      "minLength": 0,
+      "type": "string"
+     },
+     "thumbnailConfiguration": {
+      "$ref": "#/components/schemas/ParticipantThumbnailConfiguration"
+     }
+    },
+    "required": [
+     "storageConfigurationArn"
+    ],
+    "type": "object"
+   },
+   "EncoderConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "arn": {
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string"
+     },
+     "name": {
+      "maxLength": 128,
+      "minLength": 0,
+      "type": "string"
+     },
+     "tags": {
+      "additionalProperties": {
+       "maxLength": 256,
+       "minLength": 0,
+       "type": "string"
+      },
+      "maxProperties": 50,
+      "minProperties": 0,
+      "type": "object"
+     },
+     "video": {
+      "$ref": "#/components/schemas/Video"
+     }
+    },
+    "required": [
+     "arn"
+    ],
+    "type": "object"
+   },
+   "EncoderConfigurationSummary": {
+    "additionalProperties": false,
+    "properties": {
+     "arn": {
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string"
+     },
+     "name": {
+      "maxLength": 128,
+      "minLength": 0,
+      "type": "string"
+     },
+     "tags": {
+      "additionalProperties": {
+       "maxLength": 256,
+       "minLength": 0,
+       "type": "string"
+      },
+      "maxProperties": 50,
+      "minProperties": 0,
+      "type": "object"
+     }
+    },
+    "required": [
+     "arn"
+    ],
+    "type": "object"
+   },
+   "ParticipantRecordingHlsConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "targetSegmentDurationSeconds": {
+      "maximum": 10,
+      "minimum": 2,
+      "type": "integer"
+     }
+    },
+    "type": "object"
+   },
+   "ParticipantThumbnailConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "recordingMode": {
+      "enum": [
+       "INTERVAL",
+       "DISABLED"
+      ],
+      "type": "string"
+     },
+     "storage": {
+      "items": {
+       "enum": [
+        "SEQUENTIAL",
+        "LATEST"
+       ],
+       "type": "string"
+      },
+      "maxItems": 2,
+      "minItems": 0,
+      "type": "array"
+     },
+     "targetIntervalSeconds": {
+      "maximum": 86400,
+      "minimum": 1,
+      "type": "integer"
+     }
+    },
+    "type": "object"
+   },
+   "ParticipantToken": {
+    "additionalProperties": false,
+    "properties": {
+     "attributes": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "capabilities": {
+      "items": {
+       "enum": [
+        "PUBLISH",
+        "SUBSCRIBE"
+       ],
+       "type": "string"
+      },
+      "maxItems": 2,
+      "minItems": 0,
+      "type": "array"
+     },
+     "duration": {
+      "maximum": 20160,
+      "minimum": 1,
+      "type": "integer"
+     },
+     "expirationTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "participantId": {
+      "maxLength": 64,
+      "minLength": 0,
+      "type": "string"
+     },
+     "token": {
+      "type": "string"
+     },
+     "userId": {
+      "maxLength": 128,
+      "minLength": 0,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ParticipantTokenConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "attributes": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "capabilities": {
+      "items": {
+       "enum": [
+        "PUBLISH",
+        "SUBSCRIBE"
+       ],
+       "type": "string"
+      },
+      "maxItems": 2,
+      "minItems": 0,
+      "type": "array"
+     },
+     "duration": {
+      "maximum": 20160,
+      "minimum": 1,
+      "type": "integer"
+     },
+     "userId": {
+      "maxLength": 128,
+      "minLength": 0,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "S3StorageConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "bucketName": {
+      "maxLength": 63,
+      "minLength": 3,
+      "type": "string"
+     }
+    },
+    "required": [
+     "bucketName"
+    ],
+    "type": "object"
+   },
+   "Stage": {
+    "additionalProperties": false,
+    "properties": {
+     "activeSessionId": {
+      "maxLength": 16,
+      "minLength": 16,
+      "type": "string"
+     },
+     "arn": {
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string"
+     },
+     "autoParticipantRecordingConfiguration": {
+      "$ref": "#/components/schemas/AutoParticipantRecordingConfiguration"
+     },
+     "endpoints": {
+      "$ref": "#/components/schemas/StageEndpoints"
+     },
+     "name": {
+      "maxLength": 128,
+      "minLength": 0,
+      "type": "string"
+     },
+     "tags": {
+      "additionalProperties": {
+       "maxLength": 256,
+       "minLength": 0,
+       "type": "string"
+      },
+      "maxProperties": 50,
+      "minProperties": 0,
+      "type": "object"
+     }
+    },
+    "required": [
+     "arn"
+    ],
+    "type": "object"
+   },
+   "StageEndpoints": {
+    "additionalProperties": false,
+    "properties": {
+     "events": {
+      "maxLength": 2048,
+      "minLength": 0,
+      "type": "string"
+     },
+     "rtmp": {
+      "maxLength": 2048,
+      "minLength": 0,
+      "type": "string"
+     },
+     "rtmps": {
+      "maxLength": 2048,
+      "minLength": 0,
+      "type": "string"
+     },
+     "whip": {
+      "maxLength": 2048,
+      "minLength": 0,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "StageSummary": {
+    "additionalProperties": false,
+    "properties": {
+     "activeSessionId": {
+      "maxLength": 16,
+      "minLength": 16,
+      "type": "string"
+     },
+     "arn": {
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string"
+     },
+     "name": {
+      "maxLength": 128,
+      "minLength": 0,
+      "type": "string"
+     },
+     "tags": {
+      "additionalProperties": {
+       "maxLength": 256,
+       "minLength": 0,
+       "type": "string"
+      },
+      "maxProperties": 50,
+      "minProperties": 0,
+      "type": "object"
+     }
+    },
+    "required": [
+     "arn"
+    ],
+    "type": "object"
+   },
+   "StorageConfiguration": {
+    "additionalProperties": false,
+    "properties": {
+     "arn": {
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string"
+     },
+     "name": {
+      "maxLength": 128,
+      "minLength": 0,
+      "type": "string"
+     },
+     "s3": {
+      "$ref": "#/components/schemas/S3StorageConfiguration"
+     },
+     "tags": {
+      "additionalProperties": {
+       "maxLength": 256,
+       "minLength": 0,
+       "type": "string"
+      },
+      "maxProperties": 50,
+      "minProperties": 0,
+      "type": "object"
+     }
+    },
+    "required": [
+     "arn"
+    ],
+    "type": "object"
+   },
+   "StorageConfigurationSummary": {
+    "additionalProperties": false,
+    "properties": {
+     "arn": {
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string"
+     },
+     "name": {
+      "maxLength": 128,
+      "minLength": 0,
+      "type": "string"
+     },
+     "s3": {
+      "$ref": "#/components/schemas/S3StorageConfiguration"
+     },
+     "tags": {
+      "additionalProperties": {
+       "maxLength": 256,
+       "minLength": 0,
+       "type": "string"
+      },
+      "maxProperties": 50,
+      "minProperties": 0,
+      "type": "object"
+     }
+    },
+    "required": [
+     "arn"
+    ],
+    "type": "object"
+   },
+   "Video": {
+    "additionalProperties": false,
+    "properties": {
+     "bitrate": {
+      "maximum": 8500000,
+      "minimum": 1,
+      "type": "integer"
+     },
+     "framerate": {
+      "maximum": 60,
+      "minimum": 1,
+      "type": "number"
+     },
+     "height": {
+      "maximum": 1920,
+      "minimum": 2,
+      "type": "integer"
+     },
+     "width": {
+      "maximum": 1920,
+      "minimum": 2,
+      "type": "integer"
+     }
+    },
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "Bounded simulator subset of the official Amazon Interactive Video Service RealTime API (2020-07-14). Every other official operation returns HTTP 501 UnknownOperationException. Encoder configurations, storage configurations and stages are stored records: no participant, session, composition or recording exists, a stage reports no activeSessionId and none of its WHIP, RTMP or events endpoints, and no S3 bucket is looked up or written to. CreateStage refuses participantTokenConfigurations because the catalog mints no participant token, so it never returns participantTokens; CreateParticipantToken and DisconnectParticipant, participants, stage sessions, compositions and participant replication return UnknownOperationException with HTTP 501. Ingest configurations (their create output carries a stream key) and public keys (they store key material) are not bound. The tag operations are not bound for the reason given for ivs (the official resourceArn pattern admits no real ARN), so tags can be set at creation but not changed afterwards. The storage configuration named by a stage's autoParticipantRecordingConfiguration is stored without being checked, and a storage configuration in use by a stage can be deleted. Limits per Region are simulator limits, not AWS quotas.",
+  "title": "Amazon Interactive Video Service RealTime (simulator catalog)",
+  "version": "2020-07-14"
+ },
+ "openapi": "3.1.0",
+ "paths": {
+  "/CreateEncoderConfiguration": {
+   "post": {
+    "operationId": "ivs-realtimeCreateEncoderConfiguration",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "ivs"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "name": {
+          "maxLength": 128,
+          "minLength": 0,
+          "type": "string"
+         },
+         "tags": {
+          "additionalProperties": {
+           "maxLength": 256,
+           "minLength": 0,
+           "type": "string"
+          },
+          "maxProperties": 50,
+          "minProperties": 0,
+          "type": "object"
+         },
+         "video": {
+          "$ref": "#/components/schemas/Video"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "encoderConfiguration": {
+           "$ref": "#/components/schemas/EncoderConfiguration"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateEncoderConfiguration",
+    "tags": [
+     "Amazon Interactive Video Service RealTime"
+    ]
+   }
+  },
+  "/CreateStage": {
+   "post": {
+    "operationId": "ivs-realtimeCreateStage",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "ivs"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "autoParticipantRecordingConfiguration": {
+          "$ref": "#/components/schemas/AutoParticipantRecordingConfiguration"
+         },
+         "name": {
+          "maxLength": 128,
+          "minLength": 0,
+          "type": "string"
+         },
+         "participantTokenConfigurations": {
+          "items": {
+           "$ref": "#/components/schemas/ParticipantTokenConfiguration"
+          },
+          "maxItems": 12,
+          "minItems": 0,
+          "type": "array"
+         },
+         "tags": {
+          "additionalProperties": {
+           "maxLength": 256,
+           "minLength": 0,
+           "type": "string"
+          },
+          "maxProperties": 50,
+          "minProperties": 0,
+          "type": "object"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "participantTokens": {
+           "items": {
+            "$ref": "#/components/schemas/ParticipantToken"
+           },
+           "type": "array"
+          },
+          "stage": {
+           "$ref": "#/components/schemas/Stage"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateStage",
+    "tags": [
+     "Amazon Interactive Video Service RealTime"
+    ]
+   }
+  },
+  "/CreateStorageConfiguration": {
+   "post": {
+    "operationId": "ivs-realtimeCreateStorageConfiguration",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "ivs"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "name": {
+          "maxLength": 128,
+          "minLength": 0,
+          "type": "string"
+         },
+         "s3": {
+          "$ref": "#/components/schemas/S3StorageConfiguration"
+         },
+         "tags": {
+          "additionalProperties": {
+           "maxLength": 256,
+           "minLength": 0,
+           "type": "string"
+          },
+          "maxProperties": 50,
+          "minProperties": 0,
+          "type": "object"
+         }
+        },
+        "required": [
+         "s3"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "storageConfiguration": {
+           "$ref": "#/components/schemas/StorageConfiguration"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateStorageConfiguration",
+    "tags": [
+     "Amazon Interactive Video Service RealTime"
+    ]
+   }
+  },
+  "/DeleteEncoderConfiguration": {
+   "post": {
+    "operationId": "ivs-realtimeDeleteEncoderConfiguration",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "ivs"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "arn": {
+          "maxLength": 128,
+          "minLength": 1,
+          "type": "string"
+         }
+        },
+        "required": [
+         "arn"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteEncoderConfiguration",
+    "tags": [
+     "Amazon Interactive Video Service RealTime"
+    ]
+   }
+  },
+  "/DeleteStage": {
+   "post": {
+    "operationId": "ivs-realtimeDeleteStage",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "ivs"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "arn": {
+          "maxLength": 128,
+          "minLength": 1,
+          "type": "string"
+         }
+        },
+        "required": [
+         "arn"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteStage",
+    "tags": [
+     "Amazon Interactive Video Service RealTime"
+    ]
+   }
+  },
+  "/DeleteStorageConfiguration": {
+   "post": {
+    "operationId": "ivs-realtimeDeleteStorageConfiguration",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "ivs"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "arn": {
+          "maxLength": 128,
+          "minLength": 1,
+          "type": "string"
+         }
+        },
+        "required": [
+         "arn"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteStorageConfiguration",
+    "tags": [
+     "Amazon Interactive Video Service RealTime"
+    ]
+   }
+  },
+  "/GetEncoderConfiguration": {
+   "post": {
+    "operationId": "ivs-realtimeGetEncoderConfiguration",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "ivs"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "arn": {
+          "maxLength": 128,
+          "minLength": 1,
+          "type": "string"
+         }
+        },
+        "required": [
+         "arn"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "encoderConfiguration": {
+           "$ref": "#/components/schemas/EncoderConfiguration"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "GetEncoderConfiguration",
+    "tags": [
+     "Amazon Interactive Video Service RealTime"
+    ]
+   }
+  },
+  "/GetStage": {
+   "post": {
+    "operationId": "ivs-realtimeGetStage",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "ivs"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "arn": {
+          "maxLength": 128,
+          "minLength": 1,
+          "type": "string"
+         }
+        },
+        "required": [
+         "arn"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "stage": {
+           "$ref": "#/components/schemas/Stage"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "GetStage",
+    "tags": [
+     "Amazon Interactive Video Service RealTime"
+    ]
+   }
+  },
+  "/GetStorageConfiguration": {
+   "post": {
+    "operationId": "ivs-realtimeGetStorageConfiguration",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "ivs"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "arn": {
+          "maxLength": 128,
+          "minLength": 1,
+          "type": "string"
+         }
+        },
+        "required": [
+         "arn"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "storageConfiguration": {
+           "$ref": "#/components/schemas/StorageConfiguration"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "GetStorageConfiguration",
+    "tags": [
+     "Amazon Interactive Video Service RealTime"
+    ]
+   }
+  },
+  "/ListEncoderConfigurations": {
+   "post": {
+    "operationId": "ivs-realtimeListEncoderConfigurations",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "ivs"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "maxResults": {
+          "maximum": 100,
+          "minimum": 1,
+          "type": "integer"
+         },
+         "nextToken": {
+          "maxLength": 1024,
+          "minLength": 0,
+          "type": "string"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "encoderConfigurations": {
+           "items": {
+            "$ref": "#/components/schemas/EncoderConfigurationSummary"
+           },
+           "type": "array"
+          },
+          "nextToken": {
+           "maxLength": 1024,
+           "minLength": 0,
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListEncoderConfigurations",
+    "tags": [
+     "Amazon Interactive Video Service RealTime"
+    ]
+   }
+  },
+  "/ListStages": {
+   "post": {
+    "operationId": "ivs-realtimeListStages",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "ivs"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "maxResults": {
+          "maximum": 100,
+          "minimum": 1,
+          "type": "integer"
+         },
+         "nextToken": {
+          "maxLength": 1024,
+          "minLength": 0,
+          "type": "string"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "nextToken": {
+           "maxLength": 1024,
+           "minLength": 0,
+           "type": "string"
+          },
+          "stages": {
+           "items": {
+            "$ref": "#/components/schemas/StageSummary"
+           },
+           "type": "array"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListStages",
+    "tags": [
+     "Amazon Interactive Video Service RealTime"
+    ]
+   }
+  },
+  "/ListStorageConfigurations": {
+   "post": {
+    "operationId": "ivs-realtimeListStorageConfigurations",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "ivs"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "maxResults": {
+          "maximum": 100,
+          "minimum": 1,
+          "type": "integer"
+         },
+         "nextToken": {
+          "maxLength": 1024,
+          "minLength": 0,
+          "type": "string"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "nextToken": {
+           "maxLength": 1024,
+           "minLength": 0,
+           "type": "string"
+          },
+          "storageConfigurations": {
+           "items": {
+            "$ref": "#/components/schemas/StorageConfigurationSummary"
+           },
+           "type": "array"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListStorageConfigurations",
+    "tags": [
+     "Amazon Interactive Video Service RealTime"
+    ]
+   }
+  },
+  "/UpdateStage": {
+   "post": {
+    "operationId": "ivs-realtimeUpdateStage",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "ivs"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "arn": {
+          "maxLength": 128,
+          "minLength": 1,
+          "type": "string"
+         },
+         "autoParticipantRecordingConfiguration": {
+          "$ref": "#/components/schemas/AutoParticipantRecordingConfiguration"
+         },
+         "name": {
+          "maxLength": 128,
+          "minLength": 0,
+          "type": "string"
+         }
+        },
+        "required": [
+         "arn"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "stage": {
+           "$ref": "#/components/schemas/Stage"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UpdateStage",
+    "tags": [
+     "Amazon Interactive Video Service RealTime"
+    ]
+   }
+  }
+ },
+ "servers": [
+  {
+   "description": "This simulator only",
+   "url": "/"
+  }
+ ],
+ "tags": [
+  {
+   "description": "Bounded simulator subset of the official Amazon Interactive Video Service RealTime API (2020-07-14). Every other official operation returns HTTP 501 UnknownOperationException. Encoder configurations, storage configurations and stages are stored records: no participant, session, composition or recording exists, a stage reports no activeSessionId and none of its WHIP, RTMP or events endpoints, and no S3 bucket is looked up or written to. CreateStage refuses participantTokenConfigurations because the catalog mints no participant token, so it never returns participantTokens; CreateParticipantToken and DisconnectParticipant, participants, stage sessions, compositions and participant replication return UnknownOperationException with HTTP 501. Ingest configurations (their create output carries a stream key) and public keys (they store key material) are not bound. The tag operations are not bound for the reason given for ivs (the official resourceArn pattern admits no real ARN), so tags can be set at creation but not changed afterwards. The storage configuration named by a stage's autoParticipantRecordingConfiguration is stored without being checked, and a storage configuration in use by a stage can be deleted. Limits per Region are simulator limits, not AWS quotas.",
+   "name": "Amazon Interactive Video Service RealTime"
+  }
+ ],
+ "x-simulator-source": {
+  "package": "botocore",
+  "version": "1.41.6",
+  "file": "botocore/data/ivs-realtime/2020-07-14/service-2.json",
+  "sha256": "fe0c0096a335f1b971e6c1a1d2d5fe95c6d8567634a438cfa61628f78679819a",
+  "license": "Apache-2.0"
+ }
+}

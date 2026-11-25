@@ -5,6 +5,13 @@ them against two real binaries (separate databases and token authorities),
 requires every bound operation of that service to succeed at least once, checks
 that a participant without permissions is refused before any change, restarts
 the owning process, re-reads state and cleans up. No AWS account or network.
+
+A fixture may name the catalog model it runs against with "model" when another
+SDK client speaks the same wire API (the neptune and docdb clients send RDS
+Actions signed as rds). Such a fixture must call only operations that model
+binds, but is not required to call all of them: only a model's own fixture
+(no "model" key) carries the every-operation rule. Borrowing fixtures run in a
+separate pair of binaries so they cannot disturb the model's own fixture.
 """
 import json
 import os
@@ -70,6 +77,15 @@ def main(selected=None):
     if selected:
         fixtures = [f for f in fixtures if f.stem in selected]
     assert fixtures, 'no catalog fixtures'
+    borrowed = [f for f in fixtures if 'model' in json.loads(f.read_text())]
+    own = [f for f in fixtures if f not in borrowed]
+    for group in (own, borrowed):
+        if group:
+            run_group(group)
+    print('Catalog fixture lifecycles passed for', ', '.join(f.stem for f in fixtures))
+
+
+def run_group(fixtures):
     with tempfile.TemporaryDirectory(prefix='tcsim-fixture-a-') as a_dir, tempfile.TemporaryDirectory(prefix='tcsim-fixture-b-') as b_dir:
         a, b = Team(a_dir), Team(b_dir)
         a.start()
@@ -83,31 +99,32 @@ def main(selected=None):
             states = {}
             for path in fixtures:
                 fixture = json.loads(path.read_text())
-                model = path.stem
-                assert model in services, f'{model} fixture has no catalog service'
+                model = fixture.get('model', path.stem)
+                assert model in services, f'{path.stem} fixture has no catalog service {model}'
                 saved, called = {}, set()
                 first = fixture['steps'][0]
                 # Query services answer AccessDenied; JSON and REST services
                 # AccessDeniedException. A fixture names its code in "denied".
-                denied = {**first, 'error': fixture.get('denied', 'AccessDeniedException'), 'status': 403}
+                denied = {**first, 'error': fixture.get('denied', 'AccessDeniedException'), 'status': fixture.get('denied_status', 403)}
                 denied.pop('save', None)
                 denied.pop('expect', None)
                 run_steps(a, fixture, [denied], {}, set(), token=nobody)
                 run_steps(a, fixture, fixture['steps'], saved, called)
                 run_steps(b, fixture, fixture.get('isolation', []), {}, set())
-                states[model] = (fixture, saved, called)
+                states[path.stem] = (fixture, saved, called)
             a.stop()
             a.start()
-            for model, (fixture, saved, called) in states.items():
+            for name, (fixture, saved, called) in states.items():
                 run_steps(a, fixture, fixture.get('after_restart', []), saved, called)
                 run_steps(a, fixture, fixture.get('cleanup', []), saved, called)
-                missing = set(services[model]['operations']) - called
-                assert not missing, f'{model} bound operations were not exercised: {sorted(missing)}'
+                bound = set(services[fixture.get('model', name)]['operations'])
+                assert called <= bound, f'{name} called operations the model does not bind: {sorted(called - bound)}'
+                missing = bound - called
+                assert 'model' in fixture or not missing, f'{name} bound operations were not exercised: {sorted(missing)}'
         finally:
             for team in (a, b):
                 if team.process is not None:
                     team.stop()
-    print('Catalog fixture lifecycles passed for', ', '.join(f.stem for f in fixtures))
 
 
 if __name__ == '__main__':

@@ -1,0 +1,680 @@
+{
+ "components": {
+  "schemas": {
+   "AgentOrchestrationConfig": {
+    "additionalProperties": false,
+    "properties": {
+     "profilingEnabled": {
+      "type": "boolean"
+     }
+    },
+    "required": [
+     "profilingEnabled"
+    ],
+    "type": "object"
+   },
+   "AggregatedProfileTime": {
+    "additionalProperties": false,
+    "properties": {
+     "period": {
+      "enum": [
+       "PT5M",
+       "PT1H",
+       "P1D"
+      ],
+      "type": "string"
+     },
+     "start": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     }
+    },
+    "type": "object"
+   },
+   "ProfilingGroupDescription": {
+    "additionalProperties": false,
+    "properties": {
+     "agentOrchestrationConfig": {
+      "$ref": "#/components/schemas/AgentOrchestrationConfig"
+     },
+     "arn": {
+      "type": "string"
+     },
+     "computePlatform": {
+      "enum": [
+       "Default",
+       "AWSLambda"
+      ],
+      "type": "string"
+     },
+     "createdAt": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "name": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+     },
+     "profilingStatus": {
+      "$ref": "#/components/schemas/ProfilingStatus"
+     },
+     "tags": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "updatedAt": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     }
+    },
+    "type": "object"
+   },
+   "ProfilingStatus": {
+    "additionalProperties": false,
+    "properties": {
+     "latestAgentOrchestratedAt": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "latestAgentProfileReportedAt": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "latestAggregatedProfile": {
+      "$ref": "#/components/schemas/AggregatedProfileTime"
+     }
+    },
+    "type": "object"
+   }
+  }
+ },
+ "info": {
+  "description": "Bounded simulator subset of the official Amazon CodeGuru Profiler API (2019-07-18). Every other official operation returns HTTP 501 UnknownOperationException. Profiling groups are stored configuration records: no agent ever connects, so ConfigureAgent, PostAgentProfile, GetProfile, ListProfileTimes, BatchGetFrameMetricData, GetRecommendations, ListFindingsReports, GetFindingsReportAccountSummary and SubmitFeedback return UnknownOperationException with HTTP 501, and a group never reports a profilingStatus. The agent orchestration setting is stored without any agent reading it. Notification channels (AddNotificationChannels, GetNotificationConfiguration, RemoveNotificationChannel) and resource-based permissions (PutPermission, GetPolicy, RemovePermission) are not implemented: they are stored beside the group with revision tokens the engine does not model, so those operations return UnknownOperationException with HTTP 501. ListProfilingGroups returns both profilingGroupNames and profilingGroups in every response, whatever includeDescription says, where AWS returns only the one that matches it. The compute platform defaults to Default, the agent orchestration setting is absent unless supplied, and the local limit is 100 profiling groups per Region. Tags apply to profiling groups by ARN (arn:aws:codeguru-profiler:region:account:profilingGroup/name). CodeGuru Reviewer and CodeGuru Security are separate services and are not served.",
+  "title": "Amazon CodeGuru Profiler (simulator catalog)",
+  "version": "2019-07-18"
+ },
+ "openapi": "3.1.0",
+ "paths": {
+  "/profilingGroups": {
+   "get": {
+    "operationId": "codeguruprofilerListProfilingGroups",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "codeguru-profiler"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "includeDescription",
+      "schema": {
+       "type": "boolean"
+      }
+     },
+     {
+      "in": "query",
+      "name": "maxResults",
+      "schema": {
+       "maximum": 1000,
+       "minimum": 1,
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "nextToken",
+      "schema": {
+       "maxLength": 64,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "nextToken": {
+           "maxLength": 64,
+           "minLength": 1,
+           "type": "string"
+          },
+          "profilingGroupNames": {
+           "items": {
+            "maxLength": 255,
+            "minLength": 1,
+            "type": "string"
+           },
+           "type": "array"
+          },
+          "profilingGroups": {
+           "items": {
+            "$ref": "#/components/schemas/ProfilingGroupDescription"
+           },
+           "type": "array"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListProfilingGroups",
+    "tags": [
+     "Amazon CodeGuru Profiler"
+    ]
+   },
+   "post": {
+    "operationId": "codeguruprofilerCreateProfilingGroup",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "codeguru-profiler"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "clientToken",
+      "schema": {
+       "maxLength": 64,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "agentOrchestrationConfig": {
+          "$ref": "#/components/schemas/AgentOrchestrationConfig"
+         },
+         "computePlatform": {
+          "enum": [
+           "Default",
+           "AWSLambda"
+          ],
+          "type": "string"
+         },
+         "profilingGroupName": {
+          "maxLength": 255,
+          "minLength": 1,
+          "type": "string"
+         },
+         "tags": {
+          "additionalProperties": {
+           "type": "string"
+          },
+          "type": "object"
+         }
+        },
+        "required": [
+         "profilingGroupName"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ProfilingGroupDescription"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateProfilingGroup",
+    "tags": [
+     "Amazon CodeGuru Profiler"
+    ]
+   }
+  },
+  "/profilingGroups/{profilingGroupName}": {
+   "delete": {
+    "operationId": "codeguruprofilerDeleteProfilingGroup",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "codeguru-profiler"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "profilingGroupName",
+      "required": true,
+      "schema": {
+       "maxLength": 255,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteProfilingGroup",
+    "tags": [
+     "Amazon CodeGuru Profiler"
+    ]
+   },
+   "get": {
+    "operationId": "codeguruprofilerDescribeProfilingGroup",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "codeguru-profiler"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "profilingGroupName",
+      "required": true,
+      "schema": {
+       "maxLength": 255,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ProfilingGroupDescription"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DescribeProfilingGroup",
+    "tags": [
+     "Amazon CodeGuru Profiler"
+    ]
+   },
+   "put": {
+    "operationId": "codeguruprofilerUpdateProfilingGroup",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "codeguru-profiler"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "profilingGroupName",
+      "required": true,
+      "schema": {
+       "maxLength": 255,
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "agentOrchestrationConfig": {
+          "$ref": "#/components/schemas/AgentOrchestrationConfig"
+         }
+        },
+        "required": [
+         "agentOrchestrationConfig"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ProfilingGroupDescription"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UpdateProfilingGroup",
+    "tags": [
+     "Amazon CodeGuru Profiler"
+    ]
+   }
+  },
+  "/tags/{resourceArn}": {
+   "delete": {
+    "operationId": "codeguruprofilerUntagResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "codeguru-profiler"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceArn",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "tagKeys",
+      "schema": {
+       "items": {
+        "type": "string"
+       },
+       "type": "array"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UntagResource",
+    "tags": [
+     "Amazon CodeGuru Profiler"
+    ]
+   },
+   "get": {
+    "operationId": "codeguruprofilerListTagsForResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "codeguru-profiler"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceArn",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "tags": {
+           "additionalProperties": {
+            "type": "string"
+           },
+           "type": "object"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListTagsForResource",
+    "tags": [
+     "Amazon CodeGuru Profiler"
+    ]
+   },
+   "post": {
+    "operationId": "codeguruprofilerTagResource",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "codeguru-profiler"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "resourceArn",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "tags": {
+          "additionalProperties": {
+           "type": "string"
+          },
+          "type": "object"
+         }
+        },
+        "required": [
+         "tags"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "TagResource",
+    "tags": [
+     "Amazon CodeGuru Profiler"
+    ]
+   }
+  }
+ },
+ "servers": [
+  {
+   "description": "This simulator only",
+   "url": "/"
+  }
+ ],
+ "tags": [
+  {
+   "description": "Bounded simulator subset of the official Amazon CodeGuru Profiler API (2019-07-18). Every other official operation returns HTTP 501 UnknownOperationException. Profiling groups are stored configuration records: no agent ever connects, so ConfigureAgent, PostAgentProfile, GetProfile, ListProfileTimes, BatchGetFrameMetricData, GetRecommendations, ListFindingsReports, GetFindingsReportAccountSummary and SubmitFeedback return UnknownOperationException with HTTP 501, and a group never reports a profilingStatus. The agent orchestration setting is stored without any agent reading it. Notification channels (AddNotificationChannels, GetNotificationConfiguration, RemoveNotificationChannel) and resource-based permissions (PutPermission, GetPolicy, RemovePermission) are not implemented: they are stored beside the group with revision tokens the engine does not model, so those operations return UnknownOperationException with HTTP 501. ListProfilingGroups returns both profilingGroupNames and profilingGroups in every response, whatever includeDescription says, where AWS returns only the one that matches it. The compute platform defaults to Default, the agent orchestration setting is absent unless supplied, and the local limit is 100 profiling groups per Region. Tags apply to profiling groups by ARN (arn:aws:codeguru-profiler:region:account:profilingGroup/name). CodeGuru Reviewer and CodeGuru Security are separate services and are not served.",
+   "name": "Amazon CodeGuru Profiler"
+  }
+ ],
+ "x-simulator-source": {
+  "package": "botocore",
+  "version": "1.41.6",
+  "file": "botocore/data/codeguruprofiler/2019-07-18/service-2.json",
+  "sha256": "6f0b631a27b05cc7161be74d5861bcc7ddfc6691f3a0012abdca7a21c89a1fb7",
+  "license": "Apache-2.0"
+ }
+}
