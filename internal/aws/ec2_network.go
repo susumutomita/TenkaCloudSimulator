@@ -220,6 +220,7 @@ type EC2NetworkSnapshot struct {
 	PublicRoute                                                       bool
 	SecurityGroupIDs                                                  []string
 	Ingress                                                           []EC2IngressRule
+	vpcID                                                             string
 }
 
 // AllowsIngress is policy admission, not evidence of successful HTTP or a VM.
@@ -261,7 +262,7 @@ func (s *EC2NetworkStore) Snapshot(ctx context.Context, region, owner, subnetID 
 	if !ok || vpc.Kind != "AWS::EC2::VPC" {
 		return out, fmt.Errorf("unknown VPC")
 	}
-	out = EC2NetworkSnapshot{Region: region, StackID: owner, SubnetID: subnetID, VPCCIDR: vpc.CIDR, SubnetCIDR: sub.CIDR, SecurityGroupIDs: append([]string{}, groups...)}
+	out = EC2NetworkSnapshot{Region: region, StackID: owner, SubnetID: subnetID, VPCCIDR: vpc.CIDR, SubnetCIDR: sub.CIDR, vpcID: vpc.ID, SecurityGroupIDs: append([]string{}, groups...)}
 	prefix, err := netip.ParsePrefix(sub.CIDR)
 	vpcPrefix, vpcErr := netip.ParsePrefix(vpc.CIDR)
 	if err != nil || vpcErr != nil || !prefix.Addr().Is4() || !vpcPrefix.Addr().Is4() || prefix.Bits() < 16 || prefix.Bits() > 28 || vpcPrefix.Bits() > prefix.Bits() || !vpcPrefix.Contains(prefix.Addr()) {
