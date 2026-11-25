@@ -62,6 +62,64 @@ function root(document,name){
   if(node?.namespaceURI!==namespace||node.localName!==name)invalid();
   return node;
 }
+// DescribeSecurityGroups is a native, regional summary. Validate its bounded
+// wire shape before the client selects one VPC; a bad or partial response isn't empty.
+const groupId=/^sg-[0-9a-f]{17}$/;
+const vpcId=/^vpc-[0-9a-f]{17}$/;
+function exactFields(node,names){
+  const children=[...(node?.children??[])];
+  if(children.some(n=>n.namespaceURI!==namespace||!names.includes(n.localName))||
+     (!children.length&&node?.textContent?.trim())||
+     [...(node?.childNodes??[])].some(n=>(n.nodeType===3||n.nodeType===4)&&n.textContent.trim()))invalid();
+}
+function members(node,name,max,required=true){
+  const set=one(node,name,required);
+  exactFields(set,['item']);
+  const items=nodes(set,'item');
+  if(items.length>max)invalid();
+  return items;
+}
+function groupCIDR(text){
+  const parts=/^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})\/(0|[1-9]|[12]\d|3[0-2])$/.exec(text);
+  if(!parts||parts.slice(1,5).some(n=>Number(n)>255||String(Number(n))!==n))invalid();
+  const address=parts.slice(1,5).reduce((n,octet)=>n*256+Number(octet),0);
+  if(address % (2 ** (32-Number(parts[5]))) !== 0)invalid();
+  return text;
+}
+function groupPort(n,name){
+  const text=value(n,name,true), port=Number(text);
+  if(!/^[1-9]\d{0,4}$/.test(text)||port>65535)invalid();
+  return port;
+}
+function groupIngress(rule){
+  exactFields(rule,['ipProtocol','fromPort','toPort','ipRanges']);
+  const protocol=value(rule,'ipProtocol',true), from=groupPort(rule,'fromPort'), to=groupPort(rule,'toPort');
+  const ranges=members(rule,'ipRanges',1);
+  if(protocol!=='tcp'||from>to||ranges.length!==1)invalid();
+  exactFields(ranges[0],['cidrIp']);
+  return {from,to,cidr:groupCIDR(value(ranges[0],'cidrIp',true))};
+}
+function securityGroupRow(node){
+  exactFields(node,['ownerId','groupId','groupDescription','vpcId','ipPermissions','tagSet']);
+  const id=value(node,'groupId',true), vpc=value(node,'vpcId',true), description=value(node,'groupDescription',true);
+  if(!groupId.test(id)||!vpcId.test(vpc)||!description||value(node,'ownerId',true)!=='000000000000')invalid();
+  const ingress=members(node,'ipPermissions',60).map(groupIngress);
+  const tags=members(node,'tagSet',50,false).map(tag=>{
+    exactFields(tag,['key','value']);
+    return {key:value(tag,'key',true),value:value(tag,'value',true)};
+  });
+  if(tags.some(tag=>!tag.key)||new Set(tags.map(tag=>tag.key)).size!==tags.length)invalid();
+  return {id,vpc,description,ingress,tags};
+}
+export function parseEC2SecurityGroups(document,selectedVPC){
+  if(!vpcId.test(selectedVPC))invalid();
+  const response=root(document,'DescribeSecurityGroupsResponse');
+  exactFields(response,['requestId','securityGroupInfo']);
+  if(!value(response,'requestId',true))invalid();
+  const groups=members(response,'securityGroupInfo',1000).map(securityGroupRow);
+  if(new Set(groups.map(group=>group.id)).size!==groups.length)invalid();
+  return groups.filter(group=>group.vpc===selectedVPC);
+}
 export function parseCreateVpc(document){
   const row=vpcRow(one(root(document,'CreateVpcResponse'),'vpc',true));
   if(!row.id)invalid();

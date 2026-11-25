@@ -18261,6 +18261,131 @@
       "limits": "Classification abstraction of persistentNIC.unhandled/receive on the persistent VM NIC only. Byte parsing, checksum and TCP option validation, ARP field validation, registry routing internals, queueing, budgets other than not charging dropped frames, ordinary single-exchange transports, liveness and full Go refinement are not modeled. Dropping grants no capability; it is not proof that a guest cannot exhaust host CPU by flooding."
     },
     {
+      "id": "EC2SecurityGroupConsoleEpoch",
+      "model": "formal/EC2SecurityGroupConsoleEpoch.tla",
+      "config": "formal/EC2SecurityGroupConsoleEpoch.cfg",
+      "bounds": "Two VPC labels, one pending reply, two view generations, independent Boolean signed-in/advertised/handoff/managed witnesses, four abstract response categories.",
+      "properties": [
+        "TypeOK",
+        "EligibleRequest",
+        "ReadOnlyOperation",
+        "OnlyCurrentScope",
+        "OnlySelectedVPC",
+        "FailuresNeverEmpty"
+      ],
+      "limits": "Finite presentation projection only. Region and identity transitions share the epoch label with VPC selection. Does not prove Access or EC2 IAM, request/abort signal implementation, XML validation, DOM, packet filtering, network liveness, SQL or Go/React refinement.",
+      "source_scope": [
+        "internal/server/server.go",
+        "internal/server/web/app.js",
+        "tools/console/src/ec2-readonly.jsx",
+        "tools/console/src/ec2-response.mjs",
+        "tools/console/src/ec2-security-groups.mjs",
+        "tools/console/src/ec2-vpc-security-groups.jsx",
+        "tools/console/src/main.jsx"
+      ],
+      "mutants": [
+        {
+          "id": "UnsignedRequest",
+          "edits": [
+            {
+              "old": "Eligible(g) == g.trusted /\\ g.offered /\\ ~g.handoff /\\ g.managed",
+              "new": "Eligible(g) == TRUE /\\ g.offered /\\ ~g.handoff /\\ g.managed",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "EligibleRequest"
+        },
+        {
+          "id": "UnadvertisedRequest",
+          "edits": [
+            {
+              "old": "Eligible(g) == g.trusted /\\ g.offered /\\ ~g.handoff /\\ g.managed",
+              "new": "Eligible(g) == g.trusted /\\ TRUE /\\ ~g.handoff /\\ g.managed",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "EligibleRequest"
+        },
+        {
+          "id": "HandoffRequest",
+          "edits": [
+            {
+              "old": "Eligible(g) == g.trusted /\\ g.offered /\\ ~g.handoff /\\ g.managed",
+              "new": "Eligible(g) == g.trusted /\\ g.offered /\\ TRUE /\\ g.managed",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "EligibleRequest"
+        },
+        {
+          "id": "NativeVPCRequest",
+          "edits": [
+            {
+              "old": "Eligible(g) == g.trusted /\\ g.offered /\\ ~g.handoff /\\ g.managed",
+              "new": "Eligible(g) == g.trusted /\\ g.offered /\\ ~g.handoff /\\ TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "EligibleRequest"
+        },
+        {
+          "id": "WrongOperation",
+          "edits": [
+            {
+              "old": "/\\ action = \"DescribeSecurityGroups\"",
+              "new": "/\\ TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadOnlyOperation"
+        },
+        {
+          "id": "LateReply",
+          "edits": [
+            {
+              "old": "IF request.scope.epoch = selected.epoch",
+              "new": "IF TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "OnlyCurrentScope"
+        },
+        {
+          "id": "OldRowsPersist",
+          "edits": [
+            {
+              "old": "/\\ shown' = {} (* ClearScope *)",
+              "new": "/\\ UNCHANGED shown (* ClearScope *)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "OnlyCurrentScope"
+        },
+        {
+          "id": "WrongVPC",
+          "edits": [
+            {
+              "old": "IF outcome = \"rows\" /\\ vpc # request.scope.target",
+              "new": "IF FALSE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "OnlySelectedVPC"
+        },
+        {
+          "id": "RefusalAsEmpty",
+          "edits": [
+            {
+              "old": "THEN \"empty\" ELSE outcome",
+              "new": "THEN \"empty\" ELSE IF outcome = \"denied\" THEN \"empty\" ELSE outcome",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "FailuresNeverEmpty"
+        }
+      ]
+    },
+    {
       "id": "EC2SecurityGroupRead",
       "model": "formal/EC2SecurityGroupRead.tla",
       "config": "formal/EC2SecurityGroupRead.cfg",

@@ -1,145 +1,237 @@
 {
   "version": 1,
-  "base_sha": "c67e16f71237ec2282c37ef0fe70643716ce63c9",
+  "base_sha": "51f7564bb8424c902f2db6e8a4039c57d601fd34",
   "changes": [
     {
+      "path": ".github/workflows/ci.yml",
+      "sha256": "4b723df4fb73e3d7b9098a240b2b5622b33c1581baf97c0d172bc1cd7be7b3cf",
+      "disposition": "formal-infrastructure",
+      "reason": "Pins the selected-VPC model and checks or runs the focused readback contract; no simulator runtime change.",
+      "models": []
+    },
+    {
       "path": "README.md",
-      "sha256": "66fd00c381f1794db655e0a80506dc8746ca6803c141f1a14e10d55f487b2a2e",
+      "sha256": "c9e8e5a56c901e100bd88dc0d2d377c0b0202a03c21fffa660e58bb5e203dbc7",
       "disposition": "documentation",
-      "reason": "Explain the public, bounded EC2 security-group read and explicitly exclude edits, console and network effects.",
+      "reason": "Documents the existing authenticated native group read from the selected VPC details; no writes or packet proof.",
       "models": []
     },
     {
       "path": "docs/design/0001-go-standalone.md",
-      "sha256": "d88cd2a039118496e2f7847c847871b606404f85c69d2d6b20c097e105987037",
+      "sha256": "91e9c07efab42dde2c2eed17714edb42672b19a63e5d9060ed53d25ac2159a58",
       "disposition": "documentation",
-      "reason": "Explain the public, bounded EC2 security-group read and explicitly exclude edits, console and network effects.",
+      "reason": "Documents the existing authenticated native group read from the selected VPC details; no writes or packet proof.",
       "models": []
     },
     {
       "path": "docs/ec2-read-discovery.md",
-      "sha256": "c2e0deee6984c335aaa923ded57ac7b5404789d444a675a649b5166075b3acfa",
+      "sha256": "f0ae121aed204772eea415aa9d4b2e10ba8a746df4ccc2033d5fce4b12abf113",
       "disposition": "documentation",
-      "reason": "Explain the public, bounded EC2 security-group read and explicitly exclude edits, console and network effects.",
+      "reason": "Documents the existing authenticated native group read from the selected VPC details; no writes or packet proof.",
       "models": []
     },
     {
-      "path": "formal/EC2SecurityGroupRead.cfg",
-      "sha256": "8e1f699ef194ca3b9654909ba3c03b80e77ca207efcee2faf83d292565c5898e",
+      "path": "formal/EC2SecurityGroupConsoleEpoch.cfg",
+      "sha256": "60336afe1828b2c7a85420bb43723aba5d83cf70a8cd8107b16893f4efe83eb4",
       "disposition": "modeled",
-      "reason": "Finite domain and checked invariants for an atomic observation of the new read.",
+      "reason": "Adds the finite selected-VPC presentation model and checked invariants.",
       "models": [
         {
-          "id": "EC2SecurityGroupRead",
+          "id": "EC2SecurityGroupConsoleEpoch",
           "properties": [
-            "OperationAdmission",
-            "AuthorizedRegionalRead",
-            "CanonicalGroup",
-            "CanonicalParent",
-            "CurrentIngress",
-            "FaithfulXML"
+            "EligibleRequest",
+            "ReadOnlyOperation",
+            "OnlyCurrentScope",
+            "OnlySelectedVPC",
+            "FailuresNeverEmpty"
           ],
-          "limits": "One symbolic atomic observation only; does not prove actual IAM parsing, SQLite snapshots, XML Code Points/serialization, quota, HTTP error shapes, TCP enforcement, full suite coverage, or Go refinement. Native tests cover the specific implementation contracts."
+          "limits": "Model only covers the declared finite presentation projection, not real Access/IAM, XML/DOM, abort transport, request delivery, concurrency, packet paths, SQL, or Go/React refinement."
         }
       ]
     },
     {
-      "path": "formal/EC2SecurityGroupRead.tla",
-      "sha256": "d1e74e3f4870834d7c7faa114eaed2a80e6660c713a0363ac8cea197c0fa24a5",
+      "path": "formal/EC2SecurityGroupConsoleEpoch.tla",
+      "sha256": "6feb19bb654e28e048932d0472072789f1f7ff350b61d0ea9e50590d6c0f1d70",
       "disposition": "modeled",
-      "reason": "Model witnesses for scope, typed lineage, canonical current rule provenance and XML-fidelity admission.",
+      "reason": "Adds the finite selected-VPC presentation model and checked invariants.",
       "models": [
         {
-          "id": "EC2SecurityGroupRead",
+          "id": "EC2SecurityGroupConsoleEpoch",
           "properties": [
-            "OperationAdmission",
-            "AuthorizedRegionalRead",
-            "CanonicalGroup",
-            "CanonicalParent",
-            "CurrentIngress",
-            "FaithfulXML"
+            "EligibleRequest",
+            "ReadOnlyOperation",
+            "OnlyCurrentScope",
+            "OnlySelectedVPC",
+            "FailuresNeverEmpty"
           ],
-          "limits": "One symbolic atomic observation only; does not prove actual IAM parsing, SQLite snapshots, XML Code Points/serialization, quota, HTTP error shapes, TCP enforcement, full suite coverage, or Go refinement. Native tests cover the specific implementation contracts."
+          "limits": "Model only covers the declared finite presentation projection, not real Access/IAM, XML/DOM, abort transport, request delivery, concurrency, packet paths, SQL, or Go/React refinement."
         }
       ]
     },
     {
       "path": "formal/models.json",
-      "sha256": "5b6518b5c5fa4c6b181b595cd6833a4ef9c3822962cf7a47a5dc8d2fddd14c0c",
+      "sha256": "41d251f9f070ec1987d83aaa51e712c830894b89617987885edef5fbaf0ac9eb",
       "disposition": "formal-infrastructure",
-      "reason": "Register and pin the new finite model scope, properties and exact sensitivity controls.",
+      "reason": "Pins the selected-VPC model and checks or runs the focused readback contract; no simulator runtime change.",
       "models": []
     },
     {
-      "path": "internal/aws/ec2_describe_security_groups_contract_test.go",
-      "sha256": "be1f708d92db55ff9a27f5c5b3c35eec6a34a6273f9238886b0d536230aa3dc4",
+      "path": "internal/server/ec2_security_groups_console_test.go",
+      "sha256": "38d8adb1351245d2592fd75fa20e49a74b9037fcf704e710d920bb8c4dc41c72",
       "disposition": "test-support",
-      "reason": "Exercise the native Gateway with real stored CloudFormation groups, exact XML, a current rule change, authorized regional reads and read-only refusal of lossy legacy text.",
+      "reason": "Verifies this bounded presentation and signed-in native read through focused tests; no application-runtime change.",
       "models": []
     },
     {
-      "path": "internal/aws/ec2_read.go",
-      "sha256": "6aabb85eaa53f50ba6de36440db74f1c4ab804e146c9820065d98b819d2b122c",
+      "path": "internal/server/server.go",
+      "sha256": "835d538b84f9137068cfe158bc33d1a3d5b023a20e490ee360b0a33dfefdab66",
       "disposition": "modeled",
-      "reason": "Apply existing request scope and bound the regional selection to typed stack ownership before returning the projection.",
+      "reason": "Advertises a read-only pane only for an ordinary trusted authenticated session; native IAM unchanged.",
       "models": [
         {
-          "id": "EC2SecurityGroupRead",
+          "id": "EC2SecurityGroupConsoleEpoch",
           "properties": [
-            "OperationAdmission",
-            "AuthorizedRegionalRead",
-            "CanonicalGroup"
+            "EligibleRequest"
           ],
-          "limits": "One symbolic atomic observation only; does not prove actual IAM parsing, SQLite snapshots, XML Code Points/serialization, quota, HTTP error shapes, TCP enforcement, full suite coverage, or Go refinement. Native tests cover the specific implementation contracts."
+          "limits": "Model only covers the declared finite presentation projection, not real Access/IAM, XML/DOM, abort transport, request delivery, concurrency, packet paths, SQL, or Go/React refinement."
         }
       ]
     },
     {
-      "path": "internal/aws/ec2_security_groups_read.go",
-      "sha256": "f86cbe77cd29750afe9fcae83746ebef9c1d0c6e6fc7d9043c568195e6756c14",
+      "path": "internal/server/web/app.js",
+      "sha256": "341bc8f8192eeffc00f68904787bccdc700047d35ae5aad9d2c540a95baf26fc",
       "disposition": "modeled",
-      "reason": "Validate canonical parent/group storage and project only current valid TCP/IPv4 ingress and losslessly representable metadata.",
+      "reason": "Rebuilt bundled equivalent of the selected-VPC console workflow; no other endpoint permissions changed.",
       "models": [
         {
-          "id": "EC2SecurityGroupRead",
+          "id": "EC2SecurityGroupConsoleEpoch",
           "properties": [
-            "CanonicalGroup",
-            "CanonicalParent",
-            "CurrentIngress",
-            "FaithfulXML"
+            "EligibleRequest",
+            "ReadOnlyOperation",
+            "OnlyCurrentScope",
+            "OnlySelectedVPC",
+            "FailuresNeverEmpty"
           ],
-          "limits": "One symbolic atomic observation only; does not prove actual IAM parsing, SQLite snapshots, XML Code Points/serialization, quota, HTTP error shapes, TCP enforcement, full suite coverage, or Go refinement. Native tests cover the specific implementation contracts."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/ec2_vpc.go",
-      "sha256": "0253a17b7862107b8af0897bebb67537e2f461039342bc7dada9deba84df6a2a",
-      "disposition": "modeled",
-      "reason": "Register the read action with the existing EC2 admission and IAM action lookup; no mutation capability added.",
-      "models": [
-        {
-          "id": "EC2SecurityGroupRead",
-          "properties": [
-            "OperationAdmission",
-            "AuthorizedRegionalRead"
-          ],
-          "limits": "One symbolic atomic observation only; does not prove actual IAM parsing, SQLite snapshots, XML Code Points/serialization, quota, HTTP error shapes, TCP enforcement, full suite coverage, or Go refinement. Native tests cover the specific implementation contracts."
+          "limits": "Model only covers the declared finite presentation projection, not real Access/IAM, XML/DOM, abort transport, request delivery, concurrency, packet paths, SQL, or Go/React refinement."
         }
       ]
     },
     {
       "path": "scripts/formal_model_gate.py",
-      "sha256": "dc55ebf45a1ffa5c6f548e6d7af8e4181497c5121b69c563bd3b678d614fd180",
+      "sha256": "9aeb535b0f35b019aad1d41e9f7900e2a33437e4b73e45af48c5e96e591927a2",
       "disposition": "formal-infrastructure",
-      "reason": "Register and pin the new finite model scope, properties and exact sensitivity controls.",
+      "reason": "Pins the selected-VPC model and checks or runs the focused readback contract; no simulator runtime change.",
       "models": []
     },
     {
       "path": "scripts/test-formal-gate.py",
-      "sha256": "7f4ceebabb591b4032ba1f391c568cd4c1d149e00931854166564e6cabc8ef50",
+      "sha256": "8ccdaeaf1257953f518aaab9e00b83028653cbe624a54d5aff2cbd63da7f3e7d",
       "disposition": "formal-infrastructure",
-      "reason": "Extend exact independent registry expectations with the new model and two already-registered models omitted by the previous literal; no changes to their models or the equality assertion.",
+      "reason": "Pins the selected-VPC model and checks or runs the focused readback contract; no simulator runtime change.",
+      "models": []
+    },
+    {
+      "path": "tools/console/bundle-digests.json",
+      "sha256": "ed3d5a6a7ff1da1e24e1f8c40dac36f5dadb42ca642c8566ebc88f04dc10ccc0",
+      "disposition": "presentation",
+      "reason": "Records the pinned Console bundle inputs and output digests; no backend authority change.",
+      "models": []
+    },
+    {
+      "path": "tools/console/bundle-inputs.json",
+      "sha256": "7d276ccc246e30c6bba7b1edc406993f2134323eb965aba93fdfa2066b29a2a3",
+      "disposition": "presentation",
+      "reason": "Records the pinned Console bundle inputs and output digests; no backend authority change.",
+      "models": []
+    },
+    {
+      "path": "tools/console/src/ec2-readonly.jsx",
+      "sha256": "a409c7342d83a800e8e861064736408c5e3ad21452a7dd3e83928071912135be",
+      "disposition": "modeled",
+      "reason": "Mounts the pane only for the active selected VPC and scoping key.",
+      "models": [
+        {
+          "id": "EC2SecurityGroupConsoleEpoch",
+          "properties": [
+            "EligibleRequest",
+            "OnlyCurrentScope"
+          ],
+          "limits": "Model only covers the declared finite presentation projection, not real Access/IAM, XML/DOM, abort transport, request delivery, concurrency, packet paths, SQL, or Go/React refinement."
+        }
+      ]
+    },
+    {
+      "path": "tools/console/src/ec2-response.mjs",
+      "sha256": "da6581342340afd19ba29d140418616d5a2713d474788fb69af1434360d76dd2",
+      "disposition": "modeled",
+      "reason": "Validates the native bounded read and retains records for exactly the selected VPC.",
+      "models": [
+        {
+          "id": "EC2SecurityGroupConsoleEpoch",
+          "properties": [
+            "OnlySelectedVPC",
+            "FailuresNeverEmpty"
+          ],
+          "limits": "Model only covers the declared finite presentation projection, not real Access/IAM, XML/DOM, abort transport, request delivery, concurrency, packet paths, SQL, or Go/React refinement."
+        }
+      ]
+    },
+    {
+      "path": "tools/console/src/ec2-security-groups.mjs",
+      "sha256": "2e5a759af1c4dc4b800863b1f5832892c7844c3b76b0cf67c6c3bca5114d284f",
+      "disposition": "modeled",
+      "reason": "Requires the advertised signed-in scope and sends only the regional native read, suppressing aborted responses.",
+      "models": [
+        {
+          "id": "EC2SecurityGroupConsoleEpoch",
+          "properties": [
+            "EligibleRequest",
+            "ReadOnlyOperation",
+            "OnlyCurrentScope"
+          ],
+          "limits": "Model only covers the declared finite presentation projection, not real Access/IAM, XML/DOM, abort transport, request delivery, concurrency, packet paths, SQL, or Go/React refinement."
+        }
+      ]
+    },
+    {
+      "path": "tools/console/src/ec2-vpc-security-groups.jsx",
+      "sha256": "f7b7714e06899987696ca9227a9f2b0084ada9f892b924004d567746f372d494",
+      "disposition": "modeled",
+      "reason": "Shows current selection only and distinguishes denied, failed and valid empty reads.",
+      "models": [
+        {
+          "id": "EC2SecurityGroupConsoleEpoch",
+          "properties": [
+            "EligibleRequest",
+            "OnlyCurrentScope",
+            "OnlySelectedVPC",
+            "FailuresNeverEmpty"
+          ],
+          "limits": "Model only covers the declared finite presentation projection, not real Access/IAM, XML/DOM, abort transport, request delivery, concurrency, packet paths, SQL, or Go/React refinement."
+        }
+      ]
+    },
+    {
+      "path": "tools/console/src/main.jsx",
+      "sha256": "a7fb97640d97631f00b9fd21e489213d0ced91a6472d201688402158992e877a",
+      "disposition": "modeled",
+      "reason": "Wires the exact authenticated capability into the VPC route and remounts on identity or region changes.",
+      "models": [
+        {
+          "id": "EC2SecurityGroupConsoleEpoch",
+          "properties": [
+            "EligibleRequest",
+            "OnlyCurrentScope"
+          ],
+          "limits": "Model only covers the declared finite presentation projection, not real Access/IAM, XML/DOM, abort transport, request delivery, concurrency, packet paths, SQL, or Go/React refinement."
+        }
+      ]
+    },
+    {
+      "path": "tools/console/test/ec2-security-groups.test.mjs",
+      "sha256": "8afa4995141aa470e61a2e2442e8ea65b1a27022bd5c93b16894b134159a3d7f",
+      "disposition": "presentation",
+      "reason": "Records the pinned Console bundle inputs and output digests; no backend authority change.",
       "models": []
     }
   ]
