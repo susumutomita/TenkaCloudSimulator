@@ -17,24 +17,30 @@ import Select from '@cloudscape-design/components/select';
 import Modal from '@cloudscape-design/components/modal';
 import Box from '@cloudscape-design/components/box';
 import {useLocale} from './i18n.jsx';
+import VPCSubnetFields from './ec2-vpc-subnet-fields.jsx';
+import {createVpcWithSubnet,vpcSubnetInputError} from './ec2-vpc-subnet.mjs';
 
 import {parseEC2Document,parseCreateVpc,parseDeleteVpc,parseEC2Error,createVpcParameters,VPC_NAME_LIMIT} from './ec2-response.mjs';
 
 const idCell=value=><span className="resource-identifier">{value||'—'}</span>;
-const blankVpc={name:'',cidr:''};
+const blankVpc={name:'',cidr:'',mode:'vpc-only',stackName:'',subnetCIDR:''};
 
 // Instances stay read-only. VPCs gain CreateVpc/DeleteVpc only when the server
 // advertises them, and only EC2-owned VPCs can be deleted here. Never infer
 // live guest health from stack metadata.
-export default function EC2Readonly({kind,region,request,sessionInstance,onSession,vpcLifecycle=false,onSaving=()=>{}}) {
+export default function EC2Readonly({kind,region,request,sessionInstance,onSession,vpcLifecycle=false,vpcSubnet=false,onSaving=()=>{}}) {
   const {t}=useLocale();
   const instance=kind==='ec2',manage=!instance&&vpcLifecycle;
   const [items,setItems]=useState([]),[loading,setLoading]=useState(false),[error,setError]=useState('');
   const [selected,setSelected]=useState([]),[filter,setFilter]=useState(''),[page,setPage]=useState(1);
   const [view,setView]=useState('list'),[form,setForm]=useState(blankVpc),[busy,setBusy]=useState(false),[formError,setFormError]=useState(''),[notice,setNotice]=useState('');
   const [deleting,setDeleting]=useState(null),[confirmation,setConfirmation]=useState(''),[deleteError,setDeleteError]=useState('');
-  const epoch=useRef(0),alive=useRef(true);
-  useEffect(()=>{alive.current=true;return()=>{alive.current=false;epoch.current++;onSaving(false);};},[]);
+  const epoch=useRef(0),alive=useRef(true),submitting=useRef(false),topology=useRef(null);
+  const heading=useRef(null), focusNext=useRef(false);
+  const paired=form.mode==='vpc-subnet';
+  function changeView(next){focusNext.current=true;setView(next);}
+  useEffect(()=>{if(focusNext.current){heading.current?.focus();focusNext.current=false;}},[view]);
+  useEffect(()=>{alive.current=true;return()=>{alive.current=false;epoch.current++;topology.current?.abort();onSaving(false);};},[]);
   useEffect(()=>{onSaving(busy);},[busy]);
   const headers={'Content-Type':'application/x-www-form-urlencoded','X-Simulator-Service':'ec2','X-Simulator-Region':region};
   async function load(select){
@@ -58,17 +64,38 @@ export default function EC2Readonly({kind,region,request,sessionInstance,onSessi
     return xml;
   }
   async function create(event){
-    event.preventDefault();if(busy)return;
+    event.preventDefault();if(busy||submitting.current)return;
     if(!form.cidr.trim()){setFormError(t('Enter an IPv4 CIDR block, such as 10.0.0.0/16.','IPv4 CIDR ブロックを入力してください (例: 10.0.0.0/16)。'));return;}
     if(form.name.length>VPC_NAME_LIMIT){setFormError(t('The Name tag can have up to 256 characters.','名前タグは 256 文字以内で入力してください。'));return;}
-    setBusy(true);setFormError('');
+    if(paired){
+      if(!vpcSubnet){setFormError(t('Only the signed-in simulator administrator can create a stack here.','ここでスタックを作成できるのは、サインイン済みのシミュレーター管理者だけです。'));return;}
+      const invalid=vpcSubnetInputError(form);
+      const messages={
+        stack:t('Enter a valid stack name that starts with a letter.','英字で始まる有効なスタック名を入力してください。'),
+        cidr:t('Enter IPv4 CIDRs between /16 and /28.','/16〜/28 の IPv4 CIDR を指定してください。'),
+        containment:t('The subnet CIDR must fit entirely inside the new VPC.','サブネットの CIDR が新しい VPC の範囲に収まるよう指定してください。'),
+        name:t('The Name tag must fit in 256 UTF-8 bytes.','名前タグは UTF-8 で 256 バイト以内にしてください。'),
+      };
+      if(invalid){setFormError(messages[invalid]);return;}
+    }
+    submitting.current=true;setBusy(true);setFormError('');
     try {
+      if(paired){
+        const handle=new AbortController();topology.current=handle;
+        const verified=await createVpcWithSubnet(request,region,form,{allowed:vpcSubnet,signal:handle.signal});
+        if(!alive.current||handle.signal.aborted)return;
+        changeView('list');setForm(blankVpc);setFilter('');
+        setNotice(t('CloudFormation stack and saved network verified: ','CloudFormation スタックと保存済みネットワークを確認: ')+form.stackName+' · '+verified.vpcId+' · '+verified.subnetId);
+        await load(verified.vpcId);
+        return;
+      }
       const vpc=parseCreateVpc(await mutate(createVpcParameters(form)));
       if(!alive.current)return;
-      setView('list');setForm(blankVpc);setFilter('');setNotice(t('You successfully created ','VPC を作成しました: ')+vpc.id);
+      changeView('list');setForm(blankVpc);setFilter('');setNotice(t('You successfully created ','VPC を作成しました: ')+vpc.id);
       await load(vpc.id);
-    }catch(e){if(alive.current)setFormError(e.message);}
-    finally{if(alive.current)setBusy(false);}
+    }catch(e){
+      if(alive.current)setFormError(paired?t('Check the CloudFormation stack before retrying. ','再試行前に CloudFormation のスタックを確認してください。 ')+e.message:e.message);
+    }finally{topology.current=null;submitting.current=false;if(alive.current)setBusy(false);}
   }
   async function remove(event){
     event.preventDefault();if(busy||!deleting)return;
@@ -88,21 +115,23 @@ export default function EC2Readonly({kind,region,request,sessionInstance,onSessi
   const filtered=items.filter(item=>Object.values(item).some(v=>String(v).toLocaleLowerCase().includes(filter.toLocaleLowerCase())));
   const detail=selected[0];
   const unavailable=t('Not available in this simulator.','このシミュレーターでは利用できません。');
-  if(manage&&view==='create')return <ContentLayout header={<Header variant="h1" description={t('Create an isolated virtual network with an IPv4 CIDR block. It is saved in this local simulator only.','IPv4 CIDR ブロックを持つ、分離された仮想ネットワークを作成します。このローカルシミュレーターにのみ保存されます。')}>{t('Create VPC','VPC を作成')}</Header>}>
-    <form onSubmit={create}><Form errorText={formError} actions={<SpaceBetween direction="horizontal" size="xs"><Button formAction="none" disabled={busy} onClick={()=>{setView('list');setFormError('');}}>{t('Cancel','キャンセル')}</Button><Button variant="primary" formAction="submit" loading={busy}>{t('Create VPC','VPC を作成')}</Button></SpaceBetween>}>
+  if(manage&&view==='create')return <ContentLayout header={<div ref={heading} tabIndex={-1}><Header variant="h1" description={t('Create an isolated virtual network with an IPv4 CIDR block. It is saved in this local simulator only.','IPv4 CIDR ブロックを持つ、分離された仮想ネットワークを作成します。このローカルシミュレーターにのみ保存されます。')}>{t('Create VPC','VPC を作成')}</Header></div>}>
+    <form onSubmit={create}><Form errorText={formError} actions={<SpaceBetween direction="horizontal" size="xs"><Button formAction="none" disabled={busy} onClick={()=>{changeView('list');setFormError('');}}>{t('Cancel','キャンセル')}</Button><Button variant="primary" formAction="submit" loading={busy}>{t('Create VPC','VPC を作成')}</Button></SpaceBetween>}>
       <SpaceBetween size="l"><Container header={<Header variant="h2">{t('VPC settings','VPC の設定')}</Header>}><SpaceBetween size="l">
-        <FormField label={t('Resources to create','作成するリソース')}><RadioGroup value="vpc-only" onChange={()=>{}} items={[{value:'vpc-only',label:t('VPC only','VPC のみ')},{value:'vpc-and-more',label:t('VPC and more','VPC など'),disabled:true,description:unavailable}]}/></FormField>
+        <VPCSubnetFields enabled={vpcSubnet} values={form} disabled={busy} change={(key,value)=>setForm(old=>({...old,[key]:value}))}/>
         <FormField label={t('Name tag - optional','名前タグ - オプション')} description={t("Creates a tag with a key of 'Name' and a value that you specify.","キーが「Name」で、指定した値を持つタグを作成します。")} constraintText={t('Up to 256 characters.','256 文字以内。')}><Input value={form.name} disabled={busy} placeholder="my-vpc-01" onChange={({detail})=>setForm({...form,name:detail.value})}/></FormField>
         <FormField label={t('IPv4 CIDR block','IPv4 CIDR ブロック')}><RadioGroup value="manual" onChange={()=>{}} items={[{value:'manual',label:t('IPv4 CIDR manual input','IPv4 CIDR の手動入力')},{value:'ipam',label:t('IPAM-allocated IPv4 CIDR block','IPAM で割り当てられた IPv4 CIDR ブロック'),disabled:true,description:unavailable}]}/></FormField>
         <FormField label={t('IPv4 CIDR','IPv4 CIDR')} constraintText={t('CIDR block size must be between /16 and /28.','CIDR ブロックのサイズは /16 から /28 の間である必要があります。')}><Input value={form.cidr} disabled={busy} placeholder="10.0.0.0/16" onChange={({detail})=>setForm({...form,cidr:detail.value})}/></FormField>
         <FormField label={t('IPv6 CIDR block','IPv6 CIDR ブロック')}><RadioGroup value="none" onChange={()=>{}} items={[{value:'none',label:t('No IPv6 CIDR block','IPv6 CIDR ブロックなし')},{value:'amazon',label:t('Amazon-provided IPv6 CIDR block','Amazon 提供の IPv6 CIDR ブロック'),disabled:true,description:unavailable}]}/></FormField>
         <FormField label={t('Tenancy','テナンシー')}><Select selectedOption={{value:'default',label:t('Default','デフォルト')}} onChange={()=>{}} options={[{value:'default',label:t('Default','デフォルト')},{value:'dedicated',label:t('Dedicated','専有'),disabled:true,description:unavailable}]}/></FormField>
       </SpaceBetween></Container>
-      <Alert type="info">{t('Only the VPC itself is created. Subnets, route tables, internet gateways, IPv6, IPAM, DNS settings and additional tags are not available in this console.','作成されるのは VPC 本体のみです。サブネット、ルートテーブル、インターネットゲートウェイ、IPv6、IPAM、DNS 設定、追加のタグはこのコンソールでは利用できません。')}</Alert></SpaceBetween>
+      <Alert type="info">{paired
+        ? t('Creates a new VPC and subnet in one local stack. It cannot attach to an existing VPC and does not add route tables, security groups or gateways.','1つのローカルスタックに新規 VPC とサブネットを作成します。既存 VPC への追加や、ルートテーブル、セキュリティグループ、ゲートウェイの作成はできません。')
+        : t('VPC only creates no subnet. Route tables, security groups, gateways, IPv6, IPAM, DNS settings and additional tags are not available in this form.','VPC のみではサブネットを作成しません。ルートテーブル、セキュリティグループ、ゲートウェイ、IPv6、IPAM、DNS 設定、追加のタグはこのフォームでは利用できません。')}</Alert></SpaceBetween>
     </Form></form></ContentLayout>;
   const deletable=detail?.managedBy==='ec2';
-  return <ContentLayout header={<Header variant="h1">{instance?t('EC2 instances','EC2 インスタンス'):'VPC'}</Header>}><SpaceBetween size="l">
-    {manage?<Alert type="info">{t('VPCs that you create here are saved in this local simulator and can be deleted here. Delete CloudFormation-managed VPCs by deleting their stack. Subnets, route tables, gateways and other network edits are not supported here.','この画面で作成した VPC はローカルのシミュレーターに保存され、この画面から削除できます。CloudFormation で管理される VPC は、スタックを削除して削除してください。サブネット、ルートテーブル、ゲートウェイなどのネットワーク編集はこの画面ではできません。')}</Alert>
+  return <ContentLayout header={<div ref={heading} tabIndex={-1}><Header variant="h1">{instance?t('EC2 instances','EC2 インスタンス'):'VPC'}</Header></div>}><SpaceBetween size="l">
+    {manage?<Alert type="info">{t('Delete EC2-managed VPCs here. Delete CloudFormation-managed networks through their stack. Editing existing subnets, route tables, security groups and gateways is not supported here.','EC2 管理の VPC はこの画面で削除できます。CloudFormation 管理のネットワークはスタックから削除してください。既存サブネット、ルートテーブル、セキュリティグループ、ゲートウェイはこの画面で編集できません。')}</Alert>
       :<Alert type="info">{t('Read-only resources managed through CloudFormation. Create, start, stop and network edits are not supported here. Reported state is not a health check of the guest.','CloudFormation で管理されるリソースの読み取り専用画面です。この画面から作成・起動・停止・ネットワーク編集はできません。表示された状態はゲストの稼働確認ではありません。')}</Alert>}
     {notice&&<Alert type="success" dismissible dismissAriaLabel={t('Dismiss','閉じる')} onDismiss={()=>setNotice('')}>{notice}</Alert>}
     {error&&<Alert type="error" header={t('Could not load resources','リソースを読み込めませんでした')}>{error}</Alert>}
@@ -112,7 +141,7 @@ export default function EC2Readonly({kind,region,request,sessionInstance,onSessi
       items={filtered.slice((page-1)*20,page*20)} columnDefinitions={fields.slice(0,instance?5:4).map(([id,en,ja])=>({id,header:t(en,ja),cell:item=>idCell(display(id,item))}))}
       header={<Header counter={'('+items.length+')'} actions={<SpaceBetween direction="horizontal" size="xs">{sessionInstance&&<Button variant="primary" disabled={selected[0]?.id!==sessionInstance} onClick={onSession}>{t('Connect with Session Manager','Session Manager で接続')}</Button>}<Button iconName="refresh" loading={loading} disabled={busy} onClick={()=>load()}>{t('Refresh','更新')}</Button>
         {manage&&<Button disabled={!deletable||busy||loading} disabledReason={detail&&!deletable?t('Delete CloudFormation-managed VPCs by deleting their stack.','CloudFormation で管理される VPC は、スタックを削除して削除してください。'):undefined} onClick={()=>{setConfirmation('');setDeleteError('');setDeleting(detail);}}>{t('Delete VPC','VPC を削除')}</Button>}
-        {manage&&<Button variant="primary" disabled={busy} onClick={()=>{setForm(blankVpc);setFormError('');setNotice('');setView('create');}}>{t('Create VPC','VPC を作成')}</Button>}</SpaceBetween>}>{instance?t('Instances','インスタンス'):t('VPCs','VPC 一覧')}</Header>}
+        {manage&&<Button variant="primary" disabled={busy} onClick={()=>{setForm(blankVpc);setFormError('');setNotice('');changeView('create');}}>{t('Create VPC','VPC を作成')}</Button>}</SpaceBetween>}>{instance?t('Instances','インスタンス'):t('VPCs','VPC 一覧')}</Header>}
       filter={<TextFilter filteringText={filter} onChange={({detail})=>{setFilter(detail.filteringText);setPage(1);setSelected([]);}} filteringAriaLabel={t('Filter resources','リソースを絞り込む')} filteringPlaceholder={t('Find resources','リソースを検索')}/>}
       pagination={<Pagination currentPageIndex={page} pagesCount={Math.max(1,Math.ceil(filtered.length/20))} onChange={({detail})=>setPage(detail.currentPageIndex)} ariaLabels={{nextPageLabel:t('Next page','次のページ'),previousPageLabel:t('Previous page','前のページ'),pageLabel:n=>String(n)}}/>}
       empty={<SpaceBetween size="s"><span>{error?t('Resources are unavailable. Retry with Refresh.','リソースを取得できません。「更新」で再試行してください。'):items.length?t('No resources match your filter.','検索条件に一致するリソースがありません。'):t('No resources found in this region.','このリージョンには該当するリソースがありません。')}</span>{items.length>0&&<Button onClick={()=>{setFilter('');setPage(1);}}>{t('Clear filter','絞り込みを解除')}</Button>}</SpaceBetween>}/>

@@ -3,9 +3,10 @@
 `POST /`, `Content-Type: application/x-www-form-urlencoded`,
 `X-Simulator-Service: ec2` and `X-Simulator-Region` select the native Query/XML
 subset. Supply `Version=2016-11-15` and `Action=DescribeInstances`,
-`Action=DescribeVpcs`, `Action=CreateVpc` or `Action=DeleteVpc`. Responses use the
-EC2 namespace and lower-camel-case `reservationSet/instancesSet/item` and
-`vpcSet/item` fields respectively. A request body is bounded to 64 KiB.
+`Action=DescribeVpcs`, `Action=DescribeSubnets`, `Action=CreateVpc` or `Action=DeleteVpc`.
+Discovery responses use the EC2 namespace and lower-camel-case
+`reservationSet/instancesSet/item`, `vpcSet/item` and `subnetSet/item` fields.
+A request body is bounded to 64 KiB.
 
 ## Discovery
 
@@ -13,7 +14,8 @@ Discovery reads CloudFormation-owned resources from the same local SQLite databa
 checking saved resource, region, stack ownership and network identity consistency.
 It does not create resources or make cloud calls. The host's existing local token
 and browser session authentication still applies. Selected exercise identities
-need the matching `ec2:DescribeInstances` or `ec2:DescribeVpcs` action on `*`.
+need the matching `ec2:DescribeInstances`, `ec2:DescribeVpcs` or
+`ec2:DescribeSubnets` action on `*`.
 One database/token authority per team is still required; exercise identities are
 not tenant isolation. Native STS session credentials are not supported here.
 
@@ -39,7 +41,7 @@ VPC ID. Each item carries the local extension `simulatorManagedBy`:
 
 `CreateVpc` and `DeleteVpc` manage VPCs owned by EC2 itself, in the same SQLite
 state that the console, SDK clients and CloudFormation use. They are what the
-console's **VPC → Create VPC** and **Delete VPC** call. A VPC is control-plane
+console's **VPC → Create VPC → VPC only** and **Delete VPC** call. A VPC is control-plane
 configuration only: no packet path, VM or DNS service is created.
 
 | Operation | Supported members | Result |
@@ -67,3 +69,32 @@ plus `ec2:CreateTags` on the same resource when tags are supplied, and
 checked before state is read or written; a denied request changes nothing. A
 console session bound to one instance cannot create or delete VPCs. Each team still
 needs its own process, database and token authority.
+
+## Console: VPC and one subnet
+
+When signed in as the simulator administrator, **VPC → Create VPC → VPC and
+one subnet (CloudFormation-managed)** creates both resources in a new local
+stack. The option is hidden for participant sessions, selected exercise
+identities, scoped handoffs, and unauthenticated development mode. Participant
+browser sessions cannot read CloudFormation outputs to verify the result.
+Enter a stack name and two IPv4 CIDRs; the subnet is within the VPC and uses the region's
+first local Availability Zone. Each range is /16–/28 and host bits are cleared
+by the server. A Name tag is optional. This does not attach to an existing VPC
+or create a route table, security group, gateway, VM or live packet path.
+
+The Console sends a fixed template with `AWS::EC2::VPC` and `AWS::EC2::Subnet`
+using the ordinary authenticated `CreateStack` route. Both resources require
+their existing CloudFormation and EC2 permissions; no role is supplied by the
+form. The Console reports success only after `DescribeStacks` confirms the
+same stack ID, completed status and both output IDs. The saved VPC and subnet
+are also available through native `DescribeVpcs` and `DescribeSubnets`. If a
+request was interrupted or readback was denied, check CloudFormation before
+trying again. Delete the stack there to remove both resources.
+
+Focused checks:
+- `node --test tools/console/test/ec2-vpc-subnet.test.mjs` after installing the pinned Console development dependencies.
+- `SIMULATOR_BINARY=/absolute/path/to/simulator python3 test/console/ec2_vpc_subnet_native.py` in an isolated loopback runner with Node. It signs into a real simulator and checks the form-generated request through the native APIs, including denial, persisted readback and removal. It does not drive a browser.
+
+Primary references: [CreateStack](https://docs.aws.amazon.com/AWSCloudFormation/latest/APIReference/API_CreateStack.html),
+[Subnet resource](https://docs.aws.amazon.com/AWSCloudFormation/latest/TemplateReference/aws-resource-ec2-subnet.html),
+[DescribeSubnets](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_DescribeSubnets.html).
