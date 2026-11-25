@@ -80,7 +80,7 @@ func TestDNSAdmissionAndFiniteRecordSyntax(t *testing.T) {
 		{"type": "MX", "rrdatas": []string{"99999 mx.example.test."}}, {"type": "MX", "rrdatas": []string{"01 mx.example.test."}}, {"type": "MX", "rrdatas": []string{"10  mx.example.test."}},
 		{"type": "TXT", "rrdatas": []string{"unquoted"}}, {"type": "TXT", "rrdatas": []string{`"with\escape"`}},
 		{"type": "CNAME", "rrdatas": []string{"one.example.test.", "two.example.test."}}, {"type": "CNAME", "rrdatas": []string{"UPPER.test."}},
-		{"type": "SRV", "rrdatas": []string{"1 2 3 srv.test."}}, {"kind": "invalid"}, {"ttl": -1}, {"ttl": 2147483648.0}, {"ttl": nil}, {"rrdatas": []string{}}, {"rrdatas": []string{"192.0.2.1", "192.0.2.1"}}, {"rrdatas": []string{strings.Repeat("a", 1025)}},
+		{"type": "NAPTR", "rrdatas": []string{`10 100 "S" "SIP+D2U" "" _sip._udp.example.test.`}}, {"kind": "invalid"}, {"ttl": -1}, {"ttl": 2147483648.0}, {"ttl": nil}, {"rrdatas": []string{}}, {"rrdatas": []string{"192.0.2.1", "192.0.2.1"}}, {"rrdatas": []string{strings.Repeat("a", 1025)}},
 		{"name": "bad..example.test."}, {"name": "-bad.example.test."}, {"name": "Upper.example.test."}, {"name": strings.Repeat("a", 64) + ".example.test."}, {"name": "bad*.example.test."},
 	}
 	before = f.snapshot("zone-one")
