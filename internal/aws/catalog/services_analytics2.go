@@ -3,6 +3,7 @@ package catalog
 import (
 	"encoding/json"
 	"regexp"
+	"strings"
 	"time"
 )
 
@@ -56,8 +57,23 @@ func appFlowDefinition(input map[string]any) error {
 			return err
 		}
 	}
-	if trigger, ok := input["triggerConfig"].(map[string]any); ok && trigger["triggerType"] == "Event" {
+	// The wire shape makes triggerProperties optional across all modes;
+	// a schedule is meaningful only for Scheduled flow definitions.
+	trigger, _ := input["triggerConfig"].(map[string]any)
+	properties, _ := trigger["triggerProperties"].(map[string]any)
+	schedule, hasSchedule := properties["Scheduled"].(map[string]any)
+	switch trigger["triggerType"] {
+	case "Event":
 		return Failure("ValidationException", "Event triggers need a connector that emits events, and none is supported.")
+	case "OnDemand":
+		if hasSchedule {
+			return Failure("ValidationException", "Scheduled trigger properties cannot be used with an OnDemand flow.")
+		}
+	case "Scheduled":
+		expression, _ := schedule["scheduleExpression"].(string)
+		if strings.TrimSpace(expression) == "" {
+			return Failure("ValidationException", "A Scheduled flow must specify a scheduleExpression.")
+		}
 	}
 	return nil
 }
