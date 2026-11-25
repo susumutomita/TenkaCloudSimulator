@@ -33,6 +33,12 @@ jobs:
       - name: Install pinned Chromium browser
         timeout-minutes: 5
         run: /tmp/simulator-tests/bin/playwright install chromium
+      - name: Check authenticated S3 multipart pagination in an isolated browser
+        timeout-minutes: 6
+        run: |
+          /tmp/simulator-tests/bin/python test/e2e/test_s3_multipart_paging_launcher.py
+          mkdir -p reports
+          /tmp/simulator-tests/bin/python test/e2e/run_s3_multipart_paging.py --binary "$PWD/dist/tenkacloud-simulator" > reports/s3-multipart-paging.json
       - name: Check native discovery, Japanese operations and desktop/mobile layouts
         run: |
           /tmp/simulator-tests/bin/python test/e2e/service_locale.py
@@ -54,6 +60,7 @@ jobs:
             reports/scalar-aws-json.json
             reports/secrets-metadata-*.png
             reports/secrets-a11y-summary.json
+            reports/s3-multipart-paging.json
           if-no-files-found: warn
           retention-days: 14
   checks:

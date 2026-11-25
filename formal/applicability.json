@@ -3,6 +3,20 @@
   "base_sha": "b55d5345a9ef292b12d1d52900cbc033c3828ccd",
   "changes": [
     {
+      "path": ".github/workflows/ci.yml",
+      "sha256": "05dafa489c2ea006851e8ba83030a9cbe2a959f455e75f362447b04de017b037",
+      "disposition": "formal-infrastructure",
+      "reason": "Runs the fixed authenticated S3 paging fixture through the same unprivileged namespace launcher as aggregate E2E; preserves permissions, action pins and existing required job dependencies.",
+      "models": []
+    },
+    {
+      "path": "docs/s3-multipart.md",
+      "sha256": "7c6902a08d73d26fbdfa29cceec8affae99194daa76385896b3965befd6f56b4",
+      "disposition": "documentation",
+      "reason": "Documents the audited local SDK/browser operations, shared entry points, loopback and capability boundary, and explicit unverified hosted/runtime limits.",
+      "models": []
+    },
+    {
       "path": "formal/S3MultipartConsolePaging.cfg",
       "sha256": "0ed8ca55ba02cda84d397df5bb2ac37d3a5f78b1c41663003d1d6ea320b27978",
       "disposition": "modeled",
@@ -78,10 +92,31 @@
       "models": []
     },
     {
+      "path": "test/e2e/check.py",
+      "sha256": "54ce5917c2cd8108d34e25c6f5b4b79f24eaecf3993cffca727eead7b3941f80",
+      "disposition": "test-support",
+      "reason": "Adds mandatory aggregate Conformance invocation of the same S3 namespace launcher and its refusal controls; subprocess failure is not skipped or ignored.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/run_s3_multipart_paging.py",
+      "sha256": "f2d79e8f591a483785019664649e80b02951687d26b7e17ff4e02b11a1325cff",
+      "disposition": "test-support",
+      "reason": "Development-only fixed-fixture launcher binds the built binary and pinned browser, isolates the current nonroot UID into private user/network namespaces, drops capabilities and fails closed before the existing browser fixture.",
+      "models": []
+    },
+    {
       "path": "test/e2e/s3_multipart_paging.py",
       "sha256": "4a6440a618024ddaac44276bb354d3dec52165e5930c84cf559d8281b81e32ed",
       "disposition": "test-support",
       "reason": "Opt-in real local Chromium and SDK acceptance for multipart two-page results and visible last-row refresh, review, expected completion refusal, Console Save part, SDK readback and cleanup. Requires independently isolated loopback runner.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/test_s3_multipart_paging_launcher.py",
+      "sha256": "8fa6928de2222dc5e61c38654a84c42a81825e0df7e02cfa22245c83fca32125",
+      "disposition": "test-support",
+      "reason": "Offline boundary/refusal and actual CI/aggregate-hook detector controls; does not create namespaces, run a browser or certify live acceptance.",
       "models": []
     },
     {

@@ -186,3 +186,27 @@ Cloudscapeを使う独立Simulatorの画面であり、認証済み実AWSコン�
 本資料は現在HEADの全gate、coverage、モデル、hosted CIの成功を宣言するものではない。
 結果は対象Issue・PRと対象commitのCIを確認する。
 [開発時の参照先](development-status.md)から辿れる。
+
+## ページングの隔離ブラウザー検証
+
+`test/e2e/run_s3_multipart_paging.py` は、ビルド済みbinaryと既存の
+`scripts/requirements-test.txt` で固定されたPlaywright/Chromiumを使う開発用入口である。
+CIの既存console jobと `make e2e` のConformanceは同じlauncherを呼ぶ。
+launcherはbinaryのSHA-256とPlaywrightのChromiumパスを取得し、現在の非root UIDを
+維持した新しいuser/network namespaceを作る。private namespace内のloopbackだけを上げ、
+capabilitiesを落としてからUID・namespace identity・capabilities・interfaceを再確認し、
+固定の `s3_multipart_paging.py` を実行する。fixture自身のloopback-only検査と
+Chromium sandboxは維持する。既存CI artifactに `reports/s3-multipart-paging.json` を残す。
+
+fixtureの操作範囲は、使い捨ての認証済みローカルprocess/SQLite上でbucketとuploadを作り、
+SDKで1001個の小さいpartを保存し、実画面から2ページを読み出すこと、最後のpartの変更後に
+古い確認を拒否すること、全1001件を含むCompleteがnativeの最小サイズ検査で拒否されて
+保存状態を変えないこと、画面からpartを保存してSDKで読み戻すこと、abortとbucket削除である。
+実AWSへの接続、DB直接書込み、mock応答は行わず、fixture用のdummy値だけを使う。
+Scalar SendやTerraform、正常なmultipart完成、S3全体の互換性をこのfixtureで検証したとは扱わない。
+
+この入口にはunprivileged namespace作成と、sandboxを保持したChromium実行を許すLinuxが必要である。
+namespace作成、capability drop、Chromium sandboxが拒否された場合は必須checkを失敗させる。
+skip、sudo、sysctl/AppArmor変更、外部networkや `--no-sandbox` へのfallbackはない。
+offlineのlauncher拒否テストはこれらの検査と入口の配線を確かめるが、namespaceや実ブラウザーの
+実機成功の証拠ではない。結果はそのcandidateの実行ログとCIで別途確認する。
