@@ -29050,7 +29050,7 @@
       "format": "esm"
     },
     "src/ec2-response.mjs": {
-      "bytes": 6966,
+      "bytes": 9685,
       "imports": [],
       "format": "esm"
     },
@@ -29131,8 +29131,85 @@
       ],
       "format": "esm"
     },
+    "src/ec2-route-tables.mjs": {
+      "bytes": 1523,
+      "imports": [
+        {
+          "path": "src/ec2-response.mjs",
+          "kind": "import-statement",
+          "original": "./ec2-response.mjs"
+        }
+      ],
+      "format": "esm"
+    },
+    "src/ec2-vpc-route-tables.jsx": {
+      "bytes": 6381,
+      "imports": [
+        {
+          "path": "node_modules/react/index.js",
+          "kind": "import-statement",
+          "original": "react"
+        },
+        {
+          "path": "node_modules/@cloudscape-design/components/alert/index.js",
+          "kind": "import-statement",
+          "original": "@cloudscape-design/components/alert"
+        },
+        {
+          "path": "node_modules/@cloudscape-design/components/box/index.js",
+          "kind": "import-statement",
+          "original": "@cloudscape-design/components/box"
+        },
+        {
+          "path": "node_modules/@cloudscape-design/components/button/index.js",
+          "kind": "import-statement",
+          "original": "@cloudscape-design/components/button"
+        },
+        {
+          "path": "node_modules/@cloudscape-design/components/form-field/index.js",
+          "kind": "import-statement",
+          "original": "@cloudscape-design/components/form-field"
+        },
+        {
+          "path": "node_modules/@cloudscape-design/components/header/index.js",
+          "kind": "import-statement",
+          "original": "@cloudscape-design/components/header"
+        },
+        {
+          "path": "node_modules/@cloudscape-design/components/select/index.js",
+          "kind": "import-statement",
+          "original": "@cloudscape-design/components/select"
+        },
+        {
+          "path": "node_modules/@cloudscape-design/components/space-between/index.js",
+          "kind": "import-statement",
+          "original": "@cloudscape-design/components/space-between"
+        },
+        {
+          "path": "node_modules/@cloudscape-design/components/status-indicator/index.js",
+          "kind": "import-statement",
+          "original": "@cloudscape-design/components/status-indicator"
+        },
+        {
+          "path": "node_modules/@cloudscape-design/components/table/index.js",
+          "kind": "import-statement",
+          "original": "@cloudscape-design/components/table"
+        },
+        {
+          "path": "src/i18n.jsx",
+          "kind": "import-statement",
+          "original": "./i18n.jsx"
+        },
+        {
+          "path": "src/ec2-route-tables.mjs",
+          "kind": "import-statement",
+          "original": "./ec2-route-tables.mjs"
+        }
+      ],
+      "format": "esm"
+    },
     "src/ec2-readonly.jsx": {
-      "bytes": 19010,
+      "bytes": 19231,
       "imports": [
         {
           "path": "node_modules/react/index.js",
@@ -29248,6 +29325,11 @@
           "path": "src/ec2-vpc-security-groups.jsx",
           "kind": "import-statement",
           "original": "./ec2-vpc-security-groups.jsx"
+        },
+        {
+          "path": "src/ec2-vpc-route-tables.jsx",
+          "kind": "import-statement",
+          "original": "./ec2-vpc-route-tables.jsx"
         },
         {
           "path": "src/ec2-response.mjs",
@@ -34370,7 +34452,7 @@
       "format": "esm"
     },
     "src/main.jsx": {
-      "bytes": 54604,
+      "bytes": 54763,
       "imports": [
         {
           "path": "src/ssm-terminal.jsx",
@@ -34556,6 +34638,11 @@
           "path": "src/ec2-security-groups.mjs",
           "kind": "import-statement",
           "original": "./ec2-security-groups.mjs"
+        },
+        {
+          "path": "src/ec2-route-tables.mjs",
+          "kind": "import-statement",
+          "original": "./ec2-route-tables.mjs"
         },
         {
           "path": "src/session-manager.jsx",
@@ -35396,7 +35483,7 @@
           "bytesInOutput": 0
         },
         "src/main.jsx": {
-          "bytesInOutput": 48540
+          "bytesInOutput": 48577
         },
         "node_modules/@cloudscape-design/global-styles/index.css": {
           "bytesInOutput": 0
@@ -37058,10 +37145,10 @@
           "bytesInOutput": 1030
         },
         "node_modules/@cloudscape-design/components/internal/components/listbox/parts/render-options.js": {
-          "bytesInOutput": 1535
+          "bytesInOutput": 1539
         },
         "node_modules/@cloudscape-design/components/select/parts/item.js": {
-          "bytesInOutput": 2453
+          "bytesInOutput": 2454
         },
         "node_modules/@cloudscape-design/components/internal/components/option/index.js": {
           "bytesInOutput": 1975
@@ -37094,13 +37181,13 @@
           "bytesInOutput": 1150
         },
         "node_modules/@cloudscape-design/components/select/parts/multiselect-item.js": {
-          "bytesInOutput": 3041
+          "bytesInOutput": 3045
         },
         "node_modules/@cloudscape-design/components/internal/components/option/utils/unflatten-options.js": {
-          "bytesInOutput": 300
+          "bytesInOutput": 301
         },
         "node_modules/@cloudscape-design/components/internal/components/listbox/parts/get-item-props.js": {
-          "bytesInOutput": 260
+          "bytesInOutput": 261
         },
         "node_modules/@cloudscape-design/components/internal/components/listbox/parts/option-group.js": {
           "bytesInOutput": 224
@@ -37457,7 +37544,7 @@
           "bytesInOutput": 232
         },
         "src/ec2-readonly.jsx": {
-          "bytesInOutput": 17989
+          "bytesInOutput": 18142
         },
         "src/ec2-vpc-subnet-fields.jsx": {
           "bytesInOutput": 2202
@@ -37472,10 +37559,16 @@
           "bytesInOutput": 5072
         },
         "src/ec2-response.mjs": {
-          "bytesInOutput": 4252
+          "bytesInOutput": 5705
         },
         "src/ec2-security-groups.mjs": {
           "bytesInOutput": 876
+        },
+        "src/ec2-vpc-route-tables.jsx": {
+          "bytesInOutput": 6102
+        },
+        "src/ec2-route-tables.mjs": {
+          "bytesInOutput": 1014
         },
         "src/session-manager.jsx": {
           "bytesInOutput": 4924
@@ -37907,7 +38000,7 @@
           "bytesInOutput": 10113
         }
       },
-      "bytes": 2561378
+      "bytes": 2570148
     },
     "../../internal/server/web/app.css.LEGAL.txt": {
       "imports": [],

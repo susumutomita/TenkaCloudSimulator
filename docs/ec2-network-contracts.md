@@ -9,6 +9,11 @@ Owner: Issue #467 contract-test worker. Base: main
 No runtime, compiler, shared Gateway, workflow, dependency, authentication,
 isolation or coverage gate changes.
 
+Subsequent change: this matrix describes the original #467 baseline. Native
+[subnet and route-table discovery](ec2-read-discovery.md) is now supported in
+the documented subset; the current route SDK check is
+`test_native_route_table_read_and_rejected_mutations`.
+
 ## Oracle and scope
 
 Official AWS references were checked on 2026-11-18 (the live pages do not expose

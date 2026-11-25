@@ -137,3 +137,50 @@ export function parseEC2Error(document){
   const error=child(child(node,'Errors'),'Error'),code=child(error,'Code')?.textContent??'';
   return code?{code,message:child(error,'Message')?.textContent??''}:null;
 }
+
+// DescribeRouteTables returns a regional snapshot, never a per-VPC filter or a data-plane observation.
+export function parseEC2RouteTables(document, selectedVPC) {
+  if (!vpcId.test(selectedVPC)) invalid();
+  const response = root(document, 'DescribeRouteTablesResponse');
+  exactFields(response, ['requestId', 'routeTableSet']);
+  if (!value(response, 'requestId', true).trim()) invalid();
+
+  const bytes = new TextEncoder();
+  let count = 0;
+  const tableIds = new Set(), associationIds = new Set(), subnetIds = new Set();
+  const unique = (set, id) => { if (set.has(id)) invalid(); set.add(id); };
+  const tables = members(response, 'routeTableSet', 1000).map(item => {
+    exactFields(item, ['routeTableId','vpcId','ownerId','routeSet','associationSet','tagSet']);
+    const id = value(item,'routeTableId',true), vpc = value(item,'vpcId',true);
+    if (!/^rtb-[0-9a-f]{17}$/.test(id) || !vpcId.test(vpc) || value(item,'ownerId',true)!=='000000000000') invalid();
+    unique(tableIds, id);
+    const routes = members(item,'routeSet',1).map(route => {
+      exactFields(route, ['destinationCidrBlock','gatewayId','origin','state']);
+      const cidr = value(route,'destinationCidrBlock',true), gateway = value(route,'gatewayId',true);
+      if (cidr!=='0.0.0.0/0' || !/^igw-[0-9a-f]{17}$/.test(gateway) ||
+          value(route,'origin', true)!=='CreateRoute' || value(route,'state',true)!=='active') invalid();
+      return {cidr,gateway};
+    });
+    const associations = members(item,'associationSet',1000).map(association => {
+      exactFields(association, ['routeTableAssociationId','routeTableId','subnetId','main']);
+      const assoc = value(association,'routeTableAssociationId',true), subnet = value(association,'subnetId',true);
+      if (!/^rtbassoc-[0-9a-f]{17}$/.test(assoc) || !/^subnet-[0-9a-f]{17}$/.test(subnet) ||
+          value(association,'routeTableId',true)!==id || value(association,'main',true)!=='false') invalid();
+      unique(associationIds, assoc); unique(subnetIds, subnet);
+      return {id:assoc,subnet};
+    });
+    const keys = new Set();
+    const tags = members(item,'tagSet',50).map(tag => {
+      exactFields(tag, ['key','value']);
+      const key = value(tag,'key',true), val = value(tag,'value',true);
+      if (!key || /^aws:/i.test(key) || bytes.encode(key).length>128 || bytes.encode(val).length>256) invalid();
+      unique(keys,key);
+      return {key,value:val};
+    });
+    count += 1 + routes.length + associations.length;
+    if (count > 1000) invalid();
+    return {id,vpc,routes,associations,tags};
+  });
+  // Malformed or truncated data anywhere is never interpreted as a successful empty selection.
+  return tables.filter(table => table.vpc===selectedVPC);
+}

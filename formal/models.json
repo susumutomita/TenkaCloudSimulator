@@ -21938,6 +21938,225 @@
           "expect_invariant": "ExactCurrentPage"
         }
       ]
+    },
+    {
+      "id": "EC2RouteTableConsoleEpoch",
+      "model": "formal/EC2RouteTableConsoleEpoch.tla",
+      "config": "formal/EC2RouteTableConsoleEpoch.cfg",
+      "bounds": "Two identity, region, target and refresh labels; six independent admission witnesses; one change between explicit contexts and one pending response; four outcome classes and two recorded-detail flags.",
+      "properties": [
+        "TypeOK",
+        "EligibleRead",
+        "FixedRead",
+        "CurrentIdentity",
+        "CurrentRegion",
+        "CurrentTarget",
+        "CurrentRevision",
+        "CurrentGate",
+        "StatusIsEvidence",
+        "DefaultIsRecorded",
+        "AssociationIsExplicit",
+        "NoImplicitMain"
+      ],
+      "limits": "Readout projection only. A change may keep identity, region, VPC, revision or availability constant, independently exercising stale responses. Bounded labels are not arbitrary refresh/ABA interleavings. Does not prove React scheduling, authentication, IAM/SQL/HTTP/XML, packet reachability, route edits, completeness or runtime refinement.",
+      "source_scope": [
+        "internal/server/server.go",
+        "internal/server/web/app.js",
+        "tools/console/src/ec2-readonly.jsx",
+        "tools/console/src/ec2-response.mjs",
+        "tools/console/src/ec2-route-tables.mjs",
+        "tools/console/src/ec2-vpc-route-tables.jsx",
+        "tools/console/src/main.jsx"
+      ],
+      "mutants": [
+        {
+          "id": "UnsignedRead",
+          "edits": [
+            {
+              "old": "Eligible(g) == g = \"signed-stack\"",
+              "new": "Eligible(g) == g \\in {\"signed-stack\",\"unsigned\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "EligibleRead"
+        },
+        {
+          "id": "UnadvertisedRead",
+          "edits": [
+            {
+              "old": "Eligible(g) == g = \"signed-stack\"",
+              "new": "Eligible(g) == g \\in {\"signed-stack\",\"unadvertised\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "EligibleRead"
+        },
+        {
+          "id": "HandoffRead",
+          "edits": [
+            {
+              "old": "Eligible(g) == g = \"signed-stack\"",
+              "new": "Eligible(g) == g \\in {\"signed-stack\",\"handoff\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "EligibleRead"
+        },
+        {
+          "id": "NativeRead",
+          "edits": [
+            {
+              "old": "Eligible(g) == g = \"signed-stack\"",
+              "new": "Eligible(g) == g \\in {\"signed-stack\",\"native\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "EligibleRead"
+        },
+        {
+          "id": "UnverifiedRead",
+          "edits": [
+            {
+              "old": "Eligible(g) == g = \"signed-stack\"",
+              "new": "Eligible(g) == g \\in {\"signed-stack\",\"unverified\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "EligibleRead"
+        },
+        {
+          "id": "OfferWrongOperation",
+          "edits": [
+            {
+              "old": "/\\ a = \"DescribeRouteTables\"",
+              "new": "/\\ TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "FixedRead"
+        },
+        {
+          "id": "AcceptOldPrincipal",
+          "edits": [
+            {
+              "old": "/\\ s.who = selected.who",
+              "new": "/\\ TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CurrentIdentity"
+        },
+        {
+          "id": "AcceptOldRegion",
+          "edits": [
+            {
+              "old": "/\\ s.region = selected.region",
+              "new": "/\\ TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CurrentRegion"
+        },
+        {
+          "id": "AcceptOldVPC",
+          "edits": [
+            {
+              "old": "/\\ s.vpc = selected.vpc",
+              "new": "/\\ TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CurrentTarget"
+        },
+        {
+          "id": "AcceptOldRevision",
+          "edits": [
+            {
+              "old": "/\\ s.gen = selected.gen",
+              "new": "/\\ TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CurrentRevision"
+        },
+        {
+          "id": "AcceptOldGate",
+          "edits": [
+            {
+              "old": "/\\ s.gate = selected.gate",
+              "new": "/\\ TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CurrentGate"
+        },
+        {
+          "id": "KeepPreviousPrincipal",
+          "edits": [
+            {
+              "old": "shown' = {} (* Scope change",
+              "new": "shown' = IF s.who # selected.who THEN shown ELSE {} (* Scope change",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CurrentIdentity"
+        },
+        {
+          "id": "IncludeForeignRows",
+          "edits": [
+            {
+              "old": "IF o = \"rows\" /\\ v # r.scope.vpc THEN \"empty\" ELSE o",
+              "new": "o",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "StatusIsEvidence"
+        },
+        {
+          "id": "MaskRefusalAsEmpty",
+          "edits": [
+            {
+              "old": "THEN \"empty\" ELSE o",
+              "new": "THEN \"empty\" ELSE IF o = \"denied\" THEN \"empty\" ELSE o",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "StatusIsEvidence"
+        },
+        {
+          "id": "InventDefault",
+          "edits": [
+            {
+              "old": "defaultRoute |-> (rows /\\ hasRoute)",
+              "new": "defaultRoute |-> rows",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "DefaultIsRecorded"
+        },
+        {
+          "id": "InventAssociation",
+          "edits": [
+            {
+              "old": "association |-> (rows /\\ hasAssoc)",
+              "new": "association |-> rows",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AssociationIsExplicit"
+        },
+        {
+          "id": "InventMain",
+          "edits": [
+            {
+              "old": "main |-> FALSE",
+              "new": "main |-> rows",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "NoImplicitMain"
+        }
+      ]
     }
   ]
 }

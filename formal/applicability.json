@@ -1,184 +1,279 @@
 {
   "version": 1,
-  "base_sha": "61cbd3d207be3009bb7e36f542209e9dd150c65c",
+  "base_sha": "5902a90faf9bb8dd3ca09fd19e59a1f34e8ed1a4",
   "changes": [
     {
       "path": "README.md",
-      "sha256": "ff2be026875adf6cce87388f7e745709d62340c40fe0e6631a36245b95cdc718",
+      "sha256": "082eef7332b6a7adf526a69511308994b663f8a1fbe54b1d1701b081caf21647",
       "disposition": "documentation",
-      "reason": "Document bounded native Select, ordering, cursor contract and unsupported surfaces; no implemented Console/Scalar or unbounded SQL is implied.",
+      "reason": "Describe the read-only route-table Console projection and its unsupported network and mutation behavior.",
       "models": []
     },
     {
       "path": "docs/design/0001-go-standalone.md",
-      "sha256": "043fe298d1dc3dde24583feda144282a2e1a18dc5de90504bccd008412f5962a",
+      "sha256": "ac31f038610e00720b03282f0e80ec71b524cdd231ec09a4e15960d1435bcd7a",
       "disposition": "documentation",
-      "reason": "Document bounded native Select, ordering, cursor contract and unsupported surfaces; no implemented Console/Scalar or unbounded SQL is implied.",
+      "reason": "Describe the read-only route-table Console projection and its unsupported network and mutation behavior.",
       "models": []
     },
     {
-      "path": "docs/simpledb-select.md",
-      "sha256": "8369a46ea6e9d138a3249c737817a64f1a8c907c6ba8216a9dc79679495749ec",
+      "path": "docs/ec2-network-contracts.md",
+      "sha256": "f03e8bb4a02e93c3880498c35c479fb0267f1083c0c1ac9ba07a65b37ab1981f",
       "disposition": "documentation",
-      "reason": "Document bounded native Select, ordering, cursor contract and unsupported surfaces; no implemented Console/Scalar or unbounded SQL is implied.",
+      "reason": "Describe the read-only route-table Console projection and its unsupported network and mutation behavior.",
       "models": []
     },
     {
-      "path": "formal/SimpleDBSelectPage.cfg",
-      "sha256": "8daf3716ba4346da7673424120a2e97242947d40584f1fe359deda55bad28a43",
+      "path": "docs/ec2-read-discovery.md",
+      "sha256": "1bfd345531a291e92f1edd3aeb68d67acf6f45a3e6a00f9009e46a1841fefcc5",
+      "disposition": "documentation",
+      "reason": "Describe the read-only route-table Console projection and its unsupported network and mutation behavior.",
+      "models": []
+    },
+    {
+      "path": "formal/EC2RouteTableConsoleEpoch.cfg",
+      "sha256": "d3d4c2584cca611148f076119317fce8b4bca9d960802938dea9ac6fbe3c6c3f",
       "disposition": "modeled",
-      "reason": "Independently compare the finite stepwise scan with the maximum admissible prefix of the current checkpoint, and exercise denied and misbound resumption.",
+      "reason": "A bounded selection, fixed read and evidence-preserving projection apply to the selected route-table Console contract; the native API is unchanged.",
       "models": [
         {
-          "id": "SimpleDBSelectPage",
+          "id": "EC2RouteTableConsoleEpoch",
           "properties": [
-            "AdmissionBeforeRead",
-            "CursorScopeBound",
-            "ExactCurrentPage",
-            "ExactConsumedCursor"
+            "EligibleRead",
+            "FixedRead",
+            "CurrentIdentity",
+            "CurrentRegion",
+            "CurrentTarget",
+            "CurrentRevision",
+            "CurrentGate",
+            "StatusIsEvidence",
+            "DefaultIsRecorded",
+            "AssociationIsExplicit",
+            "NoImplicitMain"
           ],
-          "limits": "Three symbolic item names and a single committed change between two pages; a query identity represents exact expression bytes (including spelling, domain and order). The scan overapproximates matches in either order; checks scan and result count, not XML/raw byte budgets, timeouts, parser completeness, ACLs, cryptography, byte collation, physical SQL transactions, CLI, Console or Scalar. Not a Go refinement."
+          "limits": "Readout projection only. A change may keep identity, region, VPC, revision or availability constant, independently exercising stale responses. Bounded labels are not arbitrary refresh/ABA interleavings. Does not prove React scheduling, authentication, IAM/SQL/HTTP/XML, packet reachability, route edits, completeness or runtime refinement."
         }
       ]
     },
     {
-      "path": "formal/SimpleDBSelectPage.tla",
-      "sha256": "15a94454e41be32e1b055d78c96e215e5545fa0ed19a476cd807586ec0079b44",
+      "path": "formal/EC2RouteTableConsoleEpoch.tla",
+      "sha256": "5bd23b553770a142a603dee75b3c9dd682691bf02a87090b2f7572d2e1a036bb",
       "disposition": "modeled",
-      "reason": "Independently compare the finite stepwise scan with the maximum admissible prefix of the current checkpoint, and exercise denied and misbound resumption.",
+      "reason": "A bounded selection, fixed read and evidence-preserving projection apply to the selected route-table Console contract; the native API is unchanged.",
       "models": [
         {
-          "id": "SimpleDBSelectPage",
+          "id": "EC2RouteTableConsoleEpoch",
           "properties": [
-            "AdmissionBeforeRead",
-            "CursorScopeBound",
-            "ExactCurrentPage",
-            "ExactConsumedCursor"
+            "EligibleRead",
+            "FixedRead",
+            "CurrentIdentity",
+            "CurrentRegion",
+            "CurrentTarget",
+            "CurrentRevision",
+            "CurrentGate",
+            "StatusIsEvidence",
+            "DefaultIsRecorded",
+            "AssociationIsExplicit",
+            "NoImplicitMain"
           ],
-          "limits": "Three symbolic item names and a single committed change between two pages; a query identity represents exact expression bytes (including spelling, domain and order). The scan overapproximates matches in either order; checks scan and result count, not XML/raw byte budgets, timeouts, parser completeness, ACLs, cryptography, byte collation, physical SQL transactions, CLI, Console or Scalar. Not a Go refinement."
+          "limits": "Readout projection only. A change may keep identity, region, VPC, revision or availability constant, independently exercising stale responses. Bounded labels are not arbitrary refresh/ABA interleavings. Does not prove React scheduling, authentication, IAM/SQL/HTTP/XML, packet reachability, route edits, completeness or runtime refinement."
         }
       ]
     },
     {
       "path": "formal/models.json",
-      "sha256": "f1c1e86d7be9d21410995fe909d471871e0db468b2b75e9802fa959e2acd332f",
+      "sha256": "4be41c8c1d8822a1b31b430694efd9ae9f451d6c106f5a17d296e13e733c8c2a",
       "disposition": "formal-infrastructure",
-      "reason": "Preserve existing models; register and independently pin the new Select model, invariant, mutation and declared source-scope inventory.",
+      "reason": "Independently register and require finite selected-pane, identity, target, admission, evidence and stale-response properties and controls.",
       "models": []
     },
     {
-      "path": "internal/aws/simpledb/http.go",
-      "sha256": "b79c2236522c1f07a05271100aa3c2bef6f2c418e2c6935614e8892820a59b85",
-      "disposition": "modeled",
-      "reason": "Parse Select before deriving the domain and check domain IAM on every page before reading the store. The model abstracts parsing and authorization decisions.",
-      "models": [
-        {
-          "id": "SimpleDBSelectPage",
-          "properties": [
-            "AdmissionBeforeRead",
-            "CursorScopeBound"
-          ],
-          "limits": "Three symbolic item names and a single committed change between two pages; a query identity represents exact expression bytes (including spelling, domain and order). The scan overapproximates matches in either order; checks scan and result count, not XML/raw byte budgets, timeouts, parser completeness, ACLs, cryptography, byte collation, physical SQL transactions, CLI, Console or Scalar. Not a Go refinement."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/simpledb/pagination.go",
-      "sha256": "4a0c0a4e3db92c1307eaede49f484c5f02ce45f871f3b5100d7593b936f4d08e",
-      "disposition": "modeled",
-      "reason": "Use authenticated cursor envelopes with a dedicated Select token purpose and current store key; the model uses validity and scope, not HMAC proof.",
-      "models": [
-        {
-          "id": "SimpleDBSelectPage",
-          "properties": [
-            "CursorScopeBound"
-          ],
-          "limits": "Three symbolic item names and a single committed change between two pages; a query identity represents exact expression bytes (including spelling, domain and order). The scan overapproximates matches in either order; checks scan and result count, not XML/raw byte budgets, timeouts, parser completeness, ACLs, cryptography, byte collation, physical SQL transactions, CLI, Console or Scalar. Not a Go refinement."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/simpledb/select.go",
-      "sha256": "a0e7a488940c5ff9d4ba720a90023b2a6ead1de05bd4b946073d51e7f0050ac7",
-      "disposition": "modeled",
-      "reason": "Bind exact query/scope and scan a current per-page snapshot in key order, resuming after the last consumed candidate even on an empty page.",
-      "models": [
-        {
-          "id": "SimpleDBSelectPage",
-          "properties": [
-            "CursorScopeBound",
-            "ExactCurrentPage",
-            "ExactConsumedCursor"
-          ],
-          "limits": "Three symbolic item names and a single committed change between two pages; a query identity represents exact expression bytes (including spelling, domain and order). The scan overapproximates matches in either order; checks scan and result count, not XML/raw byte budgets, timeouts, parser completeness, ACLs, cryptography, byte collation, physical SQL transactions, CLI, Console or Scalar. Not a Go refinement."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/simpledb/select_contract_test.go",
-      "sha256": "392355e67647b7b13ce5d2e210cca6e8ff4055586f30b9649f702fb13406de1b",
+      "path": "internal/server/ec2_security_groups_console_test.go",
+      "sha256": "432c8161296504e4de085bf382be5e0294b55e029e7eb09a5e46ea8b5dd518ee",
       "disposition": "test-support",
-      "reason": "Exercise native Select lexical and byte bounds, descending continuations, five-second query timeout and all-or-error reads on malformed SQLite data.",
-      "models": []
-    },
-    {
-      "path": "internal/aws/simpledb/select_grammar.go",
-      "sha256": "50f37dc4c01bfb01056acefeb5dab02eaddc990806984269a413f2d6f4cfef7e",
-      "disposition": "modeled",
-      "reason": "Only the accepted grammar can dispatch. Syntax, direction, limit and exact query identity are abstract inputs; the language parser itself is not proven.",
-      "models": [
-        {
-          "id": "SimpleDBSelectPage",
-          "properties": [
-            "AdmissionBeforeRead",
-            "ExactCurrentPage"
-          ],
-          "limits": "Three symbolic item names and a single committed change between two pages; a query identity represents exact expression bytes (including spelling, domain and order). The scan overapproximates matches in either order; checks scan and result count, not XML/raw byte budgets, timeouts, parser completeness, ACLs, cryptography, byte collation, physical SQL transactions, CLI, Console or Scalar. Not a Go refinement."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/simpledb/select_test.go",
-      "sha256": "ca7174c54c16cf6d47c0645e284b3984d670a64f1ff41cf363aa12ac069d69ca",
-      "disposition": "test-support",
-      "reason": "Exercise bounded query parsing, real SQLite handler reads, per-page policy, errors, keyset paging, cross-scope tokens, restart, scan limits and XML encodings.",
+      "reason": "Exercise the selected route read contract, region/identity scope, real/refused response distinction or stale completion.",
       "models": []
     },
     {
       "path": "internal/server/server.go",
-      "sha256": "21ef4787a0d546dd8fd3420a8f6ab01acaf8e785a36cd95d380fa16fb79c5f53",
+      "sha256": "5d09ee00093bcfff1d3ec07a05aaf7f65a9cf3ea6211c3fc113dd921709446b5",
       "disposition": "modeled",
-      "reason": "The only modified discovery metadata advertises the native Select operation whose acceptance and paging contract are modeled; the model does not verify UI, JSON discovery contents or server wiring.",
+      "reason": "A bounded selection, fixed read and evidence-preserving projection apply to the selected route-table Console contract; the native API is unchanged.",
       "models": [
         {
-          "id": "SimpleDBSelectPage",
+          "id": "EC2RouteTableConsoleEpoch",
           "properties": [
-            "AdmissionBeforeRead",
-            "ExactCurrentPage"
+            "EligibleRead",
+            "FixedRead"
           ],
-          "limits": "Three symbolic item names and a single committed change between two pages; a query identity represents exact expression bytes (including spelling, domain and order). The scan overapproximates matches in either order; checks scan and result count, not XML/raw byte budgets, timeouts, parser completeness, ACLs, cryptography, byte collation, physical SQL transactions, CLI, Console or Scalar. Not a Go refinement."
+          "limits": "Readout projection only. A change may keep identity, region, VPC, revision or availability constant, independently exercising stale responses. Bounded labels are not arbitrary refresh/ABA interleavings. Does not prove React scheduling, authentication, IAM/SQL/HTTP/XML, packet reachability, route edits, completeness or runtime refinement."
+        }
+      ]
+    },
+    {
+      "path": "internal/server/web/app.js",
+      "sha256": "b2b16680df13820f6c1165fe68f3b42ba8ee0bf4fafa33293f0d636b2771105b",
+      "disposition": "modeled",
+      "reason": "A bounded selection, fixed read and evidence-preserving projection apply to the selected route-table Console contract; the native API is unchanged.",
+      "models": [
+        {
+          "id": "EC2RouteTableConsoleEpoch",
+          "properties": [
+            "EligibleRead",
+            "FixedRead",
+            "CurrentIdentity",
+            "CurrentRegion",
+            "CurrentTarget",
+            "CurrentRevision",
+            "CurrentGate",
+            "StatusIsEvidence",
+            "DefaultIsRecorded",
+            "AssociationIsExplicit",
+            "NoImplicitMain"
+          ],
+          "limits": "Readout projection only. A change may keep identity, region, VPC, revision or availability constant, independently exercising stale responses. Bounded labels are not arbitrary refresh/ABA interleavings. Does not prove React scheduling, authentication, IAM/SQL/HTTP/XML, packet reachability, route edits, completeness or runtime refinement."
         }
       ]
     },
     {
       "path": "scripts/formal_model_gate.py",
-      "sha256": "ce9e800adfdbdf43632efdab50bc8a70d8388bd969616238b3640380eb23a8c0",
+      "sha256": "1517540925685923bf38f63da47e07a4c5e3bca55102ab460952f053bfbb9081",
       "disposition": "formal-infrastructure",
-      "reason": "Preserve existing models; register and independently pin the new Select model, invariant, mutation and declared source-scope inventory.",
+      "reason": "Independently register and require finite selected-pane, identity, target, admission, evidence and stale-response properties and controls.",
       "models": []
     },
     {
       "path": "scripts/test-formal-gate.py",
-      "sha256": "fd06056d2bab48995a25ae966abaa4062eee583bd07756bda1081267c8643f61",
+      "sha256": "0fe41f5f10d20605f89bb07f2bc6a212dde36a94628e31c8ecf26b5942784f4e",
       "disposition": "formal-infrastructure",
-      "reason": "Preserve existing models; register and independently pin the new Select model, invariant, mutation and declared source-scope inventory.",
+      "reason": "Independently register and require finite selected-pane, identity, target, admission, evidence and stale-response properties and controls.",
       "models": []
     },
     {
-      "path": "scripts/test-simpledb-select-sdk.py",
-      "sha256": "a4d839f9ef6fa4354cfa1b4a64e1b976f30b61e6bcf65ff8f0e1eaa03e6099a8",
+      "path": "test/console/ec2_route_table_identity.py",
+      "sha256": "87211b29de34cec3089367bcf74390d7fbc4fedc7a52c76692354874d5479f31",
       "disposition": "test-support",
-      "reason": "Optional pinned SDK client exercises the supported native operation across two local processes and checks cleanup. A checked-in client is not evidence of running the full simulator.",
+      "reason": "Exercise the selected route read contract, region/identity scope, real/refused response distinction or stale completion.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/ec2_readonly_console.py",
+      "sha256": "057b24f1135a344c75ae4a1056678a652c15abc5c8ecb8c955d44b2858311d00",
+      "disposition": "test-support",
+      "reason": "Exercise the selected route read contract, region/identity scope, real/refused response distinction or stale completion.",
+      "models": []
+    },
+    {
+      "path": "tools/console/bundle-digests.json",
+      "sha256": "6a12b0b59ad8792eaa7c71f3af38c935e8b2c1610aa84c55ccc7cdaaf40d0a90",
+      "disposition": "presentation",
+      "reason": "Pinned production build provenance or focused component coverage; no independent state transition is introduced here.",
+      "models": []
+    },
+    {
+      "path": "tools/console/bundle-inputs.json",
+      "sha256": "8dcc099bbf4a5b87b389a24ad120f39219c39cf42fcbe8f796386252eb95f2a1",
+      "disposition": "presentation",
+      "reason": "Pinned production build provenance or focused component coverage; no independent state transition is introduced here.",
+      "models": []
+    },
+    {
+      "path": "tools/console/src/ec2-readonly.jsx",
+      "sha256": "86a95a1b5d802ecec9f753c09e2d728a4b91aa4139d0b81bfce650c7dae85a24",
+      "disposition": "modeled",
+      "reason": "A bounded selection, fixed read and evidence-preserving projection apply to the selected route-table Console contract; the native API is unchanged.",
+      "models": [
+        {
+          "id": "EC2RouteTableConsoleEpoch",
+          "properties": [
+            "CurrentTarget",
+            "CurrentIdentity",
+            "CurrentRegion"
+          ],
+          "limits": "Readout projection only. A change may keep identity, region, VPC, revision or availability constant, independently exercising stale responses. Bounded labels are not arbitrary refresh/ABA interleavings. Does not prove React scheduling, authentication, IAM/SQL/HTTP/XML, packet reachability, route edits, completeness or runtime refinement."
+        }
+      ]
+    },
+    {
+      "path": "tools/console/src/ec2-response.mjs",
+      "sha256": "9257dc4be1b517c958628710177f05c65acc64e8617ad5e3f9d3d5540eb88021",
+      "disposition": "modeled",
+      "reason": "A bounded selection, fixed read and evidence-preserving projection apply to the selected route-table Console contract; the native API is unchanged.",
+      "models": [
+        {
+          "id": "EC2RouteTableConsoleEpoch",
+          "properties": [
+            "StatusIsEvidence",
+            "DefaultIsRecorded",
+            "AssociationIsExplicit",
+            "NoImplicitMain"
+          ],
+          "limits": "Readout projection only. A change may keep identity, region, VPC, revision or availability constant, independently exercising stale responses. Bounded labels are not arbitrary refresh/ABA interleavings. Does not prove React scheduling, authentication, IAM/SQL/HTTP/XML, packet reachability, route edits, completeness or runtime refinement."
+        }
+      ]
+    },
+    {
+      "path": "tools/console/src/ec2-route-tables.mjs",
+      "sha256": "5e5481ee0af5d6a66983bcbd7003406468c731c5f571cd026f9eb0789edf5dce",
+      "disposition": "modeled",
+      "reason": "A bounded selection, fixed read and evidence-preserving projection apply to the selected route-table Console contract; the native API is unchanged.",
+      "models": [
+        {
+          "id": "EC2RouteTableConsoleEpoch",
+          "properties": [
+            "EligibleRead",
+            "FixedRead",
+            "StatusIsEvidence"
+          ],
+          "limits": "Readout projection only. A change may keep identity, region, VPC, revision or availability constant, independently exercising stale responses. Bounded labels are not arbitrary refresh/ABA interleavings. Does not prove React scheduling, authentication, IAM/SQL/HTTP/XML, packet reachability, route edits, completeness or runtime refinement."
+        }
+      ]
+    },
+    {
+      "path": "tools/console/src/ec2-vpc-route-tables.jsx",
+      "sha256": "571f71ba57db844ed87eb27487350931fdf6b087b3f9e48662ba9b4ada5912be",
+      "disposition": "modeled",
+      "reason": "A bounded selection, fixed read and evidence-preserving projection apply to the selected route-table Console contract; the native API is unchanged.",
+      "models": [
+        {
+          "id": "EC2RouteTableConsoleEpoch",
+          "properties": [
+            "CurrentIdentity",
+            "CurrentRegion",
+            "CurrentTarget",
+            "CurrentRevision",
+            "CurrentGate",
+            "StatusIsEvidence",
+            "DefaultIsRecorded",
+            "AssociationIsExplicit",
+            "NoImplicitMain"
+          ],
+          "limits": "Readout projection only. A change may keep identity, region, VPC, revision or availability constant, independently exercising stale responses. Bounded labels are not arbitrary refresh/ABA interleavings. Does not prove React scheduling, authentication, IAM/SQL/HTTP/XML, packet reachability, route edits, completeness or runtime refinement."
+        }
+      ]
+    },
+    {
+      "path": "tools/console/src/main.jsx",
+      "sha256": "33fcff89d6beb8fb3f6484996ee1d4734933b98fc56ca5fe94f80447dc139472",
+      "disposition": "modeled",
+      "reason": "A bounded selection, fixed read and evidence-preserving projection apply to the selected route-table Console contract; the native API is unchanged.",
+      "models": [
+        {
+          "id": "EC2RouteTableConsoleEpoch",
+          "properties": [
+            "EligibleRead",
+            "CurrentIdentity",
+            "CurrentRegion"
+          ],
+          "limits": "Readout projection only. A change may keep identity, region, VPC, revision or availability constant, independently exercising stale responses. Bounded labels are not arbitrary refresh/ABA interleavings. Does not prove React scheduling, authentication, IAM/SQL/HTTP/XML, packet reachability, route edits, completeness or runtime refinement."
+        }
+      ]
+    },
+    {
+      "path": "tools/console/test/ec2-route-tables.test.mjs",
+      "sha256": "0645f2aad1a28751e141540658723f7bc100f07252763f035b770b22f06a36a6",
+      "disposition": "presentation",
+      "reason": "Pinned production build provenance or focused component coverage; no independent state transition is introduced here.",
       "models": []
     }
   ]
