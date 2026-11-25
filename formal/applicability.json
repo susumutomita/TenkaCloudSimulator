@@ -1,116 +1,203 @@
 {
   "version": 1,
-  "base_sha": "27010d3660036036b6fdbd420c1a566f73794e87",
+  "base_sha": "df94e52673ebe9aaeb593c1f89abef16913dc130",
   "changes": [
     {
+      "path": ".github/workflows/ci.yml",
+      "sha256": "9f53b1f1e64c68e11372b84ef244569d1243f6050631c6569d6c4b84b80945dc",
+      "disposition": "formal-infrastructure",
+      "reason": "Execute focused Cloud DNS Node and actual React rendering tests after the existing pinned Console dependency install and rebuild. No new dependency, blanket E2E, or change to the formal job.",
+      "models": []
+    },
+    {
       "path": "README.md",
-      "sha256": "7680f230aa500173879e752f1fa6d5d792f7fbcbb1f6f995320c26ce54609ab8",
+      "sha256": "6859ec8e150d55e27788e8dfe71c1db74cb61d2365cb5effc7095adcf80d27d5",
       "disposition": "documentation",
-      "reason": "Documents local saved PTR names and reverse-lookup boundaries.",
+      "reason": "Documents the owner-only local SRV record editor, its entry point or its limits; no runtime operation.",
+      "models": []
+    },
+    {
+      "path": "docs/acceptance/gcp-cloud-dns.md",
+      "sha256": "6caff168859289ed4d2e38b9fba9832ec8dac43134e575934a0906171397c20e",
+      "disposition": "documentation",
+      "reason": "Documents the owner-only local SRV record editor, its entry point or its limits; no runtime operation.",
       "models": []
     },
     {
       "path": "docs/design/0001-go-standalone.md",
-      "sha256": "fc60b0c3e4cb94ca316b612b0796c9a9cfcb2d5cd9cc5bfaa2b870bcf17135cc",
+      "sha256": "5bf651488715678206b4b7119406f2ad5131e340d41f605103ecdcc8ce4fac9f",
       "disposition": "documentation",
-      "reason": "Documents local saved PTR names and reverse-lookup boundaries.",
+      "reason": "Documents the owner-only local SRV record editor, its entry point or its limits; no runtime operation.",
       "models": []
     },
     {
-      "path": "docs/route53.md",
-      "sha256": "1a4ba2b81e02638b045d7725528069fa030beb7a38940a516b2fc12d7f17686f",
-      "disposition": "documentation",
-      "reason": "Documents local saved PTR names and reverse-lookup boundaries.",
-      "models": []
-    },
-    {
-      "path": "internal/aws/route53_http.go",
-      "sha256": "3cb6c3f0e22324c44fbdbf1ff4e52a9318e2fad4121460af86c3407f8478a791",
-      "disposition": "modeled",
-      "reason": "PTR uses existing saved-name validation and authorized transactional record storage; the newly admitted record type does not change the transaction, authority or team boundary.",
-      "models": [
-        {
-          "id": "Route53AtomicBatch",
-          "properties": [
-            "AtomicPair",
-            "OnlyAuthorizedValid",
-            "OtherTeamUnchanged"
-          ],
-          "limits": "The finite pair model covers abstract admission and isolation, not PTR syntax, DNS type ordering, XML or Go/SQLite refinement; targeted native and SDK tests cover those implementation boundaries."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/route53_ptr_test.go",
-      "sha256": "e43d897b2c67dd05251942262d6f6909573978f6a6bc68f5a649dd0bf9932a0d",
+      "path": "internal/server/gcp_dns_handler_test.go",
+      "sha256": "b45ba78e2ad2eb3982fc0e4de5903f65451749d732ed2c8c39bf6fc4949b4672",
       "disposition": "test-support",
-      "reason": "Focused PTR acceptance or exact additive API description checks; does not change runtime.",
+      "reason": "Tracks the exact owner-only native capability descriptor; tests do not add an operation.",
       "models": []
     },
     {
-      "path": "internal/aws/route53_store.go",
-      "sha256": "af3834c964f3b8426b741cdd8e90aa5e8b6c2b5ed5827347ffd68c5d89be2f86",
+      "path": "internal/server/server.go",
+      "sha256": "1a572062b50e4264f3a18f02e39fe4b57979b937f7ee73e327a8764f1940cfa1",
       "disposition": "modeled",
-      "reason": "PTR uses existing saved-name validation and authorized transactional record storage; the newly admitted record type does not change the transaction, authority or team boundary.",
+      "reason": "Cloud DNS editor is offered only by the existing trusted-owner capability and uses the active zone view for local change/readback.",
       "models": [
         {
-          "id": "Route53AtomicBatch",
+          "id": "CloudDNSConsoleScope",
           "properties": [
-            "AtomicPair",
-            "OnlyAuthorizedValid",
-            "OtherTeamUnchanged"
+            "CapabilityAuthorized"
           ],
-          "limits": "The finite pair model covers abstract admission and isolation, not PTR syntax, DNS type ordering, XML or Go/SQLite refinement; targeted native and SDK tests cover those implementation boundaries."
+          "limits": "The existing finite owner/scope and stale-read model does not prove React rendering, SRV syntax, mutation success, native HTTP or SQLite; those behaviors have separately scoped tests."
         }
       ]
     },
     {
-      "path": "internal/server/apidocs/openapi.json",
-      "sha256": "1b4386f3102441a87e2339b94ee80a8c3ac355e53fd300833e400c6971190bce",
+      "path": "internal/server/web/app.css",
+      "sha256": "e0b74fd84601248100caa904e0e9f0e05724a1bf81025aaeb57d7bdb86e0a2eb",
       "disposition": "presentation",
-      "reason": "Embedded API reference lists the newly admitted simple PTR record type.",
+      "reason": "Scoped CSS or its shipped asset makes long SRV values wrap without truncation or changing native data.",
       "models": []
     },
     {
-      "path": "test/e2e/autoscaling_plans_openapi.py",
-      "sha256": "5845f59d71a0c3c98393a88e02ee6c426fb9ccb48e78017e5f61da17691316f7",
+      "path": "internal/server/web/app.js",
+      "sha256": "d67e5975510582954720bf88aeca810bfb3fd7156bc654c28dfa3d1f3ca1647b",
+      "disposition": "modeled",
+      "reason": "Cloud DNS editor is offered only by the existing trusted-owner capability and uses the active zone view for local change/readback.",
+      "models": [
+        {
+          "id": "CloudDNSConsoleScope",
+          "properties": [
+            "OnlyCurrentDiscovery",
+            "NoStaleContinuation"
+          ],
+          "limits": "The existing finite owner/scope and stale-read model does not prove React rendering, SRV syntax, mutation success, native HTTP or SQLite; those behaviors have separately scoped tests."
+        }
+      ]
+    },
+    {
+      "path": "test/e2e/gcp_dns_console_gui.py",
+      "sha256": "095de1b74d06b757282d35846e72726684aed0d4b7abf7844d3ad02c32cfc8e7",
       "disposition": "test-support",
-      "reason": "Focused PTR acceptance or exact additive API description checks; does not change runtime.",
+      "reason": "Tracks the exact owner-only native capability descriptor; tests do not add an operation.",
       "models": []
     },
     {
-      "path": "test/e2e/route53.py",
-      "sha256": "2cf7408c092cab8880b767571134eb88641cff4f3acd5f983f919c36df8300ca",
-      "disposition": "test-support",
-      "reason": "Focused PTR acceptance or exact additive API description checks; does not change runtime.",
+      "path": "tools/console/bundle-digests.json",
+      "sha256": "97d671f804afcd8990c20eeabe3025baafa31ccd909a71f45661f2a30106093b",
+      "disposition": "presentation",
+      "reason": "Implements, exercises or identifies the local structured SRV editor; no backend authority or DNS-serving semantics.",
       "models": []
     },
     {
-      "path": "test/e2e/route53_openapi.py",
-      "sha256": "8a6630e6d8ad099944cb3e2113a544cb3b0607c1451a9dd3dae45ec07ebfed97",
-      "disposition": "test-support",
-      "reason": "Focused PTR acceptance or exact additive API description checks; does not change runtime.",
+      "path": "tools/console/bundle-inputs.json",
+      "sha256": "ce9edf8d6be233fdfae709f39458ba2d5d94d4b210e6cebcf4db7abf0cbc067e",
+      "disposition": "presentation",
+      "reason": "Implements, exercises or identifies the local structured SRV editor; no backend authority or DNS-serving semantics.",
       "models": []
     },
     {
-      "path": "test/e2e/route53_ptr_reference.py",
-      "sha256": "1b5e9cd125ba529124c68d946adceb353a5804ffd610c1df4735757c2a3231dc",
-      "disposition": "test-support",
-      "reason": "Focused PTR acceptance or exact additive API description checks; does not change runtime.",
+      "path": "tools/console/src/console-navigation.mjs",
+      "sha256": "66a1079aa7919a40a795c022a25c186a8ed387b61af1a9a01e5186f1447525fc",
+      "disposition": "modeled",
+      "reason": "Cloud DNS editor is offered only by the existing trusted-owner capability and uses the active zone view for local change/readback.",
+      "models": [
+        {
+          "id": "CloudDNSConsoleScope",
+          "properties": [
+            "CapabilityAuthorized",
+            "OnlyCurrentDiscovery"
+          ],
+          "limits": "The existing finite owner/scope and stale-read model does not prove React rendering, SRV syntax, mutation success, native HTTP or SQLite; those behaviors have separately scoped tests."
+        }
+      ]
+    },
+    {
+      "path": "tools/console/src/gcp-dns-requests.mjs",
+      "sha256": "3b45f1063101f623078c8332fde9a59eac50bf5017e85a6438f3351401f7a94e",
+      "disposition": "modeled",
+      "reason": "Cloud DNS editor is offered only by the existing trusted-owner capability and uses the active zone view for local change/readback.",
+      "models": [
+        {
+          "id": "CloudDNSConsoleScope",
+          "properties": [
+            "NoStaleContinuation"
+          ],
+          "limits": "The existing finite owner/scope and stale-read model does not prove React rendering, SRV syntax, mutation success, native HTTP or SQLite; those behaviors have separately scoped tests."
+        }
+      ]
+    },
+    {
+      "path": "tools/console/src/gcp-dns-srv-form.jsx",
+      "sha256": "592e38d6f4e55cfa19184c4ab44b19cd9c41184b8c912075c3b3216da162efa7",
+      "disposition": "presentation",
+      "reason": "Implements, exercises or identifies the local structured SRV editor; no backend authority or DNS-serving semantics.",
       "models": []
     },
     {
-      "path": "test/e2e/test_route53_openapi.py",
-      "sha256": "1daaee9399804b1017b100cb598eaf409cdf616f29b4526e14808e1ca59b0982",
-      "disposition": "test-support",
-      "reason": "Focused PTR acceptance or exact additive API description checks; does not change runtime.",
+      "path": "tools/console/src/gcp-dns-srv.css",
+      "sha256": "c9a6a669eb7a34fc4090ccc56f8bb2446845e9f6b12068f713cc9e5afb6b2097",
+      "disposition": "presentation",
+      "reason": "Scoped CSS or its shipped asset makes long SRV values wrap without truncation or changing native data.",
       "models": []
     },
     {
-      "path": "test/e2e/test_sakura_openapi.py",
-      "sha256": "8575f9f42ed9fa27cd80e469c79ec3cedcea31731e0c1601e86ccb063cf74e04",
-      "disposition": "test-support",
-      "reason": "Focused PTR acceptance or exact additive API description checks; does not change runtime.",
+      "path": "tools/console/src/gcp-dns-srv.mjs",
+      "sha256": "fd41dde38a1bd0913fcbbc549423d20632bebbba95f407a38a773ab87df7b6ed",
+      "disposition": "presentation",
+      "reason": "Implements, exercises or identifies the local structured SRV editor; no backend authority or DNS-serving semantics.",
+      "models": []
+    },
+    {
+      "path": "tools/console/src/gcp-dns.jsx",
+      "sha256": "210c6b31fa2f4132587551c332108ebe63971f3054f75cfe01681afc5b76697a",
+      "disposition": "modeled",
+      "reason": "Cloud DNS editor is offered only by the existing trusted-owner capability and uses the active zone view for local change/readback.",
+      "models": [
+        {
+          "id": "CloudDNSConsoleScope",
+          "properties": [
+            "OnlyCurrentReadVisible",
+            "NoStaleContinuation"
+          ],
+          "limits": "The existing finite owner/scope and stale-read model does not prove React rendering, SRV syntax, mutation success, native HTTP or SQLite; those behaviors have separately scoped tests."
+        }
+      ]
+    },
+    {
+      "path": "tools/console/src/main.jsx",
+      "sha256": "80ec19822530fb17f8fdcdfc876d22d7b1782626a1fc33a79e594f689f63fe29",
+      "disposition": "modeled",
+      "reason": "Cloud DNS editor is offered only by the existing trusted-owner capability and uses the active zone view for local change/readback.",
+      "models": [
+        {
+          "id": "CloudDNSConsoleScope",
+          "properties": [
+            "OnlyCurrentDiscovery"
+          ],
+          "limits": "The existing finite owner/scope and stale-read model does not prove React rendering, SRV syntax, mutation success, native HTTP or SQLite; those behaviors have separately scoped tests."
+        }
+      ]
+    },
+    {
+      "path": "tools/console/test/gcp-dns-navigation.test.mjs",
+      "sha256": "86b0b19917c784526effe51f780d365ef26c4dc7826b0d9f73bc82c20b48fad2",
+      "disposition": "presentation",
+      "reason": "Implements, exercises or identifies the local structured SRV editor; no backend authority or DNS-serving semantics.",
+      "models": []
+    },
+    {
+      "path": "tools/console/test/gcp-dns-srv-render.test.mjs",
+      "sha256": "7485b484aeecb8f3b12f2a1b1e946b3a667da1cc115cbf13079dbfdb4edd29d0",
+      "disposition": "presentation",
+      "reason": "Implements, exercises or identifies the local structured SRV editor; no backend authority or DNS-serving semantics.",
+      "models": []
+    },
+    {
+      "path": "tools/console/test/gcp-dns-srv.test.mjs",
+      "sha256": "207c5510b5bbb29cd8fde16ecfa7b5c526a24df83849516d248e0d802e0c6dab",
+      "disposition": "presentation",
+      "reason": "Implements, exercises or identifies the local structured SRV editor; no backend authority or DNS-serving semantics.",
       "models": []
     }
   ]

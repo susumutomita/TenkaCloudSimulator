@@ -27,7 +27,7 @@ OWNER = 'simulator-admin'
 ALTERNATE = 'dns-gui-nonowner'
 CAPS = '/_simulator/v1/capabilities'
 COLLECTION = '/_simulator/providers/gcp/dns/v1/projects/' + PROJECT + '/managedZones'
-OPS = {'managedZones.list', 'managedZones.create', 'managedZones.get', 'resourceRecordSets.list'}
+OPS = {'managedZones.list', 'managedZones.create', 'managedZones.get', 'resourceRecordSets.list', 'changes.create'}
 
 
 def require(condition, reason):

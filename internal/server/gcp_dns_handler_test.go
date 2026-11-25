@@ -230,7 +230,7 @@ func TestGCPDNSHandlerConsoleCapability(t *testing.T) {
 		"api":        "dns.v1",
 		"project":    h.project,
 		"endpoint":   h.root(),
-		"operations": []string{"managedZones.list", "managedZones.create", "managedZones.get", "resourceRecordSets.list"},
+		"operations": []string{"managedZones.list", "managedZones.create", "managedZones.get", "resourceRecordSets.list", "changes.create"},
 	}
 	for _, tc := range []struct {
 		name, token, selected string

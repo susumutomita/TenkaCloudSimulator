@@ -326,7 +326,7 @@ func addGCPDNSConsoleCapability(r *http.Request, capabilities map[string]any, cf
 		"api":        "dns.v1",
 		"project":    cfg.GCPProject,
 		"endpoint":   "/_simulator/providers/gcp/dns/v1/projects/" + cfg.GCPProject + "/managedZones",
-		"operations": []string{"managedZones.list", "managedZones.create", "managedZones.get", "resourceRecordSets.list"},
+		"operations": []string{"managedZones.list", "managedZones.create", "managedZones.get", "resourceRecordSets.list", "changes.create"},
 	}
 }
 

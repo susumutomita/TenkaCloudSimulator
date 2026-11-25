@@ -1,16 +1,17 @@
 import React, {useContext, useEffect, useId, useMemo, useRef, useState} from 'react';
 import {useLocale} from './i18n.jsx';
 import {GCPConsoleContext} from './gcp-console-shell.jsx';
-import {cloudDNS, zoneBody} from './gcp-dns-requests.mjs';
+import {cloudDNS, saveAndReadSRV, zoneBody} from './gcp-dns-requests.mjs';
+import SRVForm from './gcp-dns-srv-form.jsx';
 import './gcp-storage.css';
 
 const blankZone = {name: '', dnsName: '', description: ''};
 
-export default function GCPDNSView({request, project}) {
-  return <ZoneScreen key={project} request={request} project={project}/>;
+export default function GCPDNSView({request, project, canEditSRV = false}) {
+  return <ZoneScreen key={JSON.stringify([project, canEditSRV])} request={request} project={project} canEditSRV={canEditSRV}/>;
 }
 
-function ZoneScreen({request, project}) {
+function ZoneScreen({request, project, canEditSRV}) {
   const {t} = useLocale();
   const id = useId();
   const shell = useContext(GCPConsoleContext);
@@ -24,6 +25,9 @@ function ZoneScreen({request, project}) {
   const [created, setCreated] = useState('');
   const [loading, setLoading] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [editor, setEditor] = useState(null);
+  const [mustRefresh, setMustRefresh] = useState(false);
+  const [srvNotice, setSRVNotice] = useState('');
   const current = useRef(null);
   const writing = useRef(false);
 
@@ -40,6 +44,7 @@ function ZoneScreen({request, project}) {
   async function loadZones() {
     if (writing.current) return;
     const handle = begin();
+    setEditor(null); setMustRefresh(false); setSRVNotice('');
     setPage('list'); setZones([]); setSelected(''); setDetail(null);
     setLoading(true); setCreated('');
     try {
@@ -55,6 +60,7 @@ function ZoneScreen({request, project}) {
   async function choose(zoneID) {
     if (writing.current) return;
     const handle = begin();
+    setEditor(null); setMustRefresh(false); setSRVNotice('');
     setPage('detail'); setSelected(zoneID); setDetail(null); setLoading(true);
     try {
       const data = await api.details(zoneID, handle.signal);
@@ -104,6 +110,23 @@ function ZoneScreen({request, project}) {
     }
     setCreated(zone.name);
     await choose(zone.id);
+  }
+
+  async function saveSRV(previous, next) {
+    if (!canEditSRV || !editor || !detail || writing.current || mustRefresh) return;
+    const handle = begin(), id = detail.zone.id;
+    writing.current = true; setBusy(true); setSRVNotice('');
+    try {
+      const fresh = await saveAndReadSRV(api, id, previous, next, handle.signal);
+      if (!active(handle)) return;
+      setDetail(fresh); setSRVNotice((previous || next).name);
+    } catch (cause) {
+      // An interrupted response may follow a committed write. Never replay it
+      // or replace the original with a new snapshot on the user's behalf.
+      if (active(handle)) { setError(cause.message); setMustRefresh(true); }
+    } finally {
+      if (active(handle)) { writing.current = false; setBusy(false); setEditor(null); }
+    }
   }
 
   const field = key => ({value: form[key], onChange: e => setForm({...form, [key]: e.target.value})});
@@ -165,9 +188,9 @@ function ZoneScreen({request, project}) {
     </form>}
     {page === 'detail' && <>
       <div className="gcp-storage-toolbar">
-        <button type="button" className="gcp-storage-link" onClick={loadZones}>{t('Back to zones', 'ゾーン一覧に戻る')}</button>
+        <button type="button" className="gcp-storage-link" disabled={busy} onClick={loadZones}>{t('Back to zones', 'ゾーン一覧に戻る')}</button>
         <h2>{t('Zone details', 'ゾーンの詳細')}{detail ? ': ' + detail.zone.name : ''}</h2>
-        <button type="button" disabled={loading} onClick={() => choose(selected)}>{t('Refresh', '更新')}</button>
+        <button type="button" disabled={loading || busy} onClick={() => choose(selected)}>{t('Refresh', '更新')}</button>
       </div>
       {detail && <>
         <dl className="gcp-storage-metadata">
@@ -176,13 +199,22 @@ function ZoneScreen({request, project}) {
           <dt>{t('Description', '説明')}</dt><dd>{detail.zone.description || '—'}</dd>
           <dt>{t('Name servers (simulated)', 'ネームサーバー（模擬）')}</dt><dd>{detail.zone.nameServers.join(', ')}</dd>
         </dl>
+        {srvNotice && <p role="status" className="gcp-storage-notice">{t('Verified SRV change: ', 'SRV の変更を確認: ')}{srvNotice}</p>}
+        {mustRefresh && <p role="status">{t('Refresh the zone before making another change.', '次の変更を行う前にゾーンを更新してください。')}</p>}
         <h3 id={id + '-records'}>{t('Record sets', 'レコードセット')}</h3>
+        {canEditSRV && !editor && <button type="button" disabled={mustRefresh} onClick={() => { setSRVNotice(''); setEditor({mode:'create', record:null}); }}>{t('Add SRV record', 'SRV レコードを追加')}</button>}
+        {canEditSRV && editor && <SRVForm mode={editor.mode} original={editor.record} zone={detail.zone.dnsName}
+          busy={busy} onCancel={() => setEditor(null)} onSave={saveSRV}/>}
         <div className="gcp-storage-table-scroll" role="region" aria-labelledby={id + '-records'} tabIndex={0}>
           <table>
             <thead><tr><th scope="col">{t('DNS name', 'DNS 名')}</th><th scope="col">{t('Type', 'タイプ')}</th>
-              <th scope="col">TTL</th><th scope="col">{t('Data', 'データ')}</th></tr></thead>
+              <th scope="col">TTL</th><th scope="col">{t('Data', 'データ')}</th>{canEditSRV && <th scope="col">{t('Actions', '操作')}</th>}</tr></thead>
             <tbody>{detail.records.map(record => <tr key={record.name + '/' + record.type}>
               <th scope="row">{record.name}</th><td>{record.type}</td><td>{record.ttl}</td><td>{record.rrdatas.join(', ')}</td>
+              {canEditSRV && <td>{record.type === 'SRV' && ['edit','delete'].map(mode => <button type="button" key={mode}
+                disabled={!!editor || mustRefresh} onClick={() => { setSRVNotice(''); setEditor({mode, record}); }}
+                aria-label={(mode === 'edit' ? t('Edit', '編集') : t('Delete', '削除')) + ' ' + record.name}>
+                {mode === 'edit' ? t('Edit', '編集') : t('Delete', '削除')}</button>)}</td>}
             </tr>)}</tbody>
           </table>
         </div>
