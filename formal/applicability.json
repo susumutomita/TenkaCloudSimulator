@@ -1,378 +1,209 @@
 {
   "version": 1,
-  "base_sha": "3bb757f1ffbabd0c7f101811b4c623d92bea6e4e",
+  "base_sha": "0f215f10081716ee5afaef90afa03d69a00c350d",
   "changes": [
     {
+      "path": ".github/workflows/ci.yml",
+      "sha256": "2f72b96a594ea9b59fb484eb2946998ac43d135732a6f8a111bad58d8bef691a",
+      "disposition": "formal-infrastructure",
+      "reason": "Adds two focused offline Node SNS contract checks to existing normal checks; does not trigger aggregate or browser E2E.",
+      "models": []
+    },
+    {
       "path": "README.md",
-      "sha256": "cab02548a644997cb164fec508e795f35d1633de3aa1e58551cdd17181658603",
+      "sha256": "50ff4802f3df2c9a4028441e63c67e3884c47c39e5b60e78173342e279f5b80a",
       "disposition": "documentation",
-      "reason": "Links the bounded Azure Queue contract without replacing the current Azure Blob read guides.",
-      "models": []
-    },
-    {
-      "path": "docs/acceptance/azure-queue.md",
-      "sha256": "b8f78261714f4a7c2aba590361eb2919f8144b7128454b19f2b2eba34f171c01",
-      "disposition": "documentation",
-      "reason": "Documents exact local operations, supported boundaries and history, and separates optional runtime/SDK evidence from normal CI.",
-      "models": []
-    },
-    {
-      "path": "docs/contributing/software-factory.md",
-      "sha256": "4ab628e2126a497c1a84c453ec37b28d92eea7ca6ddc848c00fcf372c6ed4f4c",
-      "disposition": "documentation",
-      "reason": "Documents the bounded Queue data-plane implementation, operational limits or acceptance method; does not alter runtime operations.",
+      "reason": "Advertises the bounded SNS increment while retaining current Azure Blob/S3 entries. Preserves the merged Azure Queue and selected-exercise reference scope.",
       "models": []
     },
     {
       "path": "docs/design/0001-go-standalone.md",
-      "sha256": "2b595912457139e5f62e880d6ca71949081d3eaf939f87f08d675470aaf656fb",
+      "sha256": "701e4a0def27ba786f032be82060cbeb1939e90e3cdbb5f88ec778bd3d573f20",
       "disposition": "documentation",
-      "reason": "Describes the independent owner-bound Queue and persistence contract alongside current Azure Blob profiles.",
+      "reason": "Documents local SNS IAM/read-back and fixed Scalar identity without modifying the concurrent Azure contracts. Preserves the merged Azure Queue and selected-exercise reference scope.",
       "models": []
     },
     {
-      "path": "formal/AzureQueueLifecycle.cfg",
-      "sha256": "3ad1ef0aa84c12b3769878c643a349cf02394b42eef52208ad69d5dc5f9769c3",
+      "path": "docs/sns.md",
+      "sha256": "e3764d8ca26794b53942a654b475a047e930c7e37886c87e3011275a05618d7c",
+      "disposition": "documentation",
+      "reason": "Documents exact retained read-back, local-only endpoint metadata, optional console/reference, and historical fanout evidence without a full provider claim.",
+      "models": []
+    },
+    {
+      "path": "formal/SNSConsoleResponseAdmission.cfg",
+      "sha256": "5c2094bf4461e821029099b59e146d9632294e167d24df9f6f8608104b331d95",
       "disposition": "modeled",
-      "reason": "Finite Queue row transition model and pinned bounds.",
+      "reason": "Finite capability/mount/observable stale-response specification and exact bound.",
       "models": [
         {
-          "id": "AzureQueueLifecycle",
+          "id": "SNSConsoleResponseAdmission",
           "properties": [
-            "Isolation",
-            "Rotation",
-            "ReceiptRequired",
-            "ExpiryGuard",
-            "VisibilityAdvance"
+            "MountRequiresCapabilityAndNoHandoff",
+            "KeyedOwnerMatchesScope",
+            "OnlyOneCurrentFlight",
+            "OnlyCurrentTopicUpdates"
           ],
-          "limits": "Includes normalized frame and receipt transitions. Selected conditional Queue row transitions only. Does not establish Go/SQLite refinement, real storage commit behavior, authentication, owner resolution, serialization, crypto, transport, TTL beyond the finite clock, account-wide limits, metadata, multiple messages/queues, list semantics, quotas, browser, SDK or liveness. Handler/protocol mapping covers only pre-normalized visibility and current/stale receipt decisions. Composition mapping covers only independent selected owner frames; the trusted actor and route are assumptions, not modeled auth."
+          "limits": "Only SNS-visible state, not global login or Scalar. Bound only visible SNS console hook state, projected typed capability and valid per-topic selection labels. Instance and topic revision are ghost labels, not invented callback-generation checks. No theorem about React or JS scheduling/code refinement, backend AWS IAM, parser/wire, final remote write outcome, shared 401 redirect/onSaving side effects, capability refresh, actual browser/keyboard, or build correctness. Scalar is signed-in session and fixed us-east-1, not Console principal/region parity; it is not modeled."
         }
       ]
     },
     {
-      "path": "formal/AzureQueueLifecycle.tla",
-      "sha256": "ea8949bfe309a0855272770e81f0a7c25b6c64a068cc9b878e7da2a3e3446981",
+      "path": "formal/SNSConsoleResponseAdmission.tla",
+      "sha256": "49c623cee74750685a5b429bfc44c713f220a9a8d42f1659393e71fc21cfb42e",
       "disposition": "modeled",
-      "reason": "Finite Queue row transition model and pinned bounds.",
+      "reason": "Finite capability/mount/observable stale-response specification and exact bound.",
       "models": [
         {
-          "id": "AzureQueueLifecycle",
+          "id": "SNSConsoleResponseAdmission",
           "properties": [
-            "Isolation",
-            "Rotation",
-            "ReceiptRequired",
-            "ExpiryGuard",
-            "VisibilityAdvance"
+            "MountRequiresCapabilityAndNoHandoff",
+            "KeyedOwnerMatchesScope",
+            "OnlyOneCurrentFlight",
+            "OnlyCurrentTopicUpdates"
           ],
-          "limits": "Includes normalized frame and receipt transitions. Selected conditional Queue row transitions only. Does not establish Go/SQLite refinement, real storage commit behavior, authentication, owner resolution, serialization, crypto, transport, TTL beyond the finite clock, account-wide limits, metadata, multiple messages/queues, list semantics, quotas, browser, SDK or liveness. Handler/protocol mapping covers only pre-normalized visibility and current/stale receipt decisions. Composition mapping covers only independent selected owner frames; the trusted actor and route are assumptions, not modeled auth."
+          "limits": "Only SNS-visible state, not global login or Scalar. Bound only visible SNS console hook state, projected typed capability and valid per-topic selection labels. Instance and topic revision are ghost labels, not invented callback-generation checks. No theorem about React or JS scheduling/code refinement, backend AWS IAM, parser/wire, final remote write outcome, shared 401 redirect/onSaving side effects, capability refresh, actual browser/keyboard, or build correctness. Scalar is signed-in session and fixed us-east-1, not Console principal/region parity; it is not modeled."
         }
       ]
     },
     {
-      "path": "formal/AzureQueueOwnerAccess.cfg",
-      "sha256": "8f8d7ce9f66523de4ffe7151f31b1043280d0109d89506962e0d371fe27212ff",
+      "path": "formal/SNSSubscriptionReadback.cfg",
+      "sha256": "3b425e677968bd2214eacf7304675262601a57a8c1346539341e491ba839bb71",
       "disposition": "modeled",
-      "reason": "Finite Queue owner discovery and guarded reference model.",
+      "reason": "Finite request/retained subscription/read-frame specification and exact bound.",
       "models": [
         {
-          "id": "AzureQueueOwnerAccess",
+          "id": "SNSSubscriptionReadback",
           "properties": [
-            "DiscoveryAuthority",
-            "OnlyCurrentDiscovery",
-            "ReferenceAccountIsConfigured",
-            "NativePermissionBoundary"
+            "LookupRequiresAuthorization",
+            "RetainedJoinIsExact",
+            "NoAuditResurrection",
+            "ReplyMatchesSnapshot"
           ],
-          "limits": "Inputs are normalized, not trusted by their syntax. Models only normalized owner/actor decisions, selected discovery epoch and matching principal, configured account projection in the dynamic spec enum/default, and native admission independent of UI visibility. Does not prove token handling, actual Go/React/SQLite refinement, URL parsing, whole schema, SDK, browser, route transport, runtime or liveness. Embedded bundle binding is the generated projection of the exact source guards, not a model of the build system or JavaScript event delivery."
+          "limits": "Finite normal and defensive stores, not production DB reachability. Models only GetSubscriptionAttributes after common Query/session admission and successful IAM policy snapshot. ARN grammar/account, IAM eval/time, SQLite isolation/refinement, XML serialization, retry/crash/new-writer behavior and real cloud/SDK compatibility are not proved. Delete/unsubscribe are bounded environment witnesses; inconsistent storage seeds are defensive, not healthy reachability claims. No HTTP(S) admission, publish, external delivery or liveness claim."
         }
       ]
     },
     {
-      "path": "formal/AzureQueueOwnerAccess.tla",
-      "sha256": "eef883db2ad6b405303a986d7abf79255cb1df116d721bed85c3edfa19a86899",
+      "path": "formal/SNSSubscriptionReadback.tla",
+      "sha256": "e99d6151826e25469b01070ce58ac3015a34bc7bc17eb960ada46a00f8bf6b90",
       "disposition": "modeled",
-      "reason": "Finite Queue owner discovery and guarded reference model.",
+      "reason": "Finite request/retained subscription/read-frame specification and exact bound.",
       "models": [
         {
-          "id": "AzureQueueOwnerAccess",
+          "id": "SNSSubscriptionReadback",
           "properties": [
-            "DiscoveryAuthority",
-            "OnlyCurrentDiscovery",
-            "ReferenceAccountIsConfigured",
-            "NativePermissionBoundary"
+            "LookupRequiresAuthorization",
+            "RetainedJoinIsExact",
+            "NoAuditResurrection",
+            "ReplyMatchesSnapshot"
           ],
-          "limits": "Inputs are normalized, not trusted by their syntax. Models only normalized owner/actor decisions, selected discovery epoch and matching principal, configured account projection in the dynamic spec enum/default, and native admission independent of UI visibility. Does not prove token handling, actual Go/React/SQLite refinement, URL parsing, whole schema, SDK, browser, route transport, runtime or liveness. Embedded bundle binding is the generated projection of the exact source guards, not a model of the build system or JavaScript event delivery."
+          "limits": "Finite normal and defensive stores, not production DB reachability. Models only GetSubscriptionAttributes after common Query/session admission and successful IAM policy snapshot. ARN grammar/account, IAM eval/time, SQLite isolation/refinement, XML serialization, retry/crash/new-writer behavior and real cloud/SDK compatibility are not proved. Delete/unsubscribe are bounded environment witnesses; inconsistent storage seeds are defensive, not healthy reachability claims. No HTTP(S) admission, publish, external delivery or liveness claim."
         }
       ]
     },
     {
       "path": "formal/models.json",
-      "sha256": "c82389fce81d94c5eff1ae81ff8725c20d5759644c2bf202ad1be9743932d78b",
+      "sha256": "9b6df8b63694e84cad4852e9f0fd52dca249763700c61d23ed48e3f9427d73c4",
       "disposition": "formal-infrastructure",
-      "reason": "Retains all 127 current-main model registrations and appends the original Azure Queue lifecycle and owner-boundary entries.",
+      "reason": "Retains all current main registry entries verbatim and appends two exact SNS-specific registrations.",
       "models": []
     },
     {
-      "path": "internal/azure/queue/expiry_quota_test.go",
-      "sha256": "9b10ed5fe8e8a0cc89de73e12ddc5068c8c33e2c4d347ab3e101c649495053e8",
+      "path": "internal/aws/sns.go",
+      "sha256": "8906525028e097b069f6b75d85c603106f65baf6ee6ed7a6fe52d0628ae5502e",
       "disposition": "modeled",
-      "reason": "Native test exercises at least one corresponding lifecycle invariant, while unsupported or unmodeled data uses separate Go assertions.",
+      "reason": "Native handler normalizes HTTP/HTTPS endpoint acceptance and handles exact parent/region readback before touching state.",
       "models": [
         {
-          "id": "AzureQueueLifecycle",
+          "id": "SNSAdmission",
           "properties": [
-            "Isolation",
-            "ReceiptRequired",
-            "ExpiryGuard",
-            "ReadRollbackDurable"
+            "NoSuccessOnRefusal",
+            "NoRejectedMutation",
+            "NoRegionMismatch"
           ],
-          "limits": "Open-ended quota, storage failure, wire semantics and HTTP authority are separate tests, not TLC proof. Selected conditional Queue row transitions only. Does not establish Go/SQLite refinement, real storage commit behavior, authentication, owner resolution, serialization, crypto, transport, TTL beyond the finite clock, account-wide limits, metadata, multiple messages/queues, list semantics, quotas, browser, SDK or liveness. Handler/protocol mapping covers only pre-normalized visibility and current/stale receipt decisions. Composition mapping covers only independent selected owner frames; the trusted actor and route are assumptions, not modeled auth."
-        }
-      ]
-    },
-    {
-      "path": "internal/azure/queue/factory_delete_oracle_test.go",
-      "sha256": "4aae30d466e3407541c9b23cc07ee51b764fe52d2645b1cfae0a0d785f1318a1",
-      "disposition": "test-support",
-      "reason": "Developer/test-only acceptance, detector or peer regression; existing nonformal test classification, not runtime code.",
-      "models": []
-    },
-    {
-      "path": "internal/azure/queue/factory_lifecycle_test.go",
-      "sha256": "98d58a0070af75ab25d64d66a048f9843b4eb1814a62d30f0e72ce75ee01ff32",
-      "disposition": "test-support",
-      "reason": "Developer/test-only acceptance, detector or peer regression; existing nonformal test classification, not runtime code.",
-      "models": []
-    },
-    {
-      "path": "internal/azure/queue/handler.go",
-      "sha256": "8c87764b88ac9206fe7eec2bdb877badeaa086a5b4096008be7dc675204637f1",
-      "disposition": "modeled",
-      "reason": "Native Queue dispatch selects the authorized owner and normalized action before running a row operation.",
-      "models": [
-        {
-          "id": "AzureQueueOwnerAccess",
-          "properties": [
-            "NativePermissionBoundary"
-          ],
-          "limits": "Covers native admission as different from mere visibility. Models only normalized owner/actor decisions, selected discovery epoch and matching principal, configured account projection in the dynamic spec enum/default, and native admission independent of UI visibility. Does not prove token handling, actual Go/React/SQLite refinement, URL parsing, whole schema, SDK, browser, route transport, runtime or liveness. Embedded bundle binding is the generated projection of the exact source guards, not a model of the build system or JavaScript event delivery."
+          "limits": "URL grammar and protocol matching remain separate native tests; the model sees normalized valid/invalid. Boolean admission witnesses abstract actual Go parsing/attributes/Subject/UTF-8/body sizes/signature syntax, IAM matching and region/resource lookup. Validated dispatch permits metadata writes; no initialization, credential, SQL, real SDK or Go refinement proof. Shared Gateway/server file bindings cover SNS registration/admission only, preserving all other providers/services. Actual malformed Query and immutable-state/region/SDK/SQL regressions remain separate evidence."
         },
         {
-          "id": "AzureQueueLifecycle",
+          "id": "SNSSubscriptionReadback",
           "properties": [
-            "ReceiptRequired",
-            "ExpiryGuard",
-            "UpdateReceipt"
+            "AuthorizationTargetsParent",
+            "LookupRequiresAuthorization",
+            "ReplyMatchesSnapshot",
+            "OnlySuccessReturnsAttributes"
           ],
-          "limits": "Binds the decisions once method/path/receipt have been parsed. Selected conditional Queue row transitions only. Does not establish Go/SQLite refinement, real storage commit behavior, authentication, owner resolution, serialization, crypto, transport, TTL beyond the finite clock, account-wide limits, metadata, multiple messages/queues, list semantics, quotas, browser, SDK or liveness. Handler/protocol mapping covers only pre-normalized visibility and current/stale receipt decisions. Composition mapping covers only independent selected owner frames; the trusted actor and route are assumptions, not modeled auth."
+          "limits": "Binds normalized authorization order and typed reply only. Models only GetSubscriptionAttributes after common Query/session admission and successful IAM policy snapshot. ARN grammar/account, IAM eval/time, SQLite isolation/refinement, XML serialization, retry/crash/new-writer behavior and real cloud/SDK compatibility are not proved. Delete/unsubscribe are bounded environment witnesses; inconsistent storage seeds are defensive, not healthy reachability claims. No HTTP(S) admission, publish, external delivery or liveness claim."
         }
       ]
     },
     {
-      "path": "internal/azure/queue/handler_test.go",
-      "sha256": "efd4b26479b3e8ed373c8f666ab1f079f5a7d00490716997ec10923427f21544",
-      "disposition": "modeled",
-      "reason": "Native test exercises at least one corresponding lifecycle invariant, while unsupported or unmodeled data uses separate Go assertions.",
-      "models": [
-        {
-          "id": "AzureQueueLifecycle",
-          "properties": [
-            "Isolation",
-            "ReceiptRequired",
-            "ExpiryGuard",
-            "ReadRollbackDurable"
-          ],
-          "limits": "Open-ended quota, storage failure, wire semantics and HTTP authority are separate tests, not TLC proof. Selected conditional Queue row transitions only. Does not establish Go/SQLite refinement, real storage commit behavior, authentication, owner resolution, serialization, crypto, transport, TTL beyond the finite clock, account-wide limits, metadata, multiple messages/queues, list semantics, quotas, browser, SDK or liveness. Handler/protocol mapping covers only pre-normalized visibility and current/stale receipt decisions. Composition mapping covers only independent selected owner frames; the trusted actor and route are assumptions, not modeled auth."
-        }
-      ]
-    },
-    {
-      "path": "internal/azure/queue/openapi.go",
-      "sha256": "34e7dd33ef5e307b824bca6d9ed29511c8c13752d691c189d73806e244b3ffd0",
-      "disposition": "modeled",
-      "reason": "Binds only the generated account enum/default projection to the owner model; generated route/schema shape is not proved.",
-      "models": [
-        {
-          "id": "AzureQueueOwnerAccess",
-          "properties": [
-            "ReferenceAccountIsConfigured"
-          ],
-          "limits": "Only the fixed configured account projection is modeled. Models only normalized owner/actor decisions, selected discovery epoch and matching principal, configured account projection in the dynamic spec enum/default, and native admission independent of UI visibility. Does not prove token handling, actual Go/React/SQLite refinement, URL parsing, whole schema, SDK, browser, route transport, runtime or liveness. Embedded bundle binding is the generated projection of the exact source guards, not a model of the build system or JavaScript event delivery."
-        }
-      ]
-    },
-    {
-      "path": "internal/azure/queue/openapi_test.go",
-      "sha256": "f29c2429db5e88c9435066dcd5f9af218b83fcf43a46999637680a86d0127a47",
+      "path": "internal/aws/sns_http_endpoint_test.go",
+      "sha256": "d042b0a134b89e01d999e7684378cb57ca85b51a8fd6bcea4bc90c8fa98be6a9",
       "disposition": "test-support",
-      "reason": "Developer/test-only acceptance, detector or peer regression; existing nonformal test classification, not runtime code.",
+      "reason": "Developer-only test entry point, regression or negative control; not simulator runtime.",
       "models": []
     },
     {
-      "path": "internal/azure/queue/peek_wire_test.go",
-      "sha256": "f7f393b306361b944e9a5eaf8fe71d8c4105bcf95cd83a26ee896859709217ba",
-      "disposition": "test-support",
-      "reason": "Developer/test-only acceptance, detector or peer regression; existing nonformal test classification, not runtime code.",
-      "models": []
-    },
-    {
-      "path": "internal/azure/queue/peek_zero_oracle_test.go",
-      "sha256": "8664a07d7d258cb37f26bba2bd8982fd024492ec171df743d235d2c2eb6f16e6",
-      "disposition": "test-support",
-      "reason": "Developer/test-only acceptance, detector or peer regression; existing nonformal test classification, not runtime code.",
-      "models": []
-    },
-    {
-      "path": "internal/azure/queue/protocol.go",
-      "sha256": "99af0288543c750c733c804ff3c225822b13425136f65794ceb9657d05a699d7",
+      "path": "internal/aws/sns_store.go",
+      "sha256": "dc307f4c207e9448f09b4306df77331d2ad5970f17d0a352e230d7542382e023",
       "disposition": "modeled",
-      "reason": "Maps wire visibility and receipt witnesses to the normalized model inputs; actual XML acceptance remains tested in Go.",
+      "reason": "Atomic joined readback constrains the stored subscription to exact ARN, parent and resolved region, without mutation or history fallback.",
       "models": [
         {
-          "id": "AzureQueueLifecycle",
+          "id": "SNSSubscriptionReadback",
           "properties": [
-            "VisibilityAdvance",
-            "UpdateReceipt",
-            "InvalidUpdate"
+            "ReadDoesNotChangeStore",
+            "RetainedJoinIsExact",
+            "NoAuditResurrection",
+            "ReplyMatchesSnapshot"
           ],
-          "limits": "Opaque epoch abstractly stands for the current receipt, not format or entropy. Selected conditional Queue row transitions only. Does not establish Go/SQLite refinement, real storage commit behavior, authentication, owner resolution, serialization, crypto, transport, TTL beyond the finite clock, account-wide limits, metadata, multiple messages/queues, list semantics, quotas, browser, SDK or liveness. Handler/protocol mapping covers only pre-normalized visibility and current/stale receipt decisions. Composition mapping covers only independent selected owner frames; the trusted actor and route are assumptions, not modeled auth."
+          "limits": "A single logical snapshot is assumed; query grammar and SQL faults are native tests. Models only GetSubscriptionAttributes after common Query/session admission and successful IAM policy snapshot. ARN grammar/account, IAM eval/time, SQLite isolation/refinement, XML serialization, retry/crash/new-writer behavior and real cloud/SDK compatibility are not proved. Delete/unsubscribe are bounded environment witnesses; inconsistent storage seeds are defensive, not healthy reachability claims. No HTTP(S) admission, publish, external delivery or liveness claim."
         }
       ]
     },
     {
-      "path": "internal/azure/queue/protocol_test.go",
-      "sha256": "7970504415a893e82cdf1ab952871a70fd9ccc11e1feb3491f99d92d1891e90d",
-      "disposition": "test-support",
-      "reason": "Developer/test-only acceptance, detector or peer regression; existing nonformal test classification, not runtime code.",
-      "models": []
-    },
-    {
-      "path": "internal/azure/queue/store.go",
-      "sha256": "dce53b7ed155f9626d8251e29c6c4f22233b0c274a812bbdf1c1267ae4d0cc77",
+      "path": "internal/aws/sns_subscription_attributes_test.go",
+      "sha256": "867996e94941f3e26fd57a999f148b1098229b7e3c0f890cd316d82ed27657e6",
       "disposition": "modeled",
-      "reason": "Maps the named-queue message row effects and stale receipt/expiry outcomes at transaction boundaries.",
+      "reason": "Native and official-SDK tests exercise exact retained readback and observed not-found after cleanup.",
       "models": [
         {
-          "id": "AzureQueueLifecycle",
+          "id": "SNSSubscriptionReadback",
           "properties": [
-            "ReadRollbackDurable",
-            "Rotation",
-            "ReceiptRequired",
-            "ExpiryGuard",
-            "ExpiryRemoval",
-            "Isolation"
+            "RetainedJoinIsExact",
+            "NoAuditResurrection",
+            "ReplyMatchesSnapshot"
           ],
-          "limits": "SQLite behavior is exercised separately; the model assumes atomic representation. Selected conditional Queue row transitions only. Does not establish Go/SQLite refinement, real storage commit behavior, authentication, owner resolution, serialization, crypto, transport, TTL beyond the finite clock, account-wide limits, metadata, multiple messages/queues, list semantics, quotas, browser, SDK or liveness. Handler/protocol mapping covers only pre-normalized visibility and current/stale receipt decisions. Composition mapping covers only independent selected owner frames; the trusted actor and route are assumptions, not modeled auth."
+          "limits": "Protocol, real SDK and cleanup behavior are observations, not inferred from the model. Models only GetSubscriptionAttributes after common Query/session admission and successful IAM policy snapshot. ARN grammar/account, IAM eval/time, SQLite isolation/refinement, XML serialization, retry/crash/new-writer behavior and real cloud/SDK compatibility are not proved. Delete/unsubscribe are bounded environment witnesses; inconsistent storage seeds are defensive, not healthy reachability claims. No HTTP(S) admission, publish, external delivery or liveness claim."
         }
       ]
     },
     {
-      "path": "internal/azure/queue/store_test.go",
-      "sha256": "ef81490f1582aeb297d950e96aaf86c96daaec21813e7c89add921943b445474",
-      "disposition": "modeled",
-      "reason": "Native test exercises at least one corresponding lifecycle invariant, while unsupported or unmodeled data uses separate Go assertions.",
-      "models": [
-        {
-          "id": "AzureQueueLifecycle",
-          "properties": [
-            "Isolation",
-            "ReceiptRequired",
-            "ExpiryGuard",
-            "ReadRollbackDurable"
-          ],
-          "limits": "Open-ended quota, storage failure, wire semantics and HTTP authority are separate tests, not TLC proof. Selected conditional Queue row transitions only. Does not establish Go/SQLite refinement, real storage commit behavior, authentication, owner resolution, serialization, crypto, transport, TTL beyond the finite clock, account-wide limits, metadata, multiple messages/queues, list semantics, quotas, browser, SDK or liveness. Handler/protocol mapping covers only pre-normalized visibility and current/stale receipt decisions. Composition mapping covers only independent selected owner frames; the trusted actor and route are assumptions, not modeled auth."
-        }
-      ]
-    },
-    {
-      "path": "internal/server/apidocs/azure-queue-init.js",
-      "sha256": "4efbdacc15909cd6b0c18bfbd608ca9005ba267514912e09722727ec60cfe2e6",
+      "path": "internal/server/apidocs/sns-http-subscriptions-init.js",
+      "sha256": "14022ac52a0f0b806869dc790d1dd23ef66e8104f098e614abbf6add18cdf999",
       "disposition": "presentation",
-      "reason": "Reference carries one validated exercise selector to the existing same-origin cookie-authenticated spec and native requests; no new authority and no retry/fallback. This browser adapter is tested offline, not modeled.",
+      "reason": "Dedicated reference normalizes one Subscribe POST to numeric-loopback same-origin serving, fixed us-east-1 and signed-in session; strict action/body/scope rules checked by Node, not a proof of Scalar UI or session authority.",
       "models": []
     },
     {
-      "path": "internal/server/apidocs/azure-queue.html",
-      "sha256": "031924fa7aeb6276044b7594393ce710cfcaccc1e9118b981a76e177900c6b59",
+      "path": "internal/server/apidocs/sns-http-subscriptions.html",
+      "sha256": "4d02b0dadebe2174d4a0eca970d178f5da4ec8aa5f35bfc65fbcd5f99e6bbedd",
       "disposition": "presentation",
-      "reason": "Prevents referrer disclosure of the noncredential exercise alias on this static reference page.",
+      "reason": "Local reference/Console layout or generated assets; actual IAM and state remain native, no external delivery.",
       "models": []
     },
     {
-      "path": "internal/server/azure_queue_reference.go",
-      "sha256": "7e016f7eb62735dc51820b8ed61cc1176d30805562840d7e8b795d81eab20e61",
-      "disposition": "modeled",
-      "reason": "Dynamic Queue JSON/spec and capabilities are served for the effective owner, configured account and non-handoff origin through existing routing.",
-      "models": [
-        {
-          "id": "AzureQueueOwnerAccess",
-          "properties": [
-            "DiscoveryAuthority",
-            "ReferenceGetAuthorized",
-            "ReferenceAccountIsConfigured"
-          ],
-          "limits": "Only typed actor, method and account witnesses; HTTP origin enforcement is outside this model. Models only normalized owner/actor decisions, selected discovery epoch and matching principal, configured account projection in the dynamic spec enum/default, and native admission independent of UI visibility. Does not prove token handling, actual Go/React/SQLite refinement, URL parsing, whole schema, SDK, browser, route transport, runtime or liveness. Embedded bundle binding is the generated projection of the exact source guards, not a model of the build system or JavaScript event delivery."
-        }
-      ]
-    },
-    {
-      "path": "internal/server/azure_queue_reference_test.go",
-      "sha256": "64447d3e0729f01f34ab08a90cefa44ecdae1ffaa74a7e0feab4de91efb49480",
-      "disposition": "test-support",
-      "reason": "Developer/test-only acceptance, detector or peer regression; existing nonformal test classification, not runtime code.",
-      "models": []
-    },
-    {
-      "path": "internal/server/azure_queue_test.go",
-      "sha256": "8b967077ab42be7ea19030f912a2c0c9564bfa328d541d8d208cb4b76b01e7d7",
-      "disposition": "modeled",
-      "reason": "Native integration test independently exercises name isolation, persistence/restart and current receipt behavior.",
-      "models": [
-        {
-          "id": "AzureQueueLifecycle",
-          "properties": [
-            "Isolation",
-            "ReadRollbackDurable",
-            "Rotation",
-            "ReceiptRequired"
-          ],
-          "limits": "Connection and API transport are observed by Go, not explored in TLC. Selected conditional Queue row transitions only. Does not establish Go/SQLite refinement, real storage commit behavior, authentication, owner resolution, serialization, crypto, transport, TTL beyond the finite clock, account-wide limits, metadata, multiple messages/queues, list semantics, quotas, browser, SDK or liveness. Handler/protocol mapping covers only pre-normalized visibility and current/stale receipt decisions. Composition mapping covers only independent selected owner frames; the trusted actor and route are assumptions, not modeled auth."
-        }
-      ]
-    },
-    {
-      "path": "internal/server/cloud_storage.go",
-      "sha256": "90370e086685e59984a59c276d3899bb0dfc8bcf18b044f0a90dc5bbc23ef582",
-      "disposition": "modeled",
-      "reason": "Scoped forwarding attaches an independently selected owner and preserves peer service isolation; other providers unchanged.",
-      "models": [
-        {
-          "id": "AzureQueueOwnerAccess",
-          "properties": [
-            "NativePermissionBoundary"
-          ],
-          "limits": "The actor selection input is assumed trusted. Models only normalized owner/actor decisions, selected discovery epoch and matching principal, configured account projection in the dynamic spec enum/default, and native admission independent of UI visibility. Does not prove token handling, actual Go/React/SQLite refinement, URL parsing, whole schema, SDK, browser, route transport, runtime or liveness. Embedded bundle binding is the generated projection of the exact source guards, not a model of the build system or JavaScript event delivery."
-        },
-        {
-          "id": "AzureQueueLifecycle",
-          "properties": [
-            "Isolation"
-          ],
-          "limits": "Composition maps only separate owner frames, not process/SQLite crash or other providers. Selected conditional Queue row transitions only. Does not establish Go/SQLite refinement, real storage commit behavior, authentication, owner resolution, serialization, crypto, transport, TTL beyond the finite clock, account-wide limits, metadata, multiple messages/queues, list semantics, quotas, browser, SDK or liveness. Handler/protocol mapping covers only pre-normalized visibility and current/stale receipt decisions. Composition mapping covers only independent selected owner frames; the trusted actor and route are assumptions, not modeled auth."
-        }
-      ]
-    },
-    {
-      "path": "internal/server/sakura_provider_test.go",
-      "sha256": "aae2e410b341a0f8eb00c72910d3f3ee41de80873711f51694a4b2d6c64e3c51",
-      "disposition": "test-support",
-      "reason": "Developer/test-only acceptance, detector or peer regression; existing nonformal test classification, not runtime code.",
+      "path": "internal/server/apidocs/sns/http-subscriptions.json",
+      "sha256": "681fee144e0aa998ac0eb7ef6fbd3be1fcaf444e8828ff7eb2efa1d638c86c13",
+      "disposition": "presentation",
+      "reason": "Local reference/Console layout or generated assets; actual IAM and state remain native, no external delivery.",
       "models": []
     },
     {
       "path": "internal/server/server.go",
-      "sha256": "481bcde81cbff3ce6425d582e74ab635adb1bb98d92758a916552f26ebb491bb",
+      "sha256": "227729a7b3a3f62844c05ca19f3edb4c5bc6f5d1f876b4e1443fbd74d728a21f",
       "disposition": "modeled",
-      "reason": "Registers the guarded reference and emits guarded Queue Console discovery without granting additional native authority.",
+      "reason": "Registers the guarded reference and emits guarded Queue Console discovery without granting additional native authority. SNS delta: Publishes existing native SNS capabilities and advertises the bounded new Console/reference; does not grant IAM. The root Queue reference registration and capability evaluation are unchanged.",
       "models": [
         {
           "id": "AzureQueueOwnerAccess",
@@ -381,21 +212,29 @@
             "ReferenceGetAuthorized"
           ],
           "limits": "Existing route and auth middleware remain outside this bounded model. Models only normalized owner/actor decisions, selected discovery epoch and matching principal, configured account projection in the dynamic spec enum/default, and native admission independent of UI visibility. Does not prove token handling, actual Go/React/SQLite refinement, URL parsing, whole schema, SDK, browser, route transport, runtime or liveness. Embedded bundle binding is the generated projection of the exact source guards, not a model of the build system or JavaScript event delivery."
+        },
+        {
+          "id": "SNSAdmission",
+          "properties": [
+            "NoSuccessOnRefusal",
+            "NoUnauthorizedEffect"
+          ],
+          "limits": "Limited registration/admission context; not proof of advertised UI auth, middleware or transport. Boolean admission witnesses abstract actual Go parsing/attributes/Subject/UTF-8/body sizes/signature syntax, IAM matching and region/resource lookup. Validated dispatch permits metadata writes; no initialization, credential, SQL, real SDK or Go refinement proof. Shared Gateway/server file bindings cover SNS registration/admission only, preserving all other providers/services. Actual malformed Query and immutable-state/region/SDK/SQL regressions remain separate evidence."
         }
       ]
     },
     {
       "path": "internal/server/web/app.css",
-      "sha256": "f87aaeb78c181d51f63af77eea0113869a05d6bc05854c58ae35529fd708939e",
+      "sha256": "1c368b482d605666d285d87d064c4b4b510b36c7b510366576b5fd3efc030ceb",
       "disposition": "presentation",
-      "reason": "Queue Console or local reference presentation/metadata, and exact generated projections; actual native authority is separately enforced.",
+      "reason": "Canonical Console rebuild appends scoped SNS presentation CSS and preserves Azure Blob stylesheet bytes in the build graph.",
       "models": []
     },
     {
       "path": "internal/server/web/app.js",
-      "sha256": "38f93ec685a0408e47ed3c6731771606f89673672a5ed93f7e2aafddef188d8f",
+      "sha256": "2435a6fc6133105cbf8d480111af54f7678a5c2c76b7e260465103b949810735",
       "disposition": "modeled",
-      "reason": "Pinned composition retains Azure Blob and S3 scope bindings and projects current Queue console owner/identity selection. Selector transport and cookie validation are not covered by the finite models.",
+      "reason": "Pinned composition retains Azure Blob and S3 scope bindings and projects current Queue console owner/identity selection. Selector transport and cookie validation are not covered by the finite models. SNS delta: Rebuilds the combined embedded Console from exact preserved Azure Blob and S3 multipart source plus the SNS capability, scope key and callback admission workflow. The binding covers only the SNS delta. Preserves the merged Azure Queue and selected-exercise reference scope.",
       "models": [
         {
           "id": "AzureBlobRowDownload",
@@ -424,140 +263,91 @@
             "PresentationOwnerOnly"
           ],
           "limits": "Only the Queue capability and matching identity epoch are modeled; no all-service or JavaScript timing claim. Models only normalized owner/actor decisions, selected discovery epoch and matching principal, configured account projection in the dynamic spec enum/default, and native admission independent of UI visibility. Does not prove token handling, actual Go/React/SQLite refinement, URL parsing, whole schema, SDK, browser, route transport, runtime or liveness. Embedded bundle binding is the generated projection of the exact source guards, not a model of the build system or JavaScript event delivery."
+        },
+        {
+          "id": "SNSConsoleResponseAdmission",
+          "properties": [
+            "MountRequiresCapabilityAndNoHandoff",
+            "KeyedOwnerMatchesScope",
+            "OnlyOneCurrentFlight",
+            "NoLateVisibleEffect",
+            "OnlyCurrentTopicUpdates"
+          ],
+          "limits": "Only modeled SNS boundary and source projection; component/browser scheduling, parser/requests, Scalar and shared auth redirect are separate. Bound only visible SNS console hook state, projected typed capability and valid per-topic selection labels. Instance and topic revision are ghost labels, not invented callback-generation checks. No theorem about React or JS scheduling/code refinement, backend AWS IAM, parser/wire, final remote write outcome, shared 401 redirect/onSaving side effects, capability refresh, actual browser/keyboard, or build correctness. Scalar is signed-in session and fixed us-east-1, not Console principal/region parity; it is not modeled."
         }
       ]
     },
     {
-      "path": "scripts/factory_acceptance.py",
-      "sha256": "50851b7bf24df21a8c5084d226003ead5987092736f2a72daa9bc19ec3a95d7e",
-      "disposition": "validation-tooling",
-      "reason": "Developer-only Queue SDK pin and factory evidence; not a runtime dependency and no blanket exemption.",
-      "models": []
-    },
-    {
-      "path": "scripts/formal_applicability.py",
-      "sha256": "aea21a7a8d508829068246642f4a8fd80bc1723f06d2040a25e0f983a8b73115",
-      "disposition": "formal-infrastructure",
-      "reason": "Adds the required finite Queue models/controls or exact test-only classification without weakening existing checks.",
-      "models": []
-    },
-    {
       "path": "scripts/formal_model_gate.py",
-      "sha256": "c2659059aaedd1525c83065485520696f52e5ea42ded5b931beb2f014b25ffa3",
+      "sha256": "f9fb8af3807f28ebbd1c50e88b3fc115512f3cc412bee18f4654ee0ede0895f8",
       "disposition": "formal-infrastructure",
-      "reason": "Requires both reviewed Queue models and exact source/control scopes while retaining the prior Azure Blob/S3 gates.",
-      "models": []
-    },
-    {
-      "path": "scripts/requirements-azure-queue-test.txt",
-      "sha256": "ac6f4ccc56ac1ba99da7514c3714a7a572612948a7354cd0fe9b2ecfa73afaa6",
-      "disposition": "validation-tooling",
-      "reason": "Developer-only Queue SDK pin and factory evidence; not a runtime dependency and no blanket exemption.",
-      "models": []
-    },
-    {
-      "path": "scripts/test-factory-acceptance.py",
-      "sha256": "1f6be9f69a7d768c1b9c9eb85d6c8bedd8de6f8a82c073185c2dad332f3ae5f4",
-      "disposition": "test-support",
-      "reason": "Developer/test-only acceptance, detector or peer regression; existing nonformal test classification, not runtime code.",
+      "reason": "Retains existing Azure and S3 guard declarations and adds two strict SNS invariant/sensitivity/source-scope requirements.",
       "models": []
     },
     {
       "path": "scripts/test-formal-gate.py",
-      "sha256": "62a8970ce6f611e4076a272c4e669fc866b737ab8fb16002b9f32690263646b7",
+      "sha256": "8342fea1b07d268d789dbb57fe7c9d1b3f4e39b5684839a1e8ec4d2d47f26368",
       "disposition": "formal-infrastructure",
-      "reason": "Adds the two reviewed Queue IDs to the independent exact registry inventory; retains the existing detectors.",
+      "reason": "Adds the two reviewed Queue IDs to the independent exact registry inventory; retains the existing detectors. Adds only SNSSubscriptionReadback and SNSConsoleResponseAdmission to the independent exact-set test; retains equality and all previous model detectors.",
       "models": []
     },
     {
-      "path": "scripts/test-simpledb-factory-registration.py",
-      "sha256": "a74e9a14e155c3c48d8ff42360709c1e895efaa0f0c101e0863ec32f27906c3c",
+      "path": "test/console/sns-http-reference.test.mjs",
+      "sha256": "245224522a694a8352e0ce45cfdca2a51881fc40cfb7622d18c287dbc56e4819",
       "disposition": "test-support",
-      "reason": "Developer/test-only acceptance, detector or peer regression; existing nonformal test classification, not runtime code.",
+      "reason": "Developer-only test entry point, regression or negative control; not simulator runtime.",
       "models": []
     },
     {
-      "path": "test/console/azure-queue.test.mjs",
-      "sha256": "86ed0089a571c95e81aac65b4539e5eaf4a89ca6165ba5979a09968912f7efc5",
+      "path": "test/console/sns-subscriptions.test.mjs",
+      "sha256": "9e443b4c1bf641f9ea0966b9001c8c60a61db0a72321d2250a3d159c057468b0",
       "disposition": "test-support",
-      "reason": "Offline Queue lifecycle and reference projection, including default bootstrap, fixed participant, explicit selection and invalid inputs.",
+      "reason": "Developer-only test entry point, regression or negative control; not simulator runtime.",
       "models": []
     },
     {
-      "path": "test/e2e/azure_queue_cli.py",
-      "sha256": "d72308fef1af83608a45577b1779803590a5266dcd14d5c8a9febee186e5e326",
+      "path": "test/e2e/sns_console_subscriptions.py",
+      "sha256": "18029f23f6eb54d8bddf5f8ba00a00a324816d137b7deedd8081fd2038cdffcd",
       "disposition": "test-support",
-      "reason": "Developer/test-only acceptance, detector or peer regression; existing nonformal test classification, not runtime code.",
+      "reason": "Developer-only test entry point, regression or negative control; not simulator runtime.",
       "models": []
     },
     {
-      "path": "test/e2e/azure_queue_console_gui.py",
-      "sha256": "6fe2c0a84e5aa8a59bc05829ac64bf936364a45ae7c0d848e62f69279928dc38",
-      "disposition": "test-support",
-      "reason": "Developer/test-only acceptance, detector or peer regression; existing nonformal test classification, not runtime code.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/azure_queue_official.py",
-      "sha256": "60056288de7d3ad3399f69ad80d36897f91e7706d776061260c34b55bb78b6d1",
-      "disposition": "test-support",
-      "reason": "Developer/test-only acceptance, detector or peer regression; existing nonformal test classification, not runtime code.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/test_azure_queue_cli.py",
-      "sha256": "8f3fb6375df47039a04fe121ac03cdbba5a7d7bc82a890675cef3d47b4adc9d2",
-      "disposition": "test-support",
-      "reason": "Developer/test-only acceptance, detector or peer regression; existing nonformal test classification, not runtime code.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/test_azure_queue_official.py",
-      "sha256": "9ee5500532c6c36f996d5e8cb6c4fc87bbd444778544b1969e5d90acaf50cdab",
-      "disposition": "test-support",
-      "reason": "Developer/test-only acceptance, detector or peer regression; existing nonformal test classification, not runtime code.",
-      "models": []
+      "path": "test/e2e/sns_subscription_readback.py",
+      "sha256": "e6d0afa2d94a6ab5a52260a1178ab4c87933d618290986298751e89a562ca963",
+      "disposition": "modeled",
+      "reason": "Native and official-SDK tests exercise exact retained readback and observed not-found after cleanup.",
+      "models": [
+        {
+          "id": "SNSSubscriptionReadback",
+          "properties": [
+            "RetainedJoinIsExact",
+            "NoAuditResurrection",
+            "ReplyMatchesSnapshot"
+          ],
+          "limits": "Protocol, real SDK and cleanup behavior are observations, not inferred from the model. Models only GetSubscriptionAttributes after common Query/session admission and successful IAM policy snapshot. ARN grammar/account, IAM eval/time, SQLite isolation/refinement, XML serialization, retry/crash/new-writer behavior and real cloud/SDK compatibility are not proved. Delete/unsubscribe are bounded environment witnesses; inconsistent storage seeds are defensive, not healthy reachability claims. No HTTP(S) admission, publish, external delivery or liveness claim."
+        }
+      ]
     },
     {
       "path": "tools/console/bundle-digests.json",
-      "sha256": "adf96d2278423cc7cd64c3b0fdfc8eb1ddbb8505354144ef3f35934af93dba75",
+      "sha256": "dfb3623316cb9acf00766480947ad8b56d4a0819b4a316a3be49150f744dd633",
       "disposition": "presentation",
-      "reason": "Pinned rebuild digests for the corrected Queue reference link; CSS and notices unchanged.",
+      "reason": "Records hashes for the combined rebuilt embedded assets; preserves prior legal-file digests.",
       "models": []
     },
     {
       "path": "tools/console/bundle-inputs.json",
-      "sha256": "aa9ae9913c936cdc7b6b545da1935a347a2af291fa1cbf7736a5db226237711c",
+      "sha256": "e59860814366648d6f750278685fbee199a64d97aa9a40ebbb3698b090cef110",
       "disposition": "presentation",
-      "reason": "Pinned rebuild input inventory for the corrected Queue reference link.",
-      "models": []
-    },
-    {
-      "path": "tools/console/src/azure-queue-requests.mjs",
-      "sha256": "63c1af886104a7e1049903c2ba99c1fb6a52f15d7b2d4b6f0f8ed56ce9305d4f",
-      "disposition": "presentation",
-      "reason": "Validates a non-secret reference selector and retains bare navigation for cookie-fixed identities and the initial built-in operator.",
-      "models": []
-    },
-    {
-      "path": "tools/console/src/azure-queue.css",
-      "sha256": "93dd62a6568a188f19c7b6f8ed66b77cec19dc7080ff8a860f9fea7daac1919d",
-      "disposition": "presentation",
-      "reason": "Queue Console or local reference presentation/metadata, and exact generated projections; actual native authority is separately enforced.",
-      "models": []
-    },
-    {
-      "path": "tools/console/src/azure-queue.jsx",
-      "sha256": "ba1706ad2869d9acbf5d01d7f6a04e33c8bb82ea46d3f2ba900ed10d6f6e06c5",
-      "disposition": "presentation",
-      "reason": "Passes the validated reference URL explicitly to the rendered Queue child; never treats selection as authorization.",
+      "reason": "Reconciled bundle provenance produced from exact current-main Azure Blob/S3 inputs plus bounded SNS source. Preserves the merged Azure Queue and selected-exercise reference scope.",
       "models": []
     },
     {
       "path": "tools/console/src/console-navigation.mjs",
-      "sha256": "b11b5bedff7216f70f50b4244aa94e0ec438af38fbb0034f4ec97f373c605399",
+      "sha256": "0e93cd45f23ca84455ccdc62b3614e1b3802e78d5a658c396a468bd7b2ca168d",
       "disposition": "modeled",
-      "reason": "Names the owner-only Queue entry and binds the selected identity/epoch result to the currently observable Console, including the generated bundle projection.",
+      "reason": "Names the owner-only Queue entry and binds the selected identity/epoch result to the currently observable Console, including the generated bundle projection. SNS delta: SNS observable scope uses capability/handoff, actual region-principal-navigation mount identity and single-flight input scope; bundle binds that generated projection.",
       "models": [
         {
           "id": "AzureQueueOwnerAccess",
@@ -567,14 +357,25 @@
             "PresentationOwnerOnly"
           ],
           "limits": "Only the Queue capability and matching identity epoch are modeled; no all-service or JavaScript timing claim. Models only normalized owner/actor decisions, selected discovery epoch and matching principal, configured account projection in the dynamic spec enum/default, and native admission independent of UI visibility. Does not prove token handling, actual Go/React/SQLite refinement, URL parsing, whole schema, SDK, browser, route transport, runtime or liveness. Embedded bundle binding is the generated projection of the exact source guards, not a model of the build system or JavaScript event delivery."
+        },
+        {
+          "id": "SNSConsoleResponseAdmission",
+          "properties": [
+            "MountRequiresCapabilityAndNoHandoff",
+            "KeyedOwnerMatchesScope",
+            "OnlyOneCurrentFlight",
+            "NoLateVisibleEffect",
+            "OnlyCurrentTopicUpdates"
+          ],
+          "limits": "Only modeled SNS boundary and source projection; component/browser scheduling, parser/requests, Scalar and shared auth redirect are separate. Bound only visible SNS console hook state, projected typed capability and valid per-topic selection labels. Instance and topic revision are ghost labels, not invented callback-generation checks. No theorem about React or JS scheduling/code refinement, backend AWS IAM, parser/wire, final remote write outcome, shared 401 redirect/onSaving side effects, capability refresh, actual browser/keyboard, or build correctness. Scalar is signed-in session and fixed us-east-1, not Console principal/region parity; it is not modeled."
         }
       ]
     },
     {
       "path": "tools/console/src/main.jsx",
-      "sha256": "6df8c70ce96b5c647cac8d6bc36881e41a36c11dd273bcec6d29f576b0d256a6",
+      "sha256": "0ac6a66d2a402fbfbd0b91244c50242787bc23e4834df3d246bbd7c97d5513ae",
       "disposition": "modeled",
-      "reason": "Preserves the owner-bound discovery epoch and current permitted selection, omitting only cookie-bound identity or the initial built-in operator.",
+      "reason": "Preserves the owner-bound discovery epoch and current permitted selection, omitting only cookie-bound identity or the initial built-in operator. SNS delta: SNS observable scope uses capability/handoff, actual region-principal-navigation mount identity and single-flight input scope; bundle binds that generated projection. Only the SNS import, navigation label, render and side-nav item are added; removing four exact insertions reproduces merged main.",
       "models": [
         {
           "id": "AzureQueueOwnerAccess",
@@ -584,15 +385,64 @@
             "PresentationOwnerOnly"
           ],
           "limits": "Only the Queue capability and matching identity epoch are modeled; no all-service or JavaScript timing claim. Models only normalized owner/actor decisions, selected discovery epoch and matching principal, configured account projection in the dynamic spec enum/default, and native admission independent of UI visibility. Does not prove token handling, actual Go/React/SQLite refinement, URL parsing, whole schema, SDK, browser, route transport, runtime or liveness. Embedded bundle binding is the generated projection of the exact source guards, not a model of the build system or JavaScript event delivery."
+        },
+        {
+          "id": "SNSConsoleResponseAdmission",
+          "properties": [
+            "MountRequiresCapabilityAndNoHandoff",
+            "KeyedOwnerMatchesScope",
+            "OnlyOneCurrentFlight",
+            "NoLateVisibleEffect",
+            "OnlyCurrentTopicUpdates"
+          ],
+          "limits": "Only modeled SNS boundary and source projection; component/browser scheduling, parser/requests, Scalar and shared auth redirect are separate. Bound only visible SNS console hook state, projected typed capability and valid per-topic selection labels. Instance and topic revision are ghost labels, not invented callback-generation checks. No theorem about React or JS scheduling/code refinement, backend AWS IAM, parser/wire, final remote write outcome, shared 401 redirect/onSaving side effects, capability refresh, actual browser/keyboard, or build correctness. Scalar is signed-in session and fixed us-east-1, not Console principal/region parity; it is not modeled."
         }
       ]
     },
     {
-      "path": "tools/console/test/azure-queue-scalar-gate.test.cjs",
-      "sha256": "f13076685d6dfebce3985c8335a5efc8754f4e3e31ded3e0a7232313f86e6cbe",
+      "path": "tools/console/src/sns-client.mjs",
+      "sha256": "8591490c91e57d98494e7f6655417603222691dcd7168bfa87746276f3548981",
+      "disposition": "modeled",
+      "reason": "SNS observable scope uses capability/handoff, actual region-principal-navigation mount identity and single-flight input scope; bundle binds that generated projection.",
+      "models": [
+        {
+          "id": "SNSConsoleResponseAdmission",
+          "properties": [
+            "MountRequiresCapabilityAndNoHandoff",
+            "KeyedOwnerMatchesScope",
+            "OnlyOneCurrentFlight",
+            "NoLateVisibleEffect",
+            "OnlyCurrentTopicUpdates"
+          ],
+          "limits": "Only modeled SNS boundary and source projection; component/browser scheduling, parser/requests, Scalar and shared auth redirect are separate. Bound only visible SNS console hook state, projected typed capability and valid per-topic selection labels. Instance and topic revision are ghost labels, not invented callback-generation checks. No theorem about React or JS scheduling/code refinement, backend AWS IAM, parser/wire, final remote write outcome, shared 401 redirect/onSaving side effects, capability refresh, actual browser/keyboard, or build correctness. Scalar is signed-in session and fixed us-east-1, not Console principal/region parity; it is not modeled."
+        }
+      ]
+    },
+    {
+      "path": "tools/console/src/sns.css",
+      "sha256": "ab1b83a7c70cc8f1c2ebc6652614c61c11261d70b0a57ae5d5c6000b08a1f7f7",
       "disposition": "presentation",
-      "reason": "Runs actual offline React first render for default/selected/malformed inputs and exercises the reference adapter, refusal, no fallback and no-referrer.",
+      "reason": "Local reference/Console layout or generated assets; actual IAM and state remain native, no external delivery.",
       "models": []
+    },
+    {
+      "path": "tools/console/src/sns.jsx",
+      "sha256": "8333dcfd5e1c856030443c7dbae356b45a5e3a8ed1bb14be0b0b452da7fdfc8f",
+      "disposition": "modeled",
+      "reason": "SNS observable scope uses capability/handoff, actual region-principal-navigation mount identity and single-flight input scope; bundle binds that generated projection. The reference link labels the separate signed-in identity and fixed us-east-1 region without passing the selected exercise principal.",
+      "models": [
+        {
+          "id": "SNSConsoleResponseAdmission",
+          "properties": [
+            "MountRequiresCapabilityAndNoHandoff",
+            "KeyedOwnerMatchesScope",
+            "OnlyOneCurrentFlight",
+            "NoLateVisibleEffect",
+            "OnlyCurrentTopicUpdates"
+          ],
+          "limits": "Only modeled SNS boundary and source projection; component/browser scheduling, parser/requests, Scalar and shared auth redirect are separate. Bound only visible SNS console hook state, projected typed capability and valid per-topic selection labels. Instance and topic revision are ghost labels, not invented callback-generation checks. No theorem about React or JS scheduling/code refinement, backend AWS IAM, parser/wire, final remote write outcome, shared 401 redirect/onSaving side effects, capability refresh, actual browser/keyboard, or build correctness. Scalar is signed-in session and fixed us-east-1, not Console principal/region parity; it is not modeled."
+        }
+      ]
     }
   ]
 }
