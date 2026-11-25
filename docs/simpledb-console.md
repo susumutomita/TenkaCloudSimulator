@@ -18,15 +18,20 @@ No AWS account or outbound connection is used.
    current attributes again after the write is acknowledged. A write that
    would exceed 256 name/value pairs is rejected without changes. Use the native
    SDK to read or repair an existing oversized item.
-5. The result is announced and focused when the initiating control still owns
+5. To delete a single-valued attribute, use **Delete attribute** on its row and
+   **Confirm deletion**. Cancel sends nothing. The server checks the value you
+   saw, then removes only that value. Deleting the last attribute removes the
+   item. Refresh after a stale comparison. Use the SDK for multivalue records.
+6. The result is announced and focused when the initiating control still owns
    focus. A refusal keeps the editor visible but locked until you read again.
 
 The existing authorization checks for `sdb:ListDomains` (on `*`) and
-`sdb:CreateDomain`, `sdb:GetAttributes`, `sdb:PutAttributes` (on the selected
+`sdb:CreateDomain`, `sdb:GetAttributes`, `sdb:PutAttributes`, and, for deletion,
+`sdb:DeleteAttributes` (on the selected
 domain) apply unchanged. The console does not grant permissions. If a write is
 not acknowledged, reload the item before retrying.
 
-This is one-attribute conditional replacement, not a full SimpleDB console.
+This console supports single-attribute conditional replacement or removal.
 To use a separate attribute for the condition, use the native SDK. Item search,
-Select, batch writes, domain metadata and deletion are not offered here.
+Select, batch writes, domain metadata, and whole-domain deletion are not offered here.
 Domain cleanup uses native `DeleteDomain`, which also removes its items.

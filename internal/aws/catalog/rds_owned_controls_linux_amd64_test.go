@@ -240,3 +240,71 @@ func TestPrivatePostgresFenceAcquisitionAndRelease(t *testing.T) {
 		})
 	}
 }
+
+func TestPrivatePostgresRegionalLifecycleIsolation(t *testing.T) {
+	db := guardDB(t)
+	cfg := guardConfig()
+	const otherRegion = "eu-west-1"
+	cfg.Regions = append(cfg.Regions, otherRegion)
+	_, owner, err := NewWithOwnedPrivatePostgres(db, cfg, guardOptions(t))
+	if err != nil {
+		t.Fatal(err)
+	}
+	home := guardRow()
+	child := &rdsruntime.Runtime{} // sentinel only: never probe or close it
+	owner.key, owner.child = generationOf(home), child
+	modify := &request{ctx: t.Context(), op: &Op{Name: "ModifyDBInstance"}}
+	// No durable lease exists. Only the nominated target consults it. Use
+	// the same generation as a sentinel so ARN comparison cannot hide an
+	// accidental lifecycle lookup outside the immutable target boundary.
+	unlock := owner.lock(home.Region, Update)
+	err = owner.preflightModify(modify, home)
+	unlock()
+	if !errors.Is(err, errOwnedPostgresDebt) {
+		t.Fatalf("nominated target did not consult the missing lease: %v", err)
+	}
+	for _, change := range []func(*row){
+		func(r *row) { r.Region = otherRegion },
+		func(r *row) { r.ID = "other-db" },
+	} {
+		r := home
+		change(&r)
+		unlock := owner.lock(r.Region, Update)
+		err := owner.preflightModify(modify, r)
+		unlock()
+		if err != nil {
+			t.Fatalf("unrelated target consulted the missing lease: %v", err)
+		}
+	}
+
+	// Exercise the unlocked foreign-region path against its own canonical
+	// row while a lifecycle owner changes those fields under its real lock.
+	// Running with -race catches a mutable read even if it returns false.
+	foreign := home
+	foreign.Region = otherRegion
+	foreign.ARN = "arn:aws:rds:eu-west-1:000000000000:db:private-pg"
+	done := make(chan struct{})
+	go func() {
+		defer close(done)
+		for i := 0; i < 128; i++ {
+			unlock := owner.lock(home.Region, Update)
+			owner.child, owner.key = nil, privateDBGeneration{}
+			owner.child, owner.key = child, generationOf(home)
+			unlock()
+		}
+	}()
+	for i := 0; i < 128; i++ {
+		unlock := owner.lock(foreign.Region, Update)
+		err := owner.preflightModify(modify, foreign)
+		retireErr := owner.retire(foreign)
+		unlock()
+		if err != nil || retireErr != nil {
+			<-done
+			t.Fatalf("unrelated mutation touched the owner: modify %v, retire %v", err, retireErr)
+		}
+	}
+	<-done
+	if owner.key != generationOf(home) || owner.child != child {
+		t.Fatal("unrelated mutation changed the nominated generation")
+	}
+}

@@ -124,8 +124,14 @@ func (c *OwnedPrivatePostgres) lock(region string, kind Kind) func() {
 	return func() {}
 }
 
+// Outside the nominated region, request mutations do not acquire mu. Check
+// only immutable configuration before consulting any mutable lifecycle state.
+func (c *OwnedPrivatePostgres) nominated(r row) bool {
+	return r.Region == c.options.Region && r.ID == c.options.Identifier
+}
+
 func (c *OwnedPrivatePostgres) reserve(tx *sql.Tx, r row) (bool, error) {
-	if r.Region != c.options.Region || r.ID != c.options.Identifier {
+	if !c.nominated(r) {
 		return false, nil
 	}
 	// Mutators for this region hold mu across commit and physical teardown.
@@ -196,7 +202,7 @@ func (c *OwnedPrivatePostgres) currentLease(ctx context.Context, tx *sql.Tx) boo
 func (c *OwnedPrivatePostgres) preflightModify(q *request, proposed row) error {
 	// This is after the existing authorization and proposal decoding. A bad
 	// proposed tuple must not stop its currently healthy, owned generation.
-	if q.op.Name != "ModifyDBInstance" || c.child == nil || generationOf(proposed) != c.key {
+	if !c.nominated(proposed) || q.op.Name != "ModifyDBInstance" || c.child == nil || generationOf(proposed) != c.key {
 		return nil
 	}
 	ctx, cancel := context.WithTimeout(q.ctx, 3*time.Second)
@@ -228,7 +234,7 @@ func (c *OwnedPrivatePostgres) preflightModify(q *request, proposed row) error {
 }
 
 func (c *OwnedPrivatePostgres) retire(r row) error {
-	if c.key.arn == "" || r.Region != c.options.Region || generationOf(r) != c.key {
+	if !c.nominated(r) || c.key.arn == "" || generationOf(r) != c.key {
 		return nil // a retained fence still rejects an unowned write at SQLite
 	}
 	return c.retireCurrent()

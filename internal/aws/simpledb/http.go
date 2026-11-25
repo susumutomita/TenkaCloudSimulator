@@ -49,9 +49,11 @@ func NewHTTPHandler(s *Store, sc Scope, authorize Authorize) http.Handler {
 			fail(400, "InvalidParameterValue")
 			return
 		}
+		action := p.Get("Action")
+		writeAttributes := action == "PutAttributes" || action == "DeleteAttributes"
 		for key, vs := range p {
 			if len(vs) != 1 {
-				if p.Get("Action") == "PutAttributes" {
+				if writeAttributes {
 					switch key {
 					case "Expected.Name":
 						fail(400, "MultipleExpectedNames")
@@ -68,7 +70,6 @@ func NewHTTPHandler(s *Store, sc Scope, authorize Authorize) http.Handler {
 				return
 			}
 		}
-		action := p.Get("Action")
 		if action == "" || p.Get("Version") == "" {
 			fail(400, "MissingParameter")
 			return
@@ -88,7 +89,7 @@ func NewHTTPHandler(s *Store, sc Scope, authorize Authorize) http.Handler {
 		case "ListDomains":
 			allowed["MaxNumberOfDomains"] = true
 			allowed["NextToken"] = true
-		case "PutAttributes":
+		case "PutAttributes", "DeleteAttributes":
 			allowed["Expected.Name"] = true
 			allowed["Expected.Value"] = true
 			allowed["Expected.Exists"] = true
@@ -109,7 +110,7 @@ func NewHTTPHandler(s *Store, sc Scope, authorize Authorize) http.Handler {
 			}
 			parts := strings.Split(key, ".")
 			valid := false
-			if action == "PutAttributes" && len(parts) == 3 && parts[0] == "Attribute" && (parts[2] == "Name" || parts[2] == "Value" || parts[2] == "Replace") {
+			if writeAttributes && len(parts) == 3 && parts[0] == "Attribute" && (parts[2] == "Name" || parts[2] == "Value" || (action == "PutAttributes" && parts[2] == "Replace")) {
 				valid = true
 			}
 			if action == "GetAttributes" && len(parts) == 2 && parts[0] == "AttributeName" {
@@ -142,7 +143,7 @@ func NewHTTPHandler(s *Store, sc Scope, authorize Authorize) http.Handler {
 			}
 		}
 		item := p.Get("ItemName")
-		if action == "PutAttributes" || action == "GetAttributes" {
+		if writeAttributes || action == "GetAttributes" {
 			if _, ok := p["ItemName"]; !ok {
 				fail(400, "MissingParameter")
 				return
@@ -154,6 +155,7 @@ func NewHTTPHandler(s *Store, sc Scope, authorize Authorize) http.Handler {
 		}
 		values := map[string][]string{}
 		replace := map[string]bool{}
+		removals := deleteSelections{}
 		names := []string{}
 		// Work is bounded by supplied entries, never the greatest numeric index.
 		ordered := make([]string, 0, len(indices))
@@ -167,17 +169,21 @@ func NewHTTPHandler(s *Store, sc Scope, authorize Authorize) http.Handler {
 			return ordered[i] < ordered[j]
 		})
 		for _, n := range ordered {
-			if action == "PutAttributes" {
+			if writeAttributes {
 				prefix := "Attribute." + n + "."
 				name, nok := p[prefix+"Name"]
 				value, vok := p[prefix+"Value"]
-				if !nok || !vok {
+				if !nok || (!vok && action == "PutAttributes") {
 					fail(400, "MissingParameter")
 					return
 				}
-				if !validText(name[0], false) || !validText(value[0], true) {
+				if !validText(name[0], false) || (vok && !validText(value[0], true)) {
 					fail(400, "InvalidParameterValue")
 					return
+				}
+				if action == "DeleteAttributes" {
+					removals.add(name[0], value)
+					continue
 				}
 				rep := false
 				if v, ok := p[prefix+"Replace"]; ok {
@@ -218,10 +224,10 @@ func NewHTTPHandler(s *Store, sc Scope, authorize Authorize) http.Handler {
 				return
 			}
 		}
-		var condition *putCondition
-		if action == "PutAttributes" {
+		var condition *writeCondition
+		if writeAttributes {
 			var code string
-			if condition, code = parsePutCondition(p); code != "" {
+			if condition, code = parseWriteCondition(p); code != "" {
 				fail(400, code)
 				return
 			}
@@ -251,6 +257,8 @@ func NewHTTPHandler(s *Store, sc Scope, authorize Authorize) http.Handler {
 			out.List = &queryList{ds, next}
 		case "PutAttributes":
 			err = s.put(r.Context(), sc.Account, sc.Region, domain, item, values, replace, condition)
+		case "DeleteAttributes":
+			err = s.deleteAttributes(r.Context(), sc.Account, sc.Region, domain, item, removals, condition)
 		case "GetAttributes":
 			var attrs map[string][]string
 			attrs, err = s.Get(r.Context(), sc.Account, sc.Region, domain, item, names)
@@ -289,9 +297,9 @@ func NewHTTPHandler(s *Store, sc Scope, authorize Authorize) http.Handler {
 	})
 }
 
-// parsePutCondition handles the canonical Query fields emitted by the AWS SDK.
+// parseWriteCondition handles the canonical Query fields emitted by the AWS SDK.
 // Presence is distinct from an empty expected value, which is valid.
-func parsePutCondition(p url.Values) (*putCondition, string) {
+func parseWriteCondition(p url.Values) (*writeCondition, string) {
 	haveName, haveValue, haveExists := p.Has("Expected.Name"), p.Has("Expected.Value"), p.Has("Expected.Exists")
 	if !haveName && !haveValue && !haveExists {
 		return nil, ""
@@ -307,12 +315,12 @@ func parsePutCondition(p url.Values) (*putCondition, string) {
 		if haveValue {
 			return nil, "ExistsAndExpectedValue"
 		}
-		return &putCondition{name: name, absent: true}, ""
+		return &writeCondition{name: name, absent: true}, ""
 	}
 	if !haveValue {
 		return nil, "IncompleteExpectedExpression"
 	}
-	return &putCondition{name: name, value: value}, ""
+	return &writeCondition{name: name, value: value}, ""
 }
 
 // Canonical decimal labels avoid aliases without imposing machine-int limits.

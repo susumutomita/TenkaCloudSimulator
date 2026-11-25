@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "base_sha": "49ecb555d405d31d868fc3d73139b0b0a42e4b75",
+  "base_sha": "7064f99ef0d0fbb8dc4556f743f774ac85f3916c",
   "changes": [
     {
       "path": "docs/design/rds-owned-generation.md",
@@ -96,7 +96,7 @@
     },
     {
       "path": "formal/models.json",
-      "sha256": "a4980a893e9a5ffe76f4912b7ee9d0b93a447f106f9e60a81877a3596fdc1356",
+      "sha256": "33a3e4a7d2ae099bbff01309822aed3150e9ed5011d4c921208f8ba6ca60e551",
       "disposition": "formal-infrastructure",
       "reason": "Registers the bounded native process model and its separate canonical generation fence model, with negative controls, without changing the gate.",
       "models": []
@@ -119,16 +119,16 @@
     },
     {
       "path": "internal/aws/catalog/rds_owned_controls_linux_amd64_test.go",
-      "sha256": "391087e0d9f1d84358cdcf826221f23277f26daa8419b6fd94eadb2249fdaf10",
+      "sha256": "d473969937961dadb441a3b827793f14ad45ec06790ecf211f161a28c7252ddc",
       "disposition": "test-support",
-      "reason": "Default offline SQLite fixture verifies lease identity, denied mutation, non-adoption, generation release and sticky failed acquisition without supplying a native workload.",
+      "reason": "Default offline SQLite fixture verifies lease identity, denied mutation, non-adoption, generation release and sticky failed acquisition without supplying a native workload. Checks that foreign-region mutators cannot consult mutable lifecycle state, including concurrent owner updates.",
       "models": []
     },
     {
       "path": "internal/aws/catalog/rds_owned_runtime_linux_amd64.go",
-      "sha256": "5e9f24caca2e43140d68533ab71eed7552da7f31f066a5cb889ac813d8e80e11",
+      "sha256": "3a6ee308c7719c9e45f6771658766c44bfd05719b82353197b87b5adaa090329",
       "disposition": "modeled",
-      "reason": "Installs and commits an exact SQLite fence with an authorized row, starts only after commit, verifies current authority before/after readiness, and releases only on confirmed teardown. Validates a merged Modify proposal before shutting down the owned generation.",
+      "reason": "Installs and commits an exact SQLite fence with an authorized row, starts only after commit, verifies current authority before/after readiness, and releases only on confirmed teardown. Validates a merged Modify proposal before shutting down the owned generation. Foreign-target mutations bypass mutable owner state; only nominated regional mutators consult it under the lock.",
       "models": [
         {
           "id": "RDSOwnedGenerationFence",
@@ -251,7 +251,7 @@
     },
     {
       "path": "scripts/test-formal-gate.py",
-      "sha256": "3cefe16541cafee609869ef6fde59b706c04851f3f673d2ca570c2af0382362a",
+      "sha256": "6260359e57c8be9bb522372f9d0cd658d725e425af6acddedfa9fb49924b67a6",
       "disposition": "formal-infrastructure",
       "reason": "Name the two new owned PostgreSQL models in the independent exact registry assertion without changing existing names or weakening equality.",
       "models": []
