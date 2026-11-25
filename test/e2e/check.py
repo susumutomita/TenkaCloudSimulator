@@ -682,6 +682,14 @@ def handler(event,context):
  def test_ssm_document_definition_native_sdk_and_restart(self):
   subprocess.run([sys.executable,str(Path(__file__).with_name('ssm_documents.py'))],check=True,timeout=180)
 
+ def test_ssm_document_versions_console_and_sdk(self):
+  from ssm_documents_console import run
+  run()
+
+ def test_ssm_document_versions_scalar_and_sdk(self):
+  from ssm_document_versions_scalar import run
+  run()
+
  def test_secrets_manager_native_two_teams_restart_and_redaction(self):
   subprocess.run([sys.executable,str(Path(__file__).with_name('secrets_manager.py'))],check=True)
 

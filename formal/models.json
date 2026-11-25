@@ -20265,6 +20265,139 @@
           "expect_invariant": "NativePermissionBoundary"
         }
       ]
+    },
+    {
+      "id": "SSMDocumentVersionPage",
+      "model": "formal/SSMDocumentVersionPage.tla",
+      "config": "formal/SSMDocumentVersionPage.cfg",
+      "bounds": "Two addresses and subjects; version counts 0–2, sizes 1–2, two abstract snapshot stamps and one response.",
+      "properties": [
+        "TypeOK",
+        "DeniedHasNoHistory",
+        "MissingHasNoHistory",
+        "ContinuationScope",
+        "AdmittedHasPage",
+        "MetadataOnly",
+        "NumericWindow",
+        "ContinuationEnd"
+      ],
+      "limits": "One abstract, already-normalized request and a committed snapshot, two addresses, two subjects, at most two numeric versions, sizes one/two and two opaque stamps. Snapshot stamp equality is an assumption, not a proof of fingerprint uniqueness, token integrity, SQL/parser/IAM refinement or real AWS behavior. No model of process restart, transport, tool or browser action; no writes or command execution.",
+      "source_scope": [
+        "internal/aws/ssm_document_versions.go",
+        "internal/aws/ssm_documents_api.go"
+      ],
+      "mutants": [
+        {
+          "id": "IgnorePermission",
+          "edits": [
+            {
+              "old": "~input.allowed THEN",
+              "new": "FALSE THEN",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "DeniedHasNoHistory"
+        },
+        {
+          "id": "IgnoreMissingDefinition",
+          "edits": [
+            {
+              "old": "input.count = 0 THEN Reject(\"InvalidDocument\")",
+              "new": "FALSE THEN Reject(\"InvalidDocument\")",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "MissingHasNoHistory"
+        },
+        {
+          "id": "IgnoreCursorAddress",
+          "edits": [
+            {
+              "old": "cursor.address = input.address",
+              "new": "TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ContinuationScope"
+        },
+        {
+          "id": "IgnoreCursorSubject",
+          "edits": [
+            {
+              "old": "cursor.subject = input.subject",
+              "new": "TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ContinuationScope"
+        },
+        {
+          "id": "IgnoreCursorStamp",
+          "edits": [
+            {
+              "old": "cursor.stamp = input.stamp",
+              "new": "TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ContinuationScope"
+        },
+        {
+          "id": "IgnoreCursorSize",
+          "edits": [
+            {
+              "old": "cursor.size = input.size",
+              "new": "TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ContinuationScope"
+        },
+        {
+          "id": "IgnoreCursorPosition",
+          "edits": [
+            {
+              "old": "cursor.offset < input.count",
+              "new": "TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ContinuationScope"
+        },
+        {
+          "id": "IncludeDefinitionBody",
+          "edits": [
+            {
+              "old": "hasBody |-> FALSE",
+              "new": "hasBody |-> TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "MetadataOnly"
+        },
+        {
+          "id": "WindowStartsAtOne",
+          "edits": [
+            {
+              "old": "version |-> offset+i",
+              "new": "version |-> i",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "NumericWindow"
+        },
+        {
+          "id": "ContinuePastEnd",
+          "edits": [
+            {
+              "old": "next |-> end < input.count",
+              "new": "next |-> TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ContinuationEnd"
+        }
+      ]
     }
   ]
 }

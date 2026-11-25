@@ -1176,6 +1176,12 @@ BASE_INVARIANTS['SSMDocumentState'] = {'AddressIsolation', 'DeleteCleanup', 'Cre
 REQUIRED_MUTANTS['SSMDocumentState'] = {'SkipLatestVersion', 'IgnoreExplicitDeny', 'SkipGlobalCount', 'KeepDeletedVersions', 'ReplaceHistory'}
 REQUIRED_SOURCE_SCOPES['SSMDocumentState'] = {'internal/server/server.go', 'internal/aws/s3.go', 'internal/aws/ssm.go', 'internal/aws/ssm_documents_validation.go', 'internal/aws/ssm_documents.go', 'internal/aws/ssm_documents_api.go'}
 
+# Normalized read-only SSM document version pages.
+BASE_MODELS.add('SSMDocumentVersionPage')
+BASE_INVARIANTS['SSMDocumentVersionPage'] = set(['TypeOK', 'DeniedHasNoHistory', 'MissingHasNoHistory', 'ContinuationScope', 'AdmittedHasPage', 'MetadataOnly', 'NumericWindow', 'ContinuationEnd'])
+REQUIRED_MUTANTS['SSMDocumentVersionPage'] = set(['IgnorePermission', 'IgnoreMissingDefinition', 'IgnoreCursorAddress', 'IgnoreCursorSubject', 'IgnoreCursorStamp', 'IgnoreCursorSize', 'IgnoreCursorPosition', 'IncludeDefinitionBody', 'WindowStartsAtOne', 'ContinuePastEnd'])
+REQUIRED_SOURCE_SCOPES['SSMDocumentVersionPage'] = set(['internal/aws/ssm_document_versions.go', 'internal/aws/ssm_documents_api.go'])
+
 BASE_MODELS.add('SecretMetadataUpdate')
 BASE_INVARIANTS['SecretMetadataUpdate'] = {'ValidPresent', 'Authorized', 'VersionPreserved', 'StagePreserved', 'ValuePreserved', 'NoPartialVisibility', 'TypeOK', 'ExactMetadata', 'IdentityPreserved', 'PeerPreserved', 'RefusalUnchanged', 'CreatedPreserved', 'DurableAcknowledgement'}
 REQUIRED_MUTANTS['SecretMetadataUpdate'] = {'FailedRollback', 'CorruptStagePreserved', 'SkipCommitAcknowledgement', 'SkipValidity', 'SkipExistence', 'SkipFinalStateCheck', 'CorruptIdentityPreserved', 'CorruptVersionPreserved', 'ExposeTentativeWrite', 'CorruptValuePreserved', 'SkipAuthorization', 'WrongDescription', 'CorruptPeerPreserved', 'CorruptCreatedPreserved'}

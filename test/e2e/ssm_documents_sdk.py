@@ -44,6 +44,18 @@ def main():
         assert client.describe_document(Name=name)["Document"]["DefaultVersion"] == "1"
         assert client.get_document(Name=name)["DocumentVersion"] == "1"
         assert json.loads(client.get_document(Name=name, DocumentVersion="$LATEST")["Content"]) == content
+        pages = list(client.get_paginator("list_document_versions").paginate(
+            Name=name, PaginationConfig={"PageSize": 1},
+        ))
+        assert len(pages) == 2
+        assert pages[0]["NextToken"] and not pages[1].get("NextToken")
+        assert all(len(page["DocumentVersions"]) == 1 for page in pages)
+        versions = [page["DocumentVersions"][0] for page in pages]
+        assert [version["DocumentVersion"] for version in versions] == ["1", "2"]
+        assert [version["IsDefaultVersion"] for version in versions] == [True, False]
+        assert all(version["Name"] == name and version["DocumentFormat"] == "JSON"
+                   and version["Status"] == "Active" and version["CreatedDate"].tzinfo is not None
+                   and "Content" not in version for version in versions)
         found = False
         token = None
         while True:
@@ -55,12 +67,13 @@ def main():
         assert found
         client.delete_document(Name=name)
         created = False
-        try:
-            client.get_document(Name=name)
-        except ClientError as exc:
-            assert exc.response["Error"]["Code"] == "InvalidDocument"
-        else:
-            raise AssertionError("deleted document remained accessible")
+        for read in (client.get_document, client.list_document_versions):
+            try:
+                read(Name=name)
+            except ClientError as exc:
+                assert exc.response["Error"]["Code"] == "InvalidDocument"
+            else:
+                raise AssertionError("deleted document or its history remained accessible")
         print("SSM document native management passed; no command was executed")
     finally:
         if created:

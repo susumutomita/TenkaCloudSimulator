@@ -1,378 +1,147 @@
 {
   "version": 1,
-  "base_sha": "3bb757f1ffbabd0c7f101811b4c623d92bea6e4e",
+  "base_sha": "0f215f10081716ee5afaef90afa03d69a00c350d",
   "changes": [
     {
       "path": "README.md",
-      "sha256": "cab02548a644997cb164fec508e795f35d1633de3aa1e58551cdd17181658603",
+      "sha256": "cc7e40ef77760e2e92efd4352b349f80b26f0e86ea5a448e9d3f1080e1f03f4b",
       "disposition": "documentation",
-      "reason": "Links the bounded Azure Queue contract without replacing the current Azure Blob read guides.",
-      "models": []
-    },
-    {
-      "path": "docs/acceptance/azure-queue.md",
-      "sha256": "b8f78261714f4a7c2aba590361eb2919f8144b7128454b19f2b2eba34f171c01",
-      "disposition": "documentation",
-      "reason": "Documents exact local operations, supported boundaries and history, and separates optional runtime/SDK evidence from normal CI.",
-      "models": []
-    },
-    {
-      "path": "docs/contributing/software-factory.md",
-      "sha256": "4ab628e2126a497c1a84c453ec37b28d92eea7ca6ddc848c00fcf372c6ed4f4c",
-      "disposition": "documentation",
-      "reason": "Documents the bounded Queue data-plane implementation, operational limits or acceptance method; does not alter runtime operations.",
+      "reason": "Documents exact SSM version-read scope, limitations, or related license notices without adding runtime authority.",
       "models": []
     },
     {
       "path": "docs/design/0001-go-standalone.md",
-      "sha256": "2b595912457139e5f62e880d6ca71949081d3eaf939f87f08d675470aaf656fb",
+      "sha256": "09162ffa82a08f7ff5aafcd21d92c7a2da93b26534b7950a0e46c7efbbe15218",
       "disposition": "documentation",
-      "reason": "Describes the independent owner-bound Queue and persistence contract alongside current Azure Blob profiles.",
+      "reason": "Documents exact SSM version-read scope, limitations, or related license notices without adding runtime authority.",
       "models": []
     },
     {
-      "path": "formal/AzureQueueLifecycle.cfg",
-      "sha256": "3ad1ef0aa84c12b3769878c643a349cf02394b42eef52208ad69d5dc5f9769c3",
+      "path": "docs/ssm-documents.md",
+      "sha256": "4161b2a61749186d31daec93ed590b0f4041f3a205adcd2c07e879fbce9a3284",
+      "disposition": "documentation",
+      "reason": "Documents exact SSM version-read scope, limitations, or related license notices without adding runtime authority.",
+      "models": []
+    },
+    {
+      "path": "formal/SSMDocumentVersionPage.cfg",
+      "sha256": "11e88f9d6e5eb0b50908e54bcba10229bdee5df061643291b1d092b6e4a23d52",
       "disposition": "modeled",
-      "reason": "Finite Queue row transition model and pinned bounds.",
+      "reason": "Follows the bounded readback contract: document-scoped request, normalized cursor and numeric metadata only; state writes are outside this model.",
       "models": [
         {
-          "id": "AzureQueueLifecycle",
+          "id": "SSMDocumentVersionPage",
           "properties": [
-            "Isolation",
-            "Rotation",
-            "ReceiptRequired",
-            "ExpiryGuard",
-            "VisibilityAdvance"
+            "DeniedHasNoHistory",
+            "MissingHasNoHistory",
+            "ContinuationScope",
+            "AdmittedHasPage",
+            "MetadataOnly",
+            "NumericWindow",
+            "ContinuationEnd"
           ],
-          "limits": "Includes normalized frame and receipt transitions. Selected conditional Queue row transitions only. Does not establish Go/SQLite refinement, real storage commit behavior, authentication, owner resolution, serialization, crypto, transport, TTL beyond the finite clock, account-wide limits, metadata, multiple messages/queues, list semantics, quotas, browser, SDK or liveness. Handler/protocol mapping covers only pre-normalized visibility and current/stale receipt decisions. Composition mapping covers only independent selected owner frames; the trusted actor and route are assumptions, not modeled auth."
+          "limits": "One abstract, already-normalized request and a committed snapshot, two addresses, two subjects, at most two numeric versions, sizes one/two and two opaque stamps. Snapshot stamp equality is an assumption, not a proof of fingerprint uniqueness, token integrity, SQL/parser/IAM refinement or real AWS behavior. No model of process restart, transport, tool or browser action; no writes or command execution."
         }
       ]
     },
     {
-      "path": "formal/AzureQueueLifecycle.tla",
-      "sha256": "ea8949bfe309a0855272770e81f0a7c25b6c64a068cc9b878e7da2a3e3446981",
+      "path": "formal/SSMDocumentVersionPage.tla",
+      "sha256": "c75fed461ec047bcf5466a714bc152eb0fbe1255dc6e82eb7fbc55a889a29a0a",
       "disposition": "modeled",
-      "reason": "Finite Queue row transition model and pinned bounds.",
+      "reason": "Follows the bounded readback contract: document-scoped request, normalized cursor and numeric metadata only; state writes are outside this model.",
       "models": [
         {
-          "id": "AzureQueueLifecycle",
+          "id": "SSMDocumentVersionPage",
           "properties": [
-            "Isolation",
-            "Rotation",
-            "ReceiptRequired",
-            "ExpiryGuard",
-            "VisibilityAdvance"
+            "DeniedHasNoHistory",
+            "MissingHasNoHistory",
+            "ContinuationScope",
+            "AdmittedHasPage",
+            "MetadataOnly",
+            "NumericWindow",
+            "ContinuationEnd"
           ],
-          "limits": "Includes normalized frame and receipt transitions. Selected conditional Queue row transitions only. Does not establish Go/SQLite refinement, real storage commit behavior, authentication, owner resolution, serialization, crypto, transport, TTL beyond the finite clock, account-wide limits, metadata, multiple messages/queues, list semantics, quotas, browser, SDK or liveness. Handler/protocol mapping covers only pre-normalized visibility and current/stale receipt decisions. Composition mapping covers only independent selected owner frames; the trusted actor and route are assumptions, not modeled auth."
-        }
-      ]
-    },
-    {
-      "path": "formal/AzureQueueOwnerAccess.cfg",
-      "sha256": "8f8d7ce9f66523de4ffe7151f31b1043280d0109d89506962e0d371fe27212ff",
-      "disposition": "modeled",
-      "reason": "Finite Queue owner discovery and guarded reference model.",
-      "models": [
-        {
-          "id": "AzureQueueOwnerAccess",
-          "properties": [
-            "DiscoveryAuthority",
-            "OnlyCurrentDiscovery",
-            "ReferenceAccountIsConfigured",
-            "NativePermissionBoundary"
-          ],
-          "limits": "Inputs are normalized, not trusted by their syntax. Models only normalized owner/actor decisions, selected discovery epoch and matching principal, configured account projection in the dynamic spec enum/default, and native admission independent of UI visibility. Does not prove token handling, actual Go/React/SQLite refinement, URL parsing, whole schema, SDK, browser, route transport, runtime or liveness. Embedded bundle binding is the generated projection of the exact source guards, not a model of the build system or JavaScript event delivery."
-        }
-      ]
-    },
-    {
-      "path": "formal/AzureQueueOwnerAccess.tla",
-      "sha256": "eef883db2ad6b405303a986d7abf79255cb1df116d721bed85c3edfa19a86899",
-      "disposition": "modeled",
-      "reason": "Finite Queue owner discovery and guarded reference model.",
-      "models": [
-        {
-          "id": "AzureQueueOwnerAccess",
-          "properties": [
-            "DiscoveryAuthority",
-            "OnlyCurrentDiscovery",
-            "ReferenceAccountIsConfigured",
-            "NativePermissionBoundary"
-          ],
-          "limits": "Inputs are normalized, not trusted by their syntax. Models only normalized owner/actor decisions, selected discovery epoch and matching principal, configured account projection in the dynamic spec enum/default, and native admission independent of UI visibility. Does not prove token handling, actual Go/React/SQLite refinement, URL parsing, whole schema, SDK, browser, route transport, runtime or liveness. Embedded bundle binding is the generated projection of the exact source guards, not a model of the build system or JavaScript event delivery."
+          "limits": "One abstract, already-normalized request and a committed snapshot, two addresses, two subjects, at most two numeric versions, sizes one/two and two opaque stamps. Snapshot stamp equality is an assumption, not a proof of fingerprint uniqueness, token integrity, SQL/parser/IAM refinement or real AWS behavior. No model of process restart, transport, tool or browser action; no writes or command execution."
         }
       ]
     },
     {
       "path": "formal/models.json",
-      "sha256": "c82389fce81d94c5eff1ae81ff8725c20d5759644c2bf202ad1be9743932d78b",
+      "sha256": "6044330a11d0c230491f2a5882810824d8784ee51c8b784b2ef28b4881f0fc2a",
       "disposition": "formal-infrastructure",
-      "reason": "Retains all 127 current-main model registrations and appends the original Azure Queue lifecycle and owner-boundary entries.",
+      "reason": "Registers the new bounded SSM readback model without dropping inherited model obligations.",
       "models": []
     },
     {
-      "path": "internal/azure/queue/expiry_quota_test.go",
-      "sha256": "9b10ed5fe8e8a0cc89de73e12ddc5068c8c33e2c4d347ab3e101c649495053e8",
+      "path": "internal/aws/ssm_document_versions.go",
+      "sha256": "0d8f4bdb7dce97440547fc69ec467ae465acf29a06601962b76bb12567654bc6",
       "disposition": "modeled",
-      "reason": "Native test exercises at least one corresponding lifecycle invariant, while unsupported or unmodeled data uses separate Go assertions.",
+      "reason": "Follows the bounded readback contract: document-scoped request, normalized cursor and numeric metadata only; state writes are outside this model.",
       "models": [
         {
-          "id": "AzureQueueLifecycle",
+          "id": "SSMDocumentVersionPage",
           "properties": [
-            "Isolation",
-            "ReceiptRequired",
-            "ExpiryGuard",
-            "ReadRollbackDurable"
+            "DeniedHasNoHistory",
+            "MissingHasNoHistory",
+            "ContinuationScope",
+            "AdmittedHasPage",
+            "MetadataOnly",
+            "NumericWindow",
+            "ContinuationEnd"
           ],
-          "limits": "Open-ended quota, storage failure, wire semantics and HTTP authority are separate tests, not TLC proof. Selected conditional Queue row transitions only. Does not establish Go/SQLite refinement, real storage commit behavior, authentication, owner resolution, serialization, crypto, transport, TTL beyond the finite clock, account-wide limits, metadata, multiple messages/queues, list semantics, quotas, browser, SDK or liveness. Handler/protocol mapping covers only pre-normalized visibility and current/stale receipt decisions. Composition mapping covers only independent selected owner frames; the trusted actor and route are assumptions, not modeled auth."
+          "limits": "One abstract, already-normalized request and a committed snapshot, two addresses, two subjects, at most two numeric versions, sizes one/two and two opaque stamps. Snapshot stamp equality is an assumption, not a proof of fingerprint uniqueness, token integrity, SQL/parser/IAM refinement or real AWS behavior. No model of process restart, transport, tool or browser action; no writes or command execution."
         }
       ]
     },
     {
-      "path": "internal/azure/queue/factory_delete_oracle_test.go",
-      "sha256": "4aae30d466e3407541c9b23cc07ee51b764fe52d2645b1cfae0a0d785f1318a1",
+      "path": "internal/aws/ssm_document_versions_test.go",
+      "sha256": "9f7811c530ff896372ede4efe2fbedaad8a64604377b24a4ce282b038ef6314b",
       "disposition": "test-support",
-      "reason": "Developer/test-only acceptance, detector or peer regression; existing nonformal test classification, not runtime code.",
+      "reason": "Focused SSM or registration test, not production execution or an independent completed runtime stamp.",
       "models": []
     },
     {
-      "path": "internal/azure/queue/factory_lifecycle_test.go",
-      "sha256": "98d58a0070af75ab25d64d66a048f9843b4eb1814a62d30f0e72ce75ee01ff32",
-      "disposition": "test-support",
-      "reason": "Developer/test-only acceptance, detector or peer regression; existing nonformal test classification, not runtime code.",
-      "models": []
-    },
-    {
-      "path": "internal/azure/queue/handler.go",
-      "sha256": "8c87764b88ac9206fe7eec2bdb877badeaa086a5b4096008be7dc675204637f1",
+      "path": "internal/aws/ssm_documents_api.go",
+      "sha256": "42a515411b55d5c1562e465bfad8c1e31decfdbc0680296519425d5dd6e35eb5",
       "disposition": "modeled",
-      "reason": "Native Queue dispatch selects the authorized owner and normalized action before running a row operation.",
+      "reason": "Keeps existing definition writes/erasure and adds the independent ListDocumentVersions dispatch. The bounded read model assumes already-normalized permission and cursor inputs.",
       "models": [
         {
-          "id": "AzureQueueOwnerAccess",
+          "id": "SSMDocumentState",
           "properties": [
-            "NativePermissionBoundary"
+            "HistoryImmutable",
+            "DefaultPreserved",
+            "DeleteCleanup"
           ],
-          "limits": "Covers native admission as different from mere visibility. Models only normalized owner/actor decisions, selected discovery epoch and matching principal, configured account projection in the dynamic spec enum/default, and native admission independent of UI visibility. Does not prove token handling, actual Go/React/SQLite refinement, URL parsing, whole schema, SDK, browser, route transport, runtime or liveness. Embedded bundle binding is the generated projection of the exact source guards, not a model of the build system or JavaScript event delivery."
+          "limits": "Definition management only. Atomic abstract transitions assume transaction commit/rollback; no SQL refinement, parser, IAM evaluation, byte quota, wire, persistence, concurrency or execution proof."
         },
         {
-          "id": "AzureQueueLifecycle",
+          "id": "SSMDocumentVersionPage",
           "properties": [
-            "ReceiptRequired",
-            "ExpiryGuard",
-            "UpdateReceipt"
+            "DeniedHasNoHistory",
+            "MissingHasNoHistory",
+            "ContinuationScope",
+            "AdmittedHasPage",
+            "MetadataOnly",
+            "NumericWindow",
+            "ContinuationEnd"
           ],
-          "limits": "Binds the decisions once method/path/receipt have been parsed. Selected conditional Queue row transitions only. Does not establish Go/SQLite refinement, real storage commit behavior, authentication, owner resolution, serialization, crypto, transport, TTL beyond the finite clock, account-wide limits, metadata, multiple messages/queues, list semantics, quotas, browser, SDK or liveness. Handler/protocol mapping covers only pre-normalized visibility and current/stale receipt decisions. Composition mapping covers only independent selected owner frames; the trusted actor and route are assumptions, not modeled auth."
+          "limits": "One abstract, already-normalized request and a committed snapshot, two addresses, two subjects, at most two numeric versions, sizes one/two and two opaque stamps. Snapshot stamp equality is an assumption, not a proof of fingerprint uniqueness, token integrity, SQL/parser/IAM refinement or real AWS behavior. No model of process restart, transport, tool or browser action; no writes or command execution."
         }
       ]
     },
     {
-      "path": "internal/azure/queue/handler_test.go",
-      "sha256": "efd4b26479b3e8ed373c8f666ab1f079f5a7d00490716997ec10923427f21544",
-      "disposition": "modeled",
-      "reason": "Native test exercises at least one corresponding lifecycle invariant, while unsupported or unmodeled data uses separate Go assertions.",
-      "models": [
-        {
-          "id": "AzureQueueLifecycle",
-          "properties": [
-            "Isolation",
-            "ReceiptRequired",
-            "ExpiryGuard",
-            "ReadRollbackDurable"
-          ],
-          "limits": "Open-ended quota, storage failure, wire semantics and HTTP authority are separate tests, not TLC proof. Selected conditional Queue row transitions only. Does not establish Go/SQLite refinement, real storage commit behavior, authentication, owner resolution, serialization, crypto, transport, TTL beyond the finite clock, account-wide limits, metadata, multiple messages/queues, list semantics, quotas, browser, SDK or liveness. Handler/protocol mapping covers only pre-normalized visibility and current/stale receipt decisions. Composition mapping covers only independent selected owner frames; the trusted actor and route are assumptions, not modeled auth."
-        }
-      ]
-    },
-    {
-      "path": "internal/azure/queue/openapi.go",
-      "sha256": "34e7dd33ef5e307b824bca6d9ed29511c8c13752d691c189d73806e244b3ffd0",
-      "disposition": "modeled",
-      "reason": "Binds only the generated account enum/default projection to the owner model; generated route/schema shape is not proved.",
-      "models": [
-        {
-          "id": "AzureQueueOwnerAccess",
-          "properties": [
-            "ReferenceAccountIsConfigured"
-          ],
-          "limits": "Only the fixed configured account projection is modeled. Models only normalized owner/actor decisions, selected discovery epoch and matching principal, configured account projection in the dynamic spec enum/default, and native admission independent of UI visibility. Does not prove token handling, actual Go/React/SQLite refinement, URL parsing, whole schema, SDK, browser, route transport, runtime or liveness. Embedded bundle binding is the generated projection of the exact source guards, not a model of the build system or JavaScript event delivery."
-        }
-      ]
-    },
-    {
-      "path": "internal/azure/queue/openapi_test.go",
-      "sha256": "f29c2429db5e88c9435066dcd5f9af218b83fcf43a46999637680a86d0127a47",
-      "disposition": "test-support",
-      "reason": "Developer/test-only acceptance, detector or peer regression; existing nonformal test classification, not runtime code.",
-      "models": []
-    },
-    {
-      "path": "internal/azure/queue/peek_wire_test.go",
-      "sha256": "f7f393b306361b944e9a5eaf8fe71d8c4105bcf95cd83a26ee896859709217ba",
-      "disposition": "test-support",
-      "reason": "Developer/test-only acceptance, detector or peer regression; existing nonformal test classification, not runtime code.",
-      "models": []
-    },
-    {
-      "path": "internal/azure/queue/peek_zero_oracle_test.go",
-      "sha256": "8664a07d7d258cb37f26bba2bd8982fd024492ec171df743d235d2c2eb6f16e6",
-      "disposition": "test-support",
-      "reason": "Developer/test-only acceptance, detector or peer regression; existing nonformal test classification, not runtime code.",
-      "models": []
-    },
-    {
-      "path": "internal/azure/queue/protocol.go",
-      "sha256": "99af0288543c750c733c804ff3c225822b13425136f65794ceb9657d05a699d7",
-      "disposition": "modeled",
-      "reason": "Maps wire visibility and receipt witnesses to the normalized model inputs; actual XML acceptance remains tested in Go.",
-      "models": [
-        {
-          "id": "AzureQueueLifecycle",
-          "properties": [
-            "VisibilityAdvance",
-            "UpdateReceipt",
-            "InvalidUpdate"
-          ],
-          "limits": "Opaque epoch abstractly stands for the current receipt, not format or entropy. Selected conditional Queue row transitions only. Does not establish Go/SQLite refinement, real storage commit behavior, authentication, owner resolution, serialization, crypto, transport, TTL beyond the finite clock, account-wide limits, metadata, multiple messages/queues, list semantics, quotas, browser, SDK or liveness. Handler/protocol mapping covers only pre-normalized visibility and current/stale receipt decisions. Composition mapping covers only independent selected owner frames; the trusted actor and route are assumptions, not modeled auth."
-        }
-      ]
-    },
-    {
-      "path": "internal/azure/queue/protocol_test.go",
-      "sha256": "7970504415a893e82cdf1ab952871a70fd9ccc11e1feb3491f99d92d1891e90d",
-      "disposition": "test-support",
-      "reason": "Developer/test-only acceptance, detector or peer regression; existing nonformal test classification, not runtime code.",
-      "models": []
-    },
-    {
-      "path": "internal/azure/queue/store.go",
-      "sha256": "dce53b7ed155f9626d8251e29c6c4f22233b0c274a812bbdf1c1267ae4d0cc77",
-      "disposition": "modeled",
-      "reason": "Maps the named-queue message row effects and stale receipt/expiry outcomes at transaction boundaries.",
-      "models": [
-        {
-          "id": "AzureQueueLifecycle",
-          "properties": [
-            "ReadRollbackDurable",
-            "Rotation",
-            "ReceiptRequired",
-            "ExpiryGuard",
-            "ExpiryRemoval",
-            "Isolation"
-          ],
-          "limits": "SQLite behavior is exercised separately; the model assumes atomic representation. Selected conditional Queue row transitions only. Does not establish Go/SQLite refinement, real storage commit behavior, authentication, owner resolution, serialization, crypto, transport, TTL beyond the finite clock, account-wide limits, metadata, multiple messages/queues, list semantics, quotas, browser, SDK or liveness. Handler/protocol mapping covers only pre-normalized visibility and current/stale receipt decisions. Composition mapping covers only independent selected owner frames; the trusted actor and route are assumptions, not modeled auth."
-        }
-      ]
-    },
-    {
-      "path": "internal/azure/queue/store_test.go",
-      "sha256": "ef81490f1582aeb297d950e96aaf86c96daaec21813e7c89add921943b445474",
-      "disposition": "modeled",
-      "reason": "Native test exercises at least one corresponding lifecycle invariant, while unsupported or unmodeled data uses separate Go assertions.",
-      "models": [
-        {
-          "id": "AzureQueueLifecycle",
-          "properties": [
-            "Isolation",
-            "ReceiptRequired",
-            "ExpiryGuard",
-            "ReadRollbackDurable"
-          ],
-          "limits": "Open-ended quota, storage failure, wire semantics and HTTP authority are separate tests, not TLC proof. Selected conditional Queue row transitions only. Does not establish Go/SQLite refinement, real storage commit behavior, authentication, owner resolution, serialization, crypto, transport, TTL beyond the finite clock, account-wide limits, metadata, multiple messages/queues, list semantics, quotas, browser, SDK or liveness. Handler/protocol mapping covers only pre-normalized visibility and current/stale receipt decisions. Composition mapping covers only independent selected owner frames; the trusted actor and route are assumptions, not modeled auth."
-        }
-      ]
-    },
-    {
-      "path": "internal/server/apidocs/azure-queue-init.js",
-      "sha256": "4efbdacc15909cd6b0c18bfbd608ca9005ba267514912e09722727ec60cfe2e6",
+      "path": "internal/server/apidocs/openapi.json",
+      "sha256": "d3db845b2679e23606fc0bfe18859d9fe3ed3a6a79f4395374ced986fb6313cb",
       "disposition": "presentation",
-      "reason": "Reference carries one validated exercise selector to the existing same-origin cookie-authenticated spec and native requests; no new authority and no retry/fallback. This browser adapter is tested offline, not modeled.",
-      "models": []
-    },
-    {
-      "path": "internal/server/apidocs/azure-queue.html",
-      "sha256": "031924fa7aeb6276044b7594393ce710cfcaccc1e9118b981a76e177900c6b59",
-      "disposition": "presentation",
-      "reason": "Prevents referrer disclosure of the noncredential exercise alias on this static reference page.",
-      "models": []
-    },
-    {
-      "path": "internal/server/azure_queue_reference.go",
-      "sha256": "7e016f7eb62735dc51820b8ed61cc1176d30805562840d7e8b795d81eab20e61",
-      "disposition": "modeled",
-      "reason": "Dynamic Queue JSON/spec and capabilities are served for the effective owner, configured account and non-handoff origin through existing routing.",
-      "models": [
-        {
-          "id": "AzureQueueOwnerAccess",
-          "properties": [
-            "DiscoveryAuthority",
-            "ReferenceGetAuthorized",
-            "ReferenceAccountIsConfigured"
-          ],
-          "limits": "Only typed actor, method and account witnesses; HTTP origin enforcement is outside this model. Models only normalized owner/actor decisions, selected discovery epoch and matching principal, configured account projection in the dynamic spec enum/default, and native admission independent of UI visibility. Does not prove token handling, actual Go/React/SQLite refinement, URL parsing, whole schema, SDK, browser, route transport, runtime or liveness. Embedded bundle binding is the generated projection of the exact source guards, not a model of the build system or JavaScript event delivery."
-        }
-      ]
-    },
-    {
-      "path": "internal/server/azure_queue_reference_test.go",
-      "sha256": "64447d3e0729f01f34ab08a90cefa44ecdae1ffaa74a7e0feab4de91efb49480",
-      "disposition": "test-support",
-      "reason": "Developer/test-only acceptance, detector or peer regression; existing nonformal test classification, not runtime code.",
-      "models": []
-    },
-    {
-      "path": "internal/server/azure_queue_test.go",
-      "sha256": "8b967077ab42be7ea19030f912a2c0c9564bfa328d541d8d208cb4b76b01e7d7",
-      "disposition": "modeled",
-      "reason": "Native integration test independently exercises name isolation, persistence/restart and current receipt behavior.",
-      "models": [
-        {
-          "id": "AzureQueueLifecycle",
-          "properties": [
-            "Isolation",
-            "ReadRollbackDurable",
-            "Rotation",
-            "ReceiptRequired"
-          ],
-          "limits": "Connection and API transport are observed by Go, not explored in TLC. Selected conditional Queue row transitions only. Does not establish Go/SQLite refinement, real storage commit behavior, authentication, owner resolution, serialization, crypto, transport, TTL beyond the finite clock, account-wide limits, metadata, multiple messages/queues, list semantics, quotas, browser, SDK or liveness. Handler/protocol mapping covers only pre-normalized visibility and current/stale receipt decisions. Composition mapping covers only independent selected owner frames; the trusted actor and route are assumptions, not modeled auth."
-        }
-      ]
-    },
-    {
-      "path": "internal/server/cloud_storage.go",
-      "sha256": "90370e086685e59984a59c276d3899bb0dfc8bcf18b044f0a90dc5bbc23ef582",
-      "disposition": "modeled",
-      "reason": "Scoped forwarding attaches an independently selected owner and preserves peer service isolation; other providers unchanged.",
-      "models": [
-        {
-          "id": "AzureQueueOwnerAccess",
-          "properties": [
-            "NativePermissionBoundary"
-          ],
-          "limits": "The actor selection input is assumed trusted. Models only normalized owner/actor decisions, selected discovery epoch and matching principal, configured account projection in the dynamic spec enum/default, and native admission independent of UI visibility. Does not prove token handling, actual Go/React/SQLite refinement, URL parsing, whole schema, SDK, browser, route transport, runtime or liveness. Embedded bundle binding is the generated projection of the exact source guards, not a model of the build system or JavaScript event delivery."
-        },
-        {
-          "id": "AzureQueueLifecycle",
-          "properties": [
-            "Isolation"
-          ],
-          "limits": "Composition maps only separate owner frames, not process/SQLite crash or other providers. Selected conditional Queue row transitions only. Does not establish Go/SQLite refinement, real storage commit behavior, authentication, owner resolution, serialization, crypto, transport, TTL beyond the finite clock, account-wide limits, metadata, multiple messages/queues, list semantics, quotas, browser, SDK or liveness. Handler/protocol mapping covers only pre-normalized visibility and current/stale receipt decisions. Composition mapping covers only independent selected owner frames; the trusted actor and route are assumptions, not modeled auth."
-        }
-      ]
-    },
-    {
-      "path": "internal/server/sakura_provider_test.go",
-      "sha256": "aae2e410b341a0f8eb00c72910d3f3ee41de80873711f51694a4b2d6c64e3c51",
-      "disposition": "test-support",
-      "reason": "Developer/test-only acceptance, detector or peer regression; existing nonformal test classification, not runtime code.",
+      "reason": "Read-only Console, reference, frontend tests or generated build metadata; the existing API is authoritative.",
       "models": []
     },
     {
       "path": "internal/server/server.go",
-      "sha256": "481bcde81cbff3ce6425d582e74ab635adb1bb98d92758a916552f26ebb491bb",
+      "sha256": "9a4d83af2b2de4c483ba0691678bc7ba7adf9962878d024cb5610aa9cf72c593",
       "disposition": "modeled",
-      "reason": "Registers the guarded reference and emits guarded Queue Console discovery without granting additional native authority.",
+      "reason": "Advertises the implemented SSM definition-only operation in the existing capability response, without changing the Queue route, identity or runtime admission. The inherited model addresses Queue only.",
       "models": [
         {
           "id": "AzureQueueOwnerAccess",
@@ -386,16 +155,16 @@
     },
     {
       "path": "internal/server/web/app.css",
-      "sha256": "f87aaeb78c181d51f63af77eea0113869a05d6bc05854c58ae35529fd708939e",
+      "sha256": "5832b6a729600530e939b4f7b9991a0c7bd778b99ff31e4567f0e1dd239fb48e",
       "disposition": "presentation",
-      "reason": "Queue Console or local reference presentation/metadata, and exact generated projections; actual native authority is separately enforced.",
+      "reason": "Read-only Console, reference, frontend tests or generated build metadata; the existing API is authoritative.",
       "models": []
     },
     {
       "path": "internal/server/web/app.js",
-      "sha256": "38f93ec685a0408e47ed3c6731771606f89673672a5ed93f7e2aafddef188d8f",
+      "sha256": "93ca74d843f0455bf0c3a31ef5294d475e987af7b79061898d8d98cfe72d4d12",
       "disposition": "modeled",
-      "reason": "Pinned composition retains Azure Blob and S3 scope bindings and projects current Queue console owner/identity selection. Selector transport and cookie validation are not covered by the finite models.",
+      "reason": "Rebuilds the embedded console from the combined exact source, preserving Azure Queue, Azure Blob and S3 multipart model scope. The added SSM view code is not covered by those inherited finite models.",
       "models": [
         {
           "id": "AzureBlobRowDownload",
@@ -428,136 +197,87 @@
       ]
     },
     {
-      "path": "scripts/factory_acceptance.py",
-      "sha256": "50851b7bf24df21a8c5084d226003ead5987092736f2a72daa9bc19ec3a95d7e",
-      "disposition": "validation-tooling",
-      "reason": "Developer-only Queue SDK pin and factory evidence; not a runtime dependency and no blanket exemption.",
-      "models": []
-    },
-    {
-      "path": "scripts/formal_applicability.py",
-      "sha256": "aea21a7a8d508829068246642f4a8fd80bc1723f06d2040a25e0f983a8b73115",
-      "disposition": "formal-infrastructure",
-      "reason": "Adds the required finite Queue models/controls or exact test-only classification without weakening existing checks.",
+      "path": "internal/server/web/app.js.LEGAL.txt",
+      "sha256": "07f02f51b4c922a2242d21ce8c3929067b724bed04f42bce3a17c11159a1b0aa",
+      "disposition": "presentation",
+      "reason": "Read-only Console, reference, frontend tests or generated build metadata; the existing API is authoritative.",
       "models": []
     },
     {
       "path": "scripts/formal_model_gate.py",
-      "sha256": "c2659059aaedd1525c83065485520696f52e5ea42ded5b931beb2f014b25ffa3",
+      "sha256": "5eb3eec1b265ebf6ad9fa326e2d04de4a215cf95dc8e3ed572566916a6eb3fa9",
       "disposition": "formal-infrastructure",
-      "reason": "Requires both reviewed Queue models and exact source/control scopes while retaining the prior Azure Blob/S3 gates.",
-      "models": []
-    },
-    {
-      "path": "scripts/requirements-azure-queue-test.txt",
-      "sha256": "ac6f4ccc56ac1ba99da7514c3714a7a572612948a7354cd0fe9b2ecfa73afaa6",
-      "disposition": "validation-tooling",
-      "reason": "Developer-only Queue SDK pin and factory evidence; not a runtime dependency and no blanket exemption.",
-      "models": []
-    },
-    {
-      "path": "scripts/test-factory-acceptance.py",
-      "sha256": "1f6be9f69a7d768c1b9c9eb85d6c8bedd8de6f8a82c073185c2dad332f3ae5f4",
-      "disposition": "test-support",
-      "reason": "Developer/test-only acceptance, detector or peer regression; existing nonformal test classification, not runtime code.",
+      "reason": "Registers the new bounded SSM readback model without dropping inherited model obligations.",
       "models": []
     },
     {
       "path": "scripts/test-formal-gate.py",
-      "sha256": "62a8970ce6f611e4076a272c4e669fc866b737ab8fb16002b9f32690263646b7",
+      "sha256": "0ba00c337d4028c534a9b060793e8a109322c8a967ffb09c47f349fb909f1d51",
       "disposition": "formal-infrastructure",
-      "reason": "Adds the two reviewed Queue IDs to the independent exact registry inventory; retains the existing detectors.",
+      "reason": "Registers the new bounded SSM readback model without dropping inherited model obligations.",
       "models": []
     },
     {
-      "path": "scripts/test-simpledb-factory-registration.py",
-      "sha256": "a74e9a14e155c3c48d8ff42360709c1e895efaa0f0c101e0863ec32f27906c3c",
+      "path": "test/e2e/check.py",
+      "sha256": "0460b6f03375f15cc8b7822e38809eb36cb6ca64d93682580888dad5c75d5b17",
       "disposition": "test-support",
-      "reason": "Developer/test-only acceptance, detector or peer regression; existing nonformal test classification, not runtime code.",
+      "reason": "Focused SSM or registration test, not production execution or an independent completed runtime stamp.",
       "models": []
     },
     {
-      "path": "test/console/azure-queue.test.mjs",
-      "sha256": "86ed0089a571c95e81aac65b4539e5eaf4a89ca6165ba5979a09968912f7efc5",
+      "path": "test/e2e/ssm_document_reference.py",
+      "sha256": "ab85abb554eaed93a3458498d545acdd536a91378a3c7105dde0ebbe2cb30d71",
       "disposition": "test-support",
-      "reason": "Offline Queue lifecycle and reference projection, including default bootstrap, fixed participant, explicit selection and invalid inputs.",
+      "reason": "Focused SSM or registration test, not production execution or an independent completed runtime stamp.",
       "models": []
     },
     {
-      "path": "test/e2e/azure_queue_cli.py",
-      "sha256": "d72308fef1af83608a45577b1779803590a5266dcd14d5c8a9febee186e5e326",
+      "path": "test/e2e/ssm_document_versions_scalar.py",
+      "sha256": "c29ce6f4591ecbf4f69f2dc51c2d7c7d04d59011567d00d8af33e255c24ab088",
       "disposition": "test-support",
-      "reason": "Developer/test-only acceptance, detector or peer regression; existing nonformal test classification, not runtime code.",
+      "reason": "Focused SSM or registration test, not production execution or an independent completed runtime stamp.",
       "models": []
     },
     {
-      "path": "test/e2e/azure_queue_console_gui.py",
-      "sha256": "6fe2c0a84e5aa8a59bc05829ac64bf936364a45ae7c0d848e62f69279928dc38",
+      "path": "test/e2e/ssm_documents.py",
+      "sha256": "845b3133520719d00ad821d21f1e63881427c4338fe99187f3d01708f9fa78ef",
       "disposition": "test-support",
-      "reason": "Developer/test-only acceptance, detector or peer regression; existing nonformal test classification, not runtime code.",
+      "reason": "Focused SSM or registration test, not production execution or an independent completed runtime stamp.",
       "models": []
     },
     {
-      "path": "test/e2e/azure_queue_official.py",
-      "sha256": "60056288de7d3ad3399f69ad80d36897f91e7706d776061260c34b55bb78b6d1",
+      "path": "test/e2e/ssm_documents_console.py",
+      "sha256": "222d7fd1a90bd376ed1dae9db77c524abe5dc6a8c7d62d8238f4ea1e17e409bc",
       "disposition": "test-support",
-      "reason": "Developer/test-only acceptance, detector or peer regression; existing nonformal test classification, not runtime code.",
+      "reason": "Focused SSM or registration test, not production execution or an independent completed runtime stamp.",
       "models": []
     },
     {
-      "path": "test/e2e/test_azure_queue_cli.py",
-      "sha256": "8f3fb6375df47039a04fe121ac03cdbba5a7d7bc82a890675cef3d47b4adc9d2",
+      "path": "test/e2e/ssm_documents_sdk.py",
+      "sha256": "115f6ca0947a69392d0174ac4ebad49ee241f2b33182a6fe179b590c88087b34",
       "disposition": "test-support",
-      "reason": "Developer/test-only acceptance, detector or peer regression; existing nonformal test classification, not runtime code.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/test_azure_queue_official.py",
-      "sha256": "9ee5500532c6c36f996d5e8cb6c4fc87bbd444778544b1969e5d90acaf50cdab",
-      "disposition": "test-support",
-      "reason": "Developer/test-only acceptance, detector or peer regression; existing nonformal test classification, not runtime code.",
+      "reason": "Focused SSM or registration test, not production execution or an independent completed runtime stamp.",
       "models": []
     },
     {
       "path": "tools/console/bundle-digests.json",
-      "sha256": "adf96d2278423cc7cd64c3b0fdfc8eb1ddbb8505354144ef3f35934af93dba75",
+      "sha256": "fbc988e5bb14f33289940fca9ef3bf03eec43b69a122d34e7d1893fa2cf26e8a",
       "disposition": "presentation",
-      "reason": "Pinned rebuild digests for the corrected Queue reference link; CSS and notices unchanged.",
+      "reason": "Read-only Console, reference, frontend tests or generated build metadata; the existing API is authoritative.",
       "models": []
     },
     {
       "path": "tools/console/bundle-inputs.json",
-      "sha256": "aa9ae9913c936cdc7b6b545da1935a347a2af291fa1cbf7736a5db226237711c",
+      "sha256": "8cbfd9ba8054566521f244af016c776a93225ef8e78d76b723257cabe62a9834",
       "disposition": "presentation",
-      "reason": "Pinned rebuild input inventory for the corrected Queue reference link.",
-      "models": []
-    },
-    {
-      "path": "tools/console/src/azure-queue-requests.mjs",
-      "sha256": "63c1af886104a7e1049903c2ba99c1fb6a52f15d7b2d4b6f0f8ed56ce9305d4f",
-      "disposition": "presentation",
-      "reason": "Validates a non-secret reference selector and retains bare navigation for cookie-fixed identities and the initial built-in operator.",
-      "models": []
-    },
-    {
-      "path": "tools/console/src/azure-queue.css",
-      "sha256": "93dd62a6568a188f19c7b6f8ed66b77cec19dc7080ff8a860f9fea7daac1919d",
-      "disposition": "presentation",
-      "reason": "Queue Console or local reference presentation/metadata, and exact generated projections; actual native authority is separately enforced.",
-      "models": []
-    },
-    {
-      "path": "tools/console/src/azure-queue.jsx",
-      "sha256": "ba1706ad2869d9acbf5d01d7f6a04e33c8bb82ea46d3f2ba900ed10d6f6e06c5",
-      "disposition": "presentation",
-      "reason": "Passes the validated reference URL explicitly to the rendered Queue child; never treats selection as authorization.",
+      "reason": "Read-only Console, reference, frontend tests or generated build metadata; the existing API is authoritative.",
       "models": []
     },
     {
       "path": "tools/console/src/console-navigation.mjs",
-      "sha256": "b11b5bedff7216f70f50b4244aa94e0ec438af38fbb0034f4ec97f373c605399",
+      "sha256": "15e30291890a7ed3f39dfaf3dd49fd8510e09dc711c527bce9f486331a17bc47",
       "disposition": "modeled",
-      "reason": "Names the owner-only Queue entry and binds the selected identity/epoch result to the currently observable Console, including the generated bundle projection.",
+      "reason": "Adds an SSM route requiring the three listed definition API operations and excludes bound handoff scopes; does not change owner-only Queue discovery. The inherited model only addresses Queue.",
       "models": [
         {
           "id": "AzureQueueOwnerAccess",
@@ -572,9 +292,9 @@
     },
     {
       "path": "tools/console/src/main.jsx",
-      "sha256": "6df8c70ce96b5c647cac8d6bc36881e41a36c11dd273bcec6d29f576b0d256a6",
+      "sha256": "15e1f4a28d255942e13b42e20b57c76cc46dd639566e1c806519d154b0e38c69",
       "disposition": "modeled",
-      "reason": "Preserves the owner-bound discovery epoch and current permitted selection, omitting only cookie-bound identity or the initial built-in operator.",
+      "reason": "Mounts read-only SSM documents by selected region, identity and navigation epoch; Azure Queue selection is retained unchanged. The SSM React/browser behavior is not part of the inherited Queue model.",
       "models": [
         {
           "id": "AzureQueueOwnerAccess",
@@ -588,10 +308,38 @@
       ]
     },
     {
-      "path": "tools/console/test/azure-queue-scalar-gate.test.cjs",
-      "sha256": "f13076685d6dfebce3985c8335a5efc8754f4e3e31ded3e0a7232313f86e6cbe",
+      "path": "tools/console/src/ssm-document-client.mjs",
+      "sha256": "2b8368289f15691ade75749d31562268bdce81cf1b6baaf470972c3218cc8a9a",
       "disposition": "presentation",
-      "reason": "Runs actual offline React first render for default/selected/malformed inputs and exercises the reference adapter, refusal, no fallback and no-referrer.",
+      "reason": "Read-only Console, reference, frontend tests or generated build metadata; the existing API is authoritative.",
+      "models": []
+    },
+    {
+      "path": "tools/console/src/ssm-documents.css",
+      "sha256": "edd4fade90bedd21431977685602e38f3f3abc72df38b43f08640be8bfaae8f4",
+      "disposition": "presentation",
+      "reason": "Read-only Console, reference, frontend tests or generated build metadata; the existing API is authoritative.",
+      "models": []
+    },
+    {
+      "path": "tools/console/src/ssm-documents.jsx",
+      "sha256": "1adf76c2316f8f02ad806437c2a0f06b18ce8682b980f760e3cdb9cacf8318df",
+      "disposition": "presentation",
+      "reason": "Read-only Console, reference, frontend tests or generated build metadata; the existing API is authoritative.",
+      "models": []
+    },
+    {
+      "path": "tools/console/test/ssm-document-client.test.mjs",
+      "sha256": "62ba8e91dce82786e0eac80cbeab3e248d684e5948ce464c4d8371afb005788b",
+      "disposition": "presentation",
+      "reason": "Read-only Console, reference, frontend tests or generated build metadata; the existing API is authoritative.",
+      "models": []
+    },
+    {
+      "path": "tools/console/test/ssm-document-navigation.test.mjs",
+      "sha256": "2eccbe0c70034b07d61577a6c1be42454cd17762099ca5da4fd52434efe23e0c",
+      "disposition": "presentation",
+      "reason": "Read-only Console, reference, frontend tests or generated build metadata; the existing API is authoritative.",
       "models": []
     }
   ]
