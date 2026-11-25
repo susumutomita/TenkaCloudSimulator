@@ -1,116 +1,99 @@
 {
   "version": 1,
-  "base_sha": "27010d3660036036b6fdbd420c1a566f73794e87",
+  "base_sha": "df94e52673ebe9aaeb593c1f89abef16913dc130",
   "changes": [
     {
       "path": "README.md",
-      "sha256": "7680f230aa500173879e752f1fa6d5d792f7fbcbb1f6f995320c26ce54609ab8",
+      "sha256": "f553a3d51051973f9cbfd21e52527aaed435b856f3d8d15c8000ad8976989528",
       "disposition": "documentation",
-      "reason": "Documents local saved PTR names and reverse-lookup boundaries.",
+      "reason": "Clarifies when an existing opt-in Battle resolve can return a capability; it does not promise readiness polling or guest execution.",
       "models": []
     },
     {
       "path": "docs/design/0001-go-standalone.md",
-      "sha256": "fc60b0c3e4cb94ca316b612b0796c9a9cfcb2d5cd9cc5bfaa2b870bcf17135cc",
+      "sha256": "7529a718d750172831435bd81592dc61fc14535393dad448952debcaa03ee11e",
       "disposition": "documentation",
-      "reason": "Documents local saved PTR names and reverse-lookup boundaries.",
+      "reason": "Documents the completed-generation guard, early 409, unchanged seal and absence of a new transport.",
       "models": []
     },
     {
-      "path": "docs/route53.md",
-      "sha256": "1a4ba2b81e02638b045d7725528069fa030beb7a38940a516b2fc12d7f17686f",
-      "disposition": "documentation",
-      "reason": "Documents local saved PTR names and reverse-lookup boundaries.",
+      "path": "formal/models.json",
+      "sha256": "3ca162411c3c2cfbf326393f72c4cc1e3662b124ddd1f09f478977f93dd16ba2",
+      "disposition": "formal-infrastructure",
+      "reason": "Adds one exact implementation path to the existing CanonicalVMComposition ownership scope; leaves models, bounds, checked invariants and sensitivity controls unchanged.",
       "models": []
     },
     {
-      "path": "internal/aws/route53_http.go",
-      "sha256": "3cb6c3f0e22324c44fbdbf1ff4e52a9318e2fad4121460af86c3407f8478a791",
+      "path": "internal/aws/ec2_completed_guest_linux_test.go",
+      "sha256": "9ed792f655cbe44d52cfa68d1b4eeca77a1ba8c3fbe4de5b792a7068818c0009",
+      "disposition": "test-support",
+      "reason": "Tests native stack persistence and retained ownership plus both readiness orderings at the existing inert VM boundary, not real guest or SQL behavior.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/ec2_completed_guest_unix.go",
+      "sha256": "9874818ec6a0486bdebea0d065824aee010cdc76867951c5772291b65618dc40",
       "disposition": "modeled",
-      "reason": "PTR uses existing saved-name validation and authorized transactional record storage; the newly admitted record type does not change the transaction, authority or team boundary.",
+      "reason": "Only the authoritative exact saved instance/stack/retained-provider association maps onto the registry's SavedAssociation condition. The new durable readiness join has separate native tests.",
       "models": [
         {
-          "id": "Route53AtomicBatch",
+          "id": "CanonicalVMComposition",
           "properties": [
-            "AtomicPair",
-            "OnlyAuthorizedValid",
-            "OtherTeamUnchanged"
+            "SavedAssociation"
           ],
-          "limits": "The finite pair model covers abstract admission and isolation, not PTR syntax, DNS type ordering, XML or Go/SQLite refinement; targeted native and SDK tests cover those implementation boundaries."
+          "limits": "SavedAssociation checks symbolic equality for the already-registered provider in the registry mode. It does not compose the launch and registry modes or check the actual SQLite CREATE_COMPLETE + ready/held join, Go/HTTP publication or teardown races, later I/O authority, VM/guest, networking or RDS."
         }
       ]
     },
     {
-      "path": "internal/aws/route53_ptr_test.go",
-      "sha256": "e43d897b2c67dd05251942262d6f6909573978f6a6bc68f5a649dd0bf9932a0d",
-      "disposition": "test-support",
-      "reason": "Focused PTR acceptance or exact additive API description checks; does not change runtime.",
-      "models": []
-    },
-    {
-      "path": "internal/aws/route53_store.go",
-      "sha256": "af3834c964f3b8426b741cdd8e90aa5e8b6c2b5ed5827347ffd68c5d89be2f86",
+      "path": "internal/server/battle_capabilities_unix.go",
+      "sha256": "cc06f2903cf1c29c25cbc5e6d73c1d87751a284e1cdf8c5f3357850c6f2000d4",
       "disposition": "modeled",
-      "reason": "PTR uses existing saved-name validation and authorized transactional record storage; the newly admitted record type does not change the transaction, authority or team boundary.",
+      "reason": "Opt-in resolve selects only the saved typed provider and refuses an owner/binding that the canonical store cannot match; the modeled part is the exact saved association, not the response's timing.",
       "models": [
         {
-          "id": "Route53AtomicBatch",
+          "id": "CanonicalVMComposition",
           "properties": [
-            "AtomicPair",
-            "OnlyAuthorizedValid",
-            "OtherTeamUnchanged"
+            "SavedAssociation"
           ],
-          "limits": "The finite pair model covers abstract admission and isolation, not PTR syntax, DNS type ordering, XML or Go/SQLite refinement; targeted native and SDK tests cover those implementation boundaries."
+          "limits": "SavedAssociation checks symbolic equality for the already-registered provider in the registry mode. It does not compose the launch and registry modes or check the actual SQLite CREATE_COMPLETE + ready/held join, Go/HTTP publication or teardown races, later I/O authority, VM/guest, networking or RDS."
         }
       ]
     },
     {
-      "path": "internal/server/apidocs/openapi.json",
-      "sha256": "1b4386f3102441a87e2339b94ee80a8c3ac355e53fd300833e400c6971190bce",
-      "disposition": "presentation",
-      "reason": "Embedded API reference lists the newly admitted simple PTR record type.",
+      "path": "internal/server/battle_completed_guest_linux_test.go",
+      "sha256": "52a904e11b706a029d8fc13cc22c169b40a3b9ef9c2bc48c4139d36f3aedbe3e",
+      "disposition": "test-support",
+      "reason": "Checks existing HTTP resolve and seal handlers with fixture-only state. No physical VM assertion.",
       "models": []
     },
     {
-      "path": "test/e2e/autoscaling_plans_openapi.py",
-      "sha256": "5845f59d71a0c3c98393a88e02ee6c426fb9ccb48e78017e5f61da17691316f7",
-      "disposition": "test-support",
-      "reason": "Focused PTR acceptance or exact additive API description checks; does not change runtime.",
+      "path": "internal/server/battle_runtime_unix.go",
+      "sha256": "61900112a05b100d5f4925b1e9f65dab76fa9824620d69a8cbe467453af7f86b",
+      "disposition": "modeled",
+      "reason": "Supplies the existing registry with the StackStore belonging to its configured provider, keeping the lookup tied to the saved association instead of a requester-provided store.",
+      "models": [
+        {
+          "id": "CanonicalVMComposition",
+          "properties": [
+            "SavedAssociation"
+          ],
+          "limits": "SavedAssociation checks symbolic equality for the already-registered provider in the registry mode. It does not compose the launch and registry modes or check the actual SQLite CREATE_COMPLETE + ready/held join, Go/HTTP publication or teardown races, later I/O authority, VM/guest, networking or RDS."
+        }
+      ]
+    },
+    {
+      "path": "scripts/formal_model_gate.py",
+      "sha256": "03390e66f99b6f9b1375e42059a753ab4ec740940411988dd8bce4d03d20f02e",
+      "disposition": "formal-infrastructure",
+      "reason": "Synchronizes one existing required exact-source pin with the registry. No gate, certification rule, bounds or execution change.",
       "models": []
     },
     {
-      "path": "test/e2e/route53.py",
-      "sha256": "2cf7408c092cab8880b767571134eb88641cff4f3acd5f983f919c36df8300ca",
-      "disposition": "test-support",
-      "reason": "Focused PTR acceptance or exact additive API description checks; does not change runtime.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/route53_openapi.py",
-      "sha256": "8a6630e6d8ad099944cb3e2113a544cb3b0607c1451a9dd3dae45ec07ebfed97",
-      "disposition": "test-support",
-      "reason": "Focused PTR acceptance or exact additive API description checks; does not change runtime.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/route53_ptr_reference.py",
-      "sha256": "1b5e9cd125ba529124c68d946adceb353a5804ffd610c1df4735757c2a3231dc",
-      "disposition": "test-support",
-      "reason": "Focused PTR acceptance or exact additive API description checks; does not change runtime.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/test_route53_openapi.py",
-      "sha256": "1daaee9399804b1017b100cb598eaf409cdf616f29b4526e14808e1ca59b0982",
-      "disposition": "test-support",
-      "reason": "Focused PTR acceptance or exact additive API description checks; does not change runtime.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/test_sakura_openapi.py",
-      "sha256": "8575f9f42ed9fa27cd80e469c79ec3cedcea31731e0c1601e86ccb063cf74e04",
-      "disposition": "test-support",
-      "reason": "Focused PTR acceptance or exact additive API description checks; does not change runtime.",
+      "path": "scripts/test-formal-gate.py",
+      "sha256": "2feed998896c2481331e4f8d90065eb66cb4ef4d902bb7ac84481ba0dd0b8663",
+      "disposition": "formal-infrastructure",
+      "reason": "Updates the existing exact scope fixture to detect omission of the newly named implementation file; all original checks remain.",
       "models": []
     }
   ]
