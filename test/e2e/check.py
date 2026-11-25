@@ -73,6 +73,12 @@ def submit(page):
  if dialog.is_visible():dialog.get_by_role('button').last.click()
  else:page.get_by_role('button',name=re.compile('^(Create bucket|Upload|Create parameter|Save changes)$')).last.click()
 class Conformance(unittest.TestCase):
+ def test_s3_multipart_paging_authenticated_browser(self):
+  subprocess.run([sys.executable,str(Path(__file__).with_name('test_s3_multipart_paging_launcher.py'))],check=True,timeout=60)
+  with (REPORTS/'s3-multipart-paging.json').open('w') as report:
+   subprocess.run([sys.executable,str(Path(__file__).with_name('run_s3_multipart_paging.py')),
+                   '--binary',str(BINARY)],check=True,timeout=300,stdout=report)
+
  def test_single_service_navigation_and_history_commit(self):
   subprocess.run([sys.executable,str(Path(__file__).with_name("navigation_single_commit.py"))],check=True,timeout=90)
 

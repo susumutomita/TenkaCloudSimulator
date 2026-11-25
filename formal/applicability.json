@@ -1,12 +1,188 @@
 {
   "version": 1,
-  "base_sha": "bc5f091511cd539a8db84780b157baddb9a0fdc1",
+  "base_sha": "4a57253c86438a3f0000ac5ec57f39474d2c55c6",
   "changes": [
     {
-      "path": "AGENTS.md",
-      "sha256": "d42886397549ed08b68951d21eb840b250cf2d4f58beddf2169c0fc4e6b5a88e",
+      "path": ".github/workflows/ci.yml",
+      "sha256": "057bf3b20b683a8fb2b38ba8b935e38276aede12e0351ab28e0f248915d120f6",
+      "disposition": "formal-infrastructure",
+      "reason": "Normal PR console CI retains only offline S3 launcher refusal checks, leaving the sandboxed browser fixture in opt-in aggregate E2E and preserving existing CI and job dependencies.",
+      "models": []
+    },
+    {
+      "path": "docs/s3-multipart.md",
+      "sha256": "818659c13378376026688fff0957ddb7eedfc25d1d6580371402391d314f5cd5",
       "disposition": "documentation",
-      "reason": "Agent merge policy documentation only. No runtime source, security control, tests, CI workflow, or formal model changed.",
+      "reason": "Documents the split between offline normal PR CI and explicitly selected sandboxed browser validation and its environment limits.",
+      "models": []
+    },
+    {
+      "path": "formal/S3MultipartConsolePaging.cfg",
+      "sha256": "0ed8ca55ba02cda84d397df5bb2ac37d3a5f78b1c41663003d1d6ea320b27978",
+      "disposition": "modeled",
+      "reason": "Pins the finite S3 console ListParts pagination model scenarios and checked safety invariants.",
+      "models": [
+        {
+          "id": "S3MultipartConsolePaging",
+          "properties": [
+            "OnlyCanonicalRows",
+            "OnlyProgressingCursor",
+            "OnlyCompleteListing",
+            "NoReadAfterStop"
+          ],
+          "limits": "Finite read-only console listing abstraction; models ascending unique part numbers, cursor progress, result visibility and stop semantics. Does not execute XML parsing, DOM, React scheduling, HTTP, storage, IAM, writes or AWS; does not establish implementation refinement or cover unrelated portions of the embedded bundle."
+        }
+      ]
+    },
+    {
+      "path": "formal/S3MultipartConsolePaging.tla",
+      "sha256": "f7392dfaae0ec1410b9fff3cc986704ec6e0957899a4d614d5afb9de11ab7023",
+      "disposition": "modeled",
+      "reason": "Models strict part order, cursor advancement, final-only visibility, and stopping during the finite read-only listing.",
+      "models": [
+        {
+          "id": "S3MultipartConsolePaging",
+          "properties": [
+            "OnlyCanonicalRows",
+            "OnlyProgressingCursor",
+            "OnlyCompleteListing",
+            "NoReadAfterStop"
+          ],
+          "limits": "Finite read-only console listing abstraction; models ascending unique part numbers, cursor progress, result visibility and stop semantics. Does not execute XML parsing, DOM, React scheduling, HTTP, storage, IAM, writes or AWS; does not establish implementation refinement or cover unrelated portions of the embedded bundle."
+        }
+      ]
+    },
+    {
+      "path": "formal/models.json",
+      "sha256": "f09b45c87210a08196d229379a47556d32c6cc74a88486d1d9b4f8a5db84c79b",
+      "disposition": "formal-infrastructure",
+      "reason": "Retains every current-main model entry and adds the original scoped S3 multipart paging registration exactly once.",
+      "models": []
+    },
+    {
+      "path": "internal/server/web/app.js",
+      "sha256": "1996757fd6344a1cfd82d3fe7ccaf136166193ac4466702994c3a4cdacf4ebb1",
+      "disposition": "modeled",
+      "reason": "Pinned combined embedded bundle retains current Azure exact row identity/epoch behavior and adds bounded S3 multipart paging; composition keeps both reviewed source projections.",
+      "models": [
+        {
+          "id": "AzureBlobRowDownload",
+          "properties": [
+            "RowIsRequestTarget",
+            "CurrentDownloadOnly",
+            "SuccessfulBytesOnly"
+          ],
+          "limits": "Models explicit row identity versus toolbar selection, one in-flight operation, a bounded two-request epoch and view retirement, and only bounded successful abstract HTTP bytes may emit a download. Does not execute DNS, React/focus, the browser/anchor, URL/path mapping, authentication, HTTP or Blob bytes and does not establish implementation refinement. Generated app.js binding covers only Azure row download behavior introduced by this change."
+        },
+        {
+          "id": "S3MultipartConsolePaging",
+          "properties": [
+            "OnlyCanonicalRows",
+            "OnlyProgressingCursor",
+            "OnlyCompleteListing",
+            "NoReadAfterStop"
+          ],
+          "limits": "Finite read-only console listing abstraction; models ascending unique part numbers, cursor progress, result visibility and stop semantics. Does not execute XML parsing, DOM, React scheduling, HTTP, storage, IAM, writes or AWS; does not establish implementation refinement or cover unrelated portions of the embedded bundle."
+        }
+      ]
+    },
+    {
+      "path": "scripts/formal_model_gate.py",
+      "sha256": "2ace9e69815156774e41d6f38e3fab14fcf3de59e932e5dad463af45d351e9aa",
+      "disposition": "formal-infrastructure",
+      "reason": "Retains current Azure read/row projections and requires the S3 multipart canonical rows, cursor progression and retirement mutation controls.",
+      "models": []
+    },
+    {
+      "path": "scripts/test-formal-gate.py",
+      "sha256": "db1260b5daeb9d9b8b5cc22c96019786e1c2236e89cd4f10af4f5199d6791d58",
+      "disposition": "formal-infrastructure",
+      "reason": "Independently enumerates all current model IDs and adds the original S3 invariant/sensitivity detector checks without removing current Azure tests.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/check.py",
+      "sha256": "926f7ee441b12a9f09978013042cc9023db01b98fa34d94b58540612acbebef0",
+      "disposition": "test-support",
+      "reason": "Preserves the current Azure sandbox detector and adds the existing S3 namespace launcher/refusals only to explicit aggregate E2E; selected failures are not skipped.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/run_s3_multipart_paging.py",
+      "sha256": "f2d79e8f591a483785019664649e80b02951687d26b7e17ff4e02b11a1325cff",
+      "disposition": "test-support",
+      "reason": "Development-only fixed-fixture launcher binds the built binary and pinned browser, isolates the current nonroot UID into private user/network namespaces, drops capabilities and fails closed before the existing browser fixture.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/s3_multipart_paging.py",
+      "sha256": "4a6440a618024ddaac44276bb354d3dec52165e5930c84cf559d8281b81e32ed",
+      "disposition": "test-support",
+      "reason": "Opt-in real local Chromium and SDK acceptance for multipart two-page results and visible last-row refresh, review, expected completion refusal, Console Save part, SDK readback and cleanup. Requires independently isolated loopback runner.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/test_s3_multipart_paging_launcher.py",
+      "sha256": "23eec669c0f53a12aa10252ff2dba5f43046f2cfd0215ec735e22a8e4b4843d5",
+      "disposition": "test-support",
+      "reason": "Offline refusal and scope detectors require normal CI launcher guards and explicit aggregate sandbox/loopback preflight; synthetic OS inputs validate wiring without creating namespaces or running a browser.",
+      "models": []
+    },
+    {
+      "path": "tools/console/bundle-digests.json",
+      "sha256": "981ca9846bb3731641c1e289f10a39246f10584588fca221c58b220c2e1f56bd",
+      "disposition": "presentation",
+      "reason": "Digest inventory regenerated for the composed main Azure and S3 source; Azure CSS and upstream notice blobs unchanged.",
+      "models": []
+    },
+    {
+      "path": "tools/console/bundle-inputs.json",
+      "sha256": "96509a0c697c54481db343a92b93ef8fc31f083566f52f7f297bd63126e754cb",
+      "disposition": "presentation",
+      "reason": "Exact build inputs regenerated for the composed main Azure and S3 console source.",
+      "models": []
+    },
+    {
+      "path": "tools/console/src/s3-multipart-parts.mjs",
+      "sha256": "6ec4b0f1b69481fb6a14c559acabd0330ca99416ca4c9ebafdbdb8502ed15901",
+      "disposition": "modeled",
+      "reason": "Checks canonical ascending rows, validated progressing markers and terminal flags across page fetches.",
+      "models": [
+        {
+          "id": "S3MultipartConsolePaging",
+          "properties": [
+            "OnlyCanonicalRows",
+            "OnlyProgressingCursor",
+            "OnlyCompleteListing",
+            "NoReadAfterStop"
+          ],
+          "limits": "Finite read-only console listing abstraction; models ascending unique part numbers, cursor progress, result visibility and stop semantics. Does not execute XML parsing, DOM, React scheduling, HTTP, storage, IAM, writes or AWS; does not establish implementation refinement or cover unrelated portions of the embedded bundle."
+        }
+      ]
+    },
+    {
+      "path": "tools/console/src/s3-multipart.jsx",
+      "sha256": "9ad3c43e0fcd3d15e90721d1b9e975958abfbdcb44e10523f8c380aed5070fc2",
+      "disposition": "modeled",
+      "reason": "Consumes the read-only pager and displays only a completed listing from the current view operation.",
+      "models": [
+        {
+          "id": "S3MultipartConsolePaging",
+          "properties": [
+            "OnlyCanonicalRows",
+            "OnlyProgressingCursor",
+            "OnlyCompleteListing",
+            "NoReadAfterStop"
+          ],
+          "limits": "Finite read-only console listing abstraction; models ascending unique part numbers, cursor progress, result visibility and stop semantics. Does not execute XML parsing, DOM, React scheduling, HTTP, storage, IAM, writes or AWS; does not establish implementation refinement or cover unrelated portions of the embedded bundle."
+        }
+      ]
+    },
+    {
+      "path": "tools/console/tests/s3-multipart-parts.test.mjs",
+      "sha256": "9a66032b1ca0078552ae11e7527aa6c9c2e473b1fb75e6d86ff0eb824cdaf073",
+      "disposition": "presentation",
+      "reason": "Console-only Node regression inputs and assertions. No runtime behavior; console test paths are classified as presentation by the current applicability gate.",
       "models": []
     }
   ]
