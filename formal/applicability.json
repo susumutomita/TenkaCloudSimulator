@@ -147,6 +147,13 @@
       "disposition": "formal-infrastructure",
       "reason": "Register and independently require the exact route-table model, source scopes, properties and sensitivity controls.",
       "models": []
+    },
+    {
+      "path": "test/e2e/ec2_network_contract.py",
+      "sha256": "111b236206585071894b17aa104442afaa9499659d85909b1f48838dc972656a",
+      "disposition": "test-support",
+      "reason": "Verify the bounded boto3 route-table projection for explicit and empty configurations while preserving native mutation refusals and unchanged snapshots.",
+      "models": []
     }
   ]
 }
