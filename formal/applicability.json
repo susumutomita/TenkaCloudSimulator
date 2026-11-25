@@ -1,63 +1,219 @@
 {
   "version": 1,
-  "base_sha": "9839b0b815e02b619b9a8b61881bc886741bd8a4",
+  "base_sha": "e0c982cfb46019d32559e7c3f4163096231dc4b8",
   "changes": [
     {
+      "path": ".github/workflows/ci.yml",
+      "sha256": "432c7754df8fde93b1c0162187eccaafe1aabb6883d1ff12f502ef94976b8243",
+      "disposition": "formal-infrastructure",
+      "reason": "Registers one bounded SimpleDB model and adds its focused Node checks to the existing pinned Console test selection; no blanket run or gate change.",
+      "models": []
+    },
+    {
       "path": "README.md",
-      "sha256": "2e869755b3a8035bbb234af94afcb91ccb4b64d706d0bc886d378da4a0f7bfe5",
+      "sha256": "cabeaf2b6263f7d8857bbd18cedca141c96f70c3f101d07e51741f189bf7ee50",
       "disposition": "documentation",
-      "reason": "Documents the bounded native per-item quota and prior-data policy.",
+      "reason": "Documents opening a local domain and conditional replacement of one attribute, and the supported scope and fallback.",
       "models": []
     },
     {
       "path": "docs/design/0001-go-standalone.md",
-      "sha256": "62bae72fe8d47abe3e001f365d8f44132381205cfb5652d9a5d7b4fdbb3d26aa",
+      "sha256": "0ce3d778c3a40064df584d97a1f0bae6dfb0b14b912b6653c2e6d05535265b16",
       "disposition": "documentation",
-      "reason": "Documents the bounded native per-item quota and prior-data policy.",
+      "reason": "Documents opening a local domain and conditional replacement of one attribute, and the supported scope and fallback.",
       "models": []
     },
     {
-      "path": "docs/simpledb-item-limits.md",
-      "sha256": "66057e5fbf266527514d12d6265a8fc8137b6574e2f10414011c2c859a4ef736",
+      "path": "docs/simpledb-console.md",
+      "sha256": "9cd7d7d77c9aa560743600525f727a4d720fe4c255b3dfccbf3786fb08940fa3",
       "disposition": "documentation",
-      "reason": "Explains or tests the bounded native SimpleDB pair count.",
+      "reason": "Documents opening a local domain and conditional replacement of one attribute, and the supported scope and fallback.",
       "models": []
     },
     {
-      "path": "internal/aws/simpledb/http.go",
-      "sha256": "7a5224e125163bc4fc1d8b0b396ee0b19eb1b6bcb8c4614262270a5cb5b2d10c",
+      "path": "formal/SimpleDBConsoleEpoch.cfg",
+      "sha256": "2d260f1000ab1166a2dca7181b1b0805922793b701c1ae545481aec57eec5313",
       "disposition": "modeled",
-      "reason": "Returns the typed quota refusal within the existing admitted SimpleDB Query envelope.",
+      "reason": "Bounded local SimpleDB discovery, current-view request ownership and acknowledgement-controlled read-back.",
       "models": [
         {
-          "id": "SimpleDBQueryAdmission",
+          "id": "SimpleDBConsoleEpoch",
           "properties": [
-            "EnvelopeMatchesOutcome"
+            "VisibleRequiresCapability",
+            "OnlyCurrentScopeVisible",
+            "SingleCurrentChain",
+            "ReadbackOnlyAfterAck",
+            "WriteNoticeRequiresAck"
           ],
-          "limits": "Abstract response category only; not the exact HTTP 409, SDK, wire parser or Go behavior."
+          "limits": "Symbolic local capability, React view ownership, native acknowledgements and publication only. No Go/JavaScript refinement, DOM focus, CSS/reflow, XML parsing or HTTP decoding, native IAM, transaction/SQLite proof, actual cancellation of server writes, or complete SimpleDB semantics."
         }
       ]
     },
     {
-      "path": "internal/aws/simpledb/item.go",
-      "sha256": "43cfc7f743f4deb54429d54a313b8511f5838719940325dbe811d9d3ee5fbdbb",
+      "path": "formal/SimpleDBConsoleEpoch.tla",
+      "sha256": "7adf28207e13f8880b3f93d63bb9fea0b426c45ef638395b145c311cab68d382",
       "disposition": "modeled",
-      "reason": "Checks the new post-merge quota before mutating the existing scoped transaction.",
+      "reason": "Bounded local SimpleDB discovery, current-view request ownership and acknowledgement-controlled read-back.",
       "models": [
         {
-          "id": "SimpleDBLifecycle",
+          "id": "SimpleDBConsoleEpoch",
           "properties": [
-            "RefusalUnchanged"
+            "VisibleRequiresCapability",
+            "OnlyCurrentScopeVisible",
+            "SingleCurrentChain",
+            "ReadbackOnlyAfterAck",
+            "WriteNoticeRequiresAck"
           ],
-          "limits": "Abstract unchanged-state refusal only; not pair counting, the number 256, concurrent writers, Go or SQLite refinement."
+          "limits": "Symbolic local capability, React view ownership, native acknowledgements and publication only. No Go/JavaScript refinement, DOM focus, CSS/reflow, XML parsing or HTTP decoding, native IAM, transaction/SQLite proof, actual cancellation of server writes, or complete SimpleDB semantics."
         }
       ]
     },
     {
-      "path": "internal/aws/simpledb/item_limit_test.go",
-      "sha256": "e1ca480964053b7dc7b75973b820e6d86ffb8d8fdfeb65e9a0e7f3bae34abad2",
+      "path": "formal/models.json",
+      "sha256": "da17aa941f494301c7ed52a509f81b9593c7afd6f4025ef49fd0cebf87a3a521",
+      "disposition": "formal-infrastructure",
+      "reason": "Registers one bounded SimpleDB model and adds its focused Node checks to the existing pinned Console test selection; no blanket run or gate change.",
+      "models": []
+    },
+    {
+      "path": "internal/server/server.go",
+      "sha256": "676aa96057b489918380706fb1c7a9a2cb2ae939e0d3e833c50113907f1f119b",
+      "disposition": "modeled",
+      "reason": "Bounded local SimpleDB discovery, current-view request ownership and acknowledgement-controlled read-back.",
+      "models": [
+        {
+          "id": "SimpleDBConsoleEpoch",
+          "properties": [
+            "VisibleRequiresCapability"
+          ],
+          "limits": "Symbolic local capability, React view ownership, native acknowledgements and publication only. No Go/JavaScript refinement, DOM focus, CSS/reflow, XML parsing or HTTP decoding, native IAM, transaction/SQLite proof, actual cancellation of server writes, or complete SimpleDB semantics."
+        }
+      ]
+    },
+    {
+      "path": "internal/server/web/app.css",
+      "sha256": "d518836e6aea1196ba6093a8713ba0c65925e128015e3ad2dba92119aa2003db",
+      "disposition": "presentation",
+      "reason": "Reproducible asset provenance, scoped value rendering or focused native request-shape and discovery checks. No added native operation or backend authority.",
+      "models": []
+    },
+    {
+      "path": "internal/server/web/app.js",
+      "sha256": "15156debe0f69444bd3fd821f8169217fe03ff566c93add7e4ac86d941e9feff",
+      "disposition": "modeled",
+      "reason": "Bounded local SimpleDB discovery, current-view request ownership and acknowledgement-controlled read-back.",
+      "models": [
+        {
+          "id": "SimpleDBConsoleEpoch",
+          "properties": [
+            "VisibleRequiresCapability",
+            "OnlyCurrentScopeVisible",
+            "SingleCurrentChain",
+            "ReadbackOnlyAfterAck",
+            "WriteNoticeRequiresAck"
+          ],
+          "limits": "Symbolic local capability, React view ownership, native acknowledgements and publication only. No Go/JavaScript refinement, DOM focus, CSS/reflow, XML parsing or HTTP decoding, native IAM, transaction/SQLite proof, actual cancellation of server writes, or complete SimpleDB semantics."
+        }
+      ]
+    },
+    {
+      "path": "test/e2e/simpledb_console.py",
+      "sha256": "81a11304081654a6e535b6277b1fe2f001fe762e112b7269c0af77b6df559e21",
       "disposition": "test-support",
-      "reason": "Explains or tests the bounded native SimpleDB pair count.",
+      "reason": "Optional UI interaction evidence only; this does not create permissions or change native behavior.",
+      "models": []
+    },
+    {
+      "path": "tools/console/bundle-digests.json",
+      "sha256": "31cddd942f3c2cda99c281da3a31c455a994975616bb6569ca6977ed5e9ee802",
+      "disposition": "presentation",
+      "reason": "Reproducible asset provenance, scoped value rendering or focused native request-shape and discovery checks. No added native operation or backend authority.",
+      "models": []
+    },
+    {
+      "path": "tools/console/bundle-inputs.json",
+      "sha256": "7f89de848933cca1ac19f649de2c2e2f4dd797ce526f3bb6978eb3689c646e4c",
+      "disposition": "presentation",
+      "reason": "Reproducible asset provenance, scoped value rendering or focused native request-shape and discovery checks. No added native operation or backend authority.",
+      "models": []
+    },
+    {
+      "path": "tools/console/src/console-navigation.mjs",
+      "sha256": "ce945b72e01ef066b74857fa55bb905f05799a7b455583004190818f25fac2f0",
+      "disposition": "modeled",
+      "reason": "Bounded local SimpleDB discovery, current-view request ownership and acknowledgement-controlled read-back.",
+      "models": [
+        {
+          "id": "SimpleDBConsoleEpoch",
+          "properties": [
+            "VisibleRequiresCapability"
+          ],
+          "limits": "Symbolic local capability, React view ownership, native acknowledgements and publication only. No Go/JavaScript refinement, DOM focus, CSS/reflow, XML parsing or HTTP decoding, native IAM, transaction/SQLite proof, actual cancellation of server writes, or complete SimpleDB semantics."
+        }
+      ]
+    },
+    {
+      "path": "tools/console/src/main.jsx",
+      "sha256": "da50dbdc55673e04ce46e663272b4a9302bc0c073a7f69bf6cac01a93eb78fd4",
+      "disposition": "modeled",
+      "reason": "Bounded local SimpleDB discovery, current-view request ownership and acknowledgement-controlled read-back.",
+      "models": [
+        {
+          "id": "SimpleDBConsoleEpoch",
+          "properties": [
+            "VisibleRequiresCapability",
+            "OnlyCurrentScopeVisible"
+          ],
+          "limits": "Symbolic local capability, React view ownership, native acknowledgements and publication only. No Go/JavaScript refinement, DOM focus, CSS/reflow, XML parsing or HTTP decoding, native IAM, transaction/SQLite proof, actual cancellation of server writes, or complete SimpleDB semantics."
+        }
+      ]
+    },
+    {
+      "path": "tools/console/src/simpledb-client.mjs",
+      "sha256": "857cb82ac0d074a8a00c00c7c23722a524219bc6322bcd2d6040de0d3ad8be20",
+      "disposition": "modeled",
+      "reason": "Bounded local SimpleDB discovery, current-view request ownership and acknowledgement-controlled read-back.",
+      "models": [
+        {
+          "id": "SimpleDBConsoleEpoch",
+          "properties": [
+            "ReadbackOnlyAfterAck",
+            "WriteNoticeRequiresAck"
+          ],
+          "limits": "Symbolic local capability, React view ownership, native acknowledgements and publication only. No Go/JavaScript refinement, DOM focus, CSS/reflow, XML parsing or HTTP decoding, native IAM, transaction/SQLite proof, actual cancellation of server writes, or complete SimpleDB semantics."
+        }
+      ]
+    },
+    {
+      "path": "tools/console/src/simpledb.css",
+      "sha256": "e9e4207ece2aa1c0245df45db0bb3322cc2416fe68e7a1072e485df1a9bac487",
+      "disposition": "presentation",
+      "reason": "Reproducible asset provenance, scoped value rendering or focused native request-shape and discovery checks. No added native operation or backend authority.",
+      "models": []
+    },
+    {
+      "path": "tools/console/src/simpledb.jsx",
+      "sha256": "22d0dc872fccac72b97bde0178425bcc29c95237695cc4f75d190876929f5c94",
+      "disposition": "modeled",
+      "reason": "Bounded local SimpleDB discovery, current-view request ownership and acknowledgement-controlled read-back.",
+      "models": [
+        {
+          "id": "SimpleDBConsoleEpoch",
+          "properties": [
+            "OnlyCurrentScopeVisible",
+            "SingleCurrentChain",
+            "ReadbackOnlyAfterAck",
+            "WriteNoticeRequiresAck"
+          ],
+          "limits": "Symbolic local capability, React view ownership, native acknowledgements and publication only. No Go/JavaScript refinement, DOM focus, CSS/reflow, XML parsing or HTTP decoding, native IAM, transaction/SQLite proof, actual cancellation of server writes, or complete SimpleDB semantics."
+        }
+      ]
+    },
+    {
+      "path": "tools/console/test/simpledb-client.test.mjs",
+      "sha256": "1761fe33fa1a5af7e023b9b83465a5eb6d8b659bb1aedd69404dee96d9410800",
+      "disposition": "presentation",
+      "reason": "Reproducible asset provenance, scoped value rendering or focused native request-shape and discovery checks. No added native operation or backend authority.",
       "models": []
     }
   ]
