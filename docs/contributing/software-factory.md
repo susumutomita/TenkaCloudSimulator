@@ -133,10 +133,9 @@ return the existing bounded retry state. Old persisted findings without an
 acceptance suite cannot become ready: reconcile through the existing owner, never
 replace a lost ledger with an empty one or automatically reset a denial.
 
-This DNS-only source registers **SQS lifecycle and Cloud DNS atomic lifecycle**.
+This source registers independent SQS, Cloud DNS and Azure Queue acceptance suites for their respective operations.
 The canonical allowlist is `scripts/factory_acceptance.py`; registration is not
-proof of a passing service, integration, SDK or full gate. No Azure Queue suite
-is registered in this branch. Do not assign either suite to unrelated work.
+proof of a passing service, integration, SDK or full gate. Do not assign any suite to unrelated work.
 Register a reviewed suite with named required tests before starting another service.
 
 | Suite | Provider / required test | Evidence scope |
@@ -210,3 +209,29 @@ Git diff. Git environment overrides and ambient Go overlays/workspaces/config ar
 removed from evidence execution; `GO` selects one explicit executable, not shell
 arguments. Already-active legacy ledger jobs need owner reconciliation; this
 change does not silently migrate, reset or replace their ledger.
+
+
+## Azure Queue branch registry
+
+These entries describe this branch, not a claim that the service has been merged
+or released. The original SQS scenario, command and required test remain intact.
+Without `--suite`, the executor runs **all registered suites**, not SQS alone.
+
+| Suite | Accepted scope |
+| --- | --- |
+| `azure-queue-lifecycle` | Eight native Queue leaf/SQLite operations and Queue Go paths |
+| `azure-queue-peek-wire` | Explicit zero DequeueCount XML; protocol and dedicated wire tests only |
+| `azure-queue-routing` | Native local server route, authentication, isolation and Blob preservation |
+| `azure-queue-peer-sakura-disabled` | Existing default-disabled Sakura and peer contracts |
+| `azure-queue-peer-sakura-enabled` | Existing opt-in Sakura and peer contracts |
+
+A routing finding requires all three routing/Sakura suites. Its allowed paths
+are exactly `internal/server/cloud_storage.go`, `internal/server/azure_queue_test.go`
+and `internal/server/sakura_provider_test.go`. Registration never broadens scope
+by combining unrelated suites. The executable registry and scope validation are
+in [factory_acceptance.py](../../scripts/factory_acceptance.py).
+
+The Python CLI/SDK runner is separate test-support developed through the normal
+[parallel-development handoff](parallel-development.md), not a registered Go
+factory suite. Its stdlib tests do not prove official SDK execution. See
+[Azure Queue acceptance and limitations](../acceptance/azure-queue.md).

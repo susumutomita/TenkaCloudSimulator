@@ -28,6 +28,7 @@ export const SERVICES = Object.freeze([
   {id: 'gcp-catalog', provider: 'gcp', label: 'Service catalog', route: '/gcp-catalog', keywords: 'google catalog api metadata カタログ サービス'},
   {id: 'gcp-dns', provider: 'gcp', label: 'Cloud DNS', route: '/gcp-dns', keywords: 'google cloud dns managed zones records ゾーン レコード'},
   {id: 'gcp-appengine', provider: 'gcp', label: 'App Engine', route: '/gcp-appengine', keywords: 'google app engine appengine gae application version traffic split firewall python wsgi アプリ アプリケーション バージョン トラフィック ファイアウォール'},
+  {id: 'azure-queue', provider: 'azure', label: 'Queue Storage', route: '/azure-queue', keywords: 'azure storage queue message キュー ストレージ メッセージ'},
   {id: 'azure-blob', provider: 'azure', label: 'Blob Storage', route: '/azure-blob', keywords: 'container blob コンテナー コンテナ ブロブ ストレージ ブロブストレージ'},
   {id: 'azure-arm', provider: 'azure', label: 'Resource Manager', route: '/azure-arm', keywords: 'arm resource group subscription リソース グループ リソースグループ サブスクリプション リソースマネージャー'},
   {id: 'sakura-servers', provider: 'sakura', label: 'Servers', route: '/sakura-servers', keywords: 'sakura cloud server metadata さくらのクラウド サーバ メタデータ'},
@@ -62,6 +63,18 @@ export function dnsCapabilitiesForPrincipal(session, epoch, principal, discovere
   if (!session || epoch === 0) return session;
   return {...session, gcpDns: discovered?.epoch === epoch && discovered.principal === principal ? discovered.value : undefined};
 }
+const queueOperations = ['CreateQueue', 'DeleteQueue', 'PutMessage', 'GetMessages', 'PeekMessages', 'UpdateMessage', 'DeleteMessage', 'ClearMessages'];
+function queueConfigured(scope) {
+  return scope?.console === true && scope.apiVersion === '2023-11-03'
+    && typeof scope.account === 'string' && /^[a-z0-9]{3,24}$/.test(scope.account)
+    && scope.endpoint === '/_simulator/providers/azure-queue/' + scope.account
+    && Array.isArray(scope.operations) && queueOperations.every(op => scope.operations.includes(op));
+}
+export function queueCapabilitiesForPrincipal(session, epoch, principal, discovered) {
+  if (!session || epoch === 0) return session;
+  const queue = discovered?.epoch === epoch && discovered.principal === principal ? discovered.queue : undefined;
+  return {...session, azureQueue: queue};
+}
 export function sakuraServerConfiguration(capabilities) {
   const scope = capabilities?.sakuraServer;
   if (!Array.isArray(capabilities?.providers) || !capabilities.providers.includes('sakura')
@@ -90,6 +103,7 @@ export function serviceAvailable(id, capabilities) {
     && capabilities.gcpAppEngine.project.length > 0 && typeof capabilities.gcpAppEngine.dataPlane === 'string';
   if (service.id === 'gcp-dns') return dnsConfigured(capabilities.gcpDns);
   if (service.id === 'gcp-catalog') return Array.isArray(capabilities.gcpCatalog?.apis) && capabilities.gcpCatalog.apis.length > 0;
+  if (service.id === 'azure-queue') return queueConfigured(capabilities.azureQueue);
   if (service.id === 'azure-arm') return Array.isArray(capabilities.azureCatalog?.providers) && capabilities.azureCatalog.providers.length > 0
     && typeof capabilities.azureCatalog.descriptors === 'string';
   const scope = capabilities.cloudStorage?.[service.provider];

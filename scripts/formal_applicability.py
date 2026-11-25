@@ -40,6 +40,7 @@ KNOWN_VALIDATION = {
     'scripts/check-native-provenance.py',
     'scripts/get-audit-tools.py', 'scripts/test-coverage-gate.py', 'scripts/update-go-notices.py',
     'scripts/requirements-test.txt',
+    'scripts/requirements-azure-queue-test.txt',  # Test-only pinned SDK wheel; not a runtime dependency.
 }
 NONFORMAL = {
     'documentation': [

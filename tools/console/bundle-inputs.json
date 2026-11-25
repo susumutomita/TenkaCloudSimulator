@@ -32501,6 +32501,41 @@
       ],
       "format": "esm"
     },
+    "src/azure-queue-requests.mjs": {
+      "bytes": 9249,
+      "imports": [],
+      "format": "esm"
+    },
+    "src/azure-queue.css": {
+      "bytes": 2790,
+      "imports": []
+    },
+    "src/azure-queue.jsx": {
+      "bytes": 18346,
+      "imports": [
+        {
+          "path": "node_modules/react/index.js",
+          "kind": "import-statement",
+          "original": "react"
+        },
+        {
+          "path": "src/i18n.jsx",
+          "kind": "import-statement",
+          "original": "./i18n.jsx"
+        },
+        {
+          "path": "src/azure-queue-requests.mjs",
+          "kind": "import-statement",
+          "original": "./azure-queue-requests.mjs"
+        },
+        {
+          "path": "src/azure-queue.css",
+          "kind": "import-statement",
+          "original": "./azure-queue.css"
+        }
+      ],
+      "format": "esm"
+    },
     "src/azure-blob.css": {
       "bytes": 9482,
       "imports": []
@@ -33156,7 +33191,7 @@
       "format": "esm"
     },
     "src/console-navigation.mjs": {
-      "bytes": 11833,
+      "bytes": 12904,
       "imports": [
         {
           "path": "src/sakura-server-read.mjs",
@@ -33739,7 +33774,7 @@
       "format": "esm"
     },
     "src/main.jsx": {
-      "bytes": 51856,
+      "bytes": 52257,
       "imports": [
         {
           "path": "src/ssm-terminal.jsx",
@@ -33985,6 +34020,11 @@
           "path": "src/gcp-storage.jsx",
           "kind": "import-statement",
           "original": "./gcp-storage.jsx"
+        },
+        {
+          "path": "src/azure-queue.jsx",
+          "kind": "import-statement",
+          "original": "./azure-queue.jsx"
         },
         {
           "path": "src/azure-blob.jsx",
@@ -34725,7 +34765,7 @@
           "bytesInOutput": 0
         },
         "src/main.jsx": {
-          "bytesInOutput": 46877
+          "bytesInOutput": 47103
         },
         "node_modules/@cloudscape-design/global-styles/index.css": {
           "bytesInOutput": 0
@@ -36711,19 +36751,19 @@
           "bytesInOutput": 3486
         },
         "src/iam-client.js": {
-          "bytesInOutput": 3666
+          "bytesInOutput": 3668
         },
         "src/lambda-invoke.mjs": {
-          "bytesInOutput": 796
+          "bytesInOutput": 797
         },
         "src/python-editor.jsx": {
           "bytesInOutput": 1103
         },
         "node_modules/@marijn/find-cluster-break/src/index.js": {
-          "bytesInOutput": 2339
+          "bytesInOutput": 2355
         },
         "node_modules/@codemirror/state/dist/index.js": {
-          "bytesInOutput": 47298
+          "bytesInOutput": 47299
         },
         "node_modules/style-mod/src/style-mod.js": {
           "bytesInOutput": 2232
@@ -36780,7 +36820,7 @@
           "bytesInOutput": 1900
         },
         "src/lambda.jsx": {
-          "bytesInOutput": 27488
+          "bytesInOutput": 27489
         },
         "node_modules/@cloudscape-design/components/checkbox/index.js": {
           "bytesInOutput": 232
@@ -36852,7 +36892,7 @@
           "bytesInOutput": 8691
         },
         "src/iam-managed.jsx": {
-          "bytesInOutput": 25830
+          "bytesInOutput": 25832
         },
         "src/kms_aliases.jsx": {
           "bytesInOutput": 17605
@@ -37031,6 +37071,15 @@
         "src/gcp-storage.css": {
           "bytesInOutput": 0
         },
+        "src/azure-queue.jsx": {
+          "bytesInOutput": 19244
+        },
+        "src/azure-queue-requests.mjs": {
+          "bytesInOutput": 5362
+        },
+        "src/azure-queue.css": {
+          "bytesInOutput": 0
+        },
         "src/azure-blob.jsx": {
           "bytesInOutput": 30922
         },
@@ -37116,7 +37165,7 @@
           "bytesInOutput": 64
         },
         "src/console-navigation.mjs": {
-          "bytesInOutput": 9726
+          "bytesInOutput": 10485
         },
         "src/console-home.jsx": {
           "bytesInOutput": 9688
@@ -37170,7 +37219,7 @@
           "bytesInOutput": 1673
         }
       },
-      "bytes": 2449856
+      "bytes": 2475470
     },
     "../../internal/server/web/app.css.LEGAL.txt": {
       "imports": [],
@@ -37702,6 +37751,9 @@
         "src/gcp-storage.css": {
           "bytesInOutput": 8184
         },
+        "src/azure-queue.css": {
+          "bytesInOutput": 2749
+        },
         "src/azure-blob.css": {
           "bytesInOutput": 9096
         },
@@ -37724,7 +37776,7 @@
           "bytesInOutput": 680
         }
       },
-      "bytes": 1313276
+      "bytes": 1316025
     }
   }
 }

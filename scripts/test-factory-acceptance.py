@@ -327,7 +327,8 @@ class SakuraRegistrationTests(unittest.TestCase):
     def test_exact_command_names_path_and_default(self):
         spec = gate.SUITES[self.suite]
         self.assertEqual(gate.DEFAULT_SUITES, ('sqs-lifecycle', 'ec2-describe-subnets'))
-        self.assertEqual(set(gate.SUITES), {'sqs-lifecycle', 'ec2-describe-subnets', 'gcp-dns-atomic-lifecycle', self.suite, *gate.SIMPLEDB_SUITES})
+        self.assertEqual(set(gate.SUITES), {'sqs-lifecycle', 'ec2-describe-subnets', 'gcp-dns-atomic-lifecycle', self.suite, 'azure-queue-routing', 'azure-queue-peer-sakura-disabled',
+                          'azure-queue-peer-sakura-enabled', 'azure-queue-peek-wire', 'azure-queue-lifecycle', *gate.SIMPLEDB_SUITES})
         self.assertEqual(spec['tests'], ['TestSakuraServerMetadataAcceptanceCRUD',
             'TestSakuraServerMetadataAcceptanceRefusals', 'TestSakuraServerMetadataComparatorControls'])
         self.assertEqual(spec['argv'], ['go', 'test', '-json', '-count=1', '-run',
@@ -402,5 +403,141 @@ _simpledb_spec = importlib.util.spec_from_file_location('simpledb_registration_t
 _simpledb_tests = importlib.util.module_from_spec(_simpledb_spec)
 _simpledb_spec.loader.exec_module(_simpledb_tests)
 SimpleDBRegistrationTests = _simpledb_tests.SimpleDBRegistrationTests
+
+
+class AzureQueueRegistrationTests(unittest.TestCase):
+    def test_fixed_command_and_operation_allowlist(self):
+        spec = gate.SUITES['azure-queue-lifecycle']
+        self.assertEqual(spec['argv'], ['go', 'test', '-json', '-count=1', '-run',
+                                      '^TestAzureQueueFactoryLifecycle$', './internal/azure/queue'])
+        self.assertEqual(spec['operations'], ['CreateQueue', 'PutMessage', 'PeekMessages',
+                                            'GetMessages', 'UpdateMessage', 'DeleteMessage',
+                                            'ClearMessages', 'DeleteQueue'])
+        for operation in spec['operations']:
+            gate.validate_scope(['azure-queue-lifecycle'], 'azure-queue', operation,
+                                ['internal/azure/queue/handler.go', 'internal/azure/queue/store_test.go'])
+
+    def test_provider_and_paths_cannot_borrow_another_suite(self):
+        cases = [
+            (['sqs-lifecycle'], 'azure-queue', 'DeleteMessage', 'internal/azure/queue/store.go'),
+            (['azure-queue-lifecycle'], 'aws', 'DeleteMessage', 'internal/aws/sqs_store.go'),
+            (['sqs-lifecycle', 'azure-queue-lifecycle'], 'azure-queue', 'DeleteMessage', 'internal/aws/sqs_store.go'),
+            (['sqs-lifecycle', 'azure-queue-lifecycle'], 'aws', 'DeleteMessage', 'internal/azure/queue/store.go'),
+        ]
+        for suites, provider, operation, path in cases:
+            with self.subTest(suites=suites, provider=provider, path=path), self.assertRaises(ValueError):
+                gate.validate_scope(suites, provider, operation, [path])
+        for path in ['internal/azure/blob/handler.go', 'internal/azure/arm/handler.go',
+                     'internal/azure/queue/nested/handler.go', 'internal/azure/queue/README.md',
+                     'internal/server/server.go', 'internal/provider/register.go',
+                     'scripts/factory_acceptance.py', 'formal/applicability.json']:
+            with self.subTest(path=path), self.assertRaises(ValueError):
+                gate.validate_scope(['azure-queue-lifecycle'], 'azure-queue', 'DeleteMessage', [path])
+        with self.assertRaises(ValueError):
+            gate.validate_scope(['azure-queue-lifecycle'], 'azure-queue', 'CreateTopic',
+                                ['internal/azure/queue/handler.go'])
+
+    def test_queue_requires_its_exact_test_and_package(self):
+        spec = gate.SUITES['azure-queue-lifecycle']
+        events = [dict(Action='run', Package=spec['package'], Test=spec['test']),
+                  dict(Action='pass', Package=spec['package'], Test=spec['test']),
+                  dict(Action='pass', Package=spec['package'])]
+        def encode(items):
+            return ('\n'.join(json.dumps(e) for e in items) + '\n').encode()
+        gate.verdict(encode(events), 'azure-queue-lifecycle', 0)
+        for items in [[], events[2:], events[:2], events + events]:
+            with self.assertRaises(ValueError):
+                gate.verdict(encode(items), 'azure-queue-lifecycle', 0)
+        for field, value in [('Action', 'skip'), ('Action', 'fail'),
+                             ('Test', 'TestSQSFactoryFidelityLifecycle'), ('Package', 'foreign')]:
+            bad = copy.deepcopy(events)
+            bad[1][field] = value
+            with self.assertRaises(ValueError):
+                gate.verdict(encode(bad), 'azure-queue-lifecycle', 0)
+        with self.assertRaises(ValueError):
+            gate.verdict(encode(events), 'azure-queue-lifecycle', 1)
+
+class PeekWireRegistrationTests(unittest.TestCase):
+    def test_fixed_identity_command_and_narrow_paths(self):
+        spec = gate.SUITES['azure-queue-peek-wire']
+        self.assertEqual(spec['provider'], 'azure-queue-wire')
+        self.assertEqual(spec['operations'], ['PeekMessages'])
+        self.assertEqual(spec['test'], 'TestAzureQueuePeekZeroWireField')
+        self.assertEqual(spec['argv'], ['go', 'test', '-json', '-count=1', '-run', '^TestAzureQueuePeekZeroWireField$', './internal/azure/queue'])
+        for path in ['internal/azure/queue/protocol.go', 'internal/azure/queue/peek_zero_oracle_test.go', 'internal/azure/queue/peek_wire_test.go']:
+            gate.validate_scope(['azure-queue-peek-wire'], 'azure-queue-wire', 'PeekMessages', [path])
+
+    def test_cannot_expand_to_prior_sql_or_shared_scope(self):
+        for suites in [['azure-queue-peek-wire'], ['azure-queue-peek-wire', 'azure-queue-lifecycle', 'sqs-lifecycle']]:
+            for path in ['internal/azure/queue/store.go', 'internal/azure/queue/handler.go',
+                         'internal/azure/queue/protocol_test.go', 'internal/azure/queue/factory_lifecycle_test.go',
+                         'internal/server/cloud_storage.go', 'scripts/software_factory.py', 'scripts/factory_acceptance.py',
+                         'internal/aws/sqs_store.go']:
+                with self.subTest(suites=suites, path=path), self.assertRaises(ValueError):
+                    gate.validate_scope(suites, 'azure-queue-wire', 'PeekMessages', [path])
+        for provider, operation in [('azure-queue-wire', 'DeleteMessage'), ('azure-queue', 'PeekMessages'), ('aws', 'PeekMessages')]:
+            with self.assertRaises(ValueError):
+                gate.validate_scope(['azure-queue-peek-wire'], provider, operation, ['internal/azure/queue/protocol.go'])
+
+    def test_exact_test_events_required(self):
+        spec = gate.SUITES['azure-queue-peek-wire']
+        events = [dict(Action='run', Package=spec['package'], Test=spec['test']),
+                  dict(Action='pass', Package=spec['package'], Test=spec['test']),
+                  dict(Action='pass', Package=spec['package'])]
+        def encode(items): return ('\n'.join(json.dumps(e) for e in items)+'\n').encode()
+        gate.verdict(encode(events), 'azure-queue-peek-wire', 0)
+        for variant in [[], events[2:], events[:2]]:
+            with self.assertRaises(ValueError): gate.verdict(encode(variant), 'azure-queue-peek-wire', 0)
+        for action in ['skip', 'fail']:
+            bad = copy.deepcopy(events); bad[1]['Action'] = action
+            with self.assertRaises(ValueError): gate.verdict(encode(bad), 'azure-queue-peek-wire', 0)
+        bad = copy.deepcopy(events)
+        for event in bad:
+            if 'Test' in event: event['Test'] = 'TestAzureQueueFactoryLifecycle'
+        with self.assertRaises(ValueError): gate.verdict(encode(bad), 'azure-queue-peek-wire', 0)
+
+class QueueRoutingRegistrationTests(unittest.TestCase):
+    required = ['azure-queue-routing', 'azure-queue-peer-sakura-disabled', 'azure-queue-peer-sakura-enabled']
+    def test_fixed_server_test_and_narrow_scope(self):
+        spec = gate.SUITES['azure-queue-routing']
+        self.assertEqual(spec['provider'], 'azure-queue-routing')
+        self.assertEqual(spec['operations'], ['NativeQueueLifecycle'])
+        self.assertEqual(spec['argv'], ['go', 'test', '-json', '-count=1', '-run', '^TestAzureQueueRoutingLifecycleAndIsolation$', './internal/server'])
+        self.assertEqual(spec['test'], 'TestAzureQueueRoutingLifecycleAndIsolation')
+        for path in ['internal/server/cloud_storage.go', 'internal/server/azure_queue_test.go', 'internal/server/sakura_provider_test.go']:
+            gate.validate_scope(self.required, 'azure-queue-routing', 'NativeQueueLifecycle', [path])
+
+    def test_shared_and_leaf_paths_not_borrowed_from_mixed_suites(self):
+        for suites in [self.required, list(gate.SUITES)]:
+            for path in ['internal/azure/queue/protocol.go', 'internal/azure/queue/store.go',
+                         'internal/server/server.go', 'internal/server/azure_catalog.go',
+                         'internal/server/sakura_provider.go', 'internal/provider/registry.go',
+                         'scripts/software_factory.py', 'scripts/requirements-test.txt',
+                         'test/e2e/azure_queue_official.py']:
+                with self.subTest(path=path, suites=suites), self.assertRaises(ValueError):
+                    gate.validate_scope(suites, 'azure-queue-routing', 'NativeQueueLifecycle', [path])
+        for provider,operation in [('azure-queue', 'NativeQueueLifecycle'), ('azure-queue-routing', 'PeekMessages')]:
+            with self.assertRaises(ValueError):
+                gate.validate_scope(['azure-queue-routing'], provider, operation, ['internal/server/cloud_storage.go'])
+
+    def test_each_peer_suite_is_required_and_has_fixed_test(self):
+        pairs = [('azure-queue-peer-sakura-disabled', 'TestSakuraServerDefaultDisabledPreservesLegacyProviderSet'),
+                 ('azure-queue-peer-sakura-enabled', 'TestSakuraServerOptInUsesRegistryAuthenticationAndCopiedScope')]
+        for suite, test in pairs:
+            spec = gate.SUITES[suite]
+            self.assertEqual(spec['test'], test)
+            self.assertEqual(spec['argv'], ['go', 'test', '-json', '-count=1', '-run', '^'+test+'$', './internal/server'])
+            with self.assertRaises(ValueError):
+                gate.validate_scope([s for s in self.required if s != suite], 'azure-queue-routing', 'NativeQueueLifecycle', ['internal/server/cloud_storage.go'])
+        with self.assertRaises(ValueError):
+            gate.validate_scope(self.required[1:], 'azure-queue-routing', 'NativeQueueLifecycle', ['internal/server/sakura_provider_test.go'])
+
+    def test_leaf_receipt_cannot_satisfy_routing(self):
+        leaf = gate.SUITES['azure-queue-lifecycle']
+        events = [dict(Action='run',Package=leaf['package'],Test=leaf['test']),
+                  dict(Action='pass',Package=leaf['package'],Test=leaf['test']),
+                  dict(Action='pass',Package=leaf['package'])]
+        with self.assertRaises(ValueError):
+            gate.verdict(('\n'.join(json.dumps(e) for e in events)).encode(), 'azure-queue-routing', 0)
 
 if __name__=='__main__':unittest.main()

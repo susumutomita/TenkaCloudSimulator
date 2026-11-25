@@ -1,0 +1,9 @@
+# Development-only official Microsoft Azure Queue SDK wheel.
+# Source: https://pypi.org/pypi/azure-storage-queue/12.18.1/json
+# Wheel: azure_storage_queue-12.18.1-py3-none-any.whl; Python >=3.10.
+# Install separately with --no-deps --require-hashes --only-binary=:all:.
+# First review/install existing scripts/requirements-test.txt dependencies;
+# this one-wheel hash does not authenticate that existing dependency set.
+# Run pip check and record exact Python/dependency versions before SDK tests.
+# No cloud credentials are needed; the test runner accepts numeric loopback only.
+azure-storage-queue==12.18.1 --hash=sha256:791ed52e2aae4b136ded3e530414fda2fdaf4ab356891b017cf77b337609a2a4

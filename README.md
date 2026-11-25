@@ -101,6 +101,7 @@ console, CloudFormation adapter or Challenge integration.
   [Azure Blob conditional and CRC64 read limits](docs/azure-blob.md#single-range-download-subset),
   [App Engine (Python 3.12 WSGI versions, traffic splits, firewall)](docs/gcp-appengine.md),
   [Google Cloud console](docs/gcp-console.md), [Azure console](docs/azure-console.md),
+  [Azure Queue Storage (bounded named-queue operations)](docs/acceptance/azure-queue.md),
   [opt-in Sakura Disk metadata](docs/sakura.md).
 - **Configuration-only catalogs:** [AWS](docs/aws-catalog.md),
   [Google Cloud](docs/gcp-catalog.md), [Azure Resource Manager](docs/azure-catalog.md).
