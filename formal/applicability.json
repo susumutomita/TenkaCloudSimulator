@@ -1,116 +1,224 @@
 {
   "version": 1,
-  "base_sha": "27010d3660036036b6fdbd420c1a566f73794e87",
+  "base_sha": "df94e52673ebe9aaeb593c1f89abef16913dc130",
   "changes": [
     {
       "path": "README.md",
-      "sha256": "7680f230aa500173879e752f1fa6d5d792f7fbcbb1f6f995320c26ce54609ab8",
+      "sha256": "87f29fa297cb8892e692cf60d8abcb9f6ee89f8a8e8fbe2b06303c05e71e908d",
       "disposition": "documentation",
-      "reason": "Documents local saved PTR names and reverse-lookup boundaries.",
+      "reason": "Documents the scoped Redshift tag read without SQL or account-wide enumeration.",
+      "models": []
+    },
+    {
+      "path": "docs/aws-catalog-services.md",
+      "sha256": "67b2f545763d95837568f500b51e322464730cd0e537de78e3ba640362fcd982",
+      "disposition": "documentation",
+      "reason": "Updates the bounded Redshift native contract reference or focused regression evidence, not SQL execution.",
       "models": []
     },
     {
       "path": "docs/design/0001-go-standalone.md",
-      "sha256": "fc60b0c3e4cb94ca316b612b0796c9a9cfcb2d5cd9cc5bfaa2b870bcf17135cc",
+      "sha256": "809edc6e5134b94e8d02407d6ea9c92318bbf86c9c86bd6b785596c968c239fb",
       "disposition": "documentation",
-      "reason": "Documents local saved PTR names and reverse-lookup boundaries.",
+      "reason": "Documents the scoped Redshift tag read without SQL or account-wide enumeration.",
       "models": []
     },
     {
-      "path": "docs/route53.md",
-      "sha256": "1a4ba2b81e02638b045d7725528069fa030beb7a38940a516b2fc12d7f17686f",
-      "disposition": "documentation",
-      "reason": "Documents local saved PTR names and reverse-lookup boundaries.",
+      "path": "formal/models.json",
+      "sha256": "815399abde9a56b0e8a25c5af6eac12ecb4c313214839f1ff4c15ba7355ce376",
+      "disposition": "formal-infrastructure",
+      "reason": "Registers two bounded Redshift code paths with the existing catalog model; no model or invariant changes.",
       "models": []
     },
     {
-      "path": "internal/aws/route53_http.go",
-      "sha256": "3cb6c3f0e22324c44fbdbf1ff4e52a9318e2fad4121460af86c3407f8478a791",
+      "path": "internal/aws/catalog/describe.go",
+      "sha256": "8d4ea6aaa43b441a9a5f8ed20c112e312abe259bf09ee5f61e380cc197e39651",
       "disposition": "modeled",
-      "reason": "PTR uses existing saved-name validation and authorized transactional record storage; the newly admitted record type does not change the transaction, authority or team boundary.",
+      "reason": "Binds exact Redshift native, descriptor or reference code to the existing catalog trust boundary.",
       "models": [
         {
-          "id": "Route53AtomicBatch",
+          "id": "CatalogResourceLifecycle",
           "properties": [
-            "AtomicPair",
-            "OnlyAuthorizedValid",
-            "OtherTeamUnchanged"
+            "AuthorizationFirst",
+            "PeerFrame"
           ],
-          "limits": "The finite pair model covers abstract admission and isolation, not PTR syntax, DNS type ordering, XML or Go/SQLite refinement; targeted native and SDK tests cover those implementation boundaries."
+          "limits": "Finite abstract catalog ownership and peer-state projection; not tag filtering, Query XML, generated reference/example data, IAM evaluation or Go refinement."
         }
       ]
     },
     {
-      "path": "internal/aws/route53_ptr_test.go",
-      "sha256": "e43d897b2c67dd05251942262d6f6909573978f6a6bc68f5a649dd0bf9932a0d",
+      "path": "internal/aws/catalog/models/redshift.json",
+      "sha256": "3960d283655c8942d6c5f29efd4c9faed3ac9a05ece25a12f50cacf91a81849c",
+      "disposition": "modeled",
+      "reason": "Binds exact Redshift native, descriptor or reference code to the existing catalog trust boundary.",
+      "models": [
+        {
+          "id": "CatalogResourceLifecycle",
+          "properties": [
+            "AuthorizationFirst",
+            "PeerFrame"
+          ],
+          "limits": "Finite abstract catalog ownership and peer-state projection; not tag filtering, Query XML, generated reference/example data, IAM evaluation or Go refinement."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/catalog/openapi.go",
+      "sha256": "4b3f6d9bd0d75821ecc00878d94468e1e6ef843c452c5d539e3cb404d6e87d29",
+      "disposition": "modeled",
+      "reason": "Binds exact Redshift native, descriptor or reference code to the existing catalog trust boundary.",
+      "models": [
+        {
+          "id": "CatalogResourceLifecycle",
+          "properties": [
+            "AuthorizationFirst",
+            "PeerFrame"
+          ],
+          "limits": "Finite abstract catalog ownership and peer-state projection; not tag filtering, Query XML, generated reference/example data, IAM evaluation or Go refinement."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/catalog/query_test.go",
+      "sha256": "c03c0b9fe7410c162e588d92e1847064c02f23e7808e4348547405fe9b607d61",
       "disposition": "test-support",
-      "reason": "Focused PTR acceptance or exact additive API description checks; does not change runtime.",
+      "reason": "Updates the bounded Redshift native contract reference or focused regression evidence, not SQL execution.",
       "models": []
     },
     {
-      "path": "internal/aws/route53_store.go",
-      "sha256": "af3834c964f3b8426b741cdd8e90aa5e8b6c2b5ed5827347ffd68c5d89be2f86",
+      "path": "internal/aws/catalog/redshift_tags.go",
+      "sha256": "c7830919366bf87ec48c73db57a9bcb49981ebc62114c37bd8f1acf8bc2380b6",
       "disposition": "modeled",
-      "reason": "PTR uses existing saved-name validation and authorized transactional record storage; the newly admitted record type does not change the transaction, authority or team boundary.",
+      "reason": "Binds exact Redshift native, descriptor or reference code to the existing catalog trust boundary.",
       "models": [
         {
-          "id": "Route53AtomicBatch",
+          "id": "CatalogResourceLifecycle",
           "properties": [
-            "AtomicPair",
-            "OnlyAuthorizedValid",
-            "OtherTeamUnchanged"
+            "AuthorizationFirst",
+            "PeerFrame"
           ],
-          "limits": "The finite pair model covers abstract admission and isolation, not PTR syntax, DNS type ordering, XML or Go/SQLite refinement; targeted native and SDK tests cover those implementation boundaries."
+          "limits": "Finite abstract catalog ownership and peer-state projection; not tag filtering, Query XML, generated reference/example data, IAM evaluation or Go refinement."
         }
       ]
     },
     {
-      "path": "internal/server/apidocs/openapi.json",
-      "sha256": "1b4386f3102441a87e2339b94ee80a8c3ac355e53fd300833e400c6971190bce",
+      "path": "internal/aws/catalog/redshift_tags_reference.go",
+      "sha256": "708532b4d80375b19cdf6a314872455ec34372056a42123a28ae3fcd75708bd0",
+      "disposition": "modeled",
+      "reason": "Binds exact Redshift native, descriptor or reference code to the existing catalog trust boundary.",
+      "models": [
+        {
+          "id": "CatalogResourceLifecycle",
+          "properties": [
+            "AuthorizationFirst",
+            "PeerFrame"
+          ],
+          "limits": "Finite abstract catalog ownership and peer-state projection; not tag filtering, Query XML, generated reference/example data, IAM evaluation or Go refinement."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/catalog/redshift_tags_reference_test.go",
+      "sha256": "bef441c9cf0b0203fdcf5c2f9cf27cb12c3344dd874cbd6adbfd33ab7c31f9ff",
+      "disposition": "test-support",
+      "reason": "Updates the bounded Redshift native contract reference or focused regression evidence, not SQL execution.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/catalog/redshift_tags_test.go",
+      "sha256": "9d6083f38210ba78682a3b9d40e5d7e128cd6afbd16f77660e52a4c4d877f56e",
+      "disposition": "test-support",
+      "reason": "Updates the bounded Redshift native contract reference or focused regression evidence, not SQL execution.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/catalog/selection.json",
+      "sha256": "327f2b3f74d0e03e98b71c2bceb9b47c8308d001d58f94b729e61e256e3e60b6",
+      "disposition": "modeled",
+      "reason": "Binds exact Redshift native, descriptor or reference code to the existing catalog trust boundary.",
+      "models": [
+        {
+          "id": "CatalogResourceLifecycle",
+          "properties": [
+            "AuthorizationFirst",
+            "PeerFrame"
+          ],
+          "limits": "Finite abstract catalog ownership and peer-state projection; not tag filtering, Query XML, generated reference/example data, IAM evaluation or Go refinement."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/catalog/semantics.go",
+      "sha256": "f4d1fcd1845f5ae79726e6ba3ce70693848d6b8b7bef499d9f5cd2a407c4c780",
+      "disposition": "modeled",
+      "reason": "Binds exact Redshift native, descriptor or reference code to the existing catalog trust boundary.",
+      "models": [
+        {
+          "id": "CatalogResourceLifecycle",
+          "properties": [
+            "AuthorizationFirst",
+            "PeerFrame"
+          ],
+          "limits": "Finite abstract catalog ownership and peer-state projection; not tag filtering, Query XML, generated reference/example data, IAM evaluation or Go refinement."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/catalog/services_data2.go",
+      "sha256": "d51a138ca089d68ee74f2b7172716531c433bd2bdb056d4f420c1e57ee5dfb8e",
+      "disposition": "modeled",
+      "reason": "Binds exact Redshift native, descriptor or reference code to the existing catalog trust boundary.",
+      "models": [
+        {
+          "id": "CatalogResourceLifecycle",
+          "properties": [
+            "AuthorizationFirst",
+            "PeerFrame"
+          ],
+          "limits": "Finite abstract catalog ownership and peer-state projection; not tag filtering, Query XML, generated reference/example data, IAM evaluation or Go refinement."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/catalog/services_data2_test.go",
+      "sha256": "9150c2b44d2045f2e6bd162345c990a8993057159fc0f724e6db343cdccc87e5",
+      "disposition": "test-support",
+      "reason": "Updates the bounded Redshift native contract reference or focused regression evidence, not SQL execution.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/catalog/services_records_test.go",
+      "sha256": "a5f77bb73f9673bf56fa5295a7db1b34ac8c191d0d249cc7ded495774f3d1826",
+      "disposition": "test-support",
+      "reason": "Updates the bounded Redshift native contract reference or focused regression evidence, not SQL execution.",
+      "models": []
+    },
+    {
+      "path": "internal/server/apidocs/catalog/index.json",
+      "sha256": "881e5ef3f59a1f112c79ff4a4c52bca97c8fc5725fc693d1d6d1a9d432de34fa",
       "disposition": "presentation",
-      "reason": "Embedded API reference lists the newly admitted simple PTR record type.",
+      "reason": "Updates the bounded Redshift native contract reference or focused regression evidence, not SQL execution.",
       "models": []
     },
     {
-      "path": "test/e2e/autoscaling_plans_openapi.py",
-      "sha256": "5845f59d71a0c3c98393a88e02ee6c426fb9ccb48e78017e5f61da17691316f7",
-      "disposition": "test-support",
-      "reason": "Focused PTR acceptance or exact additive API description checks; does not change runtime.",
+      "path": "internal/server/apidocs/catalog/redshift.json",
+      "sha256": "bf09c893b015d250b7bb7b03ae070fe9c8fde00076e245cae4b3f9f0be91354a",
+      "disposition": "presentation",
+      "reason": "Updates the bounded Redshift native contract reference or focused regression evidence, not SQL execution.",
       "models": []
     },
     {
-      "path": "test/e2e/route53.py",
-      "sha256": "2cf7408c092cab8880b767571134eb88641cff4f3acd5f983f919c36df8300ca",
+      "path": "test/e2e/catalog_fixtures/redshift.json",
+      "sha256": "2dc88936318196c6e16adb288ad1aa17431c556e58b27244eeff607a60702396",
       "disposition": "test-support",
-      "reason": "Focused PTR acceptance or exact additive API description checks; does not change runtime.",
+      "reason": "Updates the bounded Redshift native contract reference or focused regression evidence, not SQL execution.",
       "models": []
     },
     {
-      "path": "test/e2e/route53_openapi.py",
-      "sha256": "8a6630e6d8ad099944cb3e2113a544cb3b0607c1451a9dd3dae45ec07ebfed97",
-      "disposition": "test-support",
-      "reason": "Focused PTR acceptance or exact additive API description checks; does not change runtime.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/route53_ptr_reference.py",
-      "sha256": "1b5e9cd125ba529124c68d946adceb353a5804ffd610c1df4735757c2a3231dc",
-      "disposition": "test-support",
-      "reason": "Focused PTR acceptance or exact additive API description checks; does not change runtime.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/test_route53_openapi.py",
-      "sha256": "1daaee9399804b1017b100cb598eaf409cdf616f29b4526e14808e1ca59b0982",
-      "disposition": "test-support",
-      "reason": "Focused PTR acceptance or exact additive API description checks; does not change runtime.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/test_sakura_openapi.py",
-      "sha256": "8575f9f42ed9fa27cd80e469c79ec3cedcea31731e0c1601e86ccb063cf74e04",
-      "disposition": "test-support",
-      "reason": "Focused PTR acceptance or exact additive API description checks; does not change runtime.",
+      "path": "tools/console/tests/fixtures/catalog-descriptors.json",
+      "sha256": "ebc780eb23e279eef457c040b237ef920d083998e5cf7b0570cda148153247dd",
+      "disposition": "presentation",
+      "reason": "Updates the bounded Redshift native contract reference or focused regression evidence, not SQL execution.",
       "models": []
     }
   ]

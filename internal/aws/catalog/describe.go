@@ -226,9 +226,21 @@ func (b *binding) describe() Descriptor {
 	}
 	sort.Strings(d.Operations)
 	inputs := map[string]InputShape{}
-	tagging := map[Kind]bool{}
-	for _, op := range b.spec.Ops {
-		tagging[op.Kind] = true
+	for i := range b.spec.Ops {
+		op := &b.spec.Ops[i]
+		if op.Kind != Tag && op.Kind != Untag && op.Kind != ListTags {
+			continue
+		}
+		od := b.describeOp(op, &Resource{}, inputs)
+		// The generic Query console reads only flat tag lists. Retain
+		// description tags for wrapped responses such as Redshift DescribeTags.
+		if op.Kind == ListTags && m.Metadata.Protocol == "query" && od.TagsKey == "" {
+			continue
+		}
+		if d.Tagging == nil {
+			d.Tagging = map[string]OpDescriptor{}
+		}
+		d.Tagging[string(op.Kind)] = od
 	}
 	for _, res := range b.spec.Resources {
 		rd := ResourceDescriptor{Kind: res.Kind, ARNMember: res.ARNMember, NameMember: res.NameMember, IDMember: res.IDMember, Parent: res.Parent, Limit: res.Limit, Ops: map[string]OpDescriptor{},
@@ -239,10 +251,10 @@ func (b *binding) describe() Descriptor {
 		if res.Token != "" {
 			rd.TokenWire = b.resourceWire(res, res.Token)
 		}
-		if res.ARNMember == "" && (tagging[Tag] || tagging[Untag] || tagging[ListTags]) {
+		if res.ARNMember == "" && len(d.Tagging) != 0 {
 			rd.ARNTemplate = res.ARN
 		}
-		if !tagging[ListTags] {
+		if d.Tagging[string(ListTags)].Name == "" {
 			shape := m.shape(res.Shape)
 			for _, name := range shape.sortedMembers() {
 				if m.isTagShape(shape.Members[name].Shape) && strings.Contains(strings.ToLower(name), "tag") {
@@ -267,15 +279,6 @@ func (b *binding) describe() Descriptor {
 			}
 		}
 		d.Resources = append(d.Resources, rd)
-	}
-	for i := range b.spec.Ops {
-		op := &b.spec.Ops[i]
-		if op.Kind == Tag || op.Kind == Untag || op.Kind == ListTags {
-			if d.Tagging == nil {
-				d.Tagging = map[string]OpDescriptor{}
-			}
-			d.Tagging[string(op.Kind)] = b.describeOp(op, &Resource{}, inputs)
-		}
 	}
 	if len(inputs) > 0 {
 		d.InputShapes = inputs

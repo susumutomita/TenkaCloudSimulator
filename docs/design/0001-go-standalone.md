@@ -20,6 +20,8 @@ AWS Batch のジョブキューは、先頭ジョブのタイムアウト設定�
 
 SimpleDB の `PutAttributes` は AWS SDK の標準形式の `Expected` 条件を 1 件だけ受け付ける。属性の単一値との比較、または属性が存在しないことの確認を更新と同じ SQLite トランザクションで行う。条件を満たさない場合は他の属性も変更しない。番号付きの条件形式、バッチ書き込み、`DeleteAttributes`、`Select` は対応しない。
 
+Redshift の `DescribeTags` は既存のローカル ARN 1件に限り、同じ認可でタグのキーと値を読む。全体検索や SQL は扱わない。
+
 Azure Queue は Blob と独立したプロバイダールートを持ち、固定 account・owner・environment に結びつくローカル SQLite にメッセージを保存する。受信と更新は表示予約と pop receipt を更新し、削除は現在の receipt を要求する。Console と API リファレンスは同じ所有者境界とデータプレーンを使う。アカウント全体のキュー一覧や Azure RBAC は模倣しない。[操作範囲と検証条件](../acceptance/azure-queue.md)。
 
 CLI token authorityはoperatorと15分participantを区別し、participant identity header上書きを拒否する。主催ホストはチームごとに別プロセス/DB/tokenを管理し、ログイン済み利用者とチームを認可する。単一プロセス内のidentity選択でチーム分離しない。library compositionのserver.Newは認証を自動追加しない。
