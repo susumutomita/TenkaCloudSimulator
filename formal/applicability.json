@@ -1,48 +1,203 @@
 {
   "version": 1,
-  "base_sha": "e9b286f7d4972b086b13ebcd6f9dcadc012ad736",
+  "base_sha": "6ac9cf77a85d262bf599cd42a1e0f7c45b6ce2cc",
   "changes": [
     {
+      "path": ".github/workflows/ci.yml",
+      "sha256": "9f53b1f1e64c68e11372b84ef244569d1243f6050631c6569d6c4b84b80945dc",
+      "disposition": "formal-infrastructure",
+      "reason": "Execute focused Cloud DNS Node and actual React rendering tests after the existing pinned Console dependency install and rebuild. No new dependency, blanket E2E, or change to the formal job.",
+      "models": []
+    },
+    {
       "path": "README.md",
-      "sha256": "12eb64e3bef5717ad66fca67cf50cd2ac802d7bf9443ce890608814a4df0bc1a",
+      "sha256": "1dddc06326cf416fd52062558568d8d745055adaa3b01f8f8c17f2f3ddb06812",
       "disposition": "documentation",
-      "reason": "Documents bounded trigger validation and no runtime execution.",
+      "reason": "Documents the owner-only local SRV record editor, its entry point or its limits; no runtime operation.",
+      "models": []
+    },
+    {
+      "path": "docs/acceptance/gcp-cloud-dns.md",
+      "sha256": "6caff168859289ed4d2e38b9fba9832ec8dac43134e575934a0906171397c20e",
+      "disposition": "documentation",
+      "reason": "Documents the owner-only local SRV record editor, its entry point or its limits; no runtime operation.",
       "models": []
     },
     {
       "path": "docs/design/0001-go-standalone.md",
-      "sha256": "ac98311ea9089018be000b4e27b8f136f33a6d3736326857bb86b9ab1aec85b8",
+      "sha256": "e1476059875dba57b3f09ddbd276dfe3503129ef2079c6e634386e0c0ab55bc9",
       "disposition": "documentation",
-      "reason": "Documents bounded trigger validation and no runtime execution.",
+      "reason": "Documents the owner-only local SRV record editor, its entry point or its limits; no runtime operation.",
       "models": []
     },
     {
-      "path": "internal/aws/catalog/appflow_trigger_contract_test.go",
-      "sha256": "12cd6c433ffef0e8ae2f4b22b95d4a33c1731a734aec065432d5147a5e8a6991",
+      "path": "internal/server/gcp_dns_handler_test.go",
+      "sha256": "b45ba78e2ad2eb3982fc0e4de5903f65451749d732ed2c8c39bf6fc4949b4672",
       "disposition": "test-support",
-      "reason": "Focused AppFlow regression, not runtime implementation.",
+      "reason": "Tracks the exact owner-only native capability descriptor; tests do not add an operation.",
       "models": []
     },
     {
-      "path": "internal/aws/catalog/services_analytics2.go",
-      "sha256": "9e777b025eabd9180e17c2488fec3411656ec9c14f73a0ea34a346aa7145aa45",
+      "path": "internal/server/server.go",
+      "sha256": "1a572062b50e4264f3a18f02e39fe4b57979b937f7ee73e327a8764f1940cfa1",
       "disposition": "modeled",
-      "reason": "AppFlow CreateFlow and UpdateFlow reject incompatible trigger settings in the existing pre-write check without changing routing, IAM, execution, storage, or the transaction model.",
+      "reason": "Cloud DNS editor is offered only by the existing trusted-owner capability and uses the active zone view for local change/readback.",
       "models": [
         {
-          "id": "CatalogResourceLifecycle",
+          "id": "CloudDNSConsoleScope",
           "properties": [
-            "FailureFrame"
+            "CapabilityAuthorized"
           ],
-          "limits": "The finite catalog model checks the unchanged store on abstract rejected operations. It does not model AppFlow trigger fields or error ordering, verify Go refinement, parse schedule expressions, or prove any SDK or job behavior. Runtime regressions cover input validation and stored read-back."
+          "limits": "The existing finite owner/scope and stale-read model does not prove React rendering, SRV syntax, mutation success, native HTTP or SQLite; those behaviors have separately scoped tests."
         }
       ]
     },
     {
-      "path": "test/e2e/catalog_fixtures/appflow.json",
-      "sha256": "dbf88d7a4866d2efdff663005b1fcbfbdb889962a1c6e1ef18e300ee6f481042",
+      "path": "internal/server/web/app.css",
+      "sha256": "e0b74fd84601248100caa904e0e9f0e05724a1bf81025aaeb57d7bdb86e0a2eb",
+      "disposition": "presentation",
+      "reason": "Scoped CSS or its shipped asset makes long SRV values wrap without truncation or changing native data.",
+      "models": []
+    },
+    {
+      "path": "internal/server/web/app.js",
+      "sha256": "d67e5975510582954720bf88aeca810bfb3fd7156bc654c28dfa3d1f3ca1647b",
+      "disposition": "modeled",
+      "reason": "Cloud DNS editor is offered only by the existing trusted-owner capability and uses the active zone view for local change/readback.",
+      "models": [
+        {
+          "id": "CloudDNSConsoleScope",
+          "properties": [
+            "OnlyCurrentDiscovery",
+            "NoStaleContinuation"
+          ],
+          "limits": "The existing finite owner/scope and stale-read model does not prove React rendering, SRV syntax, mutation success, native HTTP or SQLite; those behaviors have separately scoped tests."
+        }
+      ]
+    },
+    {
+      "path": "test/e2e/gcp_dns_console_gui.py",
+      "sha256": "095de1b74d06b757282d35846e72726684aed0d4b7abf7844d3ad02c32cfc8e7",
       "disposition": "test-support",
-      "reason": "Focused AppFlow regression, not runtime implementation.",
+      "reason": "Tracks the exact owner-only native capability descriptor; tests do not add an operation.",
+      "models": []
+    },
+    {
+      "path": "tools/console/bundle-digests.json",
+      "sha256": "97d671f804afcd8990c20eeabe3025baafa31ccd909a71f45661f2a30106093b",
+      "disposition": "presentation",
+      "reason": "Implements, exercises or identifies the local structured SRV editor; no backend authority or DNS-serving semantics.",
+      "models": []
+    },
+    {
+      "path": "tools/console/bundle-inputs.json",
+      "sha256": "ce9edf8d6be233fdfae709f39458ba2d5d94d4b210e6cebcf4db7abf0cbc067e",
+      "disposition": "presentation",
+      "reason": "Implements, exercises or identifies the local structured SRV editor; no backend authority or DNS-serving semantics.",
+      "models": []
+    },
+    {
+      "path": "tools/console/src/console-navigation.mjs",
+      "sha256": "66a1079aa7919a40a795c022a25c186a8ed387b61af1a9a01e5186f1447525fc",
+      "disposition": "modeled",
+      "reason": "Cloud DNS editor is offered only by the existing trusted-owner capability and uses the active zone view for local change/readback.",
+      "models": [
+        {
+          "id": "CloudDNSConsoleScope",
+          "properties": [
+            "CapabilityAuthorized",
+            "OnlyCurrentDiscovery"
+          ],
+          "limits": "The existing finite owner/scope and stale-read model does not prove React rendering, SRV syntax, mutation success, native HTTP or SQLite; those behaviors have separately scoped tests."
+        }
+      ]
+    },
+    {
+      "path": "tools/console/src/gcp-dns-requests.mjs",
+      "sha256": "3b45f1063101f623078c8332fde9a59eac50bf5017e85a6438f3351401f7a94e",
+      "disposition": "modeled",
+      "reason": "Cloud DNS editor is offered only by the existing trusted-owner capability and uses the active zone view for local change/readback.",
+      "models": [
+        {
+          "id": "CloudDNSConsoleScope",
+          "properties": [
+            "NoStaleContinuation"
+          ],
+          "limits": "The existing finite owner/scope and stale-read model does not prove React rendering, SRV syntax, mutation success, native HTTP or SQLite; those behaviors have separately scoped tests."
+        }
+      ]
+    },
+    {
+      "path": "tools/console/src/gcp-dns-srv-form.jsx",
+      "sha256": "592e38d6f4e55cfa19184c4ab44b19cd9c41184b8c912075c3b3216da162efa7",
+      "disposition": "presentation",
+      "reason": "Implements, exercises or identifies the local structured SRV editor; no backend authority or DNS-serving semantics.",
+      "models": []
+    },
+    {
+      "path": "tools/console/src/gcp-dns-srv.css",
+      "sha256": "c9a6a669eb7a34fc4090ccc56f8bb2446845e9f6b12068f713cc9e5afb6b2097",
+      "disposition": "presentation",
+      "reason": "Scoped CSS or its shipped asset makes long SRV values wrap without truncation or changing native data.",
+      "models": []
+    },
+    {
+      "path": "tools/console/src/gcp-dns-srv.mjs",
+      "sha256": "fd41dde38a1bd0913fcbbc549423d20632bebbba95f407a38a773ab87df7b6ed",
+      "disposition": "presentation",
+      "reason": "Implements, exercises or identifies the local structured SRV editor; no backend authority or DNS-serving semantics.",
+      "models": []
+    },
+    {
+      "path": "tools/console/src/gcp-dns.jsx",
+      "sha256": "210c6b31fa2f4132587551c332108ebe63971f3054f75cfe01681afc5b76697a",
+      "disposition": "modeled",
+      "reason": "Cloud DNS editor is offered only by the existing trusted-owner capability and uses the active zone view for local change/readback.",
+      "models": [
+        {
+          "id": "CloudDNSConsoleScope",
+          "properties": [
+            "OnlyCurrentReadVisible",
+            "NoStaleContinuation"
+          ],
+          "limits": "The existing finite owner/scope and stale-read model does not prove React rendering, SRV syntax, mutation success, native HTTP or SQLite; those behaviors have separately scoped tests."
+        }
+      ]
+    },
+    {
+      "path": "tools/console/src/main.jsx",
+      "sha256": "80ec19822530fb17f8fdcdfc876d22d7b1782626a1fc33a79e594f689f63fe29",
+      "disposition": "modeled",
+      "reason": "Cloud DNS editor is offered only by the existing trusted-owner capability and uses the active zone view for local change/readback.",
+      "models": [
+        {
+          "id": "CloudDNSConsoleScope",
+          "properties": [
+            "OnlyCurrentDiscovery"
+          ],
+          "limits": "The existing finite owner/scope and stale-read model does not prove React rendering, SRV syntax, mutation success, native HTTP or SQLite; those behaviors have separately scoped tests."
+        }
+      ]
+    },
+    {
+      "path": "tools/console/test/gcp-dns-navigation.test.mjs",
+      "sha256": "86b0b19917c784526effe51f780d365ef26c4dc7826b0d9f73bc82c20b48fad2",
+      "disposition": "presentation",
+      "reason": "Implements, exercises or identifies the local structured SRV editor; no backend authority or DNS-serving semantics.",
+      "models": []
+    },
+    {
+      "path": "tools/console/test/gcp-dns-srv-render.test.mjs",
+      "sha256": "7485b484aeecb8f3b12f2a1b1e946b3a667da1cc115cbf13079dbfdb4edd29d0",
+      "disposition": "presentation",
+      "reason": "Implements, exercises or identifies the local structured SRV editor; no backend authority or DNS-serving semantics.",
+      "models": []
+    },
+    {
+      "path": "tools/console/test/gcp-dns-srv.test.mjs",
+      "sha256": "207c5510b5bbb29cd8fde16ecfa7b5c526a24df83849516d248e0d802e0c6dab",
+      "disposition": "presentation",
+      "reason": "Implements, exercises or identifies the local structured SRV editor; no backend authority or DNS-serving semantics.",
       "models": []
     }
   ]

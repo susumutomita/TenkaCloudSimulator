@@ -58,7 +58,7 @@ function dnsConfigured(cap) {
   return cap?.console === true && cap.api === 'dns.v1'
     && typeof cap.project === 'string' && /^[a-z](?:[a-z0-9-]{0,61}[a-z0-9])?$/.test(cap.project)
     && cap.endpoint === '/_simulator/providers/gcp/dns/v1/projects/' + cap.project + '/managedZones'
-    && Array.isArray(cap.operations) && cap.operations.length === dnsOperations.length
+    && Array.isArray(cap.operations) && cap.operations.length === dnsOperations.length + (cap.operations.includes('changes.create') ? 1 : 0)
     && dnsOperations.every(op => cap.operations.includes(op));
 }
 export function dnsCapabilitiesForPrincipal(session, epoch, principal, discovered) {
