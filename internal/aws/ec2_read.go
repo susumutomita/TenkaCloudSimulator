@@ -87,7 +87,7 @@ func (g *Gateway) serveEC2(w http.ResponseWriter, r *http.Request) {
 	}
 	action := fields.Get("Action")
 	if len(fields["Action"]) != 1 || len(fields["Version"]) != 1 || fields.Get("Version") != "2016-11-15" || !slices.Contains(ec2Operations, action) {
-		fail("UnsupportedOperation", "Only DescribeInstances, DescribeVpcs, DescribeSubnets, CreateVpc and DeleteVpc version 2016-11-15 are supported.", 400)
+		fail("UnsupportedOperation", "Only DescribeInstances, DescribeVpcs, DescribeSubnets, DescribeSecurityGroups, CreateVpc and DeleteVpc version 2016-11-15 are supported.", 400)
 		return
 	}
 	request, failure := parseEC2Request(action, fields)
@@ -196,12 +196,13 @@ type ec2SubnetSet struct {
 	Items []ec2SubnetRead `xml:"item"`
 }
 type ec2ReadResponse struct {
-	Subnets      *ec2SubnetSet `xml:"subnetSet,omitempty"`
-	XMLName      xml.Name
-	XMLNS        string               `xml:"xmlns,attr"`
-	RequestID    string               `xml:"requestId"`
-	Reservations []ec2ReservationRead `xml:"reservationSet>item,omitempty"`
-	VPCs         []ec2VPCRead         `xml:"vpcSet>item,omitempty"`
+	Subnets        *ec2SubnetSet `xml:"subnetSet,omitempty"`
+	XMLName        xml.Name
+	XMLNS          string               `xml:"xmlns,attr"`
+	RequestID      string               `xml:"requestId"`
+	Reservations   []ec2ReservationRead `xml:"reservationSet>item,omitempty"`
+	VPCs           []ec2VPCRead         `xml:"vpcSet>item,omitempty"`
+	SecurityGroups *ec2SecurityGroupSet `xml:"securityGroupInfo,omitempty"`
 }
 
 func ec2ReadTags(tags map[string]string) []ec2Tag {
@@ -229,6 +230,9 @@ func (s *StackStore) ec2Read(ctx context.Context, region, action string) (ec2Rea
 	} else if action == "DescribeSubnets" {
 		kind = "AWS::EC2::Subnet"
 		out.Subnets = &ec2SubnetSet{}
+	} else if action == "DescribeSecurityGroups" {
+		kind = ec2SecurityGroupKind
+		out.SecurityGroups = &ec2SecurityGroupSet{}
 	}
 	rows, e := tx.QueryContext(ctx, `SELECT o.physical_id,o.stack_id,s.document FROM aws_cfn_ownership o JOIN aws_cfn_stacks s ON s.id=o.stack_id WHERE o.namespace=? AND o.kind=? AND s.region=? ORDER BY o.physical_id LIMIT 1001`, stackResourceNamespace(region, kind), kind, region)
 	if e != nil {
@@ -269,6 +273,14 @@ func (s *StackStore) ec2Read(ctx context.Context, region, action string) (ec2Rea
 		}
 		if resource == nil {
 			return out, fmt.Errorf("missing resource")
+		}
+		if kind == ec2SecurityGroupKind {
+			group, err := ec2OwnedSecurityGroup(ctx, tx, record, *resource)
+			if err != nil {
+				return out, err
+			}
+			out.SecurityGroups.Items = append(out.SecurityGroups.Items, group)
+			continue
 		}
 		if kind == "AWS::EC2::VPC" || kind == "AWS::EC2::Subnet" {
 			v, e := networkRead(ctx, tx, region, item.id)

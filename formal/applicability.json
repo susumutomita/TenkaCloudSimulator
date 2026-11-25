@@ -1,26 +1,145 @@
 {
   "version": 1,
-  "base_sha": "74b24a21acbf2c91aeeaee77696d43ded145abed",
+  "base_sha": "c67e16f71237ec2282c37ef0fe70643716ce63c9",
   "changes": [
     {
-      "path": "test/rds/README.md",
-      "sha256": "c9d8001aec98525231d88eece1c393a228910d0fe8a54d2b72b305bf9f5c228d",
-      "disposition": "test-support",
-      "reason": "Opt-in isolated local development fixture and documentation only, with no production runtime or RDS transport change.",
+      "path": "README.md",
+      "sha256": "66fd00c381f1794db655e0a80506dc8746ca6803c141f1a14e10d55f487b2a2e",
+      "disposition": "documentation",
+      "reason": "Explain the public, bounded EC2 security-group read and explicitly exclude edits, console and network effects.",
       "models": []
     },
     {
-      "path": "test/rds/test_verify_local_sql.py",
-      "sha256": "74d1954629a1794bcfadf9b52a5bdb287237a0fbf22737f66d1741b96b259fd0",
-      "disposition": "test-support",
-      "reason": "Opt-in isolated local development fixture and documentation only, with no production runtime or RDS transport change.",
+      "path": "docs/design/0001-go-standalone.md",
+      "sha256": "d88cd2a039118496e2f7847c847871b606404f85c69d2d6b20c097e105987037",
+      "disposition": "documentation",
+      "reason": "Explain the public, bounded EC2 security-group read and explicitly exclude edits, console and network effects.",
       "models": []
     },
     {
-      "path": "test/rds/verify_local_sql.py",
-      "sha256": "f7e53ba961fae94dea9688e0356165140c27e0f0203ed1a07ad06efe0546f4c5",
+      "path": "docs/ec2-read-discovery.md",
+      "sha256": "c2e0deee6984c335aaa923ded57ac7b5404789d444a675a649b5166075b3acfa",
+      "disposition": "documentation",
+      "reason": "Explain the public, bounded EC2 security-group read and explicitly exclude edits, console and network effects.",
+      "models": []
+    },
+    {
+      "path": "formal/EC2SecurityGroupRead.cfg",
+      "sha256": "8e1f699ef194ca3b9654909ba3c03b80e77ca207efcee2faf83d292565c5898e",
+      "disposition": "modeled",
+      "reason": "Finite domain and checked invariants for an atomic observation of the new read.",
+      "models": [
+        {
+          "id": "EC2SecurityGroupRead",
+          "properties": [
+            "OperationAdmission",
+            "AuthorizedRegionalRead",
+            "CanonicalGroup",
+            "CanonicalParent",
+            "CurrentIngress",
+            "FaithfulXML"
+          ],
+          "limits": "One symbolic atomic observation only; does not prove actual IAM parsing, SQLite snapshots, XML Code Points/serialization, quota, HTTP error shapes, TCP enforcement, full suite coverage, or Go refinement. Native tests cover the specific implementation contracts."
+        }
+      ]
+    },
+    {
+      "path": "formal/EC2SecurityGroupRead.tla",
+      "sha256": "d1e74e3f4870834d7c7faa114eaed2a80e6660c713a0363ac8cea197c0fa24a5",
+      "disposition": "modeled",
+      "reason": "Model witnesses for scope, typed lineage, canonical current rule provenance and XML-fidelity admission.",
+      "models": [
+        {
+          "id": "EC2SecurityGroupRead",
+          "properties": [
+            "OperationAdmission",
+            "AuthorizedRegionalRead",
+            "CanonicalGroup",
+            "CanonicalParent",
+            "CurrentIngress",
+            "FaithfulXML"
+          ],
+          "limits": "One symbolic atomic observation only; does not prove actual IAM parsing, SQLite snapshots, XML Code Points/serialization, quota, HTTP error shapes, TCP enforcement, full suite coverage, or Go refinement. Native tests cover the specific implementation contracts."
+        }
+      ]
+    },
+    {
+      "path": "formal/models.json",
+      "sha256": "5b6518b5c5fa4c6b181b595cd6833a4ef9c3822962cf7a47a5dc8d2fddd14c0c",
+      "disposition": "formal-infrastructure",
+      "reason": "Register and pin the new finite model scope, properties and exact sensitivity controls.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/ec2_describe_security_groups_contract_test.go",
+      "sha256": "be1f708d92db55ff9a27f5c5b3c35eec6a34a6273f9238886b0d536230aa3dc4",
       "disposition": "test-support",
-      "reason": "Opt-in isolated local development fixture and documentation only, with no production runtime or RDS transport change.",
+      "reason": "Exercise the native Gateway with real stored CloudFormation groups, exact XML, a current rule change, authorized regional reads and read-only refusal of lossy legacy text.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/ec2_read.go",
+      "sha256": "a577187645fa11a87035f1e316719774b28eb9f6a0d799c35c7149a0c1f61154",
+      "disposition": "modeled",
+      "reason": "Apply existing request scope and bound the regional selection to typed stack ownership before returning the projection.",
+      "models": [
+        {
+          "id": "EC2SecurityGroupRead",
+          "properties": [
+            "OperationAdmission",
+            "AuthorizedRegionalRead",
+            "CanonicalGroup"
+          ],
+          "limits": "One symbolic atomic observation only; does not prove actual IAM parsing, SQLite snapshots, XML Code Points/serialization, quota, HTTP error shapes, TCP enforcement, full suite coverage, or Go refinement. Native tests cover the specific implementation contracts."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/ec2_security_groups_read.go",
+      "sha256": "f57c7c5baaf7000e42dd3079bd3e2821fe1c08931d996c71957b4466c90ebd85",
+      "disposition": "modeled",
+      "reason": "Validate canonical parent/group storage and project only current valid TCP/IPv4 ingress and losslessly representable metadata.",
+      "models": [
+        {
+          "id": "EC2SecurityGroupRead",
+          "properties": [
+            "CanonicalGroup",
+            "CanonicalParent",
+            "CurrentIngress",
+            "FaithfulXML"
+          ],
+          "limits": "One symbolic atomic observation only; does not prove actual IAM parsing, SQLite snapshots, XML Code Points/serialization, quota, HTTP error shapes, TCP enforcement, full suite coverage, or Go refinement. Native tests cover the specific implementation contracts."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/ec2_vpc.go",
+      "sha256": "164e9a96ba800e68e2afca6de2e416eb94dcb655e3e9b371bd963d1f10e5dc0c",
+      "disposition": "modeled",
+      "reason": "Register the read action with the existing EC2 admission and IAM action lookup; no mutation capability added.",
+      "models": [
+        {
+          "id": "EC2SecurityGroupRead",
+          "properties": [
+            "OperationAdmission",
+            "AuthorizedRegionalRead"
+          ],
+          "limits": "One symbolic atomic observation only; does not prove actual IAM parsing, SQLite snapshots, XML Code Points/serialization, quota, HTTP error shapes, TCP enforcement, full suite coverage, or Go refinement. Native tests cover the specific implementation contracts."
+        }
+      ]
+    },
+    {
+      "path": "scripts/formal_model_gate.py",
+      "sha256": "dc55ebf45a1ffa5c6f548e6d7af8e4181497c5121b69c563bd3b678d614fd180",
+      "disposition": "formal-infrastructure",
+      "reason": "Register and pin the new finite model scope, properties and exact sensitivity controls.",
+      "models": []
+    },
+    {
+      "path": "scripts/test-formal-gate.py",
+      "sha256": "7f4ceebabb591b4032ba1f391c568cd4c1d149e00931854166564e6cabc8ef50",
+      "disposition": "formal-infrastructure",
+      "reason": "Extend exact independent registry expectations with the new model and two already-registered models omitted by the previous literal; no changes to their models or the equality assertion.",
       "models": []
     }
   ]
