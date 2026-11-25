@@ -177,6 +177,10 @@ func (c *OwnedPrivatePostgres) startCommitted(caller context.Context, r row) {
 }
 
 func (c *OwnedPrivatePostgres) current(ctx context.Context) bool {
+	return c.currentMatching(ctx, nil)
+}
+
+func (c *OwnedPrivatePostgres) currentMatching(ctx context.Context, match func(context.Context, *sql.Tx, RDSPrivatePostgresRefs) error) bool {
 	// This is a lookup-only transaction. Do not change query_only: the
 	// provider's SQLite connection must remain usable for fence release.
 	tx, err := c.engine.store.db.BeginTx(ctx, nil)
@@ -188,9 +192,16 @@ func (c *OwnedPrivatePostgres) current(ctx context.Context) bool {
 		return false
 	}
 	r, err := findARN(tx, "rds", c.key.arn)
-	return err == nil && generationOf(r) == c.key && r.Region == c.options.Region && r.ID == c.options.Identifier &&
-		privatePostgresShape(r) && validatePrivatePostgresRefs(ctx, tx, r, c.engine.cfg.ValidateRDSPrivatePostgres) == nil &&
-		tx.Commit() == nil
+	if err != nil || generationOf(r) != c.key || r.Region != c.options.Region || r.ID != c.options.Identifier || !privatePostgresShape(r) {
+		return false
+	}
+	check := func(ctx context.Context, tx *sql.Tx, refs RDSPrivatePostgresRefs) error {
+		if err := c.engine.cfg.ValidateRDSPrivatePostgres(ctx, tx, refs); err != nil || match == nil {
+			return err
+		}
+		return match(ctx, tx, refs)
+	}
+	return validatePrivatePostgresRefs(ctx, tx, r, check) == nil && tx.Commit() == nil
 }
 
 func (c *OwnedPrivatePostgres) currentLease(ctx context.Context, tx *sql.Tx) bool {
