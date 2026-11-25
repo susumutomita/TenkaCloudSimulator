@@ -93,7 +93,7 @@ console, CloudFormation adapter or Challenge integration.
   [Secrets Manager](docs/secrets-manager.md), [KMS](docs/kms.md), [WAFv2](docs/wafv2.md).
 - **Networking:** [EC2/VPC discovery and VPC create/delete](docs/ec2-read-discovery.md),
   [Elastic Load Balancing](docs/elb.md) (Lambda targets),
-  [CloudFront VPC origins](docs/cloudfront-vpc-origin.md), [Route 53](docs/route53.md).
+  [CloudFront VPC origins](docs/cloudfront-vpc-origin.md), [Route 53 public zones, including PTR reverse lookups](docs/route53.md).
 - **Scaling:** [Auto Scaling plans for local DynamoDB tables](docs/autoscaling-plans.md).
 - **Infrastructure:** [CloudFormation](docs/cloudformation-rest.md),
   [SSM value parameters](docs/cloudformation-ssm-parameters.md),
@@ -104,7 +104,7 @@ console, CloudFormation adapter or Challenge integration.
 - **Other clouds:** [Google Cloud Storage / Azure Blob Storage](docs/multicloud-storage.md),
   [Azure Blob conditional and CRC64 read limits](docs/azure-blob.md#single-range-download-subset),
   [App Engine (Python 3.12 WSGI versions, traffic splits, firewall)](docs/gcp-appengine.md),
-  [Cloud DNS (bounded zone and record changes, including SRV)](docs/acceptance/gcp-cloud-dns.md),
+  [Cloud DNS (bounded zone and record changes; Console SRV editor)](docs/acceptance/gcp-cloud-dns.md),
   [Google Cloud console](docs/gcp-console.md), [Azure console](docs/azure-console.md),
   [Azure Queue Storage (bounded named-queue operations)](docs/acceptance/azure-queue.md),
   [opt-in Sakura Disk metadata](docs/sakura.md).

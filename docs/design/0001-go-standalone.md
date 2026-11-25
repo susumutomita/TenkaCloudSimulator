@@ -26,7 +26,9 @@ CLI token authorityはoperatorと15分participantを区別し、participant iden
 
 SQLiteは既存のncruces SQLite/Wasm engineをGo process内で実行する。外部SQLite実行ファイルやWasm runtimeサービスは不要。有限quotaと接続数制限を維持し、実AWSの整合性/リージョン/アカウント/クォータ全体を再現しない。
 
-Protocol/API subsetと制限は[README](../../README.md)。限定的なGoogle Cloud Storage/Azure Blob Storageを独立providerとして接続し、認証済みActorから固定project/account所有者へ写像する。[Cloud DNS](../acceptance/gcp-cloud-dns.md) は同じproject所有者の範囲でSRVを含むRRsetの変更と参照を提供する。SRVの優先度・重み・ポートは保存するが、名前解決や接続先の選択は行わない。AWS IAMの権限を継承せず、owner-onlyローカル認可と公式SDKの検証範囲は[マルチクラウドストレージ](../multicloud-storage.md)に記す。旧Python world/deploy/grading protocolは復活させず、必要なSSM/CFNの知識だけGoへ移行。問題取り込み・採点はTenkaCloud/Challenge責務とする。
+[Route 53のPTRレコード](../route53.md)は、公開ゾーンのSQLiteに保存した名前をTestDNSAnswerで返す。外部DNSへの問い合わせや実IPアドレスの逆引き設定は行わない。
+
+Protocol/API subsetと制限は[README](../../README.md)。限定的なGoogle Cloud Storage/Azure Blob Storageを独立providerとして接続し、認証済みActorから固定project/account所有者へ写像する。[Cloud DNS](../acceptance/gcp-cloud-dns.md) は同じproject所有者の範囲でSRVを含むRRsetの変更と参照を提供する。所有者コンソールではSRVの追加・置換・削除を変更受領証と再読で確認する。SRVの優先度・重み・ポートは保存するが、名前解決や接続先の選択は行わない。AWS IAMの権限を継承せず、owner-onlyローカル認可と公式SDKの検証範囲は[マルチクラウドストレージ](../multicloud-storage.md)に記す。旧Python world/deploy/grading protocolは復活させず、必要なSSM/CFNの知識だけGoへ移行。問題取り込み・採点はTenkaCloud/Challenge責務とする。
 
 Azure Blobの通常APIは `2023-11-03` に固定する。BlobのGET/HEADでは単一の `If-Modified-Since` を扱い、通常のGETには有界の単一範囲CRC64がある。明示的にネゴシエートした `2025-01-05` のGet Blobだけで、最大4 MiBの単一セグメントを構造化CRC64として返す。共通のローカル所有者・読み取り条件を適用し、通常の範囲チェックサムヘッダーと併用しない。それ以外の同バージョン操作やSDK全体の互換性は対象外。[Azure Blobの条件付き読み取りとチェックサムの詳細](../azure-blob.md#single-range-download-subset)。
 
