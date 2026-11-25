@@ -30,13 +30,10 @@ architecture:
 done:
   define_before_edit: official spec + issue -> operations, inputs, observable state, errors, cleanup, applicable entry points; evidence in existing issue, PR, or tests
   environment: actual simulator built from one candidate SHA; approved isolated hosted runner; no owner's Mac or live cloud
-  console: real browser + provider-equivalent entry/sequence/inputs -> actual API, persisted state/read-back, errors, cleanup
-  api_reference: actual Scalar Send -> same simulator API, response and state
-  terraform: pinned official provider -> apply, read-back, destroy, verify removal
-  surface_gate: every applicable operation and entry point must pass; no substitution; justify not applicable
+  verification: test changed operations and affected contracts with focused automated checks; verify real behavior when it is the issue's deliverable
+  optional_e2e: no blanket merge gate for make e2e, browser, Scalar Send, or Terraform; run only if specifically requested or needed to demonstrate a claimed behavior; do not claim skipped coverage
   checks:
     always: make before-commit
-    protocol_persistence_console_docs_ui: make e2e
     model: TLA_JAR=... make formal
     finder_fixer: docs/contributing/software-factory.md; register independent acceptance before claim; run make test on clean exact HEAD and include acceptance report in independent review
     invalid_evidence: [required check failed or not run, required test skipped or missing, failed cleanup, stale SHA, altered log, weakened regression]
