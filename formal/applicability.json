@@ -1,2727 +1,477 @@
 {
+  "base_sha": "b55d5345a9ef292b12d1d52900cbc033c3828ccd",
   "version": 1,
-  "base_sha": "142888be7812c841f440f4d6b7f6c727f2adc0f8",
   "changes": [
     {
-      "path": "docs/aws-catalog-services.md",
-      "sha256": "d1cd665b9257f7e15f316f12274db953545547c6571438cecdfedcf352c0aee6",
+      "path": "README.md",
+      "sha256": "7eb9d079a4d670dc4b16d229bf4113d12e66169761ca813dba718e7c765d6278",
       "disposition": "documentation",
-      "reason": "Generated service table listing the newly added services with their bound operations and bounds.",
+      "reason": "Links the public Azure Blob read contract and limits; no runtime behavior changes.",
       "models": []
     },
     {
-      "path": "docs/aws-catalog.md",
-      "sha256": "928ec3c1583f1ed292f2a26b7a4f150e885981940b102f94a19a00991b463f18",
+      "path": "docs/acceptance/crossprovider-console.md",
+      "sha256": "5c32b7bc1255c0e21ed7d83f5aefc737195433203905c30ad5d7f7aa8a366510",
       "disposition": "documentation",
-      "reason": "Catalog guide: service count, protocols, the products served through the RDS API and fixture options.",
+      "reason": "Documents mandatory Chromium sandbox and distinguishes existing loopback guards from externally provisioned isolation and actual browser/SDK acceptance.",
       "models": []
     },
     {
-      "path": "docs/catalog-backlog-assessment.md",
-      "sha256": "b8a52fdd91297ec71c80499b569e1a53c978f8dc6f859119e323027b588e41f4",
+      "path": "docs/azure-blob.md",
+      "sha256": "56fdcaab0886a67e8fddec2a3eee7bb9587dac50af98e618414b2e9a6c0c098f",
       "disposition": "documentation",
-      "reason": "Per-product assessment of the unimplemented AWS backlog against the pinned models and the catalog vocabulary.",
+      "reason": "Documents bounded conditional, transactional and structured CRC64 read profiles and separates historical SDK evidence from the optional current-candidate fixture.",
       "models": []
     },
     {
-      "path": "formal/SARPolicyAuthorizationTarget.cfg",
-      "sha256": "1301d22587f6728e93ed3e41690cd077ef3ab3c9552fa917e2c48a8a6e7aa2cb",
+      "path": "docs/design/0001-go-standalone.md",
+      "sha256": "bc0126c6ba54d438fd1551dbeb80fe5d752a87d4e83cc38c7d1aed38e75cd0ba",
+      "disposition": "documentation",
+      "reason": "Describes the local Azure Blob read-profile and ownership boundary; no implementation proof.",
+      "models": []
+    },
+    {
+      "path": "docs/multicloud-storage.md",
+      "sha256": "d43fbe51f07ca814133f13e579a283dec38a49f56ca02c2aba60aa7f2c97e6f6",
+      "disposition": "documentation",
+      "reason": "Distinguishes the ordinary API version from the opt-in Get Blob profile.",
+      "models": []
+    },
+    {
+      "path": "formal/AzureBlobRowDownload.cfg",
+      "sha256": "be0a52279be40930d52a23c57f45adc9eb3254c8f3a93da661f305b213f7e9b8",
       "disposition": "modeled",
-      "reason": "The finite SAR application-policy target and refusal/legitimate effects check.",
+      "reason": "Model binds only the changed Azure row target, retirement epoch and successful payload publication.",
       "models": [
         {
-          "id": "SARPolicyAuthorizationTarget",
+          "id": "AzureBlobRowDownload",
           "properties": [
-            "ResolvedParentTarget",
-            "NoUnpermittedEffects",
-            "PermittedBehavior",
-            "ReadPreservesStoredPolicy"
+            "RowIsRequestTarget",
+            "CurrentDownloadOnly",
+            "SuccessfulBytesOnly"
           ],
-          "limits": "Finite receipt for one SAR Get/Put of saved local application-policy metadata. Existing parent ARN and private stored policy identity are symbolic distinct targets; decision assumes the existing identity-policy evaluator and a resolved application's ARN. Verifies the abstract selection, read/write refusal frames and legitimate permitted effects, not actual ARN parsing, resolution/native engine ordering, sibling or process concurrency, absence wire error distinctions, IAM evaluation, resource-sharing policies, API transport, database failures, SDK or concrete Go refinement. Native in-process tests separately observe exact Go IAM action/resource calls and unchanged state on refusal."
+          "limits": "Models explicit row identity versus toolbar selection, one in-flight operation, a bounded two-request epoch and view retirement, and only bounded successful abstract HTTP bytes may emit a download. Does not execute DNS, React/focus, the browser/anchor, URL/path mapping, authentication, HTTP or Blob bytes and does not establish implementation refinement. Generated app.js binding covers only Azure row download behavior introduced by this change."
         }
       ]
     },
     {
-      "path": "formal/SARPolicyAuthorizationTarget.tla",
-      "sha256": "7d0e81e7cec63fa3e0be763501141c0580c6b3db7218df5d50241b9e2e5b7bcd",
+      "path": "formal/AzureBlobRowDownload.tla",
+      "sha256": "61b0e7a64b5fee66ebee36d1394075739beccf7637ae02e1ceb93f4fe826c22f",
       "disposition": "modeled",
-      "reason": "The finite SAR application-policy target and refusal/legitimate effects check.",
+      "reason": "Model binds only the changed Azure row target, retirement epoch and successful payload publication.",
       "models": [
         {
-          "id": "SARPolicyAuthorizationTarget",
+          "id": "AzureBlobRowDownload",
           "properties": [
-            "ResolvedParentTarget",
-            "NoUnpermittedEffects",
-            "PermittedBehavior",
-            "ReadPreservesStoredPolicy"
+            "RowIsRequestTarget",
+            "CurrentDownloadOnly",
+            "SuccessfulBytesOnly"
           ],
-          "limits": "Finite receipt for one SAR Get/Put of saved local application-policy metadata. Existing parent ARN and private stored policy identity are symbolic distinct targets; decision assumes the existing identity-policy evaluator and a resolved application's ARN. Verifies the abstract selection, read/write refusal frames and legitimate permitted effects, not actual ARN parsing, resolution/native engine ordering, sibling or process concurrency, absence wire error distinctions, IAM evaluation, resource-sharing policies, API transport, database failures, SDK or concrete Go refinement. Native in-process tests separately observe exact Go IAM action/resource calls and unchanged state on refusal."
+          "limits": "Models explicit row identity versus toolbar selection, one in-flight operation, a bounded two-request epoch and view retirement, and only bounded successful abstract HTTP bytes may emit a download. Does not execute DNS, React/focus, the browser/anchor, URL/path mapping, authentication, HTTP or Blob bytes and does not establish implementation refinement. Generated app.js binding covers only Azure row download behavior introduced by this change."
+        }
+      ]
+    },
+    {
+      "path": "formal/AzureConditionalCRCRead.cfg",
+      "sha256": "739c2dc1420d7eeb809fc4d029b78b36702ee3f57e6b4787924d552098afebd2",
+      "disposition": "modeled",
+      "reason": "Config exhausts the finite spec and runs every declared invariant for baseline and all registered sensitivity controls.",
+      "models": [
+        {
+          "id": "AzureConditionalCRCRead",
+          "properties": [
+            "DeniedBeforeOptions",
+            "OptionsBeforeLookup",
+            "MissingBeforeDate",
+            "CacheHitHasNoPartialOutput",
+            "EligibleSelectedCRC",
+            "CRCRejectsOversize",
+            "CRCEmitsOnlyWhenRequested"
+          ],
+          "limits": "Bounded symbolic normalized GET; no Go/SQLite refinement, real authentication, HTTP wire, or exact hash arithmetic."
+        }
+      ]
+    },
+    {
+      "path": "formal/AzureConditionalCRCRead.tla",
+      "sha256": "47ce960aa0460bfd82f2fca83a3b4fdae89b7d038b79df281026bf500d0dab75",
+      "disposition": "modeled",
+      "reason": "Makes the conditional read decision and symbolic response shape explicit under bounded inputs.",
+      "models": [
+        {
+          "id": "AzureConditionalCRCRead",
+          "properties": [
+            "DeniedBeforeOptions",
+            "OptionsBeforeLookup",
+            "MissingBeforeDate",
+            "CacheHitHasNoPartialOutput",
+            "EligibleSelectedCRC",
+            "CRCRejectsOversize",
+            "CRCEmitsOnlyWhenRequested"
+          ],
+          "limits": "Bounded symbolic normalized GET; no Go/SQLite refinement, real authentication, HTTP wire, or exact hash arithmetic."
+        }
+      ]
+    },
+    {
+      "path": "formal/AzureStructuredReadAdmission.cfg",
+      "sha256": "14efddf687d54dab5383d487b30813477e1814f305b9af9d28681a2eadff095a",
+      "disposition": "modeled",
+      "reason": "Bounded state-based check for native structured read framing and isolation from legacy dispatch.",
+      "models": [
+        {
+          "id": "AzureStructuredReadAdmission",
+          "properties": [
+            "ExactNegotiation",
+            "LegacyIsUnchanged",
+            "DeniedOrConditionalIsQuiet",
+            "LargeReadsAreQuiet",
+            "FullHasNoRangeMetadata",
+            "RangeHasRangeMetadata"
+          ],
+          "limits": "Bounded structured transport admission and response-frame abstraction for the local 2025-01-05 explicit Get Blob profile. Legacy dispatch is opaque; prior conditional CRC64 model covers its declared subset. Abstract admitted native outcomes, relative size and stored-MD5 header eligibility (assuming the digest exists), not real actor authorization or conditions, physical lengths, HTTP/error XML serialization, byte exact CRC64/MD5, storage atomicity, Go refinement, SDK or browser execution, full API parity, concurrency or multi-segment streams. Quiet means no encoded blob body or structured/range response headers, not no native error XML."
+        }
+      ]
+    },
+    {
+      "path": "formal/AzureStructuredReadAdmission.tla",
+      "sha256": "488f0c8c271b411c4a228110ec7af5d674c36a7a6941c50bd1b0d372319aad0a",
+      "disposition": "modeled",
+      "reason": "Bounded state-based check for native structured read framing and isolation from legacy dispatch.",
+      "models": [
+        {
+          "id": "AzureStructuredReadAdmission",
+          "properties": [
+            "ExactNegotiation",
+            "LegacyIsUnchanged",
+            "DeniedOrConditionalIsQuiet",
+            "LargeReadsAreQuiet",
+            "FullHasNoRangeMetadata",
+            "RangeHasRangeMetadata"
+          ],
+          "limits": "Bounded structured transport admission and response-frame abstraction for the local 2025-01-05 explicit Get Blob profile. Legacy dispatch is opaque; prior conditional CRC64 model covers its declared subset. Abstract admitted native outcomes, relative size and stored-MD5 header eligibility (assuming the digest exists), not real actor authorization or conditions, physical lengths, HTTP/error XML serialization, byte exact CRC64/MD5, storage atomicity, Go refinement, SDK or browser execution, full API parity, concurrency or multi-segment streams. Quiet means no encoded blob body or structured/range response headers, not no native error XML."
         }
       ]
     },
     {
       "path": "formal/models.json",
-      "sha256": "3f37fd38e4f6c5a0a41e62e42ff03ee5ab54ec2bc78623a0ad183ba109e27d03",
+      "sha256": "350e84e2801cd7acbce3af5c90fe716046258393b40ab444e94ab9ac665d0965",
       "disposition": "formal-infrastructure",
-      "reason": "Preserves all main model registrations including the four SimpleDB models; adds catalog source paths and the bounded SAR policy authorization target model without changing existing lifecycle model limits.",
+      "reason": "Preserves all current main registrations including SimpleDB and merged catalog/SAR coverage, and retains the three bounded Azure read admission, CRC64 conditional read and row-download models.",
       "models": []
     },
     {
-      "path": "internal/aws/catalog/aiops_topic_contract_test.go",
-      "sha256": "ad4c1cb67eb1a03807f3dc12af4e3e71def4ec6e83b6006398e92f9815f9396c",
-      "disposition": "test-support",
-      "reason": "AiOps stored SNS topic identifier format and invalid create/update refusal.",
-      "models": []
-    },
-    {
-      "path": "internal/aws/catalog/b2bi_partnership_capability_contract_test.go",
-      "sha256": "e736c2cddf95fb3d85330c28f47905178213edf1083572ea1d17f1c8b2554985",
-      "disposition": "test-support",
-      "reason": "B2BI Partnership request regression: nonempty capabilities and preservation on refused mutations.",
-      "models": []
-    },
-    {
-      "path": "internal/aws/catalog/billing_request_contract_test.go",
-      "sha256": "671930c9a45c50bf42949fba59f5cd112e7bc2e90a40ce0390a5981ccdfea5d7",
-      "disposition": "test-support",
-      "reason": "Cost Category month-start and Data Exports SELECT boundary regression, including no partial mutation.",
-      "models": []
-    },
-    {
-      "path": "internal/aws/catalog/braket_device_contract_test.go",
-      "sha256": "9686cca429b2e47fdbc1e9afdc72cc495d835b973a51110e94d906adb04341a0",
-      "disposition": "test-support",
-      "reason": "Braket spending limit device ARN boundary and refusal without storage mutation.",
-      "models": []
-    },
-    {
-      "path": "internal/aws/catalog/chime_identity_metadata_contract_test.go",
-      "sha256": "bd75696933827474c5ee2db520f6a137906733453c3c8bc8fef3a6687adfbf98",
-      "disposition": "test-support",
-      "reason": "Chime SDK Identity CreateAppInstance UTF-8 metadata boundary and no-write refusal regression.",
-      "models": []
-    },
-    {
-      "path": "internal/aws/catalog/cleanrooms_methods_contract_test.go",
-      "sha256": "ab7b6ea59ef7bdee99fae56b3091e9ff38e3ccba783e5517319de7be38197e31",
-      "disposition": "test-support",
-      "reason": "Clean Rooms distinct analysis method selection and refusal without partial mutation.",
-      "models": []
-    },
-    {
-      "path": "internal/aws/catalog/describe.go",
-      "sha256": "bb95e6923075c11126387ae8aed26700a009729ab67a4b4f826205db1a7f6e2f",
+      "path": "internal/azure/blob/http.go",
+      "sha256": "6eca4fe7981af860977e9a2afa86f9665fa11de154d6a36324cd871528db5f60",
       "disposition": "modeled",
-      "reason": "Catalog engine vocabulary extended for the newly served services; requests still pass through the shared validated execution path and refusals leave state unchanged.",
+      "reason": "Owner admission precedes normalized checksum option validation; cache status maps to a response without partial payload or checksum headers. Structured transport is an additional opt-in only, with separate scoped bindings.",
       "models": [
         {
-          "id": "CatalogResourceLifecycle",
+          "id": "AzureConditionalCRCRead",
           "properties": [
-            "AuthorizationFirst",
-            "FailureFrame",
-            "PeerFrame"
+            "DeniedBeforeOptions",
+            "OptionsBeforeLookup",
+            "CacheHitHasNoPartialOutput",
+            "EligibleSelectedCRC",
+            "CRCEmitsOnlyWhenRequested"
           ],
-          "limits": "Finite store-level model of catalog resources: authorization order, replay, quotas, names, generations, child guards and pagination tokens. Wire decoding and encoding, descriptor projection, reference generation and the service-specific rules in specification check hooks are outside the model and are checked by native tests and the boto3 end-to-end fixtures."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/catalog/emr_image_contract_test.go",
-      "sha256": "3d70b8d83f0950405c0622ce381c628a66d393be54fd4321c571dcc1055fc044",
-      "disposition": "test-support",
-      "reason": "EMR Serverless same-request global and worker image conflict and refusal without mutation.",
-      "models": []
-    },
-    {
-      "path": "internal/aws/catalog/engine.go",
-      "sha256": "04c703b4cc3a33214eb7f3c95979ce490f9277d482e73596d66966a31b3a104c",
-      "disposition": "modeled",
-      "reason": "Catalog engine vocabulary extended for the newly served services; requests still pass through the shared validated execution path and refusals leave state unchanged. The exact parent authorization option is restricted to Read/Put with a declared parent and parent input.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "FailureFrame",
-            "PeerFrame"
-          ],
-          "limits": "Finite store-level model of catalog resources: authorization order, replay, quotas, names, generations, child guards and pagination tokens. Wire decoding and encoding, descriptor projection, reference generation and the service-specific rules in specification check hooks are outside the model and are checked by native tests and the boto3 end-to-end fixtures."
+          "limits": "Only bounded admitted GET sequencing and symbolic output. Header parsing, transport authentication, response bytes and other operations are not modeled."
         },
         {
-          "id": "SARPolicyAuthorizationTarget",
+          "id": "AzureStructuredReadAdmission",
           "properties": [
-            "ResolvedParentTarget",
-            "NoUnpermittedEffects",
-            "PermittedBehavior",
-            "ReadPreservesStoredPolicy"
+            "ExactNegotiation",
+            "LegacyIsUnchanged",
+            "DeniedOrConditionalIsQuiet",
+            "LargeReadsAreQuiet",
+            "FullHasNoRangeMetadata",
+            "RangeHasRangeMetadata"
           ],
-          "limits": "Finite receipt for one SAR Get/Put of saved local application-policy metadata. Existing parent ARN and private stored policy identity are symbolic distinct targets; decision assumes the existing identity-policy evaluator and a resolved application's ARN. Verifies the abstract selection, read/write refusal frames and legitimate permitted effects, not actual ARN parsing, resolution/native engine ordering, sibling or process concurrency, absence wire error distinctions, IAM evaluation, resource-sharing policies, API transport, database failures, SDK or concrete Go refinement. Native in-process tests separately observe exact Go IAM action/resource calls and unchanged state on refusal."
+          "limits": "Bounded structured transport admission and response-frame abstraction for the local 2025-01-05 explicit Get Blob profile. Legacy dispatch is opaque; prior conditional CRC64 model covers its declared subset. Abstract admitted native outcomes, relative size and stored-MD5 header eligibility (assuming the digest exists), not real actor authorization or conditions, physical lengths, HTTP/error XML serialization, byte exact CRC64/MD5, storage atomicity, Go refinement, SDK or browser execution, full API parity, concurrency or multi-segment streams. Quiet means no encoded blob body or structured/range response headers, not no native error XML."
         }
       ]
     },
     {
-      "path": "internal/aws/catalog/ivs_rendition_contract_test.go",
-      "sha256": "4c94ace23a69378e27131ed46bbef1b0eddb436ce340ea745ce81696d3d44699",
+      "path": "internal/azure/blob/http_boundaries_test.go",
+      "sha256": "d2e7e7c713269bb807934d62623ccc6128f1ebe609717be99e1c131e38a0202c",
       "disposition": "test-support",
-      "reason": "IVS CUSTOM rendition selection requires a nonempty rendition list and must refuse invalid writes without persistence.",
+      "reason": "Native rejection table now uses still unsupported If-Unmodified-Since; this parser refusal is outside the normalized model.",
       "models": []
     },
     {
-      "path": "internal/aws/catalog/media_ipv4_contract_test.go",
-      "sha256": "35b12681b9f11df5f99798df7c00ca74ac4f81c6ebff6957595dc7f00bd95e2c",
+      "path": "internal/azure/blob/range.go",
+      "sha256": "5c7d58a507fd07fc1ad227825ea1fc8cc7878fb12e12cbe76bf6c551f1fe493d",
+      "disposition": "modeled",
+      "reason": "Option admission and cap gate select bounded range CRC64 before emitting checksum metadata; modeled output requires an eligible selected range.",
+      "models": [
+        {
+          "id": "AzureConditionalCRCRead",
+          "properties": [
+            "OptionsBeforeLookup",
+            "EligibleSelectedCRC",
+            "CRCRejectsOversize",
+            "CRCEmitsOnlyWhenRequested"
+          ],
+          "limits": "Only response kind and header presence; no CRC64/MD5 bytes, range parser, length arithmetic, or corrupt storage handling."
+        }
+      ]
+    },
+    {
+      "path": "internal/azure/blob/range_crc64_test.go",
+      "sha256": "6f70e836df568fe7940d0b5d5e86f8b95680067560d9627c85ee182c63c36172",
+      "disposition": "modeled",
+      "reason": "Native unauthorized malformed and authorized missing-object requests distinguish admission from lookup; successful, oversized and unrequested reads witness CRC64 guards.",
+      "models": [
+        {
+          "id": "AzureConditionalCRCRead",
+          "properties": [
+            "DeniedBeforeOptions",
+            "OptionsBeforeLookup",
+            "EligibleSelectedCRC",
+            "CRCRejectsOversize",
+            "CRCEmitsOnlyWhenRequested"
+          ],
+          "limits": "Only response kind and header presence; no CRC64/MD5 bytes, range parser, length arithmetic, or corrupt storage handling."
+        }
+      ]
+    },
+    {
+      "path": "internal/azure/blob/range_integrity_test.go",
+      "sha256": "0fbc1813c6b6ed3b5dc9d44f19f9e54997e123a836c8e5650c44b89101c25981",
       "disposition": "test-support",
-      "reason": "MediaConnect and MediaLive reject IPv4-mapped IPv6 in explicitly IPv4 CIDR inputs without changing other persisted values.",
+      "reason": "Independent native damaged-stored-checksum invariant and refusal checks; malformed storage is outside these bounded models.",
       "models": []
     },
     {
-      "path": "internal/aws/catalog/models/aiops.json",
-      "sha256": "e2c28e05167bcaf67df57b951832187e07f796d5b53206a6fb73e91519dfab22",
+      "path": "internal/azure/blob/range_test.go",
+      "sha256": "6afe865e749b259987a8a3cd12c205571b6863bfc9f73dba8ad2c42a295b124a",
       "disposition": "modeled",
-      "reason": "Documentation-free subset of the pinned botocore 1.41.6 aiops model for the reviewed operations; bound operations run through the catalog store.",
+      "reason": "Retains modeled non-disclosure, nonmutation, conditional gating and distinct partial/full response assertions while adding native whole-object MD5 header checks.",
       "models": [
         {
-          "id": "CatalogResourceLifecycle",
+          "id": "BlobRange",
           "properties": [
-            "AuthorizationFirst",
-            "FailureFrame"
+            "Frame",
+            "DeniedNoDisclosure",
+            "ConditionBeforeRange",
+            "ExactSelectedBytes",
+            "NoFullMD5OnPartial"
           ],
-          "limits": "Finite store-level model of catalog resources: authorization order, replay, quotas, names, generations, child guards and pagination tokens. Wire decoding and encoding, descriptor projection, reference generation and the service-specific rules in specification check hooks are outside the model and are checked by native tests and the boto3 end-to-end fixtures."
+          "limits": "The separate x-ms-blob-content-md5 HTTP header and checksum bytes are native assertions, not properties of BlobRange."
         }
       ]
     },
     {
-      "path": "internal/aws/catalog/models/appflow.json",
-      "sha256": "29545efd08e2573044764255862ec418216831b698e7afdbd9029077c52b739a",
+      "path": "internal/azure/blob/read_time_condition_test.go",
+      "sha256": "844bffc2daa170bacb004e06d76709e68b559d19d69cfc80639055f5dcf5b01d",
       "disposition": "modeled",
-      "reason": "Documentation-free subset of the pinned botocore 1.41.6 appflow model for the reviewed operations; bound operations run through the catalog store.",
+      "reason": "Native equal/newer date GET regressions distinguish cache hit from a payload-bearing result and assert the no-payload behavior.",
       "models": [
         {
-          "id": "CatalogResourceLifecycle",
+          "id": "AzureConditionalCRCRead",
           "properties": [
-            "AuthorizationFirst",
-            "FailureFrame"
+            "CacheHitHasNoPartialOutput"
           ],
-          "limits": "Finite store-level model of catalog resources: authorization order, replay, quotas, names, generations, child guards and pagination tokens. Wire decoding and encoding, descriptor projection, reference generation and the service-specific rules in specification check hooks are outside the model and are checked by native tests and the boto3 end-to-end fixtures."
+          "limits": "Only date ordering relative to stored Last-Modified; no timestamp parser, other validator combinations, or complete wire behavior."
         }
       ]
     },
     {
-      "path": "internal/aws/catalog/models/artifact.json",
-      "sha256": "9d626f11e60164f390329583ef6cc1383245aa048a4388b9a9f050dcfcd08d59",
+      "path": "internal/azure/blob/read_time_range_checksum_test.go",
+      "sha256": "3cd63467436f250e362056c6b4e0bb3b8e33f16fb610b1046493ed50204fb575",
       "disposition": "modeled",
-      "reason": "Documentation-free subset of the pinned botocore 1.41.6 artifact model for the reviewed operations; bound operations run through the catalog store.",
+      "reason": "Native composed date/range requests distinguish cache-hit no-partial metadata from a selected CRC result.",
       "models": [
         {
-          "id": "CatalogResourceLifecycle",
+          "id": "AzureConditionalCRCRead",
           "properties": [
-            "AuthorizationFirst",
-            "FailureFrame"
+            "CacheHitHasNoPartialOutput",
+            "EligibleSelectedCRC"
           ],
-          "limits": "Finite store-level model of catalog resources: authorization order, replay, quotas, names, generations, child guards and pagination tokens. Wire decoding and encoding, descriptor projection, reference generation and the service-specific rules in specification check hooks are outside the model and are checked by native tests and the boto3 end-to-end fixtures."
+          "limits": "Bounded symbolic normalized GET; no Go/SQLite refinement, real authentication, HTTP wire, or exact hash arithmetic."
         }
       ]
     },
     {
-      "path": "internal/aws/catalog/models/autoscaling.json",
-      "sha256": "f9cf60ee17bb53a0865b40664393ca1594cc417c249037fc5e4630462c84003b",
+      "path": "internal/azure/blob/store.go",
+      "sha256": "4e39d72c444cf819150ef953d857fe90fdfd86d4133930c5cc151b80bf3a38d6",
       "disposition": "modeled",
-      "reason": "Documentation-free subset of the pinned botocore 1.41.6 autoscaling model for the reviewed operations; bound operations run through the catalog store.",
+      "reason": "Existing object lookup must succeed before date-based suppression, which in turn precedes range-result production.",
       "models": [
         {
-          "id": "CatalogResourceLifecycle",
+          "id": "AzureConditionalCRCRead",
           "properties": [
-            "AuthorizationFirst",
-            "FailureFrame"
+            "MissingBeforeDate",
+            "CacheHitHasNoPartialOutput",
+            "EligibleSelectedCRC"
           ],
-          "limits": "Finite store-level model of catalog resources: authorization order, replay, quotas, names, generations, child guards and pagination tokens. Wire decoding and encoding, descriptor projection, reference generation and the service-specific rules in specification check hooks are outside the model and are checked by native tests and the boto3 end-to-end fixtures."
+          "limits": "Only existence/date/output decision over symbolic storage. No SQL atomicity, corruption handling, snapshot, checksum bytes or relation across concurrent requests."
         }
       ]
     },
     {
-      "path": "internal/aws/catalog/models/b2bi.json",
-      "sha256": "3ea59c11b155ddeccf0e01c12bf30b549d8898ec1a2f0416940cc90f8225301b",
+      "path": "internal/azure/blob/structured_crc64.go",
+      "sha256": "c57fbb377300edf6cfbedb2083bd2fb492f1ce72f0c9ee092bc07489be071233",
       "disposition": "modeled",
-      "reason": "Documentation-free subset of the pinned botocore 1.41.6 b2bi model for the reviewed operations; bound operations run through the catalog store.",
+      "reason": "Only bounded one-segment output and absence on refusals are abstracted; CRC arithmetic and wire bytes are verified separately by focused Go tests.",
       "models": [
         {
-          "id": "CatalogResourceLifecycle",
+          "id": "AzureStructuredReadAdmission",
           "properties": [
-            "AuthorizationFirst",
-            "FailureFrame"
+            "LargeReadsAreQuiet",
+            "FullHasNoRangeMetadata",
+            "RangeHasRangeMetadata"
           ],
-          "limits": "Finite store-level model of catalog resources: authorization order, replay, quotas, names, generations, child guards and pagination tokens. Wire decoding and encoding, descriptor projection, reference generation and the service-specific rules in specification check hooks are outside the model and are checked by native tests and the boto3 end-to-end fixtures."
+          "limits": "Bounded structured transport admission and response-frame abstraction for the local 2025-01-05 explicit Get Blob profile. Legacy dispatch is opaque; prior conditional CRC64 model covers its declared subset. Abstract admitted native outcomes, relative size and stored-MD5 header eligibility (assuming the digest exists), not real actor authorization or conditions, physical lengths, HTTP/error XML serialization, byte exact CRC64/MD5, storage atomicity, Go refinement, SDK or browser execution, full API parity, concurrency or multi-segment streams. Quiet means no encoded blob body or structured/range response headers, not no native error XML."
         }
       ]
     },
     {
-      "path": "internal/aws/catalog/models/batch.json",
-      "sha256": "7eac50a37bdefc810c17a37e6dd10ac11883384db57dc34f9a3631046585dcff",
-      "disposition": "modeled",
-      "reason": "Documentation-free subset of the pinned botocore 1.41.6 batch model for the reviewed operations; bound operations run through the catalog store.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "FailureFrame"
-          ],
-          "limits": "Finite store-level model of catalog resources: authorization order, replay, quotas, names, generations, child guards and pagination tokens. Wire decoding and encoding, descriptor projection, reference generation and the service-specific rules in specification check hooks are outside the model and are checked by native tests and the boto3 end-to-end fixtures."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/catalog/models/bcm-data-exports.json",
-      "sha256": "13ffcc3395423df076147154392344f81159174b100be52030d3e9831ee759ab",
-      "disposition": "modeled",
-      "reason": "Documentation-free subset of the pinned botocore 1.41.6 bcm-data-exports model for the reviewed operations; bound operations run through the catalog store.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "FailureFrame"
-          ],
-          "limits": "Finite store-level model of catalog resources: authorization order, replay, quotas, names, generations, child guards and pagination tokens. Wire decoding and encoding, descriptor projection, reference generation and the service-specific rules in specification check hooks are outside the model and are checked by native tests and the boto3 end-to-end fixtures."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/catalog/models/braket.json",
-      "sha256": "e45baaa5f2782e67fa2fdc07cfb560690078bc687c92b9cfdd98be78a39d5ea8",
-      "disposition": "modeled",
-      "reason": "Documentation-free subset of the pinned botocore 1.41.6 braket model for the reviewed operations; bound operations run through the catalog store.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "FailureFrame"
-          ],
-          "limits": "Finite store-level model of catalog resources: authorization order, replay, quotas, names, generations, child guards and pagination tokens. Wire decoding and encoding, descriptor projection, reference generation and the service-specific rules in specification check hooks are outside the model and are checked by native tests and the boto3 end-to-end fixtures."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/catalog/models/ce.json",
-      "sha256": "da856899e8014b91a1a832e3440e5f00c01c475dc5d71b18471d8158ed8c8907",
-      "disposition": "modeled",
-      "reason": "Documentation-free subset of the pinned botocore 1.41.6 ce model for the reviewed operations; bound operations run through the catalog store.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "FailureFrame"
-          ],
-          "limits": "Finite store-level model of catalog resources: authorization order, replay, quotas, names, generations, child guards and pagination tokens. Wire decoding and encoding, descriptor projection, reference generation and the service-specific rules in specification check hooks are outside the model and are checked by native tests and the boto3 end-to-end fixtures."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/catalog/models/chime-sdk-identity.json",
-      "sha256": "e83fa844566335aeb8e9a57188aafaa233dd1d53a3b5feda18a6db48412557cc",
-      "disposition": "modeled",
-      "reason": "Documentation-free subset of the pinned botocore 1.41.6 chime-sdk-identity model for the reviewed operations; bound operations run through the catalog store.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "FailureFrame"
-          ],
-          "limits": "Finite store-level model of catalog resources: authorization order, replay, quotas, names, generations, child guards and pagination tokens. Wire decoding and encoding, descriptor projection, reference generation and the service-specific rules in specification check hooks are outside the model and are checked by native tests and the boto3 end-to-end fixtures."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/catalog/models/chime-sdk-media-pipelines.json",
-      "sha256": "910bc5438ab0ae96d767f2b2f46b918008bf7b9ef507a533b58122147c10fe86",
-      "disposition": "modeled",
-      "reason": "Documentation-free subset of the pinned botocore 1.41.6 chime-sdk-media-pipelines model for the reviewed operations; bound operations run through the catalog store.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "FailureFrame"
-          ],
-          "limits": "Finite store-level model of catalog resources: authorization order, replay, quotas, names, generations, child guards and pagination tokens. Wire decoding and encoding, descriptor projection, reference generation and the service-specific rules in specification check hooks are outside the model and are checked by native tests and the boto3 end-to-end fixtures."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/catalog/models/chime-sdk-voice.json",
-      "sha256": "ca47318b92a855230233e190138b4567ad738cd4400c80f8869f98cdcca233b3",
-      "disposition": "modeled",
-      "reason": "Documentation-free subset of the pinned botocore 1.41.6 chime-sdk-voice model for the reviewed operations; bound operations run through the catalog store.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "FailureFrame"
-          ],
-          "limits": "Finite store-level model of catalog resources: authorization order, replay, quotas, names, generations, child guards and pagination tokens. Wire decoding and encoding, descriptor projection, reference generation and the service-specific rules in specification check hooks are outside the model and are checked by native tests and the boto3 end-to-end fixtures."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/catalog/models/cleanrooms.json",
-      "sha256": "5c13cd781815ab91d842ece557b135c672869a88b02351636e0a7ae9b0eaa984",
-      "disposition": "modeled",
-      "reason": "Documentation-free subset of the pinned botocore 1.41.6 cleanrooms model for the reviewed operations; bound operations run through the catalog store.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "FailureFrame"
-          ],
-          "limits": "Finite store-level model of catalog resources: authorization order, replay, quotas, names, generations, child guards and pagination tokens. Wire decoding and encoding, descriptor projection, reference generation and the service-specific rules in specification check hooks are outside the model and are checked by native tests and the boto3 end-to-end fixtures."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/catalog/models/cleanroomsml.json",
-      "sha256": "3e62653942e9e8a3d723665c13ef109b778e789d0a4dd327fae8cbaa332e38db",
-      "disposition": "modeled",
-      "reason": "Documentation-free subset of the pinned botocore 1.41.6 cleanroomsml model for the reviewed operations; bound operations run through the catalog store.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "FailureFrame"
-          ],
-          "limits": "Finite store-level model of catalog resources: authorization order, replay, quotas, names, generations, child guards and pagination tokens. Wire decoding and encoding, descriptor projection, reference generation and the service-specific rules in specification check hooks are outside the model and are checked by native tests and the boto3 end-to-end fixtures."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/catalog/models/cloudsearch.json",
-      "sha256": "2d3dead2e4d0157c9df1bedb7318caccbb83eaae1b9bca72b133feac75091a7d",
-      "disposition": "modeled",
-      "reason": "Documentation-free subset of the pinned botocore 1.41.6 cloudsearch model for the reviewed operations; bound operations run through the catalog store.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "FailureFrame"
-          ],
-          "limits": "Finite store-level model of catalog resources: authorization order, replay, quotas, names, generations, child guards and pagination tokens. Wire decoding and encoding, descriptor projection, reference generation and the service-specific rules in specification check hooks are outside the model and are checked by native tests and the boto3 end-to-end fixtures."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/catalog/models/codeguruprofiler.json",
-      "sha256": "31f6238785d5336ee5397a86db6456335872e0186ffbc7a09ba4a009180b86e9",
-      "disposition": "modeled",
-      "reason": "Documentation-free subset of the pinned botocore 1.41.6 codeguruprofiler model for the reviewed operations; bound operations run through the catalog store.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "FailureFrame"
-          ],
-          "limits": "Finite store-level model of catalog resources: authorization order, replay, quotas, names, generations, child guards and pagination tokens. Wire decoding and encoding, descriptor projection, reference generation and the service-specific rules in specification check hooks are outside the model and are checked by native tests and the boto3 end-to-end fixtures."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/catalog/models/connect.json",
-      "sha256": "cc3df357f489811130968cd697a0eead9cf721b4110881bee539e391367ac548",
-      "disposition": "modeled",
-      "reason": "Documentation-free subset of the pinned botocore 1.41.6 connect model for the reviewed operations; bound operations run through the catalog store.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "FailureFrame"
-          ],
-          "limits": "Finite store-level model of catalog resources: authorization order, replay, quotas, names, generations, child guards and pagination tokens. Wire decoding and encoding, descriptor projection, reference generation and the service-specific rules in specification check hooks are outside the model and are checked by native tests and the boto3 end-to-end fixtures."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/catalog/models/datazone.json",
-      "sha256": "dab1b7ede04d5f7547dc22ff5724c93982cef0ededaa06b36522b77a233301a5",
-      "disposition": "modeled",
-      "reason": "Documentation-free subset of the pinned botocore 1.41.6 datazone model for the reviewed operations; bound operations run through the catalog store.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "FailureFrame"
-          ],
-          "limits": "Finite store-level model of catalog resources: authorization order, replay, quotas, names, generations, child guards and pagination tokens. Wire decoding and encoding, descriptor projection, reference generation and the service-specific rules in specification check hooks are outside the model and are checked by native tests and the boto3 end-to-end fixtures."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/catalog/models/deadline.json",
-      "sha256": "c19f9e19510fb7fc49119aa5ab6016c108f139de89211c1f701a6d114c84295d",
-      "disposition": "modeled",
-      "reason": "Documentation-free subset of the pinned botocore 1.41.6 deadline model for the reviewed operations; bound operations run through the catalog store.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "FailureFrame"
-          ],
-          "limits": "Finite store-level model of catalog resources: authorization order, replay, quotas, names, generations, child guards and pagination tokens. Wire decoding and encoding, descriptor projection, reference generation and the service-specific rules in specification check hooks are outside the model and are checked by native tests and the boto3 end-to-end fixtures."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/catalog/models/directconnect.json",
-      "sha256": "5e9cf21f0f93246a0361f92c2e38d1872e55dfe32fd6a406c3cda53038b31202",
-      "disposition": "modeled",
-      "reason": "Documentation-free subset of the pinned botocore 1.41.6 directconnect model for the reviewed operations; bound operations run through the catalog store.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "FailureFrame"
-          ],
-          "limits": "Finite store-level model of catalog resources: authorization order, replay, quotas, names, generations, child guards and pagination tokens. Wire decoding and encoding, descriptor projection, reference generation and the service-specific rules in specification check hooks are outside the model and are checked by native tests and the boto3 end-to-end fixtures."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/catalog/models/dms.json",
-      "sha256": "202af3e828094ac53f6f67d396d9e41e7dda1375062f549cad9e7f917e51391c",
-      "disposition": "modeled",
-      "reason": "Documentation-free subset of the pinned botocore 1.41.6 dms model for the reviewed operations; bound operations run through the catalog store.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "FailureFrame"
-          ],
-          "limits": "Finite store-level model of catalog resources: authorization order, replay, quotas, names, generations, child guards and pagination tokens. Wire decoding and encoding, descriptor projection, reference generation and the service-specific rules in specification check hooks are outside the model and are checked by native tests and the boto3 end-to-end fixtures."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/catalog/models/drs.json",
-      "sha256": "b72394ec836c72d851bc99ea4ac8b459cc932c94593ca742133c5bad925d4571",
-      "disposition": "modeled",
-      "reason": "Documentation-free subset of the pinned botocore 1.41.6 drs model for the reviewed operations; bound operations run through the catalog store.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "FailureFrame"
-          ],
-          "limits": "Finite store-level model of catalog resources: authorization order, replay, quotas, names, generations, child guards and pagination tokens. Wire decoding and encoding, descriptor projection, reference generation and the service-specific rules in specification check hooks are outside the model and are checked by native tests and the boto3 end-to-end fixtures."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/catalog/models/elasticache.json",
-      "sha256": "87ceddf15d4cf1b9605fb4f33644a9559fef3396c52b2eba9c46e551b4548d9f",
-      "disposition": "modeled",
-      "reason": "Documentation-free subset of the pinned botocore 1.41.6 elasticache model for the reviewed operations; bound operations run through the catalog store.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "FailureFrame"
-          ],
-          "limits": "Finite store-level model of catalog resources: authorization order, replay, quotas, names, generations, child guards and pagination tokens. Wire decoding and encoding, descriptor projection, reference generation and the service-specific rules in specification check hooks are outside the model and are checked by native tests and the boto3 end-to-end fixtures."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/catalog/models/elasticbeanstalk.json",
-      "sha256": "58ecb901ccaf3ab3a7761a6b2ec47346c2538c99cf6b9dfdbe3a02885dd3b17b",
-      "disposition": "modeled",
-      "reason": "Documentation-free subset of the pinned botocore 1.41.6 elasticbeanstalk model for the reviewed operations; bound operations run through the catalog store.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "FailureFrame"
-          ],
-          "limits": "Finite store-level model of catalog resources: authorization order, replay, quotas, names, generations, child guards and pagination tokens. Wire decoding and encoding, descriptor projection, reference generation and the service-specific rules in specification check hooks are outside the model and are checked by native tests and the boto3 end-to-end fixtures."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/catalog/models/emr-containers.json",
-      "sha256": "0368d0e21f75694085ae6020e804e5be358e544136e72cd8cc053ce3c45cdbcf",
-      "disposition": "modeled",
-      "reason": "Documentation-free subset of the pinned botocore 1.41.6 emr-containers model for the reviewed operations; bound operations run through the catalog store.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "FailureFrame"
-          ],
-          "limits": "Finite store-level model of catalog resources: authorization order, replay, quotas, names, generations, child guards and pagination tokens. Wire decoding and encoding, descriptor projection, reference generation and the service-specific rules in specification check hooks are outside the model and are checked by native tests and the boto3 end-to-end fixtures."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/catalog/models/emr-serverless.json",
-      "sha256": "af6566b06a9eb2fc3f72324ed80bad0acf6947f56d371d911707ee85f259f69c",
-      "disposition": "modeled",
-      "reason": "Documentation-free subset of the pinned botocore 1.41.6 emr-serverless model for the reviewed operations; bound operations run through the catalog store.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "FailureFrame"
-          ],
-          "limits": "Finite store-level model of catalog resources: authorization order, replay, quotas, names, generations, child guards and pagination tokens. Wire decoding and encoding, descriptor projection, reference generation and the service-specific rules in specification check hooks are outside the model and are checked by native tests and the boto3 end-to-end fixtures."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/catalog/models/emr.json",
-      "sha256": "abe26d75a608291ee3257803680796e6f0540fd148a1b1fe6609297e27abecaa",
-      "disposition": "modeled",
-      "reason": "Documentation-free subset of the pinned botocore 1.41.6 emr model for the reviewed operations; bound operations run through the catalog store.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "FailureFrame"
-          ],
-          "limits": "Finite store-level model of catalog resources: authorization order, replay, quotas, names, generations, child guards and pagination tokens. Wire decoding and encoding, descriptor projection, reference generation and the service-specific rules in specification check hooks are outside the model and are checked by native tests and the boto3 end-to-end fixtures."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/catalog/models/forecast.json",
-      "sha256": "2ae1f112493f6a52f4a32f8a7271f48eec166183b9565ddf14b060149ba26263",
-      "disposition": "modeled",
-      "reason": "Documentation-free subset of the pinned botocore 1.41.6 forecast model for the reviewed operations; bound operations run through the catalog store.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "FailureFrame"
-          ],
-          "limits": "Finite store-level model of catalog resources: authorization order, replay, quotas, names, generations, child guards and pagination tokens. Wire decoding and encoding, descriptor projection, reference generation and the service-specific rules in specification check hooks are outside the model and are checked by native tests and the boto3 end-to-end fixtures."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/catalog/models/frauddetector.json",
-      "sha256": "a02e2a244a51e681e4b3658958058da456c2be426e623f3771ffecee39e52ad5",
-      "disposition": "modeled",
-      "reason": "Documentation-free subset of the pinned botocore 1.41.6 frauddetector model for the reviewed operations; bound operations run through the catalog store.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "FailureFrame"
-          ],
-          "limits": "Finite store-level model of catalog resources: authorization order, replay, quotas, names, generations, child guards and pagination tokens. Wire decoding and encoding, descriptor projection, reference generation and the service-specific rules in specification check hooks are outside the model and are checked by native tests and the boto3 end-to-end fixtures."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/catalog/models/grafana.json",
-      "sha256": "2df5ba5325c6894c4310e22e283f3f866f137fb7a224e100809c695875ab6cb4",
-      "disposition": "modeled",
-      "reason": "Documentation-free subset of the pinned botocore 1.41.6 grafana model for the reviewed operations; bound operations run through the catalog store.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "FailureFrame"
-          ],
-          "limits": "Finite store-level model of catalog resources: authorization order, replay, quotas, names, generations, child guards and pagination tokens. Wire decoding and encoding, descriptor projection, reference generation and the service-specific rules in specification check hooks are outside the model and are checked by native tests and the boto3 end-to-end fixtures."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/catalog/models/groundstation.json",
-      "sha256": "62ba1e2e53448767e66e651b7890a6047b4099bd047b18aa378b9bc6466d5a2e",
-      "disposition": "modeled",
-      "reason": "Documentation-free subset of the pinned botocore 1.41.6 groundstation model for the reviewed operations; bound operations run through the catalog store.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "FailureFrame"
-          ],
-          "limits": "Finite store-level model of catalog resources: authorization order, replay, quotas, names, generations, child guards and pagination tokens. Wire decoding and encoding, descriptor projection, reference generation and the service-specific rules in specification check hooks are outside the model and are checked by native tests and the boto3 end-to-end fixtures."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/catalog/models/healthlake.json",
-      "sha256": "a8599e7f11af101a3bcf78a05360a50f4402aae450ba133b53842229b7d0fa8c",
-      "disposition": "modeled",
-      "reason": "Documentation-free subset of the pinned botocore 1.41.6 healthlake model for the reviewed operations; bound operations run through the catalog store.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "FailureFrame"
-          ],
-          "limits": "Finite store-level model of catalog resources: authorization order, replay, quotas, names, generations, child guards and pagination tokens. Wire decoding and encoding, descriptor projection, reference generation and the service-specific rules in specification check hooks are outside the model and are checked by native tests and the boto3 end-to-end fixtures."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/catalog/models/ivs-realtime.json",
-      "sha256": "ff528d10eb069be2e02a1161e04d9af530b444dbd573c96a3afd688758877693",
-      "disposition": "modeled",
-      "reason": "Documentation-free subset of the pinned botocore 1.41.6 ivs-realtime model for the reviewed operations; bound operations run through the catalog store.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "FailureFrame"
-          ],
-          "limits": "Finite store-level model of catalog resources: authorization order, replay, quotas, names, generations, child guards and pagination tokens. Wire decoding and encoding, descriptor projection, reference generation and the service-specific rules in specification check hooks are outside the model and are checked by native tests and the boto3 end-to-end fixtures."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/catalog/models/ivs.json",
-      "sha256": "788056f19c6b9b476f75d257f39eb4e7ac12bd7685e025d9a9ac94d356a0a6dc",
-      "disposition": "modeled",
-      "reason": "Documentation-free subset of the pinned botocore 1.41.6 ivs model for the reviewed operations; bound operations run through the catalog store.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "FailureFrame"
-          ],
-          "limits": "Finite store-level model of catalog resources: authorization order, replay, quotas, names, generations, child guards and pagination tokens. Wire decoding and encoding, descriptor projection, reference generation and the service-specific rules in specification check hooks are outside the model and are checked by native tests and the boto3 end-to-end fixtures."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/catalog/models/ivschat.json",
-      "sha256": "fa26807c9f4dee1195b188cfe49c5fbb1fa01690ff96e4c986be2ca4b4344c5e",
-      "disposition": "modeled",
-      "reason": "Documentation-free subset of the pinned botocore 1.41.6 ivschat model for the reviewed operations; bound operations run through the catalog store.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "FailureFrame"
-          ],
-          "limits": "Finite store-level model of catalog resources: authorization order, replay, quotas, names, generations, child guards and pagination tokens. Wire decoding and encoding, descriptor projection, reference generation and the service-specific rules in specification check hooks are outside the model and are checked by native tests and the boto3 end-to-end fixtures."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/catalog/models/keyspaces.json",
-      "sha256": "f855ce70770d9ab811f612218034c9f764f68126d3c436bd8ae2d2016469b59e",
-      "disposition": "modeled",
-      "reason": "Documentation-free subset of the pinned botocore 1.41.6 keyspaces model for the reviewed operations; bound operations run through the catalog store.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "FailureFrame"
-          ],
-          "limits": "Finite store-level model of catalog resources: authorization order, replay, quotas, names, generations, child guards and pagination tokens. Wire decoding and encoding, descriptor projection, reference generation and the service-specific rules in specification check hooks are outside the model and are checked by native tests and the boto3 end-to-end fixtures."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/catalog/models/kinesisvideo.json",
-      "sha256": "0dc90f06b4f625568abf4744bc3c6d3c4f9cc30261f2837e3b55d48e1d66b6af",
-      "disposition": "modeled",
-      "reason": "Documentation-free subset of the pinned botocore 1.41.6 kinesisvideo model for the reviewed operations; bound operations run through the catalog store.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "FailureFrame"
-          ],
-          "limits": "Finite store-level model of catalog resources: authorization order, replay, quotas, names, generations, child guards and pagination tokens. Wire decoding and encoding, descriptor projection, reference generation and the service-specific rules in specification check hooks are outside the model and are checked by native tests and the boto3 end-to-end fixtures."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/catalog/models/lakeformation.json",
-      "sha256": "6be935bb435ca7e700a5c7f28d75002153c350238b00828f64cd316436c66576",
-      "disposition": "modeled",
-      "reason": "Documentation-free subset of the pinned botocore 1.41.6 lakeformation model for the reviewed operations; bound operations run through the catalog store.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "FailureFrame"
-          ],
-          "limits": "Finite store-level model of catalog resources: authorization order, replay, quotas, names, generations, child guards and pagination tokens. Wire decoding and encoding, descriptor projection, reference generation and the service-specific rules in specification check hooks are outside the model and are checked by native tests and the boto3 end-to-end fixtures."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/catalog/models/m2.json",
-      "sha256": "b41a568205c95a01a5812e413dac1c653f858eaf72349353096f904a20bfca3f",
-      "disposition": "modeled",
-      "reason": "Documentation-free subset of the pinned botocore 1.41.6 m2 model for the reviewed operations; bound operations run through the catalog store.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "FailureFrame"
-          ],
-          "limits": "Finite store-level model of catalog resources: authorization order, replay, quotas, names, generations, child guards and pagination tokens. Wire decoding and encoding, descriptor projection, reference generation and the service-specific rules in specification check hooks are outside the model and are checked by native tests and the boto3 end-to-end fixtures."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/catalog/models/mediaconnect.json",
-      "sha256": "64755a1c1766daf18be9ac631ee5e243293e0a29214e8ffe03fccace2019c3ee",
-      "disposition": "modeled",
-      "reason": "Documentation-free subset of the pinned botocore 1.41.6 mediaconnect model for the reviewed operations; bound operations run through the catalog store.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "FailureFrame"
-          ],
-          "limits": "Finite store-level model of catalog resources: authorization order, replay, quotas, names, generations, child guards and pagination tokens. Wire decoding and encoding, descriptor projection, reference generation and the service-specific rules in specification check hooks are outside the model and are checked by native tests and the boto3 end-to-end fixtures."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/catalog/models/mediaconvert.json",
-      "sha256": "153dd9dc53501b42749a94702c37e279aa19ac4ac7a29bb3157453986778f814",
-      "disposition": "modeled",
-      "reason": "Documentation-free subset of the pinned botocore 1.41.6 mediaconvert model for the reviewed operations; bound operations run through the catalog store.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "FailureFrame"
-          ],
-          "limits": "Finite store-level model of catalog resources: authorization order, replay, quotas, names, generations, child guards and pagination tokens. Wire decoding and encoding, descriptor projection, reference generation and the service-specific rules in specification check hooks are outside the model and are checked by native tests and the boto3 end-to-end fixtures."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/catalog/models/medialive.json",
-      "sha256": "f3a80c9cb1e1cb0f41f70ca29b20af95ae517f7f2486960dbe46caf7366bf7c5",
-      "disposition": "modeled",
-      "reason": "Documentation-free subset of the pinned botocore 1.41.6 medialive model for the reviewed operations; bound operations run through the catalog store.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "FailureFrame"
-          ],
-          "limits": "Finite store-level model of catalog resources: authorization order, replay, quotas, names, generations, child guards and pagination tokens. Wire decoding and encoding, descriptor projection, reference generation and the service-specific rules in specification check hooks are outside the model and are checked by native tests and the boto3 end-to-end fixtures."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/catalog/models/mediapackage-vod.json",
-      "sha256": "13523fffb4b09e776b376346f346256132f87df1e0257e4956f80e6941bccd7c",
-      "disposition": "modeled",
-      "reason": "Documentation-free subset of the pinned botocore 1.41.6 mediapackage-vod model for the reviewed operations; bound operations run through the catalog store.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "FailureFrame"
-          ],
-          "limits": "Finite store-level model of catalog resources: authorization order, replay, quotas, names, generations, child guards and pagination tokens. Wire decoding and encoding, descriptor projection, reference generation and the service-specific rules in specification check hooks are outside the model and are checked by native tests and the boto3 end-to-end fixtures."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/catalog/models/mediapackage.json",
-      "sha256": "f6e866919ec20342f10db65d8fe0a376bea78f57651f4abca30d6e52b3cdd374",
-      "disposition": "modeled",
-      "reason": "Documentation-free subset of the pinned botocore 1.41.6 mediapackage model for the reviewed operations; bound operations run through the catalog store.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "FailureFrame"
-          ],
-          "limits": "Finite store-level model of catalog resources: authorization order, replay, quotas, names, generations, child guards and pagination tokens. Wire decoding and encoding, descriptor projection, reference generation and the service-specific rules in specification check hooks are outside the model and are checked by native tests and the boto3 end-to-end fixtures."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/catalog/models/mediapackagev2.json",
-      "sha256": "5620e068596b9e80f64eea1b06b3776d42b7709ad8c319b76d48d953cc5600d7",
-      "disposition": "modeled",
-      "reason": "Documentation-free subset of the pinned botocore 1.41.6 mediapackagev2 model for the reviewed operations; bound operations run through the catalog store.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "FailureFrame"
-          ],
-          "limits": "Finite store-level model of catalog resources: authorization order, replay, quotas, names, generations, child guards and pagination tokens. Wire decoding and encoding, descriptor projection, reference generation and the service-specific rules in specification check hooks are outside the model and are checked by native tests and the boto3 end-to-end fixtures."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/catalog/models/mediatailor.json",
-      "sha256": "928473f08aaa9dde1094fcf2e2ac8c65b181d57fdd6da862e3480e7bfbdd10a8",
-      "disposition": "modeled",
-      "reason": "Documentation-free subset of the pinned botocore 1.41.6 mediatailor model for the reviewed operations; bound operations run through the catalog store.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "FailureFrame"
-          ],
-          "limits": "Finite store-level model of catalog resources: authorization order, replay, quotas, names, generations, child guards and pagination tokens. Wire decoding and encoding, descriptor projection, reference generation and the service-specific rules in specification check hooks are outside the model and are checked by native tests and the boto3 end-to-end fixtures."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/catalog/models/medical-imaging.json",
-      "sha256": "0c1ea042c18d8891b2b643cd20e33d3b307f550f933d6264794afaf42ebd02b4",
-      "disposition": "modeled",
-      "reason": "Documentation-free subset of the pinned botocore 1.41.6 medical-imaging model for the reviewed operations; bound operations run through the catalog store.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "FailureFrame"
-          ],
-          "limits": "Finite store-level model of catalog resources: authorization order, replay, quotas, names, generations, child guards and pagination tokens. Wire decoding and encoding, descriptor projection, reference generation and the service-specific rules in specification check hooks are outside the model and are checked by native tests and the boto3 end-to-end fixtures."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/catalog/models/mgh.json",
-      "sha256": "1d4113aeef8366be8d16d106c5fa6023d958bcb3a32ed2730794bbab3538c4b4",
-      "disposition": "modeled",
-      "reason": "Documentation-free subset of the pinned botocore 1.41.6 mgh model for the reviewed operations; bound operations run through the catalog store.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "FailureFrame"
-          ],
-          "limits": "Finite store-level model of catalog resources: authorization order, replay, quotas, names, generations, child guards and pagination tokens. Wire decoding and encoding, descriptor projection, reference generation and the service-specific rules in specification check hooks are outside the model and are checked by native tests and the boto3 end-to-end fixtures."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/catalog/models/mgn.json",
-      "sha256": "6886a8fbc4dc3a7da969444ae8b9a6b05a27c9cb3e439a5ecacba59f85206ba0",
-      "disposition": "modeled",
-      "reason": "Documentation-free subset of the pinned botocore 1.41.6 mgn model for the reviewed operations; bound operations run through the catalog store.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "FailureFrame"
-          ],
-          "limits": "Finite store-level model of catalog resources: authorization order, replay, quotas, names, generations, child guards and pagination tokens. Wire decoding and encoding, descriptor projection, reference generation and the service-specific rules in specification check hooks are outside the model and are checked by native tests and the boto3 end-to-end fixtures."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/catalog/models/network-firewall.json",
-      "sha256": "6dedcdd3e4ace4d307de557c55a9d8d759cf59467cbc4c3525d32d2816765d55",
-      "disposition": "modeled",
-      "reason": "Documentation-free subset of the pinned botocore 1.41.6 network-firewall model for the reviewed operations; bound operations run through the catalog store.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "FailureFrame"
-          ],
-          "limits": "Finite store-level model of catalog resources: authorization order, replay, quotas, names, generations, child guards and pagination tokens. Wire decoding and encoding, descriptor projection, reference generation and the service-specific rules in specification check hooks are outside the model and are checked by native tests and the boto3 end-to-end fixtures."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/catalog/models/omics.json",
-      "sha256": "7bedb46fdb89c4f315486e352f99c1d0fa744a3ec88723c1c89d44756966f7bd",
-      "disposition": "modeled",
-      "reason": "Documentation-free subset of the pinned botocore 1.41.6 omics model for the reviewed operations; bound operations run through the catalog store.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "FailureFrame"
-          ],
-          "limits": "Finite store-level model of catalog resources: authorization order, replay, quotas, names, generations, child guards and pagination tokens. Wire decoding and encoding, descriptor projection, reference generation and the service-specific rules in specification check hooks are outside the model and are checked by native tests and the boto3 end-to-end fixtures."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/catalog/models/outposts.json",
-      "sha256": "cbab5a8c7498e9de6b237653986a2bc5c57c762182cbde24bc3c22772a3ad89d",
-      "disposition": "modeled",
-      "reason": "Documentation-free subset of the pinned botocore 1.41.6 outposts model for the reviewed operations; bound operations run through the catalog store.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "FailureFrame"
-          ],
-          "limits": "Finite store-level model of catalog resources: authorization order, replay, quotas, names, generations, child guards and pagination tokens. Wire decoding and encoding, descriptor projection, reference generation and the service-specific rules in specification check hooks are outside the model and are checked by native tests and the boto3 end-to-end fixtures."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/catalog/models/pcs.json",
-      "sha256": "926a44dcaf3526804697c489b61735ab95ea7decb4e188c97e2eeabdf5b5ec05",
-      "disposition": "modeled",
-      "reason": "Documentation-free subset of the pinned botocore 1.41.6 pcs model for the reviewed operations; bound operations run through the catalog store.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "FailureFrame"
-          ],
-          "limits": "Finite store-level model of catalog resources: authorization order, replay, quotas, names, generations, child guards and pagination tokens. Wire decoding and encoding, descriptor projection, reference generation and the service-specific rules in specification check hooks are outside the model and are checked by native tests and the boto3 end-to-end fixtures."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/catalog/models/personalize.json",
-      "sha256": "da196233ad75e418ecb1f328f37728f94c823158386d4eff91eb6edc2a29ec7b",
-      "disposition": "modeled",
-      "reason": "Documentation-free subset of the pinned botocore 1.41.6 personalize model for the reviewed operations; bound operations run through the catalog store.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "FailureFrame"
-          ],
-          "limits": "Finite store-level model of catalog resources: authorization order, replay, quotas, names, generations, child guards and pagination tokens. Wire decoding and encoding, descriptor projection, reference generation and the service-specific rules in specification check hooks are outside the model and are checked by native tests and the boto3 end-to-end fixtures."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/catalog/models/qbusiness.json",
-      "sha256": "adfa4d9d5ffaedf290a05591d4d12f5fe207d7ec0eb83b0ab3facdc82fc1e6e9",
-      "disposition": "modeled",
-      "reason": "Documentation-free subset of the pinned botocore 1.41.6 qbusiness model for the reviewed operations; bound operations run through the catalog store.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "FailureFrame"
-          ],
-          "limits": "Finite store-level model of catalog resources: authorization order, replay, quotas, names, generations, child guards and pagination tokens. Wire decoding and encoding, descriptor projection, reference generation and the service-specific rules in specification check hooks are outside the model and are checked by native tests and the boto3 end-to-end fixtures."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/catalog/models/quicksight.json",
-      "sha256": "d5ee2ab690980cf3d81989a50fb516577e6d48762c17077af637b3936f8254c6",
-      "disposition": "modeled",
-      "reason": "Documentation-free subset of the pinned botocore 1.41.6 quicksight model for the reviewed operations; bound operations run through the catalog store.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "FailureFrame"
-          ],
-          "limits": "Finite store-level model of catalog resources: authorization order, replay, quotas, names, generations, child guards and pagination tokens. Wire decoding and encoding, descriptor projection, reference generation and the service-specific rules in specification check hooks are outside the model and are checked by native tests and the boto3 end-to-end fixtures."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/catalog/models/rds.json",
-      "sha256": "288c46b037bc8378b09e15e361aa9a78b743d8d7c067e80306bdcac872c1070e",
-      "disposition": "modeled",
-      "reason": "Documentation-free subset of the pinned botocore 1.41.6 rds model for the reviewed operations; bound operations run through the catalog store.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "FailureFrame"
-          ],
-          "limits": "Finite store-level model of catalog resources: authorization order, replay, quotas, names, generations, child guards and pagination tokens. Wire decoding and encoding, descriptor projection, reference generation and the service-specific rules in specification check hooks are outside the model and are checked by native tests and the boto3 end-to-end fixtures."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/catalog/models/redshift.json",
-      "sha256": "c63dbe9c9de56e9ddb0a2f96ccb7be469deb6327fb1e4b3aa00fc1cbe0ffb39a",
-      "disposition": "modeled",
-      "reason": "Documentation-free subset of the pinned botocore 1.41.6 redshift model for the reviewed operations; bound operations run through the catalog store.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "FailureFrame"
-          ],
-          "limits": "Finite store-level model of catalog resources: authorization order, replay, quotas, names, generations, child guards and pagination tokens. Wire decoding and encoding, descriptor projection, reference generation and the service-specific rules in specification check hooks are outside the model and are checked by native tests and the boto3 end-to-end fixtures."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/catalog/models/repostspace.json",
-      "sha256": "b08ab75ef3673f70fc3107733ffd6598f84cff7fcaada808366407ff6ff26aa9",
-      "disposition": "modeled",
-      "reason": "Documentation-free subset of the pinned botocore 1.41.6 repostspace model for the reviewed operations; bound operations run through the catalog store.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "FailureFrame"
-          ],
-          "limits": "Finite store-level model of catalog resources: authorization order, replay, quotas, names, generations, child guards and pagination tokens. Wire decoding and encoding, descriptor projection, reference generation and the service-specific rules in specification check hooks are outside the model and are checked by native tests and the boto3 end-to-end fixtures."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/catalog/models/serverlessrepo.json",
-      "sha256": "0ecc537da188ca02d911d23629017803880fae03ad9f750a834e38bf9ce06a95",
-      "disposition": "modeled",
-      "reason": "Documentation-free subset of the pinned botocore 1.41.6 serverlessrepo model for the reviewed operations; bound operations run through the catalog store.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "FailureFrame"
-          ],
-          "limits": "Finite store-level model of catalog resources: authorization order, replay, quotas, names, generations, child guards and pagination tokens. Wire decoding and encoding, descriptor projection, reference generation and the service-specific rules in specification check hooks are outside the model and are checked by native tests and the boto3 end-to-end fixtures."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/catalog/models/transfer.json",
-      "sha256": "d0551f724acca2fac29b6548e74af951fe5699a09f56769d330b473b469b65ef",
-      "disposition": "modeled",
-      "reason": "Documentation-free subset of the pinned botocore 1.41.6 transfer model for the reviewed operations; bound operations run through the catalog store.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "FailureFrame"
-          ],
-          "limits": "Finite store-level model of catalog resources: authorization order, replay, quotas, names, generations, child guards and pagination tokens. Wire decoding and encoding, descriptor projection, reference generation and the service-specific rules in specification check hooks are outside the model and are checked by native tests and the boto3 end-to-end fixtures."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/catalog/models/workmail.json",
-      "sha256": "3a22de9a15a02974a1cc3b14a903cfb465caf078f98ca68fcea96cbc0a39d9a4",
-      "disposition": "modeled",
-      "reason": "Documentation-free subset of the pinned botocore 1.41.6 workmail model for the reviewed operations; bound operations run through the catalog store.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "FailureFrame"
-          ],
-          "limits": "Finite store-level model of catalog resources: authorization order, replay, quotas, names, generations, child guards and pagination tokens. Wire decoding and encoding, descriptor projection, reference generation and the service-specific rules in specification check hooks are outside the model and are checked by native tests and the boto3 end-to-end fixtures."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/catalog/pcs_queue_contract_test.go",
-      "sha256": "c17534fe15921e8cc5fe4f679950cc1e85cb7dff1ba4553c40b60ae5b96d1718",
+      "path": "internal/azure/blob/structured_crc64_http_test.go",
+      "sha256": "1739f978fbab72652fb95dcd557da6e466372e208d423edc16dc567041082bf4",
       "disposition": "test-support",
-      "reason": "PCS creation requires an actual nonempty node group configuration; reject without persistence. Update omission and empty replacement stay unchanged.",
+      "reason": "Focused, no-socket in-process proof support fixture with immutable values; no real SDK or product claim.",
       "models": []
     },
     {
-      "path": "internal/aws/catalog/query_test.go",
-      "sha256": "aa7e80a216a8b4c29d7744fb967a10f69eadc18267dfdba1a475fac89e3e38fb",
+      "path": "internal/azure/blob/structured_crc64_test.go",
+      "sha256": "db0494e4fa591f733f495ea0045c6b3415ca868533b0d321a36196ebcc7d77e6",
       "disposition": "test-support",
-      "reason": "Routing regression list updated for services the catalog now serves over Query.",
+      "reason": "Focused, no-socket in-process proof support fixture with immutable values; no real SDK or product claim.",
       "models": []
     },
     {
-      "path": "internal/aws/catalog/quicksight_root_folder_contract_test.go",
-      "sha256": "c333e7bb0f4446b114a09b474ac17bfe2bb20f885d06db16989ddd3626fef464",
+      "path": "internal/azure/blob/types.go",
+      "sha256": "ea0ae25e566cc2326c87d5f02b0e4aad5fc9a10b5a1f46aaeb670c7eb7d4540a",
+      "disposition": "modeled",
+      "reason": "The date condition implements the equal/newer cache-hit decision on an already located blob and preserves existing unrelated validator handling.",
+      "models": [
+        {
+          "id": "AzureConditionalCRCRead",
+          "properties": [
+            "CacheHitHasNoPartialOutput"
+          ],
+          "limits": "Only date ordering relative to stored Last-Modified; no timestamp parser, other validator combinations, or complete wire behavior."
+        }
+      ]
+    },
+    {
+      "path": "internal/server/azure_range_headers_test.go",
+      "sha256": "71e3b09ac70331716d3a227762935c52164462ed83614f8e7c01261f9c5ee133",
       "disposition": "test-support",
-      "reason": "QuickSight root-folder empty parent normalization, documented default sharing, and no write on unsupported folders or permissions.",
+      "reason": "Independent native authorized gateway/header transport regression; gateway routing and exact checksum header bytes are not modeled here.",
       "models": []
     },
     {
-      "path": "internal/aws/catalog/selection.json",
-      "sha256": "1d915555a1b85db9f0986cafac998ee10c1d39ef4bb2a5533e5d34b1d29ad486",
-      "disposition": "modeled",
-      "reason": "Selects the reviewed operations of the newly added services for extraction; every selected operation is authorized before it reads or changes state.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "FailureFrame"
-          ],
-          "limits": "Finite store-level model of catalog resources: authorization order, replay, quotas, names, generations, child guards and pagination tokens. Wire decoding and encoding, descriptor projection, reference generation and the service-specific rules in specification check hooks are outside the model and are checked by native tests and the boto3 end-to-end fixtures."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/catalog/semantics.go",
-      "sha256": "c56e1a1a26525329bef2f449005ac35b144bc4fb7d16673af9051f07267ac79d",
-      "disposition": "modeled",
-      "reason": "Catalog engine vocabulary extended for the newly served services; requests still pass through the shared validated execution path and refusals leave state unchanged. The policy read/replace and first write use the resolved application ARN, not the internal policy row key.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "FailureFrame",
-            "PeerFrame"
-          ],
-          "limits": "Finite store-level model of catalog resources: authorization order, replay, quotas, names, generations, child guards and pagination tokens. Wire decoding and encoding, descriptor projection, reference generation and the service-specific rules in specification check hooks are outside the model and are checked by native tests and the boto3 end-to-end fixtures."
-        },
-        {
-          "id": "SARPolicyAuthorizationTarget",
-          "properties": [
-            "ResolvedParentTarget",
-            "NoUnpermittedEffects",
-            "PermittedBehavior",
-            "ReadPreservesStoredPolicy"
-          ],
-          "limits": "Finite receipt for one SAR Get/Put of saved local application-policy metadata. Existing parent ARN and private stored policy identity are symbolic distinct targets; decision assumes the existing identity-policy evaluator and a resolved application's ARN. Verifies the abstract selection, read/write refusal frames and legitimate permitted effects, not actual ARN parsing, resolution/native engine ordering, sibling or process concurrency, absence wire error distinctions, IAM evaluation, resource-sharing policies, API transport, database failures, SDK or concrete Go refinement. Native in-process tests separately observe exact Go IAM action/resource calls and unchanged state on refusal."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/catalog/serverlessrepo_policy_authorization_test.go",
-      "sha256": "b49d3d2ad7fb4cd82c0fdf8c0bb75cb4f1448cf45d12426522fc9bfba7e82196",
-      "disposition": "test-support",
-      "reason": "Asserts the resolved application IAM target for both actions in a synthetic owned fixture, positive grants, typed refusals, and unchanged metadata.",
-      "models": []
-    },
-    {
-      "path": "internal/aws/catalog/services.go",
-      "sha256": "271d3d71a91017d020cfe84cb78591fb364319bd47e27dea22ddf50cca8f9a7a",
-      "disposition": "modeled",
-      "reason": "Registers the newly reviewed services with the catalog.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "UniqueNames",
-            "QuotaBound"
-          ],
-          "limits": "Finite store-level model of catalog resources: authorization order, replay, quotas, names, generations, child guards and pagination tokens. Wire decoding and encoding, descriptor projection, reference generation and the service-specific rules in specification check hooks are outside the model and are checked by native tests and the boto3 end-to-end fixtures."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/catalog/services_analytics2.go",
-      "sha256": "4cb3c772e6e50f378c8c606a6daa8e54cb5ccb8be370cdcc52034ca7a71639f7",
-      "disposition": "modeled",
-      "reason": "Reviewed specifications for newly added services: stored configuration and configuration records with unique names and per-Region limits.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "FailureFrame",
-            "QuotaBound",
-            "UniqueNames"
-          ],
-          "limits": "Finite store-level model of catalog resources: authorization order, replay, quotas, names, generations, child guards and pagination tokens. Wire decoding and encoding, descriptor projection, reference generation and the service-specific rules in specification check hooks are outside the model and are checked by native tests and the boto3 end-to-end fixtures."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/catalog/services_analytics2_test.go",
-      "sha256": "83d85065d90e2eceb9a7abcdea0c2b83dcf84a43c4e87f691b51416006c5fa08",
-      "disposition": "test-support",
-      "reason": "Native tests of the newly added specifications: lifecycles, documented rules, faults and refusals.",
-      "models": []
-    },
-    {
-      "path": "internal/aws/catalog/services_business.go",
-      "sha256": "10f4cd8f954c31240eb01378e59ea0cce3b1015624256776c6b7fa65319d3c2f",
-      "disposition": "modeled",
-      "reason": "Reviewed specifications for newly added services: stored configuration and configuration records with unique names and per-Region limits.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "FailureFrame",
-            "QuotaBound",
-            "UniqueNames"
-          ],
-          "limits": "Finite store-level model of catalog resources: authorization order, replay, quotas, names, generations, child guards and pagination tokens. Wire decoding and encoding, descriptor projection, reference generation and the service-specific rules in specification check hooks are outside the model and are checked by native tests and the boto3 end-to-end fixtures."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/catalog/services_business_test.go",
-      "sha256": "2316eacf80868f4b23e8fc479ee9ecf8f632fa8956645adc5b0e74deac5be15d",
-      "disposition": "test-support",
-      "reason": "Native tests of the newly added specifications: lifecycles, documented rules, faults and refusals.",
-      "models": []
-    },
-    {
-      "path": "internal/aws/catalog/services_compute2.go",
-      "sha256": "51c6006184b8cebeb03c1b2f9ce71f602c8a416276c8d22e6219a5cdee51b256",
-      "disposition": "modeled",
-      "reason": "Reviewed specifications for newly added services: stored configuration and configuration records with unique names and per-Region limits.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "FailureFrame",
-            "QuotaBound",
-            "UniqueNames"
-          ],
-          "limits": "Finite store-level model of catalog resources: authorization order, replay, quotas, names, generations, child guards and pagination tokens. Wire decoding and encoding, descriptor projection, reference generation and the service-specific rules in specification check hooks are outside the model and are checked by native tests and the boto3 end-to-end fixtures."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/catalog/services_compute2_test.go",
-      "sha256": "03ad5d65fbf383efcd566ff1d6ff21cd26de206ac93e28d66d80cbb68c2ccafa",
-      "disposition": "test-support",
-      "reason": "Native tests of the newly added specifications: lifecycles, documented rules, faults and refusals.",
-      "models": []
-    },
-    {
-      "path": "internal/aws/catalog/services_compute3.go",
-      "sha256": "6f3cdff61330baf1ee174980a541ce67082d2bf69522fcce15b4a1f534456428",
-      "disposition": "modeled",
-      "reason": "Reviewed specifications for newly added services: stored configuration and configuration records with unique names and per-Region limits. Only the two SAR application-policy actions opt into resolved parent authorization.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "FailureFrame",
-            "QuotaBound",
-            "UniqueNames"
-          ],
-          "limits": "Finite store-level model of catalog resources: authorization order, replay, quotas, names, generations, child guards and pagination tokens. Wire decoding and encoding, descriptor projection, reference generation and the service-specific rules in specification check hooks are outside the model and are checked by native tests and the boto3 end-to-end fixtures."
-        },
-        {
-          "id": "SARPolicyAuthorizationTarget",
-          "properties": [
-            "ResolvedParentTarget",
-            "NoUnpermittedEffects",
-            "PermittedBehavior",
-            "ReadPreservesStoredPolicy"
-          ],
-          "limits": "Finite receipt for one SAR Get/Put of saved local application-policy metadata. Existing parent ARN and private stored policy identity are symbolic distinct targets; decision assumes the existing identity-policy evaluator and a resolved application's ARN. Verifies the abstract selection, read/write refusal frames and legitimate permitted effects, not actual ARN parsing, resolution/native engine ordering, sibling or process concurrency, absence wire error distinctions, IAM evaluation, resource-sharing policies, API transport, database failures, SDK or concrete Go refinement. Native in-process tests separately observe exact Go IAM action/resource calls and unchanged state on refusal."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/catalog/services_compute3_test.go",
-      "sha256": "99224782e5060464a73d1892180ce23f08499eed477e15095c53040d215b60dc",
-      "disposition": "test-support",
-      "reason": "Native tests of the newly added specifications: lifecycles, documented rules, faults and refusals.",
-      "models": []
-    },
-    {
-      "path": "internal/aws/catalog/services_data.go",
-      "sha256": "7ed7053edfb3aef15cfa039acfba547f6ab91d7d1f7844866e4301d1cedd0a9f",
-      "disposition": "modeled",
-      "reason": "Amazon RDS specification: bounds, issue list and bound resources updated; stored resources keep unique names and per-Region limits.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "FailureFrame",
-            "QuotaBound",
-            "UniqueNames"
-          ],
-          "limits": "Finite store-level model of catalog resources: authorization order, replay, quotas, names, generations, child guards and pagination tokens. Wire decoding and encoding, descriptor projection, reference generation and the service-specific rules in specification check hooks are outside the model and are checked by native tests and the boto3 end-to-end fixtures."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/catalog/services_data2.go",
-      "sha256": "e2fcc7bf75d57ed72850048c380665ac9199acdb66a4a09d3c6bc9b2ca118b70",
-      "disposition": "modeled",
-      "reason": "Amazon ElastiCache and Amazon Redshift specifications: bounds and bound resources updated; stored resources keep unique names and per-Region limits.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "FailureFrame",
-            "QuotaBound",
-            "UniqueNames"
-          ],
-          "limits": "Finite store-level model of catalog resources: authorization order, replay, quotas, names, generations, child guards and pagination tokens. Wire decoding and encoding, descriptor projection, reference generation and the service-specific rules in specification check hooks are outside the model and are checked by native tests and the boto3 end-to-end fixtures."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/catalog/services_data2_test.go",
-      "sha256": "787173cc1133a927228c8776549b826f8c5e31e7078df35ee30722fa7f8df4d3",
-      "disposition": "test-support",
-      "reason": "Native tests of the newly added specifications: lifecycles, documented rules, faults and refusals.",
-      "models": []
-    },
-    {
-      "path": "internal/aws/catalog/services_edge.go",
-      "sha256": "b4d57de134e9db60a4a137412358ca58d3244d5ac308da1f33eebb287145e873",
-      "disposition": "modeled",
-      "reason": "Bounded AppStream configuration validates the documented packaging constraint before storing an app block.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "FailureFrame",
-            "QuotaBound",
-            "UniqueNames"
-          ],
-          "limits": "Finite store-level model of catalog resources: authorization order, replay, quotas, names, generations, child guards and pagination tokens. Wire decoding and encoding, descriptor projection, reference generation and the service-specific rules in specification check hooks are outside the model and are checked by native tests and the boto3 end-to-end fixtures."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/catalog/services_edge_test.go",
-      "sha256": "49e7eb7ca9037e37554df2053cf0aeb1ad60b668c4d1f87d65d8877fd44d4786",
-      "disposition": "test-support",
-      "reason": "Native regression for permitted APPSTREAM2 and rejected CUSTOM PostSetupScriptDetails, including the default packaging case.",
-      "models": []
-    },
-    {
-      "path": "internal/aws/catalog/services_engine2.go",
-      "sha256": "c3783a62df95c6e6a723674feb4ff7d283c1f7b109eeffc8b58b384079f4fe6d",
-      "disposition": "modeled",
-      "reason": "Reviewed specifications for newly added services: stored configuration and configuration records with unique names and per-Region limits.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "FailureFrame",
-            "QuotaBound",
-            "UniqueNames"
-          ],
-          "limits": "Finite store-level model of catalog resources: authorization order, replay, quotas, names, generations, child guards and pagination tokens. Wire decoding and encoding, descriptor projection, reference generation and the service-specific rules in specification check hooks are outside the model and are checked by native tests and the boto3 end-to-end fixtures."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/catalog/services_engine2_test.go",
-      "sha256": "51847ac04299bb3e66f0025fc20e3353481f43559cdae8204f566e5b6d5a9d1f",
-      "disposition": "test-support",
-      "reason": "Native tests of the newly added specifications: lifecycles, documented rules, faults and refusals.",
-      "models": []
-    },
-    {
-      "path": "internal/aws/catalog/services_health.go",
-      "sha256": "3d11b6e268f7b624c4aef231f74b7d9c293fc3f295400fa958bf841e07c20f4c",
-      "disposition": "modeled",
-      "reason": "Reviewed specifications for newly added services: stored configuration and configuration records with unique names and per-Region limits.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "FailureFrame",
-            "QuotaBound",
-            "UniqueNames"
-          ],
-          "limits": "Finite store-level model of catalog resources: authorization order, replay, quotas, names, generations, child guards and pagination tokens. Wire decoding and encoding, descriptor projection, reference generation and the service-specific rules in specification check hooks are outside the model and are checked by native tests and the boto3 end-to-end fixtures."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/catalog/services_health_test.go",
-      "sha256": "80db420499b377de548bbf590d6edc4626cdcb97243c5968a0b6e87d4a51dda2",
-      "disposition": "test-support",
-      "reason": "Native tests of the newly added specifications: lifecycles, documented rules, faults and refusals.",
-      "models": []
-    },
-    {
-      "path": "internal/aws/catalog/services_media.go",
-      "sha256": "6bc214a7d80ffc7094bf8a09b785c1e67e6b53f88b3795dd50bf5cb6042e18c5",
-      "disposition": "modeled",
-      "reason": "Reviewed specifications for newly added services: stored configuration and configuration records with unique names and per-Region limits.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "FailureFrame",
-            "QuotaBound",
-            "UniqueNames"
-          ],
-          "limits": "Finite store-level model of catalog resources: authorization order, replay, quotas, names, generations, child guards and pagination tokens. Wire decoding and encoding, descriptor projection, reference generation and the service-specific rules in specification check hooks are outside the model and are checked by native tests and the boto3 end-to-end fixtures."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/catalog/services_media2.go",
-      "sha256": "d21357668401845fa5fe198d0bfdd05ac27eecfe3d726414adbe4797681050f7",
-      "disposition": "modeled",
-      "reason": "Reviewed specifications for newly added services: stored configuration and configuration records with unique names and per-Region limits.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "FailureFrame",
-            "QuotaBound",
-            "UniqueNames"
-          ],
-          "limits": "Finite store-level model of catalog resources: authorization order, replay, quotas, names, generations, child guards and pagination tokens. Wire decoding and encoding, descriptor projection, reference generation and the service-specific rules in specification check hooks are outside the model and are checked by native tests and the boto3 end-to-end fixtures."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/catalog/services_media2_test.go",
-      "sha256": "43cc048c32dd2d6d0977afe2f2a5025b1a20256507c946eb8b275a5baf194c22",
-      "disposition": "test-support",
-      "reason": "Native tests of the newly added specifications: lifecycles, documented rules, faults and refusals.",
-      "models": []
-    },
-    {
-      "path": "internal/aws/catalog/services_media_test.go",
-      "sha256": "eeeb0dbe0bd2d1e616f2df1702c71426c782665675082a68c92a84abc616c7d2",
-      "disposition": "test-support",
-      "reason": "Native tests of the newly added specifications: lifecycles, documented rules, faults and refusals.",
-      "models": []
-    },
-    {
-      "path": "internal/aws/catalog/services_migration.go",
-      "sha256": "edc1d1c04887494c4e54efc36f6ea7a966d0324238f43805ca227ef5464fe0ea",
-      "disposition": "modeled",
-      "reason": "Reviewed specifications for newly added services: stored configuration and configuration records with unique names and per-Region limits.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "FailureFrame",
-            "QuotaBound",
-            "UniqueNames"
-          ],
-          "limits": "Finite store-level model of catalog resources: authorization order, replay, quotas, names, generations, child guards and pagination tokens. Wire decoding and encoding, descriptor projection, reference generation and the service-specific rules in specification check hooks are outside the model and are checked by native tests and the boto3 end-to-end fixtures."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/catalog/services_migration_test.go",
-      "sha256": "f2c6fdfbf882f07f20eb3cb4c097f46954de8ba052baac4c1ece5739b055c37c",
-      "disposition": "test-support",
-      "reason": "Native tests of the newly added specifications: lifecycles, documented rules, faults and refusals.",
-      "models": []
-    },
-    {
-      "path": "internal/aws/catalog/services_ml2.go",
-      "sha256": "42a523b19eba2119ac8f547c09601e6c39625852698c986b18851c5901758322",
-      "disposition": "modeled",
-      "reason": "Reviewed specifications for newly added services: stored configuration and configuration records with unique names and per-Region limits.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "FailureFrame",
-            "QuotaBound",
-            "UniqueNames"
-          ],
-          "limits": "Finite store-level model of catalog resources: authorization order, replay, quotas, names, generations, child guards and pagination tokens. Wire decoding and encoding, descriptor projection, reference generation and the service-specific rules in specification check hooks are outside the model and are checked by native tests and the boto3 end-to-end fixtures."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/catalog/services_ml2_test.go",
-      "sha256": "fc21cb1e31d73efad683e0b5189c1e2007e75df8934e00dec76d87ed54526e6d",
-      "disposition": "test-support",
-      "reason": "Native tests of the newly added specifications: lifecycles, documented rules, faults and refusals.",
-      "models": []
-    },
-    {
-      "path": "internal/aws/catalog/services_network2.go",
-      "sha256": "e371f301650a0d519d09338b1801628e574e3b46dae4ef26f32d8c6a8511964a",
-      "disposition": "modeled",
-      "reason": "Reviewed specifications for newly added services: stored configuration and configuration records with unique names and per-Region limits.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "FailureFrame",
-            "QuotaBound",
-            "UniqueNames"
-          ],
-          "limits": "Finite store-level model of catalog resources: authorization order, replay, quotas, names, generations, child guards and pagination tokens. Wire decoding and encoding, descriptor projection, reference generation and the service-specific rules in specification check hooks are outside the model and are checked by native tests and the boto3 end-to-end fixtures."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/catalog/services_network2_test.go",
-      "sha256": "e98de4ee258e68170693674973033b7d43ca2f0499bca8f1d227c1115b47df15",
-      "disposition": "test-support",
-      "reason": "Native tests of the newly added specifications: lifecycles, documented rules, faults and refusals.",
-      "models": []
-    },
-    {
-      "path": "internal/aws/catalog/services_ops2.go",
-      "sha256": "5c1b375909fbb22fdb7e6f5194447dd8b3e4bc2b931494ee878e11002579144f",
-      "disposition": "modeled",
-      "reason": "Reviewed specifications for newly added services: stored configuration and configuration records with unique names and per-Region limits.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "FailureFrame",
-            "QuotaBound",
-            "UniqueNames"
-          ],
-          "limits": "Finite store-level model of catalog resources: authorization order, replay, quotas, names, generations, child guards and pagination tokens. Wire decoding and encoding, descriptor projection, reference generation and the service-specific rules in specification check hooks are outside the model and are checked by native tests and the boto3 end-to-end fixtures."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/catalog/services_ops2_test.go",
-      "sha256": "38b5c8b6aea1523709755023436bedb88ad22e2d9bb540ee138a42d13ae5a994",
-      "disposition": "test-support",
-      "reason": "Native tests of the newly added specifications: lifecycles, documented rules, faults and refusals.",
-      "models": []
-    },
-    {
-      "path": "internal/aws/catalog/services_records_test.go",
-      "sha256": "d7e5bb4fdeb4227c939cb2a618c0a6f85f03f0d15609eb7be6d54e64158ed567",
-      "disposition": "test-support",
-      "reason": "Native tests of the newly added specifications: lifecycles, documented rules, faults and refusals.",
-      "models": []
-    },
-    {
-      "path": "internal/aws/catalog/spec.go",
-      "sha256": "c89a86e5bce48d0e9ff1b712f43ab01508394ae3c7d21bea06b40641772a185f",
-      "disposition": "modeled",
-      "reason": "Catalog engine vocabulary extended for the newly served services; requests still pass through the shared validated execution path and refusals leave state unchanged. Defines the small configuration field selecting application ARN for the two reviewed SAR policy operations.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "FailureFrame",
-            "PeerFrame"
-          ],
-          "limits": "Finite store-level model of catalog resources: authorization order, replay, quotas, names, generations, child guards and pagination tokens. Wire decoding and encoding, descriptor projection, reference generation and the service-specific rules in specification check hooks are outside the model and are checked by native tests and the boto3 end-to-end fixtures."
-        },
-        {
-          "id": "SARPolicyAuthorizationTarget",
-          "properties": [
-            "ResolvedParentTarget",
-            "NoUnpermittedEffects",
-            "PermittedBehavior",
-            "ReadPreservesStoredPolicy"
-          ],
-          "limits": "Finite receipt for one SAR Get/Put of saved local application-policy metadata. Existing parent ARN and private stored policy identity are symbolic distinct targets; decision assumes the existing identity-policy evaluator and a resolved application's ARN. Verifies the abstract selection, read/write refusal frames and legitimate permitted effects, not actual ARN parsing, resolution/native engine ordering, sibling or process concurrency, absence wire error distinctions, IAM evaluation, resource-sharing policies, API transport, database failures, SDK or concrete Go refinement. Native in-process tests separately observe exact Go IAM action/resource calls and unchanged state on refusal."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/catalog/store.go",
-      "sha256": "20b91e0ad8d36fdcd7036bcbfde447361d6eaae8541d59c002e66bd01c8780f2",
-      "disposition": "modeled",
-      "reason": "Catalog engine vocabulary extended for the newly served services; requests still pass through the shared validated execution path and refusals leave state unchanged.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "FailureFrame",
-            "PeerFrame"
-          ],
-          "limits": "Finite store-level model of catalog resources: authorization order, replay, quotas, names, generations, child guards and pagination tokens. Wire decoding and encoding, descriptor projection, reference generation and the service-specific rules in specification check hooks are outside the model and are checked by native tests and the boto3 end-to-end fixtures."
-        }
-      ]
-    },
-    {
-      "path": "internal/server/apidocs/catalog/aiops.json",
-      "sha256": "584301ff2e6b56a839b0835977c954746c24255251021107cb24186a48339b57",
+      "path": "internal/server/web/app.css",
+      "sha256": "33ee98152999874800918838ff9f5cacbeecbe8c482edd922fcfef6140fc520a",
       "disposition": "presentation",
-      "reason": "Generated aiops reference.",
-      "models": []
-    },
-    {
-      "path": "internal/server/apidocs/catalog/appflow.json",
-      "sha256": "6d3c6864bb33d482579d774de5775ccfb7131241d428836760fcbe17176ab8cb",
-      "disposition": "presentation",
-      "reason": "Generated appflow reference.",
-      "models": []
-    },
-    {
-      "path": "internal/server/apidocs/catalog/artifact.json",
-      "sha256": "5be9975e14a89ddd06a338a05a24528b0c846c371231395785ba1d0c9b41ddd3",
-      "disposition": "presentation",
-      "reason": "Generated artifact reference.",
-      "models": []
-    },
-    {
-      "path": "internal/server/apidocs/catalog/autoscaling.json",
-      "sha256": "8aefd567ad437b38f1e16e6a2678a053543e90b022159944af6a90c222737e3a",
-      "disposition": "presentation",
-      "reason": "Generated autoscaling reference.",
-      "models": []
-    },
-    {
-      "path": "internal/server/apidocs/catalog/b2bi.json",
-      "sha256": "045f9088864dee7c960bdf20ae3b222c84edf7dd8e7f65e062e78b69b3aabd8b",
-      "disposition": "presentation",
-      "reason": "Generated b2bi reference.",
-      "models": []
-    },
-    {
-      "path": "internal/server/apidocs/catalog/batch.json",
-      "sha256": "78cc211be0b431c60be13cdb1532233b67dcada9c531d7bc16bbd12d3f534e44",
-      "disposition": "presentation",
-      "reason": "Generated batch reference.",
-      "models": []
-    },
-    {
-      "path": "internal/server/apidocs/catalog/bcm-data-exports.json",
-      "sha256": "54e5ae37b6f6d8e2996e49008735371aff483c021167db23312ed8a4c9cb6aef",
-      "disposition": "presentation",
-      "reason": "Generated bcm-data-exports reference.",
-      "models": []
-    },
-    {
-      "path": "internal/server/apidocs/catalog/braket.json",
-      "sha256": "bf89f0381598aa72290ab3dcac7b79aedc5dbe008d70ceaebb1ab287ce624592",
-      "disposition": "presentation",
-      "reason": "Generated braket reference.",
-      "models": []
-    },
-    {
-      "path": "internal/server/apidocs/catalog/ce.json",
-      "sha256": "5cf91c5e34ccdf8053f34dd06589ec62b8dcec65f3d4116d8984efaae40880f5",
-      "disposition": "presentation",
-      "reason": "Generated ce reference.",
-      "models": []
-    },
-    {
-      "path": "internal/server/apidocs/catalog/chime-sdk-identity.json",
-      "sha256": "a9765476a0d0196be9835e1a09b32ee542255ac365ac32cb14129c31be919d96",
-      "disposition": "presentation",
-      "reason": "Generated chime-sdk-identity reference.",
-      "models": []
-    },
-    {
-      "path": "internal/server/apidocs/catalog/chime-sdk-media-pipelines.json",
-      "sha256": "396df81a0c7421794e906c4c0530a1c816d29020fd71a1fb88d2cb4f3b4f8232",
-      "disposition": "presentation",
-      "reason": "Generated chime-sdk-media-pipelines reference.",
-      "models": []
-    },
-    {
-      "path": "internal/server/apidocs/catalog/chime-sdk-voice.json",
-      "sha256": "1f402882e334ff051cf03363db17a8d79b2812de958cf84933fe4a066c3e77d7",
-      "disposition": "presentation",
-      "reason": "Generated chime-sdk-voice reference.",
-      "models": []
-    },
-    {
-      "path": "internal/server/apidocs/catalog/cleanrooms.json",
-      "sha256": "3a96c48ef87954b77380ee1c24bff1fed5f1f5f1d1d70dbb0e630e71afd41fe1",
-      "disposition": "presentation",
-      "reason": "Generated cleanrooms reference.",
-      "models": []
-    },
-    {
-      "path": "internal/server/apidocs/catalog/cleanroomsml.json",
-      "sha256": "dbc6150c3bb59f8219630ce11ece3b473a983e3def36ce9104c78f9d5b8aa7f0",
-      "disposition": "presentation",
-      "reason": "Generated cleanroomsml reference.",
-      "models": []
-    },
-    {
-      "path": "internal/server/apidocs/catalog/cloudsearch.json",
-      "sha256": "a3a11b870933083663595f8f4758b443429629e850ed28b97c8d862670b78133",
-      "disposition": "presentation",
-      "reason": "Generated cloudsearch reference.",
-      "models": []
-    },
-    {
-      "path": "internal/server/apidocs/catalog/codeguruprofiler.json",
-      "sha256": "89219424b45e33b22f169086e9805800c8635c6c6668b3f6c6d0d8180d10e2de",
-      "disposition": "presentation",
-      "reason": "Generated codeguruprofiler reference.",
-      "models": []
-    },
-    {
-      "path": "internal/server/apidocs/catalog/connect.json",
-      "sha256": "599a11e6c314ceff3d8e5f5daa402971d16e1d7c7296d22319ce0df28e0df1d5",
-      "disposition": "presentation",
-      "reason": "Generated connect reference.",
-      "models": []
-    },
-    {
-      "path": "internal/server/apidocs/catalog/datazone.json",
-      "sha256": "e062b51a97122d35cf035b9bd7bb5b7b83dbaa5d23931d568976dfb1672e10c9",
-      "disposition": "presentation",
-      "reason": "Generated datazone reference.",
-      "models": []
-    },
-    {
-      "path": "internal/server/apidocs/catalog/deadline.json",
-      "sha256": "cca26e7b07d00ce86615de0f5a07ed003bd003b14592c2e059505ea2e0951fe0",
-      "disposition": "presentation",
-      "reason": "Generated deadline reference.",
-      "models": []
-    },
-    {
-      "path": "internal/server/apidocs/catalog/directconnect.json",
-      "sha256": "02420ae6ba105fb6bc551b80ca00a9b502d3a8e6f00b6ec78b757811c1b51207",
-      "disposition": "presentation",
-      "reason": "Generated directconnect reference.",
-      "models": []
-    },
-    {
-      "path": "internal/server/apidocs/catalog/dms.json",
-      "sha256": "2516fc95979fee6f0aa5f06227dd71c1449e7cb9858e341f45f10c9c19dd221d",
-      "disposition": "presentation",
-      "reason": "Generated dms reference.",
-      "models": []
-    },
-    {
-      "path": "internal/server/apidocs/catalog/drs.json",
-      "sha256": "6fa2a46ff29f8b46de5dc57f6de2caaa8ed387c5bf2c13d3286c6ba2e279ec61",
-      "disposition": "presentation",
-      "reason": "Generated drs reference.",
-      "models": []
-    },
-    {
-      "path": "internal/server/apidocs/catalog/elasticache.json",
-      "sha256": "09ba87d267a0d8678373286b3eeb0f9f9723ca0397f559610c96755f13f35a23",
-      "disposition": "presentation",
-      "reason": "Generated elasticache reference.",
-      "models": []
-    },
-    {
-      "path": "internal/server/apidocs/catalog/elasticbeanstalk.json",
-      "sha256": "ecba85239fd96f2561a8207c25db7d3298ec5b9c4fe28ef7de40a83b891869a8",
-      "disposition": "presentation",
-      "reason": "Generated elasticbeanstalk reference.",
-      "models": []
-    },
-    {
-      "path": "internal/server/apidocs/catalog/emr-containers.json",
-      "sha256": "846c75671cc69b7938e3cfbac5c5bdb8781bbcdf41ea866da0879068bb8f58cf",
-      "disposition": "presentation",
-      "reason": "Generated emr-containers reference.",
-      "models": []
-    },
-    {
-      "path": "internal/server/apidocs/catalog/emr-serverless.json",
-      "sha256": "667578b6955f88dc8bb26dd7efe7f6078448621d9a537260f58a89b2077bf070",
-      "disposition": "presentation",
-      "reason": "Generated emr-serverless reference.",
-      "models": []
-    },
-    {
-      "path": "internal/server/apidocs/catalog/emr.json",
-      "sha256": "a474d57bd78a194f9186f96f8a8e62bb9b175f3ccff1ddbd916d588dc9aac4cf",
-      "disposition": "presentation",
-      "reason": "Generated emr reference.",
-      "models": []
-    },
-    {
-      "path": "internal/server/apidocs/catalog/forecast.json",
-      "sha256": "2cb42e9e76105951e3429cb0831e3dc26daf897a0c46a47c081e80452829adc8",
-      "disposition": "presentation",
-      "reason": "Generated forecast reference.",
-      "models": []
-    },
-    {
-      "path": "internal/server/apidocs/catalog/frauddetector.json",
-      "sha256": "8c21a2e3c1bdc27d0ea147db5a25a6bb97037340923128b90f9163e16bda2896",
-      "disposition": "presentation",
-      "reason": "Generated frauddetector reference.",
-      "models": []
-    },
-    {
-      "path": "internal/server/apidocs/catalog/grafana.json",
-      "sha256": "1c5d901af40f4fc6b5446a75cfba6635a80c93191cd9f60ddc4e6f3a2ab5488b",
-      "disposition": "presentation",
-      "reason": "Generated grafana reference.",
-      "models": []
-    },
-    {
-      "path": "internal/server/apidocs/catalog/groundstation.json",
-      "sha256": "5ca9d892c557c6a9e1e2f6845847f3ff8a84fd979c9fb88f9422dc16b30569bc",
-      "disposition": "presentation",
-      "reason": "Generated groundstation reference.",
-      "models": []
-    },
-    {
-      "path": "internal/server/apidocs/catalog/healthlake.json",
-      "sha256": "06e3ca0ecdb3c25a8b282ddc0513753cb12a80df75b0d37cdc9c92fe6295fc5b",
-      "disposition": "presentation",
-      "reason": "Generated healthlake reference.",
-      "models": []
-    },
-    {
-      "path": "internal/server/apidocs/catalog/index.json",
-      "sha256": "586bee0f2563c22587b8a4b228630acad9a881934c1dff914d3b1dc57bf644b8",
-      "disposition": "presentation",
-      "reason": "Generated reference index listing the newly added services.",
-      "models": []
-    },
-    {
-      "path": "internal/server/apidocs/catalog/ivs-realtime.json",
-      "sha256": "64a869b30fb6340cbde8e0a6ac309471ce6816ad5281eedc42942aca69cd712f",
-      "disposition": "presentation",
-      "reason": "Generated ivs-realtime reference.",
-      "models": []
-    },
-    {
-      "path": "internal/server/apidocs/catalog/ivs.json",
-      "sha256": "10e3648cef734528493ef8d97ae61f0d6323ef73b5528ae750bba71082658fd6",
-      "disposition": "presentation",
-      "reason": "Generated ivs reference.",
-      "models": []
-    },
-    {
-      "path": "internal/server/apidocs/catalog/ivschat.json",
-      "sha256": "3b6e8f8d5a4df10f720102b88917fa0d949f1075ed715eb8f484d95c575dcc7e",
-      "disposition": "presentation",
-      "reason": "Generated ivschat reference.",
-      "models": []
-    },
-    {
-      "path": "internal/server/apidocs/catalog/keyspaces.json",
-      "sha256": "e199f402fce9493962d10a97ac5f8d9e82a13fccbc0a19a3d23371bc4aad4da5",
-      "disposition": "presentation",
-      "reason": "Generated keyspaces reference.",
-      "models": []
-    },
-    {
-      "path": "internal/server/apidocs/catalog/kinesisvideo.json",
-      "sha256": "468d771222b141f415fedf53cf4ddd2ffd0d0da4bad1edd2371bcc8d17c28bd3",
-      "disposition": "presentation",
-      "reason": "Generated kinesisvideo reference.",
-      "models": []
-    },
-    {
-      "path": "internal/server/apidocs/catalog/lakeformation.json",
-      "sha256": "cc2ad9c353088a7289a1f66c96b9e057d29122b53f897234821bb0ecf3639e82",
-      "disposition": "presentation",
-      "reason": "Generated lakeformation reference.",
-      "models": []
-    },
-    {
-      "path": "internal/server/apidocs/catalog/m2.json",
-      "sha256": "a0a18eb0c0a8f764f972baeb12b92f70e83bd9fe0ca2e3fd4cd0316231f80087",
-      "disposition": "presentation",
-      "reason": "Generated m2 reference.",
-      "models": []
-    },
-    {
-      "path": "internal/server/apidocs/catalog/mediaconnect.json",
-      "sha256": "fa35c453c230ba4a9e78ee60e60aa274e2772c5aa0832048240cf551b148c6ec",
-      "disposition": "presentation",
-      "reason": "Generated mediaconnect reference.",
-      "models": []
-    },
-    {
-      "path": "internal/server/apidocs/catalog/mediaconvert.json",
-      "sha256": "958fd9052e3aa7bc14018818dcb67ab426558a44fd01203347159456f16cd963",
-      "disposition": "presentation",
-      "reason": "Generated mediaconvert reference.",
-      "models": []
-    },
-    {
-      "path": "internal/server/apidocs/catalog/medialive.json",
-      "sha256": "75145ce97f347ad87430ff5813e17be50ed0f00bbbcfc6bc991da720f10a6fb5",
-      "disposition": "presentation",
-      "reason": "Generated medialive reference.",
-      "models": []
-    },
-    {
-      "path": "internal/server/apidocs/catalog/mediapackage-vod.json",
-      "sha256": "1f2c7c097c2ce6d40685011e1ab00e5a7aaba3e76b43aff4a1c51935f34dbea9",
-      "disposition": "presentation",
-      "reason": "Generated mediapackage-vod reference.",
-      "models": []
-    },
-    {
-      "path": "internal/server/apidocs/catalog/mediapackage.json",
-      "sha256": "980972ddfd27595bf97b23276f9c0b392ed7197d99a13b4f7968097d7e151de3",
-      "disposition": "presentation",
-      "reason": "Generated mediapackage reference.",
-      "models": []
-    },
-    {
-      "path": "internal/server/apidocs/catalog/mediapackagev2.json",
-      "sha256": "44b46d09c28db2611141a12f2c113bbddb0bff0542489bbe7553b87d7a5b3ed5",
-      "disposition": "presentation",
-      "reason": "Generated mediapackagev2 reference.",
-      "models": []
-    },
-    {
-      "path": "internal/server/apidocs/catalog/mediatailor.json",
-      "sha256": "110db6ac7a2af64b4faab8e6fb0c8e90a7bfd7ea82549517f82989fb87324046",
-      "disposition": "presentation",
-      "reason": "Generated mediatailor reference.",
-      "models": []
-    },
-    {
-      "path": "internal/server/apidocs/catalog/medical-imaging.json",
-      "sha256": "c3313e6c33a91f6ab628004c2844dd8e8be5e84e03f380bae5e49236cc7b6364",
-      "disposition": "presentation",
-      "reason": "Generated medical-imaging reference.",
-      "models": []
-    },
-    {
-      "path": "internal/server/apidocs/catalog/mgh.json",
-      "sha256": "3938b4eb110d4391709f359ec79b71d7dba98bb22cd3c6c2aa9b194c03086eca",
-      "disposition": "presentation",
-      "reason": "Generated mgh reference.",
-      "models": []
-    },
-    {
-      "path": "internal/server/apidocs/catalog/mgn.json",
-      "sha256": "544f8894789d2dda168f58aa48640e68d2167b95cc8f90f2a72db58945020995",
-      "disposition": "presentation",
-      "reason": "Generated mgn reference.",
-      "models": []
-    },
-    {
-      "path": "internal/server/apidocs/catalog/network-firewall.json",
-      "sha256": "e8db091fbf9bd368b2b6c4f8548509bbb3aba9f7c0b5b28cf5e99d1b7db57719",
-      "disposition": "presentation",
-      "reason": "Generated network-firewall reference.",
-      "models": []
-    },
-    {
-      "path": "internal/server/apidocs/catalog/omics.json",
-      "sha256": "59f24443511784dcaf4f36c6e96f55f1e65b1d5724999e5ca0ff5d585a87e27f",
-      "disposition": "presentation",
-      "reason": "Generated omics reference.",
-      "models": []
-    },
-    {
-      "path": "internal/server/apidocs/catalog/outposts.json",
-      "sha256": "d1348268e1d8fea811744afe2b6c73c7c4cba6675d3d28384be7a6f8d2fca236",
-      "disposition": "presentation",
-      "reason": "Generated outposts reference.",
-      "models": []
-    },
-    {
-      "path": "internal/server/apidocs/catalog/pcs.json",
-      "sha256": "2df1a98bb6a052003225156d9ed38179ed62764b92b417e1a24d47c36d4de09e",
-      "disposition": "presentation",
-      "reason": "Generated pcs reference.",
-      "models": []
-    },
-    {
-      "path": "internal/server/apidocs/catalog/personalize.json",
-      "sha256": "7f2eb5439c9804b20aae200a8f1d227ae1fb020e8395f8d14d9406a08c69c6c7",
-      "disposition": "presentation",
-      "reason": "Generated personalize reference.",
-      "models": []
-    },
-    {
-      "path": "internal/server/apidocs/catalog/qbusiness.json",
-      "sha256": "4a986577ced96032f2a52c451c404fa61438b250e7371093b2da3c6dcc094921",
-      "disposition": "presentation",
-      "reason": "Generated qbusiness reference.",
-      "models": []
-    },
-    {
-      "path": "internal/server/apidocs/catalog/quicksight.json",
-      "sha256": "bf959fca5c45a7200b763b9a4252b0ccc440c1a769a0a0d86a4da62c12359a65",
-      "disposition": "presentation",
-      "reason": "Generated quicksight reference.",
-      "models": []
-    },
-    {
-      "path": "internal/server/apidocs/catalog/rds.json",
-      "sha256": "feb41706b018e7e27692e0828d71c092c37d1cc9ea28699daf1bac75436ae531",
-      "disposition": "presentation",
-      "reason": "Generated rds reference.",
-      "models": []
-    },
-    {
-      "path": "internal/server/apidocs/catalog/redshift.json",
-      "sha256": "e32dfa30ee56113dd9da2db4e5fee90e3322699244522ea514e22daafd5d68eb",
-      "disposition": "presentation",
-      "reason": "Generated redshift reference.",
-      "models": []
-    },
-    {
-      "path": "internal/server/apidocs/catalog/repostspace.json",
-      "sha256": "c2b979abcaa582f9fe5801a456ccfb0d1823ba708f6dac2385a76848755b989b",
-      "disposition": "presentation",
-      "reason": "Generated repostspace reference.",
-      "models": []
-    },
-    {
-      "path": "internal/server/apidocs/catalog/serverlessrepo.json",
-      "sha256": "b56fe1d02a45c57de36fee411dec122ffdc1b00a0e70f2af2587a53c9061e115",
-      "disposition": "presentation",
-      "reason": "Generated serverlessrepo reference.",
-      "models": []
-    },
-    {
-      "path": "internal/server/apidocs/catalog/transfer.json",
-      "sha256": "3e8304a22fad7ea2eeb6c2e65554094c0a8e56c48b24ee30e6b65a1ac56027c2",
-      "disposition": "presentation",
-      "reason": "Generated transfer reference.",
-      "models": []
-    },
-    {
-      "path": "internal/server/apidocs/catalog/workmail.json",
-      "sha256": "021aea8d0d33d3ea633c6ecb7dc8dfcc76880b6048a0655f8a3067953f9388d4",
-      "disposition": "presentation",
-      "reason": "Generated workmail reference.",
-      "models": []
-    },
-    {
-      "path": "internal/server/aws_catalog_query_test.go",
-      "sha256": "902ad32551f9bd70b63400f33e8c1f07420363e814ea11db19f55a8ec25b8fc6",
-      "disposition": "test-support",
-      "reason": "Composed-server routing regressions for the catalog Query services and the native handlers beside them.",
+      "reason": "Azure console presentation or generated asset metadata; unrelated provider styles and signed runtime policy unchanged.",
       "models": []
     },
     {
       "path": "internal/server/web/app.js",
+      "sha256": "2d9f6d15289c437921972bbd6c084dd42623358a8271a71aa6d6c72f34c6c86f",
       "disposition": "modeled",
-      "reason": "Catalog Edit binds the version and body from the accepted current read to a single user-initiated update; the bundled change is limited to the Catalog UI. Includes the AppStream App blocks view, which uses the existing single-write and epoch guards for native create, exact ARN describe and delete. Also covers the existing epoch and single-write boundaries used by the native Kinesis Video data retention edit.",
+      "reason": "Model binds only the changed Azure row target, retirement epoch and successful payload publication. Exact bundle additionally retains already merged Cloud DNS and Sakura Server console inputs.",
       "models": [
         {
-          "id": "CatalogConsoleEpoch",
+          "id": "AzureBlobRowDownload",
           "properties": [
-            "OnlyCurrentReplies",
-            "SingleWriter",
-            "FailureVisible"
+            "RowIsRequestTarget",
+            "CurrentDownloadOnly",
+            "SuccessfulBytesOnly"
           ],
-          "limits": "Finite UI model covers epochs, single writes and error visibility, not concrete response projection, optimistic token shape, or browser behavior (covered separately by runtime tests). The model does not cover AppStream packaging form validation, S3 URI decomposition or actual browser/API interaction. The Kinesis UI composition reuses these abstract epoch/write guards; the model does not prove integer conversion, directional retention deltas, pinned AWS API parity, actual browser interaction or other SDK/Terraform behavior."
-        }
-      ],
-      "sha256": "b65df437a37b66c1ca15f7b0cd25d3ef25d770e9827e424ce91ef0dfe5103ac8"
-    },
-    {
-      "path": "scripts/formal_model_gate.py",
-      "sha256": "a10d6acf7042feb2fbf2e8a6f4eacdd5eeaaab3a93d1513716bdf723aa9d32df",
-      "disposition": "formal-infrastructure",
-      "reason": "Require the exact SAR target model, property inventory, source scope and sensitivity controls.",
-      "models": []
-    },
-    {
-      "path": "scripts/test-formal-gate.py",
-      "sha256": "2d71d0c7401d1fdf45688082a75b9699caba8d50dcea9755bdedaf368111d33f",
-      "disposition": "formal-infrastructure",
-      "reason": "Preserves main SimpleDB policy detector tests and explicit inventory while adding the existing SAR policy authorization model inventory and detector tests.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/aws_catalog_console.py",
-      "sha256": "d167e95a8be87524036438e1a537762da569d53c17d6794ba4a26dd5d1088d01",
-      "disposition": "test-support",
-      "reason": "Browser and Node regression evidence for the catalog Edit version and full-stack save flow.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/aws_catalog_fixtures.py",
-      "sha256": "dc82101603f6a1bfc565ab56275f1a1be38efe5038a18eb193349098b8d68253",
-      "disposition": "test-support",
-      "reason": "Fixture runner: a fixture may name the catalog model it runs against and the denial code and status its service returns; defaults are unchanged.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/catalog_fixtures/aiops.json",
-      "sha256": "51ad8a425453eb45eeec9db0d85bdad53a47da37cc47de1765466b48b66a4ca3",
-      "disposition": "test-support",
-      "reason": "boto3 lifecycle fixture for aiops.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/catalog_fixtures/appflow.json",
-      "sha256": "547adb1405269415ace071b79cba219c0441513b4f59bcc878a133fd788405a3",
-      "disposition": "test-support",
-      "reason": "boto3 lifecycle fixture for appflow.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/catalog_fixtures/artifact.json",
-      "sha256": "c2e02cbacc17681cdd10fd086588d50af0b3faf0c905f9a9858c667b49525790",
-      "disposition": "test-support",
-      "reason": "boto3 lifecycle fixture for artifact.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/catalog_fixtures/autoscaling.json",
-      "sha256": "40ec8dd1499f03b108c1b6334340dd21bafadaf25b6a9434f3d6006ff42514cc",
-      "disposition": "test-support",
-      "reason": "boto3 lifecycle fixture for autoscaling.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/catalog_fixtures/b2bi.json",
-      "sha256": "9f20dc5ed4c677e06ea3ae43ba62ccadcb82f8816c43449a390d18cd0d4239d3",
-      "disposition": "test-support",
-      "reason": "boto3 lifecycle fixture for b2bi.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/catalog_fixtures/batch.json",
-      "sha256": "8fb8891f0f02c702dc97b7adb818fb158ffb0aab9d6457e0d08a142cee069ffc",
-      "disposition": "test-support",
-      "reason": "boto3 lifecycle fixture for batch.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/catalog_fixtures/bcm-data-exports.json",
-      "sha256": "ce51015a42797a08b462920f5f9cbb6d36ec5a1b8c7104ae97d2c244e95d92c3",
-      "disposition": "test-support",
-      "reason": "boto3 lifecycle fixture for bcm-data-exports.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/catalog_fixtures/braket.json",
-      "sha256": "412a4a8b45de20fd16ed8a10a3846a07cf3d27d7f3d0aa4424b6a2022f3273ac",
-      "disposition": "test-support",
-      "reason": "boto3 lifecycle fixture for braket.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/catalog_fixtures/ce.json",
-      "sha256": "178b45b00a0cdf7b4dc08cade04904b8e5746dbbd07171e04177ff3414abfc7c",
-      "disposition": "test-support",
-      "reason": "boto3 lifecycle fixture for ce.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/catalog_fixtures/chime-sdk-identity.json",
-      "sha256": "06a232eeeca46baf176158af0c1c3d9fcaf3dea3a7f610a0fb6a55782074a870",
-      "disposition": "test-support",
-      "reason": "boto3 lifecycle fixture for chime-sdk-identity.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/catalog_fixtures/chime-sdk-media-pipelines.json",
-      "sha256": "cff4f6fdeadb259f7d65c3bf764f715b61ac021c3185ca51b8e49645b154a902",
-      "disposition": "test-support",
-      "reason": "boto3 lifecycle fixture for chime-sdk-media-pipelines.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/catalog_fixtures/chime-sdk-voice.json",
-      "sha256": "21a51355bd458d7c9e6bd24deb4936e8e052b96b16aaee76b9b6c0b167251089",
-      "disposition": "test-support",
-      "reason": "boto3 lifecycle fixture for chime-sdk-voice.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/catalog_fixtures/cleanrooms.json",
-      "sha256": "0340705beef67e1237c5cf5f6e5f2b416c4270a56300eed51c2e4608f89945d5",
-      "disposition": "test-support",
-      "reason": "boto3 lifecycle fixture for cleanrooms.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/catalog_fixtures/cleanroomsml.json",
-      "sha256": "809cf51491bd02b09653311950be05ef9253563122dde667ea0c935960ca6549",
-      "disposition": "test-support",
-      "reason": "boto3 lifecycle fixture for cleanroomsml.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/catalog_fixtures/cloudsearch.json",
-      "sha256": "749d083bfcf602b4014965fc412ebd9e6933f6dead550ebe3cab2bd84c82663b",
-      "disposition": "test-support",
-      "reason": "boto3 lifecycle fixture for cloudsearch.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/catalog_fixtures/codeguruprofiler.json",
-      "sha256": "83cb1564eb40555b776f74e0487753c4e4e246837ca9ef5d2190d0f5ffd26a26",
-      "disposition": "test-support",
-      "reason": "boto3 lifecycle fixture for codeguruprofiler.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/catalog_fixtures/connect.json",
-      "sha256": "50bd520c8e84d798a807d8958c66f9211d428a620b47b1fbb6809d4d60ef03e7",
-      "disposition": "test-support",
-      "reason": "boto3 lifecycle fixture for connect.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/catalog_fixtures/datazone.json",
-      "sha256": "c7f75296233dff30b24cbf961f51fccbfeb988e66c1aa1431b22c0caa612b157",
-      "disposition": "test-support",
-      "reason": "boto3 lifecycle fixture for datazone.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/catalog_fixtures/deadline.json",
-      "sha256": "b0c15844f7f7d867c564d439d7a710415911f8ca2e92a7e094788f33f24146aa",
-      "disposition": "test-support",
-      "reason": "boto3 lifecycle fixture for deadline.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/catalog_fixtures/directconnect.json",
-      "sha256": "e23be66540ef5d305ee17909bcba13e84080799f4888cc1007feea6625e9b0cb",
-      "disposition": "test-support",
-      "reason": "boto3 lifecycle fixture for directconnect.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/catalog_fixtures/dms.json",
-      "sha256": "7f7a9aab7ab4ba49e13955a8921dabab93bcaeae5bcc6727c0e6ea10ba23e1fa",
-      "disposition": "test-support",
-      "reason": "boto3 lifecycle fixture for dms.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/catalog_fixtures/docdb.json",
-      "sha256": "9516fb3bbd78691ed60b50170dd0763ec3440ee7ec8cd573ca1a69b7c6720c55",
-      "disposition": "test-support",
-      "reason": "boto3 lifecycle fixture for docdb.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/catalog_fixtures/drs.json",
-      "sha256": "be3bda4143dcab61d83d7cf260bd32535aba4cdf02ffa082e8eddcb11a84d8dd",
-      "disposition": "test-support",
-      "reason": "boto3 lifecycle fixture for drs.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/catalog_fixtures/elasticache.json",
-      "sha256": "17f58c8b3c0b81af3e83fbaaf8a47ae8d631e6a54d1b36122888431a78d6cc90",
-      "disposition": "test-support",
-      "reason": "boto3 lifecycle fixture for elasticache.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/catalog_fixtures/elasticbeanstalk.json",
-      "sha256": "7206cd9172177e6d36361e73f3d39282c0e462945f7a2d727f47ab2614ff1dbb",
-      "disposition": "test-support",
-      "reason": "boto3 lifecycle fixture for elasticbeanstalk.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/catalog_fixtures/emr-containers.json",
-      "sha256": "b31cb04f68c66594988a700e3be8fe42e37b8a670921d9d6f7f5a45ebc57f719",
-      "disposition": "test-support",
-      "reason": "boto3 lifecycle fixture for emr-containers.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/catalog_fixtures/emr-serverless.json",
-      "sha256": "0d1ece990214d3e126e664bb4357e953e3644d696f603483f5a9663d34b31713",
-      "disposition": "test-support",
-      "reason": "boto3 lifecycle fixture for emr-serverless.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/catalog_fixtures/emr.json",
-      "sha256": "cd760d77aee4b6d9aefc092bbaeb900da23aa47d465d3c8dda2eaa8c115d4a11",
-      "disposition": "test-support",
-      "reason": "boto3 lifecycle fixture for emr.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/catalog_fixtures/forecast.json",
-      "sha256": "3ba0aeaa37402b6811cab05820802fa73c54fb678cb1c3b47a2a791840bee5e1",
-      "disposition": "test-support",
-      "reason": "boto3 lifecycle fixture for forecast.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/catalog_fixtures/frauddetector.json",
-      "sha256": "8c9e36544600bf89c2ed308446e668b9effe000ea2cca6c471797c65630050d3",
-      "disposition": "test-support",
-      "reason": "boto3 lifecycle fixture for frauddetector.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/catalog_fixtures/grafana.json",
-      "sha256": "d8dc4459eac274dd68761dc065c8607df72c3606b49959d58d53bcf4e4b63d4e",
-      "disposition": "test-support",
-      "reason": "boto3 lifecycle fixture for grafana.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/catalog_fixtures/groundstation.json",
-      "sha256": "575092302722e7ee3a23a5adae1e536c07223f800dd750bf80851b61ef005c3f",
-      "disposition": "test-support",
-      "reason": "boto3 lifecycle fixture for groundstation.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/catalog_fixtures/healthlake.json",
-      "sha256": "872589fcf721d7459f3a14ca530181381d2708d8075186112ae5685c4ff8055e",
-      "disposition": "test-support",
-      "reason": "boto3 lifecycle fixture for healthlake.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/catalog_fixtures/ivs-realtime.json",
-      "sha256": "bd10ceed9619682af12958e5aa22168a394d1ba0dc90b95a0f38939a2e333f12",
-      "disposition": "test-support",
-      "reason": "boto3 lifecycle fixture for ivs-realtime.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/catalog_fixtures/ivs.json",
-      "sha256": "058768b7faa798b4505e96ed7a3d8aa0a92e2d6cc8f9648dd7e615722b5b91fb",
-      "disposition": "test-support",
-      "reason": "boto3 lifecycle fixture for ivs.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/catalog_fixtures/ivschat.json",
-      "sha256": "16f2f3f62a81bd22330a4a2d0fee4b9b4e94ee1d18c75e93cb4ab291b713b84a",
-      "disposition": "test-support",
-      "reason": "boto3 lifecycle fixture for ivschat.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/catalog_fixtures/keyspaces.json",
-      "sha256": "0fad1c8a6b978d67a3fe5c9ff88755185fe22802a401ae49aab11c2736a896be",
-      "disposition": "test-support",
-      "reason": "boto3 lifecycle fixture for keyspaces.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/catalog_fixtures/kinesisvideo.json",
-      "sha256": "62ad33dacc1da0c591814ec80b8cb1fc0d07bc359527a98f52fc353c3d1cb00e",
-      "disposition": "test-support",
-      "reason": "boto3 lifecycle fixture for kinesisvideo.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/catalog_fixtures/lakeformation.json",
-      "sha256": "ee08506a2f4c332f1aba5390926817596533a97bd8fb374793d54c2d75409b67",
-      "disposition": "test-support",
-      "reason": "boto3 lifecycle fixture for lakeformation.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/catalog_fixtures/m2.json",
-      "sha256": "741f7bc64be751ac3fa0eb802a566749fb69ef08d4f3f4a25bbe1453d92f67e4",
-      "disposition": "test-support",
-      "reason": "boto3 lifecycle fixture for m2.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/catalog_fixtures/mediaconnect.json",
-      "sha256": "67286b5ae162bcdc6fd109f44f4c63b02e75f36e42298915dc4380741b6a1a18",
-      "disposition": "test-support",
-      "reason": "boto3 lifecycle fixture for mediaconnect.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/catalog_fixtures/mediaconvert.json",
-      "sha256": "a75215eb31f250fd070a1d6abe0dbf764d97dfba66a0e9325634250ea149f4ef",
-      "disposition": "test-support",
-      "reason": "boto3 lifecycle fixture for mediaconvert.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/catalog_fixtures/medialive.json",
-      "sha256": "a7ecb9b3659eb429a02ff1d89ec2535111b9826e7366d8387957ff432858670e",
-      "disposition": "test-support",
-      "reason": "boto3 lifecycle fixture for medialive.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/catalog_fixtures/mediapackage-vod.json",
-      "sha256": "57ef7e12e04ebc5fc8623706c2a57c58e7eacad9910582ddba053282088477ba",
-      "disposition": "test-support",
-      "reason": "boto3 lifecycle fixture for mediapackage-vod.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/catalog_fixtures/mediapackage.json",
-      "sha256": "badaf1acfc8d051255401b2104e8be80b56a5f043cb61bd5c279b7403a382d59",
-      "disposition": "test-support",
-      "reason": "boto3 lifecycle fixture for mediapackage.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/catalog_fixtures/mediapackagev2.json",
-      "sha256": "6505a40a9d2e2eb6007d6e79b1f97b97fa61c279956b0f66b9e9ed8bda997da4",
-      "disposition": "test-support",
-      "reason": "boto3 lifecycle fixture for mediapackagev2.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/catalog_fixtures/mediatailor.json",
-      "sha256": "dcd6613774fb571a14f24b08c1d70416a38940f3309709ede897a04e8307e9c5",
-      "disposition": "test-support",
-      "reason": "boto3 lifecycle fixture for mediatailor.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/catalog_fixtures/medical-imaging.json",
-      "sha256": "2d1552cd13e86cc2599b9eda233e7960faaf065ccb1bde0401fb8196996de4ca",
-      "disposition": "test-support",
-      "reason": "boto3 lifecycle fixture for medical-imaging.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/catalog_fixtures/mgh.json",
-      "sha256": "10d12d3879e6fa3e6c5ad860eea8a986e16fd261b50ddae0d2039923a858bf3e",
-      "disposition": "test-support",
-      "reason": "boto3 lifecycle fixture for mgh.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/catalog_fixtures/mgn.json",
-      "sha256": "d7e8b446c28ea2e93caf82b566ca5349adea561ce157f6b58058584900cc2d21",
-      "disposition": "test-support",
-      "reason": "boto3 lifecycle fixture for mgn.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/catalog_fixtures/neptune.json",
-      "sha256": "916bd041cccbec2ef4aa06e0457e2d73fbfb2e59db833c0fe5a4c38bce1db547",
-      "disposition": "test-support",
-      "reason": "boto3 lifecycle fixture for neptune.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/catalog_fixtures/network-firewall.json",
-      "sha256": "f752271bdf7b4a6fa50b7382d756bd72fd9bd50499f9d5d60f6196e040109fb4",
-      "disposition": "test-support",
-      "reason": "boto3 lifecycle fixture for network-firewall.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/catalog_fixtures/omics.json",
-      "sha256": "a44e4dc1f8afab7f3225a01ebbc1e1eb3c41d09cb0a0439e5cf38d3aae8b2571",
-      "disposition": "test-support",
-      "reason": "boto3 lifecycle fixture for omics.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/catalog_fixtures/outposts.json",
-      "sha256": "b9046b3c3dd6d87b1350d8329cc2825af2ab49d96c996b7eb209b48b539eb229",
-      "disposition": "test-support",
-      "reason": "boto3 lifecycle fixture for outposts.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/catalog_fixtures/pcs.json",
-      "sha256": "b19ee3ee65bf4302f7a50a10d9245ac0131f76393b1aa63ef3d7711c137ae246",
-      "disposition": "test-support",
-      "reason": "boto3 lifecycle fixture for pcs.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/catalog_fixtures/personalize.json",
-      "sha256": "3207981c8f8dc6bf51a50d77b4b48a3f9bb9cbd0cca0029f1ae2e01f1eec5962",
-      "disposition": "test-support",
-      "reason": "boto3 lifecycle fixture for personalize.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/catalog_fixtures/qbusiness.json",
-      "sha256": "ec8224b4ea8a5d2a336e5efe20233f21b254397331de2375ecf39112d10d5067",
-      "disposition": "test-support",
-      "reason": "boto3 lifecycle fixture for qbusiness.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/catalog_fixtures/quicksight.json",
-      "sha256": "b1f3fe172c89931c578742209c09603ea80ef8246dbd1a1fdfaa0d072dd4d3de",
-      "disposition": "test-support",
-      "reason": "boto3 lifecycle fixture for quicksight.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/catalog_fixtures/rds.json",
-      "sha256": "7110328d92b426c97478ef9a6208227b18ba40b5a3d7040fabd8d152b39663e1",
-      "disposition": "test-support",
-      "reason": "boto3 lifecycle fixture for rds.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/catalog_fixtures/redshift.json",
-      "sha256": "a000d8c10e6f50c649abab6bed973d55128cd2cae4f561341153d0041ba5fd3a",
-      "disposition": "test-support",
-      "reason": "boto3 lifecycle fixture for redshift.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/catalog_fixtures/repostspace.json",
-      "sha256": "0a05ddd20f6fa207ebe2c4660a8e515423d062b554018a193841785f7940984d",
-      "disposition": "test-support",
-      "reason": "boto3 lifecycle fixture for repostspace.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/catalog_fixtures/serverlessrepo.json",
-      "sha256": "86e025bd5c713a470a204a031404b8d0119bbb26bd50bb2f8b04c254d720d141",
-      "disposition": "test-support",
-      "reason": "boto3 lifecycle fixture for serverlessrepo.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/catalog_fixtures/transfer.json",
-      "sha256": "bb4b062c6afc75b43b1681d302bc74ca2336ffa44dc99ae8c2eddd391bf151c3",
-      "disposition": "test-support",
-      "reason": "boto3 lifecycle fixture for transfer.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/catalog_fixtures/workmail.json",
-      "sha256": "cf05d19f3caf14ece5287e947e03e511cf7511e6490841a52cbe626b70a379e0",
-      "disposition": "test-support",
-      "reason": "boto3 lifecycle fixture for workmail.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/check.py",
-      "sha256": "a01f4f01c6dbd836e6b6ce5622b1c608e850b9c2a94e9aebbe4b43573ed44a6d",
-      "disposition": "test-support",
-      "reason": "Gives the catalog console test a longer timeout, because its sweep grows with the number of catalog services.",
-      "models": []
-    },
-    {
-      "path": "tools/console/bundle-digests.json",
-      "disposition": "presentation",
-      "reason": "Generated asset digests from combined current Sakura, DNS, AppStream, and Kinesis console inputs.",
-      "models": [],
-      "sha256": "01ee29987f8aba40f0f0e226aa63b47bc006d3acedaeace2a17fcb16d070e8a1"
-    },
-    {
-      "path": "tools/console/bundle-inputs.json",
-      "disposition": "presentation",
-      "reason": "Generated input graph from combined current Sakura, DNS, AppStream, and Kinesis console source.",
-      "models": [],
-      "sha256": "4bc1259e8a2042835ac696d7d3114c346646814e2ff41acc06eba58755117ea2"
-    },
-    {
-      "path": "tools/console/src/appstream-app-block.jsx",
-      "disposition": "presentation",
-      "reason": "Bounded packaging form and review presentation; native creates and epoch handling remain in the Catalog view.",
-      "models": [],
-      "sha256": "9a6b0c000930e843fb4a74a2aac7a7ca79558cadaa4d42d52222481443e98f5b"
-    },
-    {
-      "path": "tools/console/src/appstream-app-block.mjs",
-      "disposition": "presentation",
-      "reason": "Presentation-only conversion of AppStream form values to native metadata request members and an exact selected ARN; no networking, store access, or authority.",
-      "models": [],
-      "sha256": "5b722a2f1f05296b8c083ef9ca60e70f1a72643a80a627226613333d8d8ea599"
-    },
-    {
-      "path": "tools/console/src/catalog.jsx",
-      "sha256": "589691ecd2efd8d36d58f800754a3165ffd0424aa06fcdca8027ab526eddbf92",
-      "disposition": "modeled",
-      "reason": "Catalog Edit binds the version and body from the accepted current read to a single user-initiated update; the bundled change is limited to the Catalog UI. Includes the AppStream App blocks view, which uses the existing single-write and epoch guards for native create, exact ARN describe and delete. Also covers the existing epoch and single-write boundaries used by the native Kinesis Video data retention edit.",
-      "models": [
-        {
-          "id": "CatalogConsoleEpoch",
-          "properties": [
-            "OnlyCurrentReplies",
-            "SingleWriter",
-            "FailureVisible"
-          ],
-          "limits": "Finite UI model covers epochs, single writes and error visibility, not concrete response projection, optimistic token shape, or browser behavior (covered separately by runtime tests). The model does not cover AppStream packaging form validation, S3 URI decomposition or actual browser/API interaction. The Kinesis UI composition reuses these abstract epoch/write guards; the model does not prove integer conversion, directional retention deltas, pinned AWS API parity, actual browser interaction or other SDK/Terraform behavior."
+          "limits": "Models explicit row identity versus toolbar selection, one in-flight operation, a bounded two-request epoch and view retirement, and only bounded successful abstract HTTP bytes may emit a download. Does not execute DNS, React/focus, the browser/anchor, URL/path mapping, authentication, HTTP or Blob bytes and does not establish implementation refinement. Generated app.js binding covers only Azure row download behavior introduced by this change."
         }
       ]
     },
     {
-      "path": "tools/console/src/kinesis-video-retention.jsx",
-      "disposition": "presentation",
-      "reason": "Presents the Kinesis Video Streams absolute retention controls; stateful edits and native authority remain in the Catalog view and gateway.",
-      "models": [],
-      "sha256": "a055ce0b310f6255ccdb87ff4a3153d1067189f7b24583f0d5f64b1c5471dfd1"
-    },
-    {
-      "path": "tools/console/src/kinesis-video-retention.mjs",
-      "disposition": "presentation",
-      "reason": "Pure conversion from desired retention and the read snapshot to the descriptor-native direction and delta; no networking or storage.",
-      "models": [],
-      "sha256": "620ac0e26df8b2d4bfa008705dc71873389ca93848fa6870635afef7f69b48fe"
-    },
-    {
-      "path": "tools/console/test/appstream-app-block.test.mjs",
-      "disposition": "presentation",
-      "reason": "Offline AppStream form payload and selected-ARN regression cases; no browser or live provider execution.",
-      "models": [],
-      "sha256": "5a46b65ee1477f9adf824c2d3bf5f3fa36f65d7075dfba030f7120c36b076740"
-    },
-    {
-      "path": "tools/console/tests/catalog-edit-token.test.mjs",
-      "sha256": "f9f70ad37b6fca323205128386720c515e7c153fdf5ba6b8da355bb93ca7f59e",
-      "disposition": "presentation",
-      "reason": "Browser and Node regression evidence for the catalog Edit version and full-stack save flow.",
+      "path": "scripts/formal_model_gate.py",
+      "sha256": "03c7c6c7fb514b90d9be98dd87760af523e2324d42a7ce15a7e69e8ae4c2837c",
+      "disposition": "formal-infrastructure",
+      "reason": "Registers or pins the bounded XSM checks and preserves the existing exact model/control inventory.",
       "models": []
     },
     {
-      "path": "tools/console/tests/catalog-input.test.mjs",
-      "disposition": "presentation",
-      "reason": "The existing generic compatibility harness resolves the new bounded Kinesis helper and keeps prior AppStream and RDS assertions.",
-      "models": [],
-      "sha256": "37b00d84bf7c1efc5ca63207414489df62c0ab85e8d2d7fd29ccbb539389be27"
-    },
-    {
-      "path": "tools/console/tests/fixtures/catalog-descriptors.json",
-      "sha256": "db96c9291fde8f8eb32eb83ba729883cdb547ae6f524b9398b995e2b0cfe0c0a",
-      "disposition": "presentation",
-      "reason": "Descriptor fixture regenerated by the Go catalog tests after specification changes.",
+      "path": "scripts/test-formal-gate.py",
+      "sha256": "3b6795532b660d7dd3555723f1270f124c4b5e93624f180536b9a2f569539d68",
+      "disposition": "formal-infrastructure",
+      "reason": "Preserves current main SimpleDB and merged catalog/SAR policy detector tests and inventory while retaining the existing three Azure read model detector tests.",
       "models": []
     },
     {
-      "path": "tools/console/tests/kinesis-video-retention.test.mjs",
+      "path": "test/e2e/azure_blob_structured_crc64_sdk.py",
+      "sha256": "a9cab870ee2e21c8149c6eb842cc7af0663b2cc99b49970b82be9fbd65cd66ff",
+      "disposition": "test-support",
+      "reason": "Opt-in official Azure Python SDK fixture verifies the caller-supplied exact review SHA against an independently verified build receipt, approved runner, binary digest and reviewed SDK lock.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/check.py",
+      "sha256": "0fb6baeb56b11bfc93802d2e4632e6151a1d550930af2c676cace69ecc41f556",
+      "disposition": "test-support",
+      "reason": "Runs the sandbox source guard before the existing mandatory cross-provider real-browser fixture; no skip or failure conversion.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/crossprovider_console.py",
+      "sha256": "50fb69fc38bb57fb05d2a5c5e1660a44fec32521db5a70b1c0fdbc42a39274ed",
+      "disposition": "test-support",
+      "reason": "Requires Chromium sandbox in the existing two-CLI GCP/Azure console fixture while preserving local process/authentication, native state readback, request guard and cleanup operations.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/test_azure_blob_structured_crc64_sdk.py",
+      "sha256": "70d87e36b15071d443af21d113c204377b00784880d6c8fb3f06cb120680f783",
+      "disposition": "test-support",
+      "reason": "Offline regression checks bind fixture preflight and report to a supplied candidate, reject stale proofs, and never run the simulator or official SDK.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/test_crossprovider_browser_sandbox.py",
+      "sha256": "760604ba7202715984a8b66cbb0a9fbbbf4d0dec0b9f20a8655efd5c09cda724",
+      "disposition": "test-support",
+      "reason": "Offline guards reject missing/default/false sandbox settings and disabled sandbox layers, and require detector plus real fixture in aggregate Conformance.",
+      "models": []
+    },
+    {
+      "path": "tools/console/bundle-digests.json",
+      "sha256": "110c96fd22c6acbe2bea7fd69068bebadb2903925e1e51002491301de869684f",
       "disposition": "presentation",
-      "reason": "Offline regression for local retention conversion, absolute boundaries and a captured stream version; not browser or live API evidence.",
-      "models": [],
-      "sha256": "1d645d88d96bbc6cccccf18ad3c0e726d5d9e2cc758244f537d2990b71a5cf04"
+      "reason": "Azure console presentation or generated asset metadata; unrelated provider styles and signed runtime policy unchanged.",
+      "models": []
+    },
+    {
+      "path": "tools/console/bundle-inputs.json",
+      "sha256": "26243a7fee5fd894464ceabbc3f8af567e653d07d45e625963d57b0842f9b70c",
+      "disposition": "presentation",
+      "reason": "Azure console presentation or generated asset metadata; unrelated provider styles and signed runtime policy unchanged.",
+      "models": []
+    },
+    {
+      "path": "tools/console/src/azure-blob.css",
+      "sha256": "32f1ad1c48cfb8b39de62160337413b2c8afb1c57a182283748d272bcab81bb6",
+      "disposition": "presentation",
+      "reason": "Azure console presentation or generated asset metadata; unrelated provider styles and signed runtime policy unchanged.",
+      "models": []
+    },
+    {
+      "path": "tools/console/src/azure-blob.jsx",
+      "sha256": "a749fab1b4a00e0266e19e585643463930cf8ea7477bd17b59f40aad2ee860ab",
+      "disposition": "modeled",
+      "reason": "Model binds only the changed Azure row target, retirement epoch and successful payload publication.",
+      "models": [
+        {
+          "id": "AzureBlobRowDownload",
+          "properties": [
+            "RowIsRequestTarget",
+            "CurrentDownloadOnly",
+            "SuccessfulBytesOnly"
+          ],
+          "limits": "Models explicit row identity versus toolbar selection, one in-flight operation, a bounded two-request epoch and view retirement, and only bounded successful abstract HTTP bytes may emit a download. Does not execute DNS, React/focus, the browser/anchor, URL/path mapping, authentication, HTTP or Blob bytes and does not establish implementation refinement. Generated app.js binding covers only Azure row download behavior introduced by this change."
+        }
+      ]
     }
   ]
 }

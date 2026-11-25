@@ -58,3 +58,9 @@
 .azure-container-more>summary:focus-visible{outline:2px solid var(--az-blue);outline-offset:2px}
 .azure-container-more>div{position:absolute;inset-inline-start:0;top:100%;z-index:4;max-width:min(280px,100%);background:#fff;border:1px solid var(--az-border);box-shadow:0 3px 9px #0002;padding:4px}
 .azure-container-more>div>button{display:block;width:100%;text-align:start;white-space:normal}
+
+.azure-blob-view .azure-blob-actions-column{width:5.5rem}
+.azure-blob-view .azure-blob-actions-trigger{width:32px;height:32px;padding:0;color:var(--az-blue)}
+.azure-blob-view .azure-blob-actions-trigger[aria-disabled=true]{color:#737373;cursor:default}
+.azure-blob-row-actions{margin-top:4px;padding:3px;border:1px solid var(--az-border);background:#fff;box-shadow:0 2px 5px #0002}
+.azure-blob-row-actions button{min-height:32px;max-width:100%;padding:2px 4px;text-align:start;white-space:normal;overflow-wrap:anywhere}

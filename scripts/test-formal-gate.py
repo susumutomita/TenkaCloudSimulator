@@ -1258,11 +1258,101 @@ class FormalGateTests(unittest.TestCase):
         finally:
             path.write_text(original)
 
+    def test_azure_conditional_crc_read_registration_is_required(self):
+        name = 'AzureConditionalCRCRead'
+        properties = ('TypeOK', 'DeniedBeforeOptions', 'OptionsBeforeLookup',
+                      'MissingBeforeDate', 'CacheHitHasNoPartialOutput', 'EligibleSelectedCRC',
+                      'CRCRejectsOversize', 'CRCEmitsOnlyWhenRequested')
+        controls = {
+            'OptionsBeforeOwner': 'DeniedBeforeOptions',
+            'LookupBeforeOptions': 'OptionsBeforeLookup',
+            'CacheBeforeExistence': 'MissingBeforeDate',
+            'EmitCRCOnCacheHit': 'CacheHitHasNoPartialOutput',
+            'OmitCap': 'CRCRejectsOversize',
+        }
+        scope = {
+            'internal/azure/blob/http.go', 'internal/azure/blob/range.go',
+            'internal/azure/blob/store.go', 'internal/azure/blob/types.go',
+            'internal/azure/blob/range_crc64_test.go',
+            'internal/azure/blob/read_time_condition_test.go',
+            'internal/azure/blob/read_time_range_checksum_test.go',
+        }
+        path = self.root / 'formal/models.json'
+        original = path.read_text()
+        config_path = self.root / 'formal/AzureConditionalCRCRead.cfg'
+        config = config_path.read_text()
+
+        def write_variant(transform, remove_invariant=None):
+            changed = json.loads(original)
+            target = next(model for model in changed['models'] if model['id'] == name)
+            transform(changed, target)
+            path.write_text(json.dumps(changed))
+            config_path.write_text(config if remove_invariant is None else
+                                   config.replace(' ' + remove_invariant, ''))
+
+        entry = next(model for model in load_registry(self.root)['models'] if model['id'] == name)
+        self.assertEqual(tuple(entry['properties']), properties)
+        self.assertEqual({m['id']: m['expect_invariant'] for m in entry['mutants']}, controls)
+        self.assertEqual(set(entry['source_scope']), scope)
+        try:
+            write_variant(lambda changed, target: changed['models'].remove(target))
+            with self.assertRaisesRegex(GateError, 'required existing model was removed'):
+                load_registry(self.root)
+            for prop in properties:
+                with self.subTest(property=prop):
+                    write_variant(lambda _, target: target['properties'].remove(prop), prop)
+                    with self.assertRaisesRegex(GateError, 'required invariant was removed'):
+                        load_registry(self.root)
+            for control in controls:
+                with self.subTest(control=control):
+                    write_variant(lambda _, target: target.update(
+                        mutants=[m for m in target['mutants'] if m['id'] != control]))
+                    with self.assertRaisesRegex(GateError, 'required mutation control was removed'):
+                        load_registry(self.root)
+            for path_name in sorted(scope):
+                with self.subTest(scope=path_name):
+                    write_variant(lambda _, target: target['source_scope'].remove(path_name))
+                    with self.assertRaisesRegex(GateError, 'required exact source scope changed'):
+                        load_registry(self.root)
+            write_variant(lambda _, target: target['source_scope'].append('docs/azure-blob.md'))
+            with self.assertRaisesRegex(GateError, 'required exact source scope changed'):
+                load_registry(self.root)
+        finally:
+            path.write_text(original)
+            config_path.write_text(config)
+
+    def test_azure_blob_row_download_controls_remain_bound(self):
+        path = self.root / 'formal/models.json'
+        original = path.read_bytes()
+        reg = load_registry(self.root)
+        model = next(m for m in reg['models'] if m['id'] == 'AzureBlobRowDownload')
+        self.assertEqual(set(model['source_scope']),
+                         {'internal/server/web/app.js', 'tools/console/src/azure-blob.jsx'})
+        self.assertEqual(set(model['properties']),
+                         {'TypeOK', 'RowIsRequestTarget', 'CurrentDownloadOnly', 'SuccessfulBytesOnly'})
+        chk = json.loads(original)
+        row = next(m for m in chk['models'] if m['id'] == 'AzureBlobRowDownload')
+        controls = {m['id']: m for m in row['mutants']}
+        self.assertEqual(set(controls),
+                         {'UseToolbarSelection', 'AllowRetiredCompletion', 'AllowBadPayload'})
+        source = (self.root / row['model']).read_text()
+        first = controls['UseToolbarSelection']
+        alternate = controls['AllowRetiredCompletion']
+        first['edits'] = alternate['edits']
+        first['expect_invariant'] = alternate['expect_invariant']
+        apply_mutant(source, row['id'], first)
+        try:
+            path.write_text(json.dumps(chk))
+            with self.assertRaisesRegex(GateError, 'Azure Blob row download mutation controls changed'):
+                load_registry(self.root)
+        finally:
+            path.write_bytes(original)
+
     def test_complete_registry_and_exact_mutations(self):
         registry = load_registry(self.root)
         # Keep this inventory independent of the implementation's required set.
         # A newly registered model must be reviewed and named here explicitly.
-        self.assertEqual({model['id'] for model in registry['models']}, {'EC2VPCOwnership', 'SimpleDBDomainMetadata', 'SimpleDBLifecycle', 'SimpleDBPageCursor', 'SimpleDBQueryAdmission', 'CloudDNSAtomicChange', 'CloudDNSChildToken', 'CloudDNSConsoleScope', 'SakuraServerMetadata', 'SakuraServerReadEpoch', 'CFNParameterRuleAdmission', 'ECSTaskRevisionLifecycle', 'VpcOriginReferenceLifecycle', 'ARPTrustedReply', 'PersistentIngressPolicy', 'AppEngineTraffic', 'AutoScalingPlanTargets', 'AzureBlobState', 'AzurePropertiesEpoch', 'AzurePropertiesTarget', 'BedrockRuntimeAdmission', 'BlobRange', 'BrowserSessions', 'CFNConditionAdmission', 'CFNConditionMemoDepth', 'CFNEventHistory', 'CFNFinalCleanupACK', 'CFNNativeIAMTransaction', 'CFNParameterSnapshot', 'CFNPhysicalResourceACK', 'CanonicalVMComposition', 'CatalogConsoleEpoch', 'CatalogResourceLifecycle', 'SARPolicyAuthorizationTarget', 'CloudWatchLogsLifecycle', 'CloudWatchLogsViewEpoch', 'CommandDispatchLifecycle', 'ConsoleHandoff', 'DurableGuestLease', 'DynamoDBAdmission', 'DynamoDBConsoleEpoch', 'DynamoDBLifecycle', 'EC2GuestAttachmentLifecycle', 'EC2ReadDiscovery', 'ELBTargetLifecycle', 'EngineLifecycle', 'FrameCodecLifecycle', 'GCPStorageState', 'GuestCommandLifecycle', 'HTTPObservationLifecycle', 'IAMBuiltinPinTransaction', 'IAMConditionEvaluation', 'IAMInstanceProfiles', 'IAMManagedPolicies', 'InstanceMetadataTokens', 'KMSAliasCatalog', 'KMSAliasCrypto', 'KMSAliasesViewEpoch', 'KMSBootstrapTransaction', 'KMSKeyState', 'KMSProtocolAdmission', 'LambdaExecutionRoleBridge', 'LambdaSourceEdit', 'MacPreparationAdmission', 'MacProbeLifecycle', 'LambdaLogTailDisclosure', 'LandingAccessAdmission', 'LandingTopologyState', 'ListenerLifecycle', 'LoginInputIntent', 'NICSessionBookkeeping', 'NativeCommandIssuer', 'NativeIAMOwnership', 'NativeWireProjection', 'ObjectStore', 'OwnedClockQualification', 'OwnedProbeAttachmentLifecycle', 'OwnedProbeDispatchPolicy', 'OwnedProbeSessionLifecycle', 'PacketAdmission', 'ParticipantSessionLifecycle', 'PassiveServiceBoundary', 'PersistentTransportLifecycle', 'ProbeOperationLifecycle', 'ProjectAuthority', 'ProviderActor', 'ProviderPath', 'RESTDeploymentSnapshot', 'RESTProxyEventBoundary', 'RESTRouteMatching', 'Route53AtomicBatch', 'S3MultipartState', 'S3Versions', 'SNSAdmission', 'SNSLifecycle', 'SNSQueueFanout', 'SQSBatchDeletion', 'SQSConsoleEpoch', 'SQSLifecycle', 'SQSStorageBudget', 'SSMBatchDeletion', 'SSMDocumentState', 'SSMDurableCommands', 'SSMParameterState', 'STSSessionLifecycle', 'SakuraDiskAdmission', 'SakuraDiskMetadata', 'SakuraDisksViewEpoch', 'SakuraStartupAdmission', 'SecretDescriptionWorkflow', 'SecretMetadataUpdate', 'SecretMetadataViewEpoch', 'SecretVersionListing', 'SecretsDisclosureChannels', 'SecretsMutationRefresh', 'SecretsRevealEpoch', 'SecretsVersionLifecycle', 'StackOwnership', 'StartupTokenVisibility', 'TCPRouteClassification', 'TerminalClientEpoch', 'WAFAssociationAuthorization', 'WAFRequestEvaluation'})
+        self.assertEqual({model['id'] for model in registry['models']}, {'SimpleDBDomainMetadata', 'SimpleDBLifecycle', 'SimpleDBPageCursor', 'SimpleDBQueryAdmission', 'SARPolicyAuthorizationTarget', 'AzureConditionalCRCRead', 'AzureStructuredReadAdmission', 'AzureBlobRowDownload', 'EC2VPCOwnership', 'CloudDNSAtomicChange', 'CloudDNSChildToken', 'CloudDNSConsoleScope', 'SakuraServerMetadata', 'SakuraServerReadEpoch', 'CFNParameterRuleAdmission', 'ECSTaskRevisionLifecycle', 'VpcOriginReferenceLifecycle', 'ARPTrustedReply', 'PersistentIngressPolicy', 'AppEngineTraffic', 'AutoScalingPlanTargets', 'AzureBlobState', 'AzurePropertiesEpoch', 'AzurePropertiesTarget', 'BedrockRuntimeAdmission', 'BlobRange', 'BrowserSessions', 'CFNConditionAdmission', 'CFNConditionMemoDepth', 'CFNEventHistory', 'CFNFinalCleanupACK', 'CFNNativeIAMTransaction', 'CFNParameterSnapshot', 'CFNPhysicalResourceACK', 'CanonicalVMComposition', 'CatalogConsoleEpoch', 'CatalogResourceLifecycle', 'CloudWatchLogsLifecycle', 'CloudWatchLogsViewEpoch', 'CommandDispatchLifecycle', 'ConsoleHandoff', 'DurableGuestLease', 'DynamoDBAdmission', 'DynamoDBConsoleEpoch', 'DynamoDBLifecycle', 'EC2GuestAttachmentLifecycle', 'EC2ReadDiscovery', 'ELBTargetLifecycle', 'EngineLifecycle', 'FrameCodecLifecycle', 'GCPStorageState', 'GuestCommandLifecycle', 'HTTPObservationLifecycle', 'IAMBuiltinPinTransaction', 'IAMConditionEvaluation', 'IAMInstanceProfiles', 'IAMManagedPolicies', 'InstanceMetadataTokens', 'KMSAliasCatalog', 'KMSAliasCrypto', 'KMSAliasesViewEpoch', 'KMSBootstrapTransaction', 'KMSKeyState', 'KMSProtocolAdmission', 'LambdaExecutionRoleBridge', 'LambdaSourceEdit', 'MacPreparationAdmission', 'MacProbeLifecycle', 'LambdaLogTailDisclosure', 'LandingAccessAdmission', 'LandingTopologyState', 'ListenerLifecycle', 'LoginInputIntent', 'NICSessionBookkeeping', 'NativeCommandIssuer', 'NativeIAMOwnership', 'NativeWireProjection', 'ObjectStore', 'OwnedClockQualification', 'OwnedProbeAttachmentLifecycle', 'OwnedProbeDispatchPolicy', 'OwnedProbeSessionLifecycle', 'PacketAdmission', 'ParticipantSessionLifecycle', 'PassiveServiceBoundary', 'PersistentTransportLifecycle', 'ProbeOperationLifecycle', 'ProjectAuthority', 'ProviderActor', 'ProviderPath', 'RESTDeploymentSnapshot', 'RESTProxyEventBoundary', 'RESTRouteMatching', 'Route53AtomicBatch', 'S3MultipartState', 'S3Versions', 'SNSAdmission', 'SNSLifecycle', 'SNSQueueFanout', 'SQSBatchDeletion', 'SQSConsoleEpoch', 'SQSLifecycle', 'SQSStorageBudget', 'SSMBatchDeletion', 'SSMDocumentState', 'SSMDurableCommands', 'SSMParameterState', 'STSSessionLifecycle', 'SakuraDiskAdmission', 'SakuraDiskMetadata', 'SakuraDisksViewEpoch', 'SakuraStartupAdmission', 'SecretDescriptionWorkflow', 'SecretMetadataUpdate', 'SecretMetadataViewEpoch', 'SecretVersionListing', 'SecretsDisclosureChannels', 'SecretsMutationRefresh', 'SecretsRevealEpoch', 'SecretsVersionLifecycle', 'StackOwnership', 'StartupTokenVisibility', 'TCPRouteClassification', 'TerminalClientEpoch', 'WAFAssociationAuthorization', 'WAFRequestEvaluation'})
 
         for model in registry['models']:
             source = (self.root / model['model']).read_text()

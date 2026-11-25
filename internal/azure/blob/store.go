@@ -330,12 +330,17 @@ func (s *Service) load(tx *sql.Tx, container, key string, body bool) (entity, bo
 	return out, true, nil
 }
 
-func (s *Service) object(ctx context.Context, op Operation, container, key string, cond condition, data []byte, meta map[string]string, contentType string) (entity, error) {
+func (s *Service) object(ctx context.Context, op Operation, container, key string, cond condition, data []byte, meta map[string]string, contentType string, requestErr error) (entity, error) {
 	tx, err := s.begin(ctx, op, container, key)
 	if err != nil {
 		return entity{}, err
 	}
 	defer tx.Rollback()
+	// Header admission must not reveal a result before the owner check, but
+	// its outcome is independent of whether the container or object exists.
+	if requestErr != nil {
+		return entity{}, requestErr
+	}
 	if _, err = s.parent(tx, container); err != nil {
 		return entity{}, err
 	}
@@ -346,7 +351,7 @@ func (s *Service) object(ctx context.Context, op Operation, container, key strin
 	if op != PutBlob && !exists {
 		return out, fail(404, "BlobNotFound", "The specified blob does not exist.")
 	}
-	if err = cond.check(out.ETag, exists, op == GetBlob || op == GetBlobProperties); err != nil {
+	if err = cond.check(out.ETag, out.Modified, exists, op == GetBlob || op == GetBlobProperties); err != nil {
 		return out, err
 	}
 	switch op {

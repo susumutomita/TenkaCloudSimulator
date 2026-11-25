@@ -59,8 +59,9 @@ SAS and managed-identity/DefaultAzureCredential lookups are unsupported.
 ## Native REST subset
 
 The account-in-path emulator shape is `/{account}/{container}/{blob}`. Requests
-must supply `x-ms-version: 2023-11-03`; this is a deliberately pinned local subset,
-not a claim of the latest API/SDK feature set. Root routing must preserve matching
+use `x-ms-version: 2023-11-03` for the operations below. A separately negotiated
+[structured CRC64 profile](#bounded-structured-crc64-reads) is available only for
+Get Blob. Neither profile claims the full Azure API or SDK feature set. Root routing must preserve matching
 URL.Path/RawPath and must not normalize data paths through ServeMux/path.Clean.
 
 | Operation | Method and suffix | Successful status |
@@ -87,8 +88,10 @@ PUT replaces the full body and metadata; it does not append. Every successful wr
 gets a fresh opaque ETag even for the same body. Blob conditions support a single
 strong If-Match/If-None-Match tag or wildcard, one condition at a time. Failed
 write conditions return412 without mutation; a matching read If-None-Match
-returns304. Lists/date conditions and conditional container operations are not
-implemented. Staged blocks, PageBlob/AppendBlob, snapshots/versions, leases,
+returns304. Blob GET and HEAD also accept a single If-Modified-Since
+without an ETag condition, returning304 when Last-Modified is not later.
+Compound conditions, other date conditions and conditional container/list
+operations are not implemented. Staged blocks, PageBlob/AppendBlob, snapshots/versions, leases,
 copy, soft deletion, encryption/tiers and access-policy operations fail explicitly.
 
 Delete Container removes its contained blobs atomically. Local cleanup is
@@ -248,15 +251,17 @@ and exact Content-Range/Content-Length; an end beyond the object is clamped,
 and a start at/beyond the end returns416. Suffix and multiple ranges are rejected
 with400, as are unsupported date conditions and range headers on other operations.
 The entire bounded blob is verified before selecting response bytes; this is not
-streaming unbounded storage. Strong ETag conditions and authorization execute
+streaming unbounded storage. Supported read conditions and authorization execute
 before range selection. Invalid/denied reads do not change stored state.
 
 A partial response omits whole-blob Content-MD5. Explicit
 `x-ms-range-get-content-md5: true` returns the selected bytes' MD5 only for a
 specified range of at most4MiB; absent range, unsupported Boolean values or a
-larger selection return400. CRC64 range checksums remain unsupported. Full GET
-retains its whole-blob MD5. Accept-Ranges is bytes; version remains pinned to
-2023-11-03. Existing bounded TLA transitions do not model HTTP range parsing,
+larger selection return400. A caller can instead request CRC64 for the same bounded
+range with `x-ms-range-get-content-crc64: true`; the result is the Azure Storage
+CRC64 value in `x-ms-content-crc64`. Requests selecting both algorithms return400. Full GET
+retains its whole-blob MD5. Accept-Ranges is bytes; this unframed profile uses
+`2023-11-03`. Existing bounded TLA transitions do not model HTTP range parsing,
 checksums or these response headers; native boundary tests are separate evidence.
 
 References: [Get Blob response and range checksum rules](https://learn.microsoft.com/en-us/rest/api/storageservices/get-blob)
@@ -276,3 +281,32 @@ state. This is historical native httptest/SQLite and fixture-loopback evidence
 only; SDK, authenticated server composition and whole-repository CI were still
 pending at `e6cb13d`. Later SDK execution is recorded separately above, without
 claiming fresh final integration CI success.
+
+## Bounded structured CRC64 reads
+
+Opt in on an ordinary **Get Blob** request by sending both of these headers once:
+
+```http
+x-ms-version: 2025-01-05
+x-ms-structured-body: XSM/1.0; properties=crc64
+```
+
+The same local ownership and read conditions apply. Successful whole or
+single-range GETs return respectively 200 or 206 with one CRC64-framed segment
+of at most 4 MiB of selected data. `Content-Length` is the framed wire length;
+`x-ms-structured-content-length` is the payload length. Partial responses retain
+a logical `Content-Range`. The usual `Content-MD5` is not a checksum of the
+framed body and is not sent for it.
+
+`2025-01-05` is not a second general-purpose API version: HEAD, lists and writes
+still use the ordinary profile. Do not combine structured mode with either
+`x-ms-range-get-content-*` checksum option. Unsupported negotiation or oversized
+selections return an error, not an unframed fallback; conditional 304 and denied
+reads do not return a structured body. Multi-segment responses and broader Azure
+or client-version parity are outside scope.
+
+The [optional official SDK fixture](../test/e2e/azure_blob_structured_crc64_sdk.py)
+can exercise a single CRC64 range read on a specific candidate, using independently
+verified build provenance and a pinned SDK environment. The historical
+`2023-11-03` SDK acceptance above is not proof of this profile or of a later
+candidate.

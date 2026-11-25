@@ -41,6 +41,9 @@ export default function AzureBlobView({request,account='tenkacloudlocal'}) {
   const {locale,setLocale,t}=useLocale();
   const pane=useRef(null), opener=useRef(null), firstField=useRef(null);
   const [menuFilter,setMenuFilter]=useState('');
+  const [rowMenu,setRowMenu]=useState(null);
+  const rowDownload=useRef(null), rowMenuOpener=useRef(null);
+  useEffect(()=>{if(rowMenu!==null)rowDownload.current?.focus();},[rowMenu]);
   const [properties,setProperties]=useState(null);
   const [container,setContainer]=useState(''),[rows,setRows]=useState([]),[next,setNext]=useState(''),[selection,setSelection]=useState([]),[filter,setFilter]=useState('');
   const [busy,setBusy]=useState(false),[error,setError]=useState(''),[notice,setNotice]=useState(''),[modal,setModal]=useState(''),[name,setName]=useState(''),[confirm,setConfirm]=useState(''),[files,setFiles]=useState([]),[overwrite,setOverwrite]=useState('');
@@ -57,7 +60,7 @@ export default function AzureBlobView({request,account='tenkacloudlocal'}) {
   };
   async function perform(task) {
     const life=lifecycle.current;if(!life.active||life.busy||!validAccount)return;
-    life.busy=true;const epoch=++life.epoch,controller=new AbortController();life.controller=controller;setBusy(true);setError('');setNotice('');
+    life.busy=true;const epoch=++life.epoch,controller=new AbortController();life.controller=controller;setRowMenu(null);setBusy(true);setError('');setNotice('');
     const current=()=>life.active&&life.epoch===epoch&&!controller.signal.aborted;
     const timer=setTimeout(()=>controller.abort(),30000);
     const native=async(path,options={})=>{
@@ -117,12 +120,25 @@ export default function AzureBlobView({request,account='tenkacloudlocal'}) {
     await native(removingContainer?containerPath(selected.name)+'?restype=container':blobPath(container,selected.name),{method:'DELETE',headers:removingContainer?{}:{'If-Match':selected.etag}});
     await fetchPage(native,signal,current,removingContainer?'':container);if(current()){setModal('');setNotice(removingContainer?'Container and all its blobs deleted.':'Blob deleted.');}
   });
-  const download=()=>perform(async(native,signal,current)=>{
-    const bytes=await boundedBytes(await native(blobPath(container,selected.name)),MAX_BLOB,signal);if(!current())return;
-    const url=URL.createObjectURL(new Blob([bytes],{type:'application/octet-stream'}));downloadURLs.current.add(url);
-    const a=document.createElement('a');a.href=url;a.download=selected.name.split('/').pop()||'blob';a.click();
-    setTimeout(()=>{URL.revokeObjectURL(url);downloadURLs.current.delete(url);},1000);
-  });
+  const download=row=>{
+    if(!container||!row||!rows.includes(row))return;
+    return perform(async(native,signal,current)=>{
+      const bytes=await boundedBytes(await native(blobPath(container,row.name)),MAX_BLOB,signal);if(!current())return;
+      const url=URL.createObjectURL(new Blob([bytes],{type:'application/octet-stream'}));downloadURLs.current.add(url);
+      const a=document.createElement('a');a.href=url;a.download=row.name.split('/').pop()||'blob';a.click();
+      setTimeout(()=>{URL.revokeObjectURL(url);downloadURLs.current.delete(url);},1000);
+    });
+  };
+  const showRowMenu=(row,trigger)=>{
+    if(!container||lifecycle.current.busy||!trigger)return;
+    rowMenuOpener.current=trigger;
+    if(rowMenu===row.name)rowDownload.current?.focus();
+    else setRowMenu(row.name);
+  };
+  const dismissRowMenu=(restore=false)=>{
+    setRowMenu(null);
+    if(restore)rowMenuOpener.current?.focus();
+  };
   const validContainer=/^(?!.*--)[a-z0-9][a-z0-9-]{1,61}[a-z0-9]$/.test(name);
   const formError=!validAccount?'This host has not configured a valid local storage account.':error;
   // Only our finite static messages are localized; never resource names or API values.
@@ -163,18 +179,38 @@ export default function AzureBlobView({request,account='tenkacloudlocal'}) {
         <div className="azure-command-bar" aria-label={t('Storage actions','ストレージ操作')}>
           <button type="button" disabled={busy||!validAccount} onClick={()=>open(container?'upload':'create')}>{container?t('Upload','アップロード'):t('+ Container','+ コンテナー')}</button>
           <button type="button" disabled={busy||!validAccount} onClick={()=>load()}>↻ {t('Refresh','最新の情報に更新')}</button>
-          {container&&<><button type="button" disabled={busy||!selected} onClick={download}>↓ {t('Download','ダウンロード')}</button><button type="button" disabled={busy||!selected} onClick={()=>showProperties(selected)}>{t('Properties','プロパティ')}</button></>}
+          {container&&<><button type="button" disabled={busy||!selected} onClick={()=>download(selected)}>↓ {t('Download','ダウンロード')}</button><button type="button" disabled={busy||!selected} onClick={()=>showProperties(selected)}>{t('Properties','プロパティ')}</button></>}
           {!container&&<details className="azure-container-more" onKeyDown={event=>{if(event.key==='Escape'){event.preventDefault();event.currentTarget.open=false;event.currentTarget.querySelector('summary').focus();}}}>
             <summary aria-disabled={busy||!selected} tabIndex={busy||!selected?-1:0} onClick={event=>{if(busy||!selected)event.preventDefault();}}>{t('More','その他')} <span aria-hidden="true">⋯</span></summary>
             <div><button type="button" disabled={busy||!selected} onClick={event=>{const menu=event.currentTarget.closest('details');menu.open=false;menu.querySelector('summary').focus();showProperties(selected,'container');}}>{t('Container properties','コンテナーのプロパティ')}</button></div>
           </details>}
           <button type="button" disabled={busy||!selected} onClick={()=>open(container?'delete-blob':'delete-container')}>{t('Delete','削除')}</button>
         </div>
-        <label className="azure-page-filter"><span className="azure-visually-hidden">{t('Filter this page by name','このページを名前で絞り込み')}</span><input type="search" placeholder={t('Filter this page by name','このページを名前で絞り込み')} value={filter} onChange={e=>setFilter(e.target.value)}/></label>
+        <label className="azure-page-filter"><span className="azure-visually-hidden">{t('Filter this page by name','このページを名前で絞り込み')}</span><input type="search" placeholder={t('Filter this page by name','このページを名前で絞り込み')} value={filter} onChange={e=>{setFilter(e.target.value);dismissRowMenu();}}/></label>
         <p className="azure-result-count" role="status">{busy?t('Loading storage resources','ストレージ リソースを読み込み中'):t(`${rows.length} on this page`, `このページに ${rows.length} 件`)}</p>
         <div className="azure-table-scroll"><table aria-label={container?t('Blobs','BLOB'):t('Containers','コンテナー')} aria-busy={busy}>
-          <thead><tr><th scope="col"><span className="azure-visually-hidden">{t('Select','選択')}</span></th><th scope="col">{t('Name','名前')}</th><th scope="col">{t('Last modified','最終更新日時')}</th>{container?<><th scope="col">{t('Blob type','BLOB の種類')}</th><th scope="col">{t('Size (bytes)','サイズ (バイト)')}</th></>:<th scope="col">{t('Anonymous access level','匿名アクセス レベル')}</th>}</tr></thead>
-          <tbody>{rows.filter(row=>row.name.toLowerCase().includes(filter.toLowerCase())).map(row=><tr key={row.name} className={selected?.name===row.name?'azure-selected':''}><td><input type="checkbox" aria-label={t('Select ','選択: ')+row.name} checked={selected?.name===row.name} disabled={busy} onChange={e=>setSelection(e.target.checked?[row]:[])}/></td><td>{container?<button className="azure-row-link" type="button" disabled={busy} onClick={()=>showProperties(row)}>{row.name}</button>:<a className="azure-row-link" href="#container" onClick={e=>{e.preventDefault();if(!busy)load(row.name);}}>{row.name}</a>}</td><td>{row.modified}</td>{container?<><td>{row.type}</td><td>{row.size}</td></>:<td>{t('Private (local subject required)','非公開 (ローカルの主体が必要)')}</td>}</tr>)}</tbody>
+          <thead><tr><th scope="col"><span className="azure-visually-hidden">{t('Select','選択')}</span></th><th scope="col">{t('Name','名前')}</th><th scope="col">{t('Last modified','最終更新日時')}</th>{container?<><th scope="col">{t('Blob type','BLOB の種類')}</th><th scope="col">{t('Size (bytes)','サイズ (バイト)')}</th><th scope="col" className="azure-blob-actions-column"><span className="azure-visually-hidden">{t('Actions','操作')}</span></th></>:<th scope="col">{t('Anonymous access level','匿名アクセス レベル')}</th>}</tr></thead>
+          <tbody>{rows.filter(row=>row.name.toLowerCase().includes(filter.toLowerCase())).map(row=>{
+            const activeMenu=!!container&&rowMenu===row.name;
+            const actionTrigger=node=>node.querySelector('.azure-blob-actions-trigger');
+            return <tr key={row.name} className={selected?.name===row.name?'azure-selected':''}
+              onContextMenu={container?event=>{event.preventDefault();showRowMenu(row,actionTrigger(event.currentTarget));}:undefined}
+              onKeyDown={container?event=>{
+                if(event.key==='Escape'&&activeMenu){event.preventDefault();dismissRowMenu(true);}
+                else if(event.key==='ContextMenu'||(event.shiftKey&&event.key==='F10')){
+                  event.preventDefault();showRowMenu(row,actionTrigger(event.currentTarget));
+                }
+              }:undefined}
+              onBlur={activeMenu?event=>{if(!event.currentTarget.contains(event.relatedTarget))dismissRowMenu();}:undefined}>
+              <td><input type="checkbox" aria-label={t('Select ','選択: ')+row.name} checked={selected?.name===row.name} disabled={busy} onChange={e=>setSelection(e.target.checked?[row]:[])}/></td>
+              <td>{container?<button className="azure-row-link" type="button" disabled={busy} onClick={()=>showProperties(row)}>{row.name}</button>:<a className="azure-row-link" href="#container" onClick={e=>{e.preventDefault();if(!busy)load(row.name);}}>{row.name}</a>}</td><td>{row.modified}</td>
+              {container?<><td>{row.type}</td><td>{row.size}</td><td className="azure-blob-actions-column">
+                <button type="button" className="azure-blob-actions-trigger" aria-label={t('Actions for ','操作: ')+row.name} aria-disabled={busy} aria-expanded={activeMenu}
+                  onClick={event=>{if(busy)return;if(activeMenu)dismissRowMenu();else showRowMenu(row,event.currentTarget);}}><span aria-hidden="true">⋯</span></button>
+                {activeMenu&&<div className="azure-blob-row-actions"><button type="button" ref={rowDownload} onClick={()=>{dismissRowMenu(true);download(row);}}>{t('Download','ダウンロード')}</button></div>}
+              </td></>:<td>{t('Private (local subject required)','非公開 (ローカルの主体が必要)')}</td>}
+            </tr>;
+          })}</tbody>
         </table></div>
         {!busy&&!rows.length&&<p className="azure-empty">{container?t('No blobs on this page. Upload a block blob to get started.','このページに BLOB はありません。ブロック BLOB をアップロードしてください。'):t('No containers on this page. Create a private container to get started.','このページにコンテナーはありません。非公開のコンテナーを作成してください。')}</p>}
         <div className="azure-pagination"><button type="button" disabled={busy||!validAccount} onClick={()=>load()}>{t('First page','最初のページ')}</button><button type="button" disabled={busy||!next} onClick={()=>load(container,next)}>{t('Next page','次のページ')}</button></div>

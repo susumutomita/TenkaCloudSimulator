@@ -27,6 +27,14 @@ does not install them. No missing capability/tool is skipped. It starts two real
 copied CLI binaries with separate persistent SQLite paths/private token files,
 empty executable PATH and actual minted browser cookies. It closes browser
 contexts and CLI processes in finally paths; state fixtures use temporary DBs.
+Chromium is launched with `chromium_sandbox=True`; sandbox-disabled execution is
+not an acceptance option. Missing kernel/sandbox support must fail the check.
+The existing authenticated numeric-loopback CLI setup and browser request guard
+remain in force. This helper does not itself provision a network namespace;
+any required isolated-runner boundary must already be provided. The offline
+`test_crossprovider_browser_sandbox.py` detector runs before the real fixture in
+Conformance and rejects removed/default/false sandbox settings and disabled
+sandbox layers. Its success does not establish a live browser or SDK run.
 
 ## Assertions
 

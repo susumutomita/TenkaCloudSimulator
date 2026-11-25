@@ -98,6 +98,7 @@ console, CloudFormation adapter or Challenge integration.
 - **Local AI inference (opt-in):** [Bedrock Runtime InvokeModel/Converse through your own
   Ollama or an optional macOS Foundation Models helper](docs/bedrock-runtime.md). Off by default; no cloud fallback, streaming or tool use.
 - **Other clouds:** [Google Cloud Storage / Azure Blob Storage](docs/multicloud-storage.md),
+  [Azure Blob conditional and CRC64 read limits](docs/azure-blob.md#single-range-download-subset),
   [App Engine (Python 3.12 WSGI versions, traffic splits, firewall)](docs/gcp-appengine.md),
   [Google Cloud console](docs/gcp-console.md), [Azure console](docs/azure-console.md),
   [opt-in Sakura Disk metadata](docs/sakura.md).
