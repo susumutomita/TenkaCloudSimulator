@@ -4,7 +4,11 @@ package aws
 
 import (
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
+	"reflect"
+	"slices"
 )
 
 // VerifyCompletedGuest checks a retained runtime receipt against its canonical
@@ -71,8 +75,68 @@ func (s *StackStore) VerifyCompletedGuest(ctx context.Context, source *EC2VMProb
 			}
 		}
 	}
-	if instances != 1 || ctx.Err() != nil || !commands.current(target) {
+	if instances != 1 || target.plan.canonical != run.plan.canonical ||
+		runtime.verifyGuestNetworkMembership(ctx, target, issuance) != nil ||
+		ctx.Err() != nil || !commands.current(target) {
 		return errGuestLease
 	}
 	return nil
+}
+
+// ec2GuestNetworkMembership identifies provider-owned topology, not a route
+// permit. Identical CIDRs in different VPCs or deployments are not equivalent.
+type ec2GuestNetworkMembership struct {
+	region, stack, vpc, subnet, generation string
+}
+
+func (s EC2NetworkSnapshot) membership() ec2GuestNetworkMembership {
+	return ec2GuestNetworkMembership{s.Region, s.StackID, s.vpcID, s.SubnetID, s.Seal}
+}
+
+// verifyGuestNetworkMembership reads the exact retained network lease through
+// its mutation fence. It grants neither ingress nor access to a backend. Future
+// traffic still needs admission inside the actual live owner and policy fence.
+func (r *EC2InstanceRuntime) verifyGuestNetworkMembership(ctx context.Context, target *ec2InstanceRuntimeEntry, issuance EC2GuestIssuance) error {
+	if ctx == nil || ctx.Err() != nil || target == nil {
+		return errGuestLease
+	}
+	owner := issuance.Lease.Owner
+	r.mu.Lock()
+	lease, source, backend, plan := target.network, target.receipt, target.backend, target.plan
+	current := !r.shutting && !target.sealed && r.retained[owner.Instance] == target
+	r.mu.Unlock()
+	if !current || source == nil || r.network == nil || r.network.db != r.db || lease == nil ||
+		lease.store != r.network || backend == nil || backend.networkLease != lease || backend.owner != owner {
+		return errGuestLease
+	}
+	source.mu.Lock()
+	resource, ready := source.resource, source.ready && !source.sealed
+	source.mu.Unlock()
+	if !ready || resource == nil || resource.network != lease || resource.issuance != issuance ||
+		issuance.BackendIncarnation == ([32]byte{}) || resource.sealed.Load() {
+		return errGuestLease
+	}
+	groups := slices.Clone(plan.SecurityGroupIDs)
+	slices.Sort(groups)
+	return lease.Transact(ctx, func(snapshot EC2NetworkSnapshot) error {
+		member := snapshot.membership()
+		if member != lease.snapshot.membership() || member.region != owner.Region || member.stack != owner.Deployment ||
+			member.vpc == "" || member.subnet != plan.SubnetID || !guestLeaseToken.MatchString(member.generation) ||
+			!slices.Equal(groups, snapshot.SecurityGroupIDs) {
+			return errGuestLease
+		}
+		// Rebuild only the canonical NIC descriptor, not the VM or its network.
+		// This check applies equally to private subnets; no public route is needed.
+		nic, _, err := instanceNICDescriptor(owner, snapshot)
+		nic.Binding.BackendIncarnation = issuance.BackendIncarnation
+		if err != nil || !reflect.DeepEqual(nic, resource.descriptor) {
+			return errGuestLease
+		}
+		policy, err := json.Marshal(nic)
+		digest := sha256.Sum256(policy)
+		if err != nil || issuance.PolicyGeneration != hex.EncodeToString(digest[:]) || resource.sealed.Load() || ctx.Err() != nil {
+			return errGuestLease
+		}
+		return nil
+	})
 }

@@ -3,6 +3,7 @@
 package aws
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"os"
@@ -12,6 +13,14 @@ import (
 // Runs the real stack store and canonical runtime bookkeeping with the repository's
 // inert VM fixture. This is not a QEMU, socket, guest-command or SQL transport test.
 func TestCompletedBattleGuestRequiresOwnedStackAndReadyGeneration(t *testing.T) {
+	for _, name := range []string{"public_subnet", "private_subnet"} {
+		t.Run(name, func(t *testing.T) {
+			testCompletedBattleGuestRequiresOwnedStackAndReadyGeneration(t, name == "private_subnet")
+		})
+	}
+}
+
+func testCompletedBattleGuestRequiresOwnedStackAndReadyGeneration(t *testing.T, privateSubnet bool) {
 	fixture, _, _, _, _, _, ctx := vmBackendFixture(t)
 	stacks, err := NewStackStore(fixture.db)
 	if err != nil {
@@ -49,6 +58,15 @@ func TestCompletedBattleGuestRequiresOwnedStackAndReadyGeneration(t *testing.T) 
 	raw, err := os.ReadFile("testdata/hello-world-battle-original.yaml")
 	if err != nil {
 		t.Fatal(err)
+	}
+	if privateSubnet {
+		// Vary only the copy used by this lifecycle test. Keep the original
+		// problem and its checked-in bytes untouched.
+		public := []byte("MapPublicIpOnLaunch: true")
+		if bytes.Count(raw, public) != 1 {
+			t.Fatal("missing one known public subnet in the fixture")
+		}
+		raw = bytes.Replace(raw, public, []byte("MapPublicIpOnLaunch: false"), 1)
 	}
 	stack, err := compileStackWithParameters("us-east-1", "completed-rds-prerequisite", string(raw),
 		map[string]string{"NamePrefix": "tc-hello-team", "TenkaCloudAccountId": "000000000000",
@@ -124,6 +142,8 @@ func TestCompletedBattleGuestRequiresOwnedStackAndReadyGeneration(t *testing.T) 
 	if stacks.VerifyCompletedGuest(cancelled, source) == nil {
 		t.Fatal("cancelled admission")
 	}
+
+	testCompletedGuestNetworkMembership(t, ctx, stacks, runtime, source, fixture.networkLease, privateSubnet)
 
 	if err = stacks.Delete(stack.Region, stack.ID); err != nil {
 		t.Fatal(err)
