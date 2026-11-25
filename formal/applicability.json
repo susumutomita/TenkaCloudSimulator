@@ -1,62 +1,33 @@
 {
   "version": 1,
-  "base_sha": "6ac9cf77a85d262bf599cd42a1e0f7c45b6ce2cc",
+  "base_sha": "527d089485694f1506bca842fc57a277bdf2bfb0",
   "changes": [
     {
-      "path": "README.md",
-      "sha256": "3019fc9ab3ffaf0017cdc88a375978c4e3fa48b2100214a9a1f1ae8874fa4a9c",
-      "disposition": "documentation",
-      "reason": "Documents the bounded Batch queue configuration contract, not timing or execution.",
-      "models": []
-    },
-    {
-      "path": "docs/aws-catalog-services.md",
-      "sha256": "28acef4c174040642c8b04c9935a5d988139c3cddddf968601b183649b1f06f4",
-      "disposition": "documentation",
-      "reason": "Documents the bounded Batch queue configuration contract, not timing or execution.",
-      "models": []
-    },
-    {
-      "path": "docs/design/0001-go-standalone.md",
-      "sha256": "25ce6ef9e2a99a3ff644201cbc2f46377dd9040e21c3cc571571ed67440ea8e8",
-      "disposition": "documentation",
-      "reason": "Documents the bounded Batch queue configuration contract, not timing or execution.",
-      "models": []
-    },
-    {
-      "path": "internal/aws/catalog/batch_queue_time_limit_test.go",
-      "sha256": "74b853d3befdec89790ffd92c6a6e1dd46e0a00e0a36f4d4ae00a83ef08450f5",
+      "path": "test/rds/README.md",
+      "sha256": "79ff050dc6c045efb20488922911ad20fe33335538511454a29393d6d1534798",
       "disposition": "test-support",
-      "reason": "Focused Batch verification, not production implementation.",
+      "reason": "Optional host-side PostgreSQL test fixture only; no production, AWS, guest, or data-plane changes.",
       "models": []
     },
     {
-      "path": "internal/aws/catalog/services_compute3.go",
-      "sha256": "cae0d6034ac034326e36b75b580cd956ef7c5fd9b1a6dea3daffdd21fb7923a5",
-      "disposition": "modeled",
-      "reason": "Rejects invalid Batch queue time-limit actions through the existing catalog resource transaction; no scheduler, routing, identity or storage protocol change.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "FailureFrame"
-          ],
-          "limits": "The finite model covers only unchanged state after a rejected abstract operation. It does not model time limits, Batch queue families, SDK parsing, execution or Go refinement."
-        }
-      ]
-    },
-    {
-      "path": "internal/server/apidocs/catalog/batch.json",
-      "sha256": "1c012188b230e4170a57b6c5c6ca57b0ebcafc36ffc0dbb23ec6870c9e73415f",
-      "disposition": "presentation",
-      "reason": "Documents the bounded Batch queue configuration contract, not timing or execution.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/catalog_fixtures/batch.json",
-      "sha256": "425aa4be4c9f942890bc26fc4713bed8a7bbe3a5fe3532bcdf10c83097e0af29",
+      "path": "test/rds/read_nonce.sql",
+      "sha256": "f731eaa66f1c6fbf5a1c0a520b554385126d1487f1592eb2fd025ad85ec89e36",
       "disposition": "test-support",
-      "reason": "Focused Batch verification, not production implementation.",
+      "reason": "Optional host-side PostgreSQL test fixture only; no production, AWS, guest, or data-plane changes.",
+      "models": []
+    },
+    {
+      "path": "test/rds/verify_local_sql.py",
+      "sha256": "223b6370e725b543d5f6c6c07a27f451fb4c4d739d752af5d5aeb7cf8114a708",
+      "disposition": "test-support",
+      "reason": "Optional host-side PostgreSQL test fixture only; no production, AWS, guest, or data-plane changes.",
+      "models": []
+    },
+    {
+      "path": "test/rds/write_nonce.sql",
+      "sha256": "21f74aaca540d4b6191dbc0e954254d2d46201767fe7eb668bcbc48ab604f9a7",
+      "disposition": "test-support",
+      "reason": "Optional host-side PostgreSQL test fixture only; no production, AWS, guest, or data-plane changes.",
       "models": []
     }
   ]
