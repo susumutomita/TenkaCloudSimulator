@@ -3302,6 +3302,79 @@ REQUIRED_SOURCE_SCOPES['AzureQueueOwnerAccess'] = {
 }
 
 
+BASE_MODELS.add('SNSSubscriptionReadback')
+BASE_INVARIANTS['SNSSubscriptionReadback'] = {
+    'TypeOK',
+    'ReadDoesNotChangeStore',
+    'AuthorizationTargetsParent',
+    'LookupRequiresAuthorization',
+    'NoAuditResurrection',
+    'RetainedJoinIsExact',
+    'TypedShortCircuit',
+    'ReplyMatchesSnapshot',
+    'OnlySuccessReturnsAttributes',
+}
+REQUIRED_MUTANTS['SNSSubscriptionReadback'] = {
+    'SkipRequestRegion',
+    'AuthorizePeerTopic',
+    'LookupBeforeAuthorization',
+    'JoinIgnoresSubscriptionArn',
+    'JoinIgnoresStoredParent',
+    'JoinIgnoresStoredRegion',
+    'RecoverFromDeliveryHistory',
+    'InvalidArnAsNotFound',
+    'DenialAsNotFound',
+    'MissingRowAsParameterError',
+    'ReadFailureAsNotFound',
+    'ReadDeletesHistory',
+    'ReplyUsesLaterStore',
+    'HardcodeReturnedDescriptor',
+    'ReturnAttributesOnError',
+    'EmitRawDeliveryTrue',
+}
+REQUIRED_SOURCE_SCOPES['SNSSubscriptionReadback'] = {
+    'internal/aws/sns.go',
+    'internal/aws/sns_store.go',
+    'internal/aws/sns_sqs_fanout.go',
+    'internal/aws/sns_subscription_attributes_test.go',
+    'test/e2e/sns_subscription_readback.py',
+}
+
+
+BASE_MODELS.add('SNSConsoleResponseAdmission')
+BASE_INVARIANTS['SNSConsoleResponseAdmission'] = {
+    'TypeOK',
+    'MountRequiresCapabilityAndNoHandoff',
+    'KeyedOwnerMatchesScope',
+    'OnlyOneCurrentFlight',
+    'NoLateVisibleEffect',
+    'AbortInhibitsCallback',
+    'OnlyCurrentTopicUpdates',
+    'OnlyCurrentTopicChoices',
+}
+REQUIRED_MUTANTS['SNSConsoleResponseAdmission'] = {
+    'AdmitBoundHandoff',
+    'IgnoreMissingUnsubscribe',
+    'RequireExactlyFourActions',
+    'AdmitBeforeBootstrap',
+    'IgnoreOperationsArrayShape',
+    'OmitRegionFromKey',
+    'OmitPrincipalFromKey',
+    'OmitNavigationFromKey',
+    'AllowOverlappingTopicRequests',
+    'RouteLateResponseToMatchingKey',
+    'IgnoreAbortedSignal',
+    'LateFinallyClearsCurrentFlight',
+}
+REQUIRED_SOURCE_SCOPES['SNSConsoleResponseAdmission'] = {
+    'tools/console/src/main.jsx',
+    'tools/console/src/console-navigation.mjs',
+    'tools/console/src/sns.jsx',
+    'tools/console/src/sns-client.mjs',
+    'internal/server/web/app.js',
+}
+
+
 def load_registry(root, relative='formal/models.json'):
     root = Path(root)
     registry_path = asset(root, relative)

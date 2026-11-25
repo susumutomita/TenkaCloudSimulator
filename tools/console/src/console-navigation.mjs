@@ -20,6 +20,7 @@ export const SERVICES = Object.freeze([
   {id: 'cfn', provider: 'aws', label: 'CloudFormation', capability: 'cloudformation', route: '/stacks', keywords: 'stack template スタック テンプレート クラウドフォーメーション'},
   {id: 'kms', provider: 'aws', label: 'Key Management Service', capability: 'kms', route: '/kms', keywords: 'kms encryption key 暗号 キー 暗号化 キー管理'},
   {id: 'dynamodb', provider: 'aws', label: 'DynamoDB', capability: 'dynamodb', route: '/dynamodb', keywords: 'table item key-value database ddb ダイナモ ダイナモDB テーブル 項目 キー データベース'},
+  {id: 'sns', provider: 'aws', label: 'SNS', capability: 'sns', route: '/sns', keywords: 'simple notification service subscription topic サブスクリプション トピック 通知'},
   {id: 'sqs', provider: 'aws', label: 'SQS', capability: 'sqs', route: '/sqs', keywords: 'queue message messaging キュー メッセージ メッセージング シンプルキューサービス'},
   {id: 'logs', provider: 'aws', label: 'CloudWatch Logs', capability: 'logs', route: '/logs', keywords: 'log group stream monitoring ログ グループ ストリーム 監視'},
   {id: 'secretsmanager', provider: 'aws', label: 'Secrets Manager', capability: 'secretsmanager', route: '/secretsmanager', keywords: 'secret version credential credentials シークレット バージョン 秘密 認証情報'},
@@ -95,6 +96,11 @@ export function serviceAvailable(id, capabilities) {
   if (id === 'ec2' || id === 'vpc') {
     const ec2=capabilities.services?.ec2;
     return ec2?.console === true && Array.isArray(ec2.operations) && ['DescribeInstances','DescribeVpcs'].every(op=>ec2.operations.includes(op));
+  }
+  if (id === 'sns') {
+    const scope = capabilities.services?.sns;
+    return scope?.console === true && Array.isArray(scope.operations)
+      && ['ListTopics', 'ListSubscriptionsByTopic', 'Subscribe', 'Unsubscribe'].every(op => scope.operations.includes(op));
   }
   if (service.provider === 'aws') return !!capabilities.services?.[service.capability];
   if (id === 'sakura-servers') return sakuraServerConfiguration(capabilities) !== null;

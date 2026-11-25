@@ -84,7 +84,8 @@ console, CloudFormation adapter or Challenge integration.
 - **Storage and data:** [S3](docs/s3.md) ([multipart](docs/s3-multipart.md)),
   [DynamoDB](docs/dynamodb.md), [Parameter Store](docs/ssm-parameters.md).
 - **Functions and messaging:** [Lambda](docs/lambda.md), [API Gateway](docs/apigateway.md),
-  [SQS](docs/sqs.md), [SNS](docs/sns.md), [CloudWatch Logs](docs/cloudwatch-logs.md).
+  [SQS](docs/sqs.md), [SNS](docs/sns.md) (local HTTP/HTTPS subscription Console and reference; no external delivery),
+  [CloudWatch Logs](docs/cloudwatch-logs.md).
 - **Identity and secrets:** [IAM](docs/iam.md), [native SDK / STS](docs/sts-native.md),
   [Secrets Manager](docs/secrets-manager.md), [KMS](docs/kms.md), [WAFv2](docs/wafv2.md).
 - **Networking:** [EC2/VPC discovery and VPC create/delete](docs/ec2-read-discovery.md),
