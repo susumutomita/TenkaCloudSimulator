@@ -19584,6 +19584,192 @@
      "expect_invariant": "SuccessfulBytesOnly"
     }
    ]
+  },
+  {
+   "id": "SimpleDBLifecycle",
+   "model": "formal/SimpleDBLifecycle.tla",
+   "config": "formal/SimpleDBLifecycle.cfg",
+   "bounds": "Two scopes, two names and values, one domain and item per scope, nine transitions.",
+   "properties": [
+    "TypeOK",
+    "NoOrphans",
+    "PendingInvisible",
+    "RefusalUnchanged",
+    "AuthorizedCommit",
+    "PeerFrame",
+    "CommittedExact",
+    "DurableAck",
+    "RestartExact",
+    "DeleteEmpty",
+    "CreateIdempotent",
+    "PutSetExact"
+   ],
+   "limits": "Abstract admitted mutations and stage/commit/failure/reopen only; no SQL, HTTP/SDK, pagination, arbitrary concurrency, IAM evaluation or Go refinement.",
+   "source_scope": [
+    "internal/aws/simpledb/store.go",
+    "internal/aws/simpledb/domain.go",
+    "internal/aws/simpledb/item.go"
+   ],
+   "mutants": [
+    {
+     "id": "PublishStagedSimpleDB",
+     "edits": [
+      {
+       "old": "/\\ UNCHANGED <<disk, visible, lastAck>>",
+       "new": "/\\ UNCHANGED <<disk, lastAck>>\n /\\ visible' = expected'",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "PendingInvisible"
+    },
+    {
+     "id": "LoseExistingSimpleDBValuesOnAppend",
+     "edits": [
+      {
+       "old": "![s].attrs[n] = IF rep THEN vs ELSE @ \\cup vs]",
+       "new": "![s].attrs[n] = vs]",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "PutSetExact"
+    }
+   ]
+  },
+  {
+   "id": "SimpleDBPageCursor",
+   "model": "formal/SimpleDBPageCursor.tla",
+   "config": "formal/SimpleDBPageCursor.cfg",
+   "bounds": "Three scopes, three ordered names, two key epochs, one retained issued cursor, sizes 0\u20133.",
+   "properties": [
+    "TypeOK",
+    "CursorBinding",
+    "ExactPage",
+    "ReadOnly"
+   ],
+   "limits": "Current rows only; no snapshot, token syntax/crypto, cancellation, errors not represented, SQL, SDK or Go refinement.",
+   "source_scope": [
+    "internal/aws/simpledb/pagination.go",
+    "internal/aws/simpledb/store.go"
+   ],
+   "mutants": [
+    {
+     "id": "IncludeAnchor",
+     "edits": [
+      {
+       "old": "Eligible(name,anchor) == name > anchor",
+       "new": "Eligible(name,anchor) == name >= anchor",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "ExactPage"
+    },
+    {
+     "id": "AcceptPreviousEpoch",
+     "edits": [
+      {
+       "old": "Admit(c,s) == c[1] = generation /\\ c[2] = s",
+       "new": "Admit(c,s) == c[2] = s",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "CursorBinding"
+    }
+   ]
+  },
+  {
+   "id": "SimpleDBQueryAdmission",
+   "model": "formal/SimpleDBQueryAdmission.tla",
+   "config": "formal/SimpleDBQueryAdmission.cfg",
+   "bounds": "One request, six operation classes, nine typed defect classes, five Boolean inputs, three backend outcomes and two scopes.",
+   "properties": [
+    "TypeOK",
+    "OneDispatch",
+    "MalformedNeverDispatches",
+    "TrustedAdmissionBeforeDispatch",
+    "ConfiguredScopeBinding",
+    "EnvelopeMatchesOutcome"
+   ],
+   "limits": "Abstract typed guards and response categories only; no raw parser/XML/signing, IAM evaluator, routing precedence, initializer wiring, exact status/codes, pagination, SQL, SDK or Go refinement.",
+   "source_scope": [
+    "internal/aws/simpledb/validation.go",
+    "internal/aws/simpledb/http.go",
+    "internal/aws/simpledb_gateway.go"
+   ],
+   "mutants": [
+    {
+     "id": "SkipTypedDomainGuard",
+     "edits": [
+      {
+       "old": "\n /\\ GoodShape(req)\n",
+       "new": "\n /\\ (GoodShape(req) \\/ (req.op = \"CreateDomain\" /\\ req.defect = \"domain\"))\n",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "MalformedNeverDispatches"
+    },
+    {
+     "id": "SelectPeerScope",
+     "edits": [
+      {
+       "old": " /\\ selected' = \"configured\"",
+       "new": " /\\ selected' = \"peer\"",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "ConfiguredScopeBinding"
+    }
+   ]
+  },
+  {
+   "id": "SimpleDBDomainMetadata",
+   "model": "formal/SimpleDBDomainMetadata.tla",
+   "config": "formal/SimpleDBDomainMetadata.cfg",
+   "bounds": "Two item names, two attribute names, five possible attribute pairs, and three value byte widths; one scoped read over fixed committed rows.",
+   "properties": [
+    "TypeOK",
+    "ReadRequiresDomainAuthority",
+    "ExactCommittedTotals"
+   ],
+   "limits": "One already-selected immutable local snapshot, symbolic byte weights and typed admission; no SQL snapshot isolation, cancellation, wall clock, raw Query/XML, IAM policy evaluation, SDK or Go refinement.",
+   "source_scope": [
+    "internal/aws/simpledb/metadata.go",
+    "internal/aws/simpledb/http.go"
+   ],
+   "mutants": [
+    {
+     "id": "CountMetadataKeysPerItem",
+     "edits": [
+      {
+       "old": "newKeys == KeySet(vs) \\ seen",
+       "new": "newKeys == KeySet(vs)",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "ExactCommittedTotals"
+    },
+    {
+     "id": "LoseMetadataValueBytes",
+     "edits": [
+      {
+       "old": "valueSize' = valueSize + SumValues(vs)",
+       "new": "valueSize' = valueSize",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "ExactCommittedTotals"
+    },
+    {
+     "id": "AdmitDeniedMetadataRead",
+     "edits": [
+      {
+       "old": "/\\ phase = \"init\" /\\ wellFormed /\\ allowed /\\ exists",
+       "new": "/\\ phase = \"init\" /\\ wellFormed /\\ exists",
+       "count": 1
+      }
+     ],
+     "expect_invariant": "ReadRequiresDomainAuthority"
+    }
+   ]
   }
  ]
 }

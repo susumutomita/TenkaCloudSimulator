@@ -1,5 +1,5 @@
 {
-  "base_sha": "3cd779798ba13d1b712e050f5ad0953072b54342",
+  "base_sha": "142888be7812c841f440f4d6b7f6c727f2adc0f8",
   "version": 1,
   "changes": [
     {
@@ -127,9 +127,9 @@
     },
     {
       "path": "formal/models.json",
-      "sha256": "83204983c1bf6ba7b85d44d59c9a830537debe87e76149ed2239ffd7a657cd18",
+      "sha256": "d599d14ec9490f53580da805891ac87453b4dbdcb1a57fb0d2dab94593f8b83e",
       "disposition": "formal-infrastructure",
-      "reason": "Registers or pins the bounded XSM checks and preserves the existing exact model/control inventory. Adds independently scoped Azure Blob row download model.",
+      "reason": "Preserves all main model registrations including the four SimpleDB models and retains the existing bounded Azure read admission, CRC64 conditional read and row-download models.",
       "models": []
     },
     {
@@ -360,16 +360,16 @@
     },
     {
       "path": "scripts/formal_model_gate.py",
-      "sha256": "b4f9a2e2b0ed47685617c60a2e457bdb9f7d63087b275c5d3a0c5e668a372600",
+      "sha256": "3d6bc3806e6cc47be3216793c65918f50adb391a69b85a67c3c78080d134fec8",
       "disposition": "formal-infrastructure",
       "reason": "Registers or pins the bounded XSM checks and preserves the existing exact model/control inventory.",
       "models": []
     },
     {
       "path": "scripts/test-formal-gate.py",
-      "sha256": "c5440f588d6ce110b11b79d5f152eabb0e2d6f0ec25ae3c0d4e20741982951a2",
+      "sha256": "c20c9518c313e50b0126a8923a4643097db46e71c18a6fa89bbf2bd34404afc0",
       "disposition": "formal-infrastructure",
-      "reason": "Registers or pins the bounded XSM checks and preserves the existing exact model/control inventory.",
+      "reason": "Preserves main SimpleDB policy detector tests and explicit inventory while retaining the existing three bounded Azure read model inventory and detector tests.",
       "models": []
     },
     {

@@ -3115,6 +3115,79 @@ REQUIRED_SOURCE_SCOPES['SakuraServerReadEpoch'] = {
 }
 SAKURA_SERVER_READ_EPOCH_MUTATIONS = [{'id': 'IgnoreDisabled', 'edits': [{'old': 'config.enabled /\\ config.valid /\\ ~config.handoff', 'new': 'config.valid /\\ ~config.handoff', 'count': 1}], 'expect_invariant': 'NoUnadvertisedMount'}, {'id': 'IgnoreMalformed', 'edits': [{'old': 'config.enabled /\\ config.valid /\\ ~config.handoff', 'new': 'config.enabled /\\ ~config.handoff', 'count': 1}], 'expect_invariant': 'NoUnadvertisedMount'}, {'id': 'IgnoreHandoff', 'edits': [{'old': 'config.enabled /\\ config.valid /\\ ~config.handoff', 'new': 'config.enabled /\\ config.valid', 'count': 1}], 'expect_invariant': 'NoUnadvertisedMount'}, {'id': 'IgnoreContext', 'edits': [{'old': 'BoundContext(r) == r.context = context.sequence', 'new': 'BoundContext(r) == TRUE', 'count': 1}], 'expect_invariant': 'OnlyCurrentResult'}, {'id': 'IgnoreRevision', 'edits': [{'old': 'BoundRevision(r) == r.revision = revision', 'new': 'BoundRevision(r) == TRUE', 'count': 1}], 'expect_invariant': 'OnlyCurrentResult'}, {'id': 'AcceptWrongServer', 'edits': [{'old': 'ProjectionOK(r, actual) == r.target = actual', 'new': 'ProjectionOK(r, actual) == TRUE', 'count': 1}], 'expect_invariant': 'NoDifferentServer'}]
 
+BASE_MODELS.add('SimpleDBLifecycle')
+BASE_INVARIANTS['SimpleDBLifecycle'] = {
+    'TypeOK',
+    'NoOrphans',
+    'PendingInvisible',
+    'RefusalUnchanged',
+    'AuthorizedCommit',
+    'PeerFrame',
+    'CommittedExact',
+    'DurableAck',
+    'RestartExact',
+    'DeleteEmpty',
+    'CreateIdempotent',
+    'PutSetExact',
+}
+REQUIRED_MUTANTS['SimpleDBLifecycle'] = {
+    'PublishStagedSimpleDB',
+    'LoseExistingSimpleDBValuesOnAppend',
+}
+REQUIRED_SOURCE_SCOPES['SimpleDBLifecycle'] = {
+    'internal/aws/simpledb/store.go',
+    'internal/aws/simpledb/domain.go',
+    'internal/aws/simpledb/item.go',
+}
+
+BASE_MODELS.add('SimpleDBPageCursor')
+BASE_INVARIANTS['SimpleDBPageCursor'] = {
+    'TypeOK',
+    'CursorBinding',
+    'ExactPage',
+    'ReadOnly',
+}
+REQUIRED_MUTANTS['SimpleDBPageCursor'] = {
+    'IncludeAnchor',
+    'AcceptPreviousEpoch',
+}
+REQUIRED_SOURCE_SCOPES['SimpleDBPageCursor'] = {
+    'internal/aws/simpledb/pagination.go',
+    'internal/aws/simpledb/store.go',
+}
+
+BASE_MODELS.add('SimpleDBQueryAdmission')
+BASE_INVARIANTS['SimpleDBQueryAdmission'] = {
+    'TypeOK',
+    'OneDispatch',
+    'MalformedNeverDispatches',
+    'TrustedAdmissionBeforeDispatch',
+    'ConfiguredScopeBinding',
+    'EnvelopeMatchesOutcome',
+}
+REQUIRED_MUTANTS['SimpleDBQueryAdmission'] = {
+    'SkipTypedDomainGuard',
+    'SelectPeerScope',
+}
+REQUIRED_SOURCE_SCOPES['SimpleDBQueryAdmission'] = {
+    'internal/aws/simpledb/validation.go',
+    'internal/aws/simpledb/http.go',
+    'internal/aws/simpledb_gateway.go',
+}
+
+
+BASE_MODELS.add('SimpleDBDomainMetadata')
+BASE_INVARIANTS['SimpleDBDomainMetadata'] = {
+    'TypeOK', 'ReadRequiresDomainAuthority', 'ExactCommittedTotals',
+}
+REQUIRED_MUTANTS['SimpleDBDomainMetadata'] = {
+    'CountMetadataKeysPerItem', 'LoseMetadataValueBytes', 'AdmitDeniedMetadataRead',
+}
+REQUIRED_SOURCE_SCOPES['SimpleDBDomainMetadata'] = {
+    'internal/aws/simpledb/metadata.go',
+    'internal/aws/simpledb/http.go',
+}
+
 
 def load_registry(root, relative='formal/models.json'):
     root = Path(root)
