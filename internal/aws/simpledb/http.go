@@ -274,7 +274,7 @@ func NewHTTPHandler(s *Store, sc Scope, authorize Authorize) http.Handler {
 				case "AttributeDoesNotExist":
 					fail(404, coded.Code())
 					return
-				case "ConditionalCheckFailed", "MultiValuedAttribute":
+				case "ConditionalCheckFailed", "MultiValuedAttribute", "NumberItemAttributesExceeded":
 					fail(409, coded.Code())
 					return
 				case "InvalidParameterValue", "InvalidNextToken", "NoSuchDomain":
