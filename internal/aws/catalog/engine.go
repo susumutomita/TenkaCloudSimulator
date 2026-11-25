@@ -22,6 +22,9 @@ type Config struct {
 	DefaultPrincipal string
 	Authorize        Authorizer
 	Now              func() time.Time
+	// ValidateRDSPrivatePostgres is optional trusted native EC2 composition.
+	// Run only for authorized, explicitly private standalone PostgreSQL writes.
+	ValidateRDSPrivatePostgres func(context.Context, *sql.Tx, RDSPrivatePostgresRefs) error
 }
 
 // binding joins one reviewed specification with its official model.

@@ -1,50 +1,180 @@
 {
   "version": 1,
-  "base_sha": "f552e42b83f65b693e520c907fbd87ff923904a1",
+  "base_sha": "35162d4936bcf83e74ac2a7352a6bd0d18462d4a",
   "changes": [
     {
-      "path": "internal/aws/ec2_completed_guest_linux_test.go",
-      "sha256": "cfcdd8cc9e1eb0dec4ed4fa9818b6078ab8d39b93e2c758ecad61184d4c15bdb",
-      "disposition": "test-support",
-      "reason": "Runs the existing local stack/ready lifecycle in two inert subnet-policy fixtures; no shipped state machine.",
+      "path": "README.md",
+      "sha256": "94b92e7979fa3f2e008807940bfcd57d6124878daa91d91e91f880d88ea5fd02",
+      "disposition": "documentation",
+      "reason": "Documents the opt-in setting and explicitly excludes a database, runtime and endpoint.",
       "models": []
     },
     {
-      "path": "internal/aws/ec2_completed_guest_unix.go",
-      "sha256": "8683d3562f4a6608269be27c8d47aaf2acbb5d2c2fbd1d8176304c13d5fdd5fe",
+      "path": "cmd/simulator/main.go",
+      "sha256": "378e8d83716733c5076cc0ffd42c3acca271b9ece3c60e3c43920a26adcaf718",
       "disposition": "modeled",
-      "reason": "Discovery requires the selected retained provider receipt to remain associated with the exact ready stack and its unchanged owned network lease.",
+      "reason": "Admits the feature flag only with existing authenticated numeric-loopback startup.",
       "models": [
         {
-          "id": "CanonicalVMComposition",
+          "id": "RDSPrivatePostgresTopology",
           "properties": [
-            "NetworkOwnership",
-            "FrozenNetwork",
-            "SavedAssociation"
+            "LocalStartupRequired"
           ],
-          "limits": "Conceptual overlap only: the finite model checks network and registry modes separately. It does not check the concrete SQLite join, same-DB/lease pointer identity, VPC/subnet/SG/NIC shape or hashes, Go locking and HTTP ordering, or any live network, VM or RDS SQL."
+          "limits": "Models the CLI admission predicate only, not HTTP forwarding, binding, or token implementation."
         }
       ]
     },
     {
-      "path": "internal/aws/ec2_guest_network_membership_linux_test.go",
-      "sha256": "2047a67e0c70f0ab8ed9a2f594750daf115dca1e9ff4daccd27c053948a6e4ac",
-      "disposition": "test-support",
-      "reason": "Exercises current, foreign, and stale membership using existing isolated SQLite and inert fixture; no shipped authority.",
+      "path": "docs/design/0001-go-standalone.md",
+      "sha256": "58e254f7d3fbf1a2d130020900d33002270f50fa0711984180e5db1cab2ba5f1",
+      "disposition": "documentation",
+      "reason": "Documents private PostgreSQL configuration scope, existing IAM ordering and metadata-only boundary.",
       "models": []
     },
     {
-      "path": "internal/aws/ec2_network.go",
-      "sha256": "e4c04d7852668b7da8cf3cae14f4816827230bf40ae9ea5b3e24c7e237c11de2",
+      "path": "formal/RDSPrivatePostgresTopology.cfg",
+      "sha256": "f8682cf918840b93313eb5057f0c963a491ff0a8bbc5d8bab6d63ce2205ac457",
       "disposition": "modeled",
-      "reason": "The existing provider-owned snapshot now retains its exact VPC identity in memory for source-side membership, without changing the persisted or encoded policy.",
+      "reason": "Binds the request state bounds and enables the checked admission and metadata invariants.",
       "models": [
         {
-          "id": "CanonicalVMComposition",
+          "id": "RDSPrivatePostgresTopology",
           "properties": [
-            "NetworkOwnership"
+            "LocalStartupRequired",
+            "AuthorityBeforeNative",
+            "LegacyConfigurationPreserved",
+            "OwnedTopologyBeforeWrite",
+            "AtomicRefusal",
+            "ConfigurationOnly"
           ],
-          "limits": "The model treats the ownership relation as an abstract verdict; it does not check SQLite row selection, values of VPC/subnet IDs, Go encoding/snapshot hashes or any packet or SQL flow."
+          "limits": "This bounded model assumes authenticated local composition and an authoritative topology verdict. It does not execute CLI, Go, SQLite, VPC lookup, actual networking, or SQL."
+        }
+      ]
+    },
+    {
+      "path": "formal/RDSPrivatePostgresTopology.tla",
+      "sha256": "8b912f94d12454b853610dbda094b257b376fac8dd4406aeef7a8f0b44f0265d",
+      "disposition": "modeled",
+      "reason": "Enumerates one authorized or refused scoped write over two symbolic initial revisions.",
+      "models": [
+        {
+          "id": "RDSPrivatePostgresTopology",
+          "properties": [
+            "LocalStartupRequired",
+            "AuthorityBeforeNative",
+            "LegacyConfigurationPreserved",
+            "OwnedTopologyBeforeWrite",
+            "AtomicRefusal",
+            "ConfigurationOnly"
+          ],
+          "limits": "This bounded model assumes authenticated local composition and an authoritative topology verdict. It does not execute CLI, Go, SQLite, VPC lookup, actual networking, or SQL."
+        }
+      ]
+    },
+    {
+      "path": "formal/models.json",
+      "sha256": "6fa184604e49d15969c090623a192c46aee2e616997b93e263a312aec0c405b7",
+      "disposition": "formal-infrastructure",
+      "reason": "Registers the bounded admission model and six intentionally failing controls in the existing formal gate.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/catalog/engine.go",
+      "sha256": "9c22e58bc25acff8a4b8abb703236683b9e26497a3073aeb96c99480ba31995d",
+      "disposition": "modeled",
+      "reason": "Declares the optional trusted composition callback; nil keeps existing catalog behavior.",
+      "models": [
+        {
+          "id": "RDSPrivatePostgresTopology",
+          "properties": [
+            "LegacyConfigurationPreserved"
+          ],
+          "limits": "The model represents callback installation with a Boolean and does not verify Go's configuration field."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/catalog/rds_private_postgres_topology.go",
+      "sha256": "984c0c5319994307dcba7139908d58a9821c7f61852197204f20e4c86a904bd8",
+      "disposition": "modeled",
+      "reason": "After existing authorization, qualifies standalone private PostgreSQL, resolves the same-region subnet group through the existing transaction, and passes typed references to the trusted native validator.",
+      "models": [
+        {
+          "id": "RDSPrivatePostgresTopology",
+          "properties": [
+            "LegacyConfigurationPreserved",
+            "OwnedTopologyBeforeWrite"
+          ],
+          "limits": "The model uses a symbolic qualifying document and topology verdict; it does not prove parsing, member bounds, or the SQLite lookup."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/catalog/semantics.go",
+      "sha256": "f343c8d564ee9c9f073eff952073987225933a3d3ec6eef46eba086c6cde606b",
+      "disposition": "modeled",
+      "reason": "Checks opt-in private topology after existing authorization and before insert or update in the same catalog transaction.",
+      "models": [
+        {
+          "id": "RDSPrivatePostgresTopology",
+          "properties": [
+            "AuthorityBeforeNative",
+            "OwnedTopologyBeforeWrite",
+            "AtomicRefusal"
+          ],
+          "limits": "The model detects abstract read/write ordering and refusal but is not a proof of IAM resolution, SQLite isolation, rollback implementation, or races."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/rds_private_postgres_topology.go",
+      "sha256": "71dd59daf198e8bb0a799aa0caf73d9dcc957631507145001277a30f65f5cbda",
+      "disposition": "modeled",
+      "reason": "Reads authoritative native subnets, VPC and security groups in the authorized transaction; rejects inconsistent owner/VPC, nonprivate and unresolved references.",
+      "models": [
+        {
+          "id": "RDSPrivatePostgresTopology",
+          "properties": [
+            "OwnedTopologyBeforeWrite"
+          ],
+          "limits": "The model assumes the Boolean owned topology verdict; focused Query and SQLite tests, not the model, exercise native lookup and specific topology checks."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/rds_private_postgres_topology_test.go",
+      "sha256": "e2a6fc1546c90167bfee4e9a6416dc3c9d8e572638988426172037da2e22741c",
+      "disposition": "test-support",
+      "reason": "Focused tests exercise scoped Query and native SQLite data, IAM ordering, preservation of existing rows and metadata-only response.",
+      "models": []
+    },
+    {
+      "path": "internal/server/sakura_provider.go",
+      "sha256": "8439c79e9f04fe5581c4a741059e3fda1b2725e385c20568ed2ac90b4bf550a5",
+      "disposition": "modeled",
+      "reason": "The provider composition option defaults to false; it enables only topology validation.",
+      "models": [
+        {
+          "id": "RDSPrivatePostgresTopology",
+          "properties": [
+            "LegacyConfigurationPreserved"
+          ],
+          "limits": "The model represents the trusted composition toggle, not provider startup, network binding or endpoint response generation."
+        }
+      ]
+    },
+    {
+      "path": "internal/server/server.go",
+      "sha256": "59a352cfaecd77815060848602948aa8e6fd3f9313650e9c5ec6ccf27b09afbd",
+      "disposition": "modeled",
+      "reason": "Installs the trusted native validation callback only for explicitly opted-in composition.",
+      "models": [
+        {
+          "id": "RDSPrivatePostgresTopology",
+          "properties": [
+            "LegacyConfigurationPreserved"
+          ],
+          "limits": "The model represents callback selection but does not verify HTTP routing, middleware, store initialization, or startup compilation."
         }
       ]
     }

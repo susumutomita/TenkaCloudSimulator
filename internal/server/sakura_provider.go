@@ -21,6 +21,9 @@ type ProviderConfig struct {
 	SakuraDisks        *sakura.Config
 	// SakuraServerConsole is an opt-in read-only presentation switch. Only bind authenticated numeric loopback when enabled.
 	SakuraServerConsole bool
+	// RDSPrivatePostgresTopology enables native private-network validation of
+	// qualifying RDS metadata writes, not database execution or a listener.
+	RDSPrivatePostgresTopology bool
 	// BedrockRuntime is the trusted, operator-built local inference adapter.
 	// nil keeps Bedrock Runtime inference disabled with explicit errors. The
 	// caller owns it and closes it; closing the composition does not.

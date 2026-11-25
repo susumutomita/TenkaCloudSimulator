@@ -794,6 +794,9 @@ func (q *request) create(ecsRevision int) (map[string]any, error) {
 	if err := q.checkRefsIn(tx, res, r.Document); err != nil {
 		return nil, err
 	}
+	if err := q.checkRDSPrivatePostgresTopology(tx, r); err != nil {
+		return nil, err
+	}
 	if err := insertNewResource(tx, res, &r, parent); err != nil {
 		return nil, err
 	}
@@ -909,6 +912,9 @@ func (q *request) update() (map[string]any, error) {
 	}
 	if err := q.commit(func(tx *sql.Tx) error {
 		if err := q.checkRefsIn(tx, res, r.Document); err != nil {
+			return err
+		}
+		if err := q.checkRDSPrivatePostgresTopology(tx, r); err != nil {
 			return err
 		}
 		if r.Seq == 0 {
