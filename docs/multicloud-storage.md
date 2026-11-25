@@ -19,7 +19,7 @@ A trusted Go host can use `server.NewWithCloudStorage(path, cfg)` to bind a part
 ## Native routes
 
 - Google: `/_simulator/providers/gcp/storage/v1/b?project=tenkacloud-local`; metadata/object collection beneath `/b/{bucket}/o`, media upload beneath `/upload/storage/v1/b/{bucket}/o`, download beneath `/download/storage/v1/b/{bucket}/o/{object}?alt=media`.
-- Azure: `/_simulator/providers/azure/tenkacloudlocal?comp=list`; container operations beneath `/{container}?restype=container`; blob operations beneath `/{container}/{blob}`. Every native request requires `x-ms-version: 2023-11-03`.
+- Azure: `/_simulator/providers/azure/tenkacloudlocal?comp=list`; container operations beneath `/{container}?restype=container`; blob operations beneath `/{container}/{blob}`. Use `x-ms-version: 2023-11-03` for the ordinary profile. Only Get Blob can opt in to the [bounded structured CRC64 profile](azure-blob.md#bounded-structured-crc64-reads) on `2025-01-05`.
 
 Both retain actual protocol responses and the same SQLite state as the new console views. Object keys are data: the provider registry preserves paired decoded/escaped paths, without cleaning or second decoding. Encoded provider identifiers are refused. UI controls explicitly refuse keys that a browser would normalize rather than changing the target silently.
 

@@ -6,12 +6,14 @@ local services. Use a trusted isolated Python environment provisioned separately
 from official hash-locked wheels, including azure-storage-blob[ext-checksums].
 This script does not install anything or provision/attest network isolation.
 
-Supply the independently reviewed executable SHA-256 for the designated runtime
-commit and a build receipt JSON {"source_commit":"...","binary_sha256":"..."}.
-Supply its SHA-256 from a trusted source after independently verifying its
-signed build provenance; this script checks identity, not signatures or trust.
-Do not build from a later fixture-only commit or generate a receipt locally to
-stand in for reviewing provenance. Also supply a reviewed SDK lock JSON: {"azure-storage-blob":{"version":"12.31.1","record_sha256":"..."},
+Supply the full commit SHA of the exact candidate under review, its independently
+verified executable SHA-256, and a build receipt JSON
+{"source_commit":"...","binary_sha256":"..."}. Supply the expected candidate SHA
+independently of the receipt. Obtain the receipt SHA-256 from a trusted source
+after independently verifying its signed build provenance; this script checks
+identity, not signatures or trust. Do not substitute a prior or later build or
+generate a receipt locally in lieu of reviewing provenance.
+Also supply a reviewed SDK lock JSON: {"azure-storage-blob":{"version":"12.31.1","record_sha256":"..."},
 "azure-storage-extensions":{"version":"...","record_sha256":"..."},
 "azure-core":{"version":"...","record_sha256":"..."},
 "requests":{"version":"...","record_sha256":"..."}}. Hashes are of installed
@@ -36,7 +38,6 @@ from crossprovider_official_storage import (
     bounded_items, expect_status, local_network_only,
 )
 
-RUNTIME_COMMIT = 'aa74a0088b3aa3a2c50961a61b40361c6bba4e1c'
 SDK_VERSION = '12.31.1'
 READ_API_VERSION = '2025-01-05'
 PACKAGES = {'azure-storage-blob', 'azure-storage-extensions', 'azure-core', 'requests'}
@@ -63,13 +64,14 @@ def exact_hex(value, size):
     return isinstance(value, str) and re.fullmatch(f'[a-f0-9]{{{size}}}', value) is not None
 
 
-def verify_build_receipt(path, trusted_receipt_sha, expected_binary_sha):
+def verify_build_receipt(path, trusted_receipt_sha, expected_source_commit, expected_binary_sha):
+    require(exact_hex(expected_source_commit, 40), 'Expected a full lowercase candidate commit SHA')
     require(exact_hex(trusted_receipt_sha, 64), 'Invalid expected build receipt digest')
     raw = path.read_bytes()
     require(hashlib.sha256(raw).hexdigest() == trusted_receipt_sha, 'Build receipt digest differs')
     receipt = json.loads(raw)
     require(isinstance(receipt, dict) and set(receipt) == {'source_commit', 'binary_sha256'}
-            and receipt['source_commit'] == RUNTIME_COMMIT
+            and receipt['source_commit'] == expected_source_commit
             and receipt['binary_sha256'] == expected_binary_sha
             and exact_hex(expected_binary_sha, 64), 'Build receipt source or binary differs')
 
@@ -175,7 +177,8 @@ def main():
     cli = argparse.ArgumentParser(description=__doc__)
     cli.add_argument('--binary', required=True, type=Path)
     cli.add_argument('--binary-sha256', required=True)
-    cli.add_argument('--source-commit', required=True, choices=[RUNTIME_COMMIT])
+    cli.add_argument('--source-commit', required=True,
+                     help='Full commit SHA of the exact independently reviewed candidate')
     cli.add_argument('--build-receipt', required=True, type=Path)
     cli.add_argument('--build-receipt-sha256', required=True,
                      help='Independent digest of the verified source-bound build receipt')
@@ -186,7 +189,8 @@ def main():
     try:
         with acceptance_phase('preflight'):
             require(__debug__, 'The existing Team helper requires assertions on')
-            verify_build_receipt(args.build_receipt, args.build_receipt_sha256, args.binary_sha256)
+            verify_build_receipt(args.build_receipt, args.build_receipt_sha256,
+                                 args.source_commit, args.binary_sha256)
             require_loopback_only()
             binary = args.binary.resolve(strict=True)
             require(binary.is_file() and os.access(binary, os.X_OK)
@@ -201,7 +205,7 @@ def main():
         print(json.dumps({'result': 'FAIL', 'phase': 'sdk-setup', 'error_type': type(error).__name__}))
         return 1
     print(json.dumps({
-        'result': 'PASS', 'designated_runtime_commit': RUNTIME_COMMIT,
+        'result': 'PASS', 'designated_runtime_commit': args.source_commit,
         'build_receipt_sha256': args.build_receipt_sha256,
         'binary_sha256': args.binary_sha256, 'sdk_versions': versions,
         'sdk_lock_sha256': lock_sha, 'read_api_version': READ_API_VERSION,

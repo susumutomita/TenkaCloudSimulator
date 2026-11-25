@@ -3,6 +3,13 @@
   "version": 1,
   "changes": [
     {
+      "path": "README.md",
+      "sha256": "7eb9d079a4d670dc4b16d229bf4113d12e66169761ca813dba718e7c765d6278",
+      "disposition": "documentation",
+      "reason": "Links the public Azure Blob read contract and limits; no runtime behavior changes.",
+      "models": []
+    },
+    {
       "path": "docs/acceptance/crossprovider-console.md",
       "sha256": "5c32b7bc1255c0e21ed7d83f5aefc737195433203905c30ad5d7f7aa8a366510",
       "disposition": "documentation",
@@ -11,9 +18,23 @@
     },
     {
       "path": "docs/azure-blob.md",
-      "sha256": "5ab4e49e7b2499eecc9f063a9e3b64cd3fc4c1260e51d20fbaa02fe64ea1c6de",
+      "sha256": "56fdcaab0886a67e8fddec2a3eee7bb9587dac50af98e618414b2e9a6c0c098f",
       "disposition": "documentation",
-      "reason": "Updates the supported conditional GET and transactional checksum contract; prose only, not a proof or runnable input.",
+      "reason": "Documents bounded conditional, transactional and structured CRC64 read profiles and separates historical SDK evidence from the optional current-candidate fixture.",
+      "models": []
+    },
+    {
+      "path": "docs/design/0001-go-standalone.md",
+      "sha256": "bc0126c6ba54d438fd1551dbeb80fe5d752a87d4e83cc38c7d1aed38e75cd0ba",
+      "disposition": "documentation",
+      "reason": "Describes the local Azure Blob read-profile and ownership boundary; no implementation proof.",
+      "models": []
+    },
+    {
+      "path": "docs/multicloud-storage.md",
+      "sha256": "d43fbe51f07ca814133f13e579a283dec38a49f56ca02c2aba60aa7f2c97e6f6",
+      "disposition": "documentation",
+      "reason": "Distinguishes the ordinary API version from the opt-in Get Blob profile.",
       "models": []
     },
     {
@@ -381,9 +402,9 @@
     },
     {
       "path": "test/e2e/azure_blob_structured_crc64_sdk.py",
-      "sha256": "aaf1630876c004a3e79fe6ae491cbc07cb621fc22693af5b41856fd96e16f432",
+      "sha256": "a9cab870ee2e21c8149c6eb842cc7af0663b2cc99b49970b82be9fbd65cd66ff",
       "disposition": "test-support",
-      "reason": "Opt-in official Azure Python SDK structured CRC64 read verification and native cleanup, with an independently approved local binary, wheel manifest and loopback-only runner.",
+      "reason": "Opt-in official Azure Python SDK fixture verifies the caller-supplied exact review SHA against an independently verified build receipt, approved runner, binary digest and reviewed SDK lock.",
       "models": []
     },
     {
@@ -398,6 +419,13 @@
       "sha256": "50fb69fc38bb57fb05d2a5c5e1660a44fec32521db5a70b1c0fdbc42a39274ed",
       "disposition": "test-support",
       "reason": "Requires Chromium sandbox in the existing two-CLI GCP/Azure console fixture while preserving local process/authentication, native state readback, request guard and cleanup operations.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/test_azure_blob_structured_crc64_sdk.py",
+      "sha256": "70d87e36b15071d443af21d113c204377b00784880d6c8fb3f06cb120680f783",
+      "disposition": "test-support",
+      "reason": "Offline regression checks bind fixture preflight and report to a supplied candidate, reject stale proofs, and never run the simulator or official SDK.",
       "models": []
     },
     {
