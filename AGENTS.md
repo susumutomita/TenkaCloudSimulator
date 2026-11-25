@@ -12,19 +12,19 @@ start:
   parallel: independent worktrees; one active writer per shared file; fill available authorized capacity without duplicates or resource overcommit
   continue: consume results and start the next executable stage immediately; block only the affected work, record cause and resume condition, then advance other work
   progress_excludes: [polling, assignment alone, status reports]
-  integrity: preserve history and unrelated changes; inspect uncertain outcomes before safe retry; never bypass access restrictions or read/write secret files
-  authorization: PR, push, merge, release, deploy, and cloud operations each require existing scoped approval
+  integrity: preserve history and unrelated changes; inspect uncertain outcomes before safe retry; never bypass access restrictions or read/write .env, credentials, or secret files/directories
+  authorization: PR, push, merge, release, deploy, and cloud operations and external agent access or transfer each require existing scoped approval
 architecture:
   artifact: standalone Go binary; embedded console, Scalar, SQLite, and pinned CPython/WASI; no host Python/Node/Docker, external DB, or real cloud runtime dependency
   core: provider-neutral storage and policy primitives; no provider dispatch or exercise IDs
   providers: concurrent, distinct protocols, models, namespaces, authorization, and UI; do not inherit AWS semantics
-  aws: own IAM actions/ARNs and protocol/state; native and legacy ownership/mutation remain atomic; reject cross-adoption
+  aws: own IAM actions/ARNs and protocol/state; native and legacy ownership/mutation remain atomic; reject cross-adoption; own function state and restricted execution-role SDK bridge
   state: shared actual HTTP API and SQLite state across console/Scalar/SDK; preserve atomicity, foreign keys, and input bounds
   unsupported: reject unsupported operations and policy fields; no fake success or runtime claims for catalog metadata, stubs, mocks, or placeholder UI
   perimeter: numeric loopback and local token auth by default; no outbound cloud calls; distinct authenticated and selected exercise identities; participants cannot select admin
   tenant: one process, SQLite database, and token authority per team
-  guest: deny host FS/env/process/network; maintain pinned provenance and negative containment tests; only trusted providers supply bounded capabilities and read-only modules; guests never select authority
-  inference: only opt-in numeric-loopback Ollama or explicitly selected absolute-path Apple helper; no backend/cloud/synthetic fallback or prompt/response retention
+  guest: deny host FS/env/process/network; maintain pinned runtime rights/provenance and negative containment tests; only trusted providers supply bounded capabilities and read-only modules; guests never select authority
+  inference: only opt-in numeric-loopback Ollama or explicitly selected absolute-path Apple helper; no backend/cloud/synthetic fallback or prompt/response storage or logging
   bedrock: AWS owns wire shapes, bedrock:InvokeModel evaluation, and operator model mapping
   boundary: TenkaCloudChallenge owns questions/scenarios/scoring/required capabilities; TenkaCloud owns platform integration; no problem-specific simulator logic
 done:
@@ -38,7 +38,7 @@ done:
     always: make before-commit
     protocol_persistence_console_docs_ui: make e2e
     model: TLA_JAR=... make formal
-    finder_fixer: docs/contributing/software-factory.md; register independent acceptance before fix; run make test on clean exact HEAD and include acceptance report in independent review
+    finder_fixer: docs/contributing/software-factory.md; register independent acceptance before claim; run make test on clean exact HEAD and include acceptance report in independent review
     invalid_evidence: [required check failed or not run, required test skipped or missing, failed cleanup, stale SHA, altered log, weakened regression]
   claims: cross-build != cross-platform execution; bounded model checking != implementation proof; optional skills/role prompts != gates
   worker_receipt: [candidate_sha, operations, compatibility, commands_and_evidence, passed_failed_not_run_not_applicable_with_reason, blockers, next_step]
