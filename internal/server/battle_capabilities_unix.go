@@ -99,6 +99,7 @@ type battleProviderReceipt struct {
 type BattleCapabilityRegistry struct {
 	monotonic *probeclock.Clock
 	driver    *aws.EC2InstanceRuntime
+	stacks    *aws.StackStore
 	providers map[string]battleProviderReceipt
 	mu        sync.Mutex
 	origin    string
@@ -410,7 +411,17 @@ func (r *BattleCapabilityRegistry) serveHTTP(w http.ResponseWriter, request *htt
 		r.mu.Lock()
 		entry := r.entries[input.Key]
 		supplied, registered := r.providers[input.Owner.StackID+"\x00"+input.Owner.InstanceID]
+		driver, stacks := r.driver, r.stacks
 		r.mu.Unlock()
+		// An OnReady receipt may arrive before CloudFormation publishes its
+		// completed generation. Check here, never inside that launch callback.
+		// Seal still accepts retained incomplete attempts for cleanup.
+		if suffix == "/resolve" && driver != nil &&
+			(stacks == nil || !registered || (entry != nil && entry.source != supplied.source) ||
+				stacks.VerifyCompletedGuest(request.Context(), supplied.source) != nil) {
+			http.Error(w, "Battle canonical deployment is not ready", 409)
+			return
+		}
 		if entry == nil && registered {
 			if e := r.Register(input.Owner, supplied.source, supplied.services); e != nil {
 				http.Error(w, "Battle association unavailable", 409)

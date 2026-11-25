@@ -14,6 +14,8 @@ An explicitly configured Battle VM runtime is separate from these default API
 simulation requirements: it needs Linux or macOS (amd64 or arm64; WSL2 on Windows), a trusted pinned QEMU/firmware/image
 bundle and private operator configuration. Host clock qualification is also
 required; enabling the flag does not establish it. See [opt-in runtime setup](docs/start.md#explicit-battle-runtime-linux-and-macos).
+Battle capability discovery resolves only after the retained instance is ready and its exact CloudFormation stack is complete.
+
 
 ## Start and sign in
 
@@ -92,6 +94,7 @@ console, CloudFormation adapter or Challenge integration.
 - **Identity and secrets:** [IAM](docs/iam.md), [native SDK / STS](docs/sts-native.md),
   [Secrets Manager](docs/secrets-manager.md), [KMS](docs/kms.md), [WAFv2](docs/wafv2.md).
 - **Networking:** [EC2/VPC discovery and VPC create/delete](docs/ec2-read-discovery.md),
+  [VPC and one subnet in the Console](docs/ec2-read-discovery.md#console-vpc-and-one-subnet),
   [Elastic Load Balancing](docs/elb.md) (Lambda targets),
   [CloudFront VPC origins](docs/cloudfront-vpc-origin.md), [Route 53 public zones, including PTR reverse lookups](docs/route53.md).
 - **Scaling:** [Auto Scaling plans for local DynamoDB tables](docs/autoscaling-plans.md).
@@ -104,14 +107,16 @@ console, CloudFormation adapter or Challenge integration.
 - **Other clouds:** [Google Cloud Storage / Azure Blob Storage](docs/multicloud-storage.md),
   [Azure Blob conditional and CRC64 read limits](docs/azure-blob.md#single-range-download-subset),
   [App Engine (Python 3.12 WSGI versions, traffic splits, firewall)](docs/gcp-appengine.md),
-  [Cloud DNS (bounded zone and record changes, including SRV)](docs/acceptance/gcp-cloud-dns.md),
+  [Cloud DNS (bounded zone and record changes; Console SRV editor)](docs/acceptance/gcp-cloud-dns.md),
   [Google Cloud console](docs/gcp-console.md), [Azure console](docs/azure-console.md),
   [Azure Queue Storage (bounded named-queue operations)](docs/acceptance/azure-queue.md),
   [opt-in Sakura Disk metadata](docs/sakura.md).
 - **SimpleDB:** One optional SDK-style `Expected` condition on `PutAttributes`
   can compare a single value or require that an attribute be absent. The check
   and write share one transaction; batch writes, `DeleteAttributes` and `Select`
-  are not supported.
+  are not supported. A write that exceeds the [256-pair item limit](docs/simpledb-item-limits.md)
+  is rejected atomically. In the [SimpleDB console](docs/simpledb-console.md),
+  select a local domain, read a known item, and conditionally replace one attribute.
 - **Configuration-only catalogs:** [AWS](docs/aws-catalog.md),
   [Google Cloud](docs/gcp-catalog.md), [Azure Resource Manager](docs/azure-catalog.md).
   These do not run workloads, provide data planes or provision real cloud resources.
