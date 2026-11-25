@@ -3400,6 +3400,47 @@ REQUIRED_SOURCE_SCOPES['SNSConsoleResponseAdmission'] = {
 }
 
 
+# Provider-owned EC2 -> RDS observation only, never permission for later I/O.
+BASE_MODELS.add('RDSGuestPeerPreflight')
+BASE_INVARIANTS['RDSGuestPeerPreflight'] = {
+    'TypeOK',
+    'CanonicalGuest',
+    'SameProviderOwner',
+    'CurrentPrivateGeneration',
+    'DestinationIngress',
+    'SnapshotClosedBeforeHost',
+    'HostAuthenticated',
+    'LiveAtReturn',
+    'ObservationOnly',
+    'DenialDoesNotRetireOwner',
+    'HealthyObservation'
+}
+REQUIRED_MUTANTS['RDSGuestPeerPreflight'] = {
+    'AcceptBorrowedGuest',
+    'AcceptForeignProvider',
+    'SkipOwnedGeneration',
+    'SkipNativePrivateBindings',
+    'UseSourceSG',
+    'IgnoreProtocol',
+    'IgnorePort',
+    'IgnoreNICAddressRange',
+    'IgnoreFailedCommit',
+    'AcceptFailedHostSCRAM',
+    'ProbeWithSnapshotOpen',
+    'SkipNICRecheck',
+    'SkipCommandRecheck',
+    'IssueReusablePermit',
+    'RetireOwnerOnPeerDenial',
+    'DenyAllHealthyGuests'
+}
+REQUIRED_SOURCE_SCOPES['RDSGuestPeerPreflight'] = {
+    'internal/aws/catalog/rds_guest_peer_linux_amd64.go',
+    'internal/aws/catalog/rds_owned_runtime_linux_amd64.go',
+    'internal/aws/ec2_completed_guest_unix.go',
+    'internal/aws/rds_guest_peer_linux_amd64.go'
+}
+
+
 def load_registry(root, relative='formal/models.json'):
     root = Path(root)
     registry_path = asset(root, relative)

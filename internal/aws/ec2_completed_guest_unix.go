@@ -7,6 +7,7 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
+	"net/netip"
 	"reflect"
 	"slices"
 )
@@ -15,6 +16,14 @@ import (
 // CloudFormation generation. It is a read-only readiness check, not a permit to
 // perform later I/O. An actual connector must still use the live owner fence.
 func (s *StackStore) VerifyCompletedGuest(ctx context.Context, source *EC2VMProbeLaunch) error {
+	return s.verifyCompletedGuest(ctx, source, nil)
+}
+
+// The peer check runs inside the authenticated NIC's network read fence. Its
+// arguments are recovered from the retained resource, never from client input.
+type ec2GuestNetworkCheck func(EC2GuestOwner, EC2NetworkSnapshot, netip.Addr) error
+
+func (s *StackStore) verifyCompletedGuest(ctx context.Context, source *EC2VMProbeLaunch, check ec2GuestNetworkCheck) error {
 	if s == nil || ctx == nil || ctx.Err() != nil || !source.Ready() {
 		return errGuestLease
 	}
@@ -76,7 +85,7 @@ func (s *StackStore) VerifyCompletedGuest(ctx context.Context, source *EC2VMProb
 		}
 	}
 	if instances != 1 || target.plan.canonical != run.plan.canonical ||
-		runtime.verifyGuestNetworkMembership(ctx, target, issuance) != nil ||
+		runtime.verifyGuestNetworkMembership(ctx, target, issuance, check) != nil ||
 		ctx.Err() != nil || !commands.current(target) {
 		return errGuestLease
 	}
@@ -96,7 +105,7 @@ func (s EC2NetworkSnapshot) membership() ec2GuestNetworkMembership {
 // verifyGuestNetworkMembership reads the exact retained network lease through
 // its mutation fence. It grants neither ingress nor access to a backend. Future
 // traffic still needs admission inside the actual live owner and policy fence.
-func (r *EC2InstanceRuntime) verifyGuestNetworkMembership(ctx context.Context, target *ec2InstanceRuntimeEntry, issuance EC2GuestIssuance) error {
+func (r *EC2InstanceRuntime) verifyGuestNetworkMembership(ctx context.Context, target *ec2InstanceRuntimeEntry, issuance EC2GuestIssuance, check ec2GuestNetworkCheck) error {
 	if ctx == nil || ctx.Err() != nil || target == nil {
 		return errGuestLease
 	}
@@ -136,6 +145,16 @@ func (r *EC2InstanceRuntime) verifyGuestNetworkMembership(ctx context.Context, t
 		digest := sha256.Sum256(policy)
 		if err != nil || issuance.PolicyGeneration != hex.EncodeToString(digest[:]) || resource.sealed.Load() || ctx.Err() != nil {
 			return errGuestLease
+		}
+		if check != nil {
+			if err := check(owner, snapshot, nic.Config.NIC.PeerIP); err != nil {
+				return err
+			}
+			// Mutation pre-seals before waiting for this gate. Do not return
+			// success after the check if teardown has begun on either receipt.
+			if !lease.Active() || !source.Ready() || ctx.Err() != nil {
+				return errGuestLease
+			}
 		}
 		return nil
 	})

@@ -21358,6 +21358,210 @@
           "expect_invariant": "InvalidModifyKeepsOwner"
         }
       ]
+    },
+    {
+      "id": "RDSGuestPeerPreflight",
+      "model": "formal/RDSGuestPeerPreflight.tla",
+      "config": "formal/RDSGuestPeerPreflight.cfg",
+      "bounds": "One retained guest, one Linux/amd64 database owner, one fixed host SCRAM observation, eighteen alternative input witnesses, two independently revocable guest signals; no persistent route.",
+      "properties": [
+        "TypeOK",
+        "CanonicalGuest",
+        "SameProviderOwner",
+        "CurrentPrivateGeneration",
+        "DestinationIngress",
+        "SnapshotClosedBeforeHost",
+        "HostAuthenticated",
+        "LiveAtReturn",
+        "ObservationOnly",
+        "DenialDoesNotRetireOwner",
+        "HealthyObservation"
+      ],
+      "limits": "One call with one independently bad static fact at a time; NIC pre-seal and command retirement may additionally interleave. Not Go refinement, database isolation, lock correctness, actual networking, guest SQL, authenticated protocol verification, public API behavior, or permission for later I/O.",
+      "source_scope": [
+        "internal/aws/catalog/rds_guest_peer_linux_amd64.go",
+        "internal/aws/catalog/rds_owned_runtime_linux_amd64.go",
+        "internal/aws/ec2_completed_guest_unix.go",
+        "internal/aws/rds_guest_peer_linux_amd64.go"
+      ],
+      "mutants": [
+        {
+          "id": "AcceptBorrowedGuest",
+          "edits": [
+            {
+              "old": "Retained == s.f # \"wrong-receipt\"",
+              "new": "Retained == TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CanonicalGuest"
+        },
+        {
+          "id": "AcceptForeignProvider",
+          "edits": [
+            {
+              "old": "Provider == s.f \\notin {\"wrong-handle\", \"wrong-account\", \"wrong-region\", \"unavailable-owner\"}",
+              "new": "Provider == TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "SameProviderOwner"
+        },
+        {
+          "id": "SkipOwnedGeneration",
+          "edits": [
+            {
+              "old": "Generation == s.f \\notin {\"stale-generation\", \"missing-owner-row\"}",
+              "new": "Generation == TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CurrentPrivateGeneration"
+        },
+        {
+          "id": "SkipNativePrivateBindings",
+          "edits": [
+            {
+              "old": "PrivateTopology == s.f \\notin {\"public-network\", \"foreign-reservation\", \"different-vpc\", \"bad-nic-ip\"}",
+              "new": "PrivateTopology == TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CurrentPrivateGeneration"
+        },
+        {
+          "id": "UseSourceSG",
+          "edits": [
+            {
+              "old": "DestinationGroup == s.f # \"only-source-sg\"",
+              "new": "DestinationGroup == TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "DestinationIngress"
+        },
+        {
+          "id": "IgnoreProtocol",
+          "edits": [
+            {
+              "old": "TCP == s.f # \"wrong-protocol\"",
+              "new": "TCP == TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "DestinationIngress"
+        },
+        {
+          "id": "IgnorePort",
+          "edits": [
+            {
+              "old": "PortCovers5432 == s.f # \"wrong-port\"",
+              "new": "PortCovers5432 == TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "DestinationIngress"
+        },
+        {
+          "id": "IgnoreNICAddressRange",
+          "edits": [
+            {
+              "old": "RangeCoversPeer == s.f # \"outside-cidr\"",
+              "new": "RangeCoversPeer == TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "DestinationIngress"
+        },
+        {
+          "id": "IgnoreFailedCommit",
+          "edits": [
+            {
+              "old": "CommitOK == s.f # \"failed-commit\"",
+              "new": "CommitOK == TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "SnapshotClosedBeforeHost"
+        },
+        {
+          "id": "AcceptFailedHostSCRAM",
+          "edits": [
+            {
+              "old": "FixedSCRAM == s.f # \"failed-scram\"",
+              "new": "FixedSCRAM == TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "HostAuthenticated"
+        },
+        {
+          "id": "ProbeWithSnapshotOpen",
+          "edits": [
+            {
+              "old": "!.p = \"probe\", !.tx = FALSE",
+              "new": "!.p = \"probe\", !.tx = TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "SnapshotClosedBeforeHost"
+        },
+        {
+          "id": "SkipNICRecheck",
+          "edits": [
+            {
+              "old": "IF s.nic /\\ s.cmd",
+              "new": "IF s.cmd",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "LiveAtReturn"
+        },
+        {
+          "id": "SkipCommandRecheck",
+          "edits": [
+            {
+              "old": "IF s.nic /\\ s.cmd",
+              "new": "IF s.nic",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "LiveAtReturn"
+        },
+        {
+          "id": "IssueReusablePermit",
+          "edits": [
+            {
+              "old": "!.p = \"observed\", !.ticket = FALSE",
+              "new": "!.p = \"observed\", !.ticket = TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ObservationOnly"
+        },
+        {
+          "id": "RetireOwnerOnPeerDenial",
+          "edits": [
+            {
+              "old": "!.p = \"denied\", !.tx = FALSE, !.retiredByCheck = FALSE",
+              "new": "!.p = \"denied\", !.tx = FALSE, !.retiredByCheck = TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "DenialDoesNotRetireOwner"
+        },
+        {
+          "id": "DenyAllHealthyGuests",
+          "edits": [
+            {
+              "old": "IF Retained /\\ Provider",
+              "new": "IF FALSE /\\ Provider",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "HealthyObservation"
+        }
+      ]
     }
   ]
 }
