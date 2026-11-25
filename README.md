@@ -118,6 +118,8 @@ console, CloudFormation adapter or Challenge integration.
   AppFlow stores S3-to-S3 flow definitions only. An `OnDemand` definition
   rejects schedule settings; a `Scheduled` definition requires a nonblank
   schedule expression. AppFlow does not start jobs or move objects.
+  AWS Batch validates job-queue time-limit actions against the queue family
+  and allows time limits from 600 to 86,400 seconds; it does not execute them.
 
 After signing in, open <http://127.0.0.1:4566/_simulator/docs/> for the API reference.
 Examples are static; **Test Request → Send** makes a live local request.
