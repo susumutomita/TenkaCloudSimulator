@@ -1,109 +1,33 @@
 {
   "version": 1,
-  "base_sha": "848b081e508bdfc843da7877908ed68e990d2e50",
+  "base_sha": "79d1e1c6f779a32f22de801affbf677bbb357d26",
   "changes": [
     {
-      "path": "README.md",
-      "sha256": "6f057490106423b32aac82db5316e76be01159f9bfc96eddf1f08a0a565f18f0",
-      "disposition": "documentation",
-      "reason": "Documents the local jointly owned VPC/subnet creation path and its limits.",
-      "models": []
-    },
-    {
-      "path": "docs/design/0001-go-standalone.md",
-      "sha256": "015b3bdf0707592d088336892aaf050f95de3b5b7fce3d2a1350ea2447cc511e",
-      "disposition": "documentation",
-      "reason": "Documents the local jointly owned VPC/subnet creation path and its limits.",
-      "models": []
-    },
-    {
-      "path": "docs/ec2-read-discovery.md",
-      "sha256": "b51befd1db7f21b608318b5477c7edf78d8eff214253ef025ea3f1589a8c4a23",
-      "disposition": "documentation",
-      "reason": "Documents the local jointly owned VPC/subnet creation path and its limits.",
-      "models": []
-    },
-    {
-      "path": "internal/server/web/app.js",
-      "sha256": "6345e8743efbfca09e0d2cd5eb11ca561de09957674e2b05890db9e6b728ad9b",
-      "disposition": "modeled",
-      "reason": "Mounts the VPC screen with an authenticated administrator-only CloudFormation form; one submission and post-acknowledgment list focus remain local.",
-      "models": [
-        {
-          "id": "CatalogConsoleEpoch",
-          "properties": [
-            "NoUnmountedAcceptance",
-            "SingleWriter",
-            "ReloadOnlyAfterAck"
-          ],
-          "limits": "The catalog model is a finite analogue for single submission, suppression after unmount, and refreshing only after confirmed output. It does not model administrator capability admission, VPC template, CloudFormation credentials/state, actual DOM focus or Go refinement."
-        }
-      ]
-    },
-    {
-      "path": "test/console/ec2_vpc_subnet_native.py",
-      "sha256": "4d89744195a94b2bb4aff5baddab4be4fd84b60b4ea52afb3eb3e90d8f998fde",
+      "path": "test/rds/README.md",
+      "sha256": "79ff050dc6c045efb20488922911ad20fe33335538511454a29393d6d1534798",
       "disposition": "test-support",
-      "reason": "Focused local native VPC console request and readback check; no runtime change.",
+      "reason": "Optional host-side PostgreSQL test fixture only; no production, AWS, guest, or data-plane changes.",
       "models": []
     },
     {
-      "path": "tools/console/bundle-digests.json",
-      "sha256": "216defc892a9bc9df3bc388b06fb9a7688395615aa161982b2d47d5d51360f8c",
-      "disposition": "presentation",
-      "reason": "Bounded VPC form, request translation, build data or presentation tests. Existing CloudFormation runtime retains native authorization, validation and atomic ownership.",
+      "path": "test/rds/read_nonce.sql",
+      "sha256": "f731eaa66f1c6fbf5a1c0a520b554385126d1487f1592eb2fd025ad85ec89e36",
+      "disposition": "test-support",
+      "reason": "Optional host-side PostgreSQL test fixture only; no production, AWS, guest, or data-plane changes.",
       "models": []
     },
     {
-      "path": "tools/console/bundle-inputs.json",
-      "sha256": "8371b6d2d7867892d7e74cf6840d62a833438071441d619eae1a21de240c4ca9",
-      "disposition": "presentation",
-      "reason": "Bounded VPC form, request translation, build data or presentation tests. Existing CloudFormation runtime retains native authorization, validation and atomic ownership.",
+      "path": "test/rds/verify_local_sql.py",
+      "sha256": "223b6370e725b543d5f6c6c07a27f451fb4c4d739d752af5d5aeb7cf8114a708",
+      "disposition": "test-support",
+      "reason": "Optional host-side PostgreSQL test fixture only; no production, AWS, guest, or data-plane changes.",
       "models": []
     },
     {
-      "path": "tools/console/src/ec2-readonly.jsx",
-      "sha256": "7f3c76feacea06954079c41daaa603a9392a7289f1ae254cc3218c75b7041f67",
-      "disposition": "presentation",
-      "reason": "Bounded VPC form, request translation, build data or presentation tests. Existing CloudFormation runtime retains native authorization, validation and atomic ownership.",
-      "models": []
-    },
-    {
-      "path": "tools/console/src/ec2-vpc-subnet-fields.jsx",
-      "sha256": "360f07020a200cd8addef2b10e08b8e691ccba22ec713c75ba28786d1b5ec33f",
-      "disposition": "presentation",
-      "reason": "Bounded VPC form, request translation, build data or presentation tests. Existing CloudFormation runtime retains native authorization, validation and atomic ownership.",
-      "models": []
-    },
-    {
-      "path": "tools/console/src/ec2-vpc-subnet.mjs",
-      "sha256": "7b950be9f18751ae58900f50c1d9b047fb913a6e4d8fcc5d610b5559574b7b49",
-      "disposition": "presentation",
-      "reason": "Bounded VPC form, request translation, build data or presentation tests. Existing CloudFormation runtime retains native authorization, validation and atomic ownership.",
-      "models": []
-    },
-    {
-      "path": "tools/console/src/main.jsx",
-      "sha256": "c6941b261c8b61d69a60d1ded152e137a02b8ba9e9418236eb1ec25de2526c08",
-      "disposition": "modeled",
-      "reason": "Mounts the VPC screen with an authenticated administrator-only CloudFormation form; one submission and post-acknowledgment list focus remain local.",
-      "models": [
-        {
-          "id": "CatalogConsoleEpoch",
-          "properties": [
-            "NoUnmountedAcceptance",
-            "SingleWriter",
-            "ReloadOnlyAfterAck"
-          ],
-          "limits": "The catalog model is a finite analogue for single submission, suppression after unmount, and refreshing only after confirmed output. It does not model administrator capability admission, VPC template, CloudFormation credentials/state, actual DOM focus or Go refinement."
-        }
-      ]
-    },
-    {
-      "path": "tools/console/test/ec2-vpc-subnet.test.mjs",
-      "sha256": "7aaa7d8f539b64b960e503af5e27e40a0c41d7e98a6f9b1197b40e4a68351d9a",
-      "disposition": "presentation",
-      "reason": "Bounded VPC form, request translation, build data or presentation tests. Existing CloudFormation runtime retains native authorization, validation and atomic ownership.",
+      "path": "test/rds/write_nonce.sql",
+      "sha256": "21f74aaca540d4b6191dbc0e954254d2d46201767fe7eb668bcbc48ab604f9a7",
+      "disposition": "test-support",
+      "reason": "Optional host-side PostgreSQL test fixture only; no production, AWS, guest, or data-plane changes.",
       "models": []
     }
   ]
