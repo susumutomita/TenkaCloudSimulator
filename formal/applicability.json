@@ -1,40 +1,151 @@
 {
   "version": 1,
-  "base_sha": "6987180961be7fa74dd045c2cf950541a8cfc5bf",
+  "base_sha": "891a0300cf6fb5f15bd0a1bb96b094d708865d64",
   "changes": [
     {
-      "path": "internal/aws/host_battle_bootstrap_contract_test.go",
-      "sha256": "243435ddf51df5b754cf0716b7a133674262800df38f2f16c6e4e54c0e375cfa",
-      "disposition": "test-support",
-      "reason": "Development-only opt-in test and exact public Host fixture; no runtime or scoring change.",
+      "path": "README.md",
+      "sha256": "dc40fc9ed8fa5768d7918861bdc2968a148a0c9b7ac8107b9e218fbbef03501d",
+      "disposition": "documentation",
+      "reason": "Documents the bounded authenticated Route 53 selected-zone flow, native IAM, shared state and explicit exclusions.",
       "models": []
     },
     {
-      "path": "internal/aws/testdata/host-battle-bootstrap/provenance.json",
-      "sha256": "b05ef5ae43f87c0de64b3fed8729a0a39e7d6573be202f596b2a005bd19e76f3",
-      "disposition": "test-support",
-      "reason": "Development-only opt-in test and exact public Host fixture; no runtime or scoring change.",
+      "path": "docs/design/0001-go-standalone.md",
+      "sha256": "6655e97e093b31e810021eb4c810b728074b5a1219da6f7a9d15bda6f293e037",
+      "disposition": "documentation",
+      "reason": "Documents the bounded authenticated Route 53 selected-zone flow, native IAM, shared state and explicit exclusions.",
       "models": []
     },
     {
-      "path": "internal/aws/testdata/host-battle-bootstrap/template.json",
-      "sha256": "4809767a7bd85d5fbeac39fae38553d86e86f216b06d06ca459ad3497c56abf3",
-      "disposition": "test-support",
-      "reason": "Development-only opt-in test and exact public Host fixture; no runtime or scoring change.",
+      "path": "docs/route53.md",
+      "sha256": "6436d7a44543ec4620c730692c7ad1f7e94f0efad6293dc87c6dabc8e4d13bf7",
+      "disposition": "documentation",
+      "reason": "Documents the bounded authenticated Route 53 selected-zone flow, native IAM, shared state and explicit exclusions.",
       "models": []
     },
     {
-      "path": "test/battle/README.md",
-      "sha256": "972ee8ff439f6171b768aeebebeff8db33569bbe24dfc05443f21949474aca45",
+      "path": "internal/server/route53_composition_test.go",
+      "sha256": "550e4610f7865b6ed3ee0ab448faff8db7859318e284c4218be80898b12916ac",
       "disposition": "test-support",
-      "reason": "Development-only opt-in test and exact public Host fixture; no runtime or scoring change.",
+      "reason": "Tests exact native service capability disclosure and preserves the token/persistence composition test.",
       "models": []
     },
     {
-      "path": "test/battle/host-bootstrap.mjs",
-      "sha256": "13e8de33052913040e2dc9ea526696c56ad932cf4eed749375e4479fc5803c2e",
-      "disposition": "test-support",
-      "reason": "Development-only opt-in test and exact public Host fixture; no runtime or scoring change.",
+      "path": "internal/server/server.go",
+      "sha256": "f3a3af064b82fa26f2aa474a4fd0ed1fc93f808addc0905b6cabf9c6e1ad8045",
+      "disposition": "modeled",
+      "reason": "Advertises the native Route 53 console only for trusted Access-wrapped, nonscoped callers; existing gateway authority and data plane remain unchanged.",
+      "models": [
+        {
+          "id": "LandingAccessAdmission",
+          "properties": [
+            "TokenBoundary"
+          ],
+          "limits": "Finite existing model for admission of protected paths; it does not model actor context, the added advertisement bit or browser proof."
+        },
+        {
+          "id": "Route53AtomicBatch",
+          "properties": [
+            "OnlyAuthorizedValid",
+            "OtherTeamUnchanged"
+          ],
+          "limits": "Native state/authorization remains unchanged. The existing bounded batch model does not prove Console DOM, XML parser behavior, rights disclosure, or Go refinement."
+        }
+      ]
+    },
+    {
+      "path": "internal/server/web/app.js",
+      "sha256": "9b8630d12b2891cfba24acee141687d8dcc98074daa4dcceda5c53e6ad5c0aea",
+      "disposition": "modeled",
+      "reason": "Mounts the authenticated Route 53 route and suppresses duplicate, lost-context or unverified PTR write feedback. Same selected-zone refresh retains the draft without reopening submission until fresh data; focus follows only the still-focused action.",
+      "models": [
+        {
+          "id": "CatalogConsoleEpoch",
+          "properties": [
+            "NoUnmountedAcceptance",
+            "OnlyCurrentReplies",
+            "SingleWriter",
+            "ReloadOnlyAfterAck",
+            "FailureVisible"
+          ],
+          "limits": "Finite Console lifecycle analogue only; selected Route 53 zone authority, field validation, XML, receipts/readback contents, actual DOM and implementation refinement are not proved."
+        }
+      ]
+    },
+    {
+      "path": "tools/console/bundle-digests.json",
+      "sha256": "846f7a4bbe9188611c35d10e1e019e3b29b5b31560623a545e9451ee882bdf3f",
+      "disposition": "presentation",
+      "reason": "Dedicated Route 53 Console view, bounded native protocol projection, focused tests or generated metadata; no backend mutation authority.",
+      "models": []
+    },
+    {
+      "path": "tools/console/bundle-inputs.json",
+      "sha256": "5553eccdc71706f9371ac2f1f28a0d216058522fd09365784c7b0dfb96f4ecff",
+      "disposition": "presentation",
+      "reason": "Dedicated Route 53 Console view, bounded native protocol projection, focused tests or generated metadata; no backend mutation authority.",
+      "models": []
+    },
+    {
+      "path": "tools/console/src/console-navigation.mjs",
+      "sha256": "4a6c3e8629523eb908fde5feeffd1ad9b695e13f55f0f5b4bec2e248802c8fe9",
+      "disposition": "modeled",
+      "reason": "Shows only the exact advertised native Route 53 subset and never during the bound AWS console handoff.",
+      "models": [
+        {
+          "id": "SNSConsoleResponseAdmission",
+          "properties": [
+            "MountRequiresCapabilityAndNoHandoff"
+          ],
+          "limits": "Finite mount-admission analogue only; it does not model Route 53 capability fields, selected-zone requests or browser or Go behavior."
+        }
+      ]
+    },
+    {
+      "path": "tools/console/src/main.jsx",
+      "sha256": "7ed315aa702a070d0f4762af6ae0a39ad8c53d49bab9e87940e8e18a54184f5f",
+      "disposition": "modeled",
+      "reason": "Mounts the authenticated Route 53 route and suppresses duplicate, lost-context or unverified PTR write feedback.",
+      "models": [
+        {
+          "id": "CatalogConsoleEpoch",
+          "properties": [
+            "NoUnmountedAcceptance",
+            "OnlyCurrentReplies",
+            "SingleWriter",
+            "ReloadOnlyAfterAck",
+            "FailureVisible"
+          ],
+          "limits": "Finite Console lifecycle analogue only; selected Route 53 zone authority, field validation, XML, receipts/readback contents, actual DOM and implementation refinement are not proved."
+        }
+      ]
+    },
+    {
+      "path": "tools/console/src/route53-console.jsx",
+      "sha256": "596262fe62816cad8137e61c15c5c7e0c22c1aebdc6c36c21f94ebbf5d42dd43",
+      "disposition": "presentation",
+      "reason": "Dedicated Route 53 Console view, bounded native protocol projection, focused tests or generated metadata; no backend mutation authority.",
+      "models": []
+    },
+    {
+      "path": "tools/console/src/route53-console.mjs",
+      "sha256": "bab8b5357909eb750f73e173f7bbaec198d8ca72a76aed4733e9280b98de2922",
+      "disposition": "presentation",
+      "reason": "Dedicated Route 53 Console view, bounded native protocol projection, focused tests or generated metadata; no backend mutation authority.",
+      "models": []
+    },
+    {
+      "path": "tools/console/test/route53-console-render.test.mjs",
+      "sha256": "4bfafb4e59505424a8e28b6ad81d29117b38562c387f02c91d008249ab0a29b8",
+      "disposition": "presentation",
+      "reason": "Dedicated Route 53 Console view, bounded native protocol projection, focused tests or generated metadata; no backend mutation authority.",
+      "models": []
+    },
+    {
+      "path": "tools/console/test/route53-console.test.mjs",
+      "sha256": "ea3340406d97ba24efe3884c4aa10646abf7c6ccfa7922940ef573e097ec5e95",
+      "disposition": "presentation",
+      "reason": "Dedicated Route 53 Console view, bounded native protocol projection, focused tests or generated metadata; no backend mutation authority.",
       "models": []
     }
   ]
