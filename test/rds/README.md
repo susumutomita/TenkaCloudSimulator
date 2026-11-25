@@ -18,4 +18,6 @@ The optional `--tcp-scram` mode additionally requires the matching `psql` and pe
 python3 test/rds/verify_local_sql.py --pg-bin /absolute/path/to/postgresql/bin --tcp-scram
 ```
 
-TCP mode is **host-only**; it proves local PostgreSQL wire behavior, not EC2, the canonical guest command, or simulator-backed RDS.
+Before launching each client, the harness confirms that its own foreground PostgreSQL child is still running and the private data lock identifies the same PID, data directory, startup stamp and numeric-loopback bind. This check is not a substitute for the same-session cluster check. Each close revokes the lease first, requests PostgreSQL fast shutdown via its direct child handle, and requires exit status zero and removal of the lock before restarting. The run verifies that the old lease is refused after restart and that a deliberately raised test exception still closes the new server. The cleanup guard is armed before launch. Ordinary Ctrl-C is deferred only until the direct child handle has been acquired, and failure inside the launch window cannot yield a ready lease. An uncertain launch or close fails the run and retains its private disposable workspace; it never signals a PID read from a file or a process group. Abrupt termination of the Python verifier itself (such as SIGKILL or host loss) is not covered.
+
+TCP mode is **host-only**; it proves local PostgreSQL wire behavior and the bounded fixture's lifecycle, not a simulator-owned DB, EC2, or the canonical guest command.
