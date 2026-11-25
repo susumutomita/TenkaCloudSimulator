@@ -4,9 +4,9 @@
 `X-Simulator-Service: ec2` and `X-Simulator-Region` select the native Query/XML
 subset. Supply `Version=2016-11-15` and `Action=DescribeInstances`,
 `Action=DescribeVpcs`, `Action=DescribeSubnets`, `Action=DescribeSecurityGroups`,
-`Action=CreateVpc` or `Action=DeleteVpc`. Discovery uses the EC2 namespace and
+`Action=DescribeRouteTables`, `Action=CreateVpc` or `Action=DeleteVpc`. Discovery uses the EC2 namespace and
 lower-camel-case `reservationSet/instancesSet/item`, `vpcSet/item`,
-`subnetSet/item` and `securityGroupInfo/item` fields.
+`subnetSet/item`, `securityGroupInfo/item` and `routeTableSet/item` fields.
 A request body is bounded to 64 KiB.
 
 ## Discovery
@@ -16,7 +16,7 @@ checking saved resource, region, stack ownership and network identity consistenc
 It does not create resources or make cloud calls. The host's existing local token
 and browser session authentication still applies. Selected exercise identities
 need the matching `ec2:DescribeInstances`, `ec2:DescribeVpcs`,
-`ec2:DescribeSubnets` or `ec2:DescribeSecurityGroups` action on `*`.
+`ec2:DescribeSubnets`, `ec2:DescribeSecurityGroups` or `ec2:DescribeRouteTables` action on `*`.
 One database/token authority per team is still required; exercise identities are
 not tenant isolation. Native STS session credentials are not supported here.
 
@@ -71,6 +71,30 @@ handoff. The pane cannot create, attach, edit or delete a security group.
 [EC2 API reference: DescribeSecurityGroups](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_DescribeSecurityGroups.html).
 Focused check: `go test ./internal/aws -run '^TestEC2DescribeSecurityGroupsContract$' -count=1`.
 
+## Route-table readback
+
+Use `Action=DescribeRouteTables` without filters to list explicit, CloudFormation-owned
+tables in this region, ordered by table ID. Each item gives the table and VPC IDs,
+local owner, tags, explicit subnet associations (`main=false`) and saved, enabled
+IPv4 default routes to an attached Internet Gateway. Removing the default route
+through the existing trusted provider removes it from the result, including after
+restart; it is not a blackhole route. Deleting the owning stack removes its tables.
+The response checks the route, gateway attachment, table, subnet and same-VPC
+ownership in one transaction. A missing, null or ambiguous saved route-enabled flag
+is not interpreted as a deleted route. Inconsistent rows or declarations for a
+discovered stack, or an exceeded bound, return `InternalError` without a partial
+list. Discovery starts from surviving table, route and association rows or typed
+ownership entries, not a scan of every stack template. If a stack loses all
+such rows and claims, its table cannot be discovered or reported as corrupt. The normal EC2 discovery IAM check runs first; an
+instance-scoped console handoff cannot enumerate tables.
+
+Unlike [AWS DescribeRouteTables](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_DescribeRouteTables.html),
+there are no implicit main tables, local routes or associations, including for
+native EC2 VPCs. `state=active` describes the configured gateway route, **not**
+observed packet forwarding. Table IDs, filters, pagination and dry-run are rejected.
+This read adds no route mutations, console workflow or forwarding engine.
+Check: `go test ./internal/aws -run '^TestEC2DescribeRouteTablesReadback$' -count=1`.
+
 ## Native VPC lifecycle
 
 `CreateVpc` and `DeleteVpc` manage VPCs owned by EC2 itself, in the same SQLite
@@ -94,7 +118,7 @@ other member are rejected with `UnsupportedOperation`, never ignored or reported
 Ownership is never shared. `DeleteVpc` on a CloudFormation-owned VPC fails with
 `UnsupportedOperation`; delete its stack instead. A CloudFormation subnet, route
 table, security group or gateway attachment cannot reference an EC2-owned VPC, so
-the stack is refused and the VPC is unchanged. Native subnets, route tables,
+the stack is refused and the VPC is unchanged. Native creation or mutation of subnets, route tables and
 gateways, `ModifyVpcAttribute` and tag edits after creation are not implemented.
 
 Exercise identities need `ec2:CreateVpc` on `arn:aws:ec2:<region>:000000000000:vpc/*`,
