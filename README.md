@@ -93,7 +93,7 @@ console, CloudFormation adapter or Challenge integration.
   [Secrets Manager](docs/secrets-manager.md), [KMS](docs/kms.md), [WAFv2](docs/wafv2.md).
 - **Networking:** [EC2/VPC discovery and VPC create/delete](docs/ec2-read-discovery.md),
   [Elastic Load Balancing](docs/elb.md) (Lambda targets),
-  [CloudFront VPC origins](docs/cloudfront-vpc-origin.md), [Route 53](docs/route53.md).
+  [CloudFront VPC origins](docs/cloudfront-vpc-origin.md), [Route 53 public zones, including PTR reverse lookups](docs/route53.md).
 - **Scaling:** [Auto Scaling plans for local DynamoDB tables](docs/autoscaling-plans.md).
 - **Infrastructure:** [CloudFormation](docs/cloudformation-rest.md),
   [SSM value parameters](docs/cloudformation-ssm-parameters.md),
@@ -108,12 +108,18 @@ console, CloudFormation adapter or Challenge integration.
   [Google Cloud console](docs/gcp-console.md), [Azure console](docs/azure-console.md),
   [Azure Queue Storage (bounded named-queue operations)](docs/acceptance/azure-queue.md),
   [opt-in Sakura Disk metadata](docs/sakura.md).
+- **SimpleDB:** One optional SDK-style `Expected` condition on `PutAttributes`
+  can compare a single value or require that an attribute be absent. The check
+  and write share one transaction; batch writes, `DeleteAttributes` and `Select`
+  are not supported.
 - **Configuration-only catalogs:** [AWS](docs/aws-catalog.md),
   [Google Cloud](docs/gcp-catalog.md), [Azure Resource Manager](docs/azure-catalog.md).
   These do not run workloads, provide data planes or provision real cloud resources.
   AppFlow stores S3-to-S3 flow definitions only. An `OnDemand` definition
   rejects schedule settings; a `Scheduled` definition requires a nonblank
   schedule expression. AppFlow does not start jobs or move objects.
+  AWS Batch validates job-queue time-limit actions against the queue family
+  and allows time limits from 600 to 86,400 seconds; it does not execute them.
 
 After signing in, open <http://127.0.0.1:4566/_simulator/docs/> for the API reference.
 Examples are static; **Test Request → Send** makes a live local request.

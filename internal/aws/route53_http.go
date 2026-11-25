@@ -404,7 +404,7 @@ func r53key(r Route53Record) string {
 	return strings.Join(p, ".") + "."
 }
 
-var r53types = map[string]int{"A": 1, "NS": 2, "CNAME": 5, "SOA": 6, "MX": 15, "TXT": 16, "AAAA": 28}
+var r53types = map[string]int{"A": 1, "NS": 2, "CNAME": 5, "SOA": 6, "PTR": 12, "MX": 15, "TXT": 16, "AAAA": 28}
 
 func r53less(a, b Route53Record) bool {
 	ka, kb := r53key(a), r53key(b)
