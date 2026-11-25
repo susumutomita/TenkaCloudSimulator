@@ -1,63 +1,59 @@
 {
   "version": 1,
-  "base_sha": "6ac9cf77a85d262bf599cd42a1e0f7c45b6ce2cc",
+  "base_sha": "527d089485694f1506bca842fc57a277bdf2bfb0",
   "changes": [
     {
       "path": "README.md",
-      "sha256": "3019fc9ab3ffaf0017cdc88a375978c4e3fa48b2100214a9a1f1ae8874fa4a9c",
+      "sha256": "1dd4826a207d92332a0d054ceaab5d43130c900a350cd71fffc23837860f5230",
       "disposition": "documentation",
-      "reason": "Documents the bounded Batch queue configuration contract, not timing or execution.",
-      "models": []
-    },
-    {
-      "path": "docs/aws-catalog-services.md",
-      "sha256": "28acef4c174040642c8b04c9935a5d988139c3cddddf968601b183649b1f06f4",
-      "disposition": "documentation",
-      "reason": "Documents the bounded Batch queue configuration contract, not timing or execution.",
+      "reason": "Documents bounded canonical conditional writes without claiming full SimpleDB.",
       "models": []
     },
     {
       "path": "docs/design/0001-go-standalone.md",
-      "sha256": "25ce6ef9e2a99a3ff644201cbc2f46377dd9040e21c3cc571571ed67440ea8e8",
+      "sha256": "d51709f4d8572b6345c4711400d8104d23896fc99bb3176efe711eca7a47297f",
       "disposition": "documentation",
-      "reason": "Documents the bounded Batch queue configuration contract, not timing or execution.",
+      "reason": "Documents bounded canonical conditional writes without claiming full SimpleDB.",
       "models": []
     },
     {
-      "path": "internal/aws/catalog/batch_queue_time_limit_test.go",
-      "sha256": "74b853d3befdec89790ffd92c6a6e1dd46e0a00e0a36f4d4ae00a83ef08450f5",
+      "path": "internal/aws/simpledb/conditional_put_test.go",
+      "sha256": "7ea85b521e2a5912e47b9e9704f6a36c77037db3a6f5b1cff5cbf138b54047c4",
       "disposition": "test-support",
-      "reason": "Focused Batch verification, not production implementation.",
+      "reason": "Focused SimpleDB native conditional write checks, not production implementation.",
       "models": []
     },
     {
-      "path": "internal/aws/catalog/services_compute3.go",
-      "sha256": "cae0d6034ac034326e36b75b580cd956ef7c5fd9b1a6dea3daffdd21fb7923a5",
+      "path": "internal/aws/simpledb/http.go",
+      "sha256": "365b8bede78ac75dda90fef56dce8dab0b9aa5667eeabf2f88b6e2deda3f20e5",
       "disposition": "modeled",
-      "reason": "Rejects invalid Batch queue time-limit actions through the existing catalog resource transaction; no scheduler, routing, identity or storage protocol change.",
+      "reason": "The new SimpleDB conditional path reuses existing admissibility and transactional rollback/commit boundaries.",
       "models": [
         {
-          "id": "CatalogResourceLifecycle",
+          "id": "SimpleDBQueryAdmission",
           "properties": [
-            "FailureFrame"
+            "MalformedNeverDispatches",
+            "EnvelopeMatchesOutcome"
           ],
-          "limits": "The finite model covers only unchanged state after a rejected abstract operation. It does not model time limits, Batch queue families, SDK parsing, execution or Go refinement."
+          "limits": "Abstract request guards and response categories only. The model does not represent the Expected syntax, exact error code/status, or Go HTTP or SQLite semantics."
         }
       ]
     },
     {
-      "path": "internal/server/apidocs/catalog/batch.json",
-      "sha256": "1c012188b230e4170a57b6c5c6ca57b0ebcafc36ffc0dbb23ec6870c9e73415f",
-      "disposition": "presentation",
-      "reason": "Documents the bounded Batch queue configuration contract, not timing or execution.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/catalog_fixtures/batch.json",
-      "sha256": "425aa4be4c9f942890bc26fc4713bed8a7bbe3a5fe3532bcdf10c83097e0af29",
-      "disposition": "test-support",
-      "reason": "Focused Batch verification, not production implementation.",
-      "models": []
+      "path": "internal/aws/simpledb/item.go",
+      "sha256": "637fd395ab5e7c2aefd7b195d749e96c056ca825d9f1245a59ca55c546580c89",
+      "disposition": "modeled",
+      "reason": "The new SimpleDB conditional path reuses existing admissibility and transactional rollback/commit boundaries.",
+      "models": [
+        {
+          "id": "SimpleDBLifecycle",
+          "properties": [
+            "RefusalUnchanged",
+            "CommittedExact"
+          ],
+          "limits": "Abstract stage, commit and refusal only. It does not model compare-and-set, multi-value semantics, concurrent writers, SQL isolation or Go refinement. The focused native regressions exercise those concrete behaviors."
+        }
+      ]
     }
   ]
 }
