@@ -72,6 +72,7 @@ var batch = &Service{
 		"Job definitions are not implemented: RegisterJobDefinition numbers revisions as name:revision and DeregisterJobDefinition marks a revision INACTIVE instead of deleting it, which the stored model does not express, so RegisterJobDefinition, DeregisterJobDefinition and DescribeJobDefinitions return HTTP 501. UpdateConsumableResource is not implemented: its SET, ADD and SUBTRACT quantity operations need the in-use accounting of running jobs, so total quantities are fixed at creation and availableQuantity always equals totalQuantity.",
 		"Describe operations fail with ClientException (HTTP 400) when a named compute environment, job queue, service environment or scheduling policy does not exist, where AWS omits it from the result; Describe by name accepts a name or an ARN. ListConsumableResources filters are refused, and createdAt of a consumable resource is not reported because the stored clock is not epoch milliseconds.",
 		"References are stored without being resolved: the compute environments and service environments of a job queue order, subnets, security groups, launch templates, instance roles, service roles, EKS clusters and Spot fleet roles are not checked, a queue is VALID at once even if its compute environments are not, and UpdateComputeEnvironment changes only state, unmanagedvCpus, serviceRole, updatePolicy and context (computeResources updates are refused). A schedulingPolicyArn must name a stored scheduling policy, but deleting a scheduling policy, compute environment or service environment that a queue still uses succeeds, and a compute environment need not be DISABLED before deletion.",
+		"Job queue time-limit actions are configuration only: each timeout must be 600 to 86400 seconds. For a nonempty action list, the queue type or its environment order must identify one family: container queues accept CANCEL and SageMaker Training queues accept TERMINATE. No action is executed.",
 		"Names are 1 to 128 letters, digits, hyphens or underscores. A compute environment's containerOrchestrationType is ECS, or EKS when eksConfiguration is given; MANAGED compute environments require computeResources, UNMANAGED creation requires a nonblank serviceRole reference, unmanagedvCpus applies only to UNMANAGED ones, and Fargate compute resources refuse ec2KeyPair and instanceRole. A job queue holds at most three compute environments and cannot use both order families. On update, an empty order can clear the old family while setting the other in the same request. Fair-share policies accept computeReservation 0 to 99 and shareDecaySeconds 0 to 604800. Each Region holds at most 50 resources of each kind (local limit). Tags apply to every kind by ARN.",
 	},
 }
@@ -170,19 +171,53 @@ func batchCreateJobQueue(input map[string]any) error {
 			return invalid("computeEnvironmentOrder and serviceEnvironmentOrder cannot both be supplied.")
 		}
 	}
-	return batchJobQueue(input)
+	if err := batchJobQueue(input); err != nil {
+		return err
+	}
+	return batchQueueTimeLimits(input)
 }
 
-func batchUpdateJobQueue(document, supplied map[string]any) error {
-	_, computeChanged := supplied["computeEnvironmentOrder"]
-	_, serviceChanged := supplied["serviceEnvironmentOrder"]
-	if !computeChanged && !serviceChanged {
-		return nil
-	}
+func batchUpdateJobQueue(document, _ map[string]any) error {
 	compute, _ := document["computeEnvironmentOrder"].([]any)
 	service, _ := document["serviceEnvironmentOrder"].([]any)
 	if len(compute) != 0 && len(service) != 0 {
 		return invalid("computeEnvironmentOrder and serviceEnvironmentOrder cannot both be populated.")
+	}
+	return batchQueueTimeLimits(document)
+}
+
+// Validate using the effective queue configuration: an update may supply just
+// new actions, or replace an environment order while retaining its old actions.
+func batchQueueTimeLimits(queue map[string]any) error {
+	actions, _ := queue["jobStateTimeLimitActions"].([]any)
+	if len(actions) == 0 {
+		return nil
+	}
+	compute, _ := queue["computeEnvironmentOrder"].([]any)
+	service, _ := queue["serviceEnvironmentOrder"].([]any)
+	container, training := len(compute) != 0, len(service) != 0
+	switch queue["jobQueueType"] {
+	case "ECS", "EKS", "ECS_FARGATE":
+		container = true
+	case "SAGEMAKER_TRAINING":
+		training = true
+	}
+	if container == training {
+		return invalid("Job queue time-limit actions require one unambiguous container or service environment family.")
+	}
+	want := "CANCEL"
+	if training {
+		want = "TERMINATE"
+	}
+	for _, value := range actions {
+		rule, _ := value.(map[string]any)
+		seconds, ok := Number(rule["maxTimeSeconds"])
+		if !ok || seconds < 600 || seconds > 86400 {
+			return invalid("maxTimeSeconds must be from 600 to 86400.")
+		}
+		if rule["action"] != want {
+			return invalid("This job queue accepts only %s time-limit actions.", want)
+		}
 	}
 	return nil
 }
