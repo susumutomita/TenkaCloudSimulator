@@ -1,0 +1,62 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "TenkaCloudSimulator SNS HTTP(S) subscription fixture",
+    "version": "0.1.0",
+    "description": "Local, unofficial reference for an existing disposable topic. Sign in to the simulator first. Example URLs are metadata only: no HTTP notification, reachability check, or AWS confirmation occurs."
+  },
+  "servers": [{"url": "/", "description": "This simulator only"}],
+  "paths": {
+    "/": {
+      "post": {
+        "operationId": "snsHttpSubscribeReference",
+        "summary": "Subscribe a local HTTP or HTTPS endpoint",
+        "description": "The URL must have a host and match the selected protocol. Try HTTPS mismatch to observe the live InvalidParameter response; the failed request must not create a subscription.",
+        "parameters": [
+          {"name": "X-Simulator-Service", "in": "header", "required": true, "schema": {"type": "string", "enum": ["sns"], "default": "sns"}},
+          {"name": "X-Simulator-Region", "in": "header", "required": true, "schema": {"type": "string", "enum": ["us-east-1"], "default": "us-east-1"}}
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "type": "object",
+                "required": ["Action", "Version", "TopicArn", "Protocol", "Endpoint"],
+                "additionalProperties": false,
+                "properties": {
+                  "Action": {"type": "string", "enum": ["Subscribe"]},
+                  "Version": {"type": "string", "enum": ["2010-03-31"]},
+                  "TopicArn": {"type": "string", "description": "ARN of a pre-created disposable local topic."},
+                  "Protocol": {"type": "string", "enum": ["http", "https"]},
+                  "Endpoint": {"type": "string", "description": "Metadata-only URL. The native API checks the scheme and hostname."}
+                }
+              },
+              "examples": {
+                "httpEndpoint": {
+                  "summary": "HTTP endpoint metadata",
+                  "value": {"Action": "Subscribe", "Version": "2010-03-31", "TopicArn": "arn:aws:sns:us-east-1:000000000000:sns-http-reference", "Protocol": "http", "Endpoint": "http://127.0.0.1:18080/my%20events?team=blue"}
+                },
+                "httpsEndpoint": {
+                  "summary": "HTTPS endpoint metadata",
+                  "value": {"Action": "Subscribe", "Version": "2010-03-31", "TopicArn": "arn:aws:sns:us-east-1:000000000000:sns-http-reference", "Protocol": "https", "Endpoint": "https://127.0.0.1:18443/events"}
+                },
+                "httpsSchemeMismatch": {
+                  "summary": "HTTPS protocol with an HTTP URL (expect InvalidParameter)",
+                  "value": {"Action": "Subscribe", "Version": "2010-03-31", "TopicArn": "arn:aws:sns:us-east-1:000000000000:sns-http-reference", "Protocol": "https", "Endpoint": "http://127.0.0.1:18080/events"}
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {"description": "SubscribeResponse with a SubscriptionArn. Duplicate requests return the existing ARN. This does not confirm delivery.", "content": {"text/xml": {"schema": {"type": "string"}}}},
+          "400": {"description": "ErrorResponse with InvalidParameter on an invalid HTTP(S) endpoint. No subscription created.", "content": {"application/xml": {"schema": {"type": "string"}}}},
+          "401": {"description": "Simulator authentication required."},
+          "403": {"description": "SNS permission denied."},
+          "404": {"description": "The topic was not found in the selected region."}
+        }
+      }
+    }
+  }
+}

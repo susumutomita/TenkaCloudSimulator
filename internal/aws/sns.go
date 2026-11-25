@@ -27,6 +27,10 @@ var (
 	snsTopicName      = regexp.MustCompile(`^[A-Za-z0-9_-]{1,256}$`)
 	snsFIFOTopicName  = regexp.MustCompile(`^[A-Za-z0-9_-]{1,251}\.fifo$`)
 	snsAttributeField = regexp.MustCompile(`^Attributes\.entry\.([1-9][0-9]*)\.(key|value)$`)
+	// Local subscriptions use a 128-bit hexadecimal identifier. UUID-shaped
+	// identifiers are accepted syntactically; unknown IDs still return NotFound.
+	snsSubscriptionID = regexp.MustCompile(`(?i)^(?:[0-9a-f]{32}|[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})$`)
+	snsARNRegion      = regexp.MustCompile(`^[a-z]{2}(?:-[a-z0-9]+)+-[0-9]+$`)
 	// Protocols whose subscriptions are stored as locally confirmed.
 	// "sqs" is handled separately by the same-database native transaction
 	// or an explicitly supplied legacy test/composition callback.
@@ -60,6 +64,21 @@ func snsQueueEndpoint(endpoint string) (region, queue string, ok bool) {
 		return "", "", false
 	}
 	return parts[3], parts[5], true
+}
+
+// snsSubscriptionScope derives the IAM topic ARN before reading stored state.
+func snsSubscriptionScope(arn string) (topic, region string, ok bool) {
+	if len(arn) > 512 {
+		return "", "", false
+	}
+	p := strings.Split(arn, ":")
+	if len(p) != 7 || p[0] != "arn" || p[1] != "aws" || p[2] != "sns" ||
+		!snsARNRegion.MatchString(p[3]) || p[4] != "000000000000" ||
+		(!snsTopicName.MatchString(p[5]) && !snsFIFOTopicName.MatchString(p[5])) ||
+		!snsSubscriptionID.MatchString(p[6]) {
+		return "", "", false
+	}
+	return snsARN(p[3], p[5]), p[3], true
 }
 
 // snsNotificationEnvelope renders the JSON document real SNS places in an
@@ -159,7 +178,7 @@ type snsAttributeEntry struct {
 	Key   string `xml:"key"`
 	Value string `xml:"value"`
 }
-type snsTopicAttributesResult struct {
+type snsAttributesResult struct {
 	Attributes []snsAttributeEntry `xml:"Attributes>entry"`
 }
 
@@ -300,15 +319,16 @@ func (g *Gateway) serveSNS(w http.ResponseWriter, r *http.Request) {
 	}
 	action := form.Get("Action")
 	fields := map[string][]string{
-		"CreateTopic":              {"Name"},
-		"ListTopics":               {"NextToken"},
-		"DeleteTopic":              {"TopicArn"},
-		"GetTopicAttributes":       {"TopicArn"},
-		"Subscribe":                {"TopicArn", "Protocol", "Endpoint", "ReturnSubscriptionArn"},
-		"Unsubscribe":              {"SubscriptionArn"},
-		"ListSubscriptions":        {"NextToken"},
-		"ListSubscriptionsByTopic": {"TopicArn", "NextToken"},
-		"Publish":                  {"TopicArn", "Message", "Subject"},
+		"CreateTopic":               {"Name"},
+		"ListTopics":                {"NextToken"},
+		"DeleteTopic":               {"TopicArn"},
+		"GetTopicAttributes":        {"TopicArn"},
+		"Subscribe":                 {"TopicArn", "Protocol", "Endpoint", "ReturnSubscriptionArn"},
+		"GetSubscriptionAttributes": {"SubscriptionArn"},
+		"Unsubscribe":               {"SubscriptionArn"},
+		"ListSubscriptions":         {"NextToken"},
+		"ListSubscriptionsByTopic":  {"TopicArn", "NextToken"},
+		"Publish":                   {"TopicArn", "Message", "Subject"},
 	}
 	allowed, ok := fields[action]
 	if !ok {
@@ -496,7 +516,7 @@ func (g *Gateway) serveSNS(w http.ResponseWriter, r *http.Request) {
 		if topic.FIFO {
 			entries = append(entries, snsAttributeEntry{"FifoTopic", "true"})
 		}
-		snsResponse(w, action, snsTopicAttributesResult{Attributes: entries})
+		snsResponse(w, action, snsAttributesResult{Attributes: entries})
 	case "Subscribe":
 		if value, present := form["ReturnSubscriptionArn"]; present && value[0] != "true" && value[0] != "false" {
 			invalid("ReturnSubscriptionArn must be true or false.")
@@ -538,6 +558,13 @@ func (g *Gateway) serveSNS(w http.ResponseWriter, r *http.Request) {
 			snsError(w, ssmFailure{"InvalidParameterException", "Endpoint is required and limited to 2048 bytes."})
 			return
 		}
+		if protocol == "http" || protocol == "https" {
+			u, err := url.ParseRequestURI(endpoint)
+			if err != nil || u.Scheme != protocol || u.Hostname() == "" || strings.ContainsFunc(endpoint, unicode.IsSpace) {
+				snsError(w, ssmFailure{"InvalidParameterException", "HTTP/S endpoints must be absolute URLs with a hostname and the selected protocol."})
+				return
+			}
+		}
 		if protocol == "lambda" && !strings.HasPrefix(endpoint, "arn:aws:lambda:") {
 			snsError(w, ssmFailure{"InvalidParameterException", "Lambda endpoints must be Lambda function ARNs."})
 			return
@@ -564,6 +591,38 @@ func (g *Gateway) serveSNS(w http.ResponseWriter, r *http.Request) {
 		snsResponse(w, action, struct {
 			SubscriptionArn string
 		}{sub.ARN})
+	case "GetSubscriptionAttributes":
+		arn := form.Get("SubscriptionArn")
+		topicARN, arnRegion, ok := snsSubscriptionScope(arn)
+		if !ok {
+			snsError(w, ssmFailure{"InvalidParameterException", "SubscriptionArn must be a simulator SNS subscription ARN."})
+			return
+		}
+		if arnRegion != region {
+			snsError(w, ssmFailure{"NotFoundException", "Subscription does not exist in this region."})
+			return
+		}
+		if !authorize(topicARN) {
+			return
+		}
+		sub, err := g.SNS.retainedSubscription(r.Context(), arn, topicARN, region)
+		if err != nil {
+			snsError(w, err)
+			return
+		}
+		// Local confirmation is implicit. No confirmation request was authenticated,
+		// no outbound delivery occurred, and raw delivery is not supported.
+		entries := []snsAttributeEntry{
+			{"SubscriptionArn", sub.ARN},
+			{"TopicArn", sub.TopicARN},
+			{"Owner", "000000000000"},
+			{"Protocol", sub.Protocol},
+			{"Endpoint", sub.Endpoint},
+			{"ConfirmationWasAuthenticated", "false"},
+			{"PendingConfirmation", "false"},
+			{"RawMessageDelivery", "false"},
+		}
+		snsResponse(w, action, snsAttributesResult{Attributes: entries})
 	case "Unsubscribe":
 		arn := form.Get("SubscriptionArn")
 		sub, err := g.SNS.GetSubscription(arn)

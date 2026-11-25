@@ -347,6 +347,20 @@ func (s *SNSStore) GetSubscription(arn string) (SNSSubscription, error) {
 	return sub, err
 }
 
+// retainedSubscription observes the subscription and its authorized parent in
+// one read snapshot. No deleted subscription can be recovered from delivery history.
+func (s *SNSStore) retainedSubscription(ctx context.Context, arn, topicARN, region string) (SNSSubscription, error) {
+	var sub SNSSubscription
+	err := s.db.QueryRowContext(ctx, `SELECT s.arn,s.topic_arn,s.protocol,s.endpoint
+		FROM aws_sns_subscriptions s JOIN aws_sns_topics t ON t.arn=s.topic_arn
+		WHERE s.arn=? AND s.topic_arn=? AND t.region=?`, arn, topicARN, region).
+		Scan(&sub.ARN, &sub.TopicARN, &sub.Protocol, &sub.Endpoint)
+	if errors.Is(err, sql.ErrNoRows) {
+		return SNSSubscription{}, ssmFailure{"NotFoundException", "Subscription does not exist."}
+	}
+	return sub, err
+}
+
 func (s *SNSStore) Unsubscribe(arn string) error {
 	tx, err := s.db.Begin()
 	if err != nil {

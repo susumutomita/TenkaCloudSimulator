@@ -16,6 +16,7 @@ simulator runs with `--state`.
 | GetTopicAttributes | TopicArn, Owner, DisplayName, subscription counts, FifoTopic. |
 | DeleteTopic | Removes the topic, subscriptions, messages and all delivery records in one transaction, including history from removed subscriptions. A valid, authorized deletion of an absent topic succeeds without changing state; retries are idempotent. |
 | Subscribe | Protocols: sqs, http, https, email, email-json, sms, lambda, application, firehose. SQS requires a same-region Standard queue and caller SendMessage permission. Duplicate (topic, protocol, endpoint) returns the existing subscription. |
+| GetSubscriptionAttributes | Read the retained subscription by ARN in the selected region, with IAM on its topic. |
 | Unsubscribe | Unknown subscription ARN is `NotFound`. |
 | ListSubscriptions / ListSubscriptionsByTopic | `NextToken` pagination (page size 100). |
 | Publish | Message up to 256 KiB UTF-8, optional Subject (fewer than 100 Unicode characters; no line breaks or controls). Standard topics only; FIFO publication is explicitly refused. Returns a MessageId. |
@@ -43,6 +44,10 @@ unimplemented operations (HTTP 400), `NotFound` (404),
 
 ## Deliberate deviations — read before relying on behavior
 
+- **HTTP/S subscription endpoints.** Subscribe requires an absolute URL with a
+  hostname and the scheme selected by the protocol (for example, `https`
+  requires `https://`). Invalid endpoints return `InvalidParameter` before
+  a subscription is saved. The simulator performs no DNS or reachability check.
 - **No outbound delivery.** Publish records the message and one local
   delivery row per current subscription of the topic. SQS subscriptions additionally
   enqueue a real local SQS message in the same SQLite transaction. Nothing is sent to
@@ -87,8 +92,30 @@ unimplemented operations (HTTP 400), `NotFound` (404),
   message attributes, message structure JSON, FIFO deduplication/ordering
   semantics, or CloudFormation `AWS::SNS::Topic` support. Unsupported
   fields and attributes are rejected rather than ignored.
-- No Cloudscape console page for SNS yet; the console and the capability
-  table say so (`"console": false`).
+- The local Cloudscape SNS page provides bounded HTTP/HTTPS subscriptions.
+  Topic creation and attribute-policy editing are not provided by this view.
+  The local Scalar reference only sends Subscribe, in us-east-1 under the signed-in
+  session identity. It does not inherit the Console’s selected exercise identity.
+  Neither surface delivers notifications.
+
+## Subscription read-back
+
+[GetSubscriptionAttributes](https://docs.aws.amazon.com/sns/latest/api/API_GetSubscriptionAttributes.html)
+returns `SubscriptionArn`, `TopicArn`, `Owner`, `Protocol` and `Endpoint` for a
+retained local subscription. It also returns `PendingConfirmation=false`
+(local immediate confirmation), `ConfirmationWasAuthenticated=false` (no
+confirmation request), and `RawMessageDelivery=false` (unsupported).
+No delivery, filter, replay, redrive or role policy is invented. The IAM
+action is `sns:GetSubscriptionAttributes` on the parent topic ARN, checked
+before reading state. Unsubscribed and topic-deleted subscriptions are not
+readable, even when old delivery records still exist.
+
+This is the read step and deletion-polling response expected by the
+[pinned AWS Terraform provider v5.100.0](https://github.com/hashicorp/terraform-provider-aws/blob/v5.100.0/internal/service/sns/topic_subscription.go#L137-L152).
+It does not provide full Terraform compatibility: subscription create with
+policy, raw delivery or other nondefault attributes and attribute updates
+remain unsupported. Topic tags, broader topic attributes and provider
+authentication setup are separate acceptance requirements.
 
 ## SDK example (boto3, local only)
 
@@ -120,9 +147,12 @@ selected region and cannot remove another region's subscription.
 FIFO topic metadata can still be created/read/deleted, but Publish refuses FIFO
 topics because ordering/deduplication/group semantics are not implemented.
 
-The service has no SNS console, CloudFormation adapter or real cloud delivery.
-SDK/HTTP operations are the supported workflow. The native queue transaction is independently covered by real SDK and SQLite fault
-regressions; the legacy callback is not an atomic integration contract.
+CloudFormation and real cloud delivery are not supported. The Console and the
+local API reference expose the bounded HTTP/HTTPS subscription workflow
+described above; the reference can send a real local Subscribe request. Other
+supported operations use the local SDK/HTTP wire. The native queue transaction is
+independently covered by real SDK and SQLite fault regressions; the legacy callback
+is not an atomic integration contract.
 
 Real AWS credentials, session tokens and presigned requests are rejected,
 consistent with the other services.
@@ -164,6 +194,6 @@ composed-server SNS tests, AWS/server vet and build. Its real boto3 driver passe
 isolation, restart and cleanup; the inherited SNS SDK checks also passed. The
 bounded fanout baseline and nine controls passed with immutable before/after
 inputs. Independent source review identified and verified the fix for a mixed
-policy-snapshot defect. These focused results do not replace full quality,
-coverage, all E2E or complete formal acceptance, which remain pending. No SNS
-console or CloudFormation support is added by this increment.
+policy-snapshot defect. These are historical fanout results, distinct from the
+HTTP/HTTPS subscription and Console changes above. They do not establish
+full SNS, CloudFormation, or end-to-end compatibility.
