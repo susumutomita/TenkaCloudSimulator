@@ -57,7 +57,16 @@ text that cannot round-trip through XML 1.0 fails the whole request with
 `InternalError`, leaving existing data unchanged. Valid Unicode, tab,
 line feed, and carriage return are preserved. This read does not support
 group filters/ID selectors, paging, group names, egress, IPv6, referenced
-groups, or rule mutation. It adds no Console control or packet filtering.
+groups, or rule mutation. It does not simulate or verify packet filtering.
+
+In the signed-in **VPC** Console, select a CloudFormation-managed VPC and
+choose a group under **Resource details → Security groups**. The pane uses
+the same native regional read with your current identity and shows only
+groups for the selected VPC. It shows the description, TCP ports, IPv4
+CIDRs and tags, including empty tag values. **Refresh security groups**
+re-reads saved configuration. A refused or unsuccessful read is not shown
+as an empty list. No read is sent for EC2-managed VPCs or inside a scoped
+handoff. The pane cannot create, attach, edit or delete a security group.
 
 [EC2 API reference: DescribeSecurityGroups](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_DescribeSecurityGroups.html).
 Focused check: `go test ./internal/aws -run '^TestEC2DescribeSecurityGroupsContract$' -count=1`.
