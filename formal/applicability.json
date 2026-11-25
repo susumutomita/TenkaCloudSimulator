@@ -1,203 +1,109 @@
 {
   "version": 1,
-  "base_sha": "df94e52673ebe9aaeb593c1f89abef16913dc130",
+  "base_sha": "9839b0b815e02b619b9a8b61881bc886741bd8a4",
   "changes": [
     {
-      "path": ".github/workflows/ci.yml",
-      "sha256": "9f53b1f1e64c68e11372b84ef244569d1243f6050631c6569d6c4b84b80945dc",
-      "disposition": "formal-infrastructure",
-      "reason": "Execute focused Cloud DNS Node and actual React rendering tests after the existing pinned Console dependency install and rebuild. No new dependency, blanket E2E, or change to the formal job.",
-      "models": []
-    },
-    {
       "path": "README.md",
-      "sha256": "6859ec8e150d55e27788e8dfe71c1db74cb61d2365cb5effc7095adcf80d27d5",
+      "sha256": "58b82f5ed2477a5e4e36f7909254185d7897a1ad86ddba45e96a5f39c842cba2",
       "disposition": "documentation",
-      "reason": "Documents the owner-only local SRV record editor, its entry point or its limits; no runtime operation.",
-      "models": []
-    },
-    {
-      "path": "docs/acceptance/gcp-cloud-dns.md",
-      "sha256": "6caff168859289ed4d2e38b9fba9832ec8dac43134e575934a0906171397c20e",
-      "disposition": "documentation",
-      "reason": "Documents the owner-only local SRV record editor, its entry point or its limits; no runtime operation.",
+      "reason": "Documents the local jointly owned VPC/subnet creation path and its limits.",
       "models": []
     },
     {
       "path": "docs/design/0001-go-standalone.md",
-      "sha256": "5bf651488715678206b4b7119406f2ad5131e340d41f605103ecdcc8ce4fac9f",
+      "sha256": "0aa9218b3ad0d08950da588cd4d2f45746d20b698eb72f4b9154a88c58cdec8f",
       "disposition": "documentation",
-      "reason": "Documents the owner-only local SRV record editor, its entry point or its limits; no runtime operation.",
+      "reason": "Documents the local jointly owned VPC/subnet creation path and its limits.",
       "models": []
     },
     {
-      "path": "internal/server/gcp_dns_handler_test.go",
-      "sha256": "b45ba78e2ad2eb3982fc0e4de5903f65451749d732ed2c8c39bf6fc4949b4672",
-      "disposition": "test-support",
-      "reason": "Tracks the exact owner-only native capability descriptor; tests do not add an operation.",
-      "models": []
-    },
-    {
-      "path": "internal/server/server.go",
-      "sha256": "1a572062b50e4264f3a18f02e39fe4b57979b937f7ee73e327a8764f1940cfa1",
-      "disposition": "modeled",
-      "reason": "Cloud DNS editor is offered only by the existing trusted-owner capability and uses the active zone view for local change/readback.",
-      "models": [
-        {
-          "id": "CloudDNSConsoleScope",
-          "properties": [
-            "CapabilityAuthorized"
-          ],
-          "limits": "The existing finite owner/scope and stale-read model does not prove React rendering, SRV syntax, mutation success, native HTTP or SQLite; those behaviors have separately scoped tests."
-        }
-      ]
-    },
-    {
-      "path": "internal/server/web/app.css",
-      "sha256": "e0b74fd84601248100caa904e0e9f0e05724a1bf81025aaeb57d7bdb86e0a2eb",
-      "disposition": "presentation",
-      "reason": "Scoped CSS or its shipped asset makes long SRV values wrap without truncation or changing native data.",
+      "path": "docs/ec2-read-discovery.md",
+      "sha256": "b51befd1db7f21b608318b5477c7edf78d8eff214253ef025ea3f1589a8c4a23",
+      "disposition": "documentation",
+      "reason": "Documents the local jointly owned VPC/subnet creation path and its limits.",
       "models": []
     },
     {
       "path": "internal/server/web/app.js",
-      "sha256": "d67e5975510582954720bf88aeca810bfb3fd7156bc654c28dfa3d1f3ca1647b",
+      "sha256": "20dfefbe9b843328c241d9ecc9956bdda40e1e46b7eef6428ce2a07d7c92049c",
       "disposition": "modeled",
-      "reason": "Cloud DNS editor is offered only by the existing trusted-owner capability and uses the active zone view for local change/readback.",
+      "reason": "Mounts the VPC screen with an authenticated administrator-only CloudFormation form; one submission and post-acknowledgment list focus remain local.",
       "models": [
         {
-          "id": "CloudDNSConsoleScope",
+          "id": "CatalogConsoleEpoch",
           "properties": [
-            "OnlyCurrentDiscovery",
-            "NoStaleContinuation"
+            "NoUnmountedAcceptance",
+            "SingleWriter",
+            "ReloadOnlyAfterAck"
           ],
-          "limits": "The existing finite owner/scope and stale-read model does not prove React rendering, SRV syntax, mutation success, native HTTP or SQLite; those behaviors have separately scoped tests."
+          "limits": "The catalog model is a finite analogue for single submission, suppression after unmount, and refreshing only after confirmed output. It does not model administrator capability admission, VPC template, CloudFormation credentials/state, actual DOM focus or Go refinement."
         }
       ]
     },
     {
-      "path": "test/e2e/gcp_dns_console_gui.py",
-      "sha256": "095de1b74d06b757282d35846e72726684aed0d4b7abf7844d3ad02c32cfc8e7",
+      "path": "test/console/ec2_vpc_subnet_native.py",
+      "sha256": "4d89744195a94b2bb4aff5baddab4be4fd84b60b4ea52afb3eb3e90d8f998fde",
       "disposition": "test-support",
-      "reason": "Tracks the exact owner-only native capability descriptor; tests do not add an operation.",
+      "reason": "Focused local native VPC console request and readback check; no runtime change.",
       "models": []
     },
     {
       "path": "tools/console/bundle-digests.json",
-      "sha256": "97d671f804afcd8990c20eeabe3025baafa31ccd909a71f45661f2a30106093b",
+      "sha256": "03e7f0a7810b783aab0762b6c1a081e6ec4707d041fd5147f1f58df6352c0023",
       "disposition": "presentation",
-      "reason": "Implements, exercises or identifies the local structured SRV editor; no backend authority or DNS-serving semantics.",
+      "reason": "Bounded VPC form, request translation, build data or presentation tests. Existing CloudFormation runtime retains native authorization, validation and atomic ownership.",
       "models": []
     },
     {
       "path": "tools/console/bundle-inputs.json",
-      "sha256": "ce9edf8d6be233fdfae709f39458ba2d5d94d4b210e6cebcf4db7abf0cbc067e",
+      "sha256": "c2a99006603897ef6feb66e6bd1dc48fb5a934f85dc5a1b77db6bb8fec4b398c",
       "disposition": "presentation",
-      "reason": "Implements, exercises or identifies the local structured SRV editor; no backend authority or DNS-serving semantics.",
+      "reason": "Bounded VPC form, request translation, build data or presentation tests. Existing CloudFormation runtime retains native authorization, validation and atomic ownership.",
       "models": []
     },
     {
-      "path": "tools/console/src/console-navigation.mjs",
-      "sha256": "66a1079aa7919a40a795c022a25c186a8ed387b61af1a9a01e5186f1447525fc",
-      "disposition": "modeled",
-      "reason": "Cloud DNS editor is offered only by the existing trusted-owner capability and uses the active zone view for local change/readback.",
-      "models": [
-        {
-          "id": "CloudDNSConsoleScope",
-          "properties": [
-            "CapabilityAuthorized",
-            "OnlyCurrentDiscovery"
-          ],
-          "limits": "The existing finite owner/scope and stale-read model does not prove React rendering, SRV syntax, mutation success, native HTTP or SQLite; those behaviors have separately scoped tests."
-        }
-      ]
-    },
-    {
-      "path": "tools/console/src/gcp-dns-requests.mjs",
-      "sha256": "3b45f1063101f623078c8332fde9a59eac50bf5017e85a6438f3351401f7a94e",
-      "disposition": "modeled",
-      "reason": "Cloud DNS editor is offered only by the existing trusted-owner capability and uses the active zone view for local change/readback.",
-      "models": [
-        {
-          "id": "CloudDNSConsoleScope",
-          "properties": [
-            "NoStaleContinuation"
-          ],
-          "limits": "The existing finite owner/scope and stale-read model does not prove React rendering, SRV syntax, mutation success, native HTTP or SQLite; those behaviors have separately scoped tests."
-        }
-      ]
-    },
-    {
-      "path": "tools/console/src/gcp-dns-srv-form.jsx",
-      "sha256": "592e38d6f4e55cfa19184c4ab44b19cd9c41184b8c912075c3b3216da162efa7",
+      "path": "tools/console/src/ec2-readonly.jsx",
+      "sha256": "7f3c76feacea06954079c41daaa603a9392a7289f1ae254cc3218c75b7041f67",
       "disposition": "presentation",
-      "reason": "Implements, exercises or identifies the local structured SRV editor; no backend authority or DNS-serving semantics.",
+      "reason": "Bounded VPC form, request translation, build data or presentation tests. Existing CloudFormation runtime retains native authorization, validation and atomic ownership.",
       "models": []
     },
     {
-      "path": "tools/console/src/gcp-dns-srv.css",
-      "sha256": "c9a6a669eb7a34fc4090ccc56f8bb2446845e9f6b12068f713cc9e5afb6b2097",
+      "path": "tools/console/src/ec2-vpc-subnet-fields.jsx",
+      "sha256": "360f07020a200cd8addef2b10e08b8e691ccba22ec713c75ba28786d1b5ec33f",
       "disposition": "presentation",
-      "reason": "Scoped CSS or its shipped asset makes long SRV values wrap without truncation or changing native data.",
+      "reason": "Bounded VPC form, request translation, build data or presentation tests. Existing CloudFormation runtime retains native authorization, validation and atomic ownership.",
       "models": []
     },
     {
-      "path": "tools/console/src/gcp-dns-srv.mjs",
-      "sha256": "fd41dde38a1bd0913fcbbc549423d20632bebbba95f407a38a773ab87df7b6ed",
+      "path": "tools/console/src/ec2-vpc-subnet.mjs",
+      "sha256": "7b950be9f18751ae58900f50c1d9b047fb913a6e4d8fcc5d610b5559574b7b49",
       "disposition": "presentation",
-      "reason": "Implements, exercises or identifies the local structured SRV editor; no backend authority or DNS-serving semantics.",
+      "reason": "Bounded VPC form, request translation, build data or presentation tests. Existing CloudFormation runtime retains native authorization, validation and atomic ownership.",
       "models": []
-    },
-    {
-      "path": "tools/console/src/gcp-dns.jsx",
-      "sha256": "210c6b31fa2f4132587551c332108ebe63971f3054f75cfe01681afc5b76697a",
-      "disposition": "modeled",
-      "reason": "Cloud DNS editor is offered only by the existing trusted-owner capability and uses the active zone view for local change/readback.",
-      "models": [
-        {
-          "id": "CloudDNSConsoleScope",
-          "properties": [
-            "OnlyCurrentReadVisible",
-            "NoStaleContinuation"
-          ],
-          "limits": "The existing finite owner/scope and stale-read model does not prove React rendering, SRV syntax, mutation success, native HTTP or SQLite; those behaviors have separately scoped tests."
-        }
-      ]
     },
     {
       "path": "tools/console/src/main.jsx",
-      "sha256": "80ec19822530fb17f8fdcdfc876d22d7b1782626a1fc33a79e594f689f63fe29",
+      "sha256": "543f00fcc1a58e3b6bb9d07d6293c607eb463ff1359fc0f52e2309f37db5a7ab",
       "disposition": "modeled",
-      "reason": "Cloud DNS editor is offered only by the existing trusted-owner capability and uses the active zone view for local change/readback.",
+      "reason": "Mounts the VPC screen with an authenticated administrator-only CloudFormation form; one submission and post-acknowledgment list focus remain local.",
       "models": [
         {
-          "id": "CloudDNSConsoleScope",
+          "id": "CatalogConsoleEpoch",
           "properties": [
-            "OnlyCurrentDiscovery"
+            "NoUnmountedAcceptance",
+            "SingleWriter",
+            "ReloadOnlyAfterAck"
           ],
-          "limits": "The existing finite owner/scope and stale-read model does not prove React rendering, SRV syntax, mutation success, native HTTP or SQLite; those behaviors have separately scoped tests."
+          "limits": "The catalog model is a finite analogue for single submission, suppression after unmount, and refreshing only after confirmed output. It does not model administrator capability admission, VPC template, CloudFormation credentials/state, actual DOM focus or Go refinement."
         }
       ]
     },
     {
-      "path": "tools/console/test/gcp-dns-navigation.test.mjs",
-      "sha256": "86b0b19917c784526effe51f780d365ef26c4dc7826b0d9f73bc82c20b48fad2",
+      "path": "tools/console/test/ec2-vpc-subnet.test.mjs",
+      "sha256": "7aaa7d8f539b64b960e503af5e27e40a0c41d7e98a6f9b1197b40e4a68351d9a",
       "disposition": "presentation",
-      "reason": "Implements, exercises or identifies the local structured SRV editor; no backend authority or DNS-serving semantics.",
-      "models": []
-    },
-    {
-      "path": "tools/console/test/gcp-dns-srv-render.test.mjs",
-      "sha256": "7485b484aeecb8f3b12f2a1b1e946b3a667da1cc115cbf13079dbfdb4edd29d0",
-      "disposition": "presentation",
-      "reason": "Implements, exercises or identifies the local structured SRV editor; no backend authority or DNS-serving semantics.",
-      "models": []
-    },
-    {
-      "path": "tools/console/test/gcp-dns-srv.test.mjs",
-      "sha256": "207c5510b5bbb29cd8fde16ecfa7b5c526a24df83849516d248e0d802e0c6dab",
-      "disposition": "presentation",
-      "reason": "Implements, exercises or identifies the local structured SRV editor; no backend authority or DNS-serving semantics.",
+      "reason": "Bounded VPC form, request translation, build data or presentation tests. Existing CloudFormation runtime retains native authorization, validation and atomic ownership.",
       "models": []
     }
   ]
