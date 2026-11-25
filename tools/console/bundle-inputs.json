@@ -33191,7 +33191,7 @@
       "format": "esm"
     },
     "src/console-navigation.mjs": {
-      "bytes": 13957,
+      "bytes": 14502,
       "imports": [
         {
           "path": "src/sakura-server-read.mjs",
@@ -34029,8 +34029,103 @@
       ],
       "format": "esm"
     },
+    "src/simpledb-client.mjs": {
+      "bytes": 5846,
+      "imports": [],
+      "format": "esm"
+    },
+    "src/simpledb.css": {
+      "bytes": 72,
+      "imports": []
+    },
+    "src/simpledb.jsx": {
+      "bytes": 14032,
+      "imports": [
+        {
+          "path": "node_modules/react/index.js",
+          "kind": "import-statement",
+          "original": "react"
+        },
+        {
+          "path": "node_modules/@cloudscape-design/components/alert/index.js",
+          "kind": "import-statement",
+          "original": "@cloudscape-design/components/alert"
+        },
+        {
+          "path": "node_modules/@cloudscape-design/components/box/index.js",
+          "kind": "import-statement",
+          "original": "@cloudscape-design/components/box"
+        },
+        {
+          "path": "node_modules/@cloudscape-design/components/button/index.js",
+          "kind": "import-statement",
+          "original": "@cloudscape-design/components/button"
+        },
+        {
+          "path": "node_modules/@cloudscape-design/components/container/index.js",
+          "kind": "import-statement",
+          "original": "@cloudscape-design/components/container"
+        },
+        {
+          "path": "node_modules/@cloudscape-design/components/content-layout/index.js",
+          "kind": "import-statement",
+          "original": "@cloudscape-design/components/content-layout"
+        },
+        {
+          "path": "node_modules/@cloudscape-design/components/form-field/index.js",
+          "kind": "import-statement",
+          "original": "@cloudscape-design/components/form-field"
+        },
+        {
+          "path": "node_modules/@cloudscape-design/components/header/index.js",
+          "kind": "import-statement",
+          "original": "@cloudscape-design/components/header"
+        },
+        {
+          "path": "node_modules/@cloudscape-design/components/input/index.js",
+          "kind": "import-statement",
+          "original": "@cloudscape-design/components/input"
+        },
+        {
+          "path": "node_modules/@cloudscape-design/components/radio-group/index.js",
+          "kind": "import-statement",
+          "original": "@cloudscape-design/components/radio-group"
+        },
+        {
+          "path": "node_modules/@cloudscape-design/components/space-between/index.js",
+          "kind": "import-statement",
+          "original": "@cloudscape-design/components/space-between"
+        },
+        {
+          "path": "node_modules/@cloudscape-design/components/table/index.js",
+          "kind": "import-statement",
+          "original": "@cloudscape-design/components/table"
+        },
+        {
+          "path": "node_modules/@cloudscape-design/components/textarea/index.js",
+          "kind": "import-statement",
+          "original": "@cloudscape-design/components/textarea"
+        },
+        {
+          "path": "src/i18n.jsx",
+          "kind": "import-statement",
+          "original": "./i18n.jsx"
+        },
+        {
+          "path": "src/simpledb-client.mjs",
+          "kind": "import-statement",
+          "original": "./simpledb-client.mjs"
+        },
+        {
+          "path": "src/simpledb.css",
+          "kind": "import-statement",
+          "original": "./simpledb.css"
+        }
+      ],
+      "format": "esm"
+    },
     "src/main.jsx": {
-      "bytes": 53333,
+      "bytes": 53762,
       "imports": [
         {
           "path": "src/ssm-terminal.jsx",
@@ -34366,6 +34461,11 @@
           "path": "src/ssm-documents.jsx",
           "kind": "import-statement",
           "original": "./ssm-documents.jsx"
+        },
+        {
+          "path": "src/simpledb.jsx",
+          "kind": "import-statement",
+          "original": "./simpledb.jsx"
         }
       ],
       "format": "esm"
@@ -35036,7 +35136,7 @@
           "bytesInOutput": 0
         },
         "src/main.jsx": {
-          "bytesInOutput": 47814
+          "bytesInOutput": 48089
         },
         "node_modules/@cloudscape-design/global-styles/index.css": {
           "bytesInOutput": 0
@@ -36839,10 +36939,10 @@
           "bytesInOutput": 155
         },
         "node_modules/@cloudscape-design/components/file-upload/index.js": {
-          "bytesInOutput": 414
+          "bytesInOutput": 418
         },
         "node_modules/@cloudscape-design/components/file-upload/internal.js": {
-          "bytesInOutput": 3090
+          "bytesInOutput": 3092
         },
         "node_modules/@cloudscape-design/components/file-dropzone/internal.js": {
           "bytesInOutput": 553
@@ -36857,7 +36957,7 @@
           "bytesInOutput": 695
         },
         "node_modules/@cloudscape-design/components/file-token-group/internal.js": {
-          "bytesInOutput": 1475
+          "bytesInOutput": 1477
         },
         "node_modules/@cloudscape-design/components/internal/components/token-list/index.js": {
           "bytesInOutput": 1281
@@ -36875,7 +36975,7 @@
           "bytesInOutput": 797
         },
         "node_modules/@cloudscape-design/components/file-token-group/file-token.js": {
-          "bytesInOutput": 2850
+          "bytesInOutput": 2851
         },
         "node_modules/@cloudscape-design/components/file-token-group/default-formatters.js": {
           "bytesInOutput": 212
@@ -36902,13 +37002,13 @@
           "bytesInOutput": 75
         },
         "node_modules/@cloudscape-design/components/link/index.js": {
-          "bytesInOutput": 566
+          "bytesInOutput": 569
         },
         "node_modules/@cloudscape-design/components/help-panel/index.js": {
-          "bytesInOutput": 118
+          "bytesInOutput": 121
         },
         "node_modules/@cloudscape-design/components/help-panel/implementation.js": {
-          "bytesInOutput": 762
+          "bytesInOutput": 763
         },
         "node_modules/@cloudscape-design/components/help-panel/styles.scoped.css": {
           "bytesInOutput": 0
@@ -36917,7 +37017,7 @@
           "bytesInOutput": 263
         },
         "node_modules/@cloudscape-design/components/help-panel/internal.js": {
-          "bytesInOutput": 12
+          "bytesInOutput": 14
         },
         "node_modules/@cloudscape-design/components/key-value-pairs/index.js": {
           "bytesInOutput": 316
@@ -37436,7 +37536,7 @@
           "bytesInOutput": 64
         },
         "src/console-navigation.mjs": {
-          "bytesInOutput": 11395
+          "bytesInOutput": 11870
         },
         "src/console-home.jsx": {
           "bytesInOutput": 9688
@@ -37515,9 +37615,18 @@
         },
         "src/ssm-documents.css": {
           "bytesInOutput": 0
+        },
+        "src/simpledb.jsx": {
+          "bytesInOutput": 12505
+        },
+        "src/simpledb-client.mjs": {
+          "bytesInOutput": 3492
+        },
+        "src/simpledb.css": {
+          "bytesInOutput": 0
         }
       },
-      "bytes": 2508415
+      "bytes": 2525180
     },
     "../../internal/server/web/app.css.LEGAL.txt": {
       "imports": [],
@@ -38081,9 +38190,12 @@
         },
         "src/ssm-documents.css": {
           "bytesInOutput": 103
+        },
+        "src/simpledb.css": {
+          "bytesInOutput": 60
         }
       },
-      "bytes": 1316362
+      "bytes": 1316422
     }
   }
 }
