@@ -44,3 +44,18 @@ The focused authorized Query fixture uses real native SQLite network state and
 PostgreSQL, including independent racing writes, authorized retirement,
 post-authentication topology loss, and an injected occupied slot. It does not
 prove production CLI composition, any guest-to-PostgreSQL path, or full RDS.
+
+**EC2 peer preflight.** On Linux/amd64, a trusted provider can call
+`StackStore.VerifyPrivatePostgresPeer(ctx, retainedGuest, ownedDatabase)`.
+The stack must still own the exact completed instance and NIC. Its private
+IPv4 address comes from that NIC, not a caller-supplied source. Both owners
+must share the SQLite handle, account, region, stack and VPC. In the exact RDS
+generation's read transaction, resolve the DB's subnet group and attached
+security groups, check their typed CloudFormation reservations, and require
+an inbound TCP rule covering the guest address and port 5432 on the **DB's**
+group. The app subnet need not be in the DB subnet group. Missing or stale
+ownership, retirement, unavailable metadata, or a busy database owner denies
+this single check. A policy denial does not retire a healthy DB. On success,
+the owned host process answered its fixed authenticated probe; no service or
+port is added to the guest NIC, and no result grants permission for later I/O.
+Guest-side SQL still needs its own fenced transport and runtime verification.
