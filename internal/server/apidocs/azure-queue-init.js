@@ -3,8 +3,17 @@
 (async () => {
   const prefix = "/_simulator/providers/azure-queue";
   const specURL = "/_simulator/docs/azure-queue/openapi.json";
+  const local = { mode: "same-origin", credentials: "same-origin", redirect: "error", referrerPolicy: "no-referrer" };
   try {
-    const response = await fetch(specURL, { credentials: "same-origin", redirect: "error" });
+    const selected = new URLSearchParams(location.search).getAll("principal");
+    const principal = selected[0];
+    if (selected.length > 1 || (principal !== undefined &&
+        (principal.trim() !== principal || !/^[A-Za-z0-9_-]{1,64}$/.test(principal))))
+      throw new Error("Invalid simulator exercise selection.");
+    // This is a request to select an exercise identity, not a credential.
+    // Access still authenticates the cookie and constrains identity selection.
+    const selectedHeaders = principal === undefined ? {} : { "X-Simulator-Principal": principal };
+    const response = await fetch(specURL, { ...local, headers: selectedHeaders });
     if (!response.ok) throw new Error("The local Queue Storage reference is unavailable.");
     const spec = await response.json();
     const account = spec.paths?.["/{account}/{queue}"]?.put?.parameters?.find(
@@ -43,15 +52,13 @@
           (parts.length === 3 && !/^[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}$/.test(parts[2]))
         ) return Promise.reject(new Error("Only operations on this local storage account are allowed."));
 
-        // Only the existing local cookie identifies the caller. Preserve the
-        // native body unchanged, and never send credentials supplied in Scalar.
-        const headers = new Headers();
+        // Only the existing local cookie authenticates the caller. Keep the
+        // same selected exercise identity and ignore Scalar-supplied credentials.
+        const headers = new Headers(selectedHeaders);
         for (const name of ["accept", "content-type", "x-ms-version"]) {
           if (request.headers.has(name)) headers.set(name, request.headers.get(name));
         }
-        return fetch(new Request(request, {
-          headers, credentials: "same-origin", redirect: "error",
-        }));
+        return fetch(new Request(request, { ...local, headers }));
       },
     });
   } catch (error) {

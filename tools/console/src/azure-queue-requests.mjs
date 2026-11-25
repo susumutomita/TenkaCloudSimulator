@@ -10,6 +10,18 @@ const xmlCharacters = /^[\t\n\r\u0020-\uD7FF\uE000-\uFFFD\u{10000}-\u{10FFFF}]*$
 const valid = (value, pattern) => typeof value === 'string' && value.trim() === value && pattern.test(value);
 export const validQueueAccount = value => valid(value, accountName);
 export const validQueueName = value => valid(value, queueName);
+// Navigation carries a non-secret exercise selection, never the access cookie.
+export function queueReferenceSelection(principal, identitySelection, epoch) {
+  // The initial built-in operator already has this exercise identity through
+  // its cookie; a fixed participant never sends a Console selection.
+  if (!identitySelection || (principal === 'simulator-admin' && epoch === 0)) return undefined;
+  return principal;
+}
+
+export function queueReferenceForPrincipal(principal) {
+  if (principal === undefined) return queueReference;
+  return valid(principal, /^[A-Za-z0-9_-]{1,64}$/) ? queueReference + '?principal=' + principal : null;
+}
 
 function refuse(code) { throw new Error(code); }
 function integer(value, low, high) {

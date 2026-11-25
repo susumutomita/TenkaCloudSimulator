@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {azureQueue, queueErrorCode, queueMaxText, queueMessageXML, queueReference, validQueueName} from '../../tools/console/src/azure-queue-requests.mjs';
+import {azureQueue, queueErrorCode, queueMaxText, queueMessageXML, queueReference, queueReferenceForPrincipal, queueReferenceSelection, validQueueName} from '../../tools/console/src/azure-queue-requests.mjs';
 
 const base = '/_simulator/providers/azure-queue/tenkacloudlocal/exact-queue';
 const version = '2023-11-03', date = 'Thu, 19 Nov 2026 00:00:00 GMT';
@@ -59,6 +59,19 @@ test('native named-queue lifecycle has one path family, distinct query modes and
   await client.deleteQueue(job.signal);
   assert.equal(script.length,0);
   assert.equal(queueReference,'/_simulator/docs/azure-queue.html');
+});
+
+test('the reference link carries only a valid selected exercise identity', () => {
+  assert.equal(queueReferenceForPrincipal(queueReferenceSelection('simulator-admin', true, 0)), queueReference);
+  assert.equal(queueReferenceForPrincipal(queueReferenceSelection('learner', false, 0)), queueReference);
+  assert.equal(queueReferenceSelection('learner', true, 1), 'learner');
+  assert.equal(queueReferenceSelection('learner', true, 0), 'learner');
+  assert.equal(queueReferenceSelection('simulator-admin', true, 2), 'simulator-admin');
+  assert.equal(queueReferenceForPrincipal(undefined), queueReference);
+  assert.equal(queueReferenceForPrincipal('learner'), queueReference + '?principal=learner');
+  assert.equal(queueReferenceForPrincipal('simulator-admin'), queueReference + '?principal=simulator-admin');
+  for (const value of ['', null, 'owner&token=ignored', 'learner\n', 'x'.repeat(65)])
+    assert.equal(queueReferenceForPrincipal(value), null);
 });
 
 test('update accepts a replacement XML body but only reports a rotated receipt', async () => {

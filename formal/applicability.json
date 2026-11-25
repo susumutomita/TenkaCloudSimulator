@@ -285,16 +285,16 @@
     },
     {
       "path": "internal/server/apidocs/azure-queue-init.js",
-      "sha256": "e1472ddc36a05eecb42e829a376762e993a83b505071aff0b435b10c5faf952d",
+      "sha256": "4efbdacc15909cd6b0c18bfbd608ca9005ba267514912e09722727ec60cfe2e6",
       "disposition": "presentation",
-      "reason": "Queue Console or local reference presentation/metadata, and exact generated projections; actual native authority is separately enforced.",
+      "reason": "Reference carries one validated exercise selector to the existing same-origin cookie-authenticated spec and native requests; no new authority and no retry/fallback. This browser adapter is tested offline, not modeled.",
       "models": []
     },
     {
       "path": "internal/server/apidocs/azure-queue.html",
-      "sha256": "a0a240e096955cce89268d0c20ecd39ca60265cbb42c4fa6d9bac6ba2d4fd9fd",
+      "sha256": "031924fa7aeb6276044b7594393ce710cfcaccc1e9118b981a76e177900c6b59",
       "disposition": "presentation",
-      "reason": "Queue Console or local reference presentation/metadata, and exact generated projections; actual native authority is separately enforced.",
+      "reason": "Prevents referrer disclosure of the noncredential exercise alias on this static reference page.",
       "models": []
     },
     {
@@ -393,9 +393,9 @@
     },
     {
       "path": "internal/server/web/app.js",
-      "sha256": "b81318b6a3e8d6a94f17ce5a7f42bf517161d1ebbcb0efb004a9d98a9884fc50",
+      "sha256": "38f93ec685a0408e47ed3c6731771606f89673672a5ed93f7e2aafddef188d8f",
       "disposition": "modeled",
-      "reason": "Rebuilt from current Azure Blob/S3 and Queue console sources. Existing row-target and S3 part models remain bound alongside the new Queue owner/identity-epoch projection.",
+      "reason": "Pinned composition retains Azure Blob and S3 scope bindings and projects current Queue console owner/identity selection. Selector transport and cookie validation are not covered by the finite models.",
       "models": [
         {
           "id": "AzureBlobRowDownload",
@@ -478,9 +478,9 @@
     },
     {
       "path": "test/console/azure-queue.test.mjs",
-      "sha256": "6ed0005c08887eef712339dc81f485616273c9481bb6742488bf2d9983daac6e",
+      "sha256": "86ed0089a571c95e81aac65b4539e5eaf4a89ca6165ba5979a09968912f7efc5",
       "disposition": "test-support",
-      "reason": "Developer/test-only acceptance, detector or peer regression; existing nonformal test classification, not runtime code.",
+      "reason": "Offline Queue lifecycle and reference projection, including default bootstrap, fixed participant, explicit selection and invalid inputs.",
       "models": []
     },
     {
@@ -520,23 +520,23 @@
     },
     {
       "path": "tools/console/bundle-digests.json",
-      "sha256": "16870943d2bad032b6519031f0947d93da482cf92b89a1257d0b494faf58121d",
+      "sha256": "adf96d2278423cc7cd64c3b0fdfc8eb1ddbb8505354144ef3f35934af93dba75",
       "disposition": "presentation",
-      "reason": "Checked-in pinned build output digest inventory for Queue plus unchanged existing Azure Blob and S3 source.",
+      "reason": "Pinned rebuild digests for the corrected Queue reference link; CSS and notices unchanged.",
       "models": []
     },
     {
       "path": "tools/console/bundle-inputs.json",
-      "sha256": "1f24018660ce1f46bb1d1c1c949112ecb0d282b97fbb6b29af7830d279aae990",
+      "sha256": "aa9ae9913c936cdc7b6b545da1935a347a2af291fa1cbf7736a5db226237711c",
       "disposition": "presentation",
-      "reason": "Pinned dependency/source inventory regenerated for the composed Console.",
+      "reason": "Pinned rebuild input inventory for the corrected Queue reference link.",
       "models": []
     },
     {
       "path": "tools/console/src/azure-queue-requests.mjs",
-      "sha256": "0661906c4be71aecf1ff00c85f87aac458c00aac78f46eccf5c701f3e0e724c2",
+      "sha256": "63c1af886104a7e1049903c2ba99c1fb6a52f15d7b2d4b6f0f8ed56ce9305d4f",
       "disposition": "presentation",
-      "reason": "Queue Console or local reference presentation/metadata, and exact generated projections; actual native authority is separately enforced.",
+      "reason": "Validates a non-secret reference selector and retains bare navigation for cookie-fixed identities and the initial built-in operator.",
       "models": []
     },
     {
@@ -548,9 +548,9 @@
     },
     {
       "path": "tools/console/src/azure-queue.jsx",
-      "sha256": "f41edbec0f8a2e323589a3b0775274b03675621b1d6ecc3b7668477e6fba449e",
+      "sha256": "ba1706ad2869d9acbf5d01d7f6a04e33c8bb82ea46d3f2ba900ed10d6f6e06c5",
       "disposition": "presentation",
-      "reason": "Queue Console or local reference presentation/metadata, and exact generated projections; actual native authority is separately enforced.",
+      "reason": "Passes the validated reference URL explicitly to the rendered Queue child; never treats selection as authorization.",
       "models": []
     },
     {
@@ -572,9 +572,9 @@
     },
     {
       "path": "tools/console/src/main.jsx",
-      "sha256": "59aa85b27dfe083cddfbe459a3c92e2d40656e3701c0eba53866e29f4b5edbed",
+      "sha256": "6df8c70ce96b5c647cac8d6bc36881e41a36c11dd273bcec6d29f576b0d256a6",
       "disposition": "modeled",
-      "reason": "Names the owner-only Queue entry and binds the selected identity/epoch result to the currently observable Console, including the generated bundle projection.",
+      "reason": "Preserves the owner-bound discovery epoch and current permitted selection, omitting only cookie-bound identity or the initial built-in operator.",
       "models": [
         {
           "id": "AzureQueueOwnerAccess",
@@ -589,9 +589,9 @@
     },
     {
       "path": "tools/console/test/azure-queue-scalar-gate.test.cjs",
-      "sha256": "c949621af35ec96e5c45f5cf40cfddff276e7a76b4849953976ef2de44c6ec38",
+      "sha256": "f13076685d6dfebce3985c8335a5efc8754f4e3e31ded3e0a7232313f86e6cbe",
       "disposition": "presentation",
-      "reason": "Queue Console or local reference presentation/metadata, and exact generated projections; actual native authority is separately enforced.",
+      "reason": "Runs actual offline React first render for default/selected/malformed inputs and exercises the reference adapter, refusal, no fallback and no-referrer.",
       "models": []
     }
   ]

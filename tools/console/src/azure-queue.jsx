@@ -1,6 +1,6 @@
 import React, {useEffect, useId, useRef, useState} from 'react';
 import {useLocale} from './i18n.jsx';
-import {azureQueue, queueErrorCode, queueMaxTTL, queueReference, validQueueAccount, validQueueName} from './azure-queue-requests.mjs';
+import {azureQueue, queueErrorCode, queueMaxTTL, queueReferenceForPrincipal, validQueueAccount, validQueueName} from './azure-queue-requests.mjs';
 import './azure-queue.css';
 
 const errors = {
@@ -43,12 +43,13 @@ function MessageDetails({item}) {
   </details>;
 }
 
-export default function AzureQueueView({request, account}) {
+export default function AzureQueueView({request, account, principal}) {
+  const reference = queueReferenceForPrincipal(principal);
   // Root also keys this view by authenticated subject and environment.
-  return <NamedQueue key={account} request={request} account={account}/>;
+  return <NamedQueue key={account} request={request} account={account} reference={reference}/>;
 }
 
-function NamedQueue({request, account}) {
+function NamedQueue({request, account, reference}) {
   const {t} = useLocale(), title = useId(), nameId = useId(), hint = useId(), confirmID = useId();
   const active = useRef(null), heading = useRef(null), input = useRef(null);
   const [name, setName] = useState(''), [queue, setQueue] = useState('');
@@ -133,7 +134,7 @@ function NamedQueue({request, account}) {
     </nav>
     <header>
       <h1 id={title} ref={heading} tabIndex={-1}>{queue || 'Azure Queue Storage'}</h1>
-      <a href={queueReference}>{t('Local API reference', 'ローカル API リファレンス')}</a>
+      {reference && <a href={reference} referrerPolicy="no-referrer">{t('Local API reference', 'ローカル API リファレンス')}</a>}
     </header>
     <p id={hint}>{t('Named queues only. This simulator does not list queues in the account, manage metadata, or connect to Azure.',
       'キュー名を指定して操作します。アカウント内のキュー一覧、メタデータ管理、実際の Azure 接続には対応していません。')}</p>
