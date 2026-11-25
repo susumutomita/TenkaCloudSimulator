@@ -1,59 +1,64 @@
 {
   "version": 1,
-  "base_sha": "527d089485694f1506bca842fc57a277bdf2bfb0",
+  "base_sha": "27010d3660036036b6fdbd420c1a566f73794e87",
   "changes": [
     {
       "path": "README.md",
-      "sha256": "1dd4826a207d92332a0d054ceaab5d43130c900a350cd71fffc23837860f5230",
+      "sha256": "ee41516225fa2f2abd54ee4bcb4ac76d8fc2af7e84ec0707c7939e1f26c0cea4",
       "disposition": "documentation",
-      "reason": "Documents bounded canonical conditional writes without claiming full SimpleDB.",
+      "reason": "Documents the bounded native per-item quota and prior-data policy.",
       "models": []
     },
     {
       "path": "docs/design/0001-go-standalone.md",
-      "sha256": "d51709f4d8572b6345c4711400d8104d23896fc99bb3176efe711eca7a47297f",
+      "sha256": "44b991fa3eb52773366624f889308030bc4b7b02eccc81d217c012af4a4f5f0c",
       "disposition": "documentation",
-      "reason": "Documents bounded canonical conditional writes without claiming full SimpleDB.",
+      "reason": "Documents the bounded native per-item quota and prior-data policy.",
       "models": []
     },
     {
-      "path": "internal/aws/simpledb/conditional_put_test.go",
-      "sha256": "7ea85b521e2a5912e47b9e9704f6a36c77037db3a6f5b1cff5cbf138b54047c4",
-      "disposition": "test-support",
-      "reason": "Focused SimpleDB native conditional write checks, not production implementation.",
+      "path": "docs/simpledb-item-limits.md",
+      "sha256": "66057e5fbf266527514d12d6265a8fc8137b6574e2f10414011c2c859a4ef736",
+      "disposition": "documentation",
+      "reason": "Explains or tests the bounded native SimpleDB pair count.",
       "models": []
     },
     {
       "path": "internal/aws/simpledb/http.go",
-      "sha256": "365b8bede78ac75dda90fef56dce8dab0b9aa5667eeabf2f88b6e2deda3f20e5",
+      "sha256": "7a5224e125163bc4fc1d8b0b396ee0b19eb1b6bcb8c4614262270a5cb5b2d10c",
       "disposition": "modeled",
-      "reason": "The new SimpleDB conditional path reuses existing admissibility and transactional rollback/commit boundaries.",
+      "reason": "Returns the typed quota refusal within the existing admitted SimpleDB Query envelope.",
       "models": [
         {
           "id": "SimpleDBQueryAdmission",
           "properties": [
-            "MalformedNeverDispatches",
             "EnvelopeMatchesOutcome"
           ],
-          "limits": "Abstract request guards and response categories only. The model does not represent the Expected syntax, exact error code/status, or Go HTTP or SQLite semantics."
+          "limits": "Abstract response category only; not the exact HTTP 409, SDK, wire parser or Go behavior."
         }
       ]
     },
     {
       "path": "internal/aws/simpledb/item.go",
-      "sha256": "637fd395ab5e7c2aefd7b195d749e96c056ca825d9f1245a59ca55c546580c89",
+      "sha256": "43cfc7f743f4deb54429d54a313b8511f5838719940325dbe811d9d3ee5fbdbb",
       "disposition": "modeled",
-      "reason": "The new SimpleDB conditional path reuses existing admissibility and transactional rollback/commit boundaries.",
+      "reason": "Checks the new post-merge quota before mutating the existing scoped transaction.",
       "models": [
         {
           "id": "SimpleDBLifecycle",
           "properties": [
-            "RefusalUnchanged",
-            "CommittedExact"
+            "RefusalUnchanged"
           ],
-          "limits": "Abstract stage, commit and refusal only. It does not model compare-and-set, multi-value semantics, concurrent writers, SQL isolation or Go refinement. The focused native regressions exercise those concrete behaviors."
+          "limits": "Abstract unchanged-state refusal only; not pair counting, the number 256, concurrent writers, Go or SQLite refinement."
         }
       ]
+    },
+    {
+      "path": "internal/aws/simpledb/item_limit_test.go",
+      "sha256": "e1ca480964053b7dc7b75973b820e6d86ffb8d8fdfeb65e9a0e7f3bae34abad2",
+      "disposition": "test-support",
+      "reason": "Explains or tests the bounded native SimpleDB pair count.",
+      "models": []
     }
   ]
 }
