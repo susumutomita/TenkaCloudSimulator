@@ -11,30 +11,48 @@ function shippedLine(prefix){
   assert.equal(matches.length,1,'The shipped lifecycle boundary must remain uniquely testable');
   return matches[0];
 }
+const errorClassStart=source.indexOf('class WAFViewError extends Error {');
+const errorClassEnd=source.indexOf('\nconst visibility=',errorClassStart);
+assert.ok(errorClassStart>=0&&errorClassEnd>errorClassStart,'Execute the shipped local error type');
+const errorHandling=source.slice(errorClassStart,errorClassEnd)+'\n'+shippedLine(' const showError=');
+// Move only the outer notice tuple into this realm for strict comparison.
+// Do not convert a legacy string into a tuple or discard an error code.
+const capture=value=>Array.isArray(value)?Array.from(value):value;
+
 function fixture(){
   const saving=[],state=[];
-  const context=vm.createContext({AbortController,onSaving:value=>saving.push(value),state});
+  const context=vm.createContext({
+    AbortController,onSaving:value=>saving.push(value),
+    setBusy:value=>state.push(['busy',value]),
+    setError:value=>state.push(['error',capture(value)]),
+    setConflict:value=>state.push(['conflict',value]),
+  });
   vm.runInContext(`
     const alive={current:true},generation={current:0},abort={current:new AbortController()};
     const busy=false;let cleanup;
     const load=()=>{},useEffect=effect=>{cleanup=effect()};
-    const setBusy=value=>state.push(['busy',value]);
-    const setError=value=>state.push(['error',value]);
-    const setConflict=value=>state.push(['conflict',value]);
+    ${errorHandling}
     ${shippedLine(' useEffect(()=>{load();')}
     ${shippedLine(' async function mutate(operation)')}
-    globalThis.harness={mutate,unmount:()=>cleanup(),signal:abort.current.signal};
+    globalThis.harness={mutate,unmount:()=>cleanup(),signal:abort.current.signal,
+      localError:(...text)=>new WAFViewError(...text)};
   `,context);
   return {...context.harness,saving,state};
 }
 
 test('mounted WAF mutation releases parent saving on success and failure',async()=>{
-  for(const failure of [false,true]){
+  for(const outcome of ['success','native error','local error']){
     const f=fixture();
-    await f.mutate(async()=>{if(failure)throw Error('dummy lock changed')});
+    const native='dummy lock changed',local=['Check the draft.','下書きを確認してください。'];
+    await f.mutate(async()=>{
+      if(outcome==='native error')throw Error(native);
+      if(outcome==='local error')throw f.localError(...local);
+    });
     assert.deepEqual(f.saving,[true,false]);
-    assert.equal(f.state.at(-1)[0],'busy');
-    assert.equal(f.state.at(-1)[1],false);
+    const expected=[['busy',true],['error','']];
+    if(outcome==='native error')expected.push(['error',native],['conflict',true]);
+    if(outcome==='local error')expected.push(['error',local]);
+    assert.deepEqual(f.state,[...expected,['busy',false]],outcome);
   }
 });
 
@@ -66,8 +84,8 @@ function saveFixture(){
     events,requests,
     call:async(operation,body)=>{requests.push({operation,body});await write},
     inspect:async()=>{events.push('refresh started');started();await read;events.push('refresh finished')},
-    setMessage:value=>events.push(value),setBusy:()=>{},onSaving:()=>{},
-    setError:value=>events.push(['error',value]),setConflict:()=>{},
+    setMessage:value=>events.push(['message',capture(value)]),setBusy:()=>{},onSaving:()=>{},
+    setError:value=>events.push(['error',capture(value)]),setConflict:()=>{},
   });
   const submit=source.slice(source.indexOf(' async function submit()'),source.indexOf(' const disabled='));
   assert.ok(submit.endsWith(' })}\n'),'Execute the complete shipped submit function');
@@ -76,6 +94,7 @@ function saveFixture(){
     const detail={Name:'acl',Id:'id',Rules:[],DefaultAction:{Allow:{}},VisibilityConfig:{MetricName:'acl'},Description:'Preserve me'};
     const form={name:'rule',priority:'0',action:'Count',statement:'{"ByteMatchStatement":{}}'};
     const visibility=name=>({MetricName:name});
+    ${errorHandling}
     ${shippedLine(' async function mutate(operation)')}
     ${shippedLine(' async function update(patch)')}
     ${submit}
@@ -89,16 +108,20 @@ test('rule save completion follows native acknowledgement and subsequent refresh
   const pending=f.submit();
   assert.equal(f.requests.length,1);
   assert.equal(f.requests[0].operation,'UpdateWebACL');
+  assert.equal(f.requests[0].body.LockToken,'old-lock');
   assert.equal(f.requests[0].body.Rules[0].Action.Count!==undefined,true);
   assert.equal(f.requests[0].body.Description,'Preserve me');
-  assert.equal(f.events.includes('Rule saved.'),false);
+  const messages=()=>f.events.filter(event=>Array.isArray(event)&&event[0]==='message');
+  assert.deepEqual(messages(),[]);
   assert.equal(f.events.includes('refresh started'),false);
   f.acknowledge();
   // Await the actual boundary, without a timer or network-speed assumption.
   await f.refreshStarted;
   assert.equal(f.events.includes('refresh started'),true);
-  assert.equal(f.events.includes('Rule saved.'),false);
+  assert.deepEqual(messages(),[]);
   f.refresh();
   await pending;
-  assert.deepEqual(f.events.slice(-2),['refresh finished','Rule saved.']);
+  const saved=['message',['Rule saved.','ルールを保存しました。']];
+  assert.deepEqual(messages(),[saved]);
+  assert.deepEqual(f.events.slice(-2),['refresh finished',saved]);
 });

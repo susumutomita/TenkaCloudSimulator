@@ -28,12 +28,41 @@ with running(authenticated=True) as (endpoint,token),sync_playwright() as p:
   else:outside.append(r.request.url);r.abort()
  page.route('**/*',route);page.goto(endpoint+'/_simulator/console/');page.get_by_label('Access token',exact=True).fill(token);page.get_by_role('button',name='Open sandbox',exact=True).click()
  page.get_by_role('button',name='Services',exact=True).click();page.get_by_role('menuitem',name='AWS WAF',exact=True).click()
- page.get_by_role('button',name='Create web ACL',exact=True).click();page.get_by_label('Name',exact=True).fill('dummy-console-waf');page.get_by_label('Description - optional',exact=True).fill('Local dummy data')
+ page.get_by_role('button',name='Create web ACL',exact=True).click()
+ page.get_by_label('Name',exact=True).fill('dummy-console-waf')
+ page.get_by_label('Description - optional',exact=True).fill('Local dummy data')
+ # Locale changes the rendered form, not its draft, region or action choice.
+ page.get_by_label('Language',exact=True).select_option('ja')
+ expect(page.locator('html')).to_have_attribute('lang','ja')
+ expect(page.get_by_role('heading',level=1,name='保護パック（ウェブ ACL）を作成',exact=True)).to_be_visible()
+ expect(page.get_by_text('独立したローカル AWS WAF シミュレーター',exact=True)).to_be_visible()
+ expect(page.get_by_label('名前',exact=True)).to_have_value('dummy-console-waf')
+ expect(page.get_by_label('説明（任意）',exact=True)).to_have_value('Local dummy data')
+ expect(page.get_by_label('リージョン',exact=True)).to_have_value('us-east-1')
+ action=page.get_by_label('ウェブ ACL のデフォルトアクション',exact=True)
+ expect(action).to_contain_text('許可')
+ action.click()
+ # Choose the unselected option. Cloudscape augments the accessible name of
+ # the already selected option; reopening the same choice proves no transition.
+ block_option=page.get_by_role('option',name='ブロック',exact=True)
+ expect(block_option).to_be_visible()
+ block_option.click()
+ expect(action).to_contain_text('ブロック')
+ expect(page.get_by_role('button',name='キャンセル',exact=True)).to_be_visible()
+ expect(page.get_by_role('button',name='ウェブ ACL を作成',exact=True)).to_be_visible()
+ page.get_by_label('言語',exact=True).select_option('en')
+ expect(page.locator('html')).to_have_attribute('lang','en')
+ expect(page.get_by_role('heading',level=1,name='Create protection pack (web ACL)',exact=True)).to_be_visible()
+ expect(page.get_by_label('Name',exact=True)).to_have_value('dummy-console-waf')
+ expect(page.get_by_label('Description - optional',exact=True)).to_have_value('Local dummy data')
+ expect(page.get_by_label('Default web ACL action',exact=True)).to_contain_text('Block')
  assert_reflow(page);page.screenshot(path=str(REPORTS/'wafv2-create-desktop.png'),full_page=True)
  page.set_viewport_size({'width':390,'height':844});assert_reflow(page);page.screenshot(path=str(REPORTS/'wafv2-create-mobile.png'),full_page=True);page.set_viewport_size({'width':1440,'height':1000})
  page.get_by_role('button',name='Create web ACL',exact=True).click();expect(page.get_by_role('heading',name='dummy-console-waf',exact=True)).to_be_visible()
  summary=waf.list_web_acls(Scope='REGIONAL')['WebACLs'];assert len(summary)==1;identifier=summary[0]['Id']
  def get():return waf.get_web_acl(Name='dummy-console-waf',Id=identifier,Scope='REGIONAL')
+ created=get()['WebACL']
+ assert created['DefaultAction']=={'Block':{}} and created['Description']=='Local dummy data'
  # Exact original statement semantics. boto3 uses bytes while native wire JSON uses base64.
  statement={'AndStatement':{'Statements':[{'ByteMatchStatement':{'SearchString':'L3dwLWpzb24vYmF0Y2gvdjE=','FieldToMatch':{'UriPath':{}},'PositionalConstraint':'ENDS_WITH','TextTransformations':[{'Priority':0,'Type':'NONE'}]}},{'SqliMatchStatement':{'FieldToMatch':{'Body':{'OversizeHandling':'CONTINUE'}},'TextTransformations':[{'Priority':0,'Type':'URL_DECODE'}]}}]}}
  page.get_by_role('button',name='Add rule',exact=True).click();page.get_by_label('Rule name',exact=True).fill('batch-sqli');page.get_by_label('Statement JSON',exact=True).fill(json.dumps(statement))

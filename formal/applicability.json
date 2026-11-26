@@ -1,168 +1,56 @@
 {
   "version": 1,
-  "base_sha": "95bf82abb24e70d9c53d6f7b59f1f640944601d1",
+  "base_sha": "67c27f2846a16c14d8834f821583e6b45e140617",
   "changes": [
     {
-      "path": "README.md",
-      "sha256": "dde6d173624e8d761388739a803f3f04c928046cf867dd99094c09a649635153",
-      "disposition": "documentation",
-      "reason": "Document the separate loopback verifier fixture, executable witness and no-login/SAML boundary.",
-      "models": []
-    },
-    {
-      "path": "cmd/simulator/azure_entra_fixture.go",
-      "sha256": "330ba509c648e948a652840809df8ed74a6a4828c8fa348280e836ba49dbf00b",
+      "path": "internal/server/web/app.js",
+      "sha256": "6ccbf28863a2970dc83d37c6024979b742703071a6ef987b932e8ec8c13353b6",
       "disposition": "modeled",
-      "reason": "Bound explicit local verification fixture startup, read-only public metadata/key response and opt-in synthetic ID-token output; ordinary simulator gateway remains separate.",
+      "reason": "Canonical rebuild of the whole console for WAF-only presentation strings. The aggregate bundle contains the previously modeled SimpleDB Select view with its input source and existing owner/paging logic unchanged.",
       "models": [
         {
-          "id": "EntraVerificationFixture",
+          "id": "SimpleDBSelectConsoleEpoch",
           "properties": [
-            "FixtureIsolated",
-            "NumericLoopback",
-            "ExplicitValidToken",
-            "SyntheticTokenOnly",
-            "ReadOnlyAdmission",
-            "PublicVerificationOnly"
+            "ReadAdmission",
+            "OnlyCurrentOwner"
           ],
-          "limits": "Admission and bounded output classification only; no OS bind semantics, HTTP parsing, cryptographic proof, clocks, process restart, production Entra, Cognito, SAML, browser authorization or code refinement."
+          "limits": "Existing finite SimpleDB owner and read-admission model applies to that unchanged component inside the aggregate artifact only. It does not model WAF localization, rendered widgets, or prove bundle refinement. WAF has separate focused mounted verification."
         }
       ]
     },
     {
-      "path": "cmd/simulator/azure_entra_fixture_test.go",
-      "sha256": "9061d3320c5ffc078bc5b723749e53c6b3d2ea6b49e07cbee7585ccb72712d1e",
+      "path": "test/console/waf-lifecycle.test.mjs",
+      "sha256": "54ffb93c8185389ee8694ca8fed74368d95523208f5ba2c10c6ccf8e11e51fdb",
       "disposition": "test-support",
-      "reason": "Drive the real optional command's loopback HTTP and signed synthetic verification, refused startup, process-scope rotation and shutdown through the existing Go coverage suite.",
+      "reason": "Execute the shipped WAF error helper in the lifecycle VM and pin localized notice state plus update ordering and ownership. No production, gate or modeled state change.",
       "models": []
     },
     {
-      "path": "cmd/simulator/main.go",
-      "sha256": "dad4b3f8479b1515158ec25d5492510376bd3a13d4caaa66f656c6c5e6d48a60",
-      "disposition": "modeled",
-      "reason": "Bound explicit local verification fixture startup, read-only public metadata/key response and opt-in synthetic ID-token output; ordinary simulator gateway remains separate.",
-      "models": [
-        {
-          "id": "EntraVerificationFixture",
-          "properties": [
-            "FixtureIsolated",
-            "NumericLoopback",
-            "ExplicitValidToken",
-            "SyntheticTokenOnly",
-            "ReadOnlyAdmission",
-            "PublicVerificationOnly"
-          ],
-          "limits": "Admission and bounded output classification only; no OS bind semantics, HTTP parsing, cryptographic proof, clocks, process restart, production Entra, Cognito, SAML, browser authorization or code refinement."
-        }
-      ]
-    },
-    {
-      "path": "docs/azure-entra-verification-fixture.md",
-      "sha256": "ee02d50c213af39b26a4c5cb3ea79a3538d20efcfcca52c5657c9f3f86039c89",
-      "disposition": "documentation",
-      "reason": "Document the separate loopback verifier fixture, executable witness and no-login/SAML boundary.",
-      "models": []
-    },
-    {
-      "path": "docs/design/0001-go-standalone.md",
-      "sha256": "0c214163b451e52b84b6ff2d071901ebe3b0ef99bc32b0ac23eddaf0b4951e19",
-      "disposition": "documentation",
-      "reason": "Document the separate loopback verifier fixture, executable witness and no-login/SAML boundary.",
-      "models": []
-    },
-    {
-      "path": "formal/EntraVerificationFixture.cfg",
-      "sha256": "3d7424cb2c84222a39ba264c8af55fa2cf964cc32b9462f35105a9602bb6f890",
-      "disposition": "modeled",
-      "reason": "Bound explicit local verification fixture startup, read-only public metadata/key response and opt-in synthetic ID-token output; ordinary simulator gateway remains separate.",
-      "models": [
-        {
-          "id": "EntraVerificationFixture",
-          "properties": [
-            "FixtureIsolated",
-            "NumericLoopback",
-            "ExplicitValidToken",
-            "SyntheticTokenOnly",
-            "ReadOnlyAdmission",
-            "PublicVerificationOnly"
-          ],
-          "limits": "Admission and bounded output classification only; no OS bind semantics, HTTP parsing, cryptographic proof, clocks, process restart, production Entra, Cognito, SAML, browser authorization or code refinement."
-        }
-      ]
-    },
-    {
-      "path": "formal/EntraVerificationFixture.tla",
-      "sha256": "f2920fc032d528912a85c1ed46c654d0cf1d3b1a4ca6e9049a3db59cead7e965",
-      "disposition": "modeled",
-      "reason": "Bound explicit local verification fixture startup, read-only public metadata/key response and opt-in synthetic ID-token output; ordinary simulator gateway remains separate.",
-      "models": [
-        {
-          "id": "EntraVerificationFixture",
-          "properties": [
-            "FixtureIsolated",
-            "NumericLoopback",
-            "ExplicitValidToken",
-            "SyntheticTokenOnly",
-            "ReadOnlyAdmission",
-            "PublicVerificationOnly"
-          ],
-          "limits": "Admission and bounded output classification only; no OS bind semantics, HTTP parsing, cryptographic proof, clocks, process restart, production Entra, Cognito, SAML, browser authorization or code refinement."
-        }
-      ]
-    },
-    {
-      "path": "formal/models.json",
-      "sha256": "cd2c0f613cdeb26e2d09ae6d7b5df1bd4f9b09ad8ec6da8a598693aa3b20b6cb",
-      "disposition": "formal-infrastructure",
-      "reason": "Register the new bounded fixture model and exact sensitivity controls without changing any previous row.",
-      "models": []
-    },
-    {
-      "path": "internal/azure/entra/verification_fixture.go",
-      "sha256": "eb18843dab49cbccf60179ba1f8d29e5f1da033a56529352a3208d0fc5731970",
-      "disposition": "modeled",
-      "reason": "Bound explicit local verification fixture startup, read-only public metadata/key response and opt-in synthetic ID-token output; ordinary simulator gateway remains separate.",
-      "models": [
-        {
-          "id": "EntraVerificationFixture",
-          "properties": [
-            "FixtureIsolated",
-            "NumericLoopback",
-            "ExplicitValidToken",
-            "SyntheticTokenOnly",
-            "ReadOnlyAdmission",
-            "PublicVerificationOnly"
-          ],
-          "limits": "Admission and bounded output classification only; no OS bind semantics, HTTP parsing, cryptographic proof, clocks, process restart, production Entra, Cognito, SAML, browser authorization or code refinement."
-        }
-      ]
-    },
-    {
-      "path": "internal/azure/entra/verification_fixture_test.go",
-      "sha256": "6805ad7c5fd7fb0694d22c2c3fcea79340f24f90e8a34ccf9e475854848b5e45",
+      "path": "test/e2e/wafv2_console.py",
+      "sha256": "8c8262f2873c755d342ab095980239809474346ec8d46487daaa801ac9fc4a19",
       "disposition": "test-support",
-      "reason": "Exercise only the opt-in fixture and signed synthetic verification on numeric loopback; no normal gateway or production trust change.",
+      "reason": "Extends the existing WAF browser regression to check EN/JA labels and persist an actual localized action change through SDK readback. No runtime or test gate change.",
       "models": []
     },
     {
-      "path": "scripts/formal_model_gate.py",
-      "sha256": "209b8d6ebeca4cb3b53bb23dc103027dfa3c99d4d704ed7543cc1bbbcd3d9b0d",
-      "disposition": "formal-infrastructure",
-      "reason": "Independently pin the Entra fixture and four already-registered main models missing from its required inventory, including all exact invariant, control and source sets. No registry, runtime or gate-algorithm changes in this correction.",
+      "path": "tools/console/bundle-digests.json",
+      "sha256": "a3d2ad63d8231fe54f7295c0146a03f7b4fd8d6b8d64a9db241ebd98c2ee0fa2",
+      "disposition": "presentation",
+      "reason": "Canonical development build output fingerprints only.",
       "models": []
     },
     {
-      "path": "scripts/test-formal-gate.py",
-      "sha256": "028728582c7aedc078ae457ada8abc6cc86b86a4f2f034ff0015acfe28162b81",
-      "disposition": "formal-infrastructure",
-      "reason": "Independently pin the Entra verification fixture registry scope, invariants and named sensitivity controls.",
+      "path": "tools/console/bundle-inputs.json",
+      "sha256": "eeab650e4e76ba62230acec672fb2ff974a5aa5ec703f9be77c2884fe96a4e26",
+      "disposition": "presentation",
+      "reason": "Canonical development build input/output graph; no package or lock changes.",
       "models": []
     },
     {
-      "path": "test/e2e/entra_verification_fixture.py",
-      "sha256": "470f58d8c46fc124a5e2537f1e9650a2f8e0c0b9d277e2b65d20b754cb3766ba",
-      "disposition": "test-support",
-      "reason": "Exercise only the opt-in fixture and signed synthetic verification on numeric loopback; no normal gateway or production trust change.",
+      "path": "tools/console/src/wafv2.jsx",
+      "sha256": "7e8f3594449ec0a58beba2fc99c4d0a4760e554e5ba1b729b4c3c3245b4fc2da",
+      "disposition": "presentation",
+      "reason": "Translate WAF-owned labels, authored notices and accessible names. Action keys, saved values, requests, authorization, and incoming native errors stay unchanged.",
       "models": []
     }
   ]
