@@ -8,12 +8,13 @@ from jsonschema import Draft202012Validator, ValidationError
 from openapi_json10 import validator as reference_validator
 from autoscaling_plans_openapi import project_before_autoscaling_plans
 from ssm_document_reference import project_ssm_documents, OPS
+from test_sakura_openapi import project_server_list
 ROOT=Path(__file__).resolve().parents[2]
 BASE_HASH='67d23ddc7a0325b066185d51c076d588a756c05ac6c6794ebe17f3def4ed0ce8'
 
 def validate(spec):
-    # Auto Scaling Plans (main) is the outermost union layer; SSM sits beneath it.
-    projected=project_before_autoscaling_plans(spec)
+    # The historic document excludes later Sakura/SimpleDB and Auto Scaling Plans.
+    projected = project_before_autoscaling_plans(project_server_list(spec))
     project_ssm_documents(projected)
     assert hashlib.sha256(json.dumps(projected,sort_keys=True,separators=(',', ':'),ensure_ascii=False).encode()).hexdigest()==BASE_HASH
 

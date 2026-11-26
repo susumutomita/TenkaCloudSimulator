@@ -4,14 +4,31 @@ from pathlib import Path
 from jsonschema import Draft202012Validator,ValidationError
 from autoscaling_plans_openapi import project_before_autoscaling_plans
 from ssm_command_reference import project_ssm_commands,OPS
+from ssm_document_reference import project_before_ssm_document_versions
+from test_sakura_openapi import project_server_list
 from openapi_json10 import validator
 ROOT=Path(__file__).resolve().parents[2]
 BASE_HASH='a476756f5844114b6f5f45c4652da5c1fd6812b8488af674e19c94b64d2aed53'
+
+
+def inherited_reference(spec):
+    projected = project_before_autoscaling_plans(project_server_list(spec))
+    project_ssm_commands(projected)
+    # The pinned RunCommand baseline also predates ListDocumentVersions.
+    project_before_ssm_document_versions(projected)
+    return projected
+
+
 class CommandReference(unittest.TestCase):
     def setUp(self): self.spec=json.loads((ROOT/'internal/server/apidocs/openapi.json').read_text())
     def test_inherited_reference_unchanged(self):
-        p=project_before_autoscaling_plans(self.spec);project_ssm_commands(p)
+        p = inherited_reference(self.spec)
         self.assertEqual(hashlib.sha256(json.dumps(p,sort_keys=True,separators=(',',':'),ensure_ascii=False).encode()).hexdigest(),BASE_HASH)
+    def test_later_document_version_delta_is_checked(self):
+        self.spec['components']['schemas']['SSMListDocumentVersionsInput']['additionalProperties'] = True
+        with self.assertRaisesRegex(AssertionError, 'SSM ListDocumentVersions reference changed'):
+            inherited_reference(self.spec)
+
     def test_exact_inputs_and_no_prefilled_execution(self):
         examples={'SendCommand':{'DocumentName':'AWS-RunShellScript','InstanceIds':['i-0123456789abcdef0'],'Parameters':{'commands':['fixture-text-only']},'TimeoutSeconds':30},'GetCommandInvocation':{'CommandId':'01234567-89ab-4def-8123-456789abcdef','InstanceId':'i-0123456789abcdef0'},'ListCommands':{'Filters':[{'key':'InvokedAfter','value':'2026-11-11T00:00:00Z'}],'MaxResults':50}}
         for op in OPS:
