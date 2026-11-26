@@ -43,6 +43,7 @@ func run(ctx context.Context, args []string, output io.Writer) (result error) {
 	clockFD := flags.Int("battle-clock-proof-fd", 0, "Managed Linux launcher private clock pipe (only 3)")
 	battleRuntime := flags.String("battle-runtime-config", "", "Explicit private pinned Battle runtime configuration for Linux or macOS on amd64/arm64 (does not qualify Host clocks)")
 	statePath := flags.String("state", ":memory:", "SQLite state path; default is ephemeral memory")
+	cognitoConfig := flags.Bool("cognito-local-federation-config", false, "Explicit signed local-only Cognito IdP and public client configuration (no sign-in)")
 	rdsTopology := flags.Bool("rds-private-postgres-topology", false, "Validate explicitly private standalone PostgreSQL metadata against native EC2 (does not enable a database by itself)")
 	rdsOwned := flags.String("rds-owned-postgres-config", "", "Optional pinned private PostgreSQL provider configuration (Linux/amd64; incompatible with Battle; no endpoint)")
 	remote := flags.Bool("allow-remote", false, "Allow binding beyond loopback; use only in an isolated trusted network")
@@ -89,6 +90,9 @@ func run(ctx context.Context, args []string, output io.Writer) (result error) {
 		return err
 	}
 	ip := net.ParseIP(host)
+	if *cognitoConfig && (*remote || *unsafe || ip == nil || !ip.IsLoopback()) {
+		return errors.New("--cognito-local-federation-config requires authenticated numeric loopback")
+	}
 	if err := validateSakuraServerConsole(sakuraOptions.serverConsole, sakuraScope, *unsafe, *remote, ip); err != nil {
 		return err
 	}
@@ -113,7 +117,8 @@ func run(ctx context.Context, args []string, output io.Writer) (result error) {
 		}
 	}
 	options := server.ProviderConfig{CloudStorage: cloudConfig, SakuraDisks: sakuraScope, SakuraServerConsole: sakuraOptions.serverConsole,
-		BedrockRuntime: bedrockRuntime, RDSPrivatePostgresTopology: *rdsTopology}
+		BedrockRuntime: bedrockRuntime, RDSPrivatePostgresTopology: *rdsTopology,
+		CognitoLocalFederationConfig: *cognitoConfig}
 	options, err = configureOwnedPostgres(options, *rdsOwned, *statePath, ip, *unsafe, *remote)
 	if err != nil {
 		return err

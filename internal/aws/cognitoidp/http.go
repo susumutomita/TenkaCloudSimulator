@@ -27,8 +27,8 @@ func RejectAuthentication(w http.ResponseWriter) {
 	writeError(w, http.StatusForbidden, "UnrecognizedClientException", "Verified local Cognito SDK credentials are required.")
 }
 
-// NewHTTPHandler implements a metadata-only AWS JSON 1.1 user-pool surface.
-// The composition layer owns native SDK authentication and provider dispatch.
+// NewHTTPHandler implements the pool metadata surface and optional bounded
+// configuration. The composition layer owns verified native SDK dispatch.
 func NewHTTPHandler(store *Store, scope Scope, actor Actor, authorize Authorize) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if store == nil || store.db == nil || !scope.valid() || !actor.valid() || authorize == nil {
@@ -47,14 +47,23 @@ func NewHTTPHandler(store *Store, scope Scope, actor Actor, authorize Authorize)
 			return
 		}
 		op, matches := strings.CutPrefix(r.Header.Get("X-Amz-Target"), TargetPrefix)
-		if !matches || !supportedOperation(op) {
+		federation := store.nativeFederation && localFederationOperation(op)
+		if !matches || (!supportedOperation(op) && !federation) {
 			writeError(w, http.StatusBadRequest, "UnknownOperationException", "This service only implements local pool metadata operations.")
+			return
+		}
+		if federation && !directLocalFederationRequest(r) {
+			RejectAuthentication(w)
 			return
 		}
 		ctx := r.Context()
 		raw, err := io.ReadAll(http.MaxBytesReader(w, r.Body, RequestLimit))
 		if err != nil {
 			operationError(w, errInvalid)
+			return
+		}
+		if federation {
+			serveLocalFederationConfig(w, ctx, store, scope, actor, authorize, op, raw)
 			return
 		}
 		fields := requestFields(raw)
@@ -160,7 +169,9 @@ func (p pool) summary() poolSummary {
 	return poolSummary{p.ID, p.Name, timestamp, timestamp}
 }
 
-func requestFields(raw []byte) map[string]json.RawMessage {
+func requestFields(raw []byte) map[string]json.RawMessage { return boundedObjectFields(raw, 2) }
+
+func boundedObjectFields(raw []byte, max int) map[string]json.RawMessage {
 	if !utf8.Valid(raw) {
 		return nil
 	}
@@ -170,7 +181,7 @@ func requestFields(raw []byte) map[string]json.RawMessage {
 	}
 	out := map[string]json.RawMessage{}
 	for d.More() {
-		if len(out) >= 2 {
+		if len(out) >= max {
 			return nil
 		}
 		key, err := d.Token()

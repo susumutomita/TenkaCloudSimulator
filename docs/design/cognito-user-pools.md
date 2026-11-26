@@ -1,9 +1,9 @@
 # Bounded local Cognito user-pool metadata
 
 Scope for [#253](https://github.com/susumutomita/TenkaCloudSimulator/issues/253):
-the four existing AWS Cognito control-plane operations below. The simulator
-creates no identity, credential, session, signing key, app client, or login
-endpoint. It contacts no external service.
+the four default AWS Cognito control-plane operations below. The default
+surface creates no identity, credential, session, signing key, app client,
+or login endpoint. It contacts no external service.
 
 The ordinary local simulator binary accepts only its already verified local
 SigV4 credentials, signed for `cognito-idp` in one configured simulator region.
@@ -41,3 +41,6 @@ Other fields and operations are explicit errors, including active deletion
 protection, app clients, users, groups, metadata/IdP configuration, OAuth/SAML,
 token issuance, managed login, MFA, triggers and CloudFormation resources.
 There is no browser, console, Scalar, or ProtoShip compatibility claim.
+The explicit local management opt-in is documented separately in
+[bounded federation configuration](cognito-federation-configuration.md);
+it does not enable a login flow.

@@ -3408,6 +3408,44 @@ REQUIRED_SOURCE_SCOPES['CognitoUserPoolMetadata'] = {
 }
 
 
+BASE_MODELS.add('CognitoFederationPoolOwnership')
+BASE_INVARIANTS['CognitoFederationPoolOwnership'] = {'TypeOK', 'PeerFrame', 'CanonicalTransition'}
+REQUIRED_SOURCE_SCOPES['CognitoFederationPoolOwnership'] = {
+    'internal/aws/cognitoidp/federation_store.go', 'internal/aws/cognitoidp/pools.go',
+}
+REQUIRED_MUTANTS['CognitoFederationPoolOwnership'] = {
+    'WritePeerAccount', 'WritePeerRegion', 'WriteSiblingPool', 'IgnoreRevision', 'WriteUnopenedPool',
+    'RetainOnDelete', 'WriteAbsentPool', 'ReuseRetiredRevision', 'IgnoreFailedCommit',
+}
+
+BASE_MODELS.add('CognitoFederationConfiguration')
+BASE_INVARIANTS['CognitoFederationConfiguration'] = {'TypeOK', 'NoDanglingClient', 'AuthorityFrame', 'ExactBinding', 'MutationFrame'}
+REQUIRED_SOURCE_SCOPES['CognitoFederationConfiguration'] = {
+    'internal/aws/cognitoidp/federation_config.go', 'internal/aws/cognitoidp/federation_metadata.go',
+    'internal/aws/cognitoidp/federation_publisher.go', 'internal/aws/cognitoidp/federation_store.go',
+    'internal/aws/cognitoidp/pools.go',
+}
+REQUIRED_MUTANTS['CognitoFederationConfiguration'] = {
+    'DefaultAdmission', 'AllowOtherPoolGrant', 'AllowWrongAction', 'OneDescribeSuffices',
+    'UseExpiredSource', 'AcceptPlain', 'UseUnregisteredCallback', 'IgnoreStaleRevision',
+    'IgnoreClientProvider', 'UseExpiredBinding', 'AllowUnsupportedScope', 'DeleteReferencedProvider',
+    'ClientWithoutProvider', 'PeerWrite', 'KeepRevision', 'DropAuthorizedWrite',
+}
+
+BASE_MODELS.add('CognitoFederationNativeAdmission')
+BASE_INVARIANTS['CognitoFederationNativeAdmission'] = {'TypeOK', 'ExactNativeAdmission', 'NativeProjection', 'CanonicalFrame'}
+REQUIRED_SOURCE_SCOPES['CognitoFederationNativeAdmission'] = {
+    'cmd/simulator/main.go', 'internal/aws/cognitoidp/federation_http.go',
+    'internal/aws/cognitoidp/federation_publisher.go', 'internal/aws/cognitoidp/http.go',
+    'internal/aws/cognitoidp/pools.go', 'internal/server/cognito_user_pools_capabilities.go',
+    'internal/server/sakura_provider.go', 'internal/server/server.go',
+}
+REQUIRED_MUTANTS['CognitoFederationNativeAdmission'] = {
+    'ForceOn', 'UseUnverified', 'AcceptOtherPeer', 'AcceptBrowserHeaders', 'IgnoreScope',
+    'IgnoreShape', 'AllowWrongGrant', 'EnableLoginDispatch', 'ReturnRawGraph', 'SkipPoolLookup',
+    'IgnoreProviderReference', 'WritePeerRegion', 'WrongProjection',
+}
+
 BASE_MODELS.add('SimpleDBSelectPage')
 BASE_INVARIANTS['SimpleDBSelectPage'] = {
     'TypeOK', 'AdmissionBeforeRead',

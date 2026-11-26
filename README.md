@@ -119,8 +119,10 @@ console, CloudFormation adapter or Challenge integration.
   [Azure Queue Storage (bounded named-queue operations)](docs/acceptance/azure-queue.md),
   [local Entra OIDC verification fixture (not login or SAML)](docs/azure-entra-verification-fixture.md),
   [opt-in Sakura Disk metadata](docs/sakura.md).
-- **Cognito User Pools:** [Local metadata only](docs/design/cognito-user-pools.md). Verified local SigV4
-  supports Create, Describe, List, and DeleteUserPool. No user sign-in, federation, or token issuance.
+- **Cognito User Pools:** [Local metadata by default](docs/design/cognito-user-pools.md). Verified local SigV4
+  supports Create, Describe, List, and DeleteUserPool. Explicit
+  [local configuration opt-in](docs/design/cognito-federation-configuration.md) adds Create/Describe for
+  synthetic SAML providers and public clients. No sign-in, token issuance, Console, or Scalar support.
 - **SimpleDB:** Native `PutAttributes` and `DeleteAttributes` accept one SDK-style `Expected` condition. It
   can compare a single value or require that an attribute be absent. The check and
   change share one transaction. Delete individual values, entire attributes or the item;

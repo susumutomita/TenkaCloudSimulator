@@ -21,6 +21,9 @@ type ProviderConfig struct {
 	SakuraDisks        *sakura.Config
 	// SakuraServerConsole is an opt-in read-only presentation switch. Only bind authenticated numeric loopback when enabled.
 	SakuraServerConsole bool
+	// CognitoLocalFederationConfig admits only direct, signed loopback
+	// configuration. It does not enable a sign-in surface.
+	CognitoLocalFederationConfig bool
 	// RDSPrivatePostgresTopology enables native private-network validation of
 	// qualifying RDS metadata writes, not database execution or a listener.
 	RDSPrivatePostgresTopology bool

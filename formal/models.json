@@ -24088,6 +24088,490 @@
           "expect_invariant": "ReadScoped"
         }
       ]
+    },
+    {
+      "id": "CognitoFederationPoolOwnership",
+      "model": "formal/CognitoFederationPoolOwnership.tla",
+      "config": "formal/CognitoFederationPoolOwnership.cfg",
+      "bounds": "Four serializable transitions; one symbolic pool targeted with one peer account, region and sibling pool; empty and two bounded payload symbols. All current, stale, absent and foreign symbolic revisions in the finite domain can be submitted; a synthetic tag is fresh for each acknowledged mutation.",
+      "properties": [
+        "TypeOK",
+        "PeerFrame",
+        "CanonicalTransition"
+      ],
+      "limits": "Models only the private bounded metadata slot in a live canonical pool row. Revisions abstract independent unpredictable draws without collision. SQLite implementation, schema migration, physical crash/recovery, Go concurrency, unbounded state, IAM, wire, SAML, OIDC, claims and browser authentication are not proved.",
+      "source_scope": [
+        "internal/aws/cognitoidp/federation_store.go",
+        "internal/aws/cognitoidp/pools.go"
+      ],
+      "mutants": [
+        {
+          "id": "WritePeerAccount",
+          "edits": [
+            {
+              "old": "[rows EXCEPT ![Target] = next]",
+              "new": "[rows EXCEPT ![Target] = next, ![PeerAccount] = next]",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PeerFrame"
+        },
+        {
+          "id": "WritePeerRegion",
+          "edits": [
+            {
+              "old": "[rows EXCEPT ![Target] = next]",
+              "new": "[rows EXCEPT ![Target] = next, ![PeerRegion] = next]",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PeerFrame"
+        },
+        {
+          "id": "WriteSiblingPool",
+          "edits": [
+            {
+              "old": "[rows EXCEPT ![Target] = next]",
+              "new": "[rows EXCEPT ![Target] = next, ![PeerID] = next]",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PeerFrame"
+        },
+        {
+          "id": "IgnoreRevision",
+          "edits": [
+            {
+              "old": "prev.rev # 0 /\\ r.rev = prev.rev",
+              "new": "prev.rev # 0",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CanonicalTransition"
+        },
+        {
+          "id": "WriteUnopenedPool",
+          "edits": [
+            {
+              "old": "prev.rev # 0 /\\ r.rev = prev.rev",
+              "new": "r.rev = prev.rev",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CanonicalTransition"
+        },
+        {
+          "id": "RetainOnDelete",
+          "edits": [
+            {
+              "old": "r.op = \"delete\" -> Blank(FALSE)",
+              "new": "r.op = \"delete\" -> [prior EXCEPT !.live = FALSE]",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CanonicalTransition"
+        },
+        {
+          "id": "WriteAbsentPool",
+          "edits": [
+            {
+              "old": "ELSE IF ~prev.live THEN \"missing\"",
+              "new": "ELSE IF ~prev.live /\\ r.op # \"open\" THEN \"missing\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CanonicalTransition"
+        },
+        {
+          "id": "ReuseRetiredRevision",
+          "edits": [
+            {
+              "old": "Fresh == Cardinality(Keys) + s.step + 1",
+              "new": "Fresh == InitialRevision(Target)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CanonicalTransition"
+        },
+        {
+          "id": "IgnoreFailedCommit",
+          "edits": [
+            {
+              "old": "IF result # \"ok\" THEN prior",
+              "new": "IF result # \"ok\" /\\ result # \"fault\" THEN prior",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CanonicalTransition"
+        }
+      ]
+    },
+    {
+      "id": "CognitoFederationConfiguration",
+      "model": "formal/CognitoFederationConfiguration.tla",
+      "config": "formal/CognitoFederationConfiguration.cfg",
+      "bounds": "Four consecutive steps, small typed graph: two symbolic providers and two clients (each client references one provider), one mutable pool plus three peer frames. Admission, callback, scope, pin, method and generation are finite predicates; optional refresh of parent via abstract lifecycle.",
+      "properties": [
+        "TypeOK",
+        "NoDanglingClient",
+        "AuthorityFrame",
+        "ExactBinding",
+        "MutationFrame"
+      ],
+      "limits": "No signature/IAM implementation, browser, issuer proof, real callback, PKCE verifier, XML schema compatibility, concrete quotas or retry/refinement proof. Model checks private configuration frames; native SQLite and Go validation are checked separately.",
+      "source_scope": [
+        "internal/aws/cognitoidp/federation_config.go",
+        "internal/aws/cognitoidp/federation_metadata.go",
+        "internal/aws/cognitoidp/federation_publisher.go",
+        "internal/aws/cognitoidp/federation_store.go",
+        "internal/aws/cognitoidp/pools.go"
+      ],
+      "mutants": [
+        {
+          "id": "DefaultAdmission",
+          "edits": [
+            {
+              "old": "Allowed(r) == r.grant = \"exact\"",
+              "new": "Allowed(r) == r.grant \\in {\"exact\", \"off\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AuthorityFrame"
+        },
+        {
+          "id": "AllowOtherPoolGrant",
+          "edits": [
+            {
+              "old": "Allowed(r) == r.grant = \"exact\"",
+              "new": "Allowed(r) == r.grant \\in {\"exact\", \"otherPool\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AuthorityFrame"
+        },
+        {
+          "id": "AllowWrongAction",
+          "edits": [
+            {
+              "old": "Allowed(r) == r.grant = \"exact\"",
+              "new": "Allowed(r) == r.grant \\in {\"exact\", \"otherAction\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AuthorityFrame"
+        },
+        {
+          "id": "OneDescribeSuffices",
+          "edits": [
+            {
+              "old": "Allowed(r) == r.grant = \"exact\"",
+              "new": "Allowed(r) == r.grant \\in {\"exact\", \"oneDescribe\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AuthorityFrame"
+        },
+        {
+          "id": "UseExpiredSource",
+          "edits": [
+            {
+              "old": "r.shape /\\ (r.op = \"provider+\" => r.pin) /\\ (r.op = \"binding\" => r.s256)",
+              "new": "r.shape /\\ (r.op = \"binding\" => r.s256)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AuthorityFrame"
+        },
+        {
+          "id": "AcceptPlain",
+          "edits": [
+            {
+              "old": "r.shape /\\ (r.op = \"provider+\" => r.pin) /\\ (r.op = \"binding\" => r.s256)",
+              "new": "r.shape /\\ (r.op = \"provider+\" => r.pin)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AuthorityFrame"
+        },
+        {
+          "id": "UseUnregisteredCallback",
+          "edits": [
+            {
+              "old": "/\\ r.callback /\\ r.scopes /\\ r.pin",
+              "new": "/\\ r.scopes /\\ r.pin",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExactBinding"
+        },
+        {
+          "id": "IgnoreStaleRevision",
+          "edits": [
+            {
+              "old": "IF r.version = \"stale\" THEN \"stale\" ELSE IF Fits(r, row) THEN \"ok\" ELSE \"unknown\"",
+              "new": "IF Fits(r, row) THEN \"ok\" ELSE \"unknown\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExactBinding"
+        },
+        {
+          "id": "IgnoreClientProvider",
+          "edits": [
+            {
+              "old": "row.clients[r.id] = r.provider\n                 /\\ r.callback",
+              "new": "row.clients[r.id] # None\n                 /\\ r.callback",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExactBinding"
+        },
+        {
+          "id": "UseExpiredBinding",
+          "edits": [
+            {
+              "old": "/\\ r.callback /\\ r.scopes /\\ r.pin",
+              "new": "/\\ r.callback /\\ r.scopes",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExactBinding"
+        },
+        {
+          "id": "AllowUnsupportedScope",
+          "edits": [
+            {
+              "old": "/\\ r.callback /\\ r.scopes /\\ r.pin",
+              "new": "/\\ r.callback /\\ r.pin",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExactBinding"
+        },
+        {
+          "id": "DeleteReferencedProvider",
+          "edits": [
+            {
+              "old": "ELSE IF Referenced(row, r.provider) THEN \"inUse\" ELSE \"ok\"",
+              "new": "ELSE \"ok\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "NoDanglingClient"
+        },
+        {
+          "id": "ClientWithoutProvider",
+          "edits": [
+            {
+              "old": "IF r.provider \\notin row.providers \\/ ~r.pin THEN \"unknown\"",
+              "new": "IF ~r.pin THEN \"unknown\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "NoDanglingClient"
+        },
+        {
+          "id": "PeerWrite",
+          "edits": [
+            {
+              "old": "!.rows = Install(s.rows,row)",
+              "new": "!.rows = IF result = \"ok\" /\\ r.op \\in Writes THEN [Install(s.rows,row) EXCEPT ![PeerRegion] = row] ELSE Install(s.rows,row)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "MutationFrame"
+        },
+        {
+          "id": "KeepRevision",
+          "edits": [
+            {
+              "old": "LET rev == s.step + 1",
+              "new": "LET rev == row.rev",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "MutationFrame"
+        },
+        {
+          "id": "DropAuthorizedWrite",
+          "edits": [
+            {
+              "old": "ELSE IF ~row.live THEN \"noPool\"\n  ELSE CASE",
+              "new": "ELSE IF ~row.live THEN \"noPool\"\n  ELSE IF r.op \\in Writes THEN \"unknown\"\n  ELSE CASE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "MutationFrame"
+        }
+      ]
+    },
+    {
+      "id": "CognitoFederationNativeAdmission",
+      "model": "formal/CognitoFederationNativeAdmission.tla",
+      "config": "formal/CognitoFederationNativeAdmission.cfg",
+      "bounds": "Four transitions, four configuration actions plus legacy delegation and unsupported login/other, one mutable canonical row and three peer frames. One symbolic provider and client per pool; independent bad proof, flag, listener/request predicates, bound scope and grant witnesses.",
+      "properties": [
+        "TypeOK",
+        "ExactNativeAdmission",
+        "NativeProjection",
+        "CanonicalFrame"
+      ],
+      "limits": "Credits only bounded control-plane routing, state and redacted response classes. Does not validate cryptography, actual XML or JSON parsing, network isolation, real provider compatibility, byte/entry counting, races, CLI platform behavior or Go refinement; those have separate targeted checks. No login or issuance semantics.",
+      "source_scope": [
+        "cmd/simulator/main.go",
+        "internal/aws/cognitoidp/federation_http.go",
+        "internal/aws/cognitoidp/federation_publisher.go",
+        "internal/aws/cognitoidp/http.go",
+        "internal/aws/cognitoidp/pools.go",
+        "internal/server/cognito_user_pools_capabilities.go",
+        "internal/server/sakura_provider.go",
+        "internal/server/server.go"
+      ],
+      "mutants": [
+        {
+          "id": "ForceOn",
+          "edits": [
+            {
+              "old": "~r.enabled \\/ r.op \\notin ConfigOps THEN \"unsupported\"",
+              "new": "r.op \\notin ConfigOps THEN \"unsupported\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExactNativeAdmission"
+        },
+        {
+          "id": "UseUnverified",
+          "edits": [
+            {
+              "old": "IF r.proof # \"verified\" THEN \"unauthenticated\"",
+              "new": "IF r.proof = \"browser\" THEN \"unauthenticated\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExactNativeAdmission"
+        },
+        {
+          "id": "AcceptOtherPeer",
+          "edits": [
+            {
+              "old": "~r.direct \\/ ~r.sdk THEN \"unauthenticated\"",
+              "new": "~r.sdk THEN \"unauthenticated\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExactNativeAdmission"
+        },
+        {
+          "id": "AcceptBrowserHeaders",
+          "edits": [
+            {
+              "old": "~r.direct \\/ ~r.sdk THEN \"unauthenticated\"",
+              "new": "~r.direct THEN \"unauthenticated\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExactNativeAdmission"
+        },
+        {
+          "id": "IgnoreScope",
+          "edits": [
+            {
+              "old": "~r.shape \\/ ~r.scoped THEN \"input\"",
+              "new": "~r.shape THEN \"input\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExactNativeAdmission"
+        },
+        {
+          "id": "IgnoreShape",
+          "edits": [
+            {
+              "old": "~r.shape \\/ ~r.scoped THEN \"input\"",
+              "new": "~r.scoped THEN \"input\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExactNativeAdmission"
+        },
+        {
+          "id": "AllowWrongGrant",
+          "edits": [
+            {
+              "old": "r.iam # \"exact\" THEN \"denied\"",
+              "new": "r.iam = \"denied\" THEN \"denied\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExactNativeAdmission"
+        },
+        {
+          "id": "EnableLoginDispatch",
+          "edits": [
+            {
+              "old": "~r.enabled \\/ r.op \\notin ConfigOps THEN \"unsupported\"",
+              "new": "~r.enabled \\/ r.op \\notin ConfigOps \\cup {\"Login\"} THEN \"unsupported\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExactNativeAdmission"
+        },
+        {
+          "id": "ReturnRawGraph",
+          "edits": [
+            {
+              "old": "ELSE IF r.op \\in {\"CreateProvider\",\"DescribeProvider\"} THEN \"provider\" ELSE \"client\"",
+              "new": "ELSE IF r.op \\in {\"CreateProvider\",\"DescribeProvider\"} THEN \"raw\" ELSE \"client\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "NativeProjection"
+        },
+        {
+          "id": "SkipPoolLookup",
+          "edits": [
+            {
+              "old": "~row.live THEN \"missing\"",
+              "new": "FALSE THEN \"missing\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "NativeProjection"
+        },
+        {
+          "id": "IgnoreProviderReference",
+          "edits": [
+            {
+              "old": "r.op = \"CreateClient\" -> IF row.provider THEN \"ok\" ELSE \"missing\"",
+              "new": "r.op = \"CreateClient\" -> \"ok\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "NativeProjection"
+        },
+        {
+          "id": "WritePeerRegion",
+          "edits": [
+            {
+              "old": "!.rows = Install(s.rows,next)",
+              "new": "!.rows = IF result = \"ok\" /\\ r.op \\in Writes THEN [Install(s.rows,next) EXCEPT ![PeerRegion] = next] ELSE Install(s.rows,next)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CanonicalFrame"
+        },
+        {
+          "id": "WrongProjection",
+          "edits": [
+            {
+              "old": "ELSE IF r.op \\in {\"CreateProvider\",\"DescribeProvider\"} THEN \"provider\" ELSE \"client\"",
+              "new": "ELSE IF r.op \\in {\"CreateProvider\",\"DescribeProvider\"} THEN \"client\" ELSE \"provider\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "NativeProjection"
+        }
+      ]
     }
   ]
 }

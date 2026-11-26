@@ -1,63 +1,446 @@
 {
   "version": 1,
-  "base_sha": "139830c0f9ddbc0fc393b033f2affd455d30a2cd",
+  "base_sha": "99b5b2fa26487872e30f482eb6a904f3e2256ab7",
   "changes": [
     {
       "path": "README.md",
-      "sha256": "ac0d87c84245bf8930975acd1939a73bda4a3dd9592becc2cacc423f92062559",
+      "sha256": "4b0a3ed6b8e830ccb1b2b7474720d4c8ef66fe1a4cfaa06502a9f7897d68a6ea",
       "disposition": "documentation",
-      "reason": "Documents already bounded stack-local network support and that an invalid placement fails before the guest launch.",
+      "reason": "Identifies unchanged default metadata, opt-in synthetic configuration and still-unsupported CLI/browser/console features.",
       "models": []
+    },
+    {
+      "path": "cmd/simulator/cognito_federation_flags_test.go",
+      "sha256": "27156b34dedc8da08cac18bf531c42b271d71e2f6640d7b5e629043bb37ae45b",
+      "disposition": "test-support",
+      "reason": "Actual CLI preflight rejects hostname, remote and unsafe before opening listener/state or touching a token path.",
+      "models": []
+    },
+    {
+      "path": "cmd/simulator/main.go",
+      "sha256": "cab18e52486ffc73464e8da028ffe214f7c574fda8eecc7ba6c24c3d995bdf66",
+      "disposition": "modeled",
+      "reason": "Adds explicit default-false configuration flag restricted to authenticated numeric loopback before startup effects.",
+      "models": [
+        {
+          "id": "CognitoFederationNativeAdmission",
+          "properties": [
+            "ExactNativeAdmission",
+            "NativeProjection",
+            "CanonicalFrame"
+          ],
+          "limits": "Four steps and symbolic signed proof, direct loopback, shape, flag, scope and grant. Does not prove SigV4 cryptography, parser behavior, listener startup, IAM evaluator, concrete SQLite execution or a login protocol."
+        }
+      ]
     },
     {
       "path": "docs/design/0001-go-standalone.md",
-      "sha256": "b738e70f6737b49020042e489252c19d8ca1e490423dbb51d261103dafdff01c",
+      "sha256": "abc8fb699c421cef42d46198e8d05c94572e573f9c669ae0306720b93db30c5d",
       "disposition": "documentation",
-      "reason": "Records the placement admission boundary, transaction rollback and unchanged post-commit readiness behavior.",
+      "reason": "Places opt-in metadata at the existing signed provider boundary and documents no sign-in, token or console support.",
       "models": []
     },
     {
-      "path": "internal/aws/cloudformation.go",
-      "sha256": "c0806d6853f57c327ae069febc65a9197df3d057f3bfd341b0da65a392e4a730",
+      "path": "docs/design/cognito-federation-configuration.md",
+      "sha256": "2d7a8d41080fc9b52665b9adb16b333a1d3ec4ec364b79d461d341fde15bebbf",
+      "disposition": "documentation",
+      "reason": "States exact local-only wire projections, operator trust and capabilities, typed state invariants, limits and unsupported paths.",
+      "models": []
+    },
+    {
+      "path": "docs/design/cognito-user-pools.md",
+      "sha256": "7809612503b7fe8326d0fbef95ad1d16613f99584019a868952af3a3683f93fd",
+      "disposition": "documentation",
+      "reason": "Keeps the existing default four-operation control-plane profile distinct from opt-in behavior.",
+      "models": []
+    },
+    {
+      "path": "formal/CognitoFederationConfiguration.cfg",
+      "sha256": "fde801333c13870f7751c221fdaeff7f1a3bdd5937e64c3bd2f2fa15abc9b23e",
       "disposition": "modeled",
-      "reason": "Require the already-modeled network ownership gate before any CREATE_IN_PROGRESS is committed and before calling Launch.",
+      "reason": "Bounded concrete applicability for this model and its exact invariants.",
       "models": [
         {
-          "id": "CanonicalVMComposition",
+          "id": "CognitoFederationConfiguration",
           "properties": [
-            "NetworkOwnership"
+            "AuthorityFrame",
+            "NoDanglingClient",
+            "ExactBinding",
+            "MutationFrame"
           ],
-          "limits": "NetworkCompile abstracts same owner and valid topology; concrete SQL claim/document matching, per-group VPC equivalence, rollback of partial inserts and Go runtime ordering are checked by regression tests, not a refinement proof."
+          "limits": "Bounded immutable request/config graph and symbolic pin/grant/callback predicates; Go aliasing, RSA/X.509, byte limits, IAM implementation and real network behavior are tested separately. No sign-in or issuance."
         }
       ]
     },
     {
-      "path": "internal/aws/cloudformation_instance.go",
-      "sha256": "76a51aa6e0e7b535cc56ca83147ab8efd215c8d0a4e1b1cdeb39a061dc735afe",
+      "path": "formal/CognitoFederationConfiguration.tla",
+      "sha256": "e3334eea7e4723bdbe927bcaaebfc01e370ecdb6eea03aefce9500f139fa1719",
       "disposition": "modeled",
-      "reason": "Checks a declared, claimed, stored subnet, its VPC and each distinct group within the same VPC and stack before publication.",
+      "reason": "Bounded concrete applicability for this model and its exact invariants.",
       "models": [
         {
-          "id": "CanonicalVMComposition",
+          "id": "CognitoFederationConfiguration",
           "properties": [
-            "NetworkOwnership"
+            "AuthorityFrame",
+            "NoDanglingClient",
+            "ExactBinding",
+            "MutationFrame"
           ],
-          "limits": "NetworkCompile abstracts same owner and valid topology; concrete SQL claim/document matching, per-group VPC equivalence, rollback of partial inserts and Go runtime ordering are checked by regression tests, not a refinement proof."
+          "limits": "Bounded immutable request/config graph and symbolic pin/grant/callback predicates; Go aliasing, RSA/X.509, byte limits, IAM implementation and real network behavior are tested separately. No sign-in or issuance."
         }
       ]
     },
     {
-      "path": "internal/aws/cloudformation_instance_placement_test.go",
-      "sha256": "97e14e6c08f05895d321f0204edc88496199d0ecb4ab4290c776fca7aa8232cf",
-      "disposition": "test-support",
-      "reason": "Exercises CFN transactions, valid and rejected placement, no leaked state or peer changes, plus isolated malformed records, missing claims/rows, readback drift and distinct internal SQL/read errors.",
+      "path": "formal/CognitoFederationNativeAdmission.cfg",
+      "sha256": "1df9bf8370f49960651e44d93657cc2c13e33ca2c19f9d26d48f79acfd6e7e8c",
+      "disposition": "modeled",
+      "reason": "Bounded concrete applicability for this model and its exact invariants.",
+      "models": [
+        {
+          "id": "CognitoFederationNativeAdmission",
+          "properties": [
+            "ExactNativeAdmission",
+            "NativeProjection",
+            "CanonicalFrame"
+          ],
+          "limits": "Four steps and symbolic signed proof, direct loopback, shape, flag, scope and grant. Does not prove SigV4 cryptography, parser behavior, listener startup, IAM evaluator, concrete SQLite execution or a login protocol."
+        }
+      ]
+    },
+    {
+      "path": "formal/CognitoFederationNativeAdmission.tla",
+      "sha256": "7f64705810a9a70ebc7d8a9e959087771b8980c40078bd16da59789a1e608e01",
+      "disposition": "modeled",
+      "reason": "Bounded concrete applicability for this model and its exact invariants.",
+      "models": [
+        {
+          "id": "CognitoFederationNativeAdmission",
+          "properties": [
+            "ExactNativeAdmission",
+            "NativeProjection",
+            "CanonicalFrame"
+          ],
+          "limits": "Four steps and symbolic signed proof, direct loopback, shape, flag, scope and grant. Does not prove SigV4 cryptography, parser behavior, listener startup, IAM evaluator, concrete SQLite execution or a login protocol."
+        }
+      ]
+    },
+    {
+      "path": "formal/CognitoFederationPoolOwnership.cfg",
+      "sha256": "082334fff8151b52f8c33d928b8911930fc615a45582af99d5b6ecb3bbb5470e",
+      "disposition": "modeled",
+      "reason": "Bounded concrete applicability for this model and its exact invariants.",
+      "models": [
+        {
+          "id": "CognitoFederationPoolOwnership",
+          "properties": [
+            "PeerFrame",
+            "CanonicalTransition"
+          ],
+          "limits": "Finite scoped transactions with symbolic noncolliding revisions only; not SQLite schema, SQL execution, crypto, races, or Go refinement."
+        }
+      ]
+    },
+    {
+      "path": "formal/CognitoFederationPoolOwnership.tla",
+      "sha256": "a7d399e3556c30ee24eedc05f0ef70bf8c2ddf68e1394485029edfd50feb6780",
+      "disposition": "modeled",
+      "reason": "Bounded concrete applicability for this model and its exact invariants.",
+      "models": [
+        {
+          "id": "CognitoFederationPoolOwnership",
+          "properties": [
+            "PeerFrame",
+            "CanonicalTransition"
+          ],
+          "limits": "Finite scoped transactions with symbolic noncolliding revisions only; not SQLite schema, SQL execution, crypto, races, or Go refinement."
+        }
+      ]
+    },
+    {
+      "path": "formal/models.json",
+      "sha256": "ab452eb6d28f21942950a954c13f2b467b07bcc28a89fc27df00e9323746b04c",
+      "disposition": "formal-infrastructure",
+      "reason": "Registers three bounded models, their exact source scopes, declared limits and sensitivity controls against this signed baseline.",
       "models": []
     },
     {
-      "path": "internal/aws/cloudformation_instance_test.go",
-      "sha256": "146473767ed9dee9016e7eeebeda9a9ba27a1ad23d23bf7cc7601ee07890ce29",
+      "path": "internal/aws/cognitoidp/federation_config.go",
+      "sha256": "7ea24b704d7576d03717d555138bb5a9d9de9f14ee010528fb9c7d13482f5567",
+      "disposition": "modeled",
+      "reason": "Validates a canonical typed projection owned by the exact pool and binds clients/providers, attribute scopes and URL forms.",
+      "models": [
+        {
+          "id": "CognitoFederationConfiguration",
+          "properties": [
+            "AuthorityFrame",
+            "NoDanglingClient",
+            "ExactBinding",
+            "MutationFrame"
+          ],
+          "limits": "Bounded immutable request/config graph and symbolic pin/grant/callback predicates; Go aliasing, RSA/X.509, byte limits, IAM implementation and real network behavior are tested separately. No sign-in or issuance."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/cognitoidp/federation_config_test.go",
+      "sha256": "3ebdd31508cd7f3d85b210f733c970758872e378e5030ea8ec8b069100012205",
       "disposition": "test-support",
-      "reason": "Updates existing lifecycle-only instance fixtures to name the valid subnet and group actually built in their stack; lifecycle assertions remain unchanged.",
+      "reason": "Native SQLite and synthetic local fixture evidence for the graph, read/mutation authority, aliasing guards, restart, limits and failure frames.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/cognitoidp/federation_http.go",
+      "sha256": "7e3705ad332b48c7ca19dc8fc5ded56dce9b4663ece56cc78dd9c449b0b22ead",
+      "disposition": "modeled",
+      "reason": "Admits strict four-operation local JSON only and returns the corresponding single redacted view after the matching IAM action.",
+      "models": [
+        {
+          "id": "CognitoFederationNativeAdmission",
+          "properties": [
+            "ExactNativeAdmission",
+            "NativeProjection",
+            "CanonicalFrame"
+          ],
+          "limits": "Four steps and symbolic signed proof, direct loopback, shape, flag, scope and grant. Does not prove SigV4 cryptography, parser behavior, listener startup, IAM evaluator, concrete SQLite execution or a login protocol."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/cognitoidp/federation_http_test.go",
+      "sha256": "169f22a88a3758b4d852d6da78a3ae26dbb74eaa693ed935d4ebd33be5895fec",
+      "disposition": "test-support",
+      "reason": "Tests per-operation shape and local peer/Host bounds, no early storage and collision-safe isolation between fixture accounts.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/cognitoidp/federation_metadata.go",
+      "sha256": "556b2c09ffb9644ccb7ed65afd61d98dacaba3d4f66d3c9c26d70f862a728c89",
+      "disposition": "modeled",
+      "reason": "Bounds and projects inline X.509 metadata and validates numeric-loopback destinations; no network discovery or assertion processing.",
+      "models": [
+        {
+          "id": "CognitoFederationConfiguration",
+          "properties": [
+            "AuthorityFrame",
+            "NoDanglingClient",
+            "ExactBinding",
+            "MutationFrame"
+          ],
+          "limits": "Bounded immutable request/config graph and symbolic pin/grant/callback predicates; Go aliasing, RSA/X.509, byte limits, IAM implementation and real network behavior are tested separately. No sign-in or issuance."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/cognitoidp/federation_metadata_test.go",
+      "sha256": "258bc4fc93f95cbe8ae6594560e34369a6266ee28c7b200585fef9bd88eacb6f",
+      "disposition": "test-support",
+      "reason": "Synthetic certificate and metadata validation, URL source checks and rejected pin forms without external providers or credentials.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/cognitoidp/federation_publisher.go",
+      "sha256": "6d297f53561327deb8e4904d888699e1b1ffdccf8bf09b85d1733d149653390a",
+      "disposition": "modeled",
+      "reason": "Applies bounded scoped writes to the canonical pool; distinguishes exact single-resource reads from full configuration requiring both Describe decisions.",
+      "models": [
+        {
+          "id": "CognitoFederationConfiguration",
+          "properties": [
+            "AuthorityFrame",
+            "NoDanglingClient",
+            "ExactBinding",
+            "MutationFrame"
+          ],
+          "limits": "Bounded immutable request/config graph and symbolic pin/grant/callback predicates; Go aliasing, RSA/X.509, byte limits, IAM implementation and real network behavior are tested separately. No sign-in or issuance."
+        },
+        {
+          "id": "CognitoFederationNativeAdmission",
+          "properties": [
+            "ExactNativeAdmission",
+            "NativeProjection",
+            "CanonicalFrame"
+          ],
+          "limits": "Four steps and symbolic signed proof, direct loopback, shape, flag, scope and grant. Does not prove SigV4 cryptography, parser behavior, listener startup, IAM evaluator, concrete SQLite execution or a login protocol."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/cognitoidp/federation_store.go",
+      "sha256": "ca1ae1a356648648f128f084642e21dedc104ac149817db11b3a63bc3f35b450",
+      "disposition": "modeled",
+      "reason": "Uses the live scoped pool row for a bounded optional metadata slot with serializable readback and non-reusable revision.",
+      "models": [
+        {
+          "id": "CognitoFederationPoolOwnership",
+          "properties": [
+            "PeerFrame",
+            "CanonicalTransition"
+          ],
+          "limits": "Finite scoped transactions with symbolic noncolliding revisions only; not SQLite schema, SQL execution, crypto, races, or Go refinement."
+        },
+        {
+          "id": "CognitoFederationConfiguration",
+          "properties": [
+            "AuthorityFrame",
+            "NoDanglingClient",
+            "ExactBinding",
+            "MutationFrame"
+          ],
+          "limits": "Bounded immutable request/config graph and symbolic pin/grant/callback predicates; Go aliasing, RSA/X.509, byte limits, IAM implementation and real network behavior are tested separately. No sign-in or issuance."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/cognitoidp/federation_store_test.go",
+      "sha256": "a43764865c300796cdb20142d5ed3283c6103e79d97ec63b83129b9e64b08774",
+      "disposition": "test-support",
+      "reason": "SQLite lifecycle, stale/corrupt/concurrent states, inherited default SDK projection and actual root-record deletion.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/cognitoidp/http.go",
+      "sha256": "ce351d5976ca528f88e145a243131ed83beaae43d4b72154fef5370eff7f2f34",
+      "disposition": "modeled",
+      "reason": "Dispatches the four new operations only with explicit enabled local configuration while leaving the default metadata dispatch and its request cap unchanged.",
+      "models": [
+        {
+          "id": "CognitoFederationNativeAdmission",
+          "properties": [
+            "ExactNativeAdmission",
+            "NativeProjection",
+            "CanonicalFrame"
+          ],
+          "limits": "Four steps and symbolic signed proof, direct loopback, shape, flag, scope and grant. Does not prove SigV4 cryptography, parser behavior, listener startup, IAM evaluator, concrete SQLite execution or a login protocol."
+        },
+        {
+          "id": "CognitoUserPoolMetadata",
+          "properties": [
+            "AdmissionBeforeStorage",
+            "ScopedCRUD"
+          ],
+          "limits": "Symbolic metadata-only default admission and canonical key authorization. Concrete Go behavior and compatibility are tested through the existing verified gateway."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/cognitoidp/pools.go",
+      "sha256": "074fc26ade493bb73713ff495f844e3ee7253b3040a0da2f40c260c0c3420d91",
+      "disposition": "modeled",
+      "reason": "Keeps one canonical pool and a default-false composition option. Identical pool-key semantics and cleanup.",
+      "models": [
+        {
+          "id": "CognitoFederationNativeAdmission",
+          "properties": [
+            "ExactNativeAdmission",
+            "NativeProjection",
+            "CanonicalFrame"
+          ],
+          "limits": "Four steps and symbolic signed proof, direct loopback, shape, flag, scope and grant. Does not prove SigV4 cryptography, parser behavior, listener startup, IAM evaluator, concrete SQLite execution or a login protocol."
+        },
+        {
+          "id": "CognitoUserPoolMetadata",
+          "properties": [
+            "AdmissionBeforeStorage",
+            "ScopedCRUD"
+          ],
+          "limits": "Symbolic metadata-only default admission and canonical key authorization. Concrete Go behavior and compatibility are tested through the existing verified gateway."
+        },
+        {
+          "id": "CognitoFederationPoolOwnership",
+          "properties": [
+            "PeerFrame",
+            "CanonicalTransition"
+          ],
+          "limits": "Finite scoped transactions with symbolic noncolliding revisions only; not SQLite schema, SQL execution, crypto, races, or Go refinement."
+        }
+      ]
+    },
+    {
+      "path": "internal/server/cognito_federation_config_test.go",
+      "sha256": "9652ca35f46496188b823a89df14bb955f87c683e3070903c3de2952070bc48b",
+      "disposition": "test-support",
+      "reason": "Signed HTTP request lifecycle through the real protected server and native gateway, permissions per ARN/action, scope, default-off, restart and deletion.",
+      "models": []
+    },
+    {
+      "path": "internal/server/cognito_user_pools_capabilities.go",
+      "sha256": "7f01a7a57ff5b459d0052165f0638d7b4d34daad1d20249a354ae038040747af",
+      "disposition": "modeled",
+      "reason": "Only advertises the narrow extra management operations when opted in; legacy shape stays unchanged.",
+      "models": [
+        {
+          "id": "CognitoFederationNativeAdmission",
+          "properties": [
+            "ExactNativeAdmission",
+            "NativeProjection",
+            "CanonicalFrame"
+          ],
+          "limits": "Four steps and symbolic signed proof, direct loopback, shape, flag, scope and grant. Does not prove SigV4 cryptography, parser behavior, listener startup, IAM evaluator, concrete SQLite execution or a login protocol."
+        },
+        {
+          "id": "CognitoUserPoolMetadata",
+          "properties": [
+            "AdmissionBeforeStorage",
+            "ScopedCRUD"
+          ],
+          "limits": "Symbolic metadata-only default admission and canonical key authorization. Concrete Go behavior and compatibility are tested through the existing verified gateway."
+        }
+      ]
+    },
+    {
+      "path": "internal/server/sakura_provider.go",
+      "sha256": "04bb4503da1c140a30e0d6da60f9bcc6ebfc2911c5c4c561c490705a899eb9f9",
+      "disposition": "modeled",
+      "reason": "Adds an independent trusted provider configuration switch; default zero value leaves the native metadata surface unchanged.",
+      "models": [
+        {
+          "id": "CognitoFederationNativeAdmission",
+          "properties": [
+            "ExactNativeAdmission",
+            "NativeProjection",
+            "CanonicalFrame"
+          ],
+          "limits": "Four steps and symbolic signed proof, direct loopback, shape, flag, scope and grant. Does not prove SigV4 cryptography, parser behavior, listener startup, IAM evaluator, concrete SQLite execution or a login protocol."
+        }
+      ]
+    },
+    {
+      "path": "internal/server/server.go",
+      "sha256": "74c6588365e8f1668091f8e3da3865eefd7edda1658e5b5b77483f9bf0d5f34a",
+      "disposition": "modeled",
+      "reason": "Composes the enabled store and truthful optional capability with existing protected gateway unchanged.",
+      "models": [
+        {
+          "id": "CognitoFederationNativeAdmission",
+          "properties": [
+            "ExactNativeAdmission",
+            "NativeProjection",
+            "CanonicalFrame"
+          ],
+          "limits": "Four steps and symbolic signed proof, direct loopback, shape, flag, scope and grant. Does not prove SigV4 cryptography, parser behavior, listener startup, IAM evaluator, concrete SQLite execution or a login protocol."
+        },
+        {
+          "id": "CognitoUserPoolMetadata",
+          "properties": [
+            "AdmissionBeforeStorage",
+            "ScopedCRUD"
+          ],
+          "limits": "Symbolic metadata-only default admission and canonical key authorization. Concrete Go behavior and compatibility are tested through the existing verified gateway."
+        }
+      ]
+    },
+    {
+      "path": "scripts/formal_model_gate.py",
+      "sha256": "01b3471c73597321be008f091a203ba35dcc1b84ecd84e5f730a6388f0a2f555",
+      "disposition": "formal-infrastructure",
+      "reason": "Makes the three new graph/ownership/routing models and sensitivity controls mandatory without removing existing obligations.",
+      "models": []
+    },
+    {
+      "path": "scripts/test-formal-gate.py",
+      "sha256": "b5e3bb46a1212509b6e2a8780040d9f600b8079ed70297e743cbe14975fd0ee0",
+      "disposition": "formal-infrastructure",
+      "reason": "Keeps the independent required-inventory check aligned with the three new source-scoped models.",
       "models": []
     }
   ]
