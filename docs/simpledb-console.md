@@ -46,3 +46,14 @@ This console supports single-attribute conditional replacement or removal.
 To use a separate attribute for the condition, use the native SDK. Arbitrary Select expressions,
 batch writes, domain metadata, and whole-domain deletion are not offered here.
 Domain cleanup uses native `DeleteDomain`, which also removes its items.
+
+
+## Read one item in the API reference
+
+In **API reference**, open the Query `POST /` form and select the
+**SimpleDB GetAttributes (read-only item values)** example. Set
+`X-Simulator-Service: sdb`, clear `X-Amz-Target`, and replace the example domain
+and item with the names you used in the console. **Send** reads the same saved
+values using your local sign-in with `sdb:GetAttributes` on the domain. The form
+does not create or change data. This is the local subset of
+[AWS GetAttributes](https://docs.aws.amazon.com/AmazonSimpleDB/latest/DeveloperGuide/SDB_API_GetAttributes.html).
