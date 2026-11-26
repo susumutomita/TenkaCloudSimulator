@@ -1,19 +1,19 @@
 {
   "version": 1,
-  "base_sha": "e25297050ac7eb2e4f086391d73bbb43d5331745",
+  "base_sha": "272d3f12456067f9e9da93b170dc7e1b819d33e0",
   "changes": [
     {
-      "path": "docs/ec2-read-discovery.md",
-      "sha256": "053a7452eb460196d1606ae8c86e18cf6040a393c7aeb880b9fa6cf140b73d8c",
+      "path": "docs/simpledb-select.md",
+      "sha256": "37d4059a58d89addae7db8a68961345ee873fd1d842ba99b0ff0e739cef20c5d",
       "disposition": "documentation",
-      "reason": "Document the existing missing-runtime boundary and optional native CLI preflight; no EC2 operation, capability, or runtime contract is changed.",
+      "reason": "Documents the optional local acceptance command and its explicit scopes; no simulator route, model, or permissions change.",
       "models": []
     },
     {
-      "path": "test/console/ec2_launch_preflight_native.py",
-      "sha256": "53915addc72af84a4187739839a7142147f38aed0fd9f1debb3bc08da3f9c91e",
+      "path": "test/e2e/simpledb_select_sessions.py",
+      "sha256": "b8ffc90a0a901b3ccec39dbdeb84b8cd5300ac81111d4c0dd8308fcdefedd78c",
       "disposition": "test-support",
-      "reason": "Drive ordinary authenticated production CLI transport with an ephemeral in-memory state. Validate the supported CloudFormation declaration, denied privilege, missing-runtime rejection and unchanged observable state without enabling any runtime.",
+      "reason": "Executes existing pinned SDK and local HTTP endpoints against temporary process and database state; no simulator, formal registry, runtime assets, or CI gate changes.",
       "models": []
     }
   ]
