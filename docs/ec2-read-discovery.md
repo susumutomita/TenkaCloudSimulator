@@ -104,13 +104,23 @@ allocated group ARN; tags require `ec2:CreateTags` on the group. A native group
 has `groupName` and the local `simulatorSecurityGroupMode=detached-config-only`
 marker. Delete requires the exact `GroupId` resource ARN. Stack-owned groups
 cannot be adopted or deleted through this API. There is no default group,
-rule mutation, egress, native attachment, execution, or native SG mutation UI.
+rule mutation, egress, native attachment, or execution.
 
-The existing CloudFormation-only **VPC → Resource details → Security groups**
-pane reads the saved rules and tags for that exact VPC using the supported
-`vpc-id` selector and current identity, then validates the selected rows. It
-still offers no mutation. EC2-managed VPCs and instance-scoped Console handoffs
-do not use that pane. A refusal or incomplete reply is not an empty list.
+In an ordinary signed-in Console, select a VPC in **VPC → Resource details →
+Security groups**. CloudFormation-owned VPCs show their saved rules and tags
+without mutation controls. Where the simulator advertises all three detached
+native actions, EC2-managed VPCs can create a named group with a description,
+view saved metadata and tags, and delete a selected group after confirmation.
+The Console reports changes only after a scoped read verifies the result.
+After an unclear response, refresh the list before retrying. This pane does
+not offer default groups, tag edits, rules, attachment, or traffic effects.
+An instance-scoped Console handoff does not receive these controls. API
+permissions still apply to the selected identity. A refusal or incomplete
+reply is not an empty list.
+
+Opt-in served Console check: `SIMULATOR_BINARY=/absolute/path/to/simulator
+python3 test/e2e/ec2_native_security_groups_gui.py` with installed Chromium,
+Playwright and pinned SDK dependencies, on numeric loopback only.
 
 [CreateSecurityGroup](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_CreateSecurityGroup.html),
 [DescribeSecurityGroups](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_DescribeSecurityGroups.html),
@@ -122,7 +132,7 @@ do not use that pane. A refusal or incomplete reply is not an empty list.
 [explicit detached configuration contract](ec2-detached-network-acls.md) in an
 EC2-managed VPC. Group/ACL mutations and reads are refused in a single-instance
 handoff. ACLs do not create a default ACL, do not bind a subnet, and do not
-provide enforcement or a Console pane.
+provide enforcement. The signed-in VPC Console manages only this detached metadata.
 
 To verify all three child kinds in one owned VPC, run
 `SIMULATOR_BINARY=/absolute/path/to/simulator python3 test/console/ec2_native_network_sdk.py`
@@ -130,6 +140,12 @@ with the pinned boto3/botocore versions from `scripts/requirements-test.txt`.
 This uses isolated, authenticated processes over numeric loopback, including a
 restart, exact grants and typed cleanup. It neither launches a guest nor talks
 to AWS.
+
+To check the actual served combination of subnet, groups and ACLs alongside
+CloudFormation readback, run `test/console/ec2_native_subnet.py` with the built
+`SIMULATOR_BINARY`, `JSDOM_MODULE` and pinned boto3/botocore. This checks
+Cloudscape in JSDOM with the real API; it is not a Chromium layout assertion
+or a mandatory E2E gate.
 
 ## Route-table readback
 

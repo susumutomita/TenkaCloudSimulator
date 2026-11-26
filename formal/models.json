@@ -23034,6 +23034,110 @@
           "expect_invariant": "ReceiptTracksLiveACL"
         }
       ]
+    },
+    {
+      "id": "EC2DetachedNetworkConsole",
+      "model": "formal/EC2DetachedNetworkConsole.tla",
+      "config": "formal/EC2DetachedNetworkConsole.cfg",
+      "bounds": "Two view epochs, three typed pane keys, one request per pane and five representative gate states. Multiple pending leases are allowed to check frame behavior.",
+      "properties": [
+        "TypeOK",
+        "AdmittedNativeOnly",
+        "OnlyCurrentScope",
+        "VerifiedWriteOnly",
+        "ScopeChangeFenced",
+        "SiblingLeasePreserved",
+        "LeaseUntilReadback"
+      ],
+      "limits": "Native UI admission, scoped completion and aggregate write leases only. No React event ordering, layout, serialized identity API, XML parsing, SQLite, packet behavior or implementation proof. Legacy CFN read-only behavior remains separately modeled.",
+      "source_scope": [
+        "internal/server/web/app.js",
+        "tools/console/src/ec2-readonly.jsx",
+        "tools/console/src/main.jsx",
+        "tools/console/src/ec2-native-security-groups.mjs",
+        "tools/console/src/ec2-vpc-security-groups.jsx",
+        "tools/console/src/ec2-network-acls.mjs",
+        "tools/console/src/ec2-vpc-network-acls.jsx"
+      ],
+      "mutants": [
+        {
+          "id": "AdmitUnverifiedOwner",
+          "edits": [
+            {
+              "old": "Start(p,s) ==\n  /\\ gate = \"native\"",
+              "new": "Start(p,s) ==\n  /\\ TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AdmittedNativeOnly"
+        },
+        {
+          "id": "AcceptLateRead",
+          "edits": [
+            {
+              "old": "IF r.epoch = epoch /\\ ok",
+              "new": "IF ok",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "OnlyCurrentScope"
+        },
+        {
+          "id": "ReportUnverified",
+          "edits": [
+            {
+              "old": "/\\ ok /\\ r.stage # \"write\"",
+              "new": "/\\ r.stage # \"write\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "VerifiedWriteOnly"
+        },
+        {
+          "id": "ReportBeforeAck",
+          "edits": [
+            {
+              "old": "/\\ ok /\\ r.stage # \"write\"",
+              "new": "/\\ ok",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "VerifiedWriteOnly"
+        },
+        {
+          "id": "NavigateWhileSaving",
+          "edits": [
+            {
+              "old": "IF leases = {} THEN 1 ELSE epoch",
+              "new": "1",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ScopeChangeFenced"
+        },
+        {
+          "id": "ReleaseSiblingLease",
+          "edits": [
+            {
+              "old": "leases' = leases \\ {r.pane}",
+              "new": "leases' = {}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "SiblingLeasePreserved"
+        },
+        {
+          "id": "ReleaseOnReceipt",
+          "edits": [
+            {
+              "old": "UNCHANGED <<epoch,gate,leases,shown>>",
+              "new": "leases' = leases \\ {r.pane} /\\ UNCHANGED <<epoch,gate,shown>>",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "LeaseUntilReadback"
+        }
+      ]
     }
   ]
 }
