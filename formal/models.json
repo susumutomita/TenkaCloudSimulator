@@ -22654,6 +22654,127 @@
           "expect_invariant": "NoReturnedValues"
         }
       ]
+    },
+    {
+      "id": "EntraVerificationFixture",
+      "model": "formal/EntraVerificationFixture.tla",
+      "config": "formal/EntraVerificationFixture.cfg",
+      "bounds": "One explicit startup and one request; launcher mode, listen family, nonce intent, path, method, peer, Host, and bounded request cleanliness are finite choices.",
+      "properties": [
+        "FixtureIsolated",
+        "NumericLoopback",
+        "ExplicitValidToken",
+        "SyntheticTokenOnly",
+        "ReadOnlyAdmission",
+        "PublicVerificationOnly"
+      ],
+      "limits": "Admission and bounded output classification only; no OS bind semantics, HTTP parsing, cryptographic proof, clocks, process restart, production Entra, Cognito, SAML, browser authorization or code refinement.",
+      "source_scope": [
+        "cmd/simulator/main.go",
+        "cmd/simulator/azure_entra_fixture.go",
+        "internal/azure/entra/verification_fixture.go"
+      ],
+      "mutants": [
+        {
+          "id": "IgnoreCommand",
+          "edits": [
+            {
+              "old": "/\\ i.mode = \"fixture\"",
+              "new": "/\\ TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "FixtureIsolated"
+        },
+        {
+          "id": "AllowRemote",
+          "edits": [
+            {
+              "old": "/\\ i.bind = \"loopback\"",
+              "new": "/\\ TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "NumericLoopback"
+        },
+        {
+          "id": "IgnoreTokenOptIn",
+          "edits": [
+            {
+              "old": "IF i.intent = \"valid\" THEN",
+              "new": "IF TRUE THEN",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExplicitValidToken"
+        },
+        {
+          "id": "AllowArbitraryIdentity",
+          "edits": [
+            {
+              "old": "\"synthetic\" ELSE \"none\"",
+              "new": "\"arbitrary\" ELSE \"none\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "SyntheticTokenOnly"
+        },
+        {
+          "id": "AllowHTTPWrite",
+          "edits": [
+            {
+              "old": "/\\ i.method = \"GET\"",
+              "new": "/\\ TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadOnlyAdmission"
+        },
+        {
+          "id": "AllowForeignHost",
+          "edits": [
+            {
+              "old": "/\\ i.exactHost",
+              "new": "/\\ TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadOnlyAdmission"
+        },
+        {
+          "id": "AllowRemotePeer",
+          "edits": [
+            {
+              "old": "/\\ i.loopbackPeer",
+              "new": "/\\ TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadOnlyAdmission"
+        },
+        {
+          "id": "AllowUnexpectedInput",
+          "edits": [
+            {
+              "old": "/\\ i.clean",
+              "new": "/\\ TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadOnlyAdmission"
+        },
+        {
+          "id": "PublishPrivateKey",
+          "edits": [
+            {
+              "old": "\"publicJWK\" ELSE \"metadata\"",
+              "new": "\"private\" ELSE \"metadata\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PublicVerificationOnly"
+        }
+      ]
     }
   ]
 }

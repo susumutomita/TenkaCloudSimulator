@@ -113,6 +113,7 @@ console, CloudFormation adapter or Challenge integration.
   [Cloud DNS (bounded zone and record changes; Console SRV editor)](docs/acceptance/gcp-cloud-dns.md),
   [Google Cloud console](docs/gcp-console.md), [Azure console](docs/azure-console.md),
   [Azure Queue Storage (bounded named-queue operations)](docs/acceptance/azure-queue.md),
+  [local Entra OIDC verification fixture (not login or SAML)](docs/azure-entra-verification-fixture.md),
   [opt-in Sakura Disk metadata](docs/sakura.md).
 - **SimpleDB:** Native `PutAttributes` and `DeleteAttributes` accept one SDK-style `Expected` condition. It
   can compare a single value or require that an attribute be absent. The check and
