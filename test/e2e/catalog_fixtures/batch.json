@@ -29,7 +29,11 @@
   {"op": "tag_resource", "args": {"resourceArn": "${queue}", "tags": {"k": "v"}}},
   {"op": "untag_resource", "args": {"resourceArn": "${queue}", "tagKeys": ["k"]}},
   {"op": "list_tags_for_resource", "args": {"resourceArn": "${policy}"}, "expect": {"tags": {"team": "a"}}},
-  {"op": "describe_job_queues", "args": {"jobQueues": ["missing-queue"]}, "error": "ClientException", "status": 400}
+  {"op": "describe_job_queues", "args": {"jobQueues": ["missing-queue"]}, "error": "ClientException", "status": 400},
+  {"op": "create_job_queue", "args": {"jobQueueName": "fixture-fifo", "state": "DISABLED", "priority": 2}},
+  {"op": "update_job_queue", "args": {"jobQueue": "fixture-fifo", "schedulingPolicyArn": "${policy}", "priority": 23, "state": "ENABLED"}, "error": "ClientException", "status": 400},
+  {"op": "describe_job_queues", "args": {"jobQueues": ["fixture-fifo"]}, "expect": {"jobQueues[0].state": "DISABLED", "jobQueues[0].priority": 2}},
+  {"op": "update_job_queue", "args": {"jobQueue": "fixture-fifo", "priority": 3}}
  ],
  "isolation": [
   {"op": "describe_job_queues", "args": {}, "expect": {"jobQueues#count": 0}},
@@ -42,10 +46,12 @@
  "after_restart": [
   {"op": "delete_scheduling_policy", "args": {"arn": "${policy}"}, "error": "ClientException", "status": 400},
   {"op": "describe_scheduling_policies", "args": {"arns": ["${policy}"]}, "expect": {"schedulingPolicies#count": 1, "schedulingPolicies[0].fairsharePolicy.computeReservation": 20, "schedulingPolicies[0].tags": {"team": "a"}}},
-  {"op": "describe_job_queues", "args": {"jobQueues": ["fixture-queue"]}, "expect": {"jobQueues[0].state": "DISABLED", "jobQueues[0].priority": 9, "jobQueues[0].schedulingPolicyArn": "${policy}", "jobQueues[0].jobStateTimeLimitActions[0].maxTimeSeconds": 86400, "jobQueues[0].jobStateTimeLimitActions[0].action": "CANCEL"}}
+  {"op": "describe_job_queues", "args": {"jobQueues": ["fixture-queue"]}, "expect": {"jobQueues[0].state": "DISABLED", "jobQueues[0].priority": 9, "jobQueues[0].schedulingPolicyArn": "${policy}", "jobQueues[0].jobStateTimeLimitActions[0].maxTimeSeconds": 86400, "jobQueues[0].jobStateTimeLimitActions[0].action": "CANCEL"}},
+  {"op": "describe_job_queues", "args": {"jobQueues": ["fixture-fifo"]}, "expect": {"jobQueues[0].state": "DISABLED", "jobQueues[0].priority": 3}}
  ],
  "cleanup": [
   {"op": "delete_job_queue", "args": {"jobQueue": "fixture-queue"}},
+  {"op": "delete_job_queue", "args": {"jobQueue": "fixture-fifo"}},
   {"op": "describe_job_queues", "args": {}, "expect": {"jobQueues#count": 0}},
   {"op": "delete_compute_environment", "args": {"computeEnvironment": "fixture-ce"}},
   {"op": "delete_service_environment", "args": {"serviceEnvironment": "fixture-service"}},
