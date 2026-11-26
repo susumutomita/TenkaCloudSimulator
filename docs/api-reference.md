@@ -24,7 +24,12 @@ not separate API operations or proof of additional service coverage.
 Native EC2 Query is documented in the
 [EC2/VPC guide](ec2-read-discovery.md), including the
 [explicit subnet route table association API](ec2-read-discovery.md#native-subnet-route-table-associations).
-The embedded Scalar reference does not expose native EC2 Query templates.
+For read-only instance discovery, choose the shared root POST, select
+`application/x-www-form-urlencoded` and its **EC2 DescribeInstances** example,
+set `X-Simulator-Service: ec2`, clear `X-Amz-Target`, and choose a local region.
+Send with the existing signed-in identity and `ec2:DescribeInstances` on `*`.
+The XML lists saved metadata (possibly empty), not running-VM evidence. No EC2
+launch, mutation, filter or pagination is provided by this preset.
 
 The stable internal tag `KMS local symmetric keys` now displays as **Shared AWS
 JSON/Query endpoint**, accurately reflecting its existing
