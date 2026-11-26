@@ -697,7 +697,8 @@
                       "DeleteAttributes",
                       "Select",
                       "GetAttributes",
-                      "DescribeInstances"
+                      "DescribeInstances",
+                      "CreateDomain"
                     ]
                   },
                   "Version": {
@@ -776,7 +777,7 @@
                     "minLength": 3,
                     "maxLength": 255,
                     "pattern": "^[A-Za-z0-9_.-]+$",
-                    "description": "Existing local domain for DomainMetadata, GetAttributes or DeleteAttributes. Do not include DomainName for Select; use the domain in SelectExpression."
+                    "description": "For CreateDomain, choose a disposable local domain name. For DomainMetadata, GetAttributes or DeleteAttributes, use an existing local domain. Do not include DomainName for Select; use the domain in SelectExpression."
                   },
                   "ItemName": {
                     "type": "string",
@@ -1117,6 +1118,15 @@
                   "value": {
                     "Action": "DescribeInstances",
                     "Version": "2016-11-15"
+                  }
+                },
+                "CreateDomain": {
+                  "summary": "SimpleDB CreateDomain (writes local state)",
+                  "description": "Set X-Simulator-Service to sdb, clear X-Amz-Target, and use us-east-1 or leave X-Simulator-Region unset. Replace DomainName with a disposable local practice name (3–255 ASCII letters, digits, dots, underscores or hyphens). Send creates the domain in your local simulator using sdb:CreateDomain on the target domain ARN. Sending the same name again keeps the existing domain and items. Use the native SDK DeleteDomain only to clean up your practice domain.",
+                  "value": {
+                    "Action": "CreateDomain",
+                    "Version": "2009-04-15",
+                    "DomainName": "scalar-practice-domain"
                   }
                 }
               }

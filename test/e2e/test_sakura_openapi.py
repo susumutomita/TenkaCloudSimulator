@@ -36,6 +36,21 @@ def operations(spec):
 
 
 
+def project_simpledb_create_domain(spec):
+    """Undo only the bounded CreateDomain preset before the historical guards."""
+    form = spec['paths']['/']['post']['requestBody']['content']['application/x-www-form-urlencoded']
+    fields = form['schema']['properties']
+    actions = fields['Action']['enum']
+    assert actions.count('CreateDomain') == 1 and actions[-1] == 'CreateDomain', 'SimpleDB CreateDomain action changed'
+    actions.pop()
+    examples = form['examples']
+    assert next(iter(examples)) == 'DescribeStacks', 'Default Query example changed'
+    assert digest(examples.pop('CreateDomain', None)) == 'd6a8cee60d5cdb13ff54982c39ba0da3d68c6b9023daf96c2f6492b5eb64bdb6', 'SimpleDB CreateDomain preset changed'
+    domain = fields.get('DomainName', {})
+    assert domain.get('description') == 'For CreateDomain, choose a disposable local domain name. For DomainMetadata, GetAttributes or DeleteAttributes, use an existing local domain. Do not include DomainName for Select; use the domain in SelectExpression.', 'SimpleDB CreateDomain DomainName note changed'
+    domain['description'] = 'Existing local domain for DomainMetadata, GetAttributes or DeleteAttributes. Do not include DomainName for Select; use the domain in SelectExpression.'
+
+
 def project_ec2_describe_instances(spec):
     """Undo exactly the one EC2 Query preset, leaving all inherited defaults intact."""
     post = spec['paths']['/']['post']
@@ -128,6 +143,7 @@ SERVER_COLLECTION = '/_simulator/providers/sakura/cloud/zone/{zone}/api/cloud/1.
 
 def project_server_list(spec):
     spec = copy.deepcopy(spec)
+    project_simpledb_create_domain(spec)
     project_ec2_describe_instances(spec)
     project_simpledb_delete_attributes(spec)
     tag = {'name': 'Sakura Server metadata',
@@ -233,6 +249,29 @@ class SakuraReference(unittest.TestCase):
     def setUpClass(cls):
         cls.spec=json.loads((ROOT/'internal/server/apidocs/openapi.json').read_text())
 
+    def test_simpledb_create_domain_adds_only_the_existing_bounded_operation(self):
+        def form(spec):
+            return spec['paths']['/']['post']['requestBody']['content']['application/x-www-form-urlencoded']
+
+        media = form(self.spec)
+        value = media['examples']['CreateDomain']['value']
+        validator(self.spec, media['schema']).validate(value)
+        self.assertEqual(value, {'Action': 'CreateDomain', 'Version': '2009-04-15',
+                                 'DomainName': 'scalar-practice-domain'})
+        for label, change in (
+            ('duplicate action', lambda f: f['schema']['properties']['Action']['enum'].append('CreateDomain')),
+            ('extra operation', lambda f: f['examples'].update(DeleteDomain={'value': {'Action': 'DeleteDomain'}})),
+            ('unbounded body', lambda f: f['examples']['CreateDomain']['value'].update(ItemName='unexpected')),
+            ('misleading read hint', lambda f: f['examples']['CreateDomain'].update(summary='SimpleDB CreateDomain (read-only)')),
+            ('hidden scope note', lambda f: f['schema']['properties']['DomainName'].update(description='Domain name')),
+            ('default example reordered', lambda f: f['examples'].update(DescribeStacks=f['examples'].pop('DescribeStacks'))),
+        ):
+            with self.subTest(label=label), self.assertRaises(AssertionError):
+                changed = copy.deepcopy(self.spec)
+                change(form(changed))
+                project_server_list(changed)
+        preserved(self.spec)
+
     def test_ec2_preset_allows_only_bounded_read(self):
         post = self.spec['paths']['/']['post']
         media = 'application/x-www-form-urlencoded'
@@ -296,6 +335,7 @@ class SakuraReference(unittest.TestCase):
         self.assertEqual(example, {'Action': 'Select', 'Version': '2009-04-15',
             'SelectExpression': 'select itemName() from `example-domain` limit 25', 'ConsistentRead': 'true'})
         preceding = copy.deepcopy(self.spec)
+        project_simpledb_create_domain(preceding)
         project_ec2_describe_instances(preceding)
         project_simpledb_get_attributes(preceding)
         project_simpledb_select(copy.deepcopy(preceding))
@@ -322,6 +362,7 @@ class SakuraReference(unittest.TestCase):
                                    'DomainName': 'scalar-practice-domain', 'ItemName': 'scalar-practice-item',
                                    'ConsistentRead': 'true'})
         preceding = copy.deepcopy(self.spec)
+        project_simpledb_create_domain(preceding)
         project_ec2_describe_instances(preceding)
         project_simpledb_get_attributes(copy.deepcopy(preceding))
         preserved(self.spec)

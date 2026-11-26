@@ -1,19 +1,47 @@
 {
   "version": 1,
-  "base_sha": "66e251dbfb87f7c385d1fbe63a3670cc38361ad3",
+  "base_sha": "7d9bd0d7d9bad85d30136abe85c9a969bc06d340",
   "changes": [
     {
-      "path": "docs/ec2-network-contracts.md",
-      "sha256": "a2b6287e06ce5bcd779730fe30f648e27a5aa33c48ebc20354c36267e08379a9",
+      "path": "README.md",
+      "sha256": "07ca0588837f627dde270ca01468613432827fef1d946860201d80b4f85f2581",
       "disposition": "documentation",
-      "reason": "Links primary IAM and CloudFormation sources and distinguishes a local ordinary policy refusal scenario from AWS service roles, other IAM policy and crash behavior.",
+      "reason": "Documents starting and cleaning a local practice domain using the existing authorized native Query operation. No state machine change.",
       "models": []
     },
     {
-      "path": "test/e2e/ec2_network_contract.py",
-      "sha256": "eaae9fb5b90d743f50f0c2665ae4a9a9d086fc699948945dcccef30ebe05ec9b",
+      "path": "docs/design/0001-go-standalone.md",
+      "sha256": "a14d43a83b4ba98c2b921df7f4e1bec2a743b96f15e35804b0390a485a6fbf35",
+      "disposition": "documentation",
+      "reason": "Documents starting and cleaning a local practice domain using the existing authorized native Query operation. No state machine change.",
+      "models": []
+    },
+    {
+      "path": "docs/simpledb-console.md",
+      "sha256": "593d92e5c46f6c5e36f81a21f1bc4c2910d36e787e70316e72be75274cf4c273",
+      "disposition": "documentation",
+      "reason": "Documents starting and cleaning a local practice domain using the existing authorized native Query operation. No state machine change.",
+      "models": []
+    },
+    {
+      "path": "internal/server/apidocs/openapi.json",
+      "sha256": "b2b81bcff453f9f003c1d7a9e570eddd2820cf931a6586b584dea15b900fd68e",
+      "disposition": "presentation",
+      "reason": "Exposes one CreateDomain body example and updates its shared field description. Native routing, authorization and stored state semantics are unchanged.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/simpledb_create_domain_reference_live.py",
+      "sha256": "59c70f6566fd7b0def1fc1a2fef9335550a5bd5505070d1ee00d97a6aa1dbcdd",
       "disposition": "test-support",
-      "reason": "Uses the existing loopback SDK runner to verify standard participant create/delete refusal and invariant CFN/EC2 readback, plus authorized creation and cleanup. No production behavior, workflow or dependency change.",
+      "reason": "Checks bounded CreateDomain template and persistence via authenticated loopback and pinned SDK, while preserving historical projections. No model or runtime change.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/test_sakura_openapi.py",
+      "sha256": "632727c70038e44f9b9edb47969ca03082be7fcc0e2d2e4bda7f332242e4ee69",
+      "disposition": "test-support",
+      "reason": "Checks bounded CreateDomain template and persistence via authenticated loopback and pinned SDK, while preserving historical projections. No model or runtime change.",
       "models": []
     }
   ]
