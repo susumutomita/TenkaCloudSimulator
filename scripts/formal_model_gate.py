@@ -4006,6 +4006,63 @@ REQUIRED_SOURCE_SCOPES['EC2RouteTableInventoryPages'] = {
     'tools/console/src/ec2-vpc-native-route-tables.jsx',
 }
 
+BASE_MODELS.add('EC2NativeRouteAssociationReplacement')
+BASE_INVARIANTS['EC2NativeRouteAssociationReplacement'] = {
+    'TypeOK',
+    'ExactOutcome',
+    'NoEffectOnRefusal',
+    'OneExplicit',
+    'ExactMove',
+    'OtherStateUnchanged',
+    'ConfirmedNotice',
+    'RetiredRetryNeverApplies',
+}
+REQUIRED_MUTANTS['EC2NativeRouteAssociationReplacement'] = {
+    'RequireScopedSession',
+    'RequireResolvedRegion',
+    'RetainCFNIncumbent',
+    'RequireDestinationGrant',
+    'RequireIncumbentGrant',
+    'RequireSubnetGrant',
+    'RequireDistinctDestination',
+    'RequireSameVPC',
+    'RetainCFNDestination',
+    'RequireNoCFNClaim',
+    'RequireNoCFNDeclaration',
+    'RejectStorageFault',
+    'RejectDurableDrift',
+    'DryRunNeverWrites',
+    'RemoveRetiredID',
+    'GenerateDistinctID',
+    'PreserveSibling',
+    'NoRouteChanges',
+    'RequireReadback',
+    'RequireCompleteReadback',
+    'RequireSourceReadback',
+    'RequireExactNewReadback',
+    'RequireRetiredAbsence',
+    'RequireSiblingReadback',
+    'RequireCurrentView',
+    'RejectRetiredReplay',
+}
+REQUIRED_SOURCE_SCOPES['EC2NativeRouteAssociationReplacement'] = {
+    'internal/aws/ec2_read.go',
+    'internal/aws/ec2_network.go',
+    'internal/aws/ec2_internet_gateway_store.go',
+    'internal/aws/ec2_route_association_native_query.go',
+    'internal/aws/ec2_route_association_native_store.go',
+    'internal/aws/ec2_route_association_replace.go',
+    'internal/aws/ec2_route_tables_native.go',
+    'internal/aws/ec2_route_tables_read.go',
+    'internal/server/server.go',
+    'internal/server/web/app.js',
+    'tools/console/src/ec2-native-route-tables.mjs',
+    'tools/console/src/ec2-route-table-pages.mjs',
+    'tools/console/src/ec2-readonly.jsx',
+    'tools/console/src/ec2-vpc-native-route-tables.jsx',
+    'tools/console/src/main.jsx',
+}
+
 
 def load_registry(root, relative='formal/models.json'):
     root = Path(root)

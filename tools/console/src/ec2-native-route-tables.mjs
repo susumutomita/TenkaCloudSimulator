@@ -7,6 +7,7 @@ import {compareIPv4RoutePrefixes,ec2IPv4Prefix,ipv4DefaultRoute,nativeIPv4RouteD
 const ns='http://ec2.amazonaws.com/doc/2016-11-15/';
 const actions=['DescribeRouteTables','CreateRouteTable','DeleteRouteTable'];
 const associationActions=['DescribeRouteTables','DescribeSubnets','AssociateRouteTable','DisassociateRouteTable'];
+const replaceAction='ReplaceRouteTableAssociation';
 const routeActions=['DescribeRouteTables','DescribeInternetGateways','CreateRoute','DeleteRoute'];
 const vpcID=/^vpc-[0-9a-f]{17}$/;
 const tableID=/^rtb-[0-9a-f]{17}$/;
@@ -35,6 +36,12 @@ export function vpcNativeRouteTablesAvailable(capabilities,authenticationRequire
 
 export function vpcNativeRouteTableAssociationsAvailable(capabilities,authenticationRequired) {
   return vpcNativeRouteTablesAvailable(capabilities,authenticationRequired)&&associationEnabled(capabilities.services.ec2);
+}
+
+export function vpcNativeRouteTableReplacementAvailable(capabilities,authenticationRequired) {
+  const ec2=capabilities?.services?.ec2;
+  return vpcNativeRouteTableAssociationsAvailable(capabilities,authenticationRequired)&&
+    ec2.routeTableAssociationReplacement===replaceAction&&includesAll(ec2.operations,[replaceAction]);
 }
 
 export function vpcNativeIPv4RoutesLimit(capabilities,authenticationRequired) {
@@ -97,7 +104,8 @@ async function snapshot(request,region,vpc,options) {
   if (options.exactID&&saved.length!==1) invalid();
   const routeLimit=options.routeLimit??0;
   if (![0,1,nativeIPv4RouteLimit].includes(routeLimit)) invalid();
-  const binding={request,region,vpc:vpc.id,cidr:vpc.cidr,associations,routeLimit,regionalSubnets};
+  const binding={request,region,vpc:vpc.id,cidr:vpc.cidr,associations,routeLimit,regionalSubnets,
+    replacement:associations&&options.replacement===true,complete:!options.exactID&&!options.selectedSubnet};
   const rows=saved.map(item=>{
     if (item.routes.length>routeLimit||item.routes.some(route=>!nativeIPv4RouteDestination(route.cidr,vpc.cidr)||
         routeLimit===1&&route.cidr!==ipv4DefaultRoute)||!associations&&item.associations.length||
@@ -194,6 +202,34 @@ export async function disassociateVpcRouteSubnet(request,region,vpc,table,associ
   // A moved ID or a different binding on the same subnet is not absence.
   if (!rows.some(row=>row.id===table.id)||regionalAssociations.has(association.id)||regionalSubnets.has(association.subnet)) invalid();
   return {disassociated:association,rows};
+}
+
+function matchesReplacedRow(saved,prior,associations) {
+  const identity=items=>items.map(a=>a.id+':'+a.subnet).sort();
+  return !!saved&&saved.name===prior.name&&JSON.stringify(saved.routes)===JSON.stringify(prior.routes)&&
+    JSON.stringify(identity(saved.associations))===JSON.stringify(identity(associations));
+}
+
+export async function replaceVpcRouteSubnet(request,region,vpc,source,association,target,options={}) {
+  const binding=scopedTable(request,region,vpc,source,options);
+  if (!binding.replacement||!binding.complete||options.replacement!==true||options.exactID||options.selectedSubnet||
+      binding!==scopedTable(request,region,vpc,target,options)||source.id===target.id||
+      !source.associations.includes(association)) invalid();
+  const doc=await send(request,region,vpc,replaceAction,{AssociationId:association.id,RouteTableId:target.id},
+    {...options,maxBytes:4096});
+  const receipt=envelope(doc,replaceAction,['newAssociationId','associationState']);
+  const id=leaf(receipt.get('newAssociationId')),state=fields(receipt.get('associationState'),['state']);
+  if (!shape(id,associationID)||id===association.id||leaf(state.get('state'))!=='associated') invalid();
+  const {rows,regionalAssociations}=await snapshot(request,region,vpc,options);
+  const from=rows.find(row=>row.id===source.id),to=rows.find(row=>row.id===target.id);
+  const replaced=to?.associations.find(row=>row.id===id&&row.subnet===association.subnet);
+  // Require the complete regional witness, not a filtered absence or the
+  // successful XML receipt alone. Preserve both visible tables and siblings.
+  if (!replaced||regionalAssociations.has(association.id)||
+      !matchesReplacedRow(from,source,source.associations.filter(a=>a!==association))||
+      !matchesReplacedRow(to,target,[...target.associations,replaced])) invalid();
+  options.signal?.throwIfAborted();
+  return {replaced,rows};
 }
 
 // Only a verified native gateway currently linked to this VPC is offered.

@@ -30,7 +30,14 @@ func TestEC2NativeRouteAssociationQuery(t *testing.T) {
 		{"invalid subnet", ec2AssociateNativeRouteTable, "InvalidParameterValue", url.Values{"RouteTableId": {table}, "SubnetId": {assoc}}},
 		{"invalid association", ec2DisassociateNativeRouteTable, "InvalidParameterValue", url.Values{"AssociationId": {subnet}}},
 		{"duplicate", ec2DisassociateNativeRouteTable, "InvalidParameterValue", url.Values{"AssociationId": {assoc, assoc}}},
-		{"no replacement", "ReplaceRouteTableAssociation", "UnsupportedOperation", url.Values{"AssociationId": {assoc}}},
+		{"replace", ec2ReplaceNativeRouteTable, "", url.Values{"AssociationId": {assoc}, "RouteTableId": {table}}},
+		{"permission-only dry run", ec2ReplaceNativeRouteTable, "", url.Values{"AssociationId": {assoc}, "RouteTableId": {table}, "DryRun": {"true"}}},
+		{"invalid dry run", ec2ReplaceNativeRouteTable, "InvalidParameterValue", url.Values{"AssociationId": {assoc}, "RouteTableId": {table}, "DryRun": {"True"}}},
+		{"missing replacement table", ec2ReplaceNativeRouteTable, "MissingParameter", url.Values{"AssociationId": {assoc}}},
+		{"invalid replacement table", ec2ReplaceNativeRouteTable, "InvalidRouteTableID.Malformed", url.Values{"AssociationId": {assoc}, "RouteTableId": {subnet}}},
+		{"invalid replacement association", ec2ReplaceNativeRouteTable, "InvalidParameterValue", url.Values{"AssociationId": {subnet}, "RouteTableId": {table}}},
+		{"replace rejects subnet overrides", ec2ReplaceNativeRouteTable, "UnsupportedOperation", url.Values{"AssociationId": {assoc}, "RouteTableId": {table}, "SubnetId": {subnet}}},
+		{"replace rejects gateway requests", ec2ReplaceNativeRouteTable, "UnsupportedOperation", url.Values{"AssociationId": {assoc}, "RouteTableId": {table}, "GatewayId": {"igw-0123456789abcdef0"}}},
 		{"no gateway", ec2AssociateNativeRouteTable, "UnsupportedOperation", url.Values{"RouteTableId": {table}, "GatewayId": {"igw-0123456789abcdef0"}}},
 		{"no client token", ec2AssociateNativeRouteTable, "UnsupportedOperation", url.Values{"RouteTableId": {table}, "SubnetId": {subnet}, "ClientToken": {"fixture"}}},
 		{"no dry run fiction", ec2DisassociateNativeRouteTable, "UnsupportedOperation", url.Values{"AssociationId": {assoc}, "DryRun": {"true"}}},
@@ -40,7 +47,7 @@ func TestEC2NativeRouteAssociationQuery(t *testing.T) {
 			q, err := parseEC2NativeRouteAssociation(tc.action, tc.form)
 			if tc.want != "" {
 				wantNativeRouteTableError(t, err, tc.want)
-			} else if err != nil || q.table != tc.form.Get("RouteTableId") || q.subnet != tc.form.Get("SubnetId") || q.association != tc.form.Get("AssociationId") {
+			} else if err != nil || q.table != tc.form.Get("RouteTableId") || q.subnet != tc.form.Get("SubnetId") || q.association != tc.form.Get("AssociationId") || q.dryRun != (tc.form.Get("DryRun") == "true") {
 				t.Fatalf("wrong typed query: %+v %v", q, err)
 			}
 		})

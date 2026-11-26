@@ -58,6 +58,7 @@ func TestEC2SecurityGroupsConsoleCapability(t *testing.T) {
 				want["subnetLifecycle"] = []string{"DescribeSubnets", "CreateSubnet", "DeleteSubnet"}
 				want["routeTableLifecycle"] = []string{"DescribeRouteTables", "CreateRouteTable", "DeleteRouteTable"}
 				want["routeTableAssociationLifecycle"] = []string{"DescribeRouteTables", "DescribeSubnets", "AssociateRouteTable", "DisassociateRouteTable"}
+				want["routeTableAssociationReplacement"] = "ReplaceRouteTableAssociation"
 				want["defaultRouteLifecycle"] = []string{"DescribeRouteTables", "DescribeInternetGateways", "CreateRoute", "DeleteRoute"}
 				want["ipv4RoutesPerTable"] = 16
 			}

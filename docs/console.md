@@ -215,7 +215,7 @@ create and delete detached metadata. These views never attach a group to
 an instance or an ACL to a subnet, enforce traffic, or edit rules. An ACL
 pane for a CloudFormation VPC does not read or change ACLs. **Route tables** can
 create and delete detached tables with optional Name tags in a native VPC,
-manage explicit subnet associations, and manage the documented [saved IPv4 routes](ec2-native-default-route.md).
+manage or [move explicit subnet associations](ec2-read-discovery.md#native-subnet-route-table-associations) between tables in the same VPC, and manage the documented [saved IPv4 routes](ec2-native-default-route.md).
 Both route table panes retrieve bounded regional pages and display the selected
 VPC only after validating the complete list. If a continuation is rejected as stale, refresh;
 the Console does not repeat a write or report an unconfirmed change as successful.

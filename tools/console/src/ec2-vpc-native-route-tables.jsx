@@ -13,7 +13,7 @@ import SpaceBetween from '@cloudscape-design/components/space-between';
 import Table from '@cloudscape-design/components/table';
 import {useLocale} from './i18n.jsx';
 import {associateVpcRouteSubnet,createVpcNativeRouteTable,deleteVpcNativeRouteTable,disassociateVpcRouteSubnet,
-  loadVpcNativeRouteTables,loadVpcRouteAssociationTargets,nativeRouteTableFailure,nativeRouteTableTarget,
+  replaceVpcRouteSubnet,loadVpcNativeRouteTables,loadVpcRouteAssociationTargets,nativeRouteTableFailure,nativeRouteTableTarget,
   validNativeRouteTableName,changeVpcNativeIPv4Route,loadVpcNativeRouteGateway} from './ec2-native-route-tables.mjs';
 
 import {ipv4DefaultRoute,nativeIPv4RouteDestination} from './ec2-ipv4-route-prefix.mjs';
@@ -22,12 +22,13 @@ const pageSize=20;
 const identifier=value=><span className="resource-identifier">{value}</span>;
 const newToken=()=>Array.from(globalThis.crypto.getRandomValues(new Uint8Array(16)),b=>b.toString(16).padStart(2,'0')).join('');
 
-export default function VPCNativeRouteTables({request,region,vpc,acquireWrite,writeBlocked=false,associations=false,routeLimit=0}) {
+export default function VPCNativeRouteTables({request,region,vpc,acquireWrite,writeBlocked=false,associations=false,replacement=false,routeLimit=0}) {
   const {t}=useLocale();
   const {id,managedBy,cidr}=vpc??{};
-  const scope=useMemo(()=>({request,region,vpc:{id,managedBy,cidr},associations,routeLimit}),[request,region,id,managedBy,cidr,associations,routeLimit]);
+  const scope=useMemo(()=>({request,region,vpc:{id,managedBy,cidr},associations,replacement,routeLimit}),
+    [request,region,id,managedBy,cidr,associations,replacement,routeLimit]);
   const validScope=nativeRouteTableTarget(scope.vpc);
-  const options=signal=>({signal,associations:scope.associations,routeLimit:scope.routeLimit});
+  const options=signal=>({signal,associations:scope.associations,replacement:scope.replacement,routeLimit:scope.routeLimit});
   const active=useRef(null);
   const [result,setResult]=useState(null),[modal,setModal]=useState(null),[notice,setNotice]=useState(null),[page,setPage]=useState(1);
   const current=result?.scope===scope ? result : null;
@@ -101,13 +102,16 @@ export default function VPCNativeRouteTables({request,region,vpc,acquireWrite,wr
   const routeTarget=addingRoute?dialog.gateway:selectedRoute;
   const destination=addingRoute?nativeIPv4RouteDestination(dialog.destination,scope.vpc.cidr):selectedRoute?.cidr;
   const duplicateRoute=addingRoute&&dialog.row.routes.some(route=>route.cidr===destination);
-  const attaching=dialog?.kind==='associate', detaching=dialog?.kind==='disassociate';
-  const selections=attaching ? dialog.choices : detaching ? dialog.row.associations : null;
+  const attaching=dialog?.kind==='associate',detaching=dialog?.kind==='disassociate',replacing=dialog?.kind==='replace';
+  const selections=attaching ? dialog.choices : detaching||replacing ? dialog.row.associations : null;
   const target=selections?.find(choice=>choice.id===dialog.selected);
   const currentRow=dialog?.row&&current?.rows?.includes(dialog.row);
+  const replacementTargets=replacing&&currentRow?current.rows.filter(row=>row.id!==dialog.row.id):[];
+  const replacementTarget=replacementTargets.find(row=>row.id===dialog.replacementID);
   const valid=dialog?.kind==='create' ? validNativeRouteTableName(dialog.name) :
     currentRow&&(attaching ? scope.associations&&target :
       detaching ? scope.associations&&target&&dialog.confirm===target.id :
+      replacing ? scope.replacement&&target&&replacementTarget :
       addingRoute ? scope.routeLimit>dialog.row.routes.length&&!!destination&&!duplicateRoute&&!!routeTarget :
       removingRoute ? scope.routeLimit&&!!routeTarget&&dialog.confirm===dialog.row.id :
       dialog?.kind==='delete'&&!dialog.row.associations?.length&&!dialog.row.routes?.length&&dialog.confirm===dialog.row.id);
@@ -127,14 +131,15 @@ export default function VPCNativeRouteTables({request,region,vpc,acquireWrite,wr
         setModal(null);setNotice({scope,kind:dialog.kind,id:updated.id});
         return;
       }
-      const {created,removed,associated,disassociated,rows}=dialog.kind==='create'
+      const {created,removed,associated,disassociated,replaced,rows}=dialog.kind==='create'
         ? await createVpcNativeRouteTable(...args,dialog.name,newToken(),callOptions)
         : attaching ? await associateVpcRouteSubnet(...args,dialog.row,target,callOptions)
           : detaching ? await disassociateVpcRouteSubnet(...args,dialog.row,target,callOptions)
-            : await deleteVpcNativeRouteTable(...args,dialog.row,callOptions);
+            : replacing ? await replaceVpcRouteSubnet(...args,dialog.row,target,replacementTarget,callOptions)
+              : await deleteVpcNativeRouteTable(...args,dialog.row,callOptions);
       if (!finish(operation)) return;
       setResult({scope,status:'ready',rows});setModal(null);
-      setNotice({scope,kind:dialog.kind,id:(created??removed??associated??disassociated).id});
+      setNotice({scope,kind:dialog.kind,id:(created??removed??associated??disassociated??replaced).id});
     } catch(error) {
       if (!finish(operation)) return;
       // The write may have happened without a reliable reply or readback.
@@ -162,20 +167,23 @@ export default function VPCNativeRouteTables({request,region,vpc,acquireWrite,wr
   const deleteLabel=t('Delete route table','ルートテーブルを削除');
   const associateLabel=t('Associate subnet','サブネットを関連付ける');
   const disassociateLabel=t('Disassociate subnet','サブネットの関連付けを解除する');
+  const replaceLabel=t('Change subnet route table','サブネットのルートテーブルを変更');
   const addRouteLabel=t('Add IPv4 route','IPv4 ルートを追加');
   const removeRouteLabel=t('Remove IPv4 route','IPv4 ルートを削除');
-  const modalTitle={create:createLabel,delete:deleteLabel,associate:associateLabel,disassociate:disassociateLabel,
+  const modalTitle={create:createLabel,delete:deleteLabel,associate:associateLabel,disassociate:disassociateLabel,replace:replaceLabel,
     'add-route':addRouteLabel,'remove-route':removeRouteLabel}[dialog?.kind];
   const notices={
     create:t('Saved route table: ','ルートテーブルを保存しました: '),
     delete:t('Deleted route table: ','ルートテーブルを削除しました: '),
     associate:t('Saved explicit subnet association: ','明示的なサブネットの関連付けを保存しました: '),
     disassociate:t('Removed explicit subnet association: ','明示的なサブネットの関連付けを解除しました: '),
+    replace:t('Changed the saved subnet association: ','サブネットの関連付けを変更しました: '),
     'add-route':t('Saved IPv4 route in: ','IPv4 ルートを保存しました: '),
     'remove-route':t('Removed IPv4 route from: ','IPv4 ルートを削除しました: '),
   };
   const associationOptions=(selections??[]).map(choice=>({value:choice.id,label:attaching?choice.id:choice.subnet,
     description:attaching?choice.cidr:choice.id}));
+  const replacementOptions=replacementTargets.map(row=>({value:row.id,label:row.id,description:row.name||undefined}));
   function change(key,value){setModal(old=>old?.scope===scope ? {...old,[key]:value} : old);}
   return <SpaceBetween size="s">
     <Header variant="h3" actions={<SpaceBetween direction="horizontal" size="xs">
@@ -207,6 +215,9 @@ export default function VPCNativeRouteTables({request,region,vpc,acquireWrite,wr
               onClick={()=>setModal({scope,kind:'associate',row:item,draft:{row:item},selected:''})}>{associateLabel}</Button>
             <Button disabled={!ready||!canWrite||!item.associations.length} ariaLabel={disassociateLabel+': '+item.id}
               onClick={()=>setModal({scope,kind:'disassociate',row:item,selected:'',confirm:''})}>{disassociateLabel}</Button>
+            {scope.replacement&&item.associations.length>0&&rows.length>1&&
+              <Button disabled={!ready||!canWrite} ariaLabel={replaceLabel+': '+item.id}
+                onClick={()=>setModal({scope,kind:'replace',row:item,selected:'',replacementID:''})}>{replaceLabel}</Button>}
           </>}
           {!!scope.routeLimit&&<>
             <Button disabled={!ready||!canWrite||item.routes.length>=scope.routeLimit} ariaLabel={addRouteLabel+': '+item.id}
@@ -270,7 +281,7 @@ export default function VPCNativeRouteTables({request,region,vpc,acquireWrite,wr
           {removingRoute&&selectedRoute&&<FormField label={t('Enter the route table ID to confirm route removal','ルートの削除を確認するにはルートテーブル ID を入力')}>
             <Input value={dialog.confirm} disabled={pending} onChange={({detail})=>change('confirm',detail.value)}/>
           </FormField>}
-        </>:attaching||detaching?<>
+        </>:attaching||detaching||replacing?<>
           <Box>{t('Selected route table: ','選択済みルートテーブル: ')}{identifier(dialog.row.id)}</Box>
           {dialog.choiceError ? <Alert type="error">{dialog.choiceError==='denied'
             ? t('Subnet discovery was denied. The selected identity needs ec2:DescribeSubnets.','サブネットの参照が拒否されました。現在の ID に ec2:DescribeSubnets 権限が必要です。')
@@ -285,6 +296,11 @@ export default function VPCNativeRouteTables({request,region,vpc,acquireWrite,wr
             </FormField>}
           {detaching&&target&&<FormField label={t('Enter the association ID to confirm removal','解除を確認するには関連付け ID を入力')}>
             <Input value={dialog.confirm} disabled={pending} onChange={({detail})=>change('confirm',detail.value)}/>
+          </FormField>}
+          {replacing&&<FormField label={t('New route table in this VPC','この VPC 内の変更先ルートテーブル')}>
+            <Select options={replacementOptions} selectedOption={replacementOptions.find(choice=>choice.value===dialog.replacementID)??null}
+              disabled={pending||!replacementOptions.length} placeholder={t('Choose a route table','ルートテーブルを選択')}
+              onChange={({detail})=>change('replacementID',detail.selectedOption.value)}/>
           </FormField>}
         </>:<>
           <Box>{t('Delete this detached configuration: ','関連付けのない設定を削除します: ')}{identifier(dialog.row.id)}</Box>

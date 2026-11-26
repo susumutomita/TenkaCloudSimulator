@@ -252,39 +252,62 @@ point this workflow at AWS.
 | Action | Supported request members | Successful EC2 Query XML |
 | --- | --- | --- |
 | [AssociateRouteTable](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_AssociateRouteTable.html) | Required `RouteTableId` and `SubnetId`; optional `DryRun=false` | `AssociateRouteTableResponse`: `requestId`, `associationId` (`rtbassoc-` plus 17 lowercase hex characters) and `associationState/state=associated` |
+| [ReplaceRouteTableAssociation](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_ReplaceRouteTableAssociation.html) | Required current `AssociationId` and new `RouteTableId`; optional `DryRun` | `ReplaceRouteTableAssociationResponse`: `requestId`, `newAssociationId` (different `rtbassoc-` ID), and `associationState/state=associated` |
 | [DisassociateRouteTable](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_DisassociateRouteTable.html) | Required `AssociationId`; optional `DryRun=false` | `DisassociateRouteTableResponse`: `requestId` and `return=true` |
 
-The selected identity needs the action on both concrete resource ARNs,
-`arn:aws:ec2:<region>:000000000000:route-table/<id>` and the matching
+Each action requires its EC2 operation grant on the concrete
+`arn:aws:ec2:<region>:000000000000:route-table/<id>` and
 `arn:aws:ec2:<region>:000000000000:subnet/<id>`. Disassociate resolves the pair
-from its saved association. An exercise identity gets `UnauthorizedOperation`
-(403) for a denied or unresolved association; only the effective local
-administrator gets `InvalidAssociationID.NotFound` (400) for an absent native ID.
+privately from the saved association. Replace resolves the same pair and also
+requires permission on the destination table. An exercise identity gets
+`UnauthorizedOperation` (403) for a denied or unresolved association; only
+the effective local administrator gets `InvalidAssociationID.NotFound` (400)
+for an absent native ID.
 
 A subnet can have at most one explicit association; a table can have several
-subnets. Repeating the same pair returns the existing ID, including after restart.
-A different table for the same subnet gives `Resource.AlreadyAssociated` until
-the old association is removed. Read back with regional `DescribeRouteTables`
-(`ec2:DescribeRouteTables` on `*`): `routeTableSet/item/associationSet/item` holds
-`routeTableAssociationId`, `routeTableId`, `subnetId` and `main=false`.
-Remove an association before deleting its table or subnet; both deletes otherwise
-return `DependencyViolation`. The association uses the existing 1,000-resource
-network bound.
+subnets. Repeating an associate call for the same pair returns its current ID,
+including after restart. Associating to a different table with `AssociateRouteTable`
+returns `Resource.AlreadyAssociated`; use `ReplaceRouteTableAssociation` to
+change it without an intermediate detach. The destination must be a
+different native table in the same VPC, region and simulator database.
+A successful replacement atomically retires the old ID and associates the same
+subnet to the new table with a fresh ID; other associations and saved routes
+are unchanged. A retry with the retired ID does not reapply the change.
+`DryRun=true` on replacement is a permission check against the requested
+table and current association's table and subnet; no destination existence,
+topology or commit is checked. A matching grant yields `DryRunOperation`, not
+a successful write. The other two actions accept only `DryRun=false`.
 
-`GatewayId`, `PublicIpv4Pool`, `ClientToken`, `DryRun=true` and
-`ReplaceRouteTableAssociation` are refused with `UnsupportedOperation`.
-CloudFormation associations remain stack-managed. Unlike AWS, disassociation
-does not fall back to a main table.
-Associations are saved configuration only, with no packet effects or route propagation.
+Use `DescribeRouteTables` (requires `ec2:DescribeRouteTables` on `*`) to confirm
+the relationship: `routeTableSet/item/associationSet/item` includes
+`routeTableAssociationId`, `routeTableId`, `subnetId` and `main=false`. Use the
+`association.subnet-id` filter for the destination, or read source and
+destination by exact ID. The read-only API Reference preset uses the same
+regional Query. In the signed-in Console, **Change subnet route table** offers
+only saved explicit associations and other native tables from the current VPC.
+It shows success only after a complete current regional read confirms the new
+ID, absence of the retired ID, and other associations on both tables. Refresh
+after an unconfirmed reply; the Console does not replay the write.
+
+Remove an association before deleting its table or subnet; both deletes
+otherwise return `DependencyViolation`. Replacement reuses one slot in the
+same 1,000-resource network bound. `GatewayId`, `PublicIpv4Pool`, `ClientToken`,
+main-table/gateway association replacement and CloudFormation mutations remain
+outside this subset. Disassociation does not fall back to a main table.
+There is no packet forwarding, implicit route, guest or reachability guarantee.
 
 Check with the repository-pinned boto3/botocore from `scripts/requirements-test.txt`:
 
 ```sh
 SIMULATOR_BINARY=/absolute/path/to/simulator python3 test/console/ec2_native_route_association_sdk.py
+SIMULATOR_BINARY=/absolute/path/to/simulator python3 test/console/ec2_native_route_association_replace_sdk.py
+JSDOM_MODULE=/path/to/jsdom SIMULATOR_BINARY=/absolute/path/to/simulator \
+  python3 test/console/ec2_native_route_association_replace_sdk.py --console
 ```
 
-The script uses an isolated authenticated simulator over numeric loopback,
-not an AWS account, a browser or a guest.
+Both scripts use authenticated simulator processes over numeric loopback, not
+an AWS account or guest. The optional Console check executes the served bundle in
+JSDOM, not a full browser.
 
 ## Native VPC lifecycle
 
