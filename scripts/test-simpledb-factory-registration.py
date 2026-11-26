@@ -36,11 +36,13 @@ class SimpleDBRegistrationTests(unittest.TestCase):
     def test_union_and_default_activation(self):
         dns = 'gcp-dns-atomic-lifecycle'
         sakura = 'sakura-server-metadata'
-        self.assertEqual({'sqs-lifecycle', 'ec2-describe-subnets', dns, sakura, *gate.SIMPLEDB_SUITES},
+        self.assertEqual({'sqs-lifecycle', 'ec2-describe-subnets', dns, sakura, 'azure-queue-routing', 'azure-queue-peer-sakura-disabled',
+                          'azure-queue-peer-sakura-enabled', 'azure-queue-peek-wire', 'azure-queue-lifecycle', *gate.SIMPLEDB_SUITES},
                          set(gate.SUITES))
         self.assertEqual(gate.SUITES[dns]['provider'], 'gcp-dns')
         self.assertEqual(gate.SUITES[sakura]['provider'], 'sakura')
-        self.assertNotIn('azure-queue-lifecycle', gate.SUITES)
+        with self.assertRaisesRegex(ValueError, 'cannot be mixed'):
+            gate.require_no_mixed_suites([*gate.SIMPLEDB_SUITES, 'azure-queue-lifecycle'])
         self.assertEqual(gate.DEFAULT_SUITES,('sqs-lifecycle','ec2-describe-subnets'))
         self.assertFalse((self.root/'internal/azure/queue').exists())
         self.assertFalse((self.root/'internal/gcp/dns').exists())

@@ -1176,6 +1176,12 @@ BASE_INVARIANTS['SSMDocumentState'] = {'AddressIsolation', 'DeleteCleanup', 'Cre
 REQUIRED_MUTANTS['SSMDocumentState'] = {'SkipLatestVersion', 'IgnoreExplicitDeny', 'SkipGlobalCount', 'KeepDeletedVersions', 'ReplaceHistory'}
 REQUIRED_SOURCE_SCOPES['SSMDocumentState'] = {'internal/server/server.go', 'internal/aws/s3.go', 'internal/aws/ssm.go', 'internal/aws/ssm_documents_validation.go', 'internal/aws/ssm_documents.go', 'internal/aws/ssm_documents_api.go'}
 
+# Normalized read-only SSM document version pages.
+BASE_MODELS.add('SSMDocumentVersionPage')
+BASE_INVARIANTS['SSMDocumentVersionPage'] = set(['TypeOK', 'DeniedHasNoHistory', 'MissingHasNoHistory', 'ContinuationScope', 'AdmittedHasPage', 'MetadataOnly', 'NumericWindow', 'ContinuationEnd'])
+REQUIRED_MUTANTS['SSMDocumentVersionPage'] = set(['IgnorePermission', 'IgnoreMissingDefinition', 'IgnoreCursorAddress', 'IgnoreCursorSubject', 'IgnoreCursorStamp', 'IgnoreCursorSize', 'IgnoreCursorPosition', 'IncludeDefinitionBody', 'WindowStartsAtOne', 'ContinuePastEnd'])
+REQUIRED_SOURCE_SCOPES['SSMDocumentVersionPage'] = set(['internal/aws/ssm_document_versions.go', 'internal/aws/ssm_documents_api.go'])
+
 BASE_MODELS.add('SecretMetadataUpdate')
 BASE_INVARIANTS['SecretMetadataUpdate'] = {'ValidPresent', 'Authorized', 'VersionPreserved', 'StagePreserved', 'ValuePreserved', 'NoPartialVisibility', 'TypeOK', 'ExactMetadata', 'IdentityPreserved', 'PeerPreserved', 'RefusalUnchanged', 'CreatedPreserved', 'DurableAcknowledgement'}
 REQUIRED_MUTANTS['SecretMetadataUpdate'] = {'FailedRollback', 'CorruptStagePreserved', 'SkipCommitAcknowledgement', 'SkipValidity', 'SkipExistence', 'SkipFinalStateCheck', 'CorruptIdentityPreserved', 'CorruptVersionPreserved', 'ExposeTentativeWrite', 'CorruptValuePreserved', 'SkipAuthorization', 'WrongDescription', 'CorruptPeerPreserved', 'CorruptCreatedPreserved'}
@@ -1325,6 +1331,204 @@ REQUIRED_SOURCE_SCOPES['AutoScalingPlanTargets'] = {'internal/aws/autoscalingpla
 
 # Independent EC2 read-only discovery admission contract. These fixed sets must
 # not be derived from the mutable registry, which this gate validates.
+BASE_MODELS.add('EC2SecurityGroupConsoleEpoch')
+BASE_INVARIANTS['EC2SecurityGroupConsoleEpoch'] = {'TypeOK', 'EligibleRequest', 'ReadOnlyOperation', 'OnlyCurrentScope', 'OnlySelectedVPC', 'FailuresNeverEmpty'}
+REQUIRED_MUTANTS['EC2SecurityGroupConsoleEpoch'] = {'UnsignedRequest', 'UnadvertisedRequest', 'HandoffRequest', 'NativeVPCRequest', 'WrongOperation', 'LateReply', 'OldRowsPersist', 'WrongVPC', 'RefusalAsEmpty'}
+REQUIRED_SOURCE_SCOPES['EC2SecurityGroupConsoleEpoch'] = {'internal/server/server.go', 'internal/server/web/app.js', 'tools/console/src/ec2-readonly.jsx', 'tools/console/src/ec2-response.mjs', 'tools/console/src/ec2-security-groups.mjs', 'tools/console/src/ec2-vpc-security-groups.jsx', 'tools/console/src/main.jsx'}
+# These models were already registered on main. Pin their reviewed inventory
+# explicitly so deleting a pre-existing property, scope or control cannot evade the gate.
+BASE_MODELS.add('SimpleDBConsoleEpoch')
+BASE_INVARIANTS['SimpleDBConsoleEpoch'] = {
+    'TypeOK', 'VisibleRequiresCapability', 'OnlyCurrentScopeVisible',
+    'SingleCurrentChain', 'ReadbackOnlyAfterAck', 'WriteNoticeRequiresAck',
+}
+REQUIRED_MUTANTS['SimpleDBConsoleEpoch'] = {'ReadBackAfterRejectedPut'}
+REQUIRED_SOURCE_SCOPES['SimpleDBConsoleEpoch'] = {
+    'internal/server/server.go', 'internal/server/web/app.js',
+    'tools/console/src/console-navigation.mjs', 'tools/console/src/main.jsx',
+    'tools/console/src/simpledb-client.mjs', 'tools/console/src/simpledb.jsx',
+}
+
+BASE_MODELS.add('RDSPrivatePostgresTopology')
+BASE_INVARIANTS['RDSPrivatePostgresTopology'] = {
+    'TypeOK', 'LocalStartupRequired', 'AuthorityBeforeNative', 'LegacyConfigurationPreserved',
+    'OwnedTopologyBeforeWrite', 'AtomicRefusal', 'ConfigurationOnly',
+}
+REQUIRED_MUTANTS['RDSPrivatePostgresTopology'] = {
+    'AllowUntrustedStartup', 'ReadBeforeAuthority', 'RequireTopologyByDefault',
+    'IgnoreTopology', 'PersistRefusedUpdate', 'AdvertiseEndpoint',
+}
+REQUIRED_SOURCE_SCOPES['RDSPrivatePostgresTopology'] = {
+    'cmd/simulator/main.go', 'internal/aws/catalog/engine.go',
+    'internal/aws/catalog/rds_private_postgres_topology.go', 'internal/aws/catalog/semantics.go',
+    'internal/aws/rds_private_postgres_topology.go', 'internal/server/sakura_provider.go',
+    'internal/server/server.go',
+}
+
+BASE_MODELS.add('RDSOwnedPostgresRuntime')
+BASE_INVARIANTS['RDSOwnedPostgresRuntime'] = {
+    'TypeOK', 'NoWorkWithoutPin', 'ReadyNeedsOwnedSCRAM', 'NoProofAfterRevocation',
+    'CleanupAfterDrain', 'UncertaintyRetainsWorkspace',
+}
+REQUIRED_MUTANTS['RDSOwnedPostgresRuntime'] = {
+    'UnpinnedWorkspace', 'ReadyBeforeProof', 'ReplyAfterRevocation',
+    'CleanBeforeDrain', 'DiscardUnknownAcquisition',
+}
+REQUIRED_SOURCE_SCOPES['RDSOwnedPostgresRuntime'] = {
+    'internal/rdsruntime/bundle_linux_amd64.go', 'internal/rdsruntime/runtime_linux_amd64.go',
+}
+
+BASE_MODELS.add('RDSOwnedOperatorComposition')
+BASE_INVARIANTS['RDSOwnedOperatorComposition'] = {
+    'TypeOK',
+    'MixedRefusesBeforeEffects',
+    'OwnedAdmissionRequiresPreflight',
+    'DefaultRemainsMetadata',
+    'IndependentClosersAttempted',
+    'ObservedJoinBeforeReturn',
+    'DebtKeepsSQLite',
+    'CleanAttemptsSQLiteClose',
+    'ReportsCloseCauses',
+}
+REQUIRED_MUTANTS['RDSOwnedOperatorComposition'] = {
+    'AllowMixedMode',
+    'IgnoreLocalScope',
+    'IgnoreBundlePin',
+    'SelectOwnerByDefault',
+    'SkipLambdaAfterDebt',
+    'SkipAppEngineAfterDebt',
+    'SkipHealthWait',
+    'CloseDespiteDebt',
+    'RetainCleanStore',
+    'SuppressOwnerError',
+    'SuppressIndependentErrorsOnDebt',
+}
+REQUIRED_SOURCE_SCOPES['RDSOwnedOperatorComposition'] = {
+    'cmd/simulator/main.go',
+    'cmd/simulator/rds_owned_config.go',
+    'internal/server/battle_runtime_unix.go',
+    'internal/server/rds_owned_operator.go',
+    'internal/server/rds_owned_operator_linux_amd64.go',
+    'internal/server/rds_owned_operator_unsupported.go',
+    'internal/server/sakura_provider.go',
+    'internal/server/server.go',
+}
+
+BASE_MODELS.add('RDSOwnedGenerationFence')
+BASE_INVARIANTS['RDSOwnedGenerationFence'] = {
+    'TypeOK', 'LaunchNeedsCommittedAuthority', 'AttachNeedsCurrent',
+    'FencedGenerationCannotChange', 'UncertainCleanupRemainsFenced',
+    'NoPublishedEndpoint', 'InvalidModifyKeepsOwner',
+}
+REQUIRED_MUTANTS['RDSOwnedGenerationFence'] = {
+    'ReserveWithoutAuthority', 'AttachStale', 'MutateThroughFence',
+    'ReleaseOnUncertainCleanup', 'PublishNetwork', 'RetireInvalidModify',
+}
+REQUIRED_SOURCE_SCOPES['RDSOwnedGenerationFence'] = {
+    'internal/aws/catalog/engine.go', 'internal/aws/catalog/rds_owned_runtime_linux_amd64.go',
+    'internal/aws/catalog/rds_private_postgres_topology.go', 'internal/aws/catalog/semantics.go',
+    'internal/rdsruntime/runtime_linux_amd64.go',
+}
+
+# Pin the isolated Entra fixture's admission, output and sensitivity checks
+# independently of the mutable registry; this is not a refinement proof.
+BASE_MODELS.add('EntraVerificationFixture')
+BASE_INVARIANTS['EntraVerificationFixture'] = {
+    'FixtureIsolated', 'NumericLoopback', 'ExplicitValidToken',
+    'SyntheticTokenOnly', 'ReadOnlyAdmission', 'PublicVerificationOnly',
+}
+REQUIRED_MUTANTS['EntraVerificationFixture'] = {
+    'IgnoreCommand', 'AllowRemote', 'IgnoreTokenOptIn', 'AllowArbitraryIdentity',
+    'AllowHTTPWrite', 'AllowForeignHost', 'AllowRemotePeer', 'AllowUnexpectedInput', 'PublishPrivateKey',
+}
+REQUIRED_SOURCE_SCOPES['EntraVerificationFixture'] = {
+    'cmd/simulator/main.go', 'cmd/simulator/azure_entra_fixture.go',
+    'internal/azure/entra/verification_fixture.go',
+}
+
+BASE_MODELS.add('EC2DetachedNetworkConsole')
+BASE_INVARIANTS['EC2DetachedNetworkConsole'] = {'TypeOK', 'AdmittedNativeOnly', 'OnlyCurrentScope', 'VerifiedWriteOnly', 'ScopeChangeFenced', 'SiblingLeasePreserved', 'LeaseUntilReadback'}
+REQUIRED_MUTANTS['EC2DetachedNetworkConsole'] = {'AdmitUnverifiedOwner', 'AcceptLateRead', 'ReportUnverified', 'ReportBeforeAck', 'NavigateWhileSaving', 'ReleaseSiblingLease', 'ReleaseOnReceipt', 'SkipRouteTableLease'}
+REQUIRED_SOURCE_SCOPES['EC2DetachedNetworkConsole'] = {'internal/server/web/app.js', 'tools/console/src/ec2-readonly.jsx', 'tools/console/src/main.jsx', 'tools/console/src/ec2-native-security-groups.mjs', 'tools/console/src/ec2-vpc-security-groups.jsx', 'tools/console/src/ec2-network-acls.mjs', 'tools/console/src/ec2-vpc-network-acls.jsx', 'tools/console/src/ec2-native-route-tables.mjs', 'tools/console/src/ec2-vpc-native-route-tables.jsx', 'internal/server/server.go'}
+
+BASE_MODELS.add('EC2NativeRouteAssociationLifecycle')
+BASE_INVARIANTS['EC2NativeRouteAssociationLifecycle'] = {
+    'TypeOK',
+    'OneBinding',
+    'LegacyAndPeerFrame',
+    'RegionalBindings',
+    'SameVPC',
+    'ExactPairAuthority',
+    'CommitFrame',
+    'CreateOrReplay',
+    'ExactRemoval',
+    'MissingIsOpaque',
+    'ParentSafety',
+    'LiveEndpoints',
+    'ScopedExplicitRead',
+}
+REQUIRED_MUTANTS['EC2NativeRouteAssociationLifecycle'] = {
+    'MissingDecision',
+    'SkipTableAuthority',
+    'SkipSubnetAuthority',
+    'IgnoreStoredRemovalPair',
+    'AdoptCloudFormationPair',
+    'RemoveCloudFormationBinding',
+    'AllowCrossVPC',
+    'AllowCrossRegion',
+    'DenyAllEligibleCreates',
+    'DenyAllEligibleRemovals',
+    'SecondBinding',
+    'LoseRetryIdentity',
+    'RemoveSiblingOnSameTable',
+    'AllowAttachedTableDelete',
+    'CascadeAttachedSubnetDelete',
+    'TreatAbortAsCommit',
+    'RevealUnknownToOrdinaryCaller',
+    'InventMain',
+    'ProjectPeerRegion',
+}
+REQUIRED_SOURCE_SCOPES['EC2NativeRouteAssociationLifecycle'] = {
+    'internal/aws/ec2_read.go',
+    'internal/aws/ec2_route_association_native_query.go',
+    'internal/aws/ec2_route_association_native_store.go',
+    'internal/aws/ec2_route_tables_native.go',
+    'internal/aws/ec2_route_tables_read.go',
+    'internal/aws/ec2_subnet_native.go',
+    'internal/aws/ec2_vpc.go',
+}
+
+BASE_MODELS.add('EC2NativeRouteTableLifecycle')
+BASE_INVARIANTS['EC2NativeRouteTableLifecycle'] = {'TypeOK', 'GrantAtomic', 'NativeParentOnly', 'ParentDependency', 'LegacyPreserved', 'RetiredNotRecreated', 'LiveReceiptMatches', 'ReplayBindsIntent', 'ReadScoped'}
+REQUIRED_MUTANTS['EC2NativeRouteTableLifecycle'] = {'IgnoreAllocatedGrant', 'AdoptCFNParent', 'RetireParentWithChild', 'DeleteCFNTable', 'ReplayResurrectsTombstone', 'LoseReceipt', 'ReplayIgnoresIntent', 'ReadOtherRegion'}
+REQUIRED_SOURCE_SCOPES['EC2NativeRouteTableLifecycle'] = {'internal/aws/cloudformation.go', 'internal/aws/ec2_read.go', 'internal/aws/ec2_route_tables_native.go', 'internal/aws/ec2_route_tables_native_query.go', 'internal/aws/ec2_route_tables_read.go', 'internal/aws/ec2_vpc.go'}
+
+BASE_MODELS.add('EC2NativeVPCChildren')
+BASE_INVARIANTS['EC2NativeVPCChildren'] = {'TypeOK', 'GrantAtomic', 'RejectOtherOwner', 'ParentDependency', 'SiblingFrame', 'ReadScoped', 'ReplayNoRecreate', 'ReceiptTracksLiveACL'}
+REQUIRED_MUTANTS['EC2NativeVPCChildren'] = {'IgnoreParentGrant', 'IgnoreAllocatedGrant', 'AdoptStackParent', 'DeleteParentWithChildren', 'DeletePeerKinds', 'ReadForeignScope', 'RecreateRetiredACL', 'LoseACLReceipt'}
+REQUIRED_SOURCE_SCOPES['EC2NativeVPCChildren'] = {'internal/aws/cloudformation.go', 'internal/aws/ec2_read.go', 'internal/aws/ec2_vpc.go', 'internal/aws/ec2_subnet_native.go', 'internal/aws/ec2_network_acl.go', 'internal/aws/ec2_network_acl_store.go', 'internal/aws/ec2_security_groups_read.go', 'internal/aws/ec2_security_groups_native_query.go', 'internal/aws/ec2_security_groups_native_store.go', 'internal/server/server.go'}
+
+BASE_MODELS.add('EC2NativeSubnetLifecycle')
+BASE_INVARIANTS['EC2NativeSubnetLifecycle'] = {'AuthorizedWrites', 'ExactRead', 'Nonoverlap', 'Bounded', 'ExactDelete', 'NativeParent', 'StackUnchanged'}
+REQUIRED_MUTANTS['EC2NativeSubnetLifecycle'] = {'AdoptStackParent', 'IgnoreLimit', 'AllowOverlap', 'UseForeignRegion', 'DeleteDependent', 'ReadAllRegions', 'AllowOutsideCIDR', 'DeleteStackOwned', 'SkipParentGrant', 'SkipChildGrant'}
+REQUIRED_SOURCE_SCOPES['EC2NativeSubnetLifecycle'] = {'tools/console/src/ec2-native-subnets.mjs', 'internal/aws/ec2_network.go', 'internal/aws/ec2_read.go', 'tools/console/src/ec2-vpc-native-subnets.jsx', 'internal/aws/ec2_subnet_native.go', 'internal/aws/ec2_vpc.go', 'tools/console/src/ec2-readonly.jsx', 'internal/server/web/app.js', 'tools/console/src/main.jsx', 'internal/server/server.go'}
+BASE_MODELS.add('EC2TemplatePreviewEpoch')
+BASE_INVARIANTS['EC2TemplatePreviewEpoch'] = {'TypeOK', 'OrdinaryPreview', 'BoundedDraft', 'FixedDeclarationRead', 'OnlyCurrentIdentity', 'OnlyCurrentRegion', 'OnlyCurrentDraft', 'NoClosedOrHandoffResult', 'EvidencePreserved', 'NoReturnedValues'}
+REQUIRED_MUTANTS['EC2TemplatePreviewEpoch'] = {'AdmitClosed', 'AdmitHandoff', 'OversizeDraft', 'AllowMutation', 'AllowTemplateURL', 'AcceptStaleIdentity', 'AcceptStaleRegion', 'AcceptStaleDraft', 'AcceptAfterClose', 'AcceptAfterHandoff', 'RetainOldDraft', 'RefusalAsAccepted', 'InvalidAsAccepted', 'MalformedAsAccepted', 'ShowReturnedValue'}
+REQUIRED_SOURCE_SCOPES['EC2TemplatePreviewEpoch'] = {'internal/server/web/app.js', 'tools/console/src/ec2-readonly.jsx', 'tools/console/src/ec2-template-preview.jsx', 'tools/console/src/ec2-template-preview.mjs', 'tools/console/src/main.jsx'}
+BASE_MODELS.add('EC2RouteTableConsoleEpoch')
+BASE_INVARIANTS['EC2RouteTableConsoleEpoch'] = {'TypeOK', 'EligibleRead', 'FixedRead', 'CurrentIdentity', 'CurrentRegion', 'CurrentTarget', 'CurrentRevision', 'CurrentGate', 'StatusIsEvidence', 'DefaultIsRecorded', 'AssociationIsExplicit', 'NoImplicitMain'}
+REQUIRED_MUTANTS['EC2RouteTableConsoleEpoch'] = {'UnsignedRead', 'UnadvertisedRead', 'HandoffRead', 'NativeRead', 'UnverifiedRead', 'OfferWrongOperation', 'AcceptOldPrincipal', 'AcceptOldRegion', 'AcceptOldVPC', 'AcceptOldRevision', 'AcceptOldGate', 'KeepPreviousPrincipal', 'IncludeForeignRows', 'MaskRefusalAsEmpty', 'InventDefault', 'InventAssociation', 'InventMain'}
+REQUIRED_SOURCE_SCOPES['EC2RouteTableConsoleEpoch'] = {'internal/server/server.go', 'internal/server/web/app.js', 'tools/console/src/ec2-readonly.jsx', 'tools/console/src/ec2-response.mjs', 'tools/console/src/ec2-route-tables.mjs', 'tools/console/src/ec2-vpc-route-tables.jsx', 'tools/console/src/main.jsx'}
+BASE_MODELS.add('EC2RouteTableRead')
+BASE_INVARIANTS['EC2RouteTableRead'] = {'TypeOK', 'Admission', 'BoundSnapshot', 'SameVPC', 'TypedDefault', 'ExplicitOnly', 'CurrentDefault'}
+REQUIRED_MUTANTS['EC2RouteTableRead'] = {'AllowUnknownAction', 'SkipIAM', 'AllowInstanceScope', 'SkipRegion', 'DropDeclaration', 'DropOwnership', 'DropStoredRows', 'AllowLossyXML', 'CrossVPCSubnet', 'CrossVPCGateway', 'InventAssociation', 'InventMain', 'ShowRemovedRoute', 'IgnoreMalformedFlag'}
+REQUIRED_SOURCE_SCOPES['EC2RouteTableRead'] = {'internal/aws/ec2_read.go', 'internal/aws/ec2_route_tables_read.go', 'internal/aws/ec2_vpc.go'}
+
+BASE_MODELS.add('EC2SecurityGroupRead')
+BASE_INVARIANTS['EC2SecurityGroupRead'] = {'OperationAdmission', 'CanonicalGroup', 'TypeOK', 'AuthorizedRegionalRead', 'CurrentIngress', 'FaithfulXML', 'CanonicalParent'}
+REQUIRED_MUTANTS['EC2SecurityGroupRead'] = {'AllowInstanceHandoff', 'MissingParentDeclaration', 'AllowUnknownOperation', 'MissingAuthorization', 'MissingParentRow', 'MissingRegion', 'MissingGroupBinding', 'MissingParentClaim', 'AllowLossyXML', 'UseStaleTemplateIngress'}
+REQUIRED_SOURCE_SCOPES['EC2SecurityGroupRead'] = {'internal/aws/ec2_read.go', 'internal/aws/ec2_security_groups_read.go', 'internal/aws/ec2_vpc.go'}
 BASE_MODELS.add('EC2ReadDiscovery')
 BASE_INVARIANTS['EC2ReadDiscovery'] = {'TypeOK', 'AuthorizedRead', 'RegionBound', 'OwnedRead'}
 REQUIRED_MUTANTS['EC2ReadDiscovery'] = {'MissingAllow', 'MissingDeny', 'MissingRegion', 'MissingOwner'}
@@ -1560,6 +1764,7 @@ BATTLE_INTEGRATION_EXPECTED = {'CanonicalVMComposition': {'bounds': 'Five disjoi
                                            'SavedOperationAuthority'],
                             'source_scope': ['internal/aws/ec2_cloudformation_adapter_unix.go',
                                              'internal/aws/ec2_cloudformation_runtime_unix.go',
+                                             'internal/aws/ec2_completed_guest_unix.go',
                                              'internal/aws/ec2_vm_backend_unix.go',
                                              'internal/aws/ec2_vm_nic_guard.go',
                                              'internal/aws/ec2_vm_nic_unix.go',
@@ -3010,6 +3215,61 @@ REQUIRED_SOURCE_SCOPES['CloudDNSConsoleScope'] = {
     'tools/console/src/gcp-dns.jsx',
     'tools/console/src/main.jsx',
 }
+BASE_MODELS.add('AzureConditionalCRCRead')
+BASE_INVARIANTS['AzureConditionalCRCRead'] = {
+    'TypeOK',
+    'DeniedBeforeOptions',
+    'OptionsBeforeLookup',
+    'MissingBeforeDate',
+    'CacheHitHasNoPartialOutput',
+    'EligibleSelectedCRC',
+    'CRCRejectsOversize',
+    'CRCEmitsOnlyWhenRequested',
+}
+REQUIRED_MUTANTS['AzureConditionalCRCRead'] = {
+    'OptionsBeforeOwner',
+    'LookupBeforeOptions',
+    'CacheBeforeExistence',
+    'EmitCRCOnCacheHit',
+    'OmitCap',
+}
+REQUIRED_SOURCE_SCOPES['AzureConditionalCRCRead'] = {
+    'internal/azure/blob/http.go',
+    'internal/azure/blob/range.go',
+    'internal/azure/blob/store.go',
+    'internal/azure/blob/types.go',
+    'internal/azure/blob/range_crc64_test.go',
+    'internal/azure/blob/read_time_condition_test.go',
+    'internal/azure/blob/read_time_range_checksum_test.go',
+}
+
+
+BASE_MODELS.add('AzureStructuredReadAdmission')
+BASE_INVARIANTS['AzureStructuredReadAdmission'] = {'FullHasNoRangeMetadata', 'LargeReadsAreQuiet', 'RangeHasRangeMetadata', 'LegacyIsUnchanged', 'DeniedOrConditionalIsQuiet', 'TypeOK', 'ExactNegotiation'}
+REQUIRED_MUTANTS['AzureStructuredReadAdmission'] = {'IgnoreMarker', 'AllowNonGet', 'FrameOnNotModified', 'SkipSizeCap', 'WholeHasStoredMD5', 'LegacyIntoXSM', 'RangeLosesStoredMD5', 'AllowConflict', 'WidenVersion'}
+REQUIRED_SOURCE_SCOPES['AzureStructuredReadAdmission'] = {'internal/azure/blob/structured_crc64.go', 'internal/azure/blob/http.go'}
+AZURE_STRUCTURED_READ_MUTATIONS = [{'id': 'WidenVersion', 'edits': [{'old': 'VersionOK(q) == q.version="XSM"', 'new': 'VersionOK(q) == q.version#"Legacy"', 'count': 1}], 'expect_invariant': 'ExactNegotiation'}, {'id': 'IgnoreMarker', 'edits': [{'old': 'MarkerOK(q) == q.marker="CRC"', 'new': 'MarkerOK(q) == TRUE', 'count': 1}], 'expect_invariant': 'ExactNegotiation'}, {'id': 'AllowNonGet', 'edits': [{'old': 'OperationOK(q) == q.operation="GetBlob"', 'new': 'OperationOK(q) == TRUE', 'count': 1}], 'expect_invariant': 'ExactNegotiation'}, {'id': 'AllowConflict', 'edits': [{'old': 'TransportOK(q) == ~q.plainChecksum', 'new': 'TransportOK(q) == TRUE', 'count': 1}], 'expect_invariant': 'ExactNegotiation'}, {'id': 'LegacyIntoXSM', 'edits': [{'old': 'THEN IF q.marker="None" THEN Reply("Legacy","Legacy",FALSE,FALSE,FALSE) ELSE Quiet("400")', 'new': 'THEN IF q.marker="None" THEN Structured(q) ELSE Quiet("400")', 'count': 1}], 'expect_invariant': 'LegacyIsUnchanged'}, {'id': 'FrameOnNotModified', 'edits': [{'old': '[] OTHER -> Quiet(status)', 'new': '[] OTHER -> IF status="304" THEN Reply(status,"FullXSM",TRUE,FALSE,FALSE) ELSE Quiet(status)', 'count': 1}], 'expect_invariant': 'DeniedOrConditionalIsQuiet'}, {'id': 'SkipSizeCap', 'edits': [{'old': 'q.nativeRead \\in {"LargeWhole","LargeRange"} -> "400"', 'new': 'q.nativeRead \\in {"LargeWhole","LargeRange"} -> "200"', 'count': 1}], 'expect_invariant': 'LargeReadsAreQuiet'}, {'id': 'WholeHasStoredMD5', 'edits': [{'old': 'status="200" -> Reply(status,"FullXSM",TRUE,FALSE,FALSE)', 'new': 'status="200" -> Reply(status,"FullXSM",TRUE,FALSE,TRUE)', 'count': 1}], 'expect_invariant': 'FullHasNoRangeMetadata'}, {'id': 'RangeLosesStoredMD5', 'edits': [{'old': 'status="206" -> Reply(status,"RangedXSM",TRUE,TRUE,TRUE)', 'new': 'status="206" -> Reply(status,"RangedXSM",TRUE,TRUE,FALSE)', 'count': 1}], 'expect_invariant': 'RangeHasRangeMetadata'}]
+
+
+BASE_MODELS.add('AzureBlobRowDownload')
+BASE_INVARIANTS['AzureBlobRowDownload'] = set(['TypeOK', 'RowIsRequestTarget', 'CurrentDownloadOnly', 'SuccessfulBytesOnly'])
+REQUIRED_SOURCE_SCOPES['AzureBlobRowDownload'] = set(['internal/server/web/app.js', 'tools/console/src/azure-blob.jsx'])
+AZURE_BLOB_ROW_DOWNLOAD_CONTROLS = [{'id': 'UseToolbarSelection',
+  'edits': [{'old': 'RequestTarget(row) == row',
+             'new': 'RequestTarget(row) == selected',
+             'count': 1}],
+  'expect_invariant': 'RowIsRequestTarget'},
+ {'id': 'AllowRetiredCompletion',
+  'edits': [{'old': 'StillCurrent == active /\\ pending.epoch = epoch',
+             'new': 'StillCurrent == TRUE',
+             'count': 1}],
+  'expect_invariant': 'CurrentDownloadOnly'},
+ {'id': 'AllowBadPayload',
+  'edits': [{'old': 'HasBytes(result) == result = "ok"',
+             'new': 'HasBytes(result) == TRUE',
+             'count': 1}],
+  'expect_invariant': 'SuccessfulBytesOnly'}]
+REQUIRED_MUTANTS['AzureBlobRowDownload'] = {m['id'] for m in AZURE_BLOB_ROW_DOWNLOAD_CONTROLS}
 
 BASE_MODELS.add('SakuraServerMetadata')
 BASE_INVARIANTS['SakuraServerMetadata'] = {
@@ -3121,6 +3381,85 @@ REQUIRED_SOURCE_SCOPES['SimpleDBQueryAdmission'] = {
 }
 
 
+# Cognito local pool metadata only: immutable bounds and independent controls.
+COGNITO_METADATA_BOUNDS = 'Four consecutive actions including at most one restart; two signed-region labels, one runtime account and a peer-store fixture, three ordered ID suffixes, local capacity two, MaxResults 1/2/60 and invalid boundary values, one retained cursor, independent credential/exercise/region/account/integrity/page-size/restart challenges.'
+COGNITO_METADATA_CONFIG = 'INIT Init\nNEXT Next\nCONSTANTS\n  StepLimit = 4\n  Capacity = 2\n  None = noValue\nINVARIANTS TypeOK AdmissionBeforeStorage ScopedCRUD ExactOrderedPage ExactNextToken RestartPersistsRows\nCHECK_DEADLOCK FALSE\n'
+BASE_MODELS.add('CognitoUserPoolMetadata')
+BASE_INVARIANTS['CognitoUserPoolMetadata'] = {
+    'TypeOK', 'AdmissionBeforeStorage', 'ScopedCRUD', 'ExactOrderedPage', 'ExactNextToken',
+    'RestartPersistsRows',
+}
+REQUIRED_MUTANTS['CognitoUserPoolMetadata'] = {
+    'AcceptUnsignedLocal', 'AcceptDummySigning', 'AcceptBrowserCredential', 'AcceptOtherSigningService',
+    'IgnoreCredentialPrincipal', 'AcceptUnboundHeaders', 'AdmitUnsupportedOperation',
+    'AllowUnsupportedInput', 'ExpandPageSizeRange', 'ApproveWildcardItem', 'IgnoreRequestedAction',
+    'TrustCursorForAuthorization', 'DecodeBeforeAuthorization', 'IgnoreCursorIntegrity',
+    'IgnoreCursorMarkerShape', 'AcceptRetiredStoreCursor', 'IgnoreCursorAccount', 'IgnoreCursorRegion',
+    'IgnoreCursorCredential', 'IgnoreCursorExercise', 'IgnoreCursorPageSize', 'ExpireDeletedMarker',
+    'IgnorePoolCapacity', 'AcceptCreateCollision', 'ReadOrDeletePeerAccount', 'ReadOrDeletePeerRegion',
+    'ListPeerAccount', 'ListPeerRegion', 'ReplayCursorMarker', 'DropRemainingPage',
+    'InventTerminalCursor', 'SkipAfterCursor', 'LosePersistedRows',
+}
+REQUIRED_SOURCE_SCOPES['CognitoUserPoolMetadata'] = {
+    'internal/aws/cognito_user_pools.go', 'internal/aws/cognitoidp/http.go',
+    'internal/aws/cognitoidp/pagination.go', 'internal/aws/cognitoidp/pools.go', 'internal/aws/s3.go',
+    'internal/aws/ssm.go', 'internal/aws/sts_signature.go', 'internal/server/access_sdk.go',
+    'internal/server/cognito_user_pools_capabilities.go', 'internal/server/server.go',
+}
+
+
+BASE_MODELS.add('SimpleDBSelectPage')
+BASE_INVARIANTS['SimpleDBSelectPage'] = {
+    'TypeOK', 'AdmissionBeforeRead',
+    'CursorScopeBound', 'ExactCurrentPage',
+    'ExactConsumedCursor',
+}
+REQUIRED_MUTANTS['SimpleDBSelectPage'] = {
+    'SkipSyntax', 'SkipPageAuthorization',
+    'InspectDeniedRows', 'InspectInvalidCursorRows',
+    'AcceptForeignAccount', 'AcceptForeignRegion',
+    'IgnoreExactExpression', 'IgnoreConsistency',
+    'AcceptRetiredStore', 'AdmitSiblingOperation',
+    'AdmitTamperedCursor', 'ReplayIssuanceImage',
+    'RepeatCursorItem', 'ResumeAfterLastMatch',
+    'SkipFirstDeferred', 'DropMatches',
+}
+REQUIRED_SOURCE_SCOPES['SimpleDBSelectPage'] = {
+    'internal/aws/simpledb/http.go', 'internal/aws/simpledb/pagination.go',
+    'internal/aws/simpledb/select.go', 'internal/aws/simpledb/select_grammar.go',
+    'internal/server/server.go',
+}
+
+BASE_MODELS.add('SimpleDBSelectConsoleEpoch')
+BASE_INVARIANTS['SimpleDBSelectConsoleEpoch'] = {
+    'TypeOK', 'ReadAdmission', 'BoundedReadRequest', 'SingleCurrentRead', 'CursorOrigin',
+    'OnlyCurrentOwner', 'OnlyAcceptedPages', 'CursorMirrorsReply', 'NextOfferedExactly',
+    'FailureClearsPage', 'EffectIsolation', 'ChoiceDoesNotObserve',
+}
+REQUIRED_MUTANTS['SimpleDBSelectConsoleEpoch'] = {
+    'AcceptUnadvertised', 'AllowInvalidCriteria', 'BypassItemBusy', 'WidenPageSize',
+    'AllowConcurrentQuery', 'CarryCursorOnFreshRun', 'ContinueWithChangedQuery', 'SkipContinuationPage',
+    'OfferNextAtEnd', 'HideNextAfterEmpty', 'KeepOwnerOnPrincipal', 'KeepOwnerOnDomain',
+    'KeepOwnerOnCriteria', 'KeepOwnerOnNavigation', 'KeepOwnerOnCapability', 'KeepOwnerOnWrite',
+    'AcceptObsoleteResult', 'AcceptObsoleteFailure', 'AcceptRepeatedCursor', 'ExposeDenialAsEmpty',
+    'DropEmptyContinuation', 'KeepCursorAfterFailure', 'UseAttributeReadAsSearch', 'ReadOnSelection',
+    'KeepObservationOnSelection',
+}
+REQUIRED_SOURCE_SCOPES['SimpleDBSelectConsoleEpoch'] = {
+    'internal/server/web/app.js', 'tools/console/src/main.jsx', 'tools/console/src/simpledb-client.mjs',
+    'tools/console/src/simpledb.jsx',
+}
+
+BASE_MODELS.add('SimpleDBAttributeDelete')
+BASE_INVARIANTS['SimpleDBAttributeDelete'] = {
+    'NoPhantomItem', 'NoUnacknowledgedChange', 'OnlyEligibleMayAck', 'ExactSurvivors',
+}
+REQUIRED_MUTANTS['SimpleDBAttributeDelete'] = {'LoseUnselectedValues', 'DropCondition'}
+REQUIRED_SOURCE_SCOPES['SimpleDBAttributeDelete'] = {
+    'internal/aws/simpledb/delete.go', 'internal/aws/simpledb/http.go', 'internal/aws/simpledb/item.go',
+}
+
+
 BASE_MODELS.add('SimpleDBDomainMetadata')
 BASE_INVARIANTS['SimpleDBDomainMetadata'] = {
     'TypeOK', 'ReadRequiresDomainAuthority', 'ExactCommittedTotals',
@@ -3131,6 +3470,43 @@ REQUIRED_MUTANTS['SimpleDBDomainMetadata'] = {
 REQUIRED_SOURCE_SCOPES['SimpleDBDomainMetadata'] = {
     'internal/aws/simpledb/metadata.go',
     'internal/aws/simpledb/http.go',
+}
+
+
+BASE_MODELS.add('S3MultipartConsolePaging')
+BASE_INVARIANTS['S3MultipartConsolePaging'] = {
+    'TypeOK',
+    'OnlyCanonicalRows',
+    'OnlyProgressingCursor',
+    'OnlyCompleteListing',
+    'NoReadAfterStop',
+}
+S3_LISTPARTS_MUTATIONS = [{'id': 'BypassRowOrder',
+  'edits': [{'old': 'RowsOK(rows, prior) == CanonicalRows(rows, prior)',
+             'new': 'RowsOK(rows, prior) == TRUE',
+             'count': 1}],
+  'expect_invariant': 'OnlyCanonicalRows'},
+ {'id': 'BypassCursor',
+  'edits': [{'old': 'CursorOK(rows, prior, cursor) == CanonicalCursor(rows, prior, cursor)',
+             'new': 'CursorOK(rows, prior, cursor) == TRUE',
+             'count': 1}],
+  'expect_invariant': 'OnlyProgressingCursor'},
+ {'id': 'AcceptUnknownFlag',
+  'edits': [{'old': 'FinalFlag(flag) == flag = "final"',
+             'new': 'FinalFlag(flag) == flag /= "more"',
+             'count': 1}],
+  'expect_invariant': 'OnlyCompleteListing'},
+ {'id': 'ReturnPartial',
+  'edits': [{'old': 'ExposeOnContinue == FALSE', 'new': 'ExposeOnContinue == TRUE', 'count': 1}],
+  'expect_invariant': 'OnlyCompleteListing'},
+ {'id': 'ContinueAfterStop',
+  'edits': [{'old': 'ActiveOK == ~stopped', 'new': 'ActiveOK == TRUE', 'count': 1}],
+  'expect_invariant': 'NoReadAfterStop'}]
+REQUIRED_MUTANTS['S3MultipartConsolePaging'] = {control['id'] for control in S3_LISTPARTS_MUTATIONS}
+REQUIRED_SOURCE_SCOPES['S3MultipartConsolePaging'] = {
+    'internal/server/web/app.js',
+    'tools/console/src/s3-multipart-parts.mjs',
+    'tools/console/src/s3-multipart.jsx',
 }
 
 
@@ -3166,50 +3542,161 @@ REQUIRED_SOURCE_SCOPES['SARPolicyAuthorizationTarget'] = {
 }
 
 
-BASE_MODELS.add('EC2LaunchRecordOwnership')
-BASE_INVARIANTS['EC2LaunchRecordOwnership'] = {
-    'NoAdoption',
-    'FailureRollsBack',
-    'IdentityDisjoint',
-    'NativeNeverChangesStackState',
-    'RunExact',
-    'TerminateExact',
-    'TokenUnique',
-    'StackDeleteSparesNative',
-    'QuotaBound',
+BASE_MODELS.add('AzureQueueLifecycle')
+BASE_INVARIANTS['AzureQueueLifecycle'] = {'TypeOK', 'Isolation', 'ReadRollbackDurable', 'Rotation', 'ReceiptRequired', 'ExpiryGuard', 'ExpiryRemoval', 'VisibilityAdvance', 'EarlyReceiveBlocked', 'UpdateReceipt', 'InvalidUpdate'}
+REQUIRED_MUTANTS['AzureQueueLifecycle'] = {'NoReceiveVisibilityAdvance', 'EarlyReceiveAllowed', 'StaleUpdateAllowed', 'NoUpdateRotation', 'StaleDeleteAllowed', 'RestartLosesState', 'CrossOwnerWrite', 'ExpiredPeekAllowed'}
+REQUIRED_SOURCE_SCOPES['AzureQueueLifecycle'] = {'internal/azure/queue/handler.go', 'internal/azure/queue/protocol.go', 'internal/azure/queue/store.go', 'internal/azure/queue/handler_test.go', 'internal/azure/queue/store_test.go', 'internal/azure/queue/expiry_quota_test.go', 'internal/server/cloud_storage.go', 'internal/server/azure_queue_test.go'}
+
+
+BASE_MODELS.add('AzureQueueOwnerAccess')
+BASE_INVARIANTS['AzureQueueOwnerAccess'] = {
     'TypeOK',
+    'FixedParticipant',
+    'OnlyCurrentDiscovery',
+    'NewestObservationRetained',
+    'DiscoveryAuthority',
+    'PresentationOwnerOnly',
+    'ReferenceGetAuthorized',
+    'ReferenceAccountIsConfigured',
+    'NativePermissionBoundary',
 }
-REQUIRED_MUTANTS['EC2LaunchRecordOwnership'] = {
-    'SkipRunAuthorization',
-    'SkipTerminateAuthorization',
-    'SkipSubnetAuthorization',
-    'SubnetInStackVpc',
-    'RunInStackSubnet',
-    'DeleteVpcWithSubnets',
-    'DeleteSubnetWithRecords',
-    'DeleteStackSubnet',
-    'DeleteStackVpc',
-    'TerminateRemovesStackClaim',
-    'StackSubnetInNativeVpc',
-    'StackInstanceInNativeSubnet',
-    'DuplicateTokenRecord',
-    'IgnoreRecordQuota',
-    'OverwriteExistingRecord',
-    'RunClaimedIdentity',
-    'StackClaimsRecordIdentity',
-    'TerminateEveryRecord',
-    'StackDeleteRemovesNative',
+REQUIRED_MUTANTS['AzureQueueOwnerAccess'] = {
+    'SwitchFixedIdentity',
+    'IgnoreDiscoveryEpoch',
+    'PermitLateObservationOverwrite',
+    'DiscoverWithoutOwner',
+    'DiscoverForHandoff',
+    'ReferenceAllowsNonGet',
+    'ReferenceAllowsHandoff',
+    'ReferenceUsesRequestHint',
+    'ReferenceSubstitutesPrincipal',
+    'NativeAllowsOtherAccount',
+    'NativeRequiresVisibleConsole',
+    'NativeAllowsAwsHandoff',
 }
-REQUIRED_SOURCE_SCOPES['EC2LaunchRecordOwnership'] = {
-    'internal/aws/ec2_instance.go',
-    'internal/aws/ec2_subnet.go',
-    'internal/aws/ec2_instance_cloudformation.go',
-    'internal/aws/cloudformation.go',
-    'internal/aws/ec2_vpc.go',
-    'internal/aws/ec2_read.go',
-    'internal/aws/ec2_network.go',
-    'internal/aws/ec2_network_cloudformation.go',
+REQUIRED_SOURCE_SCOPES['AzureQueueOwnerAccess'] = {
+    'internal/server/azure_queue_reference.go',
+    'internal/azure/queue/openapi.go',
+    'tools/console/src/console-navigation.mjs',
+    'tools/console/src/main.jsx',
     'internal/server/server.go',
+    'internal/server/cloud_storage.go',
+    'internal/azure/queue/handler.go',
+    'internal/server/web/app.js',
+}
+
+
+BASE_MODELS.add('SNSSubscriptionReadback')
+BASE_INVARIANTS['SNSSubscriptionReadback'] = {
+    'TypeOK',
+    'ReadDoesNotChangeStore',
+    'AuthorizationTargetsParent',
+    'LookupRequiresAuthorization',
+    'NoAuditResurrection',
+    'RetainedJoinIsExact',
+    'TypedShortCircuit',
+    'ReplyMatchesSnapshot',
+    'OnlySuccessReturnsAttributes',
+}
+REQUIRED_MUTANTS['SNSSubscriptionReadback'] = {
+    'SkipRequestRegion',
+    'AuthorizePeerTopic',
+    'LookupBeforeAuthorization',
+    'JoinIgnoresSubscriptionArn',
+    'JoinIgnoresStoredParent',
+    'JoinIgnoresStoredRegion',
+    'RecoverFromDeliveryHistory',
+    'InvalidArnAsNotFound',
+    'DenialAsNotFound',
+    'MissingRowAsParameterError',
+    'ReadFailureAsNotFound',
+    'ReadDeletesHistory',
+    'ReplyUsesLaterStore',
+    'HardcodeReturnedDescriptor',
+    'ReturnAttributesOnError',
+    'EmitRawDeliveryTrue',
+}
+REQUIRED_SOURCE_SCOPES['SNSSubscriptionReadback'] = {
+    'internal/aws/sns.go',
+    'internal/aws/sns_store.go',
+    'internal/aws/sns_sqs_fanout.go',
+    'internal/aws/sns_subscription_attributes_test.go',
+    'test/e2e/sns_subscription_readback.py',
+}
+
+
+BASE_MODELS.add('SNSConsoleResponseAdmission')
+BASE_INVARIANTS['SNSConsoleResponseAdmission'] = {
+    'TypeOK',
+    'MountRequiresCapabilityAndNoHandoff',
+    'KeyedOwnerMatchesScope',
+    'OnlyOneCurrentFlight',
+    'NoLateVisibleEffect',
+    'AbortInhibitsCallback',
+    'OnlyCurrentTopicUpdates',
+    'OnlyCurrentTopicChoices',
+}
+REQUIRED_MUTANTS['SNSConsoleResponseAdmission'] = {
+    'AdmitBoundHandoff',
+    'IgnoreMissingUnsubscribe',
+    'RequireExactlyFourActions',
+    'AdmitBeforeBootstrap',
+    'IgnoreOperationsArrayShape',
+    'OmitRegionFromKey',
+    'OmitPrincipalFromKey',
+    'OmitNavigationFromKey',
+    'AllowOverlappingTopicRequests',
+    'RouteLateResponseToMatchingKey',
+    'IgnoreAbortedSignal',
+    'LateFinallyClearsCurrentFlight',
+}
+REQUIRED_SOURCE_SCOPES['SNSConsoleResponseAdmission'] = {
+    'tools/console/src/main.jsx',
+    'tools/console/src/console-navigation.mjs',
+    'tools/console/src/sns.jsx',
+    'tools/console/src/sns-client.mjs',
+    'internal/server/web/app.js',
+}
+
+
+# Provider-owned EC2 -> RDS observation only, never permission for later I/O.
+BASE_MODELS.add('RDSGuestPeerPreflight')
+BASE_INVARIANTS['RDSGuestPeerPreflight'] = {
+    'TypeOK',
+    'CanonicalGuest',
+    'SameProviderOwner',
+    'CurrentPrivateGeneration',
+    'DestinationIngress',
+    'SnapshotClosedBeforeHost',
+    'HostAuthenticated',
+    'LiveAtReturn',
+    'ObservationOnly',
+    'DenialDoesNotRetireOwner',
+    'HealthyObservation'
+}
+REQUIRED_MUTANTS['RDSGuestPeerPreflight'] = {
+    'AcceptBorrowedGuest',
+    'AcceptForeignProvider',
+    'SkipOwnedGeneration',
+    'SkipNativePrivateBindings',
+    'UseSourceSG',
+    'IgnoreProtocol',
+    'IgnorePort',
+    'IgnoreNICAddressRange',
+    'IgnoreFailedCommit',
+    'AcceptFailedHostSCRAM',
+    'ProbeWithSnapshotOpen',
+    'SkipNICRecheck',
+    'SkipCommandRecheck',
+    'IssueReusablePermit',
+    'RetireOwnerOnPeerDenial',
+    'DenyAllHealthyGuests'
+}
+REQUIRED_SOURCE_SCOPES['RDSGuestPeerPreflight'] = {
+    'internal/aws/catalog/rds_guest_peer_linux_amd64.go',
+    'internal/aws/catalog/rds_owned_runtime_linux_amd64.go',
+    'internal/aws/ec2_completed_guest_unix.go',
+    'internal/aws/rds_guest_peer_linux_amd64.go'
 }
 
 
@@ -3238,6 +3725,9 @@ def load_registry(root, relative='formal/models.json'):
         source, config = asset(root, model['model']).read_text(), asset(root, model['config']).read_text()
         files.update((model['model'], model['config']))
         require(len(re.findall(r'\bMODULE\s+' + re.escape(name) + r'\b', source)) == 1, 'model module declaration mismatch')
+        if name == 'CognitoUserPoolMetadata':
+            require(model['bounds'] == COGNITO_METADATA_BOUNDS, 'Cognito metadata model bounds changed')
+            require(config == COGNITO_METADATA_CONFIG, 'Cognito metadata model configuration changed')
         if name in BATTLE_INTEGRATION_EXPECTED:
             require(model['bounds'] == BATTLE_INTEGRATION_EXPECTED[name]['bounds'], 'Battle integration bounds changed')
             require(config == BATTLE_INTEGRATION_CONFIGS[name], 'Battle integration configuration changed')
@@ -3272,8 +3762,15 @@ def load_registry(root, relative='formal/models.json'):
             require(model['mutants'] == SAR_POLICY_TARGET_MUTATIONS, 'SAR policy target controls changed')
         if name == 'SakuraServerReadEpoch':
             require(model['mutants'] == SAKURA_SERVER_READ_EPOCH_MUTATIONS, 'Sakura Server read-epoch mutation controls changed')
+        if name == 'AzureStructuredReadAdmission':
+            require(model['mutants'] == AZURE_STRUCTURED_READ_MUTATIONS, 'Azure structured read mutation controls changed')
         if name in BATTLE_INTEGRATION_MUTATIONS:
             require(model['mutants'] == BATTLE_INTEGRATION_MUTATIONS[name], 'Battle integration mutation controls changed')
+        if name == 'AzureBlobRowDownload':
+            require(model['mutants'] == AZURE_BLOB_ROW_DOWNLOAD_CONTROLS,
+                    'Azure Blob row download mutation controls changed')
+        if name == 'S3MultipartConsolePaging':
+            require(model['mutants'] == S3_LISTPARTS_MUTATIONS, 'ListParts paging mutation controls changed')
     require(BASE_MODELS <= ids, 'a required existing model was removed')
     actual = {p.relative_to(root).as_posix() for suffix in ('*.tla', '*.cfg') for p in (root / 'formal').glob(suffix)}
     require(actual == files, 'unregistered or missing model/config artifact')

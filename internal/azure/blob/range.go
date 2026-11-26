@@ -3,7 +3,9 @@ package blob
 import (
 	"crypto/md5"
 	"encoding/base64"
+	"encoding/binary"
 	"fmt"
+	"hash/crc64"
 	"net/http"
 	"strconv"
 	"strings"
@@ -52,20 +54,38 @@ func selectedRange(header string, total int64) (int64, int64, error) {
 	return start, end, nil
 }
 
+var azureCRC64Table = crc64.MakeTable(0x9a6c9329ac4bc9b5) // Azure Storage uses reflected CRC64-NVME.
+
+func validateRangeCRC64Header(headers http.Header) error {
+	values := headers.Values("x-ms-range-get-content-crc64")
+	if len(values) == 0 {
+		return nil
+	}
+	if len(headers.Values("x-ms-range-get-content-md5")) > 0 {
+		return fail(400, "InvalidHeaderValue", "Select either range MD5 or CRC64, not both.")
+	}
+	if len(values) != 1 || values[0] != "true" ||
+		(len(headers.Values("Range")) == 0 && len(headers.Values("x-ms-range")) == 0) {
+		return fail(400, "InvalidHeaderValue", "Range CRC64 requires a single range and value true.")
+	}
+	return nil
+}
+
 // applyDownloadRange returns the selected response copy; persisted bytes and
 // stored whole-blob MD5 are never changed. The caller publishes headers only
 // after every range/checksum guard has succeeded.
-func applyDownloadRange(r *http.Request, result entity) (entity, string, error) {
+func applyDownloadRange(r *http.Request, result entity) (entity, string, string, error) {
 	rangeValues := r.Header.Values("Range")
 	nativeValues := r.Header.Values("x-ms-range")
 	hasRange := len(rangeValues) > 0 || len(nativeValues) > 0
 	md5Values := r.Header.Values("x-ms-range-get-content-md5")
 	wantMD5 := len(md5Values) > 0
+	wantCRC64 := len(r.Header.Values("x-ms-range-get-content-crc64")) > 0
 	if wantMD5 && (len(md5Values) != 1 || md5Values[0] != "true" || !hasRange) {
-		return entity{}, "", fail(400, "InvalidHeaderValue", "Range MD5 requires a single range and value true.")
+		return entity{}, "", "", fail(400, "InvalidHeaderValue", "Range MD5 requires a single range and value true.")
 	}
 	if !hasRange {
-		return result, "", nil
+		return result, "", "", nil
 	}
 	raw := r.Header.Get("Range")
 	if len(nativeValues) > 0 {
@@ -73,11 +93,11 @@ func applyDownloadRange(r *http.Request, result entity) (entity, string, error) 
 	}
 	start, end, err := selectedRange(raw, result.Length)
 	if err != nil {
-		return entity{}, "", err
+		return entity{}, "", "", err
 	}
 	size := end - start + 1
-	if wantMD5 && size > 4<<20 {
-		return entity{}, "", fail(400, "OutOfRangeInput", "Range MD5 is limited to four MiB.")
+	if (wantMD5 || wantCRC64) && size > 4<<20 {
+		return entity{}, "", "", fail(400, "OutOfRangeInput", "Range checksums are limited to four MiB.")
 	}
 	contentRange := fmt.Sprintf("bytes %d-%d/%d", start, end, result.Length)
 	result.Body = result.Body[start : end+1]
@@ -87,5 +107,11 @@ func applyDownloadRange(r *http.Request, result entity) (entity, string, error) 
 		sum := md5.Sum(result.Body)
 		result.MD5 = base64.StdEncoding.EncodeToString(sum[:])
 	}
-	return result, contentRange, nil
+	checksum := ""
+	if wantCRC64 {
+		var wire [8]byte
+		binary.LittleEndian.PutUint64(wire[:], crc64.Checksum(result.Body, azureCRC64Table))
+		checksum = base64.StdEncoding.EncodeToString(wire[:])
+	}
+	return result, contentRange, checksum, nil
 }

@@ -1,179 +1,316 @@
-# Local EC2/VPC discovery and native VPC, subnet and instance lifecycle
+# Local EC2/VPC discovery and native VPC lifecycle
 
 `POST /`, `Content-Type: application/x-www-form-urlencoded`,
 `X-Simulator-Service: ec2` and `X-Simulator-Region` select the native Query/XML
-subset. Supply `Version=2016-11-15` and one of these actions:
-
-| Kind | Actions |
-| --- | --- |
-| Discovery | `DescribeInstances`, `DescribeVpcs`, `DescribeSubnets` |
-| VPC | `CreateVpc`, `DeleteVpc` |
-| Subnet | `CreateSubnet`, `DeleteSubnet` |
-| Instance | `RunInstances`, `TerminateInstances` |
-
-Responses use the EC2 namespace and lower-camel-case `reservationSet/instancesSet/item`,
-`vpcSet/item` and `subnetSet/item` fields. A request body is bounded to 64 KiB.
-Every other action, including `StartInstances`, `StopInstances` and
-`RebootInstances`, returns `UnsupportedOperation`.
+subset. Supply `Version=2016-11-15` and `Action=DescribeInstances`,
+`Action=DescribeVpcs`, `Action=DescribeSubnets`, `Action=DescribeSecurityGroups`,
+`Action=DescribeRouteTables`, `Action=CreateVpc`, `Action=DeleteVpc`,
+`Action=CreateSubnet` or `Action=DeleteSubnet`, plus the named SG, ACL and route
+table operations below. Discovery uses the EC2 namespace and
+lower-camel-case `reservationSet/instancesSet/item`, `vpcSet/item`,
+`subnetSet/item`, `securityGroupInfo/item` and `routeTableSet/item` fields.
+A request body is bounded to 64 KiB.
 
 ## Discovery
 
-Discovery reads CloudFormation-owned and EC2-owned resources from the same local
-SQLite database, checking saved resource, region, ownership and network identity
-consistency. It does not create resources or make cloud calls. The host's existing
-local token and browser session authentication still applies. Selected exercise
-identities need the matching `ec2:DescribeInstances`, `ec2:DescribeVpcs` or
-`ec2:DescribeSubnets` action on `*`.
+Discovery reads CloudFormation resources and native EC2 networking data from the
+same SQLite database, checking saved resource, region, owner and network identity.
+It does not create resources or make cloud calls. The host's existing local token
+and browser session authentication still applies. Selected exercise identities
+need the matching `ec2:DescribeInstances`, `ec2:DescribeVpcs`,
+`ec2:DescribeSubnets`, `ec2:DescribeSecurityGroups` or `ec2:DescribeRouteTables` action on `*`.
 One database/token authority per team is still required; exercise identities are
 not tenant isolation. Native STS session credentials are not supported here.
 
-Discovery has no filters, selected-ID queries or pagination.
-Unsupported fields are rejected, not silently ignored. More than 1000 matching
-resources fails the whole request, rather than returning a truncated list.
-
-Every item carries the local extension `simulatorManagedBy`: `cloudformation`
-(delete it by deleting its stack) or `ec2` (created by a native create action and
-removed by the matching native delete action). SDKs ignore the extension. Results
-of both owners are returned together, ordered by resource ID.
+Only the documented SG and ACL selectors support IDs or the `vpc-id` filter;
+there is no pagination. Other fields are rejected. Over-bound results fail rather
+than returning a truncated list.
 
 Instances expose only IDs, image/type, subnet/VPC, security-group IDs and tags.
+Select an instance in the console's **EC2 instances** list to see its saved
+security-group IDs and tags, including intentionally empty tag values. These
+come from the existing [DescribeInstances instance fields](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_Instance.html);
+the console does not attach security groups, edit tags or create an instance.
 UserData, runtime plans and internal access information are never returned.
-`instanceState` is deliberately absent: successful provisioning, a saved
-`ready` journal entry or a launch record does not prove a live running VM. The
-extension `simulatorRuntimeState` is the recorded `launch_pending`, `ready` or
-`seal_pending` value of a CloudFormation-owned instance, `not_launched` for an
-EC2-owned launch record, and `unknown` when absent or unrecognized. VPC CIDR and
-tags are saved local configuration, not AWS availability evidence, so VPCs have no
-`state` field. Subnets report `state` `available` and their `availabilityZone`.
-Deleted ownership disappears from results; inconsistent surviving ownership fails
-closed.
+`instanceState` is deliberately absent: successful provisioning or a saved
+`ready` journal entry does not prove a live running VM. The extension
+`simulatorRuntimeState` is the recorded `launch_pending`, `ready` or `seal_pending`
+value; absent/unrecognized state is `unknown`. VPC CIDR and tags are saved local
+configuration, not AWS availability evidence, so VPCs have no `state` field. Deleted ownership disappears from
+results; inconsistent surviving ownership fails closed.
 
-## Native VPC and subnet lifecycle
+`DescribeVpcs` returns CloudFormation-owned and EC2-owned VPCs together, ordered by
+VPC ID. Each item carries the local extension `simulatorManagedBy`:
+`cloudformation` (delete it by deleting its stack) or `ec2` (created by
+`CreateVpc`, deletable with `DeleteVpc`). SDKs ignore the extension.
 
-`CreateVpc`, `DeleteVpc`, `CreateSubnet` and `DeleteSubnet` manage networks owned
-by EC2 itself, in the same SQLite state that the console, SDK clients and
-CloudFormation use. They are what the console's **VPC → Create VPC**,
-**VPC → Subnets → Create subnet** and the matching delete controls call. A VPC or
-subnet is control-plane configuration only: no packet path, route, address pool,
-VM or DNS service is created.
+### Instance launch: preview is not a launch
+
+Default simulator startup does not configure an instance runtime, and the
+EC2 console has no Launch action. Native `RunInstances` and `DescribeImages`
+are unsupported. A signed-in caller with `cloudformation:ValidateTemplate` can
+preview the declaration of a stack containing one instance and a same-stack
+instance profile, but this does not certify its AMI, capacity or runtime.
+In normal startup, an authorized `CreateStack` for that declaration returns
+`NotImplemented` instead of creating a stack or a metadata-only instance.
+
+In **EC2 instances → Preview CloudFormation template**, paste inline YAML/JSON
+(up to 51,200 UTF-8 bytes), or load the example and choose **Validate template**.
+The ordinary Console sends only the regional `ValidateTemplate` query with your
+current exercise identity; this action is not offered in single-instance handoffs.
+The result shows declared parameter names, their `NoEcho` flags and default
+presence (not values), and any IAM acknowledgement. Editing the draft, closing
+the preview, or changing region or identity discards pending and old results.
+Template content is not saved by this view. This is not the EC2 Launch Templates
+API, a launch-permission or AMI check, or a runtime readiness test.
+
+Local prerequisite check:
+
+```sh
+SIMULATOR_BINARY=/absolute/path/to/simulator python3 test/console/ec2_launch_preflight_native.py
+# With jsdom installed, mount the served embedded Console and use its real local API:
+SIMULATOR_BINARY=/absolute/path/to/simulator JSDOM_MODULE=/absolute/path/to/jsdom \
+  python3 test/console/ec2_template_preview_native.py
+```
+
+The check starts a disposable authenticated simulator on numeric loopback with
+in-memory state and no guest-runtime flags. It tests the preview-only browser
+identity, the unconfigured runtime error, the two regional reads, and cleanup.
+It does not run a browser or guest. Only add a launch action after the chosen
+pinned runtime and its authorized native or CloudFormation path can demonstrably
+start and clean up a guest on a qualified runner. Do not infer readiness from a
+template preview or a saved runtime-state label.
+
+Primary references: [ValidateTemplate](https://docs.aws.amazon.com/AWSCloudFormation/latest/APIReference/API_ValidateTemplate.html),
+[CreateStack](https://docs.aws.amazon.com/AWSCloudFormation/latest/APIReference/API_CreateStack.html)
+and [RunInstances](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_RunInstances.html).
+
+### Security-group readback
+
+`DescribeSecurityGroups` reads CloudFormation-owned groups and detached native
+groups in one regional SQLite snapshot, ordered by group ID. Describe needs
+`ec2:DescribeSecurityGroups` on `*`. It accepts up to 50 explicit `GroupId.N`
+values and the optional `vpc-id` selector with up to 50 VPC IDs; these narrow
+the response, not authorization. Other filters and paging are unsupported.
+Legacy rows preserve local account, group ID, description, VPC ID, tags, and
+persisted TCP/IPv4 ingress rules. Invalid ownership or text prevents a partial
+success. No metadata returned here proves guest packet filtering.
+
+On an **EC2-managed IPv4 VPC**, `CreateSecurityGroup` records a detached group
+with explicit `VpcId`, `GroupName` and `GroupDescription` and optional native
+tag specification. The name is unique case-insensitively within its VPC.
+Creation authorizes the exact parent VPC, new security-group wildcard, and
+allocated group ARN; tags require `ec2:CreateTags` on the group. A native group
+has `groupName` and the local `simulatorSecurityGroupMode=detached-config-only`
+marker. Delete requires the exact `GroupId` resource ARN. Stack-owned groups
+cannot be adopted or deleted through this API. There is no default group,
+rule mutation, egress, native attachment, or execution.
+
+In an ordinary signed-in Console, select a VPC in **VPC → Resource details →
+Security groups**. CloudFormation-owned VPCs show their saved rules and tags
+without mutation controls. Where the simulator advertises all three detached
+native actions, EC2-managed VPCs can create a named group with a description,
+view saved metadata and tags, and delete a selected group after confirmation.
+The Console reports changes only after a scoped read verifies the result.
+After an unclear response, refresh the list before retrying. This pane does
+not offer default groups, tag edits, rules, attachment, or traffic effects.
+An instance-scoped Console handoff does not receive these controls. API
+permissions still apply to the selected identity. A refusal or incomplete
+reply is not an empty list.
+
+Opt-in served Console check: `SIMULATOR_BINARY=/absolute/path/to/simulator
+python3 test/e2e/ec2_native_security_groups_gui.py` with installed Chromium,
+Playwright and pinned SDK dependencies, on numeric loopback only.
+
+[CreateSecurityGroup](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_CreateSecurityGroup.html),
+[DescribeSecurityGroups](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_DescribeSecurityGroups.html),
+[DeleteSecurityGroup](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_DeleteSecurityGroup.html).
+
+### Detached network ACL discovery and metadata
+
+`CreateNetworkAcl`, `DescribeNetworkAcls` and `DeleteNetworkAcl` support the
+[explicit detached configuration contract](ec2-detached-network-acls.md) in an
+EC2-managed VPC. Group/ACL mutations and reads are refused in a single-instance
+handoff. ACLs do not create a default ACL, do not bind a subnet, and do not
+provide enforcement. The signed-in VPC Console manages only this detached metadata.
+
+To verify all three child kinds in one owned VPC, run
+`SIMULATOR_BINARY=/absolute/path/to/simulator python3 test/console/ec2_native_network_sdk.py`
+with the pinned boto3/botocore versions from `scripts/requirements-test.txt`.
+This uses isolated, authenticated processes over numeric loopback, including a
+restart, exact grants and typed cleanup. It neither launches a guest nor talks
+to AWS.
+
+To check the actual served combination of subnet, detached groups, ACLs and route
+tables alongside CloudFormation readback, run `test/console/ec2_native_subnet.py` with the built
+`SIMULATOR_BINARY`, `JSDOM_MODULE` and pinned boto3/botocore. This checks
+Cloudscape in JSDOM with the real API; it is not a Chromium layout assertion
+or a mandatory E2E gate.
+
+## Route-table readback
+
+Use `Action=DescribeRouteTables` without filters to list CloudFormation and native
+tables in this region, ordered by table ID. Each item gives the table and VPC IDs,
+local owner, tags and explicit subnet associations (`main=false`).
+Only CloudFormation tables can show a saved, enabled IPv4 default route to an
+attached Internet Gateway; native tables have no route entries. Removing that
+default route through the existing trusted provider removes it from the result,
+including after restart; it is not a blackhole route. Deleting the owning stack
+removes its tables.
+The response checks the route, gateway attachment, table, subnet and same-VPC
+ownership in one transaction. A missing, null or ambiguous saved route-enabled flag
+is not interpreted as a deleted route. Inconsistent rows or declarations for a
+discovered stack, or an exceeded bound, return `InternalError` without a partial
+list. Discovery starts from surviving table, route and association rows or typed
+ownership entries, not a scan of every stack template. If a stack loses all
+such rows and claims, its table cannot be discovered or reported as corrupt. The normal EC2 discovery IAM check runs first; an
+instance-scoped console handoff cannot enumerate tables.
+
+Unlike [AWS DescribeRouteTables](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_DescribeRouteTables.html),
+there are no main tables, local routes or implicit associations, including for
+native EC2 VPCs. `state=active` describes the configured gateway route, **not**
+observed packet forwarding. Table IDs, filters, pagination and dry-run are rejected.
+In an ordinary signed-in **VPC** Console, select a CloudFormation-managed VPC
+and look under **Route tables** in its details. Choose a table to see its enabled
+default route, explicit subnet associations and tags. The Console makes the same
+regional EC2 Query as the SDK with the current exercise identity, validates the
+whole response, then selects the matching VPC in the browser. This selection is
+not an IAM filter: the operation requires regional `ec2:DescribeRouteTables` on
+`*`. A refusal or incomplete reply is never displayed as “no tables.” The
+CloudFormation view offers no mutations. Scoped handoffs do not offer either
+route table pane. Refresh, VPC, region and identity changes discard old replies.
+
+For a verified **EC2-managed** VPC, **Route tables** supports local
+[CreateRouteTable](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_CreateRouteTable.html)
+and [DeleteRouteTable](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_DeleteRouteTable.html).
+It uses a fresh readback of the same VPC and region before reporting success;
+a write without confirmed readback requires refresh. The native route pane stops
+reading after 16 MiB and displays the snapshot as unavailable, not as an empty list.
+When a table is present,
+its exact ID is required to confirm deletion. Create accepts the selected
+`VpcId`, an idempotency `ClientToken`, and optionally a Name tag. IAM checks
+the VPC and created table resource, including `ec2:CreateTags` if a tag is
+saved. Delete checks the exact table resource. A VPC with dependent metadata
+cannot be deleted before its table. The persisted ledger retains up to 4,096
+create token digests to prevent replay after deletion. A new native table starts
+without associations. Native route entries, propagation and forwarding are not provided.
+
+### Native subnet route table associations
+
+Use the same authenticated local EC2 Query `POST /`, with `Version=2016-11-15`,
+the selected region, and an existing **EC2-managed** route table and IPv4 subnet
+in the same VPC and region. Use the host-issued simulator token or a signed-in
+session; dummy SDK credentials do not authenticate. Single-instance handoffs
+cannot read or change these associations. Use a local simulator endpoint in
+an SDK and supply the `X-Simulator-Token` header as in the check below; never
+point this workflow at AWS.
+
+| Action | Supported request members | Successful EC2 Query XML |
+| --- | --- | --- |
+| [AssociateRouteTable](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_AssociateRouteTable.html) | Required `RouteTableId` and `SubnetId`; optional `DryRun=false` | `AssociateRouteTableResponse`: `requestId`, `associationId` (`rtbassoc-` plus 17 lowercase hex characters) and `associationState/state=associated` |
+| [DisassociateRouteTable](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_DisassociateRouteTable.html) | Required `AssociationId`; optional `DryRun=false` | `DisassociateRouteTableResponse`: `requestId` and `return=true` |
+
+The selected identity needs the action on both concrete resource ARNs,
+`arn:aws:ec2:<region>:000000000000:route-table/<id>` and the matching
+`arn:aws:ec2:<region>:000000000000:subnet/<id>`. Disassociate resolves the pair
+from its saved association. An exercise identity gets `UnauthorizedOperation`
+(403) for a denied or unresolved association; only the effective local
+administrator gets `InvalidAssociationID.NotFound` (400) for an absent native ID.
+
+A subnet can have at most one explicit association; a table can have several
+subnets. Repeating the same pair returns the existing ID, including after restart.
+A different table for the same subnet gives `Resource.AlreadyAssociated` until
+the old association is removed. Read back with regional `DescribeRouteTables`
+(`ec2:DescribeRouteTables` on `*`): `routeTableSet/item/associationSet/item` holds
+`routeTableAssociationId`, `routeTableId`, `subnetId` and `main=false`.
+Remove an association before deleting its table or subnet; both deletes otherwise
+return `DependencyViolation`. The association uses the existing 1,000-resource
+network bound.
+
+`GatewayId`, `PublicIpv4Pool`, `ClientToken`, `DryRun=true` and
+`ReplaceRouteTableAssociation` are refused with `UnsupportedOperation`.
+CloudFormation associations remain stack-managed. Unlike AWS, disassociation
+does not fall back to a main table.
+Associations are saved configuration only, with no packet effects or route propagation.
+
+Check with the repository-pinned boto3/botocore from `scripts/requirements-test.txt`:
+
+```sh
+SIMULATOR_BINARY=/absolute/path/to/simulator python3 test/console/ec2_native_route_association_sdk.py
+```
+
+The script uses an isolated authenticated simulator over numeric loopback,
+not an AWS account, a browser or a guest.
+
+## Native VPC lifecycle
+
+`CreateVpc` and `DeleteVpc` manage VPCs owned by EC2 itself, in the same SQLite
+state that the console, SDK clients and CloudFormation use. They are what the
+console's **VPC → Create VPC → VPC only** and **Delete VPC** call. A VPC is control-plane
+configuration only: no packet path, VM or DNS service is created.
 
 | Operation | Supported members | Result |
 | --- | --- | --- |
 | `CreateVpc` | `CidrBlock` (IPv4, `/16`–`/28`; host bits are cleared as in CloudFormation), `TagSpecification.1` with `ResourceType=vpc` and up to 50 tags, `InstanceTenancy=default`, `DryRun=false` | `vpc` with `vpcId` (`vpc-` + 17 hex), `cidrBlock`, `tagSet` and `simulatorManagedBy=ec2`. DNS support is on and DNS hostnames are off, as AWS defaults for a non-default VPC |
 | `DeleteVpc` | `VpcId`, `DryRun=false` | `return` `true`; the row is removed in one transaction |
-| `CreateSubnet` | `VpcId` (an EC2-owned VPC of the request region), `CidrBlock` (IPv4, `/16`–`/28`, inside the VPC CIDR, not overlapping another subnet of the VPC; host bits are cleared), `AvailabilityZone` (the region name plus `a`, `b` or `c`; default `a` when omitted, an empty value is rejected), `TagSpecification.1` with `ResourceType=subnet`, `DryRun=false` | `subnet` with `subnetId` (`subnet-` + 17 hex), `vpcId`, `cidrBlock`, `state` `available`, `availabilityZone`, `tagSet` and `simulatorManagedBy=ec2` |
-| `DeleteSubnet` | `SubnetId`, `DryRun=false` | `return` `true`; the row is removed in one transaction |
 
-Errors use AWS codes: `MissingParameter`, `InvalidParameterValue` (malformed CIDR,
-tags or Availability Zone), `InvalidVpc.Range` and `InvalidSubnet.Range` (netmask
-outside `/16`–`/28`, or a subnet outside its VPC), `InvalidSubnet.Conflict`
-(overlapping subnet), `InvalidVpcID.Malformed`, `InvalidVpcID.NotFound`,
-`InvalidSubnetID.Malformed`, `InvalidSubnetID.NotFound` (`NotFound` also for
-another region's resource), `DependencyViolation`, and `VpcLimitExceeded` or
-`SubnetLimitExceeded` (the shared local bound of 1000 network resources).
-`DryRun=true`, IPv6, IPAM, dedicated tenancy, `AvailabilityZoneId`, a second tag
-specification and every other member are rejected with `UnsupportedOperation`,
-never ignored or reported as `DryRunOperation`.
+Errors use AWS codes: `MissingParameter`, `InvalidParameterValue` (malformed CIDR
+or tags), `InvalidVpc.Range` (netmask outside `/16`–`/28`), `InvalidVpcID.Malformed`,
+`InvalidVpcID.NotFound` (also for another region's VPC), `DependencyViolation`
+and `VpcLimitExceeded` (the shared local bound of 1000 network resources).
+`DryRun=true`, IPv6, IPAM, dedicated tenancy, a second tag specification and every
+other member are rejected with `UnsupportedOperation`, never ignored or reported as
+`DryRunOperation`.
 
-`DeleteVpc` fails with `DependencyViolation` while the VPC has a subnet, and
-`DeleteSubnet` while the subnet holds a launch record. Native route tables,
-gateways, security groups, `ModifyVpcAttribute`, `ModifySubnetAttribute` and tag
-edits after creation are not implemented.
+Ownership is never shared. `DeleteVpc` on a CloudFormation-owned VPC fails with
+`UnsupportedOperation`; delete its stack instead. A CloudFormation subnet, route
+table, security group or gateway attachment cannot reference an EC2-owned VPC, so
+the stack is refused and the VPC is unchanged. For an EC2-owned VPC,
+[the native subnet lifecycle](ec2-native-subnet.md) is available without changing ownership.
+Detached security groups, network ACLs and route tables also use the existing
+EC2-owned VPC and shared 1,000-resource bound. Deletion of a native VPC is refused
+while any native subnet, group, ACL or route table depends on it. Remove the
+children through their own APIs. Native route entry or gateway creation,
+`ModifyVpcAttribute`,
+VPC endpoints and tag edits are not implemented.
 
-## Native instance launch records
+**Existing databases remain readable when upgraded. Do not downgrade a
+database after creating new native children, including route table associations:**
+earlier Simulators do not recognize those native records and can reject discovery. No migration-back or
+downgrade procedure has been verified.
 
-`RunInstances` saves one **launch record** below an EC2-owned subnet and
-`TerminateInstances` removes it. They are what the console's
-**EC2 → Launch instances** and **Terminate (delete) instance** call. A launch
-record is the saved request: image ID, instance type, subnet, VPC and tags. No
-guest, IP address, disk, network interface, security group or metadata service
-exists for it, and it never starts or becomes `running`. This is true even when
-the simulator was started with a Battle runtime: only an `AWS::EC2::Instance` in a
-CloudFormation stack launches a guest there. A launch record is not a substitute
-for an exercise that needs a running Linux server.
+Exercise identities need `ec2:CreateVpc` on `arn:aws:ec2:<region>:000000000000:vpc/*`,
+plus `ec2:CreateTags` on the same resource when tags are supplied, and
+`ec2:DeleteVpc` on `arn:aws:ec2:<region>:000000000000:vpc/<vpc-id>`. Authorization is
+checked before state is read or written; a denied request changes nothing. A
+console session bound to one instance cannot create or delete VPCs. Each team still
+needs its own process, database and token authority.
 
-| Operation | Supported members | Result |
-| --- | --- | --- |
-| `RunInstances` | `ImageId` (`ami-` + 8 or 17 hex; only the format is checked, no image is looked up or downloaded), `InstanceType` (`t3.micro` or `t3.small`, required), `MinCount=1`, `MaxCount=1`, `SubnetId` (an EC2-owned subnet of the request region), `TagSpecification.1` with `ResourceType=instance` and up to 50 tags, `ClientToken` (1–64 printable ASCII characters without spaces), `DryRun=false` | `ownerId` and one `instancesSet/item` with `instanceId` (`i-` + 17 hex), `imageId`, `instanceType`, `subnetId`, `vpcId`, an empty `groupSet`, `tagSet`, `simulatorRuntimeState=not_launched` and `simulatorManagedBy=ec2`. No `instanceState`, address, DNS name, launch time or reservation ID is returned |
-| `TerminateInstances` | `InstanceId.1` (exactly one), `DryRun=false` | One `instancesSet/item` with `instanceId` and `currentState` `terminated` (code 48). `previousState` is absent because no runtime state was ever recorded. The record is removed in one transaction and no longer appears in `DescribeInstances` |
+## Console: VPC and one subnet
 
-A repeated `ClientToken` with the same image, type, subnet and tags returns the
-record it first created instead of a second one; the same token with different
-values fails with `IdempotentParameterMismatch`. A token is scoped to its region
-and is forgotten when its record is terminated. The official SDKs send a fresh
-token with every `RunInstances` call.
+When signed in as the simulator administrator, **VPC → Create VPC → VPC and
+one subnet (CloudFormation-managed)** creates both resources in a new local
+stack. The option is hidden for participant sessions, selected exercise
+identities, scoped handoffs, and unauthenticated development mode. Participant
+browser sessions cannot read CloudFormation outputs to verify the result.
+Enter a stack name and two IPv4 CIDRs; the subnet is within the VPC and uses the region's
+first local Availability Zone. Each range is /16–/28 and host bits are cleared
+by the server. A Name tag is optional. This does not attach to an existing VPC
+or create a route table, security group, gateway, VM or live packet path.
 
-Errors use AWS codes: `MissingParameter`, `InvalidAMIID.Malformed`,
-`InvalidParameterValue` (another instance type, a malformed client token or tags),
-`InvalidSubnetID.Malformed`, `InvalidSubnetID.NotFound`,
-`InvalidInstanceID.Malformed`, `InvalidInstanceID.NotFound`,
-`IdempotentParameterMismatch` and `InstanceLimitExceeded` (the local bound of 100
-launch records). Any other count than one, a second instance ID, `DryRun=true`, key
-pairs, security groups, user data, instance profiles, block devices, network
-interfaces, placement, launch templates and every other member are rejected with
-`UnsupportedOperation`, never ignored.
+The Console sends a fixed template with `AWS::EC2::VPC` and `AWS::EC2::Subnet`
+using the ordinary authenticated `CreateStack` route. Both resources require
+their existing CloudFormation and EC2 permissions; no role is supplied by the
+form. The Console reports success only after `DescribeStacks` confirms the
+same stack ID, completed status and both output IDs. The saved VPC and subnet
+are also available through native `DescribeVpcs` and `DescribeSubnets`. If a
+request was interrupted or readback was denied, check CloudFormation before
+trying again. Delete the stack there to remove both resources.
 
-## Ownership
+Focused checks:
+- `node --test tools/console/test/ec2-vpc-subnet.test.mjs` after installing the pinned Console development dependencies.
+- `SIMULATOR_BINARY=/absolute/path/to/simulator python3 test/console/ec2_vpc_subnet_native.py` in an isolated loopback runner with Node. It signs into a real simulator and checks the form-generated request through the native APIs, including denial, persisted readback and removal. It does not drive a browser.
 
-Ownership is never shared or adopted in either direction:
-
-- The native delete actions refuse CloudFormation-owned resources with
-  `UnsupportedOperation`: `DeleteVpc`, `DeleteSubnet` and `TerminateInstances` on a
-  stack's VPC, subnet or instance. Delete its stack instead.
-- `CreateSubnet` refuses a CloudFormation-owned VPC, and `RunInstances` refuses a
-  CloudFormation-owned subnet, with `UnsupportedOperation`.
-- A CloudFormation subnet, route table, security group, gateway attachment,
-  route table association or instance cannot reference an EC2-owned VPC or subnet,
-  so the stack is refused and the EC2-owned resource is unchanged. A stack
-  instance must name a subnet and security groups created by its own stack, in one
-  VPC; any other `SubnetId` or `SecurityGroupIds`, including a missing ID or
-  another stack's resource, fails `CreateStack` with `ValidationError` inside the
-  create transaction, before a guest launch starts and before anything is stored.
-  An instance ID that is already a launch record fails with
-  `AlreadyExistsException`.
-- Deleting a stack never removes an EC2-owned resource.
-
-A launch record references its subnet with a SQLite foreign key, so a subnet row
-that holds a record cannot be removed by any path. An EC2-owned row that carries a
-stack claim, a subnet without an EC2-owned VPC, or a record whose stored columns
-disagree makes the affected read and write actions fail closed with
-`InternalError`.
-
-## Authorization
-
-Authorization is checked before state is read or written; a denied request changes
-nothing. Exercise identities need:
-
-| Action | IAM action on resource |
-| --- | --- |
-| `CreateVpc` | `ec2:CreateVpc` on `arn:aws:ec2:<region>:000000000000:vpc/*` |
-| `DeleteVpc` | `ec2:DeleteVpc` on `arn:aws:ec2:<region>:000000000000:vpc/<vpc-id>` |
-| `CreateSubnet` | `ec2:CreateSubnet` on `…:vpc/<vpc-id>` and on `…:subnet/*` |
-| `DeleteSubnet` | `ec2:DeleteSubnet` on `…:subnet/<subnet-id>` |
-| `RunInstances` | `ec2:RunInstances` on `…:instance/*`, on `arn:aws:ec2:<region>::image/<image-id>` and on `…:subnet/<subnet-id>` |
-| `TerminateInstances` | `ec2:TerminateInstances` on `…:instance/<instance-id>` |
-
-When tags are supplied, `ec2:CreateTags` is also needed on the new resource:
-`…:vpc/*`, `…:subnet/*` or `…:instance/*`. `RunInstances` does not check a network
-interface, volume or security group resource, because none is created. A console
-session bound to one instance can only read that instance; it cannot create or
-delete VPCs, subnets or launch records. Such a session never lists a launch
-record, even when it was bound to a record's ID, because a record has no guest to
-connect to. Each team still needs its own process, database and token authority.
-
-## Verification
-
-- `go test ./internal/aws -run TestEC2` and `go test ./internal/server -run EC2`:
-  wire format, validation, IAM evaluation, ownership, idempotency, bounds and
-  storage failures.
-- `python3 test/e2e/ec2_native_vpc.py` and `python3 test/e2e/ec2_native_instance.py`:
-  the official Python SDK against the real binary.
-- `python3 test/e2e/ec2_readonly_console.py` and
-  `python3 test/e2e/ec2_native_instance_console.py`: a real browser drives the
-  console forms and the SDK reads the same state back.
-- `python3 test/e2e/ec2_scalar_send.py`: the embedded API reference client sends
-  the lifecycle with the browser session, and the SDK reads the same state back.
-
-Terraform is not supported for these resources. The AWS provider reads each
-resource back by ID or filter and waits for an instance to reach `running`; local
-discovery has no selected-ID read, and a launch record never runs.
+Primary references: [CreateStack](https://docs.aws.amazon.com/AWSCloudFormation/latest/APIReference/API_CreateStack.html),
+[Subnet resource](https://docs.aws.amazon.com/AWSCloudFormation/latest/TemplateReference/aws-resource-ec2-subnet.html),
+[DescribeSubnets](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_DescribeSubnets.html).

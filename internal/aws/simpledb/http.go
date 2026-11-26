@@ -49,13 +49,27 @@ func NewHTTPHandler(s *Store, sc Scope, authorize Authorize) http.Handler {
 			fail(400, "InvalidParameterValue")
 			return
 		}
-		for _, vs := range p {
+		action := p.Get("Action")
+		writeAttributes := action == "PutAttributes" || action == "DeleteAttributes"
+		for key, vs := range p {
 			if len(vs) != 1 {
+				if writeAttributes {
+					switch key {
+					case "Expected.Name":
+						fail(400, "MultipleExpectedNames")
+						return
+					case "Expected.Value":
+						fail(400, "MultipleExpectedValues")
+						return
+					case "Expected.Exists":
+						fail(400, "MultipleExistsConditions")
+						return
+					}
+				}
 				fail(400, "InvalidParameterValue")
 				return
 			}
 		}
-		action := p.Get("Action")
 		if action == "" || p.Get("Version") == "" {
 			fail(400, "MissingParameter")
 			return
@@ -72,10 +86,15 @@ func NewHTTPHandler(s *Store, sc Scope, authorize Authorize) http.Handler {
 		switch action {
 		case "CreateDomain", "DeleteDomain", "DomainMetadata":
 			allowed["DomainName"] = true
+		case "Select":
+			allowed["SelectExpression"], allowed["NextToken"], allowed["ConsistentRead"] = true, true, true
 		case "ListDomains":
 			allowed["MaxNumberOfDomains"] = true
 			allowed["NextToken"] = true
-		case "PutAttributes":
+		case "PutAttributes", "DeleteAttributes":
+			allowed["Expected.Name"] = true
+			allowed["Expected.Value"] = true
+			allowed["Expected.Exists"] = true
 			allowed["DomainName"] = true
 			allowed["ItemName"] = true
 		case "GetAttributes":
@@ -93,7 +112,7 @@ func NewHTTPHandler(s *Store, sc Scope, authorize Authorize) http.Handler {
 			}
 			parts := strings.Split(key, ".")
 			valid := false
-			if action == "PutAttributes" && len(parts) == 3 && parts[0] == "Attribute" && (parts[2] == "Name" || parts[2] == "Value" || parts[2] == "Replace") {
+			if writeAttributes && len(parts) == 3 && parts[0] == "Attribute" && (parts[2] == "Name" || parts[2] == "Value" || (action == "PutAttributes" && parts[2] == "Replace")) {
 				valid = true
 			}
 			if action == "GetAttributes" && len(parts) == 2 && parts[0] == "AttributeName" {
@@ -115,7 +134,19 @@ func NewHTTPHandler(s *Store, sc Scope, authorize Authorize) http.Handler {
 			}
 		}
 		domain := p.Get("DomainName")
-		if action != "ListDomains" {
+		var plan selectPlan
+		if action == "Select" {
+			if !p.Has("SelectExpression") {
+				fail(400, "MissingParameter")
+				return
+			}
+			var code string
+			if plan, code = parseSelect(p.Get("SelectExpression")); code != "" {
+				fail(400, code)
+				return
+			}
+			domain = plan.domain
+		} else if action != "ListDomains" {
 			if _, ok := p["DomainName"]; !ok {
 				fail(400, "MissingParameter")
 				return
@@ -126,7 +157,7 @@ func NewHTTPHandler(s *Store, sc Scope, authorize Authorize) http.Handler {
 			}
 		}
 		item := p.Get("ItemName")
-		if action == "PutAttributes" || action == "GetAttributes" {
+		if writeAttributes || action == "GetAttributes" {
 			if _, ok := p["ItemName"]; !ok {
 				fail(400, "MissingParameter")
 				return
@@ -138,6 +169,7 @@ func NewHTTPHandler(s *Store, sc Scope, authorize Authorize) http.Handler {
 		}
 		values := map[string][]string{}
 		replace := map[string]bool{}
+		removals := deleteSelections{}
 		names := []string{}
 		// Work is bounded by supplied entries, never the greatest numeric index.
 		ordered := make([]string, 0, len(indices))
@@ -151,17 +183,21 @@ func NewHTTPHandler(s *Store, sc Scope, authorize Authorize) http.Handler {
 			return ordered[i] < ordered[j]
 		})
 		for _, n := range ordered {
-			if action == "PutAttributes" {
+			if writeAttributes {
 				prefix := "Attribute." + n + "."
 				name, nok := p[prefix+"Name"]
 				value, vok := p[prefix+"Value"]
-				if !nok || !vok {
+				if !nok || (!vok && action == "PutAttributes") {
 					fail(400, "MissingParameter")
 					return
 				}
-				if !validText(name[0], false) || !validText(value[0], true) {
+				if !validText(name[0], false) || (vok && !validText(value[0], true)) {
 					fail(400, "InvalidParameterValue")
 					return
+				}
+				if action == "DeleteAttributes" {
+					removals.add(name[0], value)
+					continue
 				}
 				rep := false
 				if v, ok := p[prefix+"Replace"]; ok {
@@ -202,6 +238,14 @@ func NewHTTPHandler(s *Store, sc Scope, authorize Authorize) http.Handler {
 				return
 			}
 		}
+		var condition *writeCondition
+		if writeAttributes {
+			var code string
+			if condition, code = parseWriteCondition(p); code != "" {
+				fail(400, code)
+				return
+			}
+		}
 		resource := "*"
 		if action != "ListDomains" {
 			resource = "arn:aws:sdb:" + sc.Region + ":" + sc.Account + ":domain/" + domain
@@ -220,34 +264,40 @@ func NewHTTPHandler(s *Store, sc Scope, authorize Authorize) http.Handler {
 			var stats DomainStats
 			stats, err = s.DomainMetadata(r.Context(), sc.Account, sc.Region, domain)
 			out.Domain = &stats
+		case "Select":
+			if p.Has("NextToken") && p.Get("NextToken") == "" {
+				fail(400, "InvalidNextToken")
+				return
+			}
+			out.Select, err = s.selectItems(r.Context(), sc, plan, p.Get("SelectExpression"), p.Get("ConsistentRead") == "true", p.Get("NextToken"))
 		case "ListDomains":
 			var ds []string
 			var next string
 			ds, next, err = s.ListDomains(r.Context(), sc.Account, sc.Region, limit, p.Get("NextToken"))
 			out.List = &queryList{ds, next}
 		case "PutAttributes":
-			err = s.Put(r.Context(), sc.Account, sc.Region, domain, item, values, replace)
+			err = s.put(r.Context(), sc.Account, sc.Region, domain, item, values, replace, condition)
+		case "DeleteAttributes":
+			err = s.deleteAttributes(r.Context(), sc.Account, sc.Region, domain, item, removals, condition)
 		case "GetAttributes":
 			var attrs map[string][]string
 			attrs, err = s.Get(r.Context(), sc.Account, sc.Region, domain, item, names)
-			out.Get = &queryGet{}
-			keys := make([]string, 0, len(attrs))
-			for k := range attrs {
-				keys = append(keys, k)
-			}
-			sort.Strings(keys)
-			for _, k := range keys {
-				sort.Strings(attrs[k])
-				for _, v := range attrs[k] {
-					out.Get.Attributes = append(out.Get.Attributes, queryAttribute{k, v})
-				}
-			}
+			out.Get = &queryGet{Attributes: wireAttributes(attrs)}
 		}
 		if err != nil {
 			var coded interface{ Code() string }
 			if errors.As(err, &coded) {
 				switch coded.Code() {
-				case "InvalidParameterValue", "InvalidNextToken", "NoSuchDomain":
+				case "AttributeDoesNotExist":
+					fail(404, coded.Code())
+					return
+				case "ConditionalCheckFailed", "MultiValuedAttribute", "NumberItemAttributesExceeded":
+					fail(409, coded.Code())
+					return
+				case "QueryTimeout":
+					fail(408, coded.Code())
+					return
+				case "ItemTooLargeForSelect", "InvalidParameterValue", "InvalidNextToken", "NoSuchDomain":
 					fail(400, coded.Code())
 					return
 				}
@@ -257,6 +307,32 @@ func NewHTTPHandler(s *Store, sc Scope, authorize Authorize) http.Handler {
 		}
 		writeQuery(w, 200, out)
 	})
+}
+
+// parseWriteCondition handles the canonical Query fields emitted by the AWS SDK.
+// Presence is distinct from an empty expected value, which is valid.
+func parseWriteCondition(p url.Values) (*writeCondition, string) {
+	haveName, haveValue, haveExists := p.Has("Expected.Name"), p.Has("Expected.Value"), p.Has("Expected.Exists")
+	if !haveName && !haveValue && !haveExists {
+		return nil, ""
+	}
+	if !haveName {
+		return nil, "MissingParameter"
+	}
+	name, value, exists := p.Get("Expected.Name"), p.Get("Expected.Value"), p.Get("Expected.Exists")
+	if !validText(name, false) || (haveValue && !validText(value, true)) || (haveExists && exists != "true" && exists != "false") {
+		return nil, "InvalidParameterValue"
+	}
+	if exists == "false" {
+		if haveValue {
+			return nil, "ExistsAndExpectedValue"
+		}
+		return &writeCondition{name: name, absent: true}, ""
+	}
+	if !haveValue {
+		return nil, "IncompleteExpectedExpression"
+	}
+	return &writeCondition{name: name, value: value}, ""
 }
 
 // Canonical decimal labels avoid aliases without imposing machine-int limits.
@@ -275,23 +351,40 @@ func queryIndex(s string) bool {
 
 type queryAttribute struct{ Name, Value string }
 
-func (a queryAttribute) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
-	type field struct {
-		Encoding string `xml:"encoding,attr,omitempty"`
-		Text     string `xml:",chardata"`
+func wireAttributes(attrs map[string][]string) []queryAttribute {
+	var out []queryAttribute
+	keys := make([]string, 0, len(attrs))
+	for k := range attrs {
+		keys = append(keys, k)
 	}
-	encode := func(s string) field {
-		for _, c := range s {
-			// XML 1.1 RestrictedChar, NUL and Unicode noncharacters.
-			if c == 0 || (c >= 1 && c <= 8) || c == 11 || c == 12 || (c >= 14 && c <= 31) ||
-				(c >= 0x7f && c <= 0x84) || (c >= 0x86 && c <= 0x9f) ||
-				(c >= 0xfdd0 && c <= 0xfdef) || c&0xffff == 0xfffe || c&0xffff == 0xffff {
-				return field{"base64", base64.StdEncoding.EncodeToString([]byte(s))}
-			}
+	sort.Strings(keys)
+	for _, k := range keys {
+		sort.Strings(attrs[k])
+		for _, v := range attrs[k] {
+			out = append(out, queryAttribute{k, v})
 		}
-		return field{Text: s}
 	}
-	return e.EncodeElement(struct{ Name, Value field }{encode(a.Name), encode(a.Value)}, start)
+	return out
+}
+
+type queryText struct {
+	Encoding string `xml:"encoding,attr,omitempty"`
+	Text     string `xml:",chardata"`
+}
+
+func xmlText(s string) queryText {
+	for _, c := range s {
+		// XML 1.1 RestrictedChar, NUL and Unicode noncharacters.
+		if c == 0 || (c >= 1 && c <= 8) || c == 11 || c == 12 || (c >= 14 && c <= 31) ||
+			(c >= 0x7f && c <= 0x84) || (c >= 0x86 && c <= 0x9f) ||
+			(c >= 0xfdd0 && c <= 0xfdef) || c&0xffff == 0xfffe || c&0xffff == 0xffff {
+			return queryText{"base64", base64.StdEncoding.EncodeToString([]byte(s))}
+		}
+	}
+	return queryText{Text: s}
+}
+func (a queryAttribute) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
+	return e.EncodeElement(struct{ Name, Value queryText }{xmlText(a.Name), xmlText(a.Value)}, start)
 }
 
 type queryGet struct {
@@ -305,11 +398,12 @@ type queryError struct{ Code, Message string }
 type queryErrors struct{ Error queryError }
 type queryResponse struct {
 	XMLName   xml.Name
-	Namespace string       `xml:"xmlns,attr"`
-	List      *queryList   `xml:"ListDomainsResult,omitempty"`
-	Get       *queryGet    `xml:"GetAttributesResult,omitempty"`
-	Domain    *DomainStats `xml:"DomainMetadataResult,omitempty"`
-	Errors    *queryErrors `xml:"Errors,omitempty"`
+	Namespace string             `xml:"xmlns,attr"`
+	Select    *querySelectResult `xml:"SelectResult,omitempty"`
+	List      *queryList         `xml:"ListDomainsResult,omitempty"`
+	Get       *queryGet          `xml:"GetAttributesResult,omitempty"`
+	Domain    *DomainStats       `xml:"DomainMetadataResult,omitempty"`
+	Errors    *queryErrors       `xml:"Errors,omitempty"`
 	Metadata  struct {
 		ID string `xml:"RequestId"`
 	} `xml:"ResponseMetadata"`

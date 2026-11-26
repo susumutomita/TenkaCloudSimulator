@@ -59,13 +59,31 @@ candidate; no provider version, execution or compatibility is claimed.
 ## Finite limits and explicit refusals
 
 Only public metadata zones are supported. Mutable record types are A, AAAA,
-CNAME, NS, PTR, MX and a restricted plain quoted TXT form. Names are lowercase,
+CNAME, NS, PTR, MX, SRV and a restricted plain quoted TXT form. Names are lowercase,
 absolute ASCII domains within the zone. Apex NS/SOA are protected; apex CNAME
 and CNAME coexistence are refused. DNSSEC, private/forwarding/peering zones,
 routing policies, arbitrary record types and direct RRset writes are unsupported.
 Unsupported methods return 501; unsupported fields/query options are rejected.
 There is no DNS listener, name resolution, propagation or outbound cloud call.
 `done` denotes the synchronous local change, with `isServing=false`.
+
+SRV records use the same Changes and RRset operations with the
+[RFC 2782](https://datatracker.ietf.org/doc/html/rfc2782) form
+`priority weight port target`. Each numeric field is canonical unsigned decimal
+from 0 to 65535, separated by a single space. The target is a lowercase absolute
+DNS name or `.` for service unavailable. For example, an addition may contain
+`{"name":"_submission._tcp.example.test.","type":"SRV","ttl":300,"rrdatas":["0 1 587 mail.example.test."]}`.
+To replace or remove the record set, submit its exact previous TTL and values
+in `deletions`. No target lookup, alias verification, endpoint selection or
+DNS serving is performed. In the owner Console, open **Cloud DNS → Zones** and
+select a zone. **Add SRV record** accepts one or more priority, weight, port
+and target rows; **Edit** and **Delete** apply to the entire selected SRV
+record set. Edits send one change with the previously displayed TTL and values
+in `deletions`, not a delete followed by a create. The Console confirms an
+exact change receipt and re-reads the zone before reporting success. If a
+write is uncertain or the record has changed, refresh before trying again.
+Legacy capability descriptors without `changes.create` keep record sets
+read-only. This is local metadata; there are no Scalar write controls.
 
 State is held in provider-owned SQLite tables. Final RRsets and complete receipt
 sequence/documents are checked inside the transaction before commit; divergence

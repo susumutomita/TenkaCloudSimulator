@@ -22,6 +22,9 @@ type Config struct {
 	DefaultPrincipal string
 	Authorize        Authorizer
 	Now              func() time.Time
+	// ValidateRDSPrivatePostgres is optional trusted native EC2 composition.
+	// Run only for authorized, explicitly private standalone PostgreSQL writes.
+	ValidateRDSPrivatePostgres func(context.Context, *sql.Tx, RDSPrivatePostgresRefs) error
 }
 
 // binding joins one reviewed specification with its official model.
@@ -40,7 +43,8 @@ type Engine struct {
 	byTarget  map[string]*binding
 	bySigning map[string][]*binding
 	// byQuery maps the signing name of each Query protocol service.
-	byQuery map[string]*binding
+	byQuery         map[string]*binding
+	ownedPrivateRDS privateRDSLifecycle // installed only by trusted native composition
 }
 
 // New validates every reviewed specification against its embedded official

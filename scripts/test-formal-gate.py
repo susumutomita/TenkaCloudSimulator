@@ -240,6 +240,198 @@ class SakuraServerReadEpochControls(unittest.TestCase):
                 ).replace(edit['old'], edit['new'], 1))
 
 
+class SimpleDBSelectConsoleControls(unittest.TestCase):
+    def test_console_owner_cursor_and_action_boundaries(self):
+        model = next(m for m in load_registry(ROOT)['models'] if m['id'] == 'SimpleDBSelectConsoleEpoch')
+        self.assertEqual(set(model['source_scope']), {
+            'internal/server/web/app.js', 'tools/console/src/main.jsx',
+            'tools/console/src/simpledb-client.mjs', 'tools/console/src/simpledb.jsx',
+        })
+        controls = {c['id']: c['expect_invariant'] for c in model['mutants']}
+        self.assertEqual(controls, {
+            'AcceptUnadvertised': 'ReadAdmission',
+            'AllowInvalidCriteria': 'ReadAdmission',
+            'BypassItemBusy': 'ReadAdmission',
+            'WidenPageSize': 'BoundedReadRequest',
+            'AllowConcurrentQuery': 'SingleCurrentRead',
+            'CarryCursorOnFreshRun': 'CursorOrigin',
+            'ContinueWithChangedQuery': 'CursorOrigin',
+            'SkipContinuationPage': 'CursorOrigin',
+            'OfferNextAtEnd': 'NextOfferedExactly',
+            'HideNextAfterEmpty': 'NextOfferedExactly',
+            'KeepOwnerOnPrincipal': 'OnlyCurrentOwner',
+            'KeepOwnerOnDomain': 'OnlyCurrentOwner',
+            'KeepOwnerOnCriteria': 'OnlyCurrentOwner',
+            'KeepOwnerOnNavigation': 'OnlyCurrentOwner',
+            'KeepOwnerOnCapability': 'OnlyCurrentOwner',
+            'KeepOwnerOnWrite': 'OnlyCurrentOwner',
+            'AcceptObsoleteResult': 'OnlyCurrentOwner',
+            'AcceptObsoleteFailure': 'OnlyCurrentOwner',
+            'AcceptRepeatedCursor': 'OnlyAcceptedPages',
+            'ExposeDenialAsEmpty': 'OnlyAcceptedPages',
+            'DropEmptyContinuation': 'CursorMirrorsReply',
+            'KeepCursorAfterFailure': 'FailureClearsPage',
+            'UseAttributeReadAsSearch': 'EffectIsolation',
+            'ReadOnSelection': 'EffectIsolation',
+            'KeepObservationOnSelection': 'ChoiceDoesNotObserve',
+        })
+        source = (ROOT / model['model']).read_text()
+        for control in model['mutants']:
+            with self.subTest(control=control['id']):
+                self.assertEqual(len(control['edits']), 1)
+                edit = control['edits'][0]
+                self.assertEqual(source.count(edit['old']), 1)
+                module, actual = apply_mutant(source, model['id'], control)
+                expected = source.replace('MODULE ' + model['id'], 'MODULE ' + module, 1)
+                self.assertEqual(actual, expected.replace(edit['old'], edit['new'], 1))
+
+
+class EntraVerificationFixtureControls(unittest.TestCase):
+    def test_isolated_local_fixture_scope_and_controls(self):
+        model = next(m for m in load_registry(ROOT)['models'] if m['id'] == 'EntraVerificationFixture')
+        self.assertEqual(set(model['source_scope']), {
+            'cmd/simulator/main.go', 'cmd/simulator/azure_entra_fixture.go',
+            'internal/azure/entra/verification_fixture.go',
+        })
+        self.assertEqual(set(model['properties']), {
+            'FixtureIsolated', 'NumericLoopback', 'ExplicitValidToken',
+            'SyntheticTokenOnly', 'ReadOnlyAdmission', 'PublicVerificationOnly',
+        })
+        self.assertEqual({m['id']: m['expect_invariant'] for m in model['mutants']}, {
+            'IgnoreCommand': 'FixtureIsolated',
+            'AllowRemote': 'NumericLoopback',
+            'IgnoreTokenOptIn': 'ExplicitValidToken',
+            'AllowArbitraryIdentity': 'SyntheticTokenOnly',
+            'AllowHTTPWrite': 'ReadOnlyAdmission',
+            'AllowForeignHost': 'ReadOnlyAdmission',
+            'AllowRemotePeer': 'ReadOnlyAdmission',
+            'AllowUnexpectedInput': 'ReadOnlyAdmission',
+            'PublishPrivateKey': 'PublicVerificationOnly',
+        })
+
+
+class EC2TemplatePreviewEpochControls(unittest.TestCase):
+    def test_preview_declares_fixed_operation_and_independent_scope_controls(self):
+        model = next(m for m in load_registry(ROOT)['models'] if m['id'] == 'EC2TemplatePreviewEpoch')
+        targets = {
+            'AdmitClosed': 'OrdinaryPreview', 'AdmitHandoff': 'OrdinaryPreview', 'OversizeDraft': 'BoundedDraft',
+            'AllowMutation': 'FixedDeclarationRead', 'AllowTemplateURL': 'FixedDeclarationRead',
+            'AcceptStaleIdentity': 'OnlyCurrentIdentity', 'AcceptStaleRegion': 'OnlyCurrentRegion',
+            'AcceptStaleDraft': 'OnlyCurrentDraft', 'RetainOldDraft': 'OnlyCurrentDraft',
+            'AcceptAfterClose': 'NoClosedOrHandoffResult', 'AcceptAfterHandoff': 'NoClosedOrHandoffResult',
+            'RefusalAsAccepted': 'EvidencePreserved', 'InvalidAsAccepted': 'EvidencePreserved',
+            'MalformedAsAccepted': 'EvidencePreserved', 'ShowReturnedValue': 'NoReturnedValues'}
+        self.assertEqual({m['id']: m['expect_invariant'] for m in model['mutants']}, targets)
+        self.assertEqual(set(model['properties']), {'TypeOK', *targets.values()})
+        self.assertEqual(set(model['source_scope']), {
+            'internal/server/web/app.js', 'tools/console/src/ec2-readonly.jsx',
+            'tools/console/src/ec2-template-preview.jsx', 'tools/console/src/ec2-template-preview.mjs',
+            'tools/console/src/main.jsx'})
+
+
+class EC2RouteTableConsoleEpochControls(unittest.TestCase):
+    def test_selected_pane_scope_and_projection_counterexamples(self):
+        model = next(m for m in load_registry(ROOT)['models'] if m['id'] == 'EC2RouteTableConsoleEpoch')
+        expected = {
+            **{k: 'EligibleRead' for k in ('UnsignedRead', 'UnadvertisedRead', 'HandoffRead', 'NativeRead', 'UnverifiedRead')},
+            'OfferWrongOperation': 'FixedRead', 'AcceptOldPrincipal': 'CurrentIdentity',
+            'KeepPreviousPrincipal': 'CurrentIdentity', 'AcceptOldRegion': 'CurrentRegion',
+            'AcceptOldVPC': 'CurrentTarget', 'AcceptOldRevision': 'CurrentRevision',
+            'AcceptOldGate': 'CurrentGate', 'IncludeForeignRows': 'StatusIsEvidence',
+            'MaskRefusalAsEmpty': 'StatusIsEvidence', 'InventDefault': 'DefaultIsRecorded',
+            'InventAssociation': 'AssociationIsExplicit', 'InventMain': 'NoImplicitMain'}
+        self.assertEqual({m['id']: m['expect_invariant'] for m in model['mutants']}, expected)
+        self.assertEqual(set(model['properties']), {'TypeOK', *expected.values()})
+        self.assertEqual(set(model['source_scope']), {
+            'internal/server/server.go', 'internal/server/web/app.js', 'tools/console/src/ec2-readonly.jsx',
+            'tools/console/src/ec2-response.mjs', 'tools/console/src/ec2-route-tables.mjs',
+            'tools/console/src/ec2-vpc-route-tables.jsx', 'tools/console/src/main.jsx'})
+
+
+class CognitoPoolMetadataControls(unittest.TestCase):
+    def test_pinned_pool_metadata_scope_and_oracles(self):
+        name = 'CognitoUserPoolMetadata'
+        model = next(m for m in load_registry(ROOT)['models'] if m['id'] == name)
+        self.assertEqual(set(model['source_scope']), {
+            'internal/aws/cognito_user_pools.go',
+            'internal/aws/cognitoidp/http.go',
+            'internal/aws/cognitoidp/pagination.go',
+            'internal/aws/cognitoidp/pools.go',
+            'internal/aws/s3.go',
+            'internal/aws/ssm.go',
+            'internal/aws/sts_signature.go',
+            'internal/server/access_sdk.go',
+            'internal/server/cognito_user_pools_capabilities.go',
+            'internal/server/server.go',
+        })
+        expectation = {
+            'AcceptUnsignedLocal': 'AdmissionBeforeStorage',
+            'AcceptDummySigning': 'AdmissionBeforeStorage',
+            'AcceptBrowserCredential': 'AdmissionBeforeStorage',
+            'AcceptOtherSigningService': 'AdmissionBeforeStorage',
+            'IgnoreCredentialPrincipal': 'AdmissionBeforeStorage',
+            'AcceptUnboundHeaders': 'AdmissionBeforeStorage',
+            'AdmitUnsupportedOperation': 'AdmissionBeforeStorage',
+            'AllowUnsupportedInput': 'AdmissionBeforeStorage',
+            'ExpandPageSizeRange': 'AdmissionBeforeStorage',
+            'ApproveWildcardItem': 'AdmissionBeforeStorage',
+            'IgnoreRequestedAction': 'AdmissionBeforeStorage',
+            'TrustCursorForAuthorization': 'AdmissionBeforeStorage',
+            'DecodeBeforeAuthorization': 'AdmissionBeforeStorage',
+            'IgnoreCursorIntegrity': 'AdmissionBeforeStorage',
+            'IgnoreCursorMarkerShape': 'AdmissionBeforeStorage',
+            'AcceptRetiredStoreCursor': 'AdmissionBeforeStorage',
+            'IgnoreCursorAccount': 'AdmissionBeforeStorage',
+            'IgnoreCursorRegion': 'AdmissionBeforeStorage',
+            'IgnoreCursorCredential': 'AdmissionBeforeStorage',
+            'IgnoreCursorExercise': 'AdmissionBeforeStorage',
+            'IgnoreCursorPageSize': 'AdmissionBeforeStorage',
+            'ExpireDeletedMarker': 'AdmissionBeforeStorage',
+            'IgnorePoolCapacity': 'ScopedCRUD',
+            'AcceptCreateCollision': 'ScopedCRUD',
+            'ReadOrDeletePeerAccount': 'ScopedCRUD',
+            'ReadOrDeletePeerRegion': 'ScopedCRUD',
+            'ListPeerAccount': 'ExactOrderedPage',
+            'ListPeerRegion': 'ExactOrderedPage',
+            'ReplayCursorMarker': 'ExactOrderedPage',
+            'DropRemainingPage': 'ExactNextToken',
+            'InventTerminalCursor': 'ExactNextToken',
+            'SkipAfterCursor': 'ExactNextToken',
+            'LosePersistedRows': 'RestartPersistsRows',
+        }
+        self.assertEqual({m['id']: m['expect_invariant'] for m in model['mutants']}, expectation)
+        self.assertEqual(len(expectation), len(model['mutants']))
+        source = (ROOT / model['model']).read_text()
+        for mutant in model['mutants']:
+            with self.subTest(mutant=mutant['id']):
+                self.assertEqual(len(mutant['edits']), 1)
+                edit = mutant['edits'][0]
+                self.assertEqual(source.count(edit['old']), 1)
+                module, actual = apply_mutant(source, name, mutant)
+                self.assertEqual(actual, source.replace('MODULE ' + name, 'MODULE ' + module, 1)
+                                 .replace(edit['old'], edit['new'], 1))
+
+
+class EC2RouteTableReadControls(unittest.TestCase):
+    def test_ec2_route_table_read_has_independent_controls(self):
+        name = 'EC2RouteTableRead'
+        registry = load_registry(ROOT)
+        model = next(m for m in registry['models'] if m['id'] == name)
+        self.assertEqual(set(model['source_scope']), {
+            'internal/aws/ec2_read.go', 'internal/aws/ec2_route_tables_read.go', 'internal/aws/ec2_vpc.go'})
+        self.assertEqual(set(model['properties']), {
+            'TypeOK', 'Admission', 'BoundSnapshot', 'SameVPC', 'TypedDefault', 'ExplicitOnly', 'CurrentDefault'})
+        expected = {
+            'AllowUnknownAction': 'Admission', 'SkipIAM': 'Admission',
+            'AllowInstanceScope': 'Admission', 'SkipRegion': 'Admission',
+            'DropDeclaration': 'BoundSnapshot', 'DropOwnership': 'BoundSnapshot',
+            'DropStoredRows': 'BoundSnapshot', 'AllowLossyXML': 'BoundSnapshot',
+            'CrossVPCSubnet': 'SameVPC', 'CrossVPCGateway': 'SameVPC',
+            'InventAssociation': 'ExplicitOnly', 'InventMain': 'ExplicitOnly',
+            'ShowRemovedRoute': 'CurrentDefault', 'IgnoreMalformedFlag': 'TypedDefault'}
+        self.assertEqual({m['id']: m['expect_invariant'] for m in model['mutants']}, expected)
+
+
 class FormalGateTests(unittest.TestCase):
     def setUp(self):
         self.output_capture = contextlib.redirect_stdout(io.StringIO())
@@ -257,6 +449,50 @@ class FormalGateTests(unittest.TestCase):
             target = self.root / path
             target.parent.mkdir(parents=True, exist_ok=True)
             shutil.copyfile(ROOT / path, target)
+
+    def test_rds_owned_operator_composition_control_oracles(self):
+        model = next(m for m in load_registry(self.root)['models']
+                     if m['id'] == 'RDSOwnedOperatorComposition')
+        self.assertEqual(set(model['source_scope']), {
+            'cmd/simulator/main.go', 'cmd/simulator/rds_owned_config.go',
+            'internal/server/battle_runtime_unix.go', 'internal/server/rds_owned_operator.go',
+            'internal/server/rds_owned_operator_linux_amd64.go',
+            'internal/server/rds_owned_operator_unsupported.go',
+            'internal/server/sakura_provider.go', 'internal/server/server.go'})
+        group = {
+            'MixedRefusesBeforeEffects': {'AllowMixedMode'},
+            'OwnedAdmissionRequiresPreflight': {'IgnoreLocalScope', 'IgnoreBundlePin'},
+            'DefaultRemainsMetadata': {'SelectOwnerByDefault'},
+            'IndependentClosersAttempted': {'SkipLambdaAfterDebt', 'SkipAppEngineAfterDebt'},
+            'ObservedJoinBeforeReturn': {'SkipHealthWait'},
+            'DebtKeepsSQLite': {'CloseDespiteDebt'},
+            'CleanAttemptsSQLiteClose': {'RetainCleanStore'},
+            'ReportsCloseCauses': {'SuppressOwnerError', 'SuppressIndependentErrorsOnDebt'}}
+        self.assertEqual(set(model['properties']), {'TypeOK', *group})
+        self.assertEqual({m['id']: m['expect_invariant'] for m in model['mutants']},
+                         {name: prop for prop, names in group.items() for name in names})
+
+    def test_rds_guest_peer_preflight_control_oracles(self):
+        model = next(m for m in load_registry(self.root)['models']
+                     if m['id'] == 'RDSGuestPeerPreflight')
+        self.assertEqual(set(model['source_scope']), {
+            'internal/aws/catalog/rds_guest_peer_linux_amd64.go',
+            'internal/aws/catalog/rds_owned_runtime_linux_amd64.go',
+            'internal/aws/ec2_completed_guest_unix.go', 'internal/aws/rds_guest_peer_linux_amd64.go'})
+        group = {
+            'CanonicalGuest': {'AcceptBorrowedGuest'},
+            'SameProviderOwner': {'AcceptForeignProvider'},
+            'CurrentPrivateGeneration': {'SkipOwnedGeneration', 'SkipNativePrivateBindings'},
+            'DestinationIngress': {'UseSourceSG', 'IgnoreProtocol', 'IgnorePort', 'IgnoreNICAddressRange'},
+            'SnapshotClosedBeforeHost': {'IgnoreFailedCommit', 'ProbeWithSnapshotOpen'},
+            'HostAuthenticated': {'AcceptFailedHostSCRAM'},
+            'LiveAtReturn': {'SkipNICRecheck', 'SkipCommandRecheck'},
+            'ObservationOnly': {'IssueReusablePermit'},
+            'DenialDoesNotRetireOwner': {'RetireOwnerOnPeerDenial'},
+            'HealthyObservation': {'DenyAllHealthyGuests'}}
+        self.assertEqual(set(model['properties']), {'TypeOK', *group})
+        self.assertEqual({m['id']: m['expect_invariant'] for m in model['mutants']},
+                         {name: prop for prop, names in group.items() for name in names})
 
     def test_mac_models_cannot_drop_controls_or_expand_scope(self):
         path = self.root / 'formal/models.json'
@@ -810,6 +1046,19 @@ class FormalGateTests(unittest.TestCase):
 
     def test_simpledb_registry_requires_every_model_property_control_and_exact_scope(self):
         expected = {
+            'SimpleDBSelectPage': (
+                'TypeOK AdmissionBeforeRead CursorScopeBound ExactCurrentPage ExactConsumedCursor',
+                'SkipSyntax SkipPageAuthorization InspectDeniedRows InspectInvalidCursorRows '
+                'AcceptForeignAccount AcceptForeignRegion IgnoreExactExpression IgnoreConsistency '
+                'AcceptRetiredStore AdmitSiblingOperation AdmitTamperedCursor ReplayIssuanceImage '
+                'RepeatCursorItem ResumeAfterLastMatch SkipFirstDeferred DropMatches',
+                'internal/aws/simpledb/http.go internal/aws/simpledb/pagination.go '
+                'internal/aws/simpledb/select.go internal/aws/simpledb/select_grammar.go '
+                'internal/server/server.go'),
+            'SimpleDBAttributeDelete': (
+                'NoPhantomItem NoUnacknowledgedChange OnlyEligibleMayAck ExactSurvivors',
+                'LoseUnselectedValues DropCondition',
+                'internal/aws/simpledb/delete.go internal/aws/simpledb/http.go internal/aws/simpledb/item.go'),
             'SimpleDBDomainMetadata': (
                 'TypeOK ReadRequiresDomainAuthority ExactCommittedTotals',
                 'CountMetadataKeysPerItem LoseMetadataValueBytes AdmitDeniedMetadataRead',
@@ -831,6 +1080,17 @@ class FormalGateTests(unittest.TestCase):
         original = path.read_bytes()
         load_registry(self.root)  # Make exact baseline validity a prerequisite for every detector.
         models = {entry['id']: entry for entry in json.loads(original)['models']}
+
+        select_targets = {
+            **dict.fromkeys(('SkipSyntax', 'SkipPageAuthorization', 'InspectDeniedRows'), 'AdmissionBeforeRead'),
+            **dict.fromkeys(('InspectInvalidCursorRows', 'AcceptForeignAccount', 'AcceptForeignRegion',
+                             'IgnoreExactExpression', 'IgnoreConsistency', 'AcceptRetiredStore',
+                             'AdmitSiblingOperation', 'AdmitTamperedCursor'), 'CursorScopeBound'),
+            **dict.fromkeys(('ReplayIssuanceImage', 'RepeatCursorItem', 'DropMatches'), 'ExactCurrentPage'),
+            **dict.fromkeys(('ResumeAfterLastMatch', 'SkipFirstDeferred'), 'ExactConsumedCursor'),
+        }
+        self.assertEqual({m['id']: m['expect_invariant'] for m in models['SimpleDBSelectPage']['mutants']},
+                         select_targets)
 
         def without_property(config, name):
             lines = []
@@ -1258,11 +1518,101 @@ class FormalGateTests(unittest.TestCase):
         finally:
             path.write_text(original)
 
+    def test_azure_conditional_crc_read_registration_is_required(self):
+        name = 'AzureConditionalCRCRead'
+        properties = ('TypeOK', 'DeniedBeforeOptions', 'OptionsBeforeLookup',
+                      'MissingBeforeDate', 'CacheHitHasNoPartialOutput', 'EligibleSelectedCRC',
+                      'CRCRejectsOversize', 'CRCEmitsOnlyWhenRequested')
+        controls = {
+            'OptionsBeforeOwner': 'DeniedBeforeOptions',
+            'LookupBeforeOptions': 'OptionsBeforeLookup',
+            'CacheBeforeExistence': 'MissingBeforeDate',
+            'EmitCRCOnCacheHit': 'CacheHitHasNoPartialOutput',
+            'OmitCap': 'CRCRejectsOversize',
+        }
+        scope = {
+            'internal/azure/blob/http.go', 'internal/azure/blob/range.go',
+            'internal/azure/blob/store.go', 'internal/azure/blob/types.go',
+            'internal/azure/blob/range_crc64_test.go',
+            'internal/azure/blob/read_time_condition_test.go',
+            'internal/azure/blob/read_time_range_checksum_test.go',
+        }
+        path = self.root / 'formal/models.json'
+        original = path.read_text()
+        config_path = self.root / 'formal/AzureConditionalCRCRead.cfg'
+        config = config_path.read_text()
+
+        def write_variant(transform, remove_invariant=None):
+            changed = json.loads(original)
+            target = next(model for model in changed['models'] if model['id'] == name)
+            transform(changed, target)
+            path.write_text(json.dumps(changed))
+            config_path.write_text(config if remove_invariant is None else
+                                   config.replace(' ' + remove_invariant, ''))
+
+        entry = next(model for model in load_registry(self.root)['models'] if model['id'] == name)
+        self.assertEqual(tuple(entry['properties']), properties)
+        self.assertEqual({m['id']: m['expect_invariant'] for m in entry['mutants']}, controls)
+        self.assertEqual(set(entry['source_scope']), scope)
+        try:
+            write_variant(lambda changed, target: changed['models'].remove(target))
+            with self.assertRaisesRegex(GateError, 'required existing model was removed'):
+                load_registry(self.root)
+            for prop in properties:
+                with self.subTest(property=prop):
+                    write_variant(lambda _, target: target['properties'].remove(prop), prop)
+                    with self.assertRaisesRegex(GateError, 'required invariant was removed'):
+                        load_registry(self.root)
+            for control in controls:
+                with self.subTest(control=control):
+                    write_variant(lambda _, target: target.update(
+                        mutants=[m for m in target['mutants'] if m['id'] != control]))
+                    with self.assertRaisesRegex(GateError, 'required mutation control was removed'):
+                        load_registry(self.root)
+            for path_name in sorted(scope):
+                with self.subTest(scope=path_name):
+                    write_variant(lambda _, target: target['source_scope'].remove(path_name))
+                    with self.assertRaisesRegex(GateError, 'required exact source scope changed'):
+                        load_registry(self.root)
+            write_variant(lambda _, target: target['source_scope'].append('docs/azure-blob.md'))
+            with self.assertRaisesRegex(GateError, 'required exact source scope changed'):
+                load_registry(self.root)
+        finally:
+            path.write_text(original)
+            config_path.write_text(config)
+
+    def test_azure_blob_row_download_controls_remain_bound(self):
+        path = self.root / 'formal/models.json'
+        original = path.read_bytes()
+        reg = load_registry(self.root)
+        model = next(m for m in reg['models'] if m['id'] == 'AzureBlobRowDownload')
+        self.assertEqual(set(model['source_scope']),
+                         {'internal/server/web/app.js', 'tools/console/src/azure-blob.jsx'})
+        self.assertEqual(set(model['properties']),
+                         {'TypeOK', 'RowIsRequestTarget', 'CurrentDownloadOnly', 'SuccessfulBytesOnly'})
+        chk = json.loads(original)
+        row = next(m for m in chk['models'] if m['id'] == 'AzureBlobRowDownload')
+        controls = {m['id']: m for m in row['mutants']}
+        self.assertEqual(set(controls),
+                         {'UseToolbarSelection', 'AllowRetiredCompletion', 'AllowBadPayload'})
+        source = (self.root / row['model']).read_text()
+        first = controls['UseToolbarSelection']
+        alternate = controls['AllowRetiredCompletion']
+        first['edits'] = alternate['edits']
+        first['expect_invariant'] = alternate['expect_invariant']
+        apply_mutant(source, row['id'], first)
+        try:
+            path.write_text(json.dumps(chk))
+            with self.assertRaisesRegex(GateError, 'Azure Blob row download mutation controls changed'):
+                load_registry(self.root)
+        finally:
+            path.write_bytes(original)
+
     def test_complete_registry_and_exact_mutations(self):
         registry = load_registry(self.root)
         # Keep this inventory independent of the implementation's required set.
         # A newly registered model must be reviewed and named here explicitly.
-        self.assertEqual({model['id'] for model in registry['models']}, {'EC2LaunchRecordOwnership', 'EC2VPCOwnership', 'SimpleDBDomainMetadata', 'SimpleDBLifecycle', 'SimpleDBPageCursor', 'SimpleDBQueryAdmission', 'CloudDNSAtomicChange', 'CloudDNSChildToken', 'CloudDNSConsoleScope', 'SakuraServerMetadata', 'SakuraServerReadEpoch', 'CFNParameterRuleAdmission', 'ECSTaskRevisionLifecycle', 'VpcOriginReferenceLifecycle', 'ARPTrustedReply', 'PersistentIngressPolicy', 'AppEngineTraffic', 'AutoScalingPlanTargets', 'AzureBlobState', 'AzurePropertiesEpoch', 'AzurePropertiesTarget', 'BedrockRuntimeAdmission', 'BlobRange', 'BrowserSessions', 'CFNConditionAdmission', 'CFNConditionMemoDepth', 'CFNEventHistory', 'CFNFinalCleanupACK', 'CFNNativeIAMTransaction', 'CFNParameterSnapshot', 'CFNPhysicalResourceACK', 'CanonicalVMComposition', 'CatalogConsoleEpoch', 'CatalogResourceLifecycle', 'SARPolicyAuthorizationTarget', 'CloudWatchLogsLifecycle', 'CloudWatchLogsViewEpoch', 'CommandDispatchLifecycle', 'ConsoleHandoff', 'DurableGuestLease', 'DynamoDBAdmission', 'DynamoDBConsoleEpoch', 'DynamoDBLifecycle', 'EC2GuestAttachmentLifecycle', 'EC2ReadDiscovery', 'ELBTargetLifecycle', 'EngineLifecycle', 'FrameCodecLifecycle', 'GCPStorageState', 'GuestCommandLifecycle', 'HTTPObservationLifecycle', 'IAMBuiltinPinTransaction', 'IAMConditionEvaluation', 'IAMInstanceProfiles', 'IAMManagedPolicies', 'InstanceMetadataTokens', 'KMSAliasCatalog', 'KMSAliasCrypto', 'KMSAliasesViewEpoch', 'KMSBootstrapTransaction', 'KMSKeyState', 'KMSProtocolAdmission', 'LambdaExecutionRoleBridge', 'LambdaSourceEdit', 'MacPreparationAdmission', 'MacProbeLifecycle', 'LambdaLogTailDisclosure', 'LandingAccessAdmission', 'LandingTopologyState', 'ListenerLifecycle', 'LoginInputIntent', 'NICSessionBookkeeping', 'NativeCommandIssuer', 'NativeIAMOwnership', 'NativeWireProjection', 'ObjectStore', 'OwnedClockQualification', 'OwnedProbeAttachmentLifecycle', 'OwnedProbeDispatchPolicy', 'OwnedProbeSessionLifecycle', 'PacketAdmission', 'ParticipantSessionLifecycle', 'PassiveServiceBoundary', 'PersistentTransportLifecycle', 'ProbeOperationLifecycle', 'ProjectAuthority', 'ProviderActor', 'ProviderPath', 'RESTDeploymentSnapshot', 'RESTProxyEventBoundary', 'RESTRouteMatching', 'Route53AtomicBatch', 'S3MultipartState', 'S3Versions', 'SNSAdmission', 'SNSLifecycle', 'SNSQueueFanout', 'SQSBatchDeletion', 'SQSConsoleEpoch', 'SQSLifecycle', 'SQSStorageBudget', 'SSMBatchDeletion', 'SSMDocumentState', 'SSMDurableCommands', 'SSMParameterState', 'STSSessionLifecycle', 'SakuraDiskAdmission', 'SakuraDiskMetadata', 'SakuraDisksViewEpoch', 'SakuraStartupAdmission', 'SecretDescriptionWorkflow', 'SecretMetadataUpdate', 'SecretMetadataViewEpoch', 'SecretVersionListing', 'SecretsDisclosureChannels', 'SecretsMutationRefresh', 'SecretsRevealEpoch', 'SecretsVersionLifecycle', 'StackOwnership', 'StartupTokenVisibility', 'TCPRouteClassification', 'TerminalClientEpoch', 'WAFAssociationAuthorization', 'WAFRequestEvaluation'})
+        self.assertEqual({model['id'] for model in registry['models']}, {'SimpleDBSelectConsoleEpoch', 'SimpleDBSelectPage', 'SimpleDBAttributeDelete', 'SimpleDBDomainMetadata', 'SimpleDBLifecycle', 'SimpleDBPageCursor', 'SimpleDBQueryAdmission', 'CognitoUserPoolMetadata', 'SimpleDBConsoleEpoch', 'RDSPrivatePostgresTopology', 'RDSOwnedPostgresRuntime', 'RDSOwnedGenerationFence', 'RDSOwnedOperatorComposition', 'RDSGuestPeerPreflight', 'SARPolicyAuthorizationTarget', 'AzureConditionalCRCRead', 'AzureStructuredReadAdmission', 'AzureBlobRowDownload', 'EC2VPCOwnership', 'CloudDNSAtomicChange', 'CloudDNSChildToken', 'CloudDNSConsoleScope', 'SakuraServerMetadata', 'SakuraServerReadEpoch', 'CFNParameterRuleAdmission', 'ECSTaskRevisionLifecycle', 'VpcOriginReferenceLifecycle', 'ARPTrustedReply', 'PersistentIngressPolicy', 'AppEngineTraffic', 'AutoScalingPlanTargets', 'AzureBlobState', 'AzureQueueLifecycle', 'AzureQueueOwnerAccess', 'AzurePropertiesEpoch', 'AzurePropertiesTarget', 'BedrockRuntimeAdmission', 'BlobRange', 'BrowserSessions', 'CFNConditionAdmission', 'CFNConditionMemoDepth', 'CFNEventHistory', 'CFNFinalCleanupACK', 'CFNNativeIAMTransaction', 'CFNParameterSnapshot', 'CFNPhysicalResourceACK', 'CanonicalVMComposition', 'CatalogConsoleEpoch', 'CatalogResourceLifecycle', 'CloudWatchLogsLifecycle', 'CloudWatchLogsViewEpoch', 'CommandDispatchLifecycle', 'ConsoleHandoff', 'DurableGuestLease', 'DynamoDBAdmission', 'DynamoDBConsoleEpoch', 'DynamoDBLifecycle', 'EC2GuestAttachmentLifecycle', 'EC2ReadDiscovery', 'EC2RouteTableConsoleEpoch', 'EC2NativeSubnetLifecycle', 'EC2NativeVPCChildren', 'EC2DetachedNetworkConsole', 'EC2NativeRouteAssociationLifecycle', 'EC2NativeRouteTableLifecycle', 'EC2TemplatePreviewEpoch', 'EntraVerificationFixture', 'EC2RouteTableRead', 'EC2SecurityGroupRead', 'EC2SecurityGroupConsoleEpoch', 'ELBTargetLifecycle', 'EngineLifecycle', 'FrameCodecLifecycle', 'GCPStorageState', 'GuestCommandLifecycle', 'HTTPObservationLifecycle', 'IAMBuiltinPinTransaction', 'IAMConditionEvaluation', 'IAMInstanceProfiles', 'IAMManagedPolicies', 'InstanceMetadataTokens', 'KMSAliasCatalog', 'KMSAliasCrypto', 'KMSAliasesViewEpoch', 'KMSBootstrapTransaction', 'KMSKeyState', 'KMSProtocolAdmission', 'LambdaExecutionRoleBridge', 'LambdaSourceEdit', 'MacPreparationAdmission', 'MacProbeLifecycle', 'LambdaLogTailDisclosure', 'LandingAccessAdmission', 'LandingTopologyState', 'ListenerLifecycle', 'LoginInputIntent', 'NICSessionBookkeeping', 'NativeCommandIssuer', 'NativeIAMOwnership', 'NativeWireProjection', 'ObjectStore', 'OwnedClockQualification', 'OwnedProbeAttachmentLifecycle', 'OwnedProbeDispatchPolicy', 'OwnedProbeSessionLifecycle', 'PacketAdmission', 'ParticipantSessionLifecycle', 'PassiveServiceBoundary', 'PersistentTransportLifecycle', 'ProbeOperationLifecycle', 'ProjectAuthority', 'ProviderActor', 'ProviderPath', 'RESTDeploymentSnapshot', 'RESTProxyEventBoundary', 'RESTRouteMatching', 'Route53AtomicBatch', 'S3MultipartConsolePaging', 'S3MultipartState', 'S3Versions', 'SNSAdmission', 'SNSLifecycle', 'SNSQueueFanout', 'SNSSubscriptionReadback', 'SNSConsoleResponseAdmission', 'SQSBatchDeletion', 'SQSConsoleEpoch', 'SQSLifecycle', 'SQSStorageBudget', 'SSMBatchDeletion', 'SSMDocumentState', 'SSMDocumentVersionPage', 'SSMDurableCommands', 'SSMParameterState', 'STSSessionLifecycle', 'SakuraDiskAdmission', 'SakuraDiskMetadata', 'SakuraDisksViewEpoch', 'SakuraStartupAdmission', 'SecretDescriptionWorkflow', 'SecretMetadataUpdate', 'SecretMetadataViewEpoch', 'SecretVersionListing', 'SecretsDisclosureChannels', 'SecretsMutationRefresh', 'SecretsRevealEpoch', 'SecretsVersionLifecycle', 'StackOwnership', 'StartupTokenVisibility', 'TCPRouteClassification', 'TerminalClientEpoch', 'WAFAssociationAuthorization', 'WAFRequestEvaluation'})
 
         for model in registry['models']:
             source = (self.root / model['model']).read_text()
@@ -1270,6 +1620,97 @@ class FormalGateTests(unittest.TestCase):
                 name, mutated = apply_mutant(source, model['id'], mutant)
                 self.assertNotEqual(mutated, source)
                 self.assertIn('MODULE ' + name, mutated)
+
+    def test_s3_listparts_paging_inventory_properties_and_scope_are_required(self):
+        path = self.root / 'formal/models.json'
+        original = path.read_bytes()
+        model_id = 'S3MultipartConsolePaging'
+        expected_properties = {'TypeOK', 'OnlyCanonicalRows', 'OnlyProgressingCursor',
+                               'OnlyCompleteListing', 'NoReadAfterStop'}
+        expected_scope = {'internal/server/web/app.js', 'tools/console/src/s3-multipart-parts.mjs',
+                          'tools/console/src/s3-multipart.jsx'}
+        registered = load_registry(self.root)
+        model = next(m for m in registered['models'] if m['id'] == model_id)
+        self.assertEqual(set(model['properties']), expected_properties)
+        self.assertEqual(set(model['source_scope']), expected_scope)
+        cfg = self.root / model['config']
+        source = self.root / model['model']
+        cfg_bytes = cfg.read_bytes()
+        source_bytes = source.read_bytes()
+        try:
+            missing = json.loads(original)
+            missing['models'] = [m for m in missing['models'] if m['id'] != model_id]
+            path.write_text(json.dumps(missing))
+            cfg.unlink()
+            source.unlink()
+            with self.assertRaisesRegex(GateError, 'required existing model was removed'):
+                load_registry(self.root)
+        finally:
+            path.write_bytes(original)
+            cfg.write_bytes(cfg_bytes)
+            source.write_bytes(source_bytes)
+
+        for prop in sorted(expected_properties):
+            with self.subTest(removed_property=prop):
+                altered = json.loads(original)
+                candidate = next(m for m in altered['models'] if m['id'] == model_id)
+                candidate['properties'].remove(prop)
+                candidate['mutants'] = [m for m in candidate['mutants'] if m['expect_invariant'] != prop]
+                parts = cfg_bytes.decode().splitlines()
+                self.assertEqual(sum(prop in ln.split()[1:] for ln in parts if ln.startswith('INVARIANT')), 1)
+                cfg.write_text('\n'.join(' '.join(p for p in ln.split() if p != prop)
+                                         if ln.startswith('INVARIANT') else ln for ln in parts) + '\n')
+                path.write_text(json.dumps(altered))
+                try:
+                    with self.assertRaisesRegex(GateError, 'existing required invariant was removed'):
+                        load_registry(self.root)
+                finally:
+                    cfg.write_bytes(cfg_bytes)
+                    path.write_bytes(original)
+
+        for scope in [expected_scope - {p} for p in sorted(expected_scope)] + [expected_scope | {'internal/core/store.go'}]:
+            with self.subTest(modified_scope=sorted(scope)):
+                altered = json.loads(original)
+                candidate = next(m for m in altered['models'] if m['id'] == model_id)
+                candidate['source_scope'] = sorted(scope)
+                path.write_text(json.dumps(altered))
+                try:
+                    with self.assertRaisesRegex(GateError, 'required exact source scope changed'):
+                        load_registry(self.root)
+                finally:
+                    path.write_bytes(original)
+
+    def test_s3_listparts_same_id_semantic_substitutions_are_rejected(self):
+        path = self.root / 'formal/models.json'
+        original = path.read_bytes()
+        baseline = load_registry(self.root)
+        model = next(m for m in baseline['models'] if m['id'] == 'S3MultipartConsolePaging')
+        by_id = {item['id']: item for item in model['mutants']}
+        self.assertEqual(set(by_id), {'BypassRowOrder', 'BypassCursor', 'AcceptUnknownFlag',
+                                      'ReturnPartial', 'ContinueAfterStop'})
+        source = (self.root / model['model']).read_text()
+        replacement = by_id['ContinueAfterStop']
+        for mutant_id, control in by_id.items():
+            alternate = replacement if mutant_id != replacement['id'] else by_id['BypassRowOrder']
+            distinct_oracle = alternate['expect_invariant']
+            self.assertNotEqual(control['expect_invariant'], distinct_oracle)
+            for field_set in (('edits',), ('expect_invariant',), ('edits', 'expect_invariant')):
+                with self.subTest(mutant=mutant_id, replaced=field_set):
+                    altered = json.loads(original)
+                    target = next(m for m in altered['models'] if m['id'] == model['id'])
+                    damaged = next(m for m in target['mutants'] if m['id'] == mutant_id)
+                    for field in field_set:
+                        damaged[field] = alternate[field]
+                    # Same ID and a valid literal edit: don't count a malformed edit
+                    # or unregistered expected invariant as semantic enforcement.
+                    apply_mutant(source, model['id'], damaged)
+                    self.assertIn(damaged['expect_invariant'], model['properties'])
+                    path.write_text(json.dumps(altered))
+                    try:
+                        with self.assertRaisesRegex(GateError, 'ListParts paging mutation controls changed'):
+                            load_registry(self.root)
+                    finally:
+                        path.write_bytes(original)
 
     def test_sakura_metadata_admission_and_startup_inventory_and_properties_are_required(self):
         path = self.root / 'formal/models.json'
@@ -4157,6 +4598,7 @@ class FormalGateTests(unittest.TestCase):
                                                    'SavedOperationAuthority'],
                                     'source_scope': ['internal/aws/ec2_cloudformation_adapter_unix.go',
                                                      'internal/aws/ec2_cloudformation_runtime_unix.go',
+                                                     'internal/aws/ec2_completed_guest_unix.go',
                                                      'internal/aws/ec2_vm_backend_unix.go',
                                                      'internal/aws/ec2_vm_nic_guard.go',
                                                      'internal/aws/ec2_vm_nic_unix.go',

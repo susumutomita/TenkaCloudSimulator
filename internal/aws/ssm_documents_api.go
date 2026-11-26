@@ -23,12 +23,13 @@ type ssmDocumentRequest struct {
 }
 
 var ssmDocumentFields = map[string][]string{
-	"CreateDocument":   {"Name", "Content", "DocumentType", "DocumentFormat"},
-	"UpdateDocument":   {"Name", "Content", "DocumentVersion", "DocumentFormat"},
-	"GetDocument":      {"Name", "DocumentVersion", "DocumentFormat"},
-	"DescribeDocument": {"Name", "DocumentVersion"},
-	"DeleteDocument":   {"Name"},
-	"ListDocuments":    {"MaxResults", "NextToken"},
+	"CreateDocument":       {"Name", "Content", "DocumentType", "DocumentFormat"},
+	"UpdateDocument":       {"Name", "Content", "DocumentVersion", "DocumentFormat"},
+	"GetDocument":          {"Name", "DocumentVersion", "DocumentFormat"},
+	"DescribeDocument":     {"Name", "DocumentVersion"},
+	"DeleteDocument":       {"Name"},
+	"ListDocuments":        {"MaxResults", "NextToken"},
+	"ListDocumentVersions": {"Name", "MaxResults", "NextToken"},
 }
 
 func isSSMDocumentOperation(op string) bool { _, ok := ssmDocumentFields[op]; return ok }
@@ -91,7 +92,7 @@ func (g *Gateway) serveSSMDocuments(w http.ResponseWriter, r *http.Request, stor
 		fail("InvalidDocumentVersion", "Supply the latest version or $LATEST.")
 		return
 	}
-	if op == "ListDocuments" {
+	if op == "ListDocuments" || op == "ListDocumentVersions" {
 		if _, present := object["MaxResults"]; !present {
 			input.MaxResults = 50
 		}
@@ -149,6 +150,8 @@ func (g *Gateway) serveSSMDocuments(w http.ResponseWriter, r *http.Request, stor
 		}
 	case "DeleteDocument":
 		err = store.Delete(r.Context(), region, input.Name)
+	case "ListDocumentVersions":
+		result, err = store.documentVersionPage(r, region, principal, input.Name, input.MaxResults, input.NextToken)
 	case "ListDocuments":
 		result, err = store.documentPage(r, region, principal, input.MaxResults, input.NextToken)
 	}
@@ -178,36 +181,54 @@ func (s *SSMDocumentStore) documentPage(r *http.Request, region, principal strin
 		return nil, err
 	}
 	raw, _ := json.Marshal(docs)
+	start, end, next, err := ssmDocumentPageWindow(raw, region, principal, size, token, len(docs))
+	if err != nil {
+		return nil, err
+	}
+	items := []any{}
+	for _, d := range docs[start:end] {
+		items = append(items, map[string]any{"Name": d.Name, "DocumentVersion": d.DocumentVersion, "DocumentType": "Command", "DocumentFormat": "JSON", "SchemaVersion": "2.2", "Owner": "000000000000", "PlatformTypes": []string{"Linux"}})
+	}
+	result := map[string]any{"DocumentIdentifiers": items}
+	if next != "" {
+		result["NextToken"] = next
+	}
+	return result, nil
+}
+
+// Retain the existing ListDocuments cursor encoding; callers domain-separate different snapshots.
+func ssmDocumentPageWindow(raw []byte, region, principal string, size int, token string, count int) (int, int, string, error) {
+	if size < 1 || size > 50 {
+		return 0, 0, "", documentFailure("ValidationException", "MaxResults must be 1 to 50.")
+	}
 	sum := sha256.Sum256(raw)
 	fingerprint := hex.EncodeToString(sum[:])
 	offset := 0
 	if token != "" {
 		bad := documentFailure("InvalidNextToken", "Token does not match this request or the current document snapshot.")
 		if len(token) > 2048 {
-			return nil, bad
+			return 0, 0, "", bad
 		}
 		raw, e := base64.RawURLEncoding.DecodeString(token)
 		if e != nil {
-			return nil, bad
+			return 0, 0, "", bad
 		}
 		var cursor ssmDocumentCursor
-		if strictDocumentJSON(raw, &cursor) != nil || cursor.Region != region || cursor.Principal != principal || cursor.Size != size || cursor.Fingerprint != fingerprint || cursor.Offset < 1 || cursor.Offset >= len(docs) || cursor.Offset%size != 0 {
-			return nil, bad
+		if strictDocumentJSON(raw, &cursor) != nil || cursor.Region != region || cursor.Principal != principal || cursor.Size != size || cursor.Fingerprint != fingerprint || cursor.Offset < 1 || cursor.Offset >= count || cursor.Offset%size != 0 {
+			return 0, 0, "", bad
 		}
 		offset = cursor.Offset
 	}
 	end := offset + size
-	if end > len(docs) {
-		end = len(docs)
+	if end > count {
+		end = count
 	}
-	items := []any{}
-	for _, d := range docs[offset:end] {
-		items = append(items, map[string]any{"Name": d.Name, "DocumentVersion": d.DocumentVersion, "DocumentType": "Command", "DocumentFormat": "JSON", "SchemaVersion": "2.2", "Owner": "000000000000", "PlatformTypes": []string{"Linux"}})
+	if end == count {
+		return offset, end, "", nil
 	}
-	result := map[string]any{"DocumentIdentifiers": items}
-	if end < len(docs) {
-		raw, _ := json.Marshal(ssmDocumentCursor{region, principal, fingerprint, size, end})
-		result["NextToken"] = base64.RawURLEncoding.EncodeToString(raw)
+	b, err := json.Marshal(ssmDocumentCursor{region, principal, fingerprint, size, end})
+	if err != nil {
+		return 0, 0, "", err
 	}
-	return result, nil
+	return offset, end, base64.RawURLEncoding.EncodeToString(b), nil
 }

@@ -11,8 +11,8 @@ function one(node,name,required=false){
   if(found.length>1||(required&&found.length!==1))invalid();
   return found[0];
 }
-function value(node,name){
-  const found=one(node,name);
+function value(node,name,required=false){
+  const found=one(node,name,required);
   if(found?.children?.length)invalid();
   return found?.textContent??'';
 }
@@ -22,82 +22,111 @@ function nameTag(node){
   if(names.length>1)invalid();
   return names.length?value(names[0],'value'):'';
 }
-// managedBy is the simulator extension: 'ec2' resources can be deleted natively,
-// 'cloudformation' resources only with their stack; absent means unconfirmed.
+// managedBy is the simulator extension: 'ec2' VPCs can be deleted natively,
+// 'cloudformation' VPCs only with their stack; absent means unconfirmed.
 function vpcRow(n){return {id:value(n,'vpcId'),name:nameTag(n),cidr:value(n,'cidrBlock'),managedBy:value(n,'simulatorManagedBy')};}
-function subnetRow(n){return {id:value(n,'subnetId'),name:nameTag(n),vpc:value(n,'vpcId'),cidr:value(n,'cidrBlock'),zone:value(n,'availabilityZone'),managedBy:value(n,'simulatorManagedBy')};}
-// state is the recorded simulatorRuntimeState. AWS instanceState is never read:
-// the simulator does not report one.
-function instanceRow(n){return {id:value(n,'instanceId'),name:nameTag(n),state:value(n,'simulatorRuntimeState'),type:value(n,'instanceType'),image:value(n,'imageId'),vpc:value(n,'vpcId'),subnet:value(n,'subnetId'),managedBy:value(n,'simulatorManagedBy')};}
-const collections={
-  ec2:['DescribeInstancesResponse',root=>nodes(one(root,'reservationSet',true),'item').flatMap(r=>nodes(one(r,'instancesSet',true),'item')),instanceRow],
-  vpc:['DescribeVpcsResponse',root=>nodes(one(root,'vpcSet',true),'item'),vpcRow],
-  subnets:['DescribeSubnetsResponse',root=>nodes(one(root,'subnetSet',true),'item'),subnetRow],
-};
-export const describeAction=kind=>collections[kind]?.[0].replace(/Response$/,'')??invalid();
+function instanceRow(n){
+  const groups=nodes(one(n,'groupSet'),'item');
+  const tagItems=nodes(one(n,'tagSet'),'item');
+  if(groups.length>5||tagItems.length>50)invalid();
+  const groupIds=groups.map(group=>value(group,'groupId',true));
+  const tags=tagItems.map(tag=>({key:value(tag,'key',true),value:value(tag,'value',true)}));
+  if(groupIds.some(id=>!id)||new Set(groupIds).size!==groupIds.length||
+     tags.some(tag=>!tag.key)||new Set(tags.map(tag=>tag.key)).size!==tags.length)invalid();
+  return {id:value(n,'instanceId'),name:tags.find(tag=>tag.key==='Name')?.value??'',
+    state:value(n,'simulatorRuntimeState'),type:value(n,'instanceType'),image:value(n,'imageId'),
+    vpc:value(n,'vpcId'),subnet:value(n,'subnetId'),groupIds,tags};
+}
 export function parseEC2Document(document,kind){
-  if(!Object.hasOwn(collections,kind))invalid();
-  const [name,items,row]=collections[kind],root=document?.documentElement;
-  if(root?.namespaceURI!==namespace||root.localName!==name)invalid();
+  if(kind!=='ec2'&&kind!=='vpc')invalid();
+  const instance=kind==='ec2',root=document?.documentElement;
+  if(root?.namespaceURI!==namespace||root.localName!==(instance?'DescribeInstancesResponse':'DescribeVpcsResponse'))invalid();
   if(value(root,'nextToken'))invalid();
-  const records=items(root);
+  const records=instance?nodes(one(root,'reservationSet',true),'item').flatMap(r=>nodes(one(r,'instancesSet',true),'item')):nodes(one(root,'vpcSet',true),'item');
   if(records.length>1000)invalid();
-  const rows=records.map(row);
+  const rows=records.map(instance?instanceRow:vpcRow);
   if(rows.some(row=>!row.id)||new Set(rows.map(row=>row.id)).size!==rows.length)invalid();
   return rows;
 }
 
 export const VPC_NAME_LIMIT=256;
-export const INSTANCE_TYPES=Object.freeze(['t3.micro','t3.small']);
-function parameters(action,fields,kind,name){
-  if(name.length>VPC_NAME_LIMIT)throw Error('The Name tag can have up to 256 characters.');
-  const params=new URLSearchParams({Action:action,Version:'2016-11-15',...fields});
-  if(name)for(const [key,v] of [['ResourceType',kind],['Tag.1.Key','Name'],['Tag.1.Value',name]])params.set('TagSpecification.1.'+key,v);
-  return params;
-}
 // One optional Name tag; the server validates the CIDR and tag bounds.
-export function createVpcParameters({name='',cidr=''}){return parameters('CreateVpc',{CidrBlock:cidr.trim()},'vpc',name);}
-// An empty zone lets the server choose, as "No preference" does in AWS.
-export function createSubnetParameters({vpc='',name='',cidr='',zone=''}){
-  return parameters('CreateSubnet',{VpcId:vpc,CidrBlock:cidr.trim(),...(zone?{AvailabilityZone:zone}:{})},'subnet',name);
-}
-// Exactly one launch record. token makes a repeated submission return the
-// record it already created instead of a second one.
-export function runInstancesParameters({name='',image='',type='',subnet='',token=''}){
-  return parameters('RunInstances',{ImageId:image.trim(),InstanceType:type,MinCount:'1',MaxCount:'1',SubnetId:subnet,...(token?{ClientToken:token}:{})},'instance',name);
+export function createVpcParameters({name='',cidr=''}){
+  const params=new URLSearchParams({Action:'CreateVpc',Version:'2016-11-15',CidrBlock:cidr.trim()});
+  if(name.length>VPC_NAME_LIMIT)throw Error('The Name tag can have up to 256 characters.');
+  if(name)for(const [key,v] of [['ResourceType','vpc'],['Tag.1.Key','Name'],['Tag.1.Value',name]])params.set('TagSpecification.1.'+key,v);
+  return params;
 }
 function root(document,name){
   const node=document?.documentElement;
   if(node?.namespaceURI!==namespace||node.localName!==name)invalid();
   return node;
 }
+// DescribeSecurityGroups is a native, regional summary. Validate its bounded
+// wire shape before the client selects one VPC; a bad or partial response isn't empty.
+const groupId=/^sg-[0-9a-f]{17}$/;
+const vpcId=/^vpc-[0-9a-f]{17}$/;
+function exactFields(node,names){
+  const children=[...(node?.children??[])];
+  if(children.some(n=>n.namespaceURI!==namespace||!names.includes(n.localName))||
+     (!children.length&&node?.textContent?.trim())||
+     [...(node?.childNodes??[])].some(n=>(n.nodeType===3||n.nodeType===4)&&n.textContent.trim()))invalid();
+}
+function members(node,name,max,required=true){
+  const set=one(node,name,required);
+  exactFields(set,['item']);
+  const items=nodes(set,'item');
+  if(items.length>max)invalid();
+  return items;
+}
+function groupCIDR(text){
+  const parts=/^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})\/(0|[1-9]|[12]\d|3[0-2])$/.exec(text);
+  if(!parts||parts.slice(1,5).some(n=>Number(n)>255||String(Number(n))!==n))invalid();
+  const address=parts.slice(1,5).reduce((n,octet)=>n*256+Number(octet),0);
+  if(address % (2 ** (32-Number(parts[5]))) !== 0)invalid();
+  return text;
+}
+function groupPort(n,name){
+  const text=value(n,name,true), port=Number(text);
+  if(!/^[1-9]\d{0,4}$/.test(text)||port>65535)invalid();
+  return port;
+}
+function groupIngress(rule){
+  exactFields(rule,['ipProtocol','fromPort','toPort','ipRanges']);
+  const protocol=value(rule,'ipProtocol',true), from=groupPort(rule,'fromPort'), to=groupPort(rule,'toPort');
+  const ranges=members(rule,'ipRanges',1);
+  if(protocol!=='tcp'||from>to||ranges.length!==1)invalid();
+  exactFields(ranges[0],['cidrIp']);
+  return {from,to,cidr:groupCIDR(value(ranges[0],'cidrIp',true))};
+}
+function securityGroupRow(node){
+  exactFields(node,['ownerId','groupId','groupDescription','vpcId','ipPermissions','tagSet']);
+  const id=value(node,'groupId',true), vpc=value(node,'vpcId',true), description=value(node,'groupDescription',true);
+  if(!groupId.test(id)||!vpcId.test(vpc)||!description||value(node,'ownerId',true)!=='000000000000')invalid();
+  const ingress=members(node,'ipPermissions',60).map(groupIngress);
+  const tags=members(node,'tagSet',50,false).map(tag=>{
+    exactFields(tag,['key','value']);
+    return {key:value(tag,'key',true),value:value(tag,'value',true)};
+  });
+  if(tags.some(tag=>!tag.key)||new Set(tags.map(tag=>tag.key)).size!==tags.length)invalid();
+  return {id,vpc,description,ingress,tags};
+}
+export function parseEC2SecurityGroups(document,selectedVPC){
+  if(!vpcId.test(selectedVPC))invalid();
+  const response=root(document,'DescribeSecurityGroupsResponse');
+  exactFields(response,['requestId','securityGroupInfo']);
+  if(!value(response,'requestId',true))invalid();
+  const groups=members(response,'securityGroupInfo',1000).map(securityGroupRow);
+  if(new Set(groups.map(group=>group.id)).size!==groups.length)invalid();
+  return groups.filter(group=>group.vpc===selectedVPC);
+}
 export function parseCreateVpc(document){
   const row=vpcRow(one(root(document,'CreateVpcResponse'),'vpc',true));
   if(!row.id)invalid();
   return row;
 }
-export function parseCreateSubnet(document){
-  const row=subnetRow(one(root(document,'CreateSubnetResponse'),'subnet',true));
-  if(!row.id)invalid();
-  return row;
-}
-function returned(document,name){
-  if(value(root(document,name),'return')!=='true')invalid();
-  return true;
-}
-export function parseDeleteVpc(document){return returned(document,'DeleteVpcResponse');}
-export function parseDeleteSubnet(document){return returned(document,'DeleteSubnetResponse');}
-export function parseRunInstances(document){
-  const records=nodes(one(root(document,'RunInstancesResponse'),'instancesSet',true),'item');
-  if(records.length!==1)invalid();
-  const row=instanceRow(records[0]);
-  if(!row.id)invalid();
-  return row;
-}
-// Success is exactly the requested instance reported as terminated.
-export function parseTerminateInstances(document,id){
-  const records=nodes(one(root(document,'TerminateInstancesResponse'),'instancesSet',true),'item');
-  if(!id||records.length!==1||value(records[0],'instanceId')!==id||value(one(records[0],'currentState',true),'name')!=='terminated')invalid();
+export function parseDeleteVpc(document){
+  if(value(root(document,'DeleteVpcResponse'),'return')!=='true')invalid();
   return true;
 }
 // EC2 Query errors are <Response><Errors><Error><Code/><Message/>. Anything else is null.
@@ -107,4 +136,51 @@ export function parseEC2Error(document){
   const child=(parent,name)=>[...(parent?.children??[])].find(n=>n.localName===name);
   const error=child(child(node,'Errors'),'Error'),code=child(error,'Code')?.textContent??'';
   return code?{code,message:child(error,'Message')?.textContent??''}:null;
+}
+
+// DescribeRouteTables returns a regional snapshot, never a per-VPC filter or a data-plane observation.
+export function parseEC2RouteTables(document, selectedVPC) {
+  if (!vpcId.test(selectedVPC)) invalid();
+  const response = root(document, 'DescribeRouteTablesResponse');
+  exactFields(response, ['requestId', 'routeTableSet']);
+  if (!value(response, 'requestId', true).trim()) invalid();
+
+  const bytes = new TextEncoder();
+  let count = 0;
+  const tableIds = new Set(), associationIds = new Set(), subnetIds = new Set();
+  const unique = (set, id) => { if (set.has(id)) invalid(); set.add(id); };
+  const tables = members(response, 'routeTableSet', 1000).map(item => {
+    exactFields(item, ['routeTableId','vpcId','ownerId','routeSet','associationSet','tagSet']);
+    const id = value(item,'routeTableId',true), vpc = value(item,'vpcId',true);
+    if (!/^rtb-[0-9a-f]{17}$/.test(id) || !vpcId.test(vpc) || value(item,'ownerId',true)!=='000000000000') invalid();
+    unique(tableIds, id);
+    const routes = members(item,'routeSet',1).map(route => {
+      exactFields(route, ['destinationCidrBlock','gatewayId','origin','state']);
+      const cidr = value(route,'destinationCidrBlock',true), gateway = value(route,'gatewayId',true);
+      if (cidr!=='0.0.0.0/0' || !/^igw-[0-9a-f]{17}$/.test(gateway) ||
+          value(route,'origin', true)!=='CreateRoute' || value(route,'state',true)!=='active') invalid();
+      return {cidr,gateway};
+    });
+    const associations = members(item,'associationSet',1000).map(association => {
+      exactFields(association, ['routeTableAssociationId','routeTableId','subnetId','main']);
+      const assoc = value(association,'routeTableAssociationId',true), subnet = value(association,'subnetId',true);
+      if (!/^rtbassoc-[0-9a-f]{17}$/.test(assoc) || !/^subnet-[0-9a-f]{17}$/.test(subnet) ||
+          value(association,'routeTableId',true)!==id || value(association,'main',true)!=='false') invalid();
+      unique(associationIds, assoc); unique(subnetIds, subnet);
+      return {id:assoc,subnet};
+    });
+    const keys = new Set();
+    const tags = members(item,'tagSet',50).map(tag => {
+      exactFields(tag, ['key','value']);
+      const key = value(tag,'key',true), val = value(tag,'value',true);
+      if (!key || /^aws:/i.test(key) || bytes.encode(key).length>128 || bytes.encode(val).length>256) invalid();
+      unique(keys,key);
+      return {key,value:val};
+    });
+    count += 1 + routes.length + associations.length;
+    if (count > 1000) invalid();
+    return {id,vpc,routes,associations,tags};
+  });
+  // Malformed or truncated data anywhere is never interpreted as a successful empty selection.
+  return tables.filter(table => table.vpc===selectedVPC);
 }

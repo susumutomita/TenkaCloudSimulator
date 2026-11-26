@@ -6,6 +6,7 @@ import (
 	"database/sql"
 	"encoding/hex"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/netip"
 	"sort"
@@ -33,10 +34,6 @@ type EC2NetworkResource struct {
 func NewEC2NetworkStore(db *sql.DB) (*EC2NetworkStore, error) {
 	_, e := db.Exec(`CREATE TABLE IF NOT EXISTS aws_ec2_network_resources(region TEXT NOT NULL,id TEXT NOT NULL,stack_id TEXT NOT NULL,kind TEXT NOT NULL,document TEXT NOT NULL,revision INTEGER NOT NULL CHECK(revision>0),PRIMARY KEY(region,id));`)
 	if e != nil {
-		return nil, e
-	}
-	// Native launch records reference their EC2-owned subnet (ec2_instance.go).
-	if _, e = db.Exec(ec2NativeInstanceSchema); e != nil {
 		return nil, e
 	}
 	return &EC2NetworkStore{db}, nil
@@ -96,13 +93,20 @@ func networkParent(ctx context.Context, tx *sql.Tx, r EC2NetworkResource, id, ki
 	}
 	return parent, nil
 }
+
+var (
+	errEC2NetworkQuota      = errors.New("local network resource quota exceeded")
+	errEC2NetworkOutsideVPC = errors.New("subnet lies outside VPC")
+	errEC2NetworkOverlap    = errors.New("subnet CIDR overlaps")
+)
+
 func createEC2Network(ctx context.Context, tx *sql.Tx, r EC2NetworkResource) error {
 	var count int
 	if e := tx.QueryRowContext(ctx, `SELECT count(*) FROM aws_ec2_network_resources`).Scan(&count); e != nil {
 		return e
 	}
 	if count >= 1000 {
-		return fmt.Errorf("local network resource quota exceeded")
+		return errEC2NetworkQuota
 	}
 	switch r.Kind {
 	case "AWS::EC2::Subnet", "AWS::EC2::RouteTable", "AWS::EC2::SecurityGroup":
@@ -114,7 +118,7 @@ func createEC2Network(ctx context.Context, tx *sql.Tx, r EC2NetworkResource) err
 			v, _ := netip.ParsePrefix(vpc.CIDR)
 			sub, _ := netip.ParsePrefix(r.CIDR)
 			if !v.Contains(sub.Addr()) || sub.Bits() < v.Bits() {
-				return fmt.Errorf("subnet lies outside VPC")
+				return errEC2NetworkOutsideVPC
 			}
 		}
 	case "AWS::EC2::VPCGatewayAttachment":
@@ -178,7 +182,7 @@ func createEC2Network(ctx context.Context, tx *sql.Tx, r EC2NetworkResource) err
 			a, _ := netip.ParsePrefix(r.CIDR)
 			b, _ := netip.ParsePrefix(v.CIDR)
 			if a.Overlaps(b) {
-				return fmt.Errorf("subnet CIDR overlaps")
+				return errEC2NetworkOverlap
 			}
 		}
 	}
@@ -224,6 +228,7 @@ type EC2NetworkSnapshot struct {
 	PublicRoute                                                       bool
 	SecurityGroupIDs                                                  []string
 	Ingress                                                           []EC2IngressRule
+	vpcID                                                             string
 }
 
 // AllowsIngress is policy admission, not evidence of successful HTTP or a VM.
@@ -265,7 +270,7 @@ func (s *EC2NetworkStore) Snapshot(ctx context.Context, region, owner, subnetID 
 	if !ok || vpc.Kind != "AWS::EC2::VPC" {
 		return out, fmt.Errorf("unknown VPC")
 	}
-	out = EC2NetworkSnapshot{Region: region, StackID: owner, SubnetID: subnetID, VPCCIDR: vpc.CIDR, SubnetCIDR: sub.CIDR, SecurityGroupIDs: append([]string{}, groups...)}
+	out = EC2NetworkSnapshot{Region: region, StackID: owner, SubnetID: subnetID, VPCCIDR: vpc.CIDR, SubnetCIDR: sub.CIDR, vpcID: vpc.ID, SecurityGroupIDs: append([]string{}, groups...)}
 	prefix, err := netip.ParsePrefix(sub.CIDR)
 	vpcPrefix, vpcErr := netip.ParsePrefix(vpc.CIDR)
 	if err != nil || vpcErr != nil || !prefix.Addr().Is4() || !vpcPrefix.Addr().Is4() || prefix.Bits() < 16 || prefix.Bits() > 28 || vpcPrefix.Bits() > prefix.Bits() || !vpcPrefix.Contains(prefix.Addr()) {

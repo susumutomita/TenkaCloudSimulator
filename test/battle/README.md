@@ -12,6 +12,30 @@ a guest image that are not in this repository. The `battle-hosts` workflow build
 both and runs it on GitHub's macOS (Apple silicon and Intel) and Linux arm64
 runners for changes to the VM runtime; Linux/amd64 is the original rehearsal host.
 
+## Check the Host bootstrap without a guest
+
+To check just the prerequisite for a Host-managed Battle, build the Simulator
+and use a local TenkaCloud checkout at
+[`5e360d56`](https://github.com/susumutomita/TenkaCloud/blob/5e360d563e03e23ea431470559399dfc33ff2cca/scripts/local-host/simulator-bootstrap.ts)
+with its Bun dependencies already installed. Pass a Simulator binary and a
+checkout with installed dependencies you trust: this check executes the
+binary and loads those dependencies. The fixture pin covers only the Host's
+bootstrap source and generated template.
+
+```sh
+make build
+bun --no-env-file --no-install test/battle/host-bootstrap.mjs "$PWD/dist/tenkacloud-simulator" /abs/TenkaCloud
+```
+
+This command verifies the Host source and its generated template against the
+[pinned fixture](../../internal/aws/testdata/host-battle-bootstrap/provenance.json).
+On a fresh authenticated loopback Simulator, it calls the Host's own bootstrap
+to create a normal stack, upgrade it to the two Battle roles, and reuse that
+stack. It assumes both roles through STS and deletes the test stack. Each SDK
+request has a five-second deadline. Setting the bootstrap's Battle option
+here tests **only role provisioning**. It does not
+enable a VM runtime, start the Host/Portal, run probes, or award points.
+
 ## Quick start
 
 ```sh
@@ -35,6 +59,11 @@ A pass shows, for the binary and bundle named in `report.json`:
 
 - `CreateStack` with the unchanged template launches one guest and returns
   `CREATE_COMPLETE` only after the private guest agent answers.
+- EC2 Query with dummy SDK signing is refused without the same Simulator's
+  local access token. Its authenticated SDK view starts empty and then returns
+  one instance. The instance ID matches both the stack output and the committed same-stack
+  EC2 event. Its VPC, subnet and security group match that stack's committed
+  events, and the image alias and instance type match the fixed fixture.
 - The original UserData installs nginx with `dnf`, starts both services and
   reads the instance hostname from the local metadata service.
 - A participant assumes the template's own viewer role, opens a Session Manager
@@ -42,16 +71,20 @@ A pass shows, for the binary and bundle named in `report.json`:
   and recovers nginx with `systemctl start nginx`.
 - The owned probes return 200 for `/` and `/healthz`, fail for the stopped
   frontend after the catalog's `AWS-RunShellScript` disruption, and recover.
-- Sealing the capability, deleting the stack and stopping the Simulator leave no
-  guest process, and the Simulator exits 0.
+- Sealing the capability and deleting the stack restore the same SDK instance
+  view to its initial empty state. Physical cleanup and Simulator shutdown leave
+  no guest process, and the Simulator exits 0. An empty SDK view does not itself
+  prove process exit or audit hidden database rows.
 
 On macOS each emulator also runs under a private supervisor process (the
 simulator executable re-entered by `guestprocess`); the cleanup checks require that
 no supervisor remains either. QEMU's seccomp `-sandbox` exists only on Linux.
 
-It does **not** show TenkaCloud host or Portal support: the host keeps this
-Battle disabled in simulator mode, so this script stands in for the host. It
-computes points itself from `metadata.json` (`uptime-flat`, +100 / −100); the
+It does **not** test the [Host Battle integration](https://github.com/susumutomita/TenkaCloud/blob/5e360d563e03e23ea431470559399dfc33ff2cca/scripts/local-host/integration/simulator-battle.ts)
+or Portal. The instance readback is for this CloudFormation-owned guest only;
+it does not test a Console launch or native EC2 `RunInstances`. It does not add
+a guest, modify the Challenge template, or change scoring. This rehearsal stands
+in for the Host and computes points itself from `metadata.json` (`uptime-flat`, +100 / −100); the
 Simulator never calculates points. The probe deadline uses the same machine's
 wall clock for both sides, which is not the independent Host clock qualification
 a real event needs. The 600-second automatic revert is a host timer and is not

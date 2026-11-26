@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	azureblob "github.com/susumutomita/TenkaCloudSimulator/internal/azure/blob"
+	azurequeue "github.com/susumutomita/TenkaCloudSimulator/internal/azure/queue"
 	gcpappengine "github.com/susumutomita/TenkaCloudSimulator/internal/gcp/appengine"
 	gcpcatalog "github.com/susumutomita/TenkaCloudSimulator/internal/gcp/catalog"
 	gcpdns "github.com/susumutomita/TenkaCloudSimulator/internal/gcp/dns"
@@ -109,10 +110,19 @@ func registerCloudStorage(db *sql.DB, registry *provider.Registry, cfg CloudStor
 		_ = appEngine.Close()
 		return nil, nil, err
 	}
+	queue, err := azurequeue.NewOwnedHandler(db, azurequeue.Config{Account: cfg.AzureAccount, Owner: cfg.AzureOwner, Environment: cfg.Environment}, func(ctx context.Context) (azurequeue.AuthenticatedActor, bool) {
+		actor, ok := provider.ActorFromContext(ctx)
+		return azurequeue.AuthenticatedActor{ExerciseIdentity: actor.ExerciseIdentity}, ok
+	})
+	if err != nil {
+		_ = appEngine.Close()
+		return nil, nil, err
+	}
+
 	for _, entry := range []struct {
 		name    string
 		handler http.Handler
-	}{{"gcp", gcp}, {"azure", azure}} {
+	}{{"gcp", gcp}, {"azure", azure}, {"azure-queue", queue}} {
 		if err = registry.Register(entry.name, entry.handler); err != nil {
 			_ = appEngine.Close()
 			return nil, nil, err
@@ -173,7 +183,8 @@ func gcpCatalogCapabilities(engine *gcpcatalog.Engine, cfg CloudStorageConfig) m
 // Keep provider scopes separate from AWS service/action metadata.
 func cloudStorageCapabilities(cfg CloudStorageConfig) map[string]any {
 	return map[string]any{
-		"gcp":   map[string]any{"service": "Cloud Storage", "project": cfg.GCPProject, "projectNumber": cfg.GCPProjectNumber, "endpoint": "/_simulator/providers/gcp", "operations": []string{"buckets.insert", "buckets.list", "buckets.get", "buckets.delete", "objects.insert", "objects.list", "objects.get", "objects.delete"}, "authorization": "Local configured project owner only; not Google IAM", "unsupported": []string{"Google credentials/OAuth", "ACLs", "resumable uploads", "cloud project provisioning"}},
-		"azure": map[string]any{"service": "Blob Storage", "account": cfg.AzureAccount, "endpoint": "/_simulator/providers/azure/" + cfg.AzureAccount, "apiVersion": azureblob.APIVersion, "operations": []string{"CreateContainer", "ListContainers", "GetContainerProperties", "DeleteContainer", "PutBlob", "GetBlob", "GetBlobProperties", "ListBlobs", "DeleteBlob"}, "authorization": "Local configured account owner only; not Azure RBAC", "unsupported": []string{"Azure credentials/Entra/SharedKey/SAS", "ARM storage account provisioning", "block staging/commit", "asynchronous container deletion"}},
+		"azure-queue": map[string]any{"service": "Queue Storage", "account": cfg.AzureAccount, "endpoint": "/_simulator/providers/azure-queue/" + cfg.AzureAccount, "apiVersion": "2023-11-03", "operations": []string{"CreateQueue", "DeleteQueue", "PutMessage", "GetMessages", "PeekMessages", "UpdateMessage", "DeleteMessage", "ClearMessages"}, "authorization": "Local configured account owner only; not Azure RBAC", "unsupported": []string{"Azure credentials/Entra/SharedKey/SAS", "ARM storage account provisioning", "queue metadata", "list queues"}},
+		"gcp":         map[string]any{"service": "Cloud Storage", "project": cfg.GCPProject, "projectNumber": cfg.GCPProjectNumber, "endpoint": "/_simulator/providers/gcp", "operations": []string{"buckets.insert", "buckets.list", "buckets.get", "buckets.delete", "objects.insert", "objects.list", "objects.get", "objects.delete"}, "authorization": "Local configured project owner only; not Google IAM", "unsupported": []string{"Google credentials/OAuth", "ACLs", "resumable uploads", "cloud project provisioning"}},
+		"azure":       map[string]any{"service": "Blob Storage", "account": cfg.AzureAccount, "endpoint": "/_simulator/providers/azure/" + cfg.AzureAccount, "apiVersion": azureblob.APIVersion, "operations": []string{"CreateContainer", "ListContainers", "GetContainerProperties", "DeleteContainer", "PutBlob", "GetBlob", "GetBlobProperties", "ListBlobs", "DeleteBlob"}, "authorization": "Local configured account owner only; not Azure RBAC", "unsupported": []string{"Azure credentials/Entra/SharedKey/SAS", "ARM storage account provisioning", "block staging/commit", "asynchronous container deletion"}},
 	}
 }

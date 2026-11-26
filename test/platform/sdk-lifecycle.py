@@ -17,8 +17,6 @@ from cloudformation_ssm_parameters import client
 from ec2_network_contract import NetworkContract
 # Native CreateVpc/DeleteVpc SDK lifecycle and CFN/native ownership separation.
 from ec2_native_vpc import NativeVpc
-# Native subnets and instance launch records: SDK lifecycle, idempotency and refusals.
-from ec2_native_instance import NativeInstance
 
 
 def template(description):

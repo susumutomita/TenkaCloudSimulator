@@ -56,9 +56,8 @@ func TestConsoleInstanceBoundaryDeniesGenericDecisions(t *testing.T) {
 
 func TestOnlyInstanceKeepsTheBoundInstance(t *testing.T) {
 	in := []ec2ReservationRead{
-		{Owner: "1", Instances: []ec2InstanceRead{{ID: "i-own", ManagedBy: ec2ManagedByCloudFormation}, {ID: "i-peer", ManagedBy: ec2ManagedByCloudFormation}}},
-		{Owner: "2", Instances: []ec2InstanceRead{{ID: "i-other", ManagedBy: ec2ManagedByCloudFormation}}},
-		{Owner: "3", Instances: []ec2InstanceRead{{ID: "i-record", ManagedBy: ec2ManagedByEC2}, {ID: "i-unlabeled"}}},
+		{Owner: "1", Instances: []ec2InstanceRead{{ID: "i-own"}, {ID: "i-peer"}}},
+		{Owner: "2", Instances: []ec2InstanceRead{{ID: "i-other"}}},
 	}
 	out := onlyInstance(in, "i-own")
 	if len(out) != 1 || len(out[0].Instances) != 1 || out[0].Instances[0].ID != "i-own" {
@@ -66,12 +65,5 @@ func TestOnlyInstanceKeepsTheBoundInstance(t *testing.T) {
 	}
 	if got := onlyInstance(in, "i-none"); len(got) != 0 {
 		t.Fatal("unknown instance kept resources")
-	}
-	// A launch record has no guest: a session bound to its ID sees nothing, and
-	// only an instance labeled as the stack's own is ever kept.
-	for _, id := range []string{"i-record", "i-unlabeled"} {
-		if got := onlyInstance(in, id); len(got) != 0 {
-			t.Fatalf("%s was shown to a bound console session: %+v", id, got)
-		}
 	}
 }

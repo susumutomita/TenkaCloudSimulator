@@ -14,6 +14,8 @@ An explicitly configured Battle VM runtime is separate from these default API
 simulation requirements: it needs Linux or macOS (amd64 or arm64; WSL2 on Windows), a trusted pinned QEMU/firmware/image
 bundle and private operator configuration. Host clock qualification is also
 required; enabling the flag does not establish it. See [opt-in runtime setup](docs/start.md#explicit-battle-runtime-linux-and-macos).
+Battle capability discovery resolves only after the retained instance is ready and its exact CloudFormation stack is complete.
+
 
 ## Start and sign in
 
@@ -83,27 +85,65 @@ console, CloudFormation adapter or Challenge integration.
 
 - **Storage and data:** [S3](docs/s3.md) ([multipart](docs/s3-multipart.md)),
   [DynamoDB](docs/dynamodb.md), [Parameter Store](docs/ssm-parameters.md).
+- **Systems Manager documents:** [definition and version history](docs/ssm-documents.md).
+  List versions through the native read-only API or compare saved definitions in the console.
+  This does not execute the documents.
 - **Functions and messaging:** [Lambda](docs/lambda.md), [API Gateway](docs/apigateway.md),
-  [SQS](docs/sqs.md), [SNS](docs/sns.md), [CloudWatch Logs](docs/cloudwatch-logs.md).
+  [SQS](docs/sqs.md), [SNS](docs/sns.md) (local HTTP/HTTPS subscription Console and reference; no external delivery),
+  [CloudWatch Logs](docs/cloudwatch-logs.md).
 - **Identity and secrets:** [IAM](docs/iam.md), [native SDK / STS](docs/sts-native.md),
   [Secrets Manager](docs/secrets-manager.md), [KMS](docs/kms.md), [WAFv2](docs/wafv2.md).
-- **Networking and compute:** [EC2/VPC discovery, VPC and subnet create/delete, and instance launch records without a guest](docs/ec2-read-discovery.md),
+- **Networking:** [EC2/VPC discovery and VPC create/delete](docs/ec2-read-discovery.md),
+  [route tables: CloudFormation readback, native tables and explicit subnet associations](docs/ec2-read-discovery.md#route-table-readback),
+  [IPv4 subnet lifecycle for existing EC2-managed VPCs](docs/ec2-native-subnet.md),
+  [security groups: CloudFormation readback and detached Console workflow](docs/ec2-read-discovery.md#security-group-readback),
+  [detached network ACL API and Console workflow](docs/ec2-detached-network-acls.md),
+  [VPC and one subnet in the Console](docs/ec2-read-discovery.md#console-vpc-and-one-subnet),
   [Elastic Load Balancing](docs/elb.md) (Lambda targets),
-  [CloudFront VPC origins](docs/cloudfront-vpc-origin.md), [Route 53](docs/route53.md).
+  [CloudFront VPC origins](docs/cloudfront-vpc-origin.md), [Route 53 public zones and one-PTR Console](docs/route53.md#console-browse-public-zones-and-create-one-ptr).
 - **Scaling:** [Auto Scaling plans for local DynamoDB tables](docs/autoscaling-plans.md).
 - **Infrastructure:** [CloudFormation](docs/cloudformation-rest.md),
+  [read-only EC2 template preview in the Console](docs/ec2-read-discovery.md#instance-launch-preview-is-not-a-launch),
   [SSM value parameters](docs/cloudformation-ssm-parameters.md),
   [native IAM profiles](docs/cloudformation-iam-profiles.md),
   [pinned SSM policy](docs/iam-ssm-managed-policy.md).
 - **Local AI inference (opt-in):** [Bedrock Runtime InvokeModel/Converse through your own
   Ollama or an optional macOS Foundation Models helper](docs/bedrock-runtime.md). Off by default; no cloud fallback, streaming or tool use.
 - **Other clouds:** [Google Cloud Storage / Azure Blob Storage](docs/multicloud-storage.md),
+  [Azure Blob conditional and CRC64 read limits](docs/azure-blob.md#single-range-download-subset),
   [App Engine (Python 3.12 WSGI versions, traffic splits, firewall)](docs/gcp-appengine.md),
+  [Cloud DNS (bounded zone and record changes; Console SRV editor)](docs/acceptance/gcp-cloud-dns.md),
   [Google Cloud console](docs/gcp-console.md), [Azure console](docs/azure-console.md),
+  [Azure Queue Storage (bounded named-queue operations)](docs/acceptance/azure-queue.md),
+  [local Entra OIDC verification fixture (not login or SAML)](docs/azure-entra-verification-fixture.md),
   [opt-in Sakura Disk metadata](docs/sakura.md).
+- **Cognito User Pools:** [Local metadata only](docs/design/cognito-user-pools.md). Verified local SigV4
+  supports Create, Describe, List, and DeleteUserPool. No user sign-in, federation, or token issuance.
+- **SimpleDB:** Native `PutAttributes` and `DeleteAttributes` accept one SDK-style `Expected` condition. It
+  can compare a single value or require that an attribute be absent. The check and
+  change share one transaction. Delete individual values, entire attributes or the item;
+  repeat unconditional deletion safely. [Native `Select`](docs/simpledb-select.md) reads matching items or their names
+  with a single predicate and paged results. Batch operations are not supported. A write that exceeds the [256-pair item limit](docs/simpledb-item-limits.md)
+  is rejected atomically. In the [SimpleDB console](docs/simpledb-console.md),
+  find item names by an optional exact attribute value, read an item, then conditionally replace or delete a single attribute.
 - **Configuration-only catalogs:** [AWS](docs/aws-catalog.md),
   [Google Cloud](docs/gcp-catalog.md), [Azure Resource Manager](docs/azure-catalog.md).
+  `--rds-private-postgres-topology` optionally validates private standalone
+  PostgreSQL configuration against native EC2 on authenticated loopback. It
+  starts no database and returns no endpoint.
   These do not run workloads, provide data planes or provision real cloud resources.
+  AppFlow stores S3-to-S3 flow definitions only. An `OnDemand` definition
+  rejects schedule settings; a `Scheduled` definition requires a nonblank
+  schedule expression. AppFlow does not start jobs or move objects.
+  AWS Batch validates job-queue time-limit actions against the queue family
+  and allows time limits from 600 to 86,400 seconds; it does not execute them.
+  Redshift can read tags on one existing stored resource ARN; it does not
+  enumerate account-wide tags or execute SQL.
+- **Opt-in owned PostgreSQL:** The [local operator flag](docs/design/rds-owned-workload.md)
+  admits one pinned private workload on Linux/amd64 authenticated loopback,
+  separately from Battle and the metadata-only default. A qualifying,
+  authorized create is still required; the API publishes no endpoint,
+  credentials, guest connectivity, or readiness claim.
 
 After signing in, open <http://127.0.0.1:4566/_simulator/docs/> for the API reference.
 Examples are static; **Test Request → Send** makes a live local request.

@@ -32,7 +32,8 @@ def digest(value):
 
 def validate_route53(spec):
     assert ROUTE53_PATHS <= set(spec['paths']), 'Missing Route53 native path'
-    contract = {path: spec['paths'][path] for path in ROUTE53_PATHS}
+    contract = copy.deepcopy({path: spec['paths'][path] for path in ROUTE53_PATHS})
+    _autoscaling['project_before_ptr'](contract)
     assert digest(contract) == CONTRACT_SHA256, 'Route53 exact path/request/response/schema contract changed'
     ids = [operation['operationId'] for path in spec['paths'].values()
         for operation in path.values() if isinstance(operation, dict) and 'operationId' in operation]

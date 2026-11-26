@@ -1,9 +1,7 @@
 package aws
 
 import (
-	"context"
 	"crypto/sha256"
-	"database/sql"
 	"encoding/base64"
 	"encoding/hex"
 	"fmt"
@@ -90,38 +88,6 @@ func stackInstancePermissions(record StackRecord, r StackResource, deleting bool
 	}
 	if tags, _ := r.Properties["Tags"].([]any); len(tags) > 0 {
 		return authorize("ec2:CreateTags", instanceARN)
-	}
-	return nil
-}
-
-// stackInstancePlacement runs inside the stack's create transaction, after its
-// network rows exist. The instance's subnet and security groups must be rows of
-// this same stack, in one VPC, and its ID must not be an EC2-owned launch
-// record. A missing row, another stack's row or an EC2-owned subnet refuses the
-// whole stack before anything is committed, so no instance claim can outlive a
-// placement that discovery would reject.
-func stackInstancePlacement(ctx context.Context, tx *sql.Tx, record StackRecord, r StackResource) error {
-	var records int
-	if err := tx.QueryRowContext(ctx, `SELECT count(*) FROM aws_ec2_native_instances WHERE region=? AND id=?`, record.Region, r.PhysicalID).Scan(&records); err != nil {
-		return err
-	}
-	if records != 0 {
-		return ssmFailure{"AlreadyExistsException", "The instance ID belongs to an EC2-owned launch record."}
-	}
-	refused := ssmFailure{"ValidationError", "An instance's SubnetId and SecurityGroupIds must name a subnet and security groups created by the same stack."}
-	subnet, err := networkRead(ctx, tx, record.Region, stringValue(r.Properties["SubnetId"]))
-	if err != nil || subnet.Kind != "AWS::EC2::Subnet" || subnet.StackID != record.ID {
-		return refused
-	}
-	groups, ok := r.Properties["SecurityGroupIds"].([]any)
-	if !ok || len(groups) == 0 {
-		return refused
-	}
-	for _, id := range groups {
-		group, err := networkRead(ctx, tx, record.Region, stringValue(id))
-		if err != nil || group.Kind != "AWS::EC2::SecurityGroup" || group.StackID != record.ID || group.VPCID != subnet.VPCID {
-			return refused
-		}
 	}
 	return nil
 }

@@ -35,6 +35,7 @@ import time
 import urllib.error
 import urllib.parse
 import urllib.request
+from xml.etree import ElementTree
 
 os.environ.update(AWS_CONFIG_FILE='/dev/null', AWS_SHARED_CREDENTIALS_FILE='/dev/null', AWS_EC2_METADATA_DISABLED='true')
 for name in ('HTTP_PROXY', 'HTTPS_PROXY', 'http_proxy', 'https_proxy', 'ALL_PROXY', 'all_proxy'):
@@ -45,6 +46,7 @@ from botocore.awsrequest import AWSRequest  # noqa: E402
 from botocore.config import Config  # noqa: E402
 from botocore.credentials import Credentials  # noqa: E402
 from botocore.exceptions import ClientError  # noqa: E402
+from botocore.parsers import ResponseParserError  # noqa: E402
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--binary', required=True, help='simulator executable built from the commit under test')
@@ -108,6 +110,8 @@ PUBLIC_PHASES = ('startup', 'initialize', 'operate', 'grade', 'cleanup', 'shutdo
 PUBLIC_CHECKS = (
     'battle-capability-receipt', 'battle-runtime-configured', 'capability-sealed-and-joined',
     'create-stack-response', 'disruption-stops-frontend-and-penalizes',
+    'ec2-inventory-empty-before-stack', 'ec2-inventory-restored-after-stack-delete',
+    'ec2-readback-matches-completed-stack-instance', 'ec2-readback-requires-local-token',
     'guest-api-answers-before-terminal', 'guest-process-exited', 'healthy-round-awards-points',
     'imds-public-hostname-in-login-banner', 'native-operator-identity',
     'no-points-before-registration', 'no-vm-before-deployment', 'one-real-qemu-guest-process',
@@ -292,6 +296,91 @@ def client(service, credentials=None, read_timeout=60):
     creds = credentials or {'aws_access_key_id': 'TCSIMOPERATOR', 'aws_secret_access_key': TOKEN}
     return boto3.client(service, endpoint_url=ENDPOINT, region_name=REGION,
                         config=Config(retries={'max_attempts': 0}, connect_timeout=5, read_timeout=read_timeout, proxies={}), **creds)
+
+
+def instance_read_client(operator_token):
+    # EC2 Query uses dummy signing credentials and separately authenticated
+    # simulator access. Native TCSIMOPERATOR signing covers other services.
+    ec2 = client('ec2', {'aws_access_key_id': 'TCSIM_BATTLE_EC2',
+                         'aws_secret_access_key': 'dummy-local-only'}, read_timeout=10)
+    if operator_token is not None:
+        ec2.meta.events.register('before-sign.ec2.DescribeInstances',
+                                 lambda request, **_: request.headers.add_header('X-Simulator-Token', operator_token))
+    ec2.meta.events.register('after-call.ec2.DescribeInstances', require_instance_response)
+    return ec2
+
+
+def missing_instance_token_is_denied():
+    ec2 = instance_read_client(None)
+    statuses = []
+    ec2.meta.events.register('before-parse.ec2.DescribeInstances',
+                             lambda response_dict, **_: statuses.append(response_dict['status_code']))
+    try:
+        ec2.describe_instances()
+    except (ClientError, ResponseParserError):
+        return statuses == [401]
+    finally:
+        ec2.close()
+    return False
+
+
+def require_instance_response(http_response, parsed, **_):
+    if http_response.status_code >= 300:
+        return  # Keep the SDK's original ClientError.
+    ns = '{http://ec2.amazonaws.com/doc/2016-11-15/}'
+    root = ElementTree.fromstring(http_response.content)
+    request_id = root.findtext(ns + 'requestId')
+    if (http_response.status_code != 200 or root.tag != ns + 'DescribeInstancesResponse'
+            or not request_id or request_id != parsed.get('ResponseMetadata', {}).get('RequestId')):
+        raise RuntimeError('unqualified DescribeInstances response')
+
+
+def instance_inventory(ec2):
+    # The bounded native Query subset takes no ID selector and omits the
+    # reservation set when the committed inventory is empty.
+    response = ec2.describe_instances()
+    reservations = response.get('Reservations', [])
+    if type(reservations) is not list or response.get('NextToken'):
+        raise RuntimeError('unqualified DescribeInstances inventory')
+    instances = []
+    for reservation in reservations:
+        items = reservation.get('Instances')
+        if type(items) is not list or not items:
+            raise RuntimeError('unqualified DescribeInstances reservation')
+        instances.extend(items)
+    return instances
+
+
+def matches_completed_stack_instance(events, stack_id, output_instance, instances):
+    # Exact logical names from the workflow-pinned unchanged Battle template.
+    # A ResourceStatus/physical ID from another stack, or a duplicate success
+    # event, cannot stand in for any of these owning commitments.
+    expected = {
+        'Ec2': ('AWS::EC2::Instance', r'i-[0-9a-f]+'),
+        'Vpc': ('AWS::EC2::VPC', r'vpc-[0-9a-f]+'),
+        'PublicSubnet': ('AWS::EC2::Subnet', r'subnet-[0-9a-f]+'),
+        'Sg': ('AWS::EC2::SecurityGroup', r'sg-[0-9a-f]+'),
+    }
+    owned = {}
+    for event in events:
+        logical = event.get('LogicalResourceId')
+        if logical not in expected or event.get('ResourceStatus') != 'CREATE_COMPLETE':
+            continue
+        resource_type, pattern = expected[logical]
+        physical = event.get('PhysicalResourceId', '')
+        if (event.get('StackId') != stack_id or event.get('ResourceType') != resource_type
+                or logical in owned or not re.fullmatch(pattern, physical)):
+            return False
+        owned[logical] = physical
+    if owned.keys() != expected.keys() or len(instances) != 1:
+        return False
+    instance = instances[0]
+    return (instance.get('InstanceId') == owned['Ec2'] == output_instance
+            and instance.get('VpcId') == owned['Vpc']
+            and instance.get('SubnetId') == owned['PublicSubnet']
+            and [g.get('GroupId') for g in instance.get('SecurityGroups', [])] == [owned['Sg']]
+            and instance.get('ImageId') == RUNTIME['imageIds'][0]
+            and instance.get('InstanceType') == 't3.micro')
 
 
 def sdk_credentials(c):
@@ -633,6 +722,10 @@ try:
     caller = client('sts').get_caller_identity()
     check(p, 'native-operator-identity', caller['Account'] == '999999999999', account=caller['Account'])
     check(p, 'no-vm-before-deployment', qemu_processes() == [] and supervisor_processes() == [], qemuPids=qemu_processes(), supervisorPids=supervisor_processes())
+    check(p, 'ec2-readback-requires-local-token', missing_instance_token_is_denied())
+    ec2 = instance_read_client(TOKEN)
+    before_instances = instance_inventory(ec2)
+    check(p, 'ec2-inventory-empty-before-stack', before_instances == [])
 
     # ------------------------------------------------------------ initialize
     p = phase('initialize')
@@ -651,6 +744,7 @@ try:
     except Exception as error:  # transport loss is recorded; the outcome is then observed, never assumed
         create_error = f'{type(error).__name__}: {str(error)[:300]}'
     check(p, 'create-stack-response', True, seconds=round(time.time() - started, 1), error=create_error, responded=create_error is None)
+    submitted_stack_id = stack_id
     describe = client('cloudformation')
     stack = None
     deadline = time.time() + args.create_timeout
@@ -666,11 +760,12 @@ try:
             if stack['StackStatus'] != 'CREATE_IN_PROGRESS':
                 break
         time.sleep(2)
-    events = []
+    event_page = {}
     try:
-        events = describe.describe_stack_events(StackName=stack_id)['StackEvents'] if stack_id else []
+        event_page = describe.describe_stack_events(StackName=stack_id) if stack_id else {}
     except ClientError:
         pass
+    events = event_page.get('StackEvents', [])
     report['stackEvents'] = [{'logicalId': e.get('LogicalResourceId'), 'type': e.get('ResourceType'), 'status': e.get('ResourceStatus'), 'reason': e.get('ResourceStatusReason')} for e in events]
     check(p, 'stack-create-complete', bool(stack) and stack['StackStatus'] == 'CREATE_COMPLETE', status=stack and stack['StackStatus'],
           reason=stack and stack.get('StackStatusReason'), seconds=round(time.time() - started, 1), createError=create_error)
@@ -694,6 +789,10 @@ try:
     check(p, 'battle-capability-receipt', status == 200 and set(receipt.get('slots', {})) == {'frontend', 'api'}, httpStatus=status,
           clockDomain=receipt.get('clockDomain'), slots={k: v['service'] for k, v in receipt.get('slots', {}).items()},
           target={k: v['binding']['target'] for k, v in receipt.get('slots', {}).items()})
+    check(p, 'ec2-readback-matches-completed-stack-instance',
+          stack.get('StackName') == prefix and (not submitted_stack_id or submitted_stack_id == stack_id)
+          and not event_page.get('NextToken')
+          and matches_completed_stack_instance(events, stack_id, instance, instance_inventory(ec2)))
     if stop_here('initialize'):
         raise SystemExit(0)
 
@@ -848,6 +947,7 @@ try:
           supervisorsAfter=supervisor_processes())
     roles = [r['RoleName'] for r in client('iam').list_roles()['Roles']]
     check(p, 'stack-iam-roles-removed', not any(r.startswith(prefix) for r in roles), remainingRoles=roles)
+    check(p, 'ec2-inventory-restored-after-stack-delete', instance_inventory(ec2) == before_instances)
     exit_code = 0
 except SystemExit as stop:
     exit_code = stop.code if type(stop.code) is int and -255 <= stop.code <= 255 else (0 if stop.code is None else 1)

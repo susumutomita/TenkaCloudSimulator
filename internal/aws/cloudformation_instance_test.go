@@ -17,13 +17,6 @@ func (r fixtureStackInstanceRuntime) PrepareStackInstance(context.Context, Stack
 	return r.attempt, nil
 }
 
-// fixtureStackInstance is placed in the stack's own public subnet and security
-// group, as a compiled template instance is.
-func fixtureStackInstance(record StackRecord) StackResource {
-	return StackResource{LogicalID: "FixtureInstance", PhysicalID: "i-fixture", Type: "AWS::EC2::Instance",
-		Properties: map[string]any{"SubnetId": networkID(record, "PublicSubnet"), "SecurityGroupIds": []any{networkID(record, "Sg")}}}
-}
-
 type fixtureStackInstanceAttempt struct {
 	started chan struct{}
 	release chan struct{}
@@ -54,7 +47,7 @@ func TestStackInstancePendingOutsideSQLAndActualCompletion(t *testing.T) {
 		t.Fatal(compileErr)
 	}
 	record = fresh
-	record.Resources = append(record.Resources, fixtureStackInstance(record))
+	record.Resources = append(record.Resources, StackResource{LogicalID: "FixtureInstance", PhysicalID: "i-fixture", Type: "AWS::EC2::Instance"})
 	attempt := &fixtureStackInstanceAttempt{started: make(chan struct{}), release: make(chan struct{})}
 	if err := stack.ConfigureInstanceRuntime(fixtureStackInstanceRuntime{attempt}); err != nil {
 		t.Fatal(err)
@@ -103,7 +96,7 @@ func TestStackInstanceFailureNeverCompletes(t *testing.T) {
 		t.Fatal(compileErr)
 	}
 	record = fresh
-	record.Resources = append(record.Resources, fixtureStackInstance(record))
+	record.Resources = append(record.Resources, StackResource{LogicalID: "FixtureInstance", PhysicalID: "i-fixture", Type: "AWS::EC2::Instance"})
 	attempt := &fixtureStackInstanceAttempt{started: make(chan struct{}), release: make(chan struct{}), failure: fmt.Errorf("fixture launch rejected")}
 	close(attempt.release)
 	if err := stack.ConfigureInstanceRuntime(fixtureStackInstanceRuntime{attempt}); err != nil {
@@ -130,7 +123,7 @@ func TestStackInstanceDeleteRejectsLateReadiness(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	record.Resources = append(record.Resources, fixtureStackInstance(record))
+	record.Resources = append(record.Resources, StackResource{LogicalID: "FixtureInstance", PhysicalID: "i-fixture", Type: "AWS::EC2::Instance"})
 	attempt := &fixtureStackInstanceAttempt{started: make(chan struct{}), release: make(chan struct{})}
 	if err = stack.ConfigureInstanceRuntime(fixtureStackInstanceRuntime{attempt}); err != nil {
 		t.Fatal(err)
@@ -164,7 +157,7 @@ func TestStackInstanceUnconfiguredHasNoSideEffects(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	record.Resources = append(record.Resources, fixtureStackInstance(record))
+	record.Resources = append(record.Resources, StackResource{LogicalID: "FixtureInstance", PhysicalID: "i-fixture", Type: "AWS::EC2::Instance"})
 	if err = stack.Create(record); err == nil {
 		t.Fatal("unconfigured runtime accepted")
 	}
@@ -187,7 +180,7 @@ func TestStackInstanceFinalizeReadbackRejectsTriggerDrift(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	record.Resources = append(record.Resources, fixtureStackInstance(record))
+	record.Resources = append(record.Resources, StackResource{LogicalID: "FixtureInstance", PhysicalID: "i-fixture", Type: "AWS::EC2::Instance"})
 	attempt := &fixtureStackInstanceAttempt{started: make(chan struct{}), release: make(chan struct{})}
 	close(attempt.release)
 	if err = stack.ConfigureInstanceRuntime(fixtureStackInstanceRuntime{attempt}); err != nil {
@@ -357,117 +350,5 @@ func TestStackInstanceOriginalFullTemplatePersistenceLifecycle(t *testing.T) {
 	var networkRows, claims int
 	if err = stack.db.QueryRow("SELECT (SELECT count(*) FROM aws_ec2_network_resources),(SELECT count(*) FROM aws_cfn_ownership)").Scan(&networkRows, &claims); err != nil || networkRows != 0 || claims != 0 {
 		t.Fatalf("cleanup incomplete: %d %d %v", networkRows, claims, err)
-	}
-}
-
-// A stack instance must be placed in its own stack's subnet and security
-// groups. Any other placement refuses the stack inside the create transaction:
-// nothing is committed, no guest launch starts and discovery stays readable.
-func TestStackInstancePlacementRefusedBeforeCommitAndLaunch(t *testing.T) {
-	stack, _, record := networkFixture(t)
-	if err := stack.Delete(record.Region, record.Name); err != nil {
-		t.Fatal(err)
-	}
-	ctx := context.Background()
-	// An EC2-owned VPC and subnet, and another stack's network, already exist.
-	vpc, err := stack.createNativeVPC(ctx, record.Region, "10.200.0.0/16", nil)
-	if err != nil {
-		t.Fatal(err)
-	}
-	native, err := stack.createNativeSubnet(ctx, record.Region, ec2Request{vpcID: vpc.ID, cidr: "10.200.1.0/24"})
-	if err != nil {
-		t.Fatal(err)
-	}
-	other, err := compileStack(record.Region, "other-network", networkTemplate(t), map[string]string{"NamePrefix": "tc-other-team"}, "")
-	if err != nil {
-		t.Fatal(err)
-	}
-	if err = stack.Create(other); err != nil {
-		t.Fatal(err)
-	}
-	attempt := &fixtureStackInstanceAttempt{started: make(chan struct{}), release: make(chan struct{})}
-	if err = stack.ConfigureInstanceRuntime(fixtureStackInstanceRuntime{attempt}); err != nil {
-		t.Fatal(err)
-	}
-	for _, tc := range []struct {
-		name   string
-		subnet string
-		groups any
-	}{
-		{"EC2-owned subnet", native.ID, []any{networkID(record, "Sg")}},
-		{"another stack's subnet", networkID(other, "PublicSubnet"), []any{networkID(record, "Sg")}},
-		{"missing subnet", "subnet-0000000000000000f", []any{networkID(record, "Sg")}},
-		{"a VPC as subnet", networkID(record, "Vpc"), []any{networkID(record, "Sg")}},
-		{"another stack's security group", networkID(record, "PublicSubnet"), []any{networkID(other, "Sg")}},
-		{"missing security group", networkID(record, "PublicSubnet"), []any{"sg-0000000000000000f"}},
-		{"a subnet as security group", networkID(record, "PublicSubnet"), []any{networkID(record, "PublicSubnet")}},
-		{"no security group", networkID(record, "PublicSubnet"), []any{}},
-		{"malformed security groups", networkID(record, "PublicSubnet"), "sg"},
-	} {
-		t.Run(tc.name, func(t *testing.T) {
-			fresh, err := compileStack(record.Region, record.Name, networkTemplate(t), map[string]string{"NamePrefix": "tc-hello-team"}, "")
-			if err != nil {
-				t.Fatal(err)
-			}
-			instance := fixtureStackInstance(fresh)
-			instance.Properties = map[string]any{"SubnetId": tc.subnet, "SecurityGroupIds": tc.groups}
-			fresh.Resources = append(fresh.Resources, instance)
-			err = stack.Create(fresh)
-			if failure, ok := err.(ssmFailure); !ok || failure.code != "ValidationError" {
-				t.Fatalf("placement was not refused as a validation error: %v", err)
-			}
-			// Records reports a missing stack as an error; either way none is stored.
-			if records, _ := stack.Records(record.Region, record.Name); len(records) != 0 {
-				t.Fatalf("a refused stack was stored: %v", records)
-			}
-			var claims int
-			if err = stack.db.QueryRow(`SELECT count(*) FROM aws_cfn_ownership WHERE physical_id=?`, instance.PhysicalID).Scan(&claims); err != nil || claims != 0 {
-				t.Fatalf("a refused stack kept its instance claim: %d %v", claims, err)
-			}
-			if _, err = stack.ec2Read(ctx, record.Region, "DescribeInstances"); err != nil {
-				t.Fatalf("discovery must stay readable after a refusal: %v", err)
-			}
-		})
-	}
-	select {
-	case <-attempt.started:
-		t.Fatal("a refused placement started a guest launch")
-	default:
-	}
-	// The EC2-owned subnet is unchanged and still usable for a launch record.
-	if _, err = stack.runNativeInstance(ctx, record.Region, ec2Request{imageID: "ami-12345678", instanceType: "t3.micro", subnetID: native.ID}); err != nil {
-		t.Fatal(err)
-	}
-	// A correctly placed instance whose ID is already a launch record is refused too.
-	fresh, err := compileStack(record.Region, record.Name, networkTemplate(t), map[string]string{"NamePrefix": "tc-hello-team"}, "")
-	if err != nil {
-		t.Fatal(err)
-	}
-	instance := fixtureStackInstance(fresh)
-	taken, _ := json.Marshal(ec2NativeInstance{ID: instance.PhysicalID, Region: record.Region, SubnetID: native.ID, VPCID: vpc.ID, ImageID: "ami-12345678", InstanceType: "t3.micro", Tags: map[string]string{}})
-	if _, err = stack.db.Exec(`INSERT INTO aws_ec2_native_instances VALUES(?,?,?,?,?)`, record.Region, instance.PhysicalID, native.ID, nil, string(taken)); err != nil {
-		t.Fatal(err)
-	}
-	fresh.Resources = append(fresh.Resources, instance)
-	if failure, ok := stack.Create(fresh).(ssmFailure); !ok || failure.code != "AlreadyExistsException" {
-		t.Fatalf("a stack instance took a launch record's ID: %v", failure)
-	}
-	if records, _ := stack.Records(record.Region, record.Name); len(records) != 0 {
-		t.Fatalf("a refused stack was stored: %v", records)
-	}
-	if _, err = stack.db.Exec(`DELETE FROM aws_ec2_native_instances WHERE id=?`, instance.PhysicalID); err != nil {
-		t.Fatal(err)
-	}
-	// With the ID free and the placement valid, the same stack is admitted.
-	done := make(chan error, 1)
-	go func() { done <- stack.Create(fresh) }()
-	select {
-	case <-attempt.started:
-	case <-time.After(2 * time.Second):
-		t.Fatal("a valid placement did not start its launch")
-	}
-	close(attempt.release)
-	if err = <-done; err != nil {
-		t.Fatal(err)
 	}
 }

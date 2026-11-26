@@ -64,6 +64,15 @@ func NewStackStore(db *sql.DB) (*StackStore, error) {
 	if _, err := NewEC2NetworkStore(db); err != nil {
 		return nil, err
 	}
+	if err := initEC2NativeSecurityGroups(db); err != nil {
+		return nil, err
+	}
+	if err := initEC2NetworkACLReplay(db); err != nil {
+		return nil, err
+	}
+	if err := initEC2NativeRouteTableReplay(db); err != nil {
+		return nil, err
+	}
 	if _, err := NewAPIGatewayStore(db); err != nil {
 		return nil, err
 	}
@@ -898,11 +907,6 @@ func (s *StackStore) createCheckedContext(ctx context.Context, record StackRecor
 			return ssmFailure{"AlreadyExistsException", "A resource already exists or its creation was rejected."}
 		}
 		if err = appendStackEvent(tx, record, &r, "CREATE_COMPLETE"); err != nil {
-			return err
-		}
-	}
-	if entry != nil {
-		if err = stackInstancePlacement(ctx, tx, record, entry.resource); err != nil {
 			return err
 		}
 	}

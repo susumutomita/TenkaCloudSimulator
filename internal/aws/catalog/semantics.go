@@ -41,6 +41,9 @@ func (q *request) execute() (map[string]any, error) {
 			return nil, err
 		}
 	}
+	if q.e.ownedPrivateRDS != nil && q.b.spec.Model == "rds" {
+		defer q.e.ownedPrivateRDS.lock(q.region, q.op.Kind)()
+	}
 	switch q.op.Kind {
 	case Create:
 		if q.isECSTaskDefinition() {
@@ -794,8 +797,21 @@ func (q *request) create(ecsRevision int) (map[string]any, error) {
 	if err := q.checkRefsIn(tx, res, r.Document); err != nil {
 		return nil, err
 	}
+	if err := q.checkRDSPrivatePostgresTopology(tx, r); err != nil {
+		return nil, err
+	}
 	if err := insertNewResource(tx, res, &r, parent); err != nil {
 		return nil, err
+	}
+	reserved := false
+	if q.e.ownedPrivateRDS != nil && q.op.Name == "CreateDBInstance" && r.Service == "rds" {
+		// insertRow writes generation 1. Reserve the exact identity in the
+		// same transaction, then start the child only after commit.
+		r.Generation = 1
+		reserved, err = q.e.ownedPrivateRDS.reserve(tx, r)
+		if err != nil {
+			return nil, err
+		}
 	}
 	if token != "" {
 		if _, err := tx.Exec("DELETE FROM aws_catalog_idempotency WHERE created<=?", q.now().Unix()-idempotencyLifetime); err != nil {
@@ -814,6 +830,9 @@ func (q *request) create(ecsRevision int) (map[string]any, error) {
 	}
 	if err := tx.Commit(); err != nil {
 		return nil, err
+	}
+	if reserved {
+		q.e.ownedPrivateRDS.startCommitted(q.ctx, r)
 	}
 	return q.output(r, parent), nil
 }
@@ -907,8 +926,19 @@ func (q *request) update() (map[string]any, error) {
 	if err := q.checkRefs(res, r.Document); err != nil {
 		return nil, err
 	}
+	if q.e.ownedPrivateRDS != nil && r.Service == "rds" && r.Kind == "dbInstance" {
+		if err := q.e.ownedPrivateRDS.preflightModify(q, r); err != nil {
+			return nil, err
+		}
+	}
+	if err := q.retireOwnedPrivateRDS(r); err != nil {
+		return nil, err
+	}
 	if err := q.commit(func(tx *sql.Tx) error {
 		if err := q.checkRefsIn(tx, res, r.Document); err != nil {
+			return err
+		}
+		if err := q.checkRDSPrivatePostgresTopology(tx, r); err != nil {
 			return err
 		}
 		if r.Seq == 0 {
@@ -987,6 +1017,9 @@ func (q *request) remove() (map[string]any, error) {
 	}
 	res := q.resource()
 	if err := q.checkToken(res, r); err != nil {
+		return nil, err
+	}
+	if err := q.retireOwnedPrivateRDS(r); err != nil {
 		return nil, err
 	}
 	kinds := q.children(res)
@@ -1362,6 +1395,9 @@ func (q *request) tag() (map[string]any, error) {
 	if len(r.Tags) > maxTagsPerResource {
 		return nil, &fault{kind: "tags", message: fmt.Sprintf("At most %d tags are supported per resource.", maxTagsPerResource)}
 	}
+	if err := q.retireOwnedPrivateRDS(r); err != nil {
+		return nil, err
+	}
 	if err := q.commit(func(tx *sql.Tx) error { return updateRow(tx, r) }); err != nil {
 		return nil, err
 	}
@@ -1372,6 +1408,9 @@ func (q *request) listTags() (map[string]any, error) {
 	r, err := q.tagged()
 	if err != nil {
 		return nil, err
+	}
+	if q.b.spec.Model == "redshift" && q.op.Name == "DescribeTags" {
+		return q.redshiftTaggedResources(r)
 	}
 	for key := range q.input {
 		if key != q.op.Lookup {

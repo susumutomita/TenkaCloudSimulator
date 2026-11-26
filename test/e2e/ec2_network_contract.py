@@ -7,6 +7,7 @@ Run after make build with the dependencies in scripts/requirements-test.txt.
 import copy
 import json
 from pathlib import Path
+import tempfile
 import unittest
 
 from check import running, boto3, Config, ClientError
@@ -14,14 +15,17 @@ from botocore.parsers import ResponseParserError
 
 
 FIXTURE = Path(__file__).with_name('fixtures') / 'ec2-network-contract.json'
+NONCANONICAL_DEFAULT = '203.0.113.19/0'
 
 
 class NetworkContract(unittest.TestCase):
     def setUp(self):
-        self.endpoint, self.token = self.enterContext(running(authenticated=True))
+        state = Path(self.enterContext(tempfile.TemporaryDirectory())) / 'state.sqlite'
+        self.endpoint, self.token = self.enterContext(running(db=state, authenticated=True))
         self.cfn = self.client('cloudformation')
         self.ec2 = self.client('ec2')
         self.template = json.loads(FIXTURE.read_text())
+        self.template['Outputs']['Gateway'] = {'Value': {'Ref': 'Gateway'}}
 
     def client(self, service, region='us-east-1', token=True):
         client = boto3.client(
@@ -64,12 +68,37 @@ class NetworkContract(unittest.TestCase):
         # Ignore response metadata (request IDs), retain every exposed resource field.
         stacks = self.cfn.describe_stacks()['Stacks']
         return (sorted(stacks, key=lambda s: s['StackId']),
-                sorted(self.ec2.describe_vpcs()['Vpcs'], key=lambda v: v['VpcId']))
+                sorted(self.ec2.describe_vpcs()['Vpcs'], key=lambda v: v['VpcId']),
+                sorted(self.ec2.describe_subnets()['Subnets'], key=lambda s: s['SubnetId']),
+                sorted(self.ec2.describe_route_tables()['RouteTables'], key=lambda t: t['RouteTableId']))
+
+    def assert_subnet(self, subnet, outputs):
+        self.assertEqual(subnet['SubnetId'], outputs['Subnet'])
+        self.assertEqual(subnet['VpcId'], outputs['Vpc'])
+        self.assertEqual(subnet['CidrBlock'], self.template['Resources']['Subnet']['Properties']['CidrBlock'])
+
+    def assert_route_table(self, table, outputs):
+        self.assertEqual(table['RouteTableId'], outputs['Table'])
+        self.assertEqual(table['VpcId'], outputs['Vpc'])
+        self.assertEqual([(r['DestinationCidrBlock'], r['GatewayId'], r['Origin'], r['State'])
+                          for r in table['Routes']],
+                         [('0.0.0.0/0', outputs['Gateway'], 'CreateRoute', 'active')])
+        self.assertEqual([(a['RouteTableAssociationId'], a['RouteTableId'], a['SubnetId'], a['Main'])
+                          for a in table['Associations']],
+                         [(outputs['Association'], outputs['Table'], outputs['Subnet'], False)])
 
     def test_refs_canonical_cidr_and_scoped_cleanup(self):
         survivor = self.create('network-survivor')
         survivor_outputs = self.outputs(survivor)
-        selected = self.create('network-selected')
+        survivor_subnets = self.ec2.describe_subnets()['Subnets']
+        self.assertEqual(len(survivor_subnets), 1)
+        self.assert_subnet(survivor_subnets[0], survivor_outputs)
+        survivor_tables = self.ec2.describe_route_tables()['RouteTables']
+        self.assertEqual(len(survivor_tables), 1)
+        self.assert_route_table(survivor_tables[0], survivor_outputs)
+        body = copy.deepcopy(self.template)
+        body['Resources']['Route']['Properties']['DestinationCidrBlock'] = NONCANONICAL_DEFAULT
+        selected = self.create('network-selected', body)
         outputs = self.outputs(selected)
         self.assertNotEqual(outputs['Vpc'], survivor_outputs['Vpc'])
         self.assertEqual(outputs['Cidr'], '10.67.0.0/16')
@@ -82,13 +111,28 @@ class NetworkContract(unittest.TestCase):
         vpcs = {v['VpcId']: v for v in self.ec2.describe_vpcs()['Vpcs']}
         self.assertEqual(set(vpcs), {outputs['Vpc'], survivor_outputs['Vpc']})
         self.assertEqual(vpcs[outputs['Vpc']]['CidrBlock'], outputs['Cidr'])
-        self.assertEqual(self.client('ec2', 'ap-northeast-1').describe_vpcs()['Vpcs'], [])
+        subnets = self.ec2.describe_subnets()['Subnets']
+        self.assertCountEqual([s['SubnetId'] for s in subnets], [outputs['Subnet'], survivor_outputs['Subnet']])
+        by_subnet_id = {s['SubnetId']: s for s in subnets}
+        self.assert_subnet(by_subnet_id[outputs['Subnet']], outputs)
+        self.assertEqual(by_subnet_id[survivor_outputs['Subnet']], survivor_subnets[0])
+        tables = self.ec2.describe_route_tables()['RouteTables']
+        self.assertCountEqual([t['RouteTableId'] for t in tables], [outputs['Table'], survivor_outputs['Table']])
+        by_id = {t['RouteTableId']: t for t in tables}
+        self.assert_route_table(by_id[outputs['Table']], outputs)
+        self.assertEqual(by_id[survivor_outputs['Table']], survivor_tables[0])
+        other = self.client('ec2', 'ap-northeast-1')
+        self.assertEqual(other.describe_vpcs()['Vpcs'], [])
+        self.assertEqual(other.describe_subnets()['Subnets'], [])
+        self.assertEqual(other.describe_route_tables()['RouteTables'], [])
         self.cfn.delete_stack(StackName=selected)
         self.rejected(self.cfn.describe_stacks, 'ValidationError', StackName=selected)
         self.assertEqual(self.outputs(survivor), survivor_outputs)
         self.assertEqual([v['VpcId'] for v in self.ec2.describe_vpcs()['Vpcs']], [survivor_outputs['Vpc']])
+        self.assertEqual(self.ec2.describe_subnets()['Subnets'], survivor_subnets)
+        self.assertEqual(self.ec2.describe_route_tables()['RouteTables'], survivor_tables)
         self.cfn.delete_stack(StackName=survivor)
-        self.assertEqual(self.state(), ([], []))
+        self.assertEqual(self.state(), ([], [], [], []))
 
     def test_invalid_network_create_preserves_existing_state(self):
         self.create('network-survivor')
@@ -114,28 +158,56 @@ class NetworkContract(unittest.TestCase):
         # gateway would independently make this template invalid.
         del body['Resources']['Route']
         cases['cross-vpc-association'] = body
+        body = copy.deepcopy(self.template)
+        duplicate = copy.deepcopy(body['Resources']['Route'])
+        duplicate['Properties']['DestinationCidrBlock'] = NONCANONICAL_DEFAULT
+        body['Resources']['DuplicateRoute'] = duplicate
+        cases['duplicate-canonical-destination'] = body
+        relationship_errors = ('absent-table', 'absent-gateway', 'cross-vpc-association',
+                               'duplicate-canonical-destination')
         for label, body in cases.items():
             with self.subTest(label=label):
                 # Relationship failures must reject atomically. Do not bless the
                 # observed InternalFailure classification as an AWS contract.
-                code = None if label in ('absent-table', 'absent-gateway', 'cross-vpc-association') else 'ValidationError'
+                code = None if label in relationship_errors else 'ValidationError'
                 self.rejected(self.cfn.create_stack, code, StackName='invalid-' + label, TemplateBody=json.dumps(body))
                 self.assertEqual(self.state(), before)
         # Reuse a rejected name: no hidden stack/name claim may remain.
         self.create('invalid-absent-table')
+        self.create('invalid-duplicate-canonical-destination')
 
-    def test_unsupported_native_routes_never_report_success_or_mutate(self):
+    def test_native_route_table_read_and_rejected_mutations(self):
         selected = self.create('network-selected')
         outputs = self.outputs(selected)
+        tables = self.ec2.describe_route_tables()['RouteTables']
+        self.assertEqual([t['RouteTableId'] for t in tables], [outputs['Table']])
+        self.assert_route_table(tables[0], outputs)
         before = self.state()
+        route = {'RouteTableId': outputs['Table'], 'DestinationCidrBlock': '0.0.0.0/0'}
+        create_route = {**route, 'GatewayId': outputs['Gateway']}
         for operation, args in [
-            (self.ec2.create_route, {'RouteTableId': outputs['Table'], 'DestinationCidrBlock': '0.0.0.0/0', 'GatewayId': 'igw-00000000000000001'}),
-            (self.ec2.create_route, {'RouteTableId': outputs['Table'], 'DestinationCidrBlock': '0.0.0.0/0', 'GatewayId': 'igw-00000000000000001', 'DryRun': True}),
-            (self.ec2.describe_route_tables, {}),
+            (self.ec2.create_route, create_route),
+            (self.ec2.create_route, {**create_route, 'DryRun': True}),
+            (self.ec2.delete_route, route),
         ]:
             with self.subTest(operation=operation.__name__, args=args):
                 self.rejected(operation, 'UnsupportedOperation', **args)
                 self.assertEqual(self.state(), before)
+
+    def test_native_vpc_has_no_implicit_table_and_bare_table_has_no_children(self):
+        self.assertEqual(self.ec2.describe_route_tables()['RouteTables'], [])
+        vpc_id = self.ec2.create_vpc(CidrBlock='10.68.0.0/16')['Vpc']['VpcId']
+        self.addCleanup(self.ec2.delete_vpc, VpcId=vpc_id)
+        self.assertEqual(self.ec2.describe_route_tables()['RouteTables'], [])
+
+        bare = {section: {key: self.template[section][key] for key in ('Vpc', 'Table')}
+                for section in ('Resources', 'Outputs')}
+        outputs = self.outputs(self.create('network-bare-table', bare))
+        tables = self.ec2.describe_route_tables()['RouteTables']
+        self.assertEqual([t['RouteTableId'] for t in tables], [outputs['Table']])
+        self.assertEqual(tables[0]['VpcId'], outputs['Vpc'])
+        self.assertEqual(tables[0]['Routes'], [])
+        self.assertEqual(tables[0]['Associations'], [])
 
     def test_missing_local_token_cannot_create_network(self):
         before = self.state()

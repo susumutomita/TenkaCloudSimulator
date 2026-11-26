@@ -1,0 +1,27 @@
+.azure-queue-view,.azure-queue-view *{box-sizing:border-box}
+.azure-queue-view{--queue-blue:#0067b8;--queue-border:#c7c7c7;min-width:0;max-width:1040px;padding:16px 24px 32px;overflow-wrap:anywhere}
+.azure-queue-trail{color:#444;font-size:.9rem}
+.azure-queue-view>header{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap}
+.azure-queue-view h1{margin:8px 0;font-size:1.65rem}.azure-queue-view h2{margin:12px 0 6px;font-size:1.15rem}
+.azure-queue-view a{color:#005a9e}.azure-queue-view p{margin:8px 0}
+.azure-queue-view fieldset{min-inline-size:0;border:1px solid var(--queue-border);padding:12px;margin:12px 0}
+.azure-queue-view legend{padding:0 6px;font-weight:600}
+.azure-queue-view label{display:block;margin:8px 0}
+.azure-queue-view input:not([type=checkbox]),.azure-queue-view textarea,.azure-queue-view select{display:block;min-width:0;width:min(100%,36rem);border:1px solid #888;background:#fff;color:#242424;font:inherit;padding:5px 8px;margin-top:4px;border-radius:2px}
+.azure-queue-view input[type=number]{width:min(100%,12rem)}
+.azure-queue-view textarea{resize:vertical}
+.azure-queue-fields,.azure-queue-toolbar{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:flex-start}
+.azure-queue-view button{font:inherit;color:#005a9e;background:#fff;border:1px solid var(--queue-border);padding:5px 12px;min-height:34px;border-radius:2px;cursor:pointer;white-space:normal}
+.azure-queue-view button.azure-queue-primary{background:var(--queue-blue);border-color:var(--queue-blue);color:#fff}
+.azure-queue-view button.azure-queue-danger{color:#8a1538}
+.azure-queue-view button:disabled,.azure-queue-view fieldset:disabled button{color:#595959;background:#f3f2f1;border-color:#aaa;cursor:not-allowed}
+.azure-queue-view :is(button,input,textarea,select,summary,a):focus-visible{outline:2px solid var(--queue-blue);outline-offset:2px}
+.azure-queue-view label.azure-queue-check{display:flex;gap:8px;align-items:baseline}
+.azure-queue-view details{padding:6px 0}.azure-queue-view summary{cursor:pointer}
+.azure-queue-view dl{display:grid;grid-template-columns:minmax(0,max-content) minmax(0,1fr);gap:4px 10px}
+.azure-queue-view dd{margin:0}
+.azure-queue-view pre{max-height:16rem;overflow:auto;white-space:pre-wrap;overflow-wrap:anywhere;border:1px solid var(--queue-border);background:#f8f8f8;padding:8px}
+.azure-queue-results{margin:0;padding-inline-start:24px}
+.azure-queue-error{border-inline-start:3px solid #a4262c;background:#fdf3f4;color:#7f1320;padding:6px 10px}
+.azure-queue-status:not(:empty){border-inline-start:3px solid var(--queue-blue);background:#f1f7fb;padding:6px 10px}
+@media(max-width:600px){.azure-queue-view{padding:12px}.azure-queue-fields{display:block}.azure-queue-view dl{display:block}.azure-queue-view dd{margin-bottom:4px}}

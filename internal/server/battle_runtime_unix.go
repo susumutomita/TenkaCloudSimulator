@@ -29,6 +29,9 @@ func NewWithMonotonicBattleRuntime(path string, options ProviderConfig, origin s
 	return newWithBattleRuntime(path, options, origin, clock, config, monotonic)
 }
 func newWithBattleRuntime(path string, options ProviderConfig, origin string, clock guesttcp.HTTPProbeCommandClock, config aws.EC2InstanceRuntimeConfig, monotonic *probeclock.Clock) (http.Handler, func() error, error) {
+	if options.ownedPostgres != nil {
+		return nil, nil, errOwnedPostgresBattleConflict
+	}
 	if config.OnReady != nil || options.configureInstances != nil || options.battleCapabilities != nil || options.commandAPI != nil {
 		return nil, nil, errors.New("Battle runtime already configured")
 	}
@@ -98,6 +101,7 @@ func newWithBattleRuntime(path string, options ProviderConfig, origin string, cl
 		}
 		registry.mu.Lock()
 		registry.driver = runtime
+		registry.stacks = stacks
 		registry.mu.Unlock()
 		return nil
 	}

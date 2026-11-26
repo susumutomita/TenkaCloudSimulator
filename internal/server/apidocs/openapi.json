@@ -78,7 +78,7 @@
       },
       "post": {
         "summary": "AWS native JSON or Query operation",
-        "description": "**Static request templates:** choose the correct Content-Type and routing headers before Test Request \u2192 Send. SSM/SQS send JSON with X-Amz-Target (JSON 1.1 for SSM, JSON 1.0 for SQS); CloudFormation/IAM send URL-encoded Query fields. The 200 response is JSON for SSM/SQS and XML for Query protocols. A successful DeleteStack has no result payload beyond Query response metadata.\n\nNative regional root endpoint. SQS: X-Amz-Target AmazonSQS.CreateQueue, ListQueues, GetQueueUrl, DeleteQueue, SendMessage, ReceiveMessage, DeleteMessage, DeleteMessageBatch, ChangeMessageVisibility, GetQueueAttributes (JSON 1.0, Standard queues only; local body limit 256 KiB, aggregate physical storage 10000 messages/64 MiB across queues/regions including expired foreign rows until scoped cleanup; bytes count body UTF-8 plus stored attribute JSON. Over-budget SendMessage returns local SimulatorQuotaExceeded without mutation; existing over-cap data remains readable/deletable; FIFO, Query protocol, SendMessageBatch, ChangeMessageVisibilityBatch and dead-letter redrive are unsupported). SSM: X-Amz-Target AmazonSSM.PutParameter, GetParameter, GetParameters, GetParametersByPath, DescribeParameters, DeleteParameter, DeleteParameters. DeleteParameters requires 1\u201310 names and ssm:DeleteParameters on every distinct target, including missing names. The simulator validates and authorizes the complete batch before one atomic transaction. Duplicate names appear once in first-occurrence order within DeletedParameters or InvalidParameters. These ordering and atomicity guarantees are local bounds, not AWS equivalence. CloudFormation: CreateStack, DescribeStacks, DeleteStack; S3 buckets, SSM parameters, inline Python Lambda functions, one inline IAM identity policy per role, five Regional REST API Gateway resource types, and bounded Lambda::Permission. Unsupported options fail. Real credentials and session tokens are rejected. Create/DeleteStack also require the caller to allow the underlying S3/SSM/IAM/Lambda actions; CAPABILITY_IAM grants no permissions. API resources use NONE/POST AWS_PROXY local Lambda, same-stack API children, explicit deployment DependsOn methods and reverse guarded cleanup. Lambda permission uses only apigateway.amazonaws.com and local execute-api SourceArn. No service RoleArn or general CloudFormation lifecycle is supported. IAM customer-managed policies and role attachments are also available through the dedicated IAM provider template, with explicit ListPolicies Scope=Local. IAM is global: send X-Simulator-Service: iam, Version2010-05-08 and one of CreateRole/GetRole/ListRoles/DeleteRole/PutRolePolicy/GetRolePolicy/DeleteRolePolicy/ListRolePolicies/UpdateAssumeRolePolicy. Policy documents are JSON strings; successful IAM XML returns them RFC3986 URL-encoded. Native role names use the local alphanumeric/underscore/hyphen subset,1\u201364; inline policy names1\u2013128 AWS characters. Trust and aggregate policies32KiB, at most10 inline policies/100 statements,1000 active+retired name claims. Deleted role names cannot be adopted by legacy identity writes. Customer-managed grants and the exact read-only AmazonSSMManagedInstanceCore v2 builtin are supported; no general AWS policy catalog or session issuance.\n\n**Local access:** browser requests use your signed-in simulator session. curl/SDK clients need the host-issued X-Simulator-Token. Dummy AWS signature keys are not login credentials. A host 401 means sign in again; an IAM 403 means the current exercise identity lacks permission.\n\nUse X-Amz-Target TrentService.<operation> matching the selected body example; example choice does not change routing headers automatically. CreateKey first, copy returned KeyId into later requests, and copy an actual local Encrypt CiphertextBlob into Decrypt (the valid-base64 documentation placeholder is deliberately not decryptable). All calls require host X-Simulator-Token or signed-in local session. Dummy TCSIM SigV4 scope is not authentication.\n\nCreateKey/ListKeys require their exact kms action on *. DescribeKey/EnableKey/DisableKey/GetKeyPolicy/Encrypt/Decrypt require the actual key ARN. Decrypt without KeyId resolves the local blob key. Explicit Deny wins. Programmatic default policy only enables local identity-policy delegation; no grant for all participants.\n\nEnabled/Disabled only; disabled blocks Encrypt/Decrypt, metadata/default policy remain readable. Local request64KiB,1000keys,plaintext1\u20134096bytes,context100entries/8192canonicalbytes,counter2^32 ceiling. Ciphertext/material are simulator-local; SQLite stores raw material, not an at-rest security boundary. Unsupported aliases/tags/grants/custom policies/asymmetric/data keys/rotation/deletion/multi-region/CFN/other-service encryption fail; no problem availability is implied. Actual AWS eventual consistency and ciphertext portability are not reproduced.\n\nKMS JSON1.1 targets TrentService.CreateKey/DescribeKey/ListKeys/EnableKey/DisableKey/GetKeyPolicy/Encrypt/Decrypt are also accepted here. This root JSON1.1 section includes all eight bounded KMS body templates and limitations.\n\nSQS static templates use application/x-amz-json-1.0 with X-Amz-Target: AmazonSQS.<operation> and X-Simulator-Service: sqs. Replace QueueUrl and ReceiptHandle fixtures with current native values; static examples are not live saved state. CloudWatch Logs JSON1.1 uses Logs_20140328.<operation> and service=logs; only the seven declared operations are implemented. Choose the matching headers separately from the body example. Secrets Manager adds seven bounded JSON1.1 operations over this same root; practice values are plaintext, not KMS-encrypted. No recovery window or rotation.\n\n**DynamoDB JSON 1.0 static templates:** select application/x-amz-json-1.0 and set X-Amz-Target to the exact DynamoDB_20120810.<operation> shown by the selected example. X-Simulator-Service may be dynamodb. Use a private practice table name; samples are not current state and selecting a body does not automatically change the target header. Seven basic operations only; immediate local lifecycle, no indexes/Query/Scan/console/CFN. DeleteItem of an absent key is idempotent; unsupported options fail. Item bytes use UTF-8 and decoded binary rather than JSON transfer length; numeric sizing is approximate. Failed conditional, oversized and IAM-refused writes leave saved state unchanged. DeleteTable permanently removes that practice table and all its items.\n\nKMS aliases: TrentService.CreateAlias, ListAliases, UpdateAlias, DeleteAlias. Customer alias names include alias/ and are case-sensitive; alias/aws/ is reserved. Alias targets are concrete local key IDs/ARNs in the same account/Region. Create requires kms:CreateAlias on alias+target, Update kms:UpdateAlias on alias+old+new, Delete kms:DeleteAlias on alias+target, List kms:ListAliases on *. Local aliases are capped at1000 total/50 per key; ListAliases defaults50 and accepts1\u2013100. Create/Update/Delete return empty200. Encrypt/Decrypt accept aliases, resolving and authorizing the concrete key in the same transaction. No alias identifiers for DescribeKey/EnableKey/DisableKey/GetKeyPolicy, AWS-managed aliases, alias ABAC, key deletion lifecycle, grants or CFN KMS resources.\n\nSQS DeleteMessageBatch: 1\u201310 distinct entry IDs, IAM sqs:DeleteMessage on the queue ARN. HTTP200 always includes Successful and Failed arrays; inspect both even on success. Invalid/stale/expired/peer receipts are per-entry SenderFault failures. Local partitions retain input order and repeated handles with different IDs succeed only on the first occurrence, unlike an AWS ordering guarantee. A required SQL, cancellation, commit or acknowledgement failure returns sanitized500 and rolls back every deletion and scoped expiry cleanup, without a success list. No batch console action is added.\n\nSSM documents: CreateDocument, GetDocument, DescribeDocument, ListDocuments,\nUpdateDocument and DeleteDocument manage local definitions only. Stored Command\nschema 2.2 JSON contains bounded literal aws:runShellScript steps but is never\nexecuted by these APIs. Status Active means the definition is stored, not that\ncommands ran. No SendCommand, inventory or sessions are added.\n\nAll calls require the existing host session/token and action-specific IAM on\narn:aws:ssm:<region>:000000000000:document/<name>; ListDocuments uses *. Update\nrequires both ssm:UpdateDocument and ssm:GetDocument. Create starts version 1;\nUpdate appends a version only when DocumentVersion is current or $LATEST.\nDefault remains 1. Get/Describe accept $DEFAULT/$LATEST or a saved version.\nDelete removes all versions and returns HTTP 200 with an empty body. Examples\nare static and destructive examples must use disposable local definitions.\n\nOnly the declared input fields are accepted. Names 3..128 ASCII letters/digits/\nunderscore/hyphen/dot, no aws/amazon/amzn prefix. Content <=64 KiB, envelope <=512\nKiB, global <=100 documents/8 MiB content, <=100 versions/document. List page\nsize 1..50; tokens bind caller/region/page size/current snapshot and expire by\nmutation. Unsupported formats, tags, attachments, roles, sharing, interpolation,\nversion-specific deletion and other schema features fail rather than being\nsilently ignored. Local transactions/pagination/quota are simulator contracts,\nnot promises of identical AWS behavior. No batch console UI or document console\nis added by this increment.\n\nOpt-in native RunCommand: SendCommand, GetCommandInvocation and ListCommands require the configured canonical guest backend, host access token and verified assumed-role SigV4 SSM credentials. They are unavailable by default; console cookies or dummy signature credentials alone cannot invoke them. Only AWS-RunShellScript is accepted; saved custom document definitions remain non-executable. SendCommand can execute guest shell code and is intentionally not prefilled as a runnable example. It requires ssm:SendCommand on the AWS document ARN and every instance, from one current policy snapshot. Targets must share one retained deployment. List/Get require their IAM action on * and additionally restrict visibility to the current role incarnation and region (a local restriction, not AWS account-wide parity). ListCommands requires exactly one InvokedAfter RFC3339 filter, page size 1..50, and immutable ten-minute cursors. Command quota 128 retained; at most eight targets, 32 script strings totaling 8192 UTF-8 bytes, 4096 output bytes per stream. Unknown results are errors, never successful execution; discover existing commands instead of resubmitting after an uncertain response. No CancelCommand, arbitrary documents, session-manager-plugin compatibility or real-guest acceptance is implied. The document-management section above describes a separate definition-only API.",
+        "description": "**Static request templates:** choose the correct Content-Type and routing headers before Test Request \u2192 Send. SSM/SQS send JSON with X-Amz-Target (JSON 1.1 for SSM, JSON 1.0 for SQS); CloudFormation/IAM send URL-encoded Query fields. The 200 response is JSON for SSM/SQS and XML for Query protocols. A successful DeleteStack has no result payload beyond Query response metadata.\n\nNative regional root endpoint. SQS: X-Amz-Target AmazonSQS.CreateQueue, ListQueues, GetQueueUrl, DeleteQueue, SendMessage, ReceiveMessage, DeleteMessage, DeleteMessageBatch, ChangeMessageVisibility, GetQueueAttributes (JSON 1.0, Standard queues only; local body limit 256 KiB, aggregate physical storage 10000 messages/64 MiB across queues/regions including expired foreign rows until scoped cleanup; bytes count body UTF-8 plus stored attribute JSON. Over-budget SendMessage returns local SimulatorQuotaExceeded without mutation; existing over-cap data remains readable/deletable; FIFO, Query protocol, SendMessageBatch, ChangeMessageVisibilityBatch and dead-letter redrive are unsupported). SSM: X-Amz-Target AmazonSSM.PutParameter, GetParameter, GetParameters, GetParametersByPath, DescribeParameters, DeleteParameter, DeleteParameters. DeleteParameters requires 1\u201310 names and ssm:DeleteParameters on every distinct target, including missing names. The simulator validates and authorizes the complete batch before one atomic transaction. Duplicate names appear once in first-occurrence order within DeletedParameters or InvalidParameters. These ordering and atomicity guarantees are local bounds, not AWS equivalence. CloudFormation: CreateStack, DescribeStacks, DeleteStack; S3 buckets, SSM parameters, inline Python Lambda functions, one inline IAM identity policy per role, five Regional REST API Gateway resource types, and bounded Lambda::Permission. Unsupported options fail. Real credentials and session tokens are rejected. Create/DeleteStack also require the caller to allow the underlying S3/SSM/IAM/Lambda actions; CAPABILITY_IAM grants no permissions. API resources use NONE/POST AWS_PROXY local Lambda, same-stack API children, explicit deployment DependsOn methods and reverse guarded cleanup. Lambda permission uses only apigateway.amazonaws.com and local execute-api SourceArn. No service RoleArn or general CloudFormation lifecycle is supported. IAM customer-managed policies and role attachments are also available through the dedicated IAM provider template, with explicit ListPolicies Scope=Local. IAM is global: send X-Simulator-Service: iam, Version2010-05-08 and one of CreateRole/GetRole/ListRoles/DeleteRole/PutRolePolicy/GetRolePolicy/DeleteRolePolicy/ListRolePolicies/UpdateAssumeRolePolicy. Policy documents are JSON strings; successful IAM XML returns them RFC3986 URL-encoded. Native role names use the local alphanumeric/underscore/hyphen subset,1\u201364; inline policy names1\u2013128 AWS characters. Trust and aggregate policies32KiB, at most10 inline policies/100 statements,1000 active+retired name claims. Deleted role names cannot be adopted by legacy identity writes. Customer-managed grants and the exact read-only AmazonSSMManagedInstanceCore v2 builtin are supported; no general AWS policy catalog or session issuance.\n\n**Local access:** browser requests use your signed-in simulator session. curl/SDK clients need the host-issued X-Simulator-Token. Dummy AWS signature keys are not login credentials. A host 401 means sign in again; an IAM 403 means the current exercise identity lacks permission.\n\nUse X-Amz-Target TrentService.<operation> matching the selected body example; example choice does not change routing headers automatically. CreateKey first, copy returned KeyId into later requests, and copy an actual local Encrypt CiphertextBlob into Decrypt (the valid-base64 documentation placeholder is deliberately not decryptable). All calls require host X-Simulator-Token or signed-in local session. Dummy TCSIM SigV4 scope is not authentication.\n\nCreateKey/ListKeys require their exact kms action on *. DescribeKey/EnableKey/DisableKey/GetKeyPolicy/Encrypt/Decrypt require the actual key ARN. Decrypt without KeyId resolves the local blob key. Explicit Deny wins. Programmatic default policy only enables local identity-policy delegation; no grant for all participants.\n\nEnabled/Disabled only; disabled blocks Encrypt/Decrypt, metadata/default policy remain readable. Local request64KiB,1000keys,plaintext1\u20134096bytes,context100entries/8192canonicalbytes,counter2^32 ceiling. Ciphertext/material are simulator-local; SQLite stores raw material, not an at-rest security boundary. Unsupported aliases/tags/grants/custom policies/asymmetric/data keys/rotation/deletion/multi-region/CFN/other-service encryption fail; no problem availability is implied. Actual AWS eventual consistency and ciphertext portability are not reproduced.\n\nKMS JSON1.1 targets TrentService.CreateKey/DescribeKey/ListKeys/EnableKey/DisableKey/GetKeyPolicy/Encrypt/Decrypt are also accepted here. This root JSON1.1 section includes all eight bounded KMS body templates and limitations.\n\nSQS static templates use application/x-amz-json-1.0 with X-Amz-Target: AmazonSQS.<operation> and X-Simulator-Service: sqs. Replace QueueUrl and ReceiptHandle fixtures with current native values; static examples are not live saved state. CloudWatch Logs JSON1.1 uses Logs_20140328.<operation> and service=logs; only the seven declared operations are implemented. Choose the matching headers separately from the body example. Secrets Manager adds seven bounded JSON1.1 operations over this same root; practice values are plaintext, not KMS-encrypted. No recovery window or rotation.\n\n**DynamoDB JSON 1.0 static templates:** select application/x-amz-json-1.0 and set X-Amz-Target to the exact DynamoDB_20120810.<operation> shown by the selected example. X-Simulator-Service may be dynamodb. Use a private practice table name; samples are not current state and selecting a body does not automatically change the target header. Seven basic operations only; immediate local lifecycle, no indexes/Query/Scan/console/CFN. DeleteItem of an absent key is idempotent; unsupported options fail. Item bytes use UTF-8 and decoded binary rather than JSON transfer length; numeric sizing is approximate. Failed conditional, oversized and IAM-refused writes leave saved state unchanged. DeleteTable permanently removes that practice table and all its items.\n\nKMS aliases: TrentService.CreateAlias, ListAliases, UpdateAlias, DeleteAlias. Customer alias names include alias/ and are case-sensitive; alias/aws/ is reserved. Alias targets are concrete local key IDs/ARNs in the same account/Region. Create requires kms:CreateAlias on alias+target, Update kms:UpdateAlias on alias+old+new, Delete kms:DeleteAlias on alias+target, List kms:ListAliases on *. Local aliases are capped at1000 total/50 per key; ListAliases defaults50 and accepts1\u2013100. Create/Update/Delete return empty200. Encrypt/Decrypt accept aliases, resolving and authorizing the concrete key in the same transaction. No alias identifiers for DescribeKey/EnableKey/DisableKey/GetKeyPolicy, AWS-managed aliases, alias ABAC, key deletion lifecycle, grants or CFN KMS resources.\n\nSQS DeleteMessageBatch: 1\u201310 distinct entry IDs, IAM sqs:DeleteMessage on the queue ARN. HTTP200 always includes Successful and Failed arrays; inspect both even on success. Invalid/stale/expired/peer receipts are per-entry SenderFault failures. Local partitions retain input order and repeated handles with different IDs succeed only on the first occurrence, unlike an AWS ordering guarantee. A required SQL, cancellation, commit or acknowledgement failure returns sanitized500 and rolls back every deletion and scoped expiry cleanup, without a success list. No batch console action is added.\n\nSSM documents: CreateDocument, GetDocument, DescribeDocument, ListDocuments,\nListDocumentVersions, UpdateDocument and DeleteDocument manage definitions only. Stored Command\nschema 2.2 JSON contains bounded literal aws:runShellScript steps but is never\nexecuted by these APIs. Status Active means the definition is stored, not that\ncommands ran. No SendCommand, inventory or sessions are added.\n\nAll calls require the existing host session/token and action-specific IAM on\narn:aws:ssm:<region>:000000000000:document/<name>; ListDocuments uses *. Update\nrequires both ssm:UpdateDocument and ssm:GetDocument. Create starts version 1;\nUpdate appends a version only when DocumentVersion is current or $LATEST.\nDefault remains 1. Get/Describe accept $DEFAULT/$LATEST or a saved version.\nDelete removes all versions and returns HTTP 200 with an empty body. Examples\nare static and destructive examples must use disposable local definitions.\n\nOnly the declared input fields are accepted. Names 3..128 ASCII letters/digits/\nunderscore/hyphen/dot, no aws/amazon/amzn prefix. Content <=64 KiB, envelope <=512\nKiB, global <=100 documents/8 MiB content, <=100 versions/document. List page\nsize 1..50; tokens bind caller/region/page size/current snapshot and expire by\nmutation. Unsupported formats, tags, attachments, roles, sharing, interpolation,\nversion-specific deletion and other schema features fail rather than being\nsilently ignored. Local transactions/pagination/quota are simulator contracts,\nnot promises of identical AWS behavior. ListDocumentVersions accepts a local\nName, with optional MaxResults and NextToken, and returns version metadata only.\nAn update invalidates a cursor for that document, not other documents. Missing\ndocuments return InvalidDocument. Supply the document name and header manually\nwhen using this example; the preset does not create anything.\n\nOpt-in native RunCommand: SendCommand, GetCommandInvocation and ListCommands require the configured canonical guest backend, host access token and verified assumed-role SigV4 SSM credentials. They are unavailable by default; console cookies or dummy signature credentials alone cannot invoke them. Only AWS-RunShellScript is accepted; saved custom document definitions remain non-executable. SendCommand can execute guest shell code and is intentionally not prefilled as a runnable example. It requires ssm:SendCommand on the AWS document ARN and every instance, from one current policy snapshot. Targets must share one retained deployment. List/Get require their IAM action on * and additionally restrict visibility to the current role incarnation and region (a local restriction, not AWS account-wide parity). ListCommands requires exactly one InvokedAfter RFC3339 filter, page size 1..50, and immutable ten-minute cursors. Command quota 128 retained; at most eight targets, 32 script strings totaling 8192 UTF-8 bytes, 4096 output bytes per stream. Unknown results are errors, never successful execution; discover existing commands instead of resubmitting after an uncertain response. No CancelCommand, arbitrary documents, session-manager-plugin compatibility or real-guest acceptance is implied. The document-management section above describes a separate definition-only API.",
         "operationId": "awsRegionalOperation",
         "parameters": [
           {
@@ -117,8 +117,7 @@
                 "logs",
                 "secretsmanager",
                 "dynamodb",
-                "sdb",
-                "ec2"
+                "sdb"
               ]
             },
             "description": "Optional native service hint; when supplied it must match the selected service target. iam selects IAM Query; cloudformation selects CloudFormation Query. SSM/Logs/KMS/Secrets Manager use JSON 1.1; SQS/DynamoDB use JSON 1.0. This routing hint grants no access."
@@ -210,6 +209,9 @@
                   },
                   {
                     "$ref": "#/components/schemas/SSMListDocumentsInput"
+                  },
+                  {
+                    "$ref": "#/components/schemas/SSMListDocumentVersionsInput"
                   },
                   {
                     "$ref": "#/components/schemas/SSMUpdateDocumentInput"
@@ -555,6 +557,13 @@
                     "MaxResults": 10
                   }
                 },
+                "SSMListDocumentVersions": {
+                  "summary": "X-Amz-Target: AmazonSSM.ListDocumentVersions (definition metadata only)",
+                  "value": {
+                    "Name": "local-definition",
+                    "MaxResults": 1
+                  }
+                },
                 "SSMUpdateDocument": {
                   "summary": "X-Amz-Target: AmazonSSM.UpdateDocument (definition only)",
                   "value": {
@@ -684,15 +693,9 @@
                       "ListInstanceProfilesForRole",
                       "ListDomains",
                       "DomainMetadata",
-                      "DescribeInstances",
-                      "DescribeVpcs",
-                      "DescribeSubnets",
-                      "CreateVpc",
-                      "DeleteVpc",
-                      "CreateSubnet",
-                      "DeleteSubnet",
-                      "RunInstances",
-                      "TerminateInstances"
+                      "DeleteAttributes",
+                      "Select",
+                      "GetAttributes"
                     ]
                   },
                   "Version": {
@@ -700,8 +703,7 @@
                     "enum": [
                       "2010-05-15",
                       "2010-05-08",
-                      "2009-04-15",
-                      "2016-11-15"
+                      "2009-04-15"
                     ]
                   },
                   "StackName": {
@@ -771,53 +773,26 @@
                     "minLength": 3,
                     "maxLength": 255,
                     "pattern": "^[A-Za-z0-9_.-]+$",
-                    "description": "Existing local SimpleDB domain name, required for DomainMetadata only in these presets."
+                    "description": "Existing local domain for DomainMetadata, GetAttributes or DeleteAttributes. Do not include DomainName for Select; use the domain in SelectExpression."
                   },
-                  "CidrBlock": {
+                  "ItemName": {
                     "type": "string",
-                    "description": "CreateVpc and CreateSubnet: IPv4 CIDR from /16 to /28. EC2 action-specific field; unsupported fields fail explicitly."
+                    "minLength": 1,
+                    "maxLength": 1024,
+                    "description": "Exact local item name for GetAttributes or DeleteAttributes. The native API enforces a 1024-byte UTF-8 limit."
                   },
-                  "VpcId": {
+                  "SelectExpression": {
                     "type": "string",
-                    "description": "CreateSubnet and DeleteVpc: an EC2-owned VPC ID. EC2 action-specific field; unsupported fields fail explicitly."
+                    "description": "SimpleDB Select only. Use a bounded expression against a domain you can query."
                   },
-                  "AvailabilityZone": {
+                  "ConsistentRead": {
                     "type": "string",
-                    "description": "CreateSubnet, optional: the region name followed by a, b or c. EC2 action-specific field; unsupported fields fail explicitly."
+                    "enum": ["true", "false"],
+                    "description": "Optional for GetAttributes or Select. Keep the same value on every Select page."
                   },
-                  "SubnetId": {
+                  "NextToken": {
                     "type": "string",
-                    "description": "RunInstances and DeleteSubnet: an EC2-owned subnet ID. EC2 action-specific field; unsupported fields fail explicitly."
-                  },
-                  "ImageId": {
-                    "type": "string",
-                    "description": "RunInstances: ami- followed by 8 or 17 hexadecimal characters; only the format is checked. EC2 action-specific field; unsupported fields fail explicitly."
-                  },
-                  "InstanceType": {
-                    "type": "string",
-                    "enum": [
-                      "t3.micro",
-                      "t3.small"
-                    ],
-                    "description": "RunInstances. EC2 action-specific field; unsupported fields fail explicitly."
-                  },
-                  "MinCount": {
-                    "type": "string",
-                    "enum": [
-                      "1"
-                    ],
-                    "description": "RunInstances: exactly one launch record. EC2 action-specific field; unsupported fields fail explicitly."
-                  },
-                  "MaxCount": {
-                    "type": "string",
-                    "enum": [
-                      "1"
-                    ],
-                    "description": "RunInstances: exactly one launch record. EC2 action-specific field; unsupported fields fail explicitly."
-                  },
-                  "InstanceId.1": {
-                    "type": "string",
-                    "description": "TerminateInstances: one EC2-owned launch record. EC2 action-specific field; unsupported fields fail explicitly."
+                    "description": "Omit on the first page. For Select, copy the token from the previous XML result without changing the expression or ConsistentRead."
                   }
                 }
               },
@@ -1089,6 +1064,30 @@
                     "Version": "2009-04-15"
                   }
                 },
+                "Select": {
+                  "summary": "SimpleDB Select (read-only item names)",
+                  "description": "Set X-Simulator-Service to sdb, clear X-Amz-Target, and use us-east-1 or leave the region header unset. Replace example-domain inside SelectExpression with your existing local domain. Send only the fields below under your local identity with sdb:Select on that domain. The XML result lists matching item names from the same store used by the console. To continue, copy NextToken from the response (even after an empty page), preserving the exact expression and ConsistentRead; stop when NextToken is absent.",
+                  "value": {
+                    "Action": "Select",
+                    "Version": "2009-04-15",
+                    "SelectExpression": "select itemName() from `example-domain` limit 25",
+                    "ConsistentRead": "true"
+                  }
+                },
+                "DeleteAttributes": {
+                  "summary": "SimpleDB DeleteAttributes (single value, conditional write)",
+                  "description": "Use a disposable local item that you own. Replace DomainName, ItemName, the attribute name, and BOTH copies of its current single value before choosing Send. Set X-Simulator-Service to sdb, clear X-Amz-Target, and use the existing local identity with sdb:DeleteAttributes on the domain. This example deletes only the matching value; deleting the last value removes the item. A stale value does not change data. Use GetAttributes to read back.",
+                  "value": {
+                    "Action": "DeleteAttributes",
+                    "Version": "2009-04-15",
+                    "DomainName": "example-domain",
+                    "ItemName": "example-item",
+                    "Attribute.1.Name": "example-attribute",
+                    "Attribute.1.Value": "replace-with-current-value",
+                    "Expected.Name": "example-attribute",
+                    "Expected.Value": "replace-with-current-value"
+                  }
+                },
                 "DomainMetadata": {
                   "summary": "SimpleDB DomainMetadata (read-only Query)",
                   "description": "Set X-Simulator-Service to sdb, use us-east-1 or leave X-Simulator-Region unset, and clear X-Amz-Target. Replace the example DomainName with an existing domain in your configured local scope. Send using your existing local sign-in or simulator access token with sdb:DomainMetadata permission. The XML result gives committed local domain statistics; this request does not create or change the domain.",
@@ -1098,87 +1097,15 @@
                     "DomainName": "scalar-practice-domain"
                   }
                 },
-                "EC2DescribeInstances": {
-                  "summary": "EC2 DescribeInstances (X-Simulator-Service: ec2)",
-                  "description": "Select the application/x-www-form-urlencoded body, set X-Simulator-Service to ec2, choose X-Simulator-Region and clear X-Amz-Target. Remove any fields left from another example: unknown fields are refused, never ignored. Lists CloudFormation-owned instances and EC2-owned launch records of the region. No instanceState is returned; simulatorRuntimeState is not_launched for a launch record.",
+                "GetAttributes": {
+                  "summary": "SimpleDB GetAttributes (read-only item values)",
+                  "description": "Set X-Simulator-Service to sdb, clear X-Amz-Target, and use us-east-1 or leave X-Simulator-Region unset. Replace DomainName and ItemName with your local domain and exact item name. Send using your existing local identity with sdb:GetAttributes on that domain. The XML lists the item's saved name/value pairs from the same store used by the console and SDK. An unknown item in an existing domain returns no attributes; nothing is created or changed.",
                   "value": {
-                    "Action": "DescribeInstances",
-                    "Version": "2016-11-15"
-                  }
-                },
-                "EC2DescribeVpcs": {
-                  "summary": "EC2 DescribeVpcs (X-Simulator-Service: ec2)",
-                  "description": "Select the application/x-www-form-urlencoded body, set X-Simulator-Service to ec2, choose X-Simulator-Region and clear X-Amz-Target. Remove any fields left from another example: unknown fields are refused, never ignored. Lists the region's VPCs of both owners with simulatorManagedBy.",
-                  "value": {
-                    "Action": "DescribeVpcs",
-                    "Version": "2016-11-15"
-                  }
-                },
-                "EC2DescribeSubnets": {
-                  "summary": "EC2 DescribeSubnets (X-Simulator-Service: ec2)",
-                  "description": "Select the application/x-www-form-urlencoded body, set X-Simulator-Service to ec2, choose X-Simulator-Region and clear X-Amz-Target. Remove any fields left from another example: unknown fields are refused, never ignored. Lists the region's subnets of both owners with simulatorManagedBy.",
-                  "value": {
-                    "Action": "DescribeSubnets",
-                    "Version": "2016-11-15"
-                  }
-                },
-                "EC2CreateVpc": {
-                  "summary": "EC2 CreateVpc (X-Simulator-Service: ec2)",
-                  "description": "Select the application/x-www-form-urlencoded body, set X-Simulator-Service to ec2, choose X-Simulator-Region and clear X-Amz-Target. Remove any fields left from another example: unknown fields are refused, never ignored. Creates an EC2-owned VPC. Copy vpcId from the XML response for CreateSubnet.",
-                  "value": {
-                    "Action": "CreateVpc",
-                    "Version": "2016-11-15",
-                    "CidrBlock": "10.0.0.0/16"
-                  }
-                },
-                "EC2CreateSubnet": {
-                  "summary": "EC2 CreateSubnet (X-Simulator-Service: ec2)",
-                  "description": "Select the application/x-www-form-urlencoded body, set X-Simulator-Service to ec2, choose X-Simulator-Region and clear X-Amz-Target. Remove any fields left from another example: unknown fields are refused, never ignored. STATIC TEMPLATE, not live state. Replace __VPC_ID__ with the vpcId of an EC2-owned VPC from CreateVpc or DescribeVpcs. The CIDR must lie inside the VPC CIDR.",
-                  "value": {
-                    "Action": "CreateSubnet",
-                    "Version": "2016-11-15",
-                    "VpcId": "__VPC_ID__",
-                    "CidrBlock": "10.0.1.0/24"
-                  }
-                },
-                "EC2RunInstances": {
-                  "summary": "EC2 RunInstances (X-Simulator-Service: ec2)",
-                  "description": "Select the application/x-www-form-urlencoded body, set X-Simulator-Service to ec2, choose X-Simulator-Region and clear X-Amz-Target. Remove any fields left from another example: unknown fields are refused, never ignored. STATIC TEMPLATE, not live state. Replace __SUBNET_ID__ with the subnetId of an EC2-owned subnet. Saves one launch record: no guest, address or disk is created and it never becomes running. The image ID is only checked for its format.",
-                  "value": {
-                    "Action": "RunInstances",
-                    "Version": "2016-11-15",
-                    "ImageId": "ami-0123456789abcdef0",
-                    "InstanceType": "t3.micro",
-                    "MinCount": "1",
-                    "MaxCount": "1",
-                    "SubnetId": "__SUBNET_ID__"
-                  }
-                },
-                "EC2TerminateInstances": {
-                  "summary": "EC2 TerminateInstances (X-Simulator-Service: ec2)",
-                  "description": "Select the application/x-www-form-urlencoded body, set X-Simulator-Service to ec2, choose X-Simulator-Region and clear X-Amz-Target. Remove any fields left from another example: unknown fields are refused, never ignored. STATIC TEMPLATE, not live state. Replace __INSTANCE_ID__ with the instanceId of an EC2-owned launch record. The record is removed; CloudFormation-owned instances are refused.",
-                  "value": {
-                    "Action": "TerminateInstances",
-                    "Version": "2016-11-15",
-                    "InstanceId.1": "__INSTANCE_ID__"
-                  }
-                },
-                "EC2DeleteSubnet": {
-                  "summary": "EC2 DeleteSubnet (X-Simulator-Service: ec2)",
-                  "description": "Select the application/x-www-form-urlencoded body, set X-Simulator-Service to ec2, choose X-Simulator-Region and clear X-Amz-Target. Remove any fields left from another example: unknown fields are refused, never ignored. STATIC TEMPLATE, not live state. Replace __SUBNET_ID__ with an EC2-owned subnet that holds no launch record.",
-                  "value": {
-                    "Action": "DeleteSubnet",
-                    "Version": "2016-11-15",
-                    "SubnetId": "__SUBNET_ID__"
-                  }
-                },
-                "EC2DeleteVpc": {
-                  "summary": "EC2 DeleteVpc (X-Simulator-Service: ec2)",
-                  "description": "Select the application/x-www-form-urlencoded body, set X-Simulator-Service to ec2, choose X-Simulator-Region and clear X-Amz-Target. Remove any fields left from another example: unknown fields are refused, never ignored. STATIC TEMPLATE, not live state. Replace __VPC_ID__ with an EC2-owned VPC that has no subnet.",
-                  "value": {
-                    "Action": "DeleteVpc",
-                    "Version": "2016-11-15",
-                    "VpcId": "__VPC_ID__"
+                    "Action": "GetAttributes",
+                    "Version": "2009-04-15",
+                    "DomainName": "scalar-practice-domain",
+                    "ItemName": "scalar-practice-item",
+                    "ConsistentRead": "true"
                   }
                 }
               }
@@ -1582,6 +1509,9 @@
                       "$ref": "#/components/schemas/SSMListDocumentsOutput"
                     },
                     {
+                      "$ref": "#/components/schemas/SSMListDocumentVersionsOutput"
+                    },
+                    {
                       "$ref": "#/components/schemas/SSMSendCommandOutput"
                     },
                     {
@@ -1748,6 +1678,21 @@
                           "PlatformTypes": [
                             "Linux"
                           ]
+                        }
+                      ]
+                    }
+                  },
+                  "SSMListDocumentVersions": {
+                    "summary": "Static document version metadata, without definition content",
+                    "value": {
+                      "DocumentVersions": [
+                        {
+                          "Name": "local-definition",
+                          "DocumentVersion": "1",
+                          "CreatedDate": 1794268800,
+                          "DocumentFormat": "JSON",
+                          "IsDefaultVersion": true,
+                          "Status": "Active"
                         }
                       ]
                     }
@@ -2208,6 +2153,12 @@
             "permission": "ssm:ListDocuments on *",
             "responseBody": "JSON metadata; GetDocument additionally returns definition content, never execution output",
             "response": "#/components/schemas/SSMListDocumentsOutput"
+          },
+          "AmazonSSM.ListDocumentVersions": {
+            "request": "#/components/schemas/SSMListDocumentVersionsInput",
+            "permission": "ssm:ListDocumentVersions on the local document ARN",
+            "responseBody": "JSON version metadata only; no definition content or execution result",
+            "response": "#/components/schemas/SSMListDocumentVersionsOutput"
           },
           "AmazonSSM.UpdateDocument": {
             "request": "#/components/schemas/SSMUpdateDocumentInput",
@@ -14549,7 +14500,7 @@
         "tags": [
           "Route53 public hosted zones"
         ],
-        "description": "Requires route53:ChangeResourceRecordSets on selected hostedzone ARN. Atomic batch, 1..100 CREATE/UPSERT/DELETE changes; simple A/AAAA/CNAME/TXT/MX only, TTL required. DELETE exactly matches canonical saved RRset. Host token/session authentication is required. Global state uses us-east-1 signing scope and dummy TCSIM credentials only. Unsupported fields fail explicitly.",
+        "description": "Requires route53:ChangeResourceRecordSets on selected hostedzone ARN. Atomic batch, 1..100 CREATE/UPSERT/DELETE changes; simple A/AAAA/CNAME/TXT/MX/PTR only, TTL required. DELETE exactly matches canonical saved RRset. Host token/session authentication is required. Global state uses us-east-1 signing scope and dummy TCSIM credentials only. Unsupported fields fail explicitly.",
         "parameters": [
           {
             "name": "Id",
@@ -18428,6 +18379,30 @@
           }
         }
       },
+      "SSMListDocumentVersionsInput": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "Name"
+        ],
+        "properties": {
+          "Name": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 128,
+            "pattern": "^(?![Aa][Ww][Ss]|[Aa][Mm][Aa][Zz][Oo][Nn]|[Aa][Mm][Zz][Nn])[a-zA-Z0-9_.-]{3,128}$"
+          },
+          "MaxResults": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 50
+          },
+          "NextToken": {
+            "type": "string",
+            "maxLength": 2048
+          }
+        }
+      },
       "SSMUpdateDocumentInput": {
         "type": "object",
         "additionalProperties": false,
@@ -18584,6 +18559,48 @@
           }
         }
       },
+      "SSMDocumentVersionInfo": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "Name",
+          "DocumentVersion",
+          "CreatedDate",
+          "DocumentFormat",
+          "IsDefaultVersion",
+          "Status"
+        ],
+        "properties": {
+          "Name": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 128,
+            "pattern": "^(?![Aa][Ww][Ss]|[Aa][Mm][Aa][Zz][Oo][Nn]|[Aa][Mm][Zz][Nn])[a-zA-Z0-9_.-]{3,128}$"
+          },
+          "DocumentVersion": {
+            "type": "string",
+            "pattern": "^(?:[1-9][0-9]?|100)$"
+          },
+          "CreatedDate": {
+            "type": "number"
+          },
+          "DocumentFormat": {
+            "type": "string",
+            "enum": [
+              "JSON"
+            ]
+          },
+          "IsDefaultVersion": {
+            "type": "boolean"
+          },
+          "Status": {
+            "type": "string",
+            "enum": [
+              "Active"
+            ]
+          }
+        }
+      },
       "SSMCreateDocumentOutput": {
         "type": "object",
         "additionalProperties": false,
@@ -18672,6 +18689,27 @@
           },
           "NextToken": {
             "type": "string"
+          }
+        }
+      },
+      "SSMListDocumentVersionsOutput": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "DocumentVersions"
+        ],
+        "properties": {
+          "DocumentVersions": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 50,
+            "items": {
+              "$ref": "#/components/schemas/SSMDocumentVersionInfo"
+            }
+          },
+          "NextToken": {
+            "type": "string",
+            "maxLength": 2048
           }
         }
       },

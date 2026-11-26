@@ -73,6 +73,12 @@ def submit(page):
  if dialog.is_visible():dialog.get_by_role('button').last.click()
  else:page.get_by_role('button',name=re.compile('^(Create bucket|Upload|Create parameter|Save changes)$')).last.click()
 class Conformance(unittest.TestCase):
+ def test_s3_multipart_paging_authenticated_browser(self):
+  subprocess.run([sys.executable,str(Path(__file__).with_name('test_s3_multipart_paging_launcher.py'))],check=True,timeout=60)
+  with (REPORTS/'s3-multipart-paging.json').open('w') as report:
+   subprocess.run([sys.executable,str(Path(__file__).with_name('run_s3_multipart_paging.py')),
+                   '--binary',str(BINARY)],check=True,timeout=300,stdout=report)
+
  def test_single_service_navigation_and_history_commit(self):
   subprocess.run([sys.executable,str(Path(__file__).with_name("navigation_single_commit.py"))],check=True,timeout=90)
 
@@ -155,6 +161,7 @@ class Conformance(unittest.TestCase):
  def test_crossprovider_console_two_cli_state_and_authority(self):
   # Run the actual standalone acceptance as a required case, never a source-only
   # or optional/skip check. It must import the real browser/audit dependencies.
+  subprocess.run([sys.executable, str(Path(__file__).with_name('test_crossprovider_browser_sandbox.py'))], check=True, timeout=60)
   subprocess.run([sys.executable, str(Path(__file__).with_name('crossprovider_console.py'))], check=True, timeout=300)
  def test_lambda_execution_role_sdk_bridge_two_teams(self):
   with running(authenticated=True) as (endpoint,operator),running(authenticated=True) as (other,other_operator):
@@ -374,9 +381,6 @@ def handler(event,context):
  def test_service_japanese_uses_canonical_native_operations(self):
   subprocess.run([sys.executable,str(Path(__file__).with_name('service_locale.py'))],check=True,timeout=180)
   subprocess.run([sys.executable,str(Path(__file__).with_name('ec2_readonly_console.py'))],check=True,timeout=180)
-  subprocess.run([sys.executable,str(Path(__file__).with_name('ec2_native_instance_console.py'))],check=True,timeout=180)
- def test_ec2_scalar_send_native_lifecycle(self):
-  subprocess.run([sys.executable,str(Path(__file__).with_name('ec2_scalar_send.py'))],check=True,timeout=180)
  def test_official_storage_sdk_harness_boundaries(self):
   subprocess.run([sys.executable,str(Path(__file__).with_name('test_crossprovider_official_storage.py'))],check=True,timeout=30)
  def test_official_storage_sdks_two_teams_restart_and_conditions(self):
@@ -677,6 +681,14 @@ def handler(event,context):
 
  def test_ssm_document_definition_native_sdk_and_restart(self):
   subprocess.run([sys.executable,str(Path(__file__).with_name('ssm_documents.py'))],check=True,timeout=180)
+
+ def test_ssm_document_versions_console_and_sdk(self):
+  from ssm_documents_console import run
+  run()
+
+ def test_ssm_document_versions_scalar_and_sdk(self):
+  from ssm_document_versions_scalar import run
+  run()
 
  def test_secrets_manager_native_two_teams_restart_and_redaction(self):
   subprocess.run([sys.executable,str(Path(__file__).with_name('secrets_manager.py'))],check=True)

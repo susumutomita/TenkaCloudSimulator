@@ -9,6 +9,7 @@ import Input from '@cloudscape-design/components/input';
 import SpaceBetween from '@cloudscape-design/components/space-between';
 import Table from '@cloudscape-design/components/table';
 import {useLocale} from './i18n.jsx';
+import {listMultipartParts} from './s3-multipart-parts.mjs';
 
 const xml=text=>{const d=new DOMParser().parseFromString(text,'application/xml');if(d.querySelector('parsererror'))throw Error('Invalid XML response');return d;};
 const value=(node,name)=>node.querySelector(name)?.textContent||'';
@@ -30,13 +31,12 @@ export default function S3Multipart({bucket,region,request,onSaving,onComplete})
   finally{mutating.current=false;if(alive.current){setBusy(false);onSaving(false)}}
  }
  const readUploads=async()=>{const d=xml(await(await call('/'+bucket+'?uploads')).text());if(value(d,'IsTruncated')==='true')throw Error(t('Upload list exceeded its local limit.','アップロード一覧がローカル上限を超えました。'));return [...d.querySelectorAll('Upload')].map(n=>({key:value(n,'Key'),id:value(n,'UploadId'),created:value(n,'Initiated')}))};
- async function readParts(upload){
-  const result=[];let marker=0;
-  do{const d=xml(await(await call(path(upload.key)+'?uploadId='+encodeURIComponent(upload.id)+'&part-number-marker='+marker)).text());
-   result.push(...[...d.querySelectorAll('Part')].map(n=>({number:Number(value(n,'PartNumber')),etag:value(n,'ETag'),size:Number(value(n,'Size'))})));
-   if(value(d,'IsTruncated')!=='true')return result;
-   const next=Number(value(d,'NextPartNumberMarker'));if(next<=marker||result.length>=10000)throw Error('Invalid part cursor');marker=next;
-  }while(alive.current);return [];
+ function readParts(upload){
+  return listMultipartParts(async marker=>{
+   const d=xml(await(await call(path(upload.key)+'?uploadId='+encodeURIComponent(upload.id)+'&part-number-marker='+marker)).text());
+   return {parts:[...d.querySelectorAll('Part')].map(n=>({number:Number(value(n,'PartNumber')),etag:value(n,'ETag'),size:Number(value(n,'Size'))})),
+    truncated:value(d,'IsTruncated'),nextMarker:value(d,'NextPartNumberMarker')};
+  },()=>alive.current);
  }
  function refresh(){action(readUploads,rows=>{setUploads(rows);setSelected([]);setParts([]);clearPartDraft()})}
  useEffect(()=>{refresh();return()=>{alive.current=false;revision.current++;controller.current.abort();if(mutating.current)onSaving(false)}},[]);

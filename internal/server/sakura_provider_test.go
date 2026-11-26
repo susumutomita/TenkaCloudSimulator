@@ -132,7 +132,7 @@ func sakuraAssertPeerCapabilities(t *testing.T, caps map[string]any) {
 		t.Fatal("incoming twelve-operation KMS capability changed")
 	}
 	storage, ok := caps["cloudStorage"].(map[string]any)
-	if !ok || len(storage) != 2 || storage["gcp"] == nil || storage["azure"] == nil {
+	if !ok || len(storage) != 3 || storage["gcp"] == nil || storage["azure"] == nil || storage["azure-queue"] == nil {
 		t.Fatal("peer storage capabilities changed")
 	}
 }
@@ -146,7 +146,7 @@ func TestSakuraServerDefaultDisabledPreservesLegacyProviderSet(t *testing.T) {
 	defer closeState()
 	caps := sakuraServerRequest(t, h, "GET", "/_simulator/v1/capabilities", "", false, 200)
 	sakuraAssertPeerCapabilities(t, caps)
-	if !reflect.DeepEqual(caps["providers"], []any{"aws", "azure", "azure-arm", "gcp"}) {
+	if !reflect.DeepEqual(caps["providers"], []any{"aws", "azure", "azure-arm", "azure-queue", "gcp"}) {
 		t.Fatal("default provider set changed")
 	}
 	for _, capability := range []string{"sakura", "sakuraServer"} {
@@ -155,7 +155,7 @@ func TestSakuraServerDefaultDisabledPreservesLegacyProviderSet(t *testing.T) {
 		}
 	}
 	storage := caps["cloudStorage"].(map[string]any)
-	if len(storage) != 2 || storage["gcp"] == nil || storage["azure"] == nil {
+	if len(storage) != 3 || storage["gcp"] == nil || storage["azure"] == nil || storage["azure-queue"] == nil {
 		t.Fatal("legacy cloud storage capability changed")
 	}
 	sakuraServerRequest(t, h, "GET", sakuraServerPath, "", false, 404)
@@ -194,7 +194,7 @@ func TestSakuraServerOptInUsesRegistryAuthenticationAndCopiedScope(t *testing.T)
 	}
 	caps := sakuraServerRequest(t, access, "GET", "/_simulator/v1/capabilities", "", true, 200)
 	sakuraAssertPeerCapabilities(t, caps)
-	if !reflect.DeepEqual(caps["providers"], []any{"aws", "azure", "azure-arm", "gcp", "sakura"}) {
+	if !reflect.DeepEqual(caps["providers"], []any{"aws", "azure", "azure-arm", "azure-queue", "gcp", "sakura"}) {
 		t.Fatal("optional registry missing provider")
 	}
 	capability := caps["sakura"].(map[string]any)

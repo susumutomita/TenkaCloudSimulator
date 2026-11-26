@@ -303,21 +303,12 @@ func TestEC2NativeVPCStateFailuresAreNotSuccess(t *testing.T) {
 	}
 	f := newEC2VPCFixture(t)
 	vpc := f.create("", url.Values{"CidrBlock": {"10.6.0.0/16"}})
-	// A dependent subnet defends deletion and is a valid EC2-owned resource.
+	// A dependent row defends deletion even though native subnets are not offered.
 	f.writeNetwork(EC2NetworkResource{ID: "subnet-0000000000000000a", Kind: "AWS::EC2::Subnet", Region: "us-east-1", StackID: ec2NativeOwner, VPCID: vpc.ID, CIDR: "10.6.1.0/24", Revision: 1})
 	f.expect(f.call("", "us-east-1", nil, url.Values{"Action": {"DeleteVpc"}, "VpcId": {vpc.ID}}), 400, "DependencyViolation")
-	if listed := f.describe("us-east-1"); len(listed) != 1 || listed[0].ID != vpc.ID {
-		t.Fatalf("a refused delete changed the VPC list: %+v", listed)
-	}
+	f.expect(f.call("", "us-east-1", nil, url.Values{"Action": {"DescribeVpcs"}}), 500, "InternalError")
 	db := f.store.Database()
 	if _, err := db.Exec(`DELETE FROM aws_ec2_network_resources WHERE id='subnet-0000000000000000a'`); err != nil {
-		t.Fatal(err)
-	}
-	// Any other EC2-owned kind was never created by a native action: fail closed.
-	f.writeNetwork(EC2NetworkResource{ID: "rtb-0000000000000000a", Kind: "AWS::EC2::RouteTable", Region: "us-east-1", StackID: ec2NativeOwner, VPCID: vpc.ID, Revision: 1})
-	f.expect(f.call("", "us-east-1", nil, url.Values{"Action": {"DescribeVpcs"}}), 500, "InternalError")
-	f.expect(f.call("", "us-east-1", nil, url.Values{"Action": {"DescribeSubnets"}}), 500, "InternalError")
-	if _, err := db.Exec(`DELETE FROM aws_ec2_network_resources WHERE id='rtb-0000000000000000a'`); err != nil {
 		t.Fatal(err)
 	}
 	claimant := StackRecord{ID: "arn:aws:cloudformation:us-east-1:000000000000:stack/x/y", Name: "x", Region: "us-east-1"}

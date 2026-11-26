@@ -16,6 +16,46 @@ ROOT = Path(__file__).resolve().parents[1]
 SOURCE = 'test/factory/upstream/source.json'
 # Fixed reviewed commands only. Never execute command strings from findings/reports.
 SUITES = {
+    'azure-queue-routing': {
+        'argv': ['go', 'test', '-json', '-count=1', '-run', '^TestAzureQueueRoutingLifecycleAndIsolation$', './internal/server'],
+        'test': 'TestAzureQueueRoutingLifecycleAndIsolation',
+        'provider': 'azure-queue-routing',
+        'operations': ['NativeQueueLifecycle'],
+        'package': 'github.com/susumutomita/TenkaCloudSimulator/internal/server',
+        'scope': 'Real local server Queue route/auth/two DBs/restart/cleanup and Blob route preservation; not official SDK, browser, cloud or whole-service acceptance',
+    },
+    'azure-queue-peer-sakura-disabled': {
+        'argv': ['go', 'test', '-json', '-count=1', '-run', '^TestSakuraServerDefaultDisabledPreservesLegacyProviderSet$', './internal/server'],
+        'test': 'TestSakuraServerDefaultDisabledPreservesLegacyProviderSet',
+        'provider': 'azure-queue-routing',
+        'operations': ['NativeQueueLifecycle'],
+        'package': 'github.com/susumutomita/TenkaCloudSimulator/internal/server',
+        'scope': 'Existing Sakura opt-in/default and AWS/KMS/Blob peer regression; mandatory alongside Queue routing',
+    },
+    'azure-queue-peer-sakura-enabled': {
+        'argv': ['go', 'test', '-json', '-count=1', '-run', '^TestSakuraServerOptInUsesRegistryAuthenticationAndCopiedScope$', './internal/server'],
+        'test': 'TestSakuraServerOptInUsesRegistryAuthenticationAndCopiedScope',
+        'provider': 'azure-queue-routing',
+        'operations': ['NativeQueueLifecycle'],
+        'package': 'github.com/susumutomita/TenkaCloudSimulator/internal/server',
+        'scope': 'Existing Sakura opt-in/default and AWS/KMS/Blob peer regression; mandatory alongside Queue routing',
+    },
+    'azure-queue-peek-wire': {
+        'argv': ['go', 'test', '-json', '-count=1', '-run', '^TestAzureQueuePeekZeroWireField$', './internal/azure/queue'],
+        'test': 'TestAzureQueuePeekZeroWireField',
+        'provider': 'azure-queue-wire',
+        'operations': ['PeekMessages'],
+        'package': 'github.com/susumutomita/TenkaCloudSimulator/internal/azure/queue',
+        'scope': 'Peek XML includes explicit zero DequeueCount; not persistence, routing, SDK or whole-service acceptance',
+    },
+    'azure-queue-lifecycle': {
+        'argv': ['go', 'test', '-json', '-count=1', '-run', '^TestAzureQueueFactoryLifecycle$', './internal/azure/queue'],
+        'test': 'TestAzureQueueFactoryLifecycle',
+        'provider': 'azure-queue',
+        'operations': ['CreateQueue', 'PutMessage', 'PeekMessages', 'GetMessages', 'UpdateMessage', 'DeleteMessage', 'ClearMessages', 'DeleteQueue'],
+        'package': 'github.com/susumutomita/TenkaCloudSimulator/internal/azure/queue',
+        'scope': 'Queue REST leaf/SQLite lifecycle; not host authentication, SDK, UI, real Azure or whole-service compatibility',
+    },
     'sqs-lifecycle': {
         'argv': ['go', 'test', '-json', '-count=1', '-run', '^TestSQSFactoryFidelityLifecycle$', './internal/aws'],
         'test': 'TestSQSFactoryFidelityLifecycle',
@@ -166,8 +206,21 @@ def validate_scope(suites, provider, operation, paths):
         for path in paths:
             require(path in SIMPLEDB_PATHS, 'SimpleDB pilot does not cover claimed path: ' + path)
         return
+    azure_queue = 'azure-queue-lifecycle' in matching
+    peek_wire = 'azure-queue-peek-wire' in matching
+    queue_routing = 'azure-queue-routing' in matching
+    if provider == 'azure-queue-routing':
+        require(queue_routing, 'Queue routing requires its exact lifecycle suite')
+        require({'azure-queue-routing', 'azure-queue-peer-sakura-disabled', 'azure-queue-peer-sakura-enabled'} <= set(suites),
+                'Queue routing requires both exact Sakura peer regression suites')
     for path in paths:
         p = Path(path)
+        queue_path = p.parent.as_posix() == 'internal/azure/queue' and p.suffix == '.go'
+        wire_path = path in ('internal/azure/queue/protocol.go', 'internal/azure/queue/peek_zero_oracle_test.go', 'internal/azure/queue/peek_wire_test.go')
+        routing_path = path in ('internal/server/cloud_storage.go', 'internal/server/azure_queue_test.go', 'internal/server/sakura_provider_test.go')
+        if azure_queue or peek_wire or queue_routing:
+            require((azure_queue and queue_path) or (peek_wire and wire_path) or (queue_routing and routing_path),
+                    'acceptance suite does not cover claimed path: ' + path)
         sqs_covered = path in ('internal/aws/sqs.go', 'internal/aws/sqs_store.go', 'formal/applicability.json') or (
             p.parent.as_posix() == 'internal/aws' and p.name.startswith('sqs_') and p.name.endswith('_test.go'))
         subnet_covered = path in (

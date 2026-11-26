@@ -33,6 +33,9 @@ jobs:
       - name: Install pinned Chromium browser
         timeout-minutes: 5
         run: /tmp/simulator-tests/bin/playwright install chromium
+      - name: Check S3 multipart launcher refusals offline
+        timeout-minutes: 6
+        run: /tmp/simulator-tests/bin/python test/e2e/test_s3_multipart_paging_launcher.py
       - name: Check native discovery, Japanese operations and desktop/mobile layouts
         run: |
           /tmp/simulator-tests/bin/python test/e2e/service_locale.py
@@ -78,6 +81,7 @@ jobs:
         run: |
           npm ci --prefix tools/console --ignore-scripts --no-audit --no-fund
           node tools/console/build.mjs
+          node --test tools/console/test/gcp-dns*.test.mjs tools/console/test/simpledb-client.test.mjs tools/console/test/ec2-security-groups.test.mjs
           git diff --exit-code -- internal/server/web internal/legal/assets/CONSOLE-NOTICES.txt third_party/CONSOLE-NOTICES.txt third_party/console-packages.json tools/console/bundle-inputs.json tools/console/bundle-digests.json
           npm audit --prefix tools/console --audit-level=high
       - name: Check secret description console and preserved disclosure contracts
@@ -88,8 +92,13 @@ jobs:
         run: node --test tools/console/tests/gcp-appengine.test.mjs
       - name: Check immutable release packaging and refusal regressions
         run: python3 test/ci/release_pipeline.py
-      - name: Check native token input regression cases
-        run: node --test test/console/login-native-input.test.mjs test/console/api-reference-json.test.mjs
+      - name: Check bounded SNS Console and reference request contracts
+        run: node --test test/console/sns-subscriptions.test.mjs test/console/sns-http-reference.test.mjs
+      - name: Check native input and bounded EC2 console regressions
+        run: >-
+          node --test test/console/login-native-input.test.mjs test/console/api-reference-json.test.mjs
+          tools/console/test/ec2-readonly.test.mjs tools/console/test/ec2-response.test.mjs
+          tools/console/test/ec2-template-preview.test.mjs tools/console/test/ec2-native-subnets.test.mjs
       - name: Check Go format, vet, modules, embedded assets and script gates
         run: |
           make format-check vet verify-assets test-scripts

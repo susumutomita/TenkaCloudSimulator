@@ -1,4 +1,5 @@
 import {sakuraServerEndpoint} from './sakura-server-read.mjs';
+import {route53ConsoleAdvertised} from './route53-console.mjs';
 
 // Console discovery only: this catalog never grants API or exercise authority.
 export const PROVIDERS = Object.freeze([
@@ -9,11 +10,10 @@ export const PROVIDERS = Object.freeze([
 ]);
 export const SERVICES = Object.freeze([
   {id: 'ec2', provider: 'aws', label: 'EC2', capability: 'ec2', route: '/ec2', keywords: 'instance compute インスタンス コンピューティング'},
-  {id: 'vpc', provider: 'aws', label: 'VPC', capability: 'ec2', route: '/vpc', keywords: 'network virtual private cloud subnet ネットワーク 仮想プライベートクラウド サブネット'},
-  // A page of VPC with its own route. `parent` keeps it out of service lists.
-  {id: 'subnets', provider: 'aws', label: 'VPC', capability: 'ec2', route: '/subnets', parent: 'vpc', keywords: ''},
+  {id: 'vpc', provider: 'aws', label: 'VPC', capability: 'ec2', route: '/vpc', keywords: 'network virtual private cloud ネットワーク 仮想プライベートクラウド'},
   {id: 's3', provider: 'aws', label: 'S3', capability: 's3', route: '/s3', keywords: 'bucket object バケット オブジェクト ストレージ'},
   {id: 'ssm', provider: 'aws', label: 'Systems Manager', capability: 'ssm', route: '/parameters', keywords: 'parameter store パラメータ 設定 システムマネージャー パラメータストア'},
+  {id: 'ssm-documents', provider: 'aws', label: 'SSM Documents', capability: 'ssm', route: '/ssm-documents', keywords: 'systems manager documents versions compare ドキュメント バージョン'},
   {id: 'ssm-session', provider: 'aws', label: 'Session Manager', capability: 'ssm', route: '/session-manager', keywords: 'systems manager session shell terminal connect セッションマネージャー セッション ターミナル 接続 システムマネージャー'},
   {id: 'lambda', provider: 'aws', label: 'Lambda', capability: 'lambda', route: '/lambda', keywords: 'function 関数 ラムダ'},
   {id: 'iam', provider: 'aws', label: 'IAM', capability: 'iam', route: '/iam', keywords: 'role identity ロール 権限 アイアム アクセス管理'},
@@ -22,6 +22,9 @@ export const SERVICES = Object.freeze([
   {id: 'cfn', provider: 'aws', label: 'CloudFormation', capability: 'cloudformation', route: '/stacks', keywords: 'stack template スタック テンプレート クラウドフォーメーション'},
   {id: 'kms', provider: 'aws', label: 'Key Management Service', capability: 'kms', route: '/kms', keywords: 'kms encryption key 暗号 キー 暗号化 キー管理'},
   {id: 'dynamodb', provider: 'aws', label: 'DynamoDB', capability: 'dynamodb', route: '/dynamodb', keywords: 'table item key-value database ddb ダイナモ ダイナモDB テーブル 項目 キー データベース'},
+  {id: 'route53', provider: 'aws', label: 'Route 53', capability: 'route53', route: '/route53', keywords: 'dns hosted zones records ptr reverse lookup 公開ホストゾーン 逆引き レコード'},
+  {id: 'simpledb', provider: 'aws', label: 'SimpleDB', capability: 'simpledb', route: '/simpledb', keywords: 'database domain item attributes conditional データベース ドメイン 項目 属性'},
+  {id: 'sns', provider: 'aws', label: 'SNS', capability: 'sns', route: '/sns', keywords: 'simple notification service subscription topic サブスクリプション トピック 通知'},
   {id: 'sqs', provider: 'aws', label: 'SQS', capability: 'sqs', route: '/sqs', keywords: 'queue message messaging キュー メッセージ メッセージング シンプルキューサービス'},
   {id: 'logs', provider: 'aws', label: 'CloudWatch Logs', capability: 'logs', route: '/logs', keywords: 'log group stream monitoring ログ グループ ストリーム 監視'},
   {id: 'secretsmanager', provider: 'aws', label: 'Secrets Manager', capability: 'secretsmanager', route: '/secretsmanager', keywords: 'secret version credential credentials シークレット バージョン 秘密 認証情報'},
@@ -30,6 +33,7 @@ export const SERVICES = Object.freeze([
   {id: 'gcp-catalog', provider: 'gcp', label: 'Service catalog', route: '/gcp-catalog', keywords: 'google catalog api metadata カタログ サービス'},
   {id: 'gcp-dns', provider: 'gcp', label: 'Cloud DNS', route: '/gcp-dns', keywords: 'google cloud dns managed zones records ゾーン レコード'},
   {id: 'gcp-appengine', provider: 'gcp', label: 'App Engine', route: '/gcp-appengine', keywords: 'google app engine appengine gae application version traffic split firewall python wsgi アプリ アプリケーション バージョン トラフィック ファイアウォール'},
+  {id: 'azure-queue', provider: 'azure', label: 'Queue Storage', route: '/azure-queue', keywords: 'azure storage queue message キュー ストレージ メッセージ'},
   {id: 'azure-blob', provider: 'azure', label: 'Blob Storage', route: '/azure-blob', keywords: 'container blob コンテナー コンテナ ブロブ ストレージ ブロブストレージ'},
   {id: 'azure-arm', provider: 'azure', label: 'Resource Manager', route: '/azure-arm', keywords: 'arm resource group subscription リソース グループ リソースグループ サブスクリプション リソースマネージャー'},
   {id: 'sakura-servers', provider: 'sakura', label: 'Servers', route: '/sakura-servers', keywords: 'sakura cloud server metadata さくらのクラウド サーバ メタデータ'},
@@ -57,12 +61,24 @@ function dnsConfigured(cap) {
   return cap?.console === true && cap.api === 'dns.v1'
     && typeof cap.project === 'string' && /^[a-z](?:[a-z0-9-]{0,61}[a-z0-9])?$/.test(cap.project)
     && cap.endpoint === '/_simulator/providers/gcp/dns/v1/projects/' + cap.project + '/managedZones'
-    && Array.isArray(cap.operations) && cap.operations.length === dnsOperations.length
+    && Array.isArray(cap.operations) && cap.operations.length === dnsOperations.length + (cap.operations.includes('changes.create') ? 1 : 0)
     && dnsOperations.every(op => cap.operations.includes(op));
 }
 export function dnsCapabilitiesForPrincipal(session, epoch, principal, discovered) {
   if (!session || epoch === 0) return session;
   return {...session, gcpDns: discovered?.epoch === epoch && discovered.principal === principal ? discovered.value : undefined};
+}
+const queueOperations = ['CreateQueue', 'DeleteQueue', 'PutMessage', 'GetMessages', 'PeekMessages', 'UpdateMessage', 'DeleteMessage', 'ClearMessages'];
+function queueConfigured(scope) {
+  return scope?.console === true && scope.apiVersion === '2023-11-03'
+    && typeof scope.account === 'string' && /^[a-z0-9]{3,24}$/.test(scope.account)
+    && scope.endpoint === '/_simulator/providers/azure-queue/' + scope.account
+    && Array.isArray(scope.operations) && queueOperations.every(op => scope.operations.includes(op));
+}
+export function queueCapabilitiesForPrincipal(session, epoch, principal, discovered) {
+  if (!session || epoch === 0) return session;
+  const queue = discovered?.epoch === epoch && discovered.principal === principal ? discovered.queue : undefined;
+  return {...session, azureQueue: queue};
 }
 export function sakuraServerConfiguration(capabilities) {
   const scope = capabilities?.sakuraServer;
@@ -81,9 +97,27 @@ export function serviceAvailable(id, capabilities) {
   const handoff = capabilities.consoleScope;
   if (id === 'ssm-session') return typeof handoff?.instanceId === 'string' && !!capabilities.services?.ssm;
   if (handoff && (typeof handoff.instanceId === 'string' ? id !== 'ec2' : id !== 'ssm')) return false;
-  if (id === 'ec2' || id === 'vpc' || id === 'subnets') {
+  if (id === 'ec2' || id === 'vpc') {
     const ec2=capabilities.services?.ec2;
-    return ec2?.console === true && Array.isArray(ec2.operations) && ['DescribeInstances','DescribeVpcs',...(id === 'subnets' ? ['DescribeSubnets'] : [])].every(op=>ec2.operations.includes(op));
+    return ec2?.console === true && Array.isArray(ec2.operations) && ['DescribeInstances','DescribeVpcs'].every(op=>ec2.operations.includes(op));
+  }
+  if (id === 'route53') return route53ConsoleAdvertised(capabilities);
+  if (id === 'simpledb') {
+    const scope = capabilities.services?.simpledb;
+    return scope?.console === true && scope.region === 'us-east-1' && scope.conditionalPut === true
+      && Array.isArray(scope.operations)
+      && ['ListDomains', 'CreateDomain', 'GetAttributes', 'PutAttributes'].every(op => scope.operations.includes(op));
+  }
+  if (id === 'sns') {
+    const scope = capabilities.services?.sns;
+    return scope?.console === true && Array.isArray(scope.operations)
+      && ['ListTopics', 'ListSubscriptionsByTopic', 'Subscribe', 'Unsubscribe'].every(op => scope.operations.includes(op));
+  }
+  if (id === 'ssm-documents') {
+    const documents = capabilities.services?.ssm?.documentManagement;
+    return documents?.definitionOnly === true && documents.execution === false
+      && Array.isArray(documents.operations)
+      && ['ListDocuments', 'ListDocumentVersions', 'GetDocument'].every(op => documents.operations.includes(op));
   }
   if (service.provider === 'aws') return !!capabilities.services?.[service.capability];
   if (id === 'sakura-servers') return sakuraServerConfiguration(capabilities) !== null;
@@ -92,6 +126,7 @@ export function serviceAvailable(id, capabilities) {
     && capabilities.gcpAppEngine.project.length > 0 && typeof capabilities.gcpAppEngine.dataPlane === 'string';
   if (service.id === 'gcp-dns') return dnsConfigured(capabilities.gcpDns);
   if (service.id === 'gcp-catalog') return Array.isArray(capabilities.gcpCatalog?.apis) && capabilities.gcpCatalog.apis.length > 0;
+  if (service.id === 'azure-queue') return queueConfigured(capabilities.azureQueue);
   if (service.id === 'azure-arm') return Array.isArray(capabilities.azureCatalog?.providers) && capabilities.azureCatalog.providers.length > 0
     && typeof capabilities.azureCatalog.descriptors === 'string';
   const scope = capabilities.cloudStorage?.[service.provider];
@@ -100,15 +135,10 @@ export function serviceAvailable(id, capabilities) {
 }
 // The VPC create/delete controls need both native operations; a handoff scope
 // never shows VPC at all. The server still authorizes every request.
-function ec2Lifecycle(capabilities, required) {
+export function vpcLifecycleAvailable(capabilities) {
   const operations = capabilities?.services?.ec2?.operations;
-  return !capabilities?.consoleScope && Array.isArray(operations) && required.every(op => operations.includes(op));
+  return !capabilities?.consoleScope && Array.isArray(operations) && ['CreateVpc', 'DeleteVpc'].every(op => operations.includes(op));
 }
-export function vpcLifecycleAvailable(capabilities) { return ec2Lifecycle(capabilities, ['CreateVpc', 'DeleteVpc']); }
-// Subnet and instance controls follow the same rule. The launch form also
-// lists VPCs and subnets, so it needs both discovery operations.
-export function subnetLifecycleAvailable(capabilities) { return ec2Lifecycle(capabilities, ['DescribeSubnets', 'CreateSubnet', 'DeleteSubnet']); }
-export function instanceLifecycleAvailable(capabilities) { return ec2Lifecycle(capabilities, ['DescribeVpcs', 'DescribeSubnets', 'RunInstances', 'TerminateInstances']); }
 // Catalog service titles come from capabilities so search finds each one.
 function searchText(service, capabilities) {
   const titles = service.id === 'catalog' && Array.isArray(capabilities?.services?.catalog?.services)
@@ -122,7 +152,7 @@ function searchText(service, capabilities) {
 }
 export function servicesForProvider(provider, capabilities, query = '') {
   const search = String(query).normalize('NFKC').trim().toLocaleLowerCase('en');
-  return SERVICES.filter(service => service.provider === provider && !service.parent && serviceAvailable(service.id, capabilities)
+  return SERVICES.filter(service => service.provider === provider && serviceAvailable(service.id, capabilities)
     && searchText(service, capabilities).includes(search));
 }
 export function serviceFromHash(hash) {
