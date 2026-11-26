@@ -28,7 +28,7 @@ func routeAssocResilienceRemove(id string) url.Values {
 
 func routeAssocResilienceNoSuccess(t *testing.T, body string) {
 	t.Helper()
-	for _, marker := range []string{"<associationId>", "<associationState>", "<return>", "<routeTableSet>", "<vpcSet>"} {
+	for _, marker := range []string{"<newAssociationId>", "<associationId>", "<associationState>", "<return>", "<routeTableSet>", "<vpcSet>"} {
 		if strings.Contains(body, marker) {
 			t.Fatalf("failed EC2 request returned a partial success: %s", body)
 		}
@@ -224,7 +224,7 @@ func TestEC2NativeRouteAssociationRejectsUnavailableTransaction(t *testing.T) {
 		t.Fatalf("typed call accepted unsupported region: %+v", out)
 	}
 	wantNativeRouteTableError(t, err, "InvalidParameterValue")
-	out, err = s.executeEC2NativeRouteAssociation(ctx, "ReplaceRouteTableAssociation", region, a, routeAssocAdminFixture)
+	out, err = s.executeEC2NativeRouteAssociation(ctx, "ReplaceRoute", region, a, routeAssocAdminFixture)
 	if out != nil {
 		t.Fatalf("typed call accepted unsupported action: %+v", out)
 	}
@@ -238,6 +238,7 @@ func TestEC2NativeRouteAssociationRejectsUnavailableTransaction(t *testing.T) {
 	}{
 		{ec2AssociateNativeRouteTable, q},
 		{ec2DisassociateNativeRouteTable, a},
+		{ec2ReplaceNativeRouteTable, ec2NativeRouteAssociationQuery{association: initial.ID, table: q.table}},
 	} {
 		out, err := s.executeEC2NativeRouteAssociation(canceled, entry.action, region, entry.query, routeAssocAdminFixture)
 		if out != nil || !errors.Is(err, context.Canceled) {

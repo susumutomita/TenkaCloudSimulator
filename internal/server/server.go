@@ -399,6 +399,7 @@ func addEC2NetworkReadbackCapabilities(w http.ResponseWriter, r *http.Request, c
 	ec2["routeTableReadback"] = "DescribeRouteTables"
 	ec2["routeTableLifecycle"] = []string{"DescribeRouteTables", "CreateRouteTable", "DeleteRouteTable"}
 	ec2["routeTableAssociationLifecycle"] = []string{"DescribeRouteTables", "DescribeSubnets", "AssociateRouteTable", "DisassociateRouteTable"}
+	ec2["routeTableAssociationReplacement"] = "ReplaceRouteTableAssociation"
 	ec2["internetGatewayLifecycle"] = []string{"DescribeInternetGateways", "CreateInternetGateway", "DeleteInternetGateway", "AttachInternetGateway", "DetachInternetGateway"}
 	ec2["internetGatewayPageLimit"] = aws.EC2InternetGatewayPageLimit
 	ec2["defaultRouteLifecycle"] = []string{"DescribeRouteTables", "DescribeInternetGateways", "CreateRoute", "DeleteRoute"}

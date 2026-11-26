@@ -25928,6 +25928,328 @@
           "expect_invariant": "ExactWriteReadback"
         }
       ]
+    },
+    {
+      "id": "EC2NativeRouteAssociationReplacement",
+      "model": "formal/EC2NativeRouteAssociationReplacement.tla",
+      "config": "formal/EC2NativeRouteAssociationReplacement.cfg",
+      "bounds": "Two same-VPC native tables and four unsupported destinations; 16 normalized attempts and dry-run variants, five preserved/moved bindings, ten reply hazards, one view retirement and one retired ID retry.",
+      "properties": [
+        "TypeOK",
+        "ExactOutcome",
+        "NoEffectOnRefusal",
+        "OneExplicit",
+        "ExactMove",
+        "OtherStateUnchanged",
+        "ConfirmedNotice",
+        "RetiredRetryNeverApplies"
+      ],
+      "limits": "Finite association graph, normalized permission/transaction outcomes and UI acknowledgment ordering only. No cryptographic ID or lasting tombstone guarantee; actual Go, SQLite concurrency/storage quota, XML, native pagination, React, guest isolation and packet routing require separate evidence.",
+      "source_scope": [
+        "internal/aws/ec2_read.go",
+        "internal/aws/ec2_network.go",
+        "internal/aws/ec2_internet_gateway_store.go",
+        "internal/aws/ec2_route_association_native_query.go",
+        "internal/aws/ec2_route_association_native_store.go",
+        "internal/aws/ec2_route_association_replace.go",
+        "internal/aws/ec2_route_tables_native.go",
+        "internal/aws/ec2_route_tables_read.go",
+        "internal/server/server.go",
+        "internal/server/web/app.js",
+        "tools/console/src/ec2-native-route-tables.mjs",
+        "tools/console/src/ec2-route-table-pages.mjs",
+        "tools/console/src/ec2-readonly.jsx",
+        "tools/console/src/ec2-vpc-native-route-tables.jsx",
+        "tools/console/src/main.jsx"
+      ],
+      "mutants": [
+        {
+          "id": "RequireScopedSession",
+          "edits": [
+            {
+              "old": "  /\\ k # \"handoff\"\n",
+              "new": "",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExactOutcome"
+        },
+        {
+          "id": "RequireResolvedRegion",
+          "edits": [
+            {
+              "old": "  /\\ Known(k) /\\ Owner(k)",
+              "new": "  /\\ Owner(k)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExactOutcome"
+        },
+        {
+          "id": "RetainCFNIncumbent",
+          "edits": [
+            {
+              "old": "  /\\ Known(k) /\\ Owner(k)",
+              "new": "  /\\ Known(k)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExactOutcome"
+        },
+        {
+          "id": "RequireDestinationGrant",
+          "edits": [
+            {
+              "old": "  /\\ TargetGrant(k) /\\ SourceGrant(k) /\\ SubnetGrant(k)",
+              "new": "  /\\ SourceGrant(k) /\\ SubnetGrant(k)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExactOutcome"
+        },
+        {
+          "id": "RequireIncumbentGrant",
+          "edits": [
+            {
+              "old": "  /\\ TargetGrant(k) /\\ SourceGrant(k) /\\ SubnetGrant(k)",
+              "new": "  /\\ TargetGrant(k) /\\ SubnetGrant(k)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExactOutcome"
+        },
+        {
+          "id": "RequireSubnetGrant",
+          "edits": [
+            {
+              "old": "  /\\ TargetGrant(k) /\\ SourceGrant(k) /\\ SubnetGrant(k)",
+              "new": "  /\\ TargetGrant(k) /\\ SourceGrant(k)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExactOutcome"
+        },
+        {
+          "id": "RequireDistinctDestination",
+          "edits": [
+            {
+              "old": "  /\\ Dest(k) # \"source\" /\\ Dest(k) # \"missing\"",
+              "new": "  /\\ Dest(k) # \"missing\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExactOutcome"
+        },
+        {
+          "id": "RequireSameVPC",
+          "edits": [
+            {
+              "old": "  /\\ Dest(k) # \"other-vpc\" /\\ Dest(k) # \"cfn-table\"",
+              "new": "  /\\ Dest(k) # \"cfn-table\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExactOutcome"
+        },
+        {
+          "id": "RetainCFNDestination",
+          "edits": [
+            {
+              "old": "  /\\ Dest(k) # \"other-vpc\" /\\ Dest(k) # \"cfn-table\"",
+              "new": "  /\\ Dest(k) # \"other-vpc\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExactOutcome"
+        },
+        {
+          "id": "RequireNoCFNClaim",
+          "edits": [
+            {
+              "old": "  /\\ k # \"retained-claim\" /\\ k # \"retained-declaration\"",
+              "new": "  /\\ k # \"retained-declaration\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExactOutcome"
+        },
+        {
+          "id": "RequireNoCFNDeclaration",
+          "edits": [
+            {
+              "old": "  /\\ k # \"retained-claim\" /\\ k # \"retained-declaration\"",
+              "new": "  /\\ k # \"retained-claim\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExactOutcome"
+        },
+        {
+          "id": "RejectStorageFault",
+          "edits": [
+            {
+              "old": "Persistent(k) == k # \"storage-fault\" /\\ k # \"durable-drift\"",
+              "new": "Persistent(k) == k # \"durable-drift\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExactOutcome"
+        },
+        {
+          "id": "RejectDurableDrift",
+          "edits": [
+            {
+              "old": "Persistent(k) == k # \"storage-fault\" /\\ k # \"durable-drift\"",
+              "new": "Persistent(k) == k # \"storage-fault\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExactOutcome"
+        },
+        {
+          "id": "DryRunNeverWrites",
+          "edits": [
+            {
+              "old": "     /\\ rows' = IF commit THEN stored ELSE rows",
+              "new": "     /\\ rows' = IF commit \\/ status = \"dry\" THEN stored ELSE rows",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "NoEffectOnRefusal"
+        },
+        {
+          "id": "RemoveRetiredID",
+          "edits": [
+            {
+              "old": "      stored == (rows \\ {Old}) \\cup {fresh}",
+              "new": "      stored == rows \\cup {fresh}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "OneExplicit"
+        },
+        {
+          "id": "GenerateDistinctID",
+          "edits": [
+            {
+              "old": "      fresh == Row(\"new\", Dest(k), Old.sub, Context(k), \"native\")",
+              "new": "      fresh == Row(\"old\", Dest(k), Old.sub, Context(k), \"native\")",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExactMove"
+        },
+        {
+          "id": "PreserveSibling",
+          "edits": [
+            {
+              "old": "      stored == (rows \\ {Old}) \\cup {fresh}",
+              "new": "      stored == (rows \\ {Old, Row(\"source-sibling\", \"source\", \"sibling-a\", \"east\", \"native\")}) \\cup {fresh}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExactMove"
+        },
+        {
+          "id": "NoRouteChanges",
+          "edits": [
+            {
+              "old": "     /\\ UNCHANGED <<network, epoch, ack, replay>>",
+              "new": "     /\\ network' = IF commit THEN network \\ {\"original-routes\"} ELSE network\n     /\\ UNCHANGED <<epoch, ack, replay>>",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "OtherStateUnchanged"
+        },
+        {
+          "id": "RequireReadback",
+          "edits": [
+            {
+              "old": "  /\\ phase = \"verified\" /\\ receipt.result = \"committed\"",
+              "new": "  /\\ phase \\in {\"verified\", \"await-read\"} /\\ receipt.result = \"committed\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ConfirmedNotice"
+        },
+        {
+          "id": "RequireCompleteReadback",
+          "edits": [
+            {
+              "old": "      valid == decoded /\\ sourceRemains /\\ exact /\\ retired /\\ siblings",
+              "new": "      valid == sourceRemains /\\ exact /\\ retired /\\ siblings",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ConfirmedNotice"
+        },
+        {
+          "id": "RequireSourceReadback",
+          "edits": [
+            {
+              "old": "      valid == decoded /\\ sourceRemains /\\ exact /\\ retired /\\ siblings",
+              "new": "      valid == decoded /\\ exact /\\ retired /\\ siblings",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ConfirmedNotice"
+        },
+        {
+          "id": "RequireExactNewReadback",
+          "edits": [
+            {
+              "old": "      valid == decoded /\\ sourceRemains /\\ exact /\\ retired /\\ siblings",
+              "new": "      valid == decoded /\\ sourceRemains /\\ retired /\\ siblings",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ConfirmedNotice"
+        },
+        {
+          "id": "RequireRetiredAbsence",
+          "edits": [
+            {
+              "old": "      valid == decoded /\\ sourceRemains /\\ exact /\\ retired /\\ siblings",
+              "new": "      valid == decoded /\\ sourceRemains /\\ exact /\\ siblings",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ConfirmedNotice"
+        },
+        {
+          "id": "RequireSiblingReadback",
+          "edits": [
+            {
+              "old": "      valid == decoded /\\ sourceRemains /\\ exact /\\ retired /\\ siblings",
+              "new": "      valid == decoded /\\ sourceRemains /\\ exact /\\ retired",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ConfirmedNotice"
+        },
+        {
+          "id": "RequireCurrentView",
+          "edits": [
+            {
+              "old": "  /\\ ack.generation = epoch\n",
+              "new": "",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ConfirmedNotice"
+        },
+        {
+          "id": "RejectRetiredReplay",
+          "edits": [
+            {
+              "old": "  /\\ replay' = \"refused\" /\\ rows' = rows",
+              "new": "  /\\ replay' = \"applied\" /\\ rows' = rows",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "RetiredRetryNeverApplies"
+        }
+      ]
     }
   ]
 }

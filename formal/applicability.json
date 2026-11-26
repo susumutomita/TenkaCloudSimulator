@@ -1,408 +1,326 @@
 {
   "version": 1,
-  "base_sha": "c9a62e7a849bb37d92a7a03c8dd928c7b943ea47",
+  "base_sha": "cc627f50cc24db70d48943702069c9b2c669a45d",
   "changes": [
     {
       "path": "README.md",
-      "sha256": "3818d3cbf5bfbc0369845829926d7af3437549b8210912705882c2c88907034e",
+      "sha256": "39a1162f21bcdf1e6c28fccf8a484d753ab6a1cdaf037731d825d13074937766",
       "disposition": "documentation",
-      "reason": "Supported native wire contract, Scalar read-only examples and limits; no executable grants or APIs.",
-      "models": []
-    },
-    {
-      "path": "docs/api-reference.md",
-      "sha256": "6201af37e219cf3f5e32654f1c226e53c5e893cdc821378de0e3e0bdf4a24de1",
-      "disposition": "documentation",
-      "reason": "Supported native wire contract, Scalar read-only examples and limits; no executable grants or APIs.",
+      "reason": "Scope, interface and reproduction documentation only.",
       "models": []
     },
     {
       "path": "docs/console.md",
-      "sha256": "fd733fe2d14331c8c5e41cf5aedf8848d2b8eeb76bb4495cc8461b7a47f78f61",
+      "sha256": "a7362656986f2f55c7a2bab980e8adee8b0d91e448e419306128123850b4237e",
       "disposition": "documentation",
-      "reason": "Supported native wire contract, Scalar read-only examples and limits; no executable grants or APIs.",
+      "reason": "Scope, interface and reproduction documentation only.",
       "models": []
     },
     {
       "path": "docs/design/0001-go-standalone.md",
-      "sha256": "cd188d614f5c18f2d1d18e92ca428f9df1760d37c1a3e8b5c1b00ac064ffbe5e",
+      "sha256": "f6e7ecf33a3e13ce35df2669e8c96eb48f984fa90ed62bdc0e425c9afeda95b8",
       "disposition": "documentation",
-      "reason": "Supported native wire contract, Scalar read-only examples and limits; no executable grants or APIs.",
-      "models": []
-    },
-    {
-      "path": "docs/ec2-native-default-route.md",
-      "sha256": "b0eb6c6866fb471c6f6f50e30e0047452d3747827e5879d05244d4f381008575",
-      "disposition": "documentation",
-      "reason": "Supported native wire contract, Scalar read-only examples and limits; no executable grants or APIs.",
+      "reason": "Scope, interface and reproduction documentation only.",
       "models": []
     },
     {
       "path": "docs/ec2-network-contracts.md",
-      "sha256": "528b3a752f190bbb931f0378bb374aeb5713b72d896f287050827ecfa848e056",
+      "sha256": "c691dec4aba1204dd4dbe2c35f457bfa12973805fd3bdf3f02b7a0a13c830232",
       "disposition": "documentation",
-      "reason": "Supported native wire contract, Scalar read-only examples and limits; no executable grants or APIs.",
+      "reason": "Scope, interface and reproduction documentation only.",
       "models": []
     },
     {
       "path": "docs/ec2-read-discovery.md",
-      "sha256": "61da51397de4c1229e469b490e7bf9d0fed4ffa325453147e594842b561eaa22",
+      "sha256": "097dcbf4fec87db9c5bcb3c3cffd5c450bda0796af33f1290719626d46c7cad5",
       "disposition": "documentation",
-      "reason": "Supported native wire contract, Scalar read-only examples and limits; no executable grants or APIs.",
+      "reason": "Scope, interface and reproduction documentation only.",
       "models": []
     },
     {
-      "path": "formal/EC2RouteTableInventoryPages.cfg",
-      "sha256": "a12c094cfdfbda25b6f3790185f4d2e8c5390f432d3dc6a69ec658ce97902866",
+      "path": "formal/EC2NativeRouteAssociationReplacement.cfg",
+      "sha256": "490d19038fe2d75826cebb643b5878b1748b8a1a71e90064f40cff75fa07e9c6",
       "disposition": "modeled",
-      "reason": "Finite scoped paging, coherent inventory, wire-shape and readback model plus sensitivity checks.",
+      "reason": "New bounded specification/properties and required sensitivity controls.",
       "models": [
         {
-          "id": "EC2RouteTableInventoryPages",
+          "id": "EC2NativeRouteAssociationReplacement",
           "properties": [
-            "PageAuthorized",
-            "PageBounds",
-            "ScopedContinuation",
-            "CurrentAssembly",
-            "CompletePublication",
-            "ExactWriteReadback"
+            "ExactOutcome",
+            "NoEffectOnRefusal",
+            "OneExplicit",
+            "ExactMove",
+            "OtherStateUnchanged",
+            "ConfirmedNotice",
+            "RetiredRetryNeverApplies"
           ],
-          "limits": "Bounded symbolic page, scope and acknowledgement relation only; not a proof of HMAC, XML arithmetic, SQL, IAM, browser transport, or traffic. Verified by local actual SDK and scoped Console/API fixtures."
+          "limits": "Finite normalized authority, atomic graph changes and current-view acknowledgement only. It is not an implementation, wire/parser/SQLite, React, ID entropy, full IAM, guest, forwarding or liveness proof."
         }
       ]
     },
     {
-      "path": "formal/EC2RouteTableInventoryPages.tla",
-      "sha256": "537554055915dfc28105c41a3d888d11906fed4ea3931ab5b0b247c91f4fb1a0",
+      "path": "formal/EC2NativeRouteAssociationReplacement.tla",
+      "sha256": "86ce5e631d22e19e98bee84c41e375809de8354ede8e79412bf302c046e80a3c",
       "disposition": "modeled",
-      "reason": "Finite scoped paging, coherent inventory, wire-shape and readback model plus sensitivity checks.",
+      "reason": "New bounded specification/properties and required sensitivity controls.",
       "models": [
         {
-          "id": "EC2RouteTableInventoryPages",
+          "id": "EC2NativeRouteAssociationReplacement",
           "properties": [
-            "PageAuthorized",
-            "PageBounds",
-            "ScopedContinuation",
-            "CurrentAssembly",
-            "CompletePublication",
-            "ExactWriteReadback"
+            "ExactOutcome",
+            "NoEffectOnRefusal",
+            "OneExplicit",
+            "ExactMove",
+            "OtherStateUnchanged",
+            "ConfirmedNotice",
+            "RetiredRetryNeverApplies"
           ],
-          "limits": "Bounded symbolic page, scope and acknowledgement relation only; not a proof of HMAC, XML arithmetic, SQL, IAM, browser transport, or traffic. Verified by local actual SDK and scoped Console/API fixtures."
+          "limits": "Finite normalized authority, atomic graph changes and current-view acknowledgement only. It is not an implementation, wire/parser/SQLite, React, ID entropy, full IAM, guest, forwarding or liveness proof."
         }
       ]
     },
     {
       "path": "formal/models.json",
-      "sha256": "c3996cd23a7ce0a30b86138f6bee4c2ceeb88a954d3112e7fa630a47157c6b2f",
+      "sha256": "a10cc0a044519e7c6e32ff432e56a8450723bff52c882c0c6cac1c3e26e5f5e9",
       "disposition": "formal-infrastructure",
-      "reason": "Register and enforce new scoped model with independent test pins; prior model/gate requirements unchanged.",
+      "reason": "Registers the new protected model and its exact oracles; existing checks remain.",
       "models": []
     },
     {
-      "path": "internal/aws/cloudformation.go",
-      "sha256": "98dd7fd74c0d919050f79f3ce9cbae122074ba0909e1bdb9b52bf81f01b272ff",
-      "disposition": "modeled",
-      "reason": "Per-store lifetime of the route-table token signing key; does not change store, credential, or CloudFormation mutations.",
-      "models": [
-        {
-          "id": "EC2RouteTableInventoryPages",
-          "properties": [
-            "ScopedContinuation"
-          ],
-          "limits": "Bounded symbolic page, scope and acknowledgement relation only; not a proof of HMAC, XML arithmetic, SQL, IAM, browser transport, or traffic. Verified by local actual SDK and scoped Console/API fixtures."
-        }
-      ]
-    },
-    {
       "path": "internal/aws/ec2_read.go",
-      "sha256": "22113a8c9cffc8fa141859a24b8526873e74971400db5239ce3ad99bca30eded",
+      "sha256": "47c923469a929f30906f2a9d78fe3fee6f65cd54ddd84fc28dcac47f7025c5b1",
       "disposition": "modeled",
-      "reason": "Authorize ordinary regional pages anew; bound full successful XML before sending exact or page output.",
+      "reason": "EC2 provider dispatch, typed association selectors, permission-only DryRun and retired-ID semantics.",
       "models": [
         {
-          "id": "EC2RouteTableInventoryPages",
+          "id": "EC2NativeRouteAssociationReplacement",
           "properties": [
-            "PageAuthorized",
-            "PageBounds",
-            "ScopedContinuation"
+            "ExactOutcome",
+            "NoEffectOnRefusal",
+            "RetiredRetryNeverApplies"
           ],
-          "limits": "Bounded symbolic page, scope and acknowledgement relation only; not a proof of HMAC, XML arithmetic, SQL, IAM, browser transport, or traffic. Verified by local actual SDK and scoped Console/API fixtures."
+          "limits": "Finite normalized authority, atomic graph changes and current-view acknowledgement only. It is not an implementation, wire/parser/SQLite, React, ID entropy, full IAM, guest, forwarding or liveness proof."
         }
       ]
     },
     {
-      "path": "internal/aws/ec2_route_table_page.go",
-      "sha256": "eb14236c905c7ed7ac538a3184f028b1f23126d5d0d6db2d74034a5aab5125a6",
+      "path": "internal/aws/ec2_route_association_native_query.go",
+      "sha256": "e3f958e3dd89f38a7a487b6003b41711c45b885f3679e9bffe0c0dab1780e2f7",
       "disposition": "modeled",
-      "reason": "Only a coherent regional projection, same scope and encoded byte cap produce a valid page.",
+      "reason": "EC2 provider dispatch, typed association selectors, permission-only DryRun and retired-ID semantics.",
       "models": [
         {
-          "id": "EC2RouteTableInventoryPages",
+          "id": "EC2NativeRouteAssociationReplacement",
           "properties": [
-            "PageBounds",
-            "ScopedContinuation"
+            "ExactOutcome",
+            "NoEffectOnRefusal",
+            "RetiredRetryNeverApplies"
           ],
-          "limits": "Bounded symbolic page, scope and acknowledgement relation only; not a proof of HMAC, XML arithmetic, SQL, IAM, browser transport, or traffic. Verified by local actual SDK and scoped Console/API fixtures."
+          "limits": "Finite normalized authority, atomic graph changes and current-view acknowledgement only. It is not an implementation, wire/parser/SQLite, React, ID entropy, full IAM, guest, forwarding or liveness proof."
         }
       ]
     },
     {
-      "path": "internal/aws/ec2_route_table_page_test.go",
-      "sha256": "d352735f70cd4cc688f91aff2ab1b16c1db322efb0777ee0a32050538cb851ce",
+      "path": "internal/aws/ec2_route_association_native_test.go",
+      "sha256": "9e17c6f0b665c8f7492dc26ba953fb8284be834b15fb6ae50cee28b8fd07dae2",
       "disposition": "test-support",
-      "reason": "SDK, transport, inventory or state verification only; no production policy, launcher or test-runner changes.",
+      "reason": "Scoped regression evidence only: real SQLite/Query/SDK state, environment-isolated browser logic and documented refusals.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/ec2_route_association_replace.go",
+      "sha256": "2db9f4a80972c0929c68210c38f728887ba669a88aa8f0e299da1eafba130a7c",
+      "disposition": "modeled",
+      "reason": "Exact incumbent and destination authorization, unchanged native and CFN siblings, and atomic old-for-new SQLite relationship.",
+      "models": [
+        {
+          "id": "EC2NativeRouteAssociationReplacement",
+          "properties": [
+            "ExactOutcome",
+            "NoEffectOnRefusal",
+            "OneExplicit",
+            "ExactMove",
+            "OtherStateUnchanged",
+            "RetiredRetryNeverApplies"
+          ],
+          "limits": "Finite normalized authority, atomic graph changes and current-view acknowledgement only. It is not an implementation, wire/parser/SQLite, React, ID entropy, full IAM, guest, forwarding or liveness proof."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/ec2_route_association_replace_test.go",
+      "sha256": "ff8caf05630f8ff9ae3f8fa7c293df83e961b4ef7c15c875c696ef606a073e31",
+      "disposition": "test-support",
+      "reason": "Scoped regression evidence only: real SQLite/Query/SDK state, environment-isolated browser logic and documented refusals.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/ec2_route_association_resilience_test.go",
+      "sha256": "ae427516ca6522560fb81675a9a7d03e1233af9b393a3c1167131250ce50aaf9",
+      "disposition": "test-support",
+      "reason": "Scoped regression evidence only: real SQLite/Query/SDK state, environment-isolated browser logic and documented refusals.",
       "models": []
     },
     {
       "path": "internal/aws/ec2_route_tables_native_registration_test.go",
-      "sha256": "4cfe60247d7a3a292fefb7880af93034f745aa3618770830cb71974b00e15bc6",
+      "sha256": "d6ee28b01821ca578b07ba93fc2f9f0a37ffd067a08c3985062dd6450c93de38",
       "disposition": "test-support",
-      "reason": "SDK, transport, inventory or state verification only; no production policy, launcher or test-runner changes.",
+      "reason": "Scoped regression evidence only: real SQLite/Query/SDK state, environment-isolated browser logic and documented refusals.",
       "models": []
-    },
-    {
-      "path": "internal/aws/ec2_route_tables_read.go",
-      "sha256": "a3ffcc46c7f532dfdfca447eb4d9567155bbbe27c485ca7a0485694dfe814fda",
-      "disposition": "modeled",
-      "reason": "Route table selection preserves whole regional projection validation and keeps exact IDs separate.",
-      "models": [
-        {
-          "id": "EC2RouteTableInventoryPages",
-          "properties": [
-            "PageAuthorized",
-            "PageBounds",
-            "ScopedContinuation"
-          ],
-          "limits": "Bounded symbolic page, scope and acknowledgement relation only; not a proof of HMAC, XML arithmetic, SQL, IAM, browser transport, or traffic. Verified by local actual SDK and scoped Console/API fixtures."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/ec2_route_tables_read_test.go",
-      "sha256": "7bff4c32aee114732325b317a32d113098a6e280575655a227cd628bb94d7c21",
-      "disposition": "test-support",
-      "reason": "SDK, transport, inventory or state verification only; no production policy, launcher or test-runner changes.",
-      "models": []
-    },
-    {
-      "path": "internal/aws/ec2_vpc.go",
-      "sha256": "fbc441ece32288c56a968dcccd03447e25a13a73f139eef0c7f10b8e62dbf6e1",
-      "disposition": "modeled",
-      "reason": "Fixed Query parser dispatch and ordinary ec2:DescribeRouteTables action checks.",
-      "models": [
-        {
-          "id": "EC2RouteTableInventoryPages",
-          "properties": [
-            "PageAuthorized"
-          ],
-          "limits": "Bounded symbolic page, scope and acknowledgement relation only; not a proof of HMAC, XML arithmetic, SQL, IAM, browser transport, or traffic. Verified by local actual SDK and scoped Console/API fixtures."
-        }
-      ]
     },
     {
       "path": "internal/server/apidocs/openapi.json",
-      "sha256": "dbe0122f731914fea7e3a1950d1ecdac3c04e2b185c8ba8c279150796c886cbb",
+      "sha256": "08813c7eefa4c7705e5714c75404afc16363d3e8093b7daf71d12baf6cbc50bd",
       "disposition": "presentation",
-      "reason": "Supported native wire contract, Scalar read-only examples and limits; no executable grants or APIs.",
+      "reason": "Read-only reference description / deterministic embedded bundle provenance; no new operation form or change to runtime policy.",
       "models": []
     },
     {
-      "path": "internal/server/web/app.js",
-      "sha256": "67ddc01024aa2c274d9cc4a95694bbd81e8c8928d12a96edf05d664517df2ea6",
+      "path": "internal/server/ec2_read_access_test.go",
+      "sha256": "e31a2dde6662a44ff520f6a324809da1d6ae5a2cb38b2f56b63aebd4f8e27860",
+      "disposition": "test-support",
+      "reason": "Scoped regression evidence only: real SQLite/Query/SDK state, environment-isolated browser logic and documented refusals.",
+      "models": []
+    },
+    {
+      "path": "internal/server/ec2_security_groups_console_test.go",
+      "sha256": "a0bac58848a7c1567cca70490579fc240641b38e37e9abfb5ee79cc38215b052",
+      "disposition": "test-support",
+      "reason": "Scoped regression evidence only: real SQLite/Query/SDK state, environment-isolated browser logic and documented refusals.",
+      "models": []
+    },
+    {
+      "path": "internal/server/server.go",
+      "sha256": "d97140a909d3f53b7327d6a2b15326b859f9667792d6eee333697830a34c583f",
       "disposition": "modeled",
-      "reason": "Same compiled Console transport and complete scope-bound readback behavior as model-bound input.",
+      "reason": "The signed-in route UI advertises the supported replacement operation without granting an instance handoff any VPC authority.",
       "models": [
         {
-          "id": "EC2RouteTableInventoryPages",
+          "id": "EC2NativeRouteAssociationReplacement",
           "properties": [
-            "PageBounds",
-            "CurrentAssembly",
-            "CompletePublication",
-            "ExactWriteReadback"
+            "ExactOutcome",
+            "ConfirmedNotice"
           ],
-          "limits": "Bounded symbolic page, scope and acknowledgement relation only; not a proof of HMAC, XML arithmetic, SQL, IAM, browser transport, or traffic. Verified by local actual SDK and scoped Console/API fixtures."
+          "limits": "Finite normalized authority, atomic graph changes and current-view acknowledgement only. It is not an implementation, wire/parser/SQLite, React, ID entropy, full IAM, guest, forwarding or liveness proof."
+        }
+      ]
+    },
+    {
+      "path": "internal/server/web/app.js",
+      "sha256": "64a7c929cb0dddcf7e16b4f6d326403482b139201670c6882f28d82f13de29fc",
+      "disposition": "modeled",
+      "reason": "Current VPC/actor explicitly selects the two native rows; success awaits complete same-view durable readback.",
+      "models": [
+        {
+          "id": "EC2NativeRouteAssociationReplacement",
+          "properties": [
+            "ConfirmedNotice"
+          ],
+          "limits": "Finite normalized authority, atomic graph changes and current-view acknowledgement only. It is not an implementation, wire/parser/SQLite, React, ID entropy, full IAM, guest, forwarding or liveness proof."
         }
       ]
     },
     {
       "path": "scripts/formal_model_gate.py",
-      "sha256": "457aa8c64ed47a30d6701cefc1ad5375313acc949a16d5c3f61df809c0a767e7",
+      "sha256": "78b05e84f0a53532c6e5ae8302453d462cd49070fd3b9b582a16b23c2a2a4863",
       "disposition": "formal-infrastructure",
-      "reason": "Register and enforce new scoped model with independent test pins; prior model/gate requirements unchanged.",
+      "reason": "Registers the new protected model and its exact oracles; existing checks remain.",
       "models": []
     },
     {
       "path": "scripts/test-formal-gate.py",
-      "sha256": "03c0ab476c7f63e90d6d4274a641a697c8c268a34bb3dcda854fb45a9dad16ba",
+      "sha256": "dc736c6c5b32f03e129dcbb2cc637e80237c2db0d713949b2c4b5d18bd124f8c",
       "disposition": "formal-infrastructure",
-      "reason": "Register and enforce new scoped model with independent test pins; prior model/gate requirements unchanged.",
+      "reason": "Registers the new protected model and its exact oracles; existing checks remain.",
       "models": []
     },
     {
-      "path": "test/console/ec2_native_default_route_dom.cjs",
-      "sha256": "921a80d55e67977a98ceeb5f7c9c5ea02b2554d0e3beb6f6b60eea9fbb2af0e5",
+      "path": "test/console/ec2_native_route_association_replace_dom.cjs",
+      "sha256": "7f6c7df88e06ce33a995420517618b5163e19c3e263e28f183a5323159145bd2",
       "disposition": "test-support",
-      "reason": "SDK, transport, inventory or state verification only; no production policy, launcher or test-runner changes.",
+      "reason": "Scoped regression evidence only: real SQLite/Query/SDK state, environment-isolated browser logic and documented refusals.",
       "models": []
     },
     {
-      "path": "test/console/ec2_native_default_route_sdk.py",
-      "sha256": "cc842050ae222269297fb6d7073f4e9cbdc2a17701b965988a8ed098e249cd21",
+      "path": "test/console/ec2_native_route_association_replace_sdk.py",
+      "sha256": "a467109e441a422030d73684450d844229f364e039c0ee97a49f8da86a9e1a55",
       "disposition": "test-support",
-      "reason": "SDK, transport, inventory or state verification only; no production policy, launcher or test-runner changes.",
-      "models": []
-    },
-    {
-      "path": "test/console/ec2_native_subnet_dom.cjs",
-      "sha256": "1da0e9d662295ae7916498d2a3b24298cffbeb1837038f6cfce7fcd6e7011d73",
-      "disposition": "test-support",
-      "reason": "Legacy native write/required readback acceptance: 100-table page, per-row association controls only, no CFN edits; no product or policy changes.",
-      "models": []
-    },
-    {
-      "path": "test/console/ec2_route_table_identity.py",
-      "sha256": "f29b90b5e1abb36840e7dd0ac6a0fd92c27ea0552c9477b0edf97874365a06d8",
-      "disposition": "test-support",
-      "reason": "SDK, transport, inventory or state verification only; no production policy, launcher or test-runner changes.",
-      "models": []
-    },
-    {
-      "path": "test/console/ec2_route_table_pages_console.py",
-      "sha256": "f1da1ef6bbcfa266fc40db3d58231485bf16a5d2718d0ea45d74e305ca5477e9",
-      "disposition": "test-support",
-      "reason": "SDK, transport, inventory or state verification only; no production policy, launcher or test-runner changes.",
-      "models": []
-    },
-    {
-      "path": "test/console/ec2_route_table_pages_dom.cjs",
-      "sha256": "8c0566ed68dc37cb4cccf4301211d8eb58a642d646969dc07eb1c66d1ad049c4",
-      "disposition": "test-support",
-      "reason": "SDK, transport, inventory or state verification only; no production policy, launcher or test-runner changes.",
-      "models": []
-    },
-    {
-      "path": "test/console/ec2_route_table_pages_sdk.py",
-      "sha256": "3080b968fc9dc49f55dc2ee7937b35b24b8d086ebaed787b4ca515b988736492",
-      "disposition": "test-support",
-      "reason": "SDK, transport, inventory or state verification only; no production policy, launcher or test-runner changes.",
-      "models": []
-    },
-    {
-      "path": "test/console/ec2_route_table_subnet_filter_dom.cjs",
-      "sha256": "8596d3176c9449a7f7392d0efd610cccc3dd7cc6716baaf7a43eefe102ab8de4",
-      "disposition": "test-support",
-      "reason": "SDK, transport, inventory or state verification only; no production policy, launcher or test-runner changes.",
+      "reason": "Scoped regression evidence only: real SQLite/Query/SDK state, environment-isolated browser logic and documented refusals.",
       "models": []
     },
     {
       "path": "tools/console/bundle-digests.json",
-      "sha256": "1376bbebbd1c0e003cfe6a6d4e31061cb5ab6aa93fc83d3a58f79363dbe14516",
+      "sha256": "3fe7e460b2aeaa9b32979363437581a90b468a38b532755bdd27ceea43559a73",
       "disposition": "presentation",
-      "reason": "Exact embedded browser artifact provenance and digest; source behavior is bound separately.",
+      "reason": "Read-only reference description / deterministic embedded bundle provenance; no new operation form or change to runtime policy.",
       "models": []
     },
     {
       "path": "tools/console/bundle-inputs.json",
-      "sha256": "c7a2a8dd2f298730e7ac89acb442f79e842635eae571c2140e7fb85f691c1491",
+      "sha256": "6004c0e7916c06ca60e9130354a62b732d10b30fc3ad8596f9b093a1bf0c6697",
       "disposition": "presentation",
-      "reason": "Exact embedded browser artifact provenance and digest; source behavior is bound separately.",
+      "reason": "Read-only reference description / deterministic embedded bundle provenance; no new operation form or change to runtime policy.",
       "models": []
     },
     {
       "path": "tools/console/src/ec2-native-route-tables.mjs",
-      "sha256": "0fc7bd56a50ffdd786acf399e56202f7de4df3cdae9e35032372a478ee2819b4",
+      "sha256": "cf8e3aca0931246cc7a6d67560ad41f1ede34273c012c54616ceee5f4dfddf42",
       "disposition": "modeled",
-      "reason": "Write confirmation depends on completed regional assembly or the existing exact route assertion.",
+      "reason": "Current VPC/actor explicitly selects the two native rows; success awaits complete same-view durable readback.",
       "models": [
         {
-          "id": "EC2RouteTableInventoryPages",
+          "id": "EC2NativeRouteAssociationReplacement",
           "properties": [
-            "CurrentAssembly",
-            "CompletePublication",
-            "ExactWriteReadback"
+            "ConfirmedNotice"
           ],
-          "limits": "Bounded symbolic page, scope and acknowledgement relation only; not a proof of HMAC, XML arithmetic, SQL, IAM, browser transport, or traffic. Verified by local actual SDK and scoped Console/API fixtures."
+          "limits": "Finite normalized authority, atomic graph changes and current-view acknowledgement only. It is not an implementation, wire/parser/SQLite, React, ID entropy, full IAM, guest, forwarding or liveness proof."
         }
       ]
     },
     {
-      "path": "tools/console/src/ec2-response.mjs",
-      "sha256": "6c2c4f7b177a495a3321278b8012678b2eb7add929ae6b30af7bbef4f7d08c72",
+      "path": "tools/console/src/ec2-readonly.jsx",
+      "sha256": "aa04670a69ff12ac5dc71815d0a13752244ac475ced11abd11dde44613f185d5",
       "disposition": "modeled",
-      "reason": "Schema and shape for ordered complete route-table pages; no partial rows or mutation authority.",
+      "reason": "Current VPC/actor explicitly selects the two native rows; success awaits complete same-view durable readback.",
       "models": [
         {
-          "id": "EC2RouteTableInventoryPages",
+          "id": "EC2NativeRouteAssociationReplacement",
           "properties": [
-            "PageBounds",
-            "CurrentAssembly"
+            "ConfirmedNotice"
           ],
-          "limits": "Bounded symbolic page, scope and acknowledgement relation only; not a proof of HMAC, XML arithmetic, SQL, IAM, browser transport, or traffic. Verified by local actual SDK and scoped Console/API fixtures."
+          "limits": "Finite normalized authority, atomic graph changes and current-view acknowledgement only. It is not an implementation, wire/parser/SQLite, React, ID entropy, full IAM, guest, forwarding or liveness proof."
         }
       ]
     },
     {
-      "path": "tools/console/src/ec2-route-table-pages.mjs",
-      "sha256": "16e5e686def8b285ba5917488d5483074bc861b9ad362ac321660fdb81bb1871",
+      "path": "tools/console/src/ec2-vpc-native-route-tables.jsx",
+      "sha256": "74492af80e8b2110ff1f6fc6e0b23426e922125da024ea72125c910a3d3578b7",
       "disposition": "modeled",
-      "reason": "A bounded page sequence is required to project an entire current regional view and receipt.",
+      "reason": "Current VPC/actor explicitly selects the two native rows; success awaits complete same-view durable readback.",
       "models": [
         {
-          "id": "EC2RouteTableInventoryPages",
+          "id": "EC2NativeRouteAssociationReplacement",
           "properties": [
-            "PageBounds",
-            "CurrentAssembly",
-            "CompletePublication",
-            "ExactWriteReadback"
+            "ConfirmedNotice"
           ],
-          "limits": "Bounded symbolic page, scope and acknowledgement relation only; not a proof of HMAC, XML arithmetic, SQL, IAM, browser transport, or traffic. Verified by local actual SDK and scoped Console/API fixtures."
+          "limits": "Finite normalized authority, atomic graph changes and current-view acknowledgement only. It is not an implementation, wire/parser/SQLite, React, ID entropy, full IAM, guest, forwarding or liveness proof."
         }
       ]
     },
     {
-      "path": "tools/console/src/ec2-route-tables.mjs",
-      "sha256": "e20281f6a00b7f221ac238752a76bcd70891a55ceebbb5b417e1d3e2fe0fd77f",
+      "path": "tools/console/src/main.jsx",
+      "sha256": "1896368b870718682de7a6918adcfd8c25b38b176459b5c8468a5c92f6f5bad6",
       "disposition": "modeled",
-      "reason": "CFN pager transport uses the same endpoint and reselects viewer scope only after validated assembly.",
+      "reason": "Current VPC/actor explicitly selects the two native rows; success awaits complete same-view durable readback.",
       "models": [
         {
-          "id": "EC2RouteTableInventoryPages",
+          "id": "EC2NativeRouteAssociationReplacement",
           "properties": [
-            "PageBounds",
-            "CurrentAssembly",
-            "CompletePublication"
+            "ConfirmedNotice"
           ],
-          "limits": "Bounded symbolic page, scope and acknowledgement relation only; not a proof of HMAC, XML arithmetic, SQL, IAM, browser transport, or traffic. Verified by local actual SDK and scoped Console/API fixtures."
+          "limits": "Finite normalized authority, atomic graph changes and current-view acknowledgement only. It is not an implementation, wire/parser/SQLite, React, ID entropy, full IAM, guest, forwarding or liveness proof."
         }
       ]
-    },
-    {
-      "path": "tools/console/test/ec2-native-route-associations.test.mjs",
-      "sha256": "c8405c2ec749e29142617efd2057b5fcae9f44395355b49f3e77463edf7f0a4c",
-      "disposition": "presentation",
-      "reason": "SDK, transport, inventory or state verification only; no production policy, launcher or test-runner changes.",
-      "models": []
-    },
-    {
-      "path": "tools/console/test/ec2-native-route-tables.test.mjs",
-      "sha256": "544adc7b508b0f57c96a440109c114377c05b1c145c7bd764de241e9ef6e6233",
-      "disposition": "presentation",
-      "reason": "SDK, transport, inventory or state verification only; no production policy, launcher or test-runner changes.",
-      "models": []
-    },
-    {
-      "path": "tools/console/test/ec2-route-table-pages.test.mjs",
-      "sha256": "f0d4668f6e9adcc095ce8e1e6bf73e619ddf04ccc89557bece586adcc3955944",
-      "disposition": "presentation",
-      "reason": "SDK, transport, inventory or state verification only; no production policy, launcher or test-runner changes.",
-      "models": []
-    },
-    {
-      "path": "tools/console/test/ec2-route-tables.test.mjs",
-      "sha256": "04513ba01405baad23bcda6414112e430429e360f57fd1106dafa29c32957137",
-      "disposition": "presentation",
-      "reason": "SDK, transport, inventory or state verification only; no production policy, launcher or test-runner changes.",
-      "models": []
     }
   ]
 }

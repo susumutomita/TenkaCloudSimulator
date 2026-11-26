@@ -224,7 +224,7 @@ func (g *Gateway) serveEC2(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		out = table
-	case ec2AssociateNativeRouteTable, ec2DisassociateNativeRouteTable:
+	case ec2AssociateNativeRouteTable, ec2DisassociateNativeRouteTable, ec2ReplaceNativeRouteTable:
 		association, err := g.Stacks.executeEC2NativeRouteAssociation(r.Context(), action, region, *request.routeAssociation, routeAssociationAuthority)
 		if err != nil {
 			failChild(err, "Local explicit route table association could not be changed.")

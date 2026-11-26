@@ -11,15 +11,17 @@ import (
 const (
 	ec2AssociateNativeRouteTable    = "AssociateRouteTable"
 	ec2DisassociateNativeRouteTable = "DisassociateRouteTable"
+	ec2ReplaceNativeRouteTable      = "ReplaceRouteTableAssociation"
 )
 
 var (
-	ec2NativeRouteAssociationOperations = []string{ec2AssociateNativeRouteTable, ec2DisassociateNativeRouteTable}
+	ec2NativeRouteAssociationOperations = []string{ec2AssociateNativeRouteTable, ec2DisassociateNativeRouteTable, ec2ReplaceNativeRouteTable}
 	ec2NativeRouteAssociationID         = regexp.MustCompile(`^rtbassoc-(?:[0-9a-f]{8}|[0-9a-f]{17})$`)
 )
 
 type ec2NativeRouteAssociationQuery struct {
 	table, subnet, association string
+	dryRun                     bool
 }
 
 // An existing gateway must supply an authorization decision bound to its
@@ -51,7 +53,7 @@ func (a ec2NativeRouteAssociationAuthority) missingAssociation() *ec2Failure {
 func parseEC2NativeRouteAssociation(action string, fields map[string][]string) (ec2NativeRouteAssociationQuery, *ec2Failure) {
 	var q ec2NativeRouteAssociationQuery
 	if !slices.Contains(ec2NativeRouteAssociationOperations, action) {
-		return q, ec2Invalid("UnsupportedOperation", "Only explicit native subnet route table association and removal are supported here.")
+		return q, ec2Invalid("UnsupportedOperation", "Only explicit native subnet route table association, replacement and removal are supported here.")
 	}
 	for _, key := range slices.Sorted(maps.Keys(fields)) {
 		values := fields[key]
@@ -63,11 +65,16 @@ func parseEC2NativeRouteAssociation(action string, fields map[string][]string) (
 		case key == "Action" || key == "Version":
 			// The common Query gateway already validated the action and version.
 		case key == "DryRun" && value == "false":
-		case action == ec2AssociateNativeRouteTable && key == "RouteTableId":
+		case action == ec2ReplaceNativeRouteTable && key == "DryRun":
+			if value != "true" {
+				return q, ec2Invalid("InvalidParameterValue", "DryRun must be true or false.")
+			}
+			q.dryRun = true
+		case (action == ec2AssociateNativeRouteTable || action == ec2ReplaceNativeRouteTable) && key == "RouteTableId":
 			q.table = value
 		case action == ec2AssociateNativeRouteTable && key == "SubnetId":
 			q.subnet = value
-		case action == ec2DisassociateNativeRouteTable && key == "AssociationId":
+		case (action == ec2DisassociateNativeRouteTable || action == ec2ReplaceNativeRouteTable) && key == "AssociationId":
 			q.association = value
 		default:
 			return q, ec2Invalid("UnsupportedOperation", "Unsupported parameter for this explicit subnet route table association.")
@@ -77,6 +84,9 @@ func parseEC2NativeRouteAssociation(action string, fields map[string][]string) (
 }
 
 func (q ec2NativeRouteAssociationQuery) validate(action string) *ec2Failure {
+	if q.dryRun && action != ec2ReplaceNativeRouteTable {
+		return ec2Invalid("UnsupportedOperation", "DryRun=true is supported only for native association replacement.")
+	}
 	switch action {
 	case ec2AssociateNativeRouteTable:
 		if q.table == "" || q.subnet == "" {
@@ -95,6 +105,16 @@ func (q ec2NativeRouteAssociationQuery) validate(action string) *ec2Failure {
 		if !ec2NativeRouteAssociationID.MatchString(q.association) || q.table != "" || q.subnet != "" {
 			return ec2Invalid("InvalidParameterValue", "AssociationId must be an rtbassoc- ID.")
 		}
+	case ec2ReplaceNativeRouteTable:
+		if q.association == "" || q.table == "" {
+			return ec2Invalid("MissingParameter", "AssociationId and RouteTableId are required.")
+		}
+		if !ec2NativeRouteAssociationID.MatchString(q.association) || q.subnet != "" {
+			return ec2Invalid("InvalidParameterValue", "Replace requires one existing native subnet association ID.")
+		}
+		if !ec2NativeRouteTableID.MatchString(q.table) {
+			return ec2Invalid("InvalidRouteTableID.Malformed", "RouteTableId must be an rtb- ID.")
+		}
 	default:
 		return ec2Invalid("UnsupportedOperation", "Unsupported native route table association operation.")
 	}
@@ -106,6 +126,7 @@ type ec2NativeRouteAssociationResponse struct {
 	XMLNS            string                           `xml:"xmlns,attr"`
 	RequestID        string                           `xml:"requestId"`
 	AssociationID    string                           `xml:"associationId,omitempty"`
+	NewAssociationID string                           `xml:"newAssociationId,omitempty"`
 	AssociationState *ec2NativeRouteAssociationStatus `xml:"associationState,omitempty"`
 	Return           *bool                            `xml:"return,omitempty"`
 }
@@ -122,14 +143,22 @@ func (s *StackStore) executeEC2NativeRouteAssociation(ctx context.Context, actio
 		return nil, ec2Invalid("InvalidParameterValue", "Unsupported region.")
 	}
 	out := &ec2NativeRouteAssociationResponse{XMLName: xml.Name{Local: action + "Response"}}
-	if action == ec2AssociateNativeRouteTable {
+	switch action {
+	case ec2AssociateNativeRouteTable:
 		r, err := s.associateNativeRouteTable(ctx, region, q, a)
 		if err != nil {
 			return nil, err
 		}
 		out.AssociationID = r.ID
 		out.AssociationState = &ec2NativeRouteAssociationStatus{State: "associated"}
-	} else {
+	case ec2ReplaceNativeRouteTable:
+		row, err := s.replaceNativeRouteTableAssociation(ctx, region, q, a)
+		if err != nil {
+			return nil, err
+		}
+		out.NewAssociationID = row.ID
+		out.AssociationState = &ec2NativeRouteAssociationStatus{State: "associated"}
+	case ec2DisassociateNativeRouteTable:
 		if err := s.disassociateNativeRouteTable(ctx, region, q.association, a); err != nil {
 			return nil, err
 		}
