@@ -56,6 +56,8 @@ Azure Blobの通常APIは `2023-11-03` に固定する。BlobのGET/HEADでは�
 
 CloudFormationのRef/GetAtt/Subはresource dependency graphを先にtopological sortし、forward referenceとcycleを識別する。リソースの論理名の辞書順に依存させない。DeleteStackはimmediate transactionを取得してからstack documentとownershipを読み、同じtransactionで削除する。遅延した旧stack IDの削除が、再利用された物理名の別stackを壊さない。
 
+CloudFormation の EC2 インスタンスは、同じスタックで宣言・所有する一つの VPC のサブネットとセキュリティグループにだけ配置できる。作成トランザクションの確定前に宣言、保存行、所有権を照合し、不整合はスタックもイベントも残さず拒否する。実際の VM の起動・準備完了の確認は従来どおりコミット後に行う。
+
 任意の Battle VM 実行環境で、既存の capability resolve はチームの正規 DB に保存された `CREATE_COMPLETE` の Stack ID と EC2 所有権を、起動時の保持済みレシート・ready 記録・lease と照合する。起動コールバックは CloudFormation の確定を待たない。先に到達した resolve は 409 になり、後から再試行できる。seal と既存の NIC 認可は変わらない。この照合は新しい通信経路や RDS の動作を保証しない。
 
 `--rds-private-postgres-topology` は認証付きの数値ループバックでだけ使える任意の設定検証。`Engine=postgres`、単独 DB インスタンス、明示的な `PubliclyAccessible=false` の `CreateDBInstance` / `ModifyDBInstance` を対象にする。通常の設定モードは変えない。既存の `rds` IAM 判定後、書き込みと同じ SQLite トランザクションで DB サブネットグループと現行のネイティブ EC2 所有行を照合する。初期の範囲は、Internet Gateway への接続や有効な外向き経路がない単一の IPv4 VPC、その VPC と同じ所有者に属する2つ以上の AZ のサブネット、および1〜5個の固有のセキュリティグループ。未知・別所有者・別 VPC の参照は書き込まない。これはその時点の設定検証であり、継続的な接続証明、SQL、バックエンド、ポート、エンドポイントの追加ではない。応答は引き続き `creating`。

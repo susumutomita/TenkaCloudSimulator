@@ -36,6 +36,13 @@ func (a *fixtureStackInstanceAttempt) Launch(ctx context.Context) error {
 func (a *fixtureStackInstanceAttempt) Seal(context.Context) error        { a.sealed.Store(true); return nil }
 func (a *fixtureStackInstanceAttempt) WaitCleanup(context.Context) error { return nil }
 
+func fixturePlacedStackInstance(record StackRecord) StackResource {
+	return StackResource{
+		LogicalID: "FixtureInstance", PhysicalID: "i-fixture", Type: "AWS::EC2::Instance",
+		Properties: map[string]any{"SubnetId": networkID(record, "PublicSubnet"), "SecurityGroupIds": []any{networkID(record, "Sg")}},
+	}
+}
+
 // Explicit fake receipt source tests only the CFN lifecycle. It is not a VM test.
 func TestStackInstancePendingOutsideSQLAndActualCompletion(t *testing.T) {
 	stack, _, record := networkFixture(t)
@@ -47,7 +54,7 @@ func TestStackInstancePendingOutsideSQLAndActualCompletion(t *testing.T) {
 		t.Fatal(compileErr)
 	}
 	record = fresh
-	record.Resources = append(record.Resources, StackResource{LogicalID: "FixtureInstance", PhysicalID: "i-fixture", Type: "AWS::EC2::Instance"})
+	record.Resources = append(record.Resources, fixturePlacedStackInstance(record))
 	attempt := &fixtureStackInstanceAttempt{started: make(chan struct{}), release: make(chan struct{})}
 	if err := stack.ConfigureInstanceRuntime(fixtureStackInstanceRuntime{attempt}); err != nil {
 		t.Fatal(err)
@@ -96,7 +103,7 @@ func TestStackInstanceFailureNeverCompletes(t *testing.T) {
 		t.Fatal(compileErr)
 	}
 	record = fresh
-	record.Resources = append(record.Resources, StackResource{LogicalID: "FixtureInstance", PhysicalID: "i-fixture", Type: "AWS::EC2::Instance"})
+	record.Resources = append(record.Resources, fixturePlacedStackInstance(record))
 	attempt := &fixtureStackInstanceAttempt{started: make(chan struct{}), release: make(chan struct{}), failure: fmt.Errorf("fixture launch rejected")}
 	close(attempt.release)
 	if err := stack.ConfigureInstanceRuntime(fixtureStackInstanceRuntime{attempt}); err != nil {
@@ -123,7 +130,7 @@ func TestStackInstanceDeleteRejectsLateReadiness(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	record.Resources = append(record.Resources, StackResource{LogicalID: "FixtureInstance", PhysicalID: "i-fixture", Type: "AWS::EC2::Instance"})
+	record.Resources = append(record.Resources, fixturePlacedStackInstance(record))
 	attempt := &fixtureStackInstanceAttempt{started: make(chan struct{}), release: make(chan struct{})}
 	if err = stack.ConfigureInstanceRuntime(fixtureStackInstanceRuntime{attempt}); err != nil {
 		t.Fatal(err)
@@ -157,7 +164,7 @@ func TestStackInstanceUnconfiguredHasNoSideEffects(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	record.Resources = append(record.Resources, StackResource{LogicalID: "FixtureInstance", PhysicalID: "i-fixture", Type: "AWS::EC2::Instance"})
+	record.Resources = append(record.Resources, fixturePlacedStackInstance(record))
 	if err = stack.Create(record); err == nil {
 		t.Fatal("unconfigured runtime accepted")
 	}
@@ -180,7 +187,7 @@ func TestStackInstanceFinalizeReadbackRejectsTriggerDrift(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	record.Resources = append(record.Resources, StackResource{LogicalID: "FixtureInstance", PhysicalID: "i-fixture", Type: "AWS::EC2::Instance"})
+	record.Resources = append(record.Resources, fixturePlacedStackInstance(record))
 	attempt := &fixtureStackInstanceAttempt{started: make(chan struct{}), release: make(chan struct{})}
 	close(attempt.release)
 	if err = stack.ConfigureInstanceRuntime(fixtureStackInstanceRuntime{attempt}); err != nil {
