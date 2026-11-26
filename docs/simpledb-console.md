@@ -48,6 +48,19 @@ batch writes, domain metadata, and whole-domain deletion are not offered here.
 Domain cleanup uses native `DeleteDomain`, which also removes its items.
 
 
+## Create a practice domain in the API reference
+
+In the shared Query `POST /` form, choose **SimpleDB CreateDomain (writes local
+state)**. Set `X-Simulator-Service: sdb`, clear `X-Amz-Target`, and use
+`us-east-1` or leave the Region header unset. Replace `DomainName` with a
+disposable name in your local environment. **Send** requires
+`sdb:CreateDomain` on that domain ARN and writes to the same SQLite state as the
+local Console and SDK. Sending the same name again preserves the existing data.
+For cleanup, use native SDK `DeleteDomain` on your practice domain only.
+See [AWS CreateDomain](https://docs.aws.amazon.com/AmazonSimpleDB/latest/DeveloperGuide/SDB_API_CreateDomain.html).
+[AWS does not offer a SimpleDB Management Console workflow](https://aws.amazon.com/blogs/database/export-amazon-simpledb-domain-data-to-amazon-s3/);
+this is the simulator's local API reference.
+
 ## Read one item in the API reference
 
 In **API reference**, open the Query `POST /` form and select the
