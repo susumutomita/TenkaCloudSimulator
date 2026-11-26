@@ -1,33 +1,26 @@
 {
   "version": 1,
-  "base_sha": "131e8ed0775c1303cf93ba88576fc5e48b489e60",
+  "base_sha": "95e59d0569650efa56066ce7945449432d7909ce",
   "changes": [
     {
-      "path": "docs/simpledb-console.md",
-      "sha256": "105bb4f63c3801a1a51d21c4008bfafa193ae5a8447b45c7bd9a3466a0ebebf6",
-      "disposition": "documentation",
-      "reason": "Documents how to select an existing authenticated read-only SimpleDB operation in the local reference. No runtime change.",
-      "models": []
-    },
-    {
-      "path": "internal/server/apidocs/openapi.json",
-      "sha256": "168c2b59f9a01bf6e7b495b729b9bb88492437ad0422b7cc0b55fab7a66c1688",
-      "disposition": "presentation",
-      "reason": "Adds one fixed read-only GetAttributes form example and associated type notes for existing DomainName, ItemName, and ConsistentRead. Existing routing, policy, storage and default example unchanged; no transition changes.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/simpledb_scalar_reference_live.py",
-      "sha256": "7866b6433337e6d944debfa6a69f082e3d5e1943eb972f9bc4116e54027b3766",
+      "path": "test/e2e/test_ssm_batch_reference.py",
+      "sha256": "8e267e3b53ac430de494578e3b12735331ff4623dc07c8a450c941a593509ce4",
       "disposition": "test-support",
-      "reason": "Optional exact-binary Scalar Send receipt checks stored values from the existing native form. No CI trigger, runtime or model change.",
+      "reason": "Validates later independently pinned OpenAPI layers before comparing an unchanged historical digest. Test-only; no runtime or state transition change.",
       "models": []
     },
     {
-      "path": "test/e2e/test_sakura_openapi.py",
-      "sha256": "1a6fd474b21464f441cbe34975b503816fc6f344aa85bdefb2a577a14fcc0a0b",
+      "path": "test/e2e/test_ssm_command_reference.py",
+      "sha256": "94f5a1122c3183eda6e48ae0e3019373e5ea9f73adcbf58f704a6c0cd1fb0407",
       "disposition": "test-support",
-      "reason": "Rejects drift or broadened GetAttributes presets, then preserves every pre-existing reference contract unchanged. No runtime behavior.",
+      "reason": "Validates later independently pinned OpenAPI layers before comparing an unchanged historical digest. Test-only; no runtime or state transition change.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/test_ssm_document_reference.py",
+      "sha256": "ed58ffd99b6ae58563faeb3701417d64fd97e66ebabfc308ae262a514e03ee6e",
+      "disposition": "test-support",
+      "reason": "Validates later independently pinned OpenAPI layers before comparing an unchanged historical digest. Test-only; no runtime or state transition change.",
       "models": []
     }
   ]
