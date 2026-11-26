@@ -44,9 +44,9 @@ API Reference の EC2 用プリセットは、既存の Query API の `DescribeI
 
 ネイティブ EC2 の [DescribeSecurityGroups](../ec2-read-discovery.md#security-group-readback) は、既存の EC2 IAM 判定とリージョンの範囲内で CloudFormation 管理グループと未接続のネイティブグループを読む。グループと親 VPC の型付き所有権を同じ SQLite スナップショットで照合し、テンプレートの初期値ではなく今の TCP/IPv4 受信ルールを返す。XML 1.0 で値をそのまま返せない行や壊れた所有権があれば一覧全体を拒否し、保存内容は変更しない。通常のサインイン済み VPC コンソールも同じ API と IAM を使い、選択した CloudFormation 管理の VPC に属するグループだけを表示する。権限不足、読み取り失敗、空の結果は区別する。セキュリティグループの変更やパケット処理は対象外。
 
-[DescribeRouteTables](../ec2-read-discovery.md#route-table-readback) は、CloudFormation 管理とネイティブ EC2 管理のテーブルを同じリージョンの SQLite から返す。有効なデフォルト経路を持てるのは CloudFormation 管理のテーブルだけで、関連付けもスタックが管理する。ネイティブのテーブルとサブネットは、同じ VPC 内に限り [明示的に関連付け・解除](../ec2-read-discovery.md#native-subnet-route-table-associations)できる。両リソースに対する認可を確認し、関連付けが残っていればテーブルもサブネットも削除しない。解除しても暗黙のメインテーブルには移らず、経路の追加やパケットの転送は行わない。
+[DescribeRouteTables](../ec2-read-discovery.md#route-table-readback) は、CloudFormation 管理とネイティブ EC2 管理のテーブルを同じリージョンの SQLite から返す。CloudFormation 管理テーブルでは、有効なデフォルト経路があれば表示し、関連付けもスタックで管理する。ネイティブのテーブルとサブネットは、同じ VPC 内に限り [明示的に関連付け・解除](../ec2-read-discovery.md#native-subnet-route-table-associations)できる。両リソースに対する認可を確認し、関連付けが残っていればテーブルもサブネットも削除しない。関連付けを解除しても暗黙のメインテーブルには移らない。
 
-明示的なサブネット関連付けの検索（`association.subnet-id`）は、同じリージョンの整合性検査とIAM判定を通過した表だけを後段で絞り込む。空入力は従来の全件取得、CloudFormationのルートテーブル画面は選択VPCと入力IDに応答を結び付ける。暗黙の関連付け・経路の作成や実通信は扱わない。
+明示的なサブネット関連付けの検索（`association.subnet-id`）は、リージョン全体の整合性検査と IAM 判定の後に行う。`MaxResults=5..100` のページは同じリージョン、利用者、条件、読み取った状態に結び付ける。通常のコンソールは全ページを確認してから選択 VPC の情報を表示する。表の作成・削除や関連付けの完了表示も、全ページの再読後に行う。単一の表を読む `RouteTableId.1` とページ指定は併用しない。従来の無指定の一括取得も変更しない。暗黙の関連付けや実通信は扱わない。
 
 [インターネットゲートウェイ](../ec2-internet-gateways.md)は、未接続で作成し、EC2 管理の VPC と 1 対 1 で接続・切断できる。両端点の IAM 許可、同一リージョンと所有権、依存関係、保存後の状態を確認し、接続中はゲートウェイも VPC も削除できない。CloudFormation 側は同じ SQLite スナップショットで型付き所有権と保存済みネットワークを照合し、表示だけ行う。Console は最大100件ずつの一覧を取り直し、接続・切断では対象 ID の個別確認も行う。途中結果や古い応答から成功を表示しない。経路やパブリック IP の設定、ゲスト起動、実通信は扱わない。
 

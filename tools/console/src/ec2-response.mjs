@@ -140,53 +140,76 @@ export function parseEC2Error(document){
   return code?{code,message:child(error,'Message')?.textContent??''}:null;
 }
 
-// DescribeRouteTables returns a regional snapshot, never a per-VPC filter or a data-plane observation.
-export function parseEC2RouteTables(document, selectedVPC, selectedSubnet = '') {
-  if (!vpcId.test(selectedVPC)) invalid();
+export const routeTableInventoryLimit=1000;
+export const routeTablePageSize=100;
+
+function routePageFields(node,names) {
+  if (!node||[...(node.childNodes??[])].some(n=>n.nodeType!==1&&(n.nodeType!==3||n.textContent.trim()))) invalid();
+  exactFields(node,names);
+}
+function routePageValue(node,name,required) {
+  const member=one(node,name,required);
+  if (member?.children?.length||[...(member?.childNodes??[])].some(n=>n.nodeType!==3&&n.nodeType!==4)) invalid();
+  return member?.textContent??'';
+}
+function routePageMembers(node,name,max) {
+  routePageFields(one(node,name,true),['item']);
+  return members(node,name,max);
+}
+
+export function parseEC2RouteTablePage(document, {selectedSubnet='',paginated=false, rowLimit=routeTableInventoryLimit}={}) {
+  if (document?.doctype) invalid();
   const response = root(document, 'DescribeRouteTablesResponse');
-  exactFields(response, ['requestId', 'routeTableSet']);
-  if (!value(response, 'requestId', true).trim()) invalid();
+  routePageFields(response, paginated?['requestId','routeTableSet','nextToken']:['requestId','routeTableSet']);
+  if (!routePageValue(response, 'requestId', true).trim()) invalid();
+  const token=one(response,'nextToken')===undefined?null:routePageValue(response,'nextToken',true);
+  if (token!==null&&/^[A-Za-z0-9_-]{48}$/.exec(token)?.[0]!==token) invalid();
 
   const bytes = new TextEncoder();
   let count = 0;
   const tableIds = new Set(), associationIds = new Set(), subnetIds = new Set();
   const unique = (set, id) => { if (set.has(id)) invalid(); set.add(id); };
-  const tables = members(response, 'routeTableSet', 1000).map(item => {
-    exactFields(item, ['routeTableId','vpcId','ownerId','routeSet','associationSet','tagSet']);
-    const id = value(item,'routeTableId',true), vpc = value(item,'vpcId',true);
-    if (!/^rtb-[0-9a-f]{17}$/.test(id) || !vpcId.test(vpc) || value(item,'ownerId',true)!=='000000000000') invalid();
+  const tables = routePageMembers(response, 'routeTableSet', rowLimit).map(item => {
+    routePageFields(item, ['routeTableId','vpcId','ownerId','routeSet','associationSet','tagSet']);
+    const id = routePageValue(item,'routeTableId',true), vpc = routePageValue(item,'vpcId',true);
+    if (!/^rtb-[0-9a-f]{17}$/.test(id) || !vpcId.test(vpc) || routePageValue(item,'ownerId',true)!=='000000000000') invalid();
     unique(tableIds, id);
     let previous=null, gatewayForTable='';
-    const routes = members(item,'routeSet',nativeIPv4RouteLimit).map(route => {
-      exactFields(route, ['destinationCidrBlock','gatewayId','origin','state']);
-      const cidr = value(route,'destinationCidrBlock',true), gateway = value(route,'gatewayId',true), prefix=ec2IPv4Prefix(cidr);
+    const routes = routePageMembers(item,'routeSet',nativeIPv4RouteLimit).map(route => {
+      routePageFields(route, ['destinationCidrBlock','gatewayId','origin','state']);
+      const cidr = routePageValue(route,'destinationCidrBlock',true), gateway = routePageValue(route,'gatewayId',true), prefix=ec2IPv4Prefix(cidr);
       if (!prefix||prefix.masked!==cidr||previous&&compareIPv4RoutePrefixes(previous,prefix)>=0||
           !/^igw-[0-9a-f]{17}$/.test(gateway)||gatewayForTable&&gatewayForTable!==gateway||
-          value(route,'origin', true)!=='CreateRoute' || value(route,'state',true)!=='active') invalid();
+          routePageValue(route,'origin', true)!=='CreateRoute' || routePageValue(route,'state',true)!=='active') invalid();
       previous=prefix;gatewayForTable=gateway;
       return {cidr,gateway};
     });
-    const associations = members(item,'associationSet',1000).map(association => {
-      exactFields(association, ['routeTableAssociationId','routeTableId','subnetId','main']);
-      const assoc = value(association,'routeTableAssociationId',true), subnet = value(association,'subnetId',true);
+    const associations = routePageMembers(item,'associationSet',1000).map(association => {
+      routePageFields(association, ['routeTableAssociationId','routeTableId','subnetId','main']);
+      const assoc = routePageValue(association,'routeTableAssociationId',true), subnet = routePageValue(association,'subnetId',true);
       if (!/^rtbassoc-[0-9a-f]{17}$/.test(assoc) || !/^subnet-[0-9a-f]{17}$/.test(subnet) ||
-          value(association,'routeTableId',true)!==id || value(association,'main',true)!=='false') invalid();
+          routePageValue(association,'routeTableId',true)!==id || routePageValue(association,'main',true)!=='false') invalid();
       unique(associationIds, assoc); unique(subnetIds, subnet);
       return {id:assoc,subnet};
     });
     const keys = new Set();
-    const tags = members(item,'tagSet',50).map(tag => {
-      exactFields(tag, ['key','value']);
-      const key = value(tag,'key',true), val = value(tag,'value',true);
+    const tags = routePageMembers(item,'tagSet',50).map(tag => {
+      routePageFields(tag, ['key','value']);
+      const key = routePageValue(tag,'key',true), val = routePageValue(tag,'value',true);
       if (!key || /^aws:/i.test(key) || bytes.encode(key).length>128 || bytes.encode(val).length>256) invalid();
       unique(keys,key);
       return {key,value:val};
     });
     if (selectedSubnet && !associations.some(association => association.subnet === selectedSubnet)) invalid();
     count += 1 + routes.length + associations.length;
-    if (count > 1000) invalid();
+    if (count > routeTableInventoryLimit) invalid();
     return {id,vpc,routes,associations,tags};
   });
-  // Malformed or truncated data anywhere is never interpreted as a successful empty selection.
-  return tables.filter(table => table.vpc===selectedVPC);
+  return {tables,token};
+}
+
+// DescribeRouteTables is regional, never a per-VPC filter or a data-plane observation.
+export function parseEC2RouteTables(document, selectedVPC, selectedSubnet='') {
+  if (!vpcId.test(selectedVPC)) invalid();
+  return parseEC2RouteTablePage(document,{selectedSubnet}).tables.filter(table=>table.vpc===selectedVPC);
 }

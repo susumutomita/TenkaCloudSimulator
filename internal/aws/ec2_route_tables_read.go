@@ -27,6 +27,7 @@ type ec2DescribeRouteTablesResponse struct {
 	XMLName   xml.Name            `xml:"DescribeRouteTablesResponse"`
 	XMLNS     string              `xml:"xmlns,attr"`
 	RequestID string              `xml:"requestId"`
+	NextToken string              `xml:"nextToken,omitempty"`
 	Tables    []ec2RouteTableRead `xml:"routeTableSet>item"`
 }
 type ec2RouteTableRead struct {
@@ -52,24 +53,36 @@ type ec2RouteAssociationRead struct {
 
 // Exact table scope yields at most one bounded wire row for mutation
 // confirmation. It cannot skip validation of the regional graph.
-func parseEC2RouteTableSelection(fields map[string][]string) (string, []string, *ec2Failure) {
+func parseEC2RouteTableSelection(fields map[string][]string) (ec2RouteTableQuery, *ec2Failure) {
+	q := ec2RouteTableQuery{}
 	ids, exact := fields["RouteTableId.1"]
 	if !exact {
+		if err := parseEC2RouteTablePageFields(fields, &q); err != nil {
+			return q, err
+		}
 		subnets, err := parseEC2RouteTableSubnetFilter(fields)
-		return "", subnets, err
+		slices.Sort(subnets)
+		q.subnets = slices.Compact(subnets)
+		return q, err
 	}
 	if len(ids) != 1 || !ec2NativeRouteTableID.MatchString(ids[0]) {
-		return "", nil, ec2Invalid("InvalidRouteTableId.Malformed", "RouteTableId.1 must be exactly one rtb- ID.")
+		return q, ec2Invalid("InvalidRouteTableId.Malformed", "RouteTableId.1 must be exactly one rtb- ID.")
+	}
+	for _, name := range []string{"MaxResults", "NextToken"} {
+		if _, found := fields[name]; found {
+			return q, ec2Invalid("InvalidParameterCombination", "RouteTableId.1 cannot be combined with pagination.")
+		}
 	}
 	for name, members := range fields {
 		if name != "Action" && name != "Version" && name != "RouteTableId.1" {
-			return "", nil, ec2Invalid("UnsupportedOperation", "The single exact route-table selector cannot be combined with other options.")
+			return q, ec2Invalid("UnsupportedOperation", "The single exact route-table selector cannot be combined with other options.")
 		}
 		if len(members) != 1 {
-			return "", nil, ec2Invalid("InvalidParameterValue", "DescribeRouteTables parameters must be sent once.")
+			return q, ec2Invalid("InvalidParameterValue", "DescribeRouteTables parameters must be sent once.")
 		}
 	}
-	return ids[0], nil, nil
+	q.id = ids[0]
+	return q, nil
 }
 
 // Accept one bounded EC2 Query filter, with continuous Value indices.
@@ -84,7 +97,7 @@ func parseEC2RouteTableSubnetFilter(fields map[string][]string) ([]string, *ec2F
 			return nil, ec2Invalid("InvalidParameterValue", "DescribeRouteTables parameters must be sent once.")
 		}
 		switch field {
-		case "Action", "Version":
+		case "Action", "Version", "MaxResults", "NextToken":
 			continue
 		case "Filter.1.Name":
 			if entries[0] != "association.subnet-id" {

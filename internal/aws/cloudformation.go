@@ -34,6 +34,7 @@ type StackStore struct {
 	instanceRuntime      StackInstanceRuntime
 	instanceAttempts     sync.Map
 	internetGatewayPages ec2InternetGatewayPager
+	routeTablePages      ec2RouteTablePager
 }
 type StackResource struct {
 	LogicalID, Type, PhysicalID string

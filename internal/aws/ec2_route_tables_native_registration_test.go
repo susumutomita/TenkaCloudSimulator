@@ -91,11 +91,11 @@ func TestEC2NativeRouteTableGatewayMaintainsLegacyReadback(t *testing.T) {
 	for _, bad := range []url.Values{
 		{"Action": {"ReplaceRoute"}, "RouteTableId": {target}},
 		{"Action": {"ReplaceRouteTableAssociation"}, "RouteTableId": {target}},
-		{"Action": {"DescribeRouteTables"}, "RouteTableId.1": {target}, "MaxResults": {"10"}},
 		{"Action": {"DescribeRouteTables"}, "Filter.1.Name": {"vpc-id"}, "Filter.1.Value.1": {parent.ID}},
 	} {
 		f.expect(f.call("", region, nil, bad), 400, "UnsupportedOperation")
 	}
+	f.expect(f.call("", region, nil, url.Values{"Action": {"DescribeRouteTables"}, "RouteTableId.1": {target}, "MaxResults": {"10"}}), 400, "InvalidParameterCombination")
 	f.expect(f.call("", region, nil, url.Values{"Action": {"DeleteVpc"}, "VpcId": {parent.ID}}), 400, "DependencyViolation")
 	del := url.Values{"Action": {"DeleteRouteTable"}, "RouteTableId": {target}}
 	f.expect(f.call("route-editor", region, nil, del), 403, "UnauthorizedOperation")

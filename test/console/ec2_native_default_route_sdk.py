@@ -156,7 +156,7 @@ def console(binary):
                 connection.close()
             ref = json.loads(document)['paths']['/']['post']['requestBody']['content']['application/x-www-form-urlencoded']
             preset = ref['examples']['DescribeRouteTables']['value']
-            assert preset == {'Action':'DescribeRouteTables','Version':'2016-11-15'}
+            assert preset == {'Action':'DescribeRouteTables','Version':'2016-11-15','MaxResults':100}
             assert preset['Action'] in ref['schema']['properties']['Action']['enum']
             assert 'RouteTableId.1' in ref['schema']['properties']
             assert 'CreateRoute' not in ref['examples'] and 'DeleteRoute' not in ref['examples']

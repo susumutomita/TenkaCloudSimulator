@@ -1,4 +1,4 @@
-import {parseEC2RouteTables} from './ec2-response.mjs';
+import {loadEC2RouteTablePages,readEC2RouteTableReply} from './ec2-route-table-pages.mjs';
 import {loadVpcSubnets} from './ec2-native-subnets.mjs';
 import {vpcRouteTablesAvailable} from './ec2-route-tables.mjs';
 import {describeInternetGateways,internetGatewaysAvailable} from './ec2-internet-gateways.mjs';
@@ -79,30 +79,6 @@ function envelope(document,action,members) {
   return result;
 }
 
-async function readReply(response,signal,limit=16*1024*1024) {
-  const type=response.headers?.get('Content-Type')?.split(';')[0].trim().toLowerCase();
-  const reader=response.body?.getReader();
-  if (!reader) invalid();
-  const decoder=new TextDecoder('utf-8',{fatal:true});
-  let data='',size=0,done=false;
-  try {
-    if (type!=='text/xml' && type!=='application/xml') invalid();
-    for (;;) {
-      signal?.throwIfAborted();
-      const chunk=await reader.read();
-      if (chunk.done) {done=true;break;}
-      if (chunk.value.byteLength>limit-size) invalid();
-      size+=chunk.value.byteLength;
-      data+=decoder.decode(chunk.value,{stream:true});
-    }
-    signal?.throwIfAborted();
-    return data+decoder.decode();
-  } finally {
-    if (!done) void reader.cancel().catch(()=>{});
-    reader.releaseLock();
-  }
-}
-
 async function send(request,region,vpc,action,params,{signal,parse=xml,maxBytes}) {
   signal?.throwIfAborted();
   if (!nativeRouteTableTarget(vpc) || !shape(region,regionID) || region.length>32) invalid();
@@ -111,33 +87,14 @@ async function send(request,region,vpc,action,params,{signal,parse=xml,maxBytes}
     body:new URLSearchParams({Action:action,Version:'2016-11-15',...params})});
   signal?.throwIfAborted();
   if (!response?.ok) throw Error((response?.status??0)+': Route table request failed.');
-  return parse(await readReply(response,signal,maxBytes));
+  return parse(await readEC2RouteTableReply(response,signal,maxBytes));
 }
 
 async function snapshot(request,region,vpc,options) {
-  // Describe is regional and validates both owners in one server snapshot.
-  // The existing decoder rejects main, duplicate and non-subnet associations.
-  const exact=options.exactID;
-  // A single route-table readback cannot carry more than 50 bounded tags,
-  // 1,000 bounded association elements and 16 routes. Do not depend on the
-  // size of the rest of the regional list after an acknowledged mutation.
-  const doc=await send(request,region,vpc,'DescribeRouteTables',exact?{'RouteTableId.1':exact}:{},
-    exact?{...options,maxBytes:512*1024}:options);
-  const found=envelope(doc,'DescribeRouteTables',['routeTableSet']);
-  const saved=parseEC2RouteTables(doc,vpc.id), associations=options.associations===true;
-  const regionalIDs=new Set(), regionalAssociations=new Set(), regionalSubnets=new Set();
-  for (const item of children(found.get('routeTableSet'))) {
-    const table=fields(item,wireFields), id=leaf(table.get('routeTableId'));
-    if (!shape(id,tableID)) invalid();
-    regionalIDs.add(id);
-    if (associations) for (const item of children(table.get('associationSet'))) {
-      const pair=fields(item,['routeTableAssociationId','routeTableId','subnetId','main']);
-      const assoc=leaf(pair.get('routeTableAssociationId')), subnet=leaf(pair.get('subnetId'));
-      if (!shape(assoc,associationID)||!shape(subnet,subnetID)) invalid();
-      regionalAssociations.add(assoc);regionalSubnets.add(subnet);
-    }
-  }
-  if (exact&&(regionalIDs.size!==1||!regionalIDs.has(exact)||saved.length!==1)) invalid();
+  if (!nativeRouteTableTarget(vpc)) invalid();
+  const {tables,regionalIDs,regionalAssociations,regionalSubnets}=await loadEC2RouteTablePages(request,region,options);
+  const saved=tables.filter(table=>table.vpc===vpc.id), associations=options.associations===true;
+  if (options.exactID&&saved.length!==1) invalid();
   const routeLimit=options.routeLimit??0;
   if (![0,1,nativeIPv4RouteLimit].includes(routeLimit)) invalid();
   const binding={request,region,vpc:vpc.id,cidr:vpc.cidr,associations,routeLimit,regionalSubnets};

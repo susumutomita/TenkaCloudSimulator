@@ -3960,6 +3960,52 @@ REQUIRED_SOURCE_SCOPES['EC2NativeIPv4RouteSet'] = {
     'tools/console/src/main.jsx',
 }
 
+BASE_MODELS.add('EC2RouteTableInventoryPages')
+BASE_INVARIANTS['EC2RouteTableInventoryPages'] = {
+    'TypeOK',
+    'PageAuthorized',
+    'PageBounds',
+    'ScopedContinuation',
+    'CurrentAssembly',
+    'CompletePublication',
+    'ExactWriteReadback',
+}
+REQUIRED_MUTANTS['EC2RouteTableInventoryPages'] = {
+    'RequirePageIAM',
+    'RequireBoundActor',
+    'AdmitExactIDWithPaging',
+    'AdmitInvalidPageSize',
+    'SkipVerifiedRegionalGraph',
+    'IgnoreEncodedByteBound',
+    'OverfullTerminalPage',
+    'AdmitEmptyContinuation',
+    'AdmitShortNonterminalPage',
+    'SkipCursorSeal',
+    'ReuseAcrossRegion',
+    'ReuseOtherActor',
+    'ChangeSubnetsOnResume',
+    'ChangeLimitOnResume',
+    'ContinueAcrossSavedSnapshots',
+    'AdmitRepeatedOrDisorderedRows',
+    'UseRetiredScopeReply',
+    'PublishBeforeTerminal',
+    'ConfirmWriteWithWrongSavedState',
+}
+REQUIRED_SOURCE_SCOPES['EC2RouteTableInventoryPages'] = {
+    'internal/aws/cloudformation.go',
+    'internal/aws/ec2_read.go',
+    'internal/aws/ec2_vpc.go',
+    'internal/aws/ec2_route_tables_read.go',
+    'internal/aws/ec2_route_table_page.go',
+    'internal/server/web/app.js',
+    'tools/console/src/ec2-response.mjs',
+    'tools/console/src/ec2-route-table-pages.mjs',
+    'tools/console/src/ec2-route-tables.mjs',
+    'tools/console/src/ec2-native-route-tables.mjs',
+    'tools/console/src/ec2-vpc-route-tables.jsx',
+    'tools/console/src/ec2-vpc-native-route-tables.jsx',
+}
+
 
 def load_registry(root, relative='formal/models.json'):
     root = Path(root)

@@ -183,11 +183,13 @@ func TestEC2DescribeRouteTablesReadback(t *testing.T) {
 	call(west, "reader", exact, false, 400)
 	call(east, "denied", exact, false, 403)
 	call(east, "reader", exact, true, 403)
-	for _, q := range []url.Values{{"RouteTableId.1": {ids["Table"]}, "RouteTableId.2": {ids["Empty"]}}, {"Filter.1.Name": {"vpc-id"}}, {"MaxResults": {"5"}}, {"NextToken": {"none"}}, {"DryRun": {"false"}}} {
+	for _, q := range []url.Values{{"RouteTableId.1": {ids["Table"]}, "RouteTableId.2": {ids["Empty"]}}, {"Filter.1.Name": {"vpc-id"}}, {"DryRun": {"false"}}} {
 		if b := call(east, "reader", q, false, 400); !strings.Contains(b, "UnsupportedOperation") || strings.Contains(b, "routeTableSet") {
 			t.Fatal(b)
 		}
 	}
+	call(east, "reader", url.Values{"MaxResults": {"5"}}, false, 403) // no bound request actor in this low-level fixture
+	call(east, "reader", url.Values{"NextToken": {"none"}}, false, 400)
 	for _, p := range []string{"unknown", "denied"} {
 		if b := call(east, p, nil, false, 403); strings.Contains(b, ids["Table"]) || !strings.Contains(b, "UnauthorizedOperation") {
 			t.Fatal(b)

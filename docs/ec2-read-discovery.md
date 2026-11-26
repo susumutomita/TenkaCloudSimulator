@@ -23,8 +23,9 @@ One database/token authority per team is still required; exercise identities are
 not tenant isolation. Native STS session credentials are not supported here.
 
 Only the documented selectors are supported: security groups and network ACLs
-accept IDs or `vpc-id`, route tables accept one exact `RouteTableId.1` or `association.subnet-id`, and
-internet gateways accept IDs or [bounded unfiltered pages](ec2-internet-gateways.md).
+accept IDs or `vpc-id`. Route tables accept an exact ID, a regional list or
+[bounded pages](#route-table-readback), with an optional explicit subnet filter
+for lists. Internet gateways accept IDs or [bounded unfiltered pages](ec2-internet-gateways.md).
 Other EC2 reads do not support pagination. Over-bound results fail rather than
 returning an unmarked truncated list.
 
@@ -180,11 +181,33 @@ filter runs **after** the same regional ownership and state validation; it does
 not narrow IAM scope, hide inconsistent state, or create an implicit fallback.
 The separate exact `RouteTableId.1` selector (SDK `RouteTableIds=[id]`) returns
 at most one complete table, retaining the same regional validation and IAM.
-An exact no-match is `InvalidRouteTableID.NotFound`. Combining selectors,
-other filter names, pagination and dry-run are rejected.
+An exact no-match is `InvalidRouteTableID.NotFound`. Combining the exact ID
+and pagination returns `InvalidParameterCombination`. Exact ID plus a filter,
+multiple IDs, other filters, and dry-run remain unsupported.
+
+For the signed-in regional list, AWS Query-compatible `MaxResults=5..100`
+opts into bounded pages. The API sorts by table ID and returns `nextToken`
+only if more selected tables remain. Use that value as `NextToken`, with the
+same actor, region, subnet selection and optional original page size; reordering
+the same OR values is allowed. Each page requires the normal IAM grant
+and is based on the whole validated regional projection before filtering.
+A changed projection, changed selection or simulator restart invalidates the
+token (`InvalidNextToken`): start the list again, rather than combining partial
+snapshots. This pagination is read-only and stores no copies of snapshots.
+Page XML is limited to 16 MiB and exact readback XML to 512 KiB; an oversized
+result fails before a successful body. Calls with neither page parameter still
+return one complete legacy list within the existing 1,000-resource storage
+bound. Use pages for large inventories. The pinned local [SDK and served reference fixture](../test/console/ec2_route_table_pages_sdk.py)
+checks a regional inventory above the single-page byte limit. The [Console fixture](../test/console/ec2_route_table_pages_console.py)
+checks complete reads and unconfirmed writes in JSDOM against the same local API.
 
 ```python
-ec2.describe_route_tables(Filters=[{'Name': 'association.subnet-id', 'Values': [subnet_id]}])
+for page in ec2.get_paginator("describe_route_tables").paginate(
+    PaginationConfig={"PageSize": 100},
+    # Optional, explicit subnet association only:
+    # Filters=[{"Name": "association.subnet-id", "Values": [subnet_id]}],
+):
+    tables = page["RouteTables"]
 ```
 
 In an ordinary signed-in **VPC** Console, select a CloudFormation-managed VPC
@@ -193,8 +216,9 @@ default route, explicit subnet associations and tags. **Filter by subnet ID**
 sends the same selector (one exact ID); clear it to return to the full view.
 Incomplete IDs do not issue a read, and previous results are not shown while the
 selector is changing. The Console makes the same
-regional EC2 Query as the SDK with the current exercise identity, validates the
-whole response, then selects the matching VPC in the browser. This selection is
+regional EC2 Query as the SDK with the current exercise identity. Both panes
+collect and validate all 100-table pages before showing the selected VPC;
+malformed, stale or incomplete continuations cannot publish a prefix. This selection is
 not an IAM filter: the operation requires regional `ec2:DescribeRouteTables` on
 `*`. A refusal or incomplete reply is never displayed as “no tables.” The
 CloudFormation view offers no mutations. Scoped handoffs do not offer either
@@ -203,9 +227,9 @@ route table pane. Refresh, subnet, VPC, region and identity changes discard old 
 For a verified **EC2-managed** VPC, **Route tables** supports local
 [CreateRouteTable](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_CreateRouteTable.html)
 and [DeleteRouteTable](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_DeleteRouteTable.html).
-It uses a fresh readback of the same VPC and region before reporting success;
-a write without confirmed readback requires refresh. The native route pane stops
-reading after 16 MiB and displays the snapshot as unavailable, not as an empty list.
+Table creation/deletion and subnet association writes wait for a complete fresh
+regional readback before reporting success; an unconfirmed write requires refresh,
+not a replay. IPv4 route changes retain the separate exact-table readback.
 When a table is present,
 its exact ID is required to confirm deletion. Create accepts the selected
 `VpcId`, an idempotency `ClientToken`, and optionally a Name tag. IAM checks

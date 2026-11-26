@@ -18,7 +18,7 @@ TRANSPORT = r"""
 window.__routes = {calls: [], releases: {}, errors: []};
 const fixture = window.__routes;
 const xml = (name, body) => '<'+name+' xmlns="http://ec2.amazonaws.com/doc/2016-11-15/">'+body+'</'+name+'>';
-const reply = body => ({ok:true, status:200, text:async()=>body});
+const reply = body => new Response(body,{status:200,headers:{'Content-Type':'text/xml'}});
 const routes = label => reply(xml('DescribeRouteTablesResponse',
   '<requestId>fixture</requestId><routeTableSet><item><routeTableId>rtb-22222222222222222</routeTableId>'+
   '<vpcId>vpc-11111111111111111</vpcId><ownerId>000000000000</ownerId><routeSet/><associationSet/>'+
@@ -31,7 +31,8 @@ window.fetch = async (url, opts={}) => {
       operations:['DescribeInstances','DescribeVpcs','DescribeRouteTables'],routeTableReadback:'DescribeRouteTables'}}})};
   const params = new URLSearchParams(opts.body), action=params.get('Action');
   if (url!=='/' || opts.method!=='POST' || opts.headers['X-Simulator-Service']!=='ec2' ||
-      opts.headers['X-Simulator-Region']!=='us-east-1' || [...params.keys()].join(',')!=='Action,Version' ||
+      opts.headers['X-Simulator-Region']!=='us-east-1' || [...params.keys()].join(',')!==(action==='DescribeRouteTables'?'Action,Version,MaxResults':'Action,Version') ||
+      (action==='DescribeRouteTables' && params.get('MaxResults')!=='100') ||
       params.get('Version')!=='2016-11-15' || !['learner-a','learner-b'].includes(identity)) {
     fixture.errors.push('unexpected transport '+url+'/'+action); throw Error(fixture.errors.at(-1));
   }

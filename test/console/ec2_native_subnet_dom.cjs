@@ -12,7 +12,7 @@ async function until(fn,label){
   assert.fail(label);
 }
 const button=(node,text)=>[...(node?.querySelectorAll('button')??[])].find(b=>b.textContent.trim()===text);
-const ruleTitles=['Authorize security group ingress','Edit inbound rules','Edit outbound rules','Edit subnet associations','Associate subnet','Attach to instance'];
+const ruleTitles=['Authorize security group ingress','Edit inbound rules','Edit outbound rules','Edit subnet associations','Attach to instance'];
 
 (async()=>{
   const [html,bundle]=await Promise.all(['/','/app.js'].map(path=>fetch(origin+'/_simulator/console'+path,
@@ -45,7 +45,7 @@ const ruleTitles=['Authorize security group ingress','Edit inbound rules','Edit 
         if(action.startsWith('Create')) assert.equal(form.get('VpcId'),vpc,'must create under selected native VPC');
         if(action==='CreateSubnet') assert.equal(form.get('CidrBlock'),'10.74.1.0/24');
         if(action==='CreateNetworkAcl') assert.match(form.get('ClientToken'),/^[a-f0-9-]{36}$/);
-        if(action==='DescribeRouteTables')assert.deepEqual([...form.keys()].sort(),['Action','Version']);
+        if(action==='DescribeRouteTables')assert.deepEqual(Object.fromEntries(form),{Action:action,Version:'2016-11-15',MaxResults:'100'});
         if(action==='CreateRouteTable'){
           assert.match(form.get('ClientToken'),/^[a-f0-9]{32}$/);
           assert.equal(form.get('TagSpecification.1.ResourceType'),'route-table');
@@ -99,13 +99,21 @@ const ruleTitles=['Authorize security group ingress','Edit inbound rules','Edit 
       assert.ok(!display(peerRoute));
 
       assert.ok(display('This panel does not read or change its network ACLs.'));
-      for(const name of ['Add subnet','Create security group','Create network ACL','Create route table','Delete subnet','Delete security group','Delete network ACL','Delete route table'])assert.equal(button(d,name),undefined);
+      for(const name of ['Add subnet','Create security group','Create network ACL','Create route table','Delete subnet','Delete security group','Delete network ACL','Delete route table','Associate subnet','Disassociate subnet'])assert.ok(!button(d,name),name+' is not a CFN action');
     }
     await legacy();
     await select(vpc);
     await until(()=>display('Independent native group')||phase==='delete'&&display('Detached GUI group'),'native SG not listed');
     assert.ok(!display(legacyRoute)&&!display(peerRoute));
-    for(const title of ruleTitles)assert.equal(button(d,title),undefined,title+' must not be offered');
+    for(const title of ruleTitles)assert.ok(!button(d,title),title+' must not be offered');
+    // Explicit association is a route-table action, not a subnet/SG/ACL
+    // edit. Its button exists only for the currently shown native row.
+    if(phase==='delete'){
+      const rowAction=await until(()=>d.querySelector('button[aria-label="Associate subnet: '+opts.saved.table+'"]'),
+        'saved native table is missing its route association control');
+      assert.equal(rowAction.textContent.trim(),'Associate subnet');
+      assert.equal(d.querySelectorAll('button[aria-label^="Associate subnet: "]').length,1);
+    } else assert.ok(!button(d,'Associate subnet'),'empty native route inventory offered association');
     if(phase==='create'){
       await click('Add subnet');
       await fill('subnet',0,'10.75.1.0/24');
@@ -184,7 +192,7 @@ const ruleTitles=['Authorize security group ingress','Edit inbound rules','Edit 
       await fill('route table',0,peerRoute);
       assert.ok(ctrl('Delete route table',active('route table')).disabled);
       await fill('route table',0,table);await submit('route table','Delete route table');
-      await until(()=>display('Deleted route table: '+table)&&display('No detached route tables are saved for this VPC.'),'route removal not confirmed');
+      await until(()=>display('Deleted route table: '+table)&&display('No route tables are saved for this VPC.'),'route removal not confirmed');
       await click('Delete subnet');await fill('subnet',0,'delete');await submit('subnet','Delete subnet');
       await until(()=>display('Removed subnet: '+subnet)&&display('No subnets are recorded for this VPC.'),'subnet removal missing');
       await legacy();
