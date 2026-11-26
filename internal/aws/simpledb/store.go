@@ -7,12 +7,11 @@ import (
 	"crypto/rand"
 	"database/sql"
 	"errors"
-	"sync"
 )
 
 type Store struct {
 	db       *sql.DB
-	mu       sync.Mutex
+	writer   chan struct{}
 	tokenKey [32]byte
 }
 type storeError string
@@ -32,7 +31,7 @@ func NewStore(db *sql.DB) (*Store, error) {
 	if db == nil {
 		return nil, errors.New("SimpleDB requires caller-owned database")
 	}
-	s := &Store{db: db}
+	s := &Store{db: db, writer: make(chan struct{}, 1)}
 	if _, err := rand.Read(s.tokenKey[:]); err != nil {
 		return nil, err
 	}
@@ -58,8 +57,18 @@ func (s *Store) write(ctx context.Context, fn func(*sql.Tx) error) error {
 	if err := ctx.Err(); err != nil {
 		return failure(ctx, err)
 	}
-	s.mu.Lock()
-	defer s.mu.Unlock()
+	// Keep one writer per store, but do not leave canceled requests
+	// waiting for an unrelated transaction to finish.
+	select {
+	case s.writer <- struct{}{}:
+	case <-ctx.Done():
+		return failure(ctx, ctx.Err())
+	}
+	defer func() { <-s.writer }()
+	// Cancellation and acquisition can become ready at the same time.
+	if err := ctx.Err(); err != nil {
+		return failure(ctx, err)
+	}
 	tx, err := s.db.BeginTx(ctx, nil)
 	if err != nil {
 		return failure(ctx, err)
