@@ -910,6 +910,11 @@ func (s *StackStore) createCheckedContext(ctx context.Context, record StackRecor
 			return err
 		}
 	}
+	if entry != nil {
+		if err = stackInstancePlacement(ctx, tx, record, entry.resource); err != nil {
+			return err
+		}
+	}
 	if err = saveStackAPIFingerprints(tx, &record); err != nil {
 		return err
 	}

@@ -56,6 +56,8 @@ CloudFormationのRef/GetAtt/Subはresource dependency graphを先にtopological 
 
 任意の Battle VM 実行環境で、既存の capability resolve はチームの正規 DB に保存された `CREATE_COMPLETE` の Stack ID と EC2 所有権を、起動時の保持済みレシート・ready 記録・lease と照合する。起動コールバックは CloudFormation の確定を待たない。先に到達した resolve は 409 になり、後から再試行できる。seal と既存の NIC 認可は変わらない。この照合は新しい通信経路や RDS の動作を保証しない。
 
+スタックの `AWS::EC2::Instance` は、同じスタックが作成したサブネットとセキュリティグループ（同一 VPC）にだけ配置できる。存在しない ID、別スタックのリソース、ネイティブ EC2 管理のサブネットやグループを指定した場合は、作成トランザクションの中で `ValidationError` として拒否する。スタックもインスタンスの所有権も保存せず、ゲストの起動も始めない。これは `DescribeInstances` がそのインスタンスを読み戻すときに要求する所有関係と同じである。[対応範囲](../cloudformation-rest.md)。
+
 `--rds-private-postgres-topology` は認証付きの数値ループバックでだけ使える任意の設定検証。`Engine=postgres`、単独 DB インスタンス、明示的な `PubliclyAccessible=false` の `CreateDBInstance` / `ModifyDBInstance` を対象にする。通常の設定モードは変えない。既存の `rds` IAM 判定後、書き込みと同じ SQLite トランザクションで DB サブネットグループと現行のネイティブ EC2 所有行を照合する。初期の範囲は、Internet Gateway への接続や有効な外向き経路がない単一の IPv4 VPC、その VPC と同じ所有者に属する2つ以上の AZ のサブネット、および1〜5個の固有のセキュリティグループ。未知・別所有者・別 VPC の参照は書き込まない。これはその時点の設定検証であり、継続的な接続証明、SQL、バックエンド、ポート、エンドポイントの追加ではない。応答は引き続き `creating`。
 
 Linux/amd64 の非 root 運用者は、認証付き数値ループバックで [`--rds-owned-postgres-config`](rds-owned-workload.md) を個別に指定できる。既存の設定検証と、承認済み PostgreSQL バンドル・独立したピン・専用作業ディレクトリ・永続 SQLite を必須とし、Battle との併用は拒否する。起動時は構成を受け入れるだけで、既存の IAM とトポロジー検証を通り、所有権を確定した指定 DB の新規作成だけが内部実行の対象になる。API の応答形式は変えず、接続先・認証情報・稼働の保証やゲスト接続は提供しない。

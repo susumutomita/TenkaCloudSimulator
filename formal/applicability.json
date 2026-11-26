@@ -1,33 +1,65 @@
 {
   "version": 1,
-  "base_sha": "131e8ed0775c1303cf93ba88576fc5e48b489e60",
+  "base_sha": "95e59d0569650efa56066ce7945449432d7909ce",
   "changes": [
     {
-      "path": "docs/simpledb-console.md",
-      "sha256": "105bb4f63c3801a1a51d21c4008bfafa193ae5a8447b45c7bd9a3466a0ebebf6",
+      "path": "docs/cloudformation-rest.md",
+      "sha256": "8f511ba95a36893a974f7dc46908a2ff254f3dc711402f89ba3fcff2a6dadc83",
       "disposition": "documentation",
-      "reason": "Documents how to select an existing authenticated read-only SimpleDB operation in the local reference. No runtime change.",
+      "reason": "CloudFormation guide: a stack instance must use a subnet and security groups of its own stack.",
       "models": []
     },
     {
-      "path": "internal/server/apidocs/openapi.json",
-      "sha256": "168c2b59f9a01bf6e7b495b729b9bb88492437ad0422b7cc0b55fab7a66c1688",
-      "disposition": "presentation",
-      "reason": "Adds one fixed read-only GetAttributes form example and associated type notes for existing DomainName, ItemName, and ConsistentRead. Existing routing, policy, storage and default example unchanged; no transition changes.",
+      "path": "docs/design/0001-go-standalone.md",
+      "sha256": "bd6425f02312501f814e60022cd89079e77a5a89d3fe8a61056b40831cf5f3b9",
+      "disposition": "documentation",
+      "reason": "Design record: stack instance placement is refused inside the create transaction when it names foreign network rows.",
       "models": []
     },
     {
-      "path": "test/e2e/simpledb_scalar_reference_live.py",
-      "sha256": "7866b6433337e6d944debfa6a69f082e3d5e1943eb972f9bc4116e54027b3766",
+      "path": "internal/aws/cloudformation.go",
+      "sha256": "57d05f844337d30797bec0aea9b913914959492ac277de91ed3abea3db91f005",
+      "disposition": "modeled",
+      "reason": "The stack create transaction calls the instance placement check before commit, so a refused placement stores no stack or instance claim and starts no guest launch. Every other resource path, event and finalization is unchanged.",
+      "models": [
+        {
+          "id": "CanonicalVMComposition",
+          "properties": [
+            "NetworkOwnership",
+            "JournalBeforeLaunch"
+          ],
+          "limits": "Finite ordering and admission model of one launch, one network ownership operation and one creator. Its network admission abstracts same-owner and validity checks as Booleans: it does not model SQL, the instance's subnet and security-group rows, CloudFormation resource order, IAM evaluation, a real guest or a Go refinement proof. The Go test with the runtime double establishes that a foreign placement is refused inside the create transaction, before the journal entry and the launch."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/cloudformation_instance_test.go",
+      "sha256": "3a5fc9345867284c350f77e1b08b5623984c0311253df4b4ef78ca061cf21c8f",
       "disposition": "test-support",
-      "reason": "Optional exact-binary Scalar Send receipt checks stored values from the existing native form. No CI trigger, runtime or model change.",
+      "reason": "Stack instance fixtures are placed in their own stack's subnet and security group, and a new test refuses every other placement before commit and before a guest launch.",
       "models": []
     },
     {
-      "path": "test/e2e/test_sakura_openapi.py",
-      "sha256": "1a6fd474b21464f441cbe34975b503816fc6f344aa85bdefb2a577a14fcc0a0b",
+      "path": "internal/aws/ec2_instance_cloudformation.go",
+      "sha256": "45ce9c818466cd5b98eda3525ed273c3164d2845b54a056d9a11eb690ed020a9",
+      "disposition": "modeled",
+      "reason": "New placement check for a stack instance, run inside the stack's create transaction after its network rows exist: the subnet and every security group must be rows of the same stack in one VPC, which is what DescribeInstances already requires to read the instance back. Compile-time validation and permissions are unchanged.",
+      "models": [
+        {
+          "id": "CanonicalVMComposition",
+          "properties": [
+            "NetworkOwnership",
+            "JournalBeforeLaunch"
+          ],
+          "limits": "Finite ordering and admission model of one launch, one network ownership operation and one creator. Its network admission abstracts same-owner and validity checks as Booleans: it does not model SQL, the instance's subnet and security-group rows, CloudFormation resource order, IAM evaluation, a real guest or a Go refinement proof. The Go test with the runtime double establishes that a foreign placement is refused inside the create transaction, before the journal entry and the launch."
+        }
+      ]
+    },
+    {
+      "path": "test/e2e/test_ssm_batch_reference.py",
+      "sha256": "8ba7fefa237a7312eef9396761a3d3faadae1aa13270021893ecfb9db6aadbf8",
       "disposition": "test-support",
-      "reason": "Rejects drift or broadened GetAttributes presets, then preserves every pre-existing reference contract unchanged. No runtime behavior.",
+      "reason": "Projects the later additive reference layers before comparing the pinned base digest, which is unchanged; the test failed on main without this.",
       "models": []
     }
   ]
