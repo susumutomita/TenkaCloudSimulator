@@ -1,129 +1,387 @@
 {
   "version": 1,
-  "base_sha": "2974d42d62db3a89da46d762198f42c5756e753c",
+  "base_sha": "265fb7c82f79033608afeaabc6144c37ebfc8df5",
   "changes": [
     {
-      "path": "docs/design/rds-owned-generation.md",
-      "sha256": "fc8d5c8e9264eff50ae22915d15463fab1fc697f0b92bf7a253fe6396da23580",
+      "path": "README.md",
+      "sha256": "b73402c2859b05e70aa619dd907bfe84253ed17e33d43d49fdd4ca3c66370a53",
       "disposition": "documentation",
-      "reason": "Describes the checked final snapshot and its explicit non-runtime limits.",
+      "reason": "Updates the discoverable local EC2 Query contract; no change to packet behavior or Scalar.",
       "models": []
     },
     {
-      "path": "formal/RDSGuestPeerPreflight.cfg",
-      "sha256": "48c4b988822e943f5857c969f0c10002f05836a4596baa7a2fac21bb983cfc71",
+      "path": "docs/api-reference.md",
+      "sha256": "258180dfc3670952d01fd98007575f45e34fe121bf60653a1b552500c648d82b",
+      "disposition": "documentation",
+      "reason": "Updates the discoverable local EC2 Query contract; no change to packet behavior or Scalar.",
+      "models": []
+    },
+    {
+      "path": "docs/design/0001-go-standalone.md",
+      "sha256": "3fee5231daec5337620d3969fdf80e3344edc93210c88081308817e11fb02cf4",
+      "disposition": "documentation",
+      "reason": "Updates the discoverable local EC2 Query contract; no change to packet behavior or Scalar.",
+      "models": []
+    },
+    {
+      "path": "docs/ec2-read-discovery.md",
+      "sha256": "fb61adfe3c0bfc5ce5554601ea2b831401a8a165dcab9c73e3e51d50e2494db1",
+      "disposition": "documentation",
+      "reason": "Updates the discoverable local EC2 Query contract; no change to packet behavior or Scalar.",
+      "models": []
+    },
+    {
+      "path": "formal/EC2NativeRouteAssociationLifecycle.cfg",
+      "sha256": "d884351b152f09d57005ac04f2c9b2f65e5a80798da71ef3b877e1fdd0302f70",
       "disposition": "modeled",
-      "reason": "Registers the final-commit and destination at final snapshot invariants without dropping any prior checks.",
+      "reason": "Maps the native route-table/subnet relationship and accepted authorization/commit/readback invariants for explicit local state.",
       "models": [
         {
-          "id": "RDSGuestPeerPreflight",
+          "id": "EC2NativeRouteAssociationLifecycle",
           "properties": [
-            "CurrentPrivateGeneration",
-            "DestinationIngress",
-            "SnapshotClosedBeforeHost",
-            "HostAuthenticated",
-            "FinalSnapshotCommitted",
-            "DestinationAtFinalSnapshot",
-            "LiveAtReturn",
-            "ObservationOnly",
-            "DenialDoesNotRetireOwner",
-            "HealthyObservation"
+            "SameVPC",
+            "ExactPairAuthority",
+            "CommitFrame",
+            "CreateOrReplay",
+            "ExactRemoval",
+            "ParentSafety",
+            "ScopedExplicitRead"
           ],
-          "limits": "One bounded observation with one independent destination loss between committed snapshots and separate guest fences; no continuous validity, actual SCRAM, transport, Go/SQLite refinement, guest SQL or later authority proven."
+          "limits": "Finite atomic local metadata contract only. Effective policy/session and commit outcomes are symbolic. Query/XML, actual IAM wiring, SQLite faults, the browser and packet routing are not proven by this model."
         }
       ]
     },
     {
-      "path": "formal/RDSGuestPeerPreflight.tla",
-      "sha256": "6d6a4aea64410ed2f1950625022a24d37ee3f5d764fea780e081ce6b48011ed5",
+      "path": "formal/EC2NativeRouteAssociationLifecycle.tla",
+      "sha256": "d0b0e305bac7e5d656f6108c51ac67a506be1f440054bb9e507e0580c6213738",
       "disposition": "modeled",
-      "reason": "Adds independent destination loss and abstract final commit to the existing bounded peer observation.",
+      "reason": "Maps the native route-table/subnet relationship and accepted authorization/commit/readback invariants for explicit local state.",
       "models": [
         {
-          "id": "RDSGuestPeerPreflight",
+          "id": "EC2NativeRouteAssociationLifecycle",
           "properties": [
-            "CurrentPrivateGeneration",
-            "DestinationIngress",
-            "SnapshotClosedBeforeHost",
-            "HostAuthenticated",
-            "FinalSnapshotCommitted",
-            "DestinationAtFinalSnapshot",
-            "LiveAtReturn",
-            "ObservationOnly",
-            "DenialDoesNotRetireOwner",
-            "HealthyObservation"
+            "SameVPC",
+            "ExactPairAuthority",
+            "CommitFrame",
+            "CreateOrReplay",
+            "ExactRemoval",
+            "ParentSafety",
+            "ScopedExplicitRead"
           ],
-          "limits": "One bounded observation with one independent destination loss between committed snapshots and separate guest fences; no continuous validity, actual SCRAM, transport, Go/SQLite refinement, guest SQL or later authority proven."
+          "limits": "Finite atomic local metadata contract only. Effective policy/session and commit outcomes are symbolic. Query/XML, actual IAM wiring, SQLite faults, the browser and packet routing are not proven by this model."
         }
       ]
     },
     {
       "path": "formal/models.json",
-      "sha256": "1407ffaaf42fcad9c2d0c01263694406f5b59fe2f468170db5d5daefef4026d8",
+      "sha256": "fd9e1339ac68c4cbf2e896dabc942abec29290bbb865612560c227ced69e81ee",
       "disposition": "formal-infrastructure",
-      "reason": "Replace only the hash-checked RDSGuestPeerPreflight entry; all other registry bytes, source scopes and prior sensitivity controls are retained.",
+      "reason": "Registers and protects the finite association case and controls without weakening existing checks.",
       "models": []
     },
     {
-      "path": "internal/aws/catalog/rds_guest_peer_controls_linux_amd64_test.go",
-      "sha256": "1e1ba993703bc849b8b25e85fdb3c40d24b19be7a15db0546034210d46423e50",
+      "path": "internal/aws/ec2_read.go",
+      "sha256": "fcfc97f187c3a9a822cbb768d48af6e5cc94c7707634b4dd131b58ed36fe9d38",
+      "disposition": "modeled",
+      "reason": "Maps the native route-table/subnet relationship and accepted authorization/commit/readback invariants for explicit local state.",
+      "models": [
+        {
+          "id": "EC2NativeRouteAssociationLifecycle",
+          "properties": [
+            "SameVPC",
+            "ExactPairAuthority",
+            "CommitFrame",
+            "CreateOrReplay",
+            "ExactRemoval",
+            "ParentSafety",
+            "ScopedExplicitRead"
+          ],
+          "limits": "Finite atomic local metadata contract only. Effective policy/session and commit outcomes are symbolic. Query/XML, actual IAM wiring, SQLite faults, the browser and packet routing are not proven by this model."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/ec2_route_association_native_query.go",
+      "sha256": "4e81e236e5c36e10cd92ed3a203cbd6a2b0e2b540d643c4ddf42f61bf769772b",
+      "disposition": "modeled",
+      "reason": "Maps the native route-table/subnet relationship and accepted authorization/commit/readback invariants for explicit local state.",
+      "models": [
+        {
+          "id": "EC2NativeRouteAssociationLifecycle",
+          "properties": [
+            "SameVPC",
+            "ExactPairAuthority",
+            "CommitFrame",
+            "CreateOrReplay",
+            "ExactRemoval",
+            "ParentSafety",
+            "ScopedExplicitRead"
+          ],
+          "limits": "Finite atomic local metadata contract only. Effective policy/session and commit outcomes are symbolic. Query/XML, actual IAM wiring, SQLite faults, the browser and packet routing are not proven by this model."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/ec2_route_association_native_store.go",
+      "sha256": "ba9d9825027f2af3305cf7891ea2d961430e42e1bc9f03fee6759740d366452e",
+      "disposition": "modeled",
+      "reason": "Maps the native route-table/subnet relationship and accepted authorization/commit/readback invariants for explicit local state.",
+      "models": [
+        {
+          "id": "EC2NativeRouteAssociationLifecycle",
+          "properties": [
+            "SameVPC",
+            "ExactPairAuthority",
+            "CommitFrame",
+            "CreateOrReplay",
+            "ExactRemoval",
+            "ParentSafety",
+            "ScopedExplicitRead"
+          ],
+          "limits": "Finite atomic local metadata contract only. Effective policy/session and commit outcomes are symbolic. Query/XML, actual IAM wiring, SQLite faults, the browser and packet routing are not proven by this model."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/ec2_route_association_native_test.go",
+      "sha256": "6f72f7177d95754416d816b260dbe00bdb8f6a44b2f37446afb90f28a067278a",
       "disposition": "test-support",
-      "reason": "Exercises production peer/Query paths and SQLite with an inert host proof; no fixture is admitted in production.",
+      "reason": "Scoped defensive and state-ownership regression evidence; no deploy/runtime behavior.",
       "models": []
     },
     {
-      "path": "internal/aws/catalog/rds_guest_peer_linux_amd64.go",
-      "sha256": "7997735d099026fb5272676aecbff357b6294e7cc9b10d8fff2b099355393f66",
+      "path": "internal/aws/ec2_route_association_resilience_test.go",
+      "sha256": "e05a87925c6b2442ca4197cfe85426e1c61167e53a0c2ab552493bc731c0ccc3",
+      "disposition": "test-support",
+      "reason": "Scoped defensive and state-ownership regression evidence; no deploy/runtime behavior.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/ec2_route_association_wire_test.go",
+      "sha256": "b76be8bd42142af3663f86fa2700fa90dace03452ede0da66b0bebfbad4e72f2",
+      "disposition": "test-support",
+      "reason": "Scoped defensive and state-ownership regression evidence; no deploy/runtime behavior.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/ec2_route_tables_native_registration_test.go",
+      "sha256": "2690635a2132552fc62b7eb435d3dc74b9df33a0102fe0f20cab2e275f917780",
+      "disposition": "test-support",
+      "reason": "Scoped defensive and state-ownership regression evidence; no deploy/runtime behavior.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/ec2_route_tables_read.go",
+      "sha256": "71617ecba5c43905ddd83f7daad6e08f4d1263e5e69bdd0e8fb2c74005e13fe0",
       "disposition": "modeled",
-      "reason": "Adds a committed destination/generation recheck after the same fixed host probe, with refusal preserving the owner.",
+      "reason": "Maps the native route-table/subnet relationship and accepted authorization/commit/readback invariants for explicit local state.",
       "models": [
         {
-          "id": "RDSGuestPeerPreflight",
+          "id": "EC2NativeRouteAssociationLifecycle",
           "properties": [
-            "CurrentPrivateGeneration",
-            "DestinationIngress",
-            "SnapshotClosedBeforeHost",
-            "HostAuthenticated",
-            "FinalSnapshotCommitted",
-            "DestinationAtFinalSnapshot",
-            "LiveAtReturn",
-            "ObservationOnly",
-            "DenialDoesNotRetireOwner",
-            "HealthyObservation"
+            "SameVPC",
+            "ExactPairAuthority",
+            "CommitFrame",
+            "CreateOrReplay",
+            "ExactRemoval",
+            "ParentSafety",
+            "ScopedExplicitRead"
           ],
-          "limits": "One bounded observation with one independent destination loss between committed snapshots and separate guest fences; no continuous validity, actual SCRAM, transport, Go/SQLite refinement, guest SQL or later authority proven."
+          "limits": "Finite atomic local metadata contract only. Effective policy/session and commit outcomes are symbolic. Query/XML, actual IAM wiring, SQLite faults, the browser and packet routing are not proven by this model."
         }
       ]
     },
     {
-      "path": "internal/aws/catalog/rds_owned_runtime_linux_amd64.go",
-      "sha256": "4f953fc915408b610cfb896910a7bdde5c908706b870d24242c75b66338e8370",
+      "path": "internal/aws/ec2_vpc.go",
+      "sha256": "6625db7d2baa1f680e7344f5726ec90f8194e62c84f6ac090579386b26220a70",
       "disposition": "modeled",
-      "reason": "Uses a package-private probe/close boundary for an already acquired child; production acquisition remains the single concrete owner and retains its exact generation and fence.",
+      "reason": "Maps the native route-table/subnet relationship and accepted authorization/commit/readback invariants for explicit local state.",
       "models": [
         {
-          "id": "RDSGuestPeerPreflight",
+          "id": "EC2NativeRouteAssociationLifecycle",
           "properties": [
-            "CurrentPrivateGeneration",
-            "HostAuthenticated",
-            "FinalSnapshotCommitted",
-            "DenialDoesNotRetireOwner",
-            "ObservationOnly"
+            "SameVPC",
+            "ExactPairAuthority",
+            "CommitFrame",
+            "CreateOrReplay",
+            "ExactRemoval",
+            "ParentSafety",
+            "ScopedExplicitRead"
           ],
-          "limits": "One bounded observation with one independent destination loss between committed snapshots and separate guest fences; no continuous validity, actual SCRAM, transport, Go/SQLite refinement, guest SQL or later authority proven."
-        },
-        {
-          "id": "RDSOwnedGenerationFence",
-          "properties": [
-            "LaunchNeedsCommittedAuthority",
-            "AttachNeedsCurrent",
-            "FencedGenerationCannotChange",
-            "UncertainCleanupRemainsFenced",
-            "NoPublishedEndpoint"
-          ],
-          "limits": "One finite provider generation and durable cleanup fence; the interface has no request-supplied implementation and this model does not prove physical child behavior, process shutdown, or refinement."
+          "limits": "Finite atomic local metadata contract only. Effective policy/session and commit outcomes are symbolic. Query/XML, actual IAM wiring, SQLite faults, the browser and packet routing are not proven by this model."
         }
       ]
+    },
+    {
+      "path": "internal/server/ec2_read_access_test.go",
+      "sha256": "f7e06ec86efd4572cdd2ee314eaca453c29d1a6cc138d45bd185f604f149fcbf",
+      "disposition": "test-support",
+      "reason": "Scoped defensive and state-ownership regression evidence; no deploy/runtime behavior.",
+      "models": []
+    },
+    {
+      "path": "internal/server/ec2_security_groups_console_test.go",
+      "sha256": "c666dcc26445998c7a400de192f2252a7cdb44b0d9bb767029af2993e8d0545a",
+      "disposition": "test-support",
+      "reason": "Scoped defensive and state-ownership regression evidence; no deploy/runtime behavior.",
+      "models": []
+    },
+    {
+      "path": "internal/server/server.go",
+      "sha256": "0d6b08fdeda704072545076f049d1bd29f12074c11aadffe9448996b4c9eb105",
+      "disposition": "modeled",
+      "reason": "Advertises new operations only at the existing network discovery boundary, preserving prior regional read semantics.",
+      "models": [
+        {
+          "id": "EC2RouteTableConsoleEpoch",
+          "properties": [
+            "EligibleRead",
+            "CurrentIdentity",
+            "CurrentRegion",
+            "CurrentGate",
+            "AssociationIsExplicit",
+            "NoImplicitMain"
+          ],
+          "limits": "The existing bounded authenticated capability/read scope applies to the unchanged routetable read guard. This does not model exact capability JSON or the new write admission; those are exercised separately by server tests and the pair authorization is modeled at the gateway/store."
+        }
+      ]
+    },
+    {
+      "path": "internal/server/web/app.js",
+      "sha256": "3775babd2dc886f49a3e0c217b57eedd1198e6b2d65f393db617da4b2c2e6388",
+      "disposition": "modeled",
+      "reason": "Uses the existing scoped native operation lease and response verification gates when wiring explicit association UI.",
+      "models": [
+        {
+          "id": "EC2DetachedNetworkConsole",
+          "properties": [
+            "AdmittedNativeOnly",
+            "OnlyCurrentScope",
+            "VerifiedWriteOnly",
+            "ScopeChangeFenced",
+            "LeaseUntilReadback"
+          ],
+          "limits": "Reuses the existing generic native-console proof of scope, lease and readback. The exact association pair and ID, rendered controls and Go endpoints are separately tested; no React or Go refinement is stated."
+        }
+      ]
+    },
+    {
+      "path": "scripts/formal_model_gate.py",
+      "sha256": "07207c1108734cbf86e0f9769fe319d370a187cfd02b86118648b103c2488e1a",
+      "disposition": "formal-infrastructure",
+      "reason": "Registers and protects the finite association case and controls without weakening existing checks.",
+      "models": []
+    },
+    {
+      "path": "scripts/test-formal-gate.py",
+      "sha256": "325c260a8a5033b21249f8eed6c1a0989c0a6f49881c2662f6abbc6f4f19aac3",
+      "disposition": "formal-infrastructure",
+      "reason": "Registers and protects the finite association case and controls without weakening existing checks.",
+      "models": []
+    },
+    {
+      "path": "test/console/ec2_native_route_association_sdk.py",
+      "sha256": "1345b2fdd293e0569bbbbdee49d51be97ee8553fc58adeadcf99bd54ff049246",
+      "disposition": "test-support",
+      "reason": "Scoped defensive and state-ownership regression evidence; no deploy/runtime behavior.",
+      "models": []
+    },
+    {
+      "path": "tools/console/bundle-digests.json",
+      "sha256": "eb8a45c3c35f455d4eb7765e535fb2c71da4cfbdd35bd93f035547d70b1daad5",
+      "disposition": "presentation",
+      "reason": "Exact rebuilt asset for the hosted console source. Browser behavior is checked separately, not proven.",
+      "models": []
+    },
+    {
+      "path": "tools/console/bundle-inputs.json",
+      "sha256": "ed23d5517e3a0758774368c5af77bc349380bf1b128afb97f1b672cdfe5a2a63",
+      "disposition": "presentation",
+      "reason": "Exact rebuilt asset for the hosted console source. Browser behavior is checked separately, not proven.",
+      "models": []
+    },
+    {
+      "path": "tools/console/src/ec2-native-route-tables.mjs",
+      "sha256": "73539413f5baf63f7eb1e88ba18fb97e21548d5623e83b421484a70af7a5165e",
+      "disposition": "modeled",
+      "reason": "Uses the existing scoped native operation lease and response verification gates when wiring explicit association UI.",
+      "models": [
+        {
+          "id": "EC2DetachedNetworkConsole",
+          "properties": [
+            "AdmittedNativeOnly",
+            "OnlyCurrentScope",
+            "VerifiedWriteOnly",
+            "ScopeChangeFenced",
+            "LeaseUntilReadback"
+          ],
+          "limits": "Reuses the existing generic native-console proof of scope, lease and readback. The exact association pair and ID, rendered controls and Go endpoints are separately tested; no React or Go refinement is stated."
+        }
+      ]
+    },
+    {
+      "path": "tools/console/src/ec2-readonly.jsx",
+      "sha256": "02842df4d359945da61246d7b900b9674be73a14e1a3db151677f2481f8782f3",
+      "disposition": "modeled",
+      "reason": "Uses the existing scoped native operation lease and response verification gates when wiring explicit association UI.",
+      "models": [
+        {
+          "id": "EC2DetachedNetworkConsole",
+          "properties": [
+            "AdmittedNativeOnly",
+            "OnlyCurrentScope",
+            "VerifiedWriteOnly",
+            "ScopeChangeFenced",
+            "LeaseUntilReadback"
+          ],
+          "limits": "Reuses the existing generic native-console proof of scope, lease and readback. The exact association pair and ID, rendered controls and Go endpoints are separately tested; no React or Go refinement is stated."
+        }
+      ]
+    },
+    {
+      "path": "tools/console/src/ec2-vpc-native-route-tables.jsx",
+      "sha256": "74cefe7905dd8753c458c4cfbb092af0478ab8c616da451b3711a0e45263a29f",
+      "disposition": "modeled",
+      "reason": "Uses the existing scoped native operation lease and response verification gates when wiring explicit association UI.",
+      "models": [
+        {
+          "id": "EC2DetachedNetworkConsole",
+          "properties": [
+            "AdmittedNativeOnly",
+            "OnlyCurrentScope",
+            "VerifiedWriteOnly",
+            "ScopeChangeFenced",
+            "LeaseUntilReadback"
+          ],
+          "limits": "Reuses the existing generic native-console proof of scope, lease and readback. The exact association pair and ID, rendered controls and Go endpoints are separately tested; no React or Go refinement is stated."
+        }
+      ]
+    },
+    {
+      "path": "tools/console/src/main.jsx",
+      "sha256": "f9782180fff8e22a0be42a552a425ec016206cd1f0e45eef9ffea341128e4d00",
+      "disposition": "modeled",
+      "reason": "Uses the existing scoped native operation lease and response verification gates when wiring explicit association UI.",
+      "models": [
+        {
+          "id": "EC2DetachedNetworkConsole",
+          "properties": [
+            "AdmittedNativeOnly",
+            "OnlyCurrentScope",
+            "VerifiedWriteOnly",
+            "ScopeChangeFenced",
+            "LeaseUntilReadback"
+          ],
+          "limits": "Reuses the existing generic native-console proof of scope, lease and readback. The exact association pair and ID, rendered controls and Go endpoints are separately tested; no React or Go refinement is stated."
+        }
+      ]
+    },
+    {
+      "path": "tools/console/test/ec2-native-route-associations.test.mjs",
+      "sha256": "d8caaed229586233f646adadc1d3ced3609b6ae3b7d40052f12e9291104d39c6",
+      "disposition": "presentation",
+      "reason": "Exact rebuilt asset for the hosted console source. Browser behavior is checked separately, not proven.",
+      "models": []
     }
   ]
 }

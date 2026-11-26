@@ -1415,6 +1415,53 @@ BASE_INVARIANTS['EC2DetachedNetworkConsole'] = {'TypeOK', 'AdmittedNativeOnly', 
 REQUIRED_MUTANTS['EC2DetachedNetworkConsole'] = {'AdmitUnverifiedOwner', 'AcceptLateRead', 'ReportUnverified', 'ReportBeforeAck', 'NavigateWhileSaving', 'ReleaseSiblingLease', 'ReleaseOnReceipt', 'SkipRouteTableLease'}
 REQUIRED_SOURCE_SCOPES['EC2DetachedNetworkConsole'] = {'internal/server/web/app.js', 'tools/console/src/ec2-readonly.jsx', 'tools/console/src/main.jsx', 'tools/console/src/ec2-native-security-groups.mjs', 'tools/console/src/ec2-vpc-security-groups.jsx', 'tools/console/src/ec2-network-acls.mjs', 'tools/console/src/ec2-vpc-network-acls.jsx', 'tools/console/src/ec2-native-route-tables.mjs', 'tools/console/src/ec2-vpc-native-route-tables.jsx', 'internal/server/server.go'}
 
+BASE_MODELS.add('EC2NativeRouteAssociationLifecycle')
+BASE_INVARIANTS['EC2NativeRouteAssociationLifecycle'] = {
+    'TypeOK',
+    'OneBinding',
+    'LegacyAndPeerFrame',
+    'RegionalBindings',
+    'SameVPC',
+    'ExactPairAuthority',
+    'CommitFrame',
+    'CreateOrReplay',
+    'ExactRemoval',
+    'MissingIsOpaque',
+    'ParentSafety',
+    'LiveEndpoints',
+    'ScopedExplicitRead',
+}
+REQUIRED_MUTANTS['EC2NativeRouteAssociationLifecycle'] = {
+    'MissingDecision',
+    'SkipTableAuthority',
+    'SkipSubnetAuthority',
+    'IgnoreStoredRemovalPair',
+    'AdoptCloudFormationPair',
+    'RemoveCloudFormationBinding',
+    'AllowCrossVPC',
+    'AllowCrossRegion',
+    'DenyAllEligibleCreates',
+    'DenyAllEligibleRemovals',
+    'SecondBinding',
+    'LoseRetryIdentity',
+    'RemoveSiblingOnSameTable',
+    'AllowAttachedTableDelete',
+    'CascadeAttachedSubnetDelete',
+    'TreatAbortAsCommit',
+    'RevealUnknownToOrdinaryCaller',
+    'InventMain',
+    'ProjectPeerRegion',
+}
+REQUIRED_SOURCE_SCOPES['EC2NativeRouteAssociationLifecycle'] = {
+    'internal/aws/ec2_read.go',
+    'internal/aws/ec2_route_association_native_query.go',
+    'internal/aws/ec2_route_association_native_store.go',
+    'internal/aws/ec2_route_tables_native.go',
+    'internal/aws/ec2_route_tables_read.go',
+    'internal/aws/ec2_subnet_native.go',
+    'internal/aws/ec2_vpc.go',
+}
+
 BASE_MODELS.add('EC2NativeRouteTableLifecycle')
 BASE_INVARIANTS['EC2NativeRouteTableLifecycle'] = {'TypeOK', 'GrantAtomic', 'NativeParentOnly', 'ParentDependency', 'LegacyPreserved', 'RetiredNotRecreated', 'LiveReceiptMatches', 'ReplayBindsIntent', 'ReadScoped'}
 REQUIRED_MUTANTS['EC2NativeRouteTableLifecycle'] = {'IgnoreAllocatedGrant', 'AdoptCFNParent', 'RetireParentWithChild', 'DeleteCFNTable', 'ReplayResurrectsTombstone', 'LoseReceipt', 'ReplayIgnoresIntent', 'ReadOtherRegion'}

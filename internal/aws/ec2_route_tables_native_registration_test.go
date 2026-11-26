@@ -90,7 +90,7 @@ func TestEC2NativeRouteTableGatewayMaintainsLegacyReadback(t *testing.T) {
 	}
 	for _, bad := range []url.Values{
 		{"Action": {"CreateRoute"}, "RouteTableId": {target}},
-		{"Action": {"AssociateRouteTable"}, "RouteTableId": {target}},
+		{"Action": {"ReplaceRouteTableAssociation"}, "RouteTableId": {target}},
 		{"Action": {"DescribeRouteTables"}, "RouteTableId.1": {target}},
 		{"Action": {"DescribeRouteTables"}, "Filter.1.Name": {"vpc-id"}, "Filter.1.Value.1": {parent.ID}},
 	} {

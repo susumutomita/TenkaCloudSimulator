@@ -29,7 +29,7 @@ const (
 
 var ec2Operations = slices.Concat(
 	[]string{"DescribeInstances", "DescribeVpcs", "DescribeSubnets", "DescribeSecurityGroups", "DescribeRouteTables", "CreateVpc", "DeleteVpc", "CreateSubnet", "DeleteSubnet"},
-	ec2NativeSecurityGroupMutations, ec2NetworkACLOperations, ec2NativeRouteTableMutations,
+	ec2NativeSecurityGroupMutations, ec2NetworkACLOperations, ec2NativeRouteTableMutations, ec2NativeRouteAssociationOperations,
 )
 
 // EC2Operations lists registered native Query operations, not granted permissions.
@@ -51,16 +51,18 @@ func (f *ec2Failure) Error() string { return f.code + ": " + f.message }
 func ec2Invalid(code, message string) *ec2Failure { return &ec2Failure{code, message, 400} }
 
 type ec2Request struct {
-	cidr, vpcID   string
-	tags          map[string]string
-	subnet        ec2SubnetMutation
-	securityGroup *ec2NativeSecurityGroupQuery
-	networkACL    *ec2NetworkACLRequest
-	routeTable    *ec2NativeRouteTableQuery
+	cidr, vpcID      string
+	tags             map[string]string
+	subnet           ec2SubnetMutation
+	securityGroup    *ec2NativeSecurityGroupQuery
+	networkACL       *ec2NetworkACLRequest
+	routeTable       *ec2NativeRouteTableQuery
+	routeAssociation *ec2NativeRouteAssociationQuery
 }
 
-// permissions are evaluated against the caller's identity policy before any
-// state is read or written. Tagging at creation also needs ec2:CreateTags.
+// permissions prechecks known resources. The route association lifecycle
+// instead receives a bound decision to check its exact endpoints in the store.
+// Tagging at creation also needs ec2:CreateTags.
 func (q ec2Request) permissions(action, region string) [][2]string {
 	switch {
 	case q.securityGroup != nil:
@@ -69,6 +71,8 @@ func (q ec2Request) permissions(action, region string) [][2]string {
 		return q.networkACL.permissions(action, region)
 	case q.routeTable != nil:
 		return q.routeTable.permissions(action, region)
+	case q.routeAssociation != nil:
+		return nil
 	}
 	switch action {
 	case "CreateSubnet", "DeleteSubnet":
@@ -99,6 +103,10 @@ func parseEC2Request(action string, fields map[string][]string) (ec2Request, *ec
 	if slices.Contains(ec2NativeRouteTableMutations, action) {
 		q, err := parseEC2NativeRouteTableMutation(action, fields)
 		return ec2Request{routeTable: &q}, err
+	}
+	if slices.Contains(ec2NativeRouteAssociationOperations, action) {
+		q, err := parseEC2NativeRouteAssociation(action, fields)
+		return ec2Request{routeAssociation: &q}, err
 	}
 	q := ec2Request{}
 	if action == "CreateSubnet" || action == "DeleteSubnet" {
@@ -244,6 +252,8 @@ func stampEC2Response(out any) {
 		v.XMLNS, v.RequestID = ns, id
 	case *ec2NativeRouteTableMutationResponse:
 		v.XMLNS, v.RequestID = ns, id
+	case *ec2NativeRouteAssociationResponse:
+		v.XMLNS, v.RequestID = ns, id
 	case *ec2CreateVpcResponse:
 		v.XMLNS, v.RequestID = ns, id
 	case *ec2DeleteVpcResponse:
@@ -275,6 +285,7 @@ func nativeVPCs(ctx context.Context, tx *sql.Tx, region string) ([]EC2NetworkRes
 		return nil, e
 	}
 	out := []EC2NetworkResource{}
+	associatedSubnets := map[string]bool{}
 	for _, v := range all {
 		switch v.Kind {
 		case "AWS::EC2::VPC":
@@ -302,6 +313,14 @@ func nativeVPCs(ctx context.Context, tx *sql.Tx, region string) ([]EC2NetworkRes
 			if _, err := readNativeRouteTable(ctx, tx, region, v.ID); err != nil {
 				return nil, err
 			}
+		case ec2Assoc:
+			if associatedSubnets[v.SubnetID] {
+				return nil, errEC2NativeRouteAssociationState
+			}
+			if err := checkNativeRouteAssociation(ctx, tx, v); err != nil {
+				return nil, err
+			}
+			associatedSubnets[v.SubnetID] = true
 		default:
 			return nil, fmt.Errorf("unexpected EC2-owned network kind")
 		}
