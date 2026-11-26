@@ -692,7 +692,9 @@
                       "RemoveRoleFromInstanceProfile",
                       "ListInstanceProfilesForRole",
                       "ListDomains",
-                      "DomainMetadata"
+                      "DomainMetadata",
+                      "DeleteAttributes",
+                      "Select"
                     ]
                   },
                   "Version": {
@@ -770,7 +772,20 @@
                     "minLength": 3,
                     "maxLength": 255,
                     "pattern": "^[A-Za-z0-9_.-]+$",
-                    "description": "Existing local SimpleDB domain name, required for DomainMetadata only in these presets."
+                    "description": "Existing local domain for DomainMetadata or DeleteAttributes. Do not include DomainName for Select; use the domain in SelectExpression."
+                  },
+                  "SelectExpression": {
+                    "type": "string",
+                    "description": "SimpleDB Select only. Use a bounded expression against a domain you can query."
+                  },
+                  "ConsistentRead": {
+                    "type": "string",
+                    "enum": ["true", "false"],
+                    "description": "Optional for Select. Keep the same value on every page."
+                  },
+                  "NextToken": {
+                    "type": "string",
+                    "description": "Omit on the first page. For Select, copy the token from the previous XML result without changing the expression or ConsistentRead."
                   }
                 }
               },
@@ -1040,6 +1055,16 @@
                   "value": {
                     "Action": "ListDomains",
                     "Version": "2009-04-15"
+                  }
+                },
+                "Select": {
+                  "summary": "SimpleDB Select (read-only item names)",
+                  "description": "Set X-Simulator-Service to sdb, clear X-Amz-Target, and use us-east-1 or leave the region header unset. Replace example-domain inside SelectExpression with your existing local domain. Send only the fields below under your local identity with sdb:Select on that domain. The XML result lists matching item names from the same store used by the console. To continue, copy NextToken from the response (even after an empty page), preserving the exact expression and ConsistentRead; stop when NextToken is absent.",
+                  "value": {
+                    "Action": "Select",
+                    "Version": "2009-04-15",
+                    "SelectExpression": "select itemName() from `example-domain` limit 25",
+                    "ConsistentRead": "true"
                   }
                 },
                 "DeleteAttributes": {

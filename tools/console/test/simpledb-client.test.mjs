@@ -94,3 +94,55 @@ test('row deletion requires the exact observed single value and never sends a wh
   await assert.rejects(api.deleteAttribute('versions', 'row', {name:'',value:'x'}, signal()), /valid attribute/);
   assert.equal(calls.length, 1);
 });
+
+const result = (names, token) => root('Select', [xml('SelectResult', '', [
+  ...names.map(name => xml('Item', '', [typeof name === 'string' ? xml('Name', name) : name])),
+  ...(token === undefined ? [] : [xml('NextToken', token)]),
+])]);
+
+test('Select is a read-only names projection on the existing local domain; every page reuses the exact scoped query', async () => {
+  const calls = [];
+  const pages = [result([], 'scan-1'), result([xml('Name', 'eAB5', [], 'base64')], 'scan-2'), result(['last'])];
+  const api = simpleDBClient(async (url, options) => {
+    assert.equal(url, '/'); assert.equal(options.method, 'POST'); assert.equal(options.credentials, 'same-origin'); assert.equal(options.redirect, 'error');
+    assert.deepEqual(options.headers, {'Content-Type':'application/x-www-form-urlencoded','X-Simulator-Service':'sdb','X-Simulator-Region':'us-east-1'});
+    calls.push(Object.fromEntries(options.body)); return response();
+  }, () => ({documentElement: pages.shift()}));
+  const page1 = await api.selectNames('shop-demo', 'bad`attr', "a' & +", signal());
+  assert.deepEqual(page1.names, []); assert.ok(page1.next);
+  const page2 = await page1.next(signal()); assert.deepEqual(page2.names, ['x\0y']);
+  const page3 = await page2.next(signal()); assert.deepEqual(page3, {names:['last'], next:null});
+  const fields = {Action:'Select', Version:'2009-04-15', SelectExpression:"select itemName() from `shop-demo` where `bad``attr` = 'a'' & +' limit 25", ConsistentRead:'true'};
+  assert.deepEqual(calls, [fields, {...fields, NextToken:'scan-1'}, {...fields, NextToken:'scan-2'}]);
+});
+
+test('Select refuses out-of-scope inputs, repeated cursors, invalid acknowledgements and excessive pages', async () => {
+  let current = result([], 'cursor'), calls = [];
+  const api = simpleDBClient(async (_, opt) => {calls.push(Object.fromEntries(opt.body)); return response();}, () => ({documentElement:current}));
+  for (const [d,k,v] of [['https://outside.test','a','b'], ['demo','','ignored'], ['demo','水'.repeat(342),'a'],['demo','a','0'.repeat(1025)]])
+    await assert.rejects(api.selectNames(d,k,v,signal()), /valid local/);
+  assert.equal(calls.length, 0);
+  const page = await api.selectNames('demo','','',signal());
+  assert.equal(calls[0].SelectExpression,'select itemName() from `demo` limit 25');
+  await assert.rejects(page.next(signal()), /Invalid local/);
+  current = result(['matches']);
+  await api.selectNames('demo','color','', signal());
+  assert.equal(calls.at(-1).SelectExpression,"select itemName() from `demo` where `color` = '' limit 25");
+  for (const bad of [result(['same','same']), result(Array.from({length:26}, (_,i)=>String(i))),
+    result(['']), result([], 'X'.repeat(8193)), result([xml('Name','%',[],'base64')]),
+    root('Select', [xml('SelectResult','',[xml('Item','',[xml('Name','ok'),xml('Attribute')])])]), root('GetAttributes')]) {
+    current = bad; await assert.rejects(api.selectNames('demo','','',signal()), /Invalid local/);
+  }
+});
+
+test('Select rejects a late response even from a transport that ignored abort, and never retries a denial', async () => {
+  let release;
+  const controller = new AbortController();
+  const api = simpleDBClient(() => new Promise(resolve => {release=resolve;}), () => ({documentElement: result(['stale'], 'old')}));
+  const late = api.selectNames('old-domain','','',controller.signal);
+  controller.abort(); release(response());
+  await assert.rejects(late, {name:'AbortError'});
+  let calls=0;
+  const denied = simpleDBClient(async () => { ++calls; return new Response(null,{status:403}); }, () => assert.fail('parse on denial'));
+  await assert.rejects(denied.selectNames('demo','','',signal()), /403/); assert.equal(calls,1);
+});

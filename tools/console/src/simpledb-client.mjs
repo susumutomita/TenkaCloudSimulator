@@ -87,6 +87,34 @@ export function simpleDBClient(request, parse = text => new DOMParser().parseFro
           || (nextToken && (nextToken.length > 8192 || nextToken === token || domains.length !== pageSize))) throw invalid();
       return {domains, nextToken};
     },
+    async selectNames(domain, attribute, value, signal) {
+      if (!validDomain(domain) || !validText(attribute, true) || !validText(value, true) || (!attribute && value))
+        throw new Error('Enter a valid local domain and attribute filter.');
+      // Only a fixed projection and a single optional equality, not free-form SQL
+      // or a second DomainName parameter. Double the SimpleDB delimiters.
+      const ident = v => '`' + v.replaceAll('`', '``') + '`';
+      const filter = attribute ? ' where ' + ident(attribute) + " = '" + value.replaceAll("'", "''") + "'" : '';
+      const expression = 'select itemName() from ' + ident(domain) + filter + ' limit ' + pageSize;
+      async function page(token, signal) {
+        const root = await query('Select', {SelectExpression: expression, ConsistentRead: 'true',
+          ...(token ? {NextToken: token} : {})}, signal);
+        const result = element(root, 'SelectResult');
+        const items = entries(result, 'Item');
+        if (items.length > pageSize) throw invalid();
+        const names = items.map(item => {
+          const name = string(item, 'Name', {encoded: true});
+          if (!validText(name) || entries(item, 'Attribute').length) throw invalid();
+          return name;
+        });
+        const next = string(result, 'NextToken', {optional: true});
+        if (new Set(names).size !== names.length ||
+            (next && (next.length > 8192 || next === token))) throw invalid();
+        // A scan can exhaust its budget with 0 matches. The continuation belongs
+        // to this request, not to mutable UI state; do not expose the raw cursor.
+        return {names, next: next ? nextSignal => page(next, nextSignal) : null};
+      }
+      return page('', signal);
+    },
     async createDomain(name, signal) {
       if (!validDomain(name)) throw new Error('Enter a valid local domain name.');
       await query('CreateDomain', {DomainName: name}, signal);

@@ -3222,6 +3222,26 @@ REQUIRED_SOURCE_SCOPES['SimpleDBSelectPage'] = {
     'internal/server/server.go',
 }
 
+BASE_MODELS.add('SimpleDBSelectConsoleEpoch')
+BASE_INVARIANTS['SimpleDBSelectConsoleEpoch'] = {
+    'TypeOK', 'ReadAdmission', 'BoundedReadRequest', 'SingleCurrentRead', 'CursorOrigin',
+    'OnlyCurrentOwner', 'OnlyAcceptedPages', 'CursorMirrorsReply', 'NextOfferedExactly',
+    'FailureClearsPage', 'EffectIsolation', 'ChoiceDoesNotObserve',
+}
+REQUIRED_MUTANTS['SimpleDBSelectConsoleEpoch'] = {
+    'AcceptUnadvertised', 'AllowInvalidCriteria', 'BypassItemBusy', 'WidenPageSize',
+    'AllowConcurrentQuery', 'CarryCursorOnFreshRun', 'ContinueWithChangedQuery', 'SkipContinuationPage',
+    'OfferNextAtEnd', 'HideNextAfterEmpty', 'KeepOwnerOnPrincipal', 'KeepOwnerOnDomain',
+    'KeepOwnerOnCriteria', 'KeepOwnerOnNavigation', 'KeepOwnerOnCapability', 'KeepOwnerOnWrite',
+    'AcceptObsoleteResult', 'AcceptObsoleteFailure', 'AcceptRepeatedCursor', 'ExposeDenialAsEmpty',
+    'DropEmptyContinuation', 'KeepCursorAfterFailure', 'UseAttributeReadAsSearch', 'ReadOnSelection',
+    'KeepObservationOnSelection',
+}
+REQUIRED_SOURCE_SCOPES['SimpleDBSelectConsoleEpoch'] = {
+    'internal/server/web/app.js', 'tools/console/src/main.jsx', 'tools/console/src/simpledb-client.mjs',
+    'tools/console/src/simpledb.jsx',
+}
+
 BASE_MODELS.add('SimpleDBAttributeDelete')
 BASE_INVARIANTS['SimpleDBAttributeDelete'] = {
     'NoPhantomItem', 'NoUnacknowledgedChange', 'OnlyEligibleMayAck', 'ExactSurvivors',

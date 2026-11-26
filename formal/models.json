@@ -22157,6 +22157,310 @@
           "expect_invariant": "NoImplicitMain"
         }
       ]
+    },
+    {
+      "id": "SimpleDBSelectConsoleEpoch",
+      "model": "formal/SimpleDBSelectConsoleEpoch.tla",
+      "config": "formal/SimpleDBSelectConsoleEpoch.cfg",
+      "bounds": "Two identity and domain labels, two valid criteria and one invalid criterion, capability and navigation masks; up to two owner changes and three manual query starts; one symbolic matching name, two opaque cursors, and separate denial, transport, invalid and successful reply classes. Each request uses the fixed 25-name page size.",
+      "properties": [
+        "TypeOK",
+        "ReadAdmission",
+        "BoundedReadRequest",
+        "SingleCurrentRead",
+        "CursorOrigin",
+        "OnlyCurrentOwner",
+        "OnlyAcceptedPages",
+        "CursorMirrorsReply",
+        "NextOfferedExactly",
+        "FailureClearsPage",
+        "EffectIsolation",
+        "ChoiceDoesNotObserve"
+      ],
+      "limits": "Abstract bounded names-only requests and React owner replacement in a finite user-visible lifecycle. One symbolic name represents an admitted page, not the 25-row payload. Does not verify native IAM, SQL, cryptographic cursor validation, actual HTTP/XML, browser cancellation at the server, React scheduling or DOM refocus, mutation acknowledgements, linearizable snapshots, Scalar, or Go/JavaScript refinement.",
+      "source_scope": [
+        "internal/server/web/app.js",
+        "tools/console/src/main.jsx",
+        "tools/console/src/simpledb-client.mjs",
+        "tools/console/src/simpledb.jsx"
+      ],
+      "mutants": [
+        {
+          "id": "AcceptUnadvertised",
+          "edits": [
+            {
+              "old": "Mounted(c) /\\ c.criteria",
+              "new": "~c.away /\\ c.criteria",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadAdmission"
+        },
+        {
+          "id": "AllowInvalidCriteria",
+          "edits": [
+            {
+              "old": "c.criteria # \"invalid\" /\\ ~lock",
+              "new": "~lock",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadAdmission"
+        },
+        {
+          "id": "BypassItemBusy",
+          "edits": [
+            {
+              "old": "c.criteria # \"invalid\" /\\ ~lock",
+              "new": "c.criteria # \"invalid\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadAdmission"
+        },
+        {
+          "id": "WidenPageSize",
+          "edits": [
+            {
+              "old": "PageSize == 25",
+              "new": "PageSize == 26",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "BoundedReadRequest"
+        },
+        {
+          "id": "AllowConcurrentQuery",
+          "edits": [
+            {
+              "old": "/\\ ~\\E r \\in v.pending : Active(r)",
+              "new": "/\\ TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "SingleCurrentRead"
+        },
+        {
+          "id": "CarryCursorOnFreshRun",
+          "edits": [
+            {
+              "old": "SentCursor(m, p) == IF m = \"more\" THEN p.cursor ELSE None",
+              "new": "SentCursor(m, p) == p.cursor",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CursorOrigin"
+        },
+        {
+          "id": "ContinueWithChangedQuery",
+          "edits": [
+            {
+              "old": "RequestScope(m, p) == IF m = \"more\" THEN p.scope ELSE v.scope",
+              "new": "RequestScope(m, p) == IF m = \"more\" THEN [p.scope EXCEPT !.criteria = \"invalid\"] ELSE v.scope",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CursorOrigin"
+        },
+        {
+          "id": "SkipContinuationPage",
+          "edits": [
+            {
+              "old": "p.number + 1 ELSE 1",
+              "new": "p.number ELSE 1",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CursorOrigin"
+        },
+        {
+          "id": "OfferNextAtEnd",
+          "edits": [
+            {
+              "old": "MoreAllowed(p) == p.cursor # None",
+              "new": "MoreAllowed(p) == p.number > 0",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "NextOfferedExactly"
+        },
+        {
+          "id": "HideNextAfterEmpty",
+          "edits": [
+            {
+              "old": "MoreAllowed(p) == p.cursor # None",
+              "new": "MoreAllowed(p) == p.cursor # None /\\ (IF \"names\" \\in DOMAIN p THEN p.names # {} ELSE FALSE)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "NextOfferedExactly"
+        },
+        {
+          "id": "KeepOwnerOnPrincipal",
+          "edits": [
+            {
+              "old": "Retire(cause) == TRUE",
+              "new": "Retire(cause) == cause # \"identity\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "OnlyCurrentOwner"
+        },
+        {
+          "id": "KeepOwnerOnDomain",
+          "edits": [
+            {
+              "old": "Retire(cause) == TRUE",
+              "new": "Retire(cause) == cause # \"domain\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "OnlyCurrentOwner"
+        },
+        {
+          "id": "KeepOwnerOnCriteria",
+          "edits": [
+            {
+              "old": "Retire(cause) == TRUE",
+              "new": "Retire(cause) == cause # \"criteria\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "OnlyCurrentOwner"
+        },
+        {
+          "id": "KeepOwnerOnNavigation",
+          "edits": [
+            {
+              "old": "Retire(cause) == TRUE",
+              "new": "Retire(cause) == cause # \"away\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "OnlyCurrentOwner"
+        },
+        {
+          "id": "KeepOwnerOnCapability",
+          "edits": [
+            {
+              "old": "Retire(cause) == TRUE",
+              "new": "Retire(cause) == cause # \"advertised\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "OnlyCurrentOwner"
+        },
+        {
+          "id": "KeepOwnerOnWrite",
+          "edits": [
+            {
+              "old": "Retire(cause) == TRUE",
+              "new": "Retire(cause) == cause # \"write\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "OnlyCurrentOwner"
+        },
+        {
+          "id": "AcceptObsoleteResult",
+          "edits": [
+            {
+              "old": "IF Publish(q) THEN IF good THEN Result(q, a) ELSE FailedPage(q) ELSE @",
+              "new": "IF good THEN Result(q, a) ELSE IF Publish(q) THEN FailedPage(q) ELSE @",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "OnlyCurrentOwner"
+        },
+        {
+          "id": "AcceptObsoleteFailure",
+          "edits": [
+            {
+              "old": "IF Publish(q) THEN IF good THEN None ELSE Signature(q) ELSE @",
+              "new": "IF good THEN IF Publish(q) THEN None ELSE @ ELSE Signature(q)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "OnlyCurrentOwner"
+        },
+        {
+          "id": "AcceptRepeatedCursor",
+          "edits": [
+            {
+              "old": "a.kind = \"ok\" /\\ ~Repeated(q, a)",
+              "new": "a.kind = \"ok\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "OnlyAcceptedPages"
+        },
+        {
+          "id": "ExposeDenialAsEmpty",
+          "edits": [
+            {
+              "old": "a.kind = \"ok\" /\\ ~Repeated(q, a)",
+              "new": "a.kind \\in {\"ok\", \"denied\"} /\\ ~Repeated(q, a)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "OnlyAcceptedPages"
+        },
+        {
+          "id": "DropEmptyContinuation",
+          "edits": [
+            {
+              "old": "ResultCursor(a) == a.token",
+              "new": "ResultCursor(a) == IF a.rows = {} THEN None ELSE a.token",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CursorMirrorsReply"
+        },
+        {
+          "id": "KeepCursorAfterFailure",
+          "edits": [
+            {
+              "old": "FailedPage(q) == None",
+              "new": "FailedPage(q) == q.prior",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "FailureClearsPage"
+        },
+        {
+          "id": "UseAttributeReadAsSearch",
+          "edits": [
+            {
+              "old": "SearchAction == \"Select\"",
+              "new": "SearchAction == \"GetAttributes\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "EffectIsolation"
+        },
+        {
+          "id": "ReadOnSelection",
+          "edits": [
+            {
+              "old": "ChoiceEffect == \"none\"",
+              "new": "ChoiceEffect == \"GetAttributes\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "EffectIsolation"
+        },
+        {
+          "id": "KeepObservationOnSelection",
+          "edits": [
+            {
+              "old": "ChoiceObserved == FALSE",
+              "new": "ChoiceObserved == TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ChoiceDoesNotObserve"
+        }
+      ]
     }
   ]
 }
