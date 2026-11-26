@@ -55,6 +55,13 @@ func generationOf(r row) privateDBGeneration {
 	return privateDBGeneration{r.ARN, r.Seq, r.Generation}
 }
 
+// Only rdsruntime.Start supplies this while serving requests. The private
+// boundary also lets lifecycle tests separate store behavior from host I/O.
+type ownedPostgresChild interface {
+	Probe(context.Context) error
+	Close() error
+}
+
 // OwnedPrivatePostgres is a trusted lifetime owner, not a client capability.
 // Close it before the shared provider database. It never publishes a secret,
 // address, endpoint, or instance-availability status.
@@ -64,7 +71,7 @@ type OwnedPrivatePostgres struct {
 	options OwnedPrivatePostgresConfig
 	owner   string
 	key     privateDBGeneration
-	child   *rdsruntime.Runtime
+	child   ownedPostgresChild
 	last    error
 	used    bool
 	closed  bool

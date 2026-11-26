@@ -11,8 +11,9 @@ import (
 )
 
 // ProbeGuestPeer is provider composition only. match is the EC2 provider's
-// read-only topology join, evaluated in the exact catalog generation's SQLite
-// snapshot. Neither the callback nor a destination is selected by a request.
+// read-only topology join, evaluated before and after the fixed host probe in
+// committed snapshots of the exact catalog generation. Neither the callback
+// nor a destination is selected by a request.
 // A successful synthetic host probe is not a permit for later traffic.
 func (c *OwnedPrivatePostgres) ProbeGuestPeer(ctx context.Context, db *sql.DB, account, region string, match func(context.Context, *sql.Tx, RDSPrivatePostgresRefs) error) error {
 	if c == nil || ctx == nil || ctx.Err() != nil || db == nil || match == nil ||
@@ -31,7 +32,14 @@ func (c *OwnedPrivatePostgres) ProbeGuestPeer(ctx context.Context, db *sql.DB, a
 		// disclose its identity, or issue a transferable ticket on a denial.
 		return rdsruntime.ErrNotReady
 	}
-	// The read transaction has ended. This is the original host's fixed SCRAM
-	// probe, not arbitrary SQL, a guest connection, or a forwarded socket.
-	return c.child.Probe(bounded)
+	// No SQLite transaction spans the original host's fixed SCRAM probe.
+	if err := c.child.Probe(bounded); err != nil {
+		return err
+	}
+	// The owner mutex protects the process, not independently managed
+	// destination dependencies. Read them again before reporting observation.
+	if !c.currentMatching(bounded, match) || bounded.Err() != nil {
+		return rdsruntime.ErrNotReady
+	}
+	return nil
 }

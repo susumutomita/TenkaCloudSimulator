@@ -55,7 +55,11 @@ security groups, check their typed CloudFormation reservations, and require
 an inbound TCP rule covering the guest address and port 5432 on the **DB's**
 group. The app subnet need not be in the DB subnet group. Missing or stale
 ownership, retirement, unavailable metadata, or a busy database owner denies
-this single check. A policy denial does not retire a healthy DB. On success,
-the owned host process answered its fixed authenticated probe; no service or
-port is added to the guest NIC, and no result grants permission for later I/O.
-Guest-side SQL still needs its own fenced transport and runtime verification.
+this single check. A policy denial does not retire a healthy DB. The provider
+ends the SQLite read before the fixed authenticated host probe and then
+rechecks the exact DB generation and destination topology in a new snapshot.
+The final committed read is a fresh observation, not proof that dependencies
+were unchanged during the host probe or will stay valid after the last read.
+No service or port is added to the guest NIC, and no result grants permission
+for later I/O. Guest-side SQL still needs its own fenced transport and runtime
+verification.

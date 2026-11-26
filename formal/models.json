@@ -21540,7 +21540,7 @@
       "id": "RDSGuestPeerPreflight",
       "model": "formal/RDSGuestPeerPreflight.tla",
       "config": "formal/RDSGuestPeerPreflight.cfg",
-      "bounds": "One retained guest, one Linux/amd64 database owner, one fixed host SCRAM observation, eighteen alternative input witnesses, two independently revocable guest signals; no persistent route.",
+      "bounds": "One retained guest, one Linux/amd64 database owner, one fixed host SCRAM observation, nineteen alternative static witnesses, one independent destination loss between committed reads, two independently revocable guest signals; no persistent route.",
       "properties": [
         "TypeOK",
         "CanonicalGuest",
@@ -21549,12 +21549,14 @@
         "DestinationIngress",
         "SnapshotClosedBeforeHost",
         "HostAuthenticated",
+        "FinalSnapshotCommitted",
+        "DestinationAtFinalSnapshot",
         "LiveAtReturn",
         "ObservationOnly",
         "DenialDoesNotRetireOwner",
         "HealthyObservation"
       ],
-      "limits": "One call with one independently bad static fact at a time; NIC pre-seal and command retirement may additionally interleave. Not Go refinement, database isolation, lock correctness, actual networking, guest SQL, authenticated protocol verification, public API behavior, or permission for later I/O.",
+      "limits": "One call with one independently bad static fact at a time. NIC pre-seal and command retirement may interleave; one independent destination loss may occur after the first committed snapshot and before the second. The second read and commit are abstracted together; observed is the checked snapshot, not continuous or future validity. Does not prove Go refinement, database isolation, lock correctness, actual networking, guest SQL, authenticated protocol verification, public API behavior, or permission for later I/O.",
       "source_scope": [
         "internal/aws/catalog/rds_guest_peer_linux_amd64.go",
         "internal/aws/catalog/rds_owned_runtime_linux_amd64.go",
@@ -21737,6 +21739,39 @@
             }
           ],
           "expect_invariant": "HealthyObservation"
+        },
+        {
+          "id": "AcceptLostDestinationAfterInitialRead",
+          "edits": [
+            {
+              "old": "LiveDestination == s.destination",
+              "new": "LiveDestination == TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "DestinationAtFinalSnapshot"
+        },
+        {
+          "id": "IgnoreFailedFinalCommit",
+          "edits": [
+            {
+              "old": "FinalCommitOK == s.f # \"failed-final-commit\"",
+              "new": "FinalCommitOK == TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "FinalSnapshotCommitted"
+        },
+        {
+          "id": "SkipCommittedPostProbeSnapshot",
+          "edits": [
+            {
+              "old": "!.p = \"recheck\", !.tried = TRUE",
+              "new": "!.p = \"review\", !.tried = TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "FinalSnapshotCommitted"
         }
       ]
     },
