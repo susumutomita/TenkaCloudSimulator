@@ -57,7 +57,8 @@ var batch = &Service{
 		{Name: "CreateJobQueue", Kind: Create, Resource: "jobQueue", Check: batchCreateJobQueue},
 		{Name: "DescribeJobQueues", Kind: List, Resource: "jobQueue", Names: "jobQueues"},
 		{Name: "UpdateJobQueue", Kind: Update, Resource: "jobQueue", Lookup: "jobQueue",
-			Fields: []string{"state", "schedulingPolicyArn", "priority", "computeEnvironmentOrder", "serviceEnvironmentOrder", "jobStateTimeLimitActions"}, Check: batchJobQueue, Merged: batchUpdateJobQueue},
+			Fields: []string{"state", "schedulingPolicyArn", "priority", "computeEnvironmentOrder", "serviceEnvironmentOrder", "jobStateTimeLimitActions"},
+			Check:  batchJobQueue, Merged: batchUpdateJobQueue, CheckReplacement: batchPreserveJobQueuePolicyMode},
 		{Name: "DeleteJobQueue", Kind: Delete, Resource: "jobQueue", Lookup: "jobQueue"},
 		{Name: "CreateServiceEnvironment", Kind: Create, Resource: "serviceEnvironment", Check: batchServiceEnvironment},
 		{Name: "DescribeServiceEnvironments", Kind: List, Resource: "serviceEnvironment", Names: "serviceEnvironments"},
@@ -72,7 +73,7 @@ var batch = &Service{
 		"Scheduling policies, consumable resources, compute environments, job queues and service environments are stored configuration records: no job is submitted, scheduled, run, listed, described or terminated, no instance, ECS or EKS cluster, Fargate task or SageMaker training job exists, and a compute environment stays CREATING with no ecsClusterArn. SubmitJob, SubmitServiceJob, CancelJob, TerminateJob, TerminateServiceJob, DescribeJobs, ListJobs, ListServiceJobs, DescribeServiceJob, ListJobsByConsumableResource, GetJobQueueSnapshot and every other official operation not bound here return UnknownOperationException with HTTP 501.",
 		"Job definitions are not implemented: RegisterJobDefinition numbers revisions as name:revision and DeregisterJobDefinition marks a revision INACTIVE instead of deleting it, which the stored model does not express, so RegisterJobDefinition, DeregisterJobDefinition and DescribeJobDefinitions return HTTP 501. UpdateConsumableResource is not implemented: its SET, ADD and SUBTRACT quantity operations need the in-use accounting of running jobs, so total quantities are fixed at creation and availableQuantity always equals totalQuantity.",
 		"Describe operations fail with ClientException (HTTP 400) when a named compute environment, job queue, service environment or scheduling policy does not exist, where AWS omits it from the result; Describe by name accepts a name or an ARN. ListConsumableResources filters are refused, and createdAt of a consumable resource is not reported because the stored clock is not epoch milliseconds.",
-		"References are stored without being resolved: the compute environments and service environments of a job queue order, subnets, security groups, launch templates, instance roles, service roles, EKS clusters and Spot fleet roles are not checked, a queue is VALID at once even if its compute environments are not, and UpdateComputeEnvironment changes only state, unmanagedvCpus, serviceRole, updatePolicy and context (computeResources updates are refused). A schedulingPolicyArn must name a stored scheduling policy. Deleting a scheduling policy still referenced by any job queue returns ClientException (HTTP 400) and leaves both records unchanged. Deleting a compute environment or service environment that a queue still uses succeeds, and a compute environment need not be DISABLED before deletion.",
+		"References are stored without being resolved: the compute environments and service environments of a job queue order, subnets, security groups, launch templates, instance roles, service roles, EKS clusters and Spot fleet roles are not checked, a queue is VALID at once even if its compute environments are not, and UpdateComputeEnvironment changes only state, unmanagedvCpus, serviceRole, updatePolicy and context (computeResources updates are refused). A schedulingPolicyArn must name a stored scheduling policy. A FIFO job queue cannot acquire a fair-share scheduling policy on update; a fair-share queue may replace its policy but not remove it. Deleting a scheduling policy still referenced by any job queue returns ClientException (HTTP 400) and leaves both records unchanged. Deleting a compute environment or service environment that a queue still uses succeeds, and a compute environment need not be DISABLED before deletion.",
 		"Job queue time-limit actions are configuration only: each timeout must be 600 to 86400 seconds. For a nonempty action list, the queue type or its environment order must identify one family: container queues accept CANCEL and SageMaker Training queues accept TERMINATE. No action is executed.",
 		"Names are 1 to 128 letters, digits, hyphens or underscores. A compute environment's containerOrchestrationType is ECS, or EKS when eksConfiguration is given; MANAGED compute environments require computeResources, UNMANAGED creation requires a nonblank serviceRole reference, unmanagedvCpus applies only to UNMANAGED ones, and Fargate compute resources refuse ec2KeyPair and instanceRole. A job queue holds at most three compute environments and cannot use both order families. On update, an empty order can clear the old family while setting the other in the same request. Fair-share policies accept computeReservation 0 to 99 and shareDecaySeconds 0 to 604800. Each Region holds at most 50 resources of each kind (local limit). Tags apply to every kind by ARN.",
 	},
@@ -185,6 +186,17 @@ func batchUpdateJobQueue(document, _ map[string]any) error {
 		return invalid("computeEnvironmentOrder and serviceEnvironmentOrder cannot both be populated.")
 	}
 	return batchQueueTimeLimits(document)
+}
+
+// Compare with the current persisted queue in the update transaction, not
+// just with the fields supplied to UpdateJobQueue.
+func batchPreserveJobQueuePolicyMode(previous, next map[string]any) error {
+	before, _ := previous["schedulingPolicyArn"].(string)
+	after, _ := next["schedulingPolicyArn"].(string)
+	if before == "" && after != "" {
+		return invalid("A FIFO job queue cannot acquire a fair-share scheduling policy.")
+	}
+	return nil
 }
 
 // Validate using the effective queue configuration: an update may supply just
