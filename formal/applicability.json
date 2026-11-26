@@ -1,40 +1,74 @@
 {
   "version": 1,
-  "base_sha": "5910d48e8432a82b7b22840d502841d0752b9016",
+  "base_sha": "dfc88a5b91362a08a7086125b9adb5390c88aed9",
   "changes": [
     {
-      "path": "test/e2e/s3_multipart_docs.py",
-      "sha256": "8708d594fd5e5750878eb570f0ae484cb1f66296e254ef91b7fd77daddbb26b1",
-      "disposition": "test-support",
-      "reason": "Keep the historical literal 67-operation/36-path inventory by validating the already-shipping Sakura Server GET and projecting out only that addition before comparison. No change to the exercised multipart HTTP or SDK payloads.",
+      "path": "README.md",
+      "sha256": "bd73513d7c407ab35818839c751c1fa6b0df6c758f169f6b1dd5c1ae71be9284",
+      "disposition": "documentation",
+      "reason": "Summarizes explicit default-class equivalence for the two existing S3 writes and unchanged archive limits.",
       "models": []
     },
     {
-      "path": "test/e2e/scalar_s3_docs.py",
-      "sha256": "5f7e25aaf38c97bccef798fd9041953f511b7541898c72223ccae4ed0dc19f87",
-      "disposition": "test-support",
-      "reason": "Use the same exact test-only Sakura projection for the historical Scalar S3 operation inventory. The production spec, browser launch and payload assertions are unchanged.",
+      "path": "docs/design/0001-go-standalone.md",
+      "sha256": "0ed9b9ede1e39ccc31ca903b3afc14388273394c64f4042cff9c73eda2f65af8",
+      "disposition": "documentation",
+      "reason": "Records the S3 wire option boundary, unchanged authorization/storage path, and existing unsupported cases.",
       "models": []
     },
     {
-      "path": "test/e2e/sqs_docs.py",
-      "sha256": "e092da7905427bdf7a1007ca4e6b93b4c1d035606340c18d0be66a7bb4ee1e4b",
-      "disposition": "test-support",
-      "reason": "Use the same exact test-only Sakura projection before historical SQS IDs and path checks, leaving native fixed examples, payload and cleanup checks unchanged.",
+      "path": "docs/s3-multipart.md",
+      "sha256": "380de7211c78ab93001d4dfadf3bd161e4a3a5f15bddc413cb40a5759d83ed14",
+      "disposition": "documentation",
+      "reason": "Documents exact single explicit STANDARD equivalence on the existing write route and retained non-default-class refusal.",
       "models": []
     },
     {
-      "path": "test/e2e/test_sakura_openapi.py",
-      "sha256": "48880458f5c7915d6e54d35e76eb706bfc1c169fc489676c73988ed0e1787598",
-      "disposition": "test-support",
-      "reason": "Extract the existing exact path digest and tag/group assertions into a reusable copy-preserving test projector. The original historical and native shape constraints remain unchanged.",
+      "path": "docs/s3.md",
+      "sha256": "ff02b671e0425f35494703f281579ba3544bfdc2ca8428d6dd36052af7f05c35",
+      "disposition": "documentation",
+      "reason": "Documents exact single explicit STANDARD equivalence on the existing write route and retained non-default-class refusal.",
       "models": []
     },
     {
-      "path": "test/e2e/test_storage_reference_sakura_projection.py",
-      "sha256": "e44e6d8a6a499710cb8014f1f27a59220c1d9d7275ef27044c0ac29e972465ee",
+      "path": "internal/aws/s3.go",
+      "sha256": "246718fde8c2a1c7b6977d13d6f18f466807f900247c09deed914a3b08c7e0ce",
+      "disposition": "modeled",
+      "reason": "A single explicit default selects existing authorized object/write and multipart-start transitions; rejected class and operation shapes cannot change state.",
+      "models": [
+        {
+          "id": "ObjectStore",
+          "properties": [
+            "NoOrphans",
+            "NoUnauthorizedMutation",
+            "DenyWins"
+          ],
+          "limits": "Only the existing atomic object/authorization transition is abstracted. Exact class/header multiplicity, HTTP routing, SDK responses, versioning and real SQLite are exercised separately."
+        },
+        {
+          "id": "S3MultipartState",
+          "properties": [
+            "Budget",
+            "NoOrphans",
+            "Cleanup",
+            "RefusalAtomic"
+          ],
+          "limits": "Only the existing multipart/refusal frame is abstracted. Class admission, upload selectors, no new durable field, native SDK cleanup and version readback are exercised via Go/HTTP/SDK, not checked as refinement."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/s3_storage_class_test.go",
+      "sha256": "65d17c160f9f42e8b5b70c5cf41791985359576287d5de4c24c3b57ca5ac4656",
       "disposition": "test-support",
-      "reason": "Test-only detector checks that exact current source is accepted without mutation and that changed, missing or duplicate Sakura/inherited reference structure and the bad multipart payload still fail, without launching a browser.",
+      "reason": "Runs ordinary supported and explicitly rejected option shapes against the existing S3/native SDK state and verifies no changed rows or response contracts.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/s3_standard_storage_class.py",
+      "sha256": "64072b7e0c14c43032aef4ecdf46de402779ba79559f8d2ab283484b8fd27049",
+      "disposition": "test-support",
+      "reason": "Runs ordinary supported and explicitly rejected option shapes against the existing S3/native SDK state and verifies no changed rows or response contracts.",
       "models": []
     }
   ]

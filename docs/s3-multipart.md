@@ -148,9 +148,12 @@ object条件headerを有効にするものではない。
 UploadPartとCompleteは任意指定のbase64 `Content-MD5`を検証する。
 multipart checksum extensions（`x-amz-checksum-*`、
 `x-amz-sdk-checksum-algorithm`）、`if-*`条件header、UploadPartCopy、
-copy-source、ACL、object tagging、任意metadata、storage class、暗号化/KMS/SSE-C、
+copy-source、ACL、object tagging、任意metadata、下記以外のstorage class、暗号化/KMS/SSE-C、
 expected-bucket-owner、request-payerは未対応。streaming署名/aws-chunked、
 presigned URL、AWS session token、virtual-hosted-styleや実AWS規模のobjectも未対応。
+開始時の`x-amz-storage-class: STANDARD`の1指定は省略と同じ扱い。
+これは[CreateMultipartUpload](https://docs.aws.amazon.com/AmazonS3/latest/API/API_CreateMultipartUpload.html)だけに適用し、
+UploadPart・Complete・Abortや他のstorage classを有効にしない。保存形式・一覧や応答は変えない。
 作成時はContent-Type以外のobject metadataとしてCache-Control、
 Content-Disposition、Content-Encoding、Content-Language、Expiresを指定すると
 501 `NotImplemented`を返す。

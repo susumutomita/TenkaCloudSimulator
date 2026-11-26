@@ -87,6 +87,8 @@ console, CloudFormation adapter or Challenge integration.
 
 - **Storage and data:** [S3](docs/s3.md) ([multipart](docs/s3-multipart.md)),
   [DynamoDB](docs/dynamodb.md), [Parameter Store](docs/ssm-parameters.md).
+  S3 treats one explicit `x-amz-storage-class: STANDARD` as omission only for
+  `PutObject` and `CreateMultipartUpload`; archive classes and restore remain unsupported.
 - **Systems Manager documents:** [definition and version history](docs/ssm-documents.md).
   List versions through the native read-only API or compare saved definitions in the console.
   This does not execute the documents.
