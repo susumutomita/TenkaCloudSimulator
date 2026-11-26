@@ -42,6 +42,34 @@ VPC ID. Each item carries the local extension `simulatorManagedBy`:
 `cloudformation` (delete it by deleting its stack) or `ec2` (created by
 `CreateVpc`, deletable with `DeleteVpc`). SDKs ignore the extension.
 
+### Instance launch: preview is not a launch
+
+Default simulator startup does not configure an instance runtime, and the
+EC2 console has no Launch action. Native `RunInstances` and `DescribeImages`
+are unsupported. A signed-in caller with `cloudformation:ValidateTemplate` can
+preview the declaration of a stack containing one instance and a same-stack
+instance profile, but this does not certify its AMI, capacity or runtime.
+In normal startup, an authorized `CreateStack` for that declaration returns
+`NotImplemented` instead of creating a stack or a metadata-only instance.
+
+Local prerequisite check:
+
+```sh
+SIMULATOR_BINARY=/absolute/path/to/simulator python3 test/console/ec2_launch_preflight_native.py
+```
+
+The check starts a disposable authenticated simulator on numeric loopback with
+in-memory state and no guest-runtime flags. It tests the preview-only browser
+identity, the unconfigured runtime error, the two regional reads, and cleanup.
+It does not run a browser or guest. Only add a launch action after the chosen
+pinned runtime and its authorized native or CloudFormation path can demonstrably
+start and clean up a guest on a qualified runner. Do not infer readiness from a
+template preview or a saved runtime-state label.
+
+Primary references: [ValidateTemplate](https://docs.aws.amazon.com/AWSCloudFormation/latest/APIReference/API_ValidateTemplate.html),
+[CreateStack](https://docs.aws.amazon.com/AWSCloudFormation/latest/APIReference/API_CreateStack.html)
+and [RunInstances](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_RunInstances.html).
+
 ### Security-group readback
 
 `DescribeSecurityGroups` lists CloudFormation-owned groups in the selected
