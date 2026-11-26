@@ -14,7 +14,6 @@ import (
 )
 
 func TestEC2SecurityGroupsConsoleCapability(t *testing.T) {
-	const name = "securityGroupReadback"
 	operator := provider.Actor{CredentialIdentity: "simulator-admin", ExerciseIdentity: "selected-reader", CredentialRole: provider.CredentialOperator}
 	participant := provider.Actor{CredentialIdentity: "learner", ExerciseIdentity: "learner", CredentialRole: provider.CredentialParticipant}
 	for _, c := range []struct {
@@ -45,12 +44,14 @@ func TestEC2SecurityGroupsConsoleCapability(t *testing.T) {
 			}
 			ec2 := map[string]any{"console": true}
 			capabilities := map[string]any{"services": map[string]any{"ec2": ec2}}
-			addEC2SecurityGroupsConsoleCapability(w, r, capabilities)
-			got, ok := ec2[name]
-			if ok != c.want || ok && got != "DescribeSecurityGroups" {
-				t.Fatalf("capability %q=%v, expected advertised=%v", name, got, c.want)
+			addEC2NetworkReadbackCapabilities(w, r, capabilities)
+			for name, op := range map[string]string{"securityGroupReadback": "DescribeSecurityGroups", "routeTableReadback": "DescribeRouteTables"} {
+				got, ok := ec2[name]
+				if ok != c.want || ok && got != op {
+					t.Fatalf("capability %q=%v, expected advertised=%v", name, got, c.want)
+				}
+				delete(ec2, name)
 			}
-			delete(ec2, name)
 			if ec2["console"] != true || len(ec2) != 1 {
 				t.Fatal("the pane must not modify other EC2 capabilities")
 			}
@@ -58,7 +59,7 @@ func TestEC2SecurityGroupsConsoleCapability(t *testing.T) {
 	}
 }
 
-// The console's exact two Query requests use a normal signed-in cookie, the
+// The console's exact Query requests use a normal signed-in cookie, the
 // real Access handler and native SQLite state. No browser driver or socket.
 func TestEC2SecurityGroupConsoleNativeReadback(t *testing.T) {
 	h, closeDB, err := New(":memory:")
@@ -85,6 +86,7 @@ func TestEC2SecurityGroupConsoleNativeReadback(t *testing.T) {
 	}
 	const template = `{"Resources":{
 		"VPC":{"Type":"AWS::EC2::VPC","Properties":{"CidrBlock":"10.42.0.0/16"}},
+		"RouteTable":{"Type":"AWS::EC2::RouteTable","Properties":{"VpcId":{"Ref":"VPC"}}},
 		"LocalGroup":{"Type":"AWS::EC2::SecurityGroup","Properties":{
 			"VpcId":{"Ref":"VPC"},"GroupDescription":"Local saved ingress",
 			"Tags":[{"Key":"Course","Value":""}],
@@ -115,7 +117,7 @@ func TestEC2SecurityGroupConsoleNativeReadback(t *testing.T) {
 		}
 	}
 	writePolicy("group-reader", `{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Action":["ec2:DescribeVpcs","ec2:DescribeSecurityGroups"],"Resource":"*"}]}`)
-	writePolicy("reader", `{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Action":"ec2:DescribeVpcs","Resource":"*"}]}`)
+	writePolicy("reader", `{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Action":["ec2:DescribeVpcs","ec2:DescribeRouteTables"],"Resource":"*"}]}`)
 	learnerCookie := browserSignIn(t, access, participantCredential(t, access, operator), nil)
 
 	for _, tc := range []struct {
@@ -123,9 +125,10 @@ func TestEC2SecurityGroupConsoleNativeReadback(t *testing.T) {
 		principal string
 		cookie    *http.Cookie
 		wantGroup int
+		wantRoute int
 	}{
-		{"operator with selected exercise identity", "group-reader", operatorCookie, ok},
-		{"ordinary learner without group IAM", "reader", learnerCookie, http.StatusForbidden},
+		{"operator with selected exercise identity", "group-reader", operatorCookie, ok, http.StatusForbidden},
+		{"ordinary learner without group IAM", "reader", learnerCookie, http.StatusForbidden, ok},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			capabilities := browserRequest(access, "GET", "/_simulator/v1/capabilities", "", "", tc.cookie,
@@ -134,11 +137,12 @@ func TestEC2SecurityGroupConsoleNativeReadback(t *testing.T) {
 				Services struct {
 					EC2 struct {
 						Readback string `json:"securityGroupReadback"`
+						Routes   string `json:"routeTableReadback"`
 					} `json:"ec2"`
 				} `json:"services"`
 			}
 			if capabilities.Code != ok || capabilities.Header().Get("X-Simulator-Authentication") != "required" ||
-				json.Unmarshal(capabilities.Body.Bytes(), &c) != nil || c.Services.EC2.Readback != "DescribeSecurityGroups" {
+				json.Unmarshal(capabilities.Body.Bytes(), &c) != nil || c.Services.EC2.Readback != "DescribeSecurityGroups" || c.Services.EC2.Routes != "DescribeRouteTables" {
 				t.Fatal("signed-in VPC pane was not advertised")
 			}
 			vpcs := query(tc.cookie, tc.principal, "ec2", url.Values{"Action": {"DescribeVpcs"}, "Version": {"2016-11-15"}})
@@ -151,6 +155,27 @@ func TestEC2SecurityGroupConsoleNativeReadback(t *testing.T) {
 			if vpcs.Code != ok || xml.Unmarshal(vpcs.Body.Bytes(), &view) != nil || len(view.VPCs) != 1 ||
 				view.VPCs[0].ID == "" || view.VPCs[0].ManagedBy != "cloudformation" {
 				t.Fatalf("missing canonically selectable VPC: %d %s", vpcs.Code, vpcs.Body.String())
+			}
+			routes := query(tc.cookie, tc.principal, "ec2", url.Values{"Action": {"DescribeRouteTables"}, "Version": {"2016-11-15"}})
+			if routes.Code != tc.wantRoute {
+				t.Fatalf("native route-table read status %d, want %d", routes.Code, tc.wantRoute)
+			}
+			if tc.wantRoute == http.StatusForbidden {
+				if !strings.Contains(routes.Body.String(), "<Code>UnauthorizedOperation</Code>") || strings.Contains(routes.Body.String(), "<routeTableSet>") {
+					t.Fatal("unauthorized route reader received the wrong result")
+				}
+			} else {
+				var routeView struct {
+					XMLName xml.Name `xml:"http://ec2.amazonaws.com/doc/2016-11-15/ DescribeRouteTablesResponse"`
+					Tables  []struct {
+						ID  string `xml:"routeTableId"`
+						VPC string `xml:"vpcId"`
+					} `xml:"routeTableSet>item"`
+				}
+				if xml.Unmarshal(routes.Body.Bytes(), &routeView) != nil || len(routeView.Tables) != 1 ||
+					!strings.HasPrefix(routeView.Tables[0].ID, "rtb-") || routeView.Tables[0].VPC != view.VPCs[0].ID {
+					t.Fatal("native route table does not belong to the selected VPC")
+				}
 			}
 			groups := query(tc.cookie, tc.principal, "ec2", url.Values{"Action": {"DescribeSecurityGroups"}, "Version": {"2016-11-15"}})
 			if groups.Code != tc.wantGroup {

@@ -92,7 +92,16 @@ Unlike [AWS DescribeRouteTables](https://docs.aws.amazon.com/AWSEC2/latest/APIRe
 there are no implicit main tables, local routes or associations, including for
 native EC2 VPCs. `state=active` describes the configured gateway route, **not**
 observed packet forwarding. Table IDs, filters, pagination and dry-run are rejected.
-This read adds no route mutations, console workflow or forwarding engine.
+In an ordinary signed-in **VPC** Console, select a CloudFormation-managed VPC
+and look under **Route tables** in its details. Choose a table to see its enabled
+default route, explicit subnet associations and tags. The Console makes the same
+regional EC2 Query as the SDK with the current exercise identity, validates the
+whole response, then selects the matching VPC in the browser. This selection is
+not an IAM filter: the operation requires regional `ec2:DescribeRouteTables` on
+`*`. A refusal or an incomplete reply is never displayed as “no tables.” A native
+EC2 VPC is explicitly marked inapplicable without a lookup; scoped handoffs do
+not offer the pane. Refresh, VPC, region and identity changes discard old replies.
+This view adds no mutations or forwarding engine.
 Check: `go test ./internal/aws -run '^TestEC2DescribeRouteTablesReadback$' -count=1`.
 
 ## Native VPC lifecycle
