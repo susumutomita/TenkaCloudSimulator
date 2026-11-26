@@ -1412,8 +1412,13 @@ REQUIRED_SOURCE_SCOPES['EntraVerificationFixture'] = {
 
 BASE_MODELS.add('EC2DetachedNetworkConsole')
 BASE_INVARIANTS['EC2DetachedNetworkConsole'] = {'TypeOK', 'AdmittedNativeOnly', 'OnlyCurrentScope', 'VerifiedWriteOnly', 'ScopeChangeFenced', 'SiblingLeasePreserved', 'LeaseUntilReadback'}
-REQUIRED_MUTANTS['EC2DetachedNetworkConsole'] = {'AdmitUnverifiedOwner', 'AcceptLateRead', 'ReportUnverified', 'ReportBeforeAck', 'NavigateWhileSaving', 'ReleaseSiblingLease', 'ReleaseOnReceipt'}
-REQUIRED_SOURCE_SCOPES['EC2DetachedNetworkConsole'] = {'internal/server/web/app.js', 'tools/console/src/ec2-readonly.jsx', 'tools/console/src/main.jsx', 'tools/console/src/ec2-native-security-groups.mjs', 'tools/console/src/ec2-vpc-security-groups.jsx', 'tools/console/src/ec2-network-acls.mjs', 'tools/console/src/ec2-vpc-network-acls.jsx'}
+REQUIRED_MUTANTS['EC2DetachedNetworkConsole'] = {'AdmitUnverifiedOwner', 'AcceptLateRead', 'ReportUnverified', 'ReportBeforeAck', 'NavigateWhileSaving', 'ReleaseSiblingLease', 'ReleaseOnReceipt', 'SkipRouteTableLease'}
+REQUIRED_SOURCE_SCOPES['EC2DetachedNetworkConsole'] = {'internal/server/web/app.js', 'tools/console/src/ec2-readonly.jsx', 'tools/console/src/main.jsx', 'tools/console/src/ec2-native-security-groups.mjs', 'tools/console/src/ec2-vpc-security-groups.jsx', 'tools/console/src/ec2-network-acls.mjs', 'tools/console/src/ec2-vpc-network-acls.jsx', 'tools/console/src/ec2-native-route-tables.mjs', 'tools/console/src/ec2-vpc-native-route-tables.jsx', 'internal/server/server.go'}
+
+BASE_MODELS.add('EC2NativeRouteTableLifecycle')
+BASE_INVARIANTS['EC2NativeRouteTableLifecycle'] = {'TypeOK', 'GrantAtomic', 'NativeParentOnly', 'ParentDependency', 'LegacyPreserved', 'RetiredNotRecreated', 'LiveReceiptMatches', 'ReplayBindsIntent', 'ReadScoped'}
+REQUIRED_MUTANTS['EC2NativeRouteTableLifecycle'] = {'IgnoreAllocatedGrant', 'AdoptCFNParent', 'RetireParentWithChild', 'DeleteCFNTable', 'ReplayResurrectsTombstone', 'LoseReceipt', 'ReplayIgnoresIntent', 'ReadOtherRegion'}
+REQUIRED_SOURCE_SCOPES['EC2NativeRouteTableLifecycle'] = {'internal/aws/cloudformation.go', 'internal/aws/ec2_read.go', 'internal/aws/ec2_route_tables_native.go', 'internal/aws/ec2_route_tables_native_query.go', 'internal/aws/ec2_route_tables_read.go', 'internal/aws/ec2_vpc.go'}
 
 BASE_MODELS.add('EC2NativeVPCChildren')
 BASE_INVARIANTS['EC2NativeVPCChildren'] = {'TypeOK', 'GrantAtomic', 'RejectOtherOwner', 'ParentDependency', 'SiblingFrame', 'ReadScoped', 'ReplayNoRecreate', 'ReceiptTracksLiveACL'}

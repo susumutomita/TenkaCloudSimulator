@@ -3,7 +3,7 @@
    Epoch summarizes a change of VPC, identity, region, or view incarnation. *)
 VARIABLES epoch, gate, pending, leases, shown, last
 
-Panes == {"subnet","securityGroup","networkAcl"}
+Panes == {"subnet","securityGroup","networkAcl","routeTable"}
 Gates == {"native","cfn","handoff","unadvertised","unauthenticated"}
 Stages == {"read","write","ack"}
 Row(p,e,g,s) == [pane |-> p, epoch |-> e, gate |-> g, stage |-> s]

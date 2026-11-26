@@ -29412,7 +29412,7 @@
       "format": "esm"
     },
     "src/ec2-vpc-route-tables.jsx": {
-      "bytes": 6381,
+      "bytes": 6331,
       "imports": [
         {
           "path": "node_modules/react/index.js",
@@ -29477,8 +29477,100 @@
       ],
       "format": "esm"
     },
+    "src/ec2-native-route-tables.mjs": {
+      "bytes": 8151,
+      "imports": [
+        {
+          "path": "src/ec2-response.mjs",
+          "kind": "import-statement",
+          "original": "./ec2-response.mjs"
+        },
+        {
+          "path": "src/ec2-route-tables.mjs",
+          "kind": "import-statement",
+          "original": "./ec2-route-tables.mjs"
+        }
+      ],
+      "format": "esm"
+    },
+    "src/ec2-vpc-native-route-tables.jsx": {
+      "bytes": 10351,
+      "imports": [
+        {
+          "path": "node_modules/react/index.js",
+          "kind": "import-statement",
+          "original": "react"
+        },
+        {
+          "path": "node_modules/@cloudscape-design/components/alert/index.js",
+          "kind": "import-statement",
+          "original": "@cloudscape-design/components/alert"
+        },
+        {
+          "path": "node_modules/@cloudscape-design/components/box/index.js",
+          "kind": "import-statement",
+          "original": "@cloudscape-design/components/box"
+        },
+        {
+          "path": "node_modules/@cloudscape-design/components/button/index.js",
+          "kind": "import-statement",
+          "original": "@cloudscape-design/components/button"
+        },
+        {
+          "path": "node_modules/@cloudscape-design/components/form/index.js",
+          "kind": "import-statement",
+          "original": "@cloudscape-design/components/form"
+        },
+        {
+          "path": "node_modules/@cloudscape-design/components/form-field/index.js",
+          "kind": "import-statement",
+          "original": "@cloudscape-design/components/form-field"
+        },
+        {
+          "path": "node_modules/@cloudscape-design/components/header/index.js",
+          "kind": "import-statement",
+          "original": "@cloudscape-design/components/header"
+        },
+        {
+          "path": "node_modules/@cloudscape-design/components/input/index.js",
+          "kind": "import-statement",
+          "original": "@cloudscape-design/components/input"
+        },
+        {
+          "path": "node_modules/@cloudscape-design/components/modal/index.js",
+          "kind": "import-statement",
+          "original": "@cloudscape-design/components/modal"
+        },
+        {
+          "path": "node_modules/@cloudscape-design/components/pagination/index.js",
+          "kind": "import-statement",
+          "original": "@cloudscape-design/components/pagination"
+        },
+        {
+          "path": "node_modules/@cloudscape-design/components/space-between/index.js",
+          "kind": "import-statement",
+          "original": "@cloudscape-design/components/space-between"
+        },
+        {
+          "path": "node_modules/@cloudscape-design/components/table/index.js",
+          "kind": "import-statement",
+          "original": "@cloudscape-design/components/table"
+        },
+        {
+          "path": "src/i18n.jsx",
+          "kind": "import-statement",
+          "original": "./i18n.jsx"
+        },
+        {
+          "path": "src/ec2-native-route-tables.mjs",
+          "kind": "import-statement",
+          "original": "./ec2-native-route-tables.mjs"
+        }
+      ],
+      "format": "esm"
+    },
     "src/ec2-readonly.jsx": {
-      "bytes": 21310,
+      "bytes": 21989,
       "imports": [
         {
           "path": "node_modules/react/index.js",
@@ -29614,6 +29706,16 @@
           "path": "src/ec2-vpc-route-tables.jsx",
           "kind": "import-statement",
           "original": "./ec2-vpc-route-tables.jsx"
+        },
+        {
+          "path": "src/ec2-vpc-native-route-tables.jsx",
+          "kind": "import-statement",
+          "original": "./ec2-vpc-native-route-tables.jsx"
+        },
+        {
+          "path": "src/ec2-native-route-tables.mjs",
+          "kind": "import-statement",
+          "original": "./ec2-native-route-tables.mjs"
         },
         {
           "path": "src/ec2-response.mjs",
@@ -34741,7 +34843,7 @@
       "format": "esm"
     },
     "src/main.jsx": {
-      "bytes": 55372,
+      "bytes": 55556,
       "imports": [
         {
           "path": "src/ssm-terminal.jsx",
@@ -34947,6 +35049,11 @@
           "path": "src/ec2-route-tables.mjs",
           "kind": "import-statement",
           "original": "./ec2-route-tables.mjs"
+        },
+        {
+          "path": "src/ec2-native-route-tables.mjs",
+          "kind": "import-statement",
+          "original": "./ec2-native-route-tables.mjs"
         },
         {
           "path": "src/session-manager.jsx",
@@ -35787,7 +35894,7 @@
           "bytesInOutput": 0
         },
         "src/main.jsx": {
-          "bytesInOutput": 48762
+          "bytesInOutput": 48804
         },
         "node_modules/@cloudscape-design/global-styles/index.css": {
           "bytesInOutput": 0
@@ -36927,7 +37034,7 @@
           "bytesInOutput": 439
         },
         "node_modules/@cloudscape-design/components/table/internal.js": {
-          "bytesInOutput": 14361
+          "bytesInOutput": 14364
         },
         "node_modules/@cloudscape-design/components/internal/hooks/use-scroll-sync/index.js": {
           "bytesInOutput": 282
@@ -37089,10 +37196,10 @@
           "bytesInOutput": 890
         },
         "node_modules/@cloudscape-design/components/table/resizer/index.js": {
-          "bytesInOutput": 5370
+          "bytesInOutput": 5375
         },
         "node_modules/@cloudscape-design/components/internal/hooks/use-throttle-callback/index.js": {
-          "bytesInOutput": 69
+          "bytesInOutput": 70
         },
         "node_modules/@cloudscape-design/components/table/resizer/styles.scoped.css": {
           "bytesInOutput": 0
@@ -37107,10 +37214,10 @@
           "bytesInOutput": 1377
         },
         "node_modules/@cloudscape-design/components/checkbox/internal.js": {
-          "bytesInOutput": 1580
+          "bytesInOutput": 1582
         },
         "node_modules/@cloudscape-design/components/internal/components/abstract-switch/index.js": {
-          "bytesInOutput": 2046
+          "bytesInOutput": 2049
         },
         "node_modules/@cloudscape-design/components/internal/components/abstract-switch/analytics-metadata/styles.scoped.css": {
           "bytesInOutput": 0
@@ -37137,7 +37244,7 @@
           "bytesInOutput": 116
         },
         "node_modules/@cloudscape-design/components/checkbox/style.js": {
-          "bytesInOutput": 912
+          "bytesInOutput": 914
         },
         "node_modules/@cloudscape-design/components/checkbox/styles.scoped.css": {
           "bytesInOutput": 0
@@ -37146,10 +37253,10 @@
           "bytesInOutput": 140
         },
         "node_modules/@cloudscape-design/components/internal/components/radio-button/index.js": {
-          "bytesInOutput": 1622
+          "bytesInOutput": 1626
         },
         "node_modules/@cloudscape-design/components/internal/components/radio-button/style.js": {
-          "bytesInOutput": 1181
+          "bytesInOutput": 1184
         },
         "node_modules/@cloudscape-design/components/internal/components/radio-button/styles.scoped.css": {
           "bytesInOutput": 0
@@ -37161,7 +37268,7 @@
           "bytesInOutput": 0
         },
         "node_modules/@cloudscape-design/components/internal/components/radio-button/test-classes/styles.css.js": {
-          "bytesInOutput": 41
+          "bytesInOutput": 42
         },
         "node_modules/@cloudscape-design/components/table/selection/styles.scoped.css": {
           "bytesInOutput": 0
@@ -37182,10 +37289,10 @@
           "bytesInOutput": 781
         },
         "node_modules/@cloudscape-design/components/table/header-cell/th-element.js": {
-          "bytesInOutput": 1618
+          "bytesInOutput": 1619
         },
         "node_modules/@cloudscape-design/components/table-header-cell/internal.js": {
-          "bytesInOutput": 843
+          "bytesInOutput": 844
         },
         "node_modules/@cloudscape-design/components/table/header-cell/styles.scoped.css": {
           "bytesInOutput": 0
@@ -37200,10 +37307,10 @@
           "bytesInOutput": 347
         },
         "node_modules/@cloudscape-design/components/table/selection/use-group-selection.js": {
-          "bytesInOutput": 2154
+          "bytesInOutput": 2155
         },
         "node_modules/@cloudscape-design/components/table/skeleton-rows.js": {
-          "bytesInOutput": 1349
+          "bytesInOutput": 1352
         },
         "node_modules/@cloudscape-design/components/skeleton/internal.js": {
           "bytesInOutput": 385
@@ -37215,25 +37322,25 @@
           "bytesInOutput": 931
         },
         "node_modules/@cloudscape-design/components/table/sticky-header.js": {
-          "bytesInOutput": 1036
+          "bytesInOutput": 1038
         },
         "node_modules/@cloudscape-design/components/table/thead.js": {
-          "bytesInOutput": 5816
+          "bytesInOutput": 5817
         },
         "node_modules/@cloudscape-design/components/table/column-groups/split-utils.js": {
-          "bytesInOutput": 532
+          "bytesInOutput": 533
         },
         "node_modules/@cloudscape-design/components/table/header-cell/index.js": {
-          "bytesInOutput": 4589
+          "bytesInOutput": 4590
         },
         "node_modules/@cloudscape-design/components/table/header-cell/sort-menu.js": {
-          "bytesInOutput": 1681
+          "bytesInOutput": 1684
         },
         "node_modules/@cloudscape-design/components/table/header-cell/group-header-cell.js": {
           "bytesInOutput": 1714
         },
         "node_modules/@cloudscape-design/components/table/use-sticky-header.js": {
-          "bytesInOutput": 512
+          "bytesInOutput": 513
         },
         "node_modules/@cloudscape-design/components/table/sticky-scrolling.js": {
           "bytesInOutput": 501
@@ -37242,7 +37349,7 @@
           "bytesInOutput": 661
         },
         "node_modules/@cloudscape-design/components/table/sticky-scrollbar/use-sticky-scrollbar.js": {
-          "bytesInOutput": 1199
+          "bytesInOutput": 1202
         },
         "node_modules/@cloudscape-design/components/table/sticky-scrollbar/styles.scoped.css": {
           "bytesInOutput": 0
@@ -37848,7 +37955,7 @@
           "bytesInOutput": 232
         },
         "src/ec2-readonly.jsx": {
-          "bytesInOutput": 19254
+          "bytesInOutput": 19529
         },
         "src/ec2-vpc-subnet-fields.jsx": {
           "bytesInOutput": 2202
@@ -37875,7 +37982,7 @@
           "bytesInOutput": 14196
         },
         "src/ec2-response.mjs": {
-          "bytesInOutput": 5704
+          "bytesInOutput": 5703
         },
         "src/ec2-security-groups.mjs": {
           "bytesInOutput": 924
@@ -37890,10 +37997,16 @@
           "bytesInOutput": 5239
         },
         "src/ec2-vpc-route-tables.jsx": {
-          "bytesInOutput": 6102
+          "bytesInOutput": 6007
         },
         "src/ec2-route-tables.mjs": {
-          "bytesInOutput": 1014
+          "bytesInOutput": 1012
+        },
+        "src/ec2-vpc-native-route-tables.jsx": {
+          "bytesInOutput": 8647
+        },
+        "src/ec2-native-route-tables.mjs": {
+          "bytesInOutput": 4851
         },
         "src/session-manager.jsx": {
           "bytesInOutput": 4924
@@ -38325,7 +38438,7 @@
           "bytesInOutput": 10113
         }
       },
-      "bytes": 2635907
+      "bytes": 2649666
     },
     "../../internal/server/web/app.css.LEGAL.txt": {
       "imports": [],

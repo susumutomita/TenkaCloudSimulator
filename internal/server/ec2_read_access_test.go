@@ -114,6 +114,7 @@ func TestEC2ReadAccessBoundary(t *testing.T) {
 			ResourceLimit             int                 `json:"resourceLimit"`
 			DescribeSelectors         map[string][]string `json:"describeSelectors"`
 			DetachedConfigurationOnly []string            `json:"detachedConfigurationOnly"`
+			RouteTableLifecycle       []string            `json:"routeTableLifecycle"`
 		} `json:"services"`
 	}
 	if w.Code != 200 || json.Unmarshal(w.Body.Bytes(), &caps) != nil {
@@ -128,7 +129,7 @@ func TestEC2ReadAccessBoundary(t *testing.T) {
 	wantOperations := []string{
 		"DescribeInstances", "DescribeVpcs", "DescribeSubnets", "DescribeSecurityGroups", "DescribeRouteTables",
 		"CreateVpc", "DeleteVpc", "CreateSubnet", "DeleteSubnet", "CreateSecurityGroup", "DeleteSecurityGroup",
-		"CreateNetworkAcl", "DescribeNetworkAcls", "DeleteNetworkAcl",
+		"CreateNetworkAcl", "DescribeNetworkAcls", "DeleteNetworkAcl", "CreateRouteTable", "DeleteRouteTable",
 	}
 	if !reflect.DeepEqual(ec2.Operations, wantOperations) {
 		t.Fatalf("unexpected EC2 operations: got %v, want %v", ec2.Operations, wantOperations)
@@ -138,7 +139,8 @@ func TestEC2ReadAccessBoundary(t *testing.T) {
 		"DescribeNetworkAcls":    {"NetworkAclId.N", "vpc-id"},
 	}
 	if ec2.Pagination || !ec2.Filters || ec2.ResourceLimit != 1000 || !reflect.DeepEqual(ec2.DescribeSelectors, wantSelectors) ||
-		!reflect.DeepEqual(ec2.DetachedConfigurationOnly, []string{"native security groups", "native network ACLs"}) {
+		!reflect.DeepEqual(ec2.DetachedConfigurationOnly, []string{"native security groups", "native network ACLs", "native route tables"}) ||
+		!reflect.DeepEqual(ec2.RouteTableLifecycle, []string{"DescribeRouteTables", "CreateRouteTable", "DeleteRouteTable"}) {
 		t.Fatalf("unexpected EC2 capability limits: %+v", ec2)
 	}
 }

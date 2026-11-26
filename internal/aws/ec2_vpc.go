@@ -29,7 +29,7 @@ const (
 
 var ec2Operations = slices.Concat(
 	[]string{"DescribeInstances", "DescribeVpcs", "DescribeSubnets", "DescribeSecurityGroups", "DescribeRouteTables", "CreateVpc", "DeleteVpc", "CreateSubnet", "DeleteSubnet"},
-	ec2NativeSecurityGroupMutations, ec2NetworkACLOperations,
+	ec2NativeSecurityGroupMutations, ec2NetworkACLOperations, ec2NativeRouteTableMutations,
 )
 
 // EC2Operations lists registered native Query operations, not granted permissions.
@@ -56,6 +56,7 @@ type ec2Request struct {
 	subnet        ec2SubnetMutation
 	securityGroup *ec2NativeSecurityGroupQuery
 	networkACL    *ec2NetworkACLRequest
+	routeTable    *ec2NativeRouteTableQuery
 }
 
 // permissions are evaluated against the caller's identity policy before any
@@ -66,6 +67,8 @@ func (q ec2Request) permissions(action, region string) [][2]string {
 		return q.securityGroup.permissions(action, region)
 	case q.networkACL != nil:
 		return q.networkACL.permissions(action, region)
+	case q.routeTable != nil:
+		return q.routeTable.permissions(action, region)
 	}
 	switch action {
 	case "CreateSubnet", "DeleteSubnet":
@@ -92,6 +95,10 @@ func parseEC2Request(action string, fields map[string][]string) (ec2Request, *ec
 	if slices.Contains(ec2NetworkACLOperations, action) {
 		q, err := parseEC2NetworkACLRequest(action, fields)
 		return ec2Request{networkACL: &q}, err
+	}
+	if slices.Contains(ec2NativeRouteTableMutations, action) {
+		q, err := parseEC2NativeRouteTableMutation(action, fields)
+		return ec2Request{routeTable: &q}, err
 	}
 	q := ec2Request{}
 	if action == "CreateSubnet" || action == "DeleteSubnet" {
@@ -235,6 +242,8 @@ func stampEC2Response(out any) {
 		v.XMLNS, v.RequestID = ns, id
 	case *ec2NetworkACLResponse:
 		v.XMLNS, v.RequestID = ns, id
+	case *ec2NativeRouteTableMutationResponse:
+		v.XMLNS, v.RequestID = ns, id
 	case *ec2CreateVpcResponse:
 		v.XMLNS, v.RequestID = ns, id
 	case *ec2DeleteVpcResponse:
@@ -287,6 +296,10 @@ func nativeVPCs(ctx context.Context, tx *sql.Tx, region string) ([]EC2NetworkRes
 			}
 		case ec2NetworkACLKind:
 			if _, err := readNativeNetworkACL(ctx, tx, region, v.ID); err != nil {
+				return nil, err
+			}
+		case ec2RT:
+			if _, err := readNativeRouteTable(ctx, tx, region, v.ID); err != nil {
 				return nil, err
 			}
 		default:

@@ -1,54 +1,40 @@
 {
   "version": 1,
-  "base_sha": "49bb97c7f62612bbbb73fa9dfccb1a8affdd6d66",
+  "base_sha": "690556838cafbbcace1b1af1d8207c06eec104df",
   "changes": [
     {
       "path": "README.md",
-      "sha256": "8f8474ae2ad2d60c2d299b8f6e045cd5216e7f87da5ce24c596e6f2d9a1898f5",
+      "sha256": "08943a2f65ac5fe85b3b6b60a36327877eea237108bc85090da49bad1aeb1062",
       "disposition": "documentation",
-      "reason": "Document the hosted native/CFN divergence, Console scope and explicit non-networking bounds.",
+      "reason": "Describe only verified detached route table metadata operations and explicit bounds.",
       "models": []
     },
     {
       "path": "docs/console.md",
-      "sha256": "a597d662e6e95581f6b3894a987113084fd3928bbcc955eaa59739d75e3b4efd",
+      "sha256": "eba9810824fa6dcc619a47e6a6797e670a611b8ee176bb26b6ba6a9b962910e2",
       "disposition": "documentation",
-      "reason": "Document the hosted native/CFN divergence, Console scope and explicit non-networking bounds.",
+      "reason": "Describe only verified detached route table metadata operations and explicit bounds.",
       "models": []
     },
     {
       "path": "docs/design/0001-go-standalone.md",
-      "sha256": "89ef3e0f03fc68bea762da3eb37cc9f161a22dfe093e949f08f2da56961d0cbb",
+      "sha256": "64bd5f80d9fdd0b6c0cf576cb48240aeac9f8a90c84b02b6f99c2ad7aabe9424",
       "disposition": "documentation",
-      "reason": "Document the hosted native/CFN divergence, Console scope and explicit non-networking bounds.",
-      "models": []
-    },
-    {
-      "path": "docs/ec2-detached-network-acls.md",
-      "sha256": "979ae908d4a335cf900d46d3a93224ba8867172b0a97dec192b80878f5e34dd5",
-      "disposition": "documentation",
-      "reason": "Document the hosted native/CFN divergence, Console scope and explicit non-networking bounds.",
-      "models": []
-    },
-    {
-      "path": "docs/ec2-native-subnet.md",
-      "sha256": "c0125450777fe00ee741c3c4612eb73c9215b2f65b23be74e83e7bfd2613c46c",
-      "disposition": "documentation",
-      "reason": "Document the hosted native/CFN divergence, Console scope and explicit non-networking bounds.",
+      "reason": "Describe only verified detached route table metadata operations and explicit bounds.",
       "models": []
     },
     {
       "path": "docs/ec2-read-discovery.md",
-      "sha256": "c9eff3c7fea62d5774e4a485e82c5306da18fdeb54b5badefdf457025e61d5f1",
+      "sha256": "f8a29372cc752bdf94c56d4457142ffbe0d3c314be64e6d98225cbfd6666d6b6",
       "disposition": "documentation",
-      "reason": "Document the hosted native/CFN divergence, Console scope and explicit non-networking bounds.",
+      "reason": "Describe only verified detached route table metadata operations and explicit bounds.",
       "models": []
     },
     {
-      "path": "formal/EC2DetachedNetworkConsole.cfg",
-      "sha256": "e037763a65e205728d9ead0c9a458ac84e65495ad6dab9733d9c23407bd02c78",
+      "path": "formal/EC2DetachedNetworkConsole.tla",
+      "sha256": "741d9d0a7ecb35be85ff6fd17fb04b13a963c0b8b1c1af808032a2ebc8e675d4",
       "disposition": "modeled",
-      "reason": "Compose the bounded native view epoch and aggregate write lease properties.",
+      "reason": "Route table admissions and per-pane write leases remain tied to the signed-in native VPC; legacy scoped CloudFormation and sibling readback contracts remain separate.",
       "models": [
         {
           "id": "EC2DetachedNetworkConsole",
@@ -65,37 +51,283 @@
       ]
     },
     {
-      "path": "formal/EC2DetachedNetworkConsole.tla",
-      "sha256": "33735a70485e823682c6819bbcacd264caa61cccca4a0a8e0e758b64cc8e5682",
+      "path": "formal/EC2NativeRouteTableLifecycle.cfg",
+      "sha256": "818949d75df429c85a0ff5f59ae42fff4eb3f3e300c309836f04cbad123bd6ca",
       "disposition": "modeled",
-      "reason": "Compose the bounded native view epoch and aggregate write lease properties.",
+      "reason": "Isolate the detached native route table lifecycle with exact IAM, ownership, retained retries and regional projection; keep existing CFN rows and native siblings intact.",
       "models": [
         {
-          "id": "EC2DetachedNetworkConsole",
+          "id": "EC2NativeRouteTableLifecycle",
           "properties": [
-            "AdmittedNativeOnly",
-            "OnlyCurrentScope",
-            "VerifiedWriteOnly",
-            "ScopeChangeFenced",
-            "SiblingLeasePreserved",
-            "LeaseUntilReadback"
+            "GrantAtomic",
+            "NativeParentOnly",
+            "ParentDependency",
+            "LegacyPreserved",
+            "RetiredNotRecreated",
+            "LiveReceiptMatches",
+            "ReplayBindsIntent",
+            "ReadScoped"
           ],
-          "limits": "Native UI admission, scoped completion and aggregate write leases only. No React event ordering, layout, serialized identity API, XML parsing, SQLite, packet behavior or implementation proof. Legacy CFN read-only behavior remains separately modeled."
+          "limits": "Detached ownership and authorization, retained idempotency intent, regional projection, dependency ordering; no SQLite, CFN projection contents, response code, XML, quotas, routes, associations, packet processing or implementation proof."
+        }
+      ]
+    },
+    {
+      "path": "formal/EC2NativeRouteTableLifecycle.tla",
+      "sha256": "f89d57f2c103118ca1a4146b8d4bab4eee1973f46bbd3a15fb0aeab359c090a6",
+      "disposition": "modeled",
+      "reason": "Isolate the detached native route table lifecycle with exact IAM, ownership, retained retries and regional projection; keep existing CFN rows and native siblings intact.",
+      "models": [
+        {
+          "id": "EC2NativeRouteTableLifecycle",
+          "properties": [
+            "GrantAtomic",
+            "NativeParentOnly",
+            "ParentDependency",
+            "LegacyPreserved",
+            "RetiredNotRecreated",
+            "LiveReceiptMatches",
+            "ReplayBindsIntent",
+            "ReadScoped"
+          ],
+          "limits": "Detached ownership and authorization, retained idempotency intent, regional projection, dependency ordering; no SQLite, CFN projection contents, response code, XML, quotas, routes, associations, packet processing or implementation proof."
         }
       ]
     },
     {
       "path": "formal/models.json",
-      "sha256": "ea33e5969a9490271e34870d843aab0dc4d0737ab0fb6f8172edd83f907ddc17",
+      "sha256": "e6011f116b5803d8f5b5840daba52e077743137e8125effa643c966fdc32a471",
       "disposition": "formal-infrastructure",
-      "reason": "Register exact typed native UI epoch/lease properties and controls; no existing gate, scope or coverage relaxation.",
+      "reason": "Extend exact model inventory and sensitivity controls without relaxing existing requirements.",
       "models": []
     },
     {
-      "path": "internal/server/web/app.js",
-      "sha256": "734ff7ea08bd51c7350606504abf75a36b8faa3887499680781b7f8d4bba043a",
+      "path": "internal/aws/cloudformation.go",
+      "sha256": "03bf6039cc53eff741373c56f506e0e0d2d705d450f66b4e90d0bed38e16744d",
       "disposition": "modeled",
-      "reason": "Rebuild the embedded Console with the exact combined native child panes, preserving existing VPC/CFN engine contracts.",
+      "reason": "Isolate the detached native route table lifecycle with exact IAM, ownership, retained retries and regional projection; keep existing CFN rows and native siblings intact.",
+      "models": [
+        {
+          "id": "EC2NativeRouteTableLifecycle",
+          "properties": [
+            "GrantAtomic",
+            "NativeParentOnly",
+            "ParentDependency",
+            "LegacyPreserved",
+            "RetiredNotRecreated",
+            "LiveReceiptMatches",
+            "ReplayBindsIntent",
+            "ReadScoped"
+          ],
+          "limits": "Detached ownership and authorization, retained idempotency intent, regional projection, dependency ordering; no SQLite, CFN projection contents, response code, XML, quotas, routes, associations, packet processing or implementation proof."
+        },
+        {
+          "id": "EC2NativeVPCChildren",
+          "properties": [
+            "GrantAtomic",
+            "RejectOtherOwner",
+            "ParentDependency",
+            "SiblingFrame",
+            "ReadScoped"
+          ],
+          "limits": "Child creation/deletion, parent guards, exact grant aggregation and retired ACL replay are bounded atomic abstractions. No XML, SQL/error timing, packet enforcement, SG name/tag rules, credentials, UI, restart or implementation refinement proof."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/ec2_read.go",
+      "sha256": "92abcf9ae8411c1e0305266abdb62e2bb16dffa7a7a146edb362577557cc66f0",
+      "disposition": "modeled",
+      "reason": "Isolate the detached native route table lifecycle with exact IAM, ownership, retained retries and regional projection; keep existing CFN rows and native siblings intact.",
+      "models": [
+        {
+          "id": "EC2NativeRouteTableLifecycle",
+          "properties": [
+            "GrantAtomic",
+            "NativeParentOnly",
+            "ParentDependency",
+            "LegacyPreserved",
+            "RetiredNotRecreated",
+            "LiveReceiptMatches",
+            "ReplayBindsIntent",
+            "ReadScoped"
+          ],
+          "limits": "Detached ownership and authorization, retained idempotency intent, regional projection, dependency ordering; no SQLite, CFN projection contents, response code, XML, quotas, routes, associations, packet processing or implementation proof."
+        },
+        {
+          "id": "EC2RouteTableRead",
+          "properties": [
+            "Admission",
+            "BoundSnapshot",
+            "SameVPC",
+            "TypedDefault",
+            "ExplicitOnly",
+            "CurrentDefault"
+          ],
+          "limits": "One table/association/default per observation; two VPCs, one invalid admission or identity witness at a time. Not Go refinement, transaction or HTTP/XML proof, policy evaluation, pagination, concurrency, creation, or packet forwarding. Undiscoverable tables that lose every row and typed claim are not modeled."
+        },
+        {
+          "id": "EC2NativeVPCChildren",
+          "properties": [
+            "GrantAtomic",
+            "RejectOtherOwner",
+            "ParentDependency",
+            "SiblingFrame",
+            "ReadScoped"
+          ],
+          "limits": "Child creation/deletion, parent guards, exact grant aggregation and retired ACL replay are bounded atomic abstractions. No XML, SQL/error timing, packet enforcement, SG name/tag rules, credentials, UI, restart or implementation refinement proof."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/ec2_route_tables_native.go",
+      "sha256": "a1ba90780060fd90b596bdbd0aacacbd1d9f13dafb5b1fbf5e609ead99a64ba0",
+      "disposition": "modeled",
+      "reason": "Isolate the detached native route table lifecycle with exact IAM, ownership, retained retries and regional projection; keep existing CFN rows and native siblings intact.",
+      "models": [
+        {
+          "id": "EC2NativeRouteTableLifecycle",
+          "properties": [
+            "GrantAtomic",
+            "NativeParentOnly",
+            "ParentDependency",
+            "LegacyPreserved",
+            "RetiredNotRecreated",
+            "LiveReceiptMatches",
+            "ReplayBindsIntent",
+            "ReadScoped"
+          ],
+          "limits": "Detached ownership and authorization, retained idempotency intent, regional projection, dependency ordering; no SQLite, CFN projection contents, response code, XML, quotas, routes, associations, packet processing or implementation proof."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/ec2_route_tables_native_query.go",
+      "sha256": "93f3e6bc71f6d074b9767fafd5f5a10d259288bb641cf36dddaf8a7bb6a8e633",
+      "disposition": "modeled",
+      "reason": "Isolate the detached native route table lifecycle with exact IAM, ownership, retained retries and regional projection; keep existing CFN rows and native siblings intact.",
+      "models": [
+        {
+          "id": "EC2NativeRouteTableLifecycle",
+          "properties": [
+            "GrantAtomic",
+            "NativeParentOnly",
+            "ParentDependency",
+            "LegacyPreserved",
+            "RetiredNotRecreated",
+            "LiveReceiptMatches",
+            "ReplayBindsIntent",
+            "ReadScoped"
+          ],
+          "limits": "Detached ownership and authorization, retained idempotency intent, regional projection, dependency ordering; no SQLite, CFN projection contents, response code, XML, quotas, routes, associations, packet processing or implementation proof."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/ec2_route_tables_native_registration_test.go",
+      "sha256": "b4fd6fe68d9a4a5c815aee25e489c1b60d669e00aac4812da7b9ecca91f19fd0",
+      "disposition": "test-support",
+      "reason": "Exercise exact authorized saved/unsupported boundaries; do not add a blanket E2E gate.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/ec2_route_tables_native_test.go",
+      "sha256": "fe3786625170a496093d183bf15cd64834591b862fc131673c9fb7b0548630d1",
+      "disposition": "test-support",
+      "reason": "Exercise exact authorized saved/unsupported boundaries; do not add a blanket E2E gate.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/ec2_route_tables_read.go",
+      "sha256": "f4988dcaac7a1ab14f7b6af70b778d9619c299dd3bad810778840c43e2200066",
+      "disposition": "modeled",
+      "reason": "Isolate the detached native route table lifecycle with exact IAM, ownership, retained retries and regional projection; keep existing CFN rows and native siblings intact.",
+      "models": [
+        {
+          "id": "EC2NativeRouteTableLifecycle",
+          "properties": [
+            "GrantAtomic",
+            "NativeParentOnly",
+            "ParentDependency",
+            "LegacyPreserved",
+            "RetiredNotRecreated",
+            "LiveReceiptMatches",
+            "ReplayBindsIntent",
+            "ReadScoped"
+          ],
+          "limits": "Detached ownership and authorization, retained idempotency intent, regional projection, dependency ordering; no SQLite, CFN projection contents, response code, XML, quotas, routes, associations, packet processing or implementation proof."
+        },
+        {
+          "id": "EC2RouteTableRead",
+          "properties": [
+            "Admission",
+            "BoundSnapshot",
+            "SameVPC",
+            "TypedDefault",
+            "ExplicitOnly",
+            "CurrentDefault"
+          ],
+          "limits": "One table/association/default per observation; two VPCs, one invalid admission or identity witness at a time. Not Go refinement, transaction or HTTP/XML proof, policy evaluation, pagination, concurrency, creation, or packet forwarding. Undiscoverable tables that lose every row and typed claim are not modeled."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/ec2_vpc.go",
+      "sha256": "6c66c9a25e5a6add29bfd49c1f10bee8cfe5f436c58d05d73175979774dc6601",
+      "disposition": "modeled",
+      "reason": "Isolate the detached native route table lifecycle with exact IAM, ownership, retained retries and regional projection; keep existing CFN rows and native siblings intact.",
+      "models": [
+        {
+          "id": "EC2NativeRouteTableLifecycle",
+          "properties": [
+            "GrantAtomic",
+            "NativeParentOnly",
+            "ParentDependency",
+            "LegacyPreserved",
+            "RetiredNotRecreated",
+            "LiveReceiptMatches",
+            "ReplayBindsIntent",
+            "ReadScoped"
+          ],
+          "limits": "Detached ownership and authorization, retained idempotency intent, regional projection, dependency ordering; no SQLite, CFN projection contents, response code, XML, quotas, routes, associations, packet processing or implementation proof."
+        },
+        {
+          "id": "EC2RouteTableRead",
+          "properties": [
+            "Admission",
+            "BoundSnapshot",
+            "SameVPC",
+            "TypedDefault",
+            "ExplicitOnly",
+            "CurrentDefault"
+          ],
+          "limits": "One table/association/default per observation; two VPCs, one invalid admission or identity witness at a time. Not Go refinement, transaction or HTTP/XML proof, policy evaluation, pagination, concurrency, creation, or packet forwarding. Undiscoverable tables that lose every row and typed claim are not modeled."
+        },
+        {
+          "id": "EC2NativeVPCChildren",
+          "properties": [
+            "GrantAtomic",
+            "RejectOtherOwner",
+            "ParentDependency",
+            "SiblingFrame",
+            "ReadScoped"
+          ],
+          "limits": "Child creation/deletion, parent guards, exact grant aggregation and retired ACL replay are bounded atomic abstractions. No XML, SQL/error timing, packet enforcement, SG name/tag rules, credentials, UI, restart or implementation refinement proof."
+        }
+      ]
+    },
+    {
+      "path": "internal/server/ec2_read_access_test.go",
+      "sha256": "1ba3ba47746aa01a194d9ed76d1edd5114d2e9435181fc1c5c17a961e1302e0d",
+      "disposition": "test-support",
+      "reason": "Exercise exact authorized saved/unsupported boundaries; do not add a blanket E2E gate.",
+      "models": []
+    },
+    {
+      "path": "internal/server/server.go",
+      "sha256": "2a9b61137f8a688c259d2c8fc3768af2aaebb2d8d95761ae06e0e9eab2eb1d06",
+      "disposition": "modeled",
+      "reason": "Route table admissions and per-pane write leases remain tied to the signed-in native VPC; legacy scoped CloudFormation and sibling readback contracts remain separate.",
       "models": [
         {
           "id": "EC2DetachedNetworkConsole",
@@ -110,6 +342,23 @@
           "limits": "Native UI admission, scoped completion and aggregate write leases only. No React event ordering, layout, serialized identity API, XML parsing, SQLite, packet behavior or implementation proof. Legacy CFN read-only behavior remains separately modeled."
         },
         {
+          "id": "EC2RouteTableConsoleEpoch",
+          "properties": [
+            "EligibleRead",
+            "FixedRead",
+            "CurrentIdentity",
+            "CurrentRegion",
+            "CurrentTarget",
+            "CurrentRevision",
+            "CurrentGate",
+            "StatusIsEvidence",
+            "DefaultIsRecorded",
+            "AssociationIsExplicit",
+            "NoImplicitMain"
+          ],
+          "limits": "Readout projection only. A change may keep identity, region, VPC, revision or availability constant, independently exercising stale responses. Bounded labels are not arbitrary refresh/ABA interleavings. Does not prove React scheduling, authentication, IAM/SQL/HTTP/XML, packet reachability, route edits, completeness or runtime refinement."
+        },
+        {
           "id": "EC2SecurityGroupConsoleEpoch",
           "properties": [
             "EligibleRequest",
@@ -118,88 +367,122 @@
             "OnlySelectedVPC",
             "FailuresNeverEmpty"
           ],
-          "limits": "Legacy CloudFormation-only VPC security-group readback, not the separate detached native writer."
+          "limits": "Finite presentation projection only. Region and identity transitions share the epoch label with VPC selection. Does not prove Access or EC2 IAM, request/abort signal implementation, XML validation, DOM, packet filtering, network liveness, SQL or Go/React refinement."
+        }
+      ]
+    },
+    {
+      "path": "internal/server/web/app.js",
+      "sha256": "0b445c777f5376d4aab44902e5fb2502d843b9b34a3117f713a764c89880de77",
+      "disposition": "modeled",
+      "reason": "Route table admissions and per-pane write leases remain tied to the signed-in native VPC; legacy scoped CloudFormation and sibling readback contracts remain separate.",
+      "models": [
+        {
+          "id": "EC2DetachedNetworkConsole",
+          "properties": [
+            "AdmittedNativeOnly",
+            "OnlyCurrentScope",
+            "VerifiedWriteOnly",
+            "ScopeChangeFenced",
+            "SiblingLeasePreserved",
+            "LeaseUntilReadback"
+          ],
+          "limits": "Native UI admission, scoped completion and aggregate write leases only. No React event ordering, layout, serialized identity API, XML parsing, SQLite, packet behavior or implementation proof. Legacy CFN read-only behavior remains separately modeled."
+        },
+        {
+          "id": "EC2RouteTableConsoleEpoch",
+          "properties": [
+            "EligibleRead",
+            "FixedRead",
+            "CurrentIdentity",
+            "CurrentRegion",
+            "CurrentTarget",
+            "CurrentRevision",
+            "CurrentGate",
+            "StatusIsEvidence",
+            "DefaultIsRecorded",
+            "AssociationIsExplicit",
+            "NoImplicitMain"
+          ],
+          "limits": "Readout projection only. A change may keep identity, region, VPC, revision or availability constant, independently exercising stale responses. Bounded labels are not arbitrary refresh/ABA interleavings. Does not prove React scheduling, authentication, IAM/SQL/HTTP/XML, packet reachability, route edits, completeness or runtime refinement."
+        },
+        {
+          "id": "EC2SecurityGroupConsoleEpoch",
+          "properties": [
+            "EligibleRequest",
+            "ReadOnlyOperation",
+            "OnlyCurrentScope",
+            "OnlySelectedVPC",
+            "FailuresNeverEmpty"
+          ],
+          "limits": "Finite presentation projection only. Region and identity transitions share the epoch label with VPC selection. Does not prove Access or EC2 IAM, request/abort signal implementation, XML validation, DOM, packet filtering, network liveness, SQL or Go/React refinement."
         }
       ]
     },
     {
       "path": "scripts/formal_model_gate.py",
-      "sha256": "82239f263fca4c0a1a8360fb833b5d2e79eca768204ddce81e25fde6530f3d3c",
+      "sha256": "42c9b28694ead34422a2d119ecd7d655ad6a534cf30bc15ce9be69df357fbe1c",
       "disposition": "formal-infrastructure",
-      "reason": "Register exact typed native UI epoch/lease properties and controls; no existing gate, scope or coverage relaxation.",
+      "reason": "Extend exact model inventory and sensitivity controls without relaxing existing requirements.",
       "models": []
     },
     {
       "path": "scripts/test-formal-gate.py",
-      "sha256": "4147bbd00f1ef3198aab33cd02eecec75154c57fab04dd4c2c0b85661b6b6eb1",
+      "sha256": "313b3b39be060c456c6be703f79a7bd22061ebcdb54a6eeaf19d1f2de8724e41",
       "disposition": "formal-infrastructure",
-      "reason": "Register exact typed native UI epoch/lease properties and controls; no existing gate, scope or coverage relaxation.",
+      "reason": "Extend exact model inventory and sensitivity controls without relaxing existing requirements.",
       "models": []
     },
     {
       "path": "test/console/ec2_native_subnet.py",
-      "sha256": "7ff77747b20ba524e3bd683b48a35a7fdad53758ba4b8f3e5f9f676295891c0b",
+      "sha256": "d54b10c9eb72f01428ae5f2a5f64e1f4ab86ee9b7b6706b2751fca87ff8a091f",
       "disposition": "test-support",
-      "reason": "Opt-in loopback fixture with actual saved child state, elapsed scope/client abort, and cleanup; no required whole-E2E run.",
+      "reason": "Exercise exact authorized saved/unsupported boundaries; do not add a blanket E2E gate.",
       "models": []
     },
     {
       "path": "test/console/ec2_native_subnet_dom.cjs",
-      "sha256": "ea76330feb733fd2b5998d797d021d96e156fb21e5cba002a2e21c825779414c",
+      "sha256": "5f83cbf163f8675b26c5c1cac9da7f21f194fd40618762cc703231cfd9e8125f",
       "disposition": "test-support",
-      "reason": "Opt-in loopback fixture with actual saved child state, elapsed scope/client abort, and cleanup; no required whole-E2E run.",
+      "reason": "Exercise exact authorized saved/unsupported boundaries; do not add a blanket E2E gate.",
       "models": []
     },
     {
-      "path": "test/e2e/ec2_native_security_groups_gui.py",
-      "sha256": "6a7a8f3a09d742107bcd377ba67a896005d86ffb5ad72cf7454e4bc9449c29eb",
+      "path": "test/e2e/ec2_readonly_console.py",
+      "sha256": "16da0349b8cac99805527bd6ba069fa0c87d0d508725d2782cfe69a517063984",
       "disposition": "test-support",
-      "reason": "Opt-in loopback fixture with actual saved child state, elapsed scope/client abort, and cleanup; no required whole-E2E run.",
+      "reason": "Exercise exact authorized saved/unsupported boundaries; do not add a blanket E2E gate.",
       "models": []
     },
     {
       "path": "tools/console/bundle-digests.json",
-      "sha256": "64e9ed0b1ae4cc35040a1d6dc79932cd9fd6ffae2672cf46e0ec1da82c27b4f2",
+      "sha256": "9cb9960a9081a8e0c30582e4a713bdf6f0632c84cf03a53fe098b93841be421c",
       "disposition": "presentation",
-      "reason": "Preserve version-pinned, locally generated console inputs or validate their selection/readback without changing backend.",
+      "reason": "Regenerate the pinned dependency and asset provenance for the route pane.",
       "models": []
     },
     {
       "path": "tools/console/bundle-inputs.json",
-      "sha256": "63a66810f6920781887a22f925e4e502440d4b82b9950a75bd2c4374f7115fd3",
+      "sha256": "053d96e63be551341d074eb122d454683221fb9534d44bb8917648525a27f6b2",
       "disposition": "presentation",
-      "reason": "Preserve version-pinned, locally generated console inputs or validate their selection/readback without changing backend.",
+      "reason": "Regenerate the pinned dependency and asset provenance for the route pane.",
       "models": []
     },
     {
-      "path": "tools/console/src/ec2-native-security-groups.mjs",
-      "sha256": "8835c10695868f9ab45841eea2dd3a713a83c6ee360bc8237502b8e251efb53a",
+      "path": "tools/console/src/ec2-native-route-tables.mjs",
+      "sha256": "8e778b4e71a2d0c43ccbc2d6abecf9bc90b8fe8c98dd7e578cd772fe7bee7d54",
       "disposition": "modeled",
-      "reason": "Offer and confirm bounded native security-group operations only in the current admitted scope.",
+      "reason": "Route table admissions and per-pane write leases remain tied to the signed-in native VPC; legacy scoped CloudFormation and sibling readback contracts remain separate.",
       "models": [
         {
           "id": "EC2DetachedNetworkConsole",
           "properties": [
             "AdmittedNativeOnly",
             "OnlyCurrentScope",
-            "VerifiedWriteOnly"
-          ],
-          "limits": "Native UI admission, scoped completion and aggregate write leases only. No React event ordering, layout, serialized identity API, XML parsing, SQLite, packet behavior or implementation proof. Legacy CFN read-only behavior remains separately modeled."
-        }
-      ]
-    },
-    {
-      "path": "tools/console/src/ec2-network-acls.mjs",
-      "sha256": "9a3450b476037dbea430707b607de9aae46528bb6ff66bdba5f2fc5379b6e617",
-      "disposition": "modeled",
-      "reason": "Offer and confirm bounded native ACL operations only in the current admitted scope.",
-      "models": [
-        {
-          "id": "EC2DetachedNetworkConsole",
-          "properties": [
-            "AdmittedNativeOnly",
-            "OnlyCurrentScope",
-            "VerifiedWriteOnly"
+            "VerifiedWriteOnly",
+            "ScopeChangeFenced",
+            "SiblingLeasePreserved",
+            "LeaseUntilReadback"
           ],
           "limits": "Native UI admission, scoped completion and aggregate write leases only. No React event ordering, layout, serialized identity API, XML parsing, SQLite, packet behavior or implementation proof. Legacy CFN read-only behavior remains separately modeled."
         }
@@ -207,9 +490,9 @@
     },
     {
       "path": "tools/console/src/ec2-readonly.jsx",
-      "sha256": "d9398cc739af0bcf4fad4246fd3309d7c0d635c7279f1a78785032179133e66f",
+      "sha256": "c7bbebb9b412a1fd42d4f9cad6cf087ee20085afd07c7f0b2870a03b7054de3f",
       "disposition": "modeled",
-      "reason": "Bind native panes to the selected VPC; a completion releases only its own lease and ordinary navigation remains fenced.",
+      "reason": "Route table admissions and per-pane write leases remain tied to the signed-in native VPC; legacy scoped CloudFormation and sibling readback contracts remain separate.",
       "models": [
         {
           "id": "EC2DetachedNetworkConsole",
@@ -224,55 +507,21 @@
           "limits": "Native UI admission, scoped completion and aggregate write leases only. No React event ordering, layout, serialized identity API, XML parsing, SQLite, packet behavior or implementation proof. Legacy CFN read-only behavior remains separately modeled."
         },
         {
-          "id": "EC2SecurityGroupConsoleEpoch",
+          "id": "EC2RouteTableConsoleEpoch",
           "properties": [
-            "EligibleRequest",
-            "ReadOnlyOperation",
-            "OnlyCurrentScope",
-            "OnlySelectedVPC",
-            "FailuresNeverEmpty"
+            "EligibleRead",
+            "FixedRead",
+            "CurrentIdentity",
+            "CurrentRegion",
+            "CurrentTarget",
+            "CurrentRevision",
+            "CurrentGate",
+            "StatusIsEvidence",
+            "DefaultIsRecorded",
+            "AssociationIsExplicit",
+            "NoImplicitMain"
           ],
-          "limits": "Legacy CloudFormation-only VPC security-group readback, not the separate detached native writer."
-        }
-      ]
-    },
-    {
-      "path": "tools/console/src/ec2-vpc-network-acls.jsx",
-      "sha256": "3d8fce08497e3df169047d8c96cc0f12ab74cb4c4082bcaf8af38175052ddcad",
-      "disposition": "modeled",
-      "reason": "Keep the CloudFormation panel nonmutating and release the native ACL lease only after reconciling the current scope.",
-      "models": [
-        {
-          "id": "EC2DetachedNetworkConsole",
-          "properties": [
-            "AdmittedNativeOnly",
-            "OnlyCurrentScope",
-            "VerifiedWriteOnly",
-            "ScopeChangeFenced",
-            "SiblingLeasePreserved",
-            "LeaseUntilReadback"
-          ],
-          "limits": "Native UI admission, scoped completion and aggregate write leases only. No React event ordering, layout, serialized identity API, XML parsing, SQLite, packet behavior or implementation proof. Legacy CFN read-only behavior remains separately modeled."
-        }
-      ]
-    },
-    {
-      "path": "tools/console/src/ec2-vpc-security-groups.jsx",
-      "sha256": "e1f83b3a09a1e9a70cf495f33b24339b8a95f391d875d8c6e15a85ce04344044",
-      "disposition": "modeled",
-      "reason": "Keep legacy CFN reads separate while adding explicit receipt/readback and release of the security-group lease.",
-      "models": [
-        {
-          "id": "EC2DetachedNetworkConsole",
-          "properties": [
-            "AdmittedNativeOnly",
-            "OnlyCurrentScope",
-            "VerifiedWriteOnly",
-            "ScopeChangeFenced",
-            "SiblingLeasePreserved",
-            "LeaseUntilReadback"
-          ],
-          "limits": "Native UI admission, scoped completion and aggregate write leases only. No React event ordering, layout, serialized identity API, XML parsing, SQLite, packet behavior or implementation proof. Legacy CFN read-only behavior remains separately modeled."
+          "limits": "Readout projection only. A change may keep identity, region, VPC, revision or availability constant, independently exercising stale responses. Bounded labels are not arbitrary refresh/ABA interleavings. Does not prove React scheduling, authentication, IAM/SQL/HTTP/XML, packet reachability, route edits, completeness or runtime refinement."
         },
         {
           "id": "EC2SecurityGroupConsoleEpoch",
@@ -283,15 +532,60 @@
             "OnlySelectedVPC",
             "FailuresNeverEmpty"
           ],
-          "limits": "Legacy CloudFormation-only VPC security-group readback, not the separate detached native writer."
+          "limits": "Finite presentation projection only. Region and identity transitions share the epoch label with VPC selection. Does not prove Access or EC2 IAM, request/abort signal implementation, XML validation, DOM, packet filtering, network liveness, SQL or Go/React refinement."
+        }
+      ]
+    },
+    {
+      "path": "tools/console/src/ec2-vpc-native-route-tables.jsx",
+      "sha256": "737f2acc27796569848004bc75cc45296ba64ed0863e1d022246dbd3c0f690c2",
+      "disposition": "modeled",
+      "reason": "Route table admissions and per-pane write leases remain tied to the signed-in native VPC; legacy scoped CloudFormation and sibling readback contracts remain separate.",
+      "models": [
+        {
+          "id": "EC2DetachedNetworkConsole",
+          "properties": [
+            "AdmittedNativeOnly",
+            "OnlyCurrentScope",
+            "VerifiedWriteOnly",
+            "ScopeChangeFenced",
+            "SiblingLeasePreserved",
+            "LeaseUntilReadback"
+          ],
+          "limits": "Native UI admission, scoped completion and aggregate write leases only. No React event ordering, layout, serialized identity API, XML parsing, SQLite, packet behavior or implementation proof. Legacy CFN read-only behavior remains separately modeled."
+        }
+      ]
+    },
+    {
+      "path": "tools/console/src/ec2-vpc-route-tables.jsx",
+      "sha256": "196ea6fb76d70380071a966a5421e60e430339bd20c8f95cd138d834af6c20d9",
+      "disposition": "modeled",
+      "reason": "Route table admissions and per-pane write leases remain tied to the signed-in native VPC; legacy scoped CloudFormation and sibling readback contracts remain separate.",
+      "models": [
+        {
+          "id": "EC2RouteTableConsoleEpoch",
+          "properties": [
+            "EligibleRead",
+            "FixedRead",
+            "CurrentIdentity",
+            "CurrentRegion",
+            "CurrentTarget",
+            "CurrentRevision",
+            "CurrentGate",
+            "StatusIsEvidence",
+            "DefaultIsRecorded",
+            "AssociationIsExplicit",
+            "NoImplicitMain"
+          ],
+          "limits": "Readout projection only. A change may keep identity, region, VPC, revision or availability constant, independently exercising stale responses. Bounded labels are not arbitrary refresh/ABA interleavings. Does not prove React scheduling, authentication, IAM/SQL/HTTP/XML, packet reachability, route edits, completeness or runtime refinement."
         }
       ]
     },
     {
       "path": "tools/console/src/main.jsx",
-      "sha256": "cb8606630e64e6809bb4c2c0b95d97c521c0f7e1d29f2aa3baaa5af21b0ababa",
+      "sha256": "341ce2eb49ce1c2621bdcf3e06f1e789fc6f3461ca4c6733cd79364b527a6ffd",
       "disposition": "modeled",
-      "reason": "Expose each native detached pane only with the corresponding signed-in capability and preserve existing region and identity scope.",
+      "reason": "Route table admissions and per-pane write leases remain tied to the signed-in native VPC; legacy scoped CloudFormation and sibling readback contracts remain separate.",
       "models": [
         {
           "id": "EC2DetachedNetworkConsole",
@@ -306,6 +600,23 @@
           "limits": "Native UI admission, scoped completion and aggregate write leases only. No React event ordering, layout, serialized identity API, XML parsing, SQLite, packet behavior or implementation proof. Legacy CFN read-only behavior remains separately modeled."
         },
         {
+          "id": "EC2RouteTableConsoleEpoch",
+          "properties": [
+            "EligibleRead",
+            "FixedRead",
+            "CurrentIdentity",
+            "CurrentRegion",
+            "CurrentTarget",
+            "CurrentRevision",
+            "CurrentGate",
+            "StatusIsEvidence",
+            "DefaultIsRecorded",
+            "AssociationIsExplicit",
+            "NoImplicitMain"
+          ],
+          "limits": "Readout projection only. A change may keep identity, region, VPC, revision or availability constant, independently exercising stale responses. Bounded labels are not arbitrary refresh/ABA interleavings. Does not prove React scheduling, authentication, IAM/SQL/HTTP/XML, packet reachability, route edits, completeness or runtime refinement."
+        },
+        {
           "id": "EC2SecurityGroupConsoleEpoch",
           "properties": [
             "EligibleRequest",
@@ -314,22 +625,15 @@
             "OnlySelectedVPC",
             "FailuresNeverEmpty"
           ],
-          "limits": "Legacy CloudFormation-only VPC security-group readback, not the separate detached native writer."
+          "limits": "Finite presentation projection only. Region and identity transitions share the epoch label with VPC selection. Does not prove Access or EC2 IAM, request/abort signal implementation, XML validation, DOM, packet filtering, network liveness, SQL or Go/React refinement."
         }
       ]
     },
     {
-      "path": "tools/console/test/ec2-native-security-groups.test.mjs",
-      "sha256": "e482756c76dcc460952711db192586e16ab033c05309d0eb1e3c76d4c52f884d",
+      "path": "tools/console/test/ec2-native-route-tables.test.mjs",
+      "sha256": "1d472665d67cbb72a2d1552566fb6ff5be0646bd3f71c503676f879467fe1b5d",
       "disposition": "presentation",
-      "reason": "Preserve version-pinned, locally generated console inputs or validate their selection/readback without changing backend.",
-      "models": []
-    },
-    {
-      "path": "tools/console/test/ec2-network-acls.test.mjs",
-      "sha256": "045ebadb4d0e7885c26c047eaaf9e44e89a9bb082d6cc297f2fd1858defcfba6",
-      "disposition": "presentation",
-      "reason": "Preserve version-pinned, locally generated console inputs or validate their selection/readback without changing backend.",
+      "reason": "Regenerate the pinned dependency and asset provenance for the route pane.",
       "models": []
     }
   ]

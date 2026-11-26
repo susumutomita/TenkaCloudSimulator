@@ -3,7 +3,7 @@ const {readFileSync}=require('node:fs');
 const {createHash, randomUUID}=require('node:crypto');
 const {JSDOM,VirtualConsole}=require(process.env.JSDOM_MODULE);
 const opts=JSON.parse(readFileSync(0,'utf8'));
-const {port,cookie,vpc,stackVpc,stackSubnet,asset,principal,phase}=opts;
+const {port,cookie,vpc,stackVpc,stackSubnet,asset,principal,phase,legacyRoute,peerRoute}=opts;
 assert.ok(Number.isInteger(port)&&port>0&&port<65536);
 const origin='http://127.0.0.1:'+port;
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
@@ -22,8 +22,8 @@ const ruleTitles=['Authorize security group ingress','Edit inbound rules','Edit 
     pretendToBeVisual:true,virtualConsole:new VirtualConsole()});
   const w=dom.window,d=w.document,calls=[];
   const allowed=new Set(['DescribeVpcs','DescribeSubnets','CreateSubnet','DeleteSubnet','DescribeSecurityGroups',
-    'CreateSecurityGroup','DeleteSecurityGroup','DescribeNetworkAcls','CreateNetworkAcl','DeleteNetworkAcl','DescribeRouteTables']);
-  let target, holdNextGroup, writeRefused, staleSignal, continueWrite, continueStale;
+    'CreateSecurityGroup','DeleteSecurityGroup','DescribeNetworkAcls','CreateNetworkAcl','DeleteNetworkAcl','DescribeRouteTables','CreateRouteTable','DeleteRouteTable']);
+  let target, holdNextGroup, writeRefused, staleSignal, continueWrite, continueStale, holdNextRoute, continueRoute;
   try{
     Object.assign(w,{TextEncoder,TextDecoder,matchMedia:()=>({matches:false,addListener(){},removeListener(){},addEventListener(){},removeEventListener(){}}),
       ResizeObserver:class{observe(){}unobserve(){}disconnect(){}},IntersectionObserver:class{observe(){}unobserve(){}disconnect(){}},scrollTo(){}});
@@ -45,6 +45,14 @@ const ruleTitles=['Authorize security group ingress','Edit inbound rules','Edit 
         if(action.startsWith('Create')) assert.equal(form.get('VpcId'),vpc,'must create under selected native VPC');
         if(action==='CreateSubnet') assert.equal(form.get('CidrBlock'),'10.74.1.0/24');
         if(action==='CreateNetworkAcl') assert.match(form.get('ClientToken'),/^[a-f0-9-]{36}$/);
+        if(action==='DescribeRouteTables')assert.deepEqual([...form.keys()].sort(),['Action','Version']);
+        if(action==='CreateRouteTable'){
+          assert.match(form.get('ClientToken'),/^[a-f0-9]{32}$/);
+          assert.equal(form.get('TagSpecification.1.ResourceType'),'route-table');
+          assert.equal(form.get('TagSpecification.1.Tag.1.Value'),'GUI route <設定>');
+        }
+        if(action==='DeleteRouteTable')assert.equal(form.get('RouteTableId'),opts.saved.table);
+
       }
       const bridge=init.signal&&new AbortController();
       if(bridge){
@@ -53,6 +61,12 @@ const ruleTitles=['Authorize security group ingress','Edit inbound rules','Edit 
       const response=await fetch(origin+path,{...init,headers,body,redirect:'error',signal:bridge?.signal});
       if(action) calls.push([action,response.status,form.get('Filter.1.Value.1')]);
       if(action==='CreateSecurityGroup'&&response.ok)holdNextGroup='write';
+      if(action==='CreateRouteTable'&&response.ok)holdNextRoute=true;
+      if(action==='DescribeRouteTables'&&holdNextRoute){
+        holdNextRoute=false;
+        await new Promise(release=>{continueRoute=release;});
+      }
+
       if(action==='DescribeSecurityGroups'&&target===vpc&&holdNextGroup){
         const mode=holdNextGroup;holdNextGroup=null;
         await new Promise(release=>{
@@ -81,12 +95,16 @@ const ruleTitles=['Authorize security group ingress','Edit inbound rules','Edit 
       await select(stackVpc);
       await until(()=>display(stackSubnet)&&display('CFN readback is still here'),'missing legacy subnet/group');
       assert.ok(display('CloudFormation owns this VPC.'));
+      await until(()=>display(legacyRoute),'missing CloudFormation route row');
+      assert.ok(!display(peerRoute));
+
       assert.ok(display('This panel does not read or change its network ACLs.'));
-      for(const name of ['Add subnet','Create security group','Create network ACL','Delete subnet','Delete security group','Delete network ACL'])assert.equal(button(d,name),undefined);
+      for(const name of ['Add subnet','Create security group','Create network ACL','Create route table','Delete subnet','Delete security group','Delete network ACL','Delete route table'])assert.equal(button(d,name),undefined);
     }
     await legacy();
     await select(vpc);
     await until(()=>display('Independent native group')||phase==='delete'&&display('Detached GUI group'),'native SG not listed');
+    assert.ok(!display(legacyRoute)&&!display(peerRoute));
     for(const title of ruleTitles)assert.equal(button(d,title),undefined,title+' must not be offered');
     if(phase==='create'){
       await click('Add subnet');
@@ -111,6 +129,18 @@ const ruleTitles=['Authorize security group ingress','Edit inbound rules','Edit 
       await fill('network ACL',0,'GUI ACL <local>');await submit('network ACL','Create network ACL');
       const acl=await until(()=>/Saved network ACL: (acl-[a-f0-9]{17})/.exec(d.body.textContent)?.[1],'ACL success missing');
       assert.ok(display('GUI ACL <local>')&&display(subnet)&&display(group));
+      await click('Create route table');
+      await fill('route table',0,'界'.repeat(86));
+      assert.ok(ctrl('Create route table',active('route table')).disabled);
+      await fill('route table',0,'GUI route <設定>');
+      await submit('route table','Create route table');
+      await until(()=>continueRoute&&ctrl('Close details')?.disabled,'missing route-table write lease');
+      assert.ok(!display('Saved route table:'));
+      assert.ok(ctrl('Add subnet').closest('[inert]')&&ctrl('Create network ACL').disabled&&ctrl('Services').disabled);
+      continueRoute();
+      const table=await until(()=>/Saved route table: (rtb-[a-f0-9]{17})/.exec(d.body.textContent)?.[1],'route readback missing');
+      assert.ok(display('GUI route <設定>')&&!display(legacyRoute)&&!display(peerRoute));
+
       holdNextGroup='stale';
       await click('Refresh security groups');
       await until(()=>continueStale,'missing held read after refresh');
@@ -120,9 +150,9 @@ const ruleTitles=['Authorize security group ingress','Edit inbound rules','Edit 
       await sleep(120);
       assert.ok(!display('Detached GUI group'),'late old-scope response leaked into CFN pane');
       writeRefused=true;
-      console.log(JSON.stringify({saved:{subnet,group,acl},holdProof:true,lateReadAborted:staleSignal.aborted}));
+      console.log(JSON.stringify({saved:{subnet,group,acl,table},holdProof:true,lateReadAborted:staleSignal.aborted,heldRouteReadback:!!continueRoute}));
     }else{
-      const {subnet,group,acl}=opts.saved;
+      const {subnet,group,acl,table}=opts.saved;
       const mouse=(node,type)=>node.dispatchEvent(new w.MouseEvent(type,{bubbles:true,cancelable:true,button:0}));
       async function chooseGroup(id,description){
         if(display(description)&&display(id))return;
@@ -150,6 +180,11 @@ const ruleTitles=['Authorize security group ingress','Edit inbound rules','Edit 
       await fill('network ACL',0,acl);await submit('network ACL','Delete network ACL');
       await until(()=>display('Deleted network ACL: '+acl),'ACL removal missing');
       assert.ok(display(subnet)&&display('Independent native group'));
+      await click('Delete route table: '+table);
+      await fill('route table',0,peerRoute);
+      assert.ok(ctrl('Delete route table',active('route table')).disabled);
+      await fill('route table',0,table);await submit('route table','Delete route table');
+      await until(()=>display('Deleted route table: '+table)&&display('No detached route tables are saved for this VPC.'),'route removal not confirmed');
       await click('Delete subnet');await fill('subnet',0,'delete');await submit('subnet','Delete subnet');
       await until(()=>display('Removed subnet: '+subnet)&&display('No subnets are recorded for this VPC.'),'subnet removal missing');
       await legacy();
@@ -157,9 +192,9 @@ const ruleTitles=['Authorize security group ingress','Edit inbound rules','Edit 
     }
     const mutations=calls.filter(([a])=>a.startsWith(phase==='create'?'Create':'Delete'));
     assert.deepEqual(mutations.map(([a,status])=>[a,status]),phase==='create'
-      ?[['CreateSubnet',200],['CreateSecurityGroup',200],['CreateNetworkAcl',200]]
-      :[['DeleteSecurityGroup',200],['DeleteNetworkAcl',200],['DeleteSubnet',200]]);
+      ?[['CreateSubnet',200],['CreateSecurityGroup',200],['CreateNetworkAcl',200],['CreateRouteTable',200]]
+      :[['DeleteSecurityGroup',200],['DeleteNetworkAcl',200],['DeleteRouteTable',200],['DeleteSubnet',200]]);
     if(phase==='create')assert.ok(writeRefused);
   } catch(error){console.error('Observed safe Console diagnostics:',calls,d.body.textContent.slice(-1300));throw error;}
-  finally {continueWrite?.();continueStale?.();w.close();}
+  finally {continueWrite?.();continueStale?.();continueRoute?.();w.close();}
 })().catch(error=>{console.error(error);process.exitCode=1;});

@@ -23039,7 +23039,7 @@
       "id": "EC2DetachedNetworkConsole",
       "model": "formal/EC2DetachedNetworkConsole.tla",
       "config": "formal/EC2DetachedNetworkConsole.cfg",
-      "bounds": "Two view epochs, three typed pane keys, one request per pane and five representative gate states. Multiple pending leases are allowed to check frame behavior.",
+      "bounds": "Two view epochs, four typed pane keys (subnet, SG, NACL, route table), one request per pane and five representative gate states. Multiple pending leases are allowed to check frame behavior.",
       "properties": [
         "TypeOK",
         "AdmittedNativeOnly",
@@ -23057,7 +23057,10 @@
         "tools/console/src/ec2-native-security-groups.mjs",
         "tools/console/src/ec2-vpc-security-groups.jsx",
         "tools/console/src/ec2-network-acls.mjs",
-        "tools/console/src/ec2-vpc-network-acls.jsx"
+        "tools/console/src/ec2-vpc-network-acls.jsx",
+        "tools/console/src/ec2-native-route-tables.mjs",
+        "tools/console/src/ec2-vpc-native-route-tables.jsx",
+        "internal/server/server.go"
       ],
       "mutants": [
         {
@@ -23136,6 +23139,133 @@
             }
           ],
           "expect_invariant": "LeaseUntilReadback"
+        },
+        {
+          "id": "SkipRouteTableLease",
+          "edits": [
+            {
+              "old": "IF s = \"write\" THEN leases",
+              "new": "IF s = \"write\" /\\ p # \"routeTable\" THEN leases",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "LeaseUntilReadback"
+        }
+      ]
+    },
+    {
+      "id": "EC2NativeRouteTableLifecycle",
+      "model": "formal/EC2NativeRouteTableLifecycle.tla",
+      "config": "formal/EC2NativeRouteTableLifecycle.cfg",
+      "bounds": "One mutable regional scope, one distinct fixed peer fixture for read isolation, two candidate native parents and one immutable CFN table per region. A single mutable native table slot, optional retained token receipt and two tag intents.",
+      "properties": [
+        "TypeOK",
+        "GrantAtomic",
+        "NativeParentOnly",
+        "ParentDependency",
+        "LegacyPreserved",
+        "RetiredNotRecreated",
+        "LiveReceiptMatches",
+        "ReplayBindsIntent",
+        "ReadScoped"
+      ],
+      "limits": "Detached ownership and authorization, retained idempotency intent, regional projection, dependency ordering; no SQLite, CFN projection contents, response code, XML, quotas, routes, associations, packet processing or implementation proof.",
+      "source_scope": [
+        "internal/aws/cloudformation.go",
+        "internal/aws/ec2_read.go",
+        "internal/aws/ec2_route_tables_native.go",
+        "internal/aws/ec2_route_tables_native_query.go",
+        "internal/aws/ec2_route_tables_read.go",
+        "internal/aws/ec2_vpc.go"
+      ],
+      "mutants": [
+        {
+          "id": "IgnoreAllocatedGrant",
+          "edits": [
+            {
+              "old": "LET admitted == parentGrant /\\ exactGrant",
+              "new": "LET admitted == parentGrant",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "GrantAtomic"
+        },
+        {
+          "id": "AdoptCFNParent",
+          "edits": [
+            {
+              "old": "/\\ p \\in Native /\\ Exists(r,p)",
+              "new": "/\\ Exists(r,p)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "NativeParentOnly"
+        },
+        {
+          "id": "RetireParentWithChild",
+          "edits": [
+            {
+              "old": "IF grant /\\ tables[r].owner # p THEN parents",
+              "new": "IF grant THEN parents",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ParentDependency"
+        },
+        {
+          "id": "DeleteCFNTable",
+          "edits": [
+            {
+              "old": "LET allowed == exactGrant /\\ isNative",
+              "new": "LET allowed == exactGrant",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "LegacyPreserved"
+        },
+        {
+          "id": "ReplayResurrectsTombstone",
+          "edits": [
+            {
+              "old": "(~token \\/ a.phase=\"unused\")",
+              "new": "(~token \\/ a.phase # \"live\")",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "RetiredNotRecreated"
+        },
+        {
+          "id": "LoseReceipt",
+          "edits": [
+            {
+              "old": "IF fresh /\\ token THEN [receipts EXCEPT ![r] = Receipt(\"live\",p,n)]",
+              "new": "IF FALSE THEN [receipts EXCEPT ![r] = Receipt(\"live\",p,n)]",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "LiveReceiptMatches"
+        },
+        {
+          "id": "ReplayIgnoresIntent",
+          "edits": [
+            {
+              "old": "/\\ Intent(a,p,n) /\\ tables[r] # None",
+              "new": "/\\ tables[r] # None",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReplayBindsIntent"
+        },
+        {
+          "id": "ReadOtherRegion",
+          "edits": [
+            {
+              "old": "IF grant THEN Projection(r) ELSE {}",
+              "new": "IF grant THEN UNION {Projection(s) : s \\in Regions} ELSE {}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadScoped"
         }
       ]
     }

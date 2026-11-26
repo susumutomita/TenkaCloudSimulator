@@ -152,6 +152,10 @@ func (g *Gateway) serveEC2(w http.ResponseWriter, r *http.Request) {
 			request.networkACL.authorizeCreateID = func(id string) error {
 				return exactChildGrant(request.networkACL.aclCreatePermissions(region, id), "network ACL")
 			}
+		case "CreateRouteTable":
+			request.routeTable.authorizeCreatedID = func(id string) error {
+				return exactChildGrant(request.routeTable.createPermissions(region, id), "route table")
+			}
 		}
 	}
 	var out any
@@ -171,6 +175,13 @@ func (g *Gateway) serveEC2(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		out = result
+	case "CreateRouteTable", "DeleteRouteTable":
+		table, err := g.Stacks.executeEC2NativeRouteTableMutation(r.Context(), action, region, *request.routeTable)
+		if err != nil {
+			failChild(err, "Local detached route table metadata could not be changed.")
+			return
+		}
+		out = table
 	case "DescribeRouteTables":
 		tables, err := g.Stacks.describeEC2RouteTables(r.Context(), region)
 		if err != nil {
