@@ -1335,6 +1335,81 @@ BASE_MODELS.add('EC2SecurityGroupConsoleEpoch')
 BASE_INVARIANTS['EC2SecurityGroupConsoleEpoch'] = {'TypeOK', 'EligibleRequest', 'ReadOnlyOperation', 'OnlyCurrentScope', 'OnlySelectedVPC', 'FailuresNeverEmpty'}
 REQUIRED_MUTANTS['EC2SecurityGroupConsoleEpoch'] = {'UnsignedRequest', 'UnadvertisedRequest', 'HandoffRequest', 'NativeVPCRequest', 'WrongOperation', 'LateReply', 'OldRowsPersist', 'WrongVPC', 'RefusalAsEmpty'}
 REQUIRED_SOURCE_SCOPES['EC2SecurityGroupConsoleEpoch'] = {'internal/server/server.go', 'internal/server/web/app.js', 'tools/console/src/ec2-readonly.jsx', 'tools/console/src/ec2-response.mjs', 'tools/console/src/ec2-security-groups.mjs', 'tools/console/src/ec2-vpc-security-groups.jsx', 'tools/console/src/main.jsx'}
+# These models were already registered on main. Pin their reviewed inventory
+# explicitly so deleting a pre-existing property, scope or control cannot evade the gate.
+BASE_MODELS.add('SimpleDBConsoleEpoch')
+BASE_INVARIANTS['SimpleDBConsoleEpoch'] = {
+    'TypeOK', 'VisibleRequiresCapability', 'OnlyCurrentScopeVisible',
+    'SingleCurrentChain', 'ReadbackOnlyAfterAck', 'WriteNoticeRequiresAck',
+}
+REQUIRED_MUTANTS['SimpleDBConsoleEpoch'] = {'ReadBackAfterRejectedPut'}
+REQUIRED_SOURCE_SCOPES['SimpleDBConsoleEpoch'] = {
+    'internal/server/server.go', 'internal/server/web/app.js',
+    'tools/console/src/console-navigation.mjs', 'tools/console/src/main.jsx',
+    'tools/console/src/simpledb-client.mjs', 'tools/console/src/simpledb.jsx',
+}
+
+BASE_MODELS.add('RDSPrivatePostgresTopology')
+BASE_INVARIANTS['RDSPrivatePostgresTopology'] = {
+    'TypeOK', 'LocalStartupRequired', 'AuthorityBeforeNative', 'LegacyConfigurationPreserved',
+    'OwnedTopologyBeforeWrite', 'AtomicRefusal', 'ConfigurationOnly',
+}
+REQUIRED_MUTANTS['RDSPrivatePostgresTopology'] = {
+    'AllowUntrustedStartup', 'ReadBeforeAuthority', 'RequireTopologyByDefault',
+    'IgnoreTopology', 'PersistRefusedUpdate', 'AdvertiseEndpoint',
+}
+REQUIRED_SOURCE_SCOPES['RDSPrivatePostgresTopology'] = {
+    'cmd/simulator/main.go', 'internal/aws/catalog/engine.go',
+    'internal/aws/catalog/rds_private_postgres_topology.go', 'internal/aws/catalog/semantics.go',
+    'internal/aws/rds_private_postgres_topology.go', 'internal/server/sakura_provider.go',
+    'internal/server/server.go',
+}
+
+BASE_MODELS.add('RDSOwnedPostgresRuntime')
+BASE_INVARIANTS['RDSOwnedPostgresRuntime'] = {
+    'TypeOK', 'NoWorkWithoutPin', 'ReadyNeedsOwnedSCRAM', 'NoProofAfterRevocation',
+    'CleanupAfterDrain', 'UncertaintyRetainsWorkspace',
+}
+REQUIRED_MUTANTS['RDSOwnedPostgresRuntime'] = {
+    'UnpinnedWorkspace', 'ReadyBeforeProof', 'ReplyAfterRevocation',
+    'CleanBeforeDrain', 'DiscardUnknownAcquisition',
+}
+REQUIRED_SOURCE_SCOPES['RDSOwnedPostgresRuntime'] = {
+    'internal/rdsruntime/bundle_linux_amd64.go', 'internal/rdsruntime/runtime_linux_amd64.go',
+}
+
+BASE_MODELS.add('RDSOwnedGenerationFence')
+BASE_INVARIANTS['RDSOwnedGenerationFence'] = {
+    'TypeOK', 'LaunchNeedsCommittedAuthority', 'AttachNeedsCurrent',
+    'FencedGenerationCannotChange', 'UncertainCleanupRemainsFenced',
+    'NoPublishedEndpoint', 'InvalidModifyKeepsOwner',
+}
+REQUIRED_MUTANTS['RDSOwnedGenerationFence'] = {
+    'ReserveWithoutAuthority', 'AttachStale', 'MutateThroughFence',
+    'ReleaseOnUncertainCleanup', 'PublishNetwork', 'RetireInvalidModify',
+}
+REQUIRED_SOURCE_SCOPES['RDSOwnedGenerationFence'] = {
+    'internal/aws/catalog/engine.go', 'internal/aws/catalog/rds_owned_runtime_linux_amd64.go',
+    'internal/aws/catalog/rds_private_postgres_topology.go', 'internal/aws/catalog/semantics.go',
+    'internal/rdsruntime/runtime_linux_amd64.go',
+}
+
+# Pin the isolated Entra fixture's admission, output and sensitivity checks
+# independently of the mutable registry; this is not a refinement proof.
+BASE_MODELS.add('EntraVerificationFixture')
+BASE_INVARIANTS['EntraVerificationFixture'] = {
+    'FixtureIsolated', 'NumericLoopback', 'ExplicitValidToken',
+    'SyntheticTokenOnly', 'ReadOnlyAdmission', 'PublicVerificationOnly',
+}
+REQUIRED_MUTANTS['EntraVerificationFixture'] = {
+    'IgnoreCommand', 'AllowRemote', 'IgnoreTokenOptIn', 'AllowArbitraryIdentity',
+    'AllowHTTPWrite', 'AllowForeignHost', 'AllowRemotePeer', 'AllowUnexpectedInput', 'PublishPrivateKey',
+}
+REQUIRED_SOURCE_SCOPES['EntraVerificationFixture'] = {
+    'cmd/simulator/main.go', 'cmd/simulator/azure_entra_fixture.go',
+    'internal/azure/entra/verification_fixture.go',
+}
+
 BASE_MODELS.add('EC2TemplatePreviewEpoch')
 BASE_INVARIANTS['EC2TemplatePreviewEpoch'] = {'TypeOK', 'OrdinaryPreview', 'BoundedDraft', 'FixedDeclarationRead', 'OnlyCurrentIdentity', 'OnlyCurrentRegion', 'OnlyCurrentDraft', 'NoClosedOrHandoffResult', 'EvidencePreserved', 'NoReturnedValues'}
 REQUIRED_MUTANTS['EC2TemplatePreviewEpoch'] = {'AdmitClosed', 'AdmitHandoff', 'OversizeDraft', 'AllowMutation', 'AllowTemplateURL', 'AcceptStaleIdentity', 'AcceptStaleRegion', 'AcceptStaleDraft', 'AcceptAfterClose', 'AcceptAfterHandoff', 'RetainOldDraft', 'RefusalAsAccepted', 'InvalidAsAccepted', 'MalformedAsAccepted', 'ShowReturnedValue'}

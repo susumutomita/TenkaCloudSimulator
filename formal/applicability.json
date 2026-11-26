@@ -30,6 +30,13 @@
       ]
     },
     {
+      "path": "cmd/simulator/azure_entra_fixture_test.go",
+      "sha256": "9061d3320c5ffc078bc5b723749e53c6b3d2ea6b49e07cbee7585ccb72712d1e",
+      "disposition": "test-support",
+      "reason": "Drive the real optional command's loopback HTTP and signed synthetic verification, refused startup, process-scope rotation and shutdown through the existing Go coverage suite.",
+      "models": []
+    },
+    {
       "path": "cmd/simulator/main.go",
       "sha256": "dad4b3f8479b1515158ec25d5492510376bd3a13d4caaa66f656c6c5e6d48a60",
       "disposition": "modeled",
@@ -135,6 +142,13 @@
       "sha256": "6805ad7c5fd7fb0694d22c2c3fcea79340f24f90e8a34ccf9e475854848b5e45",
       "disposition": "test-support",
       "reason": "Exercise only the opt-in fixture and signed synthetic verification on numeric loopback; no normal gateway or production trust change.",
+      "models": []
+    },
+    {
+      "path": "scripts/formal_model_gate.py",
+      "sha256": "209b8d6ebeca4cb3b53bb23dc103027dfa3c99d4d704ed7543cc1bbbcd3d9b0d",
+      "disposition": "formal-infrastructure",
+      "reason": "Independently pin the Entra fixture and four already-registered main models missing from its required inventory, including all exact invariant, control and source sets. No registry, runtime or gate-algorithm changes in this correction.",
       "models": []
     },
     {
