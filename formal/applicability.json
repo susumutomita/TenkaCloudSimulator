@@ -150,6 +150,13 @@
       "models": []
     },
     {
+      "path": "internal/aws/cognitoidp/storage_observation_test.go",
+      "sha256": "ef12e65d52eb1b9fa08e066092e2e2556477a700afe5b0fdc815836954219baa",
+      "disposition": "test-support",
+      "reason": "Uses owned SQLite fixtures to verify rejected invalid scope and fail-closed write acknowledgment and page-stream errors. Observational faults are injected through the test-only database/sql adapter; runtime and models are unchanged.",
+      "models": []
+    },
+    {
       "path": "internal/aws/s3.go",
       "sha256": "b865e662975febe98d2bbef4e82da8ee6d2291d56efaeffcde4202ee41d7deba",
       "disposition": "modeled",
