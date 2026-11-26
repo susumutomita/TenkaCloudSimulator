@@ -14,17 +14,18 @@ import Table from '@cloudscape-design/components/table';
 import {useLocale} from './i18n.jsx';
 import {associateVpcRouteSubnet,createVpcNativeRouteTable,deleteVpcNativeRouteTable,disassociateVpcRouteSubnet,
   loadVpcNativeRouteTables,loadVpcRouteAssociationTargets,nativeRouteTableFailure,nativeRouteTableTarget,
-  validNativeRouteTableName} from './ec2-native-route-tables.mjs';
+  validNativeRouteTableName,changeVpcNativeDefaultRoute,loadVpcNativeRouteGateway,ipv4DefaultRoute} from './ec2-native-route-tables.mjs';
 
 const pageSize=20;
 const identifier=value=><span className="resource-identifier">{value}</span>;
 const newToken=()=>Array.from(globalThis.crypto.getRandomValues(new Uint8Array(16)),b=>b.toString(16).padStart(2,'0')).join('');
 
-export default function VPCNativeRouteTables({request,region,vpc,acquireWrite,writeBlocked=false,associations=false}) {
+export default function VPCNativeRouteTables({request,region,vpc,acquireWrite,writeBlocked=false,associations=false,defaultRoutes=false}) {
   const {t}=useLocale();
   const {id,managedBy,cidr}=vpc??{};
-  const scope=useMemo(()=>({request,region,vpc:{id,managedBy,cidr},associations}),[request,region,id,managedBy,cidr,associations]);
+  const scope=useMemo(()=>({request,region,vpc:{id,managedBy,cidr},associations,defaultRoutes}),[request,region,id,managedBy,cidr,associations,defaultRoutes]);
   const validScope=nativeRouteTableTarget(scope.vpc);
+  const options=signal=>({signal,associations:scope.associations,defaultRoutes:scope.defaultRoutes});
   const active=useRef(null);
   const [result,setResult]=useState(null),[modal,setModal]=useState(null),[notice,setNotice]=useState(null),[page,setPage]=useState(1);
   const current=result?.scope===scope ? result : null;
@@ -58,7 +59,7 @@ export default function VPCNativeRouteTables({request,region,vpc,acquireWrite,wr
     if (!operation) return;
     setResult({scope,status:'loading'});setModal(null);setNotice(null);setPage(1);
     try {
-      const rows=await loadVpcNativeRouteTables(scope.request,scope.region,scope.vpc,{signal:operation.controller.signal,associations:scope.associations});
+      const rows=await loadVpcNativeRouteTables(scope.request,scope.region,scope.vpc,options(operation.controller.signal));
       if (finish(operation)) setResult({scope,status:'ready',rows});
     } catch(error) {
       if (finish(operation)) setResult({scope,status:nativeRouteTableFailure(error)});
@@ -75,11 +76,25 @@ export default function VPCNativeRouteTables({request,region,vpc,acquireWrite,wr
     function save(choices,error) {
       if (!controller.signal.aborted) setModal(old=>old?.draft===draft ? {...old,choices,choiceError:error} : old);
     }
-    loadVpcRouteAssociationTargets(scope.request,scope.region,scope.vpc,draft.row,{signal:controller.signal,associations:true})
+    loadVpcRouteAssociationTargets(scope.request,scope.region,scope.vpc,draft.row,options(controller.signal))
       .then(choices=>save(choices,null),error=>save(null,nativeRouteTableFailure(error)));
     return ()=>controller.abort();
   },[draft,scope]);
 
+  const routeDraft=dialog?.kind==='add-route' ? dialog.draft : null;
+  useEffect(()=>{
+    if (!routeDraft || !scope.defaultRoutes) return;
+    const controller=new AbortController();
+    function save(gateway,error) {
+      if (!controller.signal.aborted) setModal(old=>old?.draft===routeDraft ? {...old,gateway,gatewayError:error} : old);
+    }
+    loadVpcNativeRouteGateway(scope.request,scope.region,scope.vpc,routeDraft.row,options(controller.signal))
+      .then(gateway=>save(gateway,null),error=>save(null,nativeRouteTableFailure(error)));
+    return ()=>controller.abort();
+  },[routeDraft,scope]);
+
+  const addingRoute=dialog?.kind==='add-route', removingRoute=dialog?.kind==='remove-route';
+  const routeTarget=addingRoute?dialog.gateway:dialog?.row?.route;
   const attaching=dialog?.kind==='associate', detaching=dialog?.kind==='disassociate';
   const selections=attaching ? dialog.choices : detaching ? dialog.row.associations : null;
   const target=selections?.find(choice=>choice.id===dialog.selected);
@@ -87,7 +102,9 @@ export default function VPCNativeRouteTables({request,region,vpc,acquireWrite,wr
   const valid=dialog?.kind==='create' ? validNativeRouteTableName(dialog.name) :
     currentRow&&(attaching ? scope.associations&&target :
       detaching ? scope.associations&&target&&dialog.confirm===target.id :
-      dialog?.kind==='delete'&&!dialog.row.associations?.length&&dialog.confirm===dialog.row.id);
+      addingRoute ? scope.defaultRoutes&&!dialog.row.route&&!!routeTarget :
+      removingRoute ? scope.defaultRoutes&&!!routeTarget&&dialog.confirm===dialog.row.id :
+      dialog?.kind==='delete'&&!dialog.row.associations?.length&&!dialog.row.route&&dialog.confirm===dialog.row.id);
   async function submit(event) {
     event.preventDefault();
     if (!validScope || !ready || !canWrite || !valid) return;
@@ -96,12 +113,19 @@ export default function VPCNativeRouteTables({request,region,vpc,acquireWrite,wr
     setResult({...current,status:'writing'});setNotice(null);
     try {
       const args=[scope.request,scope.region,scope.vpc];
-      const options={signal:operation.controller.signal,associations:scope.associations};
+      const callOptions=options(operation.controller.signal);
+      if (addingRoute||removingRoute) {
+        const updated=await changeVpcNativeDefaultRoute(...args,dialog.row,routeTarget,addingRoute,callOptions);
+        if (!finish(operation)) return;
+        setResult({scope,status:'ready',rows:current.rows.map(row=>row===dialog.row?updated:row)});
+        setModal(null);setNotice({scope,kind:dialog.kind,id:updated.id});
+        return;
+      }
       const {created,removed,associated,disassociated,rows}=dialog.kind==='create'
-        ? await createVpcNativeRouteTable(...args,dialog.name,newToken(),options)
-        : attaching ? await associateVpcRouteSubnet(...args,dialog.row,target,options)
-          : detaching ? await disassociateVpcRouteSubnet(...args,dialog.row,target,options)
-            : await deleteVpcNativeRouteTable(...args,dialog.row,options);
+        ? await createVpcNativeRouteTable(...args,dialog.name,newToken(),callOptions)
+        : attaching ? await associateVpcRouteSubnet(...args,dialog.row,target,callOptions)
+          : detaching ? await disassociateVpcRouteSubnet(...args,dialog.row,target,callOptions)
+            : await deleteVpcNativeRouteTable(...args,dialog.row,callOptions);
       if (!finish(operation)) return;
       setResult({scope,status:'ready',rows});setModal(null);
       setNotice({scope,kind:dialog.kind,id:(created??removed??associated??disassociated).id});
@@ -117,6 +141,8 @@ export default function VPCNativeRouteTables({request,region,vpc,acquireWrite,wr
   const errors={
     denied:t('The selected identity cannot complete this route table request. Check its EC2 permissions.','現在の ID ではルートテーブルを操作できません。EC2 の権限を確認してください。'),
     'not-found':t('The selected VPC, route table, subnet or association is no longer available.','選択した VPC、ルートテーブル、サブネット、または関連付けは利用できなくなりました。'),
+    'route-exists':t('This table already has a saved IPv4 default route. No route was replaced.','このテーブルには保存済みの IPv4 デフォルトルートがあります。ルートの置き換えは行っていません。'),
+    'no-gateway':t('The internet gateway is not attached to this VPC. No route was added.','インターネットゲートウェイはこの VPC に接続されていません。ルートは追加していません。'),
     associated:t('This subnet already has an explicit association. No association was replaced.','このサブネットには既に明示的な関連付けがあります。関連付けの置き換えは行っていません。'),
     dependency:t('A saved dependency prevents deletion. The route table was not removed.','保存済みの依存関係があるため、ルートテーブルを削除できませんでした。'),
     limit:t('The local route table resource or request limit was reached.','ローカルのルートテーブルのリソース数またはリクエスト数が上限に達しました。'),
@@ -129,12 +155,17 @@ export default function VPCNativeRouteTables({request,region,vpc,acquireWrite,wr
   const deleteLabel=t('Delete route table','ルートテーブルを削除');
   const associateLabel=t('Associate subnet','サブネットを関連付ける');
   const disassociateLabel=t('Disassociate subnet','サブネットの関連付けを解除する');
-  const modalTitle={create:createLabel,delete:deleteLabel,associate:associateLabel,disassociate:disassociateLabel}[dialog?.kind];
+  const addRouteLabel=t('Add IPv4 default route','IPv4 デフォルトルートを追加');
+  const removeRouteLabel=t('Remove IPv4 default route','IPv4 デフォルトルートを削除');
+  const modalTitle={create:createLabel,delete:deleteLabel,associate:associateLabel,disassociate:disassociateLabel,
+    'add-route':addRouteLabel,'remove-route':removeRouteLabel}[dialog?.kind];
   const notices={
     create:t('Saved route table: ','ルートテーブルを保存しました: '),
     delete:t('Deleted route table: ','ルートテーブルを削除しました: '),
     associate:t('Saved explicit subnet association: ','明示的なサブネットの関連付けを保存しました: '),
     disassociate:t('Removed explicit subnet association: ','明示的なサブネットの関連付けを解除しました: '),
+    'add-route':t('Saved IPv4 default route in: ','IPv4 デフォルトルートを保存しました: '),
+    'remove-route':t('Removed IPv4 default route from: ','IPv4 デフォルトルートを削除しました: '),
   };
   const associationOptions=(selections??[]).map(choice=>({value:choice.id,label:attaching?choice.id:choice.subnet,
     description:attaching?choice.cidr:choice.id}));
@@ -144,7 +175,9 @@ export default function VPCNativeRouteTables({request,region,vpc,acquireWrite,wr
       <Button iconName="refresh" disabled={pending} loading={loading} onClick={refresh}>{refreshLabel}</Button>
       <Button disabled={!ready||!canWrite} onClick={()=>setModal({scope,kind:'create',name:''})}>{createLabel}</Button>
     </SpaceBetween>}>{t('Route tables','ルートテーブル')}</Header>
-    <Box color="text-body-secondary">{scope.associations
+    <Box color="text-body-secondary">{scope.defaultRoutes
+      ? t('Saved configuration only. A route may target the native internet gateway attached to this VPC. No main table, local route or packet forwarding is created.','保存済みの設定のみです。ルートの宛先には、この VPC に接続されたネイティブのインターネットゲートウェイを指定できます。メインテーブルやローカルルートは作成されず、通信は転送されません。')
+      : scope.associations
       ? t('Saved configuration only. Explicit subnet associations do not create routes, a main table or packet forwarding.','保存済みの設定のみです。サブネットの明示的な関連付けは、ルートやメインテーブルを作成せず、パケットも転送しません。')
       : t('Detached configuration only. These tables have no routes or subnet associations and do not forward traffic.','関連付けのない設定のみです。ルートやサブネットの関連付けは含まれず、通信は転送しません。')}</Box>
     {notice?.scope===scope&&<Alert type="success">{notices[notice.kind]}{identifier(notice.id)}</Alert>}
@@ -159,6 +192,8 @@ export default function VPCNativeRouteTables({request,region,vpc,acquireWrite,wr
         ...(scope.associations?[{id:'associations',header:t('Explicit subnet associations','明示的なサブネットの関連付け'),
           cell:item=>item.associations.length ? item.associations.map(row=><div key={row.id}>{identifier(row.subnet)}</div>)
             : t('None','なし')}]:[]),
+        ...(scope.defaultRoutes?[{id:'default-route',header:t('IPv4 default route','IPv4 デフォルトルート'),
+          cell:item=>item.route?<>{identifier(item.route.cidr)} → {identifier(item.route.gateway)}</>:t('None','なし')}]:[]),
         {id:'actions',header:t('Actions','操作'),cell:item=><SpaceBetween size="xxs">
           {scope.associations&&<>
             <Button disabled={!ready||!canWrite} ariaLabel={associateLabel+': '+item.id}
@@ -166,8 +201,13 @@ export default function VPCNativeRouteTables({request,region,vpc,acquireWrite,wr
             <Button disabled={!ready||!canWrite||!item.associations.length} ariaLabel={disassociateLabel+': '+item.id}
               onClick={()=>setModal({scope,kind:'disassociate',row:item,selected:'',confirm:''})}>{disassociateLabel}</Button>
           </>}
-          <Button disabled={!ready||!canWrite||!!item.associations?.length} ariaLabel={deleteLabel+': '+item.id}
-            disabledReason={item.associations?.length?t('Remove the explicit associations before deleting this table.','このテーブルを削除するには明示的な関連付けを先に解除してください。'):undefined}
+          {scope.defaultRoutes&&(item.route
+            ? <Button disabled={!ready||!canWrite} ariaLabel={removeRouteLabel+': '+item.id}
+                onClick={()=>setModal({scope,kind:'remove-route',row:item,confirm:''})}>{removeRouteLabel}</Button>
+            : <Button disabled={!ready||!canWrite} ariaLabel={addRouteLabel+': '+item.id}
+                onClick={()=>setModal({scope,kind:'add-route',row:item,draft:{row:item}})}>{addRouteLabel}</Button>)}
+          <Button disabled={!ready||!canWrite||!!item.associations?.length||!!item.route} ariaLabel={deleteLabel+': '+item.id}
+            disabledReason={item.route?t('Remove the saved IPv4 default route before deleting this table.','テーブルを削除するには保存済みの IPv4 デフォルトルートを先に削除してください。'):item.associations?.length?t('Remove the explicit associations before deleting this table.','このテーブルを削除するには明示的な関連付けを先に解除してください。'):undefined}
             onClick={()=>setModal({scope,kind:'delete',row:item,confirm:''})}>{deleteLabel}</Button>
         </SpaceBetween>},
       ]}
@@ -193,6 +233,18 @@ export default function VPCNativeRouteTables({request,region,vpc,acquireWrite,wr
             errorText={!valid?t('Use valid text of at most 256 UTF-8 bytes.','UTF-8 で 256 バイト以内の有効な文字を入力してください。'):undefined}>
             <Input value={dialog.name} disabled={pending} onChange={({detail})=>change('name',detail.value)}/>
           </FormField>
+        </>:addingRoute||removingRoute?<>
+          <Box>{t('Selected route table: ','選択済みルートテーブル: ')}{identifier(dialog.row.id)}</Box>
+          <Box>{t('Destination: ','送信先: ')}{identifier(ipv4DefaultRoute)}</Box>
+          {routeTarget?<Box>{t('Target internet gateway: ','ターゲットのインターネットゲートウェイ: ')}{identifier(addingRoute?routeTarget.id:routeTarget.gateway)}</Box>
+            : dialog.gatewayError?<Alert type="error">{dialog.gatewayError==='denied'
+              ?t('The selected identity needs ec2:DescribeInternetGateways to verify a target.','ターゲットの確認には現在の ID に ec2:DescribeInternetGateways 権限が必要です。')
+              :t('Could not confirm an attached gateway. No route request was sent.','接続済みのゲートウェイを確認できません。ルートのリクエストは送信していません。')}</Alert>
+            : dialog.gateway===null?<Alert type="info">{t('Attach a native internet gateway to this VPC first.','先にネイティブのインターネットゲートウェイをこの VPC に接続してください。')}</Alert>
+            : <Box>{t('Reading attached internet gateway','接続済みのインターネットゲートウェイを読み込み中')}</Box>}
+          {removingRoute&&<FormField label={t('Enter the route table ID to confirm route removal','ルートの削除を確認するにはルートテーブル ID を入力')}>
+            <Input value={dialog.confirm} disabled={pending} onChange={({detail})=>change('confirm',detail.value)}/>
+          </FormField>}
         </>:attaching||detaching?<>
           <Box>{t('Selected route table: ','選択済みルートテーブル: ')}{identifier(dialog.row.id)}</Box>
           {dialog.choiceError ? <Alert type="error">{dialog.choiceError==='denied'

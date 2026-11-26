@@ -699,6 +699,7 @@
                       "GetAttributes",
                       "DescribeInstances",
                       "DescribeInternetGateways",
+                      "DescribeRouteTables",
                       "CreateDomain"
                     ]
                   },
@@ -724,6 +725,10 @@
                   "NextToken": {
                     "type": "string",
                     "description": "Opaque continuation returned by the specific Query operation. For EC2 DescribeInternetGateways, continue the same region, caller and page-size request."
+                  },
+                  "RouteTableId.1": {
+                    "type": "string",
+                    "description": "Optional single exact DescribeRouteTables selector. Cannot be combined with filters or pagination."
                   },
                   "RoleName": {
                     "type": "string",
@@ -1136,6 +1141,14 @@
                     "Action": "DescribeInternetGateways",
                     "Version": "2016-11-15",
                     "MaxResults": 100
+                  }
+                },
+                "DescribeRouteTables": {
+                  "summary": "EC2 DescribeRouteTables (read-only configuration)",
+                  "description": "Set X-Simulator-Service to ec2, clear X-Amz-Target, and choose a local X-Simulator-Region. Requires ec2:DescribeRouteTables on *. Lists verified saved route tables and explicit routes and associations from local SQLite. Add RouteTableId.1 with one existing route-table ID for exact readback, or use the supported association.subnet-id filter separately. Use the SDK or VPC console to create or delete the single supported native IPv4 default route to the native gateway attached to the same VPC. This reference preset only reads configuration. No implicit main/local route or packet forwarding.",
+                  "value": {
+                    "Action": "DescribeRouteTables",
+                    "Version": "2016-11-15"
                   }
                 },
                 "CreateDomain": {

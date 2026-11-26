@@ -118,6 +118,7 @@ func TestEC2ReadAccessBoundary(t *testing.T) {
 			InternetGatewayPageLimit       int                 `json:"internetGatewayPageLimit"`
 			RouteTableLifecycle            []string            `json:"routeTableLifecycle"`
 			RouteTableAssociationLifecycle []string            `json:"routeTableAssociationLifecycle"`
+			DefaultRouteLifecycle          []string            `json:"defaultRouteLifecycle"`
 		} `json:"services"`
 	}
 	if w.Code != 200 || json.Unmarshal(w.Body.Bytes(), &caps) != nil {
@@ -135,6 +136,7 @@ func TestEC2ReadAccessBoundary(t *testing.T) {
 		"CreateNetworkAcl", "DescribeNetworkAcls", "DeleteNetworkAcl", "CreateRouteTable", "DeleteRouteTable",
 		"AssociateRouteTable", "DisassociateRouteTable",
 		"CreateInternetGateway", "DescribeInternetGateways", "DeleteInternetGateway", "AttachInternetGateway", "DetachInternetGateway",
+		"CreateRoute", "DeleteRoute",
 	}
 	if !reflect.DeepEqual(ec2.Operations, wantOperations) {
 		t.Fatalf("unexpected EC2 operations: got %v, want %v", ec2.Operations, wantOperations)
@@ -143,13 +145,15 @@ func TestEC2ReadAccessBoundary(t *testing.T) {
 		"DescribeSecurityGroups":   {"GroupId.N", "vpc-id"},
 		"DescribeNetworkAcls":      {"NetworkAclId.N", "vpc-id"},
 		"DescribeInternetGateways": {"InternetGatewayId.N", "MaxResults", "NextToken"},
+		"DescribeRouteTables":      {"RouteTableId.1", "association.subnet-id"},
 	}
 	if ec2.Pagination || !ec2.Filters || ec2.ResourceLimit != 1000 || !reflect.DeepEqual(ec2.DescribeSelectors, wantSelectors) ||
 		!reflect.DeepEqual(ec2.DetachedConfigurationOnly, []string{"native security groups", "native network ACLs"}) ||
 		ec2.InternetGatewayPageLimit != 100 ||
 		!reflect.DeepEqual(ec2.InternetGatewayLifecycle, []string{"DescribeInternetGateways", "CreateInternetGateway", "DeleteInternetGateway", "AttachInternetGateway", "DetachInternetGateway"}) ||
 		!reflect.DeepEqual(ec2.RouteTableLifecycle, []string{"DescribeRouteTables", "CreateRouteTable", "DeleteRouteTable"}) ||
-		!reflect.DeepEqual(ec2.RouteTableAssociationLifecycle, []string{"DescribeRouteTables", "DescribeSubnets", "AssociateRouteTable", "DisassociateRouteTable"}) {
+		!reflect.DeepEqual(ec2.RouteTableAssociationLifecycle, []string{"DescribeRouteTables", "DescribeSubnets", "AssociateRouteTable", "DisassociateRouteTable"}) ||
+		!reflect.DeepEqual(ec2.DefaultRouteLifecycle, []string{"DescribeRouteTables", "DescribeInternetGateways", "CreateRoute", "DeleteRoute"}) {
 		t.Fatalf("unexpected EC2 capability limits: %+v", ec2)
 	}
 }

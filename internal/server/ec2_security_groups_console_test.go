@@ -48,8 +48,7 @@ func TestEC2SecurityGroupsConsoleCapability(t *testing.T) {
 			addEC2NetworkReadbackCapabilities(w, r, capabilities)
 			// Pin the exact helper contract independently: capability claims are
 			// available to ordinary signed-in sessions, not to a scoped handoff.
-			// The route writer adds the explicit association capability without
-			// changing legacy reads or advertising forwarding.
+			// The route capabilities do not grant IAM or advertise forwarding.
 			want := map[string]any{"console": true}
 			if c.want {
 				want["securityGroupReadback"] = "DescribeSecurityGroups"
@@ -59,6 +58,7 @@ func TestEC2SecurityGroupsConsoleCapability(t *testing.T) {
 				want["subnetLifecycle"] = []string{"DescribeSubnets", "CreateSubnet", "DeleteSubnet"}
 				want["routeTableLifecycle"] = []string{"DescribeRouteTables", "CreateRouteTable", "DeleteRouteTable"}
 				want["routeTableAssociationLifecycle"] = []string{"DescribeRouteTables", "DescribeSubnets", "AssociateRouteTable", "DisassociateRouteTable"}
+				want["defaultRouteLifecycle"] = []string{"DescribeRouteTables", "DescribeInternetGateways", "CreateRoute", "DeleteRoute"}
 			}
 			if !reflect.DeepEqual(ec2, want) {
 				t.Fatalf("unexpected exact EC2 network capabilities: got %+v, want %+v", ec2, want)

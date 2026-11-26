@@ -44,7 +44,7 @@ func regionalGatewayStacks(ctx context.Context, tx *sql.Tx, region string) (map[
 			if !stackNetworkKind(member.Type) {
 				continue
 			}
-			if strings.HasPrefix(member.PhysicalID, nativeInternetGatewayLinkPrefix) {
+			if strings.HasPrefix(member.PhysicalID, nativeInternetGatewayLinkPrefix) || strings.HasPrefix(member.PhysicalID, nativeDefaultRoutePrefix) {
 				return nil, nil, errEC2InternetGatewayState
 			}
 			declared[member.PhysicalID] = true
@@ -79,7 +79,8 @@ func ensureNativeInternetGatewayUnclaimed(ctx context.Context, tx *sql.Tx, regio
 
 func internetGatewayHasDependents(ctx context.Context, tx *sql.Tx, region, id, except string) (bool, error) {
 	rows, err := tx.QueryContext(ctx, `SELECT id FROM aws_ec2_network_resources WHERE region=?
-		AND (kind IN (?,?) OR id GLOB ?) ORDER BY id LIMIT 1001`, region, ec2RTAttachment, ec2Route, nativeInternetGatewayLinkPrefix+"*")
+		AND (kind IN (?,?) OR id GLOB ? OR id GLOB ?) ORDER BY id LIMIT 1001`, region, ec2RTAttachment, ec2Route,
+		nativeInternetGatewayLinkPrefix+"*", nativeDefaultRoutePrefix+"*")
 	if err != nil {
 		return false, err
 	}
@@ -107,7 +108,8 @@ func internetGatewayHasDependents(ctx context.Context, tx *sql.Tx, region, id, e
 		}
 		if !ec2InternetGatewayID.MatchString(related.GatewayID) ||
 			(strings.HasPrefix(related.ID, nativeInternetGatewayLinkPrefix) || related.StackID == ec2NativeOwner && related.Kind == ec2RTAttachment) &&
-				!validNativeInternetGatewayLink(related) {
+				!validNativeInternetGatewayLink(related) ||
+			strings.HasPrefix(related.ID, nativeDefaultRoutePrefix) && related.Kind != ec2Route {
 			return false, errEC2InternetGatewayState
 		}
 		if related.GatewayID == id && related.ID != except {
@@ -224,6 +226,7 @@ func (s *StackStore) describeInternetGateways(ctx context.Context, region string
 type ec2InternetGatewayInventory struct {
 	rows     []ec2InternetGateway
 	links    nativeInternetGatewayLinks
+	routes   map[string]nativeDefaultRoute
 	declared map[string]bool // physical IDs, independently of the claims
 }
 
@@ -239,6 +242,9 @@ func readInternetGatewayInventory(ctx context.Context, tx *sql.Tx, region string
 		return out, err
 	}
 	out.declared = declared
+	if err := checkNativeDefaultRouteReservation(ctx, tx, region); err != nil {
+		return out, err
+	}
 	owners := map[string]bool{}
 	for id, record := range stacks {
 		for _, member := range record.Resources {
@@ -258,8 +264,9 @@ func readInternetGatewayInventory(ctx context.Context, tx *sql.Tx, region string
 	}
 	rows, err := tx.QueryContext(ctx, `SELECT stack_id FROM aws_cfn_ownership WHERE namespace=? AND kind IN (?,?,?)
 		UNION SELECT stack_id FROM aws_ec2_network_resources WHERE region=?
-		AND (kind IN (?,?,?) OR id GLOB ?) ORDER BY 1 LIMIT 1001`,
-		namespace, ec2RTGateway, ec2RTAttachment, ec2Route, region, ec2RTGateway, ec2RTAttachment, ec2Route, nativeInternetGatewayLinkPrefix+"*")
+		AND (kind IN (?,?,?) OR id GLOB ? OR id GLOB ?) ORDER BY 1 LIMIT 1001`,
+		namespace, ec2RTGateway, ec2RTAttachment, ec2Route, region, ec2RTGateway, ec2RTAttachment, ec2Route,
+		nativeInternetGatewayLinkPrefix+"*", nativeDefaultRoutePrefix+"*")
 	if err != nil {
 		return out, err
 	}
@@ -304,6 +311,10 @@ func readInternetGatewayInventory(ctx context.Context, tx *sql.Tx, region string
 		}
 		if owner == ec2NativeOwner {
 			out.links, err = readNativeInternetGatewayLinks(ctx, tx, region, network, declared)
+			if err != nil {
+				return out, err
+			}
+			out.routes, err = nativeDefaultRoutes(ctx, tx, region, network, declared, out.links)
 			if err != nil {
 				return out, err
 			}

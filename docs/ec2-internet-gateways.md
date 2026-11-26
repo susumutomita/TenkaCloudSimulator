@@ -6,7 +6,7 @@ The Internet gateways pane and the EC2 Query API manage **EC2-owned
 configuration**. Create a detached gateway, attach it to one local EC2-managed
 VPC in the same region, verify the configuration, and detach it before cleanup.
 AWS separates the attachment, route and address steps in its [VPC workflow][aws-console].
-This local slice does not create an internet route or provide public addresses,
+Attaching a gateway does not create a route or provide public addresses,
 guest instances or packet forwarding.
 
 Use the authenticated local EC2 Query endpoint, `POST /` with
@@ -29,8 +29,9 @@ is at most [one gateway per VPC][quotas] and one VPC per gateway. Both parent
 deletions refuse a saved link; detach does not silently remove routes or
 adopt stack records. Only EC2-network claims and declarations participate;
 an independently named non-network resource such as an S3 bucket does not.
-Explicit native route writes and address assignment are
-unsupported. A configured link also makes that VPC ineligible for the optional
+[Explicit native IPv4 routes](ec2-native-default-route.md) can reference an
+attached native gateway. Delete these routes before detaching it; address
+assignment remains unsupported. A configured link also makes that VPC ineligible for the optional
 private PostgreSQL topology check; this is not a network reachability check. A saved attachment is
 returned with its VPC ID and `state=available`: this reports the configuration,
 not successful traffic. A mismatched row or relationship fails the read without

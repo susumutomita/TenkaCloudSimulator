@@ -259,6 +259,13 @@ func (s *StackStore) deleteNativeRouteTable(ctx context.Context, region, id stri
 	if err != nil {
 		return err
 	}
+	routes, err := nativeDefaultRoutesInRegion(ctx, tx, region)
+	if err != nil {
+		return err
+	}
+	if _, found := routes[id]; found {
+		return ec2Invalid("DependencyViolation", "Delete this route table's saved IPv4 default route first.")
+	}
 	var referenced bool
 	if err := tx.QueryRowContext(ctx, `SELECT EXISTS(SELECT 1 FROM aws_ec2_network_resources
 		WHERE region=? AND id<>? AND json_extract(document,'$.RouteTableID')=?)`, region, id, id).Scan(&referenced); err != nil {
@@ -276,6 +283,10 @@ func (s *StackStore) deleteNativeRouteTable(ctx context.Context, region, id stri
 		return errEC2NativeRouteTableState
 	}
 	if _, err := networkRead(ctx, tx, region, id); !errors.Is(err, sql.ErrNoRows) {
+		return errEC2NativeRouteTableState
+	}
+	currentRoutes, err := nativeDefaultRoutesInRegion(ctx, tx, region)
+	if err != nil || !maps.Equal(routes, currentRoutes) {
 		return errEC2NativeRouteTableState
 	}
 	return tx.Commit()

@@ -95,7 +95,7 @@ def sdk_check(binary):
                 assert spec['internetGatewayLifecycle'] == OPERATIONS
                 assert spec['internetGatewayPageLimit'] == 100
                 assert spec['describeSelectors']['DescribeInternetGateways'] == ['InternetGatewayId.N', 'MaxResults', 'NextToken']
-                assert 'CreateRoute' not in spec['operations'] and 'RunInstances' not in spec['operations']
+                assert 'ReplaceRoute' not in spec['operations'] and 'RunInstances' not in spec['operations']
                 a = sdk(ax, ap, at)
                 cfn = cfn_client(ax, ap, at)
                 assert a.describe_internet_gateways()['InternetGateways'] == []

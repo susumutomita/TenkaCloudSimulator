@@ -25223,6 +25223,259 @@
           "expect_invariant": "ConfirmedNotice"
         }
       ]
+    },
+    {
+      "id": "EC2NativeDefaultRouteLifecycle",
+      "model": "formal/EC2NativeDefaultRouteLifecycle.tla",
+      "config": "formal/EC2NativeDefaultRouteLifecycle.cfg",
+      "bounds": "Two native tables in separate modeled VPCs, two unique eligible gateways, one saved route per table, two view epochs, and one permission, transaction or readback failure witness per operation.",
+      "properties": [
+        "TypeOK",
+        "OwnedGraph",
+        "GrantAndScope",
+        "AtomicEffect",
+        "ExactReadback",
+        "VerifiedNotice"
+      ],
+      "limits": "Finite native default-route configuration, dependency and console readback abstraction. No implementation refinement, real IAM evaluation, XML, SQLite, React, concurrency proof, subnet routing, or packets. The native VPC/IGW pairing is abstracted in DefaultGateway and attachments; actor/region are summarized in one scoped admission and a browser epoch.",
+      "source_scope": [
+        "internal/aws/ec2_internet_gateway_attachment_store.go",
+        "internal/aws/ec2_internet_gateway_store.go",
+        "internal/aws/ec2_native_default_route_query.go",
+        "internal/aws/ec2_native_default_route_store.go",
+        "internal/aws/ec2_read.go",
+        "internal/aws/ec2_route_tables_native.go",
+        "internal/aws/ec2_route_tables_read.go",
+        "internal/aws/ec2_vpc.go",
+        "internal/server/server.go",
+        "internal/server/web/app.js",
+        "tools/console/src/ec2-native-route-tables.mjs",
+        "tools/console/src/ec2-readonly.jsx",
+        "tools/console/src/ec2-vpc-native-route-tables.jsx",
+        "tools/console/src/main.jsx"
+      ],
+      "mutants": [
+        {
+          "id": "AdmitStaleOrForeignActor",
+          "edits": [
+            {
+              "old": "Authorization(f) == f \\notin {\"wrongScope\", \"noGrant\"}",
+              "new": "Authorization(f) == f # \"noGrant\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "GrantAndScope"
+        },
+        {
+          "id": "IgnoreRouteTableGrant",
+          "edits": [
+            {
+              "old": "Authorization(f) == f \\notin {\"wrongScope\", \"noGrant\"}",
+              "new": "Authorization(f) == f # \"wrongScope\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "GrantAndScope"
+        },
+        {
+          "id": "AdoptCFNRouteTable",
+          "edits": [
+            {
+              "old": "Native(f) == f \\notin {\"foreignTable\", \"foreignGateway\", \"claim\", \"declaration\"}",
+              "new": "Native(f) == f \\notin {\"foreignGateway\", \"claim\", \"declaration\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "GrantAndScope"
+        },
+        {
+          "id": "AdoptCFNGateway",
+          "edits": [
+            {
+              "old": "Native(f) == f \\notin {\"foreignTable\", \"foreignGateway\", \"claim\", \"declaration\"}",
+              "new": "Native(f) == f \\notin {\"foreignTable\", \"claim\", \"declaration\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "GrantAndScope"
+        },
+        {
+          "id": "IgnoreOwnershipClaim",
+          "edits": [
+            {
+              "old": "Native(f) == f \\notin {\"foreignTable\", \"foreignGateway\", \"claim\", \"declaration\"}",
+              "new": "Native(f) == f \\notin {\"foreignTable\", \"foreignGateway\", \"declaration\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "GrantAndScope"
+        },
+        {
+          "id": "IgnoreStackDeclaration",
+          "edits": [
+            {
+              "old": "Native(f) == f \\notin {\"foreignTable\", \"foreignGateway\", \"claim\", \"declaration\"}",
+              "new": "Native(f) == f \\notin {\"foreignTable\", \"foreignGateway\", \"claim\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "GrantAndScope"
+        },
+        {
+          "id": "ApplyDryRun",
+          "edits": [
+            {
+              "old": "Persistent(f) == f \\notin {\"dryRun\", \"quota\", \"unconfirmed\"}",
+              "new": "Persistent(f) == f \\notin {\"quota\", \"unconfirmed\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AtomicEffect"
+        },
+        {
+          "id": "ApplyAtQuota",
+          "edits": [
+            {
+              "old": "Persistent(f) == f \\notin {\"dryRun\", \"quota\", \"unconfirmed\"}",
+              "new": "Persistent(f) == f \\notin {\"dryRun\", \"unconfirmed\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AtomicEffect"
+        },
+        {
+          "id": "AcknowledgeFailedReadback",
+          "edits": [
+            {
+              "old": "Persistent(f) == f \\notin {\"dryRun\", \"quota\", \"unconfirmed\"}",
+              "new": "Persistent(f) == f \\notin {\"dryRun\", \"quota\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AtomicEffect"
+        },
+        {
+          "id": "AllowForeignGatewayTarget",
+          "edits": [
+            {
+              "old": "/\\ g = DefaultGateway(t) /\\ routes[t] = None",
+              "new": "/\\ routes[t] = None",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "OwnedGraph"
+        },
+        {
+          "id": "AllowDetachedGatewayTarget",
+          "edits": [
+            {
+              "old": "THEN t \\in attachments /\\ g = DefaultGateway(t)",
+              "new": "THEN g = DefaultGateway(t)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "OwnedGraph"
+        },
+        {
+          "id": "OverwriteExistingRoute",
+          "edits": [
+            {
+              "old": "/\\ g = DefaultGateway(t) /\\ routes[t] = None",
+              "new": "/\\ g = DefaultGateway(t)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AtomicEffect"
+        },
+        {
+          "id": "DeleteAbsentRoute",
+          "edits": [
+            {
+              "old": "ELSE routes[t] # None",
+              "new": "ELSE TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AtomicEffect"
+        },
+        {
+          "id": "OrphanSavedRoute",
+          "edits": [
+            {
+              "old": "/\\ phase = \"idle\" /\\ routes[t] = None",
+              "new": "/\\ phase = \"idle\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "OwnedGraph"
+        },
+        {
+          "id": "AcceptOldScopeRead",
+          "edits": [
+            {
+              "old": "/\\ p.ok /\\ p.at = e /\\ w.at = e",
+              "new": "/\\ p.ok /\\ w.at = e",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExactReadback"
+        },
+        {
+          "id": "AcceptPartialRead",
+          "edits": [
+            {
+              "old": "/\\ w.complete /\\ w.t = p.t",
+              "new": "/\\ w.t = p.t",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExactReadback"
+        },
+        {
+          "id": "AcceptDifferentTable",
+          "edits": [
+            {
+              "old": "/\\ w.complete /\\ w.t = p.t",
+              "new": "/\\ w.complete",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExactReadback"
+        },
+        {
+          "id": "AcceptWrongSavedTarget",
+          "edits": [
+            {
+              "old": "/\\ w.result = p.after[p.t]",
+              "new": "/\\ TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExactReadback"
+        },
+        {
+          "id": "PublishBeforeRead",
+          "edits": [
+            {
+              "old": "/\\ phase = \"confirmed\"",
+              "new": "/\\ phase \\in {\"await\", \"confirmed\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExactReadback"
+        },
+        {
+          "id": "KeepNoticeOnScopeChange",
+          "edits": [
+            {
+              "old": "/\\ epoch' = 1 /\\ notice' = FALSE",
+              "new": "/\\ epoch' = 1 /\\ UNCHANGED notice",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "VerifiedNotice"
+        }
+      ]
     }
   ]
 }

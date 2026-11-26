@@ -340,13 +340,16 @@ class NetworkContract(unittest.TestCase):
         before = self.state()
         route = {'RouteTableId': outputs['Table'], 'DestinationCidrBlock': '0.0.0.0/0'}
         create_route = {**route, 'GatewayId': outputs['Gateway']}
-        for operation, args in [
-            (self.ec2.create_route, create_route),
-            (self.ec2.create_route, {**create_route, 'DryRun': True}),
-            (self.ec2.delete_route, route),
+        self.assertEqual(self.ec2.describe_route_tables(RouteTableIds=[outputs['Table']])['RouteTables'], tables)
+        for operation, args, code in [
+            (self.ec2.create_route, create_route, 'UnsupportedOperation'),
+            # Native DryRun only checks permissions; it does not authorize
+            # adopting or changing CloudFormation ownership or routes.
+            (self.ec2.create_route, {**create_route, 'DryRun': True}, 'DryRunOperation'),
+            (self.ec2.delete_route, route, 'UnsupportedOperation'),
         ]:
             with self.subTest(operation=operation.__name__, args=args):
-                self.rejected(operation, 'UnsupportedOperation', **args)
+                self.rejected(operation, code, **args)
                 self.assertEqual(self.state(), before)
 
     def test_native_vpc_has_no_implicit_table_and_bare_table_has_no_children(self):

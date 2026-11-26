@@ -175,7 +175,15 @@ func TestEC2DescribeRouteTablesReadback(t *testing.T) {
 	if err := other.Close(); err != nil {
 		t.Fatal(err)
 	}
-	for _, q := range []url.Values{{"RouteTableId.1": {ids["Table"]}}, {"Filter.1.Name": {"vpc-id"}}, {"MaxResults": {"5"}}, {"NextToken": {"none"}}, {"DryRun": {"false"}}} {
+	exact := url.Values{"RouteTableId.1": {ids["Table"]}}
+	exactTables := call(east, "reader", exact, false, 200)
+	if !strings.Contains(exactTables, ids["Table"]) || !strings.Contains(exactTables, ids["Assoc"]) || strings.Contains(exactTables, ids["Empty"]) {
+		t.Fatal(exactTables)
+	}
+	call(west, "reader", exact, false, 400)
+	call(east, "denied", exact, false, 403)
+	call(east, "reader", exact, true, 403)
+	for _, q := range []url.Values{{"RouteTableId.1": {ids["Table"]}, "RouteTableId.2": {ids["Empty"]}}, {"Filter.1.Name": {"vpc-id"}}, {"MaxResults": {"5"}}, {"NextToken": {"none"}}, {"DryRun": {"false"}}} {
 		if b := call(east, "reader", q, false, 400); !strings.Contains(b, "UnsupportedOperation") || strings.Contains(b, "routeTableSet") {
 			t.Fatal(b)
 		}

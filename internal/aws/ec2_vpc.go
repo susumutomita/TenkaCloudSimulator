@@ -30,7 +30,7 @@ const (
 
 var ec2Operations = slices.Concat(
 	[]string{"DescribeInstances", "DescribeVpcs", "DescribeSubnets", "DescribeSecurityGroups", "DescribeRouteTables", "CreateVpc", "DeleteVpc", "CreateSubnet", "DeleteSubnet"},
-	ec2NativeSecurityGroupMutations, ec2NetworkACLOperations, ec2NativeRouteTableMutations, ec2NativeRouteAssociationOperations, ec2InternetGatewayOperations,
+	ec2NativeSecurityGroupMutations, ec2NetworkACLOperations, ec2NativeRouteTableMutations, ec2NativeRouteAssociationOperations, ec2InternetGatewayOperations, ec2NativeDefaultRouteOperations,
 )
 
 // EC2Operations lists registered native Query operations, not granted permissions.
@@ -52,15 +52,17 @@ func (f *ec2Failure) Error() string { return f.code + ": " + f.message }
 func ec2Invalid(code, message string) *ec2Failure { return &ec2Failure{code, message, 400} }
 
 type ec2Request struct {
-	cidr, vpcID       string
-	tags              map[string]string
-	subnet            ec2SubnetMutation
-	securityGroup     *ec2NativeSecurityGroupQuery
-	networkACL        *ec2NetworkACLRequest
-	routeTable        *ec2NativeRouteTableQuery
-	routeAssociation  *ec2NativeRouteAssociationQuery
-	routeTableSubnets []string
-	internetGateway   *ec2InternetGatewayQuery
+	cidr, vpcID        string
+	tags               map[string]string
+	subnet             ec2SubnetMutation
+	securityGroup      *ec2NativeSecurityGroupQuery
+	networkACL         *ec2NetworkACLRequest
+	routeTable         *ec2NativeRouteTableQuery
+	routeAssociation   *ec2NativeRouteAssociationQuery
+	routeTableSubnets  []string
+	routeTableID       string
+	nativeDefaultRoute *ec2NativeDefaultRouteQuery
+	internetGateway    *ec2InternetGatewayQuery
 }
 
 // permissions prechecks known resources. The route association lifecycle
@@ -74,6 +76,8 @@ func (q ec2Request) permissions(action, region string) [][2]string {
 		return q.networkACL.permissions(action, region)
 	case q.routeTable != nil:
 		return q.routeTable.permissions(action, region)
+	case q.nativeDefaultRoute != nil:
+		return q.nativeDefaultRoute.permissions(action, region)
 	case q.routeAssociation != nil:
 		return nil
 	case q.internetGateway != nil:
@@ -98,8 +102,8 @@ func (q ec2Request) permissions(action, region string) [][2]string {
 // members are rejected rather than ignored.
 func parseEC2Request(action string, fields map[string][]string) (ec2Request, *ec2Failure) {
 	if action == "DescribeRouteTables" {
-		ids, err := parseEC2RouteTableSubnetFilter(fields)
-		return ec2Request{routeTableSubnets: ids}, err
+		table, subnets, err := parseEC2RouteTableSelection(fields)
+		return ec2Request{routeTableID: table, routeTableSubnets: subnets}, err
 	}
 	if action == "DescribeSecurityGroups" || slices.Contains(ec2NativeSecurityGroupMutations, action) {
 		q, err := parseEC2NativeSGQuery(action, fields)
@@ -108,6 +112,10 @@ func parseEC2Request(action string, fields map[string][]string) (ec2Request, *ec
 	if slices.Contains(ec2NetworkACLOperations, action) {
 		q, err := parseEC2NetworkACLRequest(action, fields)
 		return ec2Request{networkACL: &q}, err
+	}
+	if slices.Contains(ec2NativeDefaultRouteOperations, action) {
+		q, err := parseEC2NativeDefaultRoute(action, fields)
+		return ec2Request{nativeDefaultRoute: &q}, err
 	}
 	if slices.Contains(ec2NativeRouteTableMutations, action) {
 		q, err := parseEC2NativeRouteTableMutation(action, fields)
@@ -265,6 +273,8 @@ func stampEC2Response(out any) {
 		v.XMLNS, v.RequestID = ns, id
 	case *ec2NetworkACLResponse:
 		v.XMLNS, v.RequestID = ns, id
+	case *ec2NativeDefaultRouteResponse:
+		v.XMLNS, v.RequestID = ns, id
 	case *ec2NativeRouteTableMutationResponse:
 		v.XMLNS, v.RequestID = ns, id
 	case *ec2NativeRouteAssociationResponse:
@@ -303,7 +313,8 @@ func nativeVPCs(ctx context.Context, tx *sql.Tx, region string) ([]EC2NetworkRes
 	associatedSubnets := map[string]bool{}
 	var hasGateways bool
 	for _, v := range all {
-		if v.Kind == ec2RTGateway || v.Kind == ec2RTAttachment || strings.HasPrefix(v.ID, nativeInternetGatewayLinkPrefix) {
+		if v.Kind == ec2RTGateway || v.Kind == ec2RTAttachment || v.Kind == ec2Route ||
+			strings.HasPrefix(v.ID, nativeInternetGatewayLinkPrefix) || strings.HasPrefix(v.ID, nativeDefaultRoutePrefix) {
 			hasGateways = true
 		}
 	}
@@ -312,7 +323,14 @@ func nativeVPCs(ctx context.Context, tx *sql.Tx, region string) ([]EC2NetworkRes
 		if err != nil {
 			return nil, err
 		}
-		if _, err = readNativeInternetGatewayLinks(ctx, tx, region, all, declared); err != nil {
+		if err := checkNativeDefaultRouteReservation(ctx, tx, region); err != nil {
+			return nil, err
+		}
+		links, err := readNativeInternetGatewayLinks(ctx, tx, region, all, declared)
+		if err != nil {
+			return nil, err
+		}
+		if _, err := nativeDefaultRoutes(ctx, tx, region, all, declared, links); err != nil {
 			return nil, err
 		}
 	}
@@ -343,7 +361,7 @@ func nativeVPCs(ctx context.Context, tx *sql.Tx, region string) ([]EC2NetworkRes
 			if _, err := readNativeRouteTable(ctx, tx, region, v.ID); err != nil {
 				return nil, err
 			}
-		case ec2RTGateway, ec2RTAttachment:
+		case ec2RTGateway, ec2RTAttachment, ec2Route:
 			// Validated as one owned graph before this inventory is exposed.
 		case ec2Assoc:
 			if associatedSubnets[v.SubnetID] {
@@ -443,7 +461,8 @@ func (s *StackStore) deleteNativeVPC(ctx context.Context, region, id string) err
 		if count > 1000 || json.Unmarshal([]byte(raw), &other) != nil || other.ID != child ||
 			other.Kind != kind || other.Region != region || other.StackID != owner || other.Revision != revision ||
 			(strings.HasPrefix(child, nativeInternetGatewayLinkPrefix) || owner == ec2NativeOwner && kind == ec2RTAttachment) &&
-				!validNativeInternetGatewayLink(other) {
+				!validNativeInternetGatewayLink(other) ||
+			(strings.HasPrefix(child, nativeDefaultRoutePrefix) || owner == ec2NativeOwner && kind == ec2Route) && !validNativeDefaultRoute(other) {
 			rows.Close()
 			return errEC2InternetGatewayState
 		}

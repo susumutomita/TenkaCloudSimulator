@@ -210,6 +210,13 @@ func (g *Gateway) serveEC2(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		out = gateways
+	case ec2CreateNativeDefaultRoute, ec2DeleteNativeDefaultRoute:
+		route, err := g.Stacks.executeEC2NativeDefaultRoute(r.Context(), action, region, *request.nativeDefaultRoute)
+		if err != nil {
+			failChild(err, "Local native route state could not be changed; nothing was committed.")
+			return
+		}
+		out = route
 	case "CreateRouteTable", "DeleteRouteTable":
 		table, err := g.Stacks.executeEC2NativeRouteTableMutation(r.Context(), action, region, *request.routeTable)
 		if err != nil {
@@ -229,6 +236,14 @@ func (g *Gateway) serveEC2(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			fail("InternalError", "Local route-table ownership or state is inconsistent or exceeds the local bound.", 500)
 			return
+		}
+		if request.routeTableID != "" {
+			i := slices.IndexFunc(tables, func(table ec2RouteTableRead) bool { return table.ID == request.routeTableID })
+			if i < 0 {
+				failChild(ec2Invalid("InvalidRouteTableID.NotFound", "The route table does not exist in this region."), "")
+				return
+			}
+			tables = tables[i : i+1]
 		}
 		out = &ec2DescribeRouteTablesResponse{Tables: filterEC2RouteTablesOnSubnet(tables, request.routeTableSubnets)}
 	case "CreateSubnet":

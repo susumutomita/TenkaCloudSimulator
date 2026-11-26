@@ -1,379 +1,421 @@
 {
   "version": 1,
-  "base_sha": "31fa0d9c06603970ccd82423de40daf2baec157d",
+  "base_sha": "06610cbb527c72205019e6c54fa0b689c137da24",
   "changes": [
     {
       "path": "README.md",
-      "sha256": "a6d12e968eb580fb7cb80cd2d59edee35cc1a1290da611f61eeef765010412a7",
+      "sha256": "18108b52f26f94e1e91e0a4bcc2ff8a520261ce4e0705fc0f02de680032c20f3",
       "disposition": "documentation",
-      "reason": "Documentation only: states the bounded compatibility, topology limits and reproduction without changing runtime.",
+      "reason": "Documents the AWS-sourced bounded subset and safe checks without implementing behavior.",
       "models": []
     },
     {
       "path": "docs/design/0001-go-standalone.md",
-      "sha256": "202097a2c94bb9e349900420ec0795e097ab2efd28541dd18584b572ee70ec1b",
+      "sha256": "4317c15f184666d5e94adbc3e65af4e16273242e95c8e5dc613b78b3752263ab",
       "disposition": "documentation",
-      "reason": "Documentation only: states the bounded compatibility, topology limits and reproduction without changing runtime.",
+      "reason": "Documents the AWS-sourced bounded subset and safe checks without implementing behavior.",
       "models": []
     },
     {
       "path": "docs/ec2-internet-gateways.md",
-      "sha256": "e71f7e0637b6df3c70a8f5de1aac205e9612503461f5bad71995430bc499128e",
+      "sha256": "33503f1fd6e12bdb39305cfb3608fb6e013e95621722e6009e45c5fa441a7ec0",
       "disposition": "documentation",
-      "reason": "Documentation only: states the bounded compatibility, topology limits and reproduction without changing runtime.",
+      "reason": "Documents the AWS-sourced bounded subset and safe checks without implementing behavior.",
+      "models": []
+    },
+    {
+      "path": "docs/ec2-native-default-route.md",
+      "sha256": "fd54e4698a9b28c2f5807e0975b8b08b3f5174ba1215019e8dfc858fb51e0696",
+      "disposition": "documentation",
+      "reason": "Documents the AWS-sourced bounded subset and safe checks without implementing behavior.",
       "models": []
     },
     {
       "path": "docs/ec2-network-contracts.md",
-      "sha256": "2d98eb385461b340a36f3a7944622279a136799c8b0e41f94195d3f0ca2db6b0",
+      "sha256": "cf83795b8abf933cb17aa42f91e814a0d349440e4cfeebd38338d269afeaff24",
       "disposition": "documentation",
-      "reason": "Documentation only: states the bounded compatibility, topology limits and reproduction without changing runtime.",
+      "reason": "Documents the AWS-sourced bounded subset and safe checks without implementing behavior.",
       "models": []
     },
     {
       "path": "docs/ec2-read-discovery.md",
-      "sha256": "e075d553a2f8b66989f4aac97977231e6d2089a598e0cc9d737282b09acf4815",
+      "sha256": "031d50e85c6b426e602f00901fbb9cecbf0bd32e071fe056afe2c4d92579196d",
       "disposition": "documentation",
-      "reason": "Documentation only: states the bounded compatibility, topology limits and reproduction without changing runtime.",
+      "reason": "Documents the AWS-sourced bounded subset and safe checks without implementing behavior.",
       "models": []
     },
     {
-      "path": "formal/EC2InternetGatewayAttachment.cfg",
-      "sha256": "8f2356e10b99c52e32891eaf7223c911786940edb1d483e14faeb0c78eedb92c",
+      "path": "formal/EC2NativeDefaultRouteLifecycle.cfg",
+      "sha256": "19aaf87447a26a874bff157cda91cd2935cd1c4293912d8b06c06df682992f4f",
       "disposition": "modeled",
-      "reason": "Pins two gateways, two VPCs and checked attach/detach and UI acknowledgment invariants.",
+      "reason": "Defines or selects the native IPv4 default-route relationship, atomic write/refusal and same-epoch exact confirmation checks.",
       "models": [
         {
-          "id": "EC2InternetGatewayAttachment",
+          "id": "EC2NativeDefaultRouteLifecycle",
           "properties": [
-            "OneGatewayPerVPC",
-            "ExactMutation",
-            "Authority",
-            "Committed",
-            "ReadbackFence",
-            "ConfirmedNotice"
+            "OwnedGraph",
+            "GrantAndScope",
+            "AtomicEffect",
+            "ExactReadback",
+            "VerifiedNotice"
           ],
-          "limits": "Native attachment configuration only. Prior link availability and same-region eligibility are modeled, not local IAM policy evaluation. Durability and view scopes are finite witnesses: no SQLite/JSON/Query, real concurrency, React, IP assignment, routes, RDS runtime or packet paths. No implementation refinement."
+          "limits": "Finite graph and state-transition model, not an implementation proof of Go, SQL, XML, IAM evaluation, React or any packet behavior."
         }
       ]
     },
     {
-      "path": "formal/EC2InternetGatewayAttachment.tla",
-      "sha256": "a0023794a6f45498cf2afd5662f771133fc2addf231ca58ba6b7d067caae2766",
+      "path": "formal/EC2NativeDefaultRouteLifecycle.tla",
+      "sha256": "c58e97ef743b83bfe18341b117b2654b3a1aa77c3bdb9dc604cd0271a715f41d",
       "disposition": "modeled",
-      "reason": "Bounded native relation admission, durable mutation and exact plus whole-list readback.",
+      "reason": "Defines or selects the native IPv4 default-route relationship, atomic write/refusal and same-epoch exact confirmation checks.",
       "models": [
         {
-          "id": "EC2InternetGatewayAttachment",
+          "id": "EC2NativeDefaultRouteLifecycle",
           "properties": [
-            "OneGatewayPerVPC",
-            "ExactMutation",
-            "Authority",
-            "Committed",
-            "ReadbackFence",
-            "ConfirmedNotice"
+            "OwnedGraph",
+            "GrantAndScope",
+            "AtomicEffect",
+            "ExactReadback",
+            "VerifiedNotice"
           ],
-          "limits": "Native attachment configuration only. Prior link availability and same-region eligibility are modeled, not local IAM policy evaluation. Durability and view scopes are finite witnesses: no SQLite/JSON/Query, real concurrency, React, IP assignment, routes, RDS runtime or packet paths. No implementation refinement."
+          "limits": "Finite graph and state-transition model, not an implementation proof of Go, SQL, XML, IAM evaluation, React or any packet behavior."
         }
       ]
-    },
-    {
-      "path": "formal/EC2InternetGatewayLifecycle.tla",
-      "sha256": "5873fcdfbba7c1868368f52ecc8134a72bdf7055804d617e1155180112657405",
-      "disposition": "modeled",
-      "reason": "Allocation/cleanup distinguishes valid native attached readback from inconsistent dependencies.",
-      "models": [
-        {
-          "id": "EC2InternetGatewayLifecycle",
-          "properties": [
-            "NativeOwnership",
-            "DependentRowsPreserved",
-            "FaithfulRead"
-          ],
-          "limits": "Detached allocation and cleanup; excludes actual SQL, wire serialization, cryptography, React, attachment mutation, routing and guest behavior. No implementation refinement proof."
-        }
-      ]
-    },
-    {
-      "path": "formal/README.md",
-      "sha256": "92101f92ec990d7d474291a2bd27ab123f80f4d027b6686d68d1fef757ef8919",
-      "disposition": "documentation",
-      "reason": "Documentation only: states the bounded compatibility, topology limits and reproduction without changing runtime.",
-      "models": []
     },
     {
       "path": "formal/models.json",
-      "sha256": "1a7d5be120c22c333df7ac87dfd5042a9cf0a4fd6b77be4d5aa93046f37f8cb1",
+      "sha256": "7d5da47cf467d0e8a048a83babaac321be5b3c61953d79e4d67950f4f2d23069",
       "disposition": "formal-infrastructure",
-      "reason": "Developer model validation and protected registry updates for native attachment; retains prior suites and controls.",
-      "models": []
-    },
-    {
-      "path": "internal/aws/ec2_internet_gateway_attachment_resilience_test.go",
-      "sha256": "9cc6616689f2a333c4e85a3faffbae5d8dd18f6806ccf09c8931c60b2f37dce1",
-      "disposition": "test-support",
-      "reason": "Local native Internet Gateway state/fault regression tests only: prove refusal, transactional rollback of exact network and CloudFormation witnesses, quota cleanup, and recovery; no production or gate behavior changes.",
+      "reason": "Adds independent expected model and mutation inventory for this scope; existing gates and required checks are not lowered.",
       "models": []
     },
     {
       "path": "internal/aws/ec2_internet_gateway_attachment_store.go",
-      "sha256": "fc9dfe360eb23a4454be52467b51ea87748af6c479c084992ac03dc65d2e566b",
+      "sha256": "736bc021cfe0acf90224ea53291830d19ed7c9233aafbcf5bd81c5819e729dbb",
       "disposition": "modeled",
-      "reason": "Changes a reciprocal typed native relation only after two eligible endpoints, unique placement and transactional readback.",
+      "reason": "Parses, authorizes, checks ownership/dependencies and projects the bounded local network relation or fails without a partial write.",
       "models": [
         {
-          "id": "EC2InternetGatewayAttachment",
+          "id": "EC2NativeDefaultRouteLifecycle",
           "properties": [
-            "OneGatewayPerVPC",
-            "ExactMutation",
-            "Authority",
-            "Committed"
+            "OwnedGraph",
+            "GrantAndScope",
+            "AtomicEffect"
           ],
-          "limits": "Native attachment configuration only. Prior link availability and same-region eligibility are modeled, not local IAM policy evaluation. Durability and view scopes are finite witnesses: no SQLite/JSON/Query, real concurrency, React, IP assignment, routes, RDS runtime or packet paths. No implementation refinement."
+          "limits": "Finite graph and state-transition model, not an implementation proof of Go, SQL, XML, IAM evaluation, React or any packet behavior."
         }
       ]
-    },
-    {
-      "path": "internal/aws/ec2_internet_gateway_attachment_test.go",
-      "sha256": "f914d9e3408deec8a930206560160c53b73c0014f66e8e8e0b7943252a8e8a5a",
-      "disposition": "test-support",
-      "reason": "Local test evidence for permitted state, ordinary refusal, rollback, cleanup, restart or UI readback; no production behavior.",
-      "models": []
     },
     {
       "path": "internal/aws/ec2_internet_gateway_store.go",
-      "sha256": "2cfb6ac7713a897cd4b16fc4727fdeea60539ad31af120f47283b05fc7a3e5ae",
+      "sha256": "b6c2890a26d225aacb8b98a8f51acdd97b888127e5256e2c153282ed6d52ada1",
       "disposition": "modeled",
-      "reason": "The shared regional EC2-network (not S3 or IAM) typed claims, declarations and dependent snapshot determine native/CFN gateway state, including existing links.",
+      "reason": "Parses, authorizes, checks ownership/dependencies and projects the bounded local network relation or fails without a partial write.",
       "models": [
         {
-          "id": "EC2InternetGatewayAttachment",
+          "id": "EC2NativeDefaultRouteLifecycle",
           "properties": [
-            "OneGatewayPerVPC",
-            "ExactMutation",
-            "Committed"
+            "OwnedGraph",
+            "GrantAndScope",
+            "AtomicEffect"
           ],
-          "limits": "Native attachment configuration only. Prior link availability and same-region eligibility are modeled, not local IAM policy evaluation. Durability and view scopes are finite witnesses: no SQLite/JSON/Query, real concurrency, React, IP assignment, routes, RDS runtime or packet paths. No implementation refinement."
-        },
-        {
-          "id": "EC2InternetGatewayLifecycle",
-          "properties": [
-            "NativeOwnership",
-            "DependentRowsPreserved",
-            "FaithfulRead"
-          ],
-          "limits": "Detached allocation and cleanup; excludes actual SQL, wire serialization, cryptography, React, attachment mutation, routing and guest behavior. No implementation refinement proof."
+          "limits": "Finite graph and state-transition model, not an implementation proof of Go, SQL, XML, IAM evaluation, React or any packet behavior."
         }
       ]
     },
     {
-      "path": "internal/aws/ec2_internet_gateway_test.go",
-      "sha256": "e4610991d9dc5f3c6d5eaeec2dea920319d54391c868c46965fc4b9787ec2e10",
+      "path": "internal/aws/ec2_native_default_route_query.go",
+      "sha256": "2e6dd1202d68b1033ada50a199c50b7ddd5007e0bd0fc5e5043ade351e5ee95a",
+      "disposition": "modeled",
+      "reason": "Parses, authorizes, checks ownership/dependencies and projects the bounded local network relation or fails without a partial write.",
+      "models": [
+        {
+          "id": "EC2NativeDefaultRouteLifecycle",
+          "properties": [
+            "OwnedGraph",
+            "GrantAndScope",
+            "AtomicEffect"
+          ],
+          "limits": "Finite graph and state-transition model, not an implementation proof of Go, SQL, XML, IAM evaluation, React or any packet behavior."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/ec2_native_default_route_store.go",
+      "sha256": "13cea841e74273b1a449ba682bdef7b7bbab550c46346a17da527a14d653201c",
+      "disposition": "modeled",
+      "reason": "Parses, authorizes, checks ownership/dependencies and projects the bounded local network relation or fails without a partial write.",
+      "models": [
+        {
+          "id": "EC2NativeDefaultRouteLifecycle",
+          "properties": [
+            "OwnedGraph",
+            "GrantAndScope",
+            "AtomicEffect"
+          ],
+          "limits": "Finite graph and state-transition model, not an implementation proof of Go, SQL, XML, IAM evaluation, React or any packet behavior."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/ec2_native_default_route_test.go",
+      "sha256": "8651c36047d45b1d68c797de910b35caa8948f04df016f1b22c1dcc5f7d106f8",
       "disposition": "test-support",
-      "reason": "Local test evidence for permitted state, ordinary refusal, rollback, cleanup, restart or UI readback; no production behavior.",
+      "reason": "Verifies actual native/CFN Query or authenticated UI, protocol, refusal, rollback and cleanup without modifying production behavior.",
       "models": []
     },
     {
-      "path": "internal/aws/ec2_internet_gateways.go",
-      "sha256": "1f5d9cae845d86bd045485974ba4483bced3334449d6c3170536a7754421032d",
+      "path": "internal/aws/ec2_read.go",
+      "sha256": "2d9d237d2cd20544a3819a92bbce8c015fd4e29c68f163a859a17a2d95ebe920",
       "disposition": "modeled",
-      "reason": "Allowlisted Query parameters and both exact resource grants for attaching or detaching; DryRun cannot write.",
+      "reason": "Parses, authorizes, checks ownership/dependencies and projects the bounded local network relation or fails without a partial write.",
       "models": [
         {
-          "id": "EC2InternetGatewayAttachment",
+          "id": "EC2NativeDefaultRouteLifecycle",
           "properties": [
-            "Authority",
-            "Committed",
-            "ExactMutation"
+            "OwnedGraph",
+            "GrantAndScope",
+            "AtomicEffect"
           ],
-          "limits": "Native attachment configuration only. Prior link availability and same-region eligibility are modeled, not local IAM policy evaluation. Durability and view scopes are finite witnesses: no SQLite/JSON/Query, real concurrency, React, IP assignment, routes, RDS runtime or packet paths. No implementation refinement."
+          "limits": "Finite graph and state-transition model, not an implementation proof of Go, SQL, XML, IAM evaluation, React or any packet behavior."
         }
       ]
     },
     {
-      "path": "internal/aws/ec2_read.go",
-      "sha256": "c43d5d125310b0277775a0621ae526a1df639f156e258704694c5f256df6755e",
+      "path": "internal/aws/ec2_route_tables_native.go",
+      "sha256": "0e2b7959254c24a8b68f0e5424cfd97b059a8abc6dea1f6dac3023105ecdc576",
       "disposition": "modeled",
-      "reason": "Existing request dispatch, authenticated endpoint checks and scoped handoff refusal encompass both new writes.",
+      "reason": "Parses, authorizes, checks ownership/dependencies and projects the bounded local network relation or fails without a partial write.",
       "models": [
         {
-          "id": "EC2InternetGatewayAttachment",
+          "id": "EC2NativeDefaultRouteLifecycle",
           "properties": [
-            "Authority"
+            "OwnedGraph",
+            "GrantAndScope",
+            "AtomicEffect"
           ],
-          "limits": "Native attachment configuration only. Prior link availability and same-region eligibility are modeled, not local IAM policy evaluation. Durability and view scopes are finite witnesses: no SQLite/JSON/Query, real concurrency, React, IP assignment, routes, RDS runtime or packet paths. No implementation refinement."
-        },
-        {
-          "id": "EC2InternetGatewayLifecycle",
-          "properties": [
-            "Authorized"
-          ],
-          "limits": "Detached allocation and cleanup; excludes actual SQL, wire serialization, cryptography, React, attachment mutation, routing and guest behavior. No implementation refinement proof."
+          "limits": "Finite graph and state-transition model, not an implementation proof of Go, SQL, XML, IAM evaluation, React or any packet behavior."
         }
       ]
+    },
+    {
+      "path": "internal/aws/ec2_route_tables_native_registration_test.go",
+      "sha256": "fa0f3556b9c1afaa149490e6aa4b8a7289a392e9a677045052563b6f1f61e2e2",
+      "disposition": "test-support",
+      "reason": "Verifies actual native/CFN Query or authenticated UI, protocol, refusal, rollback and cleanup without modifying production behavior.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/ec2_route_tables_read.go",
+      "sha256": "b47502221246ab86b671d07f84fb0ba921077a2e16721c6f21284968042b630d",
+      "disposition": "modeled",
+      "reason": "Parses, authorizes, checks ownership/dependencies and projects the bounded local network relation or fails without a partial write.",
+      "models": [
+        {
+          "id": "EC2NativeDefaultRouteLifecycle",
+          "properties": [
+            "OwnedGraph",
+            "GrantAndScope",
+            "AtomicEffect"
+          ],
+          "limits": "Finite graph and state-transition model, not an implementation proof of Go, SQL, XML, IAM evaluation, React or any packet behavior."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/ec2_route_tables_read_test.go",
+      "sha256": "511504af3dd53a6110f068f992f577238d1f1a3bb65ef63ff401897b81601baa",
+      "disposition": "test-support",
+      "reason": "Verifies actual native/CFN Query or authenticated UI, protocol, refusal, rollback and cleanup without modifying production behavior.",
+      "models": []
     },
     {
       "path": "internal/aws/ec2_vpc.go",
-      "sha256": "f133ef9f6de9e3a2c451afe037fd5bbb257eafa2f3ac36afc0aff66a5c5bf510",
+      "sha256": "b1625a8af61aec79f381a781ad432e645f24334f5607dcdf7b098cf9a9ed0721",
       "disposition": "modeled",
-      "reason": "VPC discovery accepts a validated native link and VPC deletion refuses dependent state.",
+      "reason": "Parses, authorizes, checks ownership/dependencies and projects the bounded local network relation or fails without a partial write.",
       "models": [
         {
-          "id": "EC2InternetGatewayAttachment",
+          "id": "EC2NativeDefaultRouteLifecycle",
           "properties": [
-            "ExactMutation",
-            "OneGatewayPerVPC"
+            "OwnedGraph",
+            "GrantAndScope",
+            "AtomicEffect"
           ],
-          "limits": "Native attachment configuration only. Prior link availability and same-region eligibility are modeled, not local IAM policy evaluation. Durability and view scopes are finite witnesses: no SQLite/JSON/Query, real concurrency, React, IP assignment, routes, RDS runtime or packet paths. No implementation refinement."
-        },
-        {
-          "id": "EC2InternetGatewayLifecycle",
-          "properties": [
-            "DependentRowsPreserved"
-          ],
-          "limits": "Detached allocation and cleanup; excludes actual SQL, wire serialization, cryptography, React, attachment mutation, routing and guest behavior. No implementation refinement proof."
+          "limits": "Finite graph and state-transition model, not an implementation proof of Go, SQL, XML, IAM evaluation, React or any packet behavior."
         }
       ]
     },
     {
       "path": "internal/server/apidocs/openapi.json",
-      "sha256": "489ed54bb6bf2a9092f009b65d08ac1ee0a99a0e3e3a4ed8865b4e4bdc8cc066",
+      "sha256": "4536215a3dc5a72679721aed8c6cccacefc08c95f1ee8939147998e06aa9fd14",
       "disposition": "presentation",
-      "reason": "Reference description or deterministic development digest for the same embedded runtime; no new endpoint or state machinery here.",
+      "reason": "Exact generated console provenance or read-only Scalar documentation for the bounded gateway route state.",
       "models": []
     },
     {
       "path": "internal/server/ec2_read_access_test.go",
-      "sha256": "44a54d0c49d011f776f0bb9a8587ed2fe4d69b646d777d0a8c0777444f5f5f66",
+      "sha256": "93f3fa1c5c80ed0b9c4486e552a3742519623e40b67ea4f04523b88557e13fab",
       "disposition": "test-support",
-      "reason": "Local test evidence for permitted state, ordinary refusal, rollback, cleanup, restart or UI readback; no production behavior.",
+      "reason": "Verifies actual native/CFN Query or authenticated UI, protocol, refusal, rollback and cleanup without modifying production behavior.",
       "models": []
     },
     {
       "path": "internal/server/ec2_security_groups_console_test.go",
-      "sha256": "6eb95645c3cfa5528ecc3f18081b02c1d26b89a88e0bb634d05c1174ecfdaf17",
+      "sha256": "44f9a6d0961dcadd93a4e8cdd09f7d1eec10838d9ecb7155710a0f78b3a05436",
       "disposition": "test-support",
-      "reason": "Local test evidence for permitted state, ordinary refusal, rollback, cleanup, restart or UI readback; no production behavior.",
+      "reason": "Verifies actual native/CFN Query or authenticated UI, protocol, refusal, rollback and cleanup without modifying production behavior.",
       "models": []
     },
     {
       "path": "internal/server/server.go",
-      "sha256": "99f1c543038afa94e84c28f4e9d63eb61a44d6302751af151f68b0547b1a33ca",
+      "sha256": "0ed70478cfd6fe7227ecfabdfb4c4a3aa9f0e8e68446e98ec692fbe5a54f40c8",
       "disposition": "modeled",
-      "reason": "Only ordinary authenticated non-handoff console scope advertises the bounded lifecycle; dispatch still supplies authority.",
+      "reason": "Advertises the exact bounded native route/readback lifecycle only to ordinary verified local sessions; capability metadata grants no authority.",
       "models": [
         {
-          "id": "EC2InternetGatewayLifecycle",
+          "id": "EC2NativeDefaultRouteLifecycle",
           "properties": [
-            "Authorized"
+            "GrantAndScope",
+            "ExactReadback"
           ],
-          "limits": "Detached allocation and cleanup; excludes actual SQL, wire serialization, cryptography, React, attachment mutation, routing and guest behavior. No implementation refinement proof."
+          "limits": "Finite graph and state-transition model, not an implementation proof of Go, SQL, XML, IAM evaluation, React or any packet behavior."
         }
       ]
     },
     {
       "path": "internal/server/web/app.js",
-      "sha256": "fbd281899a60bbefe076b133bff03efb9f9f2ca34c1baa0bb071ffd5bb5c6ac3",
+      "sha256": "1cf18cfb282defff4561795e5b3db577aa92ece2ddde0ae8dd1fc9cdbf211cb4",
       "disposition": "modeled",
-      "reason": "Deterministic bundled form, scope fence and complete regional readback for gateway writes.",
+      "reason": "Projects and publishes only the current, verified exact route state; the embedded source follows this same admission and readback contract.",
       "models": [
         {
-          "id": "EC2InternetGatewayAttachment",
+          "id": "EC2NativeDefaultRouteLifecycle",
           "properties": [
-            "ReadbackFence",
-            "ConfirmedNotice"
+            "ExactReadback",
+            "VerifiedNotice"
           ],
-          "limits": "Native attachment configuration only. Prior link availability and same-region eligibility are modeled, not local IAM policy evaluation. Durability and view scopes are finite witnesses: no SQLite/JSON/Query, real concurrency, React, IP assignment, routes, RDS runtime or packet paths. No implementation refinement."
-        },
-        {
-          "id": "EC2InternetGatewayInventoryPages",
-          "properties": [
-            "PageFenced",
-            "CompletePublication"
-          ],
-          "limits": "Symbolic paging and selection consistency, not cryptography, overflow/serializer math, real SQL/concurrency, transport or React refinement."
+          "limits": "Finite graph and state-transition model, not an implementation proof of Go, SQL, XML, IAM evaluation, React or any packet behavior."
         }
       ]
     },
     {
       "path": "scripts/formal_model_gate.py",
-      "sha256": "60252de20b19e119f41354a68c3b94848de12e66f99f99cf37aef1ee847f510b",
+      "sha256": "d0fc2ab5fe649f232c7d6232d98e737451bf67b9085061be957efb0a0a023c59",
       "disposition": "formal-infrastructure",
-      "reason": "Pins the bounded native gateway attachment model and already merged #577 route/#130 RDS peer property and control names without changing their registered tests or runtime.",
+      "reason": "Adds independent expected model and mutation inventory for this scope; existing gates and required checks are not lowered.",
       "models": []
     },
     {
       "path": "scripts/test-formal-gate.py",
-      "sha256": "1b239f6266fff909931a90026cc819578a1c52a80a07669b09c16b7f3953f677",
+      "sha256": "24c9e954b6794f3f088df66383d76fa1b9231fcd3c2ee81c5594059de74dc4b4",
       "disposition": "formal-infrastructure",
-      "reason": "Independent exact new attachment model registration, plus additive expected control and property names verified against already merged #577 subnet filters and #130 RDS peer preflight; no earlier assertion removed.",
-      "models": []
-    },
-    {
-      "path": "test/console/ec2_internet_gateway_dom.cjs",
-      "sha256": "25959bb92fe19d16a3442bb64f8f49a7224a2ec0d1bbba770d35cba5565132ee",
-      "disposition": "test-support",
-      "reason": "Local test evidence for permitted state, ordinary refusal, rollback, cleanup, restart or UI readback; no production behavior.",
+      "reason": "Adds independent expected model and mutation inventory for this scope; existing gates and required checks are not lowered.",
       "models": []
     },
     {
       "path": "test/console/ec2_internet_gateway_sdk.py",
-      "sha256": "6d7d56c83e701e83f03c8df3d5736d4655472e3e8bb270f27629ea57a91b135e",
+      "sha256": "5ba736816ce4f18362f474cedcbc2938d355480b8925667e6520f0cb36a3a2c0",
       "disposition": "test-support",
-      "reason": "Local test evidence for permitted state, ordinary refusal, rollback, cleanup, restart or UI readback; no production behavior.",
+      "reason": "Verifies actual native/CFN Query or authenticated UI, protocol, refusal, rollback and cleanup without modifying production behavior.",
+      "models": []
+    },
+    {
+      "path": "test/console/ec2_native_default_route_dom.cjs",
+      "sha256": "40d4867e5c7ae803aa3d974f4df37742205689fac605f9a3d11ff4aca9e5f08f",
+      "disposition": "test-support",
+      "reason": "Verifies actual native/CFN Query or authenticated UI, protocol, refusal, rollback and cleanup without modifying production behavior.",
+      "models": []
+    },
+    {
+      "path": "test/console/ec2_native_default_route_sdk.py",
+      "sha256": "9eb58436ed30d676f7b95327a1495d52740a0a4e913d4f5e17249152c70b8927",
+      "disposition": "test-support",
+      "reason": "Verifies actual native/CFN Query or authenticated UI, protocol, refusal, rollback and cleanup without modifying production behavior.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/ec2_network_contract.py",
+      "sha256": "941d42f9fac493b0a407735a18fadc689835633bc4dc17a474f6d61611495775",
+      "disposition": "test-support",
+      "reason": "Verifies actual native/CFN Query or authenticated UI, protocol, refusal, rollback and cleanup without modifying production behavior.",
       "models": []
     },
     {
       "path": "tools/console/bundle-digests.json",
-      "sha256": "025e803f66a6b5fc34ce2262ed78f1752f4a61a578e38d90c4dabcf70865596f",
+      "sha256": "ed7f37bba6fdf12c737cf0a43444e416f5a9091c5df3a0c7914b753909db24f6",
       "disposition": "presentation",
-      "reason": "Reference description or deterministic development digest for the same embedded runtime; no new endpoint or state machinery here.",
+      "reason": "Exact generated console provenance or read-only Scalar documentation for the bounded gateway route state.",
       "models": []
     },
     {
       "path": "tools/console/bundle-inputs.json",
-      "sha256": "78fdc5cd84afd669873733a558ff465a6fbe0c100161d7f50609b5c763486191",
+      "sha256": "88aaf1029cc42911bad2bf892a92713160befc4987b72460ad752931175f856f",
       "disposition": "presentation",
-      "reason": "Reference description or deterministic development digest for the same embedded runtime; no new endpoint or state machinery here.",
+      "reason": "Exact generated console provenance or read-only Scalar documentation for the bounded gateway route state.",
       "models": []
     },
     {
-      "path": "tools/console/src/ec2-internet-gateways.mjs",
-      "sha256": "4c908724b652c625e4ef9d458cb15ef3fb5bd7a07e7675461276aae895fbaaca",
+      "path": "tools/console/src/ec2-native-route-tables.mjs",
+      "sha256": "eb84bd2547ec5e5e8668e139673aac5e151f3b00591b9d204f27471eb32808a8",
       "disposition": "modeled",
-      "reason": "Attachment acknowledgments require matching exact response and complete live regional list; request/region bind rows.",
+      "reason": "Projects and publishes only the current, verified exact route state; the embedded source follows this same admission and readback contract.",
       "models": [
         {
-          "id": "EC2InternetGatewayAttachment",
+          "id": "EC2NativeDefaultRouteLifecycle",
           "properties": [
-            "ReadbackFence",
-            "ConfirmedNotice"
+            "ExactReadback",
+            "VerifiedNotice"
           ],
-          "limits": "Native attachment configuration only. Prior link availability and same-region eligibility are modeled, not local IAM policy evaluation. Durability and view scopes are finite witnesses: no SQLite/JSON/Query, real concurrency, React, IP assignment, routes, RDS runtime or packet paths. No implementation refinement."
-        },
-        {
-          "id": "EC2InternetGatewayInventoryPages",
-          "properties": [
-            "PageFenced",
-            "CompletePublication"
-          ],
-          "limits": "Symbolic paging and selection consistency, not cryptography, overflow/serializer math, real SQL/concurrency, transport or React refinement."
+          "limits": "Finite graph and state-transition model, not an implementation proof of Go, SQL, XML, IAM evaluation, React or any packet behavior."
         }
       ]
     },
     {
-      "path": "tools/console/src/ec2-vpc-internet-gateways.jsx",
-      "sha256": "01438cdf882688f01e285d0c4fc1d43679dda1c5618c98b5a8fc06c477b8cc79",
+      "path": "tools/console/src/ec2-readonly.jsx",
+      "sha256": "a8c6047c2928b00dca44b72c4c323b51740448d4b3a21ec2bd7546f17cf15168",
       "disposition": "modeled",
-      "reason": "Only the current selected native pair is writable, and the UI publishes only confirmed fresh state.",
+      "reason": "Projects and publishes only the current, verified exact route state; the embedded source follows this same admission and readback contract.",
       "models": [
         {
-          "id": "EC2InternetGatewayAttachment",
+          "id": "EC2NativeDefaultRouteLifecycle",
           "properties": [
-            "ReadbackFence",
-            "ConfirmedNotice"
+            "ExactReadback",
+            "VerifiedNotice"
           ],
-          "limits": "Native attachment configuration only. Prior link availability and same-region eligibility are modeled, not local IAM policy evaluation. Durability and view scopes are finite witnesses: no SQLite/JSON/Query, real concurrency, React, IP assignment, routes, RDS runtime or packet paths. No implementation refinement."
+          "limits": "Finite graph and state-transition model, not an implementation proof of Go, SQL, XML, IAM evaluation, React or any packet behavior."
+        }
+      ]
+    },
+    {
+      "path": "tools/console/src/ec2-vpc-native-route-tables.jsx",
+      "sha256": "840ce8d3581d91cf774d437490639404514e0e602b44e804c773d98e6d92ad49",
+      "disposition": "modeled",
+      "reason": "Projects and publishes only the current, verified exact route state; the embedded source follows this same admission and readback contract.",
+      "models": [
+        {
+          "id": "EC2NativeDefaultRouteLifecycle",
+          "properties": [
+            "ExactReadback",
+            "VerifiedNotice"
+          ],
+          "limits": "Finite graph and state-transition model, not an implementation proof of Go, SQL, XML, IAM evaluation, React or any packet behavior."
+        }
+      ]
+    },
+    {
+      "path": "tools/console/src/main.jsx",
+      "sha256": "ee2f970a363d79337e10e8feef80800327b8121c9e4d45c6dc4d91b88cbb9844",
+      "disposition": "modeled",
+      "reason": "Projects and publishes only the current, verified exact route state; the embedded source follows this same admission and readback contract.",
+      "models": [
+        {
+          "id": "EC2NativeDefaultRouteLifecycle",
+          "properties": [
+            "ExactReadback",
+            "VerifiedNotice"
+          ],
+          "limits": "Finite graph and state-transition model, not an implementation proof of Go, SQL, XML, IAM evaluation, React or any packet behavior."
         }
       ]
     }
