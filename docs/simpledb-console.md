@@ -70,3 +70,29 @@ and item with the names you used in the console. **Send** reads the same saved
 values using your local sign-in with `sdb:GetAttributes` on the domain. The form
 does not create or change data. This is the local subset of
 [AWS GetAttributes](https://docs.aws.amazon.com/AmazonSimpleDB/latest/DeveloperGuide/SDB_API_GetAttributes.html).
+
+## Verify shared local state
+
+The opt-in cross-surface check mounts the served Cloudscape HTML and JavaScript
+in jsdom and uses the exact served API reference examples and pinned official
+SDK against disposable loopback simulators. It verifies both directions:
+SDK values appear in the Console, and Console conditional writes and deletes
+appear in SDK and API reference reads. Two teams use different processes,
+database files and login tokens for the same domain/item names. The check
+also verifies a denied write, signed-session refusal, persistence after
+restart and cleanup observed by all three entry points.
+
+Use a clean checkout, an independently verified simulator binary from that
+revision, the pinned SimpleDB Python SDK packages in `scripts/requirements-test.txt`,
+and approved local Node v24.22.3 and jsdom 30.0.1 installations:
+
+```sh
+python3 test/e2e/simpledb_crosssurface.py \
+  --revision "$(git rev-parse HEAD)" \
+  --binary dist/tenkacloud-simulator --binary-sha256 "$VERIFIED_SHA256" \
+  --node /absolute/path/to/node --jsdom /absolute/path/to/node_modules/jsdom
+```
+
+This runs offline with no cloud account, external endpoint, or installed
+browser required. It verifies Console DOM controls and real HTTP replies, not
+browser rendering, layout, or clicks in the Scalar API reference.
