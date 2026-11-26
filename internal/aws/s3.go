@@ -540,6 +540,43 @@ func (g *Gateway) list(w http.ResponseWriter, r *http.Request, name string) {
 	}
 	writeXML(w, 200, result)
 }
+
+// s3ReadIfMatch validates the entire combined field before testing the
+// selected representation. Weak tags are valid list members but never match.
+func s3ReadIfMatch(fields []string, selected string) bool {
+	value := strings.Trim(strings.Join(fields, ","), " \t")
+	if value == "*" {
+		return true
+	}
+	matched := false
+	for value != "" {
+		tag, weak := strings.CutPrefix(value, "W/")
+		if len(tag) < 2 || tag[0] != '"' {
+			return false
+		}
+		end := strings.IndexByte(tag[1:], '"') + 1
+		if end == 0 {
+			return false
+		}
+		// Inside the quotes RFC 9110 etagc excludes controls, space and DEL.
+		for i := 1; i < end; i++ {
+			if tag[i] <= ' ' || tag[i] == 0x7f {
+				return false
+			}
+		}
+		matched = matched || !weak && tag[:end+1] == selected
+		rest := strings.TrimLeft(tag[end+1:], " \t")
+		if rest == "" {
+			return matched
+		}
+		if rest[0] != ',' {
+			return false
+		}
+		value = strings.TrimLeft(rest[1:], " \t")
+	}
+	return false
+}
+
 func (g *Gateway) object(w http.ResponseWriter, r *http.Request, name, key string) {
 	switch r.Method {
 	case "PUT":
@@ -588,9 +625,17 @@ func (g *Gateway) object(w http.ResponseWriter, r *http.Request, name, key strin
 		w.Header().Set("ETag", obj.ETag)
 		w.Header().Set("Last-Modified", obj.Modified.Format(http.TimeFormat))
 		w.Header().Set("Accept-Ranges", "bytes")
-		if match := r.Header.Get("If-Match"); match != "" && match != "*" && match != obj.ETag {
-			fail(w, r, "PreconditionFailed", "ETag does not match.")
-			return
+		if match := r.Header.Values("If-Match"); len(match) != 0 {
+			if !s3ReadIfMatch(match, obj.ETag) {
+				fail(w, r, "PreconditionFailed", "ETag does not match.")
+				return
+			}
+			if len(match) != 1 || match[0] != "*" && match[0] != obj.ETag {
+				// ServeContent rechecks only the first field value. Preserve a
+				// true If-Match and its precedence over If-Unmodified-Since.
+				r = r.Clone(r.Context())
+				r.Header.Set("If-Match", obj.ETag)
+			}
 		}
 		if none := r.Header.Get("If-None-Match"); none == "*" || none == obj.ETag {
 			w.WriteHeader(304)

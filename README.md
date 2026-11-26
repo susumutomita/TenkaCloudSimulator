@@ -89,6 +89,8 @@ console, CloudFormation adapter or Challenge integration.
   [DynamoDB](docs/dynamodb.md), [Parameter Store](docs/ssm-parameters.md).
   S3 treats one explicit `x-amz-storage-class: STANDARD` as omission only for
   `PutObject` and `CreateMultipartUpload`; archive classes and restore remain unsupported.
+  `GetObject` and `HeadObject` also accept `If-Match` lists without empty elements
+  when a strong tag matches the selected version. Write conditions are unchanged.
 - **Systems Manager documents:** [definition and version history](docs/ssm-documents.md).
   List versions through the native read-only API or compare saved definitions in the console.
   This does not execute the documents.

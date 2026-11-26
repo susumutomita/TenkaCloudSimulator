@@ -1,65 +1,57 @@
 {
   "version": 1,
-  "base_sha": "8e4b39e19c9a59ebdadf267127d224d1cf17e762",
+  "base_sha": "10290614c12d2cd876a1508f1fe09c4045485b0f",
   "changes": [
     {
       "path": "README.md",
-      "sha256": "5f70acecafce3621050fafc7f6697fcf2aa58e24ae565da43193931dc4ce8484",
+      "sha256": "8bbdae77f3b09b0a00ea83bf6e8d715dc2abc77c18375779968648c15bdc25db",
       "disposition": "documentation",
-      "reason": "Document the bounded local refusal for adding a fair-share policy to an existing FIFO queue.",
-      "models": []
-    },
-    {
-      "path": "docs/aws-catalog-services.md",
-      "sha256": "ac493c713ca2553e9fd4678001e02e100fd7aa5390c5759c26b8b21117dda761",
-      "disposition": "documentation",
-      "reason": "Generated catalog text changes exactly one Batch bounds sentence; supported operation inventory unchanged.",
+      "reason": "Records the bounded selected-version read If-Match contract, strict sender list grammar, and unchanged write and lookup semantics.",
       "models": []
     },
     {
       "path": "docs/design/0001-go-standalone.md",
-      "sha256": "d4b5d0e432c1498aeba276c817980ccffb2fc3df5467fafd0ce2d26f8c6a33e7",
+      "sha256": "5c2da3027dc06d49c7c91b22a292af1ee90ad916bdb6dd09ba0a3b31b8a173eb",
       "disposition": "documentation",
-      "reason": "Describe the local current-generation transaction mode check and unchanged state on refusal.",
+      "reason": "Records the bounded selected-version read If-Match contract, strict sender list grammar, and unchanged write and lookup semantics.",
       "models": []
     },
     {
-      "path": "internal/aws/catalog/batch_queue_policy_mode_test.go",
-      "sha256": "ec02b7137fb3031cc25d140e353e55a8b09c1eb81716e56402d260c322d732f0",
-      "disposition": "test-support",
-      "reason": "Exercise the bounded local queue update on a real SQLite fixture, including exact saved-state refusal and preserved successful updates.",
+      "path": "docs/s3.md",
+      "sha256": "02eb63899eb8424e8918e9cfddd23e21e7060e9ee22376356241a4811ea1a460",
+      "disposition": "documentation",
+      "reason": "Records the bounded selected-version read If-Match contract, strict sender list grammar, and unchanged write and lookup semantics.",
       "models": []
     },
     {
-      "path": "internal/aws/catalog/services_compute3.go",
-      "sha256": "044a4b1bf8fdc06e2b0309be57dd467d14466d4b08acd0dad1bbd2a349e83db4",
+      "path": "internal/aws/s3.go",
+      "sha256": "f1974b6af43a57da7f75b1e1505ff42f9ed6118a18bd13020b9ea1eb044903cf",
       "disposition": "modeled",
-      "reason": "Add a single Batch policy-mode check via existing current-generation update callback after authorization; refuse FIFO to fair-share before persistence, without altering operational scope.",
+      "reason": "Changing only the selected GET/HEAD response predicate keeps the existing IAM, lookup order and object mutation rules unchanged.",
       "models": [
         {
-          "id": "CatalogResourceLifecycle",
+          "id": "ObjectStore",
           "properties": [
-            "AuthorizationFirst",
-            "FailureFrame",
-            "PeerFrame",
-            "StaleWriteRejected"
+            "NoOrphans",
+            "NoUnauthorizedMutation",
+            "DenyWins"
           ],
-          "limits": "Models only existing abstract authorization, stale/failed update and peer frames; no FIFO/fair-share field or precise policy-mode relation, request formatting, actual IAM, SQLite implementation/concurrency/driver, workloads, browser, or Go refinement. Scoped native and real local pinned SDK tests check the concrete mode transition and rollback."
+          "limits": "Models only the existing authorized and denied object mutations, not read response selection, HTTP entity-tag syntax, prepared or legacy SQLite reads, Go semantics, or implementation refinement. Exact native and Go tests independently exercise current and versioned conditions and visible stored state."
         }
       ]
     },
     {
-      "path": "internal/server/apidocs/catalog/batch.json",
-      "sha256": "ae81a052da4fe28a71c4d7cc9038d812f7327ed6aa79ed4f4b75b20291d87a6d",
-      "disposition": "presentation",
-      "reason": "Describe the bounded FIFO restriction in Batch info and tag only; existing official routes, request/error schemas and no workload claim unchanged.",
+      "path": "internal/aws/s3_if_match_test.go",
+      "sha256": "f58fa5ee0c99c1808c9c02b70e4d3f10a80b179a02e87a2b7a42c21524efbcc8",
+      "disposition": "test-support",
+      "reason": "Runs exact read and write-frame behavior on local owned S3 and pinned SDK state, including restart and final cleanup.",
       "models": []
     },
     {
-      "path": "test/e2e/catalog_fixtures/batch.json",
-      "sha256": "24660bf6f0af6b7e6bf7d808708b3ebdd68889bad4d361384f742a50922bf54e",
+      "path": "test/e2e/s3_read_if_match.py",
+      "sha256": "a429cdcef7c70476fdb103333fda5d4383ae45a5bec24ff5c388e0dd33be080a",
       "disposition": "test-support",
-      "reason": "Pinned native SDK fixture adds FIFO refusal and unchanged permissions/readback, restart and cleanup.",
+      "reason": "Runs exact read and write-frame behavior on local owned S3 and pinned SDK state, including restart and final cleanup.",
       "models": []
     }
   ]

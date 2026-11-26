@@ -82,6 +82,8 @@ S3 version history/public-access-blockはAWS layerのaws_s3_versions/aws_s3_conf
 
 S3 REST/XMLは既存のIAM判定後、通常の`PutObject`と`CreateMultipartUpload`だけで、単一の`x-amz-storage-class: STANDARD`を省略と同じ扱いにする。既存の保存形式・応答・トランザクションは変えない。他のstorage class、`RestoreObject`、対象外の操作での当該ヘッダーは引き続き`NotImplemented`。
 
+`GetObject`と`HeadObject`は既存のIAM判定とバージョン解決の後、`If-Match`の送信側文法に沿った空要素のないリストを検証し、選択した版に強いETagが1つでも一致すると条件を満たす。`*`の単独指定は従来どおり。不正な書式や一致なしは`412 PreconditionFailed`。版の参照処理、他の条件の優先順位、書き込みは変えない。
+
 CloudFormationはservice RoleArnを受け付けず、呼出者のimmutable policy snapshotでStack ARNに加え全resource actionを事前確認する。SSM Put/DeleteParameter、IAM Create/DeleteRole・inline policy・指定managed policyのattach/detach・作成時TagRole、S3 Create/DeleteBucketと指定設定のPut actionを個別評価する。CAPABILITY_IAMは権限付与ではない。resource事前確認の拒否は変更を残さない。version履歴が残るbucketのDeleteStackはAPIエラーとなり、先行削除もrollbackする。非同期AWS lifecycle/Eventsとの同等性は主張しない。
 
 CFNのDependsOn文字列/配列をimplicit Ref/GetAtt/Subと統合して事前検証し、依存順で作成・逆順で削除する。inline Pythonはindex.pyのZIPへ変換し、native saveLambdaFunctionを同じtransactionで呼び出す。新しいresource typeのclaim namespaceは未対応旧readerのIAM fallbackに一致させず、未知kindはdefault処理で削除しない。旧binaryとのDB共有/downgradeはサポートしない。
