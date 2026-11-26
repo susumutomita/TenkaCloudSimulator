@@ -15,6 +15,7 @@ simulation requirements: it needs Linux or macOS (amd64 or arm64; WSL2 on Window
 bundle and private operator configuration. Host clock qualification is also
 required; enabling the flag does not establish it. See [opt-in runtime setup](docs/start.md#explicit-battle-runtime-linux-and-macos).
 Battle capability discovery resolves only after the retained instance is ready and its exact CloudFormation stack is complete.
+A CloudFormation instance must use a subnet and security groups declared by that same stack, all in one VPC. Invalid placement is rejected before any pending stack or guest launch is published.
 
 
 ## Start and sign in

@@ -2,6 +2,7 @@ package aws
 
 import (
 	"context"
+	"database/sql"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -62,6 +63,73 @@ func (s *StackStore) prepareStackInstance(ctx context.Context, record StackRecor
 		return nil, fmt.Errorf("instance runtime returned no attempt")
 	}
 	return &stackInstanceAttempt{attempt: attempt, resource: *selected}, nil
+}
+
+// Placement is deliberately local to the stack: granting RunInstances on an
+// ARN is not proof that the stack declared or owns the underlying network.
+func validateStackInstancePlacement(ctx context.Context, tx *sql.Tx, record StackRecord, instance StackResource) error {
+	invalid := ssmFailure{"ValidationError", "Instance requires a subnet and security groups in the same VPC owned by this stack."}
+	owned := func(kind, id string) (EC2NetworkResource, error) {
+		var declaration *StackResource
+		for i := range record.Resources {
+			r := &record.Resources[i]
+			if r.Type == kind && r.PhysicalID == id && id != "" {
+				if declaration != nil {
+					return EC2NetworkResource{}, invalid
+				}
+				declaration = r
+			}
+		}
+		if declaration == nil {
+			return EC2NetworkResource{}, invalid
+		}
+		state, err := networkRead(ctx, tx, record.Region, id)
+		if errors.Is(err, sql.ErrNoRows) {
+			return state, invalid
+		}
+		if err != nil {
+			return state, err
+		}
+		if state.Kind != kind || state.StackID != record.ID || state.VPCID != stringValue(declaration.Properties["VpcId"]) {
+			return state, invalid
+		}
+		var claimed bool
+		if err := tx.QueryRowContext(ctx, `SELECT EXISTS(SELECT 1 FROM aws_cfn_ownership WHERE namespace=? AND kind=? AND physical_id=? AND stack_id=?)`,
+			stackResourceNamespace(record.Region, kind), kind, id, record.ID).Scan(&claimed); err != nil {
+			return state, err
+		}
+		if !claimed {
+			return state, invalid
+		}
+		return state, nil
+	}
+	subnet, err := owned("AWS::EC2::Subnet", stringValue(instance.Properties["SubnetId"]))
+	if err != nil {
+		return err
+	}
+	if _, err = owned("AWS::EC2::VPC", subnet.VPCID); err != nil {
+		return err
+	}
+	groups, ok := instance.Properties["SecurityGroupIds"].([]any)
+	if !ok || len(groups) == 0 || len(groups) > 5 {
+		return invalid
+	}
+	seen := map[string]bool{}
+	for _, raw := range groups {
+		id := stringValue(raw)
+		if seen[id] {
+			return invalid
+		}
+		seen[id] = true
+		group, err := owned(ec2SecurityGroupKind, id)
+		if err != nil {
+			return err
+		}
+		if group.VPCID != subnet.VPCID {
+			return invalid
+		}
+	}
+	return nil
 }
 
 func stackStatus(record StackRecord) string {

@@ -1,47 +1,63 @@
 {
   "version": 1,
-  "base_sha": "e3883f4fd2ac7cd73e3e9818bf91c778cb4d9664",
+  "base_sha": "139830c0f9ddbc0fc393b033f2affd455d30a2cd",
   "changes": [
     {
       "path": "README.md",
-      "sha256": "69d5e12bfb78443c4de311d2712d01c3b41446ae5af54fc2b9263116cbfc4ed8",
+      "sha256": "ac0d87c84245bf8930975acd1939a73bda4a3dd9592becc2cacc423f92062559",
       "disposition": "documentation",
-      "reason": "Describes how to select an existing read-only EC2 Query preset; no simulator runtime or state transitions change.",
-      "models": []
-    },
-    {
-      "path": "docs/api-reference.md",
-      "sha256": "5f8130c55ba1dd9681d365a4af18275c9b5b808bed95118272d67599191f4da2",
-      "disposition": "documentation",
-      "reason": "Describes how to select an existing read-only EC2 Query preset; no simulator runtime or state transitions change.",
+      "reason": "Documents already bounded stack-local network support and that an invalid placement fails before the guest launch.",
       "models": []
     },
     {
       "path": "docs/design/0001-go-standalone.md",
-      "sha256": "0b9b5a184fd6d15785c33d17458b8d12e69d1597ea342f12f73f0e98a4c11a25",
+      "sha256": "b738e70f6737b49020042e489252c19d8ca1e490423dbb51d261103dafdff01c",
       "disposition": "documentation",
-      "reason": "Describes how to select an existing read-only EC2 Query preset; no simulator runtime or state transitions change.",
+      "reason": "Records the placement admission boundary, transaction rollback and unchanged post-commit readiness behavior.",
       "models": []
     },
     {
-      "path": "internal/server/apidocs/openapi.json",
-      "sha256": "eea3c31766d3f6688f4a87228ce8251d10c684cc3e7c4a01e46ae1b88f67b1a3",
-      "disposition": "presentation",
-      "reason": "Exposes one fixed DescribeInstances example, action, API date and service selector; existing authentication, routing and state remain unchanged.",
-      "models": []
+      "path": "internal/aws/cloudformation.go",
+      "sha256": "c0806d6853f57c327ae069febc65a9197df3d057f3bfd341b0da65a392e4a730",
+      "disposition": "modeled",
+      "reason": "Require the already-modeled network ownership gate before any CREATE_IN_PROGRESS is committed and before calling Launch.",
+      "models": [
+        {
+          "id": "CanonicalVMComposition",
+          "properties": [
+            "NetworkOwnership"
+          ],
+          "limits": "NetworkCompile abstracts same owner and valid topology; concrete SQL claim/document matching, per-group VPC equivalence, rollback of partial inserts and Go runtime ordering are checked by regression tests, not a refinement proof."
+        }
+      ]
     },
     {
-      "path": "test/console/ec2_describe_instances_reference_native.py",
-      "sha256": "2c4fdf31466bc1c29c9b95bcfb7e0a384c0aff6c67f2c8cd40a1106ae85d20bd",
+      "path": "internal/aws/cloudformation_instance.go",
+      "sha256": "76a51aa6e0e7b535cc56ca83147ab8efd215c8d0a4e1b1cdeb39a061dc735afe",
+      "disposition": "modeled",
+      "reason": "Checks a declared, claimed, stored subnet, its VPC and each distinct group within the same VPC and stack before publication.",
+      "models": [
+        {
+          "id": "CanonicalVMComposition",
+          "properties": [
+            "NetworkOwnership"
+          ],
+          "limits": "NetworkCompile abstracts same owner and valid topology; concrete SQL claim/document matching, per-group VPC equivalence, rollback of partial inserts and Go runtime ordering are checked by regression tests, not a refinement proof."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/cloudformation_instance_placement_test.go",
+      "sha256": "97e14e6c08f05895d321f0204edc88496199d0ecb4ab4290c776fca7aa8232cf",
       "disposition": "test-support",
-      "reason": "Checks the precise read-only preset and existing reference against regression. Neither simulator runtime nor modeled transition changes.",
+      "reason": "Exercises CFN transactions, valid and rejected placement, no leaked state or peer changes, plus isolated malformed records, missing claims/rows, readback drift and distinct internal SQL/read errors.",
       "models": []
     },
     {
-      "path": "test/e2e/test_sakura_openapi.py",
-      "sha256": "803d79678fddec1d51361e2df6205370fbb5c6053ac5b9b823d16bb198e7e06b",
+      "path": "internal/aws/cloudformation_instance_test.go",
+      "sha256": "146473767ed9dee9016e7eeebeda9a9ba27a1ad23d23bf7cc7601ee07890ce29",
       "disposition": "test-support",
-      "reason": "Checks the precise read-only preset and existing reference against regression. Neither simulator runtime nor modeled transition changes.",
+      "reason": "Updates existing lifecycle-only instance fixtures to name the valid subnet and group actually built in their stack; lifecycle assertions remain unchanged.",
       "models": []
     }
   ]

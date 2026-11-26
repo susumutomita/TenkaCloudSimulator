@@ -927,6 +927,11 @@ func (s *StackStore) createCheckedContext(ctx context.Context, record StackRecor
 	if entry == nil {
 		return tx.Commit()
 	}
+	// All declarations and claims now exist in this transaction. Refuse bad
+	// placement before publishing pending state; Launch only runs after commit.
+	if err = validateStackInstancePlacement(ctx, tx, record, entry.resource); err != nil {
+		return err
+	}
 	if _, loaded := s.instanceAttempts.LoadOrStore(record.ID, entry); loaded {
 		return fmt.Errorf("instance attempt already retained")
 	}
