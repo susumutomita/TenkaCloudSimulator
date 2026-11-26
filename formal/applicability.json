@@ -109,6 +109,13 @@
       "models": []
     },
     {
+      "path": "internal/aws/ec2_internet_gateway_attachment_resilience_test.go",
+      "sha256": "9cc6616689f2a333c4e85a3faffbae5d8dd18f6806ccf09c8931c60b2f37dce1",
+      "disposition": "test-support",
+      "reason": "Local native Internet Gateway state/fault regression tests only: prove refusal, transactional rollback of exact network and CloudFormation witnesses, quota cleanup, and recovery; no production or gate behavior changes.",
+      "models": []
+    },
+    {
       "path": "internal/aws/ec2_internet_gateway_attachment_store.go",
       "sha256": "fc9dfe360eb23a4454be52467b51ea87748af6c479c084992ac03dc65d2e566b",
       "disposition": "modeled",
