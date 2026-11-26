@@ -74,9 +74,10 @@ with running(authenticated=True) as (endpoint, operator), sync_playwright() as p
     expect(page.get_by_text('Console VPC 日本語',exact=True).first).to_be_visible()
     # The created VPC is selected; its delete requires typing delete.
     expect(page.get_by_role('radio',name='Select '+native_id,exact=True)).to_be_checked()
-    expect(page.get_by_text('EC2-managed VPCs have no explicit route tables in this simulator. No lookup was made.',exact=True)).to_be_visible()
+    expect(page.get_by_text('No detached route tables are saved for this VPC.',exact=True)).to_be_visible()
     expect(page.get_by_text(association['SubnetId'],exact=True)).to_have_count(0)
-    expect(page.get_by_role('button',name='Refresh route tables',exact=True)).to_have_count(0)
+    expect(page.get_by_role('button',name='Refresh route tables',exact=True)).to_be_enabled()
+    expect(page.get_by_role('button',name='Create route table',exact=True)).to_be_enabled()
     page.get_by_role('button',name='Delete VPC',exact=True).click()
     dialog=page.get_by_role('dialog')
     expect(dialog.get_by_role('button',name='Delete',exact=True)).to_be_disabled()

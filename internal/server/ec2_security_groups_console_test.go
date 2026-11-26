@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"net/url"
+	"reflect"
 	"strings"
 	"testing"
 
@@ -45,20 +46,19 @@ func TestEC2SecurityGroupsConsoleCapability(t *testing.T) {
 			ec2 := map[string]any{"console": true}
 			capabilities := map[string]any{"services": map[string]any{"ec2": ec2}}
 			addEC2NetworkReadbackCapabilities(w, r, capabilities)
-			for name, op := range map[string]string{"securityGroupReadback": "DescribeSecurityGroups", "routeTableReadback": "DescribeRouteTables"} {
-				got, ok := ec2[name]
-				if ok != c.want || ok && got != op {
-					t.Fatalf("capability %q=%v, expected advertised=%v", name, got, c.want)
-				}
-				delete(ec2, name)
+			// Pin the exact helper contract independently: capability claims are
+			// available to ordinary signed-in sessions, not to a scoped handoff.
+			// The route writer does not change legacy reads or advertise routes
+			// or subnet associations.
+			want := map[string]any{"console": true}
+			if c.want {
+				want["securityGroupReadback"] = "DescribeSecurityGroups"
+				want["routeTableReadback"] = "DescribeRouteTables"
+				want["subnetLifecycle"] = []string{"DescribeSubnets", "CreateSubnet", "DeleteSubnet"}
+				want["routeTableLifecycle"] = []string{"DescribeRouteTables", "CreateRouteTable", "DeleteRouteTable"}
 			}
-			subnet, got := ec2["subnetLifecycle"].([]string)
-			if got != c.want || got && strings.Join(subnet, ",") != "DescribeSubnets,CreateSubnet,DeleteSubnet" {
-				t.Fatal("unexpected subnet lifecycle advertisement")
-			}
-			delete(ec2, "subnetLifecycle")
-			if ec2["console"] != true || len(ec2) != 1 {
-				t.Fatal("the pane must not modify other EC2 capabilities")
+			if !reflect.DeepEqual(ec2, want) {
+				t.Fatalf("unexpected exact EC2 network capabilities: got %+v, want %+v", ec2, want)
 			}
 		})
 	}

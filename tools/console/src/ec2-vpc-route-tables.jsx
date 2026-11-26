@@ -36,7 +36,7 @@ function Details({table}) {
 
 export function RouteTableReadout({status,tables=[],preferred='',onSelect}) {
   const {t} = useLocale();
-  if (status==='native') return <Box>{t('EC2-managed VPCs have no explicit route tables in this simulator. No lookup was made.','このシミュレーターでは EC2 管理の VPC に明示的なルートテーブルはありません。問い合わせは行っていません。')}</Box>;
+  if (status==='native') return <Box>{t('This view reads CloudFormation-managed VPCs only. No lookup was made.','この画面の参照対象は CloudFormation 管理の VPC のみです。問い合わせは行っていません。')}</Box>;
   if (status==='unverified') return <Box>{t('Select a verified CloudFormation-managed VPC to read its route tables.','ルートテーブルを表示するには CloudFormation 管理と確認できる VPC を選択してください。')}</Box>;
   if (status==='loading') return <StatusIndicator type="loading">{t('Loading route tables','ルートテーブルを読み込み中')}</StatusIndicator>;
   if (status==='denied') return <Alert type="error" header={t('Route table access denied','ルートテーブルの参照が拒否されました')}>{t('A signed-in identity needs ec2:DescribeRouteTables. No route table data was shown.','サインイン済みの ID に ec2:DescribeRouteTables 権限が必要です。ルートテーブル情報は表示していません。')}</Alert>;

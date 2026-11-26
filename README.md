@@ -94,7 +94,7 @@ console, CloudFormation adapter or Challenge integration.
 - **Identity and secrets:** [IAM](docs/iam.md), [native SDK / STS](docs/sts-native.md),
   [Secrets Manager](docs/secrets-manager.md), [KMS](docs/kms.md), [WAFv2](docs/wafv2.md).
 - **Networking:** [EC2/VPC discovery and VPC create/delete](docs/ec2-read-discovery.md),
-  [explicit route tables, default gateway routes and subnet associations in native EC2 and the VPC Console](docs/ec2-read-discovery.md#route-table-readback),
+  [route tables: CloudFormation readback and detached native VPC Console lifecycle](docs/ec2-read-discovery.md#route-table-readback),
   [IPv4 subnet lifecycle for existing EC2-managed VPCs](docs/ec2-native-subnet.md),
   [security groups: CloudFormation readback and detached Console workflow](docs/ec2-read-discovery.md#security-group-readback),
   [detached network ACL API and Console workflow](docs/ec2-detached-network-acls.md),

@@ -141,16 +141,16 @@ This uses isolated, authenticated processes over numeric loopback, including a
 restart, exact grants and typed cleanup. It neither launches a guest nor talks
 to AWS.
 
-To check the actual served combination of subnet, groups and ACLs alongside
-CloudFormation readback, run `test/console/ec2_native_subnet.py` with the built
+To check the actual served combination of subnet, detached groups, ACLs and route
+tables alongside CloudFormation readback, run `test/console/ec2_native_subnet.py` with the built
 `SIMULATOR_BINARY`, `JSDOM_MODULE` and pinned boto3/botocore. This checks
 Cloudscape in JSDOM with the real API; it is not a Chromium layout assertion
 or a mandatory E2E gate.
 
 ## Route-table readback
 
-Use `Action=DescribeRouteTables` without filters to list explicit, CloudFormation-owned
-tables in this region, ordered by table ID. Each item gives the table and VPC IDs,
+Use `Action=DescribeRouteTables` without filters to list explicit CloudFormation and
+detached native tables in this region, ordered by table ID. Each item gives the table and VPC IDs,
 local owner, tags, explicit subnet associations (`main=false`) and saved, enabled
 IPv4 default routes to an attached Internet Gateway. Removing the default route
 through the existing trusted provider removes it from the result, including after
@@ -174,11 +174,26 @@ default route, explicit subnet associations and tags. The Console makes the same
 regional EC2 Query as the SDK with the current exercise identity, validates the
 whole response, then selects the matching VPC in the browser. This selection is
 not an IAM filter: the operation requires regional `ec2:DescribeRouteTables` on
-`*`. A refusal or an incomplete reply is never displayed as “no tables.” A native
-EC2 VPC is explicitly marked inapplicable without a lookup; scoped handoffs do
-not offer the pane. Refresh, VPC, region and identity changes discard old replies.
-This view adds no mutations or forwarding engine.
-Check: `go test ./internal/aws -run '^TestEC2DescribeRouteTablesReadback$' -count=1`.
+`*`. A refusal or incomplete reply is never displayed as “no tables.” The
+CloudFormation view offers no mutations. Scoped handoffs do not offer either
+route table pane. Refresh, VPC, region and identity changes discard old replies.
+
+For a verified **EC2-managed** VPC, **Route tables** offers local
+[CreateRouteTable](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_CreateRouteTable.html)
+and [DeleteRouteTable](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_DeleteRouteTable.html).
+It uses a fresh readback of the same VPC and region before reporting success;
+a write without confirmed readback requires refresh. The native route pane stops
+reading after 16 MiB and displays the snapshot as unavailable, not as an empty list.
+When a table is present,
+its exact ID is required to confirm deletion. Create accepts the selected
+`VpcId`, an idempotency `ClientToken`, and optionally a Name tag. IAM checks
+the VPC and created table resource, including `ec2:CreateTags` if a tag is
+saved. Delete checks the exact table resource. A VPC with dependent metadata
+cannot be deleted before its table. The persisted ledger retains up to 4,096
+create token digests to prevent replay after deletion. These tables intentionally
+have no local or default routes and no associations; native route edits,
+associations, propagation and forwarding are not provided.
+Check: `go test ./internal/aws -run 'TestEC2DescribeRouteTables|TestEC2NativeRouteTable' -count=1`.
 
 ## Native VPC lifecycle
 
@@ -205,10 +220,11 @@ Ownership is never shared. `DeleteVpc` on a CloudFormation-owned VPC fails with
 table, security group or gateway attachment cannot reference an EC2-owned VPC, so
 the stack is refused and the VPC is unchanged. For an EC2-owned VPC,
 [the native subnet lifecycle](ec2-native-subnet.md) is available without changing ownership.
-Detached native security groups and network ACLs also use the existing EC2-owned
-VPC and shared 1,000-resource bound. Deletion of a native VPC is refused while
-any native subnet, group or ACL depends on it. Remove the children through their
-own APIs. Native route/gateway creation or attachment, `ModifyVpcAttribute`,
+Detached security groups, network ACLs and route tables also use the existing
+EC2-owned VPC and shared 1,000-resource bound. Deletion of a native VPC is refused
+while any native subnet, group, ACL or route table depends on it. Remove the
+children through their own APIs. Native route entry or gateway creation,
+subnet associations, `ModifyVpcAttribute`,
 VPC endpoints and tag edits are not implemented.
 
 **Existing databases remain readable when upgraded. Do not downgrade a

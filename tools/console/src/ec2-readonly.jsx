@@ -25,6 +25,8 @@ import EC2TemplatePreview from './ec2-template-preview.jsx';
 import VPCSecurityGroups from './ec2-vpc-security-groups.jsx';
 import VPCNetworkACLs from './ec2-vpc-network-acls.jsx';
 import VPCRouteTables from './ec2-vpc-route-tables.jsx';
+import VPCNativeRouteTables from './ec2-vpc-native-route-tables.jsx';
+import {nativeRouteTableTarget} from './ec2-native-route-tables.mjs';
 
 import {parseEC2Document,parseCreateVpc,parseDeleteVpc,parseEC2Error,createVpcParameters,VPC_NAME_LIMIT} from './ec2-response.mjs';
 
@@ -34,7 +36,7 @@ const blankVpc={name:'',cidr:'',mode:'vpc-only',stackName:'',subnetCIDR:''};
 // Instances stay read-only. VPCs gain CreateVpc/DeleteVpc only when the server
 // advertises them, and only EC2-owned VPCs can be deleted here. Never infer
 // live guest health from stack metadata.
-export default function EC2Readonly({kind,region,request,sessionInstance,onSession,vpcLifecycle=false,vpcSubnet=false,vpcNativeSubnets=false,vpcSecurityGroups=false,vpcNativeSecurityGroups=false,vpcNetworkACLs=false,vpcRouteTables=false,onSaving=()=>{}}) {
+export default function EC2Readonly({kind,region,request,sessionInstance,onSession,vpcLifecycle=false,vpcSubnet=false,vpcNativeSubnets=false,vpcSecurityGroups=false,vpcNativeSecurityGroups=false,vpcNetworkACLs=false,vpcRouteTables=false,vpcNativeRouteTables=false,onSaving=()=>{}}) {
   const {t}=useLocale();
   const instance=kind==='ec2',manage=!instance&&vpcLifecycle;
   const [items,setItems]=useState([]),[loading,setLoading]=useState(false),[error,setError]=useState('');
@@ -46,7 +48,7 @@ export default function EC2Readonly({kind,region,request,sessionInstance,onSessi
   const pendingWrites=useRef(writeLeases);
   // Stable per-pane leases aggregate on the host. A readback completion or
   // unmount releases only its own lease, even if another pane is still saving.
-  const lease=useMemo(()=>Object.fromEntries(['subnet','sg','acl'].map(pane=>[pane,open=>{
+  const lease=useMemo(()=>Object.fromEntries(['subnet','sg','acl','rtb'].map(pane=>[pane,open=>{
     const current=pendingWrites.current;
     if(current.has(pane)===open)return;
     const next=new Set(current);
@@ -57,6 +59,12 @@ export default function EC2Readonly({kind,region,request,sessionInstance,onSessi
   const saving=busy||writeLeases.size>0;
   const selectionLocked=()=>busy||pendingWrites.current.size>0;
   const siblingBusy=pane=>busy||[...writeLeases].some(owner=>owner!==pane);
+  function acquireRouteTableWrite(){
+    if (selectionLocked()) return null;
+    lease.rtb(true);
+    let held=true;
+    return ()=>{if(held){held=false;lease.rtb(false);}};
+  }
   const epoch=useRef(0),alive=useRef(true),submitting=useRef(false),topology=useRef(null);
   const heading=useRef(null), focusNext=useRef(false);
   const paired=form.mode==='vpc-subnet';
@@ -154,6 +162,7 @@ export default function EC2Readonly({kind,region,request,sessionInstance,onSessi
         : t('VPC only creates no subnet. Route tables, security groups, gateways, IPv6, IPAM, DNS settings and additional tags are not available in this form.','VPC のみではサブネットを作成しません。ルートテーブル、セキュリティグループ、ゲートウェイ、IPv6、IPAM、DNS 設定、追加のタグはこのフォームでは利用できません。')}</Alert></SpaceBetween>
     </Form></form></ContentLayout>;
   const deletable=detail?.managedBy==='ec2';
+  const nativeRoutePane=vpcNativeRouteTables&&nativeRouteTableTarget(detail);
   return <ContentLayout header={<div ref={heading} tabIndex={-1}><Header variant="h1">{instance?t('EC2 instances','EC2 インスタンス'):'VPC'}</Header></div>}><SpaceBetween size="l">
     {manage?<Alert type="info">{t('Delete CloudFormation-managed networks through their stack. Use the available subnet and detached configuration controls on EC2-managed VPCs. Native route and gateway edits are unavailable.','CloudFormation 管理のネットワークはスタックから削除してください。EC2 管理の VPC では利用可能なサブネットと未接続設定の操作を行えます。ルートやゲートウェイの編集はできません。')}</Alert>
       :<Alert type="info">{t('Read-only resources managed through CloudFormation. Create, start, stop and network edits are not supported here. Reported state is not a health check of the guest.','CloudFormation で管理されるリソースの読み取り専用画面です。この画面から作成・起動・停止・ネットワーク編集はできません。表示された状態はゲストの稼働確認ではありません。')}</Alert>}
@@ -178,7 +187,9 @@ export default function EC2Readonly({kind,region,request,sessionInstance,onSessi
           request={request} onSaving={lease.subnet}/></div>}
         {!instance&&vpcNetworkACLs&&<VPCNetworkACLs key={'nacl|'+region+'|'+detail.id} vpc={detail} region={region} request={request}
           writeBlocked={siblingBusy('acl')} onSaving={lease.acl}/>}
-        {!instance&&vpcRouteTables&&<VPCRouteTables key={'rtb|'+region+'|'+detail.id} vpc={detail} region={region} request={request}/>}
+        {!instance&&nativeRoutePane&&<VPCNativeRouteTables key={'rtb-native|'+region+'|'+detail.id} vpc={detail} region={region} request={request}
+          writeBlocked={siblingBusy('rtb')} acquireWrite={acquireRouteTableWrite}/>}
+        {!instance&&vpcRouteTables&&!nativeRoutePane&&<VPCRouteTables key={'rtb|'+region+'|'+detail.id} vpc={detail} region={region} request={request}/>}
       </SpaceBetween>
     </Container>}
     {instance&&!sessionInstance&&preview&&<EC2TemplatePreview region={region} request={request} onDismiss={()=>setPreview(false)}/>}
