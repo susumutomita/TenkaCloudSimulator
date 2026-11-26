@@ -18,10 +18,12 @@ from ec2_native_network_sdk import REGION, boto3, botocore, reject, sdk
 from botocore.config import Config
 
 ROOT = Path(__file__).resolve().parents[2]
-OPERATIONS = ['DescribeInternetGateways', 'CreateInternetGateway', 'DeleteInternetGateway']
+OPERATIONS = ['DescribeInternetGateways', 'CreateInternetGateway', 'DeleteInternetGateway',
+              'AttachInternetGateway', 'DetachInternetGateway']
 ID_SHAPE = re.compile(r'igw-[0-9a-f]{17}')
 NOT_FOUND = 'InvalidInternetGatewayID.NotFound'
 CFN_NAME = 'internet-gateway-contract'
+UNRELATED_BUCKET = 'igwattach-reports'
 
 
 def cfn_client(lifetime, port, token):
@@ -37,6 +39,8 @@ def create_stack(client):
     fixture = json.loads((ROOT / 'test/e2e/fixtures/ec2-network-contract.json').read_text())
     fixture['Resources']['Gateway'].setdefault('Properties', {})['Tags'] = [{'Key': 'Name', 'Value': 'Owned by stack'}]
     fixture['Outputs']['Gateway'] = {'Value': {'Ref': 'Gateway'}}
+    fixture['Resources']['Reports'] = {'Type': 'AWS::S3::Bucket', 'Properties': {'BucketName': UNRELATED_BUCKET}}
+    fixture['Outputs']['Reports'] = {'Value': {'Ref': 'Reports'}}
     return client.create_stack(StackName=CFN_NAME, TemplateBody=json.dumps(fixture))['StackId']
 
 
@@ -79,6 +83,7 @@ def sdk_check(binary):
             other = sdk(bx, bp, bt)
             other_id = other.create_internet_gateway()['InternetGateway']['InternetGatewayId']
             other_before = inventory(other)
+            other_vpc = other.create_vpc(CidrBlock='10.72.0.0/16')['Vpc']['VpcId']
             assert ID_SHAPE.fullmatch(other_id)
             with run_default(binary, state=one) as (ap, at), ExitStack() as ax:
                 assert at != bt and ap != bp
@@ -90,13 +95,14 @@ def sdk_check(binary):
                 assert spec['internetGatewayLifecycle'] == OPERATIONS
                 assert spec['internetGatewayPageLimit'] == 100
                 assert spec['describeSelectors']['DescribeInternetGateways'] == ['InternetGatewayId.N', 'MaxResults', 'NextToken']
-                assert not any(action in spec['operations'] for action in ('AttachInternetGateway', 'DetachInternetGateway', 'CreateRoute'))
+                assert 'CreateRoute' not in spec['operations'] and 'RunInstances' not in spec['operations']
                 a = sdk(ax, ap, at)
                 cfn = cfn_client(ax, ap, at)
                 assert a.describe_internet_gateways()['InternetGateways'] == []
                 stack = create_stack(cfn)
                 state = outputs(cfn, stack)
                 g = state['Gateway']
+                assert state['Reports'] == UNRELATED_BUCKET
                 baseline = inventory(a)
                 assert set(baseline) == {g}
                 assert baseline[g]['Attachments'] == [{'State': 'available', 'VpcId': state['Vpc']}]
@@ -138,11 +144,57 @@ def sdk_check(binary):
                 assert inventory(a) == saved and inventory(other) == other_before
                 assert outputs(cfn, stack) == state and a.describe_route_tables()['RouteTables'] == routes
 
+                # Actual AWS SDK operations, same native graph across the two
+                # APIs; operator sets narrowly scoped rights on both ends.
+                vpc = a.create_vpc(CidrBlock='10.73.0.0/16')['Vpc']['VpcId']
+                alternate_vpc = a.create_vpc(CidrBlock='10.74.0.0/16')['Vpc']['VpcId']
+                extra = [a.create_internet_gateway()['InternetGateway']['InternetGatewayId'] for _ in range(4)]
+                spare = extra[0]
+                vpc_arn = f'arn:aws:ec2:{REGION}:000000000000:vpc/{vpc}'
+                both_side = [allow(action, arn+native) for action in ('AttachInternetGateway', 'DetachInternetGateway')]
+                lacks_vpc = sdk(ax, ap, grant(ap, at, 'gateway-side-only', [reader, *both_side]))
+                both_side += [allow(action, vpc_arn) for action in ('AttachInternetGateway', 'DetachInternetGateway')]
+                linked_actor = sdk(ax, ap, grant(ap, at, 'both-gateway-ends', [reader, *both_side]))
+                pair = {'InternetGatewayId': native, 'VpcId': vpc}
+                full_detached = inventory(a)
+                previous_page = a.describe_internet_gateways(MaxResults=5)['NextToken']
+                reject(lacks_vpc.attach_internet_gateway, 'UnauthorizedOperation', **pair)
+                reject(lacks_vpc.attach_internet_gateway, 'UnauthorizedOperation', DryRun=True, **pair)
+                reject(linked_actor.attach_internet_gateway, 'DryRunOperation', DryRun=True, **pair)
+                reject(a.attach_internet_gateway, 'InvalidVpcID.NotFound', InternetGatewayId=native, VpcId=other_vpc)
+                assert inventory(a) == full_detached
+                assert linked_actor.attach_internet_gateway(DryRun=False, **pair)['ResponseMetadata']['HTTPStatusCode'] == 200
+                reject(a.describe_internet_gateways, 'InvalidNextToken', NextToken=previous_page)
+                attached = {**made, 'Attachments': [{'State': 'available', 'VpcId': vpc}]}
+                persisted = {**full_detached, native: attached}
+                assert inventory(a) == persisted == inventory(linked_actor)
+                assert {item['VpcId'] for item in a.describe_vpcs()['Vpcs']} == {state['Vpc'], vpc, alternate_vpc}
+                for gw, dest in ((native, vpc), (native, alternate_vpc), (spare, vpc)):
+                    reject(a.attach_internet_gateway, 'Resource.AlreadyAssociated', InternetGatewayId=gw, VpcId=dest)
+                reject(a.detach_internet_gateway, 'Gateway.NotAttached', InternetGatewayId=native, VpcId=alternate_vpc)
+                reject(lacks_vpc.detach_internet_gateway, 'UnauthorizedOperation', **pair)
+                reject(linked_actor.detach_internet_gateway, 'DryRunOperation', DryRun=True, **pair)
+                reject(a.delete_vpc, 'DependencyViolation', VpcId=vpc)
+                reject(a.delete_internet_gateway, 'DependencyViolation', InternetGatewayId=native)
+                assert a.describe_internet_gateways(InternetGatewayIds=[native])['InternetGateways'] == [attached]
+                assert inventory(a) == persisted and inventory(other) == other_before
+
             with run_default(binary, state=one) as (ap, at), ExitStack() as ax:
                 a = sdk(ax, ap, at)
                 cfn = cfn_client(ax, ap, at)
-                assert inventory(a) == saved and outputs(cfn, stack) == state
+                assert inventory(a) == persisted and outputs(cfn, stack) == state
                 assert a.describe_route_tables()['RouteTables'] == routes
+                assert a.describe_internet_gateways(InternetGatewayIds=[native])['InternetGateways'] == [attached]
+                assert a.detach_internet_gateway(**pair)['ResponseMetadata']['HTTPStatusCode'] == 200
+                assert inventory(a) == full_detached
+                reject(a.detach_internet_gateway, 'Gateway.NotAttached', **pair)
+                a.attach_internet_gateway(InternetGatewayId=native, VpcId=alternate_vpc)
+                assert inventory(a)[native]['Attachments'] == [{'State': 'available', 'VpcId': alternate_vpc}]
+                a.detach_internet_gateway(InternetGatewayId=native, VpcId=alternate_vpc)
+                for parent in (vpc, alternate_vpc):
+                    a.delete_vpc(VpcId=parent)
+                for extra_id in extra:
+                    a.delete_internet_gateway(InternetGatewayId=extra_id)
                 cleaner = sdk(ax, ap, grant(ap, at, 'one-gateway-cleaner', [reader, allow('DeleteInternetGateway', arn+native)]))
                 reject(cleaner.delete_internet_gateway, 'UnauthorizedOperation', InternetGatewayId=g)
                 reject(cleaner.delete_internet_gateway, 'UnsupportedOperation', InternetGatewayId=native, DryRun=True)
@@ -154,8 +206,9 @@ def sdk_check(binary):
                 assert not inventory(a) and not a.describe_route_tables()['RouteTables'] and not a.describe_vpcs()['Vpcs']
                 assert not cfn.describe_stacks()['Stacks'] and inventory(other) == other_before
             other.delete_internet_gateway(InternetGatewayId=other_id)
-            assert not inventory(other)
-    print('PASS pinned boto3 EC2/CFN: detached create, tags, exact regional read, restart, local IAM, ownership, two databases and cleanup.')
+            other.delete_vpc(VpcId=other_vpc)
+            assert not inventory(other) and not other.describe_vpcs()['Vpcs']
+    print('PASS pinned boto3 EC2/CFN: create, pair IAM and DryRun, one-to-one attach/detach and readback, dependent parent refusal, page fence, restart, two stores and cleanup.')
 
 
 def check_reference(local, cookie, expected):
@@ -173,7 +226,8 @@ def check_reference(local, cookie, expected):
     preset = form['examples']['DescribeInternetGateways']['value']
     assert preset == {'Action': 'DescribeInternetGateways', 'Version': '2016-11-15', 'MaxResults': 100}
     assert preset['Action'] in form['schema']['properties']['Action']['enum']
-    assert not any(action in form['examples'] for action in ('CreateInternetGateway', 'DeleteInternetGateway'))
+    assert not any(action in form['examples'] for action in ('CreateInternetGateway', 'DeleteInternetGateway',
+                                                                  'AttachInternetGateway', 'DetachInternetGateway'))
     _, wire = local.call('POST', '/', urlencode(preset), Cookie=cookie, **{
         'Content-Type': mime, 'X-Simulator-Service': 'ec2', 'X-Simulator-Region': REGION})
     result = ET.fromstring(wire)
@@ -189,8 +243,11 @@ def console_check(binary):
         client = cfn_client(lifetime, port, token)
         ec2 = sdk(lifetime, port, token)
         stack = create_stack(client)
+        native_vpc = ec2.create_vpc(CidrBlock='10.75.0.0/16')['Vpc']['VpcId']
         try:
             state = outputs(client, stack)
+            state['NativeVpc'] = native_vpc
+            assert state['Reports'] == UNRELATED_BUCKET
             cookie = local.session(token)
             check_reference(local, cookie, state)
             script = Path(__file__).with_name('ec2_internet_gateway_dom.cjs')
@@ -199,9 +256,10 @@ def console_check(binary):
                 {'port': port, 'cookie': cookie, 'state': state, 'asset': asset}))
             assert set(inventory(ec2)) == {state['Gateway']}
         finally:
+            ec2.delete_vpc(VpcId=native_vpc)
             client.delete_stack(StackName=stack)
         assert not inventory(ec2)
-    print('PASS served reference Query replay and console in JSDOM: owner readback, named create, state verification and exact delete confirmation. Not Chromium layout.')
+    print('PASS served reference and console in JSDOM: create, owned-only attach/detach, exact and complete readback, delete. Not Chromium layout.')
 
 
 def wide_inventory(path, exemplar):

@@ -97,7 +97,7 @@ console, CloudFormation adapter or Challenge integration.
   [Secrets Manager](docs/secrets-manager.md), [KMS](docs/kms.md), [WAFv2](docs/wafv2.md).
 - **Networking:** [read-only EC2 instance discovery in the API Reference](docs/api-reference.md#aws-services-and-the-shared-endpoint),
   [EC2/VPC discovery and VPC create/delete](docs/ec2-read-discovery.md),
-  [detached internet gateways in SDK and Console](docs/ec2-internet-gateways.md),
+  [local internet gateway allocation and VPC attachment in SDK and Console](docs/ec2-internet-gateways.md),
   [route tables: CloudFormation readback, native tables and explicit subnet associations](docs/ec2-read-discovery.md#route-table-readback),
   [IPv4 subnet lifecycle for existing EC2-managed VPCs](docs/ec2-native-subnet.md),
   [security groups: CloudFormation readback and detached Console workflow](docs/ec2-read-discovery.md#security-group-readback),

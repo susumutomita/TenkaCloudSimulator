@@ -1131,7 +1131,7 @@
                 },
                 "DescribeInternetGateways": {
                   "summary": "EC2 DescribeInternetGateways (read-only configuration)",
-                  "description": "Set X-Simulator-Service to ec2, clear X-Amz-Target, and choose a local X-Simulator-Region. Send with your existing local sign-in or simulator token and ec2:DescribeInternetGateways on *. Shows the first page of saved attached CloudFormation and detached EC2-managed gateways. Use nextToken as NextToken to continue. It never performs attachment, routing or internet access.",
+                  "description": "Set X-Simulator-Service to ec2, clear X-Amz-Target, and choose a local X-Simulator-Region. Send with your existing local sign-in or simulator token and ec2:DescribeInternetGateways on *. Shows the first page of saved CloudFormation and EC2-managed gateways, including their configured VPC attachment. Use nextToken as NextToken to continue. This read does not change attachments or verify routing or internet access.",
                   "value": {
                     "Action": "DescribeInternetGateways",
                     "Version": "2016-11-15",

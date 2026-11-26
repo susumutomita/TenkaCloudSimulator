@@ -24646,7 +24646,7 @@
       "id": "EC2InternetGatewayLifecycle",
       "model": "formal/EC2InternetGatewayLifecycle.tla",
       "config": "formal/EC2InternetGatewayLifecycle.cfg",
-      "bounds": "Two regions, one gateway ID each, five ownership/dependency states, and a separate confirmable UI mutation receipt. One failed admission or readback witness per check.",
+      "bounds": "Two regions, one gateway ID each, six ownership/dependency states including existing native links, and a separate confirmable UI mutation receipt. One failed admission or readback witness per check.",
       "properties": [
         "TypeOK",
         "Authorized",
@@ -24669,7 +24669,8 @@
         "tools/console/src/ec2-vpc-internet-gateways.jsx",
         "tools/console/src/ec2-readonly.jsx",
         "tools/console/src/main.jsx",
-        "internal/server/web/app.js"
+        "internal/server/web/app.js",
+        "internal/aws/ec2_internet_gateway_attachment_store.go"
       ],
       "mutants": [
         {
@@ -24731,7 +24732,7 @@
           "id": "DeleteReferencedGateway",
           "edits": [
             {
-              "old": "/\\ row[region] # \"native-dependent\"\n    /\\ Admitted(f)",
+              "old": "/\\ row[region] \\notin {\"native-attached\", \"native-dependent\"}\n    /\\ Admitted(f)",
               "new": "/\\ Admitted(f)",
               "count": 1
             }
@@ -24775,7 +24776,7 @@
           "id": "InventAttachment",
           "edits": [
             {
-              "old": "f, selector, row[region] = \"stack-attached\")",
+              "old": "f, selector, row[region] \\in {\"stack-attached\", \"native-attached\"})",
               "new": "f, selector, row[region] # \"absent\")",
               "count": 1
             }
@@ -25016,6 +25017,210 @@
             }
           ],
           "expect_invariant": "PageBounded"
+        }
+      ]
+    },
+    {
+      "id": "EC2InternetGatewayAttachment",
+      "model": "formal/EC2InternetGatewayAttachment.tla",
+      "config": "formal/EC2InternetGatewayAttachment.cfg",
+      "bounds": "Two gateways and two VPCs; one transaction, authority or relationship refusal witness; one exact and complete UI read receipt at a time.",
+      "properties": [
+        "TypeOK",
+        "OneGatewayPerVPC",
+        "ExactMutation",
+        "Authority",
+        "Committed",
+        "ReadbackFence",
+        "ConfirmedNotice"
+      ],
+      "limits": "Native attachment configuration only. Prior link availability and same-region eligibility are modeled, not local IAM policy evaluation. Durability and view scopes are finite witnesses: no SQLite/JSON/Query, real concurrency, React, IP assignment, routes, RDS runtime or packet paths. No implementation refinement.",
+      "source_scope": [
+        "internal/aws/ec2_internet_gateway_attachment_store.go",
+        "internal/aws/ec2_internet_gateway_store.go",
+        "internal/aws/ec2_internet_gateways.go",
+        "internal/aws/ec2_read.go",
+        "internal/aws/ec2_vpc.go",
+        "tools/console/src/ec2-internet-gateways.mjs",
+        "tools/console/src/ec2-vpc-internet-gateways.jsx",
+        "internal/server/web/app.js"
+      ],
+      "mutants": [
+        {
+          "id": "AdmitUnscopedMutation",
+          "edits": [
+            {
+              "old": "AuthorizedScope(f) == f \\notin {\"region\", \"scoped\"}",
+              "new": "AuthorizedScope(f) == TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "Authority"
+        },
+        {
+          "id": "SkipGatewayGrant",
+          "edits": [
+            {
+              "old": "BothIAM(f) == f \\notin {\"gatewayGrant\", \"vpcGrant\"}",
+              "new": "BothIAM(f) == f # \"vpcGrant\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "Authority"
+        },
+        {
+          "id": "SkipVPCGrant",
+          "edits": [
+            {
+              "old": "BothIAM(f) == f \\notin {\"gatewayGrant\", \"vpcGrant\"}",
+              "new": "BothIAM(f) == f # \"gatewayGrant\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "Authority"
+        },
+        {
+          "id": "AdoptStackResource",
+          "edits": [
+            {
+              "old": "NativeEndpoints(f) == f \\notin {\"stackGateway\", \"stackVPC\", \"claim\", \"declaration\"}",
+              "new": "NativeEndpoints(f) == f \\notin {\"claim\", \"declaration\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "Authority"
+        },
+        {
+          "id": "IgnoreStackDeclaration",
+          "edits": [
+            {
+              "old": "NativeEndpoints(f) == f \\notin {\"stackGateway\", \"stackVPC\", \"claim\", \"declaration\"}",
+              "new": "NativeEndpoints(f) == f \\notin {\"stackGateway\", \"stackVPC\", \"claim\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "Authority"
+        },
+        {
+          "id": "IgnoreStackClaim",
+          "edits": [
+            {
+              "old": "NativeEndpoints(f) == f \\notin {\"stackGateway\", \"stackVPC\", \"claim\", \"declaration\"}",
+              "new": "NativeEndpoints(f) == f \\notin {\"stackGateway\", \"stackVPC\", \"declaration\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "Authority"
+        },
+        {
+          "id": "ApplyDryRun",
+          "edits": [
+            {
+              "old": "RealWrite(f) == f # \"dryRun\"",
+              "new": "RealWrite(f) == TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "Committed"
+        },
+        {
+          "id": "AcceptUnconfirmedPersistence",
+          "edits": [
+            {
+              "old": "Durable(f) == f # \"unconfirmed\"",
+              "new": "Durable(f) == TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "Committed"
+        },
+        {
+          "id": "MoveAttachedGateway",
+          "edits": [
+            {
+              "old": "/\\ links[g] = None\n    /\\ VPCAvailable(v)",
+              "new": "/\\ VPCAvailable(v)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExactMutation"
+        },
+        {
+          "id": "AttachToOccupiedVPC",
+          "edits": [
+            {
+              "old": "/\\ VPCAvailable(v)\n    /\\ links'",
+              "new": "/\\ TRUE\n    /\\ links'",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "OneGatewayPerVPC"
+        },
+        {
+          "id": "DetachWrongPair",
+          "edits": [
+            {
+              "old": "/\\ links[g] = v\n    /\\ f # \"dependent\"",
+              "new": "/\\ f # \"dependent\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExactMutation"
+        },
+        {
+          "id": "DetachReferencedGateway",
+          "edits": [
+            {
+              "old": "/\\ f # \"dependent\"\n    /\\ links'",
+              "new": "/\\ TRUE\n    /\\ links'",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExactMutation"
+        },
+        {
+          "id": "AcceptStaleExact",
+          "edits": [
+            {
+              "old": "/\\ pending.phase = \"written\"\n    /\\ mode = \"current\"",
+              "new": "/\\ pending.phase = \"written\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadbackFence"
+        },
+        {
+          "id": "IgnoreExactReadback",
+          "edits": [
+            {
+              "old": "/\\ pending.phase = \"exact\"\n    /\\ mode = \"current\"",
+              "new": "/\\ pending.phase = \"written\"\n    /\\ mode = \"current\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadbackFence"
+        },
+        {
+          "id": "AcceptPartialOrStaleList",
+          "edits": [
+            {
+              "old": "/\\ pending.phase = \"exact\"\n    /\\ mode = \"current\"",
+              "new": "/\\ pending.phase = \"exact\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadbackFence"
+        },
+        {
+          "id": "PublishBeforeVerifiedList",
+          "edits": [
+            {
+              "old": "/\\ pending.phase = \"regional\"\n    /\\ notice'",
+              "new": "/\\ pending.phase = \"exact\"\n    /\\ notice'",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ConfirmedNotice"
         }
       ]
     }
