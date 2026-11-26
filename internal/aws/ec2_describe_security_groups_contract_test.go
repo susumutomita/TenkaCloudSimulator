@@ -178,10 +178,13 @@ func TestEC2DescribeSecurityGroupsContract(t *testing.T) {
 	if rows := decode(t, call(t, empty, "sg-reader", nil, false, http.StatusOK)); len(rows) != 0 {
 		t.Fatalf("empty region: %#v", rows)
 	}
-	for _, field := range []string{"DryRun", "Filter.1.Name", "GroupId.1", "GroupName.1", "MaxResults", "NextToken"} {
+	for _, field := range []string{"DryRun", "Filter.1.Name", "GroupName.1", "MaxResults", "NextToken"} {
 		if body := call(t, east, "sg-reader", url.Values{field: {"ignored"}}, false, http.StatusBadRequest); !strings.Contains(body, "<Code>UnsupportedOperation</Code>") {
 			t.Fatalf("unsupported %s accepted or misclassified: %s", field, body)
 		}
+	}
+	if body := call(t, east, "sg-reader", url.Values{"GroupId.1": {"ignored"}}, false, http.StatusBadRequest); !strings.Contains(body, "<Code>InvalidGroupId.Malformed</Code>") {
+		t.Fatalf("typed ID selection admitted malformed ID: %s", body)
 	}
 	for _, denied := range []struct {
 		principal string

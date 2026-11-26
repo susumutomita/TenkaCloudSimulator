@@ -22463,6 +22463,146 @@
       ]
     },
     {
+      "id": "EC2NativeSubnetLifecycle",
+      "model": "formal/EC2NativeSubnetLifecycle.tla",
+      "config": "formal/EC2NativeSubnetLifecycle.cfg",
+      "bounds": "Two regions, one fixed CloudFormation subnet and three native candidates, two owned parent VPCs, two abstract nonoverlapping ranges plus an invalid range; limit three rows.",
+      "properties": [
+        "StackUnchanged",
+        "AuthorizedWrites",
+        "NativeParent",
+        "Nonoverlap",
+        "Bounded",
+        "ExactDelete",
+        "ExactRead"
+      ],
+      "limits": "Finite atomic store choices and regional read evidence only; no YAML/XML/parser/HTTP implementation, CIDR arithmetic, Windows/browser, exact timing, AWS runtime, or code-refinement proof.",
+      "source_scope": [
+        "internal/aws/ec2_subnet_native.go",
+        "internal/aws/ec2_network.go",
+        "internal/aws/ec2_read.go",
+        "internal/aws/ec2_vpc.go",
+        "internal/server/server.go",
+        "internal/server/web/app.js",
+        "tools/console/src/ec2-native-subnets.mjs",
+        "tools/console/src/ec2-vpc-native-subnets.jsx",
+        "tools/console/src/ec2-readonly.jsx",
+        "tools/console/src/main.jsx"
+      ],
+      "mutants": [
+        {
+          "id": "SkipParentGrant",
+          "edits": [
+            {
+              "old": "IF vpcOK /\\ subnetOK /\\ Parent[v].owner",
+              "new": "IF subnetOK /\\ Parent[v].owner",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AuthorizedWrites"
+        },
+        {
+          "id": "SkipChildGrant",
+          "edits": [
+            {
+              "old": "IF vpcOK /\\ subnetOK /\\ Parent[v].owner",
+              "new": "IF vpcOK /\\ Parent[v].owner",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AuthorizedWrites"
+        },
+        {
+          "id": "AdoptStackParent",
+          "edits": [
+            {
+              "old": " /\\ Parent[v].owner = \"ec2\" /\\ Parent[v].region",
+              "new": " /\\ Parent[v].region",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "NativeParent"
+        },
+        {
+          "id": "UseForeignRegion",
+          "edits": [
+            {
+              "old": " /\\ Parent[v].region = r",
+              "new": "",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "NativeParent"
+        },
+        {
+          "id": "AllowOutsideCIDR",
+          "edits": [
+            {
+              "old": "b # \"outside\" /\\ Cardinality(rows)",
+              "new": "Cardinality(rows)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "NativeParent"
+        },
+        {
+          "id": "AllowOverlap",
+          "edits": [
+            {
+              "old": "s.id = i \\/ (s.vpc = v /\\ s.block = b)",
+              "new": "s.id = i",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "Nonoverlap"
+        },
+        {
+          "id": "IgnoreLimit",
+          "edits": [
+            {
+              "old": " /\\ Cardinality(rows) < Limit",
+              "new": "",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "Bounded"
+        },
+        {
+          "id": "DeleteStackOwned",
+          "edits": [
+            {
+              "old": "s.id # i \\/ s.owner # \"ec2\" \\/ s.region # r",
+              "new": "s.id # i \\/ s.region # r",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "StackUnchanged"
+        },
+        {
+          "id": "DeleteDependent",
+          "edits": [
+            {
+              "old": "IF subnetOK /\\ ~dep",
+              "new": "IF subnetOK",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExactDelete"
+        },
+        {
+          "id": "ReadAllRegions",
+          "edits": [
+            {
+              "old": "{s \\in rows: s.region = r}",
+              "new": "rows",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExactRead"
+        }
+      ]
+    },
+    {
       "id": "EC2TemplatePreviewEpoch",
       "model": "formal/EC2TemplatePreviewEpoch.tla",
       "config": "formal/EC2TemplatePreviewEpoch.cfg",
@@ -22773,6 +22913,125 @@
             }
           ],
           "expect_invariant": "PublicVerificationOnly"
+        }
+      ]
+    },
+    {
+      "id": "EC2NativeVPCChildren",
+      "model": "formal/EC2NativeVPCChildren.tla",
+      "config": "formal/EC2NativeVPCChildren.cfg",
+      "bounds": "Two abstract deployment/region scopes each with one initially present native VPC, one possible IPv4 subnet, detached security group, detached network ACL and ACL token. No parent recreation or second ACL token.",
+      "properties": [
+        "TypeOK",
+        "GrantAtomic",
+        "RejectOtherOwner",
+        "ParentDependency",
+        "SiblingFrame",
+        "ReadScoped",
+        "ReplayNoRecreate",
+        "ReceiptTracksLiveACL"
+      ],
+      "limits": "Child creation/deletion, parent guards, exact grant aggregation and retired ACL replay are bounded atomic abstractions. No XML, SQL/error timing, packet enforcement, SG name/tag rules, credentials, UI, restart or implementation refinement proof.",
+      "source_scope": [
+        "internal/aws/cloudformation.go",
+        "internal/aws/ec2_read.go",
+        "internal/aws/ec2_vpc.go",
+        "internal/aws/ec2_subnet_native.go",
+        "internal/aws/ec2_network_acl.go",
+        "internal/aws/ec2_network_acl_store.go",
+        "internal/aws/ec2_security_groups_read.go",
+        "internal/aws/ec2_security_groups_native_query.go",
+        "internal/aws/ec2_security_groups_native_store.go",
+        "internal/server/server.go"
+      ],
+      "mutants": [
+        {
+          "id": "IgnoreParentGrant",
+          "edits": [
+            {
+              "old": "LET admitted == parentGrant /\\ exactGrant /\\ isNative",
+              "new": "LET admitted == exactGrant /\\ isNative",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "GrantAtomic"
+        },
+        {
+          "id": "IgnoreAllocatedGrant",
+          "edits": [
+            {
+              "old": "LET admitted == parentGrant /\\ exactGrant /\\ isNative",
+              "new": "LET admitted == parentGrant /\\ isNative",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "GrantAtomic"
+        },
+        {
+          "id": "AdoptStackParent",
+          "edits": [
+            {
+              "old": "LET admitted == parentGrant /\\ exactGrant /\\ isNative",
+              "new": "LET admitted == parentGrant /\\ exactGrant",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "RejectOtherOwner"
+        },
+        {
+          "id": "DeleteParentWithChildren",
+          "edits": [
+            {
+              "old": "IF grant /\\ InScope(s) = {} THEN parents",
+              "new": "IF grant THEN parents",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ParentDependency"
+        },
+        {
+          "id": "DeletePeerKinds",
+          "edits": [
+            {
+              "old": "IF exactGrant THEN children \\ {<<s,k>>} ELSE children",
+              "new": "IF exactGrant THEN children \\ InScope(s) ELSE children",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "SiblingFrame"
+        },
+        {
+          "id": "ReadForeignScope",
+          "edits": [
+            {
+              "old": "visible' = IF grant THEN InScope(s) ELSE {}",
+              "new": "visible' = IF grant THEN children ELSE {}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadScoped"
+        },
+        {
+          "id": "RecreateRetiredACL",
+          "edits": [
+            {
+              "old": "k # \"acl\" \\/ receipts[s] = \"unused\"",
+              "new": "k # \"acl\" \\/ receipts[s] # \"live\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReplayNoRecreate"
+        },
+        {
+          "id": "LoseACLReceipt",
+          "edits": [
+            {
+              "old": "[receipts EXCEPT ![s] = \"live\"]",
+              "new": "receipts",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReceiptTracksLiveACL"
         }
       ]
     }

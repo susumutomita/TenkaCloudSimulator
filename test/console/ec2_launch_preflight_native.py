@@ -46,10 +46,10 @@ def launch_declaration():
 
 
 @contextmanager
-def run_default(binary):
+def run_default(binary, *, state=':memory:'):
     with tempfile.TemporaryDirectory(prefix='ec2-launch-preflight-') as directory:
         token_file = Path(directory) / 'operator-token'
-        with subprocess.Popen([binary, '--listen', '127.0.0.1:0', '--state', ':memory:', '--token-file', token_file],
+        with subprocess.Popen([binary, '--listen', '127.0.0.1:0', '--state', state, '--token-file', token_file],
                               cwd=directory, env={'HOME': directory, 'PATH': '/nonexistent'},
                               stdin=subprocess.DEVNULL, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL) as proc:
             try:
