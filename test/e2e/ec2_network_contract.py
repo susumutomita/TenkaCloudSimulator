@@ -12,6 +12,7 @@ import tempfile
 import unittest
 
 from check import running, boto3, Config, ClientError
+from cloudformation_ssm_parameters import control
 from botocore.parsers import ResponseParserError
 
 
@@ -33,15 +34,16 @@ class NetworkContract(unittest.TestCase):
         self.cfn = self.client('cloudformation')
         self.ec2 = self.client('ec2')
 
-    def client(self, service, region='us-east-1', token=True):
+    def client(self, service, region='us-east-1', token=None):
         client = boto3.client(
             service, endpoint_url=self.endpoint, region_name=region,
             aws_access_key_id='TCSIM_NETWORK_CONTRACT',
             aws_secret_access_key='dummy-local-only',
             config=Config(retries={'max_attempts': 0}, connect_timeout=3,
                           read_timeout=10, proxies={}))
-        if token:
-            client.meta.events.register('before-sign', lambda request, **_: request.headers.add_header('X-Simulator-Token', self.token))
+        access_token = self.token if token is None else token
+        if access_token:
+            client.meta.events.register('before-sign', lambda request, **_: request.headers.add_header('X-Simulator-Token', access_token))
         self.runtime.callback(client.close)
         return client
 
@@ -71,6 +73,7 @@ class NetworkContract(unittest.TestCase):
         if code is not None:
             self.assertEqual(caught.exception.response['Error']['Code'], code)
         self.assertGreaterEqual(caught.exception.response['ResponseMetadata']['HTTPStatusCode'], 400)
+        return caught.exception.response
 
     def state(self):
         # Ignore response metadata (request IDs), retain every exposed resource field.
@@ -181,6 +184,67 @@ class NetworkContract(unittest.TestCase):
         self.assertCountEqual(completed_resources(history, 'DELETE_COMPLETE'), expected)
         self.assertEqual([e for e in history if e['ResourceStatus'].startswith('CREATE_')], events)
 
+    def test_participant_missing_subnet_grant_preserves_stack_network(self):
+        keys = ('Vpc', 'Subnet', 'Table', 'Association')
+        template = {section: {key: self.template[section][key] for key in keys}
+                    for section in ('Resources', 'Outputs')}
+        survivor = self.create('network-policy-survivor', template)
+        baseline = self.state()
+        survivor_events = self.cfn.describe_stack_events(StackName=survivor)['StackEvents']
+
+        name = 'network-policy-target'
+        principal = 'network-policy-participant'
+        region = 'us-east-1'
+        ec2_arn = f'arn:aws:ec2:{region}:000000000000:'
+        policy = {'Version': '2012-10-17', 'Statement': [
+            {'Effect': 'Allow', 'Action': ['cloudformation:CreateStack', 'cloudformation:DeleteStack'],
+             'Resource': f'arn:aws:cloudformation:{region}:000000000000:stack/{name}/*'},
+            {'Effect': 'Allow', 'Action': ['ec2:CreateVpc', 'ec2:ModifyVpcAttribute', 'ec2:DeleteVpc',
+                                           'ec2:CreateSubnet', 'ec2:ModifySubnetAttribute', 'ec2:DeleteSubnet',
+                                           'ec2:CreateRouteTable', 'ec2:DeleteRouteTable'],
+             'Resource': ec2_arn + '*'},
+            {'Effect': 'Allow', 'Action': 'ec2:DescribeRouteTables', 'Resource': '*'},
+            # The table grant alone does not authorize attaching or detaching its subnet.
+            {'Effect': 'Allow', 'Action': ['ec2:AssociateRouteTable', 'ec2:DisassociateRouteTable'],
+             'Resource': ec2_arn + 'route-table/*'},
+        ]}
+        control(self.endpoint, self.token, f'/_simulator/v1/iam/principals/{principal}/policy', policy)
+        token = control(self.endpoint, self.token, '/_simulator/v1/access', {'Principal': principal})['AccessToken']
+        limited_cfn = self.client('cloudformation', token=token)
+        limited_ec2 = self.client('ec2', token=token)
+        self.assertCountEqual(limited_ec2.describe_route_tables()['RouteTables'], baseline[3])
+
+        def denied_on_subnet(operation, action, subnet='', **kwargs):
+            response = self.rejected(operation, 'AccessDenied', **kwargs)
+            self.assertEqual(response['ResponseMetadata']['HTTPStatusCode'], 403)
+            self.assertIn(f'{action} on {ec2_arn}subnet/{subnet}', response['Error']['Message'])
+
+        denied_on_subnet(limited_cfn.create_stack, 'ec2:AssociateRouteTable',
+                         StackName=name, TemplateBody=json.dumps(template))
+        self.assertEqual(self.state(), baseline)
+        self.rejected(self.cfn.describe_stack_events, 'ValidationError', StackName=name)
+        self.assertEqual(self.cfn.describe_stack_events(StackName=survivor)['StackEvents'], survivor_events)
+
+        # The identical name and template can be used by the authorized operator.
+        target = self.create(name, template)
+        outputs = self.outputs(target)
+        live = self.state()
+        table = next(r for r in live[3] if r['RouteTableId'] == outputs['Table'])
+        self.assertEqual([(a['RouteTableAssociationId'], a['SubnetId'], a['Main'])
+                          for a in table['Associations']],
+                         [(outputs['Association'], outputs['Subnet'], False)])
+        target_events = self.cfn.describe_stack_events(StackName=target)['StackEvents']
+        denied_on_subnet(limited_cfn.delete_stack, 'ec2:DisassociateRouteTable',
+                         subnet=outputs['Subnet'], StackName=target)
+        self.assertEqual(self.state(), live)
+        self.assertEqual(self.cfn.describe_stack_events(StackName=target)['StackEvents'], target_events)
+
+        self.cfn.delete_stack(StackName=target)
+        self.assertEqual(self.state(), baseline)
+        self.assertEqual(self.cfn.describe_stack_events(StackName=survivor)['StackEvents'], survivor_events)
+        self.cfn.delete_stack(StackName=survivor)
+        self.assertEqual(self.state(), ([], [], [], []))
+
     def test_invalid_network_create_preserves_existing_state(self):
         self.create('network-survivor')
         before = self.state()
@@ -258,7 +322,7 @@ class NetworkContract(unittest.TestCase):
 
     def test_missing_local_token_cannot_create_network(self):
         before = self.state()
-        client = self.client('cloudformation', token=False)
+        client = self.client('cloudformation', token='')
         statuses = []
         client.meta.events.register('before-parse.cloudformation.CreateStack',
                                     lambda response_dict, **_: statuses.append(response_dict['status_code']))
