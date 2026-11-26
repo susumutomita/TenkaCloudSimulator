@@ -81,6 +81,23 @@ test('uses only fixed regional EC2 Query through the existing signed-in transpor
   assert.equal(requests.length,1);
 });
 
+test('requests one exact subnet association and refuses an out-of-filter table', async()=>{
+  const calls=[], fixture=async(path, options)=>{
+    calls.push([path, options]);
+    return {ok:true,text:async()=>document([table()])};
+  };
+  const rows=await loadVpcRouteTables(fixture,'us-east-1',selected,{subnetId:subnet,parse:x=>x});
+  assert.equal(rows[0].id,tab);
+  assert.equal(calls[0][0],'/');
+  assert.deepEqual(Object.fromEntries(calls[0][1].body),
+    {Action:'DescribeRouteTables',Version:'2016-11-15','Filter.1.Name':'association.subnet-id','Filter.1.Value.1':subnet});
+  for(const value of ['subnet-*','subnet-1234',subnet+'\n'])
+    await assert.rejects(loadVpcRouteTables(()=>assert.fail('invalid input must not query'),'us-east-1',selected,{subnetId:value}),/exact subnet ID/);
+  await assert.rejects(loadVpcRouteTables(fixture,'us-east-1',selected,{subnetId:id('subnet','8'),parse:x=>x}),/Invalid or incomplete EC2 response/);
+  // A real match in a different selected VPC is not shown under this VPC.
+  assert.deepEqual(await loadVpcRouteTables(fixture,'us-east-1',{...selected,id:other},{subnetId:subnet,parse:x=>x}),[]);
+});
+
 test('refusal, unavailable, aborted responses are not empty success',async()=>{
   for(const msg of ['403: refused','UnauthorizedOperation: denied','Sign in to continue.'])
     await assert.rejects(loadVpcRouteTables(async()=>{throw Error(msg);},'us-east-1',selected), e=>routeTableFailure(e)==='denied');
@@ -96,7 +113,7 @@ const {outputFiles}=await build({absWorkingDir:consoleDir,entryPoints:['src/ec2-
 const module={exports:{}};
 Function('require','module','exports',outputFiles[0].text)(require,module,module.exports);
 const {createElement}=require('react'), {renderToStaticMarkup}=require('react-dom/server');
-const readout=(status,tables=[],preferred)=>renderToStaticMarkup(createElement(module.exports.RouteTableReadout,{status,tables,preferred}));
+const readout=(status,tables=[],preferred,subnetId)=>renderToStaticMarkup(createElement(module.exports.RouteTableReadout,{status,tables,preferred,subnetId}));
 
 test('real Cloudscape readout distinguishes refused, loading, scope, empty and bare without a route mutation control',()=>{
   const view=vpc=>renderToStaticMarkup(createElement(module.exports.default,{vpc,region:'us-east-1',request:()=>assert.fail('SSR cannot query')}));
@@ -105,6 +122,10 @@ test('real Cloudscape readout distinguishes refused, loading, scope, empty and b
   assert.doesNotMatch(view({...selected,managedBy:'ec2'}),/Refresh route tables/);
   assert.match(view({...selected,managedBy:''}),/Select a verified CloudFormation-managed VPC/);
   assert.match(readout('ready'),/No explicit route tables are recorded/);
+  assert.match(readout('ready',[],'',subnet),/No explicit route table is associated with this subnet/);
+  assert.equal(readout('editing-filter',[{}]),'');
+  assert.match(view(selected),/Filter by subnet ID/);
+  assert.doesNotMatch(view({...selected,managedBy:'ec2'}),/Filter by subnet ID/);
   for(const [status,expected] of [['denied',/Route table access denied/],['error',/Could not read route tables/],['loading',/Loading route tables/]]){
     assert.match(readout(status),expected);assert.doesNotMatch(readout(status),/No explicit route tables are recorded/);
   }

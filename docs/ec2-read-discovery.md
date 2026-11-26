@@ -169,16 +169,31 @@ instance-scoped console handoff cannot enumerate tables.
 Unlike [AWS DescribeRouteTables](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_DescribeRouteTables.html),
 there are no main tables, local routes or implicit associations, including for
 native EC2 VPCs. `state=active` describes the configured gateway route, **not**
-observed packet forwarding. Table IDs, filters, pagination and dry-run are rejected.
+observed packet forwarding. The only supported filter is
+`association.subnet-id`: specify one to eight exact lowercase 8- or 17-hex
+subnet IDs. The values are ORed, and a match returns the entire route table.
+The selector considers only current explicit associations, both native and
+CloudFormation-managed. A well-formed no-match returns an empty list. The
+filter runs **after** the same regional ownership and state validation; it does
+not narrow IAM scope, hide inconsistent state, or create an implicit fallback.
+Other filter names, extra filters, route table IDs, pagination and dry-run are rejected.
+
+```python
+ec2.describe_route_tables(Filters=[{'Name': 'association.subnet-id', 'Values': [subnet_id]}])
+```
+
 In an ordinary signed-in **VPC** Console, select a CloudFormation-managed VPC
 and look under **Route tables** in its details. Choose a table to see its enabled
-default route, explicit subnet associations and tags. The Console makes the same
+default route, explicit subnet associations and tags. **Filter by subnet ID**
+sends the same selector (one exact ID); clear it to return to the full view.
+Incomplete IDs do not issue a read, and previous results are not shown while the
+selector is changing. The Console makes the same
 regional EC2 Query as the SDK with the current exercise identity, validates the
 whole response, then selects the matching VPC in the browser. This selection is
 not an IAM filter: the operation requires regional `ec2:DescribeRouteTables` on
 `*`. A refusal or incomplete reply is never displayed as “no tables.” The
 CloudFormation view offers no mutations. Scoped handoffs do not offer either
-route table pane. Refresh, VPC, region and identity changes discard old replies.
+route table pane. Refresh, subnet, VPC, region and identity changes discard old replies.
 
 For a verified **EC2-managed** VPC, **Route tables** supports local
 [CreateRouteTable](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_CreateRouteTable.html)

@@ -18389,7 +18389,7 @@
       "id": "EC2RouteTableRead",
       "model": "formal/EC2RouteTableRead.tla",
       "config": "formal/EC2RouteTableRead.cfg",
-      "bounds": "One atomic observation of a discovered table, two VPCs, independent subnet/gateway bindings, explicit or absent association, absent/removed/enabled default route, ten input witnesses.",
+      "bounds": "One atomic observation of a discovered table, two VPCs, independent subnet/gateway bindings, explicit or absent association, absent/removed/enabled default route, ten input witnesses. Unfiltered, valid subnet and malformed selection with an independent exact-match bit.",
       "properties": [
         "TypeOK",
         "Admission",
@@ -18397,9 +18397,10 @@
         "SameVPC",
         "TypedDefault",
         "ExplicitOnly",
-        "CurrentDefault"
+        "CurrentDefault",
+        "FilterMatchesExplicit"
       ],
-      "limits": "One table/association/default per observation; two VPCs, one invalid admission or identity witness at a time. Not Go refinement, transaction or HTTP/XML proof, policy evaluation, pagination, concurrency, creation, or packet forwarding. Undiscoverable tables that lose every row and typed claim are not modeled.",
+      "limits": "One table/association/default per observation; two VPCs, one invalid admission or identity witness at a time. Not Go refinement, transaction or HTTP/XML proof, policy evaluation, pagination, concurrency, creation, or packet forwarding. Undiscoverable tables that lose every row and typed claim are not modeled. The model does not prove the wire grammar, multi-value OR completeness, whole-store witnesses or authorization implementation.",
       "source_scope": [
         "internal/aws/ec2_read.go",
         "internal/aws/ec2_route_tables_read.go",
@@ -18559,6 +18560,39 @@
             }
           ],
           "expect_invariant": "TypedDefault"
+        },
+        {
+          "id": "AdmitMalformedSelector",
+          "edits": [
+            {
+              "old": "/\\ (selector = \"all\" \\/ (selector = \"subnet\" /\\ explicit /\\ match))",
+              "new": "/\\ (selector = \"all\" \\/ selector = \"malformed\" \\/ (selector = \"subnet\" /\\ explicit /\\ match))",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "FilterMatchesExplicit"
+        },
+        {
+          "id": "ReturnUnmatchedTable",
+          "edits": [
+            {
+              "old": "/\\ (selector = \"all\" \\/ (selector = \"subnet\" /\\ explicit /\\ match))",
+              "new": "/\\ (selector = \"all\" \\/ (selector = \"subnet\" /\\ explicit))",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "FilterMatchesExplicit"
+        },
+        {
+          "id": "ReturnImplicitSubnetTable",
+          "edits": [
+            {
+              "old": "/\\ (selector = \"all\" \\/ (selector = \"subnet\" /\\ explicit /\\ match))",
+              "new": "/\\ (selector = \"all\" \\/ (selector = \"subnet\" /\\ match))",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "FilterMatchesExplicit"
         }
       ]
     },
@@ -22521,7 +22555,7 @@
       "id": "EC2RouteTableConsoleEpoch",
       "model": "formal/EC2RouteTableConsoleEpoch.tla",
       "config": "formal/EC2RouteTableConsoleEpoch.cfg",
-      "bounds": "Two identity, region, target and refresh labels; six independent admission witnesses; one change between explicit contexts and one pending response; four outcome classes and two recorded-detail flags.",
+      "bounds": "Two identity, region, target and refresh labels; six independent admission witnesses; one change between explicit contexts and one pending response; four outcome classes and two recorded-detail flags. The selector is unfiltered, first subnet, second subnet or invalid; responses carry an exact-match witness.",
       "properties": [
         "TypeOK",
         "EligibleRead",
@@ -22534,9 +22568,11 @@
         "StatusIsEvidence",
         "DefaultIsRecorded",
         "AssociationIsExplicit",
-        "NoImplicitMain"
+        "NoImplicitMain",
+        "CurrentSubnet",
+        "ValidSubnetRequest"
       ],
-      "limits": "Readout projection only. A change may keep identity, region, VPC, revision or availability constant, independently exercising stale responses. Bounded labels are not arbitrary refresh/ABA interleavings. Does not prove React scheduling, authentication, IAM/SQL/HTTP/XML, packet reachability, route edits, completeness or runtime refinement.",
+      "limits": "Readout projection only. A change may keep identity, region, VPC, revision or availability constant, independently exercising stale responses. Bounded labels are not arbitrary refresh/ABA interleavings. Does not prove React scheduling, authentication, IAM/SQL/HTTP/XML, packet reachability, route edits, completeness or runtime refinement. Subnets and exact-match flags are symbolic. It does not prove the input parser or correlation of real transport callbacks.",
       "source_scope": [
         "internal/server/server.go",
         "internal/server/web/app.js",
@@ -22733,6 +22769,39 @@
             }
           ],
           "expect_invariant": "NoImplicitMain"
+        },
+        {
+          "id": "AcceptOldSubnet",
+          "edits": [
+            {
+              "old": "/\\ s.subnet = selected.subnet",
+              "new": "/\\ TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CurrentSubnet"
+        },
+        {
+          "id": "QueryIncompleteSubnet",
+          "edits": [
+            {
+              "old": "/\\ selected.subnet # \"invalid\"",
+              "new": "/\\ TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ValidSubnetRequest"
+        },
+        {
+          "id": "MaskNonmatchingSubnetResponse",
+          "edits": [
+            {
+              "old": "IF o = \"rows\" /\\ r.scope.subnet # \"all\" /\\ ~matched THEN \"error\" ELSE vpcStatus",
+              "new": "vpcStatus",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "StatusIsEvidence"
         }
       ]
     },

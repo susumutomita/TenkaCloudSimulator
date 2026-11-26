@@ -7,7 +7,9 @@ import (
 	"encoding/xml"
 	"errors"
 	"maps"
+	"slices"
 	"sort"
+	"strings"
 )
 
 const (
@@ -45,6 +47,59 @@ type ec2RouteAssociationRead struct {
 	Table  string `xml:"routeTableId"`
 	Subnet string `xml:"subnetId"`
 	Main   bool   `xml:"main"`
+}
+
+// Accept one bounded EC2 Query filter, with continuous Value indices.
+func parseEC2RouteTableSubnetFilter(fields map[string][]string) ([]string, *ec2Failure) {
+	const valuePrefix = "Filter.1.Value."
+	var values [8]string
+	var named bool
+	var count int
+	for _, field := range slices.Sorted(maps.Keys(fields)) {
+		entries := fields[field]
+		if len(entries) != 1 {
+			return nil, ec2Invalid("InvalidParameterValue", "DescribeRouteTables parameters must be sent once.")
+		}
+		switch field {
+		case "Action", "Version":
+			continue
+		case "Filter.1.Name":
+			if entries[0] != "association.subnet-id" {
+				return nil, ec2Invalid("UnsupportedOperation", "DescribeRouteTables supports only the association.subnet-id filter.")
+			}
+			named = true
+		default:
+			index, ok := strings.CutPrefix(field, valuePrefix)
+			if !ok {
+				return nil, ec2Invalid("UnsupportedOperation", "That DescribeRouteTables option is not supported.")
+			}
+			if len(index) != 1 || index[0] < '1' || int(index[0]-'1') >= len(values) {
+				return nil, ec2Invalid("InvalidParameterValue", "Use 1–8 continuous association.subnet-id values.")
+			}
+			if !ec2SubnetIDPattern.MatchString(entries[0]) {
+				return nil, ec2Invalid("InvalidSubnetID.Malformed", "association.subnet-id values must be exact subnet IDs.")
+			}
+			values[index[0]-'1'] = entries[0]
+			count++
+		}
+	}
+	if named != (count > 0) || slices.Contains(values[:count], "") {
+		return nil, ec2Invalid("InvalidParameterValue", "association.subnet-id requires a name and 1–8 continuous values.")
+	}
+	return values[:count], nil
+}
+
+// Select parents only after the entire regional projection has been verified.
+// The selector neither alters IAM admission nor hides invalid regional state.
+func filterEC2RouteTablesOnSubnet(tables []ec2RouteTableRead, ids []string) []ec2RouteTableRead {
+	if len(ids) == 0 {
+		return tables
+	}
+	return slices.DeleteFunc(tables, func(table ec2RouteTableRead) bool {
+		return !slices.ContainsFunc(table.Associations, func(a ec2RouteAssociationRead) bool {
+			return !a.Main && slices.Contains(ids, a.Subnet)
+		})
+	})
 }
 
 var errEC2RouteSnapshot = errors.New("inconsistent EC2 route table snapshot")

@@ -1,26 +1,277 @@
 {
   "version": 1,
-  "base_sha": "c3347f2de0dd8bac909f84b762d3353ea5d56bc4",
+  "base_sha": "8772cc3c419e5951fb5bd0d66d586e9f8350ef32",
   "changes": [
     {
-      "path": "docs/simpledb-console.md",
-      "sha256": "7904aad5e8456a5d113278525a8a44710cff714a36889b92ec68b7261682da11",
+      "path": "README.md",
+      "sha256": "7b17e43e9a1f374757938a880f9779f15cd98311d7a44aeadb9e9479ad69b369",
       "disposition": "documentation",
-      "reason": "Documents opt-in verification of existing local SimpleDB entry points. No provider or state semantics change.",
+      "reason": "Documents the new bounded explicit association read, official sources, guided Console use and remaining limits.",
       "models": []
     },
     {
-      "path": "test/e2e/simpledb_crosssurface.py",
-      "sha256": "4129969d898377582f5d6114c3b62137d22b9a2d55e73183c4cc1741e744b92b",
-      "disposition": "test-support",
-      "reason": "Runs authenticated bounded local checks against unmodified Cloudscape, pinned SDK and served Query templates. No production code or model transitions change.",
+      "path": "docs/design/0001-go-standalone.md",
+      "sha256": "e534b5563a4453395228aa7707f8dc3cc6825907560222efc6d4849b71c1785e",
+      "disposition": "documentation",
+      "reason": "Documents the new bounded explicit association read, official sources, guided Console use and remaining limits.",
       "models": []
     },
     {
-      "path": "test/e2e/simpledb_crosssurface_dom.cjs",
-      "sha256": "c2af644d562a93d2e4be405d203a529d10723e26ec5c25ce9d5d0ec3f2f3edc9",
+      "path": "docs/ec2-network-contracts.md",
+      "sha256": "48f23918ce03873451b59ae93d3e9edd600ba52406fbd4e4e75f550fa7b7ba85",
+      "disposition": "documentation",
+      "reason": "Documents the new bounded explicit association read, official sources, guided Console use and remaining limits.",
+      "models": []
+    },
+    {
+      "path": "docs/ec2-read-discovery.md",
+      "sha256": "79d411464871c51bab54f1f0a8327789c2c3b6e0239c74f934422faf2b432705",
+      "disposition": "documentation",
+      "reason": "Documents the new bounded explicit association read, official sources, guided Console use and remaining limits.",
+      "models": []
+    },
+    {
+      "path": "formal/EC2RouteTableConsoleEpoch.cfg",
+      "sha256": "ed7ef3d5b38f928c43bdb26dd167ab09ec50e2ffca82c87505af7845b68b62ec",
+      "disposition": "modeled",
+      "reason": "Extend the bounded route-table projection or response epoch with a subnet selector while preserving all pre-existing checked invariants.",
+      "models": [
+        {
+          "id": "EC2RouteTableConsoleEpoch",
+          "properties": [
+            "CurrentSubnet",
+            "ValidSubnetRequest",
+            "StatusIsEvidence"
+          ],
+          "limits": "Symbolic selector and async boundary; no React, transport or wire refinement proof."
+        }
+      ]
+    },
+    {
+      "path": "formal/EC2RouteTableConsoleEpoch.tla",
+      "sha256": "98a9fc86afcbf867e169af7f93c62f8082895fd04f1daf6f9a56f67e38ee86bc",
+      "disposition": "modeled",
+      "reason": "Extend the bounded route-table projection or response epoch with a subnet selector while preserving all pre-existing checked invariants.",
+      "models": [
+        {
+          "id": "EC2RouteTableConsoleEpoch",
+          "properties": [
+            "CurrentSubnet",
+            "ValidSubnetRequest",
+            "StatusIsEvidence"
+          ],
+          "limits": "Symbolic selector and async boundary; no React, transport or wire refinement proof."
+        }
+      ]
+    },
+    {
+      "path": "formal/EC2RouteTableRead.cfg",
+      "sha256": "98e23f5621867f0f5a98ec1ab64005f73db6e8aaa9b7af5bd5d9337026b7335f",
+      "disposition": "modeled",
+      "reason": "Extend the bounded route-table projection or response epoch with a subnet selector while preserving all pre-existing checked invariants.",
+      "models": [
+        {
+          "id": "EC2RouteTableRead",
+          "properties": [
+            "FilterMatchesExplicit"
+          ],
+          "limits": "One output row; no parser, OR completeness, regional consistency or Go refinement proof."
+        }
+      ]
+    },
+    {
+      "path": "formal/EC2RouteTableRead.tla",
+      "sha256": "f8d134d18e0ac7a1ccaa020c6ca4546f981f133ebeef591ddee13f62359b9b35",
+      "disposition": "modeled",
+      "reason": "Extend the bounded route-table projection or response epoch with a subnet selector while preserving all pre-existing checked invariants.",
+      "models": [
+        {
+          "id": "EC2RouteTableRead",
+          "properties": [
+            "FilterMatchesExplicit"
+          ],
+          "limits": "One output row; no parser, OR completeness, regional consistency or Go refinement proof."
+        }
+      ]
+    },
+    {
+      "path": "formal/models.json",
+      "sha256": "a0afcbdda8982b6f1a5ab97c67f65dc9dea0c6ab60f4f0890bce56db4be34338",
+      "disposition": "formal-infrastructure",
+      "reason": "Record two existing models\u2019 additional filter invariants and mutation controls, preserving protected scopes and properties.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/ec2_read.go",
+      "sha256": "1f74367640010e4f354734f16bf46b962292c1cef00c513bb0d0ab92a1914e01",
+      "disposition": "modeled",
+      "reason": "Apply the selector only to the full already-validated regional DescribeRouteTables snapshot.",
+      "models": [
+        {
+          "id": "EC2RouteTableRead",
+          "properties": [
+            "Admission",
+            "BoundSnapshot",
+            "FilterMatchesExplicit"
+          ],
+          "limits": "One output row; no parser, OR completeness, regional consistency or Go refinement proof."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/ec2_route_tables_filter_test.go",
+      "sha256": "b722a87056548128b22034a01a2c063f649a1ed10544a459a62e1dfbf0b641e1",
       "disposition": "test-support",
-      "reason": "Runs authenticated bounded local checks against unmodified Cloudscape, pinned SDK and served Query templates. No production code or model transitions change.",
+      "reason": "Executes the bounded filter acceptance or validates parser, Query, SDK or console error and state semantics; not runtime behavior.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/ec2_route_tables_read.go",
+      "sha256": "1454da0b70a732a7b6d4e81d7de4dbb11f2e7a060e0a2058340d09f8fc93e52b",
+      "disposition": "modeled",
+      "reason": "Parse one bounded OR selector and match only explicit persisted subnet associations.",
+      "models": [
+        {
+          "id": "EC2RouteTableRead",
+          "properties": [
+            "BoundSnapshot",
+            "ExplicitOnly",
+            "FilterMatchesExplicit"
+          ],
+          "limits": "One output row; no parser, OR completeness, regional consistency or Go refinement proof."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/ec2_route_tables_read_test.go",
+      "sha256": "da70c7eb9ef0ffb2a7f20353b8e285ecaada941ff1ca175089c1844d1f20ebac",
+      "disposition": "test-support",
+      "reason": "Executes the bounded filter acceptance or validates parser, Query, SDK or console error and state semantics; not runtime behavior.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/ec2_vpc.go",
+      "sha256": "19bab635707c6f7779892aa5d92371ed80eb20578b20f106b1a158206d6e909d",
+      "disposition": "modeled",
+      "reason": "Wire the bounded filter to the DescribeRouteTables parser only, preserving the same wildcard-action IAM boundary.",
+      "models": [
+        {
+          "id": "EC2RouteTableRead",
+          "properties": [
+            "Admission",
+            "FilterMatchesExplicit"
+          ],
+          "limits": "One output row; no parser, OR completeness, regional consistency or Go refinement proof."
+        }
+      ]
+    },
+    {
+      "path": "internal/server/web/app.js",
+      "sha256": "3849fa244f058443a860231aa02da60a44f1a5f738e063445ba752858d46099b",
+      "disposition": "modeled",
+      "reason": "Derived production Cloudscape bundle embeds the filter input, exact Query and stale-result boundary.",
+      "models": [
+        {
+          "id": "EC2RouteTableConsoleEpoch",
+          "properties": [
+            "CurrentSubnet",
+            "ValidSubnetRequest",
+            "StatusIsEvidence"
+          ],
+          "limits": "Symbolic selector and async boundary; no React, transport or wire refinement proof."
+        }
+      ]
+    },
+    {
+      "path": "test/console/ec2_route_table_subnet_filter.py",
+      "sha256": "f822ade788d8f1989e93b869f291d5b6b7261d5dc6405cb07f43b11dd7f8d21b",
+      "disposition": "test-support",
+      "reason": "Executes the bounded filter acceptance or validates parser, Query, SDK or console error and state semantics; not runtime behavior.",
+      "models": []
+    },
+    {
+      "path": "test/console/ec2_route_table_subnet_filter_dom.cjs",
+      "sha256": "36efaea147eb21c795b352907771edc6de5a955cf8a0c70f2f83fdb93270eddb",
+      "disposition": "test-support",
+      "reason": "Real served Cloudscape/SQLite filter acceptance in existing optional JSDOM harness, including a deliberately delayed prior response and cleanup. No runtime dependency.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/ec2_network_contract.py",
+      "sha256": "f7a58612ebcb5a7b6398b4ee14b0746f5c07a9c60431f9a2e372e18167b90573",
+      "disposition": "test-support",
+      "reason": "Executes the bounded filter acceptance or validates parser, Query, SDK or console error and state semantics; not runtime behavior.",
+      "models": []
+    },
+    {
+      "path": "tools/console/bundle-digests.json",
+      "sha256": "e2fbc3030cdcaa15fd5b73562a2ad2abf39396cfae15e94909e12dfbc7b63a32",
+      "disposition": "presentation",
+      "reason": "Reproducible metadata and digest for the updated source-generated console asset; no package or policy change.",
+      "models": []
+    },
+    {
+      "path": "tools/console/bundle-inputs.json",
+      "sha256": "1b4e2169e898081f056ccb2d4457fa7ede686962329476a91d51c0c0f8e19bfe",
+      "disposition": "presentation",
+      "reason": "Reproducible metadata and digest for the updated source-generated console asset; no package or policy change.",
+      "models": []
+    },
+    {
+      "path": "tools/console/src/ec2-response.mjs",
+      "sha256": "ddb54735452c85061435370af8f2b4d8e657c9dc9d431ae8e70c1bf3d7bd8cfd",
+      "disposition": "modeled",
+      "reason": "Reject an out-of-filter server table before publishing the VPC view.",
+      "models": [
+        {
+          "id": "EC2RouteTableConsoleEpoch",
+          "properties": [
+            "StatusIsEvidence",
+            "CurrentSubnet"
+          ],
+          "limits": "Symbolic selector and async boundary; no React, transport or wire refinement proof."
+        }
+      ]
+    },
+    {
+      "path": "tools/console/src/ec2-route-tables.mjs",
+      "sha256": "28e6535a10bce602701bffe15c3a620104c761d2927504e3d193939795ce3d43",
+      "disposition": "modeled",
+      "reason": "Admit one exact ID in the existing Query transport; incomplete IDs perform no read.",
+      "models": [
+        {
+          "id": "EC2RouteTableConsoleEpoch",
+          "properties": [
+            "FixedRead",
+            "ValidSubnetRequest",
+            "StatusIsEvidence"
+          ],
+          "limits": "Symbolic selector and async boundary; no React, transport or wire refinement proof."
+        }
+      ]
+    },
+    {
+      "path": "tools/console/src/ec2-vpc-route-tables.jsx",
+      "sha256": "4d5c3578835d3ddd65e3c9a18c874fc3ae1f7364014862cac2e87afa1b4925aa",
+      "disposition": "modeled",
+      "reason": "Bind the result and view to the selected subnet as well as selected VPC, request identity, region and epoch.",
+      "models": [
+        {
+          "id": "EC2RouteTableConsoleEpoch",
+          "properties": [
+            "CurrentSubnet",
+            "ValidSubnetRequest",
+            "StatusIsEvidence"
+          ],
+          "limits": "Symbolic selector and async boundary; no React, transport or wire refinement proof."
+        }
+      ]
+    },
+    {
+      "path": "tools/console/test/ec2-route-tables.test.mjs",
+      "sha256": "b59a8dff2bde137fb098dfd2ce257b81c06eacbf7b27381de3e0f2b6158d270c",
+      "disposition": "presentation",
+      "reason": "Executes the bounded filter acceptance or validates parser, Query, SDK or console error and state semantics; not runtime behavior.",
       "models": []
     }
   ]

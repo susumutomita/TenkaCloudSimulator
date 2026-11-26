@@ -1,6 +1,6 @@
 # Bounded EC2/CloudFormation network contracts (#467)
 
-Reviewed baseline: [signed main `66e251d`][main-reviewed] (2026-11-26).
+Reviewed baseline: [signed main `8772cc3`][main-reviewed] (2026-11-26).
 The first #467 inventory used `d2dd8bca`; it predates native route-table
 readback and explicit native subnet associations. This is a contract and
 evidence record, not an expansion of the [EC2/VPC API](ec2-read-discovery.md).
@@ -50,6 +50,7 @@ A passing API call or returned association ID is not proof of packet forwarding.
 | EC2 `DescribeRouteTables`, `CreateRoute`, `CreateRoute` with `DryRun=true`, and `DeleteRoute` against the saved table | Describe returns the CFN route and its explicit association. All three mutation requests return `UnsupportedOperation`; neither the route nor any exposed inventory changes. AWS's native DryRun authorization check is not implemented. | [DescribeRouteTables][describe-tables], [CreateRoute][create-route], [DeleteRoute][delete-route] | `test_native_route_table_read_and_rejected_mutations` |
 | EC2 `CreateVpc` without a route table, then a separate bare CFN table | The native VPC does not synthesize a main table. The independently created CFN table has no routes or associations. AWS local routes are not synthesized. | [CreateVpc][create-vpc], [AWS main and local routes][aws-route-tables] | `test_native_vpc_has_no_implicit_table_and_bare_table_has_no_children` |
 | Native `AssociateRouteTable(RouteTableId, SubnetId)` on an existing same-VPC EC2-owned pair | Exact pair permissions apply; the association is explicit and has a stable ID across retries and restart. A different table for the same subnet is rejected. EC2 reads the typed association from its own regional store; it does not adopt a CFN association. | [AssociateRouteTable][associate-table], [DescribeRouteTables][describe-tables], [Same-VPC relationship][cfn-association] | [#560][association-pr]: [native SDK fixture][association-test] and [wire tests][association-wire] |
+| EC2 `DescribeRouteTables` with `association.subnet-id` | One to eight exact IDs union the whole tables for current explicit associations, for either owner. Absent, detached or stale subnet IDs do not match; another region cannot match. No change to regional integrity checks or IAM. | [DescribeRouteTables][describe-tables], [Filter][ec2-filter], [RouteTableAssociation][ec2-association-type] | `test_route_table_filter_observes_only_live_explicit_subnet_associations`; signed-in CFN console uses the same filter |
 | Native `DisassociateRouteTable(AssociationId)` and dependent deletes | One exact saved relation disappears. An unauthorized caller cannot remove it; table/subnet deletion is refused while it exists, then succeeds after removal. A separate team's snapshot is unchanged. No fallback to an implicit main table. | [DisassociateRouteTable][disassociate-table] (AWS **does** fall back to the main table), [DeleteRouteTable][delete-table] | [#560][association-pr]: [native SDK fixture][association-test] |
 | CFN `CreateStack` / `DeleteStack`: valid local participant token with the stack actions and route-table association permissions on the table but not its subnet | Both calls get the local CFN `AccessDenied` (HTTP 403) for the missing subnet permission. CFN/EC2 inventories and captured live history do not change. The operator can use the rejected name, read the resulting explicit association, and clean up without changing the other stack. | [CFN access control][cfn-access], [Associate IAM][associate-iam], [Disassociate IAM][disassociate-iam], [SubnetRouteTableAssociation][cfn-association] | `test_participant_missing_subnet_grant_preserves_stack_network`; local policy and synchronous refusal, not AWS service-role/error parity |
 | CFN `CreateStack` without any local token | HTTP 401 text, not AWS Query XML; SDK parsing fails and all inventories stay unchanged. | [Simulator access contract](../AGENTS.md), not AWS authentication | `test_missing_local_token_cannot_create_network` |
@@ -63,9 +64,11 @@ build the simulator and use the existing loopback-only entry points:
 make build
 python3 test/platform/sdk-lifecycle.py -v
 SIMULATOR_BINARY="$PWD/dist/tenkacloud-simulator" python3 test/console/ec2_native_route_association_sdk.py
+SIMULATOR_BINARY="$PWD/dist/tenkacloud-simulator" JSDOM_MODULE=/path/to/jsdom \
+  python3 test/console/ec2_route_table_subnet_filter.py
 ```
 
-The CFN suite has seven methods, including restart and participant refusal,
+The CFN suite has eight methods, including restart, participant refusal and the subnet filter,
 with eight invalid-template and three unsupported-native-mutation subcases. It uses
 fresh local token/store state and dummy SDK signing credentials. It is imported by the
 [platform runner][platform-runner], not gated on the optional full E2E job.
@@ -80,7 +83,7 @@ reuse cover exposed state, not an exhaustive audit of hidden SQLite rows. The
 public comparator was read only; no emulator differential run, AWS operation,
 real VM, packet flow, or challenge scoring is established here. #467 remains open.
 
-[main-reviewed]: https://github.com/susumutomita/TenkaCloudSimulator/tree/66e251dbfb87f7c385d1fbe63a3670cc38361ad3
+[main-reviewed]: https://github.com/susumutomita/TenkaCloudSimulator/tree/8772cc3c419e5951fb5bd0d66d586e9f8350ef32
 [vpc-owner]: https://github.com/susumutomita/TenkaCloudSimulator/issues/56
 [vm-owner]: https://github.com/susumutomita/TenkaCloudSimulator/pull/465
 [instance-placement]: https://github.com/susumutomita/TenkaCloudSimulator/pull/570
@@ -112,6 +115,8 @@ real VM, packet flow, or challenge scoring is established here. #467 remains ope
 [describe-vpcs]: https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_DescribeVpcs.html
 [describe-subnets]: https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_DescribeSubnets.html
 [describe-tables]: https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_DescribeRouteTables.html
+[ec2-filter]: https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_Filter.html
+[ec2-association-type]: https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_RouteTableAssociation.html
 [cfn-access]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/control-access-with-iam.html
 [associate-iam]: https://docs.aws.amazon.com/service-authorization/latest/reference/list_ec2.html#amazonec2-AssociateRouteTable
 [disassociate-iam]: https://docs.aws.amazon.com/service-authorization/latest/reference/list_ec2.html#amazonec2-DisassociateRouteTable

@@ -139,7 +139,7 @@ export function parseEC2Error(document){
 }
 
 // DescribeRouteTables returns a regional snapshot, never a per-VPC filter or a data-plane observation.
-export function parseEC2RouteTables(document, selectedVPC) {
+export function parseEC2RouteTables(document, selectedVPC, selectedSubnet = '') {
   if (!vpcId.test(selectedVPC)) invalid();
   const response = root(document, 'DescribeRouteTablesResponse');
   exactFields(response, ['requestId', 'routeTableSet']);
@@ -177,6 +177,7 @@ export function parseEC2RouteTables(document, selectedVPC) {
       unique(keys,key);
       return {key,value:val};
     });
+    if (selectedSubnet && !associations.some(association => association.subnet === selectedSubnet)) invalid();
     count += 1 + routes.length + associations.length;
     if (count > 1000) invalid();
     return {id,vpc,routes,associations,tags};
