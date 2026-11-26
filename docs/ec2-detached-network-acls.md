@@ -4,9 +4,16 @@ Issue [#56](https://github.com/susumutomita/TenkaCloudSimulator/issues/56)
 tracks the broader VPC workflow. This slice stores and removes a custom ACL
 inside an existing EC2-managed VPC; it **does not apply** to any subnet or
 affect packet traffic. It does not create a VPC's default ACL or support rule
-mutation, association, a console screen, Terraform, or CloudFormation ACLs.
+mutation, association, Terraform, or CloudFormation ACLs.
 
-The native entry point is authenticated EC2 Query/XML, version `2016-11-15`.
+In the signed-in **VPC → Resource details → Network ACLs** pane, select a
+verified EC2-managed VPC. If the detached ACL capability is present, you can
+list, create with an optional Name, and delete by confirming the exact ACL ID.
+The Console checks its scoped readback before reporting success. If a result
+cannot be confirmed, refresh before retrying. For a CloudFormation VPC the
+pane makes no ACL query or mutation. Instance-scoped handoffs have no controls.
+
+Both the SDK and Console use authenticated EC2 Query/XML, version `2016-11-15`.
 
 | Operation | Supported arguments and effect |
 | --- | --- |

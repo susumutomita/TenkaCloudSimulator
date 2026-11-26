@@ -1,90 +1,165 @@
-const assert = require('node:assert/strict');
-const {readFileSync} = require('node:fs');
-const {JSDOM, VirtualConsole} = require(process.env.JSDOM_MODULE);
-const {port, cookie, vpc, stackVpc, stackSubnet} = JSON.parse(readFileSync(0,'utf8'));
-assert.ok(Number.isInteger(port) && port > 0 && port < 65536);
-const origin = 'http://127.0.0.1:' + port;
-const sleep = ms=>new Promise(resolve=>setTimeout(resolve,ms));
-async function until(test,note){
-  for(let limit=Date.now()+20000;Date.now()<limit;){const s=test();if(s)return s; await sleep(15);}
-  assert.fail(note);
+const assert=require('node:assert/strict');
+const {readFileSync}=require('node:fs');
+const {createHash, randomUUID}=require('node:crypto');
+const {JSDOM,VirtualConsole}=require(process.env.JSDOM_MODULE);
+const opts=JSON.parse(readFileSync(0,'utf8'));
+const {port,cookie,vpc,stackVpc,stackSubnet,asset,principal,phase}=opts;
+assert.ok(Number.isInteger(port)&&port>0&&port<65536);
+const origin='http://127.0.0.1:'+port;
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+async function until(fn,label){
+  for(const end=Date.now()+16000;Date.now()<end;){const value=fn();if(value)return value;await sleep(15);}
+  assert.fail(label);
 }
-const button=(node,title)=>[...(node?.querySelectorAll('button')??[])].find(b=>b.textContent.trim()===title);
+const button=(node,text)=>[...(node?.querySelectorAll('button')??[])].find(b=>b.textContent.trim()===text);
+const ruleTitles=['Authorize security group ingress','Edit inbound rules','Edit outbound rules','Edit subnet associations','Associate subnet','Attach to instance'];
+
 (async()=>{
-  const [html, bundle]=await Promise.all(['/', '/app.js'].map(path=>fetch(origin+'/_simulator/console'+path,{headers:{Cookie:cookie},redirect:'error'}).then(r=>{
-    assert.equal(r.status,200); return r.text();
-  })));
-  const dom=new JSDOM(html,{url:origin+'/_simulator/console/#/vpc',runScripts:'outside-only',pretendToBeVisual:true,virtualConsole:new VirtualConsole()});
+  const [html,bundle]=await Promise.all(['/','/app.js'].map(path=>fetch(origin+'/_simulator/console'+path,
+    {headers:{Cookie:cookie},redirect:'error'}).then(r=>{assert.equal(r.status,200);return r.text();})));
+  assert.equal(createHash('sha256').update(bundle).digest('hex'),asset,'must use exact served asset');
+  const dom=new JSDOM(html,{url:origin+'/_simulator/console/#/vpc',runScripts:'outside-only',
+    pretendToBeVisual:true,virtualConsole:new VirtualConsole()});
   const w=dom.window,d=w.document,calls=[];
-  try {
+  const allowed=new Set(['DescribeVpcs','DescribeSubnets','CreateSubnet','DeleteSubnet','DescribeSecurityGroups',
+    'CreateSecurityGroup','DeleteSecurityGroup','DescribeNetworkAcls','CreateNetworkAcl','DeleteNetworkAcl','DescribeRouteTables']);
+  let target, holdNextGroup, writeRefused, staleSignal, continueWrite, continueStale;
+  try{
     Object.assign(w,{TextEncoder,TextDecoder,matchMedia:()=>({matches:false,addListener(){},removeListener(){},addEventListener(){},removeEventListener(){}}),
       ResizeObserver:class{observe(){}unobserve(){}disconnect(){}},IntersectionObserver:class{observe(){}unobserve(){}disconnect(){}},scrollTo(){}});
+    Object.defineProperty(w.crypto,'randomUUID',{value:randomUUID});
     w.HTMLElement.prototype.scrollIntoView=function(){};
     w.fetch=async(path,init={})=>{
       assert.ok(path==='/'||path==='/_simulator/v1/capabilities','unexpected application route');
-      const headers=new Headers(init.headers); headers.set('Cookie',cookie);
+      const headers=new Headers(init.headers);headers.set('Cookie',cookie);
       const body=init.body?.toString(), form=new URLSearchParams(body), action=form.get('Action');
-      if(path==='/') {
-        assert.ok(['DescribeVpcs','DescribeSubnets','CreateSubnet','DeleteSubnet','DescribeSecurityGroups','DescribeRouteTables'].includes(action),'unexpected action '+action);
+      if(path==='/'){
+        assert.ok(allowed.has(action),'unexpected operation '+action);
         assert.equal(headers.get('X-Simulator-Region'),'us-east-1');
-        if (action==='DescribeSecurityGroups') {
+        assert.equal(headers.get('X-Simulator-Principal'),principal);
+        if(action==='DescribeSecurityGroups'||action==='DescribeNetworkAcls'){
           assert.equal(form.get('Filter.1.Name'),'vpc-id');
-          assert.equal(form.get('Filter.1.Value.1'),stackVpc);
+          assert.equal(form.get('Filter.1.Value.1'),target);
+          if(action==='DescribeNetworkAcls') assert.equal(target,vpc,'CFN pane must not query ACLs');
         }
-        if (action==='CreateSubnet') {assert.equal(form.get('VpcId'),vpc); assert.equal(form.get('CidrBlock'),'10.74.1.0/24');}
+        if(action.startsWith('Create')) assert.equal(form.get('VpcId'),vpc,'must create under selected native VPC');
+        if(action==='CreateSubnet') assert.equal(form.get('CidrBlock'),'10.74.1.0/24');
+        if(action==='CreateNetworkAcl') assert.match(form.get('ClientToken'),/^[a-f0-9-]{36}$/);
       }
       const bridge=init.signal&&new AbortController();
-      if(bridge) {
+      if(bridge){
         if(init.signal.aborted)bridge.abort();else init.signal.addEventListener('abort',()=>bridge.abort(),{once:true});
       }
-      const r=await fetch(origin+path,{...init,headers,body,redirect:'error',signal:bridge?.signal});
-      if(action) calls.push([action,r.status,headers.get('X-Simulator-Principal')]);
-      return r;
+      const response=await fetch(origin+path,{...init,headers,body,redirect:'error',signal:bridge?.signal});
+      if(action) calls.push([action,response.status,form.get('Filter.1.Value.1')]);
+      if(action==='CreateSecurityGroup'&&response.ok)holdNextGroup='write';
+      if(action==='DescribeSecurityGroups'&&target===vpc&&holdNextGroup){
+        const mode=holdNextGroup;holdNextGroup=null;
+        await new Promise(release=>{
+          if(mode==='write')continueWrite=release;
+          else{staleSignal=init.signal;continueStale=release;}
+        });
+      }
+      return response;
     };
     w.eval(bundle);
-    const display=s=>d.body.textContent.includes(s);
-    const select=async id=>(await until(()=>d.querySelector('input[type="radio"][aria-label="Select '+id+'"]'),'VPC list missing id')).click();
-    await select(stackVpc);
-    await until(()=>display(stackSubnet),'CloudFormation readback absent');
-    assert.ok(display('CloudFormation owns this VPC.'));
-    await until(()=>display('CFN readback is still here'),'existing CloudFormation SG pane lost its readback with a native SG present');
-    assert.equal(button(d,'Add subnet'),undefined);
-    await select(vpc);
-    const add=await until(()=>{const b=button(d,'Add subnet');return b&&!b.disabled&&b;},'native subnet action absent');
-    assert.ok(!display(stackSubnet));
-    assert.ok(display('This pane displays CloudFormation-managed groups only.'));
-    assert.ok(!display('Detached group'));
-    add.click();
-    const dialog=()=>d.querySelector('button[aria-label="Close subnet dialog"]')?.closest('[role="dialog"]');
-    const fill=async text=>{
-      const input=await until(()=>dialog()?.querySelector('input[type="text"]'),'subnet form input absent');
-      Object.getOwnPropertyDescriptor(w.HTMLInputElement.prototype,'value').set.call(input,text);
-      input.dispatchEvent(new w.InputEvent('input',{bubbles:true,composed:true,inputType:'insertText',data:text}));
-      input.dispatchEvent(new w.Event('change',{bubbles:true}));
-      await sleep(40);
+    const display=text=>d.body.textContent.includes(text);
+    const ctrl=(title,node=d)=>button(node,title)||[...(node?.querySelectorAll('button')??[])].find(b=>b.getAttribute('aria-label')===title);
+    const click=async(title,node=d)=>(await until(()=>{const b=ctrl(title,node);return b&&!b.disabled&&b;},'unavailable control '+title)).click();
+    const radio=async id=>until(()=>d.querySelector('input[type="radio"][aria-label="Select '+id+'"]'),'missing VPC');
+    const select=async id=>{target=id;(await radio(id)).click();};
+    const active=label=>d.querySelector('button[aria-label="Close '+label+' dialog"]')?.closest('[role="dialog"]');
+    const fill=async(label,index,text)=>{
+      const inputs=await until(()=>active(label)?.querySelectorAll('input[type="text"]')?.[index],'missing '+label+' input');
+      Object.getOwnPropertyDescriptor(w.HTMLInputElement.prototype,'value').set.call(inputs,text);
+      inputs.dispatchEvent(new w.InputEvent('input',{bubbles:true,composed:true,inputType:'insertText',data:text}));
+      inputs.dispatchEvent(new w.Event('change',{bubbles:true}));
+      await sleep(45);
     };
-    const submit=async title=>(await until(()=>{const b=button(dialog(),title);return b&&!b.disabled&&b;},'subnet submit unavailable')).click();
-    await fill('10.75.1.0/24');
-    assert.ok(button(dialog(),'Create subnet').disabled);
-    await fill('10.74.1.11/24');
-    await submit('Create subnet');
-    await until(()=>display('Saved subnet:'),'native create was not confirmed');
-    const saved= /Saved subnet: (subnet-[0-9a-f]{17})/.exec(d.body.textContent)?.[1];
-    assert.ok(saved);
-    assert.ok(display('10.74.1.0/24'));
-    const found=calls.findIndex(x=>x[0]==='CreateSubnet');
-    assert.deepEqual(calls.slice(found,found+2).map(x=>x.slice(0,2)),[['CreateSubnet',200],['DescribeSubnets',200]]);
-    assert.ok(calls.every(x=>x[2]==='subnet-builder'));
-    (await until(()=>button(d,'Delete subnet'),'delete action missing')).click();
-    await fill('delete');
-    await submit('Delete subnet');
-    await until(()=>display('Removed subnet: '+saved)&&display('No subnets are recorded for this VPC.'),'native delete was not confirmed');
-    assert.equal(calls.filter(x=>x[0]==='CreateSubnet').length,1);
-    assert.equal(calls.filter(x=>x[0]==='DeleteSubnet').length,1);
-    await select(stackVpc);
-    await until(()=>display(stackSubnet),'stack readback was lost');
-    assert.equal(button(d,'Add subnet'),undefined);
-    assert.equal(button(d,'Delete subnet'),undefined);
-    console.log('PASS real embedded VPC Console in JSDOM: selected existing native VPC add/read/remove under selected participant policy; existing CFN subnet remains read-only.');
-  } catch(error) {console.error('Observed safe Console diagnostics:', calls, d.body.textContent.slice(-1100)); throw error;} finally {w.close();}
+    const submit=async(label,title)=>click(title,await until(()=>active(label),'missing active '+label+' modal'));
+    async function legacy(){
+      await select(stackVpc);
+      await until(()=>display(stackSubnet)&&display('CFN readback is still here'),'missing legacy subnet/group');
+      assert.ok(display('CloudFormation owns this VPC.'));
+      assert.ok(display('This panel does not read or change its network ACLs.'));
+      for(const name of ['Add subnet','Create security group','Create network ACL','Delete subnet','Delete security group','Delete network ACL'])assert.equal(button(d,name),undefined);
+    }
+    await legacy();
+    await select(vpc);
+    await until(()=>display('Independent native group')||phase==='delete'&&display('Detached GUI group'),'native SG not listed');
+    for(const title of ruleTitles)assert.equal(button(d,title),undefined,title+' must not be offered');
+    if(phase==='create'){
+      await click('Add subnet');
+      await fill('subnet',0,'10.75.1.0/24');
+      assert.ok(ctrl('Create subnet',active('subnet')).disabled);
+      await fill('subnet',0,'10.74.1.11/24');
+      await submit('subnet','Create subnet');
+      const subnet=await until(()=>/Saved subnet: (subnet-[a-f0-9]{17})/.exec(d.body.textContent)?.[1],'subnet success missing');
+      await click('Create security group');
+      await fill('security group',0,'GUI group');await fill('security group',1,'Detached GUI group');
+      await submit('security group','Create security group');
+      await until(()=>continueWrite&&ctrl('Close details')?.disabled,'missing aggregate write lease');
+      assert.ok(!display('Saved security group:'),'success published before real native readback');
+      assert.ok(ctrl('Create network ACL').disabled);
+      assert.ok(ctrl('Add subnet').closest('[inert]'));
+      assert.ok(ctrl('Services').disabled,'host navigation block did not include held write');
+      (await radio(stackVpc)).click();
+      assert.ok(!display(stackSubnet),'VPC switched during a write');
+      continueWrite();
+      const group=await until(()=>/Saved security group: (sg-[a-f0-9]{17})/.exec(d.body.textContent)?.[1],'group success missing');
+      await click('Create network ACL');
+      await fill('network ACL',0,'GUI ACL <local>');await submit('network ACL','Create network ACL');
+      const acl=await until(()=>/Saved network ACL: (acl-[a-f0-9]{17})/.exec(d.body.textContent)?.[1],'ACL success missing');
+      assert.ok(display('GUI ACL <local>')&&display(subnet)&&display(group));
+      holdNextGroup='stale';
+      await click('Refresh security groups');
+      await until(()=>continueStale,'missing held read after refresh');
+      await legacy();
+      assert.equal(staleSignal.aborted,true);
+      continueStale();
+      await sleep(120);
+      assert.ok(!display('Detached GUI group'),'late old-scope response leaked into CFN pane');
+      writeRefused=true;
+      console.log(JSON.stringify({saved:{subnet,group,acl},holdProof:true,lateReadAborted:staleSignal.aborted}));
+    }else{
+      const {subnet,group,acl}=opts.saved;
+      const mouse=(node,type)=>node.dispatchEvent(new w.MouseEvent(type,{bubbles:true,cancelable:true,button:0}));
+      async function chooseGroup(id,description){
+        if(display(description)&&display(id))return;
+        const picker=await until(()=>[...d.querySelectorAll('button[aria-haspopup="listbox"]')].find(b=>{
+          const labels=(b.getAttribute('aria-labelledby')??'').split(' ').map(id=>d.getElementById(id)?.textContent.trim());
+          return labels.includes('Saved security group');
+        }),'missing group selector');
+        // Cloudscape Select opens on mouse-down and commits on option mouse-up.
+        mouse(picker,'mousedown');
+        const option=await until(()=>[...(d.getElementById(picker.getAttribute('aria-controls'))?.querySelectorAll('[role="option"]')??[])]
+          .find(row=>row.textContent.includes(id)),'missing scoped saved SG option');
+        mouse(option,'mouseup');
+        await until(()=>display(description)&&display(id),'saved SG selection was not applied');
+      }
+      // Force a real selection change on every run, regardless of generated-ID order.
+      await chooseGroup(opts.sibling,'Independent native group');
+      await chooseGroup(group,'Detached GUI group');
+      await click('Delete security group');
+      await fill('security group',0,'delete');await submit('security group','Delete security group');
+      await until(()=>display('Removed security group: '+group),'group removal missing');
+      assert.ok(display(acl)&&display(subnet)&&display('Independent native group'));
+      await click('Delete network ACL');
+      await fill('network ACL',0,'acl-incorrect');
+      assert.ok(ctrl('Delete network ACL',active('network ACL')).disabled);
+      await fill('network ACL',0,acl);await submit('network ACL','Delete network ACL');
+      await until(()=>display('Deleted network ACL: '+acl),'ACL removal missing');
+      assert.ok(display(subnet)&&display('Independent native group'));
+      await click('Delete subnet');await fill('subnet',0,'delete');await submit('subnet','Delete subnet');
+      await until(()=>display('Removed subnet: '+subnet)&&display('No subnets are recorded for this VPC.'),'subnet removal missing');
+      await legacy();
+      console.log(JSON.stringify({removed:true}));
+    }
+    const mutations=calls.filter(([a])=>a.startsWith(phase==='create'?'Create':'Delete'));
+    assert.deepEqual(mutations.map(([a,status])=>[a,status]),phase==='create'
+      ?[['CreateSubnet',200],['CreateSecurityGroup',200],['CreateNetworkAcl',200]]
+      :[['DeleteSecurityGroup',200],['DeleteNetworkAcl',200],['DeleteSubnet',200]]);
+    if(phase==='create')assert.ok(writeRefused);
+  } catch(error){console.error('Observed safe Console diagnostics:',calls,d.body.textContent.slice(-1300));throw error;}
+  finally {continueWrite?.();continueStale?.();w.close();}
 })().catch(error=>{console.error(error);process.exitCode=1;});

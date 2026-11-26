@@ -96,8 +96,8 @@ console, CloudFormation adapter or Challenge integration.
 - **Networking:** [EC2/VPC discovery and VPC create/delete](docs/ec2-read-discovery.md),
   [explicit route tables, default gateway routes and subnet associations in native EC2 and the VPC Console](docs/ec2-read-discovery.md#route-table-readback),
   [IPv4 subnet lifecycle for existing EC2-managed VPCs](docs/ec2-native-subnet.md),
-  [security-group readback and detached native SG CRUD](docs/ec2-read-discovery.md#security-group-readback),
-  [detached native network ACL CRUD](docs/ec2-detached-network-acls.md),
+  [security groups: CloudFormation readback and detached Console workflow](docs/ec2-read-discovery.md#security-group-readback),
+  [detached network ACL API and Console workflow](docs/ec2-detached-network-acls.md),
   [VPC and one subnet in the Console](docs/ec2-read-discovery.md#console-vpc-and-one-subnet),
   [Elastic Load Balancing](docs/elb.md) (Lambda targets),
   [CloudFront VPC origins](docs/cloudfront-vpc-origin.md), [Route 53 public zones and one-PTR Console](docs/route53.md#console-browse-public-zones-and-create-one-ptr).

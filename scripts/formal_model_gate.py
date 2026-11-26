@@ -1410,6 +1410,11 @@ REQUIRED_SOURCE_SCOPES['EntraVerificationFixture'] = {
     'internal/azure/entra/verification_fixture.go',
 }
 
+BASE_MODELS.add('EC2DetachedNetworkConsole')
+BASE_INVARIANTS['EC2DetachedNetworkConsole'] = {'TypeOK', 'AdmittedNativeOnly', 'OnlyCurrentScope', 'VerifiedWriteOnly', 'ScopeChangeFenced', 'SiblingLeasePreserved', 'LeaseUntilReadback'}
+REQUIRED_MUTANTS['EC2DetachedNetworkConsole'] = {'AdmitUnverifiedOwner', 'AcceptLateRead', 'ReportUnverified', 'ReportBeforeAck', 'NavigateWhileSaving', 'ReleaseSiblingLease', 'ReleaseOnReceipt'}
+REQUIRED_SOURCE_SCOPES['EC2DetachedNetworkConsole'] = {'internal/server/web/app.js', 'tools/console/src/ec2-readonly.jsx', 'tools/console/src/main.jsx', 'tools/console/src/ec2-native-security-groups.mjs', 'tools/console/src/ec2-vpc-security-groups.jsx', 'tools/console/src/ec2-network-acls.mjs', 'tools/console/src/ec2-vpc-network-acls.jsx'}
+
 BASE_MODELS.add('EC2NativeVPCChildren')
 BASE_INVARIANTS['EC2NativeVPCChildren'] = {'TypeOK', 'GrantAtomic', 'RejectOtherOwner', 'ParentDependency', 'SiblingFrame', 'ReadScoped', 'ReplayNoRecreate', 'ReceiptTracksLiveACL'}
 REQUIRED_MUTANTS['EC2NativeVPCChildren'] = {'IgnoreParentGrant', 'IgnoreAllocatedGrant', 'AdoptStackParent', 'DeleteParentWithChildren', 'DeletePeerKinds', 'ReadForeignScope', 'RecreateRetiredACL', 'LoseACLReceipt'}

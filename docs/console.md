@@ -210,7 +210,10 @@ CloudFormation-managed VPCs show why deletion is disabled: delete their stack.
 Select an EC2-managed VPC and use [Add subnet](ec2-native-subnet.md) under
 **Subnets** to save a native IPv4 subnet. CloudFormation subnets remain
 read-only in VPC details. Existing CFN route/SG panes display saved state
-only. Native security group and network ACL management is SDK-only. No
+only. In an EC2-managed VPC, **Security groups** and **Network ACLs** can
+create and delete detached metadata. These views never attach a group to
+an instance or an ACL to a subnet, enforce traffic, or edit rules. An ACL
+pane for a CloudFormation VPC does not read or change ACLs. There are no
 native route mutations, gateway controls, or general VPC attribute edits.
 
 Lists are bounded by the API and must fail rather than silently truncate. A read

@@ -41,7 +41,7 @@ VPC コンソールの「VPC とサブネット1つ」は、認証済みのシ�
 [DescribeRouteTables](../ec2-read-discovery.md#route-table-readback) は、CloudFormation が同じ VPC に作成したルートテーブル、明示的なサブネットの関連付け、有効なデフォルト経路を SQLite からまとめて返す。サインイン後の VPC コンソールでは、選んだ VPC の結果だけを表示する。ネイティブの作成・変更、暗黙のメインテーブルやパケットの到達性は提供しない。
 
 [既存 VPC のネイティブ IPv4 サブネット](../ec2-native-subnet.md)は、EC2 管理の親 VPC に対して追加・参照・削除できる。Console と SDK は同じ EC2 API と SQLite を使い、CloudFormation の所有権を変更しない。ルーティングやゲストの到達性は扱わない。
-[ネイティブのセキュリティグループとネットワーク ACL](../ec2-read-discovery.md)は、同じ VPC に保存できる未接続の設定である。操作は Query API に限り、インスタンス・サブネットへの関連付けや通信の制御は扱わない。子が残る VPC の削除を拒否する。
+[ネイティブのセキュリティグループとネットワーク ACL](../ec2-read-discovery.md)は、同じ VPC に保存できる未接続の設定である。Console と SDK は同じ Query API で保存・再照会し、インスタンス・サブネットへの関連付けや通信の制御は扱わない。子が残る VPC の削除を拒否する。
 
 
 [EC2 コンソールのテンプレートプレビュー](../ec2-read-discovery.md#instance-launch-preview-is-not-a-launch)は、現在の演習 ID とリージョンで既存の `ValidateTemplate` のみに接続する。パラメータ名と IAM の確認項目を返すが、既定値の内容やリソースは表示・保存しない。AMI の有無、起動権限、ゲストの実行可否は検証せず、インスタンスは起動しない。
