@@ -55,8 +55,9 @@ func (a Actor) valid() bool {
 }
 
 type Store struct {
-	db        *sql.DB
-	cursorKey [32]byte
+	db               *sql.DB
+	cursorKey        [32]byte
+	nativeFederation bool
 }
 
 type pool struct {
@@ -64,11 +65,17 @@ type pool struct {
 	CreatedMS int64
 }
 
-func NewStore(db *sql.DB) (*Store, error) {
+func NewStore(db *sql.DB) (*Store, error) { return newStore(db, false) }
+
+// NewStoreWithLocalFederationConfig explicitly enables the bounded native SDK
+// configuration operations. It does not initialize federation state or sign-in.
+func NewStoreWithLocalFederationConfig(db *sql.DB) (*Store, error) { return newStore(db, true) }
+
+func newStore(db *sql.DB, nativeFederation bool) (*Store, error) {
 	if db == nil {
 		return nil, errors.New("Cognito user pools require caller-owned SQLite")
 	}
-	s := &Store{db: db}
+	s := &Store{db: db, nativeFederation: nativeFederation}
 	if _, err := rand.Read(s.cursorKey[:]); err != nil {
 		return nil, err
 	}
