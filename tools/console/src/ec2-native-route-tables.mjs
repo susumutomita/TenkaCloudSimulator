@@ -1,10 +1,14 @@
 import {parseEC2RouteTables} from './ec2-response.mjs';
+import {loadVpcSubnets} from './ec2-native-subnets.mjs';
 import {vpcRouteTablesAvailable} from './ec2-route-tables.mjs';
 
 const ns='http://ec2.amazonaws.com/doc/2016-11-15/';
 const actions=['DescribeRouteTables','CreateRouteTable','DeleteRouteTable'];
+const associationActions=['DescribeRouteTables','DescribeSubnets','AssociateRouteTable','DisassociateRouteTable'];
 const vpcID=/^vpc-[0-9a-f]{17}$/;
 const tableID=/^rtb-[0-9a-f]{17}$/;
+const subnetID=/^subnet-[0-9a-f]{17}$/;
+const associationID=/^rtbassoc-[0-9a-f]{17}$/;
 const regionID=/^[a-z]{2}(?:-[a-z0-9]+)+-[0-9]+$/;
 const tokenShape=/^[ -~]{1,64}$/;
 const wireFields=['routeTableId','vpcId','ownerId','routeSet','associationSet','tagSet'];
@@ -14,15 +18,20 @@ const xml=text=>new DOMParser().parseFromString(text,'application/xml');
 const shape=(value,pattern)=>typeof value==='string'&&pattern.exec(value)?.[0]===value;
 // A delete target is a frozen row from a validated native read in this
 // transport/identity, region and VPC, not an ID copied from another view.
-const rowScopes=new WeakMap();
+const rowScopes=new WeakMap(), subnetScopes=new WeakMap();
+const includesAll=(actual,expected)=>Array.isArray(actual)&&expected.every(value=>actual.includes(value));
+const exactActions=(actual,expected)=>actual?.length===expected.length&&includesAll(actual,expected);
+const associationEnabled=ec2=>exactActions(ec2?.routeTableAssociationLifecycle,associationActions)&&includesAll(ec2?.operations,associationActions);
 
 export function vpcNativeRouteTablesAvailable(capabilities,authenticationRequired) {
   const ec2=capabilities?.services?.ec2;
   return vpcRouteTablesAvailable(capabilities,authenticationRequired) &&
-    Array.isArray(ec2.operations) && actions.every(action=>ec2.operations.includes(action)) &&
-    Array.isArray(ec2.routeTableLifecycle) && ec2.routeTableLifecycle.length===actions.length &&
-    actions.every(action=>ec2.routeTableLifecycle.includes(action)) &&
-    Array.isArray(ec2.detachedConfigurationOnly) && ec2.detachedConfigurationOnly.includes('native route tables');
+    includesAll(ec2.operations,actions) && exactActions(ec2.routeTableLifecycle,actions) &&
+    (associationEnabled(ec2)||includesAll(ec2.detachedConfigurationOnly,['native route tables']));
+}
+
+export function vpcNativeRouteTableAssociationsAvailable(capabilities,authenticationRequired) {
+  return vpcNativeRouteTablesAvailable(capabilities,authenticationRequired)&&associationEnabled(capabilities.services.ec2);
 }
 
 export function nativeRouteTableTarget(vpc) {
@@ -96,24 +105,40 @@ async function send(request,region,vpc,action,params,{signal,parse=xml}) {
 }
 
 async function snapshot(request,region,vpc,options) {
-  // Retain unfiltered regional Describe and the original CFN decoder. The
-  // server has verified typed ownership; the selected native VPC must have
-  // only detached records. A damaged row elsewhere invalidates the snapshot.
+  // Describe is regional and validates both owners in one server snapshot.
+  // The existing decoder rejects main, duplicate and non-subnet associations.
   const doc=await send(request,region,vpc,'DescribeRouteTables',{},options);
   const found=envelope(doc,'DescribeRouteTables',['routeTableSet']);
-  const saved=parseEC2RouteTables(doc,vpc.id);
-  const regionalIDs=new Set(children(found.get('routeTableSet')).map(item=>{
-    const id=leaf(fields(item,wireFields).get('routeTableId'));
+  const saved=parseEC2RouteTables(doc,vpc.id), associations=options.associations===true;
+  const regionalIDs=new Set(), regionalAssociations=new Set(), regionalSubnets=new Set();
+  for (const item of children(found.get('routeTableSet'))) {
+    const table=fields(item,wireFields), id=leaf(table.get('routeTableId'));
     if (!shape(id,tableID)) invalid();
-    return id;
-  }));
+    regionalIDs.add(id);
+    if (associations) for (const item of children(table.get('associationSet'))) {
+      const pair=fields(item,['routeTableAssociationId','routeTableId','subnetId','main']);
+      const assoc=leaf(pair.get('routeTableAssociationId')), subnet=leaf(pair.get('subnetId'));
+      if (!shape(assoc,associationID)||!shape(subnet,subnetID)) invalid();
+      regionalAssociations.add(assoc);regionalSubnets.add(subnet);
+    }
+  }
+  const binding={request,region,vpc:vpc.id,cidr:vpc.cidr,associations,regionalSubnets};
   const rows=saved.map(item=>{
-    if (item.routes.length || item.associations.length || item.tags.some(tag=>!validNativeRouteTableName(tag.value))) invalid();
-    const row=Object.freeze({id:item.id,vpc:item.vpc,name:item.tags.find(tag=>tag.key==='Name')?.value??''});
-    rowScopes.set(row,{request,region,id:vpc.id});
+    if (item.routes.length || !associations&&item.associations.length || item.tags.some(tag=>!validNativeRouteTableName(tag.value))) invalid();
+    const row=Object.freeze({id:item.id,vpc:item.vpc,name:item.tags.find(tag=>tag.key==='Name')?.value??'',
+      ...(associations?{associations:Object.freeze(item.associations.map(Object.freeze))}:{})});
+    rowScopes.set(row,binding);
     return row;
   });
-  return {rows,saved,regionalIDs};
+  return {rows,saved,regionalIDs,regionalAssociations,regionalSubnets};
+}
+
+function scopedTable(request,region,vpc,table,options) {
+  const binding=rowScopes.get(table);
+  if (!nativeRouteTableTarget(vpc) || !binding || binding.request!==request || binding.region!==region ||
+      binding.vpc!==vpc.id || binding.cidr!==vpc.cidr || table.vpc!==vpc.id ||
+      binding.associations!==(options.associations===true)) invalid();
+  return binding;
 }
 
 export async function loadVpcNativeRouteTables(request,region,vpc,options={}) {
@@ -143,9 +168,8 @@ export async function createVpcNativeRouteTable(request,region,vpc,name,clientTo
 }
 
 export async function deleteVpcNativeRouteTable(request,region,vpc,table,options={}) {
-  const binding=rowScopes.get(table);
-  if (!nativeRouteTableTarget(vpc) || !binding || binding.request!==request || binding.region!==region ||
-      binding.id!==vpc.id || table.vpc!==vpc.id) invalid();
+  scopedTable(request,region,vpc,table,options);
+  if (table.associations?.length) invalid();
   const doc=await send(request,region,vpc,'DeleteRouteTable',{RouteTableId:table.id},options);
   if (leaf(envelope(doc,'DeleteRouteTable',['return']).get('return'))!=='true') invalid();
   const {rows,regionalIDs}=await snapshot(request,region,vpc,options);
@@ -155,11 +179,51 @@ export async function deleteVpcNativeRouteTable(request,region,vpc,table,options
   return {removed:table,rows};
 }
 
+// Candidates are sourced only from ordinary DescribeSubnets for the same
+// native VPC, not from text entry or from a chosen service/identity override.
+export async function loadVpcRouteAssociationTargets(request,region,vpc,table,options={}) {
+  const binding=scopedTable(request,region,vpc,table,options);
+  if (!binding.associations) invalid();
+  const subnets=await loadVpcSubnets(request,region,vpc,options);
+  options.signal?.throwIfAborted();
+  return subnets.filter(s=>!binding.regionalSubnets.has(s.id)).map(subnet=>{
+    if (subnet.owner!=='ec2'||subnet.vpc!==vpc.id||!shape(subnet.id,subnetID)) invalid();
+    const target=Object.freeze(subnet);
+    subnetScopes.set(target,table);
+    return target;
+  });
+}
+
+export async function associateVpcRouteSubnet(request,region,vpc,table,subnet,options={}) {
+  const binding=scopedTable(request,region,vpc,table,options);
+  if (!binding.associations||subnetScopes.get(subnet)!==table||binding.regionalSubnets.has(subnet.id)) invalid();
+  const doc=await send(request,region,vpc,'AssociateRouteTable',{RouteTableId:table.id,SubnetId:subnet.id},options);
+  const receipt=envelope(doc,'AssociateRouteTable',['associationId','associationState']);
+  const id=leaf(receipt.get('associationId')), state=fields(receipt.get('associationState'),['state']);
+  if (!shape(id,associationID)||leaf(state.get('state'))!=='associated') invalid();
+  const {rows}=await snapshot(request,region,vpc,options);
+  const associated=rows.find(row=>row.id===table.id)?.associations.find(row=>row.id===id&&row.subnet===subnet.id);
+  if (!associated) invalid();
+  return {associated,rows};
+}
+
+export async function disassociateVpcRouteSubnet(request,region,vpc,table,association,options={}) {
+  const binding=scopedTable(request,region,vpc,table,options);
+  if (!binding.associations||!table.associations.includes(association)) invalid();
+  const doc=await send(request,region,vpc,'DisassociateRouteTable',{AssociationId:association.id},options);
+  if (leaf(envelope(doc,'DisassociateRouteTable',['return']).get('return'))!=='true') invalid();
+  const {rows,regionalAssociations,regionalSubnets}=await snapshot(request,region,vpc,options);
+  // A moved ID or a different binding on the same subnet is not absence.
+  if (!rows.some(row=>row.id===table.id)||regionalAssociations.has(association.id)||regionalSubnets.has(association.subnet)) invalid();
+  return {disassociated:association,rows};
+}
+
 export function nativeRouteTableFailure(error) {
   const message=error?.message??'';
   if (/^(401|403|UnauthorizedOperation|AccessDenied(?:Exception)?)(?=:|$)/.test(message) || message==='Sign in to continue.') return 'denied';
-  if (/^(InvalidRouteTableID\.NotFound|InvalidVpcID\.NotFound)(?=:|$)/.test(message)) return 'not-found';
+  if (/^Invalid(?:RouteTableID|SubnetID|AssociationID|VpcID)\.NotFound(?=:|$)/.test(message)) return 'not-found';
   if (/^DependencyViolation(?=:|$)/.test(message)) return 'dependency';
-  if (/^RouteTableLimitExceeded(?=:|$)/.test(message)) return 'limit';
+  if (/^Resource\.AlreadyAssociated(?=:|$)/.test(message)) return 'associated';
+  if (/^(RouteTableLimitExceeded|ResourceLimitExceeded)(?=:|$)/.test(message)) return 'limit';
   return 'unconfirmed';
 }

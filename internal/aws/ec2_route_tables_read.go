@@ -59,8 +59,8 @@ func ec2RouteMember(kind string) bool {
 
 // Query both sources so losing a network row or an ownership row cannot turn
 // a damaged table or child into a successful empty response. Each stack is
-// projected once, from the same SQLite snapshot. Only the exact native table
-// kind is handled separately; native route or association rows remain invalid.
+// projected once, from the same SQLite snapshot. Native tables and explicit
+// native subnet associations are verified separately; native routes remain invalid.
 func (s *StackStore) describeEC2RouteTables(ctx context.Context, region string) ([]ec2RouteTableRead, error) {
 	tx, err := s.db.BeginTx(ctx, nil)
 	if err != nil {
@@ -69,8 +69,8 @@ func (s *StackStore) describeEC2RouteTables(ctx context.Context, region string) 
 	defer tx.Rollback()
 	rows, err := tx.QueryContext(ctx, `SELECT stack_id FROM aws_cfn_ownership WHERE namespace=? AND kind IN (?,?,?)
 		UNION SELECT stack_id FROM aws_ec2_network_resources WHERE region=? AND kind IN (?,?,?)
-			AND NOT (stack_id=? AND kind=?) ORDER BY 1 LIMIT 1001`,
-		stackResourceNamespace(region, ec2RT), ec2RT, ec2Route, ec2Assoc, region, ec2RT, ec2Route, ec2Assoc, ec2NativeOwner, ec2RT)
+			AND NOT (stack_id=? AND kind IN (?,?)) ORDER BY 1 LIMIT 1001`,
+		stackResourceNamespace(region, ec2RT), ec2RT, ec2Route, ec2Assoc, region, ec2RT, ec2Route, ec2Assoc, ec2NativeOwner, ec2RT, ec2Assoc)
 	if err != nil {
 		return nil, err
 	}
@@ -140,11 +140,21 @@ func (s *StackStore) describeEC2RouteTables(ctx context.Context, region string) 
 	if err != nil {
 		return nil, err
 	}
-	if count+len(native) > ec2NativeRouteTableRowLimit {
+	associations, associationCount, err := nativeRouteAssociationProjection(ctx, tx, region)
+	if err != nil {
+		return nil, err
+	}
+	if count+len(native)+associationCount > ec2NativeRouteTableRowLimit {
 		return nil, errEC2RouteSnapshot
 	}
 	for _, item := range native {
-		out = append(out, ec2NativeRouteTableRecord(item))
+		table := ec2NativeRouteTableRecord(item)
+		table.Associations = associations[item.ID]
+		delete(associations, item.ID)
+		out = append(out, table)
+	}
+	if len(associations) != 0 {
+		return nil, errEC2RouteSnapshot
 	}
 	sort.Slice(out, func(i, j int) bool { return out[i].ID < out[j].ID })
 	return out, tx.Commit()

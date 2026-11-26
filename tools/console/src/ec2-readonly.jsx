@@ -36,7 +36,7 @@ const blankVpc={name:'',cidr:'',mode:'vpc-only',stackName:'',subnetCIDR:''};
 // Instances stay read-only. VPCs gain CreateVpc/DeleteVpc only when the server
 // advertises them, and only EC2-owned VPCs can be deleted here. Never infer
 // live guest health from stack metadata.
-export default function EC2Readonly({kind,region,request,sessionInstance,onSession,vpcLifecycle=false,vpcSubnet=false,vpcNativeSubnets=false,vpcSecurityGroups=false,vpcNativeSecurityGroups=false,vpcNetworkACLs=false,vpcRouteTables=false,vpcNativeRouteTables=false,onSaving=()=>{}}) {
+export default function EC2Readonly({kind,region,request,sessionInstance,onSession,vpcLifecycle=false,vpcSubnet=false,vpcNativeSubnets=false,vpcSecurityGroups=false,vpcNativeSecurityGroups=false,vpcNetworkACLs=false,vpcRouteTables=false,vpcNativeRouteTables=false,vpcNativeRouteAssociations=false,onSaving=()=>{}}) {
   const {t}=useLocale();
   const instance=kind==='ec2',manage=!instance&&vpcLifecycle;
   const [items,setItems]=useState([]),[loading,setLoading]=useState(false),[error,setError]=useState('');
@@ -164,7 +164,7 @@ export default function EC2Readonly({kind,region,request,sessionInstance,onSessi
   const deletable=detail?.managedBy==='ec2';
   const nativeRoutePane=vpcNativeRouteTables&&nativeRouteTableTarget(detail);
   return <ContentLayout header={<div ref={heading} tabIndex={-1}><Header variant="h1">{instance?t('EC2 instances','EC2 インスタンス'):'VPC'}</Header></div>}><SpaceBetween size="l">
-    {manage?<Alert type="info">{t('Delete CloudFormation-managed networks through their stack. Use the available subnet and detached configuration controls on EC2-managed VPCs. Native route and gateway edits are unavailable.','CloudFormation 管理のネットワークはスタックから削除してください。EC2 管理の VPC では利用可能なサブネットと未接続設定の操作を行えます。ルートやゲートウェイの編集はできません。')}</Alert>
+    {manage?<Alert type="info">{t('Delete CloudFormation-managed networks through their stack. Use the available subnet and network configuration controls on EC2-managed VPCs. Native route and gateway edits are unavailable.','CloudFormation 管理のネットワークはスタックから削除してください。EC2 管理の VPC ではサブネットと利用可能なネットワーク設定を操作できます。ルートやゲートウェイの編集はできません。')}</Alert>
       :<Alert type="info">{t('Read-only resources managed through CloudFormation. Create, start, stop and network edits are not supported here. Reported state is not a health check of the guest.','CloudFormation で管理されるリソースの読み取り専用画面です。この画面から作成・起動・停止・ネットワーク編集はできません。表示された状態はゲストの稼働確認ではありません。')}</Alert>}
     {notice&&<Alert type="success" dismissible dismissAriaLabel={t('Dismiss','閉じる')} onDismiss={()=>setNotice('')}>{notice}</Alert>}
     {error&&<Alert type="error" header={t('Could not load resources','リソースを読み込めませんでした')}>{error}</Alert>}
@@ -188,7 +188,7 @@ export default function EC2Readonly({kind,region,request,sessionInstance,onSessi
         {!instance&&vpcNetworkACLs&&<VPCNetworkACLs key={'nacl|'+region+'|'+detail.id} vpc={detail} region={region} request={request}
           writeBlocked={siblingBusy('acl')} onSaving={lease.acl}/>}
         {!instance&&nativeRoutePane&&<VPCNativeRouteTables key={'rtb-native|'+region+'|'+detail.id} vpc={detail} region={region} request={request}
-          writeBlocked={siblingBusy('rtb')} acquireWrite={acquireRouteTableWrite}/>}
+          writeBlocked={siblingBusy('rtb')} acquireWrite={acquireRouteTableWrite} associations={vpcNativeRouteAssociations}/>}
         {!instance&&vpcRouteTables&&!nativeRoutePane&&<VPCRouteTables key={'rtb|'+region+'|'+detail.id} vpc={detail} region={region} request={request}/>}
       </SpaceBetween>
     </Container>}

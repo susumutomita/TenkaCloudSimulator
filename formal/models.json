@@ -23581,6 +23581,248 @@
       ]
     },
     {
+      "id": "EC2NativeRouteAssociationLifecycle",
+      "model": "formal/EC2NativeRouteAssociationLifecycle.tla",
+      "config": "formal/EC2NativeRouteAssociationLifecycle.cfg",
+      "bounds": "One mutable region: two native route tables and two native subnets share one VPC, with two symbolic ID slots; one second-VPC table, one fixed foreign-region binding, one fixed CloudFormation pair and its binding. Exact/partial/absent local authority and a Boolean commit outcome.",
+      "properties": [
+        "TypeOK",
+        "OneBinding",
+        "LegacyAndPeerFrame",
+        "RegionalBindings",
+        "SameVPC",
+        "ExactPairAuthority",
+        "CommitFrame",
+        "CreateOrReplay",
+        "ExactRemoval",
+        "MissingIsOpaque",
+        "ParentSafety",
+        "LiveEndpoints",
+        "ScopedExplicitRead"
+      ],
+      "limits": "Atomic metadata only. Effective grants are inputs, including for parent deletes and DescribeRouteTables; no IAM/SigV4, parser, malformed SQLite state, real rollback, ID entropy/retirement guarantee, quotas, lifecycle beyond this subset or Go refinement. Parent deletion considers only modeled dependencies and never cascades. No native routes, gateway/main associations, fallback, forwarding, browser/Scalar or AWS compatibility proof.",
+      "source_scope": [
+        "internal/aws/ec2_read.go",
+        "internal/aws/ec2_route_association_native_query.go",
+        "internal/aws/ec2_route_association_native_store.go",
+        "internal/aws/ec2_route_tables_native.go",
+        "internal/aws/ec2_route_tables_read.go",
+        "internal/aws/ec2_subnet_native.go",
+        "internal/aws/ec2_vpc.go"
+      ],
+      "mutants": [
+        {
+          "id": "MissingDecision",
+          "edits": [
+            {
+              "old": "\n  /\\ d.available\n",
+              "new": "\n  /\\ TRUE\n",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExactPairAuthority"
+        },
+        {
+          "id": "SkipTableAuthority",
+          "edits": [
+            {
+              "old": "/\\ d.tab = t",
+              "new": "/\\ TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExactPairAuthority"
+        },
+        {
+          "id": "SkipSubnetAuthority",
+          "edits": [
+            {
+              "old": "/\\ d.sub = s",
+              "new": "/\\ TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExactPairAuthority"
+        },
+        {
+          "id": "IgnoreStoredRemovalPair",
+          "edits": [
+            {
+              "old": "native /\\ AllowsPair(d, target.tab, target.sub)",
+              "new": "native",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExactPairAuthority"
+        },
+        {
+          "id": "AdoptCloudFormationPair",
+          "edits": [
+            {
+              "old": "/\\ {t, s} \\cap LegacyKeys = {}",
+              "new": "/\\ TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "LegacyAndPeerFrame"
+        },
+        {
+          "id": "RemoveCloudFormationBinding",
+          "edits": [
+            {
+              "old": "allowed == native /\\ AllowsPair(d, target.tab, target.sub)",
+              "new": "allowed == (target # Missing) /\\ AllowsPair(d, target.tab, target.sub)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "LegacyAndPeerFrame"
+        },
+        {
+          "id": "AllowCrossVPC",
+          "edits": [
+            {
+              "old": "/\\ Vpc[t] = Vpc[s]",
+              "new": "/\\ TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "SameVPC"
+        },
+        {
+          "id": "AllowCrossRegion",
+          "edits": [
+            {
+              "old": "/\\ Region(t) = r /\\ Region(s) = r",
+              "new": "/\\ TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "RegionalBindings"
+        },
+        {
+          "id": "DenyAllEligibleCreates",
+          "edits": [
+            {
+              "old": "create == permitted /\\",
+              "new": "create == FALSE /\\",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CreateOrReplay"
+        },
+        {
+          "id": "DenyAllEligibleRemovals",
+          "edits": [
+            {
+              "old": "removed == allowed /\\ commits",
+              "new": "removed == FALSE /\\ commits",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExactRemoval"
+        },
+        {
+          "id": "SecondBinding",
+          "edits": [
+            {
+              "old": "/\\ existing = {}",
+              "new": "/\\ matched = {}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "OneBinding"
+        },
+        {
+          "id": "LoseRetryIdentity",
+          "edits": [
+            {
+              "old": "(CHOOSE b \\in matched : TRUE).id",
+              "new": "NewID(r)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CreateOrReplay"
+        },
+        {
+          "id": "RemoveSiblingOnSameTable",
+          "edits": [
+            {
+              "old": "THEN rows \\ {target} ELSE rows",
+              "new": "THEN {b \\in rows : b.tab # target.tab} ELSE rows",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExactRemoval"
+        },
+        {
+          "id": "AllowAttachedTableDelete",
+          "edits": [
+            {
+              "old": "remove == ready /\\ commits /\\ ~Dependent(rows, live, k)",
+              "new": "remove == ready /\\ commits /\\ (k \\in Tables \\/ ~Dependent(rows, live, k))",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ParentSafety"
+        },
+        {
+          "id": "CascadeAttachedSubnetDelete",
+          "edits": [
+            {
+              "old": "    /\\ rows' = rows\n     /\\ last' = [Event(\"delete-parent\",",
+              "new": "    /\\ rows' = IF ready /\\ commits /\\ k \\in EastSubnets THEN {b \\in rows : b.sub # k} ELSE rows\n     /\\ last' = [Event(\"delete-parent\",",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ParentSafety"
+        },
+        {
+          "id": "TreatAbortAsCommit",
+          "edits": [
+            {
+              "old": "create == permitted /\\ commits /\\ existing",
+              "new": "create == permitted /\\ existing",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CommitFrame"
+        },
+        {
+          "id": "RevealUnknownToOrdinaryCaller",
+          "edits": [
+            {
+              "old": "absent == ~native /\\ d.available /\\ d.detail",
+              "new": "absent == ~native /\\ d.available",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "MissingIsOpaque"
+        },
+        {
+          "id": "InventMain",
+          "edits": [
+            {
+              "old": "main |-> FALSE] :\n    b \\in",
+              "new": "main |-> TRUE] :\n    b \\in",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ScopedExplicitRead"
+        },
+        {
+          "id": "ProjectPeerRegion",
+          "edits": [
+            {
+              "old": "b \\in {b \\in rs : b.region = r}",
+              "new": "b \\in rs",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ScopedExplicitRead"
+        }
+      ]
+    },
+    {
       "id": "EC2NativeRouteTableLifecycle",
       "model": "formal/EC2NativeRouteTableLifecycle.tla",
       "config": "formal/EC2NativeRouteTableLifecycle.cfg",

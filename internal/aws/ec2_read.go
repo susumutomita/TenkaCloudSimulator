@@ -113,6 +113,7 @@ func (g *Gateway) serveEC2(w http.ResponseWriter, r *http.Request) {
 		principal = core.Administrator
 	}
 	boundary, instanceScoped := r.Context().Value(consoleInstanceBoundaryKey{}).(consoleInstanceBoundary)
+	var routeAssociationAuthority ec2NativeRouteAssociationAuthority
 	if instanceScoped {
 		policy, ok := SDKPolicyFromContext(r.Context())
 		if action != "DescribeInstances" || region != boundary.region || !ok || core.Evaluate(policy, "ec2:DescribeInstances", "*") != "allowed" {
@@ -124,6 +125,15 @@ func (g *Gateway) serveEC2(w http.ResponseWriter, r *http.Request) {
 		if e != nil {
 			fail("InternalError", "Identity state unavailable.", 500)
 			return
+		}
+		if request.routeAssociation != nil {
+			if !found {
+				failChild(deniedNativeRouteAssociation(), "")
+				return
+			}
+			routeAssociationAuthority.check = func(action, resource string) bool {
+				return core.Evaluate(policy, action, resource) == "allowed"
+			}
 		}
 		for _, check := range request.permissions(action, region) {
 			if !found || core.Evaluate(policy, check[0], check[1]) != "allowed" {
@@ -157,6 +167,10 @@ func (g *Gateway) serveEC2(w http.ResponseWriter, r *http.Request) {
 				return exactChildGrant(request.routeTable.createPermissions(region, id), "route table")
 			}
 		}
+	} else if request.routeAssociation != nil {
+		// Only the matched effective local administrator (never a scoped
+		// instance session) receives this authority and native-not-found detail.
+		routeAssociationAuthority = ec2NativeRouteAssociationAuthority{check: func(string, string) bool { return true }, revealMissingID: true}
 	}
 	var out any
 	const sgFailure = "Local security group metadata could not be read or changed."
@@ -182,6 +196,13 @@ func (g *Gateway) serveEC2(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		out = table
+	case ec2AssociateNativeRouteTable, ec2DisassociateNativeRouteTable:
+		association, err := g.Stacks.executeEC2NativeRouteAssociation(r.Context(), action, region, *request.routeAssociation, routeAssociationAuthority)
+		if err != nil {
+			failChild(err, "Local explicit route table association could not be changed.")
+			return
+		}
+		out = association
 	case "DescribeRouteTables":
 		tables, err := g.Stacks.describeEC2RouteTables(r.Context(), region)
 		if err != nil {

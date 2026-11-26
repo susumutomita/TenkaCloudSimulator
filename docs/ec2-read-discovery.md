@@ -5,8 +5,8 @@
 subset. Supply `Version=2016-11-15` and `Action=DescribeInstances`,
 `Action=DescribeVpcs`, `Action=DescribeSubnets`, `Action=DescribeSecurityGroups`,
 `Action=DescribeRouteTables`, `Action=CreateVpc`, `Action=DeleteVpc`,
-`Action=CreateSubnet` or `Action=DeleteSubnet`, plus the named detached SG and ACL
-operations below. Discovery uses the EC2 namespace and
+`Action=CreateSubnet` or `Action=DeleteSubnet`, plus the named SG, ACL and route
+table operations below. Discovery uses the EC2 namespace and
 lower-camel-case `reservationSet/instancesSet/item`, `vpcSet/item`,
 `subnetSet/item`, `securityGroupInfo/item` and `routeTableSet/item` fields.
 A request body is bounded to 64 KiB.
@@ -149,12 +149,14 @@ or a mandatory E2E gate.
 
 ## Route-table readback
 
-Use `Action=DescribeRouteTables` without filters to list explicit CloudFormation and
-detached native tables in this region, ordered by table ID. Each item gives the table and VPC IDs,
-local owner, tags, explicit subnet associations (`main=false`) and saved, enabled
-IPv4 default routes to an attached Internet Gateway. Removing the default route
-through the existing trusted provider removes it from the result, including after
-restart; it is not a blackhole route. Deleting the owning stack removes its tables.
+Use `Action=DescribeRouteTables` without filters to list CloudFormation and native
+tables in this region, ordered by table ID. Each item gives the table and VPC IDs,
+local owner, tags and explicit subnet associations (`main=false`).
+Only CloudFormation tables can show a saved, enabled IPv4 default route to an
+attached Internet Gateway; native tables have no route entries. Removing that
+default route through the existing trusted provider removes it from the result,
+including after restart; it is not a blackhole route. Deleting the owning stack
+removes its tables.
 The response checks the route, gateway attachment, table, subnet and same-VPC
 ownership in one transaction. A missing, null or ambiguous saved route-enabled flag
 is not interpreted as a deleted route. Inconsistent rows or declarations for a
@@ -165,7 +167,7 @@ such rows and claims, its table cannot be discovered or reported as corrupt. The
 instance-scoped console handoff cannot enumerate tables.
 
 Unlike [AWS DescribeRouteTables](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_DescribeRouteTables.html),
-there are no implicit main tables, local routes or associations, including for
+there are no main tables, local routes or implicit associations, including for
 native EC2 VPCs. `state=active` describes the configured gateway route, **not**
 observed packet forwarding. Table IDs, filters, pagination and dry-run are rejected.
 In an ordinary signed-in **VPC** Console, select a CloudFormation-managed VPC
@@ -178,7 +180,7 @@ not an IAM filter: the operation requires regional `ec2:DescribeRouteTables` on
 CloudFormation view offers no mutations. Scoped handoffs do not offer either
 route table pane. Refresh, VPC, region and identity changes discard old replies.
 
-For a verified **EC2-managed** VPC, **Route tables** offers local
+For a verified **EC2-managed** VPC, **Route tables** supports local
 [CreateRouteTable](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_CreateRouteTable.html)
 and [DeleteRouteTable](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_DeleteRouteTable.html).
 It uses a fresh readback of the same VPC and region before reporting success;
@@ -190,10 +192,55 @@ its exact ID is required to confirm deletion. Create accepts the selected
 the VPC and created table resource, including `ec2:CreateTags` if a tag is
 saved. Delete checks the exact table resource. A VPC with dependent metadata
 cannot be deleted before its table. The persisted ledger retains up to 4,096
-create token digests to prevent replay after deletion. These tables intentionally
-have no local or default routes and no associations; native route edits,
-associations, propagation and forwarding are not provided.
-Check: `go test ./internal/aws -run 'TestEC2DescribeRouteTables|TestEC2NativeRouteTable' -count=1`.
+create token digests to prevent replay after deletion. A new native table starts
+without associations. Native route entries, propagation and forwarding are not provided.
+
+### Native subnet route table associations
+
+Use the same authenticated local EC2 Query `POST /`, with `Version=2016-11-15`,
+the selected region, and an existing **EC2-managed** route table and IPv4 subnet
+in the same VPC and region. Use the host-issued simulator token or a signed-in
+session; dummy SDK credentials do not authenticate. Single-instance handoffs
+cannot read or change these associations. Use a local simulator endpoint in
+an SDK and supply the `X-Simulator-Token` header as in the check below; never
+point this workflow at AWS.
+
+| Action | Supported request members | Successful EC2 Query XML |
+| --- | --- | --- |
+| [AssociateRouteTable](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_AssociateRouteTable.html) | Required `RouteTableId` and `SubnetId`; optional `DryRun=false` | `AssociateRouteTableResponse`: `requestId`, `associationId` (`rtbassoc-` plus 17 lowercase hex characters) and `associationState/state=associated` |
+| [DisassociateRouteTable](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_DisassociateRouteTable.html) | Required `AssociationId`; optional `DryRun=false` | `DisassociateRouteTableResponse`: `requestId` and `return=true` |
+
+The selected identity needs the action on both concrete resource ARNs,
+`arn:aws:ec2:<region>:000000000000:route-table/<id>` and the matching
+`arn:aws:ec2:<region>:000000000000:subnet/<id>`. Disassociate resolves the pair
+from its saved association. An exercise identity gets `UnauthorizedOperation`
+(403) for a denied or unresolved association; only the effective local
+administrator gets `InvalidAssociationID.NotFound` (400) for an absent native ID.
+
+A subnet can have at most one explicit association; a table can have several
+subnets. Repeating the same pair returns the existing ID, including after restart.
+A different table for the same subnet gives `Resource.AlreadyAssociated` until
+the old association is removed. Read back with regional `DescribeRouteTables`
+(`ec2:DescribeRouteTables` on `*`): `routeTableSet/item/associationSet/item` holds
+`routeTableAssociationId`, `routeTableId`, `subnetId` and `main=false`.
+Remove an association before deleting its table or subnet; both deletes otherwise
+return `DependencyViolation`. The association uses the existing 1,000-resource
+network bound.
+
+`GatewayId`, `PublicIpv4Pool`, `ClientToken`, `DryRun=true` and
+`ReplaceRouteTableAssociation` are refused with `UnsupportedOperation`.
+CloudFormation associations remain stack-managed. Unlike AWS, disassociation
+does not fall back to a main table.
+Associations are saved configuration only, with no packet effects or route propagation.
+
+Check with the repository-pinned boto3/botocore from `scripts/requirements-test.txt`:
+
+```sh
+SIMULATOR_BINARY=/absolute/path/to/simulator python3 test/console/ec2_native_route_association_sdk.py
+```
+
+The script uses an isolated authenticated simulator over numeric loopback,
+not an AWS account, a browser or a guest.
 
 ## Native VPC lifecycle
 
@@ -224,12 +271,12 @@ Detached security groups, network ACLs and route tables also use the existing
 EC2-owned VPC and shared 1,000-resource bound. Deletion of a native VPC is refused
 while any native subnet, group, ACL or route table depends on it. Remove the
 children through their own APIs. Native route entry or gateway creation,
-subnet associations, `ModifyVpcAttribute`,
+`ModifyVpcAttribute`,
 VPC endpoints and tag edits are not implemented.
 
 **Existing databases remain readable when upgraded. Do not downgrade a
-database after creating the new native child kinds:** earlier Simulators do not
-recognize those types and can reject VPC discovery. No migration-back or
+database after creating new native children, including route table associations:**
+earlier Simulators do not recognize those native records and can reject discovery. No migration-back or
 downgrade procedure has been verified.
 
 Exercise identities need `ec2:CreateVpc` on `arn:aws:ec2:<region>:000000000000:vpc/*`,

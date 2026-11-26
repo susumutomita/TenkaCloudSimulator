@@ -21,6 +21,11 @@ DynamoDB also have short **documentation-only service guides**. These explain
 which existing shared root POST template and routing headers to use. They are
 not separate API operations or proof of additional service coverage.
 
+Native EC2 Query is documented in the
+[EC2/VPC guide](ec2-read-discovery.md), including the
+[explicit subnet route table association API](ec2-read-discovery.md#native-subnet-route-table-associations).
+The embedded Scalar reference does not expose native EC2 Query templates.
+
 The stable internal tag `KMS local symmetric keys` now displays as **Shared AWS
 JSON/Query endpoint**, accurately reflecting its existing
 `awsRegionalOperation`. Its underlying tag name and operation remain intact.
