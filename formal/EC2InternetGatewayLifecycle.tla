@@ -4,7 +4,7 @@ VARIABLES row, proof, pending, notice
 vars == <<row, proof, pending, notice>>
 Writes == {"create", "delete"}
 Operations == Writes \cup {"describe", "none"}
-States == {"absent", "native", "native-dependent", "stack", "stack-attached"}
+States == {"absent", "native", "native-attached", "native-dependent", "stack", "stack-attached"}
 Selection == {"all", "exact", "missing"}
 Modes == {"current", "stale"}
 Good == [regional |-> TRUE, scoped |-> FALSE, allowed |-> TRUE,
@@ -46,7 +46,7 @@ Allocate(region, f) ==
 Remove(region, f) ==
     /\ row[region] \in States \ {"absent"}
     /\ row[region] \notin {"stack", "stack-attached"}
-    /\ row[region] # "native-dependent"
+    /\ row[region] \notin {"native-attached", "native-dependent"}
     /\ Admitted(f)
     /\ f.durable /\ f.coherent
     /\ row' = [row EXCEPT ![region] = "absent"]
@@ -60,7 +60,7 @@ ReadAllowed(region, f, selector) ==
     /\ row[region] # "native-dependent"
     /\ (selector = "all" \/ (selector = "exact" /\ row[region] # "absent"))
 ReadWitness(region, f, selector) ==
-    Record("describe", row[region], row[region], f, selector, row[region] = "stack-attached")
+    Record("describe", row[region], row[region], f, selector, row[region] \in {"stack-attached", "native-attached"})
 
 Read(region, f, selector) ==
     /\ ReadAllowed(region, f, selector)
@@ -114,11 +114,11 @@ TaggedCreation == proof.op = "create" => ~proof.f.tagged \/ proof.f.tagGrant
 NativeOwnership ==
     /\ (proof.op = "create" => proof.prior = "absent" /\ proof.post = "native")
     /\ (proof.op = "delete" => proof.prior \notin {"stack", "stack-attached"} /\ proof.post = "absent")
-DependentRowsPreserved == proof.op = "delete" => proof.prior # "native-dependent"
+DependentRowsPreserved == proof.op = "delete" => proof.prior \notin {"native-attached", "native-dependent"}
 DurableMutation == proof.op \in Writes => proof.f.durable /\ proof.f.coherent
 FaithfulRead == proof.op = "describe" =>
      /\ proof.f.coherent /\ proof.prior # "native-dependent" /\ proof.post = proof.prior
-     /\ proof.attached = (proof.prior = "stack-attached")
+     /\ proof.attached = (proof.prior \in {"stack-attached", "native-attached"})
      /\ (proof.selector = "all" \/ (proof.selector = "exact" /\ proof.prior # "absent"))
 ExactConfirmation == pending.confirmed => pending.op \in Writes /\ pending.mode = "current" /\
     pending.region = pending.readRegion /\ pending.matches /\ row[pending.region] = pending.expected

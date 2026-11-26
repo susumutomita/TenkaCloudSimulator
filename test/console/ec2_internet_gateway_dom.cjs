@@ -19,7 +19,8 @@ async function boot(html, bundle, locale) {
   const dom = new JSDOM(html, {url: origin+'/_simulator/console/#/vpc', runScripts: 'outside-only',
     pretendToBeVisual: true, virtualConsole: new VirtualConsole()});
   const w = dom.window, d = w.document;
-  const receipt = {calls: [], nextReadIsHeld: false, continuationHeld: !!large, blankContinuation: false, release: null, heldSignal: null};
+  const receipt = {calls: [], nextReadIsHeld: false, continuationHeld: !!large, blankContinuation: false,
+    release: null, heldSignal: null, captureExact: false, priorExact: null, staleExact: false};
   Object.assign(w, {TextEncoder, TextDecoder,
     matchMedia: () => ({matches: false, addListener(){}, removeListener(){}, addEventListener(){}, removeEventListener(){}}),
     ResizeObserver: class {observe(){} unobserve(){} disconnect(){}},
@@ -38,6 +39,16 @@ async function boot(html, bundle, locale) {
       assert.equal(headers.get('X-Simulator-Region'), 'us-east-1');
       assert.equal(form.get('Version'), '2016-11-15');
       receipt.calls.push({action, data: Object.fromEntries(form), status: response.status});
+      if (action === 'DescribeInternetGateways' && form.has('InternetGatewayId.1')) {
+        if (receipt.captureExact) {
+          receipt.captureExact = false;
+          receipt.priorExact = await response.clone().text();
+        } else if (receipt.staleExact) {
+          receipt.staleExact = false;
+          await response.body.cancel();
+          return new Response(receipt.priorExact, {status:200,headers:{'Content-Type':'text/xml'}});
+        }
+      }
       if (receipt.blankContinuation && action==='DescribeInternetGateways' && form.has('NextToken')) {
         receipt.blankContinuation=false;
         await response.body.cancel();
@@ -158,7 +169,7 @@ async function boot(html, bundle, locale) {
     assert.ok(stackRow.textContent.includes(state.Vpc));
     stackRow.querySelector('input').click();
     assert.ok(button('Delete internet gateway').disabled, 'CFN gateway became writable');
-    assert.ok(!button('Attach internet gateway'), 'unsupported attachment is exposed');
+    assert.ok(button('Attach to VPC').disabled && button('Detach from VPC').disabled, 'CFN attachment became writable');
     assert.ok(!button('Create route'), 'unsupported native route write is exposed');
     button('Create internet gateway').click();
     const editor = await until(()=>getDialog()?.querySelector('input'),'missing create form');
@@ -173,7 +184,90 @@ async function boot(html, bundle, locale) {
     const id = native.querySelector('input').getAttribute('aria-label').replace('Select gateway ','');
     assert.match(id,/^igw-[0-9a-f]{17}$/);
     assert.ok(d.body.textContent.includes('Saved internet gateway: '+id));
-    native.querySelector('input').click();
+    assert.deepEqual(receipt.calls.map(call=>call.action),[
+      'DescribeInternetGateways','CreateInternetGateway','DescribeInternetGateways','DescribeInternetGateways',
+    ]);
+    assert.equal(receipt.calls[1].data['TagSpecification.1.Tag.1.Value'],'Console & 練習');
+    assert.equal(receipt.calls[0].data.MaxResults,'100');
+    assert.equal(receipt.calls[2].data['InternetGatewayId.1'],id);
+    assert.equal(receipt.calls[3].data.MaxResults,'100');
+
+    async function dialog(kind,value,bad='wrong-input') {
+      const toolbar = kind==='Attach'?'Attach to VPC':'Detach from VPC';
+      row(id).querySelector('input').click();
+      await until(()=>!button(toolbar).disabled,'native attachment operation unavailable');
+      button(toolbar).click();
+      const input=await until(()=>getDialog()?.querySelector('input[placeholder="vpc-…"]'),'missing attachment form');
+      change(input,bad);
+      assert.ok(button(kind,getDialog()).disabled,'wrong ID enabled confirmation');
+      change(input,value);
+      await until(()=>!button(kind,getDialog()).disabled,'valid VPC ID did not enable confirmation');
+    }
+
+    // Make a normal user-visible attempt with a real stack-owned VPC.
+    await dialog('Attach',state.Vpc);
+    button('Attach',getDialog()).click();
+    await until(()=>d.body.textContent.includes('Only EC2-managed gateways and VPCs can be changed here.'),'CFN refusal not shown');
+    assert.ok(!d.body.textContent.includes('Saved VPC attachment:'));
+    assert.equal(receipt.calls.at(-1).status,400);
+    button('Refresh internet gateways').click();
+    await until(()=>row(id)?.textContent.includes('Detached'),'refresh did not restore detached state');
+
+    const firstLinkStart=receipt.calls.length;
+    await dialog('Attach',state.NativeVpc);
+    receipt.nextReadIsHeld=true;
+    receipt.captureExact=true;
+    receipt.release=null;
+    button('Attach',getDialog()).click();
+    const first=await until(()=>receipt.release,'missing exact attachment verification');
+    assert.ok(!d.body.textContent.includes('Saved VPC attachment:'),'attachment published before exact readback');
+    receipt.nextReadIsHeld=true;
+    receipt.release=null;
+    first();
+    const complete=await until(()=>receipt.release,'missing complete attachment verification');
+    assert.ok(!d.body.textContent.includes('Saved VPC attachment:'),'attachment published before complete readback');
+    complete();
+    await until(()=>d.body.textContent.includes('Saved VPC attachment: '+id+' / '+state.NativeVpc),'no confirmed attachment');
+    assert.ok(row(id).textContent.includes(state.NativeVpc));
+    const linkCalls=receipt.calls.slice(firstLinkStart);
+    assert.deepEqual(linkCalls.map(call=>[call.action,call.status]),[
+      ['AttachInternetGateway',200],['DescribeInternetGateways',200],['DescribeInternetGateways',200],
+    ]);
+    assert.equal(linkCalls[0].data.VpcId,state.NativeVpc);
+    assert.equal(linkCalls[0].data.InternetGatewayId,id);
+    assert.equal(linkCalls[1].data['InternetGatewayId.1'],id);
+    assert.equal(linkCalls[2].data.MaxResults,'100');
+
+    const staleStart=receipt.calls.length;
+    await dialog('Detach',state.NativeVpc,state.Vpc);
+    assert.ok(button('Delete internet gateway').disabled,'attached native gateway could be deleted');
+    receipt.staleExact=true;
+    button('Detach',getDialog()).click();
+    await until(()=>d.body.textContent.includes('The saved gateway state could not be verified.'),'stale exact detach readback was accepted');
+    assert.ok(!d.body.textContent.includes('Removed VPC attachment:'),'stale detach readback was announced as success');
+    assert.deepEqual(receipt.calls.slice(staleStart).map(call=>call.action),['DetachInternetGateway','DescribeInternetGateways']);
+    button('Refresh internet gateways').click();
+    await until(()=>row(id)?.textContent.includes('Detached'),'fresh inventory did not show committed detach');
+    assert.equal(receipt.calls.slice(staleStart).filter(call=>call.action==='DetachInternetGateway').length,1);
+
+    await dialog('Attach',state.NativeVpc);
+    button('Attach',getDialog()).click();
+    await until(()=>row(id)?.textContent.includes(state.NativeVpc),'could not reattach native VPC');
+    const detachStart=receipt.calls.length;
+    await dialog('Detach',state.NativeVpc,state.Vpc);
+    receipt.nextReadIsHeld=true;
+    receipt.release=null;
+    button('Detach',getDialog()).click();
+    const unlink=await until(()=>receipt.release,'missing detach verification');
+    assert.ok(!d.body.textContent.includes('Removed VPC attachment:'),'detach published before readback');
+    unlink();
+    await until(()=>row(id)?.textContent.includes('Detached')&&d.body.textContent.includes('Removed VPC attachment: '+id),'no confirmed detach');
+    assert.deepEqual(receipt.calls.slice(detachStart).map(call=>[call.action,call.status]),[
+      ['DetachInternetGateway',200],['DescribeInternetGateways',200],['DescribeInternetGateways',200],
+    ]);
+
+    const deleteStart=receipt.calls.length;
+    row(id).querySelector('input').click();
     button('Delete internet gateway').click();
     const confirm = await until(()=>getDialog()?.querySelector('input[placeholder="igw-…"]'),'missing delete confirmation');
     change(confirm,state.Gateway);
@@ -188,15 +282,10 @@ async function boot(html, bundle, locale) {
     receipt.release();
     await until(()=>d.body.textContent.includes('Deleted internet gateway: '+id),'saved deletion not shown');
     assert.ok(!row(id) && row(state.Gateway));
-    assert.deepEqual(receipt.calls.map(call=>[call.action,call.status]),[
-      ['DescribeInternetGateways',200], ['CreateInternetGateway',200], ['DescribeInternetGateways',200],
-      ['DescribeInternetGateways',200], ['DeleteInternetGateway',200], ['DescribeInternetGateways',200],
+    assert.deepEqual(receipt.calls.slice(deleteStart).map(call=>[call.action,call.status]),[
+      ['DeleteInternetGateway',200], ['DescribeInternetGateways',200],
     ]);
-    assert.equal(receipt.calls[1].data['TagSpecification.1.Tag.1.Value'],'Console & 練習');
-    assert.equal(receipt.calls[0].data.MaxResults,'100');
-    assert.equal(receipt.calls[2].data['InternetGatewayId.1'],id);
-    assert.equal(receipt.calls[3].data.MaxResults,'100');
-    assert.equal(receipt.calls[4].data.InternetGatewayId,id);
+    assert.equal(receipt.calls[deleteStart].data.InternetGatewayId,id);
   } finally {
     dom.window.close();
   }
@@ -205,6 +294,7 @@ async function boot(html, bundle, locale) {
   try {
     await until(()=>ja.document.documentElement.lang==='ja' &&
       ja.document.body.textContent.includes('インターネットゲートウェイを作成') &&
+      ja.document.body.textContent.includes('VPC に接続') && ja.document.body.textContent.includes('VPC から切断') &&
       ja.document.body.textContent.includes(state.Gateway),'Japanese view did not load actual readback');
   } finally {
     ja.dom.window.close();

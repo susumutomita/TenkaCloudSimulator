@@ -134,7 +134,7 @@ func TestEC2ReadAccessBoundary(t *testing.T) {
 		"CreateVpc", "DeleteVpc", "CreateSubnet", "DeleteSubnet", "CreateSecurityGroup", "DeleteSecurityGroup",
 		"CreateNetworkAcl", "DescribeNetworkAcls", "DeleteNetworkAcl", "CreateRouteTable", "DeleteRouteTable",
 		"AssociateRouteTable", "DisassociateRouteTable",
-		"CreateInternetGateway", "DescribeInternetGateways", "DeleteInternetGateway",
+		"CreateInternetGateway", "DescribeInternetGateways", "DeleteInternetGateway", "AttachInternetGateway", "DetachInternetGateway",
 	}
 	if !reflect.DeepEqual(ec2.Operations, wantOperations) {
 		t.Fatalf("unexpected EC2 operations: got %v, want %v", ec2.Operations, wantOperations)
@@ -145,9 +145,9 @@ func TestEC2ReadAccessBoundary(t *testing.T) {
 		"DescribeInternetGateways": {"InternetGatewayId.N", "MaxResults", "NextToken"},
 	}
 	if ec2.Pagination || !ec2.Filters || ec2.ResourceLimit != 1000 || !reflect.DeepEqual(ec2.DescribeSelectors, wantSelectors) ||
-		!reflect.DeepEqual(ec2.DetachedConfigurationOnly, []string{"native security groups", "native network ACLs", "native internet gateways"}) ||
+		!reflect.DeepEqual(ec2.DetachedConfigurationOnly, []string{"native security groups", "native network ACLs"}) ||
 		ec2.InternetGatewayPageLimit != 100 ||
-		!reflect.DeepEqual(ec2.InternetGatewayLifecycle, []string{"DescribeInternetGateways", "CreateInternetGateway", "DeleteInternetGateway"}) ||
+		!reflect.DeepEqual(ec2.InternetGatewayLifecycle, []string{"DescribeInternetGateways", "CreateInternetGateway", "DeleteInternetGateway", "AttachInternetGateway", "DetachInternetGateway"}) ||
 		!reflect.DeepEqual(ec2.RouteTableLifecycle, []string{"DescribeRouteTables", "CreateRouteTable", "DeleteRouteTable"}) ||
 		!reflect.DeepEqual(ec2.RouteTableAssociationLifecycle, []string{"DescribeRouteTables", "DescribeSubnets", "AssociateRouteTable", "DisassociateRouteTable"}) {
 		t.Fatalf("unexpected EC2 capability limits: %+v", ec2)

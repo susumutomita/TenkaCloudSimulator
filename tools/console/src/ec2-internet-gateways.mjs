@@ -1,5 +1,5 @@
 const ns='http://ec2.amazonaws.com/doc/2016-11-15/';
-const operations=['DescribeInternetGateways','CreateInternetGateway','DeleteInternetGateway'];
+const operations=['DescribeInternetGateways','CreateInternetGateway','DeleteInternetGateway','AttachInternetGateway','DetachInternetGateway'];
 // Mirrored by the server capability and encoder bound regression. 100 legal
 // rows fit within the same 16 MiB limit even after XML escaping.
 const pageSize=100,inventoryLimit=1000,responseBytes=16*1024*1024;
@@ -19,6 +19,8 @@ export function internetGatewaysAvailable(capabilities,authenticationRequired) {
     Array.isArray(ec2.internetGatewayLifecycle)&&ec2.internetGatewayLifecycle.length===operations.length&&Array.isArray(ec2.operations)&&
     operations.every(id=>ec2.internetGatewayLifecycle.includes(id)&&ec2.operations.includes(id));
 }
+
+export function validInternetGatewayVPC(id) { return exact(id,vpcPattern); }
 
 export function validInternetGatewayName(name) {
   return typeof name==='string'&&!forbiddenXml.test(name)&&bytes.encode(name).length<=256;
@@ -57,12 +59,11 @@ function gateway(node) {
   const id=text(f.get('internetGatewayId')),managedBy=text(f.get('simulatorManagedBy'));
   if (!exact(id,gatewayPattern)||text(f.get('ownerId'))!=='000000000000'||!['ec2','cloudformation'].includes(managedBy)) invalid();
   const attachments=list(f.get('attachmentSet'),1);
-  if (managedBy==='ec2'&&attachments.length) invalid();
   let vpc='';
   if (attachments.length) {
     const a=members(attachments[0],['vpcId','state']);
     vpc=text(a.get('vpcId'));
-    if (!exact(vpc,vpcPattern)||text(a.get('state'))!=='available') invalid();
+    if (!validInternetGatewayVPC(vpc)||text(a.get('state'))!=='available') invalid();
   }
   const tags=new Map();
   for (const item of list(f.get('tagSet'),50)) {
@@ -101,7 +102,7 @@ async function send(request,region,action,params,signal) {
     signal?.throwIfAborted();
     const document=xml(raw+decoder.decode()),root=document.documentElement;
     if (document.doctype||root?.namespaceURI!==ns||root.localName!==action+'Response') invalid();
-    const member={CreateInternetGateway:'internetGateway',DescribeInternetGateways:'internetGatewaySet',DeleteInternetGateway:'return'}[action];
+    const member=action==='CreateInternetGateway'?'internetGateway':action==='DescribeInternetGateways'?'internetGatewaySet':'return';
     const describing=action==='DescribeInternetGateways';
     const fields=members(root,['requestId',member],describing?['nextToken']:[]);
     if (!text(fields.get('requestId')).trim()) invalid();
@@ -159,8 +160,8 @@ export async function createInternetGateway(request,region,name,signal) {
   if (!validInternetGatewayName(name)) invalid();
   const params=name?{'TagSpecification.1.ResourceType':'internet-gateway','TagSpecification.1.Tag.1.Key':'Name','TagSpecification.1.Tag.1.Value':name}:{};
   const created=gateway(await send(request,region,'CreateInternetGateway',params,signal));
-  if (created.managedBy!=='ec2'||created.name!==name||created.tagCount!==(name?1:0)) invalid();
-  const matches=row=>row.id===created.id&&row.managedBy==='ec2'&&row.name===name&&row.tagCount===created.tagCount;
+  if (created.managedBy!=='ec2'||created.vpc||created.name!==name||created.tagCount!==(name?1:0)) invalid();
+  const matches=row=>row.id===created.id&&row.managedBy==='ec2'&&!row.vpc&&row.name===name&&row.tagCount===created.tagCount;
   if (!matches(await describeExactInternetGateway(request,region,created.id,signal))) invalid();
   const rows=await describeInternetGateways(request,region,signal);
   if (!rows.some(matches)) invalid();
@@ -176,6 +177,29 @@ export async function deleteInternetGateway(request,region,row,signal) {
   return {id:row.id,rows};
 }
 
+export async function changeInternetGatewayAttachment(request,region,row,vpc,attach,signal) {
+  const scope=bindings.get(row);
+  if (!scope||scope.request!==request||scope.region!==region||row.managedBy!=='ec2'||!validInternetGatewayVPC(vpc)||
+      (attach?row.vpc!=='':row.vpc!==vpc)) invalid();
+  const action=attach?'AttachInternetGateway':'DetachInternetGateway';
+  if (text(await send(request,region,action,{InternetGatewayId:row.id,VpcId:vpc},signal))!=='true') invalid();
+  const expected=attach?vpc:'';
+  const matches=found=>found?.id===row.id&&found.managedBy==='ec2'&&found.vpc===expected&&
+    found.name===row.name&&found.tagCount===row.tagCount;
+  if (!matches(await describeExactInternetGateway(request,region,row.id,signal))) invalid();
+  const rows=await describeInternetGateways(request,region,signal);
+  if (!matches(rows.find(found=>found.id===row.id))) invalid();
+  return {id:row.id,vpc,rows};
+}
+
+// The shared authenticated console request throws Query errors prefixed
+// by a machine code. Only these localized messages, not server text, are shown.
+const mutationRefusals=new Map([['Resource.AlreadyAssociated','occupied'],['Gateway.NotAttached','detached'],
+  ['DependencyViolation','dependent'],['InvalidVpcID.NotFound','missing'],['InvalidInternetGatewayID.NotFound','missing'],
+  ['UnsupportedOperation','unsupported']]);
 export function internetGatewayError(error) {
-  return /^(?:401:|403:|UnauthorizedOperation:|Sign in to continue\.)/.test(error?.message??'')?'denied':'unconfirmed';
+  const message=error?.message??'';
+  if (/^(?:401:|403:|UnauthorizedOperation:|Sign in to continue\.)/.test(message)) return 'denied';
+  const code=message.match(/^([A-Za-z0-9.]+): /)?.[1];
+  return mutationRefusals.get(code)??'unconfirmed';
 }

@@ -16,11 +16,16 @@ const (
 	ec2CreateInternetGateway   = "CreateInternetGateway"
 	ec2DescribeInternetGateway = "DescribeInternetGateways"
 	ec2DeleteInternetGateway   = "DeleteInternetGateway"
+	ec2AttachInternetGateway   = "AttachInternetGateway"
+	ec2DetachInternetGateway   = "DetachInternetGateway"
 	ec2InternetGatewayARNKind  = "internet-gateway"
 	ec2GatewaySelectorLimit    = 8
 )
 
-var ec2InternetGatewayOperations = []string{ec2CreateInternetGateway, ec2DescribeInternetGateway, ec2DeleteInternetGateway}
+var ec2InternetGatewayOperations = []string{
+	ec2CreateInternetGateway, ec2DescribeInternetGateway, ec2DeleteInternetGateway,
+	ec2AttachInternetGateway, ec2DetachInternetGateway,
+}
 
 var (
 	ec2InternetGatewayID    = regexp.MustCompile(`^igw-(?:[0-9a-f]{8}|[0-9a-f]{17})$`)
@@ -28,7 +33,8 @@ var (
 )
 
 type ec2InternetGatewayQuery struct {
-	id                 string
+	id, vpc            string
+	dryRun             bool
 	ids                []string
 	tags               map[string]string
 	authorizeCreatedID func(string) error
@@ -45,6 +51,11 @@ func (q ec2InternetGatewayQuery) permissions(action, region string) [][2]string 
 		return q.createPermissions(region, "*")
 	case ec2DeleteInternetGateway:
 		return [][2]string{{"ec2:DeleteInternetGateway", networkARN(region, ec2InternetGatewayARNKind, q.id)}}
+	case ec2AttachInternetGateway, ec2DetachInternetGateway:
+		return [][2]string{
+			{"ec2:" + action, networkARN(region, ec2InternetGatewayARNKind, q.id)},
+			{"ec2:" + action, networkARN(region, "vpc", q.vpc)},
+		}
 	default:
 		return [][2]string{{"ec2:DescribeInternetGateways", "*"}}
 	}
@@ -74,9 +85,16 @@ func parseEC2InternetGateway(action string, fields map[string][]string) (ec2Inte
 		case "Action", "Version":
 			continue
 		case "DryRun":
-			if value != "false" {
-				return q, ec2Invalid("UnsupportedOperation", "Only DryRun=false is supported by local internet gateways.")
+			if value == "false" {
+				continue
 			}
+			if action != ec2AttachInternetGateway && action != ec2DetachInternetGateway {
+				return q, ec2Invalid("UnsupportedOperation", "DryRun=true is supported only by native attachment operations.")
+			}
+			if value != "true" {
+				return q, ec2Invalid("InvalidParameterValue", "DryRun must be true or false.")
+			}
+			q.dryRun = true
 			continue
 		}
 		switch action {
@@ -120,9 +138,13 @@ func parseEC2InternetGateway(action string, fields map[string][]string) (ec2Inte
 				ids[n] = value
 				continue
 			}
-		case ec2DeleteInternetGateway:
+		case ec2DeleteInternetGateway, ec2AttachInternetGateway, ec2DetachInternetGateway:
 			if key == "InternetGatewayId" {
 				q.id = value
+				continue
+			}
+			if key == "VpcId" && action != ec2DeleteInternetGateway {
+				q.vpc = value
 				continue
 			}
 		}
@@ -168,15 +190,23 @@ func parseEC2InternetGateway(action string, fields map[string][]string) (ec2Inte
 			}
 			q.ids = append(q.ids, id)
 		}
-	case ec2DeleteInternetGateway:
+	case ec2DeleteInternetGateway, ec2AttachInternetGateway, ec2DetachInternetGateway:
 		if q.id == "" {
 			return q, ec2Invalid("MissingParameter", "InternetGatewayId is required.")
 		}
 		if !ec2InternetGatewayID.MatchString(q.id) {
 			return q, malformedInternetGatewayID()
 		}
+		if action != ec2DeleteInternetGateway {
+			if q.vpc == "" {
+				return q, ec2Invalid("MissingParameter", "VpcId is required.")
+			}
+			if !ec2InternetGatewayVPCID(q.vpc) {
+				return q, ec2Invalid("InvalidVpcID.Malformed", "VpcId must be an exact vpc- ID.")
+			}
+		}
 	default:
-		return q, ec2Invalid("UnsupportedOperation", "Only creation, discovery and deletion of detached native internet gateways are supported.")
+		return q, ec2Invalid("UnsupportedOperation", "Unsupported native internet gateway operation.")
 	}
 	return q, nil
 }
@@ -269,8 +299,18 @@ func (s *StackStore) executeEC2InternetGateway(ctx context.Context, action, regi
 		}
 		ok := true
 		out.Return = &ok
+	case ec2AttachInternetGateway, ec2DetachInternetGateway:
+		// serveEC2 has already checked both exact endpoint permissions.
+		if q.dryRun {
+			return nil, ec2Invalid("DryRunOperation", "The caller has both local permissions; no attachment was changed.")
+		}
+		if err := s.changeNativeInternetGatewayAttachment(ctx, region, q.id, q.vpc, action == ec2AttachInternetGateway); err != nil {
+			return nil, err
+		}
+		ok := true
+		out.Return = &ok
 	default:
-		return nil, ec2Invalid("UnsupportedOperation", "Native gateway attachments and routing are not supported.")
+		return nil, ec2Invalid("UnsupportedOperation", "Unsupported native internet gateway operation.")
 	}
 	return out, nil
 }

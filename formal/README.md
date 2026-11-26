@@ -663,3 +663,11 @@ are never synthesized, rerouted, misreported or persisted. Fourteen named
 controls must each violate their declared invariant. See the
 [model contract and source correspondence](../docs/formal-bedrock-runtime.md);
 it is not a Go/HTTP refinement or a real-model result.
+
+The native Internet Gateway and VPC link model
+[`EC2InternetGatewayAttachment`](EC2InternetGatewayAttachment.tla) checks a
+two-by-two endpoint relation, required grants on both endpoints, ownership,
+durable attach/detach, and current exact and complete regional readback before a
+console notice. The existing gateway inventory and allocation models retain the
+empty-page, authorization and dependency controls. These finite witnesses do
+not prove SQL/Go/UI refinement, VPC routing or packet forwarding.

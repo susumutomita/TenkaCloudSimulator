@@ -10,6 +10,7 @@ import (
 	"maps"
 	"slices"
 	"sort"
+	"strings"
 )
 
 var errEC2InternetGatewayState = errors.New("inconsistent internet gateway configuration")
@@ -37,14 +38,23 @@ func regionalGatewayStacks(ctx context.Context, tx *sql.Tx, region string) (map[
 		}
 		stacks[id] = stack
 		for _, member := range stack.Resources {
+			// Only members in the EC2 network namespace own these IDs.
+			// Legal S3 bucket, IAM role or function names may match the
+			// literal prefix (or even the whole derived relation ID).
+			if !stackNetworkKind(member.Type) {
+				continue
+			}
+			if strings.HasPrefix(member.PhysicalID, nativeInternetGatewayLinkPrefix) {
+				return nil, nil, errEC2InternetGatewayState
+			}
 			declared[member.PhysicalID] = true
 		}
 	}
 	return stacks, declared, rows.Err()
 }
 
-// Neither native create nor delete adopts a CloudFormation-owned gateway or
-// relation. A caller can pass declarations from this same SQLite snapshot.
+// No native gateway or its endpoints adopt a CloudFormation claim or
+// declaration. A caller can pass declarations from this same SQLite snapshot.
 func ensureNativeInternetGatewayUnclaimed(ctx context.Context, tx *sql.Tx, region, id string, declared map[string]bool) error {
 	var claimed bool
 	err := tx.QueryRowContext(ctx, `SELECT EXISTS(SELECT 1 FROM aws_cfn_ownership WHERE namespace=? AND physical_id=?)`,
@@ -67,9 +77,9 @@ func ensureNativeInternetGatewayUnclaimed(ctx context.Context, tx *sql.Tx, regio
 	return nil
 }
 
-func internetGatewayHasDependents(ctx context.Context, tx *sql.Tx, region, id string) (bool, error) {
+func internetGatewayHasDependents(ctx context.Context, tx *sql.Tx, region, id, except string) (bool, error) {
 	rows, err := tx.QueryContext(ctx, `SELECT id FROM aws_ec2_network_resources WHERE region=?
-		AND kind IN (?,?) ORDER BY id LIMIT 1001`, region, ec2RTAttachment, ec2Route)
+		AND (kind IN (?,?) OR id GLOB ?) ORDER BY id LIMIT 1001`, region, ec2RTAttachment, ec2Route, nativeInternetGatewayLinkPrefix+"*")
 	if err != nil {
 		return false, err
 	}
@@ -95,10 +105,12 @@ func internetGatewayHasDependents(ctx context.Context, tx *sql.Tx, region, id st
 		if err != nil {
 			return false, err
 		}
-		if !ec2InternetGatewayID.MatchString(related.GatewayID) {
+		if !ec2InternetGatewayID.MatchString(related.GatewayID) ||
+			(strings.HasPrefix(related.ID, nativeInternetGatewayLinkPrefix) || related.StackID == ec2NativeOwner && related.Kind == ec2RTAttachment) &&
+				!validNativeInternetGatewayLink(related) {
 			return false, errEC2InternetGatewayState
 		}
-		if related.GatewayID == id {
+		if related.GatewayID == id && related.ID != except {
 			return true, nil
 		}
 	}
@@ -134,7 +146,7 @@ func (s *StackStore) createNativeInternetGateway(ctx context.Context, region str
 	if err = ensureNativeInternetGatewayUnclaimed(ctx, tx, region, id, nil); err != nil {
 		return EC2NetworkResource{}, err
 	}
-	if found, err := internetGatewayHasDependents(ctx, tx, region, id); err != nil || found {
+	if found, err := internetGatewayHasDependents(ctx, tx, region, id, ""); err != nil || found {
 		return EC2NetworkResource{}, errEC2InternetGatewayState
 	}
 	return row, tx.Commit()
@@ -162,7 +174,7 @@ func (s *StackStore) deleteNativeInternetGateway(ctx context.Context, region, id
 	if err = ensureNativeInternetGatewayUnclaimed(ctx, tx, region, id, nil); err != nil {
 		return err
 	}
-	if found, err := internetGatewayHasDependents(ctx, tx, region, id); err != nil {
+	if found, err := internetGatewayHasDependents(ctx, tx, region, id, ""); err != nil {
 		return err
 	} else if found {
 		return ec2Invalid("DependencyViolation", "The internet gateway is still referenced; it was not deleted.")
@@ -181,7 +193,7 @@ func (s *StackStore) deleteNativeInternetGateway(ctx context.Context, region, id
 	if err = ensureNativeInternetGatewayUnclaimed(ctx, tx, region, id, nil); err != nil {
 		return err
 	}
-	if found, err := internetGatewayHasDependents(ctx, tx, region, id); err != nil || found {
+	if found, err := internetGatewayHasDependents(ctx, tx, region, id, ""); err != nil || found {
 		return errEC2InternetGatewayState
 	}
 	return tx.Commit()
@@ -194,87 +206,11 @@ func (s *StackStore) describeInternetGateways(ctx context.Context, region string
 	}
 	defer tx.Rollback()
 
-	// Seeds are deliberately independent. Losing the typed ownership and
-	// network rows does not erase a surviving declaration, and a route-only
-	// orphan must still enter the regional consistency check before filtering.
-	stacks, declared, err := regionalGatewayStacks(ctx, tx, region)
+	inventory, err := readInternetGatewayInventory(ctx, tx, region)
 	if err != nil {
 		return nil, err
 	}
-	owners := map[string]bool{}
-	for id, record := range stacks {
-		for _, member := range record.Resources {
-			if member.Type == ec2RTGateway || member.Type == ec2RTAttachment || member.Type == ec2Route {
-				owners[id] = true
-			}
-		}
-	}
-	rows, err := tx.QueryContext(ctx, `SELECT stack_id FROM aws_cfn_ownership WHERE namespace=? AND kind IN (?,?,?)
-		UNION SELECT stack_id FROM aws_ec2_network_resources WHERE region=? AND kind IN (?,?,?) ORDER BY 1 LIMIT 1001`,
-		stackResourceNamespace(region, ec2RTGateway), ec2RTGateway, ec2RTAttachment, ec2Route, region, ec2RTGateway, ec2RTAttachment, ec2Route)
-	if err != nil {
-		return nil, err
-	}
-	for rows.Next() {
-		var owner string
-		if err = rows.Scan(&owner); err != nil {
-			rows.Close()
-			return nil, err
-		}
-		owners[owner] = true
-	}
-	err = rows.Err()
-	rows.Close()
-	if err != nil {
-		return nil, err
-	}
-	if len(owners) > 1000 {
-		return nil, errEC2InternetGatewayState
-	}
-	var out []ec2InternetGateway
-	count := 0
-	for _, owner := range slices.Sorted(maps.Keys(owners)) {
-		network, err := networkList(ctx, tx, region, owner)
-		if err != nil {
-			return nil, err
-		}
-		count += len(network)
-		if count > 1000 {
-			return nil, errEC2InternetGatewayState
-		}
-		if owner == ec2NativeOwner {
-			for _, r := range network {
-				if r.Kind == ec2RTAttachment || r.Kind == ec2Route {
-					return nil, errEC2InternetGatewayState
-				}
-				if r.Kind != ec2RTGateway {
-					continue
-				}
-				if !validInternetGatewayRow(r) {
-					return nil, errEC2InternetGatewayState
-				}
-				if err := ensureNativeInternetGatewayUnclaimed(ctx, tx, region, r.ID, declared); err != nil {
-					return nil, err
-				}
-				out = append(out, internetGatewayProjection(r, ""))
-			}
-			continue
-		}
-		stack, found := stacks[owner]
-		if !found {
-			return nil, errEC2InternetGatewayState
-		}
-		claims, err := ec2RouteClaims(ctx, tx, region, owner)
-		if err != nil {
-			return nil, err
-		}
-		gateways, err := projectCFNInternetGateways(stack, network, claims)
-		if err != nil {
-			return nil, err
-		}
-		out = append(out, gateways...)
-	}
-
+	out := inventory.rows
 	if len(ids) > 0 {
 		out = slices.DeleteFunc(out, func(gw ec2InternetGateway) bool { return !slices.Contains(ids, gw.ID) })
 		if len(out) != len(ids) {
@@ -283,6 +219,125 @@ func (s *StackStore) describeInternetGateways(ctx context.Context, region string
 	}
 	sort.Slice(out, func(i, j int) bool { return out[i].ID < out[j].ID })
 	return out, tx.Commit()
+}
+
+type ec2InternetGatewayInventory struct {
+	rows     []ec2InternetGateway
+	links    nativeInternetGatewayLinks
+	declared map[string]bool // physical IDs, independently of the claims
+}
+
+// The same authoritative graph drives wire readback and admission and fresh
+// transaction readback of native attachment changes.
+func readInternetGatewayInventory(ctx context.Context, tx *sql.Tx, region string) (ec2InternetGatewayInventory, error) {
+	out := ec2InternetGatewayInventory{}
+	// Seeds are deliberately independent. Losing the typed ownership and
+	// network rows does not erase a surviving declaration, and a route-only
+	// orphan must still enter the regional consistency check before filtering.
+	stacks, declared, err := regionalGatewayStacks(ctx, tx, region)
+	if err != nil {
+		return out, err
+	}
+	out.declared = declared
+	owners := map[string]bool{}
+	for id, record := range stacks {
+		for _, member := range record.Resources {
+			if member.Type == ec2RTGateway || member.Type == ec2RTAttachment || member.Type == ec2Route {
+				owners[id] = true
+			}
+		}
+	}
+	namespace := stackResourceNamespace(region, ec2RTGateway)
+	var reservedClaim bool
+	if err := tx.QueryRowContext(ctx, `SELECT EXISTS(SELECT 1 FROM aws_cfn_ownership
+			WHERE namespace=? AND physical_id GLOB ?)`, namespace, nativeInternetGatewayLinkPrefix+"*").Scan(&reservedClaim); err != nil {
+		return out, err
+	}
+	if reservedClaim {
+		return out, errEC2InternetGatewayState
+	}
+	rows, err := tx.QueryContext(ctx, `SELECT stack_id FROM aws_cfn_ownership WHERE namespace=? AND kind IN (?,?,?)
+		UNION SELECT stack_id FROM aws_ec2_network_resources WHERE region=?
+		AND (kind IN (?,?,?) OR id GLOB ?) ORDER BY 1 LIMIT 1001`,
+		namespace, ec2RTGateway, ec2RTAttachment, ec2Route, region, ec2RTGateway, ec2RTAttachment, ec2Route, nativeInternetGatewayLinkPrefix+"*")
+	if err != nil {
+		return out, err
+	}
+	for rows.Next() {
+		var owner string
+		if err = rows.Scan(&owner); err != nil {
+			rows.Close()
+			return out, err
+		}
+		owners[owner] = true
+	}
+	err = rows.Err()
+	rows.Close()
+	if err != nil {
+		return out, err
+	}
+	if len(owners) > 1000 {
+		return out, errEC2InternetGatewayState
+	}
+	vpcUsed := map[string]bool{}
+	appendGateways := func(rows []ec2InternetGateway) error {
+		for _, row := range rows {
+			for _, link := range row.Attachments {
+				if vpcUsed[link.VPCID] {
+					return errEC2InternetGatewayState
+				}
+				vpcUsed[link.VPCID] = true
+			}
+			out.rows = append(out.rows, row)
+		}
+		return nil
+	}
+	count := 0
+	for _, owner := range slices.Sorted(maps.Keys(owners)) {
+		network, err := networkList(ctx, tx, region, owner)
+		if err != nil {
+			return out, err
+		}
+		count += len(network)
+		if count > 1000 {
+			return out, errEC2InternetGatewayState
+		}
+		if owner == ec2NativeOwner {
+			out.links, err = readNativeInternetGatewayLinks(ctx, tx, region, network, declared)
+			if err != nil {
+				return out, err
+			}
+			for _, r := range network {
+				if r.Kind == ec2RTGateway {
+					if err := appendGateways([]ec2InternetGateway{internetGatewayProjection(r, out.links.byGateway[r.ID].VPCID)}); err != nil {
+						return out, err
+					}
+				}
+			}
+			continue
+		}
+		for _, row := range network {
+			if strings.HasPrefix(row.ID, nativeInternetGatewayLinkPrefix) {
+				return out, errEC2InternetGatewayState
+			}
+		}
+		stack, found := stacks[owner]
+		if !found {
+			return out, errEC2InternetGatewayState
+		}
+		claims, err := ec2RouteClaims(ctx, tx, region, owner)
+		if err != nil {
+			return out, err
+		}
+		gateways, err := projectCFNInternetGateways(stack, network, claims)
+		if err != nil {
+			return out, err
+		}
+		if err := appendGateways(gateways); err != nil {
+			return out, err
+		}
+	}
+	return out, nil
 }
 
 func projectCFNInternetGateways(stack StackRecord, network []EC2NetworkResource, claims map[string]string) ([]ec2InternetGateway, error) {

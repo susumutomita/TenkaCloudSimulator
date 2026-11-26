@@ -242,13 +242,19 @@ func TestEC2InternetGatewayFaultAtomicity(t *testing.T) {
 				// writes, not authority to adopt or delete the physical ID.
 				exec(`UPDATE aws_cfn_stacks SET document=replace(document,?,?) WHERE id=?`, oldID, g.ID, stack.ID)
 				f.expect(f.call("", igwRegion, nil, list), 500, "InternalError")
-			case "attachment", "route", "route-typed-field", "route-malformed":
-				// Model a local database fault, not an exposed operation.
-				kind := ec2RTAttachment
-				if fault != "attachment" {
-					kind = ec2Route
+			case "attachment":
+				vpc := f.create("", url.Values{"CidrBlock": {"10.61.0.0/16"}}).ID
+				nativeGatewayTestChange(t, f, "", ec2AttachInternetGateway, g.ID, vpc)
+				got := nativeGatewayTestExact(t, f, g.ID)
+				if len(got.Attachments) != 1 || got.Attachments[0].VPCID != vpc {
+					t.Fatalf("test did not install a canonical attachment: %+v", got)
 				}
-				f.writeNetwork(EC2NetworkResource{ID: "local-dependency", Kind: kind, Region: igwRegion, StackID: ec2NativeOwner, GatewayID: g.ID, Revision: 1})
+				f.expect(f.call("", igwRegion, nil, del), 400, "DependencyViolation")
+				wantRows(1)
+				return
+			case "route", "route-typed-field", "route-malformed":
+				// Model a local database fault, not an exposed operation.
+				f.writeNetwork(EC2NetworkResource{ID: "local-dependency", Kind: ec2Route, Region: igwRegion, StackID: ec2NativeOwner, GatewayID: g.ID, Revision: 1})
 				if fault == "route-typed-field" {
 					exec(`UPDATE aws_ec2_network_resources
 						SET document=json_set(json_remove(document,'$.GatewayID'),'$.gatewayId',?) WHERE id='local-dependency'`, g.ID)

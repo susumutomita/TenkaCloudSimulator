@@ -14,6 +14,7 @@ import (
 	"regexp"
 	"slices"
 	"strconv"
+	"strings"
 )
 
 // Native EC2 VPC lifecycle. CreateVpc stores a VPC in the same
@@ -300,7 +301,21 @@ func nativeVPCs(ctx context.Context, tx *sql.Tx, region string) ([]EC2NetworkRes
 	}
 	out := []EC2NetworkResource{}
 	associatedSubnets := map[string]bool{}
-	var gatewayDeclarations map[string]bool
+	var hasGateways bool
+	for _, v := range all {
+		if v.Kind == ec2RTGateway || v.Kind == ec2RTAttachment || strings.HasPrefix(v.ID, nativeInternetGatewayLinkPrefix) {
+			hasGateways = true
+		}
+	}
+	if hasGateways {
+		_, declared, err := regionalGatewayStacks(ctx, tx, region)
+		if err != nil {
+			return nil, err
+		}
+		if _, err = readNativeInternetGatewayLinks(ctx, tx, region, all, declared); err != nil {
+			return nil, err
+		}
+	}
 	for _, v := range all {
 		switch v.Kind {
 		case "AWS::EC2::VPC":
@@ -328,19 +343,8 @@ func nativeVPCs(ctx context.Context, tx *sql.Tx, region string) ([]EC2NetworkRes
 			if _, err := readNativeRouteTable(ctx, tx, region, v.ID); err != nil {
 				return nil, err
 			}
-		case ec2RTGateway:
-			if !validInternetGatewayRow(v) {
-				return nil, errEC2InternetGatewayState
-			}
-			if gatewayDeclarations == nil {
-				_, gatewayDeclarations, e = regionalGatewayStacks(ctx, tx, region)
-				if e != nil {
-					return nil, e
-				}
-			}
-			if err := ensureNativeInternetGatewayUnclaimed(ctx, tx, region, v.ID, gatewayDeclarations); err != nil {
-				return nil, err
-			}
+		case ec2RTGateway, ec2RTAttachment:
+			// Validated as one owned graph before this inventory is exposed.
 		case ec2Assoc:
 			if associatedSubnets[v.SubnetID] {
 				return nil, errEC2NativeRouteAssociationState
@@ -420,32 +424,37 @@ func (s *StackStore) deleteNativeVPC(ctx context.Context, region, id string) err
 	if claims != 0 {
 		return fmt.Errorf("EC2-owned VPC has a stack claim")
 	}
-	rows, e := tx.QueryContext(ctx, `SELECT document FROM aws_ec2_network_resources WHERE region=? AND id<>? ORDER BY id LIMIT 1001`, region, id)
+	rows, e := tx.QueryContext(ctx, `SELECT id,document,kind,stack_id,revision FROM aws_ec2_network_resources
+		WHERE region=? AND id<>? ORDER BY id LIMIT 1001`, region, id)
 	if e != nil {
 		return e
 	}
-	dependents := 0
+	var hasDependents bool
+	count := 0
 	for rows.Next() {
-		var raw string
+		var child, raw, kind, owner string
+		var revision int64
 		var other EC2NetworkResource
-		if e = rows.Scan(&raw); e != nil {
+		if e = rows.Scan(&child, &raw, &kind, &owner, &revision); e != nil {
 			rows.Close()
 			return e
 		}
-		if e = json.Unmarshal([]byte(raw), &other); e != nil {
+		count++
+		if count > 1000 || json.Unmarshal([]byte(raw), &other) != nil || other.ID != child ||
+			other.Kind != kind || other.Region != region || other.StackID != owner || other.Revision != revision ||
+			(strings.HasPrefix(child, nativeInternetGatewayLinkPrefix) || owner == ec2NativeOwner && kind == ec2RTAttachment) &&
+				!validNativeInternetGatewayLink(other) {
 			rows.Close()
-			return e
+			return errEC2InternetGatewayState
 		}
-		if other.VPCID == id {
-			dependents++
-		}
+		hasDependents = hasDependents || other.VPCID == id
 	}
 	e = rows.Err()
 	rows.Close()
 	if e != nil {
 		return e
 	}
-	if dependents != 0 {
+	if hasDependents {
 		return ec2Invalid("DependencyViolation", "The vpc '"+id+"' has dependencies and cannot be deleted.")
 	}
 	result, e := tx.ExecContext(ctx, `DELETE FROM aws_ec2_network_resources WHERE region=? AND id=? AND stack_id=? AND revision=?`, region, id, ec2NativeOwner, v.Revision)

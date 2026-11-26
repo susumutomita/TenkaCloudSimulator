@@ -195,7 +195,7 @@ func (g *Gateway) serveEC2(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		out = result
-	case ec2CreateInternetGateway, ec2DescribeInternetGateway, ec2DeleteInternetGateway:
+	case ec2CreateInternetGateway, ec2DescribeInternetGateway, ec2DeleteInternetGateway, ec2AttachInternetGateway, ec2DetachInternetGateway:
 		if request.internetGateway.paginated() {
 			caller, ok := provider.ActorFromContext(r.Context())
 			if !ok || caller.ExerciseIdentity != principal {

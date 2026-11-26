@@ -1517,12 +1517,12 @@ BASE_INVARIANTS['EC2TemplatePreviewEpoch'] = {'TypeOK', 'OrdinaryPreview', 'Boun
 REQUIRED_MUTANTS['EC2TemplatePreviewEpoch'] = {'AdmitClosed', 'AdmitHandoff', 'OversizeDraft', 'AllowMutation', 'AllowTemplateURL', 'AcceptStaleIdentity', 'AcceptStaleRegion', 'AcceptStaleDraft', 'AcceptAfterClose', 'AcceptAfterHandoff', 'RetainOldDraft', 'RefusalAsAccepted', 'InvalidAsAccepted', 'MalformedAsAccepted', 'ShowReturnedValue'}
 REQUIRED_SOURCE_SCOPES['EC2TemplatePreviewEpoch'] = {'internal/server/web/app.js', 'tools/console/src/ec2-readonly.jsx', 'tools/console/src/ec2-template-preview.jsx', 'tools/console/src/ec2-template-preview.mjs', 'tools/console/src/main.jsx'}
 BASE_MODELS.add('EC2RouteTableConsoleEpoch')
-BASE_INVARIANTS['EC2RouteTableConsoleEpoch'] = {'TypeOK', 'EligibleRead', 'FixedRead', 'CurrentIdentity', 'CurrentRegion', 'CurrentTarget', 'CurrentRevision', 'CurrentGate', 'StatusIsEvidence', 'DefaultIsRecorded', 'AssociationIsExplicit', 'NoImplicitMain'}
-REQUIRED_MUTANTS['EC2RouteTableConsoleEpoch'] = {'UnsignedRead', 'UnadvertisedRead', 'HandoffRead', 'NativeRead', 'UnverifiedRead', 'OfferWrongOperation', 'AcceptOldPrincipal', 'AcceptOldRegion', 'AcceptOldVPC', 'AcceptOldRevision', 'AcceptOldGate', 'KeepPreviousPrincipal', 'IncludeForeignRows', 'MaskRefusalAsEmpty', 'InventDefault', 'InventAssociation', 'InventMain'}
+BASE_INVARIANTS['EC2RouteTableConsoleEpoch'] = {'TypeOK', 'EligibleRead', 'FixedRead', 'CurrentIdentity', 'CurrentRegion', 'CurrentTarget', 'CurrentRevision', 'CurrentGate', 'StatusIsEvidence', 'DefaultIsRecorded', 'AssociationIsExplicit', 'NoImplicitMain', 'CurrentSubnet', 'ValidSubnetRequest'}
+REQUIRED_MUTANTS['EC2RouteTableConsoleEpoch'] = {'UnsignedRead', 'UnadvertisedRead', 'HandoffRead', 'NativeRead', 'UnverifiedRead', 'OfferWrongOperation', 'AcceptOldPrincipal', 'AcceptOldRegion', 'AcceptOldVPC', 'AcceptOldRevision', 'AcceptOldGate', 'KeepPreviousPrincipal', 'IncludeForeignRows', 'MaskRefusalAsEmpty', 'InventDefault', 'InventAssociation', 'InventMain', 'AcceptOldSubnet', 'QueryIncompleteSubnet', 'MaskNonmatchingSubnetResponse'}
 REQUIRED_SOURCE_SCOPES['EC2RouteTableConsoleEpoch'] = {'internal/server/server.go', 'internal/server/web/app.js', 'tools/console/src/ec2-readonly.jsx', 'tools/console/src/ec2-response.mjs', 'tools/console/src/ec2-route-tables.mjs', 'tools/console/src/ec2-vpc-route-tables.jsx', 'tools/console/src/main.jsx'}
 BASE_MODELS.add('EC2RouteTableRead')
-BASE_INVARIANTS['EC2RouteTableRead'] = {'TypeOK', 'Admission', 'BoundSnapshot', 'SameVPC', 'TypedDefault', 'ExplicitOnly', 'CurrentDefault'}
-REQUIRED_MUTANTS['EC2RouteTableRead'] = {'AllowUnknownAction', 'SkipIAM', 'AllowInstanceScope', 'SkipRegion', 'DropDeclaration', 'DropOwnership', 'DropStoredRows', 'AllowLossyXML', 'CrossVPCSubnet', 'CrossVPCGateway', 'InventAssociation', 'InventMain', 'ShowRemovedRoute', 'IgnoreMalformedFlag'}
+BASE_INVARIANTS['EC2RouteTableRead'] = {'TypeOK', 'Admission', 'BoundSnapshot', 'SameVPC', 'TypedDefault', 'ExplicitOnly', 'CurrentDefault', 'FilterMatchesExplicit'}
+REQUIRED_MUTANTS['EC2RouteTableRead'] = {'AllowUnknownAction', 'SkipIAM', 'AllowInstanceScope', 'SkipRegion', 'DropDeclaration', 'DropOwnership', 'DropStoredRows', 'AllowLossyXML', 'CrossVPCSubnet', 'CrossVPCGateway', 'InventAssociation', 'InventMain', 'ShowRemovedRoute', 'IgnoreMalformedFlag', 'AdmitMalformedSelector', 'ReturnUnmatchedTable', 'ReturnImplicitSubnetTable'}
 REQUIRED_SOURCE_SCOPES['EC2RouteTableRead'] = {'internal/aws/ec2_read.go', 'internal/aws/ec2_route_tables_read.go', 'internal/aws/ec2_vpc.go'}
 
 BASE_MODELS.add('EC2SecurityGroupRead')
@@ -3710,7 +3710,9 @@ BASE_INVARIANTS['RDSGuestPeerPreflight'] = {
     'LiveAtReturn',
     'ObservationOnly',
     'DenialDoesNotRetireOwner',
-    'HealthyObservation'
+    'HealthyObservation',
+    'DestinationAtFinalSnapshot',
+    'FinalSnapshotCommitted'
 }
 REQUIRED_MUTANTS['RDSGuestPeerPreflight'] = {
     'AcceptBorrowedGuest',
@@ -3728,7 +3730,10 @@ REQUIRED_MUTANTS['RDSGuestPeerPreflight'] = {
     'SkipCommandRecheck',
     'IssueReusablePermit',
     'RetireOwnerOnPeerDenial',
-    'DenyAllHealthyGuests'
+    'DenyAllHealthyGuests',
+    'AcceptLostDestinationAfterInitialRead',
+    'IgnoreFailedFinalCommit',
+    'SkipCommittedPostProbeSnapshot'
 }
 REQUIRED_SOURCE_SCOPES['RDSGuestPeerPreflight'] = {
     'internal/aws/catalog/rds_guest_peer_linux_amd64.go',
@@ -3770,6 +3775,7 @@ REQUIRED_MUTANTS['EC2InternetGatewayLifecycle'] = {
 REQUIRED_SOURCE_SCOPES['EC2InternetGatewayLifecycle'] = {
     'internal/aws/ec2_internet_gateways.go',
     'internal/aws/ec2_internet_gateway_store.go',
+    'internal/aws/ec2_internet_gateway_attachment_store.go',
     'internal/aws/ec2_read.go',
     'internal/aws/ec2_vpc.go',
     'internal/server/server.go',
@@ -3815,6 +3821,47 @@ REQUIRED_SOURCE_SCOPES['EC2InternetGatewayInventoryPages'] = {
     'internal/aws/ec2_read.go',
     'internal/server/server.go',
     'tools/console/src/ec2-internet-gateways.mjs',
+    'internal/server/web/app.js',
+}
+
+
+# Bounded native Internet Gateway-to-VPC relation and confirmed readback.
+BASE_MODELS.add('EC2InternetGatewayAttachment')
+BASE_INVARIANTS['EC2InternetGatewayAttachment'] = {
+    'TypeOK',
+    'OneGatewayPerVPC',
+    'ExactMutation',
+    'Authority',
+    'Committed',
+    'ReadbackFence',
+    'ConfirmedNotice',
+}
+REQUIRED_MUTANTS['EC2InternetGatewayAttachment'] = {
+    'AdmitUnscopedMutation',
+    'SkipGatewayGrant',
+    'SkipVPCGrant',
+    'AdoptStackResource',
+    'IgnoreStackDeclaration',
+    'IgnoreStackClaim',
+    'ApplyDryRun',
+    'AcceptUnconfirmedPersistence',
+    'MoveAttachedGateway',
+    'AttachToOccupiedVPC',
+    'DetachWrongPair',
+    'DetachReferencedGateway',
+    'AcceptStaleExact',
+    'IgnoreExactReadback',
+    'AcceptPartialOrStaleList',
+    'PublishBeforeVerifiedList',
+}
+REQUIRED_SOURCE_SCOPES['EC2InternetGatewayAttachment'] = {
+    'internal/aws/ec2_internet_gateway_attachment_store.go',
+    'internal/aws/ec2_internet_gateway_store.go',
+    'internal/aws/ec2_internet_gateways.go',
+    'internal/aws/ec2_read.go',
+    'internal/aws/ec2_vpc.go',
+    'tools/console/src/ec2-internet-gateways.mjs',
+    'tools/console/src/ec2-vpc-internet-gateways.jsx',
     'internal/server/web/app.js',
 }
 

@@ -6,7 +6,7 @@ subset. Supply `Version=2016-11-15` and `Action=DescribeInstances`,
 `Action=DescribeVpcs`, `Action=DescribeSubnets`, `Action=DescribeSecurityGroups`,
 `Action=DescribeRouteTables`, `Action=CreateVpc`, `Action=DeleteVpc`,
 `Action=CreateSubnet` or `Action=DeleteSubnet`, plus the named SG, ACL and route
-table operations below and the [detached Internet Gateway operations](ec2-internet-gateways.md). Discovery uses the EC2 namespace and
+table operations below and the [Internet Gateway configuration operations](ec2-internet-gateways.md). Discovery uses the EC2 namespace and
 lower-camel-case `reservationSet/instancesSet/item`, `vpcSet/item`,
 `subnetSet/item`, `securityGroupInfo/item` and `routeTableSet/item` fields.
 A request body is bounded to 64 KiB.
