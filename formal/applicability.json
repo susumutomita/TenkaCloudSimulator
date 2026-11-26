@@ -240,6 +240,21 @@
       "models": []
     },
     {
+      "path": "internal/server/console_handoff_test.go",
+      "sha256": "09995380ca02706e105d692360981504ae1e02386e058e89f7ee26676388c4e2",
+      "disposition": "modeled",
+      "reason": "This existing ConsoleHandoff-scoped test preserves the Access-only separation between browser handoff and the verified native signing interface; the admitted signing inventory now includes Cognito metadata only.",
+      "models": [
+        {
+          "id": "ConsoleHandoff",
+          "properties": [
+            "SDKAuthorityPreserved"
+          ],
+          "limits": "Existing finite lifecycle/SDK authority frame only. Does not model the Go response header, service list, version, SigV4, or Cognito metadata. The exact six-service declaration and bare-embedding negative are executable Go assertions; Cognito behavior is scoped separately."
+        }
+      ]
+    },
+    {
       "path": "internal/server/server.go",
       "sha256": "0fada89a3b7ce3362e0eeaac732dce50729c38a88c25427066efc4ccae97914b",
       "disposition": "modeled",

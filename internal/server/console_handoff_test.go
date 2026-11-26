@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"net/url"
+	"slices"
 	"strings"
 	"sync"
 	"testing"
@@ -409,7 +410,10 @@ func TestConsoleHandoffRequiresAccessCapability(t *testing.T) {
 			Services []string
 		} `json:"nativeSdk"`
 	}
-	if response.Code != 200 || json.Unmarshal(response.Body.Bytes(), &advertised) != nil || advertised.NativeSDK.Version != 1 || strings.Join(advertised.NativeSDK.Services, ",") != "sts,iam,cloudformation,ssm,lambda" {
-		t.Fatal("Access did not advertise the native SDK services it verifies", response.Code, response.Body.String())
+	wantServices := []string{"sts", "iam", "cloudformation", "ssm", "lambda", "cognito-idp"}
+	if response.Code != http.StatusOK || json.Unmarshal(response.Body.Bytes(), &advertised) != nil ||
+		advertised.NativeSDK.Version != 1 || !slices.Equal(advertised.NativeSDK.Services, wantServices) {
+		t.Fatalf("Access did not advertise the exact native SDK services it verifies: status=%d version=%d services=%v",
+			response.Code, advertised.NativeSDK.Version, advertised.NativeSDK.Services)
 	}
 }
