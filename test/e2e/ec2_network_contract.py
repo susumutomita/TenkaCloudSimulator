@@ -184,6 +184,50 @@ class NetworkContract(unittest.TestCase):
         self.assertCountEqual(completed_resources(history, 'DELETE_COMPLETE'), expected)
         self.assertEqual([e for e in history if e['ResourceStatus'].startswith('CREATE_')], events)
 
+    def test_route_table_filter_observes_only_live_explicit_subnet_associations(self):
+        selected = self.create('network-filter-stack')
+        outputs = self.outputs(selected)
+        cfn_subnet = outputs['Subnet']
+
+        def filtered(*values, client=None):
+            return (client or self.ec2).describe_route_tables(
+                Filters=[{'Name': 'association.subnet-id', 'Values': list(values)}])['RouteTables']
+
+        def table_ids(rows):
+            return [table['RouteTableId'] for table in rows]
+
+        vpc = self.ec2.create_vpc(CidrBlock='10.89.0.0/16')['Vpc']['VpcId']
+        self.addCleanup(self.ec2.delete_vpc, VpcId=vpc)
+        subnet = self.ec2.create_subnet(VpcId=vpc, CidrBlock='10.89.1.0/24')['Subnet']['SubnetId']
+        self.addCleanup(self.ec2.delete_subnet, SubnetId=subnet)
+        table = self.ec2.create_route_table(VpcId=vpc)['RouteTable']['RouteTableId']
+        self.addCleanup(self.ec2.delete_route_table, RouteTableId=table)
+        self.assertEqual(table_ids(filtered(cfn_subnet)), [outputs['Table']])
+        self.assert_route_table(filtered(cfn_subnet)[0], outputs)
+        self.assertEqual(filtered(subnet), [])
+        self.assertEqual(filtered(cfn_subnet, client=self.client('ec2', 'ap-northeast-1')), [])
+
+        association = self.ec2.associate_route_table(RouteTableId=table, SubnetId=subnet)['AssociationId']
+        try:
+            rows = filtered(subnet, cfn_subnet, subnet)
+            self.assertEqual(table_ids(rows), sorted([table, outputs['Table']]))
+            native, = [row for row in rows if row['RouteTableId'] == table]
+            self.assertEqual([(a['RouteTableAssociationId'], a['SubnetId'], a['Main'])
+                              for a in native['Associations']], [(association, subnet, False)])
+            self.assertEqual(table_ids(filtered(subnet)), [table])
+        finally:
+            self.ec2.disassociate_route_table(AssociationId=association)
+        self.assertEqual(filtered(subnet), [])
+        self.assertCountEqual(table_ids(self.ec2.describe_route_tables()['RouteTables']),
+                              [table, outputs['Table']])
+
+        # A reused logical stack name must not give the old subnet a new association.
+        self.cfn.delete_stack(StackName=selected)
+        replacement = self.outputs(self.create('network-filter-stack'))
+        self.assertNotEqual(replacement['Subnet'], cfn_subnet)
+        self.assertEqual(filtered(cfn_subnet), [])
+        self.assertEqual(table_ids(filtered(replacement['Subnet'])), [replacement['Table']])
+
     def test_participant_missing_subnet_grant_preserves_stack_network(self):
         keys = ('Vpc', 'Subnet', 'Table', 'Association')
         template = {section: {key: self.template[section][key] for key in keys}

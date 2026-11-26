@@ -186,6 +186,19 @@ func TestEC2DescribeRouteTablesReadback(t *testing.T) {
 		}
 	}
 	call(east, "reader", nil, true, 403)
+	filter := ec2TestSubnetRouteFilter(ids["Subnet"])
+	filtered := call(east, "reader", filter, false, 200)
+	if !strings.Contains(filtered, ids["Table"]) || strings.Contains(filtered, ids["Empty"]) {
+		t.Fatal(filtered)
+	}
+	for _, region := range []string{west} {
+		empty := call(region, "reader", filter, false, 200)
+		if !strings.Contains(empty, "<routeTableSet></routeTableSet>") {
+			t.Fatal(empty)
+		}
+	}
+	call(east, "denied", filter, false, 403)
+	call(east, "reader", filter, true, 403)
 	change := func(enabled bool) {
 		t.Helper()
 		network, err := NewEC2NetworkStore(store.Database())
@@ -260,9 +273,13 @@ func TestEC2DescribeRouteTablesReadback(t *testing.T) {
 	modify("UPDATE aws_ec2_network_resources SET document=json_set(document,'$.SubnetID',?) WHERE id=?", ids["OtherSubnet"], ids["Assoc"])
 	mustReject := func() {
 		t.Helper()
-		b := call(east, "reader", nil, false, 500)
-		if !strings.Contains(b, "InternalError") || strings.Contains(b, "routeTableSet") || strings.Contains(b, ids["Table"]) {
-			t.Fatal(b)
+		// A selector that cannot match in this region must not hide damaged
+		// bindings, compute a partial list, or turn store errors into empty.
+		for _, q := range []url.Values{nil, ec2TestSubnetRouteFilter(westIDs["Subnet"])} {
+			b := call(east, "reader", q, false, 500)
+			if !strings.Contains(b, "InternalError") || strings.Contains(b, "routeTableSet") || strings.Contains(b, ids["Table"]) {
+				t.Fatal(b)
+			}
 		}
 		verify(west, westIDs, true)
 	}

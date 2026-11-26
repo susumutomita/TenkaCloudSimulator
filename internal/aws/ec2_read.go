@@ -209,7 +209,7 @@ func (g *Gateway) serveEC2(w http.ResponseWriter, r *http.Request) {
 			fail("InternalError", "Local route-table ownership or state is inconsistent or exceeds the local bound.", 500)
 			return
 		}
-		out = &ec2DescribeRouteTablesResponse{Tables: tables}
+		out = &ec2DescribeRouteTablesResponse{Tables: filterEC2RouteTablesOnSubnet(tables, request.routeTableSubnets)}
 	case "CreateSubnet":
 		subnet, e := g.Stacks.createNativeSubnet(r.Context(), region, request.subnet)
 		if e != nil {

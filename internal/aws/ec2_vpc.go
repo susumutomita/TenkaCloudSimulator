@@ -51,13 +51,14 @@ func (f *ec2Failure) Error() string { return f.code + ": " + f.message }
 func ec2Invalid(code, message string) *ec2Failure { return &ec2Failure{code, message, 400} }
 
 type ec2Request struct {
-	cidr, vpcID      string
-	tags             map[string]string
-	subnet           ec2SubnetMutation
-	securityGroup    *ec2NativeSecurityGroupQuery
-	networkACL       *ec2NetworkACLRequest
-	routeTable       *ec2NativeRouteTableQuery
-	routeAssociation *ec2NativeRouteAssociationQuery
+	cidr, vpcID       string
+	tags              map[string]string
+	subnet            ec2SubnetMutation
+	securityGroup     *ec2NativeSecurityGroupQuery
+	networkACL        *ec2NetworkACLRequest
+	routeTable        *ec2NativeRouteTableQuery
+	routeAssociation  *ec2NativeRouteAssociationQuery
+	routeTableSubnets []string
 }
 
 // permissions prechecks known resources. The route association lifecycle
@@ -89,9 +90,13 @@ func (q ec2Request) permissions(action, region string) [][2]string {
 	return [][2]string{{"ec2:" + action, "*"}}
 }
 
-// parseEC2Request admits only documented members of each action. SG and NACL
-// own their explicit selectors; unknown members are rejected rather than ignored.
+// parseEC2Request admits only supported members of each action. Unknown
+// members are rejected rather than ignored.
 func parseEC2Request(action string, fields map[string][]string) (ec2Request, *ec2Failure) {
+	if action == "DescribeRouteTables" {
+		ids, err := parseEC2RouteTableSubnetFilter(fields)
+		return ec2Request{routeTableSubnets: ids}, err
+	}
 	if action == "DescribeSecurityGroups" || slices.Contains(ec2NativeSecurityGroupMutations, action) {
 		q, err := parseEC2NativeSGQuery(action, fields)
 		return ec2Request{securityGroup: &q}, err
