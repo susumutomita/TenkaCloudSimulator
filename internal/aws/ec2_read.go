@@ -232,20 +232,33 @@ func (g *Gateway) serveEC2(w http.ResponseWriter, r *http.Request) {
 		}
 		out = association
 	case "DescribeRouteTables":
-		tables, err := g.Stacks.describeEC2RouteTables(r.Context(), region)
-		if err != nil {
-			fail("InternalError", "Local route-table ownership or state is inconsistent or exceeds the local bound.", 500)
-			return
-		}
-		if request.routeTableID != "" {
-			i := slices.IndexFunc(tables, func(table ec2RouteTableRead) bool { return table.ID == request.routeTableID })
-			if i < 0 {
-				failChild(ec2Invalid("InvalidRouteTableID.NotFound", "The route table does not exist in this region."), "")
+		query := request.routeTableRead
+		var caller provider.Actor
+		if query.paginated() {
+			actor, ok := provider.ActorFromContext(r.Context())
+			if !ok || actor.ExerciseIdentity != principal {
+				fail("UnauthorizedOperation", "A verified local actor is required for a route table page.", 403)
 				return
 			}
-			tables = tables[i : i+1]
+			caller = actor
 		}
-		out = &ec2DescribeRouteTablesResponse{Tables: filterEC2RouteTablesOnSubnet(tables, request.routeTableSubnets)}
+		tables, err := g.Stacks.executeEC2RouteTableRead(r.Context(), region, query, caller)
+		const failure = "Local route-table ownership or state is inconsistent or exceeds the local bound."
+		if err != nil {
+			failChild(err, failure)
+			return
+		}
+		if query.paginated() || query.id != "" {
+			wire, err := encodeEC2RouteTableBounded(tables, query.id != "")
+			if err != nil {
+				failChild(err, failure)
+				return
+			}
+			w.Header().Set("Content-Type", "text/xml")
+			_, _ = w.Write(wire)
+			return
+		}
+		out = tables
 	case "CreateSubnet":
 		subnet, e := g.Stacks.createNativeSubnet(r.Context(), region, request.subnet)
 		if e != nil {

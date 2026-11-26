@@ -25687,6 +25687,247 @@
           "expect_invariant": "CompleteReadback"
         }
       ]
+    },
+    {
+      "id": "EC2RouteTableInventoryPages",
+      "model": "formal/EC2RouteTableInventoryPages.tla",
+      "config": "formal/EC2RouteTableInventoryPages.cfg",
+      "bounds": "At most three pages, three projected inventory revisions, one mismatch witness per page, explicit all/subnet query forms, and absent, matched or unmatched acknowledged writes.",
+      "properties": [
+        "TypeOK",
+        "PageAuthorized",
+        "PageBounds",
+        "ScopedContinuation",
+        "CurrentAssembly",
+        "CompletePublication",
+        "ExactWriteReadback"
+      ],
+      "limits": "Finite symbolic paging, exact query/binding and post-write UI completion; no cryptographic, actual SQLite, wire/byte math, React or packet refinement. A small or empty complete first page is admitted; a continued response cannot end empty.",
+      "source_scope": [
+        "internal/aws/cloudformation.go",
+        "internal/aws/ec2_read.go",
+        "internal/aws/ec2_vpc.go",
+        "internal/aws/ec2_route_tables_read.go",
+        "internal/aws/ec2_route_table_page.go",
+        "internal/server/web/app.js",
+        "tools/console/src/ec2-response.mjs",
+        "tools/console/src/ec2-route-table-pages.mjs",
+        "tools/console/src/ec2-route-tables.mjs",
+        "tools/console/src/ec2-native-route-tables.mjs",
+        "tools/console/src/ec2-vpc-route-tables.jsx",
+        "tools/console/src/ec2-vpc-native-route-tables.jsx"
+      ],
+      "mutants": [
+        {
+          "id": "RequirePageIAM",
+          "edits": [
+            {
+              "old": "Authorized(f) == f.allowed /\\ f.actor",
+              "new": "Authorized(f) == f.actor",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PageAuthorized"
+        },
+        {
+          "id": "RequireBoundActor",
+          "edits": [
+            {
+              "old": "Authorized(f) == f.allowed /\\ f.actor",
+              "new": "Authorized(f) == f.allowed",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PageAuthorized"
+        },
+        {
+          "id": "AdmitExactIDWithPaging",
+          "edits": [
+            {
+              "old": " /\\ ~f.idCombined /\\ f.validSize",
+              "new": " /\\ f.validSize",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PageAuthorized"
+        },
+        {
+          "id": "AdmitInvalidPageSize",
+          "edits": [
+            {
+              "old": " /\\ ~f.idCombined /\\ f.validSize",
+              "new": " /\\ ~f.idCombined",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PageAuthorized"
+        },
+        {
+          "id": "SkipVerifiedRegionalGraph",
+          "edits": [
+            {
+              "old": "/\\ f.graph /\\ f.fits /\\ f.rows <= MaxRows",
+              "new": "/\\ f.fits /\\ f.rows <= MaxRows",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PageBounds"
+        },
+        {
+          "id": "IgnoreEncodedByteBound",
+          "edits": [
+            {
+              "old": "/\\ f.graph /\\ f.fits /\\ f.rows <= MaxRows",
+              "new": "/\\ f.graph /\\ f.rows <= MaxRows",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PageBounds"
+        },
+        {
+          "id": "OverfullTerminalPage",
+          "edits": [
+            {
+              "old": "/\\ f.graph /\\ f.fits /\\ f.rows <= MaxRows",
+              "new": "/\\ f.graph /\\ f.fits",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PageBounds"
+        },
+        {
+          "id": "AdmitEmptyContinuation",
+          "edits": [
+            {
+              "old": "    /\\ (used = 0 \\/ f.rows > 0)\n",
+              "new": "",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PageBounds"
+        },
+        {
+          "id": "AdmitShortNonterminalPage",
+          "edits": [
+            {
+              "old": "    /\\ (terminal \\/ f.rows = MaxRows)\n",
+              "new": "",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PageBounds"
+        },
+        {
+          "id": "SkipCursorSeal",
+          "edits": [
+            {
+              "old": "CursorBound(f) == f.seal /\\ f.region",
+              "new": "CursorBound(f) == f.region",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ScopedContinuation"
+        },
+        {
+          "id": "ReuseAcrossRegion",
+          "edits": [
+            {
+              "old": "CursorBound(f) == f.seal /\\ f.region",
+              "new": "CursorBound(f) == f.seal",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ScopedContinuation"
+        },
+        {
+          "id": "ReuseOtherActor",
+          "edits": [
+            {
+              "old": " /\\ f.sameActor /\\ f.sameSelector /\\ f.sameSize",
+              "new": " /\\ f.sameSelector /\\ f.sameSize",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ScopedContinuation"
+        },
+        {
+          "id": "ChangeSubnetsOnResume",
+          "edits": [
+            {
+              "old": " /\\ f.sameActor /\\ f.sameSelector /\\ f.sameSize",
+              "new": " /\\ f.sameActor /\\ f.sameSize",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ScopedContinuation"
+        },
+        {
+          "id": "ChangeLimitOnResume",
+          "edits": [
+            {
+              "old": " /\\ f.sameActor /\\ f.sameSelector /\\ f.sameSize",
+              "new": " /\\ f.sameActor /\\ f.sameSelector",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ScopedContinuation"
+        },
+        {
+          "id": "ContinueAcrossSavedSnapshots",
+          "edits": [
+            {
+              "old": "    /\\ inventory = origin\n",
+              "new": "",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ScopedContinuation"
+        },
+        {
+          "id": "AdmitRepeatedOrDisorderedRows",
+          "edits": [
+            {
+              "old": "SafeAssembly(f) == f.sameOrder /\\ f.live",
+              "new": "SafeAssembly(f) == f.live",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CurrentAssembly"
+        },
+        {
+          "id": "UseRetiredScopeReply",
+          "edits": [
+            {
+              "old": "SafeAssembly(f) == f.sameOrder /\\ f.live",
+              "new": "SafeAssembly(f) == f.sameOrder",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CurrentAssembly"
+        },
+        {
+          "id": "PublishBeforeTerminal",
+          "edits": [
+            {
+              "old": " /\\ proof.terminal\n    /\\ (afterWrite",
+              "new": "\n    /\\ (afterWrite",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CompletePublication"
+        },
+        {
+          "id": "ConfirmWriteWithWrongSavedState",
+          "edits": [
+            {
+              "old": "(matches /\\ proof.read >= afterWrite)",
+              "new": "(proof.read >= afterWrite)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExactWriteReadback"
+        }
+      ]
     }
   ]
 }

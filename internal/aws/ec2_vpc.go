@@ -59,8 +59,7 @@ type ec2Request struct {
 	networkACL         *ec2NetworkACLRequest
 	routeTable         *ec2NativeRouteTableQuery
 	routeAssociation   *ec2NativeRouteAssociationQuery
-	routeTableSubnets  []string
-	routeTableID       string
+	routeTableRead     ec2RouteTableQuery
 	nativeDefaultRoute *ec2NativeDefaultRouteQuery
 	internetGateway    *ec2InternetGatewayQuery
 }
@@ -102,8 +101,8 @@ func (q ec2Request) permissions(action, region string) [][2]string {
 // members are rejected rather than ignored.
 func parseEC2Request(action string, fields map[string][]string) (ec2Request, *ec2Failure) {
 	if action == "DescribeRouteTables" {
-		table, subnets, err := parseEC2RouteTableSelection(fields)
-		return ec2Request{routeTableID: table, routeTableSubnets: subnets}, err
+		query, err := parseEC2RouteTableSelection(fields)
+		return ec2Request{routeTableRead: query}, err
 	}
 	if action == "DescribeSecurityGroups" || slices.Contains(ec2NativeSecurityGroupMutations, action) {
 		q, err := parseEC2NativeSGQuery(action, fields)

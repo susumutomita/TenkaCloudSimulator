@@ -105,9 +105,11 @@ async function boot(html, bundle, locale) {
       'creation was not published after its exact durable readback');
     assert.ok(rowButton('Delete route table').disabled||rowButton('Delete route table').getAttribute('aria-disabled')==='true');
     assert.ok(rowButton(remove).closest('tr').textContent.includes(gateway));
+    const {MaxResults:pageSize,...oneTable}=preset;
+    assert.equal(pageSize,100);
     const ref=await fetch(origin+'/',{method:'POST',redirect:'error',headers:{Cookie:cookie,'X-Simulator-Service':'ec2',
       'X-Simulator-Region':'us-east-1','Content-Type':'application/x-www-form-urlencoded'},
-      body:new URLSearchParams({...preset,'RouteTableId.1':table})});
+      body:new URLSearchParams({...oneTable,'RouteTableId.1':table})});
     assert.equal(ref.status,200);
     const refXML=new w.DOMParser().parseFromString(await ref.text(),'application/xml');
     assert.equal(refXML.querySelector('routeTableId').textContent,table);

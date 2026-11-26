@@ -22,7 +22,7 @@ const node=(localName,content=[],namespaceURI=ns)=>{
 const fields=object=>Object.entries(object).map(([k,v])=>node(k,v));
 const row=(overrides={})=>({routeTableId:tableID,vpcId:vpc.id,ownerId:'000000000000',routeSet:[],associationSet:[],tagSet:[],...overrides});
 const tag=(key,value)=>node('item',fields({key,value}));
-const describe=(tables=[],extra={})=>({documentElement:node('DescribeRouteTablesResponse',fields({requestId:'read',routeTableSet:tables.map(t=>node('item',fields(t))),...extra}))});
+const describe=(tables=[],extra={})=>({documentElement:node('DescribeRouteTablesResponse',fields({requestId:'read',routeTableSet:[...tables].sort((a,b)=>a.routeTableId.localeCompare(b.routeTableId)).map(t=>node('item',fields(t))),...extra}))});
 const create=(table=row(),extra={})=>({documentElement:node('CreateRouteTableResponse',fields({requestId:'created',routeTable:fields(table),clientToken:token,...extra}))});
 const remove=value=>({documentElement:node('DeleteRouteTableResponse',fields({requestId:'deleted',return:value}))});
 const defaultRoute=node('item',fields({destinationCidrBlock:'0.0.0.0/0',gatewayId:id('igw','7'),origin:'CreateRoute',state:'active'}));
@@ -69,7 +69,7 @@ test('loads only the exact detached VPC from a validated complete mixed regional
   const rows=await loadVpcNativeRouteTables(f.request,region,vpc,{parse:f.parse,signal:controller.signal});
   assert.deepEqual(rows,[{id:tableID,vpc:vpc.id,name:label}]);
   assert.equal(Object.isFrozen(rows[0]),true);
-  assert.deepEqual(f.calls,[{body:{Action:'DescribeRouteTables',Version:'2016-11-15'},signal:controller.signal}]);
+  assert.deepEqual(f.calls,[{body:{Action:'DescribeRouteTables',Version:'2016-11-15',MaxResults:'100'},signal:controller.signal}]);
   const empty=queryFixture([describe([cfnRow,row({routeTableId:sibling,vpcId:other.id})])]);
   assert.deepEqual(await loadVpcNativeRouteTables(empty.request,region,vpc,empty),[]);
   for(const doc of [
@@ -96,7 +96,7 @@ test('creates only in a verified native VPC and confirms exact allocated ID and 
     assert.deepEqual(f.calls.map(x=>x.body),[
       {Action:'CreateRouteTable',Version:'2016-11-15',VpcId:vpc.id,ClientToken:token,
         ...(input?{'TagSpecification.1.ResourceType':'route-table','TagSpecification.1.Tag.1.Key':'Name','TagSpecification.1.Tag.1.Value':input}:{})},
-      {Action:'DescribeRouteTables',Version:'2016-11-15'},
+      {Action:'DescribeRouteTables',Version:'2016-11-15',MaxResults:'100'},
     ]);
   }
   const absent=()=>assert.fail('invalid target cannot send a request');
@@ -126,7 +126,7 @@ test('deletes only a row verified in the same identity/region/VPC and confirms r
   const result=await deleteVpcNativeRouteTable(f.request,region,vpc,target,f);
   assert.equal(result.removed,target);assert.deepEqual(result.rows.map(x=>x.id),[sibling]);
   assert.deepEqual(f.calls.slice(1).map(x=>x.body),[{Action:'DeleteRouteTable',Version:'2016-11-15',RouteTableId:tableID},
-    {Action:'DescribeRouteTables',Version:'2016-11-15'}]);
+    {Action:'DescribeRouteTables',Version:'2016-11-15',MaxResults:'100'}]);
   await assert.rejects(deleteVpcNativeRouteTable(f.request,region,vpc,target,f),failure);
   for(const [receipt,list] of [[remove('false'),describe([])],[remove('true'),describe([row()])],
     [remove('true'),describe([row({vpcId:other.id})])]]) {

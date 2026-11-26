@@ -110,10 +110,10 @@ test('only exact native table snapshots and unassociated same-VPC native subnet 
   assert.deepEqual(result.associated,{id:assigned,subnet:target});
   assert.equal(result.rows[0].associations[0],result.associated);
   assert.deepEqual(f.calls.map(call=>call.body),[
-    {Action:'DescribeRouteTables',Version:'2016-11-15'},
+    {Action:'DescribeRouteTables',Version:'2016-11-15',MaxResults:'100'},
     {Action:'DescribeSubnets',Version:'2016-11-15'},
     {Action:'AssociateRouteTable',Version:'2016-11-15',RouteTableId:table,SubnetId:target},
-    {Action:'DescribeRouteTables',Version:'2016-11-15'},
+    {Action:'DescribeRouteTables',Version:'2016-11-15',MaxResults:'100'},
   ]);
 });
 
@@ -151,9 +151,9 @@ test('disassociation requires a bound saved association and verifies regional ab
   assert.equal(result.disassociated,association);
   assert.deepEqual(result.rows.map(row=>[row.id,row.associations.length]),[[table,0],[peerTable,1]]);
   assert.deepEqual(f.calls.map(call=>call.body),[
-    {Action:'DescribeRouteTables',Version:'2016-11-15'},
+    {Action:'DescribeRouteTables',Version:'2016-11-15',MaxResults:'100'},
     {Action:'DisassociateRouteTable',Version:'2016-11-15',AssociationId:assigned},
-    {Action:'DescribeRouteTables',Version:'2016-11-15'},
+    {Action:'DescribeRouteTables',Version:'2016-11-15',MaxResults:'100'},
   ]);
   for(const [ack,read] of [[removal('false'),mixed()],[removal(),mixed({current:[onTable]})],
     [removal(),mixed({foreign:[assoc(otherTable,foreign,assigned)]})],

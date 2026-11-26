@@ -24,6 +24,7 @@ const blank=(opts={})=>table({routeSet:[],associationSet:[],tagSet:[],...opts});
 const envelope=(children)=>({documentElement:n('DescribeRouteTablesResponse',children)});
 const document=(rows,extra=[])=>envelope([n('requestId','local-request'),n('routeTableSet',rows),...extra]);
 const parse=doc=>parseEC2RouteTables(doc,selected.id);
+const reply=()=>new Response('captured XML',{headers:{'Content-Type':'text/xml'}});
 
 test('a normal signed-in Console requires the specific native capability; handoffs never qualify',()=>{
   const services={ec2:{console:true,routeTableReadback:'DescribeRouteTables'}};
@@ -70,25 +71,24 @@ test('rejects malformed, partial, unknown, duplicate and out-of-scope corrupt da
 test('CFN view keeps its single default contract and coexists with multi-route native VPC rows',async()=>{
   const extra={routeTableId:id('rtb','8'),vpcId:other,associationSet:[],
     routeSet:[route(),route({destinationCidrBlock:'198.51.100.0/24'})]};
-  const query=async()=>({ok:true,text:async()=>document([table(),table(extra)])});
-  const retained=await loadVpcRouteTables(query,'us-east-1',selected,{parse:x=>x});
+  const query=async()=>reply();
+  const retained=await loadVpcRouteTables(query,'us-east-1',selected,{parse:()=>document([table(),table(extra)])});
   assert.equal(retained.length,1);
   assert.deepEqual(retained[0].routes,[{cidr:'0.0.0.0/0',gateway}]);
-  const malformedCFN=async()=>({ok:true,text:async()=>document([table({...extra,vpcId:selected.id})])});
-  await assert.rejects(loadVpcRouteTables(malformedCFN,'us-east-1',selected,{parse:x=>x}),/Invalid CloudFormation/);
+  await assert.rejects(loadVpcRouteTables(query,'us-east-1',selected,{parse:()=>document([table({...extra,vpcId:selected.id})])}),/Invalid CloudFormation/);
 });
 
 test('uses only fixed regional EC2 Query through the existing signed-in transport; rejects invalid scope without a request',async()=>{
   const controller=new AbortController(), requests=[];
-  const fixture=async(...args)=>{requests.push(args);return {ok:true,text:async()=>document([blank()])};};
-  const rows=await loadVpcRouteTables(fixture,'ap-northeast-1',selected,{signal:controller.signal,parse:x=>x});
+  const fixture=async(...args)=>{requests.push(args);return reply();};
+  const rows=await loadVpcRouteTables(fixture,'ap-northeast-1',selected,{signal:controller.signal,parse:()=>document([blank()])});
   assert.equal(rows[0].id,tab);
   const [[path,opts]]=requests;
   assert.equal(requests[0].length,2,'do not pass an identity override');
   assert.equal(path,'/');assert.equal(opts.method,'POST');assert.equal(opts.credentials,'same-origin');
   assert.equal(opts.redirect,'error');assert.equal(opts.signal,controller.signal);
   assert.deepEqual(opts.headers,{'Content-Type':'application/x-www-form-urlencoded','X-Simulator-Service':'ec2','X-Simulator-Region':'ap-northeast-1'});
-  assert.equal(opts.body.toString(),'Action=DescribeRouteTables&Version=2016-11-15');
+  assert.equal(opts.body.toString(),'Action=DescribeRouteTables&Version=2016-11-15&MaxResults=100');
   for(const vpc of [{...selected,managedBy:'ec2'}, {...selected,id:'bad'}, {...selected,managedBy:'unknown'}])
     await assert.rejects(loadVpcRouteTables(fixture,'ap-northeast-1',vpc),/verified CloudFormation/);
   assert.equal(requests.length,1);
@@ -97,18 +97,18 @@ test('uses only fixed regional EC2 Query through the existing signed-in transpor
 test('requests one exact subnet association and refuses an out-of-filter table', async()=>{
   const calls=[], fixture=async(path, options)=>{
     calls.push([path, options]);
-    return {ok:true,text:async()=>document([table()])};
+    return reply();
   };
-  const rows=await loadVpcRouteTables(fixture,'us-east-1',selected,{subnetId:subnet,parse:x=>x});
+  const rows=await loadVpcRouteTables(fixture,'us-east-1',selected,{subnetId:subnet,parse:()=>document([table()])});
   assert.equal(rows[0].id,tab);
   assert.equal(calls[0][0],'/');
   assert.deepEqual(Object.fromEntries(calls[0][1].body),
-    {Action:'DescribeRouteTables',Version:'2016-11-15','Filter.1.Name':'association.subnet-id','Filter.1.Value.1':subnet});
+    {Action:'DescribeRouteTables',Version:'2016-11-15',MaxResults:'100','Filter.1.Name':'association.subnet-id','Filter.1.Value.1':subnet});
   for(const value of ['subnet-*','subnet-1234',subnet+'\n'])
     await assert.rejects(loadVpcRouteTables(()=>assert.fail('invalid input must not query'),'us-east-1',selected,{subnetId:value}),/exact subnet ID/);
-  await assert.rejects(loadVpcRouteTables(fixture,'us-east-1',selected,{subnetId:id('subnet','8'),parse:x=>x}),/Invalid or incomplete EC2 response/);
+  await assert.rejects(loadVpcRouteTables(fixture,'us-east-1',selected,{subnetId:id('subnet','8'),parse:()=>document([table()])}),/Invalid or incomplete EC2 response/);
   // A real match in a different selected VPC is not shown under this VPC.
-  assert.deepEqual(await loadVpcRouteTables(fixture,'us-east-1',{...selected,id:other},{subnetId:subnet,parse:x=>x}),[]);
+  assert.deepEqual(await loadVpcRouteTables(fixture,'us-east-1',{...selected,id:other},{subnetId:subnet,parse:()=>document([table()])}),[]);
 });
 
 test('refusal, unavailable, aborted responses are not empty success',async()=>{
@@ -116,7 +116,7 @@ test('refusal, unavailable, aborted responses are not empty success',async()=>{
     await assert.rejects(loadVpcRouteTables(async()=>{throw Error(msg);},'us-east-1',selected), e=>routeTableFailure(e)==='denied');
   await assert.rejects(loadVpcRouteTables(async()=>({ok:false,status:500}),'us-east-1',selected), e=>routeTableFailure(e)==='error');
   const controller=new AbortController(), opts={signal:controller.signal,parse:()=>assert.fail('stale result cannot be parsed')};
-  await assert.rejects(loadVpcRouteTables(async()=>({ok:true,text:async()=>{controller.abort();return document([table()]);}}),'us-east-1',selected,opts),{name:'AbortError'});
+  await assert.rejects(loadVpcRouteTables(async()=>{controller.abort();return reply();},'us-east-1',selected,opts),{name:'AbortError'});
   await assert.rejects(loadVpcRouteTables(()=>assert.fail('unmounted pane cannot issue a read'),'us-east-1',selected,opts),{name:'AbortError'});
 });
 

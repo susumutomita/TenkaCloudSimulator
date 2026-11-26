@@ -29207,7 +29207,7 @@
       "format": "esm"
     },
     "src/ec2-response.mjs": {
-      "bytes": 10179,
+      "bytes": 11369,
       "imports": [
         {
           "path": "src/ec2-ipv4-route-prefix.mjs",
@@ -29411,13 +29411,24 @@
       ],
       "format": "esm"
     },
-    "src/ec2-route-tables.mjs": {
-      "bytes": 2341,
+    "src/ec2-route-table-pages.mjs": {
+      "bytes": 3939,
       "imports": [
         {
           "path": "src/ec2-response.mjs",
           "kind": "import-statement",
           "original": "./ec2-response.mjs"
+        }
+      ],
+      "format": "esm"
+    },
+    "src/ec2-route-tables.mjs": {
+      "bytes": 1814,
+      "imports": [
+        {
+          "path": "src/ec2-route-table-pages.mjs",
+          "kind": "import-statement",
+          "original": "./ec2-route-table-pages.mjs"
         },
         {
           "path": "src/ec2-ipv4-route-prefix.mjs",
@@ -29504,12 +29515,12 @@
       "format": "esm"
     },
     "src/ec2-native-route-tables.mjs": {
-      "bytes": 16746,
+      "bytes": 14762,
       "imports": [
         {
-          "path": "src/ec2-response.mjs",
+          "path": "src/ec2-route-table-pages.mjs",
           "kind": "import-statement",
-          "original": "./ec2-response.mjs"
+          "original": "./ec2-route-table-pages.mjs"
         },
         {
           "path": "src/ec2-native-subnets.mjs",
@@ -37192,7 +37203,7 @@
           "bytesInOutput": 255
         },
         "node_modules/@cloudscape-design/components/table/body-cell/td-element.js": {
-          "bytesInOutput": 1997
+          "bytesInOutput": 1998
         },
         "node_modules/@cloudscape-design/components/internal/components/expand-toggle-button/index.js": {
           "bytesInOutput": 722
@@ -37219,7 +37230,7 @@
           "bytesInOutput": 86
         },
         "node_modules/@cloudscape-design/components/table/sticky-columns/use-sticky-columns.js": {
-          "bytesInOutput": 5085
+          "bytesInOutput": 5088
         },
         "node_modules/@cloudscape-design/components/area-chart/async-store/index.js": {
           "bytesInOutput": 452
@@ -37237,10 +37248,10 @@
           "bytesInOutput": 0
         },
         "node_modules/@cloudscape-design/components/table/table-role/grid-navigation.js": {
-          "bytesInOutput": 4755
+          "bytesInOutput": 4759
         },
         "node_modules/@cloudscape-design/components/table/table-role/utils.js": {
-          "bytesInOutput": 2181
+          "bytesInOutput": 2188
         },
         "node_modules/@cloudscape-design/components/table/styles.scoped.css": {
           "bytesInOutput": 0
@@ -37252,7 +37263,7 @@
           "bytesInOutput": 0
         },
         "node_modules/@cloudscape-design/components/table/test-classes/styles.css.js": {
-          "bytesInOutput": 69
+          "bytesInOutput": 70
         },
         "node_modules/@cloudscape-design/components/table/body-cell/inline-editor.js": {
           "bytesInOutput": 2179
@@ -38122,7 +38133,7 @@
           "bytesInOutput": 711
         },
         "src/ec2-response.mjs": {
-          "bytesInOutput": 5797
+          "bytesInOutput": 6348
         },
         "src/ec2-security-groups.mjs": {
           "bytesInOutput": 924
@@ -38139,8 +38150,11 @@
         "src/ec2-vpc-route-tables.jsx": {
           "bytesInOutput": 7290
         },
+        "src/ec2-route-table-pages.mjs": {
+          "bytesInOutput": 2212
+        },
         "src/ec2-route-tables.mjs": {
-          "bytesInOutput": 1409
+          "bytesInOutput": 986
         },
         "src/ec2-vpc-native-route-tables.jsx": {
           "bytesInOutput": 22202
@@ -38149,7 +38163,7 @@
           "bytesInOutput": 6130
         },
         "src/ec2-native-route-tables.mjs": {
-          "bytesInOutput": 8959
+          "bytesInOutput": 8028
         },
         "src/ec2-vpc-internet-gateways.jsx": {
           "bytesInOutput": 10626
@@ -38584,7 +38598,7 @@
           "bytesInOutput": 10113
         }
       },
-      "bytes": 2687091
+      "bytes": 2688516
     },
     "../../internal/server/web/app.css.LEGAL.txt": {
       "imports": [],

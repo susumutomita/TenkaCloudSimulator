@@ -17,7 +17,7 @@ cannot read or mutate these route tables.
 | Operation | Bounded contract |
 | --- | --- |
 | [CreateRoute][create] | Send one `RouteTableId`, IPv4 `DestinationCidrBlock` and `GatewayId`. The destination is canonicalized; for example, `198.51.100.19/24` becomes `198.51.100.0/24`. Detached and other-VPC gateways are refused. A duplicate canonical destination returns `RouteAlreadyExists` without replacing it. |
-| [DescribeRouteTables][describe] | Each saved route appears with canonical `DestinationCidrBlock`, the target `GatewayId`, `Origin=CreateRoute` and `State=active`. This means validated, saved configuration only. Use a single exact `RouteTableId.1` (SDK `RouteTableIds=[id]`), an explicit `association.subnet-id` filter, or no selector. The exact selector has at most one response row; a missing table returns `InvalidRouteTableID.NotFound`. The full regional consistency check occurs before selecting any output. Selectors are not combined; pagination is not supported here. |
+| [DescribeRouteTables][describe] | Each saved route appears with canonical `DestinationCidrBlock`, the target `GatewayId`, `Origin=CreateRoute` and `State=active`. This means validated, saved configuration only. Use a single exact `RouteTableId.1` (SDK `RouteTableIds=[id]`), an explicit `association.subnet-id` filter, or no selector. The exact selector has at most one response row; a missing table returns `InvalidRouteTableID.NotFound`. The full regional consistency check occurs before selecting any output. Exact-ID readback is unpaged and cannot be combined with a filter. The [regional list](ec2-read-discovery.md#route-table-readback) can be paged with or without an explicit subnet filter. |
 | [DeleteRoute][delete] | Send the exact `RouteTableId` and exact canonical `DestinationCidrBlock`. No target parameter. Removes only the saved route for that destination; other routes stay unchanged. An absent route returns `InvalidRoute.NotFound`. |
 
 For writes, the [EC2 action][iam] must be allowed on the exact
@@ -66,11 +66,11 @@ Console shows success only after a fresh exact-table readback confirms the
 entire expected route set, including siblings, in the same browser scope.
 Missing siblings, a different table, wrong target, damaged reply or changed
 scope cannot confirm success. Refresh after uncertainty instead of replaying a
-mutation. This exact confirmation does not depend on reading a second regional
-table list; the existing full regional browsing byte bound remains unchanged.
+mutation. This exact confirmation is bounded independently of regional inventory size. Browsing uses bounded regional pages; the exact confirmation does not page the inventory again.
 
-The shared Scalar example is **EC2 DescribeRouteTables** (read only); add
-`RouteTableId.1` to verify one saved table after using the SDK or Console. There
+The shared read-only Scalar example **EC2 DescribeRouteTables** starts with
+`MaxResults=100`. Remove pagination fields before specifying `RouteTableId.1`
+to verify one saved table after using the SDK or Console. There
 are no mutation presets.
 
 ```sh

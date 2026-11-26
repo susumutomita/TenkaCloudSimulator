@@ -720,11 +720,11 @@
                   },
                   "MaxResults": {
                     "type": "integer",
-                    "description": "For EC2 DescribeInternetGateways, page size request from 5 to 1000 (the local service returns at most 100 per page)."
+                    "description": "EC2 DescribeRouteTables: 5–100 for regional pages, optionally with association.subnet-id. EC2 DescribeInternetGateways: 5–1000, at most 100 emitted per page. Do not combine EC2 exact IDs with pagination."
                   },
                   "NextToken": {
                     "type": "string",
-                    "description": "Opaque continuation returned by the specific Query operation. For EC2 DescribeInternetGateways, continue the same region, caller and page-size request."
+                    "description": "Omit on the first page. For EC2 DescribeRouteTables or DescribeInternetGateways, copy nextToken from the last XML result and keep the same caller, region, selector and page-size request; restart if the token is stale. For SimpleDB Select, keep the same expression and ConsistentRead."
                   },
                   "RouteTableId.1": {
                     "type": "string",
@@ -807,10 +807,6 @@
                     "type": "string",
                     "enum": ["true", "false"],
                     "description": "Optional for GetAttributes or Select. Keep the same value on every Select page."
-                  },
-                  "NextToken": {
-                    "type": "string",
-                    "description": "Omit on the first page. For Select, copy the token from the previous XML result without changing the expression or ConsistentRead."
                   }
                 }
               },
@@ -1145,10 +1141,11 @@
                 },
                 "DescribeRouteTables": {
                   "summary": "EC2 DescribeRouteTables (read-only configuration)",
-                  "description": "Set X-Simulator-Service to ec2, clear X-Amz-Target, and choose a local X-Simulator-Region. Requires ec2:DescribeRouteTables on *. Lists verified saved route tables and explicit routes and associations from local SQLite. Add RouteTableId.1 with one existing route-table ID for exact readback, or use the supported association.subnet-id filter separately. Use the SDK or VPC console to create and delete up to 16 saved native IPv4 routes per table to the native gateway attached to the same VPC. Non-default destinations must not overlap the VPC IPv4 block or reserved service range. This reference preset only reads configuration. No implicit main/local route or packet forwarding.",
+                  "description": "Set X-Simulator-Service to ec2, clear X-Amz-Target, and choose a local X-Simulator-Region. Requires ec2:DescribeRouteTables on *. Lists a bounded page of verified saved route tables and explicit routes and associations from local SQLite. Keep MaxResults and the optional association.subnet-id filter unchanged and use XML nextToken as NextToken to continue. To read one existing RouteTableId.1, remove pagination and the filter first. Use the SDK or VPC console to create and delete up to 16 saved native IPv4 routes per table to the native gateway attached to the same VPC. Non-default destinations must not overlap the VPC IPv4 block or reserved service range. This reference preset only reads configuration. No implicit main/local route or packet forwarding.",
                   "value": {
                     "Action": "DescribeRouteTables",
-                    "Version": "2016-11-15"
+                    "Version": "2016-11-15",
+                    "MaxResults": 100
                   }
                 },
                 "CreateDomain": {

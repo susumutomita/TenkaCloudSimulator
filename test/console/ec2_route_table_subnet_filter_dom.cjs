@@ -15,7 +15,7 @@ async function until(predicate, message) {
   assert.fail(message);
 }
 const exactQuery = subnet => ({
-  Action: 'DescribeRouteTables', Version: '2016-11-15',
+  Action: 'DescribeRouteTables', Version: '2016-11-15', MaxResults: '100',
   ...(subnet ? {'Filter.1.Name': 'association.subnet-id', 'Filter.1.Value.1': subnet} : {}),
 });
 
