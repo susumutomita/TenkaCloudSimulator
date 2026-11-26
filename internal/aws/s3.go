@@ -136,6 +136,26 @@ func validText(s string) bool {
 	}
 	return true
 }
+
+// STANDARD is the existing persisted class, so an explicit value is an alias
+// for omission, only on the two operations that choose the object's class.
+func acceptsExplicitStandardStorageClass(r *http.Request, query url.Values) bool {
+	values := r.Header.Values("X-Amz-Storage-Class")
+	bucket, key, object := strings.Cut(strings.TrimPrefix(r.URL.Path, "/"), "/")
+	if len(values) != 1 || values[0] != "STANDARD" || !object || bucket == "" || key == "" {
+		return false
+	}
+	switch r.Method {
+	case http.MethodPut:
+		return len(query) == 0 || len(query) == 1 && query.Has("x-id")
+	case http.MethodPost:
+		return query.Has("uploads") && query.Get("uploads") == "" &&
+			(len(query) == 1 || len(query) == 2 && query.Has("x-id"))
+	default:
+		return false
+	}
+}
+
 func (g *Gateway) serveS3(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("x-amz-request-id", fmt.Sprintf("TCSIM%016x", sequence.Add(1)))
 	if a := r.Header.Get("Authorization"); a != "" {
@@ -146,11 +166,12 @@ func (g *Gateway) serveS3(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-	if r.Header.Get("X-Amz-Security-Token") != "" || r.URL.Query().Get("X-Amz-Credential") != "" {
+	query, queryErr := url.ParseQuery(r.URL.RawQuery)
+	if r.Header.Get("X-Amz-Security-Token") != "" || query.Get("X-Amz-Credential") != "" {
 		fail(w, r, "NotImplemented", "Session tokens and presigned requests are not supported.")
 		return
 	}
-	for k, values := range r.URL.Query() {
+	for k, values := range query {
 		if len(values) != 1 {
 			fail(w, r, "InvalidArgument", "Duplicate query parameters are unsupported.")
 			return
@@ -187,7 +208,7 @@ func (g *Gateway) serveS3(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-	for _, header := range []string{"x-amz-expected-bucket-owner", "x-amz-request-payer", "x-amz-optional-object-attributes", "x-amz-copy-source", "x-amz-acl", "x-amz-server-side-encryption", "x-amz-tagging", "x-amz-storage-class"} {
+	for _, header := range []string{"x-amz-expected-bucket-owner", "x-amz-request-payer", "x-amz-optional-object-attributes", "x-amz-copy-source", "x-amz-acl", "x-amz-server-side-encryption", "x-amz-tagging"} {
 		if r.Header.Get(header) != "" {
 			fail(w, r, "NotImplemented", "Unsupported option: "+header)
 			return
@@ -196,6 +217,11 @@ func (g *Gateway) serveS3(w http.ResponseWriter, r *http.Request) {
 	for name := range r.Header {
 		if strings.HasPrefix(strings.ToLower(name), "x-amz-") {
 			switch strings.ToLower(name) {
+			case "x-amz-storage-class":
+				if queryErr != nil || !acceptsExplicitStandardStorageClass(r, query) {
+					fail(w, r, "NotImplemented", "Unsupported option: x-amz-storage-class")
+					return
+				}
 			case "x-amz-date", "x-amz-content-sha256", "x-amz-user-agent", "x-amz-checksum-sha1", "x-amz-checksum-sha256", "x-amz-checksum-crc32", "x-amz-checksum-crc32c", "x-amz-sdk-checksum-algorithm":
 			default:
 				fail(w, r, "NotImplemented", "Unsupported header: "+name)

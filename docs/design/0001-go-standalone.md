@@ -78,6 +78,8 @@ IAMはglobal namespaceなので、自動Role名はStack固有IDとlogical IDか�
 
 S3 version history/public-access-blockはAWS layerのaws_s3_versions/aws_s3_configに保存する。current-object viewは既存coreのobjectsと共有し、history/current/null置換・marker除去を単一transactionで更新する。GET時の旧状態importもtransaction内。config XMLの読込/検証は共有DB transactionより前で行い、遅い本文送信で他操作の接続を塞がない。bucket削除はcurrentだけでなく全history/markersを確認。provider-neutral coreへS3 versioningの分岐を持ち込まない。[保存・IAM・quota詳細](../s3.md)。
 
+S3 REST/XMLは既存のIAM判定後、通常の`PutObject`と`CreateMultipartUpload`だけで、単一の`x-amz-storage-class: STANDARD`を省略と同じ扱いにする。既存の保存形式・応答・トランザクションは変えない。他のstorage class、`RestoreObject`、対象外の操作での当該ヘッダーは引き続き`NotImplemented`。
+
 CloudFormationはservice RoleArnを受け付けず、呼出者のimmutable policy snapshotでStack ARNに加え全resource actionを事前確認する。SSM Put/DeleteParameter、IAM Create/DeleteRole・inline policy・指定managed policyのattach/detach・作成時TagRole、S3 Create/DeleteBucketと指定設定のPut actionを個別評価する。CAPABILITY_IAMは権限付与ではない。resource事前確認の拒否は変更を残さない。version履歴が残るbucketのDeleteStackはAPIエラーとなり、先行削除もrollbackする。非同期AWS lifecycle/Eventsとの同等性は主張しない。
 
 CFNのDependsOn文字列/配列をimplicit Ref/GetAtt/Subと統合して事前検証し、依存順で作成・逆順で削除する。inline Pythonはindex.pyのZIPへ変換し、native saveLambdaFunctionを同じtransactionで呼び出す。新しいresource typeのclaim namespaceは未対応旧readerのIAM fallbackに一致させず、未知kindはdefault処理で削除しない。旧binaryとのDB共有/downgradeはサポートしない。
