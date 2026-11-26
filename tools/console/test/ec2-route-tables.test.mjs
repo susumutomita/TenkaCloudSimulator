@@ -55,7 +55,9 @@ test('rejects malformed, partial, unknown, duplicate and out-of-scope corrupt da
     document([],[n('nextToken','more')]),document([],[n('routeTableSet')]),document([],[n('routeTableSet',[],'urn:wrong')]),
     document([table({ownerId:'unverified'})]),document([blank(),blank()]),document([blank({routeTableId:'no'})]),
     document([table({routeSet:[route({gatewayId:'local'})]})]),document([table({routeSet:[route({state:'blackhole'})]})]),
-    document([table({routeSet:[route({origin:'CreateRouteTable'})]})]),document([table({routeSet:[route({destinationCidrBlock:'10.0.0.0/16'})]})]),
+    document([table({routeSet:[route({origin:'CreateRouteTable'})]})]),document([table({routeSet:[route({destinationCidrBlock:'10.0.0.7/16'})]})]),
+    document([table({routeSet:[route({destinationCidrBlock:'198.51.100.128/25'}),route({destinationCidrBlock:'198.51.100.0/24'})]})]),
+    document([table({routeSet:[route(),route({destinationCidrBlock:'198.51.100.0/24',gatewayId:id('igw','7')})]})]),
     document([table({routeSet:[route(),route()]})]),document([table({associationSet:[association({main:'true'})]})]),
     document([table({associationSet:[association({routeTableId:id('rtb','7')})]})]),
     document([table(),table({routeTableId:id('rtb','7'),vpcId:other,associationSet:[association({routeTableId:id('rtb','7')})]})]),
@@ -63,6 +65,17 @@ test('rejects malformed, partial, unknown, duplicate and out-of-scope corrupt da
     document([blank({tagSet:[item({key:'missing value'})]})]),document([blank({tagSet:[item({key:'a',value:'値'.repeat(86)})]})]),
     document([blank(),blank({routeTableId:id('rtb','8'),vpcId:other,routeSet:[route({gatewayId:'bad'})]})]),
   ]) assert.throws(()=>parse(doc),/Invalid or incomplete EC2 response/);
+});
+
+test('CFN view keeps its single default contract and coexists with multi-route native VPC rows',async()=>{
+  const extra={routeTableId:id('rtb','8'),vpcId:other,associationSet:[],
+    routeSet:[route(),route({destinationCidrBlock:'198.51.100.0/24'})]};
+  const query=async()=>({ok:true,text:async()=>document([table(),table(extra)])});
+  const retained=await loadVpcRouteTables(query,'us-east-1',selected,{parse:x=>x});
+  assert.equal(retained.length,1);
+  assert.deepEqual(retained[0].routes,[{cidr:'0.0.0.0/0',gateway}]);
+  const malformedCFN=async()=>({ok:true,text:async()=>document([table({...extra,vpcId:selected.id})])});
+  await assert.rejects(loadVpcRouteTables(malformedCFN,'us-east-1',selected,{parse:x=>x}),/Invalid CloudFormation/);
 });
 
 test('uses only fixed regional EC2 Query through the existing signed-in transport; rejects invalid scope without a request',async()=>{

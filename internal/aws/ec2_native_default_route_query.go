@@ -13,12 +13,14 @@ const (
 	ec2CreateNativeDefaultRoute = "CreateRoute"
 	ec2DeleteNativeDefaultRoute = "DeleteRoute"
 	ec2NativeDefaultCIDR        = "0.0.0.0/0"
+	EC2NativeIPv4RouteLimit     = 16
 )
 
 var ec2NativeDefaultRouteOperations = []string{ec2CreateNativeDefaultRoute, ec2DeleteNativeDefaultRoute}
 
 type ec2NativeDefaultRouteQuery struct {
 	table, gateway string
+	destination    netip.Prefix
 	dryRun         bool
 }
 
@@ -55,7 +57,7 @@ func parseEC2NativeDefaultRoute(action string, fields map[string][]string) (ec2N
 			}
 			q.dryRun = value == "true"
 		default:
-			return q, ec2Invalid("UnsupportedOperation", "Only a native IPv4 default route to a native internet gateway is supported.")
+			return q, ec2Invalid("UnsupportedOperation", "Only an explicitly configured IPv4 route to a native internet gateway is supported.")
 		}
 	}
 	if q.table == "" || destination == "" || action == ec2CreateNativeDefaultRoute && q.gateway == "" {
@@ -68,11 +70,9 @@ func parseEC2NativeDefaultRoute(action string, fields map[string][]string) (ec2N
 	if err != nil || !prefix.Addr().Is4() {
 		return q, ec2Invalid("InvalidParameterValue", "DestinationCidrBlock must be an IPv4 CIDR.")
 	}
-	if prefix.Bits() != 0 {
-		return q, ec2Invalid("UnsupportedOperation", "Only the IPv4 default destination is supported.")
-	}
-	if action == ec2DeleteNativeDefaultRoute && destination != ec2NativeDefaultCIDR {
-		return q, ec2Invalid("InvalidRoute.NotFound", "DeleteRoute requires the exact saved destination, 0.0.0.0/0.")
+	q.destination = prefix.Masked()
+	if action == ec2DeleteNativeDefaultRoute && destination != q.destination.String() {
+		return q, ec2Invalid("InvalidRoute.NotFound", "DeleteRoute requires the exact saved IPv4 CIDR.")
 	}
 	if action == ec2CreateNativeDefaultRoute && !ec2InternetGatewayID.MatchString(q.gateway) {
 		if !strings.HasPrefix(q.gateway, "igw-") {

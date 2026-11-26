@@ -226,7 +226,7 @@ func (s *StackStore) describeInternetGateways(ctx context.Context, region string
 type ec2InternetGatewayInventory struct {
 	rows     []ec2InternetGateway
 	links    nativeInternetGatewayLinks
-	routes   map[string]nativeDefaultRoute
+	routes   map[nativeIPv4RouteKey]nativeIPv4Route
 	declared map[string]bool // physical IDs, independently of the claims
 }
 
@@ -314,7 +314,7 @@ func readInternetGatewayInventory(ctx context.Context, tx *sql.Tx, region string
 			if err != nil {
 				return out, err
 			}
-			out.routes, err = nativeDefaultRoutes(ctx, tx, region, network, declared, out.links)
+			out.routes, err = nativeIPv4Routes(ctx, tx, region, network, declared, out.links)
 			if err != nil {
 				return out, err
 			}

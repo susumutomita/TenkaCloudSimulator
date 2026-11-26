@@ -330,7 +330,7 @@ func nativeVPCs(ctx context.Context, tx *sql.Tx, region string) ([]EC2NetworkRes
 		if err != nil {
 			return nil, err
 		}
-		if _, err := nativeDefaultRoutes(ctx, tx, region, all, declared, links); err != nil {
+		if _, err := nativeIPv4Routes(ctx, tx, region, all, declared, links); err != nil {
 			return nil, err
 		}
 	}
@@ -462,7 +462,7 @@ func (s *StackStore) deleteNativeVPC(ctx context.Context, region, id string) err
 			other.Kind != kind || other.Region != region || other.StackID != owner || other.Revision != revision ||
 			(strings.HasPrefix(child, nativeInternetGatewayLinkPrefix) || owner == ec2NativeOwner && kind == ec2RTAttachment) &&
 				!validNativeInternetGatewayLink(other) ||
-			(strings.HasPrefix(child, nativeDefaultRoutePrefix) || owner == ec2NativeOwner && kind == ec2Route) && !validNativeDefaultRoute(other) {
+			(strings.HasPrefix(child, nativeDefaultRoutePrefix) || owner == ec2NativeOwner && kind == ec2Route) && !validNativeIPv4Route(other) {
 			rows.Close()
 			return errEC2InternetGatewayState
 		}

@@ -19,7 +19,7 @@ async function boot(html, bundle, locale) {
   const dom=new JSDOM(html,{url:origin+'/_simulator/console/#/vpc',runScripts:'outside-only',
     pretendToBeVisual:true,virtualConsole:new VirtualConsole()});
   const w=dom.window,d=w.document;
-  const receipt={calls:[],holdExact:false,wrongTable:false,release:null};
+  const receipt={calls:[],holdExact:false,wrongTable:false,omitSavedSibling:false,release:null};
   Object.assign(w,{TextEncoder,TextDecoder,
     matchMedia:()=>({matches:false,addListener(){},removeListener(){},addEventListener(){},removeEventListener(){}}),
     ResizeObserver:class {observe(){} unobserve(){} disconnect(){}},
@@ -42,6 +42,14 @@ async function boot(html, bundle, locale) {
       if (receipt.holdExact) {
         receipt.holdExact=false;
         await new Promise(resolve=>{receipt.release=resolve;});
+      }
+      if (receipt.omitSavedSibling) {
+        receipt.omitSavedSibling=false;
+        const state=new w.DOMParser().parseFromString(await response.text(),'application/xml');
+        const route=state.querySelector('routeSet item');
+        assert.equal(route.querySelector('destinationCidrBlock').textContent,'198.51.100.0/24');
+        route.remove();
+        return new Response(new w.XMLSerializer().serializeToString(state),{status:200,headers:{'Content-Type':'text/xml'}});
       }
       if (receipt.wrongTable) {
         receipt.wrongTable=false;
@@ -80,20 +88,20 @@ async function boot(html, bundle, locale) {
       input.dispatchEvent(new w.Event('change',{bubbles:true}));
     };
     (await selectVPC(d,'English')).click();
-    const add='Add IPv4 default route',remove='Remove IPv4 default route';
+    const add='Add IPv4 route',remove='Remove IPv4 route';
     (await until(()=>rowButton(add)&&!rowButton(add).disabled&&rowButton(add),'missing available native route control')).click();
     const submit=await until(()=>dialog()?.textContent.includes(gateway)&&!btn(add,dialog())?.disabled&&btn(add,dialog()),
       'missing verified attached gateway in route dialog');
-    assert.ok(dialog().textContent.includes('0.0.0.0/0'));
+    assert.equal(dialog().querySelector('input[placeholder="198.51.100.0/24"]').value,'0.0.0.0/0');
     assert.equal(receipt.calls.filter(c=>c.action==='CreateRoute').length,0);
     receipt.holdExact=true;
     submit.click();
     await until(()=>receipt.release,'no exact-table readback for route creation');
-    assert.ok(!d.body.textContent.includes('Saved IPv4 default route in:'));
+    assert.ok(!d.body.textContent.includes('Saved IPv4 route in:'));
     assert.deepEqual(receipt.calls.find(c=>c.action==='CreateRoute').form,
       {Action:'CreateRoute',Version:'2016-11-15',RouteTableId:table,DestinationCidrBlock:'0.0.0.0/0',GatewayId:gateway});
     receipt.release();
-    await until(()=>d.body.textContent.includes('Saved IPv4 default route in: '+table)&&rowButton(remove),
+    await until(()=>d.body.textContent.includes('Saved IPv4 route in: '+table)&&rowButton(remove)&&!rowButton(remove).disabled,
       'creation was not published after its exact durable readback');
     assert.ok(rowButton('Delete route table').disabled||rowButton('Delete route table').getAttribute('aria-disabled')==='true');
     assert.ok(rowButton(remove).closest('tr').textContent.includes(gateway));
@@ -113,36 +121,63 @@ async function boot(html, bundle, locale) {
     receipt.wrongTable=true;
     btn(remove,dialog()).click();
     await until(()=>d.body.textContent.includes('Could not confirm the saved route table state.'),'accepted a different table as deletion proof');
-    assert.ok(!d.body.textContent.includes('Removed IPv4 default route from:'));
+    assert.ok(!d.body.textContent.includes('Removed IPv4 route from:'));
     assert.deepEqual(receipt.calls.find(c=>c.action==='DeleteRoute').form,
       {Action:'DeleteRoute',Version:'2016-11-15',RouteTableId:table,DestinationCidrBlock:'0.0.0.0/0'});
     btn('Refresh route tables').click();
     await until(()=>rowButton(add)&&!rowButton(add).disabled,'fresh inventory did not show the saved deletion');
-    assert.ok(!rowButton(remove),'refresh did not clear stale route');
+    assert.ok(rowButton(remove).disabled,'refresh did not clear stale route');
     assert.equal(receipt.calls.filter(c=>c.action==='DeleteRoute').length,1,'refresh replayed deletion');
 
-    // The normal delete path also requires the exact table + canonical empty
-    // route result, independently of the preceding faulty-response scenario.
     rowButton(add).click();
     (await until(()=>dialog()?.textContent.includes(gateway)&&!btn(add,dialog())?.disabled&&btn(add,dialog()),
-      'could not verify gateway on second route creation')).click();
-    await until(()=>d.body.textContent.includes('Saved IPv4 default route in: '+table)&&rowButton(remove),'missing second create');
+      'could not verify gateway on second default route creation')).click();
+    await until(()=>d.body.textContent.includes('Saved IPv4 route in: '+table)&&!rowButton(remove).disabled,'missing second default create');
+    rowButton(add).click();
+    const prefix=await until(()=>dialog()?.querySelector('input[placeholder="198.51.100.0/24"]'),'missing CIDR input');
+    formChange(prefix,'198.51.100.93/24');
+    await until(()=>dialog()?.textContent.includes('Saved as: 198.51.100.0/24')&&btn(add,dialog())&&!btn(add,dialog()).disabled,
+      'missing canonical outside-VPC preview');
+    btn(add,dialog()).click();
+    await until(()=>rowButton(remove)?.closest('tr').textContent.includes('198.51.100.0/24')&&!rowButton(remove).disabled,
+      'outside-VPC route was not saved alongside /0');
     rowButton(remove).click();
-    const again=await until(()=>dialog()?.querySelector('input'),'missing second confirmation');
-    formChange(again,table);
-    await until(()=>!btn(remove,dialog())?.disabled,'second matching ID did not permit removal');
+    const select=await until(()=>dialog()?.querySelector('button[aria-haspopup="listbox"]'),'missing saved route selector');
+    select.dispatchEvent(new w.MouseEvent('mousedown',{bubbles:true,cancelable:true,button:0}));
+    const defaultOption=await until(()=>d.getElementById(select.getAttribute('aria-controls'))?.
+      querySelector('[role="option"] [data-value="0.0.0.0/0"]')?.closest('[role="option"]'),
+      'missing saved default route option');
+    defaultOption.dispatchEvent(new w.MouseEvent('mouseup',{bubbles:true,cancelable:true,button:0}));
+    const confirm=await until(()=>dialog()?.querySelector('input'),'missing confirmation after choosing one saved route');
+    formChange(confirm,table);
+    await until(()=>!btn(remove,dialog())?.disabled,'matching table ID did not permit selected route removal');
+    receipt.omitSavedSibling=true;
     btn(remove,dialog()).click();
-    await until(()=>d.body.textContent.includes('Removed IPv4 default route from: '+table)&&rowButton(add),'verified delete was not shown');
+    await until(()=>d.body.textContent.includes('Could not confirm the saved route table state.'),'accepted an exact row with a missing sibling');
+    assert.ok(!d.body.textContent.includes('Removed IPv4 route from:'));
+    assert.equal(receipt.calls.filter(c=>c.action==='DeleteRoute').at(-1).form.DestinationCidrBlock,'0.0.0.0/0');
+    btn('Refresh route tables').click();
+    await until(()=>rowButton(remove)&&!rowButton(remove).disabled&&rowButton(remove).closest('tr').textContent.includes('198.51.100.0/24'),
+      'fresh snapshot lost the untouched non-default sibling');
+    assert.ok(!rowButton(remove).closest('tr').textContent.includes('0.0.0.0/0'));
+    rowButton(remove).click();
+    const again=await until(()=>dialog()?.querySelector('input'),'missing non-default route confirmation');
+    formChange(again,table);
+    await until(()=>!btn(remove,dialog())?.disabled,'matching ID did not permit final non-default removal');
+    btn(remove,dialog()).click();
+    await until(()=>d.body.textContent.includes('Removed IPv4 route from: '+table)&&rowButton(remove).disabled,
+      'verified non-default removal was not shown');
+    assert.equal(receipt.calls.filter(c=>c.action==='DeleteRoute').at(-1).form.DestinationCidrBlock,'198.51.100.0/24');
   } finally {
     dom.window.close();
   }
   const jp=await boot(html,bundle,'ja');
   try {
     (await selectVPC(jp.d,'Japanese')).click();
-    await until(()=>jp.d.querySelector('button[aria-label="IPv4 デフォルトルートを追加: '+table+'"]'),'missing Japanese route action');
+    await until(()=>jp.d.querySelector('button[aria-label="IPv4 ルートを追加: '+table+'"]'),'missing Japanese route action');
     assert.ok(jp.d.body.textContent.includes('通信は転送されません'));
   } finally {
     jp.dom.window.close();
   }
-  console.log('PASS signed embedded Cloudscape/JSDOM: IPv4 route add, held exact readback, unconfirmed wrong table, refresh without replay, verified delete, Japanese route control.');
+  console.log('PASS signed embedded Cloudscape/JSDOM: IPv4 default and non-default routes, held exact readback, wrong table and missing sibling refusal, refresh without replay, exact detach-safe removal, Japanese controls.');
 })().catch(error=>{console.error(error);process.exitCode=1;});

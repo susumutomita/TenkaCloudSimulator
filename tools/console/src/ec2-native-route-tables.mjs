@@ -2,12 +2,12 @@ import {parseEC2RouteTables} from './ec2-response.mjs';
 import {loadVpcSubnets} from './ec2-native-subnets.mjs';
 import {vpcRouteTablesAvailable} from './ec2-route-tables.mjs';
 import {describeInternetGateways,internetGatewaysAvailable} from './ec2-internet-gateways.mjs';
+import {compareIPv4RoutePrefixes,ec2IPv4Prefix,ipv4DefaultRoute,nativeIPv4RouteDestination,nativeIPv4RouteLimit} from './ec2-ipv4-route-prefix.mjs';
 
 const ns='http://ec2.amazonaws.com/doc/2016-11-15/';
 const actions=['DescribeRouteTables','CreateRouteTable','DeleteRouteTable'];
 const associationActions=['DescribeRouteTables','DescribeSubnets','AssociateRouteTable','DisassociateRouteTable'];
 const routeActions=['DescribeRouteTables','DescribeInternetGateways','CreateRoute','DeleteRoute'];
-export const ipv4DefaultRoute='0.0.0.0/0';
 const vpcID=/^vpc-[0-9a-f]{17}$/;
 const tableID=/^rtb-[0-9a-f]{17}$/;
 const subnetID=/^subnet-[0-9a-f]{17}$/;
@@ -37,10 +37,11 @@ export function vpcNativeRouteTableAssociationsAvailable(capabilities,authentica
   return vpcNativeRouteTablesAvailable(capabilities,authenticationRequired)&&associationEnabled(capabilities.services.ec2);
 }
 
-export function vpcNativeDefaultRoutesAvailable(capabilities,authenticationRequired) {
+export function vpcNativeIPv4RoutesLimit(capabilities,authenticationRequired) {
   const ec2=capabilities?.services?.ec2;
-  return vpcNativeRouteTablesAvailable(capabilities,authenticationRequired)&&internetGatewaysAvailable(capabilities,authenticationRequired)&&
-    exactActions(ec2.defaultRouteLifecycle,routeActions)&&includesAll(ec2.operations,routeActions);
+  if(!vpcNativeRouteTablesAvailable(capabilities,authenticationRequired)||!internetGatewaysAvailable(capabilities,authenticationRequired)||
+    !exactActions(ec2.defaultRouteLifecycle,routeActions)||!includesAll(ec2.operations,routeActions))return 0;
+  return ec2.ipv4RoutesPerTable===nativeIPv4RouteLimit?nativeIPv4RouteLimit:ec2.ipv4RoutesPerTable===undefined?1:0;
 }
 
 export function nativeRouteTableTarget(vpc) {
@@ -118,7 +119,7 @@ async function snapshot(request,region,vpc,options) {
   // The existing decoder rejects main, duplicate and non-subnet associations.
   const exact=options.exactID;
   // A single route-table readback cannot carry more than 50 bounded tags,
-  // 1,000 bounded association elements and one route. Do not depend on the
+  // 1,000 bounded association elements and 16 routes. Do not depend on the
   // size of the rest of the regional list after an acknowledged mutation.
   const doc=await send(request,region,vpc,'DescribeRouteTables',exact?{'RouteTableId.1':exact}:{},
     exact?{...options,maxBytes:512*1024}:options);
@@ -137,13 +138,16 @@ async function snapshot(request,region,vpc,options) {
     }
   }
   if (exact&&(regionalIDs.size!==1||!regionalIDs.has(exact)||saved.length!==1)) invalid();
-  const defaultRoutes=options.defaultRoutes===true;
-  const binding={request,region,vpc:vpc.id,cidr:vpc.cidr,associations,defaultRoutes,regionalSubnets};
+  const routeLimit=options.routeLimit??0;
+  if (![0,1,nativeIPv4RouteLimit].includes(routeLimit)) invalid();
+  const binding={request,region,vpc:vpc.id,cidr:vpc.cidr,associations,routeLimit,regionalSubnets};
   const rows=saved.map(item=>{
-    if (!defaultRoutes&&item.routes.length || !associations&&item.associations.length || item.tags.some(tag=>!validNativeRouteTableName(tag.value))) invalid();
+    if (item.routes.length>routeLimit||item.routes.some(route=>!nativeIPv4RouteDestination(route.cidr,vpc.cidr)||
+        routeLimit===1&&route.cidr!==ipv4DefaultRoute)||!associations&&item.associations.length||
+        item.tags.some(tag=>!validNativeRouteTableName(tag.value))) invalid();
     const row=Object.freeze({id:item.id,vpc:item.vpc,name:item.tags.find(tag=>tag.key==='Name')?.value??'',
       ...(associations?{associations:Object.freeze(item.associations.map(Object.freeze))}:{}),
-      ...(defaultRoutes?{route:item.routes.length?Object.freeze(item.routes[0]):null}:{})});
+      ...(routeLimit?{routes:Object.freeze(item.routes.map(Object.freeze))}:{})});
     rowScopes.set(row,binding);
     return row;
   });
@@ -154,7 +158,7 @@ function scopedTable(request,region,vpc,table,options) {
   const binding=rowScopes.get(table);
   if (!nativeRouteTableTarget(vpc) || !binding || binding.request!==request || binding.region!==region ||
       binding.vpc!==vpc.id || binding.cidr!==vpc.cidr || table.vpc!==vpc.id ||
-      binding.associations!==(options.associations===true)||binding.defaultRoutes!==(options.defaultRoutes===true)) invalid();
+      binding.associations!==(options.associations===true)||binding.routeLimit!==(options.routeLimit??0)) invalid();
   return binding;
 }
 
@@ -186,7 +190,7 @@ export async function createVpcNativeRouteTable(request,region,vpc,name,clientTo
 
 export async function deleteVpcNativeRouteTable(request,region,vpc,table,options={}) {
   scopedTable(request,region,vpc,table,options);
-  if (table.associations?.length||table.route) invalid();
+  if (table.associations?.length||table.routes?.length) invalid();
   const doc=await send(request,region,vpc,'DeleteRouteTable',{RouteTableId:table.id},options);
   if (leaf(envelope(doc,'DeleteRouteTable',['return']).get('return'))!=='true') invalid();
   const {rows,regionalIDs}=await snapshot(request,region,vpc,options);
@@ -238,7 +242,7 @@ export async function disassociateVpcRouteSubnet(request,region,vpc,table,associ
 // Only a verified native gateway currently linked to this VPC is offered.
 export async function loadVpcNativeRouteGateway(request,region,vpc,table,options={}) {
   const binding=scopedTable(request,region,vpc,table,options);
-  if (!binding.defaultRoutes||table.route) invalid();
+  if (!binding.routeLimit||table.routes.length>=binding.routeLimit) invalid();
   const rows=await describeInternetGateways(request,region,options.signal);
   options.signal?.throwIfAborted();
   const gateway=rows.find(row=>row.vpc===vpc.id);
@@ -248,19 +252,26 @@ export async function loadVpcNativeRouteGateway(request,region,vpc,table,options
   return gateway;
 }
 
-export async function changeVpcNativeDefaultRoute(request,region,vpc,table,target,create,options={}) {
+export async function changeVpcNativeIPv4Route(request,region,vpc,table,target,destination,create,options={}) {
   const binding=scopedTable(request,region,vpc,table,options);
-  if (!binding.defaultRoutes || (create ? table.route||gatewayScopes.get(target)!==table : !table.route||table.route!==target)) invalid();
+  if(!binding.routeLimit)invalid();
+  const cidr=nativeIPv4RouteDestination(destination,vpc.cidr);
+  if(!cidr||binding.routeLimit===1&&cidr!==ipv4DefaultRoute)invalid();
+  const current=table.routes.find(route=>route.cidr===cidr);
+  if(create ? current||table.routes.length>=binding.routeLimit||gatewayScopes.get(target)!==table :
+    !current||current!==target||destination!==cidr) invalid();
   const action=create?'CreateRoute':'DeleteRoute';
-  const params={RouteTableId:table.id,DestinationCidrBlock:ipv4DefaultRoute,...(create?{GatewayId:target.id}:{})};
+  const params={RouteTableId:table.id,DestinationCidrBlock:cidr,...(create?{GatewayId:target.id}:{})};
   const doc=await send(request,region,vpc,action,params,options);
   if (leaf(envelope(doc,action,['return']).get('return'))!=='true') invalid();
   const {rows,saved}=await snapshot(request,region,vpc,{...options,exactID:table.id});
   const next=rows[0];
-  // Absence is confirmed only inside the same still-existing table. The
-  // untouched association projection must agree with the previous scoped
-  // view before we can keep its regional selectors and other table rows.
-  if ((create?next.route?.gateway!==target.id||next.route.cidr!==ipv4DefaultRoute:next.route!==null) ||
+  const expected=create ? [...table.routes,{cidr,gateway:target.id}] : table.routes.filter(route=>route!==target);
+  expected.sort((a,b)=>compareIPv4RoutePrefixes(ec2IPv4Prefix(a.cidr),ec2IPv4Prefix(b.cidr)));
+  // On deletion, confirm absence of just that prefix in the very same table
+  // AND preservation of sibling routes. A stale or partial set cannot become
+  // success merely because the selected CIDR is missing.
+  if (next.routes.length!==expected.length||next.routes.some((r,i)=>r.cidr!==expected[i].cidr||r.gateway!==expected[i].gateway)||
       next.name!==table.name||JSON.stringify(next.associations)!==JSON.stringify(table.associations)||
       saved[0].id!==table.id) invalid();
   options.signal?.throwIfAborted();
@@ -274,6 +285,7 @@ export function nativeRouteTableFailure(error) {
   if (/^(401|403|UnauthorizedOperation|AccessDenied(?:Exception)?)(?=:|$)/.test(message) || message==='Sign in to continue.') return 'denied';
   if (/^Invalid(?:Route|RouteTableID|SubnetID|AssociationID|VpcID)\.NotFound(?=:|$)/.test(message)) return 'not-found';
   if (/^RouteAlreadyExists(?=:|$)/.test(message)) return 'route-exists';
+  if (/^InvalidParameterValue(?=:|$)/.test(message)) return 'invalid-route';
   if (/^(Gateway\.NotAttached|InvalidInternetGatewayID\.NotFound)(?=:|$)/.test(message)) return 'no-gateway';
   if (/^DependencyViolation(?=:|$)/.test(message)) return 'dependency';
   if (/^Resource\.AlreadyAssociated(?=:|$)/.test(message)) return 'associated';

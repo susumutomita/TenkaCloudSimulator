@@ -5,40 +5,86 @@ import (
 	"database/sql"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"maps"
+	"net/netip"
 	"reflect"
 	"strings"
 )
 
 const nativeDefaultRoutePrefix = "rtbroute-"
 
-var errEC2NativeDefaultRouteState = errors.New("inconsistent native IPv4 default route state")
+var errEC2NativeDefaultRouteState = errors.New("inconsistent native IPv4 route state")
 
 func nativeDefaultRouteID(table string) string {
 	return nativeDefaultRoutePrefix + strings.TrimPrefix(table, "rtb-")
 }
 
-func validNativeDefaultRoute(row EC2NetworkResource) bool {
-	return row.Kind == ec2Route && row.StackID == ec2NativeOwner && row.Revision == 1 &&
-		ec2NativeRouteTableID.MatchString(row.RouteTableID) && row.ID == nativeDefaultRouteID(row.RouteTableID) &&
+// Preserve the 582 default route's identity so no migration or dual-key
+// adoption is needed. Non-default keys use the canonical address and length.
+func nativeIPv4RouteID(table string, destination netip.Prefix) string {
+	if destination.Bits() == 0 {
+		return nativeDefaultRouteID(table)
+	}
+	return fmt.Sprintf("%s-%x-%02d", nativeDefaultRouteID(table), destination.Addr().As4(), destination.Bits())
+}
+
+var reservedEC2RouteDestination = netip.MustParsePrefix("169.254.168.0/22")
+
+func nativeRouteDestinationAllowed(destination, vpc netip.Prefix) bool {
+	// The existing default remains valid. For non-default routes this
+	// bounded IGW target does not model local route replacement or special
+	// address paths: require full separation from the VPC and reserved range.
+	return vpc.IsValid() && (destination.Bits() == 0 ||
+		!vpc.Overlaps(destination) && !reservedEC2RouteDestination.Overlaps(destination))
+}
+
+func validNativeIPv4Route(row EC2NetworkResource) bool {
+	destination, err := netip.ParsePrefix(row.CIDR)
+	return err == nil && destination.Addr().Is4() && destination.Masked().String() == row.CIDR &&
+		row.Kind == ec2Route && row.StackID == ec2NativeOwner && row.Revision == 1 &&
+		ec2NativeRouteTableID.MatchString(row.RouteTableID) && row.ID == nativeIPv4RouteID(row.RouteTableID, destination) &&
 		ec2InternetGatewayID.MatchString(row.GatewayID) && ec2InternetGatewayVPCID(row.VPCID) &&
-		row.CIDR == ec2NativeDefaultCIDR && row.RouteEnabled &&
+		row.RouteEnabled &&
 		row.SubnetID == "" && row.Description == "" && row.AvailabilityZone == "" &&
 		!row.DNSHostnames && !row.DNSSupport && !row.PublicIP && len(row.Tags) == 0 && len(row.Ingress) == 0
 }
 
-type nativeDefaultRoute struct {
+type nativeIPv4RouteKey struct {
+	table       string
+	destination netip.Prefix
+}
+
+type nativeIPv4Route struct {
 	gateway, vpc string
 }
 
-func nativeDefaultRoutes(ctx context.Context, tx *sql.Tx, region string, all []EC2NetworkResource,
-	declared map[string]bool, links nativeInternetGatewayLinks) (map[string]nativeDefaultRoute, error) {
-	out := map[string]nativeDefaultRoute{}
+func nativeIPv4RoutesForTable(routes map[nativeIPv4RouteKey]nativeIPv4Route, table string) int {
+	count := 0
+	for key := range routes {
+		if key.table == table {
+			count++
+		}
+	}
+	return count
+}
+
+func nativeIPv4Routes(ctx context.Context, tx *sql.Tx, region string, all []EC2NetworkResource,
+	declared map[string]bool, links nativeInternetGatewayLinks) (map[nativeIPv4RouteKey]nativeIPv4Route, error) {
+	out := map[nativeIPv4RouteKey]nativeIPv4Route{}
+	count := map[string]int{}
+	vpcPrefixes := map[string]netip.Prefix{}
+	for _, row := range all {
+		if row.Kind == ec2RTVPC && links.byVPC[row.ID].ID != "" {
+			prefix, _ := netip.ParsePrefix(row.CIDR)
+			vpcPrefixes[row.ID] = prefix
+		}
+	}
 	for _, r := range all {
 		if r.Kind != ec2Route && !strings.HasPrefix(r.ID, nativeDefaultRoutePrefix) {
 			continue
 		}
-		if !validNativeDefaultRoute(r) || r.Region != region {
+		if !validNativeIPv4Route(r) || r.Region != region {
 			return nil, errEC2NativeDefaultRouteState
 		}
 		// Only this bounded native writer may persist these rows. Require the
@@ -67,10 +113,15 @@ func nativeDefaultRoutes(ctx context.Context, tx *sql.Tx, region string, all []E
 			return nil, err
 		}
 		link := links.byGateway[r.GatewayID]
-		if link.ID == "" || link.VPCID != r.VPCID || links.byVPC[r.VPCID].ID != link.ID || out[table.ID].gateway != "" {
+		destination, _ := netip.ParsePrefix(r.CIDR) // checked by validNativeIPv4Route
+		key := nativeIPv4RouteKey{table.ID, destination}
+		if link.ID == "" || link.VPCID != r.VPCID || links.byVPC[r.VPCID].ID != link.ID ||
+			out[key].gateway != "" || count[table.ID] >= EC2NativeIPv4RouteLimit ||
+			!nativeRouteDestinationAllowed(destination, vpcPrefixes[r.VPCID]) {
 			return nil, errEC2NativeDefaultRouteState
 		}
-		out[table.ID] = nativeDefaultRoute{r.GatewayID, r.VPCID}
+		out[key] = nativeIPv4Route{r.GatewayID, r.VPCID}
+		count[table.ID]++
 	}
 	return out, nil
 }
@@ -93,7 +144,7 @@ func checkNativeDefaultRouteReservation(ctx context.Context, tx *sql.Tx, region 
 
 // All reads use the same snapshot. Avoid imposing IGW projection semantics
 // on unrelated CFN tables: only the native route graph is imported here.
-func nativeDefaultRoutesInRegion(ctx context.Context, tx *sql.Tx, region string) (map[string]nativeDefaultRoute, error) {
+func nativeIPv4RoutesInRegion(ctx context.Context, tx *sql.Tx, region string) (map[nativeIPv4RouteKey]nativeIPv4Route, error) {
 	if err := checkNativeDefaultRouteReservation(ctx, tx, region); err != nil {
 		return nil, err
 	}
@@ -118,7 +169,7 @@ func nativeDefaultRoutesInRegion(ctx context.Context, tx *sql.Tx, region string)
 	if err != nil {
 		return nil, err
 	}
-	return nativeDefaultRoutes(ctx, tx, region, all, declared, links)
+	return nativeIPv4Routes(ctx, tx, region, all, declared, links)
 }
 
 func (s *StackStore) changeNativeDefaultRoute(ctx context.Context, region string, q ec2NativeDefaultRouteQuery, create bool) error {
@@ -135,7 +186,11 @@ func (s *StackStore) changeNativeDefaultRoute(ctx context.Context, region string
 	if err != nil {
 		return err
 	}
-	id := nativeDefaultRouteID(table.ID)
+	key := nativeIPv4RouteKey{table.ID, q.destination}
+	if !key.destination.Addr().Is4() || key.destination.Masked() != key.destination {
+		return errEC2NativeDefaultRouteState
+	}
+	id := nativeIPv4RouteID(table.ID, key.destination)
 	for _, resource := range []string{id, table.ID, table.VPCID} {
 		if err := ensureNativeInternetGatewayUnclaimed(ctx, tx, region, resource, before.declared); err != nil {
 			return err
@@ -143,16 +198,19 @@ func (s *StackStore) changeNativeDefaultRoute(ctx context.Context, region string
 	}
 	wantRoutes := maps.Clone(before.routes)
 	if wantRoutes == nil {
-		wantRoutes = map[string]nativeDefaultRoute{}
+		wantRoutes = map[nativeIPv4RouteKey]nativeIPv4Route{}
 	}
-	route, exists := before.routes[table.ID]
+	route, exists := before.routes[key]
 	if create {
 		if exists {
-			return ec2Invalid("RouteAlreadyExists", "The IPv4 default route already exists in this route table.")
+			return ec2Invalid("RouteAlreadyExists", "This IPv4 destination already exists in this route table.")
 		}
-		route = nativeDefaultRoute{q.gateway, table.VPCID}
+		if nativeIPv4RoutesForTable(before.routes, table.ID) >= EC2NativeIPv4RouteLimit {
+			return ec2Invalid("RouteLimitExceeded", "The local IPv4 route-table bound has been reached.")
+		}
+		route = nativeIPv4Route{q.gateway, table.VPCID}
 	} else if !exists {
-		return ec2Invalid("InvalidRoute.NotFound", "The IPv4 default route does not exist in this route table.")
+		return ec2Invalid("InvalidRoute.NotFound", "That IPv4 destination does not exist in this route table.")
 	}
 	gateway, vpc, err := readNativeInternetGatewayPair(ctx, tx, region, route.gateway, table.VPCID)
 	if err != nil {
@@ -163,15 +221,19 @@ func (s *StackStore) changeNativeDefaultRoute(ctx context.Context, region string
 		return ec2Invalid("Gateway.NotAttached", "The native internet gateway is not attached to this VPC.")
 	}
 	if create {
+		prefix, _ := netip.ParsePrefix(vpc.CIDR) // verified by the attachment snapshot
+		if !nativeRouteDestinationAllowed(key.destination, prefix) {
+			return ec2Invalid("InvalidParameterValue", "A non-default route cannot overlap the VPC or the reserved IPv4 service range.")
+		}
 		row := EC2NetworkResource{ID: id, Region: region, StackID: ec2NativeOwner, Kind: ec2Route,
-			VPCID: table.VPCID, RouteTableID: table.ID, GatewayID: route.gateway, CIDR: ec2NativeDefaultCIDR, RouteEnabled: true}
+			VPCID: table.VPCID, RouteTableID: table.ID, GatewayID: route.gateway, CIDR: key.destination.String(), RouteEnabled: true}
 		if err := createEC2Network(ctx, tx, row); err != nil {
 			if errors.Is(err, errEC2NetworkQuota) {
 				return ec2Invalid("RouteLimitExceeded", "The local network resource bound has been reached.")
 			}
 			return err
 		}
-		wantRoutes[table.ID] = route
+		wantRoutes[key] = route
 	} else {
 		result, err := tx.ExecContext(ctx, `DELETE FROM aws_ec2_network_resources
 			WHERE region=? AND id=? AND stack_id=? AND kind=? AND revision=1`, region, id, ec2NativeOwner, ec2Route)
@@ -184,7 +246,7 @@ func (s *StackStore) changeNativeDefaultRoute(ctx context.Context, region string
 		if _, err := networkRead(ctx, tx, region, id); !errors.Is(err, sql.ErrNoRows) {
 			return errEC2NativeDefaultRouteState
 		}
-		delete(wantRoutes, table.ID)
+		delete(wantRoutes, key)
 	}
 	current, err := readNativeRouteTable(ctx, tx, region, table.ID)
 	if err != nil || !reflect.DeepEqual(current, table) {

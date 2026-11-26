@@ -25476,6 +25476,217 @@
           "expect_invariant": "VerifiedNotice"
         }
       ]
+    },
+    {
+      "id": "EC2NativeIPv4RouteSet",
+      "model": "formal/EC2NativeIPv4RouteSet.tla",
+      "config": "formal/EC2NativeIPv4RouteSet.cfg",
+      "bounds": "Two explicit tables and three legal symbolic IPv4 destinations (default, external, nested external), canonical alias or forbidden destinations, two saved routes per table in the model, two view epochs and one refusal/readback witness.",
+      "properties": [
+        "TypeOK",
+        "OwnedCanonical",
+        "PerTableLimit",
+        "AtomicClass",
+        "ExactRouteEffect",
+        "CompleteReadback",
+        "ConfirmedNotice"
+      ],
+      "limits": "Finite shared-destination map, same-native-witness abstraction and exact current-readback state only. Real limit is 16. No IP arithmetic proof, actual SQLite/JSON/Query/IAM/React refinement, actor concurrency or network forwarding.",
+      "source_scope": [
+        "internal/aws/ec2_native_default_route_query.go",
+        "internal/aws/ec2_native_default_route_store.go",
+        "internal/aws/ec2_internet_gateway_store.go",
+        "internal/aws/ec2_vpc.go",
+        "internal/aws/ec2_route_tables_native.go",
+        "internal/aws/ec2_route_tables_read.go",
+        "internal/server/server.go",
+        "internal/server/web/app.js",
+        "tools/console/src/ec2-ipv4-route-prefix.mjs",
+        "tools/console/src/ec2-native-route-tables.mjs",
+        "tools/console/src/ec2-readonly.jsx",
+        "tools/console/src/ec2-response.mjs",
+        "tools/console/src/ec2-route-tables.mjs",
+        "tools/console/src/ec2-vpc-native-route-tables.jsx",
+        "tools/console/src/main.jsx"
+      ],
+      "mutants": [
+        {
+          "id": "AdmitReservedDestination",
+          "edits": [
+            {
+              "old": "Admissible(d) == d \\in Legal",
+              "new": "Admissible(d) == TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "OwnedCanonical"
+        },
+        {
+          "id": "SkipAliasCanonicalization",
+          "edits": [
+            {
+              "old": "Write(op,t,d,r) == Expected(op,t,d,r)",
+              "new": "Write(op,t,d,r) == IF op = \"add\" THEN r \\cup {<<t,d>>} ELSE Expected(op,t,d,r)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "OwnedCanonical"
+        },
+        {
+          "id": "AdmitNonExactDelete",
+          "edits": [
+            {
+              "old": "ELSE d = Canonical(d) /\\ d \\in Routes(t,r)",
+              "new": "ELSE Canonical(d) \\in Routes(t,r)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AtomicClass"
+        },
+        {
+          "id": "ReplaceCanonicalDuplicate",
+          "edits": [
+            {
+              "old": "THEN Canonical(d) \\notin Routes(t,r) /\\ CapacityAvailable(t,r)",
+              "new": "THEN CapacityAvailable(t,r)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AtomicClass"
+        },
+        {
+          "id": "SkipTableCapacity",
+          "edits": [
+            {
+              "old": "/\\ CapacityAvailable(t,r)",
+              "new": "/\\ TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PerTableLimit"
+        },
+        {
+          "id": "AdoptForeignOwner",
+          "edits": [
+            {
+              "old": "Allowed(f) == f \\notin {\"policy\", \"owner\", \"target\"}",
+              "new": "Allowed(f) == f \\notin {\"policy\", \"target\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AtomicClass"
+        },
+        {
+          "id": "AcceptWrongGateway",
+          "edits": [
+            {
+              "old": "Allowed(f) == f \\notin {\"policy\", \"owner\", \"target\"}",
+              "new": "Allowed(f) == f \\notin {\"policy\", \"owner\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AtomicClass"
+        },
+        {
+          "id": "ApplyDeniedWrite",
+          "edits": [
+            {
+              "old": "Allowed(f) == f \\notin {\"policy\", \"owner\", \"target\"}",
+              "new": "Allowed(f) == f \\notin {\"owner\", \"target\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AtomicClass"
+        },
+        {
+          "id": "ApplyDryRun",
+          "edits": [
+            {
+              "old": "Durable(f) == f \\notin {\"dryRun\", \"unconfirmed\"}",
+              "new": "Durable(f) == f # \"unconfirmed\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AtomicClass"
+        },
+        {
+          "id": "CommitWithoutStorageReadback",
+          "edits": [
+            {
+              "old": "Durable(f) == f \\notin {\"dryRun\", \"unconfirmed\"}",
+              "new": "Durable(f) == f # \"dryRun\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AtomicClass"
+        },
+        {
+          "id": "EraseSiblingRoute",
+          "edits": [
+            {
+              "old": "Write(op,t,d,r) == Expected(op,t,d,r)",
+              "new": "Write(op,t,d,r) == IF op = \"remove\" THEN r \\ (Tables \\X {d}) ELSE Expected(op,t,d,r)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExactRouteEffect"
+        },
+        {
+          "id": "IgnoreSiblingReadback",
+          "edits": [
+            {
+              "old": "/\\ r.routes = Routes(p.t,p.after)",
+              "new": "/\\ (Canonical(p.d) \\in r.routes) = (Canonical(p.d) \\in Routes(p.t,p.after))",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CompleteReadback"
+        },
+        {
+          "id": "ConfirmWrongTable",
+          "edits": [
+            {
+              "old": "/\\ r.complete /\\ r.t = p.t",
+              "new": "/\\ r.complete",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CompleteReadback"
+        },
+        {
+          "id": "ConfirmIncompleteReply",
+          "edits": [
+            {
+              "old": "/\\ r.complete /\\ r.t = p.t",
+              "new": "/\\ r.t = p.t",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CompleteReadback"
+        },
+        {
+          "id": "ReuseEarlierScope",
+          "edits": [
+            {
+              "old": "/\\ p.ok /\\ p.issued = e /\\ r.at = e",
+              "new": "/\\ p.ok /\\ r.at = e",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CompleteReadback"
+        },
+        {
+          "id": "PublishWithoutReadback",
+          "edits": [
+            {
+              "old": "phase = \"confirmed\" /\\ proof.issued = epoch",
+              "new": "phase \\in {\"await\",\"confirmed\"} /\\ proof.issued = epoch",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CompleteReadback"
+        }
+      ]
     }
   ]
 }
