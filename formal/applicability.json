@@ -167,6 +167,27 @@
       "models": []
     },
     {
+      "path": "internal/aws/ec2_native_nacl_line_regression_test.go",
+      "sha256": "6fe7ac5f75c820c03a62a29f83e3046cc7b26c6f8606fcd9c2cadbeedea5c6ff",
+      "disposition": "test-support",
+      "reason": "Adds a focused regression for native EC2 VPC state, intended failures and cleanup; no production code, coverage floor or required gate changes.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/ec2_native_sg_line_regression_test.go",
+      "sha256": "38a105fb14dc8ba19ab7f520efa17fd85ab69a52be03328942fef5ae09700af0",
+      "disposition": "test-support",
+      "reason": "Adds a focused regression for native EC2 VPC state, intended failures and cleanup; no production code, coverage floor or required gate changes.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/ec2_native_subnet_line_regression_test.go",
+      "sha256": "1d2b0621cbf2b83cbb357798d77e355bbdb2634c93cce8f215182448b6c35f60",
+      "disposition": "test-support",
+      "reason": "Adds a focused regression for native EC2 VPC state, intended failures and cleanup; no production code, coverage floor or required gate changes.",
+      "models": []
+    },
+    {
       "path": "internal/aws/ec2_network.go",
       "sha256": "bc544836abbbe3f5229596433107f976bdfab0a8515fad071413cc1ce73076ef",
       "disposition": "modeled",
@@ -411,6 +432,13 @@
           "limits": "Child creation/deletion, parent guards, exact grant aggregation and retired ACL replay are bounded atomic abstractions. No XML, SQL/error timing, packet enforcement, SG name/tag rules, credentials, UI, restart or implementation refinement proof."
         }
       ]
+    },
+    {
+      "path": "internal/server/ec2_native_vpc_console_line_regression_test.go",
+      "sha256": "f51ddef2a75d72638d4efda2cb56b053757e23212cdd66effa8aecd8d83bc95d",
+      "disposition": "test-support",
+      "reason": "Adds a focused regression for native EC2 VPC state, intended failures and cleanup; no production code, coverage floor or required gate changes.",
+      "models": []
     },
     {
       "path": "internal/server/ec2_read_access_test.go",
