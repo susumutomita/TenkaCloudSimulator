@@ -36,6 +36,24 @@ def operations(spec):
 
 
 
+def project_simpledb_get_attributes(spec):
+    """Undo only the reviewed GetAttributes preset and its shared field notes."""
+    form = spec['paths']['/']['post']['requestBody']['content']['application/x-www-form-urlencoded']
+    props = form['schema']['properties']
+    actions = props['Action']['enum']
+    assert actions.count('GetAttributes') == 1 and actions[-1] == 'GetAttributes', 'SimpleDB GetAttributes action changed'
+    actions.pop()
+    assert next(iter(form['examples'])) == 'DescribeStacks', 'Existing root POST default example changed'
+    assert digest(form['examples'].pop('GetAttributes', None)) == '7d9e2594400ac49720ee8792e67549ebb027ac64aa5cb1489c389e0d6abe01fd', 'SimpleDB GetAttributes preset changed'
+    assert digest(props.pop('ItemName', None)) == '4f3ce58d185af32421e5714428e0a11cebb1124e92add7445387ca04d831f516', 'SimpleDB ItemName field changed'
+    domain = props.get('DomainName', {})
+    assert domain.get('description') == 'Existing local domain for DomainMetadata, GetAttributes or DeleteAttributes. Do not include DomainName for Select; use the domain in SelectExpression.', 'SimpleDB GetAttributes domain note changed'
+    domain['description'] = 'Existing local domain for DomainMetadata or DeleteAttributes. Do not include DomainName for Select; use the domain in SelectExpression.'
+    consistent = props.get('ConsistentRead', {})
+    assert consistent.get('description') == 'Optional for GetAttributes or Select. Keep the same value on every Select page.', 'SimpleDB GetAttributes consistency note changed'
+    consistent['description'] = 'Optional for Select. Keep the same value on every page.'
+
+
 def project_simpledb_select(spec):
     """Project only the precise reviewed additions, preserving all earlier guards."""
     form = spec['paths']['/']['post']['requestBody']['content']['application/x-www-form-urlencoded']
@@ -106,6 +124,7 @@ def project_server_list(spec):
     grouped[0]['tags'].remove(tag['name'])
     server = spec['paths'].pop(SERVER_COLLECTION, None)
     assert digest(server) == '81203e3d7065de93e30b5941964ba52f94a11c12888f61b85dbe7c542dc9a521', 'Server List reference changed'
+    project_simpledb_get_attributes(spec)
     project_simpledb_select(spec)
     project_simpledb_domain_metadata(spec)
     project_simpledb_list_domains(spec)
@@ -239,7 +258,9 @@ class SakuraReference(unittest.TestCase):
         validator(self.spec, form(self.spec)['schema']).validate(example)
         self.assertEqual(example, {'Action': 'Select', 'Version': '2009-04-15',
             'SelectExpression': 'select itemName() from `example-domain` limit 25', 'ConsistentRead': 'true'})
-        project_simpledb_select(copy.deepcopy(self.spec))
+        preceding = copy.deepcopy(self.spec)
+        project_simpledb_get_attributes(preceding)
+        project_simpledb_select(copy.deepcopy(preceding))
         for change in (
             lambda f: f['schema']['properties']['Action']['enum'].append('Select'),
             lambda f: f['schema']['properties'].pop('ConsistentRead'),
@@ -247,10 +268,38 @@ class SakuraReference(unittest.TestCase):
             lambda f: f['examples']['Select']['value'].update(Action='DeleteAttributes'),
             lambda f: f['examples']['Select']['value'].update(DomainName='elsewhere'),
         ):
-            changed = copy.deepcopy(self.spec)
+            changed = copy.deepcopy(preceding)
             change(form(changed))
             with self.assertRaises(AssertionError):
                 project_simpledb_select(changed)
+
+    def test_read_only_simpledb_get_attributes_preserves_previous_presets(self):
+        def form(spec):
+            return spec['paths']['/']['post']['requestBody']['content']['application/x-www-form-urlencoded']
+
+        actual = form(self.spec)
+        example = actual['examples']['GetAttributes']['value']
+        validator(self.spec, actual['schema']).validate(example)
+        self.assertEqual(example, {'Action': 'GetAttributes', 'Version': '2009-04-15',
+                                   'DomainName': 'scalar-practice-domain', 'ItemName': 'scalar-practice-item',
+                                   'ConsistentRead': 'true'})
+        project_simpledb_get_attributes(copy.deepcopy(self.spec))
+        preserved(self.spec)
+        for label, change in (
+            ('missing action', lambda f: f['schema']['properties']['Action']['enum'].remove('GetAttributes')),
+            ('duplicate action', lambda f: f['schema']['properties']['Action']['enum'].append('GetAttributes')),
+            ('foreign write', lambda f: f['examples']['GetAttributes']['value'].update(Action='PutAttributes')),
+            ('write controls', lambda f: f['examples']['GetAttributes']['value'].update({'Expected.Exists': 'false'})),
+            ('wrong default', lambda f: f['examples'].update(DescribeStacks=f['examples'].pop('DescribeStacks'))),
+            ('unbounded item name', lambda f: f['schema']['properties']['ItemName'].pop('maxLength')),
+            ('changed authority note', lambda f: f['examples']['GetAttributes'].update(description='unreviewed')),
+            ('changed shared field', lambda f: f['schema']['properties']['DomainName'].update(description='unreviewed')),
+            ('changed consistency note', lambda f: f['schema']['properties']['ConsistentRead'].update(description='unreviewed')),
+        ):
+            changed = copy.deepcopy(self.spec)
+            change(form(changed))
+            with self.subTest(change=label), self.assertRaises(AssertionError):
+                preserved(changed)
 
     def test_simpledb_projection_cannot_hide_missing_changed_or_inherited_contracts(self):
         def post(spec):

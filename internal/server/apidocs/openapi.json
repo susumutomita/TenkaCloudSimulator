@@ -694,7 +694,8 @@
                       "ListDomains",
                       "DomainMetadata",
                       "DeleteAttributes",
-                      "Select"
+                      "Select",
+                      "GetAttributes"
                     ]
                   },
                   "Version": {
@@ -772,7 +773,13 @@
                     "minLength": 3,
                     "maxLength": 255,
                     "pattern": "^[A-Za-z0-9_.-]+$",
-                    "description": "Existing local domain for DomainMetadata or DeleteAttributes. Do not include DomainName for Select; use the domain in SelectExpression."
+                    "description": "Existing local domain for DomainMetadata, GetAttributes or DeleteAttributes. Do not include DomainName for Select; use the domain in SelectExpression."
+                  },
+                  "ItemName": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 1024,
+                    "description": "Exact local item name for GetAttributes or DeleteAttributes. The native API enforces a 1024-byte UTF-8 limit."
                   },
                   "SelectExpression": {
                     "type": "string",
@@ -781,7 +788,7 @@
                   "ConsistentRead": {
                     "type": "string",
                     "enum": ["true", "false"],
-                    "description": "Optional for Select. Keep the same value on every page."
+                    "description": "Optional for GetAttributes or Select. Keep the same value on every Select page."
                   },
                   "NextToken": {
                     "type": "string",
@@ -1088,6 +1095,17 @@
                     "Action": "DomainMetadata",
                     "Version": "2009-04-15",
                     "DomainName": "scalar-practice-domain"
+                  }
+                },
+                "GetAttributes": {
+                  "summary": "SimpleDB GetAttributes (read-only item values)",
+                  "description": "Set X-Simulator-Service to sdb, clear X-Amz-Target, and use us-east-1 or leave X-Simulator-Region unset. Replace DomainName and ItemName with your local domain and exact item name. Send using your existing local identity with sdb:GetAttributes on that domain. The XML lists the item's saved name/value pairs from the same store used by the console and SDK. An unknown item in an existing domain returns no attributes; nothing is created or changed.",
+                  "value": {
+                    "Action": "GetAttributes",
+                    "Version": "2009-04-15",
+                    "DomainName": "scalar-practice-domain",
+                    "ItemName": "scalar-practice-item",
+                    "ConsistentRead": "true"
                   }
                 }
               }

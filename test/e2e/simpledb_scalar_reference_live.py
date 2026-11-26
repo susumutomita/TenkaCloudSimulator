@@ -1,4 +1,4 @@
-"""Opt-in served Scalar ListDomains and DomainMetadata Send against a pinned local binary.
+"""Opt-in served Scalar ListDomains, DomainMetadata, and GetAttributes Send.
 
 Run from exact checkout with Playwright's pinned Chromium:
 SIMULATOR_BINARY=/path/to/binary SIMULATOR_BINARY_SHA256=<verified> \
@@ -19,6 +19,10 @@ VERSION = '2009-04-15'
 EXAMPLE_DOMAIN = 'scalar-practice-domain'
 LIST_FIELDS = {'Action': 'ListDomains', 'Version': VERSION}
 METADATA_FIELDS = {'Action': 'DomainMetadata', 'Version': VERSION, 'DomainName': EXAMPLE_DOMAIN}
+EXAMPLE_ITEM = 'scalar-practice-item'
+GET_FIELDS = {'Action': 'GetAttributes', 'Version': VERSION, 'DomainName': EXAMPLE_DOMAIN,
+              'ItemName': EXAMPLE_ITEM, 'ConsistentRead': 'true'}
+SAVED_VALUES = [('display-state', 'saved + & 値'), ('empty', '')]
 STATS = ('ItemCount', 'ItemNamesSizeBytes', 'AttributeNameCount',
          'AttributeNamesSizeBytes', 'AttributeValueCount', 'AttributeValuesSizeBytes')
 NS = '{http://sdb.amazonaws.com/doc/2009-04-15/}'
@@ -68,6 +72,12 @@ def empty_metadata_timestamp(body):
     timestamp = result.findtext(NS + 'Timestamp')
     assert timestamp and timestamp.isascii() and timestamp.isdecimal() and int(timestamp) > 0
     return timestamp
+
+
+def item_values(body):
+    result = query_result(body, 'GetAttributes')
+    return sorted((row.findtext(NS + 'Name'), row.findtext(NS + 'Value'))
+                  for row in result.findall(NS + 'Attribute'))
 
 
 def run():
@@ -123,6 +133,7 @@ def run():
                         presets = root['requestBody']['content'][FORM]['examples']
                         assert presets['ListDomains']['value'] == LIST_FIELDS
                         assert presets['DomainMetadata']['value'] == METADATA_FIELDS
+                        assert presets['GetAttributes']['value'] == GET_FIELDS
                         page.get_by_role('button', name='Test Request (post /)', exact=True).click()
                         client = page.get_by_role('dialog').filter(
                             has=page.get_by_role('button', name='Close Client', exact=True))
@@ -190,6 +201,28 @@ def run():
                         assert len(sends) == 2
                         checked_send(endpoint, sends[:1], response, LIST_FIELDS)
                         checked_send(endpoint, sends[1:], metadata, METADATA_FIELDS)
+
+                        # Seed through the native Query API, then let Scalar Send
+                        # read exactly that item without any browser header bypass.
+                        fixture = {f'Attribute.{i}.{k}': v for i, (name, value) in enumerate(SAVED_VALUES, 1)
+                                   for k, v in [('Name', name), ('Value', value)]}
+                        created = query('PutAttributes', DomainName=domain, ItemName=EXAMPLE_ITEM, **fixture)
+                        assert created.status == 200
+                        assert ElementTree.fromstring(created.body()).tag == NS + 'PutAttributesResponse'
+                        client.get_by_role('button', name='Body', exact=True).click()
+                        picker.click()
+                        page.get_by_role('option', name=presets['GetAttributes']['summary'], exact=True).click()
+                        assert len(sends) == 2, 'the GetAttributes preset sent a request before Send'
+                        with page.expect_response(lambda response: response.request.method == 'POST'
+                                                  and response.url == endpoint + '/') as capture:
+                            client.get_by_role('button', name=re.compile(r'^Send post request to ')).click()
+                        values = capture.value
+                        checked_send(endpoint, sends[2:], values, GET_FIELDS)
+                        assert values.headers['content-type'].split(';', 1)[0] == 'text/xml'
+                        assert item_values(values.body()) == SAVED_VALUES
+                        expect(panel).to_contain_text('GetAttributesResult')
+                        expect(panel).to_contain_text('display-state')
+                        checked_send(endpoint, sends[2:], values, GET_FIELDS)
                         assert not outside and not errors
                     finally:
                         context.close()
@@ -204,8 +237,9 @@ def run():
             native.dispose()
     # Emit success only after real response, domain removal and standalone shutdown.
     (REPORTS / 'simpledb-scalar-reference-live.json').write_text(json.dumps({
-        'binary_sha256': expected, 'servedPresets': ['ListDomains', 'DomainMetadata'],
-        'nativeStatuses': {'ListDomains': 200, 'DomainMetadata': 200},
+        'binary_sha256': expected, 'servedPresets': ['ListDomains', 'DomainMetadata', 'GetAttributes'],
+        'nativeStatuses': {'ListDomains': 200, 'DomainMetadata': 200, 'GetAttributes': 200},
+        'getAttributesMatchesNativeWriteIncludingEmptyValue': True,
         'exactForm': True, 'canonicalService': 'sdb', 'oneMatchedSendPerPresetNoRedirect': True,
         'requestCookiePresent': True, 'forbiddenSendHeadersAbsent': list(FORBIDDEN_SEND_HEADERS),
         'liveXml': True, 'freshDomainDeleted': True,
