@@ -164,6 +164,13 @@
       "models": []
     },
     {
+      "path": "internal/aws/cognitoidp/federation_boundaries_test.go",
+      "sha256": "b8e00ba2519a66e646b8abd1c2f81cbbc2313f1e761b8f8ae4ae689253d06b20",
+      "disposition": "test-support",
+      "reason": "Tests fail-closed canonical configuration reads, typed binding and scope admission, signed-handler-independent native wire capacity/error contracts, and SQLite write, readback and deferred-commit rollback. No production behavior or formal model changes.",
+      "models": []
+    },
+    {
       "path": "internal/aws/cognitoidp/federation_config.go",
       "sha256": "7ea24b704d7576d03717d555138bb5a9d9de9f14ee010528fb9c7d13482f5567",
       "disposition": "modeled",
@@ -229,6 +236,13 @@
           "limits": "Bounded immutable request/config graph and symbolic pin/grant/callback predicates; Go aliasing, RSA/X.509, byte limits, IAM implementation and real network behavior are tested separately. No sign-in or issuance."
         }
       ]
+    },
+    {
+      "path": "internal/aws/cognitoidp/federation_metadata_boundaries_test.go",
+      "sha256": "8885fcf083455b178dc73ad9b06157749d24379cd302325e46158c0233b85c1e",
+      "disposition": "test-support",
+      "reason": "Tests the existing bounded SAML metadata projection, XML ambiguity and unsupported certificate rejection with inert local fixtures. Does not execute SAML authentication or change a modeled transition.",
+      "models": []
     },
     {
       "path": "internal/aws/cognitoidp/federation_metadata_test.go",
