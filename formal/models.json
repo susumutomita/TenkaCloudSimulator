@@ -22461,6 +22461,199 @@
           "expect_invariant": "ChoiceDoesNotObserve"
         }
       ]
+    },
+    {
+      "id": "EC2TemplatePreviewEpoch",
+      "model": "formal/EC2TemplatePreviewEpoch.tla",
+      "config": "formal/EC2TemplatePreviewEpoch.cfg",
+      "bounds": "One in-flight request and one context change. Independent closed, handoff, identity, region, draft and oversized witnesses; four response classes and presence of a reported value.",
+      "properties": [
+        "TypeOK",
+        "OrdinaryPreview",
+        "BoundedDraft",
+        "FixedDeclarationRead",
+        "OnlyCurrentIdentity",
+        "OnlyCurrentRegion",
+        "OnlyCurrentDraft",
+        "NoClosedOrHandoffResult",
+        "EvidencePreserved",
+        "NoReturnedValues"
+      ],
+      "limits": "Finite UI declaration-preview projection only. Context changes are bounded, not arbitrary browser interleavings. Does not model actual authentication or IAM, raw HTTP, YAML/XML validation, secrets in the editable textarea, backend guest availability or code refinement.",
+      "source_scope": [
+        "internal/server/web/app.js",
+        "tools/console/src/ec2-readonly.jsx",
+        "tools/console/src/ec2-template-preview.jsx",
+        "tools/console/src/ec2-template-preview.mjs",
+        "tools/console/src/main.jsx"
+      ],
+      "mutants": [
+        {
+          "id": "AdmitClosed",
+          "edits": [
+            {
+              "old": "Ordinary(s) == s.visible /\\ ~s.handoff",
+              "new": "Ordinary(s) == ~s.handoff",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "OrdinaryPreview"
+        },
+        {
+          "id": "AdmitHandoff",
+          "edits": [
+            {
+              "old": "Ordinary(s) == s.visible /\\ ~s.handoff",
+              "new": "Ordinary(s) == s.visible",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "OrdinaryPreview"
+        },
+        {
+          "id": "OversizeDraft",
+          "edits": [
+            {
+              "old": "/\\ Useful(selected)",
+              "new": "/\\ TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "BoundedDraft"
+        },
+        {
+          "id": "AllowMutation",
+          "edits": [
+            {
+              "old": "/\\ op = \"ValidateTemplate\"",
+              "new": "/\\ TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "FixedDeclarationRead"
+        },
+        {
+          "id": "AllowTemplateURL",
+          "edits": [
+            {
+              "old": "/\\ ~url",
+              "new": "/\\ TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "FixedDeclarationRead"
+        },
+        {
+          "id": "AcceptStaleIdentity",
+          "edits": [
+            {
+              "old": "/\\ s.identity = selected.identity",
+              "new": "/\\ TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "OnlyCurrentIdentity"
+        },
+        {
+          "id": "AcceptStaleRegion",
+          "edits": [
+            {
+              "old": "/\\ s.region = selected.region",
+              "new": "/\\ TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "OnlyCurrentRegion"
+        },
+        {
+          "id": "AcceptStaleDraft",
+          "edits": [
+            {
+              "old": "/\\ s.draft = selected.draft",
+              "new": "/\\ TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "OnlyCurrentDraft"
+        },
+        {
+          "id": "AcceptAfterClose",
+          "edits": [
+            {
+              "old": "/\\ s.visible = selected.visible",
+              "new": "/\\ TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "NoClosedOrHandoffResult"
+        },
+        {
+          "id": "AcceptAfterHandoff",
+          "edits": [
+            {
+              "old": "/\\ s.handoff = selected.handoff",
+              "new": "/\\ TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "NoClosedOrHandoffResult"
+        },
+        {
+          "id": "RetainOldDraft",
+          "edits": [
+            {
+              "old": "shown' = {} (* Discard previous preview before continuing. *)",
+              "new": "shown' = IF s.draft # selected.draft THEN shown ELSE {} (* Discard previous preview before continuing. *)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "OnlyCurrentDraft"
+        },
+        {
+          "id": "RefusalAsAccepted",
+          "edits": [
+            {
+              "old": "outcome |-> raw",
+              "new": "outcome |-> (IF raw = \"denied\" THEN \"valid\" ELSE raw)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "EvidencePreserved"
+        },
+        {
+          "id": "InvalidAsAccepted",
+          "edits": [
+            {
+              "old": "outcome |-> raw",
+              "new": "outcome |-> (IF raw = \"invalid\" THEN \"valid\" ELSE raw)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "EvidencePreserved"
+        },
+        {
+          "id": "MalformedAsAccepted",
+          "edits": [
+            {
+              "old": "outcome |-> raw",
+              "new": "outcome |-> (IF raw = \"malformed\" THEN \"valid\" ELSE raw)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "EvidencePreserved"
+        },
+        {
+          "id": "ShowReturnedValue",
+          "edits": [
+            {
+              "old": "displaysValue |-> FALSE",
+              "new": "displaysValue |-> hasValue",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "NoReturnedValues"
+        }
+      ]
     }
   ]
 }

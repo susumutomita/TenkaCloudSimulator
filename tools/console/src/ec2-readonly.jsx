@@ -20,6 +20,7 @@ import {useLocale} from './i18n.jsx';
 import VPCSubnetFields from './ec2-vpc-subnet-fields.jsx';
 import {createVpcWithSubnet,vpcSubnetInputError} from './ec2-vpc-subnet.mjs';
 import EC2InstanceMetadata from './ec2-instance-metadata.jsx';
+import EC2TemplatePreview from './ec2-template-preview.jsx';
 import VPCSecurityGroups from './ec2-vpc-security-groups.jsx';
 import VPCRouteTables from './ec2-vpc-route-tables.jsx';
 
@@ -35,6 +36,7 @@ export default function EC2Readonly({kind,region,request,sessionInstance,onSessi
   const {t}=useLocale();
   const instance=kind==='ec2',manage=!instance&&vpcLifecycle;
   const [items,setItems]=useState([]),[loading,setLoading]=useState(false),[error,setError]=useState('');
+  const [preview,setPreview]=useState(false);
   const [selected,setSelected]=useState([]),[filter,setFilter]=useState(''),[page,setPage]=useState(1);
   const [view,setView]=useState('list'),[form,setForm]=useState(blankVpc),[busy,setBusy]=useState(false),[formError,setFormError]=useState(''),[notice,setNotice]=useState('');
   const [deleting,setDeleting]=useState(null),[confirmation,setConfirmation]=useState(''),[deleteError,setDeleteError]=useState('');
@@ -145,6 +147,7 @@ export default function EC2Readonly({kind,region,request,sessionInstance,onSessi
       loading={loading} loadingText={t('Loading resources','リソースを読み込み中')}
       items={filtered.slice((page-1)*20,page*20)} columnDefinitions={fields.slice(0,instance?5:4).map(([id,en,ja])=>({id,header:t(en,ja),cell:item=>idCell(display(id,item))}))}
       header={<Header counter={'('+items.length+')'} actions={<SpaceBetween direction="horizontal" size="xs">{sessionInstance&&<Button variant="primary" disabled={selected[0]?.id!==sessionInstance} onClick={onSession}>{t('Connect with Session Manager','Session Manager で接続')}</Button>}<Button iconName="refresh" loading={loading} disabled={busy} onClick={()=>load()}>{t('Refresh','更新')}</Button>
+        {instance&&!sessionInstance&&<Button onClick={()=>setPreview(true)}>{t('Preview CloudFormation template','CloudFormation テンプレートをプレビュー')}</Button>}
         {manage&&<Button disabled={!deletable||busy||loading} disabledReason={detail&&!deletable?t('Delete CloudFormation-managed VPCs by deleting their stack.','CloudFormation で管理される VPC は、スタックを削除して削除してください。'):undefined} onClick={()=>{setConfirmation('');setDeleteError('');setDeleting(detail);}}>{t('Delete VPC','VPC を削除')}</Button>}
         {manage&&<Button variant="primary" disabled={busy} onClick={()=>{setForm(blankVpc);setFormError('');setNotice('');changeView('create');}}>{t('Create VPC','VPC を作成')}</Button>}</SpaceBetween>}>{instance?t('Instances','インスタンス'):t('VPCs','VPC 一覧')}</Header>}
       filter={<TextFilter filteringText={filter} onChange={({detail})=>{setFilter(detail.filteringText);setPage(1);setSelected([]);}} filteringAriaLabel={t('Filter resources','リソースを絞り込む')} filteringPlaceholder={t('Find resources','リソースを検索')}/>}
@@ -156,6 +159,7 @@ export default function EC2Readonly({kind,region,request,sessionInstance,onSessi
         {!instance&&vpcRouteTables&&<VPCRouteTables key={'rtb|'+region+'|'+detail.id} vpc={detail} region={region} request={request}/>}
       </SpaceBetween>
     </Container>}
+    {instance&&!sessionInstance&&preview&&<EC2TemplatePreview region={region} request={request} onDismiss={()=>setPreview(false)}/>}
     {manage&&<Modal visible={!!deleting} onDismiss={()=>{if(!busy)setDeleting(null);}} header={t('Delete VPC','VPC を削除')} closeAriaLabel={t('Close dialog','ダイアログを閉じる')}>
       <form onSubmit={remove}><Form errorText={deleteError} actions={<SpaceBetween direction="horizontal" size="xs"><Button formAction="none" disabled={busy} onClick={()=>setDeleting(null)}>{t('Cancel','キャンセル')}</Button><Button variant="primary" formAction="submit" loading={busy} disabled={confirmation!=='delete'}>{t('Delete','削除')}</Button></SpaceBetween>}>
         <SpaceBetween size="m"><Box>{t('Delete this VPC? This cannot be undone.','この VPC を削除しますか? この操作は元に戻せません。')}</Box><Box>{idCell(deleting?.id)}{deleting?.name?' ('+deleting.name+')':''}</Box>
