@@ -1,48 +1,59 @@
 {
   "version": 1,
-  "base_sha": "e3883f4fd2ac7cd73e3e9818bf91c778cb4d9664",
+  "base_sha": "139830c0f9ddbc0fc393b033f2affd455d30a2cd",
   "changes": [
     {
-      "path": "README.md",
-      "sha256": "69d5e12bfb78443c4de311d2712d01c3b41446ae5af54fc2b9263116cbfc4ed8",
+      "path": "docs/cloudformation-rest.md",
+      "sha256": "8f511ba95a36893a974f7dc46908a2ff254f3dc711402f89ba3fcff2a6dadc83",
       "disposition": "documentation",
-      "reason": "Describes how to select an existing read-only EC2 Query preset; no simulator runtime or state transitions change.",
-      "models": []
-    },
-    {
-      "path": "docs/api-reference.md",
-      "sha256": "5f8130c55ba1dd9681d365a4af18275c9b5b808bed95118272d67599191f4da2",
-      "disposition": "documentation",
-      "reason": "Describes how to select an existing read-only EC2 Query preset; no simulator runtime or state transitions change.",
+      "reason": "CloudFormation guide: a stack instance must use a subnet and security groups of its own stack.",
       "models": []
     },
     {
       "path": "docs/design/0001-go-standalone.md",
-      "sha256": "0b9b5a184fd6d15785c33d17458b8d12e69d1597ea342f12f73f0e98a4c11a25",
+      "sha256": "fc61ce0c9e86b92da2305ec9976f735ca5d2f5a565185f7f5b7182ee5f2e5068",
       "disposition": "documentation",
-      "reason": "Describes how to select an existing read-only EC2 Query preset; no simulator runtime or state transitions change.",
+      "reason": "Design record: stack instance placement is refused inside the create transaction when it names foreign network rows.",
       "models": []
     },
     {
-      "path": "internal/server/apidocs/openapi.json",
-      "sha256": "eea3c31766d3f6688f4a87228ce8251d10c684cc3e7c4a01e46ae1b88f67b1a3",
-      "disposition": "presentation",
-      "reason": "Exposes one fixed DescribeInstances example, action, API date and service selector; existing authentication, routing and state remain unchanged.",
-      "models": []
+      "path": "internal/aws/cloudformation.go",
+      "sha256": "57d05f844337d30797bec0aea9b913914959492ac277de91ed3abea3db91f005",
+      "disposition": "modeled",
+      "reason": "The stack create transaction calls the instance placement check before commit, so a refused placement stores no stack or instance claim and starts no guest launch. Every other resource path, event and finalization is unchanged.",
+      "models": [
+        {
+          "id": "CanonicalVMComposition",
+          "properties": [
+            "NetworkOwnership",
+            "JournalBeforeLaunch"
+          ],
+          "limits": "Finite ordering and admission model of one launch, one network ownership operation and one creator. Its network admission abstracts same-owner and validity checks as Booleans: it does not model SQL, the instance's subnet and security-group rows, CloudFormation resource order, IAM evaluation, a real guest or a Go refinement proof. The Go test with the runtime double establishes that a foreign placement is refused inside the create transaction, before the journal entry and the launch."
+        }
+      ]
     },
     {
-      "path": "test/console/ec2_describe_instances_reference_native.py",
-      "sha256": "2c4fdf31466bc1c29c9b95bcfb7e0a384c0aff6c67f2c8cd40a1106ae85d20bd",
+      "path": "internal/aws/cloudformation_instance_test.go",
+      "sha256": "7a6fc0f7539e914fc0a71b8de5a3652e9582c1bbe84772418f6c65064a6b8df8",
       "disposition": "test-support",
-      "reason": "Checks the precise read-only preset and existing reference against regression. Neither simulator runtime nor modeled transition changes.",
+      "reason": "Stack instance fixtures are placed in their own stack's subnet and security group. A new test refuses every foreign, missing, mistyped or cross-VPC placement before commit and before a guest launch, reports a failed read as an error, and admits the stack's own placement.",
       "models": []
     },
     {
-      "path": "test/e2e/test_sakura_openapi.py",
-      "sha256": "803d79678fddec1d51361e2df6205370fbb5c6053ac5b9b823d16bb198e7e06b",
-      "disposition": "test-support",
-      "reason": "Checks the precise read-only preset and existing reference against regression. Neither simulator runtime nor modeled transition changes.",
-      "models": []
+      "path": "internal/aws/ec2_instance_cloudformation.go",
+      "sha256": "952bae9aca4c6cafee287e13581de0e36368e4fb3d7d32a3561f52ea1585e294",
+      "disposition": "modeled",
+      "reason": "New placement check for a stack instance, run inside the stack's create transaction after its network rows exist: the subnet and every security group must be rows of the same stack in one VPC, which is what DescribeInstances already requires to read the instance back. A missing or foreign row is a validation refusal; a row that cannot be read stays an error. Compile-time validation and permissions are unchanged.",
+      "models": [
+        {
+          "id": "CanonicalVMComposition",
+          "properties": [
+            "NetworkOwnership",
+            "JournalBeforeLaunch"
+          ],
+          "limits": "Finite ordering and admission model of one launch, one network ownership operation and one creator. Its network admission abstracts same-owner and validity checks as Booleans: it does not model SQL, the instance's subnet and security-group rows, CloudFormation resource order, IAM evaluation, a real guest or a Go refinement proof. The Go test with the runtime double establishes that a foreign placement is refused inside the create transaction, before the journal entry and the launch."
+        }
+      ]
     }
   ]
 }

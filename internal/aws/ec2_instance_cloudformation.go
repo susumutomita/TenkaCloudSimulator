@@ -6,6 +6,7 @@ import (
 	"database/sql"
 	"encoding/base64"
 	"encoding/hex"
+	"errors"
 	"fmt"
 	"strings"
 )
@@ -99,20 +100,37 @@ func stackInstancePermissions(record StackRecord, r StackResource, deleting bool
 // this same stack, in one VPC: exactly what DescribeInstances requires to read
 // the instance back. A missing row, another stack's row or an EC2-owned subnet
 // or group refuses the whole stack before anything is committed, so no instance
-// claim can outlive a placement that discovery would reject.
+// claim can outlive a placement that discovery would reject. A row that cannot
+// be read is a failure, not a placement verdict.
 func stackInstancePlacement(ctx context.Context, tx *sql.Tx, record StackRecord, r StackResource) error {
 	refused := ssmFailure{"ValidationError", "An instance's SubnetId and SecurityGroupIds must name a subnet and security groups created by the same stack."}
-	subnet, err := networkRead(ctx, tx, record.Region, stringValue(r.Properties["SubnetId"]))
-	if err != nil || subnet.Kind != "AWS::EC2::Subnet" || subnet.StackID != record.ID {
-		return refused
+	owned := func(id, kind string) (EC2NetworkResource, error) {
+		row, err := networkRead(ctx, tx, record.Region, id)
+		if errors.Is(err, sql.ErrNoRows) {
+			return row, refused
+		}
+		if err != nil {
+			return row, err
+		}
+		if row.Kind != kind || row.StackID != record.ID {
+			return row, refused
+		}
+		return row, nil
+	}
+	subnet, err := owned(stringValue(r.Properties["SubnetId"]), "AWS::EC2::Subnet")
+	if err != nil {
+		return err
 	}
 	groups, ok := r.Properties["SecurityGroupIds"].([]any)
 	if !ok || len(groups) == 0 {
 		return refused
 	}
 	for _, id := range groups {
-		group, err := networkRead(ctx, tx, record.Region, stringValue(id))
-		if err != nil || group.Kind != "AWS::EC2::SecurityGroup" || group.StackID != record.ID || group.VPCID != subnet.VPCID {
+		group, err := owned(stringValue(id), "AWS::EC2::SecurityGroup")
+		if err != nil {
+			return err
+		}
+		if group.VPCID != subnet.VPCID {
 			return refused
 		}
 	}

@@ -369,12 +369,16 @@ func TestStackInstancePlacementRefusedBeforeCommitAndLaunch(t *testing.T) {
 		t.Fatal(err)
 	}
 	ctx := context.Background()
-	// An EC2-owned VPC and subnet, and another stack's network, already exist.
+	// EC2-owned network rows and another stack's network already exist.
 	vpc, err := stack.createNativeVPC(ctx, record.Region, "10.200.0.0/16", nil)
 	if err != nil {
 		t.Fatal(err)
 	}
-	native, err := stack.createNativeSubnet(ctx, record.Region, ec2SubnetMutation{vpc: vpc.ID, cidr: "10.200.1.0/24"})
+	nativeSubnet, err := stack.createNativeSubnet(ctx, record.Region, ec2SubnetMutation{vpc: vpc.ID, cidr: "10.200.1.0/24"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	nativeGroup, err := stack.createEC2NativeSecurityGroup(ctx, record.Region, ec2NativeSecurityGroupQuery{name: "detached", description: "detached group", vpc: vpc.ID})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -389,6 +393,8 @@ func TestStackInstancePlacementRefusedBeforeCommitAndLaunch(t *testing.T) {
 	if err = stack.ConfigureInstanceRuntime(fixtureStackInstanceRuntime{attempt}); err != nil {
 		t.Fatal(err)
 	}
+	// Every compile draws a new stack ID, and network IDs derive from it, so a
+	// case must name the rows of the stack it is about to create.
 	compiled := func() StackRecord {
 		t.Helper()
 		fresh, err := compileStack(record.Region, record.Name, networkTemplate(t), map[string]string{"NamePrefix": "tc-hello-team"}, "")
@@ -397,25 +403,51 @@ func TestStackInstancePlacementRefusedBeforeCommitAndLaunch(t *testing.T) {
 		}
 		return fresh
 	}
+	rows := func(fresh StackRecord) int {
+		t.Helper()
+		var n int
+		if err := stack.db.QueryRow(`SELECT (SELECT count(*) FROM aws_cfn_stacks WHERE id=?1)+(SELECT count(*) FROM aws_cfn_ownership WHERE stack_id=?1)+(SELECT count(*) FROM aws_ec2_network_resources WHERE stack_id=?1)+(SELECT count(*) FROM aws_cfn_event_history WHERE stack_id=?1)+(SELECT count(*) FROM aws_cfn_events WHERE stack_id=?1)`, fresh.ID).Scan(&n); err != nil {
+			t.Fatal(err)
+		}
+		return n
+	}
+	own := func(fresh StackRecord, logical string) string {
+		t.Helper()
+		id := networkID(fresh, logical)
+		if id == "" || id == networkID(record, logical) || id == networkID(other, logical) {
+			t.Fatalf("%s is not a row of the stack being created: %q", logical, id)
+		}
+		return id
+	}
 	for _, tc := range []struct {
-		name   string
-		subnet string
-		groups any
+		name  string
+		place func(fresh StackRecord) (subnet string, groups any)
 	}{
-		{"EC2-owned subnet", native.ID, []any{networkID(record, "Sg")}},
-		{"another stack's subnet", networkID(other, "PublicSubnet"), []any{networkID(record, "Sg")}},
-		{"missing subnet", "subnet-0000000000000000f", []any{networkID(record, "Sg")}},
-		{"a VPC as subnet", networkID(record, "Vpc"), []any{networkID(record, "Sg")}},
-		{"another stack's security group", networkID(record, "PublicSubnet"), []any{networkID(other, "Sg")}},
-		{"missing security group", networkID(record, "PublicSubnet"), []any{"sg-0000000000000000f"}},
-		{"a subnet as security group", networkID(record, "PublicSubnet"), []any{networkID(record, "PublicSubnet")}},
-		{"no security group", networkID(record, "PublicSubnet"), []any{}},
-		{"malformed security groups", networkID(record, "PublicSubnet"), "sg"},
+		{"EC2-owned subnet", func(f StackRecord) (string, any) { return nativeSubnet.ID, []any{own(f, "Sg")} }},
+		{"another stack's subnet", func(f StackRecord) (string, any) { return networkID(other, "PublicSubnet"), []any{own(f, "Sg")} }},
+		{"missing subnet", func(f StackRecord) (string, any) { return "subnet-0000000000000000f", []any{own(f, "Sg")} }},
+		{"own VPC as subnet", func(f StackRecord) (string, any) { return own(f, "Vpc"), []any{own(f, "Sg")} }},
+		{"own security group as subnet", func(f StackRecord) (string, any) { return own(f, "Sg"), []any{own(f, "Sg")} }},
+		{"EC2-owned security group", func(f StackRecord) (string, any) { return own(f, "PublicSubnet"), []any{nativeGroup.ID} }},
+		{"another stack's security group", func(f StackRecord) (string, any) { return own(f, "PublicSubnet"), []any{networkID(other, "Sg")} }},
+		{"missing security group", func(f StackRecord) (string, any) { return own(f, "PublicSubnet"), []any{"sg-0000000000000000f"} }},
+		{"own subnet as security group", func(f StackRecord) (string, any) { return own(f, "PublicSubnet"), []any{own(f, "PublicSubnet")} }},
+		// Both rows foreign and in one VPC: only the ownership check can refuse these.
+		{"another stack's subnet and group", func(f StackRecord) (string, any) {
+			return networkID(other, "PublicSubnet"), []any{networkID(other, "Sg")}
+		}},
+		{"EC2-owned subnet and group", func(f StackRecord) (string, any) { return nativeSubnet.ID, []any{nativeGroup.ID} }},
+		{"own group followed by a foreign one", func(f StackRecord) (string, any) {
+			return own(f, "PublicSubnet"), []any{own(f, "Sg"), networkID(other, "Sg")}
+		}},
+		{"no security group", func(f StackRecord) (string, any) { return own(f, "PublicSubnet"), []any{} }},
+		{"malformed security groups", func(f StackRecord) (string, any) { return own(f, "PublicSubnet"), "sg" }},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			fresh := compiled()
 			instance := fixtureStackInstance(fresh)
-			instance.Properties = map[string]any{"SubnetId": tc.subnet, "SecurityGroupIds": tc.groups}
+			subnet, groups := tc.place(fresh)
+			instance.Properties = map[string]any{"SubnetId": subnet, "SecurityGroupIds": groups}
 			fresh.Resources = append(fresh.Resources, instance)
 			// Without the refusal the create would commit and block in Launch.
 			done := make(chan error, 1)
@@ -431,30 +463,107 @@ func TestStackInstancePlacementRefusedBeforeCommitAndLaunch(t *testing.T) {
 			if failure, ok := err.(ssmFailure); !ok || failure.code != "ValidationError" {
 				t.Fatalf("placement was not refused as a validation error: %v", err)
 			}
-			// Records reports a missing stack as an error; either way none is stored.
-			if records, _ := stack.Records(record.Region, record.Name); len(records) != 0 {
-				t.Fatalf("a refused stack was stored: %v", records)
+			// The stack, its claims, its own network rows and its events are all rolled back.
+			if n := rows(fresh); n != 0 {
+				t.Fatalf("a refused stack left %d rows", n)
 			}
-			var claims int
-			if err = stack.db.QueryRow(`SELECT count(*) FROM aws_cfn_ownership WHERE physical_id=?`, instance.PhysicalID).Scan(&claims); err != nil || claims != 0 {
-				t.Fatalf("a refused stack kept its instance claim: %d %v", claims, err)
+			if _, retained := stack.instanceAttempts.Load(fresh.ID); retained {
+				t.Fatal("a refused stack retained its launch attempt")
 			}
 			if _, err = stack.ec2Read(ctx, record.Region, "DescribeInstances"); err != nil {
 				t.Fatalf("discovery must stay readable after a refusal: %v", err)
 			}
 		})
 	}
+	// Two placements that no supported action can produce are still refused, as
+	// DescribeInstances would reject them: a group of the same stack in another
+	// VPC than the subnet, and a foreign group inside the stack's own VPC. Their
+	// rows are seeded directly, under IDs derived from the new stack.
+	for _, tc := range []struct {
+		name string
+		seed func(fresh StackRecord) []EC2NetworkResource
+	}{
+		{"own group in another VPC", func(f StackRecord) []EC2NetworkResource {
+			return []EC2NetworkResource{
+				{ID: "vpc-0000000000000000e", Kind: "AWS::EC2::VPC", Region: f.Region, StackID: f.ID, CIDR: "10.201.0.0/16", Revision: 1},
+				{ID: "sg-0000000000000000e", Kind: "AWS::EC2::SecurityGroup", Region: f.Region, StackID: f.ID, VPCID: "vpc-0000000000000000e", Revision: 1},
+			}
+		}},
+		{"foreign group in the own VPC", func(f StackRecord) []EC2NetworkResource {
+			return []EC2NetworkResource{{ID: "sg-0000000000000000e", Kind: "AWS::EC2::SecurityGroup", Region: f.Region, StackID: other.ID, VPCID: own(f, "Vpc"), Revision: 1}}
+		}},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			fresh := compiled()
+			seed, err := stack.db.Begin()
+			if err != nil {
+				t.Fatal(err)
+			}
+			// The store has one connection: never leave this transaction or its rows behind.
+			defer seed.Rollback()
+			defer stack.db.Exec(`DELETE FROM aws_ec2_network_resources WHERE id IN ('vpc-0000000000000000e','sg-0000000000000000e')`)
+			for _, row := range tc.seed(fresh) {
+				if err = networkWrite(ctx, seed, row, true); err != nil {
+					t.Fatal(err)
+				}
+			}
+			if err = seed.Commit(); err != nil {
+				t.Fatal(err)
+			}
+			instance := fixtureStackInstance(fresh)
+			instance.Properties["SecurityGroupIds"] = []any{own(fresh, "Sg"), "sg-0000000000000000e"}
+			fresh.Resources = append(fresh.Resources, instance)
+			done := make(chan error, 1)
+			go func() { done <- stack.Create(fresh) }()
+			select {
+			case err = <-done:
+			case <-attempt.started:
+				t.Fatal("a refused placement started a guest launch")
+			case <-time.After(5 * time.Second):
+				t.Fatal("the placement refusal did not return")
+			}
+			if failure, ok := err.(ssmFailure); !ok || failure.code != "ValidationError" {
+				t.Fatalf("the seeded placement was not refused: %v", err)
+			}
+			// Only the seeded rows may remain under this stack ID.
+			if _, err = stack.db.Exec(`DELETE FROM aws_ec2_network_resources WHERE id IN ('vpc-0000000000000000e','sg-0000000000000000e')`); err != nil {
+				t.Fatal(err)
+			}
+			if n := rows(fresh); n != 0 {
+				t.Fatalf("a refused stack left %d rows", n)
+			}
+		})
+	}
+	// A read that fails is an error, not a placement verdict, and stores nothing.
+	t.Run("cancelled read", func(t *testing.T) {
+		fresh := compiled()
+		fresh.Resources = append(fresh.Resources, fixtureStackInstance(fresh))
+		cancelled, cancel := context.WithCancel(ctx)
+		cancel()
+		err := stack.createCheckedContext(cancelled, fresh, nil)
+		if _, verdict := err.(ssmFailure); err == nil || verdict {
+			t.Fatalf("a failed read was reported as a placement verdict or success: %v", err)
+		}
+		if n := rows(fresh); n != 0 {
+			t.Fatalf("a failed create left %d rows", n)
+		}
+	})
+	// A failed case may have started the one launch this double can run; the
+	// remaining checks would then block instead of reporting.
+	if t.Failed() {
+		return
+	}
 	select {
 	case <-attempt.started:
 		t.Fatal("a refused placement started a guest launch")
 	default:
 	}
-	// The refusals changed neither the EC2-owned subnet nor the other stack.
+	// The refusals changed neither the EC2-owned rows nor the other stack.
 	var kept int
-	if err = stack.db.QueryRow(`SELECT count(*) FROM aws_ec2_network_resources WHERE region=? AND id IN (?,?)`, record.Region, native.ID, networkID(other, "PublicSubnet")).Scan(&kept); err != nil || kept != 2 {
-		t.Fatalf("a refused placement changed foreign subnets: %d %v", kept, err)
+	if err = stack.db.QueryRow(`SELECT count(*) FROM aws_ec2_network_resources WHERE region=? AND id IN (?,?,?,?)`, record.Region, nativeSubnet.ID, nativeGroup.ID, networkID(other, "PublicSubnet"), networkID(other, "Sg")).Scan(&kept); err != nil || kept != 4 {
+		t.Fatalf("a refused placement changed foreign rows: %d %v", kept, err)
 	}
-	// The same stack with a valid placement is admitted and launches.
+	// The same stack with its own subnet and group is admitted and launches.
 	fresh := compiled()
 	fresh.Resources = append(fresh.Resources, fixtureStackInstance(fresh))
 	done := make(chan error, 1)
