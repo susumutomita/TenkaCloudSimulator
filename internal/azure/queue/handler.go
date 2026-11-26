@@ -8,7 +8,6 @@ import (
 	"net/url"
 	"regexp"
 	"strings"
-	"sync"
 	"time"
 )
 
@@ -19,10 +18,10 @@ type Config struct {
 }
 type AuthenticatedActor struct{ ExerciseIdentity string }
 type Handler struct {
-	db    *sql.DB
-	cfg   Config
-	actor func(context.Context) (AuthenticatedActor, bool)
-	mu    sync.Mutex
+	db     *sql.DB
+	cfg    Config
+	actor  func(context.Context) (AuthenticatedActor, bool)
+	txGate chan struct{}
 }
 
 var queueName = regexp.MustCompile(`^[a-z0-9][a-z0-9-]{1,61}[a-z0-9]$`)
@@ -38,7 +37,7 @@ func NewOwnedHandler(db *sql.DB, cfg Config, actor func(context.Context) (Authen
 	if err := initialize(db, cfg); err != nil {
 		return nil, err
 	}
-	return &Handler{db: db, cfg: cfg, actor: actor}, nil
+	return &Handler{db: db, cfg: cfg, actor: actor, txGate: make(chan struct{}, 1)}, nil
 }
 func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("x-ms-version", apiVersion)
@@ -117,10 +116,21 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-	// Serialize a leaf's writes and keep all state observations in one transaction.
-	h.mu.Lock()
-	defer h.mu.Unlock()
-	tx, err := h.db.BeginTx(r.Context(), nil)
+	// Keep a leaf's operations serial, but allow a waiting request to leave
+	// without acquiring the gate or entering SQLite after cancellation.
+	ctx := r.Context()
+	select {
+	case <-ctx.Done():
+		respondError(w, ctx.Err())
+		return
+	case h.txGate <- struct{}{}:
+	}
+	defer func() { <-h.txGate }()
+	if err = ctx.Err(); err != nil {
+		respondError(w, err)
+		return
+	}
+	tx, err := h.db.BeginTx(ctx, nil)
 	if err != nil {
 		respondError(w, err)
 		return

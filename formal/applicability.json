@@ -1,12 +1,35 @@
 {
   "version": 1,
-  "base_sha": "61295dfeacf23724a38d6ccce2416c8f7a73d16e",
+  "base_sha": "377e95ce03fd8596865c1826d631f6a88cf905cd",
   "changes": [
     {
-      "path": "test/e2e/ec2_network_contract.py",
-      "sha256": "d4ed3b12a056dbcbca1fc8c528abfdea60e4dbe1b2840512e3ca7ab47e1c39fd",
+      "path": "internal/azure/queue/handler.go",
+      "sha256": "67d1b2c80eecc2d936e71078487c692a8ba7b479511ba8c978ee630cc820d17f",
+      "disposition": "modeled",
+      "reason": "Replace the pre-transaction mutex with a context-aware one-slot Queue admission gate. A queued cancellation returns before transaction entry without changing durable Queue state; continuing requests retain previous serialized owner checks and operation transitions.",
+      "models": [
+        {
+          "id": "AzureQueueLifecycle",
+          "properties": [
+            "ReadRollbackDurable",
+            "Isolation"
+          ],
+          "limits": "Abstract Fail and peer frame do not model Go channel selection, queue fairness, context timing, SQLite transactions, disconnection or any service-side timeout. The deterministic leaf regression addresses local waiting cancellation separately."
+        },
+        {
+          "id": "AzureQueueOwnerAccess",
+          "properties": [
+            "NativePermissionBoundary"
+          ],
+          "limits": "Normalized owner admission remains unchanged before the gate; no modeling of real authentication, context/channel admission or transport timing."
+        }
+      ]
+    },
+    {
+      "path": "internal/azure/queue/cancellation_test.go",
+      "sha256": "610b4425e8359ee26d873191f0d7ff4f2eb13867731c13487dea7b66b2657d28",
       "disposition": "test-support",
-      "reason": "Extend the existing authenticated loopback AWS SDK test with request refusal and exact database snapshot preservation; no product behavior changes.",
+      "reason": "Test-only fixture holds one real SQLite transaction and verifies a second authenticated leaf call exits before release, leaves no row and permits retry. No additional consumer or runtime behavior.",
       "models": []
     }
   ]
