@@ -1,296 +1,129 @@
 {
   "version": 1,
-  "base_sha": "78cf1219985a19833b2378734b85cad056b4b164",
+  "base_sha": "2974d42d62db3a89da46d762198f42c5756e753c",
   "changes": [
     {
-      "path": "README.md",
-      "sha256": "4a3685247ea0bcd1c6c24134d3fae7933c4e17f915e9742ae47155e689be55e4",
+      "path": "docs/design/rds-owned-generation.md",
+      "sha256": "fc8d5c8e9264eff50ae22915d15463fab1fc697f0b92bf7a253fe6396da23580",
       "disposition": "documentation",
-      "reason": "Document explicit four-operation metadata profile and exclusions without promising sign-in or workload compatibility.",
+      "reason": "Describes the checked final snapshot and its explicit non-runtime limits.",
       "models": []
     },
     {
-      "path": "docs/design/0001-go-standalone.md",
-      "sha256": "94a2a3bd86fdaf93bba66bfd8ab023f43d722d056dc1687a0a5c90c08623dd8a",
-      "disposition": "documentation",
-      "reason": "Document explicit four-operation metadata profile and exclusions without promising sign-in or workload compatibility.",
-      "models": []
-    },
-    {
-      "path": "docs/design/cognito-user-pools.md",
-      "sha256": "f7a2ab734b683e30647527b1220a9ab579d57951ede43f4181e68f440994c8e7",
-      "disposition": "documentation",
-      "reason": "Document explicit four-operation metadata profile and exclusions without promising sign-in or workload compatibility.",
-      "models": []
-    },
-    {
-      "path": "formal/CognitoUserPoolMetadata.cfg",
-      "sha256": "80040a230faa73112b06080f71dd16f9ce23b72a526a3e418f0540711676f706",
+      "path": "formal/RDSGuestPeerPreflight.cfg",
+      "sha256": "48c4b988822e943f5857c969f0c10002f05836a4596baa7a2fac21bb983cfc71",
       "disposition": "modeled",
-      "reason": "Bind bounded local Cognito pool metadata only to the corresponding finite contract.",
+      "reason": "Registers the final-commit and destination at final snapshot invariants without dropping any prior checks.",
       "models": [
         {
-          "id": "CognitoUserPoolMetadata",
+          "id": "RDSGuestPeerPreflight",
           "properties": [
-            "AdmissionBeforeStorage",
-            "ScopedCRUD",
-            "ExactOrderedPage",
-            "ExactNextToken",
-            "RestartPersistsRows"
+            "CurrentPrivateGeneration",
+            "DestinationIngress",
+            "SnapshotClosedBeforeHost",
+            "HostAuthenticated",
+            "FinalSnapshotCommitted",
+            "DestinationAtFinalSnapshot",
+            "LiveAtReturn",
+            "ObservationOnly",
+            "DenialDoesNotRetireOwner",
+            "HealthyObservation"
           ],
-          "limits": "Finite metadata keys only; authorization proof, typed parsing and token integrity are symbolic conditions, not proofs of SigV4, IAM implementation, HMAC, key handling, SQLite atomicity, actual process isolation, parser/wire fidelity, concurrency or all sizes. Peer/malformed cursor variants independently probe guards, not obtainable tokens. Each accepted page uses the current table, not a historical snapshot. No users, login, app clients, roles issued, Entra, federation, Console, Scalar, CloudFormation, or Go refinement."
+          "limits": "One bounded observation with one independent destination loss between committed snapshots and separate guest fences; no continuous validity, actual SCRAM, transport, Go/SQLite refinement, guest SQL or later authority proven."
         }
       ]
     },
     {
-      "path": "formal/CognitoUserPoolMetadata.tla",
-      "sha256": "46f5215126c872d30e0e7f529ebf5a57b653f705645178dd751e1a3d1adafebd",
+      "path": "formal/RDSGuestPeerPreflight.tla",
+      "sha256": "6d6a4aea64410ed2f1950625022a24d37ee3f5d764fea780e081ce6b48011ed5",
       "disposition": "modeled",
-      "reason": "Bind bounded local Cognito pool metadata only to the corresponding finite contract.",
+      "reason": "Adds independent destination loss and abstract final commit to the existing bounded peer observation.",
       "models": [
         {
-          "id": "CognitoUserPoolMetadata",
+          "id": "RDSGuestPeerPreflight",
           "properties": [
-            "AdmissionBeforeStorage",
-            "ScopedCRUD",
-            "ExactOrderedPage",
-            "ExactNextToken",
-            "RestartPersistsRows"
+            "CurrentPrivateGeneration",
+            "DestinationIngress",
+            "SnapshotClosedBeforeHost",
+            "HostAuthenticated",
+            "FinalSnapshotCommitted",
+            "DestinationAtFinalSnapshot",
+            "LiveAtReturn",
+            "ObservationOnly",
+            "DenialDoesNotRetireOwner",
+            "HealthyObservation"
           ],
-          "limits": "Finite metadata keys only; authorization proof, typed parsing and token integrity are symbolic conditions, not proofs of SigV4, IAM implementation, HMAC, key handling, SQLite atomicity, actual process isolation, parser/wire fidelity, concurrency or all sizes. Peer/malformed cursor variants independently probe guards, not obtainable tokens. Each accepted page uses the current table, not a historical snapshot. No users, login, app clients, roles issued, Entra, federation, Console, Scalar, CloudFormation, or Go refinement."
+          "limits": "One bounded observation with one independent destination loss between committed snapshots and separate guest fences; no continuous validity, actual SCRAM, transport, Go/SQLite refinement, guest SQL or later authority proven."
         }
       ]
     },
     {
       "path": "formal/models.json",
-      "sha256": "7e03c1fa25871438790dfd93e785ba4a315adf64c40bfa78e927714446b5e5d1",
+      "sha256": "1407ffaaf42fcad9c2d0c01263694406f5b59fe2f468170db5d5daefef4026d8",
       "disposition": "formal-infrastructure",
-      "reason": "Register new finite model, pinned source scope and independent positive/negative controls without relaxing earlier coverage.",
+      "reason": "Replace only the hash-checked RDSGuestPeerPreflight entry; all other registry bytes, source scopes and prior sensitivity controls are retained.",
       "models": []
     },
     {
-      "path": "internal/aws/cognito_user_pools.go",
-      "sha256": "f9429099ded52038760321616f17d7ddbb9408d338623c92c08c16b3a6efdc26",
-      "disposition": "modeled",
-      "reason": "Bind bounded local Cognito pool metadata only to the corresponding finite contract.",
-      "models": [
-        {
-          "id": "CognitoUserPoolMetadata",
-          "properties": [
-            "AdmissionBeforeStorage"
-          ],
-          "limits": "Exact trusted native credential, selected exercise identity and resource account/signed region through the Cognito adapter. Signature parsing and IAM evaluation are symbolic, not proven."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/cognitoidp/contract_test.go",
-      "sha256": "bfd1705054faec01e547aa8c54bde6ceb65be46298ba7478e9f09abdd7be37b8",
+      "path": "internal/aws/catalog/rds_guest_peer_controls_linux_amd64_test.go",
+      "sha256": "1e1ba993703bc849b8b25e85fdb3c40d24b19be7a15db0546034210d46423e50",
       "disposition": "test-support",
-      "reason": "Exercise malformed/empty response rejection, metadata-only scoped page/restart and quota/deletion against isolated SQLite; no shipped state or behavior.",
+      "reason": "Exercises production peer/Query paths and SQLite with an inert host proof; no fixture is admitted in production.",
       "models": []
     },
     {
-      "path": "internal/aws/cognitoidp/http.go",
-      "sha256": "12648294cb1e2bd98ff852b3f77c464dddc54721f69619ba7cbd519eecdb7367",
+      "path": "internal/aws/catalog/rds_guest_peer_linux_amd64.go",
+      "sha256": "7997735d099026fb5272676aecbff357b6294e7cc9b10d8fff2b099355393f66",
       "disposition": "modeled",
-      "reason": "Bind bounded local Cognito pool metadata only to the corresponding finite contract.",
+      "reason": "Adds a committed destination/generation recheck after the same fixed host probe, with refusal preserving the owner.",
       "models": [
         {
-          "id": "CognitoUserPoolMetadata",
+          "id": "RDSGuestPeerPreflight",
           "properties": [
-            "AdmissionBeforeStorage",
-            "ScopedCRUD",
-            "ExactOrderedPage",
-            "ExactNextToken"
+            "CurrentPrivateGeneration",
+            "DestinationIngress",
+            "SnapshotClosedBeforeHost",
+            "HostAuthenticated",
+            "FinalSnapshotCommitted",
+            "DestinationAtFinalSnapshot",
+            "LiveAtReturn",
+            "ObservationOnly",
+            "DenialDoesNotRetireOwner",
+            "HealthyObservation"
           ],
-          "limits": "Modeled admission order, four action/resource checks, refusal frame and typed success class; JSON decoding, request bytes, actual ARN/error envelopes and metadata fields are not modeled."
+          "limits": "One bounded observation with one independent destination loss between committed snapshots and separate guest fences; no continuous validity, actual SCRAM, transport, Go/SQLite refinement, guest SQL or later authority proven."
         }
       ]
     },
     {
-      "path": "internal/aws/cognitoidp/pagination.go",
-      "sha256": "05c77dfafe161215b46e67de0da7521aa40699fa390f6bf04015feeb076aacc0",
+      "path": "internal/aws/catalog/rds_owned_runtime_linux_amd64.go",
+      "sha256": "4f953fc915408b610cfb896910a7bdde5c908706b870d24242c75b66338e8370",
       "disposition": "modeled",
-      "reason": "Bind bounded local Cognito pool metadata only to the corresponding finite contract.",
+      "reason": "Uses a package-private probe/close boundary for an already acquired child; production acquisition remains the single concrete owner and retains its exact generation and fence.",
       "models": [
         {
-          "id": "CognitoUserPoolMetadata",
+          "id": "RDSGuestPeerPreflight",
           "properties": [
-            "AdmissionBeforeStorage",
-            "ExactOrderedPage",
-            "ExactNextToken",
-            "RestartPersistsRows"
+            "CurrentPrivateGeneration",
+            "HostAuthenticated",
+            "FinalSnapshotCommitted",
+            "DenialDoesNotRetireOwner",
+            "ObservationOnly"
           ],
-          "limits": "Opaque scoped continuation, reauthorized on every page; current ordered rows and last-key boundary, not snapshots. HMAC, bytes, compare/sort implementation and key entropy are not modeled."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/cognitoidp/pools.go",
-      "sha256": "f2e983a51bfc3578ebebb6dcc70d964311193760e12bb0d60d9266a132974d7d",
-      "disposition": "modeled",
-      "reason": "Bind bounded local Cognito pool metadata only to the corresponding finite contract.",
-      "models": [
+          "limits": "One bounded observation with one independent destination loss between committed snapshots and separate guest fences; no continuous validity, actual SCRAM, transport, Go/SQLite refinement, guest SQL or later authority proven."
+        },
         {
-          "id": "CognitoUserPoolMetadata",
+          "id": "RDSOwnedGenerationFence",
           "properties": [
-            "ScopedCRUD",
-            "RestartPersistsRows"
+            "LaunchNeedsCommittedAuthority",
+            "AttachNeedsCurrent",
+            "FencedGenerationCannotChange",
+            "UncertainCleanupRemainsFenced",
+            "NoPublishedEndpoint"
           ],
-          "limits": "Modeled local account/region keys, quota, collision/missing, exact delete/create frame and persisted rows; time, names, SQLite, transaction/concurrency behavior not proven."
+          "limits": "One finite provider generation and durable cleanup fence; the interface has no request-supplied implementation and this model does not prove physical child behavior, process shutdown, or refinement."
         }
       ]
-    },
-    {
-      "path": "internal/aws/cognitoidp/pools_test.go",
-      "sha256": "0c9777de19487a42beeb84b89455774e05c1469cf8523bffcf5c4c1f8d79a7b6",
-      "disposition": "test-support",
-      "reason": "Exercise Cognito metadata state and native authentication boundaries without introducing shipped state.",
-      "models": []
-    },
-    {
-      "path": "internal/aws/cognitoidp/storage_observation_test.go",
-      "sha256": "ef12e65d52eb1b9fa08e066092e2e2556477a700afe5b0fdc815836954219baa",
-      "disposition": "test-support",
-      "reason": "Uses owned SQLite fixtures to verify rejected invalid scope and fail-closed write acknowledgment and page-stream errors. Observational faults are injected through the test-only database/sql adapter; runtime and models are unchanged.",
-      "models": []
-    },
-    {
-      "path": "internal/aws/s3.go",
-      "sha256": "b865e662975febe98d2bbef4e82da8ee6d2291d56efaeffcde4202ee41d7deba",
-      "disposition": "modeled",
-      "reason": "Bind bounded local Cognito pool metadata only to the corresponding finite contract.",
-      "models": [
-        {
-          "id": "CognitoUserPoolMetadata",
-          "properties": [
-            "AdmissionBeforeStorage",
-            "ScopedCRUD"
-          ],
-          "limits": "Only the gateway attachment and authority/store scope, not other AWS Gateway services."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/ssm.go",
-      "sha256": "8701702f70680334dbeb9fbb7d028de816b764dc776e3978d04151eeb3b17eb3",
-      "disposition": "modeled",
-      "reason": "Bind bounded local Cognito pool metadata only to the corresponding finite contract.",
-      "models": [
-        {
-          "id": "CognitoUserPoolMetadata",
-          "properties": [
-            "AdmissionBeforeStorage"
-          ],
-          "limits": "Only dispatch to explicitly modeled metadata operations, not previously supported gateway paths or header parser proofs."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/sts_signature.go",
-      "sha256": "8abda74178271f75db7d4ea090d032fbeb66dd2f38dc2e64e14fa2f3c07a5a7a",
-      "disposition": "modeled",
-      "reason": "Bind bounded local Cognito pool metadata only to the corresponding finite contract.",
-      "models": [
-        {
-          "id": "CognitoUserPoolMetadata",
-          "properties": [
-            "AdmissionBeforeStorage"
-          ],
-          "limits": "Only symbolic trusted-native precondition and bound request headers; does not prove signature checks, credential lifetime, IAM policy execution or neighboring signing protocols."
-        }
-      ]
-    },
-    {
-      "path": "internal/server/access_sdk.go",
-      "sha256": "d6f9fed3c900bf0a27ec0e5c277af43b9a057691370af2a1a739a79bca9d1fb9",
-      "disposition": "modeled",
-      "reason": "Bind bounded local Cognito pool metadata only to the corresponding finite contract.",
-      "models": [
-        {
-          "id": "CognitoUserPoolMetadata",
-          "properties": [
-            "AdmissionBeforeStorage"
-          ],
-          "limits": "Modeled rejection before storage, not native Access middleware behavior or error envelope serialization."
-        }
-      ]
-    },
-    {
-      "path": "internal/server/cognito_user_pools_capabilities.go",
-      "sha256": "1bcf15d200389d9eab4f2947fee202460800309e2bf24125a617061b5c4a5409",
-      "disposition": "modeled",
-      "reason": "Bind bounded local Cognito pool metadata only to the corresponding finite contract.",
-      "models": [
-        {
-          "id": "CognitoUserPoolMetadata",
-          "properties": [
-            "AdmissionBeforeStorage"
-          ],
-          "limits": "Modeled operation envelope has precisely these four implemented pool metadata actions; the capability document projection itself is separately exercised, no Console/sign-in support is asserted."
-        }
-      ]
-    },
-    {
-      "path": "internal/server/cognito_user_pools_contract_test.go",
-      "sha256": "8873d24d49917a5377bf0859bd0403ac902cf4b15c8d0722ab944bc94321b254",
-      "disposition": "test-support",
-      "reason": "Exercise exact local SDK admission and metadata capability reporting in a regression harness; this file is test-only and not shipped runtime.",
-      "models": []
-    },
-    {
-      "path": "internal/server/cognito_user_pools_test.go",
-      "sha256": "c1023f0fe08d433a433a8b26861b56e5d659d42f27204f9aa36cb64f26731a8d",
-      "disposition": "test-support",
-      "reason": "Exercise Cognito metadata state and native authentication boundaries without introducing shipped state.",
-      "models": []
-    },
-    {
-      "path": "internal/server/console_handoff_test.go",
-      "sha256": "09995380ca02706e105d692360981504ae1e02386e058e89f7ee26676388c4e2",
-      "disposition": "modeled",
-      "reason": "This existing ConsoleHandoff-scoped test preserves the Access-only separation between browser handoff and the verified native signing interface; the admitted signing inventory now includes Cognito metadata only.",
-      "models": [
-        {
-          "id": "ConsoleHandoff",
-          "properties": [
-            "SDKAuthorityPreserved"
-          ],
-          "limits": "Existing finite lifecycle/SDK authority frame only. Does not model the Go response header, service list, version, SigV4, or Cognito metadata. The exact six-service declaration and bare-embedding negative are executable Go assertions; Cognito behavior is scoped separately."
-        }
-      ]
-    },
-    {
-      "path": "internal/server/server.go",
-      "sha256": "0fada89a3b7ce3362e0eeaac732dce50729c38a88c25427066efc4ccae97914b",
-      "disposition": "modeled",
-      "reason": "Bind bounded local Cognito pool metadata only to the corresponding finite contract.",
-      "models": [
-        {
-          "id": "CognitoUserPoolMetadata",
-          "properties": [
-            "AdmissionBeforeStorage",
-            "ScopedCRUD",
-            "RestartPersistsRows"
-          ],
-          "limits": "Only native pool store composition and persisted state/frame; the advertised capability, process isolation, actual SQLite behavior, router composition and unrelated services are not proved."
-        }
-      ]
-    },
-    {
-      "path": "scripts/formal_model_gate.py",
-      "sha256": "63d84fbfefad0dfcca98d9affa644a31c93bbec9a2cbb92a8c72f0a481c1c632",
-      "disposition": "formal-infrastructure",
-      "reason": "Register new finite model, pinned source scope and independent positive/negative controls without relaxing earlier coverage.",
-      "models": []
-    },
-    {
-      "path": "scripts/test-formal-gate.py",
-      "sha256": "2c746fd33956b3f4e527b044ca603e06909cf4210ba0a5844712f1a0c83b6ae6",
-      "disposition": "formal-infrastructure",
-      "reason": "Register new finite model, pinned source scope and independent positive/negative controls without relaxing earlier coverage.",
-      "models": []
     }
   ]
 }
