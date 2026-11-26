@@ -4,6 +4,7 @@ Starts only a disposable authenticated loopback simulator via the existing E2E
 harness. No VM, real AWS, emulator comparison, or external endpoint argument.
 Run after make build with the dependencies in scripts/requirements-test.txt.
 """
+from contextlib import ExitStack
 import copy
 import json
 from pathlib import Path
@@ -20,12 +21,17 @@ NONCANONICAL_DEFAULT = '203.0.113.19/0'
 
 class NetworkContract(unittest.TestCase):
     def setUp(self):
-        state = Path(self.enterContext(tempfile.TemporaryDirectory())) / 'state.sqlite'
-        self.endpoint, self.token = self.enterContext(running(db=state, authenticated=True))
-        self.cfn = self.client('cloudformation')
-        self.ec2 = self.client('ec2')
+        self.database = Path(self.enterContext(tempfile.TemporaryDirectory())) / 'state.sqlite'
+        self.runtime = self.enterContext(ExitStack())
+        self.start_runtime()
         self.template = json.loads(FIXTURE.read_text())
         self.template['Outputs']['Gateway'] = {'Value': {'Ref': 'Gateway'}}
+
+    def start_runtime(self):
+        self.endpoint, self.token = self.runtime.enter_context(
+            running(db=self.database, authenticated=True))
+        self.cfn = self.client('cloudformation')
+        self.ec2 = self.client('ec2')
 
     def client(self, service, region='us-east-1', token=True):
         client = boto3.client(
@@ -36,7 +42,7 @@ class NetworkContract(unittest.TestCase):
                           read_timeout=10, proxies={}))
         if token:
             client.meta.events.register('before-sign', lambda request, **_: request.headers.add_header('X-Simulator-Token', self.token))
-        self.addCleanup(client.close)
+        self.runtime.callback(client.close)
         return client
 
     def outputs(self, name):
@@ -51,6 +57,8 @@ class NetworkContract(unittest.TestCase):
         return result['StackId']
 
     def delete_if_present(self, stack_id):
+        if self.cfn is None:  # A failed restart still disposes the local database.
+            return
         # Explicit deletes cancel cleanup by proving absence through CFN first.
         names = {s['StackId'] for s in self.cfn.describe_stacks()['Stacks']}
         if stack_id in names:
@@ -133,6 +141,45 @@ class NetworkContract(unittest.TestCase):
         self.assertEqual(self.ec2.describe_route_tables()['RouteTables'], survivor_tables)
         self.cfn.delete_stack(StackName=survivor)
         self.assertEqual(self.state(), ([], [], [], []))
+
+    def test_stack_network_persists_across_process_restart(self):
+        stack_id = self.create('network-restart')
+        before = self.state()
+        outputs = self.outputs(stack_id)
+        events = self.cfn.describe_stack_events(StackName=stack_id)['StackEvents']
+
+        # Close the process (and clients) before reopening its SQLite file.
+        # running() allocates a fresh isolated localhost endpoint and auth file.
+        self.cfn = self.ec2 = None
+        self.runtime.close()
+        self.start_runtime()
+
+        inventory = self.state()
+        self.assertEqual(inventory, before)
+        self.assertEqual(self.outputs(stack_id), outputs)
+        self.assertEqual(self.cfn.describe_stack_events(StackName=stack_id)['StackEvents'], events)
+        _, vpcs, subnets, tables = inventory
+        self.assertEqual([v['VpcId'] for v in vpcs], [outputs['Vpc']])
+        self.assertEqual(len(subnets), 1)
+        self.assert_subnet(subnets[0], outputs)
+        self.assertEqual(len(tables), 1)
+        self.assert_route_table(tables[0], outputs)
+
+        logical_ids = ('Vpc', 'Subnet', 'Table', 'Association')
+        expected = [(stack_id, key, self.template['Resources'][key]['Type'], outputs[key])
+                    for key in logical_ids]
+
+        def completed_resources(history, status):
+            return [(e['StackId'], e['LogicalResourceId'], e['ResourceType'], e['PhysicalResourceId'])
+                    for e in history if e['LogicalResourceId'] in logical_ids and e['ResourceStatus'] == status]
+
+        self.assertCountEqual(completed_resources(events, 'CREATE_COMPLETE'), expected)
+        self.cfn.delete_stack(StackName=stack_id)
+        self.rejected(self.cfn.describe_stacks, 'ValidationError', StackName=stack_id)
+        self.assertEqual(self.state(), ([], [], [], []))
+        history = self.cfn.describe_stack_events(StackName=stack_id)['StackEvents']
+        self.assertCountEqual(completed_resources(history, 'DELETE_COMPLETE'), expected)
+        self.assertEqual([e for e in history if e['ResourceStatus'].startswith('CREATE_')], events)
 
     def test_invalid_network_create_preserves_existing_state(self):
         self.create('network-survivor')
