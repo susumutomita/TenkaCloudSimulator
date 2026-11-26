@@ -1,12 +1,19 @@
 {
   "version": 1,
-  "base_sha": "60b1a2b63bc8fcec571b473dfb8f57fc7162d76e",
+  "base_sha": "6c14132ccf9d753f31143e1d22f2572e392994f5",
   "changes": [
     {
-      "path": "docs/ec2-network-contracts.md",
-      "sha256": "a2cdede13dc416be386897897940fc19ecacc473ca42fcd1358eb57b809264ed",
-      "disposition": "documentation",
-      "reason": "Update citations, evidence boundaries, and residual coverage for already merged native EC2 and CloudFormation network tests; no executable or modeled behavior changes.",
+      "path": "test/battle/README.md",
+      "sha256": "c8149b99080c425d5b48d4b1dafc674d77b03610100e3374ce49b906e8790c10",
+      "disposition": "test-support",
+      "reason": "Explain readback and cleanup checked by the existing opt-in Battle rehearsal; evidence remains limited to this fixed fixture.",
+      "models": []
+    },
+    {
+      "path": "test/battle/rehearsal.py",
+      "sha256": "4c0fa1b24de156ce9622c3d5ff2321e3e57ba2cfcd314d192cf4235c1183412b",
+      "disposition": "test-support",
+      "reason": "Add authenticated EC2 SDK read-only launch and teardown inventory checks and a missing-token control to the existing qualified fixture. No runtime, workflow, template, or scoring change.",
       "models": []
     }
   ]

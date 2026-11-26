@@ -59,6 +59,11 @@ A pass shows, for the binary and bundle named in `report.json`:
 
 - `CreateStack` with the unchanged template launches one guest and returns
   `CREATE_COMPLETE` only after the private guest agent answers.
+- EC2 Query with dummy SDK signing is refused without the same Simulator's
+  local access token. Its authenticated SDK view starts empty and then returns
+  one instance. The instance ID matches both the stack output and the committed same-stack
+  EC2 event. Its VPC, subnet and security group match that stack's committed
+  events, and the image alias and instance type match the fixed fixture.
 - The original UserData installs nginx with `dnf`, starts both services and
   reads the instance hostname from the local metadata service.
 - A participant assumes the template's own viewer role, opens a Session Manager
@@ -66,15 +71,20 @@ A pass shows, for the binary and bundle named in `report.json`:
   and recovers nginx with `systemctl start nginx`.
 - The owned probes return 200 for `/` and `/healthz`, fail for the stopped
   frontend after the catalog's `AWS-RunShellScript` disruption, and recover.
-- Sealing the capability, deleting the stack and stopping the Simulator leave no
-  guest process, and the Simulator exits 0.
+- Sealing the capability and deleting the stack restore the same SDK instance
+  view to its initial empty state. Physical cleanup and Simulator shutdown leave
+  no guest process, and the Simulator exits 0. An empty SDK view does not itself
+  prove process exit or audit hidden database rows.
 
 On macOS each emulator also runs under a private supervisor process (the
 simulator executable re-entered by `guestprocess`); the cleanup checks require that
 no supervisor remains either. QEMU's seccomp `-sandbox` exists only on Linux.
 
 It does **not** test the [Host Battle integration](https://github.com/susumutomita/TenkaCloud/blob/5e360d563e03e23ea431470559399dfc33ff2cca/scripts/local-host/integration/simulator-battle.ts)
-or Portal. This rehearsal stands in for the Host and computes points itself from `metadata.json` (`uptime-flat`, +100 / −100); the
+or Portal. The instance readback is for this CloudFormation-owned guest only;
+it does not test a Console launch or native EC2 `RunInstances`. It does not add
+a guest, modify the Challenge template, or change scoring. This rehearsal stands
+in for the Host and computes points itself from `metadata.json` (`uptime-flat`, +100 / −100); the
 Simulator never calculates points. The probe deadline uses the same machine's
 wall clock for both sides, which is not the independent Host clock qualification
 a real event needs. The 600-second automatic revert is a host timer and is not
