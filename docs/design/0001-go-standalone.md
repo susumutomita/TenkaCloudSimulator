@@ -38,6 +38,8 @@ SQLiteは既存のncruces SQLite/Wasm engineをGo process内で実行する。�
 
 VPC コンソールの「VPC とサブネット1つ」は、認証済みのシミュレーター管理者だけが CloudFormation に固定テンプレートを送る。参加者ブラウザーにはスタック出力が開示されないため、この選択肢を表示しない。新規スタックが両方を所有し、作成受領証の正確なスタック ID で再取得できたときだけ成功を表示する。ネイティブ EC2 所有 VPC への追加や、実ネットワークの作成は行わない。[対応範囲](../ec2-read-discovery.md#console-vpc-and-one-subnet)。
 
+API Reference の EC2 用プリセットは、既存の Query API の `DescribeInstances` を呼び、選択リージョンに記録されたメタデータを表示する。起動や稼働確認は行わない。
+
 ネイティブ EC2 の [DescribeSecurityGroups](../ec2-read-discovery.md#security-group-readback) は、既存の EC2 IAM 判定とリージョンの範囲内で CloudFormation 管理グループと未接続のネイティブグループを読む。グループと親 VPC の型付き所有権を同じ SQLite スナップショットで照合し、テンプレートの初期値ではなく今の TCP/IPv4 受信ルールを返す。XML 1.0 で値をそのまま返せない行や壊れた所有権があれば一覧全体を拒否し、保存内容は変更しない。通常のサインイン済み VPC コンソールも同じ API と IAM を使い、選択した CloudFormation 管理の VPC に属するグループだけを表示する。権限不足、読み取り失敗、空の結果は区別する。セキュリティグループの変更やパケット処理は対象外。
 
 [DescribeRouteTables](../ec2-read-discovery.md#route-table-readback) は、CloudFormation 管理とネイティブ EC2 管理のテーブルを同じリージョンの SQLite から返す。有効なデフォルト経路を持てるのは CloudFormation 管理のテーブルだけで、関連付けもスタックが管理する。ネイティブのテーブルとサブネットは、同じ VPC 内に限り [明示的に関連付け・解除](../ec2-read-discovery.md#native-subnet-route-table-associations)できる。両リソースに対する認可を確認し、関連付けが残っていればテーブルもサブネットも削除しない。解除しても暗黙のメインテーブルには移らず、経路の追加やパケットの転送は行わない。

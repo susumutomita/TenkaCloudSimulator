@@ -36,6 +36,22 @@ def operations(spec):
 
 
 
+def project_ec2_describe_instances(spec):
+    """Undo exactly the one EC2 Query preset, leaving all inherited defaults intact."""
+    post = spec['paths']['/']['post']
+    service, = (p for p in post['parameters'] if p.get('name') == 'X-Simulator-Service')
+    form = post['requestBody']['content']['application/x-www-form-urlencoded']
+    fields = form['schema']['properties']
+    for choices, value in ((service['schema']['enum'], 'ec2'),
+                           (fields['Action']['enum'], 'DescribeInstances'),
+                           (fields['Version']['enum'], '2016-11-15')):
+        assert choices.count(value) == 1 and choices[-1] == value, 'EC2 option changed: ' + value
+        choices.pop()
+    examples = form['examples']
+    assert next(iter(examples)) == 'DescribeStacks', 'Default Query example changed'
+    assert digest(examples.pop('DescribeInstances', None)) == '98e0dc514c8397bec15a2535638fc0a14778a98a42c97aa09b85e0d2950fa674', 'EC2 DescribeInstances preset changed'
+
+
 def project_simpledb_get_attributes(spec):
     """Undo only the reviewed GetAttributes preset and its shared field notes."""
     form = spec['paths']['/']['post']['requestBody']['content']['application/x-www-form-urlencoded']
@@ -112,6 +128,7 @@ SERVER_COLLECTION = '/_simulator/providers/sakura/cloud/zone/{zone}/api/cloud/1.
 
 def project_server_list(spec):
     spec = copy.deepcopy(spec)
+    project_ec2_describe_instances(spec)
     project_simpledb_delete_attributes(spec)
     tag = {'name': 'Sakura Server metadata',
            'description': 'Read saved Server metadata in the configured local zone; no VM or network state.'}
@@ -216,6 +233,26 @@ class SakuraReference(unittest.TestCase):
     def setUpClass(cls):
         cls.spec=json.loads((ROOT/'internal/server/apidocs/openapi.json').read_text())
 
+    def test_ec2_preset_allows_only_bounded_read(self):
+        post = self.spec['paths']['/']['post']
+        media = 'application/x-www-form-urlencoded'
+        form = post['requestBody']['content'][media]
+        value = form['examples']['DescribeInstances']['value']
+        self.assertEqual(value, {'Action': 'DescribeInstances', 'Version': '2016-11-15'})
+        for label, change in (
+            ('unsupported launch', lambda p, f: f['examples'].update(RunInstances={'value': {'Action': 'RunInstances'}})),
+            ('unsupported filter', lambda p, f: f['examples']['DescribeInstances']['value'].update({'Filter.1.Name': 'tag:Name'})),
+            ('missing service choice', lambda p, f: next(h for h in p['parameters'] if h.get('name') == 'X-Simulator-Service')['schema']['enum'].remove('ec2')),
+            ('duplicate version', lambda p, f: f['schema']['properties']['Version']['enum'].append('2016-11-15')),
+        ):
+            with self.subTest(label=label):
+                broken = copy.deepcopy(self.spec)
+                p = broken['paths']['/']['post']
+                change(p, p['requestBody']['content'][media])
+                with self.assertRaises(AssertionError):
+                    project_server_list(broken)
+        project_server_list(self.spec)
+
     def test_single_server_list_preserves_every_old_path(self):
         server = self.spec['paths'][SERVER_COLLECTION]
         assert set(server) == {'parameters', 'get'}
@@ -259,6 +296,7 @@ class SakuraReference(unittest.TestCase):
         self.assertEqual(example, {'Action': 'Select', 'Version': '2009-04-15',
             'SelectExpression': 'select itemName() from `example-domain` limit 25', 'ConsistentRead': 'true'})
         preceding = copy.deepcopy(self.spec)
+        project_ec2_describe_instances(preceding)
         project_simpledb_get_attributes(preceding)
         project_simpledb_select(copy.deepcopy(preceding))
         for change in (
@@ -283,7 +321,9 @@ class SakuraReference(unittest.TestCase):
         self.assertEqual(example, {'Action': 'GetAttributes', 'Version': '2009-04-15',
                                    'DomainName': 'scalar-practice-domain', 'ItemName': 'scalar-practice-item',
                                    'ConsistentRead': 'true'})
-        project_simpledb_get_attributes(copy.deepcopy(self.spec))
+        preceding = copy.deepcopy(self.spec)
+        project_ec2_describe_instances(preceding)
+        project_simpledb_get_attributes(copy.deepcopy(preceding))
         preserved(self.spec)
         for label, change in (
             ('missing action', lambda f: f['schema']['properties']['Action']['enum'].remove('GetAttributes')),

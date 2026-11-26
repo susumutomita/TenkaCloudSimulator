@@ -1,26 +1,47 @@
 {
   "version": 1,
-  "base_sha": "95e59d0569650efa56066ce7945449432d7909ce",
+  "base_sha": "e3883f4fd2ac7cd73e3e9818bf91c778cb4d9664",
   "changes": [
     {
-      "path": "test/e2e/test_ssm_batch_reference.py",
-      "sha256": "8e267e3b53ac430de494578e3b12735331ff4623dc07c8a450c941a593509ce4",
-      "disposition": "test-support",
-      "reason": "Validates later independently pinned OpenAPI layers before comparing an unchanged historical digest. Test-only; no runtime or state transition change.",
+      "path": "README.md",
+      "sha256": "69d5e12bfb78443c4de311d2712d01c3b41446ae5af54fc2b9263116cbfc4ed8",
+      "disposition": "documentation",
+      "reason": "Describes how to select an existing read-only EC2 Query preset; no simulator runtime or state transitions change.",
       "models": []
     },
     {
-      "path": "test/e2e/test_ssm_command_reference.py",
-      "sha256": "94f5a1122c3183eda6e48ae0e3019373e5ea9f73adcbf58f704a6c0cd1fb0407",
-      "disposition": "test-support",
-      "reason": "Validates later independently pinned OpenAPI layers before comparing an unchanged historical digest. Test-only; no runtime or state transition change.",
+      "path": "docs/api-reference.md",
+      "sha256": "5f8130c55ba1dd9681d365a4af18275c9b5b808bed95118272d67599191f4da2",
+      "disposition": "documentation",
+      "reason": "Describes how to select an existing read-only EC2 Query preset; no simulator runtime or state transitions change.",
       "models": []
     },
     {
-      "path": "test/e2e/test_ssm_document_reference.py",
-      "sha256": "ed58ffd99b6ae58563faeb3701417d64fd97e66ebabfc308ae262a514e03ee6e",
+      "path": "docs/design/0001-go-standalone.md",
+      "sha256": "0b9b5a184fd6d15785c33d17458b8d12e69d1597ea342f12f73f0e98a4c11a25",
+      "disposition": "documentation",
+      "reason": "Describes how to select an existing read-only EC2 Query preset; no simulator runtime or state transitions change.",
+      "models": []
+    },
+    {
+      "path": "internal/server/apidocs/openapi.json",
+      "sha256": "eea3c31766d3f6688f4a87228ce8251d10c684cc3e7c4a01e46ae1b88f67b1a3",
+      "disposition": "presentation",
+      "reason": "Exposes one fixed DescribeInstances example, action, API date and service selector; existing authentication, routing and state remain unchanged.",
+      "models": []
+    },
+    {
+      "path": "test/console/ec2_describe_instances_reference_native.py",
+      "sha256": "2c4fdf31466bc1c29c9b95bcfb7e0a384c0aff6c67f2c8cd40a1106ae85d20bd",
       "disposition": "test-support",
-      "reason": "Validates later independently pinned OpenAPI layers before comparing an unchanged historical digest. Test-only; no runtime or state transition change.",
+      "reason": "Checks the precise read-only preset and existing reference against regression. Neither simulator runtime nor modeled transition changes.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/test_sakura_openapi.py",
+      "sha256": "803d79678fddec1d51361e2df6205370fbb5c6053ac5b9b823d16bb198e7e06b",
+      "disposition": "test-support",
+      "reason": "Checks the precise read-only preset and existing reference against regression. Neither simulator runtime nor modeled transition changes.",
       "models": []
     }
   ]
