@@ -1789,7 +1789,7 @@ class FormalGateTests(unittest.TestCase):
         registry = load_registry(self.root)
         # Keep this inventory independent of the implementation's required set.
         # A newly registered model must be reviewed and named here explicitly.
-        self.assertEqual({model['id'] for model in registry['models']}, {'CognitoFederationNativeAdmission', 'CognitoFederationConfiguration', 'CognitoFederationPoolOwnership', 'SimpleDBSelectConsoleEpoch', 'SimpleDBSelectPage', 'SimpleDBAttributeDelete', 'SimpleDBDomainMetadata', 'SimpleDBLifecycle', 'SimpleDBPageCursor', 'SimpleDBQueryAdmission', 'CognitoUserPoolMetadata', 'SimpleDBConsoleEpoch', 'RDSPrivatePostgresTopology', 'RDSOwnedPostgresRuntime', 'RDSOwnedGenerationFence', 'RDSOwnedOperatorComposition', 'RDSGuestPeerPreflight', 'SARPolicyAuthorizationTarget', 'AzureConditionalCRCRead', 'AzureStructuredReadAdmission', 'AzureBlobRowDownload', 'EC2VPCOwnership', 'CloudDNSAtomicChange', 'CloudDNSChildToken', 'CloudDNSConsoleScope', 'SakuraServerMetadata', 'SakuraServerReadEpoch', 'CFNParameterRuleAdmission', 'ECSTaskRevisionLifecycle', 'VpcOriginReferenceLifecycle', 'ARPTrustedReply', 'PersistentIngressPolicy', 'AppEngineTraffic', 'AutoScalingPlanTargets', 'AzureBlobState', 'AzureQueueLifecycle', 'AzureQueueOwnerAccess', 'AzurePropertiesEpoch', 'AzurePropertiesTarget', 'BedrockRuntimeAdmission', 'BlobRange', 'BrowserSessions', 'CFNConditionAdmission', 'CFNConditionMemoDepth', 'CFNEventHistory', 'CFNFinalCleanupACK', 'CFNNativeIAMTransaction', 'CFNParameterSnapshot', 'CFNPhysicalResourceACK', 'CanonicalVMComposition', 'CatalogConsoleEpoch', 'CatalogResourceLifecycle', 'CloudWatchLogsLifecycle', 'CloudWatchLogsViewEpoch', 'CommandDispatchLifecycle', 'ConsoleHandoff', 'DurableGuestLease', 'DynamoDBAdmission', 'DynamoDBConsoleEpoch', 'DynamoDBLifecycle', 'EC2GuestAttachmentLifecycle', 'EC2InternetGatewayLifecycle', 'EC2InternetGatewayAttachment', 'EC2InternetGatewayInventoryPages', 'EC2ReadDiscovery', 'EC2RouteTableConsoleEpoch', 'EC2NativeSubnetLifecycle', 'EC2NativeVPCChildren', 'EC2DetachedNetworkConsole', 'EC2NativeRouteAssociationLifecycle', 'EC2NativeRouteTableLifecycle', 'EC2TemplatePreviewEpoch', 'EntraVerificationFixture', 'EC2RouteTableRead', 'EC2SecurityGroupRead', 'EC2SecurityGroupConsoleEpoch', 'ELBTargetLifecycle', 'EngineLifecycle', 'FrameCodecLifecycle', 'GCPStorageState', 'GuestCommandLifecycle', 'HTTPObservationLifecycle', 'IAMBuiltinPinTransaction', 'IAMConditionEvaluation', 'IAMInstanceProfiles', 'IAMManagedPolicies', 'InstanceMetadataTokens', 'KMSAliasCatalog', 'KMSAliasCrypto', 'KMSAliasesViewEpoch', 'KMSBootstrapTransaction', 'KMSKeyState', 'KMSProtocolAdmission', 'LambdaExecutionRoleBridge', 'LambdaSourceEdit', 'MacPreparationAdmission', 'MacProbeLifecycle', 'LambdaLogTailDisclosure', 'LandingAccessAdmission', 'LandingTopologyState', 'ListenerLifecycle', 'LoginInputIntent', 'NICSessionBookkeeping', 'NativeCommandIssuer', 'NativeIAMOwnership', 'NativeWireProjection', 'ObjectStore', 'OwnedClockQualification', 'OwnedProbeAttachmentLifecycle', 'OwnedProbeDispatchPolicy', 'OwnedProbeSessionLifecycle', 'PacketAdmission', 'ParticipantSessionLifecycle', 'PassiveServiceBoundary', 'PersistentTransportLifecycle', 'ProbeOperationLifecycle', 'ProjectAuthority', 'ProviderActor', 'ProviderPath', 'RESTDeploymentSnapshot', 'RESTProxyEventBoundary', 'RESTRouteMatching', 'Route53AtomicBatch', 'S3MultipartConsolePaging', 'S3MultipartState', 'S3Versions', 'SNSAdmission', 'SNSLifecycle', 'SNSQueueFanout', 'SNSSubscriptionReadback', 'SNSConsoleResponseAdmission', 'SQSBatchDeletion', 'SQSConsoleEpoch', 'SQSLifecycle', 'SQSStorageBudget', 'SSMBatchDeletion', 'SSMDocumentState', 'SSMDocumentVersionPage', 'SSMDurableCommands', 'SSMParameterState', 'STSSessionLifecycle', 'SakuraDiskAdmission', 'SakuraDiskMetadata', 'SakuraDisksViewEpoch', 'SakuraStartupAdmission', 'SecretDescriptionWorkflow', 'SecretMetadataUpdate', 'SecretMetadataViewEpoch', 'SecretVersionListing', 'SecretsDisclosureChannels', 'SecretsMutationRefresh', 'SecretsRevealEpoch', 'SecretsVersionLifecycle', 'StackOwnership', 'StartupTokenVisibility', 'TCPRouteClassification', 'TerminalClientEpoch', 'WAFAssociationAuthorization', 'WAFRequestEvaluation', 'EC2NativeDefaultRouteLifecycle', 'EC2NativeIPv4RouteSet', 'EC2RouteTableInventoryPages', 'EC2NativeRouteAssociationReplacement'})
+        self.assertEqual({model['id'] for model in registry['models']}, {'CognitoFederationNativeAdmission', 'CognitoFederationConfiguration', 'CognitoFederationPoolOwnership', 'SimpleDBSelectConsoleEpoch', 'SimpleDBSelectPage', 'SimpleDBAttributeDelete', 'SimpleDBDomainMetadata', 'SimpleDBLifecycle', 'SimpleDBPageCursor', 'SimpleDBQueryAdmission', 'CognitoUserPoolMetadata', 'SimpleDBConsoleEpoch', 'RDSPrivatePostgresTopology', 'RDSOwnedPostgresRuntime', 'RDSOwnedGenerationFence', 'RDSOwnedOperatorComposition', 'RDSGuestPeerPreflight', 'SARPolicyAuthorizationTarget', 'AzureConditionalCRCRead', 'AzureStructuredReadAdmission', 'AzureBlobRowDownload', 'EC2VPCOwnership', 'CloudDNSAtomicChange', 'CloudDNSChildToken', 'CloudDNSConsoleScope', 'SakuraServerMetadata', 'SakuraServerReadEpoch', 'CFNParameterRuleAdmission', 'ECSTaskRevisionLifecycle', 'VpcOriginReferenceLifecycle', 'ARPTrustedReply', 'PersistentIngressPolicy', 'AppEngineTraffic', 'AutoScalingPlanTargets', 'AzureBlobState', 'AzureQueueLifecycle', 'AzureQueueOwnerAccess', 'AzurePropertiesEpoch', 'AzurePropertiesTarget', 'BedrockRuntimeAdmission', 'BlobRange', 'BrowserSessions', 'CFNConditionAdmission', 'CFNConditionMemoDepth', 'CFNEventHistory', 'CFNFinalCleanupACK', 'CFNNativeIAMTransaction', 'CFNParameterSnapshot', 'CFNPhysicalResourceACK', 'CanonicalVMComposition', 'CatalogConsoleEpoch', 'CatalogResourceLifecycle', 'CloudWatchLogsLifecycle', 'CloudWatchLogsViewEpoch', 'CommandDispatchLifecycle', 'ConsoleHandoff', 'DurableGuestLease', 'DynamoDBAdmission', 'DynamoDBConsoleEpoch', 'DynamoDBLifecycle', 'EC2GuestAttachmentLifecycle', 'EC2InternetGatewayLifecycle', 'EC2InternetGatewayAttachment', 'EC2InternetGatewayInventoryPages', 'EC2ReadDiscovery', 'EC2RouteTableConsoleEpoch', 'EC2NativeSubnetLifecycle', 'EC2NativeVPCChildren', 'EC2DetachedNetworkConsole', 'EC2NativeRouteAssociationLifecycle', 'EC2NativeRouteTableLifecycle', 'EC2TemplatePreviewEpoch', 'EntraVerificationFixture', 'EC2RouteTableRead', 'EC2SecurityGroupRead', 'EC2SecurityGroupConsoleEpoch', 'ELBTargetLifecycle', 'EngineLifecycle', 'FrameCodecLifecycle', 'GCPStorageState', 'GuestCommandLifecycle', 'HTTPObservationLifecycle', 'IAMBuiltinPinTransaction', 'IAMConditionEvaluation', 'IAMInstanceProfiles', 'IAMManagedPolicies', 'InstanceMetadataTokens', 'KMSAliasCatalog', 'KMSAliasCrypto', 'KMSAliasesViewEpoch', 'KMSBootstrapTransaction', 'KMSKeyState', 'KMSProtocolAdmission', 'LambdaExecutionRoleBridge', 'LambdaSourceEdit', 'MacPreparationAdmission', 'MacProbeLifecycle', 'LambdaLogTailDisclosure', 'LandingAccessAdmission', 'LandingTopologyState', 'ListenerLifecycle', 'LoginInputIntent', 'NICSessionBookkeeping', 'NativeCommandIssuer', 'NativeIAMOwnership', 'NativeWireProjection', 'ObjectStore', 'OwnedClockQualification', 'OwnedProbeAttachmentLifecycle', 'OwnedProbeDispatchPolicy', 'OwnedProbeSessionLifecycle', 'PacketAdmission', 'ParticipantSessionLifecycle', 'PassiveServiceBoundary', 'PersistentTransportLifecycle', 'ProbeOperationLifecycle', 'ProjectAuthority', 'ProviderActor', 'ProviderPath', 'RESTDeploymentSnapshot', 'RESTProxyEventBoundary', 'RESTRouteMatching', 'Route53AtomicBatch', 'S3MultipartConsolePaging', 'S3MultipartState', 'S3Versions', 'SNSAdmission', 'SNSLifecycle', 'SNSQueueFanout', 'SNSSubscriptionReadback', 'SNSConsoleResponseAdmission', 'SQSBatchDeletion', 'SQSConsoleEpoch', 'SQSLifecycle', 'SQSStorageBudget', 'SSMBatchDeletion', 'SSMDocumentState', 'SSMDocumentVersionPage', 'SSMDurableCommands', 'SSMParameterState', 'STSSessionLifecycle', 'SakuraDiskAdmission', 'SakuraDiskMetadata', 'SakuraDisksViewEpoch', 'SakuraStartupAdmission', 'SecretDescriptionWorkflow', 'SecretMetadataUpdate', 'SecretMetadataViewEpoch', 'SecretVersionListing', 'SecretsDisclosureChannels', 'SecretsMutationRefresh', 'SecretsRevealEpoch', 'SecretsVersionLifecycle', 'StackOwnership', 'StartupTokenVisibility', 'TCPRouteClassification', 'TerminalClientEpoch', 'WAFAssociationAuthorization', 'WAFRequestEvaluation', 'EC2NativeDefaultRouteLifecycle', 'EC2NativeIPv4RouteSet', 'EC2RouteTableInventoryPages', 'EC2NativeRouteAssociationReplacement', 'S3MultipartPartReceipt'})
 
         for model in registry['models']:
             source = (self.root / model['model']).read_text()
@@ -1797,6 +1797,47 @@ class FormalGateTests(unittest.TestCase):
                 name, mutated = apply_mutant(source, model['id'], mutant)
                 self.assertNotEqual(mutated, source)
                 self.assertIn('MODULE ' + name, mutated)
+
+    def test_s3_part_receipt_registers_exact_scope_and_rejects_same_id_control_changes(self):
+        path = self.root / 'formal/models.json'
+        original = path.read_bytes()
+        registry = load_registry(self.root)
+        model = next(m for m in registry['models'] if m['id'] == 'S3MultipartPartReceipt')
+        self.assertEqual(set(model['properties']), {
+            'TypeOK', 'ConfirmedReadback', 'CurrentViewNotice', 'NoMutationReplay',
+        })
+        self.assertEqual(set(model['source_scope']), {
+            'internal/server/web/app.js', 'tools/console/src/s3-multipart-parts.mjs',
+            'tools/console/src/s3-multipart.jsx',
+        })
+        self.assertEqual({m['id']:m['expect_invariant'] for m in model['mutants']}, {
+            'RequireSuccessfulWrite': 'ConfirmedReadback',
+            'RequireStrongETag': 'ConfirmedReadback',
+            'RequireCurrentUpload': 'ConfirmedReadback',
+            'RequireCompleteListing': 'ConfirmedReadback',
+            'RequirePartNumber': 'ConfirmedReadback',
+            'RequirePartSize': 'ConfirmedReadback',
+            'RequirePartETag': 'ConfirmedReadback',
+            'FenceRetiredView': 'CurrentViewNotice',
+            'DoNotPublishFromPUT': 'ConfirmedReadback',
+            'DoNotReplayOnRefresh': 'NoMutationReplay',
+        })
+        variants = {
+            'altered oracle': ('expect_invariant', 'CurrentViewNotice'),
+            'valid but unrelated edit': ('edits', model['mutants'][-1]['edits']),
+        }
+        for case, (field, replacement) in variants.items():
+            with self.subTest(change=case):
+                changed = json.loads(original)
+                required = next(m for m in changed['models'] if m['id'] == model['id'])
+                target = next(m for m in required['mutants'] if m['id'] == 'RequireSuccessfulWrite')
+                target[field] = replacement
+                path.write_text(json.dumps(changed))
+                try:
+                    with self.assertRaisesRegex(GateError, 'S3 part receipt mutation controls changed'):
+                        load_registry(self.root)
+                finally:
+                    path.write_bytes(original)
 
     def test_s3_listparts_paging_inventory_properties_and_scope_are_required(self):
         path = self.root / 'formal/models.json'

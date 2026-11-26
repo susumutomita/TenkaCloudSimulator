@@ -1,35 +1,183 @@
 {
   "version": 1,
-  "base_sha": "377e95ce03fd8596865c1826d631f6a88cf905cd",
+  "base_sha": "b4105ff8b12fe293ed785be4b976d87469e315be",
   "changes": [
     {
-      "path": "internal/azure/queue/handler.go",
-      "sha256": "67d1b2c80eecc2d936e71078487c692a8ba7b479511ba8c978ee630cc820d17f",
+      "path": "docs/s3-multipart.md",
+      "sha256": "80edbc5758f7ff4cbeae54cd3784b3effc356365c897c0d340909ef2a14c702d",
+      "disposition": "documentation",
+      "reason": "States the exact ListParts confirmation and explains unconfirmed/retry scope.",
+      "models": []
+    },
+    {
+      "path": "formal/S3MultipartPartReceipt.cfg",
+      "sha256": "c6713b487d775a47819bc612467144fcb85eff09e2083dcdf2fedf2ff7b8e1bb",
       "disposition": "modeled",
-      "reason": "Replace the pre-transaction mutex with a context-aware one-slot Queue admission gate. A queued cancellation returns before transaction entry without changing durable Queue state; continuing requests retain previous serialized owner checks and operation transitions.",
+      "reason": "The exact saved part is acknowledged only after a complete current listing matches the successful receipt; an uncertain result does not replay a write.",
       "models": [
         {
-          "id": "AzureQueueLifecycle",
+          "id": "S3MultipartPartReceipt",
           "properties": [
-            "ReadRollbackDurable",
-            "Isolation"
+            "ConfirmedReadback",
+            "CurrentViewNotice",
+            "NoMutationReplay"
           ],
-          "limits": "Abstract Fail and peer frame do not model Go channel selection, queue fairness, context timing, SQLite transactions, disconnection or any service-side timeout. The deterministic leaf regression addresses local waiting cancellation separately."
-        },
-        {
-          "id": "AzureQueueOwnerAccess",
-          "properties": [
-            "NativePermissionBoundary"
-          ],
-          "limits": "Normalized owner admission remains unchanged before the gate; no modeling of real authentication, context/channel admission or transport timing."
+          "limits": "Finite Console receipt/state abstraction only. A scoped terminal read summarizes live page admission; a subsequent SDK write does not invalidate an already supported observation. No proof of HTTP/XML/JavaScript/browser/SQL/MD5 refinement, consistent cross-page snapshots, real AWS behavior, or liveness."
         }
       ]
     },
     {
-      "path": "internal/azure/queue/cancellation_test.go",
-      "sha256": "610b4425e8359ee26d873191f0d7ff4f2eb13867731c13487dea7b66b2657d28",
+      "path": "formal/S3MultipartPartReceipt.tla",
+      "sha256": "9e64f6229121be8974a9784dd9aadf63ee58f3971de751fd60ce178dd0e2c905",
+      "disposition": "modeled",
+      "reason": "The exact saved part is acknowledged only after a complete current listing matches the successful receipt; an uncertain result does not replay a write.",
+      "models": [
+        {
+          "id": "S3MultipartPartReceipt",
+          "properties": [
+            "ConfirmedReadback",
+            "CurrentViewNotice",
+            "NoMutationReplay"
+          ],
+          "limits": "Finite Console receipt/state abstraction only. A scoped terminal read summarizes live page admission; a subsequent SDK write does not invalidate an already supported observation. No proof of HTTP/XML/JavaScript/browser/SQL/MD5 refinement, consistent cross-page snapshots, real AWS behavior, or liveness."
+        }
+      ]
+    },
+    {
+      "path": "formal/models.json",
+      "sha256": "37849b537ee253f34c8f8f5fbf2a4a78a04f2ad0949a240a8a44b45442457760",
+      "disposition": "formal-infrastructure",
+      "reason": "Registers and independently pins one new finite receipt model and its exact negative-control definitions.",
+      "models": []
+    },
+    {
+      "path": "internal/server/web/app.js",
+      "sha256": "5dd0f38f92021000b2194cbcd76d004c630f1c6b2c63508024a283b8c0986d82",
+      "disposition": "modeled",
+      "reason": "The exact saved part is acknowledged only after a complete current listing matches the successful receipt; an uncertain result does not replay a write.",
+      "models": [
+        {
+          "id": "S3MultipartPartReceipt",
+          "properties": [
+            "ConfirmedReadback",
+            "CurrentViewNotice",
+            "NoMutationReplay"
+          ],
+          "limits": "Finite Console receipt/state abstraction only. A scoped terminal read summarizes live page admission; a subsequent SDK write does not invalidate an already supported observation. No proof of HTTP/XML/JavaScript/browser/SQL/MD5 refinement, consistent cross-page snapshots, real AWS behavior, or liveness."
+        },
+        {
+          "id": "S3MultipartConsolePaging",
+          "properties": [
+            "OnlyCanonicalRows",
+            "OnlyProgressingCursor",
+            "OnlyCompleteListing",
+            "NoReadAfterStop"
+          ],
+          "limits": "Existing read-only finite pager; XML parsing, actual 1000-row pages, HTTP and browser runtime are tested separately."
+        }
+      ]
+    },
+    {
+      "path": "scripts/formal_model_gate.py",
+      "sha256": "d64fc8a9aa379b3419e89c0af4ba5f6579b384efa35c13abaff5d791cf3122ac",
+      "disposition": "formal-infrastructure",
+      "reason": "Registers and independently pins one new finite receipt model and its exact negative-control definitions.",
+      "models": []
+    },
+    {
+      "path": "scripts/test-formal-gate.py",
+      "sha256": "46834169e4af48bff889bcad67010e0cb6409247bad1feb4578207865c608505",
+      "disposition": "formal-infrastructure",
+      "reason": "Registers and independently pins one new finite receipt model and its exact negative-control definitions.",
+      "models": []
+    },
+    {
+      "path": "test/console/s3_multipart_part_receipt.cjs",
+      "sha256": "4dfdf2eaca5fb7e6f7b1763069d93be4dbf266b675ba49b35b617a436f14ffcf",
       "disposition": "test-support",
-      "reason": "Test-only fixture holds one real SQLite transaction and verifies a second authenticated leaf call exits before release, leaves no row and permits retry. No additional consumer or runtime behavior.",
+      "reason": "Opt-in isolated served DOM and pinned local SDK evidence for truthful success and refresh, not runtime code.",
+      "models": []
+    },
+    {
+      "path": "test/console/s3_multipart_part_receipt.py",
+      "sha256": "30a5c42bf36f81f4a7f049094cc204e21ea3ee0388de83bd8e08b4ef52f8dba0",
+      "disposition": "test-support",
+      "reason": "Opt-in isolated served DOM and pinned local SDK evidence for truthful success and refresh, not runtime code.",
+      "models": []
+    },
+    {
+      "path": "tools/console/bundle-digests.json",
+      "sha256": "c6664a4aeb3236bf364b8a2832d3af603494fddf4c862eec758eed5fbc750865",
+      "disposition": "presentation",
+      "reason": "Generated embedded Console source-input or asset receipt metadata only.",
+      "models": []
+    },
+    {
+      "path": "tools/console/bundle-inputs.json",
+      "sha256": "a28f3f1dddd6d14f51c3b97938cea211b219a7b65eb8599cc17a81b3c0dfcc80",
+      "disposition": "presentation",
+      "reason": "Generated embedded Console source-input or asset receipt metadata only.",
+      "models": []
+    },
+    {
+      "path": "tools/console/src/s3-multipart-parts.mjs",
+      "sha256": "6d94d1ea350af40a0baaec7966c937616f8a70a5a109a6ba056b695ebf2f2204",
+      "disposition": "modeled",
+      "reason": "The exact saved part is acknowledged only after a complete current listing matches the successful receipt; an uncertain result does not replay a write.",
+      "models": [
+        {
+          "id": "S3MultipartPartReceipt",
+          "properties": [
+            "ConfirmedReadback",
+            "CurrentViewNotice",
+            "NoMutationReplay"
+          ],
+          "limits": "Finite Console receipt/state abstraction only. A scoped terminal read summarizes live page admission; a subsequent SDK write does not invalidate an already supported observation. No proof of HTTP/XML/JavaScript/browser/SQL/MD5 refinement, consistent cross-page snapshots, real AWS behavior, or liveness."
+        },
+        {
+          "id": "S3MultipartConsolePaging",
+          "properties": [
+            "OnlyCanonicalRows",
+            "OnlyProgressingCursor",
+            "OnlyCompleteListing",
+            "NoReadAfterStop"
+          ],
+          "limits": "Existing read-only finite pager; XML parsing, actual 1000-row pages, HTTP and browser runtime are tested separately."
+        }
+      ]
+    },
+    {
+      "path": "tools/console/src/s3-multipart.jsx",
+      "sha256": "7ec908549b581d226c0de16b259ef8674f16238a416010280838d1b95ab4e642",
+      "disposition": "modeled",
+      "reason": "The exact saved part is acknowledged only after a complete current listing matches the successful receipt; an uncertain result does not replay a write.",
+      "models": [
+        {
+          "id": "S3MultipartPartReceipt",
+          "properties": [
+            "ConfirmedReadback",
+            "CurrentViewNotice",
+            "NoMutationReplay"
+          ],
+          "limits": "Finite Console receipt/state abstraction only. A scoped terminal read summarizes live page admission; a subsequent SDK write does not invalidate an already supported observation. No proof of HTTP/XML/JavaScript/browser/SQL/MD5 refinement, consistent cross-page snapshots, real AWS behavior, or liveness."
+        },
+        {
+          "id": "S3MultipartConsolePaging",
+          "properties": [
+            "OnlyCanonicalRows",
+            "OnlyProgressingCursor",
+            "OnlyCompleteListing",
+            "NoReadAfterStop"
+          ],
+          "limits": "Existing read-only finite pager; XML parsing, actual 1000-row pages, HTTP and browser runtime are tested separately."
+        }
+      ]
+    },
+    {
+      "path": "tools/console/tests/s3-multipart-part-receipt.test.mjs",
+      "sha256": "fcc3ff20e6e8183d8b9842df7f42b271a1e99bc6948cf9ec1a9bdd57847d8ec9",
+      "disposition": "presentation",
+      "reason": "Standalone Console parser and receipt tests; excluded from the production build.",
       "models": []
     }
   ]

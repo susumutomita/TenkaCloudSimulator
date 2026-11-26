@@ -3548,6 +3548,48 @@ REQUIRED_SOURCE_SCOPES['S3MultipartConsolePaging'] = {
 }
 
 
+BASE_MODELS.add('S3MultipartPartReceipt')
+BASE_INVARIANTS['S3MultipartPartReceipt'] = {'TypeOK', 'ConfirmedReadback', 'CurrentViewNotice', 'NoMutationReplay'}
+S3_PART_RECEIPT_MUTATIONS = [
+    {'id': 'RequireSuccessfulWrite', 'expect_invariant': 'ConfirmedReadback',
+     'edits': [{'old': '           /\\ ack.status = 200 /\\ ack.strong\n',
+                'new': '           /\\ ack.strong\n', 'count': 1}]},
+    {'id': 'RequireStrongETag', 'expect_invariant': 'ConfirmedReadback',
+     'edits': [{'old': '           /\\ ack.status = 200 /\\ ack.strong\n',
+                'new': '           /\\ ack.status = 200\n', 'count': 1}]},
+    {'id': 'RequireCurrentUpload', 'expect_invariant': 'ConfirmedReadback',
+     'edits': [{'old': '/\\ observed.bound /\\ observed.full /\\ observed.seen',
+                'new': '/\\ observed.full /\\ observed.seen', 'count': 1}]},
+    {'id': 'RequireCompleteListing', 'expect_invariant': 'ConfirmedReadback',
+     'edits': [{'old': '/\\ observed.bound /\\ observed.full /\\ observed.seen',
+                'new': '/\\ observed.bound /\\ observed.seen', 'count': 1}]},
+    {'id': 'RequirePartNumber', 'expect_invariant': 'ConfirmedReadback',
+     'edits': [{'old': '           /\\ observed.v.num = ack.part.num\n',
+                'new': '', 'count': 1}]},
+    {'id': 'RequirePartSize', 'expect_invariant': 'ConfirmedReadback',
+     'edits': [{'old': '           /\\ observed.v.size = ack.part.size\n',
+                'new': '', 'count': 1}]},
+    {'id': 'RequirePartETag', 'expect_invariant': 'ConfirmedReadback',
+     'edits': [{'old': '           /\\ observed.v.tag = ack.part.tag\n',
+                'new': '', 'count': 1}]},
+    {'id': 'FenceRetiredView', 'expect_invariant': 'CurrentViewNotice',
+     'edits': [{'old': '           /\\ observed.generation = scope\n',
+                'new': '', 'count': 1}]},
+    {'id': 'DoNotPublishFromPUT', 'expect_invariant': 'ConfirmedReadback',
+     'edits': [{'old': '  /\\ Allowed\n  /\\ phase\' = "done"',
+                'new': '  /\\ (phase = "await" \\/ Allowed)\n  /\\ phase\' = "done"', 'count': 1}]},
+    {'id': 'DoNotReplayOnRefresh', 'expect_invariant': 'NoMutationReplay',
+     'edits': [{'old': '  /\\ phase\' = "refresh" /\\ notice\' = FALSE\n  /\\ UNCHANGED <<stored, scope, writes, ack, observed>>',
+                'new': '  /\\ phase\' = "refresh" /\\ notice\' = FALSE\n  /\\ writes\' = writes+1\n  /\\ UNCHANGED <<stored, scope, ack, observed>>', 'count': 1}]},
+]
+REQUIRED_MUTANTS['S3MultipartPartReceipt'] = {control['id'] for control in S3_PART_RECEIPT_MUTATIONS}
+REQUIRED_SOURCE_SCOPES['S3MultipartPartReceipt'] = {
+    'internal/server/web/app.js',
+    'tools/console/src/s3-multipart-parts.mjs',
+    'tools/console/src/s3-multipart.jsx',
+}
+
+
 BASE_MODELS.add('SARPolicyAuthorizationTarget')
 BASE_INVARIANTS['SARPolicyAuthorizationTarget'] = {
     'TypeOK', 'ResolvedParentTarget', 'NoUnpermittedEffects',
@@ -4135,6 +4177,8 @@ def load_registry(root, relative='formal/models.json'):
                     'Azure Blob row download mutation controls changed')
         if name == 'S3MultipartConsolePaging':
             require(model['mutants'] == S3_LISTPARTS_MUTATIONS, 'ListParts paging mutation controls changed')
+        if name == 'S3MultipartPartReceipt':
+            require(model['mutants'] == S3_PART_RECEIPT_MUTATIONS, 'S3 part receipt mutation controls changed')
     require(BASE_MODELS <= ids, 'a required existing model was removed')
     actual = {p.relative_to(root).as_posix() for suffix in ('*.tla', '*.cfg') for p in (root / 'formal').glob(suffix)}
     require(actual == files, 'unregistered or missing model/config artifact')
