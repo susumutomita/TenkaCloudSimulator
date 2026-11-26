@@ -141,11 +141,9 @@ def project_simpledb_delete_attributes(spec):
 SERVER_COLLECTION = '/_simulator/providers/sakura/cloud/zone/{zone}/api/cloud/1.1/server'
 
 
-def project_server_list(spec):
+def project_sakura_server_list_only(spec):
+    """Check and remove only the reviewed Sakura Server list path and tag."""
     spec = copy.deepcopy(spec)
-    project_simpledb_create_domain(spec)
-    project_ec2_describe_instances(spec)
-    project_simpledb_delete_attributes(spec)
     tag = {'name': 'Sakura Server metadata',
            'description': 'Read saved Server metadata in the configured local zone; no VM or network state.'}
     declared = [entry for entry in spec['tags'] if entry['name'] == tag['name']]
@@ -157,6 +155,14 @@ def project_server_list(spec):
     grouped[0]['tags'].remove(tag['name'])
     server = spec['paths'].pop(SERVER_COLLECTION, None)
     assert digest(server) == '81203e3d7065de93e30b5941964ba52f94a11c12888f61b85dbe7c542dc9a521', 'Server List reference changed'
+    return spec
+
+
+def project_server_list(spec):
+    spec = project_sakura_server_list_only(spec)
+    project_simpledb_create_domain(spec)
+    project_ec2_describe_instances(spec)
+    project_simpledb_delete_attributes(spec)
     project_simpledb_get_attributes(spec)
     project_simpledb_select(spec)
     project_simpledb_domain_metadata(spec)

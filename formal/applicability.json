@@ -1,183 +1,40 @@
 {
   "version": 1,
-  "base_sha": "b4105ff8b12fe293ed785be4b976d87469e315be",
+  "base_sha": "5910d48e8432a82b7b22840d502841d0752b9016",
   "changes": [
     {
-      "path": "docs/s3-multipart.md",
-      "sha256": "80edbc5758f7ff4cbeae54cd3784b3effc356365c897c0d340909ef2a14c702d",
-      "disposition": "documentation",
-      "reason": "States the exact ListParts confirmation and explains unconfirmed/retry scope.",
-      "models": []
-    },
-    {
-      "path": "formal/S3MultipartPartReceipt.cfg",
-      "sha256": "c6713b487d775a47819bc612467144fcb85eff09e2083dcdf2fedf2ff7b8e1bb",
-      "disposition": "modeled",
-      "reason": "The exact saved part is acknowledged only after a complete current listing matches the successful receipt; an uncertain result does not replay a write.",
-      "models": [
-        {
-          "id": "S3MultipartPartReceipt",
-          "properties": [
-            "ConfirmedReadback",
-            "CurrentViewNotice",
-            "NoMutationReplay"
-          ],
-          "limits": "Finite Console receipt/state abstraction only. A scoped terminal read summarizes live page admission; a subsequent SDK write does not invalidate an already supported observation. No proof of HTTP/XML/JavaScript/browser/SQL/MD5 refinement, consistent cross-page snapshots, real AWS behavior, or liveness."
-        }
-      ]
-    },
-    {
-      "path": "formal/S3MultipartPartReceipt.tla",
-      "sha256": "9e64f6229121be8974a9784dd9aadf63ee58f3971de751fd60ce178dd0e2c905",
-      "disposition": "modeled",
-      "reason": "The exact saved part is acknowledged only after a complete current listing matches the successful receipt; an uncertain result does not replay a write.",
-      "models": [
-        {
-          "id": "S3MultipartPartReceipt",
-          "properties": [
-            "ConfirmedReadback",
-            "CurrentViewNotice",
-            "NoMutationReplay"
-          ],
-          "limits": "Finite Console receipt/state abstraction only. A scoped terminal read summarizes live page admission; a subsequent SDK write does not invalidate an already supported observation. No proof of HTTP/XML/JavaScript/browser/SQL/MD5 refinement, consistent cross-page snapshots, real AWS behavior, or liveness."
-        }
-      ]
-    },
-    {
-      "path": "formal/models.json",
-      "sha256": "37849b537ee253f34c8f8f5fbf2a4a78a04f2ad0949a240a8a44b45442457760",
-      "disposition": "formal-infrastructure",
-      "reason": "Registers and independently pins one new finite receipt model and its exact negative-control definitions.",
-      "models": []
-    },
-    {
-      "path": "internal/server/web/app.js",
-      "sha256": "5dd0f38f92021000b2194cbcd76d004c630f1c6b2c63508024a283b8c0986d82",
-      "disposition": "modeled",
-      "reason": "The exact saved part is acknowledged only after a complete current listing matches the successful receipt; an uncertain result does not replay a write.",
-      "models": [
-        {
-          "id": "S3MultipartPartReceipt",
-          "properties": [
-            "ConfirmedReadback",
-            "CurrentViewNotice",
-            "NoMutationReplay"
-          ],
-          "limits": "Finite Console receipt/state abstraction only. A scoped terminal read summarizes live page admission; a subsequent SDK write does not invalidate an already supported observation. No proof of HTTP/XML/JavaScript/browser/SQL/MD5 refinement, consistent cross-page snapshots, real AWS behavior, or liveness."
-        },
-        {
-          "id": "S3MultipartConsolePaging",
-          "properties": [
-            "OnlyCanonicalRows",
-            "OnlyProgressingCursor",
-            "OnlyCompleteListing",
-            "NoReadAfterStop"
-          ],
-          "limits": "Existing read-only finite pager; XML parsing, actual 1000-row pages, HTTP and browser runtime are tested separately."
-        }
-      ]
-    },
-    {
-      "path": "scripts/formal_model_gate.py",
-      "sha256": "d64fc8a9aa379b3419e89c0af4ba5f6579b384efa35c13abaff5d791cf3122ac",
-      "disposition": "formal-infrastructure",
-      "reason": "Registers and independently pins one new finite receipt model and its exact negative-control definitions.",
-      "models": []
-    },
-    {
-      "path": "scripts/test-formal-gate.py",
-      "sha256": "46834169e4af48bff889bcad67010e0cb6409247bad1feb4578207865c608505",
-      "disposition": "formal-infrastructure",
-      "reason": "Registers and independently pins one new finite receipt model and its exact negative-control definitions.",
-      "models": []
-    },
-    {
-      "path": "test/console/s3_multipart_part_receipt.cjs",
-      "sha256": "4dfdf2eaca5fb7e6f7b1763069d93be4dbf266b675ba49b35b617a436f14ffcf",
+      "path": "test/e2e/s3_multipart_docs.py",
+      "sha256": "8708d594fd5e5750878eb570f0ae484cb1f66296e254ef91b7fd77daddbb26b1",
       "disposition": "test-support",
-      "reason": "Opt-in isolated served DOM and pinned local SDK evidence for truthful success and refresh, not runtime code.",
+      "reason": "Keep the historical literal 67-operation/36-path inventory by validating the already-shipping Sakura Server GET and projecting out only that addition before comparison. No change to the exercised multipart HTTP or SDK payloads.",
       "models": []
     },
     {
-      "path": "test/console/s3_multipart_part_receipt.py",
-      "sha256": "30a5c42bf36f81f4a7f049094cc204e21ea3ee0388de83bd8e08b4ef52f8dba0",
+      "path": "test/e2e/scalar_s3_docs.py",
+      "sha256": "5f7e25aaf38c97bccef798fd9041953f511b7541898c72223ccae4ed0dc19f87",
       "disposition": "test-support",
-      "reason": "Opt-in isolated served DOM and pinned local SDK evidence for truthful success and refresh, not runtime code.",
+      "reason": "Use the same exact test-only Sakura projection for the historical Scalar S3 operation inventory. The production spec, browser launch and payload assertions are unchanged.",
       "models": []
     },
     {
-      "path": "tools/console/bundle-digests.json",
-      "sha256": "c6664a4aeb3236bf364b8a2832d3af603494fddf4c862eec758eed5fbc750865",
-      "disposition": "presentation",
-      "reason": "Generated embedded Console source-input or asset receipt metadata only.",
+      "path": "test/e2e/sqs_docs.py",
+      "sha256": "e092da7905427bdf7a1007ca4e6b93b4c1d035606340c18d0be66a7bb4ee1e4b",
+      "disposition": "test-support",
+      "reason": "Use the same exact test-only Sakura projection before historical SQS IDs and path checks, leaving native fixed examples, payload and cleanup checks unchanged.",
       "models": []
     },
     {
-      "path": "tools/console/bundle-inputs.json",
-      "sha256": "a28f3f1dddd6d14f51c3b97938cea211b219a7b65eb8599cc17a81b3c0dfcc80",
-      "disposition": "presentation",
-      "reason": "Generated embedded Console source-input or asset receipt metadata only.",
+      "path": "test/e2e/test_sakura_openapi.py",
+      "sha256": "48880458f5c7915d6e54d35e76eb706bfc1c169fc489676c73988ed0e1787598",
+      "disposition": "test-support",
+      "reason": "Extract the existing exact path digest and tag/group assertions into a reusable copy-preserving test projector. The original historical and native shape constraints remain unchanged.",
       "models": []
     },
     {
-      "path": "tools/console/src/s3-multipart-parts.mjs",
-      "sha256": "6d94d1ea350af40a0baaec7966c937616f8a70a5a109a6ba056b695ebf2f2204",
-      "disposition": "modeled",
-      "reason": "The exact saved part is acknowledged only after a complete current listing matches the successful receipt; an uncertain result does not replay a write.",
-      "models": [
-        {
-          "id": "S3MultipartPartReceipt",
-          "properties": [
-            "ConfirmedReadback",
-            "CurrentViewNotice",
-            "NoMutationReplay"
-          ],
-          "limits": "Finite Console receipt/state abstraction only. A scoped terminal read summarizes live page admission; a subsequent SDK write does not invalidate an already supported observation. No proof of HTTP/XML/JavaScript/browser/SQL/MD5 refinement, consistent cross-page snapshots, real AWS behavior, or liveness."
-        },
-        {
-          "id": "S3MultipartConsolePaging",
-          "properties": [
-            "OnlyCanonicalRows",
-            "OnlyProgressingCursor",
-            "OnlyCompleteListing",
-            "NoReadAfterStop"
-          ],
-          "limits": "Existing read-only finite pager; XML parsing, actual 1000-row pages, HTTP and browser runtime are tested separately."
-        }
-      ]
-    },
-    {
-      "path": "tools/console/src/s3-multipart.jsx",
-      "sha256": "7ec908549b581d226c0de16b259ef8674f16238a416010280838d1b95ab4e642",
-      "disposition": "modeled",
-      "reason": "The exact saved part is acknowledged only after a complete current listing matches the successful receipt; an uncertain result does not replay a write.",
-      "models": [
-        {
-          "id": "S3MultipartPartReceipt",
-          "properties": [
-            "ConfirmedReadback",
-            "CurrentViewNotice",
-            "NoMutationReplay"
-          ],
-          "limits": "Finite Console receipt/state abstraction only. A scoped terminal read summarizes live page admission; a subsequent SDK write does not invalidate an already supported observation. No proof of HTTP/XML/JavaScript/browser/SQL/MD5 refinement, consistent cross-page snapshots, real AWS behavior, or liveness."
-        },
-        {
-          "id": "S3MultipartConsolePaging",
-          "properties": [
-            "OnlyCanonicalRows",
-            "OnlyProgressingCursor",
-            "OnlyCompleteListing",
-            "NoReadAfterStop"
-          ],
-          "limits": "Existing read-only finite pager; XML parsing, actual 1000-row pages, HTTP and browser runtime are tested separately."
-        }
-      ]
-    },
-    {
-      "path": "tools/console/tests/s3-multipart-part-receipt.test.mjs",
-      "sha256": "fcc3ff20e6e8183d8b9842df7f42b271a1e99bc6948cf9ec1a9bdd57847d8ec9",
-      "disposition": "presentation",
-      "reason": "Standalone Console parser and receipt tests; excluded from the production build.",
+      "path": "test/e2e/test_storage_reference_sakura_projection.py",
+      "sha256": "e44e6d8a6a499710cb8014f1f27a59220c1d9d7275ef27044c0ac29e972465ee",
+      "disposition": "test-support",
+      "reason": "Test-only detector checks that exact current source is accepted without mutation and that changed, missing or duplicate Sakura/inherited reference structure and the bad multipart payload still fail, without launching a browser.",
       "models": []
     }
   ]
