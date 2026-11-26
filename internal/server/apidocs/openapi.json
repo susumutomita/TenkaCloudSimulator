@@ -698,6 +698,7 @@
                       "Select",
                       "GetAttributes",
                       "DescribeInstances",
+                      "DescribeInternetGateways",
                       "CreateDomain"
                     ]
                   },
@@ -1117,6 +1118,14 @@
                   "description": "Set X-Simulator-Service to ec2, clear X-Amz-Target, and select a local X-Simulator-Region. Send with your existing simulator sign-in or host-issued token and ec2:DescribeInstances on *. The XML lists saved instance metadata for that region; an empty reservationSet is valid. No instance is launched or changed, and simulatorRuntimeState is not proof of a running VM. Do not add IDs, filters or pagination fields.",
                   "value": {
                     "Action": "DescribeInstances",
+                    "Version": "2016-11-15"
+                  }
+                },
+                "DescribeInternetGateways": {
+                  "summary": "EC2 DescribeInternetGateways (read-only configuration)",
+                  "description": "Set X-Simulator-Service to ec2, clear X-Amz-Target, and choose a local X-Simulator-Region. Send with your existing local sign-in or simulator token and ec2:DescribeInternetGateways on *. Lists saved attached CloudFormation and detached EC2-managed gateways. It never performs attachment, routing or internet access.",
+                  "value": {
+                    "Action": "DescribeInternetGateways",
                     "Version": "2016-11-15"
                   }
                 },

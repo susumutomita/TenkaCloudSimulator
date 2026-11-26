@@ -162,6 +162,10 @@ func (g *Gateway) serveEC2(w http.ResponseWriter, r *http.Request) {
 			request.networkACL.authorizeCreateID = func(id string) error {
 				return exactChildGrant(request.networkACL.aclCreatePermissions(region, id), "network ACL")
 			}
+		case ec2CreateInternetGateway:
+			request.internetGateway.authorizeCreatedID = func(id string) error {
+				return exactChildGrant(request.internetGateway.createPermissions(region, id), "internet gateway")
+			}
 		case "CreateRouteTable":
 			request.routeTable.authorizeCreatedID = func(id string) error {
 				return exactChildGrant(request.routeTable.createPermissions(region, id), "route table")
@@ -189,6 +193,13 @@ func (g *Gateway) serveEC2(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		out = result
+	case ec2CreateInternetGateway, ec2DescribeInternetGateway, ec2DeleteInternetGateway:
+		gateways, err := g.Stacks.executeEC2InternetGateway(r.Context(), action, region, *request.internetGateway)
+		if err != nil {
+			failChild(err, "Local internet gateway configuration could not be read or changed.")
+			return
+		}
+		out = gateways
 	case "CreateRouteTable", "DeleteRouteTable":
 		table, err := g.Stacks.executeEC2NativeRouteTableMutation(r.Context(), action, region, *request.routeTable)
 		if err != nil {

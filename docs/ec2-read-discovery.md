@@ -6,7 +6,7 @@ subset. Supply `Version=2016-11-15` and `Action=DescribeInstances`,
 `Action=DescribeVpcs`, `Action=DescribeSubnets`, `Action=DescribeSecurityGroups`,
 `Action=DescribeRouteTables`, `Action=CreateVpc`, `Action=DeleteVpc`,
 `Action=CreateSubnet` or `Action=DeleteSubnet`, plus the named SG, ACL and route
-table operations below. Discovery uses the EC2 namespace and
+table operations below and the [detached Internet Gateway operations](ec2-internet-gateways.md). Discovery uses the EC2 namespace and
 lower-camel-case `reservationSet/instancesSet/item`, `vpcSet/item`,
 `subnetSet/item`, `securityGroupInfo/item` and `routeTableSet/item` fields.
 A request body is bounded to 64 KiB.
@@ -18,13 +18,14 @@ same SQLite database, checking saved resource, region, owner and network identit
 It does not create resources or make cloud calls. The host's existing local token
 and browser session authentication still applies. Selected exercise identities
 need the matching `ec2:DescribeInstances`, `ec2:DescribeVpcs`,
-`ec2:DescribeSubnets`, `ec2:DescribeSecurityGroups` or `ec2:DescribeRouteTables` action on `*`.
+`ec2:DescribeSubnets`, `ec2:DescribeSecurityGroups` `ec2:DescribeRouteTables` or `ec2:DescribeInternetGateways` action on `*`.
 One database/token authority per team is still required; exercise identities are
 not tenant isolation. Native STS session credentials are not supported here.
 
-Only the documented SG and ACL selectors support IDs or the `vpc-id` filter;
-there is no pagination. Other fields are rejected. Over-bound results fail rather
-than returning a truncated list.
+Only the documented selectors are supported: security groups and network ACLs
+accept IDs or `vpc-id`, route tables accept `association.subnet-id`, and
+internet gateways accept IDs. There is no pagination. Over-bound results fail
+rather than returning a truncated list.
 
 Instances expose only IDs, image/type, subnet/VPC, security-group IDs and tags.
 Select an instance in the console's **EC2 instances** list to see its saved

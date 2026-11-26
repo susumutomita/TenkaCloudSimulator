@@ -54,6 +54,7 @@ A passing API call or returned association ID is not proof of packet forwarding.
 | Native `DisassociateRouteTable(AssociationId)` and dependent deletes | One exact saved relation disappears. An unauthorized caller cannot remove it; table/subnet deletion is refused while it exists, then succeeds after removal. A separate team's snapshot is unchanged. No fallback to an implicit main table. | [DisassociateRouteTable][disassociate-table] (AWS **does** fall back to the main table), [DeleteRouteTable][delete-table] | [#560][association-pr]: [native SDK fixture][association-test] |
 | CFN `CreateStack` / `DeleteStack`: valid local participant token with the stack actions and route-table association permissions on the table but not its subnet | Both calls get the local CFN `AccessDenied` (HTTP 403) for the missing subnet permission. CFN/EC2 inventories and captured live history do not change. The operator can use the rejected name, read the resulting explicit association, and clean up without changing the other stack. | [CFN access control][cfn-access], [Associate IAM][associate-iam], [Disassociate IAM][disassociate-iam], [SubnetRouteTableAssociation][cfn-association] | `test_participant_missing_subnet_grant_preserves_stack_network`; local policy and synchronous refusal, not AWS service-role/error parity |
 | CFN `CreateStack` without any local token | HTTP 401 text, not AWS Query XML; SDK parsing fails and all inventories stay unchanged. | [Simulator access contract](../AGENTS.md), not AWS authentication | `test_missing_local_token_cannot_create_network` |
+| Internet Gateway allocation, attachment readback and detached deletion | Native EC2 allocation is detached. Native Describe and CFN agree on the existing stack gateway ID and its saved VPC link; native Delete refuses that gateway and preserves its stack and route. The native gateway survives a process restart and is then deleted by an identity with permission on its exact ARN. Two team stores stay independent. | [AWS Create, Describe and Delete and local limits](ec2-internet-gateways.md) | [Pinned SDK and signed-in console receipt](../test/console/ec2_internet_gateway_sdk.py); no native attach/detach or traffic |
 
 ## Reproduce and interpret
 
@@ -73,7 +74,7 @@ with eight invalid-template and three unsupported-native-mutation subcases. It u
 fresh local token/store state and dummy SDK signing credentials. It is imported by the
 [platform runner][platform-runner], not gated on the optional full E2E job.
 
-**Still outside these receipts:** successful native route entry mutations (including
+**Still outside these receipts:** native internet-gateway attach/detach, successful native route entry mutations (including
 IPv6, prefix lists and alternate targets), AWS DryRun responses, and gateway
 [VPC endpoints][cfn-endpoint]. The participant refusal covers one local
 policy that omits the subnet grant, not all IAM policies, service roles or
