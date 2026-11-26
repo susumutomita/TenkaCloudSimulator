@@ -302,7 +302,11 @@ func (q *request) referenced(tx *sql.Tx, res *Resource, r row) error {
 		for _, candidate := range rows {
 			for _, path := range paths {
 				if slices.Contains(refValues(candidate.Document, path), r.ARN) {
-					return &fault{kind: "dependents", code: res.InUse, message: fmt.Sprintf("The %s %s is still referenced by the %s %s.", res.Kind, r.Name, other.Kind, candidate.Name)}
+					message := res.InUseMessage
+					if message == "" {
+						message = fmt.Sprintf("The %s %s is still referenced by the %s %s.", res.Kind, r.Name, other.Kind, candidate.Name)
+					}
+					return &fault{kind: "dependents", code: res.InUse, message: message}
 				}
 			}
 		}
