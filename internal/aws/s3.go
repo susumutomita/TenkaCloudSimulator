@@ -25,6 +25,7 @@ import (
 	"time"
 	"unicode/utf8"
 
+	"github.com/susumutomita/TenkaCloudSimulator/internal/aws/cognitoidp"
 	"github.com/susumutomita/TenkaCloudSimulator/internal/aws/simpledb"
 	"github.com/susumutomita/TenkaCloudSimulator/internal/core"
 )
@@ -36,32 +37,34 @@ var sequence atomic.Uint64
 var Regions = []string{"us-east-1", "us-west-2", "ap-northeast-1", "eu-west-1"}
 
 type Gateway struct {
-	SimpleDB          *simpledb.Store
-	SimpleDBScope     simpledb.Scope
-	CloudFront        *CloudFrontStore
-	AutoScalingPlans  *AutoScalingPlansStore
-	ELB               *ELBStore
-	Route53           *Route53Store
-	WAF               *WAFStore
-	SNS               *SNSStore
-	QueueFanout       SNSQueueFanout
-	Secrets           *SecretStore
-	CloudWatchLogs    *CloudWatchLogsStore
-	KMS               *KMSStore
-	APIGateway        *APIGatewayStore
-	LambdaPermissions *LambdaPermissionStore
-	Store             *core.Store
-	S3                *S3Store
-	Identities        *core.Identities
-	Parameters        *ParameterStore
-	Documents         *SSMDocumentStore
-	Sessions          *SSMSessionStore
-	Commands          *SSMCommandAPI
-	Queues            *SQSStore
-	Stacks            *StackStore
-	Lambdas           *LambdaStore
-	Roles             *IAMRoleStore
-	DynamoDB          *DynamoDBStore
+	CognitoUserPools       *cognitoidp.Store
+	CognitoResourceAccount string
+	SimpleDB               *simpledb.Store
+	SimpleDBScope          simpledb.Scope
+	CloudFront             *CloudFrontStore
+	AutoScalingPlans       *AutoScalingPlansStore
+	ELB                    *ELBStore
+	Route53                *Route53Store
+	WAF                    *WAFStore
+	SNS                    *SNSStore
+	QueueFanout            SNSQueueFanout
+	Secrets                *SecretStore
+	CloudWatchLogs         *CloudWatchLogsStore
+	KMS                    *KMSStore
+	APIGateway             *APIGatewayStore
+	LambdaPermissions      *LambdaPermissionStore
+	Store                  *core.Store
+	S3                     *S3Store
+	Identities             *core.Identities
+	Parameters             *ParameterStore
+	Documents              *SSMDocumentStore
+	Sessions               *SSMSessionStore
+	Commands               *SSMCommandAPI
+	Queues                 *SQSStore
+	Stacks                 *StackStore
+	Lambdas                *LambdaStore
+	Roles                  *IAMRoleStore
+	DynamoDB               *DynamoDBStore
 	// Catalog serves model-driven bounded control-plane services. It owns
 	// only its registered JSON targets and REST signing scopes.
 	Catalog http.Handler

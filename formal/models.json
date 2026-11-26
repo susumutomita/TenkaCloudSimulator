@@ -21741,6 +21741,398 @@
       ]
     },
     {
+      "id": "CognitoUserPoolMetadata",
+      "model": "formal/CognitoUserPoolMetadata.tla",
+      "config": "formal/CognitoUserPoolMetadata.cfg",
+      "bounds": "Four consecutive actions including at most one restart; two signed-region labels, one runtime account and a peer-store fixture, three ordered ID suffixes, local capacity two, MaxResults 1/2/60 and invalid boundary values, one retained cursor, independent credential/exercise/region/account/integrity/page-size/restart challenges.",
+      "properties": [
+        "TypeOK",
+        "AdmissionBeforeStorage",
+        "ScopedCRUD",
+        "ExactOrderedPage",
+        "ExactNextToken",
+        "RestartPersistsRows"
+      ],
+      "limits": "Finite metadata keys only; authorization proof, typed parsing and token integrity are symbolic conditions, not proofs of SigV4, IAM implementation, HMAC, key handling, SQLite atomicity, actual process isolation, parser/wire fidelity, concurrency or all sizes. Peer/malformed cursor variants independently probe guards, not obtainable tokens. Each accepted page uses the current table, not a historical snapshot. No users, login, app clients, roles issued, Entra, federation, Console, Scalar, CloudFormation, or Go refinement.",
+      "source_scope": [
+        "internal/aws/cognito_user_pools.go",
+        "internal/aws/cognitoidp/http.go",
+        "internal/aws/cognitoidp/pagination.go",
+        "internal/aws/cognitoidp/pools.go",
+        "internal/aws/s3.go",
+        "internal/aws/ssm.go",
+        "internal/aws/sts_signature.go",
+        "internal/server/access_sdk.go",
+        "internal/server/cognito_user_pools_capabilities.go",
+        "internal/server/server.go"
+      ],
+      "mutants": [
+        {
+          "id": "AcceptUnsignedLocal",
+          "edits": [
+            {
+              "old": "NativeProof(r) == r.proof = \"verified\"",
+              "new": "NativeProof(r) == r.proof \\in {\"verified\", \"unsigned\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AdmissionBeforeStorage"
+        },
+        {
+          "id": "AcceptDummySigning",
+          "edits": [
+            {
+              "old": "NativeProof(r) == r.proof = \"verified\"",
+              "new": "NativeProof(r) == r.proof \\in {\"verified\", \"dummy\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AdmissionBeforeStorage"
+        },
+        {
+          "id": "AcceptBrowserCredential",
+          "edits": [
+            {
+              "old": "NativeProof(r) == r.proof = \"verified\"",
+              "new": "NativeProof(r) == r.proof \\in {\"verified\", \"browser\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AdmissionBeforeStorage"
+        },
+        {
+          "id": "AcceptOtherSigningService",
+          "edits": [
+            {
+              "old": "NativeProof(r) == r.proof = \"verified\"",
+              "new": "NativeProof(r) == r.proof \\in {\"verified\", \"wrongService\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AdmissionBeforeStorage"
+        },
+        {
+          "id": "IgnoreCredentialPrincipal",
+          "edits": [
+            {
+              "old": "NativeProof(r) == r.proof = \"verified\"",
+              "new": "NativeProof(r) == r.proof \\in {\"verified\", \"wrongPrincipal\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AdmissionBeforeStorage"
+        },
+        {
+          "id": "AcceptUnboundHeaders",
+          "edits": [
+            {
+              "old": "NativeProof(r) == r.proof = \"verified\"",
+              "new": "NativeProof(r) == r.proof \\in {\"verified\", \"unboundHeaders\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AdmissionBeforeStorage"
+        },
+        {
+          "id": "AdmitUnsupportedOperation",
+          "edits": [
+            {
+              "old": "ELSE IF r.op \\notin MetaOps THEN \"unsupported\"",
+              "new": "ELSE IF FALSE THEN \"unsupported\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AdmissionBeforeStorage"
+        },
+        {
+          "id": "AllowUnsupportedInput",
+          "edits": [
+            {
+              "old": "ShapeOK(r) == r.shape /\\",
+              "new": "ShapeOK(r) == TRUE /\\",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AdmissionBeforeStorage"
+        },
+        {
+          "id": "ExpandPageSizeRange",
+          "edits": [
+            {
+              "old": "r.op = \"ListUserPools\" => r.limit \\in 1..60",
+              "new": "r.op = \"ListUserPools\" => r.limit \\in 1..61",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AdmissionBeforeStorage"
+        },
+        {
+          "id": "ApproveWildcardItem",
+          "edits": [
+            {
+              "old": "NativeResource(r) == ExpectedResource(r)",
+              "new": "NativeResource(r) == Wildcard",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AdmissionBeforeStorage"
+        },
+        {
+          "id": "IgnoreRequestedAction",
+          "edits": [
+            {
+              "old": "PolicyOK(r) == r.grantOp = r.op /\\",
+              "new": "PolicyOK(r) == TRUE /\\",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AdmissionBeforeStorage"
+        },
+        {
+          "id": "TrustCursorForAuthorization",
+          "edits": [
+            {
+              "old": "ELSE IF ~PolicyOK(r) THEN \"denied\"",
+              "new": "ELSE IF ~PolicyOK(r) /\\ r.cursor = None THEN \"denied\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AdmissionBeforeStorage"
+        },
+        {
+          "id": "DecodeBeforeAuthorization",
+          "edits": [
+            {
+              "old": "ELSE IF ~PolicyOK(r) THEN \"denied\"\n  ELSE IF ~CursorOK(r, n) THEN \"cursor\"",
+              "new": "ELSE IF ~CursorOK(r, n) THEN \"cursor\"\n  ELSE IF ~PolicyOK(r) THEN \"denied\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AdmissionBeforeStorage"
+        },
+        {
+          "id": "IgnoreCursorIntegrity",
+          "edits": [
+            {
+              "old": "/\\ c.integrity /\\ c.afterFits /\\ c.epoch = n",
+              "new": "/\\ c.afterFits /\\ c.epoch = n",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AdmissionBeforeStorage"
+        },
+        {
+          "id": "IgnoreCursorMarkerShape",
+          "edits": [
+            {
+              "old": "/\\ c.integrity /\\ c.afterFits /\\ c.epoch = n",
+              "new": "/\\ c.integrity /\\ c.epoch = n",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AdmissionBeforeStorage"
+        },
+        {
+          "id": "AcceptRetiredStoreCursor",
+          "edits": [
+            {
+              "old": "/\\ c.integrity /\\ c.afterFits /\\ c.epoch = n",
+              "new": "/\\ c.integrity /\\ c.afterFits",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AdmissionBeforeStorage"
+        },
+        {
+          "id": "IgnoreCursorAccount",
+          "edits": [
+            {
+              "old": "/\\ c.account = \"local\" /\\ c.region = r.region",
+              "new": "/\\ c.region = r.region",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AdmissionBeforeStorage"
+        },
+        {
+          "id": "IgnoreCursorRegion",
+          "edits": [
+            {
+              "old": "/\\ c.account = \"local\" /\\ c.region = r.region",
+              "new": "/\\ c.account = \"local\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AdmissionBeforeStorage"
+        },
+        {
+          "id": "IgnoreCursorCredential",
+          "edits": [
+            {
+              "old": "/\\ c.actor.credential = r.actor.credential /\\ c.actor.exercise = r.actor.exercise",
+              "new": "/\\ c.actor.exercise = r.actor.exercise",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AdmissionBeforeStorage"
+        },
+        {
+          "id": "IgnoreCursorExercise",
+          "edits": [
+            {
+              "old": "/\\ c.actor.credential = r.actor.credential /\\ c.actor.exercise = r.actor.exercise",
+              "new": "/\\ c.actor.credential = r.actor.credential",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AdmissionBeforeStorage"
+        },
+        {
+          "id": "IgnoreCursorPageSize",
+          "edits": [
+            {
+              "old": "/\\ c.limit = r.limit\n\nAdmit",
+              "new": "/\\ TRUE\n\nAdmit",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AdmissionBeforeStorage"
+        },
+        {
+          "id": "ExpireDeletedMarker",
+          "edits": [
+            {
+              "old": "LET gate == Admit(r, n)",
+              "new": "LET gate == IF Admit(r, n) = \"ok\" /\\ r.cursor # None\n                    THEN IF << \"local\", r.region, r.cursor.after >> \\in rows THEN \"ok\" ELSE \"cursor\"\n                    ELSE Admit(r, n)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AdmissionBeforeStorage"
+        },
+        {
+          "id": "IgnorePoolCapacity",
+          "edits": [
+            {
+              "old": "Cardinality({p \\in rows : MatchesScope(p, r)}) < Capacity",
+              "new": "TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ScopedCRUD"
+        },
+        {
+          "id": "AcceptCreateCollision",
+          "edits": [
+            {
+              "old": "IF p \\in rows THEN \"collision\" ELSE \"ok\"",
+              "new": "\"ok\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ScopedCRUD"
+        },
+        {
+          "id": "ReadOrDeletePeerAccount",
+          "edits": [
+            {
+              "old": "ItemRows(rows, r) == {p \\in rows : p = Key(r)}",
+              "new": "ItemRows(rows, r) == {p \\in rows : p[2] = r.region /\\ p[3] = r.id}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ScopedCRUD"
+        },
+        {
+          "id": "ReadOrDeletePeerRegion",
+          "edits": [
+            {
+              "old": "ItemRows(rows, r) == {p \\in rows : p = Key(r)}",
+              "new": "ItemRows(rows, r) == {p \\in rows : p[1] = \"local\" /\\ p[3] = r.id}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ScopedCRUD"
+        },
+        {
+          "id": "ListPeerAccount",
+          "edits": [
+            {
+              "old": "InPageRange(p, r) == MatchesScope(p, r) /\\ p[3] > Lower(r)",
+              "new": "InPageRange(p, r) == p[2] = r.region /\\ p[3] > Lower(r)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExactOrderedPage"
+        },
+        {
+          "id": "ListPeerRegion",
+          "edits": [
+            {
+              "old": "InPageRange(p, r) == MatchesScope(p, r) /\\ p[3] > Lower(r)",
+              "new": "InPageRange(p, r) == p[1] = \"local\" /\\ p[3] > Lower(r)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExactOrderedPage"
+        },
+        {
+          "id": "ReplayCursorMarker",
+          "edits": [
+            {
+              "old": "InPageRange(p, r) == MatchesScope(p, r) /\\ p[3] > Lower(r)",
+              "new": "InPageRange(p, r) == MatchesScope(p, r) /\\ p[3] >= Lower(r)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExactOrderedPage"
+        },
+        {
+          "id": "DropRemainingPage",
+          "edits": [
+            {
+              "old": "next == IF Len(candidates) > count THEN AfterPage(r, n, page[count][3]) ELSE None",
+              "new": "next == None",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExactNextToken"
+        },
+        {
+          "id": "InventTerminalCursor",
+          "edits": [
+            {
+              "old": "Len(candidates) > count THEN AfterPage(r, n, page[count][3])",
+              "new": "count > 0 THEN AfterPage(r, n, page[count][3])",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExactNextToken"
+        },
+        {
+          "id": "SkipAfterCursor",
+          "edits": [
+            {
+              "old": "AfterPage(r, n, page[count][3])",
+              "new": "AfterPage(r, n, 3)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExactNextToken"
+        },
+        {
+          "id": "LosePersistedRows",
+          "edits": [
+            {
+              "old": "!.epoch = 1, !.rows = s.rows",
+              "new": "!.epoch = 1, !.rows = {}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "RestartPersistsRows"
+        }
+      ]
+    },
+    {
       "id": "SimpleDBSelectPage",
       "model": "formal/SimpleDBSelectPage.tla",
       "config": "formal/SimpleDBSelectPage.cfg",

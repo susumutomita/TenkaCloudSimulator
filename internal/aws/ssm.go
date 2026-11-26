@@ -33,6 +33,10 @@ func (g *Gateway) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		g.serveBedrockRuntime(w, r)
 		return
 	}
+	if isCognitoUserPools(r) {
+		g.serveCognitoUserPools(w, r)
+		return
+	}
 	// DynamoDB's explicit protocol target owns its admission errors even when
 	// the service hint or signing scope incorrectly names EC2.
 	if strings.HasPrefix(r.Header.Get("X-Amz-Target"), "DynamoDB_20120810.") {
