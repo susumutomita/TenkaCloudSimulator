@@ -15,6 +15,7 @@ from route53_openapi import project_before_route53
 from route53_ptr_reference import project_before_ptr
 from batch_reference_projection import project_batches
 from secret_reference_projection import project_secret_description
+from ssm_document_reference import project_before_ssm_document_versions
 
 ROOT = Path(__file__).resolve().parents[2]
 COLLECTION = '/_simulator/providers/sakura/cloud/zone/{zone}/api/cloud/1.1/disk'
@@ -33,6 +34,22 @@ def digest(value):
 def operations(spec):
     return [(path,method,value) for path,item in spec['paths'].items() for method,value in item.items() if method in METHODS]
 
+
+
+def project_simpledb_select(spec):
+    """Project only the precise reviewed additions, preserving all earlier guards."""
+    form = spec['paths']['/']['post']['requestBody']['content']['application/x-www-form-urlencoded']
+    props = form['schema']['properties']
+    actions = props['Action']['enum']
+    # DeleteAttributes previously had a template but was missing from the enum.
+    assert actions[-2:] == ['DeleteAttributes', 'Select'] and all(actions.count(a) == 1 for a in actions[-2:]), 'SimpleDB Select action list changed'
+    del actions[-2:]
+    fields = {k: props.pop(k, None) for k in ('SelectExpression', 'ConsistentRead', 'NextToken')}
+    assert digest(fields) == '1f253a796e2b3f502a9bfd70be5f1c0140ea8cd974db9646497a7a743401111a', 'SimpleDB Select fields changed'
+    assert digest(form['examples'].pop('Select', None)) == '2d5602fc395a166ae8ded1f65fb99b43e0aaee42ec97751cceb224e565d62c2c', 'SimpleDB Select example changed'
+    domain = props.get('DomainName', {})
+    assert domain.get('description') == 'Existing local domain for DomainMetadata or DeleteAttributes. Do not include DomainName for Select; use the domain in SelectExpression.', 'SimpleDB domain documentation changed'
+    domain['description'] = 'Existing local SimpleDB domain name, required for DomainMetadata only in these presets.'
 
 
 def project_simpledb_domain_metadata(spec):
@@ -64,11 +81,20 @@ def project_simpledb_list_domains(spec):
     assert digest(response) == '11a7932f16b348011034c0f82be5a858922db9d92fcec924d3190612c5c6bc09', 'SimpleDB XML media/example changed'
 
 
+
+def project_simpledb_delete_attributes(spec):
+    """Validate the exact conditional single-value XML Query preset."""
+    form = spec['paths']['/']['post']['requestBody']['content']['application/x-www-form-urlencoded']
+    example = form['examples'].pop('DeleteAttributes', None)
+    assert digest(example) == '155821983ff943031d61913b8d87b4a4bf6ea735567231b1fb51bfff69e18536', 'SimpleDB DeleteAttributes preset changed'
+
+
 SERVER_COLLECTION = '/_simulator/providers/sakura/cloud/zone/{zone}/api/cloud/1.1/server'
 
 
 def project_server_list(spec):
     spec = copy.deepcopy(spec)
+    project_simpledb_delete_attributes(spec)
     tag = {'name': 'Sakura Server metadata',
            'description': 'Read saved Server metadata in the configured local zone; no VM or network state.'}
     declared = [entry for entry in spec['tags'] if entry['name'] == tag['name']]
@@ -80,10 +106,14 @@ def project_server_list(spec):
     grouped[0]['tags'].remove(tag['name'])
     server = spec['paths'].pop(SERVER_COLLECTION, None)
     assert digest(server) == '81203e3d7065de93e30b5941964ba52f94a11c12888f61b85dbe7c542dc9a521', 'Server List reference changed'
+    project_simpledb_select(spec)
     project_simpledb_domain_metadata(spec)
     project_simpledb_list_domains(spec)
     inherited = copy.deepcopy(spec)
     project_before_ptr(inherited['paths'])
+    # The older Sakura guard already covered the preceding SSM API. The
+    # full SSM projection later still sees and validates all seven operations.
+    project_before_ssm_document_versions(inherited)
     assert digest(inherited['paths']) == '1dce93acc032ee7c312d7a8bd9e7442368953b59403f494e5fb3ab8e20d2ede8', 'Pre-existing reference paths changed'
     assert digest(inherited) == '62dc82bc8496d80e92364df28c940012d22498553e779929dd10fa431a0a57c6', 'Pre-existing reference spec changed'
     return spec
@@ -202,6 +232,26 @@ class SakuraReference(unittest.TestCase):
     def test_all_existing_operations_components_and_28_templates_are_exact(self):
         preserved(self.spec)
 
+    def test_read_only_simpledb_select_projection(self):
+        def form(d):
+            return d['paths']['/']['post']['requestBody']['content']['application/x-www-form-urlencoded']
+        example = form(self.spec)['examples']['Select']['value']
+        validator(self.spec, form(self.spec)['schema']).validate(example)
+        self.assertEqual(example, {'Action': 'Select', 'Version': '2009-04-15',
+            'SelectExpression': 'select itemName() from `example-domain` limit 25', 'ConsistentRead': 'true'})
+        project_simpledb_select(copy.deepcopy(self.spec))
+        for change in (
+            lambda f: f['schema']['properties']['Action']['enum'].append('Select'),
+            lambda f: f['schema']['properties'].pop('ConsistentRead'),
+            lambda f: f['schema']['properties']['NextToken'].update(type='integer'),
+            lambda f: f['examples']['Select']['value'].update(Action='DeleteAttributes'),
+            lambda f: f['examples']['Select']['value'].update(DomainName='elsewhere'),
+        ):
+            changed = copy.deepcopy(self.spec)
+            change(form(changed))
+            with self.assertRaises(AssertionError):
+                project_simpledb_select(changed)
+
     def test_simpledb_projection_cannot_hide_missing_changed_or_inherited_contracts(self):
         def post(spec):
             return spec['paths']['/']['post']
@@ -223,7 +273,7 @@ class SakuraReference(unittest.TestCase):
             ('missing action', lambda spec: form(spec)['schema']['properties']['Action']['enum'].remove('ListDomains')),
             ('wrong query version', lambda spec: form(spec)['schema']['properties']['Version']['enum'].__setitem__(-1, '2020-01-01')),
             ('missing form example', lambda spec: form(spec)['examples'].pop('ListDomains')),
-            ('missing metadata action', lambda spec: form(spec)['schema']['properties']['Action']['enum'].pop()),
+            ('missing metadata action', lambda spec: form(spec)['schema']['properties']['Action']['enum'].remove('DomainMetadata')),
             ('missing metadata field', lambda spec: form(spec)['schema']['properties'].pop('DomainName')),
             ('wrong metadata domain field shape', lambda spec: form(spec)['schema']['properties']['DomainName'].update(type='integer')),
             ('missing metadata example', lambda spec: form(spec)['examples'].pop('DomainMetadata')),
@@ -248,6 +298,68 @@ class SakuraReference(unittest.TestCase):
             change(broken)
             with self.subTest(change=label), self.assertRaises(AssertionError):
                 preserved(broken)
+
+    def test_simpledb_delete_attributes_preset_is_one_conditional_pair(self):
+        def examples(spec):
+            return spec['paths']['/']['post']['requestBody']['content']['application/x-www-form-urlencoded']['examples']
+
+        value = examples(self.spec)['DeleteAttributes']['value']
+        self.assertEqual(value, {
+            'Action': 'DeleteAttributes', 'Version': '2009-04-15',
+            'DomainName': 'example-domain', 'ItemName': 'example-item',
+            'Attribute.1.Name': 'example-attribute', 'Attribute.1.Value': 'replace-with-current-value',
+            'Expected.Name': 'example-attribute', 'Expected.Value': 'replace-with-current-value',
+        })
+        for label, change in (
+            ('missing preset', lambda x: x.pop('DeleteAttributes')),
+            ('missing row selector', lambda x: x['DeleteAttributes']['value'].pop('Attribute.1.Name')),
+            ('unconditional delete', lambda x: x['DeleteAttributes']['value'].pop('Expected.Value')),
+            ('wrong expected value', lambda x: x['DeleteAttributes']['value'].update({'Expected.Value': 'elsewhere'})),
+            ('unreviewed extra input', lambda x: x['DeleteAttributes']['value'].update(Unexpected='extra')),
+            ('changed authority note', lambda x: x['DeleteAttributes'].update(description='unreviewed')),
+        ):
+            broken = copy.deepcopy(self.spec)
+            change(examples(broken))
+            with self.subTest(change=label), self.assertRaisesRegex(AssertionError, 'SimpleDB DeleteAttributes preset changed'):
+                project_server_list(broken)
+
+    def test_document_version_projection_cannot_hide_reference_or_inherited_drift(self):
+        name = 'SSMListDocumentVersions'
+
+        def root(spec):
+            return spec['paths']['/']['post']
+
+        def request(spec):
+            return root(spec)['requestBody']['content'][JSON11]
+
+        def response(spec):
+            return root(spec)['responses']['200']['content'][JSON11]
+
+        def move_version(spec):
+            union = response(spec)['schema']['anyOf']
+            ref = {'$ref': '#/components/schemas/' + name + 'Output'}
+            union.remove(ref)
+            union.insert(0, ref)
+
+        for label, change, expected in (
+            ('missing request', lambda s: request(s)['examples'].pop(name), 'reference changed'),
+            ('wrong target', lambda s: request(s)['examples'][name].update(summary='X-Amz-Target: other'), 'reference changed'),
+            ('invented response', lambda s: response(s)['examples'][name]['value'].update(Content='new'), 'reference changed'),
+            ('weakened input', lambda s: s['components']['schemas'][name + 'Input'].update(additionalProperties=True), 'reference changed'),
+            ('widened version model', lambda s: s['components']['schemas']['SSMDocumentVersionInfo']['properties']['DocumentFormat'].update(enum=['JSON', 'YAML']), 'reference changed'),
+            ('missing output model', lambda s: s['components']['schemas'].pop(name + 'Output'), 'reference changed'),
+            ('wrong IAM permission', lambda s: root(s)['x-simulator-ssm-document-operation-schemas']['AmazonSSM.ListDocumentVersions'].update(permission='unreviewed'), 'reference changed'),
+            ('duplicate request reference', lambda s: request(s)['schema']['anyOf'].append({'$ref': '#/components/schemas/' + name + 'Input'}), 'union binding changed'),
+            ('moved response reference', move_version, 'union order changed'),
+            ('changed operation text', lambda s: root(s).update(description=root(s)['description'].replace('the preset does not create anything', 'the preset writes a parent')), 'description changed'),
+            ('changed previous SSM operation', lambda s: request(s)['examples']['SSMListDocuments']['value'].update(MaxResults=49), 'Pre-existing reference paths changed'),
+            ('unreviewed similar schema', lambda s: s['components']['schemas'].update(SSMUnreviewedVersion={'type': 'object'}), 'Pre-existing reference spec changed'),
+        ):
+            broken = copy.deepcopy(self.spec)
+            change(broken)
+            error = expected if expected.startswith('Pre-existing') else 'SSM ListDocumentVersions ' + expected
+            with self.subTest(change=label), self.assertRaisesRegex(AssertionError, error):
+                project_server_list(broken)
 
     def test_sqs_batch_projection_cannot_hide_contract_or_inherited_drift(self):
         def media(spec):

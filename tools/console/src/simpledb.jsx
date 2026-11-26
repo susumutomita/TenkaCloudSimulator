@@ -88,10 +88,65 @@ function Domains({api, choose, returning}) {
   </SpaceBetween>;
 }
 
-function Item({api, domain, goBack, canDelete}) {
+// A change of domain, identity, criteria, or local write unmounts the old
+// results owner, aborting its outstanding read and discarding its cursor.
+function SelectPages({api, domain, attribute, value, choose, display, locked}) {
+  const {t} = useLocale();
+  const {busy, error, run} = useRequestChain();
+  const [page, setPage] = useState(null);
+  const valid = validText(attribute, true) && validText(value, true) && (attribute !== '' || value === '');
+  function load(more) {
+    if (locked || !valid || (more && !page?.next)) return;
+    run(async signal => {
+      const read = more ? page.next : sig => api.selectNames(domain, attribute, value, sig);
+      const number = more ? page.number + 1 : 1;
+      setPage(null);
+      const data = await read(signal);
+      signal.throwIfAborted();
+      setPage({...data, number});
+    });
+  }
+  return <SpaceBetween size="s">
+    <SpaceBetween direction="horizontal" size="xs">
+      <Button disabled={locked || busy || !valid} onClick={() => load(false)}>{t('Run query','検索する')}</Button>
+      <Button disabled={locked || busy || !page?.next} onClick={() => load(true)}>{t('Load next result page','次の検索結果を表示')}</Button>
+    </SpaceBetween>
+    {error && <Alert type="error">{error.startsWith('AccessDenied:') ?
+      t('Your identity cannot query this domain.','現在の演習IDにはこのドメインを検索する権限がありません。') :
+      t('The query did not complete. Run it again to start from the first page.','検索に失敗しました。もう一度検索すると最初のページから表示します。')}</Alert>}
+    <div role="status">{busy ? t('Searching…','検索中…') : page ?
+      t('Page ' + page.number + ': ' + page.names.length + ' matches.', page.number + 'ページ目：' + page.names.length + '件。') +
+      (page.next ? t(' More results can be checked.',' 続きのページがあります。') : t(' End of results.',' 最後のページです。')) : ''}</div>
+    {page && <Table ariaLabels={{tableLabel: t('Matching item names','一致した項目名')}} items={page.names}
+      columnDefinitions={[{id: 'name', header: t('Matching item name','一致した項目名'), cell: name =>
+        <Button variant="inline-link" disabled={locked} onClick={() => choose(name)}>{display(name)}</Button>}]}
+      empty={<Box textAlign="center">{page.next ? t('No matches on this page. Continue to check more items.','このページに該当はありません。次のページも確認できます。') :
+        t('No matches on this page.','このページに該当する項目はありません。')}</Box>}/>}
+  </SpaceBetween>;
+}
+
+function FindItems({api, domain, choose, display, locked, epoch}) {
+  const {t} = useLocale();
+  const [attribute, setAttribute] = useState(''), [value, setValue] = useState('');
+  return <Container header={<Header variant="h2" description={t('Search this domain, up to 25 item names per page. Choose a name to put it in the item editor, then read its attributes.','このドメインの項目名を1ページに最大25件表示します。項目名を選ぶと取得欄に入ります。「属性を読み込む」で内容を確認できます。')}>
+    {t('Find items','項目を検索')}</Header>}>
+    <SpaceBetween size="s">
+      <FormField label={t('Filter by attribute (optional)','検索する属性名（任意）')} constraintText={t('Leave blank to list all item names.','空欄で全項目名を検索します。')}>
+        <Input value={attribute} disabled={locked} onChange={({detail}) => {setAttribute(detail.value); if (!detail.value) setValue('');}}/>
+      </FormField>
+      <FormField label={t('Exact attribute value','検索する属性値（完全一致）')} constraintText={t('With an attribute selected, blank matches an empty string.','属性名がある場合、空欄は空文字列に一致します。')}>
+        <Input value={value} disabled={locked || !attribute} onChange={({detail}) => setValue(detail.value)}/>
+      </FormField>
+      <SelectPages key={JSON.stringify([domain, attribute, value, epoch])} {...{api, domain, attribute, value, choose, display, locked}}/>
+    </SpaceBetween>
+  </Container>;
+}
+
+function Item({api, domain, goBack, canDelete, canSelect}) {
   const {t} = useLocale();
   const {busy, error, run, clearError} = useRequestChain();
   const [item, setItem] = useState(''), [attrs, setAttrs] = useState(null), [notice, setNotice] = useState('');
+  const [queryEpoch, setQueryEpoch] = useState(0);
   const [editor, showEditor] = useState(false), [deleting, setDeleting] = useState(null);
   const itemInput = useRef(null), attributeInput = useRef(null), status = useRef(null), completion = useRef(null);
   useLayoutEffect(() => {itemInput.current?.focus();}, []);
@@ -129,6 +184,7 @@ function Item({api, domain, goBack, canDelete}) {
   function change(apply, result) {
     setDeleting(null);
     run(async signal => {
+      setQueryEpoch(epoch => epoch + 1);
       completion.current = {origin: document.activeElement, target: 'status'};
       setNotice(''); setAttrs(null);
       await apply(signal);
@@ -175,6 +231,8 @@ function Item({api, domain, goBack, canDelete}) {
         <Button disabled={busy || !validText(item)} onClick={read}>{t('Read attributes','属性を読み込む')}</Button>
       </SpaceBetween>
     </Container>
+    {canSelect && <FindItems epoch={queryEpoch} api={api} domain={domain} display={display} locked={busy}
+      choose={name => {editItem(name); itemInput.current?.focus();}}/>}
     {attrs !== null && <Table ariaLabels={{tableLabel: t('Saved attributes','保存された属性')}} items={attrs} trackBy="id"
         columnDefinitions={[{id:'name', header:t('Attribute name','属性名'), cell:x => display(x.name)},
           {id:'value', header:t('Value','値'), cell:x => display(x.value)},
@@ -209,12 +267,12 @@ function Item({api, domain, goBack, canDelete}) {
   </SpaceBetween>;
 }
 
-export default function SimpleDBView({request, canDelete = false}) {
+export default function SimpleDBView({request, canDelete = false, canSelect = false}) {
   const {t} = useLocale();
   const api = useMemo(() => simpleDBClient(request), [request]);
   const [domain, setDomain] = useState(''), [returning, setReturning] = useState(false);
   function goBack() {setReturning(true); setDomain('');}
-  return <ContentLayout header={<Header variant="h1" description={t('Local us-east-1 only. Read a named item and conditionally update one attribute. Item search is not available here.','ローカルの us-east-1 のみ。名前を指定して項目を読み込み、属性を条件付きで1件更新します。項目検索はこの画面では利用できません。')}>Amazon SimpleDB</Header>}>
-    {domain ? <Item key={domain} api={api} domain={domain} goBack={goBack} canDelete={canDelete}/> : <Domains api={api} choose={setDomain} returning={returning}/>}
+  return <ContentLayout header={<Header variant="h1" description={canSelect ? t('Local us-east-1 only. Find items or read one by name, then conditionally update an attribute.','ローカルの us-east-1 のみ。項目を検索するか名前で読み込み、属性を条件付きで更新します。') : t('Local us-east-1 only. Read a named item and conditionally update one attribute.','ローカルの us-east-1 のみ。名前を指定して項目を読み込み、属性を条件付きで1件更新します。')}>Amazon SimpleDB</Header>}>
+    {domain ? <Item key={domain} api={api} domain={domain} goBack={goBack} canDelete={canDelete} canSelect={canSelect}/> : <Domains api={api} choose={setDomain} returning={returning}/>}
   </ContentLayout>;
 }

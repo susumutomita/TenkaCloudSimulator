@@ -25,13 +25,24 @@ No AWS account or outbound connection is used.
 6. The result is announced and focused when the initiating control still owns
    focus. A refusal keeps the editor visible but locked until you read again.
 
+## Find matching items
+
+In an open domain, choose **Run query** to list item names, or enter an
+attribute and its exact value before running. A blank value matches an empty
+string. Each button press loads **one page of up to 25 names**. Use **Load next
+result page** when available, even if this page found no matches. Changing the
+filter or domain drops the old results and cursor. After a local editor write,
+run the query again to refresh. Choose a result to fill **Item name**;
+**Read attributes** still needs `sdb:GetAttributes` separately. The query
+does not enable editing or deletion on its own.
+
 The existing authorization checks for `sdb:ListDomains` (on `*`) and
-`sdb:CreateDomain`, `sdb:GetAttributes`, `sdb:PutAttributes`, and, for deletion,
+`sdb:CreateDomain`, `sdb:Select` (on every results page), `sdb:GetAttributes`, `sdb:PutAttributes`, and, for deletion,
 `sdb:DeleteAttributes` (on the selected
 domain) apply unchanged. The console does not grant permissions. If a write is
 not acknowledged, reload the item before retrying.
 
 This console supports single-attribute conditional replacement or removal.
-To use a separate attribute for the condition, use the native SDK. Item search,
-Select, batch writes, domain metadata, and whole-domain deletion are not offered here.
+To use a separate attribute for the condition, use the native SDK. Arbitrary Select expressions,
+batch writes, domain metadata, and whole-domain deletion are not offered here.
 Domain cleanup uses native `DeleteDomain`, which also removes its items.

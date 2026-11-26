@@ -1,279 +1,242 @@
 {
   "version": 1,
-  "base_sha": "5902a90faf9bb8dd3ca09fd19e59a1f34e8ed1a4",
+  "base_sha": "36e8efdcbbd853ea4bdc1b81e69eb8c05179da92",
   "changes": [
     {
       "path": "README.md",
-      "sha256": "082eef7332b6a7adf526a69511308994b663f8a1fbe54b1d1701b081caf21647",
+      "sha256": "7bb658ed9d734d720f10b291dfdd0e2576b6ea4ff0dab55f50db83476ce09c66",
       "disposition": "documentation",
-      "reason": "Describe the read-only route-table Console projection and its unsupported network and mutation behavior.",
+      "reason": "Document bounded names-only query, matching workflow and prior native/API limits without promising unmodeled behavior.",
       "models": []
     },
     {
       "path": "docs/design/0001-go-standalone.md",
-      "sha256": "ac31f038610e00720b03282f0e80ec71b524cdd231ec09a4e15960d1435bcd7a",
+      "sha256": "86fbf1de2f8f787b20d34420a25032b5d4201aa17ca3bee1f68ec7926898b7e3",
       "disposition": "documentation",
-      "reason": "Describe the read-only route-table Console projection and its unsupported network and mutation behavior.",
+      "reason": "Document bounded names-only query, matching workflow and prior native/API limits without promising unmodeled behavior.",
       "models": []
     },
     {
-      "path": "docs/ec2-network-contracts.md",
-      "sha256": "f03e8bb4a02e93c3880498c35c479fb0267f1083c0c1ac9ba07a65b37ab1981f",
+      "path": "docs/simpledb-console.md",
+      "sha256": "7e5e8106edb33e7d57a7c84dc39b8bbf1f6a8f2f9becec9014b78fd7c4841143",
       "disposition": "documentation",
-      "reason": "Describe the read-only route-table Console projection and its unsupported network and mutation behavior.",
+      "reason": "Document bounded names-only query, matching workflow and prior native/API limits without promising unmodeled behavior.",
       "models": []
     },
     {
-      "path": "docs/ec2-read-discovery.md",
-      "sha256": "1bfd345531a291e92f1edd3aeb68d67acf6f45a3e6a00f9009e46a1841fefcc5",
+      "path": "docs/simpledb-select.md",
+      "sha256": "f33321eef854eb844af1a7a6250e2f89ae17ef2d2cf65687b477eeae124ce672",
       "disposition": "documentation",
-      "reason": "Describe the read-only route-table Console projection and its unsupported network and mutation behavior.",
+      "reason": "Document bounded names-only query, matching workflow and prior native/API limits without promising unmodeled behavior.",
       "models": []
     },
     {
-      "path": "formal/EC2RouteTableConsoleEpoch.cfg",
-      "sha256": "d3d4c2584cca611148f076119317fce8b4bca9d960802938dea9ac6fbe3c6c3f",
+      "path": "formal/SimpleDBSelectConsoleEpoch.cfg",
+      "sha256": "25871382bd77a88611c87b72e4884fb97a66500d2db47ab2b25f9225e1f16a5c",
       "disposition": "modeled",
-      "reason": "A bounded selection, fixed read and evidence-preserving projection apply to the selected route-table Console contract; the native API is unchanged.",
+      "reason": "Console Select state/lifecycle mapping; inherited native Select and item writes are not changed.",
       "models": [
         {
-          "id": "EC2RouteTableConsoleEpoch",
+          "id": "SimpleDBSelectConsoleEpoch",
           "properties": [
-            "EligibleRead",
-            "FixedRead",
-            "CurrentIdentity",
-            "CurrentRegion",
-            "CurrentTarget",
-            "CurrentRevision",
-            "CurrentGate",
-            "StatusIsEvidence",
-            "DefaultIsRecorded",
-            "AssociationIsExplicit",
-            "NoImplicitMain"
+            "ReadAdmission",
+            "BoundedReadRequest",
+            "SingleCurrentRead",
+            "CursorOrigin",
+            "OnlyCurrentOwner",
+            "OnlyAcceptedPages",
+            "CursorMirrorsReply",
+            "NextOfferedExactly",
+            "FailureClearsPage",
+            "EffectIsolation",
+            "ChoiceDoesNotObserve"
           ],
-          "limits": "Readout projection only. A change may keep identity, region, VPC, revision or availability constant, independently exercising stale responses. Bounded labels are not arbitrary refresh/ABA interleavings. Does not prove React scheduling, authentication, IAM/SQL/HTTP/XML, packet reachability, route edits, completeness or runtime refinement."
+          "limits": "Abstract bounded names-only requests and React owner replacement in a finite user-visible lifecycle. One symbolic name represents an admitted page, not the 25-row payload. Does not verify native IAM, SQL, cryptographic cursor validation, actual HTTP/XML, browser cancellation at the server, React scheduling or DOM refocus, mutation acknowledgements, linearizable snapshots, Scalar, or Go/JavaScript refinement."
         }
       ]
     },
     {
-      "path": "formal/EC2RouteTableConsoleEpoch.tla",
-      "sha256": "5bd23b553770a142a603dee75b3c9dd682691bf02a87090b2f7572d2e1a036bb",
+      "path": "formal/SimpleDBSelectConsoleEpoch.tla",
+      "sha256": "af293faf81c162ea49f351c7ccc3a3573574165dd458330bf530ac8a444c77d9",
       "disposition": "modeled",
-      "reason": "A bounded selection, fixed read and evidence-preserving projection apply to the selected route-table Console contract; the native API is unchanged.",
+      "reason": "Console Select state/lifecycle mapping; inherited native Select and item writes are not changed.",
       "models": [
         {
-          "id": "EC2RouteTableConsoleEpoch",
+          "id": "SimpleDBSelectConsoleEpoch",
           "properties": [
-            "EligibleRead",
-            "FixedRead",
-            "CurrentIdentity",
-            "CurrentRegion",
-            "CurrentTarget",
-            "CurrentRevision",
-            "CurrentGate",
-            "StatusIsEvidence",
-            "DefaultIsRecorded",
-            "AssociationIsExplicit",
-            "NoImplicitMain"
+            "ReadAdmission",
+            "BoundedReadRequest",
+            "SingleCurrentRead",
+            "CursorOrigin",
+            "OnlyCurrentOwner",
+            "OnlyAcceptedPages",
+            "CursorMirrorsReply",
+            "NextOfferedExactly",
+            "FailureClearsPage",
+            "EffectIsolation",
+            "ChoiceDoesNotObserve"
           ],
-          "limits": "Readout projection only. A change may keep identity, region, VPC, revision or availability constant, independently exercising stale responses. Bounded labels are not arbitrary refresh/ABA interleavings. Does not prove React scheduling, authentication, IAM/SQL/HTTP/XML, packet reachability, route edits, completeness or runtime refinement."
+          "limits": "Abstract bounded names-only requests and React owner replacement in a finite user-visible lifecycle. One symbolic name represents an admitted page, not the 25-row payload. Does not verify native IAM, SQL, cryptographic cursor validation, actual HTTP/XML, browser cancellation at the server, React scheduling or DOM refocus, mutation acknowledgements, linearizable snapshots, Scalar, or Go/JavaScript refinement."
         }
       ]
     },
     {
       "path": "formal/models.json",
-      "sha256": "4be41c8c1d8822a1b31b430694efd9ae9f451d6c106f5a17d296e13e733c8c2a",
+      "sha256": "733f5fe9734199f65beb4f423665c5dc01da38b9ec72ad9f0675a6dea6d5b231",
       "disposition": "formal-infrastructure",
-      "reason": "Independently register and require finite selected-pane, identity, target, admission, evidence and stale-response properties and controls.",
+      "reason": "Add the independently scoped finite Console model, its required invariants, immutable path mapping and executable negative-control registration tests.",
       "models": []
     },
     {
-      "path": "internal/server/ec2_security_groups_console_test.go",
-      "sha256": "432c8161296504e4de085bf382be5e0294b55e029e7eb09a5e46ea8b5dd518ee",
-      "disposition": "test-support",
-      "reason": "Exercise the selected route read contract, region/identity scope, real/refused response distinction or stale completion.",
+      "path": "internal/server/apidocs/openapi.json",
+      "sha256": "71f37a57d5474c3efb1c7357c4e9ed8a695906c2fc7ce59ac5fe4c44b553cd8c",
+      "disposition": "presentation",
+      "reason": "Add a fixed read-only Select preset to disclose the implemented native action; it does not itself establish authorization or model Scalar transport.",
       "models": []
-    },
-    {
-      "path": "internal/server/server.go",
-      "sha256": "5d09ee00093bcfff1d3ec07a05aaf7f65a9cf3ea6211c3fc113dd921709446b5",
-      "disposition": "modeled",
-      "reason": "A bounded selection, fixed read and evidence-preserving projection apply to the selected route-table Console contract; the native API is unchanged.",
-      "models": [
-        {
-          "id": "EC2RouteTableConsoleEpoch",
-          "properties": [
-            "EligibleRead",
-            "FixedRead"
-          ],
-          "limits": "Readout projection only. A change may keep identity, region, VPC, revision or availability constant, independently exercising stale responses. Bounded labels are not arbitrary refresh/ABA interleavings. Does not prove React scheduling, authentication, IAM/SQL/HTTP/XML, packet reachability, route edits, completeness or runtime refinement."
-        }
-      ]
     },
     {
       "path": "internal/server/web/app.js",
-      "sha256": "b2b16680df13820f6c1165fe68f3b42ba8ee0bf4fafa33293f0d636b2771105b",
+      "sha256": "c00f67563dce3ff5cede66cce284a1e8447a2311a6c024e245edef32b62d6527",
       "disposition": "modeled",
-      "reason": "A bounded selection, fixed read and evidence-preserving projection apply to the selected route-table Console contract; the native API is unchanged.",
+      "reason": "Console Select state/lifecycle mapping; inherited native Select and item writes are not changed.",
       "models": [
         {
-          "id": "EC2RouteTableConsoleEpoch",
+          "id": "SimpleDBSelectConsoleEpoch",
           "properties": [
-            "EligibleRead",
-            "FixedRead",
-            "CurrentIdentity",
-            "CurrentRegion",
-            "CurrentTarget",
-            "CurrentRevision",
-            "CurrentGate",
-            "StatusIsEvidence",
-            "DefaultIsRecorded",
-            "AssociationIsExplicit",
-            "NoImplicitMain"
+            "ReadAdmission",
+            "BoundedReadRequest",
+            "SingleCurrentRead",
+            "CursorOrigin",
+            "OnlyCurrentOwner",
+            "OnlyAcceptedPages",
+            "CursorMirrorsReply",
+            "NextOfferedExactly",
+            "FailureClearsPage",
+            "EffectIsolation",
+            "ChoiceDoesNotObserve"
           ],
-          "limits": "Readout projection only. A change may keep identity, region, VPC, revision or availability constant, independently exercising stale responses. Bounded labels are not arbitrary refresh/ABA interleavings. Does not prove React scheduling, authentication, IAM/SQL/HTTP/XML, packet reachability, route edits, completeness or runtime refinement."
+          "limits": "State carried by compiled Select UI only; exact canonical bundle reproduction and tests are separate, not a proof of minified code, runtime behavior or parser correctness."
         }
       ]
     },
     {
       "path": "scripts/formal_model_gate.py",
-      "sha256": "1517540925685923bf38f63da47e07a4c5e3bca55102ab460952f053bfbb9081",
+      "sha256": "db39fc7ab25c3f2939baa44e6125eb1854c5ed63928df35ace60967290f14afd",
       "disposition": "formal-infrastructure",
-      "reason": "Independently register and require finite selected-pane, identity, target, admission, evidence and stale-response properties and controls.",
+      "reason": "Add the independently scoped finite Console model, its required invariants, immutable path mapping and executable negative-control registration tests.",
       "models": []
     },
     {
       "path": "scripts/test-formal-gate.py",
-      "sha256": "0fe41f5f10d20605f89bb07f2bc6a212dde36a94628e31c8ecf26b5942784f4e",
+      "sha256": "3f142a8ac7a62e85d44348834beddf1bdb625a0a285b68fe0dfcd607154e33b0",
       "disposition": "formal-infrastructure",
-      "reason": "Independently register and require finite selected-pane, identity, target, admission, evidence and stale-response properties and controls.",
+      "reason": "Add the independently scoped finite Console model, its required invariants, immutable path mapping and executable negative-control registration tests.",
       "models": []
     },
     {
-      "path": "test/console/ec2_route_table_identity.py",
-      "sha256": "87211b29de34cec3089367bcf74390d7fbc4fedc7a52c76692354874d5479f31",
+      "path": "test/e2e/simpledb_console.py",
+      "sha256": "6cb0716f5dc0b2d52e55809361a8e56c9d145a4184cddd5ee598d83881202674",
       "disposition": "test-support",
-      "reason": "Exercise the selected route read contract, region/identity scope, real/refused response distinction or stale completion.",
+      "reason": "Exercise the Console query workflow or keep existing API/reference fixture outputs stable; no shipped code, data or state changes.",
       "models": []
     },
     {
-      "path": "test/e2e/ec2_readonly_console.py",
-      "sha256": "057b24f1135a344c75ae4a1056678a652c15abc5c8ecb8c955d44b2858311d00",
+      "path": "test/e2e/ssm_document_reference.py",
+      "sha256": "8ba7afea86cd09519224673e15d3359553d1a025cffa2a9e91f530b8702aeaaf",
       "disposition": "test-support",
-      "reason": "Exercise the selected route read contract, region/identity scope, real/refused response distinction or stale completion.",
+      "reason": "Exercise the Console query workflow or keep existing API/reference fixture outputs stable; no shipped code, data or state changes.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/test_openapi_json10.py",
+      "sha256": "039cb4c262babbf7a18da3da5f9ba7270c592b0de6a4fec3f882245d018b6e40",
+      "disposition": "test-support",
+      "reason": "Exercise the Console query workflow or keep existing API/reference fixture outputs stable; no shipped code, data or state changes.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/test_sakura_openapi.py",
+      "sha256": "cf5b639b6ad72a0240842ce7fd84276633cf0a9873f311fe8ba52d813927e4ab",
+      "disposition": "test-support",
+      "reason": "Exercise the Console query workflow or keep existing API/reference fixture outputs stable; no shipped code, data or state changes.",
       "models": []
     },
     {
       "path": "tools/console/bundle-digests.json",
-      "sha256": "6a12b0b59ad8792eaa7c71f3af38c935e8b2c1610aa84c55ccc7cdaaf40d0a90",
+      "sha256": "81105c05a8a72796c8c43ab6bfba2dce862b7f8c3080156b6f8742ebf9066c17",
       "disposition": "presentation",
-      "reason": "Pinned production build provenance or focused component coverage; no independent state transition is introduced here.",
+      "reason": "Canonical stable input/output manifest and hashes; no state machine or runtime behavior beyond the separately modeled shipped source artifact.",
       "models": []
     },
     {
       "path": "tools/console/bundle-inputs.json",
-      "sha256": "8dcc099bbf4a5b87b389a24ad120f39219c39cf42fcbe8f796386252eb95f2a1",
+      "sha256": "f661921bca5caf64caec2bd6a3222aa536e92c4c69c5564a354391eaf0ff6e26",
       "disposition": "presentation",
-      "reason": "Pinned production build provenance or focused component coverage; no independent state transition is introduced here.",
+      "reason": "Canonical stable input/output manifest and hashes; no state machine or runtime behavior beyond the separately modeled shipped source artifact.",
       "models": []
     },
     {
-      "path": "tools/console/src/ec2-readonly.jsx",
-      "sha256": "86a95a1b5d802ecec9f753c09e2d728a4b91aa4139d0b81bfce650c7dae85a24",
-      "disposition": "modeled",
-      "reason": "A bounded selection, fixed read and evidence-preserving projection apply to the selected route-table Console contract; the native API is unchanged.",
-      "models": [
-        {
-          "id": "EC2RouteTableConsoleEpoch",
-          "properties": [
-            "CurrentTarget",
-            "CurrentIdentity",
-            "CurrentRegion"
-          ],
-          "limits": "Readout projection only. A change may keep identity, region, VPC, revision or availability constant, independently exercising stale responses. Bounded labels are not arbitrary refresh/ABA interleavings. Does not prove React scheduling, authentication, IAM/SQL/HTTP/XML, packet reachability, route edits, completeness or runtime refinement."
-        }
-      ]
-    },
-    {
-      "path": "tools/console/src/ec2-response.mjs",
-      "sha256": "9257dc4be1b517c958628710177f05c65acc64e8617ad5e3f9d3d5540eb88021",
-      "disposition": "modeled",
-      "reason": "A bounded selection, fixed read and evidence-preserving projection apply to the selected route-table Console contract; the native API is unchanged.",
-      "models": [
-        {
-          "id": "EC2RouteTableConsoleEpoch",
-          "properties": [
-            "StatusIsEvidence",
-            "DefaultIsRecorded",
-            "AssociationIsExplicit",
-            "NoImplicitMain"
-          ],
-          "limits": "Readout projection only. A change may keep identity, region, VPC, revision or availability constant, independently exercising stale responses. Bounded labels are not arbitrary refresh/ABA interleavings. Does not prove React scheduling, authentication, IAM/SQL/HTTP/XML, packet reachability, route edits, completeness or runtime refinement."
-        }
-      ]
-    },
-    {
-      "path": "tools/console/src/ec2-route-tables.mjs",
-      "sha256": "5e5481ee0af5d6a66983bcbd7003406468c731c5f571cd026f9eb0789edf5dce",
-      "disposition": "modeled",
-      "reason": "A bounded selection, fixed read and evidence-preserving projection apply to the selected route-table Console contract; the native API is unchanged.",
-      "models": [
-        {
-          "id": "EC2RouteTableConsoleEpoch",
-          "properties": [
-            "EligibleRead",
-            "FixedRead",
-            "StatusIsEvidence"
-          ],
-          "limits": "Readout projection only. A change may keep identity, region, VPC, revision or availability constant, independently exercising stale responses. Bounded labels are not arbitrary refresh/ABA interleavings. Does not prove React scheduling, authentication, IAM/SQL/HTTP/XML, packet reachability, route edits, completeness or runtime refinement."
-        }
-      ]
-    },
-    {
-      "path": "tools/console/src/ec2-vpc-route-tables.jsx",
-      "sha256": "571f71ba57db844ed87eb27487350931fdf6b087b3f9e48662ba9b4ada5912be",
-      "disposition": "modeled",
-      "reason": "A bounded selection, fixed read and evidence-preserving projection apply to the selected route-table Console contract; the native API is unchanged.",
-      "models": [
-        {
-          "id": "EC2RouteTableConsoleEpoch",
-          "properties": [
-            "CurrentIdentity",
-            "CurrentRegion",
-            "CurrentTarget",
-            "CurrentRevision",
-            "CurrentGate",
-            "StatusIsEvidence",
-            "DefaultIsRecorded",
-            "AssociationIsExplicit",
-            "NoImplicitMain"
-          ],
-          "limits": "Readout projection only. A change may keep identity, region, VPC, revision or availability constant, independently exercising stale responses. Bounded labels are not arbitrary refresh/ABA interleavings. Does not prove React scheduling, authentication, IAM/SQL/HTTP/XML, packet reachability, route edits, completeness or runtime refinement."
-        }
-      ]
-    },
-    {
       "path": "tools/console/src/main.jsx",
-      "sha256": "33fcff89d6beb8fb3f6484996ee1d4734933b98fc56ca5fe94f80447dc139472",
+      "sha256": "f8d65fefbb0536cd85206ab0b6a31d796a6755452f6bedf4ac1f43531e6eabc7",
       "disposition": "modeled",
-      "reason": "A bounded selection, fixed read and evidence-preserving projection apply to the selected route-table Console contract; the native API is unchanged.",
+      "reason": "Console Select state/lifecycle mapping; inherited native Select and item writes are not changed.",
       "models": [
         {
-          "id": "EC2RouteTableConsoleEpoch",
+          "id": "SimpleDBSelectConsoleEpoch",
           "properties": [
-            "EligibleRead",
-            "CurrentIdentity",
-            "CurrentRegion"
+            "ReadAdmission",
+            "OnlyCurrentOwner"
           ],
-          "limits": "Readout projection only. A change may keep identity, region, VPC, revision or availability constant, independently exercising stale responses. Bounded labels are not arbitrary refresh/ABA interleavings. Does not prove React scheduling, authentication, IAM/SQL/HTTP/XML, packet reachability, route edits, completeness or runtime refinement."
+          "limits": "Covers Select capability/nav/principal ownership; no React scheduling, server authentication, old-route bootstrap rendering, or other views are proved."
         }
       ]
     },
     {
-      "path": "tools/console/test/ec2-route-tables.test.mjs",
-      "sha256": "0645f2aad1a28751e141540658723f7bc100f07252763f035b770b22f06a36a6",
+      "path": "tools/console/src/simpledb-client.mjs",
+      "sha256": "875abc82cfc36917fe96bc1e30529f2df550017961abf54ca2ec2931da961fe2",
+      "disposition": "modeled",
+      "reason": "Console Select state/lifecycle mapping; inherited native Select and item writes are not changed.",
+      "models": [
+        {
+          "id": "SimpleDBSelectConsoleEpoch",
+          "properties": [
+            "BoundedReadRequest",
+            "CursorOrigin",
+            "OnlyAcceptedPages",
+            "CursorMirrorsReply",
+            "EffectIsolation"
+          ],
+          "limits": "Covers fixed Select request/page size, accepted reply/cursor and ownership of continuation. Field escaping, byte/shape validation, HTTP/XML and native authentication are tested separately, not encoded."
+        }
+      ]
+    },
+    {
+      "path": "tools/console/src/simpledb.jsx",
+      "sha256": "4e590bde193698aabb62222e78a3568193e40bd3a6200300c9f325d719cb79aa",
+      "disposition": "modeled",
+      "reason": "Console Select state/lifecycle mapping; inherited native Select and item writes are not changed.",
+      "models": [
+        {
+          "id": "SimpleDBSelectConsoleEpoch",
+          "properties": [
+            "ReadAdmission",
+            "SingleCurrentRead",
+            "CursorOrigin",
+            "OnlyCurrentOwner",
+            "NextOfferedExactly",
+            "FailureClearsPage",
+            "EffectIsolation",
+            "ChoiceDoesNotObserve"
+          ],
+          "limits": "Covers manual bounded paging, stale result/notice suppression, terminal and empty continuation, and non-observing choice. Existing action implementation, DOM focus, real server cancellation and scheduling are not covered."
+        }
+      ]
+    },
+    {
+      "path": "tools/console/test/simpledb-client.test.mjs",
+      "sha256": "205ac01ca95eb99c27a0c15dc56a95592b3588334533af6dfc075dcdeffbc1ca",
       "disposition": "presentation",
-      "reason": "Pinned production build provenance or focused component coverage; no independent state transition is introduced here.",
+      "reason": "Console-side parser and request test fixtures only; these files are not shipped runtime source.",
       "models": []
     }
   ]

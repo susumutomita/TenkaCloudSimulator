@@ -9,6 +9,50 @@ OPS=['CreateDocument', 'GetDocument', 'DescribeDocument', 'ListDocuments', 'List
 SCHEMAS=['SSMCreateDocumentInput', 'SSMGetDocumentInput', 'SSMDescribeDocumentInput', 'SSMListDocumentsInput', 'SSMUpdateDocumentInput', 'SSMDeleteDocumentInput', 'SSMDocumentDescription', 'SSMDocumentIdentifier', 'SSMCreateDocumentOutput', 'SSMUpdateDocumentOutput', 'SSMDescribeDocumentOutput', 'SSMGetDocumentOutput', 'SSMListDocumentsOutput', 'SSMListDocumentVersionsInput', 'SSMDocumentVersionInfo', 'SSMListDocumentVersionsOutput']
 OUTPUTS=['SSMCreateDocumentOutput', 'SSMUpdateDocumentOutput', 'SSMDescribeDocumentOutput', 'SSMGetDocumentOutput', 'SSMListDocumentsOutput', 'SSMListDocumentVersionsOutput']
 
+def project_before_ssm_document_versions(spec):
+    """Undo only the reviewed ListDocumentVersions increment in a historical copy."""
+    post = spec['paths']['/']['post']
+    media_type = 'application/x-amz-json-1.1'
+    request = post['requestBody']['content'][media_type]
+    response = post['responses']['200']['content'][media_type]
+    name = 'SSMListDocumentVersions'
+    shapes = (name + 'Input', 'SSMDocumentVersionInfo', name + 'Output')
+    schemas = spec['components']['schemas']
+    mapping = post.get('x-simulator-ssm-document-operation-schemas')
+    assert isinstance(mapping, dict), 'SSM ListDocumentVersions operation map missing'
+    delta = {
+        'mapping': mapping.pop('AmazonSSM.ListDocumentVersions', None),
+        'request': request['examples'].pop(name, None),
+        'response': response['examples'].pop(name, None),
+        'schemas': {shape: schemas.pop(shape, None) for shape in shapes},
+    }
+    exact = hashlib.sha256(json.dumps(delta, sort_keys=True, separators=(',', ':'), ensure_ascii=False).encode()).hexdigest()
+    assert exact == '06b42e935e7226e6a5365f5d6e7c1113d36940155084e4b9c3e6a70a050fbf6e', 'SSM ListDocumentVersions reference changed'
+
+    for media, suffix in ((request, 'Input'), (response, 'Output')):
+        anchor = {'$ref': '#/components/schemas/SSMListDocuments' + suffix}
+        version = {'$ref': '#/components/schemas/' + name + suffix}
+        union = media['schema']['anyOf']
+        assert union.count(anchor) == 1 and union.count(version) == 1, 'SSM ListDocumentVersions union binding changed'
+        index = union.index(anchor) + 1
+        assert union[index:index + 1] == [version], 'SSM ListDocumentVersions union order changed'
+        union.pop(index)
+
+    first = 'ListDocumentVersions, UpdateDocument and DeleteDocument manage definitions only.'
+    tail = (' ListDocumentVersions accepts a local\n'
+            'Name, with optional MaxResults and NextToken, and returns version metadata only.\n'
+            'An update invalidates a cursor for that document, not other documents. Missing\n'
+            'documents return InvalidDocument. Supply the document name and header manually\n'
+            'when using this example; the preset does not create anything.')
+    assert TEXT.count(first) == 1 and TEXT.endswith(tail), 'SSM ListDocumentVersions projection format changed'
+    historical = TEXT.removesuffix(tail).replace(
+        first, 'UpdateDocument and DeleteDocument manage local definitions only.', 1)
+    historical += ' No batch console UI or document console\nis added by this increment.'
+    current = '\n\n' + TEXT
+    assert post['description'].count(current) == 1, 'SSM ListDocumentVersions description changed'
+    post['description'] = post['description'].replace(current, '\n\n' + historical, 1)
+
+
 def project_ssm_documents(spec):
     project_ssm_commands(spec)
     post=spec['paths']['/']['post']

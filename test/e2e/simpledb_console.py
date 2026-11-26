@@ -124,6 +124,40 @@ def run():
                 assert values() == [("version", "new + & 値")]
                 page.get_by_role("button", name="Read attributes", exact=True).click()
                 expect(page.get_by_text("new + & 値", exact=True)).to_be_visible()
+                # No automatic scan or attribute read. The names query uses the
+                # same store and principal, but does not confer GetAttributes.
+                page.get_by_label("Filter by attribute (optional)", exact=True).fill("version")
+                page.get_by_label("Exact attribute value", exact=True).fill("new + & 値")
+                page.get_by_role("button", name="Run query", exact=True).click()
+                matches = page.get_by_role("table", name="Matching item names", exact=True)
+                hit = matches.get_by_role("button", name=ITEM, exact=True)
+                expect(hit).to_be_visible()
+                count = len(actions)
+                hit.click()
+                expect(page.get_by_label("Item name", exact=True)).to_have_value(ITEM)
+                expect(page.get_by_label("Item name", exact=True)).to_be_focused()
+                expect(page.get_by_role("table", name="Saved attributes", exact=True)).to_have_count(0)
+                assert len(actions) == count
+                page.get_by_role("button", name="Read attributes", exact=True).click()
+                expect(page.get_by_text("new + & 値", exact=True)).to_be_visible()
+                page.get_by_label("Exact attribute value", exact=True).fill("not-a-match")
+                expect(matches).to_have_count(0)
+                expect(page.get_by_role("button", name="Load next result page")).to_be_disabled()
+                # Deliberately seed one extra page through the native endpoint.
+                for index in range(26):
+                    native("PutAttributes", DomainName=DOMAIN, ItemName=f"paging-{index:02}",
+                           **{"Attribute.1.Name": "batch", "Attribute.1.Value": "two-pages"})
+                page.get_by_label("Filter by attribute (optional)", exact=True).fill("batch")
+                page.get_by_label("Exact attribute value", exact=True).fill("two-pages")
+                page.get_by_role("button", name="Run query", exact=True).click()
+                expect(matches.get_by_role("button", name="paging-24", exact=True)).to_be_visible()
+                page.get_by_role("button", name="Load next result page", exact=True).click()
+                expect(matches.get_by_role("button", name="paging-25", exact=True)).to_be_visible()
+                expect(matches.get_by_role("button", name="paging-24", exact=True)).to_have_count(0)
+                expect(page.get_by_role("button", name="Load next result page")).to_be_disabled()
+                select_calls = [a for a in actions if a["Action"] == ["Select"]]
+                assert select_calls[-2]["SelectExpression"] == select_calls[-1]["SelectExpression"]
+                assert "NextToken" not in select_calls[-2] and select_calls[-1].get("NextToken")
                 page.get_by_role("button", name="Back to domains", exact=True).click()
                 expect(page.get_by_role("button", name=DOMAIN, exact=True)).to_be_visible()
                 expect(page.get_by_label("Domain to open or create", exact=True)).to_be_focused()
@@ -141,6 +175,9 @@ def run():
                 expect(limited.get_by_text("AccessDenied", exact=False)).to_be_visible()
                 limited.get_by_label("Domain to open or create", exact=True).fill(DOMAIN)
                 limited.get_by_role("button", name="Open domain", exact=True).click()
+                limited.get_by_role("button", name="Run query", exact=True).click()
+                expect(limited.get_by_text("Your identity cannot query this domain.", exact=True)).to_be_visible()
+                expect(limited.get_by_role("table", name="Matching item names", exact=True)).to_have_count(0)
                 read(limited)
                 expect(limited.get_by_text("new + & 値", exact=True)).to_be_visible()
                 limited.get_by_label("Attribute to change", exact=True).fill("denied")

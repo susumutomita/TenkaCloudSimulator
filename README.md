@@ -119,7 +119,7 @@ console, CloudFormation adapter or Challenge integration.
   repeat unconditional deletion safely. [Native `Select`](docs/simpledb-select.md) reads matching items or their names
   with a single predicate and paged results. Batch operations are not supported. A write that exceeds the [256-pair item limit](docs/simpledb-item-limits.md)
   is rejected atomically. In the [SimpleDB console](docs/simpledb-console.md),
-  select a local domain, read a known item, and conditionally replace or delete a single attribute.
+  find item names by an optional exact attribute value, read an item, then conditionally replace or delete a single attribute.
 - **Configuration-only catalogs:** [AWS](docs/aws-catalog.md),
   [Google Cloud](docs/gcp-catalog.md), [Azure Resource Manager](docs/azure-catalog.md).
   `--rds-private-postgres-topology` optionally validates private standalone
