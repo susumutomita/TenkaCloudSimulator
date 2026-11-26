@@ -98,6 +98,7 @@ jobs:
         run: >-
           node --test test/console/login-native-input.test.mjs test/console/api-reference-json.test.mjs
           tools/console/test/ec2-readonly.test.mjs tools/console/test/ec2-response.test.mjs
+          tools/console/test/ec2-template-preview.test.mjs
       - name: Check Go format, vet, modules, embedded assets and script gates
         run: |
           make format-check vet verify-assets test-scripts

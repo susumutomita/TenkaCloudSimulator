@@ -52,10 +52,23 @@ instance profile, but this does not certify its AMI, capacity or runtime.
 In normal startup, an authorized `CreateStack` for that declaration returns
 `NotImplemented` instead of creating a stack or a metadata-only instance.
 
+In **EC2 instances → Preview CloudFormation template**, paste inline YAML/JSON
+(up to 51,200 UTF-8 bytes), or load the example and choose **Validate template**.
+The ordinary Console sends only the regional `ValidateTemplate` query with your
+current exercise identity; this action is not offered in single-instance handoffs.
+The result shows declared parameter names, their `NoEcho` flags and default
+presence (not values), and any IAM acknowledgement. Editing the draft, closing
+the preview, or changing region or identity discards pending and old results.
+Template content is not saved by this view. This is not the EC2 Launch Templates
+API, a launch-permission or AMI check, or a runtime readiness test.
+
 Local prerequisite check:
 
 ```sh
 SIMULATOR_BINARY=/absolute/path/to/simulator python3 test/console/ec2_launch_preflight_native.py
+# With jsdom installed, mount the served embedded Console and use its real local API:
+SIMULATOR_BINARY=/absolute/path/to/simulator JSDOM_MODULE=/absolute/path/to/jsdom \
+  python3 test/console/ec2_template_preview_native.py
 ```
 
 The check starts a disposable authenticated simulator on numeric loopback with

@@ -1,19 +1,227 @@
 {
   "version": 1,
-  "base_sha": "272d3f12456067f9e9da93b170dc7e1b819d33e0",
+  "base_sha": "c89b81819b68caf73cb66ca3f6bfda4e8d7863ed",
   "changes": [
     {
-      "path": "docs/simpledb-select.md",
-      "sha256": "37d4059a58d89addae7db8a68961345ee873fd1d842ba99b0ff0e739cef20c5d",
-      "disposition": "documentation",
-      "reason": "Documents the optional local acceptance command and its explicit scopes; no simulator route, model, or permissions change.",
+      "path": ".github/workflows/ci.yml",
+      "sha256": "f0e5bc50aba4b0c708e99ad164b54f66354608a247a3ae8b5ff41a9badc3b442",
+      "disposition": "formal-infrastructure",
+      "reason": "Register the new focused browser request/projection regression in the existing static Node step; no new workflow or broad E2E gate.",
       "models": []
     },
     {
-      "path": "test/e2e/simpledb_select_sessions.py",
-      "sha256": "b8ffc90a0a901b3ccec39dbdeb84b8cd5300ac81111d4c0dd8308fcdefedd78c",
+      "path": "README.md",
+      "sha256": "f3ec7f233c029fb2ce6d871b5bc75b6dfe21f83929eca693895f8b7e29be24b7",
+      "disposition": "documentation",
+      "reason": "Document the existing read-only ValidateTemplate user entry point and its preview, privilege and runtime limits.",
+      "models": []
+    },
+    {
+      "path": "docs/design/0001-go-standalone.md",
+      "sha256": "1d11ccaabd628b2a9833ecbd434a4337e8d838f1cd2bc5907fd685b1aa3938f8",
+      "disposition": "documentation",
+      "reason": "Document the existing read-only ValidateTemplate user entry point and its preview, privilege and runtime limits.",
+      "models": []
+    },
+    {
+      "path": "docs/ec2-read-discovery.md",
+      "sha256": "175e634e299dd44f7de8b133b1c69879ec5f543b57cae2f083e98d5c9211103d",
+      "disposition": "documentation",
+      "reason": "Document the existing read-only ValidateTemplate user entry point and its preview, privilege and runtime limits.",
+      "models": []
+    },
+    {
+      "path": "formal/EC2TemplatePreviewEpoch.cfg",
+      "sha256": "803260c9b2f2ffdf0f9ee54e4462cc64aa165e11c215c5d1a719d74a48a4bc5d",
+      "disposition": "modeled",
+      "reason": "The fixed CloudFormation declaration-only request, current draft/region/identity, instance-handoff exclusion and display of no returned values apply to the EC2 Console preview.",
+      "models": [
+        {
+          "id": "EC2TemplatePreviewEpoch",
+          "properties": [
+            "OrdinaryPreview",
+            "BoundedDraft",
+            "FixedDeclarationRead",
+            "OnlyCurrentIdentity",
+            "OnlyCurrentRegion",
+            "OnlyCurrentDraft",
+            "NoClosedOrHandoffResult",
+            "EvidencePreserved",
+            "NoReturnedValues"
+          ],
+          "limits": "Finite UI declaration-preview projection only. Context changes are bounded, not arbitrary browser interleavings. Does not model actual authentication or IAM, raw HTTP, YAML/XML validation, secrets in the editable textarea, backend guest availability or code refinement."
+        }
+      ]
+    },
+    {
+      "path": "formal/EC2TemplatePreviewEpoch.tla",
+      "sha256": "04b11b52c23028e58f1f95cc33a162c512c7bce53f703d067e00ccc9f04e8f73",
+      "disposition": "modeled",
+      "reason": "The fixed CloudFormation declaration-only request, current draft/region/identity, instance-handoff exclusion and display of no returned values apply to the EC2 Console preview.",
+      "models": [
+        {
+          "id": "EC2TemplatePreviewEpoch",
+          "properties": [
+            "OrdinaryPreview",
+            "BoundedDraft",
+            "FixedDeclarationRead",
+            "OnlyCurrentIdentity",
+            "OnlyCurrentRegion",
+            "OnlyCurrentDraft",
+            "NoClosedOrHandoffResult",
+            "EvidencePreserved",
+            "NoReturnedValues"
+          ],
+          "limits": "Finite UI declaration-preview projection only. Context changes are bounded, not arbitrary browser interleavings. Does not model actual authentication or IAM, raw HTTP, YAML/XML validation, secrets in the editable textarea, backend guest availability or code refinement."
+        }
+      ]
+    },
+    {
+      "path": "formal/models.json",
+      "sha256": "f9595e112cfe8e42bbecd7e76dbaa85f55cd45def8c941ae430effd4711be43e",
+      "disposition": "formal-infrastructure",
+      "reason": "Require the new independent model, exact scope and named counterexample controls without weakening existing registrations.",
+      "models": []
+    },
+    {
+      "path": "internal/server/web/app.js",
+      "sha256": "c5e44a087ebffcc998836792471dd3dc07c583c6591bd9bb462f86177fb4904b",
+      "disposition": "modeled",
+      "reason": "The fixed CloudFormation declaration-only request, current draft/region/identity, instance-handoff exclusion and display of no returned values apply to the EC2 Console preview.",
+      "models": [
+        {
+          "id": "EC2TemplatePreviewEpoch",
+          "properties": [
+            "OrdinaryPreview",
+            "BoundedDraft",
+            "FixedDeclarationRead",
+            "OnlyCurrentIdentity",
+            "OnlyCurrentRegion",
+            "OnlyCurrentDraft",
+            "NoClosedOrHandoffResult",
+            "EvidencePreserved",
+            "NoReturnedValues"
+          ],
+          "limits": "Finite UI declaration-preview projection only. Context changes are bounded, not arbitrary browser interleavings. Does not model actual authentication or IAM, raw HTTP, YAML/XML validation, secrets in the editable textarea, backend guest availability or code refinement."
+        }
+      ]
+    },
+    {
+      "path": "scripts/formal_model_gate.py",
+      "sha256": "bc78a10d1fd64ddba788f6f9f79a48c64a499c0f201c9c1a3a5542753c0aa079",
+      "disposition": "formal-infrastructure",
+      "reason": "Require the new independent model, exact scope and named counterexample controls without weakening existing registrations.",
+      "models": []
+    },
+    {
+      "path": "scripts/test-formal-gate.py",
+      "sha256": "96a2d8d140dfe891b49af47bd662a840345f9dd27b7c6ebcfbe9eefc2088508c",
+      "disposition": "formal-infrastructure",
+      "reason": "Require the new independent model, exact scope and named counterexample controls without weakening existing registrations.",
+      "models": []
+    },
+    {
+      "path": "test/console/ec2_template_preview_dom.cjs",
+      "sha256": "c86d415c8e6f9a1d5e241c7bec6cb783cc9f42c5bee06f1c5b2bbc9183687b07",
       "disposition": "test-support",
-      "reason": "Executes existing pinned SDK and local HTTP endpoints against temporary process and database state; no simulator, formal registry, runtime assets, or CI gate changes.",
+      "reason": "Exercise the real served Console bundle and local authenticated ValidateTemplate path without creating resources or starting a guest.",
+      "models": []
+    },
+    {
+      "path": "test/console/ec2_template_preview_native.py",
+      "sha256": "cf855c0348773e67170a85cc5dce2b5c2c62335c7c31c3530b2477cd4fb086ed",
+      "disposition": "test-support",
+      "reason": "Exercise the real served Console bundle and local authenticated ValidateTemplate path without creating resources or starting a guest.",
+      "models": []
+    },
+    {
+      "path": "tools/console/bundle-digests.json",
+      "sha256": "5d20505c2d56629e8ccd69e7831286fe86d1a6e4ee930bc943ec8905cec7bbce",
+      "disposition": "presentation",
+      "reason": "Provide generated provenance or focused validation transport tests for the reviewed Console changes.",
+      "models": []
+    },
+    {
+      "path": "tools/console/bundle-inputs.json",
+      "sha256": "a0cc7b32faf2a323e9a87bf9bb05a4645571a280a54fca56f2e18592467412d8",
+      "disposition": "presentation",
+      "reason": "Provide generated provenance or focused validation transport tests for the reviewed Console changes.",
+      "models": []
+    },
+    {
+      "path": "tools/console/src/ec2-readonly.jsx",
+      "sha256": "c0dbc1c63ae39dfaa1f6f78d05340b9050a0958e2ec39d145becc7d128a7427f",
+      "disposition": "modeled",
+      "reason": "The fixed CloudFormation declaration-only request, current draft/region/identity, instance-handoff exclusion and display of no returned values apply to the EC2 Console preview.",
+      "models": [
+        {
+          "id": "EC2TemplatePreviewEpoch",
+          "properties": [
+            "OrdinaryPreview",
+            "BoundedDraft",
+            "FixedDeclarationRead",
+            "OnlyCurrentIdentity",
+            "OnlyCurrentRegion",
+            "OnlyCurrentDraft",
+            "NoClosedOrHandoffResult",
+            "EvidencePreserved",
+            "NoReturnedValues"
+          ],
+          "limits": "Finite UI declaration-preview projection only. Context changes are bounded, not arbitrary browser interleavings. Does not model actual authentication or IAM, raw HTTP, YAML/XML validation, secrets in the editable textarea, backend guest availability or code refinement."
+        }
+      ]
+    },
+    {
+      "path": "tools/console/src/ec2-template-preview.jsx",
+      "sha256": "6e1e61246fc02cb01efd03124be137e14405e210ecf82e676018c6df0f791686",
+      "disposition": "modeled",
+      "reason": "The fixed CloudFormation declaration-only request, current draft/region/identity, instance-handoff exclusion and display of no returned values apply to the EC2 Console preview.",
+      "models": [
+        {
+          "id": "EC2TemplatePreviewEpoch",
+          "properties": [
+            "OrdinaryPreview",
+            "BoundedDraft",
+            "FixedDeclarationRead",
+            "OnlyCurrentIdentity",
+            "OnlyCurrentRegion",
+            "OnlyCurrentDraft",
+            "NoClosedOrHandoffResult",
+            "EvidencePreserved",
+            "NoReturnedValues"
+          ],
+          "limits": "Finite UI declaration-preview projection only. Context changes are bounded, not arbitrary browser interleavings. Does not model actual authentication or IAM, raw HTTP, YAML/XML validation, secrets in the editable textarea, backend guest availability or code refinement."
+        }
+      ]
+    },
+    {
+      "path": "tools/console/src/ec2-template-preview.mjs",
+      "sha256": "74ca90c1b21f34eb7f174eb3d6f29152be906550087dd67905fca3fdb1103807",
+      "disposition": "modeled",
+      "reason": "The fixed CloudFormation declaration-only request, current draft/region/identity, instance-handoff exclusion and display of no returned values apply to the EC2 Console preview.",
+      "models": [
+        {
+          "id": "EC2TemplatePreviewEpoch",
+          "properties": [
+            "OrdinaryPreview",
+            "BoundedDraft",
+            "FixedDeclarationRead",
+            "OnlyCurrentIdentity",
+            "OnlyCurrentRegion",
+            "OnlyCurrentDraft",
+            "NoClosedOrHandoffResult",
+            "EvidencePreserved",
+            "NoReturnedValues"
+          ],
+          "limits": "Finite UI declaration-preview projection only. Context changes are bounded, not arbitrary browser interleavings. Does not model actual authentication or IAM, raw HTTP, YAML/XML validation, secrets in the editable textarea, backend guest availability or code refinement."
+        }
+      ]
+    },
+    {
+      "path": "tools/console/test/ec2-template-preview.test.mjs",
+      "sha256": "dde2cb8bbfa57cca35f2181b9d4335d2ac79e6ba5c4cd05be0c3672e2e807ceb",
+      "disposition": "presentation",
+      "reason": "Provide generated provenance or focused validation transport tests for the reviewed Console changes.",
       "models": []
     }
   ]
