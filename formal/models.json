@@ -24641,6 +24641,383 @@
           "expect_invariant": "NativeProjection"
         }
       ]
+    },
+    {
+      "id": "EC2InternetGatewayLifecycle",
+      "model": "formal/EC2InternetGatewayLifecycle.tla",
+      "config": "formal/EC2InternetGatewayLifecycle.cfg",
+      "bounds": "Two regions, one gateway ID each, five ownership/dependency states, and a separate confirmable UI mutation receipt. One failed admission or readback witness per check.",
+      "properties": [
+        "TypeOK",
+        "Authorized",
+        "TaggedCreation",
+        "NativeOwnership",
+        "DependentRowsPreserved",
+        "DurableMutation",
+        "FaithfulRead",
+        "ExactConfirmation",
+        "ConfirmedNotice"
+      ],
+      "limits": "Detached allocation and cleanup; excludes actual SQL, wire serialization, cryptography, React, attachment mutation, routing and guest behavior. No implementation refinement proof.",
+      "source_scope": [
+        "internal/aws/ec2_internet_gateways.go",
+        "internal/aws/ec2_internet_gateway_store.go",
+        "internal/aws/ec2_read.go",
+        "internal/aws/ec2_vpc.go",
+        "internal/server/server.go",
+        "tools/console/src/ec2-internet-gateways.mjs",
+        "tools/console/src/ec2-vpc-internet-gateways.jsx",
+        "tools/console/src/ec2-readonly.jsx",
+        "tools/console/src/main.jsx",
+        "internal/server/web/app.js"
+      ],
+      "mutants": [
+        {
+          "id": "IgnoreRegionalAuthorization",
+          "edits": [
+            {
+              "old": "Admitted(f) == f.regional /\\ ~f.scoped /\\ f.allowed",
+              "new": "Admitted(f) == ~f.scoped /\\ f.allowed",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "Authorized"
+        },
+        {
+          "id": "IgnoreScopedHandoff",
+          "edits": [
+            {
+              "old": "Admitted(f) == f.regional /\\ ~f.scoped /\\ f.allowed",
+              "new": "Admitted(f) == f.regional /\\ f.allowed",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "Authorized"
+        },
+        {
+          "id": "IgnoreActionGrant",
+          "edits": [
+            {
+              "old": "Admitted(f) == f.regional /\\ ~f.scoped /\\ f.allowed",
+              "new": "Admitted(f) == f.regional /\\ ~f.scoped",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "Authorized"
+        },
+        {
+          "id": "IgnoreTagGrant",
+          "edits": [
+            {
+              "old": "/\\ (~f.tagged \\/ f.tagGrant)",
+              "new": "/\\ TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "TaggedCreation"
+        },
+        {
+          "id": "AdoptStackGateway",
+          "edits": [
+            {
+              "old": "/\\ row[region] \\notin {\"stack\", \"stack-attached\"}",
+              "new": "/\\ TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "NativeOwnership"
+        },
+        {
+          "id": "DeleteReferencedGateway",
+          "edits": [
+            {
+              "old": "/\\ row[region] # \"native-dependent\"\n    /\\ Admitted(f)",
+              "new": "/\\ Admitted(f)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "DependentRowsPreserved"
+        },
+        {
+          "id": "AcknowledgeFailedPersistence",
+          "edits": [
+            {
+              "old": "/\\ f.durable /\\ f.coherent",
+              "new": "/\\ f.coherent",
+              "count": 2
+            }
+          ],
+          "expect_invariant": "DurableMutation"
+        },
+        {
+          "id": "ProjectCorruptGraph",
+          "edits": [
+            {
+              "old": "/\\ f.coherent\n    /\\ row[region] # \"native-dependent\"",
+              "new": "/\\ row[region] # \"native-dependent\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "FaithfulRead"
+        },
+        {
+          "id": "ReadMissingExactID",
+          "edits": [
+            {
+              "old": "(selector = \"all\" \\/ (selector = \"exact\" /\\ row[region] # \"absent\"))",
+              "new": "(selector = \"all\" \\/ selector = \"exact\")",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "FaithfulRead"
+        },
+        {
+          "id": "InventAttachment",
+          "edits": [
+            {
+              "old": "f, selector, row[region] = \"stack-attached\")",
+              "new": "f, selector, row[region] # \"absent\")",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "FaithfulRead"
+        },
+        {
+          "id": "NoticeBeforeReadback",
+          "edits": [
+            {
+              "old": "/\\ pending.confirmed\n    /\\ notice'",
+              "new": "/\\ TRUE\n    /\\ notice'",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ConfirmedNotice"
+        },
+        {
+          "id": "AcceptStaleReadback",
+          "edits": [
+            {
+              "old": "/\\ mode = \"current\"\n    /\\ region = pending.region",
+              "new": "/\\ region = pending.region",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExactConfirmation"
+        },
+        {
+          "id": "AcceptWrongRegionReadback",
+          "edits": [
+            {
+              "old": "/\\ region = pending.region\n    /\\ matches",
+              "new": "/\\ matches",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExactConfirmation"
+        },
+        {
+          "id": "AcceptUnmatchedReadback",
+          "edits": [
+            {
+              "old": "/\\ matches\n    /\\ row[region] = pending.expected",
+              "new": "/\\ row[region] = pending.expected",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExactConfirmation"
+        }
+      ]
+    },
+    {
+      "id": "EC2InternetGatewayInventoryPages",
+      "model": "formal/EC2InternetGatewayInventoryPages.tla",
+      "config": "formal/EC2InternetGatewayInventoryPages.cfg",
+      "bounds": "Three pages, one inventory generation change, and one invalid request, cursor, scope, bound or view witness at a time.",
+      "properties": [
+        "TypeOK",
+        "PageAuthorized",
+        "PageBounded",
+        "PageFenced",
+        "ContinuationBound",
+        "CompletePublication"
+      ],
+      "limits": "Symbolic paging and selection consistency, not cryptography, overflow/serializer math, real SQL/concurrency, transport or React refinement.",
+      "source_scope": [
+        "internal/aws/cloudformation.go",
+        "internal/aws/ec2_internet_gateway_page.go",
+        "internal/aws/ec2_internet_gateways.go",
+        "internal/aws/ec2_read.go",
+        "internal/server/server.go",
+        "tools/console/src/ec2-internet-gateways.mjs",
+        "internal/server/web/app.js"
+      ],
+      "mutants": [
+        {
+          "id": "SkipNewPageAuthorization",
+          "edits": [
+            {
+              "old": "Allowed(f) == f.allowed /\\ f.actor /\\ f.selector = \"all\" /\\ f.requested",
+              "new": "Allowed(f) == f.actor /\\ f.selector = \"all\" /\\ f.requested",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PageAuthorized"
+        },
+        {
+          "id": "AcceptAnonymousCursor",
+          "edits": [
+            {
+              "old": "Allowed(f) == f.allowed /\\ f.actor /\\ f.selector = \"all\" /\\ f.requested",
+              "new": "Allowed(f) == f.allowed /\\ f.selector = \"all\" /\\ f.requested",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PageAuthorized"
+        },
+        {
+          "id": "AcceptExactIDCombination",
+          "edits": [
+            {
+              "old": "Allowed(f) == f.allowed /\\ f.actor /\\ f.selector = \"all\" /\\ f.requested",
+              "new": "Allowed(f) == f.allowed /\\ f.actor /\\ f.requested",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PageAuthorized"
+        },
+        {
+          "id": "IgnoreRequestedLimit",
+          "edits": [
+            {
+              "old": "Allowed(f) == f.allowed /\\ f.actor /\\ f.selector = \"all\" /\\ f.requested",
+              "new": "Allowed(f) == f.allowed /\\ f.actor /\\ f.selector = \"all\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PageAuthorized"
+        },
+        {
+          "id": "OverfullPage",
+          "edits": [
+            {
+              "old": "SafePage(f) == 0 < f.rows /\\ f.rows <= 100 /\\ f.fits /\\ f.order /\\ f.current",
+              "new": "SafePage(f) == 0 < f.rows /\\ f.fits /\\ f.order /\\ f.current",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PageBounded"
+        },
+        {
+          "id": "IgnoreWireBound",
+          "edits": [
+            {
+              "old": "SafePage(f) == 0 < f.rows /\\ f.rows <= 100 /\\ f.fits /\\ f.order /\\ f.current",
+              "new": "SafePage(f) == 0 < f.rows /\\ f.rows <= 100 /\\ f.order /\\ f.current",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PageBounded"
+        },
+        {
+          "id": "AcceptRepeatedOrSkippedRows",
+          "edits": [
+            {
+              "old": "SafePage(f) == 0 < f.rows /\\ f.rows <= 100 /\\ f.fits /\\ f.order /\\ f.current",
+              "new": "SafePage(f) == 0 < f.rows /\\ f.rows <= 100 /\\ f.fits /\\ f.current",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PageFenced"
+        },
+        {
+          "id": "AcceptStaleConsolePage",
+          "edits": [
+            {
+              "old": "SafePage(f) == 0 < f.rows /\\ f.rows <= 100 /\\ f.fits /\\ f.order /\\ f.current",
+              "new": "SafePage(f) == 0 < f.rows /\\ f.rows <= 100 /\\ f.fits /\\ f.order",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PageFenced"
+        },
+        {
+          "id": "SkipMAC",
+          "edits": [
+            {
+              "old": "/\\ f.seal /\\ f.region /\\ f.caller /\\ f.limit",
+              "new": "/\\ f.region /\\ f.caller /\\ f.limit",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ContinuationBound"
+        },
+        {
+          "id": "CrossRegionCursor",
+          "edits": [
+            {
+              "old": "/\\ f.seal /\\ f.region /\\ f.caller /\\ f.limit",
+              "new": "/\\ f.seal /\\ f.caller /\\ f.limit",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ContinuationBound"
+        },
+        {
+          "id": "CrossCallerCursor",
+          "edits": [
+            {
+              "old": "/\\ f.seal /\\ f.region /\\ f.caller /\\ f.limit",
+              "new": "/\\ f.seal /\\ f.region /\\ f.limit",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ContinuationBound"
+        },
+        {
+          "id": "SwitchPageSizeCursor",
+          "edits": [
+            {
+              "old": "/\\ f.seal /\\ f.region /\\ f.caller /\\ f.limit",
+              "new": "/\\ f.seal /\\ f.region /\\ f.caller",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ContinuationBound"
+        },
+        {
+          "id": "ContinueOnNewSnapshot",
+          "edits": [
+            {
+              "old": "/\\ snapshot = origin\n    /\\ seen' = seen + 1",
+              "new": "/\\ seen' = seen + 1",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ContinuationBound"
+        },
+        {
+          "id": "RenderPartialInventory",
+          "edits": [
+            {
+              "old": "/\\ seen = Last\n    /\\ publication' =",
+              "new": "/\\ seen > 0\n    /\\ publication' =",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CompletePublication"
+        },
+        {
+          "id": "AcceptEmptyContinuation",
+          "edits": [
+            {
+              "old": "SafePage(f) == 0 < f.rows /\\ f.rows <= 100 /\\ f.fits /\\ f.order /\\ f.current",
+              "new": "SafePage(f) == f.rows <= 100 /\\ f.fits /\\ f.order /\\ f.current",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PageBounded"
+        }
+      ]
     }
   ]
 }

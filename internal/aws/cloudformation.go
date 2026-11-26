@@ -30,9 +30,10 @@ import (
 var stackCreateName = regexp.MustCompile(`^[a-zA-Z][a-zA-Z0-9-]{0,127}$`)
 
 type StackStore struct {
-	db               *sql.DB
-	instanceRuntime  StackInstanceRuntime
-	instanceAttempts sync.Map
+	db                   *sql.DB
+	instanceRuntime      StackInstanceRuntime
+	instanceAttempts     sync.Map
+	internetGatewayPages ec2InternetGatewayPager
 }
 type StackResource struct {
 	LogicalID, Type, PhysicalID string

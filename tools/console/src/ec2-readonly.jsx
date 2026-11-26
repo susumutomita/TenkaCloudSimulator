@@ -26,6 +26,7 @@ import VPCSecurityGroups from './ec2-vpc-security-groups.jsx';
 import VPCNetworkACLs from './ec2-vpc-network-acls.jsx';
 import VPCRouteTables from './ec2-vpc-route-tables.jsx';
 import VPCNativeRouteTables from './ec2-vpc-native-route-tables.jsx';
+import VPCInternetGateways from './ec2-vpc-internet-gateways.jsx';
 import {nativeRouteTableTarget} from './ec2-native-route-tables.mjs';
 
 import {parseEC2Document,parseCreateVpc,parseDeleteVpc,parseEC2Error,createVpcParameters,VPC_NAME_LIMIT} from './ec2-response.mjs';
@@ -36,7 +37,7 @@ const blankVpc={name:'',cidr:'',mode:'vpc-only',stackName:'',subnetCIDR:''};
 // Instances stay read-only. VPCs gain CreateVpc/DeleteVpc only when the server
 // advertises them, and only EC2-owned VPCs can be deleted here. Never infer
 // live guest health from stack metadata.
-export default function EC2Readonly({kind,region,request,sessionInstance,onSession,vpcLifecycle=false,vpcSubnet=false,vpcNativeSubnets=false,vpcSecurityGroups=false,vpcNativeSecurityGroups=false,vpcNetworkACLs=false,vpcRouteTables=false,vpcNativeRouteTables=false,vpcNativeRouteAssociations=false,onSaving=()=>{}}) {
+export default function EC2Readonly({kind,region,request,sessionInstance,onSession,vpcLifecycle=false,vpcSubnet=false,vpcNativeSubnets=false,vpcSecurityGroups=false,vpcNativeSecurityGroups=false,vpcNetworkACLs=false,vpcRouteTables=false,vpcNativeRouteTables=false,vpcNativeRouteAssociations=false,vpcInternetGateways=false,onSaving=()=>{}}) {
   const {t}=useLocale();
   const instance=kind==='ec2',manage=!instance&&vpcLifecycle;
   const [items,setItems]=useState([]),[loading,setLoading]=useState(false),[error,setError]=useState('');
@@ -48,7 +49,7 @@ export default function EC2Readonly({kind,region,request,sessionInstance,onSessi
   const pendingWrites=useRef(writeLeases);
   // Stable per-pane leases aggregate on the host. A readback completion or
   // unmount releases only its own lease, even if another pane is still saving.
-  const lease=useMemo(()=>Object.fromEntries(['subnet','sg','acl','rtb'].map(pane=>[pane,open=>{
+  const lease=useMemo(()=>Object.fromEntries(['subnet','sg','acl','rtb','igw'].map(pane=>[pane,open=>{
     const current=pendingWrites.current;
     if(current.has(pane)===open)return;
     const next=new Set(current);
@@ -59,11 +60,11 @@ export default function EC2Readonly({kind,region,request,sessionInstance,onSessi
   const saving=busy||writeLeases.size>0;
   const selectionLocked=()=>busy||pendingWrites.current.size>0;
   const siblingBusy=pane=>busy||[...writeLeases].some(owner=>owner!==pane);
-  function acquireRouteTableWrite(){
+  function acquireNetworkWrite(pane){
     if (selectionLocked()) return null;
-    lease.rtb(true);
+    lease[pane](true);
     let held=true;
-    return ()=>{if(held){held=false;lease.rtb(false);}};
+    return ()=>{if(held){held=false;lease[pane](false);}};
   }
   const epoch=useRef(0),alive=useRef(true),submitting=useRef(false),topology=useRef(null);
   const heading=useRef(null), focusNext=useRef(false);
@@ -164,7 +165,7 @@ export default function EC2Readonly({kind,region,request,sessionInstance,onSessi
   const deletable=detail?.managedBy==='ec2';
   const nativeRoutePane=vpcNativeRouteTables&&nativeRouteTableTarget(detail);
   return <ContentLayout header={<div ref={heading} tabIndex={-1}><Header variant="h1">{instance?t('EC2 instances','EC2 インスタンス'):'VPC'}</Header></div>}><SpaceBetween size="l">
-    {manage?<Alert type="info">{t('Delete CloudFormation-managed networks through their stack. Use the available subnet and network configuration controls on EC2-managed VPCs. Native route and gateway edits are unavailable.','CloudFormation 管理のネットワークはスタックから削除してください。EC2 管理の VPC ではサブネットと利用可能なネットワーク設定を操作できます。ルートやゲートウェイの編集はできません。')}</Alert>
+    {manage?<Alert type="info">{t('Delete CloudFormation-managed networks through their stack. Use the available subnet and network configuration controls on EC2-managed VPCs. Native route and gateway attachment edits are unavailable.','CloudFormation 管理のネットワークはスタックから削除してください。EC2 管理の VPC ではサブネットと利用可能なネットワーク設定を操作できます。ルートやゲートウェイの接続は編集できません。')}</Alert>
       :<Alert type="info">{t('Read-only resources managed through CloudFormation. Create, start, stop and network edits are not supported here. Reported state is not a health check of the guest.','CloudFormation で管理されるリソースの読み取り専用画面です。この画面から作成・起動・停止・ネットワーク編集はできません。表示された状態はゲストの稼働確認ではありません。')}</Alert>}
     {notice&&<Alert type="success" dismissible dismissAriaLabel={t('Dismiss','閉じる')} onDismiss={()=>setNotice('')}>{notice}</Alert>}
     {error&&<Alert type="error" header={t('Could not load resources','リソースを読み込めませんでした')}>{error}</Alert>}
@@ -188,10 +189,12 @@ export default function EC2Readonly({kind,region,request,sessionInstance,onSessi
         {!instance&&vpcNetworkACLs&&<VPCNetworkACLs key={'nacl|'+region+'|'+detail.id} vpc={detail} region={region} request={request}
           writeBlocked={siblingBusy('acl')} onSaving={lease.acl}/>}
         {!instance&&nativeRoutePane&&<VPCNativeRouteTables key={'rtb-native|'+region+'|'+detail.id} vpc={detail} region={region} request={request}
-          writeBlocked={siblingBusy('rtb')} acquireWrite={acquireRouteTableWrite} associations={vpcNativeRouteAssociations}/>}
+          writeBlocked={siblingBusy('rtb')} acquireWrite={()=>acquireNetworkWrite('rtb')} associations={vpcNativeRouteAssociations}/>}
         {!instance&&vpcRouteTables&&!nativeRoutePane&&<VPCRouteTables key={'rtb|'+region+'|'+detail.id} vpc={detail} region={region} request={request}/>}
       </SpaceBetween>
     </Container>}
+    {!instance&&vpcInternetGateways&&<VPCInternetGateways request={request} region={region}
+      writeBlocked={siblingBusy('igw')} acquireWrite={()=>acquireNetworkWrite('igw')}/>}
     {instance&&!sessionInstance&&preview&&<EC2TemplatePreview region={region} request={request} onDismiss={()=>setPreview(false)}/>}
     {manage&&<Modal visible={!!deleting} onDismiss={()=>{if(!busy)setDeleting(null);}} header={t('Delete VPC','VPC を削除')} closeAriaLabel={t('Close dialog','ダイアログを閉じる')}>
       <form onSubmit={remove}><Form errorText={deleteError} actions={<SpaceBetween direction="horizontal" size="xs"><Button formAction="none" disabled={busy} onClick={()=>setDeleting(null)}>{t('Cancel','キャンセル')}</Button><Button variant="primary" formAction="submit" loading={busy} disabled={confirmation!=='delete'||writeLeases.size>0}>{t('Delete','削除')}</Button></SpaceBetween>}>
