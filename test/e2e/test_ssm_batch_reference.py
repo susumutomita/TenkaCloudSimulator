@@ -8,14 +8,16 @@ import unittest
 from secret_reference_projection import project_secret_description
 from batch_reference_projection import project_batches
 from route53_openapi import project_before_route53
-from test_sakura_openapi import preserved
+from test_sakura_openapi import SERVER_COLLECTION, preserved, project_server_list
 
 ROOT = Path(__file__).resolve().parents[2]
 BASE_SHA256 = '02bdc1440b20fe8bf74d2cef12613b9a48dfc4bf1a0f0a4956ebd7e8773ccba2'
 
 
 def validate(spec):
-    base = project_before_route53(spec)
+    # Verify and remove the later Sakura Server and SimpleDB reference additions
+    # before comparing with the unchanged pre-batch document.
+    base = project_before_route53(project_server_list(spec))
     project_secret_description(base)
     project_batches(base)
     assert hashlib.sha256(json.dumps(base, sort_keys=True, separators=(',', ':')).encode()).hexdigest() == BASE_SHA256
@@ -27,6 +29,18 @@ class SSMReference(unittest.TestCase):
 
     def test_additive_contract_and_existing_reference(self):
         validate(self.spec)
+
+    def test_later_reference_layers_are_validated_before_projection(self):
+        broken = copy.deepcopy(self.spec)
+        broken['paths'][SERVER_COLLECTION]['get']['summary'] = 'changed'
+        with self.assertRaisesRegex(AssertionError, 'Server List reference changed'):
+            validate(broken)
+
+        broken = copy.deepcopy(self.spec)
+        form = broken['paths']['/']['post']['requestBody']['content']['application/x-www-form-urlencoded']
+        form['examples']['GetAttributes']['summary'] = 'changed'
+        with self.assertRaisesRegex(AssertionError, 'SimpleDB GetAttributes preset changed'):
+            validate(broken)
 
     def test_negative_controls(self):
         changes = (
