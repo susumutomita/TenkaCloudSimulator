@@ -152,6 +152,9 @@ type Resource struct {
 	// exception code reported (the dependents family when the operation
 	// does not model it).
 	InUse string
+	// InUseMessage optionally supplies a static public refusal instead of
+	// including the names of related resources in the dependency error.
+	InUseMessage string
 	// Singleton resources have exactly one instance per region (account
 	// settings). Reads without a stored instance return the Generate
 	// defaults; Put and Update store it.

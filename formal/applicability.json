@@ -1,74 +1,98 @@
 {
   "version": 1,
-  "base_sha": "dfc88a5b91362a08a7086125b9adb5390c88aed9",
+  "base_sha": "aa8e9e3bc31b27e70df5d76d950e3d472408c859",
   "changes": [
     {
       "path": "README.md",
-      "sha256": "bd73513d7c407ab35818839c751c1fa6b0df6c758f169f6b1dd5c1ae71be9284",
+      "sha256": "aad1e773566df6691bc5b637838b907489a1e8603e34ead1e35783d3b64fb372",
       "disposition": "documentation",
-      "reason": "Summarizes explicit default-class equivalence for the two existing S3 writes and unchanged archive limits.",
+      "reason": "State the bounded Batch policy deletion condition without claiming a workload or console flow.",
+      "models": []
+    },
+    {
+      "path": "docs/aws-catalog-services.md",
+      "sha256": "9f896ce3f9bcc80a75bee4186b4bd264fd6925b5cab69e37ed7ca979cb753413",
+      "disposition": "documentation",
+      "reason": "Update only the generated Batch bounds row to reflect the new policy-deletion refusal.",
       "models": []
     },
     {
       "path": "docs/design/0001-go-standalone.md",
-      "sha256": "0ed9b9ede1e39ccc31ca903b3afc14388273394c64f4042cff9c73eda2f65af8",
+      "sha256": "9b0723febfd8e989ae894c138e698de0ef36f57575686fce07f258f6c899d817",
       "disposition": "documentation",
-      "reason": "Records the S3 wire option boundary, unchanged authorization/storage path, and existing unsupported cases.",
+      "reason": "Record the local same-transaction reference read, protected error and unchanged saved state on refusal.",
       "models": []
     },
     {
-      "path": "docs/s3-multipart.md",
-      "sha256": "380de7211c78ab93001d4dfadf3bd161e4a3a5f15bddc413cb40a5759d83ed14",
-      "disposition": "documentation",
-      "reason": "Documents exact single explicit STANDARD equivalence on the existing write route and retained non-default-class refusal.",
+      "path": "internal/aws/catalog/batch_policy_delete_test.go",
+      "sha256": "ed8b19637c373e56eb4cef6101983a58d703274137fcba949bea3a91d86b644e",
+      "disposition": "test-support",
+      "reason": "Synthetic native Batch test of in-use and IAM refusal, fixed public message under a policy-only grant, unchanged saved rows and final cleanup.",
       "models": []
     },
     {
-      "path": "docs/s3.md",
-      "sha256": "ff02b671e0425f35494703f281579ba3544bfdc2ca8428d6dd36052af7f05c35",
-      "disposition": "documentation",
-      "reason": "Documents exact single explicit STANDARD equivalence on the existing write route and retained non-default-class refusal.",
-      "models": []
-    },
-    {
-      "path": "internal/aws/s3.go",
-      "sha256": "246718fde8c2a1c7b6977d13d6f18f466807f900247c09deed914a3b08c7e0ce",
+      "path": "internal/aws/catalog/semantics.go",
+      "sha256": "17a10a05fb6a95662a1e66828b706c22f4d7dd8a7108bf10fc5f9ea2c84a3ef9",
       "disposition": "modeled",
-      "reason": "A single explicit default selects existing authorized object/write and multipart-start transitions; rejected class and operation shapes cannot change state.",
+      "reason": "Choose a configured static public message only when the existing transaction has already determined the resource is in use; otherwise exactly preserve the generic error and existing no-commit refusal.",
       "models": [
         {
-          "id": "ObjectStore",
+          "id": "CatalogResourceLifecycle",
           "properties": [
-            "NoOrphans",
-            "NoUnauthorizedMutation",
-            "DenyWins"
+            "AuthorizationFirst",
+            "FailureFrame",
+            "PeerFrame"
           ],
-          "limits": "Only the existing atomic object/authorization transition is abstracted. Exact class/header multiplicity, HTTP routing, SDK responses, versioning and real SQLite are exercised separately."
-        },
-        {
-          "id": "S3MultipartState",
-          "properties": [
-            "Budget",
-            "NoOrphans",
-            "Cleanup",
-            "RefusalAtomic"
-          ],
-          "limits": "Only the existing multipart/refusal frame is abstracted. Class admission, upload selectors, no new durable field, native SDK cleanup and version readback are exercised via Go/HTTP/SDK, not checked as refinement."
+          "limits": "Binds only the existing bounded authorized operation and no-mutation refusal/peer frames. This is not a model of the non-parent Batch queue-to-policy edge, static error text, names, ARN syntax, actual IAM, SQL transactions/driver, concurrency, transports, job scheduling or Go refinement. Scoped native tests and the local SDK receipt check the specific contract."
         }
       ]
     },
     {
-      "path": "internal/aws/s3_storage_class_test.go",
-      "sha256": "65d17c160f9f42e8b5b70c5cf41791985359576287d5de4c24c3b57ca5ac4656",
-      "disposition": "test-support",
-      "reason": "Runs ordinary supported and explicitly rejected option shapes against the existing S3/native SDK state and verifies no changed rows or response contracts.",
+      "path": "internal/aws/catalog/services_compute3.go",
+      "sha256": "f14b4121595f2a4027e38d02b2851f89bbebdb36217c1a0b0d0f32700aa0d1a1",
+      "disposition": "modeled",
+      "reason": "Bind Batch DeleteSchedulingPolicy to its existing reference transaction; a referenced saved policy produces the modeled ClientException with fixed public text, leaving saved queue and policy state unchanged.",
+      "models": [
+        {
+          "id": "CatalogResourceLifecycle",
+          "properties": [
+            "AuthorizationFirst",
+            "FailureFrame",
+            "PeerFrame"
+          ],
+          "limits": "Binds only the existing bounded authorized operation and no-mutation refusal/peer frames. This is not a model of the non-parent Batch queue-to-policy edge, static error text, names, ARN syntax, actual IAM, SQL transactions/driver, concurrency, transports, job scheduling or Go refinement. Scoped native tests and the local SDK receipt check the specific contract."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/catalog/spec.go",
+      "sha256": "48ed6e5b75fd6da87680b560e78ddbf80bb80e81b39afc1a9eeed123b7cb3f44",
+      "disposition": "modeled",
+      "reason": "The optional static dependency refusal text does not widen or change authorization and preserves existing fallback behavior for all other declarations.",
+      "models": [
+        {
+          "id": "CatalogResourceLifecycle",
+          "properties": [
+            "AuthorizationFirst",
+            "FailureFrame",
+            "PeerFrame"
+          ],
+          "limits": "Binds only the existing bounded authorized operation and no-mutation refusal/peer frames. This is not a model of the non-parent Batch queue-to-policy edge, static error text, names, ARN syntax, actual IAM, SQL transactions/driver, concurrency, transports, job scheduling or Go refinement. Scoped native tests and the local SDK receipt check the specific contract."
+        }
+      ]
+    },
+    {
+      "path": "internal/server/apidocs/catalog/batch.json",
+      "sha256": "5b64da4f3bea930c1bb7d912ad7ed1786e842983e528b2ac5fddac16d28c3c4c",
+      "disposition": "presentation",
+      "reason": "Regenerated Batch description of the established in-use refusal; OpenAPI operation inventory, request/response schema, native paths and runtime renderer unchanged.",
       "models": []
     },
     {
-      "path": "test/e2e/s3_standard_storage_class.py",
-      "sha256": "64072b7e0c14c43032aef4ecdf46de402779ba79559f8d2ab283484b8fd27049",
+      "path": "test/e2e/catalog_fixtures/batch.json",
+      "sha256": "e9b3090596f1e86ecf033571d511e9f27fdb095f79f74105bda4be79c07b3b4d",
       "disposition": "test-support",
-      "reason": "Runs ordinary supported and explicitly rejected option shapes against the existing S3/native SDK state and verifies no changed rows or response contracts.",
+      "reason": "Pinned AWS SDK fixture adds attached refusal, exact policy and queue readback, same-name peer isolation, restart and successful release/cleanup, with no jobs or real AWS.",
       "models": []
     }
   ]
