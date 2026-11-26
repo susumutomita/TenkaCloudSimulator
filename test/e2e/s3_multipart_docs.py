@@ -18,6 +18,7 @@ from sqs import BINARY, Team, NoRedirect
 from sqs_docs import MAIN_OPERATION_IDS, MAIN_PATHS
 from openapi_parameters import validate_parameter_lists
 from test_sakura_openapi import NEW_IDS as SAKURA_IDS, COLLECTION as SAKURA_COLLECTION, ITEM as SAKURA_ITEM
+from test_sakura_openapi import project_sakura_server_list_only
 import boto3
 from botocore.config import Config
 from botocore.exceptions import ClientError
@@ -49,8 +50,8 @@ def parameters(spec, path, method):
 
 
 def validate_contract(spec):
-    inherited = project_before_route53(spec)
-    # Preserve the 61-operation baseline plus current main's five opt-in Sakura
+    inherited = project_sakura_server_list_only(project_before_route53(spec))
+    # Preserve the 61-operation baseline plus the five opt-in Sakura Disk
     # routes. Both are literal fixtures, never read from the served document.
     assert len(MAIN_OPERATION_IDS) == len(set(MAIN_OPERATION_IDS)) == 61
     assert len(MAIN_PATHS) == len(set(MAIN_PATHS)) == 34

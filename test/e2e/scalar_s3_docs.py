@@ -16,11 +16,11 @@ from playwright.sync_api import sync_playwright, expect
 from check import running, REPORTS
 from reflow import assert_reflow
 from openapi_parameters import validate_parameter_lists
-from test_sakura_openapi import OLD_IDS, NEW_IDS, COLLECTION, ITEM
+from test_sakura_openapi import OLD_IDS, NEW_IDS, COLLECTION, ITEM, project_sakura_server_list_only
 
 
 def validate_reference_contract(spec):
-    inherited = project_before_route53(spec)
+    inherited = project_sakura_server_list_only(project_before_route53(spec))
     operations = [op['operationId'] for item in inherited['paths'].values() for op in item.values() if isinstance(op, dict) and 'operationId' in op]
     assert len(operations) == 67 and len(set(operations)) == 67 and set(operations) == OLD_IDS | NEW_IDS | {'S3MultipartUpload'}
     assert spec['paths']['/{bucket}/{key}']['post']['operationId'] == 'S3MultipartUpload'

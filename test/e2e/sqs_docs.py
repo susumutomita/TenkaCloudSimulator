@@ -15,7 +15,7 @@ from urllib.parse import urlsplit
 
 from sqs_batch_delete import Team, NoRedirect
 from openapi_json10 import validate_json10_examples, validate_json10_response
-from test_sakura_openapi import NEW_IDS, COLLECTION, ITEM
+from test_sakura_openapi import NEW_IDS, COLLECTION, ITEM, project_sakura_server_list_only
 import boto3
 from botocore.config import Config
 from botocore.exceptions import ClientError
@@ -29,7 +29,7 @@ REPORTS=Path(os.environ.get('SIMULATOR_REPORTS','reports')).resolve()
 
 
 def validate_reference_contract(spec):
-    inherited = project_before_route53(spec)
+    inherited = project_sakura_server_list_only(project_before_route53(spec))
     ids=[value['operationId'] for path in inherited['paths'].values() for method,value in path.items() if method in ('get','post','put','head','delete')]
     assert len(ids)==67 and len(set(ids))==67 and set(ids)==set(MAIN_OPERATION_IDS)|NEW_IDS|{'S3MultipartUpload'}
     assert spec['paths']['/{bucket}/{key}']['post']['operationId']=='S3MultipartUpload'
