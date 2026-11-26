@@ -1,6 +1,6 @@
 # Bounded EC2/CloudFormation network contracts (#467)
 
-Reviewed baseline: [signed main `eab7983`][main-reviewed] (2026-11-26).
+Reviewed baseline: [signed main `66e251d`][main-reviewed] (2026-11-26).
 The first #467 inventory used `d2dd8bca`; it predates native route-table
 readback and explicit native subnet associations. This is a contract and
 evidence record, not an expansion of the [EC2/VPC API](ec2-read-discovery.md).
@@ -22,8 +22,10 @@ cover VM composition and EC2 instance placement, not this network-only lifecycle
 - **CFN SDK evidence:** [#562][parity-pr] and its [hosted platform-audit
   job][parity-ci] on `bcff9a708335bb0dbea706c775d3189e52e8f0a1` show all five
   then-existing `NetworkContract` tests passing (10 tests in the whole runner).
-  The [new CFN restart test][cfn-test] also uses two successive processes on one
-  SQLite file. No EC2 instance or regional infrastructure is provisioned.
+  The [CFN restart test][restart-pr] also uses two successive processes on one
+  SQLite file. The [participant policy test][cfn-test] uses a real local session,
+  created by the operator, and separate participant and operator SDK clients.
+  No EC2 instance or regional infrastructure is provisioned.
 - **Native association evidence:** [#560][association-pr] adds a separate
   [pinned SDK fixture][association-test] and [Go wire tests][association-wire].
   The fixture was exercised on the joined implementation predecessor recorded
@@ -49,6 +51,7 @@ A passing API call or returned association ID is not proof of packet forwarding.
 | EC2 `CreateVpc` without a route table, then a separate bare CFN table | The native VPC does not synthesize a main table. The independently created CFN table has no routes or associations. AWS local routes are not synthesized. | [CreateVpc][create-vpc], [AWS main and local routes][aws-route-tables] | `test_native_vpc_has_no_implicit_table_and_bare_table_has_no_children` |
 | Native `AssociateRouteTable(RouteTableId, SubnetId)` on an existing same-VPC EC2-owned pair | Exact pair permissions apply; the association is explicit and has a stable ID across retries and restart. A different table for the same subnet is rejected. EC2 reads the typed association from its own regional store; it does not adopt a CFN association. | [AssociateRouteTable][associate-table], [DescribeRouteTables][describe-tables], [Same-VPC relationship][cfn-association] | [#560][association-pr]: [native SDK fixture][association-test] and [wire tests][association-wire] |
 | Native `DisassociateRouteTable(AssociationId)` and dependent deletes | One exact saved relation disappears. An unauthorized caller cannot remove it; table/subnet deletion is refused while it exists, then succeeds after removal. A separate team's snapshot is unchanged. No fallback to an implicit main table. | [DisassociateRouteTable][disassociate-table] (AWS **does** fall back to the main table), [DeleteRouteTable][delete-table] | [#560][association-pr]: [native SDK fixture][association-test] |
+| CFN `CreateStack` / `DeleteStack`: valid local participant token with the stack actions and route-table association permissions on the table but not its subnet | Both calls get the local CFN `AccessDenied` (HTTP 403) for the missing subnet permission. CFN/EC2 inventories and captured live history do not change. The operator can use the rejected name, read the resulting explicit association, and clean up without changing the other stack. | [CFN access control][cfn-access], [Associate IAM][associate-iam], [Disassociate IAM][disassociate-iam], [SubnetRouteTableAssociation][cfn-association] | `test_participant_missing_subnet_grant_preserves_stack_network`; local policy and synchronous refusal, not AWS service-role/error parity |
 | CFN `CreateStack` without any local token | HTTP 401 text, not AWS Query XML; SDK parsing fails and all inventories stay unchanged. | [Simulator access contract](../AGENTS.md), not AWS authentication | `test_missing_local_token_cannot_create_network` |
 
 ## Reproduce and interpret
@@ -62,22 +65,22 @@ python3 test/platform/sdk-lifecycle.py -v
 SIMULATOR_BINARY="$PWD/dist/tenkacloud-simulator" python3 test/console/ec2_native_route_association_sdk.py
 ```
 
-The CFN suite has six methods, including the restart case, eight invalid-template and three
-unsupported-native-mutation subcases. It uses fresh local token/store state
-and dummy SDK signing credentials. It is imported by the
+The CFN suite has seven methods, including restart and participant refusal,
+with eight invalid-template and three unsupported-native-mutation subcases. It uses
+fresh local token/store state and dummy SDK signing credentials. It is imported by the
 [platform runner][platform-runner], not gated on the optional full E2E job.
 
 **Still outside these receipts:** successful native route entry mutations (including
 IPv6, prefix lists and alternate targets), AWS DryRun responses, and gateway
-[VPC endpoints][cfn-endpoint]. The native association restart and team-isolation
-fixture does not establish participant-denied CFN create/delete preservation.
-The CFN restart receipt covers an orderly shutdown, not process loss in the
-middle of an operation or a separate team. Snapshot equality and failed-name
+[VPC endpoints][cfn-endpoint]. The participant refusal covers one local
+policy that omits the subnet grant, not all IAM policies, service roles or
+organizations. The CFN restart receipt covers an orderly shutdown, not process
+loss in the middle of an operation or a separate team. Snapshot equality and failed-name
 reuse cover exposed state, not an exhaustive audit of hidden SQLite rows. The
 public comparator was read only; no emulator differential run, AWS operation,
 real VM, packet flow, or challenge scoring is established here. #467 remains open.
 
-[main-reviewed]: https://github.com/susumutomita/TenkaCloudSimulator/tree/eab7983e15b7b09e3df8f9d0c476f1871bada4ef
+[main-reviewed]: https://github.com/susumutomita/TenkaCloudSimulator/tree/66e251dbfb87f7c385d1fbe63a3670cc38361ad3
 [vpc-owner]: https://github.com/susumutomita/TenkaCloudSimulator/issues/56
 [vm-owner]: https://github.com/susumutomita/TenkaCloudSimulator/pull/465
 [instance-placement]: https://github.com/susumutomita/TenkaCloudSimulator/pull/570
@@ -88,6 +91,7 @@ real VM, packet flow, or challenge scoring is established here. #467 remains ope
 [parity-ci]: https://github.com/susumutomita/TenkaCloudSimulator/actions/runs/45776139395/job/139760135713
 [association-pr]: https://github.com/susumutomita/TenkaCloudSimulator/pull/560
 [association-ci]: https://github.com/susumutomita/TenkaCloudSimulator/actions/runs/45774002539
+[restart-pr]: https://github.com/susumutomita/TenkaCloudSimulator/pull/573
 [cfn-test]: ../test/e2e/ec2_network_contract.py
 [association-test]: ../test/console/ec2_native_route_association_sdk.py
 [association-wire]: ../internal/aws/ec2_route_association_wire_test.go
@@ -108,6 +112,9 @@ real VM, packet flow, or challenge scoring is established here. #467 remains ope
 [describe-vpcs]: https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_DescribeVpcs.html
 [describe-subnets]: https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_DescribeSubnets.html
 [describe-tables]: https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_DescribeRouteTables.html
+[cfn-access]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/control-access-with-iam.html
+[associate-iam]: https://docs.aws.amazon.com/service-authorization/latest/reference/list_ec2.html#amazonec2-AssociateRouteTable
+[disassociate-iam]: https://docs.aws.amazon.com/service-authorization/latest/reference/list_ec2.html#amazonec2-DisassociateRouteTable
 [associate-table]: https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_AssociateRouteTable.html
 [disassociate-table]: https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_DisassociateRouteTable.html
 [delete-table]: https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_DeleteRouteTable.html

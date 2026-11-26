@@ -1,19 +1,19 @@
 {
   "version": 1,
-  "base_sha": "eab7983e15b7b09e3df8f9d0c476f1871bada4ef",
+  "base_sha": "66e251dbfb87f7c385d1fbe63a3670cc38361ad3",
   "changes": [
     {
       "path": "docs/ec2-network-contracts.md",
-      "sha256": "ca2da82478057d28c386c77261f8fecfdfb09d3b8c8946a5b057bda9a7f38755",
+      "sha256": "a2b6287e06ce5bcd779730fe30f648e27a5aa33c48ebc20354c36267e08379a9",
       "disposition": "documentation",
-      "reason": "Explains the existing bounded CloudFormation/EC2 network association lifecycle across an orderly local restart, links primary API sources, and states the evidence limits.",
+      "reason": "Links primary IAM and CloudFormation sources and distinguishes a local ordinary policy refusal scenario from AWS service roles, other IAM policy and crash behavior.",
       "models": []
     },
     {
       "path": "test/e2e/ec2_network_contract.py",
-      "sha256": "760727720b106a90be40c8921f055e8b4d470f138c6965068fd53d0c2351f5fe",
+      "sha256": "eaae9fb5b90d743f50f0c2665ae4a9a9d086fc699948945dcccef30ebe05ec9b",
       "disposition": "test-support",
-      "reason": "Adds one pinned SDK case for persisted CloudFormation network IDs, exact EC2 readback, post-restart deletion and retained history; no runtime, dependency, or runner behavior changes.",
+      "reason": "Uses the existing loopback SDK runner to verify standard participant create/delete refusal and invariant CFN/EC2 readback, plus authorized creation and cleanup. No production behavior, workflow or dependency change.",
       "models": []
     }
   ]
