@@ -1,10 +1,13 @@
 import {parseEC2RouteTables} from './ec2-response.mjs';
 import {loadVpcSubnets} from './ec2-native-subnets.mjs';
 import {vpcRouteTablesAvailable} from './ec2-route-tables.mjs';
+import {describeInternetGateways,internetGatewaysAvailable} from './ec2-internet-gateways.mjs';
 
 const ns='http://ec2.amazonaws.com/doc/2016-11-15/';
 const actions=['DescribeRouteTables','CreateRouteTable','DeleteRouteTable'];
 const associationActions=['DescribeRouteTables','DescribeSubnets','AssociateRouteTable','DisassociateRouteTable'];
+const routeActions=['DescribeRouteTables','DescribeInternetGateways','CreateRoute','DeleteRoute'];
+export const ipv4DefaultRoute='0.0.0.0/0';
 const vpcID=/^vpc-[0-9a-f]{17}$/;
 const tableID=/^rtb-[0-9a-f]{17}$/;
 const subnetID=/^subnet-[0-9a-f]{17}$/;
@@ -18,7 +21,7 @@ const xml=text=>new DOMParser().parseFromString(text,'application/xml');
 const shape=(value,pattern)=>typeof value==='string'&&pattern.exec(value)?.[0]===value;
 // A delete target is a frozen row from a validated native read in this
 // transport/identity, region and VPC, not an ID copied from another view.
-const rowScopes=new WeakMap(), subnetScopes=new WeakMap();
+const rowScopes=new WeakMap(), subnetScopes=new WeakMap(), gatewayScopes=new WeakMap();
 const includesAll=(actual,expected)=>Array.isArray(actual)&&expected.every(value=>actual.includes(value));
 const exactActions=(actual,expected)=>actual?.length===expected.length&&includesAll(actual,expected);
 const associationEnabled=ec2=>exactActions(ec2?.routeTableAssociationLifecycle,associationActions)&&includesAll(ec2?.operations,associationActions);
@@ -32,6 +35,12 @@ export function vpcNativeRouteTablesAvailable(capabilities,authenticationRequire
 
 export function vpcNativeRouteTableAssociationsAvailable(capabilities,authenticationRequired) {
   return vpcNativeRouteTablesAvailable(capabilities,authenticationRequired)&&associationEnabled(capabilities.services.ec2);
+}
+
+export function vpcNativeDefaultRoutesAvailable(capabilities,authenticationRequired) {
+  const ec2=capabilities?.services?.ec2;
+  return vpcNativeRouteTablesAvailable(capabilities,authenticationRequired)&&internetGatewaysAvailable(capabilities,authenticationRequired)&&
+    exactActions(ec2.defaultRouteLifecycle,routeActions)&&includesAll(ec2.operations,routeActions);
 }
 
 export function nativeRouteTableTarget(vpc) {
@@ -69,7 +78,7 @@ function envelope(document,action,members) {
   return result;
 }
 
-async function readReply(response,signal) {
+async function readReply(response,signal,limit=16*1024*1024) {
   const type=response.headers?.get('Content-Type')?.split(';')[0].trim().toLowerCase();
   const reader=response.body?.getReader();
   if (!reader) invalid();
@@ -81,8 +90,8 @@ async function readReply(response,signal) {
       signal?.throwIfAborted();
       const chunk=await reader.read();
       if (chunk.done) {done=true;break;}
+      if (chunk.value.byteLength>limit-size) invalid();
       size+=chunk.value.byteLength;
-      if (size>16*1024*1024) invalid();
       data+=decoder.decode(chunk.value,{stream:true});
     }
     signal?.throwIfAborted();
@@ -93,7 +102,7 @@ async function readReply(response,signal) {
   }
 }
 
-async function send(request,region,vpc,action,params,{signal,parse=xml}) {
+async function send(request,region,vpc,action,params,{signal,parse=xml,maxBytes}) {
   signal?.throwIfAborted();
   if (!nativeRouteTableTarget(vpc) || !shape(region,regionID) || region.length>32) invalid();
   const response=await request('/',{method:'POST',credentials:'same-origin',redirect:'error',signal,
@@ -101,13 +110,18 @@ async function send(request,region,vpc,action,params,{signal,parse=xml}) {
     body:new URLSearchParams({Action:action,Version:'2016-11-15',...params})});
   signal?.throwIfAborted();
   if (!response?.ok) throw Error((response?.status??0)+': Route table request failed.');
-  return parse(await readReply(response,signal));
+  return parse(await readReply(response,signal,maxBytes));
 }
 
 async function snapshot(request,region,vpc,options) {
   // Describe is regional and validates both owners in one server snapshot.
   // The existing decoder rejects main, duplicate and non-subnet associations.
-  const doc=await send(request,region,vpc,'DescribeRouteTables',{},options);
+  const exact=options.exactID;
+  // A single route-table readback cannot carry more than 50 bounded tags,
+  // 1,000 bounded association elements and one route. Do not depend on the
+  // size of the rest of the regional list after an acknowledged mutation.
+  const doc=await send(request,region,vpc,'DescribeRouteTables',exact?{'RouteTableId.1':exact}:{},
+    exact?{...options,maxBytes:512*1024}:options);
   const found=envelope(doc,'DescribeRouteTables',['routeTableSet']);
   const saved=parseEC2RouteTables(doc,vpc.id), associations=options.associations===true;
   const regionalIDs=new Set(), regionalAssociations=new Set(), regionalSubnets=new Set();
@@ -122,11 +136,14 @@ async function snapshot(request,region,vpc,options) {
       regionalAssociations.add(assoc);regionalSubnets.add(subnet);
     }
   }
-  const binding={request,region,vpc:vpc.id,cidr:vpc.cidr,associations,regionalSubnets};
+  if (exact&&(regionalIDs.size!==1||!regionalIDs.has(exact)||saved.length!==1)) invalid();
+  const defaultRoutes=options.defaultRoutes===true;
+  const binding={request,region,vpc:vpc.id,cidr:vpc.cidr,associations,defaultRoutes,regionalSubnets};
   const rows=saved.map(item=>{
-    if (item.routes.length || !associations&&item.associations.length || item.tags.some(tag=>!validNativeRouteTableName(tag.value))) invalid();
+    if (!defaultRoutes&&item.routes.length || !associations&&item.associations.length || item.tags.some(tag=>!validNativeRouteTableName(tag.value))) invalid();
     const row=Object.freeze({id:item.id,vpc:item.vpc,name:item.tags.find(tag=>tag.key==='Name')?.value??'',
-      ...(associations?{associations:Object.freeze(item.associations.map(Object.freeze))}:{})});
+      ...(associations?{associations:Object.freeze(item.associations.map(Object.freeze))}:{}),
+      ...(defaultRoutes?{route:item.routes.length?Object.freeze(item.routes[0]):null}:{})});
     rowScopes.set(row,binding);
     return row;
   });
@@ -137,7 +154,7 @@ function scopedTable(request,region,vpc,table,options) {
   const binding=rowScopes.get(table);
   if (!nativeRouteTableTarget(vpc) || !binding || binding.request!==request || binding.region!==region ||
       binding.vpc!==vpc.id || binding.cidr!==vpc.cidr || table.vpc!==vpc.id ||
-      binding.associations!==(options.associations===true)) invalid();
+      binding.associations!==(options.associations===true)||binding.defaultRoutes!==(options.defaultRoutes===true)) invalid();
   return binding;
 }
 
@@ -169,7 +186,7 @@ export async function createVpcNativeRouteTable(request,region,vpc,name,clientTo
 
 export async function deleteVpcNativeRouteTable(request,region,vpc,table,options={}) {
   scopedTable(request,region,vpc,table,options);
-  if (table.associations?.length) invalid();
+  if (table.associations?.length||table.route) invalid();
   const doc=await send(request,region,vpc,'DeleteRouteTable',{RouteTableId:table.id},options);
   if (leaf(envelope(doc,'DeleteRouteTable',['return']).get('return'))!=='true') invalid();
   const {rows,regionalIDs}=await snapshot(request,region,vpc,options);
@@ -218,12 +235,48 @@ export async function disassociateVpcRouteSubnet(request,region,vpc,table,associ
   return {disassociated:association,rows};
 }
 
+// Only a verified native gateway currently linked to this VPC is offered.
+export async function loadVpcNativeRouteGateway(request,region,vpc,table,options={}) {
+  const binding=scopedTable(request,region,vpc,table,options);
+  if (!binding.defaultRoutes||table.route) invalid();
+  const rows=await describeInternetGateways(request,region,options.signal);
+  options.signal?.throwIfAborted();
+  const gateway=rows.find(row=>row.vpc===vpc.id);
+  if (!gateway) return null;
+  if (gateway.managedBy!=='ec2') invalid();
+  gatewayScopes.set(gateway,table);
+  return gateway;
+}
+
+export async function changeVpcNativeDefaultRoute(request,region,vpc,table,target,create,options={}) {
+  const binding=scopedTable(request,region,vpc,table,options);
+  if (!binding.defaultRoutes || (create ? table.route||gatewayScopes.get(target)!==table : !table.route||table.route!==target)) invalid();
+  const action=create?'CreateRoute':'DeleteRoute';
+  const params={RouteTableId:table.id,DestinationCidrBlock:ipv4DefaultRoute,...(create?{GatewayId:target.id}:{})};
+  const doc=await send(request,region,vpc,action,params,options);
+  if (leaf(envelope(doc,action,['return']).get('return'))!=='true') invalid();
+  const {rows,saved}=await snapshot(request,region,vpc,{...options,exactID:table.id});
+  const next=rows[0];
+  // Absence is confirmed only inside the same still-existing table. The
+  // untouched association projection must agree with the previous scoped
+  // view before we can keep its regional selectors and other table rows.
+  if ((create?next.route?.gateway!==target.id||next.route.cidr!==ipv4DefaultRoute:next.route!==null) ||
+      next.name!==table.name||JSON.stringify(next.associations)!==JSON.stringify(table.associations)||
+      saved[0].id!==table.id) invalid();
+  options.signal?.throwIfAborted();
+  rowScopes.set(next,binding);
+  rowScopes.delete(table);
+  return next;
+}
+
 export function nativeRouteTableFailure(error) {
   const message=error?.message??'';
   if (/^(401|403|UnauthorizedOperation|AccessDenied(?:Exception)?)(?=:|$)/.test(message) || message==='Sign in to continue.') return 'denied';
-  if (/^Invalid(?:RouteTableID|SubnetID|AssociationID|VpcID)\.NotFound(?=:|$)/.test(message)) return 'not-found';
+  if (/^Invalid(?:Route|RouteTableID|SubnetID|AssociationID|VpcID)\.NotFound(?=:|$)/.test(message)) return 'not-found';
+  if (/^RouteAlreadyExists(?=:|$)/.test(message)) return 'route-exists';
+  if (/^(Gateway\.NotAttached|InvalidInternetGatewayID\.NotFound)(?=:|$)/.test(message)) return 'no-gateway';
   if (/^DependencyViolation(?=:|$)/.test(message)) return 'dependency';
   if (/^Resource\.AlreadyAssociated(?=:|$)/.test(message)) return 'associated';
-  if (/^(RouteTableLimitExceeded|ResourceLimitExceeded)(?=:|$)/.test(message)) return 'limit';
+  if (/^(RouteLimitExceeded|RouteTableLimitExceeded|ResourceLimitExceeded)(?=:|$)/.test(message)) return 'limit';
   return 'unconfirmed';
 }

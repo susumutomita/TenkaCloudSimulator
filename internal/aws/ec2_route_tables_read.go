@@ -49,6 +49,28 @@ type ec2RouteAssociationRead struct {
 	Main   bool   `xml:"main"`
 }
 
+// Exact table scope yields at most one bounded wire row for mutation
+// confirmation. It cannot skip validation of the regional graph.
+func parseEC2RouteTableSelection(fields map[string][]string) (string, []string, *ec2Failure) {
+	ids, exact := fields["RouteTableId.1"]
+	if !exact {
+		subnets, err := parseEC2RouteTableSubnetFilter(fields)
+		return "", subnets, err
+	}
+	if len(ids) != 1 || !ec2NativeRouteTableID.MatchString(ids[0]) {
+		return "", nil, ec2Invalid("InvalidRouteTableId.Malformed", "RouteTableId.1 must be exactly one rtb- ID.")
+	}
+	for name, members := range fields {
+		if name != "Action" && name != "Version" && name != "RouteTableId.1" {
+			return "", nil, ec2Invalid("UnsupportedOperation", "The single exact route-table selector cannot be combined with other options.")
+		}
+		if len(members) != 1 {
+			return "", nil, ec2Invalid("InvalidParameterValue", "DescribeRouteTables parameters must be sent once.")
+		}
+	}
+	return ids[0], nil, nil
+}
+
 // Accept one bounded EC2 Query filter, with continuous Value indices.
 func parseEC2RouteTableSubnetFilter(fields map[string][]string) ([]string, *ec2Failure) {
 	const valuePrefix = "Filter.1.Value."
@@ -114,8 +136,8 @@ func ec2RouteMember(kind string) bool {
 
 // Query both sources so losing a network row or an ownership row cannot turn
 // a damaged table or child into a successful empty response. Each stack is
-// projected once, from the same SQLite snapshot. Native tables and explicit
-// native subnet associations are verified separately; native routes remain invalid.
+// projected once, from the same SQLite snapshot. Native tables, explicit
+// native subnet associations and IPv4 default routes are verified separately.
 func (s *StackStore) describeEC2RouteTables(ctx context.Context, region string) ([]ec2RouteTableRead, error) {
 	tx, err := s.db.BeginTx(ctx, nil)
 	if err != nil {
@@ -124,8 +146,8 @@ func (s *StackStore) describeEC2RouteTables(ctx context.Context, region string) 
 	defer tx.Rollback()
 	rows, err := tx.QueryContext(ctx, `SELECT stack_id FROM aws_cfn_ownership WHERE namespace=? AND kind IN (?,?,?)
 		UNION SELECT stack_id FROM aws_ec2_network_resources WHERE region=? AND kind IN (?,?,?)
-			AND NOT (stack_id=? AND kind IN (?,?)) ORDER BY 1 LIMIT 1001`,
-		stackResourceNamespace(region, ec2RT), ec2RT, ec2Route, ec2Assoc, region, ec2RT, ec2Route, ec2Assoc, ec2NativeOwner, ec2RT, ec2Assoc)
+			AND NOT (stack_id=? AND kind IN (?,?,?)) ORDER BY 1 LIMIT 1001`,
+		stackResourceNamespace(region, ec2RT), ec2RT, ec2Route, ec2Assoc, region, ec2RT, ec2Route, ec2Assoc, ec2NativeOwner, ec2RT, ec2Assoc, ec2Route)
 	if err != nil {
 		return nil, err
 	}
@@ -199,16 +221,24 @@ func (s *StackStore) describeEC2RouteTables(ctx context.Context, region string) 
 	if err != nil {
 		return nil, err
 	}
-	if count+len(native)+associationCount > ec2NativeRouteTableRowLimit {
+	routes, err := nativeDefaultRoutesInRegion(ctx, tx, region)
+	if err != nil {
+		return nil, err
+	}
+	if count+len(native)+associationCount+len(routes) > ec2NativeRouteTableRowLimit {
 		return nil, errEC2RouteSnapshot
 	}
 	for _, item := range native {
 		table := ec2NativeRouteTableRecord(item)
 		table.Associations = associations[item.ID]
 		delete(associations, item.ID)
+		if route, exists := routes[item.ID]; exists {
+			table.Routes = []ec2RouteRead{{CIDR: ec2NativeDefaultCIDR, Gateway: route.gateway, Origin: "CreateRoute", State: "active"}}
+			delete(routes, item.ID)
+		}
 		out = append(out, table)
 	}
-	if len(associations) != 0 {
+	if len(associations) != 0 || len(routes) != 0 {
 		return nil, errEC2RouteSnapshot
 	}
 	sort.Slice(out, func(i, j int) bool { return out[i].ID < out[j].ID })

@@ -45,15 +45,15 @@ func checkNativeInternetGatewayVPC(ctx context.Context, tx *sql.Tx, region strin
 	return ensureNativeInternetGatewayUnclaimed(ctx, tx, region, vpc.ID, declared)
 }
 
-// All rows come from one SQLite snapshot through networkList. Native routes
-// are still unsupported; a wrong-kind row occupying a reserved identity must
-// not turn a damaged attachment into an apparently detached gateway.
+// All rows come from one SQLite snapshot through networkList. A wrong
+// kind occupying a reserved identity must not hide an attachment. Callers
+// validate the native routes against these links before publishing state.
 func readNativeInternetGatewayLinks(ctx context.Context, tx *sql.Tx, region string, network []EC2NetworkResource, declared map[string]bool) (nativeInternetGatewayLinks, error) {
 	out := nativeInternetGatewayLinks{byGateway: map[string]EC2NetworkResource{}, byVPC: map[string]EC2NetworkResource{}}
 	byID := make(map[string]EC2NetworkResource, len(network))
 	for _, row := range network {
 		byID[row.ID] = row
-		if row.Kind == ec2Route || strings.HasPrefix(row.ID, nativeInternetGatewayLinkPrefix) && row.Kind != ec2RTAttachment {
+		if strings.HasPrefix(row.ID, nativeInternetGatewayLinkPrefix) && row.Kind != ec2RTAttachment {
 			return out, errEC2InternetGatewayState
 		}
 		if row.Kind == ec2RTGateway {

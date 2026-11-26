@@ -89,9 +89,9 @@ func TestEC2NativeRouteTableGatewayMaintainsLegacyReadback(t *testing.T) {
 		t.Fatal("other region had a route table")
 	}
 	for _, bad := range []url.Values{
-		{"Action": {"CreateRoute"}, "RouteTableId": {target}},
+		{"Action": {"ReplaceRoute"}, "RouteTableId": {target}},
 		{"Action": {"ReplaceRouteTableAssociation"}, "RouteTableId": {target}},
-		{"Action": {"DescribeRouteTables"}, "RouteTableId.1": {target}},
+		{"Action": {"DescribeRouteTables"}, "RouteTableId.1": {target}, "MaxResults": {"10"}},
 		{"Action": {"DescribeRouteTables"}, "Filter.1.Name": {"vpc-id"}, "Filter.1.Value.1": {parent.ID}},
 	} {
 		f.expect(f.call("", region, nil, bad), 400, "UnsupportedOperation")

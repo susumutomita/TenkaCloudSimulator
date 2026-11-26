@@ -23,7 +23,7 @@ One database/token authority per team is still required; exercise identities are
 not tenant isolation. Native STS session credentials are not supported here.
 
 Only the documented selectors are supported: security groups and network ACLs
-accept IDs or `vpc-id`, route tables accept `association.subnet-id`, and
+accept IDs or `vpc-id`, route tables accept one exact `RouteTableId.1` or `association.subnet-id`, and
 internet gateways accept IDs or [bounded unfiltered pages](ec2-internet-gateways.md).
 Other EC2 reads do not support pagination. Over-bound results fail rather than
 returning an unmarked truncated list.
@@ -178,7 +178,10 @@ The selector considers only current explicit associations, both native and
 CloudFormation-managed. A well-formed no-match returns an empty list. The
 filter runs **after** the same regional ownership and state validation; it does
 not narrow IAM scope, hide inconsistent state, or create an implicit fallback.
-Other filter names, extra filters, route table IDs, pagination and dry-run are rejected.
+The separate exact `RouteTableId.1` selector (SDK `RouteTableIds=[id]`) returns
+at most one complete table, retaining the same regional validation and IAM.
+An exact no-match is `InvalidRouteTableID.NotFound`. Combining selectors,
+other filter names, pagination and dry-run are rejected.
 
 ```python
 ec2.describe_route_tables(Filters=[{'Name': 'association.subnet-id', 'Values': [subnet_id]}])
@@ -210,7 +213,7 @@ the VPC and created table resource, including `ec2:CreateTags` if a tag is
 saved. Delete checks the exact table resource. A VPC with dependent metadata
 cannot be deleted before its table. The persisted ledger retains up to 4,096
 create token digests to prevent replay after deletion. A new native table starts
-without associations. Native route entries, propagation and forwarding are not provided.
+without associations or routes. [The native default route lifecycle](ec2-native-default-route.md) adds and removes a single saved IPv4 route; propagation and forwarding are not provided.
 
 ### Native subnet route table associations
 
@@ -287,12 +290,12 @@ the stack is refused and the VPC is unchanged. For an EC2-owned VPC,
 Detached security groups, network ACLs and route tables also use the existing
 EC2-owned VPC and shared 1,000-resource bound. Deletion of a native VPC is refused
 while any native subnet, group, ACL or route table depends on it. Remove the
-children through their own APIs. Native route entry or gateway creation,
+children through their own APIs, including [native gateways](ec2-internet-gateways.md) and [native default routes](ec2-native-default-route.md).
 `ModifyVpcAttribute`,
 VPC endpoints and tag edits are not implemented.
 
 **Existing databases remain readable when upgraded. Do not downgrade a
-database after creating new native children, including route table associations:**
+database after creating new native children, including route table associations and routes:**
 earlier Simulators do not recognize those native records and can reject discovery. No migration-back or
 downgrade procedure has been verified.
 

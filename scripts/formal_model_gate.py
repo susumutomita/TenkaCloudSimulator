@@ -3865,6 +3865,55 @@ REQUIRED_SOURCE_SCOPES['EC2InternetGatewayAttachment'] = {
     'internal/server/web/app.js',
 }
 
+# Native IPv4 default route write and exact current-scope readback.
+BASE_MODELS.add('EC2NativeDefaultRouteLifecycle')
+BASE_INVARIANTS['EC2NativeDefaultRouteLifecycle'] = {
+    'TypeOK',
+    'OwnedGraph',
+    'GrantAndScope',
+    'AtomicEffect',
+    'ExactReadback',
+    'VerifiedNotice',
+}
+REQUIRED_MUTANTS['EC2NativeDefaultRouteLifecycle'] = {
+    'AdmitStaleOrForeignActor',
+    'IgnoreRouteTableGrant',
+    'AdoptCFNRouteTable',
+    'AdoptCFNGateway',
+    'IgnoreOwnershipClaim',
+    'IgnoreStackDeclaration',
+    'ApplyDryRun',
+    'ApplyAtQuota',
+    'AcknowledgeFailedReadback',
+    'AllowForeignGatewayTarget',
+    'AllowDetachedGatewayTarget',
+    'OverwriteExistingRoute',
+    'DeleteAbsentRoute',
+    'OrphanSavedRoute',
+    'AcceptOldScopeRead',
+    'AcceptPartialRead',
+    'AcceptDifferentTable',
+    'AcceptWrongSavedTarget',
+    'PublishBeforeRead',
+    'KeepNoticeOnScopeChange',
+}
+REQUIRED_SOURCE_SCOPES['EC2NativeDefaultRouteLifecycle'] = {
+    'internal/aws/ec2_internet_gateway_attachment_store.go',
+    'internal/aws/ec2_internet_gateway_store.go',
+    'internal/aws/ec2_native_default_route_query.go',
+    'internal/aws/ec2_native_default_route_store.go',
+    'internal/aws/ec2_read.go',
+    'internal/aws/ec2_route_tables_native.go',
+    'internal/aws/ec2_route_tables_read.go',
+    'internal/aws/ec2_vpc.go',
+    'internal/server/server.go',
+    'internal/server/web/app.js',
+    'tools/console/src/ec2-native-route-tables.mjs',
+    'tools/console/src/ec2-readonly.jsx',
+    'tools/console/src/ec2-vpc-native-route-tables.jsx',
+    'tools/console/src/main.jsx',
+}
+
 
 def load_registry(root, relative='formal/models.json'):
     root = Path(root)
