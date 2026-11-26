@@ -1,6 +1,7 @@
 package aws
 
 import (
+	"cmp"
 	"context"
 	"database/sql"
 	"encoding/json"
@@ -137,7 +138,7 @@ func ec2RouteMember(kind string) bool {
 // Query both sources so losing a network row or an ownership row cannot turn
 // a damaged table or child into a successful empty response. Each stack is
 // projected once, from the same SQLite snapshot. Native tables, explicit
-// native subnet associations and IPv4 default routes are verified separately.
+// native subnet associations and explicit IPv4 routes are verified separately.
 func (s *StackStore) describeEC2RouteTables(ctx context.Context, region string) ([]ec2RouteTableRead, error) {
 	tx, err := s.db.BeginTx(ctx, nil)
 	if err != nil {
@@ -221,24 +222,37 @@ func (s *StackStore) describeEC2RouteTables(ctx context.Context, region string) 
 	if err != nil {
 		return nil, err
 	}
-	routes, err := nativeDefaultRoutesInRegion(ctx, tx, region)
+	routes, err := nativeIPv4RoutesInRegion(ctx, tx, region)
 	if err != nil {
 		return nil, err
 	}
 	if count+len(native)+associationCount+len(routes) > ec2NativeRouteTableRowLimit {
 		return nil, errEC2RouteSnapshot
 	}
+	byTable := map[string][]ec2RouteRead{}
+	keys := slices.SortedFunc(maps.Keys(routes), func(a, b nativeIPv4RouteKey) int {
+		if n := cmp.Compare(a.table, b.table); n != 0 {
+			return n
+		}
+		if n := a.destination.Addr().Compare(b.destination.Addr()); n != 0 {
+			return n
+		}
+		return cmp.Compare(a.destination.Bits(), b.destination.Bits())
+	})
+	for _, key := range keys {
+		byTable[key.table] = append(byTable[key.table], ec2RouteRead{
+			CIDR: key.destination.String(), Gateway: routes[key].gateway, Origin: "CreateRoute", State: "active",
+		})
+	}
 	for _, item := range native {
 		table := ec2NativeRouteTableRecord(item)
 		table.Associations = associations[item.ID]
 		delete(associations, item.ID)
-		if route, exists := routes[item.ID]; exists {
-			table.Routes = []ec2RouteRead{{CIDR: ec2NativeDefaultCIDR, Gateway: route.gateway, Origin: "CreateRoute", State: "active"}}
-			delete(routes, item.ID)
-		}
+		table.Routes = byTable[item.ID]
+		delete(byTable, item.ID)
 		out = append(out, table)
 	}
-	if len(associations) != 0 || len(routes) != 0 {
+	if len(associations) != 0 || len(byTable) != 0 {
 		return nil, errEC2RouteSnapshot
 	}
 	sort.Slice(out, func(i, j int) bool { return out[i].ID < out[j].ID })

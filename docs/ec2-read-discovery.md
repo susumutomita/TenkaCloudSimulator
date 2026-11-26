@@ -154,7 +154,7 @@ or a mandatory E2E gate.
 Use `Action=DescribeRouteTables` without filters to list CloudFormation and native
 tables in this region, ordered by table ID. Each item gives the table and VPC IDs,
 local owner, tags and explicit subnet associations (`main=false`).
-Only CloudFormation tables can show a saved, enabled IPv4 default route to an
+CloudFormation tables can show one saved, enabled IPv4 default route to an
 attached Internet Gateway; native tables have no route entries. Removing that
 default route through the existing trusted provider removes it from the result,
 including after restart; it is not a blackhole route. Deleting the owning stack
@@ -213,7 +213,7 @@ the VPC and created table resource, including `ec2:CreateTags` if a tag is
 saved. Delete checks the exact table resource. A VPC with dependent metadata
 cannot be deleted before its table. The persisted ledger retains up to 4,096
 create token digests to prevent replay after deletion. A new native table starts
-without associations or routes. [The native default route lifecycle](ec2-native-default-route.md) adds and removes a single saved IPv4 route; propagation and forwarding are not provided.
+without associations or routes. [The native IPv4 route lifecycle](ec2-native-default-route.md) adds and removes up to 16 canonical destinations per table; propagation and forwarding are not provided.
 
 ### Native subnet route table associations
 
@@ -290,7 +290,7 @@ the stack is refused and the VPC is unchanged. For an EC2-owned VPC,
 Detached security groups, network ACLs and route tables also use the existing
 EC2-owned VPC and shared 1,000-resource bound. Deletion of a native VPC is refused
 while any native subnet, group, ACL or route table depends on it. Remove the
-children through their own APIs, including [native gateways](ec2-internet-gateways.md) and [native default routes](ec2-native-default-route.md).
+children through their own APIs, including [native gateways](ec2-internet-gateways.md) and [native IPv4 routes](ec2-native-default-route.md).
 `ModifyVpcAttribute`,
 VPC endpoints and tag edits are not implemented.
 

@@ -119,6 +119,7 @@ func TestEC2ReadAccessBoundary(t *testing.T) {
 			RouteTableLifecycle            []string            `json:"routeTableLifecycle"`
 			RouteTableAssociationLifecycle []string            `json:"routeTableAssociationLifecycle"`
 			DefaultRouteLifecycle          []string            `json:"defaultRouteLifecycle"`
+			IPv4RoutesPerTable             int                 `json:"ipv4RoutesPerTable"`
 		} `json:"services"`
 	}
 	if w.Code != 200 || json.Unmarshal(w.Body.Bytes(), &caps) != nil {
@@ -153,7 +154,7 @@ func TestEC2ReadAccessBoundary(t *testing.T) {
 		!reflect.DeepEqual(ec2.InternetGatewayLifecycle, []string{"DescribeInternetGateways", "CreateInternetGateway", "DeleteInternetGateway", "AttachInternetGateway", "DetachInternetGateway"}) ||
 		!reflect.DeepEqual(ec2.RouteTableLifecycle, []string{"DescribeRouteTables", "CreateRouteTable", "DeleteRouteTable"}) ||
 		!reflect.DeepEqual(ec2.RouteTableAssociationLifecycle, []string{"DescribeRouteTables", "DescribeSubnets", "AssociateRouteTable", "DisassociateRouteTable"}) ||
-		!reflect.DeepEqual(ec2.DefaultRouteLifecycle, []string{"DescribeRouteTables", "DescribeInternetGateways", "CreateRoute", "DeleteRoute"}) {
+		!reflect.DeepEqual(ec2.DefaultRouteLifecycle, []string{"DescribeRouteTables", "DescribeInternetGateways", "CreateRoute", "DeleteRoute"}) || ec2.IPv4RoutesPerTable != 16 {
 		t.Fatalf("unexpected EC2 capability limits: %+v", ec2)
 	}
 }

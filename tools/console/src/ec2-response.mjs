@@ -1,3 +1,5 @@
+import {compareIPv4RoutePrefixes,ec2IPv4Prefix,nativeIPv4RouteLimit} from './ec2-ipv4-route-prefix.mjs';
+
 // Parse only the bounded EC2 responses. Missing state is not empty success.
 const namespace='http://ec2.amazonaws.com/doc/2016-11-15/';
 const invalid=()=>{throw Error('Invalid or incomplete EC2 response.');};
@@ -154,11 +156,14 @@ export function parseEC2RouteTables(document, selectedVPC, selectedSubnet = '') 
     const id = value(item,'routeTableId',true), vpc = value(item,'vpcId',true);
     if (!/^rtb-[0-9a-f]{17}$/.test(id) || !vpcId.test(vpc) || value(item,'ownerId',true)!=='000000000000') invalid();
     unique(tableIds, id);
-    const routes = members(item,'routeSet',1).map(route => {
+    let previous=null, gatewayForTable='';
+    const routes = members(item,'routeSet',nativeIPv4RouteLimit).map(route => {
       exactFields(route, ['destinationCidrBlock','gatewayId','origin','state']);
-      const cidr = value(route,'destinationCidrBlock',true), gateway = value(route,'gatewayId',true);
-      if (cidr!=='0.0.0.0/0' || !/^igw-[0-9a-f]{17}$/.test(gateway) ||
+      const cidr = value(route,'destinationCidrBlock',true), gateway = value(route,'gatewayId',true), prefix=ec2IPv4Prefix(cidr);
+      if (!prefix||prefix.masked!==cidr||previous&&compareIPv4RoutePrefixes(previous,prefix)>=0||
+          !/^igw-[0-9a-f]{17}$/.test(gateway)||gatewayForTable&&gatewayForTable!==gateway||
           value(route,'origin', true)!=='CreateRoute' || value(route,'state',true)!=='active') invalid();
+      previous=prefix;gatewayForTable=gateway;
       return {cidr,gateway};
     });
     const associations = members(item,'associationSet',1000).map(association => {

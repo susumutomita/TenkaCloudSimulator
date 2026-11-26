@@ -1,423 +1,447 @@
 {
   "version": 1,
-  "base_sha": "06610cbb527c72205019e6c54fa0b689c137da24",
+  "base_sha": "905c3b8d518e8622606dd00078159301341b413a",
   "changes": [
     {
       "path": "README.md",
-      "sha256": "18108b52f26f94e1e91e0a4bcc2ff8a520261ce4e0705fc0f02de680032c20f3",
+      "sha256": "1b4406ba29000f41996604e8fbc5b1e0c19899848317f760bc8d97875a5e8876",
       "disposition": "documentation",
-      "reason": "Documents the AWS-sourced bounded subset and safe checks without implementing behavior.",
+      "reason": "Scope, primary AWS contract, limitations and reproduction only.",
       "models": []
     },
     {
       "path": "docs/design/0001-go-standalone.md",
-      "sha256": "4317c15f184666d5e94adbc3e65af4e16273242e95c8e5dc613b78b3752263ab",
+      "sha256": "63547806339ca0f62b5b6bdac5e1e84fc27f8f47e0fcf44aa75cbbff65f300d0",
       "disposition": "documentation",
-      "reason": "Documents the AWS-sourced bounded subset and safe checks without implementing behavior.",
-      "models": []
-    },
-    {
-      "path": "docs/ec2-internet-gateways.md",
-      "sha256": "33503f1fd6e12bdb39305cfb3608fb6e013e95621722e6009e45c5fa441a7ec0",
-      "disposition": "documentation",
-      "reason": "Documents the AWS-sourced bounded subset and safe checks without implementing behavior.",
+      "reason": "Scope, primary AWS contract, limitations and reproduction only.",
       "models": []
     },
     {
       "path": "docs/ec2-native-default-route.md",
-      "sha256": "fd54e4698a9b28c2f5807e0975b8b08b3f5174ba1215019e8dfc858fb51e0696",
+      "sha256": "f9c43085d070ce57b6b9f7db1d682a2246b61dd556fc048105c0c24776c7c922",
       "disposition": "documentation",
-      "reason": "Documents the AWS-sourced bounded subset and safe checks without implementing behavior.",
+      "reason": "Scope, primary AWS contract, limitations and reproduction only.",
       "models": []
     },
     {
       "path": "docs/ec2-network-contracts.md",
-      "sha256": "cf83795b8abf933cb17aa42f91e814a0d349440e4cfeebd38338d269afeaff24",
+      "sha256": "d2ec0759fbdad0647dc0230969f839439ac5119d598e421b453f2ae5235bb76b",
       "disposition": "documentation",
-      "reason": "Documents the AWS-sourced bounded subset and safe checks without implementing behavior.",
+      "reason": "Scope, primary AWS contract, limitations and reproduction only.",
       "models": []
     },
     {
       "path": "docs/ec2-read-discovery.md",
-      "sha256": "031d50e85c6b426e602f00901fbb9cecbf0bd32e071fe056afe2c4d92579196d",
+      "sha256": "fc1f1896cbda8b12257492402dc01b5ac9b2cf5502c9a40ddf8e8883424cfb48",
       "disposition": "documentation",
-      "reason": "Documents the AWS-sourced bounded subset and safe checks without implementing behavior.",
+      "reason": "Scope, primary AWS contract, limitations and reproduction only.",
       "models": []
     },
     {
-      "path": "formal/EC2NativeDefaultRouteLifecycle.cfg",
-      "sha256": "19aaf87447a26a874bff157cda91cd2935cd1c4293912d8b06c06df682992f4f",
+      "path": "formal/EC2NativeIPv4RouteSet.cfg",
+      "sha256": "a7765312ef59a9e79c52219f71cca95b416b43ebdd49687298fc8d7221d032a2",
       "disposition": "modeled",
-      "reason": "Defines or selects the native IPv4 default-route relationship, atomic write/refusal and same-epoch exact confirmation checks.",
+      "reason": "Finite canonical route-key, per-table capacity, refusal, exact effect and complete readback witnesses.",
       "models": [
         {
-          "id": "EC2NativeDefaultRouteLifecycle",
+          "id": "EC2NativeIPv4RouteSet",
           "properties": [
-            "OwnedGraph",
-            "GrantAndScope",
-            "AtomicEffect",
-            "ExactReadback",
-            "VerifiedNotice"
+            "OwnedCanonical",
+            "PerTableLimit",
+            "AtomicClass",
+            "ExactRouteEffect",
+            "CompleteReadback",
+            "ConfirmedNotice"
           ],
-          "limits": "Finite graph and state-transition model, not an implementation proof of Go, SQL, XML, IAM evaluation, React or any packet behavior."
+          "limits": "Finite metadata relation, not Go/SQLite/React/Query/IAM or packet-path refinement; pinned actual API/UI tests cover runtime."
         }
       ]
     },
     {
-      "path": "formal/EC2NativeDefaultRouteLifecycle.tla",
-      "sha256": "c58e97ef743b83bfe18341b117b2654b3a1aa77c3bdb9dc604cd0271a715f41d",
+      "path": "formal/EC2NativeIPv4RouteSet.tla",
+      "sha256": "737cbba8f6e7982d365777df090e31e538d2f76d01d3be73c6ffdb2e0f37d09b",
       "disposition": "modeled",
-      "reason": "Defines or selects the native IPv4 default-route relationship, atomic write/refusal and same-epoch exact confirmation checks.",
+      "reason": "Finite canonical route-key, per-table capacity, refusal, exact effect and complete readback witnesses.",
       "models": [
         {
-          "id": "EC2NativeDefaultRouteLifecycle",
+          "id": "EC2NativeIPv4RouteSet",
           "properties": [
-            "OwnedGraph",
-            "GrantAndScope",
-            "AtomicEffect",
-            "ExactReadback",
-            "VerifiedNotice"
+            "OwnedCanonical",
+            "PerTableLimit",
+            "AtomicClass",
+            "ExactRouteEffect",
+            "CompleteReadback",
+            "ConfirmedNotice"
           ],
-          "limits": "Finite graph and state-transition model, not an implementation proof of Go, SQL, XML, IAM evaluation, React or any packet behavior."
+          "limits": "Finite metadata relation, not Go/SQLite/React/Query/IAM or packet-path refinement; pinned actual API/UI tests cover runtime."
         }
       ]
     },
     {
       "path": "formal/models.json",
-      "sha256": "7d5da47cf467d0e8a048a83babaac321be5b3c61953d79e4d67950f4f2d23069",
+      "sha256": "13c3972d9b8ef4c38f3d3c188cb6216ae1437e0241c4327cad62d649a8459dc0",
       "disposition": "formal-infrastructure",
-      "reason": "Adds independent expected model and mutation inventory for this scope; existing gates and required checks are not lowered.",
+      "reason": "Adds protected model expectations only; old registry and required gates remain unchanged.",
       "models": []
     },
     {
-      "path": "internal/aws/ec2_internet_gateway_attachment_store.go",
-      "sha256": "736bc021cfe0acf90224ea53291830d19ed7c9233aafbcf5bd81c5819e729dbb",
-      "disposition": "modeled",
-      "reason": "Parses, authorizes, checks ownership/dependencies and projects the bounded local network relation or fails without a partial write.",
-      "models": [
-        {
-          "id": "EC2NativeDefaultRouteLifecycle",
-          "properties": [
-            "OwnedGraph",
-            "GrantAndScope",
-            "AtomicEffect"
-          ],
-          "limits": "Finite graph and state-transition model, not an implementation proof of Go, SQL, XML, IAM evaluation, React or any packet behavior."
-        }
-      ]
-    },
-    {
       "path": "internal/aws/ec2_internet_gateway_store.go",
-      "sha256": "b6c2890a26d225aacb8b98a8f51acdd97b888127e5256e2c153282ed6d52ada1",
+      "sha256": "d8d995ccdc0a18230e0465dbf827ba8f51a5b85267c2a6751d6d1c6ecb13a3a9",
       "disposition": "modeled",
-      "reason": "Parses, authorizes, checks ownership/dependencies and projects the bounded local network relation or fails without a partial write.",
+      "reason": "Canonical key, quota, independent siblings, native ownership and committed transaction validation; no CFN/guest changes.",
       "models": [
         {
-          "id": "EC2NativeDefaultRouteLifecycle",
+          "id": "EC2NativeIPv4RouteSet",
           "properties": [
-            "OwnedGraph",
-            "GrantAndScope",
-            "AtomicEffect"
+            "OwnedCanonical",
+            "PerTableLimit",
+            "AtomicClass",
+            "ExactRouteEffect"
           ],
-          "limits": "Finite graph and state-transition model, not an implementation proof of Go, SQL, XML, IAM evaluation, React or any packet behavior."
+          "limits": "Finite metadata relation, not Go/SQLite/React/Query/IAM or packet-path refinement; pinned actual API/UI tests cover runtime."
         }
       ]
     },
     {
       "path": "internal/aws/ec2_native_default_route_query.go",
-      "sha256": "2e6dd1202d68b1033ada50a199c50b7ddd5007e0bd0fc5e5043ade351e5ee95a",
+      "sha256": "c639d7e8fa44b73b4580bc396f2477d83f5ab2153d43c21fbaa92b9362d76fec",
       "disposition": "modeled",
-      "reason": "Parses, authorizes, checks ownership/dependencies and projects the bounded local network relation or fails without a partial write.",
+      "reason": "Canonical key, quota, independent siblings, native ownership and committed transaction validation; no CFN/guest changes.",
       "models": [
         {
-          "id": "EC2NativeDefaultRouteLifecycle",
+          "id": "EC2NativeIPv4RouteSet",
           "properties": [
-            "OwnedGraph",
-            "GrantAndScope",
-            "AtomicEffect"
+            "OwnedCanonical",
+            "PerTableLimit",
+            "AtomicClass",
+            "ExactRouteEffect"
           ],
-          "limits": "Finite graph and state-transition model, not an implementation proof of Go, SQL, XML, IAM evaluation, React or any packet behavior."
+          "limits": "Finite metadata relation, not Go/SQLite/React/Query/IAM or packet-path refinement; pinned actual API/UI tests cover runtime."
         }
       ]
     },
     {
       "path": "internal/aws/ec2_native_default_route_store.go",
-      "sha256": "13cea841e74273b1a449ba682bdef7b7bbab550c46346a17da527a14d653201c",
+      "sha256": "2970359c3c55bd77342dc35ee652a1ad0dc1942e3ad35dc845ac9c2b53018fc3",
       "disposition": "modeled",
-      "reason": "Parses, authorizes, checks ownership/dependencies and projects the bounded local network relation or fails without a partial write.",
+      "reason": "Canonical key, quota, independent siblings, native ownership and committed transaction validation; no CFN/guest changes.",
       "models": [
         {
-          "id": "EC2NativeDefaultRouteLifecycle",
+          "id": "EC2NativeIPv4RouteSet",
           "properties": [
-            "OwnedGraph",
-            "GrantAndScope",
-            "AtomicEffect"
+            "OwnedCanonical",
+            "PerTableLimit",
+            "AtomicClass",
+            "ExactRouteEffect"
           ],
-          "limits": "Finite graph and state-transition model, not an implementation proof of Go, SQL, XML, IAM evaluation, React or any packet behavior."
+          "limits": "Finite metadata relation, not Go/SQLite/React/Query/IAM or packet-path refinement; pinned actual API/UI tests cover runtime."
         }
       ]
     },
     {
       "path": "internal/aws/ec2_native_default_route_test.go",
-      "sha256": "8651c36047d45b1d68c797de910b35caa8948f04df016f1b22c1dcc5f7d106f8",
+      "sha256": "b7715a5b2a2c87612cb950c0acb10b685a460ffbf00841a2c2d429ddadaf4194",
       "disposition": "test-support",
-      "reason": "Verifies actual native/CFN Query or authenticated UI, protocol, refusal, rollback and cleanup without modifying production behavior.",
+      "reason": "Read-only fixtures and isolated owned simulator tests; no production behavior change.",
       "models": []
     },
     {
-      "path": "internal/aws/ec2_read.go",
-      "sha256": "2d9d237d2cd20544a3819a92bbce8c015fd4e29c68f163a859a17a2d95ebe920",
-      "disposition": "modeled",
-      "reason": "Parses, authorizes, checks ownership/dependencies and projects the bounded local network relation or fails without a partial write.",
-      "models": [
-        {
-          "id": "EC2NativeDefaultRouteLifecycle",
-          "properties": [
-            "OwnedGraph",
-            "GrantAndScope",
-            "AtomicEffect"
-          ],
-          "limits": "Finite graph and state-transition model, not an implementation proof of Go, SQL, XML, IAM evaluation, React or any packet behavior."
-        }
-      ]
+      "path": "internal/aws/ec2_native_ipv4_routes_test.go",
+      "sha256": "f32da793165a9c011a88a1ce437b2c5379f1b49cdcd4729df428ad852a5764ff",
+      "disposition": "test-support",
+      "reason": "Read-only fixtures and isolated owned simulator tests; no production behavior change.",
+      "models": []
     },
     {
       "path": "internal/aws/ec2_route_tables_native.go",
-      "sha256": "0e2b7959254c24a8b68f0e5424cfd97b059a8abc6dea1f6dac3023105ecdc576",
+      "sha256": "23a5280d3bf55a3901d6204a9be993593eee20edb104d34c99bb9feeaea233e5",
       "disposition": "modeled",
-      "reason": "Parses, authorizes, checks ownership/dependencies and projects the bounded local network relation or fails without a partial write.",
+      "reason": "Canonical key, quota, independent siblings, native ownership and committed transaction validation; no CFN/guest changes.",
       "models": [
         {
-          "id": "EC2NativeDefaultRouteLifecycle",
+          "id": "EC2NativeIPv4RouteSet",
           "properties": [
-            "OwnedGraph",
-            "GrantAndScope",
-            "AtomicEffect"
+            "OwnedCanonical",
+            "PerTableLimit",
+            "AtomicClass",
+            "ExactRouteEffect"
           ],
-          "limits": "Finite graph and state-transition model, not an implementation proof of Go, SQL, XML, IAM evaluation, React or any packet behavior."
+          "limits": "Finite metadata relation, not Go/SQLite/React/Query/IAM or packet-path refinement; pinned actual API/UI tests cover runtime."
         }
       ]
-    },
-    {
-      "path": "internal/aws/ec2_route_tables_native_registration_test.go",
-      "sha256": "fa0f3556b9c1afaa149490e6aa4b8a7289a392e9a677045052563b6f1f61e2e2",
-      "disposition": "test-support",
-      "reason": "Verifies actual native/CFN Query or authenticated UI, protocol, refusal, rollback and cleanup without modifying production behavior.",
-      "models": []
     },
     {
       "path": "internal/aws/ec2_route_tables_read.go",
-      "sha256": "b47502221246ab86b671d07f84fb0ba921077a2e16721c6f21284968042b630d",
+      "sha256": "0958b1af4545e528d79577ba90a24bdf2379f8f78087f42bb5653e61a235e3ca",
       "disposition": "modeled",
-      "reason": "Parses, authorizes, checks ownership/dependencies and projects the bounded local network relation or fails without a partial write.",
+      "reason": "Canonical key, quota, independent siblings, native ownership and committed transaction validation; no CFN/guest changes.",
       "models": [
         {
-          "id": "EC2NativeDefaultRouteLifecycle",
+          "id": "EC2NativeIPv4RouteSet",
           "properties": [
-            "OwnedGraph",
-            "GrantAndScope",
-            "AtomicEffect"
+            "OwnedCanonical",
+            "PerTableLimit",
+            "AtomicClass",
+            "ExactRouteEffect"
           ],
-          "limits": "Finite graph and state-transition model, not an implementation proof of Go, SQL, XML, IAM evaluation, React or any packet behavior."
+          "limits": "Finite metadata relation, not Go/SQLite/React/Query/IAM or packet-path refinement; pinned actual API/UI tests cover runtime."
         }
       ]
     },
     {
-      "path": "internal/aws/ec2_route_tables_read_test.go",
-      "sha256": "511504af3dd53a6110f068f992f577238d1f1a3bb65ef63ff401897b81601baa",
-      "disposition": "test-support",
-      "reason": "Verifies actual native/CFN Query or authenticated UI, protocol, refusal, rollback and cleanup without modifying production behavior.",
-      "models": []
-    },
-    {
       "path": "internal/aws/ec2_vpc.go",
-      "sha256": "b1625a8af61aec79f381a781ad432e645f24334f5607dcdf7b098cf9a9ed0721",
+      "sha256": "390e9d57022aa6c98f54cd8decae1662e2d4a831cff1327015496eac5615dce7",
       "disposition": "modeled",
-      "reason": "Parses, authorizes, checks ownership/dependencies and projects the bounded local network relation or fails without a partial write.",
+      "reason": "Canonical key, quota, independent siblings, native ownership and committed transaction validation; no CFN/guest changes.",
       "models": [
         {
-          "id": "EC2NativeDefaultRouteLifecycle",
+          "id": "EC2NativeIPv4RouteSet",
           "properties": [
-            "OwnedGraph",
-            "GrantAndScope",
-            "AtomicEffect"
+            "OwnedCanonical",
+            "PerTableLimit",
+            "AtomicClass",
+            "ExactRouteEffect"
           ],
-          "limits": "Finite graph and state-transition model, not an implementation proof of Go, SQL, XML, IAM evaluation, React or any packet behavior."
+          "limits": "Finite metadata relation, not Go/SQLite/React/Query/IAM or packet-path refinement; pinned actual API/UI tests cover runtime."
         }
       ]
     },
     {
       "path": "internal/server/apidocs/openapi.json",
-      "sha256": "4536215a3dc5a72679721aed8c6cccacefc08c95f1ee8939147998e06aa9fd14",
+      "sha256": "de64a8c5a80626d57fb7a9b00250286bd863728622585184340d22cb289b0379",
       "disposition": "presentation",
-      "reason": "Exact generated console provenance or read-only Scalar documentation for the bounded gateway route state.",
+      "reason": "Read-only reference, generated UI provenance, or isolated JavaScript tests for canonical route rendering.",
       "models": []
     },
     {
       "path": "internal/server/ec2_read_access_test.go",
-      "sha256": "93f3fa1c5c80ed0b9c4486e552a3742519623e40b67ea4f04523b88557e13fab",
+      "sha256": "d044cc4a51369de8adb843652a9ab5a13f14557faccbf36a8857d6a7671404f5",
       "disposition": "test-support",
-      "reason": "Verifies actual native/CFN Query or authenticated UI, protocol, refusal, rollback and cleanup without modifying production behavior.",
+      "reason": "Read-only fixtures and isolated owned simulator tests; no production behavior change.",
       "models": []
     },
     {
       "path": "internal/server/ec2_security_groups_console_test.go",
-      "sha256": "44f9a6d0961dcadd93a4e8cdd09f7d1eec10838d9ecb7155710a0f78b3a05436",
+      "sha256": "26bdcab37fcc76d1b8cbee2ed176bead6e0b273c40254e54449b46e82d46be7f",
       "disposition": "test-support",
-      "reason": "Verifies actual native/CFN Query or authenticated UI, protocol, refusal, rollback and cleanup without modifying production behavior.",
+      "reason": "Read-only fixtures and isolated owned simulator tests; no production behavior change.",
       "models": []
     },
     {
       "path": "internal/server/server.go",
-      "sha256": "0ed70478cfd6fe7227ecfabdfb4c4a3aa9f0e8e68446e98ec692fbe5a54f40c8",
+      "sha256": "934797b8045ae3450f6b2f32002396a0f4fa62d30e3e21c0496e0a059ea6412a",
       "disposition": "modeled",
-      "reason": "Advertises the exact bounded native route/readback lifecycle only to ordinary verified local sessions; capability metadata grants no authority.",
+      "reason": "The authorized console advertises the implemented bounded set, not extra authority or network traffic.",
       "models": [
         {
-          "id": "EC2NativeDefaultRouteLifecycle",
+          "id": "EC2NativeIPv4RouteSet",
           "properties": [
-            "GrantAndScope",
-            "ExactReadback"
+            "PerTableLimit",
+            "CompleteReadback"
           ],
-          "limits": "Finite graph and state-transition model, not an implementation proof of Go, SQL, XML, IAM evaluation, React or any packet behavior."
+          "limits": "Finite metadata relation, not Go/SQLite/React/Query/IAM or packet-path refinement; pinned actual API/UI tests cover runtime."
         }
       ]
     },
     {
       "path": "internal/server/web/app.js",
-      "sha256": "1cf18cfb282defff4561795e5b3db577aa92ece2ddde0ae8dd1fc9cdbf211cb4",
+      "sha256": "a4fb4113f10e2341f793246bca5e68abd73402a555086de13eb470eadb357df7",
       "disposition": "modeled",
-      "reason": "Projects and publishes only the current, verified exact route state; the embedded source follows this same admission and readback contract.",
+      "reason": "Bounded canonical IPv4 route shape and same-scope exact post-action route-set validation before publication.",
       "models": [
         {
-          "id": "EC2NativeDefaultRouteLifecycle",
+          "id": "EC2NativeIPv4RouteSet",
           "properties": [
-            "ExactReadback",
-            "VerifiedNotice"
+            "OwnedCanonical",
+            "PerTableLimit",
+            "CompleteReadback",
+            "ConfirmedNotice"
           ],
-          "limits": "Finite graph and state-transition model, not an implementation proof of Go, SQL, XML, IAM evaluation, React or any packet behavior."
+          "limits": "Finite metadata relation, not Go/SQLite/React/Query/IAM or packet-path refinement; pinned actual API/UI tests cover runtime."
         }
       ]
     },
     {
       "path": "scripts/formal_model_gate.py",
-      "sha256": "d0fc2ab5fe649f232c7d6232d98e737451bf67b9085061be957efb0a0a023c59",
+      "sha256": "fe22421d5ba174ec1f89fbcd17353e328993cf3559d7d03584f9bf01314c29d5",
       "disposition": "formal-infrastructure",
-      "reason": "Adds independent expected model and mutation inventory for this scope; existing gates and required checks are not lowered.",
+      "reason": "Adds protected model expectations only; old registry and required gates remain unchanged.",
       "models": []
     },
     {
       "path": "scripts/test-formal-gate.py",
-      "sha256": "24c9e954b6794f3f088df66383d76fa1b9231fcd3c2ee81c5594059de74dc4b4",
+      "sha256": "5f4924f19243b7d9ea50694c5e845fe7730d369499f3c5541b00dada38fa3e6a",
       "disposition": "formal-infrastructure",
-      "reason": "Adds independent expected model and mutation inventory for this scope; existing gates and required checks are not lowered.",
-      "models": []
-    },
-    {
-      "path": "test/console/ec2_internet_gateway_sdk.py",
-      "sha256": "5ba736816ce4f18362f474cedcbc2938d355480b8925667e6520f0cb36a3a2c0",
-      "disposition": "test-support",
-      "reason": "Verifies actual native/CFN Query or authenticated UI, protocol, refusal, rollback and cleanup without modifying production behavior.",
+      "reason": "Adds protected model expectations only; old registry and required gates remain unchanged.",
       "models": []
     },
     {
       "path": "test/console/ec2_native_default_route_dom.cjs",
-      "sha256": "40d4867e5c7ae803aa3d974f4df37742205689fac605f9a3d11ff4aca9e5f08f",
+      "sha256": "c07136c3f528db43fdbe14b5198df93ad81cedfd25af7ff4830890658a08b7b3",
       "disposition": "test-support",
-      "reason": "Verifies actual native/CFN Query or authenticated UI, protocol, refusal, rollback and cleanup without modifying production behavior.",
+      "reason": "Read-only fixtures and isolated owned simulator tests; no production behavior change.",
       "models": []
     },
     {
       "path": "test/console/ec2_native_default_route_sdk.py",
-      "sha256": "9eb58436ed30d676f7b95327a1495d52740a0a4e913d4f5e17249152c70b8927",
+      "sha256": "3ab843959abb85b0014e99f56f9107737a78836f915cc7d5de7b23ed0b5f02cd",
       "disposition": "test-support",
-      "reason": "Verifies actual native/CFN Query or authenticated UI, protocol, refusal, rollback and cleanup without modifying production behavior.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/ec2_network_contract.py",
-      "sha256": "941d42f9fac493b0a407735a18fadc689835633bc4dc17a474f6d61611495775",
-      "disposition": "test-support",
-      "reason": "Verifies actual native/CFN Query or authenticated UI, protocol, refusal, rollback and cleanup without modifying production behavior.",
+      "reason": "Read-only fixtures and isolated owned simulator tests; no production behavior change.",
       "models": []
     },
     {
       "path": "tools/console/bundle-digests.json",
-      "sha256": "ed7f37bba6fdf12c737cf0a43444e416f5a9091c5df3a0c7914b753909db24f6",
+      "sha256": "88406d58c3738c4b915cdd45240647a6bd9b1535fc14198ad952837b96557213",
       "disposition": "presentation",
-      "reason": "Exact generated console provenance or read-only Scalar documentation for the bounded gateway route state.",
+      "reason": "Read-only reference, generated UI provenance, or isolated JavaScript tests for canonical route rendering.",
       "models": []
     },
     {
       "path": "tools/console/bundle-inputs.json",
-      "sha256": "88aaf1029cc42911bad2bf892a92713160befc4987b72460ad752931175f856f",
+      "sha256": "ef973e74aee5c1535e1580054881c63ed93486a3db964091afab0e0297b0cdea",
       "disposition": "presentation",
-      "reason": "Exact generated console provenance or read-only Scalar documentation for the bounded gateway route state.",
+      "reason": "Read-only reference, generated UI provenance, or isolated JavaScript tests for canonical route rendering.",
       "models": []
     },
     {
-      "path": "tools/console/src/ec2-native-route-tables.mjs",
-      "sha256": "eb84bd2547ec5e5e8668e139673aac5e151f3b00591b9d204f27471eb32808a8",
+      "path": "tools/console/src/ec2-ipv4-route-prefix.mjs",
+      "sha256": "a3d9cc034550ed6a6eb29064e1207d3e330c67db42a101fafd78dd7af16d221f",
       "disposition": "modeled",
-      "reason": "Projects and publishes only the current, verified exact route state; the embedded source follows this same admission and readback contract.",
+      "reason": "Bounded canonical IPv4 route shape and same-scope exact post-action route-set validation before publication.",
       "models": [
         {
-          "id": "EC2NativeDefaultRouteLifecycle",
+          "id": "EC2NativeIPv4RouteSet",
           "properties": [
-            "ExactReadback",
-            "VerifiedNotice"
+            "OwnedCanonical",
+            "PerTableLimit",
+            "CompleteReadback",
+            "ConfirmedNotice"
           ],
-          "limits": "Finite graph and state-transition model, not an implementation proof of Go, SQL, XML, IAM evaluation, React or any packet behavior."
+          "limits": "Finite metadata relation, not Go/SQLite/React/Query/IAM or packet-path refinement; pinned actual API/UI tests cover runtime."
+        }
+      ]
+    },
+    {
+      "path": "tools/console/src/ec2-native-route-tables.mjs",
+      "sha256": "4e4a1a6f1c1bb5bed46bec675f31480c7b41b87e325a42eb2dfd78b12836b296",
+      "disposition": "modeled",
+      "reason": "Bounded canonical IPv4 route shape and same-scope exact post-action route-set validation before publication.",
+      "models": [
+        {
+          "id": "EC2NativeIPv4RouteSet",
+          "properties": [
+            "OwnedCanonical",
+            "PerTableLimit",
+            "CompleteReadback",
+            "ConfirmedNotice"
+          ],
+          "limits": "Finite metadata relation, not Go/SQLite/React/Query/IAM or packet-path refinement; pinned actual API/UI tests cover runtime."
         }
       ]
     },
     {
       "path": "tools/console/src/ec2-readonly.jsx",
-      "sha256": "a8c6047c2928b00dca44b72c4c323b51740448d4b3a21ec2bd7546f17cf15168",
+      "sha256": "f86138049162cbb2a61c503d11d6dfcbe1e8b4df3bfebe794bc4ac4981e3101a",
       "disposition": "modeled",
-      "reason": "Projects and publishes only the current, verified exact route state; the embedded source follows this same admission and readback contract.",
+      "reason": "Bounded canonical IPv4 route shape and same-scope exact post-action route-set validation before publication.",
       "models": [
         {
-          "id": "EC2NativeDefaultRouteLifecycle",
+          "id": "EC2NativeIPv4RouteSet",
           "properties": [
-            "ExactReadback",
-            "VerifiedNotice"
+            "OwnedCanonical",
+            "PerTableLimit",
+            "CompleteReadback",
+            "ConfirmedNotice"
           ],
-          "limits": "Finite graph and state-transition model, not an implementation proof of Go, SQL, XML, IAM evaluation, React or any packet behavior."
+          "limits": "Finite metadata relation, not Go/SQLite/React/Query/IAM or packet-path refinement; pinned actual API/UI tests cover runtime."
+        }
+      ]
+    },
+    {
+      "path": "tools/console/src/ec2-response.mjs",
+      "sha256": "b250520238b4fda8c205f92575a13311a66cecb2db82728102c54dee5f8dd107",
+      "disposition": "modeled",
+      "reason": "Bounded canonical IPv4 route shape and same-scope exact post-action route-set validation before publication.",
+      "models": [
+        {
+          "id": "EC2NativeIPv4RouteSet",
+          "properties": [
+            "OwnedCanonical",
+            "PerTableLimit",
+            "CompleteReadback",
+            "ConfirmedNotice"
+          ],
+          "limits": "Finite metadata relation, not Go/SQLite/React/Query/IAM or packet-path refinement; pinned actual API/UI tests cover runtime."
+        }
+      ]
+    },
+    {
+      "path": "tools/console/src/ec2-route-tables.mjs",
+      "sha256": "6b502d9f5bc1d98801152a46c34861187c70bc68b9ed19c62ac3ab3435e2013f",
+      "disposition": "modeled",
+      "reason": "Bounded canonical IPv4 route shape and same-scope exact post-action route-set validation before publication.",
+      "models": [
+        {
+          "id": "EC2NativeIPv4RouteSet",
+          "properties": [
+            "OwnedCanonical",
+            "PerTableLimit",
+            "CompleteReadback",
+            "ConfirmedNotice"
+          ],
+          "limits": "Finite metadata relation, not Go/SQLite/React/Query/IAM or packet-path refinement; pinned actual API/UI tests cover runtime."
         }
       ]
     },
     {
       "path": "tools/console/src/ec2-vpc-native-route-tables.jsx",
-      "sha256": "840ce8d3581d91cf774d437490639404514e0e602b44e804c773d98e6d92ad49",
+      "sha256": "46d30f731cb980fceb4bc9ac5154b8d6cae256f86706cd8f0e7129cee02b65f6",
       "disposition": "modeled",
-      "reason": "Projects and publishes only the current, verified exact route state; the embedded source follows this same admission and readback contract.",
+      "reason": "Bounded canonical IPv4 route shape and same-scope exact post-action route-set validation before publication.",
       "models": [
         {
-          "id": "EC2NativeDefaultRouteLifecycle",
+          "id": "EC2NativeIPv4RouteSet",
           "properties": [
-            "ExactReadback",
-            "VerifiedNotice"
+            "OwnedCanonical",
+            "PerTableLimit",
+            "CompleteReadback",
+            "ConfirmedNotice"
           ],
-          "limits": "Finite graph and state-transition model, not an implementation proof of Go, SQL, XML, IAM evaluation, React or any packet behavior."
+          "limits": "Finite metadata relation, not Go/SQLite/React/Query/IAM or packet-path refinement; pinned actual API/UI tests cover runtime."
         }
       ]
     },
     {
       "path": "tools/console/src/main.jsx",
-      "sha256": "ee2f970a363d79337e10e8feef80800327b8121c9e4d45c6dc4d91b88cbb9844",
+      "sha256": "ed60a0b26ebc2f843abd5dd546745797648836099b051d760d1b047fa03e0b27",
       "disposition": "modeled",
-      "reason": "Projects and publishes only the current, verified exact route state; the embedded source follows this same admission and readback contract.",
+      "reason": "Bounded canonical IPv4 route shape and same-scope exact post-action route-set validation before publication.",
       "models": [
         {
-          "id": "EC2NativeDefaultRouteLifecycle",
+          "id": "EC2NativeIPv4RouteSet",
           "properties": [
-            "ExactReadback",
-            "VerifiedNotice"
+            "OwnedCanonical",
+            "PerTableLimit",
+            "CompleteReadback",
+            "ConfirmedNotice"
           ],
-          "limits": "Finite graph and state-transition model, not an implementation proof of Go, SQL, XML, IAM evaluation, React or any packet behavior."
+          "limits": "Finite metadata relation, not Go/SQLite/React/Query/IAM or packet-path refinement; pinned actual API/UI tests cover runtime."
         }
       ]
+    },
+    {
+      "path": "tools/console/test/ec2-ipv4-route-prefix.test.mjs",
+      "sha256": "ebcb091c37c29287dcb32a8b3ff92af11c1f723735c85486e366a1858fb83249",
+      "disposition": "presentation",
+      "reason": "Read-only reference, generated UI provenance, or isolated JavaScript tests for canonical route rendering.",
+      "models": []
+    },
+    {
+      "path": "tools/console/test/ec2-route-tables.test.mjs",
+      "sha256": "79ec4f83e3a77cf4e3dc5851549389005f858fc365d0802b8458f63f4386f7ce",
+      "disposition": "presentation",
+      "reason": "Read-only reference, generated UI provenance, or isolated JavaScript tests for canonical route rendering.",
+      "models": []
     }
   ]
 }

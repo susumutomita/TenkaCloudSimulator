@@ -25,8 +25,8 @@ def exact(client, table):
     return row
 
 
-def expect_route(gateway):
-    return {'DestinationCidrBlock': CIDR, 'GatewayId': gateway, 'Origin': 'CreateRoute', 'State': 'active'}
+def expect_route(gateway, destination=CIDR):
+    return {'DestinationCidrBlock': destination, 'GatewayId': gateway, 'Origin': 'CreateRoute', 'State': 'active'}
 
 
 def native_network(client, name):
@@ -75,6 +75,8 @@ def check(binary):
                 reject(wrong.create_route, 'UnauthorizedOperation', DryRun=True, GatewayId=gateway, **payload)
                 reject(r.create_route, 'DryRunOperation', DryRun=True, GatewayId=gateway, **payload)
                 reject(r.delete_route, 'DryRunOperation', DryRun=True, **payload)
+                reject(r.create_route, 'DryRunOperation', DryRun=True, GatewayId=gateway, RouteTableId=table,
+                       DestinationCidrBlock='198.51.100.199/25')
                 before = exact(r, table)
                 assert before['Routes'] == [] and before['Associations'][0]['RouteTableAssociationId'] == assoc
                 reject(c.create_route, 'UnsupportedOperation', RouteTableId=resources['Table'], DestinationCidrBlock=CIDR, GatewayId=resources['Gateway'])
@@ -85,10 +87,17 @@ def check(binary):
                 reject(west.describe_route_tables, EXACT_NOT_FOUND, RouteTableIds=[table])
                 reject(west.create_route, EXACT_NOT_FOUND, GatewayId=gateway, **payload)
                 reject(c.delete_route, 'InvalidRoute.NotFound', **payload)
-                reject(c.create_route, 'UnsupportedOperation', GatewayId=gateway, RouteTableId=table, DestinationCidrBlock='192.0.2.0/24')
+                for protected in ('10.91.0.0/16', '10.91.3.0/24', '10.90.0.0/15', '169.254.168.0/22', '169.254.169.1/32'):
+                    reject(c.create_route, 'InvalidParameterValue', GatewayId=gateway, RouteTableId=table, DestinationCidrBlock=protected)
                 assert r.create_route(RouteTableId=table, DestinationCidrBlock='192.0.2.123/0',
                                       GatewayId=gateway, DryRun=False)['ResponseMetadata']['HTTPStatusCode'] == 200
-                saved = {**before, 'Routes': [expect_route(gateway)]}
+                external = {'GatewayId': gateway, 'RouteTableId': table}
+                first, narrower = '198.51.100.0/24', '198.51.100.128/25'
+                assert r.create_route(DestinationCidrBlock='198.51.100.199/25', **external)['ResponseMetadata']['HTTPStatusCode'] == 200
+                assert r.create_route(DestinationCidrBlock='198.51.100.111/24', **external)['ResponseMetadata']['HTTPStatusCode'] == 200
+                reject(c.create_route, 'RouteAlreadyExists', DestinationCidrBlock='198.51.100.151/24', **external)
+                reject(c.delete_route, 'InvalidRoute.NotFound', RouteTableId=table, DestinationCidrBlock='198.51.100.151/24')
+                saved = {**before, 'Routes': [expect_route(gateway, cidr) for cidr in (CIDR, first, narrower)]}
                 assert exact(c, table) == exact(r, table) == saved
                 assert r.describe_route_tables(Filters=[{'Name':'association.subnet-id','Values':[subnet]}])['RouteTables'] == [saved]
                 assert c.describe_internet_gateways(InternetGatewayIds=[gateway])['InternetGateways'][0]['Attachments'] == [
@@ -106,6 +115,11 @@ def check(binary):
                 assert exact(c, table) == saved and exact(c, resources['Table']) == original_cfn
                 assert outputs(cfn, stack) == resources
                 assert c.delete_route(**payload)['ResponseMetadata']['HTTPStatusCode'] == 200
+                assert exact(c, table) == {**before, 'Routes': [expect_route(gateway, cidr) for cidr in (first, narrower)]}
+                reject(c.detach_internet_gateway, 'DependencyViolation', InternetGatewayId=gateway, VpcId=vpc)
+                c.delete_route(RouteTableId=table, DestinationCidrBlock=first)
+                assert exact(c, table) == {**before, 'Routes': [expect_route(gateway, narrower)]}
+                c.delete_route(RouteTableId=table, DestinationCidrBlock=narrower)
                 assert exact(c, table) == before
                 c.disassociate_route_table(AssociationId=assoc)
                 c.delete_subnet(SubnetId=subnet)
@@ -120,7 +134,7 @@ def check(binary):
                 assert c.describe_vpcs()['Vpcs'] == []
             assert exact(b, other_table) == other_baseline
             erase_network(b, other_vpc, other_table, other_gateway)
-    print('PASS actual Boto3 1.42.0/Botocore 1.41.6: native default route, exact and subnet-filter reads, IAM, refusals, restart, team separation and cleanup.')
+    print('PASS actual Boto3 1.42.0/Botocore 1.41.6: native IPv4 route set, canonical prefix independence, default compatibility, exact and subnet-filter reads, IAM, refusals, restart, team separation and cleanup.')
 
 
 def console(binary):

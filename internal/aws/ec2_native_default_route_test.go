@@ -180,7 +180,7 @@ func TestEC2NativeDefaultRouteRefusesUnsupportedQueryShapes(t *testing.T) {
 		{"Action=CreateRoute&RouteTableId=rtb-01234567&DestinationCidrBlock=0.0.0.0/0&GatewayId=igw-invalid", "InvalidInternetGatewayId.Malformed"},
 		{"Action=CreateRoute&RouteTableId=wrong&DestinationCidrBlock=0.0.0.0/0&GatewayId=igw-01234567", "InvalidRouteTableId.Malformed"},
 		{"Action=CreateRoute&RouteTableId=rtb-01234567&DestinationCidrBlock=::/0&GatewayId=igw-01234567", "InvalidParameterValue"},
-		{"Action=CreateRoute&RouteTableId=rtb-01234567&DestinationCidrBlock=192.0.2.0/24&GatewayId=igw-01234567", "UnsupportedOperation"},
+		{"Action=CreateRoute&RouteTableId=rtb-01234567&DestinationCidrBlock=192.0.2.0/33&GatewayId=igw-01234567", "InvalidParameterValue"},
 		{"Action=CreateRoute&RouteTableId=rtb-01234567&DestinationIpv6CidrBlock=::/0&GatewayId=igw-01234567", "UnsupportedOperation"},
 		{"Action=CreateRoute&RouteTableId=rtb-01234567&DestinationCidrBlock=0.0.0.0/0&GatewayId=igw-01234567&NatGatewayId=nat-01234567", "UnsupportedOperation"},
 		{"Action=DeleteRoute&RouteTableId=rtb-01234567&DestinationCidrBlock=0.0.0.0/0&DryRun=maybe", "InvalidParameterValue"},

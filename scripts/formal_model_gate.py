@@ -3914,6 +3914,52 @@ REQUIRED_SOURCE_SCOPES['EC2NativeDefaultRouteLifecycle'] = {
     'tools/console/src/main.jsx',
 }
 
+BASE_MODELS.add('EC2NativeIPv4RouteSet')
+BASE_INVARIANTS['EC2NativeIPv4RouteSet'] = {
+    'TypeOK',
+    'OwnedCanonical',
+    'PerTableLimit',
+    'AtomicClass',
+    'ExactRouteEffect',
+    'CompleteReadback',
+    'ConfirmedNotice',
+}
+REQUIRED_MUTANTS['EC2NativeIPv4RouteSet'] = {
+    'AdmitReservedDestination',
+    'SkipAliasCanonicalization',
+    'AdmitNonExactDelete',
+    'ReplaceCanonicalDuplicate',
+    'SkipTableCapacity',
+    'AdoptForeignOwner',
+    'AcceptWrongGateway',
+    'ApplyDeniedWrite',
+    'ApplyDryRun',
+    'CommitWithoutStorageReadback',
+    'EraseSiblingRoute',
+    'IgnoreSiblingReadback',
+    'ConfirmWrongTable',
+    'ConfirmIncompleteReply',
+    'ReuseEarlierScope',
+    'PublishWithoutReadback',
+}
+REQUIRED_SOURCE_SCOPES['EC2NativeIPv4RouteSet'] = {
+    'internal/aws/ec2_native_default_route_query.go',
+    'internal/aws/ec2_native_default_route_store.go',
+    'internal/aws/ec2_internet_gateway_store.go',
+    'internal/aws/ec2_vpc.go',
+    'internal/aws/ec2_route_tables_native.go',
+    'internal/aws/ec2_route_tables_read.go',
+    'internal/server/server.go',
+    'internal/server/web/app.js',
+    'tools/console/src/ec2-ipv4-route-prefix.mjs',
+    'tools/console/src/ec2-native-route-tables.mjs',
+    'tools/console/src/ec2-readonly.jsx',
+    'tools/console/src/ec2-response.mjs',
+    'tools/console/src/ec2-route-tables.mjs',
+    'tools/console/src/ec2-vpc-native-route-tables.jsx',
+    'tools/console/src/main.jsx',
+}
+
 
 def load_registry(root, relative='formal/models.json'):
     root = Path(root)

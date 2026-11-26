@@ -1,4 +1,5 @@
 import {parseEC2RouteTables} from './ec2-response.mjs';
+import {ipv4DefaultRoute} from './ec2-ipv4-route-prefix.mjs';
 
 export function vpcRouteTablesAvailable(capabilities, authenticationRequired) {
   const ec2 = capabilities?.services?.ec2;
@@ -32,7 +33,12 @@ export async function loadVpcRouteTables(request, region, vpc, {signal, subnetId
   if (!response.ok) throw Error(response.status + ': Could not read route tables.');
   const text = await response.text();
   signal?.throwIfAborted();
-  return parseEC2RouteTables(parse(text), vpc.id, subnetId);
+  const tables=parseEC2RouteTables(parse(text), vpc.id, subnetId);
+  // Other VPCs may contain multiple native routes; a verified CloudFormation
+  // view retains its existing bounded one-default-route projection.
+  if(tables.some(row=>row.routes.length>1||row.routes[0]&&row.routes[0].cidr!==ipv4DefaultRoute))
+    throw Error('Invalid CloudFormation-managed route table.');
+  return tables;
 }
 
 export function routeTableFailure(error) {

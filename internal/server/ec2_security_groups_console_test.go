@@ -59,6 +59,7 @@ func TestEC2SecurityGroupsConsoleCapability(t *testing.T) {
 				want["routeTableLifecycle"] = []string{"DescribeRouteTables", "CreateRouteTable", "DeleteRouteTable"}
 				want["routeTableAssociationLifecycle"] = []string{"DescribeRouteTables", "DescribeSubnets", "AssociateRouteTable", "DisassociateRouteTable"}
 				want["defaultRouteLifecycle"] = []string{"DescribeRouteTables", "DescribeInternetGateways", "CreateRoute", "DeleteRoute"}
+				want["ipv4RoutesPerTable"] = 16
 			}
 			if !reflect.DeepEqual(ec2, want) {
 				t.Fatalf("unexpected exact EC2 network capabilities: got %+v, want %+v", ec2, want)

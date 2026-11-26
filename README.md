@@ -99,7 +99,7 @@ console, CloudFormation adapter or Challenge integration.
   [EC2/VPC discovery and VPC create/delete](docs/ec2-read-discovery.md),
   [local internet gateway allocation and VPC attachment in SDK and Console](docs/ec2-internet-gateways.md),
   [route tables: CloudFormation readback, native tables and explicit subnet associations](docs/ec2-read-discovery.md#route-table-readback),
-  [native IPv4 default route configuration](docs/ec2-native-default-route.md),
+  [native IPv4 route configuration](docs/ec2-native-default-route.md),
   [IPv4 subnet lifecycle for existing EC2-managed VPCs](docs/ec2-native-subnet.md),
   [security groups: CloudFormation readback and detached Console workflow](docs/ec2-read-discovery.md#security-group-readback),
   [detached network ACL API and Console workflow](docs/ec2-detached-network-acls.md),
