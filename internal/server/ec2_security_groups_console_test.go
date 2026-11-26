@@ -55,6 +55,7 @@ func TestEC2SecurityGroupsConsoleCapability(t *testing.T) {
 				want["securityGroupReadback"] = "DescribeSecurityGroups"
 				want["routeTableReadback"] = "DescribeRouteTables"
 				want["internetGatewayLifecycle"] = []string{"DescribeInternetGateways", "CreateInternetGateway", "DeleteInternetGateway"}
+				want["internetGatewayPageLimit"] = 100
 				want["subnetLifecycle"] = []string{"DescribeSubnets", "CreateSubnet", "DeleteSubnet"}
 				want["routeTableLifecycle"] = []string{"DescribeRouteTables", "CreateRouteTable", "DeleteRouteTable"}
 				want["routeTableAssociationLifecycle"] = []string{"DescribeRouteTables", "DescribeSubnets", "AssociateRouteTable", "DisassociateRouteTable"}

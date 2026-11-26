@@ -6,6 +6,7 @@ import json
 import os
 from pathlib import Path
 import re
+import sqlite3
 import subprocess
 import sys
 import tempfile
@@ -87,7 +88,8 @@ def sdk_check(binary):
                 spec = json.loads(data)['services']['ec2']
                 assert all(action in spec['operations'] for action in OPERATIONS)
                 assert spec['internetGatewayLifecycle'] == OPERATIONS
-                assert spec['describeSelectors']['DescribeInternetGateways'] == ['InternetGatewayId.N']
+                assert spec['internetGatewayPageLimit'] == 100
+                assert spec['describeSelectors']['DescribeInternetGateways'] == ['InternetGatewayId.N', 'MaxResults', 'NextToken']
                 assert not any(action in spec['operations'] for action in ('AttachInternetGateway', 'DetachInternetGateway', 'CreateRoute'))
                 a = sdk(ax, ap, at)
                 cfn = cfn_client(ax, ap, at)
@@ -129,7 +131,10 @@ def sdk_check(binary):
                 reject(a.attach_internet_gateway, 'UnsupportedOperation', InternetGatewayId=native, VpcId=state['Vpc'])
                 reject(a.detach_internet_gateway, 'UnsupportedOperation', InternetGatewayId=g, VpcId=state['Vpc'])
                 reject(a.describe_internet_gateways, 'UnsupportedOperation', Filters=[{'Name': 'attachment.vpc-id', 'Values': [state['Vpc']]}])
-                reject(a.describe_internet_gateways, 'UnsupportedOperation', MaxResults=5)
+                small_page = a.describe_internet_gateways(MaxResults=5)
+                assert 'NextToken' not in small_page
+                assert {row['InternetGatewayId']: row for row in small_page['InternetGateways']} == saved
+                reject(a.describe_internet_gateways, 'InvalidParameterCombination', MaxResults=5, InternetGatewayIds=[native])
                 assert inventory(a) == saved and inventory(other) == other_before
                 assert outputs(cfn, stack) == state and a.describe_route_tables()['RouteTables'] == routes
 
@@ -166,7 +171,7 @@ def check_reference(local, cookie, expected):
     finally:
         connection.close()
     preset = form['examples']['DescribeInternetGateways']['value']
-    assert preset == {'Action': 'DescribeInternetGateways', 'Version': '2016-11-15'}
+    assert preset == {'Action': 'DescribeInternetGateways', 'Version': '2016-11-15', 'MaxResults': 100}
     assert preset['Action'] in form['schema']['properties']['Action']['enum']
     assert not any(action in form['examples'] for action in ('CreateInternetGateway', 'DeleteInternetGateway'))
     _, wire = local.call('POST', '/', urlencode(preset), Cookie=cookie, **{
@@ -199,13 +204,112 @@ def console_check(binary):
     print('PASS served reference Query replay and console in JSDOM: owner readback, named create, state verification and exact delete confirmation. Not Chromium layout.')
 
 
+def wide_inventory(path, exemplar):
+    """Populate an offline test fixture by copying the actual native row schema.
+
+    This sets up a lawful large inventory without hundreds of create requests.
+    Only the disposable test DB is written directly. All reads and mutations
+    asserted below go through the authenticated compiled simulator.
+    """
+    ids = [f'igw-{serial:017x}' for serial in range(1, 701)]
+    pattern = ('"<&> rollout log & source ', "Audit & report > internal / 監査", 'Normal gateway operations: ')
+    with sqlite3.connect(path) as db:
+        raw, = db.execute('SELECT document FROM aws_ec2_network_resources WHERE id=?', (exemplar,)).fetchone()
+        template = json.loads(raw)
+        for serial, gw_id in enumerate(ids, 1):
+            text = pattern[serial % len(pattern)]
+            filled = (text * 260).encode('utf-8')
+            labels = {f'Name': f'Fixture gateway {serial:03d}'}
+            for index in range(49):
+                tail = filled[:124-(index % 7)].decode('utf-8', 'ignore')
+                value = filled[:256-(index % 13)].decode('utf-8', 'ignore')
+                labels[f'{index:02d}-{tail}'] = value
+            row = {**template, 'ID': gw_id, 'Tags': labels}
+            db.execute('INSERT INTO aws_ec2_network_resources VALUES(?,?,?,?,?,?)',
+                       (row['Region'], gw_id, row['StackID'], row['Kind'], json.dumps(row), row['Revision']))
+    return ids
+
+
+def unpaged_wire_bytes(port, token):
+    connection = http.client.HTTPConnection('127.0.0.1', port, timeout=20)
+    try:
+        connection.request('POST', '/', 'Action=DescribeInternetGateways&Version=2016-11-15', headers={
+            'Content-Type': 'application/x-www-form-urlencoded', 'X-Simulator-Token': token,
+            'X-Simulator-Service': 'ec2', 'X-Simulator-Region': REGION})
+        reply = connection.getresponse()
+        assert reply.status == 200 and reply.headers.get_content_type() == 'text/xml'
+        total = 0
+        while chunk := reply.read(128*1024):
+            total += len(chunk)
+            assert total < 128*1024*1024
+        return total
+    finally:
+        connection.close()
+
+
+def paged_console_check(binary):
+    with tempfile.TemporaryDirectory(prefix='legitimate-igw-capacity-') as directory:
+        path = Path(directory)/'state.sqlite'
+        with run_default(binary, state=path) as (port, token), ExitStack() as life:
+            client = sdk(life, port, token)
+            sample = client.create_internet_gateway(TagSpecifications=tags('Gateway exemplar'))['InternetGateway']['InternetGatewayId']
+        ids = wide_inventory(path, sample)
+        expected = set(ids) | {sample}
+        with run_default(binary, state=path) as (port, token), ExitStack() as life:
+            local, client = Local(port), sdk(life, port, token)
+            legacy_bytes = unpaged_wire_bytes(port, token)
+            assert legacy_bytes > 16*1024*1024, legacy_bytes
+
+            def snapshot():
+                saved = []
+                last_id = ''
+                for page in client.get_paginator('describe_internet_gateways').paginate(PaginationConfig={'PageSize': 1000}):
+                    batch = page['InternetGateways']
+                    assert 0 < len(batch) <= 100
+                    for row in batch:
+                        rid = row['InternetGatewayId']
+                        assert rid > last_id and row['Attachments'] == []
+                        last_id = rid
+                        saved.append(rid)
+                return set(saved)
+
+            assert snapshot() == expected
+            single = client.describe_internet_gateways(InternetGatewayIds=[ids[0]])['InternetGateways'][0]
+            assert len(single['Tags']) == 50 and {'Key': 'Name', 'Value': 'Fixture gateway 001'} in single['Tags']
+            prev = client.describe_internet_gateways(MaxResults=100)['NextToken']
+            changed = client.create_internet_gateway(TagSpecifications=tags('Capacity refresh checkpoint'))['InternetGateway']['InternetGatewayId']
+            reject(client.describe_internet_gateways, 'InvalidNextToken', NextToken=prev)
+            client.delete_internet_gateway(InternetGatewayId=changed)
+
+            script = Path(__file__).with_name('ec2_internet_gateway_dom.cjs')
+            asset = sha256((ROOT/'internal/server/web/app.js').read_bytes()).hexdigest()
+            subprocess.run(['node', str(script)], check=True, text=True, timeout=200, input=json.dumps({
+                'port': port, 'cookie': local.session(token), 'state': None,
+                'large': {'first': ids[0], 'second': ids[1], 'total': len(expected)}, 'asset': asset,
+            }))
+            actual = snapshot()
+            new = actual - expected
+            assert len(new) == 1 and expected - actual == set(ids[:2])
+            added, = new
+            assert client.describe_internet_gateways(InternetGatewayIds=[added])['InternetGateways'][0]['Tags'] == [
+                {'Key': 'Name', 'Value': 'Created in a large region'},
+            ]
+            client.delete_internet_gateway(InternetGatewayId=added)
+            assert snapshot() == expected - set(ids[:2])
+            # The large synthetic inventory is scoped to the disposable DB,
+            # which is deleted at context exit, not a host resource.
+            print(f'PASS {len(expected)} legal gateways, {legacy_bytes} unpaged XML bytes, all SDK/console pages and actual write readbacks.')
+
+
 if __name__ == '__main__':
     if not __debug__:
         raise RuntimeError('Run without Python optimization')
     binary = Path(os.environ['SIMULATOR_BINARY']).resolve(strict=True)
     if sys.argv[1:] == ['--console']:
         console_check(binary)
+    elif sys.argv[1:] == ['--paged-console']:
+        paged_console_check(binary)
     elif not sys.argv[1:]:
         sdk_check(binary)
     else:
-        raise SystemExit('Expected no argument or --console')
+        raise SystemExit('Expected no argument, --console or --paged-console')

@@ -3781,6 +3781,44 @@ REQUIRED_SOURCE_SCOPES['EC2InternetGatewayLifecycle'] = {
 }
 
 
+# Detached internet gateway pagination and complete publication.
+BASE_MODELS.add('EC2InternetGatewayInventoryPages')
+BASE_INVARIANTS['EC2InternetGatewayInventoryPages'] = {
+    'TypeOK',
+    'PageAuthorized',
+    'PageBounded',
+    'PageFenced',
+    'ContinuationBound',
+    'CompletePublication',
+}
+REQUIRED_MUTANTS['EC2InternetGatewayInventoryPages'] = {
+    'SkipNewPageAuthorization',
+    'AcceptAnonymousCursor',
+    'AcceptExactIDCombination',
+    'IgnoreRequestedLimit',
+    'OverfullPage',
+    'IgnoreWireBound',
+    'AcceptRepeatedOrSkippedRows',
+    'AcceptStaleConsolePage',
+    'SkipMAC',
+    'CrossRegionCursor',
+    'CrossCallerCursor',
+    'SwitchPageSizeCursor',
+    'ContinueOnNewSnapshot',
+    'RenderPartialInventory',
+    'AcceptEmptyContinuation',
+}
+REQUIRED_SOURCE_SCOPES['EC2InternetGatewayInventoryPages'] = {
+    'internal/aws/cloudformation.go',
+    'internal/aws/ec2_internet_gateway_page.go',
+    'internal/aws/ec2_internet_gateways.go',
+    'internal/aws/ec2_read.go',
+    'internal/server/server.go',
+    'tools/console/src/ec2-internet-gateways.mjs',
+    'internal/server/web/app.js',
+}
+
+
 def load_registry(root, relative='formal/models.json'):
     root = Path(root)
     registry_path = asset(root, relative)

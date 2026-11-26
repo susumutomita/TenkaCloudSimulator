@@ -33,9 +33,10 @@ launch, mutation, filter or pagination is provided by this preset.
 
 The **EC2 DescribeInternetGateways** example on the same shared Query endpoint
 uses the same EC2 headers and requires `ec2:DescribeInternetGateways` on `*`.
-It lists regional [saved internet gateway configuration](ec2-internet-gateways.md),
-including the recorded VPC for CloudFormation-managed attachments. It does not
-create, attach or route through a gateway.
+It reads the first page of regional [saved internet gateway configuration](ec2-internet-gateways.md)
+with `MaxResults=100`, including recorded VPC attachments from CloudFormation.
+Use the returned `nextToken` as `NextToken` to continue in the same scope. It
+does not create, attach or route through a gateway.
 
 The stable internal tag `KMS local symmetric keys` now displays as **Shared AWS
 JSON/Query endpoint**, accurately reflecting its existing

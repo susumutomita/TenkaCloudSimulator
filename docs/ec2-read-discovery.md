@@ -24,8 +24,9 @@ not tenant isolation. Native STS session credentials are not supported here.
 
 Only the documented selectors are supported: security groups and network ACLs
 accept IDs or `vpc-id`, route tables accept `association.subnet-id`, and
-internet gateways accept IDs. There is no pagination. Over-bound results fail
-rather than returning a truncated list.
+internet gateways accept IDs or [bounded unfiltered pages](ec2-internet-gateways.md).
+Other EC2 reads do not support pagination. Over-bound results fail rather than
+returning an unmarked truncated list.
 
 Instances expose only IDs, image/type, subnet/VPC, security-group IDs and tags.
 Select an instance in the console's **EC2 instances** list to see its saved

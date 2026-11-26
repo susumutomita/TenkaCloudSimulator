@@ -8,6 +8,8 @@ import (
 	"slices"
 	"strconv"
 	"strings"
+
+	"github.com/susumutomita/TenkaCloudSimulator/internal/provider"
 )
 
 const (
@@ -30,7 +32,12 @@ type ec2InternetGatewayQuery struct {
 	ids                []string
 	tags               map[string]string
 	authorizeCreatedID func(string) error
+	maxResults         int
+	nextToken          string
+	caller             provider.Actor // trusted request binding for pages only
 }
+
+func (q ec2InternetGatewayQuery) paginated() bool { return q.maxResults != 0 || q.nextToken != "" }
 
 func (q ec2InternetGatewayQuery) permissions(action, region string) [][2]string {
 	switch action {
@@ -93,6 +100,21 @@ func parseEC2InternetGateway(action string, fields map[string][]string) (ec2Inte
 				continue
 			}
 		case ec2DescribeInternetGateway:
+			switch key {
+			case "MaxResults":
+				size, failure := parseEC2GatewayMaxResults(value)
+				if failure != nil {
+					return q, failure
+				}
+				q.maxResults = size
+				continue
+			case "NextToken":
+				if len(value) != ec2GatewayPageWireLen {
+					return q, invalidEC2GatewayPage()
+				}
+				q.nextToken = value
+				continue
+			}
 			if m := ec2InternetGatewayParam.FindStringSubmatch(key); m != nil {
 				n, _ := strconv.Atoi(m[1])
 				ids[n] = value
@@ -129,6 +151,9 @@ func parseEC2InternetGateway(action string, fields map[string][]string) (ec2Inte
 		}
 		q.tags = parsed
 	case ec2DescribeInternetGateway:
+		if len(ids) != 0 && q.paginated() {
+			return q, ec2Invalid("InvalidParameterCombination", "InternetGatewayId cannot be combined with MaxResults or NextToken.")
+		}
 		if len(ids) > ec2GatewaySelectorLimit {
 			return q, ec2Invalid("InvalidParameterValue", "At most eight internet gateway IDs are supported.")
 		}
@@ -170,6 +195,7 @@ type ec2InternetGatewayResponse struct {
 	RequestID string                 `xml:"requestId"`
 	Gateway   *ec2InternetGateway    `xml:"internetGateway,omitempty"`
 	Gateways  *ec2InternetGatewaySet `xml:"internetGatewaySet,omitempty"`
+	NextToken string                 `xml:"nextToken,omitempty"`
 	Return    *bool                  `xml:"return,omitempty"`
 }
 
@@ -232,7 +258,11 @@ func (s *StackStore) executeEC2InternetGateway(ctx context.Context, action, regi
 		if err != nil {
 			return nil, err
 		}
-		out.Gateways = &ec2InternetGatewaySet{Items: gateways}
+		page, next, err := s.internetGatewayPages.page(region, q, gateways)
+		if err != nil {
+			return nil, err
+		}
+		out.Gateways, out.NextToken = &ec2InternetGatewaySet{Items: page}, next
 	case ec2DeleteInternetGateway:
 		if err := s.deleteNativeInternetGateway(ctx, region, q.id); err != nil {
 			return nil, err

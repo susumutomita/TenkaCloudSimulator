@@ -7,13 +7,15 @@ import (
 	"encoding/xml"
 	"errors"
 	"fmt"
-	"github.com/susumutomita/TenkaCloudSimulator/internal/core"
 	"io"
 	"net/http"
 	"net/url"
 	"slices"
 	"sort"
 	"strings"
+
+	"github.com/susumutomita/TenkaCloudSimulator/internal/core"
+	"github.com/susumutomita/TenkaCloudSimulator/internal/provider"
 )
 
 // EC2 Query/XML: discovery of CloudFormation-owned and EC2-owned local
@@ -194,6 +196,14 @@ func (g *Gateway) serveEC2(w http.ResponseWriter, r *http.Request) {
 		}
 		out = result
 	case ec2CreateInternetGateway, ec2DescribeInternetGateway, ec2DeleteInternetGateway:
+		if request.internetGateway.paginated() {
+			caller, ok := provider.ActorFromContext(r.Context())
+			if !ok || caller.ExerciseIdentity != principal {
+				fail("UnauthorizedOperation", "A verified local actor is required for an internet gateway page.", 403)
+				return
+			}
+			request.internetGateway.caller = caller
+		}
 		gateways, err := g.Stacks.executeEC2InternetGateway(r.Context(), action, region, *request.internetGateway)
 		if err != nil {
 			failChild(err, "Local internet gateway configuration could not be read or changed.")

@@ -717,6 +717,14 @@
                   "TemplateBody": {
                     "type": "string"
                   },
+                  "MaxResults": {
+                    "type": "integer",
+                    "description": "For EC2 DescribeInternetGateways, page size request from 5 to 1000 (the local service returns at most 100 per page)."
+                  },
+                  "NextToken": {
+                    "type": "string",
+                    "description": "Opaque continuation returned by the specific Query operation. For EC2 DescribeInternetGateways, continue the same region, caller and page-size request."
+                  },
                   "RoleName": {
                     "type": "string",
                     "description": "IAM action-specific field; unsupported fields fail explicitly."
@@ -1123,10 +1131,11 @@
                 },
                 "DescribeInternetGateways": {
                   "summary": "EC2 DescribeInternetGateways (read-only configuration)",
-                  "description": "Set X-Simulator-Service to ec2, clear X-Amz-Target, and choose a local X-Simulator-Region. Send with your existing local sign-in or simulator token and ec2:DescribeInternetGateways on *. Lists saved attached CloudFormation and detached EC2-managed gateways. It never performs attachment, routing or internet access.",
+                  "description": "Set X-Simulator-Service to ec2, clear X-Amz-Target, and choose a local X-Simulator-Region. Send with your existing local sign-in or simulator token and ec2:DescribeInternetGateways on *. Shows the first page of saved attached CloudFormation and detached EC2-managed gateways. Use nextToken as NextToken to continue. It never performs attachment, routing or internet access.",
                   "value": {
                     "Action": "DescribeInternetGateways",
-                    "Version": "2016-11-15"
+                    "Version": "2016-11-15",
+                    "MaxResults": 100
                   }
                 },
                 "CreateDomain": {

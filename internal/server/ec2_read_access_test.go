@@ -115,6 +115,7 @@ func TestEC2ReadAccessBoundary(t *testing.T) {
 			DescribeSelectors              map[string][]string `json:"describeSelectors"`
 			DetachedConfigurationOnly      []string            `json:"detachedConfigurationOnly"`
 			InternetGatewayLifecycle       []string            `json:"internetGatewayLifecycle"`
+			InternetGatewayPageLimit       int                 `json:"internetGatewayPageLimit"`
 			RouteTableLifecycle            []string            `json:"routeTableLifecycle"`
 			RouteTableAssociationLifecycle []string            `json:"routeTableAssociationLifecycle"`
 		} `json:"services"`
@@ -141,10 +142,11 @@ func TestEC2ReadAccessBoundary(t *testing.T) {
 	wantSelectors := map[string][]string{
 		"DescribeSecurityGroups":   {"GroupId.N", "vpc-id"},
 		"DescribeNetworkAcls":      {"NetworkAclId.N", "vpc-id"},
-		"DescribeInternetGateways": {"InternetGatewayId.N"},
+		"DescribeInternetGateways": {"InternetGatewayId.N", "MaxResults", "NextToken"},
 	}
 	if ec2.Pagination || !ec2.Filters || ec2.ResourceLimit != 1000 || !reflect.DeepEqual(ec2.DescribeSelectors, wantSelectors) ||
 		!reflect.DeepEqual(ec2.DetachedConfigurationOnly, []string{"native security groups", "native network ACLs", "native internet gateways"}) ||
+		ec2.InternetGatewayPageLimit != 100 ||
 		!reflect.DeepEqual(ec2.InternetGatewayLifecycle, []string{"DescribeInternetGateways", "CreateInternetGateway", "DeleteInternetGateway"}) ||
 		!reflect.DeepEqual(ec2.RouteTableLifecycle, []string{"DescribeRouteTables", "CreateRouteTable", "DeleteRouteTable"}) ||
 		!reflect.DeepEqual(ec2.RouteTableAssociationLifecycle, []string{"DescribeRouteTables", "DescribeSubnets", "AssociateRouteTable", "DisassociateRouteTable"}) {

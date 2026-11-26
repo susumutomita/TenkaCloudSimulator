@@ -1,5 +1,9 @@
 const ns='http://ec2.amazonaws.com/doc/2016-11-15/';
 const operations=['DescribeInternetGateways','CreateInternetGateway','DeleteInternetGateway'];
+// Mirrored by the server capability and encoder bound regression. 100 legal
+// rows fit within the same 16 MiB limit even after XML escaping.
+const pageSize=100,inventoryLimit=1000,responseBytes=16*1024*1024;
+const pageTokenPattern=/^[A-Za-z0-9_-]{48}$/;
 const gatewayPattern=/^igw-(?:[0-9a-f]{8}|[0-9a-f]{17})$/;
 const vpcPattern=/^vpc-(?:[0-9a-f]{8}|[0-9a-f]{17})$/;
 const forbiddenXml=/[\u0000-\u0008\u000b\u000c\u000e-\u001f\ud800-\udfff\ufffe\uffff]/u;
@@ -11,7 +15,7 @@ const exact=(value,pattern)=>typeof value==='string'&&pattern.exec(value)?.[0]==
 
 export function internetGatewaysAvailable(capabilities,authenticationRequired) {
   const ec2=capabilities?.services?.ec2;
-  return authenticationRequired===true&&!capabilities?.consoleScope&&ec2?.console===true&&
+  return authenticationRequired===true&&!capabilities?.consoleScope&&ec2?.console===true&&ec2.internetGatewayPageLimit===pageSize&&
     Array.isArray(ec2.internetGatewayLifecycle)&&ec2.internetGatewayLifecycle.length===operations.length&&Array.isArray(ec2.operations)&&
     operations.every(id=>ec2.internetGatewayLifecycle.includes(id)&&ec2.operations.includes(id));
 }
@@ -27,13 +31,13 @@ function entries(node) {
   return elements;
 }
 
-function members(node,names) {
+function members(node,names,optional=[]) {
   const result=new Map();
   for (const entry of entries(node)) {
-    if (!names.includes(entry.localName)||result.has(entry.localName)) invalid();
+    if ((!names.includes(entry.localName)&&!optional.includes(entry.localName))||result.has(entry.localName)) invalid();
     result.set(entry.localName,entry);
   }
-  if (result.size!==names.length) invalid();
+  if (!names.every(name=>result.has(name))) invalid();
   return result;
 }
 
@@ -78,6 +82,7 @@ async function send(request,region,action,params,signal) {
     headers:{'Content-Type':'application/x-www-form-urlencoded','X-Simulator-Service':'ec2','X-Simulator-Region':region},
     body:new URLSearchParams({Action:action,Version:'2016-11-15',...params}),
   });
+  signal?.throwIfAborted();
   if (!response?.ok) throw Error((response?.status??0)+': Internet gateway request failed.');
   if (!['text/xml','application/xml'].includes(response.headers?.get('Content-Type')?.split(';')[0].trim().toLowerCase())) invalid();
   const reader=response.body?.getReader();
@@ -89,17 +94,21 @@ async function send(request,region,action,params,signal) {
       signal?.throwIfAborted();
       const chunk=await reader.read();
       if (chunk.done) {done=true;break;}
+      if (chunk.value.byteLength>responseBytes-size) invalid();
       size+=chunk.value.byteLength;
-      if (size>16*1024*1024) invalid();
       raw+=decoder.decode(chunk.value,{stream:true});
     }
     signal?.throwIfAborted();
     const document=xml(raw+decoder.decode()),root=document.documentElement;
     if (document.doctype||root?.namespaceURI!==ns||root.localName!==action+'Response') invalid();
     const member={CreateInternetGateway:'internetGateway',DescribeInternetGateways:'internetGatewaySet',DeleteInternetGateway:'return'}[action];
-    const fields=members(root,['requestId',member]);
+    const describing=action==='DescribeInternetGateways';
+    const fields=members(root,['requestId',member],describing?['nextToken']:[]);
     if (!text(fields.get('requestId')).trim()) invalid();
-    return fields.get(member);
+    if (!describing) return fields.get(member);
+    const token=fields.has('nextToken')?text(fields.get('nextToken')):null;
+    if (token!==null&&!exact(token,pageTokenPattern)) invalid();
+    return {node:fields.get(member),token};
   } finally {
     if (!done) void reader.cancel().catch(()=>{});
     reader.releaseLock();
@@ -107,15 +116,43 @@ async function send(request,region,action,params,signal) {
 }
 
 export async function describeInternetGateways(request,region,signal) {
-  const result=await send(request,region,'DescribeInternetGateways',{},signal);
-  const rows=list(result,1000).map(gateway), ids=new Set(), vpcs=new Set();
-  for (const row of rows) {
-    if (ids.has(row.id)||row.vpc&&vpcs.has(row.vpc)) invalid();
-    ids.add(row.id);
-    if (row.vpc) vpcs.add(row.vpc);
-    bindings.set(row,{request,region});
+  const rows=[], vpcs=new Set(), seenTokens=new Set();
+  let next=null, lastID='';
+  // Nothing is published on a stale, partial or repeated page. Only bounded
+  // projected rows remain in the UI; tag payloads are parsed and discarded
+  // per response rather than accumulating a regional XML document.
+  for (let page=0;page<Math.ceil(inventoryLimit/pageSize);page++) {
+    const {node,token}=await send(request,region,'DescribeInternetGateways',
+      {MaxResults:pageSize,...(next===null?{}:{NextToken:next})},signal);
+    const items=list(node,pageSize);
+    // A continuation is issued only when at least one row remains.
+    if (next!==null&&items.length===0||items.length>inventoryLimit-rows.length||
+        token!==null&&(items.length!==pageSize||seenTokens.has(token))) invalid();
+    for (const item of items) {
+      const row=gateway(item);
+      if (row.id<=lastID||row.vpc&&vpcs.has(row.vpc)) invalid();
+      lastID=row.id;
+      if (row.vpc) vpcs.add(row.vpc);
+      rows.push(row);
+    }
+    signal?.throwIfAborted();
+    if (token===null) {
+      for (const row of rows) bindings.set(row,{request,region});
+      return rows;
+    }
+    seenTokens.add(token);
+    next=token;
   }
-  return rows;
+  return invalid();
+}
+
+async function describeExactInternetGateway(request,region,id,signal) {
+  const {node,token}=await send(request,region,'DescribeInternetGateways',{'InternetGatewayId.1':id},signal);
+  const items=list(node,1);
+  if (items.length!==1||token!==null) invalid();
+  const row=gateway(items[0]);
+  if (row.id!==id) invalid();
+  return row;
 }
 
 export async function createInternetGateway(request,region,name,signal) {
@@ -123,8 +160,10 @@ export async function createInternetGateway(request,region,name,signal) {
   const params=name?{'TagSpecification.1.ResourceType':'internet-gateway','TagSpecification.1.Tag.1.Key':'Name','TagSpecification.1.Tag.1.Value':name}:{};
   const created=gateway(await send(request,region,'CreateInternetGateway',params,signal));
   if (created.managedBy!=='ec2'||created.name!==name||created.tagCount!==(name?1:0)) invalid();
+  const matches=row=>row.id===created.id&&row.managedBy==='ec2'&&row.name===name&&row.tagCount===created.tagCount;
+  if (!matches(await describeExactInternetGateway(request,region,created.id,signal))) invalid();
   const rows=await describeInternetGateways(request,region,signal);
-  if (!rows.some(row=>row.id===created.id&&row.managedBy==='ec2'&&row.name===name&&row.tagCount===created.tagCount)) invalid();
+  if (!rows.some(matches)) invalid();
   return {id:created.id,rows};
 }
 
