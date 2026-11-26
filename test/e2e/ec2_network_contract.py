@@ -4,15 +4,17 @@ Starts only a disposable authenticated loopback simulator via the existing E2E
 harness. No VM, real AWS, emulator comparison, or external endpoint argument.
 Run after make build with the dependencies in scripts/requirements-test.txt.
 """
-from contextlib import ExitStack
+from contextlib import ExitStack, closing
 import copy
 import json
 from pathlib import Path
+import sqlite3
 import tempfile
 import unittest
 
 from check import running, boto3, Config, ClientError
 from cloudformation_ssm_parameters import control
+from botocore.exceptions import ParamValidationError
 from botocore.parsers import ResponseParserError
 
 
@@ -351,6 +353,107 @@ class NetworkContract(unittest.TestCase):
             with self.subTest(operation=operation.__name__, args=args):
                 self.rejected(operation, code, **args)
                 self.assertEqual(self.state(), before)
+
+    def test_native_route_query_refusals_preserve_saved_network(self):
+        def snapshot():
+            gateways = sorted(self.ec2.describe_internet_gateways()['InternetGateways'],
+                              key=lambda g: g['InternetGatewayId'])
+            # Check the actual network rows as well as SDK projections. This
+            # is a separate read-only connection to this test's own database.
+            with closing(sqlite3.connect(self.database.as_uri() + '?mode=ro', uri=True)) as db:
+                rows = tuple(db.execute('SELECT region,id,stack_id,kind,document,revision '
+                                        'FROM aws_ec2_network_resources ORDER BY region,id'))
+            return self.state(), gateways, rows
+
+        def make_vpc(cleanup, cidr):
+            vpc = self.ec2.create_vpc(CidrBlock=cidr)['Vpc']['VpcId']
+            cleanup.callback(self.ec2.delete_vpc, VpcId=vpc)
+            return vpc
+
+        def make_gateway(cleanup, vpc=None):
+            gateway = self.ec2.create_internet_gateway()['InternetGateway']['InternetGatewayId']
+            cleanup.callback(self.ec2.delete_internet_gateway, InternetGatewayId=gateway)
+            if vpc is not None:
+                link = {'InternetGatewayId': gateway, 'VpcId': vpc}
+                self.ec2.attach_internet_gateway(**link)
+                cleanup.callback(self.ec2.detach_internet_gateway, **link)
+            return gateway
+
+        empty = snapshot()
+        survivor = self.create('native-route-refusal-survivor')
+        initial = snapshot()
+        with ExitStack() as cleanup:
+            vpc = make_vpc(cleanup, '10.76.0.0/16')
+            other = make_vpc(cleanup, '10.77.0.0/16')
+            table = self.ec2.create_route_table(VpcId=vpc)['RouteTable']['RouteTableId']
+            cleanup.callback(self.ec2.delete_route_table, RouteTableId=table)
+            subnet = self.ec2.create_subnet(VpcId=vpc, CidrBlock='10.76.1.0/24')['Subnet']['SubnetId']
+            cleanup.callback(self.ec2.delete_subnet, SubnetId=subnet)
+            assoc = self.ec2.associate_route_table(RouteTableId=table, SubnetId=subnet)['AssociationId']
+            cleanup.callback(self.ec2.disassociate_route_table, AssociationId=assoc)
+            gateway = make_gateway(cleanup, vpc)
+            foreign = make_gateway(cleanup, other)
+            detached = make_gateway(cleanup)
+
+            self.assertTrue(self.ec2.create_route(RouteTableId=table, GatewayId=gateway,
+                                                  DestinationCidrBlock='192.0.2.51/24')['Return'])
+            cleanup.callback(self.ec2.delete_route, RouteTableId=table, DestinationCidrBlock='192.0.2.0/24')
+            before = snapshot()
+            exact, = self.ec2.describe_route_tables(RouteTableIds=[table])['RouteTables']
+            self.assertEqual(exact['Routes'], [{'DestinationCidrBlock': '192.0.2.0/24',
+                                               'GatewayId': gateway, 'Origin': 'CreateRoute', 'State': 'active'}])
+            self.assertEqual(exact['Associations'][0]['RouteTableAssociationId'], assoc)
+
+            query = {'RouteTableId': table}
+            ipv4 = {'DestinationCidrBlock': '198.51.100.128/25'}
+            ipv6 = {'DestinationIpv6CidrBlock': '2001:db8::/64'}
+            prefix = {'DestinationPrefixListId': 'pl-0123456789abcdef0'}
+            igw = {'GatewayId': gateway}
+            nat = {'NatGatewayId': 'nat-0123456789abcdef0'}
+            cases = [
+                ('IPv6 only', {**ipv6, **igw}, 'UnsupportedOperation'),
+                ('prefix list only', {**prefix, **igw}, 'UnsupportedOperation'),
+                ('IPv4 and IPv6', {**ipv4, **ipv6, **igw}, 'UnsupportedOperation'),
+                ('IPv4 and prefix list', {**ipv4, **prefix, **igw}, 'UnsupportedOperation'),
+                ('NAT only', {**ipv4, **nat}, 'UnsupportedOperation'),
+                ('internet and NAT gateways', {**ipv4, **igw, **nat}, 'UnsupportedOperation'),
+                ('missing destination', igw, 'MissingParameter'),
+                ('missing target', ipv4, 'MissingParameter'),
+                ('invalid IPv4 prefix', {**igw, 'DestinationCidrBlock': '198.51.100.254/33'},
+                 'InvalidParameterValue'),
+                ('missing table', {**ipv4, **igw, 'RouteTableId': 'rtb-00000000000000001'},
+                 'InvalidRouteTableID.NotFound'),
+                ('missing gateway', {**ipv4, 'GatewayId': 'igw-00000000000000001'},
+                 'InvalidInternetGatewayID.NotFound'),
+                ('gateway attached to different VPC', {**ipv4, 'GatewayId': foreign}, 'Gateway.NotAttached'),
+                ('detached gateway', {**ipv4, 'GatewayId': detached}, 'Gateway.NotAttached'),
+            ]
+            replies = []
+
+            def observe(http_response, parsed, **_):
+                media = http_response.headers.get('content-type', '').partition(';')[0]
+                replies.append((http_response.status_code, media, parsed.get('Error', {}).get('Code')))
+
+            self.ec2.meta.events.register('after-call.ec2.CreateRoute', observe)
+            for label, fields, code in cases:
+                with self.subTest(label=label):
+                    count = len(replies)
+                    self.rejected(self.ec2.create_route, code, **{**query, **fields})
+                    self.assertEqual(replies[count:], [(400, 'text/xml', code)])
+                    self.assertEqual(self.ec2.describe_route_tables(RouteTableIds=[table])['RouteTables'], [exact])
+                    self.assertEqual(snapshot(), before)
+
+            # The official SDK rejects these two before sending Query/XML.
+            # They are client validation, not evidence about the server.
+            for kwargs in ({**ipv4, **igw}, {**query, **igw, 'DestinationCidrBlock': 99}):
+                count = len(replies)
+                with self.assertRaises(ParamValidationError):
+                    self.ec2.create_route(**kwargs)
+                self.assertEqual(len(replies), count)
+            self.assertEqual(snapshot(), before)
+        self.assertEqual(snapshot(), initial)
+        self.cfn.delete_stack(StackName=survivor)
+        self.assertEqual(snapshot(), empty)
 
     def test_native_vpc_has_no_implicit_table_and_bare_table_has_no_children(self):
         self.assertEqual(self.ec2.describe_route_tables()['RouteTables'], [])
