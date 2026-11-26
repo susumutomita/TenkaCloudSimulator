@@ -117,7 +117,8 @@
                 "logs",
                 "secretsmanager",
                 "dynamodb",
-                "sdb"
+                "sdb",
+                "ec2"
               ]
             },
             "description": "Optional native service hint; when supplied it must match the selected service target. iam selects IAM Query; cloudformation selects CloudFormation Query. SSM/Logs/KMS/Secrets Manager use JSON 1.1; SQS/DynamoDB use JSON 1.0. This routing hint grants no access."
@@ -695,7 +696,8 @@
                       "DomainMetadata",
                       "DeleteAttributes",
                       "Select",
-                      "GetAttributes"
+                      "GetAttributes",
+                      "DescribeInstances"
                     ]
                   },
                   "Version": {
@@ -703,7 +705,8 @@
                     "enum": [
                       "2010-05-15",
                       "2010-05-08",
-                      "2009-04-15"
+                      "2009-04-15",
+                      "2016-11-15"
                     ]
                   },
                   "StackName": {
@@ -1106,6 +1109,14 @@
                     "DomainName": "scalar-practice-domain",
                     "ItemName": "scalar-practice-item",
                     "ConsistentRead": "true"
+                  }
+                },
+                "DescribeInstances": {
+                  "summary": "EC2 DescribeInstances (read-only discovery)",
+                  "description": "Set X-Simulator-Service to ec2, clear X-Amz-Target, and select a local X-Simulator-Region. Send with your existing simulator sign-in or host-issued token and ec2:DescribeInstances on *. The XML lists saved instance metadata for that region; an empty reservationSet is valid. No instance is launched or changed, and simulatorRuntimeState is not proof of a running VM. Do not add IDs, filters or pagination fields.",
+                  "value": {
+                    "Action": "DescribeInstances",
+                    "Version": "2016-11-15"
                   }
                 }
               }
