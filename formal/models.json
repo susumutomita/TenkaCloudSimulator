@@ -21537,6 +21537,157 @@
       ]
     },
     {
+      "id": "RDSOwnedOperatorComposition",
+      "model": "formal/RDSOwnedOperatorComposition.tla",
+      "config": "formal/RDSOwnedOperatorComposition.cfg",
+      "bounds": "Four operator mode selections, five independent Boolean preflight verdicts, one server admission and one sequential shutdown, with separate Boolean owned cleanup debt and Lambda/App Engine error outcomes.",
+      "properties": [
+        "TypeOK",
+        "MixedRefusesBeforeEffects",
+        "OwnedAdmissionRequiresPreflight",
+        "DefaultRemainsMetadata",
+        "IndependentClosersAttempted",
+        "ObservedJoinBeforeReturn",
+        "DebtKeepsSQLite",
+        "CleanAttemptsSQLiteClose",
+        "ReportsCloseCauses"
+      ],
+      "limits": "Finite composition checks for startup effects and recorded close attempts, not Go refinement, IAM, actual config/ELF/path/SQLite proof, child/VM execution, Battle teardown, synchronization liveness, PostgreSQL readiness, crash recovery or guest SQL. A store-close attempt does not assert a successful close.",
+      "source_scope": [
+        "cmd/simulator/main.go",
+        "cmd/simulator/rds_owned_config.go",
+        "internal/server/battle_runtime_unix.go",
+        "internal/server/rds_owned_operator.go",
+        "internal/server/rds_owned_operator_linux_amd64.go",
+        "internal/server/rds_owned_operator_unsupported.go",
+        "internal/server/sakura_provider.go",
+        "internal/server/server.go"
+      ],
+      "mutants": [
+        {
+          "id": "AllowMixedMode",
+          "edits": [
+            {
+              "old": "[] plan.mode = \"mixed\" -> FALSE",
+              "new": "[] plan.mode = \"mixed\" -> TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "MixedRefusesBeforeEffects"
+        },
+        {
+          "id": "IgnoreLocalScope",
+          "edits": [
+            {
+              "old": "plan.localAuth /\\ plan.topology /\\ plan.hostAccepted /\\ plan.pinnedBundle /\\ plan.privateState\n\nStartable",
+              "new": "plan.topology /\\ plan.hostAccepted /\\ plan.pinnedBundle /\\ plan.privateState\n\nStartable",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "OwnedAdmissionRequiresPreflight"
+        },
+        {
+          "id": "IgnoreBundlePin",
+          "edits": [
+            {
+              "old": "plan.localAuth /\\ plan.topology /\\ plan.hostAccepted /\\ plan.pinnedBundle /\\ plan.privateState\n\nStartable",
+              "new": "plan.localAuth /\\ plan.topology /\\ plan.hostAccepted /\\ plan.privateState\n\nStartable",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "OwnedAdmissionRequiresPreflight"
+        },
+        {
+          "id": "SelectOwnerByDefault",
+          "edits": [
+            {
+              "old": "(IF plan.mode = \"mixed\" THEN \"postgres\" ELSE plan.mode)",
+              "new": "(IF plan.mode \\in {\"mixed\", \"metadata\"} THEN \"postgres\" ELSE plan.mode)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "DefaultRemainsMetadata"
+        },
+        {
+          "id": "SkipLambdaAfterDebt",
+          "edits": [
+            {
+              "old": "!.triedLambda = TRUE",
+              "new": "!.triedLambda = ~run.ownerDebt",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "IndependentClosersAttempted"
+        },
+        {
+          "id": "SkipAppEngineAfterDebt",
+          "edits": [
+            {
+              "old": "!.triedAppEngine = TRUE",
+              "new": "!.triedAppEngine = ~run.ownerDebt",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "IndependentClosersAttempted"
+        },
+        {
+          "id": "SkipHealthWait",
+          "edits": [
+            {
+              "old": "!.joinedHealth = TRUE",
+              "new": "!.joinedHealth = FALSE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ObservedJoinBeforeReturn"
+        },
+        {
+          "id": "CloseDespiteDebt",
+          "edits": [
+            {
+              "old": "MayCloseSQLite == ~run.ownerDebt",
+              "new": "MayCloseSQLite == TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "DebtKeepsSQLite"
+        },
+        {
+          "id": "RetainCleanStore",
+          "edits": [
+            {
+              "old": "MayCloseSQLite == ~run.ownerDebt",
+              "new": "MayCloseSQLite == FALSE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CleanAttemptsSQLiteClose"
+        },
+        {
+          "id": "SuppressOwnerError",
+          "edits": [
+            {
+              "old": "ReportDebt == run.ownerDebt",
+              "new": "ReportDebt == FALSE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReportsCloseCauses"
+        },
+        {
+          "id": "SuppressIndependentErrorsOnDebt",
+          "edits": [
+            {
+              "old": "ReportIndependent == run.lambdaError \\/ run.appEngineError",
+              "new": "ReportIndependent == ~run.ownerDebt /\\ (run.lambdaError \\/ run.appEngineError)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReportsCloseCauses"
+        }
+      ]
+    },
+    {
       "id": "RDSGuestPeerPreflight",
       "model": "formal/RDSGuestPeerPreflight.tla",
       "config": "formal/RDSGuestPeerPreflight.cfg",

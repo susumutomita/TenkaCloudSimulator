@@ -1378,6 +1378,42 @@ REQUIRED_SOURCE_SCOPES['RDSOwnedPostgresRuntime'] = {
     'internal/rdsruntime/bundle_linux_amd64.go', 'internal/rdsruntime/runtime_linux_amd64.go',
 }
 
+BASE_MODELS.add('RDSOwnedOperatorComposition')
+BASE_INVARIANTS['RDSOwnedOperatorComposition'] = {
+    'TypeOK',
+    'MixedRefusesBeforeEffects',
+    'OwnedAdmissionRequiresPreflight',
+    'DefaultRemainsMetadata',
+    'IndependentClosersAttempted',
+    'ObservedJoinBeforeReturn',
+    'DebtKeepsSQLite',
+    'CleanAttemptsSQLiteClose',
+    'ReportsCloseCauses',
+}
+REQUIRED_MUTANTS['RDSOwnedOperatorComposition'] = {
+    'AllowMixedMode',
+    'IgnoreLocalScope',
+    'IgnoreBundlePin',
+    'SelectOwnerByDefault',
+    'SkipLambdaAfterDebt',
+    'SkipAppEngineAfterDebt',
+    'SkipHealthWait',
+    'CloseDespiteDebt',
+    'RetainCleanStore',
+    'SuppressOwnerError',
+    'SuppressIndependentErrorsOnDebt',
+}
+REQUIRED_SOURCE_SCOPES['RDSOwnedOperatorComposition'] = {
+    'cmd/simulator/main.go',
+    'cmd/simulator/rds_owned_config.go',
+    'internal/server/battle_runtime_unix.go',
+    'internal/server/rds_owned_operator.go',
+    'internal/server/rds_owned_operator_linux_amd64.go',
+    'internal/server/rds_owned_operator_unsupported.go',
+    'internal/server/sakura_provider.go',
+    'internal/server/server.go',
+}
+
 BASE_MODELS.add('RDSOwnedGenerationFence')
 BASE_INVARIANTS['RDSOwnedGenerationFence'] = {
     'TypeOK', 'LaunchNeedsCommittedAuthority', 'AttachNeedsCurrent',

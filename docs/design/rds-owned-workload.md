@@ -1,13 +1,48 @@
 # Optional owned PostgreSQL workload
 
-This Linux/amd64 provider-internal package is not wired to server startup, an
-AWS resource, a guest or any UI. The standalone binary still has no external
-database requirement. An eventual trusted host composition can opt in by
-supplying a separately installed, immutable PostgreSQL 15.20 bundle and its
-independently approved content pin. Never take either value from a simulator
-resource or an untrusted archive. Neither a hostname nor an existing DB is
-accepted. No endpoint, SQL proxy, instance readiness or credentials are
-published.
+Ordinary startup remains metadata-only: neither default startup nor
+`--rds-private-postgres-topology` alone starts PostgreSQL. The trusted local
+operator can opt into one owned private PostgreSQL generation on Linux/amd64
+as a non-root user. Existing RDS IAM checks still apply, and qualifying
+private creates and modifications still undergo topology validation. The
+startup option grants no request permissions. It adds no public RDS readiness,
+SQL proxy, endpoint, credentials, guest connectivity, or UI capability.
+
+For an already approved PostgreSQL 15.20 bundle and its independently approved
+tree SHA-256, place this JSON in an absolute private regular file (at most
+4 KiB; mode 0600 recommended). Replace the illustrative paths and pin:
+
+```json
+{
+  "bundleDirectory": "/trusted/pgsql",
+  "bundleSha256": "<independently approved lowercase SHA-256>",
+  "workRoot": "/private/owned-postgres-work",
+  "region": "us-east-1",
+  "dbInstanceIdentifier": "example-db"
+}
+```
+
+Use a separate, existing, idle mode-0700 work root. The state path must be an
+existing, absolute, operator-owned mode-0600 regular SQLite file with one link
+in an operator-owned mode-0700 directory. The paths must satisfy the local
+owner, permission and disjointness checks; no host database URL is accepted.
+Then start the simulator on authenticated numeric loopback:
+
+```sh
+./dist/tenkacloud-simulator --listen 127.0.0.1:4566 \
+  --state /private/state/simulator.sqlite --token-file /private/state/simulator-token \
+  --rds-private-postgres-topology --rds-owned-postgres-config /private/rds.json
+```
+
+Do not combine this mode with `--allow-remote`, `--unsafe-no-auth` or
+`--battle-runtime-config`. Starting the server only validates and admits the
+configuration. A qualifying, IAM-authorized `CreateDBInstance` for the
+nominated region and identifier must commit valid native private topology and
+its exact ownership fence before the internal runtime attempts startup. An
+existing instance is not adopted. The RDS API still reports configuration,
+not successful PostgreSQL launch. If owned teardown cannot be confirmed,
+shutdown returns an error and retains the SQLite ownership fence and private
+work state; an ordinary restart does not adopt that debt.
 
 `OpenBundle` recognizes only the bounded Linux/amd64 layout and fixed executable
 names (`bin/initdb`, `bin/postgres`, `bin/psql`) plus `lib/libpq.so.5`. The pin
