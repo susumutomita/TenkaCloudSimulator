@@ -105,17 +105,40 @@ func TestEC2ReadAccessBoundary(t *testing.T) {
 	w = request("GET", "/_simulator/v1/capabilities", "", operator, nil)
 	var caps struct {
 		Services map[string]struct {
-			Console            bool     `json:"console"`
-			ReadOnly           bool     `json:"readOnly"`
-			SessionCredentials bool     `json:"sessionCredentials"`
-			Operations         []string `json:"operations"`
+			Console                   bool                `json:"console"`
+			ReadOnly                  bool                `json:"readOnly"`
+			SessionCredentials        bool                `json:"sessionCredentials"`
+			Operations                []string            `json:"operations"`
+			Pagination                bool                `json:"pagination"`
+			Filters                   bool                `json:"filters"`
+			ResourceLimit             int                 `json:"resourceLimit"`
+			DescribeSelectors         map[string][]string `json:"describeSelectors"`
+			DetachedConfigurationOnly []string            `json:"detachedConfigurationOnly"`
 		} `json:"services"`
 	}
 	if w.Code != 200 || json.Unmarshal(w.Body.Bytes(), &caps) != nil {
 		t.Fatal("capabilities unavailable", w.Code)
 	}
 	ec2, exists := caps.Services["ec2"]
-	if !exists || !ec2.Console || ec2.ReadOnly || ec2.SessionCredentials || !reflect.DeepEqual(ec2.Operations, []string{"DescribeInstances", "DescribeVpcs", "CreateVpc", "DeleteVpc"}) {
-		t.Fatalf("unexpected EC2 capabilities: %+v", ec2)
+	if !exists || !ec2.Console || ec2.ReadOnly || ec2.SessionCredentials {
+		t.Fatalf("unexpected EC2 access capabilities: %+v", ec2)
+	}
+	// The expected public subset is independent of the provider's registration.
+	// Do not accept a missing operation or advertise any unsupported mutation.
+	wantOperations := []string{
+		"DescribeInstances", "DescribeVpcs", "DescribeSubnets", "DescribeSecurityGroups", "DescribeRouteTables",
+		"CreateVpc", "DeleteVpc", "CreateSubnet", "DeleteSubnet", "CreateSecurityGroup", "DeleteSecurityGroup",
+		"CreateNetworkAcl", "DescribeNetworkAcls", "DeleteNetworkAcl",
+	}
+	if !reflect.DeepEqual(ec2.Operations, wantOperations) {
+		t.Fatalf("unexpected EC2 operations: got %v, want %v", ec2.Operations, wantOperations)
+	}
+	wantSelectors := map[string][]string{
+		"DescribeSecurityGroups": {"GroupId.N", "vpc-id"},
+		"DescribeNetworkAcls":    {"NetworkAclId.N", "vpc-id"},
+	}
+	if ec2.Pagination || !ec2.Filters || ec2.ResourceLimit != 1000 || !reflect.DeepEqual(ec2.DescribeSelectors, wantSelectors) ||
+		!reflect.DeepEqual(ec2.DetachedConfigurationOnly, []string{"native security groups", "native network ACLs"}) {
+		t.Fatalf("unexpected EC2 capability limits: %+v", ec2)
 	}
 }
