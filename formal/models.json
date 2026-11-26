@@ -7369,6 +7369,136 @@
       ]
     },
     {
+      "id": "S3MultipartPartReceipt",
+      "model": "formal/S3MultipartPartReceipt.tla",
+      "config": "formal/S3MultipartPartReceipt.cfg",
+      "bounds": "One Console PUT, one scoped ListParts observation, one refresh/view retirement; two part numbers/sizes, a same-size different ETag and a missing row; Boolean scope, completeness and receipt flags with independent peer replacement/removal.",
+      "properties": [
+        "TypeOK",
+        "ConfirmedReadback",
+        "CurrentViewNotice",
+        "NoMutationReplay"
+      ],
+      "limits": "Finite Console receipt/state abstraction only. A scoped terminal read summarizes live page admission; a subsequent SDK write does not invalidate an already supported observation. No proof of HTTP/XML/JavaScript/browser/SQL/MD5 refinement, consistent cross-page snapshots, real AWS behavior, or liveness.",
+      "source_scope": [
+        "internal/server/web/app.js",
+        "tools/console/src/s3-multipart-parts.mjs",
+        "tools/console/src/s3-multipart.jsx"
+      ],
+      "mutants": [
+        {
+          "id": "RequireSuccessfulWrite",
+          "edits": [
+            {
+              "old": "           /\\ ack.status = 200 /\\ ack.strong\n",
+              "new": "           /\\ ack.strong\n",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ConfirmedReadback"
+        },
+        {
+          "id": "RequireStrongETag",
+          "edits": [
+            {
+              "old": "           /\\ ack.status = 200 /\\ ack.strong\n",
+              "new": "           /\\ ack.status = 200\n",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ConfirmedReadback"
+        },
+        {
+          "id": "RequireCurrentUpload",
+          "edits": [
+            {
+              "old": "/\\ observed.bound /\\ observed.full /\\ observed.seen",
+              "new": "/\\ observed.full /\\ observed.seen",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ConfirmedReadback"
+        },
+        {
+          "id": "RequireCompleteListing",
+          "edits": [
+            {
+              "old": "/\\ observed.bound /\\ observed.full /\\ observed.seen",
+              "new": "/\\ observed.bound /\\ observed.seen",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ConfirmedReadback"
+        },
+        {
+          "id": "RequirePartNumber",
+          "edits": [
+            {
+              "old": "           /\\ observed.v.num = ack.part.num\n",
+              "new": "",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ConfirmedReadback"
+        },
+        {
+          "id": "RequirePartSize",
+          "edits": [
+            {
+              "old": "           /\\ observed.v.size = ack.part.size\n",
+              "new": "",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ConfirmedReadback"
+        },
+        {
+          "id": "RequirePartETag",
+          "edits": [
+            {
+              "old": "           /\\ observed.v.tag = ack.part.tag\n",
+              "new": "",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ConfirmedReadback"
+        },
+        {
+          "id": "FenceRetiredView",
+          "edits": [
+            {
+              "old": "           /\\ observed.generation = scope\n",
+              "new": "",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CurrentViewNotice"
+        },
+        {
+          "id": "DoNotPublishFromPUT",
+          "edits": [
+            {
+              "old": "  /\\ Allowed\n  /\\ phase' = \"done\"",
+              "new": "  /\\ (phase = \"await\" \\/ Allowed)\n  /\\ phase' = \"done\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ConfirmedReadback"
+        },
+        {
+          "id": "DoNotReplayOnRefresh",
+          "edits": [
+            {
+              "old": "  /\\ phase' = \"refresh\" /\\ notice' = FALSE\n  /\\ UNCHANGED <<stored, scope, writes, ack, observed>>",
+              "new": "  /\\ phase' = \"refresh\" /\\ notice' = FALSE\n  /\\ writes' = writes+1\n  /\\ UNCHANGED <<stored, scope, ack, observed>>",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "NoMutationReplay"
+        }
+      ]
+    },
+    {
       "id": "S3MultipartState",
       "model": "formal/S3MultipartState.tla",
       "config": "formal/S3MultipartState.cfg",

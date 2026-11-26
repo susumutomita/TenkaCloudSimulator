@@ -9,7 +9,7 @@ import Input from '@cloudscape-design/components/input';
 import SpaceBetween from '@cloudscape-design/components/space-between';
 import Table from '@cloudscape-design/components/table';
 import {useLocale} from './i18n.jsx';
-import {listMultipartParts} from './s3-multipart-parts.mjs';
+import {confirmsSavedMultipartPart,listMultipartParts,parseMultipartPartPage} from './s3-multipart-parts.mjs';
 
 const xml=text=>{const d=new DOMParser().parseFromString(text,'application/xml');if(d.querySelector('parsererror'))throw Error('Invalid XML response');return d;};
 const value=(node,name)=>node.querySelector(name)?.textContent||'';
@@ -24,18 +24,21 @@ export default function S3Multipart({bucket,region,request,onSaving,onComplete})
  const current=selected[0];
  const call=async(url,options={})=>{if(options.method&&options.method!=='GET')attempted.current=true;return request(url,{...options,signal:controller.current.signal,headers:{'X-Simulator-Region':region,...options.headers}})};
  function clearPartDraft(){file.current=null;if(fileInput.current)fileInput.current.value='';setNumber('1');setConfirmation('')}
- async function action(work,apply){
+ async function action(work,apply,onUnconfirmed){
   if(mutating.current||!alive.current)return;mutating.current=true;attempted.current=false;const epoch=++revision.current;setBusy(true);onSaving(true);setError('');setNotice('');setReceipt(null);
   try{const result=await work();if(alive.current&&epoch===revision.current)apply(result)}
-  catch(e){if(alive.current&&epoch===revision.current)setError(e.message+(attempted.current?t(' Refresh state before retrying; an interrupted request may have completed.',' 中断したリクエストが完了している可能性があるため、再試行前に状態を更新してください。'):''))}
+  catch(e){if(alive.current&&epoch===revision.current){
+   if(attempted.current)onUnconfirmed?.();
+   setError(e.message+(attempted.current?t(' Refresh state before retrying; an interrupted request may have completed.',' 中断したリクエストが完了している可能性があるため、再試行前に状態を更新してください。'):''));
+  }}
   finally{mutating.current=false;if(alive.current){setBusy(false);onSaving(false)}}
  }
  const readUploads=async()=>{const d=xml(await(await call('/'+bucket+'?uploads')).text());if(value(d,'IsTruncated')==='true')throw Error(t('Upload list exceeded its local limit.','アップロード一覧がローカル上限を超えました。'));return [...d.querySelectorAll('Upload')].map(n=>({key:value(n,'Key'),id:value(n,'UploadId'),created:value(n,'Initiated')}))};
  function readParts(upload){
   return listMultipartParts(async marker=>{
-   const d=xml(await(await call(path(upload.key)+'?uploadId='+encodeURIComponent(upload.id)+'&part-number-marker='+marker)).text());
-   return {parts:[...d.querySelectorAll('Part')].map(n=>({number:Number(value(n,'PartNumber')),etag:value(n,'ETag'),size:Number(value(n,'Size'))})),
-    truncated:value(d,'IsTruncated'),nextMarker:value(d,'NextPartNumberMarker')};
+   const response=await call(path(upload.key)+'?uploadId='+encodeURIComponent(upload.id)+'&part-number-marker='+marker);
+   if(response.status!==200)throw Error(t('Could not confirm the part listing.','part一覧を確認できませんでした。'));
+   return parseMultipartPartPage(xml(await response.text()),{bucket,key:upload.key,uploadId:upload.id,marker});
   },()=>alive.current);
  }
  function refresh(){action(readUploads,rows=>{setUploads(rows);setSelected([]);setParts([]);clearPartDraft()})}
@@ -52,8 +55,18 @@ export default function S3Multipart({bucket,region,request,onSaving,onComplete})
   const chosen=file.current;if(!chosen)throw Error(t('Choose a part file.','partファイルを選択してください。'));
   if(chosen.size>8388608)throw Error(t('Each part is limited to 8 MiB.','各partは8 MiB以内です。'));
   if(!/^[0-9]+$/.test(number)||Number(number)<1||Number(number)>10000)throw Error(t('Part number must be 1–10000.','part番号は1～10000です。'));
-  const response=await call(path(current.key)+'?uploadId='+encodeURIComponent(current.id)+'&partNumber='+Number(number),{method:'PUT',body:chosen});return {rows:await readParts(current),etag:response.headers.get('ETag')};
- },result=>{setParts(result.rows);clearPartDraft();setNotice('part');setReceipt({key:current.key,id:current.id,etag:result.etag})})}
+  const partNumber=Number(number);
+  const response=await call(path(current.key)+'?uploadId='+encodeURIComponent(current.id)+'&partNumber='+partNumber,{method:'PUT',body:chosen});
+  const etag=response.headers.get('ETag'),rows=await readParts(current);
+  return {rows,etag,confirmed:confirmsSavedMultipartPart(rows,{number:partNumber,size:chosen.size,etag,status:response.status})};
+ },result=>{
+  setParts(result.rows);clearPartDraft();
+  if(!result.confirmed){
+   setError(t('Could not confirm this exact saved part. Review the refreshed list before saving again.','保存したpartの内容を確認できませんでした。再保存する前に、更新された一覧を確認してください。'));
+   return;
+  }
+  setNotice('part');setReceipt({key:current.key,id:current.id,etag:result.etag});
+ },()=>{setSelected([]);setParts([]);clearPartDraft()})}
  function complete(){action(async()=>{
   if(confirmation!=='complete')throw Error(t('Type complete to confirm replacement.','置換を確認するため complete と入力してください。'));
   const actual=await readParts(current);if(!actual.length)throw Error(t('Upload at least one part.','少なくとも1つのpartを保存してください。'));
