@@ -94,11 +94,11 @@ jobs:
         run: python3 test/ci/release_pipeline.py
       - name: Check bounded SNS Console and reference request contracts
         run: node --test test/console/sns-subscriptions.test.mjs test/console/sns-http-reference.test.mjs
-      - name: Check native input and read-only EC2 console regressions
+      - name: Check native input and bounded EC2 console regressions
         run: >-
           node --test test/console/login-native-input.test.mjs test/console/api-reference-json.test.mjs
           tools/console/test/ec2-readonly.test.mjs tools/console/test/ec2-response.test.mjs
-          tools/console/test/ec2-template-preview.test.mjs
+          tools/console/test/ec2-template-preview.test.mjs tools/console/test/ec2-native-subnets.test.mjs
       - name: Check Go format, vet, modules, embedded assets and script gates
         run: |
           make format-check vet verify-assets test-scripts

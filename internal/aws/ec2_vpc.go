@@ -12,6 +12,7 @@ import (
 	"net/http"
 	"net/netip"
 	"regexp"
+	"slices"
 	"strconv"
 )
 
@@ -26,7 +27,13 @@ const (
 	ec2ManagedByCloudFormation = "cloudformation"
 )
 
-var ec2Operations = []string{"DescribeInstances", "DescribeVpcs", "DescribeSubnets", "DescribeSecurityGroups", "DescribeRouteTables", "CreateVpc", "DeleteVpc"}
+var ec2Operations = slices.Concat(
+	[]string{"DescribeInstances", "DescribeVpcs", "DescribeSubnets", "DescribeSecurityGroups", "DescribeRouteTables", "CreateVpc", "DeleteVpc", "CreateSubnet", "DeleteSubnet"},
+	ec2NativeSecurityGroupMutations, ec2NetworkACLOperations,
+)
+
+// EC2Operations lists registered native Query operations, not granted permissions.
+func EC2Operations() []string { return slices.Clone(ec2Operations) }
 
 var (
 	ec2VPCIDPattern  = regexp.MustCompile(`^vpc-[0-9a-f]{8,17}$`)
@@ -44,14 +51,25 @@ func (f *ec2Failure) Error() string { return f.code + ": " + f.message }
 func ec2Invalid(code, message string) *ec2Failure { return &ec2Failure{code, message, 400} }
 
 type ec2Request struct {
-	cidr, vpcID string
-	tags        map[string]string
+	cidr, vpcID   string
+	tags          map[string]string
+	subnet        ec2SubnetMutation
+	securityGroup *ec2NativeSecurityGroupQuery
+	networkACL    *ec2NetworkACLRequest
 }
 
 // permissions are evaluated against the caller's identity policy before any
 // state is read or written. Tagging at creation also needs ec2:CreateTags.
 func (q ec2Request) permissions(action, region string) [][2]string {
+	switch {
+	case q.securityGroup != nil:
+		return q.securityGroup.permissions(action, region)
+	case q.networkACL != nil:
+		return q.networkACL.permissions(action, region)
+	}
 	switch action {
+	case "CreateSubnet", "DeleteSubnet":
+		return q.subnet.permissions(action, region)
 	case "CreateVpc":
 		out := [][2]string{{"ec2:CreateVpc", networkARN(region, "vpc", "*")}}
 		if len(q.tags) > 0 {
@@ -64,11 +82,23 @@ func (q ec2Request) permissions(action, region string) [][2]string {
 	return [][2]string{{"ec2:" + action, "*"}}
 }
 
-// parseEC2Request admits only documented members of each action. An unknown
-// member, including a filter, page token or IPAM/IPv6 option, is rejected
-// rather than ignored.
+// parseEC2Request admits only documented members of each action. SG and NACL
+// own their explicit selectors; unknown members are rejected rather than ignored.
 func parseEC2Request(action string, fields map[string][]string) (ec2Request, *ec2Failure) {
+	if action == "DescribeSecurityGroups" || slices.Contains(ec2NativeSecurityGroupMutations, action) {
+		q, err := parseEC2NativeSGQuery(action, fields)
+		return ec2Request{securityGroup: &q}, err
+	}
+	if slices.Contains(ec2NetworkACLOperations, action) {
+		q, err := parseEC2NetworkACLRequest(action, fields)
+		return ec2Request{networkACL: &q}, err
+	}
 	q := ec2Request{}
+	if action == "CreateSubnet" || action == "DeleteSubnet" {
+		sub, err := parseEC2SubnetMutation(action, fields)
+		q.subnet = sub
+		return q, err
+	}
 	type tagMember struct{ key, value *string }
 	specs := map[int]string{}
 	tags := map[int]map[int]*tagMember{}
@@ -175,7 +205,7 @@ func (g *Gateway) failEC2Mutation(w http.ResponseWriter, e error) {
 		ec2Error(w, failure.code, failure.message, failure.status)
 		return
 	}
-	ec2Error(w, "InternalError", "Local VPC state could not be changed; nothing was committed.", 500)
+	ec2Error(w, "InternalError", "Local EC2 network state could not be changed; nothing was committed.", 500)
 }
 
 type ec2CreateVpcResponse struct {
@@ -201,9 +231,19 @@ func stampEC2Response(out any) {
 		v.XMLNS, v.RequestID = ns, id
 	case *ec2DescribeSecurityGroupsResponse:
 		v.XMLNS, v.RequestID = ns, id
+	case *ec2NativeSecurityGroupMutationResponse:
+		v.XMLNS, v.RequestID = ns, id
+	case *ec2NetworkACLResponse:
+		v.XMLNS, v.RequestID = ns, id
 	case *ec2CreateVpcResponse:
 		v.XMLNS, v.RequestID = ns, id
 	case *ec2DeleteVpcResponse:
+		v.XMLNS, v.RequestID = ns, id
+	case *ec2CreateSubnetResponse:
+		v.XMLNS, v.RequestID = ns, id
+	case *ec2DeleteSubnetResponse:
+		v.XMLNS, v.RequestID = ns, id
+	case *ec2DescribeSubnetsResponse:
 		v.XMLNS, v.RequestID = ns, id
 	}
 }
@@ -227,17 +267,31 @@ func nativeVPCs(ctx context.Context, tx *sql.Tx, region string) ([]EC2NetworkRes
 	}
 	out := []EC2NetworkResource{}
 	for _, v := range all {
-		if v.Kind != "AWS::EC2::VPC" {
+		switch v.Kind {
+		case "AWS::EC2::VPC":
+			claims, err := cloudFormationClaims(ctx, tx, region, v.ID)
+			if err != nil {
+				return nil, err
+			}
+			if claims != 0 {
+				return nil, fmt.Errorf("EC2-owned VPC has a stack claim")
+			}
+			out = append(out, v)
+		case ec2NativeSubnetKind:
+			if _, err := nativeSubnetReadback(ctx, tx, v); err != nil {
+				return nil, err
+			}
+		case ec2SecurityGroupKind:
+			if _, err := readEC2NativeSecurityGroup(ctx, tx, region, v.ID); err != nil {
+				return nil, err
+			}
+		case ec2NetworkACLKind:
+			if _, err := readNativeNetworkACL(ctx, tx, region, v.ID); err != nil {
+				return nil, err
+			}
+		default:
 			return nil, fmt.Errorf("unexpected EC2-owned network kind")
 		}
-		claims, e := cloudFormationClaims(ctx, tx, region, v.ID)
-		if e != nil {
-			return nil, e
-		}
-		if claims != 0 {
-			return nil, fmt.Errorf("EC2-owned VPC has a stack claim")
-		}
-		out = append(out, v)
 	}
 	return out, nil
 }

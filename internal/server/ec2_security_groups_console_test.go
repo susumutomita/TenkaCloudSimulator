@@ -52,6 +52,11 @@ func TestEC2SecurityGroupsConsoleCapability(t *testing.T) {
 				}
 				delete(ec2, name)
 			}
+			subnet, got := ec2["subnetLifecycle"].([]string)
+			if got != c.want || got && strings.Join(subnet, ",") != "DescribeSubnets,CreateSubnet,DeleteSubnet" {
+				t.Fatal("unexpected subnet lifecycle advertisement")
+			}
+			delete(ec2, "subnetLifecycle")
 			if ec2["console"] != true || len(ec2) != 1 {
 				t.Fatal("the pane must not modify other EC2 capabilities")
 			}

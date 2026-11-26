@@ -1410,6 +1410,15 @@ REQUIRED_SOURCE_SCOPES['EntraVerificationFixture'] = {
     'internal/azure/entra/verification_fixture.go',
 }
 
+BASE_MODELS.add('EC2NativeVPCChildren')
+BASE_INVARIANTS['EC2NativeVPCChildren'] = {'TypeOK', 'GrantAtomic', 'RejectOtherOwner', 'ParentDependency', 'SiblingFrame', 'ReadScoped', 'ReplayNoRecreate', 'ReceiptTracksLiveACL'}
+REQUIRED_MUTANTS['EC2NativeVPCChildren'] = {'IgnoreParentGrant', 'IgnoreAllocatedGrant', 'AdoptStackParent', 'DeleteParentWithChildren', 'DeletePeerKinds', 'ReadForeignScope', 'RecreateRetiredACL', 'LoseACLReceipt'}
+REQUIRED_SOURCE_SCOPES['EC2NativeVPCChildren'] = {'internal/aws/cloudformation.go', 'internal/aws/ec2_read.go', 'internal/aws/ec2_vpc.go', 'internal/aws/ec2_subnet_native.go', 'internal/aws/ec2_network_acl.go', 'internal/aws/ec2_network_acl_store.go', 'internal/aws/ec2_security_groups_read.go', 'internal/aws/ec2_security_groups_native_query.go', 'internal/aws/ec2_security_groups_native_store.go', 'internal/server/server.go'}
+
+BASE_MODELS.add('EC2NativeSubnetLifecycle')
+BASE_INVARIANTS['EC2NativeSubnetLifecycle'] = {'AuthorizedWrites', 'ExactRead', 'Nonoverlap', 'Bounded', 'ExactDelete', 'NativeParent', 'StackUnchanged'}
+REQUIRED_MUTANTS['EC2NativeSubnetLifecycle'] = {'AdoptStackParent', 'IgnoreLimit', 'AllowOverlap', 'UseForeignRegion', 'DeleteDependent', 'ReadAllRegions', 'AllowOutsideCIDR', 'DeleteStackOwned', 'SkipParentGrant', 'SkipChildGrant'}
+REQUIRED_SOURCE_SCOPES['EC2NativeSubnetLifecycle'] = {'tools/console/src/ec2-native-subnets.mjs', 'internal/aws/ec2_network.go', 'internal/aws/ec2_read.go', 'tools/console/src/ec2-vpc-native-subnets.jsx', 'internal/aws/ec2_subnet_native.go', 'internal/aws/ec2_vpc.go', 'tools/console/src/ec2-readonly.jsx', 'internal/server/web/app.js', 'tools/console/src/main.jsx', 'internal/server/server.go'}
 BASE_MODELS.add('EC2TemplatePreviewEpoch')
 BASE_INVARIANTS['EC2TemplatePreviewEpoch'] = {'TypeOK', 'OrdinaryPreview', 'BoundedDraft', 'FixedDeclarationRead', 'OnlyCurrentIdentity', 'OnlyCurrentRegion', 'OnlyCurrentDraft', 'NoClosedOrHandoffResult', 'EvidencePreserved', 'NoReturnedValues'}
 REQUIRED_MUTANTS['EC2TemplatePreviewEpoch'] = {'AdmitClosed', 'AdmitHandoff', 'OversizeDraft', 'AllowMutation', 'AllowTemplateURL', 'AcceptStaleIdentity', 'AcceptStaleRegion', 'AcceptStaleDraft', 'AcceptAfterClose', 'AcceptAfterHandoff', 'RetainOldDraft', 'RefusalAsAccepted', 'InvalidAsAccepted', 'MalformedAsAccepted', 'ShowReturnedValue'}

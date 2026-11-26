@@ -4,15 +4,17 @@
 `X-Simulator-Service: ec2` and `X-Simulator-Region` select the native Query/XML
 subset. Supply `Version=2016-11-15` and `Action=DescribeInstances`,
 `Action=DescribeVpcs`, `Action=DescribeSubnets`, `Action=DescribeSecurityGroups`,
-`Action=DescribeRouteTables`, `Action=CreateVpc` or `Action=DeleteVpc`. Discovery uses the EC2 namespace and
+`Action=DescribeRouteTables`, `Action=CreateVpc`, `Action=DeleteVpc`,
+`Action=CreateSubnet` or `Action=DeleteSubnet`, plus the named detached SG and ACL
+operations below. Discovery uses the EC2 namespace and
 lower-camel-case `reservationSet/instancesSet/item`, `vpcSet/item`,
 `subnetSet/item`, `securityGroupInfo/item` and `routeTableSet/item` fields.
 A request body is bounded to 64 KiB.
 
 ## Discovery
 
-Discovery reads CloudFormation-owned resources from the same local SQLite database,
-checking saved resource, region, stack ownership and network identity consistency.
+Discovery reads CloudFormation resources and native EC2 networking data from the
+same SQLite database, checking saved resource, region, owner and network identity.
 It does not create resources or make cloud calls. The host's existing local token
 and browser session authentication still applies. Selected exercise identities
 need the matching `ec2:DescribeInstances`, `ec2:DescribeVpcs`,
@@ -20,9 +22,9 @@ need the matching `ec2:DescribeInstances`, `ec2:DescribeVpcs`,
 One database/token authority per team is still required; exercise identities are
 not tenant isolation. Native STS session credentials are not supported here.
 
-Discovery has no filters, selected-ID queries or pagination.
-Unsupported fields are rejected, not silently ignored. More than 1000 matching
-resources fails the whole request, rather than returning a truncated list.
+Only the documented SG and ACL selectors support IDs or the `vpc-id` filter;
+there is no pagination. Other fields are rejected. Over-bound results fail rather
+than returning a truncated list.
 
 Instances expose only IDs, image/type, subnet/VPC, security-group IDs and tags.
 Select an instance in the console's **EC2 instances** list to see its saved
@@ -85,32 +87,49 @@ and [RunInstances](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_Ru
 
 ### Security-group readback
 
-`DescribeSecurityGroups` lists CloudFormation-owned groups in the selected
-region, ordered by group ID. EC2-owned standalone VPCs do not acquire groups.
-Each item reports the local account ID, group ID, description, VPC ID, optional
-saved tags and current ingress rules (TCP ports and canonical IPv4 CIDRs).
-The group and its VPC must be typed members of the same stack. The query
-reads persisted rules, not the template, and does not change state. A
-single-instance scoped session cannot list security groups.
+`DescribeSecurityGroups` reads CloudFormation-owned groups and detached native
+groups in one regional SQLite snapshot, ordered by group ID. Describe needs
+`ec2:DescribeSecurityGroups` on `*`. It accepts up to 50 explicit `GroupId.N`
+values and the optional `vpc-id` selector with up to 50 VPC IDs; these narrow
+the response, not authorization. Other filters and paging are unsupported.
+Legacy rows preserve local account, group ID, description, VPC ID, tags, and
+persisted TCP/IPv4 ingress rules. Invalid ownership or text prevents a partial
+success. No metadata returned here proves guest packet filtering.
 
-An empty region returns an empty list. Inconsistent persisted ownership or
-text that cannot round-trip through XML 1.0 fails the whole request with
-`InternalError`, leaving existing data unchanged. Valid Unicode, tab,
-line feed, and carriage return are preserved. This read does not support
-group filters/ID selectors, paging, group names, egress, IPv6, referenced
-groups, or rule mutation. It does not simulate or verify packet filtering.
+On an **EC2-managed IPv4 VPC**, `CreateSecurityGroup` records a detached group
+with explicit `VpcId`, `GroupName` and `GroupDescription` and optional native
+tag specification. The name is unique case-insensitively within its VPC.
+Creation authorizes the exact parent VPC, new security-group wildcard, and
+allocated group ARN; tags require `ec2:CreateTags` on the group. A native group
+has `groupName` and the local `simulatorSecurityGroupMode=detached-config-only`
+marker. Delete requires the exact `GroupId` resource ARN. Stack-owned groups
+cannot be adopted or deleted through this API. There is no default group,
+rule mutation, egress, native attachment, execution, or native SG mutation UI.
 
-In the signed-in **VPC** Console, select a CloudFormation-managed VPC and
-choose a group under **Resource details → Security groups**. The pane uses
-the same native regional read with your current identity and shows only
-groups for the selected VPC. It shows the description, TCP ports, IPv4
-CIDRs and tags, including empty tag values. **Refresh security groups**
-re-reads saved configuration. A refused or unsuccessful read is not shown
-as an empty list. No read is sent for EC2-managed VPCs or inside a scoped
-handoff. The pane cannot create, attach, edit or delete a security group.
+The existing CloudFormation-only **VPC → Resource details → Security groups**
+pane reads the saved rules and tags for that exact VPC using the supported
+`vpc-id` selector and current identity, then validates the selected rows. It
+still offers no mutation. EC2-managed VPCs and instance-scoped Console handoffs
+do not use that pane. A refusal or incomplete reply is not an empty list.
 
-[EC2 API reference: DescribeSecurityGroups](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_DescribeSecurityGroups.html).
-Focused check: `go test ./internal/aws -run '^TestEC2DescribeSecurityGroupsContract$' -count=1`.
+[CreateSecurityGroup](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_CreateSecurityGroup.html),
+[DescribeSecurityGroups](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_DescribeSecurityGroups.html),
+[DeleteSecurityGroup](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_DeleteSecurityGroup.html).
+
+### Detached network ACL discovery and metadata
+
+`CreateNetworkAcl`, `DescribeNetworkAcls` and `DeleteNetworkAcl` support the
+[explicit detached configuration contract](ec2-detached-network-acls.md) in an
+EC2-managed VPC. Group/ACL mutations and reads are refused in a single-instance
+handoff. ACLs do not create a default ACL, do not bind a subnet, and do not
+provide enforcement or a Console pane.
+
+To verify all three child kinds in one owned VPC, run
+`SIMULATOR_BINARY=/absolute/path/to/simulator python3 test/console/ec2_native_network_sdk.py`
+with the pinned boto3/botocore versions from `scripts/requirements-test.txt`.
+This uses isolated, authenticated processes over numeric loopback, including a
+restart, exact grants and typed cleanup. It neither launches a guest nor talks
+to AWS.
 
 ## Route-table readback
 
@@ -168,8 +187,18 @@ other member are rejected with `UnsupportedOperation`, never ignored or reported
 Ownership is never shared. `DeleteVpc` on a CloudFormation-owned VPC fails with
 `UnsupportedOperation`; delete its stack instead. A CloudFormation subnet, route
 table, security group or gateway attachment cannot reference an EC2-owned VPC, so
-the stack is refused and the VPC is unchanged. Native creation or mutation of subnets, route tables and
-gateways, `ModifyVpcAttribute` and tag edits after creation are not implemented.
+the stack is refused and the VPC is unchanged. For an EC2-owned VPC,
+[the native subnet lifecycle](ec2-native-subnet.md) is available without changing ownership.
+Detached native security groups and network ACLs also use the existing EC2-owned
+VPC and shared 1,000-resource bound. Deletion of a native VPC is refused while
+any native subnet, group or ACL depends on it. Remove the children through their
+own APIs. Native route/gateway creation or attachment, `ModifyVpcAttribute`,
+VPC endpoints and tag edits are not implemented.
+
+**Existing databases remain readable when upgraded. Do not downgrade a
+database after creating the new native child kinds:** earlier Simulators do not
+recognize those types and can reject VPC discovery. No migration-back or
+downgrade procedure has been verified.
 
 Exercise identities need `ec2:CreateVpc` on `arn:aws:ec2:<region>:000000000000:vpc/*`,
 plus `ec2:CreateTags` on the same resource when tags are supplied, and

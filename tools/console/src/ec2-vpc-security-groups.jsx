@@ -56,7 +56,7 @@ export default function VPCSecurityGroups({vpc, region, request}) {
       setState(loading);setRefresh(v=>v+1);
     }}>{t('Refresh security groups','セキュリティグループを更新')}</Button>}>{title}</Header>
     {!applicable ? <Box color="text-body-secondary">{managedBy==='ec2'
-      ? t('EC2-managed VPCs do not have security groups in this simulator.', 'このシミュレーターでは EC2 管理の VPC にセキュリティグループはありません。')
+      ? t('This pane displays CloudFormation-managed groups only. Detached EC2 security groups are available through the native API.', 'この画面は CloudFormation 管理のグループ専用です。未接続の EC2 セキュリティグループはネイティブ API で操作できます。')
       : t('Security group readback requires a CloudFormation-managed VPC.', 'セキュリティグループの読み取りには CloudFormation 管理の VPC が必要です。')}</Box>
       : state.status==='loading' ? <StatusIndicator type="loading">{t('Loading security groups','セキュリティグループを読み込み中')}</StatusIndicator>
       : state.status==='denied' ? <Alert type="error" header={t('Security group access denied','セキュリティグループの参照が拒否されました')}>{t('The current identity needs ec2:DescribeSecurityGroups. No group data was shown.', '現在の ID には ec2:DescribeSecurityGroups が必要です。グループ情報は表示していません。')}</Alert>

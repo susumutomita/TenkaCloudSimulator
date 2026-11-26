@@ -76,7 +76,7 @@ test('wrong shape, claim or bounds produce errors instead of partial or valid em
   ]) assert.throws(()=>parseEC2SecurityGroups(doc,selected.id),/Invalid or incomplete EC2 response/);
 });
 
-test('calls fixed native identity-preserving regional POST, no selected-ID argument or write', async () => {
+test('calls fixed native identity-preserving POST for the selected CFN VPC, no write', async () => {
   const signal = new AbortController().signal, requests=[];
   const fixture=async (path,options) => {
     requests.push([path,options]);
@@ -89,7 +89,7 @@ test('calls fixed native identity-preserving regional POST, no selected-ID argum
   assert.equal(path,'/'); assert.equal(opts.method,'POST');
   assert.equal(opts.redirect,'error'); assert.equal(opts.signal,signal);
   assert.deepEqual(opts.headers,{'Content-Type':'application/x-www-form-urlencoded','X-Simulator-Service':'ec2','X-Simulator-Region':'us-west-2'});
-  assert.equal(opts.body.toString(),'Action=DescribeSecurityGroups&Version=2016-11-15');
+  assert.deepEqual([...opts.body],[['Action','DescribeSecurityGroups'],['Version','2016-11-15'],['Filter.1.Name','vpc-id'],['Filter.1.Value.1',selected.id]]);
   for (const managedBy of ['ec2','']) await assert.rejects(loadVpcSecurityGroups(fixture,'us-west-2',{...selected, managedBy}),/CloudFormation-managed/);
   assert.equal(requests.length,1);
 });
@@ -125,7 +125,7 @@ test('real React pane shows progress, a native-managed message, and readable esc
     request:()=>assert.fail('static rendering makes no call')}));
   assert.match(render(selected),/Loading security groups/);
   assert.match(render(selected),/Refresh security groups/);
-  assert.match(render({...selected,managedBy:'ec2'}),/EC2-managed VPCs do not have security groups/);
+  assert.match(render({...selected,managedBy:'ec2'}),/This pane displays CloudFormation-managed groups only/);
   assert.doesNotMatch(render({...selected,managedBy:'ec2'}),/Loading security groups|Refresh security groups/);
   const details=group=>renderToStaticMarkup(createElement(module.exports.SecurityGroupDetails,{group}));
   const full=details(parseEC2SecurityGroups(response([row({})]),selected.id)[0]);

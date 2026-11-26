@@ -1,56 +1,728 @@
 {
   "version": 1,
-  "base_sha": "67c27f2846a16c14d8834f821583e6b45e140617",
+  "base_sha": "86d904c7967356cfe1221284fe50352662e22e0e",
   "changes": [
     {
-      "path": "internal/server/web/app.js",
-      "sha256": "6ccbf28863a2970dc83d37c6024979b742703071a6ef987b932e8ec8c13353b6",
+      "path": ".github/workflows/ci.yml",
+      "sha256": "70611c49468a24fbe6a7d756fe4cdbf5ec2b52c92ccc623964b916f1c56e8de1",
+      "disposition": "formal-infrastructure",
+      "reason": "Register the bounded subnet lifecycle and its independent tests; existing gates, required coverage floors and remaining CI checks are unchanged.",
+      "models": []
+    },
+    {
+      "path": "README.md",
+      "sha256": "e053e7d09ae7e42658e0c211a54ce33e22d62ec79335fedd3ec22073542143dd",
+      "disposition": "documentation",
+      "reason": "State the bounded native subnet lifecycle and its ownership, permission and runtime limits.",
+      "models": []
+    },
+    {
+      "path": "docs/console.md",
+      "sha256": "df6f24855ec2c9a1395eab3f4ae7795b2a390ed6fbe87de9342974af6ba4426d",
+      "disposition": "documentation",
+      "reason": "Document public native topology subset, unsupported GUI/packet routes, and downgrade limitations; no execution or persistence change.",
+      "models": []
+    },
+    {
+      "path": "docs/design/0001-go-standalone.md",
+      "sha256": "2d8cbfb945f077fefb118dfbe64d91fd2d43cae840bc90a0f0c7d384a23809c2",
+      "disposition": "documentation",
+      "reason": "State the bounded native subnet lifecycle and its ownership, permission and runtime limits.",
+      "models": []
+    },
+    {
+      "path": "docs/ec2-detached-network-acls.md",
+      "sha256": "313add6fc53e4eaa0fa964570e3e01ea6ae5114f83842d1e0aea39ebbb96b8ee",
+      "disposition": "documentation",
+      "reason": "Document public native topology subset, unsupported GUI/packet routes, and downgrade limitations; no execution or persistence change.",
+      "models": []
+    },
+    {
+      "path": "docs/ec2-native-subnet.md",
+      "sha256": "62d000b5bab3c3da469ac16f996aa172ebf3c366731b150e667d21edd49e4a67",
+      "disposition": "documentation",
+      "reason": "State the bounded native subnet lifecycle and its ownership, permission and runtime limits.",
+      "models": []
+    },
+    {
+      "path": "docs/ec2-read-discovery.md",
+      "sha256": "98f5138fb2559578f0bf83713b64c66b268b278bc87efd94504669ffe307420d",
+      "disposition": "documentation",
+      "reason": "State the bounded native subnet lifecycle and its ownership, permission and runtime limits.",
+      "models": []
+    },
+    {
+      "path": "formal/EC2NativeSubnetLifecycle.cfg",
+      "sha256": "4f070ee84ef70f0a18dac3a18181550ee835bd5c1d181c13b35135092eab3a8d",
       "disposition": "modeled",
-      "reason": "Canonical rebuild of the whole console for WAF-only presentation strings. The aggregate bundle contains the previously modeled SimpleDB Select view with its input source and existing owner/paging logic unchanged.",
+      "reason": "Expose only same-region native-subnet writes and bounded regional saved readback. The binding covers the abstract owned-store admission; HTTP/XML, authorization wiring, stale UI and generated asset correspondence are checked separately.",
       "models": [
         {
-          "id": "SimpleDBSelectConsoleEpoch",
+          "id": "EC2NativeSubnetLifecycle",
           "properties": [
-            "ReadAdmission",
-            "OnlyCurrentOwner"
+            "StackUnchanged",
+            "AuthorizedWrites",
+            "NativeParent",
+            "Nonoverlap",
+            "Bounded",
+            "ExactDelete",
+            "ExactRead"
           ],
-          "limits": "Existing finite SimpleDB owner and read-admission model applies to that unchanged component inside the aggregate artifact only. It does not model WAF localization, rendered widgets, or prove bundle refinement. WAF has separate focused mounted verification."
+          "limits": "Finite atomic store choices and regional read evidence only; no YAML/XML/parser/HTTP implementation, CIDR arithmetic, Windows/browser, exact timing, AWS runtime, or code-refinement proof."
         }
       ]
     },
     {
-      "path": "test/console/waf-lifecycle.test.mjs",
-      "sha256": "54ffb93c8185389ee8694ca8fed74368d95523208f5ba2c10c6ccf8e11e51fdb",
-      "disposition": "test-support",
-      "reason": "Execute the shipped WAF error helper in the lifecycle VM and pin localized notice state plus update ordering and ownership. No production, gate or modeled state change.",
+      "path": "formal/EC2NativeSubnetLifecycle.tla",
+      "sha256": "958cad6e9f59895f55e08ce9be37621fb190e691369e5249e97b0fb0999d8266",
+      "disposition": "modeled",
+      "reason": "Expose only same-region native-subnet writes and bounded regional saved readback. The binding covers the abstract owned-store admission; HTTP/XML, authorization wiring, stale UI and generated asset correspondence are checked separately.",
+      "models": [
+        {
+          "id": "EC2NativeSubnetLifecycle",
+          "properties": [
+            "StackUnchanged",
+            "AuthorizedWrites",
+            "NativeParent",
+            "Nonoverlap",
+            "Bounded",
+            "ExactDelete",
+            "ExactRead"
+          ],
+          "limits": "Finite atomic store choices and regional read evidence only; no YAML/XML/parser/HTTP implementation, CIDR arithmetic, Windows/browser, exact timing, AWS runtime, or code-refinement proof."
+        }
+      ]
+    },
+    {
+      "path": "formal/EC2NativeVPCChildren.cfg",
+      "sha256": "2b99958756c48d6965651c80af32b96d507b8e1d35882e4f674b2cc5d6240b9a",
+      "disposition": "modeled",
+      "reason": "Bounded model and invariant configuration for typed child ownership, dependency-safe removal, true scoped reads and no ACL resurrection.",
+      "models": [
+        {
+          "id": "EC2NativeVPCChildren",
+          "properties": [
+            "GrantAtomic",
+            "RejectOtherOwner",
+            "ParentDependency",
+            "SiblingFrame",
+            "ReadScoped",
+            "ReplayNoRecreate",
+            "ReceiptTracksLiveACL"
+          ],
+          "limits": "Child creation/deletion, parent guards, exact grant aggregation and retired ACL replay are bounded atomic abstractions. No XML, SQL/error timing, packet enforcement, SG name/tag rules, credentials, UI, restart or implementation refinement proof."
+        }
+      ]
+    },
+    {
+      "path": "formal/EC2NativeVPCChildren.tla",
+      "sha256": "d248f62a6405942d5abb83e10ae0e6884523fef5bd3fe1cd668766900d8ed9bd",
+      "disposition": "modeled",
+      "reason": "Bounded model and invariant configuration for typed child ownership, dependency-safe removal, true scoped reads and no ACL resurrection.",
+      "models": [
+        {
+          "id": "EC2NativeVPCChildren",
+          "properties": [
+            "GrantAtomic",
+            "RejectOtherOwner",
+            "ParentDependency",
+            "SiblingFrame",
+            "ReadScoped",
+            "ReplayNoRecreate",
+            "ReceiptTracksLiveACL"
+          ],
+          "limits": "Child creation/deletion, parent guards, exact grant aggregation and retired ACL replay are bounded atomic abstractions. No XML, SQL/error timing, packet enforcement, SG name/tag rules, credentials, UI, restart or implementation refinement proof."
+        }
+      ]
+    },
+    {
+      "path": "formal/models.json",
+      "sha256": "9551b0afe96e33029c1cc0cbfea6df525971d2048432d860d19ddea5f1f4b393",
+      "disposition": "formal-infrastructure",
+      "reason": "Register the bounded subnet lifecycle and its independent tests; existing gates, required coverage floors and remaining CI checks are unchanged.",
       "models": []
     },
     {
-      "path": "test/e2e/wafv2_console.py",
-      "sha256": "8c8262f2873c755d342ab095980239809474346ec8d46487daaa801ac9fc4a19",
+      "path": "internal/aws/cloudformation.go",
+      "sha256": "0cd25f1ceded8e3a092192bcf612a422d9c5a7fbf0a51b00213a54401bad0cc9",
+      "disposition": "modeled",
+      "reason": "Initialize both typed native child companion tables after the common network table. No CloudFormation child compiler or owner adoption is added.",
+      "models": [
+        {
+          "id": "EC2NativeVPCChildren",
+          "properties": [
+            "ParentDependency",
+            "SiblingFrame",
+            "ReceiptTracksLiveACL"
+          ],
+          "limits": "Child creation/deletion, parent guards, exact grant aggregation and retired ACL replay are bounded atomic abstractions. No XML, SQL/error timing, packet enforcement, SG name/tag rules, credentials, UI, restart or implementation refinement proof."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/ec2_describe_security_groups_contract_test.go",
+      "sha256": "0060b6bdc10bc44638dec1e04a2ca1907c7f8c95b019e9c18c50e05c49b81a87",
       "disposition": "test-support",
-      "reason": "Extends the existing WAF browser regression to check EN/JA labels and persist an actual localized action change through SDK readback. No runtime or test gate change.",
+      "reason": "Deterministic local fixtures verify the explicit child/aggregate lifecycle, authorization, regional state and cleanup; no live AWS.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/ec2_native_nacl_line_regression_test.go",
+      "sha256": "6fe7ac5f75c820c03a62a29f83e3046cc7b26c6f8606fcd9c2cadbeedea5c6ff",
+      "disposition": "test-support",
+      "reason": "Adds a focused regression for native EC2 VPC state, intended failures and cleanup; no production code, coverage floor or required gate changes.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/ec2_native_sg_line_regression_test.go",
+      "sha256": "38a105fb14dc8ba19ab7f520efa17fd85ab69a52be03328942fef5ae09700af0",
+      "disposition": "test-support",
+      "reason": "Adds a focused regression for native EC2 VPC state, intended failures and cleanup; no production code, coverage floor or required gate changes.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/ec2_native_subnet_line_regression_test.go",
+      "sha256": "1d2b0621cbf2b83cbb357798d77e355bbdb2634c93cce8f215182448b6c35f60",
+      "disposition": "test-support",
+      "reason": "Adds a focused regression for native EC2 VPC state, intended failures and cleanup; no production code, coverage floor or required gate changes.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/ec2_network.go",
+      "sha256": "bc544836abbbe3f5229596433107f976bdfab0a8515fad071413cc1ce73076ef",
+      "disposition": "modeled",
+      "reason": "Expose only same-region native-subnet writes and bounded regional saved readback. The binding covers the abstract owned-store admission; HTTP/XML, authorization wiring, stale UI and generated asset correspondence are checked separately.",
+      "models": [
+        {
+          "id": "EC2NativeSubnetLifecycle",
+          "properties": [
+            "StackUnchanged",
+            "AuthorizedWrites",
+            "NativeParent",
+            "Nonoverlap",
+            "Bounded",
+            "ExactDelete",
+            "ExactRead"
+          ],
+          "limits": "Finite atomic store choices and regional read evidence only; no YAML/XML/parser/HTTP implementation, CIDR arithmetic, Windows/browser, exact timing, AWS runtime, or code-refinement proof."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/ec2_network_acl.go",
+      "sha256": "67799b00d09f33f9f97e342549c31a4716fb2aebf2b8eb15da001cc45bf543df",
+      "disposition": "modeled",
+      "reason": "Admit the bounded ACL Query operations, explicit identity grants and selectors, with no executable packet capability.",
+      "models": [
+        {
+          "id": "EC2NativeVPCChildren",
+          "properties": [
+            "GrantAtomic",
+            "SiblingFrame",
+            "ReadScoped",
+            "ReplayNoRecreate"
+          ],
+          "limits": "Child creation/deletion, parent guards, exact grant aggregation and retired ACL replay are bounded atomic abstractions. No XML, SQL/error timing, packet enforcement, SG name/tag rules, credentials, UI, restart or implementation refinement proof."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/ec2_network_acl_registration_test.go",
+      "sha256": "b08f1a709f7de239570a2da47371d5322a6031400767d4b5fd6b4e1c2989deb3",
+      "disposition": "test-support",
+      "reason": "Deterministic local fixtures verify the explicit child/aggregate lifecycle, authorization, regional state and cleanup; no live AWS.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/ec2_network_acl_store.go",
+      "sha256": "3bd1f8525b86905ff3a8fd1cfcb88b285857c86688c70cfcddbd255b40327b27",
+      "disposition": "modeled",
+      "reason": "Persist network ACLs and bounded regional replay receipts in the same transaction, refusing replay of removed resources and foreign parents.",
+      "models": [
+        {
+          "id": "EC2NativeVPCChildren",
+          "properties": [
+            "RejectOtherOwner",
+            "ParentDependency",
+            "SiblingFrame",
+            "ReplayNoRecreate",
+            "ReceiptTracksLiveACL"
+          ],
+          "limits": "Child creation/deletion, parent guards, exact grant aggregation and retired ACL replay are bounded atomic abstractions. No XML, SQL/error timing, packet enforcement, SG name/tag rules, credentials, UI, restart or implementation refinement proof."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/ec2_network_acl_test.go",
+      "sha256": "72c2123637ef64938911495b2c147cc5156fa0e219c3a2d0a352747e08aef135",
+      "disposition": "test-support",
+      "reason": "Deterministic local fixtures verify the explicit child/aggregate lifecycle, authorization, regional state and cleanup; no live AWS.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/ec2_read.go",
+      "sha256": "d85e9c9927479cf353309de702669930d0afaf2b6ae52f69a972c733ad7799f8",
+      "disposition": "modeled",
+      "reason": "Compose native dispatch, late concrete ARN admission and typed regional snapshots without altering CloudFormation or instance handoff authority.",
+      "models": [
+        {
+          "id": "EC2NativeSubnetLifecycle",
+          "properties": [
+            "StackUnchanged",
+            "AuthorizedWrites",
+            "NativeParent",
+            "Nonoverlap",
+            "Bounded",
+            "ExactDelete",
+            "ExactRead"
+          ],
+          "limits": "Finite atomic store choices and regional read evidence only; no YAML/XML/parser/HTTP implementation, CIDR arithmetic, Windows/browser, exact timing, AWS runtime, or code-refinement proof."
+        },
+        {
+          "id": "EC2NativeVPCChildren",
+          "properties": [
+            "GrantAtomic",
+            "ReadScoped",
+            "SiblingFrame"
+          ],
+          "limits": "Child creation/deletion, parent guards, exact grant aggregation and retired ACL replay are bounded atomic abstractions. No XML, SQL/error timing, packet enforcement, SG name/tag rules, credentials, UI, restart or implementation refinement proof."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/ec2_security_groups_native_query.go",
+      "sha256": "3ef3a093fa52ccb1df3d7ce08fd4f3813dbcedea37a10b31ed7b948aa3cfc5ee",
+      "disposition": "modeled",
+      "reason": "Admit the bounded native group Query operations and exact parent/group permissions with regional read selectors.",
+      "models": [
+        {
+          "id": "EC2NativeVPCChildren",
+          "properties": [
+            "GrantAtomic",
+            "SiblingFrame",
+            "ReadScoped"
+          ],
+          "limits": "Child creation/deletion, parent guards, exact grant aggregation and retired ACL replay are bounded atomic abstractions. No XML, SQL/error timing, packet enforcement, SG name/tag rules, credentials, UI, restart or implementation refinement proof."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/ec2_security_groups_native_registration_test.go",
+      "sha256": "c4314648bb23c33aedab638a3e04f336e0b76c8a5851e7aea9a9ad130e9c09bf",
+      "disposition": "test-support",
+      "reason": "Deterministic local fixtures verify the explicit child/aggregate lifecycle, authorization, regional state and cleanup; no live AWS.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/ec2_security_groups_native_store.go",
+      "sha256": "53d0ddd15141c7457b321465b2f5c1e53c4f1ca0abcbb37a19229f0731600001",
+      "disposition": "modeled",
+      "reason": "Persist and validate detached groups and their exact FK-bound VPC/name; do not detach a sibling or adopt any foreign VPC.",
+      "models": [
+        {
+          "id": "EC2NativeVPCChildren",
+          "properties": [
+            "GrantAtomic",
+            "RejectOtherOwner",
+            "ParentDependency",
+            "SiblingFrame",
+            "ReadScoped"
+          ],
+          "limits": "Child creation/deletion, parent guards, exact grant aggregation and retired ACL replay are bounded atomic abstractions. No XML, SQL/error timing, packet enforcement, SG name/tag rules, credentials, UI, restart or implementation refinement proof."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/ec2_security_groups_native_test.go",
+      "sha256": "0045ff5daf24b185e681b12d8791f0399dbe499fa62ab0e0d097f8deb52f54c1",
+      "disposition": "test-support",
+      "reason": "Deterministic local fixtures verify the explicit child/aggregate lifecycle, authorization, regional state and cleanup; no live AWS.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/ec2_security_groups_read.go",
+      "sha256": "806100896a054f445521715c9aae2b8ada9215a3b322171256928910e9f3294d",
+      "disposition": "modeled",
+      "reason": "Add names/type markers only to native group projection; existing stack-owned readback is not adopted by native mutations.",
+      "models": [
+        {
+          "id": "EC2NativeVPCChildren",
+          "properties": [
+            "SiblingFrame",
+            "ReadScoped"
+          ],
+          "limits": "Child creation/deletion, parent guards, exact grant aggregation and retired ACL replay are bounded atomic abstractions. No XML, SQL/error timing, packet enforcement, SG name/tag rules, credentials, UI, restart or implementation refinement proof."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/ec2_subnet_native.go",
+      "sha256": "31c7637be1773b3acb03e46782e0ca5ae52d37a420b9ca9d6d69e103f580efc7",
+      "disposition": "modeled",
+      "reason": "Subnet storage checks the parent and exact generated resource; native subnet CRUD shares the typed-child frame.",
+      "models": [
+        {
+          "id": "EC2NativeSubnetLifecycle",
+          "properties": [
+            "StackUnchanged",
+            "AuthorizedWrites",
+            "NativeParent",
+            "Nonoverlap",
+            "Bounded",
+            "ExactDelete",
+            "ExactRead"
+          ],
+          "limits": "Finite atomic store choices and regional read evidence only; no YAML/XML/parser/HTTP implementation, CIDR arithmetic, Windows/browser, exact timing, AWS runtime, or code-refinement proof."
+        },
+        {
+          "id": "EC2NativeVPCChildren",
+          "properties": [
+            "GrantAtomic",
+            "RejectOtherOwner",
+            "ParentDependency",
+            "SiblingFrame",
+            "ReadScoped"
+          ],
+          "limits": "Child creation/deletion, parent guards, exact grant aggregation and retired ACL replay are bounded atomic abstractions. No XML, SQL/error timing, packet enforcement, SG name/tag rules, credentials, UI, restart or implementation refinement proof."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/ec2_subnet_native_boundaries_test.go",
+      "sha256": "208ad706412c5da01c1ff2c3e95b1cb432dbd878d685d97676f4f751728cb05b",
+      "disposition": "test-support",
+      "reason": "Exercise authentic subnet quota, ownership corruption, dependency refusal and transaction cancellation with isolated SQLite fixtures; no production or gate changes.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/ec2_subnet_native_test.go",
+      "sha256": "e848213ac3261ebf1be0088d377391ebd1d74ceabc094446a060b42da3ed889c",
+      "disposition": "test-support",
+      "reason": "Run the actual native API, scoped authorization and saved readback or clean up isolated fixtures; no production behavior.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/ec2_vpc.go",
+      "sha256": "f054e5598e77884d32e0a1d5fd9eba32e88e3e4762329ae9f637cd60834d7952",
+      "disposition": "modeled",
+      "reason": "Register all exact EC2 operations, validate all three native child kinds from the same regional store, and preserve dependency-safe deletion.",
+      "models": [
+        {
+          "id": "EC2NativeSubnetLifecycle",
+          "properties": [
+            "StackUnchanged",
+            "AuthorizedWrites",
+            "NativeParent",
+            "Nonoverlap",
+            "Bounded",
+            "ExactDelete",
+            "ExactRead"
+          ],
+          "limits": "Finite atomic store choices and regional read evidence only; no YAML/XML/parser/HTTP implementation, CIDR arithmetic, Windows/browser, exact timing, AWS runtime, or code-refinement proof."
+        },
+        {
+          "id": "EC2NativeVPCChildren",
+          "properties": [
+            "GrantAtomic",
+            "RejectOtherOwner",
+            "ParentDependency",
+            "SiblingFrame",
+            "ReadScoped"
+          ],
+          "limits": "Child creation/deletion, parent guards, exact grant aggregation and retired ACL replay are bounded atomic abstractions. No XML, SQL/error timing, packet enforcement, SG name/tag rules, credentials, UI, restart or implementation refinement proof."
+        }
+      ]
+    },
+    {
+      "path": "internal/server/ec2_native_vpc_console_line_regression_test.go",
+      "sha256": "f51ddef2a75d72638d4efda2cb56b053757e23212cdd66effa8aecd8d83bc95d",
+      "disposition": "test-support",
+      "reason": "Adds a focused regression for native EC2 VPC state, intended failures and cleanup; no production code, coverage floor or required gate changes.",
+      "models": []
+    },
+    {
+      "path": "internal/server/ec2_read_access_test.go",
+      "sha256": "4201af67f8c4680203fcb01c774a92c50059cbcb264a7ffda2721fbe6cea05bf",
+      "disposition": "test-support",
+      "reason": "Maintain the independent exact hosted EC2 capability and bounded-metadata assertions after adding native subnet and detached SG/ACL operations; preserve all access/authorization cases. No implementation or model change.",
+      "models": []
+    },
+    {
+      "path": "internal/server/ec2_security_groups_console_test.go",
+      "sha256": "39b121f8a021c388d38f3393c5c8451a8e7f32d5983a737abd27c56595ea3a6b",
+      "disposition": "test-support",
+      "reason": "Run the actual native API, scoped authorization and saved readback or clean up isolated fixtures; no production behavior.",
+      "models": []
+    },
+    {
+      "path": "internal/server/server.go",
+      "sha256": "51912ce2b47069e9316ea12055ab3b532d7933a6d2c918fb69da4db45d1de51c",
+      "disposition": "modeled",
+      "reason": "Surface registered EC2 operations and operation-specific selectors without granting authority or exposing new SG/ACL write panes.",
+      "models": [
+        {
+          "id": "EC2NativeSubnetLifecycle",
+          "properties": [
+            "StackUnchanged",
+            "AuthorizedWrites",
+            "NativeParent",
+            "Nonoverlap",
+            "Bounded",
+            "ExactDelete",
+            "ExactRead"
+          ],
+          "limits": "Finite atomic store choices and regional read evidence only; no YAML/XML/parser/HTTP implementation, CIDR arithmetic, Windows/browser, exact timing, AWS runtime, or code-refinement proof."
+        },
+        {
+          "id": "EC2NativeVPCChildren",
+          "properties": [
+            "GrantAtomic",
+            "ReadScoped"
+          ],
+          "limits": "Child creation/deletion, parent guards, exact grant aggregation and retired ACL replay are bounded atomic abstractions. No XML, SQL/error timing, packet enforcement, SG name/tag rules, credentials, UI, restart or implementation refinement proof."
+        },
+        {
+          "id": "EC2SecurityGroupConsoleEpoch",
+          "properties": [
+            "EligibleRequest",
+            "ReadOnlyOperation"
+          ],
+          "limits": "Abstracts the CFN-selected read and epoch, not encoded XML selectors, exact Cloudscape rendering or native SG CRUD."
+        }
+      ]
+    },
+    {
+      "path": "internal/server/web/app.js",
+      "sha256": "b5bb10a55aa12ed89808a1f8b766505b256089a9ad9b1b163316b13dbe088e55",
+      "disposition": "modeled",
+      "reason": "Generated from the exact pinned Cloudscape sources; subnet lifecycle and selected CFN SG readback are the changing local behaviors.",
+      "models": [
+        {
+          "id": "EC2NativeSubnetLifecycle",
+          "properties": [
+            "StackUnchanged",
+            "AuthorizedWrites",
+            "NativeParent",
+            "Nonoverlap",
+            "Bounded",
+            "ExactDelete",
+            "ExactRead"
+          ],
+          "limits": "Finite atomic store choices and regional read evidence only; no YAML/XML/parser/HTTP implementation, CIDR arithmetic, Windows/browser, exact timing, AWS runtime, or code-refinement proof."
+        },
+        {
+          "id": "EC2SecurityGroupConsoleEpoch",
+          "properties": [
+            "ReadOnlyOperation",
+            "OnlySelectedVPC",
+            "OnlyCurrentScope"
+          ],
+          "limits": "Abstracts the CFN-selected read and epoch, not encoded XML selectors, exact Cloudscape rendering or native SG CRUD."
+        }
+      ]
+    },
+    {
+      "path": "scripts/formal_model_gate.py",
+      "sha256": "f888473919b2293668e0b696bd30a1b992c5b6a0b7d08c18f0835d8f7136c71f",
+      "disposition": "formal-infrastructure",
+      "reason": "Register the bounded subnet lifecycle and its independent tests; existing gates, required coverage floors and remaining CI checks are unchanged.",
+      "models": []
+    },
+    {
+      "path": "scripts/test-formal-gate.py",
+      "sha256": "a4109ce9416173a2e731ea439e70170e00b6f84dfec0320a5b5cacdc3a59de05",
+      "disposition": "formal-infrastructure",
+      "reason": "Register the bounded subnet lifecycle and its independent tests; existing gates, required coverage floors and remaining CI checks are unchanged.",
+      "models": []
+    },
+    {
+      "path": "test/console/ec2_launch_preflight_native.py",
+      "sha256": "75b1baca0e4dac4ab4b580b67225ecca8cbc55ee29fd914c1f2a53a63d4f93ec",
+      "disposition": "test-support",
+      "reason": "Deterministic local fixtures verify the explicit child/aggregate lifecycle, authorization, regional state and cleanup; no live AWS.",
+      "models": []
+    },
+    {
+      "path": "test/console/ec2_native_network_sdk.py",
+      "sha256": "8736390e15a2ec9b7a78e7362f9739eccf02787ac9f699e316cb4fecc86f2fae",
+      "disposition": "test-support",
+      "reason": "Deterministic local fixtures verify the explicit child/aggregate lifecycle, authorization, regional state and cleanup; no live AWS.",
+      "models": []
+    },
+    {
+      "path": "test/console/ec2_native_subnet.py",
+      "sha256": "a8c14b3c65e6360b51941dcbf4543e0a9bf68e854bda7f677fedc8f36521ff07",
+      "disposition": "test-support",
+      "reason": "Run the actual native API, scoped authorization and saved readback or clean up isolated fixtures; no production behavior.",
+      "models": []
+    },
+    {
+      "path": "test/console/ec2_native_subnet_dom.cjs",
+      "sha256": "27fe9121765a1d94f9300d600c83199098818d226854bc1ece5b12a38082568d",
+      "disposition": "test-support",
+      "reason": "Run the actual native API, scoped authorization and saved readback or clean up isolated fixtures; no production behavior.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/ec2_detached_nacl.py",
+      "sha256": "ce5b5049fab099b1e0ec5ff58c4a24f990c8a0db7d518851be975ed2eec533f3",
+      "disposition": "test-support",
+      "reason": "Deterministic local fixtures verify the explicit child/aggregate lifecycle, authorization, regional state and cleanup; no live AWS.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/ec2_native_security_groups.py",
+      "sha256": "ca72098f6eb5513edc309455f2a60da7b5b3e76244fd55fdd55c89a3cfc56f7d",
+      "disposition": "test-support",
+      "reason": "Deterministic local fixtures verify the explicit child/aggregate lifecycle, authorization, regional state and cleanup; no live AWS.",
       "models": []
     },
     {
       "path": "tools/console/bundle-digests.json",
-      "sha256": "a3d2ad63d8231fe54f7295c0146a03f7b4fd8d6b8d64a9db241ebd98c2ee0fa2",
+      "sha256": "7f0b9a8bdf8eb740ba4bcca9bc2873a9be43cac0d4983670d3c6cc1448d3d9d1",
       "disposition": "presentation",
-      "reason": "Canonical development build output fingerprints only.",
+      "reason": "Regenerated Console build metadata or focused test of the fixed native request and response pairing.",
       "models": []
     },
     {
       "path": "tools/console/bundle-inputs.json",
-      "sha256": "eeab650e4e76ba62230acec672fb2ff974a5aa5ec703f9be77c2884fe96a4e26",
+      "sha256": "2ee41ec078f8cbc51160e5fdf5422a8e41ae1eb21e55d5ee87f6bd9dfb645a58",
       "disposition": "presentation",
-      "reason": "Canonical development build input/output graph; no package or lock changes.",
+      "reason": "Regenerated Console build metadata or focused test of the fixed native request and response pairing.",
       "models": []
     },
     {
-      "path": "tools/console/src/wafv2.jsx",
-      "sha256": "7e8f3594449ec0a58beba2fc99c4d0a4760e554e5ba1b729b4c3c3245b4fc2da",
+      "path": "tools/console/src/ec2-native-subnets.mjs",
+      "sha256": "f40f66543bdf46292178087804136c3cecf29503ecaecfcfd8c744651b02e590",
+      "disposition": "modeled",
+      "reason": "Expose only same-region native-subnet writes and bounded regional saved readback. The binding covers the abstract owned-store admission; HTTP/XML, authorization wiring, stale UI and generated asset correspondence are checked separately.",
+      "models": [
+        {
+          "id": "EC2NativeSubnetLifecycle",
+          "properties": [
+            "StackUnchanged",
+            "AuthorizedWrites",
+            "NativeParent",
+            "Nonoverlap",
+            "Bounded",
+            "ExactDelete",
+            "ExactRead"
+          ],
+          "limits": "Finite atomic store choices and regional read evidence only; no YAML/XML/parser/HTTP implementation, CIDR arithmetic, Windows/browser, exact timing, AWS runtime, or code-refinement proof."
+        }
+      ]
+    },
+    {
+      "path": "tools/console/src/ec2-readonly.jsx",
+      "sha256": "3dc57bec22021ebf2f4fbc51a56121af07b5a5e83d48ae52e75d6d4134663009",
+      "disposition": "modeled",
+      "reason": "Expose only same-region native-subnet writes and bounded regional saved readback. The binding covers the abstract owned-store admission; HTTP/XML, authorization wiring, stale UI and generated asset correspondence are checked separately.",
+      "models": [
+        {
+          "id": "EC2NativeSubnetLifecycle",
+          "properties": [
+            "StackUnchanged",
+            "AuthorizedWrites",
+            "NativeParent",
+            "Nonoverlap",
+            "Bounded",
+            "ExactDelete",
+            "ExactRead"
+          ],
+          "limits": "Finite atomic store choices and regional read evidence only; no YAML/XML/parser/HTTP implementation, CIDR arithmetic, Windows/browser, exact timing, AWS runtime, or code-refinement proof."
+        }
+      ]
+    },
+    {
+      "path": "tools/console/src/ec2-security-groups.mjs",
+      "sha256": "641db4e4e7dc7f4740998f7def42d4d20f6b3e970be4b4a795c0ab204f2f7a83",
+      "disposition": "modeled",
+      "reason": "Preserve the existing CFN-only read path by requesting one VPC from the native DescribeSecurityGroups selector, then validating the returned scope.",
+      "models": [
+        {
+          "id": "EC2SecurityGroupConsoleEpoch",
+          "properties": [
+            "EligibleRequest",
+            "ReadOnlyOperation",
+            "OnlySelectedVPC",
+            "FailuresNeverEmpty"
+          ],
+          "limits": "Abstracts the CFN-selected read and epoch, not encoded XML selectors, exact Cloudscape rendering or native SG CRUD."
+        }
+      ]
+    },
+    {
+      "path": "tools/console/src/ec2-vpc-native-subnets.jsx",
+      "sha256": "392564ad552dad3506fcc52ff372391e53f570bf6b7c62a489670a09851e21da",
+      "disposition": "modeled",
+      "reason": "Expose only same-region native-subnet writes and bounded regional saved readback. The binding covers the abstract owned-store admission; HTTP/XML, authorization wiring, stale UI and generated asset correspondence are checked separately.",
+      "models": [
+        {
+          "id": "EC2NativeSubnetLifecycle",
+          "properties": [
+            "StackUnchanged",
+            "AuthorizedWrites",
+            "NativeParent",
+            "Nonoverlap",
+            "Bounded",
+            "ExactDelete",
+            "ExactRead"
+          ],
+          "limits": "Finite atomic store choices and regional read evidence only; no YAML/XML/parser/HTTP implementation, CIDR arithmetic, Windows/browser, exact timing, AWS runtime, or code-refinement proof."
+        }
+      ]
+    },
+    {
+      "path": "tools/console/src/ec2-vpc-security-groups.jsx",
+      "sha256": "d18122a0cc865719b6e75bdfb615e9c14cc907392c435a15543e663503f3b882",
+      "disposition": "modeled",
+      "reason": "Keep the existing read-only CFN domain and make detached native SG API availability honest, without offering a new mutation UI.",
+      "models": [
+        {
+          "id": "EC2SecurityGroupConsoleEpoch",
+          "properties": [
+            "EligibleRequest",
+            "OnlyCurrentScope",
+            "OnlySelectedVPC",
+            "FailuresNeverEmpty"
+          ],
+          "limits": "Abstracts the CFN-selected read and epoch, not encoded XML selectors, exact Cloudscape rendering or native SG CRUD."
+        }
+      ]
+    },
+    {
+      "path": "tools/console/src/main.jsx",
+      "sha256": "8a95c95970251a9afed1bde5e3dedc3e239f2de36c7d720e2b2808a916d6be3d",
+      "disposition": "modeled",
+      "reason": "Expose only same-region native-subnet writes and bounded regional saved readback. The binding covers the abstract owned-store admission; HTTP/XML, authorization wiring, stale UI and generated asset correspondence are checked separately.",
+      "models": [
+        {
+          "id": "EC2NativeSubnetLifecycle",
+          "properties": [
+            "StackUnchanged",
+            "AuthorizedWrites",
+            "NativeParent",
+            "Nonoverlap",
+            "Bounded",
+            "ExactDelete",
+            "ExactRead"
+          ],
+          "limits": "Finite atomic store choices and regional read evidence only; no YAML/XML/parser/HTTP implementation, CIDR arithmetic, Windows/browser, exact timing, AWS runtime, or code-refinement proof."
+        }
+      ]
+    },
+    {
+      "path": "tools/console/test/ec2-native-subnets.test.mjs",
+      "sha256": "dbf8400fef9e01e43dee41802e1164d6221b6a3f3f030fe4a7c943848a52061a",
       "disposition": "presentation",
-      "reason": "Translate WAF-owned labels, authored notices and accessible names. Action keys, saved values, requests, authorization, and incoming native errors stay unchanged.",
+      "reason": "Regenerated Console build metadata or focused test of the fixed native request and response pairing.",
+      "models": []
+    },
+    {
+      "path": "tools/console/test/ec2-security-groups.test.mjs",
+      "sha256": "d08a2e63ad2cd8a7e2ff799b923926bf456aaa0b6cb144d7c7833c7bf3713a8d",
+      "disposition": "presentation",
+      "reason": "Source-only Console validation/support metadata; not an executable standalone service path.",
       "models": []
     }
   ]

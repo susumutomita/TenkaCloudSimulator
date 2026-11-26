@@ -207,7 +207,11 @@ a refusal such as `InvalidVpc.Range` stays on the form as an error and creates
 nothing. A created VPC is selected in the refreshed list. **Delete VPC** is enabled
 only for a VPC whose **Managed by** column says EC2, and requires typing `delete`.
 CloudFormation-managed VPCs show why deletion is disabled: delete their stack.
-Subnets, route tables, gateways and VPC attribute edits are not available.
+Select an EC2-managed VPC and use [Add subnet](ec2-native-subnet.md) under
+**Subnets** to save a native IPv4 subnet. CloudFormation subnets remain
+read-only in VPC details. Existing CFN route/SG panes display saved state
+only. Native security group and network ACL management is SDK-only. No
+native route mutations, gateway controls, or general VPC attribute edits.
 
 Lists are bounded by the API and must fail rather than silently truncate. A read
 failure clears previous data and is shown as an error, not an empty-success

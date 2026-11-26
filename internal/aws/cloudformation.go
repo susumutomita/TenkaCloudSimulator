@@ -64,6 +64,12 @@ func NewStackStore(db *sql.DB) (*StackStore, error) {
 	if _, err := NewEC2NetworkStore(db); err != nil {
 		return nil, err
 	}
+	if err := initEC2NativeSecurityGroups(db); err != nil {
+		return nil, err
+	}
+	if err := initEC2NetworkACLReplay(db); err != nil {
+		return nil, err
+	}
 	if _, err := NewAPIGatewayStore(db); err != nil {
 		return nil, err
 	}

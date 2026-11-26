@@ -18,6 +18,7 @@ import Modal from '@cloudscape-design/components/modal';
 import Box from '@cloudscape-design/components/box';
 import {useLocale} from './i18n.jsx';
 import VPCSubnetFields from './ec2-vpc-subnet-fields.jsx';
+import VPCNativeSubnets from './ec2-vpc-native-subnets.jsx';
 import {createVpcWithSubnet,vpcSubnetInputError} from './ec2-vpc-subnet.mjs';
 import EC2InstanceMetadata from './ec2-instance-metadata.jsx';
 import EC2TemplatePreview from './ec2-template-preview.jsx';
@@ -32,7 +33,7 @@ const blankVpc={name:'',cidr:'',mode:'vpc-only',stackName:'',subnetCIDR:''};
 // Instances stay read-only. VPCs gain CreateVpc/DeleteVpc only when the server
 // advertises them, and only EC2-owned VPCs can be deleted here. Never infer
 // live guest health from stack metadata.
-export default function EC2Readonly({kind,region,request,sessionInstance,onSession,vpcLifecycle=false,vpcSubnet=false,vpcSecurityGroups=false,vpcRouteTables=false,onSaving=()=>{}}) {
+export default function EC2Readonly({kind,region,request,sessionInstance,onSession,vpcLifecycle=false,vpcSubnet=false,vpcNativeSubnets=false,vpcSecurityGroups=false,vpcRouteTables=false,onSaving=()=>{}}) {
   const {t}=useLocale();
   const instance=kind==='ec2',manage=!instance&&vpcLifecycle;
   const [items,setItems]=useState([]),[loading,setLoading]=useState(false),[error,setError]=useState('');
@@ -138,7 +139,7 @@ export default function EC2Readonly({kind,region,request,sessionInstance,onSessi
     </Form></form></ContentLayout>;
   const deletable=detail?.managedBy==='ec2';
   return <ContentLayout header={<div ref={heading} tabIndex={-1}><Header variant="h1">{instance?t('EC2 instances','EC2 インスタンス'):'VPC'}</Header></div>}><SpaceBetween size="l">
-    {manage?<Alert type="info">{t('Delete EC2-managed VPCs here. Delete CloudFormation-managed networks through their stack. Editing existing subnets, route tables, security groups and gateways is not supported here.','EC2 管理の VPC はこの画面で削除できます。CloudFormation 管理のネットワークはスタックから削除してください。既存サブネット、ルートテーブル、セキュリティグループ、ゲートウェイはこの画面で編集できません。')}</Alert>
+    {manage?<Alert type="info">{t('Delete EC2-managed VPCs here. Delete CloudFormation-managed networks through their stack. Subnet changes are limited to EC2-managed VPCs. Route tables, security groups and gateways cannot be edited here.','EC2 管理の VPC はこの画面で削除できます。CloudFormation 管理のネットワークはスタックから削除してください。サブネットを変更できるのは EC2 管理の VPC だけです。ルートテーブル、セキュリティグループ、ゲートウェイはこの画面で編集できません。')}</Alert>
       :<Alert type="info">{t('Read-only resources managed through CloudFormation. Create, start, stop and network edits are not supported here. Reported state is not a health check of the guest.','CloudFormation で管理されるリソースの読み取り専用画面です。この画面から作成・起動・停止・ネットワーク編集はできません。表示された状態はゲストの稼働確認ではありません。')}</Alert>}
     {notice&&<Alert type="success" dismissible dismissAriaLabel={t('Dismiss','閉じる')} onDismiss={()=>setNotice('')}>{notice}</Alert>}
     {error&&<Alert type="error" header={t('Could not load resources','リソースを読み込めませんでした')}>{error}</Alert>}
@@ -156,6 +157,7 @@ export default function EC2Readonly({kind,region,request,sessionInstance,onSessi
     {detail&&<Container header={<Header variant="h2" actions={<Button onClick={()=>setSelected([])}>{t('Close details','詳細を閉じる')}</Button>}>{t('Resource details','リソースの詳細')}</Header>}>
       <SpaceBetween size="l">{detailFields}{instance?<EC2InstanceMetadata groupIds={detail.groupIds} tags={detail.tags}/>
         :vpcSecurityGroups&&<VPCSecurityGroups key={region+'|'+detail.id} vpc={detail} region={region} request={request}/>}
+        {!instance&&vpcNativeSubnets&&<VPCNativeSubnets key={'subnet|'+region+'|'+detail.id} vpc={detail} region={region} request={request} onSaving={onSaving}/>}
         {!instance&&vpcRouteTables&&<VPCRouteTables key={'rtb|'+region+'|'+detail.id} vpc={detail} region={region} request={request}/>}
       </SpaceBetween>
     </Container>}

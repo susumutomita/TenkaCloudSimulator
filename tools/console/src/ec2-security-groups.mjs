@@ -14,7 +14,10 @@ export async function loadVpcSecurityGroups(request, region, vpc, {signal, parse
   const response = await request('/', {
     method: 'POST', redirect: 'error', signal,
     headers: {'Content-Type': 'application/x-www-form-urlencoded', 'X-Simulator-Service': 'ec2', 'X-Simulator-Region': region},
-    body: new URLSearchParams({Action: 'DescribeSecurityGroups', Version: '2016-11-15'}),
+    // The existing pane is still CFN-only. Ask for its specific VPC so native
+    // detached SG metadata is not confused with legacy persisted rule detail.
+    body: new URLSearchParams({Action: 'DescribeSecurityGroups', Version: '2016-11-15',
+      'Filter.1.Name': 'vpc-id', 'Filter.1.Value.1': vpc.id}),
   });
   if (!response.ok) throw Error(response.status + ': Could not read security groups.');
   const xml = await response.text();

@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"encoding/xml"
+	"errors"
 	"fmt"
 	"github.com/susumutomita/TenkaCloudSimulator/internal/core"
 	"io"
@@ -39,6 +40,14 @@ const ec2QueryBytes = 64 << 10
 
 func (g *Gateway) serveEC2(w http.ResponseWriter, r *http.Request) {
 	fail := func(code, msg string, status int) { ec2Error(w, code, msg, status) }
+	failChild := func(err error, fallback string) {
+		var failure *ec2Failure
+		if errors.As(err, &failure) {
+			fail(failure.code, failure.message, failure.status)
+		} else {
+			fail("InternalError", fallback, 500)
+		}
+	}
 	for _, h := range []string{"Authorization", "X-Simulator-Service", "X-Simulator-Region", "X-Simulator-Principal", "X-Amz-Security-Token", "X-Amz-Target"} {
 		if len(r.Header.Values(h)) > 1 {
 			fail("InvalidParameterValue", "Duplicate headers are unsupported.", 400)
@@ -87,7 +96,7 @@ func (g *Gateway) serveEC2(w http.ResponseWriter, r *http.Request) {
 	}
 	action := fields.Get("Action")
 	if len(fields["Action"]) != 1 || len(fields["Version"]) != 1 || fields.Get("Version") != "2016-11-15" || !slices.Contains(ec2Operations, action) {
-		fail("UnsupportedOperation", "Only DescribeInstances, DescribeVpcs, DescribeSubnets, DescribeSecurityGroups, DescribeRouteTables, CreateVpc and DeleteVpc version 2016-11-15 are supported.", 400)
+		fail("UnsupportedOperation", "Only "+strings.Join(ec2Operations, ", ")+" version 2016-11-15 are supported.", 400)
 		return
 	}
 	request, failure := parseEC2Request(action, fields)
@@ -122,9 +131,46 @@ func (g *Gateway) serveEC2(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 		}
+		exactChildGrant := func(checks [][2]string, kind string) error {
+			for _, check := range checks {
+				if core.Evaluate(policy, check[0], check[1]) != "allowed" {
+					return &ec2Failure{"UnauthorizedOperation", "You are not authorized to create this " + kind + ".", 403}
+				}
+			}
+			return nil
+		}
+		switch action {
+		case "CreateSubnet":
+			request.subnet.authorizeCreatedID = func(id string) error {
+				return exactChildGrant([][2]string{nativeSubnetCreatePermission(region, id)}, "subnet")
+			}
+		case "CreateSecurityGroup":
+			request.securityGroup.authorizeCreatedID = func(id string) error {
+				return exactChildGrant(request.securityGroup.createPermissions(region, id), "security group")
+			}
+		case "CreateNetworkAcl":
+			request.networkACL.authorizeCreateID = func(id string) error {
+				return exactChildGrant(request.networkACL.aclCreatePermissions(region, id), "network ACL")
+			}
+		}
 	}
 	var out any
+	const sgFailure = "Local security group metadata could not be read or changed."
 	switch action {
+	case "CreateSecurityGroup", "DeleteSecurityGroup":
+		group, err := g.Stacks.executeEC2NativeSGMutation(r.Context(), action, region, *request.securityGroup)
+		if err != nil {
+			failChild(err, sgFailure)
+			return
+		}
+		out = group
+	case "CreateNetworkAcl", "DescribeNetworkAcls", "DeleteNetworkAcl":
+		result, err := g.Stacks.executeEC2NetworkACL(r.Context(), action, region, *request.networkACL)
+		if err != nil {
+			failChild(err, "Local detached network ACL state could not be read or changed.")
+			return
+		}
+		out = result
 	case "DescribeRouteTables":
 		tables, err := g.Stacks.describeEC2RouteTables(r.Context(), region)
 		if err != nil {
@@ -132,6 +178,19 @@ func (g *Gateway) serveEC2(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		out = &ec2DescribeRouteTablesResponse{Tables: tables}
+	case "CreateSubnet":
+		subnet, e := g.Stacks.createNativeSubnet(r.Context(), region, request.subnet)
+		if e != nil {
+			g.failEC2Mutation(w, e)
+			return
+		}
+		out = &ec2CreateSubnetResponse{Subnet: subnet}
+	case "DeleteSubnet":
+		if e := g.Stacks.deleteNativeSubnet(r.Context(), region, request.subnet.id); e != nil {
+			g.failEC2Mutation(w, e)
+			return
+		}
+		out = &ec2DeleteSubnetResponse{Return: true}
 	case "CreateVpc":
 		vpc, e := g.Stacks.createNativeVPC(r.Context(), region, request.cidr, request.tags)
 		if e != nil {
@@ -151,8 +210,17 @@ func (g *Gateway) serveEC2(w http.ResponseWriter, r *http.Request) {
 			fail("InternalError", "Local discovery state is inconsistent or exceeds the 1000-resource bound.", 500)
 			return
 		}
+		if action == "DescribeSubnets" {
+			out = &ec2DescribeSubnetsResponse{Subnets: *read.Subnets}
+			break
+		}
 		if action == "DescribeSecurityGroups" {
-			out = &ec2DescribeSecurityGroupsResponse{Groups: ec2SecurityGroupSet{Items: read.securityGroups}}
+			groups, err := request.securityGroup.filterSecurityGroups(read.securityGroups)
+			if err != nil {
+				failChild(err, sgFailure)
+				return
+			}
+			out = &ec2DescribeSecurityGroupsResponse{Groups: ec2SecurityGroupSet{Items: groups}}
 			break
 		}
 		if instanceScoped {
@@ -197,11 +265,13 @@ type ec2VPCRead struct {
 	ManagedBy string   `xml:"simulatorManagedBy"`
 }
 type ec2SubnetRead struct {
-	ID    string   `xml:"subnetId"`
-	VPC   string   `xml:"vpcId"`
-	CIDR  string   `xml:"cidrBlock"`
-	State string   `xml:"state"`
-	Tags  []ec2Tag `xml:"tagSet>item"`
+	ID        string   `xml:"subnetId"`
+	VPC       string   `xml:"vpcId"`
+	CIDR      string   `xml:"cidrBlock"`
+	State     string   `xml:"state"`
+	AZ        string   `xml:"availabilityZone,omitempty"`
+	ManagedBy string   `xml:"simulatorManagedBy,omitempty"`
+	Tags      []ec2Tag `xml:"tagSet>item"`
 }
 type ec2SubnetSet struct {
 	Items []ec2SubnetRead `xml:"item"`
@@ -299,7 +369,7 @@ func (s *StackStore) ec2Read(ctx context.Context, region, action string) (ec2Rea
 				return out, fmt.Errorf("network identity")
 			}
 			if kind == "AWS::EC2::Subnet" {
-				out.Subnets.Items = append(out.Subnets.Items, ec2SubnetRead{v.ID, v.VPCID, v.CIDR, "available", ec2ReadTags(v.Tags)})
+				out.Subnets.Items = append(out.Subnets.Items, ec2SubnetRead{ID: v.ID, VPC: v.VPCID, CIDR: v.CIDR, State: "available", AZ: v.AvailabilityZone, Tags: ec2ReadTags(v.Tags)})
 			} else {
 				out.VPCs = append(out.VPCs, ec2VPCRead{v.ID, v.CIDR, ec2ReadTags(v.Tags), ec2ManagedByCloudFormation})
 			}
@@ -359,6 +429,24 @@ func (s *StackStore) ec2Read(ctx context.Context, region, action string) (ec2Rea
 			return out, fmt.Errorf("resource bound")
 		}
 		sort.Slice(out.VPCs, func(i, j int) bool { return out.VPCs[i].ID < out.VPCs[j].ID })
+	}
+	if out.Subnets != nil {
+		if err := addNativeSubnetReadback(ctx, tx, region, out.Subnets); err != nil {
+			return out, err
+		}
+	}
+	if kind == ec2SecurityGroupKind {
+		groups, err := listEC2NativeSecurityGroups(ctx, tx, region)
+		if err != nil || len(groups)+len(out.securityGroups) > ec2NativeSGNetworkLimit {
+			return out, errEC2NativeSecurityGroupState
+		}
+		for _, g := range groups {
+			out.securityGroups = append(out.securityGroups, ec2SecurityGroupRead{
+				ID: g.ID, Name: g.Name, Description: g.Description, VPC: g.VPCID, Owner: "000000000000",
+				Tags: ec2ReadTags(g.Tags), Mode: "detached-config-only",
+			})
+		}
+		sort.Slice(out.securityGroups, func(i, j int) bool { return out.securityGroups[i].ID < out.securityGroups[j].ID })
 	}
 	return out, tx.Commit()
 }

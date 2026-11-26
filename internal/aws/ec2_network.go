@@ -6,6 +6,7 @@ import (
 	"database/sql"
 	"encoding/hex"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/netip"
 	"sort"
@@ -92,13 +93,20 @@ func networkParent(ctx context.Context, tx *sql.Tx, r EC2NetworkResource, id, ki
 	}
 	return parent, nil
 }
+
+var (
+	errEC2NetworkQuota      = errors.New("local network resource quota exceeded")
+	errEC2NetworkOutsideVPC = errors.New("subnet lies outside VPC")
+	errEC2NetworkOverlap    = errors.New("subnet CIDR overlaps")
+)
+
 func createEC2Network(ctx context.Context, tx *sql.Tx, r EC2NetworkResource) error {
 	var count int
 	if e := tx.QueryRowContext(ctx, `SELECT count(*) FROM aws_ec2_network_resources`).Scan(&count); e != nil {
 		return e
 	}
 	if count >= 1000 {
-		return fmt.Errorf("local network resource quota exceeded")
+		return errEC2NetworkQuota
 	}
 	switch r.Kind {
 	case "AWS::EC2::Subnet", "AWS::EC2::RouteTable", "AWS::EC2::SecurityGroup":
@@ -110,7 +118,7 @@ func createEC2Network(ctx context.Context, tx *sql.Tx, r EC2NetworkResource) err
 			v, _ := netip.ParsePrefix(vpc.CIDR)
 			sub, _ := netip.ParsePrefix(r.CIDR)
 			if !v.Contains(sub.Addr()) || sub.Bits() < v.Bits() {
-				return fmt.Errorf("subnet lies outside VPC")
+				return errEC2NetworkOutsideVPC
 			}
 		}
 	case "AWS::EC2::VPCGatewayAttachment":
@@ -174,7 +182,7 @@ func createEC2Network(ctx context.Context, tx *sql.Tx, r EC2NetworkResource) err
 			a, _ := netip.ParsePrefix(r.CIDR)
 			b, _ := netip.ParsePrefix(v.CIDR)
 			if a.Overlaps(b) {
-				return fmt.Errorf("subnet CIDR overlaps")
+				return errEC2NetworkOverlap
 			}
 		}
 	}
