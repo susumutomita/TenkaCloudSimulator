@@ -12,11 +12,13 @@ import (
 	"sort"
 	"strings"
 	"time"
+
+	"github.com/susumutomita/TenkaCloudSimulator/internal/aws/cognitoidp"
 )
 
 // NativeSDKServices are the signing services a TCSIMOPERATOR or assumed-role
 // session may use. Hosts read the same list from the capability document.
-var NativeSDKServices = []string{"sts", "iam", "cloudformation", "ssm", "lambda"}
+var NativeSDKServices = []string{"sts", "iam", "cloudformation", "ssm", "lambda", cognitoUserPoolsSigningName}
 
 type sdkSignature struct {
 	key, date, region, service, scope, headers, signature string
@@ -54,8 +56,8 @@ func parseSDKSignature(r *http.Request) (sdkSignature, error) {
 		return fail()
 	}
 	// This native credential surface is the exact subset needed by unchanged
-	// CloudFormation/SSM problems and by participants using a problem's own Lambda
-	// function (REST paths below /2015-03-31/functions only). Other services fail closed.
+	// CloudFormation/SSM problems, the bounded Cognito metadata surface, and
+	// participants using a problem's own Lambda function. Other services fail closed.
 	serviceSupported := false
 	for _, service := range NativeSDKServices {
 		serviceSupported = serviceSupported || service == parts[3]
@@ -98,6 +100,10 @@ func verifySDKSignature(r *http.Request, s sdkSignature, secret string, now time
 		return fail()
 	case handoff:
 		if r.Header.Get("Content-Type") != "application/json" || r.Header.Get("X-Amz-Target") != "" {
+			return fail()
+		}
+	case s.service == cognitoUserPoolsSigningName:
+		if !strings.HasPrefix(r.Header.Get("X-Amz-Target"), cognitoidp.TargetPrefix) || r.Header.Get("Content-Type") != cognitoidp.JSONMediaType {
 			return fail()
 		}
 	case s.service == "ssm":
@@ -155,6 +161,9 @@ func verifySDKSignature(r *http.Request, s sdkSignature, secret string, now time
 	if !seen["host"] || !seen["x-amz-date"] || r.Header.Get("X-Amz-Security-Token") != "" && !seen["x-amz-security-token"] {
 		return fail()
 	}
+	if s.service == cognitoUserPoolsSigningName && !seen["content-type"] {
+		return fail()
+	}
 	// Signed dispatch and identity selectors cannot be injected after signing.
 	for _, name := range []string{"x-amz-target", "x-simulator-principal", "x-simulator-region", "x-simulator-service"} {
 		if r.Header.Get(name) != "" && !seen[name] {
@@ -165,6 +174,8 @@ func verifySDKSignature(r *http.Request, s sdkSignature, secret string, now time
 	limit := int64(256 << 10)
 	if lambdaREST {
 		limit = 384 << 10
+	} else if s.service == cognitoUserPoolsSigningName {
+		limit = cognitoidp.RequestLimit
 	}
 	var body []byte
 	if r.Body != nil {

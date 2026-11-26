@@ -3298,6 +3298,33 @@ REQUIRED_SOURCE_SCOPES['SimpleDBQueryAdmission'] = {
 }
 
 
+# Cognito local pool metadata only: immutable bounds and independent controls.
+COGNITO_METADATA_BOUNDS = 'Four consecutive actions including at most one restart; two signed-region labels, one runtime account and a peer-store fixture, three ordered ID suffixes, local capacity two, MaxResults 1/2/60 and invalid boundary values, one retained cursor, independent credential/exercise/region/account/integrity/page-size/restart challenges.'
+COGNITO_METADATA_CONFIG = 'INIT Init\nNEXT Next\nCONSTANTS\n  StepLimit = 4\n  Capacity = 2\n  None = noValue\nINVARIANTS TypeOK AdmissionBeforeStorage ScopedCRUD ExactOrderedPage ExactNextToken RestartPersistsRows\nCHECK_DEADLOCK FALSE\n'
+BASE_MODELS.add('CognitoUserPoolMetadata')
+BASE_INVARIANTS['CognitoUserPoolMetadata'] = {
+    'TypeOK', 'AdmissionBeforeStorage', 'ScopedCRUD', 'ExactOrderedPage', 'ExactNextToken',
+    'RestartPersistsRows',
+}
+REQUIRED_MUTANTS['CognitoUserPoolMetadata'] = {
+    'AcceptUnsignedLocal', 'AcceptDummySigning', 'AcceptBrowserCredential', 'AcceptOtherSigningService',
+    'IgnoreCredentialPrincipal', 'AcceptUnboundHeaders', 'AdmitUnsupportedOperation',
+    'AllowUnsupportedInput', 'ExpandPageSizeRange', 'ApproveWildcardItem', 'IgnoreRequestedAction',
+    'TrustCursorForAuthorization', 'DecodeBeforeAuthorization', 'IgnoreCursorIntegrity',
+    'IgnoreCursorMarkerShape', 'AcceptRetiredStoreCursor', 'IgnoreCursorAccount', 'IgnoreCursorRegion',
+    'IgnoreCursorCredential', 'IgnoreCursorExercise', 'IgnoreCursorPageSize', 'ExpireDeletedMarker',
+    'IgnorePoolCapacity', 'AcceptCreateCollision', 'ReadOrDeletePeerAccount', 'ReadOrDeletePeerRegion',
+    'ListPeerAccount', 'ListPeerRegion', 'ReplayCursorMarker', 'DropRemainingPage',
+    'InventTerminalCursor', 'SkipAfterCursor', 'LosePersistedRows',
+}
+REQUIRED_SOURCE_SCOPES['CognitoUserPoolMetadata'] = {
+    'internal/aws/cognito_user_pools.go', 'internal/aws/cognitoidp/http.go',
+    'internal/aws/cognitoidp/pagination.go', 'internal/aws/cognitoidp/pools.go', 'internal/aws/s3.go',
+    'internal/aws/ssm.go', 'internal/aws/sts_signature.go', 'internal/server/access_sdk.go',
+    'internal/server/cognito_user_pools_capabilities.go', 'internal/server/server.go',
+}
+
+
 BASE_MODELS.add('SimpleDBSelectPage')
 BASE_INVARIANTS['SimpleDBSelectPage'] = {
     'TypeOK', 'AdmissionBeforeRead',
@@ -3615,6 +3642,9 @@ def load_registry(root, relative='formal/models.json'):
         source, config = asset(root, model['model']).read_text(), asset(root, model['config']).read_text()
         files.update((model['model'], model['config']))
         require(len(re.findall(r'\bMODULE\s+' + re.escape(name) + r'\b', source)) == 1, 'model module declaration mismatch')
+        if name == 'CognitoUserPoolMetadata':
+            require(model['bounds'] == COGNITO_METADATA_BOUNDS, 'Cognito metadata model bounds changed')
+            require(config == COGNITO_METADATA_CONFIG, 'Cognito metadata model configuration changed')
         if name in BATTLE_INTEGRATION_EXPECTED:
             require(model['bounds'] == BATTLE_INTEGRATION_EXPECTED[name]['bounds'], 'Battle integration bounds changed')
             require(config == BATTLE_INTEGRATION_CONFIGS[name], 'Battle integration configuration changed')

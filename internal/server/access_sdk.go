@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/susumutomita/TenkaCloudSimulator/internal/aws"
+	"github.com/susumutomita/TenkaCloudSimulator/internal/aws/cognitoidp"
 )
 
 type sdkAuthority = aws.STSAuthority
@@ -38,6 +39,10 @@ func sdkAuthenticationError(w http.ResponseWriter, r *http.Request) {
 	// Do not expose whether a key, role or token exists. Preserve official wire
 	// envelopes so SDK clients can display a typed error instead of XML parsing.
 	const message = "The local AWS credentials or signature are invalid or expired."
+	if strings.HasPrefix(r.Header.Get("X-Amz-Target"), cognitoidp.TargetPrefix) {
+		cognitoidp.RejectAuthentication(w)
+		return
+	}
 	if strings.HasPrefix(r.Header.Get("X-Amz-Target"), "AmazonSSM.") {
 		w.Header().Set("Content-Type", "application/x-amz-json-1.1")
 		w.WriteHeader(http.StatusForbidden)
