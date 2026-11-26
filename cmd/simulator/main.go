@@ -43,7 +43,8 @@ func run(ctx context.Context, args []string, output io.Writer) (result error) {
 	clockFD := flags.Int("battle-clock-proof-fd", 0, "Managed Linux launcher private clock pipe (only 3)")
 	battleRuntime := flags.String("battle-runtime-config", "", "Explicit private pinned Battle runtime configuration for Linux or macOS on amd64/arm64 (does not qualify Host clocks)")
 	statePath := flags.String("state", ":memory:", "SQLite state path; default is ephemeral memory")
-	rdsTopology := flags.Bool("rds-private-postgres-topology", false, "Validate explicitly private standalone PostgreSQL metadata against native EC2 (no database or endpoint)")
+	rdsTopology := flags.Bool("rds-private-postgres-topology", false, "Validate explicitly private standalone PostgreSQL metadata against native EC2 (does not enable a database by itself)")
+	rdsOwned := flags.String("rds-owned-postgres-config", "", "Optional pinned private PostgreSQL provider configuration (Linux/amd64; incompatible with Battle; no endpoint)")
 	remote := flags.Bool("allow-remote", false, "Allow binding beyond loopback; use only in an isolated trusted network")
 	tokenFile := flags.String("token-file", "simulator-token", "Private local operator access-token file (created with mode 0600)")
 	unsafe := flags.Bool("unsafe-no-auth", false, "Development-only: disable access tokens on numeric loopback")
@@ -62,6 +63,9 @@ func run(ctx context.Context, args []string, output io.Writer) (result error) {
 	}
 	if flags.NArg() != 0 {
 		return fmt.Errorf("unexpected positional arguments")
+	}
+	if *rdsOwned != "" && *battleRuntime != "" {
+		return errors.New("--rds-owned-postgres-config cannot be combined with --battle-runtime-config")
 	}
 	if !regexp.MustCompile(`^[a-zA-Z0-9_-]{1,64}$`).MatchString(*cloudOwner) {
 		return fmt.Errorf("--cloud-storage-owner must contain 1–64 ASCII letters, digits, underscores or hyphens")
@@ -108,6 +112,12 @@ func run(ctx context.Context, args []string, output io.Writer) (result error) {
 			return err
 		}
 	}
+	options := server.ProviderConfig{CloudStorage: cloudConfig, SakuraDisks: sakuraScope, SakuraServerConsole: sakuraOptions.serverConsole,
+		BedrockRuntime: bedrockRuntime, RDSPrivatePostgresTopology: *rdsTopology}
+	options, err = configureOwnedPostgres(options, *rdsOwned, *statePath, ip, *unsafe, *remote)
+	if err != nil {
+		return err
+	}
 	var ownedClock *probeclock.Clock
 	if *clockFD != 0 {
 		if *clockFD != 3 || *battleRuntime == "" || *remote || *unsafe {
@@ -129,8 +139,6 @@ func run(ctx context.Context, args []string, output io.Writer) (result error) {
 	}
 	var handler http.Handler
 	var closeState func() error
-	options := server.ProviderConfig{CloudStorage: cloudConfig, SakuraDisks: sakuraScope, SakuraServerConsole: sakuraOptions.serverConsole,
-		BedrockRuntime: bedrockRuntime, RDSPrivatePostgresTopology: *rdsTopology}
 	if *battleRuntime != "" {
 		handler, closeState, err = newBattleServer(ctx, *battleRuntime, "http://"+l.Addr().String(), *statePath, options, ownedClock)
 	} else {

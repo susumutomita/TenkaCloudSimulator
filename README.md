@@ -139,6 +139,11 @@ console, CloudFormation adapter or Challenge integration.
   and allows time limits from 600 to 86,400 seconds; it does not execute them.
   Redshift can read tags on one existing stored resource ARN; it does not
   enumerate account-wide tags or execute SQL.
+- **Opt-in owned PostgreSQL:** The [local operator flag](docs/design/rds-owned-workload.md)
+  admits one pinned private workload on Linux/amd64 authenticated loopback,
+  separately from Battle and the metadata-only default. A qualifying,
+  authorized create is still required; the API publishes no endpoint,
+  credentials, guest connectivity, or readiness claim.
 
 After signing in, open <http://127.0.0.1:4566/_simulator/docs/> for the API reference.
 Examples are static; **Test Request → Send** makes a live local request.

@@ -42,6 +42,17 @@ func NewWithProviders(path string, options ProviderConfig) (http.Handler, func()
 	if options.SakuraServerConsole && sakuraScope == nil {
 		return nil, nil, errors.New("Sakura Server console requires an explicit Sakura scope")
 	}
+	if owned := options.ownedPostgres; owned != nil {
+		if options.configureInstances != nil || options.closeInstances != nil {
+			return nil, nil, errOwnedPostgresBattleConflict
+		}
+		if !options.RDSPrivatePostgresTopology {
+			return nil, nil, errOwnedPostgresTopology
+		}
+		if err := owned.checkState(path); err != nil {
+			return nil, nil, err
+		}
+	}
 	cloudConfig := options.CloudStorage
 	store, err := core.New(path)
 	if err != nil {
@@ -171,11 +182,14 @@ func NewWithProviders(path string, options ProviderConfig) (http.Handler, func()
 	if options.RDSPrivatePostgresTopology {
 		catalogConfig.ValidateRDSPrivatePostgres = aws.ValidateRDSPrivatePostgresTopology
 	}
-	catalogEngine, err := catalog.New(store.Database(), catalogConfig, catalog.Services())
-	if err != nil {
-		_ = lambdas.Close()
-		_ = store.Close()
-		return nil, nil, err
+	var catalogEngine *catalog.Engine
+	if options.ownedPostgres == nil {
+		catalogEngine, err = catalog.New(store.Database(), catalogConfig, catalog.Services())
+		if err != nil {
+			_ = lambdas.Close()
+			_ = store.Close()
+			return nil, nil, err
+		}
 	}
 	cognitoUserPools, err := cognitoidp.NewStore(store.Database())
 	if err != nil {
@@ -183,7 +197,7 @@ func NewWithProviders(path string, options ProviderConfig) (http.Handler, func()
 		_ = store.Close()
 		return nil, nil, err
 	}
-	gateway := &aws.Gateway{CognitoUserPools: cognitoUserPools, CognitoResourceAccount: "000000000000", SimpleDB: simpleDB, SimpleDBScope: simpledb.Scope{Account: "000000000000", Region: "us-east-1"}, AutoScalingPlans: autoScalingPlans, BedrockRuntime: options.BedrockRuntime, ELB: elb, CloudFront: cloudFront, Route53: route53, WAF: waf, SNS: snsTopics, Catalog: catalogEngine, CatalogOwns: catalogEngine.Owns, CloudWatchLogs: cloudWatchLogs, Secrets: secrets, DynamoDB: dynamodb, KMS: keys, APIGateway: apiGateway, LambdaPermissions: lambdaPermissions, Store: store, S3: s3, Identities: identities, Parameters: parameters, Queues: queues, Stacks: stacks, Lambdas: lambdas, Roles: roles, Documents: documents}
+	gateway := &aws.Gateway{CognitoUserPools: cognitoUserPools, CognitoResourceAccount: "000000000000", SimpleDB: simpleDB, SimpleDBScope: simpledb.Scope{Account: "000000000000", Region: "us-east-1"}, AutoScalingPlans: autoScalingPlans, BedrockRuntime: options.BedrockRuntime, ELB: elb, CloudFront: cloudFront, Route53: route53, WAF: waf, SNS: snsTopics, CloudWatchLogs: cloudWatchLogs, Secrets: secrets, DynamoDB: dynamodb, KMS: keys, APIGateway: apiGateway, LambdaPermissions: lambdaPermissions, Store: store, S3: s3, Identities: identities, Parameters: parameters, Queues: queues, Stacks: stacks, Lambdas: lambdas, Roles: roles, Documents: documents}
 	if options.commandAPI != nil {
 		gateway.Commands = options.commandAPI()
 	}
@@ -215,6 +229,16 @@ func NewWithProviders(path string, options ProviderConfig) (http.Handler, func()
 		_ = store.Close()
 		return nil, nil, err
 	}
+	// Select the real owned catalog only after the other fallible provider
+	// initializers, while this gateway and its SQLite handle are still private.
+	var closeOwnedPostgres func() error
+	if owned := options.ownedPostgres; owned != nil {
+		catalogEngine, closeOwnedPostgres, err = owned.open(store.Database(), catalogConfig)
+		if err != nil {
+			return nil, nil, errors.Join(err, appEngine.Close(), lambdas.Close(), store.Close())
+		}
+	}
+	gateway.Catalog, gateway.CatalogOwns = catalogEngine, catalogEngine.Owns
 	mux := http.NewServeMux()
 	if options.battleCapabilities != nil {
 		mux.Handle("/_simulator/v1/battle-capabilities/", options.battleCapabilities)
@@ -321,14 +345,27 @@ func NewWithProviders(path string, options ProviderConfig) (http.Handler, func()
 				return err
 			}
 		}
-		runtimeErr := errors.Join(lambdas.Close(), appEngine.Close())
-		<-healthDone
-		storeErr := store.Close()
-		if runtimeErr != nil {
-			return runtimeErr
-		}
-		return storeErr
+		return closeProviderState(healthDone, closeOwnedPostgres, lambdas.Close, appEngine.Close, store.Close)
 	}, nil
+}
+
+// Uncertain PostgreSQL teardown retains SQLite and its ownership fence, but
+// does not leave the independent Lambda and App Engine runtimes running.
+func closeProviderState(healthDone <-chan struct{}, closeOwnedPostgres, closeLambda, closeAppEngine, closeStore func() error) error {
+	var ownerErr error
+	if closeOwnedPostgres != nil {
+		ownerErr = closeOwnedPostgres()
+	}
+	runtimeErr := errors.Join(closeLambda(), closeAppEngine())
+	<-healthDone
+	if ownerErr != nil {
+		return errors.Join(ownerErr, runtimeErr)
+	}
+	storeErr := closeStore()
+	if runtimeErr != nil {
+		return runtimeErr
+	}
+	return storeErr
 }
 
 // Only the authenticated Access wrapper advertises this local Console view.
