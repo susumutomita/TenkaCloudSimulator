@@ -72,6 +72,9 @@ func NewStackStore(db *sql.DB) (*StackStore, error) {
 	if err := initEC2NetworkACLReplay(db); err != nil {
 		return nil, err
 	}
+	if err := initEC2NativeNetworkACLAssociations(db); err != nil {
+		return nil, err
+	}
 	if err := initEC2NativeRouteTableReplay(db); err != nil {
 		return nil, err
 	}

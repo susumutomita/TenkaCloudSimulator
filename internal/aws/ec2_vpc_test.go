@@ -328,7 +328,7 @@ func TestEC2NativeVPCStateFailuresAreNotSuccess(t *testing.T) {
 		t.Fatal(err)
 	}
 	f.expect(f.call("", "us-east-1", nil, url.Values{"Action": {"DeleteVpc"}, "VpcId": {vpc.ID}}), 500, "InternalError")
-	if _, err := db.Exec(`DELETE FROM aws_ec2_network_resources`); err != nil {
+	if _, err := db.Exec(`DELETE FROM aws_ec2_native_acl_defaults; DELETE FROM aws_ec2_network_resources`); err != nil {
 		t.Fatal(err)
 	}
 	tx, err := db.Begin()

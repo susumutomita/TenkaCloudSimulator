@@ -19,6 +19,7 @@ import TextFilter from '@cloudscape-design/components/text-filter';
 import {useLocale} from './i18n.jsx';
 import {createVpcNativeSubnet,loadRegionalSubnetInventory,nativeSubnetCIDR,nativeSubnetFailure} from './ec2-native-subnets.mjs';
 import {loadEC2RouteTablePages} from './ec2-route-table-pages.mjs';
+import SubnetNetworkACLPanel from './ec2-subnet-network-acl-panel.jsx';
 import VpcTagsPanel from './ec2-vpc-tags-panel.jsx';
 import {subnetConsoleHref,subnetRouteTable} from './ec2-subnet-console-route.mjs';
 
@@ -27,9 +28,9 @@ const identifier=value=><span className="resource-identifier">{value}</span>;
 const pageSize=20;
 function vpcOption(vpc){return {value:vpc.id,label:vpc.name? vpc.name+' · '+vpc.id:vpc.id};}
 
-function SubnetDetails({subnet,request,region,showRoutes,back,hrefForResource,subnetTags,acquireWrite,onConfirmed}) {
+function SubnetDetails({subnet,request,region,showRoutes,back,hrefForResource,subnetTags,subnetACLAssociation,acquireWrite,onConfirmed}) {
   const {t}=useLocale();
-  const [tagBusy,setTagBusy]=useState(false);
+  const [changeBusy,setChangeBusy]=useState(false);
   const [routes,setRoutes]=useState({status:'loading'});
   const {id,vpc,owner:ownership}=subnet;
   useEffect(()=>{
@@ -44,14 +45,14 @@ function SubnetDetails({subnet,request,region,showRoutes,back,hrefForResource,su
   function lease() {
     const release=acquireWrite();
     if(!release)return null;
-    setTagBusy(true);
-    return ()=>{release();setTagBusy(false);};
+    setChangeBusy(true);
+    return ()=>{release();setChangeBusy(false);};
   }
   const owner=subnet.owner==='ec2'?'EC2':'CloudFormation';
   const ref=(kind,id)=>{const href=hrefForResource?.({kind,id,vpcId:subnet.vpc});
-    return href?<Link href={href} onFollow={event=>{if(tagBusy)event.preventDefault();}}>{identifier(id)}</Link>:identifier(id);};
+    return href?<Link href={href} onFollow={event=>{if(changeBusy)event.preventDefault();}}>{identifier(id)}</Link>:identifier(id);};
   return <SpaceBetween size="l">
-    <Link href={back} onFollow={event=>{if(tagBusy)event.preventDefault();}}>{t('Back to subnets','サブネット一覧に戻る')}</Link>
+    <Link href={back} onFollow={event=>{if(changeBusy)event.preventDefault();}}>{t('Back to subnets','サブネット一覧に戻る')}</Link>
     <Container header={<Header variant="h2">{t('Subnet details','サブネットの詳細')}</Header>}>
       <KeyValuePairs columns={2} minColumnWidth={180} items={[
         {label:t('Subnet ID','サブネット ID'),value:identifier(subnet.id)},
@@ -74,13 +75,17 @@ function SubnetDetails({subnet,request,region,showRoutes,back,hrefForResource,su
         ]}/>:<Box>{t('No route-table association was confirmed for this subnet.','このサブネットのルートテーブルの関連付けは確認できませんでした。')}</Box>}
     </Container>}
     {subnetTags&&<Container><VpcTagsPanel subnet={subnet} request={request} region={region}
-      acquireWrite={lease} writeBlocked={tagBusy} onConfirmed={onConfirmed}/></Container>}
-    <Box color="text-body-secondary">{t('Subnet ACL associations, reserved addresses and guest connectivity are not provided by this view.',
-      'この画面ではサブネットの ACL 関連付け、予約アドレス、ゲストの通信状態は表示しません。')}</Box>
+      acquireWrite={lease} writeBlocked={changeBusy} onConfirmed={onConfirmed}/></Container>}
+    {subnetACLAssociation&&<SubnetNetworkACLPanel request={request} region={region} vpcId={vpc} subnetId={id} owner={ownership}
+      interactive acquireWrite={lease} writeBlocked={changeBusy}/>}
+    {subnetACLAssociation?<Box color="text-body-secondary">{t('Reserved addresses and guest connectivity are not provided by this view.',
+      'この画面では予約アドレスとゲストの通信状態は表示しません。')}</Box>
+      :<Box color="text-body-secondary">{t('Subnet ACL associations, reserved addresses and guest connectivity are not provided by this view.',
+      'この画面ではサブネットの ACL 関連付け、予約アドレス、ゲストの通信状態は表示しません。')}</Box>}
   </SpaceBetween>;
 }
 
-export default function EC2SubnetsConsole({request,region,route,publicIPv4,showRoutes,onSaving,canCreate=true,hrefForResource,subnetTags=false,acquireWrite}) {
+export default function EC2SubnetsConsole({request,region,route,publicIPv4,showRoutes,onSaving,canCreate=true,hrefForResource,subnetTags=false,subnetACLAssociation=false,acquireWrite}) {
   const {t}=useLocale();
   const [snapshot,setSnapshot]=useState({status:'loading'}),[revision,setRevision]=useState(0);
   const [filter,setFilter]=useState(route.vpc),[text,setText]=useState(''),[page,setPage]=useState(1);
@@ -198,7 +203,7 @@ export default function EC2SubnetsConsole({request,region,route,publicIPv4,showR
         :!detail?<Alert type="warning" action={<Button href={listHref}>{t('Back to subnets','サブネット一覧に戻る')}</Button>}>
           {t('This subnet was not found in the selected region.','選択したリージョンにはこのサブネットがありません。')}</Alert>
         :<SubnetDetails key={detail.id} subnet={detail} request={request} region={region} showRoutes={showRoutes} back={listHref} hrefForResource={hrefForResource}
-          subnetTags={subnetTags} acquireWrite={acquireWrite}
+          subnetTags={subnetTags} subnetACLAssociation={subnetACLAssociation} acquireWrite={acquireWrite}
           onConfirmed={saved=>setSnapshot(prev=>prev.status!=='ready'?prev:{...prev,subnets:prev.subnets.map(row=>
             row.id===detail.id&&row.vpc===detail.vpc&&row.name!==saved.name?{...row,name:saved.name}:row)})}/>}
     </SpaceBetween>:<SpaceBetween size="l">

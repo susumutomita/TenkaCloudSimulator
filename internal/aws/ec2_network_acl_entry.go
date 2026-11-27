@@ -3,7 +3,6 @@ package aws
 import (
 	"cmp"
 	"context"
-	"database/sql"
 	"math"
 	"net/netip"
 	"slices"
@@ -190,37 +189,20 @@ func networkACLRecordEntries(state *nativeNetworkACLRuleState) []ec2NetworkACLEn
 	return append(out, terminal)
 }
 
-// Entry writes additionally look at the independent stack declarations in
-// the same snapshot, including an unsupported ACL kind left by old data.
-func checkNetworkACLEntryOwners(ctx context.Context, tx *sql.Tx, r EC2NetworkResource) error {
-	stacks, declared, err := regionalGatewayStacks(ctx, tx, r.Region)
-	if err != nil {
-		return err
-	}
-	if declared[r.VPCID] || declared[r.ID] {
-		return errNetworkACLState
-	}
-	for _, stack := range stacks {
-		for _, member := range stack.Resources {
-			if member.Type == ec2NetworkACLKind && member.PhysicalID == r.ID {
-				return errNetworkACLState
-			}
-		}
-	}
-	return nil
-}
-
 func (s *StackStore) mutateNativeNetworkACLEntry(ctx context.Context, action, region, id string, entry ec2NetworkACLEntry) error {
 	tx, err := s.db.BeginTx(ctx, nil)
 	if err != nil {
 		return err
 	}
 	defer tx.Rollback()
+	if err := rejectNativeDefaultACLID(ctx, tx, region, id); err != nil {
+		return err
+	}
 	r, err := readNativeNetworkACL(ctx, tx, region, id)
 	if err != nil {
 		return err
 	}
-	if err := checkNetworkACLEntryOwners(ctx, tx, r); err != nil {
+	if err := validateDetachedNativeACLForWrite(ctx, tx, r); err != nil {
 		return err
 	}
 	state := r.NativeACLRules
@@ -264,6 +246,10 @@ func (s *StackStore) mutateNativeNetworkACLEntry(ctx context.Context, action, re
 	state.Updates++
 	r.Revision++
 	r.NativeACLRules = state
+	before, err := nativeACLWriteCount(ctx, tx)
+	if err != nil {
+		return err
+	}
 	if err := networkWrite(ctx, tx, r, false); err != nil {
 		return err
 	}
@@ -273,7 +259,10 @@ func (s *StackStore) mutateNativeNetworkACLEntry(ctx context.Context, action, re
 	if err != nil {
 		return err
 	}
-	if err := checkNetworkACLEntryOwners(ctx, tx, stored); err != nil {
+	if err := validateDetachedNativeACLForWrite(ctx, tx, stored); err != nil {
+		return err
+	}
+	if err := nativeACLRequireWriteDelta(ctx, tx, before, 1); err != nil {
 		return err
 	}
 	return tx.Commit()

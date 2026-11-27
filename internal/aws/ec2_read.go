@@ -116,6 +116,7 @@ func (g *Gateway) serveEC2(w http.ResponseWriter, r *http.Request) {
 	}
 	boundary, instanceScoped := r.Context().Value(consoleInstanceBoundaryKey{}).(consoleInstanceBoundary)
 	var routeAssociationAuthority ec2NativeRouteAssociationAuthority
+	var aclAssociationAuthority ec2NetworkACLAssociationAuthority
 	if instanceScoped {
 		policy, ok := SDKPolicyFromContext(r.Context())
 		if action != "DescribeInstances" || region != boundary.region || !ok || core.Evaluate(policy, "ec2:DescribeInstances", "*") != "allowed" {
@@ -134,6 +135,15 @@ func (g *Gateway) serveEC2(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 			routeAssociationAuthority.check = func(action, resource string) bool {
+				return core.Evaluate(policy, action, resource) == "allowed"
+			}
+		}
+		if request.aclAssociation != nil {
+			if !found {
+				failChild(deniedNetworkACLAssociation(), "")
+				return
+			}
+			aclAssociationAuthority.check = func(action, resource string) bool {
 				return core.Evaluate(policy, action, resource) == "allowed"
 			}
 		}
@@ -173,10 +183,16 @@ func (g *Gateway) serveEC2(w http.ResponseWriter, r *http.Request) {
 				return exactChildGrant(request.routeTable.createPermissions(region, id), "route table")
 			}
 		}
-	} else if request.routeAssociation != nil {
+	} else {
 		// Only the matched effective local administrator (never a scoped
-		// instance session) receives this authority and native-not-found detail.
-		routeAssociationAuthority = ec2NativeRouteAssociationAuthority{check: func(string, string) bool { return true }, revealMissingID: true}
+		// instance session) receives native-not-found detail.
+		allow := func(string, string) bool { return true }
+		if request.routeAssociation != nil {
+			routeAssociationAuthority = ec2NativeRouteAssociationAuthority{check: allow, revealMissingID: true}
+		}
+		if request.aclAssociation != nil {
+			aclAssociationAuthority = ec2NetworkACLAssociationAuthority{check: allow, revealMissingID: true}
+		}
 	}
 	var out any
 	const sgFailure = "Local security group configuration could not be read or changed."
@@ -199,7 +215,14 @@ func (g *Gateway) serveEC2(w http.ResponseWriter, r *http.Request) {
 		ec2CreateNetworkACLEntry, ec2ReplaceNetworkACLEntry, ec2DeleteNetworkACLEntry:
 		result, err := g.Stacks.executeEC2NetworkACL(r.Context(), action, region, *request.networkACL)
 		if err != nil {
-			failChild(err, "Local detached network ACL state could not be read or changed.")
+			failChild(err, "Local network ACL configuration could not be read or changed.")
+			return
+		}
+		out = result
+	case ec2ReplaceNetworkACLAssociation:
+		result, err := g.Stacks.executeEC2NetworkACLAssociation(r.Context(), region, *request.aclAssociation, aclAssociationAuthority)
+		if err != nil {
+			failChild(err, "Local network ACL association could not be read or changed.")
 			return
 		}
 		out = result

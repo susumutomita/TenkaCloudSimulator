@@ -17,7 +17,7 @@ import Table from '@cloudscape-design/components/table';
 import Tabs from '@cloudscape-design/components/tabs';
 import {useLocale} from './i18n.jsx';
 import {changeNetworkACLRule,createVpcNetworkACL,deleteVpcNetworkACL,loadNetworkACLInventory,loadNetworkACLVpcs,
-  networkACLFailure,networkACLInventoryOperations,networkACLRuleActionsAvailable,normalizeNetworkACLRule,validNetworkACLID,validNetworkACLName,validNetworkACLVpcID} from './ec2-network-acls.mjs';
+  networkACLFailure,networkACLInventoryOperations,networkACLRuleActionsAvailable,subnetACLAssociationAvailable,normalizeNetworkACLRule,validNetworkACLID,validNetworkACLName,validNetworkACLVpcID} from './ec2-network-acls.mjs';
 
 const noSaving=()=>{};
 const pageSize=20;
@@ -78,6 +78,7 @@ export default function NetworkACLInventory({request,region,capabilities,authent
   const {t}=useLocale();
   const {read,create,delete:canDelete,vpcs:canListVPCs}=networkACLInventoryOperations(capabilities,authenticationRequired);
   const canEditRules=networkACLRuleActionsAvailable(capabilities,authenticationRequired);
+  const canAssociate=subnetACLAssociationAvailable(capabilities,authenticationRequired);
   const [selection,setSelection]=useState(()=>({region,vpc:validNetworkACLVpcID(initialVpcId)?initialVpcId:'',
     acl:validNetworkACLID(initialAclId)?initialAclId:''}));
   const filter=selection.region===region?selection.vpc:'';
@@ -174,7 +175,7 @@ export default function NetworkACLInventory({request,region,capabilities,authent
       const targetId=result.created?.id??'';
       setSelection({region,vpc:filter,acl:targetId});
       if(onSelectAcl) onSelectAcl(targetId, result.created ? target.id : filter, true);
-      setNotice({scope,id,kind:dialog.kind});
+      setNotice({scope,id,kind:dialog.kind,attached:result.created?.mode==='attached-config-only'});
     } catch (error) {
       if (!finish(op)) return;
       setView({scope,status:networkACLFailure(error),refreshBeforeWrite:true});setModal(null);
@@ -224,11 +225,11 @@ export default function NetworkACLInventory({request,region,capabilities,authent
       onClick={()=>setModal({scope,kind:'delete',acl:selected,confirm:''})}>{deleting}</Button>}
   </SpaceBetween>}>{title}</Header>}>
     <SpaceBetween size="l">
-      <Alert type="info">{canEditRules ? t('Edit saved IPv4 rules on detached custom ACLs. Subnet attachment and packet filtering are not supported.','関連付けのないカスタム ACL の IPv4 ルールを編集できます。サブネットへの関連付けやパケットフィルタリングには対応していません。')
+      <Alert type="info">{canAssociate?t('Inspect saved ACLs and their associations here. Edit rules on detached custom ACLs, and change the associated ACL from a subnet. Packet filtering is not emulated.','保存済みの ACL と関連付けを確認できます。ルールを編集できるのは関連付けのないカスタム ACL です。付け替えはサブネット画面から行います。パケットフィルタリングはシミュレートされません。'):canEditRules ? t('Edit saved IPv4 rules on detached custom ACLs. Subnet attachment and packet filtering are not supported.','関連付けのないカスタム ACL の IPv4 ルールを編集できます。サブネットへの関連付けやパケットフィルタリングには対応していません。')
         : t('Only saved, detached custom ACLs are available. Default ACLs, rule changes, subnet attachment, and packet filtering are not supported.','保存済みの、関連付けのないカスタム ACL のみ利用できます。デフォルト ACL、ルールの変更、サブネットへの関連付け、パケットフィルタリングには対応していません。')}</Alert>
       {errors[current?.status]&&<Alert type="error">{errors[current.status]} {current.refreshBeforeWrite&&
         t('Refresh before trying another write.','次の変更の前に一覧を更新してください。')}</Alert>}
-      {notice?.scope===scope&&<Alert type="success">{notice.kind==='rule'?t('Confirmed rule configuration: ','ルール設定を確認しました: ')+notice.number+' / ':notice.kind==='create'?t('Saved network ACL: ','ネットワーク ACL を保存しました: ')
+      {notice?.scope===scope&&<Alert type="success">{notice.kind==='rule'?t('Confirmed rule configuration: ','ルール設定を確認しました: ')+notice.number+' / ':notice.kind==='create'?(notice.attached?t('Confirmed existing attached network ACL: ','関連付け済みの既存ネットワーク ACL を確認しました: '):t('Saved network ACL: ','ネットワーク ACL を保存しました: '))
         :t('Deleted network ACL: ','ネットワーク ACL を削除しました: ')}{idCell(notice.id)}</Alert>}
       <FormField label={t('Filter by VPC','VPC で絞り込み')}><Select options={filters} filteringType="auto"
         disabled={writing||Boolean(dialog)||writeBlocked} selectedOption={filters.find(item=>item.value===filter)}
@@ -247,7 +248,7 @@ export default function NetworkACLInventory({request,region,capabilities,authent
           {id:'subnets',header:t('Subnet associations','サブネットの関連付け'),cell:acl=>String(acl.associations.length)},
         ]} pagination={pages>1&&<Pagination currentPageIndex={shown} pagesCount={pages} onChange={({detail})=>setPage(detail.currentPageIndex)}
           ariaLabels={{previousPageLabel:t('Previous page','前のページ'),nextPageLabel:t('Next page','次のページ'),pageLabel:n=>String(n)}}/>}
-        empty={ready?t('No detached network ACLs match this VPC filter.','VPC の絞り込みに一致する関連付けのないネットワーク ACL はありません。')
+        empty={ready?(canAssociate?t('No network ACLs match this VPC filter.','VPC の絞り込みに一致するネットワーク ACL はありません。'):t('No detached network ACLs match this VPC filter.','VPC の絞り込みに一致する関連付けのないネットワーク ACL はありません。'))
           :t('Network ACL data is not available.','ネットワーク ACL のデータは利用できません。')}/>
       {initialAclId&&ready&&!selected&&<Alert type="info">{t('The selected network ACL was not found in this inventory.',
         '選択したネットワーク ACL は、この一覧にはありません。')}</Alert>}

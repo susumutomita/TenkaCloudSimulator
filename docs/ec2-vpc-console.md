@@ -9,10 +9,10 @@ still needs the server's IAM permission for each actual resource and operation.
 | Page | Saved configuration in this simulator |
 | --- | --- |
 | VPCs | [Native IPv4 VPCs and the limited CloudFormation option](ec2-read-discovery.md#console-vpc-and-one-subnet). Select a VPC to view [DNS settings](ec2-vpc-dns-attributes.md) or open its [read-only Resource map](#read-only-resource-map). |
-| Subnets | [Regional inventory, native IPv4 creation, and verified implicit or explicit route-table association](ec2-native-subnet.md). |
+| Subnets | [Regional inventory, native IPv4 creation and verified route-table association](ec2-native-subnet.md). On eligible native subnets, use Actions to [change the saved network ACL](ec2-detached-network-acls.md#change-a-subnets-saved-network-acl). |
 | Route tables | Tags, saved IPv4 routes, and subnet associations. Native operations are available where backed by the [route table](ec2-read-discovery.md#route-table-readback) and [route](ec2-native-default-route.md) APIs. |
 | Internet gateways | [Regional inventory, detached creation/deletion, and VPC attachment/detachment](ec2-internet-gateways.md). CloudFormation-owned gateways remain read-only here. |
-| Network ACLs | [Detached custom ACLs only](ec2-detached-network-acls.md). No default ACL, rule editing, subnet association, or traffic filtering. |
+| Network ACLs | [Stored ACLs, IPv4 rules and associations](ec2-detached-network-acls.md). Rules are editable only while a custom ACL is detached. This does not filter traffic. |
 | Security groups | Select a VPC to see stored groups. [Native detached groups and supported TCP/IPv4 rules](ec2-read-discovery.md#security-group-readback) can be managed where advertised; CloudFormation groups are read-only here. |
 
 The links use the selected region. A resolved subnet can link to its actual

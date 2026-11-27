@@ -209,7 +209,7 @@ func TestEC2NetworkACLEntryQueryRejectsUnsupportedAndReservedInputs(t *testing.T
 	if !reflect.DeepEqual(before, replaceTestInventory(t, f.store.Database())) {
 		t.Fatal("invalid request wrote ACL state")
 	}
-	f.expect(f.call("", naclRegressionRegion, nil, url.Values{"Action": {"ReplaceNetworkAclAssociation"}}), 400, "UnsupportedOperation")
+	f.expect(f.call("", naclRegressionRegion, nil, url.Values{"Action": {"ReplaceNetworkAclAssociation"}}), 400, "MissingParameter")
 }
 
 func TestEC2NetworkACLEntryLimitAndTransactionalRefusals(t *testing.T) {

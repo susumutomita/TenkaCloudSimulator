@@ -20,8 +20,9 @@ The standalone page opens the exact saved subnet after verifying the create
 response and regional readback. If the outcome is unknown, return to **Subnets**
 to inspect state before trying again. A subnet ID link opens the overview and,
 when available, the confirmed explicit or native main route table. The
-simulator's ACL API lists detached ACLs; it does not report an ACL association
-for a subnet. This page does not estimate available IPs or test guest traffic.
+[Network ACL workflow](ec2-detached-network-acls.md#change-a-subnets-saved-network-acl)
+shows and changes the saved association for eligible native subnets in newly
+created native VPCs. It cannot verify or change actual packet filtering.
 
 This uses the same native Query API and SQLite state as SDK clients. It does not create a stack, attach to a CloudFormation VPC, add a gateway or route, start a VM, or verify packet reachability. Subnets owned by a CloudFormation stack are visible, not editable, here. The original operator-only **VPC and more** creates one VPC and one subnet together in a new stack and is unchanged.
 

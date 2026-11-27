@@ -226,15 +226,16 @@ layout/Chromium or network enforcement.
 [DescribeSecurityGroups](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_DescribeSecurityGroups.html),
 [DeleteSecurityGroup](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_DeleteSecurityGroup.html).
 
-### Detached network ACL discovery and metadata
+### Native network ACL discovery and metadata
 
-`CreateNetworkAcl`, `DescribeNetworkAcls` and `DeleteNetworkAcl` support the
-[explicit detached configuration contract](ec2-detached-network-acls.md) in an
-EC2-managed VPC. Group/ACL mutations and reads are refused in a single-instance
-handoff. The dedicated Network ACLs page and the native EC2 API share the
-same saved IPv4 rule configuration for detached custom ACLs. ACLs do not
-create a default ACL, bind a subnet, or filter traffic. See the
-[rule workflow and exact API limits](ec2-detached-network-acls.md#rule-profile-and-readback).
+The [ACL configuration contract](ec2-detached-network-acls.md) covers custom
+ACLs, rule configuration while detached, and stored defaults and subnet
+associations in newly created native VPCs. Neither a CloudFormation resource
+nor a legacy VPC is upgraded implicitly. An ordinary signed session can
+change an eligible subnet's saved association to another ACL in the same VPC;
+the provider verifies the selected association, both resource permissions and
+the saved readback. Single-instance handoffs cannot use these APIs. These
+saved settings do not filter traffic.
 
 To verify all three child kinds in one owned VPC, run
 `SIMULATOR_BINARY=/absolute/path/to/simulator python3 test/console/ec2_native_network_sdk.py`

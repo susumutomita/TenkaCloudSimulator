@@ -1,10 +1,11 @@
-# EC2: detached custom IPv4 network ACLs
+# EC2: IPv4 network ACLs and native subnet associations
 
-Issue [#56](https://github.com/susumutomita/TenkaCloudSimulator/issues/56)
-tracks the broader VPC workflow. The simulator stores detached custom ACLs
-and a bounded set of IPv4 rules inside an existing EC2-managed VPC. These are
-**saved configuration only**: there is no subnet association, packet filtering,
-VPC default ACL, IPv6, Terraform workflow or CloudFormation ACL lifecycle.
+Issue [#605](https://github.com/susumutomita/TenkaCloudSimulator/issues/605)
+tracks the broader VPC workflow. The simulator stores custom IPv4 ACLs,
+bounded rule configuration, per-VPC defaults for newly created native VPCs,
+and a single saved association per eligible native subnet. These are
+**saved configuration only**; no packet filtering, IPv6, Terraform workflow
+or CloudFormation ACL lifecycle is implemented.
 
 In the signed-in **VPC → Resource details → Network ACLs** pane, select a
 verified EC2-managed VPC. If the detached ACL capability is present, you can
@@ -17,19 +18,51 @@ choose **Inbound rules** or **Outbound rules**. Add, edit or delete one rule at
 a time. Rule 32767 is fixed. The editor verifies the current VPC and ACL,
 sends the corresponding native operation, and checks the saved rule in
 `DescribeNetworkAcls`. If verification fails, refresh before trying again.
-The VPC details pane manages the ACL itself; neither page associates ACLs with
-subnets or filters traffic.
+Both the VPC details pane and the rule editor restrict writes to detached
+custom ACLs. Association changes start from the subnet page.
 
 Both the SDK and Console use authenticated EC2 Query/XML, version `2016-11-15`.
 
 | Operation | Supported arguments and effect |
 | --- | --- |
 | [CreateNetworkAcl](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_CreateNetworkAcl.html) | `VpcId`, optional `ClientToken`, optional one `TagSpecification` of type `network-acl` with at most 50 tags. Creates one durable ACL in the caller's region under the EC2-managed parent. |
-| [DescribeNetworkAcls](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_DescribeNetworkAcls.html) | All detached ACLs, up to 50 explicit ACL IDs and/or one `vpc-id` filter with up to 50 VPC IDs. Results are ordered by ACL ID. Other filters and pagination return an error. |
+| [DescribeNetworkAcls](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_DescribeNetworkAcls.html) | All supported native ACLs, up to 50 explicit ACL IDs or one exact `vpc-id` filter with up to 50 VPC IDs (also accepted with ACL IDs), or one `association.subnet-id` filter with one exact subnet ID. Other filters and pagination return an error. |
 | [DeleteNetworkAcl](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_DeleteNetworkAcl.html) | `NetworkAclId`. Deletes only the requested detached ACL and its saved rules. Missing IDs return an error. Delete ACLs before deleting their VPC. |
 | [CreateNetworkAclEntry](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_CreateNetworkAclEntry.html) | `NetworkAclId`, `RuleNumber`, `Egress`, `Protocol`, `RuleAction`, `CidrBlock`, plus `PortRange.From` and `PortRange.To` for TCP/UDP. Adds one numbered rule. Duplicate numbers in that direction return `NetworkAclEntryAlreadyExists`. |
 | [ReplaceNetworkAclEntry](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_ReplaceNetworkAclEntry.html) | Same arguments as create. Replaces only that existing direction and rule number. An identical normalized replacement leaves the saved generation unchanged. |
 | [DeleteNetworkAclEntry](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_DeleteNetworkAclEntry.html) | `NetworkAclId`, `RuleNumber`, `Egress`. Removes only that existing rule. Replace and delete return `InvalidNetworkAclEntry.NotFound` if it does not exist. |
+
+## Change a subnet's saved network ACL
+
+Create a new EC2-managed IPv4 VPC and a native IPv4 subnet. The VPC gets a
+stored default ACL, and the subnet starts with one persisted association to
+it. This is not inferred during a read. Existing VPCs created before this
+support, and CloudFormation-managed VPCs or subnets, are not automatically
+enrolled and cannot use this association workflow.
+
+In **VPC → Subnets**, open that subnet and open **Actions → Edit network
+ACL association** in the Network ACL pane. Choose a different ACL from the
+same VPC, review its saved IPv4 rules, and save. To switch back, choose the
+default ACL. The Console checks the exact current association before sending
+one request and matches the new receipt against a fresh API read. If
+confirmation fails, refresh instead of replaying or assuming a rollback.
+
+[ReplaceNetworkAclAssociation](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_ReplaceNetworkAclAssociation.html)
+takes the current `AssociationId` and destination `NetworkAclId`, plus the
+standard Query API version. `DryRun=true` and extra parameters are not
+supported. The response contains `newAssociationId`. A change issues a fresh
+ID; sending the same target with the current ID is a no-op. The immediate
+prior ID can recover the same committed target's receipt. Older IDs or a
+different target with a stale ID require fresh discovery.
+
+Both the destination `network-acl` ARN and the actual resolved `subnet` ARN
+must allow `ec2:ReplaceNetworkAclAssociation`. `DescribeNetworkAcls` with
+`association.subnet-id` reads the whole matching ACL and reports its saved
+links as `associationSet/item` entries with ACL, subnet and association IDs.
+The VPC default is marked `default=true` with one immutable allow rule
+and terminal deny in each IPv4 direction. A custom ACL with a subnet is
+read-only for deletion and rule changes. This operation does not change
+subnet CIDR, neighbors, routes, or actual network traffic.
 
 ## Rule profile and readback
 
@@ -44,8 +77,9 @@ Both the SDK and Console use authenticated EC2 Query/XML, version `2016-11-15`.
 - `DescribeNetworkAcls` returns inbound and outbound in separate ascending
   sequences in `entrySet`, including the immutable terminal IPv4 deny at
   `32767` in each as with a custom ACL. TCP/UDP use `portRange/from` and
-  `portRange/to`. The ACL stays `default=false`, association-free and
-  `simulatorNetworkAclMode=detached-config-only`.
+  `portRange/to`. Detached custom rows are `default=false`, association-free and
+  `simulatorNetworkAclMode=detached-config-only`. Attached custom rows are
+  `attached-config-only` and the stored VPC default is `default-config-only`.
 - Every entry mutation checks the ACL, its native parent and CloudFormation
   ownership in one SQLite transaction, verifies the stored change and only
   then returns `return=true`. If delivery or subsequent confirmation is
@@ -63,8 +97,10 @@ read was too large, check the saved state before retrying.
 Keep a pre-upgrade copy of the SQLite state if a downgrade is possible.
 An older Simulator can read unchanged detached ACLs but cannot read a row after
 its rule state has been modified by this version, even if all editable rules
-are later removed. To downgrade, restore the earlier database copy rather
-than opening the updated database with the previous binary.
+are later removed. Once a newer binary writes default and association rows,
+an older binary can neither read those relationships nor reliably delete the
+marked VPCs/subnets or referenced custom ACLs. To downgrade, restore the
+earlier database copy instead of opening the updated state.
 
 ## Local authorization and lifecycle
 
@@ -78,8 +114,8 @@ operations. See the [EC2 authorization reference](https://docs.aws.amazon.com/se
 
 `ClientToken` accepts 1–64 printable ASCII characters. Only its digest and
 the canonical request digest are stored, atomically with the new ACL. A
-matching retry in the same region returns the existing ACL; a changed
-request with the same token receives `IdempotentParameterMismatch`.
+matching retry in the same region returns the existing ACL with its current
+saved associations, without recreating or changing it. A changed request with the same token receives `IdempotentParameterMismatch`.
 A matching retry after ACL removal returns `InvalidNetworkAclID.NotFound`
 instead of silently recreating a resource. The existing 1,000-resource
 network bound and a local 4,096-receipt bound apply; deletion does not

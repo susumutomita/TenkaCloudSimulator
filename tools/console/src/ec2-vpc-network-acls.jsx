@@ -84,7 +84,7 @@ export default function VPCNetworkACLs({request,region,vpc,onSaving=noSaving,wri
       if (!finish(operation)) return;
       setSnapshot({scope,status:'ready',rows:result.rows});
       setModal(null);
-      setNotice({scope,kind:dialog.kind,id:(result.created??result.removed).id});
+      setNotice({scope,kind:dialog.kind,id:(result.created??result.removed).id,attached:result.created?.mode==='attached-config-only'});
     } catch (error) {
       if (!finish(operation)) return;
       // An accepted write may have lost its reply or readback. Require a new
@@ -118,9 +118,9 @@ export default function VPCNetworkACLs({request,region,vpc,onSaving=noSaving,wri
       <Button iconName="refresh" disabled={pending} loading={statusLoading} onClick={refresh}>{refreshLabel}</Button>
       <Button disabled={!ready||writeBlocked} onClick={()=>setModal({scope,kind:'create',name:''})}>{createLabel}</Button>
     </SpaceBetween>}>{t('Network ACLs','ネットワーク ACL')}</Header>
-    <Box color="text-body-secondary">{t('This pane manages detached ACLs only. When available, edit rules on the dedicated Network ACLs page. Subnet association and packet filtering are not supported.','この画面で管理できるのは関連付けのない ACL です。ルールは、対応している場合に専用のネットワーク ACL ページから編集できます。サブネットへの関連付けやパケットフィルタリングには対応していません。')}</Box>
+    <Box color="text-body-secondary">{t('This pane manages detached ACLs only. When available, use Network ACLs for rule configuration and Subnets for association. Packet filtering is not emulated.','この画面で管理できるのは関連付けのない ACL です。対応している場合、ルールはネットワーク ACL、関連付けはサブネットのページから操作します。パケットフィルタリングはシミュレートされません。')}</Box>
     {notice?.scope===scope&&<Alert type="success">{notice.kind==='create'
-      ? t('Saved network ACL: ','ネットワーク ACL を保存しました: ')
+      ? (notice.attached?t('Confirmed existing attached network ACL: ','関連付け済みの既存ネットワーク ACL を確認しました: '):t('Saved network ACL: ','ネットワーク ACL を保存しました: '))
       : t('Deleted network ACL: ','ネットワーク ACL を削除しました: ')}{identifier(notice.id)}</Alert>}
     {errors[current?.status]&&<Alert type="error">{errors[current.status]} {current.refreshBeforeWrite&&t('Refresh network ACLs before trying again.','再試行する前にネットワーク ACL を更新してください。')}</Alert>}
     <Table variant="embedded" trackBy="id" items={rows.slice((shown-1)*PAGE_SIZE,shown*PAGE_SIZE)} loading={statusLoading||pending}

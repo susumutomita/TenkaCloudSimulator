@@ -209,6 +209,14 @@ func (s *StackStore) createNativeSubnet(ctx context.Context, region string, q ec
 	if err != nil {
 		return ec2SubnetRead{}, err
 	}
+	_, marked, err := rawNativeACLDefault(ctx, tx, region, r.VPCID)
+	if err != nil {
+		return ec2SubnetRead{}, err
+	}
+	before, err := nativeACLWriteCount(ctx, tx)
+	if err != nil {
+		return ec2SubnetRead{}, err
+	}
 	if err := createEC2Network(ctx, tx, r); err != nil {
 		switch {
 		case errors.Is(err, errEC2NetworkOverlap):
@@ -216,6 +224,16 @@ func (s *StackStore) createNativeSubnet(ctx context.Context, region string, q ec
 		case errors.Is(err, errEC2NetworkQuota):
 			return ec2SubnetRead{}, ec2Invalid("SubnetLimitExceeded", "The local limit of 1000 network resources has been reached.")
 		}
+		return ec2SubnetRead{}, err
+	}
+	if err := createNativeSubnetACLAssociation(ctx, tx, r); err != nil {
+		return ec2SubnetRead{}, err
+	}
+	want := int64(1)
+	if marked {
+		want++
+	}
+	if err := nativeACLRequireWriteDelta(ctx, tx, before, want); err != nil {
 		return ec2SubnetRead{}, err
 	}
 	return read, tx.Commit()
@@ -247,6 +265,17 @@ func (s *StackStore) deleteNativeSubnet(ctx context.Context, region, id string) 
 	if dependent {
 		return ec2Invalid("DependencyViolation", "The subnet still has a network dependency.")
 	}
+	_, marked, err := rawNativeACLDefault(ctx, tx, region, r.VPCID)
+	if err != nil {
+		return err
+	}
+	before, err := nativeACLWriteCount(ctx, tx)
+	if err != nil {
+		return err
+	}
+	if err := removeNativeSubnetACLAssociation(ctx, tx, r); err != nil {
+		return err
+	}
 	result, err := tx.ExecContext(ctx, `DELETE FROM aws_ec2_network_resources WHERE region=? AND id=? AND kind=? AND stack_id=? AND revision=?`,
 		region, id, ec2NativeSubnetKind, ec2NativeOwner, r.Revision)
 	if err != nil {
@@ -254,6 +283,19 @@ func (s *StackStore) deleteNativeSubnet(ctx context.Context, region, id string) 
 	}
 	if n, err := result.RowsAffected(); err != nil || n != 1 {
 		return errors.New("subnet delete was not acknowledged")
+	}
+	if _, err := networkRead(ctx, tx, region, id); !errors.Is(err, sql.ErrNoRows) {
+		return errNativeNetworkACLAssociationState
+	}
+	if err := checkNativeACLSubnetBindingAbsent(ctx, tx, r); err != nil {
+		return err
+	}
+	want := int64(1)
+	if marked {
+		want++
+	}
+	if err := nativeACLRequireWriteDelta(ctx, tx, before, want); err != nil {
+		return err
 	}
 	return tx.Commit()
 }

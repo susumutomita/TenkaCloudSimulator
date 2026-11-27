@@ -76,9 +76,11 @@ API Reference の EC2 用プリセットは、既存の Query API の `DescribeI
 [既存 VPC のネイティブ IPv4 サブネット](../ec2-native-subnet.md)は、EC2 管理の親 VPC に対して追加・参照・削除できる。Console と SDK は同じ EC2 API と SQLite を使い、CloudFormation の所有権を変更しない。ルーティングやゲストの到達性は扱わない。
 [保存済みの EC2 管理サブネットの名前とタグ](../ec2-native-subnet.md#native-subnet-tag-editing)も、一つの ID と一つのタグを指定する。VPC タグと同じ Query 処理を使い、対象をサブネット ARN で認可する。サブネットと親 VPC の所有権・CloudFormation の宣言・正規化済みドキュメントを同じ SQLite トランザクション内で検証する。更新対象は既存のサブネット行のタグだけで、サブネットのリビジョン、パブリック IPv4 設定、親 VPC の DNS と経路を変更しない。エラー時は途中の変更を確定せず、既存の `DescribeSubnets` から保存済みのタグを取得する。作成時のタグ、スタック管理のサブネット、パケットの挙動は対象外。
 
-[ネイティブのセキュリティグループとネットワーク ACL](../ec2-read-discovery.md)は、同じ VPC に保存できる未接続の設定である。Console と SDK は同じ Query API で保存・再照会し、インスタンス・サブネットへの関連付けや通信の制御は扱わない。子が残る VPC の削除を拒否する。
+[ネイティブのセキュリティグループとネットワーク ACL](../ec2-read-discovery.md)は、同じ VPC に保存できる未接続の設定である。Console と SDK は同じ Query API で保存・再照会し、セキュリティグループのインスタンスへの関連付けや、通信の制御は扱わない。子が残る VPC の削除を拒否する。
 
-[未接続ネットワーク ACL の IPv4 ルール](../ec2-detached-network-acls.md)は、作成・置換・削除ごとに対象 ACL の ARN で認可し、同じリージョン内で ACL と親 VPC の所有権・CloudFormation の宣言・保存後の状態を照合する。ルールは ACL の既存 SQLite 行に保存し、ACL の削除とともに消える。方向ごとに 1〜32766 の番号で最大 20 件。最終の拒否ルールは変更できない。確認には同じ ACL の `DescribeNetworkAcls` を使う。既定 ACL、サブネットへの関連付け、パケットの許可・拒否は扱わない。
+[未接続ネットワーク ACL の IPv4 ルール](../ec2-detached-network-acls.md)は、作成・置換・削除ごとに対象 ACL の ARN で認可し、同じリージョン内で ACL と親 VPC の所有権・CloudFormation の宣言・保存後の状態を照合する。ルールは ACL の既存 SQLite 行に保存し、ACL の削除とともに消える。方向ごとに 1〜32766 の番号で最大 20 件。最終の拒否ルールは変更できない。確認には同じ ACL の `DescribeNetworkAcls` を使う。パケットの許可・拒否は扱わない。
+
+[ネイティブサブネットの ACL 関連付け](../ec2-detached-network-acls.md#change-a-subnets-saved-network-acl)は、新規の EC2 管理 VPC のデフォルト ACL と、そのサブネットの現在の関連付けを、VPC とサブネットのライフサイクルと同じ SQLite トランザクションで保存する。対象サブネットと同じ VPC の選択先 ACL の両方を認可し、一つの関連付けだけを更新する。SDK とコンソールは同じ保存済みの関連付けを再取得する。既存の未対応 VPC や CloudFormation は自動移行せず、経路や通信は変更しない。
 
 
 [VPC コンソールの個別ページ](../ec2-vpc-console.md)は、リージョン付きの VPC・サブネット・ルートテーブル・インターネットゲートウェイ・ネットワーク ACL・セキュリティグループの閲覧経路を提供する。ページの表示と操作は対応する API の通知、認証とセッション範囲、同じリージョンの再照会に基づく。リンクは API の認可を増やさない。応答を待つ間は画面内の移動を止め、ブラウザー履歴で離脱した場合は現在の画面用の照会を破棄する。既存の VPC からも個別設定を閲覧できる。実通信・インスタンスの配置要件は変えない。

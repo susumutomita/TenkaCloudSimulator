@@ -39,8 +39,11 @@ func TestEC2NetworkACLGatewayEnforcesAdmissionAndReadback(t *testing.T) {
 	f.expect(f.call("acl-editor", region, nil, create), 403, "UnauthorizedOperation")
 	create.Del("TagSpecification.1.ResourceType")
 	create.Del("TagSpecification.1.Tag.1.Key")
-	if body := f.expect(f.call("", region, nil, describe), 200, ""); !strings.Contains(body, "<networkAclSet></networkAclSet>") {
-		t.Fatal("failed admissions altered persisted state")
+	var denied ec2NetworkACLResponse
+	if body := f.expect(f.call("", region, nil, describe), 200, ""); xml.Unmarshal([]byte(body), &denied) != nil ||
+		denied.NetworkACLs == nil || len(denied.NetworkACLs.Items) != 1 || !denied.NetworkACLs.Items[0].Default ||
+		denied.NetworkACLs.Items[0].ID != nativeDefaultACLID(region, vpc.ID) {
+		t.Fatal("failed admissions added a custom ACL or changed the default")
 	}
 	raw := f.expect(f.call("acl-editor", region, nil, create), 200, "")
 	var created ec2NetworkACLResponse
@@ -66,7 +69,7 @@ func TestEC2NetworkACLGatewayEnforcesAdmissionAndReadback(t *testing.T) {
 	bound := context.WithValue(context.Background(), consoleInstanceBoundaryKey{}, consoleInstanceBoundary{region: region, instance: "i-00000000"})
 	f.expect(f.call("acl-editor", region, bound, describe), 403, "UnauthorizedOperation")
 	f.expect(f.call("", region, nil, url.Values{"Action": {"CreateNetworkAclEntry"}}), 400, "MissingParameter")
-	f.expect(f.call("", region, nil, url.Values{"Action": {"ReplaceNetworkAclAssociation"}}), 400, "UnsupportedOperation")
+	f.expect(f.call("", region, nil, url.Values{"Action": {"ReplaceNetworkAclAssociation"}}), 400, "MissingParameter")
 	f.expect(f.call("", region, nil, url.Values{"Action": {"DeleteVpc"}, "VpcId": {vpc.ID}}), 400, "DependencyViolation")
 	f.expect(f.call("acl-editor", region, nil, url.Values{"Action": {"DeleteNetworkAcl"}, "NetworkAclId": {id}}), 200, "")
 	f.expect(f.call("", region, nil, url.Values{"Action": {"DeleteVpc"}, "VpcId": {vpc.ID}}), 200, "")

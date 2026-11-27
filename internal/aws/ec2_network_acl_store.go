@@ -11,7 +11,6 @@ import (
 	"errors"
 	"fmt"
 	"maps"
-	"slices"
 )
 
 const (
@@ -119,11 +118,16 @@ func nativeNetworkACLRequestHash(q ec2NetworkACLRequest) ([32]byte, error) {
 	return sha256.Sum256(data), err
 }
 
-func (s *StackStore) createNativeNetworkACL(ctx context.Context, region string, q ec2NetworkACLRequest) (EC2NetworkResource, error) {
-	var r EC2NetworkResource
+type nativeNetworkACLCreateResult struct {
+	EC2NetworkResource
+	record ec2NetworkACLRead
+}
+
+func (s *StackStore) createNativeNetworkACL(ctx context.Context, region string, q ec2NetworkACLRequest) (nativeNetworkACLCreateResult, error) {
+	var result nativeNetworkACLCreateResult
 	tx, err := s.db.BeginTx(ctx, nil)
 	if err != nil {
-		return r, err
+		return result, err
 	}
 	defer tx.Rollback()
 	var tokenHash, requestHash [32]byte
@@ -131,114 +135,107 @@ func (s *StackStore) createNativeNetworkACL(ctx context.Context, region string, 
 		tokenHash = sha256.Sum256([]byte(q.clientToken))
 		requestHash, err = nativeNetworkACLRequestHash(q)
 		if err != nil {
-			return r, err
+			return result, err
 		}
 		var storedHash []byte
 		var id string
 		err = tx.QueryRowContext(ctx, `SELECT request_hash,acl_id FROM aws_ec2_network_acl_replay WHERE region=? AND token_hash=?`, region, tokenHash[:]).Scan(&storedHash, &id)
 		if err == nil {
 			if len(storedHash) != sha256.Size || !ec2NetworkACLIDPattern.MatchString(id) {
-				return r, errNetworkACLState
+				return result, errNetworkACLState
 			}
 			if q.authorizeCreateID != nil {
 				if err := q.authorizeCreateID(id); err != nil {
-					return r, err
+					return result, err
 				}
 			}
 			if !bytes.Equal(storedHash, requestHash[:]) {
-				return r, ec2Invalid("IdempotentParameterMismatch", "ClientToken was already used with different parameters in this region.")
+				return result, ec2Invalid("IdempotentParameterMismatch", "ClientToken was already used with different parameters in this region.")
 			}
-			r, err = readNativeNetworkACL(ctx, tx, region, id)
+			r, err := readNativeNetworkACL(ctx, tx, region, id)
 			if err != nil {
-				return r, err // a retired ACL never provisions a new ACL on retry
+				return result, err // a retired ACL never provisions a new ACL on retry
 			}
 			if r.VPCID != q.vpcID || !maps.Equal(r.Tags, q.tags) {
-				return EC2NetworkResource{}, errNetworkACLState
+				return result, errNetworkACLState
 			}
-			return r, tx.Commit()
+			// The same token and request only read the established ACL. An
+			// attachment never retires it or turns the retry into a write.
+			view, err := newNativeACLReadSnapshot(ctx, tx, region)
+			if err != nil {
+				return result, err
+			}
+			record, err := view.record(id)
+			if err != nil {
+				return result, err
+			}
+			if record.Default || record.ID != id || record.VPCID != r.VPCID {
+				return result, errNetworkACLState
+			}
+			return nativeNetworkACLCreateResult{r, record}, tx.Commit()
 		}
 		if !errors.Is(err, sql.ErrNoRows) {
-			return r, err
+			return result, err
 		}
 		var receipts int
 		if err = tx.QueryRowContext(ctx, `SELECT count(*) FROM aws_ec2_network_acl_replay`).Scan(&receipts); err != nil {
-			return r, err
+			return result, err
 		}
 		if receipts >= ec2NetworkACLReplayLimit {
-			return r, ec2Invalid("NetworkAclLimitExceeded", "The local network ACL create-replay bound has been reached.")
+			return result, ec2Invalid("NetworkAclLimitExceeded", "The local network ACL create-replay bound has been reached.")
 		}
 	}
 	if err = nativeNetworkACLParent(ctx, tx, region, q.vpcID); err != nil {
-		return r, err
+		return result, err
 	}
 	var count int
 	if err = tx.QueryRowContext(ctx, `SELECT count(*) FROM aws_ec2_network_resources`).Scan(&count); err != nil {
-		return r, err
+		return result, err
 	}
 	if count >= ec2NetworkACLRowLimit {
-		return r, ec2Invalid("NetworkAclLimitExceeded", "The local network resource bound has been reached.")
+		return result, ec2Invalid("NetworkAclLimitExceeded", "The local network resource bound has been reached.")
 	}
 	var entropy [9]byte
 	if _, err = rand.Read(entropy[:]); err != nil {
-		return r, err
+		return result, err
 	}
 	id := "acl-" + hex.EncodeToString(entropy[:])[:17]
+	if err := rejectNativeDefaultACLID(ctx, tx, region, id); err != nil {
+		return result, err
+	}
 	if q.authorizeCreateID != nil {
 		if err := q.authorizeCreateID(id); err != nil {
-			return r, err
+			return result, err
 		}
 	}
-	r = EC2NetworkResource{ID: id, Kind: ec2NetworkACLKind, Region: region, StackID: ec2NativeOwner, VPCID: q.vpcID, Tags: q.tags, Revision: 1}
+	r := EC2NetworkResource{ID: id, Kind: ec2NetworkACLKind, Region: region, StackID: ec2NativeOwner, VPCID: q.vpcID, Tags: q.tags, Revision: 1}
 	if err = networkWrite(ctx, tx, r, true); err != nil {
-		return r, err
+		return result, err
 	}
 	if err = nativeNetworkACLClaims(ctx, tx, region, id); err != nil {
-		return r, err
+		return result, err
 	}
 	if q.clientToken != "" {
-		result, err := tx.ExecContext(ctx, `INSERT INTO aws_ec2_network_acl_replay(region,token_hash,request_hash,acl_id) VALUES(?,?,?,?)`, region, tokenHash[:], requestHash[:], id)
+		insert, err := tx.ExecContext(ctx, `INSERT INTO aws_ec2_network_acl_replay(region,token_hash,request_hash,acl_id) VALUES(?,?,?,?)`, region, tokenHash[:], requestHash[:], id)
 		if err != nil {
-			return r, err
+			return result, err
 		}
-		if n, err := result.RowsAffected(); err != nil || n != 1 {
-			return r, errNetworkACLState
+		if n, err := insert.RowsAffected(); err != nil || n != 1 {
+			return result, errNetworkACLState
 		}
 		var storedHash []byte
 		var storedID string
 		if err := tx.QueryRowContext(ctx, `SELECT request_hash,acl_id FROM aws_ec2_network_acl_replay WHERE region=? AND token_hash=?`, region, tokenHash[:]).Scan(&storedHash, &storedID); err != nil {
-			return r, err
+			return result, err
 		}
 		if storedID != id || !bytes.Equal(storedHash, requestHash[:]) {
-			return r, errNetworkACLState
+			return result, errNetworkACLState
 		}
 	}
-	return r, tx.Commit()
-}
-
-func (s *StackStore) describeNativeNetworkACLs(ctx context.Context, region string, q ec2NetworkACLRequest) ([]EC2NetworkResource, error) {
-	tx, err := s.db.BeginTx(ctx, nil)
-	if err != nil {
-		return nil, err
+	if err := validateDetachedNativeACLForWrite(ctx, tx, r); err != nil {
+		return result, err
 	}
-	defer tx.Rollback()
-	ids := q.ids
-	if len(ids) == 0 {
-		ids, err = listNativeNetworkACLIDs(ctx, tx, region)
-		if err != nil {
-			return nil, err
-		}
-	}
-	out := make([]EC2NetworkResource, 0, len(ids))
-	for _, id := range ids {
-		r, err := readNativeNetworkACL(ctx, tx, region, id)
-		if err != nil {
-			return nil, err
-		}
-		if len(q.filterVPCs) == 0 || slices.Contains(q.filterVPCs, r.VPCID) {
-			out = append(out, r)
-		}
-	}
-	return out, tx.Commit()
+	return nativeNetworkACLCreateResult{r, ec2NetworkACLRecord(r)}, tx.Commit()
 }
 
 func listNativeNetworkACLIDs(ctx context.Context, tx *sql.Tx, region string) ([]string, error) {
@@ -271,7 +268,17 @@ func (s *StackStore) deleteNativeNetworkACL(ctx context.Context, region, id stri
 		return err
 	}
 	defer tx.Rollback()
+	if err := rejectNativeDefaultACLID(ctx, tx, region, id); err != nil {
+		return err
+	}
 	r, err := readNativeNetworkACL(ctx, tx, region, id)
+	if err != nil {
+		return err
+	}
+	if err := validateDetachedNativeACLForWrite(ctx, tx, r); err != nil {
+		return err
+	}
+	before, err := nativeACLWriteCount(ctx, tx)
 	if err != nil {
 		return err
 	}
@@ -280,8 +287,8 @@ func (s *StackStore) deleteNativeNetworkACL(ctx context.Context, region, id stri
 	if err != nil {
 		return err
 	}
-	if n, err := res.RowsAffected(); err != nil || n != 1 {
-		return errNetworkACLState
+	if err := nativeACLConfirmWrite(ctx, tx, res, before); err != nil {
+		return fmt.Errorf("%w: %w", errNetworkACLState, err)
 	}
 	if _, err := networkRead(ctx, tx, region, id); !errors.Is(err, sql.ErrNoRows) {
 		return errNetworkACLState
