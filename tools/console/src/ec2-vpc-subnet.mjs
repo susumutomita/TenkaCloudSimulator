@@ -18,13 +18,25 @@ function ipv4(s) {
   if (!m || m.slice(1, 5).some(octet => Number(octet) > 255 || String(Number(octet)) !== octet)) return null;
   return {address: m.slice(1,5).reduce((n, octet) => n * 256 + Number(octet), 0), bits: Number(m[5])};
 }
+// Form feedback before any write. The native EC2 and CloudFormation APIs remain authoritative.
+export function vpcCreateIssues({stackName, name = '', cidr, subnetCIDR}, paired) {
+  const issues = {};
+  const vpc = ipv4(cidr);
+  if (!vpc) issues.cidr = 'cidr';
+  if (typeof name !== 'string' || new TextEncoder().encode(name).length > 256) issues.name = 'name';
+  if (paired) {
+    if (typeof stackName !== 'string' || !stackNamePattern.test(stackName)) issues.stack = 'stack';
+    const subnet = ipv4(subnetCIDR);
+    if (!subnet) issues.subnet = 'subnet';
+    else if (vpc && (subnet.bits < vpc.bits || subnet.address >>> (32 - vpc.bits) !== vpc.address >>> (32 - vpc.bits))) {
+      issues.subnet = 'containment';
+    }
+  }
+  return issues;
+}
 export function vpcSubnetInputError({stackName, name, cidr, subnetCIDR}) {
-  if (typeof stackName !== 'string' || !stackNamePattern.test(stackName)) return 'stack';
-  if (name !== undefined && (typeof name !== 'string' || new TextEncoder().encode(name).length > 256)) return 'name';
-  const vpc = ipv4(cidr), subnet = ipv4(subnetCIDR);
-  if (!vpc || !subnet) return 'cidr';
-  if (subnet.bits < vpc.bits || subnet.address >>> (32 - vpc.bits) !== vpc.address >>> (32 - vpc.bits)) return 'containment';
-  return null;
+  const issues = vpcCreateIssues({stackName, name, cidr, subnetCIDR}, true);
+  return issues.stack ?? issues.name ?? issues.cidr ?? (issues.subnet === 'subnet' ? 'cidr' : issues.subnet) ?? null;
 }
 export function vpcSubnetParameters(form) {
   const invalid = vpcSubnetInputError(form);

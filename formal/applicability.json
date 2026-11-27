@@ -1,108 +1,250 @@
 {
   "version": 1,
-  "base_sha": "34f00a3ce59b9d0b291a529a2fbc9f9dbdad5321",
+  "base_sha": "dc6ccbe8f8c758f338c7716183b345b957cb6f3a",
   "changes": [
     {
-      "path": "formal/BattleDisruptionRoleCleanup.cfg",
-      "sha256": "7c6a0525697adfc176974a2a172ecc7fff19c5a8e192f5e0956f3cc0e387db72",
+      "path": "README.md",
+      "sha256": "a7953de059d4d35f84f78bf5449265d70466dbfd095e4522a015bbea8e2186cc",
+      "disposition": "documentation",
+      "reason": "Documents the supported VPC defaults, explicit native/stack ownership and limits; no provider/VM change.",
+      "models": []
+    },
+    {
+      "path": "docs/console.md",
+      "sha256": "f34c008c7c61bd1cc2f268791aa1bf2ed8fb8963304a4c6a01547c9cb87bf95e",
+      "disposition": "documentation",
+      "reason": "Documents the supported VPC defaults, explicit native/stack ownership and limits; no provider/VM change.",
+      "models": []
+    },
+    {
+      "path": "docs/design/0001-go-standalone.md",
+      "sha256": "f010d487dac701220539bbda3e85f535c2f54f2affbc6b0ce43174ca638e4073",
+      "disposition": "documentation",
+      "reason": "Documents the supported VPC defaults, explicit native/stack ownership and limits; no provider/VM change.",
+      "models": []
+    },
+    {
+      "path": "docs/ec2-read-discovery.md",
+      "sha256": "a77aa7971acb1b9a820693ad312f440456bce67cce035506581f5172b6232cc6",
+      "disposition": "documentation",
+      "reason": "Documents the supported VPC defaults, explicit native/stack ownership and limits; no provider/VM change.",
+      "models": []
+    },
+    {
+      "path": "formal/EC2VPCCreateForm.cfg",
+      "sha256": "e1e2eb9583204b1eb94a9fde3d6e0312e973703e659dc298ff8ccfd277ce46af",
       "disposition": "modeled",
-      "reason": "Configures the twelve bounded driver scenarios, including attachment, identity and missing-readback refusal cases.",
+      "reason": "Enumerates the configured safety properties for current view, draft admission and separated native/paired create actions.",
       "models": [
         {
-          "id": "BattleDisruptionRoleCleanup",
+          "id": "EC2VPCCreateForm",
           "properties": [
-            "ForeignStatePreserved",
-            "NoDeleteWithInlinePolicy",
-            "NoUnconfirmedCleanupReport",
-            "NoFailedGradeReport",
-            "KnownRoleCleanedAfterFailedWork"
+            "PairedNeedsOperator",
+            "InvalidDraftNeverWrites",
+            "NativeAndStackRemainDistinct",
+            "DiscardRetiredRead",
+            "ConfirmedBeforeSuccess"
           ],
-          "limits": "Single rehearsal-owned name and inline policy; mutually exclusive injected faults. No claim about independent AWS behavior, SQLite, credential revocation, a concurrently replaced role after lookup, VM/stack shutdown, or actual scoring."
+          "limits": "Finite VPC UI mode/draft/current-view abstraction only. No DOM, IPv4/UTF-8 implementation, AWS/network, VM or SQLite/runtime ownership proof; independent real browser/API checks remain separate."
         }
       ]
     },
     {
-      "path": "formal/BattleDisruptionRoleCleanup.tla",
-      "sha256": "00ef0f0c7bc5edb551d421861b6734cfdaca9951d04e86376918c038e7e6bcf4",
+      "path": "formal/EC2VPCCreateForm.tla",
+      "sha256": "9c09ba5929d4092f2873f9eeeecfddc23ff6afb74c7504367ec7854f4876f258",
       "disposition": "modeled",
-      "reason": "Models the grader-owned role from creation and install through same-identity policy removal, deletion, exact absence, and cleanup reporting.",
+      "reason": "Finite model of the VPC creation view, conditional CloudFormation choice, guarded write and exact readback in the current view.",
       "models": [
         {
-          "id": "BattleDisruptionRoleCleanup",
+          "id": "EC2VPCCreateForm",
           "properties": [
-            "ForeignStatePreserved",
-            "NoDeleteWithInlinePolicy",
-            "NoUnconfirmedCleanupReport",
-            "NoFailedGradeReport",
-            "KnownRoleCleanedAfterFailedWork"
+            "PairedNeedsOperator",
+            "InvalidDraftNeverWrites",
+            "NativeAndStackRemainDistinct",
+            "DiscardRetiredRead",
+            "ConfirmedBeforeSuccess"
           ],
-          "limits": "Single rehearsal-owned name and inline policy; mutually exclusive injected faults. No claim about independent AWS behavior, SQLite, credential revocation, a concurrently replaced role after lookup, VM/stack shutdown, or actual scoring."
+          "limits": "Finite VPC UI mode/draft/current-view abstraction only. No DOM, IPv4/UTF-8 implementation, AWS/network, VM or SQLite/runtime ownership proof; independent real browser/API checks remain separate."
         }
       ]
     },
     {
       "path": "formal/models.json",
-      "sha256": "ff0c300a3c5745095307ea788774f557983a5668142b0c4087a7061d501a0ca9",
+      "sha256": "cebcbe8d66c7502f55bca0d5571c823537a5b2c7d382a32401ef486be07294c5",
       "disposition": "formal-infrastructure",
-      "reason": "Registers the bounded Battle cleanup model and five required failure witnesses without changing an existing specification, scope, invariant or control.",
+      "reason": "Registers one explicit VPC UI state machine and five sensitivity controls; leaves the previous formal inventory unchanged.",
       "models": []
     },
     {
-      "path": "test/battle/README.md",
-      "sha256": "8352d540a0229ad2c5e20adedc467696781621bbf2447472376b4b29de86352d",
-      "disposition": "test-support",
-      "reason": "Explains the developer rehearsal role cleanup evidence and its limits; no simulator or release change.",
+      "path": "internal/server/web/app.css",
+      "sha256": "50d07fc206f060fc9eb9766908dacdbd4fd1d1fc9faaa4881faa45892304d058",
+      "disposition": "presentation",
+      "reason": "Generated Cloudscape styling for the two radio tiles and form. It has no query, authorization or network behavior.",
       "models": []
     },
     {
-      "path": "test/battle/image/test_rehearsal_operator_role.py",
-      "sha256": "d52595d28a442f714aad6539d1e8ef3ac22a2dd7af1db164e07b93c85e5d8e6a",
+      "path": "internal/server/web/app.js",
+      "sha256": "7dadd0db776366e788128a6337b6f68df442d954167f1168b7db8e45fa306afe",
       "disposition": "modeled",
-      "reason": "Executes the real driver helper against controlled IAM outcomes, including a late policy write, role replacement, delete ordering and unqualified absence. Checks the grading call sites use that context before recording success.",
+      "reason": "Served projection of the VPC mode/admission/live-view code; other service flows are unchanged.",
       "models": [
         {
-          "id": "BattleDisruptionRoleCleanup",
+          "id": "EC2VPCCreateForm",
           "properties": [
-            "ForeignStatePreserved",
-            "NoDeleteWithInlinePolicy",
-            "NoUnconfirmedCleanupReport",
-            "NoFailedGradeReport",
-            "KnownRoleCleanedAfterFailedWork"
+            "PairedNeedsOperator",
+            "InvalidDraftNeverWrites",
+            "NativeAndStackRemainDistinct",
+            "DiscardRetiredRead",
+            "ConfirmedBeforeSuccess"
           ],
-          "limits": "Single rehearsal-owned name and inline policy; mutually exclusive injected faults. No claim about independent AWS behavior, SQLite, credential revocation, a concurrently replaced role after lookup, VM/stack shutdown, or actual scoring."
+          "limits": "Finite VPC UI mode/draft/current-view abstraction only. No DOM, IPv4/UTF-8 implementation, AWS/network, VM or SQLite/runtime ownership proof; independent real browser/API checks remain separate."
         }
       ]
     },
     {
-      "path": "test/battle/image/test_rehearsal_process_scope.py",
-      "sha256": "191b1896d142144aaae4f3548009927237c9c69b50693a171d49c2ae0b82245f",
-      "disposition": "test-support",
-      "reason": "Supplies the existing AST test harness with the standard-library context manager it now imports; its process observation checks are unchanged.",
-      "models": []
-    },
-    {
-      "path": "test/battle/image/test_rehearsal_public_output.py",
-      "sha256": "55beb24539a33c0fbf985b41b90f07df899bf6ca254f9032e192d3719043bf61",
-      "disposition": "test-support",
-      "reason": "Supplies the existing AST test harness with the standard-library context manager; public-output/redaction checks and production admission are unchanged.",
-      "models": []
-    },
-    {
-      "path": "test/battle/rehearsal.py",
-      "sha256": "e2a68d9e21b083d967a7493d214017e74c72afab3c740c85ef17172fb2b414ff",
+      "path": "test/console/ec2_vpc_create_browser.cjs",
+      "sha256": "0b53cc16d7fb2048511640a085480e26621a1c97470f1ef5d7845cf2c7ed009b",
       "disposition": "modeled",
-      "reason": "The grading context removes its positively identified driver-owned inline policy before the role. It confirms the named role is absent before reporting success, including cleanup on exceptions without converting them to grading success.",
+      "reason": "Opt-in real Chromium and loopback-state witness for guarded distinct write modes, navigation and readback; contains no simulated success response.",
       "models": [
         {
-          "id": "BattleDisruptionRoleCleanup",
+          "id": "EC2VPCCreateForm",
           "properties": [
-            "ForeignStatePreserved",
-            "NoDeleteWithInlinePolicy",
-            "NoUnconfirmedCleanupReport",
-            "NoFailedGradeReport",
-            "KnownRoleCleanedAfterFailedWork"
+            "PairedNeedsOperator",
+            "InvalidDraftNeverWrites",
+            "NativeAndStackRemainDistinct",
+            "DiscardRetiredRead",
+            "ConfirmedBeforeSuccess"
           ],
-          "limits": "Single rehearsal-owned name and inline policy; mutually exclusive injected faults. No claim about independent AWS behavior, SQLite, credential revocation, a concurrently replaced role after lookup, VM/stack shutdown, or actual scoring."
+          "limits": "Finite VPC UI mode/draft/current-view abstraction only. No DOM, IPv4/UTF-8 implementation, AWS/network, VM or SQLite/runtime ownership proof; independent real browser/API checks remain separate."
+        }
+      ]
+    },
+    {
+      "path": "tools/console/bundle-digests.json",
+      "sha256": "30fe452d5b4cef45ffbdb1176829c4157096fb2e9a4e1542a77c3d00aae16845",
+      "disposition": "presentation",
+      "reason": "Rebuilt console CSS/JS digests; bundled code is separately bound.",
+      "models": []
+    },
+    {
+      "path": "tools/console/bundle-inputs.json",
+      "sha256": "e298e5059c2d5b39eee41f94be7006cf29cc8221ae7f858ce8c3b434a164c4e0",
+      "disposition": "presentation",
+      "reason": "Rebuilt console source map of inputs/byte counts; package versions/legal notices did not change.",
+      "models": []
+    },
+    {
+      "path": "tools/console/src/ec2-readonly.jsx",
+      "sha256": "cbd743df007aa084b3d26ae316d582c5c35f67e82e4c62ec8b2a3d0d363b85ce",
+      "disposition": "modeled",
+      "reason": "Guards creation against the active capability and invalid local draft, keeps native and paired routes separate, and retains current-view response fencing.",
+      "models": [
+        {
+          "id": "EC2VPCCreateForm",
+          "properties": [
+            "PairedNeedsOperator",
+            "InvalidDraftNeverWrites",
+            "NativeAndStackRemainDistinct",
+            "DiscardRetiredRead",
+            "ConfirmedBeforeSuccess"
+          ],
+          "limits": "Finite VPC UI mode/draft/current-view abstraction only. No DOM, IPv4/UTF-8 implementation, AWS/network, VM or SQLite/runtime ownership proof; independent real browser/API checks remain separate."
+        }
+      ]
+    },
+    {
+      "path": "tools/console/src/ec2-vpc-create.jsx",
+      "sha256": "412f9136c2c10dacb39e9d3752bfc63db7b8cc411246e41a4112655c9dbe8ffc",
+      "disposition": "modeled",
+      "reason": "Projects bounded default and paired mode, requiring a valid draft before any action and rendering only offered settings.",
+      "models": [
+        {
+          "id": "EC2VPCCreateForm",
+          "properties": [
+            "PairedNeedsOperator",
+            "InvalidDraftNeverWrites",
+            "NativeAndStackRemainDistinct",
+            "DiscardRetiredRead",
+            "ConfirmedBeforeSuccess"
+          ],
+          "limits": "Finite VPC UI mode/draft/current-view abstraction only. No DOM, IPv4/UTF-8 implementation, AWS/network, VM or SQLite/runtime ownership proof; independent real browser/API checks remain separate."
+        }
+      ]
+    },
+    {
+      "path": "tools/console/src/ec2-vpc-subnet-fields.jsx",
+      "sha256": "d958e51d2d235cd9ef83821adce46b334ac5ce4558eb3bb38c27c907f2989359",
+      "disposition": "modeled",
+      "reason": "Paired settings are only exposed under the existing operator capability; native mode remains default.",
+      "models": [
+        {
+          "id": "EC2VPCCreateForm",
+          "properties": [
+            "PairedNeedsOperator",
+            "InvalidDraftNeverWrites",
+            "NativeAndStackRemainDistinct",
+            "DiscardRetiredRead",
+            "ConfirmedBeforeSuccess"
+          ],
+          "limits": "Finite VPC UI mode/draft/current-view abstraction only. No DOM, IPv4/UTF-8 implementation, AWS/network, VM or SQLite/runtime ownership proof; independent real browser/API checks remain separate."
+        }
+      ]
+    },
+    {
+      "path": "tools/console/src/ec2-vpc-subnet.mjs",
+      "sha256": "d8b3aedd0ce1803a698f82721109e2676bd15bf2a467ac439bf0763f08cd7955",
+      "disposition": "modeled",
+      "reason": "Separates native-only form validation from operator-owned stack name and same-VPC IPv4 subnet containment.",
+      "models": [
+        {
+          "id": "EC2VPCCreateForm",
+          "properties": [
+            "PairedNeedsOperator",
+            "InvalidDraftNeverWrites",
+            "NativeAndStackRemainDistinct",
+            "DiscardRetiredRead",
+            "ConfirmedBeforeSuccess"
+          ],
+          "limits": "Finite VPC UI mode/draft/current-view abstraction only. No DOM, IPv4/UTF-8 implementation, AWS/network, VM or SQLite/runtime ownership proof; independent real browser/API checks remain separate."
+        }
+      ]
+    },
+    {
+      "path": "tools/console/src/main.jsx",
+      "sha256": "c9622ee8cb7d42c9d25f6d6865b785a3899da24cd17b39ac51769e0718c1095a",
+      "disposition": "modeled",
+      "reason": "VPC route/history changes identify and retire their view before accepting another rendered destination.",
+      "models": [
+        {
+          "id": "EC2VPCCreateForm",
+          "properties": [
+            "PairedNeedsOperator",
+            "InvalidDraftNeverWrites",
+            "NativeAndStackRemainDistinct",
+            "DiscardRetiredRead",
+            "ConfirmedBeforeSuccess"
+          ],
+          "limits": "Finite VPC UI mode/draft/current-view abstraction only. No DOM, IPv4/UTF-8 implementation, AWS/network, VM or SQLite/runtime ownership proof; independent real browser/API checks remain separate."
+        }
+      ]
+    },
+    {
+      "path": "tools/console/test/ec2-vpc-subnet.test.mjs",
+      "sha256": "1427e7ddfaadba86a67abb92868402b6786f5f74058838f44ac230a00a9f0bd6",
+      "disposition": "modeled",
+      "reason": "Checks the actual conditional form projection, invalid drafts, and unmodified authenticated CloudFormation receipt verification.",
+      "models": [
+        {
+          "id": "EC2VPCCreateForm",
+          "properties": [
+            "PairedNeedsOperator",
+            "InvalidDraftNeverWrites",
+            "NativeAndStackRemainDistinct",
+            "DiscardRetiredRead",
+            "ConfirmedBeforeSuccess"
+          ],
+          "limits": "Finite VPC UI mode/draft/current-view abstraction only. No DOM, IPv4/UTF-8 implementation, AWS/network, VM or SQLite/runtime ownership proof; independent real browser/API checks remain separate."
         }
       ]
     }
