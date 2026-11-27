@@ -72,7 +72,8 @@ func TestBatchSchedulingPoliciesAndConsumableResources(t *testing.T) {
 	// Unbound operations answer 501.
 	expect(t, h.rest("batch", "POST", "/v1/updateconsumableresource", map[string]any{"consumableResource": "x", "operation": "ADD", "quantity": 1}), 501, "UnknownOperationException")
 	expect(t, h.rest("batch", "POST", "/v1/submitjob", map[string]any{"jobName": "j", "jobQueue": "q", "jobDefinition": "d"}), 501, "UnknownOperationException")
-	expect(t, h.rest("batch", "POST", "/v1/registerjobdefinition", map[string]any{"jobDefinitionName": "d", "type": "container"}), 501, "UnknownOperationException")
+	// Registration is now bound, but its inert container configuration is required.
+	expect(t, h.rest("batch", "POST", "/v1/registerjobdefinition", map[string]any{"jobDefinitionName": "d", "type": "container"}), 400, "ClientException")
 }
 
 func TestBatchComputeEnvironmentsQueuesAndServiceEnvironments(t *testing.T) {

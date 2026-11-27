@@ -1,47 +1,40 @@
 {
   "version": 1,
-  "base_sha": "d242c553ea234b82077fd89b5f41cd965c6dee07",
+  "base_sha": "ecdfbd861ef924048901cd579475402b58d65100",
   "changes": [
     {
       "path": "README.md",
-      "sha256": "21d76c31da3542de38aadc3f36d86cd4fd7e0e5ec62c309a1069f4b449240ca1",
+      "sha256": "c2cbb95944d0eb4e0895419ed3fbe5763733d9be6b87ec1b1b0b4d9ba4c80be0",
       "disposition": "documentation",
-      "reason": "State the bounded requirement to disable a Batch queue before local deletion and preserve state on refusal.",
+      "reason": "Describe the new bounded metadata workflow without implying job or image execution.",
       "models": []
     },
     {
       "path": "docs/aws-catalog-services.md",
-      "sha256": "019708a7e8cb8958a5d19654d4401ae10d912e80224af65b920d86a6d7a81f78",
+      "sha256": "13123211143fe493351ec54d1389713f59d3c43ad22b14fa4685f6386bbc761d",
       "disposition": "documentation",
-      "reason": "Generated catalog text adds one Batch bounds sentence; supported operation inventory and unrelated service rows stay unchanged.",
+      "reason": "Generated catalog marks only three existing Batch metadata operations available and documents their scope.",
       "models": []
     },
     {
       "path": "docs/design/0001-go-standalone.md",
-      "sha256": "c025ba22e03fafe3947ecb12895ae106f66e7554ae18c8a105363af485c632c7",
+      "sha256": "38f2160e70b00bf38b9ac4d445379dc5101e984b62c94f45d6c8590567170dab",
       "disposition": "documentation",
-      "reason": "Describe the current-generation transaction guard and unchanged queue and references on Batch deletion refusal.",
+      "reason": "Document exact family/revision authorization, transactional revision storage and bounded local inactive retention.",
       "models": []
     },
     {
-      "path": "internal/aws/catalog/batch_queue_delete_test.go",
-      "sha256": "29ecad0e2d4df3b384f9306403d7e8bcb5279b8e8ffacf1ddb0733f03315d00b",
-      "disposition": "test-support",
-      "reason": "Exercise Batch DeleteJobQueue before and after disabling; prove complete stored state, reference preservation, exact authorization and stale update/recreation CAS behavior with ordinary local requests.",
+      "path": "formal/models.json",
+      "sha256": "33a94c9a7eb1c09157856a4a18d287639a7f9513ad2a072f9b643e8186bb7af1",
+      "disposition": "formal-infrastructure",
+      "reason": "Register only the new Batch catalog implementation path in the source scope of the existing atomic catalog model; no model transition, configuration or invariant changes.",
       "models": []
     },
     {
-      "path": "internal/aws/catalog/batch_queue_time_limit_test.go",
-      "sha256": "a141b3d8846cb8fafcef8fb654a07b29b1a1a29315ac3fea94a37b2a2bb4dc4b",
-      "disposition": "test-support",
-      "reason": "Disable the existing time-limit fixture queues before cleanup, without changing the independent time-limit assertions.",
-      "models": []
-    },
-    {
-      "path": "internal/aws/catalog/semantics.go",
-      "sha256": "d7506c2fca24abc3097bb7fe787fc709208b782d35ef8fe7ecea8984b36e60f7",
+      "path": "internal/aws/catalog/batch_job_definitions.go",
+      "sha256": "e6552bd8337620edafd8c231541f63a966dccf8ce1b66fc556791ff82db77376",
       "disposition": "modeled",
-      "reason": "Invoke an optional operation validation on the authorized matching-generation snapshot within the unchanged catalog delete transaction and retain the existing CAS path for missing or changed rows.",
+      "reason": "Implement authenticated bounded Batch definition registration and listing over the existing catalog store, with transactional fresh revision assignment and retained quota.",
       "models": [
         {
           "id": "CatalogResourceLifecycle",
@@ -49,17 +42,76 @@
             "AuthorizationFirst",
             "FailureFrame",
             "PeerFrame",
-            "StaleWriteRejected"
+            "QuotaBound",
+            "FreshIDs"
           ],
-          "limits": "Existing bounded catalog abstraction for authorization, failed/stale writes and peer scope only. It does not model the Batch state field, the exact DISABLED predicate, references, same-ARN recreation, actual IAM, wire, Go/SQLite transaction/refinement, browser or workloads. Scoped local tests exercise the concrete deletion, generation and preserved-state contracts."
+          "limits": "The existing bounded abstraction covers only the selected authorization, atomic failure and peer/writer properties. It does not model named Batch revision allocation, inactive retention or exact quota, IAM targets and decisions, the official wire/operation schema, cursor mechanics, tags, SQL locking/disconnects or Go refinement. These concrete bounds are checked with local native SDK/HTTP and kernel tests; this slice adds no executing jobs."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/catalog/batch_job_definitions_test.go",
+      "sha256": "639409bf9c87f754b90b807867e3e2f5679fd373ae29d0b1e88b494daff94d51",
+      "disposition": "test-support",
+      "reason": "Exercise bounded metadata, retained quota, exact authorization, existing tags, pagination, concurrent registration, soft deregistration and unsupported HTTP routes in local fixtures.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/catalog/models/batch.json",
+      "sha256": "cb95d50a32517318ec8b88adab0e2449f59197afed8ec025db422d6c967dc510",
+      "disposition": "modeled",
+      "reason": "Extract three previously known Batch routes and only their reachable schemas, bound metadata errors and paginator from the same pinned Botocore model.",
+      "models": [
+        {
+          "id": "CatalogResourceLifecycle",
+          "properties": [
+            "AuthorizationFirst",
+            "FailureFrame",
+            "PeerFrame"
+          ],
+          "limits": "The existing bounded abstraction covers only the selected authorization, atomic failure and peer/writer properties. It does not model named Batch revision allocation, inactive retention or exact quota, IAM targets and decisions, the official wire/operation schema, cursor mechanics, tags, SQL locking/disconnects or Go refinement. These concrete bounds are checked with local native SDK/HTTP and kernel tests; this slice adds no executing jobs."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/catalog/selection.json",
+      "sha256": "cb59612e8317b281c42749f3eb1233609461e1bf231cea7c59d1de862eb11625",
+      "disposition": "modeled",
+      "reason": "Select exactly the three newly implemented definition metadata operations; keep every prior binding and leave all execution routes unbound.",
+      "models": [
+        {
+          "id": "CatalogResourceLifecycle",
+          "properties": [
+            "AuthorizationFirst",
+            "FailureFrame",
+            "PeerFrame"
+          ],
+          "limits": "The existing bounded abstraction covers only the selected authorization, atomic failure and peer/writer properties. It does not model named Batch revision allocation, inactive retention or exact quota, IAM targets and decisions, the official wire/operation schema, cursor mechanics, tags, SQL locking/disconnects or Go refinement. These concrete bounds are checked with local native SDK/HTTP and kernel tests; this slice adds no executing jobs."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/catalog/semantics.go",
+      "sha256": "b5e449201e25cff389a2a31db1244ba412a7726689fb503f63a88abd1e12fbbe",
+      "disposition": "modeled",
+      "reason": "Route only the new Batch jobDefinition create/list to the scoped handlers; retain existing dispatch and transaction behavior for every other catalog resource.",
+      "models": [
+        {
+          "id": "CatalogResourceLifecycle",
+          "properties": [
+            "AuthorizationFirst",
+            "FailureFrame",
+            "PeerFrame"
+          ],
+          "limits": "The existing bounded abstraction covers only the selected authorization, atomic failure and peer/writer properties. It does not model named Batch revision allocation, inactive retention or exact quota, IAM targets and decisions, the official wire/operation schema, cursor mechanics, tags, SQL locking/disconnects or Go refinement. These concrete bounds are checked with local native SDK/HTTP and kernel tests; this slice adds no executing jobs."
         }
       ]
     },
     {
       "path": "internal/aws/catalog/services_compute3.go",
-      "sha256": "71d097d5c0d0f191e932d4ee0c328d52c5723d7d0935091f08b943a0f3b35289",
+      "sha256": "d81304ed60e097bd15de64dfa3ecc2d92bbe85490c56676a9ab83fd6c5128b06",
       "disposition": "modeled",
-      "reason": "Only Batch DeleteJobQueue opts into the read-only delete guard; require the exact saved DISABLED state and preserve native ClientException/400 for failures and all related rows.",
+      "reason": "Bind the three official job definition operations to revisioned Batch metadata, including authorized generation-checked soft deregistration, with explicit input and runtime limits.",
       "models": [
         {
           "id": "CatalogResourceLifecycle",
@@ -69,40 +121,36 @@
             "PeerFrame",
             "StaleWriteRejected"
           ],
-          "limits": "Existing bounded catalog abstraction for authorization, failed/stale writes and peer scope only. It does not model the Batch state field, the exact DISABLED predicate, references, same-ARN recreation, actual IAM, wire, Go/SQLite transaction/refinement, browser or workloads. Scoped local tests exercise the concrete deletion, generation and preserved-state contracts."
+          "limits": "The existing bounded abstraction covers only the selected authorization, atomic failure and peer/writer properties. It does not model named Batch revision allocation, inactive retention or exact quota, IAM targets and decisions, the official wire/operation schema, cursor mechanics, tags, SQL locking/disconnects or Go refinement. These concrete bounds are checked with local native SDK/HTTP and kernel tests; this slice adds no executing jobs."
         }
       ]
     },
     {
-      "path": "internal/aws/catalog/spec.go",
-      "sha256": "6c8914d1b5345c0d136c7ddd0ed430b20521ab98029a7dd4f0ccbf69ebd8d25c",
-      "disposition": "modeled",
-      "reason": "Declare the operation-scoped read-only pre-delete guard; unbound operations continue to use the existing delete and CAS behavior.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "FailureFrame",
-            "PeerFrame",
-            "StaleWriteRejected"
-          ],
-          "limits": "Existing bounded catalog abstraction for authorization, failed/stale writes and peer scope only. It does not model the Batch state field, the exact DISABLED predicate, references, same-ARN recreation, actual IAM, wire, Go/SQLite transaction/refinement, browser or workloads. Scoped local tests exercise the concrete deletion, generation and preserved-state contracts."
-        }
-      ]
+      "path": "internal/aws/catalog/services_compute3_test.go",
+      "sha256": "03c2ff99473fe74067ccf35f7e77dc1140229d5328188fb1022ee7faef47dc39",
+      "disposition": "test-support",
+      "reason": "Confirm that native RegisterJobDefinition without its required bounded configuration is now validation-failed, preserving both neighboring preexisting 501 assertions.",
+      "models": []
     },
     {
       "path": "internal/server/apidocs/catalog/batch.json",
-      "sha256": "7862280b22cf8334cd3208bd6a4e979c18e4af59156fcebdb42155dabd5b58a7",
+      "sha256": "22edf5c098181fbb373e4829839a7cb01eb63a20997219d6c8c1e6269f6f023f",
       "disposition": "presentation",
-      "reason": "Reflect Batch deletion precondition in the existing info and tag descriptions, without changing paths, errors or schemas.",
+      "reason": "Regenerate Batch OpenAPI against the same pinned model for three additive metadata operations and the new scope text.",
+      "models": []
+    },
+    {
+      "path": "internal/server/apidocs/catalog/index.json",
+      "sha256": "a743cb5326bc6833e537f679fe2fd453d8829355f447101d19f00a2d7fd9a732",
+      "disposition": "presentation",
+      "reason": "Update only the generated Batch bound operation count, 27 of 39.",
       "models": []
     },
     {
       "path": "test/e2e/catalog_fixtures/batch.json",
-      "sha256": "3b8eadedb88150671577206b947fd2406a308ab826c4305d1e75842fd82736d3",
+      "sha256": "f23650c61863d11dff43f297fb79534d33561498af00ed3631689cc0d664ecca",
       "disposition": "test-support",
-      "reason": "Extend the pinned SDK Batch lifecycle with an enabled delete refusal, unchanged readback, existing disabled cleanup and missing repeat-delete behavior.",
+      "reason": "Exercise all 27 operations via actual bounded SDK workflows, including revision registration, pagination, soft deregistration, persistence, peer isolation, and cleanup with inactive rows retained.",
       "models": []
     }
   ]
