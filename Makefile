@@ -6,6 +6,7 @@ START_STATE ?= ./practice.db
 START_TOKEN_FILE ?= ./simulator-token
 GO_TEST_PACKAGES ?= ./...
 COVERAGE_PROFILE ?= reports/coverage.out
+COGNITO_HOSTED_FLAGS := -mod=readonly -modfile=cognito-hosted.mod -tags=cognito_hosted
 export GO START_LISTEN START_STATE START_TOKEN_FILE
 
 .PHONY: build dev start test-start test test-scripts test-go vet format-check before-commit e2e formal verify-assets cross-check
@@ -64,7 +65,16 @@ format-check:
 verify-assets:
 	$(PYTHON) scripts/check-assets.py
 
-before-commit: format-check vet verify-assets
+# Exercise the separate, opt-in module graph; never overwrite the release binary
+# or feed tagged coverage into the default profile's floors.
+.PHONY: check-cognito-hosted
+check-cognito-hosted: export GOWORK := off
+check-cognito-hosted:
+	$(GO) test $(COGNITO_HOSTED_FLAGS) -count=1 -p 1 -run '^(TestFederation|TestHosted|TestCognito)' ./internal/aws/cognitoidp ./internal/server ./cmd/simulator
+	CGO_ENABLED=0 $(GO) build $(COGNITO_HOSTED_FLAGS) -trimpath -o /dev/null ./cmd/simulator
+	$(GO) mod verify -modfile=cognito-hosted.mod
+
+before-commit: format-check vet verify-assets check-cognito-hosted
 	$(GO) mod verify
 	mkdir -p reports
 	$(MAKE) test build

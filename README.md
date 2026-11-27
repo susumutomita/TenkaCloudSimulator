@@ -130,7 +130,8 @@ console, CloudFormation adapter or Challenge integration.
 - **Cognito User Pools:** [Local metadata by default](docs/design/cognito-user-pools.md). Verified local SigV4
   supports Create, Describe, List, and DeleteUserPool. Explicit
   [local configuration opt-in](docs/design/cognito-federation-configuration.md) adds Create/Describe for
-  synthetic SAML providers and public clients. No sign-in, token issuance, Console, or Scalar support.
+  synthetic SAML providers and public clients, with optional authenticated local
+  HTTPS transport. No sign-in, token issuance, Console, or Scalar support.
 - **SimpleDB:** Native `PutAttributes` and `DeleteAttributes` accept one SDK-style `Expected` condition. It
   can compare a single value or require that an attribute be absent. The check and
   change share one transaction. Delete individual values, entire attributes or the item;
@@ -212,3 +213,8 @@ The identified runtime portions were independently reimplemented against public
 AWS contracts. We retain the [original MIT notice](third_party/KUMO-LICENSE.txt)
 and [reviewed replacement scope](third_party/independent-native-source.json).
 These records are not a clean-room or legal certification.
+
+The [experimental local HTTPS Cognito hosted-login profile](docs/design/cognito-local-hosted-login.md)
+is a separate explicitly built test profile, not a default service capability.
+It requires a signed Entra directory object ID or persistent Keycloak NameID;
+the token subject belongs to one pinned provider registration.

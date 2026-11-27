@@ -27642,6 +27642,287 @@
           "expect_invariant": "CurrentWriteOwnsLease"
         }
       ]
+    },
+    {
+      "id": "CognitoHostedLoginLifecycle",
+      "model": "formal/CognitoHostedLoginLifecycle.tla",
+      "config": "formal/CognitoHostedLoginLifecycle.cfg",
+      "bounds": "One canonical account/region/pool, one untouched peer pool, two clients and IdP registrations with one possible Entra registration replacement, two stable subject values, and one authorize/verify/grant/exchange chain plus exact retry inputs. Four initial profiles, two monotonic clock ticks after start, one process restart, one signed configuration revision change, deletion and one modeled recreation. One issuer-wide assertion replay witness; malformed input variants change one fact at a time in the initial context.",
+      "properties": [
+        "TypeOK",
+        "PeerPoolFrame",
+        "PoolRemovalClearsSlots",
+        "AdmissionAndRefusal",
+        "ExactPending",
+        "VerifiedReturn",
+        "CommitFence",
+        "ExactExchange",
+        "CodeConsumed",
+        "ExactTokenProjection"
+      ],
+      "limits": "Finite state-machine safety only, not Go/SQLite refinement or AWS parity. The explicit tagged local mode, exact route, direct loopback TLS, verifier input, verified SAML source/audience/pin/assertion, stable identifier schema and callback origin are symbolic facts, not cryptography, XML processing, certificate installation, browser cookie behavior or an assertion about IdP implementations. Configured sources may share an origin, issuer or key: equality symbols are relative to the selected registration and do not imply distinct keys. Subject tuples stand for collision-resistant domain-separated hashing; time models expiry decisions, not numeric JVM/Go clocks, skew or actual configured seconds. One fixed replay ID/preserved marker and one active login chain, not cardinality limits, overlapping browser transactions, full replay-cache cleanup or resource exhaustion. Only fresh issuance and scope-class projections are modeled; JWT proof, cached-key trust and revocation of already-issued tokens before expiry are not modeled. Management IAM, public key/metadata payloads, real Entra/Keycloak and application E2E are separately checked. Manifest paths are in scope for profile opt-in, not for authenticity or security of supplier packages.",
+      "source_scope": [
+        "cmd/simulator/cognito_local_tls.go",
+        "cmd/simulator/main.go",
+        "cognito-hosted.mod",
+        "cognito-hosted.sum",
+        "internal/aws/cognitoidp/federation_config.go",
+        "internal/aws/cognitoidp/federation_metadata.go",
+        "internal/aws/cognitoidp/federation_publisher.go",
+        "internal/aws/cognitoidp/hosted_browser.go",
+        "internal/aws/cognitoidp/hosted_disabled.go",
+        "internal/aws/cognitoidp/hosted_profile.go",
+        "internal/aws/cognitoidp/hosted_saml.go",
+        "internal/aws/cognitoidp/hosted_state.go",
+        "internal/server/access.go",
+        "internal/server/cognito_hosted.go",
+        "internal/server/sakura_provider.go",
+        "internal/server/server.go"
+      ],
+      "mutants": [
+        {
+          "id": "DefaultProfileStarts",
+          "edits": [
+            {
+              "old": "Direct(r, x) == x.mode = \"local\" /\\ r.wire = \"localTLS\"",
+              "new": "Direct(r, x) == r.wire = \"localTLS\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AdmissionAndRefusal"
+        },
+        {
+          "id": "PlaintextMount",
+          "edits": [
+            {
+              "old": "x.mode = \"local\" /\\ r.wire = \"localTLS\"",
+              "new": "x.mode = \"local\" /\\ r.wire \\in {\"localTLS\", \"plaintext\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AdmissionAndRefusal"
+        },
+        {
+          "id": "LegacyPinStarts",
+          "edits": [
+            {
+              "old": "\n  /\\ x.registration[r.provider] # \"noID\"\nRecordPending",
+              "new": "\nRecordPending",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExactPending"
+        },
+        {
+          "id": "WrongReturnOrigin",
+          "edits": [
+            {
+              "old": "r.origin = \"selectedIdP\" /\\ r.cookie = p.cookie",
+              "new": "r.cookie = p.cookie",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "VerifiedReturn"
+        },
+        {
+          "id": "WrongSigningPin",
+          "edits": [
+            {
+              "old": "\n          /\\ r.signer = \"bound\" /\\ r.issuer = \"bound\"",
+              "new": "\n          /\\ r.issuer = \"bound\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "VerifiedReturn"
+        },
+        {
+          "id": "IgnoreRequestConfirmation",
+          "edits": [
+            {
+              "old": "r.cookie = p.cookie /\\ r.request = p.request\n",
+              "new": "r.cookie = p.cookie\n",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "VerifiedReturn"
+        },
+        {
+          "id": "AllowTransientSubject",
+          "edits": [
+            {
+              "old": "r.stableKind = IdentityKind(p.provider) /\\ r.qualifiers",
+              "new": "r.stableKind \\in Kinds /\\ r.qualifiers",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "VerifiedReturn"
+        },
+        {
+          "id": "AcceptExpiredPending",
+          "edits": [
+            {
+              "old": "IN /\\ p.rev = x.rev /\\ p.epoch = x.epoch /\\ x.now < p.until",
+              "new": "IN /\\ p.rev = x.rev /\\ p.epoch = x.epoch",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "VerifiedReturn"
+        },
+        {
+          "id": "CommitStaleRevision",
+          "edits": [
+            {
+              "old": "x.pending = p /\\ p.rev = x.rev",
+              "new": "x.pending = p",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CommitFence"
+        },
+        {
+          "id": "CommitExpiredAssertion",
+          "edits": [
+            {
+              "old": "x.now < p.until /\\ x.now < x.proof.until",
+              "new": "x.now < p.until",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CommitFence"
+        },
+        {
+          "id": "RepeatAssertion",
+          "edits": [
+            {
+              "old": "\n          /\\ x.replay # <<x.rev, x.epoch>>\nExchangeOK",
+              "new": "\nExchangeOK",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CommitFence"
+        },
+        {
+          "id": "KeepDeletedGrant",
+          "edits": [
+            {
+              "old": "!.live = FALSE, !.pending = None, !.grant = None, !.replay = None",
+              "new": "!.live = FALSE, !.pending = None, !.replay = None",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PoolRemovalClearsSlots"
+        },
+        {
+          "id": "RedeemStaleEpoch",
+          "edits": [
+            {
+              "old": "p.rev = x.rev /\\ p.epoch = x.epoch /\\ x.now < g.until",
+              "new": "p.rev = x.rev /\\ x.now < g.until",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExactExchange"
+        },
+        {
+          "id": "RedeemExpiredGrant",
+          "edits": [
+            {
+              "old": "p.epoch = x.epoch /\\ x.now < g.until",
+              "new": "p.epoch = x.epoch",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExactExchange"
+        },
+        {
+          "id": "RedeemUnboundPKCE",
+          "edits": [
+            {
+              "old": "r.origin \\in {\"absent\", p.redirect} /\\ r.verifier = p.client",
+              "new": "r.origin \\in {\"absent\", p.redirect}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExactExchange"
+        },
+        {
+          "id": "KeepRedeemedGrant",
+          "edits": [
+            {
+              "old": "[x EXCEPT !.grant = None, !.issued = @ + 1]",
+              "new": "[x EXCEPT !.issued = @ + 1]",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CodeConsumed"
+        },
+        {
+          "id": "WrongPoolExchange",
+          "edits": [
+            {
+              "old": "r.pool = Pool /\\ x.live\nStartOK",
+              "new": "(r.pool = Pool \\/ r.op = \"exchange\") /\\ x.live\nStartOK",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AdmissionAndRefusal"
+        },
+        {
+          "id": "LeakUnrequestedEmail",
+          "edits": [
+            {
+              "old": "idClaims |-> (g.p.scopes \\ {\"openid\"})",
+              "new": "idClaims |-> ((g.p.scopes \\ {\"openid\"}) \\cup {\"email\"})",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExactTokenProjection"
+        },
+        {
+          "id": "CollapseProviderIdentity",
+          "edits": [
+            {
+              "old": "<<g.p.pool, g.p.provider, g.p.registration, g.identity>>",
+              "new": "<<g.p.pool, \"Entra\", g.p.registration, g.identity>>",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExactTokenProjection"
+        },
+        {
+          "id": "CollapseRegistrationIdentity",
+          "edits": [
+            {
+              "old": "<<g.p.pool, g.p.provider, g.p.registration, g.identity>>",
+              "new": "<<g.p.pool, g.p.provider, \"first\", g.identity>>",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExactTokenProjection"
+        },
+        {
+          "id": "WritePeerPool",
+          "edits": [
+            {
+              "old": "!.pending = None, !.replay = <<x.rev, x.epoch>>]",
+              "new": "!.pending = None, !.replay = <<x.rev, x.epoch>>, !.peerFrame = \"changed\"]",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PeerPoolFrame"
+        },
+        {
+          "id": "InstallSimulatorActor",
+          "edits": [
+            {
+              "old": "idUse |-> \"id\", accessUse |-> \"access\", until |-> now + 2, actor |-> \"none\"",
+              "new": "idUse |-> \"id\", accessUse |-> \"access\", until |-> now + 2, actor |-> \"simulator\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExactTokenProjection"
+        }
+      ]
     }
   ]
 }

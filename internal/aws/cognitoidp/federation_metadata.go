@@ -147,7 +147,7 @@ func parseFederationPin(der []byte) (*x509.Certificate, error) {
 }
 
 // Accept one HTTP-Redirect declaration and, optionally, one HTTP-POST
-// declaration for the same broker. POST is never selected as a fallback.
+// declaration at the same broker origin. POST is never selected as a fallback.
 func federationRedirect(endpoints []samlEndpoint) (string, error) {
 	if len(endpoints) < 1 || len(endpoints) > 2 {
 		return "", errInvalid
@@ -156,10 +156,14 @@ func federationRedirect(endpoints []samlEndpoint) (string, error) {
 	post := false
 	for _, e := range endpoints {
 		u, err := localFederationURL(e.Location, false)
-		if err != nil || e.Response != "" || (anchor != "" && anchor != u.Host) {
+		if err != nil || e.Response != "" {
 			return "", errInvalid
 		}
-		anchor = u.Host
+		origin := u.Scheme + "://" + u.Host
+		if anchor != "" && anchor != origin {
+			return "", errInvalid
+		}
+		anchor = origin
 		switch e.Binding {
 		case federationSAMLRedirect:
 			if redirect != "" {

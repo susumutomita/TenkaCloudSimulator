@@ -1,145 +1,445 @@
 {
   "version": 1,
-  "base_sha": "a1f155caaf648bcec8729774234a9115de13bef8",
+  "base_sha": "7f500c9e951d9328a36df3a9946f1c6827200085",
   "changes": [
     {
-      "path": "docs/design/rds-owned-generation.md",
-      "sha256": "23d7f8762d65da0fd5d696d1834be3de1735d1f5d91a8ed25a532a009f2d1a6f",
-      "disposition": "documentation",
-      "reason": "Describe the new in-process observation, unchanged public and transport boundary, and separate bounds of the model and native tests.",
+      "path": ".github/workflows/ci.yml",
+      "sha256": "43401b4319c2ef29b71f6ed04958b37aff51bf285896cdf1b3d3230873719c62",
+      "disposition": "formal-infrastructure",
+      "reason": "Require the unchanged tagged profile gate in the existing result aggregate; no production release profile, external IdP startup or permissions changes.",
       "models": []
     },
     {
-      "path": "formal/RDSGuestPeerPreflight.cfg",
-      "sha256": "92133d75a05b54ded89c21159fd7a7122b203c8f1c79e0e69d41565284991323",
+      "path": "Makefile",
+      "sha256": "42fe7b1fdd91d514b0f7f4fa7de21ec6fd497a203176cd65e23a4f0ba73b43fd",
       "disposition": "modeled",
-      "reason": "Keep existing invariant checks and add the three distinct failure oracles for original group at entry, at final snapshot and matching revisions across reads.",
+      "reason": "Require separate tagged build/tests/lock without modifying the ordinary build/start or token-file visibility contract.",
       "models": [
         {
-          "id": "RDSGuestPeerPreflight",
+          "id": "StartupTokenVisibility",
           "properties": [
-            "OriginalGroupBeforeProbe",
-            "OriginalGroupAtFinalSnapshot",
-            "MatchingGroupSnapshotRevisions"
+            "CreatedFilePrivate",
+            "InvalidFileNeverEmits"
           ],
-          "limits": "One provider-owned call after reservation, with one original group, a same-ARN replacement and two catalog revisions. The final snapshot is an observation, not authority for a future connection. SQLite capture/isolation, guest execution, PostgreSQL, SQL and transport remain concrete obligations."
+          "limits": "Existing symbolic startup visibility is framed; this does not model or certify any CI, compiler, lock or browser output."
         }
       ]
     },
     {
-      "path": "formal/RDSGuestPeerPreflight.tla",
-      "sha256": "d4b2eedb55952aa0893528a3924d96c65183501ce87722464708899b73728904",
+      "path": "README.md",
+      "sha256": "fef4b4e235a0d977e22ca001cf998ff076462c8dc0cb94acfdfd9d5ae8b56185",
+      "disposition": "documentation",
+      "reason": "Describe the explicit local opt-in, compatibility/authorization limits, and independent IdP and verification scope.",
+      "models": []
+    },
+    {
+      "path": "cmd/simulator/cognito_local_tls.go",
+      "sha256": "5be7b4d8adf71753220ffc3cbe9dc2be6ade4785a8dfa3df9ff7b9dbc47c5c17",
       "disposition": "modeled",
-      "reason": "Extend the bounded committed-read model with explicit same-ARN replacement and in-place revision transitions before and during a probe, without requiring the snapshots to remain valid after the final read.",
+      "reason": "Load a valid explicit TLS pair only for the authenticated numeric loopback profile.",
       "models": [
         {
-          "id": "RDSGuestPeerPreflight",
+          "id": "CognitoHostedLoginLifecycle",
           "properties": [
-            "OriginalGroupBeforeProbe",
-            "OriginalGroupAtFinalSnapshot",
-            "MatchingGroupSnapshotRevisions",
-            "HealthyObservation",
-            "ObservationOnly"
+            "AdmissionAndRefusal"
           ],
-          "limits": "One provider-owned call after reservation, with one original group, a same-ARN replacement and two catalog revisions. The final snapshot is an observation, not authority for a future connection. SQLite capture/isolation, guest execution, PostgreSQL, SQL and transport remain concrete obligations."
+          "limits": "Bounded abstract HTTPS/profile, trust-registration, request/grant/clock, and current-scope transitions only. Independent native tests must verify actual TLS, XML parsing, signatures, SQLite transitions, Go refinement, and SDK/browser behavior; no live cloud, provider parity, deployment or cryptographic proof."
+        }
+      ]
+    },
+    {
+      "path": "cmd/simulator/cognito_local_tls_test.go",
+      "sha256": "8823027a8d8bf7ebe2ea1dde94c6e67d9fc4a1a0b5741ff988bad95d7a807171",
+      "disposition": "test-support",
+      "reason": "Focused scoped local authentication/trust, ownership, transport, persistence or native wire assertions; no production substitute or expanded privilege.",
+      "models": []
+    },
+    {
+      "path": "cmd/simulator/main.go",
+      "sha256": "d943a61c72850528c6afd3a096e21d69e8c13cf54fa5c4a22ce6b213531b3747",
+      "disposition": "modeled",
+      "reason": "Feed the same bounded opt-in and loopback gates into CLI startup and runtime attachment.",
+      "models": [
+        {
+          "id": "CognitoHostedLoginLifecycle",
+          "properties": [
+            "AdmissionAndRefusal"
+          ],
+          "limits": "Bounded abstract HTTPS/profile, trust-registration, request/grant/clock, and current-scope transitions only. Independent native tests must verify actual TLS, XML parsing, signatures, SQLite transitions, Go refinement, and SDK/browser behavior; no live cloud, provider parity, deployment or cryptographic proof."
+        }
+      ]
+    },
+    {
+      "path": "cognito-hosted.mod",
+      "sha256": "c336492b66b4a64fa13cd2c4051e0a7aed6b12c57341eb837f50282d7a3b5e7c",
+      "disposition": "modeled",
+      "reason": "Confine SAML and signing dependencies to the opt-in tagged build, leaving the default manifest unchanged.",
+      "models": [
+        {
+          "id": "CognitoHostedLoginLifecycle",
+          "properties": [
+            "AdmissionAndRefusal"
+          ],
+          "limits": "Bounded abstract HTTPS/profile, trust-registration, request/grant/clock, and current-scope transitions only. Independent native tests must verify actual TLS, XML parsing, signatures, SQLite transitions, Go refinement, and SDK/browser behavior; no live cloud, provider parity, deployment or cryptographic proof."
+        }
+      ]
+    },
+    {
+      "path": "cognito-hosted.sum",
+      "sha256": "69ffd08828be7b912d093bf64e7a263d34d554f9af0ceeecad275f12ee2a6d91",
+      "disposition": "modeled",
+      "reason": "Retain separate pinned module checksums for the optional build; model refers only to separation, not dependency integrity.",
+      "models": [
+        {
+          "id": "CognitoHostedLoginLifecycle",
+          "properties": [
+            "AdmissionAndRefusal"
+          ],
+          "limits": "Bounded abstract HTTPS/profile, trust-registration, request/grant/clock, and current-scope transitions only. Independent native tests must verify actual TLS, XML parsing, signatures, SQLite transitions, Go refinement, and SDK/browser behavior; no live cloud, provider parity, deployment or cryptographic proof."
+        }
+      ]
+    },
+    {
+      "path": "docs/design/0001-go-standalone.md",
+      "sha256": "0d373e5242799e54e4ae99c9715ba57f59445c14fd5f707697e7bf1c90bd1dab",
+      "disposition": "documentation",
+      "reason": "Describe the explicit local opt-in, compatibility/authorization limits, and independent IdP and verification scope.",
+      "models": []
+    },
+    {
+      "path": "docs/design/cognito-federation-configuration.md",
+      "sha256": "791e5e415d2bef8e297ad6b806ffb73cf508969bb32bc033220fbbfbb759fee1",
+      "disposition": "documentation",
+      "reason": "Describe the explicit local opt-in, compatibility/authorization limits, and independent IdP and verification scope.",
+      "models": []
+    },
+    {
+      "path": "docs/design/cognito-local-hosted-login.md",
+      "sha256": "86999160b5546946bf5f36961ac9753b62f4be21fcb6e5fa561a211978f19be5",
+      "disposition": "documentation",
+      "reason": "Describe the explicit local opt-in, compatibility/authorization limits, and independent IdP and verification scope.",
+      "models": []
+    },
+    {
+      "path": "formal/CognitoHostedLoginLifecycle.cfg",
+      "sha256": "1ceebf77238c120ce132fd8b8028544044b66253c56487bd884934753f8efb40",
+      "disposition": "modeled",
+      "reason": "Check each declared bounded lifecycle property with the official TLC gate.",
+      "models": [
+        {
+          "id": "CognitoHostedLoginLifecycle",
+          "properties": [
+            "AdmissionAndRefusal",
+            "VerifiedReturn",
+            "CommitFence",
+            "ExactExchange",
+            "CodeConsumed"
+          ],
+          "limits": "Bounded abstract HTTPS/profile, trust-registration, request/grant/clock, and current-scope transitions only. Independent native tests must verify actual TLS, XML parsing, signatures, SQLite transitions, Go refinement, and SDK/browser behavior; no live cloud, provider parity, deployment or cryptographic proof."
+        }
+      ]
+    },
+    {
+      "path": "formal/CognitoHostedLoginLifecycle.tla",
+      "sha256": "601669b18be7fc2981a7e9ccabc53486f2d57004d0642243c5c8d04c1c41b5ef",
+      "disposition": "modeled",
+      "reason": "Add bounded exact-pool, selected provider, request/response, single-use and token projection behavior with explicit refusal controls.",
+      "models": [
+        {
+          "id": "CognitoHostedLoginLifecycle",
+          "properties": [
+            "PeerPoolFrame",
+            "PoolRemovalClearsSlots",
+            "AdmissionAndRefusal",
+            "ExactPending",
+            "VerifiedReturn",
+            "CommitFence",
+            "ExactExchange",
+            "CodeConsumed",
+            "ExactTokenProjection"
+          ],
+          "limits": "Bounded abstract HTTPS/profile, trust-registration, request/grant/clock, and current-scope transitions only. Independent native tests must verify actual TLS, XML parsing, signatures, SQLite transitions, Go refinement, and SDK/browser behavior; no live cloud, provider parity, deployment or cryptographic proof."
         }
       ]
     },
     {
       "path": "formal/models.json",
-      "sha256": "fa31e5e26547811f682960e9d95bd03f0c87de35f81d05cc56f3c2c1274e4900",
+      "sha256": "4482179850c00a839d924a47a4233f1073e06b78d542b5bc7b10d03713b8a9e0",
       "disposition": "formal-infrastructure",
-      "reason": "Register enlarged finite #130 model bounds, the existing resolver source path, and four required, specifically classified counterexamples. No other registry sections change.",
+      "reason": "Add only the independent bounded hosted lifecycle model and its explicit targeted sensitivity controls.",
       "models": []
     },
     {
-      "path": "internal/aws/catalog/rds_guest_peer_linux_amd64.go",
-      "sha256": "0b1c6e2e1f9b15e6da7da106a117dd5c93a6073a3ccff80df88a07336f8a112b",
-      "disposition": "modeled",
-      "reason": "Reject a replacement before or after the fixed host probe, and refuse to join different catalog revisions of the original group across two committed reads.",
-      "models": [
-        {
-          "id": "RDSGuestPeerPreflight",
-          "properties": [
-            "OriginalGroupBeforeProbe",
-            "OriginalGroupAtFinalSnapshot",
-            "MatchingGroupSnapshotRevisions",
-            "HealthyObservation",
-            "ObservationOnly"
-          ],
-          "limits": "One provider-owned call after reservation, with one original group, a same-ARN replacement and two catalog revisions. The final snapshot is an observation, not authority for a future connection. SQLite capture/isolation, guest execution, PostgreSQL, SQL and transport remain concrete obligations."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/catalog/rds_guest_peer_subnet_linux_amd64_test.go",
-      "sha256": "4a0d06f88cddf9e493a4418c8bc056a43324a153947d0a562f5a0430d0132eb5",
+      "path": "internal/aws/cognitoidp/federation_boundaries_test.go",
+      "sha256": "1a8d4d7c831f117b6060b61cdaefec1f1c0416f45397e0697260d1f35aaf00f6",
       "disposition": "test-support",
-      "reason": "Use real scoped native RDS Query and SQLite changes with a simulated host probe for same-name replacement, in-place revision and unrelated-group regression controls. No production mode, route or live database.",
+      "reason": "Focused scoped local authentication/trust, ownership, transport, persistence or native wire assertions; no production substitute or expanded privilege.",
       "models": []
     },
     {
-      "path": "internal/aws/catalog/rds_owned_runtime_linux_amd64.go",
-      "sha256": "7b803a73255c154274215ec456798d485e1c963cba026bfc855cd7f47d263dd2",
+      "path": "internal/aws/cognitoidp/federation_config.go",
+      "sha256": "c9cac51062394a7f9238807226ef4a5b9a83886aa71275b77da77e8423c85678",
       "disposition": "modeled",
-      "reason": "Derive the original group identity from the same write transaction as the exact DB reservation. Peer preflight requires the exact owned child and committed lease; this guard alone does not enable a route.",
+      "reason": "Retain existing registered client/provider membership and define an exact stable trust-incarnation namespace; no silent linking.",
       "models": [
         {
-          "id": "RDSOwnedGenerationFence",
+          "id": "CognitoHostedLoginLifecycle",
           "properties": [
-            "LaunchNeedsCommittedAuthority",
-            "AttachNeedsCurrent",
-            "NoPublishedEndpoint"
+            "ExactPending",
+            "VerifiedReturn",
+            "ExactTokenProjection"
           ],
-          "limits": "One bounded owner and exact DB generation; the native tests, not this model, verify actual group lookups and lifecycle behavior. No guest transport or real process claim."
+          "limits": "Bounded abstract HTTPS/profile, trust-registration, request/grant/clock, and current-scope transitions only. Independent native tests must verify actual TLS, XML parsing, signatures, SQLite transitions, Go refinement, and SDK/browser behavior; no live cloud, provider parity, deployment or cryptographic proof."
         },
         {
-          "id": "RDSGuestPeerPreflight",
+          "id": "CognitoFederationConfiguration",
           "properties": [
-            "OriginalGroupBeforeProbe",
-            "OriginalGroupAtFinalSnapshot"
+            "ExactBinding",
+            "AuthorityFrame"
           ],
-          "limits": "One provider-owned call after reservation, with one original group, a same-ARN replacement and two catalog revisions. The final snapshot is an observation, not authority for a future connection. SQLite capture/isolation, guest execution, PostgreSQL, SQL and transport remain concrete obligations."
+          "limits": "Bounded management fixtures and mutation/projection only, not protocol, issuer validation or Go/SQLite refinement."
         }
       ]
     },
     {
-      "path": "internal/aws/catalog/rds_private_postgres_topology.go",
-      "sha256": "1c7c023b5361d0d9b71bd81431d143cb313147a3754c6e8a271f6f72616d6752",
+      "path": "internal/aws/cognitoidp/federation_metadata.go",
+      "sha256": "2d08179b5c9537210bcb6a55de4702a45edc54cf1c06dc490caeb0ed7652cd7e",
       "disposition": "modeled",
-      "reason": "Resolve ARN, creation sequence and revision from the same validated native catalog subnet-group row as its two or more subnet IDs. No wire shape, topology policy or backend returned to callers.",
+      "reason": "Validate explicitly inlined, bounded local IdP identity, redirect, signing pin and registration; no metadata fetch or trust inheritance.",
       "models": [
         {
-          "id": "RDSPrivatePostgresTopology",
+          "id": "CognitoHostedLoginLifecycle",
           "properties": [
-            "OwnedTopologyBeforeWrite",
-            "ConfigurationOnly"
+            "ExactPending",
+            "VerifiedReturn"
           ],
-          "limits": "Finite configuration validation; this model does not prove Go input decoding, AWS API parity or the exact sequence readback."
+          "limits": "Bounded abstract HTTPS/profile, trust-registration, request/grant/clock, and current-scope transitions only. Independent native tests must verify actual TLS, XML parsing, signatures, SQLite transitions, Go refinement, and SDK/browser behavior; no live cloud, provider parity, deployment or cryptographic proof."
         },
         {
-          "id": "RDSGuestPeerPreflight",
+          "id": "CognitoFederationConfiguration",
           "properties": [
-            "OriginalGroupBeforeProbe",
-            "OriginalGroupAtFinalSnapshot",
-            "MatchingGroupSnapshotRevisions"
+            "ExactBinding",
+            "AuthorityFrame"
           ],
-          "limits": "One provider-owned call after reservation, with one original group, a same-ARN replacement and two catalog revisions. The final snapshot is an observation, not authority for a future connection. SQLite capture/isolation, guest execution, PostgreSQL, SQL and transport remain concrete obligations."
+          "limits": "Bounded management fixtures and mutation/projection only, not protocol, issuer validation or Go/SQLite refinement."
         }
       ]
     },
     {
-      "path": "scripts/formal_model_gate.py",
-      "sha256": "63efa7893491c58912d410880c6a5549dc9166744b6f2517c3c0dd8ee529583e",
-      "disposition": "formal-infrastructure",
-      "reason": "Require the three additional invariants, four targeted controls and the exact #130 resolver binding. No weakening of prior requirements, runtime checks or runner policy.",
+      "path": "internal/aws/cognitoidp/federation_metadata_test.go",
+      "sha256": "435fda27fb62644d8890e28612ab55ca28f612fc9fc2f82d9c729249e35db556",
+      "disposition": "test-support",
+      "reason": "Focused scoped local authentication/trust, ownership, transport, persistence or native wire assertions; no production substitute or expanded privilege.",
       "models": []
     },
     {
-      "path": "scripts/test-formal-gate.py",
-      "sha256": "b43eb72d6da205cbb94d6ec986da87d10443a7c1841191fea729fffee7518b51",
-      "disposition": "formal-infrastructure",
-      "reason": "Pin exact expected #130 source scope and all old and new invariant/control mappings in tooling unit tests; not a TLC run or Go proof.",
+      "path": "internal/aws/cognitoidp/federation_publisher.go",
+      "sha256": "55ec6830fd97d6e620ea6c11eccf2307fc227b7b524dfc4c2fc4e2806019f9bf",
+      "disposition": "modeled",
+      "reason": "Pin registration identity when the existing signed native publisher commits; separate legacy managed state from hosted eligibility.",
+      "models": [
+        {
+          "id": "CognitoHostedLoginLifecycle",
+          "properties": [
+            "ExactPending",
+            "CommitFence"
+          ],
+          "limits": "Bounded abstract HTTPS/profile, trust-registration, request/grant/clock, and current-scope transitions only. Independent native tests must verify actual TLS, XML parsing, signatures, SQLite transitions, Go refinement, and SDK/browser behavior; no live cloud, provider parity, deployment or cryptographic proof."
+        },
+        {
+          "id": "CognitoFederationConfiguration",
+          "properties": [
+            "ExactBinding",
+            "AuthorityFrame"
+          ],
+          "limits": "Bounded management fixtures and mutation/projection only, not protocol, issuer validation or Go/SQLite refinement."
+        },
+        {
+          "id": "CognitoFederationNativeAdmission",
+          "properties": [
+            "ExactNativeAdmission",
+            "CanonicalFrame"
+          ],
+          "limits": "Models a bounded local authenticated management mutation; actual SDK, auth, region and transaction shape require native checks."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/cognitoidp/hosted_browser.go",
+      "sha256": "8a4066fc0e202e2332da66d3d423e7fff3aaa5ad81e4966cc4437c2de71ce251",
+      "disposition": "modeled",
+      "reason": "Keep request correlation, authority-bound stable subject, callback origin, exact PKCE, single-use code and typed projection on selected pool.",
+      "models": [
+        {
+          "id": "CognitoHostedLoginLifecycle",
+          "properties": [
+            "AdmissionAndRefusal",
+            "ExactPending",
+            "VerifiedReturn",
+            "CommitFence",
+            "ExactExchange",
+            "CodeConsumed",
+            "ExactTokenProjection"
+          ],
+          "limits": "Bounded abstract HTTPS/profile, trust-registration, request/grant/clock, and current-scope transitions only. Independent native tests must verify actual TLS, XML parsing, signatures, SQLite transitions, Go refinement, and SDK/browser behavior; no live cloud, provider parity, deployment or cryptographic proof."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/cognitoidp/hosted_browser_test.go",
+      "sha256": "8315c8299840cadfe9b133645a2dd272fec5e26d74c2b5a90bea36552c0e05d1",
+      "disposition": "test-support",
+      "reason": "Focused scoped local authentication/trust, ownership, transport, persistence or native wire assertions; no production substitute or expanded privilege.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/cognitoidp/hosted_disabled.go",
+      "sha256": "96a18afdd6476f98dcfd0174be561e3fe33f45e42fba7f4b4e605e94fa87df36",
+      "disposition": "modeled",
+      "reason": "The untagged profile does not construct or mount a hosted browser service even if requested.",
+      "models": [
+        {
+          "id": "CognitoHostedLoginLifecycle",
+          "properties": [
+            "AdmissionAndRefusal"
+          ],
+          "limits": "Bounded abstract HTTPS/profile, trust-registration, request/grant/clock, and current-scope transitions only. Independent native tests must verify actual TLS, XML parsing, signatures, SQLite transitions, Go refinement, and SDK/browser behavior; no live cloud, provider parity, deployment or cryptographic proof."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/cognitoidp/hosted_identity_test.go",
+      "sha256": "5719f485e3276e1fb1298a3687f264a5b78c91b32155776f6a6ca0185caaf1a1",
+      "disposition": "test-support",
+      "reason": "Focused scoped local authentication/trust, ownership, transport, persistence or native wire assertions; no production substitute or expanded privilege.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/cognitoidp/hosted_profile.go",
+      "sha256": "b9955a1d43f45f93cf2d8a73e66cb82a144af4002ff0525bfef912514b232d47",
+      "disposition": "modeled",
+      "reason": "Expose the narrow compile-time profile contract and runtime options without expanding the SDK authority.",
+      "models": [
+        {
+          "id": "CognitoHostedLoginLifecycle",
+          "properties": [
+            "AdmissionAndRefusal"
+          ],
+          "limits": "Bounded abstract HTTPS/profile, trust-registration, request/grant/clock, and current-scope transitions only. Independent native tests must verify actual TLS, XML parsing, signatures, SQLite transitions, Go refinement, and SDK/browser behavior; no live cloud, provider parity, deployment or cryptographic proof."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/cognitoidp/hosted_saml.go",
+      "sha256": "a3d4a974bfd913cce95378159bcb95151a94244bda86c07f65cf619d49f55048",
+      "disposition": "modeled",
+      "reason": "Bind a verified signed assertion to exactly the selected issuer, pin, request, recipient and stable identifier.",
+      "models": [
+        {
+          "id": "CognitoHostedLoginLifecycle",
+          "properties": [
+            "ExactPending",
+            "VerifiedReturn",
+            "ExactTokenProjection"
+          ],
+          "limits": "Bounded abstract HTTPS/profile, trust-registration, request/grant/clock, and current-scope transitions only. Independent native tests must verify actual TLS, XML parsing, signatures, SQLite transitions, Go refinement, and SDK/browser behavior; no live cloud, provider parity, deployment or cryptographic proof."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/cognitoidp/hosted_state.go",
+      "sha256": "3530d4899fd5d6b4827b8c78e187919c45f077aa75040add47fde80fb172df31",
+      "disposition": "modeled",
+      "reason": "Store pending requests, digest replay and grants in bounded pool-owned transactional rows with revision/epoch fences and teardown.",
+      "models": [
+        {
+          "id": "CognitoHostedLoginLifecycle",
+          "properties": [
+            "PeerPoolFrame",
+            "PoolRemovalClearsSlots",
+            "ExactPending",
+            "CommitFence",
+            "ExactExchange",
+            "CodeConsumed"
+          ],
+          "limits": "Bounded abstract HTTPS/profile, trust-registration, request/grant/clock, and current-scope transitions only. Independent native tests must verify actual TLS, XML parsing, signatures, SQLite transitions, Go refinement, and SDK/browser behavior; no live cloud, provider parity, deployment or cryptographic proof."
+        }
+      ]
+    },
+    {
+      "path": "internal/server/access.go",
+      "sha256": "1e03576ed3a44ce94257c2374094acb91bd069bad1e6930d75ecdfe1035bd378",
+      "disposition": "modeled",
+      "reason": "Permit only exact browser paths on explicitly admitted standalone loopback TLS without moving unrelated SDK, session or remote admission.",
+      "models": [
+        {
+          "id": "CognitoHostedLoginLifecycle",
+          "properties": [
+            "AdmissionAndRefusal",
+            "PeerPoolFrame"
+          ],
+          "limits": "Bounded abstract HTTPS/profile, trust-registration, request/grant/clock, and current-scope transitions only. Independent native tests must verify actual TLS, XML parsing, signatures, SQLite transitions, Go refinement, and SDK/browser behavior; no live cloud, provider parity, deployment or cryptographic proof."
+        }
+      ]
+    },
+    {
+      "path": "internal/server/cognito_hosted.go",
+      "sha256": "9e5f0fae974bc4ca50ca467130eca78dfcb37db383c55a0bddf22076112e37aa",
+      "disposition": "modeled",
+      "reason": "Give exact typed composed browser instance only to the access layer; ordinary unmounted handlers have no hosted path.",
+      "models": [
+        {
+          "id": "CognitoHostedLoginLifecycle",
+          "properties": [
+            "AdmissionAndRefusal"
+          ],
+          "limits": "Bounded abstract HTTPS/profile, trust-registration, request/grant/clock, and current-scope transitions only. Independent native tests must verify actual TLS, XML parsing, signatures, SQLite transitions, Go refinement, and SDK/browser behavior; no live cloud, provider parity, deployment or cryptographic proof."
+        }
+      ]
+    },
+    {
+      "path": "internal/server/cognito_hosted_test.go",
+      "sha256": "3b6fc4a45620ad9d5f601423f614288ce177b46acd29d7f3800dcc50f8da079c",
+      "disposition": "test-support",
+      "reason": "Focused scoped local authentication/trust, ownership, transport, persistence or native wire assertions; no production substitute or expanded privilege.",
+      "models": []
+    },
+    {
+      "path": "internal/server/sakura_provider.go",
+      "sha256": "f32b121467ddfc008f2959cd6950457fe75914e2ddf503b262928980b8f93177",
+      "disposition": "modeled",
+      "reason": "Compose the bounded Cognito browser transport without changing existing Sakura method/route behavior or adding cross-provider authority.",
+      "models": [
+        {
+          "id": "CognitoHostedLoginLifecycle",
+          "properties": [
+            "AdmissionAndRefusal"
+          ],
+          "limits": "Bounded abstract HTTPS/profile, trust-registration, request/grant/clock, and current-scope transitions only. Independent native tests must verify actual TLS, XML parsing, signatures, SQLite transitions, Go refinement, and SDK/browser behavior; no live cloud, provider parity, deployment or cryptographic proof."
+        }
+      ]
+    },
+    {
+      "path": "internal/server/server.go",
+      "sha256": "9e4d5f93431f838f696b04ea8c879c897557e2fbe6d9c9dc9cd9308a01da9ed8",
+      "disposition": "modeled",
+      "reason": "Mount only the explicit profile on the original pool store; configuration/key capabilities do not grant user or provider data access.",
+      "models": [
+        {
+          "id": "CognitoHostedLoginLifecycle",
+          "properties": [
+            "AdmissionAndRefusal",
+            "PeerPoolFrame"
+          ],
+          "limits": "Bounded abstract HTTPS/profile, trust-registration, request/grant/clock, and current-scope transitions only. Independent native tests must verify actual TLS, XML parsing, signatures, SQLite transitions, Go refinement, and SDK/browser behavior; no live cloud, provider parity, deployment or cryptographic proof."
+        }
+      ]
+    },
+    {
+      "path": "test/e2e/cognito_hosted_public_entra.py",
+      "sha256": "744b6ad1d201bb14946a41f832a5e89dfd9eed8ec171e0fc110dc48d86eed913",
+      "disposition": "test-support",
+      "reason": "Optional independently pinned public Entra SAML/Chromium/SDK and synthetic protected application witness on fresh numeric loopback; no production route or everyday CI E2E.",
       "models": []
     }
   ]

@@ -25,7 +25,7 @@ AWS カタログコンソールのジョブ定義では、名前、イメージ�
 
 [Cognito User Pools](cognito-user-pools.md) は、検証済みのローカル SigV4 で既定ではプールの作成・参照・一覧・削除だけを扱う。保存先はチームの SQLite であり、サインイン、セッション、SAML、トークン発行は実装しない。
 
-`--cognito-local-federation-config` を明示した認証付き数値ループバック環境では、[テスト用 SAML IdP と公開アプリクライアントの設定作成・参照](cognito-federation-configuration.md)も可能。署名・スコープ・IAM は既定操作と同じ境界で検証する。実 IdP との通信、SAML ログイン、トークン発行、コンソール、Scalar は提供しない。
+`--cognito-local-federation-config` を明示した認証付き数値ループバック環境では、[テスト用 SAML IdP と公開アプリクライアントの設定作成・参照](cognito-federation-configuration.md)も可能。署名・スコープ・IAM は既定操作と同じ境界で検証する。認証付きローカル HTTPS を明示した場合も、公開する操作と認可は変えない。実 IdP との通信、SAML ログイン、トークン発行、コンソール、Scalar は提供しない。
 
 SimpleDB の `PutAttributes` と `DeleteAttributes` は AWS SDK の標準形式の `Expected` 条件を 1 件だけ受け付ける。属性の単一値との比較、または属性が存在しないことの確認を更新と同じ SQLite トランザクションで行う。条件を満たさない場合は他の属性も変更しない。削除は、値を指定すると一致する値だけ、属性名だけならその属性、属性の指定がなければ項目全体が対象となる。最後の属性を削除すると項目も消える。無条件の削除は何度実行してもよい。番号付きの条件形式とバッチ操作には対応しない。[ネイティブ `Select`](../simpledb-select.md) は同じ SQLite の項目を読み取り、限定した述語とページ送りを提供する。コンソールの項目名検索とAPIリファレンスの読み取り例も同じ操作を使う。新しい値の組が追加されるときは同じ書き込みトランザクションで最大256組を検証し、超過時は他の属性も変更しない。[既存超過データの扱い](../simpledb-item-limits.md)。
 
@@ -122,3 +122,8 @@ with their group. SDK and Console share EC2 Query `DescribeSecurityGroups`
 readback. This separate detached state never modifies CloudFormation-owned
 ingress or feeds live network/instance attachment decisions. See the
 [security group subset](../ec2-read-discovery.md#security-group-readback).
+
+The [experimental local HTTPS Cognito hosted-login profile](cognito-local-hosted-login.md)
+is a separate explicitly built test profile, not a default service capability.
+Subjects derive from the supported IdP's stable signed identifier and the exact
+pool/provider trust registration, not from a mutable account name or email.

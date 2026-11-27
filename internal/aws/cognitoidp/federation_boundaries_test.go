@@ -38,6 +38,13 @@ func TestFederationStoredConfigRejectsInconsistentProjection(t *testing.T) {
 		{"duplicate client", func(c *federationConfig) { c.Clients = append(c.Clients, c.Clients[0]) }},
 		{"orphaned client", func(c *federationConfig) { c.Providers = nil }},
 		{"nonlocal saved destination", func(c *federationConfig) { c.Providers[0].RedirectURL = "http://localhost:18081/sso" }},
+		{"malformed provider registration", func(c *federationConfig) { c.Providers[0].RegistrationID = strings.Repeat("Z", 32) }},
+		{"duplicate provider registration", func(c *federationConfig) {
+			c.Providers[0].RegistrationID = strings.Repeat("a", 32)
+			duplicate := c.Providers[0]
+			duplicate.Name = "Entra"
+			c.Providers = append(c.Providers, duplicate)
+		}},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			cfg, err := readFederationConfig(encoded, owner)

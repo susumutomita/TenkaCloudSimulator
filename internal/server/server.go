@@ -35,6 +35,11 @@ func NewWithCloudStorage(path string, cloudConfig CloudStorageConfig) (http.Hand
 
 // NewWithProviders is trusted composition; callers must still wrap NewAccess.
 func NewWithProviders(path string, options ProviderConfig) (http.Handler, func() error, error) {
+	if options.CognitoLocalHostedOrigin != "" && (!options.CognitoLocalFederationConfig ||
+		options.ownedPostgres != nil || options.battleCapabilities != nil || options.configureInstances != nil ||
+		options.closeInstances != nil || options.terminalSessions != nil) {
+		return nil, nil, errors.New("Cognito hosted login requires standalone authenticated loopback configuration")
+	}
 	sakuraScope, err := validatedSakuraScope(options.SakuraDisks)
 	if err != nil {
 		return nil, nil, err
@@ -201,7 +206,15 @@ func NewWithProviders(path string, options ProviderConfig) (http.Handler, func()
 		_ = store.Close()
 		return nil, nil, err
 	}
-	gateway := &aws.Gateway{CognitoUserPools: cognitoUserPools, CognitoResourceAccount: "000000000000", SimpleDB: simpleDB, SimpleDBScope: simpledb.Scope{Account: "000000000000", Region: "us-east-1"}, AutoScalingPlans: autoScalingPlans, BedrockRuntime: options.BedrockRuntime, ELB: elb, CloudFront: cloudFront, Route53: route53, WAF: waf, SNS: snsTopics, CloudWatchLogs: cloudWatchLogs, Secrets: secrets, DynamoDB: dynamodb, KMS: keys, APIGateway: apiGateway, LambdaPermissions: lambdaPermissions, Store: store, S3: s3, Identities: identities, Parameters: parameters, Queues: queues, Stacks: stacks, Lambdas: lambdas, Roles: roles, Documents: documents}
+	var hostedBrowser cognitoidp.HostedBrowser
+	if options.CognitoLocalHostedOrigin != "" {
+		hostedBrowser, err = cognitoidp.NewHostedBrowser(cognitoUserPools, localCognitoAccount, options.CognitoLocalHostedOrigin)
+		if err != nil {
+			store.Close()
+			return nil, nil, err
+		}
+	}
+	gateway := &aws.Gateway{CognitoUserPools: cognitoUserPools, CognitoResourceAccount: localCognitoAccount, SimpleDB: simpleDB, SimpleDBScope: simpledb.Scope{Account: "000000000000", Region: "us-east-1"}, AutoScalingPlans: autoScalingPlans, BedrockRuntime: options.BedrockRuntime, ELB: elb, CloudFront: cloudFront, Route53: route53, WAF: waf, SNS: snsTopics, CloudWatchLogs: cloudWatchLogs, Secrets: secrets, DynamoDB: dynamodb, KMS: keys, APIGateway: apiGateway, LambdaPermissions: lambdaPermissions, Store: store, S3: s3, Identities: identities, Parameters: parameters, Queues: queues, Stacks: stacks, Lambdas: lambdas, Roles: roles, Documents: documents}
 	if options.commandAPI != nil {
 		gateway.Commands = options.commandAPI()
 	}
@@ -342,7 +355,11 @@ func NewWithProviders(path string, options ProviderConfig) (http.Handler, func()
 		defer close(healthDone)
 		gateway.ELBHealthLoop(healthContext, time.Second)
 	}()
-	return handler, func() error {
+	var composed http.Handler = handler
+	if hostedBrowser != nil {
+		composed = &cognitoHostedComposition{Handler: handler, browser: hostedBrowser}
+	}
+	return composed, func() error {
 		stopHealth()
 		if options.closeInstances != nil {
 			if err := options.closeInstances(); err != nil {

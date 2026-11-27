@@ -176,6 +176,14 @@ func (p *federationPublisher) addProvider(ctx context.Context, id string, input 
 		if !provider.currentPin(time.Now()) {
 			return errInvalid
 		}
+		var registration [federationRegistrationBytes]byte
+		if _, err := rand.Read(registration[:]); err != nil {
+			return err
+		}
+		provider.RegistrationID = hex.EncodeToString(registration[:])
+		if slices.ContainsFunc(cfg.Providers, func(v federationProvider) bool { return v.RegistrationID == provider.RegistrationID }) {
+			return errFederationDuplicate
+		}
 		cfg.Providers = append(cfg.Providers, provider)
 		return nil
 	}); err != nil {

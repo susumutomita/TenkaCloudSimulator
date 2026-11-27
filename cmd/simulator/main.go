@@ -46,7 +46,10 @@ func run(ctx context.Context, args []string, output io.Writer) (result error) {
 	clockFD := flags.Int("battle-clock-proof-fd", 0, "Managed Linux launcher private clock pipe (only 3)")
 	battleRuntime := flags.String("battle-runtime-config", "", "Explicit private pinned Battle runtime configuration for Linux or macOS on amd64/arm64 (does not qualify Host clocks)")
 	statePath := flags.String("state", ":memory:", "SQLite state path; default is ephemeral memory")
-	cognitoConfig := flags.Bool("cognito-local-federation-config", false, "Explicit signed local-only Cognito IdP and public client configuration (no sign-in)")
+	cognitoConfig := flags.Bool("cognito-local-federation-config", false, "Explicit signed local-only Cognito IdP and public client configuration")
+	cognitoHosted := flags.Bool("cognito-local-hosted-login", false, "Explicit HTTPS-only local signed SAML and PKCE integration (requires cognito_hosted build)")
+	cognitoTLSCert := flags.String("cognito-local-tls-cert", "", "TLS certificate for the authenticated local Cognito configuration listener")
+	cognitoTLSKey := flags.String("cognito-local-tls-key", "", "Private TLS key for the authenticated local Cognito configuration listener")
 	rdsTopology := flags.Bool("rds-private-postgres-topology", false, "Validate explicitly private standalone PostgreSQL metadata against native EC2 (does not enable a database by itself)")
 	rdsOwned := flags.String("rds-owned-postgres-config", "", "Optional pinned private PostgreSQL provider configuration (Linux/amd64; incompatible with Battle; no endpoint)")
 	remote := flags.Bool("allow-remote", false, "Allow binding beyond loopback; use only in an isolated trusted network")
@@ -95,6 +98,14 @@ func run(ctx context.Context, args []string, output io.Writer) (result error) {
 	ip := net.ParseIP(host)
 	if *cognitoConfig && (*remote || *unsafe || ip == nil || !ip.IsLoopback()) {
 		return errors.New("--cognito-local-federation-config requires authenticated numeric loopback")
+	}
+	localTLS, err := configureCognitoLocalTLS(*cognitoConfig && *battleRuntime == "" && *rdsOwned == "", host, *cognitoTLSCert, *cognitoTLSKey)
+	if err != nil {
+		return err
+	}
+	if *cognitoHosted && (localTLS == nil || !*cognitoConfig || *remote || *unsafe || *battleRuntime != "" ||
+		*rdsOwned != "" || *clockFD != 0) {
+		return errors.New("--cognito-local-hosted-login requires standalone authenticated numeric-loopback TLS and federation configuration")
 	}
 	if err := validateSakuraServerConsole(sakuraOptions.serverConsole, sakuraScope, *unsafe, *remote, ip); err != nil {
 		return err
@@ -145,6 +156,9 @@ func run(ctx context.Context, args []string, output io.Writer) (result error) {
 	if err != nil {
 		return err
 	}
+	if *cognitoHosted {
+		options.CognitoLocalHostedOrigin = "https://" + l.Addr().String()
+	}
 	var handler http.Handler
 	var closeState func() error
 	if *battleRuntime != "" {
@@ -181,8 +195,15 @@ func run(ctx context.Context, args []string, output io.Writer) (result error) {
 		srv.RegisterOnShutdown(bedrockRuntime.Close)
 	}
 	done := make(chan error, 1)
-	go func() { done <- srv.Serve(l) }()
-	fmt.Fprintf(output, "TenkaCloud Simulator · independent local simulation\nConsole http://%s/_simulator/console/\nAWS simulation endpoint http://%s\n", l.Addr(), l.Addr())
+	scheme := "http"
+	if localTLS != nil {
+		scheme = "https"
+		srv.TLSConfig = localTLS
+		go func() { done <- srv.ServeTLS(l, "", "") }()
+	} else {
+		go func() { done <- srv.Serve(l) }()
+	}
+	fmt.Fprintf(output, "TenkaCloud Simulator · independent local simulation\nConsole %s://%s/_simulator/console/\nAWS simulation endpoint %s://%s\n", scheme, l.Addr(), scheme, l.Addr())
 	if bedrockRuntime != nil {
 		fmt.Fprintf(output, "Bedrock Runtime: local %s backend, %d mapped model(s); no cloud or synthetic fallback\n", bedrockRuntime.BackendName(), len(bedrockRuntime.ModelIDs()))
 	}
