@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"encoding/xml"
+	"errors"
 	"fmt"
 	"net/url"
 	"path/filepath"
@@ -223,4 +224,135 @@ func TestEC2NativeSubnetPublicIPv4RollbackAndRestart(t *testing.T) {
 	if err := reopened.deleteNativeSubnet(t.Context(), region, subnet.ID); err != nil {
 		t.Fatal(err)
 	}
+}
+
+func subnetSettingsEvidenceStack(t *testing.T, f ec2VPCFixture) StackRecord {
+	t.Helper()
+	stack, err := compileStack(subnetLineRegion, "settings-evidence-stack", `{"Resources":{
+		"Vpc":{"Type":"AWS::EC2::VPC","Properties":{"CidrBlock":"10.227.0.0/16"}}
+	}}`, nil, "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := f.stacks.Create(stack); err != nil {
+		t.Fatal(err)
+	}
+	return stack
+}
+
+func subnetSettingsEvidenceDocument(t *testing.T, f ec2VPCFixture, stackID string) string {
+	t.Helper()
+	var document string
+	if err := f.store.Database().QueryRowContext(t.Context(), "SELECT document FROM aws_cfn_stacks WHERE id=?", stackID).Scan(&document); err != nil {
+		t.Fatal(err)
+	}
+	return document
+}
+
+func TestEC2NativeSubnetPublicIPv4RejectsUnavailableEvidence(t *testing.T) {
+	f, _, child := nativeSubnetLineTopology(t)
+	stack := subnetSettingsEvidenceStack(t, f)
+	db := f.store.Database()
+	form := subnetPublicIPv4Query(child.ID, true)
+	baseline := replaceTestInventory(t, db)
+	document := subnetSettingsEvidenceDocument(t, f, stack.ID)
+
+	canceled, cancel := context.WithCancel(t.Context())
+	cancel()
+	if err := f.stacks.modifyNativeSubnetPublicIPv4(canceled, subnetLineRegion, child.ID, true); !errors.Is(err, context.Canceled) {
+		t.Fatalf("canceled settings write: %v", err)
+	}
+	if !reflect.DeepEqual(baseline, replaceTestInventory(t, db)) {
+		t.Fatal("canceled settings write changed persisted resources")
+	}
+
+	t.Run("indexed child disagrees with saved revision", func(t *testing.T) {
+		f := f
+		f.t = t
+		nativeSubnetLineExec(t, db, `UPDATE aws_ec2_network_resources SET revision=revision+1 WHERE region=? AND id=?`, subnetLineRegion, child.ID)
+		defer nativeSubnetLineExec(t, db, `UPDATE aws_ec2_network_resources SET revision=revision-1 WHERE region=? AND id=?`, subnetLineRegion, child.ID)
+		damaged := replaceTestInventory(t, db)
+		nativeSubnetLineServerFailure(t, f, form)
+		nativeSubnetLineServerFailure(t, f, url.Values{"Action": {"DescribeSubnets"}})
+		if !reflect.DeepEqual(damaged, replaceTestInventory(t, db)) {
+			t.Fatal("refusal rewrote the existing child revision disagreement")
+		}
+	})
+	t.Run("regional stack document is unreadable", func(t *testing.T) {
+		f := f
+		f.t = t
+		const unreadable = "{"
+		nativeSubnetLineExec(t, db, "UPDATE aws_cfn_stacks SET document=? WHERE id=?", unreadable, stack.ID)
+		defer nativeSubnetLineExec(t, db, "UPDATE aws_cfn_stacks SET document=? WHERE id=?", document, stack.ID)
+		if err := f.stacks.modifyNativeSubnetPublicIPv4(t.Context(), subnetLineRegion, child.ID, true); !errors.Is(err, errEC2InternetGatewayState) {
+			t.Fatalf("expected regional declaration evidence failure, got %v", err)
+		}
+		nativeSubnetLineServerFailure(t, f, form)
+		if subnetSettingsEvidenceDocument(t, f, stack.ID) != unreadable || !reflect.DeepEqual(baseline, replaceTestInventory(t, db)) {
+			t.Fatal("refusal changed the stack document or native network")
+		}
+	})
+	t.Run("stack inventory temporarily unavailable", func(t *testing.T) {
+		f := f
+		f.t = t
+		nativeSubnetLineExec(t, db, "ALTER TABLE aws_cfn_stacks RENAME TO held_stack_inventory")
+		defer nativeSubnetLineExec(t, db, "ALTER TABLE held_stack_inventory RENAME TO aws_cfn_stacks")
+		nativeSubnetLineServerFailure(t, f, form)
+		nativeSubnetLineServerFailure(t, f, url.Values{"Action": {"DescribeSubnets"}})
+		if !reflect.DeepEqual(baseline, replaceTestInventory(t, db)) {
+			t.Fatal("unavailable ownership evidence changed the native network")
+		}
+	})
+	f.expect(f.call("", subnetLineRegion, nil, form), 200, "")
+	on := true
+	requireSubnetPublicIPv4(t, nativeSubnetLineInventory(t, f), child.ID, &on)
+}
+
+func TestEC2NativeSubnetPublicIPv4RollsBackLateOwnershipEvidence(t *testing.T) {
+	f, vpc, child := nativeSubnetLineTopology(t)
+	stack := subnetSettingsEvidenceStack(t, f)
+	db := f.store.Database()
+	baseline := replaceTestInventory(t, db)
+	document := subnetSettingsEvidenceDocument(t, f, stack.ID)
+	claims := func(t *testing.T) int {
+		t.Helper()
+		var n int
+		if err := db.QueryRowContext(t.Context(), `SELECT count(*) FROM aws_cfn_ownership WHERE namespace=? AND physical_id IN (?,?)`,
+			stackResourceNamespace(subnetLineRegion, ec2NativeSubnetKind), child.ID, vpc.ID).Scan(&n); err != nil {
+			t.Fatal(err)
+		}
+		return n
+	}
+	if claims(t) != 0 {
+		t.Fatal("native baseline unexpectedly owned by a stack")
+	}
+	form := subnetPublicIPv4Query(child.ID, true)
+	for _, tc := range []struct{ name, fault, cause string }{
+		{"claim appears during write", `INSERT INTO aws_cfn_ownership(namespace,kind,physical_id,stack_id)
+			SELECT 'ec2-network:' || NEW.region,NEW.kind,NEW.id,id FROM aws_cfn_stacks
+			WHERE region=NEW.region AND name='settings-evidence-stack';`, "native subnet or VPC has a CloudFormation ownership claim"},
+		{"parent declaration appears during write", `UPDATE aws_cfn_stacks SET document=json_insert(document,'$.Resources[#]',
+			json_object('LogicalID','RetainedParent','Type','AWS::EC2::VPC','PhysicalID',json_extract(NEW.document,'$.VPCID')))
+			WHERE region=NEW.region AND name='settings-evidence-stack';`, "native subnet settings conflict with a CloudFormation declaration"},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			f := f
+			f.t = t
+			// Model an inconsistent storage acknowledgement inside the same
+			// SQLite transaction, never a request-controlled ownership change.
+			nativeSubnetLineExec(t, db, `CREATE TRIGGER late_subnet_evidence AFTER UPDATE OF revision ON aws_ec2_network_resources
+				WHEN NEW.kind='AWS::EC2::Subnet' BEGIN `+tc.fault+` END`)
+			defer nativeSubnetLineExec(t, db, "DROP TRIGGER late_subnet_evidence")
+			if err := f.stacks.modifyNativeSubnetPublicIPv4(t.Context(), subnetLineRegion, child.ID, true); err == nil || err.Error() != tc.cause {
+				t.Fatalf("write did not reach the expected late evidence guard: %v", err)
+			}
+			nativeSubnetLineServerFailure(t, f, form)
+			if claims(t) != 0 || subnetSettingsEvidenceDocument(t, f, stack.ID) != document || !reflect.DeepEqual(baseline, replaceTestInventory(t, db)) {
+				t.Fatal("rejected write left a preference, revision, topology, claim or declaration behind")
+			}
+		})
+	}
+	f.expect(f.call("", subnetLineRegion, nil, form), 200, "")
+	on := true
+	requireSubnetPublicIPv4(t, nativeSubnetLineInventory(t, f), child.ID, &on)
 }
