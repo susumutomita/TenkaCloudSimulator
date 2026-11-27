@@ -1,4 +1,5 @@
 import {parseEC2Document} from './ec2-response.mjs';
+import {validVpcTagKey,validVpcTagValue} from './ec2-vpc-tags.mjs';
 
 const ns = 'http://ec2.amazonaws.com/doc/2016-11-15/';
 const vpcId = /^vpc-([0-9a-f]{8}|[0-9a-f]{17})$/;
@@ -13,6 +14,12 @@ export function vpcNativeSubnetsAvailable(capabilities, auth) {
   const ec2 = capabilities?.services?.ec2;
   return auth === true && !capabilities?.consoleScope && ec2?.console === true &&
     Array.isArray(ec2.subnetLifecycle) && operations.every(action => ec2.subnetLifecycle.includes(action));
+}
+
+export function nativeSubnetTagsAvailable(capabilities,auth) {
+  const ec2=capabilities?.services?.ec2;
+  return vpcNativeSubnetsAvailable(capabilities,auth)&&ec2.subnetTagMutationProfile==='single-native-subnet'&&
+    Array.isArray(ec2.operations)&&['DescribeSubnets','CreateTags','DeleteTags'].every(name=>ec2.operations.includes(name));
 }
 
 export function vpcNativeSubnetPublicIPv4Available(capabilities, auth) {
@@ -72,26 +79,28 @@ function envelope(doc, action, body) {
   return lookup.get(body);
 }
 
-function row(item, region, publicIPv4Required, display = false) {
+function row(item, region, publicIPv4Required, display = false, retainTags = false) {
   const lookup = fields(item, ['subnetId','vpcId','cidrBlock','state','availabilityZone','simulatorManagedBy','tagSet','mapPublicIpOnLaunch']);
   const id = text(lookup.get('subnetId')), vpc = text(lookup.get('vpcId')), cidr = text(lookup.get('cidrBlock'));
   const az = text(lookup.get('availabilityZone'), true), owner = text(lookup.get('simulatorManagedBy'), true);
   let name = '';
+  const savedTags=[];
   if (!subnetId.test(id) || !vpcId.test(vpc) || prefix(cidr)?.cidr !== cidr || text(lookup.get('state')) !== 'available' ||
       lookup.has('simulatorManagedBy') && owner !== 'ec2' || (az || owner) && !['a','b','c'].some(suffix=>az === region + suffix)) invalid();
   if (lookup.has('tagSet')) {
     const tags = members(lookup.get('tagSet'), 50);
-    if (owner && tags.length) invalid();
     const seen = new Set(), bytes = new TextEncoder();
     for (const tag of tags) {
       const fieldsForTag = fields(tag, ['key','value']);
       const key = text(fieldsForTag.get('key')), value = text(fieldsForTag.get('value'));
-      if (!key || seen.has(key) || bytes.encode(key).length > 128 || bytes.encode(value).length > 256) invalid();
+      if (!key || seen.has(key) || bytes.encode(key).length > 128 || bytes.encode(value).length > 256 ||
+          (owner==='ec2'&&(!validVpcTagKey(key)||!validVpcTagValue(value)))) invalid();
+      if(retainTags) savedTags.push(Object.freeze({key,value}));
       seen.add(key);
       if (key === 'Name') name = value;
     }
   }
-  const meta = display ? {name,state:'available'} : {};
+  const meta = {...(display ? {name,state:'available'} : {}),...(retainTags ? {tags:Object.freeze(savedTags)} : {})};
   const flag = lookup.get('mapPublicIpOnLaunch');
   if (flag) {
     const value = text(flag);
@@ -102,8 +111,8 @@ function row(item, region, publicIPv4Required, display = false) {
   return {id,vpc,cidr,az,owner:owner || 'cloudformation',...meta};
 }
 
-function regionalSubnetRows(doc,region,publicIPv4,display=false) {
-  const rows=members(envelope(doc, 'DescribeSubnets', 'subnetSet'),1000).map(item=>row(item,region,publicIPv4,display));
+function regionalSubnetRows(doc,region,publicIPv4,display=false,retainTags=false) {
+  const rows=members(envelope(doc, 'DescribeSubnets', 'subnetSet'),1000).map(item=>row(item,region,publicIPv4,display,retainTags));
   if(new Set(rows.map(item=>item.id)).size!==rows.length) invalid();
   return rows;
 }
@@ -132,7 +141,7 @@ async function readXML(response, signal) {
       const chunk = await reader.read();
       if (chunk.done) {done = true; break;}
       size += chunk.value.byteLength;
-      if (size > 16 * 1024 * 1024) invalid();
+      if (size > 16 * 1024 * 1024) throw Error('Subnet inventory exceeds the Console response limit.');
       text += decoder.decode(chunk.value, {stream:true});
     }
     signal?.throwIfAborted();
@@ -222,8 +231,58 @@ export async function modifyVpcNativeSubnetPublicIPv4(request, region, vpc, subn
   return {updated,rows};
 }
 
+const savedSubnetTagScope=new WeakMap();
+const subnetTagError=()=>{throw Error('Could not verify the saved tags for this subnet.');};
+function tagScope(request,region,subnet) {
+  if(typeof request!=='function'||typeof region!=='string'||region.length>32||
+     /^[a-z]{2}(?:-[a-z0-9]+)+-[0-9]+$/.exec(region)?.[0]!==region||
+     typeof subnet?.id!=='string'||subnetId.exec(subnet.id)?.[0]!==subnet.id||
+     typeof subnet.vpc!=='string'||vpcId.exec(subnet.vpc)?.[0]!==subnet.vpc||subnet.owner!=='ec2'||
+     prefix(subnet.cidr)?.cidr!==subnet.cidr||!['a','b','c'].some(s=>subnet.az===region+s)) subnetTagError();
+  return {request,region,id:subnet.id,vpc:subnet.vpc,cidr:subnet.cidr,az:subnet.az};
+}
+
+async function readSubnetTags(scope,{signal,parse=xml}={}) {
+  const doc=await send(scope.request,scope.region,'DescribeSubnets',{},signal,parse);
+  const snapshot=regionalSubnetRows(doc,scope.region,false,true,true).find(row=>row.id===scope.id);
+  if(!snapshot||snapshot.owner!=='ec2'||snapshot.vpc!==scope.vpc||
+       snapshot.cidr!==scope.cidr||snapshot.az!==scope.az) subnetTagError();
+  signal?.throwIfAborted();
+  savedSubnetTagScope.set(Object.freeze(snapshot),scope);
+  return snapshot;
+}
+export const loadSubnetTagSnapshot=async (request,region,subnet,options)=>readSubnetTags(tagScope(request,region,subnet),options);
+
+export async function changeSubnetTag(request,region,subnet,snapshot,change,options={}) {
+  const scope=tagScope(request,region,subnet), prior=savedSubnetTagScope.get(snapshot);
+  const {kind,key,value}=change??{};
+  if(!prior||Object.keys(scope).some(k=>scope[k]!==prior[k])||!validVpcTagKey(key)||
+     !(kind==='remove'&&value===undefined||kind==='upsert'&&validVpcTagValue(value))) subnetTagError();
+  const find=rows=>rows.tags.find(row=>row.key===key)?.value;
+  const previous=find(snapshot);
+  if(kind==='remove'&&previous===undefined) subnetTagError();
+  const fresh=await readSubnetTags(scope,options);
+  if(find(fresh)!==previous) subnetTagError();
+  if(kind==='upsert'&&previous===value) return fresh;
+  if(kind==='upsert'&&previous===undefined&&fresh.tags.length>=50) throw Error('Subnet tag limit reached.');
+  const action=kind==='upsert'?'CreateTags':'DeleteTags';
+  const doc=await send(request,region,action,{'ResourceId.1':scope.id,'Tag.1.Key':key,'Tag.1.Value':kind==='remove'?previous:value},
+    options.signal,options.parse??xml);
+  if(text(envelope(doc,action,'return'))!=='true') subnetTagError();
+  const saved=await readSubnetTags(scope,options);
+  if(find(saved)!==(kind==='remove'?undefined:value)) subnetTagError();
+  return saved;
+}
+
+export function subnetTagFailure(error) {
+  const message=String(error?.message??'');
+  if(message==='Subnet tag limit reached.')return 'tag-limit';
+  return nativeSubnetFailure(error);
+}
+
 export function nativeSubnetFailure(error) {
   const message = error?.message ?? '';
+  if(message==='Subnet inventory exceeds the Console response limit.')return 'response-too-large';
   if (/^(401:|403:|UnauthorizedOperation:|Sign in to continue\.)/.test(message)) return 'denied';
   if (message.startsWith('InvalidSubnet.Conflict:')) return 'overlap';
   if (message.startsWith('DependencyViolation:')) return 'dependency';

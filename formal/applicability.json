@@ -1,270 +1,337 @@
 {
   "version": 1,
-  "base_sha": "1a1ffb3da6eb5312771fb229504c25f91f22f234",
+  "base_sha": "ee62782fa6d8c7e4838893f3e3cc66ca27fb4e70",
   "changes": [
     {
       "path": "README.ja.md",
-      "sha256": "cb6d9d537a48e91319899713385fd7ec21c0e4eb021e058db4259a41d5da63e5",
+      "sha256": "1b3c36526b6d5fcfd9cbb481d10dd4a0b9b3aa428afa5c3f724fe494dd016ae7",
       "disposition": "documentation",
-      "reason": "Explain the exact single-VPC tag operations and their metadata-only boundaries without claiming a broader workflow.",
+      "reason": "Describe the bounded subnet Name and tag operations and their current limits.",
       "models": []
     },
     {
       "path": "README.md",
-      "sha256": "1d9f4b4708abbc4d6862e2d2dc6a7ba76b28928af773d2ad6dcbd857414dfd30",
+      "sha256": "aeefbd0c27ef0878751ea7bf8b7c46b9749c8a73a5deb2e7e745062be00ea1c3",
       "disposition": "documentation",
-      "reason": "Explain the exact single-VPC tag operations and their metadata-only boundaries without claiming a broader workflow.",
+      "reason": "Describe the bounded subnet Name and tag operations and their current limits.",
       "models": []
     },
     {
       "path": "docs/design/0001-go-standalone.md",
-      "sha256": "90a511e612a385c1bed2322136bb980cca4f22cf07056511f77bf1a29e684f2c",
+      "sha256": "e939f333b97199c8c37095b878375cd76ea5819658d649d023375f1333c6d25a",
       "disposition": "documentation",
-      "reason": "Explain the exact single-VPC tag operations and their metadata-only boundaries without claiming a broader workflow.",
+      "reason": "Describe the bounded subnet Name and tag operations and their current limits.",
+      "models": []
+    },
+    {
+      "path": "docs/ec2-native-subnet.md",
+      "sha256": "c1a1661595b99eea790f6575cdd37e25c0ace9e1f0e7e421f03fefb82b33fae4",
+      "disposition": "documentation",
+      "reason": "Describe the bounded subnet Name and tag operations and their current limits.",
       "models": []
     },
     {
       "path": "docs/ec2-read-discovery.md",
-      "sha256": "1d584481df057ed768733bffb48b14479ff6f277bcd1760e5317cb46e3354974",
+      "sha256": "a47cc8952102d1283cd8f099583ea1c65674ba8e1cc2631d6242330cd2c09499",
       "disposition": "documentation",
-      "reason": "Explain the exact single-VPC tag operations and their metadata-only boundaries without claiming a broader workflow.",
+      "reason": "Describe the bounded subnet Name and tag operations and their current limits.",
       "models": []
     },
     {
-      "path": "formal/EC2NativeVPCTags.cfg",
-      "sha256": "62ab278d9cc3a46c295a4d12a0c2b94c6937765d17212bb5de16f39bf3988976",
+      "path": "formal/EC2NativeSubnetTags.cfg",
+      "sha256": "414c08e67ad6cf23d6474365c97f0068568f7d4fd61d217274c956c7322b79b0",
       "disposition": "modeled",
-      "reason": "Check the bounded declared VPC tag lifecycle and console confirmation using the complete named regression oracles.",
+      "reason": "Check the native subnet tag and console contracts with all named mutation controls.",
       "models": [
         {
-          "id": "EC2NativeVPCTags",
+          "id": "EC2NativeSubnetTags",
           "properties": [
-            "ExactNativeAdmission",
-            "ExactTagEffect",
-            "AtomicTagCommit",
-            "NonTagFrame",
-            "ExactConsoleRequest",
-            "VerifiedConsoleOutcome",
-            "NoConfirmationRollback"
+            "SubnetAndParentFences",
+            "SingleDocumentCommit",
+            "UnchangedNetworkFrame",
+            "ExactNativeTagProjection",
+            "ExactSelectedSubnetRequest",
+            "ExactSelectedSubnetConfirmation",
+            "NoUnconfirmedUndo"
           ],
-          "limits": "Local one-VPC, one-tag metadata and normalized exact selection, admission, store/commit and selected-key readback witnesses only. No raw Query/XML/Unicode grammar, IAM evaluator, full-tag snapshot or SQL isolation/crash proof, arbitrary concurrent schedules, browser lease/timing proof, offline file fingerprint, broader AWS parity, packet/traffic behavior or Go/JavaScript refinement. Console pre-read is not compare-and-set; unconfirmed does not imply rollback."
+          "limits": "Additive local subnet tag metadata, independent native inventory and exact selected-row receipts only. Shared API parsing and quotas remain in EC2NativeVPCTags. Input normalization, finite ownership/main/DNS/CIDR/AZ witnesses, exact document re-read and total changed row count are abstractions, not raw SQL/parser/IAM proofs. No full regional inventory validation, filter/pagination, schedule exhaustiveness, rollback from UI, browser routing/refetch timing/capacity diagnostics, cloud parity, packet behavior or Go/JavaScript refinement."
         }
       ]
     },
     {
-      "path": "formal/EC2NativeVPCTags.tla",
-      "sha256": "841a63b663b866e23a096f6fec1610696e1ddeda0a4a02ce20af83d967d4a3b1",
+      "path": "formal/EC2NativeSubnetTags.tla",
+      "sha256": "2c0d35f5e5150f6e54abe690ce5a861aacf8118c07e61db1a56d7722ad5acbb2",
       "disposition": "modeled",
-      "reason": "Check the bounded declared VPC tag lifecycle and console confirmation using the complete named regression oracles.",
+      "reason": "Check the native subnet tag and console contracts with all named mutation controls.",
       "models": [
         {
-          "id": "EC2NativeVPCTags",
+          "id": "EC2NativeSubnetTags",
           "properties": [
-            "ExactNativeAdmission",
-            "ExactTagEffect",
-            "AtomicTagCommit",
-            "NonTagFrame",
-            "ExactConsoleRequest",
-            "VerifiedConsoleOutcome",
-            "NoConfirmationRollback"
+            "SubnetAndParentFences",
+            "SingleDocumentCommit",
+            "UnchangedNetworkFrame",
+            "ExactNativeTagProjection",
+            "ExactSelectedSubnetRequest",
+            "ExactSelectedSubnetConfirmation",
+            "NoUnconfirmedUndo"
           ],
-          "limits": "Local one-VPC, one-tag metadata and normalized exact selection, admission, store/commit and selected-key readback witnesses only. No raw Query/XML/Unicode grammar, IAM evaluator, full-tag snapshot or SQL isolation/crash proof, arbitrary concurrent schedules, browser lease/timing proof, offline file fingerprint, broader AWS parity, packet/traffic behavior or Go/JavaScript refinement. Console pre-read is not compare-and-set; unconfirmed does not imply rollback."
+          "limits": "Additive local subnet tag metadata, independent native inventory and exact selected-row receipts only. Shared API parsing and quotas remain in EC2NativeVPCTags. Input normalization, finite ownership/main/DNS/CIDR/AZ witnesses, exact document re-read and total changed row count are abstractions, not raw SQL/parser/IAM proofs. No full regional inventory validation, filter/pagination, schedule exhaustiveness, rollback from UI, browser routing/refetch timing/capacity diagnostics, cloud parity, packet behavior or Go/JavaScript refinement."
         }
       ]
     },
     {
       "path": "formal/models.json",
-      "sha256": "7c07c15cc779b3fa378ff257d86e3830275c611b6cbd467031f232dbc0c5bc6e",
+      "sha256": "5b08dcf18e406f6340aa89f584a810bef163dff091d03be7d341eec7516f6142",
       "disposition": "formal-infrastructure",
-      "reason": "Register and detect removal of the bounded native VPC tag contract while preserving prior mandatory models and requirements.",
+      "reason": "Register and select the appended native subnet tag model without removing existing required models.",
       "models": []
     },
     {
       "path": "internal/aws/ec2_read.go",
-      "sha256": "5eaedda9dde02849cfeae85f0c938cd2238658dd705415e2bd66132377ba9056",
+      "sha256": "cbf86b3101a98d14af752e986831d8684fa1b0d6d68db4da93fb37841b89c4d0",
       "disposition": "modeled",
-      "reason": "Admit only declared native VPC tag operations in the existing regional query surface.",
+      "reason": "Route only the declared single native subnet tag operations and return the saved subnet tag projection.",
       "models": [
         {
-          "id": "EC2NativeVPCTags",
+          "id": "EC2NativeSubnetTags",
           "properties": [
-            "ExactNativeAdmission"
+            "SubnetAndParentFences",
+            "ExactNativeTagProjection"
           ],
-          "limits": "Local one-VPC, one-tag metadata and normalized exact selection, admission, store/commit and selected-key readback witnesses only. No raw Query/XML/Unicode grammar, IAM evaluator, full-tag snapshot or SQL isolation/crash proof, arbitrary concurrent schedules, browser lease/timing proof, offline file fingerprint, broader AWS parity, packet/traffic behavior or Go/JavaScript refinement. Console pre-read is not compare-and-set; unconfirmed does not imply rollback."
+          "limits": "Additive local subnet tag metadata, independent native inventory and exact selected-row receipts only. Shared API parsing and quotas remain in EC2NativeVPCTags. Input normalization, finite ownership/main/DNS/CIDR/AZ witnesses, exact document re-read and total changed row count are abstractions, not raw SQL/parser/IAM proofs. No full regional inventory validation, filter/pagination, schedule exhaustiveness, rollback from UI, browser routing/refetch timing/capacity diagnostics, cloud parity, packet behavior or Go/JavaScript refinement."
         }
       ]
     },
     {
-      "path": "internal/aws/ec2_vpc.go",
-      "sha256": "85faf344ba51f10fa8ea70dcb775fdee0e37a7e09d2581728c1f2231c2557013",
+      "path": "internal/aws/ec2_subnet_native.go",
+      "sha256": "769c0d52e8093d9d0503cde8359cfd29fc49b1571a492b907c880e9545b11eb9",
       "disposition": "modeled",
-      "reason": "Serialize tag writes with DNS and topology document operations without advancing topology generation.",
+      "reason": "Load the exact native subnet row and preserve its parent, network attributes and saved tag projection.",
       "models": [
         {
-          "id": "EC2NativeVPCTags",
+          "id": "EC2NativeSubnetTags",
           "properties": [
-            "AtomicTagCommit",
-            "NonTagFrame"
+            "SubnetAndParentFences",
+            "ExactNativeTagProjection",
+            "UnchangedNetworkFrame"
           ],
-          "limits": "Local one-VPC, one-tag metadata and normalized exact selection, admission, store/commit and selected-key readback witnesses only. No raw Query/XML/Unicode grammar, IAM evaluator, full-tag snapshot or SQL isolation/crash proof, arbitrary concurrent schedules, browser lease/timing proof, offline file fingerprint, broader AWS parity, packet/traffic behavior or Go/JavaScript refinement. Console pre-read is not compare-and-set; unconfirmed does not imply rollback."
+          "limits": "Additive local subnet tag metadata, independent native inventory and exact selected-row receipts only. Shared API parsing and quotas remain in EC2NativeVPCTags. Input normalization, finite ownership/main/DNS/CIDR/AZ witnesses, exact document re-read and total changed row count are abstractions, not raw SQL/parser/IAM proofs. No full regional inventory validation, filter/pagination, schedule exhaustiveness, rollback from UI, browser routing/refetch timing/capacity diagnostics, cloud parity, packet behavior or Go/JavaScript refinement."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/ec2_subnet_tag.go",
+      "sha256": "17f305bddf2390d14221652f3c5592486aad84b737a5447964ced10b0bf06154",
+      "disposition": "modeled",
+      "reason": "Fence the subnet and parent, write exactly one document, preserve network state and read back the requested tag effect.",
+      "models": [
+        {
+          "id": "EC2NativeSubnetTags",
+          "properties": [
+            "SubnetAndParentFences",
+            "SingleDocumentCommit",
+            "UnchangedNetworkFrame",
+            "ExactNativeTagProjection"
+          ],
+          "limits": "Additive local subnet tag metadata, independent native inventory and exact selected-row receipts only. Shared API parsing and quotas remain in EC2NativeVPCTags. Input normalization, finite ownership/main/DNS/CIDR/AZ witnesses, exact document re-read and total changed row count are abstractions, not raw SQL/parser/IAM proofs. No full regional inventory validation, filter/pagination, schedule exhaustiveness, rollback from UI, browser routing/refetch timing/capacity diagnostics, cloud parity, packet behavior or Go/JavaScript refinement."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/ec2_subnet_tag_test.go",
+      "sha256": "0eddee9a4b1c636872ab37a7206c2b363de0583b76109678e77ce3daddf415c6",
+      "disposition": "test-support",
+      "reason": "Exercise the exact native subnet metadata flow, saved state, independent SDK readback and existing runtime capabilities.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/ec2_vpc.go",
+      "sha256": "d2eb9fd7efe60352cb74211963519cd56a5ac94e588bcceee270c7c62a7e6a09",
+      "disposition": "modeled",
+      "reason": "Serialize subnet metadata updates with topology writes on the native document path.",
+      "models": [
+        {
+          "id": "EC2NativeSubnetTags",
+          "properties": [
+            "SubnetAndParentFences",
+            "SingleDocumentCommit",
+            "UnchangedNetworkFrame"
+          ],
+          "limits": "Additive local subnet tag metadata, independent native inventory and exact selected-row receipts only. Shared API parsing and quotas remain in EC2NativeVPCTags. Input normalization, finite ownership/main/DNS/CIDR/AZ witnesses, exact document re-read and total changed row count are abstractions, not raw SQL/parser/IAM proofs. No full regional inventory validation, filter/pagination, schedule exhaustiveness, rollback from UI, browser routing/refetch timing/capacity diagnostics, cloud parity, packet behavior or Go/JavaScript refinement."
         }
       ]
     },
     {
       "path": "internal/aws/ec2_vpc_tag.go",
-      "sha256": "4098bc9922adb61a038cb6991d66a6c7fdf611c0527b74909955063e7dfcfedb",
+      "sha256": "6ba8fb86e50e6e2a76ac10549029d353478d28925f7189c5eeebb3247ab94f93",
       "disposition": "modeled",
-      "reason": "Use the one native VPC and one literal tag contract; authorize only the declared action, retain topology and confirm the scoped transaction.",
+      "reason": "Keep native ownership and topology fences explicit on the shared VPC/subnet tag route.",
       "models": [
         {
-          "id": "EC2NativeVPCTags",
+          "id": "EC2NativeSubnetTags",
           "properties": [
-            "ExactNativeAdmission",
-            "ExactTagEffect",
-            "AtomicTagCommit",
-            "NonTagFrame"
+            "SubnetAndParentFences",
+            "SingleDocumentCommit",
+            "UnchangedNetworkFrame"
           ],
-          "limits": "Local one-VPC, one-tag metadata and normalized exact selection, admission, store/commit and selected-key readback witnesses only. No raw Query/XML/Unicode grammar, IAM evaluator, full-tag snapshot or SQL isolation/crash proof, arbitrary concurrent schedules, browser lease/timing proof, offline file fingerprint, broader AWS parity, packet/traffic behavior or Go/JavaScript refinement. Console pre-read is not compare-and-set; unconfirmed does not imply rollback."
+          "limits": "Additive local subnet tag metadata, independent native inventory and exact selected-row receipts only. Shared API parsing and quotas remain in EC2NativeVPCTags. Input normalization, finite ownership/main/DNS/CIDR/AZ witnesses, exact document re-read and total changed row count are abstractions, not raw SQL/parser/IAM proofs. No full regional inventory validation, filter/pagination, schedule exhaustiveness, rollback from UI, browser routing/refetch timing/capacity diagnostics, cloud parity, packet behavior or Go/JavaScript refinement."
         }
       ]
     },
     {
-      "path": "internal/aws/ec2_vpc_tag_test.go",
-      "sha256": "33819790b1d8dd90da08df75d8d8484b3892eb2b663531ec32eafb8c78a5b9fa",
+      "path": "internal/server/ec2_read_access_test.go",
+      "sha256": "34a25e8207e6ea4e7b63a5eb6e67e01b2f2b858bf1131cc705020f4549af57f9",
       "disposition": "test-support",
-      "reason": "Exercise bounded native VPC tag behavior, scope, durable readback and existing capability or Console behavior against deterministic fixtures.",
+      "reason": "Exercise the exact native subnet metadata flow, saved state, independent SDK readback and existing runtime capabilities.",
       "models": []
     },
     {
-      "path": "internal/server/ec2_read_access_test.go",
-      "sha256": "332072bc4495068cd5d58ed1871b5cdcce46a52269717544cbeb5b94e603bf35",
+      "path": "internal/server/ec2_security_groups_console_test.go",
+      "sha256": "7b5cd58c5459644b4b2b116407795429ccb12bd6fa91780e9e746d7b0ccaed72",
       "disposition": "test-support",
-      "reason": "Exercise bounded native VPC tag behavior, scope, durable readback and existing capability or Console behavior against deterministic fixtures.",
+      "reason": "Exercise the exact native subnet metadata flow, saved state, independent SDK readback and existing runtime capabilities.",
       "models": []
     },
     {
       "path": "internal/server/server.go",
-      "sha256": "5b7f2b9bf2e3d803dd232cf0cdc1d84616658fb0b860ef8b9c2c48df549b645b",
+      "sha256": "215abfcd8daef74edacd43d56eaf8040335972ffb3a5bf354a40c20e32c77ef6",
       "disposition": "modeled",
-      "reason": "Advertise the bounded one-VPC tag contract separately from other EC2 resources.",
+      "reason": "Advertise the separate bounded subnet profile so generic EC2 availability cannot authorize the console write.",
       "models": [
         {
-          "id": "EC2NativeVPCTags",
+          "id": "EC2NativeSubnetTags",
           "properties": [
-            "ExactNativeAdmission",
-            "ExactConsoleRequest"
+            "SubnetAndParentFences",
+            "ExactSelectedSubnetRequest"
           ],
-          "limits": "Local one-VPC, one-tag metadata and normalized exact selection, admission, store/commit and selected-key readback witnesses only. No raw Query/XML/Unicode grammar, IAM evaluator, full-tag snapshot or SQL isolation/crash proof, arbitrary concurrent schedules, browser lease/timing proof, offline file fingerprint, broader AWS parity, packet/traffic behavior or Go/JavaScript refinement. Console pre-read is not compare-and-set; unconfirmed does not imply rollback."
+          "limits": "Additive local subnet tag metadata, independent native inventory and exact selected-row receipts only. Shared API parsing and quotas remain in EC2NativeVPCTags. Input normalization, finite ownership/main/DNS/CIDR/AZ witnesses, exact document re-read and total changed row count are abstractions, not raw SQL/parser/IAM proofs. No full regional inventory validation, filter/pagination, schedule exhaustiveness, rollback from UI, browser routing/refetch timing/capacity diagnostics, cloud parity, packet behavior or Go/JavaScript refinement."
         }
       ]
     },
     {
       "path": "internal/server/web/app.js",
-      "sha256": "ee4b945da7a9e435c7770a4c0d934767a3221258ee88867fa4fc155201cfb531",
+      "sha256": "eef1585226e6a4a99f5f27c90f7096235b7eb7f73093173bc1bd0082bcb3e67b",
       "disposition": "modeled",
-      "reason": "Serve the canonical compiled Console that reconciles its single write through native readback.",
+      "reason": "Deliver the canonical app bundle with native single-tag request and confirmation behavior.",
       "models": [
         {
-          "id": "EC2NativeVPCTags",
+          "id": "EC2NativeSubnetTags",
           "properties": [
-            "ExactConsoleRequest",
-            "VerifiedConsoleOutcome",
-            "NoConfirmationRollback"
+            "ExactSelectedSubnetRequest",
+            "ExactSelectedSubnetConfirmation",
+            "NoUnconfirmedUndo"
           ],
-          "limits": "Local one-VPC, one-tag metadata and normalized exact selection, admission, store/commit and selected-key readback witnesses only. No raw Query/XML/Unicode grammar, IAM evaluator, full-tag snapshot or SQL isolation/crash proof, arbitrary concurrent schedules, browser lease/timing proof, offline file fingerprint, broader AWS parity, packet/traffic behavior or Go/JavaScript refinement. Console pre-read is not compare-and-set; unconfirmed does not imply rollback."
+          "limits": "Additive local subnet tag metadata, independent native inventory and exact selected-row receipts only. Shared API parsing and quotas remain in EC2NativeVPCTags. Input normalization, finite ownership/main/DNS/CIDR/AZ witnesses, exact document re-read and total changed row count are abstractions, not raw SQL/parser/IAM proofs. No full regional inventory validation, filter/pagination, schedule exhaustiveness, rollback from UI, browser routing/refetch timing/capacity diagnostics, cloud parity, packet behavior or Go/JavaScript refinement."
         }
       ]
     },
     {
       "path": "scripts/formal_model_gate.py",
-      "sha256": "39d317ad7e4c2fa48138f93247b79d812c8c2e6918704af6367ef34bd8dc65c5",
+      "sha256": "3b7e86b102a45f8ed574b4ed1fac4a62603609ab50dea7f0ce49e9a35101e09c",
       "disposition": "formal-infrastructure",
-      "reason": "Register and detect removal of the bounded native VPC tag contract while preserving prior mandatory models and requirements.",
+      "reason": "Register and select the appended native subnet tag model without removing existing required models.",
       "models": []
     },
     {
       "path": "scripts/test-formal-gate.py",
-      "sha256": "cf49e8fb0a0ec7e3c234e694b2180222b73126aa914de0bc008f359ea7c3b17b",
+      "sha256": "4866bb01ecfe47fe0ff1ee3675af8efa12d130eace68730eca531e3b7f28dd38",
       "disposition": "formal-infrastructure",
-      "reason": "Register and detect removal of the bounded native VPC tag contract while preserving prior mandatory models and requirements.",
+      "reason": "Register and select the appended native subnet tag model without removing existing required models.",
       "models": []
     },
     {
-      "path": "test/e2e/ec2_vpc_tags.py",
-      "sha256": "fb545b914eb314a4aca2cc26134f389ffabc93ae22862aefd870dbe555271c89",
+      "path": "test/e2e/ec2_subnet_tags.py",
+      "sha256": "6f45ef1c977079c0fdc3685fd2958e1afa51d1d7dcdc888b80cb545808c4eea0",
       "disposition": "test-support",
-      "reason": "Exercise bounded native VPC tag behavior, scope, durable readback and existing capability or Console behavior against deterministic fixtures.",
+      "reason": "Exercise the exact native subnet metadata flow, saved state, independent SDK readback and existing runtime capabilities.",
       "models": []
     },
     {
       "path": "tools/console/bundle-digests.json",
-      "sha256": "542a7058bf5969736fa9c2937579aab7b662ef2e71b1a0f5bb8e41178b0230bc",
+      "sha256": "a6b38adacc9850f25051f6f5d936bf83774ee4bfd017ac0308d9dd80b35a72a2",
       "disposition": "presentation",
-      "reason": "Bind canonical generated asset manifests to the actual Console component bytes and reproducible build inputs.",
+      "reason": "Bind reproducible Console bytes and build inputs in the generated manifests.",
       "models": []
     },
     {
       "path": "tools/console/bundle-inputs.json",
-      "sha256": "3e5a241dc88e4d15df024fceb54cc8a9e99d9d3458621ee77d786aff655dcd43",
+      "sha256": "bbe37cd1d1d0c1403102f657ebe216e5f15f241bfdff68bd69447421ad669b19",
       "disposition": "presentation",
-      "reason": "Bind canonical generated asset manifests to the actual Console component bytes and reproducible build inputs.",
+      "reason": "Bind reproducible Console bytes and build inputs in the generated manifests.",
       "models": []
     },
     {
-      "path": "tools/console/src/ec2-readonly.jsx",
-      "sha256": "3891b2a450c935be76c81dfe2eb257c0355e5d5929d5b9161630bbf42ca2feb2",
+      "path": "tools/console/src/ec2-native-subnets.mjs",
+      "sha256": "a9fbe02677f9a2d9ad3991e9d17c144c4a1bbaa1ac392f5582d08a2f2455153b",
       "disposition": "modeled",
-      "reason": "Use the selected regional VPC and existing pane lease; update the visible selected row only from a confirmed native snapshot.",
+      "reason": "Use the saved native subnet projection and confirm the literal one-tag operation against the selected network.",
       "models": [
         {
-          "id": "EC2NativeVPCTags",
+          "id": "EC2NativeSubnetTags",
           "properties": [
-            "ExactConsoleRequest",
-            "VerifiedConsoleOutcome"
+            "ExactNativeTagProjection",
+            "ExactSelectedSubnetRequest",
+            "ExactSelectedSubnetConfirmation"
           ],
-          "limits": "Local one-VPC, one-tag metadata and normalized exact selection, admission, store/commit and selected-key readback witnesses only. No raw Query/XML/Unicode grammar, IAM evaluator, full-tag snapshot or SQL isolation/crash proof, arbitrary concurrent schedules, browser lease/timing proof, offline file fingerprint, broader AWS parity, packet/traffic behavior or Go/JavaScript refinement. Console pre-read is not compare-and-set; unconfirmed does not imply rollback."
+          "limits": "Additive local subnet tag metadata, independent native inventory and exact selected-row receipts only. Shared API parsing and quotas remain in EC2NativeVPCTags. Input normalization, finite ownership/main/DNS/CIDR/AZ witnesses, exact document re-read and total changed row count are abstractions, not raw SQL/parser/IAM proofs. No full regional inventory validation, filter/pagination, schedule exhaustiveness, rollback from UI, browser routing/refetch timing/capacity diagnostics, cloud parity, packet behavior or Go/JavaScript refinement."
+        }
+      ]
+    },
+    {
+      "path": "tools/console/src/ec2-subnets-console.jsx",
+      "sha256": "44cdbd5613f9358b22115a666dd80a187216589c94d3e06087d134ddcd46ff54",
+      "disposition": "modeled",
+      "reason": "Use the selected subnet until native readback and do not treat a failed confirmation as an undo.",
+      "models": [
+        {
+          "id": "EC2NativeSubnetTags",
+          "properties": [
+            "ExactSelectedSubnetRequest",
+            "ExactSelectedSubnetConfirmation",
+            "NoUnconfirmedUndo"
+          ],
+          "limits": "Additive local subnet tag metadata, independent native inventory and exact selected-row receipts only. Shared API parsing and quotas remain in EC2NativeVPCTags. Input normalization, finite ownership/main/DNS/CIDR/AZ witnesses, exact document re-read and total changed row count are abstractions, not raw SQL/parser/IAM proofs. No full regional inventory validation, filter/pagination, schedule exhaustiveness, rollback from UI, browser routing/refetch timing/capacity diagnostics, cloud parity, packet behavior or Go/JavaScript refinement."
+        }
+      ]
+    },
+    {
+      "path": "tools/console/src/ec2-vpc-resource-view.jsx",
+      "sha256": "c20319ce3c022e633d09f54d8172c9457158115bbdb8044f00dac0735d803916",
+      "disposition": "modeled",
+      "reason": "Mount only the bounded editor for the selected native subnet and preserve the surrounding network context.",
+      "models": [
+        {
+          "id": "EC2NativeSubnetTags",
+          "properties": [
+            "ExactSelectedSubnetRequest",
+            "ExactSelectedSubnetConfirmation"
+          ],
+          "limits": "Additive local subnet tag metadata, independent native inventory and exact selected-row receipts only. Shared API parsing and quotas remain in EC2NativeVPCTags. Input normalization, finite ownership/main/DNS/CIDR/AZ witnesses, exact document re-read and total changed row count are abstractions, not raw SQL/parser/IAM proofs. No full regional inventory validation, filter/pagination, schedule exhaustiveness, rollback from UI, browser routing/refetch timing/capacity diagnostics, cloud parity, packet behavior or Go/JavaScript refinement."
         }
       ]
     },
     {
       "path": "tools/console/src/ec2-vpc-tags-panel.jsx",
-      "sha256": "bbf7d718d2a0d3306578dbfe82f9dc0e89adb885ab9e787992624a56e7cc2e82",
+      "sha256": "6efc85c2ba26f56689c9d90591b9fc96489928a84e663e94782f9995e92988d1",
       "disposition": "modeled",
-      "reason": "Offer guarded add, edit and exact-value delete controls and show a verified result only after same-scope readback.",
+      "reason": "Apply one scoped, typed tag action and mark it confirmed only after live readback, never rollback on failure.",
       "models": [
         {
-          "id": "EC2NativeVPCTags",
+          "id": "EC2NativeSubnetTags",
           "properties": [
-            "ExactConsoleRequest",
-            "VerifiedConsoleOutcome",
-            "NoConfirmationRollback"
+            "ExactSelectedSubnetRequest",
+            "ExactSelectedSubnetConfirmation",
+            "NoUnconfirmedUndo"
           ],
-          "limits": "Local one-VPC, one-tag metadata and normalized exact selection, admission, store/commit and selected-key readback witnesses only. No raw Query/XML/Unicode grammar, IAM evaluator, full-tag snapshot or SQL isolation/crash proof, arbitrary concurrent schedules, browser lease/timing proof, offline file fingerprint, broader AWS parity, packet/traffic behavior or Go/JavaScript refinement. Console pre-read is not compare-and-set; unconfirmed does not imply rollback."
+          "limits": "Additive local subnet tag metadata, independent native inventory and exact selected-row receipts only. Shared API parsing and quotas remain in EC2NativeVPCTags. Input normalization, finite ownership/main/DNS/CIDR/AZ witnesses, exact document re-read and total changed row count are abstractions, not raw SQL/parser/IAM proofs. No full regional inventory validation, filter/pagination, schedule exhaustiveness, rollback from UI, browser routing/refetch timing/capacity diagnostics, cloud parity, packet behavior or Go/JavaScript refinement."
         }
       ]
     },
     {
-      "path": "tools/console/src/ec2-vpc-tags.mjs",
-      "sha256": "bffed71da92b436299aaa6d928374431376df13b27d063eeda946d4803aa21c1",
-      "disposition": "modeled",
-      "reason": "Check the authorized selected VPC around precisely one native tag write and compare the requested key on readback.",
-      "models": [
-        {
-          "id": "EC2NativeVPCTags",
-          "properties": [
-            "ExactConsoleRequest",
-            "VerifiedConsoleOutcome",
-            "NoConfirmationRollback"
-          ],
-          "limits": "Local one-VPC, one-tag metadata and normalized exact selection, admission, store/commit and selected-key readback witnesses only. No raw Query/XML/Unicode grammar, IAM evaluator, full-tag snapshot or SQL isolation/crash proof, arbitrary concurrent schedules, browser lease/timing proof, offline file fingerprint, broader AWS parity, packet/traffic behavior or Go/JavaScript refinement. Console pre-read is not compare-and-set; unconfirmed does not imply rollback."
-        }
-      ]
-    },
-    {
-      "path": "tools/console/test/ec2-vpc-tags.test.mjs",
-      "sha256": "f80e87dc0f960581fc513f337956123d20151944344f1b874bb6298075eacfdd",
+      "path": "tools/console/test/ec2-native-subnets.test.mjs",
+      "sha256": "4ece9ffc4fe85341a45a130b052012385a9df615a6a83d0c7bace6b64a6cc480",
       "disposition": "presentation",
-      "reason": "Exercise strict scoped VPC tag response projection, exact native readback, and existing Console admission and accessibility controls.",
+      "reason": "Bind reproducible Console bytes and build inputs in the generated manifests.",
       "models": []
     }
   ]
