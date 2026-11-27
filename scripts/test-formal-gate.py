@@ -2165,11 +2165,135 @@ class FormalGateTests(unittest.TestCase):
             model_file.write_bytes(model_bytes)
             config_file.write_bytes(config_bytes)
 
+    def test_native_vpc_tag_contract_and_required_controls(self):
+        name = 'EC2NativeVPCTags'
+        path = self.root / 'formal/models.json'
+        original = path.read_text()
+        model = next(m for m in load_registry(self.root)['models'] if m['id'] == name)
+        self.assertEqual(set(model['source_scope']), {
+            'internal/aws/ec2_read.go',
+            'internal/aws/ec2_vpc.go',
+            'internal/aws/ec2_vpc_tag.go',
+            'internal/server/server.go',
+            'internal/server/web/app.js',
+            'tools/console/src/ec2-readonly.jsx',
+            'tools/console/src/ec2-vpc-tags-panel.jsx',
+            'tools/console/src/ec2-vpc-tags.mjs',
+        })
+        expected = {
+            'ExactNativeAdmission': {
+                'IgnoreRegionalTarget',
+                'IgnoreVPCIdentity',
+                'IgnoreGrantedAction',
+                'IgnoreGrantedRegion',
+                'IgnoreGrantedVPC',
+                'AdmitSecondResource',
+                'AdmitSecondTag',
+                'AdmitMissingTagKey',
+                'AdmitInvalidTagText',
+                'AdmitCFNOwner',
+                'IgnorePersistentCFNClaim',
+                'IgnoreIndependentCFNDeclaration',
+                'IgnoreMainSlotFence',
+                'RewriteNoncanonicalDocument',
+                'IgnoreGenerationWitness',
+                'AllowReservedPrefix',
+                'AllowOmittedCreate',
+                'AllowFiftyFirstTag',
+                'RejectReplacementAtQuota',
+            },
+            'ExactTagEffect': {
+                'TreatEmptyDeleteAsOmitted',
+                'RefuseKeyOnlyDeletion',
+                'DeleteDifferentValue',
+                'PhysicallyRewriteIdenticalTag',
+                'PhysicallyRewriteMissingDeletion',
+            },
+            'AtomicTagCommit': {
+                'IgnoreExactCASDocument',
+                'IgnoreExactlyOneAffectedRow',
+                'IgnoreDocumentReread',
+                'IgnoreOwnershipReread',
+                'AcknowledgeWithoutCommit',
+                'KeepUncommittedDocument',
+                'AssumeConsolePreReadIsCAS',
+            },
+            'NonTagFrame': {
+                'AdvanceTopologyRevisionForTag',
+                'AdvanceDNSGenerationForTag',
+                'DropNeighborTagFromDocument',
+                'RetagPeerVPC',
+            },
+            'ExactConsoleRequest': {
+                'OperateUnadvertisedConsole',
+                'OperateScopedParticipantConsole',
+                'IgnoreOtherActorCapture',
+                'IgnoreOtherPaneLease',
+                'SkipFreshObservedValue',
+                'IgnoreScopeOfPreRead',
+                'UseKeyOnlyConsoleRemoval',
+            },
+            'VerifiedConsoleOutcome': {
+                'PublishOnRefusedMutation',
+                'AcceptFalseReturn',
+                'PublishRetiredResult',
+                'ReadbackFromWrongRegion',
+                'ReadbackFromOtherVPC',
+                'ReadbackFromOtherKey',
+                'ReadbackFromWrongOwner',
+                'SkipExpectedTagReadback',
+                'DisplayDraftAsVerifiedName',
+            },
+            'NoConfirmationRollback': {
+                'UndoCommittedTagOnUnconfirmedUI',
+            },
+        }
+        self.assertEqual(set(model['properties']), {'TypeOK', *expected})
+        self.assertEqual({m['id']: m['expect_invariant'] for m in model['mutants']},
+                         {control: prop for prop, controls in expected.items() for control in controls})
+
+        def edit_row(edit):
+            data = json.loads(original)
+            edit(next(m for m in data['models'] if m['id'] == name))
+            path.write_text(json.dumps(data))
+
+        model_file, config_file = (self.root / model[k] for k in ('model', 'config'))
+        source, config = model_file.read_bytes(), config_file.read_bytes()
+        try:
+            edit_row(lambda row: row['source_scope'].remove('internal/aws/ec2_vpc_tag.go'))
+            with self.assertRaisesRegex(GateError, 'required exact source scope changed'):
+                load_registry(self.root)
+
+            edit_row(lambda row: row.update(mutants=[
+                m for m in row['mutants'] if m['id'] != 'UndoCommittedTagOnUnconfirmedUI']))
+            with self.assertRaisesRegex(GateError, 'required mutation control was removed'):
+                load_registry(self.root)
+
+            def drop_commit_invariant(row):
+                row['properties'].remove('AtomicTagCommit')
+                row['mutants'] = [m for m in row['mutants'] if m['expect_invariant'] != 'AtomicTagCommit']
+            edit_row(drop_commit_invariant)
+            config_file.write_text(config.decode().replace(' AtomicTagCommit', ''))
+            with self.assertRaisesRegex(GateError, 'existing required invariant was removed'):
+                load_registry(self.root)
+
+            data = json.loads(original)
+            data['models'] = [row for row in data['models'] if row['id'] != name]
+            path.write_text(json.dumps(data))
+            model_file.unlink()
+            config_file.unlink()
+            with self.assertRaisesRegex(GateError, 'required existing model was removed'):
+                load_registry(self.root)
+        finally:
+            path.write_text(original)
+            model_file.write_bytes(source)
+            config_file.write_bytes(config)
+
     def test_complete_registry_and_exact_mutations(self):
         registry = load_registry(self.root)
         # Keep this inventory independent of the implementation's required set.
         # A newly registered model must be reviewed and named here explicitly.
-        self.assertEqual({model['id'] for model in registry['models']}, {'EC2DetachedNetworkACLRules', 'CognitoFederationNativeAdmission', 'CognitoFederationConfiguration', 'CognitoFederationPoolOwnership', 'SimpleDBSelectConsoleEpoch', 'SimpleDBSelectPage', 'SimpleDBAttributeDelete', 'SimpleDBDomainMetadata', 'SimpleDBLifecycle', 'SimpleDBPageCursor', 'SimpleDBQueryAdmission', 'CognitoUserPoolMetadata', 'SimpleDBConsoleEpoch', 'RDSPrivatePostgresTopology', 'RDSOwnedPostgresRuntime', 'RDSOwnedGenerationFence', 'RDSOwnedOperatorComposition', 'RDSGuestPeerPreflight', 'SARPolicyAuthorizationTarget', 'AzureConditionalCRCRead', 'AzureStructuredReadAdmission', 'AzureBlobRowDownload', 'EC2VPCOwnership', 'CloudDNSAtomicChange', 'CloudDNSChildToken', 'CloudDNSConsoleScope', 'SakuraServerMetadata', 'SakuraServerReadEpoch', 'CFNParameterRuleAdmission', 'ECSTaskRevisionLifecycle', 'VpcOriginReferenceLifecycle', 'ARPTrustedReply', 'PersistentIngressPolicy', 'AppEngineTraffic', 'AutoScalingPlanTargets', 'AzureBlobState', 'AzureQueueLifecycle', 'AzureQueueOwnerAccess', 'AzurePropertiesEpoch', 'AzurePropertiesTarget', 'BedrockRuntimeAdmission', 'BlobRange', 'BrowserSessions', 'CFNConditionAdmission', 'CFNConditionMemoDepth', 'CFNEventHistory', 'CFNFinalCleanupACK', 'CFNNativeIAMTransaction', 'CFNParameterSnapshot', 'CFNPhysicalResourceACK', 'CanonicalVMComposition', 'CatalogConsoleEpoch', 'CatalogResourceLifecycle', 'CloudWatchLogsLifecycle', 'CloudWatchLogsViewEpoch', 'CommandDispatchLifecycle', 'ConsoleHandoff', 'DurableGuestLease', 'DynamoDBAdmission', 'DynamoDBConsoleEpoch', 'DynamoDBLifecycle', 'EC2GuestAttachmentLifecycle', 'EC2InternetGatewayLifecycle', 'EC2InternetGatewayAttachment', 'EC2InternetGatewayInventoryPages', 'EC2ReadDiscovery', 'EC2RouteTableConsoleEpoch', 'EC2NativeSubnetLifecycle', 'EC2NativeVPCChildren', 'EC2DetachedNetworkConsole', 'EC2NativeRouteAssociationLifecycle', 'EC2NativeRouteTableLifecycle', 'EC2TemplatePreviewEpoch', 'EntraVerificationFixture', 'EC2RouteTableRead', 'EC2SecurityGroupRead', 'EC2SecurityGroupConsoleEpoch', 'ELBTargetLifecycle', 'EngineLifecycle', 'FrameCodecLifecycle', 'GCPStorageState', 'GuestCommandLifecycle', 'HTTPObservationLifecycle', 'IAMBuiltinPinTransaction', 'IAMConditionEvaluation', 'IAMInstanceProfiles', 'IAMManagedPolicies', 'InstanceMetadataTokens', 'KMSAliasCatalog', 'KMSAliasCrypto', 'KMSAliasesViewEpoch', 'KMSBootstrapTransaction', 'KMSKeyState', 'KMSProtocolAdmission', 'LambdaExecutionRoleBridge', 'LambdaSourceEdit', 'MacPreparationAdmission', 'MacProbeLifecycle', 'LambdaLogTailDisclosure', 'LandingAccessAdmission', 'LandingTopologyState', 'ListenerLifecycle', 'LoginInputIntent', 'NICSessionBookkeeping', 'NativeCommandIssuer', 'NativeIAMOwnership', 'NativeWireProjection', 'ObjectStore', 'OwnedClockQualification', 'OwnedProbeAttachmentLifecycle', 'OwnedProbeDispatchPolicy', 'OwnedProbeSessionLifecycle', 'PacketAdmission', 'ParticipantSessionLifecycle', 'PassiveServiceBoundary', 'PersistentTransportLifecycle', 'ProbeOperationLifecycle', 'ProjectAuthority', 'ProviderActor', 'ProviderPath', 'RESTDeploymentSnapshot', 'RESTProxyEventBoundary', 'RESTRouteMatching', 'Route53AtomicBatch', 'S3MultipartConsolePaging', 'S3MultipartState', 'S3Versions', 'SNSAdmission', 'SNSLifecycle', 'SNSQueueFanout', 'SNSSubscriptionReadback', 'SNSConsoleResponseAdmission', 'SQSBatchDeletion', 'SQSConsoleEpoch', 'SQSLifecycle', 'SQSStorageBudget', 'SSMBatchDeletion', 'SSMDocumentState', 'SSMDocumentVersionPage', 'SSMDurableCommands', 'SSMParameterState', 'STSSessionLifecycle', 'SakuraDiskAdmission', 'SakuraDiskMetadata', 'SakuraDisksViewEpoch', 'SakuraStartupAdmission', 'SecretDescriptionWorkflow', 'SecretMetadataUpdate', 'SecretMetadataViewEpoch', 'SecretVersionListing', 'SecretsDisclosureChannels', 'SecretsMutationRefresh', 'SecretsRevealEpoch', 'SecretsVersionLifecycle', 'StackOwnership', 'StartupTokenVisibility', 'TCPRouteClassification', 'TerminalClientEpoch', 'WAFAssociationAuthorization', 'WAFRequestEvaluation', 'EC2NativeDefaultRouteLifecycle', 'EC2NativeIPv4RouteSet', 'EC2RouteTableInventoryPages', 'EC2NativeRouteAssociationReplacement', 'S3MultipartPartReceipt', 'EC2NativeSubnetPublicIPv4', 'EC2DetachedSecurityGroupRules', 'EC2NativeVPCMainRoute', 'EC2InstanceStackConsole', 'EC2LegacyNativeMainRepair', 'BattleDisruptionRoleCleanup', 'EC2RegionalSubnetConsole', 'EC2VPCCreateForm', 'EC2VpcConsoleNavigation', 'EC2VPCDNSAttributes', 'EC2VpcResourceMap'})
+        self.assertEqual({model['id'] for model in registry['models']}, {'EC2NativeVPCTags', 'EC2DetachedNetworkACLRules', 'CognitoFederationNativeAdmission', 'CognitoFederationConfiguration', 'CognitoFederationPoolOwnership', 'SimpleDBSelectConsoleEpoch', 'SimpleDBSelectPage', 'SimpleDBAttributeDelete', 'SimpleDBDomainMetadata', 'SimpleDBLifecycle', 'SimpleDBPageCursor', 'SimpleDBQueryAdmission', 'CognitoUserPoolMetadata', 'SimpleDBConsoleEpoch', 'RDSPrivatePostgresTopology', 'RDSOwnedPostgresRuntime', 'RDSOwnedGenerationFence', 'RDSOwnedOperatorComposition', 'RDSGuestPeerPreflight', 'SARPolicyAuthorizationTarget', 'AzureConditionalCRCRead', 'AzureStructuredReadAdmission', 'AzureBlobRowDownload', 'EC2VPCOwnership', 'CloudDNSAtomicChange', 'CloudDNSChildToken', 'CloudDNSConsoleScope', 'SakuraServerMetadata', 'SakuraServerReadEpoch', 'CFNParameterRuleAdmission', 'ECSTaskRevisionLifecycle', 'VpcOriginReferenceLifecycle', 'ARPTrustedReply', 'PersistentIngressPolicy', 'AppEngineTraffic', 'AutoScalingPlanTargets', 'AzureBlobState', 'AzureQueueLifecycle', 'AzureQueueOwnerAccess', 'AzurePropertiesEpoch', 'AzurePropertiesTarget', 'BedrockRuntimeAdmission', 'BlobRange', 'BrowserSessions', 'CFNConditionAdmission', 'CFNConditionMemoDepth', 'CFNEventHistory', 'CFNFinalCleanupACK', 'CFNNativeIAMTransaction', 'CFNParameterSnapshot', 'CFNPhysicalResourceACK', 'CanonicalVMComposition', 'CatalogConsoleEpoch', 'CatalogResourceLifecycle', 'CloudWatchLogsLifecycle', 'CloudWatchLogsViewEpoch', 'CommandDispatchLifecycle', 'ConsoleHandoff', 'DurableGuestLease', 'DynamoDBAdmission', 'DynamoDBConsoleEpoch', 'DynamoDBLifecycle', 'EC2GuestAttachmentLifecycle', 'EC2InternetGatewayLifecycle', 'EC2InternetGatewayAttachment', 'EC2InternetGatewayInventoryPages', 'EC2ReadDiscovery', 'EC2RouteTableConsoleEpoch', 'EC2NativeSubnetLifecycle', 'EC2NativeVPCChildren', 'EC2DetachedNetworkConsole', 'EC2NativeRouteAssociationLifecycle', 'EC2NativeRouteTableLifecycle', 'EC2TemplatePreviewEpoch', 'EntraVerificationFixture', 'EC2RouteTableRead', 'EC2SecurityGroupRead', 'EC2SecurityGroupConsoleEpoch', 'ELBTargetLifecycle', 'EngineLifecycle', 'FrameCodecLifecycle', 'GCPStorageState', 'GuestCommandLifecycle', 'HTTPObservationLifecycle', 'IAMBuiltinPinTransaction', 'IAMConditionEvaluation', 'IAMInstanceProfiles', 'IAMManagedPolicies', 'InstanceMetadataTokens', 'KMSAliasCatalog', 'KMSAliasCrypto', 'KMSAliasesViewEpoch', 'KMSBootstrapTransaction', 'KMSKeyState', 'KMSProtocolAdmission', 'LambdaExecutionRoleBridge', 'LambdaSourceEdit', 'MacPreparationAdmission', 'MacProbeLifecycle', 'LambdaLogTailDisclosure', 'LandingAccessAdmission', 'LandingTopologyState', 'ListenerLifecycle', 'LoginInputIntent', 'NICSessionBookkeeping', 'NativeCommandIssuer', 'NativeIAMOwnership', 'NativeWireProjection', 'ObjectStore', 'OwnedClockQualification', 'OwnedProbeAttachmentLifecycle', 'OwnedProbeDispatchPolicy', 'OwnedProbeSessionLifecycle', 'PacketAdmission', 'ParticipantSessionLifecycle', 'PassiveServiceBoundary', 'PersistentTransportLifecycle', 'ProbeOperationLifecycle', 'ProjectAuthority', 'ProviderActor', 'ProviderPath', 'RESTDeploymentSnapshot', 'RESTProxyEventBoundary', 'RESTRouteMatching', 'Route53AtomicBatch', 'S3MultipartConsolePaging', 'S3MultipartState', 'S3Versions', 'SNSAdmission', 'SNSLifecycle', 'SNSQueueFanout', 'SNSSubscriptionReadback', 'SNSConsoleResponseAdmission', 'SQSBatchDeletion', 'SQSConsoleEpoch', 'SQSLifecycle', 'SQSStorageBudget', 'SSMBatchDeletion', 'SSMDocumentState', 'SSMDocumentVersionPage', 'SSMDurableCommands', 'SSMParameterState', 'STSSessionLifecycle', 'SakuraDiskAdmission', 'SakuraDiskMetadata', 'SakuraDisksViewEpoch', 'SakuraStartupAdmission', 'SecretDescriptionWorkflow', 'SecretMetadataUpdate', 'SecretMetadataViewEpoch', 'SecretVersionListing', 'SecretsDisclosureChannels', 'SecretsMutationRefresh', 'SecretsRevealEpoch', 'SecretsVersionLifecycle', 'StackOwnership', 'StartupTokenVisibility', 'TCPRouteClassification', 'TerminalClientEpoch', 'WAFAssociationAuthorization', 'WAFRequestEvaluation', 'EC2NativeDefaultRouteLifecycle', 'EC2NativeIPv4RouteSet', 'EC2RouteTableInventoryPages', 'EC2NativeRouteAssociationReplacement', 'S3MultipartPartReceipt', 'EC2NativeSubnetPublicIPv4', 'EC2DetachedSecurityGroupRules', 'EC2NativeVPCMainRoute', 'EC2InstanceStackConsole', 'EC2LegacyNativeMainRepair', 'BattleDisruptionRoleCleanup', 'EC2RegionalSubnetConsole', 'EC2VPCCreateForm', 'EC2VpcConsoleNavigation', 'EC2VPCDNSAttributes', 'EC2VpcResourceMap'})
 
         for model in registry['models']:
             source = (self.root / model['model']).read_text()

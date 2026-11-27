@@ -80,6 +80,7 @@ Python 3.12のみ、ゲストメモリ128 MiB、タイムアウト1〜30秒で�
 - **ネットワーク：** [EC2/VPC の一覧と VPC の作成・削除](docs/ec2-read-discovery.md)、
   [選択した VPC のリソースマップ（参照のみ）](docs/ec2-vpc-console.md#read-only-resource-map)、
   [VPC の DNS 設定](docs/ec2-vpc-dns-attributes.md)、
+  [EC2 管理 VPC の名前とタグの設定 API](docs/ec2-read-discovery.md#native-vpc-tag-editing)、
   [未接続ネットワーク ACL と IPv4 ルールの設定 API](docs/ec2-detached-network-acls.md)、
   [Elastic Load Balancing](docs/elb.md)（Lambda ターゲット）、
   [Route 53](docs/route53.md)。

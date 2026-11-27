@@ -101,6 +101,7 @@ console, CloudFormation adapter or Challenge integration.
   [Secrets Manager](docs/secrets-manager.md), [KMS](docs/kms.md), [WAFv2](docs/wafv2.md).
 - **Networking:** [read-only EC2 instance discovery in the API Reference](docs/api-reference.md#aws-services-and-the-shared-endpoint),
   [EC2/VPC discovery and VPC create/delete](docs/ec2-read-discovery.md),
+  [EC2-managed VPC Name and tags API](docs/ec2-read-discovery.md#native-vpc-tag-editing),
   [VPC DNS settings through the EC2 Query API and console](docs/ec2-vpc-dns-attributes.md),
   [read-only Resource map for a selected VPC](docs/ec2-vpc-console.md#read-only-resource-map),
   [local internet gateway allocation and VPC attachment in SDK and Console](docs/ec2-internet-gateways.md),

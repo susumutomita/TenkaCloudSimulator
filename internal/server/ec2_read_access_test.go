@@ -105,6 +105,7 @@ func TestEC2ReadAccessBoundary(t *testing.T) {
 	w = request("GET", "/_simulator/v1/capabilities", "", operator, nil)
 	var caps struct {
 		Services map[string]struct {
+			VpcTagMutationProfile            string              `json:"vpcTagMutationProfile"`
 			Console                          bool                `json:"console"`
 			ReadOnly                         bool                `json:"readOnly"`
 			SessionCredentials               bool                `json:"sessionCredentials"`
@@ -129,14 +130,14 @@ func TestEC2ReadAccessBoundary(t *testing.T) {
 		t.Fatal("capabilities unavailable", w.Code)
 	}
 	ec2, exists := caps.Services["ec2"]
-	if !exists || !ec2.Console || ec2.ReadOnly || ec2.SessionCredentials {
+	if !exists || !ec2.Console || ec2.ReadOnly || ec2.SessionCredentials || ec2.VpcTagMutationProfile != "single-native-vpc" {
 		t.Fatalf("unexpected EC2 access capabilities: %+v", ec2)
 	}
 	// The expected public subset is independent of the provider's registration.
 	// Do not accept a missing operation or advertise any unsupported mutation.
 	wantOperations := []string{
 		"DescribeInstances", "DescribeVpcs", "DescribeSubnets", "DescribeSecurityGroups", "DescribeRouteTables",
-		"CreateVpc", "DeleteVpc", "DescribeVpcAttribute", "ModifyVpcAttribute",
+		"CreateVpc", "DeleteVpc", "DescribeVpcAttribute", "ModifyVpcAttribute", "CreateTags", "DeleteTags",
 		"CreateSubnet", "DeleteSubnet", "ModifySubnetAttribute", "CreateSecurityGroup", "DeleteSecurityGroup",
 		"AuthorizeSecurityGroupIngress", "AuthorizeSecurityGroupEgress", "RevokeSecurityGroupIngress", "RevokeSecurityGroupEgress",
 		"CreateNetworkAcl", "DescribeNetworkAcls", "DeleteNetworkAcl",
