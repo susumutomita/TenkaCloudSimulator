@@ -1,6 +1,7 @@
 import React,{useEffect,useMemo,useRef,useState} from 'react';
 import Alert from '@cloudscape-design/components/alert';
 import Box from '@cloudscape-design/components/box';
+import Checkbox from '@cloudscape-design/components/checkbox';
 import Button from '@cloudscape-design/components/button';
 import Form from '@cloudscape-design/components/form';
 import FormField from '@cloudscape-design/components/form-field';
@@ -11,13 +12,13 @@ import Select from '@cloudscape-design/components/select';
 import SpaceBetween from '@cloudscape-design/components/space-between';
 import Table from '@cloudscape-design/components/table';
 import {useLocale} from './i18n.jsx';
-import {createVpcNativeSubnet,deleteVpcNativeSubnet,loadVpcSubnets,nativeSubnetCIDR,nativeSubnetFailure,subnetTarget} from './ec2-native-subnets.mjs';
+import {createVpcNativeSubnet,deleteVpcNativeSubnet,loadVpcSubnets,modifyVpcNativeSubnetPublicIPv4,nativeSubnetCIDR,nativeSubnetFailure,subnetTarget} from './ec2-native-subnets.mjs';
 
-export default function VPCNativeSubnets({request,region,vpc,onSaving}) {
+export default function VPCNativeSubnets({request,region,vpc,onSaving,publicIPv4=false}) {
   const {t} = useLocale();
   const {id,cidr,managedBy} = vpc;
-  const scope = useMemo(()=>({request,region,vpc:{id,cidr,managedBy}}),[request,region,id,cidr,managedBy]);
-  const target = subnetTarget(vpc), writable = target==='ec2';
+  const scope = useMemo(()=>({request,region,vpc:{id,cidr,managedBy},publicIPv4}),[request,region,id,cidr,managedBy,publicIPv4]);
+  const target = subnetTarget(vpc), writable = target==='ec2', settings = writable&&scope.publicIPv4;
   const active = useRef(null);
   const [snapshot,setSnapshot] = useState(null), [modal,setModal] = useState(null), [notice,setNotice] = useState(null);
   const current = snapshot?.scope===scope ? snapshot : null;
@@ -49,7 +50,7 @@ export default function VPCNativeSubnets({request,region,vpc,onSaving}) {
     setSnapshot({scope,status:'loading'});
     setNotice(null);
     try {
-      const rows = await loadVpcSubnets(scope.request,scope.region,scope.vpc,{signal:operation.controller.signal});
+      const rows = await loadVpcSubnets(scope.request,scope.region,scope.vpc,{signal:operation.controller.signal,publicIPv4:scope.publicIPv4});
       if (complete(operation)) setSnapshot({scope,status:'ready',rows});
     } catch (error) {
       if (complete(operation)) setSnapshot({scope,status:nativeSubnetFailure(error)});
@@ -57,24 +58,30 @@ export default function VPCNativeSubnets({request,region,vpc,onSaving}) {
   }
   useEffect(()=>{void refresh(); return cancel;},[scope]);
   const validCIDR = dialog?.kind==='create' && !!nativeSubnetCIDR(vpc,dialog.cidr);
-  function change(key,value) {setModal(old=>({...old,[key]:value}));}
+  const settingChange = dialog?.kind==='settings';
+  const valid = dialog?.kind==='create' ? validCIDR : settingChange ?
+    settings && current?.rows?.includes(dialog.subnet) && dialog.publicIPv4!==dialog.subnet.publicIPv4 :
+    dialog?.kind==='delete' && dialog.confirm==='delete';
+  function change(key,value) {setModal(old=>old?.scope===scope ? {...old,[key]:value} : old);}
   async function submit(event) {
     event.preventDefault();
-    if (!writable || !dialog || current?.status!=='ready' || (dialog.kind==='create' ? !validCIDR : dialog.confirm!=='delete')) return;
+    if (!writable || !dialog || current?.status!=='ready' || !valid) return;
     const operation = begin(true);
     if (!operation) return;
     setNotice(null);
     setSnapshot({...current,status:'writing'});
     onSaving(true);
     try {
-      const config = {signal:operation.controller.signal};
+      const config = {signal:operation.controller.signal,publicIPv4:scope.publicIPv4};
+      const args = [scope.request,scope.region,scope.vpc];
       const result = dialog.kind==='create'
-        ? await createVpcNativeSubnet(scope.request,scope.region,scope.vpc,dialog.cidr,dialog.az,config)
-        : await deleteVpcNativeSubnet(scope.request,scope.region,scope.vpc,dialog.subnet,config);
+        ? await createVpcNativeSubnet(...args,dialog.cidr,dialog.az,config)
+        : settingChange ? await modifyVpcNativeSubnetPublicIPv4(...args,dialog.subnet,dialog.publicIPv4,config)
+          : await deleteVpcNativeSubnet(...args,dialog.subnet,config);
       if (!complete(operation)) return;
       setSnapshot({scope,status:'ready',rows:result.rows});
       setModal(null);
-      setNotice({scope,id:(result.created || result.removed).id,kind:dialog.kind});
+      setNotice({scope,id:(result.created || result.removed || result.updated).id,kind:dialog.kind});
     } catch (error) {
       if (!complete(operation)) return;
       // After ambiguous completion reconcile by a read, never resend a write.
@@ -84,6 +91,13 @@ export default function VPCNativeSubnets({request,region,vpc,onSaving}) {
   }
   if (!target) return <Box>{t('Select a verified VPC to read subnets.','サブネットを表示するには確認済みの VPC を選択してください。')}</Box>;
   const ready = current?.status==='ready';
+  const editLabel = t('Edit subnet settings','サブネットの設定を編集');
+  const deleteLabel = t('Delete subnet','サブネットを削除');
+  const notices = {
+    create:t('Saved subnet: ','サブネットを保存しました: '),
+    settings:t('Saved subnet settings: ','サブネットの設定を保存しました: '),
+    delete:t('Removed subnet: ','サブネットを削除しました: '),
+  };
   const errors = {
     denied: t('The selected identity cannot complete the subnet request. Check its EC2 permissions.','現在の ID ではサブネットへの操作が許可されていません。EC2 権限を確認してください。'),
     overlap: t('The CIDR overlaps a subnet in this VPC.','CIDR がこの VPC の別のサブネットと重複しています。'),
@@ -98,7 +112,7 @@ export default function VPCNativeSubnets({request,region,vpc,onSaving}) {
     <Box color="text-body-secondary">{writable
       ? t('Saved IPv4 configuration in this VPC. No routes or guest connectivity are created.','この VPC の IPv4 設定を保存します。ルートやゲストの通信は作成しません。')
       : t('CloudFormation owns this VPC. Saved subnets are shown, but this Console does not change the stack.','CloudFormation が管理する VPC です。保存済みのサブネットは表示しますが、スタックは変更できません。')}</Box>
-    {notice?.scope===scope&&<Alert type="success">{notice.kind==='create'?t('Saved subnet: ','サブネットを保存しました: '):t('Removed subnet: ','サブネットを削除しました: ')}{notice.id}</Alert>}
+    {notice?.scope===scope&&<Alert type="success">{notices[notice.kind]}{notice.id}</Alert>}
     {errors[current?.status]&&<Alert type="error">{errors[current.status]} {current.mutationFailed&&t('Refresh subnets before retrying.','再試行する前にサブネットを更新してください。')}</Alert>}
     <Table variant="embedded" trackBy="id" items={current?.rows??[]} loading={!current||current.status==='loading'||pending}
       ariaLabels={{tableLabel:t('Saved subnets','保存済みサブネット')}}
@@ -106,14 +120,20 @@ export default function VPCNativeSubnets({request,region,vpc,onSaving}) {
         {id:'id',header:t('Subnet ID','サブネット ID'),cell:item=><span className="resource-identifier">{item.id}</span>},
         {id:'cidr',header:t('IPv4 CIDR','IPv4 CIDR'),cell:item=>item.cidr},
         {id:'az',header:t('Availability Zone','アベイラビリティーゾーン'),cell:item=>item.az||'—'},
-        ...(writable?[{id:'actions',header:t('Actions','操作'),cell:item=><Button disabled={!ready} onClick={()=>setModal({scope,kind:'delete',subnet:item,confirm:''})}>{t('Delete subnet','サブネットを削除')}</Button>}]:[]),
+        ...(settings?[{id:'public-ipv4',header:t('Auto-assign public IPv4','パブリック IPv4 の自動割り当て'),
+          cell:item=>item.publicIPv4?t('Enabled','有効'):t('Disabled','無効')}]:[]),
+        ...(writable?[{id:'actions',header:t('Actions','操作'),cell:item=><SpaceBetween direction="horizontal" size="xs">
+          {settings&&<Button disabled={!ready} ariaLabel={editLabel+': '+item.id}
+            onClick={()=>setModal({scope,kind:'settings',subnet:item,publicIPv4:item.publicIPv4})}>{editLabel}</Button>}
+          <Button disabled={!ready} onClick={()=>setModal({scope,kind:'delete',subnet:item,confirm:''})}>{deleteLabel}</Button>
+        </SpaceBetween>}]:[]),
       ]} empty={ready?t('No subnets are recorded for this VPC.','この VPC にサブネットはありません。'):t('Subnets are unavailable.','サブネットは利用できません。')}/>
     {dialog&&<Modal visible closeAriaLabel={t('Close subnet dialog','サブネットのダイアログを閉じる')} onDismiss={()=>{if (!pending) setModal(null);}}
-      header={dialog.kind==='create'?t('Add subnet','サブネットを追加'):t('Delete subnet','サブネットを削除')}>
+      header={dialog.kind==='create'?t('Add subnet','サブネットを追加'):settingChange?editLabel:deleteLabel}>
       <form onSubmit={submit}><Form actions={<SpaceBetween direction="horizontal" size="xs">
         <Button formAction="none" disabled={pending} onClick={()=>setModal(null)}>{t('Cancel','キャンセル')}</Button>
-        <Button variant="primary" formAction="submit" loading={pending} disabled={dialog.kind==='create'?!validCIDR:dialog.confirm!=='delete'}>
-          {dialog.kind==='create'?t('Create subnet','サブネットを作成'):t('Delete subnet','サブネットを削除')}
+        <Button variant="primary" formAction="submit" loading={pending} disabled={!valid}>
+          {dialog.kind==='create'?t('Create subnet','サブネットを作成'):settingChange?t('Save changes','変更を保存'):deleteLabel}
         </Button>
       </SpaceBetween>}><SpaceBetween size="m">
         {dialog.kind==='create'?<>
@@ -125,6 +145,13 @@ export default function VPCNativeSubnets({request,region,vpc,onSaving}) {
           </FormField>
           <FormField label={t('Availability Zone','アベイラビリティーゾーン')}><Select options={zones} disabled={pending}
             selectedOption={zones.find(option=>option.value===dialog.az)} onChange={({detail})=>change('az',detail.selectedOption.value)}/></FormField>
+        </>:settingChange?<>
+          <Box>{t('Selected subnet: ','選択済みサブネット: ')}{dialog.subnet.id}</Box>
+          <Checkbox checked={dialog.publicIPv4} disabled={pending} onChange={({detail})=>change('publicIPv4',detail.checked)}>
+            {t('Enable auto-assign public IPv4 address','パブリック IPv4 アドレスの自動割り当てを有効にする')}
+          </Checkbox>
+          <Box color="text-body-secondary">{t('This saves the launch setting only. It does not allocate a public address or enable network traffic.',
+            '起動時の設定のみ保存します。パブリックアドレスの割り当てや通信は行いません。')}</Box>
         </>:<>
           <Box>{t('Delete this saved subnet from the selected VPC: ','選択した VPC からこのサブネットを削除します: ')}{dialog.subnet.id}</Box>
           <FormField label={t('Type delete to confirm','確認のため delete と入力')}><Input value={dialog.confirm} disabled={pending} onChange={({detail})=>change('confirm',detail.value)}/></FormField>

@@ -29,7 +29,7 @@ const (
 )
 
 var ec2Operations = slices.Concat(
-	[]string{"DescribeInstances", "DescribeVpcs", "DescribeSubnets", "DescribeSecurityGroups", "DescribeRouteTables", "CreateVpc", "DeleteVpc", "CreateSubnet", "DeleteSubnet"},
+	[]string{"DescribeInstances", "DescribeVpcs", "DescribeSubnets", "DescribeSecurityGroups", "DescribeRouteTables", "CreateVpc", "DeleteVpc", "CreateSubnet", "DeleteSubnet", ec2ModifyNativeSubnet},
 	ec2NativeSecurityGroupMutations, ec2NetworkACLOperations, ec2NativeRouteTableMutations, ec2NativeRouteAssociationOperations, ec2InternetGatewayOperations, ec2NativeDefaultRouteOperations,
 )
 
@@ -83,7 +83,7 @@ func (q ec2Request) permissions(action, region string) [][2]string {
 		return q.internetGateway.permissions(action, region)
 	}
 	switch action {
-	case "CreateSubnet", "DeleteSubnet":
+	case "CreateSubnet", "DeleteSubnet", ec2ModifyNativeSubnet:
 		return q.subnet.permissions(action, region)
 	case "CreateVpc":
 		out := [][2]string{{"ec2:CreateVpc", networkARN(region, "vpc", "*")}}
@@ -129,7 +129,7 @@ func parseEC2Request(action string, fields map[string][]string) (ec2Request, *ec
 		return ec2Request{internetGateway: &q}, err
 	}
 	q := ec2Request{}
-	if action == "CreateSubnet" || action == "DeleteSubnet" {
+	if action == "CreateSubnet" || action == "DeleteSubnet" || action == ec2ModifyNativeSubnet {
 		sub, err := parseEC2SubnetMutation(action, fields)
 		q.subnet = sub
 		return q, err
@@ -285,6 +285,8 @@ func stampEC2Response(out any) {
 	case *ec2CreateSubnetResponse:
 		v.XMLNS, v.RequestID = ns, id
 	case *ec2DeleteSubnetResponse:
+		v.XMLNS, v.RequestID = ns, id
+	case *ec2ModifySubnetResponse:
 		v.XMLNS, v.RequestID = ns, id
 	case *ec2DescribeSubnetsResponse:
 		v.XMLNS, v.RequestID = ns, id

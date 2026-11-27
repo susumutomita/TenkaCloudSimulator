@@ -9,16 +9,21 @@ import (
 	"errors"
 	"fmt"
 	"net/netip"
+	"reflect"
 	"regexp"
 	"sort"
 )
 
-const ec2NativeSubnetKind = "AWS::EC2::Subnet"
+const (
+	ec2NativeSubnetKind   = "AWS::EC2::Subnet"
+	ec2ModifyNativeSubnet = "ModifySubnetAttribute"
+)
 
 var ec2SubnetIDPattern = regexp.MustCompile(`^subnet-([0-9a-f]{8}|[0-9a-f]{17})$`)
 
 type ec2SubnetMutation struct {
 	vpc, id, cidr, az string
+	publicIPv4        *bool
 	// An admitted non-admin caller must also be authorized for the allocated ID.
 	authorizeCreatedID func(string) error
 }
@@ -39,8 +44,14 @@ func parseEC2SubnetMutation(action string, fields map[string][]string) (ec2Subne
 			q.cidr = value
 		case action == "CreateSubnet" && key == "AvailabilityZone" && value != "":
 			q.az = value
-		case action == "DeleteSubnet" && key == "SubnetId":
+		case (action == "DeleteSubnet" || action == ec2ModifyNativeSubnet) && key == "SubnetId":
 			q.id = value
+		case action == ec2ModifyNativeSubnet && key == "MapPublicIpOnLaunch.Value":
+			if value != "true" && value != "false" {
+				return q, ec2Invalid("InvalidParameterValue", "MapPublicIpOnLaunch.Value must be true or false.")
+			}
+			on := value == "true"
+			q.publicIPv4 = &on
 		default:
 			return q, ec2Invalid("UnsupportedOperation", "Parameter "+key+" is not supported by local "+action+".")
 		}
@@ -64,6 +75,9 @@ func parseEC2SubnetMutation(action string, fields map[string][]string) (ec2Subne
 		if !ec2SubnetIDPattern.MatchString(q.id) {
 			return q, ec2Invalid("InvalidSubnetID.Malformed", "SubnetId is not a valid subnet ID.")
 		}
+		if action == ec2ModifyNativeSubnet && q.publicIPv4 == nil {
+			return q, ec2Invalid("MissingParameter", "MapPublicIpOnLaunch.Value is required.")
+		}
 	}
 	return q, nil
 }
@@ -85,7 +99,7 @@ func (q ec2SubnetMutation) permissions(action, region string) [][2]string {
 	if action == "CreateSubnet" {
 		return [][2]string{{"ec2:CreateSubnet", networkARN(region, "vpc", q.vpc)}, nativeSubnetCreatePermission(region, "*")}
 	}
-	return [][2]string{{"ec2:DeleteSubnet", networkARN(region, "subnet", q.id)}}
+	return [][2]string{{"ec2:" + action, networkARN(region, "subnet", q.id)}}
 }
 
 func nativeSubnetUnclaimed(ctx context.Context, tx *sql.Tx, region, id string) error {
@@ -141,7 +155,8 @@ func nativeSubnetReadback(ctx context.Context, tx *sql.Tx, r EC2NetworkResource)
 	if p.Bits() < parent.Bits() || !parent.Contains(p.Addr()) {
 		return ec2SubnetRead{}, errEC2NetworkOutsideVPC
 	}
-	return ec2SubnetRead{ID: r.ID, VPC: r.VPCID, CIDR: r.CIDR, State: "available", AZ: r.AvailabilityZone, ManagedBy: ec2ManagedByEC2}, nil
+	return ec2SubnetRead{ID: r.ID, VPC: r.VPCID, CIDR: r.CIDR, State: "available", AZ: r.AvailabilityZone,
+		ManagedBy: ec2ManagedByEC2, PublicIPv4: &r.PublicIP}, nil
 }
 
 func nativeSubnetRows(ctx context.Context, tx *sql.Tx, region string) ([]ec2SubnetRead, error) {
@@ -241,6 +256,80 @@ func (s *StackStore) deleteNativeSubnet(ctx context.Context, region, id string) 
 		return errors.New("subnet delete was not acknowledged")
 	}
 	return tx.Commit()
+}
+
+// Store only the requested launch preference. This never allocates an address,
+// changes a route, or turns a configuration-only subnet into a guest network.
+func (s *StackStore) modifyNativeSubnetPublicIPv4(ctx context.Context, region, id string, on bool) error {
+	tx, err := s.db.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+	row, err := networkRead(ctx, tx, region, id)
+	if errors.Is(err, sql.ErrNoRows) || err == nil && row.Kind != ec2NativeSubnetKind {
+		return ec2Invalid("InvalidSubnetID.NotFound", "The subnet does not exist in this region.")
+	}
+	if err != nil {
+		return err
+	}
+	if row.StackID != ec2NativeOwner {
+		return ec2Invalid("UnsupportedOperation", "CloudFormation owns this subnet; native settings do not change its stack.")
+	}
+	if _, err := nativeSubnetReadback(ctx, tx, row); err != nil {
+		return err
+	}
+	parent, err := networkRead(ctx, tx, region, row.VPCID)
+	if err != nil {
+		return err
+	}
+	checkDeclarations := func() error {
+		_, declared, err := regionalGatewayStacks(ctx, tx, region)
+		if err != nil {
+			return err
+		}
+		if declared[row.ID] || declared[row.VPCID] {
+			return errors.New("native subnet settings conflict with a CloudFormation declaration")
+		}
+		return nil
+	}
+	if err := checkDeclarations(); err != nil {
+		return err
+	}
+	if row.PublicIP == on {
+		return tx.Commit() // A repeat does not change the row revision.
+	}
+	row.PublicIP = on
+	row.Revision++
+	if err := networkWrite(ctx, tx, row, false); err != nil {
+		return err
+	}
+	stored, err := networkRead(ctx, tx, region, id)
+	if err != nil {
+		return err
+	}
+	observed, err := nativeSubnetReadback(ctx, tx, stored)
+	if err != nil {
+		return err
+	}
+	currentParent, err := networkRead(ctx, tx, region, row.VPCID)
+	if err != nil {
+		return err
+	}
+	if observed.PublicIPv4 == nil || *observed.PublicIPv4 != on || !reflect.DeepEqual(parent, currentParent) {
+		return errors.New("native subnet settings readback differs")
+	}
+	if err := checkDeclarations(); err != nil {
+		return err
+	}
+	return tx.Commit()
+}
+
+type ec2ModifySubnetResponse struct {
+	XMLName   xml.Name `xml:"ModifySubnetAttributeResponse"`
+	XMLNS     string   `xml:"xmlns,attr"`
+	RequestID string   `xml:"requestId"`
+	Return    bool     `xml:"return"`
 }
 
 type ec2CreateSubnetResponse struct {

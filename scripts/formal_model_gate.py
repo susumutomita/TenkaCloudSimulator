@@ -4106,6 +4106,53 @@ REQUIRED_SOURCE_SCOPES['EC2NativeRouteAssociationReplacement'] = {
 }
 
 
+BASE_MODELS.add('EC2NativeSubnetPublicIPv4')
+BASE_INVARIANTS['EC2NativeSubnetPublicIPv4'] = {
+    'TypeOK',
+    'ExactAdmission',
+    'RefusalNoEffect',
+    'ExactPreference',
+    'SameFrame',
+    'CurrentConfirmedNotice',
+    'NoReplay',
+}
+REQUIRED_MUTANTS['EC2NativeSubnetPublicIPv4'] = {
+    'RequireSubnetGrant',
+    'RejectScopedHandoff',
+    'RequireSameRegion',
+    'RequireExistingSubnet',
+    'KeepStackOwnership',
+    'RejectRetainedClaim',
+    'RejectRetainedDeclaration',
+    'RequireBooleanInput',
+    'RejectStoreFailure',
+    'RejectStorageDrift',
+    'NeverPersistRefusal',
+    'PersistTheRequestedBoolean',
+    'DoNotAdvanceIdempotentRevision',
+    'PreserveSiblingAndTopology',
+    'RequirePostWriteRead',
+    'RequireCompleteRead',
+    'RequireSameTarget',
+    'RequireRequestedValue',
+    'RequireCurrentView',
+    'NoRetryOnRefresh',
+}
+REQUIRED_SOURCE_SCOPES['EC2NativeSubnetPublicIPv4'] = {
+    'internal/aws/ec2_internet_gateway_store.go',
+    'internal/aws/ec2_network.go',
+    'internal/aws/ec2_read.go',
+    'internal/aws/ec2_subnet_native.go',
+    'internal/aws/ec2_vpc.go',
+    'internal/server/server.go',
+    'internal/server/web/app.js',
+    'tools/console/src/ec2-native-subnets.mjs',
+    'tools/console/src/ec2-readonly.jsx',
+    'tools/console/src/ec2-vpc-native-subnets.jsx',
+    'tools/console/src/main.jsx',
+}
+
+
 def load_registry(root, relative='formal/models.json'):
     root = Path(root)
     registry_path = asset(root, relative)
