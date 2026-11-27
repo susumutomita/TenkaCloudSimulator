@@ -218,6 +218,19 @@ def console_fixture(browser, expect, endpoint, port, token, target, peer_token):
                 completed.add(operation)
             return response
 
+        def click_messages(name, query, operation):
+            observer = Path(__file__).with_name('azure_queue_browser_capture.js').read_text()
+            capture = page.evaluate_handle(observer, {'path': target_messages, 'query': query})
+            try:
+                click(name, 'GET', target_messages, 200, query, operation)
+                page.wait_for_function('capture => capture.done', arg=capture, timeout=12000)
+                text = capture.evaluate('capture => capture.text')
+                need(isinstance(text, str), 'missing or invalid real browser Queue response body')
+                return rows(text)
+            finally:
+                capture.evaluate('capture => capture.stop()')
+                capture.dispose()
+
         wire(port, token, 'GET', target_messages, (404,))
         view.get_by_label('Queue name', exact=True).fill(queue)
         click('Create queue', 'PUT', target, 201, operation='CreateQueue')
@@ -242,16 +255,15 @@ def console_fixture(browser, expect, endpoint, port, token, target, peer_token):
         peer_denied()
         check_message(readback(), body, 0, ident)
 
-        peek = click('Peek visible messages', 'GET', target_messages, 200, peek_query, 'PeekMessages')
-        check_message(rows(peek.body()), body, 0, ident)
+        peek = click_messages('Peek visible messages', peek_query, 'PeekMessages')
+        check_message(peek, body, 0, ident)
         peek_results = view.get_by_role('region', name='Peek results', exact=True)
         peek_results.get_by_text(ident, exact=True).click()
         expect(peek_results.locator('pre')).to_have_text(body)
 
         view.get_by_label('Receive visibility timeout (seconds)', exact=True).fill('300')
-        got = click('Receive and reserve', 'GET', target_messages, 200,
-                    {'numofmessages': '8', 'visibilitytimeout': '300'}, 'GetMessages')
-        old = check_message(rows(got.body()), body, 1, ident).get('PopReceipt')
+        got = click_messages('Receive and reserve', {'numofmessages': '8', 'visibilitytimeout': '300'}, 'GetMessages')
+        old = check_message(got, body, 1, ident).get('PopReceipt')
         need(old and readback() == [], 'receive did not reserve and issue a receipt')
         manage = view.get_by_role('group', name='Manage a received message', exact=True)
         expect(manage.get_by_role('combobox')).to_have_value(ident)
