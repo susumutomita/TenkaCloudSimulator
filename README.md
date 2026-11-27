@@ -105,7 +105,7 @@ console, CloudFormation adapter or Challenge integration.
   [route tables: CloudFormation readback, native tables and explicit subnet associations](docs/ec2-read-discovery.md#route-table-readback),
   [native IPv4 route configuration](docs/ec2-native-default-route.md),
   [IPv4 subnet lifecycle for existing EC2-managed VPCs](docs/ec2-native-subnet.md),
-  [security groups: CloudFormation readback and detached Console workflow](docs/ec2-read-discovery.md#security-group-readback),
+  [security groups: CloudFormation readback and detached TCP/IPv4 rules](docs/ec2-read-discovery.md#security-group-readback),
   [detached network ACL API and Console workflow](docs/ec2-detached-network-acls.md),
   [VPC and one subnet in the Console](docs/ec2-read-discovery.md#console-vpc-and-one-subnet),
   [Elastic Load Balancing](docs/elb.md) (Lambda targets),

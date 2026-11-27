@@ -107,16 +107,38 @@ allocated group ARN; tags require `ec2:CreateTags` on the group. A native group
 has `groupName` and the local `simulatorSecurityGroupMode=detached-config-only`
 marker. Delete requires the exact `GroupId` resource ARN. Stack-owned groups
 cannot be adopted or deleted through this API. There is no default group,
-rule mutation, egress, native attachment, or execution.
+implicit egress, native attachment, or execution.
+
+For this detached profile, `AuthorizeSecurityGroupIngress`,
+`AuthorizeSecurityGroupEgress`, `RevokeSecurityGroupIngress` and
+`RevokeSecurityGroupEgress` accept an explicit `GroupId`, exactly one
+`IpPermissions` entry with protocol `tcp`, an inclusive port range of 1–65535,
+and one canonical `IpRanges.CidrIp` contained within the owning VPC's IPv4 CIDR.
+Each operation requires its own `ec2:` action on the exact group's ARN.
+A duplicate tuple or a missing revoke returns a refusal, not success. Up to
+60 rules per direction are saved; describing the group reports both actual
+saved directions (egress is omitted when empty). Rules survive database
+reopen and are removed atomically with that group. They do not appear in the
+guest network-policy record and do not affect packets.
+
+The native APIs reject CloudFormation-owned groups, IPv6, UDP/ICMP, all-protocol
+or externally addressed ranges, group/prefix-list targets, multiple permissions
+or ranges in one call, tags and descriptions on rules, group-name selectors,
+rule-ID forms, and `DryRun=true`. `DescribeSecurityGroupRules` and
+`ModifySecurityGroupRules` are outside this subset. Use `DescribeSecurityGroups`
+to verify saved tuples; local mutation receipts are not firewall attestations.
 
 In an ordinary signed-in Console, select a VPC in **VPC → Resource details →
 Security groups**. CloudFormation-owned VPCs show their saved rules and tags
 without mutation controls. Where the simulator advertises all three detached
 native actions, EC2-managed VPCs can create a named group with a description,
 view saved metadata and tags, and delete a selected group after confirmation.
+When the bounded rule profile is advertised, the Console also lists both
+directions, supports separate **Add inbound rule** and **Add outbound rule**
+controls, and removes a selected tuple in its own confirmation dialog.
 The Console reports changes only after a scoped read verifies the result.
 After an unclear response, refresh the list before retrying. This pane does
-not offer default groups, tag edits, rules, attachment, or traffic effects.
+not offer default groups, tag edits, attachment, or traffic effects.
 An instance-scoped Console handoff does not receive these controls. API
 permissions still apply to the selected identity. A refusal or incomplete
 reply is not an empty list.
@@ -124,6 +146,10 @@ reply is not an empty list.
 Opt-in served Console check: `SIMULATOR_BINARY=/absolute/path/to/simulator
 python3 test/e2e/ec2_native_security_groups_gui.py` with installed Chromium,
 Playwright and pinned SDK dependencies, on numeric loopback only.
+The dedicated rules test `python3 test/console/ec2_native_sg_rules_sdk.py` uses
+the pinned SDK and, when `JSDOM_MODULE` is supplied, exercises the exact served
+application against the same disposable database. It does not qualify browser
+layout/Chromium or network enforcement.
 
 [CreateSecurityGroup](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_CreateSecurityGroup.html),
 [DescribeSecurityGroups](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_DescribeSecurityGroups.html),

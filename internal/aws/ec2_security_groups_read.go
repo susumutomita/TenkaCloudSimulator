@@ -22,15 +22,20 @@ type ec2SecurityGroupPermission struct {
 	Ranges   []ec2SecurityGroupIPv4Range `xml:"ipRanges>item"`
 }
 
+type ec2SecurityGroupPermissionSet struct {
+	Items []ec2SecurityGroupPermission `xml:"item"`
+}
+
 type ec2SecurityGroupRead struct {
-	Owner       string                       `xml:"ownerId"`
-	ID          string                       `xml:"groupId"`
-	Name        string                       `xml:"groupName,omitempty"`
-	Description string                       `xml:"groupDescription"`
-	VPC         string                       `xml:"vpcId"`
-	Ingress     []ec2SecurityGroupPermission `xml:"ipPermissions>item"`
-	Tags        []ec2Tag                     `xml:"tagSet>item,omitempty"`
-	Mode        string                       `xml:"simulatorSecurityGroupMode,omitempty"`
+	Owner       string                         `xml:"ownerId"`
+	ID          string                         `xml:"groupId"`
+	Name        string                         `xml:"groupName,omitempty"`
+	Description string                         `xml:"groupDescription"`
+	VPC         string                         `xml:"vpcId"`
+	Ingress     []ec2SecurityGroupPermission   `xml:"ipPermissions>item"`
+	Egress      *ec2SecurityGroupPermissionSet `xml:"ipPermissionsEgress,omitempty"`
+	Tags        []ec2Tag                       `xml:"tagSet>item,omitempty"`
+	Mode        string                         `xml:"simulatorSecurityGroupMode,omitempty"`
 }
 
 type ec2SecurityGroupSet struct {

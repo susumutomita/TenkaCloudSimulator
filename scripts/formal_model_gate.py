@@ -1503,6 +1503,37 @@ BASE_INVARIANTS['EC2NativeRouteTableLifecycle'] = {'TypeOK', 'GrantAtomic', 'Nat
 REQUIRED_MUTANTS['EC2NativeRouteTableLifecycle'] = {'IgnoreAllocatedGrant', 'AdoptCFNParent', 'RetireParentWithChild', 'DeleteCFNTable', 'ReplayResurrectsTombstone', 'LoseReceipt', 'ReplayIgnoresIntent', 'ReadOtherRegion'}
 REQUIRED_SOURCE_SCOPES['EC2NativeRouteTableLifecycle'] = {'internal/aws/cloudformation.go', 'internal/aws/ec2_read.go', 'internal/aws/ec2_route_tables_native.go', 'internal/aws/ec2_route_tables_native_query.go', 'internal/aws/ec2_route_tables_read.go', 'internal/aws/ec2_vpc.go'}
 
+BASE_MODELS.add('EC2DetachedSecurityGroupRules')
+BASE_INVARIANTS['EC2DetachedSecurityGroupRules'] = {'OwnershipFrame', 'TypeOK', 'DirectionBounds', 'ExactTransition'}
+REQUIRED_SOURCE_SCOPES['EC2DetachedSecurityGroupRules'] = {
+    'internal/aws/ec2_read.go',
+    'internal/aws/ec2_security_group_rules_native.go',
+    'internal/aws/ec2_security_groups_native_query.go',
+    'internal/aws/ec2_security_groups_native_store.go',
+    'internal/aws/ec2_security_groups_read.go',
+    'internal/aws/ec2_vpc.go',
+    'internal/server/server.go',
+    'internal/server/web/app.js',
+    'tools/console/src/ec2-native-security-groups.mjs',
+    'tools/console/src/ec2-readonly.jsx',
+    'tools/console/src/ec2-vpc-security-groups.jsx',
+    'tools/console/src/main.jsx',
+}
+REQUIRED_MUTANTS['EC2DetachedSecurityGroupRules'] = {
+    'IgnoreRegion',
+    'AdoptStack',
+    'IgnoreActionGrant',
+    'AllowOutsideParent',
+    'AcknowledgeFailedCommit',
+    'AllowDuplicate',
+    'AllowMissingRevoke',
+    'PermitOverflow',
+    'WrongDirection',
+    'RetainDeletedRules',
+    'InventDefaultEgress',
+    'HideSavedEgress',
+}
+
 BASE_MODELS.add('EC2NativeVPCChildren')
 BASE_INVARIANTS['EC2NativeVPCChildren'] = {'TypeOK', 'GrantAtomic', 'RejectOtherOwner', 'ParentDependency', 'SiblingFrame', 'ReadScoped', 'ReplayNoRecreate', 'ReceiptTracksLiveACL'}
 REQUIRED_MUTANTS['EC2NativeVPCChildren'] = {'IgnoreParentGrant', 'IgnoreAllocatedGrant', 'AdoptStackParent', 'DeleteParentWithChildren', 'DeletePeerKinds', 'ReadForeignScope', 'RecreateRetiredACL', 'LoseACLReceipt'}

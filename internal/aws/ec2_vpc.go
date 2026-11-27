@@ -268,6 +268,8 @@ func stampEC2Response(out any) {
 		v.XMLNS, v.RequestID = ns, id
 	case *ec2NativeSecurityGroupMutationResponse:
 		v.XMLNS, v.RequestID = ns, id
+	case *ec2NativeSGRuleMutationResponse:
+		v.XMLNS, v.RequestID = ns, id
 	case *ec2InternetGatewayResponse:
 		v.XMLNS, v.RequestID = ns, id
 	case *ec2NetworkACLResponse:

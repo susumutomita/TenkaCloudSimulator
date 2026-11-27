@@ -26632,6 +26632,167 @@
           "expect_invariant": "NoReplay"
         }
       ]
+    },
+    {
+      "id": "EC2DetachedSecurityGroupRules",
+      "model": "formal/EC2DetachedSecurityGroupRules.tla",
+      "config": "formal/EC2DetachedSecurityGroupRules.cfg",
+      "bounds": "Four operations per trace, two representative rule tuples, one rule per direction, one native group plus framed peer/stack-owned records; explicit exact-grant, out-of-region, wrong-owner, parent CIDR and failed confirm cases.",
+      "limits": "Abstracts XML/Query/SQLite/React mechanics, physical IP networks, timing and API edge parsing. Describes only the native group projection, not the distinct CloudFormation read protocol, no actual NIC/traffic, and no implementation refinement.",
+      "properties": [
+        "TypeOK",
+        "OwnershipFrame",
+        "DirectionBounds",
+        "ExactTransition"
+      ],
+      "source_scope": [
+        "internal/aws/ec2_read.go",
+        "internal/aws/ec2_security_group_rules_native.go",
+        "internal/aws/ec2_security_groups_native_query.go",
+        "internal/aws/ec2_security_groups_native_store.go",
+        "internal/aws/ec2_security_groups_read.go",
+        "internal/aws/ec2_vpc.go",
+        "internal/server/server.go",
+        "internal/server/web/app.js",
+        "tools/console/src/ec2-native-security-groups.mjs",
+        "tools/console/src/ec2-readonly.jsx",
+        "tools/console/src/ec2-vpc-security-groups.jsx",
+        "tools/console/src/main.jsx"
+      ],
+      "mutants": [
+        {
+          "id": "IgnoreRegion",
+          "edits": [
+            {
+              "old": "Scoped(r) == r.failure # \"foreign-region\" /\\ r.failure # \"stack-owned\"",
+              "new": "Scoped(r) == r.failure # \"stack-owned\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExactTransition"
+        },
+        {
+          "id": "AdoptStack",
+          "edits": [
+            {
+              "old": "Scoped(r) == r.failure # \"foreign-region\" /\\ r.failure # \"stack-owned\"",
+              "new": "Scoped(r) == r.failure # \"foreign-region\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExactTransition"
+        },
+        {
+          "id": "IgnoreActionGrant",
+          "edits": [
+            {
+              "old": "Grant(r) == r.failure # \"denied\"",
+              "new": "Grant(r) == TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExactTransition"
+        },
+        {
+          "id": "AllowOutsideParent",
+          "edits": [
+            {
+              "old": "WithinParent(r) == r.failure # \"outside-parent\"",
+              "new": "WithinParent(r) == TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExactTransition"
+        },
+        {
+          "id": "AcknowledgeFailedCommit",
+          "edits": [
+            {
+              "old": "/\\ r.failure # \"unconfirmed\"",
+              "new": "/\\ TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExactTransition"
+        },
+        {
+          "id": "AllowDuplicate",
+          "edits": [
+            {
+              "old": "CanAdd(r) == r.rule \\notin s.saved[r.direction] /\\ Cardinality(s.saved[r.direction]) < RuleLimit",
+              "new": "CanAdd(r) == r.rule \\in s.saved[r.direction] \\/ Cardinality(s.saved[r.direction]) < RuleLimit",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExactTransition"
+        },
+        {
+          "id": "AllowMissingRevoke",
+          "edits": [
+            {
+              "old": "CanRemove(r) == r.rule \\in s.saved[r.direction]",
+              "new": "CanRemove(r) == TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExactTransition"
+        },
+        {
+          "id": "PermitOverflow",
+          "edits": [
+            {
+              "old": "Cardinality(s.saved[r.direction]) < RuleLimit",
+              "new": "Cardinality(s.saved[r.direction]) <= RuleLimit",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "DirectionBounds"
+        },
+        {
+          "id": "WrongDirection",
+          "edits": [
+            {
+              "old": "![r.direction] = @ \\cup {r.rule}",
+              "new": "![IF r.direction=\"ingress\" THEN \"egress\" ELSE \"ingress\"] = @ \\cup {r.rule}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExactTransition"
+        },
+        {
+          "id": "RetainDeletedRules",
+          "edits": [
+            {
+              "old": "[] r.op = \"delete\" -> Empty",
+              "new": "[] r.op = \"delete\" -> s.saved",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "OwnershipFrame"
+        },
+        {
+          "id": "InventDefaultEgress",
+          "edits": [
+            {
+              "old": "Project == s.saved",
+              "new": "Project == [s.saved EXCEPT ![\"egress\"] = @ \\cup {1}]",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExactTransition"
+        },
+        {
+          "id": "HideSavedEgress",
+          "edits": [
+            {
+              "old": "Project == s.saved",
+              "new": "Project == [s.saved EXCEPT ![\"egress\"] = {}]",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExactTransition"
+        }
+      ]
     }
   ]
 }

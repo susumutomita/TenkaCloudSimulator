@@ -10,7 +10,10 @@ import (
 	"strings"
 )
 
-var ec2NativeSecurityGroupMutations = []string{"CreateSecurityGroup", "DeleteSecurityGroup"}
+var ec2NativeSecurityGroupMutations = []string{
+	"CreateSecurityGroup", "DeleteSecurityGroup", ec2AuthorizeNativeSGIngress, ec2AuthorizeNativeSGEgress,
+	ec2RevokeNativeSGIngress, ec2RevokeNativeSGEgress,
+}
 
 var (
 	ec2NativeSecurityGroupID = regexp.MustCompile(`^sg-(?:[0-9a-f]{8}|[0-9a-f]{17})$`)
@@ -22,6 +25,7 @@ type ec2NativeSecurityGroupQuery struct {
 	name, description, vpc, id string
 	tags                       map[string]string
 	ids, vpcs                  []string
+	rule                       ec2NativeSGRule
 	// The gateway binds trusted identity-policy checks before SQL. A create
 	// rechecks the assigned ID so a wildcard Allow cannot hide a concrete Deny.
 	authorizeCreatedID func(string) error
@@ -32,8 +36,8 @@ func (q ec2NativeSecurityGroupQuery) permissions(action, region string) [][2]str
 	case "CreateSecurityGroup":
 		vpc := [][2]string{{"ec2:CreateSecurityGroup", networkARN(region, "vpc", q.vpc)}}
 		return append(vpc, q.createPermissions(region, "*")...)
-	case "DeleteSecurityGroup":
-		return [][2]string{{"ec2:DeleteSecurityGroup", networkARN(region, "security-group", q.id)}}
+	case "DeleteSecurityGroup", ec2AuthorizeNativeSGIngress, ec2AuthorizeNativeSGEgress, ec2RevokeNativeSGIngress, ec2RevokeNativeSGEgress:
+		return [][2]string{{"ec2:" + action, networkARN(region, "security-group", q.id)}}
 	default:
 		return [][2]string{{"ec2:DescribeSecurityGroups", "*"}}
 	}
@@ -73,6 +77,9 @@ func invalidNativeSGName(name string) *ec2Failure {
 }
 
 func parseEC2NativeSGQuery(action string, fields map[string][]string) (ec2NativeSecurityGroupQuery, *ec2Failure) {
+	if _, _, rule := ec2NativeSGRuleAction(action); rule {
+		return parseEC2NativeSGRuleQuery(action, fields)
+	}
 	var q ec2NativeSecurityGroupQuery
 	ids, vpcs := map[int]string{}, map[int]string{}
 	tagMembers := map[int]map[string]any{}
