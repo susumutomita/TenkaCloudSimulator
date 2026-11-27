@@ -3,7 +3,7 @@ const {readFileSync}=require('node:fs');
 const {createHash, randomUUID}=require('node:crypto');
 const {JSDOM,VirtualConsole}=require(process.env.JSDOM_MODULE);
 const opts=JSON.parse(readFileSync(0,'utf8'));
-const {port,cookie,vpc,stackVpc,stackSubnet,asset,principal,phase,legacyRoute,peerRoute}=opts;
+const {port,cookie,vpc,stackVpc,stackSubnet,asset,principal,phase,legacyRoute,peerRoute,nativeMain,peerMain}=opts;
 assert.ok(Number.isInteger(port)&&port>0&&port<65536);
 const origin='http://127.0.0.1:'+port;
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
@@ -96,7 +96,7 @@ const ruleTitles=['Authorize security group ingress','Edit inbound rules','Edit 
       await until(()=>display(stackSubnet)&&display('CFN readback is still here'),'missing legacy subnet/group');
       assert.ok(display('CloudFormation owns this VPC.'));
       await until(()=>display(legacyRoute),'missing CloudFormation route row');
-      assert.ok(!display(peerRoute));
+      assert.ok(!display(peerRoute)&&!display(peerMain)&&!display(nativeMain));
 
       assert.ok(display('This panel does not read or change its network ACLs.'));
       for(const name of ['Add subnet','Create security group','Create network ACL','Create route table','Delete subnet','Delete security group','Delete network ACL','Delete route table','Associate subnet','Disassociate subnet'])assert.ok(!button(d,name),name+' is not a CFN action');
@@ -104,16 +104,17 @@ const ruleTitles=['Authorize security group ingress','Edit inbound rules','Edit 
     await legacy();
     await select(vpc);
     await until(()=>display('Independent native group')||phase==='delete'&&display('Detached GUI group'),'native SG not listed');
-    assert.ok(!display(legacyRoute)&&!display(peerRoute));
+    assert.ok(!display(legacyRoute)&&!display(peerRoute)&&!display(peerMain));
     for(const title of ruleTitles)assert.ok(!button(d,title),title+' must not be offered');
     // Explicit association is a route-table action, not a subnet/SG/ACL
-    // edit. Its button exists only for the currently shown native row.
-    if(phase==='delete'){
-      const rowAction=await until(()=>d.querySelector('button[aria-label="Associate subnet: '+opts.saved.table+'"]'),
-        'saved native table is missing its route association control');
-      assert.equal(rowAction.textContent.trim(),'Associate subnet');
-      assert.equal(d.querySelectorAll('button[aria-label^="Associate subnet: "]').length,1);
-    } else assert.ok(!button(d,'Associate subnet'),'empty native route inventory offered association');
+    // edit. Only verified tables in this VPC, including its main, offer it.
+    const scopedTables=[nativeMain,...(phase==='delete'?[opts.saved.table]:[])].sort();
+    await until(()=>scopedTables.every(id=>d.querySelector('button[aria-label="Associate subnet: '+id+'"]')),
+      'saved native rows missing verified route association controls');
+    const associations=[...d.querySelectorAll('button[aria-label^="Associate subnet: "]')];
+    assert.deepEqual(associations.map(b=>b.getAttribute('aria-label')).sort(),scopedTables.map(id=>'Associate subnet: '+id));
+    const protectedMain=ctrl('Delete route table: '+nativeMain);
+    assert.equal(protectedMain.getAttribute('aria-disabled'),'true');
     if(phase==='create'){
       await click('Add subnet');
       await fill('subnet',0,'10.75.1.0/24');
@@ -147,7 +148,7 @@ const ruleTitles=['Authorize security group ingress','Edit inbound rules','Edit 
       assert.ok(ctrl('Add subnet').closest('[inert]')&&ctrl('Create network ACL').disabled&&ctrl('Services').disabled);
       continueRoute();
       const table=await until(()=>/Saved route table: (rtb-[a-f0-9]{17})/.exec(d.body.textContent)?.[1],'route readback missing');
-      assert.ok(display('GUI route <設定>')&&!display(legacyRoute)&&!display(peerRoute));
+      assert.ok(display('GUI route <設定>')&&!display(legacyRoute)&&!display(peerRoute)&&!display(peerMain));
 
       holdNextGroup='stale';
       await click('Refresh security groups');
@@ -192,7 +193,8 @@ const ruleTitles=['Authorize security group ingress','Edit inbound rules','Edit 
       await fill('route table',0,peerRoute);
       assert.ok(ctrl('Delete route table',active('route table')).disabled);
       await fill('route table',0,table);await submit('route table','Delete route table');
-      await until(()=>display('Deleted route table: '+table)&&display('No route tables are saved for this VPC.'),'route removal not confirmed');
+      await until(()=>display('Deleted route table: '+table)&&!ctrl('Delete route table: '+table)&&ctrl('Delete route table: '+nativeMain),
+        'custom route table removal or preserved main was not confirmed');
       await click('Delete subnet');await fill('subnet',0,'delete');await submit('subnet','Delete subnet');
       await until(()=>display('Removed subnet: '+subnet)&&display('No subnets are recorded for this VPC.'),'subnet removal missing');
       await legacy();

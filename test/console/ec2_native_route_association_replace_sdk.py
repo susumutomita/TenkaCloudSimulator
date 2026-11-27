@@ -12,10 +12,12 @@ import sys
 import tempfile
 
 from ec2_launch_preflight_native import Local, run_default
-from ec2_native_network_sdk import REGION, boto3, botocore, reject, sdk
+from ec2_native_network_sdk import REGION, boto3, botocore, fresh_main_route_table, native_local_route, reject, sdk
 from ec2_route_table_pages_sdk import create_stack, rows, sdk_pages
 
 ACTION = 'ReplaceRouteTableAssociation'
+VPC_CIDR = '10.68.0.0/16'
+LOCAL = native_local_route(VPC_CIDR)
 ROOT = Path(__file__).resolve().parents[2]
 
 
@@ -35,12 +37,15 @@ def replacement_token(local, operator, name, resources):
 
 
 def fixture(c):
-    vpc = c.create_vpc(CidrBlock='10.68.0.0/16')['Vpc']['VpcId']
+    vpc = c.create_vpc(CidrBlock=VPC_CIDR)['Vpc']['VpcId']
+    fresh_main_route_table(c, vpc, VPC_CIDR)
     subnets = [c.create_subnet(VpcId=vpc, CidrBlock=f'10.68.{i}.0/24')['Subnet']['SubnetId']
                for i in (1, 2, 3)]
-    tables = [c.create_route_table(VpcId=vpc, TagSpecifications=[{
+    rows = [c.create_route_table(VpcId=vpc, TagSpecifications=[{
         'ResourceType': 'route-table', 'Tags': [{'Key': 'Name', 'Value': name}],
-    }])['RouteTable']['RouteTableId'] for name in ('Source route table', 'Destination route table')]
+    }])['RouteTable'] for name in ('Source route table', 'Destination route table')]
+    assert all(row['Routes'] == [LOCAL] and not row.get('Associations') for row in rows)
+    tables = [row['RouteTableId'] for row in rows]
     association = [c.associate_route_table(SubnetId=s, RouteTableId=t)['AssociationId']
                    for s, t in zip(subnets, (tables[0], tables[0], tables[1]))]
     gateway = c.create_internet_gateway()['InternetGateway']['InternetGatewayId']
@@ -73,7 +78,9 @@ def cleanup(c, vpc, subnets, tables, gateway):
     for table in tables:
         for a in wanted[table]['Associations']:
             c.disassociate_route_table(AssociationId=a['RouteTableAssociationId'])
-        for r in wanted[table]['Routes']:
+        routes = wanted[table]['Routes']
+        assert [r for r in routes if r['GatewayId'] == 'local'] == [LOCAL]
+        for r in (r for r in routes if r != LOCAL):
             c.delete_route(RouteTableId=table, DestinationCidrBlock=r['DestinationCidrBlock'])
         c.delete_route_table(RouteTableId=table)
     c.detach_internet_gateway(InternetGatewayId=gateway, VpcId=vpc)

@@ -40,7 +40,7 @@ func TestEC2RouteTablePagesAcrossOwnersAndScope(t *testing.T) {
 		}
 	}
 	var ids, native, subnets []string
-	ids, subnets = append(ids, cfnTable), append(subnets, cfnSubnet)
+	ids, subnets = append(ids, cfnTable, nativeMainTableID(igwRegion, vpc)), append(subnets, cfnSubnet)
 	for n := range 11 {
 		table := nativeDefaultRouteTestTable(t, f, vpc)
 		native, ids = append(native, table), append(ids, table)

@@ -33,8 +33,19 @@ func TestEC2NativeRouteTableGatewayMaintainsLegacyReadback(t *testing.T) {
 		return out.Tables
 	}
 	baseline := list("", region)
-	if len(baseline) != 1 || len(baseline[0].Tags) != 1 || baseline[0].Tags[0].Value != "legacy table" {
-		t.Fatalf("expected surviving legacy table only; got %+v", baseline)
+	mainID := nativeMainTableID(region, parent.ID)
+	var legacy, main ec2RouteTableRead
+	for _, row := range baseline {
+		if row.ID == mainID {
+			main = row
+		} else {
+			legacy = row
+		}
+	}
+	if len(baseline) != 2 || len(legacy.Tags) != 1 || legacy.Tags[0].Value != "legacy table" ||
+		len(main.Associations) != 1 || !main.Associations[0].Main || main.Associations[0].Subnet != "" ||
+		!reflect.DeepEqual(main.Routes, []ec2RouteRead{nativeLocalRouteFixture(parent.CIDR)}) {
+		t.Fatalf("expected unchanged legacy and one owned system table; got %+v", baseline)
 	}
 	policy := func(statements string) {
 		t.Helper()
@@ -69,7 +80,7 @@ func TestEC2NativeRouteTableGatewayMaintainsLegacyReadback(t *testing.T) {
 	if err := xml.Unmarshal([]byte(body), &made); err != nil || made.XMLName.Space != "http://ec2.amazonaws.com/doc/2016-11-15/" ||
 		made.XMLName.Local != "CreateRouteTableResponse" || made.RequestID == "" || made.Table == nil ||
 		!ec2NativeRouteTableID.MatchString(made.Table.ID) || made.ClientToken != create.Get("ClientToken") || made.Table.VPC != parent.ID ||
-		len(made.Table.Routes) != 0 || len(made.Table.Associations) != 0 || len(made.Table.Tags) != 1 || made.Table.Tags[0].Value != create.Get("TagSpecification.1.Tag.1.Value") {
+		!reflect.DeepEqual(made.Table.Routes, main.Routes) || len(made.Table.Associations) != 0 || len(made.Table.Tags) != 1 || made.Table.Tags[0].Value != create.Get("TagSpecification.1.Tag.1.Value") {
 		t.Fatalf("CreateRouteTable protocol: %v / %s", err, body)
 	}
 	target := made.Table.ID
@@ -78,11 +89,11 @@ func TestEC2NativeRouteTableGatewayMaintainsLegacyReadback(t *testing.T) {
 	}
 	policy(both + "," + tags + `,{"Effect":"Allow","Action":"ec2:DescribeRouteTables","Resource":"*"}`)
 	got := list("route-editor", region)
-	if len(got) != 2 || got[0].ID >= got[1].ID {
+	if len(got) != 3 || got[0].ID >= got[1].ID || got[1].ID >= got[2].ID {
 		t.Fatalf("combined regional list: %+v", got)
 	}
-	by := map[string]ec2RouteTableRead{got[0].ID: got[0], got[1].ID: got[1]}
-	if !reflect.DeepEqual(by[baseline[0].ID], baseline[0]) || !reflect.DeepEqual(by[target], *made.Table) {
+	by := map[string]ec2RouteTableRead{got[0].ID: got[0], got[1].ID: got[1], got[2].ID: got[2]}
+	if !reflect.DeepEqual(by[legacy.ID], legacy) || !reflect.DeepEqual(by[mainID], main) || !reflect.DeepEqual(by[target], *made.Table) {
 		t.Fatalf("legacy or native projection changed: %+v", by)
 	}
 	if len(list("", other)) != 0 {
@@ -99,7 +110,7 @@ func TestEC2NativeRouteTableGatewayMaintainsLegacyReadback(t *testing.T) {
 	f.expect(f.call("", region, nil, url.Values{"Action": {"DeleteVpc"}, "VpcId": {parent.ID}}), 400, "DependencyViolation")
 	del := url.Values{"Action": {"DeleteRouteTable"}, "RouteTableId": {target}}
 	f.expect(f.call("route-editor", region, nil, del), 403, "UnauthorizedOperation")
-	f.expect(f.call("", region, nil, url.Values{"Action": {"DeleteRouteTable"}, "RouteTableId": {baseline[0].ID}}), 400, "UnsupportedOperation")
+	f.expect(f.call("", region, nil, url.Values{"Action": {"DeleteRouteTable"}, "RouteTableId": {legacy.ID}}), 400, "UnsupportedOperation")
 	f.expect(f.call("", other, nil, del), 400, "InvalidRouteTableID.NotFound")
 	policy(fmt.Sprintf(`{"Effect":"Allow","Action":"ec2:DeleteRouteTable","Resource":%q}`, networkARN(region, "route-table", target)))
 	f.expect(f.call("route-editor", region, scope, del), 403, "UnauthorizedOperation")
@@ -111,7 +122,7 @@ func TestEC2NativeRouteTableGatewayMaintainsLegacyReadback(t *testing.T) {
 	}
 	f.expect(f.call("", region, nil, create), 400, "InvalidRouteTableID.NotFound")
 	f.expect(f.call("", region, nil, url.Values{"Action": {"DeleteVpc"}, "VpcId": {parent.ID}}), 200, "")
-	if got := list("", region); !reflect.DeepEqual(got, baseline) {
-		t.Fatalf("cleanup changed the legacy projection: %+v", got)
+	if got := list("", region); !reflect.DeepEqual(got, []ec2RouteTableRead{legacy}) {
+		t.Fatalf("cleanup changed the legacy projection or retained the system child: %+v", got)
 	}
 }

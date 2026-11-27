@@ -274,13 +274,27 @@ func TestEC2NativeVPCConsoleKeepsCloudFormationAndNativeOwnershipSeparate(t *tes
 			VPCID string `xml:"vpcId"`
 			Links []struct {
 				Subnet string `xml:"subnetId"`
+				Main   bool   `xml:"main"`
 			} `xml:"associationSet>item"`
+			Paths []struct {
+				CIDR    string `xml:"destinationCidrBlock"`
+				Gateway string `xml:"gatewayId"`
+			} `xml:"routeSet>item"`
 		} `xml:"routeTableSet>item"`
 	}
 	vpcConsoleXML(t, f.ec2("DescribeRouteTables", nil), "DescribeRouteTablesResponse", &routes)
-	if len(routes.Routes) != 1 || routes.Routes[0].ID != cfn["RouteTable"] || routes.Routes[0].VPCID != cfn["VPC"] ||
-		len(routes.Routes[0].Links) != 1 || routes.Routes[0].Links[0].Subnet != cfn["Subnet"] {
-		t.Fatalf("coexisting native children changed the saved CFN routes: %+v", routes.Routes)
+	var seenCFN, seenMain bool
+	for _, table := range routes.Routes {
+		switch table.VPCID {
+		case cfn["VPC"]:
+			seenCFN = table.ID == cfn["RouteTable"] && len(table.Links) == 1 && !table.Links[0].Main && table.Links[0].Subnet == cfn["Subnet"]
+		case native:
+			seenMain = strings.HasPrefix(table.ID, "rtb-") && len(table.Links) == 1 && table.Links[0].Main && table.Links[0].Subnet == "" &&
+				len(table.Paths) == 1 && table.Paths[0].CIDR == "10.48.0.0/16" && table.Paths[0].Gateway == "local"
+		}
+	}
+	if len(routes.Routes) != 2 || !seenCFN || !seenMain {
+		t.Fatalf("mixed route discovery did not preserve CFN and native ownership: %+v", routes.Routes)
 	}
 
 	vpcConsoleXML(t, f.stack("DeleteStack", nil), "DeleteStackResponse", &struct{}{})

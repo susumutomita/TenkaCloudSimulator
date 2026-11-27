@@ -385,8 +385,12 @@ func TestEC2NativeSGRegressionSharedNetworkQuota(t *testing.T) {
 		INSERT INTO aws_ec2_network_resources
 		SELECT ?,printf('vpc-%017x',i),?,'AWS::EC2::VPC',
 		  json_object('ID',printf('vpc-%017x',i),'Kind','AWS::EC2::VPC','Region',?,'StackID',?,'CIDR','10.81.0.0/16','DNSSupport',true,'Revision',1),1
-		FROM n`, ec2NativeSGNetworkLimit-2, other, ec2NativeOwner, other, ec2NativeOwner); err != nil {
+		FROM n`, ec2NativeSGNetworkLimit-3, other, ec2NativeOwner, other, ec2NativeOwner); err != nil {
 		t.Fatal(err)
+	}
+	var stored int
+	if err := db.QueryRow("SELECT count(*) FROM aws_ec2_network_resources").Scan(&stored); err != nil || stored != ec2NativeSGNetworkLimit-1 {
+		t.Fatalf("expected one remaining slot after the VPC and its main table: %d (%v)", stored, err)
 	}
 	q := ec2NativeSecurityGroupQuery{name: "last-slot", description: "quota test", vpc: vpc}
 	first, err := f.stacks.createEC2NativeSecurityGroup(ctx, region, q)

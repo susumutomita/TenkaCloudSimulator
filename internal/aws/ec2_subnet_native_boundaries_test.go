@@ -100,6 +100,9 @@ func TestEC2NativeSubnetBoundaries(t *testing.T) {
 	if _, err := store.db.ExecContext(ctx, `DELETE FROM aws_cfn_ownership WHERE stack_id='stack-claim'`); err != nil {
 		t.Fatal(err)
 	}
+	if _, err := store.db.ExecContext(ctx, `DELETE FROM aws_cfn_stacks WHERE id='stack-claim'`); err != nil {
+		t.Fatal(err)
+	}
 
 	// Whole-store quota also includes networks in other regions. Populate the
 	// remaining slots with typed fixtures in the shared store, not a shadow quota.
@@ -110,7 +113,7 @@ func TestEC2NativeSubnetBoundaries(t *testing.T) {
 	defer tx.Rollback()
 	// Each row is a bounded typed VPC fixture. The source of truth and count
 	// still come from the actual shared SQLite table.
-	if _, err := tx.ExecContext(ctx, `WITH RECURSIVE n(i) AS (VALUES(1) UNION ALL SELECT i+1 FROM n WHERE i<998)
+	if _, err := tx.ExecContext(ctx, `WITH RECURSIVE n(i) AS (VALUES(1) UNION ALL SELECT i+1 FROM n WHERE i<997)
 INSERT INTO aws_ec2_network_resources(region,id,stack_id,kind,document,revision)
 SELECT 'us-west-2',printf('vpc-%017x',i),'ec2:native','AWS::EC2::VPC',
  json_object('Region','us-west-2','ID',printf('vpc-%017x',i),'StackID','ec2:native','Kind','AWS::EC2::VPC','CIDR','10.200.0.0/16','Revision',1),1 FROM n`); err != nil {

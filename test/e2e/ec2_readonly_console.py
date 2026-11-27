@@ -74,7 +74,15 @@ with running(authenticated=True) as (endpoint, operator), sync_playwright() as p
     expect(page.get_by_text('Console VPC 日本語',exact=True).first).to_be_visible()
     # The created VPC is selected; its delete requires typing delete.
     expect(page.get_by_role('radio',name='Select '+native_id,exact=True)).to_be_checked()
-    expect(page.get_by_text('No detached route tables are saved for this VPC.',exact=True)).to_be_visible()
+    main, = [row for row in ec2.describe_route_tables()['RouteTables'] if row['VpcId']==native_id]
+    primary, = main['Associations']
+    assert primary['Main'] and primary['RouteTableId']==main['RouteTableId'] and 'SubnetId' not in primary
+    assert main['Routes']==[{'DestinationCidrBlock':'10.24.0.0/16','GatewayId':'local',
+                             'Origin':'CreateRouteTable','State':'active'}]
+    main_row=page.get_by_role('row').filter(has_text=main['RouteTableId'])
+    expect(main_row).to_contain_text(' · Main')
+    expect(main_row).to_contain_text('local · Read-only')
+    expect(main_row.get_by_role('button',name='Delete route table: '+main['RouteTableId'],exact=True)).to_be_disabled()
     expect(page.get_by_text(association['SubnetId'],exact=True)).to_have_count(0)
     expect(page.get_by_role('button',name='Refresh route tables',exact=True)).to_be_enabled()
     expect(page.get_by_role('button',name='Create route table',exact=True)).to_be_enabled()
@@ -86,6 +94,7 @@ with running(authenticated=True) as (endpoint, operator), sync_playwright() as p
     expect(page.get_by_text('Deleted '+native_id,exact=True)).to_be_visible()
     expect(page.get_by_text(native_id,exact=True)).to_have_count(0)
     assert [v['VpcId'] for v in ec2.describe_vpcs()['Vpcs']]==[vpc_id]
+    assert ec2.describe_route_tables()['RouteTables']==[table]
     page.get_by_role('button',name='Refresh',exact=True).click()
     expect(page.get_by_text(vpc_id,exact=True)).to_be_visible()
     page.get_by_label('Filter resources',exact=True).fill('does-not-match-any-resource')

@@ -10,10 +10,11 @@ from pathlib import Path
 import tempfile
 
 from ec2_launch_preflight_native import Local, run_default
-from ec2_native_network_sdk import REGION, boto3, botocore, reject, sdk
+from ec2_native_network_sdk import REGION, boto3, botocore, fresh_main_route_table, native_local_route, reject, sdk
 
 CAPABILITIES = '/_simulator/v1/capabilities'
 ASSOCIATION_OPERATIONS = ['DescribeRouteTables', 'DescribeSubnets', 'AssociateRouteTable', 'DisassociateRouteTable']
+VPC_CIDR = '10.67.0.0/16'
 
 
 def inventory(client):
@@ -37,7 +38,8 @@ def check(binary):
         alpha, beta = Path(directory)/'team-a.sqlite', Path(directory)/'team-b.sqlite'
         with run_default(binary, state=beta) as (bp, bt), ExitStack() as bx:
             b = sdk(bx, bp, bt)
-            bv = b.create_vpc(CidrBlock='10.67.0.0/16')['Vpc']['VpcId']
+            bv = b.create_vpc(CidrBlock=VPC_CIDR)['Vpc']['VpcId']
+            other_main = fresh_main_route_table(b, bv, VPC_CIDR)
             bs = b.create_subnet(VpcId=bv, CidrBlock='10.67.1.0/24')['Subnet']['SubnetId']
             br = b.create_route_table(VpcId=bv)['RouteTable']['RouteTableId']
             b_before = inventory(b)
@@ -51,7 +53,8 @@ def check(binary):
                 assert set(ASSOCIATION_OPERATIONS) <= set(ec2['operations'])
                 assert 'native route tables' not in ec2['detachedConfigurationOnly']
                 a = sdk(ax, ap, at)
-                av = a.create_vpc(CidrBlock='10.67.0.0/16')['Vpc']['VpcId']
+                av = a.create_vpc(CidrBlock=VPC_CIDR)['Vpc']['VpcId']
+                main = fresh_main_route_table(a, av, VPC_CIDR)
                 asub = a.create_subnet(VpcId=av, CidrBlock='10.67.1.0/24')['Subnet']['SubnetId']
                 ar = a.create_route_table(VpcId=av)['RouteTable']['RouteTableId']
                 alternate = a.create_route_table(VpcId=av)['RouteTable']['RouteTableId']
@@ -61,7 +64,9 @@ def check(binary):
                 reader = sdk(ax, ap, endpoint_token(local, at, 'table-only', [route_arn]))
                 pair = {'RouteTableId': ar, 'SubnetId': asub}
                 before = inventory(a)
-                assert len(before) == 2 and before[ar]['Associations'] == []
+                main_id = main['RouteTableId']
+                assert set(before) == {main_id, ar, alternate} and before[main_id] == main
+                assert set(b_before) == {other_main['RouteTableId'], br} and before[ar]['Associations'] == []
                 reject(reader.associate_route_table, 'UnauthorizedOperation', **pair)
                 assert inventory(editor) == inventory(a) == before
                 reply = editor.associate_route_table(DryRun=False, **pair)
@@ -77,7 +82,8 @@ def check(binary):
                 reject(a.delete_subnet, 'DependencyViolation', SubnetId=asub)
                 saved = inventory(editor)
                 assert saved == inventory(a) and inventory(b) == b_before and not inventory(other_region)
-                assert saved[alternate] == before[alternate] and saved[ar]['Routes'] == []
+                assert saved[main_id] == main and saved[alternate] == before[alternate]
+                assert saved[ar]['Routes'] == before[ar]['Routes'] == [native_local_route(VPC_CIDR)]
                 assert saved[ar]['Associations'] == [
                     {'Main': False, 'RouteTableAssociationId': assoc, 'RouteTableId': ar, 'SubnetId': asub},
                 ]

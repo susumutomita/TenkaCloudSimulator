@@ -1,4 +1,4 @@
-import {parseEC2RouteTablePage,routeTableInventoryLimit,routeTablePageSize} from './ec2-response.mjs';
+import {parseEC2RouteTablePage,routeTableInventoryLimit,routeTablePageSize,validateEC2RouteTableSystem} from './ec2-response.mjs';
 
 const regionShape=/^[a-z]{2}(?:-[a-z0-9]+)+-[0-9]+$/;
 const tableShape=/^rtb-[0-9a-f]{17}$/;
@@ -65,16 +65,21 @@ export async function loadEC2RouteTablePages(request,region,{signal,selectedSubn
       if (t.id<=lastID) invalid();
       lastID=t.id;
       unique(result.regionalIDs,t.id);
+      if (t.mainAssociation) unique(result.regionalAssociations,t.mainAssociation.id);
       for (const a of t.associations) {
         unique(result.regionalAssociations,a.id);
         unique(result.regionalSubnets,a.subnet);
       }
+      // Neither of the two system markers is a persisted relation/route.
       count+=1+t.associations.length+t.routes.length;
       if (count>routeTableInventoryLimit) invalid();
       result.tables.push(t);
     }
     signal?.throwIfAborted();
-    if (token===null) return result;
+    if (token===null) {
+      validateEC2RouteTableSystem(result.tables,!exactID&&!selectedSubnet);
+      return result;
+    }
     unique(seenTokens,token);
     next=token;
   }

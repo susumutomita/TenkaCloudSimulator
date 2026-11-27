@@ -14,7 +14,7 @@ from urllib.parse import urlencode
 import xml.etree.ElementTree as ET
 
 from ec2_launch_preflight_native import EC2, Local, REGIONS, run_default
-from ec2_native_network_sdk import REGION, boto3, botocore, reject, sdk
+from ec2_native_network_sdk import REGION, boto3, botocore, fresh_main_route_table, reject, sdk
 from botocore.config import Config
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -147,7 +147,10 @@ def sdk_check(binary):
                 # Actual AWS SDK operations, same native graph across the two
                 # APIs; operator sets narrowly scoped rights on both ends.
                 vpc = a.create_vpc(CidrBlock='10.73.0.0/16')['Vpc']['VpcId']
+                main = fresh_main_route_table(a, vpc, '10.73.0.0/16')
                 alternate_vpc = a.create_vpc(CidrBlock='10.74.0.0/16')['Vpc']['VpcId']
+                alternate_main = fresh_main_route_table(a, alternate_vpc, '10.74.0.0/16')
+                expected_routes = sorted([*routes, main, alternate_main], key=lambda r: r['RouteTableId'])
                 extra = [a.create_internet_gateway()['InternetGateway']['InternetGatewayId'] for _ in range(4)]
                 spare = extra[0]
                 vpc_arn = f'arn:aws:ec2:{REGION}:000000000000:vpc/{vpc}'
@@ -178,12 +181,13 @@ def sdk_check(binary):
                 reject(a.delete_internet_gateway, 'DependencyViolation', InternetGatewayId=native)
                 assert a.describe_internet_gateways(InternetGatewayIds=[native])['InternetGateways'] == [attached]
                 assert inventory(a) == persisted and inventory(other) == other_before
+                assert a.describe_route_tables()['RouteTables'] == expected_routes
 
             with run_default(binary, state=one) as (ap, at), ExitStack() as ax:
                 a = sdk(ax, ap, at)
                 cfn = cfn_client(ax, ap, at)
                 assert inventory(a) == persisted and outputs(cfn, stack) == state
-                assert a.describe_route_tables()['RouteTables'] == routes
+                assert a.describe_route_tables()['RouteTables'] == expected_routes
                 assert a.describe_internet_gateways(InternetGatewayIds=[native])['InternetGateways'] == [attached]
                 assert a.detach_internet_gateway(**pair)['ResponseMetadata']['HTTPStatusCode'] == 200
                 assert inventory(a) == full_detached
@@ -193,6 +197,7 @@ def sdk_check(binary):
                 a.detach_internet_gateway(InternetGatewayId=native, VpcId=alternate_vpc)
                 for parent in (vpc, alternate_vpc):
                     a.delete_vpc(VpcId=parent)
+                assert a.describe_route_tables()['RouteTables'] == routes
                 for extra_id in extra:
                     a.delete_internet_gateway(InternetGatewayId=extra_id)
                 cleaner = sdk(ax, ap, grant(ap, at, 'one-gateway-cleaner', [reader, allow('DeleteInternetGateway', arn+native)]))

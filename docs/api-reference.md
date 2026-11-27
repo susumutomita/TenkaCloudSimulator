@@ -42,7 +42,9 @@ The **EC2 DescribeRouteTables** example requires `ec2:DescribeRouteTables` on
 `*`. It reads the first page of the same [saved route tables](ec2-read-discovery.md#route-table-readback)
 with `MaxResults=100`. For the next page, copy XML `nextToken` into `NextToken`
 with the same authenticated local caller, region and query. For single-table readback, remove
-`MaxResults` and `NextToken` before entering one `RouteTableId.1`. The reference
+`MaxResults` and `NextToken` before entering one `RouteTableId.1`. New native
+VPCs include their main association and `local` route in this metadata; the
+explicit subnet filter does not include implicit main-table use. The reference
 does not change a table or test routes.
 
 The stable internal tag `KMS local symmetric keys` now displays as **Shared AWS

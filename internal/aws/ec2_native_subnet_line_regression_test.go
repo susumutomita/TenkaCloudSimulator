@@ -91,6 +91,10 @@ func TestEC2NativeSubnetLineRegressionRejectsUnreadableSibling(t *testing.T) {
 	f, vpc, subnet := nativeSubnetLineTopology(t)
 	db := f.store.Database()
 	peer := f.create("", url.Values{"CidrBlock": {"10.115.0.0/16"}})
+	var originalPeer string
+	if err := db.QueryRow(`SELECT document FROM aws_ec2_network_resources WHERE region=? AND id=?`, subnetLineRegion, peer.ID).Scan(&originalPeer); err != nil {
+		t.Fatal(err)
+	}
 	before := nativeSubnetLineInventory(t, f)
 	// The target's relational revision and JSON identity must agree before
 	// a delete or an operation accepting that target as a subnet parent.
@@ -110,9 +114,8 @@ func TestEC2NativeSubnetLineRegressionRejectsUnreadableSibling(t *testing.T) {
 	} {
 		nativeSubnetLineServerFailure(t, f, input)
 	}
-	nativeSubnetLineExec(t, db, `UPDATE aws_ec2_network_resources SET document=json_object('ID',id,'Region',region,
-		'StackID',stack_id,'Kind',kind,'Revision',revision,'CIDR',?,'DNSSupport',json('true')) WHERE region=? AND id=?`,
-		peer.CIDR, subnetLineRegion, peer.ID)
+	nativeSubnetLineExec(t, db, `UPDATE aws_ec2_network_resources SET document=? WHERE region=? AND id=?`,
+		originalPeer, subnetLineRegion, peer.ID)
 	if got := nativeSubnetLineInventory(t, f); !reflect.DeepEqual(before, got) {
 		t.Fatalf("failed graph operation changed the valid sibling %+v", got)
 	}

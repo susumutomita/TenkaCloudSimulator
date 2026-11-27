@@ -315,6 +315,7 @@ func nativeVPCs(ctx context.Context, tx *sql.Tx, region string) ([]EC2NetworkRes
 	out := []EC2NetworkResource{}
 	associatedSubnets := map[string]bool{}
 	var hasGateways bool
+	var declared map[string]bool
 	for _, v := range all {
 		if v.Kind == ec2RTGateway || v.Kind == ec2RTAttachment || v.Kind == ec2Route ||
 			strings.HasPrefix(v.ID, nativeInternetGatewayLinkPrefix) || strings.HasPrefix(v.ID, nativeDefaultRoutePrefix) {
@@ -322,9 +323,9 @@ func nativeVPCs(ctx context.Context, tx *sql.Tx, region string) ([]EC2NetworkRes
 		}
 	}
 	if hasGateways {
-		_, declared, err := regionalGatewayStacks(ctx, tx, region)
-		if err != nil {
-			return nil, err
+		_, declared, e = regionalGatewayStacks(ctx, tx, region)
+		if e != nil {
+			return nil, e
 		}
 		if err := checkNativeDefaultRouteReservation(ctx, tx, region); err != nil {
 			return nil, err
@@ -347,6 +348,9 @@ func nativeVPCs(ctx context.Context, tx *sql.Tx, region string) ([]EC2NetworkRes
 			if claims != 0 {
 				return nil, fmt.Errorf("EC2-owned VPC has a stack claim")
 			}
+			if err := verifyNativeVPCMainSlot(ctx, tx, v, &declared); err != nil {
+				return nil, err
+			}
 			out = append(out, v)
 		case ec2NativeSubnetKind:
 			if _, err := nativeSubnetReadback(ctx, tx, v); err != nil {
@@ -361,7 +365,7 @@ func nativeVPCs(ctx context.Context, tx *sql.Tx, region string) ([]EC2NetworkRes
 				return nil, err
 			}
 		case ec2RT:
-			if _, err := readNativeRouteTable(ctx, tx, region, v.ID); err != nil {
+			if _, err := readNativeRouteTableInSnapshot(ctx, tx, region, v.ID, &declared); err != nil {
 				return nil, err
 			}
 		case ec2RTGateway, ec2RTAttachment, ec2Route:
@@ -394,7 +398,8 @@ func (s *StackStore) createNativeVPC(ctx context.Context, region, cidr string, t
 	if e != nil {
 		return EC2NetworkResource{}, e
 	}
-	r := EC2NetworkResource{ID: id, Kind: "AWS::EC2::VPC", Region: region, StackID: ec2NativeOwner, CIDR: cidr, DNSSupport: true, Tags: tags, Revision: 1}
+	r := EC2NetworkResource{ID: id, Kind: "AWS::EC2::VPC", Region: region, StackID: ec2NativeOwner, CIDR: cidr, DNSSupport: true, Tags: tags, Revision: 1,
+		MainRouteTableID: nativeMainTableID(region, id)}
 	if r.Tags == nil {
 		r.Tags = map[string]string{}
 	}
@@ -407,7 +412,7 @@ func (s *StackStore) createNativeVPC(ctx context.Context, region, cidr string, t
 	if e = tx.QueryRowContext(ctx, `SELECT count(*) FROM aws_ec2_network_resources`).Scan(&count); e != nil {
 		return r, e
 	}
-	if count >= 1000 {
+	if count > ec2NativeRouteTableRowLimit-2 {
 		return r, ec2Invalid("VpcLimitExceeded", "The local limit of 1000 network resources has been reached.")
 	}
 	if e = createEC2Network(ctx, tx, r); e != nil {
@@ -415,6 +420,9 @@ func (s *StackStore) createNativeVPC(ctx context.Context, region, cidr string, t
 	}
 	if claims, e := cloudFormationClaims(ctx, tx, region, id); e != nil || claims != 0 {
 		return r, fmt.Errorf("new VPC identity is already claimed")
+	}
+	if e = createNativeVPCMainTable(ctx, tx, r); e != nil {
+		return r, e
 	}
 	return r, tx.Commit()
 }
@@ -445,39 +453,18 @@ func (s *StackStore) deleteNativeVPC(ctx context.Context, region, id string) err
 	if claims != 0 {
 		return fmt.Errorf("EC2-owned VPC has a stack claim")
 	}
-	rows, e := tx.QueryContext(ctx, `SELECT id,document,kind,stack_id,revision FROM aws_ec2_network_resources
-		WHERE region=? AND id<>? ORDER BY id LIMIT 1001`, region, id)
-	if e != nil {
+	if e := verifyNativeVPCMainSlot(ctx, tx, v, nil); e != nil {
 		return e
 	}
-	var hasDependents bool
-	count := 0
-	for rows.Next() {
-		var child, raw, kind, owner string
-		var revision int64
-		var other EC2NetworkResource
-		if e = rows.Scan(&child, &raw, &kind, &owner, &revision); e != nil {
-			rows.Close()
-			return e
-		}
-		count++
-		if count > 1000 || json.Unmarshal([]byte(raw), &other) != nil || other.ID != child ||
-			other.Kind != kind || other.Region != region || other.StackID != owner || other.Revision != revision ||
-			(strings.HasPrefix(child, nativeInternetGatewayLinkPrefix) || owner == ec2NativeOwner && kind == ec2RTAttachment) &&
-				!validNativeInternetGatewayLink(other) ||
-			(strings.HasPrefix(child, nativeDefaultRoutePrefix) || owner == ec2NativeOwner && kind == ec2Route) && !validNativeIPv4Route(other) {
-			rows.Close()
-			return errEC2InternetGatewayState
-		}
-		hasDependents = hasDependents || other.VPCID == id
-	}
-	e = rows.Err()
-	rows.Close()
+	hasDependents, e := nativeVPCRetainedDependents(ctx, tx, v, true)
 	if e != nil {
 		return e
 	}
 	if hasDependents {
 		return ec2Invalid("DependencyViolation", "The vpc '"+id+"' has dependencies and cannot be deleted.")
+	}
+	if e := removeNativeVPCMainTable(ctx, tx, v); e != nil {
+		return e
 	}
 	result, e := tx.ExecContext(ctx, `DELETE FROM aws_ec2_network_resources WHERE region=? AND id=? AND stack_id=? AND revision=?`, region, id, ec2NativeOwner, v.Revision)
 	if e != nil {
@@ -486,5 +473,47 @@ func (s *StackStore) deleteNativeVPC(ctx context.Context, region, id string) err
 	if n, e := result.RowsAffected(); e != nil || n != 1 {
 		return fmt.Errorf("VPC delete was not acknowledged")
 	}
+	if _, e := networkRead(ctx, tx, region, id); !errors.Is(e, sql.ErrNoRows) {
+		return fmt.Errorf("VPC delete readback was not acknowledged")
+	}
+	if e := verifyNativeVPCMainRetired(ctx, tx, v); e != nil {
+		return e
+	}
 	return tx.Commit()
+}
+
+// Use the same bounded typed snapshot before delete and for final readback.
+// A raw JSON path lookup would recognize fewer stored field spellings than
+// the Go resource readers. Validate the whole snapshot even on a match.
+func nativeVPCRetainedDependents(ctx context.Context, tx *sql.Tx, v EC2NetworkResource, ignoreExactMain bool) (bool, error) {
+	rows, e := tx.QueryContext(ctx, `SELECT id,document,kind,stack_id,revision FROM aws_ec2_network_resources
+		WHERE region=? AND id<>? ORDER BY id LIMIT ?`, v.Region, v.ID, ec2NativeRouteTableRowLimit+1)
+	if e != nil {
+		return false, e
+	}
+	defer rows.Close()
+	var hasDependents bool
+	count := 0
+	for rows.Next() {
+		var child, raw, kind, owner string
+		var revision int64
+		var other EC2NetworkResource
+		if e = rows.Scan(&child, &raw, &kind, &owner, &revision); e != nil {
+			return false, e
+		}
+		count++
+		if count > ec2NativeRouteTableRowLimit || json.Unmarshal([]byte(raw), &other) != nil || other.ID != child ||
+			other.Kind != kind || other.Region != v.Region || other.StackID != owner || other.Revision != revision ||
+			(other.MainRouteTableID != "" && (kind != ec2RTVPC || owner != ec2NativeOwner)) ||
+			(strings.HasPrefix(child, nativeInternetGatewayLinkPrefix) || owner == ec2NativeOwner && kind == ec2RTAttachment) &&
+				!validNativeInternetGatewayLink(other) ||
+			(strings.HasPrefix(child, nativeDefaultRoutePrefix) || owner == ec2NativeOwner && kind == ec2Route) && !validNativeIPv4Route(other) {
+			return false, errEC2InternetGatewayState
+		}
+		if !ignoreExactMain || child != v.MainRouteTableID {
+			hasDependents = hasDependents || other.VPCID == v.ID ||
+				v.MainRouteTableID != "" && other.RouteTableID == v.MainRouteTableID
+		}
+	}
+	return hasDependents, rows.Err()
 }

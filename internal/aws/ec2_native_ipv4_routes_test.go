@@ -18,13 +18,19 @@ func nativeIPv4TableRoutes(t *testing.T, f ec2VPCFixture, table, vpc, igw string
 		t.Fatalf("invalid one-table projection: %s (%v)", raw, err)
 	}
 	var got []string
+	localCount := 0
+	local := expectsNativeLocalRoute(t, f, igwRegion, vpc)
 	for _, route := range read.Tables[0].Routes {
+		if route == local {
+			localCount++
+			continue
+		}
 		if route.Gateway != igw || route.State != "active" || route.Origin != "CreateRoute" {
 			t.Fatalf("unexpected modeled route %+v", route)
 		}
 		got = append(got, route.CIDR)
 	}
-	if !slices.Equal(got, want) {
+	if localCount != 1 || !slices.Equal(got, want) {
 		t.Fatalf("canonical routes %v, want %v", got, want)
 	}
 }

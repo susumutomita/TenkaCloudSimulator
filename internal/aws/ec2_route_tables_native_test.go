@@ -7,6 +7,7 @@ import (
 	"net/url"
 	"path/filepath"
 	"reflect"
+	"slices"
 	"testing"
 
 	"github.com/susumutomita/TenkaCloudSimulator/internal/core"
@@ -148,7 +149,7 @@ func TestEC2NativeRouteTableMetadataRestartAndCleanup(t *testing.T) {
 	reply, err := store.executeEC2NativeRouteTableMutation(ctx, "CreateRouteTable", region, query)
 	if err != nil || reply.Table == nil || !ec2NativeRouteTableID.MatchString(reply.Table.ID) ||
 		reply.Table.VPC != parent || !reflect.DeepEqual(reply.Table.Tags, []ec2Tag{{Key: "Name", Value: "独立 metadata"}}) ||
-		reply.ClientToken != query.clientToken || len(reply.Table.Routes) != 0 || len(reply.Table.Associations) != 0 {
+		reply.ClientToken != query.clientToken || !slices.Equal(reply.Table.Routes, []ec2RouteRead{nativeLocalRouteFixture("10.23.0.0/16")}) || len(reply.Table.Associations) != 0 {
 		t.Fatalf("detached create: %+v / %v", reply, err)
 	}
 	id := reply.Table.ID
@@ -170,7 +171,10 @@ func TestEC2NativeRouteTableMetadataRestartAndCleanup(t *testing.T) {
 
 	db, store = nativeRouteTableTestStore(t, path)
 	rows, err := nativeRouteTableListForTest(t, store, region)
-	if err != nil || len(rows) != 2 || rows[0].ID >= rows[1].ID {
+	if err != nil || len(rows) != 3 || rows[0].ID >= rows[1].ID || rows[1].ID >= rows[2].ID ||
+		!slices.ContainsFunc(rows, func(row EC2NetworkResource) bool {
+			return row.ID == nativeMainTableID(region, parent) && row.CIDR == "10.23.0.0/16"
+		}) {
 		t.Fatalf("same-region restart read: %+v / %v", rows, err)
 	}
 	replay, err := store.createNativeRouteTable(ctx, region, query)
@@ -210,7 +214,8 @@ func TestEC2NativeRouteTableMetadataRestartAndCleanup(t *testing.T) {
 	_, err = store.createNativeRouteTable(ctx, region, query)
 	wantNativeRouteTableError(t, err, "InvalidRouteTableID.NotFound")
 	rows, err = nativeRouteTableListForTest(t, store, region)
-	if err != nil || len(rows) != 1 || rows[0].ID != eastSecond.ID {
+	if err != nil || len(rows) != 2 || !slices.ContainsFunc(rows, func(row EC2NetworkResource) bool { return row.ID == eastSecond.ID }) ||
+		!slices.ContainsFunc(rows, func(row EC2NetworkResource) bool { return row.ID == nativeMainTableID(region, parent) }) {
 		t.Fatalf("cleanup touched a sibling: %+v / %v", rows, err)
 	}
 	for _, existing := range []struct{ region, child, parent string }{{region, eastSecond.ID, parent}, {other, otherTable.ID, otherParent}} {
@@ -247,7 +252,7 @@ func TestEC2NativeRouteTableTwoConnectionReplayAndRollback(t *testing.T) {
 	if _, err := one.createNativeRouteTable(t.Context(), region, q); !errors.Is(err, errEC2NativeRouteTableState) {
 		t.Fatalf("receipt-fault error: %v", err)
 	}
-	if rows, err := nativeRouteTableListForTest(t, one, region); err != nil || len(rows) != 0 {
+	if rows, err := nativeRouteTableListForTest(t, one, region); err != nil || len(rows) != 1 || rows[0].ID != nativeMainTableID(region, parent) {
 		t.Fatalf("failed receipt left a partial table: %+v / %v", rows, err)
 	}
 	exec(`DROP TRIGGER native_rtb_receipt_drop`)
@@ -276,7 +281,9 @@ func TestEC2NativeRouteTableTwoConnectionReplayAndRollback(t *testing.T) {
 	if err := one.deleteNativeRouteTable(t.Context(), region, id); !errors.Is(err, errEC2NativeRouteTableState) {
 		t.Fatalf("delete fault was acknowledged: %v", err)
 	}
-	if rows, err := nativeRouteTableListForTest(t, one, region); err != nil || len(rows) != 1 || rows[0].ID != id {
+	if rows, err := nativeRouteTableListForTest(t, one, region); err != nil || len(rows) != 2 ||
+		!slices.ContainsFunc(rows, func(row EC2NetworkResource) bool { return row.ID == id }) ||
+		!slices.ContainsFunc(rows, func(row EC2NetworkResource) bool { return row.ID == nativeMainTableID(region, parent) }) {
 		t.Fatalf("failed delete corrupted saved state: %+v / %v", rows, err)
 	}
 	exec(`DROP TRIGGER native_rtb_delete_drop`)

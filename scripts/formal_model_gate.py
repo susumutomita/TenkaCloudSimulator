@@ -4184,6 +4184,53 @@ REQUIRED_SOURCE_SCOPES['EC2NativeSubnetPublicIPv4'] = {
 }
 
 
+BASE_MODELS.add('EC2NativeVPCMainRoute')
+BASE_INVARIANTS['EC2NativeVPCMainRoute'] = {
+    'TypeOK',
+    'AtomicPairedSlot',
+    'OwnedLocalOnly',
+    'NoImplicitWire',
+    'CountersExcludeLocal',
+    'RetainedFencesDelete',
+    'ReadInvalidRefuses',
+    'UnrelatedOwnershipUnchanged',
+    'EffectiveNeedsFreshInventories',
+    'EffectiveOnlyUnassociated',
+}
+REQUIRED_MUTANTS['EC2NativeVPCMainRoute'] = {
+    'CreateUnpaired',
+    'OmitAutomaticLocal',
+    'DeleteMainDirect',
+    'DropReferenceFence',
+    'DropFinalFence',
+    'InventExplicitBinding',
+    'ChargeAutomaticRoute',
+    'IgnoreIndependentDeclaration',
+    'RewriteLegacy',
+    'AdmitEffectiveDeniedSubnets',
+    'AdmitEffectivePartialTables',
+    'AdmitEffectiveStaleScope',
+    'IgnoreUnconfirmedEffectiveOwnership',
+    'DoubleCountExplicitSubnet',
+}
+REQUIRED_SOURCE_SCOPES['EC2NativeVPCMainRoute'] = {
+    'internal/aws/ec2_native_default_route_store.go',
+    'internal/aws/ec2_native_vpc_main_route.go',
+    'internal/aws/ec2_network.go',
+    'internal/aws/ec2_route_tables_native.go',
+    'internal/aws/ec2_route_tables_native_query.go',
+    'internal/aws/ec2_route_tables_read.go',
+    'internal/aws/ec2_vpc.go',
+    'internal/server/web/app.js',
+    'tools/console/src/ec2-native-route-tables.mjs',
+    'tools/console/src/ec2-readonly.jsx',
+    'tools/console/src/ec2-response.mjs',
+    'tools/console/src/ec2-route-table-pages.mjs',
+    'tools/console/src/ec2-route-tables.mjs',
+    'tools/console/src/ec2-vpc-native-route-tables.jsx',
+}
+
+
 def load_registry(root, relative='formal/models.json'):
     root = Path(root)
     registry_path = asset(root, relative)

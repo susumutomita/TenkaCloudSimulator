@@ -121,6 +121,11 @@ func ec2RouteTableSnapshot(rows []ec2RouteTableRead) (digest [sha256.Size]byte) 
 			out.field(a.Table)
 			out.field(a.Subnet)
 			out.field(strconv.FormatBool(a.Main))
+			var state string
+			if a.State != nil {
+				state = a.State.State
+			}
+			out.field(state)
 		}
 		out.count(len(row.Tags))
 		for _, t := range row.Tags {

@@ -115,22 +115,45 @@ func TestEC2DescribeRouteTablesReadback(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(read(east, "reader")) != 0 {
-		t.Fatalf("synthesized table for EC2-owned VPC %s", nativeVPC.ID)
+	mainID := nativeMainTableID(east, nativeVPC.ID)
+	assertMain := func(r ec2RouteTableRead) {
+		t.Helper()
+		if r.ID != mainID || r.VPC != nativeVPC.ID || len(r.Associations) != 1 || !r.Associations[0].Main ||
+			r.Associations[0].Subnet != "" || !slices.Equal(r.Routes, []ec2RouteRead{nativeLocalRouteFixture(nativeVPC.CIDR)}) {
+			t.Fatalf("wrong saved native system table: %+v", r)
+		}
+	}
+	if rows := read(east, "reader"); len(rows) != 1 {
+		t.Fatalf("new EC2-owned VPC must have exactly one route table: %+v", rows)
+	} else {
+		assertMain(rows[0])
 	}
 	stack, ids := create(east, "east-net")
 	_, westIDs := create(west, "west-net")
 	verify := func(region string, ids map[string]string, route bool) {
 		t.Helper()
 		tables := read(region, "reader")
-		if len(tables) != 2 || tables[0].ID >= tables[1].ID {
-			t.Fatalf("count/order: %+v", tables)
+		want := []string{ids["Empty"], ids["Table"]}
+		if region == east {
+			want = append(want, mainID)
 		}
-		for _, r := range tables {
+		slices.Sort(want)
+		if len(tables) != len(want) {
+			t.Fatalf("count: %+v want %v", tables, want)
+		}
+		for i, r := range tables {
+			if r.ID != want[i] || i > 0 && tables[i-1].ID >= r.ID {
+				t.Fatalf("exact ordered, unique IDs: %+v want %v", tables, want)
+			}
 			if r.Owner != "000000000000" {
 				t.Fatal(r)
 			}
 			switch r.ID {
+			case mainID:
+				if region != east {
+					t.Fatal("native main crossed regions")
+				}
+				assertMain(r)
 			case ids["Empty"]:
 				if r.VPC != ids["Other"] || len(r.Associations) != 0 || len(r.Routes) != 0 {
 					t.Fatalf("implicit default/local route or wrong VPC: %+v", r)
@@ -323,8 +346,10 @@ func TestEC2DescribeRouteTablesReadback(t *testing.T) {
 	if err := g.Stacks.Delete(east, stack.Name); err != nil {
 		t.Fatal(err)
 	}
-	if len(read(east, "reader")) != 0 {
-		t.Fatal("returned deleted route table")
+	if rows := read(east, "reader"); len(rows) != 1 {
+		t.Fatal("deleted CFN route tables survived, or unrelated native main was removed")
+	} else {
+		assertMain(rows[0])
 	}
 	verify(west, westIDs, true)
 }
