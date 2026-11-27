@@ -27339,6 +27339,88 @@
           "expect_invariant": "KnownRoleCleanedAfterFailedWork"
         }
       ]
+    },
+    {
+      "id": "EC2VPCCreateForm",
+      "model": "formal/EC2VPCCreateForm.tla",
+      "config": "formal/EC2VPCCreateForm.cfg",
+      "bounds": "Two authorized UI shapes (operator with the paired option, native-only), two modes, three navigation epochs, Boolean draft validity and readback qualification; one in-flight browser submit.",
+      "properties": [
+        "TypeOK",
+        "PairedNeedsOperator",
+        "InvalidDraftNeverWrites",
+        "NativeAndStackRemainDistinct",
+        "DiscardRetiredRead",
+        "ConfirmedBeforeSuccess"
+      ],
+      "limits": "VPC creation form only. Capability availability, draft validity and qualified native/stack readback are abstract; not a proof of CIDR/Name parsing, React or keyboard layout, cryptography, CloudFormation/SQLite or persistence semantics. Retired view checks do not cancel an accepted server-side write. No VM, packet, existing-network attachment, or AWS parity claim.",
+      "source_scope": [
+        "tools/console/src/ec2-vpc-create.jsx",
+        "tools/console/src/ec2-vpc-subnet-fields.jsx",
+        "tools/console/src/ec2-vpc-subnet.mjs",
+        "tools/console/src/ec2-readonly.jsx",
+        "tools/console/src/main.jsx",
+        "internal/server/web/app.js",
+        "tools/console/test/ec2-vpc-subnet.test.mjs",
+        "test/console/ec2_vpc_create_browser.cjs"
+      ],
+      "mutants": [
+        {
+          "id": "OfferPairedToNativeOnly",
+          "edits": [
+            {
+              "old": "CanChoose(mode) == mode = \"vpc-only\" \\/ actor = \"operator\"",
+              "new": "CanChoose(mode) == TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PairedNeedsOperator"
+        },
+        {
+          "id": "SubmitInvalidDraft",
+          "edits": [
+            {
+              "old": "CanSubmit == view.valid /\\ CanChoose(view.mode)",
+              "new": "CanSubmit == CanChoose(view.mode)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "InvalidDraftNeverWrites"
+        },
+        {
+          "id": "TreatStackAsNative",
+          "edits": [
+            {
+              "old": "ActionFor(mode) == IF mode = \"vpc-only\" THEN \"CreateVpc\" ELSE \"CreateStack\"",
+              "new": "ActionFor(mode) == \"CreateVpc\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "NativeAndStackRemainDistinct"
+        },
+        {
+          "id": "UseRetiredRead",
+          "edits": [
+            {
+              "old": "CurrentRead == pending.from = epoch /\\ view.phase = \"busy\"",
+              "new": "CurrentRead == TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "DiscardRetiredRead"
+        },
+        {
+          "id": "ShowSuccessWithoutConfirmation",
+          "edits": [
+            {
+              "old": "CanReport(exact) == exact",
+              "new": "CanReport(exact) == TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ConfirmedBeforeSuccess"
+        }
+      ]
     }
   ]
 }

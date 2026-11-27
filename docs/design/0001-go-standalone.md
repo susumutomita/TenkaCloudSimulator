@@ -43,7 +43,7 @@ SQLiteは既存のncruces SQLite/Wasm engineをGo process内で実行する。�
 
 [Route 53のPTRレコード](../route53.md)は、公開ゾーンのSQLiteに保存した名前をTestDNSAnswerで返す。外部DNSへの問い合わせや実IPアドレスの逆引き設定は行わない。認証済みの通常コンソールでは既存公開ゾーンとレコードを参照し、1件のPTRを選択ゾーンの同じネイティブ認可で作成できる。INSYNC受領証と同じ名前・種類・TTL・値の再読で確認する。ゾーンの変更、上書き、削除、限定ハンドオフは[この画面の対象外](../route53.md#console-browse-public-zones-and-create-one-ptr)。
 
-VPC コンソールの「VPC とサブネット1つ」は、認証済みのシミュレーター管理者だけが CloudFormation に固定テンプレートを送る。参加者ブラウザーにはスタック出力が開示されないため、この選択肢を表示しない。新規スタックが両方を所有し、作成受領証の正確なスタック ID で再取得できたときだけ成功を表示する。ネイティブ EC2 所有 VPC への追加や、実ネットワークの作成は行わない。[対応範囲](../ec2-read-discovery.md#console-vpc-and-one-subnet)。
+VPC コンソールは「VPC のみ」を既定にし、既存のネイティブ CreateVpc を使う。「VPC など」は、認証済みのシミュレーター管理者だけが CloudFormation に新規 VPC とサブネット 1 つの固定テンプレートを送る。参加者ブラウザーにはスタック出力が開示されないため、この選択肢を表示しない。新規スタックが両方を所有し、作成受領証の正確なスタック ID で再取得できたときだけ成功を表示する。ネイティブ EC2 所有 VPC への追加や、実ネットワークの作成は行わない。[対応範囲](../ec2-read-discovery.md#console-vpc-and-one-subnet)。
 
 API Reference の EC2 用プリセットは、既存の Query API の `DescribeInstances` を呼び、選択リージョンに記録されたメタデータを表示する。起動や稼働確認は行わない。
 
