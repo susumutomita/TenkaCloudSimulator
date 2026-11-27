@@ -1,156 +1,113 @@
 {
   "version": 1,
-  "base_sha": "ecdfbd861ef924048901cd579475402b58d65100",
+  "base_sha": "7eea6c29daa8aa0df0fa6ca82632389b996f0dbf",
   "changes": [
     {
       "path": "README.md",
-      "sha256": "c2cbb95944d0eb4e0895419ed3fbe5763733d9be6b87ec1b1b0b4d9ba4c80be0",
+      "sha256": "7a4e42600d01df03201616e9c3de4f59b901fa2fdc0b9f13c6a9f2285ff3e92c",
       "disposition": "documentation",
-      "reason": "Describe the new bounded metadata workflow without implying job or image execution.",
-      "models": []
-    },
-    {
-      "path": "docs/aws-catalog-services.md",
-      "sha256": "13123211143fe493351ec54d1389713f59d3c43ad22b14fa4685f6386bbc761d",
-      "disposition": "documentation",
-      "reason": "Generated catalog marks only three existing Batch metadata operations available and documents their scope.",
+      "reason": "Describe the scoped Cloudscape form and exact-revision deregistration with inactive history retained.",
       "models": []
     },
     {
       "path": "docs/design/0001-go-standalone.md",
-      "sha256": "38f2160e70b00bf38b9ac4d445379dc5101e984b62c94f45d6c8590567170dab",
+      "sha256": "9af600d5a773d7eb211d625a3eea7d90e40a02d14d966ae1f4137766d96cf169",
       "disposition": "documentation",
-      "reason": "Document exact family/revision authorization, transactional revision storage and bounded local inactive retention.",
+      "reason": "Describe unchanged native Batch state shared between the catalog console, SDK and served reference.",
       "models": []
     },
     {
-      "path": "formal/models.json",
-      "sha256": "33a94c9a7eb1c09157856a4a18d287639a7f9513ad2a072f9b643e8186bb7af1",
-      "disposition": "formal-infrastructure",
-      "reason": "Register only the new Batch catalog implementation path in the source scope of the existing atomic catalog model; no model transition, configuration or invariant changes.",
-      "models": []
-    },
-    {
-      "path": "internal/aws/catalog/batch_job_definitions.go",
-      "sha256": "e6552bd8337620edafd8c231541f63a966dccf8ce1b66fc556791ff82db77376",
+      "path": "internal/server/web/app.js",
+      "sha256": "6db26d6b06689a67142d236b161a5568e5868fd8dea6130c23c33fbfd48d5449",
       "disposition": "modeled",
-      "reason": "Implement authenticated bounded Batch definition registration and listing over the existing catalog store, with transactional fresh revision assignment and retained quota.",
+      "reason": "Embed the rebuilt Catalog UI, bound only to the changed Batch view acceptance and command sequencing projection.",
       "models": [
         {
-          "id": "CatalogResourceLifecycle",
+          "id": "CatalogConsoleEpoch",
           "properties": [
-            "AuthorizationFirst",
-            "FailureFrame",
-            "PeerFrame",
-            "QuotaBound",
-            "FreshIDs"
+            "NoUnmountedAcceptance",
+            "OnlyCurrentReplies",
+            "SingleWriter",
+            "ReloadOnlyAfterAck",
+            "FailureVisible"
           ],
-          "limits": "The existing bounded abstraction covers only the selected authorization, atomic failure and peer/writer properties. It does not model named Batch revision allocation, inactive retention or exact quota, IAM targets and decisions, the official wire/operation schema, cursor mechanics, tags, SQL locking/disconnects or Go refinement. These concrete bounds are checked with local native SDK/HTTP and kernel tests; this slice adds no executing jobs."
+          "limits": "Existing bounded view epoch and acknowledged write sequencing abstraction only, not an implementation refinement or proof of the rest of the bundle. It does not model the exact ARN, input validation, HTTP/IAM, persistence or restart, DOM rendering or accessibility, asynchronous tag reads, React scheduling, or real browser behavior. Concrete changed paths are exercised against the local built simulator, real SDK/reference requests and jsdom, not live AWS or Chromium."
         }
       ]
     },
     {
-      "path": "internal/aws/catalog/batch_job_definitions_test.go",
-      "sha256": "639409bf9c87f754b90b807867e3e2f5679fd373ae29d0b1e88b494daff94d51",
+      "path": "test/e2e/batch_job_definition_console.cjs",
+      "sha256": "ad9698feb5e0163358de390e4900bb682f86cea5c8fe6a0e901a3e0f92d024c3",
       "disposition": "test-support",
-      "reason": "Exercise bounded metadata, retained quota, exact authorization, existing tags, pagination, concurrent registration, soft deregistration and unsupported HTTP routes in local fixtures.",
+      "reason": "Drive exact served Cloudscape through real loopback, including held genuine native replies across hash navigation and a later write owner.",
       "models": []
     },
     {
-      "path": "internal/aws/catalog/models/batch.json",
-      "sha256": "cb95d50a32517318ec8b88adab0e2449f59197afed8ec025db422d6c967dc510",
-      "disposition": "modeled",
-      "reason": "Extract three previously known Batch routes and only their reachable schemas, bound metadata errors and paginator from the same pinned Botocore model.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "FailureFrame",
-            "PeerFrame"
-          ],
-          "limits": "The existing bounded abstraction covers only the selected authorization, atomic failure and peer/writer properties. It does not model named Batch revision allocation, inactive retention or exact quota, IAM targets and decisions, the official wire/operation schema, cursor mechanics, tags, SQL locking/disconnects or Go refinement. These concrete bounds are checked with local native SDK/HTTP and kernel tests; this slice adds no executing jobs."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/catalog/selection.json",
-      "sha256": "cb59612e8317b281c42749f3eb1233609461e1bf231cea7c59d1de862eb11625",
-      "disposition": "modeled",
-      "reason": "Select exactly the three newly implemented definition metadata operations; keep every prior binding and leave all execution routes unbound.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "FailureFrame",
-            "PeerFrame"
-          ],
-          "limits": "The existing bounded abstraction covers only the selected authorization, atomic failure and peer/writer properties. It does not model named Batch revision allocation, inactive retention or exact quota, IAM targets and decisions, the official wire/operation schema, cursor mechanics, tags, SQL locking/disconnects or Go refinement. These concrete bounds are checked with local native SDK/HTTP and kernel tests; this slice adds no executing jobs."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/catalog/semantics.go",
-      "sha256": "b5e449201e25cff389a2a31db1244ba412a7726689fb503f63a88abd1e12fbbe",
-      "disposition": "modeled",
-      "reason": "Route only the new Batch jobDefinition create/list to the scoped handlers; retain existing dispatch and transaction behavior for every other catalog resource.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "FailureFrame",
-            "PeerFrame"
-          ],
-          "limits": "The existing bounded abstraction covers only the selected authorization, atomic failure and peer/writer properties. It does not model named Batch revision allocation, inactive retention or exact quota, IAM targets and decisions, the official wire/operation schema, cursor mechanics, tags, SQL locking/disconnects or Go refinement. These concrete bounds are checked with local native SDK/HTTP and kernel tests; this slice adds no executing jobs."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/catalog/services_compute3.go",
-      "sha256": "d81304ed60e097bd15de64dfa3ecc2d92bbe85490c56676a9ab83fd6c5128b06",
-      "disposition": "modeled",
-      "reason": "Bind the three official job definition operations to revisioned Batch metadata, including authorized generation-checked soft deregistration, with explicit input and runtime limits.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "FailureFrame",
-            "PeerFrame",
-            "StaleWriteRejected"
-          ],
-          "limits": "The existing bounded abstraction covers only the selected authorization, atomic failure and peer/writer properties. It does not model named Batch revision allocation, inactive retention or exact quota, IAM targets and decisions, the official wire/operation schema, cursor mechanics, tags, SQL locking/disconnects or Go refinement. These concrete bounds are checked with local native SDK/HTTP and kernel tests; this slice adds no executing jobs."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/catalog/services_compute3_test.go",
-      "sha256": "03c2ff99473fe74067ccf35f7e77dc1140229d5328188fb1022ee7faef47dc39",
+      "path": "test/e2e/batch_job_definition_console.py",
+      "sha256": "50c89e953ee98a32467af2a85216f777c346d7c69edc1d92f67d2de4b94545cc",
       "disposition": "test-support",
-      "reason": "Confirm that native RegisterJobDefinition without its required bounded configuration is now validation-failed, preserving both neighboring preexisting 501 assertions.",
+      "reason": "Verify actual authenticated Console/SDK/reference across isolated stores, held reply navigation, refusal, restart and native cleanup.",
       "models": []
     },
     {
-      "path": "internal/server/apidocs/catalog/batch.json",
-      "sha256": "22edf5c098181fbb373e4829839a7cb01eb63a20997219d6c8c1e6269f6f023f",
+      "path": "tools/console/bundle-digests.json",
+      "sha256": "b17077bb179279e7bbbe61d210a295d5dc014ae2f1f72b4f6dd7ecc550e3dcb5",
       "disposition": "presentation",
-      "reason": "Regenerate Batch OpenAPI against the same pinned model for three additive metadata operations and the new scope text.",
+      "reason": "Pin regenerated offline console JS digest; leave stylesheet and notice digests unchanged.",
       "models": []
     },
     {
-      "path": "internal/server/apidocs/catalog/index.json",
-      "sha256": "a743cb5326bc6833e537f679fe2fd453d8829355f447101d19f00a2d7fd9a732",
+      "path": "tools/console/bundle-inputs.json",
+      "sha256": "a0f5f58a800199c7df67d6c3d6ce336954be3f3a14ed2adfdc2b17fdc389d79e",
       "disposition": "presentation",
-      "reason": "Update only the generated Batch bound operation count, 27 of 39.",
+      "reason": "Record the regenerated asset inputs with the same packages, lockfile and build tool.",
       "models": []
     },
     {
-      "path": "test/e2e/catalog_fixtures/batch.json",
-      "sha256": "f23650c61863d11dff43f297fb79534d33561498af00ed3631689cc0d664ecca",
-      "disposition": "test-support",
-      "reason": "Exercise all 27 operations via actual bounded SDK workflows, including revision registration, pagination, soft deregistration, persistence, peer isolation, and cleanup with inactive rows retained.",
+      "path": "tools/console/src/batch-job-definition-form.jsx",
+      "sha256": "83f3776e8b2c452517ccefe5fa0299d3ef5b61c0ed4283ce4a120d4cf65e5316",
+      "disposition": "presentation",
+      "reason": "Render four scoped metadata controls, field validation and no workload action.",
+      "models": []
+    },
+    {
+      "path": "tools/console/src/batch-job-definitions.mjs",
+      "sha256": "70e2e14a1406564725fb58c77b2a7414b569c1a61d47107b9e4db92e40837bf5",
+      "disposition": "presentation",
+      "reason": "Select only the bounded advertised operations and exact revision ARNs, and derive a closed four-field metadata request.",
+      "models": []
+    },
+    {
+      "path": "tools/console/src/catalog.jsx",
+      "sha256": "2a6cfdfb44bea84b37484258870bb6dd12e1048bab2986651930c13bb09bcf72",
+      "disposition": "modeled",
+      "reason": "Bind both Batch mutations to a view-owned saving latch, reject stale replies, and read the exact ARN only after acknowledgement.",
+      "models": [
+        {
+          "id": "CatalogConsoleEpoch",
+          "properties": [
+            "NoUnmountedAcceptance",
+            "OnlyCurrentReplies",
+            "SingleWriter",
+            "ReloadOnlyAfterAck",
+            "FailureVisible"
+          ],
+          "limits": "Existing bounded view epoch and acknowledged write sequencing abstraction only, not an implementation refinement or proof of the rest of the bundle. It does not model the exact ARN, input validation, HTTP/IAM, persistence or restart, DOM rendering or accessibility, asynchronous tag reads, React scheduling, or real browser behavior. Concrete changed paths are exercised against the local built simulator, real SDK/reference requests and jsdom, not live AWS or Chromium."
+        }
+      ]
+    },
+    {
+      "path": "tools/console/tests/batch-job-definitions.test.mjs",
+      "sha256": "103ca17291de5ce6eef55cc9d94d2ae2ed3b9b8463cbc71e9836aa557e5b6df0",
+      "disposition": "presentation",
+      "reason": "Verify scoped descriptor guards, regional ARN targeting and exact normalized request projection in console unit fixtures.",
+      "models": []
+    },
+    {
+      "path": "tools/console/tests/catalog-input.test.mjs",
+      "sha256": "077bb683c90d6c0e1d9efc7ad81884dddba7a13f383fa07a9c88189fcda38c22",
+      "disposition": "presentation",
+      "reason": "Expose the added real pure helper to existing catalog unit loaders without changing any inherited assertions.",
       "models": []
     }
   ]
