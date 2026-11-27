@@ -1028,6 +1028,19 @@ func (q *request) remove() (map[string]any, error) {
 	}
 	kinds := q.children(res)
 	err = q.commit(func(tx *sql.Tx) error {
+		if q.op.CheckDelete != nil {
+			current, err := findARN(tx, r.Service, r.ARN)
+			if err != nil && !errors.Is(err, sql.ErrNoRows) {
+				return err
+			}
+			// A stale or missing row still receives deleteRow's existing CAS
+			// failure, rather than validating a different row than authorized.
+			if err == nil && current.Seq == r.Seq && current.Generation == r.Generation {
+				if err := q.op.CheckDelete(current.Document); err != nil {
+					return err
+				}
+			}
+		}
 		if err := q.referenced(tx, res, r); err != nil {
 			return err
 		}

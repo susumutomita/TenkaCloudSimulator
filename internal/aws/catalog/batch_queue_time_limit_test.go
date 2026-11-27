@@ -97,6 +97,7 @@ func TestBatchJobQueueTimeLimitConfiguration(t *testing.T) {
 		t.Fatalf("clear retained rules: %v", rules)
 	}
 	for _, name := range []string{"compute", "service"} {
+		expect(t, call("updatejobqueue", map[string]any{"jobQueue": name, "state": "DISABLED"}), 200, "")
 		expect(t, call("deletejobqueue", map[string]any{"jobQueue": name}), 200, "")
 	}
 	expect(t, call("describejobs", map[string]any{"jobs": []any{"absent"}}), 501, "UnknownOperationException")
