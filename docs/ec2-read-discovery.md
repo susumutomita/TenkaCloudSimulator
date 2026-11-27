@@ -67,9 +67,9 @@ Use the `ec2:CreateTags` or `ec2:DeleteTags` permission on the target VPC ARN.
 The local limit is 50 tags per VPC; keys must be 1–128 UTF-8 bytes, values
 at most 256 bytes. These byte bounds match local `CreateVpc` tags. Invalid
 XML text, reserved case-insensitive `aws:` keys, additional tags or resource
-IDs, `DryRun=true`, and other resource types are refused. The native API
-cannot change CloudFormation-controlled VPCs or be used from instance-scoped
-handoffs. There is no general `DescribeTags` or bulk tag editing.
+IDs and `DryRun=true` are refused. The native API cannot change
+CloudFormation-controlled VPCs or be used from instance-scoped handoffs.
+The only other supported tag target is an [existing EC2-managed subnet](ec2-native-subnet.md#native-subnet-tag-editing). There is no general `DescribeTags` or bulk tag editing.
 
 Both writes acknowledge with `requestId` and `return=true`. Confirm the result
 in the same VPC's existing `DescribeVpcs` row (`tagSet`); if that read cannot
