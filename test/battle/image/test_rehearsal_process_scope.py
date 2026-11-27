@@ -14,6 +14,7 @@ definitions execute against fake OS/process-table inputs only. No CLI/import,
 real process enumeration, child, network, VM or credential access is performed.
 """
 import ast
+from contextlib import contextmanager
 import os
 from pathlib import Path
 import re
@@ -79,7 +80,7 @@ class SyntheticInventory:
 def source_namespace(platform, rows, runtime=ROOT):
     inventory = SyntheticInventory(platform, rows)
     namespace = {
-        'RUNTIME_DIR': Path(runtime), 're': re,
+        'RUNTIME_DIR': Path(runtime), 're': re, 'contextmanager': contextmanager,
         'os': types.SimpleNamespace(path=types.SimpleNamespace(
             isdir=lambda path: path == '/proc' and platform == 'linux',
             basename=os.path.basename, dirname=os.path.dirname,

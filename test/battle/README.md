@@ -71,6 +71,9 @@ A pass shows, for the binary and bundle named in `report.json`:
   and recovers nginx with `systemctl start nginx`.
 - The owned probes return 200 for `/` and `/healthz`, fail for the stopped
   frontend after the catalog's `AWS-RunShellScript` disruption, and recover.
+- The driver's temporary disruption-operator IAM role and inline policy are
+  removed when grading ends, including when a grading check raises. A named
+  IAM read must confirm role absence; deleting the Challenge stack alone does not remove it.
 - Sealing the capability and deleting the stack restore the same SDK instance
   view to its initial empty state. Physical cleanup and Simulator shutdown leave
   no guest process, and the Simulator exits 0. An empty SDK view does not itself

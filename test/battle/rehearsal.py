@@ -19,6 +19,7 @@ See README.md in this directory for the bundle this needs and what a pass means.
 """
 import argparse
 import base64
+from contextlib import contextmanager
 import hashlib
 import json
 import math
@@ -116,7 +117,7 @@ def stamp():
 PUBLIC_PHASES = ('startup', 'console-form', 'initialize', 'operate', 'grade', 'cleanup', 'shutdown')
 PUBLIC_CHECKS = (
     'battle-capability-receipt', 'battle-runtime-configured', 'capability-sealed-and-joined',
-    'create-stack-response', 'disruption-stops-frontend-and-penalizes',
+    'create-stack-response', 'disruption-stops-frontend-and-penalizes', 'disruption-operator-role-removed',
     'console-form-browser-session', 'console-form-real-qemu-process',
     'console-form-sdk-state-matches', 'console-form-stack-process-and-state-cleanup',
     'console-form-wire-succeeded',
@@ -775,6 +776,42 @@ def send_command(ssm, instance, commands, label, entry, timeout=180):
     return invocation
 
 
+@contextmanager
+def disruption_role(iam, trust, policy):
+    """Scope the driver's own IAM role to grading; it is not part of the stack."""
+    name = 'RehearsalDisruptionOperator-' + secrets.token_hex(8)
+    created = iam.create_role(RoleName=name, AssumeRolePolicyDocument=json.dumps(trust))['Role']
+    role_id, arn = created['RoleId'], created['Arn']
+    if not isinstance(role_id, str) or not role_id or not isinstance(arn, str) or not arn:
+        raise RuntimeError('disruption role creation did not confirm its identity')
+
+    def missing(error):
+        return (error.response.get('Error', {}).get('Code') == 'NoSuchEntity'
+                and error.response.get('ResponseMetadata', {}).get('HTTPStatusCode') == 404)
+
+    try:
+        iam.put_role_policy(RoleName=name, PolicyName='Disruption', PolicyDocument=json.dumps(policy))
+        yield arn
+    finally:
+        # Only our positively identified role in this driver's private simulator.
+        # Do not delete another role if our name or ownership is ambiguous.
+        if iam.get_role(RoleName=name)['Role']['RoleId'] != role_id:
+            raise RuntimeError('disruption role identity changed')
+        try:
+            iam.delete_role_policy(RoleName=name, PolicyName='Disruption')
+        except ClientError as error:
+            if not missing(error):  # a failed Put may not have installed the policy
+                raise
+        iam.delete_role(RoleName=name)
+        try:
+            iam.get_role(RoleName=name)
+        except ClientError as error:
+            if not missing(error):
+                raise
+        else:
+            raise RuntimeError('disruption role still present after deletion')
+
+
 def stop_here(name):
     return args.stop_after == name
 
@@ -950,44 +987,43 @@ try:
     # Operator disruption exactly as metadata.disruptions[0].action describes.
     disruption = METADATA['disruptions'][0]['action']
     iam = client('iam')
-    role = 'RehearsalDisruptionOperator'
     ops_external = 'ops-' + secrets.token_hex(12)
     trust = {'Version': '2012-10-17', 'Statement': [{'Effect': 'Allow', 'Principal': {'AWS': 'arn:aws:iam::999999999999:root'}, 'Action': 'sts:AssumeRole',
                                                      'Condition': {'StringEquals': {'sts:ExternalId': ops_external}}}]}
-    iam.create_role(RoleName=role, AssumeRolePolicyDocument=json.dumps(trust))
     policy = {'Version': '2012-10-17', 'Statement': [
         {'Effect': 'Allow', 'Action': 'ssm:SendCommand', 'Resource': [f'arn:aws:ssm:{REGION}::document/{disruption["documentName"]}', f'arn:aws:ec2:{REGION}:000000000000:instance/{instance}']},
         {'Effect': 'Allow', 'Action': ['ssm:GetCommandInvocation', 'ssm:ListCommands'], 'Resource': '*'}]}
-    iam.put_role_policy(RoleName=role, PolicyName='Disruption', PolicyDocument=json.dumps(policy))
-    ops = sdk_credentials(client('sts').assume_role(RoleArn=f'arn:aws:iam::000000000000:role/{role}', RoleSessionName='disruption', ExternalId=ops_external, DurationSeconds=3600)['Credentials'])
-    ssm = client('ssm', ops)
-    send_command(ssm, instance, disruption['paramTemplate']['commands'], 'operator-disruption-run-shell-script', p)
-    time.sleep(2)
-    down = score_round('after-disruption', registered, receipt)
-    frontend = [o for o in down['observations'] if o['slot'] == 'frontend'][0]
-    api = [o for o in down['observations'] if o['slot'] == 'api'][0]
-    check(p, 'disruption-stops-frontend-and-penalizes', down['points'] == SCORING['failurePenalty'] and frontend['httpStatus'] != 200 and api['httpStatus'] == 200,
-          points=down['points'], frontend=frontend, api=api)
+    with disruption_role(iam, trust, policy) as role_arn:
+        ops = sdk_credentials(client('sts').assume_role(RoleArn=role_arn, RoleSessionName='disruption', ExternalId=ops_external, DurationSeconds=3600)['Credentials'])
+        ssm = client('ssm', ops)
+        send_command(ssm, instance, disruption['paramTemplate']['commands'], 'operator-disruption-run-shell-script', p)
+        time.sleep(2)
+        down = score_round('after-disruption', registered, receipt)
+        frontend = [o for o in down['observations'] if o['slot'] == 'frontend'][0]
+        api = [o for o in down['observations'] if o['slot'] == 'api'][0]
+        check(p, 'disruption-stops-frontend-and-penalizes', down['points'] == SCORING['failurePenalty'] and frontend['httpStatus'] != 200 and api['httpStatus'] == 200,
+              points=down['points'], frontend=frontend, api=api)
 
-    # Participant recovers early through Session Manager.
-    terminal = Terminal(participant, instance)
-    terminal.start()
-    terminal.expect('$', 30)
-    code, text = terminal.run('systemctl is-active nginx; sudo systemctl start nginx && systemctl is-active nginx', 120)
-    check(p, 'participant-recovers-with-systemctl-start-nginx', code == 0 and 'inactive' in text and '\nactive' in text.replace('\r', ''), exitCode=code, transcript=text[-400:])
-    terminal.terminate()
-    recovered = score_round('after-participant-recovery', registered, receipt)
-    check(p, 'recovery-restores-points', recovered['points'] == SCORING['pointsPerSuccess'], points=recovered['points'])
+        # Participant recovers early through Session Manager.
+        terminal = Terminal(participant, instance)
+        terminal.start()
+        terminal.expect('$', 30)
+        code, text = terminal.run('systemctl is-active nginx; sudo systemctl start nginx && systemctl is-active nginx', 120)
+        check(p, 'participant-recovers-with-systemctl-start-nginx', code == 0 and 'inactive' in text and '\nactive' in text.replace('\r', ''), exitCode=code, transcript=text[-400:])
+        terminal.terminate()
+        recovered = score_round('after-participant-recovery', registered, receipt)
+        check(p, 'recovery-restores-points', recovered['points'] == SCORING['pointsPerSuccess'], points=recovered['points'])
 
-    # Second disruption, then the catalog's revert command (the 600 s timer itself is a host duty and is not waited here).
-    send_command(ssm, instance, disruption['paramTemplate']['commands'], 'operator-second-disruption', p)
-    time.sleep(2)
-    down2 = score_round('after-second-disruption', registered, receipt)
-    check(p, 'second-disruption-penalizes', down2['points'] == SCORING['failurePenalty'], points=down2['points'])
-    send_command(ssm, instance, disruption['revert']['paramTemplate']['commands'], 'operator-revert-run-shell-script', p)
-    time.sleep(2)
-    reverted = score_round('after-operator-revert', registered, receipt)
-    check(p, 'revert-restores-points', reverted['points'] == SCORING['pointsPerSuccess'], points=reverted['points'])
+        # Second disruption, then the catalog's revert command (the 600 s timer itself is a host duty and is not waited here).
+        send_command(ssm, instance, disruption['paramTemplate']['commands'], 'operator-second-disruption', p)
+        time.sleep(2)
+        down2 = score_round('after-second-disruption', registered, receipt)
+        check(p, 'second-disruption-penalizes', down2['points'] == SCORING['failurePenalty'], points=down2['points'])
+        send_command(ssm, instance, disruption['revert']['paramTemplate']['commands'], 'operator-revert-run-shell-script', p)
+        time.sleep(2)
+        reverted = score_round('after-operator-revert', registered, receipt)
+        check(p, 'revert-restores-points', reverted['points'] == SCORING['pointsPerSuccess'], points=reverted['points'])
+    check(p, 'disruption-operator-role-removed', True)
     expected = sum(r['points'] for r in report['score']['rounds'])
     check(p, 'score-ledger-consistent', report['score']['total'] == expected, total=report['score']['total'],
           ledger=[(r['label'], r['points']) for r in report['score']['rounds']])

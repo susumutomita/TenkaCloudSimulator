@@ -65,6 +65,7 @@ class PublicHarness:
                        'templateSha256': DIGEST, 'result': 'PASS'}
         self.ns = {
             'json': json, 're': re, 'math': math, 'hashlib': hashlib,
+            'contextmanager': contextlib.contextmanager,
             'os': os, 'pathlib': types.SimpleNamespace(Path=Path),
             'time': types.SimpleNamespace(time=lambda: 10.0, sleep=lambda _: None,
                                           strftime=lambda *a: '2026-11-18T00:00:00Z',
