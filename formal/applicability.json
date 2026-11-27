@@ -1,145 +1,436 @@
 {
   "version": 1,
-  "base_sha": "a1f155caaf648bcec8729774234a9115de13bef8",
+  "base_sha": "7f500c9e951d9328a36df3a9946f1c6827200085",
   "changes": [
     {
-      "path": "docs/design/rds-owned-generation.md",
-      "sha256": "23d7f8762d65da0fd5d696d1834be3de1735d1f5d91a8ed25a532a009f2d1a6f",
+      "path": "README.ja.md",
+      "sha256": "9bb8834f421bb4d826e3057bc9cb775f84f49367ef625330b48d7aabc5eca0bf",
       "disposition": "documentation",
-      "reason": "Describe the new in-process observation, unchanged public and transport boundary, and separate bounds of the model and native tests.",
+      "reason": "Link the selected-VPC read-only Resource map and DNS settings from the Japanese networking capability index.",
       "models": []
     },
     {
-      "path": "formal/RDSGuestPeerPreflight.cfg",
-      "sha256": "92133d75a05b54ded89c21159fd7a7122b203c8f1c79e0e69d41565284991323",
+      "path": "README.md",
+      "sha256": "bfe0bc85e6344ee1678bd1bb5a6db20b71c36b5c8cada2143913623f8c01f1ec",
+      "disposition": "documentation",
+      "reason": "Name the selected-VPC read-only Resource map in the existing networking capability index, alongside the two saved DNS settings.",
+      "models": []
+    },
+    {
+      "path": "docs/design/0001-go-standalone.md",
+      "sha256": "74406d2cadca7abb28b59a8d2999a06921d6a3dd0088b1047b91377094f75e82",
+      "disposition": "documentation",
+      "reason": "Define the bounded selected-VPC UI and DNS control-plane boundary, independent Describe reads, exact join evidence, honest fallback, and what the formal model does not prove.",
+      "models": []
+    },
+    {
+      "path": "docs/ec2-read-discovery.md",
+      "sha256": "f0e11ea7d37d8b8e5947a1a12752d3fc017338e489597f6f4fe7d98fdba6dda1",
+      "disposition": "documentation",
+      "reason": "Replace the obsolete missing DNS API statement, preserving unrelated limits.",
+      "models": []
+    },
+    {
+      "path": "docs/ec2-vpc-console.md",
+      "sha256": "94409dd6b3cafb736ec5a22ebfe2de3e41a1ee0835c65be40e578a84662adfe4",
+      "disposition": "documentation",
+      "reason": "Document the selected VPC tab workflow, supported recorded associations and attached IPv4 targets, limits, read refusal/freshness, and unchanged separately verified DNS writes.",
+      "models": []
+    },
+    {
+      "path": "docs/ec2-vpc-dns-attributes.md",
+      "sha256": "5c554dc11017332d73540abe1a53937e2c6600b0249f46cd9c288cc34bc22187",
+      "disposition": "documentation",
+      "reason": "Document the exact supported wire fields, flags, checked dependency, default values, and non-cloud/data-plane boundary.",
+      "models": []
+    },
+    {
+      "path": "formal/EC2VPCDNSAttributes.cfg",
+      "sha256": "b8bf12df39586d47fcc0cf22e10bb705077667fb515b525a107b42604343eacd",
       "disposition": "modeled",
-      "reason": "Keep existing invariant checks and add the three distinct failure oracles for original group at entry, at final snapshot and matching revisions across reads.",
+      "reason": "Select the complete finite behavior and explicit checked property oracles, with no added filter.",
       "models": [
         {
-          "id": "RDSGuestPeerPreflight",
+          "id": "EC2VPCDNSAttributes",
           "properties": [
-            "OriginalGroupBeforeProbe",
-            "OriginalGroupAtFinalSnapshot",
-            "MatchingGroupSnapshotRevisions"
+            "ExactReceipt",
+            "Frame",
+            "RefusalOrReadUnchanged",
+            "ExactSetting",
+            "NoSpuriousRevision"
           ],
-          "limits": "One provider-owned call after reservation, with one original group, a same-ARN replacement and two catalog revisions. The final snapshot is an observation, not authority for a future connection. SQLite capture/isolation, guest execution, PostgreSQL, SQL and transport remain concrete obligations."
+          "limits": "Two native VPCs and one stack-owned VPC, bounded booleans, one symbolic exact operation/resource grant and one repeat. Models normalized admission and atomic per-flag effects, not SQLite, CFN claims reconciliation, EC2 Query XML, route repair, IAM semantics/refinement, packets, guest DNS or hostnames."
         }
       ]
     },
     {
-      "path": "formal/RDSGuestPeerPreflight.tla",
-      "sha256": "d4b2eedb55952aa0893528a3924d96c65183501ce87722464708899b73728904",
+      "path": "formal/EC2VPCDNSAttributes.tla",
+      "sha256": "394f2c55daadc892ff1bf24389cbe6d257594f00724fd11c1755c6249db13703",
       "disposition": "modeled",
-      "reason": "Extend the bounded committed-read model with explicit same-ARN replacement and in-place revision transitions before and during a probe, without requiring the snapshots to remain valid after the final read.",
+      "reason": "Model fixed VPC/region/admission evidence, native-only writes, DNS prerequisite and repeat without spurious generation change.",
       "models": [
         {
-          "id": "RDSGuestPeerPreflight",
+          "id": "EC2VPCDNSAttributes",
           "properties": [
-            "OriginalGroupBeforeProbe",
-            "OriginalGroupAtFinalSnapshot",
-            "MatchingGroupSnapshotRevisions",
-            "HealthyObservation",
-            "ObservationOnly"
+            "ExactReceipt",
+            "Frame",
+            "RefusalOrReadUnchanged",
+            "ExactSetting",
+            "NoSpuriousRevision"
           ],
-          "limits": "One provider-owned call after reservation, with one original group, a same-ARN replacement and two catalog revisions. The final snapshot is an observation, not authority for a future connection. SQLite capture/isolation, guest execution, PostgreSQL, SQL and transport remain concrete obligations."
+          "limits": "Two native VPCs and one stack-owned VPC, bounded booleans, one symbolic exact operation/resource grant and one repeat. Models normalized admission and atomic per-flag effects, not SQLite, CFN claims reconciliation, EC2 Query XML, route repair, IAM semantics/refinement, packets, guest DNS or hostnames."
+        }
+      ]
+    },
+    {
+      "path": "formal/EC2VpcResourceMap.cfg",
+      "sha256": "73ffdb4dec83d611f46ad35b3adecf2fccf34d26b1cb95412a2a652bd6b00a4d",
+      "disposition": "modeled",
+      "reason": "Select the whole bounded projection and every named evidence invariant; no arbitrary state filters.",
+      "models": [
+        {
+          "id": "EC2VpcResourceMap",
+          "properties": [
+            "AssociationQualityExact",
+            "ExplicitNeedsEvidence",
+            "MainNeedsWitness",
+            "ExactAttachedGatewayEdges",
+            "GatewayFailureNotEmpty",
+            "GatewayHoleReported"
+          ],
+          "limits": "One bounded join of independent normalized observations for a witnessed VPC and symbolic gateway targets; does not prove the HTTP/XML/route prefix parser, IAM, storage, React scheduling, HTML layout, API atomicity, reachability or packets."
+        }
+      ]
+    },
+    {
+      "path": "formal/EC2VpcResourceMap.tla",
+      "sha256": "c88c0cb83e1ed990c2f73427014e8a68d9815a764207eb86e7960f9c4b5b758f",
+      "disposition": "modeled",
+      "reason": "Finite symbolic projection for owned/current parsed read evidence, distinguishing explicit, verified-main, attached-target and partial/denied outcomes.",
+      "models": [
+        {
+          "id": "EC2VpcResourceMap",
+          "properties": [
+            "AssociationQualityExact",
+            "ExplicitNeedsEvidence",
+            "MainNeedsWitness",
+            "ExactAttachedGatewayEdges",
+            "GatewayFailureNotEmpty",
+            "GatewayHoleReported"
+          ],
+          "limits": "One bounded join of independent normalized observations for a witnessed VPC and symbolic gateway targets; does not prove the HTTP/XML/route prefix parser, IAM, storage, React scheduling, HTML layout, API atomicity, reachability or packets."
         }
       ]
     },
     {
       "path": "formal/models.json",
-      "sha256": "fa31e5e26547811f682960e9d95bd03f0c87de35f81d05cc56f3c2c1274e4900",
+      "sha256": "42f0b70355bc5a6573742277b84ff07923bae6d84a7b761a47f3762dd0928549",
       "disposition": "formal-infrastructure",
-      "reason": "Register enlarged finite #130 model bounds, the existing resolver source path, and four required, specifically classified counterexamples. No other registry sections change.",
+      "reason": "Keep all prior registry entries and DNS controls; append the bounded Map join model with six evidence oracles and nine literal falsification cases.",
       "models": []
     },
     {
-      "path": "internal/aws/catalog/rds_guest_peer_linux_amd64.go",
-      "sha256": "0b1c6e2e1f9b15e6da7da106a117dd5c93a6073a3ccff80df88a07336f8a112b",
+      "path": "internal/aws/ec2_native_vpc_main_repair.go",
+      "sha256": "7d59b99a1cd5e6240bcd78e3cf899e0ecc7ca90148b9dd4f7b07cae7595915b0",
       "disposition": "modeled",
-      "reason": "Reject a replacement before or after the fixed host probe, and refuse to join different catalog revisions of the original group across two committed reads.",
+      "reason": "Retain the original repair relation and account for separately witnessed native-DNS writes when validating the VPC generation.",
       "models": [
         {
-          "id": "RDSGuestPeerPreflight",
+          "id": "EC2VPCDNSAttributes",
           "properties": [
-            "OriginalGroupBeforeProbe",
-            "OriginalGroupAtFinalSnapshot",
-            "MatchingGroupSnapshotRevisions",
-            "HealthyObservation",
-            "ObservationOnly"
+            "Frame",
+            "NoSpuriousRevision"
           ],
-          "limits": "One provider-owned call after reservation, with one original group, a same-ARN replacement and two catalog revisions. The final snapshot is an observation, not authority for a future connection. SQLite capture/isolation, guest execution, PostgreSQL, SQL and transport remain concrete obligations."
+          "limits": "Two native VPCs and one stack-owned VPC, bounded booleans, one symbolic exact operation/resource grant and one repeat. Models normalized admission and atomic per-flag effects, not SQLite, CFN claims reconciliation, EC2 Query XML, route repair, IAM semantics/refinement, packets, guest DNS or hostnames."
         }
       ]
     },
     {
-      "path": "internal/aws/catalog/rds_guest_peer_subnet_linux_amd64_test.go",
-      "sha256": "4a0d06f88cddf9e493a4418c8bc056a43324a153947d0a562f5a0430d0132eb5",
+      "path": "internal/aws/ec2_native_vpc_main_route.go",
+      "sha256": "bab96da7566db4669b2ff3a3e70db23fa6954a3a81cadf3fdf9b7069dbf6bd71",
+      "disposition": "modeled",
+      "reason": "Verify the VPC revision as native DNS edits plus the pre-existing main/repair generation while preventing main/route adoption.",
+      "models": [
+        {
+          "id": "EC2VPCDNSAttributes",
+          "properties": [
+            "Frame",
+            "NoSpuriousRevision"
+          ],
+          "limits": "Two native VPCs and one stack-owned VPC, bounded booleans, one symbolic exact operation/resource grant and one repeat. Models normalized admission and atomic per-flag effects, not SQLite, CFN claims reconciliation, EC2 Query XML, route repair, IAM semantics/refinement, packets, guest DNS or hostnames."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/ec2_network.go",
+      "sha256": "f33bf7b7026a7bc2da3b0b955110f771b66b399111056be6eece468a1e012a67",
+      "disposition": "modeled",
+      "reason": "Extend the existing typed VPC row with a generation counter only; sibling and CloudFormation state retain their existing representation.",
+      "models": [
+        {
+          "id": "EC2VPCDNSAttributes",
+          "properties": [
+            "Frame",
+            "ExactSetting",
+            "NoSpuriousRevision"
+          ],
+          "limits": "Two native VPCs and one stack-owned VPC, bounded booleans, one symbolic exact operation/resource grant and one repeat. Models normalized admission and atomic per-flag effects, not SQLite, CFN claims reconciliation, EC2 Query XML, route repair, IAM semantics/refinement, packets, guest DNS or hostnames."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/ec2_read.go",
+      "sha256": "e996d2502765ef6f83e9d8effdfd92b0dd5962505aa4506d98ee0c922838d49c",
+      "disposition": "modeled",
+      "reason": "Route only the two native DNS operations through the existing exact EC2 authorization/region boundary before returning a per-attribute receipt.",
+      "models": [
+        {
+          "id": "EC2VPCDNSAttributes",
+          "properties": [
+            "ExactReceipt",
+            "RefusalOrReadUnchanged"
+          ],
+          "limits": "Two native VPCs and one stack-owned VPC, bounded booleans, one symbolic exact operation/resource grant and one repeat. Models normalized admission and atomic per-flag effects, not SQLite, CFN claims reconciliation, EC2 Query XML, route repair, IAM semantics/refinement, packets, guest DNS or hostnames."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/ec2_vpc.go",
+      "sha256": "8a138eb51cfade0091d39a7515d6ff641bbbb378571e1ea6b8d5d0cf0b5072dd",
+      "disposition": "modeled",
+      "reason": "Advertise and parse the actual bounded Query dispatch without broadening unrelated fields or actions.",
+      "models": [
+        {
+          "id": "EC2VPCDNSAttributes",
+          "properties": [
+            "ExactReceipt",
+            "RefusalOrReadUnchanged"
+          ],
+          "limits": "Two native VPCs and one stack-owned VPC, bounded booleans, one symbolic exact operation/resource grant and one repeat. Models normalized admission and atomic per-flag effects, not SQLite, CFN claims reconciliation, EC2 Query XML, route repair, IAM semantics/refinement, packets, guest DNS or hostnames."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/ec2_vpc_dns.go",
+      "sha256": "d961ad9fc38648d34ba07955288b5894fc58644bcf590c528edbe42818f7384c",
+      "disposition": "modeled",
+      "reason": "Single-snapshot scope and storage checks protect one owning VPC; refuse unsupported/ambiguous/foreign changes; commit only requested valid new values.",
+      "models": [
+        {
+          "id": "EC2VPCDNSAttributes",
+          "properties": [
+            "ExactReceipt",
+            "Frame",
+            "RefusalOrReadUnchanged",
+            "ExactSetting",
+            "NoSpuriousRevision"
+          ],
+          "limits": "Two native VPCs and one stack-owned VPC, bounded booleans, one symbolic exact operation/resource grant and one repeat. Models normalized admission and atomic per-flag effects, not SQLite, CFN claims reconciliation, EC2 Query XML, route repair, IAM semantics/refinement, packets, guest DNS or hostnames."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/ec2_vpc_dns_test.go",
+      "sha256": "9d7f1c30d937a289d1df12e0c6a8a3e50a1f48b1de6c6b910f82514b6f03514a",
       "disposition": "test-support",
-      "reason": "Use real scoped native RDS Query and SQLite changes with a simulated host probe for same-name replacement, in-place revision and unrelated-group regression controls. No production mode, route or live database.",
+      "reason": "Backend-only tests for exact ownership, persistence, no-op, failure rollback and unchanged main route, not runtime authority.",
       "models": []
     },
     {
-      "path": "internal/aws/catalog/rds_owned_runtime_linux_amd64.go",
-      "sha256": "7b803a73255c154274215ec456798d485e1c963cba026bfc855cd7f47d263dd2",
-      "disposition": "modeled",
-      "reason": "Derive the original group identity from the same write transaction as the exact DB reservation. Peer preflight requires the exact owned child and committed lease; this guard alone does not enable a route.",
-      "models": [
-        {
-          "id": "RDSOwnedGenerationFence",
-          "properties": [
-            "LaunchNeedsCommittedAuthority",
-            "AttachNeedsCurrent",
-            "NoPublishedEndpoint"
-          ],
-          "limits": "One bounded owner and exact DB generation; the native tests, not this model, verify actual group lookups and lifecycle behavior. No guest transport or real process claim."
-        },
-        {
-          "id": "RDSGuestPeerPreflight",
-          "properties": [
-            "OriginalGroupBeforeProbe",
-            "OriginalGroupAtFinalSnapshot"
-          ],
-          "limits": "One provider-owned call after reservation, with one original group, a same-ARN replacement and two catalog revisions. The final snapshot is an observation, not authority for a future connection. SQLite capture/isolation, guest execution, PostgreSQL, SQL and transport remain concrete obligations."
-        }
-      ]
+      "path": "internal/server/ec2_read_access_test.go",
+      "sha256": "7b53e216fb612b89081ceead1568dc589d2ac54a3b19361cbc86b9f8e42699e4",
+      "disposition": "test-support",
+      "reason": "Add precise test expectations for real advertised EC2 Query operations; changes no server dispatch.",
+      "models": []
     },
     {
-      "path": "internal/aws/catalog/rds_private_postgres_topology.go",
-      "sha256": "1c7c023b5361d0d9b71bd81431d143cb313147a3754c6e8a271f6f72616d6752",
+      "path": "internal/server/web/app.js",
+      "sha256": "858d224b83cb51ef29b238b5b66bb1b98fd1b486947cd1d40832349df00ba0b5",
       "disposition": "modeled",
-      "reason": "Resolve ARN, creation sequence and revision from the same validated native catalog subnet-group row as its two or more subnet IDs. No wire shape, topology policy or backend returned to callers.",
+      "reason": "Exact canonical bytes embed DNS and the read-only Resource Map join with the existing session/navigation/lease fence. No EC2 launch or traffic behavior.",
       "models": [
         {
-          "id": "RDSPrivatePostgresTopology",
+          "id": "EC2DetachedNetworkConsole",
           "properties": [
-            "OwnedTopologyBeforeWrite",
-            "ConfigurationOnly"
+            "OnlyCurrentScope",
+            "ScopeChangeFenced",
+            "SiblingLeasePreserved",
+            "LeaseUntilReadback"
           ],
-          "limits": "Finite configuration validation; this model does not prove Go input decoding, AWS API parity or the exact sequence readback."
+          "limits": "Existing console abstraction covers view-scoped results and sibling ownership of a lease until readback. It does not model this exact DNS tab transition, DOM event/React scheduling, the DNS sequence, or any operation’s Go implementation."
         },
         {
-          "id": "RDSGuestPeerPreflight",
+          "id": "EC2VpcConsoleNavigation",
           "properties": [
-            "OriginalGroupBeforeProbe",
-            "OriginalGroupAtFinalSnapshot",
-            "MatchingGroupSnapshotRevisions"
+            "AdvertisedOnly",
+            "CurrentRegionAndView",
+            "VerifiedDisplay"
           ],
-          "limits": "One provider-owned call after reservation, with one original group, a same-ARN replacement and two catalog revisions. The final snapshot is an observation, not authority for a future connection. SQLite capture/isolation, guest execution, PostgreSQL, SQL and transport remain concrete obligations."
+          "limits": "Existing route abstraction covers current view, region and capability gates. It does not model the new tab surface, actual hash parsing or lifecycle, React scheduling, or the Map join."
+        },
+        {
+          "id": "EC2VpcResourceMap",
+          "properties": [
+            "AssociationQualityExact",
+            "ExplicitNeedsEvidence",
+            "MainNeedsWitness",
+            "ExactAttachedGatewayEdges",
+            "GatewayFailureNotEmpty",
+            "GatewayHoleReported"
+          ],
+          "limits": "One bounded join of independent normalized observations for a witnessed VPC and symbolic gateway targets; does not prove the HTTP/XML/route prefix parser, IAM, storage, React scheduling, HTML layout, API atomicity, reachability or packets."
         }
       ]
     },
     {
       "path": "scripts/formal_model_gate.py",
-      "sha256": "63efa7893491c58912d410880c6a5549dc9166744b6f2517c3c0dd8ee529583e",
+      "sha256": "2d0c19780caabaa761df473ec241a67e00b67953e6c6f85b821aa6bfea9f8d30",
       "disposition": "formal-infrastructure",
-      "reason": "Require the three additional invariants, four targeted controls and the exact #130 resolver binding. No weakening of prior requirements, runtime checks or runner policy.",
+      "reason": "Preserve four pre-existing signed-base registry requirements from a separately tracked policy slice; make the DNS and Resource Map models, named invariants, required controls, and exact source scope mandatory without relaxing the gate.",
       "models": []
     },
     {
       "path": "scripts/test-formal-gate.py",
-      "sha256": "b43eb72d6da205cbb94d6ec986da87d10443a7c1841191fea729fffee7518b51",
+      "sha256": "1c1be668a0efcbd02968b5ddd49429e774879b937cb27493979890f09ab6b18b",
       "disposition": "formal-infrastructure",
-      "reason": "Pin exact expected #130 source scope and all old and new invariant/control mappings in tooling unit tests; not a TLC run or Go proof.",
+      "reason": "Keep the independent exact expected registry exhaustive for both signed-base policy and the new DNS/Map obligations; add exact oracle and non-removal checks without making expected sets dynamic.",
+      "models": []
+    },
+    {
+      "path": "test/console/ec2_vpc_dns_sdk.py",
+      "sha256": "fd56bd92f7614505767c237161b185c41ebeb63daa2d6215f88325afe08df757",
+      "disposition": "test-support",
+      "reason": "Disposable loopback SDK regression only; exact ARN denial, restart, CFN refusal, untouched neighbor and cleanup.",
+      "models": []
+    },
+    {
+      "path": "tools/console/bundle-digests.json",
+      "sha256": "8eda48f5e9c9d06951397c237b9861a0582d738df74663025f967fd3d2c8193b",
+      "disposition": "presentation",
+      "reason": "Record the canonically rebuilt embedded JS for both selected-VPC tabs. CSS, dependency notices and both license hashes are unchanged.",
+      "models": []
+    },
+    {
+      "path": "tools/console/bundle-inputs.json",
+      "sha256": "2f90ef31c4c661ef513613bddacf1ffdc99d97dca34781636c6ee22d6e44f799",
+      "disposition": "presentation",
+      "reason": "Record exact reproducible inputs including the two new Map leaf modules; dependencies and their declarations are unchanged.",
+      "models": []
+    },
+    {
+      "path": "tools/console/src/ec2-readonly.jsx",
+      "sha256": "8ef414addbebb31692dcbf0ff1690d38dbb1bf6a02ac147c9a14fb7f8dd1adcd",
+      "disposition": "modeled",
+      "reason": "Mount one current selected VPC Details/Map tab alongside DNS; reuse the host selection fence throughout sibling mutations/readback, not a new navigation capability.",
+      "models": [
+        {
+          "id": "EC2DetachedNetworkConsole",
+          "properties": [
+            "OnlyCurrentScope",
+            "ScopeChangeFenced",
+            "SiblingLeasePreserved",
+            "LeaseUntilReadback"
+          ],
+          "limits": "Existing console abstraction covers view-scoped results and sibling ownership of a lease until readback. It does not model this exact DNS tab transition, DOM event/React scheduling, the DNS sequence, or any operation’s Go implementation."
+        },
+        {
+          "id": "EC2VpcConsoleNavigation",
+          "properties": [
+            "AdvertisedOnly",
+            "CurrentRegionAndView",
+            "VerifiedDisplay"
+          ],
+          "limits": "Existing route abstraction covers current view, region and capability gates. It does not model the new tab surface, actual hash parsing or lifecycle, React scheduling, or the Map join."
+        }
+      ]
+    },
+    {
+      "path": "tools/console/src/ec2-vpc-dns-attributes.mjs",
+      "sha256": "f59e814a0f142283ce1f75f19b92e764b4610b4db57edad9a096418e623903ee",
+      "disposition": "presentation",
+      "reason": "Presentation adapter bounds Query receipts and saves one confirmed field at a time, without creating local authority.",
+      "models": []
+    },
+    {
+      "path": "tools/console/src/ec2-vpc-dns-settings.jsx",
+      "sha256": "e8c14f7d23873f1ca1a4dad8c7621c6b1b4e6532e5cb0d669340013baeaba865",
+      "disposition": "presentation",
+      "reason": "Localized existing VPC detail presentation, guarded from unadvertised/unsigned/handoff scope; never routing, IAM or DNS data plane.",
+      "models": []
+    },
+    {
+      "path": "tools/console/src/ec2-vpc-resource-map.jsx",
+      "sha256": "14aee4068c2d03e222b2d242d161e6683d70a62fe8901da5615329e6d117dffd",
+      "disposition": "modeled",
+      "reason": "Accessible presentation of confirmed read-only saved topology and honest denied/inconsistent/partial status, with no invented traffic claim.",
+      "models": [
+        {
+          "id": "EC2VpcResourceMap",
+          "properties": [
+            "AssociationQualityExact",
+            "GatewayFailureNotEmpty",
+            "GatewayHoleReported"
+          ],
+          "limits": "The model constrains the projection and its ready/partial/unconfirmed classification; the JSX reads those states. It does not model JSX, mobile or screen reader output, abort, policy, or URL decisions."
+        }
+      ]
+    },
+    {
+      "path": "tools/console/src/ec2-vpc-topology-read.mjs",
+      "sha256": "94a4a0d01ff7e7a3985f7cfb33a595c97d4876f49182bdfc7f998fdf48d7e174",
+      "disposition": "modeled",
+      "reason": "Derive only evidenced selected-VPC relationships from the typed bounded real reader outputs; reject conflicting associations and missing/peer targets.",
+      "models": [
+        {
+          "id": "EC2VpcResourceMap",
+          "properties": [
+            "AssociationQualityExact",
+            "ExplicitNeedsEvidence",
+            "MainNeedsWitness",
+            "ExactAttachedGatewayEdges",
+            "GatewayFailureNotEmpty",
+            "GatewayHoleReported"
+          ],
+          "limits": "One bounded join of independent normalized observations for a witnessed VPC and symbolic gateway targets; does not prove the HTTP/XML/route prefix parser, IAM, storage, React scheduling, HTML layout, API atomicity, reachability or packets."
+        }
+      ]
+    },
+    {
+      "path": "tools/console/src/main.jsx",
+      "sha256": "5ec42f94f6d7cda1f2cb717efd707155475869fb63383369744450d93f813168",
+      "disposition": "modeled",
+      "reason": "Pass current scoped capability/admission data only to selected VPC Details. New tabs do not add routes or permit stale/foreign views.",
+      "models": [
+        {
+          "id": "EC2VpcConsoleNavigation",
+          "properties": [
+            "AdvertisedOnly",
+            "CurrentRegionAndView",
+            "VerifiedDisplay"
+          ],
+          "limits": "Existing route abstraction covers current view, region and capability gates. It does not model the new tab surface, actual hash parsing or lifecycle, React scheduling, or the Map join."
+        }
+      ]
+    },
+    {
+      "path": "tools/console/test/ec2-vpc-details-tabs.test.mjs",
+      "sha256": "4a6a33a685b0b9f733f54bcda27f87922a87c25d4755495dc2bc732a4228dbd7",
+      "disposition": "presentation",
+      "reason": "Presentation regression checks default Details, sibling lease tab disable, and absent/invalid capability or scope; no production or model authority.",
+      "models": []
+    },
+    {
+      "path": "tools/console/test/ec2-vpc-dns-attributes.test.mjs",
+      "sha256": "4c5b72a76ddd20fdd73f95a53b64bf0d6d5150c31c70d2f23d01e9ef8ce83978",
+      "disposition": "presentation",
+      "reason": "Unit and protocol-fixture checks only, including invalid/foreign/partial readback and no replay.",
+      "models": []
+    },
+    {
+      "path": "tools/console/test/ec2-vpc-resource-map.test.mjs",
+      "sha256": "235eaae09ef31447faa43c7df5bf5f0610b19f2f3c213ddbedb8ca7e564956bd",
+      "disposition": "presentation",
+      "reason": "Presentation and synthetic read regression tests exercise safe joins, labels, scoped links, refusal and canceled reads. No runtime or formal authority.",
       "models": []
     }
   ]

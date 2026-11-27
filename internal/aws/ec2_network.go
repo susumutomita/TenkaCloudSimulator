@@ -25,6 +25,7 @@ type EC2NetworkResource struct {
 	ID, Kind, Region, StackID                        string
 	MainRouteTableID                                 string                     `json:",omitempty"`
 	MainRouteRepair                                  *nativeVPCMainRepairMarker `json:",omitempty"`
+	NativeDNSUpdates                                 int64                      `json:",omitempty"`
 	VPCID, SubnetID, GatewayID, RouteTableID         string
 	CIDR, AvailabilityZone, Description              string
 	DNSHostnames, DNSSupport, PublicIP, RouteEnabled bool
@@ -51,7 +52,8 @@ func networkRead(ctx context.Context, tx *sql.Tx, region, id string) (EC2Network
 	}
 	if json.Unmarshal([]byte(raw), &r) != nil || r.ID != id || r.Region != region || r.Kind != kind || r.StackID != owner || r.Revision != revision ||
 		(r.MainRouteTableID != "" && (r.Kind != ec2RTVPC || r.StackID != ec2NativeOwner)) ||
-		(r.MainRouteRepair != nil && !validNativeVPCMainRepair(r)) {
+		(r.MainRouteRepair != nil && !validNativeVPCMainRepair(r)) ||
+		(r.NativeDNSUpdates != 0 && !validNativeDNSGeneration(r)) {
 		return r, fmt.Errorf("network state identity invariant failed")
 	}
 	return r, nil
