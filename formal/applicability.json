@@ -1,145 +1,119 @@
 {
   "version": 1,
-  "base_sha": "a1f155caaf648bcec8729774234a9115de13bef8",
+  "base_sha": "7f500c9e951d9328a36df3a9946f1c6827200085",
   "changes": [
     {
-      "path": "docs/design/rds-owned-generation.md",
-      "sha256": "23d7f8762d65da0fd5d696d1834be3de1735d1f5d91a8ed25a532a009f2d1a6f",
+      "path": "README.md",
+      "sha256": "f0836908606339f7e69011dcb965c96dcdf88af3ef22666b4351e75cb3471998",
       "disposition": "documentation",
-      "reason": "Describe the new in-process observation, unchanged public and transport boundary, and separate bounds of the model and native tests.",
+      "reason": "Document group-name readback, optional statuses, isolated legacy normalization and the unchanged no-endpoint boundary.",
       "models": []
     },
     {
-      "path": "formal/RDSGuestPeerPreflight.cfg",
-      "sha256": "92133d75a05b54ded89c21159fd7a7122b203c8f1c79e0e69d41565284991323",
-      "disposition": "modeled",
-      "reason": "Keep existing invariant checks and add the three distinct failure oracles for original group at entry, at final snapshot and matching revisions across reads.",
-      "models": [
-        {
-          "id": "RDSGuestPeerPreflight",
-          "properties": [
-            "OriginalGroupBeforeProbe",
-            "OriginalGroupAtFinalSnapshot",
-            "MatchingGroupSnapshotRevisions"
-          ],
-          "limits": "One provider-owned call after reservation, with one original group, a same-ARN replacement and two catalog revisions. The final snapshot is an observation, not authority for a future connection. SQLite capture/isolation, guest execution, PostgreSQL, SQL and transport remain concrete obligations."
-        }
-      ]
-    },
-    {
-      "path": "formal/RDSGuestPeerPreflight.tla",
-      "sha256": "d4b2eedb55952aa0893528a3924d96c65183501ce87722464708899b73728904",
-      "disposition": "modeled",
-      "reason": "Extend the bounded committed-read model with explicit same-ARN replacement and in-place revision transitions before and during a probe, without requiring the snapshots to remain valid after the final read.",
-      "models": [
-        {
-          "id": "RDSGuestPeerPreflight",
-          "properties": [
-            "OriginalGroupBeforeProbe",
-            "OriginalGroupAtFinalSnapshot",
-            "MatchingGroupSnapshotRevisions",
-            "HealthyObservation",
-            "ObservationOnly"
-          ],
-          "limits": "One provider-owned call after reservation, with one original group, a same-ARN replacement and two catalog revisions. The final snapshot is an observation, not authority for a future connection. SQLite capture/isolation, guest execution, PostgreSQL, SQL and transport remain concrete obligations."
-        }
-      ]
-    },
-    {
-      "path": "formal/models.json",
-      "sha256": "fa31e5e26547811f682960e9d95bd03f0c87de35f81d05cc56f3c2c1274e4900",
-      "disposition": "formal-infrastructure",
-      "reason": "Register enlarged finite #130 model bounds, the existing resolver source path, and four required, specifically classified counterexamples. No other registry sections change.",
+      "path": "docs/aws-catalog-services.md",
+      "sha256": "60a2f072e7acf896ec02d1534ff328c44cc011d552ddaa4bc4edcb28e7409f07",
+      "disposition": "documentation",
+      "reason": "Canonical generator refreshes only the RDS capability row to show saved metadata, optional absent statuses, and unchanged compatibility bounds.",
       "models": []
     },
     {
-      "path": "internal/aws/catalog/rds_guest_peer_linux_amd64.go",
-      "sha256": "0b1c6e2e1f9b15e6da7da106a117dd5c93a6073a3ccff80df88a07336f8a112b",
-      "disposition": "modeled",
-      "reason": "Reject a replacement before or after the fixed host probe, and refuse to join different catalog revisions of the original group across two committed reads.",
-      "models": [
-        {
-          "id": "RDSGuestPeerPreflight",
-          "properties": [
-            "OriginalGroupBeforeProbe",
-            "OriginalGroupAtFinalSnapshot",
-            "MatchingGroupSnapshotRevisions",
-            "HealthyObservation",
-            "ObservationOnly"
-          ],
-          "limits": "One provider-owned call after reservation, with one original group, a same-ARN replacement and two catalog revisions. The final snapshot is an observation, not authority for a future connection. SQLite capture/isolation, guest execution, PostgreSQL, SQL and transport remain concrete obligations."
-        }
-      ]
+      "path": "docs/design/0001-go-standalone.md",
+      "sha256": "0d02a6ab3b0facc2996c47446ece67a2545c85cc04995e65912ba10e014212be",
+      "disposition": "documentation",
+      "reason": "Describe the scoped Query wire and prior-SQLite compatibility contract, link the official optional members and identify unchanged shared-engine and networking responses.",
+      "models": []
     },
     {
-      "path": "internal/aws/catalog/rds_guest_peer_subnet_linux_amd64_test.go",
-      "sha256": "4a0d06f88cddf9e493a4418c8bc056a43324a153947d0a562f5a0430d0132eb5",
+      "path": "internal/aws/catalog/rds_instance_groups_test.go",
+      "sha256": "d0283f49c8e2fc4a96cecf048bc160a6951e41c91b64b357d784ad493b057fc1",
       "disposition": "test-support",
-      "reason": "Use real scoped native RDS Query and SQLite changes with a simulated host probe for same-name replacement, in-place revision and unrelated-group regression controls. No production mode, route or live database.",
+      "reason": "Observe real SQLite before and after Query restart and a successful authorized legacy Modify. Check exact JSON, tags, sequence and generation plus named SDK-style group readback, omissions, refusal frames and cleanup. This is executable Go/Query evidence, not a model proof or PostgreSQL execution.",
       "models": []
     },
     {
-      "path": "internal/aws/catalog/rds_owned_runtime_linux_amd64.go",
-      "sha256": "7b803a73255c154274215ec456798d485e1c963cba026bfc855cd7f47d263dd2",
+      "path": "internal/aws/catalog/semantics.go",
+      "sha256": "481295bad06a2bb6359bbde676fd177919adcdb4a4a6456b1ee3b9f34857be8a",
       "disposition": "modeled",
-      "reason": "Derive the original group identity from the same write transaction as the exact DB reservation. Peer preflight requires the exact owned child and committed lease; this guard alone does not enable a route.",
+      "reason": "Apply the configured response-only hook to the existing scalar/list projection after the normal authorized operation, without modifying rows on read. Successful RDS metadata operations stay within the same generation-checked mutations; old endpoint, authorization, topology and ownership boundaries are unchanged.",
       "models": [
         {
-          "id": "RDSOwnedGenerationFence",
+          "id": "CatalogResourceLifecycle",
           "properties": [
-            "LaunchNeedsCommittedAuthority",
-            "AttachNeedsCurrent",
-            "NoPublishedEndpoint"
+            "AuthorizationFirst",
+            "FailureFrame",
+            "PeerFrame"
           ],
-          "limits": "One bounded owner and exact DB generation; the native tests, not this model, verify actual group lookups and lifecycle behavior. No guest transport or real process claim."
+          "limits": "The bounded abstract catalog models permission and unchanged failure/peer state. Optional Query member omission and copy-on-write of stored nested JSON are verified in the concrete tests, not modeled."
         },
-        {
-          "id": "RDSGuestPeerPreflight",
-          "properties": [
-            "OriginalGroupBeforeProbe",
-            "OriginalGroupAtFinalSnapshot"
-          ],
-          "limits": "One provider-owned call after reservation, with one original group, a same-ARN replacement and two catalog revisions. The final snapshot is an observation, not authority for a future connection. SQLite capture/isolation, guest execution, PostgreSQL, SQL and transport remain concrete obligations."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/catalog/rds_private_postgres_topology.go",
-      "sha256": "1c7c023b5361d0d9b71bd81431d143cb313147a3754c6e8a271f6f72616d6752",
-      "disposition": "modeled",
-      "reason": "Resolve ARN, creation sequence and revision from the same validated native catalog subnet-group row as its two or more subnet IDs. No wire shape, topology policy or backend returned to callers.",
-      "models": [
         {
           "id": "RDSPrivatePostgresTopology",
           "properties": [
-            "OwnedTopologyBeforeWrite",
+            "AtomicRefusal",
             "ConfigurationOnly"
           ],
-          "limits": "Finite configuration validation; this model does not prove Go input decoding, AWS API parity or the exact sequence readback."
+          "limits": "This model tracks symbolic admission and configuration effects. No packet, database listener, SQL execution or wire-property behavior is claimed."
         },
         {
-          "id": "RDSGuestPeerPreflight",
+          "id": "RDSOwnedGenerationFence",
           "properties": [
-            "OriginalGroupBeforeProbe",
-            "OriginalGroupAtFinalSnapshot",
-            "MatchingGroupSnapshotRevisions"
+            "NoPublishedEndpoint"
           ],
-          "limits": "One provider-owned call after reservation, with one original group, a same-ARN replacement and two catalog revisions. The final snapshot is an observation, not authority for a future connection. SQLite capture/isolation, guest execution, PostgreSQL, SQL and transport remain concrete obligations."
+          "limits": "The existing symbolic local owner fence still does not publish an endpoint. Current workload health, SQL and JSON refinement are out of scope."
         }
       ]
     },
     {
-      "path": "scripts/formal_model_gate.py",
-      "sha256": "63efa7893491c58912d410880c6a5549dc9166744b6f2517c3c0dd8ee529583e",
-      "disposition": "formal-infrastructure",
-      "reason": "Require the three additional invariants, four targeted controls and the exact #130 resolver binding. No weakening of prior requirements, runtime checks or runner policy.",
+      "path": "internal/aws/catalog/services_data.go",
+      "sha256": "860ae1b2d57c11abaa114f288c7b4c632029563fff09110ec76bfe1dd6a41b55",
+      "disposition": "modeled",
+      "reason": "Normalize only the stale DBInstance parameter-apply and option-sync statuses for native RDS engines during the existing configuration create/update and authorized resource projection. Failed updates do not normalize saved rows; named groups and unrelated settings/engines remain unchanged.",
+      "models": [
+        {
+          "id": "CatalogResourceLifecycle",
+          "properties": [
+            "AuthorizationFirst",
+            "FailureFrame",
+            "GenerationAdvances"
+          ],
+          "limits": "The model covers abstract admission and failure/committed generation effects, not old SQLite JSON, groups, defaults, SDK shapes, or application of database settings."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/catalog/services_records_test.go",
+      "sha256": "a618c007522cfc2dbd301a7b43772e21528d36d523757f55ca7aebb48fbcf40c",
+      "disposition": "test-support",
+      "reason": "Check official optional member absence with configured names retained in the existing native DBInstance lifecycle test.",
       "models": []
     },
     {
-      "path": "scripts/test-formal-gate.py",
-      "sha256": "b43eb72d6da205cbb94d6ec986da87d10443a7c1841191fea729fffee7518b51",
-      "disposition": "formal-infrastructure",
-      "reason": "Pin exact expected #130 source scope and all old and new invariant/control mappings in tooling unit tests; not a TLC run or Go proof.",
+      "path": "internal/aws/catalog/spec.go",
+      "sha256": "3dfa8eb7dc07b1f69b97d2e61c1b59ddb1dfd38b4c049703898a97db46dfd7d0",
+      "disposition": "modeled",
+      "reason": "Declare an optional output-only hook on the resource specification. It consumes a shallow response copy, and the RDS binding makes nested copies when omitting status; resource authority and stored state contracts do not move.",
+      "models": [
+        {
+          "id": "CatalogResourceLifecycle",
+          "properties": [
+            "FailureFrame",
+            "PeerFrame"
+          ],
+          "limits": "This is a state-frame correspondence only. The model does not model optional Query fields, callback implementation, serialization or Go refinement; focused tests exercise the actual response path."
+        }
+      ]
+    },
+    {
+      "path": "internal/server/apidocs/catalog/rds.json",
+      "sha256": "ef808233dd406be86b77c7addfa44a23ca45fcebd7038c895f6463591361fc68",
+      "disposition": "presentation",
+      "reason": "Canonical generator refreshes only the published RDS info/tag descriptions; no OpenAPI operation, request, response shape or runtime behavior changes.",
+      "models": []
+    },
+    {
+      "path": "tools/console/tests/fixtures/catalog-descriptors.json",
+      "sha256": "718f29aa99e6a679b1a8be462277edd2189a3178c3ae61dee39ec0b7e016a7ba",
+      "disposition": "presentation",
+      "reason": "Canonical generator refreshes only two textual Bounds entries in the RDS console descriptor fixture; no scope, operation or payload changes.",
       "models": []
     }
   ]

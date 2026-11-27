@@ -144,6 +144,12 @@ console, CloudFormation adapter or Challenge integration.
   `--rds-private-postgres-topology` optionally validates private standalone
   PostgreSQL configuration against native EC2 on authenticated loopback. It
   starts no database and returns no endpoint.
+  Native RDS DB instances return saved parameter and option group names, not an
+  applied status: the optional `ParameterApplyStatus` and option-group `Status`
+  are omitted. Reading an older SQLite record does not rewrite it. An authorized
+  modification drops any stale application statuses without changing unrelated
+  configuration. Instance status is still `creating` (`deleting` in a successful
+  delete response), with no database endpoint.
   These do not run workloads, provide data planes or provision real cloud resources.
   AppFlow stores S3-to-S3 flow definitions only. An `OnDemand` definition
   rejects schedule settings; a `Scheduled` definition requires a nonblank

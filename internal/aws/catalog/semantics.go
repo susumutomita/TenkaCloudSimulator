@@ -1279,7 +1279,7 @@ func (q *request) listOutput(page []row, parent *row, outputToken, next string) 
 		switch {
 		case element == res.Shape || element == res.Summary:
 			for _, r := range page {
-				if value, ok := enc.project(element, q.withTags(r, element), 0); ok {
+				if value, ok := enc.project(element, q.responseDocument(res, r, element), 0); ok {
 					items = append(items, value)
 				}
 			}
@@ -1300,11 +1300,14 @@ func (q *request) listOutput(page []row, parent *row, outputToken, next string) 
 	return out
 }
 
-// withTags adds the stored tag map to the document in the shape's form.
-func (q *request) withTags(r row, shapeName string) map[string]any {
+// responseDocument derives an output-only record including its stored tags.
+func (q *request) responseDocument(res *Resource, r row, shapeName string) map[string]any {
 	doc := map[string]any{}
 	for k, v := range r.Document {
 		doc[k] = v
+	}
+	if res.ProjectResponse != nil {
+		res.ProjectResponse(doc)
 	}
 	if member := q.tagMember(shapeName); member != "" {
 		doc[member] = q.renderTags(q.b.model.shape(shapeName).Members[member].Shape, r.Tags)
@@ -1333,7 +1336,7 @@ func (q *request) output(r row, parent *row) map[string]any {
 		var ok bool
 		switch {
 		case member.Shape == res.Shape || member.Shape == res.Summary:
-			value, ok = enc.project(member.Shape, q.withTags(r, member.Shape), 0)
+			value, ok = enc.project(member.Shape, q.responseDocument(res, r, member.Shape), 0)
 		case name == tagsMember:
 			value, ok = enc.project(member.Shape, q.renderTags(member.Shape, r.Tags), 0)
 		default:
