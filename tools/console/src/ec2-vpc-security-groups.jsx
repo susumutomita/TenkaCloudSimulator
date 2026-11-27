@@ -42,7 +42,26 @@ export function SecurityGroupDetails({group}) {
   </SpaceBetween>;
 }
 
-function LegacyVPCSecurityGroups({vpc, region, request}) {
+export function SecurityGroupInventoryTable({groups, group, onSelect}) {
+  const {t} = useLocale();
+  return <Table variant="embedded" trackBy="id" selectionType="single"
+    items={groups} selectedItems={group ? [group] : []}
+    onSelectionChange={({detail}) => onSelect(detail.selectedItems[0]?.id ?? '')}
+    ariaLabels={{
+      tableLabel:t('Saved security groups','保存済みセキュリティグループ'),
+      selectionGroupLabel:t('Select a security group','セキュリティグループを選択'),
+      itemSelectionLabel:(_, row)=>row.id,
+    }}
+    columnDefinitions={[
+      {id:'id',header:t('Group ID','グループ ID'),cell:row=>wrap(row.id)},
+      {id:'name',header:t('Name','名前'),cell:row=>row.name ? wrap(row.name) : '—'},
+      {id:'vpc',header:'VPC ID',cell:row=>wrap(row.vpc)},
+      {id:'description',header:t('Description','説明'),cell:row=>wrap(row.description)},
+    ]}
+    empty={<p role="status">{t('No security groups are recorded for this VPC.','この VPC に記録されたセキュリティグループはありません。')}</p>}/>;
+}
+
+function LegacyVPCSecurityGroups({vpc, region, request, inventory=false, groupId='', onOpenGroup}) {
   const {t} = useLocale();
   const [state, setState] = useState(loading), [selected, setSelected] = useState(''), [refresh, setRefresh] = useState(0);
   const id = vpc.id, managedBy = vpc.managedBy;
@@ -60,7 +79,7 @@ function LegacyVPCSecurityGroups({vpc, region, request}) {
   }, [request, region, id, managedBy, applicable, refresh]);
 
   const options = state.groups.map(group => ({value:group.id,label:group.id}));
-  const group = state.groups.find(g => g.id === selected) ?? state.groups[0];
+  const group = state.groups.find(g => g.id === (onOpenGroup?groupId:selected)) ?? (inventory ? undefined : state.groups[0]);
   const title = t('Security groups','セキュリティグループ');
   return <SpaceBetween size="m">
     <Header variant="h3" actions={applicable && <Button iconName="refresh" loading={state.status==='loading'} onClick={() => {
@@ -72,6 +91,14 @@ function LegacyVPCSecurityGroups({vpc, region, request}) {
       : state.status==='loading' ? <StatusIndicator type="loading">{t('Loading security groups','セキュリティグループを読み込み中')}</StatusIndicator>
       : state.status==='denied' ? <Alert type="error" header={t('Security group access denied','セキュリティグループの参照が拒否されました')}>{t('The current identity needs ec2:DescribeSecurityGroups. No group data was shown.', '現在の ID には ec2:DescribeSecurityGroups が必要です。グループ情報は表示していません。')}</Alert>
       : state.status==='error' ? <Alert type="error" header={t('Could not read security groups','セキュリティグループを読み取れませんでした')}>{t('Use Refresh security groups to try again.', '「セキュリティグループを更新」で再試行してください。')}</Alert>
+      : inventory ? <SpaceBetween size="m">
+        <Alert type="info">{t('CloudFormation-managed groups are read-only here. Outbound rule readback is not available for these groups.',
+          'CloudFormation 管理のグループは読み取り専用です。これらのグループの送信ルールは参照できません。')}</Alert>
+        <SecurityGroupInventoryTable groups={state.groups} group={group} onSelect={onOpenGroup||setSelected}/>
+        {groupId&&!group&&<Alert type="info">{t('This security group was not found in the selected VPC.',
+          '選択した VPC にはこのセキュリティグループがありません。')}</Alert>}
+        {group && <SecurityGroupDetails group={group}/>}
+      </SpaceBetween>
       : group ? <SpaceBetween size="m">
         <FormField label={t('Security group','セキュリティグループ')} description={t('Saved rules only. This view does not verify network traffic.', '保存済みルールのみを表示しています。この画面では通信を検証しません。')}>
           <Select selectedOption={options.find(option=>option.value===group.id)} options={options} onChange={({detail})=>setSelected(detail.selectedOption.value)}/>
@@ -102,7 +129,7 @@ function NativeRuleList({rows,direction,onAdd,onRemove}) {
   </SpaceBetween>;
 }
 
-function VPCNativeSecurityGroups({vpc, region, request, nativeRules=false, writeBlocked=false, acquireWrite, onSaving = noop}) {
+function VPCNativeSecurityGroups({vpc, region, request, nativeRules=false, inventory=false, writeBlocked=false, acquireWrite, onSaving = noop, groupId='', onOpenGroup}) {
   const {t} = useLocale(), {id, managedBy, cidr} = vpc;
   const scope = useMemo(()=>({region,request,vpc:{id,managedBy,cidr},rulesEnabled:nativeRules}),[region,request,id,managedBy,cidr,nativeRules]);
   const active = useRef(null);
@@ -112,7 +139,7 @@ function VPCNativeSecurityGroups({vpc, region, request, nativeRules=false, write
   const dialog = modal?.scope===scope ? modal : null;
   const ready = current?.status==='ready', writing = current?.status==='writing';
   const rows = current?.rows??[];
-  const group = rows.find(g=>selection?.scope===scope&&g.id===selection.id) ?? rows[0];
+  const group = rows.find(g=>g.id===(onOpenGroup?groupId:selection?.scope===scope&&selection.id)) ?? (inventory ? undefined : rows[0]);
   const options = rows.map(g=>({value:g.id,label:g.name,description:g.id}));
 
   function cancel() {
@@ -177,6 +204,7 @@ function VPCNativeSecurityGroups({vpc, region, request, nativeRules=false, write
       setSelection(saved?{scope,id:saved.id}:null);
       setModal(null);
       setNotice({scope,kind:dialog.kind,id:(saved||result.removed).id});
+      if(onOpenGroup&&(dialog.kind==='create'||dialog.kind==='delete'))onOpenGroup(saved?.id??'',true);
     } catch (error) {
       if (!complete(operation)) return;
       // A failed readback may follow a committed write. Require a new read
@@ -226,11 +254,18 @@ function VPCNativeSecurityGroups({vpc, region, request, nativeRules=false, write
     {(!current||current.status==='loading'||writing)&&<StatusIndicator type="loading">
       {writing?t('Checking the saved change','保存結果を確認中'):t('Loading security groups','セキュリティグループを読み込み中')}
     </StatusIndicator>}
+    {ready&&inventory&&<SecurityGroupInventoryTable groups={rows} group={group}
+      onSelect={id=>{if (!writeBlocked) {
+        if(onOpenGroup) onOpenGroup(id);
+        else setSelection({scope,id});
+      }}}/>}
+    {ready&&inventory&&groupId&&!group&&<Alert type="info">{t('This security group was not found in the selected VPC.',
+      '選択した VPC にはこのセキュリティグループがありません。')}</Alert>}
     {ready&&(group?<SpaceBetween size="m">
-      <FormField label={t('Saved security group','保存済みセキュリティグループ')}>
+      {!inventory&&<FormField label={t('Saved security group','保存済みセキュリティグループ')}>
         <Select selectedOption={options.find(option=>option.value===group.id)} options={options}
           onChange={({detail})=>setSelection({scope,id:detail.selectedOption.value})}/>
-      </FormField>
+      </FormField>}
       <div><Box variant="h4">{t('Group ID','グループ ID')}</Box>{wrap(group.id)}</div>
       <div><Box variant="h4">{t('Description','説明')}</Box>{wrap(group.description)}</div>
       <SecurityGroupTags tags={group.tags}/>
@@ -239,7 +274,7 @@ function VPCNativeSecurityGroups({vpc, region, request, nativeRules=false, write
         <NativeRuleList rows={group.egress} direction="egress" onAdd={()=>editRule('egress')} onRemove={rule=>editRule('egress',rule)}/>
       </>}
       <Button disabled={writeBlocked} onClick={()=>setModal({scope,kind:'delete',group,confirm:''})}>{deleteLabel}</Button>
-    </SpaceBetween>:<div role="status">{t('No detached security groups are recorded for this VPC.','この VPC に未接続のセキュリティグループはありません。')}</div>)}
+    </SpaceBetween>:!inventory&&<div role="status">{t('No detached security groups are recorded for this VPC.','この VPC に未接続のセキュリティグループはありません。')}</div>)}
     {dialog&&<Modal visible closeAriaLabel={t('Close security group dialog','セキュリティグループのダイアログを閉じる')}
       header={labels[dialog.kind]} onDismiss={()=>{if (!writing) setModal(null);}}>
       <form onSubmit={submit}><Form actions={<SpaceBetween direction="horizontal" size="xs">

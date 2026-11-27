@@ -35,7 +35,7 @@ const blankVpc={name:'',cidr:'10.0.0.0/16',mode:'vpc-only',stackName:'',subnetCI
 
 // The instance list is saved state. Opt-in local launches use CloudFormation,
 // never native RunInstances. VPC deletion applies only to EC2-owned VPCs.
-export default function EC2Readonly({kind,region,request,sessionInstance,onSession,instanceStackLaunchVisible=false,instanceStackLaunchAllowed=false,vpcLifecycle=false,vpcSubnet=false,vpcNativeSubnets=false,vpcNativeSubnetPublicIPv4=false,vpcSecurityGroups=false,vpcNativeSecurityGroups=false,vpcNativeSecurityGroupRules=false,vpcNetworkACLs=false,vpcRouteTables=false,vpcNativeRouteTables=false,vpcNativeRouteAssociations=false,vpcNativeRouteReplacement=false,vpcNativeIPv4RouteLimit=0,vpcInternetGateways=false,onSaving=()=>{},onVpcCreateView=()=>{},initialVpcCreate=false}) {
+export default function EC2Readonly({kind,region,request,sessionInstance,onSession,instanceStackLaunchVisible=false,instanceStackLaunchAllowed=false,vpcLifecycle=false,vpcSubnet=false,vpcNativeSubnets=false,vpcNativeSubnetPublicIPv4=false,vpcSecurityGroups=false,vpcNativeSecurityGroups=false,vpcNativeSecurityGroupRules=false,vpcNetworkACLs=false,vpcRouteTables=false,vpcNativeRouteTables=false,vpcNativeRouteAssociations=false,vpcNativeRouteReplacement=false,vpcNativeIPv4RouteLimit=0,vpcInternetGateways=false,onSaving=()=>{},onVpcCreateView=()=>{},initialVpcCreate=false,initialVpcId=''}) {
   const {t}=useLocale();
   const instance=kind==='ec2',manage=!instance&&vpcLifecycle;
   const [items,setItems]=useState([]),[loading,setLoading]=useState(false),[error,setError]=useState('');
@@ -84,7 +84,7 @@ export default function EC2Readonly({kind,region,request,sessionInstance,onSessi
     }catch(e){if(alive.current&&current===epoch.current)setError(e.message);}
     finally{if(alive.current&&current===epoch.current)setLoading(false);}
   }
-  useEffect(()=>{load();},[kind,region]);
+  useEffect(()=>{load(initialVpcId);},[kind,region,initialVpcId]);
   // A refused mutation reports the server's EC2 error code; it is never shown as success.
   async function mutate(body){
     const response=await request('/',{method:'POST',headers,body});
@@ -152,7 +152,7 @@ export default function EC2Readonly({kind,region,request,sessionInstance,onSessi
       ariaLabels={{selectionGroupLabel:t('Select a resource','リソースを選択'),itemSelectionLabel:(_,item)=>t('Select ','選択: ')+item.id}}
       loading={loading} loadingText={t('Loading resources','リソースを読み込み中')}
       items={filtered.slice((page-1)*20,page*20)} columnDefinitions={fields.slice(0,instance?5:4).map(([id,en,ja])=>({id,header:t(en,ja),cell:item=>idCell(display(id,item))}))}
-      header={<Header counter={'('+items.length+')'} actions={<SpaceBetween direction="horizontal" size="xs">{sessionInstance&&<Button variant="primary" disabled={selected[0]?.id!==sessionInstance} onClick={onSession}>{t('Connect with Session Manager','Session Manager で接続')}</Button>}<Button iconName="refresh" loading={loading} disabled={saving} onClick={()=>load()}>{t('Refresh','更新')}</Button>
+      header={<Header counter={'('+items.length+')'} actions={<SpaceBetween direction="horizontal" size="xs">{sessionInstance&&<Button variant="primary" disabled={selected[0]?.id!==sessionInstance} onClick={onSession}>{t('Connect with Session Manager','Session Manager で接続')}</Button>}<Button iconName="refresh" loading={loading} disabled={saving} onClick={()=>load(detail?.id||initialVpcId)}>{t('Refresh','更新')}</Button>
         {instance&&!sessionInstance&&instanceStackLaunchVisible&&<Button variant="primary" disabled={saving||!instanceStackLaunchAllowed}
           disabledReason={!instanceStackLaunchAllowed?t('Configure the local VM runtime first.','ローカル VM 実行環境を先に設定してください。'):undefined}
           onClick={()=>setLaunchOpen(true)}>{t('Create instance stack','インスタンスのスタックを作成')}</Button>}
@@ -162,6 +162,8 @@ export default function EC2Readonly({kind,region,request,sessionInstance,onSessi
       filter={<TextFilter filteringText={filter} disabled={saving} onChange={({detail})=>{if(!selectionLocked()){setFilter(detail.filteringText);setPage(1);setSelected([]);}}} filteringAriaLabel={t('Filter resources','リソースを絞り込む')} filteringPlaceholder={t('Find resources','リソースを検索')}/>}
       pagination={<Pagination currentPageIndex={page} pagesCount={Math.max(1,Math.ceil(filtered.length/20))} onChange={({detail})=>{if(!selectionLocked())setPage(detail.currentPageIndex);}} ariaLabels={{nextPageLabel:t('Next page','次のページ'),previousPageLabel:t('Previous page','前のページ'),pageLabel:n=>String(n)}}/>}
       empty={<SpaceBetween size="s"><span>{error?t('Resources are unavailable. Retry with Refresh.','リソースを取得できません。「更新」で再試行してください。'):items.length?t('No resources match your filter.','検索条件に一致するリソースがありません。'):t('No resources found in this region.','このリージョンには該当するリソースがありません。')}</span>{items.length>0&&<Button disabled={saving} onClick={()=>{setFilter('');setPage(1);}}>{t('Clear filter','絞り込みを解除')}</Button>}</SpaceBetween>}/>
+    {!instance&&initialVpcId&&!loading&&!error&&!items.some(item=>item.id===initialVpcId)&&<Alert type="info">
+      {t('This VPC was not found in the selected region.','選択したリージョンにはこの VPC がありません。')}</Alert>}
     {detail&&<Container header={<Header variant="h2" actions={<Button disabled={saving} onClick={()=>setSelected([])}>{t('Close details','詳細を閉じる')}</Button>}>{t('Resource details','リソースの詳細')}</Header>}>
       <SpaceBetween size="l">{detailFields}{instance&&<EC2InstanceMetadata groupIds={detail.groupIds} tags={detail.tags}/>}
         {!instance&&vpcNativeSubnets&&<div inert={siblingBusy('subnet')}><VPCNativeSubnets key={'subnet|'+region+'|'+detail.id} vpc={detail} region={region}

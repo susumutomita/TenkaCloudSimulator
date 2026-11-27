@@ -22,11 +22,12 @@ const pageSize=20;
 const identifier=value=><span className="resource-identifier">{value}</span>;
 const newToken=()=>Array.from(globalThis.crypto.getRandomValues(new Uint8Array(16)),b=>b.toString(16).padStart(2,'0')).join('');
 
-export default function VPCNativeRouteTables({request,region,vpc,acquireWrite,writeBlocked=false,associations=false,replacement=false,routeLimit=0}) {
+export default function VPCNativeRouteTables({request,region,vpc,acquireWrite,writeBlocked=false,associations=false,replacement=false,routeLimit=0,
+  focusedTableId='',actionView='overview',onMutation}) {
   const {t}=useLocale();
   const {id,managedBy,cidr}=vpc??{};
-  const scope=useMemo(()=>({request,region,vpc:{id,managedBy,cidr},associations,replacement,routeLimit}),
-    [request,region,id,managedBy,cidr,associations,replacement,routeLimit]);
+  const scope=useMemo(()=>({request,region,vpc:{id,managedBy,cidr},associations,replacement,routeLimit,focusedTableId}),
+    [request,region,id,managedBy,cidr,associations,replacement,routeLimit,focusedTableId]);
   const validScope=nativeRouteTableTarget(scope.vpc);
   const options=signal=>({signal,associations:scope.associations,replacement:scope.replacement,routeLimit:scope.routeLimit});
   const active=useRef(null);
@@ -75,7 +76,7 @@ export default function VPCNativeRouteTables({request,region,vpc,acquireWrite,wr
   // A failed subnet inventory leaves the confirmed tables and explicit
   // associations visible, but never turns an unknown fallback into "none".
   useEffect(()=>{
-    if (!readyRows?.some(row=>row.mainAssociation)) return;
+    if (scope.focusedTableId || !readyRows?.some(row=>row.mainAssociation)) return;
     const controller=new AbortController();
     const save=(value,error)=>{
       if(!controller.signal.aborted) setFallback({scope,rows:readyRows,value,error});
@@ -144,6 +145,7 @@ export default function VPCNativeRouteTables({request,region,vpc,acquireWrite,wr
         if (!finish(operation)) return;
         setResult({scope,status:'ready',rows:current.rows.map(row=>row===dialog.row?updated:row)});
         setModal(null);setNotice({scope,kind:dialog.kind,id:updated.id});
+        onMutation?.({kind:dialog.kind,id:updated.id,confirmed:true});
         return;
       }
       const {created,removed,associated,disassociated,replaced,rows}=dialog.kind==='create'
@@ -154,12 +156,16 @@ export default function VPCNativeRouteTables({request,region,vpc,acquireWrite,wr
               : await deleteVpcNativeRouteTable(...args,dialog.row,callOptions);
       if (!finish(operation)) return;
       setResult({scope,status:'ready',rows});setModal(null);
-      setNotice({scope,kind:dialog.kind,id:(created??removed??associated??disassociated??replaced).id});
+      const changed=(created??removed??associated??disassociated??replaced).id;
+      setNotice({scope,kind:dialog.kind,id:changed});
+      onMutation?.({kind:dialog.kind,id:changed,confirmed:true});
     } catch(error) {
       if (!finish(operation)) return;
       // The write may have happened without a reliable reply or readback.
       // Hide stale rows and require fresh state rather than replaying it.
-      setResult({scope,status:nativeRouteTableFailure(error),refreshBeforeWrite:true});setModal(null);
+      const failure=nativeRouteTableFailure(error);
+      setResult({scope,status:failure,refreshBeforeWrite:true});setModal(null);
+      onMutation?.({kind:dialog.kind,confirmed:false,error:failure});
     }
   }
   if (!validScope) return null;
@@ -212,21 +218,50 @@ export default function VPCNativeRouteTables({request,region,vpc,acquireWrite,wr
     description:attaching?choice.cidr:choice.id}));
   const replacementOptions=replacementTargets.map(row=>({value:row.id,label:row.id,description:row.name||undefined}));
   function change(key,value){setModal(old=>old?.scope===scope ? {...old,[key]:value} : old);}
+  const focused=rows.find(row=>row.id===focusedTableId);
+  function rowActions(item) {
+    return <SpaceBetween size="xxs">
+          {scope.associations&&(!focusedTableId||actionView==='associations')&&<>
+            <Button disabled={!ready||!canWrite} ariaLabel={associateLabel+': '+item.id}
+              onClick={()=>setModal({scope,kind:'associate',row:item,draft:{row:item},selected:''})}>{associateLabel}</Button>
+            <Button disabled={!ready||!canWrite||!item.associations.length} ariaLabel={disassociateLabel+': '+item.id}
+              onClick={()=>setModal({scope,kind:'disassociate',row:item,selected:'',confirm:''})}>{disassociateLabel}</Button>
+            {scope.replacement&&item.associations.length>0&&rows.length>1&&
+              <Button disabled={!ready||!canWrite} ariaLabel={replaceLabel+': '+item.id}
+                onClick={()=>setModal({scope,kind:'replace',row:item,selected:'',replacementID:''})}>{replaceLabel}</Button>}
+          </>}
+          {!!scope.routeLimit&&(!focusedTableId||actionView==='routes')&&<>
+            <Button disabled={!ready||!canWrite||item.routes.length>=scope.routeLimit} ariaLabel={addRouteLabel+': '+item.id}
+              disabledReason={item.routes.length>=scope.routeLimit?t('The saved route limit was reached.','保存できるルート数の上限に達しました。'):undefined}
+              onClick={()=>setModal({scope,kind:'add-route',row:item,draft:{row:item},
+                destination:item.routes.some(route=>route.cidr===ipv4DefaultRoute)?'':ipv4DefaultRoute})}>{addRouteLabel}</Button>
+            <Button disabled={!ready||!canWrite||!item.routes.length} ariaLabel={removeRouteLabel+': '+item.id}
+              disabledReason={!item.routes.length&&item.localRoute?t('The local route is read-only.','ローカルルートは読み取り専用です。'):undefined}
+              onClick={()=>setModal({scope,kind:'remove-route',row:item,routeSelected:'',confirm:''})}>{removeRouteLabel}</Button>
+          </>}
+          {(!focusedTableId||actionView==='overview')&&<Button disabled={!ready||!canWrite||!!item.mainAssociation||!!item.associations?.length||!!item.routes?.length} ariaLabel={deleteLabel+': '+item.id}
+            disabledReason={item.mainAssociation?t('The main route table cannot be deleted.','メインルートテーブルは削除できません。'):item.routes?.length?t('Remove the saved IPv4 routes before deleting this table.','テーブルを削除するには保存済みの IPv4 ルートを先に削除してください。'):item.associations?.length?t('Remove the explicit associations before deleting this table.','このテーブルを削除するには明示的な関連付けを先に解除してください。'):undefined}
+            onClick={()=>setModal({scope,kind:'delete',row:item,confirm:''})}>{deleteLabel}</Button>}
+        </SpaceBetween>;
+  }
   return <SpaceBetween size="s">
     <Header variant="h3" actions={<SpaceBetween direction="horizontal" size="xs">
       <Button iconName="refresh" disabled={pending} loading={loading} onClick={refresh}>{refreshLabel}</Button>
-      <Button disabled={!ready||!canWrite} onClick={()=>setModal({scope,kind:'create',name:''})}>{createLabel}</Button>
-    </SpaceBetween>}>{t('Route tables','ルートテーブル')}</Header>
-    <Box color="text-body-secondary">{hasMain
+      {!focusedTableId&&<Button disabled={!ready||!canWrite} onClick={()=>setModal({scope,kind:'create',name:''})}>{createLabel}</Button>}
+    </SpaceBetween>}>{focusedTableId?t('Saved configuration actions','保存済み設定の操作'):t('Route tables','ルートテーブル')}</Header>
+    {!focusedTableId&&<Box color="text-body-secondary">{hasMain
       ? t('Saved configuration only. Subnets without an explicit association use the main table. The local route is read-only, and no packets are forwarded.','保存済みの設定のみです。明示的な関連付けのないサブネットにはメインテーブルが適用されます。ローカルルートは読み取り専用で、通信は転送されません。')
       : scope.routeLimit
       ? t('Saved configuration only. A route may target the native internet gateway attached to this VPC. No packets are forwarded.','保存済みの設定のみです。ルートの宛先には、この VPC に接続されたネイティブのインターネットゲートウェイを指定できます。通信は転送されません。')
       : scope.associations
       ? t('Saved configuration only. Explicit subnet associations do not create routes or forward packets.','保存済みの設定のみです。サブネットの明示的な関連付けではルートを作成せず、パケットも転送しません。')
-      : t('Detached configuration only. These tables have no routes or subnet associations and do not forward traffic.','関連付けのない設定のみです。ルートやサブネットの関連付けは含まれず、通信は転送しません。')}</Box>
+      : t('Detached configuration only. These tables have no routes or subnet associations and do not forward traffic.','関連付けのない設定のみです。ルートやサブネットの関連付けは含まれず、通信は転送しません。')}</Box>}
     {notice?.scope===scope&&<Alert type="success">{notices[notice.kind]}{identifier(notice.id)}</Alert>}
     {errors[current?.status]&&<Alert type="error">{errors[current.status]} {current.refreshBeforeWrite&&
       t('Refresh route tables before trying again.','再試行する前にルートテーブルを更新してください。')}</Alert>}
+    {focusedTableId?(focused?rowActions(focused):loading?
+      <Box role="status">{t('Reading route tables','ルートテーブルを読み込み中')}</Box>:
+      ready?<Box>{t('The selected route table is no longer in this VPC.','選択したルートテーブルはこの VPC に存在しません。')}</Box>:null):
     <Table variant="embedded" trackBy="id" items={rows.slice((shown-1)*pageSize,shown*pageSize)} loading={loading||pending}
       loadingText={t('Reading route tables','ルートテーブルを読み込み中')}
       ariaLabels={{tableLabel:scope.associations||hasMain?t('Saved route tables','保存済みのルートテーブル'):t('Saved detached route tables','保存済みの関連付けのないルートテーブル')}}
@@ -242,36 +277,14 @@ export default function VPCNativeRouteTables({request,region,vpc,acquireWrite,wr
         ...(scope.routeLimit||hasMain?[{id:'ipv4-routes',header:t('IPv4 routes','IPv4 ルート'),cell:item=>
           item.localRoute||item.routes?.length?<>{item.localRoute&&<div>{identifier(item.localRoute.cidr)} → {identifier('local')} · {t('Read-only','読み取り専用')}</div>}
             {item.routes?.map(route=><div key={route.cidr}>{identifier(route.cidr)} → {identifier(route.gateway)}</div>)}</>:t('None','なし')}]:[]),
-        {id:'actions',header:t('Actions','操作'),cell:item=><SpaceBetween size="xxs">
-          {scope.associations&&<>
-            <Button disabled={!ready||!canWrite} ariaLabel={associateLabel+': '+item.id}
-              onClick={()=>setModal({scope,kind:'associate',row:item,draft:{row:item},selected:''})}>{associateLabel}</Button>
-            <Button disabled={!ready||!canWrite||!item.associations.length} ariaLabel={disassociateLabel+': '+item.id}
-              onClick={()=>setModal({scope,kind:'disassociate',row:item,selected:'',confirm:''})}>{disassociateLabel}</Button>
-            {scope.replacement&&item.associations.length>0&&rows.length>1&&
-              <Button disabled={!ready||!canWrite} ariaLabel={replaceLabel+': '+item.id}
-                onClick={()=>setModal({scope,kind:'replace',row:item,selected:'',replacementID:''})}>{replaceLabel}</Button>}
-          </>}
-          {!!scope.routeLimit&&<>
-            <Button disabled={!ready||!canWrite||item.routes.length>=scope.routeLimit} ariaLabel={addRouteLabel+': '+item.id}
-              disabledReason={item.routes.length>=scope.routeLimit?t('The saved route limit was reached.','保存できるルート数の上限に達しました。'):undefined}
-              onClick={()=>setModal({scope,kind:'add-route',row:item,draft:{row:item},
-                destination:item.routes.some(route=>route.cidr===ipv4DefaultRoute)?'':ipv4DefaultRoute})}>{addRouteLabel}</Button>
-            <Button disabled={!ready||!canWrite||!item.routes.length} ariaLabel={removeRouteLabel+': '+item.id}
-              disabledReason={!item.routes.length&&item.localRoute?t('The local route is read-only.','ローカルルートは読み取り専用です。'):undefined}
-              onClick={()=>setModal({scope,kind:'remove-route',row:item,routeSelected:'',confirm:''})}>{removeRouteLabel}</Button>
-          </>}
-          <Button disabled={!ready||!canWrite||!!item.mainAssociation||!!item.associations?.length||!!item.routes?.length} ariaLabel={deleteLabel+': '+item.id}
-            disabledReason={item.mainAssociation?t('The main route table cannot be deleted.','メインルートテーブルは削除できません。'):item.routes?.length?t('Remove the saved IPv4 routes before deleting this table.','テーブルを削除するには保存済みの IPv4 ルートを先に削除してください。'):item.associations?.length?t('Remove the explicit associations before deleting this table.','このテーブルを削除するには明示的な関連付けを先に解除してください。'):undefined}
-            onClick={()=>setModal({scope,kind:'delete',row:item,confirm:''})}>{deleteLabel}</Button>
-        </SpaceBetween>},
+        {id:'actions',header:t('Actions','操作'),cell:rowActions},
       ]}
       pagination={pages>1&&<Pagination currentPageIndex={shown} pagesCount={pages} onChange={({detail})=>setPage(detail.currentPageIndex)}
         ariaLabels={{previousPageLabel:t('Previous page','前のページ'),nextPageLabel:t('Next page','次のページ'),pageLabel:n=>String(n)}}/>}
       empty={ready ? scope.associations
         ?t('No route tables are saved for this VPC.','この VPC に保存されたルートテーブルはありません。')
         :t('No detached route tables are saved for this VPC.','この VPC に関連付けのないルートテーブルはありません。')
-        :t('Route tables are unavailable.','ルートテーブルを取得できません。')}/>
+        :t('Route tables are unavailable.','ルートテーブルを取得できません。')}/>}
     {dialog&&<Modal visible header={modalTitle}
       closeAriaLabel={t('Close route table dialog','ルートテーブルのダイアログを閉じる')}
       onDismiss={()=>{if (!active.current?.release) setModal(null);}}>
