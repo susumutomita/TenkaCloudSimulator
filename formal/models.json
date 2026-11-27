@@ -27263,6 +27263,82 @@
           "expect_invariant": "RetainedFrame"
         }
       ]
+    },
+    {
+      "id": "BattleDisruptionRoleCleanup",
+      "model": "formal/BattleDisruptionRoleCleanup.tla",
+      "config": "formal/BattleDisruptionRoleCleanup.cfg",
+      "bounds": "One ephemeral native IAM role name, two distinguishable identities, one inline policy, twelve mutually exclusive environment cases, and a local grading result.",
+      "properties": [
+        "TypeOK",
+        "ForeignStatePreserved",
+        "NoDeleteWithInlinePolicy",
+        "NoUnconfirmedCleanupReport",
+        "NoFailedGradeReport",
+        "KnownRoleCleanedAfterFailedWork"
+      ],
+      "limits": "Scoped to the Battle rehearsal driver: native IAM responses are abstract cases, not a proof of AWS, SQLite, timing, transport, concurrency after ownership lookup, runtime cleanup, STS revocation, or real Battle scoring. A lost/malformed Create may leave an unidentified role in disposable state; such a case never reports cleanup. Failed-work cleanup covers failure after identified creation with no second independent fault. Focused test checks and actual local IAM/STS evidence are separate from bounded TLC.",
+      "source_scope": [
+        "test/battle/rehearsal.py",
+        "test/battle/image/test_rehearsal_operator_role.py"
+      ],
+      "mutants": [
+        {
+          "id": "DeleteDifferentIdentity",
+          "edits": [
+            {
+              "old": "OwnerMatches == role = \"Owned\" /\\ fault # \"OwnerReadDenied\"",
+              "new": "OwnerMatches == role # \"Absent\" /\\ fault # \"OwnerReadDenied\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ForeignStatePreserved"
+        },
+        {
+          "id": "SkipInlinePolicyRemoval",
+          "edits": [
+            {
+              "old": "inline' = FALSE (* RemoveOrKnownAbsent *)",
+              "new": "inline' = inline (* RemoveOrKnownAbsent *)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "NoDeleteWithInlinePolicy"
+        },
+        {
+          "id": "IgnoreMissingRoleReadback",
+          "edits": [
+            {
+              "old": "AbsenceConfirmed == observation = \"NoSuchEntity404\"",
+              "new": "AbsenceConfirmed == TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "NoUnconfirmedCleanupReport"
+        },
+        {
+          "id": "ReportEvenAfterFailedGrading",
+          "edits": [
+            {
+              "old": "GradingCompleted == work = \"Passed\"",
+              "new": "GradingCompleted == TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "NoFailedGradeReport"
+        },
+        {
+          "id": "SkipCleanupOnGradeException",
+          "edits": [
+            {
+              "old": "step' = \"CheckOwner\" (* GradeFinally *)",
+              "new": "step' = IF fault = \"GradeFailed\" THEN \"Refused\" ELSE \"CheckOwner\" (* GradeFinally *)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "KnownRoleCleanedAfterFailedWork"
+        }
+      ]
     }
   ]
 }
