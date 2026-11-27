@@ -1,330 +1,270 @@
 {
   "version": 1,
-  "base_sha": "9bb4eb16d46d7096d282c81bd1572bff237c790b",
+  "base_sha": "1a1ffb3da6eb5312771fb229504c25f91f22f234",
   "changes": [
     {
       "path": "README.ja.md",
-      "sha256": "5e534f4609dfe4476342cebd39604879b75b55b815cb4917792b268996c93bf0",
+      "sha256": "cb6d9d537a48e91319899713385fd7ec21c0e4eb021e058db4259a41d5da63e5",
       "disposition": "documentation",
-      "reason": "Explain the exact detached IPv4 ACL rule configuration and its explicit unsupported associations and packet behavior without claiming a broader workflow.",
+      "reason": "Explain the exact single-VPC tag operations and their metadata-only boundaries without claiming a broader workflow.",
       "models": []
     },
     {
       "path": "README.md",
-      "sha256": "eba976a0851f7503e586605b7e0aed5307de93eeb2947cf9cb709883e0b1d753",
+      "sha256": "1d9f4b4708abbc4d6862e2d2dc6a7ba76b28928af773d2ad6dcbd857414dfd30",
       "disposition": "documentation",
-      "reason": "Explain the exact detached IPv4 ACL rule configuration and its explicit unsupported associations and packet behavior without claiming a broader workflow.",
+      "reason": "Explain the exact single-VPC tag operations and their metadata-only boundaries without claiming a broader workflow.",
       "models": []
     },
     {
       "path": "docs/design/0001-go-standalone.md",
-      "sha256": "b43999a56f97b901de47f1b30d55db4a94fdc5ea393e459e5a2564a44d804058",
+      "sha256": "90a511e612a385c1bed2322136bb980cca4f22cf07056511f77bf1a29e684f2c",
       "disposition": "documentation",
-      "reason": "Explain the exact detached IPv4 ACL rule configuration and its explicit unsupported associations and packet behavior without claiming a broader workflow.",
-      "models": []
-    },
-    {
-      "path": "docs/ec2-detached-network-acls.md",
-      "sha256": "c76d79cf07ef4e664f6f309063554fe6c44a6e9eb7b5b17faeb64e792c8207d9",
-      "disposition": "documentation",
-      "reason": "Explain the exact detached IPv4 ACL rule configuration and its explicit unsupported associations and packet behavior without claiming a broader workflow.",
+      "reason": "Explain the exact single-VPC tag operations and their metadata-only boundaries without claiming a broader workflow.",
       "models": []
     },
     {
       "path": "docs/ec2-read-discovery.md",
-      "sha256": "604ed94a21d3fe1efa9a210498eaabc26fc309792b708b2c2efb4ecb883a6277",
+      "sha256": "1d584481df057ed768733bffb48b14479ff6f277bcd1760e5317cb46e3354974",
       "disposition": "documentation",
-      "reason": "Explain the exact detached IPv4 ACL rule configuration and its explicit unsupported associations and packet behavior without claiming a broader workflow.",
+      "reason": "Explain the exact single-VPC tag operations and their metadata-only boundaries without claiming a broader workflow.",
       "models": []
     },
     {
-      "path": "formal/EC2DetachedNetworkACLRules.cfg",
-      "sha256": "a5d1e0f9a80c0892a00e47ccc56bec31d786d9d9cff5a2dfafdf2f0b2d86ba3f",
+      "path": "formal/EC2NativeVPCTags.cfg",
+      "sha256": "62ab278d9cc3a46c295a4d12a0c2b94c6937765d17212bb5de16f39bf3988976",
       "disposition": "modeled",
-      "reason": "Check the bounded declared detached ACL lifecycle and console confirmation using the complete named regression oracles.",
+      "reason": "Check the bounded declared VPC tag lifecycle and console confirmation using the complete named regression oracles.",
       "models": [
         {
-          "id": "EC2DetachedNetworkACLRules",
+          "id": "EC2NativeVPCTags",
           "properties": [
-            "ScopeFrame",
-            "OnlyEditablePersisted",
-            "AtomicGeneration",
-            "ExactNativeOperation",
-            "ExactReadProjection",
-            "VerifiedSelectedConsole"
+            "ExactNativeAdmission",
+            "ExactTagEffect",
+            "AtomicTagCommit",
+            "NonTagFrame",
+            "ExactConsoleRequest",
+            "VerifiedConsoleOutcome",
+            "NoConfirmationRollback"
           ],
-          "limits": "Symbolic metadata configuration only. Does not model actual 20-per-direction count, full SDK/HTTP/XML/SQL or IAM parsing, real 64-bit wrap, raw CIDR/port validation or snapshot isolation, concurrency between browser pre-read and write, React lease scheduling, rollback of a committed write when UI confirmation fails, ACL creation/deletion/association, or packet behavior. No Go/JavaScript refinement proof."
+          "limits": "Local one-VPC, one-tag metadata and normalized exact selection, admission, store/commit and selected-key readback witnesses only. No raw Query/XML/Unicode grammar, IAM evaluator, full-tag snapshot or SQL isolation/crash proof, arbitrary concurrent schedules, browser lease/timing proof, offline file fingerprint, broader AWS parity, packet/traffic behavior or Go/JavaScript refinement. Console pre-read is not compare-and-set; unconfirmed does not imply rollback."
         }
       ]
     },
     {
-      "path": "formal/EC2DetachedNetworkACLRules.tla",
-      "sha256": "149716115129c93d0974a688ff8506a1c8e79d1f10e6f33607ea82cdfc652a91",
+      "path": "formal/EC2NativeVPCTags.tla",
+      "sha256": "841a63b663b866e23a096f6fec1610696e1ddeda0a4a02ce20af83d967d4a3b1",
       "disposition": "modeled",
-      "reason": "Check the bounded declared detached ACL lifecycle and console confirmation using the complete named regression oracles.",
+      "reason": "Check the bounded declared VPC tag lifecycle and console confirmation using the complete named regression oracles.",
       "models": [
         {
-          "id": "EC2DetachedNetworkACLRules",
+          "id": "EC2NativeVPCTags",
           "properties": [
-            "ScopeFrame",
-            "OnlyEditablePersisted",
-            "AtomicGeneration",
-            "ExactNativeOperation",
-            "ExactReadProjection",
-            "VerifiedSelectedConsole"
+            "ExactNativeAdmission",
+            "ExactTagEffect",
+            "AtomicTagCommit",
+            "NonTagFrame",
+            "ExactConsoleRequest",
+            "VerifiedConsoleOutcome",
+            "NoConfirmationRollback"
           ],
-          "limits": "Symbolic metadata configuration only. Does not model actual 20-per-direction count, full SDK/HTTP/XML/SQL or IAM parsing, real 64-bit wrap, raw CIDR/port validation or snapshot isolation, concurrency between browser pre-read and write, React lease scheduling, rollback of a committed write when UI confirmation fails, ACL creation/deletion/association, or packet behavior. No Go/JavaScript refinement proof."
+          "limits": "Local one-VPC, one-tag metadata and normalized exact selection, admission, store/commit and selected-key readback witnesses only. No raw Query/XML/Unicode grammar, IAM evaluator, full-tag snapshot or SQL isolation/crash proof, arbitrary concurrent schedules, browser lease/timing proof, offline file fingerprint, broader AWS parity, packet/traffic behavior or Go/JavaScript refinement. Console pre-read is not compare-and-set; unconfirmed does not imply rollback."
         }
       ]
     },
     {
       "path": "formal/models.json",
-      "sha256": "6fddaadfed95e8e19989792adb72af185672cf8ddbdfb5350ae03e73941c61b4",
+      "sha256": "7c07c15cc779b3fa378ff257d86e3830275c611b6cbd467031f232dbc0c5bc6e",
       "disposition": "formal-infrastructure",
-      "reason": "Register and detect removal of the bounded ACL rule contract while preserving prior mandatory models and requirements.",
-      "models": []
-    },
-    {
-      "path": "internal/aws/ec2_network.go",
-      "sha256": "00169de596496eb09e41e825c9fc37d646578114588609ac44f0082b9cfbe6d2",
-      "disposition": "modeled",
-      "reason": "Retain the bounded rule projection in the canonical native ACL and reject inconsistent state instead of decoding it as an empty list.",
-      "models": [
-        {
-          "id": "EC2DetachedNetworkACLRules",
-          "properties": [
-            "ScopeFrame",
-            "OnlyEditablePersisted",
-            "ExactReadProjection"
-          ],
-          "limits": "Symbolic metadata configuration only. Does not model actual 20-per-direction count, full SDK/HTTP/XML/SQL or IAM parsing, real 64-bit wrap, raw CIDR/port validation or snapshot isolation, concurrency between browser pre-read and write, React lease scheduling, rollback of a committed write when UI confirmation fails, ACL creation/deletion/association, or packet behavior. No Go/JavaScript refinement proof."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/ec2_network_acl.go",
-      "sha256": "17c5b7d6b2a4d2e1719d2b3f8ea0aa0c10d5b740f36587155fd1e388b90bea8b",
-      "disposition": "modeled",
-      "reason": "Admit the three native rule actions on exactly one detached native ACL and route the same persisted rule state through DescribeNetworkAcls.",
-      "models": [
-        {
-          "id": "EC2DetachedNetworkACLRules",
-          "properties": [
-            "ScopeFrame",
-            "ExactNativeOperation",
-            "ExactReadProjection"
-          ],
-          "limits": "Symbolic metadata configuration only. Does not model actual 20-per-direction count, full SDK/HTTP/XML/SQL or IAM parsing, real 64-bit wrap, raw CIDR/port validation or snapshot isolation, concurrency between browser pre-read and write, React lease scheduling, rollback of a committed write when UI confirmation fails, ACL creation/deletion/association, or packet behavior. No Go/JavaScript refinement proof."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/ec2_network_acl_entry.go",
-      "sha256": "22e304232df709e53b2613f2bb800b41908108bbd5f4508bd178ad876461c4f7",
-      "disposition": "modeled",
-      "reason": "Enforce editable direction-number identity, bounded normalized rules, and atomic saved generation; readback retains the fixed terminal deny rows.",
-      "models": [
-        {
-          "id": "EC2DetachedNetworkACLRules",
-          "properties": [
-            "OnlyEditablePersisted",
-            "AtomicGeneration",
-            "ExactNativeOperation",
-            "ExactReadProjection",
-            "ScopeFrame"
-          ],
-          "limits": "Symbolic metadata configuration only. Does not model actual 20-per-direction count, full SDK/HTTP/XML/SQL or IAM parsing, real 64-bit wrap, raw CIDR/port validation or snapshot isolation, concurrency between browser pre-read and write, React lease scheduling, rollback of a committed write when UI confirmation fails, ACL creation/deletion/association, or packet behavior. No Go/JavaScript refinement proof."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/ec2_network_acl_entry_test.go",
-      "sha256": "72624382312b88b757b9149b8c567a46304374585b7238ca71f338d9c6cb13dc",
-      "disposition": "test-support",
-      "reason": "Exercise bounded detached ACL entry behavior, scope, durable readback and existing capability or Console behavior against deterministic fixtures.",
-      "models": []
-    },
-    {
-      "path": "internal/aws/ec2_network_acl_registration_test.go",
-      "sha256": "d688aa0c229cab3bc102601cd63a73b040919fb75012de0203b401b6fa522c69",
-      "disposition": "test-support",
-      "reason": "Exercise bounded detached ACL entry behavior, scope, durable readback and existing capability or Console behavior against deterministic fixtures.",
-      "models": []
-    },
-    {
-      "path": "internal/aws/ec2_network_acl_store.go",
-      "sha256": "083efc3eb37f303a115eed47a9d228a0907e92a6e379181c63b55e78c6e53bbf",
-      "disposition": "modeled",
-      "reason": "Advance only one owned rule, condition persistence and success on the actual scoped ACL and parent records, and preserve defaults and peer state.",
-      "models": [
-        {
-          "id": "EC2DetachedNetworkACLRules",
-          "properties": [
-            "ScopeFrame",
-            "AtomicGeneration",
-            "ExactNativeOperation"
-          ],
-          "limits": "Symbolic metadata configuration only. Does not model actual 20-per-direction count, full SDK/HTTP/XML/SQL or IAM parsing, real 64-bit wrap, raw CIDR/port validation or snapshot isolation, concurrency between browser pre-read and write, React lease scheduling, rollback of a committed write when UI confirmation fails, ACL creation/deletion/association, or packet behavior. No Go/JavaScript refinement proof."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/ec2_network_acl_test.go",
-      "sha256": "1db7c43bf28912c01713680df1a254e888ee5eecb00d4c25f28672f47e27a20d",
-      "disposition": "test-support",
-      "reason": "Exercise bounded detached ACL entry behavior, scope, durable readback and existing capability or Console behavior against deterministic fixtures.",
+      "reason": "Register and detect removal of the bounded native VPC tag contract while preserving prior mandatory models and requirements.",
       "models": []
     },
     {
       "path": "internal/aws/ec2_read.go",
-      "sha256": "fe2085adb3c310f4a3ffd8dc52ebcd3591735f6b061e6fca757c71bba3662d44",
+      "sha256": "5eaedda9dde02849cfeae85f0c938cd2238658dd705415e2bd66132377ba9056",
       "disposition": "modeled",
-      "reason": "Extend the existing EC2 query dispatch to reach the declared detached ACL operations without advertising subnet or runtime enforcement.",
+      "reason": "Admit only declared native VPC tag operations in the existing regional query surface.",
       "models": [
         {
-          "id": "EC2DetachedNetworkACLRules",
+          "id": "EC2NativeVPCTags",
           "properties": [
-            "ScopeFrame",
-            "ExactNativeOperation"
+            "ExactNativeAdmission"
           ],
-          "limits": "Symbolic metadata configuration only. Does not model actual 20-per-direction count, full SDK/HTTP/XML/SQL or IAM parsing, real 64-bit wrap, raw CIDR/port validation or snapshot isolation, concurrency between browser pre-read and write, React lease scheduling, rollback of a committed write when UI confirmation fails, ACL creation/deletion/association, or packet behavior. No Go/JavaScript refinement proof."
+          "limits": "Local one-VPC, one-tag metadata and normalized exact selection, admission, store/commit and selected-key readback witnesses only. No raw Query/XML/Unicode grammar, IAM evaluator, full-tag snapshot or SQL isolation/crash proof, arbitrary concurrent schedules, browser lease/timing proof, offline file fingerprint, broader AWS parity, packet/traffic behavior or Go/JavaScript refinement. Console pre-read is not compare-and-set; unconfirmed does not imply rollback."
         }
       ]
     },
     {
-      "path": "internal/server/ec2_read_access_test.go",
-      "sha256": "953f472c0d054b5eb9c689bbc2f0c179378ae0aa0a11b1efa10f27666bacb599",
+      "path": "internal/aws/ec2_vpc.go",
+      "sha256": "85faf344ba51f10fa8ea70dcb775fdee0e37a7e09d2581728c1f2231c2557013",
+      "disposition": "modeled",
+      "reason": "Serialize tag writes with DNS and topology document operations without advancing topology generation.",
+      "models": [
+        {
+          "id": "EC2NativeVPCTags",
+          "properties": [
+            "AtomicTagCommit",
+            "NonTagFrame"
+          ],
+          "limits": "Local one-VPC, one-tag metadata and normalized exact selection, admission, store/commit and selected-key readback witnesses only. No raw Query/XML/Unicode grammar, IAM evaluator, full-tag snapshot or SQL isolation/crash proof, arbitrary concurrent schedules, browser lease/timing proof, offline file fingerprint, broader AWS parity, packet/traffic behavior or Go/JavaScript refinement. Console pre-read is not compare-and-set; unconfirmed does not imply rollback."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/ec2_vpc_tag.go",
+      "sha256": "4098bc9922adb61a038cb6991d66a6c7fdf611c0527b74909955063e7dfcfedb",
+      "disposition": "modeled",
+      "reason": "Use the one native VPC and one literal tag contract; authorize only the declared action, retain topology and confirm the scoped transaction.",
+      "models": [
+        {
+          "id": "EC2NativeVPCTags",
+          "properties": [
+            "ExactNativeAdmission",
+            "ExactTagEffect",
+            "AtomicTagCommit",
+            "NonTagFrame"
+          ],
+          "limits": "Local one-VPC, one-tag metadata and normalized exact selection, admission, store/commit and selected-key readback witnesses only. No raw Query/XML/Unicode grammar, IAM evaluator, full-tag snapshot or SQL isolation/crash proof, arbitrary concurrent schedules, browser lease/timing proof, offline file fingerprint, broader AWS parity, packet/traffic behavior or Go/JavaScript refinement. Console pre-read is not compare-and-set; unconfirmed does not imply rollback."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/ec2_vpc_tag_test.go",
+      "sha256": "5d118296efa4e43f9187c7394ba557b4a4a334d25f1643e855f3f80fbee1c8be",
       "disposition": "test-support",
-      "reason": "Exercise bounded detached ACL entry behavior, scope, durable readback and existing capability or Console behavior against deterministic fixtures.",
+      "reason": "Exercise bounded native VPC tag behavior, scope, durable readback and existing capability or Console behavior against deterministic fixtures.",
+      "models": []
+    },
+    {
+      "path": "internal/server/ec2_read_access_test.go",
+      "sha256": "332072bc4495068cd5d58ed1871b5cdcce46a52269717544cbeb5b94e603bf35",
+      "disposition": "test-support",
+      "reason": "Exercise bounded native VPC tag behavior, scope, durable readback and existing capability or Console behavior against deterministic fixtures.",
       "models": []
     },
     {
       "path": "internal/server/server.go",
-      "sha256": "b5c0e32e1eb4744f7d3a0a85b9ba6b8171b5e50713080e8e43cd09cd64237a5d",
+      "sha256": "5b7f2b9bf2e3d803dd232cf0cdc1d84616658fb0b860ef8b9c2c48df549b645b",
       "disposition": "modeled",
-      "reason": "Report the exact native configuration scope and distinguish saved configuration from unsupported attachment, protocols and traffic policy.",
+      "reason": "Advertise the bounded one-VPC tag contract separately from other EC2 resources.",
       "models": [
         {
-          "id": "EC2DetachedNetworkACLRules",
+          "id": "EC2NativeVPCTags",
           "properties": [
-            "ScopeFrame",
-            "VerifiedSelectedConsole"
+            "ExactNativeAdmission",
+            "ExactConsoleRequest"
           ],
-          "limits": "Symbolic metadata configuration only. Does not model actual 20-per-direction count, full SDK/HTTP/XML/SQL or IAM parsing, real 64-bit wrap, raw CIDR/port validation or snapshot isolation, concurrency between browser pre-read and write, React lease scheduling, rollback of a committed write when UI confirmation fails, ACL creation/deletion/association, or packet behavior. No Go/JavaScript refinement proof."
+          "limits": "Local one-VPC, one-tag metadata and normalized exact selection, admission, store/commit and selected-key readback witnesses only. No raw Query/XML/Unicode grammar, IAM evaluator, full-tag snapshot or SQL isolation/crash proof, arbitrary concurrent schedules, browser lease/timing proof, offline file fingerprint, broader AWS parity, packet/traffic behavior or Go/JavaScript refinement. Console pre-read is not compare-and-set; unconfirmed does not imply rollback."
         }
       ]
     },
     {
       "path": "internal/server/web/app.js",
-      "sha256": "27be15c67f86f8c849113e390bbfeb7c1d61d05e1aa41982ccc987164395dd68",
+      "sha256": "ee4b945da7a9e435c7770a4c0d934767a3221258ee88867fa4fc155201cfb531",
       "disposition": "modeled",
-      "reason": "Serve the reproducibly generated Console editor, exact selected ACL readback and guarded result measured by the separate live browser test.",
+      "reason": "Serve the canonical compiled Console that reconciles its single write through native readback.",
       "models": [
         {
-          "id": "EC2DetachedNetworkACLRules",
+          "id": "EC2NativeVPCTags",
           "properties": [
-            "VerifiedSelectedConsole",
-            "ExactReadProjection"
+            "ExactConsoleRequest",
+            "VerifiedConsoleOutcome",
+            "NoConfirmationRollback"
           ],
-          "limits": "Symbolic metadata configuration only. Does not model actual 20-per-direction count, full SDK/HTTP/XML/SQL or IAM parsing, real 64-bit wrap, raw CIDR/port validation or snapshot isolation, concurrency between browser pre-read and write, React lease scheduling, rollback of a committed write when UI confirmation fails, ACL creation/deletion/association, or packet behavior. No Go/JavaScript refinement proof."
+          "limits": "Local one-VPC, one-tag metadata and normalized exact selection, admission, store/commit and selected-key readback witnesses only. No raw Query/XML/Unicode grammar, IAM evaluator, full-tag snapshot or SQL isolation/crash proof, arbitrary concurrent schedules, browser lease/timing proof, offline file fingerprint, broader AWS parity, packet/traffic behavior or Go/JavaScript refinement. Console pre-read is not compare-and-set; unconfirmed does not imply rollback."
         }
       ]
     },
     {
       "path": "scripts/formal_model_gate.py",
-      "sha256": "837e36519dccd498feb530ebef33d18006a39f399e84d59e4a784d16fee81bd9",
+      "sha256": "39d317ad7e4c2fa48138f93247b79d812c8c2e6918704af6367ef34bd8dc65c5",
       "disposition": "formal-infrastructure",
-      "reason": "Register and detect removal of the bounded ACL rule contract while preserving prior mandatory models and requirements.",
+      "reason": "Register and detect removal of the bounded native VPC tag contract while preserving prior mandatory models and requirements.",
       "models": []
     },
     {
       "path": "scripts/test-formal-gate.py",
-      "sha256": "b8bce9c1c35b266de62c9d81e4aac10be783939c1d151fe27c0532b57f5e0dcd",
+      "sha256": "cf49e8fb0a0ec7e3c234e694b2180222b73126aa914de0bc008f359ea7c3b17b",
       "disposition": "formal-infrastructure",
-      "reason": "Register and detect removal of the bounded ACL rule contract while preserving prior mandatory models and requirements.",
+      "reason": "Register and detect removal of the bounded native VPC tag contract while preserving prior mandatory models and requirements.",
       "models": []
     },
     {
-      "path": "test/e2e/ec2_detached_nacl.py",
-      "sha256": "0e3ea1bf1db48a0b999555fccfb7e780e3ed63d9def14cdf2543fcc65c114c74",
+      "path": "test/e2e/ec2_vpc_tags.py",
+      "sha256": "fb545b914eb314a4aca2cc26134f389ffabc93ae22862aefd870dbe555271c89",
       "disposition": "test-support",
-      "reason": "Exercise bounded detached ACL entry behavior, scope, durable readback and existing capability or Console behavior against deterministic fixtures.",
+      "reason": "Exercise bounded native VPC tag behavior, scope, durable readback and existing capability or Console behavior against deterministic fixtures.",
       "models": []
     },
     {
       "path": "tools/console/bundle-digests.json",
-      "sha256": "807e2dd194c89ea9e32912a0b8d68720b9fb8f1254eef8976f1802df754e9f55",
+      "sha256": "542a7058bf5969736fa9c2937579aab7b662ef2e71b1a0f5bb8e41178b0230bc",
       "disposition": "presentation",
       "reason": "Bind canonical generated asset manifests to the actual Console component bytes and reproducible build inputs.",
       "models": []
     },
     {
       "path": "tools/console/bundle-inputs.json",
-      "sha256": "5c40d842c86ad041ff8d8ee10f1732838266a29d3ec6038d3169e0b300fc362f",
+      "sha256": "3e5a241dc88e4d15df024fceb54cc8a9e99d9d3458621ee77d786aff655dcd43",
       "disposition": "presentation",
       "reason": "Bind canonical generated asset manifests to the actual Console component bytes and reproducible build inputs.",
       "models": []
     },
     {
-      "path": "tools/console/src/ec2-network-acl-inventory.jsx",
-      "sha256": "e244b9683d09ec5fad629ad64a5bf4d42e4e414909a27215c497e31c81a8c50c",
+      "path": "tools/console/src/ec2-readonly.jsx",
+      "sha256": "3891b2a450c935be76c81dfe2eb257c0355e5d5929d5b9161630bbf42ca2feb2",
       "disposition": "modeled",
-      "reason": "Use separate directional edit controls on a verified native detached ACL and expose a result only after the exact selected snapshot is re-read.",
+      "reason": "Use the selected regional VPC and existing pane lease; update the visible selected row only from a confirmed native snapshot.",
       "models": [
         {
-          "id": "EC2DetachedNetworkACLRules",
+          "id": "EC2NativeVPCTags",
           "properties": [
-            "VerifiedSelectedConsole",
-            "ExactReadProjection"
+            "ExactConsoleRequest",
+            "VerifiedConsoleOutcome"
           ],
-          "limits": "Symbolic metadata configuration only. Does not model actual 20-per-direction count, full SDK/HTTP/XML/SQL or IAM parsing, real 64-bit wrap, raw CIDR/port validation or snapshot isolation, concurrency between browser pre-read and write, React lease scheduling, rollback of a committed write when UI confirmation fails, ACL creation/deletion/association, or packet behavior. No Go/JavaScript refinement proof."
+          "limits": "Local one-VPC, one-tag metadata and normalized exact selection, admission, store/commit and selected-key readback witnesses only. No raw Query/XML/Unicode grammar, IAM evaluator, full-tag snapshot or SQL isolation/crash proof, arbitrary concurrent schedules, browser lease/timing proof, offline file fingerprint, broader AWS parity, packet/traffic behavior or Go/JavaScript refinement. Console pre-read is not compare-and-set; unconfirmed does not imply rollback."
         }
       ]
     },
     {
-      "path": "tools/console/src/ec2-network-acls.mjs",
-      "sha256": "69bfa99509cdcefdfacc2c21a2f876defcaf43fc9e3c3c65da93c4077fee5e7b",
+      "path": "tools/console/src/ec2-vpc-tags-panel.jsx",
+      "sha256": "bbf7d718d2a0d3306578dbfe82f9dc0e89adb885ab9e787992624a56e7cc2e82",
       "disposition": "modeled",
-      "reason": "Decode the native rule shape and verify the scoped previous and final rule identity and contents around one native write.",
+      "reason": "Offer guarded add, edit and exact-value delete controls and show a verified result only after same-scope readback.",
       "models": [
         {
-          "id": "EC2DetachedNetworkACLRules",
+          "id": "EC2NativeVPCTags",
           "properties": [
-            "VerifiedSelectedConsole",
-            "ExactReadProjection"
+            "ExactConsoleRequest",
+            "VerifiedConsoleOutcome",
+            "NoConfirmationRollback"
           ],
-          "limits": "Symbolic metadata configuration only. Does not model actual 20-per-direction count, full SDK/HTTP/XML/SQL or IAM parsing, real 64-bit wrap, raw CIDR/port validation or snapshot isolation, concurrency between browser pre-read and write, React lease scheduling, rollback of a committed write when UI confirmation fails, ACL creation/deletion/association, or packet behavior. No Go/JavaScript refinement proof."
+          "limits": "Local one-VPC, one-tag metadata and normalized exact selection, admission, store/commit and selected-key readback witnesses only. No raw Query/XML/Unicode grammar, IAM evaluator, full-tag snapshot or SQL isolation/crash proof, arbitrary concurrent schedules, browser lease/timing proof, offline file fingerprint, broader AWS parity, packet/traffic behavior or Go/JavaScript refinement. Console pre-read is not compare-and-set; unconfirmed does not imply rollback."
         }
       ]
     },
     {
-      "path": "tools/console/src/ec2-vpc-network-acls.jsx",
-      "sha256": "ed16488173ab493b5d523f5e8fed59a7a317240b9dfb643c08c98bd62b77623c",
+      "path": "tools/console/src/ec2-vpc-tags.mjs",
+      "sha256": "bffed71da92b436299aaa6d928374431376df13b27d063eeda946d4803aa21c1",
       "disposition": "modeled",
-      "reason": "Explain which controls this pane manages and which are in the dedicated page without implying subnet or packet effects. Surface a bounded response-size failure without changing the operation or write lease of this pane.",
+      "reason": "Check the authorized selected VPC around precisely one native tag write and compare the requested key on readback.",
       "models": [
         {
-          "id": "EC2DetachedNetworkConsole",
+          "id": "EC2NativeVPCTags",
           "properties": [
-            "OnlyCurrentScope",
-            "VerifiedWriteOnly"
+            "ExactConsoleRequest",
+            "VerifiedConsoleOutcome",
+            "NoConfirmationRollback"
           ],
-          "limits": "Native UI admission, scoped completion and aggregate write leases only. No React event ordering, layout, serialized identity API, XML parsing, SQLite, packet behavior or implementation proof. Legacy CFN read-only behavior remains separately modeled."
+          "limits": "Local one-VPC, one-tag metadata and normalized exact selection, admission, store/commit and selected-key readback witnesses only. No raw Query/XML/Unicode grammar, IAM evaluator, full-tag snapshot or SQL isolation/crash proof, arbitrary concurrent schedules, browser lease/timing proof, offline file fingerprint, broader AWS parity, packet/traffic behavior or Go/JavaScript refinement. Console pre-read is not compare-and-set; unconfirmed does not imply rollback."
         }
       ]
     },
     {
-      "path": "tools/console/test/ec2-network-acl-inventory.test.mjs",
-      "sha256": "495ae6e05e48be1dd0190c718cdb317587b90a6e9c7844b967a76633515c29b2",
+      "path": "tools/console/test/ec2-vpc-tags.test.mjs",
+      "sha256": "f80e87dc0f960581fc513f337956123d20151944344f1b874bb6298075eacfdd",
       "disposition": "presentation",
-      "reason": "Exercise strict ACL rule response projection, exact native readback, and existing Console admission and accessibility controls.",
-      "models": []
-    },
-    {
-      "path": "tools/console/test/ec2-network-acls.test.mjs",
-      "sha256": "3f544289bfdf3b9a199707530329d9c3953e7bef1767dabc8d27914b39506921",
-      "disposition": "presentation",
-      "reason": "Exercise strict ACL rule response projection, exact native readback, and existing Console admission and accessibility controls.",
+      "reason": "Exercise strict scoped VPC tag response projection, exact native readback, and existing Console admission and accessibility controls.",
       "models": []
     }
   ]

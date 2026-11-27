@@ -28325,6 +28325,607 @@
           "expect_invariant": "VerifiedSelectedConsole"
         }
       ]
+    },
+    {
+      "id": "EC2NativeVPCTags",
+      "model": "formal/EC2NativeVPCTags.tla",
+      "config": "formal/EC2NativeVPCTags.cfg",
+      "bounds": "44 native and 34 selected-console synthetic scenarios; one request per case, two editable key cells, separate absent/empty/omitted values, immutable filler at the exact 50-tag boundary, two protected row frames and at most one independent pre/post tag or DNS event.",
+      "properties": [
+        "TypeOK",
+        "ExactNativeAdmission",
+        "ExactTagEffect",
+        "AtomicTagCommit",
+        "NonTagFrame",
+        "ExactConsoleRequest",
+        "VerifiedConsoleOutcome",
+        "NoConfirmationRollback"
+      ],
+      "limits": "Local one-VPC, one-tag metadata and normalized exact selection, admission, store/commit and selected-key readback witnesses only. No raw Query/XML/Unicode grammar, IAM evaluator, full-tag snapshot or SQL isolation/crash proof, arbitrary concurrent schedules, browser lease/timing proof, offline file fingerprint, broader AWS parity, packet/traffic behavior or Go/JavaScript refinement. Console pre-read is not compare-and-set; unconfirmed does not imply rollback.",
+      "source_scope": [
+        "internal/aws/ec2_read.go",
+        "internal/aws/ec2_vpc.go",
+        "internal/aws/ec2_vpc_tag.go",
+        "internal/server/server.go",
+        "internal/server/web/app.js",
+        "tools/console/src/ec2-readonly.jsx",
+        "tools/console/src/ec2-vpc-tags-panel.jsx",
+        "tools/console/src/ec2-vpc-tags.mjs"
+      ],
+      "mutants": [
+        {
+          "id": "IgnoreRegionalTarget",
+          "edits": [
+            {
+              "old": "SameRegion(q) == q.target[1] = Scope[1]",
+              "new": "SameRegion(q) == TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExactNativeAdmission"
+        },
+        {
+          "id": "IgnoreVPCIdentity",
+          "edits": [
+            {
+              "old": "SameResource(q) == q.target[2] = Scope[2]",
+              "new": "SameResource(q) == TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExactNativeAdmission"
+        },
+        {
+          "id": "IgnoreGrantedAction",
+          "edits": [
+            {
+              "old": "ExactGrant(q) == q.grant[1] = q.action /\\ q.grant[2] = q.target",
+              "new": "ExactGrant(q) == q.grant[2] = q.target",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExactNativeAdmission"
+        },
+        {
+          "id": "IgnoreGrantedRegion",
+          "edits": [
+            {
+              "old": "ExactGrant(q) == q.grant[1] = q.action /\\ q.grant[2] = q.target",
+              "new": "ExactGrant(q) == q.grant[1] = q.action /\\ q.grant[2][2] = q.target[2]",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExactNativeAdmission"
+        },
+        {
+          "id": "IgnoreGrantedVPC",
+          "edits": [
+            {
+              "old": "ExactGrant(q) == q.grant[1] = q.action /\\ q.grant[2] = q.target",
+              "new": "ExactGrant(q) == q.grant[1] = q.action /\\ q.grant[2][1] = q.target[1]",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExactNativeAdmission"
+        },
+        {
+          "id": "AdmitSecondResource",
+          "edits": [
+            {
+              "old": "ValidShape(q) == q.shape = \"single\"",
+              "new": "ValidShape(q) == q.shape \\in {\"single\",\"second-resource\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExactNativeAdmission"
+        },
+        {
+          "id": "AdmitSecondTag",
+          "edits": [
+            {
+              "old": "ValidShape(q) == q.shape = \"single\"",
+              "new": "ValidShape(q) == q.shape \\in {\"single\",\"second-tag\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExactNativeAdmission"
+        },
+        {
+          "id": "AdmitMissingTagKey",
+          "edits": [
+            {
+              "old": "ValidShape(q) == q.shape = \"single\"",
+              "new": "ValidShape(q) == q.shape \\in {\"single\",\"missing-key\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExactNativeAdmission"
+        },
+        {
+          "id": "AdmitInvalidTagText",
+          "edits": [
+            {
+              "old": "ValidShape(q) == q.shape = \"single\"",
+              "new": "ValidShape(q) == q.shape \\in {\"single\",\"invalid-text\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExactNativeAdmission"
+        },
+        {
+          "id": "AdmitCFNOwner",
+          "edits": [
+            {
+              "old": "OwnsCanonical(q) == q.witness = \"canonical\"",
+              "new": "OwnsCanonical(q) == q.witness \\in {\"canonical\",\"cfn-owner\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExactNativeAdmission"
+        },
+        {
+          "id": "IgnorePersistentCFNClaim",
+          "edits": [
+            {
+              "old": "OwnsCanonical(q) == q.witness = \"canonical\"",
+              "new": "OwnsCanonical(q) == q.witness \\in {\"canonical\",\"cfn-claim\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExactNativeAdmission"
+        },
+        {
+          "id": "IgnoreIndependentCFNDeclaration",
+          "edits": [
+            {
+              "old": "OwnsCanonical(q) == q.witness = \"canonical\"",
+              "new": "OwnsCanonical(q) == q.witness \\in {\"canonical\",\"cfn-declared\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExactNativeAdmission"
+        },
+        {
+          "id": "IgnoreMainSlotFence",
+          "edits": [
+            {
+              "old": "OwnsCanonical(q) == q.witness = \"canonical\"",
+              "new": "OwnsCanonical(q) == q.witness \\in {\"canonical\",\"main-slot\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExactNativeAdmission"
+        },
+        {
+          "id": "RewriteNoncanonicalDocument",
+          "edits": [
+            {
+              "old": "OwnsCanonical(q) == q.witness = \"canonical\"",
+              "new": "OwnsCanonical(q) == q.witness \\in {\"canonical\",\"noncanonical-document\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExactNativeAdmission"
+        },
+        {
+          "id": "IgnoreGenerationWitness",
+          "edits": [
+            {
+              "old": "OwnsCanonical(q) == q.witness = \"canonical\"",
+              "new": "OwnsCanonical(q) == q.witness \\in {\"canonical\",\"invalid-generation\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExactNativeAdmission"
+        },
+        {
+          "id": "AllowReservedPrefix",
+          "edits": [
+            {
+              "old": "LegalKey(q) == q.key \\in Keys",
+              "new": "LegalKey(q) == q.key \\in Cells",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExactNativeAdmission"
+        },
+        {
+          "id": "AllowOmittedCreate",
+          "edits": [
+            {
+              "old": "LegalValue(q) == q.value \\in Values \\/ (q.action = \"DeleteTags\" /\\ q.value = Omitted)",
+              "new": "LegalValue(q) == q.value \\in Values \\cup {Omitted}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExactNativeAdmission"
+        },
+        {
+          "id": "AllowFiftyFirstTag",
+          "edits": [
+            {
+              "old": "Fits(next) == TagCount(next) <= TagLimit",
+              "new": "Fits(next) == TagCount(next) <= TagLimit + 1",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExactNativeAdmission"
+        },
+        {
+          "id": "RejectReplacementAtQuota",
+          "edits": [
+            {
+              "old": "admitted == Admit(q) /\\ Fits(candidate)",
+              "new": "admitted == Admit(q) /\\ Fits(candidate) /\\\n           ~(q.action = \"CreateTags\" /\\ TagCount(before) = TagLimit /\\ before.tags[q.key] # Absent)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExactNativeAdmission"
+        },
+        {
+          "id": "TreatEmptyDeleteAsOmitted",
+          "edits": [
+            {
+              "old": "RemoveMatches(q, old) == old # Absent /\\ (q.value = Omitted \\/ q.value = old)",
+              "new": "RemoveMatches(q, old) == old # Absent /\\ (q.value \\in {\"\",Omitted} \\/ q.value = old)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExactTagEffect"
+        },
+        {
+          "id": "RefuseKeyOnlyDeletion",
+          "edits": [
+            {
+              "old": "RemoveMatches(q, old) == old # Absent /\\ (q.value = Omitted \\/ q.value = old)",
+              "new": "RemoveMatches(q, old) == old # Absent /\\ q.value = old",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExactTagEffect"
+        },
+        {
+          "id": "DeleteDifferentValue",
+          "edits": [
+            {
+              "old": "RemoveMatches(q, old) == old # Absent /\\ (q.value = Omitted \\/ q.value = old)",
+              "new": "RemoveMatches(q, old) == old # Absent /\\ (q.value \\in {Omitted,\"green\"} \\/ q.value = old)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExactTagEffect"
+        },
+        {
+          "id": "PhysicallyRewriteIdenticalTag",
+          "edits": [
+            {
+              "old": "writes == IF ack /\\ changed THEN 1 ELSE 0",
+              "new": "writes == IF ack /\\ (changed \\/ q.action = \"CreateTags\") THEN 1 ELSE 0",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExactTagEffect"
+        },
+        {
+          "id": "PhysicallyRewriteMissingDeletion",
+          "edits": [
+            {
+              "old": "writes == IF ack /\\ changed THEN 1 ELSE 0",
+              "new": "writes == IF ack /\\ (changed \\/ (q.action = \"DeleteTags\" /\\ before.tags[q.key] = Absent)) THEN 1 ELSE 0",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExactTagEffect"
+        },
+        {
+          "id": "IgnoreExactCASDocument",
+          "edits": [
+            {
+              "old": "OneRowWrite(q) == q.tx \\notin {\"cas-mismatch\", \"write-refused\"}",
+              "new": "OneRowWrite(q) == q.tx # \"write-refused\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AtomicTagCommit"
+        },
+        {
+          "id": "IgnoreExactlyOneAffectedRow",
+          "edits": [
+            {
+              "old": "OneRowWrite(q) == q.tx \\notin {\"cas-mismatch\", \"write-refused\"}",
+              "new": "OneRowWrite(q) == q.tx # \"cas-mismatch\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AtomicTagCommit"
+        },
+        {
+          "id": "IgnoreDocumentReread",
+          "edits": [
+            {
+              "old": "MatchesStored(q) == q.tx \\notin {\"reread-document\", \"reread-ownership\"}",
+              "new": "MatchesStored(q) == q.tx # \"reread-ownership\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AtomicTagCommit"
+        },
+        {
+          "id": "IgnoreOwnershipReread",
+          "edits": [
+            {
+              "old": "MatchesStored(q) == q.tx \\notin {\"reread-document\", \"reread-ownership\"}",
+              "new": "MatchesStored(q) == q.tx # \"reread-document\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AtomicTagCommit"
+        },
+        {
+          "id": "AcknowledgeWithoutCommit",
+          "edits": [
+            {
+              "old": "q.tx # \"commit-refused\" /\\ (~writes \\/ (OneRowWrite(q) /\\ MatchesStored(q)))",
+              "new": "(~writes \\/ (OneRowWrite(q) /\\ MatchesStored(q)))",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AtomicTagCommit"
+        },
+        {
+          "id": "KeepUncommittedDocument",
+          "edits": [
+            {
+              "old": "writes == IF ack /\\ changed THEN 1 ELSE 0",
+              "new": "writes == IF (ack \\/ (admitted /\\ q.tx = \"commit-refused\")) /\\ changed THEN 1 ELSE 0",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AtomicTagCommit"
+        },
+        {
+          "id": "AssumeConsolePreReadIsCAS",
+          "edits": [
+            {
+              "old": "r == IF s.sent = Absent THEN Absent ELSE Execute(s.sent,before)",
+              "new": "r == IF s.sent = Absent THEN Absent ELSE\n              Execute(IF s.plan.concurrent = \"tag-before\" /\\ s.sent.action = \"CreateTags\"\n                      THEN [s.sent EXCEPT !.tx = \"cas-mismatch\"] ELSE s.sent,before)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AtomicTagCommit"
+        },
+        {
+          "id": "AdvanceTopologyRevisionForTag",
+          "edits": [
+            {
+              "old": "saved == IF writes = 1 THEN candidate ELSE before",
+              "new": "saved == IF writes = 1 THEN [candidate EXCEPT !.rev = @ + 1] ELSE before",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "NonTagFrame"
+        },
+        {
+          "id": "AdvanceDNSGenerationForTag",
+          "edits": [
+            {
+              "old": "saved == IF writes = 1 THEN candidate ELSE before",
+              "new": "saved == IF writes = 1 THEN [candidate EXCEPT !.dnsRev = @ + 1] ELSE before",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "NonTagFrame"
+        },
+        {
+          "id": "DropNeighborTagFromDocument",
+          "edits": [
+            {
+              "old": "saved == IF writes = 1 THEN candidate ELSE before",
+              "new": "saved == IF writes = 1 THEN [candidate EXCEPT !.tags[IF q.key = \"Name\" THEN \"Color\" ELSE \"Name\"] = Absent] ELSE before",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "NonTagFrame"
+        },
+        {
+          "id": "RetagPeerVPC",
+          "edits": [
+            {
+              "old": "!.row = IF r = Absent THEN before ELSE r.saved]",
+              "new": "!.peer = [s.peer EXCEPT !.tags[\"Name\"] = \"\"], !.row = IF r = Absent THEN before ELSE r.saved]",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "NonTagFrame"
+        },
+        {
+          "id": "OperateUnadvertisedConsole",
+          "edits": [
+            {
+              "old": "EditGate(p) == p.pre \\notin UIBlocks",
+              "new": "EditGate(p) == p.pre \\notin (UIBlocks \\ {\"unadvertised\"})",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExactConsoleRequest"
+        },
+        {
+          "id": "OperateScopedParticipantConsole",
+          "edits": [
+            {
+              "old": "EditGate(p) == p.pre \\notin UIBlocks",
+              "new": "EditGate(p) == p.pre \\notin (UIBlocks \\ {\"participant-scope\"})",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExactConsoleRequest"
+        },
+        {
+          "id": "IgnoreOtherActorCapture",
+          "edits": [
+            {
+              "old": "EditGate(p) == p.pre \\notin UIBlocks",
+              "new": "EditGate(p) == p.pre \\notin (UIBlocks \\ {\"different-capture\"})",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExactConsoleRequest"
+        },
+        {
+          "id": "IgnoreOtherPaneLease",
+          "edits": [
+            {
+              "old": "EditGate(p) == p.pre \\notin UIBlocks",
+              "new": "EditGate(p) == p.pre \\notin (UIBlocks \\ {\"lease-busy\"})",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExactConsoleRequest"
+        },
+        {
+          "id": "SkipFreshObservedValue",
+          "edits": [
+            {
+              "old": "/\\ ExactSnapshot(fresh,k) /\\ fresh.tag = old /\\ k \\in Keys",
+              "new": "/\\ ExactSnapshot(fresh,k) /\\ k \\in Keys",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExactConsoleRequest"
+        },
+        {
+          "id": "IgnoreScopeOfPreRead",
+          "edits": [
+            {
+              "old": "/\\ ExactSnapshot(fresh,k) /\\ fresh.tag = old /\\ k \\in Keys",
+              "new": "/\\ fresh.tag = old /\\ k \\in Keys",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExactConsoleRequest"
+        },
+        {
+          "id": "UseKeyOnlyConsoleRemoval",
+          "edits": [
+            {
+              "old": "WireValue(p) == IF p.q.action = \"DeleteTags\" THEN ObservedValue(p) ELSE p.q.value",
+              "new": "WireValue(p) == IF p.q.action = \"DeleteTags\" THEN Omitted ELSE p.q.value",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExactConsoleRequest"
+        },
+        {
+          "id": "PublishOnRefusedMutation",
+          "edits": [
+            {
+              "old": "r.ack /\\ p.read2 # \"false-return\"",
+              "new": "p.read2 # \"false-return\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "VerifiedConsoleOutcome"
+        },
+        {
+          "id": "AcceptFalseReturn",
+          "edits": [
+            {
+              "old": "r.ack /\\ p.read2 # \"false-return\" /\\ p.read2 # \"retired\"",
+              "new": "r.ack /\\ p.read2 # \"retired\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "VerifiedConsoleOutcome"
+        },
+        {
+          "id": "PublishRetiredResult",
+          "edits": [
+            {
+              "old": "r.ack /\\ p.read2 # \"false-return\" /\\ p.read2 # \"retired\"",
+              "new": "r.ack /\\ p.read2 # \"false-return\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "VerifiedConsoleOutcome"
+        },
+        {
+          "id": "ReadbackFromWrongRegion",
+          "edits": [
+            {
+              "old": "/\\ ExactSnapshot(read,p.q.key) /\\ read.tag = Wanted(p)",
+              "new": "/\\ read.scope[2] = Scope[2] /\\ read.key = p.q.key /\\ read.native /\\ read.parsed /\\ read.tag = Wanted(p)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "VerifiedConsoleOutcome"
+        },
+        {
+          "id": "ReadbackFromOtherVPC",
+          "edits": [
+            {
+              "old": "/\\ ExactSnapshot(read,p.q.key) /\\ read.tag = Wanted(p)",
+              "new": "/\\ read.scope[1] = Scope[1] /\\ read.key = p.q.key /\\ read.native /\\ read.parsed /\\ read.tag = Wanted(p)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "VerifiedConsoleOutcome"
+        },
+        {
+          "id": "ReadbackFromOtherKey",
+          "edits": [
+            {
+              "old": "/\\ ExactSnapshot(read,p.q.key) /\\ read.tag = Wanted(p)",
+              "new": "/\\ read.scope = Scope /\\ read.native /\\ read.parsed /\\ read.tag = Wanted(p)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "VerifiedConsoleOutcome"
+        },
+        {
+          "id": "ReadbackFromWrongOwner",
+          "edits": [
+            {
+              "old": "/\\ ExactSnapshot(read,p.q.key) /\\ read.tag = Wanted(p)",
+              "new": "/\\ read.scope = Scope /\\ read.key = p.q.key /\\ read.parsed /\\ read.tag = Wanted(p)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "VerifiedConsoleOutcome"
+        },
+        {
+          "id": "SkipExpectedTagReadback",
+          "edits": [
+            {
+              "old": "/\\ ExactSnapshot(read,p.q.key) /\\ read.tag = Wanted(p)",
+              "new": "/\\ ExactSnapshot(read,p.q.key)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "VerifiedConsoleOutcome"
+        },
+        {
+          "id": "DisplayDraftAsVerifiedName",
+          "edits": [
+            {
+              "old": "!.shown = IF publish THEN got ELSE Absent]",
+              "new": "!.shown = IF publish THEN [got EXCEPT !.name = p.q.value] ELSE Absent]",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "VerifiedConsoleOutcome"
+        },
+        {
+          "id": "UndoCommittedTagOnUnconfirmedUI",
+          "edits": [
+            {
+              "old": "!.phase = 3, !.row = actual, !.observed = got,",
+              "new": "!.phase = 3, !.row = IF publish THEN actual ELSE s.before, !.observed = got,",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "NoConfirmationRollback"
+        }
+      ]
     }
   ]
 }
