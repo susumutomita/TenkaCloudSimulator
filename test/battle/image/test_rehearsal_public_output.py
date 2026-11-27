@@ -21,6 +21,7 @@ import subprocess
 import tempfile
 import types
 import unittest
+from unittest.mock import Mock, call
 
 
 SOURCE = Path(__file__).resolve().parents[1] / 'rehearsal.py'
@@ -31,6 +32,18 @@ RAW = ('+ TOKEN=' + CANARIES[0] + '\nAuthorization: Bearer ' + CANARIES[1]
        + '\nX-Amz-Security-Token: ' + CANARIES[2]
        + '\nAWS_SECRET_ACCESS_KEY=' + CANARIES[3] + '\n' + CANARIES[4])
 DIGEST = 'ab' * 32
+
+
+class ClientError(Exception):
+    def __init__(self, code, status):
+        super().__init__(RAW)
+        self.response = {'Error': {'Code': code, 'Message': RAW},
+                         'ResponseMetadata': {'HTTPStatusCode': status, 'RequestId': RAW}}
+
+
+SDK_TRANSPORT_TYPES = {name: type(name, (Exception,), {}) for name in (
+    'ConnectionClosedError', 'ConnectTimeoutError', 'ReadTimeoutError',
+    'EndpointConnectionError', 'HTTPClientError', 'ResponseParserError')}
 
 
 def source_tree():
@@ -65,6 +78,7 @@ class PublicHarness:
                        'templateSha256': DIGEST, 'result': 'PASS'}
         self.ns = {
             'json': json, 're': re, 'math': math, 'hashlib': hashlib,
+            'ClientError': ClientError, **SDK_TRANSPORT_TYPES,
             'contextmanager': contextlib.contextmanager,
             'os': os, 'pathlib': types.SimpleNamespace(Path=Path),
             'time': types.SimpleNamespace(time=lambda: 10.0, sleep=lambda _: None,
@@ -134,6 +148,31 @@ class PublicHarness:
                         handlers=outer[0].handlers, orelse=[], finalbody=outer[0].finalbody)
         with contextlib.redirect_stdout(self.console):
             exec(compile_nodes([block]), self.ns)
+
+    def initialize_stack(self, sdk, process, *, expect_describe=True):
+        outer, = (node for node in source_tree().body if isinstance(node, ast.Try)
+                  and any(isinstance(h.type, ast.Name) and h.type.id == 'BaseException' for h in node.handlers))
+        block = outer.body
+        start, = (i for i, stmt in enumerate(block) if isinstance(stmt, ast.Assign)
+                  and isinstance(stmt.value, ast.Call) and isinstance(stmt.value.func, ast.Name)
+                  and stmt.value.func.id == 'phase' and stmt.value.args[0].value == 'initialize')
+        end, = (i for i, stmt in enumerate(block) if isinstance(stmt, ast.Expr)
+                and isinstance(stmt.value, ast.Call) and isinstance(stmt.value.func, ast.Name)
+                and stmt.value.func.id == 'check' and stmt.value.args[1].value == 'stack-create-complete')
+        factory = Mock(return_value=sdk)
+        self.ns.update(args=types.SimpleNamespace(create_timeout=900), client=factory,
+                       process=process, stack_id='', TEMPLATE=RAW.encode(),
+                       secrets=types.SimpleNamespace(token_hex=lambda _: CANARIES[3]))
+        try:
+            with contextlib.redirect_stdout(self.console):
+                exec(compile_nodes(block[start:end + 1]), self.ns)
+        finally:
+            self.call('save')
+            clients = [call('cloudformation', read_timeout=900)]
+            if expect_describe:
+                clients.append(call('cloudformation'))
+            if factory.call_args_list != clients:
+                raise AssertionError('stack creation must use the unchanged SDK client setup')
 
     def child_capture(self):
         body = source_tree().body
@@ -321,6 +360,158 @@ class RehearsalPublicOutputTests(unittest.TestCase):
             self.h.call('save')
         except (ValueError, TypeError):
             return
+        self.assert_private_text_absent(self.h.saved())
+
+    def stack_fixture(self, stack_status):
+        sdk = Mock()
+        sdk.create_stack.return_value = {'StackId': RAW}
+        sdk.describe_stacks.return_value = {'Stacks': [
+            {'StackId': RAW, 'StackStatus': stack_status, 'StackStatusReason': RAW}]}
+        sdk.describe_stack_events.return_value = {'StackEvents': [
+            {'StackId': RAW, 'ResourceType': 'AWS::CloudFormation::Stack',
+             'ResourceStatus': stack_status, 'ResourceStatusReason': RAW}]}
+        process = Mock()
+        process.poll.return_value = None
+        return sdk, process
+
+    def stack_signals(self):
+        phase, = self.h.saved()['phases']
+        self.assertEqual(phase['name'], 'initialize')
+        self.assert_private_text_absent(self.h.saved())
+        self.assert_private_text_absent(self.h.console.getvalue())
+        self.assert_private_text_absent((self.h.work / 'simulator.log').read_text())
+        return phase['stackCreateDiagnostics'], phase['checks']
+
+    def test_stack_diagnostics_observe_normal_success_without_extra_calls(self):
+        sdk, process = self.stack_fixture('CREATE_COMPLETE')
+        self.h.initialize_stack(sdk, process)
+        signals, checks = self.stack_signals()
+        self.assertEqual(signals, {'createStack': 'response-confirmed',
+                                   'describeStacks': 'stack-observed',
+                                   'describeStackEvents': 'no-failed-event-observed',
+                                   'simulatorAtCreateReply': 'running', 'simulatorAtReadback': 'running'})
+        self.assertEqual([(c['name'], c['passed']) for c in checks],
+                         [('create-stack-response', True), ('stack-create-complete', True)])
+        self.assertTrue(checks[0]['responded'])
+        self.assertEqual(checks[1]['status'], 'CREATE_COMPLETE')
+        sdk.create_stack.assert_called_once()
+        sdk.describe_stacks.assert_called_once_with(StackName=RAW)
+        sdk.describe_stack_events.assert_called_once_with(StackName=RAW)
+
+    def test_stack_diagnostics_distinguish_service_failure_and_owned_instance_event(self):
+        sdk, process = self.stack_fixture('CREATE_FAILED')
+        sdk.create_stack.side_effect = ClientError('InternalFailure', 500)
+        sdk.describe_stack_events.return_value['StackEvents'] += [
+            {'StackId': RAW, 'ResourceType': 'AWS::EC2::Instance', 'ResourceStatus': 'CREATE_FAILED',
+             'PhysicalResourceId': RAW, 'ResourceStatusReason': RAW}]
+        with self.assertRaisesRegex(RuntimeError, '^stack-create-complete failed$'):
+            self.h.initialize_stack(sdk, process)
+        signals, checks = self.stack_signals()
+        self.assertEqual(signals, {'createStack': 'service-internal-failure',
+                                   'describeStacks': 'stack-observed',
+                                   'describeStackEvents': 'instance-create-failed',
+                                   'simulatorAtCreateReply': 'running', 'simulatorAtReadback': 'running'})
+        self.assertFalse(checks[0]['responded'])
+        self.assertEqual(checks[1]['status'], 'CREATE_FAILED')
+        self.assertFalse(checks[1]['passed'])
+        sdk.create_stack.assert_called_once()
+        sdk.describe_stacks.assert_called_once_with(StackName='tc-hello-world-battle-team1')
+        sdk.describe_stack_events.assert_called_once_with(StackName=RAW)
+
+    def test_stack_diagnostics_keep_description_transport_failure_fatal(self):
+        sdk, process = self.stack_fixture('CREATE_COMPLETE')
+        sdk.create_stack.side_effect = SDK_TRANSPORT_TYPES['ConnectionClosedError'](RAW)
+        failure = SDK_TRANSPORT_TYPES['ReadTimeoutError'](RAW)
+        sdk.describe_stacks.side_effect = failure
+        process.poll.side_effect = [None, 5]
+        with self.assertRaises(type(failure)) as raised:
+            self.h.initialize_stack(sdk, process)
+        self.assertIs(raised.exception, failure)
+        signals, checks = self.stack_signals()
+        self.assertEqual(signals, {'createStack': 'connection-closed', 'describeStacks': 'read-timeout',
+                                   'simulatorAtCreateReply': 'running', 'simulatorAtReadback': 'exited'})
+        self.assertEqual(len(checks), 1)
+        self.assertFalse(checks[0]['responded'])
+        sdk.describe_stack_events.assert_not_called()
+
+    def test_malformed_create_stack_error_stops_before_readback(self):
+        for field in ('Code', 'Message'):
+            with self.subTest(field=field):
+                self.h.report['phases'] = []
+                sdk, process = self.stack_fixture('CREATE_COMPLETE')
+                failure = ClientError('InternalFailure', 500)
+                del failure.response['Error'][field]
+                sdk.create_stack.side_effect = failure
+                with self.assertRaises(KeyError) as raised:
+                    self.h.initialize_stack(sdk, process, expect_describe=False)
+                self.assertEqual(raised.exception.args, (field,))
+                signals, checks = self.stack_signals()
+                self.assertEqual(signals, {'createStack': 'malformed-service-error',
+                                           'simulatorAtCreateReply': 'running'})
+                self.assertEqual(checks, [])
+                sdk.create_stack.assert_called_once()
+                sdk.describe_stacks.assert_not_called()
+                sdk.describe_stack_events.assert_not_called()
+
+    def test_malformed_describe_stacks_error_stops_before_completion(self):
+        sdk, process = self.stack_fixture('CREATE_COMPLETE')
+        failure = ClientError('InternalFailure', 500)
+        del failure.response['Error']['Code']
+        sdk.describe_stacks.side_effect = [failure, sdk.describe_stacks.return_value]
+        with self.assertRaises(KeyError) as raised:
+            self.h.initialize_stack(sdk, process)
+        self.assertEqual(raised.exception.args, ('Code',))
+        signals, checks = self.stack_signals()
+        self.assertEqual(signals, {'createStack': 'response-confirmed',
+                                   'describeStacks': 'malformed-service-error',
+                                   'simulatorAtCreateReply': 'running', 'simulatorAtReadback': 'running'})
+        self.assertEqual([c['name'] for c in checks], ['create-stack-response'])
+        sdk.describe_stacks.assert_called_once_with(StackName=RAW)
+        sdk.describe_stack_events.assert_not_called()
+
+    def test_describe_stacks_keeps_existing_poll_for_error_with_code_only(self):
+        sdk, process = self.stack_fixture('CREATE_COMPLETE')
+        failure = ClientError('InternalFailure', 500)
+        del failure.response['Error']['Message']
+        sdk.describe_stacks.side_effect = [failure, sdk.describe_stacks.return_value]
+        self.h.initialize_stack(sdk, process)
+        signals, checks = self.stack_signals()
+        self.assertEqual(signals['describeStacks'], 'stack-observed')
+        self.assertEqual(checks[-1]['status'], 'CREATE_COMPLETE')
+        self.assertEqual(sdk.describe_stacks.call_args_list, [call(StackName=RAW), call(StackName=RAW)])
+        sdk.describe_stack_events.assert_called_once_with(StackName=RAW)
+
+    def test_malformed_stack_event_shape_stops_before_completion(self):
+        sdk, process = self.stack_fixture('CREATE_COMPLETE')
+        sdk.describe_stack_events.return_value['StackEvents'].append(RAW)
+        with self.assertRaises(AttributeError):
+            self.h.initialize_stack(sdk, process)
+        signals, checks = self.stack_signals()
+        self.assertEqual(signals['describeStackEvents'], 'malformed-event-page')
+        self.assertEqual([c['name'] for c in checks], ['create-stack-response'])
+        sdk.describe_stack_events.assert_called_once_with(StackName=RAW)
+
+    def test_stack_diagnostics_never_publish_unknown_codes_or_misattributed_events(self):
+        sdk, process = self.stack_fixture('CREATE_FAILED')
+        sdk.create_stack.side_effect = ClientError(RAW, 500)
+        sdk.describe_stack_events.return_value['StackEvents'] += [
+            {'StackId': 'unrelated-stack', 'ResourceType': 'AWS::EC2::Instance',
+             'ResourceStatus': 'CREATE_FAILED', 'ResourceStatusReason': RAW}]
+        with self.assertRaisesRegex(RuntimeError, '^stack-create-complete failed$'):
+            self.h.initialize_stack(sdk, process)
+        signals, _ = self.stack_signals()
+        self.assertEqual(signals['createStack'], 'other-service-error')
+        self.assertEqual(signals['describeStackEvents'], 'stack-create-failed')
+        entry = self.h.report['phases'][0]
+        entry['stackCreateDiagnostics'].update(createStack=RAW, simulatorAtReadback='read-timeout',
+                                               describeStacks='instance-create-failed', extra=RAW)
+        other = self.h.call('phase', 'operate')
+        other['stackCreateDiagnostics'] = {'createStack': 'response-confirmed'}
+        self.h.call('save')
+        initialize, operate = self.h.saved()['phases']
+        self.assertEqual(initialize['stackCreateDiagnostics'],
+                         {'describeStackEvents': 'stack-create-failed', 'simulatorAtCreateReply': 'running'})
+        self.assertNotIn('stackCreateDiagnostics', operate)
         self.assert_private_text_absent(self.h.saved())
 
     def test_known_status_survives_but_unknown_status_is_not_public(self):

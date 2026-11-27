@@ -4298,6 +4298,60 @@ EC2INSTANCESTACKCONSOLE_MUTATIONS = [{'id': 'OmitCurrentCapability',
   'expect_invariant': 'NoGuestLivenessClaim'}]
 
 
+# Selected-VPC DNS and Resource Map are separate formal obligations.
+BASE_MODELS.add('EC2VPCDNSAttributes')
+BASE_INVARIANTS['EC2VPCDNSAttributes'] = {
+    'TypeOK',
+    'ExactReceipt',
+    'Frame',
+    'RefusalOrReadUnchanged',
+    'ExactSetting',
+    'NoSpuriousRevision',
+}
+REQUIRED_MUTANTS['EC2VPCDNSAttributes'] = {
+    'IgnoreExactVpcGrant',
+    'WriteStackVpc',
+    'IgnoreDNSDependency',
+    'AlwaysAdvanceGeneration',
+}
+REQUIRED_SOURCE_SCOPES['EC2VPCDNSAttributes'] = {
+    'internal/aws/ec2_native_vpc_main_repair.go',
+    'internal/aws/ec2_native_vpc_main_route.go',
+    'internal/aws/ec2_network.go',
+    'internal/aws/ec2_read.go',
+    'internal/aws/ec2_vpc.go',
+    'internal/aws/ec2_vpc_dns.go',
+}
+
+
+BASE_MODELS.add('EC2VpcResourceMap')
+BASE_INVARIANTS['EC2VpcResourceMap'] = {
+    'TypeOK',
+    'AssociationQualityExact',
+    'ExplicitNeedsEvidence',
+    'MainNeedsWitness',
+    'ExactAttachedGatewayEdges',
+    'GatewayFailureNotEmpty',
+    'GatewayHoleReported',
+}
+REQUIRED_MUTANTS['EC2VpcResourceMap'] = {
+    'IgnoreAssociationConflict',
+    'InventExplicitForAbsent',
+    'InventUnseenMain',
+    'AcceptStackNativeMarkers',
+    'AllowDetachedOrPeerRoute',
+    'IgnoreAttachmentWitness',
+    'TreatDeniedAsEmpty',
+    'HidePartialMissingTarget',
+    'DropOtherConfirmedRoute',
+}
+REQUIRED_SOURCE_SCOPES['EC2VpcResourceMap'] = {
+    'internal/server/web/app.js',
+    'tools/console/src/ec2-vpc-resource-map.jsx',
+    'tools/console/src/ec2-vpc-topology-read.mjs',
+}
+
+
 BASE_MODELS.add('EC2LegacyNativeMainRepair')
 BASE_INVARIANTS['EC2LegacyNativeMainRepair'] = {
     'TypeOK',
@@ -4524,7 +4578,6 @@ REQUIRED_SOURCE_SCOPES['LocalSSOSyntheticLifecycle'] = {
     'internal/server/cognito_hosted.go',
     'internal/server/server.go',
 }
-
 
 def load_registry(root, relative='formal/models.json'):
     root = Path(root)

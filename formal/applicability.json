@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "base_sha": "7f500c9e951d9328a36df3a9946f1c6827200085",
+  "base_sha": "9bb4eb16d46d7096d282c81bd1572bff237c790b",
   "changes": [
     {
       "path": ".github/workflows/battle-hosts.yml",
@@ -11,14 +11,14 @@
     },
     {
       "path": "README.ja.md",
-      "sha256": "b594e91a77a5aa2e2ed5eed26071bdbf223b8c5b7b4c532006e9f596e3381840",
+      "sha256": "df539ab3dc62472fa4ed47cbc74a058fcce08da1b0b56ee7d7cb5dd75fdabf72",
       "disposition": "documentation",
       "reason": "Discover the local-only sample from the Japanese startup section.",
       "models": []
     },
     {
       "path": "README.md",
-      "sha256": "5d78191dfc3bdf470a470b815ec3a179161a526e0fd34c426b7c46524d1a6dfb",
+      "sha256": "86d05eb5bd105fa37a7aa797bc457976d4978f4e2e2813ec6709a4b8eab6b50c",
       "disposition": "documentation",
       "reason": "Discover and separate the explicit SSO sample from existing default/management-only Cognito documentation.",
       "models": []
@@ -79,6 +79,13 @@
       ]
     },
     {
+      "path": "cmd/simulator/local_sso_startup_failures_test.go",
+      "sha256": "1daa81f68f3cc683468f76a5f37f62b3d99c239e98c7253cf397118bee73f65f",
+      "disposition": "test-support",
+      "reason": "Checks actual failure before readiness from private filesystem and local listener failures, and verifies cleanup.",
+      "models": []
+    },
+    {
       "path": "cmd/simulator/local_sso_test.go",
       "sha256": "41804db3039c927f534835781a3aa53ac11b3de76f8da9d3d2b1680b72638ff1",
       "disposition": "test-support",
@@ -125,7 +132,7 @@
     },
     {
       "path": "docs/design/0001-go-standalone.md",
-      "sha256": "e33106647d30676ef37fccfc34a5257c602474cd7b9f311d9bfe2057e640527f",
+      "sha256": "325fbe78be774cdb809f70ee57c43091b9e2e7ed68fb36e9d50ee2159bf9761a",
       "disposition": "documentation",
       "reason": "Record explicit single-binary, split-origin local fixture architecture and limited validated boundary.",
       "models": []
@@ -203,9 +210,9 @@
     },
     {
       "path": "formal/models.json",
-      "sha256": "5ad7dd778a39ea21a26f2230cbfcc14aed6c6b3b7ca04c515b1f1b2eb9bf9982",
+      "sha256": "2a39a33915a0c58da191ebc843f42c68684a2f2167f3814dfee7650b007e09e9",
       "disposition": "formal-infrastructure",
-      "reason": "Append only the new bounded model registry row and its required named controls; do not remove or weaken existing models.",
+      "reason": "Extend the main registry with the first-party local SSO lifecycle while preserving the VPC controls.",
       "models": []
     },
     {
@@ -397,6 +404,13 @@
       "models": []
     },
     {
+      "path": "internal/aws/cognitoidp/hosted_pool_deletion_test.go",
+      "sha256": "58c162690bf1f4730d17237069aadcb298fb1b0b2200b0053b360252f96e9055",
+      "disposition": "test-support",
+      "reason": "Test ordinary owning-pool deletion during two active sign-ins and confirm recovery and sibling isolation without changing runtime.",
+      "models": []
+    },
+    {
       "path": "internal/aws/cognitoidp/hosted_profile.go",
       "sha256": "baf626153f0a7521da99a64dc2587f628786996c07e32fe794bfa59de9a80aab",
       "disposition": "modeled",
@@ -418,6 +432,13 @@
       "sha256": "ed084d9155db67cbc3abaf0f69e8068903b2f4410c0098c52237bef8e58157fb",
       "disposition": "test-support",
       "reason": "Tests trust revision expiry for pending and unredeemed logins, and durable write refusal or recovery without incorrect browser success.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/cognitoidp/hosted_reopen_test.go",
+      "sha256": "56cae0525c7003a40e1eb31ea4ca141674060c872f95ce502091c6aa39ca10e1",
+      "disposition": "test-support",
+      "reason": "Checks refusal for a read-only legacy Native store, preserved enrollments, and a fresh successful signed login after writable reopen.",
       "models": []
     },
     {
@@ -574,16 +595,16 @@
     },
     {
       "path": "scripts/formal_model_gate.py",
-      "sha256": "b0de9f53594a3ef219459f434cf3eebf1217a408a48258295bc29d9aa4d2f44c",
+      "sha256": "0249458cc2c206e43abe204c2ea8603b1fce385dff0dcb2fc2c4c8c39b5b65b9",
       "disposition": "formal-infrastructure",
-      "reason": "Require new exact lifecycle registration, invariant set, source scope and named controls; no existing policy relaxation. Repair missing mandatory names, controls and source scopes for four unchanged registered models on the exact signed base; preserve all validation semantics.",
+      "reason": "Extend the main formal gate with the local SSO lifecycle obligations without changing VPC or existing guard requirements.",
       "models": []
     },
     {
       "path": "scripts/test-formal-gate.py",
-      "sha256": "700921f474e6005d96a36ee5a8a101b34b2fa8610d5ce8009d0dbcadc4ce75ca",
+      "sha256": "ea3ca7dda46f27d2690728293a77f894cca3ba875b0b46eb42eeb8a9659fe5f6",
       "disposition": "formal-infrastructure",
-      "reason": "Independently require model registration and detect removal of controls, paths and properties; align the explicit detector with four already mandatory signed-base registry names.",
+      "reason": "Assert exact local SSO and both VPC detectors and require the complete named inventory.",
       "models": []
     },
     {
