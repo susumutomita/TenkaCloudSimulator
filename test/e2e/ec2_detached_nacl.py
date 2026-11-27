@@ -61,8 +61,15 @@ class DetachedNetworkACL(unittest.TestCase):
             )
             self.assertEqual(ec2.create_network_acl(**request)["NetworkAcl"], acl)
             self.rejected(ec2.create_network_acl, "IdempotentParameterMismatch", **{**request, "VpcId": second})
-            self.assertEqual(ec2.describe_network_acls(Filters=[{"Name": "vpc-id", "Values": [first]}])["NetworkAcls"], [acl])
-            self.assertEqual(ec2.describe_network_acls(Filters=[{"Name": "vpc-id", "Values": [second]}])["NetworkAcls"], [])
+            first_rows = ec2.describe_network_acls(Filters=[{"Name": "vpc-id", "Values": [first]}])["NetworkAcls"]
+            second_rows = ec2.describe_network_acls(Filters=[{"Name": "vpc-id", "Values": [second]}])["NetworkAcls"]
+            self.assertEqual([r for r in first_rows if not r["IsDefault"]], [acl])
+            [first_default] = [r for r in first_rows if r["IsDefault"]]
+            [second_default] = second_rows
+            self.assertTrue(second_default["IsDefault"])
+            self.assertEqual((first_default["VpcId"], second_default["VpcId"]), (first, second))
+            self.assertEqual(first_default["Associations"], [])
+            self.assertEqual(second_default["Associations"], [])
             self.assertEqual({r["VpcId"] for r in ec2.describe_vpcs()["Vpcs"]}, {first, second})
             self.assertEqual(other_region.describe_network_acls()["NetworkAcls"], [])
             self.rejected(other_region.describe_network_acls, "InvalidNetworkAclID.NotFound", NetworkAclIds=[acl_id])
@@ -77,12 +84,14 @@ class DetachedNetworkACL(unittest.TestCase):
             self.assertEqual(ec2.describe_network_acls(NetworkAclIds=[acl_id])["NetworkAcls"], [acl])
             self.assertEqual(ec2.create_network_acl(**request)["NetworkAcl"]["NetworkAclId"], acl_id)
             ec2.delete_network_acl(NetworkAclId=acl_id)
-            self.assertEqual(ec2.describe_network_acls()["NetworkAcls"], [])
+            remaining = ec2.describe_network_acls()["NetworkAcls"]
+            self.assertCountEqual(remaining, [first_default, second_default])
             self.rejected(ec2.create_network_acl, "InvalidNetworkAclID.NotFound", **request)
             self.rejected(ec2.delete_network_acl, "InvalidNetworkAclID.NotFound", NetworkAclId=acl_id)
             ec2.delete_vpc(VpcId=first)
             ec2.delete_vpc(VpcId=second)
             self.assertEqual(ec2.describe_vpcs()["Vpcs"], [])
+            self.assertEqual(ec2.describe_network_acls()["NetworkAcls"], [])
 
 
     def test_sdk_rule_configuration_survives_restart_without_associations(self):

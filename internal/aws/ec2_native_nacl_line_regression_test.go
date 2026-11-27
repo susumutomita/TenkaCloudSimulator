@@ -166,7 +166,7 @@ func TestEC2NetworkACLCreateDeleteRequirePersistentReadback(t *testing.T) {
 		if err := db.QueryRow(`SELECT count(*) FROM aws_ec2_network_acl_replay`).Scan(&receiptCount); err != nil || receiptCount != 0 {
 			t.Fatalf("partial create receipt: %d / %v", receiptCount, err)
 		}
-		if rows, err := stacks.describeNativeNetworkACLs(ctx, naclRegressionRegion, ec2NetworkACLRequest{}); err != nil || len(rows) != 0 {
+		if rows, err := stacks.describeNativeNetworkACLs(ctx, naclRegressionRegion, ec2NetworkACLRequest{}); err != nil || len(rows) != 1 || !rows[0].Default {
 			t.Fatalf("partial create resource: %+v / %v", rows, err)
 		}
 	}
@@ -200,7 +200,7 @@ func TestEC2NetworkACLCreateDeleteRequirePersistentReadback(t *testing.T) {
 	_, fresh := openNetworkACLState(t, path)
 	_, err = fresh.createNativeNetworkACL(ctx, naclRegressionRegion, q)
 	expectNetworkACLError(t, err, "InvalidNetworkAclID.NotFound")
-	if rows, err := fresh.describeNativeNetworkACLs(ctx, naclRegressionRegion, ec2NetworkACLRequest{}); err != nil || len(rows) != 0 {
+	if rows, err := fresh.describeNativeNetworkACLs(ctx, naclRegressionRegion, ec2NetworkACLRequest{}); err != nil || len(rows) != 1 || !rows[0].Default {
 		t.Fatalf("retired token resurrected resource after restart: %+v / %v", rows, err)
 	}
 	if err := fresh.deleteNativeVPC(ctx, naclRegressionRegion, vpc.ID); err != nil {

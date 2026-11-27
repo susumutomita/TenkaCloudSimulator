@@ -29477,7 +29477,7 @@
       "format": "esm"
     },
     "src/ec2-network-acls.mjs": {
-      "bytes": 15913,
+      "bytes": 20487,
       "imports": [
         {
           "path": "src/ec2-response.mjs",
@@ -30028,7 +30028,7 @@
       "format": "esm"
     },
     "src/ec2-vpc-network-acls.jsx": {
-      "bytes": 11128,
+      "bytes": 11311,
       "imports": [
         {
           "path": "node_modules/react/index.js",
@@ -30634,13 +30634,150 @@
       ],
       "format": "esm"
     },
+    "node_modules/@cloudscape-design/components/button-dropdown/index.js": {
+      "bytes": 3657,
+      "imports": [
+        {
+          "path": "node_modules/react/index.js",
+          "kind": "import-statement",
+          "original": "react"
+        },
+        {
+          "path": "node_modules/@cloudscape-design/component-toolkit/mjs/internal/analytics-metadata/index.js",
+          "kind": "import-statement",
+          "original": "@cloudscape-design/component-toolkit/internal/analytics-metadata"
+        },
+        {
+          "path": "node_modules/@cloudscape-design/components/i18n/context.js",
+          "kind": "import-statement",
+          "original": "../i18n/context"
+        },
+        {
+          "path": "node_modules/@cloudscape-design/components/internal/base-component/index.js",
+          "kind": "import-statement",
+          "original": "../internal/base-component"
+        },
+        {
+          "path": "node_modules/@cloudscape-design/components/internal/hooks/use-base-component/index.js",
+          "kind": "import-statement",
+          "original": "../internal/hooks/use-base-component"
+        },
+        {
+          "path": "node_modules/@cloudscape-design/components/internal/utils/apply-display-name.js",
+          "kind": "import-statement",
+          "original": "../internal/utils/apply-display-name"
+        },
+        {
+          "path": "node_modules/@cloudscape-design/components/button-dropdown/internal.js",
+          "kind": "import-statement",
+          "original": "./internal"
+        },
+        {
+          "path": "node_modules/@cloudscape-design/components/button-dropdown/utils/utils.js",
+          "kind": "import-statement",
+          "original": "./utils/utils"
+        },
+        {
+          "path": "node_modules/@cloudscape-design/components/button-dropdown/analytics-metadata/styles.css.js",
+          "kind": "import-statement",
+          "original": "./analytics-metadata/styles.css.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "src/ec2-subnet-network-acl-panel.jsx": {
+      "bytes": 9938,
+      "imports": [
+        {
+          "path": "node_modules/react/index.js",
+          "kind": "import-statement",
+          "original": "react"
+        },
+        {
+          "path": "node_modules/@cloudscape-design/components/alert/index.js",
+          "kind": "import-statement",
+          "original": "@cloudscape-design/components/alert"
+        },
+        {
+          "path": "node_modules/@cloudscape-design/components/box/index.js",
+          "kind": "import-statement",
+          "original": "@cloudscape-design/components/box"
+        },
+        {
+          "path": "node_modules/@cloudscape-design/components/button/index.js",
+          "kind": "import-statement",
+          "original": "@cloudscape-design/components/button"
+        },
+        {
+          "path": "node_modules/@cloudscape-design/components/button-dropdown/index.js",
+          "kind": "import-statement",
+          "original": "@cloudscape-design/components/button-dropdown"
+        },
+        {
+          "path": "node_modules/@cloudscape-design/components/container/index.js",
+          "kind": "import-statement",
+          "original": "@cloudscape-design/components/container"
+        },
+        {
+          "path": "node_modules/@cloudscape-design/components/form-field/index.js",
+          "kind": "import-statement",
+          "original": "@cloudscape-design/components/form-field"
+        },
+        {
+          "path": "node_modules/@cloudscape-design/components/header/index.js",
+          "kind": "import-statement",
+          "original": "@cloudscape-design/components/header"
+        },
+        {
+          "path": "node_modules/@cloudscape-design/components/key-value-pairs/index.js",
+          "kind": "import-statement",
+          "original": "@cloudscape-design/components/key-value-pairs"
+        },
+        {
+          "path": "node_modules/@cloudscape-design/components/modal/index.js",
+          "kind": "import-statement",
+          "original": "@cloudscape-design/components/modal"
+        },
+        {
+          "path": "node_modules/@cloudscape-design/components/select/index.js",
+          "kind": "import-statement",
+          "original": "@cloudscape-design/components/select"
+        },
+        {
+          "path": "node_modules/@cloudscape-design/components/space-between/index.js",
+          "kind": "import-statement",
+          "original": "@cloudscape-design/components/space-between"
+        },
+        {
+          "path": "node_modules/@cloudscape-design/components/status-indicator/index.js",
+          "kind": "import-statement",
+          "original": "@cloudscape-design/components/status-indicator"
+        },
+        {
+          "path": "node_modules/@cloudscape-design/components/table/index.js",
+          "kind": "import-statement",
+          "original": "@cloudscape-design/components/table"
+        },
+        {
+          "path": "src/i18n.jsx",
+          "kind": "import-statement",
+          "original": "./i18n.jsx"
+        },
+        {
+          "path": "src/ec2-network-acls.mjs",
+          "kind": "import-statement",
+          "original": "./ec2-network-acls.mjs"
+        }
+      ],
+      "format": "esm"
+    },
     "src/ec2-subnet-console-route.mjs": {
       "bytes": 1759,
       "imports": [],
       "format": "esm"
     },
     "src/ec2-subnets-console.jsx": {
-      "bytes": 19570,
+      "bytes": 20197,
       "imports": [
         {
           "path": "node_modules/react/index.js",
@@ -30746,6 +30883,11 @@
           "path": "src/ec2-route-table-pages.mjs",
           "kind": "import-statement",
           "original": "./ec2-route-table-pages.mjs"
+        },
+        {
+          "path": "src/ec2-subnet-network-acl-panel.jsx",
+          "kind": "import-statement",
+          "original": "./ec2-subnet-network-acl-panel.jsx"
         },
         {
           "path": "src/ec2-vpc-tags-panel.jsx",
@@ -30877,7 +31019,7 @@
       "format": "esm"
     },
     "src/ec2-network-acl-inventory.jsx": {
-      "bytes": 23616,
+      "bytes": 24523,
       "imports": [
         {
           "path": "node_modules/react/index.js",
@@ -31155,7 +31297,7 @@
       "format": "esm"
     },
     "src/ec2-vpc-resource-view.jsx": {
-      "bytes": 3763,
+      "bytes": 3927,
       "imports": [
         {
           "path": "node_modules/react/index.js",
@@ -31201,6 +31343,11 @@
           "path": "src/ec2-internet-gateway-page.jsx",
           "kind": "import-statement",
           "original": "./ec2-internet-gateway-page.jsx"
+        },
+        {
+          "path": "src/ec2-network-acls.mjs",
+          "kind": "import-statement",
+          "original": "./ec2-network-acls.mjs"
         },
         {
           "path": "src/ec2-native-subnets.mjs",
@@ -31297,57 +31444,6 @@
           "path": "src/session-manager-state.mjs",
           "kind": "import-statement",
           "original": "./session-manager-state.mjs"
-        }
-      ],
-      "format": "esm"
-    },
-    "node_modules/@cloudscape-design/components/button-dropdown/index.js": {
-      "bytes": 3657,
-      "imports": [
-        {
-          "path": "node_modules/react/index.js",
-          "kind": "import-statement",
-          "original": "react"
-        },
-        {
-          "path": "node_modules/@cloudscape-design/component-toolkit/mjs/internal/analytics-metadata/index.js",
-          "kind": "import-statement",
-          "original": "@cloudscape-design/component-toolkit/internal/analytics-metadata"
-        },
-        {
-          "path": "node_modules/@cloudscape-design/components/i18n/context.js",
-          "kind": "import-statement",
-          "original": "../i18n/context"
-        },
-        {
-          "path": "node_modules/@cloudscape-design/components/internal/base-component/index.js",
-          "kind": "import-statement",
-          "original": "../internal/base-component"
-        },
-        {
-          "path": "node_modules/@cloudscape-design/components/internal/hooks/use-base-component/index.js",
-          "kind": "import-statement",
-          "original": "../internal/hooks/use-base-component"
-        },
-        {
-          "path": "node_modules/@cloudscape-design/components/internal/utils/apply-display-name.js",
-          "kind": "import-statement",
-          "original": "../internal/utils/apply-display-name"
-        },
-        {
-          "path": "node_modules/@cloudscape-design/components/button-dropdown/internal.js",
-          "kind": "import-statement",
-          "original": "./internal"
-        },
-        {
-          "path": "node_modules/@cloudscape-design/components/button-dropdown/utils/utils.js",
-          "kind": "import-statement",
-          "original": "./utils/utils"
-        },
-        {
-          "path": "node_modules/@cloudscape-design/components/button-dropdown/analytics-metadata/styles.css.js",
-          "kind": "import-statement",
-          "original": "./analytics-metadata/styles.css.js"
         }
       ],
       "format": "esm"
@@ -38130,7 +38226,7 @@
           "bytesInOutput": 2927
         },
         "node_modules/@dnd-kit/core/dist/core.esm.js": {
-          "bytesInOutput": 39396
+          "bytesInOutput": 39417
         },
         "node_modules/@dnd-kit/utilities/dist/utilities.esm.js": {
           "bytesInOutput": 3220
@@ -39603,7 +39699,7 @@
           "bytesInOutput": 8285
         },
         "src/ec2-network-acls.mjs": {
-          "bytesInOutput": 9145
+          "bytesInOutput": 11844
         },
         "src/ec2-route-table-pages.mjs": {
           "bytesInOutput": 2299
@@ -39654,7 +39750,7 @@
           "bytesInOutput": 21864
         },
         "src/ec2-vpc-network-acls.jsx": {
-          "bytesInOutput": 9739
+          "bytesInOutput": 9968
         },
         "src/ec2-vpc-route-tables.jsx": {
           "bytesInOutput": 7289
@@ -39672,10 +39768,16 @@
           "bytesInOutput": 8646
         },
         "src/ec2-vpc-resource-view.jsx": {
-          "bytesInOutput": 1756
+          "bytesInOutput": 1785
         },
         "src/ec2-subnets-console.jsx": {
-          "bytesInOutput": 17343
+          "bytesInOutput": 17865
+        },
+        "src/ec2-subnet-network-acl-panel.jsx": {
+          "bytesInOutput": 7692
+        },
+        "node_modules/@cloudscape-design/components/button-dropdown/index.js": {
+          "bytesInOutput": 1763
         },
         "src/ec2-subnet-console-route.mjs": {
           "bytesInOutput": 807
@@ -39684,7 +39786,7 @@
           "bytesInOutput": 18190
         },
         "src/ec2-network-acl-inventory.jsx": {
-          "bytesInOutput": 19844
+          "bytesInOutput": 21010
         },
         "src/ec2-security-groups-console.jsx": {
           "bytesInOutput": 4235
@@ -39699,10 +39801,7 @@
           "bytesInOutput": 304
         },
         "src/iam.jsx": {
-          "bytesInOutput": 22084
-        },
-        "node_modules/@cloudscape-design/components/button-dropdown/index.js": {
-          "bytesInOutput": 1764
+          "bytesInOutput": 22083
         },
         "node_modules/@cloudscape-design/components/wizard/index.js": {
           "bytesInOutput": 843
@@ -40128,7 +40227,7 @@
           "bytesInOutput": 10107
         }
       },
-      "bytes": 2878416
+      "bytes": 2890772
     },
     "../../internal/server/web/app.css.LEGAL.txt": {
       "imports": [],

@@ -1,10 +1,14 @@
 import {parseEC2Document} from './ec2-response.mjs';
 import {ec2IPv4Prefix} from './ec2-ipv4-route-prefix.mjs';
 
-// The native wire exposes only detached, non-default metadata. A wrong or
-// incomplete reply is unavailable, not an empty list or a successful write.
+// This wire represents saved ACL configuration, not packet filtering. A
+// wrong or incomplete reply is unavailable, not an empty list or success.
 const namespace = 'http://ec2.amazonaws.com/doc/2016-11-15/';
 const mode = 'detached-config-only';
+const defaultMode = 'default-config-only';
+const attachedMode = 'attached-config-only';
+const associationId = /^aclassoc-(?:[0-9a-f]{8}|[0-9a-f]{17})$/;
+const subnetId = /^subnet-(?:[0-9a-f]{8}|[0-9a-f]{17})$/;
 const vpcId = /^vpc-(?:[0-9a-f]{8}|[0-9a-f]{17})$/;
 const aclId = /^acl-(?:[0-9a-f]{8}|[0-9a-f]{17})$/;
 const tokenShape = /^[ -~]{1,64}$/;
@@ -13,7 +17,7 @@ const ruleActions = {create:'CreateNetworkAclEntry',replace:'ReplaceNetworkAclEn
 const terminalRule = 32767;
 const rulesPerDirection = 20;
 const isShape = (value, re) => typeof value === 'string' && re.exec(value)?.[0] === value;
-const invalid = () => {throw Error('Invalid or incomplete detached network ACL response.');};
+const invalid = () => {throw Error('Invalid or incomplete network ACL response.');};
 const bytes = new TextEncoder();
 const xml = text => new DOMParser().parseFromString(text,'application/xml');
 
@@ -31,6 +35,15 @@ export function networkACLInventoryOperations(capabilities, authenticationRequir
     Array.isArray(selectors) && selectors.includes('vpc-id');
   return {read, create:read && ec2.operations.includes(operations[1]), delete:read && ec2.operations.includes(operations[2]),
     vpcs:read && ec2.operations.includes('DescribeVpcs')};
+}
+
+export function subnetACLAssociationAvailable(capabilities, authenticationRequired) {
+  if (!networkACLInventoryOperations(capabilities,authenticationRequired).read) return false;
+  const ec2=capabilities.services.ec2;
+  return ec2.networkAclAssociationProfile==='single-native-ipv4-subnet-config-only' &&
+    Array.isArray(ec2.subnetLifecycle) && ec2.subnetLifecycle.includes('CreateSubnet') &&
+    ['DescribeSubnets','ReplaceNetworkAclAssociation'].every(action=>ec2.operations.includes(action)) &&
+    ec2.describeSelectors.DescribeNetworkAcls.includes('association.subnet-id');
 }
 
 export function networkACLRuleActionsAvailable(capabilities, authenticationRequired) {
@@ -128,13 +141,24 @@ function aclEntries(node) {
   return entries;
 }
 
-function row(node, selected, details=false) {
+function row(node, selected) {
   const cols=fields(node,['networkAclId','vpcId','ownerId','default','entrySet','associationSet','tagSet','simulatorNetworkAclMode']);
-  const id=text(cols.get('networkAclId')), vpc=text(cols.get('vpcId'));
+  const id=text(cols.get('networkAclId')), vpc=text(cols.get('vpcId')), aclMode=text(cols.get('simulatorNetworkAclMode'));
+  const defaultValue=text(cols.get('default'));
   if (!validNetworkACLID(id) || !validNetworkACLVpcID(vpc) || (selected && vpc!==selected) || text(cols.get('ownerId'))!=='000000000000' ||
-      text(cols.get('default'))!=='false' || text(cols.get('simulatorNetworkAclMode'))!==mode ||
-      children(cols.get('associationSet')).length!==0) invalid();
+      !['false','true'].includes(defaultValue) || ![mode,defaultMode,attachedMode].includes(aclMode) ||
+      (defaultValue==='true')!==(aclMode===defaultMode)) invalid();
   const entries=aclEntries(cols.get('entrySet'));
+  if (aclMode===defaultMode && (entries.length!==4 || [false,true].some(egress=>
+    !entries.some(rule=>rule.egress===egress&&rule.number===100&&rule.protocol==='-1'&&
+      rule.action==='allow'&&rule.cidr==='0.0.0.0/0')))) invalid();
+  const associations=items(cols.get('associationSet'),1000).map(item=>{
+    const f=fields(item,['networkAclAssociationId','networkAclId','subnetId']);
+    const assoc=text(f.get('networkAclAssociationId')), subnet=text(f.get('subnetId'));
+    if (!isShape(assoc,associationId) || text(f.get('networkAclId'))!==id || !isShape(subnet,subnetId)) invalid();
+    return {id:assoc,subnetId:subnet};
+  });
+  if ((aclMode===mode && associations.length) || (aclMode===attachedMode && !associations.length)) invalid();
   const tags=new Map();
   for (const tag of cols.has('tagSet') ? items(cols.get('tagSet'),50) : []) {
     const f=fields(tag,['key','value']);
@@ -143,10 +167,7 @@ function row(node, selected, details=false) {
         !validNetworkACLName(key) || !validNetworkACLName(value)) invalid();
     tags.set(key,value);
   }
-  const summary = {id,vpc,mode,name:tags.get('Name')??''};
-  // A valid detached rule inventory does not imply an association or effective
-  // packet filtering. Do not infer defaults or turn subnets into associations.
-  return details ? {...summary,entries,associations:[],isDefault:false} : summary;
+  return {id,vpc,mode:aclMode,name:tags.get('Name')??'',entries,associations,isDefault:defaultValue==='true'};
 }
 
 export function parseVpcNetworkACLs(document, selected) {
@@ -161,9 +182,20 @@ export function parseNetworkACLInventory(document, selected='') {
 
 function networkACLRows(document, selected, details) {
   const members=envelope(document,'DescribeNetworkAcls',['networkAclSet']);
-  const rows=items(members.get('networkAclSet'),1000).map(item=>row(item,selected,details));
-  if (new Set(rows.map(item=>item.id)).size!==rows.length) invalid();
-  return rows;
+  const rows=items(members.get('networkAclSet'),1000).map(item=>row(item,selected));
+  const seen=new Set(),defaults=new Set(),associations=new Set(),subnets=new Set();
+  for (const acl of rows) {
+    if (seen.has(acl.id) || (acl.isDefault && defaults.has(acl.vpc))) invalid();
+    seen.add(acl.id);
+    if (acl.isDefault) defaults.add(acl.vpc);
+    for (const a of acl.associations) {
+      if (associations.size>=1000 || associations.has(a.id) || subnets.has(a.subnetId)) invalid();
+      associations.add(a.id);subnets.add(a.subnetId);
+    }
+  }
+  // The inline VPC editor continues to manage only detached configurations.
+  // Validate every wire row before projecting the safe subset.
+  return details ? rows : rows.filter(acl=>acl.mode===mode).map(({id,vpc,mode,name})=>({id,vpc,mode,name}));
 }
 
 async function readReply(response, signal) {
@@ -233,10 +265,16 @@ export async function createVpcNetworkACL(request, region, vpc, name, clientToke
   const fieldsForTag=name ? {'TagSpecification.1.ResourceType':'network-acl','TagSpecification.1.Tag.1.Key':'Name','TagSpecification.1.Tag.1.Value':name} : {};
   const document=await send(request,region,vpc,'CreateNetworkAcl',{VpcId:vpc?.id,ClientToken:clientToken,...fieldsForTag},options);
   const members=envelope(document,'CreateNetworkAcl',['networkAcl','clientToken']);
-  const created=row(members.get('networkAcl'),vpc.id);
-  if (created.name!==name || text(members.get('clientToken'))!==clientToken) invalid();
-  const rows=await loadVpcNetworkACLs(request,region,vpc,options);
-  if (!rows.some(item=>item.id===created.id&&item.name===name)) invalid();
+  const record=row(members.get('networkAcl'),vpc.id);
+  if (record.isDefault || record.name!==name || text(members.get('clientToken'))!==clientToken) invalid();
+  const all=await loadNetworkACLInventory(request,region,vpc.id,options);
+  const saved=all.find(item=>item.id===record.id);
+  if (!saved || saved.name!==record.name || saved.mode!==record.mode ||
+      saved.associations.length!==record.associations.length || record.associations.some(link=>
+        !saved.associations.some(a=>a.id===link.id&&a.subnetId===link.subnetId))) invalid();
+  const {id,vpc:createdVpc,mode:createdMode,name:createdName}=saved;
+  const created={id,vpc:createdVpc,mode:createdMode,name:createdName};
+  const rows=all.filter(item=>item.mode===mode).map(({id,vpc,mode,name})=>({id,vpc,mode,name}));
   return {created,rows};
 }
 
@@ -244,8 +282,9 @@ export async function deleteVpcNetworkACL(request, region, vpc, acl, options={})
   if (acl?.vpc!==vpc?.id || acl?.mode!==mode || !isShape(acl?.id,aclId)) invalid();
   const document=await send(request,region,vpc,'DeleteNetworkAcl',{NetworkAclId:acl.id},options);
   if (text(envelope(document,'DeleteNetworkAcl',['return']).get('return'))!=='true') invalid();
-  const rows=await loadVpcNetworkACLs(request,region,vpc,options);
-  if (rows.some(item=>item.id===acl.id)) invalid();
+  const all=await loadNetworkACLInventory(request,region,vpc.id,options);
+  if (all.some(item=>item.id===acl.id)) invalid();
+  const rows=all.filter(item=>item.mode===mode).map(({id,vpc,mode,name})=>({id,vpc,mode,name}));
   return {removed:acl,rows};
 }
 
@@ -256,6 +295,40 @@ export async function loadNetworkACLDetails(request, region, vpc, id, options={}
   const rows=parseNetworkACLInventory(document,vpc.id);
   if (rows.length!==1 || rows[0].id!==id) invalid();
   return rows[0];
+}
+
+function verifySubnetSelection(vpc, subnet) {
+  if (networkACLTarget(vpc)!=='ec2' || subnet?.vpc!==vpc.id ||
+      subnet?.owner!=='ec2' || !isShape(subnet?.id,subnetId)) invalid();
+}
+
+export async function loadSubnetNetworkACL(request, region, vpc, subnet, options={}) {
+  verifySubnetSelection(vpc,subnet);
+  const document=await send(request,region,vpc,'DescribeNetworkAcls',
+    {'Filter.1.Name':'association.subnet-id','Filter.1.Value.1':subnet.id},options);
+  const rows=parseNetworkACLInventory(document,vpc.id);
+  if (!rows.length) return null;
+  if (rows.length!==1) invalid();
+  const [acl]=rows, linked=acl.associations.find(a=>a.subnetId===subnet.id);
+  if (!linked) invalid();
+  return {acl,association:linked};
+}
+
+export async function replaceSubnetNetworkACL(request, region, vpc, subnet, prior, destination, options={}) {
+  verifySubnetSelection(vpc,subnet);
+  if (prior?.acl?.vpc!==vpc.id || prior?.association?.subnetId!==subnet.id ||
+      !isShape(prior?.association?.id,associationId) || !validNetworkACLID(prior?.acl?.id) ||
+      !validNetworkACLID(destination?.id) || destination.vpc!==vpc.id || destination.id===prior.acl.id) invalid();
+  const before=await loadSubnetNetworkACL(request,region,vpc,subnet,options);
+  if (before?.acl.id!==prior.acl.id || before?.association.id!==prior.association.id) invalid();
+  const action='ReplaceNetworkAclAssociation';
+  const reply=await send(request,region,vpc,action,
+    {AssociationId:before.association.id,NetworkAclId:destination.id},options);
+  const receipt=text(envelope(reply,action,['newAssociationId']).get('newAssociationId'));
+  if (!isShape(receipt,associationId) || receipt===before.association.id) invalid();
+  const after=await loadSubnetNetworkACL(request,region,vpc,subnet,options);
+  if (after?.acl.id!==destination.id || after?.association.id!==receipt) invalid();
+  return after;
 }
 
 const equalRule=(a,b)=>a===b || Boolean(a&&b&&a.number===b.number&&a.egress===b.egress&&
@@ -275,7 +348,7 @@ export async function changeNetworkACLRule(request, region, vpc, acl, kind, inpu
   // Refresh the exact selected ACL before attempting a write. The API has no
   // compare-and-swap, so this detects stale input but is not an atomic lock.
   const current=await loadNetworkACLDetails(request,region,vpc,acl.id,options);
-  if (!equalRule(locate(current.entries),previous) ||
+  if (current.mode!==mode || !equalRule(locate(current.entries),previous) ||
       (kind==='create' && current.entries.filter(rule=>rule.egress===value.egress&&rule.number<terminalRule).length>=rulesPerDirection)) invalid();
   const params={NetworkAclId:acl.id,RuleNumber:String(value.number),Egress:String(value.egress)};
   if (kind!=='delete') {
@@ -286,7 +359,7 @@ export async function changeNetworkACLRule(request, region, vpc, acl, kind, inpu
   const reply=await send(request,region,vpc,action,params,options);
   if (text(envelope(reply,action,['return']).get('return'))!=='true') invalid();
   const readback=await loadNetworkACLDetails(request,region,vpc,acl.id,options);
-  if (!equalRule(locate(readback.entries),kind==='delete' ? undefined : value)) invalid();
+  if (readback.mode!==mode || !equalRule(locate(readback.entries),kind==='delete' ? undefined : value)) invalid();
   return readback;
 }
 

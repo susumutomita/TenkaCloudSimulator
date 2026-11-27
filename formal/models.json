@@ -29497,6 +29497,551 @@
           ]
         }
       ]
+    },
+    {
+      "id": "EC2NativeNetworkACLAssociation",
+      "model": "formal/EC2NativeNetworkACLAssociation.tla",
+      "config": "formal/EC2NativeNetworkACLAssociation.cfg",
+      "bounds": "Forty native schedules and thirty selected-console synthetic cases; one selected IPv4 subnet in an exact regional native VPC, one durable default and two custom identities, at most three symbolic generations, a protected peer/stack/route frame, and at most one independent saved change around a console receipt.",
+      "properties": [
+        "TypeOK",
+        "ExactSavedDefault",
+        "ExactAssociationReceipt",
+        "DetachedRuleAndDeleteFence",
+        "UnchangedNetworkFrame",
+        "ExactStoredACLProjection",
+        "ExactSelectedUI",
+        "ReadbackDoesNotUndo"
+      ],
+      "limits": "Bounded persisted ACL configuration only, including normalized same-VPC refusal and replacement receipts. Does not prove the CreateNetworkAcl ClientToken/fingerprint/attached-replay projection, exact Query/XML/HTTP scope error priority or codes, hash collision/64-bit arithmetic, raw IAM/SQL, all multi-subnet/cohort concurrency, existing route lifecycle, real browser/network/packet behavior or Go/JavaScript refinement. A late or unverified readback does not reverse a committed binding.",
+      "source_scope": [
+        "internal/aws/cloudformation.go",
+        "internal/aws/ec2_network_acl.go",
+        "internal/aws/ec2_network_acl_association_query.go",
+        "internal/aws/ec2_network_acl_association_state.go",
+        "internal/aws/ec2_network_acl_association_store.go",
+        "internal/aws/ec2_network_acl_entry.go",
+        "internal/aws/ec2_network_acl_readback.go",
+        "internal/aws/ec2_network_acl_store.go",
+        "internal/aws/ec2_read.go",
+        "internal/aws/ec2_subnet_native.go",
+        "internal/aws/ec2_vpc.go",
+        "internal/server/server.go",
+        "internal/server/web/app.js",
+        "tools/console/src/ec2-network-acl-inventory.jsx",
+        "tools/console/src/ec2-network-acls.mjs",
+        "tools/console/src/ec2-subnet-network-acl-panel.jsx",
+        "tools/console/src/ec2-subnets-console.jsx",
+        "tools/console/src/ec2-vpc-resource-view.jsx"
+      ],
+      "mutants": [
+        {
+          "id": "DefaultNotStoredOnNativeCreate",
+          "expect_invariant": "ExactSavedDefault",
+          "edits": [
+            {
+              "old": "q.op=\"create-vpc\" -> World(\"marked\",FALSE,{})",
+              "new": "q.op=\"create-vpc\" -> World(\"legacy\",FALSE,{})",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "SkipInitialSubnetBinding",
+          "expect_invariant": "ExactSavedDefault",
+          "edits": [
+            {
+              "old": "!.binding=IF db.default=DefaultRow THEN Bind(DefaultId,1) ELSE None",
+              "new": "!.binding=None",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "EnrollLegacySubnetOnCreate",
+          "expect_invariant": "ExactSavedDefault",
+          "edits": [
+            {
+              "old": "!.binding=IF db.default=DefaultRow THEN Bind(DefaultId,1) ELSE None",
+              "new": "!.binding=Bind(DefaultId,1)",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "CommitChildWithoutStoreReceipt",
+          "expect_invariant": "ExactSavedDefault",
+          "edits": [
+            {
+              "old": "IF q.proof # \"exact\" \\/ ~CommitOne(q) \\/ ~CanLifecycle(q,db) THEN",
+              "new": "IF q.proof # \"exact\" \\/ (~CommitOne(q) /\\ q.op#\"create-subnet\") \\/ ~CanLifecycle(q,db) THEN",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "AcceptNativeChildOfStack",
+          "expect_invariant": "ExactSavedDefault",
+          "edits": [
+            {
+              "old": "q.op=\"create-subnet\" -> db.vpc \\in {\"marked\",\"legacy\"} /\\ ~db.hasSubnet",
+              "new": "q.op=\"create-subnet\" -> db.vpc \\in {\"marked\",\"legacy\",\"stack\"} /\\ ~db.hasSubnet",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "EnrollDuringAssociationReplacement",
+          "expect_invariant": "ExactSavedDefault",
+          "edits": [
+            {
+              "old": "Replace(q,db) ==\n    LET outcome == Approved(q,db)",
+              "new": "Replace(q,db) ==\n    IF db.vpc=\"legacy\" THEN Save(\"ok\",Ticket(1),World(\"marked\",TRUE,db.custom))\n    ELSE LET outcome == Approved(q,db)",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "LinkOutsideSelectedVPC",
+          "expect_invariant": "ExactSavedDefault",
+          "edits": [
+            {
+              "old": "SameVpcDestination(q,db) == q.acl=DefaultId \\/ q.acl \\in db.custom",
+              "new": "SameVpcDestination(q,db) == q.acl=DefaultId \\/ q.acl \\in db.custom \\/ q.acl=Foreign",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "ForgetImmediatePredecessor",
+          "expect_invariant": "ExactSavedDefault",
+          "edits": [
+            {
+              "old": "LET next == Bind(q.acl,db.binding.gen+1)",
+              "new": "LET next == [Bind(q.acl,db.binding.gen+1) EXCEPT !.prev=None]",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "IgnoreRequestedACLGrant",
+          "expect_invariant": "ExactAssociationReceipt",
+          "edits": [
+            {
+              "old": "CanACL(q) == q.aclGrant=ACLGrant(q.region,q.acl)",
+              "new": "CanACL(q) == TRUE",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "IgnoreResolvedSubnetGrant",
+          "expect_invariant": "ExactAssociationReceipt",
+          "edits": [
+            {
+              "old": "CanSubnet(q) == q.subnetGrant=SubnetGrant(q.region,Subnet)",
+              "new": "CanSubnet(q) == TRUE",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "ResolveOutsideRequestedRegion",
+          "expect_invariant": "ExactAssociationReceipt",
+          "edits": [
+            {
+              "old": "db.binding # None /\\ q.region=Region /\\\n      (q.ticket",
+              "new": "db.binding # None /\\\n      (q.ticket",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "RevealMissingOrdinaryIdentity",
+          "expect_invariant": "ExactAssociationReceipt",
+          "edits": [
+            {
+              "old": "MissingReceipt(q) == IF q.actor=\"ordinary\" THEN \"denied\" ELSE \"missing\"",
+              "new": "MissingReceipt(q) == \"missing\"",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "IgnoreIncompleteCohort",
+          "expect_invariant": "ExactAssociationReceipt",
+          "edits": [
+            {
+              "old": "CohortOK(q,db) == db.default = DefaultRow /\\ q.proof \\notin BadGraph",
+              "new": "CohortOK(q,db) == db.default = DefaultRow /\\ q.proof \\notin (BadGraph \\ {\"incomplete-cohort\"})",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "IgnoreOutsideCohortReference",
+          "expect_invariant": "ExactAssociationReceipt",
+          "edits": [
+            {
+              "old": "CohortOK(q,db) == db.default = DefaultRow /\\ q.proof \\notin BadGraph",
+              "new": "CohortOK(q,db) == db.default = DefaultRow /\\ q.proof \\notin (BadGraph \\ {\"outside-cohort-reference\"})",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "IgnoreAssociationCFNDeclaration",
+          "expect_invariant": "ExactAssociationReceipt",
+          "edits": [
+            {
+              "old": "CohortOK(q,db) == db.default = DefaultRow /\\ q.proof \\notin BadGraph",
+              "new": "CohortOK(q,db) == db.default = DefaultRow /\\ q.proof \\notin (BadGraph \\ {\"cfn-declaration\"})",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "IgnoreAssociationCFNClaim",
+          "expect_invariant": "ExactAssociationReceipt",
+          "edits": [
+            {
+              "old": "CohortOK(q,db) == db.default = DefaultRow /\\ q.proof \\notin BadGraph",
+              "new": "CohortOK(q,db) == db.default = DefaultRow /\\ q.proof \\notin (BadGraph \\ {\"cfn-claim\"})",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "AcceptSecondPreviousReceipt",
+          "expect_invariant": "ExactAssociationReceipt",
+          "edits": [
+            {
+              "old": "(q.ticket=db.binding.current \\/ (db.binding.prev # None /\\ q.ticket=db.binding.prev))",
+              "new": "(q.ticket=db.binding.current \\/ (db.binding.prev # None /\\ q.ticket=db.binding.prev)\n        \\/ (db.binding.gen=3 /\\ q.ticket=Ticket(1)))",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "ChangeDifferentDestinationOnImmediateReplay",
+          "expect_invariant": "ExactAssociationReceipt",
+          "edits": [
+            {
+              "old": "IF db.binding.acl=q.acl THEN \"repeat\" ELSE MissingReceipt(q)",
+              "new": "IF db.binding.acl=q.acl THEN \"repeat\" ELSE \"update\"",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "AdvanceSameDestinationGeneration",
+          "expect_invariant": "ExactAssociationReceipt",
+          "edits": [
+            {
+              "old": "ELSE IF db.binding.acl=q.acl THEN \"repeat\"",
+              "new": "ELSE IF db.binding.acl=q.acl THEN \"update\"",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "ReportPreviousInsteadOfCurrent",
+          "expect_invariant": "ExactAssociationReceipt",
+          "edits": [
+            {
+              "old": "outcome = \"repeat\" /\\ q.commit # \"commit\" -> Save(\"ok\",db.binding.current,db)",
+              "new": "outcome = \"repeat\" /\\ q.commit # \"commit\" -> Save(\"ok\",q.ticket,db)",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "ReuseReservedNewAssociationID",
+          "expect_invariant": "ExactAssociationReceipt",
+          "edits": [
+            {
+              "old": "q.proof \\notin {\"new-id-unavailable\"}",
+              "new": "q.proof # \"never\"",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "IgnoreExactPriorAssociationRow",
+          "expect_invariant": "ExactAssociationReceipt",
+          "edits": [
+            {
+              "old": "CASE outcome = \"update\" /\\ CommitOne(q) ->",
+              "new": "CASE outcome = \"update\" /\\ (CommitOne(q) \\/ q.commit = \"exact-row\") ->",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "IgnoreExtraAssociationWrite",
+          "expect_invariant": "ExactAssociationReceipt",
+          "edits": [
+            {
+              "old": "CASE outcome = \"update\" /\\ CommitOne(q) ->",
+              "new": "CASE outcome = \"update\" /\\ (CommitOne(q) \\/ q.commit = \"extra-write\") ->",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "IgnorePostwriteCohort",
+          "expect_invariant": "ExactAssociationReceipt",
+          "edits": [
+            {
+              "old": "CASE outcome = \"update\" /\\ CommitOne(q) ->",
+              "new": "CASE outcome = \"update\" /\\ (CommitOne(q) \\/ q.commit = \"post-cohort\") ->",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "ReportUncommittedAssociation",
+          "expect_invariant": "ExactAssociationReceipt",
+          "edits": [
+            {
+              "old": "CASE outcome = \"update\" /\\ CommitOne(q) ->",
+              "new": "CASE outcome = \"update\" /\\ (CommitOne(q) \\/ q.commit = \"commit\") ->",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "PermitDefaultACLMutation",
+          "expect_invariant": "DetachedRuleAndDeleteFence",
+          "edits": [
+            {
+              "old": "[] OTHER -> Detached(db,q.acl)",
+              "new": "[] OTHER -> Detached(db,q.acl) \\/ (db.default=DefaultRow /\\ q.acl=DefaultId)",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "PermitAttachedACLRuleEdit",
+          "expect_invariant": "DetachedRuleAndDeleteFence",
+          "edits": [
+            {
+              "old": "[] OTHER -> Detached(db,q.acl)",
+              "new": "[] OTHER -> Detached(db,q.acl) \\/ (q.op=\"edit-rules\" /\\ q.acl \\in db.custom)",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "DeleteCustomACLWithSavedBinding",
+          "expect_invariant": "ExactSavedDefault",
+          "edits": [
+            {
+              "old": "[] OTHER -> Detached(db,q.acl)",
+              "new": "[] OTHER -> Detached(db,q.acl) \\/ (q.op=\"delete-acl\" /\\ q.acl \\in db.custom)",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "AlterPeerNetworkFrame",
+          "expect_invariant": "UnchangedNetworkFrame",
+          "edits": [
+            {
+              "old": "[] OTHER -> [db EXCEPT !.ruleEdited=@ \\cup {q.acl}]",
+              "new": "[] OTHER -> [db EXCEPT !.ruleEdited=@ \\cup {q.acl}, !.routes=\"rewritten-unrelated-route\"]",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "InventLegacyBindingOnDescribe",
+          "expect_invariant": "ExactStoredACLProjection",
+          "edits": [
+            {
+              "old": "ELSE Receipt(\"read\",projected,db)",
+              "new": "ELSE Receipt(\"read\",IF db.vpc=\"legacy\" /\\ q.op=\"describe-subnet\" THEN ACLProjection(Native,DefaultId) ELSE projected,db)",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "InventStackBindingOnDescribe",
+          "expect_invariant": "ExactStoredACLProjection",
+          "edits": [
+            {
+              "old": "ELSE Receipt(\"read\",projected,db)",
+              "new": "ELSE Receipt(\"read\",IF db.vpc=\"stack\" /\\ q.op=\"describe-subnet\" THEN ACLProjection(Native,DefaultId) ELSE projected,db)",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "CallAttachedACLDetached",
+          "expect_invariant": "ExactStoredACLProjection",
+          "edits": [
+            {
+              "old": "ELSE IF db.binding # None /\\ db.binding.acl=id THEN \"attached-config-only\"",
+              "new": "ELSE IF db.binding # None /\\ db.binding.acl=id THEN \"detached-config-only\"",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "OmitDefaultTerminalRules",
+          "expect_invariant": "ExactStoredACLProjection",
+          "edits": [
+            {
+              "old": "rules |-> IF id=DefaultId THEN DefaultRules ELSE None]",
+              "new": "rules |-> IF id=DefaultId THEN {r \\in DefaultRules : r[2]=100} ELSE None]",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "IgnoreUnverifiedAssociationRead",
+          "expect_invariant": "ExactStoredACLProjection",
+          "edits": [
+            {
+              "old": "IF q.proof \\in BadGraph \\/ q.commit=\"commit\" THEN",
+              "new": "IF q.commit=\"commit\" THEN",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "AllowScopedHandoffPane",
+          "expect_invariant": "ExactSelectedUI",
+          "edits": [
+            {
+              "old": "ui.gate \\notin UIBlock /\\ saved#None",
+              "new": "ui.gate \\notin (UIBlock \\ {\"scoped-handoff\"}) /\\ saved#None",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "AllowBackgroundACLWrite",
+          "expect_invariant": "ExactSelectedUI",
+          "edits": [
+            {
+              "old": "ui.gate \\notin UIBlock /\\ saved#None",
+              "new": "ui.gate \\notin (UIBlock \\ {\"lease-busy\"}) /\\ saved#None",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "UseCatalogWithoutStoredDefault",
+          "expect_invariant": "ExactSelectedUI",
+          "edits": [
+            {
+              "old": "ui.gate \\notin UIBlock /\\ saved#None",
+              "new": "ui.gate \\notin (UIBlock \\ {\"no-default-in-catalog\"}) /\\ saved#None",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "UseStaleCatalogAssociation",
+          "expect_invariant": "ExactSelectedUI",
+          "edits": [
+            {
+              "old": "ui.gate \\notin UIBlock /\\ saved#None",
+              "new": "ui.gate \\notin (UIBlock \\ {\"stale-catalog-row\"}) /\\ saved#None",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "SkipFreshCurrentAssociation",
+          "expect_invariant": "ExactSelectedUI",
+          "edits": [
+            {
+              "old": "/\\ saved#None /\\ fresh=saved",
+              "new": "/\\ saved#None /\\ fresh#None",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "PublishRetiredAssociation",
+          "expect_invariant": "ExactSelectedUI",
+          "edits": [
+            {
+              "old": "/\\ ui.post#\"retired-after\" /\\ read # None",
+              "new": "/\\ read # None",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "ReadbackIgnoresVPC",
+          "expect_invariant": "ExactSelectedUI",
+          "edits": [
+            {
+              "old": "read = [vpc |-> Vpc, subnet |-> Subnet, acl |-> ui.choice, id |-> ack]",
+              "new": "read = [[vpc |-> Vpc, subnet |-> Subnet, acl |-> ui.choice, id |-> ack] EXCEPT !.vpc=read.vpc]",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "ReadbackIgnoresSubnet",
+          "expect_invariant": "ExactSelectedUI",
+          "edits": [
+            {
+              "old": "read = [vpc |-> Vpc, subnet |-> Subnet, acl |-> ui.choice, id |-> ack]",
+              "new": "read = [[vpc |-> Vpc, subnet |-> Subnet, acl |-> ui.choice, id |-> ack] EXCEPT !.subnet=read.subnet]",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "ReadbackIgnoresDestination",
+          "expect_invariant": "ExactSelectedUI",
+          "edits": [
+            {
+              "old": "read = [vpc |-> Vpc, subnet |-> Subnet, acl |-> ui.choice, id |-> ack]",
+              "new": "read = [[vpc |-> Vpc, subnet |-> Subnet, acl |-> ui.choice, id |-> ack] EXCEPT !.acl=read.acl]",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "ReadbackIgnoresReturnedAssociation",
+          "expect_invariant": "ExactSelectedUI",
+          "edits": [
+            {
+              "old": "read = [vpc |-> Vpc, subnet |-> Subnet, acl |-> ui.choice, id |-> ack]",
+              "new": "read = [[vpc |-> Vpc, subnet |-> Subnet, acl |-> ui.choice, id |-> ack] EXCEPT !.id=read.id]",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "PublishWithoutAcknowledgedWrite",
+          "expect_invariant": "ExactSelectedUI",
+          "edits": [
+            {
+              "old": "confirmed == UICheck(ui,ack,read,old)",
+              "new": "confirmed == IF ack=None /\\ read#None THEN UICheck(ui,read.id,read,old) ELSE UICheck(ui,ack,read,old)",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "RevertCommitOnUnconfirmedACLRead",
+          "expect_invariant": "ReadbackDoesNotUndo",
+          "edits": [
+            {
+              "old": "!.step=3, !.data=live, !.shown=IF confirmed THEN read ELSE None]",
+              "new": "!.step=3, !.data=IF confirmed THEN live ELSE s.plan.initial, !.shown=IF confirmed THEN read ELSE None]",
+              "count": 1
+            }
+          ]
+        }
+      ]
     }
   ]
 }

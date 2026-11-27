@@ -131,7 +131,7 @@ const render=scope=>renderToStaticMarkup(createElement(module.exports.default,{v
 test('real Cloudscape markup offers only bounded detached controls and explains the non-mutating CFN case',()=>{
   const native=render(vpc),stack=render(cfg),unknown=render({...vpc,managedBy:''});
   assert.match(native,/network ACLs/i);assert.match(native,/manages detached ACLs only/i);
-  assert.match(native,/edit rules on the dedicated Network ACLs page/i);assert.match(native,/Subnet association and packet filtering are not supported/);assert.match(native,/Reading network ACLs/);
+  assert.match(native,/use Network ACLs for rule configuration and Subnets for association/i);assert.match(native,/Packet filtering is not emulated/);assert.match(native,/Reading network ACLs/);
   assert.doesNotMatch(native,/No detached network ACLs are saved/);
   assert.match(stack,/CloudFormation manages this VPC/);assert.doesNotMatch(stack,/Create network ACL|Delete network ACL|Refresh network ACL/);
   assert.match(unknown,/Select a verified EC2-managed VPC/);

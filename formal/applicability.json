@@ -1,337 +1,547 @@
 {
   "version": 1,
-  "base_sha": "ee62782fa6d8c7e4838893f3e3cc66ca27fb4e70",
+  "base_sha": "31fdcca2c632fe0795938a11ed075f371f6e1f36",
   "changes": [
     {
       "path": "README.ja.md",
-      "sha256": "1b3c36526b6d5fcfd9cbb481d10dd4a0b9b3aa428afa5c3f724fe494dd016ae7",
+      "sha256": "2c18d9a76c120e2fbc0a1184ef55dbda1c418fed3be07fc4dea4b1426bf160ac",
       "disposition": "documentation",
-      "reason": "Describe the bounded subnet Name and tag operations and their current limits.",
+      "reason": "Document the bounded native IPv4 association, enrolled/legacy boundaries and downgrade requirements; do not claim packet filtering.",
       "models": []
     },
     {
       "path": "README.md",
-      "sha256": "aeefbd0c27ef0878751ea7bf8b7c46b9749c8a73a5deb2e7e745062be00ea1c3",
+      "sha256": "30420039724c9957551ebad1eea483e6f3d72b2c8ae261fb51e6b2e496e70bfb",
       "disposition": "documentation",
-      "reason": "Describe the bounded subnet Name and tag operations and their current limits.",
+      "reason": "Document the bounded native IPv4 association, enrolled/legacy boundaries and downgrade requirements; do not claim packet filtering.",
       "models": []
     },
     {
       "path": "docs/design/0001-go-standalone.md",
-      "sha256": "e939f333b97199c8c37095b878375cd76ea5819658d649d023375f1333c6d25a",
+      "sha256": "712abd2584c0d5940e639fd62bf4ab8a712ab80998b764b0b793eacd6641a64d",
       "disposition": "documentation",
-      "reason": "Describe the bounded subnet Name and tag operations and their current limits.",
+      "reason": "Document the bounded native IPv4 association, enrolled/legacy boundaries and downgrade requirements; do not claim packet filtering.",
+      "models": []
+    },
+    {
+      "path": "docs/ec2-detached-network-acls.md",
+      "sha256": "4a6a7c15b1887c3db893955eb117150de0c958ea87863c54e3f32845a4a76670",
+      "disposition": "documentation",
+      "reason": "Document the bounded native IPv4 association, enrolled/legacy boundaries and downgrade requirements; do not claim packet filtering.",
       "models": []
     },
     {
       "path": "docs/ec2-native-subnet.md",
-      "sha256": "c1a1661595b99eea790f6575cdd37e25c0ace9e1f0e7e421f03fefb82b33fae4",
+      "sha256": "a34cb864cb00c4bad35fdfde3a1c833c607e38b7ee2ddb7b53af713a8f7fea81",
       "disposition": "documentation",
-      "reason": "Describe the bounded subnet Name and tag operations and their current limits.",
+      "reason": "Document the bounded native IPv4 association, enrolled/legacy boundaries and downgrade requirements; do not claim packet filtering.",
       "models": []
     },
     {
       "path": "docs/ec2-read-discovery.md",
-      "sha256": "a47cc8952102d1283cd8f099583ea1c65674ba8e1cc2631d6242330cd2c09499",
+      "sha256": "d20dea01e6011f93d187896f77efc0af63968b0894a6e016b261e4a51609a2e7",
       "disposition": "documentation",
-      "reason": "Describe the bounded subnet Name and tag operations and their current limits.",
+      "reason": "Document the bounded native IPv4 association, enrolled/legacy boundaries and downgrade requirements; do not claim packet filtering.",
       "models": []
     },
     {
-      "path": "formal/EC2NativeSubnetTags.cfg",
-      "sha256": "414c08e67ad6cf23d6474365c97f0068568f7d4fd61d217274c956c7322b79b0",
+      "path": "docs/ec2-vpc-console.md",
+      "sha256": "2c78fb9928d04cf738eb762888afb934445cfb5688fa889dd9ac0dfe82bdcbb9",
+      "disposition": "documentation",
+      "reason": "Document the bounded native IPv4 association, enrolled/legacy boundaries and downgrade requirements; do not claim packet filtering.",
+      "models": []
+    },
+    {
+      "path": "formal/EC2NativeNetworkACLAssociation.cfg",
+      "sha256": "81b25843397302058c836ea0a1c02e8a55f9a7eda08749d8f2b826ccb9b06fd8",
       "disposition": "modeled",
-      "reason": "Check the native subnet tag and console contracts with all named mutation controls.",
+      "reason": "Check the bounded default, association lifecycle and Console conditions with the exact named negative controls.",
       "models": [
         {
-          "id": "EC2NativeSubnetTags",
+          "id": "EC2NativeNetworkACLAssociation",
           "properties": [
-            "SubnetAndParentFences",
-            "SingleDocumentCommit",
+            "ExactSavedDefault",
+            "ExactAssociationReceipt",
+            "DetachedRuleAndDeleteFence",
             "UnchangedNetworkFrame",
-            "ExactNativeTagProjection",
-            "ExactSelectedSubnetRequest",
-            "ExactSelectedSubnetConfirmation",
-            "NoUnconfirmedUndo"
+            "ExactStoredACLProjection",
+            "ExactSelectedUI",
+            "ReadbackDoesNotUndo"
           ],
-          "limits": "Additive local subnet tag metadata, independent native inventory and exact selected-row receipts only. Shared API parsing and quotas remain in EC2NativeVPCTags. Input normalization, finite ownership/main/DNS/CIDR/AZ witnesses, exact document re-read and total changed row count are abstractions, not raw SQL/parser/IAM proofs. No full regional inventory validation, filter/pagination, schedule exhaustiveness, rollback from UI, browser routing/refetch timing/capacity diagnostics, cloud parity, packet behavior or Go/JavaScript refinement."
+          "limits": "Bounded persisted ACL configuration only, including normalized same-VPC refusal and replacement receipts. Does not prove the CreateNetworkAcl ClientToken/fingerprint/attached-replay projection, exact Query/XML/HTTP scope error priority or codes, hash collision/64-bit arithmetic, raw IAM/SQL, all multi-subnet/cohort concurrency, existing route lifecycle, real browser/network/packet behavior or Go/JavaScript refinement. A late or unverified readback does not reverse a committed binding."
         }
       ]
     },
     {
-      "path": "formal/EC2NativeSubnetTags.tla",
-      "sha256": "2c0d35f5e5150f6e54abe690ce5a861aacf8118c07e61db1a56d7722ad5acbb2",
+      "path": "formal/EC2NativeNetworkACLAssociation.tla",
+      "sha256": "6325ea5c88a62f69f75c34613ac2f5fcb075a6ec36dba6cbf81dc096c76e41b1",
       "disposition": "modeled",
-      "reason": "Check the native subnet tag and console contracts with all named mutation controls.",
+      "reason": "Check the bounded default, association lifecycle and Console conditions with the exact named negative controls.",
       "models": [
         {
-          "id": "EC2NativeSubnetTags",
+          "id": "EC2NativeNetworkACLAssociation",
           "properties": [
-            "SubnetAndParentFences",
-            "SingleDocumentCommit",
+            "ExactSavedDefault",
+            "ExactAssociationReceipt",
+            "DetachedRuleAndDeleteFence",
             "UnchangedNetworkFrame",
-            "ExactNativeTagProjection",
-            "ExactSelectedSubnetRequest",
-            "ExactSelectedSubnetConfirmation",
-            "NoUnconfirmedUndo"
+            "ExactStoredACLProjection",
+            "ExactSelectedUI",
+            "ReadbackDoesNotUndo"
           ],
-          "limits": "Additive local subnet tag metadata, independent native inventory and exact selected-row receipts only. Shared API parsing and quotas remain in EC2NativeVPCTags. Input normalization, finite ownership/main/DNS/CIDR/AZ witnesses, exact document re-read and total changed row count are abstractions, not raw SQL/parser/IAM proofs. No full regional inventory validation, filter/pagination, schedule exhaustiveness, rollback from UI, browser routing/refetch timing/capacity diagnostics, cloud parity, packet behavior or Go/JavaScript refinement."
+          "limits": "Bounded persisted ACL configuration only, including normalized same-VPC refusal and replacement receipts. Does not prove the CreateNetworkAcl ClientToken/fingerprint/attached-replay projection, exact Query/XML/HTTP scope error priority or codes, hash collision/64-bit arithmetic, raw IAM/SQL, all multi-subnet/cohort concurrency, existing route lifecycle, real browser/network/packet behavior or Go/JavaScript refinement. A late or unverified readback does not reverse a committed binding."
         }
       ]
     },
     {
       "path": "formal/models.json",
-      "sha256": "5b08dcf18e406f6340aa89f584a810bef163dff091d03be7d341eec7516f6142",
+      "sha256": "8a515e6eb583591145d749d0441c156effa2d220abe2176ef682e3cc3079111d",
       "disposition": "formal-infrastructure",
-      "reason": "Register and select the appended native subnet tag model without removing existing required models.",
+      "reason": "Register and detect changes to the bounded association model without removing any earlier required checks.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/cloudformation.go",
+      "sha256": "b7578416ba018dc8bf610f54a0ea397500f3c711fca9a26da84228730080cdea",
+      "disposition": "modeled",
+      "reason": "Initialize the separate ACL relations without enrolling existing native or CloudFormation-owned VPCs on open.",
+      "models": [
+        {
+          "id": "EC2NativeNetworkACLAssociation",
+          "properties": [
+            "ExactSavedDefault",
+            "UnchangedNetworkFrame"
+          ],
+          "limits": "Bounded persisted ACL configuration only, including normalized same-VPC refusal and replacement receipts. Does not prove the CreateNetworkAcl ClientToken/fingerprint/attached-replay projection, exact Query/XML/HTTP scope error priority or codes, hash collision/64-bit arithmetic, raw IAM/SQL, all multi-subnet/cohort concurrency, existing route lifecycle, real browser/network/packet behavior or Go/JavaScript refinement. A late or unverified readback does not reverse a committed binding."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/ec2_native_nacl_line_regression_test.go",
+      "sha256": "b8689ccc3cf3d23283bc208c507527cb584dfc8473ea213134d46761669b1d98",
+      "disposition": "test-support",
+      "reason": "Exercise supported state, existing native and Console regressions, exact SDK scope and readback.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/ec2_network_acl.go",
+      "sha256": "946ebba8dc8327d18084cb13383b09ca687e501ae41114cada97dde37b27c74d",
+      "disposition": "modeled",
+      "reason": "Expose the distinct detailed ACL projection and bounded replacement response; existing write-result semantics remain separately verified.",
+      "models": [
+        {
+          "id": "EC2NativeNetworkACLAssociation",
+          "properties": [
+            "ExactStoredACLProjection",
+            "ExactAssociationReceipt",
+            "DetachedRuleAndDeleteFence"
+          ],
+          "limits": "Bounded persisted ACL configuration only, including normalized same-VPC refusal and replacement receipts. Does not prove the CreateNetworkAcl ClientToken/fingerprint/attached-replay projection, exact Query/XML/HTTP scope error priority or codes, hash collision/64-bit arithmetic, raw IAM/SQL, all multi-subnet/cohort concurrency, existing route lifecycle, real browser/network/packet behavior or Go/JavaScript refinement. A late or unverified readback does not reverse a committed binding."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/ec2_network_acl_association_query.go",
+      "sha256": "fa742ff3cb305cdecdeec23d158d42205087baa6e5cd7b35f857e3124e70b79e",
+      "disposition": "modeled",
+      "reason": "Accept only the bounded replacement request using exact typed identifiers and response receipt.",
+      "models": [
+        {
+          "id": "EC2NativeNetworkACLAssociation",
+          "properties": [
+            "ExactAssociationReceipt",
+            "ExactSavedDefault"
+          ],
+          "limits": "Bounded persisted ACL configuration only, including normalized same-VPC refusal and replacement receipts. Does not prove the CreateNetworkAcl ClientToken/fingerprint/attached-replay projection, exact Query/XML/HTTP scope error priority or codes, hash collision/64-bit arithmetic, raw IAM/SQL, all multi-subnet/cohort concurrency, existing route lifecycle, real browser/network/packet behavior or Go/JavaScript refinement. A late or unverified readback does not reverse a committed binding."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/ec2_network_acl_association_sdk_test.go",
+      "sha256": "d922a1d274bebe8646c117084eadcb98b89509346041da052a977de77df820bd",
+      "disposition": "test-support",
+      "reason": "Exercise supported state, existing native and Console regressions, exact SDK scope and readback.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/ec2_network_acl_association_state.go",
+      "sha256": "a2a72fef5bbd9aefe130ddc3a3482fe361cb44357b7132a4d33a289d08ad80d0",
+      "disposition": "modeled",
+      "reason": "Represent current typed defaults and verified native same-VPC subnet relationships without inferring legacy or CFN state.",
+      "models": [
+        {
+          "id": "EC2NativeNetworkACLAssociation",
+          "properties": [
+            "ExactSavedDefault",
+            "ExactAssociationReceipt",
+            "UnchangedNetworkFrame",
+            "ExactStoredACLProjection"
+          ],
+          "limits": "Bounded persisted ACL configuration only, including normalized same-VPC refusal and replacement receipts. Does not prove the CreateNetworkAcl ClientToken/fingerprint/attached-replay projection, exact Query/XML/HTTP scope error priority or codes, hash collision/64-bit arithmetic, raw IAM/SQL, all multi-subnet/cohort concurrency, existing route lifecycle, real browser/network/packet behavior or Go/JavaScript refinement. A late or unverified readback does not reverse a committed binding."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/ec2_network_acl_association_store.go",
+      "sha256": "a58e0c4042102837dd56d731fb69971372c5b3d29ccfd84251822a628fd5f93e",
+      "disposition": "modeled",
+      "reason": "Verify complete prior native state, two explicit permissions, one typed association update, route frame and matching saved readback.",
+      "models": [
+        {
+          "id": "EC2NativeNetworkACLAssociation",
+          "properties": [
+            "ExactSavedDefault",
+            "ExactAssociationReceipt",
+            "DetachedRuleAndDeleteFence",
+            "UnchangedNetworkFrame",
+            "ExactStoredACLProjection"
+          ],
+          "limits": "Bounded persisted ACL configuration only, including normalized same-VPC refusal and replacement receipts. Does not prove the CreateNetworkAcl ClientToken/fingerprint/attached-replay projection, exact Query/XML/HTTP scope error priority or codes, hash collision/64-bit arithmetic, raw IAM/SQL, all multi-subnet/cohort concurrency, existing route lifecycle, real browser/network/packet behavior or Go/JavaScript refinement. A late or unverified readback does not reverse a committed binding."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/ec2_network_acl_association_test.go",
+      "sha256": "144c7418a1f529f79df34cb3ec79d07b5f05e9201a4da9e5ac9070a96477c46d",
+      "disposition": "test-support",
+      "reason": "Exercise supported state, existing native and Console regressions, exact SDK scope and readback.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/ec2_network_acl_association_wire_test.go",
+      "sha256": "605c2115986b4ac5c4a59cb3f7113117626b65d0accb253b0025beddbb001491",
+      "disposition": "test-support",
+      "reason": "Exercise supported state, existing native and Console regressions, exact SDK scope and readback.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/ec2_network_acl_entry.go",
+      "sha256": "27d9f84926953cfa15eaacea4d7f28bf2012ff6ff5c096db3534c1599e06af08",
+      "disposition": "modeled",
+      "reason": "Refuse edits for default/attached ACLs within the rule transaction and preserve saved associations.",
+      "models": [
+        {
+          "id": "EC2NativeNetworkACLAssociation",
+          "properties": [
+            "DetachedRuleAndDeleteFence",
+            "UnchangedNetworkFrame"
+          ],
+          "limits": "Bounded persisted ACL configuration only, including normalized same-VPC refusal and replacement receipts. Does not prove the CreateNetworkAcl ClientToken/fingerprint/attached-replay projection, exact Query/XML/HTTP scope error priority or codes, hash collision/64-bit arithmetic, raw IAM/SQL, all multi-subnet/cohort concurrency, existing route lifecycle, real browser/network/packet behavior or Go/JavaScript refinement. A late or unverified readback does not reverse a committed binding."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/ec2_network_acl_entry_test.go",
+      "sha256": "2e6a60d3e45a4ea399789460505369295adb9e0ab8a352c394f372bb7ec94506",
+      "disposition": "test-support",
+      "reason": "Exercise supported state, existing native and Console regressions, exact SDK scope and readback.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/ec2_network_acl_readback.go",
+      "sha256": "56672276696cd6f978d1fa0edff0fb1d95b22545fa69935311d17a3060daaa28",
+      "disposition": "modeled",
+      "reason": "Read actual typed default and custom records in the same snapshot, without labeling missing associations as success.",
+      "models": [
+        {
+          "id": "EC2NativeNetworkACLAssociation",
+          "properties": [
+            "ExactSavedDefault",
+            "ExactStoredACLProjection",
+            "DetachedRuleAndDeleteFence"
+          ],
+          "limits": "Bounded persisted ACL configuration only, including normalized same-VPC refusal and replacement receipts. Does not prove the CreateNetworkAcl ClientToken/fingerprint/attached-replay projection, exact Query/XML/HTTP scope error priority or codes, hash collision/64-bit arithmetic, raw IAM/SQL, all multi-subnet/cohort concurrency, existing route lifecycle, real browser/network/packet behavior or Go/JavaScript refinement. A late or unverified readback does not reverse a committed binding."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/ec2_network_acl_registration_test.go",
+      "sha256": "5e57b2a5f563969a0e9b12f7c5ada52af7980edb7e081bc75a2652ce0546455d",
+      "disposition": "test-support",
+      "reason": "Exercise supported state, existing native and Console regressions, exact SDK scope and readback.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/ec2_network_acl_store.go",
+      "sha256": "e31c1c31b1ce85a48b36ffd5eb6ccdaf377880e2438ae4d0530ae8c17b84e145",
+      "disposition": "modeled",
+      "reason": "Keep mutation guards and projected custom state exact. Create token replay is established separately by Go and SDK tests.",
+      "models": [
+        {
+          "id": "EC2NativeNetworkACLAssociation",
+          "properties": [
+            "ExactSavedDefault",
+            "DetachedRuleAndDeleteFence",
+            "ExactStoredACLProjection",
+            "UnchangedNetworkFrame"
+          ],
+          "limits": "Bounded persisted ACL configuration only, including normalized same-VPC refusal and replacement receipts. Does not prove the CreateNetworkAcl ClientToken/fingerprint/attached-replay projection, exact Query/XML/HTTP scope error priority or codes, hash collision/64-bit arithmetic, raw IAM/SQL, all multi-subnet/cohort concurrency, existing route lifecycle, real browser/network/packet behavior or Go/JavaScript refinement. A late or unverified readback does not reverse a committed binding."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/ec2_network_acl_test.go",
+      "sha256": "f23da9ce268565850354496779b515075cef1dbbecdff1c671bb7d4ebffbbd53",
+      "disposition": "test-support",
+      "reason": "Exercise supported state, existing native and Console regressions, exact SDK scope and readback.",
       "models": []
     },
     {
       "path": "internal/aws/ec2_read.go",
-      "sha256": "cbf86b3101a98d14af752e986831d8684fa1b0d6d68db4da93fb37841b89c4d0",
+      "sha256": "f3b28cf351daef2da0965653011dcddc8e32f6202ea6d5cd62697d3e8c9ceb27",
       "disposition": "modeled",
-      "reason": "Route only the declared single native subnet tag operations and return the saved subnet tag projection.",
+      "reason": "Route the authenticated AWS operation and validated native reads without inferring default state.",
       "models": [
         {
-          "id": "EC2NativeSubnetTags",
+          "id": "EC2NativeNetworkACLAssociation",
           "properties": [
-            "SubnetAndParentFences",
-            "ExactNativeTagProjection"
+            "ExactSavedDefault",
+            "ExactAssociationReceipt",
+            "ExactStoredACLProjection"
           ],
-          "limits": "Additive local subnet tag metadata, independent native inventory and exact selected-row receipts only. Shared API parsing and quotas remain in EC2NativeVPCTags. Input normalization, finite ownership/main/DNS/CIDR/AZ witnesses, exact document re-read and total changed row count are abstractions, not raw SQL/parser/IAM proofs. No full regional inventory validation, filter/pagination, schedule exhaustiveness, rollback from UI, browser routing/refetch timing/capacity diagnostics, cloud parity, packet behavior or Go/JavaScript refinement."
+          "limits": "Bounded persisted ACL configuration only, including normalized same-VPC refusal and replacement receipts. Does not prove the CreateNetworkAcl ClientToken/fingerprint/attached-replay projection, exact Query/XML/HTTP scope error priority or codes, hash collision/64-bit arithmetic, raw IAM/SQL, all multi-subnet/cohort concurrency, existing route lifecycle, real browser/network/packet behavior or Go/JavaScript refinement. A late or unverified readback does not reverse a committed binding."
         }
       ]
     },
     {
       "path": "internal/aws/ec2_subnet_native.go",
-      "sha256": "769c0d52e8093d9d0503cde8359cfd29fc49b1571a492b907c880e9545b11eb9",
+      "sha256": "d9c784a007458e48d8d13e790e09b5c9ee2d131b0a67c37a53a6c258f45738b5",
       "disposition": "modeled",
-      "reason": "Load the exact native subnet row and preserve its parent, network attributes and saved tag projection.",
+      "reason": "Create or remove the exact saved subnet association with the same lifecycle transaction while retaining existing route and ownership checks.",
       "models": [
         {
-          "id": "EC2NativeSubnetTags",
+          "id": "EC2NativeNetworkACLAssociation",
           "properties": [
-            "SubnetAndParentFences",
-            "ExactNativeTagProjection",
+            "ExactSavedDefault",
+            "ExactAssociationReceipt",
             "UnchangedNetworkFrame"
           ],
-          "limits": "Additive local subnet tag metadata, independent native inventory and exact selected-row receipts only. Shared API parsing and quotas remain in EC2NativeVPCTags. Input normalization, finite ownership/main/DNS/CIDR/AZ witnesses, exact document re-read and total changed row count are abstractions, not raw SQL/parser/IAM proofs. No full regional inventory validation, filter/pagination, schedule exhaustiveness, rollback from UI, browser routing/refetch timing/capacity diagnostics, cloud parity, packet behavior or Go/JavaScript refinement."
+          "limits": "Bounded persisted ACL configuration only, including normalized same-VPC refusal and replacement receipts. Does not prove the CreateNetworkAcl ClientToken/fingerprint/attached-replay projection, exact Query/XML/HTTP scope error priority or codes, hash collision/64-bit arithmetic, raw IAM/SQL, all multi-subnet/cohort concurrency, existing route lifecycle, real browser/network/packet behavior or Go/JavaScript refinement. A late or unverified readback does not reverse a committed binding."
         }
       ]
-    },
-    {
-      "path": "internal/aws/ec2_subnet_tag.go",
-      "sha256": "17f305bddf2390d14221652f3c5592486aad84b737a5447964ced10b0bf06154",
-      "disposition": "modeled",
-      "reason": "Fence the subnet and parent, write exactly one document, preserve network state and read back the requested tag effect.",
-      "models": [
-        {
-          "id": "EC2NativeSubnetTags",
-          "properties": [
-            "SubnetAndParentFences",
-            "SingleDocumentCommit",
-            "UnchangedNetworkFrame",
-            "ExactNativeTagProjection"
-          ],
-          "limits": "Additive local subnet tag metadata, independent native inventory and exact selected-row receipts only. Shared API parsing and quotas remain in EC2NativeVPCTags. Input normalization, finite ownership/main/DNS/CIDR/AZ witnesses, exact document re-read and total changed row count are abstractions, not raw SQL/parser/IAM proofs. No full regional inventory validation, filter/pagination, schedule exhaustiveness, rollback from UI, browser routing/refetch timing/capacity diagnostics, cloud parity, packet behavior or Go/JavaScript refinement."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/ec2_subnet_tag_test.go",
-      "sha256": "0eddee9a4b1c636872ab37a7206c2b363de0583b76109678e77ce3daddf415c6",
-      "disposition": "test-support",
-      "reason": "Exercise the exact native subnet metadata flow, saved state, independent SDK readback and existing runtime capabilities.",
-      "models": []
     },
     {
       "path": "internal/aws/ec2_vpc.go",
-      "sha256": "d2eb9fd7efe60352cb74211963519cd56a5ac94e588bcceee270c7c62a7e6a09",
+      "sha256": "ebb4963fc8d90818cab7f7b10d4ec41bfff616098f63ad0f89a1d87363cef00e",
       "disposition": "modeled",
-      "reason": "Serialize subnet metadata updates with topology writes on the native document path.",
+      "reason": "Apply the ACL side relation to the same exact native VPC lifecycle and preserve legacy/refusal paths.",
       "models": [
         {
-          "id": "EC2NativeSubnetTags",
+          "id": "EC2NativeNetworkACLAssociation",
           "properties": [
-            "SubnetAndParentFences",
-            "SingleDocumentCommit",
+            "ExactSavedDefault",
             "UnchangedNetworkFrame"
           ],
-          "limits": "Additive local subnet tag metadata, independent native inventory and exact selected-row receipts only. Shared API parsing and quotas remain in EC2NativeVPCTags. Input normalization, finite ownership/main/DNS/CIDR/AZ witnesses, exact document re-read and total changed row count are abstractions, not raw SQL/parser/IAM proofs. No full regional inventory validation, filter/pagination, schedule exhaustiveness, rollback from UI, browser routing/refetch timing/capacity diagnostics, cloud parity, packet behavior or Go/JavaScript refinement."
+          "limits": "Bounded persisted ACL configuration only, including normalized same-VPC refusal and replacement receipts. Does not prove the CreateNetworkAcl ClientToken/fingerprint/attached-replay projection, exact Query/XML/HTTP scope error priority or codes, hash collision/64-bit arithmetic, raw IAM/SQL, all multi-subnet/cohort concurrency, existing route lifecycle, real browser/network/packet behavior or Go/JavaScript refinement. A late or unverified readback does not reverse a committed binding."
         }
       ]
     },
     {
-      "path": "internal/aws/ec2_vpc_tag.go",
-      "sha256": "6ba8fb86e50e6e2a76ac10549029d353478d28925f7189c5eeebb3247ab94f93",
-      "disposition": "modeled",
-      "reason": "Keep native ownership and topology fences explicit on the shared VPC/subnet tag route.",
-      "models": [
-        {
-          "id": "EC2NativeSubnetTags",
-          "properties": [
-            "SubnetAndParentFences",
-            "SingleDocumentCommit",
-            "UnchangedNetworkFrame"
-          ],
-          "limits": "Additive local subnet tag metadata, independent native inventory and exact selected-row receipts only. Shared API parsing and quotas remain in EC2NativeVPCTags. Input normalization, finite ownership/main/DNS/CIDR/AZ witnesses, exact document re-read and total changed row count are abstractions, not raw SQL/parser/IAM proofs. No full regional inventory validation, filter/pagination, schedule exhaustiveness, rollback from UI, browser routing/refetch timing/capacity diagnostics, cloud parity, packet behavior or Go/JavaScript refinement."
-        }
-      ]
+      "path": "internal/aws/ec2_vpc_test.go",
+      "sha256": "f2b52134cad765e58551bb829d18881416b7fcecb39226e17244c9bcb065df83",
+      "disposition": "test-support",
+      "reason": "Exercise supported state, existing native and Console regressions, exact SDK scope and readback.",
+      "models": []
+    },
+    {
+      "path": "internal/server/ec2_native_vpc_console_line_regression_test.go",
+      "sha256": "28a62c50d6aed7a07d3110c2090de17a263c8c3ae3cde5986a007511d3ea348a",
+      "disposition": "test-support",
+      "reason": "Exercise supported state, existing native and Console regressions, exact SDK scope and readback.",
+      "models": []
     },
     {
       "path": "internal/server/ec2_read_access_test.go",
-      "sha256": "34a25e8207e6ea4e7b63a5eb6e67e01b2f2b858bf1131cc705020f4549af57f9",
+      "sha256": "7f3214b129ff8c207fdebb3cdf478f1deb73695b048eea3c5d91df97abf87707",
       "disposition": "test-support",
-      "reason": "Exercise the exact native subnet metadata flow, saved state, independent SDK readback and existing runtime capabilities.",
+      "reason": "Exercise supported state, existing native and Console regressions, exact SDK scope and readback.",
       "models": []
     },
     {
       "path": "internal/server/ec2_security_groups_console_test.go",
-      "sha256": "7b5cd58c5459644b4b2b116407795429ccb12bd6fa91780e9e746d7b0ccaed72",
+      "sha256": "dd57606b827e8e928d9c4807069899d3737a74efec6c7d12b4fd427900493e29",
       "disposition": "test-support",
-      "reason": "Exercise the exact native subnet metadata flow, saved state, independent SDK readback and existing runtime capabilities.",
+      "reason": "Assert the exact additional authenticated native subnet ACL capability alongside the existing claims; unauthenticated and instance-scoped callers remain unchanged.",
       "models": []
     },
     {
       "path": "internal/server/server.go",
-      "sha256": "215abfcd8daef74edacd43d56eaf8040335972ffb3a5bf354a40c20e32c77ef6",
+      "sha256": "d89b8a0150825e0bc47378ee69b6179e99da516b633c97eeb470bb77b8db4284",
       "disposition": "modeled",
-      "reason": "Advertise the separate bounded subnet profile so generic EC2 availability cannot authorize the console write.",
+      "reason": "Advertise the association operation only on eligible signed local management sessions.",
       "models": [
         {
-          "id": "EC2NativeSubnetTags",
+          "id": "EC2NativeNetworkACLAssociation",
           "properties": [
-            "SubnetAndParentFences",
-            "ExactSelectedSubnetRequest"
+            "ExactAssociationReceipt",
+            "ExactSelectedUI"
           ],
-          "limits": "Additive local subnet tag metadata, independent native inventory and exact selected-row receipts only. Shared API parsing and quotas remain in EC2NativeVPCTags. Input normalization, finite ownership/main/DNS/CIDR/AZ witnesses, exact document re-read and total changed row count are abstractions, not raw SQL/parser/IAM proofs. No full regional inventory validation, filter/pagination, schedule exhaustiveness, rollback from UI, browser routing/refetch timing/capacity diagnostics, cloud parity, packet behavior or Go/JavaScript refinement."
+          "limits": "Bounded persisted ACL configuration only, including normalized same-VPC refusal and replacement receipts. Does not prove the CreateNetworkAcl ClientToken/fingerprint/attached-replay projection, exact Query/XML/HTTP scope error priority or codes, hash collision/64-bit arithmetic, raw IAM/SQL, all multi-subnet/cohort concurrency, existing route lifecycle, real browser/network/packet behavior or Go/JavaScript refinement. A late or unverified readback does not reverse a committed binding."
         }
       ]
     },
     {
       "path": "internal/server/web/app.js",
-      "sha256": "eef1585226e6a4a99f5f27c90f7096235b7eb7f73093173bc1bd0082bcb3e67b",
+      "sha256": "794ac3c038d9c3055644f1d25d4380c8b2b19880fe122bc765f29d4cc1a99c03",
       "disposition": "modeled",
-      "reason": "Deliver the canonical app bundle with native single-tag request and confirmation behavior.",
+      "reason": "Serve the canonical Console bytes that render actual ACL records and submit one confirmed native association replacement.",
       "models": [
         {
-          "id": "EC2NativeSubnetTags",
+          "id": "EC2NativeNetworkACLAssociation",
           "properties": [
-            "ExactSelectedSubnetRequest",
-            "ExactSelectedSubnetConfirmation",
-            "NoUnconfirmedUndo"
+            "ExactSelectedUI",
+            "ReadbackDoesNotUndo",
+            "ExactStoredACLProjection"
           ],
-          "limits": "Additive local subnet tag metadata, independent native inventory and exact selected-row receipts only. Shared API parsing and quotas remain in EC2NativeVPCTags. Input normalization, finite ownership/main/DNS/CIDR/AZ witnesses, exact document re-read and total changed row count are abstractions, not raw SQL/parser/IAM proofs. No full regional inventory validation, filter/pagination, schedule exhaustiveness, rollback from UI, browser routing/refetch timing/capacity diagnostics, cloud parity, packet behavior or Go/JavaScript refinement."
+          "limits": "Bounded persisted ACL configuration only, including normalized same-VPC refusal and replacement receipts. Does not prove the CreateNetworkAcl ClientToken/fingerprint/attached-replay projection, exact Query/XML/HTTP scope error priority or codes, hash collision/64-bit arithmetic, raw IAM/SQL, all multi-subnet/cohort concurrency, existing route lifecycle, real browser/network/packet behavior or Go/JavaScript refinement. A late or unverified readback does not reverse a committed binding."
         }
       ]
     },
     {
       "path": "scripts/formal_model_gate.py",
-      "sha256": "3b7e86b102a45f8ed574b4ed1fac4a62603609ab50dea7f0ce49e9a35101e09c",
+      "sha256": "1b1ec5b1428dd1a175cd401b563f7ae75287d69d64cdb2e468b9f166011542b5",
       "disposition": "formal-infrastructure",
-      "reason": "Register and select the appended native subnet tag model without removing existing required models.",
+      "reason": "Register and detect changes to the bounded association model without removing any earlier required checks.",
       "models": []
     },
     {
       "path": "scripts/test-formal-gate.py",
-      "sha256": "4866bb01ecfe47fe0ff1ee3675af8efa12d130eace68730eca531e3b7f28dd38",
+      "sha256": "2d3253dd9499f14ad26adace23e771e1a14f59303e8b27ba85ac10283d26a160",
       "disposition": "formal-infrastructure",
-      "reason": "Register and select the appended native subnet tag model without removing existing required models.",
+      "reason": "Register and detect changes to the bounded association model without removing any earlier required checks.",
       "models": []
     },
     {
-      "path": "test/e2e/ec2_subnet_tags.py",
-      "sha256": "6f45ef1c977079c0fdc3685fd2958e1afa51d1d7dcdc888b80cb545808c4eea0",
+      "path": "test/e2e/ec2_detached_nacl.py",
+      "sha256": "ae261c502b1e033483152596af9dfcfadf4886d92cb7b7252696ddbb1cfe0c48",
       "disposition": "test-support",
-      "reason": "Exercise the exact native subnet metadata flow, saved state, independent SDK readback and existing runtime capabilities.",
+      "reason": "Exercise supported state, existing native and Console regressions, exact SDK scope and readback.",
       "models": []
     },
     {
       "path": "tools/console/bundle-digests.json",
-      "sha256": "a6b38adacc9850f25051f6f5d936bf83774ee4bfd017ac0308d9dd80b35a72a2",
+      "sha256": "27f1232567b23b8591109f62fd0f554944e79eb9580324e685386f9b046f88f8",
       "disposition": "presentation",
-      "reason": "Bind reproducible Console bytes and build inputs in the generated manifests.",
+      "reason": "Bind the canonical generated Console assets to the unchanged build inputs and notices.",
       "models": []
     },
     {
       "path": "tools/console/bundle-inputs.json",
-      "sha256": "bbe37cd1d1d0c1403102f657ebe216e5f15f241bfdff68bd69447421ad669b19",
+      "sha256": "4c7d60d615f658242b1908dfa6b8b7ad18cbb340decfa7aa92c08ae793342887",
       "disposition": "presentation",
-      "reason": "Bind reproducible Console bytes and build inputs in the generated manifests.",
+      "reason": "Bind the canonical generated Console assets to the unchanged build inputs and notices.",
       "models": []
     },
     {
-      "path": "tools/console/src/ec2-native-subnets.mjs",
-      "sha256": "a9fbe02677f9a2d9ad3991e9d17c144c4a1bbaa1ac392f5582d08a2f2455153b",
+      "path": "tools/console/src/ec2-network-acl-inventory.jsx",
+      "sha256": "253d8333853cbc9828a17d45befef98fb889077e2dffba28d97ebf44c452a5e6",
       "disposition": "modeled",
-      "reason": "Use the saved native subnet projection and confirm the literal one-tag operation against the selected network.",
+      "reason": "Display typed default, attached and detached state without offering writes forbidden by the native capability.",
       "models": [
         {
-          "id": "EC2NativeSubnetTags",
+          "id": "EC2NativeNetworkACLAssociation",
           "properties": [
-            "ExactNativeTagProjection",
-            "ExactSelectedSubnetRequest",
-            "ExactSelectedSubnetConfirmation"
+            "ExactStoredACLProjection",
+            "DetachedRuleAndDeleteFence"
           ],
-          "limits": "Additive local subnet tag metadata, independent native inventory and exact selected-row receipts only. Shared API parsing and quotas remain in EC2NativeVPCTags. Input normalization, finite ownership/main/DNS/CIDR/AZ witnesses, exact document re-read and total changed row count are abstractions, not raw SQL/parser/IAM proofs. No full regional inventory validation, filter/pagination, schedule exhaustiveness, rollback from UI, browser routing/refetch timing/capacity diagnostics, cloud parity, packet behavior or Go/JavaScript refinement."
+          "limits": "Bounded persisted ACL configuration only, including normalized same-VPC refusal and replacement receipts. Does not prove the CreateNetworkAcl ClientToken/fingerprint/attached-replay projection, exact Query/XML/HTTP scope error priority or codes, hash collision/64-bit arithmetic, raw IAM/SQL, all multi-subnet/cohort concurrency, existing route lifecycle, real browser/network/packet behavior or Go/JavaScript refinement. A late or unverified readback does not reverse a committed binding."
+        }
+      ]
+    },
+    {
+      "path": "tools/console/src/ec2-network-acls.mjs",
+      "sha256": "4e7e184be6552e3acff42656cc884368a40caaf5026556fe01ed173b2a0b4a64",
+      "disposition": "modeled",
+      "reason": "Validate saved ACL/subnet state and exact native receipt readback, never infer success or undo on error.",
+      "models": [
+        {
+          "id": "EC2NativeNetworkACLAssociation",
+          "properties": [
+            "ExactAssociationReceipt",
+            "ExactStoredACLProjection",
+            "ExactSelectedUI",
+            "ReadbackDoesNotUndo"
+          ],
+          "limits": "Bounded persisted ACL configuration only, including normalized same-VPC refusal and replacement receipts. Does not prove the CreateNetworkAcl ClientToken/fingerprint/attached-replay projection, exact Query/XML/HTTP scope error priority or codes, hash collision/64-bit arithmetic, raw IAM/SQL, all multi-subnet/cohort concurrency, existing route lifecycle, real browser/network/packet behavior or Go/JavaScript refinement. A late or unverified readback does not reverse a committed binding."
+        }
+      ]
+    },
+    {
+      "path": "tools/console/src/ec2-subnet-network-acl-panel.jsx",
+      "sha256": "f6a3beabbbfdc17a75ab043c963fd30e0e68a1c894a30c2047a74b6670169f77",
+      "disposition": "modeled",
+      "reason": "Keep the selected permitted scope and lease through the single write and live readback.",
+      "models": [
+        {
+          "id": "EC2NativeNetworkACLAssociation",
+          "properties": [
+            "ExactSelectedUI",
+            "ReadbackDoesNotUndo"
+          ],
+          "limits": "Bounded persisted ACL configuration only, including normalized same-VPC refusal and replacement receipts. Does not prove the CreateNetworkAcl ClientToken/fingerprint/attached-replay projection, exact Query/XML/HTTP scope error priority or codes, hash collision/64-bit arithmetic, raw IAM/SQL, all multi-subnet/cohort concurrency, existing route lifecycle, real browser/network/packet behavior or Go/JavaScript refinement. A late or unverified readback does not reverse a committed binding."
         }
       ]
     },
     {
       "path": "tools/console/src/ec2-subnets-console.jsx",
-      "sha256": "44cdbd5613f9358b22115a666dd80a187216589c94d3e06087d134ddcd46ff54",
+      "sha256": "60b9a9a674fe828d9b4cd610bebcf0b017b3148ee1bf089f81fd28e444d703eb",
       "disposition": "modeled",
-      "reason": "Use the selected subnet until native readback and do not treat a failed confirmation as an undo.",
+      "reason": "Keep the association panel attached only to the exact existing selected subnet and verified scoped lease.",
       "models": [
         {
-          "id": "EC2NativeSubnetTags",
+          "id": "EC2NativeNetworkACLAssociation",
           "properties": [
-            "ExactSelectedSubnetRequest",
-            "ExactSelectedSubnetConfirmation",
-            "NoUnconfirmedUndo"
+            "ExactSelectedUI",
+            "ReadbackDoesNotUndo"
           ],
-          "limits": "Additive local subnet tag metadata, independent native inventory and exact selected-row receipts only. Shared API parsing and quotas remain in EC2NativeVPCTags. Input normalization, finite ownership/main/DNS/CIDR/AZ witnesses, exact document re-read and total changed row count are abstractions, not raw SQL/parser/IAM proofs. No full regional inventory validation, filter/pagination, schedule exhaustiveness, rollback from UI, browser routing/refetch timing/capacity diagnostics, cloud parity, packet behavior or Go/JavaScript refinement."
+          "limits": "Bounded persisted ACL configuration only, including normalized same-VPC refusal and replacement receipts. Does not prove the CreateNetworkAcl ClientToken/fingerprint/attached-replay projection, exact Query/XML/HTTP scope error priority or codes, hash collision/64-bit arithmetic, raw IAM/SQL, all multi-subnet/cohort concurrency, existing route lifecycle, real browser/network/packet behavior or Go/JavaScript refinement. A late or unverified readback does not reverse a committed binding."
+        }
+      ]
+    },
+    {
+      "path": "tools/console/src/ec2-vpc-network-acls.jsx",
+      "sha256": "156b7576881273a5f845a7aa1ae6bf3cc8b6b0bae2e782ccc62a0d7a1af19f9e",
+      "disposition": "modeled",
+      "reason": "Preserve the detached writer and verified inline inventory; report an attached replay only after the actual matching readback.",
+      "models": [
+        {
+          "id": "EC2DetachedNetworkConsole",
+          "properties": [
+            "OnlyCurrentScope",
+            "VerifiedWriteOnly",
+            "LeaseUntilReadback"
+          ],
+          "limits": "Native UI admission, scoped completion and aggregate write leases only. No React event ordering, layout, serialized identity API, XML parsing, SQLite, packet behavior or implementation proof. Legacy CFN read-only behavior remains separately modeled."
         }
       ]
     },
     {
       "path": "tools/console/src/ec2-vpc-resource-view.jsx",
-      "sha256": "c20319ce3c022e633d09f54d8172c9457158115bbdb8044f00dac0735d803916",
+      "sha256": "0d3982b032315e662fa11b13cad57394afd8b4b8d186416165819e62a3f5cfa7",
       "disposition": "modeled",
-      "reason": "Mount only the bounded editor for the selected native subnet and preserve the surrounding network context.",
+      "reason": "Connect authenticated capability selection and current regional VPC and subnet context.",
       "models": [
         {
-          "id": "EC2NativeSubnetTags",
+          "id": "EC2NativeNetworkACLAssociation",
           "properties": [
-            "ExactSelectedSubnetRequest",
-            "ExactSelectedSubnetConfirmation"
+            "ExactSelectedUI"
           ],
-          "limits": "Additive local subnet tag metadata, independent native inventory and exact selected-row receipts only. Shared API parsing and quotas remain in EC2NativeVPCTags. Input normalization, finite ownership/main/DNS/CIDR/AZ witnesses, exact document re-read and total changed row count are abstractions, not raw SQL/parser/IAM proofs. No full regional inventory validation, filter/pagination, schedule exhaustiveness, rollback from UI, browser routing/refetch timing/capacity diagnostics, cloud parity, packet behavior or Go/JavaScript refinement."
+          "limits": "Bounded persisted ACL configuration only, including normalized same-VPC refusal and replacement receipts. Does not prove the CreateNetworkAcl ClientToken/fingerprint/attached-replay projection, exact Query/XML/HTTP scope error priority or codes, hash collision/64-bit arithmetic, raw IAM/SQL, all multi-subnet/cohort concurrency, existing route lifecycle, real browser/network/packet behavior or Go/JavaScript refinement. A late or unverified readback does not reverse a committed binding."
         }
       ]
     },
     {
-      "path": "tools/console/src/ec2-vpc-tags-panel.jsx",
-      "sha256": "6efc85c2ba26f56689c9d90591b9fc96489928a84e663e94782f9995e92988d1",
-      "disposition": "modeled",
-      "reason": "Apply one scoped, typed tag action and mark it confirmed only after live readback, never rollback on failure.",
-      "models": [
-        {
-          "id": "EC2NativeSubnetTags",
-          "properties": [
-            "ExactSelectedSubnetRequest",
-            "ExactSelectedSubnetConfirmation",
-            "NoUnconfirmedUndo"
-          ],
-          "limits": "Additive local subnet tag metadata, independent native inventory and exact selected-row receipts only. Shared API parsing and quotas remain in EC2NativeVPCTags. Input normalization, finite ownership/main/DNS/CIDR/AZ witnesses, exact document re-read and total changed row count are abstractions, not raw SQL/parser/IAM proofs. No full regional inventory validation, filter/pagination, schedule exhaustiveness, rollback from UI, browser routing/refetch timing/capacity diagnostics, cloud parity, packet behavior or Go/JavaScript refinement."
-        }
-      ]
-    },
-    {
-      "path": "tools/console/test/ec2-native-subnets.test.mjs",
-      "sha256": "4ece9ffc4fe85341a45a130b052012385a9df615a6a83d0c7bace6b64a6cc480",
+      "path": "tools/console/test/ec2-network-acl-associations.test.mjs",
+      "sha256": "05bd9e09a7d56ee2ad8d18b931ef41fe7772c055e7b0758d7c0f121c4d8acf24",
       "disposition": "presentation",
-      "reason": "Bind reproducible Console bytes and build inputs in the generated manifests.",
+      "reason": "Bind the canonical generated Console assets to the unchanged build inputs and notices.",
+      "models": []
+    },
+    {
+      "path": "tools/console/test/ec2-network-acls.test.mjs",
+      "sha256": "b48a236b7639c572761cab5ec0414adeaaa53a3743b225a29426bc136f42c6fc",
+      "disposition": "presentation",
+      "reason": "Bind the canonical generated Console assets to the unchanged build inputs and notices.",
       "models": []
     }
   ]

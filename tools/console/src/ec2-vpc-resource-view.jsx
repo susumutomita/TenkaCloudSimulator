@@ -7,6 +7,7 @@ import EC2RouteTableConsole from './ec2-route-table-console.jsx';
 import NetworkACLInventory from './ec2-network-acl-inventory.jsx';
 import SecurityGroupsConsole from './ec2-security-groups-console.jsx';
 import InternetGatewaysPage from './ec2-internet-gateway-page.jsx';
+import {subnetACLAssociationAvailable} from './ec2-network-acls.mjs';
 import {nativeSubnetTagsAvailable,vpcNativeSubnetPublicIPv4Available} from './ec2-native-subnets.mjs';
 import {internetGatewayPageOperations} from './ec2-internet-gateway-console.mjs';
 import {vpcConsoleHref,vpcResourceHref,vpcConsoleSectionName} from './ec2-vpc-navigation.mjs';
@@ -39,6 +40,7 @@ export default function VPCResourceView({
   };
   const shared={request,region,capabilities,authenticationRequired,onSaving};
   if (section==='subnets') return <EC2SubnetsConsole {...shared} route={route} acquireWrite={acquireWrite}
+    subnetACLAssociation={subnetACLAssociationAvailable(capabilities,authenticationRequired)}
     subnetTags={nativeSubnetTagsAvailable(capabilities,authenticationRequired)}
     canCreate={capabilities.services.ec2.operations.includes('CreateSubnet')} hrefForResource={hrefForResource}
     publicIPv4={vpcNativeSubnetPublicIPv4Available(capabilities,authenticationRequired)} showRoutes={available['route-tables']}/>;

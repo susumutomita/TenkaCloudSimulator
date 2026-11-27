@@ -59,6 +59,7 @@ type ec2Request struct {
 	nativeTag          ec2NativeTagQuery
 	securityGroup      *ec2NativeSecurityGroupQuery
 	networkACL         *ec2NetworkACLRequest
+	aclAssociation     *ec2NetworkACLAssociationQuery
 	routeTable         *ec2NativeRouteTableQuery
 	routeAssociation   *ec2NativeRouteAssociationQuery
 	routeTableRead     ec2RouteTableQuery
@@ -66,8 +67,8 @@ type ec2Request struct {
 	internetGateway    *ec2InternetGatewayQuery
 }
 
-// permissions prechecks known resources. The route association lifecycle
-// instead receives a bound decision to check its exact endpoints in the store.
+// permissions prechecks known resources. Route and ACL associations
+// instead receive a bound decision to check their exact endpoints in the store.
 // Tagging at creation also needs ec2:CreateTags.
 func (q ec2Request) permissions(action, region string) [][2]string {
 	switch {
@@ -79,7 +80,7 @@ func (q ec2Request) permissions(action, region string) [][2]string {
 		return q.routeTable.permissions(action, region)
 	case q.nativeDefaultRoute != nil:
 		return q.nativeDefaultRoute.permissions(action, region)
-	case q.routeAssociation != nil:
+	case q.routeAssociation != nil || q.aclAssociation != nil:
 		return nil
 	case q.internetGateway != nil:
 		return q.internetGateway.permissions(action, region)
@@ -117,6 +118,10 @@ func parseEC2Request(action string, fields map[string][]string) (ec2Request, *ec
 	if action == "DescribeSecurityGroups" || slices.Contains(ec2NativeSecurityGroupMutations, action) {
 		q, err := parseEC2NativeSGQuery(action, fields)
 		return ec2Request{securityGroup: &q}, err
+	}
+	if action == ec2ReplaceNetworkACLAssociation {
+		q, err := parseEC2NetworkACLAssociation(fields)
+		return ec2Request{aclAssociation: &q}, err
 	}
 	if slices.Contains(ec2NetworkACLOperations, action) {
 		q, err := parseEC2NetworkACLRequest(action, fields)
@@ -284,6 +289,8 @@ func stampEC2Response(out any) {
 		v.XMLNS, v.RequestID = ns, id
 	case *ec2NetworkACLResponse:
 		v.XMLNS, v.RequestID = ns, id
+	case *ec2ReplaceNetworkACLAssociationResponse:
+		v.XMLNS, v.RequestID = ns, id
 	case *ec2NativeDefaultRouteResponse:
 		v.XMLNS, v.RequestID = ns, id
 	case *ec2NativeRouteTableMutationResponse:
@@ -429,6 +436,10 @@ func (s *StackStore) createNativeVPC(ctx context.Context, region, cidr string, t
 	if count > ec2NativeRouteTableRowLimit-2 {
 		return r, ec2Invalid("VpcLimitExceeded", "The local limit of 1000 network resources has been reached.")
 	}
+	before, e := nativeACLWriteCount(ctx, tx)
+	if e != nil {
+		return r, e
+	}
 	if e = createEC2Network(ctx, tx, r); e != nil {
 		return r, e
 	}
@@ -436,6 +447,12 @@ func (s *StackStore) createNativeVPC(ctx context.Context, region, cidr string, t
 		return r, fmt.Errorf("new VPC identity is already claimed")
 	}
 	if e = createNativeVPCMainTable(ctx, tx, r); e != nil {
+		return r, e
+	}
+	if e = createNativeNetworkACLDefault(ctx, tx, r); e != nil {
+		return r, e
+	}
+	if e = nativeACLRequireWriteDelta(ctx, tx, before, 3); e != nil {
 		return r, e
 	}
 	return r, tx.Commit()
@@ -477,6 +494,24 @@ func (s *StackStore) deleteNativeVPC(ctx context.Context, region, id string) err
 	if hasDependents {
 		return ec2Invalid("DependencyViolation", "The vpc '"+id+"' has dependencies and cannot be deleted.")
 	}
+	_, marked, e := rawNativeACLDefault(ctx, tx, region, v.ID)
+	if e != nil {
+		return e
+	}
+	before, e := nativeACLWriteCount(ctx, tx)
+	if e != nil {
+		return e
+	}
+	want := int64(1)
+	if marked {
+		want++
+	}
+	if v.MainRouteTableID != "" {
+		want++
+	}
+	if e := removeNativeNetworkACLDefault(ctx, tx, v); e != nil {
+		return e
+	}
 	if e := removeNativeVPCMainTable(ctx, tx, v); e != nil {
 		return e
 	}
@@ -491,6 +526,12 @@ func (s *StackStore) deleteNativeVPC(ctx context.Context, region, id string) err
 		return fmt.Errorf("VPC delete readback was not acknowledged")
 	}
 	if e := verifyNativeVPCMainRetired(ctx, tx, v); e != nil {
+		return e
+	}
+	if _, found, e := rawNativeACLDefault(ctx, tx, region, v.ID); found || e != nil {
+		return errNativeNetworkACLAssociationState
+	}
+	if e := nativeACLRequireWriteDelta(ctx, tx, before, want); e != nil {
 		return e
 	}
 	return tx.Commit()

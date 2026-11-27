@@ -23,6 +23,16 @@ func mustNetworkACLRequest(t *testing.T, action string, fields url.Values) ec2Ne
 	return q
 }
 
+func testCustomNetworkACLRows(rows []ec2NetworkACLRead) []ec2NetworkACLRead {
+	custom := []ec2NetworkACLRead{}
+	for _, row := range rows {
+		if !row.Default {
+			custom = append(custom, row)
+		}
+	}
+	return custom
+}
+
 func expectNetworkACLError(t *testing.T, err error, code string) {
 	t.Helper()
 	var f *ec2Failure
@@ -154,7 +164,7 @@ func TestEC2NetworkACLPersistedDetachedLifecycle(t *testing.T) {
 	}
 	_, err := s.createNativeNetworkACL(ctx, region, denied)
 	expectNetworkACLError(t, err, "UnauthorizedOperation")
-	if rows, err := s.describeNativeNetworkACLs(ctx, region, ec2NetworkACLRequest{}); err != nil || len(rows) != 0 {
+	if rows, err := s.describeNativeNetworkACLs(ctx, region, ec2NetworkACLRequest{}); err != nil || len(testCustomNetworkACLRows(rows)) != 0 {
 		t.Fatalf("denied concrete ACL created state: %+v / %v", rows, err)
 	}
 	_, err = s.createNativeNetworkACL(ctx, otherRegion, q)
@@ -203,12 +213,13 @@ func TestEC2NetworkACLPersistedDetachedLifecycle(t *testing.T) {
 	}
 	_, s = openNetworkACLState(t, path)
 	list, err := s.executeEC2NetworkACL(ctx, "DescribeNetworkAcls", region, ec2NetworkACLRequest{filterVPCs: []string{vpc.ID}})
-	if err != nil || list == nil || list.NetworkACLs == nil || !reflect.DeepEqual(list.NetworkACLs.Items, []ec2NetworkACLRead{*created.NetworkACL}) {
+	if err != nil || list == nil || list.NetworkACLs == nil || len(list.NetworkACLs.Items) != 2 ||
+		!reflect.DeepEqual(testCustomNetworkACLRows(list.NetworkACLs.Items), []ec2NetworkACLRead{*created.NetworkACL}) {
 		t.Fatalf("restart readback: %+v / %v", list, err)
 	}
 	miss, err := s.describeNativeNetworkACLs(ctx, region, ec2NetworkACLRequest{filterVPCs: []string{second.ID}})
-	if err != nil || len(miss) != 0 {
-		t.Fatalf("filter readback: %+v / %v", miss, err)
+	if err != nil || len(miss) != 1 || !miss[0].Default || miss[0].ID != nativeDefaultACLID(region, second.ID) {
+		t.Fatalf("filter readback must contain only the other VPC's verified default: %+v / %v", miss, err)
 	}
 	replayed, err := s.createNativeNetworkACL(ctx, region, q)
 	if err != nil || replayed.ID != id || replayed.Revision != 1 {
@@ -221,7 +232,7 @@ func TestEC2NetworkACLPersistedDetachedLifecycle(t *testing.T) {
 	_, err = s.createNativeNetworkACL(ctx, region, q)
 	expectNetworkACLError(t, err, "InvalidNetworkAclID.NotFound")
 	expectNetworkACLError(t, s.deleteNativeNetworkACL(ctx, region, id), "InvalidNetworkAclID.NotFound")
-	if empty, err := s.describeNativeNetworkACLs(ctx, region, ec2NetworkACLRequest{}); err != nil || len(empty) != 0 {
+	if empty, err := s.describeNativeNetworkACLs(ctx, region, ec2NetworkACLRequest{}); err != nil || len(testCustomNetworkACLRows(empty)) != 0 {
 		t.Fatalf("stale or recreated ACL: %+v / %v", empty, err)
 	}
 	if err := s.deleteNativeVPC(ctx, region, vpc.ID); err != nil {
@@ -255,7 +266,8 @@ func TestEC2NetworkACLReplaySameTokenIsAtomicAcrossConnections(t *testing.T) {
 		t.Fatalf("concurrent retries did not share one object: %+v / %+v", a, b)
 	}
 	rows, err := second.describeNativeNetworkACLs(ctx, "us-east-1", ec2NetworkACLRequest{})
-	if err != nil || len(rows) != 1 || rows[0].ID != a.id {
+	custom := testCustomNetworkACLRows(rows)
+	if err != nil || len(rows) != 2 || len(custom) != 1 || custom[0].ID != a.id {
 		t.Fatalf("atomic readback: %+v / %v", rows, err)
 	}
 }
@@ -275,7 +287,7 @@ func TestEC2NetworkACLFailClosedOnIncompleteWriteAndBrokenParent(t *testing.T) {
 	if _, err := s.createNativeNetworkACL(ctx, "us-east-1", q); err == nil {
 		t.Fatal("mutated with no committed replay receipt")
 	}
-	if rows, err := s.describeNativeNetworkACLs(ctx, "us-east-1", ec2NetworkACLRequest{}); err != nil || len(rows) != 0 {
+	if rows, err := s.describeNativeNetworkACLs(ctx, "us-east-1", ec2NetworkACLRequest{}); err != nil || len(testCustomNetworkACLRows(rows)) != 0 {
 		t.Fatalf("partial write: %+v / %v", rows, err)
 	}
 	sql(`DROP TRIGGER test_replay_fault`)
@@ -287,11 +299,16 @@ func TestEC2NetworkACLFailClosedOnIncompleteWriteAndBrokenParent(t *testing.T) {
 	if err := s.deleteNativeNetworkACL(ctx, "us-east-1", ok.ID); !errors.Is(err, errNetworkACLState) {
 		t.Fatalf("delete failure appeared successful: %v", err)
 	}
-	if rows, err := s.describeNativeNetworkACLs(ctx, "us-east-1", ec2NetworkACLRequest{}); err != nil || len(rows) != 1 || rows[0].ID != ok.ID {
+	rows, err := s.describeNativeNetworkACLs(ctx, "us-east-1", ec2NetworkACLRequest{})
+	custom := testCustomNetworkACLRows(rows)
+	if err != nil || len(rows) != 2 || len(custom) != 1 || custom[0].ID != ok.ID {
 		t.Fatalf("failed delete lost original state: %+v / %v", rows, err)
 	}
 	sql(`DROP TRIGGER test_delete_fault`)
-	sql(`DELETE FROM aws_ec2_network_resources WHERE region=? AND id=?`, "us-east-1", vpc.ID)
+	if _, err := store.Database().Exec(`DELETE FROM aws_ec2_network_resources WHERE region=? AND id=?`, "us-east-1", vpc.ID); err == nil {
+		t.Fatal("storage allowed removing a VPC with a retained default ACL")
+	}
+	sql(`UPDATE aws_ec2_network_resources SET document='[' WHERE region=? AND id=?`, "us-east-1", vpc.ID)
 	if rows, err := s.describeNativeNetworkACLs(ctx, "us-east-1", ec2NetworkACLRequest{}); !errors.Is(err, errNetworkACLState) || rows != nil {
 		t.Fatalf("broken parent appeared as successful read: %+v / %v", rows, err)
 	}

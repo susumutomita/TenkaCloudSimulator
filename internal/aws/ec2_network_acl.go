@@ -13,7 +13,7 @@ import (
 
 var ec2NetworkACLOperations = []string{
 	"CreateNetworkAcl", "DescribeNetworkAcls", "DeleteNetworkAcl",
-	ec2CreateNetworkACLEntry, ec2ReplaceNetworkACLEntry, ec2DeleteNetworkACLEntry,
+	ec2CreateNetworkACLEntry, ec2ReplaceNetworkACLEntry, ec2DeleteNetworkACLEntry, ec2ReplaceNetworkACLAssociation,
 }
 
 var (
@@ -27,6 +27,7 @@ type ec2NetworkACLRequest struct {
 	vpcID, aclID, clientToken string
 	tags                      map[string]string
 	ids, filterVPCs           []string
+	filterSubnet              string
 	entry                     ec2NetworkACLEntry
 	// Bound by the gateway for a non-admin caller after the initial IAM check.
 	// Recheck the actual generated/replayed resource before using its state.
@@ -60,7 +61,8 @@ func parseEC2NetworkACLRequest(action string, fields map[string][]string) (ec2Ne
 	q := ec2NetworkACLRequest{tags: map[string]string{}}
 	ids, vpcs := map[int]string{}, map[int]string{}
 	tags := map[int]map[string]any{}
-	var tagSpec, vpcFilter bool
+	var tagSpec bool
+	var filterName string
 	for _, key := range slices.Sorted(maps.Keys(fields)) {
 		values := fields[key]
 		if len(values) != 1 {
@@ -108,10 +110,10 @@ func parseEC2NetworkACLRequest(action string, fields map[string][]string) (ec2Ne
 			}
 		case "DescribeNetworkAcls":
 			if key == "Filter.1.Name" {
-				if value != "vpc-id" {
-					return q, ec2Invalid("UnsupportedOperation", "Only the vpc-id network ACL filter is supported.")
+				if value != "vpc-id" && value != "association.subnet-id" {
+					return q, ec2Invalid("UnsupportedOperation", "Only the vpc-id and association.subnet-id network ACL filters are supported.")
 				}
-				vpcFilter = true
+				filterName = value
 				continue
 			}
 			if m := ec2NetworkACLIDParam.FindStringSubmatch(key); m != nil {
@@ -168,14 +170,21 @@ func parseEC2NetworkACLRequest(action string, fields map[string][]string) (ec2Ne
 			return q, f
 		}
 		q.ids = parsed
-		if vpcFilter != (len(vpcs) > 0) {
-			return q, ec2Invalid("InvalidParameterValue", "The vpc-id filter requires a name and at least one value.")
+		if (filterName != "") != (len(vpcs) > 0) {
+			return q, ec2Invalid("InvalidParameterValue", "A network ACL filter requires a name and at least one value.")
 		}
-		parsed, f = networkACLIndexedValues(vpcs, ec2VPCIDPattern, "vpc-id", "InvalidVpcID.Malformed")
-		if f != nil {
-			return q, f
+		if filterName == "association.subnet-id" {
+			if len(vpcs) != 1 || !ec2SubnetIDPattern.MatchString(vpcs[1]) {
+				return q, ec2Invalid("InvalidParameterValue", "The association.subnet-id filter requires one native subnet ID.")
+			}
+			q.filterSubnet = vpcs[1]
+		} else {
+			parsed, f = networkACLIndexedValues(vpcs, ec2VPCIDPattern, "vpc-id", "InvalidVpcID.Malformed")
+			if f != nil {
+				return q, f
+			}
+			q.filterVPCs = parsed
 		}
-		q.filterVPCs = parsed
 	case "DeleteNetworkAcl", ec2CreateNetworkACLEntry, ec2ReplaceNetworkACLEntry, ec2DeleteNetworkACLEntry:
 		if q.aclID == "" {
 			return q, ec2Invalid("MissingParameter", "NetworkAclId is required.")
@@ -236,14 +245,18 @@ type ec2NetworkACLSet struct {
 }
 
 type ec2NetworkACLRead struct {
-	ID           string               `xml:"networkAclId"`
-	VPCID        string               `xml:"vpcId"`
-	OwnerID      string               `xml:"ownerId"`
-	Default      bool                 `xml:"default"`
-	Entries      []ec2NetworkACLEntry `xml:"entrySet>item"`
-	Associations struct{}             `xml:"associationSet"`
-	Tags         []ec2Tag             `xml:"tagSet>item"`
-	Mode         string               `xml:"simulatorNetworkAclMode"`
+	ID           string                      `xml:"networkAclId"`
+	VPCID        string                      `xml:"vpcId"`
+	OwnerID      string                      `xml:"ownerId"`
+	Default      bool                        `xml:"default"`
+	Entries      []ec2NetworkACLEntry        `xml:"entrySet>item"`
+	Associations ec2NetworkACLAssociationSet `xml:"associationSet"`
+	Tags         []ec2Tag                    `xml:"tagSet>item"`
+	Mode         string                      `xml:"simulatorNetworkAclMode"`
+}
+
+type ec2NetworkACLAssociationSet struct {
+	Items []ec2NetworkACLAssociationRead `xml:"item"`
 }
 
 type ec2NetworkACLEntry struct {
@@ -256,8 +269,8 @@ type ec2NetworkACLEntry struct {
 }
 
 func ec2NetworkACLRecord(r EC2NetworkResource) ec2NetworkACLRead {
-	// Append an immutable terminal deny after each direction’s saved rules.
-	// No subnet applies any of these rules in the simulator.
+	// Verified read snapshots add the current association projection.
+	// Neither a detached nor an attached configuration filters packets.
 	return ec2NetworkACLRead{
 		ID: r.ID, VPCID: r.VPCID, OwnerID: "000000000000", Mode: "detached-config-only",
 		Entries: networkACLRecordEntries(r.NativeACLRules),
@@ -273,17 +286,13 @@ func (s *StackStore) executeEC2NetworkACL(ctx context.Context, action, region st
 		if err != nil {
 			return nil, err
 		}
-		record := ec2NetworkACLRecord(r)
-		out.NetworkACL, out.ClientToken = &record, q.clientToken
+		out.NetworkACL, out.ClientToken = &r.record, q.clientToken
 	case "DescribeNetworkAcls":
 		rows, err := s.describeNativeNetworkACLs(ctx, region, q)
 		if err != nil {
 			return nil, err
 		}
-		out.NetworkACLs = &ec2NetworkACLSet{Items: make([]ec2NetworkACLRead, 0, len(rows))}
-		for _, r := range rows {
-			out.NetworkACLs.Items = append(out.NetworkACLs.Items, ec2NetworkACLRecord(r))
-		}
+		out.NetworkACLs = &ec2NetworkACLSet{Items: rows}
 	case "DeleteNetworkAcl":
 		if err := s.deleteNativeNetworkACL(ctx, region, q.aclID); err != nil {
 			return nil, err

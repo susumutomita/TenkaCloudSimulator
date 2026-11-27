@@ -8,6 +8,7 @@ import (
 	"net/http/httptest"
 	"net/url"
 	"path/filepath"
+	"reflect"
 	"sort"
 	"strings"
 	"testing"
@@ -100,15 +101,17 @@ func vpcConsoleFailure(t *testing.T, w *httptest.ResponseRecorder, status int, c
 }
 
 type vpcConsoleItem struct {
-	VPCID     string `xml:"vpcId"`
-	SubnetID  string `xml:"subnetId"`
-	GroupID   string `xml:"groupId"`
-	ACLID     string `xml:"networkAclId"`
-	Owner     string `xml:"simulatorManagedBy"`
-	CIDR      string `xml:"cidrBlock"`
-	Zone      string `xml:"availabilityZone"`
-	GroupMode string `xml:"simulatorSecurityGroupMode"`
-	ACLMode   string `xml:"simulatorNetworkAclMode"`
+	VPCID      string   `xml:"vpcId"`
+	SubnetID   string   `xml:"subnetId"`
+	GroupID    string   `xml:"groupId"`
+	ACLID      string   `xml:"networkAclId"`
+	Owner      string   `xml:"simulatorManagedBy"`
+	CIDR       string   `xml:"cidrBlock"`
+	Zone       string   `xml:"availabilityZone"`
+	GroupMode  string   `xml:"simulatorSecurityGroupMode"`
+	ACLMode    string   `xml:"simulatorNetworkAclMode"`
+	ACLDefault bool     `xml:"default"`
+	ACLSubnets []string `xml:"associationSet>item>subnetId"`
 }
 
 type vpcConsoleReply struct {
@@ -265,8 +268,18 @@ func TestEC2NativeVPCConsoleKeepsCloudFormationAndNativeOwnershipSeparate(t *tes
 		t.Fatalf("native group leaked from or into another owner: %+v", groups.Groups)
 	}
 	acls = f.network("DescribeNetworkAcls", url.Values{"Filter.1.Name": {"vpc-id"}, "Filter.1.Value.1": {native}})
-	if len(acls.ACLs) != 1 || acls.ACLs[0].ACLID != acl {
-		t.Fatalf("detached ACL lost its parent: %+v", acls.ACLs)
+	var defaultACL, customACL vpcConsoleItem
+	for _, item := range acls.ACLs {
+		if item.ACLDefault {
+			defaultACL = item
+		} else {
+			customACL = item
+		}
+	}
+	if len(acls.ACLs) != 2 || customACL.ACLID != acl || customACL.ACLMode != "detached-config-only" ||
+		len(customACL.ACLSubnets) != 0 || defaultACL.ACLMode != "default-config-only" ||
+		!reflect.DeepEqual(defaultACL.ACLSubnets, []string{subnet}) {
+		t.Fatalf("expected exact detached ACL and associated default: %+v", acls.ACLs)
 	}
 	var routes struct {
 		Routes []struct {

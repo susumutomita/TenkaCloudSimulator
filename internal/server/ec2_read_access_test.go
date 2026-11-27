@@ -107,6 +107,7 @@ func TestEC2ReadAccessBoundary(t *testing.T) {
 		Services map[string]struct {
 			VpcTagMutationProfile            string              `json:"vpcTagMutationProfile"`
 			SubnetTagMutationProfile         string              `json:"subnetTagMutationProfile"`
+			NetworkACLAssociationProfile     string              `json:"networkAclAssociationProfile"`
 			Console                          bool                `json:"console"`
 			ReadOnly                         bool                `json:"readOnly"`
 			SessionCredentials               bool                `json:"sessionCredentials"`
@@ -131,7 +132,8 @@ func TestEC2ReadAccessBoundary(t *testing.T) {
 		t.Fatal("capabilities unavailable", w.Code)
 	}
 	ec2, exists := caps.Services["ec2"]
-	if !exists || !ec2.Console || ec2.ReadOnly || ec2.SessionCredentials || ec2.VpcTagMutationProfile != "single-native-vpc" || ec2.SubnetTagMutationProfile != "single-native-subnet" {
+	if !exists || !ec2.Console || ec2.ReadOnly || ec2.SessionCredentials || ec2.VpcTagMutationProfile != "single-native-vpc" || ec2.SubnetTagMutationProfile != "single-native-subnet" ||
+		ec2.NetworkACLAssociationProfile != "single-native-ipv4-subnet-config-only" {
 		t.Fatalf("unexpected EC2 access capabilities: %+v", ec2)
 	}
 	// The expected public subset is independent of the provider's registration.
@@ -142,7 +144,8 @@ func TestEC2ReadAccessBoundary(t *testing.T) {
 		"CreateSubnet", "DeleteSubnet", "ModifySubnetAttribute", "CreateSecurityGroup", "DeleteSecurityGroup",
 		"AuthorizeSecurityGroupIngress", "AuthorizeSecurityGroupEgress", "RevokeSecurityGroupIngress", "RevokeSecurityGroupEgress",
 		"CreateNetworkAcl", "DescribeNetworkAcls", "DeleteNetworkAcl",
-		"CreateNetworkAclEntry", "ReplaceNetworkAclEntry", "DeleteNetworkAclEntry", "CreateRouteTable", "DeleteRouteTable",
+		"CreateNetworkAclEntry", "ReplaceNetworkAclEntry", "DeleteNetworkAclEntry", "ReplaceNetworkAclAssociation",
+		"CreateRouteTable", "DeleteRouteTable",
 		"AssociateRouteTable", "DisassociateRouteTable", "ReplaceRouteTableAssociation",
 		"CreateInternetGateway", "DescribeInternetGateways", "DeleteInternetGateway", "AttachInternetGateway", "DetachInternetGateway",
 		"CreateRoute", "DeleteRoute",
@@ -152,7 +155,7 @@ func TestEC2ReadAccessBoundary(t *testing.T) {
 	}
 	wantSelectors := map[string][]string{
 		"DescribeSecurityGroups":   {"GroupId.N", "vpc-id"},
-		"DescribeNetworkAcls":      {"NetworkAclId.N", "vpc-id"},
+		"DescribeNetworkAcls":      {"NetworkAclId.N", "vpc-id", "association.subnet-id"},
 		"DescribeInternetGateways": {"InternetGatewayId.N", "MaxResults", "NextToken"},
 		"DescribeRouteTables":      {"RouteTableId.1", "association.subnet-id"},
 	}

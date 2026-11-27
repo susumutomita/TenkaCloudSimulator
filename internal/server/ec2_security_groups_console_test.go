@@ -57,6 +57,7 @@ func TestEC2SecurityGroupsConsoleCapability(t *testing.T) {
 				want["internetGatewayPageLimit"] = 100
 				want["subnetLifecycle"] = []string{"DescribeSubnets", "CreateSubnet", "DeleteSubnet", "ModifySubnetAttribute"}
 				want["subnetTagMutationProfile"] = "single-native-subnet"
+				want["networkAclAssociationProfile"] = "single-native-ipv4-subnet-config-only"
 				want["routeTableLifecycle"] = []string{"DescribeRouteTables", "CreateRouteTable", "DeleteRouteTable"}
 				want["routeTableAssociationLifecycle"] = []string{"DescribeRouteTables", "DescribeSubnets", "AssociateRouteTable", "DisassociateRouteTable"}
 				want["routeTableAssociationReplacement"] = "ReplaceRouteTableAssociation"
