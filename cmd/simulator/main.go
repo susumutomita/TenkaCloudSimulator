@@ -37,6 +37,9 @@ func run(ctx context.Context, args []string, output io.Writer) (result error) {
 	if len(args) != 0 && args[0] == entraFixtureCommand {
 		return runEntraVerificationFixture(ctx, args[1:], output)
 	}
+	if len(args) != 0 && args[0] == ec2NativeMainRepairCommand {
+		return runEC2NativeMainRepair(ctx, args[1:], output)
+	}
 	flags := flag.NewFlagSet("simulator", flag.ContinueOnError)
 	flags.SetOutput(output)
 	listen := flags.String("listen", "127.0.0.1:4566", "HTTP listen address (console: /_simulator/console/)")

@@ -1,366 +1,397 @@
 {
   "version": 1,
-  "base_sha": "e347ee3298834bc1271ff338634a960d9a152920",
+  "base_sha": "f9cb3efb42faa679912a1bac4c27f754b28f43dd",
   "changes": [
     {
-      "path": ".github/workflows/battle-hosts.yml",
-      "sha256": "94c9247c6a5c5b227b2e86aa253a13cdc22fee974cbcca980fea4006e034e3bd",
-      "disposition": "formal-infrastructure",
-      "reason": "Opt in solely the existing Linux arm64 Battle step on an exact same-repository PR branch, preserving original rehearsal, triggers, permissions, installers, and retained artifacts.",
+      "path": "README.ja.md",
+      "sha256": "eee3f7a6fc8c64a6ed2a8e9a42e07000b42bfcd7b2e7bf616e085d216acfad98",
+      "disposition": "documentation",
+      "reason": "Describes explicit copy-first local maintenance, compatibility bounds, observable main/local and untouched ownership, or operator rollback.",
       "models": []
     },
     {
       "path": "README.md",
-      "sha256": "59f4981a28c4388cd607ee66e451307872579aaa5a88468ff61a7cb34b3622b5",
+      "sha256": "a1afc94cdbd7db8ea99fd9f85d6cbb945f2c7517e10f805140495705bb6ad8bb",
       "disposition": "documentation",
-      "reason": "Document the opt-in local stack workflow, default refusal and status versus current VM liveness.",
+      "reason": "Describes explicit copy-first local maintenance, compatibility bounds, observable main/local and untouched ownership, or operator rollback.",
       "models": []
     },
     {
+      "path": "cmd/simulator/ec2_native_main_route_repair.go",
+      "sha256": "465caf42d6da2f9ee0fce4d6e414fa065626cde13bf47cf887e8c1634d94a3a1",
+      "disposition": "modeled",
+      "reason": "Bind explicit versioned one-VPC repair admission, unchanged refusal/planning, retained rows, and one-row atomic persisted outcome; runtime details are independently tested.",
+      "models": [
+        {
+          "id": "EC2LegacyNativeMainRepair",
+          "properties": [
+            "ExactAdmission",
+            "NoPartialRefusal",
+            "PlanAndRepeatAreReadOnly"
+          ],
+          "limits": "Finite model of one explicit offline repair with two legacy custom tables, one stored slot, abstract copy/owner/plan and final witness, and preserved peer sentinels. Not a Go, SQLite, cryptography, filesystem, OS authorization, HTTP/IAM, Console, packet or AWS parity proof."
+        }
+      ]
+    },
+    {
+      "path": "cmd/simulator/ec2_native_main_route_repair_boundaries_test.go",
+      "sha256": "36f89732483597b0068ab1f63465d5896d983935c2decee3737575d46e43cb6c",
+      "disposition": "test-support",
+      "reason": "Exact stock command and real disposable SQLite refusal/retry, immutable copy and rollback coverage. No changed product behavior, scheduling, exclusions, or gate.",
+      "models": []
+    },
+    {
+      "path": "cmd/simulator/ec2_native_main_route_repair_other.go",
+      "sha256": "4f9a4a6329178adcd50c8aefdbf83e3faa1ccbd2d2d89a249754731e6f7158b6",
+      "disposition": "modeled",
+      "reason": "Bind explicit versioned one-VPC repair admission, unchanged refusal/planning, retained rows, and one-row atomic persisted outcome; runtime details are independently tested.",
+      "models": [
+        {
+          "id": "EC2LegacyNativeMainRepair",
+          "properties": [
+            "ExactAdmission"
+          ],
+          "limits": "Finite model of one explicit offline repair with two legacy custom tables, one stored slot, abstract copy/owner/plan and final witness, and preserved peer sentinels. Not a Go, SQLite, cryptography, filesystem, OS authorization, HTTP/IAM, Console, packet or AWS parity proof."
+        }
+      ]
+    },
+    {
+      "path": "cmd/simulator/ec2_native_main_route_repair_posix.go",
+      "sha256": "b35b3a428235f425aea44e8976e21180c499c9f07c45ea7c5288e88d3fd54a2d",
+      "disposition": "modeled",
+      "reason": "Bind explicit versioned one-VPC repair admission, unchanged refusal/planning, retained rows, and one-row atomic persisted outcome; runtime details are independently tested.",
+      "models": [
+        {
+          "id": "EC2LegacyNativeMainRepair",
+          "properties": [
+            "ExactAdmission"
+          ],
+          "limits": "Finite model of one explicit offline repair with two legacy custom tables, one stored slot, abstract copy/owner/plan and final witness, and preserved peer sentinels. Not a Go, SQLite, cryptography, filesystem, OS authorization, HTTP/IAM, Console, packet or AWS parity proof."
+        }
+      ]
+    },
+    {
+      "path": "cmd/simulator/ec2_native_main_route_repair_test.go",
+      "sha256": "727813af1c030bd2c06730950bb0c7a1883df8462ede8b0484a46c6a1e4bd9cb",
+      "disposition": "test-support",
+      "reason": "Exercises actual stopped SQLite/CLI and pinned SDK or served read-only DOM, or bounded fixture unit fault paths; no product capability change.",
+      "models": []
+    },
+    {
+      "path": "cmd/simulator/ec2_native_main_route_repair_unsupported_test.go",
+      "sha256": "0413f6db53b6f56c12e7dbd5da13e912a0f5d20e4cf85943e9f8a316b19c40a4",
+      "disposition": "test-support",
+      "reason": "Verifies alternate locking builds cannot initialize a maintenance state; no runtime change.",
+      "models": []
+    },
+    {
+      "path": "cmd/simulator/main.go",
+      "sha256": "f908ee13526a53133fd73e57029a99d3b6883813ad259e15958466f8b34cd5a8",
+      "disposition": "modeled",
+      "reason": "Bind explicit versioned one-VPC repair admission, unchanged refusal/planning, retained rows, and one-row atomic persisted outcome; runtime details are independently tested.",
+      "models": [
+        {
+          "id": "EC2LegacyNativeMainRepair",
+          "properties": [
+            "ExactAdmission",
+            "PlanAndRepeatAreReadOnly"
+          ],
+          "limits": "Finite model of one explicit offline repair with two legacy custom tables, one stored slot, abstract copy/owner/plan and final witness, and preserved peer sentinels. Not a Go, SQLite, cryptography, filesystem, OS authorization, HTTP/IAM, Console, packet or AWS parity proof."
+        }
+      ]
+    },
+    {
       "path": "docs/console.md",
-      "sha256": "966cf46a1a2a4a518f3d917e67b43a78fa604493658932b3fdc645e2ae14d1f9",
+      "sha256": "4f2ec3897ed55f18e0fdb881383f166d611a6a66d0b44e8e858acbf63a5088f4",
       "disposition": "documentation",
-      "reason": "Describe the guarded CloudFormation EC2 form without claiming default availability or native RunInstances.",
+      "reason": "Describes explicit copy-first local maintenance, compatibility bounds, observable main/local and untouched ownership, or operator rollback.",
       "models": []
     },
     {
       "path": "docs/design/0001-go-standalone.md",
-      "sha256": "017be3de09e78430a7226a9cdfdc0d18a9414c9d2498843ee4b03d1658c2bb0d",
+      "sha256": "38823962e4558276b0c133da223edf0eb3b9570aa750c0d2014c45a84930b8d9",
       "disposition": "documentation",
-      "reason": "Document the opt-in local stack workflow, default refusal and status versus current VM liveness.",
+      "reason": "Describes explicit copy-first local maintenance, compatibility bounds, observable main/local and untouched ownership, or operator rollback.",
+      "models": []
+    },
+    {
+      "path": "docs/ec2-legacy-native-main-repair.md",
+      "sha256": "d7662403f49f45e4239ce54a782440b8ea9f3efb5632df82bee35ae0e069ea9f",
+      "disposition": "documentation",
+      "reason": "Describes explicit copy-first local maintenance, compatibility bounds, observable main/local and untouched ownership, or operator rollback.",
       "models": []
     },
     {
       "path": "docs/ec2-read-discovery.md",
-      "sha256": "2c3846b7cfd848eeef841b204ed56b72bc5e1fb9db7594cd4215c097522e3e36",
+      "sha256": "8d5f7a891d4b752c011f53fbcb15ec8842ae39ed0602936d443f5c4f7560ed12",
       "disposition": "documentation",
-      "reason": "Document the opt-in local stack workflow, default refusal and status versus current VM liveness.",
+      "reason": "Describes explicit copy-first local maintenance, compatibility bounds, observable main/local and untouched ownership, or operator rollback.",
       "models": []
     },
     {
-      "path": "formal/EC2InstanceStackConsole.cfg",
-      "sha256": "4f9e657a98b81de9dbeed2faec218736bb094d060b4a69febc658de9e86b6df0",
+      "path": "formal/EC2LegacyNativeMainRepair.cfg",
+      "sha256": "8a47e5bfb77eaeb936eca877146b7174c6fc448f5f6d626aa1c70b9915f2d11a",
       "disposition": "modeled",
-      "reason": "Scope the opt-in EC2 console capability, single mutation, receipt and matching readback; preserve the existing CloudFormation authority and backend.",
+      "reason": "Bind explicit versioned one-VPC repair admission, unchanged refusal/planning, retained rows, and one-row atomic persisted outcome; runtime details are independently tested.",
       "models": [
         {
-          "id": "EC2InstanceStackConsole",
+          "id": "EC2LegacyNativeMainRepair",
           "properties": [
-            "QualifiedMutation",
-            "SingleMutation",
-            "ReceiptBelongsToView",
-            "VerifiedMeansMatch",
-            "NoGuestLivenessClaim"
+            "AtomicRepair",
+            "OneStoredRow",
+            "ExactAdmission",
+            "NoPartialRefusal",
+            "PlanAndRepeatAreReadOnly",
+            "RetainedFrame"
           ],
-          "limits": "Finite three UX generations with one reply in flight, actor roles and a configuration observation. An admission sample does not exclude expiry between discovery and CreateStack. This models only the workflow and no replay/retarget acknowledgment, not actual token/HTTP bounds, runtime health, SQLite rollback, live guest launch or cleanup, React or browser refinement."
+          "limits": "Finite model of one explicit offline repair with two legacy custom tables, one stored slot, abstract copy/owner/plan and final witness, and preserved peer sentinels. Not a Go, SQLite, cryptography, filesystem, OS authorization, HTTP/IAM, Console, packet or AWS parity proof."
         }
       ]
     },
     {
-      "path": "formal/EC2InstanceStackConsole.tla",
-      "sha256": "f34dfbf1bc11aa4ca86e393630c1445af60f313a197d3e17a42a8d1c10df5027",
+      "path": "formal/EC2LegacyNativeMainRepair.tla",
+      "sha256": "072e962e20a3057871b708626078c3f29e09ef6471b932a6a7f6417aed38adb4",
       "disposition": "modeled",
-      "reason": "Scope the opt-in EC2 console capability, single mutation, receipt and matching readback; preserve the existing CloudFormation authority and backend.",
+      "reason": "Bind explicit versioned one-VPC repair admission, unchanged refusal/planning, retained rows, and one-row atomic persisted outcome; runtime details are independently tested.",
       "models": [
         {
-          "id": "EC2InstanceStackConsole",
+          "id": "EC2LegacyNativeMainRepair",
           "properties": [
-            "QualifiedMutation",
-            "SingleMutation",
-            "ReceiptBelongsToView",
-            "VerifiedMeansMatch",
-            "NoGuestLivenessClaim"
+            "AtomicRepair",
+            "OneStoredRow",
+            "ExactAdmission",
+            "NoPartialRefusal",
+            "PlanAndRepeatAreReadOnly",
+            "RetainedFrame"
           ],
-          "limits": "Finite three UX generations with one reply in flight, actor roles and a configuration observation. An admission sample does not exclude expiry between discovery and CreateStack. This models only the workflow and no replay/retarget acknowledgment, not actual token/HTTP bounds, runtime health, SQLite rollback, live guest launch or cleanup, React or browser refinement."
+          "limits": "Finite model of one explicit offline repair with two legacy custom tables, one stored slot, abstract copy/owner/plan and final witness, and preserved peer sentinels. Not a Go, SQLite, cryptography, filesystem, OS authorization, HTTP/IAM, Console, packet or AWS parity proof."
         }
       ]
-    },
-    {
-      "path": "formal/README.md",
-      "sha256": "2268d969c6a9cda5a0e8bbcb539a041cab29f85f735b4d71744feca26c69fdc1",
-      "disposition": "documentation",
-      "reason": "Document the opt-in local stack workflow, default refusal and status versus current VM liveness.",
-      "models": []
     },
     {
       "path": "formal/models.json",
-      "sha256": "faadd8689dcc783fec3f8d008073c9150899541fe58867274ee6a59b55dbfadb",
+      "sha256": "bb622218bc30d3ec5c563e9548e6e619b0c9dfdc8459a23c3feb57ed306a9d21",
       "disposition": "formal-infrastructure",
-      "reason": "Register and independently require the new EC2 instance-stack workflow model, scope, invariants and exact negative controls.",
+      "reason": "Registers exact finite offline repair rules and negative controls without broadening other model obligations.",
       "models": []
     },
     {
-      "path": "internal/aws/ec2_cloudformation_runtime_unix.go",
-      "sha256": "cd23892d570c74b11377525caf421af2abd710ffef7006b63a4d8bb602e7ae68",
+      "path": "internal/aws/ec2_native_vpc_main_repair.go",
+      "sha256": "502f88433353d2864296423e01f2750fc93d77742f722f476d71051fe74bed24",
       "disposition": "modeled",
-      "reason": "Scope the opt-in EC2 console capability, single mutation, receipt and matching readback; preserve the existing CloudFormation authority and backend.",
+      "reason": "Bind explicit versioned one-VPC repair admission, unchanged refusal/planning, retained rows, and one-row atomic persisted outcome; runtime details are independently tested.",
       "models": [
         {
-          "id": "EC2InstanceStackConsole",
+          "id": "EC2LegacyNativeMainRepair",
           "properties": [
-            "QualifiedMutation",
-            "SingleMutation",
-            "ReceiptBelongsToView",
-            "VerifiedMeansMatch",
-            "NoGuestLivenessClaim"
+            "AtomicRepair",
+            "OneStoredRow",
+            "ExactAdmission",
+            "RetainedFrame",
+            "NoPartialRefusal"
           ],
-          "limits": "Finite three UX generations with one reply in flight, actor roles and a configuration observation. An admission sample does not exclude expiry between discovery and CreateStack. This models only the workflow and no replay/retarget acknowledgment, not actual token/HTTP bounds, runtime health, SQLite rollback, live guest launch or cleanup, React or browser refinement."
+          "limits": "Finite model of one explicit offline repair with two legacy custom tables, one stored slot, abstract copy/owner/plan and final witness, and preserved peer sentinels. Not a Go, SQLite, cryptography, filesystem, OS authorization, HTTP/IAM, Console, packet or AWS parity proof."
         }
       ]
     },
     {
-      "path": "internal/server/battle_runtime_unix.go",
-      "sha256": "777de072268dba6eb203a476096575a0547c660869230905a267faa7c5e58069",
-      "disposition": "modeled",
-      "reason": "Scope the opt-in EC2 console capability, single mutation, receipt and matching readback; preserve the existing CloudFormation authority and backend.",
-      "models": [
-        {
-          "id": "EC2InstanceStackConsole",
-          "properties": [
-            "QualifiedMutation",
-            "SingleMutation",
-            "ReceiptBelongsToView",
-            "VerifiedMeansMatch",
-            "NoGuestLivenessClaim"
-          ],
-          "limits": "Finite three UX generations with one reply in flight, actor roles and a configuration observation. An admission sample does not exclude expiry between discovery and CreateStack. This models only the workflow and no replay/retarget acknowledgment, not actual token/HTTP bounds, runtime health, SQLite rollback, live guest launch or cleanup, React or browser refinement."
-        }
-      ]
-    },
-    {
-      "path": "internal/server/ec2_instance_stack_launch.go",
-      "sha256": "7b70195bebc51c1ec801fdce9cae585edc2a206d95cd128232c7176d94f6c025",
-      "disposition": "modeled",
-      "reason": "Scope the opt-in EC2 console capability, single mutation, receipt and matching readback; preserve the existing CloudFormation authority and backend.",
-      "models": [
-        {
-          "id": "EC2InstanceStackConsole",
-          "properties": [
-            "QualifiedMutation",
-            "SingleMutation",
-            "ReceiptBelongsToView",
-            "VerifiedMeansMatch",
-            "NoGuestLivenessClaim"
-          ],
-          "limits": "Finite three UX generations with one reply in flight, actor roles and a configuration observation. An admission sample does not exclude expiry between discovery and CreateStack. This models only the workflow and no replay/retarget acknowledgment, not actual token/HTTP bounds, runtime health, SQLite rollback, live guest launch or cleanup, React or browser refinement."
-        }
-      ]
-    },
-    {
-      "path": "internal/server/ec2_instance_stack_launch_linux_test.go",
-      "sha256": "f2eaa71912f3745fae98b23b3cbb8a9c87e2ee84e235736b59f73f5c3078795a",
+      "path": "internal/aws/ec2_native_vpc_main_repair_boundaries_test.go",
+      "sha256": "bdfec9af68703e8256dcbf1fec3c6518e4593801657ad577691b3ca90468cd6c",
       "disposition": "test-support",
-      "reason": "Exercise authenticated local routing and exact refusal/readback scope without physical guest, real AWS or new authorization.",
+      "reason": "Exact stock command and real disposable SQLite refusal/retry, immutable copy and rollback coverage. No changed product behavior, scheduling, exclusions, or gate.",
       "models": []
     },
     {
-      "path": "internal/server/ec2_instance_stack_launch_test.go",
-      "sha256": "503d292cf64315ce2e6467088ab6257df396ee16ef40ead2432a046b39afaeb7",
+      "path": "internal/aws/ec2_native_vpc_main_repair_test.go",
+      "sha256": "3572fe193e9634948d1f33e677c248b12ff36a65a40c384d913882b3fbcf0ac2",
       "disposition": "test-support",
-      "reason": "Exercise authenticated local routing and exact refusal/readback scope without physical guest, real AWS or new authorization.",
+      "reason": "Exercises actual stopped SQLite/CLI and pinned SDK or served read-only DOM, or bounded fixture unit fault paths; no product capability change.",
       "models": []
     },
     {
-      "path": "internal/server/sakura_provider.go",
-      "sha256": "0b2dc2200e0418d2e75efadbdb203d0dac05e21d9e8fa13100ebb4ee9389cd67",
+      "path": "internal/aws/ec2_native_vpc_main_route.go",
+      "sha256": "1d90121e0603c88538f5098e811279fda9f0f488b03baef54705a05c5f10862e",
       "disposition": "modeled",
-      "reason": "Scope the opt-in EC2 console capability, single mutation, receipt and matching readback; preserve the existing CloudFormation authority and backend.",
+      "reason": "Bind explicit versioned one-VPC repair admission, unchanged refusal/planning, retained rows, and one-row atomic persisted outcome; runtime details are independently tested.",
       "models": [
         {
-          "id": "EC2InstanceStackConsole",
+          "id": "EC2LegacyNativeMainRepair",
           "properties": [
-            "QualifiedMutation",
-            "SingleMutation",
-            "ReceiptBelongsToView",
-            "VerifiedMeansMatch",
-            "NoGuestLivenessClaim"
+            "AtomicRepair",
+            "ExactAdmission"
           ],
-          "limits": "Finite three UX generations with one reply in flight, actor roles and a configuration observation. An admission sample does not exclude expiry between discovery and CreateStack. This models only the workflow and no replay/retarget acknowledgment, not actual token/HTTP bounds, runtime health, SQLite rollback, live guest launch or cleanup, React or browser refinement."
+          "limits": "Finite model of one explicit offline repair with two legacy custom tables, one stored slot, abstract copy/owner/plan and final witness, and preserved peer sentinels. Not a Go, SQLite, cryptography, filesystem, OS authorization, HTTP/IAM, Console, packet or AWS parity proof."
+        },
+        {
+          "id": "EC2NativeVPCMainRoute",
+          "properties": [
+            "AtomicPairedSlot",
+            "OwnedLocalOnly",
+            "RetainedFencesDelete",
+            "ReadInvalidRefuses"
+          ],
+          "limits": "Finite symbolic parent/child and recorded-route lifecycle, explicit filter and current effective-pane evidence only. The implementation storage bound is 1,000 and the explicit table limit is 16. No Go/SQLite, mixed-case JSON, XML or pagination/cryptography refinement; no IAM, React or browser scheduling proof, legacy migration, guest, reachability or packet routing."
         }
       ]
     },
     {
-      "path": "internal/server/server.go",
-      "sha256": "6d41c12ea28707805f17c92771094044e7693100b006f2667f5544fd68fb43d6",
+      "path": "internal/aws/ec2_network.go",
+      "sha256": "54397bc69ae5990973f68285754329d17e04636ea2c3bb031c33de5c8d1a567b",
       "disposition": "modeled",
-      "reason": "Scope the opt-in EC2 console capability, single mutation, receipt and matching readback; preserve the existing CloudFormation authority and backend.",
+      "reason": "Bind explicit versioned one-VPC repair admission, unchanged refusal/planning, retained rows, and one-row atomic persisted outcome; runtime details are independently tested.",
       "models": [
         {
-          "id": "EC2InstanceStackConsole",
+          "id": "EC2LegacyNativeMainRepair",
           "properties": [
-            "QualifiedMutation",
-            "SingleMutation",
-            "ReceiptBelongsToView",
-            "VerifiedMeansMatch",
-            "NoGuestLivenessClaim"
+            "AtomicRepair",
+            "RetainedFrame"
           ],
-          "limits": "Finite three UX generations with one reply in flight, actor roles and a configuration observation. An admission sample does not exclude expiry between discovery and CreateStack. This models only the workflow and no replay/retarget acknowledgment, not actual token/HTTP bounds, runtime health, SQLite rollback, live guest launch or cleanup, React or browser refinement."
+          "limits": "Finite model of one explicit offline repair with two legacy custom tables, one stored slot, abstract copy/owner/plan and final witness, and preserved peer sentinels. Not a Go, SQLite, cryptography, filesystem, OS authorization, HTTP/IAM, Console, packet or AWS parity proof."
+        },
+        {
+          "id": "EC2NativeVPCMainRoute",
+          "properties": [
+            "AtomicPairedSlot",
+            "UnrelatedOwnershipUnchanged"
+          ],
+          "limits": "Finite symbolic parent/child and recorded-route lifecycle, explicit filter and current effective-pane evidence only. The implementation storage bound is 1,000 and the explicit table limit is 16. No Go/SQLite, mixed-case JSON, XML or pagination/cryptography refinement; no IAM, React or browser scheduling proof, legacy migration, guest, reachability or packet routing."
+        },
+        {
+          "id": "EC2VPCOwnership",
+          "properties": [
+            "NoAdoption",
+            "FailureRollsBack"
+          ],
+          "limits": "Atomic store-level ownership, authorization order, quota and DescribeVpcs owner labels only; not SQL transactions, HTTP/XML parsing, IAM policy evaluation, CIDR or tag validation, random ID collision, console rendering or a Go refinement proof. Native Go tests, the boto3 lifecycle and the browser end-to-end flow establish those implementation properties."
         }
       ]
     },
     {
-      "path": "internal/server/web/app.js",
-      "sha256": "a82483775769e1eb39ac7e37a2b3ae416b38c9dc4e03c5de2ca35d1cf2d7111a",
+      "path": "internal/aws/ec2_route_tables_native.go",
+      "sha256": "77fc9561503bcdc8e3d8c7b81a71ce99b5288666813dce5e140811442d06985d",
       "disposition": "modeled",
-      "reason": "Scope the opt-in EC2 console capability, single mutation, receipt and matching readback; preserve the existing CloudFormation authority and backend.",
+      "reason": "Bind explicit versioned one-VPC repair admission, unchanged refusal/planning, retained rows, and one-row atomic persisted outcome; runtime details are independently tested.",
       "models": [
         {
-          "id": "EC2InstanceStackConsole",
+          "id": "EC2LegacyNativeMainRepair",
           "properties": [
-            "QualifiedMutation",
-            "SingleMutation",
-            "ReceiptBelongsToView",
-            "VerifiedMeansMatch",
-            "NoGuestLivenessClaim"
+            "AtomicRepair",
+            "ExactAdmission"
           ],
-          "limits": "Finite three UX generations with one reply in flight, actor roles and a configuration observation. An admission sample does not exclude expiry between discovery and CreateStack. This models only the workflow and no replay/retarget acknowledgment, not actual token/HTTP bounds, runtime health, SQLite rollback, live guest launch or cleanup, React or browser refinement."
+          "limits": "Finite model of one explicit offline repair with two legacy custom tables, one stored slot, abstract copy/owner/plan and final witness, and preserved peer sentinels. Not a Go, SQLite, cryptography, filesystem, OS authorization, HTTP/IAM, Console, packet or AWS parity proof."
+        },
+        {
+          "id": "EC2NativeVPCMainRoute",
+          "properties": [
+            "AtomicPairedSlot",
+            "OwnedLocalOnly",
+            "RetainedFencesDelete"
+          ],
+          "limits": "Finite symbolic parent/child and recorded-route lifecycle, explicit filter and current effective-pane evidence only. The implementation storage bound is 1,000 and the explicit table limit is 16. No Go/SQLite, mixed-case JSON, XML or pagination/cryptography refinement; no IAM, React or browser scheduling proof, legacy migration, guest, reachability or packet routing."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/ec2_route_tables_read.go",
+      "sha256": "2b1a7623e2815dfc764ccdd3c46d42f48633dc11860f6e1fab64ed5e9c18ce04",
+      "disposition": "modeled",
+      "reason": "Bind explicit versioned one-VPC repair admission, unchanged refusal/planning, retained rows, and one-row atomic persisted outcome; runtime details are independently tested.",
+      "models": [
+        {
+          "id": "EC2LegacyNativeMainRepair",
+          "properties": [
+            "PlanAndRepeatAreReadOnly",
+            "NoPartialRefusal"
+          ],
+          "limits": "Finite model of one explicit offline repair with two legacy custom tables, one stored slot, abstract copy/owner/plan and final witness, and preserved peer sentinels. Not a Go, SQLite, cryptography, filesystem, OS authorization, HTTP/IAM, Console, packet or AWS parity proof."
+        },
+        {
+          "id": "EC2NativeVPCMainRoute",
+          "properties": [
+            "AtomicPairedSlot",
+            "ReadInvalidRefuses",
+            "NoImplicitWire"
+          ],
+          "limits": "Finite symbolic parent/child and recorded-route lifecycle, explicit filter and current effective-pane evidence only. The implementation storage bound is 1,000 and the explicit table limit is 16. No Go/SQLite, mixed-case JSON, XML or pagination/cryptography refinement; no IAM, React or browser scheduling proof, legacy migration, guest, reachability or packet routing."
+        },
+        {
+          "id": "EC2RouteTableInventoryPages",
+          "properties": [
+            "ScopedContinuation",
+            "PageBounds"
+          ],
+          "limits": "Finite symbolic paging, exact query/binding and post-write UI completion; no cryptographic, actual SQLite, wire/byte math, React or packet refinement. A small or empty complete first page is admitted; a continued response cannot end empty."
+        },
+        {
+          "id": "EC2NativeIPv4RouteSet",
+          "properties": [
+            "OwnedCanonical",
+            "CompleteReadback"
+          ],
+          "limits": "Finite shared-destination map, same-native-witness abstraction and exact current-readback state only. Real limit is 16. No IP arithmetic proof, actual SQLite/JSON/Query/IAM/React refinement, actor concurrency or network forwarding."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/ec2_vpc.go",
+      "sha256": "cc02af7ca39d8b6332f22ebedac3166c8569231a5bacb375348cead9090be1e1",
+      "disposition": "modeled",
+      "reason": "Bind explicit versioned one-VPC repair admission, unchanged refusal/planning, retained rows, and one-row atomic persisted outcome; runtime details are independently tested.",
+      "models": [
+        {
+          "id": "EC2LegacyNativeMainRepair",
+          "properties": [
+            "AtomicRepair",
+            "ExactAdmission"
+          ],
+          "limits": "Finite model of one explicit offline repair with two legacy custom tables, one stored slot, abstract copy/owner/plan and final witness, and preserved peer sentinels. Not a Go, SQLite, cryptography, filesystem, OS authorization, HTTP/IAM, Console, packet or AWS parity proof."
+        },
+        {
+          "id": "EC2NativeVPCMainRoute",
+          "properties": [
+            "AtomicPairedSlot",
+            "RetainedFencesDelete",
+            "UnrelatedOwnershipUnchanged"
+          ],
+          "limits": "Finite symbolic parent/child and recorded-route lifecycle, explicit filter and current effective-pane evidence only. The implementation storage bound is 1,000 and the explicit table limit is 16. No Go/SQLite, mixed-case JSON, XML or pagination/cryptography refinement; no IAM, React or browser scheduling proof, legacy migration, guest, reachability or packet routing."
+        },
+        {
+          "id": "EC2VPCOwnership",
+          "properties": [
+            "NativeDeleteExact",
+            "NativeCreateOwned",
+            "QuotaBound"
+          ],
+          "limits": "Atomic store-level ownership, authorization order, quota and DescribeVpcs owner labels only; not SQL transactions, HTTP/XML parsing, IAM policy evaluation, CIDR or tag validation, random ID collision, console rendering or a Go refinement proof. Native Go tests, the boto3 lifecycle and the browser end-to-end flow establish those implementation properties."
         }
       ]
     },
     {
       "path": "scripts/formal_model_gate.py",
-      "sha256": "8798e16f54c43b495d94849e07cec92783511ee33dbf5da94abe928e9a2f2cad",
+      "sha256": "fbc5a1dc9f3090dcccee18c5bbf5a698fb050e4647d915b6df8cc1266411260a",
       "disposition": "formal-infrastructure",
-      "reason": "Register and independently require the new EC2 instance-stack workflow model, scope, invariants and exact negative controls.",
+      "reason": "Registers exact finite offline repair rules and negative controls without broadening other model obligations.",
       "models": []
     },
     {
       "path": "scripts/test-formal-gate.py",
-      "sha256": "45bb650ec34b68b4f7e2a07a72cc65b4b0a0a22a51a67380d31454d94f16c236",
+      "sha256": "24e0c3845873823ba401aa0bb73800f29599cb741f2fddf0ee6ff44fa0933acb",
       "disposition": "formal-infrastructure",
-      "reason": "Register and independently require the new EC2 instance-stack workflow model, scope, invariants and exact negative controls.",
+      "reason": "Registers exact finite offline repair rules and negative controls without broadening other model obligations.",
       "models": []
     },
     {
-      "path": "test/battle/README.md",
-      "sha256": "441f261b3dabe49599c527c1d28ad548479144ee8f7aec9178475af8a7b8842f",
+      "path": "test/console/ec2_legacy_main_repair.py",
+      "sha256": "f114d04c922f4826a05a552bdbcd054709b24b7febe6c65d6266ca8677a1c1e9",
       "disposition": "test-support",
-      "reason": "Document the separate scoped form-only CLI witness and its explicit hosted opt-in without a browser or application health claim.",
+      "reason": "Exercises actual stopped SQLite/CLI and pinned SDK or served read-only DOM, or bounded fixture unit fault paths; no product capability change.",
       "models": []
     },
     {
-      "path": "test/battle/ec2_console_form_smoke.mjs",
-      "sha256": "040282b65e3c69dc56638ad7c37ab40d5a9da028313374cedba39cae740656a9",
+      "path": "test/console/ec2_legacy_main_repair_dom.cjs",
+      "sha256": "8347a0cfe6a7744ee2e5e60a75d26478cf98495a95963aaafb170b6b14873475",
       "disposition": "test-support",
-      "reason": "Drive the production-generated guarded create and bounded readback over the private browser cookie on actual numeric loopback without a browser layout claim.",
-      "models": []
-    },
-    {
-      "path": "test/battle/rehearsal.py",
-      "sha256": "d8742b089221ccfb5ad7a710fd458f0499612ac400d229801179798a7f3abef7",
-      "disposition": "test-support",
-      "reason": "Expose a default-off console-only physical launch/readback/cleanup witness and distinct allowlisted report; retain the original default Challenge entirely.",
-      "models": []
-    },
-    {
-      "path": "test/console/ec2_instance_stack_launch_dom.cjs",
-      "sha256": "10546e6eba86406609f6f1e145af28d365ac3aa04c58bb76d17d2ffcb845ee0c",
-      "disposition": "test-support",
-      "reason": "Exercise authenticated local routing and exact refusal/readback scope without physical guest, real AWS or new authorization.",
-      "models": []
-    },
-    {
-      "path": "test/console/ec2_instance_stack_launch_native.py",
-      "sha256": "830921c1dd1b31c7f69aa1106f96cdfeced6f5051b2780a376070588f99b8b74",
-      "disposition": "test-support",
-      "reason": "Exercise authenticated local routing and exact refusal/readback scope without physical guest, real AWS or new authorization.",
-      "models": []
-    },
-    {
-      "path": "tools/console/bundle-digests.json",
-      "sha256": "376dc27cda699b44b94c1ff638cf81866427156baf81c6f5d00cbc9ada23d703",
-      "disposition": "presentation",
-      "reason": "Bind the actual embedded console build or bounded transport fixture to this EC2 slice.",
-      "models": []
-    },
-    {
-      "path": "tools/console/bundle-inputs.json",
-      "sha256": "fbf9fa82a127fa8a2a4a2ee6b04d8192e7de5659a3c826ba8d385f09877e45c8",
-      "disposition": "presentation",
-      "reason": "Bind the actual embedded console build or bounded transport fixture to this EC2 slice.",
-      "models": []
-    },
-    {
-      "path": "tools/console/src/ec2-instance-stack-launch.jsx",
-      "sha256": "c11b1e6e8a771b1f4871c61a701407b4a001b7a9890461d8158d3207a7d1a0b4",
-      "disposition": "modeled",
-      "reason": "Scope the opt-in EC2 console capability, single mutation, receipt and matching readback; preserve the existing CloudFormation authority and backend.",
-      "models": [
-        {
-          "id": "EC2InstanceStackConsole",
-          "properties": [
-            "QualifiedMutation",
-            "SingleMutation",
-            "ReceiptBelongsToView",
-            "VerifiedMeansMatch",
-            "NoGuestLivenessClaim"
-          ],
-          "limits": "Finite three UX generations with one reply in flight, actor roles and a configuration observation. An admission sample does not exclude expiry between discovery and CreateStack. This models only the workflow and no replay/retarget acknowledgment, not actual token/HTTP bounds, runtime health, SQLite rollback, live guest launch or cleanup, React or browser refinement."
-        }
-      ]
-    },
-    {
-      "path": "tools/console/src/ec2-instance-stack-launch.mjs",
-      "sha256": "85026b5a579e9df0bf6f9b7d577b61922a0b8d7a48370030ed488e9d68531c1b",
-      "disposition": "modeled",
-      "reason": "Scope the opt-in EC2 console capability, single mutation, receipt and matching readback; preserve the existing CloudFormation authority and backend.",
-      "models": [
-        {
-          "id": "EC2InstanceStackConsole",
-          "properties": [
-            "QualifiedMutation",
-            "SingleMutation",
-            "ReceiptBelongsToView",
-            "VerifiedMeansMatch",
-            "NoGuestLivenessClaim"
-          ],
-          "limits": "Finite three UX generations with one reply in flight, actor roles and a configuration observation. An admission sample does not exclude expiry between discovery and CreateStack. This models only the workflow and no replay/retarget acknowledgment, not actual token/HTTP bounds, runtime health, SQLite rollback, live guest launch or cleanup, React or browser refinement."
-        }
-      ]
-    },
-    {
-      "path": "tools/console/src/ec2-readonly.jsx",
-      "sha256": "bd82676a908ac28bc12b6d6439b16d64ceaea1e216b5f6617b99c8cb7705588d",
-      "disposition": "modeled",
-      "reason": "Scope the opt-in EC2 console capability, single mutation, receipt and matching readback; preserve the existing CloudFormation authority and backend.",
-      "models": [
-        {
-          "id": "EC2InstanceStackConsole",
-          "properties": [
-            "QualifiedMutation",
-            "SingleMutation",
-            "ReceiptBelongsToView",
-            "VerifiedMeansMatch",
-            "NoGuestLivenessClaim"
-          ],
-          "limits": "Finite three UX generations with one reply in flight, actor roles and a configuration observation. An admission sample does not exclude expiry between discovery and CreateStack. This models only the workflow and no replay/retarget acknowledgment, not actual token/HTTP bounds, runtime health, SQLite rollback, live guest launch or cleanup, React or browser refinement."
-        }
-      ]
-    },
-    {
-      "path": "tools/console/src/main.jsx",
-      "sha256": "409973e87e565b1ecd60b85757e80de223fbc4050cd3c7e68e237924045cd54f",
-      "disposition": "modeled",
-      "reason": "Scope the opt-in EC2 console capability, single mutation, receipt and matching readback; preserve the existing CloudFormation authority and backend.",
-      "models": [
-        {
-          "id": "EC2InstanceStackConsole",
-          "properties": [
-            "QualifiedMutation",
-            "SingleMutation",
-            "ReceiptBelongsToView",
-            "VerifiedMeansMatch",
-            "NoGuestLivenessClaim"
-          ],
-          "limits": "Finite three UX generations with one reply in flight, actor roles and a configuration observation. An admission sample does not exclude expiry between discovery and CreateStack. This models only the workflow and no replay/retarget acknowledgment, not actual token/HTTP bounds, runtime health, SQLite rollback, live guest launch or cleanup, React or browser refinement."
-        }
-      ]
-    },
-    {
-      "path": "tools/console/test/ec2-instance-stack-launch.test.mjs",
-      "sha256": "0ef53399e3f0b1144f15a6f269b1e3fe0606561aef1a1f14b6b9412b1567cfe7",
-      "disposition": "presentation",
-      "reason": "Bind the actual embedded console build or bounded transport fixture to this EC2 slice.",
+      "reason": "Exercises actual stopped SQLite/CLI and pinned SDK or served read-only DOM, or bounded fixture unit fault paths; no product capability change.",
       "models": []
     }
   ]

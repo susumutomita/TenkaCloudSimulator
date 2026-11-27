@@ -408,11 +408,11 @@ VPC endpoints and tag edits are not implemented.
 As in the [AWS main and local route model](https://docs.aws.amazon.com/vpc/latest/userguide/subnet-route-tables.html),
 new native VPCs have one main route table and a `local` route in each table.
 The native VPC and main have stable persisted ownership; the main is deleted
-with its parent only. Existing native VPCs are **not** backfilled, and reading an
-existing database never creates a main table or `local` route. For the new
-behavior, create a new EC2-owned VPC. Do not downgrade a database after creating
-new native children. Older binaries can reject discovery; no downgrade procedure
-has been verified. Main-table reassignment and secondary CIDRs are not supported.
+with its parent only. Startup and reads never upgrade legacy VPCs. An operator can
+[explicitly repair one saved native VPC on a stopped copy](ec2-legacy-native-main-repair.md).
+Do not open repaired state with a binary older than the repair. Restore the
+untouched pre-repair file if needed. Main-table reassignment and secondary CIDRs
+are not supported.
 
 Exercise identities need `ec2:CreateVpc` on `arn:aws:ec2:<region>:000000000000:vpc/*`,
 plus `ec2:CreateTags` on the same resource when tags are supplied, and

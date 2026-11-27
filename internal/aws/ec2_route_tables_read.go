@@ -160,6 +160,14 @@ func (s *StackStore) describeEC2RouteTables(ctx context.Context, region string) 
 		return nil, err
 	}
 	defer tx.Rollback()
+	out, err := describeEC2RouteTablesInSnapshot(ctx, tx, region)
+	if err != nil {
+		return nil, err
+	}
+	return out, tx.Commit()
+}
+
+func describeEC2RouteTablesInSnapshot(ctx context.Context, tx *sql.Tx, region string) ([]ec2RouteTableRead, error) {
 	rows, err := tx.QueryContext(ctx, `SELECT stack_id FROM aws_cfn_ownership WHERE namespace=? AND kind IN (?,?,?)
 		UNION SELECT stack_id FROM aws_ec2_network_resources WHERE region=? AND kind IN (?,?,?)
 			AND NOT (stack_id=? AND kind IN (?,?,?)) ORDER BY 1 LIMIT 1001`,
@@ -294,7 +302,7 @@ func (s *StackStore) describeEC2RouteTables(ctx context.Context, region string) 
 		return nil, errEC2RouteSnapshot
 	}
 	sort.Slice(out, func(i, j int) bool { return out[i].ID < out[j].ID })
-	return out, tx.Commit()
+	return out, nil
 }
 
 func ec2RouteClaims(ctx context.Context, tx *sql.Tx, region, owner string) (map[string]string, error) {

@@ -73,8 +73,8 @@ func nativeRouteTableVPC(ctx context.Context, tx *sql.Tx, region, id string, dec
 }
 
 func nativeRouteTableFields(r EC2NetworkResource) bool {
-	return ec2NativeRouteTableID.MatchString(r.ID) && ec2VPCIDPattern.MatchString(r.VPCID) && r.Revision == 1 &&
-		r.MainRouteTableID == "" && r.SubnetID == "" && r.GatewayID == "" && r.RouteTableID == "" && r.AvailabilityZone == "" &&
+	return ec2NativeRouteTableID.MatchString(r.ID) && ec2VPCIDPattern.MatchString(r.VPCID) && (r.Revision == 1 || r.Revision == 2) &&
+		r.MainRouteRepair == nil && r.MainRouteTableID == "" && r.SubnetID == "" && r.GatewayID == "" && r.RouteTableID == "" && r.AvailabilityZone == "" &&
 		r.Description == "" && !r.DNSHostnames && !r.DNSSupport && !r.PublicIP && !r.RouteEnabled && len(r.Ingress) == 0 && len(r.Tags) <= 50
 }
 
@@ -103,7 +103,7 @@ func readNativeRouteTableInSnapshot(ctx context.Context, tx *sql.Tx, region, id 
 		}
 	}
 	vpc, err := nativeRouteTableVPC(ctx, tx, region, r.VPCID, declarations)
-	if err != nil || r.CIDR != nativeTableLocalCIDR(vpc) ||
+	if err != nil || r.CIDR != nativeTableLocalCIDR(vpc) || r.Revision == 2 && !validNativeVPCMainRepair(vpc) ||
 		nativeMainTableID(region, r.VPCID) == r.ID && (vpc.MainRouteTableID != r.ID || len(r.Tags) != 0) {
 		return EC2NetworkResource{}, errEC2NativeRouteTableState
 	}
