@@ -15,6 +15,14 @@ The existing whole signed request limit is **4 KiB**, including the inline
 fixture XML and JSON escaping. Do not use real AWS credentials or IdP metadata;
 the intended input is a compact self-contained local test document.
 
+To exercise an HTTPS-only test topology, provide both `--cognito-local-tls-cert`
+and `--cognito-local-tls-key` along with the config opt-in. The certificate must
+cover the canonical numeric-loopback listener. Use a new development key and
+trust its CA only in the isolated SDK or test browser. This changes the
+local listener transport, not SigV4, authorization or the set of operations;
+it is rejected with Battle, owned PostgreSQL, remote or unsafe modes. Without
+both TLS flags the existing default HTTP configuration is unchanged.
+
 | Opt-in operation | Supported wire input and output |
 | --- | --- |
 | `CreateIdentityProvider` | `UserPoolId`, `ProviderName` (`Keycloak` or `Entra`), `ProviderType: "SAML"`, `ProviderDetails: {"MetadataFile":"<xml>"}`, optional `AttributeMapping`. |
@@ -58,9 +66,11 @@ is an operator's trust input, not proof that the metadata document was signed.
 RSA pins require an odd 2048–4096-bit modulus and odd exponent from 3 through
 2³¹−1, matching the pinned Go verifier's accepted public key shape and the
 local size limit.
-A callback must be a canonical numeric-loopback HTTP origin with explicit
-port and path and cannot preselect OAuth response parameters. Registered
-callback strings are compared without normalization.
+A callback must be a canonical numeric-loopback HTTP or HTTPS URL with an
+explicit port and path and cannot preselect OAuth response parameters.
+Registered callback strings are compared without normalization. An optional
+POST metadata entry must share the exact Redirect scheme, host and port;
+it is still never selected as a fallback.
 
 The versioned projection fits in the canonical pool's 64 KiB metadata slot,
 capped at two providers and ten clients per pool. A read or failed edit does
@@ -78,3 +88,7 @@ exposed. In particular, a future multi-step operation must check its original
 config revision and pool lifetime again in the transaction that commits it.
 No live Entra/Keycloak, SDK compatibility beyond the existing metadata
 profile, or ProtoShip sign-in is implied.
+
+Use the separate [experimental HTTPS hosted-login profile](cognito-local-hosted-login.md)
+only when explicitly testing signed local browser federation. The config flag
+by itself still exposes no browser flow.

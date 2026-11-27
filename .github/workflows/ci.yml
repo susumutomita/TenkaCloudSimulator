@@ -103,6 +103,10 @@ jobs:
         run: |
           make format-check vet verify-assets test-scripts
           go mod verify
+      - name: Verify the opt-in Cognito hosted-login profile
+        run: |
+          make check-cognito-hosted
+          git diff --exit-code -- cognito-hosted.mod cognito-hosted.sum
       - name: Build the static binary and compile all supported targets
         run: make build cross-check
       - name: Audit the locked API-reference build dependencies

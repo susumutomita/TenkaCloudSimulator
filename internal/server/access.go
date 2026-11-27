@@ -33,6 +33,7 @@ type browserSession struct {
 // Access instance and database must be assigned to each team by the host.
 type Access struct {
 	next             http.Handler
+	cognitoHosted    *cognitoHostedComposition
 	sdk              *sdkAuthority
 	operator         [32]byte
 	cookie           string
@@ -51,8 +52,12 @@ func NewAccess(next http.Handler, operatorToken string, allowRemote bool) (*Acce
 	if !regexp.MustCompile(`^[A-Za-z0-9_-]{32,256}$`).MatchString(operatorToken) {
 		return nil, fmt.Errorf("operator token must contain 32–256 URL-safe characters")
 	}
+	hosted, _ := next.(*cognitoHostedComposition)
+	if allowRemote && hosted != nil {
+		return nil, fmt.Errorf("Cognito hosted login cannot be mounted with remote access")
+	}
 	sum := sha256.Sum256([]byte(operatorToken))
-	return &Access{next: next, sdk: newSDKAuthority(operatorToken), operator: sum, cookie: "tcsim_" + hex.EncodeToString(sum[:6]), remote: allowRemote, sessions: map[[32]byte]accessSession{}, browsers: map[[32]byte]browserSession{}, handoffs: map[[32]byte]consoleHandoff{}, terminalHandoffs: map[[32]byte]terminalHandoff{}, terminalBrowsers: map[[32]byte]terminalHandoff{}, boundBrowsers: map[[32]byte]consoleHandoff{}, now: time.Now}, nil
+	return &Access{next: next, cognitoHosted: hosted, sdk: newSDKAuthority(operatorToken), operator: sum, cookie: "tcsim_" + hex.EncodeToString(sum[:6]), remote: allowRemote, sessions: map[[32]byte]accessSession{}, browsers: map[[32]byte]browserSession{}, handoffs: map[[32]byte]consoleHandoff{}, terminalHandoffs: map[[32]byte]terminalHandoff{}, terminalBrowsers: map[[32]byte]terminalHandoff{}, boundBrowsers: map[[32]byte]consoleHandoff{}, now: time.Now}, nil
 }
 func (a *Access) credential(token string) (accessSession, bool) {
 	sum := sha256.Sum256([]byte(token))
@@ -117,6 +122,12 @@ func (a *Access) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	ip := net.ParseIP(host)
 	if host != "localhost" && (ip == nil || !a.remote && !ip.IsLoopback()) {
 		http.Error(w, "Unrecognized simulator host", 403)
+		return
+	}
+	// Only the exact Cognito browser method/path pairs get their own pinned
+	// transport and per-operation Origin guard. They never install an actor.
+	if a.cognitoHosted != nil && a.cognitoHosted.browser.Owns(r) {
+		a.cognitoHosted.browser.ServeHTTP(w, r)
 		return
 	}
 	if origin := r.Header.Get("Origin"); origin != "" {

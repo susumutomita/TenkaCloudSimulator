@@ -74,7 +74,10 @@ func TestFederationMetadataBoundedTypedProjection(t *testing.T) {
 }
 
 func TestFederationCallbackSourceBoundsAndLocalIdentity(t *testing.T) {
-	for _, good := range []string{fixtureCallback, "http://[::1]:8080/oidc/callback", "http://127.0.0.2:15555/callback/"} {
+	for _, good := range []string{
+		fixtureCallback, "http://[::1]:8080/oidc/callback", "http://127.0.0.2:15555/callback/",
+		"https://127.0.0.1:8080/callback", "https://[::1]:8443/oidc/callback",
+	} {
 		if _, err := localFederationURL(good, true); err != nil {
 			t.Fatal("local callback refused", err)
 		}
@@ -82,7 +85,10 @@ func TestFederationCallbackSourceBoundsAndLocalIdentity(t *testing.T) {
 	for _, unacceptable := range []string{
 		"not a URL", "http://localhost:8080/callback", "http://192.0.2.8:8080/callback",
 		"http://127.0.0.1/callback", "http://127.0.0.1:65536/callback", "http://127.0.0.1:0/callback",
-		"http://127.0.0.1:08080/callback", "https://127.0.0.1:8080/callback",
+		"http://127.0.0.1:08080/callback", "HTTPS://127.0.0.1:8080/callback",
+		"https://localhost:8443/callback", "https://192.0.2.8:8443/callback",
+		"https://user@127.0.0.1:8443/callback", "https://127.0.0.1/callback",
+		"https://127.0.0.1:8443/callback?STATE=fixture",
 		"http://127.0.0.1:8080/callback#section", "http://127.0.0.1:8080/callback?state=fixture",
 		"http://127.0.0.1:8080/callback?error_description=fixture",
 		"http://127.0.0.1:8080/callback?app=one&app=two",
@@ -103,6 +109,25 @@ func TestFederationCallbackSourceBoundsAndLocalIdentity(t *testing.T) {
 	for _, value := range []federationClientInput{empty, unbounded, repeat} {
 		if value.valid() {
 			t.Fatal("invalid app client shape accepted")
+		}
+	}
+}
+
+func TestFederationSignedProviderConfigurationRetainsExactTLSOrigins(t *testing.T) {
+	now := time.Now().UTC().Truncate(time.Second)
+	fixture := federationXMLFixture(now, federationCertFixture(t, now, 13))
+	good := strings.ReplaceAll(fixture, "http://127.0.0.1:18081/", "https://127.0.0.1:18081/")
+	got, err := compileFederationProvider(federationProviderInput{Name: "Entra", MetadataFile: good}, now)
+	if err != nil || got.RedirectURL != "https://127.0.0.1:18081/sso" {
+		t.Fatalf("approved HTTPS location not retained: %v", err)
+	}
+	for _, bad := range []string{
+		strings.Replace(good, "https://127.0.0.1:18081/post", "http://127.0.0.1:18081/post", 1),
+		strings.Replace(good, "https://127.0.0.1:18081/post", "https://127.0.0.1:18082/post", 1),
+		strings.Replace(good, "https://127.0.0.1:18081/sso", "https://localhost:18081/sso", 1),
+	} {
+		if _, err := compileFederationProvider(federationProviderInput{Name: "Entra", MetadataFile: bad}, now); !errors.Is(err, errInvalid) {
+			t.Fatal("invalid HTTPS broker origin was admitted")
 		}
 	}
 }

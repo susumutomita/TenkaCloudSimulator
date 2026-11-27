@@ -24,6 +24,9 @@ type ProviderConfig struct {
 	// CognitoLocalFederationConfig admits only direct, signed loopback
 	// configuration. It does not enable a sign-in surface.
 	CognitoLocalFederationConfig bool
+	// CognitoLocalHostedOrigin is a trusted, explicitly enabled local browser
+	// origin. NewAccess alone installs the tightly scoped browser projection.
+	CognitoLocalHostedOrigin string
 	// RDSPrivatePostgresTopology enables native private-network validation of
 	// qualifying RDS metadata writes, not database execution or a listener.
 	RDSPrivatePostgresTopology bool
