@@ -69,3 +69,9 @@ snapshot does not grant authority for any later I/O.
 No service or port is added to the guest NIC, and no result grants permission
 for later I/O. Guest-side SQL still needs its own fenced transport and runtime
 verification.
+
+The bounded `RDSGuestPeerPreflight` model covers a same-ARN replacement before
+or between reads and an in-place revision change between reads. It starts
+after reservation and tracks the committed snapshots; it does not model
+SQLite ownership allocation or prove executable PostgreSQL. The native
+regression drives real RDS Query group changes with a synthetic host probe.

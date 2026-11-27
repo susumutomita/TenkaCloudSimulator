@@ -21856,7 +21856,7 @@
       "id": "RDSGuestPeerPreflight",
       "model": "formal/RDSGuestPeerPreflight.tla",
       "config": "formal/RDSGuestPeerPreflight.cfg",
-      "bounds": "One retained guest, one Linux/amd64 database owner, one fixed host SCRAM observation, nineteen alternative static witnesses, one independent destination loss between committed reads, two independently revocable guest signals; no persistent route.",
+      "bounds": "One retained guest, one Linux/amd64 database owner, one fixed host SCRAM observation, nineteen alternative static witnesses, one loss of the live destination, two independently revocable guest signals, one reserved group plus a same-ARN replacement and two revisions; no persistent route.",
       "properties": [
         "TypeOK",
         "CanonicalGuest",
@@ -21870,12 +21870,16 @@
         "LiveAtReturn",
         "ObservationOnly",
         "DenialDoesNotRetireOwner",
-        "HealthyObservation"
+        "HealthyObservation",
+        "OriginalGroupBeforeProbe",
+        "OriginalGroupAtFinalSnapshot",
+        "MatchingGroupSnapshotRevisions"
       ],
-      "limits": "One call with one independently bad static fact at a time. NIC pre-seal and command retirement may interleave; one independent destination loss may occur after the first committed snapshot and before the second. The second read and commit are abstracted together; observed is the checked snapshot, not continuous or future validity. Does not prove Go refinement, database isolation, lock correctness, actual networking, guest SQL, authenticated protocol verification, public API behavior, or permission for later I/O.",
+      "limits": "One preflight call after DB reservation, with one independently bad static fact at a time. Guest revocation and a bounded destination loss or subnet-group edit/replacement can interleave. Reads of the reserved identity are symbolic; both successful group snapshots must read the original identity and the same revision. This does not require continuity for other dependencies or validity after the final read. It does not model how SQLite captures, allocates or commits ownership, prove Go refinement or isolation, exercise networking or PostgreSQL, or grant future I/O.",
       "source_scope": [
         "internal/aws/catalog/rds_guest_peer_linux_amd64.go",
         "internal/aws/catalog/rds_owned_runtime_linux_amd64.go",
+        "internal/aws/catalog/rds_private_postgres_topology.go",
         "internal/aws/ec2_completed_guest_unix.go",
         "internal/aws/rds_guest_peer_linux_amd64.go"
       ],
@@ -22088,6 +22092,50 @@
             }
           ],
           "expect_invariant": "FinalSnapshotCommitted"
+        },
+        {
+          "id": "AcceptReplacementBeforeProbe",
+          "edits": [
+            {
+              "old": "InitialGroupOK == s.group = \"reserved\"",
+              "new": "InitialGroupOK == TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "OriginalGroupBeforeProbe"
+        },
+        {
+          "id": "AcceptReplacementAfterProbe",
+          "edits": [
+            {
+              "old": "FinalGroupOK == s.group = \"reserved\"",
+              "new": "FinalGroupOK == TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "OriginalGroupAtFinalSnapshot"
+        },
+        {
+          "id": "AcceptChangedGroupRevision",
+          "edits": [
+            {
+              "old": "SameGroupRevision == s.firstRev = s.rev",
+              "new": "SameGroupRevision == TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "MatchingGroupSnapshotRevisions"
+        },
+        {
+          "id": "RefuseInPlaceRevision",
+          "edits": [
+            {
+              "old": "InitialGroupOK == s.group = \"reserved\"",
+              "new": "InitialGroupOK == s.group = \"reserved\" /\\ s.rev = 1",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "HealthyObservation"
         }
       ]
     },
