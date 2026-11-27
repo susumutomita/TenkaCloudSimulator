@@ -3,12 +3,12 @@ import {createRequire} from 'node:module';
 import {fileURLToPath} from 'node:url';
 import test from 'node:test';
 import {build} from 'esbuild';
-import {createVpcWithSubnet, vpcSubnetAvailable, vpcSubnetParameters} from '../src/ec2-vpc-subnet.mjs';
+import {createVpcWithSubnet, vpcCreateIssues, vpcSubnetAvailable, vpcSubnetParameters} from '../src/ec2-vpc-subnet.mjs';
 
 const require = createRequire(import.meta.url);
 const consoleDir = fileURLToPath(new URL('..', import.meta.url));
 const {outputFiles} = await build({
-  absWorkingDir: consoleDir, stdin: {contents: "export {default} from './src/ec2-vpc-subnet-fields.jsx';", resolveDir: consoleDir},
+  absWorkingDir: consoleDir, stdin: {contents: "export {default} from './src/ec2-vpc-create.jsx';", resolveDir: consoleDir},
   bundle: true, write: false, platform: 'node', format: 'cjs', loader: {'.css': 'empty'},
   external: ['react', 'react-dom', 'react/jsx-runtime'], define: {'process.env.NODE_ENV': '"production"'},
 });
@@ -33,16 +33,30 @@ const stack = ({stackId=id,name=form.stackName,status='CREATE_COMPLETE',vpc=vpcI
 
 test('actual React VPC settings show editable two-resource fields only when opted in and supported', () => {
   const render = (enabled, values, disabled=false) => renderToStaticMarkup(createElement(module.exports.default,
-    {enabled,values,disabled,change(){}}));
+    {pairedAvailable:enabled,values,busy:disabled,change(){}}));
   const only = render(true,{...form,mode:'vpc-only'});
-  assert.match(only,/VPC only/); assert.match(only,/VPC and one subnet \(CloudFormation-managed\)/);
+  assert.match(only,/VPC only/); assert.match(only,/VPC and more/);
+  assert.match(only,/role="radiogroup"/);
+  assert.match(only,/value="vpc-only"[^>]*checked|checked[^>]*value="vpc-only"/);
+  const headings=['VPC settings', 'Resources to create', 'Name tag - optional', 'IPv4 CIDR block', 'IPv6 CIDR block', 'Tenancy', 'Tags'];
+  const positions=headings.map(heading=>only.indexOf(heading));
+  assert.ok(positions.every((pos,i)=>pos>=0 && (i===0 || pos>positions[i-1])));
   assert.doesNotMatch(only,/Subnet IPv4 CIDR|CloudFormation stack name/);
   const legacy = render(false,form);
-  assert.doesNotMatch(legacy,/VPC and one subnet|Subnet IPv4 CIDR|CloudFormation stack name/);
+  assert.doesNotMatch(legacy,/VPC and more|Subnet IPv4 CIDR|CloudFormation stack name/);
   const draft = render(true,form);
-  assert.match(draft,/Host only/); assert.match(draft,/Subnet IPv4 CIDR/); assert.match(draft,/CloudFormation stack name/);
+  assert.match(draft,/only a VPC and one subnet/); assert.match(draft,/Subnet IPv4 CIDR/); assert.match(draft,/CloudFormation stack name/);
   assert.match(draft,/value="10\.20\.1\.0\/24"/); assert.match(draft,/value="sandbox-network"/);
   assert.match(render(true,form,true),/disabled=""/);
+});
+
+test('native form has no stack inputs; draft problems block invalid requests and explain the exact field', () => {
+  assert.deepEqual(vpcCreateIssues({cidr:'10.0.0.0/16'},false),{});
+  assert.deepEqual(vpcCreateIssues({cidr:'10.0.0.0/15',name:'界'.repeat(86)},false),{cidr:'cidr',name:'name'});
+  assert.deepEqual(vpcCreateIssues({cidr:'10.0.0.0/16',stackName:'',subnetCIDR:'10.1.0.0/24'},true),
+    {stack:'stack',subnet:'containment'});
+  assert.deepEqual(vpcCreateIssues({cidr:'10.0.0.0/16',stackName:'valid',subnetCIDR:'not a subnet'},true),{subnet:'subnet'});
+  assert.deepEqual(vpcCreateIssues({cidr:'10.0.0.7/16',stackName:'valid',subnetCIDR:'10.0.1.12/24',name:'界'.repeat(85)},true),{});
 });
 
 test('only a verified operator using the administrator identity can submit the paired workflow', async () => {
@@ -61,8 +75,8 @@ test('only a verified operator using the administrator identity can submit the p
   for (const input of denied) {
     const allowed=vpcSubnetAvailable(...input);
     assert.equal(allowed,false);
-    const html=renderToStaticMarkup(createElement(module.exports.default,{enabled:allowed,values:form,change(){}}));
-    assert.doesNotMatch(html,/VPC and one subnet|Subnet IPv4 CIDR|CloudFormation stack name/);
+    const html=renderToStaticMarkup(createElement(module.exports.default,{pairedAvailable:allowed,values:form,change(){}}));
+    assert.doesNotMatch(html,/VPC and more|Subnet IPv4 CIDR|CloudFormation stack name/);
     await assert.rejects(createVpcWithSubnet(async()=>assert.fail('No participant CreateStack call'),
       region,form,{allowed}),/authenticated operator/);
   }

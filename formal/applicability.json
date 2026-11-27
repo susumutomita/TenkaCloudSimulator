@@ -1,398 +1,252 @@
 {
   "version": 1,
-  "base_sha": "f9cb3efb42faa679912a1bac4c27f754b28f43dd",
+  "base_sha": "34f00a3ce59b9d0b291a529a2fbc9f9dbdad5321",
   "changes": [
     {
-      "path": "README.ja.md",
-      "sha256": "eee3f7a6fc8c64a6ed2a8e9a42e07000b42bfcd7b2e7bf616e085d216acfad98",
-      "disposition": "documentation",
-      "reason": "Describes explicit copy-first local maintenance, compatibility bounds, observable main/local and untouched ownership, or operator rollback.",
-      "models": []
-    },
-    {
       "path": "README.md",
-      "sha256": "a1afc94cdbd7db8ea99fd9f85d6cbb945f2c7517e10f805140495705bb6ad8bb",
+      "sha256": "a7953de059d4d35f84f78bf5449265d70466dbfd095e4522a015bbea8e2186cc",
       "disposition": "documentation",
-      "reason": "Describes explicit copy-first local maintenance, compatibility bounds, observable main/local and untouched ownership, or operator rollback.",
+      "reason": "Documents the supported VPC defaults, explicit native/stack ownership and limits; no provider/VM change.",
       "models": []
-    },
-    {
-      "path": "cmd/simulator/ec2_native_main_route_repair.go",
-      "sha256": "465caf42d6da2f9ee0fce4d6e414fa065626cde13bf47cf887e8c1634d94a3a1",
-      "disposition": "modeled",
-      "reason": "Bind explicit versioned one-VPC repair admission, unchanged refusal/planning, retained rows, and one-row atomic persisted outcome; runtime details are independently tested.",
-      "models": [
-        {
-          "id": "EC2LegacyNativeMainRepair",
-          "properties": [
-            "ExactAdmission",
-            "NoPartialRefusal",
-            "PlanAndRepeatAreReadOnly"
-          ],
-          "limits": "Finite model of one explicit offline repair with two legacy custom tables, one stored slot, abstract copy/owner/plan and final witness, and preserved peer sentinels. Not a Go, SQLite, cryptography, filesystem, OS authorization, HTTP/IAM, Console, packet or AWS parity proof."
-        }
-      ]
-    },
-    {
-      "path": "cmd/simulator/ec2_native_main_route_repair_boundaries_test.go",
-      "sha256": "36f89732483597b0068ab1f63465d5896d983935c2decee3737575d46e43cb6c",
-      "disposition": "test-support",
-      "reason": "Exact stock command and real disposable SQLite refusal/retry, immutable copy and rollback coverage. No changed product behavior, scheduling, exclusions, or gate.",
-      "models": []
-    },
-    {
-      "path": "cmd/simulator/ec2_native_main_route_repair_other.go",
-      "sha256": "4f9a4a6329178adcd50c8aefdbf83e3faa1ccbd2d2d89a249754731e6f7158b6",
-      "disposition": "modeled",
-      "reason": "Bind explicit versioned one-VPC repair admission, unchanged refusal/planning, retained rows, and one-row atomic persisted outcome; runtime details are independently tested.",
-      "models": [
-        {
-          "id": "EC2LegacyNativeMainRepair",
-          "properties": [
-            "ExactAdmission"
-          ],
-          "limits": "Finite model of one explicit offline repair with two legacy custom tables, one stored slot, abstract copy/owner/plan and final witness, and preserved peer sentinels. Not a Go, SQLite, cryptography, filesystem, OS authorization, HTTP/IAM, Console, packet or AWS parity proof."
-        }
-      ]
-    },
-    {
-      "path": "cmd/simulator/ec2_native_main_route_repair_posix.go",
-      "sha256": "b35b3a428235f425aea44e8976e21180c499c9f07c45ea7c5288e88d3fd54a2d",
-      "disposition": "modeled",
-      "reason": "Bind explicit versioned one-VPC repair admission, unchanged refusal/planning, retained rows, and one-row atomic persisted outcome; runtime details are independently tested.",
-      "models": [
-        {
-          "id": "EC2LegacyNativeMainRepair",
-          "properties": [
-            "ExactAdmission"
-          ],
-          "limits": "Finite model of one explicit offline repair with two legacy custom tables, one stored slot, abstract copy/owner/plan and final witness, and preserved peer sentinels. Not a Go, SQLite, cryptography, filesystem, OS authorization, HTTP/IAM, Console, packet or AWS parity proof."
-        }
-      ]
-    },
-    {
-      "path": "cmd/simulator/ec2_native_main_route_repair_test.go",
-      "sha256": "727813af1c030bd2c06730950bb0c7a1883df8462ede8b0484a46c6a1e4bd9cb",
-      "disposition": "test-support",
-      "reason": "Exercises actual stopped SQLite/CLI and pinned SDK or served read-only DOM, or bounded fixture unit fault paths; no product capability change.",
-      "models": []
-    },
-    {
-      "path": "cmd/simulator/ec2_native_main_route_repair_unsupported_test.go",
-      "sha256": "0413f6db53b6f56c12e7dbd5da13e912a0f5d20e4cf85943e9f8a316b19c40a4",
-      "disposition": "test-support",
-      "reason": "Verifies alternate locking builds cannot initialize a maintenance state; no runtime change.",
-      "models": []
-    },
-    {
-      "path": "cmd/simulator/main.go",
-      "sha256": "f908ee13526a53133fd73e57029a99d3b6883813ad259e15958466f8b34cd5a8",
-      "disposition": "modeled",
-      "reason": "Bind explicit versioned one-VPC repair admission, unchanged refusal/planning, retained rows, and one-row atomic persisted outcome; runtime details are independently tested.",
-      "models": [
-        {
-          "id": "EC2LegacyNativeMainRepair",
-          "properties": [
-            "ExactAdmission",
-            "PlanAndRepeatAreReadOnly"
-          ],
-          "limits": "Finite model of one explicit offline repair with two legacy custom tables, one stored slot, abstract copy/owner/plan and final witness, and preserved peer sentinels. Not a Go, SQLite, cryptography, filesystem, OS authorization, HTTP/IAM, Console, packet or AWS parity proof."
-        }
-      ]
     },
     {
       "path": "docs/console.md",
-      "sha256": "4f2ec3897ed55f18e0fdb881383f166d611a6a66d0b44e8e858acbf63a5088f4",
+      "sha256": "f34c008c7c61bd1cc2f268791aa1bf2ed8fb8963304a4c6a01547c9cb87bf95e",
       "disposition": "documentation",
-      "reason": "Describes explicit copy-first local maintenance, compatibility bounds, observable main/local and untouched ownership, or operator rollback.",
+      "reason": "Documents the supported VPC defaults, explicit native/stack ownership and limits; no provider/VM change.",
       "models": []
     },
     {
       "path": "docs/design/0001-go-standalone.md",
-      "sha256": "38823962e4558276b0c133da223edf0eb3b9570aa750c0d2014c45a84930b8d9",
+      "sha256": "f010d487dac701220539bbda3e85f535c2f54f2affbc6b0ce43174ca638e4073",
       "disposition": "documentation",
-      "reason": "Describes explicit copy-first local maintenance, compatibility bounds, observable main/local and untouched ownership, or operator rollback.",
-      "models": []
-    },
-    {
-      "path": "docs/ec2-legacy-native-main-repair.md",
-      "sha256": "d7662403f49f45e4239ce54a782440b8ea9f3efb5632df82bee35ae0e069ea9f",
-      "disposition": "documentation",
-      "reason": "Describes explicit copy-first local maintenance, compatibility bounds, observable main/local and untouched ownership, or operator rollback.",
+      "reason": "Documents the supported VPC defaults, explicit native/stack ownership and limits; no provider/VM change.",
       "models": []
     },
     {
       "path": "docs/ec2-read-discovery.md",
-      "sha256": "8d5f7a891d4b752c011f53fbcb15ec8842ae39ed0602936d443f5c4f7560ed12",
+      "sha256": "a77aa7971acb1b9a820693ad312f440456bce67cce035506581f5172b6232cc6",
       "disposition": "documentation",
-      "reason": "Describes explicit copy-first local maintenance, compatibility bounds, observable main/local and untouched ownership, or operator rollback.",
+      "reason": "Documents the supported VPC defaults, explicit native/stack ownership and limits; no provider/VM change.",
       "models": []
     },
     {
-      "path": "formal/EC2LegacyNativeMainRepair.cfg",
-      "sha256": "8a47e5bfb77eaeb936eca877146b7174c6fc448f5f6d626aa1c70b9915f2d11a",
+      "path": "formal/EC2VPCCreateForm.cfg",
+      "sha256": "e1e2eb9583204b1eb94a9fde3d6e0312e973703e659dc298ff8ccfd277ce46af",
       "disposition": "modeled",
-      "reason": "Bind explicit versioned one-VPC repair admission, unchanged refusal/planning, retained rows, and one-row atomic persisted outcome; runtime details are independently tested.",
+      "reason": "Enumerates the configured safety properties for current view, draft admission and separated native/paired create actions.",
       "models": [
         {
-          "id": "EC2LegacyNativeMainRepair",
+          "id": "EC2VPCCreateForm",
           "properties": [
-            "AtomicRepair",
-            "OneStoredRow",
-            "ExactAdmission",
-            "NoPartialRefusal",
-            "PlanAndRepeatAreReadOnly",
-            "RetainedFrame"
+            "PairedNeedsOperator",
+            "InvalidDraftNeverWrites",
+            "NativeAndStackRemainDistinct",
+            "DiscardRetiredRead",
+            "ConfirmedBeforeSuccess"
           ],
-          "limits": "Finite model of one explicit offline repair with two legacy custom tables, one stored slot, abstract copy/owner/plan and final witness, and preserved peer sentinels. Not a Go, SQLite, cryptography, filesystem, OS authorization, HTTP/IAM, Console, packet or AWS parity proof."
+          "limits": "Finite VPC UI mode/draft/current-view abstraction only. No DOM, IPv4/UTF-8 implementation, AWS/network, VM or SQLite/runtime ownership proof; independent real browser/API checks remain separate."
         }
       ]
     },
     {
-      "path": "formal/EC2LegacyNativeMainRepair.tla",
-      "sha256": "072e962e20a3057871b708626078c3f29e09ef6471b932a6a7f6417aed38adb4",
+      "path": "formal/EC2VPCCreateForm.tla",
+      "sha256": "9c09ba5929d4092f2873f9eeeecfddc23ff6afb74c7504367ec7854f4876f258",
       "disposition": "modeled",
-      "reason": "Bind explicit versioned one-VPC repair admission, unchanged refusal/planning, retained rows, and one-row atomic persisted outcome; runtime details are independently tested.",
+      "reason": "Finite model of the VPC creation view, conditional CloudFormation choice, guarded write and exact readback in the current view.",
       "models": [
         {
-          "id": "EC2LegacyNativeMainRepair",
+          "id": "EC2VPCCreateForm",
           "properties": [
-            "AtomicRepair",
-            "OneStoredRow",
-            "ExactAdmission",
-            "NoPartialRefusal",
-            "PlanAndRepeatAreReadOnly",
-            "RetainedFrame"
+            "PairedNeedsOperator",
+            "InvalidDraftNeverWrites",
+            "NativeAndStackRemainDistinct",
+            "DiscardRetiredRead",
+            "ConfirmedBeforeSuccess"
           ],
-          "limits": "Finite model of one explicit offline repair with two legacy custom tables, one stored slot, abstract copy/owner/plan and final witness, and preserved peer sentinels. Not a Go, SQLite, cryptography, filesystem, OS authorization, HTTP/IAM, Console, packet or AWS parity proof."
+          "limits": "Finite VPC UI mode/draft/current-view abstraction only. No DOM, IPv4/UTF-8 implementation, AWS/network, VM or SQLite/runtime ownership proof; independent real browser/API checks remain separate."
         }
       ]
     },
     {
       "path": "formal/models.json",
-      "sha256": "bb622218bc30d3ec5c563e9548e6e619b0c9dfdc8459a23c3feb57ed306a9d21",
+      "sha256": "c92b73a79a2e7fb0afc62a8cf3655a31c1e16568aa97640141524256e5a7d2dc",
       "disposition": "formal-infrastructure",
-      "reason": "Registers exact finite offline repair rules and negative controls without broadening other model obligations.",
+      "reason": "Registers one explicit VPC UI state machine and five sensitivity controls; leaves the previous formal inventory unchanged.",
       "models": []
     },
     {
-      "path": "internal/aws/ec2_native_vpc_main_repair.go",
-      "sha256": "502f88433353d2864296423e01f2750fc93d77742f722f476d71051fe74bed24",
+      "path": "internal/server/web/app.css",
+      "sha256": "50d07fc206f060fc9eb9766908dacdbd4fd1d1fc9faaa4881faa45892304d058",
+      "disposition": "presentation",
+      "reason": "Generated Cloudscape styling for the two radio tiles and form. It has no query, authorization or network behavior.",
+      "models": []
+    },
+    {
+      "path": "internal/server/web/app.js",
+      "sha256": "7dadd0db776366e788128a6337b6f68df442d954167f1168b7db8e45fa306afe",
       "disposition": "modeled",
-      "reason": "Bind explicit versioned one-VPC repair admission, unchanged refusal/planning, retained rows, and one-row atomic persisted outcome; runtime details are independently tested.",
+      "reason": "Served projection of the VPC mode/admission/live-view code; other service flows are unchanged.",
       "models": [
         {
-          "id": "EC2LegacyNativeMainRepair",
+          "id": "EC2VPCCreateForm",
           "properties": [
-            "AtomicRepair",
-            "OneStoredRow",
-            "ExactAdmission",
-            "RetainedFrame",
-            "NoPartialRefusal"
+            "PairedNeedsOperator",
+            "InvalidDraftNeverWrites",
+            "NativeAndStackRemainDistinct",
+            "DiscardRetiredRead",
+            "ConfirmedBeforeSuccess"
           ],
-          "limits": "Finite model of one explicit offline repair with two legacy custom tables, one stored slot, abstract copy/owner/plan and final witness, and preserved peer sentinels. Not a Go, SQLite, cryptography, filesystem, OS authorization, HTTP/IAM, Console, packet or AWS parity proof."
+          "limits": "Finite VPC UI mode/draft/current-view abstraction only. No DOM, IPv4/UTF-8 implementation, AWS/network, VM or SQLite/runtime ownership proof; independent real browser/API checks remain separate."
         }
       ]
     },
     {
-      "path": "internal/aws/ec2_native_vpc_main_repair_boundaries_test.go",
-      "sha256": "bdfec9af68703e8256dcbf1fec3c6518e4593801657ad577691b3ca90468cd6c",
-      "disposition": "test-support",
-      "reason": "Exact stock command and real disposable SQLite refusal/retry, immutable copy and rollback coverage. No changed product behavior, scheduling, exclusions, or gate.",
-      "models": []
-    },
-    {
-      "path": "internal/aws/ec2_native_vpc_main_repair_test.go",
-      "sha256": "3572fe193e9634948d1f33e677c248b12ff36a65a40c384d913882b3fbcf0ac2",
-      "disposition": "test-support",
-      "reason": "Exercises actual stopped SQLite/CLI and pinned SDK or served read-only DOM, or bounded fixture unit fault paths; no product capability change.",
-      "models": []
-    },
-    {
-      "path": "internal/aws/ec2_native_vpc_main_route.go",
-      "sha256": "1d90121e0603c88538f5098e811279fda9f0f488b03baef54705a05c5f10862e",
+      "path": "test/console/ec2_vpc_create_browser.cjs",
+      "sha256": "0b53cc16d7fb2048511640a085480e26621a1c97470f1ef5d7845cf2c7ed009b",
       "disposition": "modeled",
-      "reason": "Bind explicit versioned one-VPC repair admission, unchanged refusal/planning, retained rows, and one-row atomic persisted outcome; runtime details are independently tested.",
+      "reason": "Opt-in real Chromium and loopback-state witness for guarded distinct write modes, navigation and readback; contains no simulated success response.",
       "models": [
         {
-          "id": "EC2LegacyNativeMainRepair",
+          "id": "EC2VPCCreateForm",
           "properties": [
-            "AtomicRepair",
-            "ExactAdmission"
+            "PairedNeedsOperator",
+            "InvalidDraftNeverWrites",
+            "NativeAndStackRemainDistinct",
+            "DiscardRetiredRead",
+            "ConfirmedBeforeSuccess"
           ],
-          "limits": "Finite model of one explicit offline repair with two legacy custom tables, one stored slot, abstract copy/owner/plan and final witness, and preserved peer sentinels. Not a Go, SQLite, cryptography, filesystem, OS authorization, HTTP/IAM, Console, packet or AWS parity proof."
-        },
-        {
-          "id": "EC2NativeVPCMainRoute",
-          "properties": [
-            "AtomicPairedSlot",
-            "OwnedLocalOnly",
-            "RetainedFencesDelete",
-            "ReadInvalidRefuses"
-          ],
-          "limits": "Finite symbolic parent/child and recorded-route lifecycle, explicit filter and current effective-pane evidence only. The implementation storage bound is 1,000 and the explicit table limit is 16. No Go/SQLite, mixed-case JSON, XML or pagination/cryptography refinement; no IAM, React or browser scheduling proof, legacy migration, guest, reachability or packet routing."
+          "limits": "Finite VPC UI mode/draft/current-view abstraction only. No DOM, IPv4/UTF-8 implementation, AWS/network, VM or SQLite/runtime ownership proof; independent real browser/API checks remain separate."
         }
       ]
     },
     {
-      "path": "internal/aws/ec2_network.go",
-      "sha256": "54397bc69ae5990973f68285754329d17e04636ea2c3bb031c33de5c8d1a567b",
+      "path": "tools/console/bundle-digests.json",
+      "sha256": "30fe452d5b4cef45ffbdb1176829c4157096fb2e9a4e1542a77c3d00aae16845",
+      "disposition": "presentation",
+      "reason": "Rebuilt console CSS/JS digests; bundled code is separately bound.",
+      "models": []
+    },
+    {
+      "path": "tools/console/bundle-inputs.json",
+      "sha256": "e298e5059c2d5b39eee41f94be7006cf29cc8221ae7f858ce8c3b434a164c4e0",
+      "disposition": "presentation",
+      "reason": "Rebuilt console source map of inputs/byte counts; package versions/legal notices did not change.",
+      "models": []
+    },
+    {
+      "path": "tools/console/src/ec2-readonly.jsx",
+      "sha256": "cbd743df007aa084b3d26ae316d582c5c35f67e82e4c62ec8b2a3d0d363b85ce",
       "disposition": "modeled",
-      "reason": "Bind explicit versioned one-VPC repair admission, unchanged refusal/planning, retained rows, and one-row atomic persisted outcome; runtime details are independently tested.",
+      "reason": "Guards creation against the active capability and invalid local draft, keeps native and paired routes separate, and retains current-view response fencing.",
       "models": [
         {
-          "id": "EC2LegacyNativeMainRepair",
+          "id": "EC2VPCCreateForm",
           "properties": [
-            "AtomicRepair",
-            "RetainedFrame"
+            "PairedNeedsOperator",
+            "InvalidDraftNeverWrites",
+            "NativeAndStackRemainDistinct",
+            "DiscardRetiredRead",
+            "ConfirmedBeforeSuccess"
           ],
-          "limits": "Finite model of one explicit offline repair with two legacy custom tables, one stored slot, abstract copy/owner/plan and final witness, and preserved peer sentinels. Not a Go, SQLite, cryptography, filesystem, OS authorization, HTTP/IAM, Console, packet or AWS parity proof."
-        },
-        {
-          "id": "EC2NativeVPCMainRoute",
-          "properties": [
-            "AtomicPairedSlot",
-            "UnrelatedOwnershipUnchanged"
-          ],
-          "limits": "Finite symbolic parent/child and recorded-route lifecycle, explicit filter and current effective-pane evidence only. The implementation storage bound is 1,000 and the explicit table limit is 16. No Go/SQLite, mixed-case JSON, XML or pagination/cryptography refinement; no IAM, React or browser scheduling proof, legacy migration, guest, reachability or packet routing."
-        },
-        {
-          "id": "EC2VPCOwnership",
-          "properties": [
-            "NoAdoption",
-            "FailureRollsBack"
-          ],
-          "limits": "Atomic store-level ownership, authorization order, quota and DescribeVpcs owner labels only; not SQL transactions, HTTP/XML parsing, IAM policy evaluation, CIDR or tag validation, random ID collision, console rendering or a Go refinement proof. Native Go tests, the boto3 lifecycle and the browser end-to-end flow establish those implementation properties."
+          "limits": "Finite VPC UI mode/draft/current-view abstraction only. No DOM, IPv4/UTF-8 implementation, AWS/network, VM or SQLite/runtime ownership proof; independent real browser/API checks remain separate."
         }
       ]
     },
     {
-      "path": "internal/aws/ec2_route_tables_native.go",
-      "sha256": "77fc9561503bcdc8e3d8c7b81a71ce99b5288666813dce5e140811442d06985d",
+      "path": "tools/console/src/ec2-vpc-create.jsx",
+      "sha256": "412f9136c2c10dacb39e9d3752bfc63db7b8cc411246e41a4112655c9dbe8ffc",
       "disposition": "modeled",
-      "reason": "Bind explicit versioned one-VPC repair admission, unchanged refusal/planning, retained rows, and one-row atomic persisted outcome; runtime details are independently tested.",
+      "reason": "Projects bounded default and paired mode, requiring a valid draft before any action and rendering only offered settings.",
       "models": [
         {
-          "id": "EC2LegacyNativeMainRepair",
+          "id": "EC2VPCCreateForm",
           "properties": [
-            "AtomicRepair",
-            "ExactAdmission"
+            "PairedNeedsOperator",
+            "InvalidDraftNeverWrites",
+            "NativeAndStackRemainDistinct",
+            "DiscardRetiredRead",
+            "ConfirmedBeforeSuccess"
           ],
-          "limits": "Finite model of one explicit offline repair with two legacy custom tables, one stored slot, abstract copy/owner/plan and final witness, and preserved peer sentinels. Not a Go, SQLite, cryptography, filesystem, OS authorization, HTTP/IAM, Console, packet or AWS parity proof."
-        },
-        {
-          "id": "EC2NativeVPCMainRoute",
-          "properties": [
-            "AtomicPairedSlot",
-            "OwnedLocalOnly",
-            "RetainedFencesDelete"
-          ],
-          "limits": "Finite symbolic parent/child and recorded-route lifecycle, explicit filter and current effective-pane evidence only. The implementation storage bound is 1,000 and the explicit table limit is 16. No Go/SQLite, mixed-case JSON, XML or pagination/cryptography refinement; no IAM, React or browser scheduling proof, legacy migration, guest, reachability or packet routing."
+          "limits": "Finite VPC UI mode/draft/current-view abstraction only. No DOM, IPv4/UTF-8 implementation, AWS/network, VM or SQLite/runtime ownership proof; independent real browser/API checks remain separate."
         }
       ]
     },
     {
-      "path": "internal/aws/ec2_route_tables_read.go",
-      "sha256": "2b1a7623e2815dfc764ccdd3c46d42f48633dc11860f6e1fab64ed5e9c18ce04",
+      "path": "tools/console/src/ec2-vpc-subnet-fields.jsx",
+      "sha256": "d958e51d2d235cd9ef83821adce46b334ac5ce4558eb3bb38c27c907f2989359",
       "disposition": "modeled",
-      "reason": "Bind explicit versioned one-VPC repair admission, unchanged refusal/planning, retained rows, and one-row atomic persisted outcome; runtime details are independently tested.",
+      "reason": "Paired settings are only exposed under the existing operator capability; native mode remains default.",
       "models": [
         {
-          "id": "EC2LegacyNativeMainRepair",
+          "id": "EC2VPCCreateForm",
           "properties": [
-            "PlanAndRepeatAreReadOnly",
-            "NoPartialRefusal"
+            "PairedNeedsOperator",
+            "InvalidDraftNeverWrites",
+            "NativeAndStackRemainDistinct",
+            "DiscardRetiredRead",
+            "ConfirmedBeforeSuccess"
           ],
-          "limits": "Finite model of one explicit offline repair with two legacy custom tables, one stored slot, abstract copy/owner/plan and final witness, and preserved peer sentinels. Not a Go, SQLite, cryptography, filesystem, OS authorization, HTTP/IAM, Console, packet or AWS parity proof."
-        },
-        {
-          "id": "EC2NativeVPCMainRoute",
-          "properties": [
-            "AtomicPairedSlot",
-            "ReadInvalidRefuses",
-            "NoImplicitWire"
-          ],
-          "limits": "Finite symbolic parent/child and recorded-route lifecycle, explicit filter and current effective-pane evidence only. The implementation storage bound is 1,000 and the explicit table limit is 16. No Go/SQLite, mixed-case JSON, XML or pagination/cryptography refinement; no IAM, React or browser scheduling proof, legacy migration, guest, reachability or packet routing."
-        },
-        {
-          "id": "EC2RouteTableInventoryPages",
-          "properties": [
-            "ScopedContinuation",
-            "PageBounds"
-          ],
-          "limits": "Finite symbolic paging, exact query/binding and post-write UI completion; no cryptographic, actual SQLite, wire/byte math, React or packet refinement. A small or empty complete first page is admitted; a continued response cannot end empty."
-        },
-        {
-          "id": "EC2NativeIPv4RouteSet",
-          "properties": [
-            "OwnedCanonical",
-            "CompleteReadback"
-          ],
-          "limits": "Finite shared-destination map, same-native-witness abstraction and exact current-readback state only. Real limit is 16. No IP arithmetic proof, actual SQLite/JSON/Query/IAM/React refinement, actor concurrency or network forwarding."
+          "limits": "Finite VPC UI mode/draft/current-view abstraction only. No DOM, IPv4/UTF-8 implementation, AWS/network, VM or SQLite/runtime ownership proof; independent real browser/API checks remain separate."
         }
       ]
     },
     {
-      "path": "internal/aws/ec2_vpc.go",
-      "sha256": "cc02af7ca39d8b6332f22ebedac3166c8569231a5bacb375348cead9090be1e1",
+      "path": "tools/console/src/ec2-vpc-subnet.mjs",
+      "sha256": "d8b3aedd0ce1803a698f82721109e2676bd15bf2a467ac439bf0763f08cd7955",
       "disposition": "modeled",
-      "reason": "Bind explicit versioned one-VPC repair admission, unchanged refusal/planning, retained rows, and one-row atomic persisted outcome; runtime details are independently tested.",
+      "reason": "Separates native-only form validation from operator-owned stack name and same-VPC IPv4 subnet containment.",
       "models": [
         {
-          "id": "EC2LegacyNativeMainRepair",
+          "id": "EC2VPCCreateForm",
           "properties": [
-            "AtomicRepair",
-            "ExactAdmission"
+            "PairedNeedsOperator",
+            "InvalidDraftNeverWrites",
+            "NativeAndStackRemainDistinct",
+            "DiscardRetiredRead",
+            "ConfirmedBeforeSuccess"
           ],
-          "limits": "Finite model of one explicit offline repair with two legacy custom tables, one stored slot, abstract copy/owner/plan and final witness, and preserved peer sentinels. Not a Go, SQLite, cryptography, filesystem, OS authorization, HTTP/IAM, Console, packet or AWS parity proof."
-        },
-        {
-          "id": "EC2NativeVPCMainRoute",
-          "properties": [
-            "AtomicPairedSlot",
-            "RetainedFencesDelete",
-            "UnrelatedOwnershipUnchanged"
-          ],
-          "limits": "Finite symbolic parent/child and recorded-route lifecycle, explicit filter and current effective-pane evidence only. The implementation storage bound is 1,000 and the explicit table limit is 16. No Go/SQLite, mixed-case JSON, XML or pagination/cryptography refinement; no IAM, React or browser scheduling proof, legacy migration, guest, reachability or packet routing."
-        },
-        {
-          "id": "EC2VPCOwnership",
-          "properties": [
-            "NativeDeleteExact",
-            "NativeCreateOwned",
-            "QuotaBound"
-          ],
-          "limits": "Atomic store-level ownership, authorization order, quota and DescribeVpcs owner labels only; not SQL transactions, HTTP/XML parsing, IAM policy evaluation, CIDR or tag validation, random ID collision, console rendering or a Go refinement proof. Native Go tests, the boto3 lifecycle and the browser end-to-end flow establish those implementation properties."
+          "limits": "Finite VPC UI mode/draft/current-view abstraction only. No DOM, IPv4/UTF-8 implementation, AWS/network, VM or SQLite/runtime ownership proof; independent real browser/API checks remain separate."
         }
       ]
     },
     {
-      "path": "scripts/formal_model_gate.py",
-      "sha256": "fbc5a1dc9f3090dcccee18c5bbf5a698fb050e4647d915b6df8cc1266411260a",
-      "disposition": "formal-infrastructure",
-      "reason": "Registers exact finite offline repair rules and negative controls without broadening other model obligations.",
-      "models": []
+      "path": "tools/console/src/main.jsx",
+      "sha256": "c9622ee8cb7d42c9d25f6d6865b785a3899da24cd17b39ac51769e0718c1095a",
+      "disposition": "modeled",
+      "reason": "VPC route/history changes identify and retire their view before accepting another rendered destination.",
+      "models": [
+        {
+          "id": "EC2VPCCreateForm",
+          "properties": [
+            "PairedNeedsOperator",
+            "InvalidDraftNeverWrites",
+            "NativeAndStackRemainDistinct",
+            "DiscardRetiredRead",
+            "ConfirmedBeforeSuccess"
+          ],
+          "limits": "Finite VPC UI mode/draft/current-view abstraction only. No DOM, IPv4/UTF-8 implementation, AWS/network, VM or SQLite/runtime ownership proof; independent real browser/API checks remain separate."
+        }
+      ]
     },
     {
-      "path": "scripts/test-formal-gate.py",
-      "sha256": "24e0c3845873823ba401aa0bb73800f29599cb741f2fddf0ee6ff44fa0933acb",
-      "disposition": "formal-infrastructure",
-      "reason": "Registers exact finite offline repair rules and negative controls without broadening other model obligations.",
-      "models": []
-    },
-    {
-      "path": "test/console/ec2_legacy_main_repair.py",
-      "sha256": "f114d04c922f4826a05a552bdbcd054709b24b7febe6c65d6266ca8677a1c1e9",
-      "disposition": "test-support",
-      "reason": "Exercises actual stopped SQLite/CLI and pinned SDK or served read-only DOM, or bounded fixture unit fault paths; no product capability change.",
-      "models": []
-    },
-    {
-      "path": "test/console/ec2_legacy_main_repair_dom.cjs",
-      "sha256": "8347a0cfe6a7744ee2e5e60a75d26478cf98495a95963aaafb170b6b14873475",
-      "disposition": "test-support",
-      "reason": "Exercises actual stopped SQLite/CLI and pinned SDK or served read-only DOM, or bounded fixture unit fault paths; no product capability change.",
-      "models": []
+      "path": "tools/console/test/ec2-vpc-subnet.test.mjs",
+      "sha256": "1427e7ddfaadba86a67abb92868402b6786f5f74058838f44ac230a00a9f0bd6",
+      "disposition": "modeled",
+      "reason": "Checks the actual conditional form projection, invalid drafts, and unmodified authenticated CloudFormation receipt verification.",
+      "models": [
+        {
+          "id": "EC2VPCCreateForm",
+          "properties": [
+            "PairedNeedsOperator",
+            "InvalidDraftNeverWrites",
+            "NativeAndStackRemainDistinct",
+            "DiscardRetiredRead",
+            "ConfirmedBeforeSuccess"
+          ],
+          "limits": "Finite VPC UI mode/draft/current-view abstraction only. No DOM, IPv4/UTF-8 implementation, AWS/network, VM or SQLite/runtime ownership proof; independent real browser/API checks remain separate."
+        }
+      ]
     }
   ]
 }
