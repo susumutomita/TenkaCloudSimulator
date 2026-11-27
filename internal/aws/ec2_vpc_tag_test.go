@@ -271,3 +271,79 @@ func TestEC2VPCTagSharesExactLegacyRepairAndCloudFormationGuards(t *testing.T) {
 		t.Fatal(verified, err)
 	}
 }
+
+func TestEC2VPCTagFailureLeavesTaglessVPCRecoverable(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "failure.db")
+	f := vpcTagFileFixture(t, path)
+	vpc := f.create("", url.Values{"CidrBlock": {"10.86.0.0/16"}})
+	db := f.store.Database()
+	before := replaceTestInventory(t, db)
+	assertVPCTags(t, f, vpc.ID, []ec2Tag{})
+	write := vpcTagForm(ec2CreateVPCTag, vpc.ID, "Name", "Recovered VPC")
+	trigger := `CREATE TRIGGER vpc_tag_persistence_offline BEFORE UPDATE ON aws_ec2_network_resources
+		WHEN NEW.kind='AWS::EC2::VPC' BEGIN SELECT RAISE(ABORT,'fixture storage is read only'); END`
+	nativeSubnetLineExec(t, db, trigger)
+	f.expect(f.call("", vpcTagRegion, nil, write), 500, "InternalError")
+	if !reflect.DeepEqual(before, replaceTestInventory(t, db)) {
+		t.Fatal("database write refusal changed VPC inventory")
+	}
+	nativeSubnetLineExec(t, db, "DROP TRIGGER vpc_tag_persistence_offline")
+	// A stale backing connection must not acknowledge a write during reopen.
+	if err := f.store.Close(); err != nil {
+		t.Fatal(err)
+	}
+	f.expect(f.call("", vpcTagRegion, nil, write), 500, "InternalError")
+	f = vpcTagFileFixture(t, path)
+	if !reflect.DeepEqual(before, replaceTestInventory(t, f.store.Database())) {
+		t.Fatal("failed update changed the reopened inventory")
+	}
+	write.Set("DryRun", "false")
+	assertVPCTagACK(t, f, "", write)
+	assertVPCTags(t, f, vpc.ID, []ec2Tag{{"Name", "Recovered VPC"}})
+}
+
+func TestEC2TaggedVPCDeleteRequiresDurableReadback(t *testing.T) {
+	f := newEC2VPCFixture(t)
+	vpc := f.create("", url.Values{"CidrBlock": {"10.87.0.0/16"}})
+	assertVPCTagACK(t, f, "", vpcTagForm(ec2CreateVPCTag, vpc.ID, "Name", "Retained"))
+	db := f.store.Database()
+	before := replaceTestInventory(t, db)
+	// Emulate a storage boundary that reports Delete success but retains the VPC.
+	nativeSubnetLineExec(t, db, `CREATE TRIGGER vpc_delete_retained AFTER DELETE ON aws_ec2_network_resources
+		WHEN OLD.kind='AWS::EC2::VPC' BEGIN INSERT INTO aws_ec2_network_resources
+		(region,id,kind,stack_id,revision,document) VALUES (OLD.region,OLD.id,OLD.kind,OLD.stack_id,OLD.revision,OLD.document); END`)
+	q := url.Values{"Action": {"DeleteVpc"}, "VpcId": {vpc.ID}}
+	f.expect(f.call("", vpcTagRegion, nil, q), 500, "InternalError")
+	if !reflect.DeepEqual(before, replaceTestInventory(t, db)) {
+		t.Fatal("unconfirmed deletion changed the VPC or its main route")
+	}
+	assertVPCTags(t, f, vpc.ID, []ec2Tag{{"Name", "Retained"}})
+	nativeSubnetLineExec(t, db, "DROP TRIGGER vpc_delete_retained")
+	f.expect(f.call("", vpcTagRegion, nil, q), 200, "")
+	if now := replaceTestInventory(t, db); len(now) != 0 {
+		t.Fatal("successful deletion retained the VPC or its main route")
+	}
+}
+
+func TestEC2VPCTagRequiresReadableLegacyOwnership(t *testing.T) {
+	f, _ := legacyMainRepairFixture(t)
+	db := f.store.Database()
+	const stack = "arn:aws:cloudformation:us-east-1:000000000000:stack/vpc-tag-index-fixture/owned"
+	const stackVPC = "vpc-00000000000000079"
+	f.cloudFormationVPC(repairRegion, stack, stackVPC, "10.88.0.0/16")
+	var stable string
+	if err := db.QueryRow("SELECT document FROM aws_cfn_stacks WHERE id=?", stack).Scan(&stable); err != nil {
+		t.Fatal(err)
+	}
+	before := replaceTestInventory(t, db)
+	nativeSubnetLineExec(t, db, "UPDATE aws_cfn_stacks SET document=? WHERE id=?", "{}", stack)
+	q := vpcTagForm(ec2CreateVPCTag, repairVPC, "Name", "Verified ownership")
+	f.expect(f.call("", repairRegion, nil, q), 500, "InternalError")
+	if !reflect.DeepEqual(before, replaceTestInventory(t, db)) {
+		t.Fatal("unreadable ownership state changed network inventory")
+	}
+	nativeSubnetLineExec(t, db, "UPDATE aws_cfn_stacks SET document=? WHERE id=?", stable, stack)
+	assertVPCTags(t, f, repairVPC, []ec2Tag{{"Name", "Legacy VPC"}})
+	assertVPCTagACK(t, f, "", q)
+	assertVPCTags(t, f, repairVPC, []ec2Tag{{"Name", "Verified ownership"}})
+}
