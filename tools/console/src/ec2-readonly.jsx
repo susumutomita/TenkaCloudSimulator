@@ -14,9 +14,13 @@ import FormField from '@cloudscape-design/components/form-field';
 import Input from '@cloudscape-design/components/input';
 import Modal from '@cloudscape-design/components/modal';
 import Box from '@cloudscape-design/components/box';
+import Tabs from '@cloudscape-design/components/tabs';
 import {useLocale} from './i18n.jsx';
 import VPCCreate from './ec2-vpc-create.jsx';
 import VPCNativeSubnets from './ec2-vpc-native-subnets.jsx';
+import VPCDNSSettings from './ec2-vpc-dns-settings.jsx';
+import VPCResourceMap from './ec2-vpc-resource-map.jsx';
+import {createVpcResourceMapScope} from './ec2-vpc-topology-read.mjs';
 import {createVpcWithSubnet,vpcCreateIssues} from './ec2-vpc-subnet.mjs';
 import EC2InstanceMetadata from './ec2-instance-metadata.jsx';
 import EC2TemplatePreview from './ec2-template-preview.jsx';
@@ -29,13 +33,39 @@ import VPCInternetGateways from './ec2-vpc-internet-gateways.jsx';
 import {nativeRouteTableTarget} from './ec2-native-route-tables.mjs';
 
 import {parseEC2Document,parseCreateVpc,parseDeleteVpc,parseEC2Error,createVpcParameters} from './ec2-response.mjs';
+import VpcTagsPanel from './ec2-vpc-tags-panel.jsx';
+import {vpcTagEditingAvailable} from './ec2-vpc-tags.mjs';
 
 const idCell=value=><span className="resource-identifier">{value||'—'}</span>;
 const blankVpc={name:'',cidr:'10.0.0.0/16',mode:'vpc-only',stackName:'',subnetCIDR:'10.0.1.0/24'};
 
+// A single selected VPC owns this tab state. Default to the existing details
+// (including DNS). A hidden map is not a background inventory reader.
+export function VPCDetailsTabs({vpc,region,request,capabilities,authenticationRequired,saving,selectionLocked,children}) {
+  const {t}=useLocale();
+  const [activeTab,setActiveTab]=useState('details');
+  const mapAvailable=useMemo(()=>!!createVpcResourceMapScope(request,region,vpc,capabilities,authenticationRequired),
+    [request,region,vpc,capabilities,authenticationRequired]);
+  if (!mapAvailable) return children;
+  const otherTabDisabled=id=>saving&&activeTab!==id;
+  return <Tabs activeTabId={activeTab} ariaLabel={t('VPC details views','VPC 詳細の表示')}
+    onChange={({detail})=>{
+      // The ref-backed guard also catches transitions before React has
+      // painted the disabled state, including a DNS readback in progress.
+      if (!selectionLocked() && ['details','resource-map'].includes(detail.activeTabId)) setActiveTab(detail.activeTabId);
+    }}
+    tabs={[
+      {id:'details',label:t('Details','詳細'),disabled:otherTabDisabled('details'),content:children},
+      {id:'resource-map',label:t('Resource map','リソースマップ'),disabled:otherTabDisabled('resource-map'),content:
+        <VPCResourceMap request={request} region={region} vpc={vpc} capabilities={capabilities}
+          authenticationRequired={authenticationRequired} active={activeTab==='resource-map'&&!saving}
+          navigationBlocked={saving}/>},
+    ]}/>;
+}
+
 // The instance list is saved state. Opt-in local launches use CloudFormation,
 // never native RunInstances. VPC deletion applies only to EC2-owned VPCs.
-export default function EC2Readonly({kind,region,request,sessionInstance,onSession,instanceStackLaunchVisible=false,instanceStackLaunchAllowed=false,vpcLifecycle=false,vpcSubnet=false,vpcNativeSubnets=false,vpcNativeSubnetPublicIPv4=false,vpcSecurityGroups=false,vpcNativeSecurityGroups=false,vpcNativeSecurityGroupRules=false,vpcNetworkACLs=false,vpcRouteTables=false,vpcNativeRouteTables=false,vpcNativeRouteAssociations=false,vpcNativeRouteReplacement=false,vpcNativeIPv4RouteLimit=0,vpcInternetGateways=false,onSaving=()=>{},onVpcCreateView=()=>{},initialVpcCreate=false,initialVpcId=''}) {
+export default function EC2Readonly({kind,region,request,sessionInstance,onSession,instanceStackLaunchVisible=false,instanceStackLaunchAllowed=false,vpcLifecycle=false,vpcSubnet=false,vpcNativeSubnets=false,vpcNativeSubnetPublicIPv4=false,vpcSecurityGroups=false,vpcNativeSecurityGroups=false,vpcNativeSecurityGroupRules=false,vpcNetworkACLs=false,vpcRouteTables=false,vpcNativeRouteTables=false,vpcNativeRouteAssociations=false,vpcNativeRouteReplacement=false,vpcNativeIPv4RouteLimit=0,vpcInternetGateways=false,vpcDetailsCapabilities,vpcDetailsAuthenticationRequired=false,onSaving=()=>{},onVpcCreateView=()=>{},initialVpcCreate=false,initialVpcId=''}) {
   const {t}=useLocale();
   const instance=kind==='ec2',manage=!instance&&vpcLifecycle;
   const [items,setItems]=useState([]),[loading,setLoading]=useState(false),[error,setError]=useState('');
@@ -47,7 +77,7 @@ export default function EC2Readonly({kind,region,request,sessionInstance,onSessi
   const pendingWrites=useRef(writeLeases);
   // Stable per-pane leases aggregate on the host. A readback completion or
   // unmount releases only its own lease, even if another pane is still saving.
-  const lease=useMemo(()=>Object.fromEntries(['subnet','sg','acl','rtb','igw'].map(pane=>[pane,open=>{
+  const lease=useMemo(()=>Object.fromEntries(['subnet','sg','acl','rtb','igw','dns','tags'].map(pane=>[pane,open=>{
     const current=pendingWrites.current;
     if(current.has(pane)===open)return;
     const next=new Set(current);
@@ -165,17 +195,34 @@ export default function EC2Readonly({kind,region,request,sessionInstance,onSessi
     {!instance&&initialVpcId&&!loading&&!error&&!items.some(item=>item.id===initialVpcId)&&<Alert type="info">
       {t('This VPC was not found in the selected region.','選択したリージョンにはこの VPC がありません。')}</Alert>}
     {detail&&<Container header={<Header variant="h2" actions={<Button disabled={saving} onClick={()=>setSelected([])}>{t('Close details','詳細を閉じる')}</Button>}>{t('Resource details','リソースの詳細')}</Header>}>
-      <SpaceBetween size="l">{detailFields}{instance&&<EC2InstanceMetadata groupIds={detail.groupIds} tags={detail.tags}/>}
-        {!instance&&vpcNativeSubnets&&<div inert={siblingBusy('subnet')}><VPCNativeSubnets key={'subnet|'+region+'|'+detail.id} vpc={detail} region={region}
-          request={request} onSaving={lease.subnet} publicIPv4={vpcNativeSubnetPublicIPv4}/></div>}
-        {!instance&&vpcSecurityGroups&&<div inert={siblingBusy('sg')}><VPCSecurityGroups key={region+'|'+detail.id} vpc={detail} region={region} request={request}
-          nativeLifecycle={vpcNativeSecurityGroups} nativeRules={vpcNativeSecurityGroupRules} writeBlocked={siblingBusy('sg')} acquireWrite={()=>acquireNetworkWrite('sg')}/></div>}
-        {!instance&&vpcNetworkACLs&&<VPCNetworkACLs key={'nacl|'+region+'|'+detail.id} vpc={detail} region={region} request={request}
-          writeBlocked={siblingBusy('acl')} onSaving={lease.acl}/>}
-        {!instance&&nativeRoutePane&&<VPCNativeRouteTables key={'rtb-native|'+region+'|'+detail.id} vpc={detail} region={region} request={request}
-          writeBlocked={siblingBusy('rtb')} acquireWrite={()=>acquireNetworkWrite('rtb')} associations={vpcNativeRouteAssociations} replacement={vpcNativeRouteReplacement} routeLimit={vpcNativeIPv4RouteLimit}/>}
-        {!instance&&vpcRouteTables&&!nativeRoutePane&&<VPCRouteTables key={'rtb|'+region+'|'+detail.id} vpc={detail} region={region} request={request}/>}
-      </SpaceBetween>
+      <VPCDetailsTabs key={'details|'+region+'|'+detail.id} vpc={instance?null:detail} region={region} request={request}
+        capabilities={vpcDetailsCapabilities} authenticationRequired={vpcDetailsAuthenticationRequired}
+        saving={saving} selectionLocked={selectionLocked}>
+        <SpaceBetween size="l">{detailFields}{instance&&<EC2InstanceMetadata groupIds={detail.groupIds} tags={detail.tags}/>}
+          {!instance&&vpcDetailsCapabilities&&<div inert={siblingBusy('dns')}>
+            <VPCDNSSettings key={'dns|'+region+'|'+detail.id} vpc={detail} region={region} request={request}
+              capabilities={vpcDetailsCapabilities} authenticationRequired={vpcDetailsAuthenticationRequired}
+              writeBlocked={siblingBusy('dns')} acquireWrite={()=>acquireNetworkWrite('dns')}/>
+          </div>}
+          {!instance&&vpcTagEditingAvailable(vpcDetailsCapabilities,vpcDetailsAuthenticationRequired)&&<div inert={siblingBusy('tags')}>
+            <VpcTagsPanel vpc={detail} region={region} request={request} writeBlocked={siblingBusy('tags')}
+              acquireWrite={()=>acquireNetworkWrite('tags')} onConfirmed={snapshot=>{
+                const name=snapshot.tags.find(tag=>tag.key==='Name')?.value??'';
+                const replace=row=>row.id===snapshot.id&&row.managedBy==='ec2'?{...row,name}:row;
+                setItems(rows=>rows.map(replace));setSelected(rows=>rows.map(replace));
+              }}/>
+          </div>}
+          {!instance&&vpcNativeSubnets&&<div inert={siblingBusy('subnet')}><VPCNativeSubnets key={'subnet|'+region+'|'+detail.id} vpc={detail} region={region}
+            request={request} onSaving={lease.subnet} publicIPv4={vpcNativeSubnetPublicIPv4}/></div>}
+          {!instance&&vpcSecurityGroups&&<div inert={siblingBusy('sg')}><VPCSecurityGroups key={region+'|'+detail.id} vpc={detail} region={region} request={request}
+            nativeLifecycle={vpcNativeSecurityGroups} nativeRules={vpcNativeSecurityGroupRules} writeBlocked={siblingBusy('sg')} acquireWrite={()=>acquireNetworkWrite('sg')}/></div>}
+          {!instance&&vpcNetworkACLs&&<VPCNetworkACLs key={'nacl|'+region+'|'+detail.id} vpc={detail} region={region} request={request}
+            writeBlocked={siblingBusy('acl')} onSaving={lease.acl}/>}
+          {!instance&&nativeRoutePane&&<VPCNativeRouteTables key={'rtb-native|'+region+'|'+detail.id} vpc={detail} region={region} request={request}
+            writeBlocked={siblingBusy('rtb')} acquireWrite={()=>acquireNetworkWrite('rtb')} associations={vpcNativeRouteAssociations} replacement={vpcNativeRouteReplacement} routeLimit={vpcNativeIPv4RouteLimit}/>}
+          {!instance&&vpcRouteTables&&!nativeRoutePane&&<VPCRouteTables key={'rtb|'+region+'|'+detail.id} vpc={detail} region={region} request={request}/>}
+        </SpaceBetween>
+      </VPCDetailsTabs>
     </Container>}
     {!instance&&vpcInternetGateways&&<VPCInternetGateways request={request} region={region}
       writeBlocked={siblingBusy('igw')} acquireWrite={()=>acquireNetworkWrite('igw')}/>}

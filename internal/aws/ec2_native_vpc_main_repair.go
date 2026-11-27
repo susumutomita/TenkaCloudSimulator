@@ -29,7 +29,7 @@ type nativeVPCMainRepairMarker struct {
 func validNativeVPCMainRepair(v EC2NetworkResource) bool {
 	m := v.MainRouteRepair
 	return m != nil && m.Version == 1 && nativeMainRepairDigest.MatchString(m.PlanDigest) && v.Kind == ec2RTVPC &&
-		v.StackID == ec2NativeOwner && v.Revision == 2 && nativeMainRepairVPC.MatchString(v.ID) &&
+		v.StackID == ec2NativeOwner && validNativeDNSCounter(v, 2) && nativeMainRepairVPC.MatchString(v.ID) &&
 		v.MainRouteTableID == nativeMainTableID(v.Region, v.ID)
 }
 
@@ -97,7 +97,7 @@ func inspectNativeMainRepair(ctx context.Context, tx *sql.Tx, region, id string)
 	if err != nil {
 		return out, err
 	}
-	if vpc.Revision != 1 && !validNativeVPCMainRepair(vpc) {
+	if !validNativeDNSGeneration(vpc) {
 		return out, fmt.Errorf("%w: unsupported native VPC generation", errNativeMainRepair)
 	}
 	out.vpc = vpc

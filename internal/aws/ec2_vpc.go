@@ -29,7 +29,7 @@ const (
 )
 
 var ec2Operations = slices.Concat(
-	[]string{"DescribeInstances", "DescribeVpcs", "DescribeSubnets", "DescribeSecurityGroups", "DescribeRouteTables", "CreateVpc", "DeleteVpc", "CreateSubnet", "DeleteSubnet", ec2ModifyNativeSubnet},
+	[]string{"DescribeInstances", "DescribeVpcs", "DescribeSubnets", "DescribeSecurityGroups", "DescribeRouteTables", "CreateVpc", "DeleteVpc", ec2DescribeVPCAttribute, ec2ModifyVPCAttribute, ec2CreateVPCTag, ec2DeleteVPCTag, "CreateSubnet", "DeleteSubnet", ec2ModifyNativeSubnet},
 	ec2NativeSecurityGroupMutations, ec2NetworkACLOperations, ec2NativeRouteTableMutations, ec2NativeRouteAssociationOperations, ec2InternetGatewayOperations, ec2NativeDefaultRouteOperations,
 )
 
@@ -55,6 +55,8 @@ type ec2Request struct {
 	cidr, vpcID        string
 	tags               map[string]string
 	subnet             ec2SubnetMutation
+	vpcAttribute       ec2VPCAttributeQuery
+	vpcTag             ec2VPCTagQuery
 	securityGroup      *ec2NativeSecurityGroupQuery
 	networkACL         *ec2NetworkACLRequest
 	routeTable         *ec2NativeRouteTableQuery
@@ -91,8 +93,8 @@ func (q ec2Request) permissions(action, region string) [][2]string {
 			out = append(out, [2]string{"ec2:CreateTags", networkARN(region, "vpc", "*")})
 		}
 		return out
-	case "DeleteVpc":
-		return [][2]string{{"ec2:DeleteVpc", networkARN(region, "vpc", q.vpcID)}}
+	case "DeleteVpc", ec2DescribeVPCAttribute, ec2ModifyVPCAttribute, ec2CreateVPCTag, ec2DeleteVPCTag:
+		return [][2]string{{"ec2:" + action, networkARN(region, "vpc", q.vpcID)}}
 	}
 	return [][2]string{{"ec2:" + action, "*"}}
 }
@@ -100,6 +102,12 @@ func (q ec2Request) permissions(action, region string) [][2]string {
 // parseEC2Request admits only supported members of each action. Unknown
 // members are rejected rather than ignored.
 func parseEC2Request(action string, fields map[string][]string) (ec2Request, *ec2Failure) {
+	if action == ec2DescribeVPCAttribute || action == ec2ModifyVPCAttribute {
+		return parseEC2VPCAttribute(action, fields)
+	}
+	if action == ec2CreateVPCTag || action == ec2DeleteVPCTag {
+		return parseEC2VPCTag(action, fields)
+	}
 	if action == "DescribeRouteTables" {
 		query, err := parseEC2RouteTableSelection(fields)
 		return ec2Request{routeTableRead: query}, err
@@ -279,6 +287,10 @@ func stampEC2Response(out any) {
 	case *ec2NativeRouteTableMutationResponse:
 		v.XMLNS, v.RequestID = ns, id
 	case *ec2NativeRouteAssociationResponse:
+		v.XMLNS, v.RequestID = ns, id
+	case *ec2VPCAttributeResponse:
+		v.XMLNS, v.RequestID = ns, id
+	case *ec2VPCTagResponse:
 		v.XMLNS, v.RequestID = ns, id
 	case *ec2CreateVpcResponse:
 		v.XMLNS, v.RequestID = ns, id
@@ -506,6 +518,7 @@ func nativeVPCRetainedDependents(ctx context.Context, tx *sql.Tx, v EC2NetworkRe
 			other.Kind != kind || other.Region != v.Region || other.StackID != owner || other.Revision != revision ||
 			(other.MainRouteTableID != "" && (kind != ec2RTVPC || owner != ec2NativeOwner)) ||
 			(other.MainRouteRepair != nil && !validNativeVPCMainRepair(other)) ||
+			(other.NativeDNSUpdates != 0 && !validNativeDNSGeneration(other)) ||
 			(strings.HasPrefix(child, nativeInternetGatewayLinkPrefix) || owner == ec2NativeOwner && kind == ec2RTAttachment) &&
 				!validNativeInternetGatewayLink(other) ||
 			(strings.HasPrefix(child, nativeDefaultRoutePrefix) || owner == ec2NativeOwner && kind == ec2Route) && !validNativeIPv4Route(other) {
