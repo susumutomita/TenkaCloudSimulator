@@ -4510,6 +4510,75 @@ REQUIRED_SOURCE_SCOPES.update({
 })
 
 
+# Exact detached ACL entry metadata rules, not the ACL lifecycle or packet path.
+BASE_MODELS.add('EC2DetachedNetworkACLRules')
+BASE_INVARIANTS['EC2DetachedNetworkACLRules'] = {
+    'TypeOK',
+    'ScopeFrame',
+    'OnlyEditablePersisted',
+    'AtomicGeneration',
+    'ExactNativeOperation',
+    'ExactReadProjection',
+    'VerifiedSelectedConsole',
+}
+REQUIRED_MUTANTS['EC2DetachedNetworkACLRules'] = {
+    'AllowForeignRegion',
+    'AllowForeignOwnedRow',
+    'AllowWrongParent',
+    'AllowPersistentCFNClaim',
+    'AllowAttachedRow',
+    'AllowCorruptGeneration',
+    'AllowDifferentIAMAction',
+    'AllowDifferentIAMResource',
+    'IgnoreIndependentCFNDeclaration',
+    'AllowExtraneousQueryShape',
+    'ModifyPeerFrame',
+    'TreatTerminalAsEditable',
+    'LosePerDirectionLimit',
+    'KeepUnknownIPv4HostBits',
+    'AllProtocolKeepsPorts',
+    'AllowTCPWithoutPortPair',
+    'AllowReversedUDPPorts',
+    'AllowNonIPv4Prefix',
+    'AllowUnsupportedProtocol',
+    'CountsEqualReplaceAsUpdate',
+    'OnlyIncrementSQLGeneration',
+    'ForgetUpdatedEmptyRecord',
+    'KeyDropsDirection',
+    'CreateOverwritesExistingNumber',
+    'ReplaceCreatesMissingSlot',
+    'IgnoreFailedSQLWrite',
+    'IgnoreExactRowReread',
+    'IgnorePostWriteClaim',
+    'IgnoreGenerationOverflow',
+    'AcknowledgeCommitRefusal',
+    'ReadStaleSlots',
+    'ReturnWrongTerminalVerdict',
+    'ProjectUnorderedEditableRows',
+    'InventSubnetAssociation',
+    'ClaimPacketEnforcement',
+    'AllowUnadvertisedConsole',
+    'SkipExactPreWriteRule',
+    'IgnoreConsoleDirectionCapacity',
+    'AcceptFalseWriteReturn',
+    'AcceptOtherACLReadback',
+    'AcceptDifferentRuleReadback',
+    'PublishRetiredConsoleResult',
+}
+REQUIRED_SOURCE_SCOPES['EC2DetachedNetworkACLRules'] = {
+    'internal/aws/ec2_network.go',
+    'internal/aws/ec2_network_acl.go',
+    'internal/aws/ec2_network_acl_entry.go',
+    'internal/aws/ec2_network_acl_store.go',
+    'internal/aws/ec2_read.go',
+    'internal/aws/ec2_vpc.go',
+    'internal/server/server.go',
+    'internal/server/web/app.js',
+    'tools/console/src/ec2-network-acl-inventory.jsx',
+    'tools/console/src/ec2-network-acls.mjs',
+}
+
+
 def load_registry(root, relative='formal/models.json'):
     root = Path(root)
     registry_path = asset(root, relative)

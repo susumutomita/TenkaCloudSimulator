@@ -85,5 +85,55 @@ class DetachedNetworkACL(unittest.TestCase):
             self.assertEqual(ec2.describe_vpcs()["Vpcs"], [])
 
 
+    def test_sdk_rule_configuration_survives_restart_without_associations(self):
+        directory = Path(self.enterContext(tempfile.TemporaryDirectory(prefix="detached-nacl-rules-")))
+        state = directory / "rules.sqlite"
+        with running(state, authenticated=True) as (endpoint, token):
+            ec2 = self.client(endpoint, token)
+            wrong_region = self.client(endpoint, token, "ap-northeast-1")
+            vpc = ec2.create_vpc(CidrBlock="10.70.0.0/16")["Vpc"]["VpcId"]
+            acl = ec2.create_network_acl(VpcId=vpc)["NetworkAcl"]
+            acl_id = acl["NetworkAclId"]
+            inbound = {"NetworkAclId": acl_id, "RuleNumber": 120, "Egress": False}
+            outbound = {**inbound, "Egress": True}
+            rule = {**inbound, "Protocol": "6", "RuleAction": "allow", "CidrBlock": "192.0.2.85/24",
+                    "PortRange": {"From": 443, "To": 443}, "DryRun": False}
+            self.rejected(wrong_region.create_network_acl_entry, "InvalidNetworkAclID.NotFound", **rule)
+            self.rejected(ec2.replace_network_acl_entry, "InvalidNetworkAclEntry.NotFound", **rule)
+            self.rejected(ec2.delete_network_acl_entry, "InvalidParameterValue", **{**inbound, "RuleNumber": 32767})
+            self.assertEqual(ec2.create_network_acl_entry(**rule)["ResponseMetadata"]["HTTPStatusCode"], 200)
+            self.rejected(ec2.create_network_acl_entry, "NetworkAclEntryAlreadyExists", **rule)
+            self.assertEqual(ec2.create_network_acl_entry(**outbound, Protocol="-1", RuleAction="deny",
+                                                          CidrBlock="203.0.113.0/24")["ResponseMetadata"]["HTTPStatusCode"], 200)
+            self.assertEqual(ec2.replace_network_acl_entry(**{**rule, "Protocol": "17", "CidrBlock": "198.51.100.99/24",
+                                                              "PortRange": {"From": 53, "To": 54}})
+                             ["ResponseMetadata"]["HTTPStatusCode"], 200)
+            query = {"NetworkAclIds": [acl_id], "Filters": [{"Name": "vpc-id", "Values": [vpc]}]}
+            [saved] = ec2.describe_network_acls(**query)["NetworkAcls"]
+            self.assertEqual(saved["Associations"], [])
+            self.assertFalse(saved["IsDefault"])
+            self.assertEqual(saved["Entries"], [
+                {"RuleNumber": 120, "Egress": False, "CidrBlock": "198.51.100.0/24", "Protocol": "17",
+                 "RuleAction": "allow", "PortRange": {"From": 53, "To": 54}},
+                acl["Entries"][0],
+                {"RuleNumber": 120, "Egress": True, "CidrBlock": "203.0.113.0/24", "Protocol": "-1", "RuleAction": "deny"},
+                acl["Entries"][1],
+            ])
+
+        with running(state, authenticated=True) as (endpoint, token):
+            ec2 = self.client(endpoint, token)
+            self.assertEqual(ec2.describe_network_acls(**query)["NetworkAcls"], [saved])
+            self.assertEqual(ec2.delete_network_acl_entry(**outbound)["ResponseMetadata"]["HTTPStatusCode"], 200)
+            self.rejected(ec2.delete_network_acl_entry, "InvalidNetworkAclEntry.NotFound", **outbound)
+            [after] = ec2.describe_network_acls(**query)["NetworkAcls"]
+            self.assertEqual(after, {**saved, "Entries": saved["Entries"][:2] + saved["Entries"][3:]})
+            ec2.delete_network_acl_entry(**inbound)
+            self.assertEqual(ec2.describe_network_acls(**query)["NetworkAcls"], [acl])
+            ec2.delete_network_acl(NetworkAclId=acl_id)
+            ec2.delete_vpc(VpcId=vpc)
+            self.assertEqual(ec2.describe_network_acls()["NetworkAcls"], [])
+            self.assertEqual(ec2.describe_vpcs()["Vpcs"], [])
+
+
 if __name__ == "__main__":
     unittest.main()

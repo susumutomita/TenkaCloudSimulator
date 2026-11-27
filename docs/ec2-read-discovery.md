@@ -189,8 +189,10 @@ layout/Chromium or network enforcement.
 `CreateNetworkAcl`, `DescribeNetworkAcls` and `DeleteNetworkAcl` support the
 [explicit detached configuration contract](ec2-detached-network-acls.md) in an
 EC2-managed VPC. Group/ACL mutations and reads are refused in a single-instance
-handoff. ACLs do not create a default ACL, do not bind a subnet, and do not
-provide enforcement. The signed-in VPC Console manages only this detached metadata.
+handoff. The dedicated Network ACLs page and the native EC2 API share the
+same saved IPv4 rule configuration for detached custom ACLs. ACLs do not
+create a default ACL, bind a subnet, or filter traffic. See the
+[rule workflow and exact API limits](ec2-detached-network-acls.md#rule-profile-and-readback).
 
 To verify all three child kinds in one owned VPC, run
 `SIMULATOR_BINARY=/absolute/path/to/simulator python3 test/console/ec2_native_network_sdk.py`
