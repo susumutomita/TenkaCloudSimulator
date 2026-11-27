@@ -4337,6 +4337,125 @@ REQUIRED_SOURCE_SCOPES['EC2LegacyNativeMainRepair'] = {
 }
 
 
+# These signed-base models were already registered but omitted from the required guards.
+# Pin the existing rows exactly; this does not change an invariant, mutant, or implementation.
+BASE_MODELS.update({
+    'BattleDisruptionRoleCleanup',
+    'EC2RegionalSubnetConsole',
+    'EC2VPCCreateForm',
+    'EC2VpcConsoleNavigation',
+})
+BASE_INVARIANTS.update({
+    'BattleDisruptionRoleCleanup': {
+        'ForeignStatePreserved',
+        'KnownRoleCleanedAfterFailedWork',
+        'NoDeleteWithInlinePolicy',
+        'NoFailedGradeReport',
+        'NoUnconfirmedCleanupReport',
+        'TypeOK',
+    },
+    'EC2RegionalSubnetConsole': {
+        'ConfirmedInventoryBeforeWrite',
+        'CurrentScopeOnly',
+        'NoUnreconciledRetry',
+        'OnlyNativeParentWrites',
+        'ReadbackBeforeDetail',
+        'TypeOK',
+    },
+    'EC2VPCCreateForm': {
+        'ConfirmedBeforeSuccess',
+        'DiscardRetiredRead',
+        'InvalidDraftNeverWrites',
+        'NativeAndStackRemainDistinct',
+        'PairedNeedsOperator',
+        'TypeOK',
+    },
+    'EC2VpcConsoleNavigation': {
+        'AdvertisedOnly',
+        'CurrentRegionAndView',
+        'CurrentWriteOwnsLease',
+        'NoLocalDepartureDuringWrite',
+        'TypeOK',
+        'VerifiedDisplay',
+    },
+})
+REQUIRED_MUTANTS.update({
+    'BattleDisruptionRoleCleanup': {
+        'DeleteDifferentIdentity',
+        'IgnoreMissingRoleReadback',
+        'ReportEvenAfterFailedGrading',
+        'SkipCleanupOnGradeException',
+        'SkipInlinePolicyRemoval',
+    },
+    'EC2RegionalSubnetConsole': {
+        'AcceptRetiredView',
+        'AllowStackParent',
+        'RetryUnknownWrite',
+        'ShowUnverifiedDetail',
+        'WriteWithoutRegionalInventory',
+    },
+    'EC2VPCCreateForm': {
+        'OfferPairedToNativeOnly',
+        'ShowSuccessWithoutConfirmation',
+        'SubmitInvalidDraft',
+        'TreatStackAsNative',
+        'UseRetiredRead',
+    },
+    'EC2VpcConsoleNavigation': {
+        'AcceptRetiredView',
+        'AllowLocalDeparture',
+        'DispatchUnadvertised',
+        'DisplayUnverified',
+        'ReleaseNewerLease',
+    },
+})
+REQUIRED_SOURCE_SCOPES.update({
+    'BattleDisruptionRoleCleanup': {
+        'test/battle/image/test_rehearsal_operator_role.py',
+        'test/battle/rehearsal.py',
+    },
+    'EC2RegionalSubnetConsole': {
+        'internal/server/web/app.js',
+        'test/console/ec2_subnets_console_browser.cjs',
+        'tools/console/src/ec2-native-subnets.mjs',
+        'tools/console/src/ec2-subnet-console-route.mjs',
+        'tools/console/src/ec2-subnets-console.jsx',
+        'tools/console/src/main.jsx',
+        'tools/console/test/ec2-subnet-console.test.mjs',
+    },
+    'EC2VPCCreateForm': {
+        'internal/server/web/app.js',
+        'test/console/ec2_vpc_create_browser.cjs',
+        'tools/console/src/ec2-readonly.jsx',
+        'tools/console/src/ec2-vpc-create.jsx',
+        'tools/console/src/ec2-vpc-subnet-fields.jsx',
+        'tools/console/src/ec2-vpc-subnet.mjs',
+        'tools/console/src/main.jsx',
+        'tools/console/test/ec2-vpc-subnet.test.mjs',
+    },
+    'EC2VpcConsoleNavigation': {
+        'internal/server/web/app.js',
+        'test/console/ec2_vpc_network_navigation_browser.cjs',
+        'tools/console/src/ec2-internet-gateway-console.mjs',
+        'tools/console/src/ec2-internet-gateway-page.jsx',
+        'tools/console/src/ec2-network-acl-inventory.jsx',
+        'tools/console/src/ec2-network-acls.mjs',
+        'tools/console/src/ec2-readonly.jsx',
+        'tools/console/src/ec2-route-table-console.jsx',
+        'tools/console/src/ec2-route-table-console.mjs',
+        'tools/console/src/ec2-security-group-inventory.mjs',
+        'tools/console/src/ec2-security-groups-console.jsx',
+        'tools/console/src/ec2-subnets-console.jsx',
+        'tools/console/src/ec2-vpc-native-route-tables.jsx',
+        'tools/console/src/ec2-vpc-navigation.mjs',
+        'tools/console/src/ec2-vpc-resource-view.jsx',
+        'tools/console/src/ec2-vpc-security-groups.jsx',
+        'tools/console/src/main.jsx',
+        'tools/console/test/ec2-vpc-navigation.test.mjs',
+    },
+})
+
+
 # Local SSO is deliberately separate from management-only Cognito and verifier-only Entra.
 BASE_MODELS.add('LocalSSOSyntheticLifecycle')
 BASE_INVARIANTS['LocalSSOSyntheticLifecycle'] = {

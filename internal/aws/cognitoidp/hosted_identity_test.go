@@ -81,9 +81,14 @@ func beginHostedSignedLogin(t *testing.T, b *hostedBrowser, id, client, provider
 
 func beginHostedSignedLoginFor(t *testing.T, b *hostedBrowser, id, client, provider, callback, state string) hostedLogin {
 	t.Helper()
+	return beginHostedSignedLoginWithScopes(t, b, id, client, provider, callback, state, "openid")
+}
+
+func beginHostedSignedLoginWithScopes(t *testing.T, b *hostedBrowser, id, client, provider, callback, state, scopes string) hostedLogin {
+	t.Helper()
 	verifier := strings.Repeat("v", 43)
 	q := url.Values{"response_type": {"code"}, "client_id": {client}, "redirect_uri": {callback},
-		"scope": {"openid"}, "state": {state}, "nonce": {fixtureHostedNonce},
+		"scope": {scopes}, "state": {state}, "nonce": {fixtureHostedNonce},
 		"code_challenge": {hostedDigest(verifier)}, "code_challenge_method": {"S256"}, "identity_provider": {provider}}
 	w := httptest.NewRecorder()
 	b.ServeHTTP(w, hostedFixtureRequest(http.MethodGet, hostedPrefix+id+"/"+hostedAuthorize+"?"+q.Encode(), nil))

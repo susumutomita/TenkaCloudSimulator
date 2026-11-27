@@ -42,6 +42,20 @@
       ]
     },
     {
+      "path": "cmd/simulator/local_sso_integration_test.go",
+      "sha256": "a79394bb7823958f13dd3b384a13544d756108bf5483c203530845aa7d92101c",
+      "disposition": "test-support",
+      "reason": "Exercises the full native HTTPS sign-in and callback, plus cleanup after the ready-output sink fails, with unchanged runtime code.",
+      "models": []
+    },
+    {
+      "path": "cmd/simulator/local_sso_lifecycle_test.go",
+      "sha256": "6a6637c39c51b3510e63c562128a92ff2b117ddc1be299ca81e1b67c0bc93e3d",
+      "disposition": "test-support",
+      "reason": "Tests launch usage, loss of a running listener, and bounded relying-party sessions and expiry without altering runtime logic.",
+      "models": []
+    },
+    {
       "path": "cmd/simulator/local_sso_relying_party.go",
       "sha256": "8e63c3397e70dfb89334b7810ff4426eea0717b912818d59f1e5b82537b3349d",
       "disposition": "modeled",
@@ -356,9 +370,16 @@
     },
     {
       "path": "internal/aws/cognitoidp/hosted_identity_test.go",
-      "sha256": "e514a23e5e204ee01b7f4248c1005f8f867a6530522b8927a1eef6d2cbefbad0",
+      "sha256": "896539a5d92d8c1ac950dbd9d7c26795fc0281116a996ddb0e047421bbd78d3c",
       "disposition": "test-support",
-      "reason": "Focused validation only; no new production route, credentials, or launch behavior.",
+      "reason": "Extends the signed SAML and OAuth test harness to cover the exact client scope set.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/cognitoidp/hosted_lifecycle_test.go",
+      "sha256": "73354a8a6fe65dac3bfe5dd1cec603ef3e8291d9b21940e12d7bbdb501b57950",
+      "disposition": "test-support",
+      "reason": "Exercises the native hosted event lifecycle, signed claims with public-key verification, configuration changes, and SQLite reopening with synthetic state.",
       "models": []
     },
     {
@@ -453,6 +474,13 @@
       "models": []
     },
     {
+      "path": "internal/azure/entraidp/lifecycle_test.go",
+      "sha256": "fec90e4e48c555aba8187bf86fc5ed66386483c3b471d132a1ddaf3a6fd9a512",
+      "disposition": "test-support",
+      "reason": "Exercises synthetic directory enrollment, per-run trust material, bounded login state, and retired fixture behavior without changing production boundaries.",
+      "models": []
+    },
+    {
       "path": "internal/azure/entraidp/saml.go",
       "sha256": "a4ff906d879cb1444c32b1880a77e988df51c6bf247c0a95db06b5762f389dbd",
       "disposition": "modeled",
@@ -518,9 +546,9 @@
     },
     {
       "path": "scripts/formal_model_gate.py",
-      "sha256": "3e566afbb51140a5c59dc3e1191ae1c357e085ebb12a39ab711c4a136f02a2de",
+      "sha256": "b0de9f53594a3ef219459f434cf3eebf1217a408a48258295bc29d9aa4d2f44c",
       "disposition": "formal-infrastructure",
-      "reason": "Require new exact lifecycle registration, invariant set, source scope and named controls; no existing policy relaxation.",
+      "reason": "Require new exact lifecycle registration, invariant set, source scope and named controls; no existing policy relaxation. Repair missing mandatory names, controls and source scopes for four unchanged registered models on the exact signed base; preserve all validation semantics.",
       "models": []
     },
     {
