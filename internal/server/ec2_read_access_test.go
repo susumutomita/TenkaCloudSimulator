@@ -134,7 +134,7 @@ func TestEC2ReadAccessBoundary(t *testing.T) {
 	// Do not accept a missing operation or advertise any unsupported mutation.
 	wantOperations := []string{
 		"DescribeInstances", "DescribeVpcs", "DescribeSubnets", "DescribeSecurityGroups", "DescribeRouteTables",
-		"CreateVpc", "DeleteVpc", "CreateSubnet", "DeleteSubnet", "CreateSecurityGroup", "DeleteSecurityGroup",
+		"CreateVpc", "DeleteVpc", "CreateSubnet", "DeleteSubnet", "ModifySubnetAttribute", "CreateSecurityGroup", "DeleteSecurityGroup",
 		"CreateNetworkAcl", "DescribeNetworkAcls", "DeleteNetworkAcl", "CreateRouteTable", "DeleteRouteTable",
 		"AssociateRouteTable", "DisassociateRouteTable", "ReplaceRouteTableAssociation",
 		"CreateInternetGateway", "DescribeInternetGateways", "DeleteInternetGateway", "AttachInternetGateway", "DetachInternetGateway",

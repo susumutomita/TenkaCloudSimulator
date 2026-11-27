@@ -272,6 +272,12 @@ func (g *Gateway) serveEC2(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		out = &ec2DeleteSubnetResponse{Return: true}
+	case ec2ModifyNativeSubnet:
+		if e := g.Stacks.modifyNativeSubnetPublicIPv4(r.Context(), region, request.subnet.id, *request.subnet.publicIPv4); e != nil {
+			g.failEC2Mutation(w, e)
+			return
+		}
+		out = &ec2ModifySubnetResponse{Return: true}
 	case "CreateVpc":
 		vpc, e := g.Stacks.createNativeVPC(r.Context(), region, request.cidr, request.tags)
 		if e != nil {
@@ -346,13 +352,14 @@ type ec2VPCRead struct {
 	ManagedBy string   `xml:"simulatorManagedBy"`
 }
 type ec2SubnetRead struct {
-	ID        string   `xml:"subnetId"`
-	VPC       string   `xml:"vpcId"`
-	CIDR      string   `xml:"cidrBlock"`
-	State     string   `xml:"state"`
-	AZ        string   `xml:"availabilityZone,omitempty"`
-	ManagedBy string   `xml:"simulatorManagedBy,omitempty"`
-	Tags      []ec2Tag `xml:"tagSet>item"`
+	ID         string   `xml:"subnetId"`
+	VPC        string   `xml:"vpcId"`
+	CIDR       string   `xml:"cidrBlock"`
+	State      string   `xml:"state"`
+	AZ         string   `xml:"availabilityZone,omitempty"`
+	ManagedBy  string   `xml:"simulatorManagedBy,omitempty"`
+	PublicIPv4 *bool    `xml:"mapPublicIpOnLaunch,omitempty"`
+	Tags       []ec2Tag `xml:"tagSet>item"`
 }
 type ec2SubnetSet struct {
 	Items []ec2SubnetRead `xml:"item"`

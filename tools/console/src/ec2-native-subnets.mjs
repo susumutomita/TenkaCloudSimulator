@@ -2,6 +2,8 @@ const ns = 'http://ec2.amazonaws.com/doc/2016-11-15/';
 const vpcId = /^vpc-([0-9a-f]{8}|[0-9a-f]{17})$/;
 const subnetId = /^subnet-([0-9a-f]{8}|[0-9a-f]{17})$/;
 const operations = ['DescribeSubnets', 'CreateSubnet', 'DeleteSubnet'];
+const modifySubnet = 'ModifySubnetAttribute';
+const subnetScope = new WeakMap();
 const invalid = () => {throw Error('Invalid subnet reply');};
 const xml = text => new DOMParser().parseFromString(text, 'application/xml');
 
@@ -9,6 +11,12 @@ export function vpcNativeSubnetsAvailable(capabilities, auth) {
   const ec2 = capabilities?.services?.ec2;
   return auth === true && !capabilities?.consoleScope && ec2?.console === true &&
     Array.isArray(ec2.subnetLifecycle) && operations.every(action => ec2.subnetLifecycle.includes(action));
+}
+
+export function vpcNativeSubnetPublicIPv4Available(capabilities, auth) {
+  const ec2 = capabilities?.services?.ec2;
+  return vpcNativeSubnetsAvailable(capabilities, auth) && ec2.subnetLifecycle.includes(modifySubnet) &&
+    Array.isArray(ec2.operations) && ec2.operations.includes(modifySubnet);
 }
 
 function prefix(text) {
@@ -62,8 +70,8 @@ function envelope(doc, action, body) {
   return lookup.get(body);
 }
 
-function row(item, region) {
-  const lookup = fields(item, ['subnetId','vpcId','cidrBlock','state','availabilityZone','simulatorManagedBy','tagSet']);
+function row(item, region, publicIPv4Required) {
+  const lookup = fields(item, ['subnetId','vpcId','cidrBlock','state','availabilityZone','simulatorManagedBy','tagSet','mapPublicIpOnLaunch']);
   const id = text(lookup.get('subnetId')), vpc = text(lookup.get('vpcId')), cidr = text(lookup.get('cidrBlock'));
   const az = text(lookup.get('availabilityZone'), true), owner = text(lookup.get('simulatorManagedBy'), true);
   if (!subnetId.test(id) || !vpcId.test(vpc) || prefix(cidr)?.cidr !== cidr || text(lookup.get('state')) !== 'available' ||
@@ -79,13 +87,20 @@ function row(item, region) {
       seen.add(key);
     }
   }
+  const flag = lookup.get('mapPublicIpOnLaunch');
+  if (flag) {
+    const value = text(flag);
+    if (owner !== 'ec2' || !['true','false'].includes(value)) invalid();
+    return {id,vpc,cidr,az,owner,publicIPv4:value === 'true'};
+  }
+  if (owner && publicIPv4Required) invalid();
   return {id,vpc,cidr,az,owner:owner || 'cloudformation'};
 }
 
-export function parseVpcSubnets(doc, region, vpc) {
+export function parseVpcSubnets(doc, region, vpc, {publicIPv4=false} = {}) {
   const selected = subnetTarget(vpc);
   if (!selected) invalid();
-  const all = members(envelope(doc, 'DescribeSubnets', 'subnetSet'), 1000).map(item=>row(item,region));
+  const all = members(envelope(doc, 'DescribeSubnets', 'subnetSet'), 1000).map(item=>row(item,region,publicIPv4));
   if (new Set(all.map(item=>item.id)).size !== all.length) invalid();
   const filtered = all.filter(item=>item.vpc===vpc.id);
   if (filtered.some(item=>item.owner!==selected || nativeSubnetCIDR(vpc,item.cidr)!==item.cidr)) invalid();
@@ -123,14 +138,17 @@ async function send(request, region, action, values, signal, parse) {
   const response = await request('/', {method:'POST', credentials:'same-origin', redirect:'error', signal,
     headers:{'Content-Type':'application/x-www-form-urlencoded','X-Simulator-Service':'ec2','X-Simulator-Region':region},
     body:new URLSearchParams({Action: action, Version:'2016-11-15', ...values})});
-  if (!response.ok) throw Error(response.status + ': Native subnet request failed');
+  if (response.status !== 200) throw Error(response.status + ': Native subnet request failed');
   return parse(await readXML(response, signal));
 }
 
-export async function loadVpcSubnets(request, region, vpc, {signal, parse=xml} = {}) {
+export async function loadVpcSubnets(request, region, vpc, {signal, parse=xml, publicIPv4=false} = {}) {
   if (!subnetTarget(vpc)) invalid();
   const doc = await send(request,region,'DescribeSubnets',{},signal,parse);
-  return parseVpcSubnets(doc,region,vpc);
+  const rows = parseVpcSubnets(doc,region,vpc,{publicIPv4});
+  const binding = {request,region,vpc:vpc.id,cidr:vpc.cidr,publicIPv4};
+  for (const item of rows) subnetScope.set(Object.freeze(item),binding);
+  return rows;
 }
 
 export async function createVpcNativeSubnet(request, region, vpc, cidr, az, opts = {}) {
@@ -138,7 +156,7 @@ export async function createVpcNativeSubnet(request, region, vpc, cidr, az, opts
   const canon = nativeSubnetCIDR(vpc,cidr);
   if (subnetTarget(vpc)!=='ec2' || !canon || !['a','b','c'].some(s=>az===region+s)) invalid();
   const doc = await send(request,region,'CreateSubnet',{VpcId:vpc.id,CidrBlock:canon,AvailabilityZone:az},signal,parse);
-  const created = row(envelope(doc,'CreateSubnet','subnet'),region);
+  const created = row(envelope(doc,'CreateSubnet','subnet'),region,opts.publicIPv4);
   if (created.vpc!==vpc.id || created.cidr!==canon || created.az!==az || created.owner!=='ec2') invalid();
   const rows = await loadVpcSubnets(request,region,vpc,opts);
   if (!rows.some(item=>item.id===created.id && item.vpc===created.vpc && item.cidr===canon && item.az===az)) invalid();
@@ -153,6 +171,23 @@ export async function deleteVpcNativeSubnet(request, region, vpc, subnet, opts =
   const rows = await loadVpcSubnets(request,region,vpc,opts);
   if (rows.some(item=>item.id===subnet.id)) invalid();
   return {removed: subnet,rows};
+}
+
+export async function modifyVpcNativeSubnetPublicIPv4(request, region, vpc, subnet, enabled, opts = {}) {
+  const {signal, parse=xml, publicIPv4} = opts;
+  const binding = subnetScope.get(subnet);
+  if (!binding?.publicIPv4 || publicIPv4 !== true || binding.request !== request ||
+      binding.region !== region || binding.vpc !== vpc.id || binding.cidr !== vpc.cidr ||
+      subnetTarget(vpc) !== 'ec2' || subnet.vpc !== vpc.id || subnet.owner !== 'ec2' ||
+      typeof subnet.publicIPv4 !== 'boolean' || typeof enabled !== 'boolean') invalid();
+  const doc = await send(request,region,modifySubnet,{SubnetId:subnet.id,'MapPublicIpOnLaunch.Value':String(enabled)},signal,parse);
+  if (text(envelope(doc,modifySubnet,'return')) !== 'true') invalid();
+  const rows = await loadVpcSubnets(request,region,vpc,opts);
+  const updated = rows.find(item=>item.id===subnet.id && item.vpc===subnet.vpc && item.cidr===subnet.cidr &&
+    item.az===subnet.az && item.owner==='ec2' && item.publicIPv4===enabled);
+  signal?.throwIfAborted();
+  if (!updated) invalid();
+  return {updated,rows};
 }
 
 export function nativeSubnetFailure(error) {

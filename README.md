@@ -5,7 +5,7 @@ English | [日本語](README.ja.md)
 An independent learning simulator for cloud APIs and console workflows, without a cloud account.
 AWS is the main focus, with limited Google Cloud, Azure and optional Sakura support.
 Supported console actions and APIs share the same SQLite state.
-EC2 [route table reads](docs/ec2-read-discovery.md#route-table-readback) support bounded regional pages and an explicit subnet association filter. Both VPC panes use the same Query API. Existing native subnet associations can move atomically to another table in the same VPC. No traffic is forwarded.
+EC2 [route table reads](docs/ec2-read-discovery.md#route-table-readback) support bounded regional pages and an explicit subnet association filter. Both VPC panes use the same Query API. Existing native subnet associations can move atomically to another table in the same VPC. Native subnet [settings](docs/ec2-native-subnet.md) save the public IPv4 auto-assign preference without allocating an address or forwarding traffic.
 
 One Go binary includes the consoles, API reference, SQLite and Python Lambda runtime.
 **Running a built binary needs no Go, Node.js, host Python, Docker, external database

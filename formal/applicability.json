@@ -1,113 +1,447 @@
 {
   "version": 1,
-  "base_sha": "7eea6c29daa8aa0df0fa6ca82632389b996f0dbf",
+  "base_sha": "15fcbd8e6b8916c26970e09ab19b04ee70ccd932",
   "changes": [
     {
       "path": "README.md",
-      "sha256": "7a4e42600d01df03201616e9c3de4f59b901fa2fdc0b9f13c6a9f2285ff3e92c",
+      "sha256": "a975e58dee6eed2058539d4e08b8e809058ba5610ab1c341cb1feca1ad8559a4",
       "disposition": "documentation",
-      "reason": "Describe the scoped Cloudscape form and exact-revision deregistration with inactive history retained.",
+      "reason": "Documented bounded AWS Query and Console settings contract; no address, networking, guest, Name or CloudFormation write claim.",
       "models": []
     },
     {
       "path": "docs/design/0001-go-standalone.md",
-      "sha256": "9af600d5a773d7eb211d625a3eea7d90e40a02d14d966ae1f4137766d96cf169",
+      "sha256": "1addcdee4deaf1e72b0ca3cbef5735f7b8f5b3dd2cb1e255b8a22c745e8aa926",
       "disposition": "documentation",
-      "reason": "Describe unchanged native Batch state shared between the catalog console, SDK and served reference.",
+      "reason": "Documented bounded AWS Query and Console settings contract; no address, networking, guest, Name or CloudFormation write claim.",
       "models": []
     },
     {
-      "path": "internal/server/web/app.js",
-      "sha256": "6db26d6b06689a67142d236b161a5568e5868fd8dea6130c23c33fbfd48d5449",
+      "path": "docs/ec2-native-subnet.md",
+      "sha256": "c95b5d616028ccb6aeb59bd4c71b239d01ce3efc83cdaa59645943faca2eaf4d",
+      "disposition": "documentation",
+      "reason": "Documented bounded AWS Query and Console settings contract; no address, networking, guest, Name or CloudFormation write claim.",
+      "models": []
+    },
+    {
+      "path": "docs/ec2-read-discovery.md",
+      "sha256": "ec18fb70b68e9d58cdb2017b1e638b0c275097eec4378b16404cf7db195434ad",
+      "disposition": "documentation",
+      "reason": "Documented bounded AWS Query and Console settings contract; no address, networking, guest, Name or CloudFormation write claim.",
+      "models": []
+    },
+    {
+      "path": "formal/EC2NativeSubnetPublicIPv4.cfg",
+      "sha256": "ba5f35df5e13afec535bd08b086c5df293c9bbfb52df5f7cd823298a5ba350b3",
       "disposition": "modeled",
-      "reason": "Embed the rebuilt Catalog UI, bound only to the changed Batch view acceptance and command sequencing projection.",
+      "reason": "Same exact native owner and IAM grant, atomic single Boolean preference with stable unchanged frame, verified same-view readback and no write replay.",
       "models": [
         {
-          "id": "CatalogConsoleEpoch",
+          "id": "EC2NativeSubnetPublicIPv4",
           "properties": [
-            "NoUnmountedAcceptance",
-            "OnlyCurrentReplies",
-            "SingleWriter",
-            "ReloadOnlyAfterAck",
-            "FailureVisible"
+            "ExactAdmission",
+            "RefusalNoEffect",
+            "ExactPreference",
+            "SameFrame",
+            "CurrentConfirmedNotice",
+            "NoReplay"
           ],
-          "limits": "Existing bounded view epoch and acknowledged write sequencing abstraction only, not an implementation refinement or proof of the rest of the bundle. It does not model the exact ARN, input validation, HTTP/IAM, persistence or restart, DOM rendering or accessibility, asynchronous tag reads, React scheduling, or real browser behavior. Concrete changed paths are exercised against the local built simulator, real SDK/reference requests and jsdom, not live AWS or Chromium."
+          "limits": "Bounded normalized authorization, atomic configuration and acknowledgement only. Does not prove Go, request parser, SQL, IAM parity, Cloudscape/browser, durability or liveness; no public IP allocation, guest, reachability or forwarding behavior."
         }
       ]
     },
     {
-      "path": "test/e2e/batch_job_definition_console.cjs",
-      "sha256": "ad9698feb5e0163358de390e4900bb682f86cea5c8fe6a0e901a3e0f92d024c3",
-      "disposition": "test-support",
-      "reason": "Drive exact served Cloudscape through real loopback, including held genuine native replies across hash navigation and a later write owner.",
+      "path": "formal/EC2NativeSubnetPublicIPv4.tla",
+      "sha256": "c143d1fdc8d9535f2e2d6c9d683935ef2e6cdd7213a32d3e0b71bd7563bd9026",
+      "disposition": "modeled",
+      "reason": "Same exact native owner and IAM grant, atomic single Boolean preference with stable unchanged frame, verified same-view readback and no write replay.",
+      "models": [
+        {
+          "id": "EC2NativeSubnetPublicIPv4",
+          "properties": [
+            "ExactAdmission",
+            "RefusalNoEffect",
+            "ExactPreference",
+            "SameFrame",
+            "CurrentConfirmedNotice",
+            "NoReplay"
+          ],
+          "limits": "Bounded normalized authorization, atomic configuration and acknowledgement only. Does not prove Go, request parser, SQL, IAM parity, Cloudscape/browser, durability or liveness; no public IP allocation, guest, reachability or forwarding behavior."
+        }
+      ]
+    },
+    {
+      "path": "formal/models.json",
+      "sha256": "d11263445e6bfdc8eb716addba5ca223a732bf5bb9314fcea1728f376a686bd9",
+      "disposition": "formal-infrastructure",
+      "reason": "Registers one bounded model, protected invariants/mutation controls and an independent fixed inventory without altering earlier models.",
       "models": []
     },
     {
-      "path": "test/e2e/batch_job_definition_console.py",
-      "sha256": "50c89e953ee98a32467af2a85216f777c346d7c69edc1d92f67d2de4b94545cc",
+      "path": "internal/aws/ec2_read.go",
+      "sha256": "27d0d9c722c7694c06a4e3c5504404d4c2b5290924ec42e0a099b63849083f7f",
+      "disposition": "modeled",
+      "reason": "Same exact native owner and IAM grant, atomic single Boolean preference with stable unchanged frame, verified same-view readback and no write replay.",
+      "models": [
+        {
+          "id": "EC2NativeSubnetPublicIPv4",
+          "properties": [
+            "ExactAdmission",
+            "RefusalNoEffect",
+            "ExactPreference",
+            "SameFrame",
+            "CurrentConfirmedNotice",
+            "NoReplay"
+          ],
+          "limits": "Bounded normalized authorization, atomic configuration and acknowledgement only. Does not prove Go, request parser, SQL, IAM parity, Cloudscape/browser, durability or liveness; no public IP allocation, guest, reachability or forwarding behavior."
+        },
+        {
+          "id": "EC2NativeSubnetLifecycle",
+          "properties": [
+            "StackUnchanged",
+            "AuthorizedWrites",
+            "NativeParent",
+            "Nonoverlap",
+            "Bounded",
+            "ExactDelete",
+            "ExactRead"
+          ],
+          "limits": "Existing finite lifecycle remains intact; does not model the new setting/ack or actual HTTP/JS/SQL."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/ec2_subnet_native.go",
+      "sha256": "c28e9706b16ebb36adfa9cea561dd45888e55b291109ceffbf0ba0a2d852634a",
+      "disposition": "modeled",
+      "reason": "Same exact native owner and IAM grant, atomic single Boolean preference with stable unchanged frame, verified same-view readback and no write replay.",
+      "models": [
+        {
+          "id": "EC2NativeSubnetPublicIPv4",
+          "properties": [
+            "ExactAdmission",
+            "RefusalNoEffect",
+            "ExactPreference",
+            "SameFrame",
+            "CurrentConfirmedNotice",
+            "NoReplay"
+          ],
+          "limits": "Bounded normalized authorization, atomic configuration and acknowledgement only. Does not prove Go, request parser, SQL, IAM parity, Cloudscape/browser, durability or liveness; no public IP allocation, guest, reachability or forwarding behavior."
+        },
+        {
+          "id": "EC2NativeSubnetLifecycle",
+          "properties": [
+            "StackUnchanged",
+            "AuthorizedWrites",
+            "NativeParent",
+            "Nonoverlap",
+            "Bounded",
+            "ExactDelete",
+            "ExactRead"
+          ],
+          "limits": "Existing finite lifecycle remains intact; does not model the new setting/ack or actual HTTP/JS/SQL."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/ec2_subnet_public_ipv4_test.go",
+      "sha256": "7b4b44b540fd6dc37c8e7d51bb1cac657eb5e3599c031a212c099a4373f463d8",
       "disposition": "test-support",
-      "reason": "Verify actual authenticated Console/SDK/reference across isolated stores, held reply navigation, refusal, restart and native cleanup.",
+      "reason": "Owned test fixtures for exact query/IAM/SQLite behavior, signed served bilingual UI, pinned local native SDK, restart and cleanup.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/ec2_vpc.go",
+      "sha256": "f88ce0cb98c36d8ad61d7992b2923f5bec0159e154502710bf0cc7b749f44ab5",
+      "disposition": "modeled",
+      "reason": "Same exact native owner and IAM grant, atomic single Boolean preference with stable unchanged frame, verified same-view readback and no write replay.",
+      "models": [
+        {
+          "id": "EC2NativeSubnetPublicIPv4",
+          "properties": [
+            "ExactAdmission",
+            "RefusalNoEffect",
+            "ExactPreference",
+            "SameFrame",
+            "CurrentConfirmedNotice",
+            "NoReplay"
+          ],
+          "limits": "Bounded normalized authorization, atomic configuration and acknowledgement only. Does not prove Go, request parser, SQL, IAM parity, Cloudscape/browser, durability or liveness; no public IP allocation, guest, reachability or forwarding behavior."
+        },
+        {
+          "id": "EC2NativeSubnetLifecycle",
+          "properties": [
+            "StackUnchanged",
+            "AuthorizedWrites",
+            "NativeParent",
+            "Nonoverlap",
+            "Bounded",
+            "ExactDelete",
+            "ExactRead"
+          ],
+          "limits": "Existing finite lifecycle remains intact; does not model the new setting/ack or actual HTTP/JS/SQL."
+        }
+      ]
+    },
+    {
+      "path": "internal/server/ec2_read_access_test.go",
+      "sha256": "a3d06b9d8b5419a98282ad808083a4b5de7642b24e70bbd7bec493c147f432a4",
+      "disposition": "test-support",
+      "reason": "Update the independent expected public EC2 operation inventory for the newly implemented ModifySubnetAttribute; all access and scope checks are unchanged.",
+      "models": []
+    },
+    {
+      "path": "internal/server/ec2_security_groups_console_test.go",
+      "sha256": "9217ce2b19f80c6779e46403b0aa5ddbab6f771e014b3c4aa1cc5ac81c593ac0",
+      "disposition": "test-support",
+      "reason": "Owned test fixtures for exact query/IAM/SQLite behavior, signed served bilingual UI, pinned local native SDK, restart and cleanup.",
+      "models": []
+    },
+    {
+      "path": "internal/server/server.go",
+      "sha256": "a01fea3b6d5ade00cec97f908d4c2aa6ee691be39a52837fd77eb0cd6cc445d0",
+      "disposition": "modeled",
+      "reason": "Same exact native owner and IAM grant, atomic single Boolean preference with stable unchanged frame, verified same-view readback and no write replay.",
+      "models": [
+        {
+          "id": "EC2NativeSubnetPublicIPv4",
+          "properties": [
+            "ExactAdmission",
+            "RefusalNoEffect",
+            "ExactPreference",
+            "SameFrame",
+            "CurrentConfirmedNotice",
+            "NoReplay"
+          ],
+          "limits": "Bounded normalized authorization, atomic configuration and acknowledgement only. Does not prove Go, request parser, SQL, IAM parity, Cloudscape/browser, durability or liveness; no public IP allocation, guest, reachability or forwarding behavior."
+        },
+        {
+          "id": "EC2NativeSubnetLifecycle",
+          "properties": [
+            "StackUnchanged",
+            "AuthorizedWrites",
+            "NativeParent",
+            "Nonoverlap",
+            "Bounded",
+            "ExactDelete",
+            "ExactRead"
+          ],
+          "limits": "Existing finite lifecycle remains intact; does not model the new setting/ack or actual HTTP/JS/SQL."
+        }
+      ]
+    },
+    {
+      "path": "internal/server/web/app.js",
+      "sha256": "78aa099ab3a632c6a7d7ec0e953cce1651f4f324d96501cf2dc3b210c436aa21",
+      "disposition": "modeled",
+      "reason": "Same exact native owner and IAM grant, atomic single Boolean preference with stable unchanged frame, verified same-view readback and no write replay.",
+      "models": [
+        {
+          "id": "EC2NativeSubnetPublicIPv4",
+          "properties": [
+            "ExactAdmission",
+            "RefusalNoEffect",
+            "ExactPreference",
+            "SameFrame",
+            "CurrentConfirmedNotice",
+            "NoReplay"
+          ],
+          "limits": "Bounded normalized authorization, atomic configuration and acknowledgement only. Does not prove Go, request parser, SQL, IAM parity, Cloudscape/browser, durability or liveness; no public IP allocation, guest, reachability or forwarding behavior."
+        },
+        {
+          "id": "EC2NativeSubnetLifecycle",
+          "properties": [
+            "StackUnchanged",
+            "AuthorizedWrites",
+            "NativeParent",
+            "Nonoverlap",
+            "Bounded",
+            "ExactDelete",
+            "ExactRead"
+          ],
+          "limits": "Existing finite lifecycle remains intact; does not model the new setting/ack or actual HTTP/JS/SQL."
+        }
+      ]
+    },
+    {
+      "path": "scripts/formal_model_gate.py",
+      "sha256": "15da04292f77240e5b92401ecd4afc0902c0b1c8cbe89ca93db2041c7b3eed80",
+      "disposition": "formal-infrastructure",
+      "reason": "Registers one bounded model, protected invariants/mutation controls and an independent fixed inventory without altering earlier models.",
+      "models": []
+    },
+    {
+      "path": "scripts/test-formal-gate.py",
+      "sha256": "ce2b60d010af44d5516d6c96aedb3ff2df23b0ce95c5e109b3561f2161b55cd6",
+      "disposition": "formal-infrastructure",
+      "reason": "Registers one bounded model, protected invariants/mutation controls and an independent fixed inventory without altering earlier models.",
+      "models": []
+    },
+    {
+      "path": "test/console/ec2_subnet_public_ipv4.cjs",
+      "sha256": "084a75ea07ff429d536740a86c0e7452cbdc711545567faebff72e90094e8414",
+      "disposition": "test-support",
+      "reason": "Owned test fixtures for exact query/IAM/SQLite behavior, signed served bilingual UI, pinned local native SDK, restart and cleanup.",
+      "models": []
+    },
+    {
+      "path": "test/console/ec2_subnet_public_ipv4.py",
+      "sha256": "55ad863dd9bfcec9ba618dbfa14d9be75e56dbe30bf2eeca518b762f91b08720",
+      "disposition": "test-support",
+      "reason": "Owned test fixtures for exact query/IAM/SQLite behavior, signed served bilingual UI, pinned local native SDK, restart and cleanup.",
       "models": []
     },
     {
       "path": "tools/console/bundle-digests.json",
-      "sha256": "b17077bb179279e7bbbe61d210a295d5dc014ae2f1f72b4f6dd7ecc550e3dcb5",
+      "sha256": "32b27381a30c77c63a7e2bf9f60c306e08160763332c5c919f3ffc1cc14784f9",
       "disposition": "presentation",
-      "reason": "Pin regenerated offline console JS digest; leave stylesheet and notice digests unchanged.",
+      "reason": "Generated bundle provenance metadata or development-only JS verification; not runtime.",
       "models": []
     },
     {
       "path": "tools/console/bundle-inputs.json",
-      "sha256": "a0f5f58a800199c7df67d6c3d6ce336954be3f3a14ed2adfdc2b17fdc389d79e",
+      "sha256": "4e189eef2f8125665cde069ef8f43f5995ba6ab532e6dd250372679c2912a66f",
       "disposition": "presentation",
-      "reason": "Record the regenerated asset inputs with the same packages, lockfile and build tool.",
+      "reason": "Generated bundle provenance metadata or development-only JS verification; not runtime.",
       "models": []
     },
     {
-      "path": "tools/console/src/batch-job-definition-form.jsx",
-      "sha256": "83f3776e8b2c452517ccefe5fa0299d3ef5b61c0ed4283ce4a120d4cf65e5316",
-      "disposition": "presentation",
-      "reason": "Render four scoped metadata controls, field validation and no workload action.",
-      "models": []
-    },
-    {
-      "path": "tools/console/src/batch-job-definitions.mjs",
-      "sha256": "70e2e14a1406564725fb58c77b2a7414b569c1a61d47107b9e4db92e40837bf5",
-      "disposition": "presentation",
-      "reason": "Select only the bounded advertised operations and exact revision ARNs, and derive a closed four-field metadata request.",
-      "models": []
-    },
-    {
-      "path": "tools/console/src/catalog.jsx",
-      "sha256": "2a6cfdfb44bea84b37484258870bb6dd12e1048bab2986651930c13bb09bcf72",
+      "path": "tools/console/src/ec2-native-subnets.mjs",
+      "sha256": "839b96e856ff53b31481a95feaefc93eab98b16662a2e32f881f39e5886c3546",
       "disposition": "modeled",
-      "reason": "Bind both Batch mutations to a view-owned saving latch, reject stale replies, and read the exact ARN only after acknowledgement.",
+      "reason": "Same exact native owner and IAM grant, atomic single Boolean preference with stable unchanged frame, verified same-view readback and no write replay.",
       "models": [
         {
-          "id": "CatalogConsoleEpoch",
+          "id": "EC2NativeSubnetPublicIPv4",
           "properties": [
-            "NoUnmountedAcceptance",
-            "OnlyCurrentReplies",
-            "SingleWriter",
-            "ReloadOnlyAfterAck",
-            "FailureVisible"
+            "ExactAdmission",
+            "RefusalNoEffect",
+            "ExactPreference",
+            "SameFrame",
+            "CurrentConfirmedNotice",
+            "NoReplay"
           ],
-          "limits": "Existing bounded view epoch and acknowledged write sequencing abstraction only, not an implementation refinement or proof of the rest of the bundle. It does not model the exact ARN, input validation, HTTP/IAM, persistence or restart, DOM rendering or accessibility, asynchronous tag reads, React scheduling, or real browser behavior. Concrete changed paths are exercised against the local built simulator, real SDK/reference requests and jsdom, not live AWS or Chromium."
+          "limits": "Bounded normalized authorization, atomic configuration and acknowledgement only. Does not prove Go, request parser, SQL, IAM parity, Cloudscape/browser, durability or liveness; no public IP allocation, guest, reachability or forwarding behavior."
+        },
+        {
+          "id": "EC2NativeSubnetLifecycle",
+          "properties": [
+            "StackUnchanged",
+            "AuthorizedWrites",
+            "NativeParent",
+            "Nonoverlap",
+            "Bounded",
+            "ExactDelete",
+            "ExactRead"
+          ],
+          "limits": "Existing finite lifecycle remains intact; does not model the new setting/ack or actual HTTP/JS/SQL."
         }
       ]
     },
     {
-      "path": "tools/console/tests/batch-job-definitions.test.mjs",
-      "sha256": "103ca17291de5ce6eef55cc9d94d2ae2ed3b9b8463cbc71e9836aa557e5b6df0",
-      "disposition": "presentation",
-      "reason": "Verify scoped descriptor guards, regional ARN targeting and exact normalized request projection in console unit fixtures.",
-      "models": []
+      "path": "tools/console/src/ec2-readonly.jsx",
+      "sha256": "8f8865cb91fb4b8b84c5e0f47244a055534c0bfb1f213a6de5be7a9c3ac96611",
+      "disposition": "modeled",
+      "reason": "Same exact native owner and IAM grant, atomic single Boolean preference with stable unchanged frame, verified same-view readback and no write replay.",
+      "models": [
+        {
+          "id": "EC2NativeSubnetPublicIPv4",
+          "properties": [
+            "ExactAdmission",
+            "RefusalNoEffect",
+            "ExactPreference",
+            "SameFrame",
+            "CurrentConfirmedNotice",
+            "NoReplay"
+          ],
+          "limits": "Bounded normalized authorization, atomic configuration and acknowledgement only. Does not prove Go, request parser, SQL, IAM parity, Cloudscape/browser, durability or liveness; no public IP allocation, guest, reachability or forwarding behavior."
+        },
+        {
+          "id": "EC2NativeSubnetLifecycle",
+          "properties": [
+            "StackUnchanged",
+            "AuthorizedWrites",
+            "NativeParent",
+            "Nonoverlap",
+            "Bounded",
+            "ExactDelete",
+            "ExactRead"
+          ],
+          "limits": "Existing finite lifecycle remains intact; does not model the new setting/ack or actual HTTP/JS/SQL."
+        }
+      ]
     },
     {
-      "path": "tools/console/tests/catalog-input.test.mjs",
-      "sha256": "077bb683c90d6c0e1d9efc7ad81884dddba7a13f383fa07a9c88189fcda38c22",
+      "path": "tools/console/src/ec2-vpc-native-subnets.jsx",
+      "sha256": "f8615f25c1a72f430df8779d78c87b7285c8e91f4a37a025fcd47b0c32e92c68",
+      "disposition": "modeled",
+      "reason": "Same exact native owner and IAM grant, atomic single Boolean preference with stable unchanged frame, verified same-view readback and no write replay.",
+      "models": [
+        {
+          "id": "EC2NativeSubnetPublicIPv4",
+          "properties": [
+            "ExactAdmission",
+            "RefusalNoEffect",
+            "ExactPreference",
+            "SameFrame",
+            "CurrentConfirmedNotice",
+            "NoReplay"
+          ],
+          "limits": "Bounded normalized authorization, atomic configuration and acknowledgement only. Does not prove Go, request parser, SQL, IAM parity, Cloudscape/browser, durability or liveness; no public IP allocation, guest, reachability or forwarding behavior."
+        },
+        {
+          "id": "EC2NativeSubnetLifecycle",
+          "properties": [
+            "StackUnchanged",
+            "AuthorizedWrites",
+            "NativeParent",
+            "Nonoverlap",
+            "Bounded",
+            "ExactDelete",
+            "ExactRead"
+          ],
+          "limits": "Existing finite lifecycle remains intact; does not model the new setting/ack or actual HTTP/JS/SQL."
+        }
+      ]
+    },
+    {
+      "path": "tools/console/src/main.jsx",
+      "sha256": "29fdef10566d06485e9b811d8a7e218b7cb54f17cb7106eaf61b9530d32eaf29",
+      "disposition": "modeled",
+      "reason": "Same exact native owner and IAM grant, atomic single Boolean preference with stable unchanged frame, verified same-view readback and no write replay.",
+      "models": [
+        {
+          "id": "EC2NativeSubnetPublicIPv4",
+          "properties": [
+            "ExactAdmission",
+            "RefusalNoEffect",
+            "ExactPreference",
+            "SameFrame",
+            "CurrentConfirmedNotice",
+            "NoReplay"
+          ],
+          "limits": "Bounded normalized authorization, atomic configuration and acknowledgement only. Does not prove Go, request parser, SQL, IAM parity, Cloudscape/browser, durability or liveness; no public IP allocation, guest, reachability or forwarding behavior."
+        },
+        {
+          "id": "EC2NativeSubnetLifecycle",
+          "properties": [
+            "StackUnchanged",
+            "AuthorizedWrites",
+            "NativeParent",
+            "Nonoverlap",
+            "Bounded",
+            "ExactDelete",
+            "ExactRead"
+          ],
+          "limits": "Existing finite lifecycle remains intact; does not model the new setting/ack or actual HTTP/JS/SQL."
+        }
+      ]
+    },
+    {
+      "path": "tools/console/test/ec2-native-subnets.test.mjs",
+      "sha256": "d94a4c10e579c90313abe929e226cc6e13aeade5c296e5184419cde47a8f1afa",
       "disposition": "presentation",
-      "reason": "Expose the added real pure helper to existing catalog unit loaders without changing any inherited assertions.",
+      "reason": "Generated bundle provenance metadata or development-only JS verification; not runtime.",
       "models": []
     }
   ]

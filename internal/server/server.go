@@ -404,7 +404,7 @@ func addEC2NetworkReadbackCapabilities(w http.ResponseWriter, r *http.Request, c
 	ec2["internetGatewayPageLimit"] = aws.EC2InternetGatewayPageLimit
 	ec2["defaultRouteLifecycle"] = []string{"DescribeRouteTables", "DescribeInternetGateways", "CreateRoute", "DeleteRoute"}
 	ec2["ipv4RoutesPerTable"] = aws.EC2NativeIPv4RouteLimit
-	ec2["subnetLifecycle"] = []string{"DescribeSubnets", "CreateSubnet", "DeleteSubnet"}
+	ec2["subnetLifecycle"] = []string{"DescribeSubnets", "CreateSubnet", "DeleteSubnet", "ModifySubnetAttribute"}
 }
 
 // DNS is registered on every successfully composed instance at present.

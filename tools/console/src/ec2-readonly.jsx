@@ -37,7 +37,7 @@ const blankVpc={name:'',cidr:'',mode:'vpc-only',stackName:'',subnetCIDR:''};
 // Instances stay read-only. VPCs gain CreateVpc/DeleteVpc only when the server
 // advertises them, and only EC2-owned VPCs can be deleted here. Never infer
 // live guest health from stack metadata.
-export default function EC2Readonly({kind,region,request,sessionInstance,onSession,vpcLifecycle=false,vpcSubnet=false,vpcNativeSubnets=false,vpcSecurityGroups=false,vpcNativeSecurityGroups=false,vpcNetworkACLs=false,vpcRouteTables=false,vpcNativeRouteTables=false,vpcNativeRouteAssociations=false,vpcNativeRouteReplacement=false,vpcNativeIPv4RouteLimit=0,vpcInternetGateways=false,onSaving=()=>{}}) {
+export default function EC2Readonly({kind,region,request,sessionInstance,onSession,vpcLifecycle=false,vpcSubnet=false,vpcNativeSubnets=false,vpcNativeSubnetPublicIPv4=false,vpcSecurityGroups=false,vpcNativeSecurityGroups=false,vpcNetworkACLs=false,vpcRouteTables=false,vpcNativeRouteTables=false,vpcNativeRouteAssociations=false,vpcNativeRouteReplacement=false,vpcNativeIPv4RouteLimit=0,vpcInternetGateways=false,onSaving=()=>{}}) {
   const {t}=useLocale();
   const instance=kind==='ec2',manage=!instance&&vpcLifecycle;
   const [items,setItems]=useState([]),[loading,setLoading]=useState(false),[error,setError]=useState('');
@@ -185,7 +185,7 @@ export default function EC2Readonly({kind,region,request,sessionInstance,onSessi
         :vpcSecurityGroups&&<div inert={siblingBusy('sg')}><VPCSecurityGroups key={region+'|'+detail.id} vpc={detail} region={region} request={request}
           nativeLifecycle={vpcNativeSecurityGroups} onSaving={lease.sg}/></div>}
         {!instance&&vpcNativeSubnets&&<div inert={siblingBusy('subnet')}><VPCNativeSubnets key={'subnet|'+region+'|'+detail.id} vpc={detail} region={region}
-          request={request} onSaving={lease.subnet}/></div>}
+          request={request} onSaving={lease.subnet} publicIPv4={vpcNativeSubnetPublicIPv4}/></div>}
         {!instance&&vpcNetworkACLs&&<VPCNetworkACLs key={'nacl|'+region+'|'+detail.id} vpc={detail} region={region} request={request}
           writeBlocked={siblingBusy('acl')} onSaving={lease.acl}/>}
         {!instance&&nativeRoutePane&&<VPCNativeRouteTables key={'rtb-native|'+region+'|'+detail.id} vpc={detail} region={region} request={request}

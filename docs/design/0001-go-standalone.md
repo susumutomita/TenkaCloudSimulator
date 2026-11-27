@@ -89,6 +89,8 @@ S3 REST/XMLは既存のIAM判定後、通常の`PutObject`と`CreateMultipartUpl
 
 CloudFormationはservice RoleArnを受け付けず、呼出者のimmutable policy snapshotでStack ARNに加え全resource actionを事前確認する。SSM Put/DeleteParameter、IAM Create/DeleteRole・inline policy・指定managed policyのattach/detach・作成時TagRole、S3 Create/DeleteBucketと指定設定のPut actionを個別評価する。CAPABILITY_IAMは権限付与ではない。resource事前確認の拒否は変更を残さない。version履歴が残るbucketのDeleteStackはAPIエラーとなり、先行削除もrollbackする。非同期AWS lifecycle/Eventsとの同等性は主張しない。
 
+EC2管理の既存IPv4サブネットは、正確なサブネットARNの `ec2:ModifySubnetAttribute` 権限で `MapPublicIpOnLaunch.Value` の真偽だけを保存できる。既存の型付きネットワーク行と親VPCの所有権を同じSQLiteトランザクションで確認し、CloudFormation側は変更しない。Consoleは同一ビューの `DescribeSubnets` で対象と値を検証してから成功を通知する。アドレス割り当て、実通信、ゲスト接続は含まない。
+
 CFNのDependsOn文字列/配列をimplicit Ref/GetAtt/Subと統合して事前検証し、依存順で作成・逆順で削除する。inline Pythonはindex.pyのZIPへ変換し、native saveLambdaFunctionを同じtransactionで呼び出す。新しいresource typeのclaim namespaceは未対応旧readerのIAM fallbackに一致させず、未知kindはdefault処理で削除しない。旧binaryとのDB共有/downgradeはサポートしない。
 
 Native IAMはAWS layerのrole/inline-policy tablesを所有し、信頼先とaggregate identityを同じSQLiteへ保存する。空roleはidentity policy rowを作らずimplicit Deny。旧JSON control APIのnative ownership検査と書込はAWS adapterの同一transaction内で行い、coreへAWS schemaを入れない。既存CFN roleはmetadata-only trustを保ちnativeへの暗黙移行をしない。[IAM](../iam.md)。
