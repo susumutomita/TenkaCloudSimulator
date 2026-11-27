@@ -17,7 +17,14 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/susumutomita/TenkaCloudSimulator/internal/azure/entraidp"
 )
+
+// The app starts before Cognito issues the signed request that starts Entra's
+// clock. Allow five existing handler budgets for the normal automatic local
+// handoffs before issuance and after code entry. This is not a guarantee for a
+// browser suspended between requests; an expired callback still cannot log in.
+const localSSOAttemptLifetime = entraidp.AuthnRequestLifetime + 5*localSSOHandlerTimeout
 
 type localSSOPending struct {
 	browser, verifier, nonce string
@@ -67,7 +74,7 @@ func (p *localSSORelyingParty) ServeHTTP(w http.ResponseWriter, r *http.Request)
 		p.start(w, r)
 	case r.URL.Path == "/callback":
 		if p.finish(w, r) != nil {
-			http.Error(w, "Local sign-in could not be verified. The current attempt has ended.", http.StatusBadRequest)
+			http.Error(w, "Local sign-in could not be verified. If you already submitted the one-time code, restart local-sso for a fresh run. Otherwise return to the original sample URL.", http.StatusBadRequest)
 		}
 	default:
 		http.NotFound(w, r)
@@ -76,7 +83,7 @@ func (p *localSSORelyingParty) ServeHTTP(w http.ResponseWriter, r *http.Request)
 func (p *localSSORelyingParty) start(w http.ResponseWriter, r *http.Request) {
 	now := time.Now()
 	state := localSSOEntropy()
-	item := localSSOPending{browser: localSSOEntropy(), verifier: localSSOEntropy(), nonce: localSSOEntropy(), expires: now.Add(100 * time.Second)}
+	item := localSSOPending{browser: localSSOEntropy(), verifier: localSSOEntropy(), nonce: localSSOEntropy(), expires: now.Add(localSSOAttemptLifetime)}
 	p.mu.Lock()
 	for k, v := range p.pending {
 		if !now.Before(v.expires) {
@@ -91,7 +98,7 @@ func (p *localSSORelyingParty) start(w http.ResponseWriter, r *http.Request) {
 	p.pending[state] = item
 	p.mu.Unlock()
 	http.SetCookie(w, &http.Cookie{Name: p.cookie, Value: item.browser, Path: "/callback", HttpOnly: true, Secure: true,
-		SameSite: http.SameSiteLaxMode, MaxAge: 100})
+		SameSite: http.SameSiteLaxMode, MaxAge: int(localSSOAttemptLifetime.Seconds())})
 	hash := sha256.Sum256([]byte(item.verifier))
 	q := url.Values{"response_type": {"code"}, "client_id": {p.clientID}, "redirect_uri": {p.callback}, "scope": {"openid"},
 		"state": {state}, "nonce": {item.nonce}, "code_challenge": {base64.RawURLEncoding.EncodeToString(hash[:])},

@@ -150,10 +150,7 @@ func TestHostedPKCEExactOriginAndOneUse(t *testing.T) {
 	b, _, scope, id, client := newHostedFixture(t)
 	path := hostedPrefix + id + "/" + hostedToken
 	now := time.Now().UTC()
-	code, err := hostedRandom()
-	if err != nil {
-		t.Fatal(err)
-	}
+	code := hostedRandom()
 	verifier := strings.Repeat("x", 43)
 	if err := b.transition(t.Context(), scope, id, nil, func(_ federationConfig, _ federationRevision, s *hostedState) (bool, error) {
 		s.Codes[hostedDigest(code)] = hostedGrant{Client: client, Provider: "Entra", Redirect: hostedFixtureCallback,

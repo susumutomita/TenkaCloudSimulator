@@ -42,6 +42,7 @@ func TestLocalSSOStartupNeverAdvertisesOrLeaksAfterPhaseFailure(t *testing.T) {
 		want         string
 	}{
 		{name: "SQLite path occupied", conflictPath: "state.sqlite", want: "could not initialize local Cognito"},
+		{name: "private Cognito bootstrap listener stopped", stopListener: 1, want: "signed local Cognito CreateUserPool failed"},
 		{name: "Entra metadata listener stopped", stopListener: 3, want: "local Entra metadata could not be confirmed"},
 		{name: "Cognito metadata listener stopped", stopListener: 2, want: "signed Cognito SP metadata could not be confirmed"},
 		{name: "sample application listener stopped", stopListener: 4, want: "local sample browser page unavailable"},

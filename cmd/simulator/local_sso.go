@@ -35,10 +35,11 @@ import (
 )
 
 const (
-	localSSOCommand = "local-sso"
-	localSSOLimit   = 64 << 10
-	localSSORegion  = "us-east-1"
-	localSSOService = "cognito-idp"
+	localSSOCommand        = "local-sso"
+	localSSOLimit          = 64 << 10
+	localSSORegion         = "us-east-1"
+	localSSOService        = "cognito-idp"
+	localSSOHandlerTimeout = 6 * time.Second
 )
 
 var localSSOPoolID = regexp.MustCompile(`^us-east-1_[A-Za-z0-9]+$`)
@@ -82,7 +83,7 @@ func (l *localSSOListener) serve(handler http.Handler, leaf tls.Certificate) {
 		l.active.Add(1)
 		l.mu.Unlock()
 		defer l.active.Done()
-		ctx, cancel := context.WithTimeout(r.Context(), 6*time.Second)
+		ctx, cancel := context.WithTimeout(r.Context(), localSSOHandlerTimeout)
 		defer cancel()
 		handler.ServeHTTP(w, r.WithContext(ctx))
 	})

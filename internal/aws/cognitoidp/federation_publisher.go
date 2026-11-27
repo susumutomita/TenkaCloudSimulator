@@ -177,9 +177,7 @@ func (p *federationPublisher) addProvider(ctx context.Context, id string, input 
 			return errInvalid
 		}
 		var registration [federationRegistrationBytes]byte
-		if _, err := rand.Read(registration[:]); err != nil {
-			return err
-		}
+		rand.Read(registration[:])
 		provider.RegistrationID = hex.EncodeToString(registration[:])
 		if slices.ContainsFunc(cfg.Providers, func(v federationProvider) bool { return v.RegistrationID == provider.RegistrationID }) {
 			return errFederationDuplicate

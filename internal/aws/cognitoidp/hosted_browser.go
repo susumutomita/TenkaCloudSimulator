@@ -86,10 +86,7 @@ func NewHostedBrowser(store *Store, account, origin string) (HostedBrowser, erro
 	if err != nil {
 		return nil, err
 	}
-	epoch, err := hostedRandom()
-	if err != nil {
-		return nil, err
-	}
+	epoch := hostedRandom()
 	return &hostedBrowser{store, account, u, epoch, spKey, cert, idKey, accessKey}, nil
 }
 
@@ -193,10 +190,10 @@ func (b *hostedBrowser) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func hostedRandom() (string, error) {
+func hostedRandom() string {
 	var raw [32]byte
-	_, err := rand.Read(raw[:])
-	return base64.RawURLEncoding.EncodeToString(raw[:]), err
+	rand.Read(raw[:])
+	return base64.RawURLEncoding.EncodeToString(raw[:])
 }
 
 func hostedDigest(s string) string {
@@ -316,19 +313,10 @@ func (b *hostedBrowser) authorize(w http.ResponseWriter, r *http.Request, scope 
 	} else {
 		// Cognito generates a nonce for third-party federation when the app
 		// omits it. Bind it to the same pending row and grant, not the caller.
-		nonce, err = hostedRandom()
-		if err != nil {
-			return err
-		}
+		nonce = hostedRandom()
 	}
-	relay, err := hostedRandom()
-	if err != nil {
-		return err
-	}
-	secret, err := hostedRandom()
-	if err != nil {
-		return err
-	}
+	relay := hostedRandom()
+	secret := hostedRandom()
 	now := time.Now().UTC()
 	p := hostedPending{Browser: hostedDigest(secret), Provider: q.Get("identity_provider"),
 		Client: q.Get("client_id"), Redirect: q.Get("redirect_uri"), Challenge: q.Get("code_challenge"),
@@ -402,14 +390,8 @@ func (b *hostedBrowser) acs(w http.ResponseWriter, r *http.Request, scope Scope,
 	replay := hostedDigest(provider.EntityID + "\x00" + assertion.ID)
 	namespace := hostedIdentityNamespace(scope, id, provider)
 	sub := hostedDigest("tcs-cognito-sub-v1\x00" + namespace + "\x00" + verified.principal)
-	code, err := hostedRandom()
-	if err != nil {
-		return err
-	}
-	pageNonce, err := hostedRandom()
-	if err != nil {
-		return err
-	}
+	code := hostedRandom()
+	pageNonce := hostedRandom()
 	var completion []byte
 	err = b.transition(r.Context(), scope, id, &revision, func(cfg federationConfig, _ federationRevision, s *hostedState) (bool, error) {
 		now := time.Now().UTC()
@@ -500,10 +482,7 @@ func (b *hostedBrowser) token(w http.ResponseWriter, r *http.Request, scope Scop
 }
 
 func (b *hostedBrowser) sign(id string, g hostedGrant, use string, now time.Time) (string, error) {
-	jti, err := hostedRandom()
-	if err != nil {
-		return "", err
-	}
+	jti := hostedRandom()
 	c := jwt.MapClaims{"iss": b.root(id), "sub": g.Subject, "iat": now.Unix(), "exp": now.Add(hostedTokenTTL).Unix(),
 		"auth_time": g.AuthTime.Unix(), "token_use": use, "jti": jti}
 	key := b.accessKey

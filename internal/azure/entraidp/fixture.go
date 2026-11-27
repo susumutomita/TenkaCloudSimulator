@@ -25,12 +25,15 @@ import (
 
 const (
 	runLifetime     = 12 * time.Minute
-	requestLifetime = 2 * time.Minute
 	assertionLife   = time.Minute
 	maxPending      = 12
 	maxCodeAttempts = 6
 	queryLimit      = 8 << 10
 )
+
+// AuthnRequestLifetime is the maximum age of the enrolled SP's signed
+// request when its one-shot browser sign-in may complete.
+const AuthnRequestLifetime = 2 * time.Minute
 
 var boundedURLPath = regexp.MustCompile(`^(/[A-Za-z0-9_.~-]+)+/?$`)
 
@@ -268,7 +271,7 @@ func (f *Fixture) begin(w http.ResponseWriter, r *http.Request) {
 			delete(f.pending, id)
 		}
 	}
-	expires := earlier(req.Request.IssueInstant.Add(requestLifetime), f.expires)
+	expires := earlier(req.Request.IssueInstant.Add(AuthnRequestLifetime), f.expires)
 	ok := f.current(now) && now.Before(expires) && !f.used && len(f.pending) < maxPending
 	for _, known := range f.pending {
 		if known.request.Request.ID == req.Request.ID {
@@ -283,7 +286,7 @@ func (f *Fixture) begin(w http.ResponseWriter, r *http.Request) {
 		refused(w, http.StatusBadRequest)
 		return
 	}
-	http.SetCookie(w, f.cookieFor(browser, int(requestLifetime.Seconds())))
+	http.SetCookie(w, f.cookieFor(browser, int(AuthnRequestLifetime.Seconds())))
 	renderForm(w, loginPage, struct{ Action, Flow string }{f.public.SSOURL, flow}, f.origin, "")
 }
 

@@ -29298,13 +29298,23 @@
       ],
       "format": "esm"
     },
+    "src/ec2-vpc-tags.mjs": {
+      "bytes": 7476,
+      "imports": [],
+      "format": "esm"
+    },
     "src/ec2-native-subnets.mjs": {
-      "bytes": 11429,
+      "bytes": 15017,
       "imports": [
         {
           "path": "src/ec2-response.mjs",
           "kind": "import-statement",
           "original": "./ec2-response.mjs"
+        },
+        {
+          "path": "src/ec2-vpc-tags.mjs",
+          "kind": "import-statement",
+          "original": "./ec2-vpc-tags.mjs"
         }
       ],
       "format": "esm"
@@ -30362,13 +30372,8 @@
       ],
       "format": "esm"
     },
-    "src/ec2-vpc-tags.mjs": {
-      "bytes": 7476,
-      "imports": [],
-      "format": "esm"
-    },
     "src/ec2-vpc-tags-panel.jsx": {
-      "bytes": 8617,
+      "bytes": 9930,
       "imports": [
         {
           "path": "node_modules/react/index.js",
@@ -30434,6 +30439,11 @@
           "path": "src/ec2-vpc-tags.mjs",
           "kind": "import-statement",
           "original": "./ec2-vpc-tags.mjs"
+        },
+        {
+          "path": "src/ec2-native-subnets.mjs",
+          "kind": "import-statement",
+          "original": "./ec2-native-subnets.mjs"
         }
       ],
       "format": "esm"
@@ -30630,7 +30640,7 @@
       "format": "esm"
     },
     "src/ec2-subnets-console.jsx": {
-      "bytes": 17875,
+      "bytes": 19570,
       "imports": [
         {
           "path": "node_modules/react/index.js",
@@ -30736,6 +30746,11 @@
           "path": "src/ec2-route-table-pages.mjs",
           "kind": "import-statement",
           "original": "./ec2-route-table-pages.mjs"
+        },
+        {
+          "path": "src/ec2-vpc-tags-panel.jsx",
+          "kind": "import-statement",
+          "original": "./ec2-vpc-tags-panel.jsx"
         },
         {
           "path": "src/ec2-subnet-console-route.mjs",
@@ -31140,7 +31155,7 @@
       "format": "esm"
     },
     "src/ec2-vpc-resource-view.jsx": {
-      "bytes": 3629,
+      "bytes": 3763,
       "imports": [
         {
           "path": "node_modules/react/index.js",
@@ -38112,10 +38127,10 @@
           "bytesInOutput": 2036
         },
         "node_modules/@cloudscape-design/components/internal/components/sortable-area/index.js": {
-          "bytesInOutput": 2926
+          "bytesInOutput": 2927
         },
         "node_modules/@dnd-kit/core/dist/core.esm.js": {
-          "bytesInOutput": 39388
+          "bytesInOutput": 39396
         },
         "node_modules/@dnd-kit/utilities/dist/utilities.esm.js": {
           "bytesInOutput": 3220
@@ -38124,7 +38139,7 @@
           "bytesInOutput": 577
         },
         "node_modules/@dnd-kit/sortable/dist/sortable.esm.js": {
-          "bytesInOutput": 5417
+          "bytesInOutput": 5418
         },
         "node_modules/@cloudscape-design/components/internal/components/sortable-area/keyboard-sensor/utilities/events.js": {
           "bytesInOutput": 183
@@ -39572,8 +39587,11 @@
         "src/ec2-response.mjs": {
           "bytesInOutput": 7241
         },
+        "src/ec2-vpc-tags.mjs": {
+          "bytesInOutput": 4487
+        },
         "src/ec2-native-subnets.mjs": {
-          "bytesInOutput": 6448
+          "bytesInOutput": 8490
         },
         "src/ec2-vpc-dns-settings.jsx": {
           "bytesInOutput": 9373
@@ -39651,16 +39669,13 @@
           "bytesInOutput": 10616
         },
         "src/ec2-vpc-tags-panel.jsx": {
-          "bytesInOutput": 7269
-        },
-        "src/ec2-vpc-tags.mjs": {
-          "bytesInOutput": 4486
+          "bytesInOutput": 8646
         },
         "src/ec2-vpc-resource-view.jsx": {
-          "bytesInOutput": 1721
+          "bytesInOutput": 1756
         },
         "src/ec2-subnets-console.jsx": {
-          "bytesInOutput": 15749
+          "bytesInOutput": 17343
         },
         "src/ec2-subnet-console-route.mjs": {
           "bytesInOutput": 807
@@ -40113,7 +40128,7 @@
           "bytesInOutput": 10107
         }
       },
-      "bytes": 2873357
+      "bytes": 2878416
     },
     "../../internal/server/web/app.css.LEGAL.txt": {
       "imports": [],

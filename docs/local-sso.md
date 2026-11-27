@@ -82,11 +82,18 @@ isolated Linux environment instead; do not install the CA globally.
    process has stopped, remove only that run's directory. The launcher
    never installs browser trust or cleans up a browser profile for you.
 
-The launcher exits after ten minutes. The current login window is shorter
-than the run. Each run accepts its synthetic code once. If an attempt
-expires, return to the original sample URL; if the code was already used,
-stop and restart `local-sso` for fresh trust, state and a new code. Open a
-fresh disposable profile or remove its prior CA before using a new run.
+The launcher exits after ten minutes. Submit the code within two minutes
+of the signed request to Entra. The sample app keeps the attempt for two
+minutes and 30 seconds from selecting the sign-in link, to allow time for
+the usual local redirects and token verification. Suspending the browser
+or pausing between steps can still exceed the app's deadline; an expired
+callback cannot sign you in.
+
+Each run accepts its synthetic code once. If a sign-in expires before you
+submit the code, return to the original sample URL. If you already submitted
+the code and the result could not be verified, stop and restart `local-sso`
+for fresh trust, state and a new code. Open a fresh disposable profile or
+remove its prior CA before using a new run.
 
 ## Scope
 

@@ -28928,6 +28928,577 @@
       ]
     },
     {
+      "id": "EC2NativeSubnetTags",
+      "model": "formal/EC2NativeSubnetTags.tla",
+      "config": "formal/EC2NativeSubnetTags.cfg",
+      "bounds": "38 native mutation, 9 native inventory and 28 selected-console synthetic scenarios; one native subnet and its parent, two tag keys, separate saved-absent/empty/omitted values, symbolic subnet/VPC/route frame, one normalized failure at a gate or one intervening tag write.",
+      "properties": [
+        "TypeOK",
+        "SubnetAndParentFences",
+        "SingleDocumentCommit",
+        "UnchangedNetworkFrame",
+        "ExactNativeTagProjection",
+        "ExactSelectedSubnetRequest",
+        "ExactSelectedSubnetConfirmation",
+        "NoUnconfirmedUndo"
+      ],
+      "limits": "Additive local subnet tag metadata, independent native inventory and exact selected-row receipts only. Shared API parsing and quotas remain in EC2NativeVPCTags. Input normalization, finite ownership/main/DNS/CIDR/AZ witnesses, exact document re-read and total changed row count are abstractions, not raw SQL/parser/IAM proofs. No full regional inventory validation, filter/pagination, schedule exhaustiveness, rollback from UI, browser routing/refetch timing/capacity diagnostics, cloud parity, packet behavior or Go/JavaScript refinement.",
+      "source_scope": [
+        "internal/aws/ec2_read.go",
+        "internal/aws/ec2_subnet_native.go",
+        "internal/aws/ec2_subnet_tag.go",
+        "internal/aws/ec2_vpc.go",
+        "internal/aws/ec2_vpc_tag.go",
+        "internal/server/server.go",
+        "internal/server/web/app.js",
+        "tools/console/src/ec2-native-subnets.mjs",
+        "tools/console/src/ec2-subnets-console.jsx",
+        "tools/console/src/ec2-vpc-resource-view.jsx",
+        "tools/console/src/ec2-vpc-tags-panel.jsx"
+      ],
+      "mutants": [
+        {
+          "id": "IgnoreRegionalSubnetTarget",
+          "expect_invariant": "SubnetAndParentFences",
+          "edits": [
+            {
+              "old": "RightTarget(q) == q.target = SubnetArn",
+              "new": "RightTarget(q) == q.target[2] = \"subnet\" /\\ q.target[3] = Scope.id",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "IgnoreExactSubnetTarget",
+          "expect_invariant": "SubnetAndParentFences",
+          "edits": [
+            {
+              "old": "RightTarget(q) == q.target = SubnetArn",
+              "new": "RightTarget(q) == q.target[1] = Scope.region /\\ q.target[2] = \"subnet\"",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "AllowMismatchedTagAction",
+          "expect_invariant": "SubnetAndParentFences",
+          "edits": [
+            {
+              "old": "RightGrant(q) == q.grant = <<q.action,q.target>>",
+              "new": "RightGrant(q) == q.grant[2] = q.target",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "AllowVPCGrantForSubnetTag",
+          "expect_invariant": "SubnetAndParentFences",
+          "edits": [
+            {
+              "old": "RightGrant(q) == q.grant = <<q.action,q.target>>",
+              "new": "RightGrant(q) == q.grant = <<q.action,q.target>> \\/ q.grant = <<q.action, Target(Scope.region,\"vpc\",Scope.vpc)>>",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "AllowOtherRegionSubnetGrant",
+          "expect_invariant": "SubnetAndParentFences",
+          "edits": [
+            {
+              "old": "RightGrant(q) == q.grant = <<q.action,q.target>>",
+              "new": "RightGrant(q) == q.grant[1] = q.action /\\ q.grant[2][2] = \"subnet\" /\\ q.grant[2][3] = Scope.id",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "AllowCloudFormationSubnet",
+          "expect_invariant": "SubnetAndParentFences",
+          "edits": [
+            {
+              "old": "NativeAdmission(q) == RightTarget(q) /\\ RightGrant(q) /\\\n    OwnSubnet(q) /\\ OwnParent(q) /\\ ValidateTagRecord(q)",
+              "new": "NativeAdmission(q) == RightTarget(q) /\\ RightGrant(q) /\\\n    (OwnSubnet(q) \\/ q.proof = \"stack-owned\") /\\ OwnParent(q) /\\ ValidateTagRecord(q)",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "IgnoreSubnetOwnershipClaim",
+          "expect_invariant": "SubnetAndParentFences",
+          "edits": [
+            {
+              "old": "NativeAdmission(q) == RightTarget(q) /\\ RightGrant(q) /\\\n    OwnSubnet(q) /\\ OwnParent(q) /\\ ValidateTagRecord(q)",
+              "new": "NativeAdmission(q) == RightTarget(q) /\\ RightGrant(q) /\\\n    (OwnSubnet(q) \\/ q.proof = \"child-claim\") /\\ OwnParent(q) /\\ ValidateTagRecord(q)",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "IgnoreChildCanonicalCIDR",
+          "expect_invariant": "SubnetAndParentFences",
+          "edits": [
+            {
+              "old": "NativeAdmission(q) == RightTarget(q) /\\ RightGrant(q) /\\\n    OwnSubnet(q) /\\ OwnParent(q) /\\ ValidateTagRecord(q)",
+              "new": "NativeAdmission(q) == RightTarget(q) /\\ RightGrant(q) /\\\n    (OwnSubnet(q) \\/ q.proof = \"child-cidr\") /\\ OwnParent(q) /\\ ValidateTagRecord(q)",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "IgnoreChildCIDRContainment",
+          "expect_invariant": "SubnetAndParentFences",
+          "edits": [
+            {
+              "old": "NativeAdmission(q) == RightTarget(q) /\\ RightGrant(q) /\\\n    OwnSubnet(q) /\\ OwnParent(q) /\\ ValidateTagRecord(q)",
+              "new": "NativeAdmission(q) == RightTarget(q) /\\ RightGrant(q) /\\\n    (OwnSubnet(q) \\/ q.proof = \"outside-parent\") /\\ OwnParent(q) /\\ ValidateTagRecord(q)",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "IgnoreRegionalAZ",
+          "expect_invariant": "SubnetAndParentFences",
+          "edits": [
+            {
+              "old": "NativeAdmission(q) == RightTarget(q) /\\ RightGrant(q) /\\\n    OwnSubnet(q) /\\ OwnParent(q) /\\ ValidateTagRecord(q)",
+              "new": "NativeAdmission(q) == RightTarget(q) /\\ RightGrant(q) /\\\n    (OwnSubnet(q) \\/ q.proof = \"foreign-zone\") /\\ OwnParent(q) /\\ ValidateTagRecord(q)",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "AllowMissingNativeParent",
+          "expect_invariant": "SubnetAndParentFences",
+          "edits": [
+            {
+              "old": "NativeAdmission(q) == RightTarget(q) /\\ RightGrant(q) /\\\n    OwnSubnet(q) /\\ OwnParent(q) /\\ ValidateTagRecord(q)",
+              "new": "NativeAdmission(q) == RightTarget(q) /\\ RightGrant(q) /\\\n    OwnSubnet(q) /\\ (OwnParent(q) \\/ q.proof = \"missing-parent\") /\\ ValidateTagRecord(q)",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "AllowForeignOwnedParent",
+          "expect_invariant": "SubnetAndParentFences",
+          "edits": [
+            {
+              "old": "NativeAdmission(q) == RightTarget(q) /\\ RightGrant(q) /\\\n    OwnSubnet(q) /\\ OwnParent(q) /\\ ValidateTagRecord(q)",
+              "new": "NativeAdmission(q) == RightTarget(q) /\\ RightGrant(q) /\\\n    OwnSubnet(q) /\\ (OwnParent(q) \\/ q.proof = \"foreign-parent\") /\\ ValidateTagRecord(q)",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "IgnoreParentOwnershipClaim",
+          "expect_invariant": "SubnetAndParentFences",
+          "edits": [
+            {
+              "old": "NativeAdmission(q) == RightTarget(q) /\\ RightGrant(q) /\\\n    OwnSubnet(q) /\\ OwnParent(q) /\\ ValidateTagRecord(q)",
+              "new": "NativeAdmission(q) == RightTarget(q) /\\ RightGrant(q) /\\\n    OwnSubnet(q) /\\ (OwnParent(q) \\/ q.proof = \"parent-claim\") /\\ ValidateTagRecord(q)",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "IgnoreParentCanonicalCIDR",
+          "expect_invariant": "SubnetAndParentFences",
+          "edits": [
+            {
+              "old": "NativeAdmission(q) == RightTarget(q) /\\ RightGrant(q) /\\\n    OwnSubnet(q) /\\ OwnParent(q) /\\ ValidateTagRecord(q)",
+              "new": "NativeAdmission(q) == RightTarget(q) /\\ RightGrant(q) /\\\n    OwnSubnet(q) /\\ (OwnParent(q) \\/ q.proof = \"parent-prefix\") /\\ ValidateTagRecord(q)",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "IgnoreDeclaredSubnet",
+          "expect_invariant": "SubnetAndParentFences",
+          "edits": [
+            {
+              "old": "NativeAdmission(q) == RightTarget(q) /\\ RightGrant(q) /\\\n    OwnSubnet(q) /\\ OwnParent(q) /\\ ValidateTagRecord(q)",
+              "new": "NativeAdmission(q) == RightTarget(q) /\\ RightGrant(q) /\\\n    OwnSubnet(q) /\\ OwnParent(q) /\\ (ValidateTagRecord(q) \\/ q.proof = \"subnet-declaration\")",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "IgnoreDeclaredParent",
+          "expect_invariant": "SubnetAndParentFences",
+          "edits": [
+            {
+              "old": "NativeAdmission(q) == RightTarget(q) /\\ RightGrant(q) /\\\n    OwnSubnet(q) /\\ OwnParent(q) /\\ ValidateTagRecord(q)",
+              "new": "NativeAdmission(q) == RightTarget(q) /\\ RightGrant(q) /\\\n    OwnSubnet(q) /\\ OwnParent(q) /\\ (ValidateTagRecord(q) \\/ q.proof = \"parent-declaration\")",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "IgnoreVPCMainSlot",
+          "expect_invariant": "SubnetAndParentFences",
+          "edits": [
+            {
+              "old": "NativeAdmission(q) == RightTarget(q) /\\ RightGrant(q) /\\\n    OwnSubnet(q) /\\ OwnParent(q) /\\ ValidateTagRecord(q)",
+              "new": "NativeAdmission(q) == RightTarget(q) /\\ RightGrant(q) /\\\n    OwnSubnet(q) /\\ OwnParent(q) /\\ (ValidateTagRecord(q) \\/ q.proof = \"parent-main\")",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "IgnoreParentDNSGeneration",
+          "expect_invariant": "SubnetAndParentFences",
+          "edits": [
+            {
+              "old": "NativeAdmission(q) == RightTarget(q) /\\ RightGrant(q) /\\\n    OwnSubnet(q) /\\ OwnParent(q) /\\ ValidateTagRecord(q)",
+              "new": "NativeAdmission(q) == RightTarget(q) /\\ RightGrant(q) /\\\n    OwnSubnet(q) /\\ OwnParent(q) /\\ (ValidateTagRecord(q) \\/ q.proof = \"parent-dns\")",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "RewriteNoncanonicalSubnetDocument",
+          "expect_invariant": "SubnetAndParentFences",
+          "edits": [
+            {
+              "old": "NativeAdmission(q) == RightTarget(q) /\\ RightGrant(q) /\\\n    OwnSubnet(q) /\\ OwnParent(q) /\\ ValidateTagRecord(q)",
+              "new": "NativeAdmission(q) == RightTarget(q) /\\ RightGrant(q) /\\\n    OwnSubnet(q) /\\ OwnParent(q) /\\ (ValidateTagRecord(q) \\/ q.proof = \"raw-document\")",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "IgnoreExactPriorSubnetRow",
+          "expect_invariant": "SingleDocumentCommit",
+          "edits": [
+            {
+              "old": "Affected(q) == IF q.tx = \"cas\" THEN 0 ELSE 1",
+              "new": "Affected(q) == 1",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "IgnoreCollateralWriteCount",
+          "expect_invariant": "SingleDocumentCommit",
+          "edits": [
+            {
+              "old": "AllWrites(q) == IF q.tx \\in Extras THEN 2 ELSE 1",
+              "new": "AllWrites(q) == 1",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "IgnoreExactSubnetReload",
+          "expect_invariant": "SingleDocumentCommit",
+          "edits": [
+            {
+              "old": "RightReadback(q) == q.tx # \"readback\"",
+              "new": "RightReadback(q) == TRUE",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "AcknowledgeFailedSubnetCommit",
+          "expect_invariant": "SingleDocumentCommit",
+          "edits": [
+            {
+              "old": "ok == admitted /\\ q.tx # \"commit\" /\\\n              (~changed",
+              "new": "ok == admitted /\\\n              (~changed",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "RewriteNoOpSubnetTag",
+          "expect_invariant": "SingleDocumentCommit",
+          "edits": [
+            {
+              "old": "count |-> IF ok /\\ changed THEN 1 ELSE 0",
+              "new": "count |-> IF ok THEN 1 ELSE 0",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "AdvanceSubnetRevisionForTag",
+          "expect_invariant": "UnchangedNetworkFrame",
+          "edits": [
+            {
+              "old": "[] OTHER -> expected",
+              "new": "[] OTHER -> [expected EXCEPT !.subnet.revision = @ + 1]",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "ChangePublicIPv4Preference",
+          "expect_invariant": "UnchangedNetworkFrame",
+          "edits": [
+            {
+              "old": "[] OTHER -> expected",
+              "new": "[] OTHER -> [expected EXCEPT !.subnet.publicIP = FALSE]",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "AlterExistingRouteAssociation",
+          "expect_invariant": "UnchangedNetworkFrame",
+          "edits": [
+            {
+              "old": "[] OTHER -> expected",
+              "new": "[] OTHER -> [expected EXCEPT !.subnet.route = \"different-route\"]",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "InventoryDropsStoredTag",
+          "expect_invariant": "ExactNativeTagProjection",
+          "edits": [
+            {
+              "old": "IF OwnSubnet(p.call) /\\ OwnParent(p.call) THEN Describe(data,p.call.key,\"ok\") ELSE Absent",
+              "new": "IF OwnSubnet(p.call) /\\ OwnParent(p.call) THEN [Describe(data,p.call.key,\"ok\") EXCEPT !.tags[\"Name\"] = Absent] ELSE Absent",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "InventWriteOnlyRequirementOnInventory",
+          "expect_invariant": "ExactNativeTagProjection",
+          "edits": [
+            {
+              "old": "IF OwnSubnet(p.call) /\\ OwnParent(p.call) THEN Describe(data,p.call.key,\"ok\") ELSE Absent",
+              "new": "IF NativeAdmission(p.call) THEN Describe(data,p.call.key,\"ok\") ELSE Absent",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "ShowUnprovedSubnetInventory",
+          "expect_invariant": "ExactNativeTagProjection",
+          "edits": [
+            {
+              "old": "IF OwnSubnet(p.call) /\\ OwnParent(p.call) THEN Describe(data,p.call.key,\"ok\") ELSE Absent",
+              "new": "Describe(data,p.call.key,\"ok\")",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "PreReadIgnoresParent",
+          "expect_invariant": "ExactSelectedSubnetRequest",
+          "edits": [
+            {
+              "old": "/\\ Selected(pre) /\\ pre.value",
+              "new": "/\\ pre.unambiguous /\\ pre.scope = [Scope EXCEPT !.vpc = pre.scope.vpc] /\\ pre.value",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "PreReadIgnoresCIDR",
+          "expect_invariant": "ExactSelectedSubnetRequest",
+          "edits": [
+            {
+              "old": "/\\ Selected(pre) /\\ pre.value",
+              "new": "/\\ pre.unambiguous /\\ pre.scope = [Scope EXCEPT !.cidr = pre.scope.cidr] /\\ pre.value",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "PreReadIgnoresAZ",
+          "expect_invariant": "ExactSelectedSubnetRequest",
+          "edits": [
+            {
+              "old": "/\\ Selected(pre) /\\ pre.value",
+              "new": "/\\ pre.unambiguous /\\ pre.scope = [Scope EXCEPT !.az = pre.scope.az] /\\ pre.value",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "ReuseStaleCaptureTag",
+          "expect_invariant": "ExactSelectedSubnetRequest",
+          "edits": [
+            {
+              "old": "/\\ pre.value = PriorValue(p)",
+              "new": "/\\ TRUE",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "RunScopedHandoffTagPane",
+          "expect_invariant": "ExactSelectedSubnetRequest",
+          "edits": [
+            {
+              "old": "p.capture \\notin UIBlock /\\ Selected(pre)",
+              "new": "p.capture \\notin (UIBlock \\ {\"scoped-handoff\"}) /\\ Selected(pre)",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "IgnoreSubnetTagCapability",
+          "expect_invariant": "ExactSelectedSubnetRequest",
+          "edits": [
+            {
+              "old": "p.capture \\notin UIBlock /\\ Selected(pre)",
+              "new": "p.capture \\notin (UIBlock \\ {\"scope-not-announced\"}) /\\ Selected(pre)",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "AllowBusyTagPane",
+          "expect_invariant": "ExactSelectedSubnetRequest",
+          "edits": [
+            {
+              "old": "p.capture \\notin UIBlock /\\ Selected(pre)",
+              "new": "p.capture \\notin (UIBlock \\ {\"no-lease\"}) /\\ Selected(pre)",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "SendKeyOnlySubnetConsoleDelete",
+          "expect_invariant": "ExactSelectedSubnetRequest",
+          "edits": [
+            {
+              "old": "IF p.call.action = \"DeleteTags\" THEN PriorValue(p) ELSE @",
+              "new": "IF p.call.action = \"DeleteTags\" THEN Omitted ELSE @",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "ReadbackIgnoresRegion",
+          "expect_invariant": "ExactSelectedSubnetConfirmation",
+          "edits": [
+            {
+              "old": "/\\ Selected(seen) /\\ seen.key",
+              "new": "/\\ seen.unambiguous /\\ seen.scope = [Scope EXCEPT !.region = seen.scope.region] /\\ seen.key",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "ReadbackIgnoresSubnet",
+          "expect_invariant": "ExactSelectedSubnetConfirmation",
+          "edits": [
+            {
+              "old": "/\\ Selected(seen) /\\ seen.key",
+              "new": "/\\ seen.unambiguous /\\ seen.scope = [Scope EXCEPT !.id = seen.scope.id] /\\ seen.key",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "ReadbackIgnoresParent",
+          "expect_invariant": "ExactSelectedSubnetConfirmation",
+          "edits": [
+            {
+              "old": "/\\ Selected(seen) /\\ seen.key",
+              "new": "/\\ seen.unambiguous /\\ seen.scope = [Scope EXCEPT !.vpc = seen.scope.vpc] /\\ seen.key",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "ReadbackIgnoresCIDR",
+          "expect_invariant": "ExactSelectedSubnetConfirmation",
+          "edits": [
+            {
+              "old": "/\\ Selected(seen) /\\ seen.key",
+              "new": "/\\ seen.unambiguous /\\ seen.scope = [Scope EXCEPT !.cidr = seen.scope.cidr] /\\ seen.key",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "ReadbackIgnoresAZ",
+          "expect_invariant": "ExactSelectedSubnetConfirmation",
+          "edits": [
+            {
+              "old": "/\\ Selected(seen) /\\ seen.key",
+              "new": "/\\ seen.unambiguous /\\ seen.scope = [Scope EXCEPT !.az = seen.scope.az] /\\ seen.key",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "ReadbackIgnoresDuplicateSubnet",
+          "expect_invariant": "ExactSelectedSubnetConfirmation",
+          "edits": [
+            {
+              "old": "/\\ Selected(seen) /\\ seen.key",
+              "new": "/\\ seen.scope = Scope /\\ seen.key",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "ReadbackIgnoresSavedTagValue",
+          "expect_invariant": "ExactSelectedSubnetConfirmation",
+          "edits": [
+            {
+              "old": "/\\ seen.value = Wanted(p)",
+              "new": "/\\ TRUE",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "AcceptFalseSubnetTagAck",
+          "expect_invariant": "ExactSelectedSubnetConfirmation",
+          "edits": [
+            {
+              "old": "receipt.ack /\\ p.post # \"false-return\" /\\ p.post # \"retired\"",
+              "new": "receipt.ack /\\ p.post # \"retired\"",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "ShowWithoutCommittedSubnetTag",
+          "expect_invariant": "ExactSelectedSubnetConfirmation",
+          "edits": [
+            {
+              "old": "receipt.ack /\\ p.post # \"false-return\"",
+              "new": "p.post # \"false-return\"",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "PublishRetiredSubnetSelection",
+          "expect_invariant": "ExactSelectedSubnetConfirmation",
+          "edits": [
+            {
+              "old": "receipt.ack /\\ p.post # \"false-return\" /\\ p.post # \"retired\"",
+              "new": "receipt.ack /\\ p.post # \"false-return\"",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "UndoTagAfterFailedConsoleReadback",
+          "expect_invariant": "NoUnconfirmedUndo",
+          "edits": [
+            {
+              "old": "!.step = 3, !.data = live, !.observed = reply,",
+              "new": "!.step = 3, !.data = IF confirmed THEN live ELSE s.prior, !.observed = reply,",
+              "count": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
       "id": "LocalSSOSyntheticLifecycle",
       "model": "formal/LocalSSOSyntheticLifecycle.tla",
       "config": "formal/LocalSSOSyntheticLifecycle.cfg",

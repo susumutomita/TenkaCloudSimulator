@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "base_sha": "ee62782fa6d8c7e4838893f3e3cc66ca27fb4e70",
+  "base_sha": "31fdcca2c632fe0795938a11ed075f371f6e1f36",
   "changes": [
     {
       "path": ".github/workflows/battle-hosts.yml",
@@ -11,14 +11,14 @@
     },
     {
       "path": "README.ja.md",
-      "sha256": "5299310fa198cb625daaaa2dd009d3cdc845589f151f844adf75377b442ff42f",
+      "sha256": "cf75cff7b9e084cbe024c491d344e258fd023d537d4d081f2120021c75bbffc1",
       "disposition": "documentation",
       "reason": "Discover the local-only sample from the Japanese startup section.",
       "models": []
     },
     {
       "path": "README.md",
-      "sha256": "0ba3e30a386d0671833a076c1adc8c40a4df1a062f49b60c9f56d2870b2b4e13",
+      "sha256": "4f10fb2b84a64f282c9f51ab7e1aa9fa9f2f04061f5b83b56e101fe78a4210c6",
       "disposition": "documentation",
       "reason": "Discover and separate the explicit SSO sample from existing default/management-only Cognito documentation.",
       "models": []
@@ -32,7 +32,7 @@
     },
     {
       "path": "cmd/simulator/local_sso.go",
-      "sha256": "126687ebae2e3521fba9af86cb465a535cbfc921372dedbefaae368e15e4b41b",
+      "sha256": "e8f2d340385fcfd2fb56e025305a93af2cef05bdd805dd4066cb4632f0af5b3e",
       "disposition": "modeled",
       "reason": "Opt in only to a private ephemeral launch, publish exact browser locations after authenticated native bootstrap, and handle normal and controlled failed-start cleanup without a public operator endpoint or raw code.",
       "models": [
@@ -63,6 +63,13 @@
       "models": []
     },
     {
+      "path": "cmd/simulator/local_sso_enrollment_interruption_test.go",
+      "sha256": "35289fdb97a3448ce27ac3f8664c72e62d3a9ea6ee36dba2cce4df49c24b42da",
+      "disposition": "test-support",
+      "reason": "Exercise real private loopback interruption during operator IdP and client enrollment, assert no readiness or leaked state, and verify a healthy fresh bootstrap.",
+      "models": []
+    },
+    {
       "path": "cmd/simulator/local_sso_integration_test.go",
       "sha256": "a79394bb7823958f13dd3b384a13544d756108bf5483c203530845aa7d92101c",
       "disposition": "test-support",
@@ -78,9 +85,9 @@
     },
     {
       "path": "cmd/simulator/local_sso_relying_party.go",
-      "sha256": "8e63c3397e70dfb89334b7810ff4426eea0717b912818d59f1e5b82537b3349d",
+      "sha256": "4feb29fb2e4bf16e0c3b0df5994155b8fb2710480dfe7a543d663ffbe3546555",
       "disposition": "modeled",
-      "reason": "Bind authorization code to a browser attempt and exact callback/verifier, then display success only after the separately verified local issuer, audience, nonce and JWS.",
+      "reason": "Bind authorization code to a browser attempt and exact callback/verifier, then display success only after the separately verified local issuer, audience, nonce and JWS. Coordinate the normal local sample attempt and cookie deadline with the unchanged Entra request lifetime; exact expiry and protocol checks still apply.",
       "models": [
         {
           "id": "LocalSSOSyntheticLifecycle",
@@ -93,10 +100,17 @@
       ]
     },
     {
-      "path": "cmd/simulator/local_sso_startup_failures_test.go",
-      "sha256": "1daa81f68f3cc683468f76a5f37f62b3d99c239e98c7253cf397118bee73f65f",
+      "path": "cmd/simulator/local_sso_shutdown_boundary_test.go",
+      "sha256": "f9ca18c18d316b5967a2bf5600eff095dabc15d58b080c54ae9d801ae71f57c0",
       "disposition": "test-support",
-      "reason": "Checks actual failure before readiness from private filesystem and local listener failures, and verifies cleanup.",
+      "reason": "Exercise the shutdown acknowledgement boundary of the owned private bootstrap socket; do not announce readiness or retain run artifacts if closure cannot be confirmed.",
+      "models": []
+    },
+    {
+      "path": "cmd/simulator/local_sso_startup_failures_test.go",
+      "sha256": "02f3985e46616f4dee5881a27ce20dca24045352f285c4776b128412c7f648c2",
+      "disposition": "test-support",
+      "reason": "Use real owned listeners and files to verify every partial launcher startup failure tears down without advertising readiness, including failure before Cognito pool bootstrap.",
       "models": []
     },
     {
@@ -105,6 +119,13 @@
       "disposition": "test-support",
       "reason": "Target exact ephemeral TLS, app browser state, sanitized joined errors, and real partial-bind/cancel startup cleanup.",
       "models": []
+    },
+    {
+      "path": "cmd/simulator/local_sso_timing_test.go",
+      "disposition": "test-support",
+      "models": [],
+      "reason": "Verify the ordinary enrolled synthetic login at 105 seconds and rejection at the exact application deadline without waiting on the actual clock.",
+      "sha256": "a87d40652226108c2d72318340b7e4c0eb80a8be63358030bd893611afa92da7"
     },
     {
       "path": "cmd/simulator/local_sso_transport_test.go",
@@ -146,7 +167,7 @@
     },
     {
       "path": "docs/design/0001-go-standalone.md",
-      "sha256": "89e0c0583e0db9444e967a31ee741cc199a0dbe9d0523d6782c7b4743311ae6a",
+      "sha256": "f2ccc4adb75aa32a61038feeeccf5aa516395ba5db96d22d53cc5798299e3fca",
       "disposition": "documentation",
       "reason": "Record explicit single-binary, split-origin local fixture architecture and limited validated boundary.",
       "models": []
@@ -160,7 +181,7 @@
     },
     {
       "path": "docs/local-sso.md",
-      "sha256": "28e45ec66e59432cfacc5f79c364b03ef75fa6d479c7645ac0c6de3870075de2",
+      "sha256": "a531231c7d3b41b54a5a652bcae27036d0d481b457af6aa0b42cf3249c698e52",
       "disposition": "documentation",
       "reason": "Describe exact launch, isolated browser CA, one-shot sign-in and cleanup; state supported Linux witness and production exclusions.",
       "models": []
@@ -224,7 +245,7 @@
     },
     {
       "path": "formal/models.json",
-      "sha256": "280faa5780f3250d400f7af481d0f1fbfd8988c94ed7713d3a5a4ab87063aac3",
+      "sha256": "63503e11c3da9087102b0d3749959684a3183ae78f43d6ef8e1fa8718359cd45",
       "disposition": "formal-infrastructure",
       "reason": "Add only the first-party local SSO model to the signed main model inventory, preserving detached ACL and all earlier models.",
       "models": []
@@ -331,9 +352,9 @@
     },
     {
       "path": "internal/aws/cognitoidp/federation_publisher.go",
-      "sha256": "55ec6830fd97d6e620ea6c11eccf2307fc227b7b524dfc4c2fc4e2806019f9bf",
+      "sha256": "d9cd631b85c2b7ea686143f3b9d6981fdf9d25e01646c6d4714fb7705e3b1ee4",
       "disposition": "modeled",
-      "reason": "Give newly enrolled trust an explicit non-reused registration identity; stale or unusable registrations cannot supply the modeled ACS witness.",
+      "reason": "Give newly enrolled trust an explicit non-reused registration identity; stale or unusable registrations cannot supply the modeled ACS witness. Preserve the exact CSPRNG sizes and encodings while dropping only error branches the Go 1.26 rand.Read contract cannot return.",
       "models": [
         {
           "id": "LocalSSOSyntheticLifecycle",
@@ -365,9 +386,9 @@
     },
     {
       "path": "internal/aws/cognitoidp/hosted_browser.go",
-      "sha256": "7bb1d4b963b50c702f30bd882ad558bb81903ea6dd193712816b4aff7953b502",
+      "sha256": "d76fc2d25462962642a68622fc9644d1da5032e11ffa0a1fe3083025a6ee0e9d",
       "disposition": "modeled",
-      "reason": "Admit the selected browser flow, verify ACS evidence, atomically grant with replay/pending retirement, and issue from a live exactly scoped code with PKCE.",
+      "reason": "Admit the selected browser flow, verify ACS evidence, atomically grant with replay/pending retirement, and issue from a live exactly scoped code with PKCE. Preserve the exact CSPRNG sizes and encodings while dropping only error branches the Go 1.26 rand.Read contract cannot return.",
       "models": [
         {
           "id": "LocalSSOSyntheticLifecycle",
@@ -382,7 +403,7 @@
     },
     {
       "path": "internal/aws/cognitoidp/hosted_browser_test.go",
-      "sha256": "4aa442894a665307602ae4fceca63567342b9f1b7d9198bbcbf3a221403506d7",
+      "sha256": "07e8fc60e423967274a5fc58173fd12fd1f4558c37485d3f8b30a046178bd1a1",
       "disposition": "test-support",
       "reason": "Focused validation only; no new production route, credentials, or launch behavior.",
       "models": []
@@ -421,7 +442,7 @@
       "path": "internal/aws/cognitoidp/hosted_pin_expiry_test.go",
       "sha256": "4286ccd2225a685b48b42d2fb076f04352c25bf8c9f25dea1deb9e4fa931c08f",
       "disposition": "test-support",
-      "reason": "Verify a legitimately issued still-live authorization code cannot be redeemed after provider metadata expires, without invalidating the same client\u2019s other provider.",
+      "reason": "Verify a legitimately issued still-live authorization code cannot be redeemed after provider metadata expires, without invalidating the same client’s other provider.",
       "models": []
     },
     {
@@ -496,6 +517,13 @@
       ]
     },
     {
+      "path": "internal/aws/cognitoidp/hosted_storage_restore_test.go",
+      "sha256": "438a564b9f67f81b2e3c61f00e06b3ef0496bfe7aab68da830523540cd52f180",
+      "disposition": "test-support",
+      "reason": "Verify normal hosted login fails closed on unreadable restored state and refuses acknowledgement on mismatched persisted readback; require retry after recovery.",
+      "models": []
+    },
+    {
       "path": "internal/aws/cognitoidp/sqlite_recovery_test.go",
       "sha256": "d8e40fee9e3c46b5ec049f2c8b001ffb8dc3c17964ddfd6201551b1d212ccca4",
       "disposition": "test-support",
@@ -520,9 +548,9 @@
     },
     {
       "path": "internal/azure/entraidp/fixture.go",
-      "sha256": "631d9a05658d16dc3566b7957e030078988f0ea72800c6c5906167e5b51755dd",
+      "sha256": "c2b14329e2f680a583b04f2f74592136e22c5aea44f5d82830a68967c356931e",
       "disposition": "modeled",
-      "reason": "Show the login prompt only after valid signed request admission, bind the synthetic code to the pending browser, consume it only once, and close its local state on retirement.",
+      "reason": "Show the login prompt only after valid signed request admission, bind the synthetic code to the pending browser, consume it only once, and close its local state on retirement. Coordinate the normal local sample attempt and cookie deadline with the unchanged Entra request lifetime; exact expiry and protocol checks still apply.",
       "models": [
         {
           "id": "LocalSSOSyntheticLifecycle",
@@ -552,7 +580,7 @@
     },
     {
       "path": "internal/azure/entraidp/saml.go",
-      "sha256": "a4ff906d879cb1444c32b1880a77e988df51c6bf247c0a95db06b5762f389dbd",
+      "sha256": "6a5e5137d69ca22d0dfa393ecace156c7304395a443c85fb05cfe83b0915924d",
       "disposition": "modeled",
       "reason": "Bind signed redirect initiation and signed response to the exact preselected public SP and generated local subject. The model consumes verified-request/response predicates rather than reasoning about XML or signatures.",
       "models": [
@@ -599,7 +627,7 @@
     },
     {
       "path": "internal/server/server.go",
-      "sha256": "d67dd89475b47d7cae733967e36a148120b87788160d18da96eb9124d6482ea5",
+      "sha256": "a861bba57a464a5a36b8ffd44ffcdbc992f1cbfc8ef4940ba15abd95897a5d5f",
       "disposition": "modeled",
       "reason": "Supply the optional setup callback only to scoped hosted construction, with no default hosted listener; existing provider/console/SDK behavior outside this selection is not covered by the new model.",
       "models": [
@@ -623,14 +651,14 @@
     },
     {
       "path": "scripts/formal_model_gate.py",
-      "sha256": "dfbb59728388daae134e85420ea891107b73be89496700362eed0d6a09359d15",
+      "sha256": "6fb95094de445eb1bf5815f9f9d69a4dab67b708dcc52f7c22e3e0adeabce348",
       "disposition": "formal-infrastructure",
       "reason": "Add the exact local SSO obligations without replacing mandatory VPC and detached ACL invariants.",
       "models": []
     },
     {
       "path": "scripts/test-formal-gate.py",
-      "sha256": "038982ea4de135af9571a0ab2b3ec9b1470ef75130839c5bb6f77aa3ee5f055a",
+      "sha256": "0aaee6e16c2e79d9bd326638aaaaec76a3db362b0dd8787f9c05f5fb9bd2e019",
       "disposition": "formal-infrastructure",
       "reason": "Retain existing detached ACL and VPC detectors, add the local SSO detector, and pin the combined exact inventory.",
       "models": []

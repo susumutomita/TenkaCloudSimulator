@@ -155,7 +155,7 @@ func (f *Fixture) signedRequest(r *http.Request) (*saml.IdpAuthnRequest, error) 
 	a := req.Request
 	now := time.Now().UTC()
 	if !requestID.MatchString(a.ID) || a.IssueInstant.After(now.Add(3*time.Second)) ||
-		!now.Before(a.IssueInstant.Add(requestLifetime)) || a.AssertionConsumerServiceURL != f.acs ||
+		!now.Before(a.IssueInstant.Add(AuthnRequestLifetime)) || a.AssertionConsumerServiceURL != f.acs ||
 		a.ProtocolBinding != saml.HTTPPostBinding || req.ACSEndpoint == nil || req.ACSEndpoint.Location != f.acs ||
 		a.AssertionConsumerServiceIndex != "" || a.AttributeConsumingServiceIndex != "" || a.RequestedAuthnContext != nil ||
 		a.Subject != nil || a.Conditions != nil || a.Scoping != nil || a.Signature != nil || a.IsPassive != nil && *a.IsPassive ||
