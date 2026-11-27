@@ -12,14 +12,12 @@ import KeyValuePairs from '@cloudscape-design/components/key-value-pairs';
 import Form from '@cloudscape-design/components/form';
 import FormField from '@cloudscape-design/components/form-field';
 import Input from '@cloudscape-design/components/input';
-import RadioGroup from '@cloudscape-design/components/radio-group';
-import Select from '@cloudscape-design/components/select';
 import Modal from '@cloudscape-design/components/modal';
 import Box from '@cloudscape-design/components/box';
 import {useLocale} from './i18n.jsx';
-import VPCSubnetFields from './ec2-vpc-subnet-fields.jsx';
+import VPCCreate from './ec2-vpc-create.jsx';
 import VPCNativeSubnets from './ec2-vpc-native-subnets.jsx';
-import {createVpcWithSubnet,vpcSubnetInputError} from './ec2-vpc-subnet.mjs';
+import {createVpcWithSubnet,vpcCreateIssues} from './ec2-vpc-subnet.mjs';
 import EC2InstanceMetadata from './ec2-instance-metadata.jsx';
 import EC2TemplatePreview from './ec2-template-preview.jsx';
 import EC2InstanceStackLaunch from './ec2-instance-stack-launch.jsx';
@@ -30,20 +28,20 @@ import VPCNativeRouteTables from './ec2-vpc-native-route-tables.jsx';
 import VPCInternetGateways from './ec2-vpc-internet-gateways.jsx';
 import {nativeRouteTableTarget} from './ec2-native-route-tables.mjs';
 
-import {parseEC2Document,parseCreateVpc,parseDeleteVpc,parseEC2Error,createVpcParameters,VPC_NAME_LIMIT} from './ec2-response.mjs';
+import {parseEC2Document,parseCreateVpc,parseDeleteVpc,parseEC2Error,createVpcParameters} from './ec2-response.mjs';
 
 const idCell=value=><span className="resource-identifier">{value||'—'}</span>;
-const blankVpc={name:'',cidr:'',mode:'vpc-only',stackName:'',subnetCIDR:''};
+const blankVpc={name:'',cidr:'10.0.0.0/16',mode:'vpc-only',stackName:'',subnetCIDR:'10.0.1.0/24'};
 
 // The instance list is saved state. Opt-in local launches use CloudFormation,
 // never native RunInstances. VPC deletion applies only to EC2-owned VPCs.
-export default function EC2Readonly({kind,region,request,sessionInstance,onSession,instanceStackLaunchVisible=false,instanceStackLaunchAllowed=false,vpcLifecycle=false,vpcSubnet=false,vpcNativeSubnets=false,vpcNativeSubnetPublicIPv4=false,vpcSecurityGroups=false,vpcNativeSecurityGroups=false,vpcNativeSecurityGroupRules=false,vpcNetworkACLs=false,vpcRouteTables=false,vpcNativeRouteTables=false,vpcNativeRouteAssociations=false,vpcNativeRouteReplacement=false,vpcNativeIPv4RouteLimit=0,vpcInternetGateways=false,onSaving=()=>{}}) {
+export default function EC2Readonly({kind,region,request,sessionInstance,onSession,instanceStackLaunchVisible=false,instanceStackLaunchAllowed=false,vpcLifecycle=false,vpcSubnet=false,vpcNativeSubnets=false,vpcNativeSubnetPublicIPv4=false,vpcSecurityGroups=false,vpcNativeSecurityGroups=false,vpcNativeSecurityGroupRules=false,vpcNetworkACLs=false,vpcRouteTables=false,vpcNativeRouteTables=false,vpcNativeRouteAssociations=false,vpcNativeRouteReplacement=false,vpcNativeIPv4RouteLimit=0,vpcInternetGateways=false,onSaving=()=>{},onVpcCreateView=()=>{},initialVpcCreate=false}) {
   const {t}=useLocale();
   const instance=kind==='ec2',manage=!instance&&vpcLifecycle;
   const [items,setItems]=useState([]),[loading,setLoading]=useState(false),[error,setError]=useState('');
   const [preview,setPreview]=useState(false),[launchOpen,setLaunchOpen]=useState(false);
   const [selected,setSelected]=useState([]),[filter,setFilter]=useState(''),[page,setPage]=useState(1);
-  const [view,setView]=useState('list'),[form,setForm]=useState(blankVpc),[busy,setBusy]=useState(false),[formError,setFormError]=useState(''),[notice,setNotice]=useState('');
+  const [view,setView]=useState(initialVpcCreate?'create':'list'),[form,setForm]=useState(blankVpc),[busy,setBusy]=useState(false),[formError,setFormError]=useState(''),[notice,setNotice]=useState('');
   const [deleting,setDeleting]=useState(null),[confirmation,setConfirmation]=useState(''),[deleteError,setDeleteError]=useState('');
   const [writeLeases,setWriteLeases]=useState(()=>new Set());
   const pendingWrites=useRef(writeLeases);
@@ -67,9 +65,9 @@ export default function EC2Readonly({kind,region,request,sessionInstance,onSessi
     return ()=>{if(held){held=false;lease[pane](false);}};
   }
   const epoch=useRef(0),alive=useRef(true),submitting=useRef(false),topology=useRef(null);
-  const heading=useRef(null), focusNext=useRef(false);
+  const heading=useRef(null), focusNext=useRef(initialVpcCreate);
   const paired=form.mode==='vpc-subnet';
-  function changeView(next){focusNext.current=true;setView(next);}
+  function changeView(next){focusNext.current=true;setView(next);onVpcCreateView(next==='create');}
   useEffect(()=>{if(focusNext.current){heading.current?.focus();focusNext.current=false;}},[view]);
   useEffect(()=>{alive.current=true;return()=>{alive.current=false;epoch.current++;topology.current?.abort();onSaving(false);};},[]);
   useEffect(()=>{onSaving(saving);},[saving,onSaving]);
@@ -96,19 +94,8 @@ export default function EC2Readonly({kind,region,request,sessionInstance,onSessi
   }
   async function create(event){
     event.preventDefault();if(selectionLocked()||submitting.current)return;
-    if(!form.cidr.trim()){setFormError(t('Enter an IPv4 CIDR block, such as 10.0.0.0/16.','IPv4 CIDR ブロックを入力してください (例: 10.0.0.0/16)。'));return;}
-    if(form.name.length>VPC_NAME_LIMIT){setFormError(t('The Name tag can have up to 256 characters.','名前タグは 256 文字以内で入力してください。'));return;}
-    if(paired){
-      if(!vpcSubnet){setFormError(t('Only the signed-in simulator administrator can create a stack here.','ここでスタックを作成できるのは、サインイン済みのシミュレーター管理者だけです。'));return;}
-      const invalid=vpcSubnetInputError(form);
-      const messages={
-        stack:t('Enter a valid stack name that starts with a letter.','英字で始まる有効なスタック名を入力してください。'),
-        cidr:t('Enter IPv4 CIDRs between /16 and /28.','/16〜/28 の IPv4 CIDR を指定してください。'),
-        containment:t('The subnet CIDR must fit entirely inside the new VPC.','サブネットの CIDR が新しい VPC の範囲に収まるよう指定してください。'),
-        name:t('The Name tag must fit in 256 UTF-8 bytes.','名前タグは UTF-8 で 256 バイト以内にしてください。'),
-      };
-      if(invalid){setFormError(messages[invalid]);return;}
-    }
+    if(paired&&!vpcSubnet){setFormError(t('Only the signed-in simulator administrator can create a stack here.','ここでスタックを作成できるのは、サインイン済みのシミュレーター管理者だけです。'));return;}
+    if(Object.keys(vpcCreateIssues(form,paired)).length){setFormError(t('Check the VPC settings before creating.','作成前に VPC の設定を確認してください。'));return;}
     submitting.current=true;setBusy(true);setFormError('');
     try {
       if(paired){
@@ -147,21 +134,9 @@ export default function EC2Readonly({kind,region,request,sessionInstance,onSessi
   const filtered=items.filter(item=>fields.some(([field])=>item[field].toLocaleLowerCase().includes(query)));
   const detail=selected[0];
   const detailFields=detail&&<KeyValuePairs columns={2} items={fields.map(([key,en,ja])=>({label:t(en,ja),value:idCell(display(key,detail))}))}/>;
-  const unavailable=t('Not available in this simulator.','このシミュレーターでは利用できません。');
-  if(manage&&view==='create')return <ContentLayout header={<div ref={heading} tabIndex={-1}><Header variant="h1" description={t('Create an isolated virtual network with an IPv4 CIDR block. It is saved in this local simulator only.','IPv4 CIDR ブロックを持つ、分離された仮想ネットワークを作成します。このローカルシミュレーターにのみ保存されます。')}>{t('Create VPC','VPC を作成')}</Header></div>}>
-    <form onSubmit={create}><Form errorText={formError} actions={<SpaceBetween direction="horizontal" size="xs"><Button formAction="none" disabled={busy} onClick={()=>{changeView('list');setFormError('');}}>{t('Cancel','キャンセル')}</Button><Button variant="primary" formAction="submit" loading={busy}>{t('Create VPC','VPC を作成')}</Button></SpaceBetween>}>
-      <SpaceBetween size="l"><Container header={<Header variant="h2">{t('VPC settings','VPC の設定')}</Header>}><SpaceBetween size="l">
-        <VPCSubnetFields enabled={vpcSubnet} values={form} disabled={busy} change={(key,value)=>setForm(old=>({...old,[key]:value}))}/>
-        <FormField label={t('Name tag - optional','名前タグ - オプション')} description={t("Creates a tag with a key of 'Name' and a value that you specify.","キーが「Name」で、指定した値を持つタグを作成します。")} constraintText={t('Up to 256 characters.','256 文字以内。')}><Input value={form.name} disabled={busy} placeholder="my-vpc-01" onChange={({detail})=>setForm({...form,name:detail.value})}/></FormField>
-        <FormField label={t('IPv4 CIDR block','IPv4 CIDR ブロック')}><RadioGroup value="manual" onChange={()=>{}} items={[{value:'manual',label:t('IPv4 CIDR manual input','IPv4 CIDR の手動入力')},{value:'ipam',label:t('IPAM-allocated IPv4 CIDR block','IPAM で割り当てられた IPv4 CIDR ブロック'),disabled:true,description:unavailable}]}/></FormField>
-        <FormField label={t('IPv4 CIDR','IPv4 CIDR')} constraintText={t('CIDR block size must be between /16 and /28.','CIDR ブロックのサイズは /16 から /28 の間である必要があります。')}><Input value={form.cidr} disabled={busy} placeholder="10.0.0.0/16" onChange={({detail})=>setForm({...form,cidr:detail.value})}/></FormField>
-        <FormField label={t('IPv6 CIDR block','IPv6 CIDR ブロック')}><RadioGroup value="none" onChange={()=>{}} items={[{value:'none',label:t('No IPv6 CIDR block','IPv6 CIDR ブロックなし')},{value:'amazon',label:t('Amazon-provided IPv6 CIDR block','Amazon 提供の IPv6 CIDR ブロック'),disabled:true,description:unavailable}]}/></FormField>
-        <FormField label={t('Tenancy','テナンシー')}><Select selectedOption={{value:'default',label:t('Default','デフォルト')}} onChange={()=>{}} options={[{value:'default',label:t('Default','デフォルト')},{value:'dedicated',label:t('Dedicated','専有'),disabled:true,description:unavailable}]}/></FormField>
-      </SpaceBetween></Container>
-      <Alert type="info">{paired
-        ? t('Creates a new VPC and subnet in one local stack. It cannot attach to an existing VPC and does not add route tables, security groups or gateways.','1つのローカルスタックに新規 VPC とサブネットを作成します。既存 VPC への追加や、ルートテーブル、セキュリティグループ、ゲートウェイの作成はできません。')
-        : t('VPC only creates a main route table automatically, but does not create a subnet. Additional network settings are not available in this form.','VPC のみでは、メインルートテーブルを自動で作成しますが、サブネットは作成しません。このフォームで追加のネットワーク設定はできません。')}</Alert></SpaceBetween>
-    </Form></form></ContentLayout>;
+  if(manage&&view==='create')return <VPCCreate values={form} pairedAvailable={vpcSubnet} heading={heading}
+    busy={busy} requestError={formError} submit={create} change={(key,value)=>{setForm(old=>({...old,[key]:value}));setFormError('');}}
+    cancel={()=>{changeView('list');setFormError('');}}/>;
   const deletable=detail?.managedBy==='ec2';
   const nativeRoutePane=vpcNativeRouteTables&&nativeRouteTableTarget(detail);
   return <ContentLayout header={<div ref={heading} tabIndex={-1}><Header variant="h1">{instance?t('EC2 instances','EC2 インスタンス'):'VPC'}</Header></div>}><SpaceBetween size="l">
@@ -188,11 +163,11 @@ export default function EC2Readonly({kind,region,request,sessionInstance,onSessi
       pagination={<Pagination currentPageIndex={page} pagesCount={Math.max(1,Math.ceil(filtered.length/20))} onChange={({detail})=>{if(!selectionLocked())setPage(detail.currentPageIndex);}} ariaLabels={{nextPageLabel:t('Next page','次のページ'),previousPageLabel:t('Previous page','前のページ'),pageLabel:n=>String(n)}}/>}
       empty={<SpaceBetween size="s"><span>{error?t('Resources are unavailable. Retry with Refresh.','リソースを取得できません。「更新」で再試行してください。'):items.length?t('No resources match your filter.','検索条件に一致するリソースがありません。'):t('No resources found in this region.','このリージョンには該当するリソースがありません。')}</span>{items.length>0&&<Button disabled={saving} onClick={()=>{setFilter('');setPage(1);}}>{t('Clear filter','絞り込みを解除')}</Button>}</SpaceBetween>}/>
     {detail&&<Container header={<Header variant="h2" actions={<Button disabled={saving} onClick={()=>setSelected([])}>{t('Close details','詳細を閉じる')}</Button>}>{t('Resource details','リソースの詳細')}</Header>}>
-      <SpaceBetween size="l">{detailFields}{instance?<EC2InstanceMetadata groupIds={detail.groupIds} tags={detail.tags}/>
-        :vpcSecurityGroups&&<div inert={siblingBusy('sg')}><VPCSecurityGroups key={region+'|'+detail.id} vpc={detail} region={region} request={request}
-          nativeLifecycle={vpcNativeSecurityGroups} nativeRules={vpcNativeSecurityGroupRules} writeBlocked={siblingBusy('sg')} acquireWrite={()=>acquireNetworkWrite('sg')}/></div>}
+      <SpaceBetween size="l">{detailFields}{instance&&<EC2InstanceMetadata groupIds={detail.groupIds} tags={detail.tags}/>}
         {!instance&&vpcNativeSubnets&&<div inert={siblingBusy('subnet')}><VPCNativeSubnets key={'subnet|'+region+'|'+detail.id} vpc={detail} region={region}
           request={request} onSaving={lease.subnet} publicIPv4={vpcNativeSubnetPublicIPv4}/></div>}
+        {!instance&&vpcSecurityGroups&&<div inert={siblingBusy('sg')}><VPCSecurityGroups key={region+'|'+detail.id} vpc={detail} region={region} request={request}
+          nativeLifecycle={vpcNativeSecurityGroups} nativeRules={vpcNativeSecurityGroupRules} writeBlocked={siblingBusy('sg')} acquireWrite={()=>acquireNetworkWrite('sg')}/></div>}
         {!instance&&vpcNetworkACLs&&<VPCNetworkACLs key={'nacl|'+region+'|'+detail.id} vpc={detail} region={region} request={request}
           writeBlocked={siblingBusy('acl')} onSaving={lease.acl}/>}
         {!instance&&nativeRoutePane&&<VPCNativeRouteTables key={'rtb-native|'+region+'|'+detail.id} vpc={detail} region={region} request={request}

@@ -201,13 +201,20 @@ simulator runtime state is not an AWS instance-state claim or a probe of guest
 health; absent/unknown state is shown as unconfirmed. UserData, runtime plans,
 credentials and internal connection details are never displayed.
 
-When discovery also advertises `CreateVpc` and `DeleteVpc`, the VPC view adds
-**Create VPC** and **Delete VPC**. **Create VPC** follows the AWS "VPC only" form:
-an optional Name tag and a manual IPv4 CIDR (`/16`–`/28`). "VPC and more", IPAM,
-IPv6 and dedicated tenancy are shown disabled. The server validates the request;
-a refusal such as `InvalidVpc.Range` stays on the form as an error and creates
-nothing. A new native VPC and its main table are saved together; no subnet is
-created by this form. A created VPC is selected in the refreshed list. **Delete VPC** is enabled
+When discovery advertises `CreateVpc` and `DeleteVpc`, the VPC view adds
+**Create VPC** and **Delete VPC**. **Create VPC** is a dedicated page with a
+**VPC → Your VPCs → Create VPC** trail, editable manual IPv4 CIDR
+(default `10.0.0.0/16`, supported masks `/16`–`/28`) and a separate preview of
+the optional **Name** tag. **VPC only** is the default. One native VPC and its
+main route table are saved together; it does not create a subnet. The
+authenticated operator also sees **VPC and more**: exactly one VPC and one
+private subnet created together in a new CloudFormation stack, not the full AWS
+wizard. The extra stack name and subnet CIDR fields appear only for that choice.
+An incomplete or out-of-range draft cannot submit. IPAM and IPv6 are disabled;
+only default tenancy is available. Encryption and automatic Internet/NAT
+gateways are not offered. Only the Name tag is editable in this form.
+The server remains authoritative, and a refusal stays on the form as an error.
+A created VPC is selected in the refreshed list. **Delete VPC** is enabled
 only for a VPC whose **Managed by** column says EC2, and requires typing `delete`.
 CloudFormation-managed VPCs show why deletion is disabled: delete their stack.
 Select an EC2-managed VPC and use [Add subnet](ec2-native-subnet.md) under

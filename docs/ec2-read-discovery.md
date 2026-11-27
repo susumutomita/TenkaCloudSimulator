@@ -423,15 +423,18 @@ needs its own process, database and token authority.
 
 ## Console: VPC and one subnet
 
-When signed in as the simulator administrator, **VPC → Create VPC → VPC and
-one subnet (CloudFormation-managed)** creates both resources in a new local
-stack. The option is hidden for participant sessions, selected exercise
+**VPC → Create VPC** opens a dedicated settings page. **VPC only** is selected
+by default and uses native `CreateVpc`. **VPC and more**, available to the
+signed-in simulator administrator, creates one new VPC and one subnet in a
+CloudFormation stack, not the full AWS wizard. The option is hidden for participant sessions, selected exercise
 identities, scoped handoffs, and unauthenticated development mode. Participant
 browser sessions cannot read CloudFormation outputs to verify the result.
 Enter a stack name and two IPv4 CIDRs; the subnet is within the VPC and uses the region's
 first local Availability Zone. Each range is /16–/28 and host bits are cleared
 by the server. A Name tag is optional. This does not attach to an existing VPC
 or create a route table, security group, gateway, VM or live packet path.
+IPAM, IPv6, encryption and automatic NAT gateway creation are not offered.
+Only the optional Name tag is editable in this form.
 
 The Console sends a fixed template with `AWS::EC2::VPC` and `AWS::EC2::Subnet`
 using the ordinary authenticated `CreateStack` route. Both resources require
@@ -446,6 +449,16 @@ Focused checks:
 - `node --test tools/console/test/ec2-vpc-subnet.test.mjs` after installing the pinned Console development dependencies.
 - `SIMULATOR_BINARY=/absolute/path/to/simulator python3 test/console/ec2_vpc_subnet_native.py` in an isolated loopback runner with Node. It signs into a real simulator and checks the form-generated request through the native APIs, including denial, persisted readback and removal. It does not drive a browser.
 
-Primary references: [CreateStack](https://docs.aws.amazon.com/AWSCloudFormation/latest/APIReference/API_CreateStack.html),
+Opt-in Chromium UI check using the candidate’s embedded console and actual
+authenticated loopback APIs (not a guest or AWS):
+```sh
+SIMULATOR_BINARY=/absolute/path/to/simulator PLAYWRIGHT_MODULE=/absolute/path/to/playwright-core \
+  node test/console/ec2_vpc_create_browser.cjs
+```
+Use `SCREENSHOTS_DIR` to retain synthetic desktop and mobile examples. Select
+the Chromium distribution for the installed Playwright version.
+
+Primary references: [Create a VPC](https://docs.aws.amazon.com/vpc/latest/userguide/create-vpc.html),
+[CreateStack](https://docs.aws.amazon.com/AWSCloudFormation/latest/APIReference/API_CreateStack.html),
 [Subnet resource](https://docs.aws.amazon.com/AWSCloudFormation/latest/TemplateReference/aws-resource-ec2-subnet.html),
 [DescribeSubnets](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_DescribeSubnets.html).
