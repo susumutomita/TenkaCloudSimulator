@@ -1,57 +1,108 @@
 {
   "version": 1,
-  "base_sha": "10290614c12d2cd876a1508f1fe09c4045485b0f",
+  "base_sha": "d242c553ea234b82077fd89b5f41cd965c6dee07",
   "changes": [
     {
       "path": "README.md",
-      "sha256": "8bbdae77f3b09b0a00ea83bf6e8d715dc2abc77c18375779968648c15bdc25db",
+      "sha256": "21d76c31da3542de38aadc3f36d86cd4fd7e0e5ec62c309a1069f4b449240ca1",
       "disposition": "documentation",
-      "reason": "Records the bounded selected-version read If-Match contract, strict sender list grammar, and unchanged write and lookup semantics.",
+      "reason": "State the bounded requirement to disable a Batch queue before local deletion and preserve state on refusal.",
+      "models": []
+    },
+    {
+      "path": "docs/aws-catalog-services.md",
+      "sha256": "019708a7e8cb8958a5d19654d4401ae10d912e80224af65b920d86a6d7a81f78",
+      "disposition": "documentation",
+      "reason": "Generated catalog text adds one Batch bounds sentence; supported operation inventory and unrelated service rows stay unchanged.",
       "models": []
     },
     {
       "path": "docs/design/0001-go-standalone.md",
-      "sha256": "5c2da3027dc06d49c7c91b22a292af1ee90ad916bdb6dd09ba0a3b31b8a173eb",
+      "sha256": "c025ba22e03fafe3947ecb12895ae106f66e7554ae18c8a105363af485c632c7",
       "disposition": "documentation",
-      "reason": "Records the bounded selected-version read If-Match contract, strict sender list grammar, and unchanged write and lookup semantics.",
+      "reason": "Describe the current-generation transaction guard and unchanged queue and references on Batch deletion refusal.",
       "models": []
     },
     {
-      "path": "docs/s3.md",
-      "sha256": "02eb63899eb8424e8918e9cfddd23e21e7060e9ee22376356241a4811ea1a460",
-      "disposition": "documentation",
-      "reason": "Records the bounded selected-version read If-Match contract, strict sender list grammar, and unchanged write and lookup semantics.",
+      "path": "internal/aws/catalog/batch_queue_delete_test.go",
+      "sha256": "29ecad0e2d4df3b384f9306403d7e8bcb5279b8e8ffacf1ddb0733f03315d00b",
+      "disposition": "test-support",
+      "reason": "Exercise Batch DeleteJobQueue before and after disabling; prove complete stored state, reference preservation, exact authorization and stale update/recreation CAS behavior with ordinary local requests.",
       "models": []
     },
     {
-      "path": "internal/aws/s3.go",
-      "sha256": "f1974b6af43a57da7f75b1e1505ff42f9ed6118a18bd13020b9ea1eb044903cf",
+      "path": "internal/aws/catalog/batch_queue_time_limit_test.go",
+      "sha256": "a141b3d8846cb8fafcef8fb654a07b29b1a1a29315ac3fea94a37b2a2bb4dc4b",
+      "disposition": "test-support",
+      "reason": "Disable the existing time-limit fixture queues before cleanup, without changing the independent time-limit assertions.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/catalog/semantics.go",
+      "sha256": "d7506c2fca24abc3097bb7fe787fc709208b782d35ef8fe7ecea8984b36e60f7",
       "disposition": "modeled",
-      "reason": "Changing only the selected GET/HEAD response predicate keeps the existing IAM, lookup order and object mutation rules unchanged.",
+      "reason": "Invoke an optional operation validation on the authorized matching-generation snapshot within the unchanged catalog delete transaction and retain the existing CAS path for missing or changed rows.",
       "models": [
         {
-          "id": "ObjectStore",
+          "id": "CatalogResourceLifecycle",
           "properties": [
-            "NoOrphans",
-            "NoUnauthorizedMutation",
-            "DenyWins"
+            "AuthorizationFirst",
+            "FailureFrame",
+            "PeerFrame",
+            "StaleWriteRejected"
           ],
-          "limits": "Models only the existing authorized and denied object mutations, not read response selection, HTTP entity-tag syntax, prepared or legacy SQLite reads, Go semantics, or implementation refinement. Exact native and Go tests independently exercise current and versioned conditions and visible stored state."
+          "limits": "Existing bounded catalog abstraction for authorization, failed/stale writes and peer scope only. It does not model the Batch state field, the exact DISABLED predicate, references, same-ARN recreation, actual IAM, wire, Go/SQLite transaction/refinement, browser or workloads. Scoped local tests exercise the concrete deletion, generation and preserved-state contracts."
         }
       ]
     },
     {
-      "path": "internal/aws/s3_if_match_test.go",
-      "sha256": "f58fa5ee0c99c1808c9c02b70e4d3f10a80b179a02e87a2b7a42c21524efbcc8",
-      "disposition": "test-support",
-      "reason": "Runs exact read and write-frame behavior on local owned S3 and pinned SDK state, including restart and final cleanup.",
+      "path": "internal/aws/catalog/services_compute3.go",
+      "sha256": "71d097d5c0d0f191e932d4ee0c328d52c5723d7d0935091f08b943a0f3b35289",
+      "disposition": "modeled",
+      "reason": "Only Batch DeleteJobQueue opts into the read-only delete guard; require the exact saved DISABLED state and preserve native ClientException/400 for failures and all related rows.",
+      "models": [
+        {
+          "id": "CatalogResourceLifecycle",
+          "properties": [
+            "AuthorizationFirst",
+            "FailureFrame",
+            "PeerFrame",
+            "StaleWriteRejected"
+          ],
+          "limits": "Existing bounded catalog abstraction for authorization, failed/stale writes and peer scope only. It does not model the Batch state field, the exact DISABLED predicate, references, same-ARN recreation, actual IAM, wire, Go/SQLite transaction/refinement, browser or workloads. Scoped local tests exercise the concrete deletion, generation and preserved-state contracts."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/catalog/spec.go",
+      "sha256": "6c8914d1b5345c0d136c7ddd0ed430b20521ab98029a7dd4f0ccbf69ebd8d25c",
+      "disposition": "modeled",
+      "reason": "Declare the operation-scoped read-only pre-delete guard; unbound operations continue to use the existing delete and CAS behavior.",
+      "models": [
+        {
+          "id": "CatalogResourceLifecycle",
+          "properties": [
+            "AuthorizationFirst",
+            "FailureFrame",
+            "PeerFrame",
+            "StaleWriteRejected"
+          ],
+          "limits": "Existing bounded catalog abstraction for authorization, failed/stale writes and peer scope only. It does not model the Batch state field, the exact DISABLED predicate, references, same-ARN recreation, actual IAM, wire, Go/SQLite transaction/refinement, browser or workloads. Scoped local tests exercise the concrete deletion, generation and preserved-state contracts."
+        }
+      ]
+    },
+    {
+      "path": "internal/server/apidocs/catalog/batch.json",
+      "sha256": "7862280b22cf8334cd3208bd6a4e979c18e4af59156fcebdb42155dabd5b58a7",
+      "disposition": "presentation",
+      "reason": "Reflect Batch deletion precondition in the existing info and tag descriptions, without changing paths, errors or schemas.",
       "models": []
     },
     {
-      "path": "test/e2e/s3_read_if_match.py",
-      "sha256": "a429cdcef7c70476fdb103333fda5d4383ae45a5bec24ff5c388e0dd33be080a",
+      "path": "test/e2e/catalog_fixtures/batch.json",
+      "sha256": "3b8eadedb88150671577206b947fd2406a308ab826c4305d1e75842fd82736d3",
       "disposition": "test-support",
-      "reason": "Runs exact read and write-frame behavior on local owned S3 and pinned SDK state, including restart and final cleanup.",
+      "reason": "Extend the pinned SDK Batch lifecycle with an enabled delete refusal, unchanged readback, existing disabled cleanup and missing repeat-delete behavior.",
       "models": []
     }
   ]

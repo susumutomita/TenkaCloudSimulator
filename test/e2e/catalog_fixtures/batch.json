@@ -15,7 +15,8 @@
   {"op": "update_compute_environment", "args": {"computeEnvironment": "fixture-ce", "state": "DISABLED"}},
   {"op": "create_compute_environment", "args": {"computeEnvironmentName": "fixture-managed", "type": "MANAGED"}, "error": "ClientException"},
   {"op": "create_job_queue", "args": {"jobQueueName": "fixture-queue", "priority": 5, "schedulingPolicyArn": "${policy}", "computeEnvironmentOrder": [{"order": 1, "computeEnvironment": "${ce}"}], "jobStateTimeLimitActions": [{"action": "CANCEL", "maxTimeSeconds": 600, "state": "RUNNABLE", "reason": "CAPACITY:INSUFFICIENT_INSTANCE_CAPACITY"}]}, "save": {"queue": "jobQueueArn"}},
-  {"op": "describe_job_queues", "args": {"jobQueues": ["fixture-queue"]}, "expect": {"jobQueues[0].status": "VALID", "jobQueues[0].priority": 5, "jobQueues[0].schedulingPolicyArn": "${policy}", "jobQueues[0].jobStateTimeLimitActions[0].maxTimeSeconds": 600, "jobQueues[0].jobStateTimeLimitActions[0].action": "CANCEL"}},
+  {"op": "delete_job_queue", "args": {"jobQueue": "${queue}"}, "error": "ClientException", "status": 400},
+  {"op": "describe_job_queues", "args": {"jobQueues": ["fixture-queue"]}, "expect": {"jobQueues[0].state": "ENABLED", "jobQueues[0].status": "VALID", "jobQueues[0].priority": 5, "jobQueues[0].schedulingPolicyArn": "${policy}", "jobQueues[0].jobStateTimeLimitActions[0].maxTimeSeconds": 600, "jobQueues[0].jobStateTimeLimitActions[0].action": "CANCEL"}},
   {"op": "delete_scheduling_policy", "args": {"arn": "${policy}"}, "error": "ClientException", "status": 400},
   {"op": "describe_scheduling_policies", "args": {"arns": ["${policy}"]}, "expect": {"schedulingPolicies#count": 1, "schedulingPolicies[0].fairsharePolicy.computeReservation": 20, "schedulingPolicies[0].tags": {"team": "a"}}},
   {"op": "update_job_queue", "args": {"jobQueue": "fixture-queue", "priority": 40, "jobStateTimeLimitActions": [{"action": "CANCEL", "maxTimeSeconds": 86401, "state": "RUNNABLE", "reason": "CAPACITY:INSUFFICIENT_INSTANCE_CAPACITY"}]}, "error": "ClientException", "status": 400},
@@ -52,6 +53,7 @@
  "cleanup": [
   {"op": "delete_job_queue", "args": {"jobQueue": "fixture-queue"}},
   {"op": "delete_job_queue", "args": {"jobQueue": "fixture-fifo"}},
+  {"op": "delete_job_queue", "args": {"jobQueue": "fixture-queue"}, "error": "ClientException", "status": 400},
   {"op": "describe_job_queues", "args": {}, "expect": {"jobQueues#count": 0}},
   {"op": "delete_compute_environment", "args": {"computeEnvironment": "fixture-ce"}},
   {"op": "delete_service_environment", "args": {"serviceEnvironment": "fixture-service"}},
