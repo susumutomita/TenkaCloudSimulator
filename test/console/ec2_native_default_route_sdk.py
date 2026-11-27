@@ -11,10 +11,12 @@ import tempfile
 
 from ec2_internet_gateway_sdk import allow, cfn_client, create_stack, grant, outputs
 from ec2_launch_preflight_native import Local, REGIONS, run_default
-from ec2_native_network_sdk import REGION, boto3, botocore, reject, sdk
+from ec2_native_network_sdk import REGION, boto3, botocore, fresh_main_route_table, native_local_route, reject, sdk
 
 ROOT = Path(__file__).resolve().parents[2]
 CIDR = '0.0.0.0/0'
+VPC_CIDR = '10.91.0.0/16'
+LOCAL = native_local_route(VPC_CIDR)
 EXACT_NOT_FOUND = 'InvalidRouteTableID.NotFound'
 
 
@@ -30,11 +32,12 @@ def expect_route(gateway, destination=CIDR):
 
 
 def native_network(client, name):
-    vpc = client.create_vpc(CidrBlock='10.91.0.0/16')['Vpc']['VpcId']
+    vpc = client.create_vpc(CidrBlock=VPC_CIDR)['Vpc']['VpcId']
+    fresh_main_route_table(client, vpc, VPC_CIDR)
     tags = [{'ResourceType': 'route-table', 'Tags': [{'Key': 'Name', 'Value': name}]}]
     table = client.create_route_table(VpcId=vpc, TagSpecifications=tags)['RouteTable']['RouteTableId']
     gateway = client.create_internet_gateway()['InternetGateway']['InternetGatewayId']
-    assert exact(client, table)['Routes'] == []
+    assert exact(client, table)['Routes'] == [LOCAL]
     client.attach_internet_gateway(InternetGatewayId=gateway, VpcId=vpc)
     return vpc, table, gateway
 
@@ -78,7 +81,7 @@ def check(binary):
                 reject(r.create_route, 'DryRunOperation', DryRun=True, GatewayId=gateway, RouteTableId=table,
                        DestinationCidrBlock='198.51.100.199/25')
                 before = exact(r, table)
-                assert before['Routes'] == [] and before['Associations'][0]['RouteTableAssociationId'] == assoc
+                assert before['Routes'] == [LOCAL] and before['Associations'][0]['RouteTableAssociationId'] == assoc
                 reject(c.create_route, 'UnsupportedOperation', RouteTableId=resources['Table'], DestinationCidrBlock=CIDR, GatewayId=resources['Gateway'])
                 reject(c.create_route, 'UnsupportedOperation', GatewayId=resources['Gateway'], **payload)
                 reject(c.create_route, 'InvalidInternetGatewayID.NotFound', GatewayId=other_gateway, **payload)
@@ -97,7 +100,8 @@ def check(binary):
                 assert r.create_route(DestinationCidrBlock='198.51.100.111/24', **external)['ResponseMetadata']['HTTPStatusCode'] == 200
                 reject(c.create_route, 'RouteAlreadyExists', DestinationCidrBlock='198.51.100.151/24', **external)
                 reject(c.delete_route, 'InvalidRoute.NotFound', RouteTableId=table, DestinationCidrBlock='198.51.100.151/24')
-                saved = {**before, 'Routes': [expect_route(gateway, cidr) for cidr in (CIDR, first, narrower)]}
+                saved = {**before, 'Routes': [expect_route(gateway, CIDR), LOCAL,
+                                              expect_route(gateway, first), expect_route(gateway, narrower)]}
                 assert exact(c, table) == exact(r, table) == saved
                 assert r.describe_route_tables(Filters=[{'Name':'association.subnet-id','Values':[subnet]}])['RouteTables'] == [saved]
                 assert c.describe_internet_gateways(InternetGatewayIds=[gateway])['InternetGateways'][0]['Attachments'] == [
@@ -115,10 +119,10 @@ def check(binary):
                 assert exact(c, table) == saved and exact(c, resources['Table']) == original_cfn
                 assert outputs(cfn, stack) == resources
                 assert c.delete_route(**payload)['ResponseMetadata']['HTTPStatusCode'] == 200
-                assert exact(c, table) == {**before, 'Routes': [expect_route(gateway, cidr) for cidr in (first, narrower)]}
+                assert exact(c, table) == {**before, 'Routes': [LOCAL, expect_route(gateway, first), expect_route(gateway, narrower)]}
                 reject(c.detach_internet_gateway, 'DependencyViolation', InternetGatewayId=gateway, VpcId=vpc)
                 c.delete_route(RouteTableId=table, DestinationCidrBlock=first)
-                assert exact(c, table) == {**before, 'Routes': [expect_route(gateway, narrower)]}
+                assert exact(c, table) == {**before, 'Routes': [LOCAL, expect_route(gateway, narrower)]}
                 c.delete_route(RouteTableId=table, DestinationCidrBlock=narrower)
                 assert exact(c, table) == before
                 c.disassociate_route_table(AssociationId=assoc)
@@ -164,7 +168,7 @@ def console(binary):
             subprocess.run(['node', str(script)], check=True, text=True, timeout=90, input=json.dumps({
                 'port': port, 'cookie': cookie, 'preset': preset, 'vpc': vpc, 'table': table, 'gateway': gateway, 'asset': boot_hash,
             }))
-            assert exact(c, table)['Routes'] == []
+            assert exact(c, table)['Routes'] == [LOCAL]
             erase_network(c, vpc, table, gateway)
             assert c.describe_route_tables()['RouteTables'] == []
 

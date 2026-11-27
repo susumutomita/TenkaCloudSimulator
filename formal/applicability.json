@@ -1,519 +1,672 @@
 {
   "version": 1,
-  "base_sha": "f7815b8c3c0a57436a4ed4f78e781e45dc1466d9",
+  "base_sha": "90f4778a980c549fd25da3697c156c1a1c35476d",
   "changes": [
     {
-      "path": "README.md",
-      "sha256": "03f28f4ad301610d83a594f889315a38b520a19a49857f204ed8ecca8acbcf01",
+      "path": "README.ja.md",
+      "sha256": "2bf2037d0f65a805d0979ca48c4f831046c55862743f5f1ef1c3a94c97cb1dd3",
       "disposition": "documentation",
-      "reason": "Describes the bounded native settings, operator workflow, and unsupported traffic/attachment behavior.",
+      "reason": "Describes fresh-only main and local scope, complete effective-subnet observation and unchanged legacy/CloudFormation limitations.",
+      "models": []
+    },
+    {
+      "path": "README.md",
+      "sha256": "aa7742965a879f1c06044e1997af7352c61210c2b9579ca4aa08fe9c46ce03a7",
+      "disposition": "documentation",
+      "reason": "Describes fresh-only main and local scope, complete effective-subnet observation and unchanged legacy/CloudFormation limitations.",
+      "models": []
+    },
+    {
+      "path": "docs/api-reference.md",
+      "sha256": "b363ff7c44573257d5a70b7457746b2ea95f2f6478423ac2349a98988308d498",
+      "disposition": "documentation",
+      "reason": "Describes fresh-only main and local scope, complete effective-subnet observation and unchanged legacy/CloudFormation limitations.",
       "models": []
     },
     {
       "path": "docs/console.md",
-      "sha256": "fcb86e9c89a54a309f325f2560d7c0a483f15288791703ba5812e9a3efba2788",
+      "sha256": "156b73df450b92dca888129ee3dbc4f78219d990a303c055e317bb42863c204e",
       "disposition": "documentation",
-      "reason": "Describes the bounded native settings, operator workflow, and unsupported traffic/attachment behavior.",
+      "reason": "Describes fresh-only main and local scope, complete effective-subnet observation and unchanged legacy/CloudFormation limitations.",
       "models": []
     },
     {
       "path": "docs/design/0001-go-standalone.md",
-      "sha256": "55d3410cdf1949b2b890e67bb23c5f51dc85df50cfa662509fb3e79f795a82bb",
+      "sha256": "88f47d6bb6909a55005d7ca76b15910283a25e28c06d59b1e84f974e6a42fb86",
       "disposition": "documentation",
-      "reason": "Describes the bounded native settings, operator workflow, and unsupported traffic/attachment behavior.",
+      "reason": "Describes fresh-only main and local scope, complete effective-subnet observation and unchanged legacy/CloudFormation limitations.",
+      "models": []
+    },
+    {
+      "path": "docs/ec2-native-default-route.md",
+      "sha256": "932c3acbcf686b9f6d9fbb69849f9c11c253439152c2fd30c2735e3aed29617e",
+      "disposition": "documentation",
+      "reason": "Describes fresh-only main and local scope, complete effective-subnet observation and unchanged legacy/CloudFormation limitations.",
+      "models": []
+    },
+    {
+      "path": "docs/ec2-network-contracts.md",
+      "sha256": "10aea22b0b059a1cff104d5bc9c979092a3f2d6b41910a133238692320fe2dd3",
+      "disposition": "documentation",
+      "reason": "Describes fresh-only main and local scope, complete effective-subnet observation and unchanged legacy/CloudFormation limitations.",
       "models": []
     },
     {
       "path": "docs/ec2-read-discovery.md",
-      "sha256": "71fc20cb632416e8cb09ac981b1312d691307c06119c1c221e00f57d99f52d35",
+      "sha256": "fba3d22eefd1eea4c7ee3e95d0865c3549ee3ef49bb81c9b62342d7d8321479c",
       "disposition": "documentation",
-      "reason": "Describes the bounded native settings, operator workflow, and unsupported traffic/attachment behavior.",
+      "reason": "Describes fresh-only main and local scope, complete effective-subnet observation and unchanged legacy/CloudFormation limitations.",
       "models": []
     },
     {
-      "path": "formal/EC2DetachedSecurityGroupRules.cfg",
-      "sha256": "8e3d2b80b8fc30fa57e5366216d9260f64810c01977bcd160905169ca6d17dd7",
+      "path": "formal/EC2NativeVPCMainRoute.cfg",
+      "sha256": "93c7ba253e80e737fbf219b5c1a5fec87d8879e0fb2110b191d958ce27a835b7",
       "disposition": "modeled",
-      "reason": "The bounded native profile admits or observes only one exact authorized detached tuple, preserving the peer direction and owner; committed readback precedes success.",
+      "reason": "Implements or verifies a fresh native VPC/main pair, bounded read-only local or explicit/effective projection, or admission to the unchanged owner-scoped flow.",
       "models": [
         {
-          "id": "EC2DetachedSecurityGroupRules",
+          "id": "EC2NativeVPCMainRoute",
           "properties": [
-            "OwnershipFrame",
-            "DirectionBounds",
-            "ExactTransition"
+            "AtomicPairedSlot",
+            "OwnedLocalOnly",
+            "EffectiveNeedsFreshInventories"
           ],
-          "limits": "Finite symbolic SQLite and UI readback contract; not implementation refinement, real concurrency, network enforcement, or CloudFormation edit authority."
+          "limits": "Finite symbolic parent/child and recorded-route lifecycle, explicit filter and current effective-pane evidence only. The implementation storage bound is 1,000 and the explicit table limit is 16. No Go/SQLite, mixed-case JSON, XML or pagination/cryptography refinement; no IAM, React or browser scheduling proof, legacy migration, guest, reachability or packet routing."
         }
       ]
     },
     {
-      "path": "formal/EC2DetachedSecurityGroupRules.tla",
-      "sha256": "f0a0e7f66e2efba9c0e9d9bfdd110f384e8b1841341bcb392038e5b320567bb5",
+      "path": "formal/EC2NativeVPCMainRoute.tla",
+      "sha256": "dd7d8d6952ebc5136c5ccf9e6de6ee770f3c8745c71b36324f4faf272aa79b92",
       "disposition": "modeled",
-      "reason": "The bounded native profile admits or observes only one exact authorized detached tuple, preserving the peer direction and owner; committed readback precedes success.",
+      "reason": "Implements or verifies a fresh native VPC/main pair, bounded read-only local or explicit/effective projection, or admission to the unchanged owner-scoped flow.",
       "models": [
         {
-          "id": "EC2DetachedSecurityGroupRules",
+          "id": "EC2NativeVPCMainRoute",
           "properties": [
-            "OwnershipFrame",
-            "DirectionBounds",
-            "ExactTransition"
+            "AtomicPairedSlot",
+            "NoImplicitWire",
+            "RetainedFencesDelete",
+            "EffectiveNeedsFreshInventories"
           ],
-          "limits": "Finite symbolic SQLite and UI readback contract; not implementation refinement, real concurrency, network enforcement, or CloudFormation edit authority."
+          "limits": "Finite symbolic parent/child and recorded-route lifecycle, explicit filter and current effective-pane evidence only. The implementation storage bound is 1,000 and the explicit table limit is 16. No Go/SQLite, mixed-case JSON, XML or pagination/cryptography refinement; no IAM, React or browser scheduling proof, legacy migration, guest, reachability or packet routing."
         }
       ]
     },
     {
       "path": "formal/models.json",
-      "sha256": "1b0b8d38b0efe9bd3072515eef75be2da539cb12726157241d36ae3f5b12e290",
+      "sha256": "f777f95c7e4d65636cb92a19083e972daba54d5ed272f9a556aa75fb32552154",
       "disposition": "formal-infrastructure",
-      "reason": "Registers the bounded model and required invariant counterexamples; previous registrations retained.",
+      "reason": "Add the named finite model to the exact gate and independent control inventory; previous registered policies and invariants remain.",
       "models": []
     },
     {
-      "path": "internal/aws/ec2_native_sg_rules_legacy_regression_test.go",
-      "sha256": "1c91a3f9e2705dba89a66fd679f20e99dfc6f2f930910ddb0d2acdec55d919a3",
-      "disposition": "test-support",
-      "reason": "Deterministic native and legacy storage fixtures verify fail-closed rule admission, rollback and shared projection without changing simulator runtime behavior.",
-      "models": []
-    },
-    {
-      "path": "internal/aws/ec2_native_sg_rules_line_regression_test.go",
-      "sha256": "51945792491b86b1aad49198c2a3eaaab3a7cd06b24599b2f39aa85bb559cbc3",
-      "disposition": "test-support",
-      "reason": "Deterministic native and legacy storage fixtures verify fail-closed rule admission, rollback and shared projection without changing simulator runtime behavior.",
-      "models": []
-    },
-    {
-      "path": "internal/aws/ec2_read.go",
-      "sha256": "dd8cfad4a8590d4e2e381bb5349b29467b31e37ae7e4cf11f050c5c0e2a68b89",
+      "path": "internal/aws/ec2_native_default_route_store.go",
+      "sha256": "3406952918775928f54163064d1872d732f0f75ae8b091a3c340d32b3cf4661c",
       "disposition": "modeled",
-      "reason": "The bounded native profile admits or observes only one exact authorized detached tuple, preserving the peer direction and owner; committed readback precedes success. The combined source retains the independently scoped native subnet launch-preference and lifecycle contracts.",
+      "reason": "Implements or verifies a fresh native VPC/main pair, bounded read-only local or explicit/effective projection, or admission to the unchanged owner-scoped flow.",
       "models": [
         {
-          "id": "EC2DetachedSecurityGroupRules",
+          "id": "EC2NativeVPCMainRoute",
           "properties": [
-            "OwnershipFrame",
-            "DirectionBounds",
-            "ExactTransition"
+            "OwnedLocalOnly",
+            "CountersExcludeLocal"
           ],
-          "limits": "Finite symbolic SQLite and UI readback contract; not implementation refinement, real concurrency, network enforcement, or CloudFormation edit authority."
+          "limits": "Finite symbolic parent/child and recorded-route lifecycle, explicit filter and current effective-pane evidence only. The implementation storage bound is 1,000 and the explicit table limit is 16. No Go/SQLite, mixed-case JSON, XML or pagination/cryptography refinement; no IAM, React or browser scheduling proof, legacy migration, guest, reachability or packet routing."
         },
         {
-          "id": "EC2NativeSubnetPublicIPv4",
+          "id": "EC2NativeIPv4RouteSet",
           "properties": [
-            "ExactAdmission",
-            "RefusalNoEffect",
-            "ExactPreference",
-            "SameFrame",
-            "CurrentConfirmedNotice",
-            "NoReplay"
+            "OwnedCanonical",
+            "PerTableLimit",
+            "AtomicClass"
           ],
-          "limits": "Bounded normalized authorization, atomic configuration and acknowledgement only. Does not prove Go, request parser, SQL, IAM parity, Cloudscape/browser, durability or liveness; no public IP allocation, guest, reachability or forwarding behavior."
+          "limits": "Finite shared-destination map, same-native-witness abstraction and exact current-readback state only. Real limit is 16. No IP arithmetic proof, actual SQLite/JSON/Query/IAM/React refinement, actor concurrency or network forwarding."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/ec2_native_default_route_test.go",
+      "sha256": "eeb964902e677ae50dbde050df3c36a1f33632e3adca6ba57251db44154409e5",
+      "disposition": "test-support",
+      "reason": "Focused Go or local SDK/served fixture exercising owned state; no additional product behavior or test scheduling.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/ec2_native_ipv4_routes_test.go",
+      "sha256": "10a7d719acb7a9530d8a207e869795f1cd682483f1c3241127816c8c44090777",
+      "disposition": "test-support",
+      "reason": "Focused Go or local SDK/served fixture exercising owned state; no additional product behavior or test scheduling.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/ec2_native_sg_line_regression_test.go",
+      "sha256": "39a27880f427404904637feb6dc27d0b45065dd9eab2eb7f2133a1ea2cd58a77",
+      "disposition": "test-support",
+      "reason": "Focused Go or local SDK/served fixture exercising owned state; no additional product behavior or test scheduling.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/ec2_native_subnet_line_regression_test.go",
+      "sha256": "62d5ba098e6c11957ada3d877b43dadf4188baafd97032397dbce79fba04c593",
+      "disposition": "test-support",
+      "reason": "Focused Go or local SDK/served fixture exercising owned state; no additional product behavior or test scheduling.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/ec2_native_vpc_main_route.go",
+      "sha256": "1ef7a8df9a8d2affc8341aff0c6de1ca01449fa90f3ee84fcefdd4fa186b20bc",
+      "disposition": "modeled",
+      "reason": "Implements or verifies a fresh native VPC/main pair, bounded read-only local or explicit/effective projection, or admission to the unchanged owner-scoped flow.",
+      "models": [
+        {
+          "id": "EC2NativeVPCMainRoute",
+          "properties": [
+            "AtomicPairedSlot",
+            "OwnedLocalOnly",
+            "RetainedFencesDelete",
+            "ReadInvalidRefuses"
+          ],
+          "limits": "Finite symbolic parent/child and recorded-route lifecycle, explicit filter and current effective-pane evidence only. The implementation storage bound is 1,000 and the explicit table limit is 16. No Go/SQLite, mixed-case JSON, XML or pagination/cryptography refinement; no IAM, React or browser scheduling proof, legacy migration, guest, reachability or packet routing."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/ec2_native_vpc_main_route_test.go",
+      "sha256": "9cca6cfccdb45a0c56ecd7c2842fec5c317ac3459b94b860336c18789ab9f092",
+      "disposition": "test-support",
+      "reason": "Focused Go or local SDK/served fixture exercising owned state; no additional product behavior or test scheduling.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/ec2_network.go",
+      "sha256": "cdc58afc42a2bf727e3eb6c6e1be6a273333b3e85bc52f290f0891023f89d40e",
+      "disposition": "modeled",
+      "reason": "Implements or verifies a fresh native VPC/main pair, bounded read-only local or explicit/effective projection, or admission to the unchanged owner-scoped flow.",
+      "models": [
+        {
+          "id": "EC2NativeVPCMainRoute",
+          "properties": [
+            "AtomicPairedSlot",
+            "UnrelatedOwnershipUnchanged"
+          ],
+          "limits": "Finite symbolic parent/child and recorded-route lifecycle, explicit filter and current effective-pane evidence only. The implementation storage bound is 1,000 and the explicit table limit is 16. No Go/SQLite, mixed-case JSON, XML or pagination/cryptography refinement; no IAM, React or browser scheduling proof, legacy migration, guest, reachability or packet routing."
         },
         {
-          "id": "EC2NativeSubnetLifecycle",
+          "id": "EC2VPCOwnership",
           "properties": [
-            "StackUnchanged",
-            "AuthorizedWrites",
-            "NativeParent",
-            "Nonoverlap",
-            "Bounded",
-            "ExactDelete",
-            "ExactRead"
+            "NoAdoption",
+            "FailureRollsBack"
           ],
-          "limits": "Existing finite lifecycle remains intact; does not model the new setting/ack or actual HTTP/JS/SQL."
+          "limits": "Atomic store-level ownership, authorization order, quota and DescribeVpcs owner labels only; not SQL transactions, HTTP/XML parsing, IAM policy evaluation, CIDR or tag validation, random ID collision, console rendering or a Go refinement proof. Native Go tests, the boto3 lifecycle and the browser end-to-end flow establish those implementation properties."
         }
       ]
     },
     {
-      "path": "internal/aws/ec2_security_group_rules_native.go",
-      "sha256": "27d53bfdf6aa4c74428f63cc453dedd1b9b7ac0751fcb83374bf8330b12632a8",
-      "disposition": "modeled",
-      "reason": "The bounded native profile admits or observes only one exact authorized detached tuple, preserving the peer direction and owner; committed readback precedes success.",
-      "models": [
-        {
-          "id": "EC2DetachedSecurityGroupRules",
-          "properties": [
-            "OwnershipFrame",
-            "DirectionBounds",
-            "ExactTransition"
-          ],
-          "limits": "Finite symbolic SQLite and UI readback contract; not implementation refinement, real concurrency, network enforcement, or CloudFormation edit authority."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/ec2_security_group_rules_native_test.go",
-      "sha256": "53096eca9bf2bcea9ffb66996393968a6f6138e9e1cc58f775536bff500f66b2",
+      "path": "internal/aws/ec2_route_association_wire_test.go",
+      "sha256": "8dc74620a4a2beaae496168cfcf939c33f87b4e028f4156a29c5ecde5ff0366d",
       "disposition": "test-support",
-      "reason": "Exercises the existing detached or CFN boundary and exact additions, no simulator execution-path change.",
+      "reason": "Focused Go or local SDK/served fixture exercising owned state; no additional product behavior or test scheduling.",
       "models": []
     },
     {
-      "path": "internal/aws/ec2_security_groups_native_query.go",
-      "sha256": "a825052b044100f881f1620b9d29d183883612b59e871718e70cc1d0303a57d6",
+      "path": "internal/aws/ec2_route_table_page.go",
+      "sha256": "e8eaea615c1263e752171337bea3e05ff1c8acd2a07e5232e13ef10eed68bac9",
       "disposition": "modeled",
-      "reason": "The bounded native profile admits or observes only one exact authorized detached tuple, preserving the peer direction and owner; committed readback precedes success.",
+      "reason": "Bind the extra system association state to the already scoped continuation; preserving the complete wire representation is deliberate.",
       "models": [
         {
-          "id": "EC2DetachedSecurityGroupRules",
+          "id": "EC2RouteTableInventoryPages",
           "properties": [
-            "OwnershipFrame",
-            "DirectionBounds",
-            "ExactTransition"
+            "ScopedContinuation",
+            "PageBounds"
           ],
-          "limits": "Finite symbolic SQLite and UI readback contract; not implementation refinement, real concurrency, network enforcement, or CloudFormation edit authority."
+          "limits": "Finite symbolic paging, exact query/binding and post-write UI completion; no cryptographic, actual SQLite, wire/byte math, React or packet refinement. A small or empty complete first page is admitted; a continued response cannot end empty."
         }
       ]
     },
     {
-      "path": "internal/aws/ec2_security_groups_native_registration_test.go",
-      "sha256": "a316ca98afcbb5773da24549dbec2d2bca1cb20130fd01e04a196a30a658c2e6",
+      "path": "internal/aws/ec2_route_table_page_test.go",
+      "sha256": "d112aea8b489f3908303944807bd03f52d3f0abcf1aaa6cd4a979957bcacee37",
       "disposition": "test-support",
-      "reason": "Exercises the existing detached or CFN boundary and exact additions, no simulator execution-path change.",
+      "reason": "Focused Go or local SDK/served fixture exercising owned state; no additional product behavior or test scheduling.",
       "models": []
     },
     {
-      "path": "internal/aws/ec2_security_groups_native_store.go",
-      "sha256": "155ad3027f8ec75f839a244047990a0396847206370727018c0ba1740306ac4b",
+      "path": "internal/aws/ec2_route_tables_native.go",
+      "sha256": "c7c7db481bbbb7ac582acd5a64f272c59ddad4ed747e9aed3465a0d9239fb639",
       "disposition": "modeled",
-      "reason": "The bounded native profile admits or observes only one exact authorized detached tuple, preserving the peer direction and owner; committed readback precedes success.",
+      "reason": "Implements or verifies a fresh native VPC/main pair, bounded read-only local or explicit/effective projection, or admission to the unchanged owner-scoped flow.",
       "models": [
         {
-          "id": "EC2DetachedSecurityGroupRules",
+          "id": "EC2NativeVPCMainRoute",
           "properties": [
-            "OwnershipFrame",
-            "DirectionBounds",
-            "ExactTransition"
+            "AtomicPairedSlot",
+            "OwnedLocalOnly",
+            "RetainedFencesDelete"
           ],
-          "limits": "Finite symbolic SQLite and UI readback contract; not implementation refinement, real concurrency, network enforcement, or CloudFormation edit authority."
+          "limits": "Finite symbolic parent/child and recorded-route lifecycle, explicit filter and current effective-pane evidence only. The implementation storage bound is 1,000 and the explicit table limit is 16. No Go/SQLite, mixed-case JSON, XML or pagination/cryptography refinement; no IAM, React or browser scheduling proof, legacy migration, guest, reachability or packet routing."
         }
       ]
     },
     {
-      "path": "internal/aws/ec2_security_groups_read.go",
-      "sha256": "b3791511c4e99bdf459b22929fe916512cfc461cae46e8c8a7a030418c59db6b",
+      "path": "internal/aws/ec2_route_tables_native_query.go",
+      "sha256": "5055000c53796794977aa9e4f2ec7ae573511ccbb3f7508974a367c7dafd070c",
       "disposition": "modeled",
-      "reason": "The bounded native profile admits or observes only one exact authorized detached tuple, preserving the peer direction and owner; committed readback precedes success.",
+      "reason": "Implements or verifies a fresh native VPC/main pair, bounded read-only local or explicit/effective projection, or admission to the unchanged owner-scoped flow.",
       "models": [
         {
-          "id": "EC2DetachedSecurityGroupRules",
+          "id": "EC2NativeVPCMainRoute",
           "properties": [
-            "OwnershipFrame",
-            "DirectionBounds",
-            "ExactTransition"
+            "OwnedLocalOnly",
+            "NoImplicitWire"
           ],
-          "limits": "Finite symbolic SQLite and UI readback contract; not implementation refinement, real concurrency, network enforcement, or CloudFormation edit authority."
+          "limits": "Finite symbolic parent/child and recorded-route lifecycle, explicit filter and current effective-pane evidence only. The implementation storage bound is 1,000 and the explicit table limit is 16. No Go/SQLite, mixed-case JSON, XML or pagination/cryptography refinement; no IAM, React or browser scheduling proof, legacy migration, guest, reachability or packet routing."
         }
       ]
+    },
+    {
+      "path": "internal/aws/ec2_route_tables_native_registration_test.go",
+      "sha256": "a8e19eb8dc8690ee9255405dea80e85ce91d4a5faa80fa6bc066e28431aa5837",
+      "disposition": "test-support",
+      "reason": "Focused Go or local SDK/served fixture exercising owned state; no additional product behavior or test scheduling.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/ec2_route_tables_native_test.go",
+      "sha256": "e560628d7246e2969adab73fdfe051ac8792d700e1eef2524e2caaa886a6557f",
+      "disposition": "test-support",
+      "reason": "Focused Go or local SDK/served fixture exercising owned state; no additional product behavior or test scheduling.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/ec2_route_tables_read.go",
+      "sha256": "d872c5345dfdcd5a39d6ad7d22dc8f684800084495e6dda42b5ea01a8101fd4d",
+      "disposition": "modeled",
+      "reason": "Implements or verifies a fresh native VPC/main pair, bounded read-only local or explicit/effective projection, or admission to the unchanged owner-scoped flow.",
+      "models": [
+        {
+          "id": "EC2NativeVPCMainRoute",
+          "properties": [
+            "AtomicPairedSlot",
+            "ReadInvalidRefuses",
+            "NoImplicitWire"
+          ],
+          "limits": "Finite symbolic parent/child and recorded-route lifecycle, explicit filter and current effective-pane evidence only. The implementation storage bound is 1,000 and the explicit table limit is 16. No Go/SQLite, mixed-case JSON, XML or pagination/cryptography refinement; no IAM, React or browser scheduling proof, legacy migration, guest, reachability or packet routing."
+        },
+        {
+          "id": "EC2RouteTableInventoryPages",
+          "properties": [
+            "ScopedContinuation",
+            "PageBounds"
+          ],
+          "limits": "Finite symbolic paging, exact query/binding and post-write UI completion; no cryptographic, actual SQLite, wire/byte math, React or packet refinement. A small or empty complete first page is admitted; a continued response cannot end empty."
+        },
+        {
+          "id": "EC2NativeIPv4RouteSet",
+          "properties": [
+            "OwnedCanonical",
+            "CompleteReadback"
+          ],
+          "limits": "Finite shared-destination map, same-native-witness abstraction and exact current-readback state only. Real limit is 16. No IP arithmetic proof, actual SQLite/JSON/Query/IAM/React refinement, actor concurrency or network forwarding."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/ec2_route_tables_read_test.go",
+      "sha256": "43ab6b852091290e94a22d20faded2d1f757ce6d98be6c8a96c1ed53b105c56f",
+      "disposition": "test-support",
+      "reason": "Focused Go or local SDK/served fixture exercising owned state; no additional product behavior or test scheduling.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/ec2_subnet_native_boundaries_test.go",
+      "sha256": "98e42ccecfcc7a83f2a079b2246a328cda20c41e453801d2ced2df158c959009",
+      "disposition": "test-support",
+      "reason": "Focused Go or local SDK/served fixture exercising owned state; no additional product behavior or test scheduling.",
+      "models": []
     },
     {
       "path": "internal/aws/ec2_vpc.go",
-      "sha256": "f9fbd60258dde2ca92a695869dfc79676890ce193f38d56e3ce1b1c750b95220",
+      "sha256": "c2bc606e2d1d0bfb1d190d09164a0fc9e6bd74522f871a4a47af64197c8ca297",
       "disposition": "modeled",
-      "reason": "The bounded native profile admits or observes only one exact authorized detached tuple, preserving the peer direction and owner; committed readback precedes success. The combined source retains the independently scoped native subnet launch-preference and lifecycle contracts.",
+      "reason": "Implements or verifies a fresh native VPC/main pair, bounded read-only local or explicit/effective projection, or admission to the unchanged owner-scoped flow.",
       "models": [
         {
-          "id": "EC2DetachedSecurityGroupRules",
+          "id": "EC2NativeVPCMainRoute",
           "properties": [
-            "OwnershipFrame",
-            "DirectionBounds",
-            "ExactTransition"
+            "AtomicPairedSlot",
+            "RetainedFencesDelete",
+            "UnrelatedOwnershipUnchanged"
           ],
-          "limits": "Finite symbolic SQLite and UI readback contract; not implementation refinement, real concurrency, network enforcement, or CloudFormation edit authority."
+          "limits": "Finite symbolic parent/child and recorded-route lifecycle, explicit filter and current effective-pane evidence only. The implementation storage bound is 1,000 and the explicit table limit is 16. No Go/SQLite, mixed-case JSON, XML or pagination/cryptography refinement; no IAM, React or browser scheduling proof, legacy migration, guest, reachability or packet routing."
         },
         {
-          "id": "EC2NativeSubnetPublicIPv4",
+          "id": "EC2VPCOwnership",
           "properties": [
-            "ExactAdmission",
-            "RefusalNoEffect",
-            "ExactPreference",
-            "SameFrame",
-            "CurrentConfirmedNotice",
-            "NoReplay"
+            "NativeDeleteExact",
+            "NativeCreateOwned",
+            "QuotaBound"
           ],
-          "limits": "Bounded normalized authorization, atomic configuration and acknowledgement only. Does not prove Go, request parser, SQL, IAM parity, Cloudscape/browser, durability or liveness; no public IP allocation, guest, reachability or forwarding behavior."
-        },
-        {
-          "id": "EC2NativeSubnetLifecycle",
-          "properties": [
-            "StackUnchanged",
-            "AuthorizedWrites",
-            "NativeParent",
-            "Nonoverlap",
-            "Bounded",
-            "ExactDelete",
-            "ExactRead"
-          ],
-          "limits": "Existing finite lifecycle remains intact; does not model the new setting/ack or actual HTTP/JS/SQL."
+          "limits": "Atomic store-level ownership, authorization order, quota and DescribeVpcs owner labels only; not SQL transactions, HTTP/XML parsing, IAM policy evaluation, CIDR or tag validation, random ID collision, console rendering or a Go refinement proof. Native Go tests, the boto3 lifecycle and the browser end-to-end flow establish those implementation properties."
         }
       ]
     },
     {
-      "path": "internal/server/ec2_read_access_test.go",
-      "sha256": "e5f2123c4c32dfc9133e0fe325fe6e11fcf395128c75d7b78041a37750fe0c97",
+      "path": "internal/server/ec2_native_vpc_console_line_regression_test.go",
+      "sha256": "31d9971bb82e1e608e4edb1c7c8a37116309478366751792f7c60cfbb0dac877",
       "disposition": "test-support",
-      "reason": "Exercises the existing detached or CFN boundary and exact additions, no simulator execution-path change.",
+      "reason": "Focused Go or local SDK/served fixture exercising owned state; no additional product behavior or test scheduling.",
       "models": []
     },
     {
-      "path": "internal/server/server.go",
-      "sha256": "771178f8ba4c06cc605bb2955b6f319391ebebca24f910adfcf9ba3927c3d2a7",
-      "disposition": "modeled",
-      "reason": "The bounded native profile admits or observes only one exact authorized detached tuple, preserving the peer direction and owner; committed readback precedes success. The combined source retains the independently scoped native subnet launch-preference and lifecycle contracts.",
-      "models": [
-        {
-          "id": "EC2DetachedSecurityGroupRules",
-          "properties": [
-            "OwnershipFrame",
-            "DirectionBounds",
-            "ExactTransition"
-          ],
-          "limits": "Finite symbolic SQLite and UI readback contract; not implementation refinement, real concurrency, network enforcement, or CloudFormation edit authority."
-        },
-        {
-          "id": "EC2NativeSubnetPublicIPv4",
-          "properties": [
-            "ExactAdmission",
-            "RefusalNoEffect",
-            "ExactPreference",
-            "SameFrame",
-            "CurrentConfirmedNotice",
-            "NoReplay"
-          ],
-          "limits": "Bounded normalized authorization, atomic configuration and acknowledgement only. Does not prove Go, request parser, SQL, IAM parity, Cloudscape/browser, durability or liveness; no public IP allocation, guest, reachability or forwarding behavior."
-        },
-        {
-          "id": "EC2NativeSubnetLifecycle",
-          "properties": [
-            "StackUnchanged",
-            "AuthorizedWrites",
-            "NativeParent",
-            "Nonoverlap",
-            "Bounded",
-            "ExactDelete",
-            "ExactRead"
-          ],
-          "limits": "Existing finite lifecycle remains intact; does not model the new setting/ack or actual HTTP/JS/SQL."
-        }
-      ]
-    },
-    {
       "path": "internal/server/web/app.js",
-      "sha256": "f035380fb93cd9a40dd1f70c9138ac3550bfffef15177b6be3fe5eaeb9908eb1",
+      "sha256": "154b9aae857f72c0534b8a1b21fdbc0636bb646a1b270b3cda7cc597f8ae64a3",
       "disposition": "modeled",
-      "reason": "The bounded native profile admits or observes only one exact authorized detached tuple, preserving the peer direction and owner; committed readback precedes success. The combined source retains the independently scoped native subnet launch-preference and lifecycle contracts.",
+      "reason": "Exact generated console artifact from the same pinned audited source; preserves the effective evidence and previously complete/current route-table page assembly.",
       "models": [
         {
-          "id": "EC2DetachedSecurityGroupRules",
+          "id": "EC2NativeVPCMainRoute",
           "properties": [
-            "OwnershipFrame",
-            "DirectionBounds",
-            "ExactTransition"
+            "OwnedLocalOnly",
+            "EffectiveNeedsFreshInventories",
+            "EffectiveOnlyUnassociated"
           ],
-          "limits": "Finite symbolic SQLite and UI readback contract; not implementation refinement, real concurrency, network enforcement, or CloudFormation edit authority."
+          "limits": "Finite symbolic parent/child and recorded-route lifecycle, explicit filter and current effective-pane evidence only. The implementation storage bound is 1,000 and the explicit table limit is 16. No Go/SQLite, mixed-case JSON, XML or pagination/cryptography refinement; no IAM, React or browser scheduling proof, legacy migration, guest, reachability or packet routing."
         },
         {
-          "id": "EC2NativeSubnetPublicIPv4",
+          "id": "EC2RouteTableInventoryPages",
           "properties": [
-            "ExactAdmission",
-            "RefusalNoEffect",
-            "ExactPreference",
-            "SameFrame",
-            "CurrentConfirmedNotice",
-            "NoReplay"
+            "CurrentAssembly",
+            "CompletePublication"
           ],
-          "limits": "Bounded normalized authorization, atomic configuration and acknowledgement only. Does not prove Go, request parser, SQL, IAM parity, Cloudscape/browser, durability or liveness; no public IP allocation, guest, reachability or forwarding behavior."
-        },
-        {
-          "id": "EC2NativeSubnetLifecycle",
-          "properties": [
-            "StackUnchanged",
-            "AuthorizedWrites",
-            "NativeParent",
-            "Nonoverlap",
-            "Bounded",
-            "ExactDelete",
-            "ExactRead"
-          ],
-          "limits": "Existing finite lifecycle remains intact; does not model the new setting/ack or actual HTTP/JS/SQL."
+          "limits": "Finite symbolic paging, exact query/binding and post-write UI completion; no cryptographic, actual SQLite, wire/byte math, React or packet refinement. A small or empty complete first page is admitted; a continued response cannot end empty."
         }
       ]
     },
     {
       "path": "scripts/formal_model_gate.py",
-      "sha256": "82bfa3dc432b0222e196c450dd2c14c11ef60be33eb269f6c01adaf0ba777dd4",
+      "sha256": "702cefcd5b853a4943fd16a5810c9661cb93b15b1bfcc4a086569975c1987c59",
       "disposition": "formal-infrastructure",
-      "reason": "Registers the bounded model and required invariant counterexamples; previous registrations retained.",
+      "reason": "Add the named finite model to the exact gate and independent control inventory; previous registered policies and invariants remain.",
       "models": []
     },
     {
       "path": "scripts/test-formal-gate.py",
-      "sha256": "a47a70c19b2224c79a439dae29f56a59b9b5f5b368d38f205ad0e06a0aefe151",
+      "sha256": "f633872007c2332380f45eca261df691d99b3510d83484ae915b580943751796",
       "disposition": "formal-infrastructure",
-      "reason": "Registers the bounded model and required invariant counterexamples; previous registrations retained.",
+      "reason": "Add the named finite model to the exact gate and independent control inventory; previous registered policies and invariants remain.",
       "models": []
     },
     {
-      "path": "test/console/ec2_native_sg_rules_dom.cjs",
-      "sha256": "62b8d2dcfd1af70d6015b4a5e60e2f98957b5feaaea48e2d6fa8f12076c8b372",
+      "path": "test/console/ec2_internet_gateway_sdk.py",
+      "sha256": "bbb64a6e84b93c58c1f77d9d756d5cead3189d54e7b13e6a8d006995c56cc616",
       "disposition": "test-support",
-      "reason": "Exercises the existing detached or CFN boundary and exact additions, no simulator execution-path change.",
+      "reason": "Focused Go or local SDK/served fixture exercising owned state; no additional product behavior or test scheduling.",
       "models": []
     },
     {
-      "path": "test/console/ec2_native_sg_rules_sdk.py",
-      "sha256": "cedfc842f8e288eea6429d6e730b4c57c5933577b153535934f70753c9533a6d",
+      "path": "test/console/ec2_native_default_route_dom.cjs",
+      "sha256": "e2fc61253d413ec4149bd3278089535396961acc60ab3494d621227ca74f6773",
       "disposition": "test-support",
-      "reason": "Exercises the existing detached or CFN boundary and exact additions, no simulator execution-path change.",
+      "reason": "Focused Go or local SDK/served fixture exercising owned state; no additional product behavior or test scheduling.",
       "models": []
     },
     {
-      "path": "test/e2e/ec2_native_security_groups_gui.py",
-      "sha256": "4fe5cc05d229243737ceef7f1fc26f4ed6535c67ccbee0342ccf7143d05c12f3",
+      "path": "test/console/ec2_native_default_route_sdk.py",
+      "sha256": "584e039caecf19f6b142b5bf3d291c0cad941932e3bc08cc236ffacdbdf8559a",
       "disposition": "test-support",
-      "reason": "Exercises the existing detached or CFN boundary and exact additions, no simulator execution-path change.",
+      "reason": "Focused Go or local SDK/served fixture exercising owned state; no additional product behavior or test scheduling.",
+      "models": []
+    },
+    {
+      "path": "test/console/ec2_native_network_sdk.py",
+      "sha256": "ac04c6808dcad1bb27c517d6046eaac83e1dd6b2bea1d0f7c20b212f661f86ec",
+      "disposition": "test-support",
+      "reason": "Focused Go or local SDK/served fixture exercising owned state; no additional product behavior or test scheduling.",
+      "models": []
+    },
+    {
+      "path": "test/console/ec2_native_route_association_replace_sdk.py",
+      "sha256": "17e7d5c0c48fbbd6ee95cafaf15fe8e196f63fb4e4a230f30fc8e43c13b0b101",
+      "disposition": "test-support",
+      "reason": "Focused Go or local SDK/served fixture exercising owned state; no additional product behavior or test scheduling.",
+      "models": []
+    },
+    {
+      "path": "test/console/ec2_native_route_association_sdk.py",
+      "sha256": "b689b415e4b73422f5cc586c19ccf0f6ba5505aba496afeeeb3f0066713b2b1b",
+      "disposition": "test-support",
+      "reason": "Focused Go or local SDK/served fixture exercising owned state; no additional product behavior or test scheduling.",
+      "models": []
+    },
+    {
+      "path": "test/console/ec2_native_route_main_console.py",
+      "sha256": "49c298d010d91b78eafb35c564bce081bd964a54a6f6cd2b6ca79df0921a006b",
+      "disposition": "test-support",
+      "reason": "Focused Go or local SDK/served fixture exercising owned state; no additional product behavior or test scheduling.",
+      "models": []
+    },
+    {
+      "path": "test/console/ec2_native_route_main_dom.cjs",
+      "sha256": "6af3e4aa4350d2f62dfaf63756ae00ba4caddd8ca34e4bca073756b9a97c19a3",
+      "disposition": "test-support",
+      "reason": "Focused Go or local SDK/served fixture exercising owned state; no additional product behavior or test scheduling.",
+      "models": []
+    },
+    {
+      "path": "test/console/ec2_native_subnet.py",
+      "sha256": "838df147c35d257591075af2b9c42d946de90a0995b69673daa13a547623b2ff",
+      "disposition": "test-support",
+      "reason": "Focused Go or local SDK/served fixture exercising owned state; no additional product behavior or test scheduling.",
+      "models": []
+    },
+    {
+      "path": "test/console/ec2_native_subnet_dom.cjs",
+      "sha256": "f3e3ea238c8822a53fd51478ff26554f4c1863066426fb2b3ef394fca76b63e5",
+      "disposition": "test-support",
+      "reason": "Focused Go or local SDK/served fixture exercising owned state; no additional product behavior or test scheduling.",
+      "models": []
+    },
+    {
+      "path": "test/console/ec2_route_table_pages_console.py",
+      "sha256": "745bd4d3a23c2d352ec5f757bb87c8e4e3c27561e49581f3b8a9a8427dd4817c",
+      "disposition": "test-support",
+      "reason": "Focused Go or local SDK/served fixture exercising owned state; no additional product behavior or test scheduling.",
+      "models": []
+    },
+    {
+      "path": "test/console/ec2_route_table_pages_sdk.py",
+      "sha256": "3e8cc6105e5c2950c93a2ba77d2e3a152be07e4d49d49310ec7d8c0f42a63c66",
+      "disposition": "test-support",
+      "reason": "Focused Go or local SDK/served fixture exercising owned state; no additional product behavior or test scheduling.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/ec2_network_contract.py",
+      "sha256": "f815b95d3042470ab0a80b13646ea3a25e7763fc9db5308a1879dc0dfdde1dff",
+      "disposition": "test-support",
+      "reason": "Focused Go or local SDK/served fixture exercising owned state; no additional product behavior or test scheduling.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/ec2_readonly_console.py",
+      "sha256": "b73b13270b2224b1fe02f44b9e326ddfa757a67ca667c0ec60f21588ec94c404",
+      "disposition": "test-support",
+      "reason": "Focused Go or local SDK/served fixture exercising owned state; no additional product behavior or test scheduling.",
       "models": []
     },
     {
       "path": "tools/console/bundle-digests.json",
-      "sha256": "6504a99d002c2091ac3e32aea16854f4eb445544bdb1e8c61d442a43b6911ea7",
+      "sha256": "4b71072074dc3cf0216d609e239748a2b92f1f4ac00b914efb78e34d1c14f591",
       "disposition": "presentation",
-      "reason": "Deterministic generated asset build metadata or console developer regression only; no independent runtime authority.",
+      "reason": "Generated asset provenance or a focused Node test fixture; no unmodeled application runtime.",
       "models": []
     },
     {
       "path": "tools/console/bundle-inputs.json",
-      "sha256": "2d957c6631b1ba067a00a4d9f09f89e146eded8581671c9b2fbfe318bf397f87",
+      "sha256": "febc7116a520a5f8b49d6b80a8d36fd1d92cdbdf3730d026165dfd0cd51b62f1",
       "disposition": "presentation",
-      "reason": "Deterministic generated asset build metadata or console developer regression only; no independent runtime authority.",
+      "reason": "Generated asset provenance or a focused Node test fixture; no unmodeled application runtime.",
       "models": []
     },
     {
-      "path": "tools/console/src/ec2-native-security-groups.mjs",
-      "sha256": "8718d0aec618634b49401ac5343cee1d8bf027ac0535b4f7c7e7412623494c4a",
+      "path": "tools/console/src/ec2-native-route-tables.mjs",
+      "sha256": "ef5c7ff8ac9a9b915def36e08465fa367c139a60ebc78c69cc5272fec5fa9d25",
       "disposition": "modeled",
-      "reason": "The bounded native profile admits or observes only one exact authorized detached tuple, preserving the peer direction and owner; committed readback precedes success.",
+      "reason": "Implements or verifies a fresh native VPC/main pair, bounded read-only local or explicit/effective projection, or admission to the unchanged owner-scoped flow.",
       "models": [
         {
-          "id": "EC2DetachedSecurityGroupRules",
+          "id": "EC2NativeVPCMainRoute",
           "properties": [
-            "OwnershipFrame",
-            "DirectionBounds",
-            "ExactTransition"
+            "NoImplicitWire",
+            "EffectiveNeedsFreshInventories",
+            "EffectiveOnlyUnassociated"
           ],
-          "limits": "Finite symbolic SQLite and UI readback contract; not implementation refinement, real concurrency, network enforcement, or CloudFormation edit authority."
+          "limits": "Finite symbolic parent/child and recorded-route lifecycle, explicit filter and current effective-pane evidence only. The implementation storage bound is 1,000 and the explicit table limit is 16. No Go/SQLite, mixed-case JSON, XML or pagination/cryptography refinement; no IAM, React or browser scheduling proof, legacy migration, guest, reachability or packet routing."
+        },
+        {
+          "id": "EC2RouteTableInventoryPages",
+          "properties": [
+            "CurrentAssembly",
+            "CompletePublication"
+          ],
+          "limits": "Finite symbolic paging, exact query/binding and post-write UI completion; no cryptographic, actual SQLite, wire/byte math, React or packet refinement. A small or empty complete first page is admitted; a continued response cannot end empty."
+        },
+        {
+          "id": "EC2NativeIPv4RouteSet",
+          "properties": [
+            "CompleteReadback",
+            "ConfirmedNotice"
+          ],
+          "limits": "Finite shared-destination map, same-native-witness abstraction and exact current-readback state only. Real limit is 16. No IP arithmetic proof, actual SQLite/JSON/Query/IAM/React refinement, actor concurrency or network forwarding."
         }
       ]
     },
     {
       "path": "tools/console/src/ec2-readonly.jsx",
-      "sha256": "3e4c008a017616e2da81d0e55b0127b7fd37f4154e82b39c30154d5eeafd1992",
+      "sha256": "4049debbfd99136ec3ee3125abfbd3d6484a1721e538d0e58d5a2d1fbea9b8e6",
       "disposition": "modeled",
-      "reason": "The bounded native profile admits or observes only one exact authorized detached tuple, preserving the peer direction and owner; committed readback precedes success. The combined source retains the independently scoped native subnet launch-preference and lifecycle contracts.",
+      "reason": "Owner-scoped console labels describe the finite paired slot and local route, without making a new acquisition path or authorizing any mutation.",
       "models": [
         {
-          "id": "EC2DetachedSecurityGroupRules",
+          "id": "EC2NativeVPCMainRoute",
           "properties": [
-            "OwnershipFrame",
-            "DirectionBounds",
-            "ExactTransition"
+            "AtomicPairedSlot",
+            "OwnedLocalOnly"
           ],
-          "limits": "Finite symbolic SQLite and UI readback contract; not implementation refinement, real concurrency, network enforcement, or CloudFormation edit authority."
-        },
-        {
-          "id": "EC2NativeSubnetPublicIPv4",
-          "properties": [
-            "ExactAdmission",
-            "RefusalNoEffect",
-            "ExactPreference",
-            "SameFrame",
-            "CurrentConfirmedNotice",
-            "NoReplay"
-          ],
-          "limits": "Bounded normalized authorization, atomic configuration and acknowledgement only. Does not prove Go, request parser, SQL, IAM parity, Cloudscape/browser, durability or liveness; no public IP allocation, guest, reachability or forwarding behavior."
-        },
-        {
-          "id": "EC2NativeSubnetLifecycle",
-          "properties": [
-            "StackUnchanged",
-            "AuthorizedWrites",
-            "NativeParent",
-            "Nonoverlap",
-            "Bounded",
-            "ExactDelete",
-            "ExactRead"
-          ],
-          "limits": "Existing finite lifecycle remains intact; does not model the new setting/ack or actual HTTP/JS/SQL."
+          "limits": "Finite symbolic parent/child and recorded-route lifecycle, explicit filter and current effective-pane evidence only. The implementation storage bound is 1,000 and the explicit table limit is 16. No Go/SQLite, mixed-case JSON, XML or pagination/cryptography refinement; no IAM, React or browser scheduling proof, legacy migration, guest, reachability or packet routing."
         }
       ]
     },
     {
-      "path": "tools/console/src/ec2-vpc-security-groups.jsx",
-      "sha256": "ed56ca2e9041df88b8f5f1d4dd0b747cd3bfd74481da4d97ba65b3be204b536f",
+      "path": "tools/console/src/ec2-response.mjs",
+      "sha256": "100a4d9cf484bd0854828516444f58d41d840fc55f169d378a88e8701933e0d0",
       "disposition": "modeled",
-      "reason": "The bounded native profile admits or observes only one exact authorized detached tuple, preserving the peer direction and owner; committed readback precedes success.",
+      "reason": "Implements or verifies a fresh native VPC/main pair, bounded read-only local or explicit/effective projection, or admission to the unchanged owner-scoped flow.",
       "models": [
         {
-          "id": "EC2DetachedSecurityGroupRules",
+          "id": "EC2NativeVPCMainRoute",
           "properties": [
-            "OwnershipFrame",
-            "DirectionBounds",
-            "ExactTransition"
+            "OwnedLocalOnly",
+            "NoImplicitWire"
           ],
-          "limits": "Finite symbolic SQLite and UI readback contract; not implementation refinement, real concurrency, network enforcement, or CloudFormation edit authority."
+          "limits": "Finite symbolic parent/child and recorded-route lifecycle, explicit filter and current effective-pane evidence only. The implementation storage bound is 1,000 and the explicit table limit is 16. No Go/SQLite, mixed-case JSON, XML or pagination/cryptography refinement; no IAM, React or browser scheduling proof, legacy migration, guest, reachability or packet routing."
+        },
+        {
+          "id": "EC2RouteTableInventoryPages",
+          "properties": [
+            "CompletePublication"
+          ],
+          "limits": "Finite symbolic paging, exact query/binding and post-write UI completion; no cryptographic, actual SQLite, wire/byte math, React or packet refinement. A small or empty complete first page is admitted; a continued response cannot end empty."
         }
       ]
     },
     {
-      "path": "tools/console/src/main.jsx",
-      "sha256": "64ad21ff1b5e57459ca4292c0f8f74d624bcf5978d49609aec6d9c0e57856b7a",
+      "path": "tools/console/src/ec2-route-table-pages.mjs",
+      "sha256": "af200984a1ba11b9e42c4a28e0ef4ab3daa99e9d531191dd753e2f83c8d3a8b2",
       "disposition": "modeled",
-      "reason": "The bounded native profile admits or observes only one exact authorized detached tuple, preserving the peer direction and owner; committed readback precedes success. The combined source retains the independently scoped native subnet launch-preference and lifecycle contracts.",
+      "reason": "Implements or verifies a fresh native VPC/main pair, bounded read-only local or explicit/effective projection, or admission to the unchanged owner-scoped flow.",
       "models": [
         {
-          "id": "EC2DetachedSecurityGroupRules",
+          "id": "EC2NativeVPCMainRoute",
           "properties": [
-            "OwnershipFrame",
-            "DirectionBounds",
-            "ExactTransition"
+            "NoImplicitWire",
+            "EffectiveNeedsFreshInventories"
           ],
-          "limits": "Finite symbolic SQLite and UI readback contract; not implementation refinement, real concurrency, network enforcement, or CloudFormation edit authority."
+          "limits": "Finite symbolic parent/child and recorded-route lifecycle, explicit filter and current effective-pane evidence only. The implementation storage bound is 1,000 and the explicit table limit is 16. No Go/SQLite, mixed-case JSON, XML or pagination/cryptography refinement; no IAM, React or browser scheduling proof, legacy migration, guest, reachability or packet routing."
         },
         {
-          "id": "EC2NativeSubnetPublicIPv4",
+          "id": "EC2RouteTableInventoryPages",
           "properties": [
-            "ExactAdmission",
-            "RefusalNoEffect",
-            "ExactPreference",
-            "SameFrame",
-            "CurrentConfirmedNotice",
-            "NoReplay"
+            "ScopedContinuation",
+            "CompletePublication"
           ],
-          "limits": "Bounded normalized authorization, atomic configuration and acknowledgement only. Does not prove Go, request parser, SQL, IAM parity, Cloudscape/browser, durability or liveness; no public IP allocation, guest, reachability or forwarding behavior."
-        },
-        {
-          "id": "EC2NativeSubnetLifecycle",
-          "properties": [
-            "StackUnchanged",
-            "AuthorizedWrites",
-            "NativeParent",
-            "Nonoverlap",
-            "Bounded",
-            "ExactDelete",
-            "ExactRead"
-          ],
-          "limits": "Existing finite lifecycle remains intact; does not model the new setting/ack or actual HTTP/JS/SQL."
+          "limits": "Finite symbolic paging, exact query/binding and post-write UI completion; no cryptographic, actual SQLite, wire/byte math, React or packet refinement. A small or empty complete first page is admitted; a continued response cannot end empty."
         }
       ]
     },
     {
-      "path": "tools/console/test/ec2-native-security-groups.test.mjs",
-      "sha256": "65eb5776d01d64f9e25e277f5aba2d2d9b625fa174e7da5135f652a8d792c0ec",
+      "path": "tools/console/src/ec2-route-tables.mjs",
+      "sha256": "d18bb8271b3d99e60190b20cd887916cc648d374bddb44877d84f43a37d3cee1",
+      "disposition": "modeled",
+      "reason": "Implements or verifies a fresh native VPC/main pair, bounded read-only local or explicit/effective projection, or admission to the unchanged owner-scoped flow.",
+      "models": [
+        {
+          "id": "EC2NativeVPCMainRoute",
+          "properties": [
+            "AtomicPairedSlot",
+            "NoImplicitWire"
+          ],
+          "limits": "Finite symbolic parent/child and recorded-route lifecycle, explicit filter and current effective-pane evidence only. The implementation storage bound is 1,000 and the explicit table limit is 16. No Go/SQLite, mixed-case JSON, XML or pagination/cryptography refinement; no IAM, React or browser scheduling proof, legacy migration, guest, reachability or packet routing."
+        },
+        {
+          "id": "EC2RouteTableInventoryPages",
+          "properties": [
+            "CurrentAssembly",
+            "CompletePublication"
+          ],
+          "limits": "Finite symbolic paging, exact query/binding and post-write UI completion; no cryptographic, actual SQLite, wire/byte math, React or packet refinement. A small or empty complete first page is admitted; a continued response cannot end empty."
+        }
+      ]
+    },
+    {
+      "path": "tools/console/src/ec2-vpc-native-route-tables.jsx",
+      "sha256": "0f15610453c4d33076d4d7508b2171c5911b49bc97d40111fcf16022e3bb5b63",
+      "disposition": "modeled",
+      "reason": "Implements or verifies a fresh native VPC/main pair, bounded read-only local or explicit/effective projection, or admission to the unchanged owner-scoped flow.",
+      "models": [
+        {
+          "id": "EC2NativeVPCMainRoute",
+          "properties": [
+            "OwnedLocalOnly",
+            "EffectiveNeedsFreshInventories",
+            "EffectiveOnlyUnassociated"
+          ],
+          "limits": "Finite symbolic parent/child and recorded-route lifecycle, explicit filter and current effective-pane evidence only. The implementation storage bound is 1,000 and the explicit table limit is 16. No Go/SQLite, mixed-case JSON, XML or pagination/cryptography refinement; no IAM, React or browser scheduling proof, legacy migration, guest, reachability or packet routing."
+        },
+        {
+          "id": "EC2RouteTableInventoryPages",
+          "properties": [
+            "CompletePublication",
+            "ExactWriteReadback"
+          ],
+          "limits": "Finite symbolic paging, exact query/binding and post-write UI completion; no cryptographic, actual SQLite, wire/byte math, React or packet refinement. A small or empty complete first page is admitted; a continued response cannot end empty."
+        },
+        {
+          "id": "EC2NativeIPv4RouteSet",
+          "properties": [
+            "ConfirmedNotice"
+          ],
+          "limits": "Finite shared-destination map, same-native-witness abstraction and exact current-readback state only. Real limit is 16. No IP arithmetic proof, actual SQLite/JSON/Query/IAM/React refinement, actor concurrency or network forwarding."
+        }
+      ]
+    },
+    {
+      "path": "tools/console/test/ec2-native-route-main.test.mjs",
+      "sha256": "178cfd2ac8b5a2c916e890f2a46bb472df80a981e37e35362133a7a59cb6a9f7",
       "disposition": "presentation",
-      "reason": "Deterministic generated asset build metadata or console developer regression only; no independent runtime authority.",
+      "reason": "Generated asset provenance or a focused Node test fixture; no unmodeled application runtime.",
       "models": []
     }
   ]

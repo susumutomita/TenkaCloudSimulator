@@ -9,7 +9,7 @@ from urllib.parse import urlencode
 import xml.etree.ElementTree as ET
 
 from ec2_launch_preflight_native import CFN, EC2, Local, run_default
-from ec2_native_network_sdk import REGION, boto3, botocore, reject, sdk
+from ec2_native_network_sdk import REGION, boto3, botocore, fresh_main_route_table, native_local_route, reject, sdk
 
 MIME = 'application/x-www-form-urlencoded'
 PAGE_BYTES = 16 * 1024 * 1024
@@ -106,7 +106,9 @@ def check(binary):
             local = Local(port)
             cookie = local.session(operator)
             client = sdk(stack, port, operator)
-            vpc = client.create_vpc(CidrBlock='10.71.0.0/16')['Vpc']['VpcId']
+            cidr = '10.71.0.0/16'
+            vpc = client.create_vpc(CidrBlock=cidr)['Vpc']['VpcId']
+            main = fresh_main_route_table(client, vpc, cidr)
             cfn, stack_out = create_stack(local, cookie)
             tags = [{'Key': f'{n:02d}'+chr(34)*126, 'Value': chr(34)*256} for n in range(50)]
             spec = [{'ResourceType': 'route-table', 'Tags': tags}]
@@ -117,7 +119,7 @@ def check(binary):
                 subnet = client.create_subnet(VpcId=vpc, CidrBlock=f'10.71.{n}.0/24')['Subnet']['SubnetId']
                 subnets.append(subnet)
                 associations.append(client.associate_route_table(RouteTableId=table, SubnetId=subnet)['AssociationId'])
-            known = sorted([*native, stack_out['Table']])
+            known = sorted([*native, main['RouteTableId'], stack_out['Table']])
             lengths = []
             client.meta.events.register('after-call.ec2.DescribeRouteTables',
                                         lambda http_response, **_: lengths.append(len(http_response.content)))
@@ -126,13 +128,13 @@ def check(binary):
             assert [row['RouteTableId'] for row in unpaged['RouteTables']] == known
 
             pages = sdk_pages(client)
-            assert [len(p['RouteTables']) for p in pages] == [100, 81]
+            assert [len(p['RouteTables']) for p in pages] == [100, 82]
             assert pages[0].get('NextToken') and not pages[1].get('NextToken')
-            assert max(lengths[-2:]) < PAGE_BYTES and rows(pages) == unpaged['RouteTables']
+            assert max(lengths[-2:]) < PAGE_BYTES and rows(pages) == unpaged['RouteTables'] and main in rows(pages)
             exact = client.describe_route_tables(RouteTableIds=[native[-1]])
             assert exact['RouteTables'] == [row for row in rows(pages) if row['RouteTableId'] == native[-1]]
             assert not exact.get('NextToken') and lengths[-1] < EXACT_BYTES
-            assert exact['RouteTables'][0]['Tags'] == tags
+            assert exact['RouteTables'][0]['Tags'] == tags and exact['RouteTables'][0]['Routes'] == [native_local_route(cidr)]
             assert scalar_pages(port, cookie, native[-1]) == known
             r1 = sdk(stack, port, reader_token(local, operator, 'route-page-reader'))
             r2 = sdk(stack, port, reader_token(local, operator, 'route-page-other'))
@@ -172,7 +174,7 @@ def check(binary):
             client.delete_vpc(VpcId=vpc)
             local.query('cloudformation', 'DeleteStack', local.session(operator), StackName=cfn)
             assert rows(sdk_pages(client)) == [] and client.describe_vpcs()['Vpcs'] == []
-    print('PASS actual pinned SDK: 181 mixed tables against 16 MiB, same legacy rows in 100+81 table pages, '
+    print('PASS actual pinned SDK: 182 mixed tables against 16 MiB, complete 100+82 pages including the native main, '
           '7 explicit filtered matches, separately authenticated readers/region, durable restart, scoped refusal and cleanup.')
 
 

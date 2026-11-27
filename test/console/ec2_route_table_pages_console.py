@@ -7,7 +7,7 @@ from pathlib import Path
 import subprocess
 
 from ec2_launch_preflight_native import Local, run_default
-from ec2_native_network_sdk import sdk
+from ec2_native_network_sdk import fresh_main_route_table, sdk
 from ec2_route_table_pages_sdk import create_stack, rows, sdk_pages
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -18,7 +18,9 @@ def check(binary):
         c = sdk(stack, port, token)
         local = Local(port)
         cookie = local.session(token)
-        vpc = c.create_vpc(CidrBlock='10.73.0.0/16')['Vpc']['VpcId']
+        cidr = '10.73.0.0/16'
+        vpc = c.create_vpc(CidrBlock=cidr)['Vpc']['VpcId']
+        main = fresh_main_route_table(c, vpc, cidr)
         cfn, stack_out = create_stack(local, cookie)
         saved = sorted(c.create_route_table(VpcId=vpc)['RouteTable']['RouteTableId'] for _ in range(105))
         assert len(set(saved)) == 105
@@ -32,7 +34,9 @@ def check(binary):
                          'lateScopeRetired': True, 'staleWriteUnconfirmed': True}
         expected = {*saved[1:], proof['peer']}
         assert saved[0] not in expected and len(expected) == 105
-        assert {t['RouteTableId'] for t in rows(sdk_pages(c))} == {*expected, stack_out['Table']}
+        all_rows = {t['RouteTableId']: t for t in rows(sdk_pages(c))}
+        assert set(all_rows) == {*expected, main['RouteTableId'], stack_out['Table']}
+        assert all_rows[main['RouteTableId']] == main
         for table in sorted(expected):
             c.delete_route_table(RouteTableId=table)
         c.delete_vpc(VpcId=vpc)

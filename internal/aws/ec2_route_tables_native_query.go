@@ -146,8 +146,16 @@ type ec2NativeRouteTableMutationResponse struct {
 }
 
 func ec2NativeRouteTableRecord(r EC2NetworkResource) ec2RouteTableRead {
-	// Do not invent a main table, implicit route or live forwarding state.
-	return ec2RouteTableRead{ID: r.ID, VPC: r.VPCID, Owner: "000000000000", Tags: ec2ReadTags(r.Tags)}
+	table := ec2RouteTableRead{ID: r.ID, VPC: r.VPCID, Owner: "000000000000", Tags: ec2ReadTags(r.Tags)}
+	// This is saved local configuration, not a data-plane observation.
+	if r.CIDR != "" {
+		table.Routes = []ec2RouteRead{{CIDR: r.CIDR, Gateway: "local", Origin: "CreateRouteTable", State: "active"}}
+	}
+	if isNativeMainTable(r) {
+		table.Associations = []ec2RouteAssociationRead{{ID: nativeMainAssociationID(r.Region, r.VPCID), Table: r.ID, Main: true,
+			State: &ec2NativeRouteAssociationStatus{State: "associated"}}}
+	}
+	return table
 }
 
 func (s *StackStore) executeEC2NativeRouteTableMutation(ctx context.Context, action, region string, q ec2NativeRouteTableQuery) (*ec2NativeRouteTableMutationResponse, error) {

@@ -8,6 +8,7 @@ import (
 	"encoding/xml"
 	"errors"
 	"maps"
+	"net/netip"
 	"slices"
 	"sort"
 	"strings"
@@ -45,10 +46,11 @@ type ec2RouteRead struct {
 	State   string `xml:"state"`
 }
 type ec2RouteAssociationRead struct {
-	ID     string `xml:"routeTableAssociationId"`
-	Table  string `xml:"routeTableId"`
-	Subnet string `xml:"subnetId"`
-	Main   bool   `xml:"main"`
+	ID     string                           `xml:"routeTableAssociationId"`
+	Table  string                           `xml:"routeTableId"`
+	Subnet string                           `xml:"subnetId,omitempty"`
+	Main   bool                             `xml:"main"`
+	State  *ec2NativeRouteAssociationStatus `xml:"associationState,omitempty"`
 }
 
 // Exact table scope yields at most one bounded wire row for mutation
@@ -257,11 +259,34 @@ func (s *StackStore) describeEC2RouteTables(ctx context.Context, region string) 
 			CIDR: key.destination.String(), Gateway: routes[key].gateway, Origin: "CreateRoute", State: "active",
 		})
 	}
+	associationIDs := make(map[string]bool, associationCount)
+	for _, matches := range associations {
+		for _, association := range matches {
+			associationIDs[association.ID] = true
+		}
+	}
 	for _, item := range native {
 		table := ec2NativeRouteTableRecord(item)
-		table.Associations = associations[item.ID]
+		if len(table.Associations) > 0 {
+			main := table.Associations[0].ID
+			if associationIDs[main] {
+				return nil, errEC2RouteSnapshot
+			}
+			associationIDs[main] = true
+		}
+		table.Associations = append(table.Associations, associations[item.ID]...)
 		delete(associations, item.ID)
-		table.Routes = byTable[item.ID]
+		table.Routes = append(table.Routes, byTable[item.ID]...)
+		if item.CIDR != "" {
+			slices.SortFunc(table.Routes, func(a, b ec2RouteRead) int {
+				aPrefix, _ := netip.ParsePrefix(a.CIDR)
+				bPrefix, _ := netip.ParsePrefix(b.CIDR)
+				if n := aPrefix.Addr().Compare(bPrefix.Addr()); n != 0 {
+					return n
+				}
+				return cmp.Compare(aPrefix.Bits(), bPrefix.Bits())
+			})
+		}
 		delete(byTable, item.ID)
 		out = append(out, table)
 	}

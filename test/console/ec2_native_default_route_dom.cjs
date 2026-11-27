@@ -6,6 +6,7 @@ const {port, cookie, vpc, table, gateway, asset, preset} = JSON.parse(readFileSy
 assert.ok(Number.isInteger(port) && port > 0 && port < 65536);
 const origin = 'http://127.0.0.1:' + port;
 const sleep = ms => new Promise(resolve => setTimeout(resolve,ms));
+const disabled = button => button.disabled || button.getAttribute('aria-disabled') === 'true';
 async function until(find, message) {
   for (const end=Date.now()+9000;Date.now()<end;) {
     const match=find();
@@ -46,8 +47,10 @@ async function boot(html, bundle, locale) {
       if (receipt.omitSavedSibling) {
         receipt.omitSavedSibling=false;
         const state=new w.DOMParser().parseFromString(await response.text(),'application/xml');
-        const route=state.querySelector('routeSet item');
-        assert.equal(route.querySelector('destinationCidrBlock').textContent,'198.51.100.0/24');
+        const routes=[...state.querySelectorAll('routeSet item')];
+        assert.ok(routes.some(item=>item.querySelector('gatewayId')?.textContent==='local'));
+        const route=routes.find(item=>item.querySelector('destinationCidrBlock')?.textContent==='198.51.100.0/24');
+        assert.ok(route);
         route.remove();
         return new Response(new w.XMLSerializer().serializeToString(state),{status:200,headers:{'Content-Type':'text/xml'}});
       }
@@ -103,7 +106,7 @@ async function boot(html, bundle, locale) {
     receipt.release();
     await until(()=>d.body.textContent.includes('Saved IPv4 route in: '+table)&&rowButton(remove)&&!rowButton(remove).disabled,
       'creation was not published after its exact durable readback');
-    assert.ok(rowButton('Delete route table').disabled||rowButton('Delete route table').getAttribute('aria-disabled')==='true');
+    assert.ok(disabled(rowButton('Delete route table')));
     assert.ok(rowButton(remove).closest('tr').textContent.includes(gateway));
     const {MaxResults:pageSize,...oneTable}=preset;
     assert.equal(pageSize,100);
@@ -128,7 +131,7 @@ async function boot(html, bundle, locale) {
       {Action:'DeleteRoute',Version:'2016-11-15',RouteTableId:table,DestinationCidrBlock:'0.0.0.0/0'});
     btn('Refresh route tables').click();
     await until(()=>rowButton(add)&&!rowButton(add).disabled,'fresh inventory did not show the saved deletion');
-    assert.ok(rowButton(remove).disabled,'refresh did not clear stale route');
+    assert.ok(disabled(rowButton(remove)),'refresh did not clear stale route');
     assert.equal(receipt.calls.filter(c=>c.action==='DeleteRoute').length,1,'refresh replayed deletion');
 
     rowButton(add).click();
@@ -167,7 +170,7 @@ async function boot(html, bundle, locale) {
     formChange(again,table);
     await until(()=>!btn(remove,dialog())?.disabled,'matching ID did not permit final non-default removal');
     btn(remove,dialog()).click();
-    await until(()=>d.body.textContent.includes('Removed IPv4 route from: '+table)&&rowButton(remove).disabled,
+    await until(()=>d.body.textContent.includes('Removed IPv4 route from: '+table)&&disabled(rowButton(remove)),
       'verified non-default removal was not shown');
     assert.equal(receipt.calls.filter(c=>c.action==='DeleteRoute').at(-1).form.DestinationCidrBlock,'198.51.100.0/24');
   } finally {

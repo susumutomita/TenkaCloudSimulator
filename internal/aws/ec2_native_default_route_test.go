@@ -54,6 +54,7 @@ func expectExactNativeDefaultRoute(t *testing.T, f ec2VPCFixture, selection url.
 	if gateway != "" {
 		want = []ec2RouteRead{{CIDR: ec2NativeDefaultCIDR, Origin: "CreateRoute", State: "active", Gateway: gateway}}
 	}
+	want = append(want, expectsNativeLocalRoute(t, f, igwRegion, vpc))
 	if !slices.Equal(r.Tables[0].Routes, want) {
 		t.Fatalf("want route %+v, got %+v", want, r.Tables[0].Routes)
 	}

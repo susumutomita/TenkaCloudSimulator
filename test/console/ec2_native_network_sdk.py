@@ -4,6 +4,7 @@ from contextlib import ExitStack
 import json
 import os
 from pathlib import Path
+import re
 import tempfile
 
 os.environ['AWS_CONFIG_FILE'] = os.environ['AWS_SHARED_CREDENTIALS_FILE'] = '/dev/null'
@@ -30,6 +31,23 @@ def sdk(stack, port, token, region=REGION):
 def state(c):
     return (c.describe_subnets()['Subnets'], c.describe_security_groups()['SecurityGroups'],
             c.describe_network_acls()['NetworkAcls'])
+
+
+def native_local_route(cidr):
+    return {'DestinationCidrBlock': cidr, 'GatewayId': 'local', 'Origin': 'CreateRouteTable', 'State': 'active'}
+
+
+def fresh_main_route_table(client, vpc, cidr):
+    row, = [table for table in client.describe_route_tables()['RouteTables'] if table['VpcId'] == vpc]
+    assert re.fullmatch(r'rtb-[0-9a-f]{17}', row['RouteTableId'])
+    assert row['Routes'] == [native_local_route(cidr)] and row['Tags'] == []
+    main, = row['Associations']
+    assert re.fullmatch(r'rtbassoc-[0-9a-f]{17}', main['RouteTableAssociationId'])
+    assert main == {'Main': True, 'RouteTableId': row['RouteTableId'],
+                    'RouteTableAssociationId': main['RouteTableAssociationId'],
+                    'AssociationState': {'State': 'associated'}}
+    assert client.describe_route_tables(RouteTableIds=[row['RouteTableId']])['RouteTables'] == [row]
+    return row
 
 
 def reject(operation, code, **fields):
@@ -63,6 +81,7 @@ def check(binary):
         with run_default(binary, state=beta) as (bp, bt), ExitStack() as bx:
             b = sdk(bx, bp, bt)
             bv = b.create_vpc(CidrBlock='10.87.0.0/16')['Vpc']['VpcId']
+            bm = fresh_main_route_table(b, bv, '10.87.0.0/16')
             assert state(b) == ([], [], [])
             with run_default(binary, state=alpha) as (ap, at), ExitStack() as ax:
                 assert ap != bp and at != bt and alpha != beta
@@ -71,6 +90,8 @@ def check(binary):
                 a = sdk(ax, ap, at)
                 parent = a.create_vpc(CidrBlock='10.87.0.0/16')['Vpc']['VpcId']
                 assert parent != bv
+                am = fresh_main_route_table(a, parent, '10.87.0.0/16')
+                assert am['RouteTableId'] != bm['RouteTableId']
                 builder = sdk(ax, ap, participant(ap, at, parent))
                 with ThreadPoolExecutor(max_workers=3) as sends:
                     sf = sends.submit(builder.create_subnet, VpcId=parent, CidrBlock='10.87.1.24/24', AvailabilityZone=REGION+'b')
@@ -90,7 +111,7 @@ def check(binary):
                 assert saved[1][0]['GroupId']==group and saved[1][0]['GroupName']=='app-workers'
                 assert saved[1][0]['IpPermissions']==[] and saved[2]==[acl]
                 assert {v['VpcId'] for v in a.describe_vpcs()['Vpcs']}=={parent}
-                assert a.describe_route_tables()['RouteTables']==[]
+                assert a.describe_route_tables()['RouteTables']==[am] and b.describe_route_tables()['RouteTables']==[bm]
                 selector = [{'Name':'vpc-id','Values':[parent]}]
                 assert a.describe_security_groups(Filters=selector, GroupIds=[group])['SecurityGroups']==saved[1]
                 assert a.describe_network_acls(Filters=selector, NetworkAclIds=[acl_id])['NetworkAcls']==saved[2]
@@ -102,11 +123,12 @@ def check(binary):
                 reject(b.delete_subnet,'InvalidSubnetID.NotFound',SubnetId=subnet_id)
                 reject(b.delete_security_group,'InvalidGroup.NotFound',GroupId=group)
                 reject(b.delete_network_acl,'InvalidNetworkAclID.NotFound',NetworkAclId=acl_id)
-                assert state(b)==state(sdk(ax,ap,at,'ap-northeast-1'))==([],[],[])
+                far = sdk(ax,ap,at,'ap-northeast-1')
+                assert state(b)==state(far)==([],[],[]) and far.describe_route_tables()['RouteTables']==[]
                 assert state(a)==saved
             with run_default(binary,state=alpha) as (ap,at), ExitStack() as ax:
                 a = sdk(ax,ap,at)
-                assert state(a) == saved
+                assert state(a) == saved and a.describe_route_tables()['RouteTables']==[am]
                 assert a.create_network_acl(VpcId=parent,ClientToken=stable)['NetworkAcl']==acl
                 a.delete_subnet(SubnetId=subnet_id)
                 assert state(a)==([],saved[1],saved[2])
@@ -118,9 +140,9 @@ def check(binary):
                 reject(a.create_network_acl,'InvalidNetworkAclID.NotFound',VpcId=parent,ClientToken=stable)
                 assert state(a)==([],[],[])
                 a.delete_vpc(VpcId=parent)
-                assert not a.describe_vpcs()['Vpcs']
+                assert not a.describe_vpcs()['Vpcs'] and not a.describe_route_tables()['RouteTables']
             b.delete_vpc(VpcId=bv)
-            assert not b.describe_vpcs()['Vpcs'] and state(b)==([],[],[])
+            assert not b.describe_vpcs()['Vpcs'] and state(b)==([],[],[]) and not b.describe_route_tables()['RouteTables']
     print('PASS exact native EC2 SDK: three concurrent child creates in one VPC, isolated reads, denied mutations, restart replay, per-child delete, parent dependencies and cleanup. Two local team DBs/tokens; no network attachment or guest.')
 
 

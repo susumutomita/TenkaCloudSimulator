@@ -195,16 +195,17 @@ ownership entries, not a scan of every stack template. If a stack loses all
 such rows and claims, its table cannot be discovered or reported as corrupt. The normal EC2 discovery IAM check runs first; an
 instance-scoped console handoff cannot enumerate tables.
 
-Unlike [AWS DescribeRouteTables](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_DescribeRouteTables.html),
-there are no main tables, local routes or implicit associations, including for
-native EC2 VPCs. `state=active` describes the configured gateway route, **not**
-observed packet forwarding. The only supported filter is
+For [new EC2-owned VPCs](#native-vpc-lifecycle), the main table has one system
+association with `main=true` and no `subnetId`. Every table in that VPC has the
+same read-only IPv4 CIDR route (`gatewayId=local`, `origin=CreateRouteTable`,
+`state=active`). A route marked `active` still describes saved configuration,
+**not** observed packet forwarding. The only supported filter is
 `association.subnet-id`: specify one to eight exact lowercase 8- or 17-hex
 subnet IDs. The values are ORed, and a match returns the entire route table.
 The selector considers only current explicit associations, both native and
 CloudFormation-managed. A well-formed no-match returns an empty list. The
 filter runs **after** the same regional ownership and state validation; it does
-not narrow IAM scope, hide inconsistent state, or create an implicit fallback.
+not narrow IAM scope, hide inconsistent state, or include implicit main-table use.
 The separate exact `RouteTableId.1` selector (SDK `RouteTableIds=[id]`) returns
 at most one complete table, retaining the same regional validation and IAM.
 An exact no-match is `InvalidRouteTableID.NotFound`. Combining the exact ID
@@ -256,14 +257,20 @@ and [DeleteRouteTable](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/AP
 Table creation/deletion and subnet association writes wait for a complete fresh
 regional readback before reporting success; an unconfirmed write requires refresh,
 not a replay. IPv4 route changes retain the separate exact-table readback.
-When a table is present,
-its exact ID is required to confirm deletion. Create accepts the selected
+For new VPCs, the pane distinguishes the main table, its read-only `local`
+route, and subnets using the main table implicitly. That last list requires an
+authorized `DescribeSubnets` read reconciled with the complete route table list.
+If it cannot verify both, it does not show an empty fallback list as success.
+The main table cannot be deleted directly. For other tables, the exact ID is
+required to confirm deletion. Create accepts the selected
 `VpcId`, an idempotency `ClientToken`, and optionally a Name tag. IAM checks
 the VPC and created table resource, including `ec2:CreateTags` if a tag is
-saved. Delete checks the exact table resource. A VPC with dependent metadata
-cannot be deleted before its table. The persisted ledger retains up to 4,096
-create token digests to prevent replay after deletion. A new native table starts
-without associations or routes. [The native IPv4 route lifecycle](ec2-native-default-route.md) adds and removes up to 16 canonical destinations per table; propagation and forwarding are not provided.
+saved. Delete checks the exact table resource. A VPC with a custom table
+cannot be deleted before that table. The persisted ledger retains up to 4,096
+create token digests to prevent replay after deletion. A custom table starts
+with no explicit associations or saved gateway routes; the `local` route
+does not count toward the [16 saved IPv4 destinations](ec2-native-default-route.md).
+Propagation and forwarding are not provided.
 
 ### Native subnet route table associations
 
@@ -319,8 +326,10 @@ Remove an association before deleting its table or subnet; both deletes
 otherwise return `DependencyViolation`. Replacement reuses one slot in the
 same 1,000-resource network bound. `GatewayId`, `PublicIpv4Pool`, `ClientToken`,
 main-table/gateway association replacement and CloudFormation mutations remain
-outside this subset. Disassociation does not fall back to a main table.
-There is no packet forwarding, implicit route, guest or reachability guarantee.
+outside this subset. Disassociation removes the explicit row. In a new native
+VPC, that subnet then uses the main table in the saved configuration; there is
+no new explicit association in the Query response. Older VPCs without a main
+stay unchanged. There is no packet forwarding, guest or reachability guarantee.
 
 Check with the repository-pinned boto3/botocore from `scripts/requirements-test.txt`:
 
@@ -344,8 +353,8 @@ configuration only: no packet path, VM or DNS service is created.
 
 | Operation | Supported members | Result |
 | --- | --- | --- |
-| `CreateVpc` | `CidrBlock` (IPv4, `/16`–`/28`; host bits are cleared as in CloudFormation), `TagSpecification.1` with `ResourceType=vpc` and up to 50 tags, `InstanceTenancy=default`, `DryRun=false` | `vpc` with `vpcId` (`vpc-` + 17 hex), `cidrBlock`, `tagSet` and `simulatorManagedBy=ec2`. DNS support is on and DNS hostnames are off, as AWS defaults for a non-default VPC |
-| `DeleteVpc` | `VpcId`, `DryRun=false` | `return` `true`; the row is removed in one transaction |
+| `CreateVpc` | `CidrBlock` (IPv4, `/16`–`/28`; host bits are cleared as in CloudFormation), `TagSpecification.1` with `ResourceType=vpc` and up to 50 tags, `InstanceTenancy=default`, `DryRun=false` | `vpc` with `vpcId` (`vpc-` + 17 hex), `cidrBlock`, `tagSet` and `simulatorManagedBy=ec2`. DNS support is on and DNS hostnames are off. The VPC and its main table are stored atomically (two network slots). |
+| `DeleteVpc` | `VpcId`, `DryRun=false` | `return` `true`; the VPC and its main table, if present, are removed atomically if no other network resource depends on either. |
 
 Errors use AWS codes: `MissingParameter`, `InvalidParameterValue` (malformed CIDR
 or tags), `InvalidVpc.Range` (netmask outside `/16`–`/28`), `InvalidVpcID.Malformed`,
@@ -362,15 +371,19 @@ the stack is refused and the VPC is unchanged. For an EC2-owned VPC,
 [the native subnet lifecycle](ec2-native-subnet.md) is available without changing ownership.
 Detached security groups, network ACLs and route tables also use the existing
 EC2-owned VPC and shared 1,000-resource bound. Deletion of a native VPC is refused
-while any native subnet, group, ACL or route table depends on it. Remove the
+while any native subnet, group, ACL, custom table, or saved route still depends on it. Remove the
 children through their own APIs, including [native gateways](ec2-internet-gateways.md) and [native IPv4 routes](ec2-native-default-route.md).
 `ModifyVpcAttribute`,
 VPC endpoints and tag edits are not implemented.
 
-**Existing databases remain readable when upgraded. Do not downgrade a
-database after creating new native children, including route table associations and routes:**
-earlier Simulators do not recognize those native records and can reject discovery. No migration-back or
-downgrade procedure has been verified.
+As in the [AWS main and local route model](https://docs.aws.amazon.com/vpc/latest/userguide/subnet-route-tables.html),
+new native VPCs have one main route table and a `local` route in each table.
+The native VPC and main have stable persisted ownership; the main is deleted
+with its parent only. Existing native VPCs are **not** backfilled, and reading an
+existing database never creates a main table or `local` route. For the new
+behavior, create a new EC2-owned VPC. Do not downgrade a database after creating
+new native children. Older binaries can reject discovery; no downgrade procedure
+has been verified. Main-table reassignment and secondary CIDRs are not supported.
 
 Exercise identities need `ec2:CreateVpc` on `arn:aws:ec2:<region>:000000000000:vpc/*`,
 plus `ec2:CreateTags` on the same resource when tags are supplied, and

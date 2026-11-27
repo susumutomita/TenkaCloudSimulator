@@ -26793,6 +26793,197 @@
           "expect_invariant": "ExactTransition"
         }
       ]
+    },
+    {
+      "id": "EC2NativeVPCMainRoute",
+      "model": "formal/EC2NativeVPCMainRoute.tla",
+      "config": "formal/EC2NativeVPCMainRoute.cfg",
+      "bounds": "One fresh native VPC and related main across two incarnations; one optional custom table and subnet, two bounded static routes, one symbolic retained owner/relationship, old and CFN frames, four independently normalized table/subnet UI read receipts.",
+      "properties": [
+        "TypeOK",
+        "AtomicPairedSlot",
+        "OwnedLocalOnly",
+        "NoImplicitWire",
+        "CountersExcludeLocal",
+        "RetainedFencesDelete",
+        "ReadInvalidRefuses",
+        "UnrelatedOwnershipUnchanged",
+        "EffectiveNeedsFreshInventories",
+        "EffectiveOnlyUnassociated"
+      ],
+      "limits": "Finite symbolic parent/child and recorded-route lifecycle, explicit filter and current effective-pane evidence only. The implementation storage bound is 1,000 and the explicit table limit is 16. No Go/SQLite, mixed-case JSON, XML or pagination/cryptography refinement; no IAM, React or browser scheduling proof, legacy migration, guest, reachability or packet routing.",
+      "source_scope": [
+        "internal/aws/ec2_native_default_route_store.go",
+        "internal/aws/ec2_native_vpc_main_route.go",
+        "internal/aws/ec2_network.go",
+        "internal/aws/ec2_route_tables_native.go",
+        "internal/aws/ec2_route_tables_native_query.go",
+        "internal/aws/ec2_route_tables_read.go",
+        "internal/aws/ec2_vpc.go",
+        "internal/server/web/app.js",
+        "tools/console/src/ec2-native-route-tables.mjs",
+        "tools/console/src/ec2-readonly.jsx",
+        "tools/console/src/ec2-response.mjs",
+        "tools/console/src/ec2-route-table-pages.mjs",
+        "tools/console/src/ec2-route-tables.mjs",
+        "tools/console/src/ec2-vpc-native-route-tables.jsx"
+      ],
+      "mutants": [
+        {
+          "id": "CreateUnpaired",
+          "edits": [
+            {
+              "old": "!.vpc = epoch + 1, !.main = epoch + 1",
+              "new": "!.vpc = epoch + 1, !.main = 0",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AtomicPairedSlot"
+        },
+        {
+          "id": "OmitAutomaticLocal",
+          "edits": [
+            {
+              "old": "!.localMain = TRUE] ELSE net",
+              "new": "!.localMain = FALSE] ELSE net",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "OwnedLocalOnly"
+        },
+        {
+          "id": "DeleteMainDirect",
+          "edits": [
+            {
+              "old": "/\\ net' = net\n  /\\ result' = \"none\" /\\ event' = \"idle\"",
+              "new": "/\\ net' = [net EXCEPT !.main=0]\n  /\\ result' = \"none\" /\\ event' = \"idle\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AtomicPairedSlot"
+        },
+        {
+          "id": "DropReferenceFence",
+          "edits": [
+            {
+              "old": "/\\ ack' = allowed'\n  /\\ net' = IF ack' THEN Empty ELSE net",
+              "new": "/\\ ack' = (~net.custom /\\ ~net.subnet /\\ net.static = 0 /\\ ~late)\n  /\\ net' = IF ack' THEN Empty ELSE net",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "RetainedFencesDelete"
+        },
+        {
+          "id": "DropFinalFence",
+          "edits": [
+            {
+              "old": "/\\ ack' = allowed'\n  /\\ net' = IF ack' THEN Empty ELSE net",
+              "new": "/\\ ack' = (retained = \"none\" /\\ ~net.custom /\\ ~net.subnet /\\ net.static = 0)\n  /\\ net' = IF ack' THEN Empty ELSE net",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "RetainedFencesDelete"
+        },
+        {
+          "id": "InventExplicitBinding",
+          "edits": [
+            {
+              "old": "IF net.explicit THEN \"explicit\" ELSE \"empty\"",
+              "new": "IF net.explicit \\/ net.main # 0 THEN \"explicit\" ELSE \"empty\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "NoImplicitWire"
+        },
+        {
+          "id": "ChargeAutomaticRoute",
+          "edits": [
+            {
+              "old": "/\\ ack' = (net.static < MaxStatic)",
+              "new": "/\\ ack' = (net.static + 1 < MaxStatic)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CountersExcludeLocal"
+        },
+        {
+          "id": "IgnoreIndependentDeclaration",
+          "edits": [
+            {
+              "old": "IF retained # \"none\" THEN \"refused\"",
+              "new": "IF retained = \"claim\" THEN \"refused\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadInvalidRefuses"
+        },
+        {
+          "id": "RewriteLegacy",
+          "edits": [
+            {
+              "old": "!.localMain = TRUE] ELSE net",
+              "new": "!.localMain = TRUE, !.legacy = \"changed\"] ELSE net",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "UnrelatedOwnershipUnchanged"
+        },
+        {
+          "id": "AdmitEffectiveDeniedSubnets",
+          "edits": [
+            {
+              "old": "IF proof = \"effective-complete\" /\\ retained = \"none\"",
+              "new": "IF (proof = \"effective-complete\" \\/ proof = \"effective-denied\") /\\ retained = \"none\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "EffectiveNeedsFreshInventories"
+        },
+        {
+          "id": "AdmitEffectivePartialTables",
+          "edits": [
+            {
+              "old": "IF proof = \"effective-complete\" /\\ retained = \"none\"",
+              "new": "IF (proof = \"effective-complete\" \\/ proof = \"effective-partial\") /\\ retained = \"none\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "EffectiveNeedsFreshInventories"
+        },
+        {
+          "id": "AdmitEffectiveStaleScope",
+          "edits": [
+            {
+              "old": "IF proof = \"effective-complete\" /\\ retained = \"none\"",
+              "new": "IF (proof = \"effective-complete\" \\/ proof = \"effective-stale\") /\\ retained = \"none\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "EffectiveNeedsFreshInventories"
+        },
+        {
+          "id": "IgnoreUnconfirmedEffectiveOwnership",
+          "edits": [
+            {
+              "old": "IF proof = \"effective-complete\" /\\ retained = \"none\"",
+              "new": "IF proof = \"effective-complete\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "EffectiveNeedsFreshInventories"
+        },
+        {
+          "id": "DoubleCountExplicitSubnet",
+          "edits": [
+            {
+              "old": "THEN IF net.subnet /\\ ~net.explicit THEN \"implicit\" ELSE \"empty\"",
+              "new": "THEN IF net.subnet THEN \"implicit\" ELSE \"empty\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "EffectiveOnlyUnassociated"
+        }
+      ]
     }
   ]
 }

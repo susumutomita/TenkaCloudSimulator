@@ -1,5 +1,6 @@
 import {loadEC2RouteTablePages,readEC2RouteTableReply} from './ec2-route-table-pages.mjs';
 import {loadVpcSubnets} from './ec2-native-subnets.mjs';
+import {parseEC2RouteTableWireRow} from './ec2-response.mjs';
 import {vpcRouteTablesAvailable} from './ec2-route-tables.mjs';
 import {describeInternetGateways,internetGatewaysAvailable} from './ec2-internet-gateways.mjs';
 import {compareIPv4RoutePrefixes,ec2IPv4Prefix,ipv4DefaultRoute,nativeIPv4RouteDestination,nativeIPv4RouteLimit} from './ec2-ipv4-route-prefix.mjs';
@@ -10,12 +11,10 @@ const associationActions=['DescribeRouteTables','DescribeSubnets','AssociateRout
 const replaceAction='ReplaceRouteTableAssociation';
 const routeActions=['DescribeRouteTables','DescribeInternetGateways','CreateRoute','DeleteRoute'];
 const vpcID=/^vpc-[0-9a-f]{17}$/;
-const tableID=/^rtb-[0-9a-f]{17}$/;
 const subnetID=/^subnet-[0-9a-f]{17}$/;
 const associationID=/^rtbassoc-[0-9a-f]{17}$/;
 const regionID=/^[a-z]{2}(?:-[a-z0-9]+)+-[0-9]+$/;
 const tokenShape=/^[ -~]{1,64}$/;
-const wireFields=['routeTableId','vpcId','ownerId','routeSet','associationSet','tagSet'];
 const bytes=new TextEncoder();
 const invalid=()=>{throw Error('Invalid or incomplete detached route table response.');};
 const xml=text=>new DOMParser().parseFromString(text,'application/xml');
@@ -105,12 +104,16 @@ async function snapshot(request,region,vpc,options) {
   const routeLimit=options.routeLimit??0;
   if (![0,1,nativeIPv4RouteLimit].includes(routeLimit)) invalid();
   const binding={request,region,vpc:vpc.id,cidr:vpc.cidr,associations,routeLimit,regionalSubnets,
+    main:saved.find(item=>item.mainAssociation),tableIDs:new Set(saved.map(item=>item.id)),
     replacement:associations&&options.replacement===true,complete:!options.exactID&&!options.selectedSubnet};
   const rows=saved.map(item=>{
-    if (item.routes.length>routeLimit||item.routes.some(route=>!nativeIPv4RouteDestination(route.cidr,vpc.cidr)||
+    if (item.localRoute&&item.localRoute.cidr!==vpc.cidr||
+        item.routes.length>routeLimit||item.routes.some(route=>!nativeIPv4RouteDestination(route.cidr,vpc.cidr)||
         routeLimit===1&&route.cidr!==ipv4DefaultRoute)||!associations&&item.associations.length||
         item.tags.some(tag=>!validNativeRouteTableName(tag.value))) invalid();
     const row=Object.freeze({id:item.id,vpc:item.vpc,name:item.tags.find(tag=>tag.key==='Name')?.value??'',
+      ...(item.mainAssociation?{mainAssociation:Object.freeze(item.mainAssociation)}:{}),
+      ...(item.localRoute?{localRoute:Object.freeze(item.localRoute)}:{}),
       ...(associations?{associations:Object.freeze(item.associations.map(Object.freeze))}:{}),
       ...(routeLimit?{routes:Object.freeze(item.routes.map(Object.freeze))}:{})});
     rowScopes.set(row,binding);
@@ -127,40 +130,72 @@ function scopedTable(request,region,vpc,table,options) {
   return binding;
 }
 
+function requireComplete(binding,options) {
+  if (!binding.complete||options.exactID||options.selectedSubnet) invalid();
+}
+
+function sameSystemRow(lhs,rhs) {
+  return lhs?.mainAssociation?.id===rhs?.mainAssociation?.id&&lhs?.localRoute?.cidr===rhs?.localRoute?.cidr;
+}
+
+function verifyMain(rows,binding) {
+  const main=rows.find(item=>item.mainAssociation);
+  if (main?.id!==binding.main?.id||!sameSystemRow(main,binding.main)) invalid();
+}
+
 export async function loadVpcNativeRouteTables(request,region,vpc,options={}) {
   return (await snapshot(request,region,vpc,options)).rows;
 }
 
+// AWS does not return implicit subnet IDs in DescribeRouteTables. Derive
+// only a display projection from the complete, current route-table read and
+// a separate verified subnet inventory, never from a filtered table lookup.
+export async function loadVpcNativeRouteFallback(request,region,vpc,rows,options={}) {
+  if (!Array.isArray(rows)) invalid();
+  if (!rows.length) return null;
+  const binding=scopedTable(request,region,vpc,rows[0],options);
+  requireComplete(binding,options);
+  if (rows.length!==binding.tableIDs.size||new Set(rows.map(row=>row.id)).size!==rows.length||
+      rows.some(row=>scopedTable(request,region,vpc,row,options)!==binding||!binding.tableIDs.has(row.id))) invalid();
+  verifyMain(rows,binding);
+  if (!binding.main) return null;
+  const subnets=await loadVpcSubnets(request,region,vpc,options);
+  options.signal?.throwIfAborted();
+  if (subnets.some(row=>row.owner!=='ec2'||row.vpc!==vpc.id||!shape(row.id,subnetID))) invalid();
+  const known=new Set(subnets.map(row=>row.id));
+  const explicit=new Set(rows.flatMap(row=>(row.associations??[]).map(assoc=>assoc.subnet)));
+  if ([...explicit].some(id=>!known.has(id))) invalid();
+  return Object.freeze({tableID:binding.main.id,subnetIDs:Object.freeze(subnets.filter(row=>!explicit.has(row.id)).map(row=>row.id))});
+}
+
 export async function createVpcNativeRouteTable(request,region,vpc,name,clientToken,options={}) {
-  if (!validNativeRouteTableName(name) || !shape(clientToken,tokenShape)) invalid();
+  if (!validNativeRouteTableName(name)||!shape(clientToken,tokenShape)||options.exactID||options.selectedSubnet) invalid();
   const tags=name ? {'TagSpecification.1.ResourceType':'route-table','TagSpecification.1.Tag.1.Key':'Name','TagSpecification.1.Tag.1.Value':name} : {};
   const doc=await send(request,region,vpc,'CreateRouteTable',{VpcId:vpc?.id,ClientToken:clientToken,...tags},options);
   const receipt=envelope(doc,'CreateRouteTable',['routeTable','clientToken']);
-  const table=fields(receipt.get('routeTable'),wireFields), id=leaf(table.get('routeTableId'));
-  if (!shape(id,tableID) || leaf(table.get('vpcId'))!==vpc.id || leaf(table.get('ownerId'))!=='000000000000' ||
-      leaf(receipt.get('clientToken'))!==clientToken || children(table.get('routeSet')).length ||
-      children(table.get('associationSet')).length) invalid();
-  const got=children(table.get('tagSet'));
-  if (got.length!==(name?1:0)) invalid();
-  if (name) {
-    if (got[0].localName!=='item') invalid();
-    const tag=fields(got[0],['key','value']);
-    if (leaf(tag.get('key'))!=='Name' || leaf(tag.get('value'))!==name) invalid();
-  }
+  let table;
+  try {table=parseEC2RouteTableWireRow(receipt.get('routeTable'));} catch {invalid();}
+  if (table.vpc!==vpc.id||leaf(receipt.get('clientToken'))!==clientToken||table.mainAssociation||
+      table.routes.length||table.associations.length||table.localRoute&&table.localRoute.cidr!==vpc.cidr||
+      table.tags.length!==(name?1:0)||name&&(table.tags[0].key!=='Name'||table.tags[0].value!==name)) invalid();
   const {rows,saved}=await snapshot(request,region,vpc,options);
-  const created=rows.find(row=>row.id===id&&row.name===name);
-  if (!created || saved.find(row=>row.id===id).tags.length!==got.length) invalid();
+  const created=rows.find(row=>row.id===table.id&&row.name===name);
+  const savedTable=saved.find(row=>row.id===table.id);
+  if (!created||!sameSystemRow(savedTable,table)||savedTable.tags.length!==table.tags.length||
+      savedTable.routes.length||savedTable.associations.length) invalid();
   return {created,rows};
 }
 
 export async function deleteVpcNativeRouteTable(request,region,vpc,table,options={}) {
-  scopedTable(request,region,vpc,table,options);
-  if (table.associations?.length||table.routes?.length) invalid();
+  const binding=scopedTable(request,region,vpc,table,options);
+  requireComplete(binding,options);
+  if (table.mainAssociation||table.associations?.length||table.routes?.length) invalid();
   const doc=await send(request,region,vpc,'DeleteRouteTable',{RouteTableId:table.id},options);
   if (leaf(envelope(doc,'DeleteRouteTable',['return']).get('return'))!=='true') invalid();
   const {rows,regionalIDs}=await snapshot(request,region,vpc,options);
   // Absence only in the selected VPC is not enough if the ID was moved.
   if (regionalIDs.has(table.id)) invalid();
+  verifyMain(rows,binding);
   rowScopes.delete(table);
   return {removed:table,rows};
 }
@@ -169,6 +204,7 @@ export async function deleteVpcNativeRouteTable(request,region,vpc,table,options
 // native VPC, not from text entry or from a chosen service/identity override.
 export async function loadVpcRouteAssociationTargets(request,region,vpc,table,options={}) {
   const binding=scopedTable(request,region,vpc,table,options);
+  requireComplete(binding,options);
   if (!binding.associations) invalid();
   const subnets=await loadVpcSubnets(request,region,vpc,options);
   options.signal?.throwIfAborted();
@@ -182,12 +218,14 @@ export async function loadVpcRouteAssociationTargets(request,region,vpc,table,op
 
 export async function associateVpcRouteSubnet(request,region,vpc,table,subnet,options={}) {
   const binding=scopedTable(request,region,vpc,table,options);
+  requireComplete(binding,options);
   if (!binding.associations||subnetScopes.get(subnet)!==table||binding.regionalSubnets.has(subnet.id)) invalid();
   const doc=await send(request,region,vpc,'AssociateRouteTable',{RouteTableId:table.id,SubnetId:subnet.id},options);
   const receipt=envelope(doc,'AssociateRouteTable',['associationId','associationState']);
   const id=leaf(receipt.get('associationId')), state=fields(receipt.get('associationState'),['state']);
   if (!shape(id,associationID)||leaf(state.get('state'))!=='associated') invalid();
   const {rows}=await snapshot(request,region,vpc,options);
+  verifyMain(rows,binding);
   const associated=rows.find(row=>row.id===table.id)?.associations.find(row=>row.id===id&&row.subnet===subnet.id);
   if (!associated) invalid();
   return {associated,rows};
@@ -195,18 +233,20 @@ export async function associateVpcRouteSubnet(request,region,vpc,table,subnet,op
 
 export async function disassociateVpcRouteSubnet(request,region,vpc,table,association,options={}) {
   const binding=scopedTable(request,region,vpc,table,options);
+  requireComplete(binding,options);
   if (!binding.associations||!table.associations.includes(association)) invalid();
   const doc=await send(request,region,vpc,'DisassociateRouteTable',{AssociationId:association.id},options);
   if (leaf(envelope(doc,'DisassociateRouteTable',['return']).get('return'))!=='true') invalid();
   const {rows,regionalAssociations,regionalSubnets}=await snapshot(request,region,vpc,options);
   // A moved ID or a different binding on the same subnet is not absence.
   if (!rows.some(row=>row.id===table.id)||regionalAssociations.has(association.id)||regionalSubnets.has(association.subnet)) invalid();
+  verifyMain(rows,binding);
   return {disassociated:association,rows};
 }
 
 function matchesReplacedRow(saved,prior,associations) {
   const identity=items=>items.map(a=>a.id+':'+a.subnet).sort();
-  return !!saved&&saved.name===prior.name&&JSON.stringify(saved.routes)===JSON.stringify(prior.routes)&&
+  return !!saved&&sameSystemRow(saved,prior)&&saved.name===prior.name&&JSON.stringify(saved.routes)===JSON.stringify(prior.routes)&&
     JSON.stringify(identity(saved.associations))===JSON.stringify(identity(associations));
 }
 
@@ -221,6 +261,7 @@ export async function replaceVpcRouteSubnet(request,region,vpc,source,associatio
   const id=leaf(receipt.get('newAssociationId')),state=fields(receipt.get('associationState'),['state']);
   if (!shape(id,associationID)||id===association.id||leaf(state.get('state'))!=='associated') invalid();
   const {rows,regionalAssociations}=await snapshot(request,region,vpc,options);
+  verifyMain(rows,binding);
   const from=rows.find(row=>row.id===source.id),to=rows.find(row=>row.id===target.id);
   const replaced=to?.associations.find(row=>row.id===id&&row.subnet===association.subnet);
   // Require the complete regional witness, not a filtered absence or the
@@ -265,7 +306,7 @@ export async function changeVpcNativeIPv4Route(request,region,vpc,table,target,d
   // AND preservation of sibling routes. A stale or partial set cannot become
   // success merely because the selected CIDR is missing.
   if (next.routes.length!==expected.length||next.routes.some((r,i)=>r.cidr!==expected[i].cidr||r.gateway!==expected[i].gateway)||
-      next.name!==table.name||JSON.stringify(next.associations)!==JSON.stringify(table.associations)||
+      !sameSystemRow(next,table)||next.name!==table.name||JSON.stringify(next.associations)!==JSON.stringify(table.associations)||
       saved[0].id!==table.id) invalid();
   options.signal?.throwIfAborted();
   rowScopes.set(next,binding);

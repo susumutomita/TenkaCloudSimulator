@@ -105,7 +105,7 @@ func nativeIPv4Routes(ctx context.Context, tx *sql.Tx, region string, all []EC2N
 		if err := ensureNativeInternetGatewayUnclaimed(ctx, tx, region, r.ID, declared); err != nil {
 			return nil, err
 		}
-		table, err := readNativeRouteTable(ctx, tx, region, r.RouteTableID)
+		table, err := readNativeRouteTableInSnapshot(ctx, tx, region, r.RouteTableID, &declared)
 		if err != nil || table.VPCID != r.VPCID {
 			return nil, errEC2NativeDefaultRouteState
 		}
@@ -181,6 +181,9 @@ func (s *StackStore) changeNativeDefaultRoute(ctx context.Context, region string
 	table, err := readNativeRouteTable(ctx, tx, region, q.table)
 	if err != nil {
 		return err
+	}
+	if table.CIDR != "" && q.destination.String() == table.CIDR {
+		return ec2Invalid("InvalidParameterValue", "The automatic VPC-local route is not editable in this simulator.")
 	}
 	before, err := readInternetGatewayInventory(ctx, tx, region)
 	if err != nil {

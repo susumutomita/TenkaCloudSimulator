@@ -1,13 +1,15 @@
 # Native IPv4 route configuration
 
 This is a bounded local EC2 network configuration operation, not a packet path.
-An explicitly created **native** route table can contain up to 16 saved IPv4
+Each **native** route table can contain up to 16 explicitly saved IPv4
 routes, optionally including a default route. Every route targets the
 **native internet gateway currently attached to the table's native VPC**
 in the same local region. A non-default route lets you describe a narrow
-outside-VPC destination without adding a catch-all route. Creating a VPC, an
-attachment or a subnet association does not create any route. CloudFormation
-routes and their ownership are unchanged.
+outside-VPC destination without adding a catch-all route. New EC2-owned VPCs
+also have a main table, and each of their tables includes a read-only `local`
+route for the VPC CIDR. That row does not consume an explicit route slot.
+Creating an attachment or subnet association adds no gateway routes. Existing
+VPCs without a main table and CloudFormation ownership are unchanged.
 
 Use the usual authenticated local Query endpoint and EC2 API version
 `2016-11-15`. Use a local simulator URL and a host-issued simulator token in SDKs;
@@ -18,7 +20,7 @@ cannot read or mutate these route tables.
 | --- | --- |
 | [CreateRoute][create] | Send one `RouteTableId`, IPv4 `DestinationCidrBlock` and `GatewayId`. The destination is canonicalized; for example, `198.51.100.19/24` becomes `198.51.100.0/24`. Detached and other-VPC gateways are refused. A duplicate canonical destination returns `RouteAlreadyExists` without replacing it. |
 | [DescribeRouteTables][describe] | Each saved route appears with canonical `DestinationCidrBlock`, the target `GatewayId`, `Origin=CreateRoute` and `State=active`. This means validated, saved configuration only. Use a single exact `RouteTableId.1` (SDK `RouteTableIds=[id]`), an explicit `association.subnet-id` filter, or no selector. The exact selector has at most one response row; a missing table returns `InvalidRouteTableID.NotFound`. The full regional consistency check occurs before selecting any output. Exact-ID readback is unpaged and cannot be combined with a filter. The [regional list](ec2-read-discovery.md#route-table-readback) can be paged with or without an explicit subnet filter. |
-| [DeleteRoute][delete] | Send the exact `RouteTableId` and exact canonical `DestinationCidrBlock`. No target parameter. Removes only the saved route for that destination; other routes stay unchanged. An absent route returns `InvalidRoute.NotFound`. |
+| [DeleteRoute][delete] | Send the exact `RouteTableId` and exact canonical `DestinationCidrBlock`. No target parameter. Removes only the saved gateway route for that destination; other routes stay unchanged. An absent route returns `InvalidRoute.NotFound`. The managed `local` route cannot be removed and returns `InvalidParameterValue`. |
 
 For writes, the [EC2 action][iam] must be allowed on the exact
 `arn:aws:ec2:<region>:000000000000:route-table/<id>`. Ordinary
@@ -32,10 +34,11 @@ change. Each native route consumes one row of the existing shared 1,000-network-
 bound. The simulator also limits a native table to 16 explicit IPv4 routes,
 not the [AWS quota][quotas]. A valid request beyond either local bound gets
 `RouteLimitExceeded`; after deleting a route, the released slot can be reused.
-Delete **all** routes referring to a table or gateway before deleting the table
+Delete **all** saved gateway routes referring to a table or gateway before deleting the table
 or detaching the gateway. Either attempted removal while referenced
 returns `DependencyViolation`. A native table must also be disassociated from
-any subnet before deleting it.
+any subnet before deleting it. The main table itself can only be removed with
+its parent VPC.
 
 A non-default destination must be disjoint from the native VPC's IPv4 CIDR
 and the reserved `169.254.168.0/22` service range ([AWS rules][local-ranges]).

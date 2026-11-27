@@ -13,7 +13,7 @@ import SpaceBetween from '@cloudscape-design/components/space-between';
 import Table from '@cloudscape-design/components/table';
 import {useLocale} from './i18n.jsx';
 import {associateVpcRouteSubnet,createVpcNativeRouteTable,deleteVpcNativeRouteTable,disassociateVpcRouteSubnet,
-  replaceVpcRouteSubnet,loadVpcNativeRouteTables,loadVpcRouteAssociationTargets,nativeRouteTableFailure,nativeRouteTableTarget,
+  replaceVpcRouteSubnet,loadVpcNativeRouteTables,loadVpcNativeRouteFallback,loadVpcRouteAssociationTargets,nativeRouteTableFailure,nativeRouteTableTarget,
   validNativeRouteTableName,changeVpcNativeIPv4Route,loadVpcNativeRouteGateway} from './ec2-native-route-tables.mjs';
 
 import {ipv4DefaultRoute,nativeIPv4RouteDestination} from './ec2-ipv4-route-prefix.mjs';
@@ -31,9 +31,11 @@ export default function VPCNativeRouteTables({request,region,vpc,acquireWrite,wr
   const options=signal=>({signal,associations:scope.associations,replacement:scope.replacement,routeLimit:scope.routeLimit});
   const active=useRef(null);
   const [result,setResult]=useState(null),[modal,setModal]=useState(null),[notice,setNotice]=useState(null),[page,setPage]=useState(1);
+  const [fallback,setFallback]=useState(null);
   const current=result?.scope===scope ? result : null;
   const dialog=modal?.scope===scope ? modal : null;
   const ready=current?.status==='ready',pending=current?.status==='writing';
+  const readyRows=ready?current.rows:null;
   const canWrite=typeof acquireWrite==='function'&&!writeBlocked;
 
   function retire() {
@@ -70,8 +72,21 @@ export default function VPCNativeRouteTables({request,region,vpc,acquireWrite,wr
   }
   useEffect(()=>{void refresh();return retire;},[scope]);
 
-  // Load only on opening the association form. A DescribeSubnets denial
-  // must not hide readable tables or their saved associations.
+  // A failed subnet inventory leaves the confirmed tables and explicit
+  // associations visible, but never turns an unknown fallback into "none".
+  useEffect(()=>{
+    if (!readyRows?.some(row=>row.mainAssociation)) return;
+    const controller=new AbortController();
+    const save=(value,error)=>{
+      if(!controller.signal.aborted) setFallback({scope,rows:readyRows,value,error});
+    };
+    loadVpcNativeRouteFallback(scope.request,scope.region,scope.vpc,readyRows,options(controller.signal))
+      .then(value=>save(value,null),error=>save(null,nativeRouteTableFailure(error)));
+    return ()=>controller.abort();
+  },[scope,readyRows]);
+
+  // A separate, current read when opening an explicit association form
+  // gives the form a scoped target rather than routing presentation data.
   const draft=dialog?.kind==='associate' ? dialog.draft : null;
   useEffect(()=>{
     if (!draft || !scope.associations) return;
@@ -114,7 +129,7 @@ export default function VPCNativeRouteTables({request,region,vpc,acquireWrite,wr
       replacing ? scope.replacement&&target&&replacementTarget :
       addingRoute ? scope.routeLimit>dialog.row.routes.length&&!!destination&&!duplicateRoute&&!!routeTarget :
       removingRoute ? scope.routeLimit&&!!routeTarget&&dialog.confirm===dialog.row.id :
-      dialog?.kind==='delete'&&!dialog.row.associations?.length&&!dialog.row.routes?.length&&dialog.confirm===dialog.row.id);
+      dialog?.kind==='delete'&&!dialog.row.mainAssociation&&!dialog.row.associations?.length&&!dialog.row.routes?.length&&dialog.confirm===dialog.row.id);
   async function submit(event) {
     event.preventDefault();
     if (!validScope || !ready || !canWrite || !valid) return;
@@ -161,6 +176,18 @@ export default function VPCNativeRouteTables({request,region,vpc,acquireWrite,wr
     unconfirmed:t('Could not confirm the saved route table state. No result was reported.','ルートテーブルの保存状態を確認できませんでした。結果は表示していません。'),
   };
   const rows=current?.rows??[],pages=Math.max(1,Math.ceil(rows.length/pageSize)),shown=Math.min(page,pages);
+  const hasMain=rows.some(row=>row.mainAssociation);
+  const verifiedFallback=readyRows&&fallback?.scope===scope&&fallback.rows===readyRows?fallback:null;
+  function effectiveFallback(item) {
+    if (!item.mainAssociation) return '—';
+    if (verifiedFallback?.error) return verifiedFallback.error==='denied'
+      ? t('Not verified: ec2:DescribeSubnets is denied.','未確認: ec2:DescribeSubnets が拒否されました。')
+      : t('Could not verify effective subnets. Refresh route tables.','実際に適用されるサブネットを確認できませんでした。ルートテーブルを更新してください。');
+    const known=verifiedFallback?.value;
+    if (known?.tableID!==item.id)
+      return t('Verifying subnets that use the main table','メインテーブルを使用するサブネットを確認中');
+    return known.subnetIDs.length? known.subnetIDs.map(id=><div key={id}>{identifier(id)}</div>) : t('None','なし');
+  }
   const loading=!current || current.status==='loading';
   const refreshLabel=t('Refresh route tables','ルートテーブルを更新');
   const createLabel=t('Create route table','ルートテーブルを作成');
@@ -190,25 +217,31 @@ export default function VPCNativeRouteTables({request,region,vpc,acquireWrite,wr
       <Button iconName="refresh" disabled={pending} loading={loading} onClick={refresh}>{refreshLabel}</Button>
       <Button disabled={!ready||!canWrite} onClick={()=>setModal({scope,kind:'create',name:''})}>{createLabel}</Button>
     </SpaceBetween>}>{t('Route tables','ルートテーブル')}</Header>
-    <Box color="text-body-secondary">{scope.routeLimit
-      ? t('Saved configuration only. A route may target the native internet gateway attached to this VPC. No main table, local route or packet forwarding is created.','保存済みの設定のみです。ルートの宛先には、この VPC に接続されたネイティブのインターネットゲートウェイを指定できます。メインテーブルやローカルルートは作成されず、通信は転送されません。')
+    <Box color="text-body-secondary">{hasMain
+      ? t('Saved configuration only. Subnets without an explicit association use the main table. The local route is read-only, and no packets are forwarded.','保存済みの設定のみです。明示的な関連付けのないサブネットにはメインテーブルが適用されます。ローカルルートは読み取り専用で、通信は転送されません。')
+      : scope.routeLimit
+      ? t('Saved configuration only. A route may target the native internet gateway attached to this VPC. No packets are forwarded.','保存済みの設定のみです。ルートの宛先には、この VPC に接続されたネイティブのインターネットゲートウェイを指定できます。通信は転送されません。')
       : scope.associations
-      ? t('Saved configuration only. Explicit subnet associations do not create routes, a main table or packet forwarding.','保存済みの設定のみです。サブネットの明示的な関連付けは、ルートやメインテーブルを作成せず、パケットも転送しません。')
+      ? t('Saved configuration only. Explicit subnet associations do not create routes or forward packets.','保存済みの設定のみです。サブネットの明示的な関連付けではルートを作成せず、パケットも転送しません。')
       : t('Detached configuration only. These tables have no routes or subnet associations and do not forward traffic.','関連付けのない設定のみです。ルートやサブネットの関連付けは含まれず、通信は転送しません。')}</Box>
     {notice?.scope===scope&&<Alert type="success">{notices[notice.kind]}{identifier(notice.id)}</Alert>}
     {errors[current?.status]&&<Alert type="error">{errors[current.status]} {current.refreshBeforeWrite&&
       t('Refresh route tables before trying again.','再試行する前にルートテーブルを更新してください。')}</Alert>}
     <Table variant="embedded" trackBy="id" items={rows.slice((shown-1)*pageSize,shown*pageSize)} loading={loading||pending}
       loadingText={t('Reading route tables','ルートテーブルを読み込み中')}
-      ariaLabels={{tableLabel:scope.associations?t('Saved route tables','保存済みのルートテーブル'):t('Saved detached route tables','保存済みの関連付けのないルートテーブル')}}
+      ariaLabels={{tableLabel:scope.associations||hasMain?t('Saved route tables','保存済みのルートテーブル'):t('Saved detached route tables','保存済みの関連付けのないルートテーブル')}}
       columnDefinitions={[
-        {id:'id',header:t('Route table ID','ルートテーブル ID'),cell:item=>identifier(item.id)},
+        {id:'id',header:t('Route table ID','ルートテーブル ID'),cell:item=><>{identifier(item.id)}
+          {item.mainAssociation&&<> · {t('Main','メイン')}</>}</>},
         {id:'name',header:t('Name','名前'),cell:item=>item.name||'—'},
         ...(scope.associations?[{id:'associations',header:t('Explicit subnet associations','明示的なサブネットの関連付け'),
           cell:item=>item.associations.length ? item.associations.map(row=><div key={row.id}>{identifier(row.subnet)}</div>)
             : t('None','なし')}]:[]),
-        ...(scope.routeLimit?[{id:'ipv4-routes',header:t('IPv4 routes','IPv4 ルート'),
-          cell:item=>item.routes.length?item.routes.map(route=><div key={route.cidr}>{identifier(route.cidr)} → {identifier(route.gateway)}</div>):t('None','なし')}]:[]),
+        ...(hasMain?[{id:'effective-subnets',header:t('Subnets using the main table implicitly','メインテーブルが暗黙的に適用されるサブネット'),
+          cell:effectiveFallback}]:[]),
+        ...(scope.routeLimit||hasMain?[{id:'ipv4-routes',header:t('IPv4 routes','IPv4 ルート'),cell:item=>
+          item.localRoute||item.routes?.length?<>{item.localRoute&&<div>{identifier(item.localRoute.cidr)} → {identifier('local')} · {t('Read-only','読み取り専用')}</div>}
+            {item.routes?.map(route=><div key={route.cidr}>{identifier(route.cidr)} → {identifier(route.gateway)}</div>)}</>:t('None','なし')}]:[]),
         {id:'actions',header:t('Actions','操作'),cell:item=><SpaceBetween size="xxs">
           {scope.associations&&<>
             <Button disabled={!ready||!canWrite} ariaLabel={associateLabel+': '+item.id}
@@ -225,10 +258,11 @@ export default function VPCNativeRouteTables({request,region,vpc,acquireWrite,wr
               onClick={()=>setModal({scope,kind:'add-route',row:item,draft:{row:item},
                 destination:item.routes.some(route=>route.cidr===ipv4DefaultRoute)?'':ipv4DefaultRoute})}>{addRouteLabel}</Button>
             <Button disabled={!ready||!canWrite||!item.routes.length} ariaLabel={removeRouteLabel+': '+item.id}
+              disabledReason={!item.routes.length&&item.localRoute?t('The local route is read-only.','ローカルルートは読み取り専用です。'):undefined}
               onClick={()=>setModal({scope,kind:'remove-route',row:item,routeSelected:'',confirm:''})}>{removeRouteLabel}</Button>
           </>}
-          <Button disabled={!ready||!canWrite||!!item.associations?.length||!!item.routes?.length} ariaLabel={deleteLabel+': '+item.id}
-            disabledReason={item.routes?.length?t('Remove the saved IPv4 routes before deleting this table.','テーブルを削除するには保存済みの IPv4 ルートを先に削除してください。'):item.associations?.length?t('Remove the explicit associations before deleting this table.','このテーブルを削除するには明示的な関連付けを先に解除してください。'):undefined}
+          <Button disabled={!ready||!canWrite||!!item.mainAssociation||!!item.associations?.length||!!item.routes?.length} ariaLabel={deleteLabel+': '+item.id}
+            disabledReason={item.mainAssociation?t('The main route table cannot be deleted.','メインルートテーブルは削除できません。'):item.routes?.length?t('Remove the saved IPv4 routes before deleting this table.','テーブルを削除するには保存済みの IPv4 ルートを先に削除してください。'):item.associations?.length?t('Remove the explicit associations before deleting this table.','このテーブルを削除するには明示的な関連付けを先に解除してください。'):undefined}
             onClick={()=>setModal({scope,kind:'delete',row:item,confirm:''})}>{deleteLabel}</Button>
         </SpaceBetween>},
       ]}
@@ -286,12 +320,13 @@ export default function VPCNativeRouteTables({request,region,vpc,acquireWrite,wr
           {dialog.choiceError ? <Alert type="error">{dialog.choiceError==='denied'
             ? t('Subnet discovery was denied. The selected identity needs ec2:DescribeSubnets.','サブネットの参照が拒否されました。現在の ID に ec2:DescribeSubnets 権限が必要です。')
             : t('Could not verify the available subnets. No request was sent to change associations.','利用可能なサブネットを確認できません。関連付けを変更するリクエストは送信していません。')}</Alert>
-            : <FormField label={attaching?t('Unassociated subnet in this VPC','この VPC 内の未関連付けサブネット')
+            : <FormField label={attaching?(hasMain?t('Subnet without an explicit association','明示的な関連付けのないサブネット')
+              :t('Unassociated subnet in this VPC','この VPC 内の未関連付けサブネット'))
               :t('Saved explicit association','保存済みの明示的な関連付け')}>
               <Select options={associationOptions} selectedOption={associationOptions.find(choice=>choice.value===dialog.selected)??null}
                 disabled={pending||!associationOptions.length} statusType={selections?'finished':'loading'}
                 loadingText={t('Reading available subnets','利用可能なサブネットを読み込み中')}
-                placeholder={selections&&!selections.length?t('No unassociated subnets are available.','関連付け可能なサブネットはありません。'):t('Choose an entry','項目を選択')}
+                placeholder={selections&&!selections.length?t('No subnets are available for explicit association.','明示的に関連付けられるサブネットはありません。'):t('Choose an entry','項目を選択')}
                 onChange={({detail})=>setModal(old=>old===dialog ? {...old,selected:detail.selectedOption.value,confirm:''} : old)}/>
             </FormField>}
           {detaching&&target&&<FormField label={t('Enter the association ID to confirm removal','解除を確認するには関連付け ID を入力')}>

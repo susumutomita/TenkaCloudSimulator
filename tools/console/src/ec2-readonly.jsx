@@ -160,12 +160,12 @@ export default function EC2Readonly({kind,region,request,sessionInstance,onSessi
       </SpaceBetween></Container>
       <Alert type="info">{paired
         ? t('Creates a new VPC and subnet in one local stack. It cannot attach to an existing VPC and does not add route tables, security groups or gateways.','1つのローカルスタックに新規 VPC とサブネットを作成します。既存 VPC への追加や、ルートテーブル、セキュリティグループ、ゲートウェイの作成はできません。')
-        : t('VPC only creates no subnet. Route tables, security groups, gateways, IPv6, IPAM, DNS settings and additional tags are not available in this form.','VPC のみではサブネットを作成しません。ルートテーブル、セキュリティグループ、ゲートウェイ、IPv6、IPAM、DNS 設定、追加のタグはこのフォームでは利用できません。')}</Alert></SpaceBetween>
+        : t('VPC only creates a main route table automatically, but does not create a subnet. Additional network settings are not available in this form.','VPC のみでは、メインルートテーブルを自動で作成しますが、サブネットは作成しません。このフォームで追加のネットワーク設定はできません。')}</Alert></SpaceBetween>
     </Form></form></ContentLayout>;
   const deletable=detail?.managedBy==='ec2';
   const nativeRoutePane=vpcNativeRouteTables&&nativeRouteTableTarget(detail);
   return <ContentLayout header={<div ref={heading} tabIndex={-1}><Header variant="h1">{instance?t('EC2 instances','EC2 インスタンス'):'VPC'}</Header></div>}><SpaceBetween size="l">
-    {manage?<Alert type="info">{t('Delete CloudFormation-managed networks through their stack. Use the available subnet and network configuration controls on EC2-managed VPCs. Native route and gateway attachment edits are unavailable.','CloudFormation 管理のネットワークはスタックから削除してください。EC2 管理の VPC ではサブネットと利用可能なネットワーク設定を操作できます。ルートやゲートウェイの接続は編集できません。')}</Alert>
+    {manage?<Alert type="info">{t('Delete CloudFormation-managed networks through their stack. In an EC2-managed VPC, select a resource to use the available subnet, route table or gateway controls. These settings do not forward traffic.','CloudFormation 管理のネットワークはスタックから削除してください。EC2 管理の VPC では、対象を選択してサブネット、ルートテーブル、ゲートウェイの利用可能な設定を変更できます。設定によって実際の通信が転送されるわけではありません。')}</Alert>
       :<Alert type="info">{t('Read-only resources managed through CloudFormation. Create, start, stop and network edits are not supported here. Reported state is not a health check of the guest.','CloudFormation で管理されるリソースの読み取り専用画面です。この画面から作成・起動・停止・ネットワーク編集はできません。表示された状態はゲストの稼働確認ではありません。')}</Alert>}
     {notice&&<Alert type="success" dismissible dismissAriaLabel={t('Dismiss','閉じる')} onDismiss={()=>setNotice('')}>{notice}</Alert>}
     {error&&<Alert type="error" header={t('Could not load resources','リソースを読み込めませんでした')}>{error}</Alert>}

@@ -55,14 +55,18 @@ func TestEC2NativeRouteAssociationGatewayReadbackAndAuthority(t *testing.T) {
 		return rows
 	}
 	baseline := list("", region)
+	mainID := nativeMainTableID(region, parent)
+	main := baseline[mainID]
 	var cfn ec2RouteTableRead
 	for id, table := range baseline {
-		if id != q.table {
+		if id != q.table && id != mainID {
 			cfn = table
 		}
 	}
-	if len(baseline) != 2 || cfn.ID == "" || len(cfn.Associations) != 1 ||
-		len(baseline[q.table].Associations) != 0 {
+	if len(baseline) != 3 || cfn.ID == "" || len(cfn.Associations) != 1 ||
+		len(main.Associations) != 1 || !main.Associations[0].Main || main.Associations[0].Subnet != "" ||
+		!reflect.DeepEqual(main.Routes, []ec2RouteRead{nativeLocalRouteFixture("10.61.0.0/16")}) ||
+		!reflect.DeepEqual(main.Routes, baseline[q.table].Routes) || len(baseline[q.table].Associations) != 0 {
 		t.Fatalf("baseline did not contain exactly one CFN association and detached native table: %+v", baseline)
 	}
 
@@ -111,8 +115,9 @@ func TestEC2NativeRouteAssociationGatewayReadbackAndAuthority(t *testing.T) {
 	}
 	got := list(editor, region)
 	wantAssociation := ec2RouteAssociationRead{ID: id, Table: q.table, Subnet: q.subnet, Main: false}
-	if len(got) != 2 || !reflect.DeepEqual(got[cfn.ID], cfn) ||
-		!reflect.DeepEqual(got[q.table].Associations, []ec2RouteAssociationRead{wantAssociation}) || len(got[q.table].Routes) != 0 ||
+	if len(got) != 3 || !reflect.DeepEqual(got[cfn.ID], cfn) || !reflect.DeepEqual(got[mainID], main) ||
+		!reflect.DeepEqual(got[q.table].Associations, []ec2RouteAssociationRead{wantAssociation}) ||
+		!reflect.DeepEqual(got[q.table].Routes, baseline[q.table].Routes) ||
 		len(list(editor, other)) != 0 || len(f.describe(region)) != 2 {
 		t.Fatalf("incorrect bound readback, legacy continuity, or region: %+v", got)
 	}

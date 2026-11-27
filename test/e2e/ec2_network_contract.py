@@ -200,6 +200,8 @@ class NetworkContract(unittest.TestCase):
 
         vpc = self.ec2.create_vpc(CidrBlock='10.89.0.0/16')['Vpc']['VpcId']
         self.addCleanup(self.ec2.delete_vpc, VpcId=vpc)
+        main, = [r for r in self.ec2.describe_route_tables()['RouteTables'] if r['VpcId'] == vpc]
+        self.assertEqual([(a['Main'], a.get('SubnetId')) for a in main['Associations']], [(True, None)])
         subnet = self.ec2.create_subnet(VpcId=vpc, CidrBlock='10.89.1.0/24')['Subnet']['SubnetId']
         self.addCleanup(self.ec2.delete_subnet, SubnetId=subnet)
         table = self.ec2.create_route_table(VpcId=vpc)['RouteTable']['RouteTableId']
@@ -220,8 +222,9 @@ class NetworkContract(unittest.TestCase):
         finally:
             self.ec2.disassociate_route_table(AssociationId=association)
         self.assertEqual(filtered(subnet), [])
-        self.assertCountEqual(table_ids(self.ec2.describe_route_tables()['RouteTables']),
-                              [table, outputs['Table']])
+        current = self.ec2.describe_route_tables()['RouteTables']
+        self.assertCountEqual(table_ids(current), [table, main['RouteTableId'], outputs['Table']])
+        self.assertIn(main, current)
 
         # A reused logical stack name must not give the old subnet a new association.
         self.cfn.delete_stack(StackName=selected)
@@ -400,8 +403,12 @@ class NetworkContract(unittest.TestCase):
             cleanup.callback(self.ec2.delete_route, RouteTableId=table, DestinationCidrBlock='192.0.2.0/24')
             before = snapshot()
             exact, = self.ec2.describe_route_tables(RouteTableIds=[table])['RouteTables']
-            self.assertEqual(exact['Routes'], [{'DestinationCidrBlock': '192.0.2.0/24',
-                                               'GatewayId': gateway, 'Origin': 'CreateRoute', 'State': 'active'}])
+            self.assertEqual(exact['Routes'], [
+                {'DestinationCidrBlock': '10.76.0.0/16', 'GatewayId': 'local',
+                 'Origin': 'CreateRouteTable', 'State': 'active'},
+                {'DestinationCidrBlock': '192.0.2.0/24', 'GatewayId': gateway,
+                 'Origin': 'CreateRoute', 'State': 'active'},
+            ])
             self.assertEqual(exact['Associations'][0]['RouteTableAssociationId'], assoc)
 
             query = {'RouteTableId': table}
@@ -455,20 +462,30 @@ class NetworkContract(unittest.TestCase):
         self.cfn.delete_stack(StackName=survivor)
         self.assertEqual(snapshot(), empty)
 
-    def test_native_vpc_has_no_implicit_table_and_bare_table_has_no_children(self):
+    def test_fresh_native_vpc_has_one_main_and_cfn_bare_table_has_no_children(self):
         self.assertEqual(self.ec2.describe_route_tables()['RouteTables'], [])
         vpc_id = self.ec2.create_vpc(CidrBlock='10.68.0.0/16')['Vpc']['VpcId']
         self.addCleanup(self.ec2.delete_vpc, VpcId=vpc_id)
-        self.assertEqual(self.ec2.describe_route_tables()['RouteTables'], [])
+        main, = self.ec2.describe_route_tables()['RouteTables']
+        self.assertEqual(main['VpcId'], vpc_id)
+        self.assertRegex(main['RouteTableId'], r'^rtb-[0-9a-f]{17}$')
+        self.assertEqual(main['Routes'], [{'DestinationCidrBlock': '10.68.0.0/16', 'GatewayId': 'local',
+                                           'Origin': 'CreateRouteTable', 'State': 'active'}])
+        owner, = main['Associations']
+        self.assertTrue(owner['Main'])
+        self.assertEqual(owner['RouteTableId'], main['RouteTableId'])
+        self.assertNotIn('SubnetId', owner)
 
         bare = {section: {key: self.template[section][key] for key in ('Vpc', 'Table')}
                 for section in ('Resources', 'Outputs')}
         outputs = self.outputs(self.create('network-bare-table', bare))
         tables = self.ec2.describe_route_tables()['RouteTables']
-        self.assertEqual([t['RouteTableId'] for t in tables], [outputs['Table']])
-        self.assertEqual(tables[0]['VpcId'], outputs['Vpc'])
-        self.assertEqual(tables[0]['Routes'], [])
-        self.assertEqual(tables[0]['Associations'], [])
+        self.assertCountEqual([t['RouteTableId'] for t in tables], [outputs['Table'], main['RouteTableId']])
+        self.assertIn(main, tables)
+        cfn, = [row for row in tables if row['RouteTableId'] == outputs['Table']]
+        self.assertEqual(cfn['VpcId'], outputs['Vpc'])
+        self.assertEqual(cfn['Routes'], [])
+        self.assertEqual(cfn['Associations'], [])
 
     def test_missing_local_token_cannot_create_network(self):
         before = self.state()

@@ -23,7 +23,7 @@ export async function loadVpcRouteTables(request, region, vpc, {signal, subnetId
   const tables=snapshot.tables.filter(table=>table.vpc===vpc.id);
   // Other VPCs may contain multiple native routes; a verified CloudFormation
   // view retains its existing bounded one-default-route projection.
-  if(tables.some(row=>row.routes.length>1||row.routes[0]&&row.routes[0].cidr!==ipv4DefaultRoute))
+  if(tables.some(row=>row.localRoute||row.mainAssociation||row.routes.length>1||row.routes[0]&&row.routes[0].cidr!==ipv4DefaultRoute))
     throw Error('Invalid CloudFormation-managed route table.');
   return tables;
 }
