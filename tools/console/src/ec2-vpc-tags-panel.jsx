@@ -12,10 +12,19 @@ import Table from '@cloudscape-design/components/table';
 import {useLocale} from './i18n.jsx';
 import {changeVpcTag,loadVpcTagSnapshot,validVpcTagKey,validVpcTagValue,vpcTagFailure} from './ec2-vpc-tags.mjs';
 
-export default function VpcTagsPanel({vpc,region,request,acquireWrite,writeBlocked,onConfirmed}) {
+import {changeSubnetTag,loadSubnetTagSnapshot,subnetTagFailure} from './ec2-native-subnets.mjs';
+
+export default function VpcTagsPanel({vpc,subnet,region,request,acquireWrite,writeBlocked,onConfirmed}) {
   const {t}=useLocale();
-  const {id,managedBy}=vpc;
-  const scope=useMemo(()=>({region,request,vpc:{id,managedBy}}),[region,request,id,managedBy]);
+  const isSubnet=!!subnet;
+  const id=isSubnet?subnet.id:vpc.id;
+  const managedBy=isSubnet?subnet.owner:vpc.managedBy;
+  const parent=subnet?.vpc,cidr=subnet?.cidr,az=subnet?.az;
+  const scope=useMemo(()=>({region,request,target:isSubnet?{id,owner:managedBy,vpc:parent,cidr,az}:{id,managedBy}}),
+    [region,request,isSubnet,id,managedBy,parent,cidr,az]);
+  const load=isSubnet?loadSubnetTagSnapshot:loadVpcTagSnapshot;
+  const changeTag=isSubnet?changeSubnetTag:changeVpcTag;
+  const failure=isSubnet?subnetTagFailure:vpcTagFailure;
   const active=useRef(null);
   const [view,setView]=useState(null),[dialog,setDialog]=useState(null),[notice,setNotice]=useState(null);
   const current=view?.scope===scope?view:null, draft=dialog?.scope===scope?dialog:null;
@@ -40,10 +49,10 @@ export default function VpcTagsPanel({vpc,region,request,acquireWrite,writeBlock
     active.current=operation;
     setView({scope,status:'loading'});setDialog(null);setNotice(null);
     try {
-      const snapshot=await loadVpcTagSnapshot(scope.request,scope.region,scope.vpc,{signal:operation.abort.signal});
+      const snapshot=await load(scope.request,scope.region,scope.target,{signal:operation.abort.signal});
       if(finish(operation))setView({scope,status:'ready',snapshot});
     }catch(error) {
-      if(finish(operation))setView({scope,status:vpcTagFailure(error)});
+      if(finish(operation))setView({scope,status:failure(error)});
     }
   }
   useEffect(()=>{void refresh();return retire;},[scope]);
@@ -66,24 +75,25 @@ export default function VpcTagsPanel({vpc,region,request,acquireWrite,writeBlock
     setView({...current,status:'writing'});setNotice(null);
     try {
       const change=deleting?{kind:'remove',key:draft.key}:{kind:'upsert',key:draft.key,value:draft.value};
-      const snapshot=await changeVpcTag(scope.request,scope.region,scope.vpc,current.snapshot,change,{signal:operation.abort.signal});
+      const snapshot=await changeTag(scope.request,scope.region,scope.target,current.snapshot,change,{signal:operation.abort.signal});
       if(!finish(operation))return;
       setView({scope,status:'ready',snapshot});setDialog(null);setNotice({scope,key:draft.key});
       onConfirmed(snapshot);
     }catch(error) {
       if(!finish(operation))return;
-      setView({scope,status:vpcTagFailure(error),afterWrite:true});setDialog(null);
+      setView({scope,status:failure(error),afterWrite:true});setDialog(null);
     }
   }
   const title=t('Tags','タグ');
   if(!native)return <SpaceBetween size="xs"><Header variant="h3">{title}</Header><Box color="text-body-secondary">
-    {t('This VPC is not EC2-managed. Change its tags through its owner.','この VPC は EC2 管理ではありません。タグは管理元で変更してください。')}</Box></SpaceBetween>;
+    {isSubnet?t('This subnet is not EC2-managed. Change its tags through its owner.','このサブネットは EC2 管理ではありません。タグは管理元で変更してください。')
+      :t('This VPC is not EC2-managed. Change its tags through its owner.','この VPC は EC2 管理ではありません。タグは管理元で変更してください。')}</Box></SpaceBetween>;
   const add=t('Add tag','タグを追加'),edit=t('Edit tag','タグを編集'),remove=t('Delete tag','タグを削除');
   const loading=!current||current.status==='loading';
   const errors={
     denied:t('This identity cannot complete the tag request. Check its EC2 permissions.','現在の ID ではタグのリクエストを完了できません。EC2 の権限を確認してください。'),
-    'tag-limit':t('This VPC already has 50 tags. Edit or remove one of them first.','この VPC にはタグが 50 件あります。先に既存のタグを編集または削除してください。'),
-    'response-too-large':t('The regional VPC response is too large for the Console. No tags could be confirmed.','リージョンの VPC 応答がコンソールの上限を超えたため、タグを確認できませんでした。'),
+    'tag-limit':isSubnet?t('This subnet already has 50 tags. Edit or remove one of them first.','このサブネットにはタグが 50 件あります。先に既存のタグを編集または削除してください。'):t('This VPC already has 50 tags. Edit or remove one of them first.','この VPC にはタグが 50 件あります。先に既存のタグを編集または削除してください。'),
+    'response-too-large':isSubnet?t('The regional subnet response exceeds the Console limit. No tags could be confirmed.','リージョンのサブネット応答がコンソールの上限を超えたため、タグを確認できませんでした。'):t('The regional VPC response is too large for the Console. No tags could be confirmed.','リージョンの VPC 応答がコンソールの上限を超えたため、タグを確認できませんでした。'),
     unconfirmed:t('Could not confirm the saved tags. No change is shown as complete.','保存済みのタグを確認できませんでした。変更を完了として表示していません。'),
   };
   const modalTitle=adding?add:deleting?remove:edit;
@@ -101,7 +111,7 @@ export default function VpcTagsPanel({vpc,region,request,acquireWrite,writeBlock
           <Button ariaLabel={edit+' '+row.key} disabled={!ready||writeBlocked} onClick={()=>open('edit',row)}>{t('Edit','編集')}</Button>
           <Button ariaLabel={remove+' '+row.key} disabled={!ready||writeBlocked} onClick={()=>open('remove',row)}>{t('Delete','削除')}</Button>
         </SpaceBetween>},
-      ]} empty={ready?t('No tags are saved for this VPC.','この VPC に保存済みのタグはありません。'):t('Tags are unavailable.','タグを取得できません。')}/>
+      ]} empty={ready?(isSubnet?t('No tags are saved for this subnet.','このサブネットに保存済みのタグはありません。'):t('No tags are saved for this VPC.','この VPC に保存済みのタグはありません。')):t('Tags are unavailable.','タグを取得できません。')}/>
     {notice?.scope===scope&&<Alert type="success">{t('Confirmed saved tag change: ','タグの変更を確認しました: ')}{notice.key}</Alert>}
     {errors[current?.status]&&<Alert type="error">{errors[current.status]} {current.afterWrite&&t('Refresh tags before trying again.','再試行する前にタグを更新してください。')}</Alert>}
     {draft&&<Modal visible header={modalTitle} closeAriaLabel={t('Close tag dialog','タグのダイアログを閉じる')}
@@ -110,7 +120,7 @@ export default function VpcTagsPanel({vpc,region,request,acquireWrite,writeBlock
         <Button formAction="none" disabled={writing} onClick={()=>setDialog(null)}>{t('Cancel','キャンセル')}</Button>
         <Button variant="primary" formAction="submit" loading={writing} disabled={!valid}>{deleting?remove:t('Save tag','タグを保存')}</Button>
       </SpaceBetween>}><SpaceBetween size="m">
-        <Box>{t('Selected VPC: ','選択済み VPC: ')}{id}</Box>
+        <Box>{isSubnet?t('Selected subnet: ','選択済みサブネット: '):t('Selected VPC: ','選択済み VPC: ')}{id}</Box>
         {deleting?<Box>{t('Delete this saved tag? ','この保存済みタグを削除しますか？ ')}{draft.key}</Box>:<>
           <FormField label={t('Tag key','タグのキー')} constraintText={t('1–128 UTF-8 bytes; aws: is reserved.','UTF-8 で 1〜128 バイト。aws: は予約済みです。')}
             errorText={duplicate?t('This key already exists. Edit its row instead.','同じキーが存在します。その行を編集してください。'):undefined}>

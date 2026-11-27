@@ -56,7 +56,7 @@ type ec2Request struct {
 	tags               map[string]string
 	subnet             ec2SubnetMutation
 	vpcAttribute       ec2VPCAttributeQuery
-	vpcTag             ec2VPCTagQuery
+	nativeTag          ec2NativeTagQuery
 	securityGroup      *ec2NativeSecurityGroupQuery
 	networkACL         *ec2NetworkACLRequest
 	routeTable         *ec2NativeRouteTableQuery
@@ -93,7 +93,9 @@ func (q ec2Request) permissions(action, region string) [][2]string {
 			out = append(out, [2]string{"ec2:CreateTags", networkARN(region, "vpc", "*")})
 		}
 		return out
-	case "DeleteVpc", ec2DescribeVPCAttribute, ec2ModifyVPCAttribute, ec2CreateVPCTag, ec2DeleteVPCTag:
+	case ec2CreateVPCTag, ec2DeleteVPCTag:
+		return [][2]string{{"ec2:" + action, networkARN(region, q.nativeTag.resourceType, q.nativeTag.id)}}
+	case "DeleteVpc", ec2DescribeVPCAttribute, ec2ModifyVPCAttribute:
 		return [][2]string{{"ec2:" + action, networkARN(region, "vpc", q.vpcID)}}
 	}
 	return [][2]string{{"ec2:" + action, "*"}}
@@ -106,7 +108,7 @@ func parseEC2Request(action string, fields map[string][]string) (ec2Request, *ec
 		return parseEC2VPCAttribute(action, fields)
 	}
 	if action == ec2CreateVPCTag || action == ec2DeleteVPCTag {
-		return parseEC2VPCTag(action, fields)
+		return parseEC2NativeTag(action, fields)
 	}
 	if action == "DescribeRouteTables" {
 		query, err := parseEC2RouteTableSelection(fields)

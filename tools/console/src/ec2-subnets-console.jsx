@@ -19,6 +19,7 @@ import TextFilter from '@cloudscape-design/components/text-filter';
 import {useLocale} from './i18n.jsx';
 import {createVpcNativeSubnet,loadRegionalSubnetInventory,nativeSubnetCIDR,nativeSubnetFailure} from './ec2-native-subnets.mjs';
 import {loadEC2RouteTablePages} from './ec2-route-table-pages.mjs';
+import VpcTagsPanel from './ec2-vpc-tags-panel.jsx';
 import {subnetConsoleHref,subnetRouteTable} from './ec2-subnet-console-route.mjs';
 
 const shown=value=>value||'—';
@@ -26,23 +27,31 @@ const identifier=value=><span className="resource-identifier">{value}</span>;
 const pageSize=20;
 function vpcOption(vpc){return {value:vpc.id,label:vpc.name? vpc.name+' · '+vpc.id:vpc.id};}
 
-function SubnetDetails({subnet,request,region,showRoutes,back,hrefForResource}) {
+function SubnetDetails({subnet,request,region,showRoutes,back,hrefForResource,subnetTags,acquireWrite,onConfirmed}) {
   const {t}=useLocale();
+  const [tagBusy,setTagBusy]=useState(false);
   const [routes,setRoutes]=useState({status:'loading'});
+  const {id,vpc,owner:ownership}=subnet;
   useEffect(()=>{
     if(!showRoutes)return;
     const controller=new AbortController();
     loadEC2RouteTablePages(request,region,{signal:controller.signal})
-      .then(({tables})=>{if(!controller.signal.aborted)setRoutes({status:'ready',association:subnetRouteTable(tables,subnet)});})
+      .then(({tables})=>{if(!controller.signal.aborted)setRoutes({status:'ready',association:subnetRouteTable(tables,{id,vpc,owner:ownership})});})
       .catch(()=>{if(!controller.signal.aborted)setRoutes({status:'error'});});
     return ()=>controller.abort();
-  },[request,region,subnet,showRoutes]);
+  },[request,region,id,vpc,ownership,showRoutes]);
   const association=routes.association;
+  function lease() {
+    const release=acquireWrite();
+    if(!release)return null;
+    setTagBusy(true);
+    return ()=>{release();setTagBusy(false);};
+  }
   const owner=subnet.owner==='ec2'?'EC2':'CloudFormation';
   const ref=(kind,id)=>{const href=hrefForResource?.({kind,id,vpcId:subnet.vpc});
-    return href?<Link href={href}>{identifier(id)}</Link>:identifier(id);};
+    return href?<Link href={href} onFollow={event=>{if(tagBusy)event.preventDefault();}}>{identifier(id)}</Link>:identifier(id);};
   return <SpaceBetween size="l">
-    <Link href={back}>{t('Back to subnets','サブネット一覧に戻る')}</Link>
+    <Link href={back} onFollow={event=>{if(tagBusy)event.preventDefault();}}>{t('Back to subnets','サブネット一覧に戻る')}</Link>
     <Container header={<Header variant="h2">{t('Subnet details','サブネットの詳細')}</Header>}>
       <KeyValuePairs columns={2} minColumnWidth={180} items={[
         {label:t('Subnet ID','サブネット ID'),value:identifier(subnet.id)},
@@ -64,12 +73,14 @@ function SubnetDetails({subnet,request,region,showRoutes,back,hrefForResource}) 
           {label:t('Association','関連付け'),value:association.kind==='explicit'?t('Explicit subnet association','サブネットに明示的に関連付け済み'):t('Main route table (implicit)','メインルートテーブル（暗黙の関連付け）')},
         ]}/>:<Box>{t('No route-table association was confirmed for this subnet.','このサブネットのルートテーブルの関連付けは確認できませんでした。')}</Box>}
     </Container>}
+    {subnetTags&&<Container><VpcTagsPanel subnet={subnet} request={request} region={region}
+      acquireWrite={lease} writeBlocked={tagBusy} onConfirmed={onConfirmed}/></Container>}
     <Box color="text-body-secondary">{t('Subnet ACL associations, reserved addresses and guest connectivity are not provided by this view.',
       'この画面ではサブネットの ACL 関連付け、予約アドレス、ゲストの通信状態は表示しません。')}</Box>
   </SpaceBetween>;
 }
 
-export default function EC2SubnetsConsole({request,region,route,publicIPv4,showRoutes,onSaving,canCreate=true,hrefForResource}) {
+export default function EC2SubnetsConsole({request,region,route,publicIPv4,showRoutes,onSaving,canCreate=true,hrefForResource,subnetTags=false,acquireWrite}) {
   const {t}=useLocale();
   const [snapshot,setSnapshot]=useState({status:'loading'}),[revision,setRevision]=useState(0);
   const [filter,setFilter]=useState(route.vpc),[text,setText]=useState(''),[page,setPage]=useState(1);
@@ -119,12 +130,14 @@ export default function EC2SubnetsConsole({request,region,route,publicIPv4,showR
   function edit(change,value){if(!busy&&!neverReplay){change(value);setFormError('');}}
   const errors={
     denied:t('The current identity is not allowed to perform this subnet operation.','現在の ID ではサブネットを操作する権限がありません。'),
+    'response-too-large':t('The regional subnet reply exceeds the Console’s 16 MiB limit. Retrieve the regional inventory with the native SDK; the Console’s VPC filter does not reduce this response.',
+      'リージョンのサブネット応答がコンソールの 16 MiB 上限を超えています。ネイティブ SDK でリージョンの一覧を取得してください。コンソールの VPC 絞り込みでは応答は小さくなりません。'),
     overlap:t('This IPv4 range overlaps an existing subnet in the selected VPC.','この IPv4 CIDR は、選択した VPC の既存サブネットと重複します。'),
     unconfirmed:t('Could not confirm what was saved. Return to Subnets and inspect the inventory before trying again.',
       '保存結果を確認できませんでした。再試行する前にサブネット一覧で状態を確認してください。'),
   };
   const statusError=snapshot.status!=='loading'&&!ready
-    ? snapshot.status==='denied'?errors.denied:t('Could not confirm the regional subnet inventory.','このリージョンのサブネット一覧を確認できませんでした。'):null;
+    ? errors[snapshot.status]&&snapshot.status!=='unconfirmed'?errors[snapshot.status]:t('Could not confirm the regional subnet inventory.','このリージョンのサブネット一覧を確認できませんでした。'):null;
   const subtitle=creating?t('Add one IPv4 subnet to a local EC2-managed VPC.', 'EC2 が管理するローカル VPC に IPv4 サブネットを 1 つ追加します。')
     :!detailID?t('Saved IPv4 subnet configuration in this region, not a connectivity check.','このリージョンの保存済み IPv4 サブネット設定です。通信状態を確認するものではありません。'):undefined;
   const contentHeading=creating?t('Create subnet','サブネットを作成'):detailID||t('Subnets','サブネット');
@@ -162,10 +175,12 @@ export default function EC2SubnetsConsole({request,region,route,publicIPv4,showR
         </Container>
         <Container header={<Header variant="h2">{t('Subnet settings','サブネットの設定')}</Header>}>
           <SpaceBetween size="l">
-            <FormField label={t('Subnet name - optional','サブネット名 - オプション')}
+            {subnetTags?<Box color="text-body-secondary">
+              {t('After creation, open the subnet to set its Name tag.','作成後にサブネットを開き、Name タグを設定できます。')}
+            </Box>:<FormField label={t('Subnet name - optional','サブネット名 - オプション')}
               constraintText={t('The native simulator cannot save subnet names or tags.','ネイティブのシミュレーターではサブネット名やタグを保存できません。')}>
               <Input value="" disabled/>
-            </FormField>
+            </FormField>}
             <FormField label={t('Availability Zone','アベイラビリティーゾーン')}>
               <Select selectedOption={zones.find(option=>option.value===az)} options={zones} disabled={!createTarget||busy||neverReplay}
                 onChange={({detail})=>edit(setAz,detail.selectedOption.value)}/>
@@ -182,7 +197,10 @@ export default function EC2SubnetsConsole({request,region,route,publicIPv4,showR
         :snapshot.status==='loading'?<StatusIndicator type="loading">{t('Loading subnet','サブネットを読み込み中')}</StatusIndicator>
         :!detail?<Alert type="warning" action={<Button href={listHref}>{t('Back to subnets','サブネット一覧に戻る')}</Button>}>
           {t('This subnet was not found in the selected region.','選択したリージョンにはこのサブネットがありません。')}</Alert>
-        :<SubnetDetails key={detail.id} subnet={detail} request={request} region={region} showRoutes={showRoutes} back={listHref} hrefForResource={hrefForResource}/>}
+        :<SubnetDetails key={detail.id} subnet={detail} request={request} region={region} showRoutes={showRoutes} back={listHref} hrefForResource={hrefForResource}
+          subnetTags={subnetTags} acquireWrite={acquireWrite}
+          onConfirmed={saved=>setSnapshot(prev=>prev.status!=='ready'?prev:{...prev,subnets:prev.subnets.map(row=>
+            row.id===detail.id&&row.vpc===detail.vpc&&row.name!==saved.name?{...row,name:saved.name}:row)})}/>}
     </SpaceBetween>:<SpaceBetween size="l">
       {statusError&&<Alert type="error">{statusError}</Alert>}
       <Table trackBy="id" items={filtered.slice((page-1)*pageSize,page*pageSize)} loading={snapshot.status==='loading'}
