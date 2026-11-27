@@ -26,6 +26,7 @@ import os
 import pathlib
 import re
 import secrets
+import shutil
 import signal
 import socket
 import struct
@@ -61,6 +62,8 @@ parser.add_argument('--probe-interval', type=float, default=60.0)
 parser.add_argument('--create-timeout', type=float, default=900.0)
 parser.add_argument('--userdata-timeout', type=float, default=1500.0)
 parser.add_argument('--stop-after', default='')
+parser.add_argument('--console-form-smoke', action='store_true',
+                    help='run only the separate guarded EC2 console wire launch and physical cleanup witness')
 args = parser.parse_args()
 
 REGION = args.region
@@ -100,16 +103,23 @@ report = {
     'phases': [],
     'score': {'total': 0, 'rounds': []},
 }
+if args.console_form_smoke:
+    report.pop('templateSha256')
+    report.pop('metadataSha256')
+    report['runKind'] = 'ec2-console-form'
 
 
 def stamp():
     return time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime())
 
 
-PUBLIC_PHASES = ('startup', 'initialize', 'operate', 'grade', 'cleanup', 'shutdown')
+PUBLIC_PHASES = ('startup', 'console-form', 'initialize', 'operate', 'grade', 'cleanup', 'shutdown')
 PUBLIC_CHECKS = (
     'battle-capability-receipt', 'battle-runtime-configured', 'capability-sealed-and-joined',
     'create-stack-response', 'disruption-stops-frontend-and-penalizes',
+    'console-form-browser-session', 'console-form-real-qemu-process',
+    'console-form-sdk-state-matches', 'console-form-stack-process-and-state-cleanup',
+    'console-form-wire-succeeded',
     'ec2-inventory-empty-before-stack', 'ec2-inventory-restored-after-stack-delete',
     'ec2-readback-matches-completed-stack-instance', 'ec2-readback-requires-local-token',
     'guest-api-answers-before-terminal', 'guest-process-exited', 'healthy-round-awards-points',
@@ -174,6 +184,8 @@ def public_report(value):
     # This is a public evidence schema, not a recursive secret-pattern filter.
     # All free-form guest/API/exception text and unknown fields stay private.
     out = {'schemaVersion': 1, 'phases': [], 'score': {'rounds': []}}
+    if type(value.get('runKind')) is str and value['runKind'] == 'ec2-console-form':
+        out['runKind'] = 'ec2-console-form'
     for key in ('templateSha256', 'metadataSha256'):
         digest = value.get(key)
         if type(digest) is str and re.fullmatch('[a-f0-9]{64}', digest):
@@ -381,6 +393,80 @@ def matches_completed_stack_instance(events, stack_id, output_instance, instance
             and [g.get('GroupId') for g in instance.get('SecurityGroups', [])] == [owned['Sg']]
             and instance.get('ImageId') == RUNTIME['imageIds'][0]
             and instance.get('InstanceType') == 't3.micro')
+
+
+def console_form_smoke(ec2, before_instances):
+    """Separate browser-wire witness on the same approved runtime."""
+    p = phase('console-form')
+    name = 'tc-console-instance-' + secrets.token_hex(6)
+    describe = client('cloudformation', read_timeout=20)
+    before_roles = sorted(role['RoleName'] for role in client('iam').list_roles()['Roles'])
+
+    def exact_stack():
+        try:
+            stacks = describe.describe_stacks(StackName=name)['Stacks']
+        except ClientError as error:
+            detail = error.response.get('Error', {})
+            status = error.response.get('ResponseMetadata', {}).get('HTTPStatusCode')
+            if status == 400 and detail.get('Code') == 'ValidationError' and detail.get('Message') == 'Stack does not exist.':
+                return None
+            raise
+        if len(stacks) != 1 or stacks[0].get('StackName') != name:
+            raise RuntimeError('Console form stack lookup was unconfirmed')
+        return stacks[0]
+
+    if exact_stack() is not None:
+        raise RuntimeError('Console smoke stack name was already occupied')
+    status, headers, _ = raw_http('POST', '/_simulator/login', urllib.parse.urlencode({'token': TOKEN}).encode(),
+                                  {'Origin': ORIGIN, 'Content-Type': 'application/x-www-form-urlencoded'}, timeout=10)
+    cookie = headers.get('Set-Cookie', '').split(';', 1)[0]
+    check(p, 'console-form-browser-session', status == 303 and
+          re.fullmatch(r'tcsim_[0-9a-f]{12}=[0-9a-f]{64}', cookie) is not None)
+
+    # The simulator already owns the configured QEMU runtime; this Node helper
+    # executes the production request/response code and no guest commands.
+    helper = pathlib.Path(__file__).with_name('ec2_console_form_smoke.mjs').resolve(strict=True)
+    node = shutil.which('node')
+    if not node:
+        raise RuntimeError('Node.js with built-in fetch is required for the optional console form smoke')
+    budget = int(min(args.create_timeout, 315) * 1000)
+    started = time.time()
+    try:
+        result = subprocess.run([node, str(helper)], input=json.dumps({
+            'endpoint': ENDPOINT, 'cookie': cookie, 'region': REGION, 'stackName': name,
+            'imageId': RUNTIME['imageIds'][0], 'python': sys.executable, 'timeout': budget,
+        }).encode(), stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, env={},
+            check=False, timeout=budget / 1000 + 10)
+        check(p, 'console-form-wire-succeeded', result.returncode == 0 and len(result.stdout) < 4096,
+              exitCode=result.returncode, seconds=round(time.time() - started, 1))
+        expected = json.loads(result.stdout)
+        stack = exact_stack()
+        rows = instance_inventory(ec2)
+        outputs = {o['OutputKey']: o['OutputValue'] for o in (stack or {}).get('Outputs', [])}
+        check(p, 'console-form-sdk-state-matches', stack is not None and stack['StackStatus'] == 'CREATE_COMPLETE'
+              and stack['StackId'] == expected['stackId'] and len(rows) == 1
+              and all(outputs.get(k) == expected[v] for k, v in (
+                  ('InstanceId', 'id'), ('VpcId', 'vpc'), ('SubnetId', 'subnet')))
+              and [outputs.get('GroupId')] == expected['groups']
+              and rows[0]['InstanceId'] == expected['id'] and rows[0]['ImageId'] == expected['image']
+              and rows[0]['InstanceType'] == expected['type'] and rows[0]['VpcId'] == expected['vpc']
+              and rows[0]['SubnetId'] == expected['subnet']
+              and [g['GroupId'] for g in rows[0]['SecurityGroups']] == expected['groups'])
+        check(p, 'console-form-real-qemu-process', len(qemu_processes()) == 1
+              and len(supervisor_processes()) == (1 if sys.platform == 'darwin' else 0))
+    finally:
+        # A lost mutation response is not a retry cue. Find only the freshly
+        # reserved name in this own isolated rehearsal and clean that stack.
+        cleanup = exact_stack()
+        if cleanup is not None:
+            client('cloudformation', read_timeout=120).delete_stack(StackName=cleanup['StackId'])
+        deadline = time.monotonic() + 30
+        while (qemu_processes() or supervisor_processes()) and time.monotonic() < deadline:
+            time.sleep(0.5)
+        roles = sorted(role['RoleName'] for role in client('iam').list_roles()['Roles'])
+        check(p, 'console-form-stack-process-and-state-cleanup', exact_stack() is None
+              and instance_inventory(ec2) == before_instances and roles == before_roles
+              and qemu_processes() == [] and supervisor_processes() == [])
 
 
 def sdk_credentials(c):
@@ -726,6 +812,9 @@ try:
     ec2 = instance_read_client(TOKEN)
     before_instances = instance_inventory(ec2)
     check(p, 'ec2-inventory-empty-before-stack', before_instances == [])
+    if args.console_form_smoke:
+        console_form_smoke(ec2, before_instances)
+        raise SystemExit(0)  # Separate witness: execute normal shutdown, not the Challenge.
 
     # ------------------------------------------------------------ initialize
     p = phase('initialize')

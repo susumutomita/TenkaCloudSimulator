@@ -161,6 +161,24 @@ takes about six minutes under TCG and writes `report.json`, `simulator.log`
 and `runtime.json` to the work directory. The exit status is nonzero when any
 check fails; the failed check stays in the report.
 
+## Optional EC2 console form witness
+
+Pass `--console-form-smoke` to the same rehearsal with a new short
+`--work` directory, the same pinned bundle and a Node.js 20+ executable.
+This separate invocation creates one private instance through the actual
+console form's query generator, authenticated browser session and
+response-validation code. It then independently compares the CloudFormation
+and native EC2 SDK state, observes the private QEMU process, deletes the
+exact stack and checks that the process and stack/instance/IAM-role
+inventories return to their pre-test state. It does not run the Challenge.
+
+In the existing hosted rehearsal, only the same-repository pull request from
+`test/ec2-guarded-console-qemu` into `main` opts in on Linux arm64.
+The unchanged Challenge invocation still runs first with its ordinary report.
+The form witness logs its own allowlisted receipt; no additional artifact is
+uploaded. This is not a real-browser layout check, a guest application
+health check, or a claim that default startup can create instances.
+
 ## After the run
 
 Deleting the stack ends the guest process, but the runtime keeps that guest's

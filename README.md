@@ -112,7 +112,7 @@ console, CloudFormation adapter or Challenge integration.
   [CloudFront VPC origins](docs/cloudfront-vpc-origin.md), [Route 53 public zones and one-PTR Console](docs/route53.md#console-browse-public-zones-and-create-one-ptr).
 - **Scaling:** [Auto Scaling plans for local DynamoDB tables](docs/autoscaling-plans.md).
 - **Infrastructure:** [CloudFormation](docs/cloudformation-rest.md),
-  [read-only EC2 template preview in the Console](docs/ec2-read-discovery.md#instance-launch-preview-is-not-a-launch),
+  [EC2 template preview and opt-in local instance creation in the Console](docs/ec2-read-discovery.md#instance-launch-preview-is-not-a-launch),
   [SSM value parameters](docs/cloudformation-ssm-parameters.md),
   [native IAM profiles](docs/cloudformation-iam-profiles.md),
   [pinned SSM policy](docs/iam-ssm-managed-policy.md).

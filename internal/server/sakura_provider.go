@@ -32,6 +32,9 @@ type ProviderConfig struct {
 	// nil keeps Bedrock Runtime inference disabled with explicit errors. The
 	// caller owns it and closes it; closing the composition does not.
 	BedrockRuntime *aws.BedrockRuntime
+
+	// Private presentation-only discovery from the trusted Battle constructor.
+	instanceStackLaunchConfigured func() bool
 }
 
 func DefaultProviderConfig() ProviderConfig {

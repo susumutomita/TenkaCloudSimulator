@@ -671,3 +671,14 @@ durable attach/detach, and current exact and complete regional readback before a
 console notice. The existing gateway inventory and allocation models retain the
 empty-page, authorization and dependency controls. These finite witnesses do
 not prove SQL/Go/UI refinement, VPC routing or packet forwarding.
+
+
+## Opt-in EC2 instance stack console
+
+[EC2InstanceStackConsole](EC2InstanceStackConsole.tla) bounds three view
+generations, six actor scopes, one held reply and one mutation per open form.
+It separates configured-capability admission, receipt, verified regional
+stack/EC2 readback and guest liveness. Seven exact mutations exercise late
+receipt, missing or untrusted capability, replay, incomplete/mismatched
+observation and false liveness. It does not prove actual VM launch, SQL/HTTP
+behavior, React/browser refinement or freshness between network requests.

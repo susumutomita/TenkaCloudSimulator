@@ -193,8 +193,10 @@ discovery; stars never grant API permission or change the session.
 
 The EC2 and VPC views list the local resources returned by `DescribeInstances` and
 `DescribeVpcs` in the selected region. Discovery must advertise both read
-operations and `console: true` before these views appear. EC2 instances stay
-read-only: there is no instance launch/start/stop or network edit. The recorded
+operations and `console: true` before these views appear. The default EC2 instance view
+is read-only. Authenticated local administrators with an explicitly configured
+VM runtime can use the separate [CloudFormation instance-stack form](ec2-read-discovery.md#instance-launch-preview-is-not-a-launch).
+There is no native `RunInstances`, direct start/stop or instance network edit. The recorded
 simulator runtime state is not an AWS instance-state claim or a probe of guest
 health; absent/unknown state is shown as unconfirmed. UserData, runtime plans,
 credentials and internal connection details are never displayed.

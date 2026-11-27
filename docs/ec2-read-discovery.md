@@ -33,7 +33,8 @@ Instances expose only IDs, image/type, subnet/VPC, security-group IDs and tags.
 Select an instance in the console's **EC2 instances** list to see its saved
 security-group IDs and tags, including intentionally empty tag values. These
 come from the existing [DescribeInstances instance fields](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_Instance.html);
-the console does not attach security groups, edit tags or create an instance.
+the discovery view does not attach security groups or edit tags. Creation uses
+the separate opt-in workflow below.
 UserData, runtime plans and internal access information are never returned.
 `instanceState` is deliberately absent: successful provisioning or a saved
 `ready` journal entry does not prove a live running VM. The extension
@@ -50,7 +51,8 @@ VPC ID. Each item carries the local extension `simulatorManagedBy`:
 ### Instance launch: preview is not a launch
 
 Default simulator startup does not configure an instance runtime, and the
-EC2 console has no Launch action. Native `RunInstances` and `DescribeImages`
+operator’s **Create instance stack** button is disabled with that explanation.
+Native `RunInstances` and `DescribeImages`
 are unsupported. A signed-in caller with `cloudformation:ValidateTemplate` can
 preview the declaration of a stack containing one instance and a same-stack
 instance profile, but this does not certify its AMI, capacity or runtime.
@@ -74,18 +76,45 @@ SIMULATOR_BINARY=/absolute/path/to/simulator python3 test/console/ec2_launch_pre
 # With jsdom installed, mount the served embedded Console and use its real local API:
 SIMULATOR_BINARY=/absolute/path/to/simulator JSDOM_MODULE=/absolute/path/to/jsdom \
   python3 test/console/ec2_template_preview_native.py
+SIMULATOR_BINARY=/absolute/path/to/simulator JSDOM_MODULE=/absolute/path/to/jsdom \
+  python3 test/console/ec2_instance_stack_launch_native.py
 ```
 
-The check starts a disposable authenticated simulator on numeric loopback with
-in-memory state and no guest-runtime flags. It tests the preview-only browser
-identity, the unconfigured runtime error, the two regional reads, and cleanup.
-It does not run a browser or guest. Only add a launch action after the chosen
-pinned runtime and its authorized native or CloudFormation path can demonstrably
-start and clean up a guest on a qualified runner. Do not infer readiness from a
-template preview or a saved runtime-state label.
+The prerequisite check uses a disposable authenticated simulator on numeric
+loopback with no runtime flags. It tests the preview-only identity, the
+unconfigured runtime error, regional readback and cleanup without a browser
+or guest. The JSDOM preview fixture mounts the served app and uses the real
+ValidateTemplate API. The separate form fixture checks the default operator,
+participant visibility and a genuine local CloudFormation refusal, with
+explicitly synthetic responses for the successful readback UI. Neither
+fixture proves a guest boot.
+
+The separate **EC2 instances → Create instance stack** form appears only for
+the authenticated local operator with the administrator exercise identity and
+no scoped handoff. To enable it, start with the [explicit Battle runtime](start.md#explicit-battle-runtime-linux-and-macos)
+and an independently trusted pinned bundle. The live discovery flag says the
+runtime is configured to accept attempts, not that a particular image or guest
+is healthy. The form sends one regional `CreateStack` with one private
+`t3.micro`, the selected configured AMI alias, same-stack VPC/subnet and a
+security group without ingress rules, and an automatically named stack-owned IAM role/profile.
+`CAPABILITY_IAM` explicitly acknowledges those resources, not an IAM grant.
+It neither downloads an AMI nor configures public access. Delete the stack
+through CloudFormation to remove its resources.
+
+The console distinguishes an accepted stack ID from confirmed completion.
+After acknowledgement it checks `DescribeStacks` at that exact ID, requires
+`CREATE_COMPLETE`, and matches the typed instance, VPC, subnet, group, image
+and instance type against the same region’s existing `DescribeInstances` read.
+An uncertain response is not replayed; with a valid receipt, **Check stack and
+instance status** repeats only the reads. An accepted or complete stack and the
+saved EC2 record are not independent evidence that its guest is currently live.
+The regional readback is limited to an 8 MiB response; exceeding that bound
+leaves confirmation unavailable, not an empty result or a new create.
 
 Primary references: [ValidateTemplate](https://docs.aws.amazon.com/AWSCloudFormation/latest/APIReference/API_ValidateTemplate.html),
-[CreateStack](https://docs.aws.amazon.com/AWSCloudFormation/latest/APIReference/API_CreateStack.html)
+[CreateStack](https://docs.aws.amazon.com/AWSCloudFormation/latest/APIReference/API_CreateStack.html),
+[DescribeStacks](https://docs.aws.amazon.com/AWSCloudFormation/latest/APIReference/API_DescribeStacks.html),
+[DescribeInstances](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_DescribeInstances.html)
 and [RunInstances](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_RunInstances.html).
 
 ### Security-group readback

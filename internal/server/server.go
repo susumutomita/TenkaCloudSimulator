@@ -289,6 +289,7 @@ func NewWithProviders(path string, options ProviderConfig) (http.Handler, func()
 		addGCPDNSConsoleCapability(r, capabilities, cloudConfig)
 		addRoute53ConsoleCapability(w, r, capabilities)
 		addEC2NetworkReadbackCapabilities(w, r, capabilities)
+		addEC2InstanceStackLaunchCapability(w, r, capabilities, options.instanceStackLaunchConfigured)
 		capabilities["services"].(map[string]any)["simpledb"] = map[string]any{
 			"console": true, "region": gateway.SimpleDBScope.Region, "protocol": "Query/XML 2009-04-15",
 			"operations":     []string{"CreateDomain", "ListDomains", "DeleteDomain", "DomainMetadata", "GetAttributes", "PutAttributes", "DeleteAttributes", "Select"},

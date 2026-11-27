@@ -26984,6 +26984,112 @@
           "expect_invariant": "EffectiveOnlyUnassociated"
         }
       ]
+    },
+    {
+      "id": "EC2InstanceStackConsole",
+      "model": "formal/EC2InstanceStackConsole.tla",
+      "config": "formal/EC2InstanceStackConsole.cfg",
+      "bounds": "Three view generations, six actor scopes, one write/read in flight, Boolean runtime configuration and readback evidence.",
+      "properties": [
+        "TypeOK",
+        "QualifiedMutation",
+        "SingleMutation",
+        "ReceiptBelongsToView",
+        "VerifiedMeansMatch",
+        "NoGuestLivenessClaim"
+      ],
+      "limits": "Finite three UX generations with one reply in flight, actor roles and a configuration observation. An admission sample does not exclude expiry between discovery and CreateStack. This models only the workflow and no replay/retarget acknowledgment, not actual token/HTTP bounds, runtime health, SQLite rollback, live guest launch or cleanup, React or browser refinement.",
+      "source_scope": [
+        "internal/aws/ec2_cloudformation_runtime_unix.go",
+        "internal/server/battle_runtime_unix.go",
+        "internal/server/ec2_instance_stack_launch.go",
+        "internal/server/sakura_provider.go",
+        "internal/server/server.go",
+        "internal/server/web/app.js",
+        "tools/console/src/ec2-instance-stack-launch.jsx",
+        "tools/console/src/ec2-instance-stack-launch.mjs",
+        "tools/console/src/ec2-readonly.jsx",
+        "tools/console/src/main.jsx"
+      ],
+      "mutants": [
+        {
+          "id": "OmitCurrentCapability",
+          "edits": [
+            {
+              "old": "    /\\ view.allow\n    /\\ view.writes = 0",
+              "new": "    /\\ TRUE\n    /\\ view.writes = 0",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "QualifiedMutation"
+        },
+        {
+          "id": "OfferParticipant",
+          "edits": [
+            {
+              "old": "!.allow = Eligible, !.qualified = Eligible",
+              "new": "!.allow = (actor = \"participant\" /\\ liveConfig) \\/ Eligible, !.qualified = Eligible",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "QualifiedMutation"
+        },
+        {
+          "id": "AcceptRetiredReceipt",
+          "edits": [
+            {
+              "old": "AcceptReceipt ==\n    /\\ flight.kind = \"write\"\n    /\\ flight.epoch = epoch",
+              "new": "AcceptReceipt ==\n    /\\ flight.kind = \"write\"\n    /\\ TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReceiptBelongsToView"
+        },
+        {
+          "id": "ReceiptAsCompletion",
+          "edits": [
+            {
+              "old": "!.phase = \"accepted\", !.receiptFrom = flight.epoch",
+              "new": "!.phase = \"verified\", !.receiptFrom = flight.epoch",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "VerifiedMeansMatch"
+        },
+        {
+          "id": "ApproveMismatchedRead",
+          "edits": [
+            {
+              "old": "IF completeMatch THEN \"verified\" ELSE \"unconfirmed\"",
+              "new": "\"verified\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "VerifiedMeansMatch"
+        },
+        {
+          "id": "MutateOnCheckAgain",
+          "edits": [
+            {
+              "old": "view' = [view EXCEPT !.phase = \"checking\"]",
+              "new": "view' = [view EXCEPT !.phase = \"checking\", !.writes = @ + 1]",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "SingleMutation"
+        },
+        {
+          "id": "InventGuestLiveness",
+          "edits": [
+            {
+              "old": "!.evidence = completeMatch, !.guestClaim = FALSE",
+              "new": "!.evidence = completeMatch, !.guestClaim = TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "NoGuestLivenessClaim"
+        }
+      ]
     }
   ]
 }
