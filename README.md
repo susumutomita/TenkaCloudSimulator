@@ -154,6 +154,8 @@ console, CloudFormation adapter or Challenge integration.
   Disable a job queue before deleting it; a refused deletion leaves it unchanged.
   Batch also stores and deregisters bounded EC2 single-container job definition
   revisions; it does not pull images, run containers, or submit jobs.
+  The AWS catalog console registers a name, image name, vCPUs and memory,
+  and deregisters exact revision ARNs without deleting inactive history.
   Redshift can read tags on one existing stored resource ARN; it does not
   enumerate account-wide tags or execute SQL.
 - **Opt-in owned PostgreSQL:** The [local operator flag](docs/design/rds-owned-workload.md)

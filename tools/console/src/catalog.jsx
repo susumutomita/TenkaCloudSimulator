@@ -1,6 +1,8 @@
 import React,{useEffect,useMemo,useRef,useState} from 'react';
 import {useLocale} from './i18n.jsx';
 import AppStreamAppBlockForm from './appstream-app-block.jsx';
+import BatchJobDefinitionForm from './batch-job-definition-form.jsx';
+import {batchDefinitionARN,batchDefinitionOperations,isBatchJobDefinition} from './batch-job-definitions.mjs';
 import KinesisVideoRetention from './kinesis-video-retention.jsx';
 import {isKinesisVideoRetention,kinesisRetentionEdit,kinesisRetentionUpdate} from './kinesis-video-retention.mjs';
 import {appStreamAppBlockDetailInput,isAppStreamAppBlock} from './appstream-app-block.mjs';
@@ -157,10 +159,14 @@ export default function CatalogView({region,request,catalog,onSaving}){
  // and the values it started from), per-field problems and new-tag fields.
  const [selected,setSelected]=useState(null),[editing,setEditing]=useState(null),[fieldErrors,setFieldErrors]=useState({}),[tagForm,setTagForm]=useState({key:'',value:''});
  const [chosen,setChosen]=useState([]),[filter,setFilter]=useState(''),[pager,setPager]=useState({tokens:[''],index:0}),[scope,setScope]=useState({});
- const revision=useRef(0),alive=useRef(true);
+ const [deregisterTarget,setDeregisterTarget]=useState(null);
+ const revision=useRef(0),alive=useRef(true),batchWriter=useRef(null);
  const service=(services||[]).find(s=>s.model===model);
  const resource=service?.resources.find(r=>r.kind===(kind||(service?.model==='appstream'?'appBlock':'')))||service?.resources[0];
- const appBlock=isAppStreamAppBlock(service,resource);
+ const appBlock=isAppStreamAppBlock(service,resource),batchDefinition=isBatchJobDefinition(service,resource);
+ const batchOperations=batchDefinitionOperations(service,resource);
+ const batchARN=item=>batchDefinitionARN(service,resource,item,region);
+ const deregisterARN=item=>batchOperations.deregister&&batchOperations.describe&&item?.status==='ACTIVE'?batchARN(item):'';
  const parentResource=resource?.parent?service.resources.find(r=>r.kind===resource.parent):null;
  // Required list members other than the parent and page token select what
  // the official list returns (ListControls controlType, GetResourceShares
@@ -170,7 +176,15 @@ export default function CatalogView({region,request,catalog,onSaving}){
  const scopeMembers=(listOp?.members||[]).filter(m=>m.required&&m.name!==listOp.parent&&m.name!==listOp.inputToken&&!(m.name in (listOp.fixed||{}))&&!(service?.accountMembers||[]).includes(m.name));
  const scopeDefaults=()=>Object.fromEntries(scopeMembers.map(m=>[m.name,m.enum?m.enum[0]:['integer','long'].includes(m.type)?String(Math.min(m.max??100,100)):'']));
  const fresh=()=>++revision.current;const valid=epoch=>alive.current&&epoch===revision.current;
- useEffect(()=>()=>{alive.current=false;revision.current++},[]);
+ // Browser history can unmount this view even while in-app navigation is
+ // locked. Only the owning Batch write may release its parent saving latch.
+ function beginBatchWrite(){
+  const owner=()=>onSaving(false);batchWriter.current=owner;onSaving(true);return owner;
+ }
+ function endBatchWrite(owner=batchWriter.current){
+  if(owner&&batchWriter.current===owner){batchWriter.current=null;owner()}
+ }
+ useEffect(()=>()=>{alive.current=false;revision.current++;endBatchWrite()},[]);
  useEffect(()=>{
   let live=true;const path=catalog?.descriptors;if(!path){setServices([]);return}
   request(path).then(async r=>{if(!r.ok)throw Error(t('Catalog descriptors are unavailable','カタログ記述子を取得できません')+' ('+r.status+').');return r.json()})
@@ -230,11 +244,19 @@ export default function CatalogView({region,request,catalog,onSaving}){
    if(valid(epoch)){setItems(listRows(list,page));setNext(list.outputToken?page[list.outputToken]||'':'')}
   }catch(e){if(valid(epoch)){setItems([]);setNext('');setLoadError(e.message)}}finally{if(valid(epoch))setLoading(false)}
  }
- useEffect(()=>{const values=scopeDefaults();setScope(values);setFilter('');setError('');setNotice('');load('',parent,values)},[model,kind,region]);
+ useEffect(()=>{const values=scopeDefaults();setScope(values);setFilter('');setError('');setNotice('');setDeregisterTarget(null);load('',parent,values)},[model,kind,region]);
  // Service tokens page forward; earlier pages are reached by their tokens.
  function turnPage(index){
   if(index===pager.index+1&&next){setPager(p=>({tokens:[...p.tokens.slice(0,p.index+1),next],index:p.index+1}));load(next);return}
   if(index>=0&&index<pager.tokens.length){const token=pager.tokens[index];if(token){setPager(p=>({...p,index}));load(token)}else load('')}
+ }
+ async function readBatchRevision(item){
+  const arn=batchARN(item),op=batchOperations.describe;
+  if(!arn||!op)throw Error(t('An exact job definition revision is required. Reload the list.','ジョブ定義の正確なリビジョンが必要です。一覧を更新してください。'));
+  const out=await call(op,{[op.names]:[arn]});
+  const value=(out[op.items]||[]).find(row=>batchARN(row)===arn);
+  if(!value)throw Error(t('This job definition revision is no longer listed.','このジョブ定義リビジョンは一覧にありません。'));
+  return value;
  }
  async function inspect(item){
   const read=resource.operations.read;const epoch=fresh();setError('');setPage('detail');setTags(null);setEditing(null);setSelected(item);setFieldErrors({});
@@ -243,7 +265,8 @@ export default function CatalogView({region,request,catalog,onSaving}){
   try{
    setLoading(true);setDetail(null);
    let value=item,token;
-   if(read){const out=await call(read,{...parentInput(read),[read.lookup]:lookupValue(item,read)});if(!valid(epoch))return null;({value,token}=catalogReadSnapshot(read,resource,out))}
+   if(batchDefinition){value=await readBatchRevision(item);if(!valid(epoch))return null}
+   else if(read){const out=await call(read,{...parentInput(read),[read.lookup]:lookupValue(item,read)});if(!valid(epoch))return null;({value,token}=catalogReadSnapshot(read,resource,out))}
    else{
     const describe=resource.operations.describe,list=resource.operations.list;
     // A describe operation whose names member is one string (RDS
@@ -285,18 +308,43 @@ export default function CatalogView({region,request,catalog,onSaving}){
   }
   return {input,problems,changed};
  }
- const createOp=resource?.operations.create;
+ const createOp=batchDefinition?batchOperations.create:resource?.operations.create;
  const fields=useMemo(()=>fieldOrder(formMembers(createOp,skipped(createOp)),resource),[createOp]);
  function openCreate(){setForm({});setFieldErrors({});setError('');setNotice('');setPage('create')}
  async function create(nativeInput){
+  if(batchDefinition&&(busy||batchWriter.current))return;
   const op=createOp;const {input,problems}=nativeInput?{input:nativeInput,problems:{}}:readFields(fields,form);
   setFieldErrors(problems);if(Object.keys(problems).length){setError('');return}
-  fresh();setBusy(true);onSaving(true);setError('');setNotice('');
+  const epoch=fresh(),owner=batchDefinition?beginBatchWrite():null;
+  setBusy(true);if(!owner)onSaving(true);setError('');setNotice('');
   let created=false;
   try{await call(op,{...parentInput(op),...input});created=true}
-  catch(e){if(alive.current)setError(e.message)}finally{if(alive.current){setBusy(false);onSaving(false)}}
+  catch(e){if(owner?valid(epoch):alive.current)setError(e.message)}
+  finally{if(owner)endBatchWrite(owner);if(alive.current){setBusy(false);if(!owner)onSaving(false)}}
   // Reload only after an acknowledged write so a failure stays visible.
-  if(created&&alive.current){await load();if(alive.current){setNotice(t('Resource created.','リソースを作成しました。'));setForm({})}}
+  if(created&&(owner?valid(epoch):alive.current)){
+   const reloadEpoch=revision.current+1;await load();
+   if(owner?valid(reloadEpoch):alive.current){setNotice(t('Resource created.','リソースを作成しました。'));setForm({})}
+  }
+ }
+ async function deregisterBatchRevision(item){
+  const op=batchOperations.deregister,arn=deregisterARN(item);
+  if(!arn||busy||batchWriter.current)return;
+  const epoch=fresh(),owner=beginBatchWrite();
+  setDeregisterTarget(null);setBusy(true);setError('');setNotice('');
+  let acknowledged=false;
+  try{
+   await call(op,{[op.lookup]:arn});if(!valid(epoch))return;
+   acknowledged=true;setPage('detail');setSelected(item);setChosen([]);setDetail(null);setTags(null);setLoading(true);
+   const value=await readBatchRevision(item);if(!valid(epoch))return;
+   if(value.status!=='INACTIVE')throw Error('The revision is not inactive.');
+   setSelected(value);setDetail(value);
+   setItems(items=>items.map(row=>batchARN(row)===arn?value:row));
+   setNotice(t('Revision deregistered. It remains visible as INACTIVE.','リビジョンの登録を解除しました。INACTIVE として引き続き表示されます。'));
+   await loadTags(epoch,value);
+  }catch(e){if(valid(epoch))setError(acknowledged?
+   t('Deregistration was accepted, but the revision status could not be confirmed. Refresh the revision.','登録解除は受理されましたが、状態を確認できませんでした。リビジョンを更新してください。'):e.message)}
+  finally{endBatchWrite(owner);if(valid(epoch))setLoading(false);if(alive.current)setBusy(false)}
  }
  async function remove(item){
   const op=resource.operations.delete;setConfirm(null);fresh();setBusy(true);onSaving(true);setError('');setNotice('');
@@ -318,7 +366,7 @@ export default function CatalogView({region,request,catalog,onSaving}){
  const updateOp=resource?.operations.update;
  const updateFields=updateOp?fieldOrder(formMembers(updateOp,new Set([...skipped(updateOp),updateOp.lookup,updateOp.token,...(updateOp.lookupAlt||[])])).filter(m=>!updateOp.editable||updateOp.editable.includes(m.name)),resource):[];
  const retentionEdit=isKinesisVideoRetention(service,resource,updateOp);
- const canEdit=updateOp&&(retentionEdit||updateFields.length>0);
+ const canEdit=!batchDefinition&&updateOp&&(retentionEdit||updateFields.length>0);
  const missingEditToken=()=>t('The service did not return the current version. Reopen Edit to read the resource again.','現在のバージョンを取得できませんでした。編集を開き直してください。');
  function startEdit(value=detail,token){
   if(catalogUpdateInput(updateOp,{},{},token)===null){setError(missingEditToken());return}
@@ -404,13 +452,30 @@ export default function CatalogView({region,request,catalog,onSaving}){
    items={[{text:service.title,href:'#list'},...(appBlock?[{text:t('Applications Manager','Applications Manager'),href:'#list'}]:[]),{text:many,href:'#list'},...(last?[{text:last,href:'#here'}]:[])]}/>;
  const alerts=<>{error&&<Alert type="error" header={t('Request failed','リクエストに失敗しました')}>{error}</Alert>}
   {notice&&<Alert type="success" dismissible onDismiss={()=>setNotice('')}>{notice}</Alert>}</>;
- const confirmModal=<Modal visible={!!confirm} onDismiss={()=>setConfirm(null)} header={t('Delete ','削除: ')+phrase(singular)}
+ const deregisterLabel=t('Deregister revision','リビジョンの登録を解除');
+ const deregisterButton=item=>batchDefinition&&batchOperations.deregister&&batchOperations.describe&&
+  <Button disabled={busy||loading||!deregisterARN(item)} onClick={()=>setDeregisterTarget(item)}>{deregisterLabel}</Button>;
+ const batchModal=batchDefinition&&!!deregisterARN(deregisterTarget)&&<Modal visible onDismiss={()=>setDeregisterTarget(null)} header={deregisterLabel}
+  footer={<Box float="right"><SpaceBetween direction="horizontal" size="xs">
+   <Button onClick={()=>setDeregisterTarget(null)}>{t('Cancel','キャンセル')}</Button>
+   <Button variant="primary" disabled={busy} onClick={()=>deregisterBatchRevision(deregisterTarget)}>{deregisterLabel}</Button>
+  </SpaceBetween></Box>}>
+  <SpaceBetween size="s"><strong>{deregisterARN(deregisterTarget)}</strong>
+   <div>{t('Only this revision becomes INACTIVE and remains in the list.','このリビジョンのみ INACTIVE になり、一覧には残ります。')}</div>
+  </SpaceBetween>
+ </Modal>;
+ const confirmModal=!batchDefinition&&<Modal visible={!!confirm} onDismiss={()=>setConfirm(null)} header={t('Delete ','削除: ')+phrase(singular)}
    footer={<Box float="right"><SpaceBetween direction="horizontal" size="xs"><Button onClick={()=>setConfirm(null)}>{t('Cancel','キャンセル')}</Button><Button variant="primary" onClick={()=>remove(confirm)}>{t('Delete','削除')}</Button></SpaceBetween></Box>}>
    {t('Delete','削除')} <strong>{identity(confirm||{})}</strong>? {t('This sends ','次の操作を送信します: ')}<code>{resource.operations.delete?.name}</code>.
   </Modal>;
  if(page==='create'&&createOp&&appBlock){
   return <ContentLayout header={<SpaceBetween size="s">{crumbs(createLabel)}<Header variant="h1">{createLabel}</Header></SpaceBetween>}>
     <AppStreamAppBlockForm busy={busy} error={error} onCancel={()=>{setError('');setPage('list')}} onCreate={create}/>
+   </ContentLayout>;
+ }
+ if(page==='create'&&createOp&&batchDefinition){
+  return <ContentLayout header={<SpaceBetween size="s">{crumbs(createLabel)}<Header variant="h1">{createLabel}</Header></SpaceBetween>}>
+    <BatchJobDefinitionForm busy={busy} error={error} onCancel={()=>{setError('');setPage('list')}} onCreate={create} t={t}/>
    </ContentLayout>;
  }
  if(page==='create'&&createOp){
@@ -454,7 +519,9 @@ export default function CatalogView({region,request,catalog,onSaving}){
   return <ContentLayout header={<SpaceBetween size="s">{crumbs(name)}<Header variant="h1" description={singular}
     actions={<SpaceBetween direction="horizontal" size="xs">
      {canEdit&&<Button disabled={busy||loading||!detail} onClick={()=>updateOp.token?editFromList(selected):startEdit()}>{t('Edit','編集')}</Button>}
-     {resource.operations.delete&&<Button disabled={busy||loading} onClick={()=>setConfirm(selected)}>{t('Delete','削除')}</Button>}</SpaceBetween>}>{name}</Header></SpaceBetween>}>
+     {batchDefinition&&batchOperations.describe&&<Button iconName="refresh" ariaLabel={t('Refresh revision','リビジョンを更新')} disabled={busy||loading||!batchARN(selected)} onClick={()=>inspect(selected)}/>}
+     {deregisterButton(detail)}
+     {!batchDefinition&&resource.operations.delete&&<Button disabled={busy||loading} onClick={()=>setConfirm(selected)}>{t('Delete','削除')}</Button>}</SpaceBetween>}>{name}</Header></SpaceBetween>}>
    <SpaceBetween size="l">
     {alerts}
     <Container header={<Header variant="h2">{t('Details','詳細')}</Header>}>
@@ -469,11 +536,18 @@ export default function CatalogView({region,request,catalog,onSaving}){
        <FormField label={t('Tag key','タグキー')} controlId="catalog-tag-key" errorText={fieldErrors.tagKey}><Input value={tagForm.key} onChange={e=>{setTagForm(f=>({...f,key:e.detail.value}));setFieldErrors({})}}/></FormField>
        <FormField label={<>{t('Tag value','タグ値')}<i>{' - '+t('optional','任意')}</i></>} controlId="catalog-tag-value"><Input value={tagForm.value} onChange={e=>setTagForm(f=>({...f,value:e.detail.value}))}/></FormField>
       </ColumnLayout><Button formAction="submit" disabled={busy} loading={busy}>{t('Add tag','タグを追加')}</Button></SpaceBetween></form>:undefined}/>}
-    {confirmModal}
+    {confirmModal}{batchModal}
    </SpaceBetween>
   </ContentLayout>;
  }
- const columns=[{id:'name',header:t('Name','名前'),cell:item=><Link onFollow={e=>{e.preventDefault();inspect(item)}} href="#">{identity(item)||'-'}</Link>,isRowHeader:true},
+ const columns=batchDefinition?[
+  {id:'name',header:t('Name','名前'),cell:item=>!busy&&batchARN(item)&&batchOperations.describe?
+   <Link onFollow={e=>{e.preventDefault();inspect(item)}} href="#">{item.jobDefinitionName}</Link>:item.jobDefinitionName||'-',isRowHeader:true},
+  {id:'revision',header:t('Revision','リビジョン'),cell:item=>item.revision??'-'},
+  {id:'status',header:t('Status','ステータス'),cell:item=>['ACTIVE','INACTIVE'].includes(item.status)?
+   <StatusIndicator type={item.status==='ACTIVE'?'success':'stopped'}>{item.status}</StatusIndicator>:'-'},
+  {id:'arn',header:'ARN',cell:item=>batchARN(item)||'-'},
+ ]:[{id:'name',header:t('Name','名前'),cell:item=><Link onFollow={e=>{e.preventDefault();inspect(item)}} href="#">{identity(item)||'-'}</Link>,isRowHeader:true},
   ...columnKeys.map(k=>({id:'c-'+k,header:humanize(k),cell:item=>item[k]===undefined||item[k]===null||item[k]===''?'-':display(item[k])})),
   ...(keys.arn&&keys.arn!==keys.name?[{id:'arn',header:'ARN',cell:item=>item[keys.arn]||'-'}]:[])];
  const createButton=createOp&&<Button variant="primary" disabled={busy||!!parentResource&&!parent} onClick={openCreate}>{createLabel}</Button>;
@@ -499,9 +573,10 @@ export default function CatalogView({region,request,catalog,onSaving}){
     header={<Header counter={'('+items.length+(next?'+':'')+')'} description={<span className="catalog-key">{resource.operations.list?.name}</span>}
      actions={<SpaceBetween direction="horizontal" size="xs">
       <Button iconName="refresh" ariaLabel={t('Refresh','更新')} disabled={busy||loading} onClick={()=>load(pager.tokens[pager.index])}/>
-      <Button disabled={!pick||busy} onClick={()=>inspect(pick)}>{t('View details','詳細を表示')}</Button>
+      <Button disabled={!pick||busy||batchDefinition&&(!batchOperations.describe||!batchARN(pick))} onClick={()=>inspect(pick)}>{t('View details','詳細を表示')}</Button>
       {canEdit&&<Button disabled={!pick||busy} onClick={()=>editFromList(pick)}>{t('Edit','編集')}</Button>}
-      {resource.operations.delete&&<Button disabled={!pick||busy} onClick={()=>setConfirm(pick)}>{t('Delete','削除')}</Button>}
+      {deregisterButton(pick)}
+      {!batchDefinition&&resource.operations.delete&&<Button disabled={!pick||busy} onClick={()=>setConfirm(pick)}>{t('Delete','削除')}</Button>}
       {createButton}</SpaceBetween>}>{many}</Header>}
     filter={<TextFilter filteringText={filter} filteringPlaceholder={t('Find ','検索: ')+phrase(many)} filteringAriaLabel={t('Filter loaded ','読み込んだ項目を絞り込む: ')+phrase(many)}
      countText={filter?shown.length+' '+t('matches','件一致'):''} onChange={e=>setFilter(e.detail.filteringText)}/>}
@@ -511,7 +586,7 @@ export default function CatalogView({region,request,catalog,onSaving}){
     empty={scopeMembers.some(m=>!scope[m.name])?<Box textAlign="center" color="inherit">{(names=>t('Enter '+names+' to list '+phrase(many)+'.','一覧表示するには次を入力してください: '+names))(scopeMembers.filter(m=>!scope[m.name]).map(m=>humanize(m.name)).join(', '))}</Box>:loadError?<Box textAlign="center" color="inherit"><SpaceBetween size="xs"><StatusIndicator type="error">{loadError}</StatusIndicator><Button onClick={()=>load(pager.tokens[pager.index])}>{t('Retry','再試行')}</Button></SpaceBetween></Box>
      :<Box textAlign="center" color="inherit"><SpaceBetween size="xs"><b>{t('No ','')+phrase(many)+t('','はありません')}</b>{createOp&&<Button disabled={busy||!!parentResource&&!parent} onClick={openCreate}>{createLabel}</Button>}</SpaceBetween></Box>}
     noMatch={<Box textAlign="center" color="inherit"><SpaceBetween size="xs"><b>{t('No matches','一致する項目はありません')}</b><Button onClick={()=>setFilter('')}>{t('Clear filter','絞り込みを解除')}</Button></SpaceBetween></Box>}/>
-   {confirmModal}
+   {confirmModal}{batchModal}
   </SpaceBetween>
  </ContentLayout>;
 }
