@@ -179,7 +179,7 @@ func (g *Gateway) serveEC2(w http.ResponseWriter, r *http.Request) {
 		routeAssociationAuthority = ec2NativeRouteAssociationAuthority{check: func(string, string) bool { return true }, revealMissingID: true}
 	}
 	var out any
-	const sgFailure = "Local security group metadata could not be read or changed."
+	const sgFailure = "Local security group configuration could not be read or changed."
 	switch action {
 	case "CreateSecurityGroup", "DeleteSecurityGroup":
 		group, err := g.Stacks.executeEC2NativeSGMutation(r.Context(), action, region, *request.securityGroup)
@@ -188,6 +188,13 @@ func (g *Gateway) serveEC2(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		out = group
+	case ec2AuthorizeNativeSGIngress, ec2AuthorizeNativeSGEgress, ec2RevokeNativeSGIngress, ec2RevokeNativeSGEgress:
+		rule, err := g.Stacks.executeEC2NativeSGRuleMutation(r.Context(), action, region, *request.securityGroup)
+		if err != nil {
+			failChild(err, sgFailure)
+			return
+		}
+		out = rule
 	case "CreateNetworkAcl", "DescribeNetworkAcls", "DeleteNetworkAcl":
 		result, err := g.Stacks.executeEC2NetworkACL(r.Context(), action, region, *request.networkACL)
 		if err != nil {
@@ -529,10 +536,7 @@ func (s *StackStore) ec2Read(ctx context.Context, region, action string) (ec2Rea
 			return out, errEC2NativeSecurityGroupState
 		}
 		for _, g := range groups {
-			out.securityGroups = append(out.securityGroups, ec2SecurityGroupRead{
-				ID: g.ID, Name: g.Name, Description: g.Description, VPC: g.VPCID, Owner: "000000000000",
-				Tags: ec2ReadTags(g.Tags), Mode: "detached-config-only",
-			})
+			out.securityGroups = append(out.securityGroups, g.readback())
 		}
 		sort.Slice(out.securityGroups, func(i, j int) bool { return out.securityGroups[i].ID < out.securityGroups[j].ID })
 	}

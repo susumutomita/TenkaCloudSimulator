@@ -68,7 +68,7 @@ func TestEC2NativeSGGatewayAdmissionAndMetadataReadback(t *testing.T) {
 	}
 	bound := context.WithValue(context.Background(), consoleInstanceBoundaryKey{}, consoleInstanceBoundary{region: region, instance: "i-00000000"})
 	f.expect(f.call("sg-editor", region, bound, create), 403, "UnauthorizedOperation")
-	f.expect(f.call("", region, nil, url.Values{"Action": {"AuthorizeSecurityGroupIngress"}}), 400, "UnsupportedOperation")
+	f.expect(f.call("", region, nil, url.Values{"Action": {"AuthorizeSecurityGroupIngress"}}), 400, "MissingParameter")
 	f.expect(f.call("", region, nil, url.Values{"Action": {"DeleteVpc"}, "VpcId": {first.ID}}), 400, "DependencyViolation")
 	remove := url.Values{"Action": {"DeleteSecurityGroup"}, "GroupId": {made.GroupID}}
 	f.expect(f.call("sg-editor", region, nil, remove), 403, "UnauthorizedOperation")

@@ -13,8 +13,8 @@ import StatusIndicator from '@cloudscape-design/components/status-indicator';
 import Table from '@cloudscape-design/components/table';
 import {useLocale} from './i18n.jsx';
 import {loadVpcSecurityGroups, vpcSecurityGroupsFailure} from './ec2-security-groups.mjs';
-import {createVpcNativeSecurityGroup, deleteVpcNativeSecurityGroup, loadVpcNativeSecurityGroups,
-  nativeSGFailure, nativeSGName, nativeSGTarget, validNativeSGDescription} from './ec2-native-security-groups.mjs';
+import {changeVpcNativeSecurityGroupRule, createVpcNativeSecurityGroup, deleteVpcNativeSecurityGroup, loadVpcNativeSecurityGroups,
+  nativeSGFailure, nativeSGName, nativeSGRule, nativeSGTarget, validNativeSGDescription} from './ec2-native-security-groups.mjs';
 
 const loading = {status:'loading', groups:[]};
 const wrap = text => <span className="resource-identifier">{text}</span>;
@@ -81,9 +81,30 @@ function LegacyVPCSecurityGroups({vpc, region, request}) {
   </SpaceBetween>;
 }
 
-function VPCNativeSecurityGroups({vpc, region, request, onSaving = noop}) {
-  const {t} = useLocale(), {id, managedBy} = vpc;
-  const scope = useMemo(()=>({region,request,vpc:{id,managedBy}}),[region,request,id,managedBy]);
+function NativeRuleList({rows,direction,onAdd,onRemove}) {
+  const {t}=useLocale();
+  const inbound=direction==='ingress';
+  const title=inbound?t('Inbound rules','受信ルール'):t('Outbound rules','送信ルール');
+  const add=inbound?t('Add inbound rule','受信ルールを追加'):t('Add outbound rule','送信ルールを追加');
+  const remove=inbound?t('Remove inbound rule','受信ルールを削除'):t('Remove outbound rule','送信ルールを削除');
+  return <SpaceBetween size="xs">
+    <Header variant="h3" actions={<Button disabled={rows.length>=60} onClick={onAdd}>{add}</Button>}>{title}</Header>
+    <Table variant="embedded" items={rows} trackBy={r=>r.from+'-'+r.to+'-'+r.cidr}
+      ariaLabels={{tableLabel:title}}
+      columnDefinitions={[
+        {id:'protocol',header:t('Protocol','プロトコル'),cell:()=> 'TCP'},
+        {id:'ports',header:t('Port range','ポート範囲'),cell:r=>r.from===r.to?r.from:r.from+'–'+r.to},
+        {id:'cidr',header:inbound?t('Source IPv4 CIDR','送信元 IPv4 CIDR'):t('Destination IPv4 CIDR','宛先 IPv4 CIDR'),cell:r=>wrap(r.cidr)},
+        {id:'action',header:t('Action','操作'),cell:r=><Button ariaLabel={remove+' '+r.cidr+' '+r.from+'–'+r.to}
+          onClick={()=>onRemove(r)}>{t('Remove','削除')}</Button>},
+      ]}
+      empty={<Box color="text-body-secondary">{t('No rules are saved in this direction.','この方向に保存されたルールはありません。')}</Box>}/>
+  </SpaceBetween>;
+}
+
+function VPCNativeSecurityGroups({vpc, region, request, nativeRules=false, writeBlocked=false, acquireWrite, onSaving = noop}) {
+  const {t} = useLocale(), {id, managedBy, cidr} = vpc;
+  const scope = useMemo(()=>({region,request,vpc:{id,managedBy,cidr},rulesEnabled:nativeRules}),[region,request,id,managedBy,cidr,nativeRules]);
   const active = useRef(null);
   const [snapshot,setSnapshot] = useState(null), [modal,setModal] = useState(null);
   const [selection,setSelection] = useState(null), [notice,setNotice] = useState(null);
@@ -98,20 +119,21 @@ function VPCNativeSecurityGroups({vpc, region, request, onSaving = noop}) {
     const operation = active.current;
     active.current = null;
     operation?.controller.abort();
-    if (operation?.writing) operation.onSaving(false);
+    operation?.release?.();
   }
   function begin(writing) {
-    if (active.current?.writing) return null;
+    if (active.current?.writing || (writing&&writeBlocked)) return null;
+    const release=writing?(acquireWrite?acquireWrite():(onSaving(true),()=>onSaving(false))):null;
+    if (writing&&!release) return null;
     cancel();
-    const operation = {controller:new AbortController(),writing,onSaving};
+    const operation = {controller:new AbortController(),writing,release};
     active.current = operation;
-    if (writing) onSaving(true);
     return operation;
   }
   function complete(operation) {
     if (active.current!==operation) return false;
     active.current = null;
-    if (operation.writing) operation.onSaving(false);
+    operation.release?.();
     return !operation.controller.signal.aborted;
   }
   async function refresh() {
@@ -120,7 +142,7 @@ function VPCNativeSecurityGroups({vpc, region, request, onSaving = noop}) {
     setSnapshot({scope,status:'loading'});
     setNotice(null);
     try {
-      const rows = await loadVpcNativeSecurityGroups(scope.request,scope.region,scope.vpc,{signal:operation.controller.signal});
+      const rows = await loadVpcNativeSecurityGroups(scope.request,scope.region,scope.vpc,{signal:operation.controller.signal,rulesEnabled:scope.rulesEnabled});
       if (complete(operation)) setSnapshot({scope,status:'ready',rows});
     } catch (error) {
       if (complete(operation)) setSnapshot({scope,status:nativeSGFailure(error)});
@@ -129,27 +151,32 @@ function VPCNativeSecurityGroups({vpc, region, request, onSaving = noop}) {
   useEffect(()=>{void refresh(); return cancel;},[scope]);
 
   const nameValid = !!nativeSGName(dialog?.name), descriptionValid = validNativeSGDescription(dialog?.description);
-  const canSubmit = !!dialog && (dialog.kind==='create' ? nameValid && descriptionValid : dialog.confirm==='delete');
+  const ruleDialog=dialog?.kind==='rule-add'||dialog?.kind==='rule-remove';
+  const ruleValid=nativeSGRule(dialog?.rule,scope.vpc);
+  const canSubmit = !!dialog && (dialog.kind==='create' ? nameValid && descriptionValid :
+    ruleDialog ? scope.rulesEnabled && !!ruleValid : dialog.confirm==='delete');
   function change(key,value) {setModal(old=>old?.scope===scope?{...old,[key]:value}:old);}
   async function submit(event) {
     event.preventDefault();
     if (!ready || !canSubmit) return;
-    if (dialog.kind==='delete' && !rows.some(g=>g.id===dialog.group.id && g.vpc===scope.vpc.id)) return;
+    if ((ruleDialog||dialog.kind==='delete') && !rows.some(g=>g===dialog.group)) return;
     const operation = begin(true);
     if (!operation) return;
     setSnapshot({scope,status:'writing'});
     setNotice(null);
     try {
-      const opts = {signal:operation.controller.signal};
+      const opts = {signal:operation.controller.signal,rulesEnabled:scope.rulesEnabled};
       const result = dialog.kind==='create'
         ? await createVpcNativeSecurityGroup(scope.request,scope.region,scope.vpc,dialog,opts)
-        : await deleteVpcNativeSecurityGroup(scope.request,scope.region,scope.vpc,dialog.group,opts);
+        : ruleDialog
+          ? await changeVpcNativeSecurityGroupRule(scope.request,scope.region,scope.vpc,dialog.group,dialog.direction,ruleValid,dialog.kind==='rule-add',opts)
+          : await deleteVpcNativeSecurityGroup(scope.request,scope.region,scope.vpc,dialog.group,opts);
       if (!complete(operation)) return;
       setSnapshot({scope,status:'ready',rows:result.rows});
-      if (result.created) setSelection({scope,id:result.created.id});
-      else setSelection(null);
+      const saved=result.created||result.changed;
+      setSelection(saved?{scope,id:saved.id}:null);
       setModal(null);
-      setNotice({scope,kind:dialog.kind,id:(result.created||result.removed).id});
+      setNotice({scope,kind:dialog.kind,id:(saved||result.removed).id});
     } catch (error) {
       if (!complete(operation)) return;
       // A failed readback may follow a committed write. Require a new read
@@ -162,22 +189,38 @@ function VPCNativeSecurityGroups({vpc, region, request, onSaving = noop}) {
   const errors = {
     denied:t('The selected identity cannot complete this security group request. Check its EC2 permissions.','現在の ID ではこのセキュリティグループを操作できません。EC2 権限を確認してください。'),
     duplicate:t('A security group with that name already exists in this VPC.','この VPC には同じ名前のセキュリティグループがあります。'),
+    duplicateRule:t('That exact rule is already saved in this direction.','この方向に同じルールが保存されています。'),
+    missingRule:t('The selected rule is no longer present.','選択したルールはすでにありません。'),
+    ruleLimit:t('No more rules can be saved in this direction.','この方向のルールは上限に達しています。'),
     dependency:t('This security group still has a dependency.','このセキュリティグループには依存リソースが残っています。'),
     unconfirmed:t('Could not confirm security group state. No change was reported.','セキュリティグループの状態を確認できず、変更結果は表示していません。'),
   };
   const createLabel = t('Create security group','セキュリティグループを作成');
   const deleteLabel = t('Delete security group','セキュリティグループを削除');
   const refreshLabel = t('Refresh security groups','セキュリティグループを更新');
+  const labels={create:createLabel,delete:deleteLabel,
+    'rule-add':dialog?.direction==='ingress'?t('Add inbound rule','受信ルールを追加'):t('Add outbound rule','送信ルールを追加'),
+    'rule-remove':dialog?.direction==='ingress'?t('Remove inbound rule','受信ルールを削除'):t('Remove outbound rule','送信ルールを削除')};
+  const notices={
+    create:t('Saved security group: ','セキュリティグループを保存しました: '),
+    delete:t('Removed security group: ','セキュリティグループを削除しました: '),
+    'rule-add':t('Saved security group rule: ','セキュリティグループのルールを保存しました: '),
+    'rule-remove':t('Removed security group rule: ','セキュリティグループのルールを削除しました: '),
+  };
+  function editRule(direction,rule) {
+    if (!ready||writeBlocked||!scope.rulesEnabled||!group) return;
+    setModal({scope,kind:rule?'rule-remove':'rule-add',group,direction,rule:rule||{from:'',to:'',cidr:''}});
+  }
   return <SpaceBetween size="m">
     <Header variant="h3" actions={<SpaceBetween direction="horizontal" size="xs">
       <Button iconName="refresh" ariaLabel={refreshLabel} disabled={writing} loading={!current||current.status==='loading'} onClick={refresh}/>
       <Button disabled={!ready} onClick={()=>setModal({scope,kind:'create',name:'',description:''})}>{createLabel}</Button>
     </SpaceBetween>}>{t('Security groups','セキュリティグループ')}</Header>
-    <Alert type="info">{t('Detached configuration only. These groups have no editable rules and do not attach to instances or affect traffic.',
-      '未接続の設定のみを保存します。ルールの編集やインスタンスへの接続はできず、通信にも影響しません。')}</Alert>
-    {notice?.scope===scope&&<Alert type="success">{notice.kind==='create'
-      ?t('Saved security group: ','セキュリティグループを保存しました: ')
-      :t('Removed security group: ','セキュリティグループを削除しました: ')}{wrap(notice.id)}</Alert>}
+    <Alert type="info">{scope.rulesEnabled
+      ? t('Save TCP/IPv4 rules only within this VPC CIDR. Groups are not attached and saved rules do not affect traffic.','この VPC の CIDR 内の TCP/IPv4 ルールのみを保存します。グループは未接続で、保存したルールは通信に影響しません。')
+      : t('Detached configuration only. These groups have no editable rules and do not attach to instances or affect traffic.',
+        '未接続の設定のみを保存します。ルールの編集やインスタンスへの接続はできず、通信にも影響しません。')}</Alert>
+    {notice?.scope===scope&&<Alert type="success">{notices[notice.kind]}{wrap(notice.id)}</Alert>}
     {errors[current?.status]&&<Alert type="error">{errors[current.status]} {current.reconcile
       &&t('Refresh security groups before retrying.','再試行する前にセキュリティグループを更新してください。')}</Alert>}
     {(!current||current.status==='loading'||writing)&&<StatusIndicator type="loading">
@@ -191,13 +234,17 @@ function VPCNativeSecurityGroups({vpc, region, request, onSaving = noop}) {
       <div><Box variant="h4">{t('Group ID','グループ ID')}</Box>{wrap(group.id)}</div>
       <div><Box variant="h4">{t('Description','説明')}</Box>{wrap(group.description)}</div>
       <SecurityGroupTags tags={group.tags}/>
-      <Button onClick={()=>setModal({scope,kind:'delete',group,confirm:''})}>{deleteLabel}</Button>
+      {scope.rulesEnabled&&<>
+        <NativeRuleList rows={group.ingress} direction="ingress" onAdd={()=>editRule('ingress')} onRemove={rule=>editRule('ingress',rule)}/>
+        <NativeRuleList rows={group.egress} direction="egress" onAdd={()=>editRule('egress')} onRemove={rule=>editRule('egress',rule)}/>
+      </>}
+      <Button disabled={writeBlocked} onClick={()=>setModal({scope,kind:'delete',group,confirm:''})}>{deleteLabel}</Button>
     </SpaceBetween>:<div role="status">{t('No detached security groups are recorded for this VPC.','この VPC に未接続のセキュリティグループはありません。')}</div>)}
     {dialog&&<Modal visible closeAriaLabel={t('Close security group dialog','セキュリティグループのダイアログを閉じる')}
-      header={dialog.kind==='create'?createLabel:deleteLabel} onDismiss={()=>{if (!writing) setModal(null);}}>
+      header={labels[dialog.kind]} onDismiss={()=>{if (!writing) setModal(null);}}>
       <form onSubmit={submit}><Form actions={<SpaceBetween direction="horizontal" size="xs">
         <Button formAction="none" disabled={writing} onClick={()=>setModal(null)}>{t('Cancel','キャンセル')}</Button>
-        <Button variant="primary" formAction="submit" disabled={!canSubmit||!ready} loading={writing}>{dialog.kind==='create'?createLabel:deleteLabel}</Button>
+        <Button variant="primary" formAction="submit" disabled={!canSubmit||!ready||writeBlocked} loading={writing}>{labels[dialog.kind]}</Button>
       </SpaceBetween>}><SpaceBetween size="m">
         <Box>{t('Selected VPC: ','選択済み VPC: ')}{wrap(id)}</Box>
         {dialog.kind==='create'?<>
@@ -211,6 +258,16 @@ function VPCNativeSecurityGroups({vpc, region, request, onSaving = noop}) {
             errorText={dialog.description&&!descriptionValid?t('Enter a valid description.','有効な説明を入力してください。'):undefined}>
             <Input value={dialog.description} disabled={writing} onChange={({detail})=>change('description',detail.value)}/>
           </FormField>
+        </>:ruleDialog?<>
+          <Box>{t('Selected group: ','選択済みグループ: ')}{wrap(dialog.group.id)}</Box>
+          {dialog.kind==='rule-add'?<>
+            <FormField label={t('Protocol','プロトコル')}><Input value="TCP" disabled/></FormField>
+            {[['from',t('From port','開始ポート')],['to',t('To port','終了ポート')],
+              ['cidr',dialog.direction==='ingress'?t('Source IPv4 CIDR','送信元 IPv4 CIDR'):t('Destination IPv4 CIDR','宛先 IPv4 CIDR')]].map(([key,label])=>
+              <FormField key={key} label={label} constraintText={key==='cidr'?t('Use a canonical IPv4 CIDR within: ','次の範囲に含まれる正規の IPv4 CIDR: ')+cidr:t('1–65535','1〜65535')}>
+                <Input value={dialog.rule[key]} disabled={writing} onChange={({detail})=>change('rule',{...dialog.rule,[key]:detail.value})}/>
+              </FormField>)}
+          </>:<Box>{wrap('TCP '+dialog.rule.from+'–'+dialog.rule.to+' · '+dialog.rule.cidr)}</Box>}
         </>:<>
           <Box>{t('Delete saved group: ','削除するグループ: ')}{wrap(dialog.group.name)} ({wrap(dialog.group.id)})</Box>
           <FormField label={t('Type delete to confirm','確認のため delete と入力')}>

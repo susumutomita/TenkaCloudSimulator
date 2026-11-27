@@ -78,8 +78,8 @@ class NativeSecurityGroupConsole(unittest.TestCase):
                 expect(page.get_by_text("Second VPC SDK group", exact=True)).to_have_count(0)
                 expect(page.get_by_text("No detached security groups are recorded for this VPC.", exact=True)).to_be_visible()
                 expect(page.get_by_text(
-                    "Detached configuration only. These groups have no editable rules "
-                    "and do not attach to instances or affect traffic.", exact=True,
+                    "Save TCP/IPv4 rules only within this VPC CIDR. Groups are not attached "
+                    "and saved rules do not affect traffic.", exact=True,
                 )).to_be_visible()
                 create = page.get_by_role("button", name="Create security group", exact=True)
                 create.click()

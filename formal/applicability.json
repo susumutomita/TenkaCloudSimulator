@@ -1,88 +1,105 @@
 {
   "version": 1,
-  "base_sha": "15fcbd8e6b8916c26970e09ab19b04ee70ccd932",
+  "base_sha": "f7815b8c3c0a57436a4ed4f78e781e45dc1466d9",
   "changes": [
     {
       "path": "README.md",
-      "sha256": "a975e58dee6eed2058539d4e08b8e809058ba5610ab1c341cb1feca1ad8559a4",
+      "sha256": "03f28f4ad301610d83a594f889315a38b520a19a49857f204ed8ecca8acbcf01",
       "disposition": "documentation",
-      "reason": "Documented bounded AWS Query and Console settings contract; no address, networking, guest, Name or CloudFormation write claim.",
+      "reason": "Describes the bounded native settings, operator workflow, and unsupported traffic/attachment behavior.",
+      "models": []
+    },
+    {
+      "path": "docs/console.md",
+      "sha256": "fcb86e9c89a54a309f325f2560d7c0a483f15288791703ba5812e9a3efba2788",
+      "disposition": "documentation",
+      "reason": "Describes the bounded native settings, operator workflow, and unsupported traffic/attachment behavior.",
       "models": []
     },
     {
       "path": "docs/design/0001-go-standalone.md",
-      "sha256": "1addcdee4deaf1e72b0ca3cbef5735f7b8f5b3dd2cb1e255b8a22c745e8aa926",
+      "sha256": "55d3410cdf1949b2b890e67bb23c5f51dc85df50cfa662509fb3e79f795a82bb",
       "disposition": "documentation",
-      "reason": "Documented bounded AWS Query and Console settings contract; no address, networking, guest, Name or CloudFormation write claim.",
-      "models": []
-    },
-    {
-      "path": "docs/ec2-native-subnet.md",
-      "sha256": "c95b5d616028ccb6aeb59bd4c71b239d01ce3efc83cdaa59645943faca2eaf4d",
-      "disposition": "documentation",
-      "reason": "Documented bounded AWS Query and Console settings contract; no address, networking, guest, Name or CloudFormation write claim.",
+      "reason": "Describes the bounded native settings, operator workflow, and unsupported traffic/attachment behavior.",
       "models": []
     },
     {
       "path": "docs/ec2-read-discovery.md",
-      "sha256": "ec18fb70b68e9d58cdb2017b1e638b0c275097eec4378b16404cf7db195434ad",
+      "sha256": "71fc20cb632416e8cb09ac981b1312d691307c06119c1c221e00f57d99f52d35",
       "disposition": "documentation",
-      "reason": "Documented bounded AWS Query and Console settings contract; no address, networking, guest, Name or CloudFormation write claim.",
+      "reason": "Describes the bounded native settings, operator workflow, and unsupported traffic/attachment behavior.",
       "models": []
     },
     {
-      "path": "formal/EC2NativeSubnetPublicIPv4.cfg",
-      "sha256": "ba5f35df5e13afec535bd08b086c5df293c9bbfb52df5f7cd823298a5ba350b3",
+      "path": "formal/EC2DetachedSecurityGroupRules.cfg",
+      "sha256": "8e3d2b80b8fc30fa57e5366216d9260f64810c01977bcd160905169ca6d17dd7",
       "disposition": "modeled",
-      "reason": "Same exact native owner and IAM grant, atomic single Boolean preference with stable unchanged frame, verified same-view readback and no write replay.",
+      "reason": "The bounded native profile admits or observes only one exact authorized detached tuple, preserving the peer direction and owner; committed readback precedes success.",
       "models": [
         {
-          "id": "EC2NativeSubnetPublicIPv4",
+          "id": "EC2DetachedSecurityGroupRules",
           "properties": [
-            "ExactAdmission",
-            "RefusalNoEffect",
-            "ExactPreference",
-            "SameFrame",
-            "CurrentConfirmedNotice",
-            "NoReplay"
+            "OwnershipFrame",
+            "DirectionBounds",
+            "ExactTransition"
           ],
-          "limits": "Bounded normalized authorization, atomic configuration and acknowledgement only. Does not prove Go, request parser, SQL, IAM parity, Cloudscape/browser, durability or liveness; no public IP allocation, guest, reachability or forwarding behavior."
+          "limits": "Finite symbolic SQLite and UI readback contract; not implementation refinement, real concurrency, network enforcement, or CloudFormation edit authority."
         }
       ]
     },
     {
-      "path": "formal/EC2NativeSubnetPublicIPv4.tla",
-      "sha256": "c143d1fdc8d9535f2e2d6c9d683935ef2e6cdd7213a32d3e0b71bd7563bd9026",
+      "path": "formal/EC2DetachedSecurityGroupRules.tla",
+      "sha256": "f0a0e7f66e2efba9c0e9d9bfdd110f384e8b1841341bcb392038e5b320567bb5",
       "disposition": "modeled",
-      "reason": "Same exact native owner and IAM grant, atomic single Boolean preference with stable unchanged frame, verified same-view readback and no write replay.",
+      "reason": "The bounded native profile admits or observes only one exact authorized detached tuple, preserving the peer direction and owner; committed readback precedes success.",
       "models": [
         {
-          "id": "EC2NativeSubnetPublicIPv4",
+          "id": "EC2DetachedSecurityGroupRules",
           "properties": [
-            "ExactAdmission",
-            "RefusalNoEffect",
-            "ExactPreference",
-            "SameFrame",
-            "CurrentConfirmedNotice",
-            "NoReplay"
+            "OwnershipFrame",
+            "DirectionBounds",
+            "ExactTransition"
           ],
-          "limits": "Bounded normalized authorization, atomic configuration and acknowledgement only. Does not prove Go, request parser, SQL, IAM parity, Cloudscape/browser, durability or liveness; no public IP allocation, guest, reachability or forwarding behavior."
+          "limits": "Finite symbolic SQLite and UI readback contract; not implementation refinement, real concurrency, network enforcement, or CloudFormation edit authority."
         }
       ]
     },
     {
       "path": "formal/models.json",
-      "sha256": "d11263445e6bfdc8eb716addba5ca223a732bf5bb9314fcea1728f376a686bd9",
+      "sha256": "1b0b8d38b0efe9bd3072515eef75be2da539cb12726157241d36ae3f5b12e290",
       "disposition": "formal-infrastructure",
-      "reason": "Registers one bounded model, protected invariants/mutation controls and an independent fixed inventory without altering earlier models.",
+      "reason": "Registers the bounded model and required invariant counterexamples; previous registrations retained.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/ec2_native_sg_rules_legacy_regression_test.go",
+      "sha256": "1c91a3f9e2705dba89a66fd679f20e99dfc6f2f930910ddb0d2acdec55d919a3",
+      "disposition": "test-support",
+      "reason": "Deterministic native and legacy storage fixtures verify fail-closed rule admission, rollback and shared projection without changing simulator runtime behavior.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/ec2_native_sg_rules_line_regression_test.go",
+      "sha256": "51945792491b86b1aad49198c2a3eaaab3a7cd06b24599b2f39aa85bb559cbc3",
+      "disposition": "test-support",
+      "reason": "Deterministic native and legacy storage fixtures verify fail-closed rule admission, rollback and shared projection without changing simulator runtime behavior.",
       "models": []
     },
     {
       "path": "internal/aws/ec2_read.go",
-      "sha256": "27d0d9c722c7694c06a4e3c5504404d4c2b5290924ec42e0a099b63849083f7f",
+      "sha256": "dd8cfad4a8590d4e2e381bb5349b29467b31e37ae7e4cf11f050c5c0e2a68b89",
       "disposition": "modeled",
-      "reason": "Same exact native owner and IAM grant, atomic single Boolean preference with stable unchanged frame, verified same-view readback and no write replay.",
+      "reason": "The bounded native profile admits or observes only one exact authorized detached tuple, preserving the peer direction and owner; committed readback precedes success. The combined source retains the independently scoped native subnet launch-preference and lifecycle contracts.",
       "models": [
+        {
+          "id": "EC2DetachedSecurityGroupRules",
+          "properties": [
+            "OwnershipFrame",
+            "DirectionBounds",
+            "ExactTransition"
+          ],
+          "limits": "Finite symbolic SQLite and UI readback contract; not implementation refinement, real concurrency, network enforcement, or CloudFormation edit authority."
+        },
         {
           "id": "EC2NativeSubnetPublicIPv4",
           "properties": [
@@ -111,51 +128,102 @@
       ]
     },
     {
-      "path": "internal/aws/ec2_subnet_native.go",
-      "sha256": "c28e9706b16ebb36adfa9cea561dd45888e55b291109ceffbf0ba0a2d852634a",
+      "path": "internal/aws/ec2_security_group_rules_native.go",
+      "sha256": "27d53bfdf6aa4c74428f63cc453dedd1b9b7ac0751fcb83374bf8330b12632a8",
       "disposition": "modeled",
-      "reason": "Same exact native owner and IAM grant, atomic single Boolean preference with stable unchanged frame, verified same-view readback and no write replay.",
+      "reason": "The bounded native profile admits or observes only one exact authorized detached tuple, preserving the peer direction and owner; committed readback precedes success.",
       "models": [
         {
-          "id": "EC2NativeSubnetPublicIPv4",
+          "id": "EC2DetachedSecurityGroupRules",
           "properties": [
-            "ExactAdmission",
-            "RefusalNoEffect",
-            "ExactPreference",
-            "SameFrame",
-            "CurrentConfirmedNotice",
-            "NoReplay"
+            "OwnershipFrame",
+            "DirectionBounds",
+            "ExactTransition"
           ],
-          "limits": "Bounded normalized authorization, atomic configuration and acknowledgement only. Does not prove Go, request parser, SQL, IAM parity, Cloudscape/browser, durability or liveness; no public IP allocation, guest, reachability or forwarding behavior."
-        },
-        {
-          "id": "EC2NativeSubnetLifecycle",
-          "properties": [
-            "StackUnchanged",
-            "AuthorizedWrites",
-            "NativeParent",
-            "Nonoverlap",
-            "Bounded",
-            "ExactDelete",
-            "ExactRead"
-          ],
-          "limits": "Existing finite lifecycle remains intact; does not model the new setting/ack or actual HTTP/JS/SQL."
+          "limits": "Finite symbolic SQLite and UI readback contract; not implementation refinement, real concurrency, network enforcement, or CloudFormation edit authority."
         }
       ]
     },
     {
-      "path": "internal/aws/ec2_subnet_public_ipv4_test.go",
-      "sha256": "7b4b44b540fd6dc37c8e7d51bb1cac657eb5e3599c031a212c099a4373f463d8",
+      "path": "internal/aws/ec2_security_group_rules_native_test.go",
+      "sha256": "53096eca9bf2bcea9ffb66996393968a6f6138e9e1cc58f775536bff500f66b2",
       "disposition": "test-support",
-      "reason": "Owned test fixtures for exact query/IAM/SQLite behavior, signed served bilingual UI, pinned local native SDK, restart and cleanup.",
+      "reason": "Exercises the existing detached or CFN boundary and exact additions, no simulator execution-path change.",
       "models": []
     },
     {
-      "path": "internal/aws/ec2_vpc.go",
-      "sha256": "f88ce0cb98c36d8ad61d7992b2923f5bec0159e154502710bf0cc7b749f44ab5",
+      "path": "internal/aws/ec2_security_groups_native_query.go",
+      "sha256": "a825052b044100f881f1620b9d29d183883612b59e871718e70cc1d0303a57d6",
       "disposition": "modeled",
-      "reason": "Same exact native owner and IAM grant, atomic single Boolean preference with stable unchanged frame, verified same-view readback and no write replay.",
+      "reason": "The bounded native profile admits or observes only one exact authorized detached tuple, preserving the peer direction and owner; committed readback precedes success.",
       "models": [
+        {
+          "id": "EC2DetachedSecurityGroupRules",
+          "properties": [
+            "OwnershipFrame",
+            "DirectionBounds",
+            "ExactTransition"
+          ],
+          "limits": "Finite symbolic SQLite and UI readback contract; not implementation refinement, real concurrency, network enforcement, or CloudFormation edit authority."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/ec2_security_groups_native_registration_test.go",
+      "sha256": "a316ca98afcbb5773da24549dbec2d2bca1cb20130fd01e04a196a30a658c2e6",
+      "disposition": "test-support",
+      "reason": "Exercises the existing detached or CFN boundary and exact additions, no simulator execution-path change.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/ec2_security_groups_native_store.go",
+      "sha256": "155ad3027f8ec75f839a244047990a0396847206370727018c0ba1740306ac4b",
+      "disposition": "modeled",
+      "reason": "The bounded native profile admits or observes only one exact authorized detached tuple, preserving the peer direction and owner; committed readback precedes success.",
+      "models": [
+        {
+          "id": "EC2DetachedSecurityGroupRules",
+          "properties": [
+            "OwnershipFrame",
+            "DirectionBounds",
+            "ExactTransition"
+          ],
+          "limits": "Finite symbolic SQLite and UI readback contract; not implementation refinement, real concurrency, network enforcement, or CloudFormation edit authority."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/ec2_security_groups_read.go",
+      "sha256": "b3791511c4e99bdf459b22929fe916512cfc461cae46e8c8a7a030418c59db6b",
+      "disposition": "modeled",
+      "reason": "The bounded native profile admits or observes only one exact authorized detached tuple, preserving the peer direction and owner; committed readback precedes success.",
+      "models": [
+        {
+          "id": "EC2DetachedSecurityGroupRules",
+          "properties": [
+            "OwnershipFrame",
+            "DirectionBounds",
+            "ExactTransition"
+          ],
+          "limits": "Finite symbolic SQLite and UI readback contract; not implementation refinement, real concurrency, network enforcement, or CloudFormation edit authority."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/ec2_vpc.go",
+      "sha256": "f9fbd60258dde2ca92a695869dfc79676890ce193f38d56e3ce1b1c750b95220",
+      "disposition": "modeled",
+      "reason": "The bounded native profile admits or observes only one exact authorized detached tuple, preserving the peer direction and owner; committed readback precedes success. The combined source retains the independently scoped native subnet launch-preference and lifecycle contracts.",
+      "models": [
+        {
+          "id": "EC2DetachedSecurityGroupRules",
+          "properties": [
+            "OwnershipFrame",
+            "DirectionBounds",
+            "ExactTransition"
+          ],
+          "limits": "Finite symbolic SQLite and UI readback contract; not implementation refinement, real concurrency, network enforcement, or CloudFormation edit authority."
+        },
         {
           "id": "EC2NativeSubnetPublicIPv4",
           "properties": [
@@ -185,24 +253,26 @@
     },
     {
       "path": "internal/server/ec2_read_access_test.go",
-      "sha256": "a3d06b9d8b5419a98282ad808083a4b5de7642b24e70bbd7bec493c147f432a4",
+      "sha256": "e5f2123c4c32dfc9133e0fe325fe6e11fcf395128c75d7b78041a37750fe0c97",
       "disposition": "test-support",
-      "reason": "Update the independent expected public EC2 operation inventory for the newly implemented ModifySubnetAttribute; all access and scope checks are unchanged.",
-      "models": []
-    },
-    {
-      "path": "internal/server/ec2_security_groups_console_test.go",
-      "sha256": "9217ce2b19f80c6779e46403b0aa5ddbab6f771e014b3c4aa1cc5ac81c593ac0",
-      "disposition": "test-support",
-      "reason": "Owned test fixtures for exact query/IAM/SQLite behavior, signed served bilingual UI, pinned local native SDK, restart and cleanup.",
+      "reason": "Exercises the existing detached or CFN boundary and exact additions, no simulator execution-path change.",
       "models": []
     },
     {
       "path": "internal/server/server.go",
-      "sha256": "a01fea3b6d5ade00cec97f908d4c2aa6ee691be39a52837fd77eb0cd6cc445d0",
+      "sha256": "771178f8ba4c06cc605bb2955b6f319391ebebca24f910adfcf9ba3927c3d2a7",
       "disposition": "modeled",
-      "reason": "Same exact native owner and IAM grant, atomic single Boolean preference with stable unchanged frame, verified same-view readback and no write replay.",
+      "reason": "The bounded native profile admits or observes only one exact authorized detached tuple, preserving the peer direction and owner; committed readback precedes success. The combined source retains the independently scoped native subnet launch-preference and lifecycle contracts.",
       "models": [
+        {
+          "id": "EC2DetachedSecurityGroupRules",
+          "properties": [
+            "OwnershipFrame",
+            "DirectionBounds",
+            "ExactTransition"
+          ],
+          "limits": "Finite symbolic SQLite and UI readback contract; not implementation refinement, real concurrency, network enforcement, or CloudFormation edit authority."
+        },
         {
           "id": "EC2NativeSubnetPublicIPv4",
           "properties": [
@@ -232,10 +302,19 @@
     },
     {
       "path": "internal/server/web/app.js",
-      "sha256": "78aa099ab3a632c6a7d7ec0e953cce1651f4f324d96501cf2dc3b210c436aa21",
+      "sha256": "f035380fb93cd9a40dd1f70c9138ac3550bfffef15177b6be3fe5eaeb9908eb1",
       "disposition": "modeled",
-      "reason": "Same exact native owner and IAM grant, atomic single Boolean preference with stable unchanged frame, verified same-view readback and no write replay.",
+      "reason": "The bounded native profile admits or observes only one exact authorized detached tuple, preserving the peer direction and owner; committed readback precedes success. The combined source retains the independently scoped native subnet launch-preference and lifecycle contracts.",
       "models": [
+        {
+          "id": "EC2DetachedSecurityGroupRules",
+          "properties": [
+            "OwnershipFrame",
+            "DirectionBounds",
+            "ExactTransition"
+          ],
+          "limits": "Finite symbolic SQLite and UI readback contract; not implementation refinement, real concurrency, network enforcement, or CloudFormation edit authority."
+        },
         {
           "id": "EC2NativeSubnetPublicIPv4",
           "properties": [
@@ -265,85 +344,85 @@
     },
     {
       "path": "scripts/formal_model_gate.py",
-      "sha256": "15da04292f77240e5b92401ecd4afc0902c0b1c8cbe89ca93db2041c7b3eed80",
+      "sha256": "82bfa3dc432b0222e196c450dd2c14c11ef60be33eb269f6c01adaf0ba777dd4",
       "disposition": "formal-infrastructure",
-      "reason": "Registers one bounded model, protected invariants/mutation controls and an independent fixed inventory without altering earlier models.",
+      "reason": "Registers the bounded model and required invariant counterexamples; previous registrations retained.",
       "models": []
     },
     {
       "path": "scripts/test-formal-gate.py",
-      "sha256": "ce2b60d010af44d5516d6c96aedb3ff2df23b0ce95c5e109b3561f2161b55cd6",
+      "sha256": "a47a70c19b2224c79a439dae29f56a59b9b5f5b368d38f205ad0e06a0aefe151",
       "disposition": "formal-infrastructure",
-      "reason": "Registers one bounded model, protected invariants/mutation controls and an independent fixed inventory without altering earlier models.",
+      "reason": "Registers the bounded model and required invariant counterexamples; previous registrations retained.",
       "models": []
     },
     {
-      "path": "test/console/ec2_subnet_public_ipv4.cjs",
-      "sha256": "084a75ea07ff429d536740a86c0e7452cbdc711545567faebff72e90094e8414",
+      "path": "test/console/ec2_native_sg_rules_dom.cjs",
+      "sha256": "62b8d2dcfd1af70d6015b4a5e60e2f98957b5feaaea48e2d6fa8f12076c8b372",
       "disposition": "test-support",
-      "reason": "Owned test fixtures for exact query/IAM/SQLite behavior, signed served bilingual UI, pinned local native SDK, restart and cleanup.",
+      "reason": "Exercises the existing detached or CFN boundary and exact additions, no simulator execution-path change.",
       "models": []
     },
     {
-      "path": "test/console/ec2_subnet_public_ipv4.py",
-      "sha256": "55ad863dd9bfcec9ba618dbfa14d9be75e56dbe30bf2eeca518b762f91b08720",
+      "path": "test/console/ec2_native_sg_rules_sdk.py",
+      "sha256": "cedfc842f8e288eea6429d6e730b4c57c5933577b153535934f70753c9533a6d",
       "disposition": "test-support",
-      "reason": "Owned test fixtures for exact query/IAM/SQLite behavior, signed served bilingual UI, pinned local native SDK, restart and cleanup.",
+      "reason": "Exercises the existing detached or CFN boundary and exact additions, no simulator execution-path change.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/ec2_native_security_groups_gui.py",
+      "sha256": "4fe5cc05d229243737ceef7f1fc26f4ed6535c67ccbee0342ccf7143d05c12f3",
+      "disposition": "test-support",
+      "reason": "Exercises the existing detached or CFN boundary and exact additions, no simulator execution-path change.",
       "models": []
     },
     {
       "path": "tools/console/bundle-digests.json",
-      "sha256": "32b27381a30c77c63a7e2bf9f60c306e08160763332c5c919f3ffc1cc14784f9",
+      "sha256": "6504a99d002c2091ac3e32aea16854f4eb445544bdb1e8c61d442a43b6911ea7",
       "disposition": "presentation",
-      "reason": "Generated bundle provenance metadata or development-only JS verification; not runtime.",
+      "reason": "Deterministic generated asset build metadata or console developer regression only; no independent runtime authority.",
       "models": []
     },
     {
       "path": "tools/console/bundle-inputs.json",
-      "sha256": "4e189eef2f8125665cde069ef8f43f5995ba6ab532e6dd250372679c2912a66f",
+      "sha256": "2d957c6631b1ba067a00a4d9f09f89e146eded8581671c9b2fbfe318bf397f87",
       "disposition": "presentation",
-      "reason": "Generated bundle provenance metadata or development-only JS verification; not runtime.",
+      "reason": "Deterministic generated asset build metadata or console developer regression only; no independent runtime authority.",
       "models": []
     },
     {
-      "path": "tools/console/src/ec2-native-subnets.mjs",
-      "sha256": "839b96e856ff53b31481a95feaefc93eab98b16662a2e32f881f39e5886c3546",
+      "path": "tools/console/src/ec2-native-security-groups.mjs",
+      "sha256": "8718d0aec618634b49401ac5343cee1d8bf027ac0535b4f7c7e7412623494c4a",
       "disposition": "modeled",
-      "reason": "Same exact native owner and IAM grant, atomic single Boolean preference with stable unchanged frame, verified same-view readback and no write replay.",
+      "reason": "The bounded native profile admits or observes only one exact authorized detached tuple, preserving the peer direction and owner; committed readback precedes success.",
       "models": [
         {
-          "id": "EC2NativeSubnetPublicIPv4",
+          "id": "EC2DetachedSecurityGroupRules",
           "properties": [
-            "ExactAdmission",
-            "RefusalNoEffect",
-            "ExactPreference",
-            "SameFrame",
-            "CurrentConfirmedNotice",
-            "NoReplay"
+            "OwnershipFrame",
+            "DirectionBounds",
+            "ExactTransition"
           ],
-          "limits": "Bounded normalized authorization, atomic configuration and acknowledgement only. Does not prove Go, request parser, SQL, IAM parity, Cloudscape/browser, durability or liveness; no public IP allocation, guest, reachability or forwarding behavior."
-        },
-        {
-          "id": "EC2NativeSubnetLifecycle",
-          "properties": [
-            "StackUnchanged",
-            "AuthorizedWrites",
-            "NativeParent",
-            "Nonoverlap",
-            "Bounded",
-            "ExactDelete",
-            "ExactRead"
-          ],
-          "limits": "Existing finite lifecycle remains intact; does not model the new setting/ack or actual HTTP/JS/SQL."
+          "limits": "Finite symbolic SQLite and UI readback contract; not implementation refinement, real concurrency, network enforcement, or CloudFormation edit authority."
         }
       ]
     },
     {
       "path": "tools/console/src/ec2-readonly.jsx",
-      "sha256": "8f8865cb91fb4b8b84c5e0f47244a055534c0bfb1f213a6de5be7a9c3ac96611",
+      "sha256": "3e4c008a017616e2da81d0e55b0127b7fd37f4154e82b39c30154d5eeafd1992",
       "disposition": "modeled",
-      "reason": "Same exact native owner and IAM grant, atomic single Boolean preference with stable unchanged frame, verified same-view readback and no write replay.",
+      "reason": "The bounded native profile admits or observes only one exact authorized detached tuple, preserving the peer direction and owner; committed readback precedes success. The combined source retains the independently scoped native subnet launch-preference and lifecycle contracts.",
       "models": [
+        {
+          "id": "EC2DetachedSecurityGroupRules",
+          "properties": [
+            "OwnershipFrame",
+            "DirectionBounds",
+            "ExactTransition"
+          ],
+          "limits": "Finite symbolic SQLite and UI readback contract; not implementation refinement, real concurrency, network enforcement, or CloudFormation edit authority."
+        },
         {
           "id": "EC2NativeSubnetPublicIPv4",
           "properties": [
@@ -372,44 +451,37 @@
       ]
     },
     {
-      "path": "tools/console/src/ec2-vpc-native-subnets.jsx",
-      "sha256": "f8615f25c1a72f430df8779d78c87b7285c8e91f4a37a025fcd47b0c32e92c68",
+      "path": "tools/console/src/ec2-vpc-security-groups.jsx",
+      "sha256": "ed56ca2e9041df88b8f5f1d4dd0b747cd3bfd74481da4d97ba65b3be204b536f",
       "disposition": "modeled",
-      "reason": "Same exact native owner and IAM grant, atomic single Boolean preference with stable unchanged frame, verified same-view readback and no write replay.",
+      "reason": "The bounded native profile admits or observes only one exact authorized detached tuple, preserving the peer direction and owner; committed readback precedes success.",
       "models": [
         {
-          "id": "EC2NativeSubnetPublicIPv4",
+          "id": "EC2DetachedSecurityGroupRules",
           "properties": [
-            "ExactAdmission",
-            "RefusalNoEffect",
-            "ExactPreference",
-            "SameFrame",
-            "CurrentConfirmedNotice",
-            "NoReplay"
+            "OwnershipFrame",
+            "DirectionBounds",
+            "ExactTransition"
           ],
-          "limits": "Bounded normalized authorization, atomic configuration and acknowledgement only. Does not prove Go, request parser, SQL, IAM parity, Cloudscape/browser, durability or liveness; no public IP allocation, guest, reachability or forwarding behavior."
-        },
-        {
-          "id": "EC2NativeSubnetLifecycle",
-          "properties": [
-            "StackUnchanged",
-            "AuthorizedWrites",
-            "NativeParent",
-            "Nonoverlap",
-            "Bounded",
-            "ExactDelete",
-            "ExactRead"
-          ],
-          "limits": "Existing finite lifecycle remains intact; does not model the new setting/ack or actual HTTP/JS/SQL."
+          "limits": "Finite symbolic SQLite and UI readback contract; not implementation refinement, real concurrency, network enforcement, or CloudFormation edit authority."
         }
       ]
     },
     {
       "path": "tools/console/src/main.jsx",
-      "sha256": "29fdef10566d06485e9b811d8a7e218b7cb54f17cb7106eaf61b9530d32eaf29",
+      "sha256": "64ad21ff1b5e57459ca4292c0f8f74d624bcf5978d49609aec6d9c0e57856b7a",
       "disposition": "modeled",
-      "reason": "Same exact native owner and IAM grant, atomic single Boolean preference with stable unchanged frame, verified same-view readback and no write replay.",
+      "reason": "The bounded native profile admits or observes only one exact authorized detached tuple, preserving the peer direction and owner; committed readback precedes success. The combined source retains the independently scoped native subnet launch-preference and lifecycle contracts.",
       "models": [
+        {
+          "id": "EC2DetachedSecurityGroupRules",
+          "properties": [
+            "OwnershipFrame",
+            "DirectionBounds",
+            "ExactTransition"
+          ],
+          "limits": "Finite symbolic SQLite and UI readback contract; not implementation refinement, real concurrency, network enforcement, or CloudFormation edit authority."
+        },
         {
           "id": "EC2NativeSubnetPublicIPv4",
           "properties": [
@@ -438,10 +510,10 @@
       ]
     },
     {
-      "path": "tools/console/test/ec2-native-subnets.test.mjs",
-      "sha256": "d94a4c10e579c90313abe929e226cc6e13aeade5c296e5184419cde47a8f1afa",
+      "path": "tools/console/test/ec2-native-security-groups.test.mjs",
+      "sha256": "65eb5776d01d64f9e25e277f5aba2d2d9b625fa174e7da5135f652a8d792c0ec",
       "disposition": "presentation",
-      "reason": "Generated bundle provenance metadata or development-only JS verification; not runtime.",
+      "reason": "Deterministic generated asset build metadata or console developer regression only; no independent runtime authority.",
       "models": []
     }
   ]

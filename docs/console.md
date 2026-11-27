@@ -210,9 +210,11 @@ CloudFormation-managed VPCs show why deletion is disabled: delete their stack.
 Select an EC2-managed VPC and use [Add subnet](ec2-native-subnet.md) under
 **Subnets** to save a native IPv4 subnet. CloudFormation subnets remain
 read-only in VPC details. Existing CFN route/SG panes display saved state
-only. In an EC2-managed VPC, **Security groups** and **Network ACLs** can
-create and delete detached metadata. These views never attach a group to
-an instance or an ACL to a subnet, enforce traffic, or edit rules. An ACL
+only. In an EC2-managed VPC, **Security groups** can create and delete detached
+groups and add or remove saved TCP/IPv4 ingress and egress rules within the
+owning VPC CIDR. **Network ACLs** can create and delete detached metadata but
+do not edit rules. These views never attach a group to an instance or an ACL to
+a subnet, nor do they enforce traffic. An ACL
 pane for a CloudFormation VPC does not read or change ACLs. **Route tables** can
 create and delete detached tables with optional Name tags in a native VPC,
 manage or [move explicit subnet associations](ec2-read-discovery.md#native-subnet-route-table-associations) between tables in the same VPC, and manage the documented [saved IPv4 routes](ec2-native-default-route.md).

@@ -114,6 +114,8 @@ func TestEC2ReadAccessBoundary(t *testing.T) {
 			ResourceLimit                    int                 `json:"resourceLimit"`
 			DescribeSelectors                map[string][]string `json:"describeSelectors"`
 			DetachedConfigurationOnly        []string            `json:"detachedConfigurationOnly"`
+			DetachedSecurityGroupRuleProfile string              `json:"detachedSecurityGroupRuleProfile"`
+			DetachedSecurityGroupRules       int                 `json:"detachedSecurityGroupRulesPerDirection"`
 			InternetGatewayLifecycle         []string            `json:"internetGatewayLifecycle"`
 			InternetGatewayPageLimit         int                 `json:"internetGatewayPageLimit"`
 			RouteTableLifecycle              []string            `json:"routeTableLifecycle"`
@@ -135,6 +137,7 @@ func TestEC2ReadAccessBoundary(t *testing.T) {
 	wantOperations := []string{
 		"DescribeInstances", "DescribeVpcs", "DescribeSubnets", "DescribeSecurityGroups", "DescribeRouteTables",
 		"CreateVpc", "DeleteVpc", "CreateSubnet", "DeleteSubnet", "ModifySubnetAttribute", "CreateSecurityGroup", "DeleteSecurityGroup",
+		"AuthorizeSecurityGroupIngress", "AuthorizeSecurityGroupEgress", "RevokeSecurityGroupIngress", "RevokeSecurityGroupEgress",
 		"CreateNetworkAcl", "DescribeNetworkAcls", "DeleteNetworkAcl", "CreateRouteTable", "DeleteRouteTable",
 		"AssociateRouteTable", "DisassociateRouteTable", "ReplaceRouteTableAssociation",
 		"CreateInternetGateway", "DescribeInternetGateways", "DeleteInternetGateway", "AttachInternetGateway", "DetachInternetGateway",
@@ -151,6 +154,7 @@ func TestEC2ReadAccessBoundary(t *testing.T) {
 	}
 	if ec2.Pagination || !ec2.Filters || ec2.ResourceLimit != 1000 || !reflect.DeepEqual(ec2.DescribeSelectors, wantSelectors) ||
 		!reflect.DeepEqual(ec2.DetachedConfigurationOnly, []string{"native security groups", "native network ACLs"}) ||
+		ec2.DetachedSecurityGroupRuleProfile != "tcp-ipv4-same-vpc" || ec2.DetachedSecurityGroupRules != 60 ||
 		ec2.InternetGatewayPageLimit != 100 ||
 		!reflect.DeepEqual(ec2.InternetGatewayLifecycle, []string{"DescribeInternetGateways", "CreateInternetGateway", "DeleteInternetGateway", "AttachInternetGateway", "DetachInternetGateway"}) ||
 		!reflect.DeepEqual(ec2.RouteTableLifecycle, []string{"DescribeRouteTables", "CreateRouteTable", "DeleteRouteTable"}) ||

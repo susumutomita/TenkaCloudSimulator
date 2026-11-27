@@ -8,6 +8,7 @@ import (
 	"errors"
 	"fmt"
 	"maps"
+	"net/netip"
 	"strings"
 )
 
@@ -17,7 +18,9 @@ var errEC2NativeSecurityGroupState = errors.New("inconsistent native security gr
 
 type ec2NativeSecurityGroup struct {
 	EC2NetworkResource
-	Name string
+	Name       string
+	parentCIDR string
+	rules      []ec2NativeSGRule
 }
 
 func initEC2NativeSecurityGroups(db *sql.DB) error {
@@ -35,28 +38,35 @@ func initEC2NativeSecurityGroups(db *sql.DB) error {
 		FOREIGN KEY(region,vpc_id) REFERENCES aws_ec2_network_resources(region,id) ON DELETE RESTRICT,
 		CHECK(id<>vpc_id)
 	) WITHOUT ROWID`)
-	return err
-}
-
-func checkEC2NativeSGParent(ctx context.Context, tx *sql.Tx, region, id string) error {
-	vpc, err := networkRead(ctx, tx, region, id)
-	if errors.Is(err, sql.ErrNoRows) || (err == nil && vpc.Kind != "AWS::EC2::VPC") {
-		return ec2Invalid("InvalidVpcID.NotFound", "The parent VPC does not exist in this region.")
-	}
 	if err != nil {
 		return err
 	}
+	return initEC2NativeSGRules(db)
+}
+
+func checkEC2NativeSGParent(ctx context.Context, tx *sql.Tx, region, id string) (EC2NetworkResource, error) {
+	vpc, err := networkRead(ctx, tx, region, id)
+	if errors.Is(err, sql.ErrNoRows) || (err == nil && vpc.Kind != "AWS::EC2::VPC") {
+		return EC2NetworkResource{}, ec2Invalid("InvalidVpcID.NotFound", "The parent VPC does not exist in this region.")
+	}
+	if err != nil {
+		return EC2NetworkResource{}, err
+	}
 	if vpc.StackID != ec2NativeOwner {
-		return ec2Invalid("UnsupportedOperation", "Only EC2-managed VPCs can own a native security group.")
+		return EC2NetworkResource{}, ec2Invalid("UnsupportedOperation", "Only EC2-managed VPCs can own a native security group.")
+	}
+	prefix, err := netip.ParsePrefix(vpc.CIDR)
+	if err != nil || !prefix.Addr().Is4() || prefix.Bits() < 16 || prefix.Bits() > 28 || prefix.Masked().String() != vpc.CIDR {
+		return EC2NetworkResource{}, errEC2NativeSecurityGroupState
 	}
 	claims, err := cloudFormationClaims(ctx, tx, region, id)
 	if err != nil {
-		return err
+		return EC2NetworkResource{}, err
 	}
 	if claims != 0 {
-		return errEC2NativeSecurityGroupState
+		return EC2NetworkResource{}, errEC2NativeSecurityGroupState
 	}
-	return nil
+	return vpc, nil
 }
 
 func readEC2NativeSecurityGroup(ctx context.Context, tx *sql.Tx, region, id string) (ec2NativeSecurityGroup, error) {
@@ -75,7 +85,7 @@ func readEC2NativeSecurityGroup(ctx context.Context, tx *sql.Tx, region, id stri
 			return out, errEC2NativeSecurityGroupState
 		}
 		if netErr == nil && r.Kind == ec2SecurityGroupKind {
-			return out, ec2Invalid("UnsupportedOperation", "This security group is managed by CloudFormation; delete the stack instead.")
+			return out, ec2Invalid("UnsupportedOperation", "This security group is managed by CloudFormation; make changes through its stack.")
 		}
 		return out, ec2Invalid("InvalidGroup.NotFound", "The security group does not exist in this region.")
 	}
@@ -95,11 +105,12 @@ func readEC2NativeSecurityGroup(ctx context.Context, tx *sql.Tx, region, id stri
 			return out, errEC2NativeSecurityGroupState
 		}
 	}
-	if err := checkEC2NativeSGParent(ctx, tx, region, vpc); err != nil {
+	parent, err := checkEC2NativeSGParent(ctx, tx, region, vpc)
+	if err != nil {
 		return out, fmt.Errorf("%w: parent unavailable", errEC2NativeSecurityGroupState)
 	}
 	var claimed bool
-	err := tx.QueryRowContext(ctx, `SELECT EXISTS (SELECT 1 FROM aws_cfn_ownership WHERE namespace=? AND kind=? AND physical_id=?)`,
+	err = tx.QueryRowContext(ctx, `SELECT EXISTS (SELECT 1 FROM aws_cfn_ownership WHERE namespace=? AND kind=? AND physical_id=?)`,
 		stackResourceNamespace(region, ec2SecurityGroupKind), ec2SecurityGroupKind, id).Scan(&claimed)
 	if err != nil {
 		return out, err
@@ -107,7 +118,11 @@ func readEC2NativeSecurityGroup(ctx context.Context, tx *sql.Tx, region, id stri
 	if claimed {
 		return out, errEC2NativeSecurityGroupState
 	}
-	return ec2NativeSecurityGroup{EC2NetworkResource: r, Name: name}, nil
+	rules, err := readEC2NativeSGRules(ctx, tx, region, id, parent.CIDR)
+	if err != nil {
+		return out, err
+	}
+	return ec2NativeSecurityGroup{EC2NetworkResource: r, Name: name, parentCIDR: parent.CIDR, rules: rules}, nil
 }
 
 func (s *StackStore) createEC2NativeSecurityGroup(ctx context.Context, region string, q ec2NativeSecurityGroupQuery) (ec2NativeSecurityGroup, error) {
@@ -127,7 +142,7 @@ func (s *StackStore) createEC2NativeSecurityGroup(ctx context.Context, region st
 		return out, err
 	}
 	defer tx.Rollback()
-	if err := checkEC2NativeSGParent(ctx, tx, region, q.vpc); err != nil {
+	if _, err := checkEC2NativeSGParent(ctx, tx, region, q.vpc); err != nil {
 		return out, err
 	}
 	var duplicate bool
@@ -161,7 +176,7 @@ func (s *StackStore) createEC2NativeSecurityGroup(ctx context.Context, region st
 	if err != nil {
 		return ec2NativeSecurityGroup{}, err
 	}
-	if out.Name != q.name || out.VPCID != q.vpc || out.Description != q.description || !maps.Equal(out.Tags, q.tags) {
+	if out.Name != q.name || out.VPCID != q.vpc || out.Description != q.description || !maps.Equal(out.Tags, q.tags) || len(out.rules) != 0 {
 		return ec2NativeSecurityGroup{}, errEC2NativeSecurityGroupState
 	}
 	return out, tx.Commit()
@@ -215,9 +230,8 @@ func (s *StackStore) deleteEC2NativeSecurityGroup(ctx context.Context, region, i
 	if err != nil {
 		return err
 	}
-	// This slice creates no references from interfaces, instances or rules.
-	// A future referencing operation must add dependency guards before it is
-	// enabled, rather than treating this detached row as an active firewall.
+	// The FK atomically removes detached rules only. Interfaces and instances
+	// remain unsupported; a future attachment operation needs its own guard.
 	result, err := tx.ExecContext(ctx, `DELETE FROM aws_ec2_native_security_groups WHERE region=? AND id=? AND vpc_id=?`, region, id, g.VPCID)
 	if err != nil {
 		return err
@@ -237,7 +251,8 @@ func (s *StackStore) deleteEC2NativeSecurityGroup(ctx context.Context, region, i
 		return errEC2NativeSecurityGroupState
 	}
 	var stillThere bool
-	err = tx.QueryRowContext(ctx, `SELECT EXISTS(SELECT 1 FROM aws_ec2_native_security_groups WHERE region=? AND id=?)`, region, id).Scan(&stillThere)
+	err = tx.QueryRowContext(ctx, `SELECT EXISTS(SELECT 1 FROM aws_ec2_native_security_groups WHERE region=? AND id=?
+		UNION ALL SELECT 1 FROM aws_ec2_native_security_group_rules WHERE region=? AND group_id=?)`, region, id, region, id).Scan(&stillThere)
 	if err != nil || stillThere {
 		return errEC2NativeSecurityGroupState
 	}
