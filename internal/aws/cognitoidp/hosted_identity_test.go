@@ -140,6 +140,16 @@ func beginHostedSignedLoginWithScopes(t *testing.T, b *hostedBrowser, id, client
 // Entra Emulator; the Keycloak case also signs the response. No injected grant.
 func (f hostedSignedIDP) post(t *testing.T, b *hostedBrowser, l hostedLogin, provider string, name saml.NameID, attrs ...saml.Attribute) *httptest.ResponseRecorder {
 	t.Helper()
+	return f.postWithAssertion(t, b, l, provider, name, nil, attrs...)
+}
+
+func (f hostedSignedIDP) postWithAssertion(t *testing.T, b *hostedBrowser, l hostedLogin, provider string, name saml.NameID, configure func(*saml.Assertion), attrs ...saml.Attribute) *httptest.ResponseRecorder {
+	t.Helper()
+	return hostedServe(b, hostedACSRequest(l, f.signedAssertionForm(t, l, provider, name, configure, attrs...)))
+}
+
+func (f hostedSignedIDP) signedAssertionForm(t *testing.T, l hostedLogin, provider string, name saml.NameID, configure func(*saml.Assertion), attrs ...saml.Attribute) url.Values {
+	t.Helper()
 	now := time.Now().UTC().Truncate(time.Second)
 	end := now.Add(2 * time.Minute)
 	issuer := saml.Issuer{Value: fixtureEntity}
@@ -156,6 +166,9 @@ func (f hostedSignedIDP) post(t *testing.T, b *hostedBrowser, l hostedLogin, pro
 	}
 	if len(attrs) > 0 {
 		a.AttributeStatements = []saml.AttributeStatement{{Attributes: attrs}}
+	}
+	if configure != nil {
+		configure(&a)
 	}
 	signed, err := f.sign.SignEnveloped(a.Element())
 	if err != nil {
@@ -177,15 +190,16 @@ func (f hostedSignedIDP) post(t *testing.T, b *hostedBrowser, l hostedLogin, pro
 	if err != nil {
 		t.Fatal(err)
 	}
-	r := hostedFixtureRequest(http.MethodPost, l.auth.AssertionConsumerServiceURL,
-		url.Values{"SAMLResponse": {base64.StdEncoding.EncodeToString(raw)}, "RelayState": {l.relay}})
+	return url.Values{"SAMLResponse": {base64.StdEncoding.EncodeToString(raw)}, "RelayState": {l.relay}}
+}
+
+func hostedACSRequest(l hostedLogin, form url.Values) *http.Request {
+	r := hostedFixtureRequest(http.MethodPost, l.auth.AssertionConsumerServiceURL, form)
 	// The wire request has an origin-form target and same host, not a proxy URL.
 	r.URL.Scheme, r.URL.Host = "", ""
 	r.Header.Set("Origin", fixtureHostedIDP)
 	r.AddCookie(l.cookie)
-	w := httptest.NewRecorder()
-	b.ServeHTTP(w, r)
-	return w
+	return r
 }
 
 func assertHostedCompletion(t *testing.T, l hostedLogin, assertion *httptest.ResponseRecorder) (*url.URL, string) {

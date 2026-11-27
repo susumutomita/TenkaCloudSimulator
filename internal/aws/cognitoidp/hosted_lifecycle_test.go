@@ -189,6 +189,8 @@ func TestHostedSignedDirectoryMappingAcceptsCorrectionsWithoutBurningPendingLogi
 		{"mail typed as bool", []saml.Attribute{idClaim, hostedTypedClaim(sampleMailClaim, "xs:boolean", "true"), verified}},
 		{"directory configured mail twice", []saml.Attribute{idClaim, mail, verified, mail}},
 		{"unexpected email status word", []saml.Attribute{idClaim, mail, hostedTypedClaim("email_verified", "xs:string", "unconfirmed")}},
+		{"timestamp is not a mapped scalar claim", []saml.Attribute{idClaim, mail, hostedTypedClaim("email_verified", "xs:dateTime", "2026-11-02T12:00:00Z")}},
+		{"incomplete synced mail value", []saml.Attribute{idClaim, hostedTypedClaim(sampleMailClaim, "xs:string", ""), verified}},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			l := beginHostedSignedLoginWithScopes(t, b, id, client, "Entra", hostedFixtureCallback, fixtureHostedState, "openid email")
@@ -325,6 +327,9 @@ func TestHostedCanonicalConfigurationReopensButBrowserGenerationDoesNot(t *testi
 	if err := db.Close(); err != nil {
 		t.Fatal(err)
 	}
+	if unavailable, err := NewHostedBrowser(s, scope.Account, hostedFixtureOrigin); err == nil || unavailable != nil {
+		t.Fatal("closed persistent state could still start its hosted listener")
+	}
 	if err := first.transition(context.Background(), scope, pool.ID, nil, func(_ federationConfig, _ federationRevision, _ *hostedState) (bool, error) {
 		t.Fatal("closed database attempted a successful browser state transition")
 		return false, nil
@@ -369,11 +374,38 @@ func TestHostedExpiredRowsArePrunedAtTheirExclusiveDeadline(t *testing.T) {
 	}
 }
 
+func TestHostedValidSignedACSRequiresBrowserBindingAndExactIdPOrigin(t *testing.T) {
+	signer := newHostedSignedIDP(t)
+	b, _, _, id, client := newHostedFixture(t, signer.provider("Entra"))
+	login := beginHostedSignedLogin(t, b, id, client, "Entra")
+	subject := saml.NameID{Format: string(saml.PersistentNameIDFormat), Value: "tester@example.invalid"}
+	// Sign once as the registered fixture IdP. Each attempt has the same
+	// assertion bytes, callback, RelayState and authorization request.
+	form := signer.signedAssertionForm(t, login, "Entra", subject, nil, hostedObjectIDs(fixtureEntraAlice))
+	t.Run("same form without the browser cookie", func(t *testing.T) {
+		request := hostedACSRequest(login, form)
+		request.Header.Del("Cookie")
+		requireNoHostedResult(t, hostedServe(b, request))
+	})
+	t.Run("same form from a different loopback IdP port", func(t *testing.T) {
+		request := hostedACSRequest(login, form)
+		request.Header.Set("Origin", "https://127.0.0.1:18449")
+		requireNoHostedResult(t, hostedServe(b, request))
+	})
+	// The unmodified submission proves these were binding checks, not a bad
+	// signature or malformed payload, and that neither failure consumed it.
+	completed := hostedServe(b, hostedACSRequest(login, form))
+	callback, _ := assertHostedCompletion(t, login, completed)
+	redeemHostedSignedLogin(t, b, login, completed)
+	requireNoHostedResult(t, hostedServe(b, hostedACSRequest(login, form)))
+	requireNoHostedResult(t, hostedServe(b, hostedExchangeRequest(login, callback.Query().Get("code"), "")))
+}
+
 func TestHostedInvalidClientSubmissionsDoNotConsumeAnActiveLogin(t *testing.T) {
 	signer := newHostedSignedIDP(t)
 	b, _, _, id, client := newHostedFixture(t, signer.provider("Entra"))
 	l := beginHostedSignedLogin(t, b, id, client, "Entra")
-	acsPath, tokenPath := hostedPrefix+id+"/"+hostedACS, hostedPrefix+id+"/"+hostedToken
+	tokenPath := hostedPrefix + id + "/" + hostedToken
 	assertRejected := func(t *testing.T, r *http.Request) {
 		t.Helper()
 		w := hostedServe(b, r)
@@ -383,30 +415,17 @@ func TestHostedInvalidClientSubmissionsDoNotConsumeAnActiveLogin(t *testing.T) {
 			t.Fatal("an unsupported request produced an authenticated result", w.Code)
 		}
 	}
-	acs := func(body string, includeCookie bool) *http.Request {
-		r := hostedFixtureRequest(http.MethodPost, acsPath, url.Values{"RelayState": {l.relay}, "SAMLResponse": {body}})
-		if includeCookie {
-			r.AddCookie(l.cookie)
-		}
-		r.Header.Set("Origin", fixtureHostedIDP)
-		return r
+	acs := func(body string) *http.Request {
+		return hostedACSRequest(l, url.Values{"RelayState": {l.relay}, "SAMLResponse": {body}})
 	}
-	t.Run("browser no longer has its login cookie", func(t *testing.T) {
-		assertRejected(t, acs("", false))
-	})
 	t.Run("directory response was not base64", func(t *testing.T) {
-		assertRejected(t, acs("not base64", true))
+		assertRejected(t, acs("not base64"))
 	})
 	t.Run("directory response arrived empty", func(t *testing.T) {
-		assertRejected(t, acs("", true))
+		assertRejected(t, acs(""))
 	})
 	t.Run("directory response XML is incomplete", func(t *testing.T) {
-		assertRejected(t, acs(base64.StdEncoding.EncodeToString([]byte("<Response")), true))
-	})
-	t.Run("form submitted from a different local origin", func(t *testing.T) {
-		r := acs("", true)
-		r.Header.Set("Origin", "https://127.0.0.1:18449")
-		assertRejected(t, r)
+		assertRejected(t, acs(base64.StdEncoding.EncodeToString([]byte("<Response"))))
 	})
 	subject := saml.NameID{Format: string(saml.PersistentNameIDFormat), Value: "tester@example.invalid"}
 	t.Run("directory signing key changed without re-registration", func(t *testing.T) {

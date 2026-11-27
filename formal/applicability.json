@@ -42,6 +42,13 @@
       ]
     },
     {
+      "path": "cmd/simulator/local_sso_callback_contract_test.go",
+      "sha256": "0e9d6660512d6ea3fd6bf287511f0950fcc2daeb3579c75795b23804185405a5",
+      "disposition": "test-support",
+      "reason": "Exercises signed callback token and browser binding validation, replay rejection, and bounded local relying-party response handling.",
+      "models": []
+    },
+    {
       "path": "cmd/simulator/local_sso_integration_test.go",
       "sha256": "a79394bb7823958f13dd3b384a13544d756108bf5483c203530845aa7d92101c",
       "disposition": "test-support",
@@ -76,6 +83,13 @@
       "sha256": "41804db3039c927f534835781a3aa53ac11b3de76f8da9d3d2b1680b72638ff1",
       "disposition": "test-support",
       "reason": "Target exact ephemeral TLS, app browser state, sanitized joined errors, and real partial-bind/cancel startup cleanup.",
+      "models": []
+    },
+    {
+      "path": "cmd/simulator/local_sso_transport_test.go",
+      "sha256": "630e8685ebd07eac2cf71b6c23263f4141d0ad8d75da0e3f0c9da5f065173421",
+      "disposition": "test-support",
+      "reason": "Tests private HTTPS destination allowlisting, refusal to follow redirects, and absent or untrusted endpoint handling.",
       "models": []
     },
     {
@@ -370,16 +384,16 @@
     },
     {
       "path": "internal/aws/cognitoidp/hosted_identity_test.go",
-      "sha256": "896539a5d92d8c1ac950dbd9d7c26795fc0281116a996ddb0e047421bbd78d3c",
+      "sha256": "3de7fc91d3c01e600a8dccb96ad4ea619d1679e67c913faba56155a1f2f5213c",
       "disposition": "test-support",
-      "reason": "Extends the signed SAML and OAuth test harness to cover the exact client scope set.",
+      "reason": "Extends the signed test harness to verify fully enrolled synthetic requests and isolate browser-origin and binding checks.",
       "models": []
     },
     {
       "path": "internal/aws/cognitoidp/hosted_lifecycle_test.go",
-      "sha256": "73354a8a6fe65dac3bfe5dd1cec603ef3e8291d9b21940e12d7bbdb501b57950",
+      "sha256": "0448c8d3aa0b0de3e20dce0666f791554392d79c4ff518ebf7a8b9e0fbe588cb",
       "disposition": "test-support",
-      "reason": "Exercises the native hosted event lifecycle, signed claims with public-key verification, configuration changes, and SQLite reopening with synthetic state.",
+      "reason": "Tests native hosted lifecycle, and separately verifies browser cookie and origin checks on fully signed requests.",
       "models": []
     },
     {
@@ -398,6 +412,13 @@
           "limits": "Symbolic correspondence only: not cryptography, parsers, OAuth/SAML platform parity, concrete time/quotas, cross-run subject stability, general Keycloak compatibility, TLS/browser/Linux/macOS execution, SQL/crash races, disclosure beyond modeled stdout fields, Battle dependency compatibility, or a Go refinement proof. An independent successful callback is not an app or operator session."
         }
       ]
+    },
+    {
+      "path": "internal/aws/cognitoidp/hosted_recovery_test.go",
+      "sha256": "ed084d9155db67cbc3abaf0f69e8068903b2f4410c0098c52237bef8e58157fb",
+      "disposition": "test-support",
+      "reason": "Tests trust revision expiry for pending and unredeemed logins, and durable write refusal or recovery without incorrect browser success.",
+      "models": []
     },
     {
       "path": "internal/aws/cognitoidp/hosted_saml.go",
@@ -512,6 +533,13 @@
           "limits": "Symbolic correspondence only: not cryptography, parsers, OAuth/SAML platform parity, concrete time/quotas, cross-run subject stability, general Keycloak compatibility, TLS/browser/Linux/macOS execution, SQL/crash races, disclosure beyond modeled stdout fields, Battle dependency compatibility, or a Go refinement proof. An independent successful callback is not an app or operator session."
         }
       ]
+    },
+    {
+      "path": "internal/server/cognito_hosted_recovery_test.go",
+      "sha256": "cdd835f7f10671812860da30ed2eb878bd4d7ef4ceea9d82c5e149b808387cc4",
+      "disposition": "test-support",
+      "reason": "Proves fail-closed hosted initialization, closure of the shared SQLite handle, and successful signed management on a clean retry.",
+      "models": []
     },
     {
       "path": "internal/server/cognito_hosted_test.go",
