@@ -4,8 +4,9 @@ In the signed-in **VPC → Subnets** navigation, view the current region’s sav
 subnets. Search by name or ID or filter the list by a VPC. **Create subnet** opens
 a separate page: choose an EC2-managed VPC, check its IPv4 CIDR, and enter an IPv4
 range and a local Availability Zone. **No preference** uses the region’s local
-`a` zone. The native API cannot set a subnet name or tags; a saved CloudFormation
-Name tag is read-only. The older **Add subnet** control in a selected VPC also
+`a` zone. Native subnet creation does not accept tags. For an existing
+native subnet, see the [post-creation Name and tag API](#native-subnet-tag-editing).
+CloudFormation tags remain read-only in the native API. The older **Add subnet** control in a selected VPC also
 uses the same native API. The Console says a subnet was saved only after verifying that the returned ID is present under that VPC; a confirmed deletion must disappear from the subsequent read. **Refresh subnets** reconciles a write whose outcome could not be verified. The Console does not automatically retry a write.
 
 For a saved native subnet, **Edit subnet settings** toggles **Enable auto-assign
@@ -33,12 +34,44 @@ This uses the same native Query API and SQLite state as SDK clients. It does not
 | `ModifySubnetAttribute` | `SubnetId`, precisely one `MapPublicIpOnLaunch.Value=true\|false`, optional `DryRun=false` | Commits that preference for one EC2-owned row; `return=true` acknowledges the write. A repeat is a no-op; all other attributes are unsupported. |
 | `DeleteSubnet` | `SubnetId`, optional `DryRun=false` | Removes exactly one unreferenced EC2-owned subnet in the current region. The parent VPC cannot be deleted while a subnet is attached. |
 
-The selected exercise identity needs `ec2:CreateSubnet` on the exact VPC ARN, `arn:aws:ec2:<region>:000000000000:subnet/*` and the newly allocated subnet ARN before any write transaction, `ec2:DescribeSubnets` on `*`, `ec2:ModifySubnetAttribute` on the exact target subnet ARN, and `ec2:DeleteSubnet` on the target subnet ARN. Scoped handoffs do not offer the pane and cannot use these APIs. Unsupported attributes, tags at creation, IPAM, IPv6, filters, pagination and `DryRun=true` are rejected. The existing shared 1,000 network-resource bound applies; the Console also refuses snapshots above 16 MiB rather than showing truncated or empty success.
+### Native subnet tag editing
+
+On an existing EC2-managed subnet, [CreateTags](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_CreateTags.html)
+and [DeleteTags](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_DeleteTags.html)
+accept one `ResourceId.1` bearing the subnet ID and one explicit `Tag.1.Key`.
+`Name` is a case-sensitive tag. For create, send `Tag.1.Value`, including an
+explicit empty string if needed. For delete, omit the value for a key-only
+match or supply the exact value, including empty. A missing key is rejected;
+there is no clear-all operation. Additional resource IDs and tags, `DryRun=true`,
+IPv6 parameters and reserved `aws:` keys are not supported. The same local
+limits as VPC tags apply: 50 tags, keys of 1–128 UTF-8 bytes, and values of up
+to 256 bytes, with valid XML text.
+
+The caller needs the matching `ec2:CreateTags` or `ec2:DeleteTags` permission
+on the exact subnet ARN in the request's region. CloudFormation subnets and
+instance-scoped sessions cannot use these native writes. `return=true`
+acknowledges the request. Read the same ID and parent from the existing
+regional `DescribeSubnets`; its `tagSet` contains the validated saved tags.
+If the readback is uncertain, inspect it again rather than repeating the write.
+Tag changes neither advance the subnet's revision nor change its CIDR, AZ,
+public IPv4 preference, parent VPC or route associations. The tags live in
+the one saved subnet row and are removed with it after normal dependency checks.
+
+Existing untagged state needs no migration. Versions predating native subnet
+tags reject tagged native rows, so keep a database backup if downgrade access
+is needed. A database change also invalidates any earlier offline route-repair
+plan fingerprint for that file.
+
+### Authorization and validation
+
+The selected exercise identity needs `ec2:CreateSubnet` on the exact VPC ARN, `arn:aws:ec2:<region>:000000000000:subnet/*` and the newly allocated subnet ARN before any write transaction, `ec2:DescribeSubnets` on `*`, `ec2:ModifySubnetAttribute` on the exact target subnet ARN, and `ec2:DeleteSubnet` on the target subnet ARN. Scoped handoffs do not offer the pane and cannot use these APIs. Unsupported attributes, tags at creation, IPAM, IPv6, filters, pagination and `DryRun=true` are rejected. The existing shared 1,000 network-resource bound applies; the Console also refuses snapshots above 16 MiB rather than showing truncated or empty success. The VPC filter is applied after this unpaginated regional response, so it cannot reduce the wire size. If the Console limit is reached, use native SDK regional `DescribeSubnets`, subject to the server’s resource bound, and filter that response locally. The simulator does not accept explicit subnet selectors or filter/page parameters for this operation.
 
 Validation: `go test ./internal/aws -run 'TestEC2NativeSubnet|TestEC2DescribeSubnetsContract'`; `node --test tools/console/test/ec2-native-subnets.test.mjs`. Scoped settings acceptance uses the pinned SDK and served console via `python3 test/console/ec2_subnet_public_ipv4.py` (set `SIMULATOR_BINARY` and `JSDOM_MODULE`). For the embedded Console against the built local simulator, set `SIMULATOR_BINARY` and `JSDOM_MODULE` and run `python3 test/console/ec2_native_subnet.py` with pinned boto3/botocore. The optional combined VPC pane check uses JSDOM rather than Chromium.
 
 Opt-in real Chromium test against the embedded console (no changes to routine
 CI): `SIMULATOR_BINARY=/abs/simulator PLAYWRIGHT_MODULE=/abs/playwright-core node test/console/ec2_subnets_console_browser.cjs`.
+The opt-in `python3 test/e2e/ec2_subnet_tags.py` checks authenticated SDK tag
+and subnet readback, restart, existing route association and cleanup.
 Use the Chromium distribution matching the installed Playwright version and
 optionally set `SCREENSHOTS_DIR` to retain synthetic screenshots.
 

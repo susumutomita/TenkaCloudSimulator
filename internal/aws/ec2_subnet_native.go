@@ -138,7 +138,7 @@ func nativeSubnetParent(ctx context.Context, tx *sql.Tx, region, id string) (net
 
 func nativeSubnetReadback(ctx context.Context, tx *sql.Tx, r EC2NetworkResource) (ec2SubnetRead, error) {
 	if r.Kind != ec2NativeSubnetKind || r.StackID != ec2NativeOwner || !ec2SubnetIDPattern.MatchString(r.ID) ||
-		!ec2VPCIDPattern.MatchString(r.VPCID) || !nativeSubnetAZ(r.Region, r.AvailabilityZone) || r.Revision < 1 || len(r.Tags) != 0 {
+		!ec2VPCIDPattern.MatchString(r.VPCID) || !nativeSubnetAZ(r.Region, r.AvailabilityZone) || r.Revision < 1 || !validNativeEC2Tags(r.Tags) {
 		return ec2SubnetRead{}, errors.New("invalid native subnet identity or settings")
 	}
 	if err := nativeSubnetUnclaimed(ctx, tx, r.Region, r.ID); err != nil {
@@ -156,7 +156,7 @@ func nativeSubnetReadback(ctx context.Context, tx *sql.Tx, r EC2NetworkResource)
 		return ec2SubnetRead{}, errEC2NetworkOutsideVPC
 	}
 	return ec2SubnetRead{ID: r.ID, VPC: r.VPCID, CIDR: r.CIDR, State: "available", AZ: r.AvailabilityZone,
-		ManagedBy: ec2ManagedByEC2, PublicIPv4: &r.PublicIP}, nil
+		ManagedBy: ec2ManagedByEC2, PublicIPv4: &r.PublicIP, Tags: ec2ReadTags(r.Tags)}, nil
 }
 
 func nativeSubnetRows(ctx context.Context, tx *sql.Tx, region string) ([]ec2SubnetRead, error) {

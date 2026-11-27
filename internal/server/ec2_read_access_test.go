@@ -106,6 +106,7 @@ func TestEC2ReadAccessBoundary(t *testing.T) {
 	var caps struct {
 		Services map[string]struct {
 			VpcTagMutationProfile            string              `json:"vpcTagMutationProfile"`
+			SubnetTagMutationProfile         string              `json:"subnetTagMutationProfile"`
 			Console                          bool                `json:"console"`
 			ReadOnly                         bool                `json:"readOnly"`
 			SessionCredentials               bool                `json:"sessionCredentials"`
@@ -130,7 +131,7 @@ func TestEC2ReadAccessBoundary(t *testing.T) {
 		t.Fatal("capabilities unavailable", w.Code)
 	}
 	ec2, exists := caps.Services["ec2"]
-	if !exists || !ec2.Console || ec2.ReadOnly || ec2.SessionCredentials || ec2.VpcTagMutationProfile != "single-native-vpc" {
+	if !exists || !ec2.Console || ec2.ReadOnly || ec2.SessionCredentials || ec2.VpcTagMutationProfile != "single-native-vpc" || ec2.SubnetTagMutationProfile != "single-native-subnet" {
 		t.Fatalf("unexpected EC2 access capabilities: %+v", ec2)
 	}
 	// The expected public subset is independent of the provider's registration.

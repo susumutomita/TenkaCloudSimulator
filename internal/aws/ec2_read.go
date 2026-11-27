@@ -298,8 +298,8 @@ func (g *Gateway) serveEC2(w http.ResponseWriter, r *http.Request) {
 		}
 		out = result
 	case ec2CreateVPCTag, ec2DeleteVPCTag:
-		if err := g.Stacks.mutateNativeVPCTag(r.Context(), action, region, request.vpcID, request.vpcTag); err != nil {
-			failChild(err, "Local VPC tags are unavailable; no tag change was acknowledged.")
+		if err := g.Stacks.mutateNativeEC2Tag(r.Context(), action, region, request.nativeTag); err != nil {
+			failChild(err, "Local resource tags are unavailable; no tag change was acknowledged.")
 			return
 		}
 		out = &ec2VPCTagResponse{XMLName: xml.Name{Local: action + "Response"}, Return: true}
