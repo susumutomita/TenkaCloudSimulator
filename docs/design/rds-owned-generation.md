@@ -58,8 +58,20 @@ ownership, retirement, unavailable metadata, or a busy database owner denies
 this single check. A policy denial does not retire a healthy DB. The provider
 ends the SQLite read before the fixed authenticated host probe and then
 rechecks the exact DB generation and destination topology in a new snapshot.
-The final committed read is a fresh observation, not proof that dependencies
-were unchanged during the host probe or will stay valid after the last read.
+The owned DB remembers the DB subnet group's ARN and creation sequence from
+the reservation transaction. Deleting and recreating the group, even with the
+same name and subnet IDs, never makes its replacement this DB's guest peer.
+Both reads for a single probe must also see the same catalog generation of
+that group. A later probe can revalidate an in-place change on the original
+group. Neither an attempted probe nor a denial modifies the group's state.
+This is not a continuous check of other network dependencies; the final
+snapshot does not grant authority for any later I/O.
 No service or port is added to the guest NIC, and no result grants permission
 for later I/O. Guest-side SQL still needs its own fenced transport and runtime
 verification.
+
+The bounded `RDSGuestPeerPreflight` model covers a same-ARN replacement before
+or between reads and an in-place revision change between reads. It starts
+after reservation and tracks the committed snapshots; it does not model
+SQLite ownership allocation or prove executable PostgreSQL. The native
+regression drives real RDS Query group changes with a synthetic host probe.

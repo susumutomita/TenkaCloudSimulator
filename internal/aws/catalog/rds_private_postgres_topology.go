@@ -14,6 +14,16 @@ import (
 type RDSPrivatePostgresRefs struct {
 	Region                      string
 	SubnetIDs, SecurityGroupIDs []string
+	// Internal catalog provenance, not an input to the native EC2 validator.
+	group           privateSubnetGroupIdentity
+	groupGeneration int64
+}
+
+// Creation sequence distinguishes groups even if their names, ARNs and subnet
+// lists match. Generation changes independently on updates to the same group.
+type privateSubnetGroupIdentity struct {
+	arn string
+	seq int64
 }
 
 // Only the concrete Linux/amd64 provider composition implements this
@@ -50,24 +60,35 @@ func privatePostgresShape(r row) bool {
 }
 
 func validatePrivatePostgresRefs(ctx context.Context, tx *sql.Tx, r row, validate func(context.Context, *sql.Tx, RDSPrivatePostgresRefs) error) error {
+	refs, err := resolvePrivatePostgresRefs(tx, r)
+	if err != nil {
+		return err
+	}
+	return validate(ctx, tx, refs)
+}
+
+func resolvePrivatePostgresRefs(tx *sql.Tx, r row) (RDSPrivatePostgresRefs, error) {
 	ref, _ := r.Document["DBSubnetGroup"].(map[string]any)
 	name, _ := ref["DBSubnetGroupName"].(string)
 	groups, groupOK := exactTopologyIDs(r.Document["VpcSecurityGroups"], "VpcSecurityGroupId", rdsSecurityPattern, 1, 5)
 	if name == "default" || !rdsReferencePattern.MatchString(name) || !groupOK {
-		return invalid("Private PostgreSQL metadata requires an explicit existing DB subnet group and one to five distinct VPC security groups.")
+		return RDSPrivatePostgresRefs{}, invalid("Private PostgreSQL metadata requires an explicit existing DB subnet group and one to five distinct VPC security groups.")
 	}
 	storedGroup, err := find(tx, "rds", r.Region, "dbSubnetGroup", "", name)
 	if errors.Is(err, sql.ErrNoRows) {
-		return Failure("InvalidVPCNetworkStateFault", "The configured private PostgreSQL DB subnet group is not present in this Region.")
+		return RDSPrivatePostgresRefs{}, Failure("InvalidVPCNetworkStateFault", "The configured private PostgreSQL DB subnet group is not present in this Region.")
 	}
 	if err != nil {
-		return err
+		return RDSPrivatePostgresRefs{}, err
 	}
 	subnets, subnetOK := exactTopologyIDs(storedGroup.Document["Subnets"], "SubnetIdentifier", rdsSubnetPattern, 2, 20)
 	if !subnetOK || storedGroup.ID != name || storedGroup.Name != name || storedGroup.Seq <= 0 || storedGroup.Generation <= 0 {
-		return Failure("InvalidVPCNetworkStateFault", "The stored private PostgreSQL DB subnet group cannot be resolved.")
+		return RDSPrivatePostgresRefs{}, Failure("InvalidVPCNetworkStateFault", "The stored private PostgreSQL DB subnet group cannot be resolved.")
 	}
-	return validate(ctx, tx, RDSPrivatePostgresRefs{Region: r.Region, SubnetIDs: subnets, SecurityGroupIDs: groups})
+	return RDSPrivatePostgresRefs{
+		Region: r.Region, SubnetIDs: subnets, SecurityGroupIDs: groups,
+		group: privateSubnetGroupIdentity{arn: storedGroup.ARN, seq: storedGroup.Seq}, groupGeneration: storedGroup.Generation,
+	}, nil
 }
 
 func exactTopologyIDs(value any, field string, pattern *regexp.Regexp, min, max int) ([]string, bool) {

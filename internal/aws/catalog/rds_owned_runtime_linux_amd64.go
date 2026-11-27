@@ -71,6 +71,7 @@ type OwnedPrivatePostgres struct {
 	options OwnedPrivatePostgresConfig
 	owner   string
 	key     privateDBGeneration
+	group   privateSubnetGroupIdentity
 	child   ownedPostgresChild
 	last    error
 	used    bool
@@ -147,10 +148,19 @@ func (c *OwnedPrivatePostgres) reserve(tx *sql.Tx, r row) (bool, error) {
 		r.Name != r.ID || r.Seq <= 0 || r.Generation != 1 || version != "" && version != "15.20" {
 		return false, nil
 	}
+	refs, err := resolvePrivatePostgresRefs(tx, r)
+	if err != nil {
+		return false, err
+	}
 	if err := exactlyOne(tx.Exec("INSERT INTO aws_catalog_owned_postgres(slot,arn,seq,generation,owner) VALUES(1,?,?,?,?)",
 		r.ARN, r.Seq, r.Generation, c.owner)); err != nil {
 		return false, errOwnedPostgresDebt
 	}
+	// Captured in the same transaction as the DB reservation. The owner mutex
+	// spans commit. A rolled-back claim cannot be consulted: peer preflight
+	// also requires a committed exact lease and a live owned child, and the
+	// next successful reservation replaces this observation.
+	c.group = refs.group
 	return true, nil
 }
 
@@ -283,6 +293,7 @@ func (c *OwnedPrivatePostgres) retireCurrent() error {
 		return errOwnedPostgresDebt
 	}
 	c.key = privateDBGeneration{}
+	c.group = privateSubnetGroupIdentity{}
 	return nil
 }
 
