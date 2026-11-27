@@ -4337,6 +4337,76 @@ REQUIRED_SOURCE_SCOPES['EC2LegacyNativeMainRepair'] = {
 }
 
 
+# Local SSO is deliberately separate from management-only Cognito and verifier-only Entra.
+BASE_MODELS.add('LocalSSOSyntheticLifecycle')
+BASE_INVARIANTS['LocalSSOSyntheticLifecycle'] = {
+    'TypeOK',
+    'ExplicitOnly',
+    'ReadyAfterPrivateBootstrap',
+    'NoPublicCredentialValues',
+    'PinnedPromptOnly',
+    'OneShotPerFixture',
+    'IssuanceBoundToBrowserAndCode',
+    'ExactACSWitness',
+    'ACSConsumesPendingAndMarksReplay',
+    'BoundSingleExchange',
+    'AppRequiresVerifiedCallback',
+    'RetiredHasNoLiveState',
+}
+REQUIRED_MUTANTS['LocalSSOSyntheticLifecycle'] = {
+    'PublishByDefault',
+    'PublishDuringBootstrap',
+    'PublishUnverifiedBootstrap',
+    'PublishOperatorListener',
+    'HideReadyEndpoints',
+    'PublishCodeValue',
+    'PromptForUnexpectedRequest',
+    'ReuseOneShotCode',
+    'AcceptDifferentCode',
+    'AcceptDifferentBrowser',
+    'OmitReplayReceipt',
+    'RetainCognitoPending',
+    'KeepAuthorizationCode',
+    'SkipTokenExchange',
+    'RetainPrivateRunFiles',
+    'LeaveListenerOnRetirement',
+    'AcceptDifferentSAMLOrigin',
+    'AcceptDifferentSigningPin',
+    'AcceptOtherRequest',
+    'AcceptOtherACSBrowser',
+    'GrantWithStaleRegistration',
+    'GrantWithUnusablePrincipal',
+    'IgnorePKCE',
+    'ExchangeForOtherClient',
+    'ExchangeForOtherCallback',
+    'ExchangeWithoutAppBrowserState',
+    'ExchangeExpiredCode',
+    'AcceptWrongOIDCNonce',
+    'AcceptWrongOIDCIssuerOrAudience',
+    'AcceptInvalidAppTokenSignature',
+}
+REQUIRED_SOURCE_SCOPES['LocalSSOSyntheticLifecycle'] = {
+    'cmd/simulator/local_sso.go',
+    'cmd/simulator/local_sso_relying_party.go',
+    'cmd/simulator/main.go',
+    'go.mod',
+    'go.sum',
+    'internal/aws/cognitoidp/federation_config.go',
+    'internal/aws/cognitoidp/federation_metadata.go',
+    'internal/aws/cognitoidp/federation_publisher.go',
+    'internal/aws/cognitoidp/hosted_browser.go',
+    'internal/aws/cognitoidp/hosted_completion.go',
+    'internal/aws/cognitoidp/hosted_profile.go',
+    'internal/aws/cognitoidp/hosted_saml.go',
+    'internal/aws/cognitoidp/hosted_state.go',
+    'internal/azure/entraidp/directory.go',
+    'internal/azure/entraidp/fixture.go',
+    'internal/azure/entraidp/saml.go',
+    'internal/server/cognito_hosted.go',
+    'internal/server/server.go',
+}
+
+
 def load_registry(root, relative='formal/models.json'):
     root = Path(root)
     registry_path = asset(root, relative)

@@ -1,145 +1,589 @@
 {
   "version": 1,
-  "base_sha": "a1f155caaf648bcec8729774234a9115de13bef8",
+  "base_sha": "7f500c9e951d9328a36df3a9946f1c6827200085",
   "changes": [
     {
-      "path": "docs/design/rds-owned-generation.md",
-      "sha256": "23d7f8762d65da0fd5d696d1834be3de1735d1f5d91a8ed25a532a009f2d1a6f",
-      "disposition": "documentation",
-      "reason": "Describe the new in-process observation, unchanged public and transport boundary, and separate bounds of the model and native tests.",
+      "path": ".github/workflows/battle-hosts.yml",
+      "sha256": "35ed1d3c964d8117b92281bff686e8e36c6953c3abc5cb5b1763494198da2769",
+      "disposition": "formal-infrastructure",
+      "reason": "CI-only path triggers run the existing Battle validation when the dedicated guest build graph changes.",
       "models": []
     },
     {
-      "path": "formal/RDSGuestPeerPreflight.cfg",
-      "sha256": "92133d75a05b54ded89c21159fd7a7122b203c8f1c79e0e69d41565284991323",
+      "path": "README.ja.md",
+      "sha256": "b594e91a77a5aa2e2ed5eed26071bdbf223b8c5b7b4c532006e9f596e3381840",
+      "disposition": "documentation",
+      "reason": "Discover the local-only sample from the Japanese startup section.",
+      "models": []
+    },
+    {
+      "path": "README.md",
+      "sha256": "5d78191dfc3bdf470a470b815ec3a179161a526e0fd34c426b7c46524d1a6dfb",
+      "disposition": "documentation",
+      "reason": "Discover and separate the explicit SSO sample from existing default/management-only Cognito documentation.",
+      "models": []
+    },
+    {
+      "path": "cmd/simulator/local_sso.go",
+      "sha256": "126687ebae2e3521fba9af86cb465a535cbfc921372dedbefaae368e15e4b41b",
       "disposition": "modeled",
-      "reason": "Keep existing invariant checks and add the three distinct failure oracles for original group at entry, at final snapshot and matching revisions across reads.",
+      "reason": "Opt in only to a private ephemeral launch, publish exact browser locations after authenticated native bootstrap, and handle normal and controlled failed-start cleanup without a public operator endpoint or raw code.",
       "models": [
         {
-          "id": "RDSGuestPeerPreflight",
+          "id": "LocalSSOSyntheticLifecycle",
           "properties": [
-            "OriginalGroupBeforeProbe",
-            "OriginalGroupAtFinalSnapshot",
-            "MatchingGroupSnapshotRevisions"
+            "ExplicitOnly",
+            "ReadyAfterPrivateBootstrap",
+            "NoPublicCredentialValues",
+            "RetiredHasNoLiveState"
           ],
-          "limits": "One provider-owned call after reservation, with one original group, a same-ARN replacement and two catalog revisions. The final snapshot is an observation, not authority for a future connection. SQLite capture/isolation, guest execution, PostgreSQL, SQL and transport remain concrete obligations."
+          "limits": "Symbolic correspondence only: not cryptography, parsers, OAuth/SAML platform parity, concrete time/quotas, cross-run subject stability, general Keycloak compatibility, TLS/browser/Linux/macOS execution, SQL/crash races, disclosure beyond modeled stdout fields, Battle dependency compatibility, or a Go refinement proof. An independent successful callback is not an app or operator session."
         }
       ]
     },
     {
-      "path": "formal/RDSGuestPeerPreflight.tla",
-      "sha256": "d4b2eedb55952aa0893528a3924d96c65183501ce87722464708899b73728904",
+      "path": "cmd/simulator/local_sso_relying_party.go",
+      "sha256": "8e63c3397e70dfb89334b7810ff4426eea0717b912818d59f1e5b82537b3349d",
       "disposition": "modeled",
-      "reason": "Extend the bounded committed-read model with explicit same-ARN replacement and in-place revision transitions before and during a probe, without requiring the snapshots to remain valid after the final read.",
+      "reason": "Bind authorization code to a browser attempt and exact callback/verifier, then display success only after the separately verified local issuer, audience, nonce and JWS.",
       "models": [
         {
-          "id": "RDSGuestPeerPreflight",
+          "id": "LocalSSOSyntheticLifecycle",
           "properties": [
-            "OriginalGroupBeforeProbe",
-            "OriginalGroupAtFinalSnapshot",
-            "MatchingGroupSnapshotRevisions",
-            "HealthyObservation",
-            "ObservationOnly"
+            "BoundSingleExchange",
+            "AppRequiresVerifiedCallback"
           ],
-          "limits": "One provider-owned call after reservation, with one original group, a same-ARN replacement and two catalog revisions. The final snapshot is an observation, not authority for a future connection. SQLite capture/isolation, guest execution, PostgreSQL, SQL and transport remain concrete obligations."
+          "limits": "Symbolic correspondence only: not cryptography, parsers, OAuth/SAML platform parity, concrete time/quotas, cross-run subject stability, general Keycloak compatibility, TLS/browser/Linux/macOS execution, SQL/crash races, disclosure beyond modeled stdout fields, Battle dependency compatibility, or a Go refinement proof. An independent successful callback is not an app or operator session."
+        }
+      ]
+    },
+    {
+      "path": "cmd/simulator/local_sso_test.go",
+      "sha256": "41804db3039c927f534835781a3aa53ac11b3de76f8da9d3d2b1680b72638ff1",
+      "disposition": "test-support",
+      "reason": "Target exact ephemeral TLS, app browser state, sanitized joined errors, and real partial-bind/cancel startup cleanup.",
+      "models": []
+    },
+    {
+      "path": "cmd/simulator/main.go",
+      "sha256": "529e894278e25fb1c237e985b55b14e472d7002cc4ae76a733995c93e5f7821a",
+      "disposition": "modeled",
+      "reason": "Select the new explicit command before the unchanged ordinary command parser; no ordinary CLI routing through the new fixture.",
+      "models": [
+        {
+          "id": "LocalSSOSyntheticLifecycle",
+          "properties": [
+            "ExplicitOnly",
+            "ReadyAfterPrivateBootstrap"
+          ],
+          "limits": "Symbolic correspondence only: not cryptography, parsers, OAuth/SAML platform parity, concrete time/quotas, cross-run subject stability, general Keycloak compatibility, TLS/browser/Linux/macOS execution, SQL/crash races, disclosure beyond modeled stdout fields, Battle dependency compatibility, or a Go refinement proof. An independent successful callback is not an app or operator session."
+        },
+        {
+          "id": "CognitoFederationNativeAdmission",
+          "properties": [
+            "ExactNativeAdmission",
+            "NativeProjection"
+          ],
+          "limits": "Existing signed management/config opt-in and no login on the native route remain separate from the new explicit browser command."
+        }
+      ]
+    },
+    {
+      "path": "docs/azure-entra-local-saml.md",
+      "sha256": "b45078909bd08d475e3811f8dae7faaf5fbe49520df7e31b507629de027d4184",
+      "disposition": "documentation",
+      "reason": "Link the independent SAML IdP component to the actual single-entry local sample.",
+      "models": []
+    },
+    {
+      "path": "docs/design/0001-go-standalone.md",
+      "sha256": "e33106647d30676ef37fccfc34a5257c602474cd7b9f311d9bfe2057e640527f",
+      "disposition": "documentation",
+      "reason": "Record explicit single-binary, split-origin local fixture architecture and limited validated boundary.",
+      "models": []
+    },
+    {
+      "path": "docs/formal-validation.md",
+      "sha256": "d750acc218a69e4923f63210402954123d1607ac9b2710e6f7517905022e4f4f",
+      "disposition": "documentation",
+      "reason": "Document the new finite lifecycle scope and preserve explicit concrete verification limits.",
+      "models": []
+    },
+    {
+      "path": "docs/local-sso.md",
+      "sha256": "28e45ec66e59432cfacc5f79c364b03ef75fa6d479c7645ac0c6de3870075de2",
+      "disposition": "documentation",
+      "reason": "Describe exact launch, isolated browser CA, one-shot sign-in and cleanup; state supported Linux witness and production exclusions.",
+      "models": []
+    },
+    {
+      "path": "docs/start.md",
+      "sha256": "75555bfa9dd0be698ad4c81161f449d447c72e55103ef88dade15ab8eaa1df2f",
+      "disposition": "documentation",
+      "reason": "Identify the standalone binary path and keep normal startup and persisted state independent.",
+      "models": []
+    },
+    {
+      "path": "formal/LocalSSOSyntheticLifecycle.cfg",
+      "sha256": "859132de8bd8a258debaa406e25918b080824908667a07805571303da90901f1",
+      "disposition": "modeled",
+      "reason": "Register one finite local sign-in/launcher transition model with separate readiness, trust, issuance, exchange and cleanup checks.",
+      "models": [
+        {
+          "id": "LocalSSOSyntheticLifecycle",
+          "properties": [
+            "ExplicitOnly",
+            "ReadyAfterPrivateBootstrap",
+            "NoPublicCredentialValues",
+            "PinnedPromptOnly",
+            "OneShotPerFixture",
+            "IssuanceBoundToBrowserAndCode",
+            "ExactACSWitness",
+            "ACSConsumesPendingAndMarksReplay",
+            "BoundSingleExchange",
+            "AppRequiresVerifiedCallback",
+            "RetiredHasNoLiveState"
+          ],
+          "limits": "Symbolic correspondence only: not cryptography, parsers, OAuth/SAML platform parity, concrete time/quotas, cross-run subject stability, general Keycloak compatibility, TLS/browser/Linux/macOS execution, SQL/crash races, disclosure beyond modeled stdout fields, Battle dependency compatibility, or a Go refinement proof. An independent successful callback is not an app or operator session."
+        }
+      ]
+    },
+    {
+      "path": "formal/LocalSSOSyntheticLifecycle.tla",
+      "sha256": "bec0c5143c021fcadf129aa96ff5ea4a1509f14c0dd8b326877eef7a0c034326",
+      "disposition": "modeled",
+      "reason": "Register one finite local sign-in/launcher transition model with separate readiness, trust, issuance, exchange and cleanup checks.",
+      "models": [
+        {
+          "id": "LocalSSOSyntheticLifecycle",
+          "properties": [
+            "ExplicitOnly",
+            "ReadyAfterPrivateBootstrap",
+            "NoPublicCredentialValues",
+            "PinnedPromptOnly",
+            "OneShotPerFixture",
+            "IssuanceBoundToBrowserAndCode",
+            "ExactACSWitness",
+            "ACSConsumesPendingAndMarksReplay",
+            "BoundSingleExchange",
+            "AppRequiresVerifiedCallback",
+            "RetiredHasNoLiveState"
+          ],
+          "limits": "Symbolic correspondence only: not cryptography, parsers, OAuth/SAML platform parity, concrete time/quotas, cross-run subject stability, general Keycloak compatibility, TLS/browser/Linux/macOS execution, SQL/crash races, disclosure beyond modeled stdout fields, Battle dependency compatibility, or a Go refinement proof. An independent successful callback is not an app or operator session."
         }
       ]
     },
     {
       "path": "formal/models.json",
-      "sha256": "fa31e5e26547811f682960e9d95bd03f0c87de35f81d05cc56f3c2c1274e4900",
+      "sha256": "5ad7dd778a39ea21a26f2230cbfcc14aed6c6b3b7ca04c515b1f1b2eb9bf9982",
       "disposition": "formal-infrastructure",
-      "reason": "Register enlarged finite #130 model bounds, the existing resolver source path, and four required, specifically classified counterexamples. No other registry sections change.",
+      "reason": "Append only the new bounded model registry row and its required named controls; do not remove or weaken existing models.",
       "models": []
     },
     {
-      "path": "internal/aws/catalog/rds_guest_peer_linux_amd64.go",
-      "sha256": "0b1c6e2e1f9b15e6da7da106a117dd5c93a6073a3ccff80df88a07336f8a112b",
+      "path": "go.mod",
+      "sha256": "6b895366761e72d15b87ca4fe0576136ea5ce5996394d7fb9cca8a2e93708258",
       "disposition": "modeled",
-      "reason": "Reject a replacement before or after the fixed host probe, and refuse to join different catalog revisions of the original group across two committed reads.",
+      "reason": "Canonical dependency selections participate in the exact build of the local signed startup and verification steps, not a second module or tag. The model assumes their correctly returned validation verdicts and explicitly does not validate Battle pin compatibility.",
       "models": [
         {
-          "id": "RDSGuestPeerPreflight",
+          "id": "LocalSSOSyntheticLifecycle",
           "properties": [
-            "OriginalGroupBeforeProbe",
-            "OriginalGroupAtFinalSnapshot",
-            "MatchingGroupSnapshotRevisions",
-            "HealthyObservation",
-            "ObservationOnly"
+            "PinnedPromptOnly",
+            "ExactACSWitness",
+            "AppRequiresVerifiedCallback"
           ],
-          "limits": "One provider-owned call after reservation, with one original group, a same-ARN replacement and two catalog revisions. The final snapshot is an observation, not authority for a future connection. SQLite capture/isolation, guest execution, PostgreSQL, SQL and transport remain concrete obligations."
+          "limits": "Symbolic correspondence only: not cryptography, parsers, OAuth/SAML platform parity, concrete time/quotas, cross-run subject stability, general Keycloak compatibility, TLS/browser/Linux/macOS execution, SQL/crash races, disclosure beyond modeled stdout fields, Battle dependency compatibility, or a Go refinement proof. An independent successful callback is not an app or operator session."
         }
       ]
     },
     {
-      "path": "internal/aws/catalog/rds_guest_peer_subnet_linux_amd64_test.go",
-      "sha256": "4a0d06f88cddf9e493a4418c8bc056a43324a153947d0a562f5a0430d0132eb5",
+      "path": "go.sum",
+      "sha256": "69ffd08828be7b912d093bf64e7a263d34d554f9af0ceeecad275f12ee2a6d91",
+      "disposition": "modeled",
+      "reason": "Lock the exact selected SAML/XMLDSig/JWS dependencies used by the new verification steps; digests and dependencies are not authenticated by TLC. Other module consumers and Battle pin compatibility remain separate.",
+      "models": [
+        {
+          "id": "LocalSSOSyntheticLifecycle",
+          "properties": [
+            "PinnedPromptOnly",
+            "ExactACSWitness",
+            "AppRequiresVerifiedCallback"
+          ],
+          "limits": "Symbolic correspondence only: not cryptography, parsers, OAuth/SAML platform parity, concrete time/quotas, cross-run subject stability, general Keycloak compatibility, TLS/browser/Linux/macOS execution, SQL/crash races, disclosure beyond modeled stdout fields, Battle dependency compatibility, or a Go refinement proof. An independent successful callback is not an app or operator session."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/cognitoidp/federation_boundaries_test.go",
+      "sha256": "1a8d4d7c831f117b6060b61cdaefec1f1c0416f45397e0697260d1f35aaf00f6",
       "disposition": "test-support",
-      "reason": "Use real scoped native RDS Query and SQLite changes with a simulated host probe for same-name replacement, in-place revision and unrelated-group regression controls. No production mode, route or live database.",
+      "reason": "Focused validation only; no new production route, credentials, or launch behavior.",
       "models": []
     },
     {
-      "path": "internal/aws/catalog/rds_owned_runtime_linux_amd64.go",
-      "sha256": "7b803a73255c154274215ec456798d485e1c963cba026bfc855cd7f47d263dd2",
+      "path": "internal/aws/cognitoidp/federation_config.go",
+      "sha256": "c9cac51062394a7f9238807226ef4a5b9a83886aa71275b77da77e8423c85678",
       "disposition": "modeled",
-      "reason": "Derive the original group identity from the same write transaction as the exact DB reservation. Peer preflight requires the exact owned child and committed lease; this guard alone does not enable a route.",
+      "reason": "Read the selected local registration and exact hosted client/callback. IDs and URL comparisons enter as finite predicates; old management-only rows are not presumed eligible for this sign-in.",
       "models": [
         {
-          "id": "RDSOwnedGenerationFence",
+          "id": "LocalSSOSyntheticLifecycle",
           "properties": [
-            "LaunchNeedsCommittedAuthority",
-            "AttachNeedsCurrent",
-            "NoPublishedEndpoint"
+            "ExactACSWitness",
+            "BoundSingleExchange"
           ],
-          "limits": "One bounded owner and exact DB generation; the native tests, not this model, verify actual group lookups and lifecycle behavior. No guest transport or real process claim."
+          "limits": "Symbolic correspondence only: not cryptography, parsers, OAuth/SAML platform parity, concrete time/quotas, cross-run subject stability, general Keycloak compatibility, TLS/browser/Linux/macOS execution, SQL/crash races, disclosure beyond modeled stdout fields, Battle dependency compatibility, or a Go refinement proof. An independent successful callback is not an app or operator session."
         },
         {
-          "id": "RDSGuestPeerPreflight",
+          "id": "CognitoFederationConfiguration",
           "properties": [
-            "OriginalGroupBeforeProbe",
-            "OriginalGroupAtFinalSnapshot"
+            "NoDanglingClient",
+            "AuthorityFrame",
+            "ExactBinding",
+            "MutationFrame"
           ],
-          "limits": "One provider-owned call after reservation, with one original group, a same-ARN replacement and two catalog revisions. The final snapshot is an observation, not authority for a future connection. SQLite capture/isolation, guest execution, PostgreSQL, SQL and transport remain concrete obligations."
+          "limits": "The existing exact model is used only for management state and bounded references, not runtime HTTPS or registration lifetime."
         }
       ]
     },
     {
-      "path": "internal/aws/catalog/rds_private_postgres_topology.go",
-      "sha256": "1c7c023b5361d0d9b71bd81431d143cb313147a3754c6e8a271f6f72616d6752",
+      "path": "internal/aws/cognitoidp/federation_metadata.go",
+      "sha256": "2d08179b5c9537210bcb6a55de4702a45edc54cf1c06dc490caeb0ed7652cd7e",
       "disposition": "modeled",
-      "reason": "Resolve ARN, creation sequence and revision from the same validated native catalog subnet-group row as its two or more subnet IDs. No wire shape, topology policy or backend returned to callers.",
+      "reason": "Normalize exact registered local origin and pinned signing data prior to the independently checked SAML witness; actual metadata/XML and key parsing remain separate.",
       "models": [
         {
-          "id": "RDSPrivatePostgresTopology",
+          "id": "LocalSSOSyntheticLifecycle",
           "properties": [
-            "OwnedTopologyBeforeWrite",
-            "ConfigurationOnly"
+            "PinnedPromptOnly",
+            "ExactACSWitness"
           ],
-          "limits": "Finite configuration validation; this model does not prove Go input decoding, AWS API parity or the exact sequence readback."
+          "limits": "Symbolic correspondence only: not cryptography, parsers, OAuth/SAML platform parity, concrete time/quotas, cross-run subject stability, general Keycloak compatibility, TLS/browser/Linux/macOS execution, SQL/crash races, disclosure beyond modeled stdout fields, Battle dependency compatibility, or a Go refinement proof. An independent successful callback is not an app or operator session."
         },
         {
-          "id": "RDSGuestPeerPreflight",
+          "id": "CognitoFederationConfiguration",
           "properties": [
-            "OriginalGroupBeforeProbe",
-            "OriginalGroupAtFinalSnapshot",
-            "MatchingGroupSnapshotRevisions"
+            "NoDanglingClient",
+            "AuthorityFrame",
+            "ExactBinding",
+            "MutationFrame"
           ],
-          "limits": "One provider-owned call after reservation, with one original group, a same-ARN replacement and two catalog revisions. The final snapshot is an observation, not authority for a future connection. SQLite capture/isolation, guest execution, PostgreSQL, SQL and transport remain concrete obligations."
+          "limits": "The existing model consumes normalized metadata outcomes; real XML/pins/URLs remain implementation checks."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/cognitoidp/federation_metadata_test.go",
+      "sha256": "435fda27fb62644d8890e28612ab55ca28f612fc9fc2f82d9c729249e35db556",
+      "disposition": "test-support",
+      "reason": "Focused validation only; no new production route, credentials, or launch behavior.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/cognitoidp/federation_publisher.go",
+      "sha256": "55ec6830fd97d6e620ea6c11eccf2307fc227b7b524dfc4c2fc4e2806019f9bf",
+      "disposition": "modeled",
+      "reason": "Give newly enrolled trust an explicit non-reused registration identity; stale or unusable registrations cannot supply the modeled ACS witness.",
+      "models": [
+        {
+          "id": "LocalSSOSyntheticLifecycle",
+          "properties": [
+            "ReadyAfterPrivateBootstrap",
+            "ExactACSWitness"
+          ],
+          "limits": "Symbolic correspondence only: not cryptography, parsers, OAuth/SAML platform parity, concrete time/quotas, cross-run subject stability, general Keycloak compatibility, TLS/browser/Linux/macOS execution, SQL/crash races, disclosure beyond modeled stdout fields, Battle dependency compatibility, or a Go refinement proof. An independent successful callback is not an app or operator session."
+        },
+        {
+          "id": "CognitoFederationConfiguration",
+          "properties": [
+            "NoDanglingClient",
+            "AuthorityFrame",
+            "ExactBinding",
+            "MutationFrame"
+          ],
+          "limits": "Preserve existing bounded Config/Publisher lifecycle only, not the new random registration identity."
+        },
+        {
+          "id": "CognitoFederationNativeAdmission",
+          "properties": [
+            "ExactNativeAdmission",
+            "NativeProjection"
+          ],
+          "limits": "Preserve existing management-only routing and classifications; this older model has no login semantics."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/cognitoidp/hosted_browser.go",
+      "sha256": "7bb1d4b963b50c702f30bd882ad558bb81903ea6dd193712816b4aff7953b502",
+      "disposition": "modeled",
+      "reason": "Admit the selected browser flow, verify ACS evidence, atomically grant with replay/pending retirement, and issue from a live exactly scoped code with PKCE.",
+      "models": [
+        {
+          "id": "LocalSSOSyntheticLifecycle",
+          "properties": [
+            "ExactACSWitness",
+            "ACSConsumesPendingAndMarksReplay",
+            "BoundSingleExchange"
+          ],
+          "limits": "Symbolic correspondence only: not cryptography, parsers, OAuth/SAML platform parity, concrete time/quotas, cross-run subject stability, general Keycloak compatibility, TLS/browser/Linux/macOS execution, SQL/crash races, disclosure beyond modeled stdout fields, Battle dependency compatibility, or a Go refinement proof. An independent successful callback is not an app or operator session."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/cognitoidp/hosted_browser_test.go",
+      "sha256": "4aa442894a665307602ae4fceca63567342b9f1b7d9198bbcbf3a221403506d7",
+      "disposition": "test-support",
+      "reason": "Focused validation only; no new production route, credentials, or launch behavior.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/cognitoidp/hosted_completion.go",
+      "sha256": "f70de96cc815094b1574c7cc0113c0b27ad9d7b7b423888ee9c2ef8760d747b1",
+      "disposition": "modeled",
+      "reason": "ACS returns an independent completion document whose authorized callback is separately checked by the app. DOM, HTML/CSP and browser redirect behavior are not modeled.",
+      "models": [
+        {
+          "id": "LocalSSOSyntheticLifecycle",
+          "properties": [
+            "ExactACSWitness",
+            "AppRequiresVerifiedCallback"
+          ],
+          "limits": "Symbolic correspondence only: not cryptography, parsers, OAuth/SAML platform parity, concrete time/quotas, cross-run subject stability, general Keycloak compatibility, TLS/browser/Linux/macOS execution, SQL/crash races, disclosure beyond modeled stdout fields, Battle dependency compatibility, or a Go refinement proof. An independent successful callback is not an app or operator session."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/cognitoidp/hosted_identity_test.go",
+      "sha256": "e514a23e5e204ee01b7f4248c1005f8f867a6530522b8927a1eef6d2cbefbad0",
+      "disposition": "test-support",
+      "reason": "Focused validation only; no new production route, credentials, or launch behavior.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/cognitoidp/hosted_profile.go",
+      "sha256": "baf626153f0a7521da99a64dc2587f628786996c07e32fe794bfa59de9a80aab",
+      "disposition": "modeled",
+      "reason": "Separate the explicit numeric-loopback browser profile and public SP description from existing AWS-native management dispatch.",
+      "models": [
+        {
+          "id": "LocalSSOSyntheticLifecycle",
+          "properties": [
+            "ExplicitOnly",
+            "ReadyAfterPrivateBootstrap",
+            "ExactACSWitness"
+          ],
+          "limits": "Symbolic correspondence only: not cryptography, parsers, OAuth/SAML platform parity, concrete time/quotas, cross-run subject stability, general Keycloak compatibility, TLS/browser/Linux/macOS execution, SQL/crash races, disclosure beyond modeled stdout fields, Battle dependency compatibility, or a Go refinement proof. An independent successful callback is not an app or operator session."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/cognitoidp/hosted_saml.go",
+      "sha256": "2e0be783bdb0baebbfa5be5cbcb498f51520884f0a9a9cd68d3a0a8e97bef208",
+      "disposition": "modeled",
+      "reason": "Invalid signature, subject, recipient/request and current registered pin/origin are distinct abstract failure classes for assertion admission, not parser/cryptographic proofs.",
+      "models": [
+        {
+          "id": "LocalSSOSyntheticLifecycle",
+          "properties": [
+            "ExactACSWitness"
+          ],
+          "limits": "Symbolic correspondence only: not cryptography, parsers, OAuth/SAML platform parity, concrete time/quotas, cross-run subject stability, general Keycloak compatibility, TLS/browser/Linux/macOS execution, SQL/crash races, disclosure beyond modeled stdout fields, Battle dependency compatibility, or a Go refinement proof. An independent successful callback is not an app or operator session."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/cognitoidp/hosted_state.go",
+      "sha256": "cd539b7f52904a34943eff3c5b34f4ceded3db04305d8a5839edb6f0c19b2fee",
+      "disposition": "modeled",
+      "reason": "Use canonical pool state with revision recheck, reap expiration, and commit replay/pending/code modifications atomically. SQLite transaction refinement and real concurrency remain separately tested.",
+      "models": [
+        {
+          "id": "LocalSSOSyntheticLifecycle",
+          "properties": [
+            "ExactACSWitness",
+            "ACSConsumesPendingAndMarksReplay",
+            "BoundSingleExchange",
+            "RetiredHasNoLiveState"
+          ],
+          "limits": "Symbolic correspondence only: not cryptography, parsers, OAuth/SAML platform parity, concrete time/quotas, cross-run subject stability, general Keycloak compatibility, TLS/browser/Linux/macOS execution, SQL/crash races, disclosure beyond modeled stdout fields, Battle dependency compatibility, or a Go refinement proof. An independent successful callback is not an app or operator session."
+        }
+      ]
+    },
+    {
+      "path": "internal/azure/entraidp/directory.go",
+      "sha256": "1c9ca7ee317fe10f9c1a68c673b3fcc25de54161d1b4a629e255f7a477c51f2f",
+      "disposition": "modeled",
+      "reason": "A per-run synthetic directory supplies the modeled stable subject verdict only within this one symbolic registration. No generated UUID distribution, Microsoft tenant or cross-run subject property is checked.",
+      "models": [
+        {
+          "id": "LocalSSOSyntheticLifecycle",
+          "properties": [
+            "IssuanceBoundToBrowserAndCode",
+            "ExactACSWitness"
+          ],
+          "limits": "Symbolic correspondence only: not cryptography, parsers, OAuth/SAML platform parity, concrete time/quotas, cross-run subject stability, general Keycloak compatibility, TLS/browser/Linux/macOS execution, SQL/crash races, disclosure beyond modeled stdout fields, Battle dependency compatibility, or a Go refinement proof. An independent successful callback is not an app or operator session."
+        }
+      ]
+    },
+    {
+      "path": "internal/azure/entraidp/fixture.go",
+      "sha256": "631d9a05658d16dc3566b7957e030078988f0ea72800c6c5906167e5b51755dd",
+      "disposition": "modeled",
+      "reason": "Show the login prompt only after valid signed request admission, bind the synthetic code to the pending browser, consume it only once, and close its local state on retirement.",
+      "models": [
+        {
+          "id": "LocalSSOSyntheticLifecycle",
+          "properties": [
+            "PinnedPromptOnly",
+            "OneShotPerFixture",
+            "IssuanceBoundToBrowserAndCode",
+            "RetiredHasNoLiveState"
+          ],
+          "limits": "Symbolic correspondence only: not cryptography, parsers, OAuth/SAML platform parity, concrete time/quotas, cross-run subject stability, general Keycloak compatibility, TLS/browser/Linux/macOS execution, SQL/crash races, disclosure beyond modeled stdout fields, Battle dependency compatibility, or a Go refinement proof. An independent successful callback is not an app or operator session."
+        }
+      ]
+    },
+    {
+      "path": "internal/azure/entraidp/fixture_test.go",
+      "sha256": "1835542d3aaa91f125138adad1a8b325da195b2c3f838db4c3fdf5877a313de3",
+      "disposition": "test-support",
+      "reason": "Focused validation only; no new production route, credentials, or launch behavior.",
+      "models": []
+    },
+    {
+      "path": "internal/azure/entraidp/saml.go",
+      "sha256": "a4ff906d879cb1444c32b1880a77e988df51c6bf247c0a95db06b5762f389dbd",
+      "disposition": "modeled",
+      "reason": "Bind signed redirect initiation and signed response to the exact preselected public SP and generated local subject. The model consumes verified-request/response predicates rather than reasoning about XML or signatures.",
+      "models": [
+        {
+          "id": "LocalSSOSyntheticLifecycle",
+          "properties": [
+            "PinnedPromptOnly",
+            "ExactACSWitness"
+          ],
+          "limits": "Symbolic correspondence only: not cryptography, parsers, OAuth/SAML platform parity, concrete time/quotas, cross-run subject stability, general Keycloak compatibility, TLS/browser/Linux/macOS execution, SQL/crash races, disclosure beyond modeled stdout fields, Battle dependency compatibility, or a Go refinement proof. An independent successful callback is not an app or operator session."
+        }
+      ]
+    },
+    {
+      "path": "internal/server/cognito_hosted.go",
+      "sha256": "91b264f51b0e662edf317799d2f9cdff6adbe88b0a45ee86119fff0eaf1c354c",
+      "disposition": "modeled",
+      "reason": "Compose a dedicated hosted boundary only through the explicitly chosen conditional constructor; private bootstrap and the separate browser route do not share a publicly advertised operator path.",
+      "models": [
+        {
+          "id": "LocalSSOSyntheticLifecycle",
+          "properties": [
+            "ExplicitOnly",
+            "ReadyAfterPrivateBootstrap",
+            "RetiredHasNoLiveState"
+          ],
+          "limits": "Symbolic correspondence only: not cryptography, parsers, OAuth/SAML platform parity, concrete time/quotas, cross-run subject stability, general Keycloak compatibility, TLS/browser/Linux/macOS execution, SQL/crash races, disclosure beyond modeled stdout fields, Battle dependency compatibility, or a Go refinement proof. An independent successful callback is not an app or operator session."
+        }
+      ]
+    },
+    {
+      "path": "internal/server/cognito_hosted_test.go",
+      "sha256": "8a2318272e3c8ca2a3231eec3aa75b862b4581b226f23d47789f58a056be4794",
+      "disposition": "test-support",
+      "reason": "Focused validation only; no new production route, credentials, or launch behavior.",
+      "models": []
+    },
+    {
+      "path": "internal/server/server.go",
+      "sha256": "b960375576f64258c5a6311030da63cb888da1f91e2cb6736328a2d364e4f7b7",
+      "disposition": "modeled",
+      "reason": "Supply the optional setup callback only to scoped hosted construction, with no default hosted listener; existing provider/console/SDK behavior outside this selection is not covered by the new model.",
+      "models": [
+        {
+          "id": "LocalSSOSyntheticLifecycle",
+          "properties": [
+            "ExplicitOnly",
+            "ReadyAfterPrivateBootstrap"
+          ],
+          "limits": "Symbolic correspondence only: not cryptography, parsers, OAuth/SAML platform parity, concrete time/quotas, cross-run subject stability, general Keycloak compatibility, TLS/browser/Linux/macOS execution, SQL/crash races, disclosure beyond modeled stdout fields, Battle dependency compatibility, or a Go refinement proof. An independent successful callback is not an app or operator session."
+        },
+        {
+          "id": "CognitoFederationNativeAdmission",
+          "properties": [
+            "ExactNativeAdmission",
+            "NativeProjection"
+          ],
+          "limits": "Existing default native route does not advertise browser login; this older model is management only."
         }
       ]
     },
     {
       "path": "scripts/formal_model_gate.py",
-      "sha256": "63efa7893491c58912d410880c6a5549dc9166744b6f2517c3c0dd8ee529583e",
+      "sha256": "3e566afbb51140a5c59dc3e1191ae1c357e085ebb12a39ab711c4a136f02a2de",
       "disposition": "formal-infrastructure",
-      "reason": "Require the three additional invariants, four targeted controls and the exact #130 resolver binding. No weakening of prior requirements, runtime checks or runner policy.",
+      "reason": "Require new exact lifecycle registration, invariant set, source scope and named controls; no existing policy relaxation.",
       "models": []
     },
     {
       "path": "scripts/test-formal-gate.py",
-      "sha256": "b43eb72d6da205cbb94d6ec986da87d10443a7c1841191fea729fffee7518b51",
+      "sha256": "700921f474e6005d96a36ee5a8a101b34b2fa8610d5ce8009d0dbcadc4ce75ca",
       "disposition": "formal-infrastructure",
-      "reason": "Pin exact expected #130 source scope and all old and new invariant/control mappings in tooling unit tests; not a TLC run or Go proof.",
+      "reason": "Independently require model registration and detect removal of controls, paths and properties; align the explicit detector with four already mandatory signed-base registry names.",
+      "models": []
+    },
+    {
+      "path": "test/battle/README.md",
+      "sha256": "51eebb8a7e5919805ac84bdbd5ead956589cef16952fed13cf938e87ae827c88",
+      "disposition": "test-support",
+      "reason": "Test execution guide refers to the checked offline overlay export rather than updating artifact pins manually.",
+      "models": []
+    },
+    {
+      "path": "test/battle/image/OVERLAY-PROVENANCE.md",
+      "sha256": "b8bfff29a187ab481b30045221283346baf161979b0d4b4d3bf16454f9430210",
+      "disposition": "test-support",
+      "reason": "Test image provenance documentation describes isolated pinned guest modules and offline byte verification, with no shipped service change.",
+      "models": []
+    },
+    {
+      "path": "test/battle/image/build_bundle.py",
+      "sha256": "44ea5ae168d840ed5ce1eb344053826dc461774de78d429ea42318fe6f8f351d",
+      "disposition": "test-support",
+      "reason": "Offline Battle qualification tool selects the separate exact guest module graph and requires unchanged pinned binary and archive bytes.",
+      "models": []
+    },
+    {
+      "path": "test/battle/image/session-overlay-provenance.json",
+      "sha256": "4ff3c3e7b16f9a9b37bbf229925d973703d0087f2a6a42e1d524a9e66d28e19c",
+      "disposition": "test-support",
+      "reason": "Test-only build receipt switches the scope of two manifest paths without changing their digests or the binary/archive output pins.",
+      "models": []
+    },
+    {
+      "path": "test/battle/image/session-relay.mod",
+      "sha256": "45ca3311750b5abaffdca174b483da2b7047834e85b582830badb1e7574f4d56",
+      "disposition": "test-support",
+      "reason": "Test-only guest profile contains the byte-identical, previously approved Go module lock for deterministic relay rebuilds.",
+      "models": []
+    },
+    {
+      "path": "test/battle/image/session-relay.sum",
+      "sha256": "e68499d806de877a1535ae951b3cb1a6aa1162587459eb9aa63d89f5467a4c3b",
+      "disposition": "test-support",
+      "reason": "Test-only exact guest transitive dependency checksum lock; existing relay and archive pins remain authoritative.",
+      "models": []
+    },
+    {
+      "path": "test/battle/image/test_build_bundle.py",
+      "sha256": "6463e7d1a38f3fe451523258726215dc4db1fd5150ca4bdeafeb9853cb904c6a",
+      "disposition": "test-support",
+      "reason": "Offline qualification tests verify manifest ownership/digest and modified-pair rejection; no product transition changes.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/local_sso_strict_browser.cjs",
+      "sha256": "8c59e3e1459d9a2c333cd84f9ccc7c0e8a42b0a341e9d401e6e4f43c6326f788",
+      "disposition": "test-support",
+      "reason": "Opt-in native Linux Chrome/NSS witness with public CA import confined to scratch; cover the real CLI baseline, failed start, signed callback and teardown without a host-trust bypass.",
       "models": []
     }
   ]

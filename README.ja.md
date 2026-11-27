@@ -37,6 +37,12 @@ operator tokenは、この環境を管理するための資格情報です。参
 このREADMEは、このソースツリーの機能を説明しています。mainと配布済みバイナリでは、Lambda Tailなどの対応が異なる場合があります。
 [バイナリのソース・バージョン](docs/releases.md)を確認してください。
 
+### オプション：ローカルの Cognito と Entra のサインインを試す
+
+このソースから作ったバイナリで `./dist/tenkacloud-simulator local-sso` を実行すると、
+使い捨てのテストユーザーで、内蔵の Entra SAML と Cognito を通るサインインを試せます。
+通常のシミュレーターのログインとは別です。[起動と隔離ブラウザーの設定](docs/local-sso.md)。
+
 ## まず試す：Python Lambdaを実行してログを見る
 
 上でサインインした管理者として、**AWS**のコンソールを使います。

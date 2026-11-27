@@ -35,6 +35,10 @@ func NewWithCloudStorage(path string, cloudConfig CloudStorageConfig) (http.Hand
 
 // NewWithProviders is trusted composition; callers must still wrap NewAccess.
 func NewWithProviders(path string, options ProviderConfig) (http.Handler, func() error, error) {
+	return newWithProviders(path, options, nil)
+}
+
+func newWithProviders(path string, options ProviderConfig, prepareCognito func(*cognitoidp.Store) error) (http.Handler, func() error, error) {
 	sakuraScope, err := validatedSakuraScope(options.SakuraDisks)
 	if err != nil {
 		return nil, nil, err
@@ -201,7 +205,14 @@ func NewWithProviders(path string, options ProviderConfig) (http.Handler, func()
 		_ = store.Close()
 		return nil, nil, err
 	}
-	gateway := &aws.Gateway{CognitoUserPools: cognitoUserPools, CognitoResourceAccount: "000000000000", SimpleDB: simpleDB, SimpleDBScope: simpledb.Scope{Account: "000000000000", Region: "us-east-1"}, AutoScalingPlans: autoScalingPlans, BedrockRuntime: options.BedrockRuntime, ELB: elb, CloudFront: cloudFront, Route53: route53, WAF: waf, SNS: snsTopics, CloudWatchLogs: cloudWatchLogs, Secrets: secrets, DynamoDB: dynamodb, KMS: keys, APIGateway: apiGateway, LambdaPermissions: lambdaPermissions, Store: store, S3: s3, Identities: identities, Parameters: parameters, Queues: queues, Stacks: stacks, Lambdas: lambdas, Roles: roles, Documents: documents}
+	if prepareCognito != nil {
+		if err := prepareCognito(cognitoUserPools); err != nil {
+			_ = lambdas.Close()
+			_ = store.Close()
+			return nil, nil, err
+		}
+	}
+	gateway := &aws.Gateway{CognitoUserPools: cognitoUserPools, CognitoResourceAccount: localCognitoAccount, SimpleDB: simpleDB, SimpleDBScope: simpledb.Scope{Account: "000000000000", Region: "us-east-1"}, AutoScalingPlans: autoScalingPlans, BedrockRuntime: options.BedrockRuntime, ELB: elb, CloudFront: cloudFront, Route53: route53, WAF: waf, SNS: snsTopics, CloudWatchLogs: cloudWatchLogs, Secrets: secrets, DynamoDB: dynamodb, KMS: keys, APIGateway: apiGateway, LambdaPermissions: lambdaPermissions, Store: store, S3: s3, Identities: identities, Parameters: parameters, Queues: queues, Stacks: stacks, Lambdas: lambdas, Roles: roles, Documents: documents}
 	if options.commandAPI != nil {
 		gateway.Commands = options.commandAPI()
 	}
