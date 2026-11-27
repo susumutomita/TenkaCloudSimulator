@@ -51,6 +51,14 @@ VPC の左ナビゲーションの [サブネット](../ec2-native-subnet.md) �
 ルートは実 API の明示的な関連付けまたは確認済みのネイティブメインテーブルのみ表示する。
 サブネット名・タグ・ACL の関連付けは新設しない。
 
+[VPC の DNS 設定](../ec2-vpc-dns-attributes.md)は、EC2 Query で DNS 解決と DNS ホスト名の設定値を1項目ずつ取得・更新する。対象の VPC ARN と操作ごとに認可する。CloudFormation 管理の VPC は両方の所有権記録を照合した上で参照のみ可能。EC2 管理の VPC は同じ行に永続化し、同じ値を再送しても行のリビジョンを増やさない。コンソールは同じ API を使い、項目を順に保存・再取得し、後の項目だけ失敗した場合は途中結果を表示する。DNS の名前解決やホスト名の配布は行わない。
+
+[EC2 管理 VPC の名前とタグ](../ec2-read-discovery.md#native-vpc-tag-editing)は、`CreateTags` / `DeleteTags` で一つの VPC に一つずつ設定する。操作と VPC ARN で認可し、SQLite トランザクション内でネイティブ所有権・CloudFormation の宣言・既存行の正規化済みデータを照合する。元の行と完全一致したときだけタグを更新し、保存結果を読み直す。DNS や経路のリビジョンは進めない。設定は既存の `DescribeVpcs` に現れる。CloudFormation 管理 VPC、VPC 以外のリソース、全タグ一括削除は対象外。停止中コピーのファイル指紋に紐づく旧メインルート修復の計画は、タグ変更後のファイルには再利用できない。
+
+選択した VPC の[リソースマップ](../ec2-vpc-console.md#read-only-resource-map)は、通常のサインイン済みコンソールで、選択リージョン・利用中の演習 ID に紐づく既存の Describe API を使う。サブネット、ルートテーブル、インターネットゲートウェイの一覧は独立に取得し、まとめて同時点の状態を保証しない。サブネットの明示的な関連付けが優先される。暗黙の関連付けは、整合したサブネットとルートテーブルの一覧に、選択した EC2 管理 VPC のメイン関連付けと CIDR が一致する `local` ルートがある場合だけ表示する。ゲートウェイへのルートは、同じ VPC への接続と所有元を確認できた保存済みの宛先だけを表示する。
+
+権限不足や整合性の確認に失敗した一覧を空として扱わない。取得できた関係は確認できない関係と区別し、選択・リージョンの変更やタブを閉じた後は古い応答を表示しない。DNS などの変更結果を再取得している間はタブの切り替えを止める。[形式モデル](../../formal/EC2VpcResourceMap.tla)が扱うのは、読み取り結果を正規化した後の有限の関係と表示の分類まで。API の実装やブラウザーの実行順序の証明ではない。通信の転送、到達性の判定、EC2 インスタンスの起動は行わない。
+
 API Reference の EC2 用プリセットは、既存の Query API の `DescribeInstances` を呼び、選択リージョンに記録されたメタデータを表示する。起動や稼働確認は行わない。
 
 ネイティブ EC2 の [DescribeSecurityGroups](../ec2-read-discovery.md#security-group-readback) は、既存の EC2 IAM 判定とリージョンの範囲内で CloudFormation 管理グループと未接続のネイティブグループを読む。グループと親 VPC の型付き所有権を同じ SQLite スナップショットで照合し、テンプレートの初期値ではなく今の TCP/IPv4 受信ルールを返す。XML 1.0 で値をそのまま返せない行や壊れた所有権があれば一覧全体を拒否し、保存内容は変更しない。通常のサインイン済み VPC コンソールも同じ API と IAM を使い、選択した CloudFormation 管理の VPC に属するグループだけを表示する。権限不足、読み取り失敗、空の結果は区別する。セキュリティグループの変更やパケット処理は対象外。
@@ -67,6 +75,8 @@ API Reference の EC2 用プリセットは、既存の Query API の `DescribeI
 
 [既存 VPC のネイティブ IPv4 サブネット](../ec2-native-subnet.md)は、EC2 管理の親 VPC に対して追加・参照・削除できる。Console と SDK は同じ EC2 API と SQLite を使い、CloudFormation の所有権を変更しない。ルーティングやゲストの到達性は扱わない。
 [ネイティブのセキュリティグループとネットワーク ACL](../ec2-read-discovery.md)は、同じ VPC に保存できる未接続の設定である。Console と SDK は同じ Query API で保存・再照会し、インスタンス・サブネットへの関連付けや通信の制御は扱わない。子が残る VPC の削除を拒否する。
+
+[未接続ネットワーク ACL の IPv4 ルール](../ec2-detached-network-acls.md)は、作成・置換・削除ごとに対象 ACL の ARN で認可し、同じリージョン内で ACL と親 VPC の所有権・CloudFormation の宣言・保存後の状態を照合する。ルールは ACL の既存 SQLite 行に保存し、ACL の削除とともに消える。方向ごとに 1〜32766 の番号で最大 20 件。最終の拒否ルールは変更できない。確認には同じ ACL の `DescribeNetworkAcls` を使う。既定 ACL、サブネットへの関連付け、パケットの許可・拒否は扱わない。
 
 
 [VPC コンソールの個別ページ](../ec2-vpc-console.md)は、リージョン付きの VPC・サブネット・ルートテーブル・インターネットゲートウェイ・ネットワーク ACL・セキュリティグループの閲覧経路を提供する。ページの表示と操作は対応する API の通知、認証とセッション範囲、同じリージョンの再照会に基づく。リンクは API の認可を増やさない。応答を待つ間は画面内の移動を止め、ブラウザー履歴で離脱した場合は現在の画面用の照会を破棄する。既存の VPC からも個別設定を閲覧できる。実通信・インスタンスの配置要件は変えない。
@@ -86,6 +96,8 @@ CloudFormation の EC2 インスタンスは、同じスタックで宣言・所
 任意の Battle VM 実行環境で、既存の capability resolve はチームの正規 DB に保存された `CREATE_COMPLETE` の Stack ID と EC2 所有権を、起動時の保持済みレシート・ready 記録・lease と照合する。起動コールバックは CloudFormation の確定を待たない。先に到達した resolve は 409 になり、後から再試行できる。seal と既存の NIC 認可は変わらない。この照合は新しい通信経路や RDS の動作を保証しない。
 
 `--rds-private-postgres-topology` は認証付きの数値ループバックでだけ使える任意の設定検証。`Engine=postgres`、単独 DB インスタンス、明示的な `PubliclyAccessible=false` の `CreateDBInstance` / `ModifyDBInstance` を対象にする。通常の設定モードは変えない。既存の `rds` IAM 判定後、書き込みと同じ SQLite トランザクションで DB サブネットグループと現行のネイティブ EC2 所有行を照合する。初期の範囲は、Internet Gateway への接続や有効な外向き経路がない単一の IPv4 VPC、その VPC と同じ所有者に属する2つ以上の AZ のサブネット、および1〜5個の固有のセキュリティグループ。未知・別所有者・別 VPC の参照は書き込まない。これはその時点の設定検証であり、継続的な接続証明、SQL、バックエンド、ポート、エンドポイントの追加ではない。応答は引き続き `creating`。
+
+RDS エンジンの DB インスタンスが返すパラメータグループ名とオプショングループ名は、保存済みの設定を示す。`CreateDBInstance`、`DescribeDBInstances`、`ModifyDBInstance`、`DeleteDBInstance` の応答では、実際に適用されたと誤認させないよう、任意項目の [`ParameterApplyStatus`](https://docs.aws.amazon.com/AmazonRDS/latest/APIReference/API_DBParameterGroupStatus.html) と [オプショングループの `Status`](https://docs.aws.amazon.com/AmazonRDS/latest/APIReference/API_OptionGroupMembership.html) を返さない。旧 SQLite 行でも参照時は状態だけを省略し、保存行を書き換えない。認可済みの変更が確定する際は古い適用状態を取り除くが、指定していない設定やタグは保持する。DB インスタンスの `creating`（削除応答は `deleting`）、エンドポイントなし、セキュリティグループの状態、および共有する Aurora・Neptune・DocumentDB の応答は従来どおり。
 
 Linux/amd64 の非 root 運用者は、認証付き数値ループバックで [`--rds-owned-postgres-config`](rds-owned-workload.md) を個別に指定できる。既存の設定検証と、承認済み PostgreSQL バンドル・独立したピン・専用作業ディレクトリ・永続 SQLite を必須とし、Battle との併用は拒否する。起動時は構成を受け入れるだけで、既存の IAM とトポロジー検証を通り、所有権を確定した指定 DB の新規作成だけが内部実行の対象になる。API の応答形式は変えず、接続先・認証情報・稼働の保証やゲスト接続は提供しない。
 

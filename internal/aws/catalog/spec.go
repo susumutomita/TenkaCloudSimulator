@@ -141,6 +141,9 @@ type Resource struct {
 	// Aliases maps create/update input members onto differently named
 	// stored members of the official resource shape.
 	Aliases map[string]string
+	// ProjectResponse adjusts the shallow copy used to encode a resource.
+	// It must copy any nested values it changes; stored state is read-only here.
+	ProjectResponse func(document map[string]any)
 	// Cascade deletes children with this resource; otherwise deletion with
 	// live children is refused.
 	Cascade bool

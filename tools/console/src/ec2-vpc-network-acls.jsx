@@ -101,6 +101,7 @@ export default function VPCNetworkACLs({request,region,vpc,onSaving=noSaving,wri
   </SpaceBetween>;
 
   const errors={
+    'response-too-large':t('This VPC has more ACL data than the Console can display (16 MiB). Use the native SDK with specific ACL IDs.','この VPC の ACL データがコンソールの上限 16 MiB を超えました。ネイティブ SDK で ACL ID を指定してください。'),
     denied:t('The selected identity cannot complete this network ACL request. Check its EC2 permissions.','現在の ID ではネットワーク ACL を操作できません。EC2 の権限を確認してください。'),
     'not-found':t('The selected VPC or network ACL is no longer available.','選択した VPC またはネットワーク ACL は利用できなくなりました。'),
     limit:t('The local network ACL resource or request limit was reached.','ローカルのネットワーク ACL のリソース数またはリクエスト数が上限に達しました。'),
@@ -117,7 +118,7 @@ export default function VPCNetworkACLs({request,region,vpc,onSaving=noSaving,wri
       <Button iconName="refresh" disabled={pending} loading={statusLoading} onClick={refresh}>{refreshLabel}</Button>
       <Button disabled={!ready||writeBlocked} onClick={()=>setModal({scope,kind:'create',name:''})}>{createLabel}</Button>
     </SpaceBetween>}>{t('Network ACLs','ネットワーク ACL')}</Header>
-    <Box color="text-body-secondary">{t('Detached configuration only. These ACLs are not associated with subnets. Rule editing and packet filtering are not available.','関連付けのない設定のみです。これらの ACL はサブネットに関連付けられません。ルールの編集やパケットのフィルタリングはできません。')}</Box>
+    <Box color="text-body-secondary">{t('This pane manages detached ACLs only. When available, edit rules on the dedicated Network ACLs page. Subnet association and packet filtering are not supported.','この画面で管理できるのは関連付けのない ACL です。ルールは、対応している場合に専用のネットワーク ACL ページから編集できます。サブネットへの関連付けやパケットフィルタリングには対応していません。')}</Box>
     {notice?.scope===scope&&<Alert type="success">{notice.kind==='create'
       ? t('Saved network ACL: ','ネットワーク ACL を保存しました: ')
       : t('Deleted network ACL: ','ネットワーク ACL を削除しました: ')}{identifier(notice.id)}</Alert>}

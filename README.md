@@ -101,12 +101,15 @@ console, CloudFormation adapter or Challenge integration.
   [Secrets Manager](docs/secrets-manager.md), [KMS](docs/kms.md), [WAFv2](docs/wafv2.md).
 - **Networking:** [read-only EC2 instance discovery in the API Reference](docs/api-reference.md#aws-services-and-the-shared-endpoint),
   [EC2/VPC discovery and VPC create/delete](docs/ec2-read-discovery.md),
+  [EC2-managed VPC Name and tags API](docs/ec2-read-discovery.md#native-vpc-tag-editing),
+  [VPC DNS settings through the EC2 Query API and console](docs/ec2-vpc-dns-attributes.md),
+  [read-only Resource map for a selected VPC](docs/ec2-vpc-console.md#read-only-resource-map),
   [local internet gateway allocation and VPC attachment in SDK and Console](docs/ec2-internet-gateways.md),
   [route tables: CloudFormation readback, native tables and explicit subnet associations](docs/ec2-read-discovery.md#route-table-readback),
   [native IPv4 route configuration](docs/ec2-native-default-route.md),
   [IPv4 subnet lifecycle for existing EC2-managed VPCs](docs/ec2-native-subnet.md),
   [security groups: CloudFormation readback and detached TCP/IPv4 rules](docs/ec2-read-discovery.md#security-group-readback),
-  [detached network ACL API and Console workflow](docs/ec2-detached-network-acls.md),
+  [detached network ACL workflow and bounded IPv4 rule API](docs/ec2-detached-network-acls.md),
   [VPC creation and the limited VPC-and-subnet option in the Console](docs/ec2-read-discovery.md#console-vpc-and-one-subnet),
   [regional VPC console pages and saved-resource links](docs/ec2-vpc-console.md),
   [Elastic Load Balancing](docs/elb.md) (Lambda targets),
@@ -144,6 +147,12 @@ console, CloudFormation adapter or Challenge integration.
   `--rds-private-postgres-topology` optionally validates private standalone
   PostgreSQL configuration against native EC2 on authenticated loopback. It
   starts no database and returns no endpoint.
+  Native RDS DB instances return saved parameter and option group names, not an
+  applied status: the optional `ParameterApplyStatus` and option-group `Status`
+  are omitted. Reading an older SQLite record does not rewrite it. An authorized
+  modification drops any stale application statuses without changing unrelated
+  configuration. Instance status is still `creating` (`deleting` in a successful
+  delete response), with no database endpoint.
   These do not run workloads, provide data planes or provision real cloud resources.
   AppFlow stores S3-to-S3 flow definitions only. An `OnDemand` definition
   rejects schedule settings; a `Scheduled` definition requires a nonblank

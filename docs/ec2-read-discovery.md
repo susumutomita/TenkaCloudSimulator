@@ -48,6 +48,48 @@ VPC ID. Each item carries the local extension `simulatorManagedBy`:
 `cloudformation` (delete it by deleting its stack) or `ec2` (created by
 `CreateVpc`, deletable with `DeleteVpc`). SDKs ignore the extension.
 
+### Native VPC tag editing
+
+[CreateTags](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_CreateTags.html)
+and [DeleteTags](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_DeleteTags.html)
+edit one tag on one existing EC2-managed VPC in the caller's region. `Name`
+is an ordinary, case-sensitive key. Use EC2 Query/XML `2016-11-15` with
+`ResourceId.1` and explicit `Tag.1.Key`:
+
+- `CreateTags` needs `Tag.1.Value`; an explicit empty value is allowed. It
+  adds the key or replaces that same key's value.
+- `DeleteTags` without `Tag.1.Value` removes that key regardless of value.
+  Providing a value, even the empty string, removes only an exact match.
+  An absent or nonmatching tag is a no-op. Omitting the key is an error,
+  never an instruction to clear all tags.
+
+Use the `ec2:CreateTags` or `ec2:DeleteTags` permission on the target VPC ARN.
+The local limit is 50 tags per VPC; keys must be 1–128 UTF-8 bytes, values
+at most 256 bytes. These byte bounds match local `CreateVpc` tags. Invalid
+XML text, reserved case-insensitive `aws:` keys, additional tags or resource
+IDs, `DryRun=true`, and other resource types are refused. The native API
+cannot change CloudFormation-controlled VPCs or be used from instance-scoped
+handoffs. There is no general `DescribeTags` or bulk tag editing.
+
+Both writes acknowledge with `requestId` and `return=true`. Confirm the result
+in the same VPC's existing `DescribeVpcs` row (`tagSet`); if that read cannot
+be confirmed, refresh rather than blindly retrying. The same SQLite row
+stores tags and the VPC topology. A tag-only write retains the existing
+ownership, DNS values and topology generation; it does not update any other
+resource. Re-plan the offline main-route repair if the saved database file
+changed after an earlier plan.
+
+In the signed-in **VPC → Resource details → Details → Tags** pane for an
+EC2-managed VPC, add, edit or delete one tag at a time. The editor checks
+the same regional VPC row before and after one native request. It deletes
+only the exact value currently shown, including an empty one. It reports a
+change only after readback; refresh or check using the native SDK before
+retrying an unconfirmed write. A Console pre-read does not lock the key:
+concurrent `CreateTags` operations on the same key are last-writer-wins,
+while the Console's deletion still supplies the exact previously observed
+value. The Console caps a regional response at 16 MiB. Changing `Name` updates the displayed name, not the VPC ID or its
+network behavior.
+
 ### Instance launch: preview is not a launch
 
 Default simulator startup does not configure an instance runtime, and the
@@ -189,8 +231,10 @@ layout/Chromium or network enforcement.
 `CreateNetworkAcl`, `DescribeNetworkAcls` and `DeleteNetworkAcl` support the
 [explicit detached configuration contract](ec2-detached-network-acls.md) in an
 EC2-managed VPC. Group/ACL mutations and reads are refused in a single-instance
-handoff. ACLs do not create a default ACL, do not bind a subnet, and do not
-provide enforcement. The signed-in VPC Console manages only this detached metadata.
+handoff. The dedicated Network ACLs page and the native EC2 API share the
+same saved IPv4 rule configuration for detached custom ACLs. ACLs do not
+create a default ACL, bind a subnet, or filter traffic. See the
+[rule workflow and exact API limits](ec2-detached-network-acls.md#rule-profile-and-readback).
 
 To verify all three child kinds in one owned VPC, run
 `SIMULATOR_BINARY=/absolute/path/to/simulator python3 test/console/ec2_native_network_sdk.py`
@@ -402,8 +446,8 @@ Detached security groups, network ACLs and route tables also use the existing
 EC2-owned VPC and shared 1,000-resource bound. Deletion of a native VPC is refused
 while any native subnet, group, ACL, custom table, or saved route still depends on it. Remove the
 children through their own APIs, including [native gateways](ec2-internet-gateways.md) and [native IPv4 routes](ec2-native-default-route.md).
-`ModifyVpcAttribute`,
-VPC endpoints and tag edits are not implemented.
+[Local DNS settings](ec2-vpc-dns-attributes.md) are available through
+`DescribeVpcAttribute` and `ModifyVpcAttribute`. VPC endpoints and tag edits are not implemented.
 
 As in the [AWS main and local route model](https://docs.aws.amazon.com/vpc/latest/userguide/subnet-route-tables.html),
 new native VPCs have one main route table and a `local` route in each table.

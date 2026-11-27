@@ -11,7 +11,10 @@ import (
 	"unicode/utf8"
 )
 
-var ec2NetworkACLOperations = []string{"CreateNetworkAcl", "DescribeNetworkAcls", "DeleteNetworkAcl"}
+var ec2NetworkACLOperations = []string{
+	"CreateNetworkAcl", "DescribeNetworkAcls", "DeleteNetworkAcl",
+	ec2CreateNetworkACLEntry, ec2ReplaceNetworkACLEntry, ec2DeleteNetworkACLEntry,
+}
 
 var (
 	ec2NetworkACLIDPattern    = regexp.MustCompile(`^acl-(?:[0-9a-f]{8}|[0-9a-f]{17})$`)
@@ -24,6 +27,7 @@ type ec2NetworkACLRequest struct {
 	vpcID, aclID, clientToken string
 	tags                      map[string]string
 	ids, filterVPCs           []string
+	entry                     ec2NetworkACLEntry
 	// Bound by the gateway for a non-admin caller after the initial IAM check.
 	// Recheck the actual generated/replayed resource before using its state.
 	authorizeCreateID func(string) error
@@ -36,8 +40,8 @@ func (q ec2NetworkACLRequest) permissions(action, region string) [][2]string {
 	case "CreateNetworkAcl":
 		vpc := [][2]string{{"ec2:CreateNetworkAcl", networkARN(region, "vpc", q.vpcID)}}
 		return append(vpc, q.aclCreatePermissions(region, "*")...)
-	case "DeleteNetworkAcl":
-		return [][2]string{{"ec2:DeleteNetworkAcl", networkARN(region, "network-acl", q.aclID)}}
+	case "DeleteNetworkAcl", ec2CreateNetworkACLEntry, ec2ReplaceNetworkACLEntry, ec2DeleteNetworkACLEntry:
+		return [][2]string{{"ec2:" + action, networkARN(region, "network-acl", q.aclID)}}
 	default:
 		return [][2]string{{"ec2:DescribeNetworkAcls", "*"}}
 	}
@@ -120,9 +124,12 @@ func parseEC2NetworkACLRequest(action string, fields map[string][]string) (ec2Ne
 				vpcs[n] = value
 				continue
 			}
-		case "DeleteNetworkAcl":
+		case "DeleteNetworkAcl", ec2CreateNetworkACLEntry, ec2ReplaceNetworkACLEntry, ec2DeleteNetworkACLEntry:
 			if key == "NetworkAclId" {
 				q.aclID = value
+				continue
+			}
+			if networkACLEntryParameter(action, key) {
 				continue
 			}
 		}
@@ -169,15 +176,20 @@ func parseEC2NetworkACLRequest(action string, fields map[string][]string) (ec2Ne
 			return q, f
 		}
 		q.filterVPCs = parsed
-	case "DeleteNetworkAcl":
+	case "DeleteNetworkAcl", ec2CreateNetworkACLEntry, ec2ReplaceNetworkACLEntry, ec2DeleteNetworkACLEntry:
 		if q.aclID == "" {
 			return q, ec2Invalid("MissingParameter", "NetworkAclId is required.")
 		}
 		if !ec2NetworkACLIDPattern.MatchString(q.aclID) {
 			return q, ec2Invalid("InvalidNetworkAclId.Malformed", "NetworkAclId must be an acl- ID.")
 		}
+		if action != "DeleteNetworkAcl" {
+			entry, f := parseNetworkACLEntry(action, fields)
+			q.entry = entry
+			return q, f
+		}
 	default:
-		return q, ec2Invalid("UnsupportedOperation", "Only detached network ACL create, describe and delete are supported.")
+		return q, ec2Invalid("UnsupportedOperation", "Only detached network ACL and IPv4 entry configuration is supported.")
 	}
 	return q, nil
 }
@@ -235,19 +247,20 @@ type ec2NetworkACLRead struct {
 }
 
 type ec2NetworkACLEntry struct {
-	Rule     int    `xml:"ruleNumber"`
-	Protocol string `xml:"protocol"`
-	Action   string `xml:"ruleAction"`
-	Egress   bool   `xml:"egress"`
-	CIDR     string `xml:"cidrBlock"`
+	Rule      int                     `xml:"ruleNumber"`
+	Protocol  string                  `xml:"protocol"`
+	Action    string                  `xml:"ruleAction"`
+	Egress    bool                    `xml:"egress"`
+	CIDR      string                  `xml:"cidrBlock"`
+	PortRange *ec2NetworkACLPortRange `xml:"portRange,omitempty" json:",omitempty"`
 }
 
 func ec2NetworkACLRecord(r EC2NetworkResource) ec2NetworkACLRead {
-	// The immutable terminal rules describe a new *custom* IPv4 ACL, not the
-	// default ACL of a VPC. No subnet applies these rules in this slice.
+	// Append an immutable terminal deny after each direction’s saved rules.
+	// No subnet applies any of these rules in the simulator.
 	return ec2NetworkACLRead{
 		ID: r.ID, VPCID: r.VPCID, OwnerID: "000000000000", Mode: "detached-config-only",
-		Entries: []ec2NetworkACLEntry{{32767, "-1", "deny", false, "0.0.0.0/0"}, {32767, "-1", "deny", true, "0.0.0.0/0"}},
+		Entries: networkACLRecordEntries(r.NativeACLRules),
 		Tags:    ec2ReadTags(r.Tags),
 	}
 }
@@ -277,8 +290,14 @@ func (s *StackStore) executeEC2NetworkACL(ctx context.Context, action, region st
 		}
 		ok := true
 		out.Return = &ok
+	case ec2CreateNetworkACLEntry, ec2ReplaceNetworkACLEntry, ec2DeleteNetworkACLEntry:
+		if err := s.mutateNativeNetworkACLEntry(ctx, action, region, q.aclID, q.entry); err != nil {
+			return nil, err
+		}
+		ok := true
+		out.Return = &ok
 	default:
-		return nil, ec2Invalid("UnsupportedOperation", "Only detached network ACL create, describe and delete are supported.")
+		return nil, ec2Invalid("UnsupportedOperation", "Only detached network ACL and IPv4 entry configuration is supported.")
 	}
 	return out, nil
 }
