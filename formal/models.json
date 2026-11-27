@@ -27833,6 +27833,498 @@
           "expect_invariant": "ExactAttachedGatewayEdges"
         }
       ]
+    },
+    {
+      "id": "EC2DetachedNetworkACLRules",
+      "model": "formal/EC2DetachedNetworkACLRules.tla",
+      "config": "formal/EC2DetachedNetworkACLRules.cfg",
+      "bounds": "42 representative native schedules (maximum four requests) plus 14 independent single-console-attempt classes. One live canonical native detached ACL with immutable peer and CloudFormation frames; two directions, three editable numbers, capacity two per direction and one fixed terminal 32767 each; finite IPv4/port and ownership/IAM/commit verdict classes.",
+      "properties": [
+        "TypeOK",
+        "ScopeFrame",
+        "OnlyEditablePersisted",
+        "AtomicGeneration",
+        "ExactNativeOperation",
+        "ExactReadProjection",
+        "VerifiedSelectedConsole"
+      ],
+      "limits": "Symbolic metadata configuration only. Does not model actual 20-per-direction count, full SDK/HTTP/XML/SQL or IAM parsing, real 64-bit wrap, raw CIDR/port validation or snapshot isolation, concurrency between browser pre-read and write, React lease scheduling, rollback of a committed write when UI confirmation fails, ACL creation/deletion/association, or packet behavior. No Go/JavaScript refinement proof.",
+      "source_scope": [
+        "internal/aws/ec2_network.go",
+        "internal/aws/ec2_network_acl.go",
+        "internal/aws/ec2_network_acl_entry.go",
+        "internal/aws/ec2_network_acl_store.go",
+        "internal/aws/ec2_read.go",
+        "internal/aws/ec2_vpc.go",
+        "internal/server/server.go",
+        "internal/server/web/app.js",
+        "tools/console/src/ec2-network-acl-inventory.jsx",
+        "tools/console/src/ec2-network-acls.mjs"
+      ],
+      "mutants": [
+        {
+          "id": "AllowForeignRegion",
+          "edits": [
+            {
+              "old": "NativeTarget(q) == q.witness \\notin BadState",
+              "new": "NativeTarget(q) == q.witness \\notin (BadState \\ {\"wrong-region\"})",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ScopeFrame"
+        },
+        {
+          "id": "AllowForeignOwnedRow",
+          "edits": [
+            {
+              "old": "NativeTarget(q) == q.witness \\notin BadState",
+              "new": "NativeTarget(q) == q.witness \\notin (BadState \\ {\"foreign-row\"})",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ScopeFrame"
+        },
+        {
+          "id": "AllowWrongParent",
+          "edits": [
+            {
+              "old": "NativeTarget(q) == q.witness \\notin BadState",
+              "new": "NativeTarget(q) == q.witness \\notin (BadState \\ {\"wrong-parent\"})",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ScopeFrame"
+        },
+        {
+          "id": "AllowPersistentCFNClaim",
+          "edits": [
+            {
+              "old": "NativeTarget(q) == q.witness \\notin BadState",
+              "new": "NativeTarget(q) == q.witness \\notin (BadState \\ {\"cf-claim\"})",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ScopeFrame"
+        },
+        {
+          "id": "AllowAttachedRow",
+          "edits": [
+            {
+              "old": "NativeTarget(q) == q.witness \\notin BadState",
+              "new": "NativeTarget(q) == q.witness \\notin (BadState \\ {\"attached\"})",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ScopeFrame"
+        },
+        {
+          "id": "AllowCorruptGeneration",
+          "edits": [
+            {
+              "old": "NativeTarget(q) == q.witness \\notin BadState",
+              "new": "NativeTarget(q) == q.witness \\notin (BadState \\ {\"corrupt-generation\"})",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ScopeFrame"
+        },
+        {
+          "id": "AllowDifferentIAMAction",
+          "edits": [
+            {
+              "old": "Authorized(q) == q.witness \\notin BadIAM",
+              "new": "Authorized(q) == q.witness # \"wrong-arn\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ScopeFrame"
+        },
+        {
+          "id": "AllowDifferentIAMResource",
+          "edits": [
+            {
+              "old": "Authorized(q) == q.witness \\notin BadIAM",
+              "new": "Authorized(q) == q.witness # \"wrong-action\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ScopeFrame"
+        },
+        {
+          "id": "IgnoreIndependentCFNDeclaration",
+          "edits": [
+            {
+              "old": "ELSE /\\ q.witness \\notin BeforeWriteOnly /\\ EditableKey(q)",
+              "new": "ELSE /\\ q.witness # \"wrong-carrier\" /\\ EditableKey(q)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ScopeFrame"
+        },
+        {
+          "id": "AllowExtraneousQueryShape",
+          "edits": [
+            {
+              "old": "ELSE /\\ q.witness \\notin BeforeWriteOnly /\\ EditableKey(q)",
+              "new": "ELSE /\\ q.witness # \"cf-declaration\" /\\ EditableKey(q)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ScopeFrame"
+        },
+        {
+          "id": "ModifyPeerFrame",
+          "edits": [
+            {
+              "old": "!.entries = Apply(q,s.entries,success),",
+              "new": "!.entries = Apply(q,s.entries,success),\n                !.peer = IF success THEN s.entries ELSE @,",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ScopeFrame"
+        },
+        {
+          "id": "TreatTerminalAsEditable",
+          "edits": [
+            {
+              "old": "EditableKey(q) == q.number \\in Numbers",
+              "new": "EditableKey(q) == q.number \\in Numbers \\cup {Terminal}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "OnlyEditablePersisted"
+        },
+        {
+          "id": "LosePerDirectionLimit",
+          "edits": [
+            {
+              "old": "Cardinality(InDirection(slots,q.direction)) < RuleLimit",
+              "new": "TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "OnlyEditablePersisted"
+        },
+        {
+          "id": "KeepUnknownIPv4HostBits",
+          "edits": [
+            {
+              "old": "Normalize(v) == IF v = AllowAlias THEN AllowAll ELSE v",
+              "new": "Normalize(v) == v",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "OnlyEditablePersisted"
+        },
+        {
+          "id": "AllProtocolKeepsPorts",
+          "edits": [
+            {
+              "old": "SupportsPayload(q) == IPv4(q.value) /\\ PortShape(q.value)",
+              "new": "SupportsPayload(q) == (IPv4(q.value) /\\ PortShape(q.value)) \\/ q.value = AllWithPorts",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "OnlyEditablePersisted"
+        },
+        {
+          "id": "AllowTCPWithoutPortPair",
+          "edits": [
+            {
+              "old": "SupportsPayload(q) == IPv4(q.value) /\\ PortShape(q.value)",
+              "new": "SupportsPayload(q) == (IPv4(q.value) /\\ PortShape(q.value)) \\/ q.value = TCPWithoutPorts",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "OnlyEditablePersisted"
+        },
+        {
+          "id": "AllowReversedUDPPorts",
+          "edits": [
+            {
+              "old": "SupportsPayload(q) == IPv4(q.value) /\\ PortShape(q.value)",
+              "new": "SupportsPayload(q) == (IPv4(q.value) /\\ PortShape(q.value)) \\/ q.value = UDPReversedPorts",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "OnlyEditablePersisted"
+        },
+        {
+          "id": "AllowNonIPv4Prefix",
+          "edits": [
+            {
+              "old": "SupportsPayload(q) == IPv4(q.value) /\\ PortShape(q.value)",
+              "new": "SupportsPayload(q) == (IPv4(q.value) /\\ PortShape(q.value)) \\/ q.value = NonIPv4",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "OnlyEditablePersisted"
+        },
+        {
+          "id": "AllowUnsupportedProtocol",
+          "edits": [
+            {
+              "old": "SupportsPayload(q) == IPv4(q.value) /\\ PortShape(q.value)",
+              "new": "SupportsPayload(q) == (IPv4(q.value) /\\ PortShape(q.value)) \\/ q.value = UnsupportedProtocol",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "OnlyEditablePersisted"
+        },
+        {
+          "id": "CountsEqualReplaceAsUpdate",
+          "edits": [
+            {
+              "old": "bump == IF success /\\ IsChanged(q,s.entries) THEN 1 ELSE 0",
+              "new": "bump == IF success /\\ q.op \\in Edits THEN 1 ELSE 0",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AtomicGeneration"
+        },
+        {
+          "id": "OnlyIncrementSQLGeneration",
+          "edits": [
+            {
+              "old": "!.revision = @ + bump, !.updates = @ + bump,",
+              "new": "!.revision = @ + bump, !.updates = @,",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AtomicGeneration"
+        },
+        {
+          "id": "ForgetUpdatedEmptyRecord",
+          "edits": [
+            {
+              "old": "!.hasRuleState = @ \\/ (bump = 1),",
+              "new": "!.hasRuleState = \\E key \\in Keys : Apply(q,s.entries,success)[key] # None,",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AtomicGeneration"
+        },
+        {
+          "id": "KeyDropsDirection",
+          "edits": [
+            {
+              "old": "Key(q) == <<q.direction,q.number>>",
+              "new": "Key(q) == <<\"in\",q.number>>",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExactNativeOperation"
+        },
+        {
+          "id": "CreateOverwritesExistingNumber",
+          "edits": [
+            {
+              "old": "slots[Key(q)] = None /\\ CapacityOK(q, slots)",
+              "new": "CapacityOK(q, slots)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExactNativeOperation"
+        },
+        {
+          "id": "ReplaceCreatesMissingSlot",
+          "edits": [
+            {
+              "old": "ELSE slots[Key(q)] # None",
+              "new": "ELSE (q.op = \"replace\" \\/ slots[Key(q)] # None)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExactNativeOperation"
+        },
+        {
+          "id": "IgnoreFailedSQLWrite",
+          "edits": [
+            {
+              "old": "(~changes \\/ q.witness \\notin WriteFailures)",
+              "new": "(~changes \\/ q.witness \\notin (WriteFailures \\ {\"write-refused\"}))",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExactNativeOperation"
+        },
+        {
+          "id": "IgnoreExactRowReread",
+          "edits": [
+            {
+              "old": "(~changes \\/ q.witness \\notin WriteFailures)",
+              "new": "(~changes \\/ q.witness \\notin (WriteFailures \\ {\"different-readback\"}))",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExactNativeOperation"
+        },
+        {
+          "id": "IgnorePostWriteClaim",
+          "edits": [
+            {
+              "old": "(~changes \\/ q.witness \\notin WriteFailures)",
+              "new": "(~changes \\/ q.witness \\notin (WriteFailures \\ {\"new-cf-claim\"}))",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExactNativeOperation"
+        },
+        {
+          "id": "IgnoreGenerationOverflow",
+          "edits": [
+            {
+              "old": "(~changes \\/ q.witness \\notin WriteFailures)",
+              "new": "(~changes \\/ q.witness \\notin (WriteFailures \\ {\"generation-limit\"}))",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExactNativeOperation"
+        },
+        {
+          "id": "AcknowledgeCommitRefusal",
+          "edits": [
+            {
+              "old": "q.witness # \"commit-refused\" /\\",
+              "new": "TRUE /\\",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExactNativeOperation"
+        },
+        {
+          "id": "ReadStaleSlots",
+          "edits": [
+            {
+              "old": "THEN View(s.entries) ELSE None",
+              "new": "THEN View(Blank) ELSE None",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExactReadProjection"
+        },
+        {
+          "id": "ReturnWrongTerminalVerdict",
+          "edits": [
+            {
+              "old": "Row(d,Terminal,TerminalDeny)",
+              "new": "Row(d,Terminal,AllowAll)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExactReadProjection"
+        },
+        {
+          "id": "ProjectUnorderedEditableRows",
+          "edits": [
+            {
+              "old": "<<Row(d,10,slots[<<d,10>>]),Row(d,20,slots[<<d,20>>]),Row(d,30,slots[<<d,30>>])>>",
+              "new": "<<Row(d,20,slots[<<d,20>>]),Row(d,10,slots[<<d,10>>]),Row(d,30,slots[<<d,30>>])>>",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExactReadProjection"
+        },
+        {
+          "id": "InventSubnetAssociation",
+          "edits": [
+            {
+              "old": "attachments |-> {}, packetProof |-> FALSE",
+              "new": "attachments |-> {\"unrelated-subnet\"}, packetProof |-> FALSE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExactReadProjection"
+        },
+        {
+          "id": "ClaimPacketEnforcement",
+          "edits": [
+            {
+              "old": "attachments |-> {}, packetProof |-> FALSE",
+              "new": "attachments |-> {}, packetProof |-> TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExactReadProjection"
+        },
+        {
+          "id": "AllowUnadvertisedConsole",
+          "edits": [
+            {
+              "old": "CanSend(ui) == ui.fault \\notin BeforeUI",
+              "new": "CanSend(ui) == ui.fault \\notin (BeforeUI \\ {\"unsupported\"})",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "VerifiedSelectedConsole"
+        },
+        {
+          "id": "SkipExactPreWriteRule",
+          "edits": [
+            {
+              "old": "CanSend(ui) == ui.fault \\notin BeforeUI",
+              "new": "CanSend(ui) == ui.fault \\notin (BeforeUI \\ {\"stale-rule\"})",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "VerifiedSelectedConsole"
+        },
+        {
+          "id": "IgnoreConsoleDirectionCapacity",
+          "edits": [
+            {
+              "old": "CanSend(ui) == ui.fault \\notin BeforeUI",
+              "new": "CanSend(ui) == ui.fault \\notin (BeforeUI \\ {\"full-direction\"})",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "VerifiedSelectedConsole"
+        },
+        {
+          "id": "AcceptFalseWriteReturn",
+          "edits": [
+            {
+              "old": "CanShow(ui) == ui.fault \\notin AfterUI",
+              "new": "CanShow(ui) == ui.fault \\notin (AfterUI \\ {\"false-ack\"})",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "VerifiedSelectedConsole"
+        },
+        {
+          "id": "AcceptOtherACLReadback",
+          "edits": [
+            {
+              "old": "CanShow(ui) == ui.fault \\notin AfterUI",
+              "new": "CanShow(ui) == ui.fault \\notin (AfterUI \\ {\"wrong-readback-scope\"})",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "VerifiedSelectedConsole"
+        },
+        {
+          "id": "AcceptDifferentRuleReadback",
+          "edits": [
+            {
+              "old": "CanShow(ui) == ui.fault \\notin AfterUI",
+              "new": "CanShow(ui) == ui.fault \\notin (AfterUI \\ {\"wrong-readback-row\"})",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "VerifiedSelectedConsole"
+        },
+        {
+          "id": "PublishRetiredConsoleResult",
+          "edits": [
+            {
+              "old": "CanShow(ui) == ui.fault \\notin AfterUI",
+              "new": "CanShow(ui) == ui.fault \\notin (AfterUI \\ {\"retired-render\"})",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "VerifiedSelectedConsole"
+        }
+      ]
     }
   ]
 }

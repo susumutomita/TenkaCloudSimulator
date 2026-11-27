@@ -80,11 +80,13 @@ func readNativeNetworkACL(ctx context.Context, tx *sql.Tx, region, id string) (E
 	if err != nil {
 		return EC2NetworkResource{}, err
 	}
-	// No ACL entries or associations are stored in this bounded release. Do
-	// not interpret foreign network fields or silently hide a broken parent.
+	// Native entries are checked by networkRead. An old ACL document has
+	// no entry state and is valid only at its original generation.
+	// Associations and other network-kind fields are not used by ACLs.
 	if !ec2NetworkACLIDPattern.MatchString(id) || !ec2VPCIDPattern.MatchString(r.VPCID) ||
 		r.SubnetID != "" || r.GatewayID != "" || r.RouteTableID != "" || r.CIDR != "" || r.AvailabilityZone != "" ||
-		r.Description != "" || r.DNSHostnames || r.DNSSupport || r.PublicIP || r.RouteEnabled || len(r.Ingress) != 0 || r.Revision != 1 {
+		r.Description != "" || r.DNSHostnames || r.DNSSupport || r.PublicIP || r.RouteEnabled || len(r.Ingress) != 0 ||
+		(r.NativeACLRules == nil && r.Revision != 1) {
 		return EC2NetworkResource{}, errNetworkACLState
 	}
 	if len(r.Tags) > 50 {

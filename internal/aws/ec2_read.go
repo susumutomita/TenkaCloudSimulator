@@ -195,7 +195,8 @@ func (g *Gateway) serveEC2(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		out = rule
-	case "CreateNetworkAcl", "DescribeNetworkAcls", "DeleteNetworkAcl":
+	case "CreateNetworkAcl", "DescribeNetworkAcls", "DeleteNetworkAcl",
+		ec2CreateNetworkACLEntry, ec2ReplaceNetworkACLEntry, ec2DeleteNetworkACLEntry:
 		result, err := g.Stacks.executeEC2NetworkACL(r.Context(), action, region, *request.networkACL)
 		if err != nil {
 			failChild(err, "Local detached network ACL state could not be read or changed.")

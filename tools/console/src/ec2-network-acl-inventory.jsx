@@ -16,8 +16,8 @@ import SpaceBetween from '@cloudscape-design/components/space-between';
 import Table from '@cloudscape-design/components/table';
 import Tabs from '@cloudscape-design/components/tabs';
 import {useLocale} from './i18n.jsx';
-import {createVpcNetworkACL,deleteVpcNetworkACL,loadNetworkACLInventory,loadNetworkACLVpcs,
-  networkACLFailure,networkACLInventoryOperations,validNetworkACLID,validNetworkACLName,validNetworkACLVpcID} from './ec2-network-acls.mjs';
+import {changeNetworkACLRule,createVpcNetworkACL,deleteVpcNetworkACL,loadNetworkACLInventory,loadNetworkACLVpcs,
+  networkACLFailure,networkACLInventoryOperations,networkACLRuleActionsAvailable,normalizeNetworkACLRule,validNetworkACLID,validNetworkACLName,validNetworkACLVpcID} from './ec2-network-acls.mjs';
 
 const noSaving=()=>{};
 const pageSize=20;
@@ -25,16 +25,24 @@ const idCell=value=><span className="resource-identifier">{value||'—'}</span>;
 
 // Details are a projection of one validated ACL record. No VPC subnet list or
 // AWS default behavior is used to fill in associations absent from readback.
-export function NetworkACLDetails({acl,onOpenSubnet}) {
+export function NetworkACLDetails({acl,onOpenSubnet,onRuleChange}) {
   const {t}=useLocale();
   const ruleTable=(egress,label)=>{
     const rules=acl.entries.filter(rule=>rule.egress===egress).sort((a,b)=>a.number-b.number);
-    return <Table variant="embedded" items={rules} trackBy="number" ariaLabels={{tableLabel:label}}
+    return <Table variant="embedded" items={rules} header={onRuleChange&&<Header variant="h3" actions={
+      <Button disabled={rules.length>=21} onClick={()=>onRuleChange('create',{egress})}>{t('Add rule','ルールを追加')}</Button>
+    }>{label}</Header>} trackBy="number" ariaLabels={{tableLabel:label}}
       columnDefinitions={[
         {id:'number',header:t('Rule number','ルール番号'),cell:row=>row.number},
-        {id:'protocol',header:t('Protocol','プロトコル'),cell:row=>row.protocol==='-1'?t('All (-1)','すべて (-1)'):row.protocol},
+        {id:'protocol',header:t('Protocol','プロトコル'),cell:row=>row.protocol==='-1'?t('All (-1)','すべて (-1)'):row.protocol==='6'?'TCP (6)':'UDP (17)'},
+        {id:'ports',header:t('Port range','ポート範囲'),cell:row=>row.ports?(row.ports.from===row.ports.to?row.ports.from:row.ports.from+'–'+row.ports.to):'—'},
         {id:'cidr',header:egress?t('Destination','送信先'):t('Source','送信元'),cell:row=>idCell(row.cidr)},
         {id:'action',header:t('Allow / Deny','許可 / 拒否'),cell:row=>row.action==='deny'?t('Deny','拒否'):t('Allow','許可')},
+        ...(onRuleChange?[{id:'manage',header:t('Actions','操作'),cell:row=>row.number===32767
+          ? t('Fixed','固定') : <SpaceBetween direction="horizontal" size="xs">
+          <Button ariaLabel={t('Edit rule ','ルールを編集 ')+row.number} onClick={()=>onRuleChange('replace',row)}>{t('Edit','編集')}</Button>
+          <Button ariaLabel={t('Delete rule ','ルールを削除 ')+row.number} onClick={()=>onRuleChange('delete',row)}>{t('Delete','削除')}</Button>
+          </SpaceBetween>}]:[]),
       ]} empty={t('No rules returned for this direction.','この方向のルールは返されませんでした。')}/>;
   };
   const inbound=t('Inbound rules','インバウンドルール'),outbound=t('Outbound rules','アウトバウンドルール');
@@ -69,10 +77,11 @@ export default function NetworkACLInventory({request,region,capabilities,authent
   onOpenSubnet,onSelectAcl,onSaving=noSaving,writeBlocked=false}) {
   const {t}=useLocale();
   const {read,create,delete:canDelete,vpcs:canListVPCs}=networkACLInventoryOperations(capabilities,authenticationRequired);
+  const canEditRules=networkACLRuleActionsAvailable(capabilities,authenticationRequired);
   const [selection,setSelection]=useState(()=>({region,vpc:validNetworkACLVpcID(initialVpcId)?initialVpcId:'',
     acl:validNetworkACLID(initialAclId)?initialAclId:''}));
   const filter=selection.region===region?selection.vpc:'';
-  const scope=useMemo(()=>({request,region,filter,read}),[request,region,filter,read]);
+  const scope=useMemo(()=>({request,region,filter,read,canEditRules}),[request,region,filter,read,canEditRules]);
   const vpcScope=useMemo(()=>({request,region,canListVPCs}),[request,region,canListVPCs]);
   const active=useRef(null);
   const [view,setView]=useState(null),[vpcView,setVpcView]=useState(null),[tick,setTick]=useState(0);
@@ -84,6 +93,8 @@ export default function NetworkACLInventory({request,region,capabilities,authent
   const rows=current?.rows??[];
   const selected=rows.find(item=>item.id===selection.acl&&selection.region===region);
   const eligible=nativeVPCs.filter(vpc=>!filter||vpc.id===filter);
+  const ruleTarget=nativeVPCs.find(vpc=>vpc.id===selected?.vpc);
+  const canStartRule=canEditRules&&ready&&!writeBlocked&&Boolean(selected&&ruleTarget&&!selected.isDefault&&!selected.associations.length);
   const canStartCreate=create&&ready&&!writeBlocked&&eligible.length>0;
   const canStartDelete=canDelete&&ready&&!writeBlocked&&Boolean(selected&&!selected.isDefault&&selected.associations.length===0);
 
@@ -129,8 +140,13 @@ export default function NetworkACLInventory({request,region,capabilities,authent
   },[vpcScope,tick]);
 
   const target=eligible.find(vpc=>vpc.id===dialog?.vpc);
-  const valid=dialog?.kind==='create' ? canStartCreate&&Boolean(target)&&validNetworkACLName(dialog.name)
-    : dialog?.kind==='delete'&&canStartDelete&&dialog.acl===selected&&dialog.confirm===dialog.acl.id;
+  const isRuleDialog=dialog?.kind==='rule';
+  const normalized=isRuleDialog?normalizeNetworkACLRule(dialog.value):null;
+  const duplicateRule=isRuleDialog&&dialog.action==='create'&&normalized&&dialog.acl.entries.some(rule=>
+    rule.number===normalized.number&&rule.egress===normalized.egress);
+  const valid=isRuleDialog ? canStartRule&&dialog.acl===selected&&Boolean(normalized)&&!duplicateRule
+    : dialog?.kind==='create' ? canStartCreate&&Boolean(target)&&validNetworkACLName(dialog.name)
+      : dialog?.kind==='delete'&&canStartDelete&&dialog.acl===selected&&dialog.confirm===dialog.acl.id;
   async function submit(event) {
     event.preventDefault();
     if (!valid) return;
@@ -139,6 +155,13 @@ export default function NetworkACLInventory({request,region,capabilities,authent
     setNotice(null);setView({...current,status:'writing'});
     try {
       const options={signal:op.controller.signal};
+      if (isRuleDialog) {
+        const confirmed=await changeNetworkACLRule(request,region,ruleTarget,dialog.acl,dialog.action,normalized,options);
+        if (!finish(op)) return;
+        setView({scope,status:'ready',rows:current.rows.map(row=>row.id===confirmed.id?confirmed:row)});
+        setModal(null);setNotice({scope,id:confirmed.id,kind:'rule',number:normalized.number});
+        return;
+      }
       const result=dialog.kind==='create'
         ? await createVpcNetworkACL(request,region,target,dialog.name,globalThis.crypto.randomUUID(),options)
         : await deleteVpcNetworkACL(request,region,{id:dialog.acl.vpc,managedBy:'ec2'},dialog.acl,options);
@@ -169,12 +192,14 @@ export default function NetworkACLInventory({request,region,capabilities,authent
   const filters=[allVPCs,...vpcIds.map(vpcOption)];
   const targets=eligible.map(vpc=>vpcOption(vpc.id));
   const errors={
+    'response-too-large':t('This ACL list exceeds the 16 MiB Console limit. Filter by VPC or use the native SDK with specific ACL IDs.','ACL 一覧がコンソールの上限 16 MiB を超えました。VPC で絞り込むか、ネイティブ SDK で ACL ID を指定してください。'),
     denied:t('This identity cannot read or change these network ACLs. Check its EC2 permissions.','現在の ID ではネットワーク ACL を参照・変更できません。EC2 の権限を確認してください。'),
     'not-found':t('The network ACL or VPC is no longer available.','ネットワーク ACL または VPC が見つかりません。'),
     limit:t('The local network ACL limit was reached.','ローカルのネットワーク ACL の上限に達しました。'),
     unconfirmed:t('Could not confirm network ACL state. No result was reported.','ネットワーク ACL の状態を確認できませんでした。結果は表示していません。'),
   };
   const creating=t('Create network ACL','ネットワーク ACL を作成'),deleting=t('Delete network ACL','ネットワーク ACL を削除');
+  const ruleLabels={create:t('Add rule','ルールを追加'),replace:t('Save rule','ルールを保存'),delete:t('Delete rule','ルールを削除')};
   const pages=Math.max(1,Math.ceil(rows.length/pageSize)),shown=Math.min(page,pages);
   const loading=!current||current.status==='loading';
   const pick=(id,vpc=filter)=>{
@@ -183,6 +208,14 @@ export default function NetworkACLInventory({request,region,capabilities,authent
     else setSelection({region,vpc,acl:id});
   };
   const edit=(key,value)=>setModal(old=>old?.scope===scope?{...old,[key]:value}:old);
+  const openRule=(action,value)=>{
+    if (!canStartRule || dialog) return;
+    setModal({scope,kind:'rule',action,acl:selected,value:action==='create'
+      ? {number:'',protocol:'-1',action:'allow',cidr:'',egress:value.egress} : value});
+  };
+  const editRule=(key,value)=>setModal(old=>old?.scope===scope&&old.kind==='rule'
+    ? {...old,value:{...old.value,[key]:value}} : old);
+  const modalTitle=isRuleDialog?ruleLabels[dialog.action]:dialog?.kind==='create'?creating:deleting;
   return <ContentLayout header={<Header variant="h1" actions={<SpaceBetween direction="horizontal" size="xs">
     <Button iconName="refresh" disabled={!canRefresh} loading={loading} onClick={()=>setTick(n=>n+1)}>{t('Refresh','更新')}</Button>
     {create&&<Button variant="primary" disabled={!canStartCreate}
@@ -191,10 +224,11 @@ export default function NetworkACLInventory({request,region,capabilities,authent
       onClick={()=>setModal({scope,kind:'delete',acl:selected,confirm:''})}>{deleting}</Button>}
   </SpaceBetween>}>{title}</Header>}>
     <SpaceBetween size="l">
-      <Alert type="info">{t('Only saved, detached custom ACLs are available. Default ACLs, rule changes, subnet attachment, and packet filtering are not supported.','保存済みの、関連付けのないカスタム ACL のみ利用できます。デフォルト ACL、ルールの変更、サブネットへの関連付け、パケットフィルタリングには対応していません。')}</Alert>
+      <Alert type="info">{canEditRules ? t('Edit saved IPv4 rules on detached custom ACLs. Subnet attachment and packet filtering are not supported.','関連付けのないカスタム ACL の IPv4 ルールを編集できます。サブネットへの関連付けやパケットフィルタリングには対応していません。')
+        : t('Only saved, detached custom ACLs are available. Default ACLs, rule changes, subnet attachment, and packet filtering are not supported.','保存済みの、関連付けのないカスタム ACL のみ利用できます。デフォルト ACL、ルールの変更、サブネットへの関連付け、パケットフィルタリングには対応していません。')}</Alert>
       {errors[current?.status]&&<Alert type="error">{errors[current.status]} {current.refreshBeforeWrite&&
         t('Refresh before trying another write.','次の変更の前に一覧を更新してください。')}</Alert>}
-      {notice?.scope===scope&&<Alert type="success">{notice.kind==='create'?t('Saved network ACL: ','ネットワーク ACL を保存しました: ')
+      {notice?.scope===scope&&<Alert type="success">{notice.kind==='rule'?t('Confirmed rule configuration: ','ルール設定を確認しました: ')+notice.number+' / ':notice.kind==='create'?t('Saved network ACL: ','ネットワーク ACL を保存しました: ')
         :t('Deleted network ACL: ','ネットワーク ACL を削除しました: ')}{idCell(notice.id)}</Alert>}
       <FormField label={t('Filter by VPC','VPC で絞り込み')}><Select options={filters} filteringType="auto"
         disabled={writing||Boolean(dialog)||writeBlocked} selectedOption={filters.find(item=>item.value===filter)}
@@ -217,15 +251,15 @@ export default function NetworkACLInventory({request,region,capabilities,authent
           :t('Network ACL data is not available.','ネットワーク ACL のデータは利用できません。')}/>
       {initialAclId&&ready&&!selected&&<Alert type="info">{t('The selected network ACL was not found in this inventory.',
         '選択したネットワーク ACL は、この一覧にはありません。')}</Alert>}
-      {selected&&<NetworkACLDetails key={selected.id} acl={selected} onOpenSubnet={!writing?onOpenSubnet:undefined}/>}
+      {selected&&<NetworkACLDetails key={selected.id} acl={selected} onOpenSubnet={!writing?onOpenSubnet:undefined} onRuleChange={canStartRule&&!dialog?openRule:undefined}/>}
     </SpaceBetween>
-    {dialog&&<Modal visible header={dialog.kind==='create'?creating:deleting} closeAriaLabel={t('Close network ACL dialog','ネットワーク ACL のダイアログを閉じる')}
+    {dialog&&<Modal visible header={modalTitle} closeAriaLabel={t('Close network ACL dialog','ネットワーク ACL のダイアログを閉じる')}
       onDismiss={()=>{if (!writing) setModal(null);}}>
       <form onSubmit={submit}><Form actions={<SpaceBetween direction="horizontal" size="xs">
         <Button formAction="none" disabled={writing} onClick={()=>setModal(null)}>{t('Cancel','キャンセル')}</Button>
-        <Button variant="primary" formAction="submit" disabled={!valid} loading={writing}>{dialog.kind==='create'?creating:deleting}</Button>
+        <Button variant="primary" formAction="submit" disabled={!valid} loading={writing}>{modalTitle}</Button>
       </SpaceBetween>}><SpaceBetween size="m">
-        {dialog.kind==='create'?<>
+        {isRuleDialog?<NetworkACLRuleFields dialog={dialog} edit={editRule} disabled={writing} duplicate={duplicateRule}/>:dialog.kind==='create'?<>
           <FormField label={t('VPC','VPC')}><Select options={targets} selectedOption={targets.find(item=>item.value===dialog.vpc)??null}
             filteringType="auto" disabled={writing} onChange={({detail})=>edit('vpc',detail.selectedOption.value??'')}/></FormField>
           <FormField label={t('Name (optional)','名前（任意）')}
@@ -242,4 +276,42 @@ export default function NetworkACLInventory({request,region,capabilities,authent
       </SpaceBetween></Form></form>
     </Modal>}
   </ContentLayout>;
+}
+
+
+// A replace or delete retains the verified rule number and direction; the
+// confirmation cannot accidentally change the affected ACL or the other set.
+function NetworkACLRuleFields({dialog,edit,disabled,duplicate}) {
+  const {t}=useLocale();
+  const rule=dialog.value;
+  const direction=rule.egress?t('Outbound rule','アウトバウンドルール'):t('Inbound rule','インバウンドルール');
+  const number=t('Rule number','ルール番号');
+  if (dialog.action==='delete') return <>
+    <Box>{direction} {rule.number} / {idCell(dialog.acl.id)}</Box>
+    <Box>{t('Delete this saved rule configuration?','この保存済みルール設定を削除しますか？')}</Box>
+  </>;
+  const protocols=[{label:t('All (-1)','すべて (-1)'),value:'-1'},{label:'TCP (6)',value:'6'},{label:'UDP (17)',value:'17'}];
+  const actions=[{label:t('Allow','許可'),value:'allow'},{label:t('Deny','拒否'),value:'deny'}];
+  return <>
+    <Box>{direction} / {idCell(dialog.acl.id)}</Box>
+    <FormField label={number} constraintText="1–32766"
+      errorText={duplicate?t('This direction already has this rule number.','この方向には同じ番号のルールがあります。'):undefined}><Input inputMode="numeric" value={String(rule.number)}
+      readOnly={dialog.action==='replace'} disabled={disabled} onChange={({detail})=>edit('number',detail.value)}/></FormField>
+    <FormField label={t('Protocol','プロトコル')}><Select options={protocols} selectedOption={protocols.find(item=>item.value===rule.protocol)}
+      disabled={disabled} onChange={({detail})=>{
+        const protocol=detail.selectedOption.value;
+        edit('protocol',protocol);edit('ports',protocol==='-1'?undefined:rule.ports??{from:'',to:''});
+      }}/></FormField>
+    {rule.protocol!=='-1'&&<>
+      <FormField label={t('From port','開始ポート')} constraintText="0–65535"><Input inputMode="numeric" value={String(rule.ports?.from??'')}
+        disabled={disabled} onChange={({detail})=>edit('ports',{...rule.ports,from:detail.value})}/></FormField>
+      <FormField label={t('To port','終了ポート')} constraintText="0–65535"><Input inputMode="numeric" value={String(rule.ports?.to??'')}
+        disabled={disabled} onChange={({detail})=>edit('ports',{...rule.ports,to:detail.value})}/></FormField>
+    </>}
+    <FormField label={rule.egress?t('Destination IPv4 CIDR','送信先 IPv4 CIDR'):t('Source IPv4 CIDR','送信元 IPv4 CIDR')}
+      constraintText={t('Example: 192.0.2.0/24','例: 192.0.2.0/24')}>
+      <Input value={rule.cidr} disabled={disabled} onChange={({detail})=>edit('cidr',detail.value)}/></FormField>
+    <FormField label={t('Allow / Deny','許可 / 拒否')}><Select options={actions} selectedOption={actions.find(item=>item.value===rule.action)}
+      disabled={disabled} onChange={({detail})=>edit('action',detail.selectedOption.value)}/></FormField>
+  </>;
 }
