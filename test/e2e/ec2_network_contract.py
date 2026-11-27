@@ -403,8 +403,12 @@ class NetworkContract(unittest.TestCase):
             cleanup.callback(self.ec2.delete_route, RouteTableId=table, DestinationCidrBlock='192.0.2.0/24')
             before = snapshot()
             exact, = self.ec2.describe_route_tables(RouteTableIds=[table])['RouteTables']
-            self.assertEqual(exact['Routes'], [{'DestinationCidrBlock': '192.0.2.0/24',
-                                               'GatewayId': gateway, 'Origin': 'CreateRoute', 'State': 'active'}])
+            self.assertEqual(exact['Routes'], [
+                {'DestinationCidrBlock': '10.76.0.0/16', 'GatewayId': 'local',
+                 'Origin': 'CreateRouteTable', 'State': 'active'},
+                {'DestinationCidrBlock': '192.0.2.0/24', 'GatewayId': gateway,
+                 'Origin': 'CreateRoute', 'State': 'active'},
+            ])
             self.assertEqual(exact['Associations'][0]['RouteTableAssociationId'], assoc)
 
             query = {'RouteTableId': table}
