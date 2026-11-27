@@ -1,6 +1,12 @@
 # Add IPv4 subnets to an existing local VPC
 
-In the signed-in **VPC** Console, select an **EC2-managed** VPC. Under **Subnets**, use **Add subnet** and enter an IPv4 CIDR and a local Availability Zone. The Console says a subnet was saved only after verifying that the returned ID is present under that VPC; a confirmed deletion must disappear from the subsequent read. **Refresh subnets** reconciles a write whose outcome could not be verified. The Console does not automatically retry a write.
+In the signed-in **VPC → Subnets** navigation, view the current region’s saved
+subnets. Search by name or ID or filter the list by a VPC. **Create subnet** opens
+a separate page: choose an EC2-managed VPC, check its IPv4 CIDR, and enter an IPv4
+range and a local Availability Zone. **No preference** uses the region’s local
+`a` zone. The native API cannot set a subnet name or tags; a saved CloudFormation
+Name tag is read-only. The older **Add subnet** control in a selected VPC also
+uses the same native API. The Console says a subnet was saved only after verifying that the returned ID is present under that VPC; a confirmed deletion must disappear from the subsequent read. **Refresh subnets** reconciles a write whose outcome could not be verified. The Console does not automatically retry a write.
 
 For a saved native subnet, **Edit subnet settings** toggles **Enable auto-assign
 public IPv4 address**. The default is off. The list shows the saved preference and
@@ -9,7 +15,14 @@ This is configuration only: enabling it does not allocate a public IP, alter
 routing, or enable a guest network. An unconfirmed write is never replayed;
 refresh to see the durable state before deciding whether to send another change.
 
-This uses the same native Query API and SQLite state as SDK clients. It does not create a stack, attach to a CloudFormation VPC, add a gateway or route, start a VM, or verify packet reachability. Subnets owned by a CloudFormation stack are visible, not editable, here. The original operator-only **VPC and one subnet (CloudFormation-managed)** creates both together in a new stack and is unchanged.
+The standalone page opens the exact saved subnet after verifying the create
+response and regional readback. If the outcome is unknown, return to **Subnets**
+to inspect state before trying again. A subnet ID link opens the overview and,
+when available, the confirmed explicit or native main route table. The
+simulator's ACL API lists detached ACLs; it does not report an ACL association
+for a subnet. This page does not estimate available IPs or test guest traffic.
+
+This uses the same native Query API and SQLite state as SDK clients. It does not create a stack, attach to a CloudFormation VPC, add a gateway or route, start a VM, or verify packet reachability. Subnets owned by a CloudFormation stack are visible, not editable, here. The original operator-only **VPC and more** creates one VPC and one subnet together in a new stack and is unchanged.
 
 `POST /`, `X-Simulator-Service: ec2`, `X-Simulator-Region: <region>`, and `Version=2016-11-15` select these bounded operations:
 
@@ -24,4 +37,10 @@ The selected exercise identity needs `ec2:CreateSubnet` on the exact VPC ARN, `a
 
 Validation: `go test ./internal/aws -run 'TestEC2NativeSubnet|TestEC2DescribeSubnetsContract'`; `node --test tools/console/test/ec2-native-subnets.test.mjs`. Scoped settings acceptance uses the pinned SDK and served console via `python3 test/console/ec2_subnet_public_ipv4.py` (set `SIMULATOR_BINARY` and `JSDOM_MODULE`). For the embedded Console against the built local simulator, set `SIMULATOR_BINARY` and `JSDOM_MODULE` and run `python3 test/console/ec2_native_subnet.py` with pinned boto3/botocore. The optional combined VPC pane check uses JSDOM rather than Chromium.
 
-References: [CreateSubnet](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_CreateSubnet.html), [DescribeSubnets](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_DescribeSubnets.html), [DeleteSubnet](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_DeleteSubnet.html), [ModifySubnetAttribute](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_ModifySubnetAttribute.html), [AWS subnet IP addressing](https://docs.aws.amazon.com/vpc/latest/userguide/subnet-public-ip.html), and [EC2 IAM actions](https://docs.aws.amazon.com/service-authorization/latest/reference/list_ec2.html).
+Opt-in real Chromium test against the embedded console (no changes to routine
+CI): `SIMULATOR_BINARY=/abs/simulator PLAYWRIGHT_MODULE=/abs/playwright-core node test/console/ec2_subnets_console_browser.cjs`.
+Use the Chromium distribution matching the installed Playwright version and
+optionally set `SCREENSHOTS_DIR` to retain synthetic screenshots.
+
+References: [Create a subnet](https://docs.aws.amazon.com/vpc/latest/userguide/create-subnets.html),
+[CreateSubnet](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_CreateSubnet.html), [DescribeSubnets](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_DescribeSubnets.html), [DeleteSubnet](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_DeleteSubnet.html), [ModifySubnetAttribute](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_ModifySubnetAttribute.html), [AWS subnet IP addressing](https://docs.aws.amazon.com/vpc/latest/userguide/subnet-public-ip.html), and [EC2 IAM actions](https://docs.aws.amazon.com/service-authorization/latest/reference/list_ec2.html).

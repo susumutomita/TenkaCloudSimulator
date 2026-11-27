@@ -27421,6 +27421,87 @@
           "expect_invariant": "ConfirmedBeforeSuccess"
         }
       ]
+    },
+    {
+      "id": "EC2RegionalSubnetConsole",
+      "model": "formal/EC2RegionalSubnetConsole.tla",
+      "config": "formal/EC2RegionalSubnetConsole.cfg",
+      "bounds": "Three navigation epochs, abstract EC2/CloudFormation/missing parent states, trusted or unavailable regional inventory, one pending write, and an exact or unconfirmed create reply.",
+      "properties": [
+        "TypeOK",
+        "OnlyNativeParentWrites",
+        "ConfirmedInventoryBeforeWrite",
+        "ReadbackBeforeDetail",
+        "CurrentScopeOnly",
+        "NoUnreconciledRetry"
+      ],
+      "limits": "Standalone subnet UI caller only. Does not refine XML, CIDR, IAM, partial two-read snapshots, SQLite, React focus, actual launch or route/ACL dataplanes. A view retirement does not reverse an already committed write. Route association readback and actual browser/API behavior are checked separately.",
+      "source_scope": [
+        "tools/console/src/main.jsx",
+        "tools/console/src/ec2-native-subnets.mjs",
+        "tools/console/src/ec2-subnet-console-route.mjs",
+        "tools/console/src/ec2-subnets-console.jsx",
+        "tools/console/test/ec2-subnet-console.test.mjs",
+        "test/console/ec2_subnets_console_browser.cjs",
+        "internal/server/web/app.js"
+      ],
+      "mutants": [
+        {
+          "id": "AllowStackParent",
+          "edits": [
+            {
+              "old": "CurrentParent == view.parent = \"ec2\"",
+              "new": "CurrentParent == view.parent # \"none\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "OnlyNativeParentWrites"
+        },
+        {
+          "id": "WriteWithoutRegionalInventory",
+          "edits": [
+            {
+              "old": "CurrentInventory == view.inventory",
+              "new": "CurrentInventory == TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ConfirmedInventoryBeforeWrite"
+        },
+        {
+          "id": "ShowUnverifiedDetail",
+          "edits": [
+            {
+              "old": "ReceiptConfirmed(exact) == exact",
+              "new": "ReceiptConfirmed(exact) == TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadbackBeforeDetail"
+        },
+        {
+          "id": "AcceptRetiredView",
+          "edits": [
+            {
+              "old": "CurrentOperation == pending.epoch = epoch /\\ view.state = \"waiting\"",
+              "new": "CurrentOperation == TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CurrentScopeOnly"
+        },
+        {
+          "id": "RetryUnknownWrite",
+          "edits": [
+            {
+              "old": "FormIsActive == view.state = \"form\"",
+              "new": "FormIsActive == view.state \\in {\"form\", \"unconfirmed\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "NoUnreconciledRetry"
+        }
+      ]
     }
   ]
 }
