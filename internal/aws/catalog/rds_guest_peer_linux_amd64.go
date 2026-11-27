@@ -27,7 +27,19 @@ func (c *OwnedPrivatePostgres) ProbeGuestPeer(ctx context.Context, db *sql.DB, a
 	}
 	bounded, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
-	if !c.currentMatching(bounded, match) {
+	// A trusted writer can replace a subnet group under the same ARN, or
+	// revise its configuration while the DB probe is outside SQLite. Never
+	// pair this DB with a replacement; do not join two different revisions
+	// of its original group into one observation.
+	var revision int64
+	sameGroup := func(ctx context.Context, tx *sql.Tx, refs RDSPrivatePostgresRefs) error {
+		if refs.group != c.group || (revision != 0 && revision != refs.groupGeneration) {
+			return rdsruntime.ErrNotReady
+		}
+		revision = refs.groupGeneration
+		return match(ctx, tx, refs)
+	}
+	if !c.currentMatching(bounded, sameGroup) {
 		// A valid workload may correctly refuse this guest. Never retire it,
 		// disclose its identity, or issue a transferable ticket on a denial.
 		return rdsruntime.ErrNotReady
@@ -38,7 +50,7 @@ func (c *OwnedPrivatePostgres) ProbeGuestPeer(ctx context.Context, db *sql.DB, a
 	}
 	// The owner mutex protects the process, not independently managed
 	// destination dependencies. Read them again before reporting observation.
-	if !c.currentMatching(bounded, match) || bounded.Err() != nil {
+	if !c.currentMatching(bounded, sameGroup) || bounded.Err() != nil {
 		return rdsruntime.ErrNotReady
 	}
 	return nil
