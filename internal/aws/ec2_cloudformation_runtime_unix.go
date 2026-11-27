@@ -90,6 +90,17 @@ func NewEC2InstanceRuntime(db *sql.DB, network *EC2NetworkStore, config EC2Insta
 	return &EC2InstanceRuntime{operations: canonicalVMNICOperations(), db: db, network: network, config: config, retained: map[string]*ec2InstanceRuntimeEntry{}}, nil
 }
 
+// ConfiguredForStackLaunch reports that the explicitly installed runtime still
+// accepts attempts. It does not start a guest, check its health or grant access.
+func (r *EC2InstanceRuntime) ConfiguredForStackLaunch() bool {
+	if r == nil {
+		return false
+	}
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	return !r.shutting && r.config.Lifetime != nil && r.config.Lifetime.Err() == nil
+}
+
 // Prepare is pure validation/planning. It creates no VM and performs no SQL.
 func (r *EC2InstanceRuntime) Prepare(ctx context.Context, stack StackRecord, resource StackResource) (*EC2InstancePlan, error) {
 	if r == nil || ctx == nil || ctx.Err() != nil || resource.Type != "AWS::EC2::Instance" {

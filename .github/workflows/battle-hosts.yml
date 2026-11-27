@@ -113,11 +113,29 @@ jobs:
           python3 test/battle/image/build_bundle.py --out "$RUNNER_TEMP/bundle" --work /tmp/bb --keep-work
       - name: Run the rehearsal
         timeout-minutes: 60
+        env:
+          # Explicit same-repository opt-in. Reuse the existing Linux bundle;
+          # default PRs, workflow_dispatch, and both macOS lanes are unchanged.
+          EC2_CONSOLE_FORM_WITNESS: ${{ github.event_name == 'pull_request' && matrix.target == 'linux_arm64' && github.event.pull_request.head.repo.full_name == github.repository }}
+          EC2_CONSOLE_PR_BASE: ${{ github.base_ref }}
+          EC2_CONSOLE_PR_HEAD: ${{ github.head_ref }}
         run: |
           rm -rf /tmp/bb/tree /tmp/bb/download
           mkdir -m 700 /tmp/hwb
           "$RUNNER_TEMP/venv/bin/python" -I test/battle/rehearsal.py --binary "$PWD/dist/tenkacloud-simulator" \
             --bundle "$RUNNER_TEMP/bundle" --challenge-root "$PWD/challenge" --work /tmp/hwb/r1
+          if [ "$EC2_CONSOLE_FORM_WITNESS" = true ] &&
+             [ "$EC2_CONSOLE_PR_BASE" = main ] &&
+             [ "$EC2_CONSOLE_PR_HEAD" = test/ec2-guarded-console-qemu ]; then
+            form_status=0
+            "$RUNNER_TEMP/venv/bin/python" -I test/battle/rehearsal.py --binary "$PWD/dist/tenkacloud-simulator" \
+              --bundle "$RUNNER_TEMP/bundle" --challenge-root "$PWD/challenge" --work /tmp/hwb/f1 \
+              --console-form-smoke || form_status=$?
+            test -s /tmp/hwb/f1/report.json
+            printf '%s\n' 'Separate EC2 console form evidence:'
+            cat /tmp/hwb/f1/report.json
+            test "$form_status" -eq 0
+          fi
       - name: Retain rehearsal evidence
         if: always()
         uses: actions/upload-artifact@v7.0.2

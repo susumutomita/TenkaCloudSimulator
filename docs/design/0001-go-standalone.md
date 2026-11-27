@@ -63,6 +63,8 @@ API Reference の EC2 用プリセットは、既存の Query API の `DescribeI
 
 [EC2 コンソールのテンプレートプレビュー](../ec2-read-discovery.md#instance-launch-preview-is-not-a-launch)は、現在の演習 ID とリージョンで既存の `ValidateTemplate` のみに接続する。パラメータ名と IAM の確認項目を返すが、既定値の内容やリソースは表示・保存しない。AMI の有無、起動権限、ゲストの実行可否は検証せず、インスタンスは起動しない。
 
+EC2 インスタンス一覧の作成は、テンプレートプレビューと別の操作。認証済みループバックの管理者が管理者 ID を選択し、明示的な Battle VM 実行環境が作成を受け付ける場合だけ利用できる。同一スタックに受信ルールのないネットワークと IAM ロール／プロファイルを含む固定構成を生成し、設定済み AMI エイリアスで既存の `CreateStack` に送る。権限評価や実行経路は変えない。応答した Stack ID の `CREATE_COMPLETE` と対応するリージョンの EC2 保存行を照合し、未確認時に作成を再送しない。保存済みの状態はゲストの現在の稼働確認ではない。
+
 Protocol/API subsetと制限は[README](../../README.md)。限定的なGoogle Cloud Storage/Azure Blob Storageを独立providerとして接続し、認証済みActorから固定project/account所有者へ写像する。[Cloud DNS](../acceptance/gcp-cloud-dns.md) は同じproject所有者の範囲でSRVを含むRRsetの変更と参照を提供する。所有者コンソールではSRVの追加・置換・削除を変更受領証と再読で確認する。SRVの優先度・重み・ポートは保存するが、名前解決や接続先の選択は行わない。AWS IAMの権限を継承せず、owner-onlyローカル認可と公式SDKの検証範囲は[マルチクラウドストレージ](../multicloud-storage.md)に記す。旧Python world/deploy/grading protocolは復活させず、必要なSSM/CFNの知識だけGoへ移行。問題取り込み・採点はTenkaCloud/Challenge責務とする。
 
 Azure Blobの通常APIは `2023-11-03` に固定する。BlobのGET/HEADでは単一の `If-Modified-Since` を扱い、通常のGETには有界の単一範囲CRC64がある。明示的にネゴシエートした `2025-01-05` のGet Blobだけで、最大4 MiBの単一セグメントを構造化CRC64として返す。共通のローカル所有者・読み取り条件を適用し、通常の範囲チェックサムヘッダーと併用しない。それ以外の同バージョン操作やSDK全体の互換性は対象外。[Azure Blobの条件付き読み取りとチェックサムの詳細](../azure-blob.md#single-range-download-subset)。

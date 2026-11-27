@@ -22,6 +22,7 @@ import VPCNativeSubnets from './ec2-vpc-native-subnets.jsx';
 import {createVpcWithSubnet,vpcSubnetInputError} from './ec2-vpc-subnet.mjs';
 import EC2InstanceMetadata from './ec2-instance-metadata.jsx';
 import EC2TemplatePreview from './ec2-template-preview.jsx';
+import EC2InstanceStackLaunch from './ec2-instance-stack-launch.jsx';
 import VPCSecurityGroups from './ec2-vpc-security-groups.jsx';
 import VPCNetworkACLs from './ec2-vpc-network-acls.jsx';
 import VPCRouteTables from './ec2-vpc-route-tables.jsx';
@@ -34,14 +35,13 @@ import {parseEC2Document,parseCreateVpc,parseDeleteVpc,parseEC2Error,createVpcPa
 const idCell=value=><span className="resource-identifier">{value||'—'}</span>;
 const blankVpc={name:'',cidr:'',mode:'vpc-only',stackName:'',subnetCIDR:''};
 
-// Instances stay read-only. VPCs gain CreateVpc/DeleteVpc only when the server
-// advertises them, and only EC2-owned VPCs can be deleted here. Never infer
-// live guest health from stack metadata.
-export default function EC2Readonly({kind,region,request,sessionInstance,onSession,vpcLifecycle=false,vpcSubnet=false,vpcNativeSubnets=false,vpcNativeSubnetPublicIPv4=false,vpcSecurityGroups=false,vpcNativeSecurityGroups=false,vpcNativeSecurityGroupRules=false,vpcNetworkACLs=false,vpcRouteTables=false,vpcNativeRouteTables=false,vpcNativeRouteAssociations=false,vpcNativeRouteReplacement=false,vpcNativeIPv4RouteLimit=0,vpcInternetGateways=false,onSaving=()=>{}}) {
+// The instance list is saved state. Opt-in local launches use CloudFormation,
+// never native RunInstances. VPC deletion applies only to EC2-owned VPCs.
+export default function EC2Readonly({kind,region,request,sessionInstance,onSession,instanceStackLaunchVisible=false,instanceStackLaunchAllowed=false,vpcLifecycle=false,vpcSubnet=false,vpcNativeSubnets=false,vpcNativeSubnetPublicIPv4=false,vpcSecurityGroups=false,vpcNativeSecurityGroups=false,vpcNativeSecurityGroupRules=false,vpcNetworkACLs=false,vpcRouteTables=false,vpcNativeRouteTables=false,vpcNativeRouteAssociations=false,vpcNativeRouteReplacement=false,vpcNativeIPv4RouteLimit=0,vpcInternetGateways=false,onSaving=()=>{}}) {
   const {t}=useLocale();
   const instance=kind==='ec2',manage=!instance&&vpcLifecycle;
   const [items,setItems]=useState([]),[loading,setLoading]=useState(false),[error,setError]=useState('');
-  const [preview,setPreview]=useState(false);
+  const [preview,setPreview]=useState(false),[launchOpen,setLaunchOpen]=useState(false);
   const [selected,setSelected]=useState([]),[filter,setFilter]=useState(''),[page,setPage]=useState(1);
   const [view,setView]=useState('list'),[form,setForm]=useState(blankVpc),[busy,setBusy]=useState(false),[formError,setFormError]=useState(''),[notice,setNotice]=useState('');
   const [deleting,setDeleting]=useState(null),[confirmation,setConfirmation]=useState(''),[deleteError,setDeleteError]=useState('');
@@ -166,7 +166,11 @@ export default function EC2Readonly({kind,region,request,sessionInstance,onSessi
   const nativeRoutePane=vpcNativeRouteTables&&nativeRouteTableTarget(detail);
   return <ContentLayout header={<div ref={heading} tabIndex={-1}><Header variant="h1">{instance?t('EC2 instances','EC2 インスタンス'):'VPC'}</Header></div>}><SpaceBetween size="l">
     {manage?<Alert type="info">{t('Delete CloudFormation-managed networks through their stack. In an EC2-managed VPC, select a resource to use the available subnet, route table or gateway controls. These settings do not forward traffic.','CloudFormation 管理のネットワークはスタックから削除してください。EC2 管理の VPC では、対象を選択してサブネット、ルートテーブル、ゲートウェイの利用可能な設定を変更できます。設定によって実際の通信が転送されるわけではありません。')}</Alert>
-      :<Alert type="info">{t('Read-only resources managed through CloudFormation. Create, start, stop and network edits are not supported here. Reported state is not a health check of the guest.','CloudFormation で管理されるリソースの読み取り専用画面です。この画面から作成・起動・停止・ネットワーク編集はできません。表示された状態はゲストの稼働確認ではありません。')}</Alert>}
+      :<Alert type="info">{instance?t('Instances are managed through CloudFormation. This list shows saved state, not guest health. There are no direct start, stop or network-edit controls.','インスタンスは CloudFormation で管理されます。ここに表示されるのは保存済みの状態で、ゲストの稼働確認ではありません。直接の起動・停止、ネットワーク編集には対応していません。')
+        :t('Read-only resources managed through CloudFormation. Create, start, stop and network edits are not supported here. Reported state is not a health check of the guest.','CloudFormation で管理されるリソースの読み取り専用画面です。この画面から作成・起動・停止・ネットワーク編集はできません。表示された状態はゲストの稼働確認ではありません。')}</Alert>}
+    {instance&&instanceStackLaunchVisible&&!instanceStackLaunchAllowed&&<Alert type="info">{t(
+      'Instance creation requires the opt-in local VM runtime (--battle-runtime-config). With the default startup you can only preview a template.',
+      'インスタンスの作成には、明示的に設定したローカル VM 実行環境（--battle-runtime-config）が必要です。既定の起動ではテンプレートのプレビューのみ利用できます。')}</Alert>}
     {notice&&<Alert type="success" dismissible dismissAriaLabel={t('Dismiss','閉じる')} onDismiss={()=>setNotice('')}>{notice}</Alert>}
     {error&&<Alert type="error" header={t('Could not load resources','リソースを読み込めませんでした')}>{error}</Alert>}
     <Table trackBy="id" selectionType="single" selectedItems={selected} onSelectionChange={({detail})=>{if(!selectionLocked())setSelected(detail.selectedItems);}}
@@ -174,7 +178,10 @@ export default function EC2Readonly({kind,region,request,sessionInstance,onSessi
       loading={loading} loadingText={t('Loading resources','リソースを読み込み中')}
       items={filtered.slice((page-1)*20,page*20)} columnDefinitions={fields.slice(0,instance?5:4).map(([id,en,ja])=>({id,header:t(en,ja),cell:item=>idCell(display(id,item))}))}
       header={<Header counter={'('+items.length+')'} actions={<SpaceBetween direction="horizontal" size="xs">{sessionInstance&&<Button variant="primary" disabled={selected[0]?.id!==sessionInstance} onClick={onSession}>{t('Connect with Session Manager','Session Manager で接続')}</Button>}<Button iconName="refresh" loading={loading} disabled={saving} onClick={()=>load()}>{t('Refresh','更新')}</Button>
-        {instance&&!sessionInstance&&<Button onClick={()=>setPreview(true)}>{t('Preview CloudFormation template','CloudFormation テンプレートをプレビュー')}</Button>}
+        {instance&&!sessionInstance&&instanceStackLaunchVisible&&<Button variant="primary" disabled={saving||!instanceStackLaunchAllowed}
+          disabledReason={!instanceStackLaunchAllowed?t('Configure the local VM runtime first.','ローカル VM 実行環境を先に設定してください。'):undefined}
+          onClick={()=>setLaunchOpen(true)}>{t('Create instance stack','インスタンスのスタックを作成')}</Button>}
+        {instance&&!sessionInstance&&<Button disabled={saving} onClick={()=>setPreview(true)}>{t('Preview CloudFormation template','CloudFormation テンプレートをプレビュー')}</Button>}
         {manage&&<Button disabled={!deletable||saving||loading} disabledReason={detail&&!deletable?t('Delete CloudFormation-managed VPCs by deleting their stack.','CloudFormation で管理される VPC は、スタックを削除して削除してください。'):undefined} onClick={()=>{setConfirmation('');setDeleteError('');setDeleting(detail);}}>{t('Delete VPC','VPC を削除')}</Button>}
         {manage&&<Button variant="primary" disabled={saving} onClick={()=>{setForm(blankVpc);setFormError('');setNotice('');changeView('create');}}>{t('Create VPC','VPC を作成')}</Button>}</SpaceBetween>}>{instance?t('Instances','インスタンス'):t('VPCs','VPC 一覧')}</Header>}
       filter={<TextFilter filteringText={filter} disabled={saving} onChange={({detail})=>{if(!selectionLocked()){setFilter(detail.filteringText);setPage(1);setSelected([]);}}} filteringAriaLabel={t('Filter resources','リソースを絞り込む')} filteringPlaceholder={t('Find resources','リソースを検索')}/>}
@@ -195,6 +202,8 @@ export default function EC2Readonly({kind,region,request,sessionInstance,onSessi
     </Container>}
     {!instance&&vpcInternetGateways&&<VPCInternetGateways request={request} region={region}
       writeBlocked={siblingBusy('igw')} acquireWrite={()=>acquireNetworkWrite('igw')}/>}
+    {instance&&!sessionInstance&&instanceStackLaunchAllowed&&launchOpen&&<EC2InstanceStackLaunch
+      region={region} request={request} onSaving={setBusy} onDismiss={()=>setLaunchOpen(false)} onConfirmed={id=>{setFilter('');void load(id);}}/>}
     {instance&&!sessionInstance&&preview&&<EC2TemplatePreview region={region} request={request} onDismiss={()=>setPreview(false)}/>}
     {manage&&<Modal visible={!!deleting} onDismiss={()=>{if(!busy)setDeleting(null);}} header={t('Delete VPC','VPC を削除')} closeAriaLabel={t('Close dialog','ダイアログを閉じる')}>
       <form onSubmit={remove}><Form errorText={deleteError} actions={<SpaceBetween direction="horizontal" size="xs"><Button formAction="none" disabled={busy} onClick={()=>setDeleting(null)}>{t('Cancel','キャンセル')}</Button><Button variant="primary" formAction="submit" loading={busy} disabled={confirmation!=='delete'||writeLeases.size>0}>{t('Delete','削除')}</Button></SpaceBetween>}>

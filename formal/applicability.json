@@ -1,672 +1,366 @@
 {
   "version": 1,
-  "base_sha": "90f4778a980c549fd25da3697c156c1a1c35476d",
+  "base_sha": "e347ee3298834bc1271ff338634a960d9a152920",
   "changes": [
     {
-      "path": "README.ja.md",
-      "sha256": "2bf2037d0f65a805d0979ca48c4f831046c55862743f5f1ef1c3a94c97cb1dd3",
-      "disposition": "documentation",
-      "reason": "Describes fresh-only main and local scope, complete effective-subnet observation and unchanged legacy/CloudFormation limitations.",
+      "path": ".github/workflows/battle-hosts.yml",
+      "sha256": "94c9247c6a5c5b227b2e86aa253a13cdc22fee974cbcca980fea4006e034e3bd",
+      "disposition": "formal-infrastructure",
+      "reason": "Opt in solely the existing Linux arm64 Battle step on an exact same-repository PR branch, preserving original rehearsal, triggers, permissions, installers, and retained artifacts.",
       "models": []
     },
     {
       "path": "README.md",
-      "sha256": "aa7742965a879f1c06044e1997af7352c61210c2b9579ca4aa08fe9c46ce03a7",
+      "sha256": "59f4981a28c4388cd607ee66e451307872579aaa5a88468ff61a7cb34b3622b5",
       "disposition": "documentation",
-      "reason": "Describes fresh-only main and local scope, complete effective-subnet observation and unchanged legacy/CloudFormation limitations.",
-      "models": []
-    },
-    {
-      "path": "docs/api-reference.md",
-      "sha256": "b363ff7c44573257d5a70b7457746b2ea95f2f6478423ac2349a98988308d498",
-      "disposition": "documentation",
-      "reason": "Describes fresh-only main and local scope, complete effective-subnet observation and unchanged legacy/CloudFormation limitations.",
+      "reason": "Document the opt-in local stack workflow, default refusal and status versus current VM liveness.",
       "models": []
     },
     {
       "path": "docs/console.md",
-      "sha256": "156b73df450b92dca888129ee3dbc4f78219d990a303c055e317bb42863c204e",
+      "sha256": "966cf46a1a2a4a518f3d917e67b43a78fa604493658932b3fdc645e2ae14d1f9",
       "disposition": "documentation",
-      "reason": "Describes fresh-only main and local scope, complete effective-subnet observation and unchanged legacy/CloudFormation limitations.",
+      "reason": "Describe the guarded CloudFormation EC2 form without claiming default availability or native RunInstances.",
       "models": []
     },
     {
       "path": "docs/design/0001-go-standalone.md",
-      "sha256": "88f47d6bb6909a55005d7ca76b15910283a25e28c06d59b1e84f974e6a42fb86",
+      "sha256": "017be3de09e78430a7226a9cdfdc0d18a9414c9d2498843ee4b03d1658c2bb0d",
       "disposition": "documentation",
-      "reason": "Describes fresh-only main and local scope, complete effective-subnet observation and unchanged legacy/CloudFormation limitations.",
-      "models": []
-    },
-    {
-      "path": "docs/ec2-native-default-route.md",
-      "sha256": "932c3acbcf686b9f6d9fbb69849f9c11c253439152c2fd30c2735e3aed29617e",
-      "disposition": "documentation",
-      "reason": "Describes fresh-only main and local scope, complete effective-subnet observation and unchanged legacy/CloudFormation limitations.",
-      "models": []
-    },
-    {
-      "path": "docs/ec2-network-contracts.md",
-      "sha256": "10aea22b0b059a1cff104d5bc9c979092a3f2d6b41910a133238692320fe2dd3",
-      "disposition": "documentation",
-      "reason": "Describes fresh-only main and local scope, complete effective-subnet observation and unchanged legacy/CloudFormation limitations.",
+      "reason": "Document the opt-in local stack workflow, default refusal and status versus current VM liveness.",
       "models": []
     },
     {
       "path": "docs/ec2-read-discovery.md",
-      "sha256": "fba3d22eefd1eea4c7ee3e95d0865c3549ee3ef49bb81c9b62342d7d8321479c",
+      "sha256": "2c3846b7cfd848eeef841b204ed56b72bc5e1fb9db7594cd4215c097522e3e36",
       "disposition": "documentation",
-      "reason": "Describes fresh-only main and local scope, complete effective-subnet observation and unchanged legacy/CloudFormation limitations.",
+      "reason": "Document the opt-in local stack workflow, default refusal and status versus current VM liveness.",
       "models": []
     },
     {
-      "path": "formal/EC2NativeVPCMainRoute.cfg",
-      "sha256": "93c7ba253e80e737fbf219b5c1a5fec87d8879e0fb2110b191d958ce27a835b7",
+      "path": "formal/EC2InstanceStackConsole.cfg",
+      "sha256": "4f9e657a98b81de9dbeed2faec218736bb094d060b4a69febc658de9e86b6df0",
       "disposition": "modeled",
-      "reason": "Implements or verifies a fresh native VPC/main pair, bounded read-only local or explicit/effective projection, or admission to the unchanged owner-scoped flow.",
+      "reason": "Scope the opt-in EC2 console capability, single mutation, receipt and matching readback; preserve the existing CloudFormation authority and backend.",
       "models": [
         {
-          "id": "EC2NativeVPCMainRoute",
+          "id": "EC2InstanceStackConsole",
           "properties": [
-            "AtomicPairedSlot",
-            "OwnedLocalOnly",
-            "EffectiveNeedsFreshInventories"
+            "QualifiedMutation",
+            "SingleMutation",
+            "ReceiptBelongsToView",
+            "VerifiedMeansMatch",
+            "NoGuestLivenessClaim"
           ],
-          "limits": "Finite symbolic parent/child and recorded-route lifecycle, explicit filter and current effective-pane evidence only. The implementation storage bound is 1,000 and the explicit table limit is 16. No Go/SQLite, mixed-case JSON, XML or pagination/cryptography refinement; no IAM, React or browser scheduling proof, legacy migration, guest, reachability or packet routing."
+          "limits": "Finite three UX generations with one reply in flight, actor roles and a configuration observation. An admission sample does not exclude expiry between discovery and CreateStack. This models only the workflow and no replay/retarget acknowledgment, not actual token/HTTP bounds, runtime health, SQLite rollback, live guest launch or cleanup, React or browser refinement."
         }
       ]
     },
     {
-      "path": "formal/EC2NativeVPCMainRoute.tla",
-      "sha256": "dd7d8d6952ebc5136c5ccf9e6de6ee770f3c8745c71b36324f4faf272aa79b92",
+      "path": "formal/EC2InstanceStackConsole.tla",
+      "sha256": "f34dfbf1bc11aa4ca86e393630c1445af60f313a197d3e17a42a8d1c10df5027",
       "disposition": "modeled",
-      "reason": "Implements or verifies a fresh native VPC/main pair, bounded read-only local or explicit/effective projection, or admission to the unchanged owner-scoped flow.",
+      "reason": "Scope the opt-in EC2 console capability, single mutation, receipt and matching readback; preserve the existing CloudFormation authority and backend.",
       "models": [
         {
-          "id": "EC2NativeVPCMainRoute",
+          "id": "EC2InstanceStackConsole",
           "properties": [
-            "AtomicPairedSlot",
-            "NoImplicitWire",
-            "RetainedFencesDelete",
-            "EffectiveNeedsFreshInventories"
+            "QualifiedMutation",
+            "SingleMutation",
+            "ReceiptBelongsToView",
+            "VerifiedMeansMatch",
+            "NoGuestLivenessClaim"
           ],
-          "limits": "Finite symbolic parent/child and recorded-route lifecycle, explicit filter and current effective-pane evidence only. The implementation storage bound is 1,000 and the explicit table limit is 16. No Go/SQLite, mixed-case JSON, XML or pagination/cryptography refinement; no IAM, React or browser scheduling proof, legacy migration, guest, reachability or packet routing."
+          "limits": "Finite three UX generations with one reply in flight, actor roles and a configuration observation. An admission sample does not exclude expiry between discovery and CreateStack. This models only the workflow and no replay/retarget acknowledgment, not actual token/HTTP bounds, runtime health, SQLite rollback, live guest launch or cleanup, React or browser refinement."
         }
       ]
+    },
+    {
+      "path": "formal/README.md",
+      "sha256": "2268d969c6a9cda5a0e8bbcb539a041cab29f85f735b4d71744feca26c69fdc1",
+      "disposition": "documentation",
+      "reason": "Document the opt-in local stack workflow, default refusal and status versus current VM liveness.",
+      "models": []
     },
     {
       "path": "formal/models.json",
-      "sha256": "f777f95c7e4d65636cb92a19083e972daba54d5ed272f9a556aa75fb32552154",
+      "sha256": "faadd8689dcc783fec3f8d008073c9150899541fe58867274ee6a59b55dbfadb",
       "disposition": "formal-infrastructure",
-      "reason": "Add the named finite model to the exact gate and independent control inventory; previous registered policies and invariants remain.",
+      "reason": "Register and independently require the new EC2 instance-stack workflow model, scope, invariants and exact negative controls.",
       "models": []
     },
     {
-      "path": "internal/aws/ec2_native_default_route_store.go",
-      "sha256": "3406952918775928f54163064d1872d732f0f75ae8b091a3c340d32b3cf4661c",
+      "path": "internal/aws/ec2_cloudformation_runtime_unix.go",
+      "sha256": "cd23892d570c74b11377525caf421af2abd710ffef7006b63a4d8bb602e7ae68",
       "disposition": "modeled",
-      "reason": "Implements or verifies a fresh native VPC/main pair, bounded read-only local or explicit/effective projection, or admission to the unchanged owner-scoped flow.",
+      "reason": "Scope the opt-in EC2 console capability, single mutation, receipt and matching readback; preserve the existing CloudFormation authority and backend.",
       "models": [
         {
-          "id": "EC2NativeVPCMainRoute",
+          "id": "EC2InstanceStackConsole",
           "properties": [
-            "OwnedLocalOnly",
-            "CountersExcludeLocal"
+            "QualifiedMutation",
+            "SingleMutation",
+            "ReceiptBelongsToView",
+            "VerifiedMeansMatch",
+            "NoGuestLivenessClaim"
           ],
-          "limits": "Finite symbolic parent/child and recorded-route lifecycle, explicit filter and current effective-pane evidence only. The implementation storage bound is 1,000 and the explicit table limit is 16. No Go/SQLite, mixed-case JSON, XML or pagination/cryptography refinement; no IAM, React or browser scheduling proof, legacy migration, guest, reachability or packet routing."
-        },
-        {
-          "id": "EC2NativeIPv4RouteSet",
-          "properties": [
-            "OwnedCanonical",
-            "PerTableLimit",
-            "AtomicClass"
-          ],
-          "limits": "Finite shared-destination map, same-native-witness abstraction and exact current-readback state only. Real limit is 16. No IP arithmetic proof, actual SQLite/JSON/Query/IAM/React refinement, actor concurrency or network forwarding."
+          "limits": "Finite three UX generations with one reply in flight, actor roles and a configuration observation. An admission sample does not exclude expiry between discovery and CreateStack. This models only the workflow and no replay/retarget acknowledgment, not actual token/HTTP bounds, runtime health, SQLite rollback, live guest launch or cleanup, React or browser refinement."
         }
       ]
     },
     {
-      "path": "internal/aws/ec2_native_default_route_test.go",
-      "sha256": "eeb964902e677ae50dbde050df3c36a1f33632e3adca6ba57251db44154409e5",
-      "disposition": "test-support",
-      "reason": "Focused Go or local SDK/served fixture exercising owned state; no additional product behavior or test scheduling.",
-      "models": []
-    },
-    {
-      "path": "internal/aws/ec2_native_ipv4_routes_test.go",
-      "sha256": "10a7d719acb7a9530d8a207e869795f1cd682483f1c3241127816c8c44090777",
-      "disposition": "test-support",
-      "reason": "Focused Go or local SDK/served fixture exercising owned state; no additional product behavior or test scheduling.",
-      "models": []
-    },
-    {
-      "path": "internal/aws/ec2_native_sg_line_regression_test.go",
-      "sha256": "39a27880f427404904637feb6dc27d0b45065dd9eab2eb7f2133a1ea2cd58a77",
-      "disposition": "test-support",
-      "reason": "Focused Go or local SDK/served fixture exercising owned state; no additional product behavior or test scheduling.",
-      "models": []
-    },
-    {
-      "path": "internal/aws/ec2_native_subnet_line_regression_test.go",
-      "sha256": "62d5ba098e6c11957ada3d877b43dadf4188baafd97032397dbce79fba04c593",
-      "disposition": "test-support",
-      "reason": "Focused Go or local SDK/served fixture exercising owned state; no additional product behavior or test scheduling.",
-      "models": []
-    },
-    {
-      "path": "internal/aws/ec2_native_vpc_main_route.go",
-      "sha256": "1ef7a8df9a8d2affc8341aff0c6de1ca01449fa90f3ee84fcefdd4fa186b20bc",
+      "path": "internal/server/battle_runtime_unix.go",
+      "sha256": "777de072268dba6eb203a476096575a0547c660869230905a267faa7c5e58069",
       "disposition": "modeled",
-      "reason": "Implements or verifies a fresh native VPC/main pair, bounded read-only local or explicit/effective projection, or admission to the unchanged owner-scoped flow.",
+      "reason": "Scope the opt-in EC2 console capability, single mutation, receipt and matching readback; preserve the existing CloudFormation authority and backend.",
       "models": [
         {
-          "id": "EC2NativeVPCMainRoute",
+          "id": "EC2InstanceStackConsole",
           "properties": [
-            "AtomicPairedSlot",
-            "OwnedLocalOnly",
-            "RetainedFencesDelete",
-            "ReadInvalidRefuses"
+            "QualifiedMutation",
+            "SingleMutation",
+            "ReceiptBelongsToView",
+            "VerifiedMeansMatch",
+            "NoGuestLivenessClaim"
           ],
-          "limits": "Finite symbolic parent/child and recorded-route lifecycle, explicit filter and current effective-pane evidence only. The implementation storage bound is 1,000 and the explicit table limit is 16. No Go/SQLite, mixed-case JSON, XML or pagination/cryptography refinement; no IAM, React or browser scheduling proof, legacy migration, guest, reachability or packet routing."
+          "limits": "Finite three UX generations with one reply in flight, actor roles and a configuration observation. An admission sample does not exclude expiry between discovery and CreateStack. This models only the workflow and no replay/retarget acknowledgment, not actual token/HTTP bounds, runtime health, SQLite rollback, live guest launch or cleanup, React or browser refinement."
         }
       ]
     },
     {
-      "path": "internal/aws/ec2_native_vpc_main_route_test.go",
-      "sha256": "9cca6cfccdb45a0c56ecd7c2842fec5c317ac3459b94b860336c18789ab9f092",
-      "disposition": "test-support",
-      "reason": "Focused Go or local SDK/served fixture exercising owned state; no additional product behavior or test scheduling.",
-      "models": []
-    },
-    {
-      "path": "internal/aws/ec2_network.go",
-      "sha256": "cdc58afc42a2bf727e3eb6c6e1be6a273333b3e85bc52f290f0891023f89d40e",
+      "path": "internal/server/ec2_instance_stack_launch.go",
+      "sha256": "7b70195bebc51c1ec801fdce9cae585edc2a206d95cd128232c7176d94f6c025",
       "disposition": "modeled",
-      "reason": "Implements or verifies a fresh native VPC/main pair, bounded read-only local or explicit/effective projection, or admission to the unchanged owner-scoped flow.",
+      "reason": "Scope the opt-in EC2 console capability, single mutation, receipt and matching readback; preserve the existing CloudFormation authority and backend.",
       "models": [
         {
-          "id": "EC2NativeVPCMainRoute",
+          "id": "EC2InstanceStackConsole",
           "properties": [
-            "AtomicPairedSlot",
-            "UnrelatedOwnershipUnchanged"
+            "QualifiedMutation",
+            "SingleMutation",
+            "ReceiptBelongsToView",
+            "VerifiedMeansMatch",
+            "NoGuestLivenessClaim"
           ],
-          "limits": "Finite symbolic parent/child and recorded-route lifecycle, explicit filter and current effective-pane evidence only. The implementation storage bound is 1,000 and the explicit table limit is 16. No Go/SQLite, mixed-case JSON, XML or pagination/cryptography refinement; no IAM, React or browser scheduling proof, legacy migration, guest, reachability or packet routing."
-        },
-        {
-          "id": "EC2VPCOwnership",
-          "properties": [
-            "NoAdoption",
-            "FailureRollsBack"
-          ],
-          "limits": "Atomic store-level ownership, authorization order, quota and DescribeVpcs owner labels only; not SQL transactions, HTTP/XML parsing, IAM policy evaluation, CIDR or tag validation, random ID collision, console rendering or a Go refinement proof. Native Go tests, the boto3 lifecycle and the browser end-to-end flow establish those implementation properties."
+          "limits": "Finite three UX generations with one reply in flight, actor roles and a configuration observation. An admission sample does not exclude expiry between discovery and CreateStack. This models only the workflow and no replay/retarget acknowledgment, not actual token/HTTP bounds, runtime health, SQLite rollback, live guest launch or cleanup, React or browser refinement."
         }
       ]
     },
     {
-      "path": "internal/aws/ec2_route_association_wire_test.go",
-      "sha256": "8dc74620a4a2beaae496168cfcf939c33f87b4e028f4156a29c5ecde5ff0366d",
+      "path": "internal/server/ec2_instance_stack_launch_linux_test.go",
+      "sha256": "f2eaa71912f3745fae98b23b3cbb8a9c87e2ee84e235736b59f73f5c3078795a",
       "disposition": "test-support",
-      "reason": "Focused Go or local SDK/served fixture exercising owned state; no additional product behavior or test scheduling.",
+      "reason": "Exercise authenticated local routing and exact refusal/readback scope without physical guest, real AWS or new authorization.",
       "models": []
     },
     {
-      "path": "internal/aws/ec2_route_table_page.go",
-      "sha256": "e8eaea615c1263e752171337bea3e05ff1c8acd2a07e5232e13ef10eed68bac9",
+      "path": "internal/server/ec2_instance_stack_launch_test.go",
+      "sha256": "503d292cf64315ce2e6467088ab6257df396ee16ef40ead2432a046b39afaeb7",
+      "disposition": "test-support",
+      "reason": "Exercise authenticated local routing and exact refusal/readback scope without physical guest, real AWS or new authorization.",
+      "models": []
+    },
+    {
+      "path": "internal/server/sakura_provider.go",
+      "sha256": "0b2dc2200e0418d2e75efadbdb203d0dac05e21d9e8fa13100ebb4ee9389cd67",
       "disposition": "modeled",
-      "reason": "Bind the extra system association state to the already scoped continuation; preserving the complete wire representation is deliberate.",
+      "reason": "Scope the opt-in EC2 console capability, single mutation, receipt and matching readback; preserve the existing CloudFormation authority and backend.",
       "models": [
         {
-          "id": "EC2RouteTableInventoryPages",
+          "id": "EC2InstanceStackConsole",
           "properties": [
-            "ScopedContinuation",
-            "PageBounds"
+            "QualifiedMutation",
+            "SingleMutation",
+            "ReceiptBelongsToView",
+            "VerifiedMeansMatch",
+            "NoGuestLivenessClaim"
           ],
-          "limits": "Finite symbolic paging, exact query/binding and post-write UI completion; no cryptographic, actual SQLite, wire/byte math, React or packet refinement. A small or empty complete first page is admitted; a continued response cannot end empty."
+          "limits": "Finite three UX generations with one reply in flight, actor roles and a configuration observation. An admission sample does not exclude expiry between discovery and CreateStack. This models only the workflow and no replay/retarget acknowledgment, not actual token/HTTP bounds, runtime health, SQLite rollback, live guest launch or cleanup, React or browser refinement."
         }
       ]
     },
     {
-      "path": "internal/aws/ec2_route_table_page_test.go",
-      "sha256": "d112aea8b489f3908303944807bd03f52d3f0abcf1aaa6cd4a979957bcacee37",
-      "disposition": "test-support",
-      "reason": "Focused Go or local SDK/served fixture exercising owned state; no additional product behavior or test scheduling.",
-      "models": []
-    },
-    {
-      "path": "internal/aws/ec2_route_tables_native.go",
-      "sha256": "c7c7db481bbbb7ac582acd5a64f272c59ddad4ed747e9aed3465a0d9239fb639",
+      "path": "internal/server/server.go",
+      "sha256": "6d41c12ea28707805f17c92771094044e7693100b006f2667f5544fd68fb43d6",
       "disposition": "modeled",
-      "reason": "Implements or verifies a fresh native VPC/main pair, bounded read-only local or explicit/effective projection, or admission to the unchanged owner-scoped flow.",
+      "reason": "Scope the opt-in EC2 console capability, single mutation, receipt and matching readback; preserve the existing CloudFormation authority and backend.",
       "models": [
         {
-          "id": "EC2NativeVPCMainRoute",
+          "id": "EC2InstanceStackConsole",
           "properties": [
-            "AtomicPairedSlot",
-            "OwnedLocalOnly",
-            "RetainedFencesDelete"
+            "QualifiedMutation",
+            "SingleMutation",
+            "ReceiptBelongsToView",
+            "VerifiedMeansMatch",
+            "NoGuestLivenessClaim"
           ],
-          "limits": "Finite symbolic parent/child and recorded-route lifecycle, explicit filter and current effective-pane evidence only. The implementation storage bound is 1,000 and the explicit table limit is 16. No Go/SQLite, mixed-case JSON, XML or pagination/cryptography refinement; no IAM, React or browser scheduling proof, legacy migration, guest, reachability or packet routing."
+          "limits": "Finite three UX generations with one reply in flight, actor roles and a configuration observation. An admission sample does not exclude expiry between discovery and CreateStack. This models only the workflow and no replay/retarget acknowledgment, not actual token/HTTP bounds, runtime health, SQLite rollback, live guest launch or cleanup, React or browser refinement."
         }
       ]
-    },
-    {
-      "path": "internal/aws/ec2_route_tables_native_query.go",
-      "sha256": "5055000c53796794977aa9e4f2ec7ae573511ccbb3f7508974a367c7dafd070c",
-      "disposition": "modeled",
-      "reason": "Implements or verifies a fresh native VPC/main pair, bounded read-only local or explicit/effective projection, or admission to the unchanged owner-scoped flow.",
-      "models": [
-        {
-          "id": "EC2NativeVPCMainRoute",
-          "properties": [
-            "OwnedLocalOnly",
-            "NoImplicitWire"
-          ],
-          "limits": "Finite symbolic parent/child and recorded-route lifecycle, explicit filter and current effective-pane evidence only. The implementation storage bound is 1,000 and the explicit table limit is 16. No Go/SQLite, mixed-case JSON, XML or pagination/cryptography refinement; no IAM, React or browser scheduling proof, legacy migration, guest, reachability or packet routing."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/ec2_route_tables_native_registration_test.go",
-      "sha256": "a8e19eb8dc8690ee9255405dea80e85ce91d4a5faa80fa6bc066e28431aa5837",
-      "disposition": "test-support",
-      "reason": "Focused Go or local SDK/served fixture exercising owned state; no additional product behavior or test scheduling.",
-      "models": []
-    },
-    {
-      "path": "internal/aws/ec2_route_tables_native_test.go",
-      "sha256": "e560628d7246e2969adab73fdfe051ac8792d700e1eef2524e2caaa886a6557f",
-      "disposition": "test-support",
-      "reason": "Focused Go or local SDK/served fixture exercising owned state; no additional product behavior or test scheduling.",
-      "models": []
-    },
-    {
-      "path": "internal/aws/ec2_route_tables_read.go",
-      "sha256": "d872c5345dfdcd5a39d6ad7d22dc8f684800084495e6dda42b5ea01a8101fd4d",
-      "disposition": "modeled",
-      "reason": "Implements or verifies a fresh native VPC/main pair, bounded read-only local or explicit/effective projection, or admission to the unchanged owner-scoped flow.",
-      "models": [
-        {
-          "id": "EC2NativeVPCMainRoute",
-          "properties": [
-            "AtomicPairedSlot",
-            "ReadInvalidRefuses",
-            "NoImplicitWire"
-          ],
-          "limits": "Finite symbolic parent/child and recorded-route lifecycle, explicit filter and current effective-pane evidence only. The implementation storage bound is 1,000 and the explicit table limit is 16. No Go/SQLite, mixed-case JSON, XML or pagination/cryptography refinement; no IAM, React or browser scheduling proof, legacy migration, guest, reachability or packet routing."
-        },
-        {
-          "id": "EC2RouteTableInventoryPages",
-          "properties": [
-            "ScopedContinuation",
-            "PageBounds"
-          ],
-          "limits": "Finite symbolic paging, exact query/binding and post-write UI completion; no cryptographic, actual SQLite, wire/byte math, React or packet refinement. A small or empty complete first page is admitted; a continued response cannot end empty."
-        },
-        {
-          "id": "EC2NativeIPv4RouteSet",
-          "properties": [
-            "OwnedCanonical",
-            "CompleteReadback"
-          ],
-          "limits": "Finite shared-destination map, same-native-witness abstraction and exact current-readback state only. Real limit is 16. No IP arithmetic proof, actual SQLite/JSON/Query/IAM/React refinement, actor concurrency or network forwarding."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/ec2_route_tables_read_test.go",
-      "sha256": "43ab6b852091290e94a22d20faded2d1f757ce6d98be6c8a96c1ed53b105c56f",
-      "disposition": "test-support",
-      "reason": "Focused Go or local SDK/served fixture exercising owned state; no additional product behavior or test scheduling.",
-      "models": []
-    },
-    {
-      "path": "internal/aws/ec2_subnet_native_boundaries_test.go",
-      "sha256": "98e42ccecfcc7a83f2a079b2246a328cda20c41e453801d2ced2df158c959009",
-      "disposition": "test-support",
-      "reason": "Focused Go or local SDK/served fixture exercising owned state; no additional product behavior or test scheduling.",
-      "models": []
-    },
-    {
-      "path": "internal/aws/ec2_vpc.go",
-      "sha256": "c2bc606e2d1d0bfb1d190d09164a0fc9e6bd74522f871a4a47af64197c8ca297",
-      "disposition": "modeled",
-      "reason": "Implements or verifies a fresh native VPC/main pair, bounded read-only local or explicit/effective projection, or admission to the unchanged owner-scoped flow.",
-      "models": [
-        {
-          "id": "EC2NativeVPCMainRoute",
-          "properties": [
-            "AtomicPairedSlot",
-            "RetainedFencesDelete",
-            "UnrelatedOwnershipUnchanged"
-          ],
-          "limits": "Finite symbolic parent/child and recorded-route lifecycle, explicit filter and current effective-pane evidence only. The implementation storage bound is 1,000 and the explicit table limit is 16. No Go/SQLite, mixed-case JSON, XML or pagination/cryptography refinement; no IAM, React or browser scheduling proof, legacy migration, guest, reachability or packet routing."
-        },
-        {
-          "id": "EC2VPCOwnership",
-          "properties": [
-            "NativeDeleteExact",
-            "NativeCreateOwned",
-            "QuotaBound"
-          ],
-          "limits": "Atomic store-level ownership, authorization order, quota and DescribeVpcs owner labels only; not SQL transactions, HTTP/XML parsing, IAM policy evaluation, CIDR or tag validation, random ID collision, console rendering or a Go refinement proof. Native Go tests, the boto3 lifecycle and the browser end-to-end flow establish those implementation properties."
-        }
-      ]
-    },
-    {
-      "path": "internal/server/ec2_native_vpc_console_line_regression_test.go",
-      "sha256": "31d9971bb82e1e608e4edb1c7c8a37116309478366751792f7c60cfbb0dac877",
-      "disposition": "test-support",
-      "reason": "Focused Go or local SDK/served fixture exercising owned state; no additional product behavior or test scheduling.",
-      "models": []
     },
     {
       "path": "internal/server/web/app.js",
-      "sha256": "154b9aae857f72c0534b8a1b21fdbc0636bb646a1b270b3cda7cc597f8ae64a3",
+      "sha256": "a82483775769e1eb39ac7e37a2b3ae416b38c9dc4e03c5de2ca35d1cf2d7111a",
       "disposition": "modeled",
-      "reason": "Exact generated console artifact from the same pinned audited source; preserves the effective evidence and previously complete/current route-table page assembly.",
+      "reason": "Scope the opt-in EC2 console capability, single mutation, receipt and matching readback; preserve the existing CloudFormation authority and backend.",
       "models": [
         {
-          "id": "EC2NativeVPCMainRoute",
+          "id": "EC2InstanceStackConsole",
           "properties": [
-            "OwnedLocalOnly",
-            "EffectiveNeedsFreshInventories",
-            "EffectiveOnlyUnassociated"
+            "QualifiedMutation",
+            "SingleMutation",
+            "ReceiptBelongsToView",
+            "VerifiedMeansMatch",
+            "NoGuestLivenessClaim"
           ],
-          "limits": "Finite symbolic parent/child and recorded-route lifecycle, explicit filter and current effective-pane evidence only. The implementation storage bound is 1,000 and the explicit table limit is 16. No Go/SQLite, mixed-case JSON, XML or pagination/cryptography refinement; no IAM, React or browser scheduling proof, legacy migration, guest, reachability or packet routing."
-        },
-        {
-          "id": "EC2RouteTableInventoryPages",
-          "properties": [
-            "CurrentAssembly",
-            "CompletePublication"
-          ],
-          "limits": "Finite symbolic paging, exact query/binding and post-write UI completion; no cryptographic, actual SQLite, wire/byte math, React or packet refinement. A small or empty complete first page is admitted; a continued response cannot end empty."
+          "limits": "Finite three UX generations with one reply in flight, actor roles and a configuration observation. An admission sample does not exclude expiry between discovery and CreateStack. This models only the workflow and no replay/retarget acknowledgment, not actual token/HTTP bounds, runtime health, SQLite rollback, live guest launch or cleanup, React or browser refinement."
         }
       ]
     },
     {
       "path": "scripts/formal_model_gate.py",
-      "sha256": "702cefcd5b853a4943fd16a5810c9661cb93b15b1bfcc4a086569975c1987c59",
+      "sha256": "8798e16f54c43b495d94849e07cec92783511ee33dbf5da94abe928e9a2f2cad",
       "disposition": "formal-infrastructure",
-      "reason": "Add the named finite model to the exact gate and independent control inventory; previous registered policies and invariants remain.",
+      "reason": "Register and independently require the new EC2 instance-stack workflow model, scope, invariants and exact negative controls.",
       "models": []
     },
     {
       "path": "scripts/test-formal-gate.py",
-      "sha256": "f633872007c2332380f45eca261df691d99b3510d83484ae915b580943751796",
+      "sha256": "45bb650ec34b68b4f7e2a07a72cc65b4b0a0a22a51a67380d31454d94f16c236",
       "disposition": "formal-infrastructure",
-      "reason": "Add the named finite model to the exact gate and independent control inventory; previous registered policies and invariants remain.",
+      "reason": "Register and independently require the new EC2 instance-stack workflow model, scope, invariants and exact negative controls.",
       "models": []
     },
     {
-      "path": "test/console/ec2_internet_gateway_sdk.py",
-      "sha256": "bbb64a6e84b93c58c1f77d9d756d5cead3189d54e7b13e6a8d006995c56cc616",
+      "path": "test/battle/README.md",
+      "sha256": "441f261b3dabe49599c527c1d28ad548479144ee8f7aec9178475af8a7b8842f",
       "disposition": "test-support",
-      "reason": "Focused Go or local SDK/served fixture exercising owned state; no additional product behavior or test scheduling.",
+      "reason": "Document the separate scoped form-only CLI witness and its explicit hosted opt-in without a browser or application health claim.",
       "models": []
     },
     {
-      "path": "test/console/ec2_native_default_route_dom.cjs",
-      "sha256": "e2fc61253d413ec4149bd3278089535396961acc60ab3494d621227ca74f6773",
+      "path": "test/battle/ec2_console_form_smoke.mjs",
+      "sha256": "040282b65e3c69dc56638ad7c37ab40d5a9da028313374cedba39cae740656a9",
       "disposition": "test-support",
-      "reason": "Focused Go or local SDK/served fixture exercising owned state; no additional product behavior or test scheduling.",
+      "reason": "Drive the production-generated guarded create and bounded readback over the private browser cookie on actual numeric loopback without a browser layout claim.",
       "models": []
     },
     {
-      "path": "test/console/ec2_native_default_route_sdk.py",
-      "sha256": "584e039caecf19f6b142b5bf3d291c0cad941932e3bc08cc236ffacdbdf8559a",
+      "path": "test/battle/rehearsal.py",
+      "sha256": "d8742b089221ccfb5ad7a710fd458f0499612ac400d229801179798a7f3abef7",
       "disposition": "test-support",
-      "reason": "Focused Go or local SDK/served fixture exercising owned state; no additional product behavior or test scheduling.",
+      "reason": "Expose a default-off console-only physical launch/readback/cleanup witness and distinct allowlisted report; retain the original default Challenge entirely.",
       "models": []
     },
     {
-      "path": "test/console/ec2_native_network_sdk.py",
-      "sha256": "ac04c6808dcad1bb27c517d6046eaac83e1dd6b2bea1d0f7c20b212f661f86ec",
+      "path": "test/console/ec2_instance_stack_launch_dom.cjs",
+      "sha256": "10546e6eba86406609f6f1e145af28d365ac3aa04c58bb76d17d2ffcb845ee0c",
       "disposition": "test-support",
-      "reason": "Focused Go or local SDK/served fixture exercising owned state; no additional product behavior or test scheduling.",
+      "reason": "Exercise authenticated local routing and exact refusal/readback scope without physical guest, real AWS or new authorization.",
       "models": []
     },
     {
-      "path": "test/console/ec2_native_route_association_replace_sdk.py",
-      "sha256": "17e7d5c0c48fbbd6ee95cafaf15fe8e196f63fb4e4a230f30fc8e43c13b0b101",
+      "path": "test/console/ec2_instance_stack_launch_native.py",
+      "sha256": "830921c1dd1b31c7f69aa1106f96cdfeced6f5051b2780a376070588f99b8b74",
       "disposition": "test-support",
-      "reason": "Focused Go or local SDK/served fixture exercising owned state; no additional product behavior or test scheduling.",
-      "models": []
-    },
-    {
-      "path": "test/console/ec2_native_route_association_sdk.py",
-      "sha256": "b689b415e4b73422f5cc586c19ccf0f6ba5505aba496afeeeb3f0066713b2b1b",
-      "disposition": "test-support",
-      "reason": "Focused Go or local SDK/served fixture exercising owned state; no additional product behavior or test scheduling.",
-      "models": []
-    },
-    {
-      "path": "test/console/ec2_native_route_main_console.py",
-      "sha256": "49c298d010d91b78eafb35c564bce081bd964a54a6f6cd2b6ca79df0921a006b",
-      "disposition": "test-support",
-      "reason": "Focused Go or local SDK/served fixture exercising owned state; no additional product behavior or test scheduling.",
-      "models": []
-    },
-    {
-      "path": "test/console/ec2_native_route_main_dom.cjs",
-      "sha256": "6af3e4aa4350d2f62dfaf63756ae00ba4caddd8ca34e4bca073756b9a97c19a3",
-      "disposition": "test-support",
-      "reason": "Focused Go or local SDK/served fixture exercising owned state; no additional product behavior or test scheduling.",
-      "models": []
-    },
-    {
-      "path": "test/console/ec2_native_subnet.py",
-      "sha256": "838df147c35d257591075af2b9c42d946de90a0995b69673daa13a547623b2ff",
-      "disposition": "test-support",
-      "reason": "Focused Go or local SDK/served fixture exercising owned state; no additional product behavior or test scheduling.",
-      "models": []
-    },
-    {
-      "path": "test/console/ec2_native_subnet_dom.cjs",
-      "sha256": "f3e3ea238c8822a53fd51478ff26554f4c1863066426fb2b3ef394fca76b63e5",
-      "disposition": "test-support",
-      "reason": "Focused Go or local SDK/served fixture exercising owned state; no additional product behavior or test scheduling.",
-      "models": []
-    },
-    {
-      "path": "test/console/ec2_route_table_pages_console.py",
-      "sha256": "745bd4d3a23c2d352ec5f757bb87c8e4e3c27561e49581f3b8a9a8427dd4817c",
-      "disposition": "test-support",
-      "reason": "Focused Go or local SDK/served fixture exercising owned state; no additional product behavior or test scheduling.",
-      "models": []
-    },
-    {
-      "path": "test/console/ec2_route_table_pages_sdk.py",
-      "sha256": "3e8cc6105e5c2950c93a2ba77d2e3a152be07e4d49d49310ec7d8c0f42a63c66",
-      "disposition": "test-support",
-      "reason": "Focused Go or local SDK/served fixture exercising owned state; no additional product behavior or test scheduling.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/ec2_network_contract.py",
-      "sha256": "f815b95d3042470ab0a80b13646ea3a25e7763fc9db5308a1879dc0dfdde1dff",
-      "disposition": "test-support",
-      "reason": "Focused Go or local SDK/served fixture exercising owned state; no additional product behavior or test scheduling.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/ec2_readonly_console.py",
-      "sha256": "b73b13270b2224b1fe02f44b9e326ddfa757a67ca667c0ec60f21588ec94c404",
-      "disposition": "test-support",
-      "reason": "Focused Go or local SDK/served fixture exercising owned state; no additional product behavior or test scheduling.",
+      "reason": "Exercise authenticated local routing and exact refusal/readback scope without physical guest, real AWS or new authorization.",
       "models": []
     },
     {
       "path": "tools/console/bundle-digests.json",
-      "sha256": "4b71072074dc3cf0216d609e239748a2b92f1f4ac00b914efb78e34d1c14f591",
+      "sha256": "376dc27cda699b44b94c1ff638cf81866427156baf81c6f5d00cbc9ada23d703",
       "disposition": "presentation",
-      "reason": "Generated asset provenance or a focused Node test fixture; no unmodeled application runtime.",
+      "reason": "Bind the actual embedded console build or bounded transport fixture to this EC2 slice.",
       "models": []
     },
     {
       "path": "tools/console/bundle-inputs.json",
-      "sha256": "febc7116a520a5f8b49d6b80a8d36fd1d92cdbdf3730d026165dfd0cd51b62f1",
+      "sha256": "fbf9fa82a127fa8a2a4a2ee6b04d8192e7de5659a3c826ba8d385f09877e45c8",
       "disposition": "presentation",
-      "reason": "Generated asset provenance or a focused Node test fixture; no unmodeled application runtime.",
+      "reason": "Bind the actual embedded console build or bounded transport fixture to this EC2 slice.",
       "models": []
     },
     {
-      "path": "tools/console/src/ec2-native-route-tables.mjs",
-      "sha256": "ef5c7ff8ac9a9b915def36e08465fa367c139a60ebc78c69cc5272fec5fa9d25",
+      "path": "tools/console/src/ec2-instance-stack-launch.jsx",
+      "sha256": "c11b1e6e8a771b1f4871c61a701407b4a001b7a9890461d8158d3207a7d1a0b4",
       "disposition": "modeled",
-      "reason": "Implements or verifies a fresh native VPC/main pair, bounded read-only local or explicit/effective projection, or admission to the unchanged owner-scoped flow.",
+      "reason": "Scope the opt-in EC2 console capability, single mutation, receipt and matching readback; preserve the existing CloudFormation authority and backend.",
       "models": [
         {
-          "id": "EC2NativeVPCMainRoute",
+          "id": "EC2InstanceStackConsole",
           "properties": [
-            "NoImplicitWire",
-            "EffectiveNeedsFreshInventories",
-            "EffectiveOnlyUnassociated"
+            "QualifiedMutation",
+            "SingleMutation",
+            "ReceiptBelongsToView",
+            "VerifiedMeansMatch",
+            "NoGuestLivenessClaim"
           ],
-          "limits": "Finite symbolic parent/child and recorded-route lifecycle, explicit filter and current effective-pane evidence only. The implementation storage bound is 1,000 and the explicit table limit is 16. No Go/SQLite, mixed-case JSON, XML or pagination/cryptography refinement; no IAM, React or browser scheduling proof, legacy migration, guest, reachability or packet routing."
-        },
+          "limits": "Finite three UX generations with one reply in flight, actor roles and a configuration observation. An admission sample does not exclude expiry between discovery and CreateStack. This models only the workflow and no replay/retarget acknowledgment, not actual token/HTTP bounds, runtime health, SQLite rollback, live guest launch or cleanup, React or browser refinement."
+        }
+      ]
+    },
+    {
+      "path": "tools/console/src/ec2-instance-stack-launch.mjs",
+      "sha256": "85026b5a579e9df0bf6f9b7d577b61922a0b8d7a48370030ed488e9d68531c1b",
+      "disposition": "modeled",
+      "reason": "Scope the opt-in EC2 console capability, single mutation, receipt and matching readback; preserve the existing CloudFormation authority and backend.",
+      "models": [
         {
-          "id": "EC2RouteTableInventoryPages",
+          "id": "EC2InstanceStackConsole",
           "properties": [
-            "CurrentAssembly",
-            "CompletePublication"
+            "QualifiedMutation",
+            "SingleMutation",
+            "ReceiptBelongsToView",
+            "VerifiedMeansMatch",
+            "NoGuestLivenessClaim"
           ],
-          "limits": "Finite symbolic paging, exact query/binding and post-write UI completion; no cryptographic, actual SQLite, wire/byte math, React or packet refinement. A small or empty complete first page is admitted; a continued response cannot end empty."
-        },
-        {
-          "id": "EC2NativeIPv4RouteSet",
-          "properties": [
-            "CompleteReadback",
-            "ConfirmedNotice"
-          ],
-          "limits": "Finite shared-destination map, same-native-witness abstraction and exact current-readback state only. Real limit is 16. No IP arithmetic proof, actual SQLite/JSON/Query/IAM/React refinement, actor concurrency or network forwarding."
+          "limits": "Finite three UX generations with one reply in flight, actor roles and a configuration observation. An admission sample does not exclude expiry between discovery and CreateStack. This models only the workflow and no replay/retarget acknowledgment, not actual token/HTTP bounds, runtime health, SQLite rollback, live guest launch or cleanup, React or browser refinement."
         }
       ]
     },
     {
       "path": "tools/console/src/ec2-readonly.jsx",
-      "sha256": "4049debbfd99136ec3ee3125abfbd3d6484a1721e538d0e58d5a2d1fbea9b8e6",
+      "sha256": "bd82676a908ac28bc12b6d6439b16d64ceaea1e216b5f6617b99c8cb7705588d",
       "disposition": "modeled",
-      "reason": "Owner-scoped console labels describe the finite paired slot and local route, without making a new acquisition path or authorizing any mutation.",
+      "reason": "Scope the opt-in EC2 console capability, single mutation, receipt and matching readback; preserve the existing CloudFormation authority and backend.",
       "models": [
         {
-          "id": "EC2NativeVPCMainRoute",
+          "id": "EC2InstanceStackConsole",
           "properties": [
-            "AtomicPairedSlot",
-            "OwnedLocalOnly"
+            "QualifiedMutation",
+            "SingleMutation",
+            "ReceiptBelongsToView",
+            "VerifiedMeansMatch",
+            "NoGuestLivenessClaim"
           ],
-          "limits": "Finite symbolic parent/child and recorded-route lifecycle, explicit filter and current effective-pane evidence only. The implementation storage bound is 1,000 and the explicit table limit is 16. No Go/SQLite, mixed-case JSON, XML or pagination/cryptography refinement; no IAM, React or browser scheduling proof, legacy migration, guest, reachability or packet routing."
+          "limits": "Finite three UX generations with one reply in flight, actor roles and a configuration observation. An admission sample does not exclude expiry between discovery and CreateStack. This models only the workflow and no replay/retarget acknowledgment, not actual token/HTTP bounds, runtime health, SQLite rollback, live guest launch or cleanup, React or browser refinement."
         }
       ]
     },
     {
-      "path": "tools/console/src/ec2-response.mjs",
-      "sha256": "100a4d9cf484bd0854828516444f58d41d840fc55f169d378a88e8701933e0d0",
+      "path": "tools/console/src/main.jsx",
+      "sha256": "409973e87e565b1ecd60b85757e80de223fbc4050cd3c7e68e237924045cd54f",
       "disposition": "modeled",
-      "reason": "Implements or verifies a fresh native VPC/main pair, bounded read-only local or explicit/effective projection, or admission to the unchanged owner-scoped flow.",
+      "reason": "Scope the opt-in EC2 console capability, single mutation, receipt and matching readback; preserve the existing CloudFormation authority and backend.",
       "models": [
         {
-          "id": "EC2NativeVPCMainRoute",
+          "id": "EC2InstanceStackConsole",
           "properties": [
-            "OwnedLocalOnly",
-            "NoImplicitWire"
+            "QualifiedMutation",
+            "SingleMutation",
+            "ReceiptBelongsToView",
+            "VerifiedMeansMatch",
+            "NoGuestLivenessClaim"
           ],
-          "limits": "Finite symbolic parent/child and recorded-route lifecycle, explicit filter and current effective-pane evidence only. The implementation storage bound is 1,000 and the explicit table limit is 16. No Go/SQLite, mixed-case JSON, XML or pagination/cryptography refinement; no IAM, React or browser scheduling proof, legacy migration, guest, reachability or packet routing."
-        },
-        {
-          "id": "EC2RouteTableInventoryPages",
-          "properties": [
-            "CompletePublication"
-          ],
-          "limits": "Finite symbolic paging, exact query/binding and post-write UI completion; no cryptographic, actual SQLite, wire/byte math, React or packet refinement. A small or empty complete first page is admitted; a continued response cannot end empty."
+          "limits": "Finite three UX generations with one reply in flight, actor roles and a configuration observation. An admission sample does not exclude expiry between discovery and CreateStack. This models only the workflow and no replay/retarget acknowledgment, not actual token/HTTP bounds, runtime health, SQLite rollback, live guest launch or cleanup, React or browser refinement."
         }
       ]
     },
     {
-      "path": "tools/console/src/ec2-route-table-pages.mjs",
-      "sha256": "af200984a1ba11b9e42c4a28e0ef4ab3daa99e9d531191dd753e2f83c8d3a8b2",
-      "disposition": "modeled",
-      "reason": "Implements or verifies a fresh native VPC/main pair, bounded read-only local or explicit/effective projection, or admission to the unchanged owner-scoped flow.",
-      "models": [
-        {
-          "id": "EC2NativeVPCMainRoute",
-          "properties": [
-            "NoImplicitWire",
-            "EffectiveNeedsFreshInventories"
-          ],
-          "limits": "Finite symbolic parent/child and recorded-route lifecycle, explicit filter and current effective-pane evidence only. The implementation storage bound is 1,000 and the explicit table limit is 16. No Go/SQLite, mixed-case JSON, XML or pagination/cryptography refinement; no IAM, React or browser scheduling proof, legacy migration, guest, reachability or packet routing."
-        },
-        {
-          "id": "EC2RouteTableInventoryPages",
-          "properties": [
-            "ScopedContinuation",
-            "CompletePublication"
-          ],
-          "limits": "Finite symbolic paging, exact query/binding and post-write UI completion; no cryptographic, actual SQLite, wire/byte math, React or packet refinement. A small or empty complete first page is admitted; a continued response cannot end empty."
-        }
-      ]
-    },
-    {
-      "path": "tools/console/src/ec2-route-tables.mjs",
-      "sha256": "d18bb8271b3d99e60190b20cd887916cc648d374bddb44877d84f43a37d3cee1",
-      "disposition": "modeled",
-      "reason": "Implements or verifies a fresh native VPC/main pair, bounded read-only local or explicit/effective projection, or admission to the unchanged owner-scoped flow.",
-      "models": [
-        {
-          "id": "EC2NativeVPCMainRoute",
-          "properties": [
-            "AtomicPairedSlot",
-            "NoImplicitWire"
-          ],
-          "limits": "Finite symbolic parent/child and recorded-route lifecycle, explicit filter and current effective-pane evidence only. The implementation storage bound is 1,000 and the explicit table limit is 16. No Go/SQLite, mixed-case JSON, XML or pagination/cryptography refinement; no IAM, React or browser scheduling proof, legacy migration, guest, reachability or packet routing."
-        },
-        {
-          "id": "EC2RouteTableInventoryPages",
-          "properties": [
-            "CurrentAssembly",
-            "CompletePublication"
-          ],
-          "limits": "Finite symbolic paging, exact query/binding and post-write UI completion; no cryptographic, actual SQLite, wire/byte math, React or packet refinement. A small or empty complete first page is admitted; a continued response cannot end empty."
-        }
-      ]
-    },
-    {
-      "path": "tools/console/src/ec2-vpc-native-route-tables.jsx",
-      "sha256": "0f15610453c4d33076d4d7508b2171c5911b49bc97d40111fcf16022e3bb5b63",
-      "disposition": "modeled",
-      "reason": "Implements or verifies a fresh native VPC/main pair, bounded read-only local or explicit/effective projection, or admission to the unchanged owner-scoped flow.",
-      "models": [
-        {
-          "id": "EC2NativeVPCMainRoute",
-          "properties": [
-            "OwnedLocalOnly",
-            "EffectiveNeedsFreshInventories",
-            "EffectiveOnlyUnassociated"
-          ],
-          "limits": "Finite symbolic parent/child and recorded-route lifecycle, explicit filter and current effective-pane evidence only. The implementation storage bound is 1,000 and the explicit table limit is 16. No Go/SQLite, mixed-case JSON, XML or pagination/cryptography refinement; no IAM, React or browser scheduling proof, legacy migration, guest, reachability or packet routing."
-        },
-        {
-          "id": "EC2RouteTableInventoryPages",
-          "properties": [
-            "CompletePublication",
-            "ExactWriteReadback"
-          ],
-          "limits": "Finite symbolic paging, exact query/binding and post-write UI completion; no cryptographic, actual SQLite, wire/byte math, React or packet refinement. A small or empty complete first page is admitted; a continued response cannot end empty."
-        },
-        {
-          "id": "EC2NativeIPv4RouteSet",
-          "properties": [
-            "ConfirmedNotice"
-          ],
-          "limits": "Finite shared-destination map, same-native-witness abstraction and exact current-readback state only. Real limit is 16. No IP arithmetic proof, actual SQLite/JSON/Query/IAM/React refinement, actor concurrency or network forwarding."
-        }
-      ]
-    },
-    {
-      "path": "tools/console/test/ec2-native-route-main.test.mjs",
-      "sha256": "178cfd2ac8b5a2c916e890f2a46bb472df80a981e37e35362133a7a59cb6a9f7",
+      "path": "tools/console/test/ec2-instance-stack-launch.test.mjs",
+      "sha256": "0ef53399e3f0b1144f15a6f269b1e3fe0606561aef1a1f14b6b9412b1567cfe7",
       "disposition": "presentation",
-      "reason": "Generated asset provenance or a focused Node test fixture; no unmodeled application runtime.",
+      "reason": "Bind the actual embedded console build or bounded transport fixture to this EC2 slice.",
       "models": []
     }
   ]

@@ -46,6 +46,7 @@ func newWithBattleRuntime(path string, options ProviderConfig, origin string, cl
 	var runtime *aws.EC2InstanceRuntime
 	var commands *aws.SSMCommandAPI
 	options.commandAPI = func() *aws.SSMCommandAPI { return commands }
+	options.instanceStackLaunchConfigured = func() bool { return runtime.ConfiguredForStackLaunch() }
 	terminal := &terminalHandler{}
 	if config.SessionImageSHA256 != "" {
 		options.terminalSessions = terminal

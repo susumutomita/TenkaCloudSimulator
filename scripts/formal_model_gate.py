@@ -4231,6 +4231,65 @@ REQUIRED_SOURCE_SCOPES['EC2NativeVPCMainRoute'] = {
 }
 
 
+BASE_MODELS.add('EC2InstanceStackConsole')
+BASE_INVARIANTS['EC2InstanceStackConsole'] = {'NoGuestLivenessClaim',
+ 'QualifiedMutation',
+ 'ReceiptBelongsToView',
+ 'SingleMutation',
+ 'TypeOK',
+ 'VerifiedMeansMatch'}
+REQUIRED_MUTANTS['EC2InstanceStackConsole'] = {'AcceptRetiredReceipt',
+ 'ApproveMismatchedRead',
+ 'InventGuestLiveness',
+ 'MutateOnCheckAgain',
+ 'OfferParticipant',
+ 'OmitCurrentCapability',
+ 'ReceiptAsCompletion'}
+REQUIRED_SOURCE_SCOPES['EC2InstanceStackConsole'] = {'internal/aws/ec2_cloudformation_runtime_unix.go',
+ 'internal/server/battle_runtime_unix.go',
+ 'internal/server/ec2_instance_stack_launch.go',
+ 'internal/server/sakura_provider.go',
+ 'internal/server/server.go',
+ 'internal/server/web/app.js',
+ 'tools/console/src/ec2-instance-stack-launch.jsx',
+ 'tools/console/src/ec2-instance-stack-launch.mjs',
+ 'tools/console/src/ec2-readonly.jsx',
+ 'tools/console/src/main.jsx'}
+EC2INSTANCESTACKCONSOLE_MUTATIONS = [{'id': 'OmitCurrentCapability',
+  'edits': [{'old': '    /\\ view.allow\n    /\\ view.writes = 0',
+             'new': '    /\\ TRUE\n    /\\ view.writes = 0',
+             'count': 1}],
+  'expect_invariant': 'QualifiedMutation'},
+ {'id': 'OfferParticipant',
+  'edits': [{'old': '!.allow = Eligible, !.qualified = Eligible',
+             'new': '!.allow = (actor = "participant" /\\ liveConfig) \\/ Eligible, !.qualified = Eligible',
+             'count': 1}],
+  'expect_invariant': 'QualifiedMutation'},
+ {'id': 'AcceptRetiredReceipt',
+  'edits': [{'old': 'AcceptReceipt ==\n    /\\ flight.kind = "write"\n    /\\ flight.epoch = epoch',
+             'new': 'AcceptReceipt ==\n    /\\ flight.kind = "write"\n    /\\ TRUE',
+             'count': 1}],
+  'expect_invariant': 'ReceiptBelongsToView'},
+ {'id': 'ReceiptAsCompletion',
+  'edits': [{'old': '!.phase = "accepted", !.receiptFrom = flight.epoch',
+             'new': '!.phase = "verified", !.receiptFrom = flight.epoch',
+             'count': 1}],
+  'expect_invariant': 'VerifiedMeansMatch'},
+ {'id': 'ApproveMismatchedRead',
+  'edits': [{'old': 'IF completeMatch THEN "verified" ELSE "unconfirmed"', 'new': '"verified"', 'count': 1}],
+  'expect_invariant': 'VerifiedMeansMatch'},
+ {'id': 'MutateOnCheckAgain',
+  'edits': [{'old': 'view\' = [view EXCEPT !.phase = "checking"]',
+             'new': 'view\' = [view EXCEPT !.phase = "checking", !.writes = @ + 1]',
+             'count': 1}],
+  'expect_invariant': 'SingleMutation'},
+ {'id': 'InventGuestLiveness',
+  'edits': [{'old': '!.evidence = completeMatch, !.guestClaim = FALSE',
+             'new': '!.evidence = completeMatch, !.guestClaim = TRUE',
+             'count': 1}],
+  'expect_invariant': 'NoGuestLivenessClaim'}]
+
+
 def load_registry(root, relative='formal/models.json'):
     root = Path(root)
     registry_path = asset(root, relative)
@@ -4302,6 +4361,8 @@ def load_registry(root, relative='formal/models.json'):
                     'Azure Blob row download mutation controls changed')
         if name == 'S3MultipartConsolePaging':
             require(model['mutants'] == S3_LISTPARTS_MUTATIONS, 'ListParts paging mutation controls changed')
+        if name == 'EC2InstanceStackConsole':
+            require(model['mutants'] == EC2INSTANCESTACKCONSOLE_MUTATIONS, 'EC2 instance stack console controls changed')
         if name == 'S3MultipartPartReceipt':
             require(model['mutants'] == S3_PART_RECEIPT_MUTATIONS, 'S3 part receipt mutation controls changed')
     require(BASE_MODELS <= ids, 'a required existing model was removed')
