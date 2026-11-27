@@ -45,6 +45,12 @@ SQLiteは既存のncruces SQLite/Wasm engineをGo process内で実行する。�
 
 VPC コンソールは「VPC のみ」を既定にし、既存のネイティブ CreateVpc を使う。「VPC など」は、認証済みのシミュレーター管理者だけが CloudFormation に新規 VPC とサブネット 1 つの固定テンプレートを送る。参加者ブラウザーにはスタック出力が開示されないため、この選択肢を表示しない。新規スタックが両方を所有し、作成受領証の正確なスタック ID で再取得できたときだけ成功を表示する。ネイティブ EC2 所有 VPC への追加や、実ネットワークの作成は行わない。[対応範囲](../ec2-read-discovery.md#console-vpc-and-one-subnet)。
 
+VPC の左ナビゲーションの [サブネット](../ec2-native-subnet.md) は、
+既存の DescribeVpcs と DescribeSubnets の範囲を照合し、同一リージョンの保存済み行だけを表示する。
+単独の作成ページは EC2 管理 VPC のみ選択可能で、保存済みサブネットを確認して詳細に進む。
+ルートは実 API の明示的な関連付けまたは確認済みのネイティブメインテーブルのみ表示する。
+サブネット名・タグ・ACL の関連付けは新設しない。
+
 API Reference の EC2 用プリセットは、既存の Query API の `DescribeInstances` を呼び、選択リージョンに記録されたメタデータを表示する。起動や稼働確認は行わない。
 
 ネイティブ EC2 の [DescribeSecurityGroups](../ec2-read-discovery.md#security-group-readback) は、既存の EC2 IAM 判定とリージョンの範囲内で CloudFormation 管理グループと未接続のネイティブグループを読む。グループと親 VPC の型付き所有権を同じ SQLite スナップショットで照合し、テンプレートの初期値ではなく今の TCP/IPv4 受信ルールを返す。XML 1.0 で値をそのまま返せない行や壊れた所有権があれば一覧全体を拒否し、保存内容は変更しない。通常のサインイン済み VPC コンソールも同じ API と IAM を使い、選択した CloudFormation 管理の VPC に属するグループだけを表示する。権限不足、読み取り失敗、空の結果は区別する。セキュリティグループの変更やパケット処理は対象外。

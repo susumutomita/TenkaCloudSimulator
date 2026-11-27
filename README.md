@@ -108,6 +108,7 @@ console, CloudFormation adapter or Challenge integration.
   [security groups: CloudFormation readback and detached TCP/IPv4 rules](docs/ec2-read-discovery.md#security-group-readback),
   [detached network ACL API and Console workflow](docs/ec2-detached-network-acls.md),
   [VPC creation and the limited VPC-and-subnet option in the Console](docs/ec2-read-discovery.md#console-vpc-and-one-subnet),
+  [standalone native Subnets console](docs/ec2-native-subnet.md),
   [Elastic Load Balancing](docs/elb.md) (Lambda targets),
   [CloudFront VPC origins](docs/cloudfront-vpc-origin.md), [Route 53 public zones and one-PTR Console](docs/route53.md#console-browse-public-zones-and-create-one-ptr).
 - **Scaling:** [Auto Scaling plans for local DynamoDB tables](docs/autoscaling-plans.md).

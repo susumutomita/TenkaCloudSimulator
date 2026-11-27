@@ -1,3 +1,5 @@
+import {parseEC2Document} from './ec2-response.mjs';
+
 const ns = 'http://ec2.amazonaws.com/doc/2016-11-15/';
 const vpcId = /^vpc-([0-9a-f]{8}|[0-9a-f]{17})$/;
 const subnetId = /^subnet-([0-9a-f]{8}|[0-9a-f]{17})$/;
@@ -70,10 +72,11 @@ function envelope(doc, action, body) {
   return lookup.get(body);
 }
 
-function row(item, region, publicIPv4Required) {
+function row(item, region, publicIPv4Required, display = false) {
   const lookup = fields(item, ['subnetId','vpcId','cidrBlock','state','availabilityZone','simulatorManagedBy','tagSet','mapPublicIpOnLaunch']);
   const id = text(lookup.get('subnetId')), vpc = text(lookup.get('vpcId')), cidr = text(lookup.get('cidrBlock'));
   const az = text(lookup.get('availabilityZone'), true), owner = text(lookup.get('simulatorManagedBy'), true);
+  let name = '';
   if (!subnetId.test(id) || !vpcId.test(vpc) || prefix(cidr)?.cidr !== cidr || text(lookup.get('state')) !== 'available' ||
       lookup.has('simulatorManagedBy') && owner !== 'ec2' || (az || owner) && !['a','b','c'].some(suffix=>az === region + suffix)) invalid();
   if (lookup.has('tagSet')) {
@@ -85,23 +88,30 @@ function row(item, region, publicIPv4Required) {
       const key = text(fieldsForTag.get('key')), value = text(fieldsForTag.get('value'));
       if (!key || seen.has(key) || bytes.encode(key).length > 128 || bytes.encode(value).length > 256) invalid();
       seen.add(key);
+      if (key === 'Name') name = value;
     }
   }
+  const meta = display ? {name,state:'available'} : {};
   const flag = lookup.get('mapPublicIpOnLaunch');
   if (flag) {
     const value = text(flag);
     if (owner !== 'ec2' || !['true','false'].includes(value)) invalid();
-    return {id,vpc,cidr,az,owner,publicIPv4:value === 'true'};
+    return {id,vpc,cidr,az,owner,publicIPv4:value === 'true',...meta};
   }
   if (owner && publicIPv4Required) invalid();
-  return {id,vpc,cidr,az,owner:owner || 'cloudformation'};
+  return {id,vpc,cidr,az,owner:owner || 'cloudformation',...meta};
+}
+
+function regionalSubnetRows(doc,region,publicIPv4,display=false) {
+  const rows=members(envelope(doc, 'DescribeSubnets', 'subnetSet'),1000).map(item=>row(item,region,publicIPv4,display));
+  if(new Set(rows.map(item=>item.id)).size!==rows.length) invalid();
+  return rows;
 }
 
 export function parseVpcSubnets(doc, region, vpc, {publicIPv4=false} = {}) {
   const selected = subnetTarget(vpc);
   if (!selected) invalid();
-  const all = members(envelope(doc, 'DescribeSubnets', 'subnetSet'), 1000).map(item=>row(item,region,publicIPv4));
-  if (new Set(all.map(item=>item.id)).size !== all.length) invalid();
+  const all = regionalSubnetRows(doc,region,publicIPv4);
   const filtered = all.filter(item=>item.vpc===vpc.id);
   if (filtered.some(item=>item.owner!==selected || nativeSubnetCIDR(vpc,item.cidr)!==item.cidr)) invalid();
   return filtered;
@@ -140,6 +150,28 @@ async function send(request, region, action, values, signal, parse) {
     body:new URLSearchParams({Action: action, Version:'2016-11-15', ...values})});
   if (response.status !== 200) throw Error(response.status + ': Native subnet request failed');
   return parse(await readXML(response, signal));
+}
+
+// One bounded DescribeVpcs and one bounded DescribeSubnets, not one
+// DescribeSubnets request per VPC. Reject a mismatched pair (including
+// concurrent deletion or mismatched ownership) rather than showing partial
+// or falsely empty results. This is not a transactional combined snapshot.
+export async function loadRegionalSubnetInventory(request,region,{signal,parse=xml,publicIPv4=false}={}) {
+  const [vpcDoc,subnetDoc]=await Promise.all([
+    send(request,region,'DescribeVpcs',{},signal,parse),
+    send(request,region,'DescribeSubnets',{},signal,parse),
+  ]);
+  if(vpcDoc?.doctype) invalid();
+  const vpcs=parseEC2Document(vpcDoc,'vpc');
+  if(vpcs.some(vpc=>!subnetTarget(vpc)||prefix(vpc.cidr)?.cidr!==vpc.cidr)) invalid();
+  const byId=new Map(vpcs.map(vpc=>[vpc.id,vpc]));
+  const subnets=regionalSubnetRows(subnetDoc,region,publicIPv4,true);
+  if(subnets.some(item=>{
+    const parent=byId.get(item.vpc);
+    return !parent||subnetTarget(parent)!==item.owner||nativeSubnetCIDR(parent,item.cidr)!==item.cidr;
+  })) invalid();
+  signal?.throwIfAborted();
+  return {vpcs,subnets};
 }
 
 export async function loadVpcSubnets(request, region, vpc, {signal, parse=xml, publicIPv4=false} = {}) {

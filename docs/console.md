@@ -217,8 +217,9 @@ The server remains authoritative, and a refusal stays on the form as an error.
 A created VPC is selected in the refreshed list. **Delete VPC** is enabled
 only for a VPC whose **Managed by** column says EC2, and requires typing `delete`.
 CloudFormation-managed VPCs show why deletion is disabled: delete their stack.
-Select an EC2-managed VPC and use [Add subnet](ec2-native-subnet.md) under
-**Subnets** to save a native IPv4 subnet. CloudFormation subnets remain
+Use the [standalone **VPC → Subnets** view](ec2-native-subnet.md) to search
+or filter by VPC and create a native IPv4 subnet in a selected EC2-managed
+VPC. The existing **Add subnet** control in VPC details remains available. CloudFormation subnets remain
 read-only in VPC details. Existing CFN route/SG panes display saved state
 only. In an EC2-managed VPC, **Security groups** can create and delete detached
 groups and add or remove saved TCP/IPv4 ingress and egress rules within the
