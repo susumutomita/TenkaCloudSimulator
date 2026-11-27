@@ -5784,6 +5784,7 @@
       ],
       "limits": "Atomic catalog store projection only, shared by the AWS catalog and the Google API catalog (configured project owner as authorization, etag as generation, requestId as client token, force as cascade): authorization-before-commit, typed refusal frames, quota, optional name uniqueness, fresh identifiers, generation-guarded update/delete, child reference integrity with refuse or cascade deletion, and client-token replay. Official shape validation, wire projection, pagination tokens, tag maps, ARN formatting, SQL/locking/crash behavior, JSON encoding and Go refinement are verified by native tests, not this model. A three-step bound is not an API cap.",
       "source_scope": [
+        "internal/aws/catalog/batch_job_definitions.go",
         "internal/aws/catalog/describe.go",
         "internal/aws/catalog/engine.go",
         "internal/aws/catalog/model.go",

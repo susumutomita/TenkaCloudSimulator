@@ -34,6 +34,11 @@ var batch = &Service{
 			ARNMember: "jobQueueArn", NameMember: "jobQueueName", Unique: true, Limit: 50,
 			Refs:     map[string]string{"schedulingPolicyArn": "schedulingPolicy"},
 			Generate: map[string]any{"state": "ENABLED", "status": "VALID", "computeEnvironmentOrder": []any{}}},
+		// The descriptor uses the ARN as the row identity so two revisions
+		// of the same jobDefinitionName do not become the same Console row.
+		{Kind: "jobDefinition", Shape: "JobDefinition", ID: "name",
+			ARN: "arn:{partition}:batch:{region}:{account}:job-definition/{id}", ARNMember: "jobDefinitionArn",
+			Unique: true, Limit: batchDefinitionLimit},
 		{Kind: "serviceEnvironment", Shape: "ServiceEnvironmentDetail", ID: "name",
 			ARN:       "arn:{partition}:batch:{region}:{account}:service-environment/{name}",
 			ARNMember: "serviceEnvironmentArn", NameMember: "serviceEnvironmentName", Unique: true, Limit: 50,
@@ -60,6 +65,10 @@ var batch = &Service{
 			Fields: []string{"state", "schedulingPolicyArn", "priority", "computeEnvironmentOrder", "serviceEnvironmentOrder", "jobStateTimeLimitActions"},
 			Check:  batchJobQueue, Merged: batchUpdateJobQueue, CheckReplacement: batchPreserveJobQueuePolicyMode},
 		{Name: "DeleteJobQueue", Kind: Delete, Resource: "jobQueue", Lookup: "jobQueue", CheckDelete: batchRequireDisabledJobQueue},
+		{Name: "RegisterJobDefinition", Kind: Create, Resource: "jobDefinition", Check: batchRegisterDefinition},
+		{Name: "DescribeJobDefinitions", Kind: List, Resource: "jobDefinition", Names: "jobDefinitions"},
+		{Name: "DeregisterJobDefinition", Kind: Update, Resource: "jobDefinition", Lookup: "jobDefinition",
+			Check: batchDeregisterDefinition, Set: map[string]any{"status": "INACTIVE"}, CheckReplacement: batchRequireActiveDefinition},
 		{Name: "CreateServiceEnvironment", Kind: Create, Resource: "serviceEnvironment", Check: batchServiceEnvironment},
 		{Name: "DescribeServiceEnvironments", Kind: List, Resource: "serviceEnvironment", Names: "serviceEnvironments"},
 		{Name: "UpdateServiceEnvironment", Kind: Update, Resource: "serviceEnvironment", Lookup: "serviceEnvironment",
@@ -71,7 +80,8 @@ var batch = &Service{
 	},
 	Bounds: []string{
 		"Scheduling policies, consumable resources, compute environments, job queues and service environments are stored configuration records: no job is submitted, scheduled, run, listed, described or terminated, no instance, ECS or EKS cluster, Fargate task or SageMaker training job exists, and a compute environment stays CREATING with no ecsClusterArn. SubmitJob, SubmitServiceJob, CancelJob, TerminateJob, TerminateServiceJob, DescribeJobs, ListJobs, ListServiceJobs, DescribeServiceJob, ListJobsByConsumableResource, GetJobQueueSnapshot and every other official operation not bound here return UnknownOperationException with HTTP 501.",
-		"Job definitions are not implemented: RegisterJobDefinition numbers revisions as name:revision and DeregisterJobDefinition marks a revision INACTIVE instead of deleting it, which the stored model does not express, so RegisterJobDefinition, DeregisterJobDefinition and DescribeJobDefinitions return HTTP 501. UpdateConsumableResource is not implemented: its SET, ADD and SUBTRACT quantity operations need the in-use accounting of running jobs, so total quantities are fixed at creation and availableQuantity always equals totalQuantity.",
+		"Job definitions are configuration records only. RegisterJobDefinition accepts an EC2 single-container definition with an inert image name (optional tag, no port or digest) and exactly one integer VCPU and MEMORY resource requirement; all other fields, including commands, roles, volumes, environment, and registration tags, are refused. It assigns successive name:revision ARNs starting at 1. DescribeJobDefinitions returns stored active and inactive revisions, filters by name or status, and supports pages of 1 to 100 or an exclusive list of exact revision identifiers. DeregisterJobDefinition marks an existing active revision INACTIVE; inactive revisions remain readable and count toward the 50-revision local per-region limit, with no timed purge or runtime. Existing tag operations use the exact stored revision ARN, including inactive revisions.",
+		"UpdateConsumableResource is not implemented: its SET, ADD and SUBTRACT quantity operations need the in-use accounting of running jobs, so total quantities are fixed at creation and availableQuantity always equals totalQuantity.",
 		"Describe operations fail with ClientException (HTTP 400) when a named compute environment, job queue, service environment or scheduling policy does not exist, where AWS omits it from the result; Describe by name accepts a name or an ARN. ListConsumableResources filters are refused, and createdAt of a consumable resource is not reported because the stored clock is not epoch milliseconds.",
 		"References are stored without being resolved: the compute environments and service environments of a job queue order, subnets, security groups, launch templates, instance roles, service roles, EKS clusters and Spot fleet roles are not checked, a queue is VALID at once even if its compute environments are not, and UpdateComputeEnvironment changes only state, unmanagedvCpus, serviceRole, updatePolicy and context (computeResources updates are refused). A schedulingPolicyArn must name a stored scheduling policy. A FIFO job queue cannot acquire a fair-share scheduling policy on update; a fair-share queue may replace its policy but not remove it. Deleting a scheduling policy still referenced by any job queue returns ClientException (HTTP 400) and leaves both records unchanged. Deleting a job queue requires DISABLED state; an ENABLED queue returns ClientException (HTTP 400) and is unchanged. Deleting a compute environment or service environment that a queue still uses succeeds, and a compute environment need not be DISABLED before deletion.",
 		"Job queue time-limit actions are configuration only: each timeout must be 600 to 86400 seconds. For a nonempty action list, the queue type or its environment order must identify one family: container queues accept CANCEL and SageMaker Training queues accept TERMINATE. No action is executed.",

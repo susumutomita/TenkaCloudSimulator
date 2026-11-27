@@ -49,10 +49,16 @@ func (q *request) execute() (map[string]any, error) {
 		if q.isECSTaskDefinition() {
 			return q.registerECSRevision()
 		}
+		if q.isBatchJobDefinition() {
+			return q.registerBatchDefinition()
+		}
 		return q.create(0)
 	case Read:
 		return q.read()
 	case List:
+		if q.isBatchJobDefinition() {
+			return q.describeBatchDefinitions()
+		}
 		return q.list()
 	case Update:
 		return q.update()

@@ -34,7 +34,12 @@
   {"op": "create_job_queue", "args": {"jobQueueName": "fixture-fifo", "state": "DISABLED", "priority": 2}},
   {"op": "update_job_queue", "args": {"jobQueue": "fixture-fifo", "schedulingPolicyArn": "${policy}", "priority": 23, "state": "ENABLED"}, "error": "ClientException", "status": 400},
   {"op": "describe_job_queues", "args": {"jobQueues": ["fixture-fifo"]}, "expect": {"jobQueues[0].state": "DISABLED", "jobQueues[0].priority": 2}},
-  {"op": "update_job_queue", "args": {"jobQueue": "fixture-fifo", "priority": 3}}
+  {"op": "update_job_queue", "args": {"jobQueue": "fixture-fifo", "priority": 3}},
+  {"op": "register_job_definition", "args": {"jobDefinitionName": "fixture-definition", "type": "container", "containerProperties": {"image": "example.invalid/batch:1", "resourceRequirements": [{"type": "VCPU", "value": "1"}, {"type": "MEMORY", "value": "512"}]}}, "save": {"firstDef": "jobDefinitionArn"}, "expect": {"jobDefinitionName": "fixture-definition", "revision": 1}},
+  {"op": "register_job_definition", "args": {"jobDefinitionName": "fixture-definition", "type": "container", "platformCapabilities": ["EC2"], "containerProperties": {"image": "example.invalid/batch:2", "resourceRequirements": [{"type": "VCPU", "value": "2"}, {"type": "MEMORY", "value": "1024"}]}}, "save": {"secondDef": "jobDefinitionArn"}, "expect": {"revision": 2}},
+  {"op": "describe_job_definitions", "args": {"jobDefinitionName": "fixture-definition", "status": "ACTIVE", "maxResults": 1}, "save": {"defPage": "nextToken"}, "expect": {"jobDefinitions#count": 1, "jobDefinitions[0].jobDefinitionArn": "${firstDef}"}},
+  {"op": "describe_job_definitions", "args": {"jobDefinitionName": "fixture-definition", "status": "ACTIVE", "maxResults": 1, "nextToken": "${defPage}"}, "expect": {"jobDefinitions#count": 1, "jobDefinitions[0].jobDefinitionArn": "${secondDef}"}},
+  {"op": "deregister_job_definition", "args": {"jobDefinition": "fixture-definition:1"}}
  ],
  "isolation": [
   {"op": "describe_job_queues", "args": {}, "expect": {"jobQueues#count": 0}},
@@ -42,13 +47,19 @@
   {"op": "list_scheduling_policies", "args": {}, "expect": {"schedulingPolicies#count": 0}},
   {"op": "create_scheduling_policy", "args": {"name": "fixture-fair"}, "save": {"peerPolicy": "arn"}, "expect": {"arn": "arn:aws:batch:us-east-1:000000000000:scheduling-policy/fixture-fair"}},
   {"op": "delete_scheduling_policy", "args": {"arn": "${peerPolicy}"}},
-  {"op": "list_scheduling_policies", "args": {}, "expect": {"schedulingPolicies#count": 0}}
+  {"op": "list_scheduling_policies", "args": {}, "expect": {"schedulingPolicies#count": 0}},
+  {"op": "describe_job_definitions", "args": {}, "expect": {"jobDefinitions#count": 0}},
+  {"op": "register_job_definition", "args": {"jobDefinitionName": "fixture-definition", "type": "container", "containerProperties": {"image": "example.invalid/other:1", "resourceRequirements": [{"type": "VCPU", "value": "1"}, {"type": "MEMORY", "value": "256"}]}}, "save": {"peerDef": "jobDefinitionArn"}, "expect": {"revision": 1}},
+  {"op": "deregister_job_definition", "args": {"jobDefinition": "${peerDef}"}},
+  {"op": "describe_job_definitions", "args": {"status": "INACTIVE"}, "expect": {"jobDefinitions#count": 1, "jobDefinitions[0].containerProperties.image": "example.invalid/other:1"}}
  ],
  "after_restart": [
   {"op": "delete_scheduling_policy", "args": {"arn": "${policy}"}, "error": "ClientException", "status": 400},
   {"op": "describe_scheduling_policies", "args": {"arns": ["${policy}"]}, "expect": {"schedulingPolicies#count": 1, "schedulingPolicies[0].fairsharePolicy.computeReservation": 20, "schedulingPolicies[0].tags": {"team": "a"}}},
   {"op": "describe_job_queues", "args": {"jobQueues": ["fixture-queue"]}, "expect": {"jobQueues[0].state": "DISABLED", "jobQueues[0].priority": 9, "jobQueues[0].schedulingPolicyArn": "${policy}", "jobQueues[0].jobStateTimeLimitActions[0].maxTimeSeconds": 86400, "jobQueues[0].jobStateTimeLimitActions[0].action": "CANCEL"}},
-  {"op": "describe_job_queues", "args": {"jobQueues": ["fixture-fifo"]}, "expect": {"jobQueues[0].state": "DISABLED", "jobQueues[0].priority": 3}}
+  {"op": "describe_job_queues", "args": {"jobQueues": ["fixture-fifo"]}, "expect": {"jobQueues[0].state": "DISABLED", "jobQueues[0].priority": 3}},
+  {"op": "describe_job_definitions", "args": {"jobDefinitions": ["${firstDef}"]}, "expect": {"jobDefinitions#count": 1, "jobDefinitions[0].status": "INACTIVE", "jobDefinitions[0].containerProperties.image": "example.invalid/batch:1"}},
+  {"op": "describe_job_definitions", "args": {"jobDefinitions": ["fixture-definition:2"]}, "expect": {"jobDefinitions#count": 1, "jobDefinitions[0].status": "ACTIVE", "jobDefinitions[0].containerProperties.image": "example.invalid/batch:2"}}
  ],
  "cleanup": [
   {"op": "delete_job_queue", "args": {"jobQueue": "fixture-queue"}},
@@ -60,6 +71,9 @@
   {"op": "delete_consumable_resource", "args": {"consumableResource": "fixture-licenses"}},
   {"op": "delete_scheduling_policy", "args": {"arn": "${policy}"}},
   {"op": "list_scheduling_policies", "args": {}, "expect": {"schedulingPolicies#count": 0}},
-  {"op": "describe_compute_environments", "args": {}, "expect": {"computeEnvironments#count": 0}}
+  {"op": "describe_compute_environments", "args": {}, "expect": {"computeEnvironments#count": 0}},
+  {"op": "deregister_job_definition", "args": {"jobDefinition": "${secondDef}"}},
+  {"op": "describe_job_definitions", "args": {"status": "ACTIVE"}, "expect": {"jobDefinitions#count": 0}},
+  {"op": "describe_job_definitions", "args": {"status": "INACTIVE"}, "expect": {"jobDefinitions#count": 2}}
  ]
 }
