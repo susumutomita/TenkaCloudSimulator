@@ -93,6 +93,8 @@ CloudFormation の EC2 インスタンスは、同じスタックで宣言・所
 
 `--rds-private-postgres-topology` は認証付きの数値ループバックでだけ使える任意の設定検証。`Engine=postgres`、単独 DB インスタンス、明示的な `PubliclyAccessible=false` の `CreateDBInstance` / `ModifyDBInstance` を対象にする。通常の設定モードは変えない。既存の `rds` IAM 判定後、書き込みと同じ SQLite トランザクションで DB サブネットグループと現行のネイティブ EC2 所有行を照合する。初期の範囲は、Internet Gateway への接続や有効な外向き経路がない単一の IPv4 VPC、その VPC と同じ所有者に属する2つ以上の AZ のサブネット、および1〜5個の固有のセキュリティグループ。未知・別所有者・別 VPC の参照は書き込まない。これはその時点の設定検証であり、継続的な接続証明、SQL、バックエンド、ポート、エンドポイントの追加ではない。応答は引き続き `creating`。
 
+RDS エンジンの DB インスタンスが返すパラメータグループ名とオプショングループ名は、保存済みの設定を示す。`CreateDBInstance`、`DescribeDBInstances`、`ModifyDBInstance`、`DeleteDBInstance` の応答では、実際に適用されたと誤認させないよう、任意項目の [`ParameterApplyStatus`](https://docs.aws.amazon.com/AmazonRDS/latest/APIReference/API_DBParameterGroupStatus.html) と [オプショングループの `Status`](https://docs.aws.amazon.com/AmazonRDS/latest/APIReference/API_OptionGroupMembership.html) を返さない。旧 SQLite 行でも参照時は状態だけを省略し、保存行を書き換えない。認可済みの変更が確定する際は古い適用状態を取り除くが、指定していない設定やタグは保持する。DB インスタンスの `creating`（削除応答は `deleting`）、エンドポイントなし、セキュリティグループの状態、および共有する Aurora・Neptune・DocumentDB の応答は従来どおり。
+
 Linux/amd64 の非 root 運用者は、認証付き数値ループバックで [`--rds-owned-postgres-config`](rds-owned-workload.md) を個別に指定できる。既存の設定検証と、承認済み PostgreSQL バンドル・独立したピン・専用作業ディレクトリ・永続 SQLite を必須とし、Battle との併用は拒否する。起動時は構成を受け入れるだけで、既存の IAM とトポロジー検証を通り、所有権を確定した指定 DB の新規作成だけが内部実行の対象になる。API の応答形式は変えず、接続先・認証情報・稼働の保証やゲスト接続は提供しない。
 
 CloudFormationのIAM判定は要求開始時のpolicy snapshotを使い、Createは生成対象ID（冪等retryは既存ID）、named Describe/Deleteは実際のStack ARNを評価する。DeleteのID解決と認可は同じwrite transaction内。全stackのDescribeにはglobal許可に加え各ARNの明示Denyも評価し、拒否時に部分Outputsを返さない。

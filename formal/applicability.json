@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "base_sha": "7f500c9e951d9328a36df3a9946f1c6827200085",
+  "base_sha": "f803fcc2f525a1a66f3f656c76cac8f1143d7e1b",
   "changes": [
     {
       "path": "README.ja.md",
@@ -11,14 +11,14 @@
     },
     {
       "path": "README.md",
-      "sha256": "bfe0bc85e6344ee1678bd1bb5a6db20b71c36b5c8cada2143913623f8c01f1ec",
+      "sha256": "d5cbd7bfed1c80e5efcdb082225d0c8030b839e0a222f9369cbac9218d136cee",
       "disposition": "documentation",
       "reason": "Name the selected-VPC read-only Resource map in the existing networking capability index, alongside the two saved DNS settings.",
       "models": []
     },
     {
       "path": "docs/design/0001-go-standalone.md",
-      "sha256": "74406d2cadca7abb28b59a8d2999a06921d6a3dd0088b1047b91377094f75e82",
+      "sha256": "a688d3015bf09262067f422044dfc79ad5a5e90d4608cd27ece0dc7e33738f7f",
       "disposition": "documentation",
       "reason": "Define the bounded selected-VPC UI and DNS control-plane boundary, independent Describe reads, exact join evidence, honest fallback, and what the formal model does not prove.",
       "models": []
@@ -295,6 +295,33 @@
       "disposition": "formal-infrastructure",
       "reason": "Keep the independent exact expected registry exhaustive for both signed-base policy and the new DNS/Map obligations; add exact oracle and non-removal checks without making expected sets dynamic.",
       "models": []
+    },
+    {
+      "path": "test/battle/image/test_rehearsal_public_output.py",
+      "sha256": "9d95890b3deefb4d32fe77c96ebf40a2936c951383e99534f0276eb984b74253",
+      "disposition": "test-support",
+      "reason": "Exercises stack observation through success/failure fixtures, fail-closed malformed-error handling and redaction with the existing requests.",
+      "models": []
+    },
+    {
+      "path": "test/battle/rehearsal.py",
+      "sha256": "dcc94d4b31e51b3f3e93ee7f3010b6502e40db55637bac11969cf5ad0f91968c",
+      "disposition": "modeled",
+      "reason": "Adds bounded, non-authoritative observations to the existing authenticated rehearsal after the same stack outcome; preserves failed-grade and cleanup decisions.",
+      "models": [
+        {
+          "id": "BattleDisruptionRoleCleanup",
+          "properties": [
+            "TypeOK",
+            "ForeignStatePreserved",
+            "NoDeleteWithInlinePolicy",
+            "NoUnconfirmedCleanupReport",
+            "NoFailedGradeReport",
+            "KnownRoleCleanedAfterFailedWork"
+          ],
+          "limits": "The model covers the abstract role cleanup and failed-grade safety contract, not SDK response errors, diagnostic serialization, host readiness or QEMU runtime. The added report is observational and cannot authorize cleanup or pass a failed grade."
+        }
+      ]
     },
     {
       "path": "test/console/ec2_vpc_dns_sdk.py",
