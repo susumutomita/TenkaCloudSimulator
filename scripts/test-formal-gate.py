@@ -820,6 +820,7 @@ class FormalGateTests(unittest.TestCase):
         self.assertEqual(set(model['source_scope']), {
             'internal/aws/catalog/rds_guest_peer_linux_amd64.go',
             'internal/aws/catalog/rds_owned_runtime_linux_amd64.go',
+            'internal/aws/catalog/rds_private_postgres_topology.go',
             'internal/aws/ec2_completed_guest_unix.go', 'internal/aws/rds_guest_peer_linux_amd64.go'})
         group = {
             'CanonicalGuest': {'AcceptBorrowedGuest'},
@@ -831,9 +832,12 @@ class FormalGateTests(unittest.TestCase):
             'LiveAtReturn': {'SkipNICRecheck', 'SkipCommandRecheck'},
             'ObservationOnly': {'IssueReusablePermit'},
             'DenialDoesNotRetireOwner': {'RetireOwnerOnPeerDenial'},
-            'HealthyObservation': {'DenyAllHealthyGuests'},
+            'HealthyObservation': {'DenyAllHealthyGuests', 'RefuseInPlaceRevision'},
             'DestinationAtFinalSnapshot': {'AcceptLostDestinationAfterInitialRead'},
-            'FinalSnapshotCommitted': {'IgnoreFailedFinalCommit', 'SkipCommittedPostProbeSnapshot'}}
+            'FinalSnapshotCommitted': {'IgnoreFailedFinalCommit', 'SkipCommittedPostProbeSnapshot'},
+            'OriginalGroupBeforeProbe': {'AcceptReplacementBeforeProbe'},
+            'OriginalGroupAtFinalSnapshot': {'AcceptReplacementAfterProbe'},
+            'MatchingGroupSnapshotRevisions': {'AcceptChangedGroupRevision'}}
         self.assertEqual(set(model['properties']), {'TypeOK', *group})
         self.assertEqual({m['id']: m['expect_invariant'] for m in model['mutants']},
                          {name: prop for prop, names in group.items() for name in names})

@@ -3785,7 +3785,10 @@ BASE_INVARIANTS['RDSGuestPeerPreflight'] = {
     'DenialDoesNotRetireOwner',
     'HealthyObservation',
     'DestinationAtFinalSnapshot',
-    'FinalSnapshotCommitted'
+    'FinalSnapshotCommitted',
+    'OriginalGroupBeforeProbe',
+    'OriginalGroupAtFinalSnapshot',
+    'MatchingGroupSnapshotRevisions',
 }
 REQUIRED_MUTANTS['RDSGuestPeerPreflight'] = {
     'AcceptBorrowedGuest',
@@ -3806,11 +3809,16 @@ REQUIRED_MUTANTS['RDSGuestPeerPreflight'] = {
     'DenyAllHealthyGuests',
     'AcceptLostDestinationAfterInitialRead',
     'IgnoreFailedFinalCommit',
-    'SkipCommittedPostProbeSnapshot'
+    'SkipCommittedPostProbeSnapshot',
+    'AcceptReplacementBeforeProbe',
+    'AcceptReplacementAfterProbe',
+    'AcceptChangedGroupRevision',
+    'RefuseInPlaceRevision',
 }
 REQUIRED_SOURCE_SCOPES['RDSGuestPeerPreflight'] = {
     'internal/aws/catalog/rds_guest_peer_linux_amd64.go',
     'internal/aws/catalog/rds_owned_runtime_linux_amd64.go',
+    'internal/aws/catalog/rds_private_postgres_topology.go',
     'internal/aws/ec2_completed_guest_unix.go',
     'internal/aws/rds_guest_peer_linux_amd64.go'
 }
