@@ -1,4 +1,5 @@
 import {parseEC2Document} from './ec2-response.mjs';
+import {ec2IPv4Prefix} from './ec2-ipv4-route-prefix.mjs';
 
 // The native wire exposes only detached, non-default metadata. A wrong or
 // incomplete reply is unavailable, not an empty list or a successful write.
@@ -8,6 +9,9 @@ const vpcId = /^vpc-(?:[0-9a-f]{8}|[0-9a-f]{17})$/;
 const aclId = /^acl-(?:[0-9a-f]{8}|[0-9a-f]{17})$/;
 const tokenShape = /^[ -~]{1,64}$/;
 const operations = ['DescribeNetworkAcls','CreateNetworkAcl','DeleteNetworkAcl'];
+const ruleActions = {create:'CreateNetworkAclEntry',replace:'ReplaceNetworkAclEntry',delete:'DeleteNetworkAclEntry'};
+const terminalRule = 32767;
+const rulesPerDirection = 20;
 const isShape = (value, re) => typeof value === 'string' && re.exec(value)?.[0] === value;
 const invalid = () => {throw Error('Invalid or incomplete detached network ACL response.');};
 const bytes = new TextEncoder();
@@ -27,6 +31,13 @@ export function networkACLInventoryOperations(capabilities, authenticationRequir
     Array.isArray(selectors) && selectors.includes('vpc-id');
   return {read, create:read && ec2.operations.includes(operations[1]), delete:read && ec2.operations.includes(operations[2]),
     vpcs:read && ec2.operations.includes('DescribeVpcs')};
+}
+
+export function networkACLRuleActionsAvailable(capabilities, authenticationRequired) {
+  if (!networkACLInventoryOperations(capabilities,authenticationRequired).read) return false;
+  const ec2=capabilities.services.ec2;
+  return ec2.operations.includes('DescribeVpcs') && ec2.describeSelectors.DescribeNetworkAcls.includes('NetworkAclId.N') &&
+    Object.values(ruleActions).every(action=>ec2.operations.includes(action));
 }
 
 export const validNetworkACLVpcID = value=>isShape(value,vpcId);
@@ -77,20 +88,53 @@ function envelope(document, action, members) {
   return result;
 }
 
+const decimal = (value, min, max) => {
+  const raw = (typeof value === 'string' || typeof value === 'number') ? String(value) : '';
+  return isShape(raw,/^(?:0|[1-9][0-9]{0,4})$/) && Number(raw)>=min && Number(raw)<=max ? Number(raw) : null;
+};
+
+export function normalizeNetworkACLRule(input) {
+  const number=decimal(input?.number,1,terminalRule-1), prefix=ec2IPv4Prefix(input?.cidr);
+  if (number===null || !prefix || !['-1','6','17'].includes(input?.protocol) ||
+      !['allow','deny'].includes(input?.action) || typeof input?.egress!=='boolean') return null;
+  const value={number,protocol:input.protocol,action:input.action,cidr:prefix.masked,egress:input.egress};
+  if (value.protocol==='-1') return input.ports===undefined ? value : null;
+  const from=decimal(input?.ports?.from,0,65535), to=decimal(input?.ports?.to,0,65535);
+  return from!==null && to!==null && from<=to ? {...value,ports:{from,to}} : null;
+}
+
+function aclEntries(node) {
+  const entries=items(node,2+2*rulesPerDirection).map(entry=>{
+    const f=fields(entry,['ruleNumber','protocol','ruleAction','egress','cidrBlock','portRange']);
+    const number=text(f.get('ruleNumber')), protocol=text(f.get('protocol')), action=text(f.get('ruleAction'));
+    const cidr=text(f.get('cidrBlock')), direction=text(f.get('egress'));
+    if (!['false','true'].includes(direction)) invalid();
+    const egress=direction==='true';
+    if (number===String(terminalRule)) {
+      if (protocol!=='-1' || action!=='deny' || cidr!=='0.0.0.0/0' || f.has('portRange')) invalid();
+      return {number:terminalRule,protocol,action,cidr,egress};
+    }
+    const ports=f.has('portRange') ? fields(f.get('portRange'),['from','to']) : null;
+    const result=normalizeNetworkACLRule({number,protocol,action,cidr,egress,
+      ...(ports ? {ports:{from:text(ports.get('from')),to:text(ports.get('to'))}} : {})});
+    if (!result || result.cidr!==cidr) invalid();
+    return result;
+  });
+  for (const direction of [false,true]) {
+    const list=entries.filter(rule=>rule.egress===direction);
+    if (!list.length || list.length>rulesPerDirection+1 || list.at(-1).number!==terminalRule ||
+        list.some((rule,index)=>index>0 && list[index-1].number>=rule.number)) invalid();
+  }
+  return entries;
+}
+
 function row(node, selected, details=false) {
   const cols=fields(node,['networkAclId','vpcId','ownerId','default','entrySet','associationSet','tagSet','simulatorNetworkAclMode']);
   const id=text(cols.get('networkAclId')), vpc=text(cols.get('vpcId'));
   if (!validNetworkACLID(id) || !validNetworkACLVpcID(vpc) || (selected && vpc!==selected) || text(cols.get('ownerId'))!=='000000000000' ||
       text(cols.get('default'))!=='false' || text(cols.get('simulatorNetworkAclMode'))!==mode ||
       children(cols.get('associationSet')).length!==0) invalid();
-  const entries=items(cols.get('entrySet'),2).map(entry=>{
-    const f=fields(entry,['ruleNumber','protocol','ruleAction','egress','cidrBlock']);
-    const number=text(f.get('ruleNumber')),protocol=text(f.get('protocol')),action=text(f.get('ruleAction'));
-    const cidr=text(f.get('cidrBlock')),direction=text(f.get('egress'));
-    if (number!=='32767' || protocol!=='-1' || action!=='deny' || cidr!=='0.0.0.0/0' || !['true','false'].includes(direction)) invalid();
-    return {number:Number(number),protocol,action,cidr,egress:direction==='true'};
-  });
-  if (!entries.some(item=>item.egress) || !entries.some(item=>!item.egress)) invalid();
+  const entries=aclEntries(cols.get('entrySet'));
   const tags=new Map();
   for (const tag of cols.has('tagSet') ? items(cols.get('tagSet'),50) : []) {
     const f=fields(tag,['key','value']);
@@ -100,8 +144,8 @@ function row(node, selected, details=false) {
     tags.set(key,value);
   }
   const summary = {id,vpc,mode,name:tags.get('Name')??''};
-  // This mode can confirm only immutable terminal rules and zero associations.
-  // Do not infer missing/default ACLs or turn VPC subnets into associations.
+  // A valid detached rule inventory does not imply an association or effective
+  // packet filtering. Do not infer defaults or turn subnets into associations.
   return details ? {...summary,entries,associations:[],isDefault:false} : summary;
 }
 
@@ -135,7 +179,7 @@ async function readReply(response, signal) {
       const part=await reader.read();
       if (part.done) {done=true;break;}
       size+=part.value.byteLength;
-      if (size > 16*1024*1024) invalid();
+      if (size > 16*1024*1024) throw Error('Network ACL response exceeds the Console size limit.');
       data+=decoder.decode(part.value,{stream:true});
     }
     signal?.throwIfAborted();
@@ -205,8 +249,50 @@ export async function deleteVpcNetworkACL(request, region, vpc, acl, options={})
   return {removed:acl,rows};
 }
 
+export async function loadNetworkACLDetails(request, region, vpc, id, options={}) {
+  if (!validNetworkACLID(id)) invalid();
+  const document=await send(request,region,vpc,'DescribeNetworkAcls',
+    {'NetworkAclId.1':id,'Filter.1.Name':'vpc-id','Filter.1.Value.1':vpc.id},options);
+  const rows=parseNetworkACLInventory(document,vpc.id);
+  if (rows.length!==1 || rows[0].id!==id) invalid();
+  return rows[0];
+}
+
+const equalRule=(a,b)=>a===b || Boolean(a&&b&&a.number===b.number&&a.egress===b.egress&&
+  a.protocol===b.protocol&&a.action===b.action&&a.cidr===b.cidr&&a.ports?.from===b.ports?.from&&a.ports?.to===b.ports?.to);
+
+export async function changeNetworkACLRule(request, region, vpc, acl, kind, input, options={}) {
+  if (!Object.hasOwn(ruleActions,kind) || networkACLTarget(vpc)!=='ec2' || acl?.vpc!==vpc.id ||
+      acl?.mode!==mode || acl?.isDefault!==false || !Array.isArray(acl?.entries) ||
+      !Array.isArray(acl?.associations) || acl.associations.length || !validNetworkACLID(acl?.id)) invalid();
+  const value=normalizeNetworkACLRule(input);
+  if (!value) invalid();
+  const locate=rules=>rules.find(rule=>rule.number===value.number&&rule.egress===value.egress);
+  const previous=locate(acl.entries);
+  if (kind==='create' ? Boolean(previous) : !previous) invalid();
+  if (kind==='delete' && !equalRule(value,previous)) invalid();
+
+  // Refresh the exact selected ACL before attempting a write. The API has no
+  // compare-and-swap, so this detects stale input but is not an atomic lock.
+  const current=await loadNetworkACLDetails(request,region,vpc,acl.id,options);
+  if (!equalRule(locate(current.entries),previous) ||
+      (kind==='create' && current.entries.filter(rule=>rule.egress===value.egress&&rule.number<terminalRule).length>=rulesPerDirection)) invalid();
+  const params={NetworkAclId:acl.id,RuleNumber:String(value.number),Egress:String(value.egress)};
+  if (kind!=='delete') {
+    Object.assign(params,{Protocol:value.protocol,RuleAction:value.action,CidrBlock:value.cidr});
+    if (value.ports) Object.assign(params,{'PortRange.From':String(value.ports.from),'PortRange.To':String(value.ports.to)});
+  }
+  const action=ruleActions[kind];
+  const reply=await send(request,region,vpc,action,params,options);
+  if (text(envelope(reply,action,['return']).get('return'))!=='true') invalid();
+  const readback=await loadNetworkACLDetails(request,region,vpc,acl.id,options);
+  if (!equalRule(locate(readback.entries),kind==='delete' ? undefined : value)) invalid();
+  return readback;
+}
+
 export function networkACLFailure(error) {
   const value=String(error?.message??'');
+  if (value==='Network ACL response exceeds the Console size limit.') return 'response-too-large';
   if (/^(401|403|UnauthorizedOperation|AccessDenied(?:Exception)?)(?=:|$)/.test(value) || value==='Sign in to continue.') return 'denied';
   if (/^(InvalidNetworkAclID\.NotFound|InvalidVpcID\.NotFound)(?=:|$)/.test(value)) return 'not-found';
   if (/^NetworkAclLimitExceeded(?=:|$)/.test(value)) return 'limit';

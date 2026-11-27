@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "base_sha": "9bb4eb16d46d7096d282c81bd1572bff237c790b",
+  "base_sha": "ee62782fa6d8c7e4838893f3e3cc66ca27fb4e70",
   "changes": [
     {
       "path": ".github/workflows/battle-hosts.yml",
@@ -11,16 +11,23 @@
     },
     {
       "path": "README.ja.md",
-      "sha256": "df539ab3dc62472fa4ed47cbc74a058fcce08da1b0b56ee7d7cb5dd75fdabf72",
+      "sha256": "5299310fa198cb625daaaa2dd009d3cdc845589f151f844adf75377b442ff42f",
       "disposition": "documentation",
       "reason": "Discover the local-only sample from the Japanese startup section.",
       "models": []
     },
     {
       "path": "README.md",
-      "sha256": "86d05eb5bd105fa37a7aa797bc457976d4978f4e2e2813ec6709a4b8eab6b50c",
+      "sha256": "0ba3e30a386d0671833a076c1adc8c40a4df1a062f49b60c9f56d2870b2b4e13",
       "disposition": "documentation",
       "reason": "Discover and separate the explicit SSO sample from existing default/management-only Cognito documentation.",
+      "models": []
+    },
+    {
+      "path": "cmd/simulator/local_cognito_cli_recovery_test.go",
+      "sha256": "39d3fb9dc240fb0427901d2dbfc04dfea4f59d8b9238c1d1826738c3d318b569",
+      "disposition": "test-support",
+      "reason": "Verify signed-configuration CLI startup rejects unavailable local prerequisites without leaking the listener or replacing operator state.",
       "models": []
     },
     {
@@ -46,6 +53,13 @@
       "sha256": "0e9d6660512d6ea3fd6bf287511f0950fcc2daeb3579c75795b23804185405a5",
       "disposition": "test-support",
       "reason": "Exercises signed callback token and browser binding validation, replay rejection, and bounded local relying-party response handling.",
+      "models": []
+    },
+    {
+      "path": "cmd/simulator/local_sso_dispatch_restart_test.go",
+      "sha256": "b8ccc2b4755765ad31330b9b3eb80d2f34072902b4fa9e48be832d600c1944d0",
+      "disposition": "test-support",
+      "reason": "Run the actual local SSO command twice and verify separate HTTPS trust and owned-state cleanup.",
       "models": []
     },
     {
@@ -132,7 +146,7 @@
     },
     {
       "path": "docs/design/0001-go-standalone.md",
-      "sha256": "325fbe78be774cdb809f70ee57c43091b9e2e7ed68fb36e9d50ee2159bf9761a",
+      "sha256": "89e0c0583e0db9444e967a31ee741cc199a0dbe9d0523d6782c7b4743311ae6a",
       "disposition": "documentation",
       "reason": "Record explicit single-binary, split-origin local fixture architecture and limited validated boundary.",
       "models": []
@@ -210,9 +224,9 @@
     },
     {
       "path": "formal/models.json",
-      "sha256": "2a39a33915a0c58da191ebc843f42c68684a2f2167f3814dfee7650b007e09e9",
+      "sha256": "280faa5780f3250d400f7af481d0f1fbfd8988c94ed7713d3a5a4ab87063aac3",
       "disposition": "formal-infrastructure",
-      "reason": "Extend the main registry with the first-party local SSO lifecycle while preserving the VPC controls.",
+      "reason": "Add only the first-party local SSO model to the signed main model inventory, preserving detached ACL and all earlier models.",
       "models": []
     },
     {
@@ -404,6 +418,13 @@
       "models": []
     },
     {
+      "path": "internal/aws/cognitoidp/hosted_pin_expiry_test.go",
+      "sha256": "4286ccd2225a685b48b42d2fb076f04352c25bf8c9f25dea1deb9e4fa931c08f",
+      "disposition": "test-support",
+      "reason": "Verify a legitimately issued still-live authorization code cannot be redeemed after provider metadata expires, without invalidating the same client\u2019s other provider.",
+      "models": []
+    },
+    {
       "path": "internal/aws/cognitoidp/hosted_pool_deletion_test.go",
       "sha256": "58c162690bf1f4730d17237069aadcb298fb1b0b2200b0053b360252f96e9055",
       "disposition": "test-support",
@@ -473,6 +494,13 @@
           "limits": "Symbolic correspondence only: not cryptography, parsers, OAuth/SAML platform parity, concrete time/quotas, cross-run subject stability, general Keycloak compatibility, TLS/browser/Linux/macOS execution, SQL/crash races, disclosure beyond modeled stdout fields, Battle dependency compatibility, or a Go refinement proof. An independent successful callback is not an app or operator session."
         }
       ]
+    },
+    {
+      "path": "internal/aws/cognitoidp/sqlite_recovery_test.go",
+      "sha256": "d8e40fee9e3c46b5ec049f2c8b001ffb8dc3c17964ddfd6201551b1d212ccca4",
+      "disposition": "test-support",
+      "reason": "Exercise native initialized SQLite read-only recovery and a normal in-flight login after actual transaction commit contention.",
+      "models": []
     },
     {
       "path": "internal/azure/entraidp/directory.go",
@@ -571,7 +599,7 @@
     },
     {
       "path": "internal/server/server.go",
-      "sha256": "b960375576f64258c5a6311030da63cb888da1f91e2cb6736328a2d364e4f7b7",
+      "sha256": "d67dd89475b47d7cae733967e36a148120b87788160d18da96eb9124d6482ea5",
       "disposition": "modeled",
       "reason": "Supply the optional setup callback only to scoped hosted construction, with no default hosted listener; existing provider/console/SDK behavior outside this selection is not covered by the new model.",
       "models": [
@@ -595,16 +623,16 @@
     },
     {
       "path": "scripts/formal_model_gate.py",
-      "sha256": "0249458cc2c206e43abe204c2ea8603b1fce385dff0dcb2fc2c4c8c39b5b65b9",
+      "sha256": "dfbb59728388daae134e85420ea891107b73be89496700362eed0d6a09359d15",
       "disposition": "formal-infrastructure",
-      "reason": "Extend the main formal gate with the local SSO lifecycle obligations without changing VPC or existing guard requirements.",
+      "reason": "Add the exact local SSO obligations without replacing mandatory VPC and detached ACL invariants.",
       "models": []
     },
     {
       "path": "scripts/test-formal-gate.py",
-      "sha256": "ea3ca7dda46f27d2690728293a77f894cca3ba875b0b46eb42eeb8a9659fe5f6",
+      "sha256": "038982ea4de135af9571a0ab2b3ec9b1470ef75130839c5bb6f77aa3ee5f055a",
       "disposition": "formal-infrastructure",
-      "reason": "Assert exact local SSO and both VPC detectors and require the complete named inventory.",
+      "reason": "Retain existing detached ACL and VPC detectors, add the local SSO detector, and pin the combined exact inventory.",
       "models": []
     },
     {

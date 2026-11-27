@@ -120,7 +120,7 @@ func TestEC2NetworkACLQueryBoundsAndAuthority(t *testing.T) {
 		{"DescribeNetworkAcls", url.Values{"NextToken": {"anything"}}, "UnsupportedOperation"},
 		{"DeleteNetworkAcl", url.Values{}, "MissingParameter"},
 		{"DeleteNetworkAcl", url.Values{"NetworkAclId": {vpc}}, "InvalidNetworkAclId.Malformed"},
-		{"CreateNetworkAclEntry", url.Values{}, "UnsupportedOperation"},
+		{"CreateNetworkAclEntry", url.Values{}, "MissingParameter"},
 	} {
 		t.Run(c.action+"_"+c.code, func(t *testing.T) {
 			_, f := parseEC2NetworkACLRequest(c.action, c.fields)

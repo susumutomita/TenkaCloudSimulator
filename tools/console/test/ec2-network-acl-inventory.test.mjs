@@ -3,7 +3,7 @@ import {createRequire} from 'node:module';
 import {fileURLToPath} from 'node:url';
 import test from 'node:test';
 import {build} from 'esbuild';
-import {loadNetworkACLInventory,loadNetworkACLVpcs,networkACLInventoryOperations,parseNetworkACLInventory} from '../src/ec2-network-acls.mjs';
+import {loadNetworkACLInventory,loadNetworkACLVpcs,networkACLInventoryOperations,networkACLRuleActionsAvailable,parseNetworkACLInventory} from '../src/ec2-network-acls.mjs';
 
 const ns='http://ec2.amazonaws.com/doc/2016-11-15/',region='us-east-1';
 const vpc='vpc-'+'1'.repeat(17),other='vpc-'+'2'.repeat(17);
@@ -94,4 +94,28 @@ test('Cloudscape inventory and details distinguish unavailable, read-only and de
     onOpenSubnet:()=>assert.fail('no unverified subnet navigation')}));
   for (const text of ['Inbound rules','Outbound rules','Subnet associations','32767','0.0.0.0/0','Deny','do not filter traffic']) assert.ok(markup.includes(text),text);
   assert.doesNotMatch(markup,/Edit inbound|Edit outbound|Edit subnet/);
+});
+
+
+test('editing appears only with exact detached capability and never applies to fixed terminal rules',()=>{
+  const actions=['CreateNetworkAclEntry','ReplaceNetworkAclEntry','DeleteNetworkAclEntry'];
+  const native=caps(['DescribeVpcs','DescribeNetworkAcls',...actions]);
+  assert.equal(networkACLRuleActionsAvailable(native,true),true);
+  assert.equal(networkACLRuleActionsAvailable(native,false),false);
+  assert.equal(networkACLRuleActionsAvailable({...native,consoleScope:{kind:'instance'}},true),false);
+  assert.equal(networkACLRuleActionsAvailable(caps(['DescribeVpcs','DescribeNetworkAcls',actions[0],actions[1]]),true),false);
+  assert.equal(networkACLRuleActionsAvailable(caps(['DescribeNetworkAcls',...actions]),true),false);
+  assert.match(render(native),/Edit saved IPv4 rules on detached custom ACLs/);
+  assert.match(render(native),/Subnet attachment and packet filtering are not supported/);
+  const snapshot=parseNetworkACLInventory(list(aclRow(acl,vpc,[
+    item({ruleNumber:'100',protocol:'6',ruleAction:'allow',cidrBlock:'192.0.2.0/24',egress:'false',
+      portRange:[node('from','80'),node('to','443')]}),terminal('false'),terminal('true'),
+  ])))[0];
+  const view=onRuleChange=>renderToStaticMarkup(createElement(module.exports.NetworkACLDetails,{acl:snapshot,onRuleChange}));
+  for (const markup of [view(undefined),view(()=>assert.fail('SSR cannot submit'))]) {
+    assert.match(markup,/TCP \(6\)/);assert.match(markup,/80–443/);assert.match(markup,/do not filter traffic/);
+    assert.doesNotMatch(markup,/Edit rule 32767|Delete rule 32767/);
+  }
+  assert.doesNotMatch(view(undefined),/Add rule|Edit rule 100/);
+  assert.match(view(()=>{}),/Add rule/);assert.match(view(()=>{}),/Edit rule 100/);
 });

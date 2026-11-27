@@ -33,6 +33,8 @@ import VPCInternetGateways from './ec2-vpc-internet-gateways.jsx';
 import {nativeRouteTableTarget} from './ec2-native-route-tables.mjs';
 
 import {parseEC2Document,parseCreateVpc,parseDeleteVpc,parseEC2Error,createVpcParameters} from './ec2-response.mjs';
+import VpcTagsPanel from './ec2-vpc-tags-panel.jsx';
+import {vpcTagEditingAvailable} from './ec2-vpc-tags.mjs';
 
 const idCell=value=><span className="resource-identifier">{value||'—'}</span>;
 const blankVpc={name:'',cidr:'10.0.0.0/16',mode:'vpc-only',stackName:'',subnetCIDR:'10.0.1.0/24'};
@@ -75,7 +77,7 @@ export default function EC2Readonly({kind,region,request,sessionInstance,onSessi
   const pendingWrites=useRef(writeLeases);
   // Stable per-pane leases aggregate on the host. A readback completion or
   // unmount releases only its own lease, even if another pane is still saving.
-  const lease=useMemo(()=>Object.fromEntries(['subnet','sg','acl','rtb','igw','dns'].map(pane=>[pane,open=>{
+  const lease=useMemo(()=>Object.fromEntries(['subnet','sg','acl','rtb','igw','dns','tags'].map(pane=>[pane,open=>{
     const current=pendingWrites.current;
     if(current.has(pane)===open)return;
     const next=new Set(current);
@@ -201,6 +203,14 @@ export default function EC2Readonly({kind,region,request,sessionInstance,onSessi
             <VPCDNSSettings key={'dns|'+region+'|'+detail.id} vpc={detail} region={region} request={request}
               capabilities={vpcDetailsCapabilities} authenticationRequired={vpcDetailsAuthenticationRequired}
               writeBlocked={siblingBusy('dns')} acquireWrite={()=>acquireNetworkWrite('dns')}/>
+          </div>}
+          {!instance&&vpcTagEditingAvailable(vpcDetailsCapabilities,vpcDetailsAuthenticationRequired)&&<div inert={siblingBusy('tags')}>
+            <VpcTagsPanel vpc={detail} region={region} request={request} writeBlocked={siblingBusy('tags')}
+              acquireWrite={()=>acquireNetworkWrite('tags')} onConfirmed={snapshot=>{
+                const name=snapshot.tags.find(tag=>tag.key==='Name')?.value??'';
+                const replace=row=>row.id===snapshot.id&&row.managedBy==='ec2'?{...row,name}:row;
+                setItems(rows=>rows.map(replace));setSelected(rows=>rows.map(replace));
+              }}/>
           </div>}
           {!instance&&vpcNativeSubnets&&<div inert={siblingBusy('subnet')}><VPCNativeSubnets key={'subnet|'+region+'|'+detail.id} vpc={detail} region={region}
             request={request} onSaving={lease.subnet} publicIPv4={vpcNativeSubnetPublicIPv4}/></div>}

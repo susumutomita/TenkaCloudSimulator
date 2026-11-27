@@ -65,7 +65,7 @@ func TestEC2NetworkACLGatewayEnforcesAdmissionAndReadback(t *testing.T) {
 	}
 	bound := context.WithValue(context.Background(), consoleInstanceBoundaryKey{}, consoleInstanceBoundary{region: region, instance: "i-00000000"})
 	f.expect(f.call("acl-editor", region, bound, describe), 403, "UnauthorizedOperation")
-	f.expect(f.call("", region, nil, url.Values{"Action": {"CreateNetworkAclEntry"}}), 400, "UnsupportedOperation")
+	f.expect(f.call("", region, nil, url.Values{"Action": {"CreateNetworkAclEntry"}}), 400, "MissingParameter")
 	f.expect(f.call("", region, nil, url.Values{"Action": {"ReplaceNetworkAclAssociation"}}), 400, "UnsupportedOperation")
 	f.expect(f.call("", region, nil, url.Values{"Action": {"DeleteVpc"}, "VpcId": {vpc.ID}}), 400, "DependencyViolation")
 	f.expect(f.call("acl-editor", region, nil, url.Values{"Action": {"DeleteNetworkAcl"}, "NetworkAclId": {id}}), 200, "")

@@ -3,8 +3,8 @@ import {createRequire} from 'node:module';
 import {fileURLToPath} from 'node:url';
 import test from 'node:test';
 import {build} from 'esbuild';
-import {createVpcNetworkACL,deleteVpcNetworkACL,loadVpcNetworkACLs,networkACLFailure,networkACLTarget,
-  parseVpcNetworkACLs,validNetworkACLName,vpcNetworkACLsAvailable} from '../src/ec2-network-acls.mjs';
+import {changeNetworkACLRule,createVpcNetworkACL,deleteVpcNetworkACL,loadVpcNetworkACLs,networkACLFailure,networkACLTarget,
+  normalizeNetworkACLRule,parseNetworkACLInventory,parseVpcNetworkACLs,validNetworkACLName,vpcNetworkACLsAvailable} from '../src/ec2-network-acls.mjs';
 
 const ns='http://ec2.amazonaws.com/doc/2016-11-15/';
 const vpc={id:'vpc-'+'1'.repeat(17),managedBy:'ec2'}, cfg={...vpc,managedBy:'cloudformation'};
@@ -130,9 +130,90 @@ const render=scope=>renderToStaticMarkup(createElement(module.exports.default,{v
 
 test('real Cloudscape markup offers only bounded detached controls and explains the non-mutating CFN case',()=>{
   const native=render(vpc),stack=render(cfg),unknown=render({...vpc,managedBy:''});
-  assert.match(native,/network ACLs/i);assert.match(native,/not associated with subnets/i);
-  assert.match(native,/Rule editing and packet filtering are not available/);assert.match(native,/Reading network ACLs/);
+  assert.match(native,/network ACLs/i);assert.match(native,/manages detached ACLs only/i);
+  assert.match(native,/edit rules on the dedicated Network ACLs page/i);assert.match(native,/Subnet association and packet filtering are not supported/);assert.match(native,/Reading network ACLs/);
   assert.doesNotMatch(native,/No detached network ACLs are saved/);
   assert.match(stack,/CloudFormation manages this VPC/);assert.doesNotMatch(stack,/Create network ACL|Delete network ACL|Refresh network ACL/);
   assert.match(unknown,/Select a verified EC2-managed VPC/);
+});
+
+
+const tcp={number:100,protocol:'6',action:'allow',cidr:'192.0.2.0/24',egress:false,ports:{from:443,to:443}};
+const deny={number:100,protocol:'-1',action:'deny',cidr:'198.51.100.0/24',egress:true};
+const changed={...tcp,ports:{from:80,to:443}};
+const wireRule=rule=>item({ruleNumber:String(rule.number),protocol:rule.protocol,ruleAction:rule.action,
+  cidrBlock:rule.cidr,egress:String(rule.egress),...(rule.ports?{portRange:columns({
+    from:String(rule.ports.from),to:String(rule.ports.to)})}:{})});
+const scopedInventory=(inbound=[],outbound=[])=>list(record({entrySet:[
+  ...inbound.map(wireRule),entry('false'),...outbound.map(wireRule),entry('true')]}));
+const exactDescription={...filter,'NetworkAclId.1':id};
+
+test('detached ACL entries decode all ordered native rules without asserting association or enforcement',()=>{
+  const [acl]=parseNetworkACLInventory(scopedInventory([tcp],[deny]),vpc.id);
+  assert.deepEqual(acl.entries.filter(rule=>rule.number===100),[tcp,deny]);
+  assert.equal(acl.isDefault,false);
+  assert.deepEqual(acl.associations,[]);
+  assert.deepEqual(normalizeNetworkACLRule({...tcp,cidr:'192.0.2.19/24'}),tcp);
+  for (const bad of [scopedInventory([tcp,tcp],[deny]),
+    scopedInventory([tcp,{...tcp,number:5}],[deny]),
+    scopedInventory([{...tcp,cidr:'192.0.2.1/24'}],[deny]),
+    scopedInventory([{...tcp,ports:{from:40,to:1}}],[deny]),
+    scopedInventory([{...tcp,ports:undefined}],[deny]),
+    scopedInventory([tcp],[{...deny,ports:{from:1,to:1}}]),
+    scopedInventory(Array.from({length:21},(_,i)=>({...tcp,number:i+1})),[])]) {
+    assert.throws(()=>parseNetworkACLInventory(bad,vpc.id),/Invalid or incomplete/);
+  }
+});
+
+test('each rule action verifies source row, exact native acknowledgement, and same-ACL final rule',async()=>{
+  for (const [kind,operation,before,after,input] of [
+    ['create','CreateNetworkAclEntry',[],[tcp],{...tcp,cidr:'192.0.2.19/24'}],
+    ['replace','ReplaceNetworkAclEntry',[tcp],[changed],changed],
+    ['delete','DeleteNetworkAclEntry',[tcp],[],tcp],
+  ]) {
+    const initial=scopedInventory(before,[deny]), final=scopedInventory(after,[deny]);
+    const [acl]=parseNetworkACLInventory(initial,vpc.id);
+    const f=transport(initial,doc(operation,[node('return','true')]),final),{signal}=new AbortController();
+    const next=await changeNetworkACLRule(f.request,region,vpc,acl,kind,input,{...f.options,signal});
+    assert.deepEqual(next,parseNetworkACLInventory(final,vpc.id)[0]);
+    const params={Action:operation,NetworkAclId:id,RuleNumber:'100',Egress:'false'};
+    if(kind!=='delete')Object.assign(params,{Protocol:'6',RuleAction:'allow',CidrBlock:tcp.cidr,
+      'PortRange.From':String(input.ports.from),'PortRange.To':String(input.ports.to)});
+    assert.equal(f.requests.length,3);
+    assertRequest(f.requests[0],exactDescription,signal);
+    assertRequest(f.requests[1],params,signal);
+    assertRequest(f.requests[2],exactDescription,signal);
+  }
+});
+
+test('unexpected ACL data never causes a second write or an optimistic success',async()=>{
+  const initial=scopedInventory([tcp],[deny]);
+  const [acl]=parseNetworkACLInventory(initial,vpc.id);
+  const reply=doc('ReplaceNetworkAclEntry',[node('return','true')]);
+  for (const [answers,requestCount] of [
+    [[scopedInventory([changed],[deny])],1],                // Earlier rule changed elsewhere.
+    [[initial,doc('ReplaceNetworkAclEntry',[node('return','false')])],2],
+    [[initial,reply,initial],3],                            // Accepted but not observed.
+    [[initial,reply,list(record({vpcId:other}))],3],
+  ]) {
+    const f=transport(...answers);
+    await assert.rejects(changeNetworkACLRule(f.request,region,vpc,acl,'replace',changed,f.options),/Invalid or incomplete/);
+    assert.equal(f.requests.length,requestCount);
+  }
+  const never=()=>assert.fail('Do not send a mutating request on an inapplicable ACL');
+  await assert.rejects(changeNetworkACLRule(never,region,cfg,acl,'replace',changed),/Invalid or incomplete/);
+  await assert.rejects(changeNetworkACLRule(never,region,vpc,acl,'delete',acl.entries[1]),/Invalid or incomplete/);
+  await assert.rejects(changeNetworkACLRule(never,region,vpc,acl,'create',tcp),/Invalid or incomplete/);
+});
+
+
+test('large real payloads keep a bounded Console reader and give a distinct recovery path',async()=>{
+  const large=new ReadableStream({start(controller){
+    const chunk=new Uint8Array(1024*1024).fill(65);
+    for(let i=0;i<17;i++)controller.enqueue(chunk);
+    controller.close();
+  }});
+  await assert.rejects(loadVpcNetworkACLs(async()=>new Response(large,{headers:{'Content-Type':'application/xml'}}),region,vpc,
+    {parse:()=>assert.fail('a response over the byte cap must not be parsed')}),
+  error=>networkACLFailure(error)==='response-too-large');
 });
