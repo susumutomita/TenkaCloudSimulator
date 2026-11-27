@@ -402,8 +402,8 @@ Detached security groups, network ACLs and route tables also use the existing
 EC2-owned VPC and shared 1,000-resource bound. Deletion of a native VPC is refused
 while any native subnet, group, ACL, custom table, or saved route still depends on it. Remove the
 children through their own APIs, including [native gateways](ec2-internet-gateways.md) and [native IPv4 routes](ec2-native-default-route.md).
-`ModifyVpcAttribute`,
-VPC endpoints and tag edits are not implemented.
+[Local DNS settings](ec2-vpc-dns-attributes.md) are available through
+`DescribeVpcAttribute` and `ModifyVpcAttribute`. VPC endpoints and tag edits are not implemented.
 
 As in the [AWS main and local route model](https://docs.aws.amazon.com/vpc/latest/userguide/subnet-route-tables.html),
 new native VPCs have one main route table and a `local` route in each table.

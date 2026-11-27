@@ -47,7 +47,10 @@ from botocore.auth import SigV4Auth  # noqa: E402
 from botocore.awsrequest import AWSRequest  # noqa: E402
 from botocore.config import Config  # noqa: E402
 from botocore.credentials import Credentials  # noqa: E402
-from botocore.exceptions import ClientError  # noqa: E402
+from botocore.exceptions import (  # noqa: E402
+    ClientError, ConnectionClosedError, ConnectTimeoutError,
+    EndpointConnectionError, HTTPClientError, ReadTimeoutError,
+)
 from botocore.parsers import ResponseParserError  # noqa: E402
 
 parser = argparse.ArgumentParser()
@@ -145,6 +148,86 @@ PUBLIC_STATUSES = ('CREATE_IN_PROGRESS', 'CREATE_COMPLETE', 'CREATE_FAILED',
                    'ROLLBACK_IN_PROGRESS', 'ROLLBACK_COMPLETE', 'ROLLBACK_FAILED',
                    'DELETE_IN_PROGRESS', 'DELETE_COMPLETE', 'DELETE_FAILED',
                    'GONE', 'UNKNOWN', 'Success', 'Failed', 'TimedOut', 'Cancelled')
+STACK_SERVICE_OUTCOMES = (
+    ('ValidationError', 400, 'service-validation-error'),
+    ('AccessDenied', 403, 'service-access-denied'),
+    ('InternalFailure', 500, 'service-internal-failure'),
+    ('NotImplemented', 501, 'service-not-implemented'),
+)
+STACK_TRANSPORT_OUTCOMES = ('connection-closed', 'connect-timeout', 'read-timeout',
+                            'endpoint-unreachable', 'http-client-error', 'response-decode-error')
+PUBLIC_STACK_ERROR_OUTCOMES = ('other-service-error', 'other-error')
+PUBLIC_STACK_CREATE_OUTCOMES = {
+    'createStack': ('response-confirmed', 'malformed-service-error'),
+    'describeStacks': ('stack-observed', 'no-stack-observed', 'malformed-service-error'),
+    'describeStackEvents': ('instance-create-failed', 'stack-create-failed',
+                            'other-resource-create-failed', 'no-failed-event-observed', 'not-attempted',
+                            'malformed-event-page'),
+    'simulatorAtCreateReply': ('running', 'exited'),
+    'simulatorAtReadback': ('running', 'exited'),
+}
+
+
+def stack_request_error(error, *required_fields):
+    if isinstance(error, ClientError):
+        response = error.response
+        # Maintain the driver's original fail-closed SDK shape checks, without
+        # retaining or formatting any of the required error fields.
+        for field in required_fields:
+            _ = response['Error'][field]
+        if type(response) is dict:
+            detail, metadata = response.get('Error'), response.get('ResponseMetadata')
+            code = detail.get('Code') if type(detail) is dict else None
+            status = metadata.get('HTTPStatusCode') if type(metadata) is dict else None
+            for exact_code, exact_status, outcome in STACK_SERVICE_OUTCOMES:
+                if type(code) is str and code == exact_code and type(status) is int and status == exact_status:
+                    return outcome
+        return 'other-service-error'
+    classes = (ConnectionClosedError, ConnectTimeoutError, ReadTimeoutError,
+               EndpointConnectionError, HTTPClientError, ResponseParserError)
+    for error_class, outcome in zip(classes, STACK_TRANSPORT_OUTCOMES):
+        if isinstance(error, error_class):
+            return outcome
+    return 'other-error'
+
+
+def stack_event_observation(event_page, stack_id):
+    if not stack_id:
+        return 'not-attempted'
+    # Evidence for one stack generation only. Absence on this page is not
+    # a claim that no resource failed. Never expose IDs, reasons or payloads.
+    kinds = set()
+    for event in event_page.get('StackEvents', []):
+        # Preserve the old .get() requirement on every returned event.
+        kind = event.get('ResourceType')
+        if (type(kind) is str and event.get('StackId') == stack_id
+                and event.get('ResourceStatus') == 'CREATE_FAILED'):
+            kinds.add(kind)
+    if 'AWS::EC2::Instance' in kinds:
+        return 'instance-create-failed'
+    if kinds - {'AWS::CloudFormation::Stack'}:
+        return 'other-resource-create-failed'
+    if 'AWS::CloudFormation::Stack' in kinds:
+        return 'stack-create-failed'
+    return 'no-failed-event-observed'
+
+
+def public_stack_create_outcomes(value):
+    if type(value) is not dict:
+        return {}
+    errors = (tuple(item[2] for item in STACK_SERVICE_OUTCOMES)
+              + STACK_TRANSPORT_OUTCOMES + PUBLIC_STACK_ERROR_OUTCOMES)
+    out = {}
+    for source, allowed in PUBLIC_STACK_CREATE_OUTCOMES.items():
+        observed = value.get(source)
+        if type(observed) is str and (observed in allowed or
+                source in ('createStack', 'describeStacks', 'describeStackEvents') and observed in errors):
+            out[source] = observed
+    return out
+
+
+def simulator_process_state():
+    return 'running' if process.poll() is None else 'exited'
 
 
 def public_number(value, lower, upper, integer=False):
@@ -207,6 +290,10 @@ def public_report(value):
         if type(entry) is not dict or type(entry.get('name')) is not str or entry['name'] not in PUBLIC_PHASES:
             continue
         phase_entry = {'name': entry['name'], 'checks': []}
+        if entry['name'] == 'initialize':
+            diagnostics = public_stack_create_outcomes(entry.get('stackCreateDiagnostics'))
+            if diagnostics:
+                phase_entry['stackCreateDiagnostics'] = diagnostics
         checks = entry.get('checks')
         for item in checks if type(checks) is list else ():
             if (type(item) is dict and type(item.get('name')) is str
@@ -860,16 +947,20 @@ try:
     cfn = client('cloudformation', read_timeout=args.create_timeout)
     parameters = {'NamePrefix': prefix, 'TenkaCloudAccountId': '999999999999', 'ExternalId': external_id}
     started = time.time()
-    create_error = None
+    diagnostics = p['stackCreateDiagnostics'] = {}
     try:
         created = cfn.create_stack(StackName=prefix, TemplateBody=TEMPLATE.decode(), Capabilities=['CAPABILITY_NAMED_IAM'],
                                    Parameters=[{'ParameterKey': k, 'ParameterValue': v} for k, v in parameters.items()])
         stack_id = created['StackId']
-    except ClientError as error:
-        create_error = f"{error.response['Error']['Code']}: {error.response['Error']['Message']}"
-    except Exception as error:  # transport loss is recorded; the outcome is then observed, never assumed
-        create_error = f'{type(error).__name__}: {str(error)[:300]}'
-    check(p, 'create-stack-response', True, seconds=round(time.time() - started, 1), error=create_error, responded=create_error is None)
+    except Exception as error:  # read back committed state even without a successful SDK result
+        diagnostics['createStack'] = 'malformed-service-error'
+        diagnostics['createStack'] = stack_request_error(error, 'Code', 'Message')
+    else:
+        diagnostics['createStack'] = 'response-confirmed'
+    finally:
+        diagnostics['simulatorAtCreateReply'] = simulator_process_state()
+    check(p, 'create-stack-response', True, seconds=round(time.time() - started, 1),
+          responded=diagnostics['createStack'] == 'response-confirmed')
     submitted_stack_id = stack_id
     describe = client('cloudformation')
     stack = None
@@ -879,7 +970,18 @@ try:
             stacks = describe.describe_stacks(StackName=stack_id or prefix)['Stacks']
         except ClientError as error:
             stacks = []
-            last = error.response['Error']['Code']
+            diagnostics['describeStacks'] = 'malformed-service-error'
+            try:
+                diagnostics['describeStacks'] = stack_request_error(error, 'Code')
+            except (AttributeError, KeyError, TypeError):
+                diagnostics['simulatorAtReadback'] = simulator_process_state()
+                raise
+        except Exception as error:
+            diagnostics['describeStacks'] = stack_request_error(error)
+            diagnostics['simulatorAtReadback'] = simulator_process_state()
+            raise
+        else:
+            diagnostics['describeStacks'] = 'stack-observed' if stacks else 'no-stack-observed'
         if stacks:
             stack = stacks[0]
             stack_id = stack['StackId']
@@ -889,12 +991,19 @@ try:
     event_page = {}
     try:
         event_page = describe.describe_stack_events(StackName=stack_id) if stack_id else {}
-    except ClientError:
-        pass
+    except ClientError as error:
+        diagnostics['describeStackEvents'] = stack_request_error(error)
+    except Exception as error:
+        diagnostics['describeStackEvents'] = stack_request_error(error)
+        raise
+    else:
+        diagnostics['describeStackEvents'] = 'malformed-event-page'
+        diagnostics['describeStackEvents'] = stack_event_observation(event_page, stack_id)
+    finally:
+        diagnostics['simulatorAtReadback'] = simulator_process_state()
     events = event_page.get('StackEvents', [])
-    report['stackEvents'] = [{'logicalId': e.get('LogicalResourceId'), 'type': e.get('ResourceType'), 'status': e.get('ResourceStatus'), 'reason': e.get('ResourceStatusReason')} for e in events]
     check(p, 'stack-create-complete', bool(stack) and stack['StackStatus'] == 'CREATE_COMPLETE', status=stack and stack['StackStatus'],
-          reason=stack and stack.get('StackStatusReason'), seconds=round(time.time() - started, 1), createError=create_error)
+          seconds=round(time.time() - started, 1))
     outputs = {o['OutputKey']: o['OutputValue'] for o in stack.get('Outputs', [])}
     instance = outputs['InstanceId']
     host_hint = outputs['Ec2HostHint']

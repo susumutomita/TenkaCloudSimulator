@@ -39,7 +39,7 @@ func verifyNativeVPCMainSlot(ctx context.Context, tx *sql.Tx, vpc EC2NetworkReso
 	}
 	if vpc.Kind != ec2RTVPC || vpc.StackID != ec2NativeOwner || !ec2VPCIDPattern.MatchString(vpc.ID) ||
 		vpc.MainRouteTableID != nativeMainTableID(vpc.Region, vpc.ID) ||
-		(vpc.Revision != 1 || vpc.MainRouteRepair != nil) && !validNativeVPCMainRepair(vpc) {
+		!validNativeDNSGeneration(vpc) {
 		return errEC2NativeRouteTableState
 	}
 	prefix, ok := nativeSubnetPrefix(vpc.CIDR)

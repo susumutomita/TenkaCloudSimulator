@@ -285,6 +285,17 @@ func (g *Gateway) serveEC2(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		out = &ec2ModifySubnetResponse{Return: true}
+	case ec2DescribeVPCAttribute, ec2ModifyVPCAttribute:
+		if request.vpcAttribute.dryRun {
+			fail("DryRunOperation", "The local request is authorized; no operation was performed.", http.StatusPreconditionFailed)
+			return
+		}
+		result, err := g.Stacks.vpcAttribute(r.Context(), action, region, request.vpcID, request.vpcAttribute)
+		if err != nil {
+			failChild(err, "Local VPC settings are unavailable; no change was committed.")
+			return
+		}
+		out = result
 	case "CreateVpc":
 		vpc, e := g.Stacks.createNativeVPC(r.Context(), region, request.cidr, request.tags)
 		if e != nil {

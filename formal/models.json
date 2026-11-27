@@ -27642,6 +27642,197 @@
           "expect_invariant": "CurrentWriteOwnsLease"
         }
       ]
+    },
+    {
+      "id": "EC2VPCDNSAttributes",
+      "model": "formal/EC2VPCDNSAttributes.tla",
+      "config": "formal/EC2VPCDNSAttributes.cfg",
+      "bounds": "Two native VPCs and one stack-owned VPC, two DNS flags, an exact action/resource grant, four normalized evidence outcomes and two identical requests.",
+      "properties": [
+        "TypeOK",
+        "ExactReceipt",
+        "Frame",
+        "RefusalOrReadUnchanged",
+        "ExactSetting",
+        "NoSpuriousRevision"
+      ],
+      "limits": "Only control-plane settings/authorization, atomic per-request effects and acknowledgements are modeled. Not an IAM, SQLite, wire, DNS packet, host naming, route repair or Go refinement proof.",
+      "source_scope": [
+        "internal/aws/ec2_native_vpc_main_repair.go",
+        "internal/aws/ec2_native_vpc_main_route.go",
+        "internal/aws/ec2_network.go",
+        "internal/aws/ec2_read.go",
+        "internal/aws/ec2_vpc.go",
+        "internal/aws/ec2_vpc_dns.go"
+      ],
+      "mutants": [
+        {
+          "id": "IgnoreExactVpcGrant",
+          "edits": [
+            {
+              "old": "Granted == req.id = req.grantedID /\\ req.op = req.grantedOp",
+              "new": "Granted == req.op = req.grantedOp",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExactReceipt"
+        },
+        {
+          "id": "WriteStackVpc",
+          "edits": [
+            {
+              "old": "Owned == req.id # \"stack\"",
+              "new": "Owned == TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExactReceipt"
+        },
+        {
+          "id": "IgnoreDNSDependency",
+          "edits": [
+            {
+              "old": "CanSetNames == req.attr # \"hostnames\" \\/ ~req.on \\/ db[req.id].support",
+              "new": "CanSetNames == TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExactReceipt"
+        },
+        {
+          "id": "AlwaysAdvanceGeneration",
+          "edits": [
+            {
+              "old": "NeedsWrite == req.op = \"write\" /\\ db[req.id][req.attr] # req.on",
+              "new": "NeedsWrite == req.op = \"write\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "NoSpuriousRevision"
+        }
+      ]
+    },
+    {
+      "id": "EC2VpcResourceMap",
+      "model": "formal/EC2VpcResourceMap.tla",
+      "config": "formal/EC2VpcResourceMap.cfg",
+      "bounds": "One witnessed VPC (native or stack), one selected subnet, three normalized Describe inventories, one explicit relation or conflicting claim, a witnessed/absent/wrong-CIDR main, and up to three symbolic gateway route targets.",
+      "properties": [
+        "TypeOK",
+        "AssociationQualityExact",
+        "ExplicitNeedsEvidence",
+        "MainNeedsWitness",
+        "ExactAttachedGatewayEdges",
+        "GatewayFailureNotEmpty",
+        "GatewayHoleReported"
+      ],
+      "limits": "One bounded join over already normalized read outcomes and symbolic target identities; no input parsing, cross-page protocol, atomic snapshots, real routing, DNS, IAM, Go/SQLite, React, or implementation proof. Existing separate models retain their lease/route claims.",
+      "source_scope": [
+        "internal/server/web/app.js",
+        "tools/console/src/ec2-vpc-resource-map.jsx",
+        "tools/console/src/ec2-vpc-topology-read.mjs"
+      ],
+      "mutants": [
+        {
+          "id": "IgnoreAssociationConflict",
+          "edits": [
+            {
+              "old": "ELSE IF f.claim \\in Conflicts THEN \"inconsistent\" ELSE \"ready\"",
+              "new": "ELSE \"ready\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AssociationQualityExact"
+        },
+        {
+          "id": "InventExplicitForAbsent",
+          "edits": [
+            {
+              "old": "ELSE IF f.claim = \"owned\" THEN \"explicit\"",
+              "new": "ELSE IF f.claim \\in {\"owned\", \"none\"} THEN \"explicit\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExplicitNeedsEvidence"
+        },
+        {
+          "id": "InventUnseenMain",
+          "edits": [
+            {
+              "old": "ELSE IF f.owner = \"native\" /\\ f.main = \"witnessed\" THEN \"main\"",
+              "new": "ELSE IF f.owner = \"native\" THEN \"main\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "MainNeedsWitness"
+        },
+        {
+          "id": "AcceptStackNativeMarkers",
+          "edits": [
+            {
+              "old": "/\\ (f.owner = \"native\" \\/ f.main = \"absent\")",
+              "new": "/\\ TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AssociationQualityExact"
+        },
+        {
+          "id": "AllowDetachedOrPeerRoute",
+          "edits": [
+            {
+              "old": "IF GatewayInputs THEN f.routes \\cap VerifiedTargets ELSE {}",
+              "new": "IF GatewayInputs THEN f.routes ELSE {}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExactAttachedGatewayEdges"
+        },
+        {
+          "id": "IgnoreAttachmentWitness",
+          "edits": [
+            {
+              "old": "VerifiedTargets == IF f.attached THEN {\"own\"} ELSE {}",
+              "new": "VerifiedTargets == {\"own\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExactAttachedGatewayEdges"
+        },
+        {
+          "id": "TreatDeniedAsEmpty",
+          "edits": [
+            {
+              "old": "IF ~GatewayInputs THEN \"unconfirmed\"",
+              "new": "IF ~GatewayInputs THEN \"ready\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "GatewayFailureNotEmpty"
+        },
+        {
+          "id": "HidePartialMissingTarget",
+          "edits": [
+            {
+              "old": "ELSE IF f.routes \\ VerifiedTargets # {} THEN \"partial\" ELSE \"ready\"",
+              "new": "ELSE \"ready\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "GatewayHoleReported"
+        },
+        {
+          "id": "DropOtherConfirmedRoute",
+          "edits": [
+            {
+              "old": "IF GatewayInputs THEN f.routes \\cap VerifiedTargets ELSE {}",
+              "new": "IF GatewayInputs /\\ f.routes \\ VerifiedTargets = {} THEN f.routes \\cap VerifiedTargets ELSE {}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExactAttachedGatewayEdges"
+        }
+      ]
     }
   ]
 }
