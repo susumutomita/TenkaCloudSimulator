@@ -253,10 +253,11 @@ def console_fixture(browser, expect, endpoint, port, token, target, peer_token):
                     {'numofmessages': '8', 'visibilitytimeout': '300'}, 'GetMessages')
         old = check_message(rows(got.body()), body, 1, ident).get('PopReceipt')
         need(old and readback() == [], 'receive did not reserve and issue a receipt')
-        expect(view.get_by_label('Received message', exact=True)).to_have_value(ident)
+        manage = view.get_by_role('group', name='Manage a received message', exact=True)
+        expect(manage.get_by_role('combobox')).to_have_value(ident)
 
         view.get_by_label('Also replace the message text', exact=True).check()
-        view.get_by_label('Replacement text', exact=True).fill(changed)
+        manage.get_by_role('textbox').fill(changed)
         update = click('Update message', 'PUT', target_messages + '/' + ident, 204,
                        {'popreceipt': old, 'visibilitytimeout': '0'}, 'UpdateMessage')
         new = update.header_value('x-ms-popreceipt')
@@ -306,7 +307,9 @@ def run():
                 need(isinstance(token, str) and re.fullmatch('[a-f0-9]{64}', token), 'invalid local operator fixture token')
                 capdoc = json.loads(wire(port, token, 'GET', CAPS)[1])
                 cap = capdoc.get('azureQueue', {})
-                need(capdoc.get('principal') == 'simulator-admin' and cap.get('console') is True
+                # An operator with no selected exercise identity sees the default owner's queue.
+                need(capdoc.get('principal') == '' and capdoc.get('identitySelection') is True
+                     and cap.get('console') is True
                      and cap.get('endpoint') == BASE and cap.get('account') == 'tenkacloudlocal'
                      and cap.get('apiVersion') == VERSION and cap.get('reference') == REFERENCE
                      and len(cap.get('operations', [])) == len(OPS) and set(cap['operations']) == OPS,
@@ -318,7 +321,8 @@ def run():
                      and re.fullmatch('[a-f0-9]{64}', peer_token) and peer_token != token,
                      'independent peer session was not issued')
                 peer_caps = json.loads(wire(port, peer_token, 'GET', CAPS)[1])
-                need(peer_caps.get('principal') == peer and 'azureQueue' not in peer_caps,
+                need(peer_caps.get('principal') == peer and peer_caps.get('identitySelection') is False
+                     and 'azureQueue' not in peer_caps,
                      'Queue capability exposed to peer')
                 target = BASE + '/gui-queue-' + token_hex(6)
                 try:
