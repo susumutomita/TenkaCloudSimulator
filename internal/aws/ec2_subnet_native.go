@@ -12,6 +12,8 @@ import (
 	"reflect"
 	"regexp"
 	"sort"
+	"strconv"
+	"strings"
 )
 
 const (
@@ -24,12 +26,15 @@ var ec2SubnetIDPattern = regexp.MustCompile(`^subnet-([0-9a-f]{8}|[0-9a-f]{17})$
 type ec2SubnetMutation struct {
 	vpc, id, cidr, az string
 	publicIPv4        *bool
+	tags              map[string]string
 	// An admitted non-admin caller must also be authorized for the allocated ID.
 	authorizeCreatedID func(string) error
 }
 
 func parseEC2SubnetMutation(action string, fields map[string][]string) (ec2SubnetMutation, *ec2Failure) {
 	var q ec2SubnetMutation
+	tagSpec := false
+	tagMembers := map[int]map[string]any{}
 	for key, values := range fields {
 		if len(values) != 1 {
 			return q, ec2Invalid("InvalidParameterValue", "Parameter "+key+" must be sent once.")
@@ -52,6 +57,24 @@ func parseEC2SubnetMutation(action string, fields map[string][]string) (ec2Subne
 			}
 			on := value == "true"
 			q.publicIPv4 = &on
+		case action == "CreateSubnet" && key == "TagSpecification.1.ResourceType":
+			if value != "subnet" {
+				return q, ec2Invalid("InvalidParameterValue", "TagSpecification.1.ResourceType must be subnet.")
+			}
+			tagSpec = true
+		case action == "CreateSubnet":
+			m := ec2TagSpecMember.FindStringSubmatch(key)
+			if m == nil || m[1] != "1" {
+				return q, ec2Invalid("UnsupportedOperation", "Parameter "+key+" is not supported by local "+action+".")
+			}
+			i, _ := strconv.Atoi(m[2])
+			if i > 50 || !ec2SecurityGroupXMLText(value) {
+				return q, ec2Invalid("InvalidParameterValue", "Subnet tags must use positions 1 through 50 and valid XML text.")
+			}
+			if tagMembers[i] == nil {
+				tagMembers[i] = map[string]any{}
+			}
+			tagMembers[i][m[3]] = value
 		default:
 			return q, ec2Invalid("UnsupportedOperation", "Parameter "+key+" is not supported by local "+action+".")
 		}
@@ -68,6 +91,27 @@ func parseEC2SubnetMutation(action string, fields map[string][]string) (ec2Subne
 			return q, ec2Invalid("InvalidSubnet.Range", "CidrBlock must be an IPv4 range between /16 and /28.")
 		}
 		q.cidr = prefix.Masked().String()
+		if tagSpec != (len(tagMembers) > 0) {
+			return q, ec2Invalid("InvalidParameterValue", "Subnet tags require one nonempty TagSpecification.1 with ResourceType subnet.")
+		}
+		if tagSpec {
+			raw := make([]any, 0, len(tagMembers))
+			for i := 1; i <= len(tagMembers); i++ {
+				m := tagMembers[i]
+				if m["Key"] == nil {
+					return q, ec2Invalid("InvalidParameterValue", "Subnet tags must be numbered from 1 without gaps and each requires a Key.")
+				}
+				if _, ok := m["Value"]; !ok {
+					m["Value"] = ""
+				}
+				raw = append(raw, m)
+			}
+			tags, err := networkTags(raw)
+			if err != nil {
+				return q, ec2Invalid("InvalidParameterValue", "Subnet tags require unique non-reserved keys of 1–128 bytes and values of up to 256 bytes.")
+			}
+			q.tags = tags
+		}
 	} else {
 		if q.id == "" {
 			return q, ec2Invalid("MissingParameter", "SubnetId is required.")
@@ -91,13 +135,18 @@ func nativeSubnetAZ(region, az string) bool {
 	return az == region+"a" || az == region+"b" || az == region+"c"
 }
 
-func nativeSubnetCreatePermission(region, id string) [2]string {
-	return [2]string{"ec2:CreateSubnet", networkARN(region, "subnet", id)}
+func (q ec2SubnetMutation) createPermissions(region, id string) [][2]string {
+	arn := networkARN(region, "subnet", id)
+	out := [][2]string{{"ec2:CreateSubnet", arn}}
+	if len(q.tags) != 0 {
+		out = append(out, [2]string{"ec2:CreateTags", arn})
+	}
+	return out
 }
 
 func (q ec2SubnetMutation) permissions(action, region string) [][2]string {
 	if action == "CreateSubnet" {
-		return [][2]string{{"ec2:CreateSubnet", networkARN(region, "vpc", q.vpc)}, nativeSubnetCreatePermission(region, "*")}
+		return append([][2]string{{"ec2:CreateSubnet", networkARN(region, "vpc", q.vpc)}}, q.createPermissions(region, "*")...)
 	}
 	return [][2]string{{"ec2:" + action, networkARN(region, "subnet", q.id)}}
 }
@@ -138,8 +187,17 @@ func nativeSubnetParent(ctx context.Context, tx *sql.Tx, region, id string) (net
 
 func nativeSubnetReadback(ctx context.Context, tx *sql.Tx, r EC2NetworkResource) (ec2SubnetRead, error) {
 	if r.Kind != ec2NativeSubnetKind || r.StackID != ec2NativeOwner || !ec2SubnetIDPattern.MatchString(r.ID) ||
-		!ec2VPCIDPattern.MatchString(r.VPCID) || !nativeSubnetAZ(r.Region, r.AvailabilityZone) || r.Revision < 1 || len(r.Tags) != 0 {
+		!ec2VPCIDPattern.MatchString(r.VPCID) || !nativeSubnetAZ(r.Region, r.AvailabilityZone) || r.Revision < 1 {
 		return ec2SubnetRead{}, errors.New("invalid native subnet identity or settings")
+	}
+	if len(r.Tags) > 50 {
+		return ec2SubnetRead{}, errors.New("invalid native subnet tags")
+	}
+	for k, v := range r.Tags {
+		if len(k) == 0 || len(k) > 128 || len(v) > 256 || strings.HasPrefix(strings.ToLower(k), "aws:") ||
+			!ec2SecurityGroupXMLText(k) || !ec2SecurityGroupXMLText(v) {
+			return ec2SubnetRead{}, errors.New("invalid native subnet tag")
+		}
 	}
 	if err := nativeSubnetUnclaimed(ctx, tx, r.Region, r.ID); err != nil {
 		return ec2SubnetRead{}, err
@@ -156,7 +214,7 @@ func nativeSubnetReadback(ctx context.Context, tx *sql.Tx, r EC2NetworkResource)
 		return ec2SubnetRead{}, errEC2NetworkOutsideVPC
 	}
 	return ec2SubnetRead{ID: r.ID, VPC: r.VPCID, CIDR: r.CIDR, State: "available", AZ: r.AvailabilityZone,
-		ManagedBy: ec2ManagedByEC2, PublicIPv4: &r.PublicIP}, nil
+		ManagedBy: ec2ManagedByEC2, PublicIPv4: &r.PublicIP, Tags: ec2ReadTags(r.Tags)}, nil
 }
 
 func nativeSubnetRows(ctx context.Context, tx *sql.Tx, region string) ([]ec2SubnetRead, error) {
@@ -196,7 +254,7 @@ func (s *StackStore) createNativeSubnet(ctx context.Context, region string, q ec
 		}
 	}
 	r := EC2NetworkResource{Region: region, ID: id, Kind: ec2NativeSubnetKind,
-		StackID: ec2NativeOwner, VPCID: q.vpc, CIDR: q.cidr, AvailabilityZone: q.az, Revision: 1}
+		StackID: ec2NativeOwner, VPCID: q.vpc, CIDR: q.cidr, AvailabilityZone: q.az, Tags: q.tags, Revision: 1}
 	tx, err := s.db.BeginTx(ctx, nil)
 	if err != nil {
 		return ec2SubnetRead{}, err

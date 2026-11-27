@@ -27642,6 +27642,106 @@
           "expect_invariant": "CurrentWriteOwnsLease"
         }
       ]
+    },
+    {
+      "id": "EC2NativeSubnetTagOnCreate",
+      "model": "formal/EC2NativeSubnetTagOnCreate.tla",
+      "config": "formal/EC2NativeSubnetTagOnCreate.cfg",
+      "bounds": "One native or CloudFormation parent, one creation, three abstract distinct tag/value fixtures, boolean capability and wildcard/exact policy witnesses, one current view or retired view.",
+      "properties": [
+        "TypeOK",
+        "TagPermissionBeforeCommit",
+        "NativeAndAuthorizedParent",
+        "AtomicTagSet",
+        "ExactCurrentReadback",
+        "OneCreateAttempt",
+        "AdvertisedCapabilityOnly"
+      ],
+      "limits": "Finite create-and-verify abstraction. Does not model AWS policy JSON/ARN matching, XML/UTF-8, SQLite or browser refinement, quotas, concurrency or packet forwarding. Go and local Chromium/SDK are independent executable evidence.",
+      "source_scope": [
+        "internal/aws/ec2_read.go",
+        "internal/aws/ec2_subnet_native.go",
+        "internal/aws/ec2_subnet_native_tags_test.go",
+        "internal/aws/ec2_subnet_native_test.go",
+        "internal/server/ec2_security_groups_console_test.go",
+        "internal/server/server.go",
+        "internal/server/web/app.js",
+        "tools/console/src/ec2-native-subnets.mjs",
+        "tools/console/src/ec2-subnet-tag-draft.mjs",
+        "tools/console/src/ec2-subnet-tags-fields.jsx",
+        "tools/console/src/ec2-subnets-console.jsx",
+        "tools/console/test/ec2-subnet-create-tags.test.mjs",
+        "test/console/ec2_subnet_create_tags_browser.cjs",
+        "test/console/ec2_subnet_create_tags_sdk.py"
+      ],
+      "mutants": [
+        {
+          "id": "SkipTagPolicy",
+          "edits": [
+            {
+              "old": "TagPolicy == intent = {} \\/ (wildcardTag /\\ exactTag)",
+              "new": "TagPolicy == TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "TagPermissionBeforeCommit"
+        },
+        {
+          "id": "AllowStackParent",
+          "edits": [
+            {
+              "old": "NativeTarget == native",
+              "new": "NativeTarget == TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "NativeAndAuthorizedParent"
+        },
+        {
+          "id": "DropRequestedTags",
+          "edits": [
+            {
+              "old": "DurableTags(tags) == tags",
+              "new": "DurableTags(tags) == {}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AtomicTagSet"
+        },
+        {
+          "id": "AcceptIncompleteReadback",
+          "edits": [
+            {
+              "old": "DescribeMatches(tags) == tags = intent",
+              "new": "DescribeMatches(tags) == TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExactCurrentReadback"
+        },
+        {
+          "id": "RetryUnknown",
+          "edits": [
+            {
+              "old": "DraftReady == phase = \"draft\"",
+              "new": "DraftReady == phase \\in {\"draft\",\"unconfirmed\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "OneCreateAttempt"
+        },
+        {
+          "id": "SendUnadvertisedTags",
+          "edits": [
+            {
+              "old": "TaggedOperationAdvertised == intent = {} \\/ advertised",
+              "new": "TaggedOperationAdvertised == TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AdvertisedCapabilityOnly"
+        }
+      ]
     }
   ]
 }

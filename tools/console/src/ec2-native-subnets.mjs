@@ -8,6 +8,9 @@ const modifySubnet = 'ModifySubnetAttribute';
 const subnetScope = new WeakMap();
 const invalid = () => {throw Error('Invalid subnet reply');};
 const xml = text => new DOMParser().parseFromString(text, 'application/xml');
+const bytes = new TextEncoder();
+const forbiddenXML = /[\u0000-\u0008\u000b\u000c\u000e-\u001f\ud800-\udfff\ufffe\uffff]/u;
+export const nativeSubnetTagLimit = 50;
 
 export function vpcNativeSubnetsAvailable(capabilities, auth) {
   const ec2 = capabilities?.services?.ec2;
@@ -19,6 +22,48 @@ export function vpcNativeSubnetPublicIPv4Available(capabilities, auth) {
   const ec2 = capabilities?.services?.ec2;
   return vpcNativeSubnetsAvailable(capabilities, auth) && ec2.subnetLifecycle.includes(modifySubnet) &&
     Array.isArray(ec2.operations) && ec2.operations.includes(modifySubnet);
+}
+
+
+export function vpcNativeSubnetTagsOnCreateAvailable(capabilities, auth) {
+  const ec2 = capabilities?.services?.ec2;
+  return vpcNativeSubnetsAvailable(capabilities, auth) && ec2.nativeSubnetTagsOnCreate === true &&
+    Array.isArray(ec2.operations) && ['CreateSubnet','DescribeSubnets'].every(operation=>ec2.operations.includes(operation));
+}
+
+export function validNativeSubnetTagValue(value) {
+  return typeof value === 'string' && bytes.encode(value).length <= 256 && !forbiddenXML.test(value);
+}
+
+export function validNativeSubnetTagKey(key) {
+  return typeof key === 'string' && key.length > 0 && bytes.encode(key).length <= 128 &&
+    !/^aws:/i.test(key) && !forbiddenXML.test(key);
+}
+
+function assertNativeSubnetTags(tags) {
+  if (!Array.isArray(tags) || tags.length > nativeSubnetTagLimit) invalid();
+  const seen = new Set();
+  for (const tag of tags) {
+    if (!validNativeSubnetTagKey(tag?.key) || !validNativeSubnetTagValue(tag?.value) || seen.has(tag.key)) invalid();
+    seen.add(tag.key);
+  }
+}
+
+function nativeSubnetTagParameters(tags) {
+  if (!tags.length) return {};
+  const values = {'TagSpecification.1.ResourceType':'subnet'};
+  for (const [index,{key,value}] of tags.entries()) {
+    const member = 'TagSpecification.1.Tag.' + (index + 1);
+    values[member+'.Key'] = key;
+    values[member+'.Value'] = value;
+  }
+  return values;
+}
+
+function exactTags(item, expected) {
+  const found = item.tags ?? [];
+  if (found.length !== expected.size) return false;
+  return found.every(tag=>expected.get(tag.key) === tag.value);
 }
 
 function prefix(text) {
@@ -76,22 +121,23 @@ function row(item, region, publicIPv4Required, display = false) {
   const lookup = fields(item, ['subnetId','vpcId','cidrBlock','state','availabilityZone','simulatorManagedBy','tagSet','mapPublicIpOnLaunch']);
   const id = text(lookup.get('subnetId')), vpc = text(lookup.get('vpcId')), cidr = text(lookup.get('cidrBlock'));
   const az = text(lookup.get('availabilityZone'), true), owner = text(lookup.get('simulatorManagedBy'), true);
-  let name = '';
+  const tags = [];
   if (!subnetId.test(id) || !vpcId.test(vpc) || prefix(cidr)?.cidr !== cidr || text(lookup.get('state')) !== 'available' ||
       lookup.has('simulatorManagedBy') && owner !== 'ec2' || (az || owner) && !['a','b','c'].some(suffix=>az === region + suffix)) invalid();
   if (lookup.has('tagSet')) {
-    const tags = members(lookup.get('tagSet'), 50);
-    if (owner && tags.length) invalid();
-    const seen = new Set(), bytes = new TextEncoder();
-    for (const tag of tags) {
+    const seen = new Set();
+    for (const tag of members(lookup.get('tagSet'), nativeSubnetTagLimit)) {
       const fieldsForTag = fields(tag, ['key','value']);
       const key = text(fieldsForTag.get('key')), value = text(fieldsForTag.get('value'));
       if (!key || seen.has(key) || bytes.encode(key).length > 128 || bytes.encode(value).length > 256) invalid();
+      if (owner === 'ec2' && (!validNativeSubnetTagKey(key) || !validNativeSubnetTagValue(value))) invalid();
       seen.add(key);
-      if (key === 'Name') name = value;
+      tags.push(Object.freeze({key,value}));
     }
   }
-  const meta = display ? {name,state:'available'} : {};
+  const saved = Object.freeze(tags);
+  const meta = display ? {name:tags.find(tag=>tag.key==='Name')?.value ?? '',state:'available',tags:saved}
+    : owner === 'ec2' && tags.length ? {tags:saved} : {};
   const flag = lookup.get('mapPublicIpOnLaunch');
   if (flag) {
     const value = text(flag);
@@ -184,14 +230,19 @@ export async function loadVpcSubnets(request, region, vpc, {signal, parse=xml, p
 }
 
 export async function createVpcNativeSubnet(request, region, vpc, cidr, az, opts = {}) {
-  const {signal, parse=xml} = opts;
+  const {signal, parse=xml, tags=[]} = opts;
   const canon = nativeSubnetCIDR(vpc,cidr);
   if (subnetTarget(vpc)!=='ec2' || !canon || !['a','b','c'].some(s=>az===region+s)) invalid();
-  const doc = await send(request,region,'CreateSubnet',{VpcId:vpc.id,CidrBlock:canon,AvailabilityZone:az},signal,parse);
+  assertNativeSubnetTags(tags);
+  if (tags.length && !vpcNativeSubnetTagsOnCreateAvailable(opts.capabilities, opts.authenticationRequired)) invalid();
+  const expected = new Map(tags.map(({key,value})=>[key,value]));
+  const doc = await send(request,region,'CreateSubnet',
+    {VpcId:vpc.id,CidrBlock:canon,AvailabilityZone:az,...nativeSubnetTagParameters(tags)},signal,parse);
   const created = row(envelope(doc,'CreateSubnet','subnet'),region,opts.publicIPv4);
-  if (created.vpc!==vpc.id || created.cidr!==canon || created.az!==az || created.owner!=='ec2') invalid();
+  if (created.vpc!==vpc.id || created.cidr!==canon || created.az!==az || created.owner!=='ec2' || !exactTags(created,expected)) invalid();
   const rows = await loadVpcSubnets(request,region,vpc,opts);
-  if (!rows.some(item=>item.id===created.id && item.vpc===created.vpc && item.cidr===canon && item.az===az)) invalid();
+  if (!rows.some(item=>item.id===created.id && item.vpc===created.vpc && item.cidr===canon && item.az===az &&
+      item.owner==='ec2' && exactTags(item,expected))) invalid();
   return {created,rows};
 }
 

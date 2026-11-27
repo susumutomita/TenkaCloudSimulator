@@ -1,146 +1,332 @@
 {
   "version": 1,
-  "base_sha": "a1f155caaf648bcec8729774234a9115de13bef8",
+  "base_sha": "7f500c9e951d9328a36df3a9946f1c6827200085",
   "changes": [
     {
-      "path": "docs/design/rds-owned-generation.md",
-      "sha256": "23d7f8762d65da0fd5d696d1834be3de1735d1f5d91a8ed25a532a009f2d1a6f",
+      "path": "README.md",
+      "sha256": "c0779147042527fc8b9cdbf26852b48d252d09d1ac53fc31e05cc1a1eade6df5",
       "disposition": "documentation",
-      "reason": "Describe the new in-process observation, unchanged public and transport boundary, and separate bounds of the model and native tests.",
+      "reason": "Documents the native subnet creation and unchanged read-only/untagged boundaries.",
       "models": []
     },
     {
-      "path": "formal/RDSGuestPeerPreflight.cfg",
-      "sha256": "92133d75a05b54ded89c21159fd7a7122b203c8f1c79e0e69d41565284991323",
+      "path": "docs/design/0001-go-standalone.md",
+      "sha256": "7efe3f309597d6fadf67d6808cb4163469041a5d369b8a6fda525d13cb5ebe62",
+      "disposition": "documentation",
+      "reason": "Documents the native subnet creation and unchanged read-only/untagged boundaries.",
+      "models": []
+    },
+    {
+      "path": "docs/ec2-native-subnet.md",
+      "sha256": "751811edcc35cba4fbe1e03b226ddec903127c7f6b9b7ba0cdf47e9699a59a6d",
+      "disposition": "documentation",
+      "reason": "Documents the native subnet creation and unchanged read-only/untagged boundaries.",
+      "models": []
+    },
+    {
+      "path": "formal/EC2NativeSubnetTagOnCreate.cfg",
+      "sha256": "3e4a916cb0d2a7a9e6295fb256ee220eaf710fbfaf0d2e5646013920a96e3843",
       "disposition": "modeled",
-      "reason": "Keep existing invariant checks and add the three distinct failure oracles for original group at entry, at final snapshot and matching revisions across reads.",
+      "reason": "Pins finite tag and policy witnesses and the explicit tested invariants.",
       "models": [
         {
-          "id": "RDSGuestPeerPreflight",
+          "id": "EC2NativeSubnetTagOnCreate",
           "properties": [
-            "OriginalGroupBeforeProbe",
-            "OriginalGroupAtFinalSnapshot",
-            "MatchingGroupSnapshotRevisions"
+            "TagPermissionBeforeCommit",
+            "NativeAndAuthorizedParent",
+            "AtomicTagSet",
+            "ExactCurrentReadback",
+            "OneCreateAttempt",
+            "AdvertisedCapabilityOnly"
           ],
-          "limits": "One provider-owned call after reservation, with one original group, a same-ARN replacement and two catalog revisions. The final snapshot is an observation, not authority for a future connection. SQLite capture/isolation, guest execution, PostgreSQL, SQL and transport remain concrete obligations."
+          "limits": "Finite create-and-verify abstraction. Does not model AWS policy JSON/ARN matching, XML/UTF-8, SQLite or browser refinement, quotas, concurrency or packet forwarding. Go and local Chromium/SDK are independent executable evidence."
         }
       ]
     },
     {
-      "path": "formal/RDSGuestPeerPreflight.tla",
-      "sha256": "d4b2eedb55952aa0893528a3924d96c65183501ce87722464708899b73728904",
+      "path": "formal/EC2NativeSubnetTagOnCreate.tla",
+      "sha256": "77e25b24897e1ab736d2cfa438d9d0534e2738b588decf6a8572fb4bacd0f17e",
       "disposition": "modeled",
-      "reason": "Extend the bounded committed-read model with explicit same-ARN replacement and in-place revision transitions before and during a probe, without requiring the snapshots to remain valid after the final read.",
+      "reason": "Models policy, atomic durable tag sets, and exact current result presentation.",
       "models": [
         {
-          "id": "RDSGuestPeerPreflight",
+          "id": "EC2NativeSubnetTagOnCreate",
           "properties": [
-            "OriginalGroupBeforeProbe",
-            "OriginalGroupAtFinalSnapshot",
-            "MatchingGroupSnapshotRevisions",
-            "HealthyObservation",
-            "ObservationOnly"
+            "TagPermissionBeforeCommit",
+            "NativeAndAuthorizedParent",
+            "AtomicTagSet",
+            "ExactCurrentReadback",
+            "OneCreateAttempt",
+            "AdvertisedCapabilityOnly"
           ],
-          "limits": "One provider-owned call after reservation, with one original group, a same-ARN replacement and two catalog revisions. The final snapshot is an observation, not authority for a future connection. SQLite capture/isolation, guest execution, PostgreSQL, SQL and transport remain concrete obligations."
+          "limits": "Finite create-and-verify abstraction. Does not model AWS policy JSON/ARN matching, XML/UTF-8, SQLite or browser refinement, quotas, concurrency or packet forwarding. Go and local Chromium/SDK are independent executable evidence."
         }
       ]
     },
     {
       "path": "formal/models.json",
-      "sha256": "fa31e5e26547811f682960e9d95bd03f0c87de35f81d05cc56f3c2c1274e4900",
+      "sha256": "b1f9417b5785c9eedbacc2c19d8ca93a5068a7964f7e77fc7c618bd82d26fe71",
       "disposition": "formal-infrastructure",
-      "reason": "Register enlarged finite #130 model bounds, the existing resolver source path, and four required, specifically classified counterexamples. No other registry sections change.",
+      "reason": "Registers the scoped native tag create-and-readback model and intentional negative controls.",
       "models": []
     },
     {
-      "path": "internal/aws/catalog/rds_guest_peer_linux_amd64.go",
-      "sha256": "0b1c6e2e1f9b15e6da7da106a117dd5c93a6073a3ccff80df88a07336f8a112b",
+      "path": "internal/aws/ec2_read.go",
+      "sha256": "0d55ab12c6e18d4388cac13807277492a5d6831ef607855c2d240791ee0947bb",
       "disposition": "modeled",
-      "reason": "Reject a replacement before or after the fixed host probe, and refuse to join different catalog revisions of the original group across two committed reads.",
+      "reason": "Serializes only authoritative scoped saved native tags without changing stack ownership.",
       "models": [
         {
-          "id": "RDSGuestPeerPreflight",
+          "id": "EC2NativeSubnetTagOnCreate",
           "properties": [
-            "OriginalGroupBeforeProbe",
-            "OriginalGroupAtFinalSnapshot",
-            "MatchingGroupSnapshotRevisions",
-            "HealthyObservation",
-            "ObservationOnly"
+            "AtomicTagSet",
+            "ExactCurrentReadback"
           ],
-          "limits": "One provider-owned call after reservation, with one original group, a same-ARN replacement and two catalog revisions. The final snapshot is an observation, not authority for a future connection. SQLite capture/isolation, guest execution, PostgreSQL, SQL and transport remain concrete obligations."
+          "limits": "Finite create-and-verify abstraction. Does not model AWS policy JSON/ARN matching, XML/UTF-8, SQLite or browser refinement, quotas, concurrency or packet forwarding. Go and local Chromium/SDK are independent executable evidence."
         }
       ]
     },
     {
-      "path": "internal/aws/catalog/rds_guest_peer_subnet_linux_amd64_test.go",
-      "sha256": "4a0d06f88cddf9e493a4418c8bc056a43324a153947d0a562f5a0430d0132eb5",
-      "disposition": "test-support",
-      "reason": "Use real scoped native RDS Query and SQLite changes with a simulated host probe for same-name replacement, in-place revision and unrelated-group regression controls. No production mode, route or live database.",
-      "models": []
-    },
-    {
-      "path": "internal/aws/catalog/rds_owned_runtime_linux_amd64.go",
-      "sha256": "7b803a73255c154274215ec456798d485e1c963cba026bfc855cd7f47d263dd2",
+      "path": "internal/aws/ec2_subnet_native.go",
+      "sha256": "8116b56bffc506f670aed514fbd2b1e3cd23a4eef1187b4569f9815f0e91f5bb",
       "disposition": "modeled",
-      "reason": "Derive the original group identity from the same write transaction as the exact DB reservation. Peer preflight requires the exact owned child and committed lease; this guard alone does not enable a route.",
+      "reason": "Checks exact native parent and CreateSubnet/conditional CreateTags policy, then persists tags and subnet together.",
       "models": [
         {
-          "id": "RDSOwnedGenerationFence",
+          "id": "EC2NativeSubnetTagOnCreate",
           "properties": [
-            "LaunchNeedsCommittedAuthority",
-            "AttachNeedsCurrent",
-            "NoPublishedEndpoint"
+            "TagPermissionBeforeCommit",
+            "NativeAndAuthorizedParent",
+            "AtomicTagSet"
           ],
-          "limits": "One bounded owner and exact DB generation; the native tests, not this model, verify actual group lookups and lifecycle behavior. No guest transport or real process claim."
-        },
-        {
-          "id": "RDSGuestPeerPreflight",
-          "properties": [
-            "OriginalGroupBeforeProbe",
-            "OriginalGroupAtFinalSnapshot"
-          ],
-          "limits": "One provider-owned call after reservation, with one original group, a same-ARN replacement and two catalog revisions. The final snapshot is an observation, not authority for a future connection. SQLite capture/isolation, guest execution, PostgreSQL, SQL and transport remain concrete obligations."
+          "limits": "Finite create-and-verify abstraction. Does not model AWS policy JSON/ARN matching, XML/UTF-8, SQLite or browser refinement, quotas, concurrency or packet forwarding. Go and local Chromium/SDK are independent executable evidence."
         }
       ]
     },
     {
-      "path": "internal/aws/catalog/rds_private_postgres_topology.go",
-      "sha256": "1c7c023b5361d0d9b71bd81431d143cb313147a3754c6e8a271f6f72616d6752",
+      "path": "internal/aws/ec2_subnet_native_tags_test.go",
+      "sha256": "b24f2958ef06ebd45663c1a529b22880cfbaa419b83e235ad5c148b692e270c4",
       "disposition": "modeled",
-      "reason": "Resolve ARN, creation sequence and revision from the same validated native catalog subnet-group row as its two or more subnet IDs. No wire shape, topology policy or backend returned to callers.",
+      "reason": "Executes denial, native/stack ownership, exact tag receipt and durable state against SQLite.",
       "models": [
         {
-          "id": "RDSPrivatePostgresTopology",
+          "id": "EC2NativeSubnetTagOnCreate",
           "properties": [
-            "OwnedTopologyBeforeWrite",
-            "ConfigurationOnly"
+            "TagPermissionBeforeCommit",
+            "NativeAndAuthorizedParent",
+            "AtomicTagSet"
           ],
-          "limits": "Finite configuration validation; this model does not prove Go input decoding, AWS API parity or the exact sequence readback."
-        },
-        {
-          "id": "RDSGuestPeerPreflight",
-          "properties": [
-            "OriginalGroupBeforeProbe",
-            "OriginalGroupAtFinalSnapshot",
-            "MatchingGroupSnapshotRevisions"
-          ],
-          "limits": "One provider-owned call after reservation, with one original group, a same-ARN replacement and two catalog revisions. The final snapshot is an observation, not authority for a future connection. SQLite capture/isolation, guest execution, PostgreSQL, SQL and transport remain concrete obligations."
+          "limits": "Finite create-and-verify abstraction. Does not model AWS policy JSON/ARN matching, XML/UTF-8, SQLite or browser refinement, quotas, concurrency or packet forwarding. Go and local Chromium/SDK are independent executable evidence."
         }
       ]
     },
     {
-      "path": "scripts/formal_model_gate.py",
-      "sha256": "63efa7893491c58912d410880c6a5549dc9166744b6f2517c3c0dd8ee529583e",
-      "disposition": "formal-infrastructure",
-      "reason": "Require the three additional invariants, four targeted controls and the exact #130 resolver binding. No weakening of prior requirements, runtime checks or runner policy.",
+      "path": "internal/aws/ec2_subnet_native_test.go",
+      "sha256": "193747145117d840dd7ea0f475b29a77662509476935296633ef6a5f370486ab",
+      "disposition": "modeled",
+      "reason": "Protects the original untagged and scoped subnet paths while permitting only the new tagged shape.",
+      "models": [
+        {
+          "id": "EC2NativeSubnetTagOnCreate",
+          "properties": [
+            "TagPermissionBeforeCommit",
+            "NativeAndAuthorizedParent",
+            "AtomicTagSet"
+          ],
+          "limits": "Finite create-and-verify abstraction. Does not model AWS policy JSON/ARN matching, XML/UTF-8, SQLite or browser refinement, quotas, concurrency or packet forwarding. Go and local Chromium/SDK are independent executable evidence."
+        }
+      ]
+    },
+    {
+      "path": "internal/server/ec2_security_groups_console_test.go",
+      "sha256": "7e5f1115d50f20d589bab2e262ef436ae99a63485df0e0ac0c4651e7e4e9a2e1",
+      "disposition": "modeled",
+      "reason": "Asserts advertisement only with exact create/read support and not in a scoped or anonymous session.",
+      "models": [
+        {
+          "id": "EC2NativeSubnetTagOnCreate",
+          "properties": [
+            "AdvertisedCapabilityOnly"
+          ],
+          "limits": "Finite create-and-verify abstraction. Does not model AWS policy JSON/ARN matching, XML/UTF-8, SQLite or browser refinement, quotas, concurrency or packet forwarding. Go and local Chromium/SDK are independent executable evidence."
+        }
+      ]
+    },
+    {
+      "path": "internal/server/server.go",
+      "sha256": "877f2dde75ea9492370e120ccaa4afed66aaca72c212599b97bc24c39914cc28",
+      "disposition": "modeled",
+      "reason": "Advertises configured native create/read capability only in unscoped authenticated sessions; does not grant IAM.",
+      "models": [
+        {
+          "id": "EC2NativeSubnetTagOnCreate",
+          "properties": [
+            "AdvertisedCapabilityOnly"
+          ],
+          "limits": "Finite create-and-verify abstraction. Does not model AWS policy JSON/ARN matching, XML/UTF-8, SQLite or browser refinement, quotas, concurrency or packet forwarding. Go and local Chromium/SDK are independent executable evidence."
+        }
+      ]
+    },
+    {
+      "path": "internal/server/web/app.css",
+      "sha256": "d5a33836548b52fd8d0def383d30874fb088ffd0796faaccc6ba6869fad766d2",
+      "disposition": "presentation",
+      "reason": "Deterministically generated presentation, inputs or notice bytes; the JS mutation path is bound separately.",
       "models": []
     },
     {
-      "path": "scripts/test-formal-gate.py",
-      "sha256": "b43eb72d6da205cbb94d6ec986da87d10443a7c1841191fea729fffee7518b51",
-      "disposition": "formal-infrastructure",
-      "reason": "Pin exact expected #130 source scope and all old and new invariant/control mappings in tooling unit tests; not a TLC run or Go proof.",
+      "path": "internal/server/web/app.js",
+      "sha256": "94913b8ffc060e2400701cd0eae351baa135ac3e549ab0557d553c74bc0a0e2a",
+      "disposition": "modeled",
+      "reason": "Exact embedded compiled caller sends one advertised create and verifies the current scoped readback.",
+      "models": [
+        {
+          "id": "EC2NativeSubnetTagOnCreate",
+          "properties": [
+            "ExactCurrentReadback",
+            "OneCreateAttempt",
+            "AdvertisedCapabilityOnly"
+          ],
+          "limits": "Finite create-and-verify abstraction. Does not model AWS policy JSON/ARN matching, XML/UTF-8, SQLite or browser refinement, quotas, concurrency or packet forwarding. Go and local Chromium/SDK are independent executable evidence."
+        }
+      ]
+    },
+    {
+      "path": "test/console/ec2_subnet_create_tags_browser.cjs",
+      "sha256": "8c1ed25d12bc0de9e50f688c49eb4cd45f1e3480ce2d2289b12da2bc672efc98",
+      "disposition": "modeled",
+      "reason": "Drives real embedded form and SQLite native EC2 operations, including missing policy and untagged prior behavior.",
+      "models": [
+        {
+          "id": "EC2NativeSubnetTagOnCreate",
+          "properties": [
+            "TagPermissionBeforeCommit",
+            "NativeAndAuthorizedParent",
+            "AtomicTagSet",
+            "ExactCurrentReadback",
+            "OneCreateAttempt",
+            "AdvertisedCapabilityOnly"
+          ],
+          "limits": "Finite create-and-verify abstraction. Does not model AWS policy JSON/ARN matching, XML/UTF-8, SQLite or browser refinement, quotas, concurrency or packet forwarding. Go and local Chromium/SDK are independent executable evidence."
+        }
+      ]
+    },
+    {
+      "path": "test/console/ec2_subnet_create_tags_sdk.py",
+      "sha256": "af9f77dc6ad2be216a7f080f32f9be03360df35716622256c5c2889898ca62ab",
+      "disposition": "modeled",
+      "reason": "Uses pinned SDK on real loopback, separately checks conditional permission and persisted readback.",
+      "models": [
+        {
+          "id": "EC2NativeSubnetTagOnCreate",
+          "properties": [
+            "TagPermissionBeforeCommit",
+            "NativeAndAuthorizedParent",
+            "AtomicTagSet",
+            "ExactCurrentReadback",
+            "OneCreateAttempt",
+            "AdvertisedCapabilityOnly"
+          ],
+          "limits": "Finite create-and-verify abstraction. Does not model AWS policy JSON/ARN matching, XML/UTF-8, SQLite or browser refinement, quotas, concurrency or packet forwarding. Go and local Chromium/SDK are independent executable evidence."
+        }
+      ]
+    },
+    {
+      "path": "tools/console/bundle-digests.json",
+      "sha256": "8e5024dd50fd5ca281d645e35bdab0d55994f12cabb35b4d7b6d4db781498241",
+      "disposition": "presentation",
+      "reason": "Deterministically generated presentation, inputs or notice bytes; the JS mutation path is bound separately.",
       "models": []
+    },
+    {
+      "path": "tools/console/bundle-inputs.json",
+      "sha256": "8714b27d3d01ae66dac06d7e5cde978b42430ce716aeaeefba3377bf46428e07",
+      "disposition": "presentation",
+      "reason": "Deterministically generated presentation, inputs or notice bytes; the JS mutation path is bound separately.",
+      "models": []
+    },
+    {
+      "path": "tools/console/src/ec2-native-subnets.mjs",
+      "sha256": "61cb4bf5e371187080dfee060ba589e462a70a954042125dd02cb2139bbb67d1",
+      "disposition": "modeled",
+      "reason": "Validates the locally advertised wire tags and requires exact tag sets in receipt and regional inventory.",
+      "models": [
+        {
+          "id": "EC2NativeSubnetTagOnCreate",
+          "properties": [
+            "ExactCurrentReadback",
+            "OneCreateAttempt",
+            "AdvertisedCapabilityOnly"
+          ],
+          "limits": "Finite create-and-verify abstraction. Does not model AWS policy JSON/ARN matching, XML/UTF-8, SQLite or browser refinement, quotas, concurrency or packet forwarding. Go and local Chromium/SDK are independent executable evidence."
+        }
+      ]
+    },
+    {
+      "path": "tools/console/src/ec2-subnet-tag-draft.mjs",
+      "sha256": "daeec092c28c495e0d96c505bcbd015ffb8760f38ee2664ef4b43448f8f743cd",
+      "disposition": "modeled",
+      "reason": "Converts bounded Name and entered values into a single intentional tag set; unentered fields do not create tags.",
+      "models": [
+        {
+          "id": "EC2NativeSubnetTagOnCreate",
+          "properties": [
+            "AtomicTagSet",
+            "AdvertisedCapabilityOnly"
+          ],
+          "limits": "Finite create-and-verify abstraction. Does not model AWS policy JSON/ARN matching, XML/UTF-8, SQLite or browser refinement, quotas, concurrency or packet forwarding. Go and local Chromium/SDK are independent executable evidence."
+        }
+      ]
+    },
+    {
+      "path": "tools/console/src/ec2-subnet-tags-fields.jsx",
+      "sha256": "5dfa2edacb5175ea78272f79aab40a6de84b3cd89642cc0e3bb892a59fbcbbbc",
+      "disposition": "modeled",
+      "reason": "Binds exact input controls to this creation draft and does not add a post-create action.",
+      "models": [
+        {
+          "id": "EC2NativeSubnetTagOnCreate",
+          "properties": [
+            "OneCreateAttempt",
+            "AdvertisedCapabilityOnly"
+          ],
+          "limits": "Finite create-and-verify abstraction. Does not model AWS policy JSON/ARN matching, XML/UTF-8, SQLite or browser refinement, quotas, concurrency or packet forwarding. Go and local Chromium/SDK are independent executable evidence."
+        }
+      ]
+    },
+    {
+      "path": "tools/console/src/ec2-subnets-console.jsx",
+      "sha256": "bfd92789d4c1c8edeb00c6dd4e134ac08749949fb27932c3e4e5a2f9a0c912a7",
+      "disposition": "modeled",
+      "reason": "Requires confirmed native parent and tag capability before writing; retires stale/unverified writes without retry.",
+      "models": [
+        {
+          "id": "EC2NativeSubnetTagOnCreate",
+          "properties": [
+            "ExactCurrentReadback",
+            "OneCreateAttempt",
+            "AdvertisedCapabilityOnly"
+          ],
+          "limits": "Finite create-and-verify abstraction. Does not model AWS policy JSON/ARN matching, XML/UTF-8, SQLite or browser refinement, quotas, concurrency or packet forwarding. Go and local Chromium/SDK are independent executable evidence."
+        }
+      ]
+    },
+    {
+      "path": "tools/console/test/ec2-subnet-create-tags.test.mjs",
+      "sha256": "4b2c7920f68766eba6809ea07bb6d676886987093d922c8b760258d421a147a1",
+      "disposition": "modeled",
+      "reason": "Covers gated controls, negative wire inputs, and current exact receipt/Describe results.",
+      "models": [
+        {
+          "id": "EC2NativeSubnetTagOnCreate",
+          "properties": [
+            "ExactCurrentReadback",
+            "OneCreateAttempt",
+            "AdvertisedCapabilityOnly"
+          ],
+          "limits": "Finite create-and-verify abstraction. Does not model AWS policy JSON/ARN matching, XML/UTF-8, SQLite or browser refinement, quotas, concurrency or packet forwarding. Go and local Chromium/SDK are independent executable evidence."
+        }
+      ]
     }
   ]
 }

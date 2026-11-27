@@ -8,6 +8,7 @@ import (
 	"io/fs"
 	"net/http"
 	"net/url"
+	"slices"
 	"strings"
 	"time"
 
@@ -406,6 +407,12 @@ func addEC2NetworkReadbackCapabilities(w http.ResponseWriter, r *http.Request, c
 	ec2["defaultRouteLifecycle"] = []string{"DescribeRouteTables", "DescribeInternetGateways", "CreateRoute", "DeleteRoute"}
 	ec2["ipv4RoutesPerTable"] = aws.EC2NativeIPv4RouteLimit
 	ec2["subnetLifecycle"] = []string{"DescribeSubnets", "CreateSubnet", "DeleteSubnet", "ModifySubnetAttribute"}
+	// This is a wire/readback feature, not a grant for the selected identity.
+	// Keep it distinct from the generic action inventory: CreateTags only
+	// participates in the existing policy checks for this tagged creation.
+	if ops, ok := ec2["operations"].([]string); ok && slices.Contains(ops, "CreateSubnet") && slices.Contains(ops, "DescribeSubnets") {
+		ec2["nativeSubnetTagsOnCreate"] = true
+	}
 }
 
 // DNS is registered on every successfully composed instance at present.

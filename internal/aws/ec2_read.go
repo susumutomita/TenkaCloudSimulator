@@ -154,7 +154,7 @@ func (g *Gateway) serveEC2(w http.ResponseWriter, r *http.Request) {
 		switch action {
 		case "CreateSubnet":
 			request.subnet.authorizeCreatedID = func(id string) error {
-				return exactChildGrant([][2]string{nativeSubnetCreatePermission(region, id)}, "subnet")
+				return exactChildGrant(request.subnet.createPermissions(region, id), "subnet")
 			}
 		case "CreateSecurityGroup":
 			request.securityGroup.authorizeCreatedID = func(id string) error {

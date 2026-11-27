@@ -11,6 +11,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/susumutomita/TenkaCloudSimulator/internal/aws"
 	"github.com/susumutomita/TenkaCloudSimulator/internal/provider"
 )
 
@@ -43,19 +44,20 @@ func TestEC2SecurityGroupsConsoleCapability(t *testing.T) {
 			if c.auth {
 				w.Header().Set("X-Simulator-Authentication", "required")
 			}
-			ec2 := map[string]any{"console": true}
+			ec2 := map[string]any{"console": true, "operations": aws.EC2Operations()}
 			capabilities := map[string]any{"services": map[string]any{"ec2": ec2}}
 			addEC2NetworkReadbackCapabilities(w, r, capabilities)
 			// Pin the exact helper contract independently: capability claims are
 			// available to ordinary signed-in sessions, not to a scoped handoff.
 			// The route capabilities do not grant IAM or advertise forwarding.
-			want := map[string]any{"console": true}
+			want := map[string]any{"console": true, "operations": aws.EC2Operations()}
 			if c.want {
 				want["securityGroupReadback"] = "DescribeSecurityGroups"
 				want["routeTableReadback"] = "DescribeRouteTables"
 				want["internetGatewayLifecycle"] = []string{"DescribeInternetGateways", "CreateInternetGateway", "DeleteInternetGateway", "AttachInternetGateway", "DetachInternetGateway"}
 				want["internetGatewayPageLimit"] = 100
 				want["subnetLifecycle"] = []string{"DescribeSubnets", "CreateSubnet", "DeleteSubnet", "ModifySubnetAttribute"}
+				want["nativeSubnetTagsOnCreate"] = true
 				want["routeTableLifecycle"] = []string{"DescribeRouteTables", "CreateRouteTable", "DeleteRouteTable"}
 				want["routeTableAssociationLifecycle"] = []string{"DescribeRouteTables", "DescribeSubnets", "AssociateRouteTable", "DisassociateRouteTable"}
 				want["routeTableAssociationReplacement"] = "ReplaceRouteTableAssociation"
@@ -64,6 +66,39 @@ func TestEC2SecurityGroupsConsoleCapability(t *testing.T) {
 			}
 			if !reflect.DeepEqual(ec2, want) {
 				t.Fatalf("unexpected exact EC2 network capabilities: got %+v, want %+v", ec2, want)
+			}
+		})
+	}
+}
+
+func TestEC2NativeSubnetTagCapabilityRequiresNativeCreateAndReadback(t *testing.T) {
+	actor := provider.Actor{CredentialIdentity: "simulator-admin", ExerciseIdentity: "selected-reader", CredentialRole: provider.CredentialOperator}
+	r := httptest.NewRequest("GET", "/_simulator/v1/capabilities", nil)
+	r = r.WithContext(provider.WithActor(r.Context(), actor))
+	w := httptest.NewRecorder()
+	w.Header().Set("X-Simulator-Authentication", "required")
+	for _, tc := range []struct {
+		name       string
+		operations any
+		want       bool
+	}{
+		{"absent", nil, false},
+		{"wrong type", "CreateSubnet,DescribeSubnets", false},
+		{"wrong case", []string{"createSubnet", "DescribeSubnets"}, false},
+		{"read only", []string{"DescribeSubnets"}, false},
+		{"no readback", []string{"CreateSubnet"}, false},
+		{"native create and readback", []string{"CreateSubnet", "DescribeSubnets"}, true},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			ec2 := map[string]any{"console": true, "operations": tc.operations}
+			caps := map[string]any{"services": map[string]any{"ec2": ec2}}
+			addEC2NetworkReadbackCapabilities(w, r, caps)
+			value, advertised := ec2["nativeSubnetTagsOnCreate"]
+			if advertised != tc.want || (advertised && value != true) {
+				t.Fatalf("advertised=%v, value=%#v; want boundary=%v", advertised, value, tc.want)
+			}
+			if !reflect.DeepEqual(ec2["operations"], tc.operations) {
+				t.Fatal("operation inventory changed")
 			}
 		})
 	}

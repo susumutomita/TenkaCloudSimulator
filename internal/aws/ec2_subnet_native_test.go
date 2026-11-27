@@ -115,7 +115,7 @@ func TestEC2NativeSubnetLifecycle(t *testing.T) {
 			ec2(test.region, admin, "CreateSubnet", create(test.vpc, test.cidr, test.az), 400, test.code)
 		})
 	}
-	for field, value := range map[string]string{"DryRun": "true", "TagSpecification.1.ResourceType": "subnet", "Ipv6CidrBlock": "::/64"} {
+	for field, value := range map[string]string{"DryRun": "true", "Ipv6CidrBlock": "::/64"} {
 		p := create(vpc.VPC.ID, "10.70.1.0/24", "")
 		p.Set(field, value)
 		ec2(east, admin, "CreateSubnet", p, 400, "UnsupportedOperation")

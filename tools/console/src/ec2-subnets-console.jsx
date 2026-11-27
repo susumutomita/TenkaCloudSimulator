@@ -17,7 +17,10 @@ import StatusIndicator from '@cloudscape-design/components/status-indicator';
 import Table from '@cloudscape-design/components/table';
 import TextFilter from '@cloudscape-design/components/text-filter';
 import {useLocale} from './i18n.jsx';
-import {createVpcNativeSubnet,loadRegionalSubnetInventory,nativeSubnetCIDR,nativeSubnetFailure} from './ec2-native-subnets.mjs';
+import {createVpcNativeSubnet,loadRegionalSubnetInventory,nativeSubnetCIDR,nativeSubnetFailure,
+  vpcNativeSubnetTagsOnCreateAvailable} from './ec2-native-subnets.mjs';
+import {nativeSubnetTagDraft} from './ec2-subnet-tag-draft.mjs';
+import SubnetTagFields,{SubnetNameField} from './ec2-subnet-tags-fields.jsx';
 import {loadEC2RouteTablePages} from './ec2-route-table-pages.mjs';
 import {subnetConsoleHref,subnetRouteTable} from './ec2-subnet-console-route.mjs';
 
@@ -56,6 +59,13 @@ function SubnetDetails({subnet,request,region,showRoutes,back,hrefForResource}) 
           value:subnet.publicIPv4?t('Enabled','有効'):t('Disabled','無効')}]:[]),
       ]}/>
     </Container>
+    {subnet.owner==='ec2' && subnet.tags?.length>0 && <Table trackBy="key" items={subnet.tags}
+      header={<Header variant="h2">{t('Tags','タグ')}</Header>}
+      ariaLabels={{tableLabel:t('Saved subnet tags','保存されたサブネットタグ')}}
+      columnDefinitions={[
+        {id:'key',header:t('Key','キー'),cell:tag=>tag.key},
+        {id:'value',header:t('Value','値'),cell:tag=>tag.value || t('(empty)','（空）')},
+      ]}/>}
     {showRoutes&&<Container header={<Header variant="h2">{t('Route table','ルートテーブル')}</Header>}>
       {routes.status==='loading'?<StatusIndicator type="loading">{t('Reading the subnet’s route table','サブネットのルートテーブルを読み込み中')}</StatusIndicator>
         :routes.status==='error'?<Alert type="error">{t('Could not confirm the route table. Refresh the page to try again.','ルートテーブルを確認できませんでした。ページを更新して再試行してください。')}</Alert>
@@ -69,12 +79,14 @@ function SubnetDetails({subnet,request,region,showRoutes,back,hrefForResource}) 
   </SpaceBetween>;
 }
 
-export default function EC2SubnetsConsole({request,region,route,publicIPv4,showRoutes,onSaving,canCreate=true,hrefForResource}) {
+export default function EC2SubnetsConsole({request,region,route,publicIPv4,showRoutes,onSaving,canCreate=true,hrefForResource,
+  capabilities,authenticationRequired}) {
   const {t}=useLocale();
   const [snapshot,setSnapshot]=useState({status:'loading'}),[revision,setRevision]=useState(0);
   const [filter,setFilter]=useState(route.vpc),[text,setText]=useState(''),[page,setPage]=useState(1);
   const [selectedVpc,chooseVpc]=useState(route.vpc),[az,setAz]=useState(''),[cidr,setCidr]=useState('');
   const [busy,setBusy]=useState(false),[formError,setFormError]=useState('');
+  const [name,setName]=useState(''),[tags,setTags]=useState([]);
   const heading=useRef(null),operation=useRef(null);
   const scopeHash=useRef(location.hash);
   const creating=route.target==='create',detailID=creating?'':route.target;
@@ -85,9 +97,12 @@ export default function EC2SubnetsConsole({request,region,route,publicIPv4,showR
   const createTarget=selected?.managedBy==='ec2'?selected:null;
   const canonical=createTarget&&nativeSubnetCIDR(createTarget,cidr);
   const neverReplay=formError==='unconfirmed';
+  const tagging=vpcNativeSubnetTagsOnCreateAvailable(capabilities,authenticationRequired);
+  const tagDraft=nativeSubnetTagDraft(name,tags);
+  const lostTagging=!tagging&&tagDraft.tags.length>0;
   const zones=[{value:'',label:t('No preference','指定なし'),description:t('Use '+region+'a locally',region+'a を使用します')},
     ...['a','b','c'].map(suffix=>({value:region+suffix,label:region+suffix}))];
-  const readyToSubmit=canCreate&&ready&&!busy&&!neverReplay&&!!canonical;
+  const readyToSubmit=canCreate&&ready&&!busy&&!neverReplay&&!!canonical&&tagDraft.valid&&!lostTagging;
   const fieldText=cidr&&createTarget&&!canonical?t('Enter an IPv4 CIDR within this VPC.','この VPC の範囲内の IPv4 CIDR を入力してください。'):undefined;
 
   useEffect(()=>{heading.current?.focus();},[]);
@@ -108,7 +123,8 @@ export default function EC2SubnetsConsole({request,region,route,publicIPv4,showR
     operation.current=controller;setBusy(true);setFormError('');onSaving(true);
     const current=()=>operation.current===controller&&!controller.signal.aborted&&location.hash===scopeHash.current;
     try {
-      const {created}=await createVpcNativeSubnet(request,region,createTarget,canonical,az||region+'a',{signal:controller.signal,publicIPv4});
+      const {created}=await createVpcNativeSubnet(request,region,createTarget,canonical,az||region+'a',
+        {signal:controller.signal,publicIPv4,tags:tagDraft.tags,capabilities,authenticationRequired});
       if(current()) location.replace(subnetConsoleHref(region,created.id,createTarget.id));
     } catch(error) {
       if(current()) setFormError(nativeSubnetFailure(error));
@@ -147,6 +163,8 @@ export default function EC2SubnetsConsole({request,region,route,publicIPv4,showR
       <SpaceBetween size="l">
         {statusError&&<Alert type="error" action={refresh}>{statusError}</Alert>}
         {formError&&<Alert type="error">{errors[formError]||errors.unconfirmed}</Alert>}
+        {lostTagging&&<Alert type="error">{t('Tagging is no longer available. Reopen the form before continuing.',
+          'タグ設定を利用できなくなりました。続行するにはフォームを開き直してください。')}</Alert>}
         <Container header={<Header variant="h2">{t('VPC','VPC')}</Header>}>
           <SpaceBetween size="s">
             <FormField label="VPC ID" description={t('Select the native VPC for this subnet. CloudFormation VPCs are read-only here.',
@@ -162,10 +180,8 @@ export default function EC2SubnetsConsole({request,region,route,publicIPv4,showR
         </Container>
         <Container header={<Header variant="h2">{t('Subnet settings','サブネットの設定')}</Header>}>
           <SpaceBetween size="l">
-            <FormField label={t('Subnet name - optional','サブネット名 - オプション')}
-              constraintText={t('The native simulator cannot save subnet names or tags.','ネイティブのシミュレーターではサブネット名やタグを保存できません。')}>
-              <Input value="" disabled/>
-            </FormField>
+            <SubnetNameField available={tagging} disabled={!createTarget||busy||neverReplay}
+              value={name} error={tagDraft.nameError} onChange={value=>edit(setName,value)}/>
             <FormField label={t('Availability Zone','アベイラビリティーゾーン')}>
               <Select selectedOption={zones.find(option=>option.value===az)} options={zones} disabled={!createTarget||busy||neverReplay}
                 onChange={({detail})=>edit(setAz,detail.selectedOption.value)}/>
@@ -176,6 +192,8 @@ export default function EC2SubnetsConsole({request,region,route,publicIPv4,showR
             </FormField>
           </SpaceBetween>
         </Container>
+        {tagging&&<SubnetTagFields rows={tags} draft={tagDraft} hasName={name!==''}
+          disabled={!createTarget||busy||neverReplay} onChange={value=>edit(setTags,value)}/>}
       </SpaceBetween>
     </Form></form>:detailID?<SpaceBetween size="l">
       {statusError?<Alert type="error" action={refresh}>{statusError}</Alert>
