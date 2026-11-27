@@ -1,145 +1,19 @@
 {
   "version": 1,
-  "base_sha": "a1f155caaf648bcec8729774234a9115de13bef8",
+  "base_sha": "7f500c9e951d9328a36df3a9946f1c6827200085",
   "changes": [
     {
-      "path": "docs/design/rds-owned-generation.md",
-      "sha256": "23d7f8762d65da0fd5d696d1834be3de1735d1f5d91a8ed25a532a009f2d1a6f",
+      "path": "README.ja.md",
+      "sha256": "d786605d0771f260a8878e4a105d83c29265025f9401dccabcda6d5c48a143fa",
       "disposition": "documentation",
-      "reason": "Describe the new in-process observation, unchanged public and transport boundary, and separate bounds of the model and native tests.",
+      "reason": "Records proposed browser learning requirements and links to the design discussion. No simulator logic, API, schema or model changes.",
       "models": []
     },
     {
-      "path": "formal/RDSGuestPeerPreflight.cfg",
-      "sha256": "92133d75a05b54ded89c21159fd7a7122b203c8f1c79e0e69d41565284991323",
-      "disposition": "modeled",
-      "reason": "Keep existing invariant checks and add the three distinct failure oracles for original group at entry, at final snapshot and matching revisions across reads.",
-      "models": [
-        {
-          "id": "RDSGuestPeerPreflight",
-          "properties": [
-            "OriginalGroupBeforeProbe",
-            "OriginalGroupAtFinalSnapshot",
-            "MatchingGroupSnapshotRevisions"
-          ],
-          "limits": "One provider-owned call after reservation, with one original group, a same-ARN replacement and two catalog revisions. The final snapshot is an observation, not authority for a future connection. SQLite capture/isolation, guest execution, PostgreSQL, SQL and transport remain concrete obligations."
-        }
-      ]
-    },
-    {
-      "path": "formal/RDSGuestPeerPreflight.tla",
-      "sha256": "d4b2eedb55952aa0893528a3924d96c65183501ce87722464708899b73728904",
-      "disposition": "modeled",
-      "reason": "Extend the bounded committed-read model with explicit same-ARN replacement and in-place revision transitions before and during a probe, without requiring the snapshots to remain valid after the final read.",
-      "models": [
-        {
-          "id": "RDSGuestPeerPreflight",
-          "properties": [
-            "OriginalGroupBeforeProbe",
-            "OriginalGroupAtFinalSnapshot",
-            "MatchingGroupSnapshotRevisions",
-            "HealthyObservation",
-            "ObservationOnly"
-          ],
-          "limits": "One provider-owned call after reservation, with one original group, a same-ARN replacement and two catalog revisions. The final snapshot is an observation, not authority for a future connection. SQLite capture/isolation, guest execution, PostgreSQL, SQL and transport remain concrete obligations."
-        }
-      ]
-    },
-    {
-      "path": "formal/models.json",
-      "sha256": "fa31e5e26547811f682960e9d95bd03f0c87de35f81d05cc56f3c2c1274e4900",
-      "disposition": "formal-infrastructure",
-      "reason": "Register enlarged finite #130 model bounds, the existing resolver source path, and four required, specifically classified counterexamples. No other registry sections change.",
-      "models": []
-    },
-    {
-      "path": "internal/aws/catalog/rds_guest_peer_linux_amd64.go",
-      "sha256": "0b1c6e2e1f9b15e6da7da106a117dd5c93a6073a3ccff80df88a07336f8a112b",
-      "disposition": "modeled",
-      "reason": "Reject a replacement before or after the fixed host probe, and refuse to join different catalog revisions of the original group across two committed reads.",
-      "models": [
-        {
-          "id": "RDSGuestPeerPreflight",
-          "properties": [
-            "OriginalGroupBeforeProbe",
-            "OriginalGroupAtFinalSnapshot",
-            "MatchingGroupSnapshotRevisions",
-            "HealthyObservation",
-            "ObservationOnly"
-          ],
-          "limits": "One provider-owned call after reservation, with one original group, a same-ARN replacement and two catalog revisions. The final snapshot is an observation, not authority for a future connection. SQLite capture/isolation, guest execution, PostgreSQL, SQL and transport remain concrete obligations."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/catalog/rds_guest_peer_subnet_linux_amd64_test.go",
-      "sha256": "4a0d06f88cddf9e493a4418c8bc056a43324a153947d0a562f5a0430d0132eb5",
-      "disposition": "test-support",
-      "reason": "Use real scoped native RDS Query and SQLite changes with a simulated host probe for same-name replacement, in-place revision and unrelated-group regression controls. No production mode, route or live database.",
-      "models": []
-    },
-    {
-      "path": "internal/aws/catalog/rds_owned_runtime_linux_amd64.go",
-      "sha256": "7b803a73255c154274215ec456798d485e1c963cba026bfc855cd7f47d263dd2",
-      "disposition": "modeled",
-      "reason": "Derive the original group identity from the same write transaction as the exact DB reservation. Peer preflight requires the exact owned child and committed lease; this guard alone does not enable a route.",
-      "models": [
-        {
-          "id": "RDSOwnedGenerationFence",
-          "properties": [
-            "LaunchNeedsCommittedAuthority",
-            "AttachNeedsCurrent",
-            "NoPublishedEndpoint"
-          ],
-          "limits": "One bounded owner and exact DB generation; the native tests, not this model, verify actual group lookups and lifecycle behavior. No guest transport or real process claim."
-        },
-        {
-          "id": "RDSGuestPeerPreflight",
-          "properties": [
-            "OriginalGroupBeforeProbe",
-            "OriginalGroupAtFinalSnapshot"
-          ],
-          "limits": "One provider-owned call after reservation, with one original group, a same-ARN replacement and two catalog revisions. The final snapshot is an observation, not authority for a future connection. SQLite capture/isolation, guest execution, PostgreSQL, SQL and transport remain concrete obligations."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/catalog/rds_private_postgres_topology.go",
-      "sha256": "1c7c023b5361d0d9b71bd81431d143cb313147a3754c6e8a271f6f72616d6752",
-      "disposition": "modeled",
-      "reason": "Resolve ARN, creation sequence and revision from the same validated native catalog subnet-group row as its two or more subnet IDs. No wire shape, topology policy or backend returned to callers.",
-      "models": [
-        {
-          "id": "RDSPrivatePostgresTopology",
-          "properties": [
-            "OwnedTopologyBeforeWrite",
-            "ConfigurationOnly"
-          ],
-          "limits": "Finite configuration validation; this model does not prove Go input decoding, AWS API parity or the exact sequence readback."
-        },
-        {
-          "id": "RDSGuestPeerPreflight",
-          "properties": [
-            "OriginalGroupBeforeProbe",
-            "OriginalGroupAtFinalSnapshot",
-            "MatchingGroupSnapshotRevisions"
-          ],
-          "limits": "One provider-owned call after reservation, with one original group, a same-ARN replacement and two catalog revisions. The final snapshot is an observation, not authority for a future connection. SQLite capture/isolation, guest execution, PostgreSQL, SQL and transport remain concrete obligations."
-        }
-      ]
-    },
-    {
-      "path": "scripts/formal_model_gate.py",
-      "sha256": "63efa7893491c58912d410880c6a5549dc9166744b6f2517c3c0dd8ee529583e",
-      "disposition": "formal-infrastructure",
-      "reason": "Require the three additional invariants, four targeted controls and the exact #130 resolver binding. No weakening of prior requirements, runtime checks or runner policy.",
-      "models": []
-    },
-    {
-      "path": "scripts/test-formal-gate.py",
-      "sha256": "b43eb72d6da205cbb94d6ec986da87d10443a7c1841191fea729fffee7518b51",
-      "disposition": "formal-infrastructure",
-      "reason": "Pin exact expected #130 source scope and all old and new invariant/control mappings in tooling unit tests; not a TLC run or Go proof.",
+      "path": "docs/design/browser-learning-access.md",
+      "sha256": "0301c4fde9b8f0b1b0652442d9be51d81e590238ce7c6d71dbeb68e6cb67479c",
+      "disposition": "documentation",
+      "reason": "Records proposed browser learning requirements and links to the design discussion. No simulator logic, API, schema or model changes.",
       "models": []
     }
   ]
