@@ -74,9 +74,9 @@ func TestRDSInstanceRecordLifecycle(t *testing.T) {
 			t.Fatalf("%s = %q, want %q: %s", path, got, want, created.raw)
 		}
 	}
-	if instance.get("InstanceCreateTime") == nil || nodeText(instance, "DBParameterGroups", "DBParameterGroup", "DBParameterGroupName") != "default.mysql8.0" ||
-		nodeText(instance, "DBParameterGroups", "DBParameterGroup", "ParameterApplyStatus") != "in-sync" ||
-		nodeText(instance, "DBSubnetGroup", "DBSubnetGroupName") != "app-subnets" || nodeText(instance, "OptionGroupMemberships", "OptionGroupMembership", "Status") != "in-sync" ||
+	checkRDSInstanceGroupConfiguration(t, instance, "default.mysql8.0", "default:mysql-8-0", "creating")
+	if instance.get("InstanceCreateTime") == nil ||
+		nodeText(instance, "DBSubnetGroup", "DBSubnetGroupName") != "app-subnets" ||
 		nodeText(instance, "VpcSecurityGroups", "VpcSecurityGroupMembership", "VpcSecurityGroupId") != "sg-0a1b2c3d" ||
 		nodeText(instance, "EnabledCloudwatchLogsExports", "member") != "error" || nodeText(instance, "TagList", "Tag", "Key") != "team" {
 		t.Fatalf("stored settings %s", created.raw)
