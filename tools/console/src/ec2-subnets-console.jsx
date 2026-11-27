@@ -26,7 +26,7 @@ const identifier=value=><span className="resource-identifier">{value}</span>;
 const pageSize=20;
 function vpcOption(vpc){return {value:vpc.id,label:vpc.name? vpc.name+' · '+vpc.id:vpc.id};}
 
-function SubnetDetails({subnet,request,region,showRoutes,back}) {
+function SubnetDetails({subnet,request,region,showRoutes,back,hrefForResource}) {
   const {t}=useLocale();
   const [routes,setRoutes]=useState({status:'loading'});
   useEffect(()=>{
@@ -39,6 +39,8 @@ function SubnetDetails({subnet,request,region,showRoutes,back}) {
   },[request,region,subnet,showRoutes]);
   const association=routes.association;
   const owner=subnet.owner==='ec2'?'EC2':'CloudFormation';
+  const ref=(kind,id)=>{const href=hrefForResource?.({kind,id,vpcId:subnet.vpc});
+    return href?<Link href={href}>{identifier(id)}</Link>:identifier(id);};
   return <SpaceBetween size="l">
     <Link href={back}>{t('Back to subnets','サブネット一覧に戻る')}</Link>
     <Container header={<Header variant="h2">{t('Subnet details','サブネットの詳細')}</Header>}>
@@ -46,7 +48,7 @@ function SubnetDetails({subnet,request,region,showRoutes,back}) {
         {label:t('Subnet ID','サブネット ID'),value:identifier(subnet.id)},
         {label:t('Name','名前'),value:shown(subnet.name)},
         {label:t('State','状態'),value:<StatusIndicator type="success">{t('Available','利用可能')}</StatusIndicator>},
-        {label:'VPC ID',value:identifier(subnet.vpc)},
+        {label:'VPC ID',value:ref('vpc',subnet.vpc)},
         {label:'IPv4 CIDR',value:subnet.cidr},
         {label:t('Availability Zone','アベイラビリティーゾーン'),value:shown(subnet.az)},
         {label:t('Managed by','管理元'),value:owner},
@@ -58,7 +60,7 @@ function SubnetDetails({subnet,request,region,showRoutes,back}) {
       {routes.status==='loading'?<StatusIndicator type="loading">{t('Reading the subnet’s route table','サブネットのルートテーブルを読み込み中')}</StatusIndicator>
         :routes.status==='error'?<Alert type="error">{t('Could not confirm the route table. Refresh the page to try again.','ルートテーブルを確認できませんでした。ページを更新して再試行してください。')}</Alert>
         :association?<KeyValuePairs columns={2} minColumnWidth={180} items={[
-          {label:t('Route table ID','ルートテーブル ID'),value:identifier(association.id)},
+          {label:t('Route table ID','ルートテーブル ID'),value:ref('route-table',association.id)},
           {label:t('Association','関連付け'),value:association.kind==='explicit'?t('Explicit subnet association','サブネットに明示的に関連付け済み'):t('Main route table (implicit)','メインルートテーブル（暗黙の関連付け）')},
         ]}/>:<Box>{t('No route-table association was confirmed for this subnet.','このサブネットのルートテーブルの関連付けは確認できませんでした。')}</Box>}
     </Container>}
@@ -67,7 +69,7 @@ function SubnetDetails({subnet,request,region,showRoutes,back}) {
   </SpaceBetween>;
 }
 
-export default function EC2SubnetsConsole({request,region,route,publicIPv4,showRoutes,onSaving}) {
+export default function EC2SubnetsConsole({request,region,route,publicIPv4,showRoutes,onSaving,canCreate=true,hrefForResource}) {
   const {t}=useLocale();
   const [snapshot,setSnapshot]=useState({status:'loading'}),[revision,setRevision]=useState(0);
   const [filter,setFilter]=useState(route.vpc),[text,setText]=useState(''),[page,setPage]=useState(1);
@@ -85,7 +87,7 @@ export default function EC2SubnetsConsole({request,region,route,publicIPv4,showR
   const neverReplay=formError==='unconfirmed';
   const zones=[{value:'',label:t('No preference','指定なし'),description:t('Use '+region+'a locally',region+'a を使用します')},
     ...['a','b','c'].map(suffix=>({value:region+suffix,label:region+suffix}))];
-  const readyToSubmit=ready&&!busy&&!neverReplay&&!!canonical;
+  const readyToSubmit=canCreate&&ready&&!busy&&!neverReplay&&!!canonical;
   const fieldText=cidr&&createTarget&&!canonical?t('Enter an IPv4 CIDR within this VPC.','この VPC の範囲内の IPv4 CIDR を入力してください。'):undefined;
 
   useEffect(()=>{heading.current?.focus();},[]);
@@ -127,15 +129,18 @@ export default function EC2SubnetsConsole({request,region,route,publicIPv4,showR
     :!detailID?t('Saved IPv4 subnet configuration in this region, not a connectivity check.','このリージョンの保存済み IPv4 サブネット設定です。通信状態を確認するものではありません。'):undefined;
   const contentHeading=creating?t('Create subnet','サブネットを作成'):detailID||t('Subnets','サブネット');
   const createHref=subnetConsoleHref(region,'create',filter);
-  const detail=ready&&subnets.find(row=>row.id===detailID);
+  const detail=ready&&subnets.find(row=>row.id===detailID&&(!route.vpc||row.vpc===route.vpc));
   const vpcOptions=[{value:'',label:t('All VPCs','すべての VPC')},...vpcs.map(vpcOption)];
+  if (ready&&filter&&!vpcs.some(vpc=>vpc.id===filter)) vpcOptions.push({value:filter,label:filter,
+    description:t('Not found in this region','このリージョンにはありません')});
   const query=text.trim().toLowerCase(), filtered=subnets.filter(subnet=>(!filter||subnet.vpc===filter)&&
     [subnet.id,subnet.name,subnet.vpc,subnet.cidr,subnet.az,subnet.state,t('Available','利用可能')]
       .some(value=>value?.toLowerCase().includes(query)));
   const refresh=<Button disabled={busy} loading={snapshot.status==='loading'} iconName="refresh"
     onClick={()=>{setPage(1);setRevision(r=>r+1);}}>{t('Refresh subnets','サブネットを更新')}</Button>;
   return <ContentLayout header={<div ref={heading} tabIndex={-1}><Header variant="h1" description={subtitle}>{contentHeading}</Header></div>}>
-    {creating?<form onSubmit={submit} data-testid="subnet-create-form"><Form actions={<SpaceBetween direction="horizontal" size="xs">
+    {creating&&!canCreate?<Alert type="info" action={<Button href={listHref}>{t('Back to subnets','サブネット一覧に戻る')}</Button>}>
+      {t('Subnet creation is unavailable in this session.','このセッションではサブネットを作成できません。')}</Alert>:creating?<form onSubmit={submit} data-testid="subnet-create-form"><Form actions={<SpaceBetween direction="horizontal" size="xs">
       <Button href={listHref} disabled={busy} formAction="none">{t('Cancel','キャンセル')}</Button>
       <Button variant="primary" formAction="submit" disabled={!readyToSubmit} loading={busy}>{t('Create subnet','サブネットを作成')}</Button>
     </SpaceBetween>}>
@@ -177,16 +182,16 @@ export default function EC2SubnetsConsole({request,region,route,publicIPv4,showR
         :snapshot.status==='loading'?<StatusIndicator type="loading">{t('Loading subnet','サブネットを読み込み中')}</StatusIndicator>
         :!detail?<Alert type="warning" action={<Button href={listHref}>{t('Back to subnets','サブネット一覧に戻る')}</Button>}>
           {t('This subnet was not found in the selected region.','選択したリージョンにはこのサブネットがありません。')}</Alert>
-        :<SubnetDetails key={detail.id} subnet={detail} request={request} region={region} showRoutes={showRoutes} back={listHref}/>}
+        :<SubnetDetails key={detail.id} subnet={detail} request={request} region={region} showRoutes={showRoutes} back={listHref} hrefForResource={hrefForResource}/>}
     </SpaceBetween>:<SpaceBetween size="l">
       {statusError&&<Alert type="error">{statusError}</Alert>}
       <Table trackBy="id" items={filtered.slice((page-1)*pageSize,page*pageSize)} loading={snapshot.status==='loading'}
         loadingText={t('Loading subnets','サブネットを読み込み中')} ariaLabels={{tableLabel:t('Subnets','サブネット')}}
         header={<Header counter={'('+filtered.length+')'} actions={<SpaceBetween direction="horizontal" size="xs">
           {refresh}
-          <Button variant="primary" href={createHref} disabled={!ready||!native.length}
+          {canCreate&&<Button variant="primary" href={createHref} disabled={!ready||!native.length}
             disabledReason={!native.length&&ready?t('Create an EC2-managed VPC first.','先に EC2 管理の VPC を作成してください。'):undefined}>
-            {t('Create subnet','サブネットを作成')}</Button>
+            {t('Create subnet','サブネットを作成')}</Button>}
         </SpaceBetween>}>{t('Subnets','サブネット')}</Header>}
         filter={<SpaceBetween direction="vertical" size="xs">
           <FormField label={t('Filter by VPC','VPC で絞り込む')}>

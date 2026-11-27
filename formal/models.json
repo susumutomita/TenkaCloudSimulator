@@ -27502,6 +27502,98 @@
           "expect_invariant": "NoUnreconciledRetry"
         }
       ]
+    },
+    {
+      "id": "EC2VpcConsoleNavigation",
+      "model": "formal/EC2VpcConsoleNavigation.tla",
+      "config": "formal/EC2VpcConsoleNavigation.cfg",
+      "bounds": "Two representative sections and two regions, a capability subset, two route retirements and bounded operations per view.",
+      "properties": [
+        "TypeOK",
+        "AdvertisedOnly",
+        "CurrentRegionAndView",
+        "VerifiedDisplay",
+        "NoLocalDepartureDuringWrite",
+        "CurrentWriteOwnsLease"
+      ],
+      "limits": "Model of frontend route, local write lease and async result presentation only; no IAM, Go or persistence refinement, DOM/events, or path/XML parser proof.",
+      "source_scope": [
+        "tools/console/src/main.jsx",
+        "tools/console/src/ec2-readonly.jsx",
+        "tools/console/src/ec2-subnets-console.jsx",
+        "tools/console/src/ec2-vpc-navigation.mjs",
+        "tools/console/src/ec2-vpc-resource-view.jsx",
+        "tools/console/src/ec2-route-table-console.jsx",
+        "tools/console/src/ec2-route-table-console.mjs",
+        "tools/console/src/ec2-vpc-native-route-tables.jsx",
+        "tools/console/src/ec2-network-acl-inventory.jsx",
+        "tools/console/src/ec2-network-acls.mjs",
+        "tools/console/src/ec2-security-groups-console.jsx",
+        "tools/console/src/ec2-security-group-inventory.mjs",
+        "tools/console/src/ec2-vpc-security-groups.jsx",
+        "tools/console/src/ec2-internet-gateway-page.jsx",
+        "tools/console/src/ec2-internet-gateway-console.mjs",
+        "internal/server/web/app.js",
+        "test/console/ec2_vpc_network_navigation_browser.cjs",
+        "tools/console/test/ec2-vpc-navigation.test.mjs"
+      ],
+      "mutants": [
+        {
+          "id": "DispatchUnadvertised",
+          "edits": [
+            {
+              "old": "CanRead == ReadAdvertised",
+              "new": "CanRead == TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AdvertisedOnly"
+        },
+        {
+          "id": "AcceptRetiredView",
+          "edits": [
+            {
+              "old": "CurrentReply(op) == op.origin = screen",
+              "new": "CurrentReply(op) == TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CurrentRegionAndView"
+        },
+        {
+          "id": "DisplayUnverified",
+          "edits": [
+            {
+              "old": "ReceiptVerified(verified) == verified",
+              "new": "ReceiptVerified(verified) == TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "VerifiedDisplay"
+        },
+        {
+          "id": "AllowLocalDeparture",
+          "edits": [
+            {
+              "old": "UserCanNavigate == lease = -1",
+              "new": "UserCanNavigate == TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "NoLocalDepartureDuringWrite"
+        },
+        {
+          "id": "ReleaseNewerLease",
+          "edits": [
+            {
+              "old": "ReleaseOwner(op) == lease = op.origin.epoch",
+              "new": "ReleaseOwner(op) == TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CurrentWriteOwnsLease"
+        }
+      ]
     }
   ]
 }

@@ -1,3 +1,5 @@
+import {parseEC2Document} from './ec2-response.mjs';
+
 // The native wire exposes only detached, non-default metadata. A wrong or
 // incomplete reply is unavailable, not an empty list or a successful write.
 const namespace = 'http://ec2.amazonaws.com/doc/2016-11-15/';
@@ -12,13 +14,23 @@ const bytes = new TextEncoder();
 const xml = text => new DOMParser().parseFromString(text,'application/xml');
 
 export function vpcNetworkACLsAvailable(capabilities, authenticationRequired) {
+  const access = networkACLInventoryOperations(capabilities, authenticationRequired);
+  return access.read && access.create && access.delete;
+}
+
+export function networkACLInventoryOperations(capabilities, authenticationRequired) {
   const ec2 = capabilities?.services?.ec2;
   const selectors = ec2?.describeSelectors?.DescribeNetworkAcls;
-  return authenticationRequired === true && !capabilities?.consoleScope && ec2?.console === true &&
-    Array.isArray(ec2.operations) && operations.every(action=>ec2.operations.includes(action)) &&
+  const read = authenticationRequired === true && !capabilities?.consoleScope && ec2?.console === true &&
+    Array.isArray(ec2.operations) && ec2.operations.includes(operations[0]) &&
     Array.isArray(ec2.detachedConfigurationOnly) && ec2.detachedConfigurationOnly.includes('native network ACLs') &&
     Array.isArray(selectors) && selectors.includes('vpc-id');
+  return {read, create:read && ec2.operations.includes(operations[1]), delete:read && ec2.operations.includes(operations[2]),
+    vpcs:read && ec2.operations.includes('DescribeVpcs')};
 }
+
+export const validNetworkACLVpcID = value=>isShape(value,vpcId);
+export const validNetworkACLID = value=>isShape(value,aclId);
 
 export function networkACLTarget(vpc) {
   if (!isShape(vpc?.id,vpcId)) return '';
@@ -65,19 +77,20 @@ function envelope(document, action, members) {
   return result;
 }
 
-function row(node, selected) {
+function row(node, selected, details=false) {
   const cols=fields(node,['networkAclId','vpcId','ownerId','default','entrySet','associationSet','tagSet','simulatorNetworkAclMode']);
   const id=text(cols.get('networkAclId')), vpc=text(cols.get('vpcId'));
-  if (!isShape(id,aclId) || vpc!==selected || text(cols.get('ownerId'))!=='000000000000' ||
+  if (!validNetworkACLID(id) || !validNetworkACLVpcID(vpc) || (selected && vpc!==selected) || text(cols.get('ownerId'))!=='000000000000' ||
       text(cols.get('default'))!=='false' || text(cols.get('simulatorNetworkAclMode'))!==mode ||
       children(cols.get('associationSet')).length!==0) invalid();
-  const directions=items(cols.get('entrySet'),2).map(entry=>{
+  const entries=items(cols.get('entrySet'),2).map(entry=>{
     const f=fields(entry,['ruleNumber','protocol','ruleAction','egress','cidrBlock']);
-    if (text(f.get('ruleNumber'))!=='32767' || text(f.get('protocol'))!=='-1' ||
-        text(f.get('ruleAction'))!=='deny' || text(f.get('cidrBlock'))!=='0.0.0.0/0') invalid();
-    return text(f.get('egress'));
+    const number=text(f.get('ruleNumber')),protocol=text(f.get('protocol')),action=text(f.get('ruleAction'));
+    const cidr=text(f.get('cidrBlock')),direction=text(f.get('egress'));
+    if (number!=='32767' || protocol!=='-1' || action!=='deny' || cidr!=='0.0.0.0/0' || !['true','false'].includes(direction)) invalid();
+    return {number:Number(number),protocol,action,cidr,egress:direction==='true'};
   });
-  if (!directions.includes('true') || !directions.includes('false')) invalid();
+  if (!entries.some(item=>item.egress) || !entries.some(item=>!item.egress)) invalid();
   const tags=new Map();
   for (const tag of cols.has('tagSet') ? items(cols.get('tagSet'),50) : []) {
     const f=fields(tag,['key','value']);
@@ -86,15 +99,25 @@ function row(node, selected) {
         !validNetworkACLName(key) || !validNetworkACLName(value)) invalid();
     tags.set(key,value);
   }
-  // Terminal entries are compatibility metadata only and are not editable or
-  // presented as in-use firewall rules. The native rows never apply to traffic.
-  return {id,vpc,mode,name:tags.get('Name')??''};
+  const summary = {id,vpc,mode,name:tags.get('Name')??''};
+  // This mode can confirm only immutable terminal rules and zero associations.
+  // Do not infer missing/default ACLs or turn VPC subnets into associations.
+  return details ? {...summary,entries,associations:[],isDefault:false} : summary;
 }
 
 export function parseVpcNetworkACLs(document, selected) {
   if (!isShape(selected,vpcId)) invalid();
+  return networkACLRows(document,selected,false);
+}
+
+export function parseNetworkACLInventory(document, selected='') {
+  if (selected!=='' && !validNetworkACLVpcID(selected)) invalid();
+  return networkACLRows(document,selected,true);
+}
+
+function networkACLRows(document, selected, details) {
   const members=envelope(document,'DescribeNetworkAcls',['networkAclSet']);
-  const rows=items(members.get('networkAclSet'),1000).map(item=>row(item,selected));
+  const rows=items(members.get('networkAclSet'),1000).map(item=>row(item,selected,details));
   if (new Set(rows.map(item=>item.id)).size!==rows.length) invalid();
   return rows;
 }
@@ -123,15 +146,37 @@ async function readReply(response, signal) {
   }
 }
 
-async function send(request, region, vpc, action, params, {signal,parse=xml}) {
+async function sendQuery(request, region, action, params, {signal,parse=xml}) {
   signal?.throwIfAborted();
-  if (networkACLTarget(vpc)!=='ec2' || !isShape(region,/^[a-z]{2}(?:-[a-z0-9]+)+-\d+$/) || region.length > 32) invalid();
+  if (!isShape(region,/^[a-z]{2}(?:-[a-z0-9]+)+-\d+$/) || region.length > 32) invalid();
   const response=await request('/',{method:'POST',credentials:'same-origin',redirect:'error',signal,
     headers:{'Content-Type':'application/x-www-form-urlencoded','X-Simulator-Service':'ec2','X-Simulator-Region':region},
     body:new URLSearchParams({Action:action,Version:'2016-11-15',...params})});
   signal?.throwIfAborted();
   if (!response?.ok) throw Error((response?.status??0)+': Network ACL request failed.');
   return parse(await readReply(response,signal));
+}
+
+function send(request, region, vpc, action, params, options) {
+  if (networkACLTarget(vpc)!=='ec2') invalid();
+  return sendQuery(request,region,action,params,options);
+}
+
+export async function loadNetworkACLInventory(request, region, selected='', options={}) {
+  if (selected!=='' && !validNetworkACLVpcID(selected)) invalid();
+  const filter=selected ? {'Filter.1.Name':'vpc-id','Filter.1.Value.1':selected} : {};
+  return parseNetworkACLInventory(await sendQuery(request,region,'DescribeNetworkAcls',filter,options),selected);
+}
+
+export async function loadNetworkACLVpcs(request, region, options={}) {
+  const document=await sendQuery(request,region,'DescribeVpcs',{},options);
+  const members=envelope(document,'DescribeVpcs',['vpcSet','reservationSet']);
+  // The native shared Describe envelope may include an empty reservationSet.
+  if (members.has('reservationSet') && children(members.get('reservationSet')).length!==0) invalid();
+  const records=items(members.get('vpcSet'),1000);
+  const rows=parseEC2Document(document,'vpc');
+  if (rows.length!==records.length || rows.some(row=>!validNetworkACLVpcID(row.id) || !validNetworkACLName(row.name))) invalid();
+  return rows.filter(row=>networkACLTarget(row)==='ec2');
 }
 
 export async function loadVpcNetworkACLs(request, region, vpc, options={}) {

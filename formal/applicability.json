@@ -1,224 +1,436 @@
 {
   "version": 1,
-  "base_sha": "3946ba50b504a1da5d7846682fc6319870219046",
+  "base_sha": "5c642f7a8ff5294c2a5ab96107ac950ef3856619",
   "changes": [
     {
       "path": "README.md",
-      "sha256": "fad78457a8bbc50dab6ccd8316a3a6e7a5f1e7b8ffb60d0a5b8249b8c4bcd296",
+      "sha256": "99031cccaabf61d02a10a2227924258cd4100ff6ef3f4efe2aad6a5e9d3940e2",
       "disposition": "documentation",
-      "reason": "Describes the bounded standalone UI, constraints and actual test entry points; no provider changes.",
-      "models": []
-    },
-    {
-      "path": "docs/console.md",
-      "sha256": "20df633dde3af5fbec4731484d1d434f3680d8a1760a27825bdab37edd325045",
-      "disposition": "documentation",
-      "reason": "Describes the bounded standalone UI, constraints and actual test entry points; no provider changes.",
+      "reason": "Documents the actual regional pages, owner/input limitations and supported API evidence.",
       "models": []
     },
     {
       "path": "docs/design/0001-go-standalone.md",
-      "sha256": "401cec1197ee286e82bb9f7504dc461e8e0b3a183a95a67786f23fc410deb350",
+      "sha256": "92cf7284f338e91622d4b91f2bcfb522fb683ae40df96d1465bd50e23fb9f6fa",
       "disposition": "documentation",
-      "reason": "Describes the bounded standalone UI, constraints and actual test entry points; no provider changes.",
+      "reason": "Documents the actual regional pages, owner/input limitations and supported API evidence.",
       "models": []
     },
     {
-      "path": "docs/ec2-native-subnet.md",
-      "sha256": "5f83b24a72b8517129019aeb8ee182ce240816f06dec1d56abd44b290de51493",
+      "path": "docs/ec2-vpc-console.md",
+      "sha256": "89365e7829572f4b778c8e32001c5569db43f0fc31d1189428b9ef2490b4e83e",
       "disposition": "documentation",
-      "reason": "Describes the bounded standalone UI, constraints and actual test entry points; no provider changes.",
+      "reason": "Documents the actual regional pages, owner/input limitations and supported API evidence.",
       "models": []
     },
     {
-      "path": "formal/EC2RegionalSubnetConsole.cfg",
-      "sha256": "2e34e77163df868b0447da261554bb716ba8eb125cefa5c1423e89459bbd33a1",
+      "path": "formal/EC2VpcConsoleNavigation.cfg",
+      "sha256": "414334de94156a594328554938fb4c780d13066e998bf9aecc47fae8b18eab02",
       "disposition": "modeled",
-      "reason": "Selects the caller boundaries and real refusal/success outcomes checked in the finite model.",
+      "reason": "Bounded two-section/two-region instance with the local-lease/current-receipt properties.",
       "models": [
         {
-          "id": "EC2RegionalSubnetConsole",
+          "id": "EC2VpcConsoleNavigation",
           "properties": [
-            "OnlyNativeParentWrites",
-            "ConfirmedInventoryBeforeWrite",
-            "ReadbackBeforeDetail",
-            "CurrentScopeOnly",
-            "NoUnreconciledRetry"
+            "AdvertisedOnly",
+            "CurrentRegionAndView",
+            "VerifiedDisplay",
+            "NoLocalDepartureDuringWrite",
+            "CurrentWriteOwnsLease"
           ],
-          "limits": "Bounded UI caller and navigation only; no React/DOM refinement, wire parser, AWS packet, VM, STS, transactional join, or provider ownership proof. Direct real browser and native API evidence is independent."
+          "limits": "Model of frontend route, local write lease and async result presentation only; no IAM, Go or persistence refinement, DOM/events, or path/XML parser proof."
         }
       ]
     },
     {
-      "path": "formal/EC2RegionalSubnetConsole.tla",
-      "sha256": "d72e6ced5a61c9548dd5a98efe1c16a6e208d003c9e5e5835611b34dc986a530",
+      "path": "formal/EC2VpcConsoleNavigation.tla",
+      "sha256": "e077ca93c16365cadbaeb422f8455f4b88c4433b18f9aa9695ddd74901aa3639",
       "disposition": "modeled",
-      "reason": "Models same-owner regional admission, one pending write, exact readback and retired-view safety.",
+      "reason": "Models advertised operation dispatch, region/view retirement and current write-lease ownership.",
       "models": [
         {
-          "id": "EC2RegionalSubnetConsole",
+          "id": "EC2VpcConsoleNavigation",
           "properties": [
-            "OnlyNativeParentWrites",
-            "ConfirmedInventoryBeforeWrite",
-            "ReadbackBeforeDetail",
-            "CurrentScopeOnly",
-            "NoUnreconciledRetry"
+            "AdvertisedOnly",
+            "CurrentRegionAndView",
+            "VerifiedDisplay",
+            "NoLocalDepartureDuringWrite",
+            "CurrentWriteOwnsLease"
           ],
-          "limits": "Bounded UI caller and navigation only; no React/DOM refinement, wire parser, AWS packet, VM, STS, transactional join, or provider ownership proof. Direct real browser and native API evidence is independent."
+          "limits": "Model of frontend route, local write lease and async result presentation only; no IAM, Go or persistence refinement, DOM/events, or path/XML parser proof."
         }
       ]
     },
     {
       "path": "formal/models.json",
-      "sha256": "e9bce4f254aacf7a99e2ed547d5173d858a5c9cf5ef743614c06aa4fc13914d6",
+      "sha256": "685f5525ae21e7558b6524d272a19c0014a9b5ee56dc69d3230a81eefe813f44",
       "disposition": "formal-infrastructure",
-      "reason": "Registers explicit subnet-UI applicability and five sensitivity controls; no changes to older models.",
+      "reason": "Registers the new route/lease model and five sensitivity controls without altering earlier models.",
       "models": []
     },
     {
       "path": "internal/server/web/app.js",
-      "sha256": "eb20134b95fd84889bd0607410285bfdc6a2c81238640be801d55d4d1eb768b1",
+      "sha256": "4909cf35d570099518517d576bbac0a0e6f7cc17173cd5cdb184afc23802ac42",
       "disposition": "modeled",
-      "reason": "Exact embedded projection of the verified regional flow. No provider changes and no runtime wired behavior.",
+      "reason": "Exact embedded build of the scoped console controls; contains no Go/protocol changes.",
       "models": [
         {
-          "id": "EC2RegionalSubnetConsole",
+          "id": "EC2VpcConsoleNavigation",
           "properties": [
-            "OnlyNativeParentWrites",
-            "ConfirmedInventoryBeforeWrite",
-            "ReadbackBeforeDetail",
-            "CurrentScopeOnly",
-            "NoUnreconciledRetry"
+            "AdvertisedOnly",
+            "CurrentRegionAndView",
+            "VerifiedDisplay",
+            "NoLocalDepartureDuringWrite",
+            "CurrentWriteOwnsLease"
           ],
-          "limits": "Bounded UI caller and navigation only; no React/DOM refinement, wire parser, AWS packet, VM, STS, transactional join, or provider ownership proof. Direct real browser and native API evidence is independent."
+          "limits": "Model of frontend route, local write lease and async result presentation only; no IAM, Go or persistence refinement, DOM/events, or path/XML parser proof."
         }
       ]
     },
     {
-      "path": "test/console/ec2_subnets_console_browser.cjs",
-      "sha256": "46c18e768e912de5de6e58156d281aaa4e9d693745cb82e19f22c9d4270770a3",
+      "path": "test/console/ec2_vpc_network_navigation_browser.cjs",
+      "sha256": "d60a70a3d38ba7208884b2219abbfb692e718e35497d1e6ebfcfc4708cf2b961",
       "disposition": "modeled",
-      "reason": "Independent real managed browser and native SDK-shaped API witness for navigation, same-parent admission and current saved state.",
+      "reason": "Real managed Chromium and native loopback independently verify the actual compiled routes, real receipts and non-advertised scope behavior.",
       "models": [
         {
-          "id": "EC2RegionalSubnetConsole",
+          "id": "EC2VpcConsoleNavigation",
           "properties": [
-            "OnlyNativeParentWrites",
-            "ConfirmedInventoryBeforeWrite",
-            "ReadbackBeforeDetail",
-            "CurrentScopeOnly",
-            "NoUnreconciledRetry"
+            "AdvertisedOnly",
+            "CurrentRegionAndView",
+            "VerifiedDisplay",
+            "NoLocalDepartureDuringWrite",
+            "CurrentWriteOwnsLease"
           ],
-          "limits": "Bounded UI caller and navigation only; no React/DOM refinement, wire parser, AWS packet, VM, STS, transactional join, or provider ownership proof. Direct real browser and native API evidence is independent."
+          "limits": "Model of frontend route, local write lease and async result presentation only; no IAM, Go or persistence refinement, DOM/events, or path/XML parser proof."
         }
       ]
     },
     {
       "path": "tools/console/bundle-digests.json",
-      "sha256": "5fb9db2ba30475df134c1e4935ee14eed309afe5a55b5c6ebf2d7e9a86ca71d9",
+      "sha256": "fa1b66654cd7e71c7b684ba97712c061c769e16c978cf1ae83568cf67ff8dfd9",
       "disposition": "presentation",
-      "reason": "Generated console asset integrity metadata; the executable JS is independently bound.",
+      "reason": "Generated metadata identifies the exact shipped bundle bytes independently scoped above.",
       "models": []
     },
     {
       "path": "tools/console/bundle-inputs.json",
-      "sha256": "13394daf1caf0180e544a157f143510154d2a042f45081e1b707f0da713a2a7d",
+      "sha256": "2c96e4a44794b685fd1a1900ab0331410a38f0ced1a8cd2a8f79cb91a0294cfe",
       "disposition": "presentation",
-      "reason": "Generated console asset integrity metadata; the executable JS is independently bound.",
+      "reason": "Generated metadata identifies the exact shipped bundle bytes independently scoped above.",
       "models": []
     },
     {
-      "path": "tools/console/src/ec2-native-subnets.mjs",
-      "sha256": "4e6a876f93a702f1a08baa280bfa1f5e4361b4fcd89ff0621dd9c954904eb92a",
+      "path": "tools/console/src/ec2-internet-gateway-console.mjs",
+      "sha256": "773ab0e07468036f2d42a7b23dad26e5aeef3160d755a69b71f30615840a2f48",
       "disposition": "modeled",
-      "reason": "Joins bounded current regional reads and refuses unknown, cross-owner and mismatched subnet records while keeping existing native mutation verification.",
+      "reason": "Guards related VPC reads and separate advertised gateway operations, with bounded confirmed-parent input.",
       "models": [
         {
-          "id": "EC2RegionalSubnetConsole",
+          "id": "EC2VpcConsoleNavigation",
           "properties": [
-            "OnlyNativeParentWrites",
-            "ConfirmedInventoryBeforeWrite",
-            "ReadbackBeforeDetail",
-            "CurrentScopeOnly",
-            "NoUnreconciledRetry"
+            "AdvertisedOnly",
+            "CurrentRegionAndView",
+            "VerifiedDisplay"
           ],
-          "limits": "Bounded UI caller and navigation only; no React/DOM refinement, wire parser, AWS packet, VM, STS, transactional join, or provider ownership proof. Direct real browser and native API evidence is independent."
+          "limits": "Model of frontend route, local write lease and async result presentation only; no IAM, Go or persistence refinement, DOM/events, or path/XML parser proof."
         }
       ]
     },
     {
-      "path": "tools/console/src/ec2-subnet-console-route.mjs",
-      "sha256": "74d9e8a09a4bafae9594f4684a7f25dab47ec925c539b296e6e09c4f0210963f",
+      "path": "tools/console/src/ec2-internet-gateway-page.jsx",
+      "sha256": "d92603d45a702eff35a3801ee069bfaee4e80bad38ced285acaf57f3851ef7c8",
       "disposition": "modeled",
-      "reason": "Binds view transitions and route-table rendering to exact IDs; no guessed or foreign association.",
+      "reason": "Each gateway control requires its corresponding advertised operation, exact saved rows, and the current lease.",
       "models": [
         {
-          "id": "EC2RegionalSubnetConsole",
+          "id": "EC2VpcConsoleNavigation",
           "properties": [
-            "OnlyNativeParentWrites",
-            "ConfirmedInventoryBeforeWrite",
-            "ReadbackBeforeDetail",
-            "CurrentScopeOnly",
-            "NoUnreconciledRetry"
+            "AdvertisedOnly",
+            "CurrentRegionAndView",
+            "VerifiedDisplay",
+            "NoLocalDepartureDuringWrite",
+            "CurrentWriteOwnsLease"
           ],
-          "limits": "Bounded UI caller and navigation only; no React/DOM refinement, wire parser, AWS packet, VM, STS, transactional join, or provider ownership proof. Direct real browser and native API evidence is independent."
+          "limits": "Model of frontend route, local write lease and async result presentation only; no IAM, Go or persistence refinement, DOM/events, or path/XML parser proof."
+        }
+      ]
+    },
+    {
+      "path": "tools/console/src/ec2-network-acl-inventory.jsx",
+      "sha256": "a47aefd697a896271ccef34a5a617b411c781e3902920d2bc47d6f0ebdadfc42",
+      "disposition": "modeled",
+      "reason": "Standalone detached ACL view applies capability gates and only links an explicit saved association.",
+      "models": [
+        {
+          "id": "EC2VpcConsoleNavigation",
+          "properties": [
+            "AdvertisedOnly",
+            "CurrentRegionAndView",
+            "VerifiedDisplay",
+            "NoLocalDepartureDuringWrite",
+            "CurrentWriteOwnsLease"
+          ],
+          "limits": "Model of frontend route, local write lease and async result presentation only; no IAM, Go or persistence refinement, DOM/events, or path/XML parser proof."
+        }
+      ]
+    },
+    {
+      "path": "tools/console/src/ec2-network-acls.mjs",
+      "sha256": "c01c79bae368f6aa9c924826d6125b18866cf247c5e3644839b0c2bf1960dda7",
+      "disposition": "modeled",
+      "reason": "Authoritative local responses and selected operation gates for detached ACL inventory, not a dataplane or a new authorization mechanism.",
+      "models": [
+        {
+          "id": "EC2VpcConsoleNavigation",
+          "properties": [
+            "AdvertisedOnly",
+            "CurrentRegionAndView",
+            "VerifiedDisplay"
+          ],
+          "limits": "Model of frontend route, local write lease and async result presentation only; no IAM, Go or persistence refinement, DOM/events, or path/XML parser proof."
+        }
+      ]
+    },
+    {
+      "path": "tools/console/src/ec2-readonly.jsx",
+      "sha256": "c791d87c549b226f2ff040fb002240aea00409174fcc0243d3376fb2438bb4df",
+      "disposition": "modeled",
+      "reason": "VPC details are selected only after the current regional inventory confirms the ID.",
+      "models": [
+        {
+          "id": "EC2VpcConsoleNavigation",
+          "properties": [
+            "CurrentRegionAndView",
+            "VerifiedDisplay"
+          ],
+          "limits": "Model of frontend route, local write lease and async result presentation only; no IAM, Go or persistence refinement, DOM/events, or path/XML parser proof."
+        }
+      ]
+    },
+    {
+      "path": "tools/console/src/ec2-route-table-console.jsx",
+      "sha256": "ea3b95cc91fb632cbd60757440374ce8e3ace0ecfcfb8d61dbdfd62253463aa5",
+      "disposition": "modeled",
+      "reason": "Standalone route tables retain current scope and action gates for confirmed mutations and transitions.",
+      "models": [
+        {
+          "id": "EC2VpcConsoleNavigation",
+          "properties": [
+            "AdvertisedOnly",
+            "CurrentRegionAndView",
+            "VerifiedDisplay",
+            "NoLocalDepartureDuringWrite",
+            "CurrentWriteOwnsLease"
+          ],
+          "limits": "Model of frontend route, local write lease and async result presentation only; no IAM, Go or persistence refinement, DOM/events, or path/XML parser proof."
+        }
+      ]
+    },
+    {
+      "path": "tools/console/src/ec2-route-table-console.mjs",
+      "sha256": "a7300f1e8ba29cc47008378c0e9a74934f0d0d15d9985a30079997e80434e1c0",
+      "disposition": "modeled",
+      "reason": "Loads verified regional routes and exact parent context; links must remain local and are displayed from verified references.",
+      "models": [
+        {
+          "id": "EC2VpcConsoleNavigation",
+          "properties": [
+            "CurrentRegionAndView",
+            "VerifiedDisplay"
+          ],
+          "limits": "Model of frontend route, local write lease and async result presentation only; no IAM, Go or persistence refinement, DOM/events, or path/XML parser proof."
+        }
+      ]
+    },
+    {
+      "path": "tools/console/src/ec2-security-group-inventory.mjs",
+      "sha256": "db029c1dd412e53118878bb5b09326447acb5fabe928a29291857785a6ff0bd2",
+      "disposition": "modeled",
+      "reason": "Allows scoped Describe only and derives the advertised native or stack profile.",
+      "models": [
+        {
+          "id": "EC2VpcConsoleNavigation",
+          "properties": [
+            "AdvertisedOnly",
+            "CurrentRegionAndView",
+            "VerifiedDisplay"
+          ],
+          "limits": "Model of frontend route, local write lease and async result presentation only; no IAM, Go or persistence refinement, DOM/events, or path/XML parser proof."
+        }
+      ]
+    },
+    {
+      "path": "tools/console/src/ec2-security-groups-console.jsx",
+      "sha256": "9e0bf257ca6e5ca5004053701622851d7a9cbbb91f2426fe2524112d3c2dcb5a",
+      "disposition": "modeled",
+      "reason": "Selects the verified VPC readback/profile before allowing any scoped groups operations.",
+      "models": [
+        {
+          "id": "EC2VpcConsoleNavigation",
+          "properties": [
+            "AdvertisedOnly",
+            "CurrentRegionAndView",
+            "VerifiedDisplay",
+            "NoLocalDepartureDuringWrite",
+            "CurrentWriteOwnsLease"
+          ],
+          "limits": "Model of frontend route, local write lease and async result presentation only; no IAM, Go or persistence refinement, DOM/events, or path/XML parser proof."
         }
       ]
     },
     {
       "path": "tools/console/src/ec2-subnets-console.jsx",
-      "sha256": "2b80f659259321dd9d29a27a6a8ab9c22a760de12ddaef32820cc918b5778fd6",
+      "sha256": "af53151397ea83874e14ffe63bf16c8b31fb140769acb96d107bd879713d4c30",
       "disposition": "modeled",
-      "reason": "Keeps current-view state, requires verified native VPC and readback, and refuses to resend after an unknown write.",
+      "reason": "Subnet details, links and optional writes use their exact selected region/parent and independently verified readback.",
       "models": [
         {
-          "id": "EC2RegionalSubnetConsole",
+          "id": "EC2VpcConsoleNavigation",
           "properties": [
-            "OnlyNativeParentWrites",
-            "ConfirmedInventoryBeforeWrite",
-            "ReadbackBeforeDetail",
-            "CurrentScopeOnly",
-            "NoUnreconciledRetry"
+            "AdvertisedOnly",
+            "CurrentRegionAndView",
+            "VerifiedDisplay",
+            "NoLocalDepartureDuringWrite",
+            "CurrentWriteOwnsLease"
           ],
-          "limits": "Bounded UI caller and navigation only; no React/DOM refinement, wire parser, AWS packet, VM, STS, transactional join, or provider ownership proof. Direct real browser and native API evidence is independent."
+          "limits": "Model of frontend route, local write lease and async result presentation only; no IAM, Go or persistence refinement, DOM/events, or path/XML parser proof."
+        }
+      ]
+    },
+    {
+      "path": "tools/console/src/ec2-vpc-native-route-tables.jsx",
+      "sha256": "b64047a5aea44c99ea58d8b8dc1bfc2744ff562b90624326ebccc14634253eac",
+      "disposition": "modeled",
+      "reason": "Optional focused editor keeps the existing scoped writes and readback, reporting results to the owning page only.",
+      "models": [
+        {
+          "id": "EC2VpcConsoleNavigation",
+          "properties": [
+            "AdvertisedOnly",
+            "CurrentRegionAndView",
+            "VerifiedDisplay",
+            "NoLocalDepartureDuringWrite",
+            "CurrentWriteOwnsLease"
+          ],
+          "limits": "Model of frontend route, local write lease and async result presentation only; no IAM, Go or persistence refinement, DOM/events, or path/XML parser proof."
+        }
+      ]
+    },
+    {
+      "path": "tools/console/src/ec2-vpc-navigation.mjs",
+      "sha256": "c5b3af15602a9996c182e505ba89077ced6fc8e423c97206d398553abd65d9cf",
+      "disposition": "modeled",
+      "reason": "Section/target and region identity are checked; only advertised session routes become visible or linked.",
+      "models": [
+        {
+          "id": "EC2VpcConsoleNavigation",
+          "properties": [
+            "AdvertisedOnly",
+            "CurrentRegionAndView"
+          ],
+          "limits": "Model of frontend route, local write lease and async result presentation only; no IAM, Go or persistence refinement, DOM/events, or path/XML parser proof."
+        }
+      ]
+    },
+    {
+      "path": "tools/console/src/ec2-vpc-resource-view.jsx",
+      "sha256": "f9a6d22f6a0e0d00ab35150b1f40156d4484273603e9c7dbdbe0cd26a3bcce3c",
+      "disposition": "modeled",
+      "reason": "Only the selected advertised section is mounted; reported writes keep the current view lease until readback or retirement.",
+      "models": [
+        {
+          "id": "EC2VpcConsoleNavigation",
+          "properties": [
+            "AdvertisedOnly",
+            "CurrentRegionAndView",
+            "VerifiedDisplay",
+            "NoLocalDepartureDuringWrite",
+            "CurrentWriteOwnsLease"
+          ],
+          "limits": "Model of frontend route, local write lease and async result presentation only; no IAM, Go or persistence refinement, DOM/events, or path/XML parser proof."
+        }
+      ]
+    },
+    {
+      "path": "tools/console/src/ec2-vpc-security-groups.jsx",
+      "sha256": "ecda6adc17d211b39215bf4ca8fc26ce50f083d4add3ab2370bcd0b8680a6f4c",
+      "disposition": "modeled",
+      "reason": "Standalone mode keeps write ownership and confirmed selection in the current VPC.",
+      "models": [
+        {
+          "id": "EC2VpcConsoleNavigation",
+          "properties": [
+            "AdvertisedOnly",
+            "CurrentRegionAndView",
+            "VerifiedDisplay",
+            "NoLocalDepartureDuringWrite",
+            "CurrentWriteOwnsLease"
+          ],
+          "limits": "Model of frontend route, local write lease and async result presentation only; no IAM, Go or persistence refinement, DOM/events, or path/XML parser proof."
         }
       ]
     },
     {
       "path": "tools/console/src/main.jsx",
-      "sha256": "6d972cad4d435e1f40efb61ccc414239a872e35582ce543efbf0814e6118a33d",
+      "sha256": "2e8a8a48e489fb27fbd5fa3bf80d99d5fd449a45385786a3bb3c46983c4bf921",
       "disposition": "modeled",
-      "reason": "VPC navigation exposes only the authenticated regional subnet API and remounts the view on region, identity and route changes.",
+      "reason": "Nav activation, region changes and actual browser history are keyed separately; exact lease owner releases the local navigation guard.",
       "models": [
         {
-          "id": "EC2RegionalSubnetConsole",
+          "id": "EC2VpcConsoleNavigation",
           "properties": [
-            "OnlyNativeParentWrites",
-            "ConfirmedInventoryBeforeWrite",
-            "ReadbackBeforeDetail",
-            "CurrentScopeOnly",
-            "NoUnreconciledRetry"
+            "AdvertisedOnly",
+            "CurrentRegionAndView",
+            "VerifiedDisplay",
+            "NoLocalDepartureDuringWrite",
+            "CurrentWriteOwnsLease"
           ],
-          "limits": "Bounded UI caller and navigation only; no React/DOM refinement, wire parser, AWS packet, VM, STS, transactional join, or provider ownership proof. Direct real browser and native API evidence is independent."
+          "limits": "Model of frontend route, local write lease and async result presentation only; no IAM, Go or persistence refinement, DOM/events, or path/XML parser proof."
         }
       ]
     },
     {
-      "path": "tools/console/test/ec2-subnet-console.test.mjs",
-      "sha256": "6ac1984f815d7185b9068bbe848026b35bcfd3b3a1cb6a6e23ac3b2d3e603489",
+      "path": "tools/console/test/ec2-internet-gateway-page.test.mjs",
+      "sha256": "9a4734bd0f2f7e2238a42912c143d1a3b9c38708ccb8d3b52a0df503caff4d9a",
+      "disposition": "presentation",
+      "reason": "Developer-only UI/adapter regression for the compiled feature. Does not change resource state or ship in the browser bundle.",
+      "models": []
+    },
+    {
+      "path": "tools/console/test/ec2-network-acl-inventory.test.mjs",
+      "sha256": "e58e7133a8eff7f8223348e769272f59fed3efb28efe2342cece7f4563dc9479",
+      "disposition": "presentation",
+      "reason": "Developer-only UI/adapter regression for the compiled feature. Does not change resource state or ship in the browser bundle.",
+      "models": []
+    },
+    {
+      "path": "tools/console/test/ec2-route-table-console.test.mjs",
+      "sha256": "6163ee05976f65c45bba3b25bd63b254b0bd6cd9eec951db347396269f414304",
+      "disposition": "presentation",
+      "reason": "Developer-only UI/adapter regression for the compiled feature. Does not change resource state or ship in the browser bundle.",
+      "models": []
+    },
+    {
+      "path": "tools/console/test/ec2-security-group-inventory.test.mjs",
+      "sha256": "868c55ca470d3d131d1304a25daebc84c042584f585b1587bc1e3111199417d8",
+      "disposition": "presentation",
+      "reason": "Developer-only UI/adapter regression for the compiled feature. Does not change resource state or ship in the browser bundle.",
+      "models": []
+    },
+    {
+      "path": "tools/console/test/ec2-vpc-navigation.test.mjs",
+      "sha256": "bc4b771a6ad4de2ad2f458e41353345f68ec4508c9f5a08c91ddca608aaad407",
       "disposition": "modeled",
-      "reason": "Exercises bounded typed projection and exact outcomes without claims of real browser or provider behavior.",
+      "reason": "Tests exact typed routes/regions and negative controls for capabilities without sending requests.",
       "models": [
         {
-          "id": "EC2RegionalSubnetConsole",
+          "id": "EC2VpcConsoleNavigation",
           "properties": [
-            "OnlyNativeParentWrites",
-            "ConfirmedInventoryBeforeWrite",
-            "ReadbackBeforeDetail",
-            "CurrentScopeOnly",
-            "NoUnreconciledRetry"
+            "AdvertisedOnly",
+            "CurrentRegionAndView"
           ],
-          "limits": "Bounded UI caller and navigation only; no React/DOM refinement, wire parser, AWS packet, VM, STS, transactional join, or provider ownership proof. Direct real browser and native API evidence is independent."
+          "limits": "Model of frontend route, local write lease and async result presentation only; no IAM, Go or persistence refinement, DOM/events, or path/XML parser proof."
         }
       ]
     }
