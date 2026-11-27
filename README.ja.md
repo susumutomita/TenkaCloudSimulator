@@ -5,7 +5,7 @@
 クラウドのアカウントなしで、APIやコンソールの操作をローカルで練習できる、非公式の学習用シミュレーターです。
 AWSを中心に、Google Cloud・Azure・任意で有効化するSakuraの一部にも対応しています。
 対応する画面とAPIは、同じSQLiteのデータを操作します。
-新規の EC2 管理 VPC には[メインルートテーブルと読み取り専用の IPv4 `local` ルート](docs/ec2-read-discovery.md#native-vpc-lifecycle)が作成されます。明示的な関連付けのないサブネットがどのメインテーブルを利用するかは、VPC コンソールで確認できます。既存 VPC と CloudFormation 管理のリソースは自動移行しません。
+新規の EC2 管理 VPC には[メインルートテーブルと読み取り専用の IPv4 `local` ルート](docs/ec2-read-discovery.md#native-vpc-lifecycle)が作成されます。明示的な関連付けのないサブネットがどのメインテーブルを利用するかは、VPC コンソールで確認できます。自動移行はありません。既存の EC2 管理 VPC は、停止済みの状態ファイルのコピーに対して[1件ずつ修復](docs/ec2-legacy-native-main-repair.md)できます。CloudFormation の所有権は変更しません。
 
 コンソール、APIリファレンス、SQLite、Python Lambdaの実行環境を1つのGoバイナリに同梱しています。
 **ビルド済みバイナリの実行にはGo・Node.js・ホストのPython・Docker・外部DB・実クラウド接続は不要です。

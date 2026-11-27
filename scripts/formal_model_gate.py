@@ -4290,6 +4290,45 @@ EC2INSTANCESTACKCONSOLE_MUTATIONS = [{'id': 'OmitCurrentCapability',
   'expect_invariant': 'NoGuestLivenessClaim'}]
 
 
+BASE_MODELS.add('EC2LegacyNativeMainRepair')
+BASE_INVARIANTS['EC2LegacyNativeMainRepair'] = {
+    'TypeOK',
+    'AtomicRepair',
+    'OneStoredRow',
+    'ExactAdmission',
+    'NoPartialRefusal',
+    'PlanAndRepeatAreReadOnly',
+    'RetainedFrame',
+}
+REQUIRED_MUTANTS['EC2LegacyNativeMainRepair'] = {
+    'PartialNativeMain',
+    'CountSyntheticAssociation',
+    'SkipOperatorOwnership',
+    'AllowAmbiguousOwner',
+    'UseOriginalDirectly',
+    'IgnoreStalePlan',
+    'IgnoreFullQuota',
+    'AllowDependentCascade',
+    'AcknowledgeLateRefusal',
+    'CommitRefusedPartial',
+    'PlanWrites',
+    'ReapplyWrites',
+    'AlterRetainedAssociation',
+}
+REQUIRED_SOURCE_SCOPES['EC2LegacyNativeMainRepair'] = {
+    'cmd/simulator/ec2_native_main_route_repair.go',
+    'cmd/simulator/ec2_native_main_route_repair_other.go',
+    'cmd/simulator/ec2_native_main_route_repair_posix.go',
+    'cmd/simulator/main.go',
+    'internal/aws/ec2_native_vpc_main_repair.go',
+    'internal/aws/ec2_native_vpc_main_route.go',
+    'internal/aws/ec2_network.go',
+    'internal/aws/ec2_route_tables_native.go',
+    'internal/aws/ec2_route_tables_read.go',
+    'internal/aws/ec2_vpc.go',
+}
+
+
 def load_registry(root, relative='formal/models.json'):
     root = Path(root)
     registry_path = asset(root, relative)

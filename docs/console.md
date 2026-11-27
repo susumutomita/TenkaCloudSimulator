@@ -221,12 +221,12 @@ a subnet, nor do they enforce traffic. An ACL
 pane for a CloudFormation VPC does not read or change ACLs. **Route tables** can
 create and delete detached tables with optional Name tags in a native VPC,
 manage or [move explicit subnet associations](ec2-read-discovery.md#native-subnet-route-table-associations) between tables in the same VPC, and manage the documented [saved IPv4 routes](ec2-native-default-route.md).
-For a new EC2-owned VPC, the pane identifies the main table and displays each
+For a new or [explicitly repaired](ec2-legacy-native-main-repair.md) EC2-owned VPC, the pane identifies the main table and displays each
 table's read-only IPv4 `local` route separately from saved gateway routes.
 The main table cannot be deleted directly. The **Subnets using the main table
 implicitly** column is confirmed only after an authorized, complete subnet
-read. This display does not add an explicit association. Existing VPCs are
-not backfilled.
+read. This display does not add an explicit association. The Console does not
+repair legacy VPCs or write during discovery.
 Both route table panes retrieve bounded regional pages and display the selected
 VPC only after validating the complete list. If a continuation is rejected as stale, refresh;
 the Console does not repeat a write or report an unconfirmed change as successful.

@@ -38,7 +38,8 @@ func verifyNativeVPCMainSlot(ctx context.Context, tx *sql.Tx, vpc EC2NetworkReso
 		return nil
 	}
 	if vpc.Kind != ec2RTVPC || vpc.StackID != ec2NativeOwner || !ec2VPCIDPattern.MatchString(vpc.ID) ||
-		vpc.MainRouteTableID != nativeMainTableID(vpc.Region, vpc.ID) || vpc.Revision != 1 {
+		vpc.MainRouteTableID != nativeMainTableID(vpc.Region, vpc.ID) ||
+		(vpc.Revision != 1 || vpc.MainRouteRepair != nil) && !validNativeVPCMainRepair(vpc) {
 		return errEC2NativeRouteTableState
 	}
 	prefix, ok := nativeSubnetPrefix(vpc.CIDR)
@@ -47,7 +48,7 @@ func verifyNativeVPCMainSlot(ctx context.Context, tx *sql.Tx, vpc EC2NetworkReso
 	}
 	main, err := networkRead(ctx, tx, vpc.Region, vpc.MainRouteTableID)
 	if err != nil || main.Kind != ec2RT || main.StackID != ec2NativeOwner || main.VPCID != vpc.ID ||
-		!nativeRouteTableFields(main) || main.CIDR != vpc.CIDR || len(main.Tags) != 0 {
+		!nativeRouteTableFields(main) || main.Revision != 1 || main.CIDR != vpc.CIDR || len(main.Tags) != 0 {
 		return errEC2NativeRouteTableState
 	}
 	for _, id := range []string{vpc.ID, main.ID, nativeMainAssociationID(vpc.Region, vpc.ID)} {

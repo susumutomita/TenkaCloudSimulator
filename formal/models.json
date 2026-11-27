@@ -27090,6 +27090,179 @@
           "expect_invariant": "NoGuestLivenessClaim"
         }
       ]
+    },
+    {
+      "id": "EC2LegacyNativeMainRepair",
+      "model": "formal/EC2LegacyNativeMainRepair.tla",
+      "config": "formal/EC2LegacyNativeMainRepair.cfg",
+      "bounds": "One authorized offline selected VPC, two retained custom table rows, one additional main row, Boolean input/save witnesses. Local routes and system association have no independent stored rows.",
+      "properties": [
+        "TypeOK",
+        "AtomicRepair",
+        "OneStoredRow",
+        "ExactAdmission",
+        "NoPartialRefusal",
+        "PlanAndRepeatAreReadOnly",
+        "RetainedFrame"
+      ],
+      "limits": "Finite model of one explicit offline repair with two legacy custom tables, one stored slot, abstract copy/owner/plan and final witness, and preserved peer sentinels. Not a Go, SQLite, cryptography, filesystem, OS authorization, HTTP/IAM, Console, packet or AWS parity proof.",
+      "source_scope": [
+        "cmd/simulator/ec2_native_main_route_repair.go",
+        "cmd/simulator/ec2_native_main_route_repair_other.go",
+        "cmd/simulator/ec2_native_main_route_repair_posix.go",
+        "cmd/simulator/main.go",
+        "internal/aws/ec2_native_vpc_main_repair.go",
+        "internal/aws/ec2_native_vpc_main_route.go",
+        "internal/aws/ec2_network.go",
+        "internal/aws/ec2_route_tables_native.go",
+        "internal/aws/ec2_route_tables_read.go",
+        "internal/aws/ec2_vpc.go"
+      ],
+      "mutants": [
+        {
+          "id": "PartialNativeMain",
+          "edits": [
+            {
+              "old": "!.main = 1,",
+              "new": "!.main = 0,",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AtomicRepair"
+        },
+        {
+          "id": "CountSyntheticAssociation",
+          "edits": [
+            {
+              "old": "!.localCustom = CustomRows, !.extra = 1]",
+              "new": "!.localCustom = CustomRows, !.extra = 2]",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "OneStoredRow"
+        },
+        {
+          "id": "SkipOperatorOwnership",
+          "edits": [
+            {
+              "old": "IF Permit(w)",
+              "new": "IF Permit([w EXCEPT !.operator = TRUE])",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExactAdmission"
+        },
+        {
+          "id": "AllowAmbiguousOwner",
+          "edits": [
+            {
+              "old": "IF Permit(w)",
+              "new": "IF Permit([w EXCEPT !.own = TRUE])",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExactAdmission"
+        },
+        {
+          "id": "UseOriginalDirectly",
+          "edits": [
+            {
+              "old": "IF Permit(w)",
+              "new": "IF Permit([w EXCEPT !.distinct = TRUE])",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExactAdmission"
+        },
+        {
+          "id": "IgnoreStalePlan",
+          "edits": [
+            {
+              "old": "IF Permit(w)",
+              "new": "IF Permit([w EXCEPT !.matches = TRUE])",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExactAdmission"
+        },
+        {
+          "id": "IgnoreFullQuota",
+          "edits": [
+            {
+              "old": "IF Permit(w)",
+              "new": "IF Permit([w EXCEPT !.slot = TRUE])",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExactAdmission"
+        },
+        {
+          "id": "AllowDependentCascade",
+          "edits": [
+            {
+              "old": "IF Permit(w)",
+              "new": "IF Permit([w EXCEPT !.schema = TRUE])",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExactAdmission"
+        },
+        {
+          "id": "AcknowledgeLateRefusal",
+          "edits": [
+            {
+              "old": "IF Permit(w)",
+              "new": "IF Permit([w EXCEPT !.late = FALSE])",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExactAdmission"
+        },
+        {
+          "id": "CommitRefusedPartial",
+          "edits": [
+            {
+              "old": "ELSE /\\ result' = \"refused\" /\\ net' = net",
+              "new": "ELSE /\\ result' = \"refused\" /\\ net' = [net EXCEPT !.retained.stack = 0]",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "NoPartialRefusal"
+        },
+        {
+          "id": "PlanWrites",
+          "edits": [
+            {
+              "old": "Plan == /\\ prev' = net /\\ net' = net",
+              "new": "Plan == /\\ prev' = net /\\ net' = [net EXCEPT !.retained.stack = 0]",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PlanAndRepeatAreReadOnly"
+        },
+        {
+          "id": "ReapplyWrites",
+          "edits": [
+            {
+              "old": "Reapply == /\\ net.marker /\\ prev' = net /\\ net' = net",
+              "new": "Reapply == /\\ net.marker /\\ prev' = net /\\ net' = [net EXCEPT !.retained.replay = 2]",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PlanAndRepeatAreReadOnly"
+        },
+        {
+          "id": "AlterRetainedAssociation",
+          "edits": [
+            {
+              "old": "!.localCustom = CustomRows, !.extra = 1]",
+              "new": "!.localCustom = CustomRows, !.extra = 1, !.retained.explicit = 0]",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "RetainedFrame"
+        }
+      ]
     }
   ]
 }

@@ -505,6 +505,7 @@ func nativeVPCRetainedDependents(ctx context.Context, tx *sql.Tx, v EC2NetworkRe
 		if count > ec2NativeRouteTableRowLimit || json.Unmarshal([]byte(raw), &other) != nil || other.ID != child ||
 			other.Kind != kind || other.Region != v.Region || other.StackID != owner || other.Revision != revision ||
 			(other.MainRouteTableID != "" && (kind != ec2RTVPC || owner != ec2NativeOwner)) ||
+			(other.MainRouteRepair != nil && !validNativeVPCMainRepair(other)) ||
 			(strings.HasPrefix(child, nativeInternetGatewayLinkPrefix) || owner == ec2NativeOwner && kind == ec2RTAttachment) &&
 				!validNativeInternetGatewayLink(other) ||
 			(strings.HasPrefix(child, nativeDefaultRoutePrefix) || owner == ec2NativeOwner && kind == ec2Route) && !validNativeIPv4Route(other) {
