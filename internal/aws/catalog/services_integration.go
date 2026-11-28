@@ -422,8 +422,13 @@ var sesV2 = &Service{
 			ARN:        "arn:{partition}:ses:{region}:{account}:template/{name}",
 			NameMember: "TemplateName", Unique: true, Limit: 100,
 			Generate: map[string]any{"CreatedTimestamp": "$now"}},
+		{Kind: "domainIdentity", Shape: "GetEmailIdentityResponse", Summary: "IdentityInfo", ID: "name", NameMember: "EmailIdentity", ARN: "arn:{partition}:ses:{region}:{account}:identity/{name}", Unique: true, Limit: 100},
 	},
 	Ops: []Op{
+		{Name: "CreateEmailIdentity", Kind: Create, Resource: "domainIdentity"},
+		{Name: "GetEmailIdentity", Kind: Read, Resource: "domainIdentity", Lookup: "EmailIdentity"},
+		{Name: "ListEmailIdentities", Kind: List, Resource: "domainIdentity"},
+		{Name: "DeleteEmailIdentity", Kind: Delete, Resource: "domainIdentity", Lookup: "EmailIdentity"},
 		{Name: "CreateConfigurationSet", Kind: Create, Resource: "configurationSet"},
 		{Name: "GetConfigurationSet", Kind: Read, Resource: "configurationSet", Lookup: "ConfigurationSetName"},
 		{Name: "ListConfigurationSets", Kind: List, Resource: "configurationSet", ListValue: "ConfigurationSetName"},
@@ -446,7 +451,8 @@ var sesV2 = &Service{
 		{Name: "ListTagsForResource", Kind: ListTags, Lookup: "ResourceArn"},
 	},
 	Bounds: []string{
+		"SES v2 domain identities are limited to lowercase names under .test with one existing exact local public Route 53 zone. Three Easy DKIM CNAME records in the captured zone establish local DNS control. Get and List recheck records. No external DNS, DKIM signing or email delivery occurs. Page sizes and live identities are limited to 100 per region.",
 		"Configuration sets, one contact list and email templates are stored locally. TestRenderEmailTemplate previews stored subject, text and HTML as MIME using flat string replacements in simple {{name}} tags. Advanced Handlebars forms, missing values, header control characters and previews larger than 256 KiB are rejected. No email is sent, tracked or archived; SendEmail, SendBulkEmail and other sending APIs return HTTP 501 UnknownOperationException.",
-		"Email identities, DKIM, dedicated IPs, contacts, suppression lists, event destinations, the Put*Options operations and account settings are not implemented. Configuration sets keep the options given at creation, and the PageSize member is refused.",
+		"Individual email address identities, identity tags and configuration options, DKIM signing, dedicated IPs, contacts, suppression lists, event destinations, the Put*Options operations and account settings are unsupported. Configuration sets keep the options given at creation and refuse PageSize.",
 	},
 }

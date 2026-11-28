@@ -431,7 +431,7 @@ func (s *Route53Store) listRecords(w http.ResponseWriter, r *http.Request, q url
 		start.Type = q.Get("type")
 	}
 	if q.Get("name") != "" {
-		start.Name, e = r53name(q.Get("name"))
+		start.Name, e = r53recordName(q.Get("name"), start.Type)
 		if e != nil {
 			r53failure(w, e)
 			return
@@ -544,7 +544,7 @@ func (s *Route53Store) answer(w http.ResponseWriter, r *http.Request, q url.Valu
 		r53failure(w, r53invalid("A hostedzoneid is required."))
 		return
 	}
-	name, e := r53name(q.Get("recordname"))
+	name, e := r53recordName(q.Get("recordname"), q.Get("recordtype"))
 	if e != nil {
 		r53failure(w, e)
 		return

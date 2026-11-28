@@ -101,7 +101,7 @@ func r53defaults(name string) []Route53Record {
 }
 func r53validateRecord(r Route53Record, zone string) (Route53Record, error) {
 	var e error
-	r.Name, e = r53name(r.Name)
+	r.Name, e = r53recordName(r.Name, r.Type)
 	if e != nil {
 		return r, e
 	}

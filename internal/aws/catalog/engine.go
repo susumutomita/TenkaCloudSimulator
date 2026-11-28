@@ -22,6 +22,8 @@ type Config struct {
 	DefaultPrincipal string
 	Authorize        Authorizer
 	Now              func() time.Time
+	// SESDomainDNS reads the local public zone and its three CNAME proofs in the identity transaction.
+	SESDomainDNS func(context.Context, *sql.Tx, string, []string) (string, bool, error)
 	// ValidateRDSPrivatePostgres is optional trusted native EC2 composition.
 	// Run only for authorized, explicitly private standalone PostgreSQL writes.
 	ValidateRDSPrivatePostgres func(context.Context, *sql.Tx, RDSPrivatePostgresRefs) error
@@ -63,6 +65,11 @@ func New(db *sql.DB, cfg Config, services []*Service) (*Engine, error) {
 	e := &Engine{cfg: cfg, store: s, byTarget: map[string]*binding{}, bySigning: map[string][]*binding{}, byQuery: map[string]*binding{}}
 	seen := map[string]bool{}
 	for _, spec := range services {
+		if spec != nil && spec.Model == "sesv2" {
+			if _, err := db.Exec(sesIdentitySchema); err != nil {
+				return nil, err
+			}
+		}
 		if seen[spec.Model] {
 			return nil, fmt.Errorf("catalog service %s is registered twice", spec.Model)
 		}

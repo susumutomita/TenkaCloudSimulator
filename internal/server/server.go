@@ -183,6 +183,7 @@ func newWithProviders(path string, options ProviderConfig, prepareCognito func(*
 		return nil, nil, err
 	}
 	catalogConfig := catalog.Config{Regions: aws.Regions, Account: "000000000000", DefaultPrincipal: core.Administrator, Authorize: identities.DecisionContext}
+	catalogConfig.SESDomainDNS = aws.LocalSESDomainDNS
 	if options.RDSPrivatePostgresTopology {
 		catalogConfig.ValidateRDSPrivatePostgres = aws.ValidateRDSPrivatePostgresTopology
 	}
