@@ -21,7 +21,10 @@ type Config struct {
 	Account          string
 	DefaultPrincipal string
 	Authorize        Authorizer
-	Now              func() time.Time
+	// AuthorizeSnapshot returns one evaluator for an operation with several
+	// dependent IAM checks. Every membership page requests a fresh evaluator.
+	AuthorizeSnapshot func(context.Context, string) (func(action, resource string) string, error)
+	Now               func() time.Time
 	// ValidateRDSPrivatePostgres is optional trusted native EC2 composition.
 	// Run only for authorized, explicitly private standalone PostgreSQL writes.
 	ValidateRDSPrivatePostgres func(context.Context, *sql.Tx, RDSPrivatePostgresRefs) error
@@ -302,7 +305,7 @@ func (e *Engine) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		e.fail(w, b, op, err)
 		return
 	}
-	if b.spec.Model == "resource-groups" && (op.Name == "CreateGroup" || op.Name == "GetGroupQuery" || op.Name == "UpdateGroupQuery" || op.Name == "ListGroupResources") && !uniqueGroupJSON(body) {
+	if (b.spec.Model == "resource-groups" && op.Name == "CreateGroup" || b.isResourceGroupQueryOperation(op.Name)) && !uniqueGroupJSON(body) {
 		e.fail(w, b, op, invalid("Expected one JSON request without duplicate fields."))
 		return
 	}
@@ -446,7 +449,7 @@ func (e *Engine) fail(w http.ResponseWriter, b *binding, op *Op, err error) {
 		name = op.Name
 	}
 	code, status := b.errorCode(name, f.kind)
-	if b.spec.Model == "resource-groups" && f.kind == "denied" && (name == "GetGroupQuery" || name == "UpdateGroupQuery" || name == "ListGroupResources") {
+	if f.kind == "denied" && b.isResourceGroupQueryOperation(name) {
 		code, status = "ForbiddenException", http.StatusForbidden
 	}
 	if official := b.model.Operations[name]; f.code != "" && official != nil {

@@ -50,6 +50,15 @@ def exercise(a, b):
     west = a.client('resource-groups', region='us-west-2')
     ecr, peer_ecr = a.client('ecr'), b.client('ecr')
     west_ecr = a.client('ecr', region='us-west-2')
+    reference = a.control('GET', '/_simulator/docs/catalog/resource-groups.json')
+    for path, operation in [('get-group-query', 'GetGroupQuery'), ('update-group-query', 'UpdateGroupQuery'),
+                            ('list-group-resources', 'ListGroupResources')]:
+        post = reference['paths']['/' + path]['post']
+        assert post['summary'] == operation and 'Group' in post['requestBody']['content']['application/json']['schema']['properties']
+        assert post['responses']['403']['description'] == 'ForbiddenException.'
+    listing = reference['paths']['/list-group-resources']['post']
+    output = listing['responses']['200']['content']['application/json']['schema']['properties']
+    assert {'Resources', 'ResourceIdentifiers', 'NextToken'} <= set(output)
     blue, green = tag_query('blue'), tag_query('green')
     name = 'release-repositories'
     group = team.create_group(Name=name, ResourceQuery=blue)['Group']['GroupArn']
@@ -60,6 +69,12 @@ def exercise(a, b):
     first, second = create_repo(ecr, 'first', 'blue'), create_repo(ecr, 'second', 'blue')
     opposite = create_repo(ecr, 'opposite', 'green')
     peer_arn, west_arn = create_repo(peer_ecr, 'peer', 'blue'), create_repo(west_ecr, 'west', 'blue')
+    try:
+        b.client('resource-groups', token=a.token).list_group_resources(Group=peer_group)
+    except ClientError as error:
+        assert error.response['ResponseMetadata']['HTTPStatusCode'] == 401
+    else:
+        raise AssertionError('another team token was accepted')
     assert list_members(team, group) == ([first, second], None)
     assert list_members(peer, peer_group) == ([peer_arn], None) and list_members(west, west_group) == ([west_arn], None)
     page, token = list_members(team, group, MaxResults=1)
@@ -96,11 +111,15 @@ def exercise(a, b):
     assert team.get_group_query(Group=name)['GroupQuery'] == {'GroupName': name, 'ResourceQuery': green}
     assert list_members(team, group) == ([opposite], None)
     assert list_members(peer, peer_group) == ([peer_arn], None) and list_members(west, west_group) == ([west_arn], None)
+    peer.delete_group(Group=peer_group)
+    assert peer_ecr.describe_repositories(repositoryNames=['peer'])['repositories'][0]['repositoryArn'] == peer_arn
+    assert peer_ecr.list_tags_for_resource(resourceArn=peer_arn)['tags'] == [{'Key': 'Team', 'Value': 'blue'}]
+    refused('NotFoundException', 404, peer.get_group, Group=peer_group)
     for client, names in [(ecr, ('first', 'opposite')), (west_ecr, ('west',)), (peer_ecr, ('peer',))]:
         for repo in names:
             client.delete_repository(repositoryName=repo)
         assert not client.describe_repositories()['repositories']
-    for client, group_arn in [(team, group), (team, other_group), (west, west_group), (peer, peer_group)]:
+    for client, group_arn in [(team, group), (team, other_group), (west, west_group)]:
         assert list_members(client, group_arn) == ([], None)
         client.delete_group(Group=group_arn)
         refused('NotFoundException', 404, client.get_group, Group=group_arn)

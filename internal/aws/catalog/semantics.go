@@ -349,6 +349,10 @@ func (q *request) authorizeAction(action, resource string) error {
 	if err != nil {
 		return err
 	}
+	return q.checkDecision(decision)
+}
+
+func (q *request) checkDecision(decision string) error {
 	q.w.Header().Set("X-Simulator-IAM-Decision", decision)
 	if decision != "allowed" {
 		return &fault{kind: "denied", message: "IAM evaluation: " + decision}

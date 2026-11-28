@@ -76,7 +76,7 @@ deleting a repository changes membership on the next read. `MaxResults` accepts
 Readers need `resource-groups:ListGroupResources` on the group ARN, along with
 `tag:GetResources`, `cloudformation:DescribeStacks` and `cloudformation:ListStackResources`
 on `*`. AWS lists these three additional permissions for the API. Each membership
-page checks all four. Queryless groups retain their metadata and tag operations.
+page checks all four against one fresh principal policy snapshot. Queryless groups retain their metadata and tag operations.
 Search, explicit member management, CloudFormation queries, service configurations,
 extra tag filters and other resource types remain outside this slice. [AWS supported resource types](https://docs.aws.amazon.com/ARG/latest/userguide/supported-resources.html) ·
 [resource query formats](https://docs.aws.amazon.com/ARG/latest/userguide/gettingstarted-query.html) ·

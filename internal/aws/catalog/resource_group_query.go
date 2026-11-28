@@ -15,6 +15,10 @@ const ecrRepositoryType = "AWS::ECR::Repository"
 
 type repositoryTagFilter struct{ key, value string }
 
+func (b *binding) isResourceGroupQueryOperation(name string) bool {
+	return b.spec.Model == "resource-groups" && (name == "GetGroupQuery" || name == "UpdateGroupQuery" || name == "ListGroupResources")
+}
+
 func parsedRepositoryTagFilter(resourceQuery any) (repositoryTagFilter, error) {
 	invalidQuery := Failure("BadRequestException", "Use TAG_FILTERS_1_0 with AWS::ECR::Repository and one exact tag key and value.")
 	query, _ := resourceQuery.(map[string]any)
@@ -127,11 +131,21 @@ func (q *request) listGroupResources() (map[string]any, error) {
 	if !strings.HasPrefix(identifier, "arn:") {
 		arn = q.formatARN(q.resource(), identifier, identifier, nil)
 	}
-	if err := q.authorize(arn); err != nil {
+	if q.e.cfg.AuthorizeSnapshot == nil {
+		return nil, fmt.Errorf("resource group membership requires a policy snapshot")
+	}
+	decide, err := q.e.cfg.AuthorizeSnapshot(q.ctx, q.principal)
+	if err != nil {
+		return nil, err
+	}
+	if decide == nil {
+		return nil, fmt.Errorf("resource group membership received an empty policy snapshot")
+	}
+	if err := q.checkDecision(decide("resource-groups:ListGroupResources", arn)); err != nil {
 		return nil, err
 	}
 	for _, action := range []string{"cloudformation:DescribeStacks", "cloudformation:ListStackResources", "tag:GetResources"} {
-		if err := q.authorizeAction(action, "*"); err != nil {
+		if err := q.checkDecision(decide(action, "*")); err != nil {
 			return nil, err
 		}
 	}

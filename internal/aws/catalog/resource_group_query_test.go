@@ -1,8 +1,10 @@
 package catalog
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
+	"maps"
 	"net/http/httptest"
 	"reflect"
 	"strings"
@@ -15,6 +17,15 @@ func repositoryTagQuery(key, value string) map[string]any {
 
 func TestNamedGroupQueryTracksOnlyRealLocalECRResources(t *testing.T) {
 	h := newHarness(t, resourceGroups, ecr)
+	h.engine.cfg.AuthorizeSnapshot = func(context.Context, string) (func(string, string) string, error) {
+		refused := maps.Clone(h.policy.deny)
+		return func(action, arn string) string {
+			if refused[action+" "+arn] {
+				return "explicitDeny"
+			}
+			return "allowed"
+		}, nil
+	}
 	group := func(op string, input map[string]any) reply {
 		t.Helper()
 		return h.rest("resource-groups", "POST", "/"+op, input)
@@ -136,4 +147,21 @@ func TestResourceGroupQueryRejectsAmbiguityBeforeMutation(t *testing.T) {
 		t.Fatal("refusal changed query")
 	}
 	expect(t, h.rest("resource-groups", "POST", "/get-group", map[string]any{"Group": "refused"}), 404, "NotFoundException")
+}
+
+func TestResourceGroupMembershipRequiresWorkingPolicySnapshot(t *testing.T) {
+	h := newHarness(t, resourceGroups, ecr)
+	group := map[string]any{"Group": "snapshot-group"}
+	expect(t, h.rest("resource-groups", "POST", "/groups", map[string]any{"Name": "snapshot-group", "ResourceQuery": repositoryTagQuery("Tag", "present")}), 200, "")
+	for _, snapshot := range []func(context.Context, string) (func(string, string) string, error){
+		nil,
+		func(context.Context, string) (func(string, string) string, error) { return nil, context.Canceled },
+		func(context.Context, string) (func(string, string) string, error) { return nil, nil },
+	} {
+		h.engine.cfg.AuthorizeSnapshot = snapshot
+		reply := h.rest("resource-groups", "POST", "/list-group-resources", group)
+		if reply.status != 500 || reply.body["Resources"] != nil || reply.body["ResourceIdentifiers"] != nil {
+			t.Fatal("membership requires a valid policy snapshot")
+		}
+	}
 }

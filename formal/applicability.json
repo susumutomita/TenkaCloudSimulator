@@ -18,7 +18,7 @@
     },
     {
       "path": "docs/aws-catalog.md",
-      "sha256": "8275f44cb6db6bb07f308c4715de4ec53edab8f1fb3c0e58416263afe5767332",
+      "sha256": "164ca728df92aeec3e1f6530fee74597a14e0af50d4b487cef52eb59e1dd6e42",
       "disposition": "documentation",
       "reason": "Document the stored ECR tag query, real membership and bounded native APIs.",
       "models": []
@@ -32,14 +32,14 @@
     },
     {
       "path": "formal/models.json",
-      "sha256": "b382fb65cc2b46edb4be8bfc795d77f62d159aa69c27999d6e6f11e2c939191a",
+      "sha256": "30eabb14062c7c07c01aa5c25938c50a3e6d7da86d48f3c4c932c01bd04fab46",
       "disposition": "formal-infrastructure",
       "reason": "Associate the query and membership implementation with the existing catalog lifecycle model.",
       "models": []
     },
     {
       "path": "internal/aws/catalog/engine.go",
-      "sha256": "9665b95092af3ad83b36e329ad3b6ab8c6ca244b3f3e4d68485582fa36e962a1",
+      "sha256": "85d6f6348c233118f6039c7cd6228f1f14a6988f98bf30a771054e9cab5dbbe6",
       "disposition": "modeled",
       "reason": "Bind named ECR tag-query groups and their guarded regional collection read to the bounded catalog lifecycle.",
       "models": [
@@ -74,8 +74,23 @@
       ]
     },
     {
+      "path": "internal/aws/catalog/openapi.go",
+      "disposition": "modeled",
+      "reason": "Expose the three new routes’ native ForbiddenException denial name in their served reference.",
+      "models": [
+        {
+          "id": "CatalogResourceLifecycle",
+          "properties": [
+            "AuthorizationFirst"
+          ],
+          "limits": "The catalog model abstracts authorization before observation. It does not represent policy revisions, specific dependent IAM actions, database reads or generated reference text."
+        }
+      ],
+      "sha256": "32e976fb1d84ca5494e693fb36eb6b6dbd1c6f48c78d75cd966402e9abd79885"
+    },
+    {
       "path": "internal/aws/catalog/resource_group_query.go",
-      "sha256": "586b697e702a31a56dbf6986da18c6e5c04504ed1c28515ba08d830189e4dd25",
+      "sha256": "da8425094244ea651b21d8649dfe2310080f03d6284d4270f6e6689f8e288fe5",
       "disposition": "modeled",
       "reason": "Bind named ECR tag-query groups and their guarded regional collection read to the bounded catalog lifecycle.",
       "models": [
@@ -93,7 +108,7 @@
     },
     {
       "path": "internal/aws/catalog/resource_group_query_test.go",
-      "sha256": "0512f07be75fb53d81e4311ad3a68f529a4f96627f458729c5cda1c113690784",
+      "sha256": "12624208c393861785f772676acc621af6a9bd4341dbb289f2291903956cf98a",
       "disposition": "test-support",
       "reason": "Exercise real named-group query operations and preservation, authorization and ECR membership behavior through the relevant test entry point.",
       "models": []
@@ -118,7 +133,7 @@
     },
     {
       "path": "internal/aws/catalog/semantics.go",
-      "sha256": "f33f6d7776abdd462579655cdcb33e18c12a2897208a477524f68c2a88690b19",
+      "sha256": "5b4c44e0a4cc3d7701bcc42e29a8471bab5c642167dfa892f4551a4dff926afa",
       "disposition": "modeled",
       "reason": "Bind named ECR tag-query groups and their guarded regional collection read to the bounded catalog lifecycle.",
       "models": [
@@ -153,6 +168,28 @@
       ]
     },
     {
+      "path": "internal/core/policy.go",
+      "disposition": "modeled",
+      "reason": "Capture the caller policy once so all related conditions use the same revision.",
+      "models": [
+        {
+          "id": "CatalogResourceLifecycle",
+          "properties": [
+            "AuthorizationFirst"
+          ],
+          "limits": "The catalog model abstracts authorization before observation. It does not represent policy revisions, specific dependent IAM actions, database reads or generated reference text."
+        }
+      ],
+      "sha256": "c19d712a2b971ccf12d295271bfd46d95703f6591c04cf277e9b2981a2488dcc"
+    },
+    {
+      "path": "internal/core/policy_test.go",
+      "sha256": "f7e77940e2eb4c499a6fa540325cfeddd3e7bbd36244fd8d03315bcf28f60441",
+      "disposition": "test-support",
+      "reason": "Check policy replacement, explicit deny, missing principals and administrator through real identity snapshots.",
+      "models": []
+    },
+    {
       "path": "internal/server/apidocs/catalog/index.json",
       "sha256": "ef37ca4add0d86bf84370e8f6ee564d4743b3b6eb6dd2b6f2737683d6eaf72fd",
       "disposition": "presentation",
@@ -161,10 +198,25 @@
     },
     {
       "path": "internal/server/apidocs/catalog/resource-groups.json",
-      "sha256": "2a13627c30e4c8d27ec9e787e3034f74c87fa8c1990b79d12475a5e16bc40660",
+      "sha256": "15f26ed36e28cd1111654fbaec27f5399d1ce31605d345c04e5e5818fe703436",
       "disposition": "presentation",
       "reason": "Ship the generated operation shapes and model index for Resource Groups query operations.",
       "models": []
+    },
+    {
+      "path": "internal/server/server.go",
+      "disposition": "modeled",
+      "reason": "Supply the existing identities store snapshot method to catalog membership requests.",
+      "models": [
+        {
+          "id": "CatalogResourceLifecycle",
+          "properties": [
+            "AuthorizationFirst"
+          ],
+          "limits": "The catalog model abstracts authorization before observation. It does not represent policy revisions, specific dependent IAM actions, database reads or generated reference text."
+        }
+      ],
+      "sha256": "a92966ab3d4c1c7ab4f35bf404e6a607e87f37e71c392f3ffbdc9c6dd01361a1"
     },
     {
       "path": "test/e2e/catalog_fixtures/resource-groups.json",
@@ -182,7 +234,7 @@
     },
     {
       "path": "test/e2e/resource_group_ecr_members.py",
-      "sha256": "fdb1b4cbee4d25b2a54295cbad9bdcb9ed1a2e9297119b4ffcaaf194c79b92d4",
+      "sha256": "e49681678463371e3cfb5c7359d9a8112ff3e290fac06efa58b575a2df943c0a",
       "disposition": "test-support",
       "reason": "Exercise real named-group query operations and preservation, authorization and ECR membership behavior through the relevant test entry point.",
       "models": []
