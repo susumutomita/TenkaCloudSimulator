@@ -139,6 +139,11 @@ def check_versioned_edits(page, team, field, back):
         current = video.describe_stream(StreamARN=arn)['StreamInfo']
         assert current['MediaType'] == 'video/h265' and current['DataRetentionInHours'] == 30
         assert current['Version'] != external['Version']
+        with page.expect_response(lambda response: urlsplit(response.url).path == '/describeStream') as saved:
+            page.get_by_role('button', name='Edit', exact=True).click()
+        assert saved.value.json()['StreamInfo']['Version'] == current['Version']
+        expect(hours).to_have_value('30')
+        page.get_by_role('button', name='Cancel', exact=True).click()
         back()
     finally:
         original_failure = sys.exception()
