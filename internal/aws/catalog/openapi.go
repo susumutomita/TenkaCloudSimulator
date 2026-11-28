@@ -61,6 +61,14 @@ func (b *binding) openAPI() map[string]any {
 			},
 		}}
 	} else {
+		service := b.signingName()
+		routeSchema := map[string]any{"type": "string", "enum": []any{service}}
+		routeHeader := map[string]any{"name": "X-Simulator-Service", "in": "header", "required": false,
+			"description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.", "schema": routeSchema}
+		if b.spec.Model == "sesv2" {
+			// Unsigned SES requests need the signing-service hint before S3 routing.
+			routeHeader["required"], routeHeader["example"], routeSchema["default"] = true, service, service
+		}
 		for _, op := range ops {
 			official := m.Operations[op.Name]
 			pathPart, _, _ := strings.Cut(official.HTTP.RequestURI, "?")
@@ -71,7 +79,7 @@ func (b *binding) openAPI() map[string]any {
 				paths[pathPart] = entry
 			}
 			operation := map[string]any{"operationId": b.spec.Model + op.Name, "tags": []any{tag}, "summary": op.Name,
-				"parameters": []any{map[string]any{"name": "X-Simulator-Service", "in": "header", "required": false, "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.", "schema": map[string]any{"type": "string", "enum": []any{b.signingName()}}}},
+				"parameters": []any{routeHeader},
 				"responses":  map[string]any{"200": map[string]any{"description": "Projected official output shape."}, "400": map[string]any{"description": "Modeled exception named by X-Amzn-ErrorType."}, "403": map[string]any{"description": "AccessDeniedException."}, "404": map[string]any{"description": "Not found or no matching official route."}}}
 			if official.Input != "" {
 				shape := m.shape(official.Input)
