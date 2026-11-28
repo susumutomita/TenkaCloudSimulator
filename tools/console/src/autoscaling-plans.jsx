@@ -31,7 +31,7 @@ export default function AutoScalingPlans({region, request, onSaving}) {
   const [form, setForm] = useState(emptyForm);
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
-  const [uncertain, setUncertain] = useState(false);
+  const [uncertain, setUncertain] = useState('');
   const change = (key, value) => setForm(old => ({...old, [key]: value}));
   const readLabel = t('Read capacity units', '読み込みキャパシティーユニット');
   const writeLabel = t('Write capacity units', '書き込みキャパシティーユニット');
@@ -82,7 +82,7 @@ export default function AutoScalingPlans({region, request, onSaving}) {
         setRows(old => token ? [...old, ...page.ScalingPlans] : page.ScalingPlans);
         setPageToken(page.NextToken || '');
       }
-      setUncertain(false);
+      if (name) setUncertain(previous => previous === name ? '' : previous);
     } catch (e) { if (!task.signal.aborted) setError(e.message); }
     finally { finish(task); }
   }
@@ -122,7 +122,7 @@ export default function AutoScalingPlans({region, request, onSaving}) {
       if (mode !== 'create') {
         const latest = await api.detail(name, task.signal);
         if (JSON.stringify(detail) !== JSON.stringify(latest)) {
-          setUncertain(true);
+          setUncertain(name);
           throw Error(t('The plan changed. Refresh before editing it.', 'プランが変更されました。更新してから操作してください。'));
         }
       }
@@ -140,7 +140,7 @@ export default function AutoScalingPlans({region, request, onSaving}) {
     } catch (e) {
       if (task.signal.aborted) return;
       if (sent && !acknowledged && !/^(400|403|404):/.test(e.message)) {
-        setUncertain(true);
+        setUncertain(name);
         setMode('');
         setSelected(name);
         setDetail(null);
@@ -164,12 +164,12 @@ export default function AutoScalingPlans({region, request, onSaving}) {
   const currentTitle = mode === 'create' ? newLabel : mode === 'edit' ? editLabel : mode === 'delete' ? deleteLabel : selected || title;
   const selectedTable = detail?.resources[0].ResourceId.slice(6);
   const actions = <SpaceBetween direction="horizontal" size="xs">
-    {selected && button(title, () => { setNotice(''); browse(); })}
+    {selected && button(title, () => { setNotice(''); browse(); }, {disabled:!!busy || !!uncertain})}
     {busy === 'read' ? <Button onClick={cancelRead}>{t('Cancel read', '読み込みをキャンセル')}</Button>
       : button(t('Refresh', '更新'), () => browse(selected), {iconName:'refresh'})}
-    {!selected && button(newLabel, () => open('create'), {variant:'primary', disabled:!!busy || uncertain})}
-    {detail && button(deleteLabel, () => open('delete'), {disabled:!!busy || uncertain})}
-    {detail?.resources.length === 1 && button(editLabel, () => open('edit'), {variant:'primary', disabled:!!busy || uncertain})}
+    {!selected && button(newLabel, () => open('create'), {variant:'primary', disabled:!!busy || !!uncertain})}
+    {detail && button(deleteLabel, () => open('delete'), {disabled:!!busy || !!uncertain})}
+    {detail?.resources.length === 1 && button(editLabel, () => open('edit'), {variant:'primary', disabled:!!busy || !!uncertain})}
   </SpaceBetween>;
   return <ContentLayout header={<Header variant="h1" actions={!mode && actions}>{currentTitle}</Header>}>
     <SpaceBetween size="l">
@@ -177,7 +177,7 @@ export default function AutoScalingPlans({region, request, onSaving}) {
       {notice && <Alert type="success">{notice}</Alert>}
       {mode ? <form onSubmit={submit}><Form actions={<SpaceBetween direction="horizontal" size="xs">
         {button(t('Cancel', 'キャンセル'), () => { setMode(''); setError(''); })}
-        <Button variant="primary" formAction="submit" loading={busy === 'write'} disabled={!canSubmit || uncertain}>{mode === 'delete' ? deleteLabel : mode === 'edit' ? t('Save changes', '変更を保存') : newLabel}</Button>
+        <Button variant="primary" formAction="submit" loading={busy === 'write'} disabled={!canSubmit || !!uncertain}>{mode === 'delete' ? deleteLabel : mode === 'edit' ? t('Save changes', '変更を保存') : newLabel}</Button>
       </SpaceBetween>}><Container><SpaceBetween size="m">
         {mode === 'create' && <>
           {field('name', nameLabel, t('Up to 128 printable ASCII characters. Omit |, : and /.', '半角英数字・記号で 128 文字以内。|、:、/ は使用できません。'))}

@@ -43,7 +43,7 @@ function requireResponse(condition) { if (!condition) throw Error('Unexpected na
 export function scalingPlanClient(request, region) {
   async function call(service, target, body, signal) {
     const response = await request('/', {method: 'POST', signal, headers: {
-      'Content-Type': 'application/x-amz-json-1.1', 'X-Simulator-Service': service, 'X-Simulator-Region': region, 'X-Amz-Target': target}, body: JSON.stringify(body)});
+      'Content-Type': service === 'dynamodb' ? 'application/x-amz-json-1.0' : 'application/x-amz-json-1.1', 'X-Simulator-Service': service, 'X-Simulator-Region': region, 'X-Amz-Target': target}, body: JSON.stringify(body)});
     const value = await response.json();
     signal.throwIfAborted();
     return value;
