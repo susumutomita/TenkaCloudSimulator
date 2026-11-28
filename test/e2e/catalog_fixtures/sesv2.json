@@ -9,9 +9,13 @@
   {"op": "update_contact_list", "args": {"ContactListName": "newsletter", "Description": "Weekly news"}},
   {"op": "list_contact_lists", "args": {}, "expect": {"ContactLists#count": 1, "ContactLists[0].ContactListName": "newsletter"}},
   {"op": "create_contact_list", "args": {"ContactListName": "second"}, "error": "LimitExceededException"},
-  {"op": "create_email_template", "args": {"TemplateName": "welcome", "TemplateContent": {"Subject": "Hi {{name}}", "Text": "Hello"}}},
-  {"op": "get_email_template", "args": {"TemplateName": "welcome"}, "expect": {"TemplateContent.Subject": "Hi {{name}}"}},
-  {"op": "update_email_template", "args": {"TemplateName": "welcome", "TemplateContent": {"Subject": "Welcome", "Html": "<p>Hello</p>"}}},
+  {"op": "create_email_template", "args": {"TemplateName": "welcome", "TemplateContent": {"Subject": "Hi {{name}}", "Text": "Hello {{name}}", "Html": "<p>Hello {{name}}</p>"}}},
+  {"op": "get_email_template", "args": {"TemplateName": "welcome"}, "expect": {"TemplateContent": {"Subject": "Hi {{name}}", "Text": "Hello {{name}}", "Html": "<p>Hello {{name}}</p>"}}},
+  {"op": "test_render_email_template", "args": {"TemplateName": "welcome", "TemplateData": "{\"name\":\"友 & <practice> {{literal}}\"}"}, "expect_mime": {"subject": "Hi 友 & <practice> {{literal}}", "parts": [["text/plain", "Hello 友 & <practice> {{literal}}"], ["text/html", "<p>Hello 友 & <practice> {{literal}}</p>"]]}},
+  {"op": "test_render_email_template", "args": {"TemplateName": "welcome", "TemplateData": "{}"}, "error": "BadRequestException", "status": 400},
+  {"op": "get_email_template", "args": {"TemplateName": "welcome"}, "expect": {"TemplateContent": {"Subject": "Hi {{name}}", "Text": "Hello {{name}}", "Html": "<p>Hello {{name}}</p>"}}},
+  {"op": "update_email_template", "args": {"TemplateName": "welcome", "TemplateContent": {"Subject": "Welcome", "Html": "<p>Welcome {{name}}</p>"}}},
+  {"op": "test_render_email_template", "args": {"TemplateName": "welcome", "TemplateData": "{\"name\":\"友 & <practice> {{literal}}\"}"}, "expect_mime": {"subject": "Welcome", "parts": [["text/html", "<p>Welcome 友 & <practice> {{literal}}</p>"]]}},
   {"op": "list_email_templates", "args": {}, "expect": {"TemplatesMetadata#count": 1, "TemplatesMetadata[0].TemplateName": "welcome"}},
   {"op": "tag_resource", "args": {"ResourceArn": "arn:aws:ses:us-east-1:000000000000:contact-list/newsletter", "Tags": [{"Key": "stage", "Value": "dev"}]}},
   {"op": "untag_resource", "args": {"ResourceArn": "arn:aws:ses:us-east-1:000000000000:contact-list/newsletter", "TagKeys": ["stage"]}},
@@ -20,16 +24,19 @@
   {"op": "get_email_template", "args": {"TemplateName": "missing"}, "error": "NotFoundException"}
  ],
  "isolation": [
-  {"op": "list_configuration_sets", "args": {}, "expect": {"ConfigurationSets#count": 0}}
+  {"op": "list_configuration_sets", "args": {}, "expect": {"ConfigurationSets#count": 0}},
+  {"op": "test_render_email_template", "args": {"TemplateName": "welcome", "TemplateData": "{\"name\":\"友 & <practice> {{literal}}\"}"}, "error": "NotFoundException", "status": 404}
  ],
  "after_restart": [
-  {"op": "get_email_template", "args": {"TemplateName": "welcome"}, "expect": {"TemplateContent.Subject": "Welcome"}},
-  {"op": "get_contact_list", "args": {"ContactListName": "newsletter"}, "expect": {"Description": "Weekly news"}}
+  {"op": "get_email_template", "args": {"TemplateName": "welcome"}, "expect": {"TemplateContent": {"Subject": "Welcome", "Html": "<p>Welcome {{name}}</p>"}}},
+  {"op": "get_contact_list", "args": {"ContactListName": "newsletter"}, "expect": {"Description": "Weekly news"}},
+  {"op": "test_render_email_template", "args": {"TemplateName": "welcome", "TemplateData": "{\"name\":\"友 & <practice> {{literal}}\"}"}, "expect_mime": {"subject": "Welcome", "parts": [["text/html", "<p>Welcome 友 & <practice> {{literal}}</p>"]]}}
  ],
  "cleanup": [
   {"op": "delete_configuration_set", "args": {"ConfigurationSetName": "transactional"}},
   {"op": "delete_contact_list", "args": {"ContactListName": "newsletter"}},
   {"op": "delete_email_template", "args": {"TemplateName": "welcome"}},
-  {"op": "list_email_templates", "args": {}, "expect": {"TemplatesMetadata#count": 0}}
+  {"op": "list_email_templates", "args": {}, "expect": {"TemplatesMetadata#count": 0}},
+  {"op": "test_render_email_template", "args": {"TemplateName": "welcome", "TemplateData": "{}"}, "error": "NotFoundException", "status": 404}
  ]
 }

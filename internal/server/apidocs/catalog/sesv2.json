@@ -226,7 +226,7 @@
   }
  },
  "info": {
-  "description": "Bounded simulator subset of the official Amazon Simple Email Service API (2019-09-27). Every other official operation returns HTTP 501 UnknownOperationException. Configuration sets, one contact list and email templates are stored as configuration metadata: no email is sent, rendered, tracked or archived, and SendEmail, SendBulkEmail and the other sending APIs return UnknownOperationException with HTTP 501. Email identities, DKIM, dedicated IPs, contacts, suppression lists, event destinations, the Put*Options operations and account settings are not implemented. Configuration sets keep the options given at creation, and the PageSize member is refused.",
+  "description": "Bounded simulator subset of the official Amazon Simple Email Service API (2019-09-27). Every other official operation returns HTTP 501 UnknownOperationException. Configuration sets, one contact list and email templates are stored locally. TestRenderEmailTemplate previews stored subject, text and HTML as MIME using flat string replacements in simple {{name}} tags. Advanced Handlebars forms, missing values, header control characters and previews larger than 256 KiB are rejected. No email is sent, tracked or archived; SendEmail, SendBulkEmail and other sending APIs return HTTP 501 UnknownOperationException. Email identities, DKIM, dedicated IPs, contacts, suppression lists, event destinations, the Put*Options operations and account settings are not implemented. Configuration sets keep the options given at creation, and the PageSize member is refused.",
   "title": "Amazon Simple Email Service (simulator catalog)",
   "version": "2019-09-27"
  },
@@ -1380,6 +1380,82 @@
      "Amazon Simple Email Service"
     ]
    }
+  },
+  "/v2/email/templates/{TemplateName}/render": {
+   "post": {
+    "operationId": "sesv2TestRenderEmailTemplate",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "ses"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "TemplateName",
+      "required": true,
+      "schema": {
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "TemplateData": {
+          "maxLength": 262144,
+          "type": "string"
+         }
+        },
+        "required": [
+         "TemplateData"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "RenderedTemplate": {
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "TestRenderEmailTemplate",
+    "tags": [
+     "Amazon Simple Email Service"
+    ]
+   }
   }
  },
  "servers": [
@@ -1390,7 +1466,7 @@
  ],
  "tags": [
   {
-   "description": "Bounded simulator subset of the official Amazon Simple Email Service API (2019-09-27). Every other official operation returns HTTP 501 UnknownOperationException. Configuration sets, one contact list and email templates are stored as configuration metadata: no email is sent, rendered, tracked or archived, and SendEmail, SendBulkEmail and the other sending APIs return UnknownOperationException with HTTP 501. Email identities, DKIM, dedicated IPs, contacts, suppression lists, event destinations, the Put*Options operations and account settings are not implemented. Configuration sets keep the options given at creation, and the PageSize member is refused.",
+   "description": "Bounded simulator subset of the official Amazon Simple Email Service API (2019-09-27). Every other official operation returns HTTP 501 UnknownOperationException. Configuration sets, one contact list and email templates are stored locally. TestRenderEmailTemplate previews stored subject, text and HTML as MIME using flat string replacements in simple {{name}} tags. Advanced Handlebars forms, missing values, header control characters and previews larger than 256 KiB are rejected. No email is sent, tracked or archived; SendEmail, SendBulkEmail and other sending APIs return HTTP 501 UnknownOperationException. Email identities, DKIM, dedicated IPs, contacts, suppression lists, event destinations, the Put*Options operations and account settings are not implemented. Configuration sets keep the options given at creation, and the PageSize member is refused.",
    "name": "Amazon Simple Email Service"
   }
  ],

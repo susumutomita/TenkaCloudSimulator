@@ -888,6 +888,9 @@ func (q *request) read() (map[string]any, error) {
 	if err != nil {
 		return nil, err
 	}
+	if q.b.spec.Model == "sesv2" && q.op.Name == "TestRenderEmailTemplate" {
+		return renderSESTemplate(q.ctx, r.Document["TemplateContent"], q.input["TemplateData"])
+	}
 	return q.output(r, parent), nil
 }
 
