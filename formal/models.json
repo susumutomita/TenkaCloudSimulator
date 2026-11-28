@@ -29870,6 +29870,106 @@
           "expect_invariant": "AppRequiresVerifiedCallback"
         }
       ]
+    },
+    {
+      "id": "StoreConnectionLifetime",
+      "model": "formal/StoreConnectionLifetime.tla",
+      "config": "formal/StoreConnectionLifetime.cfg",
+      "bounds": "Two independently owned in-process stores sharing one logical row name, two abstract values, one staged transaction per store, connection present/absent, and six transitions; one lifetime per store.",
+      "properties": [
+        "TypeOK",
+        "PeerBackingUnchanged",
+        "ConnectionTurnoverPreserves",
+        "CancelDiscardsStaged",
+        "DisposedBackingReleased",
+        "ClosedStoresUnavailable",
+        "ConnectionPragmasApplied",
+        "LiveCommittedData"
+      ],
+      "limits": "Initialized in-process memory stores only. Store identity denotes a unique retained memdb namespace; cryptographic name uniqueness, initialization/Close failures, exact SQLite schema/values/SQL/locking, goroutines, driver cancellation timing, actual PRAGMA values, external handles, file-backed/crash/process restart persistence and Go refinement are not proved. ConnectionPragmasApplied is a normalized configured witness, not validation of foreign_keys or busy_timeout. Native TestStoreConnectionTurnover separately verifies file/default/:memory: paths, provider/core committed data, cancellation, explicit ErrBadConn turnover, FK and timeout. TestMemoryStoreOwnsItsBackingUntilClose verifies same-name independent stores, read-only backing absence after Close, and fresh-store isolation.",
+      "source_scope": [
+        "internal/core/store.go",
+        "internal/core/store_connection_test.go"
+      ],
+      "mutants": [
+        {
+          "id": "ConnectionOwnsBacking",
+          "edits": [
+            {
+              "old": "backing' = backing (* ConnectionDoesNotOwnBacking *)",
+              "new": "backing' = [backing EXCEPT ![s] = Empty] (* ConnectionDoesNotOwnBacking *)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ConnectionTurnoverPreserves"
+        },
+        {
+          "id": "CanceledWriteCommitted",
+          "edits": [
+            {
+              "old": "backing' = backing (* CancelKeepsCommitted *)",
+              "new": "backing' = [backing EXCEPT ![s] = staged[s]] (* CancelKeepsCommitted *)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CancelDiscardsStaged"
+        },
+        {
+          "id": "CanceledStageRetained",
+          "edits": [
+            {
+              "old": "staged' = [staged EXCEPT ![s] = Empty] (* DiscardCanceledStage *)",
+              "new": "staged' = staged (* DiscardCanceledStage *)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CancelDiscardsStaged"
+        },
+        {
+          "id": "SharedStoreBacking",
+          "edits": [
+            {
+              "old": "backing' = [backing EXCEPT ![s] = staged[s]] (* CommitOwnBacking *)",
+              "new": "backing' = [other \\in Stores |-> staged[s]] (* CommitOwnBacking *)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PeerBackingUnchanged"
+        },
+        {
+          "id": "DisposedBackingRetained",
+          "edits": [
+            {
+              "old": "backing' = [backing EXCEPT ![s] = Empty] (* ReleaseOwnedBacking *)",
+              "new": "backing' = backing (* ReleaseOwnedBacking *)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "DisposedBackingReleased"
+        },
+        {
+          "id": "ReconnectClosedStore",
+          "edits": [
+            {
+              "old": "s \\in live /\\ s \\notin connected (* LiveStoreRequired *)",
+              "new": "s \\notin connected (* LiveStoreRequired *)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ClosedStoresUnavailable"
+        },
+        {
+          "id": "MissingReconnectPragmas",
+          "edits": [
+            {
+              "old": "configured' = configured \\cup {s} (* ReapplyConnectionPragmas *)",
+              "new": "configured' = configured (* ReapplyConnectionPragmas *)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ConnectionPragmasApplied"
+        }
+      ]
     }
   ]
 }

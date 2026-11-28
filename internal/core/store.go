@@ -4,6 +4,7 @@ package core
 import (
 	"context"
 	"crypto/md5"
+	"crypto/rand"
 	"database/sql"
 	"encoding/hex"
 	"errors"
@@ -17,6 +18,7 @@ import (
 
 	_ "github.com/ncruces/go-sqlite3/driver"
 	_ "github.com/ncruces/go-sqlite3/embed"
+	"github.com/ncruces/go-sqlite3/vfs/memdb"
 )
 
 const MaxObjectBytes = 8 << 20
@@ -60,85 +62,97 @@ type Bucket struct {
 	Created time.Time `json:"created"`
 	Objects []Object  `json:"objects"`
 }
-type Store struct{ db *sql.DB }
+type Store struct {
+	db         *sql.DB
+	memoryName string
+}
 
 func New(path string) (*Store, error) {
-	if path == "" {
-		path = ":memory:"
-	}
 	if strings.HasPrefix(path, "file:") {
 		return nil, fmt.Errorf("--state accepts a file path, not a SQLite URI")
 	}
-	if path != ":memory:" {
-		f, e := os.OpenFile(path, os.O_CREATE|os.O_RDWR, 0600)
-		if e != nil {
-			return nil, e
+	params := url.Values{
+		"_txlock": {"immediate"},
+		"_pragma": {"busy_timeout(5000)", "foreign_keys(ON)"},
+	}
+	var memoryName string
+	if path == "" || path == ":memory:" {
+		memoryName = rand.Text()
+		path = "/" + memoryName
+		params.Set("vfs", "memdb")
+	} else {
+		f, err := os.OpenFile(path, os.O_CREATE|os.O_RDWR, 0600)
+		if err != nil {
+			return nil, err
 		}
-		if e = f.Close(); e != nil {
-			return nil, e
+		if err = f.Close(); err != nil {
+			return nil, err
+		}
+		path, err = filepath.Abs(path)
+		if err != nil {
+			return nil, err
 		}
 	}
-	dsn := "file::memory:?_txlock=immediate"
-	if path != ":memory:" {
-		absolute, e := filepath.Abs(path)
-		if e != nil {
-			return nil, e
-		}
-		dsn = (&url.URL{Scheme: "file", Path: absolute, RawQuery: "_txlock=immediate"}).String()
-	}
-	db, err := sql.Open("sqlite3", dsn)
+	dsn := url.URL{Scheme: "file", OmitHost: memoryName != "", Path: path, RawQuery: params.Encode()}
+	db, err := sql.Open("sqlite3", dsn.String())
 	if err != nil {
 		return nil, err
 	}
+	store := &Store{db: db, memoryName: memoryName}
+	if memoryName != "" {
+		// The Store owns the backing data even between physical connections.
+		// database/sql can discard its only connection after a canceled transaction.
+		memdb.Create(memoryName, nil)
+	}
 	db.SetMaxOpenConns(1)
 	db.SetMaxIdleConns(1)
-	// A single connection serializes this process; immediate transactions and a busy
-	// timeout also serialize independent processes that intentionally share a DB file.
-	if _, err = db.Exec("PRAGMA foreign_keys=ON; PRAGMA busy_timeout=5000;"); err != nil {
-		_ = db.Close()
+	if err := initializeSchema(db); err != nil {
+		_ = store.Close()
 		return nil, err
 	}
+	return store, nil
+}
+
+func initializeSchema(db *sql.DB) error {
 	var version int
-	if err = db.QueryRow("PRAGMA user_version").Scan(&version); err != nil {
-		_ = db.Close()
-		return nil, err
+	if err := db.QueryRow("PRAGMA user_version").Scan(&version); err != nil {
+		return err
 	}
-	if version != 0 && version != 1 {
-		_ = db.Close()
-		return nil, fmt.Errorf("unsupported simulator schema version %d", version)
+	if version == 1 {
+		return nil
 	}
-	if version == 0 {
-		var tables int
-		if err = db.QueryRow("SELECT count(*) FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'").Scan(&tables); err != nil {
-			_ = db.Close()
-			return nil, err
-		}
-		if tables != 0 {
-			_ = db.Close()
-			return nil, fmt.Errorf("state file is not an empty or versioned simulator database")
-		}
-		tx, e := db.Begin()
-		if e != nil {
-			_ = db.Close()
-			return nil, e
-		}
-		_, err = tx.Exec(`CREATE TABLE buckets(name TEXT PRIMARY KEY, region TEXT NOT NULL, created TEXT NOT NULL);
+	if version != 0 {
+		return fmt.Errorf("unsupported simulator schema version %d", version)
+	}
+	var tables int
+	if err := db.QueryRow("SELECT count(*) FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'").Scan(&tables); err != nil {
+		return err
+	}
+	if tables != 0 {
+		return fmt.Errorf("state file is not an empty or versioned simulator database")
+	}
+	tx, err := db.Begin()
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+	if _, err = tx.Exec(`CREATE TABLE buckets(name TEXT PRIMARY KEY, region TEXT NOT NULL, created TEXT NOT NULL);
  CREATE TABLE objects(bucket TEXT NOT NULL REFERENCES buckets(name) ON DELETE RESTRICT, key TEXT NOT NULL, content_type TEXT NOT NULL, etag TEXT NOT NULL, modified TEXT NOT NULL, data BLOB NOT NULL, PRIMARY KEY(bucket,key));
  CREATE TABLE identity_policies(name TEXT PRIMARY KEY, document TEXT NOT NULL);
- PRAGMA user_version=1;`)
-		if err == nil {
-			err = tx.Commit()
-		} else {
-			_ = tx.Rollback()
-		}
-		if err != nil {
-			_ = db.Close()
-			return nil, err
-		}
+ PRAGMA user_version=1;`); err != nil {
+		return err
 	}
-	return &Store{db}, nil
+	return tx.Commit()
 }
-func (s *Store) Close() error { return s.db.Close() }
+
+func (s *Store) Close() error {
+	err := s.db.Close()
+	if s.memoryName != "" {
+		memdb.Delete(s.memoryName)
+	}
+	return err
+}
+
 func (s *Store) Create(name, region string) error {
 	tx, err := s.db.Begin()
 	if err != nil {

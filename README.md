@@ -29,6 +29,9 @@ make start
 
 This builds the current source and starts at `127.0.0.1:4566`, reusing
 `./practice.db` and `./simulator-token`. A failed build never starts an old binary.
+For a temporary session, pass `--state :memory:` when running the simulator
+directly. Committed resources survive a canceled request during that session.
+Stopping the simulator discards the in-memory state.
 
 1. Open <http://127.0.0.1:4566/_simulator/console/>.
 2. Choose **Choose token file**, select `simulator-token`, then **Open sandbox**.
