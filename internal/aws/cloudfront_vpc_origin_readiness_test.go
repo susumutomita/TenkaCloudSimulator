@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"net/http/httptest"
 	"reflect"
 	"slices"
 	"strings"
@@ -195,9 +196,17 @@ func TestCloudFrontVpcOriginReadOutageRefusesCreateAndRepairs(t *testing.T) {
 			if !reflect.DeepEqual(before, cfVPCContractFrame(t, host.store.Database())) || !reflect.DeepEqual(peerBefore, cfVPCContractFrame(t, peer.store.Database())) {
 				t.Fatal("read outage changed owner or peer")
 			}
-			created := host.origin(host.request("POST", cloudFrontPath, cfCreateXML(host.config)), 202)
+			accepted := host.request("POST", cloudFrontPath, cfCreateXML(host.config))
+			created := host.origin(accepted, 202)
+			if !cloudFrontOriginID.MatchString(created.ID) || created.ARN != cloudFrontARNPrefix+created.ID || created.ETag == "" || accepted.Header().Get("Location") != cloudFrontPath+"/"+created.ID {
+				t.Fatal("repair did not acknowledge the actual created origin")
+			}
+			expected, _, err := parseCFOriginRequest([]byte(cfCreateXML(host.config)), true)
+			if err != nil {
+				t.Fatal(err)
+			}
 			fresh := host.origin(host.request("GET", cloudFrontPath+"/"+created.ID, ""), 200)
-			if fresh.ETag != created.ETag || fresh.Config.ARN != host.alb || fresh.Config.Name != "origin-a" || fresh.Status != "Deployed" {
+			if fresh.ETag == "" || fresh.ETag != created.ETag || fresh.ID != created.ID || fresh.ARN != created.ARN || !reflect.DeepEqual(created.Config, expected) || !reflect.DeepEqual(fresh.Config, expected) || fresh.CreatedTime == "" || fresh.CreatedTime != created.CreatedTime || fresh.Status != "Deployed" {
 				t.Fatal("repair did not persist real origin configuration")
 			}
 			host.origin(host.request("DELETE", cloudFrontPath+"/"+created.ID, "", "If-Match", created.ETag), 202)
@@ -216,11 +225,15 @@ func TestCloudFrontVpcOriginUnavailableAuthorityAndStoreGuards(t *testing.T) {
 	before, peerBefore := cfVPCContractFrame(t, host.store.Database()), cfVPCContractFrame(t, peer.store.Database())
 	authority := host.gateway.Identities
 	host.gateway.Identities = nil
-	failed := host.request("GET", cloudFrontPath+"/"+created.ID, "")
+	missingRead := host.request("GET", cloudFrontPath+"/"+created.ID, "")
+	repairedConfig := strings.Replace(host.config, "origin-a", "authority-repaired", 1)
+	missingCreate := host.request("POST", cloudFrontPath, cfCreateXML(repairedConfig))
 	host.gateway.Identities = authority
-	cfExpectError(t, failed, 500, "InternalError")
-	if failed.Header().Get("ETag") != "" || failed.Header().Get("Location") != "" {
-		t.Fatal("missing authority exposed successful metadata")
+	for _, failed := range []*httptest.ResponseRecorder{missingRead, missingCreate} {
+		cfExpectError(t, failed, 500, "InternalError")
+		if failed.Header().Get("ETag") != "" || failed.Header().Get("Location") != "" {
+			t.Fatal("missing authority exposed successful metadata")
+		}
 	}
 	// Exported store guard: an empty ID cannot silently become a creation.
 	config, _, err := parseCFOriginRequest([]byte(cfCreateXML(host.config)), true)
@@ -253,5 +266,19 @@ func TestCloudFrontVpcOriginUnavailableAuthorityAndStoreGuards(t *testing.T) {
 	if fresh.ETag != created.ETag || fresh.Config.ARN != host.alb {
 		t.Fatal("restored authority lost existing origin")
 	}
+	accepted := host.request("POST", cloudFrontPath, cfCreateXML(repairedConfig))
+	repaired := host.origin(accepted, 202)
+	expected, _, err := parseCFOriginRequest([]byte(cfCreateXML(repairedConfig)), true)
+	if err != nil {
+		t.Fatal(err)
+	}
+	read := host.origin(host.request("GET", cloudFrontPath+"/"+repaired.ID, ""), 200)
+	if !cloudFrontOriginID.MatchString(repaired.ID) || repaired.ETag == "" || accepted.Header().Get("Location") != cloudFrontPath+"/"+repaired.ID || read.ETag != repaired.ETag || !reflect.DeepEqual(read.Config, expected) {
+		t.Fatal("restored authority did not persist actual requested origin")
+	}
+	host.origin(host.request("DELETE", cloudFrontPath+"/"+repaired.ID, "", "If-Match", repaired.ETag), 202)
 	host.origin(host.request("DELETE", cloudFrontPath+"/"+created.ID, "", "If-Match", created.ETag), 202)
+	if !reflect.DeepEqual(peerBefore, cfVPCContractFrame(t, peer.store.Database())) {
+		t.Fatal("authority repair/cleanup changed peer")
+	}
 }
