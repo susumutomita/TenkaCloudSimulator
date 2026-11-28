@@ -10,7 +10,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7.0.1
         with:
-          ref: 3740b743f7fa781fabc1c476365bdadddb3da4ed
+          ref: 7c3872b924fbedeb4942c00c1a9c6f44c61e0dfb
           persist-credentials: false
       - uses: actions/setup-go@v6.5.0
         with:
@@ -18,15 +18,15 @@ jobs:
       - name: Build the exact product and install pinned clients
         run: |
           set -euo pipefail
-          test "$(git rev-parse HEAD)" = 3740b743f7fa781fabc1c476365bdadddb3da4ed
-          test "$(git rev-parse 'HEAD^{tree}')" = 2741b1c352bff3bdc5a0bbd3104a0cde68bdc92b
+          test "$(git rev-parse HEAD)" = 7c3872b924fbedeb4942c00c1a9c6f44c61e0dfb
+          test "$(git rev-parse 'HEAD^{tree}')" = 796faf1aebb735c8a4849e47a528843a71c95bbe
           test -z "$(git status --porcelain)"
           test "$(go env GOVERSION)" = go1.26.11
           make build
           mkdir "$RUNNER_TEMP/proof"
           go version -m dist/tenkacloud-simulator > "$RUNNER_TEMP/proof/build.txt"
           grep -F 'vcs.modified=false' "$RUNNER_TEMP/proof/build.txt"
-          grep -F 'vcs.revision=3740b743f7fa781fabc1c476365bdadddb3da4ed' "$RUNNER_TEMP/proof/build.txt"
+          grep -F 'vcs.revision=7c3872b924fbedeb4942c00c1a9c6f44c61e0dfb' "$RUNNER_TEMP/proof/build.txt"
           sha256sum dist/tenkacloud-simulator > "$RUNNER_TEMP/proof/binary.sha256"
           python="$RUNNER_TOOL_CACHE/Python/3.12.16/x64/bin/python3.12"
           "$python" -m venv "$RUNNER_TEMP/venv"
