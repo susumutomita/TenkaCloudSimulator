@@ -32600,6 +32600,97 @@
       ],
       "format": "esm"
     },
+    "src/autoscaling-plans.mjs": {
+      "bytes": 6041,
+      "imports": [],
+      "format": "esm"
+    },
+    "src/autoscaling-plans.jsx": {
+      "bytes": 14062,
+      "imports": [
+        {
+          "path": "node_modules/react/index.js",
+          "kind": "import-statement",
+          "original": "react"
+        },
+        {
+          "path": "node_modules/@cloudscape-design/components/alert/index.js",
+          "kind": "import-statement",
+          "original": "@cloudscape-design/components/alert"
+        },
+        {
+          "path": "node_modules/@cloudscape-design/components/box/index.js",
+          "kind": "import-statement",
+          "original": "@cloudscape-design/components/box"
+        },
+        {
+          "path": "node_modules/@cloudscape-design/components/button/index.js",
+          "kind": "import-statement",
+          "original": "@cloudscape-design/components/button"
+        },
+        {
+          "path": "node_modules/@cloudscape-design/components/container/index.js",
+          "kind": "import-statement",
+          "original": "@cloudscape-design/components/container"
+        },
+        {
+          "path": "node_modules/@cloudscape-design/components/content-layout/index.js",
+          "kind": "import-statement",
+          "original": "@cloudscape-design/components/content-layout"
+        },
+        {
+          "path": "node_modules/@cloudscape-design/components/form/index.js",
+          "kind": "import-statement",
+          "original": "@cloudscape-design/components/form"
+        },
+        {
+          "path": "node_modules/@cloudscape-design/components/form-field/index.js",
+          "kind": "import-statement",
+          "original": "@cloudscape-design/components/form-field"
+        },
+        {
+          "path": "node_modules/@cloudscape-design/components/header/index.js",
+          "kind": "import-statement",
+          "original": "@cloudscape-design/components/header"
+        },
+        {
+          "path": "node_modules/@cloudscape-design/components/input/index.js",
+          "kind": "import-statement",
+          "original": "@cloudscape-design/components/input"
+        },
+        {
+          "path": "node_modules/@cloudscape-design/components/key-value-pairs/index.js",
+          "kind": "import-statement",
+          "original": "@cloudscape-design/components/key-value-pairs"
+        },
+        {
+          "path": "node_modules/@cloudscape-design/components/radio-group/index.js",
+          "kind": "import-statement",
+          "original": "@cloudscape-design/components/radio-group"
+        },
+        {
+          "path": "node_modules/@cloudscape-design/components/space-between/index.js",
+          "kind": "import-statement",
+          "original": "@cloudscape-design/components/space-between"
+        },
+        {
+          "path": "node_modules/@cloudscape-design/components/table/index.js",
+          "kind": "import-statement",
+          "original": "@cloudscape-design/components/table"
+        },
+        {
+          "path": "src/autoscaling-plans.mjs",
+          "kind": "import-statement",
+          "original": "./autoscaling-plans.mjs"
+        },
+        {
+          "path": "src/i18n.jsx",
+          "kind": "import-statement",
+          "original": "./i18n.jsx"
+        }
+      ],
+      "format": "esm"
+    },
     "src/cloudwatch-logs.jsx": {
       "bytes": 13544,
       "imports": [
@@ -35338,8 +35429,13 @@
       "format": "esm"
     },
     "src/console-navigation.mjs": {
-      "bytes": 14839,
+      "bytes": 15214,
       "imports": [
+        {
+          "path": "src/autoscaling-plans.mjs",
+          "kind": "import-statement",
+          "original": "./autoscaling-plans.mjs"
+        },
         {
           "path": "src/sakura-server-read.mjs",
           "kind": "import-statement",
@@ -36414,7 +36510,7 @@
       "format": "esm"
     },
     "src/main.jsx": {
-      "bytes": 60878,
+      "bytes": 61280,
       "imports": [
         {
           "path": "src/ssm-terminal.jsx",
@@ -36670,6 +36766,11 @@
           "path": "src/dynamodb.jsx",
           "kind": "import-statement",
           "original": "./dynamodb.jsx"
+        },
+        {
+          "path": "src/autoscaling-plans.jsx",
+          "kind": "import-statement",
+          "original": "./autoscaling-plans.jsx"
         },
         {
           "path": "src/cloudwatch-logs.jsx",
@@ -37485,7 +37586,7 @@
           "bytesInOutput": 0
         },
         "src/main.jsx": {
-          "bytesInOutput": 51164
+          "bytesInOutput": 51477
         },
         "node_modules/@cloudscape-design/global-styles/index.css": {
           "bytesInOutput": 0
@@ -38130,7 +38231,7 @@
           "bytesInOutput": 2927
         },
         "node_modules/@dnd-kit/core/dist/core.esm.js": {
-          "bytesInOutput": 39396
+          "bytesInOutput": 39417
         },
         "node_modules/@dnd-kit/utilities/dist/utilities.esm.js": {
           "bytesInOutput": 3220
@@ -39770,6 +39871,12 @@
         "src/dynamodb.jsx": {
           "bytesInOutput": 25811
         },
+        "src/autoscaling-plans.jsx": {
+          "bytesInOutput": 11326
+        },
+        "src/autoscaling-plans.mjs": {
+          "bytesInOutput": 4035
+        },
         "src/cloudwatch-logs.jsx": {
           "bytesInOutput": 12866
         },
@@ -40029,7 +40136,7 @@
           "bytesInOutput": 5687
         },
         "src/console-navigation.mjs": {
-          "bytesInOutput": 12132
+          "bytesInOutput": 12438
         },
         "src/console-home.jsx": {
           "bytesInOutput": 9688
@@ -40128,7 +40235,7 @@
           "bytesInOutput": 10107
         }
       },
-      "bytes": 2878416
+      "bytes": 2894417
     },
     "../../internal/server/web/app.css.LEGAL.txt": {
       "imports": [],

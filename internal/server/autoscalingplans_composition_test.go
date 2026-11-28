@@ -143,7 +143,7 @@ func TestAutoScalingPlansCompositionTokenPersistenceIsolationAndCapabilities(t *
 		t.Fatal(err)
 	}
 	asp := caps.Services["autoscaling-plans"]
-	if strings.Join(asp.Operations, ",") != "CreateScalingPlan,DescribeScalingPlans,DescribeScalingPlanResources,UpdateScalingPlan,DeleteScalingPlan" || asp.Console || asp.ForecastData || asp.CloudFormation || len(asp.Targets) != 2 {
+	if strings.Join(asp.Operations, ",") != "CreateScalingPlan,DescribeScalingPlans,DescribeScalingPlanResources,UpdateScalingPlan,DeleteScalingPlan" || !asp.Console || asp.ForecastData || asp.CloudFormation || len(asp.Targets) != 2 {
 		t.Fatal(w.Body.String())
 	}
 	if code, body := autoScalingComposedCall(t, access, "AnyScaleScalingPlannerFrontendService.DeleteScalingPlan", `{"ScalingPlanName":"shop","ScalingPlanVersion":1}`, token); code != 200 {
