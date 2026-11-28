@@ -18,7 +18,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7.0.1
         with:
-          ref: 5e80be0c62fd3f2b04a0672f557edba8513bc085
+          ref: e95246d069b72196955aeba84c9b503857a107a7
           persist-credentials: false
       - uses: actions/setup-go@v6.5.0
         with:
@@ -26,8 +26,8 @@ jobs:
           cache: true
       - name: Verify the immutable source, toolchain and neutral runner
         run: |
-          test "$(git rev-parse HEAD)" = 5e80be0c62fd3f2b04a0672f557edba8513bc085
-          test "$(git rev-parse HEAD^{tree})" = 1a5c8898047f0055e5de30131a208d8bfe2502b5
+          test "$(git rev-parse HEAD)" = e95246d069b72196955aeba84c9b503857a107a7
+          test "$(git rev-parse HEAD^{tree})" = a9db27000ca1e91f0c60a0690f25a59cfc16e91c
           test -z "$(git status --porcelain)"
           test "$(go env GOVERSION)" = go1.26.11
           test "$(id -u)" -ne 0
@@ -57,10 +57,10 @@ jobs:
       - name: Identify the exact binary
         run: |
           go version -m dist/tenkacloud-simulator > "$RUNNER_TEMP/ses-evidence/build.txt"
-          grep -F 'vcs.revision=5e80be0c62fd3f2b04a0672f557edba8513bc085' "$RUNNER_TEMP/ses-evidence/build.txt"
+          grep -F 'vcs.revision=e95246d069b72196955aeba84c9b503857a107a7' "$RUNNER_TEMP/ses-evidence/build.txt"
           grep -F 'vcs.modified=false' "$RUNNER_TEMP/ses-evidence/build.txt"
           sha256sum dist/tenkacloud-simulator > "$RUNNER_TEMP/ses-evidence/binary.sha256"
-          test "$(cut -d ' ' -f 1 "$RUNNER_TEMP/ses-evidence/binary.sha256")" = ddde9c80ebc46f9f7f30fe1bd32732efd374f9d7b907892f8c71e8d99c2bc1b2
+          test "$(cut -d ' ' -f 1 "$RUNNER_TEMP/ses-evidence/binary.sha256")" = afdc270e9706eb4e6c460ef3584c4ce6a1066407f4e035c1cb4ab45e88e3c003
       - name: Install the pinned SDK
         if: matrix.check == 'sdk'
         run: |
@@ -99,9 +99,20 @@ jobs:
           body = log.read_text(errors='replace') if log.is_file() else ''
           known = set(subprocess.check_output(['git', 'ls-files'], text=True).splitlines())
           found = [(path.removeprefix(str(Path.cwd()) + '/'), int(line)) for path, line in re.findall(r'File "([^"\n]+)", line (\d+)', body)]
+          module = 'github.com/susumutomita/TenkaCloudSimulator'
+          packages = {module + '/' + str(Path(path).parent) for path in known if path.endswith('.go')}
+          go_tests = set()
+          for path in known:
+              if path.endswith('_test.go'):
+                  go_tests.update(re.findall(r'^func (Test[A-Za-z0-9_]+)\(', Path(path).read_text(), re.M))
+          failed_packages = sorted(packages.intersection(re.findall(r'^FAIL\s+(\S+)', body, re.M)))
+          failed_tests = sorted(go_tests.intersection(re.findall(r'^\s*--- FAIL: (Test[A-Za-z0-9_]+)', body, re.M)))
+          terms = ('test timed out', 'no such table', 'race detected', 'permission denied', 'deadline exceeded', 'no space left on device', 'connection reset', 'signal: killed')
           coverage = re.search(r'^Go statements \(full module\): (\d+/\d+ \([\d.]+%; minimum \d+%\))$', body, re.M)
           data = {'go_packages_passed':len(re.findall(r'^ok\s+', body, re.M)), 'coverage':coverage.group(1) if coverage else None,
-                  'locations':[{'path':path,'line':line} for path,line in found if path in known]}
+                  'locations':[{'path':path,'line':line} for path,line in found if path in known],
+                  'failed_packages': failed_packages, 'failed_tests': failed_tests,
+                  'fixed_diagnostics': [term for term in terms if term in body.lower()]}
           (out / 'checks.json').write_text(json.dumps(data)+'\n')
           PY
           test -z "$(git status --porcelain)"
