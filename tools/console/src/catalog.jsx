@@ -3,6 +3,8 @@ import {useLocale} from './i18n.jsx';
 import AppStreamAppBlockForm from './appstream-app-block.jsx';
 import BatchJobDefinitionForm from './batch-job-definition-form.jsx';
 import {batchDefinitionARN,batchDefinitionOperations,isBatchJobDefinition} from './batch-job-definitions.mjs';
+import CodeCommitContent from './codecommit-content.jsx';
+import {contentOperations} from './codecommit-content.mjs';
 import KinesisVideoRetention from './kinesis-video-retention.jsx';
 import {isKinesisVideoRetention,kinesisRetentionEdit,kinesisRetentionUpdate} from './kinesis-video-retention.mjs';
 import {appStreamAppBlockDetailInput,isAppStreamAppBlock} from './appstream-app-block.mjs';
@@ -527,6 +529,9 @@ export default function CatalogView({region,request,catalog,onSaving}){
     <Container header={<Header variant="h2">{t('Details','詳細')}</Header>}>
      {loading?<StatusIndicator type="loading">{t('Loading','読み込み中')}</StatusIndicator>:detail?<KeyValuePairs columns={3} items={scalars.map(([k,v])=>({label:<span className="catalog-key">{humanize(k)}</span>,value:<SpaceBetween size="xxxs"><span className="catalog-key">{display(v)===''?'-':display(v)}</span><Official name={k}/></SpaceBetween>}))}/>:<Box>{t('No details','詳細はありません')}</Box>}
     </Container>
+    {!loading&&service.model==='codecommit'&&resource.kind==='repository'&&detail?.repositoryId&&detail.repositoryName&&
+      contentOperations.every(operation=>service.operations.includes(operation))&&<CodeCommitContent key={region+'-'+detail.repositoryId}
+        request={request} region={region} repository={detail} onSaving={value=>{setBusy(value);onSaving(value)}}/>}
     {!loading&&complex.map(([k,v])=>section(k,v))}
     {!loading&&tags!==null&&<Table variant="container" items={pairs.map(([key,value])=>({key,value}))} trackBy="key" empty={<Box textAlign="center" color="inherit">{t('No tags','タグはありません')}</Box>}
       header={<Header variant="h2" counter={'('+pairs.length+')'} description={t('Tags are written with ','タグは次の操作で書き込みます: ')+[tagOp?.name,untagOp?.name].filter(Boolean).join(t(' and ','、'))+'.'}>{t('Tags','タグ')}</Header>}
