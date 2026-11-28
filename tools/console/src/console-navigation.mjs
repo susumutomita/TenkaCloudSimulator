@@ -1,4 +1,5 @@
 import {cloudFrontAvailable} from './cloudfront-local.mjs';
+import {elbAvailable} from './elb.mjs';
 import {scalingPlansAvailable} from './autoscaling-plans.mjs';
 import {sakuraServerEndpoint} from './sakura-server-read.mjs';
 import {supportAdvertised} from './support-client.mjs';
@@ -27,6 +28,7 @@ export const SERVICES = Object.freeze([
   {id: 'kms', provider: 'aws', label: 'Key Management Service', capability: 'kms', route: '/kms', keywords: 'kms encryption key 暗号 キー 暗号化 キー管理'},
   {id: 'dynamodb', provider: 'aws', label: 'DynamoDB', capability: 'dynamodb', route: '/dynamodb', keywords: 'table item key-value database ddb ダイナモ ダイナモDB テーブル 項目 キー データベース'},
   {id: 'cloudfront', provider: 'aws', label: 'CloudFront', capability: 'cloudfront', route: '/cloudfront', keywords: 'cloudfront distribution cache invalidation s3 ディストリビューション キャッシュ 無効化'},
+  {id: 'elasticloadbalancing', provider: 'aws', label: 'Elastic Load Balancing', capability: 'elasticloadbalancing', route: '/elasticloadbalancing', keywords: 'ALB load balancer listeners target health ロードバランサー リスナー ターゲット'},
   {id: 'autoscaling-plans', provider: 'aws', label: 'AWS Auto Scaling Plans', capability: 'autoscaling-plans', route: '/autoscaling-plans', keywords: 'scaling plans capacity dynamodb スケーリングプラン テーブル 容量'},
   {id: 'route53', provider: 'aws', label: 'Route 53', capability: 'route53', route: '/route53', keywords: 'dns hosted zones records ptr reverse lookup 公開ホストゾーン 逆引き レコード'},
   {id: 'support', provider: 'aws', label: 'AWS Support', capability: 'support', route: '/support', keywords: 'support cases communication attachments サポート ケース メッセージ 添付ファイル'},
@@ -114,6 +116,7 @@ export function serviceAvailable(id, capabilities) {
     return ec2?.console === true && Array.isArray(ec2.operations) && ['DescribeInstances','DescribeVpcs'].every(op=>ec2.operations.includes(op));
   }
   if (id === 'cloudfront') return cloudFrontAvailable(capabilities);
+  if (id === 'elasticloadbalancing') return elbAvailable(capabilities);
   if (id === 'autoscaling-plans') return scalingPlansAvailable(capabilities);
   if (id === 'route53') return route53ConsoleAdvertised(capabilities);
   if (id === 'support') return supportAdvertised(capabilities);

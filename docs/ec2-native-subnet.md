@@ -32,7 +32,7 @@ This uses the same native Query API and SQLite state as SDK clients. It does not
 | `CreateSubnet` | `VpcId`, IPv4 `CidrBlock` (`/16`–`/28`, inside the VPC and nonoverlapping), optional `AvailabilityZone` (`<region>a`, `b`, or `c`, default `a`), optional `DryRun=false` | Saved `subnet` with canonical CIDR, VPC ID, availability zone, explicit `mapPublicIpOnLaunch=false`, and local `simulatorManagedBy=ec2` marker. |
 | `DescribeSubnets` | No operation-specific members | Bounded regional list of saved native and CloudFormation subnet rows. Native rows include the saved Boolean `mapPublicIpOnLaunch`; the CloudFormation projection is unchanged. The Console validates the response and selects one VPC locally; this is not an IAM filter. |
 | `ModifySubnetAttribute` | `SubnetId`, precisely one `MapPublicIpOnLaunch.Value=true\|false`, optional `DryRun=false` | Commits that preference for one EC2-owned row; `return=true` acknowledges the write. A repeat is a no-op; all other attributes are unsupported. |
-| `DeleteSubnet` | `SubnetId`, optional `DryRun=false` | Removes exactly one unreferenced EC2-owned subnet in the current region. The parent VPC cannot be deleted while a subnet is attached. |
+| `DeleteSubnet` | `SubnetId`, optional `DryRun=false` | Removes exactly one unreferenced EC2-owned subnet in the current region. A saved [ALB placement](elb.md) referencing the subnet also blocks its deletion. The parent VPC cannot be deleted while a subnet is attached. |
 
 ### Native subnet tag editing
 

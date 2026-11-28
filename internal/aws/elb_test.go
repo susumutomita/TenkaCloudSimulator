@@ -17,6 +17,7 @@ import (
 )
 
 type elbHarness struct {
+	network   elbTestNetwork
 	t         *testing.T
 	gateway   *Gateway
 	store     *core.Store
@@ -34,7 +35,7 @@ func newELBHarness(t *testing.T) *elbHarness {
 	if err != nil {
 		t.Fatal(err)
 	}
-	return &elbHarness{t: t, store: db, gateway: &Gateway{ELB: elb, Store: db, Identities: identities, Lambdas: functions, LambdaPermissions: permissions}}
+	return &elbHarness{network: makeELBTestNetwork(t, db.Database()), t: t, store: db, gateway: &Gateway{ELB: elb, Store: db, Identities: identities, Lambdas: functions, LambdaPermissions: permissions}}
 }
 
 func (h *elbHarness) raw(headers map[string]string, body string) *httptest.ResponseRecorder {
@@ -109,7 +110,7 @@ func elbDecode(t *testing.T, body string) elbDecoded {
 
 func (h *elbHarness) loadBalancer(name string) elbLBWire {
 	h.t.Helper()
-	return elbDecode(h.t, h.ok("CreateLoadBalancer", "Name", name, "Subnets.member.1", "subnet-0123456789abcdef0", "Subnets.member.2", "subnet-89abcdef")).LoadBalancers[0]
+	return elbDecode(h.t, h.ok("CreateLoadBalancer", append([]string{"Name", name}, h.network.form()...)...)).LoadBalancers[0]
 }
 func (h *elbHarness) targetGroup(name string, fields ...string) elbTGWire {
 	h.t.Helper()
@@ -130,12 +131,12 @@ func TestELBLoadBalancerTargetGroupAndListenerLifecycle(t *testing.T) {
 		t.Fatal(lb.LoadBalancerArn, lb.DNSName)
 	}
 	// Identical settings, including reordered subnets, return the same resource.
-	again := elbDecode(t, h.ok("CreateLoadBalancer", "Name", "web", "Subnets.member.1", "subnet-89abcdef", "Subnets.member.2", "subnet-0123456789abcdef0")).LoadBalancers[0]
+	again := elbDecode(t, h.ok("CreateLoadBalancer", "Name", "web", "Subnets.member.1", h.network.b, "Subnets.member.2", h.network.a, "SecurityGroups.member.1", h.network.group)).LoadBalancers[0]
 	if again.LoadBalancerArn != lb.LoadBalancerArn {
 		t.Fatal("idempotent create allocated a second load balancer")
 	}
 	h.fail("DuplicateLoadBalancerName", 400, "CreateLoadBalancer", "Name", "web", "Scheme", "internal", "Subnets.member.1", "subnet-89abcdef", "Subnets.member.2", "subnet-0123456789abcdef0")
-	internal := elbDecode(t, h.ok("CreateLoadBalancer", "Name", "Inside", "Scheme", "internal", "Type", "application", "IpAddressType", "ipv4", "Subnets.member.1", "subnet-11111111", "Subnets.member.2", "subnet-22222222", "SecurityGroups.member.1", "sg-12345678")).LoadBalancers[0]
+	internal := elbDecode(t, h.ok("CreateLoadBalancer", "Name", "Inside", "Scheme", "internal", "Type", "application", "IpAddressType", "ipv4", "Subnets.member.1", h.network.a, "Subnets.member.2", h.network.b, "SecurityGroups.member.1", h.network.group)).LoadBalancers[0]
 	if !strings.HasPrefix(internal.DNSName, "internal-inside-") || len(internal.SecurityGroups) != 1 {
 		t.Fatalf("%+v", internal)
 	}
@@ -653,7 +654,7 @@ func TestELBInjectedWriteFailuresRollBackCompletely(t *testing.T) {
 		name, trigger, action string
 		fields                []string
 	}{
-		{"insert load balancer", "BEFORE INSERT ON aws_elb_load_balancers", "CreateLoadBalancer", []string{"Name", "next", "Subnets.member.1", "subnet-11111111", "Subnets.member.2", "subnet-22222222"}},
+		{"insert load balancer", "BEFORE INSERT ON aws_elb_load_balancers", "CreateLoadBalancer", append([]string{"Name", "next"}, h.network.form()...)},
 		{"insert target group", "BEFORE INSERT ON aws_elb_target_groups", "CreateTargetGroup", []string{"Name", "next", "TargetType", "lambda"}},
 		{"update target group", "BEFORE UPDATE ON aws_elb_target_groups", "ModifyTargetGroup", []string{"TargetGroupArn", spare.TargetGroupArn, "HealthCheckEnabled", "true"}},
 		{"bump on first listener", "BEFORE UPDATE ON aws_elb_target_groups", "CreateListener", []string{"LoadBalancerArn", lb.LoadBalancerArn, "Protocol", "HTTP", "Port", "81", "DefaultActions.member.1.Type", "forward", "DefaultActions.member.1.TargetGroupArn", spare.TargetGroupArn}},

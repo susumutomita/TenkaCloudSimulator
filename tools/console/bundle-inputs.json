@@ -32600,6 +32600,87 @@
       ],
       "format": "esm"
     },
+    "src/elb.mjs": {
+      "bytes": 7211,
+      "imports": [],
+      "format": "esm"
+    },
+    "src/elb.jsx": {
+      "bytes": 10924,
+      "imports": [
+        {
+          "path": "node_modules/react/index.js",
+          "kind": "import-statement",
+          "original": "react"
+        },
+        {
+          "path": "node_modules/@cloudscape-design/components/alert/index.js",
+          "kind": "import-statement",
+          "original": "@cloudscape-design/components/alert"
+        },
+        {
+          "path": "node_modules/@cloudscape-design/components/box/index.js",
+          "kind": "import-statement",
+          "original": "@cloudscape-design/components/box"
+        },
+        {
+          "path": "node_modules/@cloudscape-design/components/button/index.js",
+          "kind": "import-statement",
+          "original": "@cloudscape-design/components/button"
+        },
+        {
+          "path": "node_modules/@cloudscape-design/components/container/index.js",
+          "kind": "import-statement",
+          "original": "@cloudscape-design/components/container"
+        },
+        {
+          "path": "node_modules/@cloudscape-design/components/form-field/index.js",
+          "kind": "import-statement",
+          "original": "@cloudscape-design/components/form-field"
+        },
+        {
+          "path": "node_modules/@cloudscape-design/components/header/index.js",
+          "kind": "import-statement",
+          "original": "@cloudscape-design/components/header"
+        },
+        {
+          "path": "node_modules/@cloudscape-design/components/input/index.js",
+          "kind": "import-statement",
+          "original": "@cloudscape-design/components/input"
+        },
+        {
+          "path": "node_modules/@cloudscape-design/components/key-value-pairs/index.js",
+          "kind": "import-statement",
+          "original": "@cloudscape-design/components/key-value-pairs"
+        },
+        {
+          "path": "node_modules/@cloudscape-design/components/space-between/index.js",
+          "kind": "import-statement",
+          "original": "@cloudscape-design/components/space-between"
+        },
+        {
+          "path": "node_modules/@cloudscape-design/components/status-indicator/index.js",
+          "kind": "import-statement",
+          "original": "@cloudscape-design/components/status-indicator"
+        },
+        {
+          "path": "node_modules/@cloudscape-design/components/table/index.js",
+          "kind": "import-statement",
+          "original": "@cloudscape-design/components/table"
+        },
+        {
+          "path": "src/elb.mjs",
+          "kind": "import-statement",
+          "original": "./elb.mjs"
+        },
+        {
+          "path": "src/i18n.jsx",
+          "kind": "import-statement",
+          "original": "./i18n.jsx"
+        }
+      ],
+      "format": "esm"
+    },
     "src/autoscaling-plans.mjs": {
       "bytes": 6159,
       "imports": [],
@@ -35530,12 +35611,17 @@
       "format": "esm"
     },
     "src/console-navigation.mjs": {
-      "bytes": 16491,
+      "bytes": 16862,
       "imports": [
         {
           "path": "src/cloudfront-local.mjs",
           "kind": "import-statement",
           "original": "./cloudfront-local.mjs"
+        },
+        {
+          "path": "src/elb.mjs",
+          "kind": "import-statement",
+          "original": "./elb.mjs"
         },
         {
           "path": "src/autoscaling-plans.mjs",
@@ -36979,7 +37065,7 @@
       "format": "esm"
     },
     "src/main.jsx": {
-      "bytes": 62729,
+      "bytes": 63004,
       "imports": [
         {
           "path": "src/ssm-terminal.jsx",
@@ -37235,6 +37321,11 @@
           "path": "src/dynamodb.jsx",
           "kind": "import-statement",
           "original": "./dynamodb.jsx"
+        },
+        {
+          "path": "src/elb.jsx",
+          "kind": "import-statement",
+          "original": "./elb.jsx"
         },
         {
           "path": "src/autoscaling-plans.jsx",
@@ -38070,7 +38161,7 @@
           "bytesInOutput": 0
         },
         "src/main.jsx": {
-          "bytesInOutput": 52461
+          "bytesInOutput": 52632
         },
         "node_modules/@cloudscape-design/global-styles/index.css": {
           "bytesInOutput": 0
@@ -38637,43 +38728,43 @@
           "bytesInOutput": 1451
         },
         "node_modules/@cloudscape-design/components/app-layout/visual-refresh-toolbar/state/use-feature-notifications.js": {
-          "bytesInOutput": 3769
+          "bytesInOutput": 3771
         },
         "node_modules/@cloudscape-design/components/internal/do-not-use/feature-prompt/index.js": {
-          "bytesInOutput": 258
+          "bytesInOutput": 263
         },
         "node_modules/@cloudscape-design/components/internal/utils/external-props.js": {
           "bytesInOutput": 77
         },
         "node_modules/@cloudscape-design/components/internal/do-not-use/feature-prompt/internal.js": {
-          "bytesInOutput": 1432
+          "bytesInOutput": 1434
         },
         "node_modules/@cloudscape-design/components/internal/context/reset-contexts-for-modal.js": {
           "bytesInOutput": 404
         },
         "node_modules/@cloudscape-design/components/internal/context/collection-label-context.js": {
-          "bytesInOutput": 42
+          "bytesInOutput": 44
         },
         "node_modules/@cloudscape-design/components/internal/do-not-use/feature-prompt/styles.scoped.css": {
           "bytesInOutput": 0
         },
         "node_modules/@cloudscape-design/components/internal/do-not-use/feature-prompt/styles.css.js": {
-          "bytesInOutput": 41
+          "bytesInOutput": 42
         },
         "node_modules/@cloudscape-design/components/internal/utils/promises.js": {
-          "bytesInOutput": 366
+          "bytesInOutput": 368
         },
         "node_modules/@cloudscape-design/components/app-layout/visual-refresh-toolbar/drawer/feature-notifications-drawer-content.js": {
           "bytesInOutput": 1474
         },
         "node_modules/@cloudscape-design/components/drawer/implementation.js": {
-          "bytesInOutput": 3087
+          "bytesInOutput": 3090
         },
         "node_modules/@cloudscape-design/components/app-layout/runtime-drawer/use-runtime-drawer-context.js": {
-          "bytesInOutput": 519
+          "bytesInOutput": 520
         },
         "node_modules/@cloudscape-design/components/drawer/use-sticky-footer.js": {
-          "bytesInOutput": 550
+          "bytesInOutput": 551
         },
         "node_modules/@cloudscape-design/components/internal/utils/throttle.js": {
           "bytesInOutput": 393
@@ -38685,7 +38776,7 @@
           "bytesInOutput": 1556
         },
         "node_modules/@cloudscape-design/components/drawer/utils.js": {
-          "bytesInOutput": 1639
+          "bytesInOutput": 1643
         },
         "node_modules/@cloudscape-design/components/drawer/test-classes/styles.scoped.css": {
           "bytesInOutput": 0
@@ -40355,6 +40446,12 @@
         "src/dynamodb.jsx": {
           "bytesInOutput": 25811
         },
+        "src/elb.jsx": {
+          "bytesInOutput": 9169
+        },
+        "src/elb.mjs": {
+          "bytesInOutput": 4310
+        },
         "src/autoscaling-plans.jsx": {
           "bytesInOutput": 11481
         },
@@ -40437,7 +40534,7 @@
           "bytesInOutput": 896
         },
         "node_modules/@cloudscape-design/components/tag-editor/internal.js": {
-          "bytesInOutput": 1487
+          "bytesInOutput": 1488
         },
         "node_modules/@cloudscape-design/components/autosuggest/internal.js": {
           "bytesInOutput": 4370
@@ -40632,7 +40729,7 @@
           "bytesInOutput": 2807
         },
         "src/console-navigation.mjs": {
-          "bytesInOutput": 13369
+          "bytesInOutput": 13709
         },
         "src/console-home.jsx": {
           "bytesInOutput": 10162
@@ -40749,7 +40846,7 @@
           "bytesInOutput": 10107
         }
       },
-      "bytes": 2965396
+      "bytes": 2979410
     },
     "../../internal/server/web/app.css.LEGAL.txt": {
       "imports": [],
