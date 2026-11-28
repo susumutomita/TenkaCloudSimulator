@@ -47,7 +47,7 @@ Grant management uses the ordinary token-authenticated KMS SDK entry point and a
 | Operation | Inputs and behavior | IAM permission |
 | --- | --- | --- |
 | CreateGrant | An Enabled key, exact `GranteePrincipal` ARN and `Operations=["DescribeKey"]`. Optional `Name` (1–256 characters) deduplicates the same request against the same role generation. An unnamed retry creates a separate grant. Returns a grant ID and a fresh opaque token. | `kms:CreateGrant` on the key ARN |
-| ListGrants | A concrete Enabled or Disabled key, optional exact `GrantId` and/or `GranteePrincipal`. Pages default to 50 entries, with `Limit` 1–100. A marker is bound to the issuing database, Region, key, filters and page size. | `kms:ListGrants` on the key ARN |
+| ListGrants | A concrete Enabled, Disabled or PendingDeletion key, optional exact `GrantId` and/or `GranteePrincipal`. Pages default to 50 entries, with `Limit` 1–100. A marker is bound to the issuing database, Region, key, filters and page size. | `kms:ListGrants` on the key ARN |
 | RevokeGrant | The concrete key and its grant ID. Confirmation follows the SQLite commit. A missing grant on that key returns `NotFoundException`. | `kms:RevokeGrant` on the key ARN |
 
 Assume the grantee role using local STS, then call the SDK's `kms.describe_key(KeyId=...)` against the same simulator. This native role path admits the signed JSON 1.1 root POST for `TrentService.DescribeKey` only. The local role policy and a matching grant can each allow the read. An explicit policy Deny wins. Optional `GrantTokens` must belong to live grants for that role and key. A Disable leaves grants readable and revocable. CreateGrant on a Disabled key returns `DisabledException`.
@@ -151,12 +151,27 @@ No Challenge problem is enabled merely by these operations.
 
 ## API reference and verification
 
-The embedded root POST has fifteen named KMS request templates and per-target
+The embedded root POST has seventeen named KMS request templates and per-target
 schema mappings. The four alias templates require actual CreateKey output; Update
 needs a second real key. Static placeholders are not saved state. Selecting a
 body example does not automatically select routing headers. Native SDK children
 execute the original eight examples and the four alias examples against the
 same SQLite; the alias examples must execute on both supported root routes.
+
+In the API reference, open **Shared AWS JSON/Query endpoint**, select the KMS
+example and open **Test Request**. Replace the example identifiers in the JSON
+body with the concrete key, role or grant from your local sandbox. In **Headers**,
+set and include `X-Amz-Target` using the example's `TrentService.<Operation>`
+value. The browser session uses the signed-in participant's permissions. A
+grantee checks its effective `DescribeKey` access with fresh local STS credentials
+and the SDK.
+
+For a seven-day deletion schedule, Scalar returns `DeletionDate` and the SDK
+reads the same deadline after a process restart. Open the key details again in
+the Console to see its current state. Canceling restores **Disabled**. Choose
+**Enable** in the Console before decrypting earlier local ciphertext. The
+[SDK and browser fixture](../test/e2e/kms_surface_lifecycle.py) exercises these
+steps with a participant restricted to one key and an independent peer sandbox.
 
 The mandatory SDK/UI/docs children preserve native transport, IAM/explicit Deny,
 crypto, two teams/regions, restart and cleanup checks. UI tests include actual
