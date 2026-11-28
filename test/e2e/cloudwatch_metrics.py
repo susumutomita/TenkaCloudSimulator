@@ -139,7 +139,8 @@ def run():
             assert not os.path.samefile(owner.db, peer.db)
             a = client(stack, owner, counts, encodings)
             caps = control(owner, '/_simulator/v1/capabilities')['services']['cloudwatch']
-            assert set(caps['operations']) == {'PutMetricData', 'GetMetricStatistics'} and caps['alarms'] is False
+            assert set(caps['operations']) == {'PutMetricData', 'GetMetricStatistics', 'PutMetricAlarm', 'DescribeAlarms', 'DeleteAlarms'} and caps['alarms'] is True
+            assert caps['alarmActions'] is False and caps['storageResolutionSeconds'] == 60 and caps['retentionDays'] == 15
             a.put_metric_data(**batch)
             assert get(b) == []
             b.put_metric_data(Namespace=NAMESPACE, MetricData=[datum(7, 0)])
