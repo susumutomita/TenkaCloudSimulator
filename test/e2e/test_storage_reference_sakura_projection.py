@@ -4,8 +4,10 @@ import json
 from pathlib import Path
 import unittest
 
+from api_cloud_sections_contract import validate_document as validate_navigation
 from cloudwatch_logs import validate_reference_contract as validate_logs
-from logs_secrets_reference_inventory import EXPECTED_ROUTES
+from dynamodb_docs import validate_reference_contract as validate_dynamodb
+from historical_reference_inventory import EXPECTED_ROUTES
 from secrets_manager_docs import validate_reference_contract as validate_secrets
 from s3_multipart_docs import validate_contract as validate_multipart
 from scalar_s3_docs import validate_reference_contract as validate_scalar_s3
@@ -13,7 +15,8 @@ from sqs_docs import validate_reference_contract as validate_sqs
 from test_sakura_openapi import SERVER_COLLECTION
 
 ROOT = Path(__file__).resolve().parents[2]
-VALIDATORS = (validate_multipart, validate_scalar_s3, validate_sqs, validate_logs, validate_secrets)
+HISTORICAL_VALIDATORS = (validate_logs, validate_secrets, validate_dynamodb, validate_navigation)
+VALIDATORS = (validate_multipart, validate_scalar_s3, validate_sqs) + HISTORICAL_VALIDATORS
 SERVER_TAG = 'Sakura Server metadata'
 OBJECT_PATH = '/{bucket}/{key}'
 
@@ -50,6 +53,10 @@ class StorageReferenceSakuraProjection(unittest.TestCase):
              lambda s: s['paths'][SERVER_COLLECTION]['get']['responses']['200'].update(description='changed')),
             ('duplicate Sakura ID on another path',
              lambda s: s['paths'].update({'/unlisted-sakura': copy.deepcopy(s['paths'][SERVER_COLLECTION])})),
+            ('missing Sakura tag',
+             lambda s: s['tags'].remove(next(t for t in s['tags'] if t['name'] == SERVER_TAG))),
+            ('changed Sakura tag',
+             lambda s: next(t for t in s['tags'] if t['name'] == SERVER_TAG).update(description='changed')),
             ('duplicate Sakura tag', duplicate_tag),
             ('regrouped Sakura tag', regroup_tag),
             ('changed inherited operation',
@@ -65,7 +72,7 @@ class StorageReferenceSakuraProjection(unittest.TestCase):
                     with self.assertRaises(AssertionError):
                         validate(document)
 
-    def test_logs_and_secrets_require_the_original_operation_at_each_route(self):
+    def test_historical_validators_require_the_original_operation_at_each_route(self):
         ids = [ident for operations in EXPECTED_ROUTES.values() for ident in operations.values()]
         self.assertEqual((len(EXPECTED_ROUTES), len(ids), len(set(ids))), (36, 67, 67))
 
@@ -89,7 +96,7 @@ class StorageReferenceSakuraProjection(unittest.TestCase):
             ('add a path', lambda s: s['paths'].update({'/new-test-path': {}})),
             ('omit a path', lambda s: s['paths'].pop('/2015-03-31/functions')),
         )
-        for validate in (validate_logs, validate_secrets):
+        for validate in HISTORICAL_VALIDATORS:
             for name, mutate in mutations:
                 with self.subTest(module=validate.__module__, mutation=name):
                     document = copy.deepcopy(self.spec)

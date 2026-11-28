@@ -7,7 +7,7 @@ import urllib.request
 from pathlib import Path
 
 from check import Config, ClientError, boto3, running
-from logs_secrets_reference_inventory import verify_historical_routes
+from historical_reference_inventory import verify_historical_routes
 from route53_openapi import project_before_route53
 from test_sakura_openapi import project_sakura_server_list_only
 
