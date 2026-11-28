@@ -23,6 +23,7 @@ export default function AutoScalingPlans({region, request, onSaving}) {
   const inflight = useRef(null);
   const [busy, setBusy] = useState('');
   const [rows, setRows] = useState([]);
+  const [listKnown, setListKnown] = useState(false);
   const [pageToken, setPageToken] = useState('');
   const [selected, setSelected] = useState('');
   const [detail, setDetail] = useState(null);
@@ -69,7 +70,7 @@ export default function AutoScalingPlans({region, request, onSaving}) {
     setSelected(name);
     setDetail(null);
     setCapacity(null);
-    if (!token) { setRows([]); setPageToken(''); }
+    if (!token) { setRows([]); setPageToken(''); setListKnown(false); }
     try {
       if (name) {
         const result = await api.detail(name, task.signal);
@@ -81,6 +82,7 @@ export default function AutoScalingPlans({region, request, onSaving}) {
         if (task.signal.aborted) return;
         setRows(old => token ? [...old, ...page.ScalingPlans] : page.ScalingPlans);
         setPageToken(page.NextToken || '');
+        setListKnown(true);
       }
       if (name) setUncertain(previous => previous === name ? '' : previous);
     } catch (e) { if (!task.signal.aborted) setError(e.message); }
@@ -196,7 +198,7 @@ export default function AutoScalingPlans({region, request, onSaving}) {
           {id:'status', header:statusLabel, cell:p => p.StatusCode},
           {id:'targets', header:t('Targets', 'ターゲット数'), cell:p => p.ScalingInstructions.length}
         ]}
-        empty={<Box textAlign="center">{t('No scaling plans found.', 'スケーリングプランが見つかりません。')}</Box>}
+        empty={<Box textAlign="center">{listKnown ? t('No scaling plans found.', 'スケーリングプランが見つかりません。') : t('Plan list unavailable.', 'プラン一覧を取得できません。')}</Box>}
         footer={pageToken && button(t('Load more plans', 'プランをさらに読み込む'), () => browse('', pageToken))}
       /> : detail ? <>
         <Container header={<Header variant="h2">{t('Plan details', 'プランの詳細')}</Header>}>
