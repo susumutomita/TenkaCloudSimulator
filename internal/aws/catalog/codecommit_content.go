@@ -85,9 +85,21 @@ func (q *request) codeCommitContent() (map[string]any, error) {
 		return nil, Failure("RepositoryNameRequiredException", "A repository name is required.")
 	}
 	arn := q.formatARN(q.resource(), "", name, nil)
-	// Authorize the exact requested repository before opening the content transaction.
+	// The policy evaluator uses the provider database, so capture the repository
+	// lifetime outside the transaction. Never reveal the lookup outcome before
+	// authorization, and never adopt a replacement created while it was running.
+	var repositoryID string
+	var sequence int64
+	observed := q.e.store.db.QueryRowContext(q.ctx,
+		"SELECT id,seq FROM aws_catalog_resources WHERE service='codecommit' AND arn=?", arn).Scan(&repositoryID, &sequence)
 	if err := q.authorize(arn); err != nil {
 		return nil, err
+	}
+	if errors.Is(observed, sql.ErrNoRows) {
+		return nil, Failure("RepositoryDoesNotExistException", "The repository does not exist.")
+	}
+	if observed != nil {
+		return nil, observed
 	}
 	tx, err := q.e.store.db.BeginTx(q.ctx, nil)
 	if err != nil {
@@ -100,6 +112,9 @@ func (q *request) codeCommitContent() (map[string]any, error) {
 	}
 	if err != nil {
 		return nil, err
+	}
+	if r.ID != repositoryID || r.Seq != sequence {
+		return nil, Failure("RepositoryDoesNotExistException", "The original repository no longer exists.")
 	}
 	if r.Region != q.region || r.Kind != "repository" || r.Name != name {
 		return nil, errGitStorage

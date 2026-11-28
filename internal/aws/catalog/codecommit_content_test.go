@@ -279,3 +279,61 @@ func TestCodeCommitRefNamesAndCustomerKey(t *testing.T) {
 		expect(t, branch(name), 400, "InvalidBranchNameException")
 	}
 }
+
+func TestCodeCommitCorruptStorageIsPreserved(t *testing.T) {
+	h := newHarness(t, codeCommit)
+	expect(t, gitCall(h, "repo", "CreateRepository", nil), 200, "")
+	created := gitCall(h, "repo", "PutFile", map[string]any{"filePath": "dir/file", "branchName": "main", "fileContent": "AQI="})
+	expect(t, created, 200, "")
+	id := created.body["commitId"].(string)
+	newFile := map[string]any{"filePath": "dir/file", "branchName": "main", "fileContent": "AwQ=", "parentCommitId": id}
+	for _, kind := range []string{"blob", "tree", "commit"} {
+		t.Run(kind, func(t *testing.T) {
+			// Use the actual persisted object and retain its original bytes.
+			oid := created.body[kind+"Id"].(string)
+			var original []byte
+			if err := h.db.QueryRow("SELECT body FROM aws_codecommit_objects WHERE oid=?", oid).Scan(&original); err != nil {
+				t.Fatal(err)
+			}
+			if _, err := h.db.Exec("UPDATE aws_codecommit_objects SET body=x'42' WHERE oid=?", oid); err != nil {
+				t.Fatal(err)
+			}
+			frame := codeCommitSnapshot(t, h.db)
+			result := gitCall(h, "repo", "GetFile", map[string]any{"filePath": "dir/file"})
+			if result.status != 500 || result.body["fileContent"] != nil || !slices.Equal(frame, codeCommitSnapshot(t, h.db)) {
+				t.Fatal("corrupt read was published", result)
+			}
+			if kind != "blob" {
+				r := gitCall(h, "repo", "PutFile", newFile)
+				if r.status != 500 || !slices.Equal(frame, codeCommitSnapshot(t, h.db)) {
+					t.Fatal("change overwrote corrupt history", r)
+				}
+			}
+			if _, err := h.db.Exec("UPDATE aws_codecommit_objects SET body=? WHERE oid=?", original, oid); err != nil {
+				t.Fatal(err)
+			}
+			expect(t, gitCall(h, "repo", "GetFile", map[string]any{"filePath": "dir/file"}), 200, "")
+		})
+	}
+	badPaths := []string{"", "/", ".git/config", "double//slash", strings.Repeat("x/", 8) + "x", strings.Repeat("a", 257)}
+	for _, path := range badPaths {
+		input := maps.Clone(newFile)
+		input["filePath"] = path
+		r := gitCall(h, "repo", "PutFile", input)
+		if r.status != 400 || r.body["commitId"] != nil {
+			t.Fatal("accepted invalid path", path, r)
+		}
+	}
+	for _, tc := range []struct{ key, value, code string }{
+		{"name", strings.Repeat("n", 257), "NameLengthExceededException"}, {"email", "missing-at", "InvalidEmailException"},
+		{"commitMessage", strings.Repeat("m", 4097), "CommitMessageLengthExceededException"},
+	} {
+		input := maps.Clone(newFile)
+		input[tc.key] = tc.value
+		expect(t, gitCall(h, "repo", "PutFile", input), 400, tc.code)
+	}
+	expect(t, gitCall(h, "repo", "GetCommit", map[string]any{"commitId": "123"}), 400, "InvalidCommitIdException")
+	expect(t, gitCall(h, "repo", "GetFile", map[string]any{"filePath": "f", "commitSpecifier": "refs/tags/test"}), 400, "InvalidCommitException")
+	expect(t, gitCall(h, "repo", "GetBranch", nil), 400, "BranchNameRequiredException")
+	expect(t, gitCall(h, "missing", "ListBranches", nil), 400, "RepositoryDoesNotExistException")
+}

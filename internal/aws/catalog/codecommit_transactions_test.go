@@ -9,6 +9,7 @@ import (
 	"net/http/httptest"
 	"path/filepath"
 	"slices"
+	"sync"
 	"testing"
 	"time"
 
@@ -180,4 +181,40 @@ func TestCodeCommitConcurrentParent(t *testing.T) {
 	if err := h.db.QueryRow("SELECT count(*) FROM aws_codecommit_objects WHERE kind='commit'").Scan(&commits); err != nil || commits != 2 {
 		t.Fatal(commits, err)
 	}
+}
+
+func TestCodeCommitPendingAuthorizationCannotAdoptReplacement(t *testing.T) {
+	h := newHarness(t, codeCommit)
+	original := gitCall(h, "target", "CreateRepository", nil)
+	expect(t, original, 200, "")
+	originalID := original.body["repositoryMetadata"].(map[string]any)["repositoryId"]
+	_, peer := openGitTeam(t, filepath.Join(t.TempDir(), "peer.db"))
+	expect(t, gitCall(peer, "target", "CreateRepository", nil), 200, "")
+	peerBefore := codeCommitSnapshot(t, peer.db)
+	entered, release := make(chan struct{}), make(chan struct{})
+	var pause sync.Once
+	base := h.engine.cfg.Authorize
+	h.engine.cfg.Authorize = func(ctx context.Context, principal, action, arn string) (string, error) {
+		if action == "codecommit:PutFile" {
+			pause.Do(func() { close(entered); <-release })
+		}
+		return base(ctx, principal, action, arn)
+	}
+	out := make(chan reply, 1)
+	body := map[string]any{"filePath": "new", "branchName": "first", "fileContent": "AA=="}
+	go func() { out <- gitCall(h, "target", "PutFile", body) }()
+	<-entered
+	expect(t, gitCall(h, "target", "DeleteRepository", nil), 200, "")
+	replacement := gitCall(h, "target", "CreateRepository", nil)
+	expect(t, replacement, 200, "")
+	if replacement.body["repositoryMetadata"].(map[string]any)["repositoryId"] == originalID {
+		t.Fatal("reused repository identity")
+	}
+	before := codeCommitSnapshot(t, h.db)
+	close(release)
+	stale := <-out
+	if stale.status < 400 || stale.body["commitId"] != nil || !slices.Equal(before, codeCommitSnapshot(t, h.db)) || !slices.Equal(peerBefore, codeCommitSnapshot(t, peer.db)) {
+		t.Fatalf("old request adopted another repository: HTTP %d", stale.status)
+	}
+	expect(t, gitCall(h, "target", "PutFile", body), 200, "")
 }
