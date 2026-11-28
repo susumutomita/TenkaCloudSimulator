@@ -166,3 +166,7 @@ share one VPC and use distinct local zones. One SQLite transaction stores the
 ALB and its references. EC2 enforces those dependencies until ALB deletion.
 Older ALBs retain their original ID-only representation. The placement describes
 configuration for the local HTTP/Lambda exercise. [ELB guide](../elb.md)
+
+The embedded Scalar reference submits ELBv2 Query forms to the regional AWS
+endpoint. The signed-in team and its existing IAM policy govern each request.
+Users can supply the subnet IDs and ARNs returned by their own simulator.

@@ -22,6 +22,24 @@ this simulator. Instance, IP and ALB targets require target registration and for
 
 ## Resources
 
+### Use the API reference
+
+After signing in, open **API Reference → Shared AWS JSON/Query endpoint**.
+Select `application/x-www-form-urlencoded` and one of the thirteen **ELBv2**
+examples. In **Test Request**, select the `elasticloadbalancing` value for
+`X-Simulator-Service`, clear `X-Amz-Target`, and choose the region that
+contains your resources. Include the form fields for that operation. All
+ELBv2 examples use `Version=2015-12-01`.
+
+`CreateTargetGroup` can create a disposable Lambda target group in an empty
+region. Copy its `TargetGroupArn` from the XML response, then use it in
+`DescribeTargetHealth`. A registered function and its listener let you
+inspect the target's actual status. For `CreateLoadBalancer`, paste two
+subnet IDs and a security group ID from the same VPC. Paste the returned
+load balancer ARN into `DescribeLoadBalancers` to inspect its zones and VPC.
+The `REPLACE_WITH_…` fields are editable placeholders. Clean up using the
+ARNs of your disposable resources, removing listeners before target groups.
+
 - **Load balancers** are `application` only, `internet-facing` (default) or
   `internal`, `ipv4` only. Names are 1 to 32 alphanumeric characters or
   hyphens, unique per region. Create the EC2 VPC, subnets and security groups
