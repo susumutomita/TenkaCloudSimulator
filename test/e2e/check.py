@@ -88,6 +88,9 @@ class Conformance(unittest.TestCase):
  def test_autoscaling_plans_native_sdk_capacity_isolation_and_restart(self):
   subprocess.run([sys.executable,str(Path(__file__).with_name("autoscaling_plans.py"))],check=True,timeout=180)
 
+ def test_autoscaling_plans_console_capacity_workflow(self):
+  subprocess.run([sys.executable,str(Path(__file__).with_name("autoscaling_plans_console.py")),"--sdk"],check=True,timeout=180)
+
  def test_route53_reference_contract_detectors(self):
   subprocess.run([sys.executable,str(Path(__file__).with_name("test_route53_openapi.py"))],check=True,timeout=60)
   subprocess.run([sys.executable,str(Path(__file__).with_name("test_route53_reference_adapters.py"))],check=True,timeout=60)

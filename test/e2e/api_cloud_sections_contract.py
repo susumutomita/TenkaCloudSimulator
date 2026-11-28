@@ -6,29 +6,20 @@ import argparse
 import copy
 import json
 from pathlib import Path
-from route53_openapi import project_before_route53
 import unittest
 
-from test_sakura_openapi import NEW_IDS, COLLECTION, ITEM
+from historical_reference_inventory import verify_historical_routes
+from route53_openapi import project_before_route53
+from test_sakura_openapi import (COLLECTION, ITEM, NEW_IDS, SERVER_COLLECTION,
+                                 project_sakura_server_list_only)
 
 METHODS = {'get', 'head', 'put', 'post', 'delete', 'patch', 'options'}
 GROUPS = ['AWS', 'Google Cloud', 'Azure', 'Sakura Cloud', 'Simulator']
-EXPECTED_IDS = set('''AddPermission AzureCreateContainer AzureDeleteBlob AzureDeleteContainer
-AzureGetBlob AzureGetBlobProperties AzureGetContainerProperties AzureListBlobs
-AzureListContainers AzurePutBlob Capabilities CreateBucket CreateDeployment
-CreateFunction CreateResource CreateRestApi CreateStage DeleteBucket DeleteFunction
-DeleteIdentityPolicy DeleteObject DeleteResource DeleteRestApi DeleteStage
-GCPCreateBucket GCPDeleteBucket GCPDeleteObject GCPDownloadObject GCPGetBucket
-GCPGetObject GCPListBuckets GCPListObjects GCPUploadObject GetDeployment
-GetFunctionConfiguration GetIdentityPolicy GetMethod GetObject GetPolicy GetResource
-GetResources GetRestApi GetRestApis GetStage HeadBucket HeadObject IAMRoleQueryOperation
-Invoke InvokeLocalRESTProxyGet InvokeLocalRESTProxyPost ListBuckets ListFunctions
-ListObjectsV2OrGetBucketLocation ListPrincipals PutIdentityPolicy PutIntegration
-PutMethod PutObject RemovePermission S3MultipartUpload UpdateFunctionCode awsRegionalOperation'''.split())
 GUIDES = {'Systems Manager Parameter Store', 'CloudFormation stacks', 'KMS service guide',
           'SQS queues', 'CloudWatch Logs', 'Secrets Manager', 'DynamoDB tables and items'}
 SAKURA_TAG = 'Sakura Cloud status'
 SAKURA_DISK_TAG = 'Sakura Disk configuration'
+SAKURA_SERVER_TAG = 'Sakura Server metadata'
 
 
 def operations(document):
@@ -64,7 +55,7 @@ def validate_document(document):
     assert group_for['Google Cloud Storage'] == 'Google Cloud'
     assert group_for['Azure Blob Storage'] == 'Azure'
     assert group_for[SAKURA_TAG] == 'Sakura Cloud'
-    assert set(groups[3]['tags']) == {SAKURA_TAG, SAKURA_DISK_TAG}
+    assert set(groups[3]['tags']) == {SAKURA_TAG, SAKURA_DISK_TAG, SAKURA_SERVER_TAG}
     assert {'Simulator control', 'Simulator IAM state'} == set(groups[4]['tags'])
     assert GUIDES <= set(groups[0]['tags'])
     assert tags_by_name['KMS local symmetric keys']['x-displayName'] == 'Shared AWS JSON/Query endpoint'
@@ -76,11 +67,9 @@ def validate_document(document):
     status = tags_by_name[SAKURA_TAG].get('description', '')
     assert 'Disk configuration API only' in status and 'disabled by default' in status
     assert 'real VM/block storage' in status and 'not claim console workflow/fidelity' in status
-    inherited = project_before_route53(document)
+    inherited = project_sakura_server_list_only(project_before_route53(document))
+    verify_historical_routes(inherited)
     ops = operations(document)
-    ids = [operation['operationId'] for _, _, operation in operations(inherited)]
-    assert len(inherited['paths']) == 36 and len(ids) == 67
-    assert len(ids) == len(set(ids)) and set(ids) == EXPECTED_IDS | NEW_IDS
     multipart = document['paths']['/{bucket}/{key}']['post']
     assert multipart['operationId'] == 'S3MultipartUpload'
     assert multipart['tags'] == ['S3 basic object storage']
@@ -88,13 +77,17 @@ def validate_document(document):
         assert operation.get('tags'), 'An operation must remain discoverable'
         expected = ('Google Cloud' if path.startswith('/_simulator/providers/gcp/') else
                     'Azure' if path.startswith('/_simulator/providers/azure/') else
-                    'Sakura Cloud' if path in (COLLECTION, ITEM) else
+                    'Sakura Cloud' if path in (COLLECTION, ITEM, SERVER_COLLECTION) else
                     'Simulator' if path.startswith('/_simulator/v1/') else 'AWS')
         for tag in operation['tags']:
             assert tag in group_for and group_for[tag] == expected, (path, tag, expected)
             assert tag != SAKURA_TAG and tag not in GUIDES, 'A guide must not invent API operations'
-    return {'cloudGroups': GROUPS[:4], 'controlGroup': 'Simulator', 'operationIDs': len(ids),
-            'paths': 36, 'documentationOnlyServiceGuides': len(GUIDES), 'SakuraOperations': len([op for _,_,op in ops if op['operationId'] in NEW_IDS])}
+    return {
+        'cloudGroups': GROUPS[:4], 'controlGroup': 'Simulator',
+        'operationIDs': len(operations(inherited)), 'paths': len(inherited['paths']),
+        'documentationOnlyServiceGuides': len(GUIDES),
+        'SakuraOperations': sum(op['operationId'] in NEW_IDS for _, _, op in ops),
+    }
 
 
 class ContractTests(unittest.TestCase):

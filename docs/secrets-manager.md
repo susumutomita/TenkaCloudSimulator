@@ -3,12 +3,12 @@
 > This bounded native implementation preserves the 42 acceptance cases and 26 models/149 controls from baseline `0a6bdce41c773f651a5bd9a8a128da4e45b8b2c2`. The ACK observation contract adds one model/four controls (27/153,180 finite cases). Combined runtime, browser and model results are revision-specific: consult the exact commit in [CI](https://github.com/susumutomita/TenkaCloudSimulator/actions/workflows/ci.yml) and [Formal validation](https://github.com/susumutomita/TenkaCloudSimulator/actions/workflows/formal.yml). Historical receipts below do not establish a different revision’s success.
 
 
-Eight native Secrets Manager operations, the Cloudscape console, SDK clients and
-the embedded API reference use the same SQLite state. This is an independent,
-bounded training implementation, not a complete AWS service or a hosted release.
-Version listing is available through the native API/SDK/reference and the
-console’s separate **Version metadata** tab. The original Secrets tab retains its
-labeled-version and explicit-retrieval flow.
+This bounded local training implementation exposes nine native Secrets Manager
+operations. The Cloudscape Console, SDK clients and embedded API reference share
+the same SQLite state. The **Secrets** tab handles
+labeled versions and explicit value retrieval. **Version metadata** pages through
+saved versions. **Edit description** changes metadata for a known secret ARN.
+[Description editor and permissions](secrets-manager-update-description.md)
 
 **Use dummy values only. SecretString is plaintext in the private database.**
 There is no KMS/envelope encryption, HSM, secure-erasure or production-vault
@@ -30,16 +30,22 @@ SigV4 signing service is `secretsmanager`. SDK wire credentials must be dummy
 `TCSIM...` values; they do not authenticate the caller or validate a real AWS
 signature. The outer local access-token middleware remains required.
 
-The embedded reference at `/_simulator/docs/` contains eight named request templates and
-illustrative version metadata under the existing shared-root operation. They are **static
-examples**, not a view of executed state. The original seven request examples have been run
-against the actual binary and checked against SDK state. The new version-list
-example requires exact-revision validation; it is not a live-state receipt. A reproducible
-[two-team boto3 lifecycle](../test/e2e/secrets_manager.py) demonstrates endpoint,
-dummy credentials, token injection and exact loopback-origin transport guards;
-[the example runner](../test/e2e/secrets_manager_docs.py) executes the served
-OpenAPI requests. Host Python is development/test tooling, not a simulator
-runtime dependency.
+The embedded reference at `/_simulator/docs/` supplies nine named request-body
+examples for the shared root POST. Set the matching `X-Amz-Target` separately.
+The original seven-example fixture sends the served JSON over HTTP and checks
+SDK state. The version-list and description-update fixtures each send their own
+served example and check the result against the same resource through boto3.
+Separate browser fixtures exercise the version pages and description editor.
+[Original seven](../test/e2e/secrets_manager_docs.py) · [Version-list example](../test/e2e/secrets_versions.py) · [Description example](../test/e2e/secrets_metadata_update.py) · [Version tab](../test/e2e/secret_versions_console.py) · [Description tab](../test/e2e/secret_description_console.py)
+
+The two-team boto3 lifecycle demonstrates endpoint setup, dummy credentials,
+local token injection and numeric-loopback transport checks. Python runs the
+development fixtures. [SDK lifecycle](../test/e2e/secrets_manager.py)
+
+The original seven operations, version-list API, version tab and description
+workflow shipped separately. Their PRs record results for their respective
+revisions. The historical route-inventory checks are tracked separately.
+[Seven-operation lifecycle (PR #408)](https://github.com/susumutomita/TenkaCloudSimulator/pull/408) · [Version listing (#427)](https://github.com/susumutomita/TenkaCloudSimulator/pull/427) · [Version tab (#430)](https://github.com/susumutomita/TenkaCloudSimulator/pull/430) · [Description update (#459)](https://github.com/susumutomita/TenkaCloudSimulator/pull/459) · [Historical reference checks (#630)](https://github.com/susumutomita/TenkaCloudSimulator/pull/630)
 
 | Operation | Accepted request subset | Result / IAM resource |
 | --- | --- | --- |
@@ -49,6 +55,7 @@ runtime dependency.
 | ListSecretVersionIds | SecretId; IncludeDeprecated default false; MaxResults 1–100, local default100; NextToken | ARN/Name/Versions metadata; only `secretsmanager:ListSecretVersionIds` on resolved saved ARN |
 | PutSecretValue | SecretId, SecretString, ClientRequestToken; VersionStages absent or `[AWSCURRENT]` | New immutable version/current transition; resolved ARN |
 | GetSecretValue | SecretId, optional VersionId and/or VersionStage AWSCURRENT/AWSPREVIOUS | The only operation returning SecretString; resolved ARN |
+| UpdateSecret | SecretId, Description (empty clears), optional ClientRequestToken | ARN/Name on success. Requires `secretsmanager:UpdateSecret` on the resolved ARN. Creates no version. |
 | UpdateSecretVersionStage | SecretId, VersionStage=AWSCURRENT, MoveToVersionId; matching RemoveFromVersionId when moving | Current/previous promotion; resolved ARN |
 | DeleteSecret | Full local ARN, ForceDeleteWithoutRecovery=true | Immediate local deletion; request ARN, including idempotent absence |
 
@@ -58,6 +65,15 @@ sanitized500. Missing/expired/foreign host credentials return401 at the outer
 access layer. Duplicate protocol/authority headers, duplicate JSON keys, null or
 wrong field types, invalid Unicode scalars and oversized bodies are rejected.
 Signed Secrets requests with missing/foreign targets do not fall through to S3.
+
+Local secrets have never had automatic rotation configured. Both `DescribeSecret`
+and entries in `ListSecrets.SecretList` omit `RotationEnabled`, `RotationRules`,
+`RotationLambdaARN`, `LastRotatedDate` and `NextRotationDate`. In boto3,
+`metadata.get("RotationEnabled")` yields `None`. AWS documents a null
+`RotationEnabled` and omitted rules in a never-configured describe result.
+The list-entry rotation fields are optional. Moving `AWSCURRENT` and
+`AWSPREVIOUS` changes version labels without configuring rotation.
+[AWS DescribeSecret](https://docs.aws.amazon.com/secretsmanager/latest/apireference/API_DescribeSecret.html) · [AWS SecretListEntry](https://docs.aws.amazon.com/secretsmanager/latest/apireference/API_SecretListEntry.html) · [AWS rotation guide](https://docs.aws.amazon.com/secretsmanager/latest/userguide/rotating-secrets.html)
 
 ## Version metadata and continuation
 
@@ -220,7 +236,8 @@ resource was accessed, so pixel-for-pixel identity is not claimed.
 | Flow | Public AWS guide | Local implemented behavior / difference |
 | --- | --- | --- |
 | Create | [Secret type → values/encryption → name → rotation → review](https://docs.aws.amazon.com/secretsmanager/latest/userguide/create_secret.html) | Same basic wizard order; other-type dummy text/key-value only. KMS/database/partner/rotation choices unavailable. Store opens details rather than the documented list. |
-| Update | [Retrieve then Edit on secret details](https://docs.aws.amazon.com/secretsmanager/latest/userguide/manage_update-secret-value.html) | Explicit Retrieve → Edit → native PutSecretValue; empty new-version draft. |
+| Update value | [Retrieve then Edit on secret details](https://docs.aws.amazon.com/secretsmanager/latest/userguide/manage_update-secret-value.html) | Explicit Retrieve → Edit → native PutSecretValue; empty new-version draft. |
+| Update description | [UpdateSecret metadata example](https://docs.aws.amazon.com/secretsmanager/latest/apireference/API_UpdateSecret.html) | Use **Edit description** with the full ARN. After the write, a separately authorized `DescribeSecret` refreshes the displayed metadata. |
 | Delete | [Actions → schedule deletion and recovery period](https://docs.aws.amazon.com/secretsmanager/latest/userguide/manage_delete-secret.html) | Explicitly force-only deletion with exact-name confirmation; no scheduled deletion/recovery. |
 | Labels | API/CLI staging-label management | Current/previous only. The rollback button is labeled a simulator helper, not an AWS console control. |
 

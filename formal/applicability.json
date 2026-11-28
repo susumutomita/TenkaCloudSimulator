@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "base_sha": "03d71307bbe6382df16d26bcd5d26e454f5036a6",
+  "base_sha": "64e5dd28dbe43f43480dfab555ffdd9aff572eb0",
   "changes": [
     {
       "path": ".github/workflows/ci.yml",
@@ -11,14 +11,14 @@
     },
     {
       "path": "README.md",
-      "sha256": "2b00b68fd707a2042e4f7a13033a56d2633135ea88a8f9b8d60df5f2d8db31de",
+      "sha256": "427e38e399dcb0572ad6ca3fe6cf8ec50684d08a79aa04e00f14c57ae195dcec",
       "disposition": "documentation",
       "reason": "Document the published and local API contracts, persistence, entry points, isolation and unsupported operations.",
       "models": []
     },
     {
       "path": "docs/design/0001-go-standalone.md",
-      "sha256": "9f625082bb6e7d276d0b69ef868147f6a7247da3a12ecb06b67e6bc8cd6803fd",
+      "sha256": "c6fa6841ed537bd5007a89391e9512749856ed984f85a6211898b70e5d06d5df",
       "disposition": "documentation",
       "reason": "Document the published and local API contracts, persistence, entry points, isolation and unsupported operations.",
       "models": []
@@ -100,7 +100,7 @@
     },
     {
       "path": "formal/models.json",
-      "sha256": "3d35adafd3c18ce950619ebf8188b6bf5d2fc15e3a573fcc19d12110cacffc4f",
+      "sha256": "62409bc247c3d239bcaf55bd1d41203140754c04fdb953cd39d2f5efabfd9297",
       "disposition": "formal-infrastructure",
       "reason": "Register and independently check the finite Cloud Trace model, its source bindings and specific mutation controls.",
       "models": []
@@ -307,7 +307,7 @@
     },
     {
       "path": "internal/server/server.go",
-      "sha256": "118a7079bbef8be710dd8a10ede4b1e4084739b6835d4eb279e9a3cb75e2de93",
+      "sha256": "457b9836537246110d5aa8382471f7ee3a78d09e5192f1d34cd667974f8fc3b9",
       "disposition": "modeled",
       "reason": "Expose trace configuration only to the authenticated local project owner.",
       "models": [
@@ -324,7 +324,7 @@
     },
     {
       "path": "internal/server/web/app.js",
-      "sha256": "572fbf8cf008eae547fef5335d23c4d1ad8146de16cf39668c487866eb779302",
+      "sha256": "1e6b7b596d155bfc4a8efe013cd921086303b4905c17ae27fe2e05bb060d4787",
       "disposition": "modeled",
       "reason": "Extend the existing Google Console discovery and guarded navigation to project Trace reads. Runtime and browser tests check the actual viewer.",
       "models": [
@@ -342,21 +342,21 @@
     },
     {
       "path": "scripts/formal_model_gate.py",
-      "sha256": "0177281b88d14189cffa323cac60f6ebd0069702ae8c3a0033de1ffdfeabbe2d",
+      "sha256": "a16d09a125afae168b81bf28b3a6dc97489637cfe38f95a3ac3b486c98eb74c4",
       "disposition": "formal-infrastructure",
       "reason": "Register and independently check the finite Cloud Trace model, its source bindings and specific mutation controls.",
       "models": []
     },
     {
       "path": "scripts/test-formal-gate.py",
-      "sha256": "9eadb097a1ebece5807b92a0d1f3b287a7540b1eedd10711657347707dba7da9",
+      "sha256": "f4b218d31f117d5e1f47207c16d60c68a8589a13e1aa1f4b443246f0e60766e5",
       "disposition": "formal-infrastructure",
       "reason": "Register and independently check the finite Cloud Trace model, its source bindings and specific mutation controls.",
       "models": []
     },
     {
       "path": "test/e2e/check.py",
-      "sha256": "5e594b55c740bed9a2c48ca4e7d56e938c9ed2640f7ddea7a785facb832085e9",
+      "sha256": "b5c6401b780939aa2082badcc8795a9d607bc5419a0790f75d6a297d6c0ecfc3",
       "disposition": "test-support",
       "reason": "Exercise the local Trace implementation, rollback or native operations through an ordinary product entry point.",
       "models": []
@@ -384,21 +384,21 @@
     },
     {
       "path": "tools/console/bundle-digests.json",
-      "sha256": "083ed5b0bd2eb1efd25fc302f32211a5118f6d25fa4e426a7d6c9ab3a0ef7073",
+      "sha256": "a5417131ae79e727c57708c2a4cbd689cd238997429016ff27ffcfbeb1ca276e",
       "disposition": "presentation",
       "reason": "Regenerate the regular Console input or artifact manifest for the embedded Trace viewer.",
       "models": []
     },
     {
       "path": "tools/console/bundle-inputs.json",
-      "sha256": "7123d78d022852e22e564ee69f805d7eba37363fa058d37279cbe57cbe4eb341",
+      "sha256": "29429a3dee36a067aefaef94ef5094685917a74f1aab664d51a07ad1ab4a3b89",
       "disposition": "presentation",
       "reason": "Regenerate the regular Console input or artifact manifest for the embedded Trace viewer.",
       "models": []
     },
     {
       "path": "tools/console/src/console-navigation.mjs",
-      "sha256": "eee0e95faaa02e796b9d4c805290ea36bb63272b10ec1ae5e62aa54613d1958e",
+      "sha256": "47ee1cf7ad5d220baf8beb4df9e29c2b3b5f872896a7d6a3638d0737808ef4e0",
       "disposition": "modeled",
       "reason": "Extend the existing Google Console discovery and guarded navigation to project Trace reads. Runtime and browser tests check the actual viewer.",
       "models": [
@@ -430,7 +430,7 @@
     },
     {
       "path": "tools/console/src/main.jsx",
-      "sha256": "86ed0c3d5f8001840bed20c91570a782468c35f1a05b85e7ff093f01dbccfb72",
+      "sha256": "7e243379171a1feb87eda5dc78b3fe8b0bc8c9b24a93971b1644259f1e52d64e",
       "disposition": "modeled",
       "reason": "Extend the existing Google Console discovery and guarded navigation to project Trace reads. Runtime and browser tests check the actual viewer.",
       "models": [

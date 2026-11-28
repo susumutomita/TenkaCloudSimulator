@@ -10,16 +10,15 @@ import urllib.request
 from dynamodb import client,COUNTS,REPORTS
 from sqs import Team,NoRedirect
 from openapi_json10 import validate_json10_examples,validate_json10_response
-from test_sakura_openapi import OLD_IDS,NEW_IDS,COLLECTION,ITEM
+from historical_reference_inventory import verify_historical_routes
+from test_sakura_openapi import project_sakura_server_list_only
 
 OPERATIONS=('CreateTable','ListTables','DescribeTable','PutItem','GetItem','DeleteItem','DeleteTable')
 
 
 def validate_reference_contract(spec):
-    inherited = project_before_route53(spec)
-    ids=[v['operationId'] for p in inherited['paths'].values() for m,v in p.items() if m in ('get','post','put','head','delete')]
-    assert len(ids)==len(set(ids))==67 and set(ids)==OLD_IDS|NEW_IDS|{'S3MultipartUpload'} and len(inherited['paths'])==36 and {COLLECTION,ITEM} <= set(inherited['paths']),'Main API paths/IDs changed'
-    assert spec['paths']['/{bucket}/{key}']['post']['operationId']=='S3MultipartUpload','Multipart addition moved from the native S3 object route'
+    inherited = project_sakura_server_list_only(project_before_route53(spec))
+    verify_historical_routes(inherited)
 
 
 def run():

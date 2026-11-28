@@ -29972,6 +29972,73 @@
       ]
     },
     {
+      "id": "ScalingPlanConsole",
+      "model": "formal/ScalingPlanConsole.tla",
+      "config": "formal/ScalingPlanConsole.cfg",
+      "bounds": "Two mounted scopes, one selected plan, three calls, plan/target/list/named-refresh reads, writes and delayed replies. Distinct request tickets identify which result was observed.",
+      "properties": [
+        "TypeOK",
+        "OnlyCurrentReplyPublishes",
+        "SuccessRequiresAck",
+        "RetryRequiresNamedRefresh"
+      ],
+      "limits": "Finite UI request ownership and publication within one mounted scope. A refresh is an explicit exact-name read. Does not model concurrent plan replacement, React/DOM, JavaScript or Go refinement, IAM, HTTP or storage. AutoScalingPlanTargets independently models native capacity effects.",
+      "source_scope": [
+        "internal/server/server.go",
+        "internal/server/web/app.js",
+        "tools/console/src/autoscaling-plans.jsx",
+        "tools/console/src/autoscaling-plans.mjs",
+        "tools/console/src/console-navigation.mjs",
+        "tools/console/src/main.jsx"
+      ],
+      "mutants": [
+        {
+          "id": "PublishRetiredRead",
+          "edits": [
+            {
+              "old": "Publish(q) == Current(q)",
+              "new": "Publish(q) == Current(q) \\/ (q.kind \\in Reads /\\ v.active # None)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "OnlyCurrentReplyPublishes"
+        },
+        {
+          "id": "UnknownAsAcknowledged",
+          "edits": [
+            {
+              "old": "Acknowledged(status) == status = \"ok\"",
+              "new": "Acknowledged(status) == status \\in {\"ok\",\"unknown\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "SuccessRequiresAck"
+        },
+        {
+          "id": "ResendUncertainWrite",
+          "edits": [
+            {
+              "old": "MayWrite == ~v.uncertain",
+              "new": "MayWrite == TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "RetryRequiresNamedRefresh"
+        },
+        {
+          "id": "ListUnlocksWrite",
+          "edits": [
+            {
+              "old": "q.kind = \"refresh\" /\\ status = \"ok\"\n\nDeliver",
+              "new": "q.kind \\in {\"list\",\"refresh\"} /\\ status = \"ok\"\n\nDeliver",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "RetryRequiresNamedRefresh"
+        }
+      ]
+    },
+    {
       "id": "CloudTraceObservations",
       "model": "formal/CloudTraceObservations.tla",
       "config": "formal/CloudTraceObservations.cfg",

@@ -1329,6 +1329,20 @@ BASE_INVARIANTS['AutoScalingPlanTargets'] = {'TypeOK', 'BoundedWhileOwned', 'Onl
 REQUIRED_MUTANTS['AutoScalingPlanTargets'] = {'OmitAuthorization', 'OmitValidation', 'SkipCapacityBound', 'ClampLowerOnly', 'StealOwnership', 'RevertOnDelete', 'WriteOtherTeam', 'ExposePendingState', 'ReuseTableGeneration', 'RejectWritesCapacity', 'RejectClaimsOwner'}
 REQUIRED_SOURCE_SCOPES['AutoScalingPlanTargets'] = {'internal/aws/autoscalingplans_store.go', 'internal/aws/autoscalingplans_http.go', 'internal/aws/autoscalingplans_dispatch.go', 'internal/aws/s3.go', 'internal/aws/ssm.go', 'internal/server/server.go'}
 
+# Console request ownership is independent of the native transaction model.
+BASE_MODELS.add('ScalingPlanConsole')
+BASE_INVARIANTS['ScalingPlanConsole'] = {
+    'TypeOK', 'OnlyCurrentReplyPublishes', 'SuccessRequiresAck', 'RetryRequiresNamedRefresh',
+}
+REQUIRED_MUTANTS['ScalingPlanConsole'] = {
+    'PublishRetiredRead', 'UnknownAsAcknowledged', 'ResendUncertainWrite', 'ListUnlocksWrite',
+}
+REQUIRED_SOURCE_SCOPES['ScalingPlanConsole'] = {
+    'internal/server/server.go', 'internal/server/web/app.js',
+    'tools/console/src/autoscaling-plans.jsx', 'tools/console/src/autoscaling-plans.mjs',
+    'tools/console/src/console-navigation.mjs', 'tools/console/src/main.jsx',
+}
+
 # Independent EC2 read-only discovery admission contract. These fixed sets must
 # not be derived from the mutable registry, which this gate validates.
 BASE_MODELS.add('EC2SecurityGroupConsoleEpoch')
