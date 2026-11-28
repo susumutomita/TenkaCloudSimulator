@@ -38,14 +38,116 @@ def create_repo(client, name, value):
     return client.create_repository(repositoryName=name, tags=[{'Key': 'Team', 'Value': value}])['repository']['repositoryArn']
 
 
-def permission(team, name, statements):
+def permission(team, name, statements, region='us-east-1'):
     team.control('PUT', f'/_simulator/v1/iam/principals/{name}/policy',
                  {'Version': '2012-10-17', 'Statement': statements})
     token = team.control('POST', '/_simulator/v1/access', {'Principal': name})['AccessToken']
-    return team.client('resource-groups', token=token)
+    return team.client('resource-groups', token=token, region=region)
+
+
+def check_named_group_actions(owner, admin, protected):
+    arn = admin.create_group(Name='named-policy-control')['Group']['GroupArn']
+    prefix = arn.rsplit('/', 1)[0] + '/'
+    actions = ['resource-groups:' + name for name in ('GetGroup', 'UpdateGroup', 'DeleteGroup', 'Tag', 'Untag', 'GetTags')]
+    exact = permission(owner, 'six-allowed-on-named-group', [{'Effect': 'Allow', 'Action': actions, 'Resource': arn}])
+    denied = permission(owner, 'six-explicitly-denied', [{'Effect': 'Allow', 'Action': actions, 'Resource': '*'},
+                                                        {'Effect': 'Deny', 'Action': actions, 'Resource': '*'}])
+    for client, decision in ((exact, 'implicitDeny'), (denied, 'explicitDeny')):
+        for target in (protected, prefix + 'absent-group'):
+            calls = ((client.get_group, {'Group': target}), (client.update_group, {'Group': target, 'Description': 'refused'}),
+                     (client.delete_group, {'Group': target}), (client.tag, {'Arn': target, 'Tags': {'changed': 'refused'}}),
+                     (client.untag, {'Arn': target, 'Keys': ['Team']}), (client.get_tags, {'Arn': target}))
+            for operation, params in calls:
+                try:
+                    operation(**params)
+                except client.exceptions.ForbiddenException as error:
+                    metadata = error.response['ResponseMetadata']
+                    assert metadata['HTTPStatusCode'] == 403 and metadata['HTTPHeaders']['x-amzn-errortype'] == 'ForbiddenException'
+                    assert error.response['Error'] == {'Code': 'ForbiddenException', 'Message': 'IAM evaluation: ' + decision}
+                else:
+                    raise AssertionError('group-scoped request unexpectedly succeeded')
+    assert exact.get_group(Group=arn)['Group']['GroupArn'] == arn
+    assert exact.update_group(Group=arn, Description='changed')['Group']['Description'] == 'changed'
+    exact.tag(Arn=arn, Tags={'Team': 'allowed'})
+    assert exact.get_tags(Arn=arn)['Tags'] == {'Team': 'allowed'}
+    exact.untag(Arn=arn, Keys=['Team'])
+    assert exact.get_tags(Arn=arn)['Tags'] == {}
+    assert exact.delete_group(Group=arn)['Group']['GroupArn'] == arn
+    refused('NotFoundException', 404, admin.get_group, Group=arn)
+
+
+def check_service_actions(owner, peer):
+    admin = owner.client('resource-groups')
+    west = owner.client('resource-groups', region='us-west-2')
+    other = peer.client('resource-groups')
+    create = 'resource-groups:CreateGroup'
+    listing = 'resource-groups:ListGroups'
+    prefix = 'arn:aws:resource-groups:us-east-1:000000000000:group/'
+
+    def grant(actions, target):
+        return {'Effect': 'Allow', 'Action': actions, 'Resource': target}
+
+    def arns(page):
+        current = [item['GroupArn'] for item in page['GroupIdentifiers']]
+        assert [item['GroupArn'] for item in page['Groups']] == current
+        assert all('ApplicationTag' not in item for item in page['Groups'])
+        return current
+
+    limited = permission(owner, 'group-kind-only', [grant([create, listing], prefix + '*')])
+    named = permission(owner, 'group-name-only', [grant([create, listing], prefix + 'scope-one')])
+    explicit = permission(owner, 'group-service-denied', [grant([create, listing], '*'),
+                          {'Effect': 'Deny', 'Action': [create, listing], 'Resource': '*'}])
+    creator = permission(owner, 'group-create-only', [grant(create, '*')])
+    list_only = [grant(listing, '*')]
+    reader = permission(owner, 'group-list-only', list_only)
+    assert arns(reader.list_groups()) == []
+    for client in (limited, named, explicit):
+        refused('ForbiddenException', 403, client.create_group, Name='scope-one', Tags={'Team': 'refused'})
+        refused('ForbiddenException', 403, client.list_groups)
+    assert arns(admin.list_groups()) == []
+    tags = {'Team': 'kept', 'awsApplication': 'ordinary-user-value'}
+    created = creator.create_group(Name='scope-one', Tags=tags)
+    queried = creator.create_group(Name='scope-two', ResourceQuery=tag_query('blue'), Tags=tags)
+    assert created['Tags'] == tags and queried['Tags'] == tags
+    assert 'ApplicationTag' not in created['Group'] and 'ApplicationTag' not in queried['Group']
+    first, second = created['Group']['GroupArn'], queried['Group']['GroupArn']
+    remote = west.create_group(Name='scope-west')['Group']['GroupArn']
+    sibling = other.create_group(Name='scope-peer')['Group']['GroupArn']
+    assert first == prefix + 'scope-one' and second == prefix + 'scope-two'
+    first_page = reader.list_groups(MaxResults=1)
+    assert arns(first_page) == [first]
+    token = first_page['NextToken']
+    next_page = reader.list_groups(MaxResults=1, NextToken=token)
+    assert arns(next_page) == [second] and 'NextToken' not in next_page
+    for client in (limited, named, explicit):
+        refused('ForbiddenException', 403, client.create_group, Name='scope-one', Tags={'Team': 'refused'})
+        refused('ForbiddenException', 403, client.list_groups, NextToken=token)
+    check_named_group_actions(owner, admin, first)
+    assert admin.get_tags(Arn=first)['Tags'] == tags
+    admin.untag(Arn=second, Keys=['awsApplication'])
+    admin.tag(Arn=second, Tags={'Team': 'changed'})
+    assert admin.get_tags(Arn=second)['Tags'] == {'Team': 'changed'}
+    assert 'ApplicationTag' not in admin.get_group(Group=second)['Group']
+    west_reader = permission(owner, 'group-list-only', list_only, 'us-west-2')
+    peer_reader = permission(peer, 'group-list-only', list_only)
+    assert arns(west_reader.list_groups()) == [remote] and arns(peer_reader.list_groups()) == [sibling]
+    owner.stop()
+    owner.start()
+    admin = owner.client('resource-groups')
+    west = owner.client('resource-groups', region='us-west-2')
+    token = owner.control('POST', '/_simulator/v1/access', {'Principal': 'group-list-only'})['AccessToken']
+    reader = owner.client('resource-groups', token=token)
+    assert 'ApplicationTag' not in admin.get_group(Group=first)['Group']
+    assert admin.get_tags(Arn=first)['Tags'] == tags
+    assert arns(reader.list_groups()) == [first, second] and arns(peer_reader.list_groups()) == [sibling]
+    for client, names in ((admin, (first, second)), (west, (remote,)), (other, (sibling,))):
+        for name in names:
+            client.delete_group(Group=name)
+        assert arns(client.list_groups()) == []
 
 
 def exercise(a, b):
+    check_service_actions(a, b)
     team, peer = a.client('resource-groups'), b.client('resource-groups')
     west = a.client('resource-groups', region='us-west-2')
     ecr, peer_ecr = a.client('ecr'), b.client('ecr')

@@ -181,7 +181,7 @@ console, CloudFormation adapter or Challenge integration.
   To delete a compute environment, disable it and remove it from every job queue in the same Region.
   Batch also stores and deregisters bounded EC2 single-container job definition
   revisions; it does not pull images, run containers, or submit jobs.
-  [Resource Groups](docs/aws-catalog.md#ecr-repository-group-membership) finds local ECR repositories matching a named group’s exact tag key and value.
+  [Resource Groups](docs/aws-catalog.md#ecr-repository-group-membership) shows local ECR repository ARNs matching a named group’s tag key and value in the service catalog. Open the group to edit its saved filter.
   The AWS catalog console registers a name, image name, vCPUs and memory,
   and deregisters exact revision ARNs without deleting inactive history.
   Redshift can read tags on one existing stored resource ARN; it does not
