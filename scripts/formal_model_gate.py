@@ -4818,6 +4818,23 @@ REQUIRED_SOURCE_SCOPES['StoreConnectionLifetime'] = {
 }
 
 
+BASE_MODELS.add('CloudWatchMetricTransaction')
+BASE_INVARIANTS['CloudWatchMetricTransaction'] = {
+    'TypeOK', 'StagedInvisible', 'PeerPreserved', 'RepeatedObservationsCount',
+    'AtomicAccepted', 'RejectedUnchanged', 'ReadAndRestartPreserve', 'BoundedRows', 'ReadAggregates',
+}
+REQUIRED_MUTANTS['CloudWatchMetricTransaction'] = {
+    'PublishBeforeCommit', 'RetentionDeletesPeer', 'PartialBatchValue', 'CollapseRepeatedObservations',
+    'CanceledRetentionCommitted', 'DeniedWriteAdmitted', 'ReadSeesStaged', 'InclusiveEnd',
+    'IgnoreIdentity', 'IgnoreUnitFilter', 'UnweightedWindowAverage', 'QuotaIgnored', 'RestartLosesRows',
+}
+REQUIRED_SOURCE_SCOPES['CloudWatchMetricTransaction'] = {
+    'internal/aws/cloudwatchmetrics/store.go', 'internal/aws/cloudwatchmetrics/http.go',
+    'internal/aws/cloudwatchmetrics/form.go', 'internal/aws/cloudwatch_metrics_gateway.go',
+    'internal/aws/s3.go', 'internal/aws/ssm.go', 'internal/server/server.go',
+}
+
+
 def load_registry(root, relative='formal/models.json'):
     root = Path(root)
     registry_path = asset(root, relative)

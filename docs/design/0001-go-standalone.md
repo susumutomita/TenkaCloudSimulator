@@ -148,3 +148,7 @@ with their group. SDK and Console share EC2 Query `DescribeSecurityGroups`
 readback. This separate detached state never modifies CloudFormation-owned
 ingress or feeds live network/instance attachment decisions. See the
 [security group subset](../ec2-read-discovery.md#security-group-readback).
+
+### CloudWatch custom metric samples
+
+AWS Query `PutMetricData` records a bounded batch of raw numeric samples in the team's SQLite database. `GetMetricStatistics` groups retained observations by region, namespace, metric name, dimension set, unit and time bucket. Both operations use the existing authenticated actor and evaluate their separate IAM actions. Only a committed write prunes expired samples from the addressed region and namespace. The SDK uses the shared AWS root with the `monitoring` signing name. [Supported limits and retention](../cloudwatch-metrics.md)

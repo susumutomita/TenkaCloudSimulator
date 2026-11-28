@@ -7,6 +7,9 @@
 > named inputs. They do not establish the current integration's final CI
 > or merge status.
 
+For the separate native custom metric ingestion and statistics workflow, see
+[CloudWatch custom metrics](cloudwatch-metrics.md).
+
 This increment adds CloudWatch **Logs**, not CloudWatch metrics or alarms. Its API
 and console use provider-owned SQLite tables. It does not deliver Lambda logs
 automatically, provision an agent, enable a Challenge problem, or claim visual
