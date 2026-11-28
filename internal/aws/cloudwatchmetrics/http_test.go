@@ -55,7 +55,7 @@ func gzipBody(t *testing.T, data []byte) []byte {
 }
 func serve(s *Store, r *http.Request, allow bool) (int, string) {
 	rec := httptest.NewRecorder()
-	s.ServeQuery(rec, r, "us-east-1", func(string) (bool, error) { return allow, nil })
+	s.ServeQuery(rec, r, "us-east-1", func(string, string) (bool, error) { return allow, nil })
 	return rec.Code, rec.Body.String()
 }
 func TestQueryAdmissionAndGzip(t *testing.T) {
@@ -73,7 +73,7 @@ func TestQueryAdmissionAndGzip(t *testing.T) {
 	compressed := gzipBody(t, raw)
 	for _, r := range []*http.Request{request(raw, ""), request(compressed, "gzip")} {
 		rec := httptest.NewRecorder()
-		s.ServeQuery(rec, r, "us-east-1", func(action string) (bool, error) {
+		s.ServeQuery(rec, r, "us-east-1", func(action, resource string) (bool, error) {
 			if action != "cloudwatch:PutMetricData" {
 				t.Fatal(action)
 			}
@@ -124,7 +124,7 @@ func TestQueryAdmissionAndGzip(t *testing.T) {
 			}
 		})
 	}
-	for _, op := range []string{"PutMetricAlarm", "DeleteMetric", "ListMetrics", "GetMetricData"} {
+	for _, op := range []string{"PutCompositeAlarm", "DeleteMetric", "ListMetrics", "GetMetricData"} {
 		f := metricWire()
 		f.Set("Action", op)
 		status, body := serve(s, request([]byte(f.Encode()), ""), true)
@@ -141,7 +141,7 @@ func TestQueryAdmissionAndGzip(t *testing.T) {
 		t.Fatal(status)
 	}
 	rec := httptest.NewRecorder()
-	s.ServeQuery(rec, request(raw, ""), "us-east-1", func(string) (bool, error) { return false, errors.New("unpublished local details") })
+	s.ServeQuery(rec, request(raw, ""), "us-east-1", func(string, string) (bool, error) { return false, errors.New("unpublished local details") })
 	if rec.Code != 500 || strings.Contains(rec.Body.String(), "unpublished") {
 		t.Fatal(rec.Code, rec.Body.String())
 	}

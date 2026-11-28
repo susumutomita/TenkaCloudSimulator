@@ -16,8 +16,9 @@ const (
 )
 
 type Store struct {
-	db  *sql.DB
-	now func() time.Time
+	db       *sql.DB
+	alarmKey []byte
+	now      func() time.Time
 }
 
 func NewStore(db *sql.DB) (*Store, error) {
@@ -37,10 +38,17 @@ func NewStore(db *sql.DB) (*Store, error) {
 	if err != nil {
 		return nil, err
 	}
+	key, err := initializeAlarms(tx)
+	if err != nil {
+		return nil, err
+	}
+	if err = evaluateRestartedAlarms(context.Background(), tx, time.Now().UTC()); err != nil {
+		return nil, err
+	}
 	if err = tx.Commit(); err != nil {
 		return nil, err
 	}
-	return &Store{db: db, now: time.Now}, nil
+	return &Store{db: db, alarmKey: key, now: time.Now}, nil
 }
 
 func (s *Store) put(ctx context.Context, region, namespace string, samples []sample, now time.Time) error {
@@ -84,6 +92,12 @@ func (s *Store) put(ctx context.Context, region, namespace string, samples []sam
 		if count != 1 {
 			return errors.New("metric sample insertion was not acknowledged")
 		}
+	}
+	if err = s.evaluateAlarms(ctx, tx, region, namespace, now); err != nil {
+		return err
+	}
+	if err = ctx.Err(); err != nil {
+		return err
 	}
 	return tx.Commit()
 }

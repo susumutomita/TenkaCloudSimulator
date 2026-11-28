@@ -100,7 +100,7 @@ func readForm(r *http.Request) (form, error) {
 
 // ServeQuery receives a trusted region and uses the gateway's authenticated
 // IAM decision before reading or mutating sample state.
-func (s *Store) ServeQuery(w http.ResponseWriter, r *http.Request, region string, authorize func(string) (bool, error)) {
+func (s *Store) ServeQuery(w http.ResponseWriter, r *http.Request, region string, authorize func(string, string) (bool, error)) {
 	fields, err := readForm(r)
 	if err != nil {
 		writeError(w, err)
@@ -112,7 +112,7 @@ func (s *Store) ServeQuery(w http.ResponseWriter, r *http.Request, region string
 		writeError(w, invalid("Expected CloudWatch version 2010-08-01."))
 		return
 	}
-	if action != "PutMetricData" && action != "GetMetricStatistics" {
+	if action != "PutMetricData" && action != "GetMetricStatistics" && action != "PutMetricAlarm" && action != "DescribeAlarms" && action != "DeleteAlarms" {
 		writeError(w, requestError{"InvalidAction", "Unsupported CloudWatch action.", 400})
 		return
 	}
@@ -120,7 +120,11 @@ func (s *Store) ServeQuery(w http.ResponseWriter, r *http.Request, region string
 		writeError(w, invalid("Only PutMetricData accepts compression."))
 		return
 	}
-	allowed, err := authorize("cloudwatch:" + action)
+	if action == "PutMetricAlarm" || action == "DescribeAlarms" || action == "DeleteAlarms" {
+		s.serveAlarm(w, r, region, action, fields, authorize)
+		return
+	}
+	allowed, err := authorize("cloudwatch:"+action, "*")
 	if err != nil {
 		writeError(w, err)
 		return

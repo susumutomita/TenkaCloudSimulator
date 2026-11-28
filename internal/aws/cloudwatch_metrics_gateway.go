@@ -50,8 +50,8 @@ func (g *Gateway) serveCloudWatchMetrics(w http.ResponseWriter, r *http.Request)
 		cloudwatchmetrics.Reject(w, false)
 		return
 	}
-	g.CloudWatchMetrics.ServeQuery(w, r, region, func(action string) (bool, error) {
-		decision, err := g.sdkDecision(r, actor.ExerciseIdentity, action, "*")
+	g.CloudWatchMetrics.ServeQuery(w, r, region, func(action, resource string) (bool, error) {
+		decision, err := g.sdkDecision(r, actor.ExerciseIdentity, action, resource)
 		if err != nil {
 			return false, err
 		}
