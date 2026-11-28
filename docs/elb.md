@@ -213,8 +213,6 @@ SQLite database and token authority per team.
 | AWS WAF, Route 53 alias records, S3 access logs, CloudWatch metrics | Optional integrations | Not connected |
 | CloudFormation `AWS::ElasticLoadBalancingV2::*` | Optional provisioning | Not supported |
 
-The Console and shared Query reference use the same regional ELBv2 endpoint and saved resources.
-
 ## References
 
 - [Elastic Load Balancing API Reference](https://docs.aws.amazon.com/elasticloadbalancing/latest/APIReference/Welcome.html); the operation, shape, error code and HTTP status contract was fixed from the official botocore 1.41.6 `elbv2/2015-12-01` model already pinned by this repository.
