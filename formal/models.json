@@ -30266,6 +30266,386 @@
           "expect_invariant": "PeerFrame"
         }
       ]
+    },
+    {
+      "id": "CodeCommitConsoleIntent",
+      "model": "formal/CodeCommitConsoleIntent.tla",
+      "config": "formal/CodeCommitConsoleIntent.cfg",
+      "bounds": "One deliberate PutFile or CreateBranch in a mounted physical repository detail. Two physical identities, four tip/list observations, nine possible write observations, ten read observations and at most two explicit recovery reads. One file path with unrelated-path and unrelated-branch controls.",
+      "properties": [
+        "TypeOK",
+        "ChoiceAndParent",
+        "PhysicalAdmission",
+        "NoReplay",
+        "Acknowledged",
+        "SavedWhenVerified",
+        "ConflictKeepsEdit",
+        "UnknownLock",
+        "RecoveryEvidence",
+        "RecoveryCompletes",
+        "CurrentIsObservation"
+      ],
+      "limits": "Abstract command selection and user-visible outcomes; generic mount epochs are covered separately by CatalogConsoleEpoch, and native Git object/ref CAS and repository lifetimes by CodeCommitGitReferences. A current recovery read can never attribute an earlier lost write. GetRepository before and after a native call cannot guarantee an atomic cross-request repositoryId condition. No Git hash, wire, timing, quota, browser, IAM or SQLite implementation proof; one command per run excludes subsequent independent user edits.",
+      "source_scope": [
+        "tools/console/src/codecommit-content.jsx",
+        "tools/console/src/codecommit-content.mjs",
+        "tools/console/src/catalog.jsx",
+        "internal/server/web/app.js"
+      ],
+      "mutants": [
+        {
+          "id": "InferEmptyFromIncompletePage",
+          "edits": [
+            {
+              "old": "v \\in {\"empty\",\"tip\"}",
+              "new": "v \\in {\"empty\",\"tip\",\"incomplete\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ChoiceAndParent"
+        },
+        {
+          "id": "EditDetachedHistory",
+          "edits": [
+            {
+              "old": "v \\in {\"empty\",\"tip\"}",
+              "new": "v \\in {\"empty\",\"tip\",\"history\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ChoiceAndParent"
+        },
+        {
+          "id": "SendParentOnFirstCommit",
+          "edits": [
+            {
+              "old": "k = \"put\" /\\ v = \"tip\" THEN Tip ELSE No",
+              "new": "k = \"put\" /\\ v \\in {\"tip\",\"empty\"} THEN Tip ELSE No",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ChoiceAndParent"
+        },
+        {
+          "id": "DropObservedParentOnUpdate",
+          "edits": [
+            {
+              "old": "k = \"put\" /\\ v = \"tip\" THEN Tip ELSE No",
+              "new": "FALSE THEN Tip ELSE No",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ChoiceAndParent"
+        },
+        {
+          "id": "ForkCurrentTipInsteadOfInspectedCommit",
+          "edits": [
+            {
+              "old": "\"fork\" THEN Inspected(v) ELSE No",
+              "new": "\"fork\" THEN Tip ELSE No",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ChoiceAndParent"
+        },
+        {
+          "id": "WriteAnotherBranch",
+          "edits": [
+            {
+              "old": "IF k = \"put\" THEN \"main\" ELSE \"fork\"",
+              "new": "IF k = \"put\" THEN \"fork\" ELSE \"main\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ChoiceAndParent"
+        },
+        {
+          "id": "SendAfterRepositoryReplacement",
+          "edits": [
+            {
+              "old": "CanSend(actual) == actual = repo",
+              "new": "CanSend(actual) == actual # \"aborted\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PhysicalAdmission"
+        },
+        {
+          "id": "SendAfterPreflightAbort",
+          "edits": [
+            {
+              "old": "CanSend(actual) == actual = repo",
+              "new": "CanSend(actual) == actual = repo \\/ actual = \"aborted\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PhysicalAdmission"
+        },
+        {
+          "id": "AcceptMalformedAck",
+          "edits": [
+            {
+              "old": "Verified(r) == r = \"verified\"",
+              "new": "Verified(r) == r \\in {\"verified\",\"malformed\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "Acknowledged"
+        },
+        {
+          "id": "TrustWrongStoredFile",
+          "edits": [
+            {
+              "old": "Verified(r) == r = \"verified\"",
+              "new": "Verified(r) == r \\in {\"verified\",\"wrong-file\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "Acknowledged"
+        },
+        {
+          "id": "TrustMismatchedTreeOrParent",
+          "edits": [
+            {
+              "old": "Verified(r) == r = \"verified\"",
+              "new": "Verified(r) == r \\in {\"verified\",\"wrong-commit\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "Acknowledged"
+        },
+        {
+          "id": "IgnoreObservedBranchMovement",
+          "edits": [
+            {
+              "old": "Verified(r) == r = \"verified\"",
+              "new": "Verified(r) == r \\in {\"verified\",\"moved-branch\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "Acknowledged"
+        },
+        {
+          "id": "PublishAfterFinalScopeChanged",
+          "edits": [
+            {
+              "old": "Verified(r) == r = \"verified\"",
+              "new": "Verified(r) == r \\in {\"verified\",\"changed-repository\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "Acknowledged"
+        },
+        {
+          "id": "AttributeAppliedLossToThisCommand",
+          "edits": [
+            {
+              "old": "Verified(r) == r = \"verified\"",
+              "new": "Verified(r) == r \\in {\"verified\",\"lost-applied\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "Acknowledged"
+        },
+        {
+          "id": "ClaimMissingResponseIsSuccess",
+          "edits": [
+            {
+              "old": "Verified(r) == r = \"verified\"",
+              "new": "Verified(r) == r \\in {\"verified\",\"lost-unapplied\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "Acknowledged"
+        },
+        {
+          "id": "LockAfterVerifiedReadback",
+          "edits": [
+            {
+              "old": "Verified(r) == r = \"verified\"",
+              "new": "Verified(r) == FALSE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "SavedWhenVerified"
+        },
+        {
+          "id": "DiscardDraftOnConflict",
+          "edits": [
+            {
+              "old": "notice' = \"rejected\" /\\ draft' = (command.kind = \"put\")",
+              "new": "notice' = \"rejected\" /\\ draft' = FALSE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ConflictKeepsEdit"
+        },
+        {
+          "id": "TreatLostResponseAsDefinitiveFailure",
+          "edits": [
+            {
+              "old": "ELSE IF r = \"conflict\"",
+              "new": "ELSE IF r \\in {\"conflict\",\"lost-unapplied\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "UnknownLock"
+        },
+        {
+          "id": "AutomaticallyReplayLostWrite",
+          "edits": [
+            {
+              "old": "/\\ sends' = sends\n /\\ UNCHANGED",
+              "new": "/\\ sends' = IF r \\in {\"lost-applied\",\"lost-unapplied\"} THEN sends + 1 ELSE sends\n /\\ UNCHANGED",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "NoReplay"
+        },
+        {
+          "id": "AcceptRetiredRecovery",
+          "edits": [
+            {
+              "old": "ticket = \"active\" /\\ CurrentEvidence(k,o)",
+              "new": "CurrentEvidence(k,o)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "RecoveryEvidence"
+        },
+        {
+          "id": "InferAbsenceFromPartialList",
+          "edits": [
+            {
+              "old": "ticket = \"active\" /\\ CurrentEvidence(k,o)",
+              "new": "ticket = \"active\" /\\ (CurrentEvidence(k,o) \\/ o = \"first-page-absent\")",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "RecoveryEvidence"
+        },
+        {
+          "id": "ObserveUnrelatedBranch",
+          "edits": [
+            {
+              "old": "ticket = \"active\" /\\ CurrentEvidence(k,o)",
+              "new": "ticket = \"active\" /\\ (CurrentEvidence(k,o) \\/ o = \"other-branch\")",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "RecoveryEvidence"
+        },
+        {
+          "id": "ObserveUnrelatedFilePath",
+          "edits": [
+            {
+              "old": "ticket = \"active\" /\\ CurrentEvidence(k,o)",
+              "new": "ticket = \"active\" /\\ (CurrentEvidence(k,o) \\/ o = \"other-path\")",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "RecoveryEvidence"
+        },
+        {
+          "id": "ClearOnUnavailableRead",
+          "edits": [
+            {
+              "old": "ticket = \"active\" /\\ CurrentEvidence(k,o)",
+              "new": "ticket = \"active\" /\\ (CurrentEvidence(k,o) \\/ o = \"unavailable\")",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "RecoveryEvidence"
+        },
+        {
+          "id": "IgnoreChangedScopeAtRecoveryStart",
+          "edits": [
+            {
+              "old": "ticket = \"active\" /\\ CurrentEvidence(k,o)",
+              "new": "ticket = \"active\" /\\ (CurrentEvidence(k,o) \\/ o = \"changed-before-read\")",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "RecoveryEvidence"
+        },
+        {
+          "id": "IgnoreChangedScopeAtRecoveryEnd",
+          "edits": [
+            {
+              "old": "ticket = \"active\" /\\ CurrentEvidence(k,o)",
+              "new": "ticket = \"active\" /\\ (CurrentEvidence(k,o) \\/ o = \"changed-after-read\")",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "RecoveryEvidence"
+        },
+        {
+          "id": "RecoverPutFromBranchOnly",
+          "edits": [
+            {
+              "old": "k = \"fork\" /\\ o = \"named-branch\"",
+              "new": "o = \"named-branch\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "RecoveryEvidence"
+        },
+        {
+          "id": "LeaveVerifiedMissingFileLocked",
+          "edits": [
+            {
+              "old": "k = \"put\" /\\ o \\in {\"exact-file\",\"missing-file\"}",
+              "new": "k = \"put\" /\\ o = \"exact-file\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "RecoveryCompletes"
+        },
+        {
+          "id": "FailToRecognizeExhaustedBranchAbsence",
+          "edits": [
+            {
+              "old": "\\/ o = \"all-pages-absent\"",
+              "new": "\\/ FALSE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "RecoveryCompletes"
+        },
+        {
+          "id": "CreditCurrentReadToPreviousWrite",
+          "edits": [
+            {
+              "old": "phase' = \"terminal\" /\\ notice' = \"current\"",
+              "new": "phase' = \"terminal\" /\\ notice' = \"saved\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "Acknowledged"
+        },
+        {
+          "id": "ResendDuringSuccessfulRecovery",
+          "edits": [
+            {
+              "old": "/\\ UNCHANGED <<repo, view, command, checked, sends, reply, draft, tries>>",
+              "new": "/\\ sends' = IF UseRead(command.kind,o) THEN sends + 1 ELSE sends\n /\\ UNCHANGED <<repo, view, command, checked, reply, draft, tries>>",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "NoReplay"
+        },
+        {
+          "id": "RetainObsoleteDraftAfterRecovery",
+          "edits": [
+            {
+              "old": "/\\ UNCHANGED <<repo, view, command, checked, sends, reply, draft, tries>>",
+              "new": "/\\ draft' = IF UseRead(command.kind,o) /\\ command.kind = \"put\" THEN TRUE ELSE draft\n /\\ UNCHANGED <<repo, view, command, checked, sends, reply, tries>>",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CurrentIsObservation"
+        }
+      ]
     }
   ]
 }
