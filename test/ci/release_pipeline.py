@@ -151,7 +151,7 @@ class TagTests(unittest.TestCase):
 
 class WorkflowTests(unittest.TestCase):
     def test_go_security_patch_pin_is_consistent(self):
-        for name, count in [('ci.yml', 6), ('release.yml', 1)]:
+        for name, count in [('ci.yml', 7), ('release.yml', 1)]:
             workflow = (ROOT / '.github/workflows' / name).read_text()
             pins = [line.strip() for line in workflow.splitlines()
                     if line.strip().startswith('go-version:')]

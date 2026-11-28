@@ -8,6 +8,13 @@
       "disposition": "formal-infrastructure",
       "reason": "Add a manual opt-in CI job running the existing isolated multipart paging fixture on a hosted Ubuntu 22.04 runner and checking a single receipt. The job changes test infrastructure only.",
       "models": []
+    },
+    {
+      "path": "test/ci/release_pipeline.py",
+      "sha256": "e7933a18cf16df96ec578a95b27cf7bb6b253f5d6f25c3772e22cfbf27a4412f",
+      "disposition": "test-support",
+      "reason": "Require the exact Go 1.26.11 security patch in all seven CI jobs that set up Go, including the new opt-in paging job, and preserve the release workflow check.",
+      "models": []
     }
   ]
 }
