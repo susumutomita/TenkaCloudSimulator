@@ -27,7 +27,7 @@ import sys
 import tempfile
 import time
 from urllib.parse import urlsplit
-from azure_queue_official import PIN, VERSION, field, run_lifecycle
+from azure_queue_official import PIN, VERSION, field, local_sdk_credential, run_lifecycle
 
 OPERATIONS = {'CreateQueue','DeleteQueue','PutMessage','GetMessages','PeekMessages','UpdateMessage','DeleteMessage','ClearMessages'}
 PREFIX = '/_simulator/providers/azure-queue/tenkacloudlocal'
@@ -293,7 +293,7 @@ def run(binary, expected_digest=None):
                     check_capability(response.json())
             transport = RequestsTransport(session=session, session_owner=False, use_env_settings=False)
             with QueueClient(account_url=instance.endpoint + PREFIX, queue_name=QUEUE_NAME,
-                    credential=None, api_version=VERSION, retry_total=0, transport=transport,
+                    credential=local_sdk_credential('tenkacloudlocal'), api_version=VERSION, retry_total=0, transport=transport,
                     connection_timeout=5, read_timeout=5) as client:
                 yield client
 
