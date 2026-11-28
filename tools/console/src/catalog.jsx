@@ -1,8 +1,11 @@
 import React,{useEffect,useMemo,useRef,useState} from 'react';
 import {useLocale} from './i18n.jsx';
 import AppStreamAppBlockForm from './appstream-app-block.jsx';
+import ResourceGroupMembers from './resource-group-members.jsx';
 import BatchJobDefinitionForm from './batch-job-definition-form.jsx';
 import {batchDefinitionARN,batchDefinitionOperations,isBatchJobDefinition} from './batch-job-definitions.mjs';
+import CodeCommitContent from './codecommit-content.jsx';
+import {contentOperations} from './codecommit-content.mjs';
 import KinesisVideoRetention from './kinesis-video-retention.jsx';
 import {isKinesisVideoRetention,kinesisRetentionEdit,kinesisRetentionUpdate} from './kinesis-video-retention.mjs';
 import {appStreamAppBlockDetailInput,isAppStreamAppBlock} from './appstream-app-block.mjs';
@@ -144,6 +147,12 @@ export function fieldOrder(members,resource){
 // label wherever a user maps it to the API or an SDK.
 function Official({name}){return <Box variant="small" color="text-body-secondary"><span className="catalog-key">{name}</span></Box>}
 
+function resourceGroupDetail(service, resource, detail, region) {
+  if (service?.model !== 'resource-groups' || resource?.kind !== 'group' ||
+      !['GetGroupQuery', 'UpdateGroupQuery', 'ListGroupResources'].every(op => service.operations.includes(op))) return false;
+  return !!detail?.Name && detail.GroupArn === 'arn:aws:resource-groups:' + region + ':' + service.account + ':group/' + detail.Name;
+}
+
 export default function CatalogView({region,request,catalog,onSaving}){
  const {t}=useLocale();
  // Capabilities list compact summaries; the full native descriptors are
@@ -160,7 +169,7 @@ export default function CatalogView({region,request,catalog,onSaving}){
  const [selected,setSelected]=useState(null),[editing,setEditing]=useState(null),[fieldErrors,setFieldErrors]=useState({}),[tagForm,setTagForm]=useState({key:'',value:''});
  const [chosen,setChosen]=useState([]),[filter,setFilter]=useState(''),[pager,setPager]=useState({tokens:[''],index:0}),[scope,setScope]=useState({});
  const [deregisterTarget,setDeregisterTarget]=useState(null);
- const revision=useRef(0),alive=useRef(true),batchWriter=useRef(null);
+ const revision=useRef(0),alive=useRef(true),writer=useRef(null);
  const service=(services||[]).find(s=>s.model===model);
  const resource=service?.resources.find(r=>r.kind===(kind||(service?.model==='appstream'?'appBlock':'')))||service?.resources[0];
  const appBlock=isAppStreamAppBlock(service,resource),batchDefinition=isBatchJobDefinition(service,resource);
@@ -177,14 +186,14 @@ export default function CatalogView({region,request,catalog,onSaving}){
  const scopeDefaults=()=>Object.fromEntries(scopeMembers.map(m=>[m.name,m.enum?m.enum[0]:['integer','long'].includes(m.type)?String(Math.min(m.max??100,100)):'']));
  const fresh=()=>++revision.current;const valid=epoch=>alive.current&&epoch===revision.current;
  // Browser history can unmount this view even while in-app navigation is
- // locked. Only the owning Batch write may release its parent saving latch.
- function beginBatchWrite(){
-  const owner=()=>onSaving(false);batchWriter.current=owner;onSaving(true);return owner;
+ // locked. Only the owning write may release its parent saving latch.
+ function beginCatalogWrite(){
+  const owner=()=>onSaving(false);writer.current=owner;onSaving(true);return owner;
  }
- function endBatchWrite(owner=batchWriter.current){
-  if(owner&&batchWriter.current===owner){batchWriter.current=null;owner()}
+ function endCatalogWrite(owner=writer.current){
+  if(owner&&writer.current===owner){writer.current=null;owner()}
  }
- useEffect(()=>()=>{alive.current=false;revision.current++;endBatchWrite()},[]);
+ useEffect(()=>()=>{alive.current=false;revision.current++;endCatalogWrite()},[]);
  useEffect(()=>{
   let live=true;const path=catalog?.descriptors;if(!path){setServices([]);return}
   request(path).then(async r=>{if(!r.ok)throw Error(t('Catalog descriptors are unavailable','カタログ記述子を取得できません')+' ('+r.status+').');return r.json()})
@@ -312,15 +321,15 @@ export default function CatalogView({region,request,catalog,onSaving}){
  const fields=useMemo(()=>fieldOrder(formMembers(createOp,skipped(createOp)),resource),[createOp]);
  function openCreate(){setForm({});setFieldErrors({});setError('');setNotice('');setPage('create')}
  async function create(nativeInput){
-  if(batchDefinition&&(busy||batchWriter.current))return;
+  if(batchDefinition&&(busy||writer.current))return;
   const op=createOp;const {input,problems}=nativeInput?{input:nativeInput,problems:{}}:readFields(fields,form);
   setFieldErrors(problems);if(Object.keys(problems).length){setError('');return}
-  const epoch=fresh(),owner=batchDefinition?beginBatchWrite():null;
+  const epoch=fresh(),owner=batchDefinition?beginCatalogWrite():null;
   setBusy(true);if(!owner)onSaving(true);setError('');setNotice('');
   let created=false;
   try{await call(op,{...parentInput(op),...input});created=true}
   catch(e){if(owner?valid(epoch):alive.current)setError(e.message)}
-  finally{if(owner)endBatchWrite(owner);if(alive.current){setBusy(false);if(!owner)onSaving(false)}}
+  finally{if(owner)endCatalogWrite(owner);if(alive.current){setBusy(false);if(!owner)onSaving(false)}}
   // Reload only after an acknowledged write so a failure stays visible.
   if(created&&(owner?valid(epoch):alive.current)){
    const reloadEpoch=revision.current+1;await load();
@@ -329,8 +338,8 @@ export default function CatalogView({region,request,catalog,onSaving}){
  }
  async function deregisterBatchRevision(item){
   const op=batchOperations.deregister,arn=deregisterARN(item);
-  if(!arn||busy||batchWriter.current)return;
-  const epoch=fresh(),owner=beginBatchWrite();
+  if(!arn||busy||writer.current)return;
+  const epoch=fresh(),owner=beginCatalogWrite();
   setDeregisterTarget(null);setBusy(true);setError('');setNotice('');
   let acknowledged=false;
   try{
@@ -344,7 +353,7 @@ export default function CatalogView({region,request,catalog,onSaving}){
    await loadTags(epoch,value);
   }catch(e){if(valid(epoch))setError(acknowledged?
    t('Deregistration was accepted, but the revision status could not be confirmed. Refresh the revision.','登録解除は受理されましたが、状態を確認できませんでした。リビジョンを更新してください。'):e.message)}
-  finally{endBatchWrite(owner);if(valid(epoch))setLoading(false);if(alive.current)setBusy(false)}
+  finally{endCatalogWrite(owner);if(valid(epoch))setLoading(false);if(alive.current)setBusy(false)}
  }
  async function remove(item){
   const op=resource.operations.delete;setConfirm(null);fresh();setBusy(true);onSaving(true);setError('');setNotice('');
@@ -527,7 +536,14 @@ export default function CatalogView({region,request,catalog,onSaving}){
     <Container header={<Header variant="h2">{t('Details','詳細')}</Header>}>
      {loading?<StatusIndicator type="loading">{t('Loading','読み込み中')}</StatusIndicator>:detail?<KeyValuePairs columns={3} items={scalars.map(([k,v])=>({label:<span className="catalog-key">{humanize(k)}</span>,value:<SpaceBetween size="xxxs"><span className="catalog-key">{display(v)===''?'-':display(v)}</span><Official name={k}/></SpaceBetween>}))}/>:<Box>{t('No details','詳細はありません')}</Box>}
     </Container>
+    {!loading&&service.model==='codecommit'&&resource.kind==='repository'&&detail?.repositoryId&&detail.repositoryName&&
+      contentOperations.every(operation=>service.operations.includes(operation))&&<CodeCommitContent key={region+'-'+detail.repositoryId}
+        request={request} region={region} repository={detail} onSaving={value=>{setBusy(value);onSaving(value)}}/>}
     {!loading&&complex.map(([k,v])=>section(k,v))}
+    {!loading&&resourceGroupDetail(service,resource,detail,region)&&<ResourceGroupMembers key={detail.GroupArn}
+      name={detail.Name} arn={detail.GroupArn} region={region} request={request} busy={busy} t={t}
+      write={()=>{if(busy||writer.current)return null;const owner=beginCatalogWrite();setBusy(true);
+        return ()=>{endCatalogWrite(owner);if(alive.current)setBusy(false)}}}/>}
     {!loading&&tags!==null&&<Table variant="container" items={pairs.map(([key,value])=>({key,value}))} trackBy="key" empty={<Box textAlign="center" color="inherit">{t('No tags','タグはありません')}</Box>}
       header={<Header variant="h2" counter={'('+pairs.length+')'} description={t('Tags are written with ','タグは次の操作で書き込みます: ')+[tagOp?.name,untagOp?.name].filter(Boolean).join(t(' and ','、'))+'.'}>{t('Tags','タグ')}</Header>}
       columnDefinitions={[{id:'key',header:t('Key','キー'),cell:tag=>tag.key},{id:'value',header:t('Value','値'),cell:tag=>tag.value||'-'},
