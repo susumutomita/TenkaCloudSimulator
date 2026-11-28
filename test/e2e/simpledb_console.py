@@ -115,7 +115,8 @@ def run():
                 page.get_by_role("radio", name="Attribute equals expected value", exact=True).check()
                 page.get_by_label("New value", exact=True).fill("new + & 値")
                 page.get_by_role("button", name="Save attribute", exact=True).click()
-                expect(page.get_by_text("new + & 値", exact=True)).to_be_visible()
+                saved_attributes = page.get_by_role("table", name="Saved attributes", exact=True)
+                expect(saved_attributes.get_by_role("cell", name="new + & 値", exact=True)).to_be_visible()
                 assert values() == [("version", "new + & 値")]
                 page.get_by_label("New value", exact=True).fill("must not persist")
                 page.get_by_role("button", name="Save attribute", exact=True).click()
