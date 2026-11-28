@@ -162,7 +162,7 @@ def check_stale_read(page, sent, team, group):
         page.unroute(team.endpoint + '/', delay)
 
 
-def check_moved_group(browser, owner, clean, elb, lb, group, function):
+def check_moved_group(browser, owner, elb, lb, clean):
     # Native operations can reassign this group while its detail view is open.
     # Each new listener is registered for cleanup immediately after creation.
     parent = lb['LoadBalancerArn']
@@ -171,22 +171,26 @@ def check_moved_group(browser, owner, clean, elb, lb, group, function):
         SecurityGroups=lb['SecurityGroups'],
     )['LoadBalancers'][0]['LoadBalancerArn']
     clean.callback(elb.delete_load_balancer, LoadBalancerArn=alternate)
-    old = elb.describe_listeners(LoadBalancerArn=parent)['Listeners']
-    assert len(old) == 1 and old[0]['DefaultActions'][0]['TargetGroupArn'] == group
+    group = elb.create_target_group(Name='console-movable', TargetType='lambda')['TargetGroups'][0]['TargetGroupArn']
+    clean.callback(elb.delete_target_group, TargetGroupArn=group)
 
     def attach(arn):
-        listener = elb.create_listener(LoadBalancerArn=arn, Protocol='HTTP', Port=80,
+        listener = elb.create_listener(LoadBalancerArn=arn, Protocol='HTTP', Port=82,
                                        DefaultActions=[{'Type':'forward','TargetGroupArn':group}])['Listeners'][0]
-        clean.callback(elb.delete_listener, ListenerArn=listener['ListenerArn'])
-        return listener['ListenerArn']
+        owned = clean.enter_context(ExitStack())
+        owned.callback(elb.delete_listener, ListenerArn=listener['ListenerArn'])
+        return owned
 
     def current():
         return elb.describe_target_groups(TargetGroupArns=[group])['TargetGroups'][0]
 
+    original_listener = attach(parent)
     before = current()
     with console(browser,owner,owner.token,'simulator-admin') as (page, requests):
-        details(page,lb,group,function)
-        elb.delete_listener(ListenerArn=old[0]['ListenerArn'])
+        click_name(page,lb['LoadBalancerName'])
+        click_name(page,'console-movable')
+        expect(page.get_by_text('No registered targets.',exact=True)).to_be_visible()
+        original_listener.close()
         moved = attach(alternate)
         assert current() == before | {'LoadBalancerArns':[alternate]}
         start = len(requests)
@@ -197,7 +201,7 @@ def check_moved_group(browser, owner, clean, elb, lb, group, function):
             {'Action':'DescribeTargetGroups','Version':VERSION,'TargetGroupArns.member.1':group}]
         expect(page.get_by_role('button',name='Save health check path',exact=True)).to_have_count(0)
         assert current() == before | {'LoadBalancerArns':[alternate]}
-        elb.delete_listener(ListenerArn=moved)
+        moved.close()
         assert current() == before | {'LoadBalancerArns':[]}
         click_name(page,'Refresh')
         expect(unavailable).to_be_visible()
@@ -266,7 +270,8 @@ def run(owner, peer, browser):
                     for p in ('/console-check','/after-lost-response')]
                 check_stale_read(page,requests,owner,group)
 
-            check_moved_group(browser, owner, clean, elb, lb, group, function)
+            with ExitStack() as moved_resources:
+                check_moved_group(browser, owner, elb, lb, moved_resources)
             assert saved(elb,sibling['TargetGroupArn']) == sibling
             assert saved(other,peer_group['TargetGroupArn']) == peer_group
 
