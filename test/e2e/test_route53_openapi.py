@@ -22,6 +22,7 @@ class Route53Reference(unittest.TestCase):
 
     def test_console_tag_correction_is_exact_and_preserves_path_hashes(self):
         import route53_openapi
+        validate_route53(self.spec)
         self.assertEqual(route53_openapi.CONTRACT_SHA256,
                          '1210ce75c2af0b81df6acb18207f1a027627d48c0c75932b34a9792d154e7388')
         current = next(tag for tag in self.spec['tags'] if tag['name'] == route53_openapi.TAG)
