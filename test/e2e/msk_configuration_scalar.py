@@ -1,5 +1,7 @@
 """MSK configurations and attached clusters through stock boto3, Cloudscape and Scalar."""
-from contextlib import ExitStack
+import base64
+from contextlib import ExitStack, contextmanager
+import json
 import os
 from pathlib import Path
 import re
@@ -16,7 +18,8 @@ TITLE = 'Amazon Managed Streaming for Apache Kafka'
 PROPERTIES = b'auto.create.topics.enable=false\n'
 
 
-def check_shared_views(browser, team, configuration, cluster):
+@contextmanager
+def msk_console(browser, team):
     with browser.new_context(service_workers='block') as context:
         outside = []
         own = urlsplit(team.endpoint)
@@ -38,6 +41,56 @@ def check_shared_views(browser, team, configuration, cluster):
         console.get_by_role('menuitem', name='Service catalog', exact=True).click()
         console.get_by_role('button', name=re.compile('^Catalog service')).click()
         console.get_by_role('option', name=re.compile('^' + TITLE)).click()
+        yield context, console
+        assert not outside, 'MSK browser attempted external access'
+
+
+def create_shared_records(browser, team, record):
+    with msk_console(browser, team) as (context, page):
+        writes = []
+        page.on('request', lambda request: writes.append(request.url) if request.method == 'POST'
+                and urlsplit(request.url).path in ('/v1/clusters', '/v1/configurations') else None)
+        page.get_by_role('tab', name=re.compile('Configuration', re.I)).click()
+        page.get_by_role('button', name=re.compile('^Create ')).first.click()
+        page.locator('#catalog-field-Name').fill(CONFIG)
+        page.locator('#catalog-field-ServerProperties').fill(base64.b64encode(PROPERTIES).decode('ascii'))
+        config_url = team.endpoint + '/v1/configurations'
+        with page.expect_response(lambda response: response.url == config_url and response.request.method == 'POST') as saved:
+            page.get_by_role('button', name='Create', exact=True).click()
+        assert saved.value.status == 200
+        config = saved.value.json()
+        record['configuration'] = config['arn']
+        assert config['latestRevision']['revision'] == 1
+        expect(page.get_by_role('link', name=CONFIG, exact=True)).to_be_visible()
+        page.get_by_role('tab', name=re.compile('Cluster', re.I)).click()
+
+        def cluster_form(name):
+            page.get_by_role('button', name=re.compile('^Create ')).first.click()
+            fields = {'ClusterName': name, 'KafkaVersion': '3.6.0', 'NumberOfBrokerNodes': '2',
+                      'BrokerNodeGroupInfo': json.dumps({'InstanceType': 'kafka.m5.large',
+                                                         'ClientSubnets': ['subnet-a', 'subnet-b']}),
+                      'ConfigurationInfo': json.dumps({'Arn': record['configuration'], 'Revision': 1})}
+            for key, value in fields.items():
+                page.locator('#catalog-field-' + key).fill(value)
+
+        cluster_form('cancelled-proposal')
+        page.get_by_role('button', name='Cancel', exact=True).click()
+        expect(page.get_by_role('button', name=re.compile('^Create ')).first).to_be_visible()
+        assert writes == [config_url]
+        cluster_form(CLUSTER)
+        cluster_url = team.endpoint + '/v1/clusters'
+        with page.expect_response(lambda response: response.url == cluster_url and response.request.method == 'POST') as saved:
+            page.get_by_role('button', name='Create', exact=True).click()
+        assert saved.value.status == 200
+        cluster = saved.value.json()
+        record['cluster'] = cluster['clusterArn']
+        assert cluster['state'] == 'CREATING'
+        expect(page.get_by_role('link', name=CLUSTER, exact=True)).to_be_visible()
+        assert writes == [config_url, cluster_url]
+
+
+def check_shared_views(browser, team, configuration, cluster):
+    with msk_console(browser, team) as (context, console):
         expect(console.get_by_role('link', name=CLUSTER, exact=True)).to_be_visible()
         console.get_by_role('tab', name=re.compile('Configuration', re.I)).click()
         expect(console.get_by_role('link', name=CONFIG, exact=True)).to_be_visible()
@@ -76,7 +129,6 @@ def check_shared_views(browser, team, configuration, cluster):
             page.get_by_role('button', name='Close Client', exact=True).click()
         assert [entry for entry in sent if urlsplit(entry[1]).path.startswith('/v1/')] == [
             ('GET', team.endpoint + '/v1/configurations'), ('GET', team.endpoint + '/v1/clusters')]
-        assert not outside, 'MSK browser attempted external access'
 
 
 def clean_team(team, record):
@@ -151,23 +203,30 @@ def check_msk_reference(browser):
             cleanup.callback(clean_team, team, record)
             team.start()
             client = record['client'] = team.client('kafka')
-            arn = client.create_configuration(Name=CONFIG, ServerProperties=PROPERTIES)['Arn']
-            record['configuration'] = arn
-            record['cluster'] = client.create_cluster(
-                ClusterName=CLUSTER, KafkaVersion='3.6.0', NumberOfBrokerNodes=2,
-                BrokerNodeGroupInfo={'InstanceType': 'kafka.m5.large', 'ClientSubnets': ['subnet-a', 'subnet-b']},
-                ConfigurationInfo={'Arn': arn, 'Revision': 1})['ClusterArn']
+            if team is owner:
+                create_shared_records(browser, team, record)
+            else:
+                arn = client.create_configuration(Name=CONFIG, ServerProperties=PROPERTIES)['Arn']
+                record['configuration'] = arn
+                record['cluster'] = client.create_cluster(
+                    ClusterName=CLUSTER, KafkaVersion='3.6.0', NumberOfBrokerNodes=2,
+                    BrokerNodeGroupInfo={'InstanceType': 'kafka.m5.large', 'ClientSubnets': ['subnet-a', 'subnet-b']},
+                    ConfigurationInfo={'Arn': arn, 'Revision': 1})['ClusterArn']
         mine, other = resources[owner], resources[peer]
         assert mine['configuration'] != other['configuration'] and mine['cluster'] != other['cluster']
         for team in (owner, peer):
             check_participant(team, resources[team]['configuration'], resources[team]['cluster'])
+            assert [item['ClusterArn'] for item in resources[team]['client'].list_clusters()['ClusterInfoList']] == [resources[team]['cluster']]
         owner.stop()
         owner.start()
         mine['client'] = owner.client('kafka')
         check_shared_views(browser, owner, mine['configuration'], mine['cluster'])
         for record in (mine, other):
             client = record['client']
-            software = client.describe_cluster(ClusterArn=record['cluster'])['ClusterInfo']['CurrentBrokerSoftwareInfo']
+            detail = client.describe_cluster(ClusterArn=record['cluster'])['ClusterInfo']
+            assert detail['State'] == 'CREATING'
+            assert detail['EncryptionInfo']['EncryptionInTransit'] == {'ClientBroker': 'TLS', 'InCluster': True}
+            software = detail['CurrentBrokerSoftwareInfo']
             assert software['ConfigurationArn'] == record['configuration'] and software['ConfigurationRevision'] == 1
             assert client.describe_configuration_revision(Arn=record['configuration'], Revision=1)['ServerProperties'] == PROPERTIES
     print('MSK stock SDK, Cloudscape, Scalar Send, restart, peer isolation and cleanup passed')
