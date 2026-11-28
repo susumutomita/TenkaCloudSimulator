@@ -124,11 +124,20 @@ class Console:
         return self.page.expect_response(lambda response: urlsplit(response.url).path == path and response.request.method == method)
 
     def select(self, identifier):
-        with self.response(PREFIX + '/' + identifier) as fetched:
-            self.page.get_by_role('table', name='Distributions', exact=True).get_by_role('button', name=identifier, exact=True).click()
-        response = fetched.value
-        assert response.status == 200
-        root = ET.fromstring(response.body())
+        capture = self.page.evaluate_handle(Path(__file__).with_name('azure_queue_browser_capture.js').read_text(),
+            {'path': PREFIX + '/' + identifier, 'query': {}})
+        try:
+            with self.response(PREFIX + '/' + identifier) as fetched:
+                self.page.get_by_role('table', name='Distributions', exact=True).get_by_role('button', name=identifier, exact=True).click()
+            response = fetched.value
+            assert response.status == 200
+            self.page.wait_for_function('capture => capture.done', arg=capture, timeout=12000)
+            captured = capture.evaluate('capture => capture.text')
+            assert captured is not None
+            root = ET.fromstring(captured)
+        finally:
+            capture.evaluate('capture => capture.stop()')
+            capture.dispose()
         assert root.findtext(NS + 'Id') == identifier
         expect(self.page.get_by_role('heading', name=identifier, exact=True)).to_be_visible()
         expect(self.page.get_by_text(response.headers['etag'], exact=True)).to_be_visible()
@@ -138,17 +147,36 @@ class Console:
         key_label = 'オブジェクトキー' if japanese else 'Object key'
         action = 'ローカルコンテンツを読み取る' if japanese else 'Read local content'
         self.page.get_by_label(key_label, exact=True).fill(KEY)
-        with self.response(f'/_simulator/cloudfront/distributions/{identifier}/objects/{KEY}') as fetched:
-            self.page.get_by_role('button', name=action, exact=True).click()
-        response = fetched.value
-        assert response.status == status
+        path = f'/_simulator/cloudfront/distributions/{identifier}/objects/{KEY}'
+        capture = self.page.evaluate_handle(Path(__file__).with_name('azure_queue_browser_capture.js').read_text(),
+            {'path': path, 'query': {}}) if status == 200 else None
+        if status != 200:
+            install_observer(self, path, 'GET', 'observe')
+        try:
+            with self.response(path) as fetched:
+                self.page.get_by_role('button', name=action, exact=True).click()
+            response = fetched.value
+            assert response.status == status
+            if capture is not None:
+                self.page.wait_for_function('capture => capture.done', arg=capture, timeout=12000)
+                observed = capture.evaluate('capture => capture.text')
+                assert observed is not None and observed.encode('utf-8') == body
+            else:
+                self.page.wait_for_function('window.__cfObservation.ready')
+                error_body = self.page.evaluate('window.__cfObservation.body')
+        finally:
+            if capture is not None:
+                capture.evaluate('capture => capture.stop()')
+                capture.dispose()
+            else:
+                remove_observer(self)
         if status == 200:
-            assert response.body() == body and response.headers['content-disposition'] == 'attachment'
+            assert response.headers['content-disposition'] == 'attachment'
             assert response.headers['x-content-type-options'] == 'nosniff'
             assert response.headers['content-security-policy'] == "sandbox; default-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'"
             expect(self.page.get_by_text(body.decode(), exact=True)).to_be_visible()
         else:
-            assert ET.fromstring(response.body()).findtext(NS + 'Error/' + NS + 'Code') == 'AccessDenied'
+            assert ET.fromstring(error_body).findtext(NS + 'Error/' + NS + 'Code') == 'AccessDenied'
             expect(self.page.get_by_text(re.compile('AccessDenied:'))).to_be_visible()
             expect(self.page.get_by_text(FRESH.decode(), exact=True)).to_have_count(0)
             expect(self.page.get_by_role('button', name='Download saved bytes', exact=True)).to_be_disabled()
@@ -161,22 +189,30 @@ class Console:
         expect(dialog.get_by_role('button', name='Invalidate all objects', exact=True)).to_be_disabled()
         return dialog, dialog.get_by_label('Caller reference', exact=True).input_value()
 
-    def submit(self, identifier, dialog, status):
-        dialog.get_by_role('checkbox').check()
-        with self.response(PREFIX + '/' + identifier + '/invalidation', 'POST') as fetched:
-            dialog.get_by_role('button', name='Invalidate all objects', exact=True).click()
-        response = fetched.value
-        assert response.status == status
-        assert response.request.post_data and response.request.method == 'POST'
-        root = ET.fromstring(response.request.post_data)
-        assert root.findtext(NS + 'Paths/' + NS + 'Quantity') == '1'
-        assert [n.text for n in root.findall(NS + 'Paths/' + NS + 'Items/' + NS + 'Path')] == ['/*']
-        if status == 201:
-            result = ET.fromstring(response.body())
-            assert result.findtext(NS + 'Status') == 'Completed'
-            return result.findtext(NS + 'Id'), root.findtext(NS + 'CallerReference'), response.request.post_data
-        assert ET.fromstring(response.body()).findtext(NS + 'Error/' + NS + 'Code') == 'InternalError'
-        return None, root.findtext(NS + 'CallerReference'), response.request.post_data
+    def submit(self, identifier, dialog, status, *, lost_ack=False):
+        if not lost_ack:
+            install_observer(self, PREFIX + '/' + identifier + '/invalidation', 'POST', 'observe')
+        try:
+            dialog.get_by_role('checkbox').check()
+            with self.response(PREFIX + '/' + identifier + '/invalidation', 'POST') as fetched:
+                dialog.get_by_role('button', name='Invalidate all objects', exact=True).click()
+            response = fetched.value
+            assert response.status == status
+            self.page.wait_for_function('window.__cfObservation.ready')
+            observed = self.page.evaluate('window.__cfObservation.body')
+            assert response.request.post_data and response.request.method == 'POST'
+            root = ET.fromstring(response.request.post_data)
+            assert root.findtext(NS + 'Paths/' + NS + 'Quantity') == '1'
+            assert [n.text for n in root.findall(NS + 'Paths/' + NS + 'Items/' + NS + 'Path')] == ['/*']
+            if status == 201:
+                result = ET.fromstring(observed)
+                assert result.findtext(NS + 'Status') == 'Completed'
+                return result.findtext(NS + 'Id'), root.findtext(NS + 'CallerReference'), response.request.post_data
+            assert ET.fromstring(observed).findtext(NS + 'Error/' + NS + 'Code') == 'InternalError'
+            return None, root.findtext(NS + 'CallerReference'), response.request.post_data
+        finally:
+            if not lost_ack:
+                remove_observer(self)
 
     def close(self):
         self.context.close()
@@ -216,6 +252,7 @@ FETCH_OBSERVER = r"""({url, method, mode}) => {
       window.fetch = original;
       throw TypeError('local fixture acknowledgement interrupted');
     }
+    if (mode === 'observe') {window.fetch = original; return response;}
     await new Promise(resolve => {
       const timer = setTimeout(resolve, 15000);
       state.release = () => {clearTimeout(timer); resolve();};
@@ -255,7 +292,7 @@ def browser_checks(browser, owner, saved, all_ids, replace_object, get_receipt, 
         path = f'/_simulator/cloudfront/distributions/{identifier}/objects/{KEY}'
         surface.read(identifier, OLD)
         send(surface.context, owner, 'GET', LOCAL_TEMPLATE, identifier, spec, path, 200, OLD.decode(), directory,
-             object_key=KEY, expected_body=OLD)
+             object_key=KEY, expected_body=OLD, show_raw_html=True)
         replace_object()
         assert surface.read(identifier, OLD).headers['x-cache'].startswith('Hit')
         dialog, _ = surface.open_invalidation()
@@ -265,7 +302,8 @@ def browser_checks(browser, owner, saved, all_ids, replace_object, get_receipt, 
         assert len([request for request in surface.requests if request.method == 'POST']) == count
         dialog, caller = surface.open_invalidation()
         first, actual_caller, _ = surface.submit(identifier, dialog, 201)
-        assert actual_caller == caller and get_receipt(first)['InvalidationBatch']['CallerReference'] == caller
+        assert actual_caller == caller, 'visible caller reference differs from original request'
+        assert get_receipt(first)['InvalidationBatch']['CallerReference'] == caller, 'native readback caller reference differs'
         expect(surface.page.get_by_text(first, exact=True)).to_be_visible()
         expect(surface.page.get_by_text(OLD.decode(), exact=True)).to_have_count(0)
         surface.read(identifier, FRESH)
@@ -275,7 +313,7 @@ def browser_checks(browser, owner, saved, all_ids, replace_object, get_receipt, 
         download.value.save_as(destination)
         assert destination.read_bytes() == FRESH
         send(surface.context, owner, 'GET', LOCAL_TEMPLATE, identifier, spec, path, 200, FRESH.decode(), directory,
-             object_key=KEY, expected_body=FRESH)
+             object_key=KEY, expected_body=FRESH, show_raw_html=True)
         # A read outage may clear presentation, but must preserve the exact known lookup ID for retry.
         with storage_fault(owner, 'read'):
             with surface.response(PREFIX + '/' + identifier + '/invalidation/' + first) as failed:
@@ -304,7 +342,7 @@ def browser_checks(browser, owner, saved, all_ids, replace_object, get_receipt, 
         try:
             dialog, caller = surface.open_invalidation()
             before_count = receipt_count(owner, identifier)
-            third, original, committed_body = surface.submit(identifier, dialog, 201)
+            third, original, committed_body = surface.submit(identifier, dialog, 201, lost_ack=True)
             assert original == caller
             surface.page.wait_for_function('window.__cfObservation.ready')
             observation = surface.page.evaluate('({status:window.__cfObservation.status,body:window.__cfObservation.body,unused:!window.__cfObservation.response.bodyUsed})')
@@ -442,6 +480,11 @@ def run():
                 owner.start()
                 assert successful(front.get_invalidation, DistributionId=target['Id'], Id=result['lastReceipt'])['Invalidation'] == last
                 assert successful(front.get_distribution, Id=target['Id'])['ETag'] == result['etag']
+                stored = successful(s3.get_object, Bucket=BUCKET, Key=KEY)['Body']
+                try:
+                    assert stored.read() == FRESH
+                finally:
+                    stored.close()
                 reopened = Console(browser, owner)
                 try:
                     reopened.select(target['Id'])

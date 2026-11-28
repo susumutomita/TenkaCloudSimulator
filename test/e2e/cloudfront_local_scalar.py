@@ -24,11 +24,12 @@ LOCAL_TEMPLATE = '/_simulator/cloudfront/distributions/{Id}/objects/{ObjectKey}'
 
 
 def send(context, team, method, template, identifier, spec, expected_path, expected_status,
-         expected_text, directory=None, *, object_key=KEY, expected_body=FRESH):
+         expected_text, directory=None, *, object_key=KEY, expected_body=FRESH, show_raw_html=False):
     operations = spec['paths'][template]
     operation = operations[method.lower()]
     tag = operation['tags'][0].lower().replace(' ', '-')
     requests, errors = [], []
+    capture = None
     page = context.new_page()
     page.on('pageerror', lambda error: errors.append(type(error).__name__))
     page.on('request', lambda request: requests.append(request)
@@ -60,6 +61,9 @@ def send(context, team, method, template, identifier, spec, expected_path, expec
         # is checked independently on the original emitted HTTP request.
         action = dialog.get_by_role('button', name=f'Send {method.lower()} request to {team.endpoint}{template}', exact=True)
         expect(action).to_have_count(1)
+        if method == 'GET':
+            capture = page.evaluate_handle(Path(__file__).with_name('azure_queue_browser_capture.js').read_text(),
+                {'path': expected_path, 'query': {}})
         with page.expect_response(lambda response: response.url == target and response.request.method == method) as observed:
             action.click()
         response = observed.value
@@ -83,10 +87,20 @@ def send(context, team, method, template, identifier, spec, expected_path, expec
             assert [path.text for path in actual.findall(NS + 'Paths/' + NS + 'Items/' + NS + 'Path')] == ['/*']
         else:
             assert response.request.post_data is None
-        body = response.body()
+        if capture is not None:
+            page.wait_for_function('capture => capture.done', arg=capture, timeout=12000)
+            captured = capture.evaluate('capture => capture.text')
+            assert captured is not None
+            body = captured.encode('utf-8')
+        else:
+            body = response.body()
         rendered = dialog.locator('.response-section-content-body').filter(
             has=page.get_by_role('link', name='Download Response Body', exact=True))
         expect(rendered).to_have_count(1)
+        if show_raw_html:
+            assert response.headers['content-type'].split(';')[0] == 'text/html'
+            rendered.get_by_role('button', name='Raw', exact=True).click()
+            expect(rendered.locator('iframe')).to_have_count(0)
         expect(rendered).to_contain_text(expected_text)
         if template == LOCAL_TEMPLATE:
             assert body == expected_body
@@ -111,6 +125,9 @@ def send(context, team, method, template, identifier, spec, expected_path, expec
         assert not errors
         return body
     finally:
+        if capture is not None:
+            capture.evaluate('capture => capture.stop()')
+            capture.dispose()
         page.close()
 
 
