@@ -9,7 +9,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7.0.1
         with:
-          ref: 829506e58a49495bc6bb87897f28cee80211f802
+          ref: 8060030cf9757505ab81483703af17bac969c572
           fetch-depth: 0
           persist-credentials: false
       - uses: actions/setup-go@v6.5.0
@@ -21,8 +21,8 @@ jobs:
           set -euo pipefail
           umask 077
           test "$(id -u)" -ne 0
-          test "$(git rev-parse HEAD)" = 829506e58a49495bc6bb87897f28cee80211f802
-          test "$(git rev-parse HEAD^{tree})" = 77c92094b0727dc6b943f961e169e8f2cda1d391
+          test "$(git rev-parse HEAD)" = 8060030cf9757505ab81483703af17bac969c572
+          test "$(git rev-parse HEAD^{tree})" = 4a624727afb040587e862709cf1b36fa0f5c163e
           test -z "$(git status --porcelain)"
           test "$(go env GOVERSION)" = go1.26.11
           python3 - <<'PY'
@@ -37,11 +37,11 @@ jobs:
           git rev-parse HEAD HEAD^{tree} > "$RUNNER_TEMP/cw-receipts/source.txt"
           make build
           go version -m dist/tenkacloud-simulator > "$RUNNER_TEMP/cw-receipts/build.txt"
-          grep -F 'vcs.revision=829506e58a49495bc6bb87897f28cee80211f802' "$RUNNER_TEMP/cw-receipts/build.txt"
-          grep -F 'v0.2.1-0.20261128143722-829506e58a49' "$RUNNER_TEMP/cw-receipts/build.txt"
+          grep -F 'vcs.revision=8060030cf9757505ab81483703af17bac969c572' "$RUNNER_TEMP/cw-receipts/build.txt"
+          grep -F 'v0.2.1-0.20261128144451-8060030cf975' "$RUNNER_TEMP/cw-receipts/build.txt"
           sha256sum dist/tenkacloud-simulator > "$RUNNER_TEMP/cw-receipts/observed.sha256"
           grep -F 'vcs.modified=false' "$RUNNER_TEMP/cw-receipts/build.txt"
-          echo '2e178a7790c04987ba23a270d547456f825e310f01f59be29429bebbbebf8c05  dist/tenkacloud-simulator' > "$RUNNER_TEMP/cw-receipts/binary.sha256"
+          echo 'a71519337fc01402a74150b934daf18948495cb9002435d3ff47a96a45b9d437  dist/tenkacloud-simulator' > "$RUNNER_TEMP/cw-receipts/binary.sha256"
           sha256sum --check "$RUNNER_TEMP/cw-receipts/binary.sha256"
       - name: Install pinned SDK, browser and audit dependencies
         run: |
@@ -62,7 +62,7 @@ jobs:
           set -euo pipefail
           umask 077
           export SIMULATOR_BINARY="$PWD/dist/tenkacloud-simulator"
-          export SIMULATOR_BINARY_SHA256=2e178a7790c04987ba23a270d547456f825e310f01f59be29429bebbbebf8c05
+          export SIMULATOR_BINARY_SHA256=a71519337fc01402a74150b934daf18948495cb9002435d3ff47a96a45b9d437
           export AXE_SCRIPT="$RUNNER_TEMP/cw-axe/axe.min.js"
           export PYTHONDONTWRITEBYTECODE=1
           chromium=("$HOME"/.cache/ms-playwright/chromium-*/chrome-linux64/chrome)
