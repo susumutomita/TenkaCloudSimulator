@@ -47,7 +47,7 @@ Grant management uses the ordinary token-authenticated KMS SDK entry point and a
 | Operation | Inputs and behavior | IAM permission |
 | --- | --- | --- |
 | CreateGrant | An Enabled key, exact `GranteePrincipal` ARN and `Operations=["DescribeKey"]`. Optional `Name` (1–256 characters) deduplicates the same request against the same role generation. An unnamed retry creates a separate grant. Returns a grant ID and a fresh opaque token. | `kms:CreateGrant` on the key ARN |
-| ListGrants | A concrete Enabled or Disabled key, optional exact `GrantId` and/or `GranteePrincipal`. Pages default to 50 entries, with `Limit` 1–100. A marker is bound to the issuing database, Region, key, filters and page size. | `kms:ListGrants` on the key ARN |
+| ListGrants | A concrete Enabled, Disabled or PendingDeletion key, optional exact `GrantId` and/or `GranteePrincipal`. Pages default to 50 entries, with `Limit` 1–100. A marker is bound to the issuing database, Region, key, filters and page size. | `kms:ListGrants` on the key ARN |
 | RevokeGrant | The concrete key and its grant ID. Confirmation follows the SQLite commit. A missing grant on that key returns `NotFoundException`. | `kms:RevokeGrant` on the key ARN |
 
 Assume the grantee role using local STS, then call the SDK's `kms.describe_key(KeyId=...)` against the same simulator. This native role path admits the signed JSON 1.1 root POST for `TrentService.DescribeKey` only. The local role policy and a matching grant can each allow the read. An explicit policy Deny wins. Optional `GrantTokens` must belong to live grants for that role and key. A Disable leaves grants readable and revocable. CreateGrant on a Disabled key returns `DisabledException`.
@@ -151,7 +151,7 @@ No Challenge problem is enabled merely by these operations.
 
 ## API reference and verification
 
-The embedded root POST has fifteen named KMS request templates and per-target
+The embedded root POST has seventeen named KMS request templates and per-target
 schema mappings. The four alias templates require actual CreateKey output; Update
 needs a second real key. Static placeholders are not saved state. Selecting a
 body example does not automatically select routing headers. Native SDK children
