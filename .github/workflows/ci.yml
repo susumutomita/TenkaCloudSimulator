@@ -9,12 +9,12 @@ jobs:
     runs-on: ubuntu-22.04
     timeout-minutes: 25
     env:
-      PRODUCT: a9da23b69a7b70f263fcfb5ffe183c3632af13f6
-      PRODUCT_TREE: 09a9d0c63d42242197bcabb1099b79605c3405d3
+      PRODUCT: 99e0a6f2baee62a601e0c134979e99904dd79517
+      PRODUCT_TREE: 3b3aca5073001574facea6887fe50925144273fc
     steps:
       - uses: actions/checkout@v7.0.1
         with:
-          ref: a9da23b69a7b70f263fcfb5ffe183c3632af13f6
+          ref: 99e0a6f2baee62a601e0c134979e99904dd79517
           path: product
           persist-credentials: false
       - uses: actions/checkout@v7.0.1
@@ -91,7 +91,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v7.0.2
         with:
-          name: cloudwatch-custom-metrics-a9da23b-${{ github.run_id }}
+          name: cloudwatch-custom-metrics-99e0a6f-${{ github.run_id }}
           path: ${{ runner.temp }}/metric-receipts/
           retention-days: 14
           if-no-files-found: error
