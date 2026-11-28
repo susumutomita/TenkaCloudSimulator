@@ -200,3 +200,11 @@ configuration for the local HTTP/Lambda exercise. [ELB guide](../elb.md)
 The embedded Scalar reference submits ELBv2 Query forms to the regional AWS
 endpoint. The signed-in team and its existing IAM policy govern each request.
 Users can supply the subnet IDs and ARNs returned by their own simulator.
+### CloudWatch custom metric samples
+
+AWS Query `PutMetricData` records a bounded batch of raw numeric samples in the team's SQLite database. `GetMetricStatistics` groups retained observations by region, namespace, metric name, dimension set, unit and time bucket. Both operations use the existing authenticated actor and evaluate their separate IAM actions. Only a committed write prunes expired samples from the addressed region and namespace. The SDK uses the shared AWS root with the `monitoring` signing name. [Supported limits and retention](../cloudwatch-metrics.md)
+
+CloudWatch metric alarms store one standard-resolution metric configuration and evaluate its matching actual samples from the last completed UTC minute. Native PutMetricAlarm/DescribeAlarms/DeleteAlarms use exact alarm ARN permissions (unnamed lists require `*`); the existing sample/statistics calls keep wildcard permissions. Accepted metric writes and their derived alarm updates commit together. Alarm reads and store startup also evaluate using a captured local clock; this is opportunistic local evaluation, not AWS background scheduling or its extended missing-data lookback. No alarm actions are delivered. [Alarm contract and limitations](../cloudwatch-metrics.md#local-metric-alarms)
+
+
+The CloudWatch alarm console reads the configured series and evaluation minute through the native monitoring Query endpoint. The authenticated API reference uses the same endpoint for its five metric and alarm examples. CloudWatch Logs events remain independently sourced.

@@ -119,7 +119,8 @@
                 "dynamodb",
                 "sdb",
                 "ec2",
-                "elasticloadbalancing"
+                "elasticloadbalancing",
+                "monitoring"
               ]
             },
             "description": "Optional native service hint; when supplied it must match the selected service target. iam selects IAM Query; cloudformation selects CloudFormation Query. SSM/Logs/KMS/Secrets Manager use JSON 1.1; SQS/DynamoDB use JSON 1.0. This routing hint grants no access."
@@ -772,7 +773,12 @@
                       "DescribeTargetHealth",
                       "CreateListener",
                       "DescribeListeners",
-                      "DeleteListener"
+                      "DeleteListener",
+                      "DescribeAlarms",
+                      "GetMetricStatistics",
+                      "PutMetricAlarm",
+                      "PutMetricData",
+                      "DeleteAlarms"
                     ]
                   },
                   "Version": {
@@ -782,7 +788,8 @@
                       "2010-05-08",
                       "2009-04-15",
                       "2016-11-15",
-                      "2015-12-01"
+                      "2015-12-01",
+                      "2010-08-01"
                     ]
                   },
                   "StackName": {
@@ -793,7 +800,7 @@
                   },
                   "MaxResults": {
                     "type": "integer",
-                    "description": "EC2 DescribeRouteTables: 5–100 for regional pages, optionally with association.subnet-id. EC2 DescribeInternetGateways: 5–1000, at most 100 emitted per page. Do not combine EC2 exact IDs with pagination."
+                    "description": "EC2 DescribeRouteTables: 5\u2013100 for regional pages, optionally with association.subnet-id. EC2 DescribeInternetGateways: 5\u20131000, at most 100 emitted per page. Do not combine EC2 exact IDs with pagination."
                   },
                   "NextToken": {
                     "type": "string",
@@ -971,6 +978,69 @@
                   "ListenerArn": {
                     "type": "string",
                     "description": "ListenerArn returned for this load balancer."
+                  },
+                  "AlarmNames.member.1": {
+                    "type": "string"
+                  },
+                  "Namespace": {
+                    "type": "string"
+                  },
+                  "MetricName": {
+                    "type": "string"
+                  },
+                  "Unit": {
+                    "type": "string"
+                  },
+                  "StartTime": {
+                    "type": "string"
+                  },
+                  "EndTime": {
+                    "type": "string"
+                  },
+                  "Period": {
+                    "type": "string"
+                  },
+                  "Statistics.member.1": {
+                    "type": "string"
+                  },
+                  "AlarmName": {
+                    "type": "string"
+                  },
+                  "Statistic": {
+                    "type": "string"
+                  },
+                  "Threshold": {
+                    "type": "string"
+                  },
+                  "ComparisonOperator": {
+                    "type": "string"
+                  },
+                  "EvaluationPeriods": {
+                    "type": "string"
+                  },
+                  "MetricData.member.1.MetricName": {
+                    "type": "string"
+                  },
+                  "MetricData.member.1.Unit": {
+                    "type": "string"
+                  },
+                  "MetricData.member.1.Value": {
+                    "type": "string"
+                  },
+                  "MetricData.member.1.Timestamp": {
+                    "type": "string"
+                  },
+                  "Dimensions.member.1.Name": {
+                    "type": "string"
+                  },
+                  "Dimensions.member.1.Value": {
+                    "type": "string"
+                  },
+                  "MetricData.member.1.Dimensions.member.1.Name": {
+                    "type": "string"
+                  },
+                  "MetricData.member.1.Dimensions.member.1.Value": {
+                    "type": "string"
                   }
                 }
               },
@@ -1314,7 +1384,7 @@
                 },
                 "CreateDomain": {
                   "summary": "SimpleDB CreateDomain (writes local state)",
-                  "description": "Set X-Simulator-Service to sdb, clear X-Amz-Target, and use us-east-1 or leave X-Simulator-Region unset. Replace DomainName with a disposable local practice name (3–255 ASCII letters, digits, dots, underscores or hyphens). Send creates the domain in your local simulator using sdb:CreateDomain on the target domain ARN. Sending the same name again keeps the existing domain and items. Use the native SDK DeleteDomain only to clean up your practice domain.",
+                  "description": "Set X-Simulator-Service to sdb, clear X-Amz-Target, and use us-east-1 or leave X-Simulator-Region unset. Replace DomainName with a disposable local practice name (3\u2013255 ASCII letters, digits, dots, underscores or hyphens). Send creates the domain in your local simulator using sdb:CreateDomain on the target domain ARN. Sending the same name again keeps the existing domain and items. Use the native SDK DeleteDomain only to clean up your practice domain.",
                   "value": {
                     "Action": "CreateDomain",
                     "Version": "2009-04-15",
@@ -1471,6 +1541,74 @@
                     "Action": "DeleteListener",
                     "Version": "2015-12-01",
                     "ListenerArn": "REPLACE_WITH_LISTENER_ARN"
+                  }
+                },
+                "DescribeAlarms": {
+                  "summary": "CloudWatch DescribeAlarms (read one named alarm)",
+                  "description": "Set X-Simulator-Service to monitoring, leave X-Amz-Target unset and select the local region. Enter the exact alarm name to read its current evaluated state.",
+                  "value": {
+                    "Action": "DescribeAlarms",
+                    "Version": "2010-08-01",
+                    "AlarmNames.member.1": "practice-queue-depth"
+                  }
+                },
+                "GetMetricStatistics": {
+                  "summary": "CloudWatch GetMetricStatistics (query one minute of samples)",
+                  "description": "Set X-Simulator-Service to monitoring, leave X-Amz-Target unset and select the local region. Replace StartTime and EndTime with a recent completed UTC minute. For a dimensioned metric, include its exact dimension set.",
+                  "value": {
+                    "Action": "GetMetricStatistics",
+                    "Version": "2010-08-01",
+                    "Namespace": "Training/Observability",
+                    "MetricName": "QueueDepth",
+                    "Unit": "Count",
+                    "StartTime": "2000-01-01T00:00:00Z",
+                    "EndTime": "2000-01-01T00:01:00Z",
+                    "Period": "60",
+                    "Statistics.member.1": "Average",
+                    "Dimensions.member.1.Name": "Queue",
+                    "Dimensions.member.1.Value": "practice"
+                  }
+                },
+                "PutMetricAlarm": {
+                  "summary": "CloudWatch PutMetricAlarm (create or update a metric alarm)",
+                  "description": "Set X-Simulator-Service to monitoring, leave X-Amz-Target unset and select the local region. Use a disposable alarm name. This replaces its configuration if it exists. The local evaluator compares one completed UTC minute.",
+                  "value": {
+                    "Action": "PutMetricAlarm",
+                    "Version": "2010-08-01",
+                    "AlarmName": "practice-queue-depth",
+                    "Namespace": "Training/Observability",
+                    "MetricName": "QueueDepth",
+                    "Unit": "Count",
+                    "Period": "60",
+                    "Statistic": "Average",
+                    "Threshold": "4",
+                    "ComparisonOperator": "GreaterThanThreshold",
+                    "EvaluationPeriods": "1",
+                    "Dimensions.member.1.Name": "Queue",
+                    "Dimensions.member.1.Value": "practice"
+                  }
+                },
+                "PutMetricData": {
+                  "summary": "CloudWatch PutMetricData (append one sample)",
+                  "description": "Set X-Simulator-Service to monitoring, leave X-Amz-Target unset and select the local region. Send appends a sample. Omitting its timestamp uses the current time. To measure a completed minute, set MetricData.member.1.Timestamp to a recent observation inside that minute.",
+                  "value": {
+                    "Action": "PutMetricData",
+                    "Version": "2010-08-01",
+                    "Namespace": "Training/Observability",
+                    "MetricData.member.1.MetricName": "QueueDepth",
+                    "MetricData.member.1.Unit": "Count",
+                    "MetricData.member.1.Value": "1",
+                    "MetricData.member.1.Dimensions.member.1.Name": "Queue",
+                    "MetricData.member.1.Dimensions.member.1.Value": "practice"
+                  }
+                },
+                "DeleteAlarms": {
+                  "summary": "CloudWatch DeleteAlarms (delete one named alarm)",
+                  "description": "Set X-Simulator-Service to monitoring, leave X-Amz-Target unset and select the local region. Enter the name of the disposable alarm to delete. Metric observations retain their own lifetime.",
+                  "value": {
+                    "Action": "DeleteAlarms",
+                    "Version": "2010-08-01",
+                    "AlarmNames.member.1": "practice-queue-depth"
                   }
                 }
               }
@@ -13140,7 +13278,7 @@
         "tags": [
           "Sakura Server metadata"
         ],
-        "description": "Read local Server configuration metadata only. This provider is disabled by default. Enable it on the simulator host, use the host-configured zone and owner identity, and use the simulator session or token. The fixed local dummy Basic marker TCSIMSAKURA / dummy-local-only is also required; it grants no authority. Never supply real Sakura credentials. Use Test Request → Send with no query to list saved metadata. Responses do not describe running VMs, network attachments or billing.",
+        "description": "Read local Server configuration metadata only. This provider is disabled by default. Enable it on the simulator host, use the host-configured zone and owner identity, and use the simulator session or token. The fixed local dummy Basic marker TCSIMSAKURA / dummy-local-only is also required; it grants no authority. Never supply real Sakura credentials. Use Test Request \u2192 Send with no query to list saved metadata. Responses do not describe running VMs, network attachments or billing.",
         "security": [
           {
             "SakuraDummyProtocolMarker": []

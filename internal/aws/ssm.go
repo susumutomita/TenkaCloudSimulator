@@ -51,6 +51,10 @@ func (g *Gateway) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		g.serveDynamoDB(w, r)
 		return
 	}
+	if isCloudWatchMetrics(r) {
+		g.serveCloudWatchMetrics(w, r)
+		return
+	}
 	if isEC2(r) {
 		g.serveEC2(w, r)
 		return

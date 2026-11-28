@@ -13,6 +13,7 @@ from jsonschema import ValidationError
 from openapi_json10 import validator
 from kms_reference_projection import project_before_kms_grants_and_deletion
 from route53_openapi import project_before_route53, project_before_route53_console
+from cloudwatch_reference_projection import project_monitoring
 from route53_ptr_reference import project_before_ptr
 from batch_reference_projection import project_batches
 from secret_reference_projection import project_secret_description
@@ -221,6 +222,7 @@ def project_sakura_server_list_only(spec):
 def project_server_list(spec):
     spec = project_sakura_server_list_only(spec)
     project_before_kms_grants_and_deletion(spec, digest)
+    project_monitoring(spec)
     project_simpledb_create_domain(spec)
     project_ec2_describe_instances(spec)
     project_simpledb_delete_attributes(spec)
@@ -476,6 +478,7 @@ class SakuraReference(unittest.TestCase):
         self.assertEqual(example, {'Action': 'Select', 'Version': '2009-04-15',
             'SelectExpression': 'select itemName() from `example-domain` limit 25', 'ConsistentRead': 'true'})
         preceding = copy.deepcopy(self.spec)
+        project_monitoring(preceding)
         project_simpledb_create_domain(preceding)
         project_ec2_describe_instances(preceding)
         project_simpledb_get_attributes(preceding)
@@ -503,6 +506,7 @@ class SakuraReference(unittest.TestCase):
                                    'DomainName': 'scalar-practice-domain', 'ItemName': 'scalar-practice-item',
                                    'ConsistentRead': 'true'})
         preceding = copy.deepcopy(self.spec)
+        project_monitoring(preceding)
         project_simpledb_create_domain(preceding)
         project_ec2_describe_instances(preceding)
         project_simpledb_get_attributes(copy.deepcopy(preceding))

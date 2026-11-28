@@ -5762,6 +5762,23 @@ REQUIRED_SOURCE_SCOPES['ALBConsoleWorkflow'] = {
 }
 
 
+BASE_MODELS.add('CloudWatchMetricTransaction')
+BASE_INVARIANTS['CloudWatchMetricTransaction'] = {
+    'TypeOK', 'StagedInvisible', 'PeerPreserved', 'RepeatedObservationsCount',
+    'AtomicAccepted', 'RejectedUnchanged', 'ReadAndRestartPreserve', 'BoundedRows', 'ReadAggregates',
+}
+REQUIRED_MUTANTS['CloudWatchMetricTransaction'] = {
+    'PublishBeforeCommit', 'RetentionDeletesPeer', 'PartialBatchValue', 'CollapseRepeatedObservations',
+    'CanceledRetentionCommitted', 'DeniedWriteAdmitted', 'ReadSeesStaged', 'InclusiveEnd',
+    'IgnoreIdentity', 'IgnoreUnitFilter', 'UnweightedWindowAverage', 'QuotaIgnored', 'RestartLosesRows',
+}
+REQUIRED_SOURCE_SCOPES['CloudWatchMetricTransaction'] = {
+    'internal/aws/cloudwatchmetrics/store.go', 'internal/aws/cloudwatchmetrics/http.go',
+    'internal/aws/cloudwatchmetrics/form.go', 'internal/aws/cloudwatch_metrics_gateway.go',
+    'internal/aws/s3.go', 'internal/aws/ssm.go', 'internal/server/server.go',
+}
+
+
 def load_registry(root, relative='formal/models.json'):
     root = Path(root)
     registry_path = asset(root, relative)
@@ -6110,3 +6127,10 @@ def main():
         run_suite(Path.cwd(), os.environ['TLA_JAR'], options.reports, options.registry, merge_gate=options.merge_gate, shard=shard)
     except GateError as error:
         parser.exit(1, 'Formal validation failed: ' + str(error) + '\n')
+
+
+# Independently fixed controls for the bounded local alarm transaction/evaluation scenarios.
+BASE_MODELS.add('CloudWatchAlarmEvaluation')
+BASE_INVARIANTS['CloudWatchAlarmEvaluation'] = {'AcknowledgedAtomic', 'FreshIdentity', 'PeerFrame', 'NoStagedPublish', 'TypeOK', 'MeasuredValueExact', 'RefusedFrame', 'ActualSampleState', 'UpdatePreservesState', 'DeleteKeepsSamples', 'InitialState'}
+REQUIRED_MUTANTS['CloudWatchAlarmEvaluation'] = {'AdmitCanceledWrite', 'AdmitDeniedWrite', 'AdoptOldAlarmState', 'DeduplicateObservations', 'DeleteMetricSamples', 'EvaluateDeniedRead', 'FabricateAlarm', 'IgnoreMetricScope', 'IgnoreUnit', 'IncludeEndBoundary', 'IncludeOldWindow', 'InventMeasuredZero', 'MaximumUsesMinimum', 'MinimumUsesMaximum', 'MutatePeer', 'PublishBeforeCommit', 'PublishFailedSamples', 'ResetStateOnUpdate', 'ReuseRetiredIdentity', 'SeparateSampleFromState', 'SumUsesAverage', 'ThresholdEqualityWrong', 'UnweightedAverage'}
+REQUIRED_SOURCE_SCOPES['CloudWatchAlarmEvaluation'] = {'internal/server/server.go', 'internal/aws/cloudwatchmetrics/store.go', 'internal/aws/cloudwatch_metrics_gateway.go', 'internal/aws/cloudwatchmetrics/alarm_store.go', 'internal/aws/cloudwatchmetrics/http.go', 'internal/aws/cloudwatchmetrics/alarm_form.go', 'internal/aws/cloudwatchmetrics/alarm_http.go'}

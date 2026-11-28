@@ -683,6 +683,9 @@ def handler(event,context):
   from sqs_console import run
   run()
 
+ def test_cloudwatch_custom_metric_statistics(self):
+  subprocess.run([sys.executable,str(Path(__file__).with_name('cloudwatch_metrics.py'))],check=True,timeout=90)
+
  def test_cloudwatch_logs_native_sdk_restart_and_two_teams(self):
   from cloudwatch_logs import run
   run()

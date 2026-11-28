@@ -25,6 +25,7 @@ import (
 	"time"
 	"unicode/utf8"
 
+	"github.com/susumutomita/TenkaCloudSimulator/internal/aws/cloudwatchmetrics"
 	"github.com/susumutomita/TenkaCloudSimulator/internal/aws/codestarnotifications"
 	"github.com/susumutomita/TenkaCloudSimulator/internal/aws/cognitoidp"
 	"github.com/susumutomita/TenkaCloudSimulator/internal/aws/simpledb"
@@ -54,6 +55,7 @@ type Gateway struct {
 	QueueFanout            SNSQueueFanout
 	Secrets                *SecretStore
 	CloudWatchLogs         *CloudWatchLogsStore
+	CloudWatchMetrics      *cloudwatchmetrics.Store
 	KMS                    *KMSStore
 	APIGateway             *APIGatewayStore
 	LambdaPermissions      *LambdaPermissionStore

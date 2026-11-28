@@ -452,7 +452,7 @@
       "id": "SQSStorageBudget",
       "model": "formal/SQSStorageBudget.tla",
       "config": "formal/SQSStorageBudget.cfg",
-      "bounds": "Two trusted queue scopes; three possible pre-existing row IDs plus one additional fresh ID; each row weight1–2 abstract payload units. MaxRows2/MaxBytes3. Initial unique-ID row sets include legacy states with3rows and up to6units, beyond either cap. Initial enumeration uses the exact729 unique-ID assignments, not a powerset filter. No time transition: expiry is a pre-existing Boolean classification.",
+      "bounds": "Two trusted queue scopes; three possible pre-existing row IDs plus one additional fresh ID; each row weight1\u20132 abstract payload units. MaxRows2/MaxBytes3. Initial unique-ID row sets include legacy states with3rows and up to6units, beyond either cap. Initial enumeration uses the exact729 unique-ID assignments, not a powerset filter. No time transition: expiry is a pre-existing Boolean classification.",
       "properties": [
         "TypeOK",
         "FailedSendPreservesRows",
@@ -644,7 +644,7 @@
       "id": "ProviderActor",
       "model": "formal/ProviderActor.tla",
       "config": "formal/ProviderActor.cfg",
-      "bounds": "64 request combinations: authentication2 × credential roles2 × exercise selections4 × spoofed wire roles2 × capabilities2; captured emission includes original request; uniform tagged records distinguish absent/attached actors without TLC heterogeneous equality;65 reachable emissions expected, to be verified",
+      "bounds": "64 request combinations: authentication2 \u00d7 credential roles2 \u00d7 exercise selections4 \u00d7 spoofed wire roles2 \u00d7 capabilities2; captured emission includes original request; uniform tagged records distinguish absent/attached actors without TLC heterogeneous equality;65 reachable emissions expected, to be verified",
       "properties": [
         "TypeOK",
         "NoActorOnRejected",
@@ -848,7 +848,7 @@
       "id": "AzureBlobState",
       "model": "formal/AzureBlobState.tla",
       "config": "formal/AzureBlobState.cfg",
-      "bounds": "Two account/environment scopes with one container each, two distinct abstract keys and payload values1–2, at most three accepted puts, rowcap2 and abstractbytecap3. Context trust and two fixed owner subjects modeled explicitly. Three-write frontier is an exploration bound, not an API quota.",
+      "bounds": "Two account/environment scopes with one container each, two distinct abstract keys and payload values1\u20132, at most three accepted puts, rowcap2 and abstractbytecap3. Context trust and two fixed owner subjects modeled explicitly. Three-write frontier is an exploration bound, not an API quota.",
       "properties": [
         "TypeOK",
         "NoUnauthorizedMutation",
@@ -4440,7 +4440,7 @@
       "id": "KMSAliasesViewEpoch",
       "model": "formal/KMSAliasesViewEpoch.tla",
       "config": "formal/KMSAliasesViewEpoch.cfg",
-      "bounds": "Two context incarnations A→B/unmount; two known customer keys per context; one alias; initial successful list and initial picker lookup normalized as reachable seed/completion. At most two subsequent ListAliases requests and two selected-target metadata requests, one form intent per context, one submitted write, one acknowledged read-only retry. Native backend outcomes abstract Success/Failure. No second normal write; request count0..2 admits replay mutant.",
+      "bounds": "Two context incarnations A\u2192B/unmount; two known customer keys per context; one alias; initial successful list and initial picker lookup normalized as reachable seed/completion. At most two subsequent ListAliases requests and two selected-target metadata requests, one form intent per context, one submitted write, one acknowledged read-only retry. Native backend outcomes abstract Success/Failure. No second normal write; request count0..2 admits replay mutant.",
       "properties": [
         "TypeOK",
         "CurrentListOutcome",
@@ -5057,7 +5057,7 @@
       "id": "CFNConditionAdmission",
       "model": "formal/CFNConditionAdmission.tla",
       "config": "formal/CFNConditionAdmission.cfg",
-      "bounds": "13 defect scenarios × 2 equality results × 3 then arms × 3 else arms = 234 immutable inputs; 6 deterministic compilation phases, no request loops",
+      "bounds": "13 defect scenarios \u00d7 2 equality results \u00d7 3 then arms \u00d7 3 else arms = 234 immutable inputs; 6 deterministic compilation phases, no request loops",
       "properties": [
         "TypeOK",
         "ParameterAdmission",
@@ -6249,7 +6249,10 @@
         "tools/console/src/catalog.jsx",
         "tools/console/src/resource-group-members.jsx",
         "tools/console/src/gcp-catalog.jsx",
-        "tools/console/src/main.jsx"
+        "tools/console/src/main.jsx",
+        "tools/console/src/cloudwatch-metrics.jsx",
+        "tools/console/src/cloudwatch-metrics.mjs",
+        "tools/console/src/console-navigation.mjs"
       ],
       "mutants": [
         {
@@ -20205,7 +20208,7 @@
       "id": "SimpleDBPageCursor",
       "model": "formal/SimpleDBPageCursor.tla",
       "config": "formal/SimpleDBPageCursor.cfg",
-      "bounds": "Three scopes, three ordered names, two key epochs, one retained issued cursor, sizes 0–3.",
+      "bounds": "Three scopes, three ordered names, two key epochs, one retained issued cursor, sizes 0\u20133.",
       "properties": [
         "TypeOK",
         "CursorBinding",
@@ -20597,7 +20600,7 @@
       "id": "AzureQueueLifecycle",
       "model": "formal/AzureQueueLifecycle.tla",
       "config": "formal/AzureQueueLifecycle.cfg",
-      "bounds": "Two separately owned databases, one message per owner, clocks from 0–3 and three positive receipt epochs. Atomic fail/restart frames and a 16-step witness are abstract.",
+      "bounds": "Two separately owned databases, one message per owner, clocks from 0\u20133 and three positive receipt epochs. Atomic fail/restart frames and a 16-step witness are abstract.",
       "properties": [
         "TypeOK",
         "Isolation",
@@ -21240,7 +21243,7 @@
       "id": "SSMDocumentVersionPage",
       "model": "formal/SSMDocumentVersionPage.tla",
       "config": "formal/SSMDocumentVersionPage.cfg",
-      "bounds": "Two addresses and subjects; version counts 0–2, sizes 1–2, two abstract snapshot stamps and one response.",
+      "bounds": "Two addresses and subjects; version counts 0\u20132, sizes 1\u20132, two abstract snapshot stamps and one response.",
       "properties": [
         "TypeOK",
         "DeniedHasNoHistory",
@@ -37174,6 +37177,472 @@
             }
           ],
           "expect_invariant": "ReadFrame"
+        }
+      ]
+    },
+    {
+      "id": "CloudWatchMetricTransaction",
+      "model": "formal/CloudWatchMetricTransaction.tla",
+      "config": "formal/CloudWatchMetricTransaction.cfg",
+      "bounds": "Two abstract region/namespace scopes, two complete metric/dimension identities, two units, values1/3, stale and three integer time positions, curated one/two-observation batches, seven-row quota and four transitions. Seed includes duplicate observations and unequal per-window counts.",
+      "properties": [
+        "TypeOK",
+        "StagedInvisible",
+        "PeerPreserved",
+        "RepeatedObservationsCount",
+        "AtomicAccepted",
+        "RejectedUnchanged",
+        "ReadAndRestartPreserve",
+        "BoundedRows",
+        "ReadAggregates"
+      ],
+      "limits": "Finite normalized transaction/read contract only. Scope denotes trusted configured namespace/region isolation; one process/database is assumed. It does not prove HTTP/gzip/XML/SigV4 or IAM evaluation, input parsing/dimension canonicalization, real UTC rounding/retention durations, floating point accuracy, SQLite schema/SQL/locking/trigger behavior, actual quotas, cancellation timing, process recovery or Go refinement. Rational average comparisons model multiplicity weighting, not IEEE754. Read/restart cannot publish staged writes; independent expected aggregation uses committed oracle rows. Native SDK/database/fault tests remain required. Gateway dispatch, store initialization and server capability composition paths are mapped for integration evidence only; this model does not verify their concrete wiring.",
+      "source_scope": [
+        "internal/aws/cloudwatchmetrics/store.go",
+        "internal/aws/cloudwatchmetrics/http.go",
+        "internal/aws/cloudwatchmetrics/form.go",
+        "internal/aws/cloudwatch_metrics_gateway.go",
+        "internal/aws/s3.go",
+        "internal/aws/ssm.go",
+        "internal/server/server.go"
+      ],
+      "mutants": [
+        {
+          "id": "PublishBeforeCommit",
+          "edits": [
+            {
+              "old": "rows'=rows (* NoEarlyPublication *)",
+              "new": "rows'=Prune(rows,s) \\o batch (* NoEarlyPublication *)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "StagedInvisible"
+        },
+        {
+          "id": "RetentionDeletesPeer",
+          "edits": [
+            {
+              "old": "~(p.scope = s /\\ p.at = 0)",
+              "new": "~(p.at = 0)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PeerPreserved"
+        },
+        {
+          "id": "PartialBatchValue",
+          "edits": [
+            {
+              "old": "rows'=Prune(rows,owner) \\o staged (* WholeBatch *)",
+              "new": "rows'=Prune(rows,owner) \\o [n \\in 1..Len(staged) |-> [staged[n] EXCEPT !.value = 1]] (* WholeBatch *)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AtomicAccepted"
+        },
+        {
+          "id": "CollapseRepeatedObservations",
+          "edits": [
+            {
+              "old": "rows'=Prune(rows,owner) \\o staged (* WholeBatch *)",
+              "new": "rows'=Prune(rows,owner) \\o (IF Len(staged)=2 /\\ staged[1]=staged[2] THEN SubSeq(staged,1,1) ELSE staged) (* WholeBatch *)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "RepeatedObservationsCount"
+        },
+        {
+          "id": "CanceledRetentionCommitted",
+          "edits": [
+            {
+              "old": "rows'=rows (* RollbackRetainsOld *)",
+              "new": "rows'=(IF kind=\"Cancel\" THEN Prune(rows,owner) ELSE rows) (* RollbackRetainsOld *)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "RejectedUnchanged"
+        },
+        {
+          "id": "DeniedWriteAdmitted",
+          "edits": [
+            {
+              "old": "rows'=rows (* RejectionRetainsOld *)",
+              "new": "rows'=(IF kind=\"Denied\" THEN Prune(rows,s) \\o batch ELSE rows) (* RejectionRetainsOld *)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "RejectedUnchanged"
+        },
+        {
+          "id": "ReadSeesStaged",
+          "edits": [
+            {
+              "old": "Groups(Select(rows,s,i,u),period) (* ReadCommittedOnly *)",
+              "new": "Groups(Select(rows \\o staged,s,i,u),period) (* ReadCommittedOnly *)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadAggregates"
+        },
+        {
+          "id": "InclusiveEnd",
+          "edits": [
+            {
+              "old": "p.at<3) (* ExclusiveEnd *)",
+              "new": "p.at<=3) (* ExclusiveEnd *)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadAggregates"
+        },
+        {
+          "id": "IgnoreIdentity",
+          "edits": [
+            {
+              "old": "p.scope=s /\\ p.identity=i /\\ (u=\"all\" \\/ p.unit=u) /\\ p.at>=1 /\\ p.at<3) (* ExclusiveEnd *)",
+              "new": "p.scope=s /\\ TRUE /\\ (u=\"all\" \\/ p.unit=u) /\\ p.at>=1 /\\ p.at<3) (* ExclusiveEnd *)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadAggregates"
+        },
+        {
+          "id": "IgnoreUnitFilter",
+          "edits": [
+            {
+              "old": "p.scope=s /\\ p.identity=i /\\ (u=\"all\" \\/ p.unit=u) /\\ p.at>=1 /\\ p.at<3) (* ExclusiveEnd *)",
+              "new": "p.scope=s /\\ p.identity=i /\\ TRUE /\\ p.at>=1 /\\ p.at<3) (* ExclusiveEnd *)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadAggregates"
+        },
+        {
+          "id": "UnweightedWindowAverage",
+          "edits": [
+            {
+              "old": "AvgNum(data) == Total(data) (* WeightedNumerator *)",
+              "new": "AvgNum(data) == UnweightedNum(data) (* WeightedNumerator *)",
+              "count": 1
+            },
+            {
+              "old": "AvgDen(data) == Len(data) (* WeightedDenominator *)",
+              "new": "AvgDen(data) == UnweightedDen(data) (* WeightedDenominator *)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadAggregates"
+        },
+        {
+          "id": "QuotaIgnored",
+          "edits": [
+            {
+              "old": "Len(Prune(data,s)) + Len(batch) <= 7",
+              "new": "Len(Prune(data,s)) + Len(batch) <= 9",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "BoundedRows"
+        },
+        {
+          "id": "RestartLosesRows",
+          "edits": [
+            {
+              "old": "rows'=rows (* RestartRetainsRows *)",
+              "new": "rows'= <<>> (* RestartRetainsRows *)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadAndRestartPreserve"
+        }
+      ]
+    },
+    {
+      "id": "CloudWatchAlarmEvaluation",
+      "model": "formal/CloudWatchAlarmEvaluation.tla",
+      "config": "formal/CloudWatchAlarmEvaluation.cfg",
+      "bounds": "Eleven directed normalized request histories (20 equality and 20 nonconstant statistic/comparison choices plus nine other histories); 49 initial scenarios, one target, one immutable populated peer, at most three raw observations, two UTC-minute classes and two physical alarm generations. Begin/stage and Commit/Cancel/Fail/Denied are distinct transitions. No arbitrary request interleavings.",
+      "properties": [
+        "TypeOK",
+        "PeerFrame",
+        "NoStagedPublish",
+        "RefusedFrame",
+        "AcknowledgedAtomic",
+        "ActualSampleState",
+        "MeasuredValueExact",
+        "InitialState",
+        "UpdatePreservesState",
+        "DeleteKeepsSamples",
+        "FreshIdentity"
+      ],
+      "limits": "Finite rational evaluation and transaction-frame scenarios only. Separate specification selector/rational oracle; multiplicities, true zero versus no value, five statistics/four comparisons, closed-window boundaries and one wrong scope/unit class. Assumes normalized requests, authentic policy decisions and atomic SQL. Does not prove Go/SQLite/HTTP/XML/IAM/decimal/float/clock refinement, numeric quotas/cursors, arbitrary concurrency, background scheduling, AWS extended lookback, delivery, browser, or entire CloudWatch coverage.",
+      "source_scope": [
+        "internal/aws/cloudwatchmetrics/alarm_form.go",
+        "internal/aws/cloudwatchmetrics/alarm_http.go",
+        "internal/aws/cloudwatchmetrics/alarm_store.go",
+        "internal/aws/cloudwatchmetrics/http.go",
+        "internal/aws/cloudwatchmetrics/store.go",
+        "internal/aws/cloudwatch_metrics_gateway.go",
+        "internal/server/server.go"
+      ],
+      "mutants": [
+        {
+          "id": "IncludeOldWindow",
+          "edits": [
+            {
+              "old": "Selected(data,w) == SelectSeq(data,LAMBDA p: p.scope = \"target\" /\\ p.unit = \"Count\" /\\ p.at >= 2*w /\\ p.at < 2*w+2)",
+              "new": "Selected(data,w) == SelectSeq(data,LAMBDA p: p.scope = \"target\" /\\ p.unit = \"Count\" /\\ p.at < 2*w+2)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ActualSampleState"
+        },
+        {
+          "id": "IncludeEndBoundary",
+          "edits": [
+            {
+              "old": "Selected(data,w) == SelectSeq(data,LAMBDA p: p.scope = \"target\" /\\ p.unit = \"Count\" /\\ p.at >= 2*w /\\ p.at < 2*w+2)",
+              "new": "Selected(data,w) == SelectSeq(data,LAMBDA p: p.scope = \"target\" /\\ p.unit = \"Count\" /\\ p.at >= 2*w /\\ p.at <= 2*w+2)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ActualSampleState"
+        },
+        {
+          "id": "IgnoreMetricScope",
+          "edits": [
+            {
+              "old": "Selected(data,w) == SelectSeq(data,LAMBDA p: p.scope = \"target\" /\\ p.unit = \"Count\" /\\ p.at >= 2*w /\\ p.at < 2*w+2)",
+              "new": "Selected(data,w) == SelectSeq(data,LAMBDA p: p.unit = \"Count\" /\\ p.at >= 2*w /\\ p.at < 2*w+2)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ActualSampleState"
+        },
+        {
+          "id": "IgnoreUnit",
+          "edits": [
+            {
+              "old": "Selected(data,w) == SelectSeq(data,LAMBDA p: p.scope = \"target\" /\\ p.unit = \"Count\" /\\ p.at >= 2*w /\\ p.at < 2*w+2)",
+              "new": "Selected(data,w) == SelectSeq(data,LAMBDA p: p.scope = \"target\" /\\ p.at >= 2*w /\\ p.at < 2*w+2)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ActualSampleState"
+        },
+        {
+          "id": "DeduplicateObservations",
+          "edits": [
+            {
+              "old": "Selected(data,w) == SelectSeq(data,LAMBDA p: p.scope = \"target\" /\\ p.unit = \"Count\" /\\ p.at >= 2*w /\\ p.at < 2*w+2)",
+              "new": "Selected(data,w) == Unique(SelectSeq(data,LAMBDA p: p.scope = \"target\" /\\ p.unit = \"Count\" /\\ p.at >= 2*w /\\ p.at < 2*w+2))",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "MeasuredValueExact"
+        },
+        {
+          "id": "UnweightedAverage",
+          "edits": [
+            {
+              "old": "c.stat \\in {\"Average\",\"Sum\"} -> Total(p)",
+              "new": "c.stat \\in {\"Average\",\"Sum\"} -> IF c.stat = \"Average\" THEN Total(Unique(p)) ELSE Total(p)",
+              "count": 1
+            },
+            {
+              "old": "  den |-> IF c.stat = \"Average\" THEN Len(p) ELSE 1]\nCompare(c,m)",
+              "new": "  den |-> IF c.stat = \"Average\" THEN Len(Unique(p)) ELSE 1]\nCompare(c,m)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ActualSampleState"
+        },
+        {
+          "id": "InventMeasuredZero",
+          "edits": [
+            {
+              "old": "!.reported = measurement",
+              "new": "!.reported = IF ~measurement.has THEN [has |-> TRUE,num |-> 0,den |-> 1] ELSE measurement",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "MeasuredValueExact"
+        },
+        {
+          "id": "FabricateAlarm",
+          "edits": [
+            {
+              "old": "ELSE IF Compare(a.config,measurement) THEN \"ALARM\" ELSE \"OK\"",
+              "new": "ELSE \"ALARM\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ActualSampleState"
+        },
+        {
+          "id": "ThresholdEqualityWrong",
+          "edits": [
+            {
+              "old": "m.num > c.threshold*m.den\n [] c.comparison",
+              "new": "m.num >= c.threshold*m.den\n [] c.comparison",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ActualSampleState"
+        },
+        {
+          "id": "PublishBeforeCommit",
+          "edits": [
+            {
+              "old": "/\\ phase' = \"pending\" /\\ raw' = raw",
+              "new": "/\\ phase' = \"pending\" /\\ raw' = (IF req.op = \"put\" THEN Append(raw,req.point) ELSE raw)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "NoStagedPublish"
+        },
+        {
+          "id": "AdmitCanceledWrite",
+          "edits": [
+            {
+              "old": "pending.request.outcome = \"Commit\"",
+              "new": "pending.request.outcome \\in {\"Commit\",\"Cancel\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "RefusedFrame"
+        },
+        {
+          "id": "PublishFailedSamples",
+          "edits": [
+            {
+              "old": "/\\ raw' = chosen.raw /\\ alarm' = chosen.alarm",
+              "new": "/\\ raw' = (IF req.outcome = \"Fail\" THEN pending.candidate.raw ELSE chosen.raw) /\\ alarm' = chosen.alarm",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "RefusedFrame"
+        },
+        {
+          "id": "AdmitDeniedWrite",
+          "edits": [
+            {
+              "old": "pending.request.allow /\\ pending.request.outcome = \"Commit\"",
+              "new": "(pending.request.allow \\/ pending.request.op = \"put\") /\\ pending.request.outcome = \"Commit\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "RefusedFrame"
+        },
+        {
+          "id": "EvaluateDeniedRead",
+          "edits": [
+            {
+              "old": "pending.request.allow /\\ pending.request.outcome = \"Commit\"",
+              "new": "(pending.request.allow \\/ pending.request.op = \"read\") /\\ pending.request.outcome = \"Commit\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "RefusedFrame"
+        },
+        {
+          "id": "SeparateSampleFromState",
+          "edits": [
+            {
+              "old": "/\\ raw' = chosen.raw /\\ alarm' = chosen.alarm",
+              "new": "/\\ raw' = chosen.raw /\\ alarm' = (IF MayPublish /\\ req.op = \"put\" THEN before.alarm ELSE chosen.alarm)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AcknowledgedAtomic"
+        },
+        {
+          "id": "ResetStateOnUpdate",
+          "edits": [
+            {
+              "old": "ELSE [alarm EXCEPT !.config = req.config]",
+              "new": "ELSE NewAlarm(req.config,alarm.id)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "UpdatePreservesState"
+        },
+        {
+          "id": "DeleteMetricSamples",
+          "edits": [
+            {
+              "old": "nextRaw == IF req.op = \"put\" THEN Append(raw,req.point) ELSE raw",
+              "new": "nextRaw == IF req.op = \"delete\" THEN <<>> ELSE IF req.op = \"put\" THEN Append(raw,req.point) ELSE raw",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "DeleteKeepsSamples"
+        },
+        {
+          "id": "ReuseRetiredIdentity",
+          "edits": [
+            {
+              "old": "[exists |-> TRUE,id |-> id, config |-> c",
+              "new": "[exists |-> TRUE,id |-> IF id > 1 THEN 1 ELSE id, config |-> c",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "FreshIdentity"
+        },
+        {
+          "id": "AdoptOldAlarmState",
+          "edits": [
+            {
+              "old": "NewAlarm(c,id) == [exists |-> TRUE,id |-> id, config |-> c, state |-> \"INSUFFICIENT_DATA\"",
+              "new": "NewAlarm(c,id) == [exists |-> TRUE,id |-> id, config |-> c, state |-> IF id > 1 THEN \"ALARM\" ELSE \"INSUFFICIENT_DATA\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "InitialState"
+        },
+        {
+          "id": "MutatePeer",
+          "edits": [
+            {
+              "old": "/\\ retired' = chosen.retired /\\ peer' = chosen.peer",
+              "new": "/\\ retired' = chosen.retired /\\ peer' = [PeerInitial EXCEPT !.state = \"OK\"]",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PeerFrame"
+        },
+        {
+          "id": "SumUsesAverage",
+          "edits": [
+            {
+              "old": "  den |-> IF c.stat = \"Average\" THEN Len(p) ELSE 1]\nCompare(c,m)",
+              "new": "  den |-> IF c.stat \\in {\"Average\",\"Sum\"} THEN Len(p) ELSE 1]\nCompare(c,m)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "MeasuredValueExact"
+        },
+        {
+          "id": "MinimumUsesMaximum",
+          "edits": [
+            {
+              "old": "[] c.stat = \"Minimum\" -> Minimum(p)",
+              "new": "[] c.stat = \"Minimum\" -> Maximum(p)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ActualSampleState"
+        },
+        {
+          "id": "MaximumUsesMinimum",
+          "edits": [
+            {
+              "old": "[] OTHER -> Maximum(p),",
+              "new": "[] OTHER -> Minimum(p),",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ActualSampleState"
         }
       ]
     }
