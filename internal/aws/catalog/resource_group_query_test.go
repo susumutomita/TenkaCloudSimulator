@@ -188,26 +188,48 @@ func TestResourceGroupMembershipRefusesIncompleteReads(t *testing.T) {
 			t.Fatalf("incomplete projection returned status %d with body %v", got.status, got.body)
 		}
 	}
+	healthy := func() {
+		t.Helper()
+		got := h.rest("resource-groups", "POST", "/list-group-resources", input)
+		expect(t, got, 200, "")
+		if len(got.body["Resources"].([]any)) != 2 || len(got.body["ResourceIdentifiers"].([]any)) != 2 {
+			t.Fatal("both repositories must match before and after a storage failure")
+		}
+	}
+	healthy()
 	// Losing the ECR binding must not turn membership into an empty success.
 	const target = "AmazonEC2ContainerRegistry_V20150921"
 	binding := h.engine.byTarget[target]
 	delete(h.engine.byTarget, target)
 	refused(400)
 	h.engine.byTarget[target] = binding
+	healthy()
 
-	// The first repository matches; an unreadable second row invalidates the whole page.
-	if _, err := h.db.Exec("UPDATE aws_catalog_resources SET tags='not-json' WHERE service='ecr' AND name='second'"); err != nil {
-		t.Fatal(err)
+	// Each case starts with both repositories readable. A refused read neither
+	// repairs the stored value nor returns the earlier matching repository.
+	for _, tc := range []struct{ name, read, write, bad string }{
+		{"unreadable second repository", "SELECT tags FROM aws_catalog_resources WHERE service='ecr' AND name='second'", "UPDATE aws_catalog_resources SET tags=? WHERE service='ecr' AND name='second'", "not-json"},
+		{"invalid stored group query", "SELECT document FROM aws_catalog_resources WHERE service='resource-groups' AND name='release'", "UPDATE aws_catalog_resources SET document=? WHERE service='resource-groups' AND name='release'", `{"Name":"release","ResourceQuery":{"Type":"TAG_FILTERS_1_0","Query":"[]"}}`},
+		{"mismatched stored group ARN", "SELECT arn FROM aws_catalog_resources WHERE service='resource-groups' AND name='release'", "UPDATE aws_catalog_resources SET arn=? WHERE service='resource-groups' AND name='release'", "different"},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			var original, after string
+			if err := h.db.QueryRow(tc.read).Scan(&original); err != nil {
+				t.Fatal(err)
+			}
+			if _, err := h.db.Exec(tc.write, tc.bad); err != nil {
+				t.Fatal(err)
+			}
+			refused(500)
+			if err := h.db.QueryRow(tc.read).Scan(&after); err != nil || after != tc.bad {
+				t.Fatal("refused read changed stored data", err)
+			}
+			if _, err := h.db.Exec(tc.write, original); err != nil {
+				t.Fatal(err)
+			}
+			healthy()
+		})
 	}
-	refused(500)
-	if _, err := h.db.Exec("UPDATE aws_catalog_resources SET document=json_set(document,'$.ResourceQuery.Query','[]') WHERE service='resource-groups' AND name='release'"); err != nil {
-		t.Fatal(err)
-	}
-	refused(500)
-	if _, err := h.db.Exec("UPDATE aws_catalog_resources SET arn='different' WHERE service='resource-groups' AND name='release'"); err != nil {
-		t.Fatal(err)
-	}
-	refused(500)
 	expect(t, h.rest("resource-groups", "POST", "/get-group-query", map[string]any{"Group": "absent"}), 404, "NotFoundException")
 	expect(t, h.rest("resource-groups", "POST", "/update-group-query", map[string]any{"GroupName": "release", "ResourceQuery": query}), 400, "BadRequestException")
 }
