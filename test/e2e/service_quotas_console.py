@@ -158,6 +158,19 @@ def run():
                         identifier = added.pop(); ids.add(identifier)
                         expect(page.get_by_text(identifier, exact=True)).to_be_visible()
                         assert sdk.get_requested_service_quota_change(RequestId=identifier)['RequestedQuota']['Status'] == 'NOT_APPROVED'
+                    # Cross the genuine served Scalar reference in both directions.
+                    # This helper is owned separately and joins the product at integration.
+                    from service_quotas_scalar import FixtureStack, ScalarReference, sdk_record_equals
+                    with FixtureStack() as scalar_stack:
+                        reference = ScalarReference(browser, owner, owner.token, scalar_stack)
+                        via_scalar = reference.send('GetRequestedServiceQuotaChange', {'RequestId': identifier})['RequestedQuota']
+                        sdk_record_equals(via_scalar, sdk.get_requested_service_quota_change(RequestId=identifier)['RequestedQuota'])
+                        scalar_saved = reference.send('RequestServiceQuotaIncrease', {**KEY, 'DesiredValue': 8, 'SupportCaseAllowed': False})['RequestedQuota']
+                        scalar_id = scalar_saved['Id']
+                        sdk_record_equals(scalar_saved, sdk.get_requested_service_quota_change(RequestId=scalar_id)['RequestedQuota'])
+                    page.get_by_role('textbox', name='Request ID', exact=True).fill(scalar_id)
+                    view.click('Get request', 'GetRequestedServiceQuotaChange')
+                    expect(page.get_by_text(scalar_id, exact=True)).to_be_visible()
                     page.get_by_role('textbox', name='Request ID', exact=True).fill(identifier)
                     view.click('Get request', 'GetRequestedServiceQuotaChange')
                     expect(page.get_by_text(identifier, exact=True)).to_be_visible()
