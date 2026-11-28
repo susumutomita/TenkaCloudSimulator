@@ -30037,6 +30037,233 @@
           "expect_invariant": "RetryRequiresNamedRefresh"
         }
       ]
+    },
+    {
+      "id": "CodeCommitGitReferences",
+      "model": "formal/CodeCommitGitReferences.tla",
+      "config": "formal/CodeCommitGitReferences.cfg",
+      "bounds": "Two repository/team scopes, two lifetimes per name/ARN, two branches and writers, four fixed acyclic mathematical commit identities and three observed blob values. Eight finite write families (history/fork/shared blob, both CAS orders, late advance, late first with retry, peer reuse, cancel, failure, denial); every phase permits arbitrary readonly observations. At most eleven scheduled transitions; readonly cycles remain finite.",
+      "properties": [
+        "TypeOK",
+        "AtomicVisibility",
+        "PeerFrame",
+        "LegacyMetadataPreserved",
+        "CASExpectedParent",
+        "DefaultBranchCorrect",
+        "ForkIsolation",
+        "HistoryRetained",
+        "LifetimeIsolation",
+        "ReferenceIntegrity",
+        "ReadExact"
+      ],
+      "limits": "A scoped transaction/reference model, not an exhaustive exploration of arbitrary mutating schedules. written is ghost per-repository/per-lifetime authorship evidence, not a retained physical object table. The same object ID may be independently authored in both scopes; distinct commits may retain the same observed file/blob while unmodeled tree/metadata differs. Models metadata-row preservation, atomic object/ref publication, CAS expected tip and incarnation, fork isolation, historical observed-file projection, error frames and purge/recreation. Does not prove canonical Git object encoding, SHA1, real content/tree parsing, arbitrary file graphs, IAM actions/policy, quotas, SQLite isolation/locking/crashes, HTTP/SDK/CLI, notification outbox, Go refinement or whole service readiness; native tests cover those separately.",
+      "source_scope": [
+        "internal/aws/catalog/codecommit_content.go",
+        "internal/aws/catalog/codecommit_objects.go",
+        "internal/aws/catalog/engine.go",
+        "internal/aws/catalog/semantics.go",
+        "internal/aws/catalog/services_compute.go"
+      ],
+      "mutants": [
+        {
+          "id": "StaleParentOverwrite",
+          "edits": [
+            {
+              "old": " /\\ s.refs[p.repo][p.branch] = p.expected",
+              "new": " /\\ TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CASExpectedParent"
+        },
+        {
+          "id": "AcceptOldLifetimeAdvance",
+          "edits": [
+            {
+              "old": " /\\ s.epoch[p.repo] = p.epoch",
+              "new": " /\\ (p.commit # \"root\" \\/ s.epoch[p.repo] = p.epoch)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CASExpectedParent"
+        },
+        {
+          "id": "AcceptOldLifetimeFirst",
+          "edits": [
+            {
+              "old": " /\\ s.epoch[p.repo] = p.epoch",
+              "new": " /\\ (p.commit = \"root\" \\/ s.epoch[p.repo] = p.epoch)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CASExpectedParent"
+        },
+        {
+          "id": "ExposeStagedObjects",
+          "edits": [
+            {
+              "old": "    /\\ store' = store\n",
+              "new": "    /\\ store' = IF allow /\\ Valid(store,p) THEN Publish(store,p) ELSE store\n",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AtomicVisibility"
+        },
+        {
+          "id": "CancelPublishes",
+          "edits": [
+            {
+              "old": "IN /\\ store' = IF ok THEN Publish(store,p) ELSE store",
+              "new": "IN /\\ store' = IF ok \\/ (outcome = \"Cancel\") THEN Publish(store,p) ELSE store",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AtomicVisibility"
+        },
+        {
+          "id": "FailurePublishes",
+          "edits": [
+            {
+              "old": "IN /\\ store' = IF ok THEN Publish(store,p) ELSE store",
+              "new": "IN /\\ store' = IF ok \\/ (outcome = \"Fail\") THEN Publish(store,p) ELSE store",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AtomicVisibility"
+        },
+        {
+          "id": "DeniedPublishes",
+          "edits": [
+            {
+              "old": "IN /\\ store' = IF ok THEN Publish(store,p) ELSE store",
+              "new": "IN /\\ store' = IF ok \\/ (outcome = \"Commit\" /\\ ~p.allowed) THEN Publish(store,p) ELSE store",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AtomicVisibility"
+        },
+        {
+          "id": "AdoptForeignCommit",
+          "edits": [
+            {
+              "old": "     own == c \\in store.history[r]",
+              "new": "     own == \\E other \\in Repos: c \\in store.history[other]",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReferenceIntegrity"
+        },
+        {
+          "id": "DropHistoricalCommits",
+          "edits": [
+            {
+              "old": " !.history[p.repo] = @ \\cup {p.commit},",
+              "new": " !.history[p.repo] = {p.commit},",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "HistoryRetained"
+        },
+        {
+          "id": "WrongFirstDefault",
+          "edits": [
+            {
+              "old": " !.default[p.repo] = IF @ = Absent THEN p.branch ELSE @,",
+              "new": " !.default[p.repo] = IF @ = Absent THEN Other(p.branch) ELSE @,",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "DefaultBranchCorrect"
+        },
+        {
+          "id": "ForkChangesDefault",
+          "edits": [
+            {
+              "old": "[store EXCEPT !.refs[r][b] = c]",
+              "new": "[store EXCEPT !.refs[r][b] = c, !.default[r] = b]",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "DefaultBranchCorrect"
+        },
+        {
+          "id": "ForkMovesExistingTip",
+          "edits": [
+            {
+              "old": "[store EXCEPT !.refs[r][b] = c]",
+              "new": "[store EXCEPT !.refs[r][b] = c, !.refs[r][primary] = c]",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ForkIsolation"
+        },
+        {
+          "id": "PartialObjectPublication",
+          "edits": [
+            {
+              "old": " !.blobs[p.repo] = @ \\cup {Blob(p.commit)},",
+              "new": " !.blobs[p.repo] = @,",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReferenceIntegrity"
+        },
+        {
+          "id": "SameARNHistoryAdoption",
+          "edits": [
+            {
+              "old": "      !.metadata[r] = Seed(r,2)]",
+              "new": "      !.metadata[r] = Seed(r,2),\n      !.history[r] = {t[3] : t \\in {v \\in store.written : v[1] = r}},\n      !.blobs[r] = {Blob(t[3]) : t \\in {v \\in store.written : v[1] = r}}]",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "LifetimeIsolation"
+        },
+        {
+          "id": "ReadLatestInsteadOfHistory",
+          "edits": [
+            {
+              "old": "LET result == IF store.live[r] /\\ c \\in store.history[r] THEN Blob(c) ELSE NoData",
+              "new": "LET result == IF store.live[r] /\\ c \\in store.history[r] THEN Blob(store.refs[r][store.default[r]]) ELSE NoData",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadExact"
+        },
+        {
+          "id": "ReadStagedObject",
+          "edits": [
+            {
+              "old": "LET result == IF store.live[r] /\\ c \\in store.history[r] THEN Blob(c) ELSE NoData",
+              "new": "LET result == IF (\\E w \\in Writers: pending[w] # Idle /\\ pending[w].repo = r /\\ pending[w].commit = c)\n                  THEN Blob(c) ELSE IF store.live[r] /\\ c \\in store.history[r] THEN Blob(c) ELSE NoData",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadExact"
+        },
+        {
+          "id": "ReplaceLegacyMetadata",
+          "edits": [
+            {
+              "old": " !.written = @ \\cup {<<p.repo,s.epoch[p.repo],p.commit>>}]",
+              "new": " !.written = @ \\cup {<<p.repo,s.epoch[p.repo],p.commit>>},\n !.metadata[p.repo] = \"replacement\"]",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "LegacyMetadataPreserved"
+        },
+        {
+          "id": "MutatePeerReference",
+          "edits": [
+            {
+              "old": " !.written = @ \\cup {<<p.repo,s.epoch[p.repo],p.commit>>}]",
+              "new": " !.written = @ \\cup {<<p.repo,s.epoch[p.repo],p.commit>>},\n !.refs[IF p.repo = \"owned\" THEN \"peer\" ELSE \"owned\"][primary] = p.commit]",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PeerFrame"
+        }
+      ]
     }
   ]
 }
