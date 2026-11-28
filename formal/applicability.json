@@ -1,135 +1,33 @@
 {
   "version": 1,
-  "base_sha": "6eba31db4e017cdb1c591b0c5af1ca4426acc1cf",
+  "base_sha": "70695e3f5c040ea98b3132a6a097a4b7ebea31ab",
   "changes": [
     {
-      "path": ".github/workflows/ci.yml",
-      "sha256": "c5670b2b7453e27c3a362034adb81b9c25a9676017ff37cef2ed83ce7dd6fe38",
-      "disposition": "formal-infrastructure",
-      "reason": "Runs the ordinary local STS session checks against the CI build using the pinned boto3 environment and its captured binary digest.",
-      "models": []
-    },
-    {
-      "path": "README.md",
-      "sha256": "de0f9081477fd837e2d30b66741ac6114eee8b1ecb6389bca8b8b00abde51228",
+      "path": "internal/server/apidocs/openapi.json",
+      "sha256": "0f67f0d3ae2c3d23daece20590de82b29f259cdaa1b462524fb46f2e63cf4e07",
       "disposition": "documentation",
-      "reason": "Describe the shared local IAM role used by the Console, reference and signed STS SDK.",
+      "reason": "Correct only the Route53 tag exclusion to acknowledge the already shipped dedicated Console; all paths, queries, examples and schemas remain unchanged.",
       "models": []
     },
     {
-      "path": "docs/design/0001-go-standalone.md",
-      "sha256": "a7a01346273cdf840557544f71a5e2bc9137eed00605ece20cffbf5be5a011ef",
-      "disposition": "documentation",
-      "reason": "Describe the existing Console, IAM GetRole and signed STS trust boundary.",
-      "models": []
-    },
-    {
-      "path": "docs/iam.md",
-      "sha256": "c304fde2d4a79672862adc98a83cdcb10a0a70561966ca896399b83cb5f5ef4e",
-      "disposition": "documentation",
-      "reason": "Correct historical service-only trust descriptions to cover the existing native AWS principal and condition subset.",
-      "models": []
-    },
-    {
-      "path": "docs/sts-native.md",
-      "sha256": "91b3b32f075c8850f8ecc377a310302c5c925623ced7353fcd09f4a43b06e527",
-      "disposition": "documentation",
-      "reason": "Document the signed SDK restart and peer-isolation acceptance, and the IAM Console role trust, API reference and signed STS workflow.",
-      "models": []
-    },
-    {
-      "path": "internal/aws/sts.go",
-      "sha256": "bdcf05f345f77f2ea4bc3de294fe5eeec08d1274ec19002db53779a2395d1862",
-      "disposition": "modeled",
-      "reason": "Pass the native AssumeRole request context to final role-generation validation and session issuance.",
-      "models": [
-        {
-          "id": "STSSessionLifecycle",
-          "properties": [
-            "IssueRequiresAllGuards"
-          ],
-          "limits": "The model covers abstract issuance guards. Native handler tests check request cancellation and deadlines; they are outside the model."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/sts_credentials.go",
-      "sha256": "acf264a7076f10f893599b59354ab05681f3991c9c789f56ca57502d870b386a",
-      "disposition": "modeled",
-      "reason": "Use the issuing context for role validation and observe cancellation under the authority lock before publishing credentials.",
-      "models": [
-        {
-          "id": "STSSessionLifecycle",
-          "properties": [
-            "IssueRequiresAllGuards"
-          ],
-          "limits": "The model treats guarded issuance as an atomic transition. Go request cancellation, SQLite waits and mutex publication ordering are checked by implementation tests."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/sts_issue_context_test.go",
-      "sha256": "ad0b3b512af2883f1640cf0f0328ee4d3c157b17a7e883daa3d3f41746f21a7a",
+      "path": "test/e2e/route53_openapi.py",
+      "sha256": "6af50ee94a8347fa60237acb038746ff135d7dbbc36db49b369464e67b912945",
       "disposition": "test-support",
-      "reason": "Check cancellation and expiry before issuance publication and while real role validation waits for SQLite, with peer preservation and subsequent issuance.",
+      "reason": "Keep the exact current Route53 tag guard in sync with the corrected documentation while preserving the path contract hash and every historical projection.",
       "models": []
     },
     {
-      "path": "internal/server/web/app.js",
-      "sha256": "1c1516a3468cb2591ede197df038231495a315e49d2db31a4eaf6e02ea28c1a3",
-      "disposition": "modeled",
-      "reason": "The rebuilt bundle includes the registered login form used to enter the IAM Console. Only IAM principal labels and help text changed in the bundle inputs.",
-      "models": [
-        {
-          "id": "LoginInputIntent",
-          "properties": [
-            "NoEmptyPOST",
-            "SubmissionSelectionExact"
-          ],
-          "limits": "The existing model describes login submission. It does not model IAM role rendering, trust evaluation or STS. The signed SDK and browser fixture exercise those operations."
-        }
-      ]
-    },
-    {
-      "path": "test/e2e/sts_iam_console.py",
-      "sha256": "8957dda21eae6e7f510028d54fa697ac0eaa3c0ab259aa0092544e5b21dcfa55",
+      "path": "test/e2e/test_route53_openapi.py",
+      "sha256": "8a47a37baeb39ffcd748711a22082dbe094505db91602ba30edf4503dc32dbf9",
       "disposition": "test-support",
-      "reason": "Exercise the existing local IAM Console, cookie-authenticated Scalar GetRole and signed STS SDK against one private role, including refused writes and cleanup.",
+      "reason": "Positive current-tag and negative stale or broadened-tag controls; explicitly retain the exact inherited path digest.",
       "models": []
     },
     {
-      "path": "test/e2e/sts_session_lifecycle.py",
-      "sha256": "7d75ef091a0cd15844fde21f51fc938f168a8f9e9d89f7e80467920fc12ce80c",
+      "path": "test/e2e/route53_scalar_send.py",
+      "sha256": "183ef1f719db0e202db0857afd8ec3a9c21b23b6ffffc895d5013617ddc2b682",
       "disposition": "test-support",
-      "reason": "Runs two isolated local simulator authorities and verifies normal role assumption, session identity, owner restart, independent peer and cleanup.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/test_sts_session_lifecycle.py",
-      "sha256": "cdbc69f44d87a71409078f1d3061589b3479795cb79ab58267e6d245d01c5419",
-      "disposition": "test-support",
-      "reason": "Checks the permitted methods, signed requests and fixed local endpoints for the development-only STS SDK fixture.",
-      "models": []
-    },
-    {
-      "path": "tools/console/bundle-digests.json",
-      "sha256": "5393d7159183e02760596148d0ce24144ff35e69ae950108a6dff3c5aa54260a",
-      "disposition": "presentation",
-      "reason": "Record the rebuilt embedded application digest.",
-      "models": []
-    },
-    {
-      "path": "tools/console/bundle-inputs.json",
-      "sha256": "3bb25b4999735a46ce86e6ef7426fc5f53336246e7a1506a0b9dff3dbd8dc2ea",
-      "disposition": "presentation",
-      "reason": "Bind the IAM component changes in the deterministic Console build inventory.",
-      "models": []
-    },
-    {
-      "path": "tools/console/src/iam.jsx",
-      "sha256": "9b5e45d33177a549aa91c20edde2974e5c71fbbbdb70684987546fe7084bf89d",
-      "disposition": "presentation",
-      "reason": "Render existing saved AWS or Service trust principal statements with their effect and condition status; correct bilingual help and maximum session duration wording.",
+      "reason": "One genuine cookie-only Scalar TestDNSAnswer GET derived from the served specification and actual owned native records, with read-only owner and peer snapshots and native cleanup. No external DNS or SDK compatibility claim.",
       "models": []
     }
   ]

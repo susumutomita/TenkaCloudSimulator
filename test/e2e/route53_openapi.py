@@ -39,7 +39,7 @@ def validate_route53(spec):
         for operation in path.values() if isinstance(operation, dict) and 'operationId' in operation]
     assert all(ids.count(name) == 1 for name in ROUTE53_IDS), 'Route53 operation missing or duplicated'
     tags = [tag for tag in spec['tags'] if tag.get('name') == TAG]
-    assert tags == [{'name': TAG, 'description': 'Bounded public zones and saved-state answers only. No external DNS, private VPC zones, aliases, routing policies, console or CloudFormation.'}]
+    assert tags == [{'name': TAG, 'description': 'Bounded public zones and saved-state answers only. A dedicated Route53 Console is available. No external DNS, private VPC zones, aliases, routing policies or CloudFormation.'}]
     assert sum(group.get('tags', []).count(TAG) for group in spec['x-tagGroups']) == 1
     assert TAG in next(group['tags'] for group in spec['x-tagGroups'] if group['name'] == 'AWS')
 
