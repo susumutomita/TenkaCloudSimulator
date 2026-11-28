@@ -5,13 +5,13 @@
     {
       "path": "README.md",
       "disposition": "documentation",
-      "sha256": "bd834e302d2a204faa4e44b5ec9779226e1c434ec4c81f7ce89af263b9a69bda",
+      "sha256": "1a9cadcf8c52e2959b49bf3af9be94fd1164c9b30a6979948b149ccc3e177461",
       "reason": "Documents custom MSK configurations, immutable revision readback, cluster attachment and the shared native surface.",
       "models": []
     },
     {
       "path": "docs/aws-catalog-services.md",
-      "sha256": "971ca54910432277944e4c96fd36a5467aba87b7e52f6578eea2f0c29356583e",
+      "sha256": "6b6186b4aa1333ea94b20359af364cee58ff6378afcd166c6338234f52f62ce5",
       "disposition": "documentation",
       "reason": "Regenerates the reviewed Kafka operations and bounds for configuration storage, attachment and deletion.",
       "models": []
@@ -19,16 +19,40 @@
     {
       "path": "docs/aws-catalog.md",
       "disposition": "documentation",
-      "sha256": "ebe3e73ea3a702489858c826ca789c7bf52ff9934ca701f65b8ed4dc1b749538",
+      "sha256": "04c7412ea2e553dd4470084cdd6283c01a02b694e336eea37091bc181f226137",
       "reason": "Documents Kafka configuration fields, IAM and attachment semantics, cleanup order, and same-origin unsigned Scalar routing.",
       "models": []
     },
     {
       "path": "docs/design/0001-go-standalone.md",
       "disposition": "documentation",
-      "sha256": "db281cfbd88478703e704e27c67edc2190dc643975c8fe8f7d74607d0ee46467",
+      "sha256": "a5547010e908787dab6a669090beaeb9272d4e1f1a27304b02de2b181d63a9b4",
       "reason": "Records immutable storage, the transactional cluster dependency and shared authenticated reference routing.",
       "models": []
+    },
+    {
+      "path": "formal/models.json",
+      "models": [],
+      "reason": "Register the MSK authorization and context-bound SQLite queries in the existing CatalogResourceLifecycle source scope.",
+      "disposition": "formal-infrastructure",
+      "sha256": "0ec7b1ed9d4fed8ff1db730e2ac0d8fc2680bf1028deb87e4e114fc479c744bd"
+    },
+    {
+      "path": "internal/aws/catalog/engine.go",
+      "models": [
+        {
+          "id": "CatalogResourceLifecycle",
+          "properties": [
+            "AuthorizationFirst",
+            "FailureFrame",
+            "PeerFrame"
+          ],
+          "limits": "CatalogResourceLifecycle abstracts allowed and denied operations, failed state changes, and peer isolation. It does not model compound IAM snapshots, wire fields, SQL request cancellation, subnet validation, current TLS defaults or prefix paging. Native and client tests cover these behaviors."
+        }
+      ],
+      "reason": "Choose the declared MSK ForbiddenException after an identity-policy refusal while retaining existing Resource Groups targets and other services.",
+      "disposition": "modeled",
+      "sha256": "cb9a2cc2855473d9852e39b1d2391c165bfe1a075c9aec7c85c34c2f3a2cecb5"
     },
     {
       "path": "internal/aws/catalog/models/kafka.json",
@@ -51,8 +75,25 @@
       ]
     },
     {
+      "path": "internal/aws/catalog/msk_admission.go",
+      "models": [
+        {
+          "id": "CatalogResourceLifecycle",
+          "properties": [
+            "AuthorizationFirst",
+            "FailureFrame",
+            "PeerFrame"
+          ],
+          "limits": "CatalogResourceLifecycle abstracts allowed and denied operations, failed state changes, and peer isolation. It does not model compound IAM snapshots, wire fields, SQL request cancellation, subnet validation, current TLS defaults or prefix paging. Native and client tests cover these behaviors."
+        }
+      ],
+      "reason": "Capture one caller policy before any attached or tagged cluster write and bind preliminary SQLite reads to the incoming context.",
+      "disposition": "modeled",
+      "sha256": "88e8b2d52e15218f48306f1388785562f73640cf6e1a1cda0f6ef4d50760ac6e"
+    },
+    {
       "path": "internal/aws/catalog/msk_attachment_test.go",
-      "sha256": "94c6db3fad2a3f4cb314d2359a97dbb86d5b68b8dfab582729a5d944bfafb684",
+      "sha256": "adf9f849b6698534a87b0ce989e557a5ae74b54c5a828762388d092d6b4ba1f4",
       "disposition": "test-support",
       "reason": "Tests both authorization targets, compatibility, projections, rollback and deterministic competing transactions.",
       "models": []
@@ -65,9 +106,16 @@
       "models": []
     },
     {
+      "path": "internal/aws/catalog/msk_lifecycle_test.go",
+      "models": [],
+      "reason": "Measure compound policy snapshots, nine native IAM denials, filtered regional paging, persisted transport defaults, queued reads, and actual cancellation or deadline after four kinds of SQL mutation.",
+      "disposition": "test-support",
+      "sha256": "b5f1d8bced6707fd20ce35dcc121cce704c5540ee18a27d55cc85d19e3f37bc0"
+    },
+    {
       "path": "internal/aws/catalog/openapi.go",
       "disposition": "modeled",
-      "sha256": "a0e178cf9c1f429901eb26ae01f509de50ea6ba3dbb57cffe7762c9d53453120",
+      "sha256": "c3fda4f1675b8b45926773a6a61e0d245412cff2d8a09a8ed912b07eca1d6f98",
       "reason": "Provides the Kafka routing header value to the unsigned MSK reference without changing the runtime handler.",
       "models": [
         {
@@ -79,6 +127,40 @@
           "limits": "The registry associates this file with the catalog lifecycle model. That finite model covers abstract authorization and peer isolation. The embedded reference header, browser serialization and native HTTP request require the focused real-browser and SDK checks."
         }
       ]
+    },
+    {
+      "path": "internal/aws/catalog/protocol.go",
+      "models": [
+        {
+          "id": "CatalogResourceLifecycle",
+          "properties": [
+            "AuthorizationFirst",
+            "FailureFrame",
+            "PeerFrame"
+          ],
+          "limits": "CatalogResourceLifecycle abstracts allowed and denied operations, failed state changes, and peer isolation. It does not model compound IAM snapshots, wire fields, SQL request cancellation, subnet validation, current TLS defaults or prefix paging. Native and client tests cover these behaviors."
+        }
+      ],
+      "reason": "Write the modeled lowercase MSK message member on REST errors while retaining established spelling in other services.",
+      "disposition": "modeled",
+      "sha256": "81ab1c82bdef7c027affbd1f56bf7aaabca467c83a925cc5ba86cf0c61591383"
+    },
+    {
+      "path": "internal/aws/catalog/resource_group_query.go",
+      "models": [
+        {
+          "id": "CatalogResourceLifecycle",
+          "properties": [
+            "AuthorizationFirst",
+            "FailureFrame",
+            "PeerFrame"
+          ],
+          "limits": "CatalogResourceLifecycle abstracts allowed and denied operations, failed state changes, and peer isolation. It does not model compound IAM snapshots, wire fields, SQL request cancellation, subnet validation, current TLS defaults or prefix paging. Native and client tests cover these behaviors."
+        }
+      ],
+      "reason": "Move the equivalent service-owned ForbiddenException selector to the shared response path, retaining the existing Resource Groups checks.",
+      "disposition": "modeled",
+      "sha256": "f8918abb8564bf80893d0557fcaa2067cdafcc345d0f9b55a79440844bf76310"
     },
     {
       "path": "internal/aws/catalog/selection.json",
@@ -102,7 +184,7 @@
     },
     {
       "path": "internal/aws/catalog/semantics.go",
-      "sha256": "1bf1f3b055cb9971d41d47b743472342de5fbc269f6b57241ea1bbad66186609",
+      "sha256": "4bf0f1d3b35d673f1f0584857bc1158197e0f90e02d507255d955552ea195e42",
       "disposition": "modeled",
       "reason": "Derives creation metadata, uses wildcard authorization for the configured list, authorizes related create resources and validates references transactionally.",
       "models": [
@@ -117,13 +199,13 @@
             "FreshIDs",
             "ChildGuard"
           ],
-          "limits": "The finite catalog model covers authorization, failed writes, peer state, dependency deletion, uniqueness, quota and fresh IDs. Native tests cover multi-ARN authorization, opaque bytes, projections, region and version matching and concrete SQLite interleavings."
+          "limits": "CatalogResourceLifecycle abstracts allowed and denied operations, failed state changes, and peer isolation. It does not model compound IAM snapshots, wire fields, SQL request cancellation, subnet validation, current TLS defaults or prefix paging. Native and client tests cover these behaviors."
         }
       ]
     },
     {
       "path": "internal/aws/catalog/services_data.go",
-      "sha256": "bc0ce56cd3bb25f694c959fa74f51442a1e5390e24ae456e0e44f0ddec29cccb",
+      "sha256": "e0548325555bc7f308354222f8301d825987336d0e521bb11fe656aa306c1bb7",
       "disposition": "modeled",
       "reason": "Binds the five configuration operations, native attachment and revision validation, dependency guard and tag restrictions.",
       "models": [
@@ -138,13 +220,13 @@
             "FreshIDs",
             "ChildGuard"
           ],
-          "limits": "The finite catalog model covers authorization, failed writes, peer state, dependency deletion, uniqueness, quota and fresh IDs. Native tests cover multi-ARN authorization, opaque bytes, projections, region and version matching and concrete SQLite interleavings."
+          "limits": "CatalogResourceLifecycle abstracts allowed and denied operations, failed state changes, and peer isolation. It does not model compound IAM snapshots, wire fields, SQL request cancellation, subnet validation, current TLS defaults or prefix paging. Native and client tests cover these behaviors."
         }
       ]
     },
     {
       "path": "internal/aws/catalog/spec.go",
-      "sha256": "d04da59995a1905c80acd1ae406ef21b2215c4233786c5ddb6cf14105173ed88",
+      "sha256": "9c1fb6fa286924a26df1a71f95b46e9bcac39e0e428d23625ca4b3548f448865",
       "disposition": "modeled",
       "reason": "Declares opt-in creation metadata initialization, wildcard list authorization, create authorization on referenced ARNs and reference compatibility checks.",
       "models": [
@@ -173,7 +255,7 @@
     {
       "path": "internal/server/apidocs/catalog/kafka.json",
       "disposition": "presentation",
-      "sha256": "658caf0deb64ee54b51272377b3719a94247a57ebf51ee99d1951499a866c707",
+      "sha256": "cb909985f6304b9680d30a5b6b205d349a2af23644ed34272b00bcc3b8ca39f7",
       "reason": "Regenerates the served Kafka operations, attachment bounds and prefilled discriminator for unsigned reference requests.",
       "models": []
     },
@@ -193,7 +275,7 @@
     },
     {
       "path": "test/e2e/catalog_fixtures/kafka.json",
-      "sha256": "a02e5342a5d1b3f1fc2a1d91bf03e1b29c88f2b6939b1ee2953fbe1c7f9817d3",
+      "sha256": "10c591d5723d2ed8c6a1113e500a80d6b8c661672ad131fad04ce81bf736e3e1",
       "disposition": "test-support",
       "reason": "Runs native SDK configuration and attached and unattached cluster lifecycles across independent teams, restart, refusal in use and cleanup.",
       "models": []
@@ -201,8 +283,8 @@
     {
       "path": "test/e2e/msk_configuration_scalar.py",
       "disposition": "test-support",
-      "sha256": "02775984d0da2773f9fc16cb7e8f38bb32f67867a6fc13874a455ae1bc243475",
-      "reason": "Seeds two isolated teams using stock boto3, verifies two real Scalar Sends and console listings after restart, and checks cleanup.",
+      "sha256": "1f337b13436089292f520ee7e923573557eb70eac65cca35b1b04b134c25026f",
+      "reason": "Real same-state SDK, Cloudscape and Scalar fixture also checks nine modeled refusals and tagged creation with scoped grants on each team.",
       "models": []
     }
   ]
