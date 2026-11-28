@@ -105,7 +105,7 @@ console, CloudFormation adapter or Challenge integration.
   List versions through the native read-only API or compare saved definitions in the console.
   This does not execute the documents.
 - **Functions and messaging:** [Lambda](docs/lambda.md), [API Gateway](docs/apigateway.md),
-  [SQS](docs/sqs.md), [SNS](docs/sns.md) (local HTTP/HTTPS subscription Console and reference; no external delivery),
+  [SQS](docs/sqs.md), [SNS](docs/sns.md) (local HTTP/HTTPS subscriptions, native SQS fanout and scoped notification topic policies),
   [CloudWatch Logs](docs/cloudwatch-logs.md).
 - [AWS Support](docs/aws-support.md) stores practice cases, follow-up messages and small attachments in the team's local database.
 - **Identity and secrets:** [IAM](docs/iam.md), [native SDK / STS](docs/sts-native.md),

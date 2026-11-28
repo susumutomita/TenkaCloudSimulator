@@ -24,6 +24,8 @@ CloudFront の [ローカル distribution](../cloudfront-local-content.md) は�
 
 SSM の [ドキュメント履歴](../ssm-documents.md) はリージョンとドキュメント名で検索し、1 回の SQLite 読み取りで番号順のスナップショットを返す。ページごとに IAM を評価し、続きは対象・呼出者・スナップショットに結び付く。一覧に定義本文は含めず、Console の本文比較には別の GetDocument 権限が必要。ドキュメントは実行しない。
 
+SNS の `SetTopicAttributes` は Standard トピックに CodeStar Notifications 専用の発行ポリシーを保存する。取得時はトピックとポリシー、購読数を同じ SQLite スナップショットから読み取る。ポリシーの物理識別子は同じトピックの更新では保持し、削除後に同名で作り直すと新しくなる。[SNS ポリシー](../sns.md#codestar-notifications-topic-policies)。
+
 SNS の HTTP/HTTPS コンソールは native Query を呼び出し、通知先 URL をローカル SQLite に記録するだけで外部に接続しない。購読属性を読む際は ARN から親トピックを特定して IAM を先に評価し、購読と親の存在およびリージョンの一致を同じ読み取りで確認する。専用 Scalar は us-east-1 固定で通常のログインセッションを使い、コンソールの演習用 ID 選択を引き継がない。[対応範囲](../sns.md)。
 
 Service Quotas の5つの読み取りは、B2B Data Interchange の Profiles に限定する。公開デフォルト5と `CreateProfile` が実際に強制する総容量を区別し、使用済みの数を上限から差し引かない。`GetServiceQuota` は対象クォータ ARN、それ以外の4操作は各 action の Resource `*` を必要とする。実在するローカルの上限定義がなければ適用値を捏造しない。[対応リージョン・空の一覧・未対応範囲](../aws-catalog.md#b2b-data-interchange-profile-quota)
