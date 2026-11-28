@@ -70,6 +70,8 @@ def run_steps(team, fixture, steps, saved, called, token=None):
         for path, expected in step.get('expect', {}).items():
             actual = len(lookup(response, path[:-6])) if path.endswith('#count') else lookup(response, path)
             assert actual == substitute(expected, saved), (step['op'], path, actual, expected)
+        for path, text in step.get('expect_utf8_bytes', {}).items():
+            assert lookup(response, path) == text.encode('utf-8'), (step['op'], path)
 
 
 def main(selected=None):

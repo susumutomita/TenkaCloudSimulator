@@ -1,138 +1,168 @@
 {
   "version": 1,
-  "base_sha": "c70822a65ab85edf87cb42a9b45bb4e6ab7fb210",
+  "base_sha": "ba506afcf994ee7a7fc55246a2688c7987e79c64",
   "changes": [
     {
       "path": "README.md",
-      "sha256": "883b4426574b3e7584df311eb79f7090f8da92f0f00c3355dab43beebc6c133d",
+      "sha256": "ef847f598293c84e506289ae2a27a1e1b7b17715e7d9ff0c7a49f4372bb3b304",
       "disposition": "documentation",
-      "reason": "Describes in-memory Store lifetime, cancellation and file-backed persistence for operators and maintainers.",
+      "reason": "Announces immutable MSK custom configuration storage and revision readback.",
+      "models": []
+    },
+    {
+      "path": "docs/aws-catalog-services.md",
+      "sha256": "3c082bba282a3d24c92b2e2b27ff5fe0e05545e66292cf0b665b1b509d57a03e",
+      "disposition": "documentation",
+      "reason": "Regenerates the reviewed list of Kafka operations and bounds.",
+      "models": []
+    },
+    {
+      "path": "docs/aws-catalog.md",
+      "sha256": "a07a9d7fdda3b9628ad2daa6e0388497c5ebcb1d2ad3844f0c44641cada481f2",
+      "disposition": "documentation",
+      "reason": "Documents the stored fields, size budget, IAM and local deletion semantics of custom configurations.",
       "models": []
     },
     {
       "path": "docs/design/0001-go-standalone.md",
-      "sha256": "06dacef120c4e90f1d12d226bca223e469edbe4b92ace38a500ad44693955d9b",
+      "sha256": "66bb2abce54976a7f14e323e24982ee2521bae899821128cdc3fb8f20eca7f8c",
       "disposition": "documentation",
-      "reason": "Describes in-memory Store lifetime, cancellation and file-backed persistence for operators and maintainers.",
+      "reason": "Records the single-row revision design and broker execution boundary.",
       "models": []
     },
     {
-      "path": "formal/StoreConnectionLifetime.cfg",
-      "sha256": "9411896e27460c096b79d224d0f679e597bd0151d191ec4ba478dcbae04835d7",
+      "path": "internal/aws/catalog/models/kafka.json",
+      "sha256": "7815d92ee05be295c2b86f740347ea81c4f783432eb9351814b53d7acfc799cc",
       "disposition": "modeled",
-      "reason": "Defines the bounded connection, cancellation, committed row, isolation and disposal transitions and invariants.",
+      "reason": "Expands the pinned Kafka model subset to include five reviewed configuration operations.",
       "models": [
         {
-          "id": "StoreConnectionLifetime",
+          "id": "CatalogResourceLifecycle",
           "properties": [
-            "PeerBackingUnchanged",
-            "ConnectionTurnoverPreserves",
-            "CancelDiscardsStaged",
-            "DisposedBackingReleased",
-            "ClosedStoresUnavailable",
-            "ConnectionPragmasApplied",
-            "LiveCommittedData"
+            "AuthorizationFirst",
+            "FailureFrame",
+            "PeerFrame",
+            "UniqueNames",
+            "QuotaBound",
+            "FreshIDs"
           ],
-          "limits": "Two initialized in-memory stores with one logical row each, two values and six steps. Native tests cover SQLite schema, existing file state, driver reconnection, busy timeout, foreign keys and backing release."
+          "limits": "The finite catalog model covers authorization, failed writes, peer state, unique names, quota and distinct identities. Native tests check the MSK ARN, wire encoding, revision selector, REST projections and immutable bytes."
         }
       ]
     },
     {
-      "path": "formal/StoreConnectionLifetime.tla",
-      "sha256": "36ae769708422d165321418d9dad4d20ffa518de1d4c31adc644663caf411663",
+      "path": "internal/aws/catalog/msk_configuration_test.go",
+      "sha256": "907c8f46977d665d046914a1388064b730bad42cee1e731c799070cfca791203",
+      "disposition": "test-support",
+      "reason": "Exercises exact revision bytes and metadata, IAM targets, failure rollback, region isolation and bounded storage.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/catalog/selection.json",
+      "sha256": "332b79af20516ba07006c6f221a6819e451e2cb8ef3194e037506b14f7a3815e",
       "disposition": "modeled",
-      "reason": "Defines the bounded connection, cancellation, committed row, isolation and disposal transitions and invariants.",
+      "reason": "Registers the five supported configuration operations in the reviewed Kafka selection.",
       "models": [
         {
-          "id": "StoreConnectionLifetime",
+          "id": "CatalogResourceLifecycle",
           "properties": [
-            "PeerBackingUnchanged",
-            "ConnectionTurnoverPreserves",
-            "CancelDiscardsStaged",
-            "DisposedBackingReleased",
-            "ClosedStoresUnavailable",
-            "ConnectionPragmasApplied",
-            "LiveCommittedData"
+            "AuthorizationFirst",
+            "FailureFrame",
+            "PeerFrame",
+            "UniqueNames",
+            "QuotaBound",
+            "FreshIDs"
           ],
-          "limits": "Two initialized in-memory stores with one logical row each, two values and six steps. Native tests cover SQLite schema, existing file state, driver reconnection, busy timeout, foreign keys and backing release."
+          "limits": "The finite catalog model covers authorization, failed writes, peer state, unique names, quota and distinct identities. Native tests check the MSK ARN, wire encoding, revision selector, REST projections and immutable bytes."
         }
       ]
     },
     {
-      "path": "formal/models.json",
-      "sha256": "495eb9c1ca908f244784818f06876cba9704a6c187cc8223d1c73ec6a9bd0b03",
-      "disposition": "formal-infrastructure",
-      "reason": "Registers the bounded store model or protects its inventory, required controls and exact source paths.",
-      "models": []
-    },
-    {
-      "path": "internal/core/store.go",
-      "sha256": "6abd6cd378ed514fd857fcd6b33788f72e241f1cc7286c8f9c4a6e97e5da5277",
+      "path": "internal/aws/catalog/semantics.go",
+      "sha256": "edf8683a6033a5b2f4b9c70f70af79b13a198392c921107e8447bb2c99d5bf0f",
       "disposition": "modeled",
-      "reason": "The Store owns the in-memory backing across physical connection replacement, reapplies per-connection settings, and releases its private backing on close.",
+      "reason": "Initializes derived metadata on creation and uses the IAM wildcard for list operations that require it.",
       "models": [
         {
-          "id": "StoreConnectionLifetime",
+          "id": "CatalogResourceLifecycle",
           "properties": [
-            "PeerBackingUnchanged",
-            "ConnectionTurnoverPreserves",
-            "CancelDiscardsStaged",
-            "DisposedBackingReleased",
-            "ClosedStoresUnavailable",
-            "ConnectionPragmasApplied",
-            "LiveCommittedData"
+            "AuthorizationFirst",
+            "FailureFrame",
+            "PeerFrame",
+            "UniqueNames",
+            "QuotaBound",
+            "FreshIDs"
           ],
-          "limits": "Two initialized in-memory stores with one logical row each, two values and six steps. Native tests cover SQLite schema, existing file state, driver reconnection, busy timeout, foreign keys and backing release."
-        },
-        {
-          "id": "ObjectStore",
-          "properties": [
-            "NoOrphans"
-          ],
-          "limits": "The abstract property covers parent/child rows. Native tests check that SQLite rejects an orphan on a replacement connection."
+          "limits": "The finite catalog model covers authorization, failed writes, peer state, unique names, quota and distinct identities. Native tests check the MSK ARN, wire encoding, revision selector, REST projections and immutable bytes."
         }
       ]
     },
     {
-      "path": "internal/core/store_connection_test.go",
-      "sha256": "7dd7475616f7c4773bf613570043d372aa756d394f71f93c80aa43a60fd70e40",
+      "path": "internal/aws/catalog/services_data.go",
+      "sha256": "fa42c9b15c39218dbe034abd6888b62983a7dcab076c7b53707f8dc8af11ce8b",
       "disposition": "modeled",
-      "reason": "Forces cancellation and physical connection retirement through database/sql and checks committed rows, schema, connection settings, foreign keys, independent stores and release on close.",
+      "reason": "Binds the regional immutable configuration, native revision lookup, authorization targets and tag restriction.",
       "models": [
         {
-          "id": "StoreConnectionLifetime",
+          "id": "CatalogResourceLifecycle",
           "properties": [
-            "PeerBackingUnchanged",
-            "ConnectionTurnoverPreserves",
-            "CancelDiscardsStaged",
-            "DisposedBackingReleased",
-            "ClosedStoresUnavailable",
-            "ConnectionPragmasApplied",
-            "LiveCommittedData"
+            "AuthorizationFirst",
+            "FailureFrame",
+            "PeerFrame",
+            "UniqueNames",
+            "QuotaBound",
+            "FreshIDs"
           ],
-          "limits": "Two initialized in-memory stores with one logical row each, two values and six steps. Native tests cover SQLite schema, existing file state, driver reconnection, busy timeout, foreign keys and backing release."
+          "limits": "The finite catalog model covers authorization, failed writes, peer state, unique names, quota and distinct identities. Native tests check the MSK ARN, wire encoding, revision selector, REST projections and immutable bytes."
         }
       ]
     },
     {
-      "path": "scripts/formal_model_gate.py",
-      "sha256": "91dd0ddaebf98333baafd028d3bc33274af58baf8d662af192b1ad824ca7e945",
-      "disposition": "formal-infrastructure",
-      "reason": "Registers the bounded store model or protects its inventory, required controls and exact source paths.",
+      "path": "internal/aws/catalog/spec.go",
+      "sha256": "a1d64dad5a84bf31553ddd2b61d87f48b825376b26f18d4341948fb2a8eb3b54",
+      "disposition": "modeled",
+      "reason": "Declares the creation metadata hook and explicit list IAM resource selection.",
+      "models": [
+        {
+          "id": "CatalogResourceLifecycle",
+          "properties": [
+            "AuthorizationFirst",
+            "FailureFrame",
+            "PeerFrame",
+            "UniqueNames",
+            "QuotaBound",
+            "FreshIDs"
+          ],
+          "limits": "The finite catalog model covers authorization, failed writes, peer state, unique names, quota and distinct identities. Native tests check the MSK ARN, wire encoding, revision selector, REST projections and immutable bytes."
+        }
+      ]
+    },
+    {
+      "path": "internal/server/apidocs/catalog/index.json",
+      "sha256": "a411a8b0eddb498242035722817df4296c34119b6ab3ff23bafa520563420eee",
+      "disposition": "presentation",
+      "reason": "Regenerates the native catalog reference index for the additional Kafka methods.",
       "models": []
     },
     {
-      "path": "scripts/test-formal-applicability.py",
-      "sha256": "7546ea5da455ad7e76a78046f3013d33dfc51f92701a5891bff51cbf13c4566c",
-      "disposition": "formal-infrastructure",
-      "reason": "Exercises both deleting a historical model-scoped source and refusing to remove the permanently protected live Store implementation. An attempted exemption of the historical source also fails.",
+      "path": "internal/server/apidocs/catalog/kafka.json",
+      "sha256": "2b432db20080ae11a72bf2fbad18f27f2090618e92275eb9afd75439941b49d9",
+      "disposition": "presentation",
+      "reason": "Regenerates the Kafka reference for the reviewed configuration methods.",
       "models": []
     },
     {
-      "path": "scripts/test-formal-gate.py",
-      "sha256": "125bd9887869a3483db308ed0a2a942ca71acaec09a77323fb11f18eea2cf5a1",
-      "disposition": "formal-infrastructure",
-      "reason": "Registers the bounded store model or protects its inventory, required controls and exact source paths.",
+      "path": "test/e2e/aws_catalog_fixtures.py",
+      "sha256": "035146eb787e3bf1ab84c6ae57fbc96429b6a4de06f1a4c9a86ca4ece0236b54",
+      "disposition": "test-support",
+      "reason": "Adds an explicit byte comparison for a native SDK response in an existing fixture.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/catalog_fixtures/kafka.json",
+      "sha256": "7b7a590f74ee5444533f5d84be35b4ecc0356cd04b82ec7b3bb92060d49f4899",
+      "disposition": "test-support",
+      "reason": "Exercises native configuration metadata, retained revision bytes, separate teams, restart and cleanup.",
       "models": []
     }
   ]

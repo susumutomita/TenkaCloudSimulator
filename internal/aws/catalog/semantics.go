@@ -758,6 +758,9 @@ func (q *request) prepareCreate(ecsRevision int) (row, *row, error) {
 	if err := q.rotateToken(res, document); err != nil {
 		return row{}, nil, err
 	}
+	if res.InitDocument != nil {
+		res.InitDocument(document)
+	}
 	r.Document = document
 	return r, parent, nil
 }
@@ -1160,7 +1163,11 @@ func (q *request) list() (map[string]any, error) {
 			}
 		}
 	}
-	if err := q.authorize(q.formatARN(res, "*", "*", parent)); err != nil {
+	listResource := q.formatARN(res, "*", "*", parent)
+	if q.op.ListRequiresWildcard {
+		listResource = "*"
+	}
+	if err := q.authorize(listResource); err != nil {
 		return nil, err
 	}
 	rows, err := list(q.e.store.db, q.b.spec.Model, q.region, res.Kind, parentID(parent))

@@ -49,6 +49,8 @@ type Op struct {
 	// AuthorizeParent binds a child Read/Put to its resolved parent's ARN.
 	// The child ARN remains an internal storage identity, not an IAM target.
 	AuthorizeParent bool
+	// ListRequiresWildcard marks a list action whose IAM resource must be "*".
+	ListRequiresWildcard bool
 	// Touch lists stored members set to the current time by this operation.
 	Touch []string
 	// Set assigns fixed values to stored members after a successful mutation,
@@ -138,6 +140,8 @@ type Resource struct {
 	// are generators: $arn, $id, $name, $now, $account, $region, $parentArn,
 	// $parentId, $parentName. Other values are stored literally.
 	Generate map[string]any
+	// InitDocument derives creation metadata from the completed initial document.
+	InitDocument func(document map[string]any)
 	// Aliases maps create/update input members onto differently named
 	// stored members of the official resource shape.
 	Aliases map[string]string

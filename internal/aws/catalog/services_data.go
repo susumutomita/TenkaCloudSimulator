@@ -672,6 +672,10 @@ var msk = &Service{
 			ARNMember: "ClusterArn", NameMember: "ClusterName", Unique: true, Limit: 20,
 			Generate: map[string]any{"State": "CREATING", "CreationTime": "$now", "CurrentVersion": mskClusterVersion, "EnhancedMonitoring": "DEFAULT", "StorageMode": "LOCAL",
 				"EncryptionInfo": map[string]any{"EncryptionInTransit": map[string]any{"ClientBroker": "TLS_PLAINTEXT", "InCluster": true}}}},
+		{Kind: "configuration", Shape: "Configuration", ID: "uuid", ARN: "arn:{partition}:kafka:{region}:{account}:configuration/{name}/{id}",
+			ARNMember: "Arn", NameMember: "Name", Unique: true, Limit: 100,
+			Beside: []string{"ServerProperties", "Revision"}, Generate: map[string]any{"State": "ACTIVE", "CreationTime": "$now", "Revision": 1},
+			InitDocument: mskFirstConfigurationRevision},
 	},
 	Ops: []Op{
 		{Name: "CreateCluster", Kind: Create, Resource: "cluster", Check: mskCreateCluster},
@@ -679,15 +683,54 @@ var msk = &Service{
 		{Name: "ListClusters", Kind: List, Resource: "cluster"},
 		{Name: "DeleteCluster", Kind: Delete, Resource: "cluster", Lookup: "ClusterArn", Accept: []string{"CurrentVersion"}, Check: mskCurrentVersion,
 			Set: map[string]any{"State": "DELETING"}},
-		{Name: "TagResource", Kind: Tag, Lookup: "ResourceArn"},
-		{Name: "UntagResource", Kind: Untag, Lookup: "ResourceArn"},
-		{Name: "ListTagsForResource", Kind: ListTags, Lookup: "ResourceArn"},
+		{Name: "CreateConfiguration", Kind: Create, Resource: "configuration", Check: mskConfigurationName},
+		{Name: "DescribeConfigurationRevision", Kind: Read, Resource: "configuration", Lookup: "Arn", Match: []string{"Revision"}, Check: mskConfigurationARN},
+		{Name: "DescribeConfiguration", Kind: Read, Resource: "configuration", Lookup: "Arn", Check: mskConfigurationARN},
+		{Name: "ListConfigurations", Kind: List, Resource: "configuration", ListRequiresWildcard: true},
+		{Name: "DeleteConfiguration", Kind: Delete, Resource: "configuration", Lookup: "Arn", Check: mskConfigurationARN, Set: map[string]any{"State": "DELETING"}},
+		{Name: "TagResource", Kind: Tag, Lookup: "ResourceArn", Check: mskTagTarget},
+		{Name: "UntagResource", Kind: Untag, Lookup: "ResourceArn", Check: mskTagTarget},
+		{Name: "ListTagsForResource", Kind: ListTags, Lookup: "ResourceArn", Check: mskTagTarget},
 	},
 	Bounds: []string{
 		"Provisioned clusters are configuration records that stay CREATING: no broker, ZooKeeper or KRaft controller, topic, bootstrap endpoint or network interface exists, no record is produced or consumed, and GetBootstrapBrokers, topic, replicator, VPC connection and SCRAM secret APIs return UnknownOperationException with HTTP 501.",
-		"The V2 and serverless APIs, configurations (whose server properties need revision storage), ConfigurationInfo, cluster policies and every cluster update operation are not implemented. CurrentVersion is the constant K1 because no update is possible, and DeleteCluster refuses any other version.",
+		"Custom configurations store one immutable revision. DescribeConfigurationRevision returns the original server.properties bytes. The 64 KiB catalog record limit includes the base64 content and metadata. A configuration can be deleted immediately, with a DELETING acknowledgement. UpdateConfiguration, ListConfigurationRevisions and attaching a configuration to a cluster are unavailable.",
+		"The V2 and serverless APIs, cluster policies and every cluster update operation are not implemented. CurrentVersion is the constant K1 because no update is possible, and DeleteCluster refuses any other version.",
 		"NumberOfBrokerNodes must be a multiple of the number of client subnets; subnets, security groups, certificate authorities, KMS keys and log destinations are stored without being checked. ListClusters refuses ClusterNameFilter.",
 	},
+}
+
+var mskConfigurationNamePattern = regexp.MustCompile(`^[0-9A-Za-z][0-9A-Za-z-]*$`)
+var mskConfigurationARNPattern = regexp.MustCompile(`^arn:aws:kafka:[a-z0-9-]+:[0-9]{12}:configuration/[0-9A-Za-z][0-9A-Za-z-]*/[0-9A-Za-z-]+$`)
+
+func mskConfigurationName(input map[string]any) error {
+	if !mskConfigurationNamePattern.MatchString(dataText(input["Name"])) {
+		return Failure("BadRequestException", "Use a configuration name beginning with a letter or digit and containing only letters, digits or hyphens.")
+	}
+	return nil
+}
+
+func mskFirstConfigurationRevision(document map[string]any) {
+	latest := map[string]any{"Revision": document["Revision"], "CreationTime": document["CreationTime"]}
+	if description, supplied := document["Description"]; supplied {
+		latest["Description"] = description
+	}
+	document["LatestRevision"] = latest
+}
+
+func mskConfigurationARN(input map[string]any) error {
+	if !mskConfigurationARNPattern.MatchString(dataText(input["Arn"])) {
+		return Failure("BadRequestException", "Supply an MSK configuration ARN.")
+	}
+	return nil
+}
+
+// MSK configuration ARNs are outside the supported resources for these tag actions.
+func mskTagTarget(input map[string]any) error {
+	if mskConfigurationARNPattern.MatchString(dataText(input["ResourceArn"])) {
+		return Failure("BadRequestException", "MSK configurations do not support this tag operation.")
+	}
+	return nil
 }
 
 // mskCreateCluster checks the broker layout and stores the requested Kafka
