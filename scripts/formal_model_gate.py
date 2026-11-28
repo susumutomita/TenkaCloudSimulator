@@ -4874,6 +4874,81 @@ REQUIRED_SOURCE_SCOPES['ALBNativePlacement'] = {
 }
 
 
+BASE_MODELS.add('ALBConsoleWorkflow')
+BASE_INVARIANTS['ALBConsoleWorkflow'] = {
+    'TypeOK',
+    'ReadAdmission',
+    'TruthfulHealth',
+    'DeniedProjection',
+    'ScopeFrame',
+    'RetiredWriteFrame',
+    'SingleSend',
+    'NativeFrame',
+    'Acknowledgement',
+    'CompleteDetail',
+    'BoundReadback',
+    'CheckedHealth',
+    'ObservedOnly',
+}
+REQUIRED_MUTANTS['ALBConsoleWorkflow'] = {
+    'ReuseTicketAcrossSource',
+    'ReuseTicketAcrossRegion',
+    'ReuseTicketAcrossPrincipal',
+    'ReuseTicketAcrossSection',
+    'ReuseTicketAcrossBalancerSelection',
+    'ReuseTicketAcrossGroupSelection',
+    'ReuseTicketAcrossMount',
+    'PublishRetiredSuccess',
+    'EraseFreshResultWithRetiredDenial',
+    'PublishDetailWithoutListeners',
+    'PublishDetailWithoutGroups',
+    'PublishGroupWithoutHealth',
+    'PublishWrongARN',
+    'DescribeEmptyHealthAsHealthy',
+    'DescribeUnhealthyAsHealthy',
+    'DescribeDeniedHealthAsHealthy',
+    'RestorePageAndMarkerAfterDenial',
+    'CarryPreviousRowsAndCursor',
+    'CarryUncertainWriteToNewScope',
+    'PublishFormerWriteAfterSwitch',
+    'SubmitSiblingArn',
+    'ChangePathOnRefusal',
+    'OverwriteSiblingPath',
+    'AcknowledgeWithoutReread',
+    'AcceptWrongAckARN',
+    'AcceptWrongAckPath',
+    'AcceptLostAcknowledgement',
+    'TreatDeniedWriteAsUncertain',
+    'IgnoreSavedPathMismatch',
+    'ReadSiblingGroupAsSaved',
+    'SkipDeniedSavedGroup',
+    'SkipUnavailableSavedGroup',
+    'CertifySavedPathBeforeHealth',
+    'AcceptOtherGroupHealth',
+    'AcceptDeniedHealth',
+    'AcceptUnavailableHealth',
+    'PublishEmptyReadbackAsHealthy',
+    'ReleaseFromOtherArn',
+    'ReleaseFromInventory',
+    'ReleaseFromDeniedRefresh',
+    'ReleaseFromFailedRefresh',
+    'ReleaseFromImplicitRefresh',
+    'ClaimLostWriteFromCurrentValue',
+    'ReportRequestedPathAfterRefusedLostAck',
+    'IgnoreConfirmedGroupAbsence',
+    'ResendAfterLostAck',
+    'RetryAutomaticallyAfterLostAck',
+}
+REQUIRED_SOURCE_SCOPES['ALBConsoleWorkflow'] = {
+    'internal/server/server.go',
+    'internal/server/web/app.js',
+    'tools/console/src/console-navigation.mjs',
+    'tools/console/src/elb.jsx',
+    'tools/console/src/elb.mjs',
+    'tools/console/src/main.jsx',
+}
+
+
 def load_registry(root, relative='formal/models.json'):
     root = Path(root)
     registry_path = asset(root, relative)

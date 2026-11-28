@@ -30265,6 +30265,555 @@
           "expect_invariant": "ReopenUnchanged"
         }
       ]
+    },
+    {
+      "id": "ALBConsoleWorkflow",
+      "model": "formal/ALBConsoleWorkflow.tla",
+      "config": "formal/ALBConsoleWorkflow.cfg",
+      "bounds": "Separate read and write trials. At most three read tasks, one active task and one retired result; one scope change may reuse a ticket number. Two symbolic balancer and group identifiers, with independently changing selections. A write trial begins at one selected saved Lambda target group. One explicit ModifyTargetGroup with two possible store outcomes, one independent group removal and arbitrary repeat observations within the finite graph.",
+      "properties": [
+        "TypeOK",
+        "ReadAdmission",
+        "TruthfulHealth",
+        "DeniedProjection",
+        "ScopeFrame",
+        "RetiredWriteFrame",
+        "SingleSend",
+        "NativeFrame",
+        "Acknowledgement",
+        "CompleteDetail",
+        "BoundReadback",
+        "CheckedHealth",
+        "ObservedOnly"
+      ],
+      "limits": "Scope and task identity abstract the request source, section, principal, region, selected ARN and mount. A detail is published only after its required native results are available. Path and health checks express logical requirements of one joined read; the model does not impose a transport completion order. A recovery reread observes the current group path or modeled absence without verifying the past write. The interlock belongs to that mounted scope. Placement, listener and target fields are represented by typed symbolic outcomes. Explicit reads seeded at a selected resource do not model navigation reachability, React, XML decoding, IAM, HTTP delivery, physical deployment, native concurrency or actual listener traffic. Routing and bundle bindings concern component selection and retirement only.",
+      "source_scope": [
+        "internal/server/server.go",
+        "internal/server/web/app.js",
+        "tools/console/src/console-navigation.mjs",
+        "tools/console/src/elb.jsx",
+        "tools/console/src/elb.mjs",
+        "tools/console/src/main.jsx"
+      ],
+      "mutants": [
+        {
+          "id": "ReuseTicketAcrossSource",
+          "edits": [
+            {
+              "old": "Current(q) == q \\in ui.active /\\ q.scope = ui.scope",
+              "new": "Current(q) == (q \\in ui.active /\\ q.scope = ui.scope) \\/ (\\E a \\in ui.active : a.id = q.id /\\ [a.scope EXCEPT !.source = q.scope.source] = q.scope)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadAdmission"
+        },
+        {
+          "id": "ReuseTicketAcrossRegion",
+          "edits": [
+            {
+              "old": "Current(q) == q \\in ui.active /\\ q.scope = ui.scope",
+              "new": "Current(q) == (q \\in ui.active /\\ q.scope = ui.scope) \\/ (\\E a \\in ui.active : a.id = q.id /\\ [a.scope EXCEPT !.region = q.scope.region] = q.scope)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadAdmission"
+        },
+        {
+          "id": "ReuseTicketAcrossPrincipal",
+          "edits": [
+            {
+              "old": "Current(q) == q \\in ui.active /\\ q.scope = ui.scope",
+              "new": "Current(q) == (q \\in ui.active /\\ q.scope = ui.scope) \\/ (\\E a \\in ui.active : a.id = q.id /\\ [a.scope EXCEPT !.principal = q.scope.principal] = q.scope)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadAdmission"
+        },
+        {
+          "id": "ReuseTicketAcrossSection",
+          "edits": [
+            {
+              "old": "Current(q) == q \\in ui.active /\\ q.scope = ui.scope",
+              "new": "Current(q) == (q \\in ui.active /\\ q.scope = ui.scope) \\/ (\\E a \\in ui.active : a.id = q.id /\\ [a.scope EXCEPT !.section = q.scope.section] = q.scope)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadAdmission"
+        },
+        {
+          "id": "ReuseTicketAcrossBalancerSelection",
+          "edits": [
+            {
+              "old": "Current(q) == q \\in ui.active /\\ q.scope = ui.scope",
+              "new": "Current(q) == (q \\in ui.active /\\ q.scope = ui.scope) \\/ (\\E a \\in ui.active : a.id = q.id /\\ [a.scope EXCEPT !.alb = q.scope.alb] = q.scope)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadAdmission"
+        },
+        {
+          "id": "ReuseTicketAcrossGroupSelection",
+          "edits": [
+            {
+              "old": "Current(q) == q \\in ui.active /\\ q.scope = ui.scope",
+              "new": "Current(q) == (q \\in ui.active /\\ q.scope = ui.scope) \\/ (\\E a \\in ui.active : a.id = q.id /\\ [a.scope EXCEPT !.group = q.scope.group] = q.scope)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadAdmission"
+        },
+        {
+          "id": "ReuseTicketAcrossMount",
+          "edits": [
+            {
+              "old": "Current(q) == q \\in ui.active /\\ q.scope = ui.scope",
+              "new": "Current(q) == (q \\in ui.active /\\ q.scope = ui.scope) \\/ (\\E a \\in ui.active : a.id = q.id /\\ [a.scope EXCEPT !.mount = q.scope.mount] = q.scope)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadAdmission"
+        },
+        {
+          "id": "PublishRetiredSuccess",
+          "edits": [
+            {
+              "old": "IF Current(q) THEN Projection(q.kind,r) ELSE @",
+              "new": "IF Current(q) \\/ (q \\in ui.retired /\\ r = \"ok\") THEN Projection(q.kind,r) ELSE @",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadAdmission"
+        },
+        {
+          "id": "EraseFreshResultWithRetiredDenial",
+          "edits": [
+            {
+              "old": "IF Current(q) THEN Projection(q.kind,r) ELSE @",
+              "new": "IF Current(q) \\/ (q \\in ui.retired /\\ r = \"denied\" /\\ ui.view.available) THEN Projection(q.kind,r) ELSE @",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadAdmission"
+        },
+        {
+          "id": "PublishDetailWithoutListeners",
+          "edits": [
+            {
+              "old": "   [] OTHER -> EmptyView",
+              "new": "   [] r = \"listenerFailed\" -> Ready(k,FALSE)\n   [] OTHER -> EmptyView",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CompleteDetail"
+        },
+        {
+          "id": "PublishDetailWithoutGroups",
+          "edits": [
+            {
+              "old": "   [] OTHER -> EmptyView",
+              "new": "   [] r = \"groupsFailed\" -> Ready(k,FALSE)\n   [] OTHER -> EmptyView",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CompleteDetail"
+        },
+        {
+          "id": "PublishGroupWithoutHealth",
+          "edits": [
+            {
+              "old": "   [] OTHER -> EmptyView",
+              "new": "   [] r = \"healthFailed\" -> Ready(k,FALSE)\n   [] OTHER -> EmptyView",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "TruthfulHealth"
+        },
+        {
+          "id": "PublishWrongARN",
+          "edits": [
+            {
+              "old": "   [] OTHER -> EmptyView",
+              "new": "   [] r = \"wrongArn\" -> Ready(k,FALSE)\n   [] OTHER -> EmptyView",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CompleteDetail"
+        },
+        {
+          "id": "DescribeEmptyHealthAsHealthy",
+          "edits": [
+            {
+              "old": "r = \"empty\" -> Ready(\"empty\",FALSE)",
+              "new": "r = \"empty\" -> Ready(IF k = \"groupDetail\" THEN \"healthy\" ELSE \"empty\",FALSE)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "TruthfulHealth"
+        },
+        {
+          "id": "DescribeUnhealthyAsHealthy",
+          "edits": [
+            {
+              "old": "r = \"unhealthy\" -> Ready(\"unhealthy\",FALSE)",
+              "new": "r = \"unhealthy\" -> Ready(\"healthy\",FALSE)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "TruthfulHealth"
+        },
+        {
+          "id": "DescribeDeniedHealthAsHealthy",
+          "edits": [
+            {
+              "old": "r = \"denied\" -> EmptyView",
+              "new": "r = \"denied\" -> IF k = \"groupDetail\" THEN Ready(\"healthy\",FALSE) ELSE EmptyView",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "TruthfulHealth"
+        },
+        {
+          "id": "RestorePageAndMarkerAfterDenial",
+          "edits": [
+            {
+              "old": "r = \"denied\" -> EmptyView",
+              "new": "r = \"denied\" -> IF k = \"nextPage\" THEN Ready(\"loadBalancers\",TRUE) ELSE EmptyView",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "DeniedProjection"
+        },
+        {
+          "id": "CarryPreviousRowsAndCursor",
+          "edits": [
+            {
+              "old": "!.view = EmptyView, !.w = Rest,",
+              "new": "!.view = @, !.w = Rest,",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ScopeFrame"
+        },
+        {
+          "id": "CarryUncertainWriteToNewScope",
+          "edits": [
+            {
+              "old": "!.view = EmptyView, !.w = Rest,",
+              "new": "!.view = EmptyView, !.w = IF ui.w.phase = \"uncertain\" THEN @ ELSE Rest,",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ScopeFrame"
+        },
+        {
+          "id": "PublishFormerWriteAfterSwitch",
+          "edits": [
+            {
+              "old": "[ui EXCEPT !.retiredWrite = FALSE]",
+              "new": "[ui EXCEPT !.w.verified = TRUE, !.retiredWrite = FALSE]",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "RetiredWriteFrame"
+        },
+        {
+          "id": "SubmitSiblingArn",
+          "edits": [
+            {
+              "old": "!.w.sent = 1, !.w.arn = ui.scope.group",
+              "new": "!.w.sent = 1, !.w.arn = \"B\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "SingleSend"
+        },
+        {
+          "id": "ChangePathOnRefusal",
+          "edits": [
+            {
+              "old": "IF outcome = \"applied\" THEN \"desired\" ELSE @",
+              "new": "\"desired\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "NativeFrame"
+        },
+        {
+          "id": "OverwriteSiblingPath",
+          "edits": [
+            {
+              "old": "!.w.outcome = outcome,",
+              "new": "!.w.outcome = outcome, !.sibling = IF outcome = \"applied\" THEN \"desired\" ELSE @,",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "NativeFrame"
+        },
+        {
+          "id": "AcknowledgeWithoutReread",
+          "edits": [
+            {
+              "old": "IN ui' = [ui EXCEPT !.w.phase = phase]",
+              "new": "IN ui' = [ui EXCEPT !.w.phase = phase, !.w.verified = r = \"matching\"]",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "Acknowledgement"
+        },
+        {
+          "id": "AcceptWrongAckARN",
+          "edits": [
+            {
+              "old": "r = \"matching\" -> \"checkingPath\"",
+              "new": "r \\in {\"matching\",\"wrongArn\"} -> \"checkingPath\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "Acknowledgement"
+        },
+        {
+          "id": "AcceptWrongAckPath",
+          "edits": [
+            {
+              "old": "r = \"matching\" -> \"checkingPath\"",
+              "new": "r \\in {\"matching\",\"wrongPath\"} -> \"checkingPath\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "Acknowledgement"
+        },
+        {
+          "id": "AcceptLostAcknowledgement",
+          "edits": [
+            {
+              "old": "r = \"matching\" -> \"checkingPath\"",
+              "new": "r \\in {\"matching\",\"lost\"} -> \"checkingPath\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "Acknowledgement"
+        },
+        {
+          "id": "TreatDeniedWriteAsUncertain",
+          "edits": [
+            {
+              "old": "r = \"denied\" -> \"refused\"",
+              "new": "r = \"denied\" -> \"uncertain\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "Acknowledgement"
+        },
+        {
+          "id": "IgnoreSavedPathMismatch",
+          "edits": [
+            {
+              "old": "IF r = \"matching\" THEN \"checkingHealth\" ELSE \"uncertain\"",
+              "new": "IF r \\in {\"matching\",\"different\"} THEN \"checkingHealth\" ELSE \"uncertain\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "BoundReadback"
+        },
+        {
+          "id": "ReadSiblingGroupAsSaved",
+          "edits": [
+            {
+              "old": "IF r = \"matching\" THEN \"checkingHealth\" ELSE \"uncertain\"",
+              "new": "IF r \\in {\"matching\",\"wrongArn\"} THEN \"checkingHealth\" ELSE \"uncertain\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "BoundReadback"
+        },
+        {
+          "id": "SkipDeniedSavedGroup",
+          "edits": [
+            {
+              "old": "IF r = \"matching\" THEN \"checkingHealth\" ELSE \"uncertain\"",
+              "new": "IF r \\in {\"matching\",\"denied\"} THEN \"checkingHealth\" ELSE \"uncertain\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "BoundReadback"
+        },
+        {
+          "id": "SkipUnavailableSavedGroup",
+          "edits": [
+            {
+              "old": "IF r = \"matching\" THEN \"checkingHealth\" ELSE \"uncertain\"",
+              "new": "IF r \\in {\"matching\",\"failed\"} THEN \"checkingHealth\" ELSE \"uncertain\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "BoundReadback"
+        },
+        {
+          "id": "CertifySavedPathBeforeHealth",
+          "edits": [
+            {
+              "old": "!.w.seenPath = IF r = \"matching\"",
+              "new": "!.w.verified = r = \"matching\", !.w.seenPath = IF r = \"matching\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "BoundReadback"
+        },
+        {
+          "id": "AcceptOtherGroupHealth",
+          "edits": [
+            {
+              "old": "LET typed == r \\in {\"healthy\",\"unhealthy\",\"empty\"}",
+              "new": "LET typed == r \\in {\"healthy\",\"unhealthy\",\"empty\",\"wrongArn\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CheckedHealth"
+        },
+        {
+          "id": "AcceptDeniedHealth",
+          "edits": [
+            {
+              "old": "LET typed == r \\in {\"healthy\",\"unhealthy\",\"empty\"}",
+              "new": "LET typed == r \\in {\"healthy\",\"unhealthy\",\"empty\",\"denied\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CheckedHealth"
+        },
+        {
+          "id": "AcceptUnavailableHealth",
+          "edits": [
+            {
+              "old": "LET typed == r \\in {\"healthy\",\"unhealthy\",\"empty\"}",
+              "new": "LET typed == r \\in {\"healthy\",\"unhealthy\",\"empty\",\"failed\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CheckedHealth"
+        },
+        {
+          "id": "PublishEmptyReadbackAsHealthy",
+          "edits": [
+            {
+              "old": "IF typed THEN r ELSE \"none\"",
+              "new": "IF r = \"empty\" THEN \"healthy\" ELSE IF typed THEN r ELSE \"none\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CheckedHealth"
+        },
+        {
+          "id": "ReleaseFromOtherArn",
+          "edits": [
+            {
+              "old": "LET exact == k \\in {\"exact\",\"absent\"}",
+              "new": "LET exact == k \\in {\"exact\",\"absent\",\"otherArn\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ObservedOnly"
+        },
+        {
+          "id": "ReleaseFromInventory",
+          "edits": [
+            {
+              "old": "LET exact == k \\in {\"exact\",\"absent\"}",
+              "new": "LET exact == k \\in {\"exact\",\"absent\",\"list\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ObservedOnly"
+        },
+        {
+          "id": "ReleaseFromDeniedRefresh",
+          "edits": [
+            {
+              "old": "LET exact == k \\in {\"exact\",\"absent\"}",
+              "new": "LET exact == k \\in {\"exact\",\"absent\",\"denied\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ObservedOnly"
+        },
+        {
+          "id": "ReleaseFromFailedRefresh",
+          "edits": [
+            {
+              "old": "LET exact == k \\in {\"exact\",\"absent\"}",
+              "new": "LET exact == k \\in {\"exact\",\"absent\",\"failed\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ObservedOnly"
+        },
+        {
+          "id": "ReleaseFromImplicitRefresh",
+          "edits": [
+            {
+              "old": "LET exact == k \\in {\"exact\",\"absent\"}",
+              "new": "LET exact == k \\in {\"exact\",\"absent\",\"automatic\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ObservedOnly"
+        },
+        {
+          "id": "ClaimLostWriteFromCurrentValue",
+          "edits": [
+            {
+              "old": "!.w.phase = \"observed\", !.w.seenPath",
+              "new": "!.w.phase = \"observed\", !.w.verified = k = \"exact\" /\\ ui.target = \"desired\", !.w.seenPath",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ObservedOnly"
+        },
+        {
+          "id": "ReportRequestedPathAfterRefusedLostAck",
+          "edits": [
+            {
+              "old": "IF k = \"absent\" THEN \"absent\" ELSE ui.target",
+              "new": "IF k = \"absent\" THEN \"absent\" ELSE \"desired\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ObservedOnly"
+        },
+        {
+          "id": "IgnoreConfirmedGroupAbsence",
+          "edits": [
+            {
+              "old": "LET exact == k \\in {\"exact\",\"absent\"}",
+              "new": "LET exact == k = \"exact\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ObservedOnly"
+        },
+        {
+          "id": "ResendAfterLostAck",
+          "edits": [
+            {
+              "old": "                       ELSE ui\n /\\ last' = Mark(\"recover\"",
+              "new": "                       ELSE IF k = \"resend\" THEN [ui EXCEPT !.w.phase = \"sending\", !.w.sent = @+1] ELSE ui\n /\\ last' = Mark(\"recover\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ObservedOnly"
+        },
+        {
+          "id": "RetryAutomaticallyAfterLostAck",
+          "edits": [
+            {
+              "old": "                       ELSE ui\n /\\ last' = Mark(\"recover\"",
+              "new": "                       ELSE IF k = \"automatic\" THEN [ui EXCEPT !.w.phase = \"sending\", !.w.sent = @+1] ELSE ui\n /\\ last' = Mark(\"recover\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ObservedOnly"
+        }
+      ]
     }
   ]
 }
