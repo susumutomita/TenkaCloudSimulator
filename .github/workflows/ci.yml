@@ -12,7 +12,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7.0.1
         with:
-          ref: d696c0f5c364d19a45e1cc4c13aecd8da7b674b6
+          ref: 17e30e18d0eb2216961158ae48f8ef42a20225e8
           persist-credentials: false
       - uses: actions/setup-go@v6.5.0
         with:
@@ -21,13 +21,13 @@ jobs:
       - name: Build the clean immutable product before receipts
         run: |
           test "$(id -u)" -ne 0
-          test "$(git rev-parse HEAD)" = d696c0f5c364d19a45e1cc4c13aecd8da7b674b6
+          test "$(git rev-parse HEAD)" = 17e30e18d0eb2216961158ae48f8ef42a20225e8
           test "$(git rev-parse 'HEAD^{tree}')" = 0f5776bef7e66bd003d8d628f78c564723efa7db
           test -z "$(git status --porcelain)"
           make build
           mkdir -p "$RUNNER_TEMP/route53-receipts"
           go version -m dist/tenkacloud-simulator > "$RUNNER_TEMP/route53-receipts/build.txt"
-          grep -F 'vcs.revision=d696c0f5c364d19a45e1cc4c13aecd8da7b674b6' "$RUNNER_TEMP/route53-receipts/build.txt"
+          grep -F 'vcs.revision=17e30e18d0eb2216961158ae48f8ef42a20225e8' "$RUNNER_TEMP/route53-receipts/build.txt"
           grep -F 'vcs.modified=false' "$RUNNER_TEMP/route53-receipts/build.txt"
           sha256sum dist/tenkacloud-simulator > "$RUNNER_TEMP/route53-receipts/binary.sha256"
       - name: Prepare the pinned SDK and sandboxed Chromium
@@ -79,7 +79,7 @@ jobs:
           root = pathlib.Path(os.environ['RUNNER_TEMP'])
           text = (root / 'route53-private.log').read_text(errors='replace')
           result = int(os.environ['ROUTE53_FIXTURE_EXIT'])
-          receipt = {'fixtureExit': result, 'sourceSha': 'd696c0f5c364d19a45e1cc4c13aecd8da7b674b6'}
+          receipt = {'fixtureExit': result, 'sourceSha': '17e30e18d0eb2216961158ae48f8ef42a20225e8'}
           if result == 0:
               records = [json.loads(line) for line in text.splitlines() if line.startswith('{"route53ScalarSend":')]
               assert len(records) == 1
@@ -101,7 +101,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v7.0.2
         with:
-          name: route53-scalar-d696c0f5c364d19a45e1cc4c13aecd8da7b674b6
+          name: route53-scalar-17e30e18d0eb2216961158ae48f8ef42a20225e8
           path: ${{ runner.temp }}/route53-receipts/
           if-no-files-found: error
           retention-days: 7
