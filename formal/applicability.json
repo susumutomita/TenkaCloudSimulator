@@ -1,26 +1,33 @@
 {
   "version": 1,
-  "base_sha": "ba506afcf994ee7a7fc55246a2688c7987e79c64",
+  "base_sha": "8c8cc8c871f887e67845c51c0c84ccc351e05dd8",
   "changes": [
     {
-      "path": "docs/aws-catalog.md",
-      "sha256": "507325178342755de0275c89b40ba46658a05d50e569e7225aba1ff9f17beb7f",
-      "disposition": "documentation",
-      "reason": "Records official end-of-support dates and the exact historical local scope of three AWS catalog entries.",
+      "path": "test/e2e/cloudwatch_logs.py",
+      "sha256": "8cddcf149da4e806d52a426fae7f3aa231981b301351e74eef27f0473bf45f16",
+      "disposition": "test-support",
+      "reason": "Check the served inventory with the verified Sakura Server and Route 53 projections before running the existing eight native Logs examples.",
       "models": []
     },
     {
-      "path": "docs/coverage-assessment.md",
-      "sha256": "2a7fc214e79f0811c9d6c076a5730ed301c4b80648b9007dc9ea7bf6af89d112",
-      "disposition": "documentation",
-      "reason": "Documents the current first-party REST contracts and prerequisites for three products absent from the pinned corpus.",
+      "path": "test/e2e/logs_secrets_reference_inventory.py",
+      "sha256": "41da241f4bad5d29e83f00374a5c916bec07306f0cb2d443c2f082cfc92a389f",
+      "disposition": "test-support",
+      "reason": "Pin the historical IDs to their HTTP methods and paths using the 66 routes from historical main and the existing multipart POST.",
       "models": []
     },
     {
-      "path": "docs/gcp-catalog.md",
-      "sha256": "6a63b2eb50f183528b1838c2e52aa276180569acd1c2b0afffff2be2d639daf5",
-      "disposition": "documentation",
-      "reason": "Distinguishes the pinned discovery corpus from three public Google APIs and identifies the native Cloud DNS provider outside the generic catalog.",
+      "path": "test/e2e/secrets_manager_docs.py",
+      "sha256": "512d418444c06cd02332bff000313cf95a5a3dac1e19ca1043e1644a3ab6988a",
+      "disposition": "test-support",
+      "reason": "Check the served inventory with the verified Sakura Server and Route 53 projections before running the existing seven native Secrets Manager examples.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/test_storage_reference_sakura_projection.py",
+      "sha256": "84c94127dd7edc39f503674dbd276e522239a06c8cc65d0090c2300f265fb629",
+      "disposition": "test-support",
+      "reason": "Check both real fixture validators against changes to inherited IDs, routes, verbs and the added Sakura Server contract.",
       "models": []
     }
   ]
