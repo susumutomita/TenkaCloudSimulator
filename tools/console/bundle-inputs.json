@@ -35337,8 +35337,13 @@
       "imports": [],
       "format": "esm"
     },
+    "src/gcp-trace.mjs": {
+      "bytes": 4526,
+      "imports": [],
+      "format": "esm"
+    },
     "src/console-navigation.mjs": {
-      "bytes": 14839,
+      "bytes": 15429,
       "imports": [
         {
           "path": "src/sakura-server-read.mjs",
@@ -35349,6 +35354,11 @@
           "path": "src/route53-console.mjs",
           "kind": "import-statement",
           "original": "./route53-console.mjs"
+        },
+        {
+          "path": "src/gcp-trace.mjs",
+          "kind": "import-statement",
+          "original": "./gcp-trace.mjs"
         }
       ],
       "format": "esm"
@@ -36042,6 +36052,97 @@
       ],
       "format": "esm"
     },
+    "src/gcp-trace.jsx": {
+      "bytes": 9227,
+      "imports": [
+        {
+          "path": "node_modules/react/index.js",
+          "kind": "import-statement",
+          "original": "react"
+        },
+        {
+          "path": "node_modules/@cloudscape-design/components/alert/index.js",
+          "kind": "import-statement",
+          "original": "@cloudscape-design/components/alert"
+        },
+        {
+          "path": "node_modules/@cloudscape-design/components/box/index.js",
+          "kind": "import-statement",
+          "original": "@cloudscape-design/components/box"
+        },
+        {
+          "path": "node_modules/@cloudscape-design/components/button/index.js",
+          "kind": "import-statement",
+          "original": "@cloudscape-design/components/button"
+        },
+        {
+          "path": "node_modules/@cloudscape-design/components/column-layout/index.js",
+          "kind": "import-statement",
+          "original": "@cloudscape-design/components/column-layout"
+        },
+        {
+          "path": "node_modules/@cloudscape-design/components/container/index.js",
+          "kind": "import-statement",
+          "original": "@cloudscape-design/components/container"
+        },
+        {
+          "path": "node_modules/@cloudscape-design/components/content-layout/index.js",
+          "kind": "import-statement",
+          "original": "@cloudscape-design/components/content-layout"
+        },
+        {
+          "path": "node_modules/@cloudscape-design/components/form/index.js",
+          "kind": "import-statement",
+          "original": "@cloudscape-design/components/form"
+        },
+        {
+          "path": "node_modules/@cloudscape-design/components/form-field/index.js",
+          "kind": "import-statement",
+          "original": "@cloudscape-design/components/form-field"
+        },
+        {
+          "path": "node_modules/@cloudscape-design/components/header/index.js",
+          "kind": "import-statement",
+          "original": "@cloudscape-design/components/header"
+        },
+        {
+          "path": "node_modules/@cloudscape-design/components/input/index.js",
+          "kind": "import-statement",
+          "original": "@cloudscape-design/components/input"
+        },
+        {
+          "path": "node_modules/@cloudscape-design/components/link/index.js",
+          "kind": "import-statement",
+          "original": "@cloudscape-design/components/link"
+        },
+        {
+          "path": "node_modules/@cloudscape-design/components/space-between/index.js",
+          "kind": "import-statement",
+          "original": "@cloudscape-design/components/space-between"
+        },
+        {
+          "path": "node_modules/@cloudscape-design/components/table/index.js",
+          "kind": "import-statement",
+          "original": "@cloudscape-design/components/table"
+        },
+        {
+          "path": "src/i18n.jsx",
+          "kind": "import-statement",
+          "original": "./i18n.jsx"
+        },
+        {
+          "path": "src/gcp-console-shell.jsx",
+          "kind": "import-statement",
+          "original": "./gcp-console-shell.jsx"
+        },
+        {
+          "path": "src/gcp-trace.mjs",
+          "kind": "import-statement",
+          "original": "./gcp-trace.mjs"
+        }
+      ],
+      "format": "esm"
+    },
     "src/sns-client.mjs": {
       "bytes": 5087,
       "imports": [],
@@ -36414,7 +36515,7 @@
       "format": "esm"
     },
     "src/main.jsx": {
-      "bytes": 60878,
+      "bytes": 61599,
       "imports": [
         {
           "path": "src/ssm-terminal.jsx",
@@ -36790,6 +36891,11 @@
           "path": "src/gcp-dns.jsx",
           "kind": "import-statement",
           "original": "./gcp-dns.jsx"
+        },
+        {
+          "path": "src/gcp-trace.jsx",
+          "kind": "import-statement",
+          "original": "./gcp-trace.jsx"
         },
         {
           "path": "src/console-navigation.mjs",
@@ -37485,7 +37591,7 @@
           "bytesInOutput": 0
         },
         "src/main.jsx": {
-          "bytesInOutput": 51164
+          "bytesInOutput": 51606
         },
         "node_modules/@cloudscape-design/global-styles/index.css": {
           "bytesInOutput": 0
@@ -38130,7 +38236,7 @@
           "bytesInOutput": 2927
         },
         "node_modules/@dnd-kit/core/dist/core.esm.js": {
-          "bytesInOutput": 39396
+          "bytesInOutput": 39414
         },
         "node_modules/@dnd-kit/utilities/dist/utilities.esm.js": {
           "bytesInOutput": 3220
@@ -40028,8 +40134,11 @@
         "src/route53-console.mjs": {
           "bytesInOutput": 5687
         },
+        "src/gcp-trace.mjs": {
+          "bytesInOutput": 2807
+        },
         "src/console-navigation.mjs": {
-          "bytesInOutput": 12132
+          "bytesInOutput": 12477
         },
         "src/console-home.jsx": {
           "bytesInOutput": 9688
@@ -40097,6 +40206,9 @@
         "src/gcp-dns-srv.css": {
           "bytesInOutput": 0
         },
+        "src/gcp-trace.jsx": {
+          "bytesInOutput": 7193
+        },
         "src/sns.jsx": {
           "bytesInOutput": 11471
         },
@@ -40128,7 +40240,7 @@
           "bytesInOutput": 10107
         }
       },
-      "bytes": 2878842
+      "bytes": 2889647
     },
     "../../internal/server/web/app.css.LEGAL.txt": {
       "imports": [],
