@@ -26,7 +26,7 @@ export function newPlan({name, tag, tagValue, table, dimension, minimum, maximum
       || !tablePattern.test(table) || !Object.hasOwn(dimensions, dimension)) return null;
   return {ScalingPlanName: name, ApplicationSource: {TagFilters: [{Key: tag, Values: [tagValue]}]},
     ScalingInstructions: [{ServiceNamespace: 'dynamodb', ResourceId: 'table/' + table,
-      ScalableDimension: dimensions[dimension], ...bounds, DisableDynamicScaling: true}]};
+      ScalableDimension: dimensions[dimension], ...bounds, DisableDynamicScaling: true, TargetTrackingConfigurations: []}]};
 }
 
 function validName(x) { return typeof x === 'string' && x.length > 0; }
@@ -84,7 +84,7 @@ export function scalingPlanClient(request, region) {
       const bounds = capacityBounds(minimum, maximum);
       requireResponse(bounds && current.ScalingInstructions.length === 1);
       const item = {...current.ScalingInstructions[0], ...bounds};
-      if (item.TargetTrackingConfigurations == null) delete item.TargetTrackingConfigurations;
+      if (item.DisableDynamicScaling && item.TargetTrackingConfigurations == null) item.TargetTrackingConfigurations = [];
       await scaling('UpdateScalingPlan', {ScalingPlanName: current.ScalingPlanName, ScalingPlanVersion: 1, ScalingInstructions: [item]}, signal);
     },
     remove: (name, signal) => scaling('DeleteScalingPlan', {ScalingPlanName: name, ScalingPlanVersion: 1}, signal),

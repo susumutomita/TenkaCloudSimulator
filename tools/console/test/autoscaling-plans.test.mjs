@@ -25,6 +25,7 @@ test('create uses a named existing table and bounded integer capacity', () => {
   assert.equal(instruction.ResourceId,'table/orders');
   assert.equal(instruction.ScalableDimension,dimensions.read);
   assert.equal(instruction.DisableDynamicScaling,true);
+  assert.deepEqual(instruction.TargetTrackingConfigurations,[]);
   assert.equal(newPlan({...input,dimension:'write'}).ScalingInstructions[0].ScalableDimension,dimensions.write);
   for (const patch of [{name:'a/b'},{table:'path/orders'},{dimension:'compute'},{tagValue:''},{minimum:'-1'},{maximum:'40001'},{minimum:'9'},{minimum:'1e2'}]) {
     assert.equal(newPlan({...input,...patch}),null);
