@@ -1,115 +1,12 @@
 {
   "version": 1,
-  "base_sha": "8c8cc8c871f887e67845c51c0c84ccc351e05dd8",
+  "base_sha": "fa06c139f93ab1e32bf8c13809ca70434464994a",
   "changes": [
     {
-      "path": "README.md",
-      "sha256": "971c5ace923cd51610d06ebb947462216418aba75b9765b95d4847051f3d0285",
-      "disposition": "documentation",
-      "reason": "Describe when a local Batch compute environment can be deleted.",
-      "models": []
-    },
-    {
-      "path": "docs/aws-catalog-services.md",
-      "sha256": "8f51aac565899eaf37ea141548af0a3ed813622d6bf44c017cd06390af45d28f",
-      "disposition": "documentation",
-      "reason": "Generated service catalog describes the Batch state and queue-reference checks.",
-      "models": []
-    },
-    {
-      "path": "docs/aws-catalog.md",
-      "sha256": "b23b6b5cdc1557964f34b0ca79be7fc048651a47cbb72e3cf063cc7051e624b7",
-      "disposition": "documentation",
-      "reason": "Correct the Batch catalog overview to identify supported configuration and deletion constraints.",
-      "models": []
-    },
-    {
-      "path": "docs/design/0001-go-standalone.md",
-      "sha256": "e42b4c2b96fe68a3943a5217a04182c8e238a78c09afc68f74a618ecc587f44b",
-      "disposition": "documentation",
-      "reason": "Document the transaction that checks Batch queues and the environment before deletion.",
-      "models": []
-    },
-    {
-      "path": "internal/aws/catalog/batch_compute_environment_delete_test.go",
-      "sha256": "9086c15bb277f557ad57de96eff65291af81c705a79e65cce8e388dba91e9aca",
+      "path": "test/e2e/ec2_readonly_console.py",
+      "sha256": "f8f61a105bb0facaee32da7cfb0a97c24bfdc8a2161a0153f23f160e91aa21cb",
       "disposition": "test-support",
-      "reason": "Exercise enabled and referenced environments, denied requests, preserved rows, same-name peers and concurrent changes.",
-      "models": []
-    },
-    {
-      "path": "internal/aws/catalog/batch_queue_delete_test.go",
-      "sha256": "fd3413f3566e05762fda89c213a07544b256edf2fea2c0fad194a13b29f5e347",
-      "disposition": "test-support",
-      "reason": "Preserve the existing queue deletion tests and disable the compute environment before fixture cleanup.",
-      "models": []
-    },
-    {
-      "path": "internal/aws/catalog/semantics.go",
-      "sha256": "f508b9fb3b1dba8bfe27e03f0c43b19bc7789b3f99492a3bf3374eef55f4d092",
-      "disposition": "modeled",
-      "reason": "Let the pre-delete predicate read the authorized current row and its related rows inside the active transaction.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "FailureFrame",
-            "PeerFrame",
-            "StaleWriteRejected"
-          ],
-          "limits": "The model covers the authorization, failure, peer and generation frames of catalog writes. The concrete DISABLED state, Batch queue references, and SQLite transaction are checked by native and SDK tests."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/catalog/services_compute3.go",
-      "sha256": "404bc6a7c0e018787f8f28bb7c01919fe771c60172f0a41e546ee6365a2cfc45",
-      "disposition": "modeled",
-      "reason": "Refuse deletion of an enabled environment or one referenced by a Batch queue in its region. Preserve the existing disabled-queue check.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "FailureFrame",
-            "PeerFrame",
-            "StaleWriteRejected"
-          ],
-          "limits": "The model covers the authorization, failure, peer and generation frames of catalog writes. The concrete DISABLED state, Batch queue references, and SQLite transaction are checked by native and SDK tests."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/catalog/spec.go",
-      "sha256": "563b85b9ccdd9314aa08574ed34b9c0d456862c6fd9ba19a8e5314f9476431fa",
-      "disposition": "modeled",
-      "reason": "Pass a read-only query interface and current saved row to the optional pre-delete predicate.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "FailureFrame",
-            "PeerFrame",
-            "StaleWriteRejected"
-          ],
-          "limits": "The model covers the authorization, failure, peer and generation frames of catalog writes. The concrete DISABLED state, Batch queue references, and SQLite transaction are checked by native and SDK tests."
-        }
-      ]
-    },
-    {
-      "path": "internal/server/apidocs/catalog/batch.json",
-      "sha256": "8487ca8321dae8193c2cad68cc208f8a0f8f75bfd9f238a832fcf0511ccaf92f",
-      "disposition": "presentation",
-      "reason": "Describe Batch deletion requirements in the served API reference.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/catalog_fixtures/batch.json",
-      "sha256": "caaf89d875bff5eba9b9136cb193239b32bda383b450da3af7311946e7db8d8b",
-      "disposition": "test-support",
-      "reason": "Extend SDK checks for refusals before and after restart and for cleanup after the queues have been removed.",
+      "reason": "Scope refreshed subnet readback to exact owning association row and separately verify Saved subnets/native VPC relationship; preserve strictness and require Chromium sandbox. No product changes.",
       "models": []
     }
   ]
