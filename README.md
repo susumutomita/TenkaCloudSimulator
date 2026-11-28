@@ -230,3 +230,7 @@ The identified runtime portions were independently reimplemented against public
 AWS contracts. We retain the [original MIT notice](third_party/KUMO-LICENSE.txt)
 and [reviewed replacement scope](third_party/independent-native-source.json).
 These records are not a clean-room or legal certification.
+
+The local SimpleDB Query reference also offers explicit PutAttributes and
+DeleteDomain practice examples. Put replaces one named attribute; whole-domain
+cleanup must target only a disposable domain owned by the caller.
