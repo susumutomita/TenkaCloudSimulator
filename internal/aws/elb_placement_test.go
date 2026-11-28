@@ -109,3 +109,84 @@ func TestELBNativePlacementAndLegacyRows(t *testing.T) {
 		t.Fatal(count, err)
 	}
 }
+
+func TestELBPlacementSharedReleaseAndAtomicReadback(t *testing.T) {
+	h := newELBHarness(t)
+	ctx := t.Context()
+	n, db := h.network, h.store.Database()
+	first, second := h.loadBalancer("first"), h.loadBalancer("second")
+	exec := func(query string, args ...any) {
+		t.Helper()
+		if _, err := db.Exec(query, args...); err != nil {
+			t.Fatal(err)
+		}
+	}
+	count := func(albs, refs int) {
+		t.Helper()
+		var a, r int
+		if err := db.QueryRow("SELECT (SELECT count(*) FROM aws_elb_load_balancers),(SELECT count(*) FROM aws_elb_placement_refs)").Scan(&a, &r); err != nil || a != albs || r != refs {
+			t.Fatalf("ALBs/refs=%d/%d, want %d/%d: %v", a, r, albs, refs, err)
+		}
+	}
+	count(2, 6)
+	exec("CREATE TRIGGER hold_alb BEFORE DELETE ON aws_elb_load_balancers BEGIN SELECT RAISE(IGNORE); END")
+	if w := h.call("DeleteLoadBalancer", "LoadBalancerArn", first.LoadBalancerArn); w.Code != 500 {
+		t.Fatal(w.Code, w.Body.String())
+	}
+	count(2, 6)
+	exec("DROP TRIGGER hold_alb")
+	h.ok("DeleteLoadBalancer", "LoadBalancerArn", first.LoadBalancerArn)
+	count(1, 3)
+	for _, err := range []error{n.stacks.deleteNativeSubnet(ctx, "us-east-1", n.a), n.stacks.deleteEC2NativeSecurityGroup(ctx, "us-east-1", n.group)} {
+		var f *ec2Failure
+		if !errors.As(err, &f) || f.code != "DependencyViolation" {
+			t.Fatal(err)
+		}
+	}
+	var authentic string
+	if err := db.QueryRow("SELECT document FROM aws_elb_load_balancers WHERE arn=?", second.LoadBalancerArn).Scan(&authentic); err != nil {
+		t.Fatal(err)
+	}
+	for _, alter := range []func(*ELBLoadBalancer){
+		func(lb *ELBLoadBalancer) { lb.VPCID = "vpc-11223344" },
+		func(lb *ELBLoadBalancer) {
+			lb.SubnetZones[n.a], lb.SubnetZones[n.b] = lb.SubnetZones[n.b], lb.SubnetZones[n.a]
+		},
+	} {
+		var lb ELBLoadBalancer
+		if err := json.Unmarshal([]byte(authentic), &lb); err != nil {
+			t.Fatal(err)
+		}
+		alter(&lb)
+		b, err := json.Marshal(lb)
+		if err != nil {
+			t.Fatal(err)
+		}
+		exec("UPDATE aws_elb_load_balancers SET document=? WHERE arn=?", string(b), second.LoadBalancerArn)
+		if w := h.call("DescribeLoadBalancers", "Names.member.1", "second"); w.Code != 500 {
+			t.Fatal(w.Code, w.Body.String())
+		}
+		if w := h.call("CreateLoadBalancer", append([]string{"Name", "second"}, n.form()...)...); w.Code != 500 {
+			t.Fatal(w.Code, w.Body.String())
+		}
+	}
+	exec("UPDATE aws_elb_load_balancers SET document=? WHERE arn=?", authentic, second.LoadBalancerArn)
+	for _, trigger := range []string{
+		"AFTER INSERT ON aws_elb_load_balancers BEGIN UPDATE aws_elb_load_balancers SET document='{}' WHERE arn=new.arn; END",
+		"BEFORE INSERT ON aws_elb_placement_refs WHEN (SELECT count(*) FROM aws_elb_placement_refs WHERE alb=new.alb)=1 BEGIN SELECT RAISE(IGNORE); END",
+	} {
+		exec("CREATE TRIGGER change_placement " + trigger)
+		if w := h.call("CreateLoadBalancer", append([]string{"Name", "retry"}, n.form()...)...); w.Code != 500 {
+			t.Fatal(w.Code, w.Body.String())
+		}
+		count(1, 3)
+		exec("DROP TRIGGER change_placement")
+	}
+	h.ok("DeleteLoadBalancer", "LoadBalancerArn", second.LoadBalancerArn)
+	count(0, 0)
+	if err := n.stacks.deleteNativeSubnet(ctx, "us-east-1", n.a); err != nil {
+		t.Fatal(err)
+	}
+	h.fail("SubnetNotFound", 400, "CreateLoadBalancer", append([]string{"Name", "after-delete"}, n.form()...)...)
+	count(0, 0)
+}

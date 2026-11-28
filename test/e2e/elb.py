@@ -9,7 +9,8 @@ from contextlib import contextmanager
 import io
 import json
 import os
-import sys
+import re
+import subprocess
 import tempfile
 import time
 import urllib.error
@@ -17,33 +18,70 @@ import urllib.request
 import zipfile
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parent))
 import boto3
 from botocore.config import Config
 from botocore.exceptions import ClientError
-from sakura_cli import CLI
+
 
 
 @contextmanager
 def running(directory):
     binary = Path(os.environ.get("SIMULATOR_BINARY", "dist/tenkacloud-simulator")).resolve(strict=True)
-    team = CLI(str(binary), directory, "", enabled=False)
-    try:
-        yield team.origin, team.token
-    finally:
-        team.close()
-        assert team.process.returncode == 0
+    directory.mkdir(exist_ok=True)
+    token_file = directory / "token"
+    args = [str(binary), "--listen", "127.0.0.1:0", "--state", str(directory / "state.db"),
+            "--token-file", str(token_file)]
+    # The CLI chooses the port while binding. Keep its ordinary inherited environment.
+    with tempfile.TemporaryFile(mode="w+") as log:
+        process = subprocess.Popen(args, cwd=directory, stdin=subprocess.DEVNULL, stdout=log, stderr=log)
+        try:
+            deadline = time.monotonic() + 25
+            while time.monotonic() < deadline and process.poll() is None:
+                log.seek(0)
+                match = re.search(r"^AWS simulation endpoint (http://127\.0\.0\.1:[1-9][0-9]{0,4})$", log.read(), re.M)
+                if match and token_file.is_file():
+                    break
+                time.sleep(.05)
+            else:
+                raise AssertionError("Owned ALB fixture CLI did not become ready")
+            token = token_file.read_text().strip()
+            assert token
+            yield match[1], token
+        finally:
+            if process.poll() is None:
+                process.terminate()
+            try:
+                assert process.wait(timeout=10) == 0
+            except subprocess.TimeoutExpired:
+                process.kill()
+                process.wait()
+                raise
 
 
-def client(service, endpoint, token):
-    c = boto3.client(service, endpoint_url=endpoint, region_name="us-east-1",
+counts = {"calls": 0, "sends": 0, "responses": 0}
+operations = set()
+
+
+def client(service, endpoint, token, region="us-east-1"):
+    c = boto3.client(service, endpoint_url=endpoint, region_name=region,
         aws_access_key_id="TCSIMLOCAL", aws_secret_access_key="dummy",
         config=Config(proxies={}, retries={"max_attempts": 0}))
-    c.meta.events.register("before-sign." + c.meta.service_model.service_name,
-        lambda request, **kwargs: request.headers.add_header("X-Simulator-Token", token))
-    def local_only(request, **kwargs):
+
+    def before_call(model, **kwargs):
+        counts["calls"] += 1
+        operations.add((service, model.name))
+
+    def before_send(request, **kwargs):
         assert request.url.startswith(endpoint + "/"), "SDK escaped the local endpoint"
-    c.meta.events.register("before-send." + c.meta.service_model.service_name, local_only)
+        counts["sends"] += 1
+
+    def after_call(**kwargs):
+        counts["responses"] += 1
+
+    c.meta.events.register("before-call", before_call)
+    c.meta.events.register("before-sign", lambda request, **kwargs: request.headers.add_header("X-Simulator-Token", token))
+    c.meta.events.register("before-send", before_send)
+    c.meta.events.register("after-call", after_call)
     return c
 
 
@@ -119,16 +157,24 @@ with tempfile.TemporaryDirectory(prefix="elb-sdk-") as directory:
         vpc = ec2.create_vpc(CidrBlock="10.91.0.0/16")["Vpc"]["VpcId"]
         subnets = [ec2.create_subnet(VpcId=vpc, CidrBlock=f"10.91.{i}.0/24", AvailabilityZone="us-east-1"+zone)["Subnet"]["SubnetId"]
                    for i, zone in [(1, "a"), (2, "b")]]
-        group = ec2.create_security_group(GroupName="team-web", Description="local ALB group", VpcId=vpc)["GroupId"]
-        placement = dict(Subnets=subnets, SecurityGroups=[group])
+        security_group = ec2.create_security_group(GroupName="team-web", Description="local ALB group", VpcId=vpc)["GroupId"]
+        placement = dict(Subnets=subnets, SecurityGroups=[security_group])
         lb = elb.create_load_balancer(Name="team-web", **placement)["LoadBalancers"][0]
-        assert lb["VpcId"] == vpc and lb["SecurityGroups"] == [group]
+        assert lb["VpcId"] == vpc and lb["SecurityGroups"] == [security_group]
         assert {z["SubnetId"]:z["ZoneName"] for z in lb["AvailabilityZones"]} == dict(zip(subnets, ("us-east-1a", "us-east-1b")))
         error("DependencyViolation", lambda: ec2.delete_subnet(SubnetId=subnets[0]))
-        error("DependencyViolation", lambda: ec2.delete_security_group(GroupId=group))
-        error("SubnetNotFound", lambda: elb.create_load_balancer(Name="absent", Subnets=[subnets[0],"subnet-deadbeef"], SecurityGroups=[group]))
+        error("DependencyViolation", lambda: ec2.delete_security_group(GroupId=security_group))
+        error("SubnetNotFound", lambda: elb.create_load_balancer(Name="absent", Subnets=[subnets[0],"subnet-deadbeef"], SecurityGroups=[security_group]))
+        shared = elb.create_load_balancer(Name="shared", **placement)["LoadBalancers"][0]
+        elb.delete_load_balancer(LoadBalancerArn=shared["LoadBalancerArn"])
+        error("DependencyViolation", lambda: ec2.delete_subnet(SubnetId=subnets[0]))
+        error("DependencyViolation", lambda: ec2.delete_security_group(GroupId=security_group))
+        west = client("elbv2", first, token, region="us-west-2")
+        error("SubnetNotFound", lambda: west.create_load_balancer(Name="wrong-region", **placement))
+        assert west.describe_load_balancers()["LoadBalancers"] == []
+        west.close()
         assert lb["State"]["Code"] == "active" and lb["Type"] == "application" and lb["DNSName"].endswith(".elb.simulator.invalid")
-        assert elb.create_load_balancer(Name="team-web", Subnets=list(reversed(subnets)), SecurityGroups=[group])["LoadBalancers"][0]["LoadBalancerArn"] == lb["LoadBalancerArn"]
+        assert elb.create_load_balancer(Name="team-web", Subnets=list(reversed(subnets)), SecurityGroups=[security_group])["LoadBalancers"][0]["LoadBalancerArn"] == lb["LoadBalancerArn"]
         error("DuplicateLoadBalancerName", lambda: elb.create_load_balancer(Name="team-web", Scheme="internal", **placement))
         error("InvalidConfigurationRequest", lambda: elb.create_load_balancer(Name="network", Type="network", **placement))
         error("InvalidConfigurationRequest", lambda: elb.create_target_group(Name="instances", Protocol="HTTP", Port=80, VpcId="vpc-12345678"))
@@ -205,12 +251,12 @@ with tempfile.TemporaryDirectory(prefix="elb-sdk-") as directory:
         elb.deregister_targets(TargetGroupArn=tg, Targets=[{"Id": function_arn}])
         elb.delete_target_group(TargetGroupArn=tg)
         reopened = elb.describe_load_balancers(LoadBalancerArns=[lb["LoadBalancerArn"]])["LoadBalancers"][0]
-        assert reopened["VpcId"]==vpc and reopened["AvailabilityZones"]==lb["AvailabilityZones"]
+        assert reopened["VpcId"] == vpc and reopened["AvailabilityZones"] == lb["AvailabilityZones"]
         elb.delete_load_balancer(LoadBalancerArn=lb["LoadBalancerArn"])
         ec2 = client("ec2", restarted, new_token)
         for subnet_id in subnets:
             ec2.delete_subnet(SubnetId=subnet_id)
-        ec2.delete_security_group(GroupId=group)
+        ec2.delete_security_group(GroupId=security_group)
         ec2.delete_vpc(VpcId=vpc)
         ec2.close()
         assert elb.describe_load_balancers()["LoadBalancers"] == [] and elb.describe_target_groups()["TargetGroups"] == []
@@ -219,6 +265,13 @@ with tempfile.TemporaryDirectory(prefix="elb-sdk-") as directory:
         elb.close()
         lambdas.close()
 
-print(json.dumps({"elbNativeSDK": True, "lambdaTargetDataPlane": True, "periodicHealthChecks": True,
+assert counts["calls"] == counts["sends"] == counts["responses"] > 0
+assert {"CreateVpc", "CreateSubnet", "CreateSecurityGroup", "DeleteVpc", "DeleteSubnet", "DeleteSecurityGroup"} <= {
+    operation for service, operation in operations if service == "ec2"}
+assert {"CreateLoadBalancer", "DescribeLoadBalancers", "DeleteLoadBalancer"} <= {
+    operation for service, operation in operations if service == "elbv2"}
+print(json.dumps({"elbNativeSDK": True, "counts": counts, "operations": sorted(operations),
+    "placement": {"sameVpc": True, "distinctZones": 2, "explicitGroups": 1, "sharedOwnerDeleteProtected": True,
+                  "crossRegionRejected": True, "crossTeamRejected": True, "restartVerified": True}, "lambdaTargetDataPlane": True, "periodicHealthChecks": True,
     "twoAuthenticatedProcesses": True, "actualCLIReopen": True, "participantIAM": True,
     "teardown": "DELETED", "ec2Networking": False, "realAWS": False}))

@@ -350,10 +350,14 @@ func (s *ELBStore) CreateLoadBalancer(ctx context.Context, lb ELBLoadBalancer, a
 			}
 		}
 	}
-	if err = checkELBPlacementRefs(ctx, tx, lb); err != nil {
+	stored, err := elbReadLoadBalancer(ctx, tx, "arn=? AND region=? AND name=? AND document=?", lb.ARN, lb.Region, lb.Name, string(data))
+	if err != nil {
 		return ELBLoadBalancer{}, err
 	}
-	return lb, tx.Commit()
+	if err = checkELBPlacementRefs(ctx, tx, stored); err != nil {
+		return ELBLoadBalancer{}, err
+	}
+	return stored, tx.Commit()
 }
 
 // DeleteLoadBalancer deletes the load balancer and its listeners atomically. A
@@ -387,6 +391,14 @@ func (s *ELBStore) DeleteLoadBalancer(ctx context.Context, region, arn string, a
 			return elbErr("ResourceInUse", "Remove origins associated with this load balancer before deleting it.")
 		}
 		return err
+	}
+	var survives bool
+	if err = tx.QueryRowContext(ctx, `SELECT EXISTS(SELECT 1 FROM aws_elb_load_balancers WHERE arn=?)
+		OR EXISTS(SELECT 1 FROM aws_elb_placement_refs WHERE alb=?)`, arn, arn).Scan(&survives); err != nil {
+		return err
+	}
+	if survives {
+		return errELBPlacement
 	}
 	for _, group := range groups {
 		if err = elbBump(ctx, tx, group, time.Now()); err != nil {

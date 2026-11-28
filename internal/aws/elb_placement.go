@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"maps"
 	"slices"
 )
 
@@ -47,11 +48,14 @@ func resolveELBPlacement(ctx context.Context, tx *sql.Tx, lb *ELBLoadBalancer) e
 	for _, id := range lb.SecurityGroups {
 		group, err := readEC2NativeSecurityGroup(ctx, tx, lb.Region, id)
 		var invalid *ec2Failure
-		if errors.As(err, &invalid) && (invalid.code == "InvalidGroup.NotFound" || invalid.code == "UnsupportedOperation") || err == nil && group.VPCID != lb.VPCID {
+		if errors.As(err, &invalid) && (invalid.code == "InvalidGroup.NotFound" || invalid.code == "UnsupportedOperation") {
 			return elbErr("InvalidSecurityGroup", "A security group does not belong to the selected native VPC.")
 		}
 		if err != nil {
 			return err
+		}
+		if group.VPCID != lb.VPCID {
+			return elbErr("InvalidSecurityGroup", "A security group does not belong to the selected native VPC.")
 		}
 	}
 	return nil
@@ -60,7 +64,8 @@ func resolveELBPlacement(ctx context.Context, tx *sql.Tx, lb *ELBLoadBalancer) e
 // Before native placement, ALBs stored only the submitted subnet/group strings.
 // Such rows have no verified VPC or child references, even if those IDs later exist.
 func checkELBPlacementRefs(ctx context.Context, tx *sql.Tx, lb ELBLoadBalancer) error {
-	ids, err := elbStrings(ctx, tx, "SELECT resource_id FROM aws_elb_placement_refs WHERE alb=? AND region=? ORDER BY resource_id", lb.ARN, lb.Region)
+	// A reference in any other region can never match a submitted resource ID.
+	ids, err := elbStrings(ctx, tx, "SELECT CASE WHEN region=? THEN resource_id ELSE '' END FROM aws_elb_placement_refs WHERE alb=?", lb.Region, lb.ARN)
 	if err != nil {
 		return err
 	}
@@ -70,16 +75,12 @@ func checkELBPlacementRefs(ctx context.Context, tx *sql.Tx, lb ELBLoadBalancer) 
 		}
 		return nil
 	}
-	if !ec2VPCIDPattern.MatchString(lb.VPCID) || len(lb.SubnetZones) != len(lb.Subnets) || len(lb.Subnets) < 2 || len(lb.SecurityGroups) == 0 {
-		return errELBPlacement
+	resolved := lb
+	if err := resolveELBPlacement(ctx, tx, &resolved); err != nil {
+		return errors.Join(errELBPlacement, err)
 	}
-	seen := make(map[string]bool, len(lb.Subnets))
-	for _, id := range lb.Subnets {
-		az := lb.SubnetZones[id]
-		if !nativeSubnetAZ(lb.Region, az) || seen[az] {
-			return errELBPlacement
-		}
-		seen[az] = true
+	if resolved.VPCID != lb.VPCID || !maps.Equal(resolved.SubnetZones, lb.SubnetZones) {
+		return errELBPlacement
 	}
 	want := append(slices.Clone(lb.Subnets), lb.SecurityGroups...)
 	if !elbSameSet(ids, want) {
