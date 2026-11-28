@@ -739,9 +739,19 @@ def handler(event,context):
   subprocess.run([sys.executable, str(Path(__file__).with_name('aws_catalog_fixtures.py'))], check=True, timeout=900)
 
  def test_resource_groups_console_saved_query_and_ecr_members(self):
-  binary_hash = hashlib.sha256(BINARY.read_bytes()).hexdigest()
+  with BINARY.open('rb') as source:
+   binary_hash = hashlib.file_digest(source, 'sha256').hexdigest()
   subprocess.run([sys.executable, str(Path(__file__).with_name('resource_group_query_console.py')), '--with-sdk'],
                  env={**os.environ, 'SIMULATOR_BINARY': str(BINARY), 'SIMULATOR_BINARY_SHA256': binary_hash}, check=True, timeout=180)
+
+ def test_resource_groups_scalar_reads_reopened_query_and_real_tag_membership(self):
+  with sync_playwright() as playwright:
+   chromium = os.environ.get('CHROMIUM_EXECUTABLE') or playwright.chromium.executable_path
+  with BINARY.open('rb') as source:
+   digest = hashlib.file_digest(source, 'sha256').hexdigest()
+  subprocess.run([sys.executable, str(Path(__file__).with_name('resource_groups_scalar.py'))],
+                 env={**os.environ, 'SIMULATOR_BINARY': str(BINARY), 'SIMULATOR_BINARY_SHA256': digest,
+                      'CHROMIUM_EXECUTABLE': chromium}, check=True, timeout=180)
 
  def test_named_resource_group_membership_tracks_live_ecr_tags(self):
   subprocess.run([sys.executable, str(Path(__file__).with_name('resource_group_ecr_members.py'))], check=True, timeout=120)

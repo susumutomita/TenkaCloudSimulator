@@ -51,17 +51,24 @@
     },
     {
       "path": "test/e2e/check.py",
-      "sha256": "88566300bf97ee505e964e422b07bd9e147489855a978bac2046f0d60b46c348",
+      "sha256": "fe96b9ae913121e48be1f0f0ad527c8e97a3dc8ad09145a294d0d4780885ee9c",
       "models": [],
       "disposition": "test-support",
       "reason": "Exercise the actual catalog detail and both real loopback teams, query writes, page projection, denials, late responses and cleanup."
     },
     {
       "path": "test/e2e/resource_group_query_console.py",
-      "sha256": "5246b44774110f5a9ff35b6ced9eeffba3cc2fe2071d3db3f7eddc107bb3fe9a",
+      "sha256": "13d60bb1f19a09313560d16a4ad4e9bfdf9bfe513c975ca711954c8dee0d40b9",
       "models": [],
       "disposition": "test-support",
       "reason": "Exercise the actual catalog detail and both real loopback teams, query writes, page projection, denials, late responses and cleanup."
+    },
+    {
+      "path": "test/e2e/resource_groups_scalar.py",
+      "disposition": "test-support",
+      "models": [],
+      "reason": "Send actual read requests from the shipped Scalar catalog and check stored matching tags, permissions, peer state, restart and cleanup.",
+      "sha256": "514c5e0303a3e8e3a456611ce7be55b285c2d395f971b6ddf95d6ee72ed28a22"
     },
     {
       "path": "tools/console/bundle-digests.json",

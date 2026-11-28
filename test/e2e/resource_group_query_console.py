@@ -13,6 +13,7 @@ from urllib.parse import urlsplit
 
 from playwright.sync_api import Error as PlaywrightError, expect, sync_playwright
 from reflow import assert_reflow
+from resource_groups_scalar import identifiers, send as scalar_send
 from sts_session_lifecycle import LocalSimulator
 
 REGION = 'us-east-1'
@@ -188,6 +189,7 @@ def run(with_sdk):
                     expect(page.get_by_text(green, exact=True)).to_be_visible()
                     assert json.loads(native(owner, '/get-group-query', {'Group': group})['GroupQuery']['ResourceQuery']['Query']) == json.loads(query('green')['Query'])
                     assert members(owner, group) == [green] and members(peer, peer_group) == [peer_repo]
+                    scalar_send(context, owner, '/list-group-resources', {'Group': group}, identifiers(green))
                     # Hold one genuine east response after the local application has
                     # answered. Change region while it is pending, then release it.
                     held = []
@@ -248,6 +250,7 @@ def run(with_sdk):
                     expect(page.get_by_text('No matching repositories', exact=True)).to_be_visible()
                     expect(page.get_by_text(green, exact=True)).to_have_count(0)
                     assert members(owner, group) == []
+                    scalar_send(context, owner, '/list-group-resources', {'Group': group}, {'Resources': [], 'ResourceIdentifiers': []})
                     page.set_viewport_size({'width': 1440, 'height': 950})
                     page.get_by_role('navigation', name='Catalog location').get_by_role('link').nth(1).click()
                     page.get_by_role('link', name='queryless', exact=True).click()
@@ -269,7 +272,7 @@ def run(with_sdk):
             assert native(team, '/groups-list', {}, region=region)['GroupIdentifiers'] == []
             assert native(team, '/', {}, target='DescribeRepositories', region=region)['repositories'] == []
     print(json.dumps({'resourceGroupConsole': True, 'binarySha256': expected, 'widths': [1440, 390],
-                      'nativePages': 2, 'deniedContinuation': 403, 'updatedThenEmpty': True,
+                      'nativePages': 2, 'sameGroupScalarSends': 2, 'deniedContinuation': 403, 'updatedThenEmpty': True,
                       'regionChangeDuringRead': True, 'lostUpdateReconciled': True, 'reopened': True, 'teamsClean': 2, 'outsideRequests': 0, 'sdkSharedState': with_sdk}))
 
 
