@@ -57,6 +57,7 @@ export default function ServiceQuotas({ request, region, account }) {
     [],
   );
   function clear() {
+    setAcknowledged(false);
     setQuota(null);
     setPublished(null);
     setRows([]);
@@ -128,6 +129,7 @@ export default function ServiceQuotas({ request, region, account }) {
     refreshQuota();
   }, [region, request]);
   async function history(token = "", page = 0, recovery = false) {
+    if (recovery) setAcknowledged(false);
     const task = reads.current.begin();
     setRows([]);
     setRecord(null);
@@ -527,6 +529,12 @@ export default function ServiceQuotas({ request, region, account }) {
               "Service Quotas API リファレンス（us-east-1）",
             )}
           </Link>
+          <p>
+            {t(
+              "The reference uses your browser credential in us-east-1. It does not forward the Console's selected exercise identity.",
+              "リファレンスは us-east-1 でブラウザーの認証情報を使用します。コンソールで選択した演習 ID は引き継ぎません。",
+            )}
+          </p>
         </SpaceBetween>
       </Container>
     </SpaceBetween>
