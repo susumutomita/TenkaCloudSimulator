@@ -158,6 +158,21 @@ body example does not automatically select routing headers. Native SDK children
 execute the original eight examples and the four alias examples against the
 same SQLite; the alias examples must execute on both supported root routes.
 
+In the API reference, open **Shared AWS JSON/Query endpoint**, select the KMS
+example and open **Test Request**. Replace the example identifiers in the JSON
+body with the concrete key, role or grant from your local sandbox. In **Headers**,
+set and include `X-Amz-Target` using the example's `TrentService.<Operation>`
+value. The browser session uses the signed-in participant's permissions. A
+grantee checks its effective `DescribeKey` access with fresh local STS credentials
+and the SDK.
+
+For a seven-day deletion schedule, Scalar returns `DeletionDate` and the SDK
+reads the same deadline after a process restart. Open the key details again in
+the Console to see its current state. Canceling restores **Disabled**. Choose
+**Enable** in the Console before decrypting earlier local ciphertext. The
+[SDK and browser fixture](../test/e2e/kms_surface_lifecycle.py) exercises these
+steps with a participant restricted to one key and an independent peer sandbox.
+
 The mandatory SDK/UI/docs children preserve native transport, IAM/explicit Deny,
 crypto, two teams/regions, restart and cleanup checks. UI tests include actual
 ACK→storage500→read-only retry, older500 after newer200, locale/context clearing,
