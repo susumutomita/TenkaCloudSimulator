@@ -134,38 +134,49 @@ def run():
                         assert presets['ListDomains']['value'] == LIST_FIELDS
                         assert presets['DomainMetadata']['value'] == METADATA_FIELDS
                         assert presets['GetAttributes']['value'] == GET_FIELDS
-                        page.get_by_role('button', name='Test Request (post /)', exact=True).click()
+                        page.get_by_role('link', name='Shared AWS JSON/Query endpoint', exact=True).click()
+                        page.get_by_role('button', name='Selected Content Type: application/x-amz-json-1.1', exact=True).click()
+                        page.get_by_role('option', name=FORM, exact=True).click()
+                        picker = page.get_by_test_id('example-picker')
                         client = page.get_by_role('dialog').filter(
                             has=page.get_by_role('button', name='Close Client', exact=True))
-                        expect(client).to_have_count(1)
-                        client.get_by_role('button', name='Body', exact=True).click()
-                        media = client.get_by_role('button', name=re.compile(
-                            r'^(application/x-amz-json-1\.[01]|application/x-www-form-urlencoded|Form URL Encoded)$'))
-                        expect(media).to_have_count(1)
-                        if media.inner_text().strip() not in (FORM, 'Form URL Encoded'):
-                            media.click()
-                            page.get_by_role('option', name='Form URL Encoded', exact=True).click()
-                        picker = client.get_by_test_id('example-picker')
-                        expect(picker).to_have_count(1)
-                        picker.click()
-                        page.get_by_role('option', name=presets['ListDomains']['summary'], exact=True).click()
-                        client.get_by_role('button', name='Headers', exact=True).click()
-                        header = client.get_by_label('X-Simulator-Service Value', exact=True)
-                        expect(header).to_have_count(1)
-                        header.fill('sdb')
-                        header.press('Tab')
-                        include = client.get_by_role('checkbox', name='Include X-Simulator-Service in request', exact=True)
-                        expect(include).to_have_count(1)
-                        if not include.is_checked():
-                            include.check()
-                        target = client.get_by_role('checkbox', name='Include X-Amz-Target in request', exact=True)
-                        expect(target).to_have_count(1)
-                        if target.is_checked():
-                            target.uncheck()
-                        region = client.get_by_role('checkbox', name='Include X-Simulator-Region in request', exact=True)
-                        expect(region).to_have_count(1)
-                        if region.is_checked():
-                            region.uncheck()
+                        request_panel = client.get_by_role('region', name='Request: ' + root['summary'], exact=True)
+
+                        def open_example(action):
+                            # Choose the named example on the reference card before opening the client.
+                            picker.click()
+                            page.get_by_role('option', name=presets[action]['summary'], exact=True).click()
+                            page.get_by_role('button', name='Test Request (post /)', exact=True).click()
+                            expect(client).to_have_count(1)
+                            request_panel.get_by_role('tab', name='Body', exact=True).press('Enter')
+                            form = request_panel.get_by_role('button', name='Form URL Encoded', exact=True)
+                            json_body = request_panel.get_by_role('button', name='application/x-amz-json-1.1', exact=True)
+                            expect(form.or_(json_body)).to_be_visible()
+                            if not form.is_visible():
+                                json_body.click()
+                                page.get_by_role('option', name='Form URL Encoded', exact=True).click()
+                            expect(form).to_be_visible()
+                            # Scalar renders the example values with optional fields unchecked.
+                            for field in presets[action]['value']:
+                                request_panel.get_by_role('checkbox', name=f'Include {field} in request', exact=True).check()
+                            request_panel.get_by_role('tab', name='Headers', exact=True).press('Enter')
+                            service_row = request_panel.get_by_role('row', name=re.compile(r'^Include X-Simulator-Service in request '))
+                            service_row.get_by_role('button', name=re.compile(r'^(ssm|sdb)$')).click()
+                            page.get_by_role('menuitem', name='sdb', exact=True).click()
+                            include = client.get_by_role('checkbox', name='Include X-Simulator-Service in request', exact=True)
+                            expect(include).to_have_count(1)
+                            if not include.is_checked():
+                                include.check()
+                            target = client.get_by_role('checkbox', name='Include X-Amz-Target in request', exact=True)
+                            expect(target).to_have_count(1)
+                            if target.is_checked():
+                                target.uncheck()
+                            region = client.get_by_role('checkbox', name='Include X-Simulator-Region in request', exact=True)
+                            expect(region).to_have_count(1)
+                            if region.is_checked():
+                                region.uncheck()
+
+                        open_example('ListDomains')
                         assert not sends, 'editing the preset sent a request before Send'
                         with page.expect_response(lambda response: response.request.method == 'POST'
                                                   and response.url == endpoint + '/') as capture:
@@ -180,11 +191,9 @@ def run():
                         expect(panel).to_contain_text(domain)
                         # Recheck after render to catch any additional root POST or redirect.
                         checked_send(endpoint, sends, response, LIST_FIELDS)
-                        # Reopen Body and select the second served preset. No manual
-                        # request substitution: the test domain is the example.
-                        client.get_by_role('button', name='Body', exact=True).click()
-                        picker.click()
-                        page.get_by_role('option', name=presets['DomainMetadata']['summary'], exact=True).click()
+                        # Select the second served example for the same test domain.
+                        client.get_by_role('button', name='Close Client', exact=True).click()
+                        open_example('DomainMetadata')
                         assert len(sends) == 1, 'the metadata preset sent a request before Send'
                         with page.expect_response(lambda response: response.request.method == 'POST'
                                                   and response.url == endpoint + '/') as capture:
@@ -209,9 +218,8 @@ def run():
                         created = query('PutAttributes', DomainName=domain, ItemName=EXAMPLE_ITEM, **fixture)
                         assert created.status == 200
                         assert ElementTree.fromstring(created.body()).tag == NS + 'PutAttributesResponse'
-                        client.get_by_role('button', name='Body', exact=True).click()
-                        picker.click()
-                        page.get_by_role('option', name=presets['GetAttributes']['summary'], exact=True).click()
+                        client.get_by_role('button', name='Close Client', exact=True).click()
+                        open_example('GetAttributes')
                         assert len(sends) == 2, 'the GetAttributes preset sent a request before Send'
                         with page.expect_response(lambda response: response.request.method == 'POST'
                                                   and response.url == endpoint + '/') as capture:
