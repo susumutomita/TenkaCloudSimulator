@@ -128,7 +128,7 @@ func sakuraAssertPeerCapabilities(t *testing.T, caps map[string]any) {
 	if !ok {
 		t.Fatal("missing native KMS capability")
 	}
-	if !reflect.DeepEqual(kms["operations"], []any{"CreateKey", "DescribeKey", "ListKeys", "EnableKey", "DisableKey", "GetKeyPolicy", "Encrypt", "Decrypt", "CreateAlias", "ListAliases", "UpdateAlias", "DeleteAlias", "CreateGrant", "ListGrants", "RevokeGrant"}) {
+	if !reflect.DeepEqual(kms["operations"], []any{"CreateKey", "DescribeKey", "ListKeys", "EnableKey", "DisableKey", "GetKeyPolicy", "Encrypt", "Decrypt", "CreateAlias", "ListAliases", "UpdateAlias", "DeleteAlias", "CreateGrant", "ListGrants", "RevokeGrant", "ScheduleKeyDeletion", "CancelKeyDeletion"}) {
 		t.Fatal("unexpected KMS operation set")
 	}
 	storage, ok := caps["cloudStorage"].(map[string]any)
