@@ -553,7 +553,7 @@
     },
     {
       "path": "test/e2e/check.py",
-      "sha256": "cad80b447e298fd6e67cf3b8c70e941376588442b7cbac14f3277eeb4011fb97",
+      "sha256": "2a8e020e66f4eac34db2f83d7898477965640097f2a6b80079da5b8693ac6f1e",
       "disposition": "test-support",
       "reason": "Run the real CodeStar branch delivery and published SNS policy fixtures in the regular standalone E2E entry point, retaining the CodeCommit content coverage.",
       "models": []
@@ -567,7 +567,7 @@
     },
     {
       "path": "test/e2e/codestar_notifications.py",
-      "sha256": "d1758a9a83aa2471e25d3cc231d5ec5d80d8176ad9816a323630c3c016d07b8b",
+      "sha256": "56b4a14562313fa08e0ae955363b9470bcabb1b7ffc4adb9dfe17ee72788e301",
       "disposition": "test-support",
       "reason": "Exercise the normally built standalone authorities using actual CodeCommit, notification, SNS and SQS operations with restart and policy repair.",
       "models": []
@@ -577,6 +577,13 @@
       "sha256": "2f932c6f2bffd47e6cfd3ebc6e06760d7b8b2f68922c7cfb433731aff37a362f",
       "disposition": "test-support",
       "reason": "Drive actual authenticated CLI processes through the official boto3 SNS protocol, including readback, isolation and retry.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/test_codestar_notifications_environment.py",
+      "sha256": "962094efb721c27c4376903aa57fdef9871ffab2ce518c05800b699f77f9e3ef",
+      "disposition": "test-support",
+      "reason": "Verify the standalone SDK environment is empty and the canonical release runner accepts only its three established settings, rejecting all added SDK settings and altered values.",
       "models": []
     }
   ]
