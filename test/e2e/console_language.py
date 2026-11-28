@@ -41,7 +41,7 @@ def run_console_language():
                         native(endpoint, operator, 'GET', '/')[0])
 
             baseline = frames()
-            browser = p.chromium.launch(executable_path=os.environ.get('CHROMIUM_EXECUTABLE') or shutil.which('chromium'), args=['--no-sandbox'])
+            browser = p.chromium.launch(executable_path=os.environ.get('CHROMIUM_EXECUTABLE') or shutil.which('chromium'), chromium_sandbox=True)
             contexts = []
             held = []
             try:
@@ -109,20 +109,23 @@ def run_console_language():
                         expect(services).to_have_attribute('aria-expanded', 'false')
                         expect(services).to_be_focused()  # Selection removed the old menu item.
 
-                    def keyboard_catalog_entry_order(provider_name, first_name, second_name):
+                    def keyboard_catalog_entry_order(provider_name, first_name, middle_name, last_name):
                         current = page.locator('html').get_attribute('lang')
                         services = page.get_by_role('button', name='サービス' if current == 'ja' else 'Services', exact=True)
                         services.focus(); services.press('Enter')
                         search = page.get_by_role('searchbox', name=('サービスを検索:' if current == 'ja' else 'Search services in')+' '+provider_name, exact=True)
                         expect(search).to_be_focused(); search.fill('')
                         first = page.get_by_role('menuitem', name=first_name, exact=True)
-                        second = page.get_by_role('menuitem', name=second_name, exact=True)
-                        expect(first).to_be_visible(); expect(second).to_be_visible()
+                        middle = page.get_by_role('menuitem', name=middle_name, exact=True)
+                        last = page.get_by_role('menuitem', name=last_name, exact=True)
+                        expect(first).to_be_visible(); expect(middle).to_be_visible(); expect(last).to_be_visible()
                         # The non-AWS search is nested in the catalog panel. Its
                         # ArrowDown must not run twice through event bubbling.
                         search.press('ArrowDown'); expect(first).to_be_focused()
-                        first.press('ArrowDown'); expect(second).to_be_focused()
-                        second.press('ArrowUp'); expect(first).to_be_focused()
+                        first.press('ArrowDown'); expect(middle).to_be_focused()
+                        middle.press('ArrowDown'); expect(last).to_be_focused()
+                        last.press('ArrowUp'); expect(middle).to_be_focused()
+                        middle.press('ArrowUp'); expect(first).to_be_focused()
                         first.press('Escape')
                         expect(services).to_have_attribute('aria-expanded', 'false')
                         expect(services).to_be_focused()
@@ -165,7 +168,7 @@ def run_console_language():
                     view = page.get_by_role('region', name='Cloud Storage', exact=True)
                     expect(view.get_by_role('heading', name='バケット', exact=True)).to_be_visible()
                     expect(view.get_by_role('button', name=gcp_name, exact=True)).to_be_visible()
-                    keyboard_catalog_entry_order('Google Cloud', 'App Engine', 'Cloud Storage')
+                    keyboard_catalog_entry_order('Google Cloud', 'App Engine', 'Cloud DNS', 'Cloud Storage')
                     keyboard_catalog('Google Cloud', 'Cloud Storage')
                     scope = page.locator('.gcp-console-scope')
                     expect(scope).to_contain_text('tenkacloud-local')
