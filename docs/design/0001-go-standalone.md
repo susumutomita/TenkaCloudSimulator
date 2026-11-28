@@ -6,6 +6,10 @@
 
 `core.Store` はインメモリ起動時に専用の SQLite データベースを所有する。要求の取り消しで接続が入れ替わっても、コミット済みのプロバイダーのテーブルと行を次の接続から参照できる。未コミットの書き込みはロールバックされ、メモリ上のデータベースはストアを閉じた時点で解放される。メモリとファイルのどちらでも、接続ごとに外部キー制約と 5 秒のロック待機時間を設定する。
 
+KMS のグラントはリージョン内の具体的なキーと IAM ロールの世代 ID を SQLite に保存する。署名済み STS セッションの `DescribeKey` が、その世代・ロールポリシー・グラントの実際の状態を検証する。失効したグラントによる読み取りは拒否する。 [KMS の範囲](../kms.md#grants-for-a-local-iam-role)
+
+KMS の削除予約は SQLite に UTC の期限を保存する。期限前の取り消しはキーを Disabled に戻す。次のプロセス起動または KMS 操作時に、期限を過ぎたキーと残存するエイリアスおよびグラントを同じトランザクションで削除する。 [削除予約](../kms.md#scheduled-key-deletion)
+
 Coreは問題ID/採点を知らない。SSM・stack/ownershipのschemaはAWS layerがcoreの共有DBを使用して初期化する。CFNはcompileで全リソースと参照を検証後、stack、ownership claim、parameter、identity、S3 bucket/config/tagsを単一transactionで作成。削除でも同一transaction。手動削除されたparameterのclaimを残し、他stackが再取得して旧stackのcleanupで消される事故を防ぐ。role/bucket namespaceはglobal、SSM/stackはregion別、Lambda claimはlambda:<region>。
 
 Lambda定義/ZIP/region/role/environment/revisionはAWS layerのprovider-owned SQLite tableに保存する。native APIのIAM・PassRoleを評価した後、provider-neutralなinternal/workload/pythonへコード/event/contextと明示したbounded capability・固定module FSを渡す。固定CPython/WASI・選択stdlib・原文rightsを埋め込み、host filesystem/environment/process/socketは渡さない。guest memory/時間/出力量/同時実行を制限する。限定inline Lambda CFNを同じ保存処理へ接続する。関数内SDKは保存role/regionに固定したnative SSM/S3 subsetのみ。問題固有のhandlerや任意HTTP proxyはない。[制限](../lambda.md)。

@@ -11,6 +11,7 @@ import unittest
 
 from jsonschema import ValidationError
 from openapi_json10 import validator
+from kms_reference_projection import project_before_kms_grants_and_deletion
 from route53_openapi import project_before_route53, project_before_route53_console
 from route53_ptr_reference import project_before_ptr
 from batch_reference_projection import project_batches
@@ -191,6 +192,7 @@ def project_sakura_server_list_only(spec):
 
 def project_server_list(spec):
     spec = project_sakura_server_list_only(spec)
+    project_before_kms_grants_and_deletion(spec, digest)
     project_simpledb_create_domain(spec)
     project_ec2_describe_instances(spec)
     project_simpledb_delete_attributes(spec)
@@ -382,6 +384,58 @@ class SakuraReference(unittest.TestCase):
             mutate(form(broken))
             with self.assertRaises(AssertionError):
                 preserved(broken)
+
+    def test_kms_grant_and_deletion_projection_rejects_drift(self):
+        root = ('paths', '/', 'post')
+        examples = root + ('requestBody', 'content', JSON11, 'examples')
+        operations = root + ('x-simulator-kms-operation-schemas',)
+        schemas = ('components', 'schemas')
+
+        def at(spec, path):
+            for key in path:
+                spec = spec[key]
+            return spec
+
+        def rejected(path, change):
+            spec = copy.deepcopy(self.spec)
+            change(at(spec, path))
+            fingerprint = digest(spec)
+            with self.assertRaises(AssertionError):
+                preserved(spec)
+            self.assertEqual(digest(spec), fingerprint)
+
+        for path, name in ((examples, 'KMSCreateGrant'), (operations, 'RevokeGrant'), (schemas, 'KMSGrantEntry')):
+            with self.subTest(path=path, name=name):
+                rejected(path, lambda entries: entries.pop(name))
+                rejected(path, lambda entries: entries[name].update(unreviewed=True))
+                rejected(path, lambda entries: entries.update(UnreviewedKMS=copy.deepcopy(entries[name])))
+
+        for path, name in (
+                (root + ('requestBody', 'content', JSON11, 'schema', 'anyOf'), 'KMSCreateGrantInput'),
+                (root + ('responses', '200', 'content', JSON11, 'schema', 'anyOf'), 'KMSGrantPage')):
+            ref = {'$ref': '#/components/schemas/' + name}
+
+            def swap_with_previous(branches):
+                i = branches.index(ref)
+                branches[i - 1], branches[i] = branches[i], branches[i - 1]
+
+            with self.subTest(union=name):
+                rejected(path, lambda branches: branches.remove(ref))
+                rejected(path, lambda branches: branches.append(ref))
+                rejected(path, swap_with_previous)
+
+        metadata = schemas + ('KMSKeyMetadata', 'properties')
+        for path, change in (
+                (operations + ('DescribeKey', 'request'), lambda entry: entry.update({'$ref': '#/components/schemas/KMSKeyInput'})),
+                (metadata + ('DeletionDate',), lambda entry: entry.update(type='string')),
+                (metadata + ('KeyState', 'enum'), lambda states: states.reverse()),
+                (examples + ('KMSListAliases', 'value'), lambda entry: entry.update(Limit=999)),
+                (schemas + ('KMSListAliasesInput',), lambda entry: entry.update(additionalProperties=True)),
+                (operations + ('Encrypt',), lambda entry: entry.update(target='unexpected')),
+                (examples + ('SSMGetParameter', 'value'), lambda entry: entry.update(Name='different-parameter')),
+                (('paths',), lambda paths: paths.update({'/unreviewed': {}}))):
+            with self.subTest(inherited_or_revised=path):
+                rejected(path, change)
 
     def test_all_existing_operations_components_and_28_templates_are_exact(self):
         preserved(self.spec)

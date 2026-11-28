@@ -410,7 +410,7 @@ func TestConsoleHandoffRequiresAccessCapability(t *testing.T) {
 			Services []string
 		} `json:"nativeSdk"`
 	}
-	wantServices := []string{"sts", "iam", "cloudformation", "ssm", "lambda", "cognito-idp"}
+	wantServices := []string{"sts", "iam", "cloudformation", "ssm", "lambda", "cognito-idp", "kms"}
 	if response.Code != http.StatusOK || json.Unmarshal(response.Body.Bytes(), &advertised) != nil ||
 		advertised.NativeSDK.Version != 1 || !slices.Equal(advertised.NativeSDK.Services, wantServices) {
 		t.Fatalf("Access did not advertise the exact native SDK services it verifies: status=%d version=%d services=%v",

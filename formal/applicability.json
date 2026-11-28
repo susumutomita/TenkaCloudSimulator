@@ -1,755 +1,533 @@
 {
   "version": 1,
-  "base_sha": "f32e88304fc8bf69d5d99f24bd6ccf5da583bc73",
+  "base_sha": "dc76e43f5664ceef7f471fd0abc7151d04949f2b",
   "changes": [
     {
       "path": "README.md",
-      "sha256": "8ee664ad68fb965c5afaff92e543bed328d3331938185840b08053a5716392d8",
+      "sha256": "98c23feac1362fdc790c1ded23fea5b1f97ef81ef068499defd7e745e0901a94",
       "disposition": "documentation",
-      "reason": "Document the published default, applied B2BI profile capacity, local increase requests and authorized history.",
-      "models": []
-    },
-    {
-      "path": "docs/aws-catalog-services.md",
-      "sha256": "71754765cf2eecb3c7161a876c09209916e1c235f6f797c1d13059738b056886",
-      "disposition": "documentation",
-      "reason": "Document the published default, applied B2BI profile capacity, local increase requests and authorized history.",
-      "models": []
-    },
-    {
-      "path": "docs/aws-catalog.md",
-      "sha256": "18fbc7e49b402f891ac74474376379f27a289903a34b8ad460efa66583edf66f",
-      "disposition": "documentation",
-      "reason": "Document the published default, applied B2BI profile capacity, local increase requests and authorized history.",
-      "models": []
-    },
-    {
-      "path": "docs/coverage-assessment.md",
-      "sha256": "13ec61fdaf11f0e8dd184777613f2f6722377514ade1971d52a2c21edcfdd1ba",
-      "disposition": "documentation",
-      "reason": "Document the published default, applied B2BI profile capacity, local increase requests and authorized history.",
+      "reason": "Link the shipped KMS role grants and scheduled deletion lifecycle.",
       "models": []
     },
     {
       "path": "docs/design/0001-go-standalone.md",
-      "sha256": "f3961e8c4e9c0f6f8d9e66168dac71b9ae35db6078ac014df7cc824cd70d0da7",
+      "sha256": "8aba03d73c7de2da96078ec47e838becdea2281c6d02905a9c77a81e8f3f150f",
       "disposition": "documentation",
-      "reason": "Document the published default, applied B2BI profile capacity, local increase requests and authorized history.",
+      "reason": "Document private KMS grant authority, key generations and the local pending-deletion lifecycle.",
       "models": []
     },
     {
-      "path": "formal/ServiceQuotaDiscovery.cfg",
-      "sha256": "29343c9ee7103f411aeca22b5d2dd1c10617b9be00dcc33c1bc49a151a5631e7",
+      "path": "docs/kms.md",
+      "sha256": "f4d68dec77c8c3912a47d003823ea9da04d53046e78f50baba43c9ced6f5cb59",
+      "disposition": "documentation",
+      "reason": "Describe grant operations, seven-to-thirty-day scheduling, state transitions and shipped SDK/Console/reference evidence.",
+      "models": []
+    },
+    {
+      "path": "formal/KMSRoleGrantLifecycle.cfg",
+      "sha256": "fbd45f5391e3c3da4ef6d8f7846be21510270e65c26b8d94313f6f1a586d6cb9",
       "disposition": "modeled",
-      "reason": "Four wildcard-authorized discovery reads and the retained quota-ARN read have independent default/applied/region/level/token projections and unchanged read frames.",
+      "reason": "Set the finite state bounds and invariants for generation-bound role grants.",
       "models": [
         {
-          "id": "ServiceQuotaDiscovery",
+          "id": "KMSRoleGrantLifecycle",
           "properties": [
-            "ReadPreservesFrame",
-            "ReadProjectionCorrect",
-            "PeerPreserved",
-            "RestartPreservesFrame"
+            "ManagementAuthorized",
+            "GrantToLiveRole",
+            "VerifiedDescribe",
+            "ExplicitDenyWins",
+            "GrantWriteFrame"
           ],
-          "limits": "Finite two-team projection oracle only; numeric JSON bounds/types, literal endpoint regions, IAM parsing/ARN formatting, SQL and real process/SDK behavior are native/stock fixture checks, not proved by this model. Abstract prior Create/Delete do not add quota write APIs."
+          "limits": "Finite model of stable role generations, key/grant/session state, effective DescribeKey and failure frames. Native tests cover wire parsing, SQLite transactions, authorization output, pagination and opaque tokens."
         }
       ]
     },
     {
-      "path": "formal/ServiceQuotaDiscovery.tla",
-      "sha256": "e1cefc02c38bbc66d6865bb17ac2e889e5ad8f027cba3a37de5128da9293062e",
+      "path": "formal/KMSRoleGrantLifecycle.tla",
+      "sha256": "20a6a061e1f7984c2ad68fd14037230a663520621f97a6522ac1f5aca8df4cb2",
       "disposition": "modeled",
-      "reason": "Four wildcard-authorized discovery reads and the retained quota-ARN read have independent default/applied/region/level/token projections and unchanged read frames.",
+      "reason": "Model exact key and generation grant authority, management, read decisions and failure frames.",
       "models": [
         {
-          "id": "ServiceQuotaDiscovery",
+          "id": "KMSRoleGrantLifecycle",
           "properties": [
-            "ReadPreservesFrame",
-            "ReadProjectionCorrect",
-            "PeerPreserved",
-            "RestartPreservesFrame"
+            "ManagementAuthorized",
+            "GrantToLiveRole",
+            "VerifiedDescribe",
+            "ExplicitDenyWins",
+            "GrantWriteFrame"
           ],
-          "limits": "Finite two-team projection oracle only; numeric JSON bounds/types, literal endpoint regions, IAM parsing/ARN formatting, SQL and real process/SDK behavior are native/stock fixture checks, not proved by this model. Abstract prior Create/Delete do not add quota write APIs."
+          "limits": "Finite model of stable role generations, key/grant/session state, effective DescribeKey and failure frames. Native tests cover wire parsing, SQLite transactions, authorization output, pagination and opaque tokens."
         }
       ]
     },
     {
-      "path": "formal/ServiceQuotaRequestConsole.cfg",
-      "sha256": "9f2ff7f84f713418a6cd14f3d051727851970ed4e2e7576bd3b55605b72b1c4c",
+      "path": "formal/KMSScheduledDeletion.cfg",
+      "sha256": "8d93c6c90c7c21a1716e0056aeb96bcd4329c13decf814a4cafec85281a30975",
       "disposition": "modeled",
-      "reason": "Bounded mounted Console write, unknown acknowledgement, explicit fresh same-scope recovery and separate user intent; property/mutant registration is not implementation or browser proof.",
+      "reason": "Register bounded state and transition checks for scheduled keys.",
       "models": [
         {
-          "id": "ServiceQuotaRequestConsole",
+          "id": "KMSScheduledDeletion",
           "properties": [
-            "SingleIntent",
-            "NoAutomaticWrite",
-            "NativeFrame",
-            "SavedExactlyOnce",
-            "Acknowledgement",
-            "FreshRecovery",
-            "ObservedOnly",
-            "SeparateIntent",
-            "RetiredRead",
-            "ScopeCleared",
-            "BlockedRetry",
-            "FreshCapacity",
-            "VisibleLookup",
-            "VisibleMount"
+            "ScheduleContract",
+            "CancelContract",
+            "ExpiryBoundary",
+            "AtomicExpiry",
+            "OperationMatrix",
+            "RestartPreservesDeadline"
           ],
-          "limits": "Finite mounted quota-request control oracle only: explicit first unfiltered ACCOUNT ByQuota recovery disarms at start and rearms only on a fresh current successful observation; failed recovery/data invalidation clears approval and saved lookup. It does not identify a lost request by matching amount/time, infer persistence from arbitrary shape-valid replies, retry writes, or promise idempotency across tabs/new mounts. No JavaScript/React/DOM/HTTP/JSON/IAM/SQL/clock/refinement proof; real fixtures independently check bytes, scope, accessibility, restart, peer and cleanup. Leaving the mounted view ends its local unknown-outcome warning."
+          "limits": "Checks persisted deadline, schedule/cancel state, serial boundary winners, ordered access after expiry, affected-only atomic removal, restart, rollback and representative pending operations. A storage failure abstracts transaction rollback. No real-time liveness, background job, wire timestamps, cryptographic erasure, all data sizes, authenticated identities, SQLite interleavings or AWS timing are proved. Native clock, database, signing, restart and SDK fixtures supply those observations."
         }
       ]
     },
     {
-      "path": "formal/ServiceQuotaRequestConsole.tla",
-      "sha256": "5339c8ef7b4640a84b761c8216881df19875113fc0ed96e6d6102c1fa4f4d79e",
+      "path": "formal/KMSScheduledDeletion.tla",
+      "sha256": "02dd8f30187d61bb701c6d84b91c15e9248c2e055d6e6cc7e1a243c18681c078",
       "disposition": "modeled",
-      "reason": "Bounded mounted Console write, unknown acknowledgement, explicit fresh same-scope recovery and separate user intent; property/mutant registration is not implementation or browser proof.",
+      "reason": "Model eligible scheduling, cancellation, exact expiry and dependent-object frames.",
       "models": [
         {
-          "id": "ServiceQuotaRequestConsole",
+          "id": "KMSScheduledDeletion",
           "properties": [
-            "SingleIntent",
-            "NoAutomaticWrite",
-            "NativeFrame",
-            "SavedExactlyOnce",
-            "Acknowledgement",
-            "FreshRecovery",
-            "ObservedOnly",
-            "SeparateIntent",
-            "RetiredRead",
-            "ScopeCleared",
-            "BlockedRetry",
-            "FreshCapacity",
-            "VisibleLookup",
-            "VisibleMount"
+            "ScheduleContract",
+            "CancelContract",
+            "ExpiryBoundary",
+            "AtomicExpiry",
+            "OperationMatrix",
+            "RestartPreservesDeadline"
           ],
-          "limits": "Finite mounted quota-request control oracle only: explicit first unfiltered ACCOUNT ByQuota recovery disarms at start and rearms only on a fresh current successful observation; failed recovery/data invalidation clears approval and saved lookup. It does not identify a lost request by matching amount/time, infer persistence from arbitrary shape-valid replies, retry writes, or promise idempotency across tabs/new mounts. No JavaScript/React/DOM/HTTP/JSON/IAM/SQL/clock/refinement proof; real fixtures independently check bytes, scope, accessibility, restart, peer and cleanup. Leaving the mounted view ends its local unknown-outcome warning."
-        }
-      ]
-    },
-    {
-      "path": "formal/ServiceQuotaRequests.cfg",
-      "sha256": "6d7efb68660e863df8d0517194dc21e17c4d27bb3efe3c17d15cfcdcd6b3a5be",
-      "disposition": "modeled",
-      "reason": "Bind the Service Quotas operation or its model to request admission, saved state, failure outcomes and history visibility.",
-      "models": [
-        {
-          "id": "ServiceQuotaRequests",
-          "properties": [
-            "Admissions",
-            "CommitFrame",
-            "StoredFields",
-            "Capacity",
-            "Visibility",
-            "Lookup",
-            "PageScope",
-            "PrivateStage",
-            "ContenderFrame",
-            "RestartFrame"
-          ],
-          "limits": "Finite team and region scopes, admission, bounded request records and page cursors. Actual IAM targets, HTTP shape validation, persistent SQLite transactions, clock changes and cursor authentication are tested separately."
-        }
-      ]
-    },
-    {
-      "path": "formal/ServiceQuotaRequests.tla",
-      "sha256": "2bcebee936a032c98bd12f99a4000b627d211a01483c08645c9e9f7670c1cbb5",
-      "disposition": "modeled",
-      "reason": "Bind the Service Quotas operation or its model to request admission, saved state, failure outcomes and history visibility.",
-      "models": [
-        {
-          "id": "ServiceQuotaRequests",
-          "properties": [
-            "Admissions",
-            "CommitFrame",
-            "StoredFields",
-            "Capacity",
-            "Visibility",
-            "Lookup",
-            "PageScope",
-            "PrivateStage",
-            "ContenderFrame",
-            "RestartFrame"
-          ],
-          "limits": "Finite team and region scopes, admission, bounded request records and page cursors. Actual IAM targets, HTTP shape validation, persistent SQLite transactions, clock changes and cursor authentication are tested separately."
+          "limits": "Checks persisted deadline, schedule/cancel state, serial boundary winners, ordered access after expiry, affected-only atomic removal, restart, rollback and representative pending operations. A storage failure abstracts transaction rollback. No real-time liveness, background job, wire timestamps, cryptographic erasure, all data sizes, authenticated identities, SQLite interleavings or AWS timing are proved. Native clock, database, signing, restart and SDK fixtures supply those observations."
         }
       ]
     },
     {
       "path": "formal/models.json",
-      "sha256": "6a6e4f22a5c37b3aa50b592994587ec3c47ba5a86e1e334ea13c40a1812ff74f",
+      "sha256": "076d122adf6d21878a969049c826f95992af38c099177de42b433bf366586b2d",
       "disposition": "formal-infrastructure",
-      "reason": "Register and independently protect the native discovery, persisted request/history and mounted non-idempotent Console recovery models; retain all older model entries, properties, controls and source scopes.",
+      "reason": "Register both bounded models and the corresponding invariants, source bindings and mutation controls.",
       "models": []
     },
     {
-      "path": "internal/aws/catalog/describe.go",
-      "sha256": "006da4e78ab08177f1cda74126e54fc35325f9185ec3df4f63db902134f1735c",
+      "path": "internal/aws/kms_aliases.go",
+      "sha256": "8a4efb3fc859424434c6b6bf2144afaa14017aea8f021616345bb635cedbd2cd",
       "disposition": "modeled",
-      "reason": "Bind the regional, read-only B2BI Profiles quota and its enforced resource limit to the bounded catalog contract.",
+      "reason": "Enforce pending destination restrictions and observe expiry before alias operations.",
       "models": [
         {
-          "id": "CatalogResourceLifecycle",
+          "id": "KMSScheduledDeletion",
           "properties": [
-            "AuthorizationFirst",
-            "FailureFrame",
-            "PeerFrame",
-            "QuotaBound"
+            "ScheduleContract",
+            "CancelContract",
+            "ExpiryBoundary",
+            "AtomicExpiry",
+            "OperationMatrix",
+            "RestartPreservesDeadline"
           ],
-          "limits": "The finite model abstracts regional peers, authorization and capacity. It does not model this AWS quota code, ARN construction, Go binding, SQLite, SDK response or HTTP status."
+          "limits": "Checks persisted deadline, schedule/cancel state, serial boundary winners, ordered access after expiry, affected-only atomic removal, restart, rollback and representative pending operations. A storage failure abstracts transaction rollback. No real-time liveness, background job, wire timestamps, cryptographic erasure, all data sizes, authenticated identities, SQLite interleavings or AWS timing are proved. Native clock, database, signing, restart and SDK fixtures supply those observations."
         }
       ]
     },
     {
-      "path": "internal/aws/catalog/engine.go",
-      "sha256": "226c14940581b3d00785453f3b4b05861173d6613711fedf52113c3d0c2b1d96",
+      "path": "internal/aws/kms_deletion.go",
+      "sha256": "f1e4f0abb50af652ed520b1c17a422bb6ccd4783ea8a1ac7067cbd2ca4195260",
       "disposition": "modeled",
-      "reason": "Bind the Service Quotas operation or its model to request admission, saved state, failure outcomes and history visibility.",
+      "reason": "Atomically persist or cancel the waiting period, expire precisely due keys and their current aliases and grants.",
       "models": [
         {
-          "id": "CatalogResourceLifecycle",
+          "id": "KMSScheduledDeletion",
           "properties": [
-            "AuthorizationFirst",
-            "FailureFrame",
-            "PeerFrame",
-            "QuotaBound"
+            "ScheduleContract",
+            "CancelContract",
+            "ExpiryBoundary",
+            "AtomicExpiry",
+            "OperationMatrix",
+            "RestartPreservesDeadline"
           ],
-          "limits": "The finite model abstracts regional peers, authorization and capacity. It does not model this AWS quota code, ARN construction, Go binding, SQLite, SDK response or HTTP status."
-        },
-        {
-          "id": "ServiceQuotaDiscovery",
-          "properties": [
-            "ReadPreservesFrame",
-            "ReadProjectionCorrect",
-            "PeerPreserved",
-            "RestartPreservesFrame"
-          ],
-          "limits": "Finite two-team projection oracle only; numeric JSON bounds/types, literal endpoint regions, IAM parsing/ARN formatting, SQL and real process/SDK behavior are native/stock fixture checks, not proved by this model. Abstract prior Create/Delete do not add quota write APIs."
-        },
-        {
-          "id": "ServiceQuotaRequests",
-          "properties": [
-            "Admissions",
-            "CommitFrame",
-            "StoredFields",
-            "Capacity",
-            "Visibility",
-            "Lookup",
-            "PageScope",
-            "PrivateStage",
-            "ContenderFrame",
-            "RestartFrame"
-          ],
-          "limits": "Finite team and region scopes, admission, bounded request records and page cursors. Actual IAM targets, HTTP shape validation, persistent SQLite transactions, clock changes and cursor authentication are tested separately."
+          "limits": "Checks persisted deadline, schedule/cancel state, serial boundary winners, ordered access after expiry, affected-only atomic removal, restart, rollback and representative pending operations. A storage failure abstracts transaction rollback. No real-time liveness, background job, wire timestamps, cryptographic erasure, all data sizes, authenticated identities, SQLite interleavings or AWS timing are proved. Native clock, database, signing, restart and SDK fixtures supply those observations."
         }
       ]
     },
     {
-      "path": "internal/aws/catalog/models/service-quotas.json",
-      "sha256": "b2eb4c3f862fd924f380d03da567c1dda0b501c3345548419ddad4203dabef96",
-      "disposition": "modeled",
-      "reason": "Bind the Service Quotas operation or its model to request admission, saved state, failure outcomes and history visibility.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "FailureFrame",
-            "PeerFrame",
-            "QuotaBound"
-          ],
-          "limits": "Covers finite operation admission, refusal/peer frames and declared capacity. The official schema, real configured backend limit, request history and regional IAM targets require native and SDK verification."
-        },
-        {
-          "id": "ServiceQuotaRequests",
-          "properties": [
-            "Admissions",
-            "CommitFrame",
-            "StoredFields",
-            "Capacity",
-            "Visibility",
-            "Lookup",
-            "PageScope",
-            "PrivateStage",
-            "ContenderFrame",
-            "RestartFrame"
-          ],
-          "limits": "Finite team and region scopes, admission, bounded request records and page cursors. Actual IAM targets, HTTP shape validation, persistent SQLite transactions, clock changes and cursor authentication are tested separately."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/catalog/openapi.go",
-      "sha256": "64b793f7b5b47157f3d5b5eea195bbdc4a9c39313f226d4bd398f5b89c729060",
-      "disposition": "modeled",
-      "reason": "Use the declared fixed JSON inputs and service-specific denial status in the generated native catalog reference.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "FailureFrame",
-            "PeerFrame",
-            "QuotaBound"
-          ],
-          "limits": "Native HTTP status codes, JSON body examples, browser rendering and Go-to-model refinement are outside the finite lifecycle model."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/catalog/selection.json",
-      "sha256": "4e5e895fe9f238ff9b68e084c3826ac51a02ce342f3d6c14ca50988b20092e1a",
-      "disposition": "modeled",
-      "reason": "Retain the five pinned official default/applied discovery reads and bind four persisted increase/history operations. Native contract tests verify copied shapes and nine-operation selection; computed projections and request admission retain their separate existing model bindings.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "FailureFrame",
-            "PeerFrame",
-            "QuotaBound"
-          ],
-          "limits": "Covers finite operation admission, refusal/peer frames and declared capacity. The official schema, real configured backend limit, request history and regional IAM targets require native and SDK verification."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/catalog/semantics.go",
-      "sha256": "a9bba8ff69292313dbd7228e9380a2dd78f2e63ff572319ec7a16f25c8f25e96",
-      "disposition": "modeled",
-      "reason": "Bind the Service Quotas operation or its model to request admission, saved state, failure outcomes and history visibility.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "FailureFrame",
-            "PeerFrame",
-            "QuotaBound"
-          ],
-          "limits": "The finite model abstracts regional peers, authorization and capacity. It does not model this AWS quota code, ARN construction, Go binding, SQLite, SDK response or HTTP status."
-        },
-        {
-          "id": "ServiceQuotaDiscovery",
-          "properties": [
-            "ReadPreservesFrame",
-            "ReadProjectionCorrect",
-            "PeerPreserved",
-            "RestartPreservesFrame"
-          ],
-          "limits": "Finite two-team projection oracle only; numeric JSON bounds/types, literal endpoint regions, IAM parsing/ARN formatting, SQL and real process/SDK behavior are native/stock fixture checks, not proved by this model. Abstract prior Create/Delete do not add quota write APIs."
-        },
-        {
-          "id": "ServiceQuotaRequests",
-          "properties": [
-            "Admissions",
-            "CommitFrame",
-            "StoredFields",
-            "Capacity",
-            "Visibility",
-            "Lookup",
-            "PageScope",
-            "PrivateStage",
-            "ContenderFrame",
-            "RestartFrame"
-          ],
-          "limits": "Finite team and region scopes, admission, bounded request records and page cursors. Actual IAM targets, HTTP shape validation, persistent SQLite transactions, clock changes and cursor authentication are tested separately."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/catalog/service_quota_interrupt_test.go",
-      "sha256": "d0ebd59714c49967c670a7d08408d86dd2ab682e297213a579b4ee03054e4356",
+      "path": "internal/aws/kms_deletion_store_failure_test.go",
+      "sha256": "a1c886bb9d7924f7090d5cb841c7fdb0ed8068cfa519167e5450d3b075a1c7cc",
       "disposition": "test-support",
-      "reason": "Verify real quota values, request history or an affected native, SDK, storage, isolation and restart contract.",
+      "reason": "Exercise real SQLite failures and cancellation during schedule, cancel and expiry, check the complete transaction rollback and retry.",
       "models": []
     },
     {
-      "path": "internal/aws/catalog/service_quota_requests.go",
-      "sha256": "83ffdfbfcc5b1951b641667bc88c8c0253245b59d426b187f8355b7647d3f4f5",
+      "path": "internal/aws/kms_deletion_test.go",
+      "sha256": "3140ec9632e8cf21a8dd22a9611af9268c294c9f7e676783ae8585e52be49ec6",
+      "disposition": "test-support",
+      "reason": "Check clock boundaries, persistence, child cleanup, failure rollback, cancellation and wire errors.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/kms_dispatch.go",
+      "sha256": "3a586f546a201d20ce924d9ea3abcff9b9b6eea1d77ea157ff4ac8dc7798a3c8",
       "disposition": "modeled",
-      "reason": "Bind the Service Quotas operation or its model to request admission, saved state, failure outcomes and history visibility.",
+      "reason": "Select the verified signed DescribeKey path without replacing the established participant authority.",
       "models": [
         {
-          "id": "ServiceQuotaRequests",
+          "id": "KMSRoleGrantLifecycle",
           "properties": [
-            "Admissions",
-            "CommitFrame",
-            "StoredFields",
-            "Capacity",
-            "Visibility",
-            "Lookup",
-            "PageScope",
-            "PrivateStage",
-            "ContenderFrame",
-            "RestartFrame"
+            "ManagementAuthorized",
+            "GrantToLiveRole",
+            "VerifiedDescribe",
+            "ExplicitDenyWins",
+            "GrantWriteFrame"
           ],
-          "limits": "Finite team and region scopes, admission, bounded request records and page cursors. Actual IAM targets, HTTP shape validation, persistent SQLite transactions, clock changes and cursor authentication are tested separately."
+          "limits": "Finite model of stable role generations, key/grant/session state, effective DescribeKey and failure frames. Native tests cover wire parsing, SQLite transactions, authorization output, pagination and opaque tokens."
         }
       ]
     },
     {
-      "path": "internal/aws/catalog/service_quota_requests_test.go",
-      "sha256": "b38bb1b7b8d492808400c8c1f2d9c5480c48368425d4f87084b9134dfd4f3150",
+      "path": "internal/aws/kms_grant_outages_test.go",
+      "sha256": "48285c9d0c603da63618e53add82a54af72640474b9c885d97890b25af705d32",
       "disposition": "test-support",
-      "reason": "Verify real quota values, request history or an affected native, SDK, storage, isolation and restart contract.",
+      "reason": "Exercise concrete grant lookups, role and signer storage failures, no acknowledgment before verified readback/commit, exact quota and recovery using unchanged native entry points.",
       "models": []
     },
     {
-      "path": "internal/aws/catalog/service_quotas.go",
-      "sha256": "e711d86c7081343245c56420983e5f4c415781691f33cedca79a000aa47d6005",
+      "path": "internal/aws/kms_grants.go",
+      "sha256": "c0c3fc732aa09d685926c65e0b787c4e5cb70f1879213c1b02e3335703806f60",
       "disposition": "modeled",
-      "reason": "Bind the Service Quotas operation or its model to request admission, saved state, failure outcomes and history visibility.",
+      "reason": "Persist and verify role-generation-bound grant state and evaluate it on live or pending keys.",
       "models": [
         {
-          "id": "CatalogResourceLifecycle",
+          "id": "KMSRoleGrantLifecycle",
           "properties": [
-            "AuthorizationFirst",
-            "FailureFrame",
-            "PeerFrame",
-            "QuotaBound"
+            "ManagementAuthorized",
+            "GrantToLiveRole",
+            "VerifiedDescribe",
+            "ExplicitDenyWins",
+            "GrantWriteFrame"
           ],
-          "limits": "The finite model abstracts regional peers, authorization and capacity. It does not model this AWS quota code, ARN construction, Go binding, SQLite, SDK response or HTTP status."
+          "limits": "Finite model of stable role generations, key/grant/session state, effective DescribeKey and failure frames. Native tests cover wire parsing, SQLite transactions, authorization output, pagination and opaque tokens."
         },
         {
-          "id": "ServiceQuotaDiscovery",
+          "id": "KMSScheduledDeletion",
           "properties": [
-            "ReadPreservesFrame",
-            "ReadProjectionCorrect",
-            "PeerPreserved",
-            "RestartPreservesFrame"
+            "ScheduleContract",
+            "CancelContract",
+            "ExpiryBoundary",
+            "AtomicExpiry",
+            "OperationMatrix",
+            "RestartPreservesDeadline"
           ],
-          "limits": "Finite two-team projection oracle only; numeric JSON bounds/types, literal endpoint regions, IAM parsing/ARN formatting, SQL and real process/SDK behavior are native/stock fixture checks, not proved by this model. Abstract prior Create/Delete do not add quota write APIs."
+          "limits": "Checks persisted deadline, schedule/cancel state, serial boundary winners, ordered access after expiry, affected-only atomic removal, restart, rollback and representative pending operations. A storage failure abstracts transaction rollback. No real-time liveness, background job, wire timestamps, cryptographic erasure, all data sizes, authenticated identities, SQLite interleavings or AWS timing are proved. Native clock, database, signing, restart and SDK fixtures supply those observations."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/kms_grants_test.go",
+      "sha256": "eabbc3de6e2215d25d1b77e8cbd54d83ce07f9553ba83709abc45a515f952168",
+      "disposition": "test-support",
+      "reason": "Exercise grant management, row/ledger readback, rollback, token and pagination bounds, IAM decisions and role recreation.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/kms_http.go",
+      "sha256": "d3efe4ac076ef171c3db16ae68a9b0df02cec214dba45e8a4cc53d7b960be09e",
+      "disposition": "modeled",
+      "reason": "Validate the concrete KMS JSON operations for grant management, signed reads and the scheduled-deletion lifecycle.",
+      "models": [
+        {
+          "id": "KMSRoleGrantLifecycle",
+          "properties": [
+            "ManagementAuthorized",
+            "GrantToLiveRole",
+            "VerifiedDescribe",
+            "ExplicitDenyWins",
+            "GrantWriteFrame"
+          ],
+          "limits": "Finite model of stable role generations, key/grant/session state, effective DescribeKey and failure frames. Native tests cover wire parsing, SQLite transactions, authorization output, pagination and opaque tokens."
         },
         {
-          "id": "ServiceQuotaRequests",
+          "id": "KMSScheduledDeletion",
           "properties": [
-            "Admissions",
-            "CommitFrame",
-            "StoredFields",
-            "Capacity",
-            "Visibility",
-            "Lookup",
-            "PageScope",
-            "PrivateStage",
-            "ContenderFrame",
-            "RestartFrame"
+            "ScheduleContract",
+            "CancelContract",
+            "ExpiryBoundary",
+            "AtomicExpiry",
+            "OperationMatrix",
+            "RestartPreservesDeadline"
           ],
-          "limits": "Finite team and region scopes, admission, bounded request records and page cursors. Actual IAM targets, HTTP shape validation, persistent SQLite transactions, clock changes and cursor authentication are tested separately."
+          "limits": "Checks persisted deadline, schedule/cancel state, serial boundary winners, ordered access after expiry, affected-only atomic removal, restart, rollback and representative pending operations. A storage failure abstracts transaction rollback. No real-time liveness, background job, wire timestamps, cryptographic erasure, all data sizes, authenticated identities, SQLite interleavings or AWS timing are proved. Native clock, database, signing, restart and SDK fixtures supply those observations."
         }
       ]
     },
     {
-      "path": "internal/aws/catalog/service_quotas_discovery_test.go",
-      "sha256": "f3acca2efa9cb644d88af486869b5e14eea344580a4cd913c41b9e2bf1044ce8",
-      "disposition": "test-support",
-      "reason": "Verify real quota values, request history or an affected native, SDK, storage, isolation and restart contract.",
-      "models": []
-    },
-    {
-      "path": "internal/aws/catalog/service_quotas_test.go",
-      "sha256": "264cbb7404620b1ffb275d23914656a1ef191ffa35fac0d3c7c48ae1d589c125",
-      "disposition": "test-support",
-      "reason": "Verify real quota values, request history or an affected native, SDK, storage, isolation and restart contract.",
-      "models": []
-    },
-    {
-      "path": "internal/aws/catalog/services.go",
-      "sha256": "d4f2d822c4fafaac7db7df062609e3117402d5fd808f935133bc30dac391cb5c",
+      "path": "internal/aws/kms_store.go",
+      "sha256": "b2993244395c4e638b0bbebc38454895dbb885796f8407a2aa7ec6fd732de660",
       "disposition": "modeled",
-      "reason": "Bind the regional, read-only B2BI Profiles quota and its enforced resource limit to the bounded catalog contract.",
+      "reason": "Initialize local grant and pending-key state while retaining existing keys and aliases.",
       "models": [
         {
-          "id": "CatalogResourceLifecycle",
+          "id": "KMSRoleGrantLifecycle",
           "properties": [
-            "AuthorizationFirst",
-            "FailureFrame",
-            "PeerFrame",
-            "QuotaBound"
+            "ManagementAuthorized",
+            "GrantToLiveRole",
+            "VerifiedDescribe",
+            "ExplicitDenyWins",
+            "GrantWriteFrame"
           ],
-          "limits": "The finite model abstracts regional peers, authorization and capacity. It does not model this AWS quota code, ARN construction, Go binding, SQLite, SDK response or HTTP status."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/catalog/spec.go",
-      "sha256": "30cbb29dfcbc2d9a54c77c55bdee0424961d09312f5977d9b01900a846d970d8",
-      "disposition": "modeled",
-      "reason": "Bind the regional, read-only B2BI Profiles quota and its enforced resource limit to the bounded catalog contract.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "FailureFrame",
-            "PeerFrame",
-            "QuotaBound"
-          ],
-          "limits": "The finite model abstracts regional peers, authorization and capacity. It does not model this AWS quota code, ARN construction, Go binding, SQLite, SDK response or HTTP status."
-        }
-      ]
-    },
-    {
-      "path": "internal/server/apidocs/catalog/index.json",
-      "sha256": "8f97c44138f3f17bfdb6f60b63abef5bda899ca89216da1271df3a95621ac54e",
-      "disposition": "presentation",
-      "reason": "Ship the generated Service Quotas schema, fixed B2BI example and catalog index from the reviewed service binding. Regenerate only the Service Quotas reference and its operation count from the reviewed definitions; all unrelated served API descriptions remain unchanged.",
-      "models": []
-    },
-    {
-      "path": "internal/server/apidocs/catalog/service-quotas.json",
-      "sha256": "baea27dfae1c302223a378f97896cbda3947298d48bae9e3a27aaa09daedd871",
-      "disposition": "presentation",
-      "reason": "Expose real bounded example inputs, native error responses and operation targets for all nine Service Quotas operations.",
-      "models": []
-    },
-    {
-      "path": "internal/server/apidocs/service-quotas-init.js",
-      "sha256": "12e650d443e6394648d210a05efe4a46b80edf201eb0e310fd2208a0a3e810d9",
-      "disposition": "presentation",
-      "reason": "Actual Scalar uses the unchanged generated nine-operation specification, explicit chosen target and body, fixed normal us-east-1 browser credential scope, exact same-origin POST and untouched original Response; reject routing/auth overrides before fetch. Native authority and wire behavior require real SDK/browser evidence.",
-      "models": []
-    },
-    {
-      "path": "internal/server/apidocs/service-quotas-reference.css",
-      "sha256": "6bd3652692449df723939bfadd494a0244da21d6df66464cd3c9de6b740168ca",
-      "disposition": "presentation",
-      "reason": "Bounded local reference presentation/reflow only; no native behavior or authorization.",
-      "models": []
-    },
-    {
-      "path": "internal/server/apidocs/service-quotas.html",
-      "sha256": "5385b33118a887c378d8aed93c4098ee3063ab4bf8743f6dbee7906cda55416e",
-      "disposition": "presentation",
-      "reason": "Serve the dedicated local Service Quotas reference and explicit native subset/browser-credential scope; no external service endpoint or automatic write.",
-      "models": []
-    },
-    {
-      "path": "internal/server/web/app.css",
-      "sha256": "d61caf35e92bf28490cec99139d02deea56ee21cc0b77864ec51d1e4c41c26e7",
-      "disposition": "presentation",
-      "reason": "Ship the regenerated Cloudscape application stylesheet including the quota warning region. Color contrast and layout are exercised with the real pinned browser and axe.",
-      "models": []
-    },
-    {
-      "path": "internal/server/web/app.js",
-      "sha256": "b4dd9700aadeafd2dfa0014cf635354fe969f8d211d065418f08aace1960d342",
-      "disposition": "modeled",
-      "reason": "Canonical embedded output of the reviewed actual Console sources, preserving prior catalog behavior and adding the dedicated mounted quota/default/request workflow. Concrete compiler/bundle correspondence is checked independently, not proved by TLA.",
-      "models": [
-        {
-          "id": "CatalogConsoleEpoch",
-          "properties": [
-            "NoUnmountedAcceptance",
-            "OnlyCurrentReplies",
-            "SingleWriter",
-            "ReloadOnlyAfterAck",
-            "FailureVisible"
-          ],
-          "limits": "Preserved finite generic catalog epoch/write oracle only. It does not prove the dedicated Service Quotas workflow, React scheduling, DOM, request serialization, native authorization or actual browser behavior; the separate quota UI model and genuine fixtures cover distinct obligations."
+          "limits": "Finite model of stable role generations, key/grant/session state, effective DescribeKey and failure frames. Native tests cover wire parsing, SQLite transactions, authorization output, pagination and opaque tokens."
         },
         {
-          "id": "ServiceQuotaRequestConsole",
+          "id": "KMSScheduledDeletion",
           "properties": [
-            "SingleIntent",
-            "NoAutomaticWrite",
-            "NativeFrame",
-            "SavedExactlyOnce",
-            "Acknowledgement",
-            "FreshRecovery",
-            "ObservedOnly",
-            "SeparateIntent",
-            "RetiredRead",
-            "ScopeCleared",
-            "BlockedRetry",
-            "FreshCapacity",
-            "VisibleLookup",
-            "VisibleMount"
+            "ScheduleContract",
+            "CancelContract",
+            "ExpiryBoundary",
+            "AtomicExpiry",
+            "OperationMatrix",
+            "RestartPreservesDeadline"
           ],
-          "limits": "Finite mounted quota-request control oracle only: explicit first unfiltered ACCOUNT ByQuota recovery disarms at start and rearms only on a fresh current successful observation; failed recovery/data invalidation clears approval and saved lookup. It does not identify a lost request by matching amount/time, infer persistence from arbitrary shape-valid replies, retry writes, or promise idempotency across tabs/new mounts. No JavaScript/React/DOM/HTTP/JSON/IAM/SQL/clock/refinement proof; real fixtures independently check bytes, scope, accessibility, restart, peer and cleanup. Leaving the mounted view ends its local unknown-outcome warning."
+          "limits": "Checks persisted deadline, schedule/cancel state, serial boundary winners, ordered access after expiry, affected-only atomic removal, restart, rollback and representative pending operations. A storage failure abstracts transaction rollback. No real-time liveness, background job, wire timestamps, cryptographic erasure, all data sizes, authenticated identities, SQLite interleavings or AWS timing are proved. Native clock, database, signing, restart and SDK fixtures supply those observations."
         }
       ]
+    },
+    {
+      "path": "internal/aws/kms_surface_deadline_test.go",
+      "sha256": "f6c037ecee99311ec97e1f5699b7145ac90c6f788c7bee6fe5bc8681ca278cd6",
+      "disposition": "test-support",
+      "reason": "Exercise actual elapsed request deadlines after four native SQLite writes, whole-database rollback, and healthy retries.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/kms_types.go",
+      "sha256": "3cc5718fed8d8a67204a11928813b44766ac5987e83506bbd54d6c357a4dcedb",
+      "disposition": "modeled",
+      "reason": "Expose an optional pending-only UTC deletion deadline in key metadata.",
+      "models": [
+        {
+          "id": "KMSScheduledDeletion",
+          "properties": [
+            "ScheduleContract",
+            "CancelContract",
+            "ExpiryBoundary",
+            "AtomicExpiry",
+            "OperationMatrix",
+            "RestartPreservesDeadline"
+          ],
+          "limits": "Checks persisted deadline, schedule/cancel state, serial boundary winners, ordered access after expiry, affected-only atomic removal, restart, rollback and representative pending operations. A storage failure abstracts transaction rollback. No real-time liveness, background job, wire timestamps, cryptographic erasure, all data sizes, authenticated identities, SQLite interleavings or AWS timing are proved. Native clock, database, signing, restart and SDK fixtures supply those observations."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/sts_signature.go",
+      "sha256": "c7177e81e5c4ff981eb474174514a6339942817fc8c5f40de7eaf7892377e45d",
+      "disposition": "modeled",
+      "reason": "Admit KMS signing only for a canonical assumed-role DescribeKey request with signed content type and target.",
+      "models": [
+        {
+          "id": "KMSRoleGrantLifecycle",
+          "properties": [
+            "ManagementAuthorized",
+            "GrantToLiveRole",
+            "VerifiedDescribe",
+            "ExplicitDenyWins",
+            "GrantWriteFrame"
+          ],
+          "limits": "Finite model of stable role generations, key/grant/session state, effective DescribeKey and failure frames. Native tests cover wire parsing, SQLite transactions, authorization output, pagination and opaque tokens."
+        }
+      ]
+    },
+    {
+      "path": "internal/server/access_sdk.go",
+      "sha256": "cbb59b195075dda2c0e0c857686b9b79f0e2484acda39cc3b7110e0eeb04608d",
+      "disposition": "modeled",
+      "reason": "Return the JSON protocol authentication failure for rejected native KMS signatures.",
+      "models": [
+        {
+          "id": "KMSRoleGrantLifecycle",
+          "properties": [
+            "ManagementAuthorized",
+            "GrantToLiveRole",
+            "VerifiedDescribe",
+            "ExplicitDenyWins",
+            "GrantWriteFrame"
+          ],
+          "limits": "Finite model of stable role generations, key/grant/session state, effective DescribeKey and failure frames. Native tests cover wire parsing, SQLite transactions, authorization output, pagination and opaque tokens."
+        }
+      ]
+    },
+    {
+      "path": "internal/server/apidocs/openapi.json",
+      "sha256": "10db0937cfaf28bf478f7d79b94d33d44e83bca463b7de347db378a9e0172296",
+      "disposition": "presentation",
+      "reason": "Add the served KMS grant and scheduled-deletion examples to the existing AWS root reference.",
+      "models": []
+    },
+    {
+      "path": "internal/server/console_handoff_test.go",
+      "sha256": "bda5ebadaf2de6c8695cfedc781ac9fe39af1afedf118367779c3930f52e2225",
+      "disposition": "modeled",
+      "reason": "Check that discovery advertises the new signed KMS service while preserving access requirements.",
+      "models": [
+        {
+          "id": "ConsoleHandoff",
+          "properties": [
+            "SDKAuthorityPreserved"
+          ],
+          "limits": "The formal model checks independent SDK authority preservation. The exact advertised service list is checked in the native test."
+        }
+      ]
+    },
+    {
+      "path": "internal/server/kms_grants_test.go",
+      "sha256": "41e373207a9eeb639d4d5f30b4a9642a92fe53cfeb060672d1875ee15e1faad8",
+      "disposition": "test-support",
+      "reason": "Exercise a signed KMS DescribeKey through actual Access authentication, native authorization and a saved grant.",
+      "models": []
+    },
+    {
+      "path": "internal/server/kms_integration_test.go",
+      "sha256": "343bf385c36826f56473f3310b38666c5355bbb6c295a98b648f0d9ec51a6798",
+      "disposition": "test-support",
+      "reason": "Check protocol dispatch and the published KMS grant and deletion capabilities on the real server.",
+      "models": []
+    },
+    {
+      "path": "internal/server/sakura_provider_test.go",
+      "sha256": "b25f233be72bb1b8af0f41683efbfddd2fe3f8a4f7100de48fe1d0e7bd78114b",
+      "disposition": "test-support",
+      "reason": "Keep the shared capability-response assertions in sync with the bounded KMS operations.",
+      "models": []
+    },
+    {
+      "path": "internal/server/server.go",
+      "sha256": "08db53e73fb7b3f8db22e3c94afd3573ffcb47f03fbe76eb3bcd98702ab4c597",
+      "disposition": "modeled",
+      "reason": "Advertise scoped KMS grant, authority and deletion behavior through the existing service capability endpoint.",
+      "models": [
+        {
+          "id": "KMSProtocolAdmission",
+          "properties": [
+            "NoAuthorityFromWireMetadata"
+          ],
+          "limits": "Discovery publishes the KMS operations and limitations. The protocol model covers the absence of authority from wire metadata, while discovery content is checked by the SDK fixture."
+        }
+      ]
+    },
+    {
+      "path": "internal/server/ssm_session_native_route_test.go",
+      "sha256": "48a4c1493cb0c70ad0d99e6769606ee55d0e4a497bd9fcb10fd089d3443f47fd",
+      "disposition": "test-support",
+      "reason": "Share the JSON 1.1 session signer between native SSM and KMS route regressions, preserving the SSM service scope.",
+      "models": []
     },
     {
       "path": "scripts/formal_model_gate.py",
-      "sha256": "a14827b1409b3a4c1fbc5db69ab5dfa021734e01780406935c9adbac94bbc00d",
+      "sha256": "976145f94f09fa9c8e593de03bc3c670378921de1fd8a4d29b726f1b27bfabc8",
       "disposition": "formal-infrastructure",
-      "reason": "Register and independently protect the native discovery, persisted request/history and mounted non-idempotent Console recovery models; retain all older model entries, properties, controls and source scopes.",
+      "reason": "Require the registry entries, native source scope and mutation controls for both KMS lifecycle models.",
       "models": []
     },
     {
       "path": "scripts/test-formal-gate.py",
-      "sha256": "b7f86d26dae9173d10f35f6f2c4e3662df0943e9f956e8148b09231219474aeb",
+      "sha256": "84fdfb5ecc8398fdded0dcc45782525b4e67e01715b08089f32cc129e911b4f4",
       "disposition": "formal-infrastructure",
-      "reason": "Register and independently protect the native discovery, persisted request/history and mounted non-idempotent Console recovery models; retain all older model entries, properties, controls and source scopes.",
+      "reason": "Require both new KMS lifecycle models in the complete independent model inventory.",
       "models": []
     },
     {
-      "path": "test/console/service-quotas-reference.test.mjs",
-      "sha256": "f62b817601952132f91cbdaf48e6fc09204e0175753c6ba94c0a92ae9d012844",
+      "path": "test/e2e/kms.py",
+      "sha256": "dd40db512a467639ddad3f01d956218163d378ec0cf30ee2f680fc4ec4af3a5d",
       "disposition": "test-support",
-      "reason": "Execute genuine customFetch guard source with exact native targets/body/origin/media/credentials negative controls; VM tests do not claim real Scalar execution.",
+      "reason": "Verify existing KMS operations against the expanded native capability contract.",
       "models": []
     },
     {
-      "path": "test/e2e/aws_catalog_console.py",
+      "path": "test/e2e/kms_alias_docs.py",
+      "sha256": "1ce63cd8af2d7c2e00332e1e92b26bdf39d2fda31055863af4989d0941b87905",
       "disposition": "test-support",
-      "reason": "Preserve the reviewed Kinesis Video versioned retention and AppStream review/cancel acceptance while retaining the exact dedicated quota read-only sweep and all generic catalog inventory assertions. No product behavior changes.",
-      "models": [],
-      "sha256": "10f242361b5195e24c2b7883fb27efe7dc71e0bdc21f3f6e15b04571f79574c5"
+      "reason": "Verify all original and new shipped KMS examples and retain the alias contract.",
+      "models": []
     },
     {
-      "path": "test/e2e/catalog_fixtures/service-quotas.json",
-      "sha256": "944525c43d5e09b9e03a0414db6f568d6a3f9bdc22e4c717fb8b5e3f20b20358",
+      "path": "test/e2e/kms_console.py",
+      "sha256": "e2e8ba411aea582964e31d8b82191afd57c062ff683e316fdff2c5ee8d033f01",
       "disposition": "test-support",
-      "reason": "Verify real quota values, request history or an affected native, SDK, storage, isolation and restart contract.",
+      "reason": "Describe the existing browser fixture cleanup accurately with native scheduling available.",
       "models": []
     },
     {
-      "path": "test/e2e/check.py",
-      "sha256": "66a800a1079267315e2be11caaf868533aa6d1d63cd9db528f4ade0812bf7a58",
+      "path": "test/e2e/kms_grants.py",
+      "sha256": "db0119d0ea918b8d53f3bdab1ed87a01fad1757d8e70dc86cb459e930dad7db2",
       "disposition": "test-support",
-      "reason": "Register the genuine native quota/default/request SDK fixtures and dedicated opt-in Console/Scalar browser entry points in the normal e2e dispatcher; execution and guards remain independent requirements.",
+      "reason": "Exercise two real local SDK processes, verified assumed roles, grants, restart, explicit denial and cleanup.",
       "models": []
     },
     {
-      "path": "test/e2e/service_quotas_catalog_sweep.py",
+      "path": "test/e2e/kms_key_deletion.py",
+      "sha256": "981bfaa9ee78d10be408e727ed84161b2dd6229593d7341e90014d117b5f292d",
       "disposition": "test-support",
-      "reason": "Read five quota operations and request history via the actual dedicated view, check the catalog selector and native values, and compare the local database before and after the read-only navigation. Verify the dedicated page has no generic creation action or resource tabs.",
-      "models": [],
-      "sha256": "25a99ef5b78febbcf405a390fc711955f6a08744ffad84b198eeacea56acb92e"
+      "reason": "Drive actual SDK schedule, cancel and past-due restart with an isolated peer and verified cleanup.",
+      "models": []
     },
     {
-      "path": "test/e2e/service_quotas_console.py",
-      "sha256": "9871b9f1f438a53c7501896985aeafb32e0460f2472e1b5c230c6c0be40b2352",
+      "path": "test/e2e/kms_reference_projection.py",
+      "sha256": "39c8cf732bda41677cdec0bfc665b5340df7361e003bbca8eeb66e121d43db8e",
       "disposition": "test-support",
-      "reason": "Opt-in unchanged official SDK and real sandboxed Cloudscape/reciprocal Scalar fixture: distinct physical requests, real history tokens/filters, committed lost ACK without blind retry, successful-then-failed recovery and repair, read retirement, partial/denied permissions, pinned axe EN/JA390, two private stores/restart/full peer frame and owned cleanup. Source registration is not an execution receipt; SDK/profile and mandatory axe guards remain intact. Check all enabled WCAG rules and retain only rule, control and contrast measurements for an accessibility failure.",
+      "reason": "Validate the exact grant and deletion reference additions before comparing the inherited API.",
       "models": []
     },
     {
-      "path": "test/e2e/service_quotas_discovery.py",
-      "sha256": "ae23eed4b0d83d0feb898b83da484d64ee30702f6bf5df9f95aa22a8a135c55b",
+      "path": "test/e2e/kms_surface_lifecycle.py",
+      "sha256": "34dc7b0163da2009484a510d03b5e000dc2c2b27fee52303e4879d47e22d8db1",
       "disposition": "test-support",
-      "reason": "Verify real quota values, request history or an affected native, SDK, storage, isolation and restart contract.",
+      "reason": "Drive the shipped KMS Console and Scalar with a scoped browser participant, verify saved state with the official SDK and real STS across two processes and an owner restart.",
       "models": []
     },
     {
-      "path": "test/e2e/service_quotas_profiles.py",
-      "sha256": "9180106150088c15bc4cd10c4961462acb38177743da7ae3ca0ce4c814f70cd2",
+      "path": "test/e2e/test_openapi_json10.py",
+      "sha256": "314f77608900dff4dd0c63346e5c20ec044e98775e8f799d4c831d21e331caaa",
       "disposition": "test-support",
-      "reason": "Verify real quota values, request history or an affected native, SDK, storage, isolation and restart contract.",
+      "reason": "Check all 48 shared JSON 1.1 examples and the five KMS grant and deletion target schemas.",
       "models": []
     },
     {
-      "path": "test/e2e/service_quotas_scalar.py",
-      "sha256": "0302eb4babf950e120cf06ede746ec9206bbde6d289d321e01cf6b9df2b9534b",
+      "path": "test/e2e/test_sakura_openapi.py",
+      "sha256": "e756a02b1500c9edd556aeb7f11633fefab69bc9adb22f1d1199fdd969ce649d",
       "disposition": "test-support",
-      "reason": "Opt-in real authenticated Scalar Sends of the nine native operations with original target/body, distinct physical requests and page tokens, SDK same-record and reciprocal Console ID readback, native mismatch refusal, scoped credentials/peer/restart and owned cleanup; no response fabrication or SDK guard override. The narrow Japanese viewport uses the same endpoint link and directly edits the stacked headers and body.",
+      "reason": "Preserve the historical API digests and reject corruption of the new KMS and inherited reference entries.",
       "models": []
     },
     {
-      "path": "tools/console/bundle-digests.json",
-      "sha256": "ebaacb3a5945690662ce8b1f0ebd3c731aac26fa2db99901e9edbe81acf2492e",
-      "disposition": "presentation",
-      "reason": "Exact generated embedded asset digests checked against the canonical reviewed build; no claim of behavioral proof from hashes.",
+      "path": "third_party/independent-native-source.json",
+      "sha256": "14a742ba1199c5834ffa32aab5c0b5e330ca4550ace7aaac61792945db6d4e60",
+      "disposition": "documentation",
+      "reason": "Bind the renewed independent seven-source review to the one changed KMS metadata projection. Preserve historical adaptation and runtime identities, notices and scope.",
       "models": []
     },
     {
-      "path": "tools/console/bundle-inputs.json",
-      "sha256": "0f88f8f242cba5290d8455d68414642d4459670cf6126bc4468714c05309fff6",
-      "disposition": "presentation",
-      "reason": "Canonical bundler input inventory for the exact reviewed Console source and pinned dependencies; metadata is not source-refinement proof.",
+      "path": "third_party/kumo-apigateway.json",
+      "sha256": "c097c47a12d860b852c910c509be09dbeac8c9ef227883a48dfbd151158799a6",
+      "disposition": "documentation",
+      "reason": "Bind the renewed independent seven-source review to the one changed KMS metadata projection. Preserve historical adaptation and runtime identities, notices and scope.",
       "models": []
     },
     {
-      "path": "tools/console/src/catalog.jsx",
-      "sha256": "b31b14a8fb83a5804ec1a7f4520a08de45fd5e72e1665b1eb63252836fab2655",
-      "disposition": "modeled",
-      "reason": "Retain ordinary catalog controls and select the quota-specific view only for its exact nine-operation descriptor; scope changes retire the mounted child and generic catalog reads are suppressed only for that selected model. All catalog service options retain their implemented and official operation counts when the selected view is Service Quotas.",
-      "models": [
-        {
-          "id": "CatalogConsoleEpoch",
-          "properties": [
-            "NoUnmountedAcceptance",
-            "OnlyCurrentReplies",
-            "SingleWriter",
-            "ReloadOnlyAfterAck",
-            "FailureVisible"
-          ],
-          "limits": "Preserved finite generic catalog epoch/write oracle only. It does not prove the dedicated Service Quotas workflow, React scheduling, DOM, request serialization, native authorization or actual browser behavior; the separate quota UI model and genuine fixtures cover distinct obligations."
-        },
-        {
-          "id": "ServiceQuotaRequestConsole",
-          "properties": [
-            "VisibleMount",
-            "ScopeCleared",
-            "RetiredRead"
-          ],
-          "limits": "Finite mounted quota-request control oracle only: explicit first unfiltered ACCOUNT ByQuota recovery disarms at start and rearms only on a fresh current successful observation; failed recovery/data invalidation clears approval and saved lookup. It does not identify a lost request by matching amount/time, infer persistence from arbitrary shape-valid replies, retry writes, or promise idempotency across tabs/new mounts. No JavaScript/React/DOM/HTTP/JSON/IAM/SQL/clock/refinement proof; real fixtures independently check bytes, scope, accessibility, restart, peer and cleanup. Leaving the mounted view ends its local unknown-outcome warning."
-        }
-      ]
-    },
-    {
-      "path": "tools/console/src/service-quotas.css",
-      "sha256": "3fb9fceda8e908f07eb39d4913fc243d933ede13d6aa8b53966ebd4f6b1a0df3",
-      "disposition": "presentation",
-      "reason": "Style only the quota unknown-outcome warning and its heading so a possibly committed write and the recovery controls remain readable from first paint.",
+      "path": "third_party/kumo-cloudwatch-logs.json",
+      "sha256": "df123eae042088024f57d7ce0dbac73dbea0c8524f20f0842f20c2e2f36e8b6a",
+      "disposition": "documentation",
+      "reason": "Bind the renewed independent seven-source review to the one changed KMS metadata projection. Preserve historical adaptation and runtime identities, notices and scope.",
       "models": []
     },
     {
-      "path": "tools/console/src/service-quotas.jsx",
-      "sha256": "d61d7d465b2da8d1d12caef9cdab21882fbdfa261395e00753714221957f972f",
-      "disposition": "modeled",
-      "reason": "Real native quota/default/history view with independent read authority, synchronous write ownership, exact acknowledged scope/fields, explicit unknown-outcome recovery, invalidation of stale approval/lookup and scope retirement; no automatic retry or ID attribution from history.",
-      "models": [
-        {
-          "id": "ServiceQuotaRequestConsole",
-          "properties": [
-            "SingleIntent",
-            "NoAutomaticWrite",
-            "NativeFrame",
-            "SavedExactlyOnce",
-            "Acknowledgement",
-            "FreshRecovery",
-            "ObservedOnly",
-            "SeparateIntent",
-            "RetiredRead",
-            "ScopeCleared",
-            "BlockedRetry",
-            "FreshCapacity",
-            "VisibleLookup",
-            "VisibleMount"
-          ],
-          "limits": "Finite mounted quota-request control oracle only: explicit first unfiltered ACCOUNT ByQuota recovery disarms at start and rearms only on a fresh current successful observation; failed recovery/data invalidation clears approval and saved lookup. It does not identify a lost request by matching amount/time, infer persistence from arbitrary shape-valid replies, retry writes, or promise idempotency across tabs/new mounts. No JavaScript/React/DOM/HTTP/JSON/IAM/SQL/clock/refinement proof; real fixtures independently check bytes, scope, accessibility, restart, peer and cleanup. Leaving the mounted view ends its local unknown-outcome warning."
-        }
-      ]
+      "path": "third_party/kumo-iam.json",
+      "sha256": "24fcaa028b598cd320d27c04cc69a65b2e17edf302dcb66c8ef37d66d9d0d027",
+      "disposition": "documentation",
+      "reason": "Bind the renewed independent seven-source review to the one changed KMS metadata projection. Preserve historical adaptation and runtime identities, notices and scope.",
+      "models": []
     },
     {
-      "path": "tools/console/src/service-quotas.mjs",
-      "sha256": "a7d8faa50c5b7dfe92a332d31bd60b66d781bb4a39f6a5783aa5227d6914010c",
-      "disposition": "modeled",
-      "reason": "Exact supported JSON1.1 operation/region request construction, typed quota and physical-record validation, acknowledgement tuple checks without client/server clock synchronization, and abortable current-read ownership.",
-      "models": [
-        {
-          "id": "ServiceQuotaRequestConsole",
-          "properties": [
-            "Acknowledgement",
-            "FreshRecovery",
-            "ObservedOnly",
-            "RetiredRead"
-          ],
-          "limits": "Finite mounted quota-request control oracle only: explicit first unfiltered ACCOUNT ByQuota recovery disarms at start and rearms only on a fresh current successful observation; failed recovery/data invalidation clears approval and saved lookup. It does not identify a lost request by matching amount/time, infer persistence from arbitrary shape-valid replies, retry writes, or promise idempotency across tabs/new mounts. No JavaScript/React/DOM/HTTP/JSON/IAM/SQL/clock/refinement proof; real fixtures independently check bytes, scope, accessibility, restart, peer and cleanup. Leaving the mounted view ends its local unknown-outcome warning."
-        }
-      ]
-    },
-    {
-      "path": "tools/console/test/service-quotas.test.mjs",
-      "sha256": "edd91e23555ba3fb68f96534f761e60e998df04e5c684d96e340381b83cae624",
-      "disposition": "presentation",
-      "reason": "Development-only quota client/epoch/acknowledgement and strict-negative checks, including server timestamp skew and unsupported-operation refusal; canonical tools/console presentation classification, not runtime model implementation.",
+      "path": "third_party/kumo-kms.json",
+      "sha256": "04357b2cb40b7d042ccb6c8587da0c9dfec26a99de136c24129ce4c8e39a3850",
+      "disposition": "documentation",
+      "reason": "Bind the renewed independent seven-source review to the one changed KMS metadata projection. Preserve historical adaptation and runtime identities, notices and scope.",
       "models": []
     }
   ]

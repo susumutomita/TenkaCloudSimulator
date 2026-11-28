@@ -188,6 +188,21 @@
                     "$ref": "#/components/schemas/KMSDeleteAliasInput"
                   },
                   {
+                    "$ref": "#/components/schemas/KMSDescribeKeyInput"
+                  },
+                  {
+                    "$ref": "#/components/schemas/KMSCreateGrantInput"
+                  },
+                  {
+                    "$ref": "#/components/schemas/KMSListGrantsInput"
+                  },
+                  {
+                    "$ref": "#/components/schemas/KMSRevokeGrantInput"
+                  },
+                  {
+                    "$ref": "#/components/schemas/KMSScheduleKeyDeletionInput"
+                  },
+                  {
                     "$ref": "#/components/schemas/SecretsListSecretVersionIdsInput"
                   },
                   {
@@ -494,6 +509,47 @@
                   "description": "Customer aliases only. Replace TargetKeyId with an actual same-region key ID from CreateKey; UpdateAlias needs a second real key. These templates are static and do not select routing headers. CreateAlias/UpdateAlias/DeleteAlias return an empty HTTP200 body.",
                   "value": {
                     "AliasName": "alias/practice"
+                  }
+                },
+                "KMSCreateGrant": {
+                  "summary": "X-Amz-Target: TrentService.CreateGrant",
+                  "description": "Replace the example key ID, role ARN or grant ID with existing local resources. Grant management uses a concrete key ID or ARN.",
+                  "value": {
+                    "KeyId": "11111111-1111-4111-8111-111111111111",
+                    "GranteePrincipal": "arn:aws:iam::000000000000:role/practice",
+                    "Operations": [
+                      "DescribeKey"
+                    ]
+                  }
+                },
+                "KMSListGrants": {
+                  "summary": "X-Amz-Target: TrentService.ListGrants",
+                  "description": "Replace the example key ID, role ARN or grant ID with existing local resources. Grant management uses a concrete key ID or ARN.",
+                  "value": {
+                    "KeyId": "11111111-1111-4111-8111-111111111111"
+                  }
+                },
+                "KMSRevokeGrant": {
+                  "summary": "X-Amz-Target: TrentService.RevokeGrant",
+                  "description": "Replace the example key ID, role ARN or grant ID with existing local resources. Grant management uses a concrete key ID or ARN.",
+                  "value": {
+                    "KeyId": "11111111-1111-4111-8111-111111111111",
+                    "GrantId": "0000000000000000000000000000000000000000000000000000000000000000"
+                  }
+                },
+                "KMSScheduleKeyDeletion": {
+                  "summary": "X-Amz-Target: TrentService.ScheduleKeyDeletion",
+                  "description": "Replace KeyId with the ID or ARN of your own local practice key.",
+                  "value": {
+                    "KeyId": "11111111-1111-4111-8111-111111111111",
+                    "PendingWindowInDays": 7
+                  }
+                },
+                "KMSCancelKeyDeletion": {
+                  "summary": "X-Amz-Target: TrentService.CancelKeyDeletion",
+                  "description": "Replace KeyId with the ID or ARN of your own local practice key.",
+                  "value": {
+                    "KeyId": "11111111-1111-4111-8111-111111111111"
                   }
                 },
                 "ListSecretVersionIds": {
@@ -1574,6 +1630,18 @@
                       "$ref": "#/components/schemas/KMSAliasPage"
                     },
                     {
+                      "$ref": "#/components/schemas/KMSCreateGrantResponse"
+                    },
+                    {
+                      "$ref": "#/components/schemas/KMSGrantPage"
+                    },
+                    {
+                      "$ref": "#/components/schemas/KMSScheduledDeletion"
+                    },
+                    {
+                      "$ref": "#/components/schemas/KMSCanceledDeletion"
+                    },
+                    {
                       "type": "object"
                     },
                     {
@@ -1985,7 +2053,7 @@
           "DescribeKey": {
             "target": "TrentService.DescribeKey",
             "request": {
-              "$ref": "#/components/schemas/KMSKeyInput"
+              "$ref": "#/components/schemas/KMSDescribeKeyInput"
             },
             "response": {
               "$ref": "#/components/schemas/KMSKeyResponse"
@@ -2079,6 +2147,51 @@
             },
             "response": {
               "description": "empty HTTP200 body"
+            }
+          },
+          "CreateGrant": {
+            "target": "TrentService.CreateGrant",
+            "request": {
+              "$ref": "#/components/schemas/KMSCreateGrantInput"
+            },
+            "response": {
+              "$ref": "#/components/schemas/KMSCreateGrantResponse"
+            }
+          },
+          "ListGrants": {
+            "target": "TrentService.ListGrants",
+            "request": {
+              "$ref": "#/components/schemas/KMSListGrantsInput"
+            },
+            "response": {
+              "$ref": "#/components/schemas/KMSGrantPage"
+            }
+          },
+          "RevokeGrant": {
+            "target": "TrentService.RevokeGrant",
+            "request": {
+              "$ref": "#/components/schemas/KMSRevokeGrantInput"
+            },
+            "response": {
+              "description": "empty HTTP200 body"
+            }
+          },
+          "ScheduleKeyDeletion": {
+            "target": "TrentService.ScheduleKeyDeletion",
+            "request": {
+              "$ref": "#/components/schemas/KMSScheduleKeyDeletionInput"
+            },
+            "response": {
+              "$ref": "#/components/schemas/KMSScheduledDeletion"
+            }
+          },
+          "CancelKeyDeletion": {
+            "target": "TrentService.CancelKeyDeletion",
+            "request": {
+              "$ref": "#/components/schemas/KMSKeyInput"
+            },
+            "response": {
+              "$ref": "#/components/schemas/KMSCanceledDeletion"
             }
           }
         },
@@ -15894,6 +16007,10 @@
           "CreationDate": {
             "type": "number"
           },
+          "DeletionDate": {
+            "type": "number",
+            "description": "UTC deadline in seconds since the Unix epoch, present while PendingDeletion."
+          },
           "Enabled": {
             "type": "boolean"
           },
@@ -15908,7 +16025,8 @@
             "type": "string",
             "enum": [
               "Enabled",
-              "Disabled"
+              "Disabled",
+              "PendingDeletion"
             ]
           },
           "Origin": {
@@ -17612,6 +17730,277 @@
             }
           }
         ]
+      },
+      "KMSDescribeKeyInput": {
+        "type": "object",
+        "properties": {
+          "KeyId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2048,
+            "description": "Local UUID key ID or full same-region/account ARN. Replace example IDs with CreateKey output. Aliases and cross-account keys are unsupported."
+          },
+          "GrantTokens": {
+            "type": "array",
+            "maxItems": 10,
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 8192
+            },
+            "description": "Optional tokens for the verified grant grantee."
+          }
+        },
+        "required": [
+          "KeyId"
+        ],
+        "additionalProperties": false
+      },
+      "KMSCreateGrantInput": {
+        "type": "object",
+        "properties": {
+          "KeyId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2048,
+            "description": "Local UUID key ID or full same-region/account ARN. Replace example IDs with CreateKey output. Aliases and cross-account keys are unsupported."
+          },
+          "GranteePrincipal": {
+            "type": "string",
+            "pattern": "^arn:aws:iam::000000000000:role/[A-Za-z0-9_-]{1,64}$"
+          },
+          "Operations": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 1,
+            "items": {
+              "type": "string",
+              "enum": [
+                "DescribeKey"
+              ]
+            }
+          },
+          "Name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256,
+            "pattern": "^[a-zA-Z0-9:/_-]+$"
+          }
+        },
+        "required": [
+          "KeyId",
+          "GranteePrincipal",
+          "Operations"
+        ],
+        "additionalProperties": false
+      },
+      "KMSListGrantsInput": {
+        "type": "object",
+        "properties": {
+          "KeyId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2048,
+            "description": "Local UUID key ID or full same-region/account ARN. Replace example IDs with CreateKey output. Aliases and cross-account keys are unsupported."
+          },
+          "Limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100,
+            "default": 50
+          },
+          "Marker": {
+            "type": "string",
+            "minLength": 1
+          },
+          "GrantId": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "GranteePrincipal": {
+            "type": "string",
+            "pattern": "^arn:aws:iam::000000000000:role/[A-Za-z0-9_-]{1,64}$"
+          }
+        },
+        "required": [
+          "KeyId"
+        ],
+        "additionalProperties": false
+      },
+      "KMSRevokeGrantInput": {
+        "type": "object",
+        "properties": {
+          "KeyId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2048,
+            "description": "Local UUID key ID or full same-region/account ARN. Replace example IDs with CreateKey output. Aliases and cross-account keys are unsupported."
+          },
+          "GrantId": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          }
+        },
+        "required": [
+          "KeyId",
+          "GrantId"
+        ],
+        "additionalProperties": false
+      },
+      "KMSCreateGrantResponse": {
+        "type": "object",
+        "properties": {
+          "GrantId": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "GrantToken": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 8192
+          }
+        },
+        "required": [
+          "GrantId",
+          "GrantToken"
+        ],
+        "additionalProperties": false
+      },
+      "KMSGrantEntry": {
+        "type": "object",
+        "properties": {
+          "KeyId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2048,
+            "description": "Local UUID key ID or full same-region/account ARN. Replace example IDs with CreateKey output. Aliases and cross-account keys are unsupported."
+          },
+          "GrantId": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "Name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256,
+            "pattern": "^[a-zA-Z0-9:/_-]+$"
+          },
+          "CreationDate": {
+            "type": "number"
+          },
+          "GranteePrincipal": {
+            "type": "string",
+            "pattern": "^arn:aws:iam::000000000000:role/[A-Za-z0-9_-]{1,64}$"
+          },
+          "IssuingAccount": {
+            "type": "string"
+          },
+          "Operations": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 1,
+            "items": {
+              "type": "string",
+              "enum": [
+                "DescribeKey"
+              ]
+            }
+          }
+        },
+        "required": [
+          "KeyId",
+          "GrantId",
+          "CreationDate",
+          "GranteePrincipal",
+          "IssuingAccount",
+          "Operations"
+        ],
+        "additionalProperties": false
+      },
+      "KMSGrantPage": {
+        "type": "object",
+        "properties": {
+          "Grants": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/KMSGrantEntry"
+            }
+          },
+          "Truncated": {
+            "type": "boolean"
+          },
+          "NextMarker": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "Grants",
+          "Truncated"
+        ],
+        "additionalProperties": false
+      },
+      "KMSScheduleKeyDeletionInput": {
+        "type": "object",
+        "properties": {
+          "KeyId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2048,
+            "description": "Local UUID key ID or full same-region/account ARN. Replace example IDs with CreateKey output. Aliases and cross-account keys are unsupported."
+          },
+          "PendingWindowInDays": {
+            "type": "integer",
+            "minimum": 7,
+            "maximum": 30,
+            "default": 30
+          }
+        },
+        "required": [
+          "KeyId"
+        ],
+        "additionalProperties": false
+      },
+      "KMSScheduledDeletion": {
+        "type": "object",
+        "properties": {
+          "KeyId": {
+            "type": "string",
+            "description": "Full canonical ARN of the local KMS key."
+          },
+          "DeletionDate": {
+            "type": "number"
+          },
+          "KeyState": {
+            "type": "string",
+            "const": "PendingDeletion"
+          },
+          "PendingWindowInDays": {
+            "type": "integer",
+            "minimum": 7,
+            "maximum": 30,
+            "default": 30
+          }
+        },
+        "required": [
+          "KeyId",
+          "DeletionDate",
+          "KeyState",
+          "PendingWindowInDays"
+        ],
+        "additionalProperties": false
+      },
+      "KMSCanceledDeletion": {
+        "type": "object",
+        "properties": {
+          "KeyId": {
+            "type": "string",
+            "description": "Full canonical ARN of the local KMS key."
+          }
+        },
+        "required": [
+          "KeyId"
+        ],
+        "additionalProperties": false
       },
       "SecretsListSecretVersionIdsInput": {
         "type": "object",

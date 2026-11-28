@@ -32691,6 +32691,736 @@
           "expect_invariant": "VisibleMount"
         }
       ]
+    },
+    {
+      "id": "KMSRoleGrantLifecycle",
+      "model": "formal/KMSRoleGrantLifecycle.tla",
+      "config": "formal/KMSRoleGrantLifecycle.cfg",
+      "bounds": "Two existing same-account regional keys, one representative DescribeKey grant per key, one grantee role that can be deleted and recreated once and one issued session slot. Other role, management limits, scope, targeting, signature, expiry, and policies are finite independent request choices.",
+      "properties": [
+        "TypeOK",
+        "ManagementAuthorized",
+        "CreateRequiresEnabled",
+        "GrantToLiveRole",
+        "PermittedManagementWorks",
+        "GrantWriteFrame",
+        "VerifiedDescribe",
+        "ExplicitDenyWins",
+        "DirectOrBoundGrant",
+        "PermittedDescribeWorks",
+        "RestartFrame"
+      ],
+      "limits": "Checks authorization, effective key/grantee/generation binding, explicit deny, revocation, restart and peer frames at atomic operation boundaries. It abstracts the underlying IAM policy, signed-request verification, role generation validation, storage transactions and commits as coherent inputs. Grant identifiers, tokens, name retry semantics, limits, list pagination, concurrency, wire formats, cryptography and user interactions require native tests. Existing KMS and STS models retain their separate guarantees.",
+      "source_scope": [
+        "internal/aws/kms_dispatch.go",
+        "internal/aws/kms_grants.go",
+        "internal/aws/kms_http.go",
+        "internal/aws/kms_store.go",
+        "internal/aws/sts_credentials.go",
+        "internal/aws/sts_signature.go",
+        "internal/server/access_sdk.go"
+      ],
+      "mutants": [
+        {
+          "id": "SkipManagementIAM",
+          "edits": [
+            {
+              "old": "authorized == manager = \"allowed\"",
+              "new": "authorized == TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ManagementAuthorized"
+        },
+        {
+          "id": "CreateOnDisabledKey",
+          "edits": [
+            {
+              "old": "canCreate == rolePresent /\\ k \\in enabled /\\ grants[k] = 0",
+              "new": "canCreate == rolePresent /\\ grants[k] = 0",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CreateRequiresEnabled"
+        },
+        {
+          "id": "CreateForMissingRole",
+          "edits": [
+            {
+              "old": "canCreate == rolePresent /\\ k \\in enabled /\\ grants[k] = 0",
+              "new": "canCreate == k \\in enabled /\\ grants[k] = 0",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "GrantToLiveRole"
+        },
+        {
+          "id": "UseDeletedRole",
+          "edits": [
+            {
+              "old": "sessionOK == rolePresent /\\ session # 0 /\\ session = generation",
+              "new": "sessionOK == session # 0 /\\ session = generation",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "VerifiedDescribe"
+        },
+        {
+          "id": "RejectDisabledRevocation",
+          "edits": [
+            {
+              "old": "canRevoke == grants[k] # 0",
+              "new": "canRevoke == grants[k] # 0 /\\ k \\in enabled",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PermittedManagementWorks"
+        },
+        {
+          "id": "RejectDisabledList",
+          "edits": [
+            {
+              "old": "[] op = \"revoke\" -> canRevoke\n                                   [] OTHER -> TRUE",
+              "new": "[] op = \"revoke\" -> canRevoke\n                                   [] OTHER -> k \\in enabled",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PermittedManagementWorks"
+        },
+        {
+          "id": "CreateWithWrongGeneration",
+          "edits": [
+            {
+              "old": "op = \"create\" -> [grants EXCEPT ![k] = generation]",
+              "new": "op = \"create\" -> [grants EXCEPT ![k] = 1]",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "GrantWriteFrame"
+        },
+        {
+          "id": "RevokeLeavesGrant",
+          "edits": [
+            {
+              "old": "op = \"revoke\" -> [grants EXCEPT ![k] = 0]",
+              "new": "op = \"revoke\" -> grants",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "GrantWriteFrame"
+        },
+        {
+          "id": "RevokeClearsPeer",
+          "edits": [
+            {
+              "old": "op = \"revoke\" -> [grants EXCEPT ![k] = 0]",
+              "new": "op = \"revoke\" -> Empty",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "GrantWriteFrame"
+        },
+        {
+          "id": "RefusalMutatesGrants",
+          "edits": [
+            {
+              "old": "IF ~success THEN grants",
+              "new": "IF ~success THEN Empty",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "GrantWriteFrame"
+        },
+        {
+          "id": "AcceptUnsignedDescribe",
+          "edits": [
+            {
+              "old": "signedOK == request = \"canonical\"",
+              "new": "signedOK == request \\in {\"canonical\",\"unsigned\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "VerifiedDescribe"
+        },
+        {
+          "id": "AcceptWrongKMSOperation",
+          "edits": [
+            {
+              "old": "signedOK == request = \"canonical\"",
+              "new": "signedOK == request \\in {\"canonical\",\"other target\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "VerifiedDescribe"
+        },
+        {
+          "id": "AcceptPeerScope",
+          "edits": [
+            {
+              "old": "signedOK == request = \"canonical\"",
+              "new": "signedOK == request \\in {\"canonical\",\"foreign scope\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "VerifiedDescribe"
+        },
+        {
+          "id": "AcceptExpiredSession",
+          "edits": [
+            {
+              "old": "signedOK == request = \"canonical\"",
+              "new": "signedOK == request \\in {\"canonical\",\"expired\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "VerifiedDescribe"
+        },
+        {
+          "id": "AcceptStaleSession",
+          "edits": [
+            {
+              "old": "sessionOK == rolePresent /\\ session # 0 /\\ session = generation",
+              "new": "sessionOK == rolePresent /\\ session # 0",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "VerifiedDescribe"
+        },
+        {
+          "id": "OverrideExplicitDeny",
+          "edits": [
+            {
+              "old": "success == sessionOK /\\ signedOK /\\ ~denied /\\ (direct \\/ bound)",
+              "new": "success == sessionOK /\\ signedOK /\\ (direct \\/ bound)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExplicitDenyWins"
+        },
+        {
+          "id": "RebindSameRoleName",
+          "edits": [
+            {
+              "old": "bound == sameRole /\\ grants[k] = generation",
+              "new": "bound == sameRole /\\ grants[k] # 0",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "DirectOrBoundGrant"
+        },
+        {
+          "id": "AllowOtherGrantee",
+          "edits": [
+            {
+              "old": "bound == sameRole /\\ grants[k] = generation",
+              "new": "bound == grants[k] = generation",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "DirectOrBoundGrant"
+        },
+        {
+          "id": "GrantAuthorizesPeerKey",
+          "edits": [
+            {
+              "old": "bound == sameRole /\\ grants[k] = generation",
+              "new": "bound == sameRole /\\ (grants[k] = generation \\/ grants[3-k] = generation)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "DirectOrBoundGrant"
+        },
+        {
+          "id": "IgnoreGrantedPermission",
+          "edits": [
+            {
+              "old": "~denied /\\ (direct \\/ bound)",
+              "new": "~denied /\\ direct",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PermittedDescribeWorks"
+        },
+        {
+          "id": "RequireGrantForDirectPermission",
+          "edits": [
+            {
+              "old": "~denied /\\ (direct \\/ bound)",
+              "new": "~denied /\\ bound",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PermittedDescribeWorks"
+        },
+        {
+          "id": "RestartDeletesGrants",
+          "edits": [
+            {
+              "old": "LET persisted == grants",
+              "new": "LET persisted == Empty",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "RestartFrame"
+        },
+        {
+          "id": "RestartRetainsSession",
+          "edits": [
+            {
+              "old": "retainedSession == 0",
+              "new": "retainedSession == session",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "RestartFrame"
+        }
+      ]
+    },
+    {
+      "id": "KMSScheduledDeletion",
+      "model": "formal/KMSScheduledDeletion.tla",
+      "config": "formal/KMSScheduledDeletion.cfg",
+      "bounds": "One local single-region key initially enabled or disabled, one permanent sibling, one movable and one sibling alias, and one grant on each key. Representative calendar days exercise pre-deadline, equality, later reads and clock rollback at the minimum and default window. Explicit 6, 7, 30 and 31 days and omission cover both bounds, adjacent invalid inputs and the default.",
+      "properties": [
+        "TypeOK",
+        "ScheduleContract",
+        "CancelContract",
+        "ExpiryBoundary",
+        "AtomicExpiry",
+        "OperationMatrix",
+        "RestartPreservesDeadline",
+        "TimePreservesStorage"
+      ],
+      "limits": "Checks persisted deadline, schedule/cancel state, serial boundary winners, ordered access after expiry, affected-only atomic removal, restart, rollback and representative pending operations. A storage failure abstracts transaction rollback. No real-time liveness, background job, wire timestamps, cryptographic erasure, all data sizes, authenticated identities, SQLite interleavings or AWS timing are proved. Native clock, database, signing, restart and SDK fixtures supply those observations.",
+      "source_scope": [
+        "internal/aws/kms_aliases.go",
+        "internal/aws/kms_crypto.go",
+        "internal/aws/kms_deletion.go",
+        "internal/aws/kms_grants.go",
+        "internal/aws/kms_http.go",
+        "internal/aws/kms_store.go",
+        "internal/aws/kms_types.go"
+      ],
+      "mutants": [
+        {
+          "id": "DefaultToMinimum",
+          "edits": [
+            {
+              "old": "days == IF window = Omitted THEN 30",
+              "new": "days == IF window = Omitted THEN 7",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ScheduleContract"
+        },
+        {
+          "id": "AcceptSixDays",
+          "edits": [
+            {
+              "old": "inputOK == days \\in 7..30",
+              "new": "inputOK == days \\in 6..30",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ScheduleContract"
+        },
+        {
+          "id": "AcceptThirtyOneDays",
+          "edits": [
+            {
+              "old": "inputOK == days \\in 7..30",
+              "new": "inputOK == days \\in 7..31",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ScheduleContract"
+        },
+        {
+          "id": "ScheduleWithoutPermission",
+          "edits": [
+            {
+              "old": "allowed == permitted /\\ inputOK",
+              "new": "allowed == inputOK",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ScheduleContract"
+        },
+        {
+          "id": "ReschedulePending",
+          "edits": [
+            {
+              "old": "inputOK /\\ db.state \\in {\"Enabled\",\"Disabled\"}",
+              "new": "inputOK /\\ db.state # \"Gone\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ScheduleContract"
+        },
+        {
+          "id": "RefuseDisabledSchedule",
+          "edits": [
+            {
+              "old": "inputOK /\\ db.state \\in {\"Enabled\",\"Disabled\"}",
+              "new": "inputOK /\\ db.state = \"Enabled\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ScheduleContract"
+        },
+        {
+          "id": "UseRelativeDeadline",
+          "edits": [
+            {
+              "old": "!.deadline = day + days",
+              "new": "!.deadline = days",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ScheduleContract"
+        },
+        {
+          "id": "ScheduleAfterFailedWrite",
+          "edits": [
+            {
+              "old": "IF success THEN written ELSE db",
+              "new": "IF allowed THEN written ELSE db",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ScheduleContract"
+        },
+        {
+          "id": "CancelWithoutPermission",
+          "edits": [
+            {
+              "old": "success == permitted /\\ Waiting /\\ ~fault",
+              "new": "success == Waiting /\\ ~fault",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CancelContract"
+        },
+        {
+          "id": "CancelWithoutPending",
+          "edits": [
+            {
+              "old": "success == permitted /\\ Waiting /\\ ~fault",
+              "new": "success == permitted /\\ db.state # \"Gone\" /\\ ~fault",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CancelContract"
+        },
+        {
+          "id": "AllowCancelAtExpiry",
+          "edits": [
+            {
+              "old": "IN /\\ ~Due\n    /\\ db' = IF success THEN changed ELSE db",
+              "new": "IN /\\ TRUE\n    /\\ db' = IF success THEN changed ELSE db",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CancelContract"
+        },
+        {
+          "id": "CancelEnablesCrypto",
+          "edits": [
+            {
+              "old": "changed == [db EXCEPT !.state = \"Disabled\", !.deadline = 0]",
+              "new": "changed == [db EXCEPT !.state = \"Enabled\", !.deadline = 0]",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CancelContract"
+        },
+        {
+          "id": "CancelRetainsDeadline",
+          "edits": [
+            {
+              "old": "changed == [db EXCEPT !.state = \"Disabled\", !.deadline = 0]",
+              "new": "changed == [db EXCEPT !.state = \"Disabled\"]",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CancelContract"
+        },
+        {
+          "id": "CancelDropsExistingGrant",
+          "edits": [
+            {
+              "old": "changed == [db EXCEPT !.state = \"Disabled\", !.deadline = 0]",
+              "new": "changed == [db EXCEPT !.state = \"Disabled\", !.deadline = 0, !.grant = FALSE]",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CancelContract"
+        },
+        {
+          "id": "CancelAfterFailedWrite",
+          "edits": [
+            {
+              "old": "IF success THEN changed ELSE db",
+              "new": "IF permitted /\\ Waiting THEN changed ELSE db",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CancelContract"
+        },
+        {
+          "id": "PurgeBeforeDeadline",
+          "edits": [
+            {
+              "old": "crossed == Waiting /\\ day >= db.deadline",
+              "new": "crossed == Waiting /\\ day + 1 >= db.deadline",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExpiryBoundary"
+        },
+        {
+          "id": "MissDeadlineEquality",
+          "edits": [
+            {
+              "old": "crossed == Waiting /\\ day >= db.deadline",
+              "new": "crossed == Waiting /\\ day > db.deadline",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExpiryBoundary"
+        },
+        {
+          "id": "PurgeCancelledKey",
+          "edits": [
+            {
+              "old": "crossed == Waiting /\\ day >= db.deadline",
+              "new": "crossed == (Waiting /\\ day >= db.deadline) \\/ (last.kind = \"cancel\" /\\ last.ok /\\ db.state = \"Disabled\")",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExpiryBoundary"
+        },
+        {
+          "id": "KeepExpiredKey",
+          "edits": [
+            {
+              "old": "purged == [db EXCEPT !.state = \"Gone\"",
+              "new": "purged == [db EXCEPT !.state = \"Disabled\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AtomicExpiry"
+        },
+        {
+          "id": "LeaveKeyMaterial",
+          "edits": [
+            {
+              "old": "!.deadline = 0, !.material = FALSE",
+              "new": "!.deadline = 0, !.material = TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AtomicExpiry"
+        },
+        {
+          "id": "LeaveGrant",
+          "edits": [
+            {
+              "old": "!.grant = FALSE, !.alias = IF @",
+              "new": "!.grant = TRUE, !.alias = IF @",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AtomicExpiry"
+        },
+        {
+          "id": "LeaveTargetAlias",
+          "edits": [
+            {
+              "old": "IF @ = \"target\" THEN \"none\" ELSE @",
+              "new": "@",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AtomicExpiry"
+        },
+        {
+          "id": "DeleteMovedAlias",
+          "edits": [
+            {
+              "old": "IF @ = \"target\" THEN \"none\" ELSE @",
+              "new": "\"none\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AtomicExpiry"
+        },
+        {
+          "id": "PurgePeerAlias",
+          "edits": [
+            {
+              "old": "!.grant = FALSE, !.alias = IF @",
+              "new": "!.grant = FALSE, !.peerAlias = FALSE, !.alias = IF @",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AtomicExpiry"
+        },
+        {
+          "id": "PurgePeerGrant",
+          "edits": [
+            {
+              "old": "!.grant = FALSE, !.alias = IF @",
+              "new": "!.grant = FALSE, !.peerGrant = FALSE, !.alias = IF @",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AtomicExpiry"
+        },
+        {
+          "id": "PurgePeerKeyMaterial",
+          "edits": [
+            {
+              "old": "!.deadline = 0, !.material = FALSE",
+              "new": "!.deadline = 0, !.material = FALSE, !.peerMaterial = FALSE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AtomicExpiry"
+        },
+        {
+          "id": "PartialFaultCommit",
+          "edits": [
+            {
+              "old": "IF commit THEN purged ELSE db",
+              "new": "IF commit THEN purged ELSE IF crossed THEN [db EXCEPT !.grant = FALSE] ELSE db",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AtomicExpiry"
+        },
+        {
+          "id": "ObserveExpiredMetadata",
+          "edits": [
+            {
+              "old": "IN /\\ ~Due\n    /\\ db' = IF allowed THEN change ELSE db",
+              "new": "IN /\\ (~Due \\/ op = \"read\")\n    /\\ db' = IF allowed THEN change ELSE db",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "OperationMatrix"
+        },
+        {
+          "id": "PendingCrypto",
+          "edits": [
+            {
+              "old": "op = \"crypto\" -> db.state = \"Enabled\"",
+              "new": "op = \"crypto\" -> db.state \\in {\"Enabled\",\"Pending\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "OperationMatrix"
+        },
+        {
+          "id": "EnablePending",
+          "edits": [
+            {
+              "old": "op \\in {\"enable\",\"disable\"} -> stable",
+              "new": "op \\in {\"enable\",\"disable\"} -> present",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "OperationMatrix"
+        },
+        {
+          "id": "CreateGrantWhilePending",
+          "edits": [
+            {
+              "old": "op = \"createGrant\" -> db.state = \"Enabled\" /\\ ~db.grant",
+              "new": "op = \"createGrant\" -> db.state \\in {\"Enabled\",\"Pending\"} /\\ ~db.grant",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "OperationMatrix"
+        },
+        {
+          "id": "DenyPendingSignedDescribe",
+          "edits": [
+            {
+              "old": "op = \"signedDescribe\" -> present /\\ db.grant",
+              "new": "op = \"signedDescribe\" -> stable /\\ db.grant",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "OperationMatrix"
+        },
+        {
+          "id": "DenyPendingRevocation",
+          "edits": [
+            {
+              "old": "op = \"revoke\" -> present /\\ db.grant",
+              "new": "op = \"revoke\" -> stable /\\ db.grant",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "OperationMatrix"
+        },
+        {
+          "id": "DenyMovingAway",
+          "edits": [
+            {
+              "old": "op = \"moveAway\" -> db.alias = \"target\"\n",
+              "new": "op = \"moveAway\" -> db.alias = \"target\" /\\ stable\n",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "OperationMatrix"
+        },
+        {
+          "id": "MoveOntoPending",
+          "edits": [
+            {
+              "old": "OTHER -> db.alias = \"peer\" /\\ stable",
+              "new": "OTHER -> db.alias = \"peer\" /\\ present",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "OperationMatrix"
+        },
+        {
+          "id": "CreateAliasWhilePending",
+          "edits": [
+            {
+              "old": "op = \"createAlias\" -> db.alias = \"none\" /\\ stable",
+              "new": "op = \"createAlias\" -> db.alias = \"none\" /\\ present",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "OperationMatrix"
+        },
+        {
+          "id": "RestartReplacesDeadline",
+          "edits": [
+            {
+              "old": "Restart ==\n /\\ db' = db",
+              "new": "Restart ==\n /\\ db' = IF Waiting THEN [db EXCEPT !.deadline = day + 7] ELSE db",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "RestartPreservesDeadline"
+        },
+        {
+          "id": "RollbackRevivesMissingKey",
+          "edits": [
+            {
+              "old": "/\\ day' = t\n /\\ UNCHANGED db",
+              "new": "/\\ day' = t\n /\\ db' = IF t < day /\\ db.state = \"Gone\" THEN Initial(\"Disabled\") ELSE db",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "TimePreservesStorage"
+        }
+      ]
     }
   ]
 }

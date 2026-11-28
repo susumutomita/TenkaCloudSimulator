@@ -43,7 +43,7 @@ func sdkAuthenticationError(w http.ResponseWriter, r *http.Request) {
 		cognitoidp.RejectAuthentication(w)
 		return
 	}
-	if strings.HasPrefix(r.Header.Get("X-Amz-Target"), "AmazonSSM.") {
+	if strings.HasPrefix(r.Header.Get("X-Amz-Target"), "AmazonSSM.") || strings.HasPrefix(r.Header.Get("X-Amz-Target"), "TrentService.") {
 		w.Header().Set("Content-Type", "application/x-amz-json-1.1")
 		w.WriteHeader(http.StatusForbidden)
 		_ = json.NewEncoder(w).Encode(map[string]string{"__type": "UnrecognizedClientException", "message": message})

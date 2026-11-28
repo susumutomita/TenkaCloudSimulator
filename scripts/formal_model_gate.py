@@ -5129,6 +5129,122 @@ REQUIRED_SOURCE_SCOPES['ServiceQuotaRequestConsole'] = {
 }
 
 
+# Pin the KMS effective-grant controls independently of the editable registry.
+BASE_MODELS.add('KMSRoleGrantLifecycle')
+BASE_INVARIANTS['KMSRoleGrantLifecycle'] = {
+    'TypeOK',
+    'ManagementAuthorized',
+    'CreateRequiresEnabled',
+    'GrantToLiveRole',
+    'PermittedManagementWorks',
+    'GrantWriteFrame',
+    'VerifiedDescribe',
+    'ExplicitDenyWins',
+    'DirectOrBoundGrant',
+    'PermittedDescribeWorks',
+    'RestartFrame',
+}
+REQUIRED_SOURCE_SCOPES['KMSRoleGrantLifecycle'] = {
+    'internal/aws/kms_dispatch.go',
+    'internal/aws/kms_grants.go',
+    'internal/aws/kms_http.go',
+    'internal/aws/kms_store.go',
+    'internal/aws/sts_credentials.go',
+    'internal/aws/sts_signature.go',
+    'internal/server/access_sdk.go',
+}
+KMS_ROLE_GRANT_CONTROLS = [
+    ('SkipManagementIAM', 'authorized == manager = "allowed"', 'authorized == TRUE', 'ManagementAuthorized'),
+    ('CreateOnDisabledKey', 'canCreate == rolePresent /\\ k \\in enabled /\\ grants[k] = 0', 'canCreate == rolePresent /\\ grants[k] = 0', 'CreateRequiresEnabled'),
+    ('CreateForMissingRole', 'canCreate == rolePresent /\\ k \\in enabled /\\ grants[k] = 0', 'canCreate == k \\in enabled /\\ grants[k] = 0', 'GrantToLiveRole'),
+    ('UseDeletedRole', 'sessionOK == rolePresent /\\ session # 0 /\\ session = generation', 'sessionOK == session # 0 /\\ session = generation', 'VerifiedDescribe'),
+    ('RejectDisabledRevocation', 'canRevoke == grants[k] # 0', 'canRevoke == grants[k] # 0 /\\ k \\in enabled', 'PermittedManagementWorks'),
+    ('RejectDisabledList', '[] op = "revoke" -> canRevoke\n                                   [] OTHER -> TRUE', '[] op = "revoke" -> canRevoke\n                                   [] OTHER -> k \\in enabled', 'PermittedManagementWorks'),
+    ('CreateWithWrongGeneration', 'op = "create" -> [grants EXCEPT ![k] = generation]', 'op = "create" -> [grants EXCEPT ![k] = 1]', 'GrantWriteFrame'),
+    ('RevokeLeavesGrant', 'op = "revoke" -> [grants EXCEPT ![k] = 0]', 'op = "revoke" -> grants', 'GrantWriteFrame'),
+    ('RevokeClearsPeer', 'op = "revoke" -> [grants EXCEPT ![k] = 0]', 'op = "revoke" -> Empty', 'GrantWriteFrame'),
+    ('RefusalMutatesGrants', 'IF ~success THEN grants', 'IF ~success THEN Empty', 'GrantWriteFrame'),
+    ('AcceptUnsignedDescribe', 'signedOK == request = "canonical"', 'signedOK == request \\in {"canonical","unsigned"}', 'VerifiedDescribe'),
+    ('AcceptWrongKMSOperation', 'signedOK == request = "canonical"', 'signedOK == request \\in {"canonical","other target"}', 'VerifiedDescribe'),
+    ('AcceptPeerScope', 'signedOK == request = "canonical"', 'signedOK == request \\in {"canonical","foreign scope"}', 'VerifiedDescribe'),
+    ('AcceptExpiredSession', 'signedOK == request = "canonical"', 'signedOK == request \\in {"canonical","expired"}', 'VerifiedDescribe'),
+    ('AcceptStaleSession', 'sessionOK == rolePresent /\\ session # 0 /\\ session = generation', 'sessionOK == rolePresent /\\ session # 0', 'VerifiedDescribe'),
+    ('OverrideExplicitDeny', 'success == sessionOK /\\ signedOK /\\ ~denied /\\ (direct \\/ bound)', 'success == sessionOK /\\ signedOK /\\ (direct \\/ bound)', 'ExplicitDenyWins'),
+    ('RebindSameRoleName', 'bound == sameRole /\\ grants[k] = generation', 'bound == sameRole /\\ grants[k] # 0', 'DirectOrBoundGrant'),
+    ('AllowOtherGrantee', 'bound == sameRole /\\ grants[k] = generation', 'bound == grants[k] = generation', 'DirectOrBoundGrant'),
+    ('GrantAuthorizesPeerKey', 'bound == sameRole /\\ grants[k] = generation', 'bound == sameRole /\\ (grants[k] = generation \\/ grants[3-k] = generation)', 'DirectOrBoundGrant'),
+    ('IgnoreGrantedPermission', '~denied /\\ (direct \\/ bound)', '~denied /\\ direct', 'PermittedDescribeWorks'),
+    ('RequireGrantForDirectPermission', '~denied /\\ (direct \\/ bound)', '~denied /\\ bound', 'PermittedDescribeWorks'),
+    ('RestartDeletesGrants', 'LET persisted == grants', 'LET persisted == Empty', 'RestartFrame'),
+    ('RestartRetainsSession', 'retainedSession == 0', 'retainedSession == session', 'RestartFrame'),
+]
+REQUIRED_MUTANTS['KMSRoleGrantLifecycle'] = {entry[0] for entry in KMS_ROLE_GRANT_CONTROLS}
+
+
+# Fixed scenarios for the single-region scheduled deletion model.
+BASE_MODELS.add('KMSScheduledDeletion')
+BASE_INVARIANTS['KMSScheduledDeletion'] = {
+    'TypeOK',
+    'ScheduleContract',
+    'CancelContract',
+    'ExpiryBoundary',
+    'AtomicExpiry',
+    'OperationMatrix',
+    'RestartPreservesDeadline',
+    'TimePreservesStorage',
+}
+REQUIRED_SOURCE_SCOPES['KMSScheduledDeletion'] = {
+    'internal/aws/kms_aliases.go',
+    'internal/aws/kms_crypto.go',
+    'internal/aws/kms_deletion.go',
+    'internal/aws/kms_grants.go',
+    'internal/aws/kms_http.go',
+    'internal/aws/kms_store.go',
+    'internal/aws/kms_types.go',
+}
+KMS_DELETION_CONTROLS = [
+    ('DefaultToMinimum', 'days == IF window = Omitted THEN 30', 'days == IF window = Omitted THEN 7', 'ScheduleContract'),
+    ('AcceptSixDays', 'inputOK == days \\in 7..30', 'inputOK == days \\in 6..30', 'ScheduleContract'),
+    ('AcceptThirtyOneDays', 'inputOK == days \\in 7..30', 'inputOK == days \\in 7..31', 'ScheduleContract'),
+    ('ScheduleWithoutPermission', 'allowed == permitted /\\ inputOK', 'allowed == inputOK', 'ScheduleContract'),
+    ('ReschedulePending', 'inputOK /\\ db.state \\in {"Enabled","Disabled"}', 'inputOK /\\ db.state # "Gone"', 'ScheduleContract'),
+    ('RefuseDisabledSchedule', 'inputOK /\\ db.state \\in {"Enabled","Disabled"}', 'inputOK /\\ db.state = "Enabled"', 'ScheduleContract'),
+    ('UseRelativeDeadline', '!.deadline = day + days', '!.deadline = days', 'ScheduleContract'),
+    ('ScheduleAfterFailedWrite', 'IF success THEN written ELSE db', 'IF allowed THEN written ELSE db', 'ScheduleContract'),
+    ('CancelWithoutPermission', 'success == permitted /\\ Waiting /\\ ~fault', 'success == Waiting /\\ ~fault', 'CancelContract'),
+    ('CancelWithoutPending', 'success == permitted /\\ Waiting /\\ ~fault', 'success == permitted /\\ db.state # "Gone" /\\ ~fault', 'CancelContract'),
+    ('AllowCancelAtExpiry', "IN /\\ ~Due\n    /\\ db' = IF success THEN changed ELSE db", "IN /\\ TRUE\n    /\\ db' = IF success THEN changed ELSE db", 'CancelContract'),
+    ('CancelEnablesCrypto', 'changed == [db EXCEPT !.state = "Disabled", !.deadline = 0]', 'changed == [db EXCEPT !.state = "Enabled", !.deadline = 0]', 'CancelContract'),
+    ('CancelRetainsDeadline', 'changed == [db EXCEPT !.state = "Disabled", !.deadline = 0]', 'changed == [db EXCEPT !.state = "Disabled"]', 'CancelContract'),
+    ('CancelDropsExistingGrant', 'changed == [db EXCEPT !.state = "Disabled", !.deadline = 0]', 'changed == [db EXCEPT !.state = "Disabled", !.deadline = 0, !.grant = FALSE]', 'CancelContract'),
+    ('CancelAfterFailedWrite', 'IF success THEN changed ELSE db', 'IF permitted /\\ Waiting THEN changed ELSE db', 'CancelContract'),
+    ('PurgeBeforeDeadline', 'crossed == Waiting /\\ day >= db.deadline', 'crossed == Waiting /\\ day + 1 >= db.deadline', 'ExpiryBoundary'),
+    ('MissDeadlineEquality', 'crossed == Waiting /\\ day >= db.deadline', 'crossed == Waiting /\\ day > db.deadline', 'ExpiryBoundary'),
+    ('PurgeCancelledKey', 'crossed == Waiting /\\ day >= db.deadline', 'crossed == (Waiting /\\ day >= db.deadline) \\/ (last.kind = "cancel" /\\ last.ok /\\ db.state = "Disabled")', 'ExpiryBoundary'),
+    ('KeepExpiredKey', 'purged == [db EXCEPT !.state = "Gone"', 'purged == [db EXCEPT !.state = "Disabled"', 'AtomicExpiry'),
+    ('LeaveKeyMaterial', '!.deadline = 0, !.material = FALSE', '!.deadline = 0, !.material = TRUE', 'AtomicExpiry'),
+    ('LeaveGrant', '!.grant = FALSE, !.alias = IF @', '!.grant = TRUE, !.alias = IF @', 'AtomicExpiry'),
+    ('LeaveTargetAlias', 'IF @ = "target" THEN "none" ELSE @', '@', 'AtomicExpiry'),
+    ('DeleteMovedAlias', 'IF @ = "target" THEN "none" ELSE @', '"none"', 'AtomicExpiry'),
+    ('PurgePeerAlias', '!.grant = FALSE, !.alias = IF @', '!.grant = FALSE, !.peerAlias = FALSE, !.alias = IF @', 'AtomicExpiry'),
+    ('PurgePeerGrant', '!.grant = FALSE, !.alias = IF @', '!.grant = FALSE, !.peerGrant = FALSE, !.alias = IF @', 'AtomicExpiry'),
+    ('PurgePeerKeyMaterial', '!.deadline = 0, !.material = FALSE', '!.deadline = 0, !.material = FALSE, !.peerMaterial = FALSE', 'AtomicExpiry'),
+    ('PartialFaultCommit', 'IF commit THEN purged ELSE db', 'IF commit THEN purged ELSE IF crossed THEN [db EXCEPT !.grant = FALSE] ELSE db', 'AtomicExpiry'),
+    ('ObserveExpiredMetadata', "IN /\\ ~Due\n    /\\ db' = IF allowed THEN change ELSE db", 'IN /\\ (~Due \\/ op = "read")\n    /\\ db\' = IF allowed THEN change ELSE db', 'OperationMatrix'),
+    ('PendingCrypto', 'op = "crypto" -> db.state = "Enabled"', 'op = "crypto" -> db.state \\in {"Enabled","Pending"}', 'OperationMatrix'),
+    ('EnablePending', 'op \\in {"enable","disable"} -> stable', 'op \\in {"enable","disable"} -> present', 'OperationMatrix'),
+    ('CreateGrantWhilePending', 'op = "createGrant" -> db.state = "Enabled" /\\ ~db.grant', 'op = "createGrant" -> db.state \\in {"Enabled","Pending"} /\\ ~db.grant', 'OperationMatrix'),
+    ('DenyPendingSignedDescribe', 'op = "signedDescribe" -> present /\\ db.grant', 'op = "signedDescribe" -> stable /\\ db.grant', 'OperationMatrix'),
+    ('DenyPendingRevocation', 'op = "revoke" -> present /\\ db.grant', 'op = "revoke" -> stable /\\ db.grant', 'OperationMatrix'),
+    ('DenyMovingAway', 'op = "moveAway" -> db.alias = "target"\n', 'op = "moveAway" -> db.alias = "target" /\\ stable\n', 'OperationMatrix'),
+    ('MoveOntoPending', 'OTHER -> db.alias = "peer" /\\ stable', 'OTHER -> db.alias = "peer" /\\ present', 'OperationMatrix'),
+    ('CreateAliasWhilePending', 'op = "createAlias" -> db.alias = "none" /\\ stable', 'op = "createAlias" -> db.alias = "none" /\\ present', 'OperationMatrix'),
+    ('RestartReplacesDeadline', "Restart ==\n /\\ db' = db", "Restart ==\n /\\ db' = IF Waiting THEN [db EXCEPT !.deadline = day + 7] ELSE db", 'RestartPreservesDeadline'),
+    ('RollbackRevivesMissingKey', "/\\ day' = t\n /\\ UNCHANGED db", '/\\ day\' = t\n /\\ db\' = IF t < day /\\ db.state = "Gone" THEN Initial("Disabled") ELSE db', 'TimePreservesStorage'),
+]
+REQUIRED_MUTANTS['KMSScheduledDeletion'] = {entry[0] for entry in KMS_DELETION_CONTROLS}
+
+
 def load_registry(root, relative='formal/models.json'):
     root = Path(root)
     registry_path = asset(root, relative)
@@ -5191,6 +5307,14 @@ def load_registry(root, relative='formal/models.json'):
             expected = [{'id': mid, 'edits': [{'old': old, 'new': new, 'count': 1}], 'expect_invariant': inv}
                         for mid, old, new, inv in SUPPORT_CASE_CONTROLS]
             require(model['mutants'] == expected, 'Support case controls changed')
+        if name == 'KMSScheduledDeletion':
+            expected = [{'id': mid, 'edits': [{'old': old, 'new': new, 'count': 1}], 'expect_invariant': inv}
+                        for mid, old, new, inv in KMS_DELETION_CONTROLS]
+            require(model['mutants'] == expected, 'KMS deletion controls changed')
+        if name == 'KMSRoleGrantLifecycle':
+            expected = [{'id': mid, 'edits': [{'old': old, 'new': new, 'count': 1}], 'expect_invariant': inv}
+                        for mid, old, new, inv in KMS_ROLE_GRANT_CONTROLS]
+            require(model['mutants'] == expected, 'KMS role grant controls changed')
         if name == 'SARPolicyAuthorizationTarget':
             require(model['mutants'] == SAR_POLICY_TARGET_MUTATIONS, 'SAR policy target controls changed')
         if name == 'SakuraServerReadEpoch':
