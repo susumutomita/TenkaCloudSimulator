@@ -13,6 +13,7 @@ import (
 
 	"github.com/susumutomita/TenkaCloudSimulator/internal/aws"
 	"github.com/susumutomita/TenkaCloudSimulator/internal/aws/catalog"
+	"github.com/susumutomita/TenkaCloudSimulator/internal/aws/codestarnotifications"
 	"github.com/susumutomita/TenkaCloudSimulator/internal/aws/cognitoidp"
 	"github.com/susumutomita/TenkaCloudSimulator/internal/aws/simpledb"
 	"github.com/susumutomita/TenkaCloudSimulator/internal/core"
@@ -187,7 +188,15 @@ func newWithProviders(path string, options ProviderConfig, prepareCognito func(*
 		catalogConfig.ValidateRDSPrivatePostgres = aws.ValidateRDSPrivatePostgresTopology
 	}
 	var catalogEngine *catalog.Engine
+	var notifications *codestarnotifications.Store
 	if options.ownedPostgres == nil {
+		notifications, err = aws.NewNotificationRules(store.Database())
+		if err != nil {
+			_ = lambdas.Close()
+			_ = store.Close()
+			return nil, nil, err
+		}
+		catalogConfig.RecordCodeCommitRef = notifications.RecordRef
 		catalogEngine, err = catalog.New(store.Database(), catalogConfig, catalog.Services())
 		if err != nil {
 			_ = lambdas.Close()
@@ -212,7 +221,7 @@ func newWithProviders(path string, options ProviderConfig, prepareCognito func(*
 			return nil, nil, err
 		}
 	}
-	gateway := &aws.Gateway{CognitoUserPools: cognitoUserPools, CognitoResourceAccount: localCognitoAccount, SimpleDB: simpleDB, SimpleDBScope: simpledb.Scope{Account: "000000000000", Region: "us-east-1"}, AutoScalingPlans: autoScalingPlans, BedrockRuntime: options.BedrockRuntime, ELB: elb, CloudFront: cloudFront, Route53: route53, WAF: waf, SNS: snsTopics, CloudWatchLogs: cloudWatchLogs, Secrets: secrets, DynamoDB: dynamodb, KMS: keys, APIGateway: apiGateway, LambdaPermissions: lambdaPermissions, Store: store, S3: s3, Identities: identities, Parameters: parameters, Queues: queues, Stacks: stacks, Lambdas: lambdas, Roles: roles, Documents: documents}
+	gateway := &aws.Gateway{Notifications: notifications, CognitoUserPools: cognitoUserPools, CognitoResourceAccount: localCognitoAccount, SimpleDB: simpleDB, SimpleDBScope: simpledb.Scope{Account: "000000000000", Region: "us-east-1"}, AutoScalingPlans: autoScalingPlans, BedrockRuntime: options.BedrockRuntime, ELB: elb, CloudFront: cloudFront, Route53: route53, WAF: waf, SNS: snsTopics, CloudWatchLogs: cloudWatchLogs, Secrets: secrets, DynamoDB: dynamodb, KMS: keys, APIGateway: apiGateway, LambdaPermissions: lambdaPermissions, Store: store, S3: s3, Identities: identities, Parameters: parameters, Queues: queues, Stacks: stacks, Lambdas: lambdas, Roles: roles, Documents: documents}
 	if options.commandAPI != nil {
 		gateway.Commands = options.commandAPI()
 	}
@@ -353,8 +362,16 @@ func newWithProviders(path string, options ProviderConfig, prepareCognito func(*
 		defer close(healthDone)
 		gateway.ELBHealthLoop(healthContext, time.Second)
 	}()
+	var notificationsDone chan struct{}
+	if notifications != nil {
+		notificationsDone = make(chan struct{})
+		go func() { defer close(notificationsDone); gateway.DeliverNotifications(healthContext) }()
+	}
 	return handler, func() error {
 		stopHealth()
+		if notificationsDone != nil {
+			<-notificationsDone
+		}
 		if options.closeInstances != nil {
 			if err := options.closeInstances(); err != nil {
 				<-healthDone

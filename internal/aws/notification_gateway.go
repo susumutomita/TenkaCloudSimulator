@@ -2,6 +2,8 @@ package aws
 
 import (
 	"bytes"
+	"context"
+	"database/sql"
 	"encoding/json"
 	"errors"
 	"io"
@@ -190,4 +192,28 @@ func (g *Gateway) serveNotifications(w http.ResponseWriter, r *http.Request) {
 	}
 	w.Header().Set("Content-Type", "application/json")
 	_ = json.NewEncoder(w).Encode(out)
+}
+
+// NewNotificationRules binds the rule store to the native SNS policy lookup.
+func NewNotificationRules(db *sql.DB) (*codestarnotifications.Store, error) {
+	return codestarnotifications.New(db, func(ctx context.Context, tx *sql.Tx, arn string) (int64, bool, error) {
+		generation, allowed, err := snsNotificationTopicGrant(ctx, tx, arn)
+		var fault ssmFailure
+		if errors.As(err, &fault) {
+			return 0, false, notificationFailure("ConfigurationException", "Select an existing local Standard SNS topic.")
+		}
+		return generation, allowed, err
+	})
+}
+
+func (g *Gateway) DeliverNotifications(ctx context.Context) {
+	g.Notifications.RunWorker(ctx, func(ctx context.Context, tx *sql.Tx, topicARN, body string, allowQueue func(string) error) (string, error) {
+		var topic SNSTopic
+		err := tx.QueryRowContext(ctx, "SELECT region,name,arn,display_name,fifo,created FROM aws_sns_topics WHERE arn=?", topicARN).
+			Scan(&topic.Region, &topic.Name, &topic.ARN, &topic.DisplayName, &topic.FIFO, &topic.CreatedAt)
+		if err != nil {
+			return "", err
+		}
+		return snsPublishQueuesTx(tx, topic, body, "", allowQueue)
+	})
 }

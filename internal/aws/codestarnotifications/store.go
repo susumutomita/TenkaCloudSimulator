@@ -84,7 +84,15 @@ func New(db *sql.DB, grant Grant) (*Store, error) {
 	if db == nil || grant == nil {
 		return nil, errors.New("notification rules require the team database and native SNS grant resolver")
 	}
-	if _, err := db.Exec(schema); err != nil {
+	tx, err := db.Begin()
+	if err != nil {
+		return nil, err
+	}
+	defer tx.Rollback()
+	if _, err := tx.Exec(schema); err != nil {
+		return nil, err
+	}
+	if err := tx.Commit(); err != nil {
 		return nil, err
 	}
 	s := &Store{db: db, grant: grant, now: time.Now}

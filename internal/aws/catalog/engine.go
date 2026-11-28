@@ -15,13 +15,20 @@ import (
 // It returns the simulator decision string, where only "allowed" permits.
 type Authorizer func(ctx context.Context, principal, action, resource string) (string, error)
 
+type CodeCommitRefChange struct {
+	Region, RepositoryARN, RepositoryID, Branch, OldCommit, Commit string
+}
+
 // Config is trusted composition input supplied by the AWS provider.
 type Config struct {
-	Regions          []string
-	Account          string
-	DefaultPrincipal string
-	Authorize        Authorizer
-	Now              func() time.Time
+	// RecordCodeCommitRef records an actual new or changed branch in the same
+	// SQLite transaction. Reading a commit never invokes this callback.
+	RecordCodeCommitRef func(context.Context, *sql.Tx, CodeCommitRefChange) error
+	Regions             []string
+	Account             string
+	DefaultPrincipal    string
+	Authorize           Authorizer
+	Now                 func() time.Time
 	// ValidateRDSPrivatePostgres is optional trusted native EC2 composition.
 	// Run only for authorized, explicitly private standalone PostgreSQL writes.
 	ValidateRDSPrivatePostgres func(context.Context, *sql.Tx, RDSPrivatePostgresRefs) error

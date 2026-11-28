@@ -9,16 +9,12 @@ import (
 	"fmt"
 	"strings"
 	"time"
+
+	"github.com/susumutomita/TenkaCloudSimulator/internal/aws/catalog"
 )
 
 const maxPendingTargets = 2048
 const maxQueuesPerTarget = 20
-
-// RefChange is supplied by the CodeCommit provider inside its existing ref
-// transaction. No HTTP operation accepts this structure.
-type RefChange struct {
-	Region, RepositoryARN, RepositoryID, Branch, OldCommit, Commit string
-}
 
 type destination struct {
 	Subscription string
@@ -96,7 +92,7 @@ func destinations(ctx context.Context, tx *sql.Tx, region, topic string, assign 
 	return string(b), err
 }
 
-func (s *Store) RecordRef(ctx context.Context, tx *sql.Tx, c RefChange) error {
+func (s *Store) RecordRef(ctx context.Context, tx *sql.Tx, c catalog.CodeCommitRefChange) error {
 	event, eventName := BranchCreated, "referenceCreated"
 	if c.OldCommit != "" {
 		event, eventName = BranchUpdated, "referenceUpdated"
