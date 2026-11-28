@@ -286,6 +286,15 @@ func (s *Store) describe(ctx context.Context, tx *sql.Tx, r Rule) (map[string]an
 				ts = "ACTIVE"
 			}
 		}
+		if ts == "ACTIVE" {
+			var stalled bool
+			if err := tx.QueryRowContext(ctx, `SELECT EXISTS(SELECT 1 FROM aws_notification_outbox WHERE rule_arn=? AND topic_arn=? AND retry_ms>0)`, r.ARN, t.arn).Scan(&stalled); err != nil {
+				return nil, err
+			}
+			if stalled {
+				ts = "UNREACHABLE"
+			}
+		}
 		targets = append(targets, map[string]string{"TargetType": "SNS", "TargetAddress": t.arn, "TargetStatus": ts})
 	}
 	return map[string]any{"Arn": r.ARN, "Name": r.Name, "Resource": r.Source, "Status": status, "CreatedBy": r.Owner,

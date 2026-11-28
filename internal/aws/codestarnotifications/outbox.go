@@ -86,6 +86,22 @@ func destinations(ctx context.Context, tx *sql.Tx, region, topic string, assign 
 		if err != nil {
 			return "", err
 		}
+		// A queue deleted after this subscription was first observed invalidates
+		// the binding even if its endpoint string and native subscription survive.
+		if assign {
+			if _, err = tx.ExecContext(ctx, `INSERT INTO aws_notification_subscriptions(subscription_arn,queue_generation)
+				SELECT ?,? WHERE NOT EXISTS(SELECT 1 FROM aws_notification_subscriptions WHERE subscription_arn=?)`, sub.arn, gen, sub.arn); err != nil {
+				return "", err
+			}
+		}
+		var original int64
+		err = tx.QueryRowContext(ctx, "SELECT queue_generation FROM aws_notification_subscriptions WHERE subscription_arn=?", sub.arn).Scan(&original)
+		if errors.Is(err, sql.ErrNoRows) || (err == nil && original != gen) {
+			return "", nil
+		}
+		if err != nil {
+			return "", err
+		}
 		captured = append(captured, destination{Subscription: sub.arn, Queue: sub.endpoint, Generation: gen})
 	}
 	b, err := json.Marshal(captured)

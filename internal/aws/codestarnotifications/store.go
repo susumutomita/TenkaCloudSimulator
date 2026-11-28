@@ -66,6 +66,10 @@ CREATE TABLE IF NOT EXISTS aws_notification_queue_instances (
  generation INTEGER PRIMARY KEY AUTOINCREMENT, region TEXT NOT NULL, queue TEXT NOT NULL,
  UNIQUE(region,queue), FOREIGN KEY(region,queue) REFERENCES aws_sqs_queues(region,name) ON DELETE CASCADE
 );
+CREATE TABLE IF NOT EXISTS aws_notification_subscriptions (
+ subscription_arn TEXT PRIMARY KEY REFERENCES aws_sns_subscriptions(arn) ON DELETE CASCADE,
+ queue_generation INTEGER NOT NULL
+);
 CREATE TABLE IF NOT EXISTS aws_notification_outbox (
  seq INTEGER PRIMARY KEY AUTOINCREMENT, rule_arn TEXT NOT NULL, rule_generation INTEGER NOT NULL,
  topic_arn TEXT NOT NULL, topic_generation INTEGER NOT NULL, event_id TEXT NOT NULL,

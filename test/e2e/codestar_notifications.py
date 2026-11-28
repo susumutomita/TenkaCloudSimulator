@@ -125,18 +125,26 @@ def exercise(binary,native):
         def policy(effect):
             owner('sns','SetTopicAttributes',TopicArn=topic,AttributeName='Policy',AttributeValue=json.dumps({'Version':'2012-10-17','Statement':[{'Effect':effect,'Principal':{'Service':'codestar-notifications.amazonaws.com'},'Action':'sns:Publish','Resource':topic}]}))
         policy('Allow')
-        def participant(name,actions,resource):
-            control(team,'PUT','/_simulator/v1/iam/principals/'+name+'/policy',{'Version':'2012-10-17','Statement':[{'Effect':'Allow','Action':actions,'Resource':resource}]})
+        def credential(name):
             issued=control(team,'POST','/_simulator/v1/access',{'Principal':name})['AccessToken']
             return clients(team,issued,stack,native,receipt)
-        writer=participant('content-writer',['codecommit:PutFile','codecommit:CreateBranch','codecommit:GetBranch'],source)
+        def install(name,statements):
+            control(team,'PUT','/_simulator/v1/iam/principals/'+name+'/policy',{'Version':'2012-10-17','Statement':statements})
+        git_actions=['codecommit:PutFile','codecommit:CreateBranch','codecommit:GetBranch']
+        install('content-writer',[{'Effect':'Allow','Action':git_actions,'Resource':source}])
+        writer=credential('content-writer')
+        rule_policy=[{'Effect':'Allow','Action':'codestar-notifications:*','Resource':'*'},
+                     {'Effect':'Allow','Action':'codecommit:GetRepository','Resource':source}]
+        with_delivery=rule_policy+[{'Effect':'Allow','Action':'sqs:SendMessage','Resource':queue}]
+        install('rule-owner',with_delivery)
+        manager=credential('rule-owner')
         expect('AccessDeniedException',writer,cs,'CreateNotificationRule',**common)
-        rule=owner(cs,'CreateNotificationRule',**common)['Arn']
-        assert owner(cs,'CreateNotificationRule',**common)['Arn']==rule
-        expect('ValidationException',owner,cs,'CreateNotificationRule',**{**common,'Name':'Different'})
+        rule=manager(cs,'CreateNotificationRule',**common)['Arn']
+        assert manager(cs,'CreateNotificationRule',**common)['Arn']==rule
+        expect('ValidationException',manager,cs,'CreateNotificationRule',**{**common,'Name':'Different'})
         assert [r['Arn'] for r in owner(cs,'ListNotificationRules',Filters=[{'Name':'RESOURCE','Value':source}])['NotificationRules']]==[rule]
         record=owner(cs,'DescribeNotificationRule',Arn=rule)
-        assert record['Resource']==source and record['Targets']==[{'TargetType':'SNS','TargetAddress':topic,'TargetStatus':'ACTIVE'}]
+        assert record['CreatedBy']=='rule-owner' and record['Resource']==source and record['Targets']==[{'TargetType':'SNS','TargetAddress':topic,'TargetStatus':'ACTIVE'}]
         assert {e['EventTypeId'] for e in record['EventTypes']}=={CREATED,UPDATED}
         assert other(cs,'ListNotificationRules')['NotificationRules']==[]
         expect('ResourceNotFoundException',other,cs,'DescribeNotificationRule',Arn=rule)
@@ -169,8 +177,14 @@ def exercise(binary,native):
         time.sleep(1.4)
         assert not owner('sqs','ReceiveMessage',QueueUrl=url).get('Messages')
         team.close();team.start()
+        writer=credential('content-writer')
         policy('Allow');receive('main',second,first)
+        install('rule-owner',rule_policy)
         writer('codecommit','CreateBranch',repositoryName=repo,branchName='review',commitId=first)
+        assert writer('codecommit','GetBranch',repositoryName=repo,branchName='review')['branch']['commitId']==first
+        time.sleep(1.4)
+        assert not owner('sqs','ReceiveMessage',QueueUrl=url).get('Messages')
+        install('rule-owner',with_delivery)
         receive('review',first)
         owner(cs,'UpdateNotificationRule',Arn=rule,Status='DISABLED')
         assert owner(cs,'DescribeNotificationRule',Arn=rule)['Status']=='DISABLED'
