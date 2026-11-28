@@ -34,6 +34,9 @@ func main() {
 	}
 }
 func run(ctx context.Context, args []string, output io.Writer) (result error) {
+	if len(args) != 0 && args[0] == localSSOCommand {
+		return runLocalSSO(ctx, args[1:], output)
+	}
 	if len(args) != 0 && args[0] == entraFixtureCommand {
 		return runEntraVerificationFixture(ctx, args[1:], output)
 	}

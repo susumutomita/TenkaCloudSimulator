@@ -55,6 +55,11 @@ func TestFederationMetadataRequiresUnambiguousLocalSigningSelection(t *testing.T
 	if err != nil {
 		t.Fatal(err)
 	}
+	// Older P-224 public certificates are still parseable by X.509 but are
+	// outside the locally supported SAML profile. The certificate is issued
+	// by the fixture's ordinary P-256 signer, not by the deprecated curve.
+	oldCurve := elliptic.P224()
+	oldPublic := &ecdsa.PublicKey{Curve: oldCurve, X: oldCurve.Params().Gx, Y: oldCurve.Params().Gy}
 	for _, tc := range []struct {
 		name string
 		pub  any
@@ -62,6 +67,7 @@ func TestFederationMetadataRequiresUnambiguousLocalSigningSelection(t *testing.T
 	}{
 		{"encryption-only certificate", &issuer.PublicKey, x509.KeyUsageKeyEncipherment},
 		{"unsupported public key type", edPublic, x509.KeyUsageDigitalSignature},
+		{"unsupported legacy signing curve", oldPublic, x509.KeyUsageDigitalSignature},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			meta := &x509.Certificate{SerialNumber: big.NewInt(46), NotBefore: at.Add(-time.Hour), NotAfter: at.Add(time.Hour), KeyUsage: tc.use}
@@ -79,5 +85,15 @@ func TestFederationMetadataRequiresUnambiguousLocalSigningSelection(t *testing.T
 	}}
 	if _, err := compileFederationProvider(bad, at); !errors.Is(err, errInvalid) {
 		t.Fatal("oversize mapping accepted", err)
+	}
+	for _, label := range []string{"given name", "名"} {
+		bad.Mapping = map[string]string{"given_name": label}
+		if got, err := compileFederationProvider(bad, at); !errors.Is(err, errInvalid) || got.Name != "" {
+			t.Error("unsupported provider attribute label was accepted", err)
+		}
+	}
+	invalidEntity := strings.Replace(raw, fixtureEntity, fixtureEntity+" 授業", 1)
+	if got, err := compile(invalidEntity); !errors.Is(err, errInvalid) || got.Name != "" {
+		t.Fatal("unsupported metadata entity label was accepted", err)
 	}
 }

@@ -137,9 +137,13 @@ of the copy prepares it:
    needed. A missing or invalid explicit CA file stops the relay; certificate and
    hostname verification remain enabled. RPM signatures are still checked inside
    the guest.
-2. Build `guest/ssm-relay` and package it with
-   `scripts/guest-image/session-overlay.py`; put the tar in `LOCAL_DIR` and its
-   digest in `image/builder-user-data.sh`.
+2. Run `python3 test/battle/image/build_bundle.py --overlay-only --out /abs/new-overlay-check`
+   from the repository root with the pinned toolchain and module cache. The
+   builder verifies the dedicated guest dependency graph and existing overlay
+   digest before producing the tar. Put that checked tar in `LOCAL_DIR`; do
+   not change the digest in `image/builder-user-data.sh` just to accept a new
+   result. See [overlay provenance](image/OVERLAY-PROVENANCE.md) for the
+   separate procedure for intentional input changes.
 3. Boot the copy once with QEMU user networking and a NoCloud seed whose
    `user-data` is `image/builder-user-data.sh` (volume label `cidata`, written by
    `genisoimage` on Linux or `hdiutil makehybrid` on macOS; see

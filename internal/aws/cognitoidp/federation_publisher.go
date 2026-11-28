@@ -176,6 +176,12 @@ func (p *federationPublisher) addProvider(ctx context.Context, id string, input 
 		if !provider.currentPin(time.Now()) {
 			return errInvalid
 		}
+		var registration [federationRegistrationBytes]byte
+		rand.Read(registration[:])
+		provider.RegistrationID = hex.EncodeToString(registration[:])
+		if slices.ContainsFunc(cfg.Providers, func(v federationProvider) bool { return v.RegistrationID == provider.RegistrationID }) {
+			return errFederationDuplicate
+		}
 		cfg.Providers = append(cfg.Providers, provider)
 		return nil
 	}); err != nil {
@@ -228,9 +234,7 @@ func (p *federationPublisher) addClient(ctx context.Context, id string, input fe
 			}
 		}
 		var suffix [12]byte
-		if _, err := rand.Read(suffix[:]); err != nil {
-			return err
-		}
+		rand.Read(suffix[:])
 		newID := hex.EncodeToString(suffix[:])
 		if cfg.clientIndex(newID) >= 0 {
 			return errFederationDuplicate

@@ -2,14 +2,15 @@
 """Build the pinned Battle guest bundle on this machine (Linux or macOS, amd64 or arm64).
 
 Usage: build_bundle.py --out NEW_DIR [--work NEW_DIR] [--qemu PATH] [--keep-work]
+       build_bundle.py --overlay-only --out NEW_DIR [--work NEW_DIR] [--keep-work]
 
 This automates the procedure in ../README.md, with nothing left to fill in by hand:
 
-1. Download the pinned official Amazon Linux 2023 KVM image and verify the RSA
+1. Build guest/ssm-relay (Linux/amd64, CGO off, -trimpath) against the reviewed
+   independent guest graph and package it with scripts/guest-image/session-overlay.py.
+   The overlay digest must equal the one pinned in builder-user-data.sh.
+2. Download the pinned official Amazon Linux 2023 KVM image and verify the RSA
    signature over SHA256SUMS with the published key, then the image checksum.
-2. Build guest/ssm-relay (Linux/amd64, CGO off, -trimpath) and package it with
-   scripts/guest-image/session-overlay.py. The overlay digest must equal the one
-   pinned in builder-user-data.sh; nothing is substituted when it differs.
 3. Boot ONE copy of the image with QEMU user networking and a NoCloud seed whose
    user-data is the unchanged builder-user-data.sh, through repo_relay.py.
 4. Pack the emulator found on this machine, its firmware and modules, and the
@@ -17,7 +18,9 @@ This automates the procedure in ../README.md, with nothing left to fill in by ha
 
 The emulator runs later from the extracted bundle with an empty environment and
 the shared libraries of THIS machine, so build the bundle where it will run.
-Network access is used only for the image download and the relay's build boot.
+A full build can fetch checksum-pinned Go inputs, the official image and guest
+package files. --overlay-only uses cached Go inputs and never downloads an image,
+runs QEMU or launches the guest relay.
 The result establishes integrity of the inputs it names, not an independent
 review of the image. The bundle is for local use; review licensing before
 redistributing it (see scripts/guest-image/SESSION-IMAGE.md).
@@ -44,6 +47,10 @@ IMAGE_SHA256 = 'ef0fe2cdda2f6a8931dad1e1c66cb21d9f6b49c85e6025b185371e90028ea7e9
 IMAGE_BASE = f'https://cdn.amazonlinux.com/al2023/os-images/{IMAGE_RELEASE}/kvm/'
 SIGNING_KEY = 'https://cdn.amazonlinux.com/al2023/_assets/AL2023_RSASSA_PKCS1_V1_5_SHA_256.pem'
 FIRMWARE = ('bios-256k.bin', 'efi-virtio.rom', 'kvmvapic.bin')
+RELAY_MODULE = 'test/battle/image/session-relay.mod'
+RELAY_SUM = 'test/battle/image/session-relay.sum'
+RELAY_UNIT = 'guest/ssm-relay/tenkacloud-session-relay.service'
+OVERLAY_TOOL = 'scripts/guest-image/session-overlay.py'
 RELAY_PORT = 8099
 BUILD_TIMEOUT = 3600
 
@@ -70,9 +77,7 @@ def pinned_overlay_digest(user_data):
 
 def validate_overlay_provenance(repo, receipt, user_data):
     """Reject stale build inputs before downloading an image or launching QEMU."""
-    files = {'go.mod', 'go.sum', 'LICENSE',
-             'guest/ssm-relay/tenkacloud-session-relay.service',
-             'scripts/guest-image/session-overlay.py'}
+    files = {RELAY_MODULE, RELAY_SUM, 'LICENSE', RELAY_UNIT, OVERLAY_TOOL}
     for folder in ('guest/ssm-relay', 'internal/workload/guestsession'):
         files.update(str(p.relative_to(repo)) for p in (repo / folder).glob('*.go')
                      if not p.name.endswith('_test.go'))
@@ -165,45 +170,106 @@ def run(command, **kwargs):
     return subprocess.run(command, check=True, **kwargs)
 
 
+def build_session_overlay(repo, work, provenance, user_data, *, offline=False):
+    """Build, but never execute, the relay and match the package bytes to the pin."""
+    validate_overlay_provenance(repo, provenance, user_data)
+    env = dict(os.environ, CGO_ENABLED='0', GOOS='linux', GOARCH='amd64', GOAMD64='v1',
+               GOFLAGS='', GOENV='off', GOEXPERIMENT='', GOWORK='off', GOTOOLCHAIN='local')
+    if offline:
+        env.update(GOPROXY='off', GONOPROXY='none', GOSUMDB='off', GOINSECURE='', GOVCS='*:off')
+    toolchain = subprocess.run(['go', 'env', 'GOVERSION'], cwd=repo, env=env,
+                               capture_output=True, text=True, check=True).stdout.strip()
+    if toolchain != provenance['toolchain']:
+        raise SystemExit(f'session overlay requires {provenance["toolchain"]}, found {toolchain}')
+
+    source_pins = provenance['source_sha256']
+    local = work / 'local'
+    local.mkdir()
+    graph = work / 'relay-graph'
+    graph.mkdir()
+    # The alternate .mod and its same-stem .sum come from the exact reviewed
+    # bytes. Go can maintain a .sum even in readonly module mode; build from
+    # private copies and reject any modification instead of touching the pins.
+    for name in (RELAY_MODULE, RELAY_SUM):
+        source = repo / name
+        shutil.copyfile(source, graph / source.name)
+
+    def check_graph():
+        for name in (RELAY_MODULE, RELAY_SUM):
+            if sha256(graph / pathlib.Path(name).name) != source_pins[name]:
+                raise SystemExit(f'session relay staged graph drift: {name}')
+
+    check_graph()
+    relay = work / 'tenkacloud-session-relay'
+    run(['go', 'build', '-mod=readonly', f'-modfile={graph / pathlib.Path(RELAY_MODULE).name}',
+         *provenance['flags'], '-o', str(relay), './guest/ssm-relay'], cwd=repo, env=env)
+    check_graph()
+    if sha256(relay) != provenance['binary_sha256']:
+        raise SystemExit('session relay binary differs from reviewed provenance')
+
+    overlay = local / 'session-overlay.tar'
+    receipt = json.loads(run([sys.executable, '-I', str(repo / OVERLAY_TOOL),
+                              '--binary', str(relay), '--binary-sha256', provenance['binary_sha256'],
+                              '--unit', str(repo / RELAY_UNIT), '--unit-sha256', source_pins[RELAY_UNIT],
+                              '--license', str(repo / 'LICENSE'), '--license-sha256', source_pins['LICENSE'],
+                              '--output', str(overlay)], capture_output=True, text=True).stdout)
+    expected = pinned_overlay_digest(user_data)
+    observed = sha256(overlay)
+    if receipt['overlaySHA256'] != observed or observed != expected:
+        raise SystemExit(f'session overlay {observed} differs from the pinned receipt or user-data pin {expected}')
+    return receipt
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__.split('\n')[0])
-    parser.add_argument('--out', required=True, help='new directory for manifest.json and guest-bundle.tar.gz')
+    parser.add_argument('--out', required=True, help='new directory for the verified bundle or overlay artifacts')
+    parser.add_argument('--overlay-only', action='store_true',
+                        help='build only the pinned relay and tar offline from cached Go inputs; never run QEMU')
     parser.add_argument('--work', help='new scratch directory (default: a temporary directory)')
     parser.add_argument('--qemu', help='qemu-system-x86_64 to bundle (default: the one on PATH)')
     parser.add_argument('--cpus', type=int, default=max(1, min(4, os.cpu_count() or 1)))
     parser.add_argument('--keep-work', action='store_true')
     args = parser.parse_args()
 
-    if sys.platform not in ('linux', 'darwin') or os.uname().machine not in ('x86_64', 'aarch64', 'arm64'):
-        raise SystemExit('the Battle runtime is qualified on Linux and macOS (amd64 or arm64) only; use WSL2 on Windows')
-    found = args.qemu or shutil.which('qemu-system-x86_64')
-    if not found:
-        raise SystemExit('qemu-system-x86_64 not found (macOS: brew install qemu; Ubuntu: apt install qemu-system-x86)')
-    emulator = pathlib.Path(found).resolve()
-    version = subprocess.run([str(emulator), '--version'], capture_output=True, text=True, check=True).stdout.splitlines()[0]
-    help_text = subprocess.run([str(emulator), '-L', 'help'], capture_output=True, text=True, check=True).stdout
-    firmware = {}
-    for name in FIRMWARE:
-        match = next((d / name for d in data_directories(help_text) if (d / name).is_file()), None)
-        if match is None:
-            raise SystemExit(f'{name} not found in the emulator data directories')
-        firmware[name] = match.resolve()
-    modules = module_directory(emulator)
-    user_data = (HERE / 'builder-user-data.sh').read_text()
-    overlay_pin = pinned_overlay_digest(user_data)
+    if args.overlay_only and args.qemu:
+        parser.error('--qemu is not used with --overlay-only')
+    if not args.overlay_only:
+        if sys.platform not in ('linux', 'darwin') or os.uname().machine not in ('x86_64', 'aarch64', 'arm64'):
+            raise SystemExit('the Battle runtime is qualified on Linux and macOS (amd64 or arm64) only; use WSL2 on Windows')
+        found = args.qemu or shutil.which('qemu-system-x86_64')
+        if not found:
+            raise SystemExit('qemu-system-x86_64 not found (macOS: brew install qemu; Ubuntu: apt install qemu-system-x86)')
+        emulator = pathlib.Path(found).resolve()
+        version = subprocess.run([str(emulator), '--version'], capture_output=True, text=True, check=True).stdout.splitlines()[0]
+        help_text = subprocess.run([str(emulator), '-L', 'help'], capture_output=True, text=True, check=True).stdout
+        firmware = {}
+        for name in FIRMWARE:
+            match = next((d / name for d in data_directories(help_text) if (d / name).is_file()), None)
+            if match is None:
+                raise SystemExit(f'{name} not found in the emulator data directories')
+            firmware[name] = match.resolve()
+        modules = module_directory(emulator)
 
+    user_data = (HERE / 'builder-user-data.sh').read_text()
     provenance = json.loads((HERE / 'session-overlay-provenance.json').read_text())
-    validate_overlay_provenance(REPO, provenance, user_data)
-    toolchain = subprocess.run(['go', 'env', 'GOVERSION'], env=dict(os.environ, GOTOOLCHAIN='local'), capture_output=True, text=True, check=True).stdout.strip()
-    if toolchain != provenance['toolchain']:
-        raise SystemExit(f'session overlay requires {provenance["toolchain"]}, found {toolchain}')
 
     out = pathlib.Path(args.out).resolve()
-    out.mkdir(parents=True, exist_ok=False)
+    if out.exists():
+        raise SystemExit(f'--out {out} already exists; name a new directory')
     work = scratch_directory(args.work)
-    log(f'emulator {emulator} ({version}); modules {modules}; work {work}')
     try:
-        # 1. Official image, verified before use.
+        # Always verify and build the exact guest artifact before any fetch or boot.
+        receipt = build_session_overlay(REPO, work, provenance, user_data, offline=args.overlay_only)
+        out.mkdir(parents=True, exist_ok=False)
+        local = work / 'local'
+        if args.overlay_only:
+            shutil.copyfile(work / 'tenkacloud-session-relay', out / 'tenkacloud-session-relay')
+            shutil.copyfile(local / 'session-overlay.tar', out / 'session-overlay.tar')
+            print(json.dumps(receipt, sort_keys=True))
+            return
+
+        log(f'emulator {emulator} ({version}); modules {modules}; work {work}')
+        # Official image, verified before use.
         download = work / 'download'
         download.mkdir()
         for name in ('SHA256SUMS', 'SHA256SUMS.RSASSA_PKCS1_V1_5_SHA_256', IMAGE_NAME):
@@ -215,24 +281,6 @@ def main():
         actual = sha256(download / IMAGE_NAME)
         if listed.get(IMAGE_NAME) != actual or actual != IMAGE_SHA256:
             raise SystemExit(f'image checksum mismatch: {actual}')
-
-        # 2. Session relay overlay, reproducibly built and matched to the user-data pin.
-        local = work / 'local'
-        local.mkdir()
-        relay = work / 'tenkacloud-session-relay'
-        env = dict(os.environ, CGO_ENABLED='0', GOOS='linux', GOARCH='amd64', GOAMD64='v1', GOFLAGS='', GOWORK='off', GOTOOLCHAIN='local')
-        run(['go', 'build', '-trimpath', '-buildvcs=false', '-o', str(relay), './guest/ssm-relay'], cwd=REPO, env=env)
-        if sha256(relay) != provenance['binary_sha256']:
-            raise SystemExit('session relay binary differs from reviewed provenance')
-        unit = REPO / 'guest/ssm-relay/tenkacloud-session-relay.service'
-        license_file = REPO / 'LICENSE'
-        receipt = json.loads(run([sys.executable, '-I', str(REPO / 'scripts/guest-image/session-overlay.py'),
-                                  '--binary', str(relay), '--binary-sha256', sha256(relay),
-                                  '--unit', str(unit), '--unit-sha256', sha256(unit),
-                                  '--license', str(license_file), '--license-sha256', sha256(license_file),
-                                  '--output', str(local / 'session-overlay.tar')], capture_output=True, text=True).stdout)
-        if receipt['overlaySHA256'] != overlay_pin:
-            raise SystemExit(f'session overlay {receipt["overlaySHA256"]} differs from the builder-user-data.sh pin {overlay_pin}')
 
         # 3. One builder boot of a copy, through the loopback relay.
         disk = work / 'al2023-battle.qcow2'
