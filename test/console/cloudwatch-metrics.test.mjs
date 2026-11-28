@@ -51,6 +51,22 @@ test('named read preserves the canonical resource and queries its exact evaluate
   await assert.rejects(wrong.api.measurement(a,signal));
 });
 
+test('statistic scalars require finite decimal XML values and preserve signed zero and exponents', async()=>{
+  const signal=new AbortController().signal;
+  const selected=await setup(envelope('DescribeAlarms',element('MetricAlarms',alarm))).api.named(name,signal);
+  function measure(text) {
+    const point=element('member',element('Unit','Count'),element('Timestamp',start),element('Average',text));
+    return setup(envelope('GetMetricStatistics',element('Label',metric),element('Datapoints',point))).api.measurement(selected,signal);
+  }
+  for(const text of ['', ' ', '\t', '0x10', '0b1', '1_000', '5e', 'NaN', 'Infinity', '1e999']) {
+    await assert.rejects(measure(text),/Invalid CloudWatch response/);
+  }
+  assert.ok(Object.is(await measure('-0'),-0));
+  assert.equal(await measure('+0'),0);
+  assert.equal(await measure('-2.5E-4'),-0.00025);
+  assert.equal(await measure('9e+15'),9e15);
+});
+
 test('duplicate/foreign selection, wrong XML namespace and a repeated cursor are refused',async()=>{
   const signal=new AbortController().signal;
   const many=setup(envelope('DescribeAlarms',element('MetricAlarms',alarm,alarm)));

@@ -87,7 +87,9 @@ export function cloudWatchMetrics(request, region, parse = source => new DOMPars
       if (!points.length) return null;
       if (points.length !== 1 || value(points[0], 'Unit') !== alarm.unit
           || Date.parse(value(points[0], 'Timestamp')) !== Date.parse(alarm.start)) throw invalid();
-      const measured = Number(value(points[0], alarm.statistic));
+      const text = value(points[0], alarm.statistic);
+      if (text.trim() !== text || !/^[+-]?(?:[0-9]+(?:\.[0-9]*)?|\.[0-9]+)(?:[eE][+-]?[0-9]+)?$/.test(text)) throw invalid();
+      const measured = Number(text);
       if (!Number.isFinite(measured)) throw invalid();
       return measured;
     },
