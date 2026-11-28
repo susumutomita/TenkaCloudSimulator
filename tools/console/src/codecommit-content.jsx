@@ -155,7 +155,7 @@ export default function CodeCommitContent({request,region,repository,onSaving}) 
         {working==='read'&&button(t('Cancel read','読み込みをキャンセル'),()=>{const job=active.current;active.current=null;job?.controller.abort();setWorking('');})}
       </SpaceBetween>
       {working==='read'&&<StatusIndicator type="loading">{t('Reading repository','読み込み中')}</StatusIndicator>}
-      {!!view.names.length&&<FormField label={t('Branch','ブランチ')}><Select selectedOption={option(view.branch)} options={view.names.map(option)}
+      {!!view.names.length&&<FormField label={t('Branch','ブランチ')} description={t('Up to 32 branches per repository.','リポジトリにつき 32 ブランチまでです。')}><Select selectedOption={option(view.branch)} options={view.names.map(option)}
         disabled={locked||!!draft} onChange={e=>select(e.detail.selectedOption.value)}/></FormField>}
       {view.next&&button(t('Load more branches','ブランチをさらに表示'),nextPage,!available||!!draft)}
       {view.empty&&<Box>{t('This repository has no branches. Commit the first file to create one.','ブランチがありません。最初のファイルをコミットするとブランチが作成されます。')}</Box>}

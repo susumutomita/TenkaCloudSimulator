@@ -735,6 +735,9 @@ def handler(event,context):
  def test_aws_catalog_console_reference_and_shared_native_state(self):
   subprocess.run([sys.executable, str(Path(__file__).with_name('aws_catalog_console.py'))], check=True, timeout=900)
 
+ def test_codecommit_console_sdk_scalar_shared_history(self):
+  subprocess.run([sys.executable, str(Path(__file__).with_name('codecommit_console.py')), '--sdk'], check=True, timeout=240)
+
  def test_codecommit_native_git_history_and_repository_isolation(self):
   subprocess.run([sys.executable, str(Path(__file__).with_name('codecommit_git.py'))], check=True, timeout=120)
 

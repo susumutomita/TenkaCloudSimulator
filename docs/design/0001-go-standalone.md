@@ -1,6 +1,6 @@
 # Go単一バイナリの設計
 
-[AWS CodeCommit](../aws-codecommit.md) は、チーム別の SQLite にリポジトリごとの Git オブジェクトとブランチを保存する。ファイル更新では、親コミットの照合、オブジェクトの追加、ブランチ先端と既定ブランチの更新を同じトランザクションで行う。Go の実装が Git オブジェクトを直接符号化する。
+[AWS CodeCommit](../aws-codecommit.md) は、チーム別の SQLite にリポジトリごとの Git オブジェクトとブランチを保存する。ファイル更新では、親コミットの照合、オブジェクトの追加、ブランチ先端と既定ブランチの更新を同じトランザクションで行う。Go の実装が Git オブジェクトを直接符号化する。Cloudscape は選択したリポジトリの API でコミットを読み、表示時のブランチ先端を親に指定して更新する。書き込みの応答を失ったときは、利用者が対象ブランチを再取得するまで次の書き込みを保留する。
 
 `cmd/simulator`はCLI、numeric loopback listener、token-file、shutdownを所有する。`internal/server`は埋込Cloudscape/Scalar、local token境界、能力表、identity control APIを提供する。`internal/provider`はprovider dispatch、`internal/core`はprovider中立のSQLite object stateと限定identity-policy評価。`internal/aws`はS3 REST/XML、SSM JSON 1.1、CloudFormation Query/XMLとAWS所有テーブルを持つ。
 
