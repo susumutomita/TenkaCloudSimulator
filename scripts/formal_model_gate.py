@@ -1553,6 +1553,10 @@ BASE_INVARIANTS['EC2NativeVPCChildren'] = {'TypeOK', 'GrantAtomic', 'RejectOther
 REQUIRED_MUTANTS['EC2NativeVPCChildren'] = {'IgnoreParentGrant', 'IgnoreAllocatedGrant', 'AdoptStackParent', 'DeleteParentWithChildren', 'DeletePeerKinds', 'ReadForeignScope', 'RecreateRetiredACL', 'LoseACLReceipt'}
 REQUIRED_SOURCE_SCOPES['EC2NativeVPCChildren'] = {'internal/aws/cloudformation.go', 'internal/aws/ec2_read.go', 'internal/aws/ec2_vpc.go', 'internal/aws/ec2_subnet_native.go', 'internal/aws/ec2_network_acl.go', 'internal/aws/ec2_network_acl_store.go', 'internal/aws/ec2_security_groups_read.go', 'internal/aws/ec2_security_groups_native_query.go', 'internal/aws/ec2_security_groups_native_store.go', 'internal/server/server.go'}
 
+BASE_MODELS.add('EC2LaunchTemplateV1')
+BASE_INVARIANTS['EC2LaunchTemplateV1'] = {'NativeScope', 'TypeOK', 'ImmutableVersion', 'FreshIdentity', 'ReplayStable', 'FreshAdmission', 'HistoricalRead', 'RetiredForever', 'ConflictRefused', 'TokenIdentity', 'AuthorizedCommit'}
+REQUIRED_MUTANTS['EC2LaunchTemplateV1'] = {'DuplicateReplay', 'HistoricalReadNeedsLive', 'ForeignBinding', 'MutatePeer', 'ReuseRetiredIdentity', 'PublishCanceledCreate', 'ResurrectReceipt', 'DeadDependency', 'PublishCanceledDelete', 'AcceptTokenConflict', 'SkipActor', 'MutableVersion'}
+REQUIRED_SOURCE_SCOPES['EC2LaunchTemplateV1'] = {'internal/aws/ec2_vpc.go', 'internal/aws/cloudformation.go', 'internal/aws/ec2_read.go', 'internal/aws/ec2_launch_template_store.go', 'internal/aws/ec2_launch_template_query.go'}
 BASE_MODELS.add('EC2NativeSubnetLifecycle')
 BASE_INVARIANTS['EC2NativeSubnetLifecycle'] = {'AuthorizedWrites', 'ExactRead', 'Nonoverlap', 'Bounded', 'ExactDelete', 'NativeParent', 'StackUnchanged'}
 REQUIRED_MUTANTS['EC2NativeSubnetLifecycle'] = {'AdoptStackParent', 'IgnoreLimit', 'AllowOverlap', 'UseForeignRegion', 'DeleteDependent', 'ReadAllRegions', 'AllowOutsideCIDR', 'DeleteStackOwned', 'SkipParentGrant', 'SkipChildGrant'}

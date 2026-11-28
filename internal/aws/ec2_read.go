@@ -101,6 +101,10 @@ func (g *Gateway) serveEC2(w http.ResponseWriter, r *http.Request) {
 		fail("UnsupportedOperation", "Only "+strings.Join(ec2Operations, ", ")+" version 2016-11-15 are supported.", 400)
 		return
 	}
+	if slices.Contains(ec2LaunchTemplateOperations, action) {
+		g.serveEC2LaunchTemplate(w, r, action, region, fields)
+		return
+	}
 	request, failure := parseEC2Request(action, fields)
 	if failure != nil {
 		fail(failure.code, failure.message, failure.status)

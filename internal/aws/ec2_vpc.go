@@ -30,7 +30,7 @@ const (
 
 var ec2Operations = slices.Concat(
 	[]string{"DescribeInstances", "DescribeVpcs", "DescribeSubnets", "DescribeSecurityGroups", "DescribeRouteTables", "CreateVpc", "DeleteVpc", ec2DescribeVPCAttribute, ec2ModifyVPCAttribute, ec2CreateVPCTag, ec2DeleteVPCTag, "CreateSubnet", "DeleteSubnet", ec2ModifyNativeSubnet},
-	ec2NativeSecurityGroupMutations, ec2NetworkACLOperations, ec2NativeRouteTableMutations, ec2NativeRouteAssociationOperations, ec2InternetGatewayOperations, ec2NativeDefaultRouteOperations,
+	ec2LaunchTemplateOperations, ec2NativeSecurityGroupMutations, ec2NetworkACLOperations, ec2NativeRouteTableMutations, ec2NativeRouteAssociationOperations, ec2InternetGatewayOperations, ec2NativeDefaultRouteOperations,
 )
 
 // EC2Operations lists registered native Query operations, not granted permissions.

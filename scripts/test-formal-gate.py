@@ -5958,6 +5958,32 @@ def run_parallel(workers):
     return 0 if ran == len(names) and not failed else 1
 
 
+class EC2LaunchTemplateV1RegistryTests(unittest.TestCase):
+    def test_exact_properties_controls_and_source_fail_closed(self):
+        registry = json.loads((ROOT / 'formal/models.json').read_text())
+        model = next(m for m in registry['models'] if m['id'] == 'EC2LaunchTemplateV1')
+        self.assertEqual(set(model['properties']), {
+            'TypeOK', 'AuthorizedCommit', 'ImmutableVersion', 'TokenIdentity',
+            'ReplayStable', 'ConflictRefused', 'FreshIdentity', 'RetiredForever',
+            'FreshAdmission', 'HistoricalRead', 'NativeScope'})
+        self.assertEqual(len(model['mutants']), 12)
+        load_registry(ROOT)
+        for field in ('properties', 'mutants', 'source_scope'):
+            for entry in model[field]:
+                with self.subTest(field=field, entry=entry):
+                    changed = json.loads(json.dumps(registry))
+                    target = next(m for m in changed['models'] if m['id'] == model['id'])
+                    target[field].remove(entry)
+                    with patch('formal_model_gate.load_json', return_value=changed):
+                        with self.assertRaises(GateError):
+                            load_registry(ROOT)
+        changed = json.loads(json.dumps(registry))
+        changed['models'] = [m for m in changed['models'] if m['id'] != model['id']]
+        with patch('formal_model_gate.load_json', return_value=changed):
+            with self.assertRaises(GateError):
+                load_registry(ROOT)
+
+
 if __name__ == '__main__':
     workers = int(os.environ.get('FORMAL_GATE_TEST_WORKERS', '1'))
     if workers > 1:

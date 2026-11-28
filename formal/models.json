@@ -30118,6 +30118,167 @@
           "expect_invariant": "CanceledUnchanged"
         }
       ]
+    },
+    {
+      "id": "EC2LaunchTemplateV1",
+      "model": "formal/EC2LaunchTemplateV1.tla",
+      "config": "formal/EC2LaunchTemplateV1.cfg",
+      "bounds": "Six transitions; two physical template identities with one reusable name and immutable version1, two tokens, two owned security-group lifetimes and one foreign SG/VPC, one independent populated peer. Sequential atomic outcomes enumerate both request orders; no staged interleaving.",
+      "properties": [
+        "TypeOK",
+        "AuthorizedCommit",
+        "ImmutableVersion",
+        "TokenIdentity",
+        "ReplayStable",
+        "ConflictRefused",
+        "FreshIdentity",
+        "RetiredForever",
+        "FreshAdmission",
+        "HistoricalRead",
+        "NativeScope"
+      ],
+      "limits": "Finite saved identity/replay/retirement and current dependency admission only. Assumes a normalized genuine scoped request and atomic commit; no SQL/Go/XML/IAM parser or signing refinement, physical failure timing, browser/SDK, monotonic clock/ABA, EC2 allocation or PCS/Slurm provisioning proof. Historical Describe does not prove current dependency presence. Constructor DDL and operation inventory are implementation obligations, not proved by the model.",
+      "source_scope": [
+        "internal/aws/ec2_launch_template_store.go",
+        "internal/aws/ec2_launch_template_query.go",
+        "internal/aws/ec2_read.go",
+        "internal/aws/ec2_vpc.go",
+        "internal/aws/cloudformation.go"
+      ],
+      "mutants": [
+        {
+          "id": "SkipActor",
+          "edits": [
+            {
+              "old": "publish == a = \"owner\" /\\ allow /\\ commit",
+              "new": "publish == allow /\\ commit",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AuthorizedCommit"
+        },
+        {
+          "id": "PublishCanceledCreate",
+          "edits": [
+            {
+              "old": "publish == a = \"owner\" /\\ allow /\\ commit",
+              "new": "publish == a = \"owner\" /\\ allow",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AuthorizedCommit"
+        },
+        {
+          "id": "PublishCanceledDelete",
+          "edits": [
+            {
+              "old": "IF a = \"owner\" /\\ allow /\\ commit /\\ i \\in Active",
+              "new": "IF a = \"owner\" /\\ allow /\\ i \\in Active",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AuthorizedCommit"
+        },
+        {
+          "id": "ForeignBinding",
+          "edits": [
+            {
+              "old": "Current(g) == g \\in live /\\ Owner(g) = \"owner\" /\\ VPC(g) = \"v1\"",
+              "new": "Current(g) == g \\in live",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "NativeScope"
+        },
+        {
+          "id": "MutableVersion",
+          "edits": [
+            {
+              "old": "[version EXCEPT ![i] = 1] ELSE version",
+              "new": "[version EXCEPT ![i] = 2] ELSE version",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ImmutableVersion"
+        },
+        {
+          "id": "AcceptTokenConflict",
+          "edits": [
+            {
+              "old": "same == replay /\\ fingerprint[t] = g",
+              "new": "same == replay",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ConflictRefused"
+        },
+        {
+          "id": "DuplicateReplay",
+          "edits": [
+            {
+              "old": "fresh == ~replay /\\ Current(g)",
+              "new": "fresh == Current(g)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReplayStable"
+        },
+        {
+          "id": "ResurrectReceipt",
+          "edits": [
+            {
+              "old": "/\\ retired' = retired",
+              "new": "/\\ retired' = IF publish /\\ same THEN retired \\ {tokens[t]} ELSE retired",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReplayStable"
+        },
+        {
+          "id": "ReuseRetiredIdentity",
+          "edits": [
+            {
+              "old": "/\\ i \\notin rows",
+              "new": "/\\ i \\notin Active",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "FreshIdentity"
+        },
+        {
+          "id": "DeadDependency",
+          "edits": [
+            {
+              "old": "Current(g) == g \\in live /\\ Owner(g)",
+              "new": "Current(g) == Owner(g)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "FreshAdmission"
+        },
+        {
+          "id": "HistoricalReadNeedsLive",
+          "edits": [
+            {
+              "old": "~admission \\/ Current(binding[i])",
+              "new": "Current(binding[i])",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "HistoricalRead"
+        },
+        {
+          "id": "MutatePeer",
+          "edits": [
+            {
+              "old": "/\\ peer' = peer /\\ UNCHANGED live",
+              "new": "/\\ peer' = {} /\\ UNCHANGED live",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "TypeOK"
+        }
+      ]
     }
   ]
 }

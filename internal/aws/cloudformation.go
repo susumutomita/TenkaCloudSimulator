@@ -69,6 +69,9 @@ func NewStackStore(db *sql.DB) (*StackStore, error) {
 	if err := initEC2NativeSecurityGroups(db); err != nil {
 		return nil, err
 	}
+	if err := initEC2LaunchTemplates(db); err != nil {
+		return nil, err
+	}
 	if err := initEC2NetworkACLReplay(db); err != nil {
 		return nil, err
 	}

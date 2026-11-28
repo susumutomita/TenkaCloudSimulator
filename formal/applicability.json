@@ -4,9 +4,9 @@
   "changes": [
     {
       "path": "README.md",
-      "sha256": "3e76cd6593c1979bb46805cf064bdf9e0572d1ae79214a03a7b0f56cceeb25f6",
+      "sha256": "6be262b37c23e7d8f9011ac2f5d88e8ca31fca84cd61fc7b753e15ccf679b471",
       "disposition": "documentation",
-      "reason": "Bounded PCS association transactions, official hierarchical child IAM targets with one existing policy snapshot, and untouched legacy flat-record compatibility. No scheduler/provisioned compute.",
+      "reason": "Bounded PCS association transactions, official hierarchical child IAM targets with one existing policy snapshot, and untouched legacy flat-record compatibility. No scheduler/provisioned compute. Immutable SG-only native EC2 launch-template version1, current physical dependency admission separate from historical reads, one captured policy snapshot and retained create-token/retirement identities. No instances or PCS provisioning.",
       "models": []
     },
     {
@@ -18,9 +18,16 @@
     },
     {
       "path": "docs/design/0001-go-standalone.md",
-      "sha256": "5ef6b9c86051d90c0df50d5acec4ec9b36cde5293716bd3cd2e174fb8dd202a1",
+      "sha256": "f64d091e92830a1bb78e0144cffe9a2c8fe018cafa02b1b64a3e42f5b6edbbca",
       "disposition": "documentation",
-      "reason": "Bounded PCS association transactions, official hierarchical child IAM targets with one existing policy snapshot, and untouched legacy flat-record compatibility. No scheduler/provisioned compute.",
+      "reason": "Bounded PCS association transactions, official hierarchical child IAM targets with one existing policy snapshot, and untouched legacy flat-record compatibility. No scheduler/provisioned compute. Immutable SG-only native EC2 launch-template version1, current physical dependency admission separate from historical reads, one captured policy snapshot and retained create-token/retirement identities. No instances or PCS provisioning.",
+      "models": []
+    },
+    {
+      "path": "docs/ec2-launch-template-v1.md",
+      "sha256": "237ad42d95e024951e11293b1255b51de520c494040840c028837de548ef4eb2",
+      "disposition": "documentation",
+      "reason": "Immutable SG-only native EC2 launch-template version1, current physical dependency admission separate from historical reads, one captured policy snapshot and retained create-token/retirement identities. No instances or PCS provisioning.",
       "models": []
     },
     {
@@ -29,6 +36,56 @@
       "disposition": "documentation",
       "reason": "Bounded PCS association transactions, official hierarchical child IAM targets with one existing policy snapshot, and untouched legacy flat-record compatibility. No scheduler/provisioned compute.",
       "models": []
+    },
+    {
+      "path": "formal/EC2LaunchTemplateV1.cfg",
+      "sha256": "a03f1a721d9b8162ad68c075696624ea04078e8d740ab6ff8b619fc4960ab23a",
+      "disposition": "modeled",
+      "reason": "Immutable SG-only native EC2 launch-template version1, current physical dependency admission separate from historical reads, one captured policy snapshot and retained create-token/retirement identities. No instances or PCS provisioning.",
+      "models": [
+        {
+          "id": "EC2LaunchTemplateV1",
+          "properties": [
+            "TypeOK",
+            "AuthorizedCommit",
+            "ImmutableVersion",
+            "TokenIdentity",
+            "ReplayStable",
+            "ConflictRefused",
+            "FreshIdentity",
+            "RetiredForever",
+            "FreshAdmission",
+            "HistoricalRead",
+            "NativeScope"
+          ],
+          "limits": "Finite saved identity/replay/retirement and current dependency admission only. Assumes a normalized genuine scoped request and atomic commit; no SQL/Go/XML/IAM parser or signing refinement, physical failure timing, browser/SDK, monotonic clock/ABA, EC2 allocation or PCS/Slurm provisioning proof. Historical Describe does not prove current dependency presence. Constructor DDL and operation inventory are implementation obligations, not proved by the model."
+        }
+      ]
+    },
+    {
+      "path": "formal/EC2LaunchTemplateV1.tla",
+      "sha256": "f899ac063167b3b5641ac6e53bf5584d31ea70b3dbb738b3d7ba4e2557a3613f",
+      "disposition": "modeled",
+      "reason": "Immutable SG-only native EC2 launch-template version1, current physical dependency admission separate from historical reads, one captured policy snapshot and retained create-token/retirement identities. No instances or PCS provisioning.",
+      "models": [
+        {
+          "id": "EC2LaunchTemplateV1",
+          "properties": [
+            "TypeOK",
+            "AuthorizedCommit",
+            "ImmutableVersion",
+            "TokenIdentity",
+            "ReplayStable",
+            "ConflictRefused",
+            "FreshIdentity",
+            "RetiredForever",
+            "FreshAdmission",
+            "HistoricalRead",
+            "NativeScope"
+          ],
+          "limits": "Finite saved identity/replay/retirement and current dependency admission only. Assumes a normalized genuine scoped request and atomic commit; no SQL/Go/XML/IAM parser or signing refinement, physical failure timing, browser/SDK, monotonic clock/ABA, EC2 allocation or PCS/Slurm provisioning proof. Historical Describe does not prove current dependency presence. Constructor DDL and operation inventory are implementation obligations, not proved by the model."
+        }
+      ]
     },
     {
       "path": "formal/PCSQueueAssociations.cfg",
@@ -70,9 +127,9 @@
     },
     {
       "path": "formal/models.json",
-      "sha256": "d95432f886b43530e91ea4b72646fe67960d93d989c4688854aaaca052eec84a",
+      "sha256": "cc5e4ac8fb76e05eb6deedf7c12d75c855e8b8c1458e36dcf9ef810eb6d3a6ea",
       "disposition": "formal-infrastructure",
-      "reason": "Bounded PCS association transactions, official hierarchical child IAM targets with one existing policy snapshot, and untouched legacy flat-record compatibility. No scheduler/provisioned compute.",
+      "reason": "Bounded PCS association transactions, official hierarchical child IAM targets with one existing policy snapshot, and untouched legacy flat-record compatibility. No scheduler/provisioned compute. Immutable SG-only native EC2 launch-template version1, current physical dependency admission separate from historical reads, one captured policy snapshot and retained create-token/retirement identities. No instances or PCS provisioning.",
       "models": []
     },
     {
@@ -208,6 +265,138 @@
       "models": []
     },
     {
+      "path": "internal/aws/cloudformation.go",
+      "sha256": "172b97bb0586b58c34321d2a29c863e66773376bf9dfa93b463d35448495ca97",
+      "disposition": "modeled",
+      "reason": "Immutable SG-only native EC2 launch-template version1, current physical dependency admission separate from historical reads, one captured policy snapshot and retained create-token/retirement identities. No instances or PCS provisioning.",
+      "models": [
+        {
+          "id": "EC2LaunchTemplateV1",
+          "properties": [
+            "TypeOK",
+            "AuthorizedCommit",
+            "ImmutableVersion",
+            "TokenIdentity",
+            "ReplayStable",
+            "ConflictRefused",
+            "FreshIdentity",
+            "RetiredForever",
+            "FreshAdmission",
+            "HistoricalRead",
+            "NativeScope"
+          ],
+          "limits": "Finite saved identity/replay/retirement and current dependency admission only. Assumes a normalized genuine scoped request and atomic commit; no SQL/Go/XML/IAM parser or signing refinement, physical failure timing, browser/SDK, monotonic clock/ABA, EC2 allocation or PCS/Slurm provisioning proof. Historical Describe does not prove current dependency presence. Constructor DDL and operation inventory are implementation obligations, not proved by the model."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/ec2_launch_template_query.go",
+      "sha256": "c547fd90722fd18bc0b7cac50202f4e91fc81482864dca3c64e2a5be350565a8",
+      "disposition": "modeled",
+      "reason": "Immutable SG-only native EC2 launch-template version1, current physical dependency admission separate from historical reads, one captured policy snapshot and retained create-token/retirement identities. No instances or PCS provisioning.",
+      "models": [
+        {
+          "id": "EC2LaunchTemplateV1",
+          "properties": [
+            "TypeOK",
+            "AuthorizedCommit",
+            "ImmutableVersion",
+            "TokenIdentity",
+            "ReplayStable",
+            "ConflictRefused",
+            "FreshIdentity",
+            "RetiredForever",
+            "FreshAdmission",
+            "HistoricalRead",
+            "NativeScope"
+          ],
+          "limits": "Finite saved identity/replay/retirement and current dependency admission only. Assumes a normalized genuine scoped request and atomic commit; no SQL/Go/XML/IAM parser or signing refinement, physical failure timing, browser/SDK, monotonic clock/ABA, EC2 allocation or PCS/Slurm provisioning proof. Historical Describe does not prove current dependency presence. Constructor DDL and operation inventory are implementation obligations, not proved by the model."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/ec2_launch_template_store.go",
+      "sha256": "bd7afdceeabaaec39c51ebe474915b1eac4c725427bd9576b3bb159a2f24a6d4",
+      "disposition": "modeled",
+      "reason": "Immutable SG-only native EC2 launch-template version1, current physical dependency admission separate from historical reads, one captured policy snapshot and retained create-token/retirement identities. No instances or PCS provisioning.",
+      "models": [
+        {
+          "id": "EC2LaunchTemplateV1",
+          "properties": [
+            "TypeOK",
+            "AuthorizedCommit",
+            "ImmutableVersion",
+            "TokenIdentity",
+            "ReplayStable",
+            "ConflictRefused",
+            "FreshIdentity",
+            "RetiredForever",
+            "FreshAdmission",
+            "HistoricalRead",
+            "NativeScope"
+          ],
+          "limits": "Finite saved identity/replay/retirement and current dependency admission only. Assumes a normalized genuine scoped request and atomic commit; no SQL/Go/XML/IAM parser or signing refinement, physical failure timing, browser/SDK, monotonic clock/ABA, EC2 allocation or PCS/Slurm provisioning proof. Historical Describe does not prove current dependency presence. Constructor DDL and operation inventory are implementation obligations, not proved by the model."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/ec2_launch_template_test.go",
+      "sha256": "570727a07a532868f06a68295e7e8cb209ca3d0af0dba48ba54516b2989f23cc",
+      "disposition": "test-support",
+      "reason": "Immutable SG-only native EC2 launch-template version1, current physical dependency admission separate from historical reads, one captured policy snapshot and retained create-token/retirement identities. No instances or PCS provisioning.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/ec2_read.go",
+      "sha256": "7261e9e20fac60bba362d41c351b67c758ee9a00cac526600f335522eb243600",
+      "disposition": "modeled",
+      "reason": "Immutable SG-only native EC2 launch-template version1, current physical dependency admission separate from historical reads, one captured policy snapshot and retained create-token/retirement identities. No instances or PCS provisioning.",
+      "models": [
+        {
+          "id": "EC2LaunchTemplateV1",
+          "properties": [
+            "TypeOK",
+            "AuthorizedCommit",
+            "ImmutableVersion",
+            "TokenIdentity",
+            "ReplayStable",
+            "ConflictRefused",
+            "FreshIdentity",
+            "RetiredForever",
+            "FreshAdmission",
+            "HistoricalRead",
+            "NativeScope"
+          ],
+          "limits": "Finite saved identity/replay/retirement and current dependency admission only. Assumes a normalized genuine scoped request and atomic commit; no SQL/Go/XML/IAM parser or signing refinement, physical failure timing, browser/SDK, monotonic clock/ABA, EC2 allocation or PCS/Slurm provisioning proof. Historical Describe does not prove current dependency presence. Constructor DDL and operation inventory are implementation obligations, not proved by the model."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/ec2_vpc.go",
+      "sha256": "0ded6433395f01e154d9b8f3061366c8b7d269bfa9b7d82d3363b620da208652",
+      "disposition": "modeled",
+      "reason": "Immutable SG-only native EC2 launch-template version1, current physical dependency admission separate from historical reads, one captured policy snapshot and retained create-token/retirement identities. No instances or PCS provisioning.",
+      "models": [
+        {
+          "id": "EC2LaunchTemplateV1",
+          "properties": [
+            "TypeOK",
+            "AuthorizedCommit",
+            "ImmutableVersion",
+            "TokenIdentity",
+            "ReplayStable",
+            "ConflictRefused",
+            "FreshIdentity",
+            "RetiredForever",
+            "FreshAdmission",
+            "HistoricalRead",
+            "NativeScope"
+          ],
+          "limits": "Finite saved identity/replay/retirement and current dependency admission only. Assumes a normalized genuine scoped request and atomic commit; no SQL/Go/XML/IAM parser or signing refinement, physical failure timing, browser/SDK, monotonic clock/ABA, EC2 allocation or PCS/Slurm provisioning proof. Historical Describe does not prove current dependency presence. Constructor DDL and operation inventory are implementation obligations, not proved by the model."
+        }
+      ]
+    },
+    {
       "path": "internal/server/apidocs/catalog/pcs.json",
       "sha256": "508dd5fa3cc54bd177440603e8c7afc53f33774dcadfa42fdafe0236d95908b5",
       "disposition": "presentation",
@@ -216,16 +405,23 @@
     },
     {
       "path": "scripts/formal_model_gate.py",
-      "sha256": "b5bb438bd2531a911288a43b413b01f58add0cd32fef6956b9441dd942ec226b",
+      "sha256": "1b67f155f6d3bbe78964f4aa6ab54d12cf7fe0cec3f57c2b15b57b426929c2c0",
       "disposition": "formal-infrastructure",
-      "reason": "Bounded PCS association transactions, official hierarchical child IAM targets with one existing policy snapshot, and untouched legacy flat-record compatibility. No scheduler/provisioned compute.",
+      "reason": "Bounded PCS association transactions, official hierarchical child IAM targets with one existing policy snapshot, and untouched legacy flat-record compatibility. No scheduler/provisioned compute. Immutable SG-only native EC2 launch-template version1, current physical dependency admission separate from historical reads, one captured policy snapshot and retained create-token/retirement identities. No instances or PCS provisioning.",
       "models": []
     },
     {
       "path": "scripts/test-formal-gate.py",
-      "sha256": "adbaefca4ad8d1b65a9f024259bde2bfc86923d8c31f281ef44ff1c49e8ecdbe",
+      "sha256": "5c3baaf965b3f6f00b4433ee61252d0202671a2c454b9cc19a79d1696e74a6f4",
       "disposition": "formal-infrastructure",
-      "reason": "Bounded PCS association transactions, official hierarchical child IAM targets with one existing policy snapshot, and untouched legacy flat-record compatibility. No scheduler/provisioned compute.",
+      "reason": "Bounded PCS association transactions, official hierarchical child IAM targets with one existing policy snapshot, and untouched legacy flat-record compatibility. No scheduler/provisioned compute. Immutable SG-only native EC2 launch-template version1, current physical dependency admission separate from historical reads, one captured policy snapshot and retained create-token/retirement identities. No instances or PCS provisioning.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/ec2_launch_templates.py",
+      "sha256": "b045c253ad6196f5673ec2d72bcb9c7e1442ce0e72f59d53a999b55bb055315a",
+      "disposition": "test-support",
+      "reason": "Immutable SG-only native EC2 launch-template version1, current physical dependency admission separate from historical reads, one captured policy snapshot and retained create-token/retirement identities. No instances or PCS provisioning.",
       "models": []
     },
     {
