@@ -66,8 +66,15 @@ def run():
         else:
             files=list(folder.glob('*.json'));assert len(files)==1
             d=json.loads(files[0].read_text())
-            assert d['binary_sha256']==digest and d['exactForm'] and d['nativeReadback']
-            assert len(d['servedPresets'])==(3 if name=='scalar-read' else 5)
+            assert d['binary_sha256']==digest and d['exactForm']
+            if name=='scalar-read':
+                expected=['ListDomains','DomainMetadata','GetAttributes']
+                assert d['getAttributesMatchesNativeWriteIncludingEmptyValue'] and d['oneMatchedSendPerPresetNoRedirect']
+                assert d['requestCookiePresent'] and d['liveXml'] and d['freshDomainDeleted']
+            else:
+                expected=['CreateDomain','Select','DeleteAttributes','PutAttributes','DeleteDomain']
+                assert d['nativeReadback'] and d['oneCookieSendPerPreset'] and d['liveXmlAndRenderedResult'] and d['freshDomainsDeleted']
+            assert d['servedPresets']==expected and d['nativeStatuses']=={op:200 for op in expected}
         print(name, 'passed', flush=True)
     assert not subprocess.check_output(['git','-C',str(product),'status','--porcelain'])
     (receipt/'result.json').write_text(json.dumps({'revision':os.environ['PRODUCT_REVISION'],'digest':digest,
