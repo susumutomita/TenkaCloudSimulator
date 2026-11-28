@@ -29970,6 +29970,281 @@
           "expect_invariant": "ConnectionPragmasApplied"
         }
       ]
+    },
+    {
+      "id": "KinesisVideoRetention",
+      "model": "formal/KinesisVideoRetention.tla",
+      "config": "formal/KinesisVideoRetention.cfg",
+      "bounds": "Named finite histories of two initially populated streams in one team database, up to two incarnations, three distinct payload labels, a database-global fragment serial, integer capture times and a capacity of two primary or four database rows. Output includes snapshot bytes by abstract identity, durable number and distinct success, receipt, refusal and lost-reply observations.",
+      "properties": [
+        "TypeOK",
+        "ReplyKind",
+        "FragmentNumber",
+        "ReturnedMedia",
+        "RetainedRows",
+        "PeerRows"
+      ],
+      "limits": "The model examines only its enumerated histories. Capacity is by reduced row counts. Byte budgets, another team process, corruption, cryptographic cursor generation, real SQL cancellation, scheduling, actual IAM, codec validation, streaming transport and restart persistence are exercised separately in native checks. The model does not prove the Go implementation.",
+      "source_scope": [
+        "internal/aws/catalog/kinesisvideo_fragments.go",
+        "internal/aws/catalog/kinesisvideo_http.go",
+        "internal/aws/catalog/kinesisvideo_media_test.go"
+      ],
+      "mutants": [
+        {
+          "id": "IgnoreWriterDeny",
+          "edits": [
+            {
+              "old": "op # \"denied\" /\\ op # \"malformed\"",
+              "new": "op # \"malformed\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReplyKind"
+        },
+        {
+          "id": "AcceptMalformedMedia",
+          "edits": [
+            {
+              "old": "op # \"denied\" /\\ op # \"malformed\"",
+              "new": "op # \"denied\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReplyKind"
+        },
+        {
+          "id": "KeepCanceledWrite",
+          "edits": [
+            {
+              "old": "op # \"cancel\" /\\ op # \"failCommit\"",
+              "new": "op # \"failCommit\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReplyKind"
+        },
+        {
+          "id": "AcknowledgeFailedCommit",
+          "edits": [
+            {
+              "old": "op # \"cancel\" /\\ op # \"failCommit\"",
+              "new": "op # \"cancel\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReplyKind"
+        },
+        {
+          "id": "IgnoreStreamBudget",
+          "edits": [
+            {
+              "old": "Len(own) < 2 /\\ Len(live) < 4",
+              "new": "Len(live) < 4",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReplyKind"
+        },
+        {
+          "id": "IgnoreDatabaseBudget",
+          "edits": [
+            {
+              "old": "Len(own) < 2 /\\ Len(live) < 4",
+              "new": "Len(own) < 2",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReplyKind"
+        },
+        {
+          "id": "NumberZeroRetention",
+          "edits": [
+            {
+              "old": ".rows = live],Reply(\"RECEIVED\",<<>>,0)",
+              "new": ".rows = live],Reply(\"RECEIVED\",<<>>,n)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "FragmentNumber"
+        },
+        {
+          "id": "InventDurableReceipt",
+          "edits": [
+            {
+              "old": "ELSE Ack(n))",
+              "new": "ELSE Ack(n+1))",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "FragmentNumber"
+        },
+        {
+          "id": "DropLostCommit",
+          "edits": [
+            {
+              "old": "!.rows = Append(live,new)",
+              "new": "!.rows = IF op = \"lostReply\" THEN live ELSE Append(live,new)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "RetainedRows"
+        },
+        {
+          "id": "ReplayOnReopen",
+          "edits": [
+            {
+              "old": "op = \"reopen\" -> Outcome(d,Quiet)",
+              "new": "op = \"reopen\" -> Outcome([d EXCEPT !.rows = Append(@,Row(\"A\",d.gen,d.serial+1,\"second\",d.now,d.now+d.ttl))],Quiet)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReturnedMedia"
+        },
+        {
+          "id": "SubstitutePayload",
+          "edits": [
+            {
+              "old": "new == Row(\"A\",d.gen,n,\"second\"",
+              "new": "new == Row(\"A\",d.gen,n,\"first\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "RetainedRows"
+        },
+        {
+          "id": "ProducerTimeControlsExpiry",
+          "edits": [
+            {
+              "old": "d.now,d.now+d.ttl)",
+              "new": "d.now,9+d.ttl)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReturnedMedia"
+        },
+        {
+          "id": "KeepFragmentAtExpiry",
+          "edits": [
+            {
+              "old": "r.expires > d.now)",
+              "new": "r.expires >= d.now)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReturnedMedia"
+        },
+        {
+          "id": "ExtendExpiredRow",
+          "edits": [
+            {
+              "old": "r.expires > d.now /\\ ttl > 0",
+              "new": "TRUE /\\ ttl > 0",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReturnedMedia"
+        },
+        {
+          "id": "RestartRetentionOnChange",
+          "edits": [
+            {
+              "old": "!.expires = r.server + ttl",
+              "new": "!.expires = d.now + ttl",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReturnedMedia"
+        },
+        {
+          "id": "LeakPeerThroughRead",
+          "edits": [
+            {
+              "old": "after == SelectSeq(own",
+              "new": "after == SelectSeq(live",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReturnedMedia"
+        },
+        {
+          "id": "HonorForeignCursor",
+          "edits": [
+            {
+              "old": "i \\in 1..Len(own): own[i].num = n",
+              "new": "i \\in 1..Len(live): live[i].num = n",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReplyKind"
+        },
+        {
+          "id": "ResumeInclusively",
+          "edits": [
+            {
+              "old": "LAMBDA r: r.num > n",
+              "new": "LAMBDA r: r.num >= n",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReturnedMedia"
+        },
+        {
+          "id": "AcceptExpiredOrRetiredCursor",
+          "edits": [
+            {
+              "old": "IF ~d.backed \\/ op = \"denyRead\" \\/ ~valid",
+              "new": "IF ~d.backed \\/ op = \"denyRead\" \\/ (~valid /\\ n # 1)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReplyKind"
+        },
+        {
+          "id": "DeletePeerOnRecreate",
+          "edits": [
+            {
+              "old": "SelectSeq(@, LAMBDA r: r.stream # \"A\")",
+              "new": "<<>>",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PeerRows"
+        },
+        {
+          "id": "ReuseStreamGeneration",
+          "edits": [
+            {
+              "old": "!.gen = @+1",
+              "new": "!.gen = @",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "RetainedRows"
+        },
+        {
+          "id": "DiscloseDeniedRead",
+          "edits": [
+            {
+              "old": "~d.backed \\/ op = \"denyRead\" \\/ ~valid",
+              "new": "~d.backed \\/ ~valid",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReplyKind"
+        },
+        {
+          "id": "AcceptCustomerKeyMedia",
+          "edits": [
+            {
+              "old": "op # \"malformed\" /\\ d.backed",
+              "new": "op # \"malformed\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReplyKind"
+        }
+      ]
     }
   ]
 }
