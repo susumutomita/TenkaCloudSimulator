@@ -4,7 +4,7 @@ import Container from '@cloudscape-design/components/container';
 import FormField from '@cloudscape-design/components/form-field';
 import Header from '@cloudscape-design/components/header';
 import SpaceBetween from '@cloudscape-design/components/space-between';
-import {limitedBytes,localMediaPath,maxFragmentBytes,readMediaChunks,uploadReceipt} from './kinesis-video-media.mjs';
+import {currentStream,limitedBytes,localMediaPath,maxFragmentBytes,readMediaChunks,uploadReceipt} from './kinesis-video-media.mjs';
 
 class Refused extends Error {}
 function requireSuccess(response) {
@@ -70,8 +70,17 @@ export default function KinesisVideoMedia({stream,region,mediaRequest,t}) {
         requireSuccess(response);
         const receipt=uploadReceipt(await limitedBytes(response,8192));
         if(active.current!==operation)return;
-        setNotice(receipt.number?t('Stored fragment ','保存したフラグメント ')+receipt.number:
-          t('Fragment received with zero retention.','フラグメントを受信しました。保持期間は 0 です。'));
+        if(receipt.number){
+          setNotice(t('Stored fragment ','保存したフラグメント ')+receipt.number);
+        }else{
+          // A short acknowledgement cannot establish why persistence was absent.
+          const check=await mediaRequest('/describeStream',{...options,headers:jsonHeaders,body:JSON.stringify({StreamARN:stream.StreamARN})});
+          if(check.status!==200)throw Error('Retention readback failed.');
+          const {StreamInfo}=await check.json();
+          if(!currentStream(StreamInfo,region)||StreamInfo.StreamARN!==stream.StreamARN||StreamInfo.DataRetentionInHours!==0)throw Error('No persistence acknowledgement.');
+          if(active.current!==operation)return;
+          setNotice(t('Fragment received. Current retention is 0 hours.','フラグメントを受信しました。現在の保持期間は 0 時間です。'));
+        }
         discard();
       } else {
         const selector=token?{StartSelectorType:'CONTINUATION_TOKEN',ContinuationToken:token}:{StartSelectorType:'EARLIEST'};
