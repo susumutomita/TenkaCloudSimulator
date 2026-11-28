@@ -7,7 +7,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"slices"
 	"strings"
 	"unicode/utf8"
 )
@@ -23,11 +22,6 @@ func (b *binding) isResourceGroupQueryOperation(name string) bool {
 // CreateGroup and ListGroups have no IAM resource type in the AWS action table.
 func (b *binding) isResourceGroupServiceAction(name string) bool {
 	return b.spec.Model == "resource-groups" && (name == "CreateGroup" || name == "ListGroups")
-}
-
-func (b *binding) usesResourceGroupForbidden(name string) bool {
-	official := b.model.Operations[name]
-	return b.spec.Model == "resource-groups" && official != nil && slices.Contains(official.Errors, "ForbiddenException")
 }
 
 func parsedRepositoryTagFilter(resourceQuery any) (repositoryTagFilter, error) {
