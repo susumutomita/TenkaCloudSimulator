@@ -183,6 +183,7 @@ func newWithProviders(path string, options ProviderConfig, prepareCognito func(*
 		return nil, nil, err
 	}
 	catalogConfig := catalog.Config{Regions: aws.Regions, Account: "000000000000", DefaultPrincipal: core.Administrator, Authorize: identities.DecisionContext}
+	catalogConfig.AuthorizeSnapshot = identities.DecisionSnapshot
 	catalogConfig.SESDomainDNS = aws.LocalSESDomainDNS
 	if options.RDSPrivatePostgresTopology {
 		catalogConfig.ValidateRDSPrivatePostgres = aws.ValidateRDSPrivatePostgresTopology
@@ -264,6 +265,7 @@ func newWithProviders(path string, options ProviderConfig, prepareCognito func(*
 		mux.Handle("/_simulator/v1/terminal-channel/", options.terminalSessions)
 		mux.Handle("/_simulator/v1/terminal-readiness", options.terminalSessions)
 	}
+	mux.Handle("/_simulator/v1/ses/sink/", sesSinkInspection(catalogEngine))
 	mux.HandleFunc("/_simulator/", serveLanding)
 	mux.Handle("/_simulator/licenses/", http.StripPrefix("/_simulator/licenses/", legal.Handler()))
 	mux.Handle(provider.Prefix, registry)
@@ -336,7 +338,7 @@ func newWithProviders(path string, options ProviderConfig, prepareCognito func(*
 			http.Error(w, "Cross-site requests are not allowed", 403)
 			return
 		}
-		if strings.HasPrefix(r.URL.Path, "/_simulator/v1/") && r.URL.Path != "/_simulator/v1/capabilities" && r.URL.Path != catalogDescriptorsPath && r.URL.Path != gcpCatalogDescriptorsPath && r.URL.Path != azureCatalogDescriptorsPath && !strings.HasPrefix(r.URL.Path, "/_simulator/v1/iam/") && !strings.HasPrefix(r.URL.Path, "/_simulator/v1/lambda/") && !(options.battleCapabilities != nil && strings.HasPrefix(r.URL.Path, "/_simulator/v1/battle-capabilities/")) && !(options.terminalSessions != nil && (r.URL.Path == "/_simulator/v1/terminal-control" || r.URL.Path == "/_simulator/v1/terminal-readiness" || strings.HasPrefix(r.URL.Path, "/_simulator/v1/terminal-channel/"))) {
+		if strings.HasPrefix(r.URL.Path, "/_simulator/v1/") && r.URL.Path != "/_simulator/v1/capabilities" && r.URL.Path != catalogDescriptorsPath && r.URL.Path != gcpCatalogDescriptorsPath && r.URL.Path != azureCatalogDescriptorsPath && !strings.HasPrefix(r.URL.Path, "/_simulator/v1/ses/sink/") && !strings.HasPrefix(r.URL.Path, "/_simulator/v1/iam/") && !strings.HasPrefix(r.URL.Path, "/_simulator/v1/lambda/") && !(options.battleCapabilities != nil && strings.HasPrefix(r.URL.Path, "/_simulator/v1/battle-capabilities/")) && !(options.terminalSessions != nil && (r.URL.Path == "/_simulator/v1/terminal-control" || r.URL.Path == "/_simulator/v1/terminal-readiness" || strings.HasPrefix(r.URL.Path, "/_simulator/v1/terminal-channel/"))) {
 			http.NotFound(w, r)
 			return
 		}

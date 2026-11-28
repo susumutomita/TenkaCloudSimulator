@@ -145,6 +145,10 @@ func renderSESTemplate(ctx context.Context, content, data any) (map[string]any, 
 			return nil, err
 		}
 	}
+	return composeSESMIME(ctx, rendered)
+}
+
+func composeSESMIME(ctx context.Context, rendered map[string]string) (map[string]any, error) {
 	plain, hasPlain := rendered["Text"]
 	html, hasHTML := rendered["Html"]
 	if !hasPlain && !hasHTML {

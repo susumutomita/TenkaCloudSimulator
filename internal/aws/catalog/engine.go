@@ -21,7 +21,10 @@ type Config struct {
 	Account          string
 	DefaultPrincipal string
 	Authorize        Authorizer
-	Now              func() time.Time
+	// AuthorizeSnapshot returns one evaluator for an operation with several
+	// dependent IAM checks. Every membership page requests a fresh evaluator.
+	AuthorizeSnapshot func(context.Context, string) (func(action, resource string) string, error)
+	Now               func() time.Time
 	// SESDomainDNS reads the local public zone and its three CNAME proofs in the identity transaction.
 	SESDomainDNS func(context.Context, *sql.Tx, string, []string) (string, bool, error)
 	// ValidateRDSPrivatePostgres is optional trusted native EC2 composition.
@@ -66,7 +69,7 @@ func New(db *sql.DB, cfg Config, services []*Service) (*Engine, error) {
 	seen := map[string]bool{}
 	for _, spec := range services {
 		if spec != nil && spec.Model == "sesv2" {
-			if _, err := db.Exec(sesIdentitySchema); err != nil {
+			if _, err := db.Exec(sesIdentitySchema + "; " + sesSinkSchema); err != nil {
 				return nil, err
 			}
 		}
@@ -308,6 +311,12 @@ func (e *Engine) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		e.fail(w, b, op, err)
 		return
+	}
+	if b.spec.Model == "sesv2" && op.Name == "SendEmail" {
+		if err := sesMessageWire(body); err != nil {
+			e.fail(w, b, op, err)
+			return
+		}
 	}
 	official := b.model.Operations[op.Name]
 	var raw map[string]any

@@ -12,6 +12,65 @@
     },
     "type": "object"
    },
+   "Attachment": {
+    "additionalProperties": false,
+    "properties": {
+     "ContentDescription": {
+      "maxLength": 1000,
+      "type": "string"
+     },
+     "ContentDisposition": {
+      "enum": [
+       "ATTACHMENT",
+       "INLINE"
+      ],
+      "type": "string"
+     },
+     "ContentId": {
+      "maxLength": 78,
+      "minLength": 1,
+      "type": "string"
+     },
+     "ContentTransferEncoding": {
+      "enum": [
+       "BASE64",
+       "QUOTED_PRINTABLE",
+       "SEVEN_BIT"
+      ],
+      "type": "string"
+     },
+     "ContentType": {
+      "maxLength": 78,
+      "minLength": 1,
+      "type": "string"
+     },
+     "FileName": {
+      "maxLength": 255,
+      "type": "string"
+     },
+     "RawContent": {
+      "contentEncoding": "base64",
+      "type": "string"
+     }
+    },
+    "required": [
+     "RawContent",
+     "FileName"
+    ],
+    "type": "object"
+   },
+   "Body": {
+    "additionalProperties": false,
+    "properties": {
+     "Html": {
+      "$ref": "#/components/schemas/Content"
+     },
+     "Text": {
+      "$ref": "#/components/schemas/Content"
+     }
+    },
+    "type": "object"
+   },
    "ContactList": {
     "additionalProperties": false,
     "properties": {
@@ -26,6 +85,21 @@
       ]
      }
     },
+    "type": "object"
+   },
+   "Content": {
+    "additionalProperties": false,
+    "properties": {
+     "Charset": {
+      "type": "string"
+     },
+     "Data": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "Data"
+    ],
     "type": "object"
    },
    "DashboardOptions": {
@@ -58,6 +132,30 @@
        "OPTIONAL"
       ],
       "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "Destination": {
+    "additionalProperties": false,
+    "properties": {
+     "BccAddresses": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "CcAddresses": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "ToAddresses": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
      }
     },
     "type": "object"
@@ -199,6 +297,21 @@
     },
     "type": "object"
    },
+   "EmailContent": {
+    "additionalProperties": false,
+    "properties": {
+     "Raw": {
+      "$ref": "#/components/schemas/RawMessage"
+     },
+     "Simple": {
+      "$ref": "#/components/schemas/Message"
+     },
+     "Template": {
+      "$ref": "#/components/schemas/Template"
+     }
+    },
+    "type": "object"
+   },
    "EmailTemplateContent": {
     "additionalProperties": false,
     "properties": {
@@ -275,6 +388,21 @@
     },
     "type": "object"
    },
+   "ListManagementOptions": {
+    "additionalProperties": false,
+    "properties": {
+     "ContactListName": {
+      "type": "string"
+     },
+     "TopicName": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "ContactListName"
+    ],
+    "type": "object"
+   },
    "MailFromAttributes": {
     "additionalProperties": false,
     "properties": {
@@ -302,6 +430,85 @@
      "MailFromDomain",
      "MailFromDomainStatus",
      "BehaviorOnMxFailure"
+    ],
+    "type": "object"
+   },
+   "Message": {
+    "additionalProperties": false,
+    "properties": {
+     "Attachments": {
+      "items": {
+       "$ref": "#/components/schemas/Attachment"
+      },
+      "type": "array"
+     },
+     "Body": {
+      "$ref": "#/components/schemas/Body"
+     },
+     "Headers": {
+      "items": {
+       "$ref": "#/components/schemas/MessageHeader"
+      },
+      "maxItems": 15,
+      "minItems": 0,
+      "type": "array"
+     },
+     "Subject": {
+      "$ref": "#/components/schemas/Content"
+     }
+    },
+    "required": [
+     "Subject",
+     "Body"
+    ],
+    "type": "object"
+   },
+   "MessageHeader": {
+    "additionalProperties": false,
+    "properties": {
+     "Name": {
+      "maxLength": 126,
+      "minLength": 1,
+      "type": "string"
+     },
+     "Value": {
+      "maxLength": 870,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "Name",
+     "Value"
+    ],
+    "type": "object"
+   },
+   "MessageTag": {
+    "additionalProperties": false,
+    "properties": {
+     "Name": {
+      "type": "string"
+     },
+     "Value": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "Name",
+     "Value"
+    ],
+    "type": "object"
+   },
+   "RawMessage": {
+    "additionalProperties": false,
+    "properties": {
+     "Data": {
+      "contentEncoding": "base64",
+      "type": "string"
+     }
+    },
+    "required": [
+     "Data"
     ],
     "type": "object"
    },
@@ -375,6 +582,41 @@
      "Key",
      "Value"
     ],
+    "type": "object"
+   },
+   "Template": {
+    "additionalProperties": false,
+    "properties": {
+     "Attachments": {
+      "items": {
+       "$ref": "#/components/schemas/Attachment"
+      },
+      "type": "array"
+     },
+     "Headers": {
+      "items": {
+       "$ref": "#/components/schemas/MessageHeader"
+      },
+      "maxItems": 15,
+      "minItems": 0,
+      "type": "array"
+     },
+     "TemplateArn": {
+      "minLength": 1,
+      "type": "string"
+     },
+     "TemplateContent": {
+      "$ref": "#/components/schemas/EmailTemplateContent"
+     },
+     "TemplateData": {
+      "maxLength": 262144,
+      "type": "string"
+     },
+     "TemplateName": {
+      "minLength": 1,
+      "type": "string"
+     }
+    },
     "type": "object"
    },
    "Topic": {
@@ -477,7 +719,7 @@
   }
  },
  "info": {
-  "description": "Bounded simulator subset of the official Amazon Simple Email Service API (2019-09-27). Every other official operation returns HTTP 501 UnknownOperationException. SES v2 domain identities are limited to lowercase names under .test with one existing exact local public Route 53 zone. Three Easy DKIM CNAME records in the captured zone establish local DNS control. Get and List recheck records. No external DNS, DKIM signing or email delivery occurs. Page sizes and live identities are limited to 100 per region. Configuration sets, one contact list and email templates are stored locally. TestRenderEmailTemplate previews stored subject, text and HTML as MIME using flat string replacements in simple {{name}} tags. Advanced Handlebars forms, missing values, header control characters and previews larger than 256 KiB are rejected. No email is sent, tracked or archived; SendEmail, SendBulkEmail and other sending APIs return HTTP 501 UnknownOperationException. Individual email address identities, identity tags and configuration options, DKIM signing, dedicated IPs, contacts, suppression lists, event destinations, the Put*Options operations and account settings are unsupported. Configuration sets keep the options given at creation and refuse PageSize.",
+  "description": "Bounded simulator subset of the official Amazon Simple Email Service API (2019-09-27). Every other official operation returns HTTP 501 UnknownOperationException. SES v2 domain identities are limited to lowercase names under .test with one existing exact local public Route 53 zone. Three Easy DKIM CNAME records in the captured zone establish local DNS control. Get and List recheck records. Verification uses the local database without external DNS or DKIM signing. Page sizes and live identities are limited to 100 per region. Configuration sets, one contact list and email templates are stored locally. TestRenderEmailTemplate previews stored subject, text and HTML as MIME using flat string replacements in simple {{name}} tags. Advanced Handlebars forms, missing values, header control characters and previews larger than 256 KiB are rejected. Template preview does not send a message. SendEmail accepts one current verified .test sender and one To recipient at inbox.ses.test. Use a UTF-8 Simple subject with Text and/or Html, or a stored TemplateName and flat TemplateData. The in-process mailbox inbox@inbox.ses.test stores the complete message, and other local mailboxes refuse it. One accepted submission receives one MessageId. The local operator may inspect or delete up to 100 saved receipts per region, with 256 KiB per MIME message. Raw email, SMTP, external destinations, bulk delivery and GetMessageInsights are unsupported. Individual email address identities, identity tags and configuration options, DKIM signing, dedicated IPs, contacts, suppression lists, event destinations, the Put*Options operations and account settings are unsupported. Configuration sets keep the options given at creation and refuse PageSize.",
   "title": "Amazon Simple Email Service (simulator catalog)",
   "version": "2019-09-27"
  },
@@ -1439,6 +1681,135 @@
     ]
    }
   },
+  "/v2/email/outbound-emails": {
+   "post": {
+    "description": "Verify the local owned.test domain in this region first. Accepted messages addressed to inbox@inbox.ses.test can be downloaded from the team operator's local inbox.",
+    "operationId": "sesv2SendEmail",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "ses"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "example": {
+        "Content": {
+         "Simple": {
+          "Body": {
+           "Text": {
+            "Data": "Hello from the local inbox."
+           }
+          },
+          "Subject": {
+           "Data": "Local greeting"
+          }
+         }
+        },
+        "Destination": {
+         "ToAddresses": [
+          "inbox@inbox.ses.test"
+         ]
+        },
+        "FromEmailAddress": "sender@owned.test"
+       },
+       "schema": {
+        "properties": {
+         "ConfigurationSetName": {
+          "type": "string"
+         },
+         "Content": {
+          "$ref": "#/components/schemas/EmailContent"
+         },
+         "Destination": {
+          "$ref": "#/components/schemas/Destination"
+         },
+         "EmailTags": {
+          "items": {
+           "$ref": "#/components/schemas/MessageTag"
+          },
+          "type": "array"
+         },
+         "EndpointId": {
+          "type": "string"
+         },
+         "FeedbackForwardingEmailAddress": {
+          "type": "string"
+         },
+         "FeedbackForwardingEmailAddressIdentityArn": {
+          "minLength": 1,
+          "type": "string"
+         },
+         "FromEmailAddress": {
+          "type": "string"
+         },
+         "FromEmailAddressIdentityArn": {
+          "minLength": 1,
+          "type": "string"
+         },
+         "ListManagementOptions": {
+          "$ref": "#/components/schemas/ListManagementOptions"
+         },
+         "ReplyToAddresses": {
+          "items": {
+           "type": "string"
+          },
+          "type": "array"
+         },
+         "TenantName": {
+          "minLength": 1,
+          "type": "string"
+         }
+        },
+        "required": [
+         "Content"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "MessageId": {
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "SendEmail",
+    "tags": [
+     "Amazon Simple Email Service"
+    ]
+   }
+  },
   "/v2/email/tags": {
    "delete": {
     "operationId": "sesv2UntagResource",
@@ -2030,7 +2401,7 @@
  ],
  "tags": [
   {
-   "description": "Bounded simulator subset of the official Amazon Simple Email Service API (2019-09-27). Every other official operation returns HTTP 501 UnknownOperationException. SES v2 domain identities are limited to lowercase names under .test with one existing exact local public Route 53 zone. Three Easy DKIM CNAME records in the captured zone establish local DNS control. Get and List recheck records. No external DNS, DKIM signing or email delivery occurs. Page sizes and live identities are limited to 100 per region. Configuration sets, one contact list and email templates are stored locally. TestRenderEmailTemplate previews stored subject, text and HTML as MIME using flat string replacements in simple {{name}} tags. Advanced Handlebars forms, missing values, header control characters and previews larger than 256 KiB are rejected. No email is sent, tracked or archived; SendEmail, SendBulkEmail and other sending APIs return HTTP 501 UnknownOperationException. Individual email address identities, identity tags and configuration options, DKIM signing, dedicated IPs, contacts, suppression lists, event destinations, the Put*Options operations and account settings are unsupported. Configuration sets keep the options given at creation and refuse PageSize.",
+   "description": "Bounded simulator subset of the official Amazon Simple Email Service API (2019-09-27). Every other official operation returns HTTP 501 UnknownOperationException. SES v2 domain identities are limited to lowercase names under .test with one existing exact local public Route 53 zone. Three Easy DKIM CNAME records in the captured zone establish local DNS control. Get and List recheck records. Verification uses the local database without external DNS or DKIM signing. Page sizes and live identities are limited to 100 per region. Configuration sets, one contact list and email templates are stored locally. TestRenderEmailTemplate previews stored subject, text and HTML as MIME using flat string replacements in simple {{name}} tags. Advanced Handlebars forms, missing values, header control characters and previews larger than 256 KiB are rejected. Template preview does not send a message. SendEmail accepts one current verified .test sender and one To recipient at inbox.ses.test. Use a UTF-8 Simple subject with Text and/or Html, or a stored TemplateName and flat TemplateData. The in-process mailbox inbox@inbox.ses.test stores the complete message, and other local mailboxes refuse it. One accepted submission receives one MessageId. The local operator may inspect or delete up to 100 saved receipts per region, with 256 KiB per MIME message. Raw email, SMTP, external destinations, bulk delivery and GetMessageInsights are unsupported. Individual email address identities, identity tags and configuration options, DKIM signing, dedicated IPs, contacts, suppression lists, event destinations, the Put*Options operations and account settings are unsupported. Configuration sets keep the options given at creation and refuse PageSize.",
    "name": "Amazon Simple Email Service"
   }
  ],

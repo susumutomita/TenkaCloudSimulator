@@ -45,6 +45,9 @@ func (q *request) execute() (map[string]any, error) {
 		defer q.e.ownedPrivateRDS.lock(q.region, q.op.Kind)()
 	}
 	if q.b.spec.Model == "sesv2" && q.op.Resource == "domainIdentity" {
+		if q.op.Name == "SendEmail" {
+			return q.sendSESEmail()
+		}
 		return q.sesDomainIdentity()
 	}
 	switch q.op.Kind {
@@ -344,6 +347,10 @@ func (q *request) authorizeAction(action, resource string) error {
 	if err != nil {
 		return err
 	}
+	return q.checkDecision(decision)
+}
+
+func (q *request) checkDecision(decision string) error {
 	q.w.Header().Set("X-Simulator-IAM-Decision", decision)
 	if decision != "allowed" {
 		return &fault{kind: "denied", message: "IAM evaluation: " + decision}

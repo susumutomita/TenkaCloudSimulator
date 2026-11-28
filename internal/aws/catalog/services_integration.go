@@ -425,6 +425,7 @@ var sesV2 = &Service{
 		{Kind: "domainIdentity", Shape: "GetEmailIdentityResponse", Summary: "IdentityInfo", ID: "name", NameMember: "EmailIdentity", ARN: "arn:{partition}:ses:{region}:{account}:identity/{name}", Unique: true, Limit: 100},
 	},
 	Ops: []Op{
+		{Name: "SendEmail", Kind: Put, Resource: "domainIdentity", Lookup: "FromEmailAddress"},
 		{Name: "CreateEmailIdentity", Kind: Create, Resource: "domainIdentity"},
 		{Name: "GetEmailIdentity", Kind: Read, Resource: "domainIdentity", Lookup: "EmailIdentity"},
 		{Name: "ListEmailIdentities", Kind: List, Resource: "domainIdentity"},
@@ -451,8 +452,9 @@ var sesV2 = &Service{
 		{Name: "ListTagsForResource", Kind: ListTags, Lookup: "ResourceArn"},
 	},
 	Bounds: []string{
-		"SES v2 domain identities are limited to lowercase names under .test with one existing exact local public Route 53 zone. Three Easy DKIM CNAME records in the captured zone establish local DNS control. Get and List recheck records. No external DNS, DKIM signing or email delivery occurs. Page sizes and live identities are limited to 100 per region.",
-		"Configuration sets, one contact list and email templates are stored locally. TestRenderEmailTemplate previews stored subject, text and HTML as MIME using flat string replacements in simple {{name}} tags. Advanced Handlebars forms, missing values, header control characters and previews larger than 256 KiB are rejected. No email is sent, tracked or archived; SendEmail, SendBulkEmail and other sending APIs return HTTP 501 UnknownOperationException.",
+		"SES v2 domain identities are limited to lowercase names under .test with one existing exact local public Route 53 zone. Three Easy DKIM CNAME records in the captured zone establish local DNS control. Get and List recheck records. Verification uses the local database without external DNS or DKIM signing. Page sizes and live identities are limited to 100 per region.",
+		"Configuration sets, one contact list and email templates are stored locally. TestRenderEmailTemplate previews stored subject, text and HTML as MIME using flat string replacements in simple {{name}} tags. Advanced Handlebars forms, missing values, header control characters and previews larger than 256 KiB are rejected. Template preview does not send a message.",
+		"SendEmail accepts one current verified .test sender and one To recipient at inbox.ses.test. Use a UTF-8 Simple subject with Text and/or Html, or a stored TemplateName and flat TemplateData. The in-process mailbox inbox@inbox.ses.test stores the complete message, and other local mailboxes refuse it. One accepted submission receives one MessageId. The local operator may inspect or delete up to 100 saved receipts per region, with 256 KiB per MIME message. Raw email, SMTP, external destinations, bulk delivery and GetMessageInsights are unsupported.",
 		"Individual email address identities, identity tags and configuration options, DKIM signing, dedicated IPs, contacts, suppression lists, event destinations, the Put*Options operations and account settings are unsupported. Configuration sets keep the options given at creation and refuse PageSize.",
 	},
 }
