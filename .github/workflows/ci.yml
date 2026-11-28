@@ -5,13 +5,13 @@ permissions:
   contents: read
 jobs:
   complete-before-commit:
-    name: Unfiltered standard make before-commit at 05f7bc6
+    name: Unfiltered standard make before-commit at d696c0f
     runs-on: ubuntu-24.04
     timeout-minutes: 80
     steps:
       - uses: actions/checkout@v7.0.1
         with:
-          ref: 05f7bc6a2adbdc60fa98ea9b4a58f42219f277c0
+          ref: d696c0f5c364d19a45e1cc4c13aecd8da7b674b6
           persist-credentials: false
       - uses: actions/setup-go@v6.5.0
         with:
@@ -19,8 +19,8 @@ jobs:
           cache: true
       - name: Verify fixed product source and ordinary runner
         run: |
-          test "$(git rev-parse HEAD)" = 05f7bc6a2adbdc60fa98ea9b4a58f42219f277c0
-          test "$(git rev-parse HEAD^{tree})" = 1fd787ea80aea7f88e511574ccc1d6963d443e76
+          test "$(git rev-parse HEAD)" = d696c0f5c364d19a45e1cc4c13aecd8da7b674b6
+          test "$(git rev-parse HEAD^{tree})" = 0f5776bef7e66bd003d8d628f78c564723efa7db
           test -z "$(git status --porcelain)"
           test "$(id -u)" -ne 0
           mkdir -p "$RUNNER_TEMP/route53-reference-complete-gate"
@@ -55,7 +55,7 @@ jobs:
                   or 'statement coverage' in line.lower() or line.startswith('Go statements (full module)')]
           result = root / 'make-exit.txt'
           (root / 'summary.json').write_text(json.dumps({
-              'source': '05f7bc6a2adbdc60fa98ea9b4a58f42219f277c0',
+              'source': 'd696c0f5c364d19a45e1cc4c13aecd8da7b674b6',
               'command': 'make before-commit',
               'make_exit': int(result.read_text()) if result.exists() else None,
               'observed_summaries': safe,
