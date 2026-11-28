@@ -1,18 +1,174 @@
-name: Verify Resource Groups Cloudscape and boto3 shared ECR membership
+name: Verify Resource Groups service IAM, SDK, console and standard gate
 on:
   workflow_dispatch:
 permissions:
   contents: read
 jobs:
+  sdk:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 25
+    env:
+      PRODUCT: b0876efe2d9dd35cf517d923a6d2f5a0a33c2c79
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          ref: b0876efe2d9dd35cf517d923a6d2f5a0a33c2c79
+          persist-credentials: false
+      - uses: actions/setup-go@v6.5.0
+        with:
+          go-version: '1.26.11'
+          cache: true
+      - name: Build clean pinned simulator and install repository SDK pins
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REPOSITORY" = susumutomita/TenkaCloudSimulator
+          test "$GITHUB_REF" = refs/heads/verify/207-service-iam
+          test "$(git rev-parse HEAD)" = "$PRODUCT"
+          test "$(git rev-parse 'HEAD^{tree}')" = d433a93c55a7fad64d8a8df425260620224c8869
+          test -z "$(git status --porcelain)"
+          test "$(go env GOVERSION)" = go1.26.11
+          test "$(id -u)" -ne 0
+          umask 077
+          mkdir "$RUNNER_TEMP/receipts"
+          make build
+          go version -m dist/tenkacloud-simulator > "$RUNNER_TEMP/receipts/build.txt"
+          grep -Fx "$(printf '\tbuild\tvcs.revision=%s' "$PRODUCT")" "$RUNNER_TEMP/receipts/build.txt"
+          grep -Fx "$(printf '\tbuild\tvcs.modified=false')" "$RUNNER_TEMP/receipts/build.txt"
+          python="$RUNNER_TOOL_CACHE/Python/3.12.16/x64/bin/python3.12"
+          test "$("$python" --version)" = "Python 3.12.16"
+          "$python" -m venv "$RUNNER_TEMP/client-tools"
+          "$RUNNER_TEMP/client-tools/bin/python" -m pip install -r scripts/requirements-test.txt awscli==1.43.6
+      - name: Run checked-in SDK fixtures on isolated numeric loopback
+        run: |
+          set -euo pipefail
+          umask 077
+          export SIMULATOR_BINARY="$PWD/dist/tenkacloud-simulator"
+          python="$RUNNER_TEMP/client-tools/bin/python"
+          "$python" -I -c 'import os; from pathlib import Path; assert not any(k.startswith(("AWS_", "BOTO_")) for k in os.environ); assert not any(os.path.lexists(p) for p in (Path.home()/".aws", Path.home()/".boto", "/etc/boto.cfg"))'
+          cat > "$RUNNER_TEMP/cli_members.py" <<'PY'
+          import contextlib
+          import io
+          import json
+          import sys
+          import tempfile
+          from importlib.metadata import version
+          from pathlib import Path
+          from urllib.parse import urlsplit
+
+          from awscli.clidriver import create_clidriver
+
+          sys.path.insert(0, str(Path.cwd() / 'test/e2e'))
+          from aws_catalog import Team
+
+          assert version('awscli') == '1.43.6' and version('botocore') == '1.41.6'
+          with tempfile.TemporaryDirectory(prefix='group-cli-') as directory:
+              team = Team(directory)
+              try:
+                  team.start()
+                  driver = create_clidriver()
+                  driver.session.set_credentials('TCSIMCLIFIXTURE', 'dummy-local-only')
+
+                  def local(request, **kwargs):
+                      origin = urlsplit(request.url)
+                      assert origin.scheme == 'http' and origin.netloc == f'127.0.0.1:{team.port}'
+
+                  def authorize(request, **kwargs):
+                      local(request)
+                      request.headers.add_header('X-Simulator-Token', team.token)
+
+                  driver.session.register('before-sign.*.*', authorize)
+                  driver.session.register('before-send.*.*', local)
+
+                  def cli(service, op, *args):
+                      stdout, stderr = io.StringIO(), io.StringIO()
+                      with contextlib.redirect_stdout(stdout), contextlib.redirect_stderr(stderr):
+                          code = driver.main(['--endpoint-url', team.endpoint, '--region', 'us-east-1', '--output', 'json',
+                                              '--no-paginate', service, op, *args])
+                      assert code == 0, f'{service} {op} failed'
+                      data = stdout.getvalue()
+                      return json.loads(data) if data.strip() else {}
+
+                  definition = {'Type': 'TAG_FILTERS_1_0', 'Query': json.dumps({
+                      'ResourceTypeFilters': ['AWS::ECR::Repository'], 'TagFilters': [{'Key': 'Team', 'Values': ['blue']}]})}
+                  group = cli('resource-groups', 'create-group', '--name', 'cli-group', '--resource-query', json.dumps(definition))['Group']['GroupArn']
+                  arn = cli('ecr', 'create-repository', '--repository-name', 'cli-repo')['repository']['repositoryArn']
+                  def members():
+                      rep = cli('resource-groups', 'list-group-resources', '--group', group)
+                      ids = rep['ResourceIdentifiers']
+                      assert rep['Resources'] == [{'Identifier': item} for item in ids]
+                      return [item['ResourceArn'] for item in ids]
+                  assert members() == []
+                  cli('ecr', 'tag-resource', '--resource-arn', arn, '--tags', 'Key=Team,Value=blue')
+                  assert members() == [arn]
+                  cli('ecr', 'untag-resource', '--resource-arn', arn, '--tag-keys', 'Team')
+                  assert members() == []
+                  cli('ecr', 'tag-resource', '--resource-arn', arn, '--tags', 'Key=Team,Value=blue')
+                  assert members() == [arn]
+                  cli('ecr', 'delete-repository', '--repository-name', 'cli-repo')
+                  assert members() == []
+                  cli('resource-groups', 'delete-group', '--group', group)
+                  assert not cli('resource-groups', 'list-groups')['Groups']
+                  assert not cli('ecr', 'describe-repositories')['repositories']
+              finally:
+                  if team.process is not None:
+                      team.stop()
+          PY
+          cat > "$RUNNER_TEMP/measure.py" <<'PY'
+          import hashlib, json, os, re, socket, subprocess, sys, time
+          from pathlib import Path
+          from importlib.metadata import version
+          tests = Path.cwd() / 'test/e2e'
+          sys.path.insert(0, str(tests))
+          import run_s3_multipart_paging as guard
+          uid, net, user = map(int, sys.argv[1:])
+          status = Path('/proc/self/status').read_text()
+          guard.validate_inside_context(uid, net, user, uid=os.getuid(), euid=os.geteuid(), net=guard.namespace_inode('net'), user=guard.namespace_inode('user'), status=status, interfaces=[n for _, n in socket.if_nameindex()], lo_up=guard.loopback_up())
+          assert next(r.split()[1] for r in status.splitlines() if r.startswith('CapBnd:')) == '0000000000000000'
+          assert (version('boto3'), version('botocore')) == ('1.42.0', '1.41.6')
+          def digest(path):
+              with path.open('rb') as stream: return hashlib.file_digest(stream, 'sha256').hexdigest()
+          binary = Path(os.environ['SIMULATOR_BINARY'])
+          initial = digest(binary)
+          assert initial == "a57c33a24f77f64eef7c5ec2834e5f158911f219159885603456d8c4a6fa4656"
+          assert digest(tests/"resource_group_ecr_members.py") == "6ffc476ad6752ee81404296e4202f5da65daecbd6155a836efe9a78b5c374c62"
+          receipt = {'sha': os.environ['PRODUCT'], 'binarySha256': initial, 'sdk': [version('boto3'), version('botocore')], 'cli': version('awscli'), 'isolation': 'nonroot private user/net, only lo, zero capabilities', 'cases': []}
+          path = Path(os.environ['RUNNER_TEMP']) / 'receipts/receipt.json'
+          for source, args in [('aws_catalog_fixtures.py', ['resource-groups']), ('resource_group_ecr_members.py', []), ('cli_members.py', [])]:
+              start = time.monotonic()
+              fixture = Path(os.environ['RUNNER_TEMP']) / source if source == 'cli_members.py' else tests/source
+              proc = subprocess.run([sys.executable, '-B', str(fixture), *args], capture_output=True, timeout=150)
+              case = {'source': source, 'fixtureSha256': digest(fixture), 'args': args, 'exit': proc.returncode, 'seconds': round(time.monotonic()-start, 2)}
+              if proc.returncode:
+                  frames = re.findall(rb'File "[^"\n]*/[a-z_]+\.py", line (\d+), in ([a-zA-Z_][a-zA-Z_0-9]{0,49}|<module>)', proc.stderr)
+                  case['frames'] = [[int(n), f.decode()] for n, f in frames[-4:]]
+                  classes = re.findall(rb'^([A-Za-z_][A-Za-z0-9_.]*(?:Error|Exception)):', proc.stderr, re.M)
+                  case['exception'] = classes[-1].decode() if classes else 'unclassified'
+              receipt['cases'].append(case)
+              path.write_text(json.dumps(receipt, indent=2)+'\n')
+              print(source, proc.returncode, flush=True)
+          assert all(c['exit'] == 0 for c in receipt['cases']) and digest(binary) == initial
+          PY
+          unshare --user --map-current-user --net --keep-caps sh -ec '
+            ip link set lo up
+            exec setpriv --inh-caps=-all --ambient-caps=-all --bounding-set=-all "$@"
+          ' groups "$python" -IB "$RUNNER_TEMP/measure.py" "$(id -u)" "$(stat -Lc %i /proc/self/ns/net)" "$(stat -Lc %i /proc/self/ns/user)"
+      - name: Retain pinned build and sanitized SDK results
+        if: always()
+        uses: actions/upload-artifact@v7.0.2
+        with:
+          name: resource-group-clients-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/receipts/
+          if-no-files-found: error
+          retention-days: 14
   group-console:
     runs-on: ubuntu-22.04
     timeout-minutes: 35
     env:
-      PRODUCT: ffd2258ec28391a3607e06ecd5aaec3152b9a542
+      PRODUCT: b0876efe2d9dd35cf517d923a6d2f5a0a33c2c79
     steps:
       - uses: actions/checkout@v7.0.1
         with:
-          ref: ffd2258ec28391a3607e06ecd5aaec3152b9a542
+          ref: b0876efe2d9dd35cf517d923a6d2f5a0a33c2c79
           persist-credentials: false
       - uses: actions/setup-go@v6.5.0
         with:
@@ -21,9 +177,9 @@ jobs:
       - name: Build the fixed product and provision its pinned clients and sandboxed Chromium
         run: |
           test "$GITHUB_REPOSITORY" = susumutomita/TenkaCloudSimulator
-          test "$GITHUB_REF" = refs/heads/verify/207-group-console
+          test "$GITHUB_REF" = refs/heads/verify/207-service-iam
           test "$(git rev-parse HEAD)" = "$PRODUCT"
-          test "$(git rev-parse 'HEAD^{tree}')" = 06677cc0ef7945aa7091d4adeb368fdd898555d4
+          test "$(git rev-parse 'HEAD^{tree}')" = d433a93c55a7fad64d8a8df425260620224c8869
           test -z "$(git status --porcelain)"
           test "$(go env GOVERSION)" = go1.26.11
           test "$(id -u)" -ne 0
@@ -43,7 +199,7 @@ jobs:
           set -euo pipefail
           umask 077
           export SIMULATOR_BINARY="$PWD/dist/tenkacloud-simulator"
-          export SIMULATOR_BINARY_SHA256=12e940a07c54c28d20c7e3ff65a159fc3f09569d1c2f4afe90542d5ad5cb364f
+          export SIMULATOR_BINARY_SHA256=a57c33a24f77f64eef7c5ec2834e5f158911f219159885603456d8c4a6fa4656
           python="$RUNNER_TEMP/group-tools/bin/python"
           "$python" -I -c 'import os; from pathlib import Path; assert not any(k.startswith(("AWS_","BOTO_")) for k in os.environ); assert not any(os.path.lexists(p) for p in (Path.home()/".aws",Path.home()/".boto","/etc/boto.cfg"))'
           cat > "$RUNNER_TEMP/group-private/verify.py" <<'PYTHON'
@@ -108,11 +264,11 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 60
     env:
-      PRODUCT: ffd2258ec28391a3607e06ecd5aaec3152b9a542
+      PRODUCT: b0876efe2d9dd35cf517d923a6d2f5a0a33c2c79
     steps:
       - uses: actions/checkout@v7.0.1
         with:
-          ref: ffd2258ec28391a3607e06ecd5aaec3152b9a542
+          ref: b0876efe2d9dd35cf517d923a6d2f5a0a33c2c79
           fetch-depth: 0
           persist-credentials: false
       - uses: actions/setup-go@v6.5.0
@@ -123,14 +279,14 @@ jobs:
         run: |
           set -euo pipefail
           test "$GITHUB_REPOSITORY" = susumutomita/TenkaCloudSimulator
-          test "$GITHUB_REF" = refs/heads/verify/207-group-console
+          test "$GITHUB_REF" = refs/heads/verify/207-service-iam
           test "$(git rev-parse HEAD)" = "$PRODUCT"
-          test "$(git rev-parse 'HEAD^{tree}')" = 06677cc0ef7945aa7091d4adeb368fdd898555d4
+          test "$(git rev-parse 'HEAD^{tree}')" = d433a93c55a7fad64d8a8df425260620224c8869
           test -z "$(git status --porcelain)"
           test "$(go env GOVERSION)" = go1.26.11
           test "$(id -u)" -ne 0
           mkdir "$RUNNER_TEMP/receipts"
-          PYTHONPYCACHEPREFIX="$RUNNER_TEMP/pycache" python3 scripts/check-formal-applicability.py check --base fd803075c37af3faa377f550c8e1cd52b3cfbbb1
+          PYTHONPYCACHEPREFIX="$RUNNER_TEMP/pycache" python3 scripts/check-formal-applicability.py check --base ffd2258ec28391a3607e06ecd5aaec3152b9a542
           umask 077
           test -z "${GOFLAGS:-}${MAKEFLAGS:-}${GO_TEST_RUN_FILE:-}${GO_TEST_PACKAGES:-}"
           status=0
