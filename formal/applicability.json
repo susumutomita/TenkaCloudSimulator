@@ -290,10 +290,31 @@
       "models": []
     },
     {
+      "path": "test/e2e/kms_reference_projection.py",
+      "sha256": "39c8cf732bda41677cdec0bfc665b5340df7361e003bbca8eeb66e121d43db8e",
+      "disposition": "test-support",
+      "reason": "Validate the exact grant and deletion reference additions before comparing the inherited API.",
+      "models": []
+    },
+    {
       "path": "test/e2e/kms_surface_lifecycle.py",
       "sha256": "34dc7b0163da2009484a510d03b5e000dc2c2b27fee52303e4879d47e22d8db1",
       "disposition": "test-support",
       "reason": "Drive the shipped KMS Console and Scalar with a scoped browser participant, verify saved state with the official SDK and real STS across two processes and an owner restart.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/test_openapi_json10.py",
+      "sha256": "314f77608900dff4dd0c63346e5c20ec044e98775e8f799d4c831d21e331caaa",
+      "disposition": "test-support",
+      "reason": "Check all 48 shared JSON 1.1 examples and the five KMS grant and deletion target schemas.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/test_sakura_openapi.py",
+      "sha256": "ab70eafcb8e19a4c7fcc54662465b6331e7a4974f43f7bf8af27b913eb8b2f08",
+      "disposition": "test-support",
+      "reason": "Preserve the historical API digests and reject corruption of the new KMS and inherited reference entries.",
       "models": []
     },
     {
