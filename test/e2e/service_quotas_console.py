@@ -10,6 +10,7 @@ import os
 from pathlib import Path
 import re
 import sqlite3
+import sys
 import tempfile
 from urllib.parse import urlsplit
 
@@ -35,6 +36,21 @@ def client(team):
 def frame(team):
     with sqlite3.connect(team.directory / 'state.db') as db:
         return tuple(db.execute('SELECT * FROM aws_b2bi_profile_quota_requests ORDER BY seq'))
+
+
+def full_frame(team):
+    with sqlite3.connect(team.directory / 'state.db') as db:
+        return tuple(db.iterdump())
+
+
+def cleanup(call):
+    primary = sys.exception()
+    try:
+        call()
+    except BaseException as error:
+        if primary is None:
+            raise
+        primary.add_note('Owned cleanup also failed: ' + type(error).__name__)
 
 
 class Console:
@@ -110,7 +126,7 @@ def run():
         sdk, other = client(owner), client(peer)
         sdks.extend((sdk, other))
         other.request_service_quota_increase(**KEY, DesiredValue=11, SupportCaseAllowed=False)
-        peer_before = frame(peer)
+        peer_before = full_frame(peer)
         preexisting = sdk.request_service_quota_increase(**KEY, DesiredValue=8, SupportCaseAllowed=False)['RequestedQuota']['Id']
         with sync_playwright() as playwright:
             browser = playwright.chromium.launch(executable_path=os.environ['CHROMIUM_EXECUTABLE'], chromium_sandbox=True)
@@ -221,7 +237,7 @@ def run():
                     page.get_by_role('option', name=re.compile('^Service Quotas')).click()
                     expect(page.get_by_role('button', name='Submit increase request', exact=True)).to_be_enabled()
                 finally:
-                    view.close()
+                    cleanup(view.close)
                 owner.stop(); owner.start()
                 reopened = Console(browser, owner, japanese=True)
                 try:
@@ -230,13 +246,20 @@ def run():
                     expect(reopened.page.get_by_text('適用済みアカウント上限', exact=True)).to_be_visible()
                     assert sdk.get_requested_service_quota_change(RequestId=pending[0]['Id'])['RequestedQuota']['Status'] == 'PENDING'
                 finally:
-                    reopened.close()
+                    cleanup(reopened.close)
                 arn = 'arn:aws:servicequotas:us-east-1:000000000000:b2bi/L-05F6A9EF'
                 scoped = participant(owner, 'quota-named-reader', [{'Effect': 'Allow', 'Action': ['servicequotas:GetServiceQuota'], 'Resource': arn}])
                 restricted = Console(browser, owner, token=scoped)
                 try:
                     expect(restricted.page.get_by_role('button', name='Submit increase request', exact=True)).to_be_enabled()
                     expect(restricted.page.get_by_text('GetAWSDefaultServiceQuota:', exact=False)).to_be_visible()
+                    before_denial = frame(owner)
+                    restricted.click('Submit increase request', 'RequestServiceQuotaIncrease', 400)
+                    assert frame(owner) == before_denial
+                    expect(restricted.page.get_by_text('Request outcome unknown', exact=True)).to_have_count(0)
+                    expect(restricted.page.get_by_role('button', name='Submit increase request', exact=True)).to_be_disabled()
+                    restricted.click('Refresh quota', 'GetServiceQuota')
+                    expect(restricted.page.get_by_role('button', name='Submit increase request', exact=True)).to_be_enabled()
                     owner.control('PUT', '/_simulator/v1/iam/principals/quota-named-reader/policy', {'Version': '2012-10-17', 'Statement': [{'Effect': 'Deny', 'Action': '*', 'Resource': '*'}]})
                     restricted.click('Refresh quota', 'GetServiceQuota', 400)
                     expect(restricted.page.get_by_role('button', name='Submit increase request', exact=True)).to_be_disabled()
@@ -244,20 +267,20 @@ def run():
                     audit(restricted.page)
                     expect(restricted.page.get_by_text(pending[0]['Id'], exact=True)).to_have_count(0)
                 finally:
-                    restricted.close()
-                assert frame(peer) == peer_before
+                    cleanup(restricted.close)
+                assert full_frame(peer) == peer_before
             finally:
-                browser.close()
+                cleanup(browser.close)
     finally:
         for sdk in sdks:
-            sdk.close()
+            cleanup(sdk.close)
         try:
-            owner.stop()
+            cleanup(owner.stop)
         finally:
             try:
-                peer.stop()
+                cleanup(peer.stop)
             finally:
-                directory.cleanup()
+                cleanup(directory.cleanup)
     assert not Path(directory.name).exists()
     print(json.dumps({'ok': True, 'serviceQuotasConsole': True, 'physicalHistoryAndLostAcknowledgement': True,
                       'peerRestartCleanup': True, 'japaneseWidth': 390,
