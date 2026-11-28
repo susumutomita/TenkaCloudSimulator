@@ -189,7 +189,7 @@ func newWithProviders(path string, options ProviderConfig, prepareCognito func(*
 		_ = store.Close()
 		return nil, nil, err
 	}
-	catalogConfig := catalog.Config{Regions: aws.Regions, Account: "000000000000", DefaultPrincipal: core.Administrator, Authorize: identities.DecisionContext}
+	catalogConfig := catalog.Config{Regions: aws.Regions, Account: "000000000000", DefaultPrincipal: core.Administrator, Authorize: identities.DecisionContext, AuthorizeSnapshot: identities.DecisionSnapshot}
 	if options.RDSPrivatePostgresTopology {
 		catalogConfig.ValidateRDSPrivatePostgres = aws.ValidateRDSPrivatePostgresTopology
 	}
