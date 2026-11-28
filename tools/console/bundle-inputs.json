@@ -35446,22 +35446,6 @@
       ],
       "format": "esm"
     },
-    "src/catalog-input.mjs": {
-      "bytes": 10765,
-      "imports": [],
-      "format": "esm"
-    },
-    "src/appstream-app-block.mjs": {
-      "bytes": 3118,
-      "imports": [
-        {
-          "path": "src/catalog-input.mjs",
-          "kind": "import-statement",
-          "original": "./catalog-input.mjs"
-        }
-      ],
-      "format": "esm"
-    },
     "node_modules/@cloudscape-design/components/expandable-section/index.js": {
       "bytes": 1324,
       "imports": [
@@ -35489,6 +35473,98 @@
           "path": "node_modules/@cloudscape-design/components/expandable-section/internal.js",
           "kind": "import-statement",
           "original": "./internal"
+        }
+      ],
+      "format": "esm"
+    },
+    "src/ses-mail.mjs": {
+      "bytes": 3183,
+      "imports": [],
+      "format": "esm"
+    },
+    "src/ses-mail.jsx": {
+      "bytes": 12419,
+      "imports": [
+        {
+          "path": "node_modules/react/index.js",
+          "kind": "import-statement",
+          "original": "react"
+        },
+        {
+          "path": "node_modules/@cloudscape-design/components/box/index.js",
+          "kind": "import-statement",
+          "original": "@cloudscape-design/components/box"
+        },
+        {
+          "path": "node_modules/@cloudscape-design/components/button/index.js",
+          "kind": "import-statement",
+          "original": "@cloudscape-design/components/button"
+        },
+        {
+          "path": "node_modules/@cloudscape-design/components/container/index.js",
+          "kind": "import-statement",
+          "original": "@cloudscape-design/components/container"
+        },
+        {
+          "path": "node_modules/@cloudscape-design/components/expandable-section/index.js",
+          "kind": "import-statement",
+          "original": "@cloudscape-design/components/expandable-section"
+        },
+        {
+          "path": "node_modules/@cloudscape-design/components/form-field/index.js",
+          "kind": "import-statement",
+          "original": "@cloudscape-design/components/form-field"
+        },
+        {
+          "path": "node_modules/@cloudscape-design/components/header/index.js",
+          "kind": "import-statement",
+          "original": "@cloudscape-design/components/header"
+        },
+        {
+          "path": "node_modules/@cloudscape-design/components/input/index.js",
+          "kind": "import-statement",
+          "original": "@cloudscape-design/components/input"
+        },
+        {
+          "path": "node_modules/@cloudscape-design/components/select/index.js",
+          "kind": "import-statement",
+          "original": "@cloudscape-design/components/select"
+        },
+        {
+          "path": "node_modules/@cloudscape-design/components/space-between/index.js",
+          "kind": "import-statement",
+          "original": "@cloudscape-design/components/space-between"
+        },
+        {
+          "path": "node_modules/@cloudscape-design/components/textarea/index.js",
+          "kind": "import-statement",
+          "original": "@cloudscape-design/components/textarea"
+        },
+        {
+          "path": "src/i18n.jsx",
+          "kind": "import-statement",
+          "original": "./i18n.jsx"
+        },
+        {
+          "path": "src/ses-mail.mjs",
+          "kind": "import-statement",
+          "original": "./ses-mail.mjs"
+        }
+      ],
+      "format": "esm"
+    },
+    "src/catalog-input.mjs": {
+      "bytes": 10765,
+      "imports": [],
+      "format": "esm"
+    },
+    "src/appstream-app-block.mjs": {
+      "bytes": 3118,
+      "imports": [
+        {
+          "path": "src/catalog-input.mjs",
+          "kind": "import-statement",
+          "original": "./catalog-input.mjs"
         }
       ],
       "format": "esm"
@@ -35724,7 +35800,7 @@
       "format": "esm"
     },
     "src/catalog.jsx": {
-      "bytes": 51742,
+      "bytes": 51934,
       "imports": [
         {
           "path": "node_modules/react/index.js",
@@ -35735,6 +35811,11 @@
           "path": "src/i18n.jsx",
           "kind": "import-statement",
           "original": "./i18n.jsx"
+        },
+        {
+          "path": "src/ses-mail.jsx",
+          "kind": "import-statement",
+          "original": "./ses-mail.jsx"
         },
         {
           "path": "src/appstream-app-block.jsx",
@@ -38130,7 +38211,7 @@
           "bytesInOutput": 2927
         },
         "node_modules/@dnd-kit/core/dist/core.esm.js": {
-          "bytesInOutput": 39396
+          "bytesInOutput": 39420
         },
         "node_modules/@dnd-kit/utilities/dist/utilities.esm.js": {
           "bytesInOutput": 3220
@@ -40038,7 +40119,16 @@
           "bytesInOutput": 476
         },
         "src/catalog.jsx": {
-          "bytesInOutput": 37890
+          "bytesInOutput": 38014
+        },
+        "src/ses-mail.jsx": {
+          "bytesInOutput": 10329
+        },
+        "node_modules/@cloudscape-design/components/expandable-section/index.js": {
+          "bytesInOutput": 419
+        },
+        "src/ses-mail.mjs": {
+          "bytesInOutput": 2201
         },
         "src/appstream-app-block.jsx": {
           "bytesInOutput": 7764
@@ -40048,9 +40138,6 @@
         },
         "src/appstream-app-block.mjs": {
           "bytesInOutput": 1800
-        },
-        "node_modules/@cloudscape-design/components/expandable-section/index.js": {
-          "bytesInOutput": 419
         },
         "src/batch-job-definition-form.jsx": {
           "bytesInOutput": 2890
@@ -40128,7 +40215,7 @@
           "bytesInOutput": 10107
         }
       },
-      "bytes": 2878842
+      "bytes": 2891520
     },
     "../../internal/server/web/app.css.LEGAL.txt": {
       "imports": [],
