@@ -50,8 +50,10 @@ Use a reviewed compatible Python version and the dedicated
 [wheel hash pin](../../scripts/requirements-azure-queue-test.txt). Review the
 [existing dependency pins](../../scripts/requirements-test.txt) separately, run
 `pip check` and record their actual versions. The single-wheel hash does not
-verify the entire environment. The runner checks the Queue SDK version, not every
-existing dependency pin. No installation or real SDK result is implied here.
+verify the entire environment. The platform-audit CI job runs this check against the simulator it builds. The
+SDK uses a public fixture signing key for client construction. Each simulator's
+own local token grants access. To check the eight SDK request shapes offline,
+run `python3 test/e2e/azure_queue_official.py --capture` in the same environment.
 
 Offline boundary checks require only stdlib:
 

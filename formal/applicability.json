@@ -1,19 +1,47 @@
 {
   "version": 1,
-  "base_sha": "427fd72ff317d1d06534dad361c3cc4544cb7753",
+  "base_sha": "2c24d2bd5ae75d013fd25d3a259441f732cbf117",
   "changes": [
     {
-      "path": "README.ja.md",
-      "sha256": "fa7fc7d0a7ba0129058a2e367f78d2b7eb60ada6bf53acecd54785ae2b784048",
-      "disposition": "documentation",
-      "reason": "Records proposed browser learning requirements and links to the design discussion. No simulator logic, API, schema or model changes.",
+      "path": ".github/workflows/ci.yml",
+      "sha256": "39b95e9cecf7620b3200414111c44099ad40897a389c7405ce55211b24b43285",
+      "disposition": "formal-infrastructure",
+      "reason": "Runs the existing two-process Queue SDK oracle with the build digest on the hosted platform-audit job. No state transition, model input or model gate changes.",
       "models": []
     },
     {
-      "path": "docs/design/browser-learning-access.md",
-      "sha256": "73e874de0907c9ed0402dafe7cca02747a95dfffcd0f81d77c177c1c5e5c52ef",
+      "path": "docs/acceptance/azure-queue.md",
+      "sha256": "ef8addcaec48eeef751dd3dc09584fe250a2ffdb506ea34d6d40199849b20124",
       "disposition": "documentation",
-      "reason": "Records proposed browser learning requirements and links to the design discussion. No simulator logic, API, schema or model changes.",
+      "reason": "Documents the SDK fixture signer, offline request capture command and hosted acceptance job.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/azure_queue_browser_capture.js",
+      "disposition": "test-support",
+      "reason": "Read a bounded clone of one matching, successful Queue response in the test browser. The simulator and the original browser Fetch request, promise and response are unchanged.",
+      "sha256": "942c7a51857fb3cdfeaaefef6b7f923f9e54607983baeebf71d0aa48ce3aceff",
+      "models": []
+    },
+    {
+      "path": "test/e2e/azure_queue_cli.py",
+      "sha256": "79652d32b5fdd71ba81b505d2164ebb38987daeb168ae21d4ff77d4d26778c74",
+      "disposition": "test-support",
+      "reason": "Uses a public SDK fixture signer for clients in the two-process CLI oracle. The local token, transport restrictions and assertions are unchanged.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/azure_queue_console_gui.py",
+      "sha256": "097f11ccc90d08191089742afc05a87ac6132db9b03be5894f7db294cf6e682c",
+      "disposition": "test-support",
+      "reason": "Check the default operator and fixed participant capabilities, use the received message controls, and validate real Peek and Receive XML without repeating either request.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/azure_queue_official.py",
+      "sha256": "2c46c66e25427131a472e4f6236f8f1aff97787618f233997adf824c9d5d7fdc",
+      "disposition": "test-support",
+      "reason": "Initializes the pinned SDK with a public test signer so its eight prepared requests can be compared with the existing wire oracle.",
       "models": []
     }
   ]
