@@ -4818,6 +4818,58 @@ REQUIRED_SOURCE_SCOPES['StoreConnectionLifetime'] = {
 }
 
 
+# Pin the KMS effective-grant controls independently of the editable registry.
+BASE_MODELS.add('KMSRoleGrantLifecycle')
+BASE_INVARIANTS['KMSRoleGrantLifecycle'] = {
+    'TypeOK',
+    'ManagementAuthorized',
+    'CreateRequiresEnabled',
+    'GrantToLiveRole',
+    'PermittedManagementWorks',
+    'GrantWriteFrame',
+    'VerifiedDescribe',
+    'ExplicitDenyWins',
+    'DirectOrBoundGrant',
+    'PermittedDescribeWorks',
+    'RestartFrame',
+}
+REQUIRED_SOURCE_SCOPES['KMSRoleGrantLifecycle'] = {
+    'internal/aws/kms_dispatch.go',
+    'internal/aws/kms_grants.go',
+    'internal/aws/kms_http.go',
+    'internal/aws/kms_store.go',
+    'internal/aws/sts_credentials.go',
+    'internal/aws/sts_signature.go',
+    'internal/server/access_sdk.go',
+}
+KMS_ROLE_GRANT_CONTROLS = [
+    ('SkipManagementIAM', 'authorized == manager = "allowed"', 'authorized == TRUE', 'ManagementAuthorized'),
+    ('CreateOnDisabledKey', 'canCreate == rolePresent /\\ k \\in enabled /\\ grants[k] = 0', 'canCreate == rolePresent /\\ grants[k] = 0', 'CreateRequiresEnabled'),
+    ('CreateForMissingRole', 'canCreate == rolePresent /\\ k \\in enabled /\\ grants[k] = 0', 'canCreate == k \\in enabled /\\ grants[k] = 0', 'GrantToLiveRole'),
+    ('UseDeletedRole', 'sessionOK == rolePresent /\\ session # 0 /\\ session = generation', 'sessionOK == session # 0 /\\ session = generation', 'VerifiedDescribe'),
+    ('RejectDisabledRevocation', 'canRevoke == grants[k] # 0', 'canRevoke == grants[k] # 0 /\\ k \\in enabled', 'PermittedManagementWorks'),
+    ('RejectDisabledList', '[] op = "revoke" -> canRevoke\n                                   [] OTHER -> TRUE', '[] op = "revoke" -> canRevoke\n                                   [] OTHER -> k \\in enabled', 'PermittedManagementWorks'),
+    ('CreateWithWrongGeneration', 'op = "create" -> [grants EXCEPT ![k] = generation]', 'op = "create" -> [grants EXCEPT ![k] = 1]', 'GrantWriteFrame'),
+    ('RevokeLeavesGrant', 'op = "revoke" -> [grants EXCEPT ![k] = 0]', 'op = "revoke" -> grants', 'GrantWriteFrame'),
+    ('RevokeClearsPeer', 'op = "revoke" -> [grants EXCEPT ![k] = 0]', 'op = "revoke" -> Empty', 'GrantWriteFrame'),
+    ('RefusalMutatesGrants', 'IF ~success THEN grants', 'IF ~success THEN Empty', 'GrantWriteFrame'),
+    ('AcceptUnsignedDescribe', 'signedOK == request = "canonical"', 'signedOK == request \\in {"canonical","unsigned"}', 'VerifiedDescribe'),
+    ('AcceptWrongKMSOperation', 'signedOK == request = "canonical"', 'signedOK == request \\in {"canonical","other target"}', 'VerifiedDescribe'),
+    ('AcceptPeerScope', 'signedOK == request = "canonical"', 'signedOK == request \\in {"canonical","foreign scope"}', 'VerifiedDescribe'),
+    ('AcceptExpiredSession', 'signedOK == request = "canonical"', 'signedOK == request \\in {"canonical","expired"}', 'VerifiedDescribe'),
+    ('AcceptStaleSession', 'sessionOK == rolePresent /\\ session # 0 /\\ session = generation', 'sessionOK == rolePresent /\\ session # 0', 'VerifiedDescribe'),
+    ('OverrideExplicitDeny', 'success == sessionOK /\\ signedOK /\\ ~denied /\\ (direct \\/ bound)', 'success == sessionOK /\\ signedOK /\\ (direct \\/ bound)', 'ExplicitDenyWins'),
+    ('RebindSameRoleName', 'bound == sameRole /\\ grants[k] = generation', 'bound == sameRole /\\ grants[k] # 0', 'DirectOrBoundGrant'),
+    ('AllowOtherGrantee', 'bound == sameRole /\\ grants[k] = generation', 'bound == grants[k] = generation', 'DirectOrBoundGrant'),
+    ('GrantAuthorizesPeerKey', 'bound == sameRole /\\ grants[k] = generation', 'bound == sameRole /\\ (grants[k] = generation \\/ grants[3-k] = generation)', 'DirectOrBoundGrant'),
+    ('IgnoreGrantedPermission', '~denied /\\ (direct \\/ bound)', '~denied /\\ direct', 'PermittedDescribeWorks'),
+    ('RequireGrantForDirectPermission', '~denied /\\ (direct \\/ bound)', '~denied /\\ bound', 'PermittedDescribeWorks'),
+    ('RestartDeletesGrants', 'LET persisted == grants', 'LET persisted == Empty', 'RestartFrame'),
+    ('RestartRetainsSession', 'retainedSession == 0', 'retainedSession == session', 'RestartFrame'),
+]
+REQUIRED_MUTANTS['KMSRoleGrantLifecycle'] = {entry[0] for entry in KMS_ROLE_GRANT_CONTROLS}
+
+
 def load_registry(root, relative='formal/models.json'):
     root = Path(root)
     registry_path = asset(root, relative)
@@ -4876,6 +4928,10 @@ def load_registry(root, relative='formal/models.json'):
             require(mutant['expect_invariant'] in model['properties'], 'mutant expects unchecked invariant')
             apply_mutant(source, name, mutant)
         require(REQUIRED_MUTANTS.get(name, set()) <= mutant_ids, 'a required mutation control was removed')
+        if name == 'KMSRoleGrantLifecycle':
+            expected = [{'id': mid, 'edits': [{'old': old, 'new': new, 'count': 1}], 'expect_invariant': inv}
+                        for mid, old, new, inv in KMS_ROLE_GRANT_CONTROLS]
+            require(model['mutants'] == expected, 'KMS role grant controls changed')
         if name == 'SARPolicyAuthorizationTarget':
             require(model['mutants'] == SAR_POLICY_TARGET_MUTATIONS, 'SAR policy target controls changed')
         if name == 'SakuraServerReadEpoch':

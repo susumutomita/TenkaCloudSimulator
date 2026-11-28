@@ -29970,6 +29970,290 @@
           "expect_invariant": "ConnectionPragmasApplied"
         }
       ]
+    },
+    {
+      "id": "KMSRoleGrantLifecycle",
+      "model": "formal/KMSRoleGrantLifecycle.tla",
+      "config": "formal/KMSRoleGrantLifecycle.cfg",
+      "bounds": "Two existing same-account regional keys, one representative DescribeKey grant per key, one grantee role that can be deleted and recreated once and one issued session slot. Other role, management limits, scope, targeting, signature, expiry, and policies are finite independent request choices.",
+      "properties": [
+        "TypeOK",
+        "ManagementAuthorized",
+        "CreateRequiresEnabled",
+        "GrantToLiveRole",
+        "PermittedManagementWorks",
+        "GrantWriteFrame",
+        "VerifiedDescribe",
+        "ExplicitDenyWins",
+        "DirectOrBoundGrant",
+        "PermittedDescribeWorks",
+        "RestartFrame"
+      ],
+      "limits": "Checks authorization, effective key/grantee/generation binding, explicit deny, revocation, restart and peer frames at atomic operation boundaries. It abstracts the underlying IAM policy, signed-request verification, role generation validation, storage transactions and commits as coherent inputs. Grant identifiers, tokens, name retry semantics, limits, list pagination, concurrency, wire formats, cryptography and user interactions require native tests. Existing KMS and STS models retain their separate guarantees.",
+      "source_scope": [
+        "internal/aws/kms_dispatch.go",
+        "internal/aws/kms_grants.go",
+        "internal/aws/kms_http.go",
+        "internal/aws/kms_store.go",
+        "internal/aws/sts_credentials.go",
+        "internal/aws/sts_signature.go",
+        "internal/server/access_sdk.go"
+      ],
+      "mutants": [
+        {
+          "id": "SkipManagementIAM",
+          "edits": [
+            {
+              "old": "authorized == manager = \"allowed\"",
+              "new": "authorized == TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ManagementAuthorized"
+        },
+        {
+          "id": "CreateOnDisabledKey",
+          "edits": [
+            {
+              "old": "canCreate == rolePresent /\\ k \\in enabled /\\ grants[k] = 0",
+              "new": "canCreate == rolePresent /\\ grants[k] = 0",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CreateRequiresEnabled"
+        },
+        {
+          "id": "CreateForMissingRole",
+          "edits": [
+            {
+              "old": "canCreate == rolePresent /\\ k \\in enabled /\\ grants[k] = 0",
+              "new": "canCreate == k \\in enabled /\\ grants[k] = 0",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "GrantToLiveRole"
+        },
+        {
+          "id": "UseDeletedRole",
+          "edits": [
+            {
+              "old": "sessionOK == rolePresent /\\ session # 0 /\\ session = generation",
+              "new": "sessionOK == session # 0 /\\ session = generation",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "VerifiedDescribe"
+        },
+        {
+          "id": "RejectDisabledRevocation",
+          "edits": [
+            {
+              "old": "canRevoke == grants[k] # 0",
+              "new": "canRevoke == grants[k] # 0 /\\ k \\in enabled",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PermittedManagementWorks"
+        },
+        {
+          "id": "RejectDisabledList",
+          "edits": [
+            {
+              "old": "[] op = \"revoke\" -> canRevoke\n                                   [] OTHER -> TRUE",
+              "new": "[] op = \"revoke\" -> canRevoke\n                                   [] OTHER -> k \\in enabled",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PermittedManagementWorks"
+        },
+        {
+          "id": "CreateWithWrongGeneration",
+          "edits": [
+            {
+              "old": "op = \"create\" -> [grants EXCEPT ![k] = generation]",
+              "new": "op = \"create\" -> [grants EXCEPT ![k] = 1]",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "GrantWriteFrame"
+        },
+        {
+          "id": "RevokeLeavesGrant",
+          "edits": [
+            {
+              "old": "op = \"revoke\" -> [grants EXCEPT ![k] = 0]",
+              "new": "op = \"revoke\" -> grants",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "GrantWriteFrame"
+        },
+        {
+          "id": "RevokeClearsPeer",
+          "edits": [
+            {
+              "old": "op = \"revoke\" -> [grants EXCEPT ![k] = 0]",
+              "new": "op = \"revoke\" -> Empty",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "GrantWriteFrame"
+        },
+        {
+          "id": "RefusalMutatesGrants",
+          "edits": [
+            {
+              "old": "IF ~success THEN grants",
+              "new": "IF ~success THEN Empty",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "GrantWriteFrame"
+        },
+        {
+          "id": "AcceptUnsignedDescribe",
+          "edits": [
+            {
+              "old": "signedOK == request = \"canonical\"",
+              "new": "signedOK == request \\in {\"canonical\",\"unsigned\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "VerifiedDescribe"
+        },
+        {
+          "id": "AcceptWrongKMSOperation",
+          "edits": [
+            {
+              "old": "signedOK == request = \"canonical\"",
+              "new": "signedOK == request \\in {\"canonical\",\"other target\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "VerifiedDescribe"
+        },
+        {
+          "id": "AcceptPeerScope",
+          "edits": [
+            {
+              "old": "signedOK == request = \"canonical\"",
+              "new": "signedOK == request \\in {\"canonical\",\"foreign scope\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "VerifiedDescribe"
+        },
+        {
+          "id": "AcceptExpiredSession",
+          "edits": [
+            {
+              "old": "signedOK == request = \"canonical\"",
+              "new": "signedOK == request \\in {\"canonical\",\"expired\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "VerifiedDescribe"
+        },
+        {
+          "id": "AcceptStaleSession",
+          "edits": [
+            {
+              "old": "sessionOK == rolePresent /\\ session # 0 /\\ session = generation",
+              "new": "sessionOK == rolePresent /\\ session # 0",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "VerifiedDescribe"
+        },
+        {
+          "id": "OverrideExplicitDeny",
+          "edits": [
+            {
+              "old": "success == sessionOK /\\ signedOK /\\ ~denied /\\ (direct \\/ bound)",
+              "new": "success == sessionOK /\\ signedOK /\\ (direct \\/ bound)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExplicitDenyWins"
+        },
+        {
+          "id": "RebindSameRoleName",
+          "edits": [
+            {
+              "old": "bound == sameRole /\\ grants[k] = generation",
+              "new": "bound == sameRole /\\ grants[k] # 0",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "DirectOrBoundGrant"
+        },
+        {
+          "id": "AllowOtherGrantee",
+          "edits": [
+            {
+              "old": "bound == sameRole /\\ grants[k] = generation",
+              "new": "bound == grants[k] = generation",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "DirectOrBoundGrant"
+        },
+        {
+          "id": "GrantAuthorizesPeerKey",
+          "edits": [
+            {
+              "old": "bound == sameRole /\\ grants[k] = generation",
+              "new": "bound == sameRole /\\ (grants[k] = generation \\/ grants[3-k] = generation)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "DirectOrBoundGrant"
+        },
+        {
+          "id": "IgnoreGrantedPermission",
+          "edits": [
+            {
+              "old": "~denied /\\ (direct \\/ bound)",
+              "new": "~denied /\\ direct",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PermittedDescribeWorks"
+        },
+        {
+          "id": "RequireGrantForDirectPermission",
+          "edits": [
+            {
+              "old": "~denied /\\ (direct \\/ bound)",
+              "new": "~denied /\\ bound",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PermittedDescribeWorks"
+        },
+        {
+          "id": "RestartDeletesGrants",
+          "edits": [
+            {
+              "old": "LET persisted == grants",
+              "new": "LET persisted == Empty",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "RestartFrame"
+        },
+        {
+          "id": "RestartRetainsSession",
+          "edits": [
+            {
+              "old": "retainedSession == 0",
+              "new": "retainedSession == session",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "RestartFrame"
+        }
+      ]
     }
   ]
 }
