@@ -5,13 +5,13 @@ permissions:
   contents: read
 jobs:
   complete-before-commit:
-    name: Unfiltered standard make before-commit at ef2dfd2
+    name: Unfiltered standard make before-commit at 0d75de0
     runs-on: ubuntu-24.04
     timeout-minutes: 80
     steps:
       - uses: actions/checkout@v7.0.1
         with:
-          ref: ef2dfd238a87646b6d97400b7b4feccdaca415d1
+          ref: 0d75de0c64af561a6d95611620aec17dbc3b1dcf
           persist-credentials: false
       - uses: actions/setup-go@v6.5.0
         with:
@@ -19,8 +19,8 @@ jobs:
           cache: true
       - name: Verify fixed product source and ordinary runner
         run: |
-          test "$(git rev-parse HEAD)" = ef2dfd238a87646b6d97400b7b4feccdaca415d1
-          test "$(git rev-parse HEAD^{tree})" = a558d293b749c7c7e43a0a8c245f27d27b196fe4
+          test "$(git rev-parse HEAD)" = 0d75de0c64af561a6d95611620aec17dbc3b1dcf
+          test "$(git rev-parse HEAD^{tree})" = dc9016f1da1760e0af03a0527164a6e97851c325
           test -z "$(git status --porcelain)"
           test "$(id -u)" -ne 0
           mkdir -p "$RUNNER_TEMP/scaling-plans-complete-gate"
@@ -55,7 +55,7 @@ jobs:
                   or 'statement coverage' in line.lower()]
           result = root / 'make-exit.txt'
           (root / 'summary.json').write_text(json.dumps({
-              'source': 'ef2dfd238a87646b6d97400b7b4feccdaca415d1',
+              'source': '0d75de0c64af561a6d95611620aec17dbc3b1dcf',
               'command': 'make before-commit',
               'make_exit': int(result.read_text()) if result.exists() else None,
               'observed_summaries': safe,
