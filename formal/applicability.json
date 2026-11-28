@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "base_sha": "b97ddbd26f3e78905bd8e26a944fb7f0a28d8a42",
+  "base_sha": "be8e01389f187a576e3ddaf63d51834e9a070763",
   "changes": [
     {
       "path": ".github/workflows/ci.yml",
@@ -11,7 +11,7 @@
     },
     {
       "path": "README.md",
-      "sha256": "42724bb96f2f348e8c50ad5ddd92d8250fa0a68fbf05b5ee38d0812672ad4bcb",
+      "sha256": "b1ff70e1acf1f498052ac71e3b8d9b943f0c94e0141c9c8cfb82bd1764c4794c",
       "disposition": "documentation",
       "reason": "Document the exact native and simulator-only local content boundaries, shared helper dependency and unsupported CloudFront features.",
       "models": []
@@ -25,7 +25,7 @@
     },
     {
       "path": "docs/design/0001-go-standalone.md",
-      "sha256": "d7bf1aff7aadc0134e29004ee176904928ecfffc13a7c61b369af45ce2d31ade",
+      "sha256": "801acb223fb7b4e76ccfa5c268a1c527b073324290b5b0e4ee1369c3643b1f8e",
       "disposition": "documentation",
       "reason": "Document the exact native and simulator-only local content boundaries, shared helper dependency and unsupported CloudFront features.",
       "models": []
@@ -80,7 +80,7 @@
     },
     {
       "path": "formal/models.json",
-      "sha256": "3165ab27badfe727a089c775516a0dcf18573f7b7cbc11bd365165ad4f20d51a",
+      "sha256": "71234abcd72801103cb9f251f2cb81e3b576846ae4c284c6d75cc4ffab24bb17",
       "disposition": "formal-infrastructure",
       "reason": "Register the bounded local CloudFront cache model and nine targeted invariant mutations without changing historical model records.",
       "models": []
@@ -266,7 +266,7 @@
     },
     {
       "path": "internal/server/server.go",
-      "sha256": "acb380c328cb4eb5e911a8e3db5e293e6a0530bad038270064e77b8964208993",
+      "sha256": "8c3b010ee774a4dd78ed119ff5e6e3d58d49b145fe2e3bff031e75da7cf7a6ef",
       "disposition": "modeled",
       "reason": "Bound the local distribution/cache transaction, joint read authorization, ETag mutation, invalidation, rollback and committed restart state; native tests separately exercise concrete protocol and SQLite behavior.",
       "models": [
