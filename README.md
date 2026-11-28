@@ -156,6 +156,7 @@ console, CloudFormation adapter or Challenge integration.
   is rejected atomically. In the [SimpleDB console](docs/simpledb-console.md),
   find item names by an optional exact attribute value, read an item, then conditionally replace or delete a single attribute.
   The [local API reference](docs/simpledb-console.md#create-a-practice-domain-in-the-api-reference) can also create a practice domain with the native Query API.
+- **SES v2 template preview.** `TestRenderEmailTemplate` returns a MIME message from the stored subject and text or HTML body. Supply flat string values for `{{name}}` tags. The operation uses the template’s regional IAM ARN and sends no email. [AWS catalog service bounds](docs/aws-catalog-services.md)
 - **Configuration-only catalogs:** [AWS](docs/aws-catalog.md),
   [Google Cloud](docs/gcp-catalog.md), [Azure Resource Manager](docs/azure-catalog.md).
   `--rds-private-postgres-topology` optionally validates private standalone

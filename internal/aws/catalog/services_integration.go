@@ -435,6 +435,8 @@ var sesV2 = &Service{
 			Fields: []string{"Topics", "Description"}, Touch: []string{"LastUpdatedTimestamp"}},
 		{Name: "DeleteContactList", Kind: Delete, Resource: "contactList", Lookup: "ContactListName"},
 		{Name: "CreateEmailTemplate", Kind: Create, Resource: "emailTemplate"},
+		// Keep GetEmailTemplate as the Console's primary detail read.
+		{Name: "TestRenderEmailTemplate", Kind: Read, Resource: "emailTemplate", Lookup: "TemplateName", Accept: []string{"TemplateData"}},
 		{Name: "GetEmailTemplate", Kind: Read, Resource: "emailTemplate", Lookup: "TemplateName"},
 		{Name: "ListEmailTemplates", Kind: List, Resource: "emailTemplate"},
 		{Name: "UpdateEmailTemplate", Kind: Update, Resource: "emailTemplate", Lookup: "TemplateName", Fields: []string{"TemplateContent"}},
@@ -444,7 +446,7 @@ var sesV2 = &Service{
 		{Name: "ListTagsForResource", Kind: ListTags, Lookup: "ResourceArn"},
 	},
 	Bounds: []string{
-		"Configuration sets, one contact list and email templates are stored as configuration metadata: no email is sent, rendered, tracked or archived, and SendEmail, SendBulkEmail and the other sending APIs return UnknownOperationException with HTTP 501.",
+		"Configuration sets, one contact list and email templates are stored locally. TestRenderEmailTemplate previews stored subject, text and HTML as MIME using flat string replacements in simple {{name}} tags. Advanced Handlebars forms, missing values, header control characters and previews larger than 256 KiB are rejected. No email is sent, tracked or archived; SendEmail, SendBulkEmail and other sending APIs return HTTP 501 UnknownOperationException.",
 		"Email identities, DKIM, dedicated IPs, contacts, suppression lists, event destinations, the Put*Options operations and account settings are not implemented. Configuration sets keep the options given at creation, and the PageSize member is refused.",
 	},
 }

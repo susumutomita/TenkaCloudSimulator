@@ -4,6 +4,8 @@
 
 `core.Store` はインメモリ起動時に専用の SQLite データベースを所有する。要求の取り消しで接続が入れ替わっても、コミット済みのプロバイダーのテーブルと行を次の接続から参照できる。未コミットの書き込みはロールバックされ、メモリ上のデータベースはストアを閉じた時点で解放される。メモリとファイルのどちらでも、接続ごとに外部キー制約と 5 秒のロック待機時間を設定する。
 
+SES v2 の `TestRenderEmailTemplate` は、リージョン内の保存済みテンプレートを `ses:TestRenderEmailTemplate` とその ARN で認可して読み、件名と text/plain・text/html 本文を含む MIME を返す。`TemplateData` は文字列値を持つ JSON オブジェクトを文字列として送る。置換は英字または下線で始まる英数字・下線の単純な `{{name}}` に限り、HTML をエスケープせず一度だけ適用する。見つからない値、重複キー、未対応の構文、件名の制御文字、256 KiB を超える MIME は `BadRequestException` で拒否する。送信・配信・追跡や AWS の秒間呼び出し制限はシミュレートしない。 [公式 API](https://docs.aws.amazon.com/ses/latest/APIReference-V2/API_TestRenderEmailTemplate.html)・[置換の仕様](https://docs.aws.amazon.com/ses/latest/dg/send-personalized-email-advanced.html)・[IAM の対象リソース](https://docs.aws.amazon.com/service-authorization/latest/reference/list_amazonsimpleemailservicev2.html)
+
 Coreは問題ID/採点を知らない。SSM・stack/ownershipのschemaはAWS layerがcoreの共有DBを使用して初期化する。CFNはcompileで全リソースと参照を検証後、stack、ownership claim、parameter、identity、S3 bucket/config/tagsを単一transactionで作成。削除でも同一transaction。手動削除されたparameterのclaimを残し、他stackが再取得して旧stackのcleanupで消される事故を防ぐ。role/bucket namespaceはglobal、SSM/stackはregion別、Lambda claimはlambda:<region>。
 
 Lambda定義/ZIP/region/role/environment/revisionはAWS layerのprovider-owned SQLite tableに保存する。native APIのIAM・PassRoleを評価した後、provider-neutralなinternal/workload/pythonへコード/event/contextと明示したbounded capability・固定module FSを渡す。固定CPython/WASI・選択stdlib・原文rightsを埋め込み、host filesystem/environment/process/socketは渡さない。guest memory/時間/出力量/同時実行を制限する。限定inline Lambda CFNを同じ保存処理へ接続する。関数内SDKは保存role/regionに固定したnative SSM/S3 subsetのみ。問題固有のhandlerや任意HTTP proxyはない。[制限](../lambda.md)。
