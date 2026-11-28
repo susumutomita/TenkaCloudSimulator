@@ -5939,6 +5939,7 @@
         "internal/aws/catalog/models/securityhub.json",
         "internal/aws/catalog/models/securitylake.json",
         "internal/aws/catalog/models/serverlessrepo.json",
+        "internal/aws/catalog/models/service-quotas.json",
         "internal/aws/catalog/models/servicecatalog.json",
         "internal/aws/catalog/models/servicediscovery.json",
         "internal/aws/catalog/models/sesv2.json",
@@ -5969,6 +5970,7 @@
         "internal/aws/catalog/resource_group_query.go",
         "internal/aws/catalog/selection.json",
         "internal/aws/catalog/semantics.go",
+        "internal/aws/catalog/service_quotas.go",
         "internal/aws/catalog/services.go",
         "internal/aws/catalog/services_analytics.go",
         "internal/aws/catalog/services_analytics2.go",
@@ -30993,6 +30995,1700 @@
             }
           ],
           "expect_invariant": "OneCurrentWrite"
+        }
+      ]
+    },
+    {
+      "id": "ServiceQuotaDiscovery",
+      "model": "formal/ServiceQuotaDiscovery.tla",
+      "config": "formal/ServiceQuotaDiscovery.cfg",
+      "bounds": "Two private team scopes, one representative supported-region class plus Tokyo, published default5 vs effective2/3 or absent binding, counts0..3, four grant classes, five reads, typed key/level/token cases, one restart and four steps. MaxResults bounds and the three literal region names are native-test obligations.",
+      "properties": [
+        "TypeOK",
+        "ReadPreservesFrame",
+        "ReadProjectionCorrect",
+        "PeerPreserved",
+        "RestartPreservesFrame"
+      ],
+      "limits": "Independent finite projection oracle only: no JSON/SDK/ARN-string/IAM-parser/evaluator/SQL/Go/process-concurrency/refinement proof. Create/Delete are bounded prior-state fixtures for the existing CatalogResourceLifecycle, not quota-increase or execution APIs. No liveness claim: the finite step budget terminates exploration. No real AWS comparison, general AWS quota inventory or pagination support.",
+      "source_scope": [
+        "internal/aws/catalog/service_quotas.go",
+        "internal/aws/catalog/engine.go",
+        "internal/aws/catalog/semantics.go",
+        "internal/aws/catalog/services_business.go"
+      ],
+      "mutants": [
+        {
+          "id": "DefaultUsesApplied",
+          "edits": [
+            {
+              "old": "QuotaValue(r,caps,used) == IF r.op \\in {\"DefaultGet\",\"DefaultList\"} THEN 5 ELSE caps[r.team]",
+              "new": "QuotaValue(r,caps,used) == IF r.op \\in {\"DefaultGet\",\"DefaultList\"} THEN IF caps[r.team]=None THEN 5 ELSE caps[r.team] ELSE caps[r.team]",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadProjectionCorrect"
+        },
+        {
+          "id": "AppliedUsesPublishedDefault",
+          "edits": [
+            {
+              "old": "QuotaValue(r,caps,used) == IF r.op \\in {\"DefaultGet\",\"DefaultList\"} THEN 5 ELSE caps[r.team]",
+              "new": "QuotaValue(r,caps,used) == IF r.op \\in {\"DefaultGet\",\"DefaultList\"} THEN 5 ELSE 5",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadProjectionCorrect"
+        },
+        {
+          "id": "AppliedReportsRemaining",
+          "edits": [
+            {
+              "old": "QuotaValue(r,caps,used) == IF r.op \\in {\"DefaultGet\",\"DefaultList\"} THEN 5 ELSE caps[r.team]",
+              "new": "QuotaValue(r,caps,used) == IF r.op \\in {\"DefaultGet\",\"DefaultList\"} THEN 5 ELSE caps[r.team]-used[r.team]",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadProjectionCorrect"
+        },
+        {
+          "id": "PeerCapacityReturned",
+          "edits": [
+            {
+              "old": "QuotaValue(r,caps,used) == IF r.op \\in {\"DefaultGet\",\"DefaultList\"} THEN 5 ELSE caps[r.team]",
+              "new": "QuotaValue(r,caps,used) == IF r.op \\in {\"DefaultGet\",\"DefaultList\"} THEN 5 ELSE IF caps[Other(r.team)]=None THEN caps[r.team] ELSE caps[Other(r.team)]",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadProjectionCorrect"
+        },
+        {
+          "id": "UnavailableRegionAdvertised",
+          "edits": [
+            {
+              "old": "Available(r) == r.region=Supported",
+              "new": "Available(r) == TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadProjectionCorrect"
+        },
+        {
+          "id": "WildcardReadsUseQuotaARN",
+          "edits": [
+            {
+              "old": "Authorized(r) == r.grant=\"Wildcard\" \\/ (r.grant=\"QuotaOnly\" /\\ r.op=\"AppliedGet\")",
+              "new": "Authorized(r) == r.grant=\"Wildcard\" \\/ r.grant=\"QuotaOnly\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadProjectionCorrect"
+        },
+        {
+          "id": "AppliedGetRequiresWildcard",
+          "edits": [
+            {
+              "old": "Authorized(r) == r.grant=\"Wildcard\" \\/ (r.grant=\"QuotaOnly\" /\\ r.op=\"AppliedGet\")",
+              "new": "Authorized(r) == r.grant=\"Wildcard\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadProjectionCorrect"
+        },
+        {
+          "id": "ExplicitDenyIgnored",
+          "edits": [
+            {
+              "old": "Authorized(r) == r.grant=\"Wildcard\" \\/ (r.grant=\"QuotaOnly\" /\\ r.op=\"AppliedGet\")",
+              "new": "Authorized(r) == r.grant=\"Wildcard\" \\/ (r.grant=\"QuotaOnly\" /\\ r.op=\"AppliedGet\") \\/ r.grant=\"Deny\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadProjectionCorrect"
+        },
+        {
+          "id": "UnrelatedActionAllowed",
+          "edits": [
+            {
+              "old": "Authorized(r) == r.grant=\"Wildcard\" \\/ (r.grant=\"QuotaOnly\" /\\ r.op=\"AppliedGet\")",
+              "new": "Authorized(r) == r.grant=\"Wildcard\" \\/ (r.grant=\"QuotaOnly\" /\\ r.op=\"AppliedGet\") \\/ r.grant=\"OtherAction\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadProjectionCorrect"
+        },
+        {
+          "id": "ResourceLevelIgnored",
+          "edits": [
+            {
+              "old": "Filtered(r) == r.op=\"AppliedList\" /\\ (~r.knownQuota \\/ r.level=\"RESOURCE\")",
+              "new": "Filtered(r) == r.op=\"AppliedList\" /\\ ~r.knownQuota",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadProjectionCorrect"
+        },
+        {
+          "id": "UnknownServiceProjected",
+          "edits": [
+            {
+              "old": "KnownService(r) == r.knownService",
+              "new": "KnownService(r) == TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadProjectionCorrect"
+        },
+        {
+          "id": "UnknownQuotaProjected",
+          "edits": [
+            {
+              "old": "(r.op \\in {\"DefaultGet\",\"AppliedGet\"} /\\ ~r.knownQuota) \\/",
+              "new": "FALSE \\/",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadProjectionCorrect"
+        },
+        {
+          "id": "ForeignTokenAccepted",
+          "edits": [
+            {
+              "old": "ForeignToken(r) == r.op \\in ListOps /\\ r.token",
+              "new": "ForeignToken(r) == FALSE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadProjectionCorrect"
+        },
+        {
+          "id": "SingleRowInventsCursor",
+          "edits": [
+            {
+              "old": "Cursor(r,rows) == FALSE",
+              "new": "Cursor(r,rows) == rows=1 /\\ r.op \\in ListOps",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadProjectionCorrect"
+        },
+        {
+          "id": "DefaultInventsQuotaARN",
+          "edits": [
+            {
+              "old": "rows=1 /\\ ~defaults /\\ r.op # \"Services\",Cursor(r,rows)",
+              "new": "rows=1 /\\ r.op # \"Services\",Cursor(r,rows)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadProjectionCorrect"
+        },
+        {
+          "id": "ReadChangesSelectedUsage",
+          "edits": [
+            {
+              "old": "/\\ counts'=counts (* read publication never changes the selected or peer state *)",
+              "new": "/\\ counts'=[counts EXCEPT ![r.team]=IF @=3 THEN 0 ELSE @+1]",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadPreservesFrame"
+        },
+        {
+          "id": "ReadChangesPeerUsage",
+          "edits": [
+            {
+              "old": "/\\ counts'=counts (* read publication never changes the selected or peer state *)",
+              "new": "/\\ counts'=[counts EXCEPT ![Other(r.team)]=IF @=3 THEN 0 ELSE @+1]",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadPreservesFrame"
+        },
+        {
+          "id": "AbsentBindingFallsBackToDefault",
+          "edits": [
+            {
+              "old": "HasBinding(r,caps) == caps[r.team] # None",
+              "new": "HasBinding(r,caps) == TRUE",
+              "count": 1
+            },
+            {
+              "old": "QuotaValue(r,caps,used) == IF r.op \\in {\"DefaultGet\",\"DefaultList\"} THEN 5 ELSE caps[r.team]",
+              "new": "QuotaValue(r,caps,used) == IF r.op \\in {\"DefaultGet\",\"DefaultList\"} THEN 5 ELSE IF caps[r.team]=None THEN 5 ELSE caps[r.team]",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadProjectionCorrect"
+        }
+      ]
+    },
+    {
+      "id": "ServiceQuotaRequests",
+      "model": "formal/ServiceQuotaRequests.tla",
+      "config": "formal/ServiceQuotaRequests.cfg",
+      "bounds": "Separate request and history trials for one B2BI account quota. Two physical team identities, two regions, a shared team budget of three rows for writes, two ordinary admissions, one waiting caller and at most four profile probes. The live profile ceiling of five is reduced to two for reachability. A second finite history trial constructs five scoped records from an empty sequence and permits one new pending record, two reads of size one or two, a restart, one-day advance across the inclusive cutoff and a clock rollback after an additional genuine insertion.",
+      "properties": [
+        "TypeOK",
+        "Admissions",
+        "CommitFrame",
+        "StoredFields",
+        "Capacity",
+        "Visibility",
+        "Lookup",
+        "PageScope",
+        "PrivateStage",
+        "ContenderFrame",
+        "RestartFrame"
+      ],
+      "limits": "The native per-team history bound is 1,000 records; the symbolic inputs distinguish admitted, invalid and refused categories rather than IEEE numeric values or exact HTTP errors. Native IAM evaluation is abstracted by the current action and target, a wildcard allow, a matching or foreign quota grant, a missing grant and explicit denial. General history and direct ID Get require the wildcard target; named request and ByQuota allow the exact quota grant. Two higher inputs symbolize 5.5 and 6.5, permitting separate saved desired values for the same quota. Global sequence represents physical insertion order with per-team sequence and identity; seeded fixture histories are appended in order from an empty sequence. General history accepts only the closed interval from 90 days before the current time through the current observation. Whole-day times permit equality at 90 days, aging over it, and a saved row in the future after the clock moves backward; Get and ByQuota may still read it. The write stage and waiting rival represent private SQLite staging and serialized admission; SQLite scheduling, real clocks, UUID generation, MAC cryptography, AWS reviewer actions and host execution are outside the graph. A committed record with a lost acknowledgement is distinct from a canceled transaction, and has no client-visible ID. The applied quota and actual profile capacity remain external native behaviors checked independently.",
+      "source_scope": [
+        "internal/aws/catalog/engine.go",
+        "internal/aws/catalog/models/service-quotas.json",
+        "internal/aws/catalog/semantics.go",
+        "internal/aws/catalog/service_quota_requests.go",
+        "internal/aws/catalog/service_quotas.go"
+      ],
+      "mutants": [
+        {
+          "id": "AdmitDenied",
+          "edits": [
+            {
+              "old": "g = \"denied\" -> \"denied\"",
+              "new": "g = \"denied\" -> \"stage\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "Admissions"
+        },
+        {
+          "id": "AdmitNonIncrease",
+          "edits": [
+            {
+              "old": "g # \"ok\" -> \"invalid\"",
+              "new": "g \\notin {\"ok\",\"notHigher\"} -> \"invalid\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "Admissions"
+        },
+        {
+          "id": "AdmitOversize",
+          "edits": [
+            {
+              "old": "g # \"ok\" -> \"invalid\"",
+              "new": "g \\notin {\"ok\",\"tooLarge\"} -> \"invalid\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "Admissions"
+        },
+        {
+          "id": "AdmitWrongLevel",
+          "edits": [
+            {
+              "old": "g # \"ok\" -> \"invalid\"",
+              "new": "g \\notin {\"ok\",\"wrongLevel\"} -> \"invalid\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "Admissions"
+        },
+        {
+          "id": "AdmitUnsupportedScope",
+          "edits": [
+            {
+              "old": "g # \"ok\" -> \"invalid\"",
+              "new": "g \\notin {\"ok\",\"unsupported\"} -> \"invalid\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "Admissions"
+        },
+        {
+          "id": "AllowAnotherPending",
+          "edits": [
+            {
+              "old": "HasPending(st0.db,s) -> \"pending\"",
+              "new": "FALSE -> \"pending\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "Admissions"
+        },
+        {
+          "id": "RefuseIndependentRegion",
+          "edits": [
+            {
+              "old": "HasPending(st0.db,s) -> \"pending\"",
+              "new": "(HasPending(st0.db,s) \\/ (s=\"AE\" /\\ HasPending(st0.db,\"AW\"))) -> \"pending\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "Admissions"
+        },
+        {
+          "id": "RefuseOtherTeamDueToPeer",
+          "edits": [
+            {
+              "old": "HasPending(st0.db,s) -> \"pending\"",
+              "new": "(HasPending(st0.db,s) \\/ (s=\"AE\" /\\ HasPending(st0.db,\"BE\"))) -> \"pending\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "Admissions"
+        },
+        {
+          "id": "CountOnlyThisRegion",
+          "edits": [
+            {
+              "old": "Len(TeamRows(st0.db,s)) >= 3",
+              "new": "Len(FilterSeq(st0.db,s)) >= 3",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "Admissions"
+        },
+        {
+          "id": "CountBothTeamDatabases",
+          "edits": [
+            {
+              "old": "Len(TeamRows(st0.db,s)) >= 3",
+              "new": "Len(st0.db) >= 3",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "Admissions"
+        },
+        {
+          "id": "MissAQueuedPendingWinner",
+          "edits": [
+            {
+              "old": "verdict == Admit(st,st.scope,\"ok\")",
+              "new": "verdict == IF HasPending(st.db,st.scope) THEN \"stage\" ELSE Admit(st,st.scope,\"ok\")",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "Admissions"
+        },
+        {
+          "id": "RejectContenderAfterRollback",
+          "edits": [
+            {
+              "old": "verdict == Admit(st,st.scope,\"ok\")",
+              "new": "verdict == IF ~HasPending(st.db,st.scope) THEN \"pending\" ELSE Admit(st,st.scope,\"ok\")",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "Admissions"
+        },
+        {
+          "id": "RivalErasesPrivateStage",
+          "edits": [
+            {
+              "old": "[st EXCEPT !.waiting=TRUE]",
+              "new": "[st EXCEPT !.waiting=TRUE, !.staged= <<>>]",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ContenderFrame"
+        },
+        {
+          "id": "PublishSpeculativeData",
+          "edits": [
+            {
+              "old": "Result(\"read\",FilterSeq(st.db,st.scope),{})",
+              "new": "Result(\"read\",Append(FilterSeq(st.db,st.scope),st.staged[1]),{})",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PrivateStage"
+        },
+        {
+          "id": "KeepCanceledRequest",
+          "edits": [
+            {
+              "old": "IF Published(m) THEN Append(@,r) ELSE @",
+              "new": "IF Published(m) \\/ m=\"cancel\" THEN Append(@,r) ELSE @",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CommitFrame"
+        },
+        {
+          "id": "KeepTimedOutRequest",
+          "edits": [
+            {
+              "old": "IF Published(m) THEN Append(@,r) ELSE @",
+              "new": "IF Published(m) \\/ m=\"deadline\" THEN Append(@,r) ELSE @",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CommitFrame"
+        },
+        {
+          "id": "KeepFaultedRequest",
+          "edits": [
+            {
+              "old": "IF Published(m) THEN Append(@,r) ELSE @",
+              "new": "IF Published(m) \\/ m=\"fault\" THEN Append(@,r) ELSE @",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CommitFrame"
+        },
+        {
+          "id": "KeepMismatchedReadback",
+          "edits": [
+            {
+              "old": "IF Published(m) THEN Append(@,r) ELSE @",
+              "new": "IF Published(m) \\/ m=\"wrongReadback\" THEN Append(@,r) ELSE @",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CommitFrame"
+        },
+        {
+          "id": "KeepFailedCommit",
+          "edits": [
+            {
+              "old": "IF Published(m) THEN Append(@,r) ELSE @",
+              "new": "IF Published(m) \\/ m=\"commitError\" THEN Append(@,r) ELSE @",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CommitFrame"
+        },
+        {
+          "id": "LoseCommittedButUnacknowledged",
+          "edits": [
+            {
+              "old": "IF Published(m) THEN Append(@,r) ELSE @",
+              "new": "IF m=\"confirmed\" THEN Append(@,r) ELSE @",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CommitFrame"
+        },
+        {
+          "id": "AcknowledgeWithoutRow",
+          "edits": [
+            {
+              "old": "IF Published(m) THEN Append(@,r) ELSE @",
+              "new": "IF m=\"lostReply\" THEN Append(@,r) ELSE @",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CommitFrame"
+        },
+        {
+          "id": "ReportIdAfterLostReply",
+          "edits": [
+            {
+              "old": "IF m=\"confirmed\" THEN Result(\"ok\",<<r>>,{})",
+              "new": "IF Published(m) THEN Result(\"ok\",<<r>>,{})",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CommitFrame"
+        },
+        {
+          "id": "KeepPrivateRowAfterCancellation",
+          "edits": [
+            {
+              "old": "!.staged= <<>>, !.out=IF m=\"confirmed\"",
+              "new": "!.staged=IF m=\"cancel\" THEN st.staged ELSE <<>>, !.out=IF m=\"confirmed\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CommitFrame"
+        },
+        {
+          "id": "DeletePeerHistoryWhenCommitting",
+          "edits": [
+            {
+              "old": "IF Published(m) THEN Append(@,r) ELSE @",
+              "new": "IF Published(m) THEN Append(SelectSeq(@, LAMBDA v : Team(v.scope)=Team(r.scope)),r) ELSE @",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CommitFrame"
+        },
+        {
+          "id": "RaiseAppliedQuotaOnRequest",
+          "edits": [
+            {
+              "old": "!.phase=\"ready\", !.db = IF Published(m)",
+              "new": "!.applied=IF Published(m) THEN 3 ELSE @, !.phase=\"ready\", !.db = IF Published(m)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "TypeOK"
+        },
+        {
+          "id": "RequestConsumesProfileSlot",
+          "edits": [
+            {
+              "old": "!.phase=\"ready\", !.db = IF Published(m)",
+              "new": "!.used=IF Published(m) THEN 0 ELSE @, !.phase=\"ready\", !.db = IF Published(m)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CommitFrame"
+        },
+        {
+          "id": "TurnFalseIntoPending",
+          "edits": [
+            {
+              "old": "IF option = \"false\" THEN \"NOT_APPROVED\" ELSE \"PENDING\"",
+              "new": "\"PENDING\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "StoredFields"
+        },
+        {
+          "id": "ApproveOmitted",
+          "edits": [
+            {
+              "old": "IF option = \"false\" THEN \"NOT_APPROVED\" ELSE \"PENDING\"",
+              "new": "IF option = \"false\" THEN \"NOT_APPROVED\" ELSE IF option=\"omitted\" THEN \"APPROVED\" ELSE \"PENDING\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "StoredFields"
+        },
+        {
+          "id": "CreateSyntheticSupportCase",
+          "edits": [
+            {
+              "old": "status |-> Status(option), hasCase |-> FALSE",
+              "new": "status |-> Status(option), hasCase |-> who=\"applicant\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "StoredFields"
+        },
+        {
+          "id": "StoreWrongApplicant",
+          "edits": [
+            {
+              "old": "requester |-> who, day |-> day",
+              "new": "requester |-> IF who=\"secondCaller\" THEN \"applicant\" ELSE who, day |-> day",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "StoredFields"
+        },
+        {
+          "id": "StoreAppliedInsteadOfDesired",
+          "edits": [
+            {
+              "old": "desired |-> want, status",
+              "new": "desired |-> IF who=\"applicant\" THEN 2 ELSE want, status",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "StoredFields"
+        },
+        {
+          "id": "ReturnAnotherTeamId",
+          "edits": [
+            {
+              "old": "id |-> <<Team(s),n>>",
+              "new": "id |-> <<IF who=\"applicant\" /\\ Team(s)=\"A\" THEN \"B\" ELSE Team(s), n>>",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "StoredFields"
+        },
+        {
+          "id": "ReturnOnlyAvailableSlots",
+          "edits": [
+            {
+              "old": "IF k=\"get\" THEN <<st.applied>> ELSE <<>>",
+              "new": "IF k=\"get\" THEN <<st.applied-st.used>> ELSE <<>>",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "Capacity"
+        },
+        {
+          "id": "BlockLastProfileSlot",
+          "edits": [
+            {
+              "old": "k=\"create\" /\\ st.used<st.applied",
+              "new": "k=\"create\" /\\ st.used+1<st.applied",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "Capacity"
+        },
+        {
+          "id": "CannotReuseReleasedProfile",
+          "edits": [
+            {
+              "old": "drop == k=\"delete\" /\\ st.used>0",
+              "new": "drop == FALSE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "Capacity"
+        },
+        {
+          "id": "OtherScopeGet",
+          "edits": [
+            {
+              "old": "row.scope=s /\\ row.id=id",
+              "new": "row.id=id",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "Lookup"
+        },
+        {
+          "id": "AgeOutDirectRequest",
+          "edits": [
+            {
+              "old": "row.scope=s /\\ row.id=id",
+              "new": "row.scope=s /\\ row.id=id /\\ row.day+90>=st.day",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "Lookup"
+        },
+        {
+          "id": "DiscloseDeniedLookup",
+          "edits": [
+            {
+              "old": "IF ~auth THEN Result(\"denied\",<<>>,{})\n                  ELSE IF r",
+              "new": "IF FALSE THEN Result(\"denied\",<<>>,{})\n                  ELSE IF r",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "Lookup"
+        },
+        {
+          "id": "ListOlderThanNinetyDays",
+          "edits": [
+            {
+              "old": "(q.op=\"byQuota\" \\/ (r.day<=day /\\ r.day+90>=day))",
+              "new": "(q.op=\"byQuota\" \\/ r.day<=day)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PageScope"
+        },
+        {
+          "id": "DropAtCurrentInstant",
+          "edits": [
+            {
+              "old": "(q.op=\"byQuota\" \\/ (r.day<=day /\\ r.day+90>=day))",
+              "new": "(q.op=\"byQuota\" \\/ (r.day<day /\\ r.day+90>=day))",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PageScope"
+        },
+        {
+          "id": "ReturnOldestFirst",
+          "edits": [
+            {
+              "old": "hay == SelectSeq(Reverse(st0.db), LAMBDA x : Eligible(x,q,st0.day,cut))",
+              "new": "hay == SelectSeq(st0.db, LAMBDA x : Eligible(x,q,st0.day,cut))",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PageScope"
+        },
+        {
+          "id": "DropExactNinetiethDay",
+          "edits": [
+            {
+              "old": "(q.op=\"byQuota\" \\/ (r.day<=day /\\ r.day+90>=day))",
+              "new": "(q.op=\"byQuota\" \\/ (r.day<=day /\\ r.day+90>day))",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PageScope"
+        },
+        {
+          "id": "AgeOutByQuota",
+          "edits": [
+            {
+              "old": "(q.op=\"byQuota\" \\/ (r.day<=day /\\ r.day+90>=day))",
+              "new": "((q.op=\"byQuota\" \\/ r.day<=day) /\\ r.day+90>=day)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PageScope"
+        },
+        {
+          "id": "LeakFutureGeneralAfterClockRollback",
+          "edits": [
+            {
+              "old": "(q.op=\"byQuota\" \\/ (r.day<=day /\\ r.day+90>=day))",
+              "new": "(q.op=\"byQuota\" \\/ r.day+90>=day)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PageScope"
+        },
+        {
+          "id": "DropFutureByQuotaAfterClockRollback",
+          "edits": [
+            {
+              "old": "(q.op=\"byQuota\" \\/ (r.day<=day /\\ r.day+90>=day))",
+              "new": "(r.day<=day /\\ (q.op=\"byQuota\" \\/ r.day+90>=day))",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PageScope"
+        },
+        {
+          "id": "HideFutureExactLookupAfterClockRollback",
+          "edits": [
+            {
+              "old": "row.scope=s /\\ row.id=id",
+              "new": "row.scope=s /\\ row.id=id /\\ row.day<=st.day",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "Lookup"
+        },
+        {
+          "id": "ListPeerRegion",
+          "edits": [
+            {
+              "old": "Eligible(r,q,day,before) ==\n /\\ r.scope=q.scope /\\ r.seq<before",
+              "new": "Eligible(r,q,day,before) ==\n /\\ Team(r.scope)=Team(q.scope) /\\ r.seq<before",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PageScope"
+        },
+        {
+          "id": "ListOtherDatabase",
+          "edits": [
+            {
+              "old": "Eligible(r,q,day,before) ==\n /\\ r.scope=q.scope /\\ r.seq<before",
+              "new": "Eligible(r,q,day,before) ==\n /\\ (r.scope=q.scope \\/ (q.scope=\"AE\" /\\ r.scope=\"BE\")) /\\ r.seq<before",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PageScope"
+        },
+        {
+          "id": "IgnoreTerminalFilter",
+          "edits": [
+            {
+              "old": "(q.filter # \"terminal\" \\/ r.status=\"NOT_APPROVED\")",
+              "new": "TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PageScope"
+        },
+        {
+          "id": "IgnorePendingFilter",
+          "edits": [
+            {
+              "old": "(q.filter # \"pending\" \\/ r.status=\"PENDING\")",
+              "new": "TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PageScope"
+        },
+        {
+          "id": "ReportUnobservedApproval",
+          "edits": [
+            {
+              "old": "q.filter \\notin {\"resource\",\"approved\",\"otherService\"}",
+              "new": "q.filter \\notin {\"resource\",\"otherService\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PageScope"
+        },
+        {
+          "id": "ReportResourceScopedQuota",
+          "edits": [
+            {
+              "old": "q.filter \\notin {\"resource\",\"approved\",\"otherService\"}",
+              "new": "q.filter \\notin {\"approved\",\"otherService\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PageScope"
+        },
+        {
+          "id": "ReportOtherServiceQuota",
+          "edits": [
+            {
+              "old": "q.filter \\notin {\"resource\",\"approved\",\"otherService\"}",
+              "new": "q.filter \\notin {\"resource\",\"approved\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PageScope"
+        },
+        {
+          "id": "IgnoreListAuthority",
+          "edits": [
+            {
+              "old": "CASE ~auth -> Result(\"denied\",<<>>,{})",
+              "new": "CASE (~auth /\\ supplied) -> Result(\"denied\",<<>>,{})",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PageScope"
+        },
+        {
+          "id": "ContinueWithoutFreshAuthority",
+          "edits": [
+            {
+              "old": "CASE ~auth -> Result(\"denied\",<<>>,{})",
+              "new": "CASE (~auth /\\ ~supplied) -> Result(\"denied\",<<>>,{})",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PageScope"
+        },
+        {
+          "id": "AcceptOtherScopeCursor",
+          "edits": [
+            {
+              "old": "supplied /\\ token # Cap(st0,q,cut)",
+              "new": "supplied /\\ [token EXCEPT !.scope = q.scope] # Cap(st0,q,cut)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PageScope"
+        },
+        {
+          "id": "AcceptOtherActorCursor",
+          "edits": [
+            {
+              "old": "supplied /\\ token # Cap(st0,q,cut)",
+              "new": "supplied /\\ [token EXCEPT !.actor = q.actor] # Cap(st0,q,cut)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PageScope"
+        },
+        {
+          "id": "AcceptOtherOperationCursor",
+          "edits": [
+            {
+              "old": "supplied /\\ token # Cap(st0,q,cut)",
+              "new": "supplied /\\ [token EXCEPT !.op = q.op] # Cap(st0,q,cut)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PageScope"
+        },
+        {
+          "id": "AcceptChangedFilterCursor",
+          "edits": [
+            {
+              "old": "supplied /\\ token # Cap(st0,q,cut)",
+              "new": "supplied /\\ [token EXCEPT !.filter = q.filter] # Cap(st0,q,cut)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PageScope"
+        },
+        {
+          "id": "AcceptPriorProcessCursor",
+          "edits": [
+            {
+              "old": "supplied /\\ token # Cap(st0,q,cut)",
+              "new": "supplied /\\ [token EXCEPT !.epoch = st0.epoch] # Cap(st0,q,cut)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PageScope"
+        },
+        {
+          "id": "AcceptBadToken",
+          "edits": [
+            {
+              "old": "IF token.before=0 /\\ auth THEN Result(\"token\",<<>>,{})",
+              "new": "IF token.before=0 /\\ auth THEN Result(\"ok\",<<>>,{})",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PageScope"
+        },
+        {
+          "id": "RepeatBoundaryRow",
+          "edits": [
+            {
+              "old": "Eligible(r,q,day,before) ==\n /\\ r.scope=q.scope /\\ r.seq<before",
+              "new": "Eligible(r,q,day,before) ==\n /\\ r.scope=q.scope /\\ r.seq<=before",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PageScope"
+        },
+        {
+          "id": "UseTimestampInCursor",
+          "edits": [
+            {
+              "old": "{Cap(st0,q,page[n].seq)}",
+              "new": "{Cap(st0,q,page[n].day)}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PageScope"
+        },
+        {
+          "id": "EmitLastPageCursor",
+          "edits": [
+            {
+              "old": "IF n<Len(hay) THEN {Cap(st0,q,page[n].seq)} ELSE {}",
+              "new": "IF n>0 THEN {Cap(st0,q,page[n].seq)} ELSE {}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PageScope"
+        },
+        {
+          "id": "LoseRealContinuation",
+          "edits": [
+            {
+              "old": "IF n<Len(hay) THEN {Cap(st0,q,page[n].seq)} ELSE {}",
+              "new": "{}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PageScope"
+        },
+        {
+          "id": "DiscardHistoryOnReopen",
+          "edits": [
+            {
+              "old": "[st EXCEPT !.epoch=1] /\\ last'=Note(\"reopen\"",
+              "new": "[st EXCEPT !.db= <<>>, !.epoch=1] /\\ last'=Note(\"reopen\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "Visibility"
+        },
+        {
+          "id": "RetainCursorAuthorityOnRestart",
+          "edits": [
+            {
+              "old": "[st EXCEPT !.epoch=1] /\\ last'=Note(\"reopen\"",
+              "new": "st /\\ last'=Note(\"reopen\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "RestartFrame"
+        },
+        {
+          "id": "PruneByGeneralAgeOnRead",
+          "edits": [
+            {
+              "old": "!.reads=@+1, !.out=PageResult(st,q,size,FALSE,{},Allowed(op,grant))",
+              "new": "!.db=IF op=\"general\" THEN SelectSeq(@,LAMBDA x : x.day+90>=st.day) ELSE @, !.reads=@+1, !.out=PageResult(st,q,size,FALSE,{},Allowed(op,grant))",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "Visibility"
+        },
+        {
+          "id": "RequireWildcardForRequest",
+          "edits": [
+            {
+              "old": "op \\in {\"request\",\"byQuota\"}",
+              "new": "op=\"byQuota\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "Admissions"
+        },
+        {
+          "id": "RequireWildcardForByquota",
+          "edits": [
+            {
+              "old": "op \\in {\"request\",\"byQuota\"}",
+              "new": "op=\"request\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PageScope"
+        },
+        {
+          "id": "UseNamedQuotaForGeneral",
+          "edits": [
+            {
+              "old": "op \\in {\"request\",\"byQuota\"}",
+              "new": "op \\in {\"request\",\"byQuota\",\"general\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PageScope"
+        },
+        {
+          "id": "UseNamedQuotaForGet",
+          "edits": [
+            {
+              "old": "op \\in {\"request\",\"byQuota\"}",
+              "new": "op \\in {\"request\",\"byQuota\",\"get\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "Lookup"
+        },
+        {
+          "id": "AdmitOtherQuotaARN",
+          "edits": [
+            {
+              "old": "verdict == Admit(st,s,RequestGuard(g))",
+              "new": "verdict == Admit(st,s,IF g=\"otherQuota\" THEN \"ok\" ELSE RequestGuard(g))",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "Admissions"
+        },
+        {
+          "id": "OverrideExplicitRequestDeny",
+          "edits": [
+            {
+              "old": "verdict == Admit(st,s,RequestGuard(g))",
+              "new": "verdict == Admit(st,s,IF g=\"explicitDeny\" THEN \"ok\" ELSE RequestGuard(g))",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "Admissions"
+        },
+        {
+          "id": "AcceptNamedGrantOnGenericContinuation",
+          "edits": [
+            {
+              "old": "auth == Allowed(q.op,grant)",
+              "new": "auth == Allowed(q.op,grant) \\/ (grant=\"sameQuota\" /\\ q.op=\"general\")",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PageScope"
+        }
+      ]
+    },
+    {
+      "id": "ServiceQuotaRequestConsole",
+      "model": "formal/ServiceQuotaRequestConsole.tla",
+      "config": "formal/ServiceQuotaRequestConsole.cfg",
+      "bounds": "One editable account quota with two eligible user submissions, up to four reads per mount, a preexisting equal-value terminal request and a private peer. A second trial allows one team/account/region/principal change, an equivalent remount, or a hidden section/capability followed by one fresh visible mount, with a retired native response. Initial quota availability and returning to an available editor abstract a successful applied-capacity read. A genuine server write may commit despite response loss.",
+      "properties": [
+        "SingleIntent",
+        "NoAutomaticWrite",
+        "NativeFrame",
+        "SavedExactlyOnce",
+        "Acknowledgement",
+        "FreshRecovery",
+        "ObservedOnly",
+        "SeparateIntent",
+        "RetiredRead",
+        "ScopeCleared",
+        "BlockedRetry",
+        "FreshCapacity",
+        "VisibleLookup",
+        "VisibleMount"
+      ],
+      "limits": "Finite mounted UI control and response semantics, complementing CatalogConsoleEpoch and the native request lifecycle. A valid recovery observes the first unfiltered ACCOUNT ByQuota page in the same current view. It neither supplies the lost submission ID nor retries it; only a separate user choice permits a fresh submission. A physical request/record and two result classes abstract native state. Historical pages and by-ID detail can show preexisting records without attributing their IDs to the latest write. The model does not define global idempotency across tabs, concurrent writes across new mounts, AWS policy evaluation, SQL rollback, actual DOM focus or response bytes. Current permission/prefix, account values, equality, and retained states are separately checked in native and browser fixtures.",
+      "source_scope": [
+        "tools/console/src/catalog.jsx",
+        "tools/console/src/main.jsx",
+        "tools/console/src/service-quotas.jsx",
+        "tools/console/src/service-quotas.mjs",
+        "internal/server/web/app.js"
+      ],
+      "mutants": [
+        {
+          "id": "SubmitUnknownAgain",
+          "edits": [
+            {
+              "old": "st.phase \\in {\"idle\",\"confirmed\",\"refused\"}",
+              "new": "st.phase \\in {\"idle\",\"confirmed\",\"refused\",\"unknown\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "SingleIntent"
+        },
+        {
+          "id": "SendWithoutAppliedCapacity",
+          "edits": [
+            {
+              "old": "/\\ st.quota /\\ st.sent<2",
+              "new": "/\\ st.sent<2",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "SingleIntent"
+        },
+        {
+          "id": "SubmitWithWrongPrincipal",
+          "edits": [
+            {
+              "old": "scope |-> st.scope,mount |-> st.mount,o |-> o",
+              "new": "scope |-> Move(st.scope,\"principal\"),mount |-> st.mount,o |-> o",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "SingleIntent"
+        },
+        {
+          "id": "SendFromWrongMountedGeneration",
+          "edits": [
+            {
+              "old": "scope |-> st.scope,mount |-> st.mount,o |-> o",
+              "new": "scope |-> st.scope,mount |-> st.mount+1,o |-> o",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "SingleIntent"
+        },
+        {
+          "id": "CommitToAnotherRegion",
+          "edits": [
+            {
+              "old": "Append(@,Row(w.scope,id,w.o))",
+              "new": "Append(@,Row(Move(w.scope,\"region\"),id,w.o))",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "SavedExactlyOnce"
+        },
+        {
+          "id": "CollapseTwoTerminalIDs",
+          "edits": [
+            {
+              "old": "id == IF saved THEN Len(st.db)+1 ELSE 0",
+              "new": "id == IF saved THEN IF st.sent=2 /\\ w.o=\"false\" /\\ Len(Owned(st.db,w.scope))>1 THEN Owned(st.db,w.scope)[Len(Owned(st.db,w.scope))].id ELSE Len(st.db)+1 ELSE 0",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "SavedExactlyOnce"
+        },
+        {
+          "id": "RepeatPendingAfterSeparateIntent",
+          "edits": [
+            {
+              "old": "saved == result=\"save\" /\\ ~Pending(st.db,w.scope)",
+              "new": "saved == result=\"save\" /\\ (~Pending(st.db,w.scope) \\/ st.separateUsed)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "SavedExactlyOnce"
+        },
+        {
+          "id": "LoseEarlierSameAmountHolder",
+          "edits": [
+            {
+              "old": "Append(@,Row(w.scope,id,w.o))",
+              "new": "Append(SelectSeq(@,LAMBDA z : z.owner#Key(w.scope)),Row(w.scope,id,w.o))",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "SavedExactlyOnce"
+        },
+        {
+          "id": "AcknowledgeAnUnstoredRow",
+          "edits": [
+            {
+              "old": "success => w.server=\"saved\"",
+              "new": "success => TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "Acknowledgement"
+        },
+        {
+          "id": "TreatSavedTransportLossAsConfirmed",
+          "edits": [
+            {
+              "old": "success == k=\"match\"",
+              "new": "success == k=\"match\" \\/ (k=\"lost\" /\\ w.server=\"saved\")",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "Acknowledgement"
+        },
+        {
+          "id": "TreatUnknownLossAsRefusal",
+          "edits": [
+            {
+              "old": "known == k \\in {\"knownRefusal\",\"forbidden\"}",
+              "new": "known == k \\in {\"knownRefusal\",\"forbidden\"} \\/ (k=\"lost\" /\\ w.server=\"refused\")",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "Acknowledgement"
+        },
+        {
+          "id": "TreatDefinitiveRefusalAsUnknown",
+          "edits": [
+            {
+              "old": "known == k \\in {\"knownRefusal\",\"forbidden\"}",
+              "new": "known == FALSE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "Acknowledgement"
+        },
+        {
+          "id": "ConfirmBadBody",
+          "edits": [
+            {
+              "old": "success == k=\"match\"",
+              "new": "success == k=\"match\" \\/ k=\"badBody\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "Acknowledgement"
+        },
+        {
+          "id": "ConfirmWrongAmount",
+          "edits": [
+            {
+              "old": "success == k=\"match\"",
+              "new": "success == k=\"match\" \\/ k=\"wrongAmount\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "Acknowledgement"
+        },
+        {
+          "id": "ConfirmWrongStatus",
+          "edits": [
+            {
+              "old": "success == k=\"match\"",
+              "new": "success == k=\"match\" \\/ k=\"wrongStatus\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "Acknowledgement"
+        },
+        {
+          "id": "ConfirmWrongArn",
+          "edits": [
+            {
+              "old": "success == k=\"match\"",
+              "new": "success == k=\"match\" \\/ k=\"wrongArn\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "Acknowledgement"
+        },
+        {
+          "id": "BindOldIdenticalRowToLostSubmit",
+          "edits": [
+            {
+              "old": "!.record=IF success THEN w.id ELSE 0",
+              "new": "!.record=IF k=\"lost\" /\\ Len(Owned(st.db,w.scope))>0 THEN Owned(st.db,w.scope)[1].id ELSE IF success THEN w.id ELSE 0",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "Acknowledgement"
+        },
+        {
+          "id": "PublishRetiredAckAcrossScope",
+          "edits": [
+            {
+              "old": "IF ~same THEN [st EXCEPT !.pending= <<>>]",
+              "new": "IF ~same /\\ k#\"match\" THEN [st EXCEPT !.pending= <<>>]",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "Acknowledgement"
+        },
+        {
+          "id": "PublishOldUnknownAcrossRemount",
+          "edits": [
+            {
+              "old": "IF ~same THEN [st EXCEPT !.pending= <<>>]",
+              "new": "IF ~same /\\ (k#\"lost\" \\/ w.scope#st.scope) THEN [st EXCEPT !.pending= <<>>]",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "Acknowledgement"
+        },
+        {
+          "id": "KeepArmedWhileNewRecoveryBegins",
+          "edits": [
+            {
+              "old": "k \\in {\"recover\",\"capacity\"} THEN FALSE",
+              "new": "k=\"capacity\" THEN FALSE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "FreshRecovery"
+        },
+        {
+          "id": "KeepArmedAcrossCapacityClear",
+          "edits": [
+            {
+              "old": "k \\in {\"recover\",\"capacity\"} THEN FALSE",
+              "new": "k=\"recover\" THEN FALSE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "FreshRecovery"
+        },
+        {
+          "id": "ArmFromOrdinaryByQuota",
+          "edits": [
+            {
+              "old": "recovered == t.kind=\"recover\" /\\ valid",
+              "new": "recovered == t.kind \\in {\"recover\",\"ordinaryByQuota\"} /\\ valid",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ObservedOnly"
+        },
+        {
+          "id": "ArmFromGeneral",
+          "edits": [
+            {
+              "old": "recovered == t.kind=\"recover\" /\\ valid",
+              "new": "recovered == t.kind \\in {\"recover\",\"general\"} /\\ valid",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ObservedOnly"
+        },
+        {
+          "id": "ArmFromFiltered",
+          "edits": [
+            {
+              "old": "recovered == t.kind=\"recover\" /\\ valid",
+              "new": "recovered == t.kind \\in {\"recover\",\"filtered\"} /\\ valid",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ObservedOnly"
+        },
+        {
+          "id": "ArmFromResource",
+          "edits": [
+            {
+              "old": "recovered == t.kind=\"recover\" /\\ valid",
+              "new": "recovered == t.kind \\in {\"recover\",\"resource\"} /\\ valid",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ObservedOnly"
+        },
+        {
+          "id": "ArmFromNext",
+          "edits": [
+            {
+              "old": "recovered == t.kind=\"recover\" /\\ valid",
+              "new": "recovered == t.kind \\in {\"recover\",\"next\"} /\\ valid",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ObservedOnly"
+        },
+        {
+          "id": "ArmFromAuto",
+          "edits": [
+            {
+              "old": "recovered == t.kind=\"recover\" /\\ valid",
+              "new": "recovered == t.kind \\in {\"recover\",\"auto\"} /\\ valid",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ObservedOnly"
+        },
+        {
+          "id": "ArmFromInspect",
+          "edits": [
+            {
+              "old": "recovered == t.kind=\"recover\" /\\ valid",
+              "new": "recovered == t.kind \\in {\"recover\",\"inspect\"} /\\ valid",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ObservedOnly"
+        },
+        {
+          "id": "ArmFromCapacity",
+          "edits": [
+            {
+              "old": "recovered == t.kind=\"recover\" /\\ valid",
+              "new": "recovered == t.kind \\in {\"recover\",\"capacity\"} /\\ valid",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ObservedOnly"
+        },
+        {
+          "id": "ArmAfterDenied",
+          "edits": [
+            {
+              "old": "[DropData(st) EXCEPT !.active= <<>>]",
+              "new": "[DropData(st) EXCEPT !.active= <<>>, !.armed=IF outcome=\"denied\" /\\ t.kind=\"recover\" THEN TRUE ELSE @]",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ObservedOnly"
+        },
+        {
+          "id": "ArmAfterFailed",
+          "edits": [
+            {
+              "old": "[DropData(st) EXCEPT !.active= <<>>]",
+              "new": "[DropData(st) EXCEPT !.active= <<>>, !.armed=IF outcome=\"failed\" /\\ t.kind=\"recover\" THEN TRUE ELSE @]",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ObservedOnly"
+        },
+        {
+          "id": "ArmAfterWrongOwner",
+          "edits": [
+            {
+              "old": "[DropData(st) EXCEPT !.active= <<>>]",
+              "new": "[DropData(st) EXCEPT !.active= <<>>, !.armed=IF outcome=\"wrongOwner\" /\\ t.kind=\"recover\" THEN TRUE ELSE @]",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ObservedOnly"
+        },
+        {
+          "id": "ArmAfterMalformed",
+          "edits": [
+            {
+              "old": "[DropData(st) EXCEPT !.active= <<>>]",
+              "new": "[DropData(st) EXCEPT !.active= <<>>, !.armed=IF outcome=\"malformed\" /\\ t.kind=\"recover\" THEN TRUE ELSE @]",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ObservedOnly"
+        },
+        {
+          "id": "RetainArmAfterPermissionLoss",
+          "edits": [
+            {
+              "old": "[DropData(st) EXCEPT !.active= <<>>]",
+              "new": "[DropData(st) EXCEPT !.active= <<>>, !.armed=IF outcome=\"denied\" THEN st.armed ELSE @]",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ObservedOnly"
+        },
+        {
+          "id": "InferFromCurrentMatchingAmount",
+          "edits": [
+            {
+              "old": "!.active= <<>>, !.data=observed",
+              "new": "!.active= <<>>, !.record=IF recovered /\\ Len(observed)>0 THEN observed[1].id ELSE @, !.data=observed",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ObservedOnly"
+        },
+        {
+          "id": "GroupReadShowsPeerRow",
+          "edits": [
+            {
+              "old": "Selected(db,t) == Owned(db,t.scope)",
+              "new": "Selected(db,t) == db",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ObservedOnly"
+        },
+        {
+          "id": "PermitEvenWhenExplicitReadFailed",
+          "edits": [
+            {
+              "old": "st.phase=\"unknown\" /\\ st.armed /\\ st.active= <<>>",
+              "new": "st.phase=\"unknown\" /\\ (st.armed \\/ (last.kind=\"receive\" /\\ last.arg=\"failed\")) /\\ st.active= <<>>",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "SeparateIntent"
+        },
+        {
+          "id": "SeparateClickSendsAgain",
+          "edits": [
+            {
+              "old": "[st EXCEPT !.phase=\"idle\", !.armed=FALSE, !.separateUsed=TRUE]",
+              "new": "[st EXCEPT !.phase=\"idle\", !.armed=FALSE, !.separateUsed=TRUE, !.sent=@+1]",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "NoAutomaticWrite"
+        },
+        {
+          "id": "RecoverySilentlyResends",
+          "edits": [
+            {
+              "old": "!.active= <<>>, !.data=observed",
+              "new": "!.active= <<>>, !.sent=IF recovered THEN @+1 ELSE @, !.data=observed",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "NoAutomaticWrite"
+        },
+        {
+          "id": "BackfillCaseDuringRecovery",
+          "edits": [
+            {
+              "old": "!.active= <<>>, !.data=observed",
+              "new": "!.active= <<>>, !.db=IF recovered THEN Append(@,Row(t.scope,Len(@)+1,\"false\")) ELSE @, !.data=observed",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "NativeFrame"
+        },
+        {
+          "id": "TreatSavedHistoryAsConfirmedOutcome",
+          "edits": [
+            {
+              "old": "!.active= <<>>, !.data=observed",
+              "new": "!.active= <<>>, !.phase=IF recovered THEN \"confirmed\" ELSE @, !.data=observed",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ObservedOnly"
+        },
+        {
+          "id": "BlindRetryAfterLostAck",
+          "edits": [
+            {
+              "old": "st'=st /\\ last'=Note(\"try\",\"\")",
+              "new": "st'=(IF st.phase=\"unknown\" THEN [st EXCEPT !.sent=@+1] ELSE st) /\\ last'=Note(\"try\",\"\")",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "NoAutomaticWrite"
+        },
+        {
+          "id": "ReleaseOnBlockedClick",
+          "edits": [
+            {
+              "old": "st'=st /\\ last'=Note(\"try\",\"\")",
+              "new": "st'=(IF st.phase=\"unknown\" THEN [st EXCEPT !.phase=\"idle\"] ELSE st) /\\ last'=Note(\"try\",\"\")",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "BlockedRetry"
+        },
+        {
+          "id": "CarryUnknownAcrossNewMount",
+          "edits": [
+            {
+              "old": "!.phase=IF a=\"hidden\" THEN \"off\" ELSE \"idle\"",
+              "new": "!.phase=IF a=\"hidden\" THEN \"off\" ELSE IF st.phase=\"unknown\" THEN \"unknown\" ELSE \"idle\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ScopeCleared"
+        },
+        {
+          "id": "SameTileRetiredSuccessArmsNewMount",
+          "edits": [
+            {
+              "old": "current == t.scope=st.scope /\\ t.mount=st.mount",
+              "new": "current == t.scope=st.scope /\\ (t.mount=st.mount \\/ (k=\"ok\" /\\ st.phase=\"unknown\" /\\ st.reads>0 /\\ ~st.armed))",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "RetiredRead"
+        },
+        {
+          "id": "StaleDenialErasesNewlyArmedView",
+          "edits": [
+            {
+              "old": "current == t.scope=st.scope /\\ t.mount=st.mount",
+              "new": "current == (t.scope=st.scope /\\ t.mount=st.mount) \\/ (k=\"denied\" /\\ st.armed)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "RetiredRead"
+        },
+        {
+          "id": "RetainAppliedCapacityAfter403",
+          "edits": [
+            {
+              "old": "!.quota=IF k=\"forbidden\" THEN FALSE ELSE @",
+              "new": "!.quota=@",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "Acknowledgement"
+        },
+        {
+          "id": "ReopenEditorWithoutFreshCapacity",
+          "edits": [
+            {
+              "old": "[st EXCEPT !.quota=TRUE] /\\ last'=Note(\"restore\",\"\")",
+              "new": "[st EXCEPT !.quota=TRUE, !.armed=TRUE] /\\ last'=Note(\"restore\",\"\")",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "FreshCapacity"
+        },
+        {
+          "id": "DisplayFirstPageAsRealContinuation",
+          "edits": [
+            {
+              "old": "i == IF t.kind=\"next\" THEN Len(rows)-1 ELSE Len(rows)",
+              "new": "i == Len(rows)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ObservedOnly"
+        },
+        {
+          "id": "KeepPriorLookupAfterNativeDenial",
+          "edits": [
+            {
+              "old": "[DropData(st) EXCEPT !.active= <<>>]",
+              "new": "[DropData(st) EXCEPT !.active= <<>>, !.lookup=IF outcome=\"denied\" THEN st.lookup ELSE @]",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "VisibleLookup"
+        },
+        {
+          "id": "GuessLostLookupFromHistory",
+          "edits": [
+            {
+              "old": "!.active= <<>>, !.data=observed",
+              "new": "!.active= <<>>, !.lookup=IF recovered /\\ Len(observed)>0 THEN observed[1].id ELSE @, !.data=observed",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "VisibleLookup"
+        },
+        {
+          "id": "ShowQuotaInHiddenView",
+          "edits": [
+            {
+              "old": "!.quota=a#\"hidden\", !.lookup=0",
+              "new": "!.quota=TRUE, !.lookup=0",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "VisibleMount"
+        },
+        {
+          "id": "ReturningToViewInheritsOldPermit",
+          "edits": [
+            {
+              "old": "st'=[st EXCEPT !.visible=TRUE, !.mount=2, !.phase=\"idle\", !.quota=TRUE]",
+              "new": "st'=[st EXCEPT !.visible=TRUE, !.armed=TRUE, !.mount=2, !.phase=\"idle\", !.quota=TRUE]",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "VisibleMount"
         }
       ]
     }
