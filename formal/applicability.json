@@ -25,7 +25,7 @@
     },
     {
       "path": "docs/pcs-queue-associations.md",
-      "sha256": "85c7b5d03735dc2e630fa127c856a2c3f91a52e011c18fee61ec2e9b30130e68",
+      "sha256": "7c2ec5fafb65878ec9a45a89e5bdc5bf46e9588a5bdac3f958f90832bb1e8003",
       "disposition": "documentation",
       "reason": "Bounded PCS association transactions, official hierarchical child IAM targets with one existing policy snapshot, and untouched legacy flat-record compatibility. No scheduler/provisioned compute.",
       "models": []
@@ -117,7 +117,7 @@
     },
     {
       "path": "internal/aws/catalog/pcs_queue_references.go",
-      "sha256": "e0cf3016a9582354e53acf4f1211ceb607d91d0d659f7fc673404c8c54eea0a1",
+      "sha256": "e3b5764c617e35465678256e819c85caaa0945723ebd9983703b00e803b02b8b",
       "disposition": "modeled",
       "reason": "Bounded PCS association transactions, official hierarchical child IAM targets with one existing policy snapshot, and untouched legacy flat-record compatibility. No scheduler/provisioned compute.",
       "models": [
@@ -149,8 +149,15 @@
       "models": []
     },
     {
+      "path": "internal/aws/catalog/pcs_transaction_context_test.go",
+      "sha256": "8eb3a8773ae7c3ed7b42c8ea3cccdbc819567939c669ffc9927f0f0b0376b0e0",
+      "disposition": "test-support",
+      "reason": "Prove six physically staged native PCS SQL cancellations/deadlines with real stored caller policy, complete durable and private peer frames after reopen, plus six actual connection-pool admission interruptions and ordinary retry. A before-fix overlay demonstrates all six transaction-admission failures; preflight HTTP latency is not claimed.",
+      "models": []
+    },
+    {
       "path": "internal/aws/catalog/semantics.go",
-      "sha256": "058e8acdabf7bc05d96f604453a90e81da125b5c8cccdcfd9c4856f378e27785",
+      "sha256": "1c9d952c40a7fdfbfdeb4d20ea9f7a3dfcb49f4628753e893ae32aa33f6bc31c",
       "disposition": "modeled",
       "reason": "Bounded PCS association transactions, official hierarchical child IAM targets with one existing policy snapshot, and untouched legacy flat-record compatibility. No scheduler/provisioned compute.",
       "models": [

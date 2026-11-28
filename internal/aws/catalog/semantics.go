@@ -1008,10 +1008,10 @@ func (q *request) update() (map[string]any, error) {
 	return q.output(r, parent), nil
 }
 
-// Resource Groups writes are entirely transactional. Other catalogs retain
-// their existing lifecycle, including RDS teardown before the SQLite write.
+// Resource Groups and reviewed PCS association writes use the request context.
+// Other catalogs retain their lifecycle, including RDS teardown before writing.
 func (q *request) beginMutation() (*sql.Tx, error) {
-	if q.b.spec.Model == "resource-groups" {
+	if q.b.spec.Model == "resource-groups" || q.pcsAssociationMutation() && q.ctx != nil {
 		return q.e.store.db.BeginTx(q.ctx, nil)
 	}
 	return q.e.store.db.Begin()

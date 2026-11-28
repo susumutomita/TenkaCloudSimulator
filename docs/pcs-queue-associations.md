@@ -64,3 +64,14 @@ Primary references:
 - [ComputeNodeGroupConfiguration](https://docs.aws.amazon.com/pcs/latest/APIReference/API_ComputeNodeGroupConfiguration.html)
 - [UpdateCluster](https://docs.aws.amazon.com/pcs/latest/APIReference/API_UpdateCluster.html)
 - [PCS IAM actions and resource types](https://docs.aws.amazon.com/service-authorization/latest/reference/list_pcs.html)
+
+## Interrupted association writes
+
+`CreateQueue`, `UpdateQueue` and `DeleteComputeNodeGroup` use the original
+request context when waiting for their write transaction and check it again
+before commit. Cancellation or an elapsed deadline before commit refuses the
+write and rolls back staged resource, association and sequence changes. An
+interruption after commit does not undo a committed write: read the current
+resource before retrying. Generic catalog preflight lookups retain their
+existing behavior, so this does not promise prompt cancellation at every HTTP
+stage.

@@ -69,10 +69,14 @@ func pcsCheckDeleteComputeNodeGroup(db querier, group row) error {
 	return nil
 }
 
-// Only the reviewed PCS association mutations opt into this final context
-// fence. An error causes their existing deferred transaction rollback.
+// Only the reviewed PCS association mutations opt into context-aware write
+// admission and the final pre-commit fence. Other catalog lifecycles stay put.
+func (q *request) pcsAssociationMutation() bool {
+	return q.b.spec.Model == "pcs" && q.op != nil && (q.op.Name == "CreateQueue" || q.op.Name == "UpdateQueue" || q.op.Name == "DeleteComputeNodeGroup")
+}
+
 func (q *request) pcsAssociationContext() error {
-	if q.b.spec.Model == "pcs" && (q.op.Name == "CreateQueue" || q.op.Name == "UpdateQueue" || q.op.Name == "DeleteComputeNodeGroup") && q.ctx != nil {
+	if q.pcsAssociationMutation() && q.ctx != nil {
 		return q.ctx.Err()
 	}
 	return nil
