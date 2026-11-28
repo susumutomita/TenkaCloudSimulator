@@ -4953,6 +4953,7 @@ REQUIRED_MUTANTS['ALBConsoleWorkflow'] = {
     'KeepDetachedGroupLockedAfterExactRefresh',
     'CallReassociationAConfirmedSave',
     'ChangeRequestedPathWhenMovingListener',
+    'IgnoreReassociationToSecondBalancer',
 }
 REQUIRED_SOURCE_SCOPES['ALBConsoleWorkflow'] = {
     'internal/server/server.go',

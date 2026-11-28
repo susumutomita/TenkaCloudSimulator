@@ -30956,6 +30956,17 @@
               "count": 1
             }
           ],
+          "expect_invariant": "NativeFrame"
+        },
+        {
+          "id": "IgnoreReassociationToSecondBalancer",
+          "edits": [
+            {
+              "old": "[ui EXCEPT !.parent = p]",
+              "new": "[ui EXCEPT !.parent = IF p = \"B\" THEN @ ELSE p]",
+              "count": 1
+            }
+          ],
           "expect_invariant": "LinkFrame"
         }
       ]
