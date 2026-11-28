@@ -5,13 +5,13 @@ permissions:
   contents: read
 jobs:
   complete-before-commit:
-    name: Unfiltered standard make before-commit at 929bc90
+    name: Unfiltered standard make before-commit at 715a0b9
     runs-on: ubuntu-24.04
     timeout-minutes: 80
     steps:
       - uses: actions/checkout@v7.0.1
         with:
-          ref: 929bc90c21ca9c05f0490ade0f7ecea54ef294fb
+          ref: 715a0b99b7369d562493800441f4923f3d672246
           persist-credentials: false
       - uses: actions/setup-go@v6.5.0
         with:
@@ -19,8 +19,8 @@ jobs:
           cache: true
       - name: Verify fixed product source and ordinary runner
         run: |
-          test "$(git rev-parse HEAD)" = 929bc90c21ca9c05f0490ade0f7ecea54ef294fb
-          test "$(git rev-parse HEAD^{tree})" = 5b0b19f817268db0ad0d11d85656591fb586ec45
+          test "$(git rev-parse HEAD)" = 715a0b99b7369d562493800441f4923f3d672246
+          test "$(git rev-parse HEAD^{tree})" = 31b697204c583f0b138be91bd6e0dd2b969eeb58
           test -z "$(git status --porcelain)"
           test "$(id -u)" -ne 0
           mkdir -p "$RUNNER_TEMP/sts-complete-gate"
@@ -55,7 +55,7 @@ jobs:
                   or 'statement coverage' in line.lower()]
           result = root / 'make-exit.txt'
           (root / 'summary.json').write_text(json.dumps({
-              'source': '929bc90c21ca9c05f0490ade0f7ecea54ef294fb',
+              'source': '715a0b99b7369d562493800441f4923f3d672246',
               'command': 'make before-commit',
               'make_exit': int(result.read_text()) if result.exists() else None,
               'observed_summaries': safe,
