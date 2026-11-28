@@ -1,12 +1,12 @@
 {
   "version": 1,
-  "base_sha": "d64ec74e4d9927b93bbb2f49e0ca03050eca7490",
+  "base_sha": "047be001fb2b0758f3b846ead7f17654990e7a88",
   "changes": [
     {
-      "path": "test/e2e/aws_catalog_console.py",
-      "sha256": "a8d6ad911a5dc0cc29c6ab57de5850eee9b2897906c83ef526f17eb7b542bb2c",
-      "disposition": "test-support",
-      "reason": "Preserve native SDK MediaType and version rejection checks and exercise the shipped Console retention editor, stale rejection, shared native readback and cleanup. Network Firewall checks remain unchanged. No runtime or model transition changes.",
+      "path": ".github/workflows/ci.yml",
+      "sha256": "2818381aa089ed4367ec2c687a8dd14d13bc1dc54463a8088e52a4f7686c21e9",
+      "disposition": "formal-infrastructure",
+      "reason": "Temporary manual-only hosted verification of immutable product047be00, running existing full catalog fixture and focused versioned-edit helper in sandboxed Chromium; this evidence branch is not a product merge candidate.",
       "models": []
     }
   ]
