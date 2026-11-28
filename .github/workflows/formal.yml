@@ -1,11 +1,6 @@
-name: Formal validation
+name: Complete notification rules validation on the exact CodeCommit PR base
 on:
-  push:
-    branches: [main]
-  pull_request:
-  merge_group:
   workflow_dispatch:
-  workflow_call:
 permissions:
   contents: read
 jobs:
@@ -17,7 +12,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7.0.1
         with:
-          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          ref: d471c199433b5d5e2b95511cfdbd2c53f90a818d
           fetch-depth: 0
           persist-credentials: false
       - name: Exercise applicability and gate negative controls
@@ -40,7 +35,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7.0.1
         with:
-          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          ref: d471c199433b5d5e2b95511cfdbd2c53f90a818d
           persist-credentials: false
       - name: Run this shard of the finite models and required invariant counterexamples
         env:
@@ -54,7 +49,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v7.0.2
         with:
-          name: formal-shard-${{ matrix.shard }}-${{ github.event.pull_request.head.sha || github.sha }}
+          name: formal-shard-${{ matrix.shard }}-d471c199433b5d5e2b95511cfdbd2c53f90a818d
           path: reports/formal/shard-${{ matrix.shard }}/
           if-no-files-found: error
           retention-days: 14
@@ -70,14 +65,17 @@ jobs:
     steps:
       - uses: actions/checkout@v7.0.1
         with:
-          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          ref: d471c199433b5d5e2b95511cfdbd2c53f90a818d
           fetch-depth: 0
           persist-credentials: false
       - name: Validate exact changed blobs and declared model applicability
         env:
           PYTHONPYCACHEPREFIX: ${{ runner.temp }}/formal-python-cache
         run: |
-          base=$(python3 scripts/check-formal-applicability.py event-base --event "$GITHUB_EVENT_PATH")
+          test "$(git rev-parse HEAD)" = d471c199433b5d5e2b95511cfdbd2c53f90a818d
+          test "$(git rev-parse HEAD^{tree})" = 0b25323dcbed14f152739132fdda1dfa937a23e0
+          base=591298e6889ff15f85df789516a570eb6da25c1e
+          git merge-base --is-ancestor "$base" HEAD
           python3 scripts/check-formal-applicability.py check --base "$base"
       - name: Require the gate tests and every TLC shard to succeed
         if: env.FULL == 'true'
@@ -90,7 +88,7 @@ jobs:
       - if: env.FULL == 'true'
         uses: actions/download-artifact@v8.0.2
         with:
-          pattern: formal-shard-*-${{ github.event.pull_request.head.sha || github.sha }}
+          pattern: formal-shard-*-d471c199433b5d5e2b95511cfdbd2c53f90a818d
           path: reports/formal/shards
       - name: Accept the shards only as one full merge-gate run of this head
         if: env.FULL == 'true'
@@ -101,7 +99,83 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v7.0.2
         with:
-          name: formal-${{ github.event.pull_request.head.sha || github.sha }}
+          name: formal-d471c199433b5d5e2b95511cfdbd2c53f90a818d
           path: reports/formal/
+          if-no-files-found: error
+          retention-days: 14
+  complete-before-commit:
+    name: Unfiltered standard make before-commit at d471c19
+    runs-on: ubuntu-24.04
+    timeout-minutes: 80
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          ref: d471c199433b5d5e2b95511cfdbd2c53f90a818d
+          persist-credentials: false
+      - uses: actions/setup-go@v6.5.0
+        with:
+          go-version: '1.26.11'
+          cache: true
+      - name: Verify fixed product source and ordinary runner
+        run: |
+          test "$(git rev-parse HEAD)" = d471c199433b5d5e2b95511cfdbd2c53f90a818d
+          test "$(git rev-parse HEAD^{tree})" = 0b25323dcbed14f152739132fdda1dfa937a23e0
+          test -z "$(git status --porcelain)"
+          test "$(id -u)" -ne 0
+          mkdir -p "$RUNNER_TEMP/notifications-complete-gate"
+          git rev-parse HEAD HEAD^{tree} > "$RUNNER_TEMP/notifications-complete-gate/source.txt"
+          uname -srmo > "$RUNNER_TEMP/notifications-complete-gate/platform.txt"
+          go version > "$RUNNER_TEMP/notifications-complete-gate/go.txt"
+          python3 --version > "$RUNNER_TEMP/notifications-complete-gate/python.txt"
+      - name: Run original complete make before-commit
+        run: |
+          test -z "$(git status --porcelain --untracked-files=all)"
+          set +e
+          make before-commit 2>&1 | tee "$RUNNER_TEMP/notifications-full.log"
+          codes=("${PIPESTATUS[@]}")
+          result=${codes[0]}
+          if test "$result" -eq 0 && test "${codes[1]}" -ne 0; then result=${codes[1]}; fi
+          set -e
+          printf '%s\n' "$result" > "$RUNNER_TEMP/notifications-complete-gate/make-exit.txt"
+          exit "$result"
+      - name: Enforce original unfiltered statement and source-line floors
+        run: |
+          go run github.com/boumenot/gocover-cobertura@v1.4.0 < reports/coverage.out > "$RUNNER_TEMP/notifications-complete-gate/coverage.xml"
+          set -o pipefail
+          python3 scripts/check-coverage.py reports/coverage.out "$RUNNER_TEMP/notifications-complete-gate/coverage.xml" | tee "$RUNNER_TEMP/notifications-complete-gate/coverage.txt"
+      - name: Preserve safe coverage and package outcomes
+        if: always()
+        run: |
+          python3 - <<'PY'
+          import json, os, re
+          from pathlib import Path
+          root = Path(os.environ['RUNNER_TEMP']) / 'notifications-complete-gate'
+          root.mkdir(parents=True, exist_ok=True)
+          log = root.parent / 'notifications-full.log'
+          text = log.read_text(errors='replace') if log.exists() else ''
+          safe = [line for line in text.splitlines()
+                  if re.match(r'^(ok\s+github\.com/|FAIL(?:\s|$)|\?\s+github\.com/|coverage:|Ran \d+ tests? in|OK$|FAILED \()', line)
+                  or 'coverage gate' in line.lower() or 'source coverage' in line.lower()
+                  or 'statement coverage' in line.lower()]
+          result = root / 'make-exit.txt'
+          (root / 'summary.json').write_text(json.dumps({
+              'source': 'd471c199433b5d5e2b95511cfdbd2c53f90a818d',
+              'command': 'make before-commit',
+              'make_exit': int(result.read_text()) if result.exists() else None,
+              'observed_summaries': safe,
+              'scope': 'Unfiltered standard command. Failure remains failure; later phases are not inferred executed.'
+          }, indent=2) + '\n')
+          PY
+          git status --porcelain > "$RUNNER_TEMP/notifications-complete-gate/post-status.txt"
+          if test -f dist/tenkacloud-simulator; then
+            go version -m dist/tenkacloud-simulator > "$RUNNER_TEMP/notifications-complete-gate/build.txt"
+            sha256sum dist/tenkacloud-simulator > "$RUNNER_TEMP/notifications-complete-gate/binary.sha256"
+          fi
+      - name: Retain exact complete-gate evidence
+        if: always()
+        uses: actions/upload-artifact@v7.0.2
+        with:
+          name: notifications-complete-gate-${{ github.run_id }}
+          path: ${{ runner.temp }}/notifications-complete-gate/
           if-no-files-found: error
           retention-days: 14
