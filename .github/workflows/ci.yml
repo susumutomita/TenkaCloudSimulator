@@ -1,79 +1,104 @@
-name: Temporary exact Cloud Trace native operations and Console complete local gate evidence
+name: Complete bounded models on the exact stacked Cloud Trace PR
 on:
   workflow_dispatch:
 permissions:
   contents: read
 jobs:
-  complete-before-commit:
-    name: Unfiltered standard make before-commit at f517e36
-    runs-on: ubuntu-24.04
-    timeout-minutes: 80
+  gate-tests:
+    name: Formal gate and applicability tests
+    if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          ref: f517e36087b5904de88871fd33ca3bc556eef2ad
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Exercise applicability and gate negative controls
+        env:
+          PYTHONPYCACHEPREFIX: ${{ runner.temp }}/formal-python-cache
+          FORMAL_GATE_TEST_WORKERS: '4'
+        run: |
+          python3 scripts/test-formal-gate.py
+          python3 scripts/test-formal-applicability.py
+  tlc:
+    name: Formal TLC shard ${{ matrix.shard }}
+    if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    # Each shard runs every tenth registered case serially with the unchanged 60s per-case cap.
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
     steps:
       - uses: actions/checkout@v7.0.1
         with:
           ref: f517e36087b5904de88871fd33ca3bc556eef2ad
           persist-credentials: false
-      - uses: actions/setup-go@v6.5.0
-        with:
-          go-version: '1.26.11'
-          cache: true
-      - name: Verify fixed product source and ordinary runner
+      - name: Run this shard of the finite models and required invariant counterexamples
+        env:
+          PYTHONPYCACHEPREFIX: ${{ runner.temp }}/formal-python-cache
+          SHARD: ${{ matrix.shard }}
         run: |
-          test "$(git rev-parse HEAD)" = f517e36087b5904de88871fd33ca3bc556eef2ad
-          test "$(git rev-parse HEAD^{tree})" = 9d8f177b6f9253d72b236459e207df4f8b687dd7
-          test -z "$(git status --porcelain)"
-          test "$(id -u)" -ne 0
-          mkdir -p "$RUNNER_TEMP/trace-complete-gate"
-          git rev-parse HEAD HEAD^{tree} > "$RUNNER_TEMP/trace-complete-gate/source.txt"
-          uname -srmo > "$RUNNER_TEMP/trace-complete-gate/platform.txt"
-          go version > "$RUNNER_TEMP/trace-complete-gate/go.txt"
-          python3 --version > "$RUNNER_TEMP/trace-complete-gate/python.txt"
-      - name: Run original complete make before-commit
-        run: |
-          test -z "$(git status --porcelain --untracked-files=all)"
-          set +e
-          make before-commit 2>&1 | tee "$RUNNER_TEMP/trace-complete-gate/full.log"
-          codes=("${PIPESTATUS[@]}")
-          result=${codes[0]}
-          if test "$result" -eq 0 && test "${codes[1]}" -ne 0; then result=${codes[1]}; fi
-          set -e
-          printf '%s\n' "$result" > "$RUNNER_TEMP/trace-complete-gate/make-exit.txt"
-          exit "$result"
-      - name: Preserve safe coverage and package outcomes
-        if: always()
-        run: |
-          python3 - <<'PY'
-          import json, os, re
-          from pathlib import Path
-          root = Path(os.environ['RUNNER_TEMP']) / 'trace-complete-gate'
-          root.mkdir(parents=True, exist_ok=True)
-          log = root / 'full.log'
-          text = log.read_text(errors='replace') if log.exists() else ''
-          safe = [line for line in text.splitlines()
-                  if re.match(r'^(ok\s+github\.com/|FAIL(?:\s|$)|\?\s+github\.com/|coverage:|Ran \d+ tests? in|OK$|FAILED \()', line)
-                  or 'coverage gate' in line.lower() or 'source coverage' in line.lower()
-                  or 'statement coverage' in line.lower() or line.startswith('Go statements (full module)')]
-          result = root / 'make-exit.txt'
-          (root / 'summary.json').write_text(json.dumps({
-              'source': 'f517e36087b5904de88871fd33ca3bc556eef2ad',
-              'command': 'make before-commit',
-              'make_exit': int(result.read_text()) if result.exists() else None,
-              'observed_summaries': safe,
-              'scope': 'Unfiltered standard command. Failure remains failure; later phases are not inferred executed.'
-          }, indent=2) + '\n')
-          PY
-          git status --porcelain > "$RUNNER_TEMP/trace-complete-gate/post-status.txt"
-          if test -f dist/tenkacloud-simulator; then
-            go version -m dist/tenkacloud-simulator > "$RUNNER_TEMP/trace-complete-gate/build.txt"
-            sha256sum dist/tenkacloud-simulator > "$RUNNER_TEMP/trace-complete-gate/binary.sha256"
-          fi
-      - name: Retain exact complete-gate evidence
+          python3 test/ci/tla_download.py
+          timeout --kill-after=5s 95s curl --fail --location --retry 3 --retry-delay 2 --retry-max-time 60 --connect-timeout 10 --max-time 30 https://github.com/tlaplus/tlaplus/releases/download/v1.7.4/tla2tools.jar --output /tmp/tla2tools.jar
+          TLA_JAR=/tmp/tla2tools.jar python3 scripts/check-formal.py --merge-gate --shard "$SHARD/10" --reports "reports/formal/shard-$SHARD"
+      - name: Retain this shard's formal evidence
         if: always()
         uses: actions/upload-artifact@v7.0.2
         with:
-          name: trace-complete-gate-${{ github.run_id }}
-          path: |
-            ${{ runner.temp }}/trace-complete-gate/
-            !${{ runner.temp }}/trace-complete-gate/full.log
+          name: formal-shard-${{ matrix.shard }}-f517e36087b5904de88871fd33ca3bc556eef2ad
+          path: reports/formal/shard-${{ matrix.shard }}/
+          if-no-files-found: error
+          retention-days: 14
+  formal:
+    name: Formal validation
+    needs: [gate-tests, tlc]
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      # Pull requests and main pushes check applicability only; releases and manual runs also run TLC.
+      FULL: ${{ startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch' }}
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          ref: f517e36087b5904de88871fd33ca3bc556eef2ad
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Validate exact changed blobs and declared model applicability
+        env:
+          PYTHONPYCACHEPREFIX: ${{ runner.temp }}/formal-python-cache
+        run: |
+          test "$(git rev-parse HEAD)" = f517e36087b5904de88871fd33ca3bc556eef2ad
+          base=03d71307bbe6382df16d26bcd5d26e454f5036a6
+          git merge-base --is-ancestor "$base" HEAD
+          python3 scripts/check-formal-applicability.py check --base "$base"
+      - name: Require the gate tests and every TLC shard to succeed
+        if: env.FULL == 'true'
+        env:
+          GATE_TESTS: ${{ needs.gate-tests.result }}
+          TLC: ${{ needs.tlc.result }}
+        run: |
+          echo "gate-tests=$GATE_TESTS tlc=$TLC"
+          test "$GATE_TESTS" = success && test "$TLC" = success
+      - if: env.FULL == 'true'
+        uses: actions/download-artifact@v8.0.2
+        with:
+          pattern: formal-shard-*-f517e36087b5904de88871fd33ca3bc556eef2ad
+          path: reports/formal/shards
+      - name: Accept the shards only as one full merge-gate run of this head
+        if: env.FULL == 'true'
+        env:
+          PYTHONPYCACHEPREFIX: ${{ runner.temp }}/formal-python-cache
+        run: python3 scripts/check-formal.py --combine reports/formal/shards/*/evidence.json --reports reports/formal/combined
+      - name: Retain exact formal evidence
+        if: always()
+        uses: actions/upload-artifact@v7.0.2
+        with:
+          name: formal-f517e36087b5904de88871fd33ca3bc556eef2ad
+          path: reports/formal/
           if-no-files-found: error
           retention-days: 14
