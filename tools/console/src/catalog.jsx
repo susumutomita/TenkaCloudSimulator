@@ -454,7 +454,7 @@ export default function CatalogView({region,request,catalog,onSaving}){
  if(services===null)return <Box>{t('Loading','読み込み中')}</Box>;
  if(!services.length)return <Alert type="info">{t('No catalog services are enabled.','有効なカタログサービスはありません。')}</Alert>;
  if(service?.model==='service-quotas')return <SpaceBetween size="l">
-  <FormField label={t('Catalog service','カタログサービス')}><Select selectedOption={{value:model,label:service.title}} filteringType="auto" onChange={({detail})=>{setModel(detail.selectedOption.value);setKind('');setParent('');setParents([])}} options={services.map(s=>({value:s.model,label:s.title}))}/></FormField>
+  <FormField label={t('Catalog service','カタログサービス')}><Select selectedOption={{value:model,label:service.title}} filteringType="auto" onChange={({detail})=>{setModel(detail.selectedOption.value);setKind('');setParent('');setParents([])}} options={services.map(s=>({value:s.model,label:s.title,description:s.operations.length+' / '+s.officialOperations+' '+t('official operations','公式操作')}))}/></FormField>
   {quotaConsoleAvailable(service)?<ServiceQuotas key={region} request={request} region={region} account={service.account}/>:<Alert type="info">{t('Service Quotas discovery and request operations are unavailable.','Service Quotas の検出とリクエスト操作は利用できません。')}</Alert>}
  </SpaceBetween>;
  const singular=kindName(resource),many=appBlock?t('App blocks','App Block'):plural(singular);

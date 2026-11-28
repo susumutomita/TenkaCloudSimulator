@@ -529,7 +529,7 @@
     },
     {
       "path": "internal/server/web/app.js",
-      "sha256": "658e9c46ee8e9c8bca1911b3248d57d0ec7ae8ef1f69f0f6dab3b307b42934c5",
+      "sha256": "41c6af9791e1c9ce5e7f894d66e1c4f782d654fb9def1713a368fdbf1aa2af7a",
       "disposition": "modeled",
       "reason": "Canonical embedded output of the reviewed actual Console sources, preserving prior catalog behavior and adding the dedicated mounted quota/default/request workflow. Concrete compiler/bundle correspondence is checked independently, not proved by TLA.",
       "models": [
@@ -588,6 +588,13 @@
       "models": []
     },
     {
+      "path": "test/e2e/aws_catalog_console.py",
+      "disposition": "test-support",
+      "reason": "Exercise the dedicated B2BI quota view inside the existing real all-service catalog sweep and preserve the existing generic resource checks for other services.",
+      "models": [],
+      "sha256": "a7b1d137c9cab843e95beb34929eea64fc51ae2ca2b4537b55c71c0531e180ed"
+    },
+    {
       "path": "test/e2e/catalog_fixtures/service-quotas.json",
       "sha256": "944525c43d5e09b9e03a0414db6f568d6a3f9bdc22e4c717fb8b5e3f20b20358",
       "disposition": "test-support",
@@ -600,6 +607,13 @@
       "disposition": "test-support",
       "reason": "Register the genuine native quota/default/request SDK fixtures and dedicated opt-in Console/Scalar browser entry points in the normal e2e dispatcher; execution and guards remain independent requirements.",
       "models": []
+    },
+    {
+      "path": "test/e2e/service_quotas_catalog_sweep.py",
+      "disposition": "test-support",
+      "reason": "Read five quota operations and request history via the actual dedicated view, check the catalog selector and native values, and compare the local database before and after the read-only navigation.",
+      "models": [],
+      "sha256": "8b597acc3033b3c2e0cfca1ad5275bb3d3413fa1070305e933be9dbb0c69cc7e"
     },
     {
       "path": "test/e2e/service_quotas_console.py",
@@ -624,30 +638,30 @@
     },
     {
       "path": "test/e2e/service_quotas_scalar.py",
-      "sha256": "9679c11718bb5afa97ab5b815603eb41d9f9a7bafc1b8b4b61162315bce775fa",
+      "sha256": "0302eb4babf950e120cf06ede746ec9206bbde6d289d321e01cf6b9df2b9534b",
       "disposition": "test-support",
-      "reason": "Opt-in real authenticated Scalar Sends of the nine native operations with original target/body, distinct physical requests and page tokens, SDK same-record and reciprocal Console ID readback, native mismatch refusal, scoped credentials/peer/restart and owned cleanup; no response fabrication or SDK guard override.",
+      "reason": "Opt-in real authenticated Scalar Sends of the nine native operations with original target/body, distinct physical requests and page tokens, SDK same-record and reciprocal Console ID readback, native mismatch refusal, scoped credentials/peer/restart and owned cleanup; no response fabrication or SDK guard override. The narrow Japanese viewport uses the same endpoint link and directly edits the stacked headers and body.",
       "models": []
     },
     {
       "path": "tools/console/bundle-digests.json",
-      "sha256": "5e9f0ee1937f6a0f7764f0c72d66393e7bc456d43daf82a235fd54fcaeb0055f",
+      "sha256": "951af7d27ec2a9b4c62553d3eb3076fa22a1b98e91aaf83bb65663c08870d49b",
       "disposition": "presentation",
       "reason": "Exact generated embedded asset digests checked against the canonical reviewed build; no claim of behavioral proof from hashes.",
       "models": []
     },
     {
       "path": "tools/console/bundle-inputs.json",
-      "sha256": "d0d235883efdd22d74f252452938e339e0d38f198c5056d02c467053c5bea3a7",
+      "sha256": "c86dc56ace0fc4ea51779d889d1c391348527db60652d569628f61c94cde7f7e",
       "disposition": "presentation",
       "reason": "Canonical bundler input inventory for the exact reviewed Console source and pinned dependencies; metadata is not source-refinement proof.",
       "models": []
     },
     {
       "path": "tools/console/src/catalog.jsx",
-      "sha256": "e1da63d0ee42f5e74a88c76123916e788aaccfa20a4044a5d0a2fea9487ffb89",
+      "sha256": "b31b14a8fb83a5804ec1a7f4520a08de45fd5e72e1665b1eb63252836fab2655",
       "disposition": "modeled",
-      "reason": "Retain ordinary catalog controls and select the quota-specific view only for its exact nine-operation descriptor; scope changes retire the mounted child and generic catalog reads are suppressed only for that selected model.",
+      "reason": "Retain ordinary catalog controls and select the quota-specific view only for its exact nine-operation descriptor; scope changes retire the mounted child and generic catalog reads are suppressed only for that selected model. All catalog service options retain their implemented and official operation counts when the selected view is Service Quotas.",
       "models": [
         {
           "id": "CatalogConsoleEpoch",
