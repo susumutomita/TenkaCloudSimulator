@@ -16,6 +16,21 @@ import (
 const mskConfigurations = "/v1/configurations"
 const mskClusters = "/v1/clusters"
 
+func mskAttachmentHarness(t *testing.T, svc *Service) *harness {
+	t.Helper()
+	h := newHarness(t, svc)
+	h.engine.cfg.AuthorizeSnapshot = func(ctx context.Context, principal string) (func(string, string) string, error) {
+		return func(action, resource string) string {
+			decision, err := h.engine.cfg.Authorize(ctx, principal, action, resource)
+			if err != nil {
+				t.Fatal(err)
+			}
+			return decision
+		}, nil
+	}
+	return h
+}
+
 func createMSKTestConfiguration(t *testing.T, h *harness, name string, versions []any) (string, string) {
 	t.Helper()
 	spec := map[string]any{"name": name, "serverProperties": "YQD/Cg=="}
@@ -41,7 +56,7 @@ func mskTestCluster(name string, info any) map[string]any {
 }
 
 func TestMSKAttachmentLifecycle(t *testing.T) {
-	h := newHarness(t, msk)
+	h := mskAttachmentHarness(t, msk)
 	arn, config := createMSKTestConfiguration(t, h, "practice", []any{"3.5.0", "3.6.0"})
 	info := map[string]any{"arn": arn, "revision": 1}
 	get := func(path string) reply { return h.rest("kafka", "GET", path, nil) }
@@ -109,7 +124,7 @@ func TestMSKAttachmentLifecycle(t *testing.T) {
 }
 
 func TestMSKAttachmentAdmission(t *testing.T) {
-	h := newHarness(t, msk)
+	h := mskAttachmentHarness(t, msk)
 	arn, path := createMSKTestConfiguration(t, h, "practice", nil)
 	empty, _ := createMSKTestConfiguration(t, h, "empty", []any{})
 	mismatch, _ := createMSKTestConfiguration(t, h, "older", []any{"3.5.0"})
@@ -166,7 +181,7 @@ func TestMSKAttachmentAdmission(t *testing.T) {
 	h.policy.calls = nil
 	created := create(info)
 	expect(t, created, 200, "")
-	want := []string{"simulator-admin kafka:CreateCluster " + str(created.body["clusterArn"]), "simulator-admin kafka:CreateCluster " + arn}
+	want := []string{"simulator-admin kafka:CreateCluster " + str(created.body["clusterArn"]), "simulator-admin kafka:CreateCluster " + arn, "simulator-admin kafka:TagResource " + str(created.body["clusterArn"])}
 	if !slices.Equal(h.policy.calls, want) {
 		t.Fatalf("authorization calls %v, want %v", h.policy.calls, want)
 	}
@@ -192,7 +207,7 @@ func TestMSKAttachmentInterleavedCreateDelete(t *testing.T) {
 					return nil
 				}
 			}
-			h := newHarness(t, &spec)
+			h := mskAttachmentHarness(t, &spec)
 			arn, path := createMSKTestConfiguration(t, h, "practice", nil)
 			create := func() reply {
 				return h.rest("kafka", "POST", mskClusters, mskTestCluster("interleaved", map[string]any{"arn": arn, "revision": 1}))

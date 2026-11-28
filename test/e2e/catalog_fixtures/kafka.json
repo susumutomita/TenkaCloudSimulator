@@ -1,8 +1,9 @@
 {
  "client": "kafka",
+ "denied": "ForbiddenException",
  "steps": [
   {"op": "create_cluster", "args": {"ClusterName": "fixture-msk", "KafkaVersion": "3.6.0", "NumberOfBrokerNodes": 2, "BrokerNodeGroupInfo": {"InstanceType": "kafka.m5.large", "ClientSubnets": ["subnet-0a1b2c3d", "subnet-4e5f6a7b"]}, "Tags": {"team": "a"}}, "save": {"cluster": "ClusterArn"}, "expect": {"State": "CREATING", "ClusterName": "fixture-msk"}},
-  {"op": "describe_cluster", "args": {"ClusterArn": "${cluster}"}, "save": {"version": "ClusterInfo.CurrentVersion"}, "expect": {"ClusterInfo.CurrentBrokerSoftwareInfo.KafkaVersion": "3.6.0", "ClusterInfo.NumberOfBrokerNodes": 2, "ClusterInfo.EncryptionInfo.EncryptionInTransit.ClientBroker": "TLS_PLAINTEXT", "ClusterInfo.Tags": {"team": "a"}}},
+  {"op": "describe_cluster", "args": {"ClusterArn": "${cluster}"}, "save": {"version": "ClusterInfo.CurrentVersion"}, "expect": {"ClusterInfo.CurrentBrokerSoftwareInfo.KafkaVersion": "3.6.0", "ClusterInfo.NumberOfBrokerNodes": 2, "ClusterInfo.EncryptionInfo.EncryptionInTransit.ClientBroker": "TLS", "ClusterInfo.Tags": {"team": "a"}}},
   {"op": "list_clusters", "args": {}, "expect": {"ClusterInfoList#count": 1, "ClusterInfoList[0].ClusterArn": "${cluster}"}},
   {"op": "create_cluster", "args": {"ClusterName": "fixture-odd", "KafkaVersion": "3.6.0", "NumberOfBrokerNodes": 3, "BrokerNodeGroupInfo": {"InstanceType": "kafka.m5.large", "ClientSubnets": ["subnet-0a1b2c3d", "subnet-4e5f6a7b"]}}, "error": "BadRequestException"},
   {"op": "tag_resource", "args": {"ResourceArn": "${cluster}", "Tags": {"stage": "dev"}}},

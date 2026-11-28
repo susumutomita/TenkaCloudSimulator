@@ -172,6 +172,20 @@ version. `DescribeCluster` and `ListClusters` return the selected configuration
 ARN and revision in `CurrentBrokerSoftwareInfo`. Clusters without a custom
 configuration continue to return only the Kafka version in that structure.
 The cluster record stays `CREATING` and its attachment is immutable.
+Tagged creation also requires `kafka:TagResource` on the new cluster ARN.
+The local server takes one snapshot of the caller's policy for these permissions.
+Both list operations require resource `*`. `ListClusters` filters by
+`ClusterNameFilter` before pagination. The nine cluster and configuration
+operations report IAM denials as HTTP 403 `ForbiddenException`.
+
+Supply two or three distinct, nonempty subnet identifiers and a broker count
+divisible by the subnet count. The simulator stores submitted identifiers without
+looking up their Availability Zones. Each new cluster defaults omitted
+`EncryptionInTransit.ClientBroker` to `TLS` and `InCluster` to true. The current
+REST API specifies these defaults. Older records retain their persisted transport
+metadata, including `TLS_PLAINTEXT`. Creation and deletion roll back uncommitted
+SQLite writes when the request is canceled or its deadline expires.
+[Subnet and encryption fields](https://docs.aws.amazon.com/msk/1.0/apireference/clusters.html#clusters-model-encryptionintransit)
 [Cluster API](https://docs.aws.amazon.com/msk/1.0/apireference/clusters.html) and
 [configuration deletion](https://docs.aws.amazon.com/msk/latest/developerguide/msk-configuration-operations-delete.html)
 

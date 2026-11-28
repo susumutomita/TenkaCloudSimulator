@@ -233,7 +233,7 @@ func (q *request) rejectUnconsumed(consumed map[string]bool) error {
 // checkRefs requires every referenced ARN to name an existing resource of
 // the declared kind. A reference path may reach into structures and lists.
 func (q *request) checkRefs(res *Resource, document map[string]any) error {
-	return q.checkRefsIn(q.e.store.db, res, document)
+	return q.checkRefsIn(q.readStore(), res, document)
 }
 
 func (q *request) checkRefsIn(db querier, res *Resource, document map[string]any) error {
@@ -443,7 +443,15 @@ func (q *request) lookup() (row, *row, error) {
 		r, err := q.lookupECSRevision(identifier)
 		return r, parent, err
 	}
-	found, err := find(q.e.store.db, q.b.spec.Model, q.region, res.Kind, parentID(parent), identifier)
+	var found row
+	if q.b.spec.Model == "kafka" {
+		found, err = findARN(q.readStore(), q.b.spec.Model, identifier)
+		if err == nil && (found.Region != q.region || found.Kind != res.Kind) {
+			err = sql.ErrNoRows
+		}
+	} else {
+		found, err = find(q.e.store.db, q.b.spec.Model, q.region, res.Kind, parentID(parent), identifier)
+	}
 	if errors.Is(err, sql.ErrNoRows) && res.Singleton {
 		r := row{Service: q.b.spec.Model, Region: q.region, Kind: res.Kind, ID: "default", Name: "default", Tags: map[string]string{}, Document: map[string]any{}}
 		r.ARN = q.formatARN(res, r.ID, r.Name, parent)
@@ -792,17 +800,12 @@ func (q *request) create(ecsRevision int) (map[string]any, error) {
 	}
 	res := q.resource()
 	tokenMember := idempotencyMember(q.b.model.shape(q.official.Input))
-	if err := q.authorizeTarget(r.ARN, parent); err != nil {
-		return nil, err
-	}
-	if q.op.AuthorizeCreateRefs {
-		for path := range res.Refs {
-			for _, arn := range refValues(r.Document, path) {
-				if err := q.authorize(arn); err != nil {
-					return nil, err
-				}
-			}
+	if q.b.spec.Model == "kafka" && q.op.Name == "CreateCluster" {
+		if err := q.authorizeMSKCreate(r); err != nil {
+			return nil, err
 		}
+	} else if err := q.authorizeTarget(r.ARN, parent); err != nil {
+		return nil, err
 	}
 	if ecsRevision > 0 {
 		if err := ecsRegistrationPermissions(q.e.cfg.Account, r, q.authorizeAction); err != nil {
@@ -1012,10 +1015,10 @@ func (q *request) update() (map[string]any, error) {
 	return q.output(r, parent), nil
 }
 
-// Resource Groups writes are entirely transactional. Other catalogs retain
+// Resource Groups and MSK writes are entirely transactional. Other catalogs retain
 // their existing lifecycle, including RDS teardown before the SQLite write.
 func (q *request) beginMutation() (*sql.Tx, error) {
-	if q.b.spec.Model == "resource-groups" {
+	if q.b.spec.Model == "resource-groups" || q.b.spec.Model == "kafka" {
 		return q.e.store.db.BeginTx(q.ctx, nil)
 	}
 	return q.e.store.db.Begin()
@@ -1179,6 +1182,10 @@ func (q *request) list() (map[string]any, error) {
 	}
 	inputToken, outputToken, limitKey := q.pagination()
 	consumed := map[string]bool{q.op.Parent: true, inputToken: true, limitKey: true}
+	mskClusters := q.b.spec.Model == "kafka" && q.op.Name == "ListClusters"
+	if mskClusters {
+		consumed["ClusterNameFilter"] = true
+	}
 	for member := range q.op.Filters {
 		consumed[member] = true
 	}
@@ -1208,15 +1215,19 @@ func (q *request) list() (map[string]any, error) {
 	if err := q.authorize(listResource); err != nil {
 		return nil, err
 	}
-	rows, err := list(q.e.store.db, q.b.spec.Model, q.region, res.Kind, parentID(parent))
+	rows, err := list(q.readStore(), q.b.spec.Model, q.region, res.Kind, parentID(parent))
 	if err != nil {
 		return nil, err
 	}
 	if q.isECSTaskDefinition() {
 		return q.listECSRevisions(rows, parent, inputToken, outputToken, limitKey, limit)
 	}
+	prefix := dataText(q.input["ClusterNameFilter"])
 	filtered := rows[:0]
 	for _, r := range rows {
+		if mskClusters && !strings.HasPrefix(r.Name, prefix) {
+			continue
+		}
 		keep := true
 		for member, stored := range q.op.Filters {
 			if want, ok := q.input[member]; ok && fmt.Sprint(r.Document[stored]) != fmt.Sprint(want) {

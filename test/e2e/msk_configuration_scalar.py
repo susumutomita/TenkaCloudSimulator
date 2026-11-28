@@ -8,7 +8,7 @@ from urllib.parse import urlsplit
 
 from playwright.sync_api import expect, sync_playwright
 
-from aws_catalog import Team
+from aws_catalog import Team, refused
 
 CONFIG = 'reference-configuration'
 CLUSTER = 'reference-cluster'
@@ -94,6 +94,54 @@ def clean_team(team, record):
             team.stop()
 
 
+def check_participant(team, configuration, cluster):
+    principal = 'msk-scope'
+    policy_path = f'/_simulator/v1/iam/principals/{principal}/policy'
+
+    def policy(statements):
+        team.control('PUT', policy_path, {'Version': '2012-10-17', 'Statement': statements})
+
+    def allow(action, resource):
+        return {'Effect': 'Allow', 'Action': action, 'Resource': resource}
+
+    policy([allow('sts:GetCallerIdentity', '*')])
+    token = team.control('POST', '/_simulator/v1/access', {'Principal': principal})['AccessToken']
+    client = team.client('kafka', token=token)
+    cluster_input = {'ClusterName': 'msk-scope-test', 'KafkaVersion': '3.6.0', 'NumberOfBrokerNodes': 2,
+                     'BrokerNodeGroupInfo': {'InstanceType': 'kafka.m5.large', 'ClientSubnets': ['subnet-a', 'subnet-b']},
+                     'ConfigurationInfo': {'Arn': configuration, 'Revision': 1}, 'Tags': {'scope': 'fixture'}}
+    try:
+        for call in (lambda: client.create_cluster(**cluster_input), lambda: client.describe_cluster(ClusterArn=cluster),
+                     lambda: client.delete_cluster(ClusterArn=cluster), client.list_clusters, client.list_configurations,
+                     lambda: client.create_configuration(Name='msk-scope-test', ServerProperties=PROPERTIES),
+                     lambda: client.describe_configuration(Arn=configuration),
+                     lambda: client.describe_configuration_revision(Arn=configuration, Revision=1),
+                     lambda: client.delete_configuration(Arn=configuration)):
+            refused('ForbiddenException', call, 403)
+        cluster_pattern = cluster.rsplit(':cluster/', 1)[0] + ':cluster/msk-scope-test/*'
+        policy([allow('kafka:ListClusters', cluster_pattern), allow('kafka:ListConfigurations', configuration)])
+        refused('ForbiddenException', client.list_clusters, 403)
+        refused('ForbiddenException', client.list_configurations, 403)
+        policy([allow(['kafka:ListClusters', 'kafka:ListConfigurations'], '*')])
+        assert [row['ClusterArn'] for row in client.list_clusters(ClusterNameFilter=CLUSTER)['ClusterInfoList']] == [cluster]
+        assert [row['Arn'] for row in client.list_configurations()['Configurations']] == [configuration]
+        create_grants = [allow('kafka:CreateCluster', [cluster_pattern, configuration])]
+        policy(create_grants)
+        refused('ForbiddenException', lambda: client.create_cluster(**cluster_input), 403)
+        policy(create_grants + [allow('kafka:TagResource', cluster_pattern)])
+        created = client.create_cluster(**cluster_input)['ClusterArn']
+        admin = team.client('kafka')
+        try:
+            detail = admin.describe_cluster(ClusterArn=created)['ClusterInfo']
+            assert detail['CurrentBrokerSoftwareInfo']['ConfigurationArn'] == configuration
+            assert detail['Tags'] == {'scope': 'fixture'}
+            assert detail['EncryptionInfo']['EncryptionInTransit'] == {'ClientBroker': 'TLS', 'InCluster': True}
+        finally:
+            admin.delete_cluster(ClusterArn=created)
+    finally:
+        team.control('DELETE', policy_path)
+
+
 def check_msk_reference(browser):
     with TemporaryDirectory() as owner_dir, TemporaryDirectory() as peer_dir, ExitStack() as cleanup:
         owner, peer = Team(owner_dir), Team(peer_dir)
@@ -111,6 +159,8 @@ def check_msk_reference(browser):
                 ConfigurationInfo={'Arn': arn, 'Revision': 1})['ClusterArn']
         mine, other = resources[owner], resources[peer]
         assert mine['configuration'] != other['configuration'] and mine['cluster'] != other['cluster']
+        for team in (owner, peer):
+            check_participant(team, resources[team]['configuration'], resources[team]['cluster'])
         owner.stop()
         owner.start()
         mine['client'] = owner.client('kafka')

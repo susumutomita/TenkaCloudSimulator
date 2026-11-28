@@ -671,17 +671,16 @@ var msk = &Service{
 		{Kind: "cluster", Shape: "ClusterInfo", ID: "uuid", ARN: "arn:{partition}:kafka:{region}:{account}:cluster/{name}/{id}",
 			ARNMember: "ClusterArn", NameMember: "ClusterName", Unique: true, Limit: 20,
 			Refs: map[string]string{"CurrentBrokerSoftwareInfo.ConfigurationArn": "configuration"}, CheckRef: mskClusterConfiguration,
-			Generate: map[string]any{"State": "CREATING", "CreationTime": "$now", "CurrentVersion": mskClusterVersion, "EnhancedMonitoring": "DEFAULT", "StorageMode": "LOCAL",
-				"EncryptionInfo": map[string]any{"EncryptionInTransit": map[string]any{"ClientBroker": "TLS_PLAINTEXT", "InCluster": true}}}},
+			Generate: map[string]any{"State": "CREATING", "CreationTime": "$now", "CurrentVersion": mskClusterVersion, "EnhancedMonitoring": "DEFAULT", "StorageMode": "LOCAL"}},
 		{Kind: "configuration", Shape: "Configuration", ID: "uuid", ARN: "arn:{partition}:kafka:{region}:{account}:configuration/{name}/{id}",
 			ARNMember: "Arn", NameMember: "Name", Unique: true, Limit: 100,
 			Beside: []string{"ServerProperties", "Revision"}, Generate: map[string]any{"State": "ACTIVE", "CreationTime": "$now", "Revision": 1},
 			InitDocument: mskFirstConfigurationRevision, InUse: "BadRequestException", InUseMessage: "This configuration is attached to a cluster."},
 	},
 	Ops: []Op{
-		{Name: "CreateCluster", Kind: Create, Resource: "cluster", Check: mskCreateCluster, AuthorizeCreateRefs: true},
-		{Name: "DescribeCluster", Kind: Read, Resource: "cluster", Lookup: "ClusterArn"},
-		{Name: "ListClusters", Kind: List, Resource: "cluster"},
+		{Name: "CreateCluster", Kind: Create, Resource: "cluster", Check: mskCreateCluster},
+		{Name: "DescribeCluster", Kind: Read, Resource: "cluster", Lookup: "ClusterArn", Check: mskClusterARN},
+		{Name: "ListClusters", Kind: List, Resource: "cluster", ListRequiresWildcard: true},
 		{Name: "DeleteCluster", Kind: Delete, Resource: "cluster", Lookup: "ClusterArn", Accept: []string{"CurrentVersion"}, Check: mskCurrentVersion,
 			Set: map[string]any{"State": "DELETING"}},
 		{Name: "CreateConfiguration", Kind: Create, Resource: "configuration", Check: mskConfigurationName},
@@ -697,10 +696,11 @@ var msk = &Service{
 		"Provisioned clusters are configuration records that stay CREATING: no broker, ZooKeeper or KRaft controller, topic, bootstrap endpoint or network interface exists, no record is produced or consumed, and GetBootstrapBrokers, topic, replicator, VPC connection and SCRAM secret APIs return UnknownOperationException with HTTP 501.",
 		"Custom configurations store one immutable revision. DescribeConfigurationRevision returns the original server.properties bytes. The 64 KiB catalog record limit includes the base64 content and metadata. CreateCluster can attach revision 1 of a compatible configuration in the same account and Region. DescribeCluster and ListClusters return its ARN and revision. DeleteConfiguration requires all attached clusters to be deleted first. UpdateConfiguration and ListConfigurationRevisions are unavailable.",
 		"The V2 and serverless APIs, cluster policies and every cluster update operation are not implemented. CurrentVersion is the constant K1 because no update is possible, and DeleteCluster refuses any other version.",
-		"NumberOfBrokerNodes must be a multiple of the number of client subnets; subnets, security groups, certificate authorities, KMS keys and log destinations are stored without being checked. ListClusters refuses ClusterNameFilter.",
+		"Provisioned clusters require two or three distinct subnet identifiers in supported Regions and the same number of brokers per subnet. Subnet availability zones, security groups, certificate authorities, KMS keys and log destinations are not resolved. New encryption-in-transit metadata defaults to TLS and inCluster=true. ListClusters supports a name prefix.",
 	},
 }
 
+var mskClusterARNPattern = regexp.MustCompile(`^arn:aws:kafka:[a-z0-9-]+:[0-9]{12}:cluster/(?s:.+)/[0-9A-Za-z-]+$`)
 var mskConfigurationNamePattern = regexp.MustCompile(`^[0-9A-Za-z][0-9A-Za-z-]*$`)
 var mskConfigurationARNPattern = regexp.MustCompile(`^arn:aws:kafka:[a-z0-9-]+:[0-9]{12}:configuration/[0-9A-Za-z][0-9A-Za-z-]*/[0-9A-Za-z-]+$`)
 
@@ -740,8 +740,39 @@ func mskCreateCluster(input map[string]any) error {
 	group, _ := input["BrokerNodeGroupInfo"].(map[string]any)
 	subnets, _ := group["ClientSubnets"].([]any)
 	brokers, _ := input["NumberOfBrokerNodes"].(int64)
-	if len(subnets) == 0 || brokers%int64(len(subnets)) != 0 {
+	if len(subnets) < 2 || len(subnets) > 3 {
+		return Failure("BadRequestException", "Specify two or three client subnets.")
+	}
+	seen := make(map[string]bool, len(subnets))
+	for _, value := range subnets {
+		subnet := dataText(value)
+		if strings.TrimSpace(subnet) == "" || seen[subnet] {
+			return Failure("BadRequestException", "Client subnet identifiers must be nonempty and distinct.")
+		}
+		seen[subnet] = true
+	}
+	if name := dataText(input["ClusterName"]); strings.Contains(name, "/") {
+		return Failure("BadRequestException", "A local cluster name must fit in one cluster ARN path segment.")
+	}
+	if brokers%int64(len(subnets)) != 0 {
 		return Failure("BadRequestException", "NumberOfBrokerNodes must be a multiple of the number of client subnets.")
+	}
+	// Apply current REST defaults only to newly stored records, retaining explicit choices.
+	encryption, _ := input["EncryptionInfo"].(map[string]any)
+	if encryption == nil {
+		encryption = map[string]any{}
+		input["EncryptionInfo"] = encryption
+	}
+	transit, _ := encryption["EncryptionInTransit"].(map[string]any)
+	if transit == nil {
+		transit = map[string]any{}
+		encryption["EncryptionInTransit"] = transit
+	}
+	if _, supplied := transit["ClientBroker"]; !supplied {
+		transit["ClientBroker"] = "TLS"
+	}
+	if _, supplied := transit["InCluster"]; !supplied {
+		transit["InCluster"] = true
 	}
 	software := map[string]any{"KafkaVersion": input["KafkaVersion"]}
 	if info, supplied := input["ConfigurationInfo"].(map[string]any); supplied {
@@ -778,7 +809,17 @@ func mskClusterConfiguration(region, account string, document map[string]any, co
 	return nil
 }
 
+func mskClusterARN(input map[string]any) error {
+	if !mskClusterARNPattern.MatchString(dataText(input["ClusterArn"])) {
+		return Failure("BadRequestException", "Supply an MSK cluster ARN.")
+	}
+	return nil
+}
+
 func mskCurrentVersion(input map[string]any) error {
+	if err := mskClusterARN(input); err != nil {
+		return err
+	}
 	if version, ok := input["CurrentVersion"]; ok && version != mskClusterVersion {
 		return Failure("BadRequestException", "CurrentVersion does not match the cluster's current version.")
 	}

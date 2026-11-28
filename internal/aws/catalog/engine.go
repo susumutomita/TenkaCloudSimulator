@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"slices"
 	"sort"
 	"strings"
 	"time"
@@ -436,6 +437,11 @@ func (e *Engine) region(r *http.Request, b *binding) (string, error) {
 	return "", invalid("Unsupported simulator region.")
 }
 
+func (b *binding) usesModeledForbidden(name string) bool {
+	official := b.model.Operations[name]
+	return (b.spec.Model == "resource-groups" || b.spec.Model == "kafka") && official != nil && slices.Contains(official.Errors, "ForbiddenException")
+}
+
 // fail maps a typed failure onto the operation's modeled exception. A nil
 // operation (a Query request whose Action is not yet known) uses the
 // protocol's common error for the failure family.
@@ -449,7 +455,7 @@ func (e *Engine) fail(w http.ResponseWriter, b *binding, op *Op, err error) {
 		name = op.Name
 	}
 	code, status := b.errorCode(name, f.kind)
-	if f.kind == "denied" && b.usesResourceGroupForbidden(name) {
+	if f.kind == "denied" && b.usesModeledForbidden(name) {
 		code, status = "ForbiddenException", http.StatusForbidden
 	}
 	if official := b.model.Operations[name]; f.code != "" && official != nil {

@@ -49,9 +49,6 @@ type Op struct {
 	// AuthorizeParent binds a child Read/Put to its resolved parent's ARN.
 	// The child ARN remains an internal storage identity, not an IAM target.
 	AuthorizeParent bool
-	// AuthorizeCreateRefs requires this create action on the ARNs in Refs
-	// in addition to authorization on the resource created.
-	AuthorizeCreateRefs bool
 	// ListRequiresWildcard marks a list action whose IAM resource must be "*".
 	ListRequiresWildcard bool
 	// Touch lists stored members set to the current time by this operation.
