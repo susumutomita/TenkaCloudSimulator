@@ -4,6 +4,11 @@ on:
     branches: [main]
   pull_request:
   workflow_dispatch:
+    inputs:
+      simpledb_sdk_sessions:
+        description: Verify the reviewed SimpleDB source with the official SDK and served Console DOM
+        type: boolean
+        default: false
   workflow_call:
 permissions:
   contents: read
@@ -352,4 +357,87 @@ jobs:
             reports/login-paste-*.png
             reports/language-login-ja-*.png
           if-no-files-found: warn
+          retention-days: 14
+  simpledb-sdk-sessions-verification:
+    name: SimpleDB SDK sessions and cross-surface verification
+    if: github.event_name == 'workflow_dispatch' && inputs.simpledb_sdk_sessions
+    runs-on: ubuntu-26.04
+    timeout-minutes: 25
+    env:
+      PRODUCT_REVISION: fc1938e77f680525a2f29adc09ac3b05c7aa2736
+      PRODUCT_TREE: 8014c08e49ae93ea01a33739ea7aa48358b4ed35
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          ref: fc1938e77f680525a2f29adc09ac3b05c7aa2736
+          persist-credentials: false
+      - uses: actions/setup-go@v6.5.0
+        with:
+          go-version: '1.26.11'
+          cache: true
+      - name: Build the reviewed product commit
+        run: |
+          test "$(uname -m)" = x86_64
+          test "$(git rev-parse HEAD)" = "$PRODUCT_REVISION"
+          test "$(git rev-parse 'HEAD^{tree}')" = "$PRODUCT_TREE"
+          test -z "$(git status --porcelain)"
+          RECEIPTS="$RUNNER_TEMP/simpledb-receipts"
+          TOOLS="$RUNNER_TEMP/simpledb-verification-tools"
+          printf 'RECEIPTS=%s\nTOOLS=%s\n' "$RECEIPTS" "$TOOLS" >> "$GITHUB_ENV"
+          mkdir -p "$RECEIPTS" "$TOOLS"
+          make build
+          go version -m dist/tenkacloud-simulator > "$RECEIPTS/build.txt"
+          grep -F "vcs.revision=$PRODUCT_REVISION" "$RECEIPTS/build.txt"
+          grep -F 'vcs.modified=false' "$RECEIPTS/build.txt"
+      - name: Install pinned Python SDK, Node and jsdom test tools
+        run: |
+          python3 -m venv "$TOOLS/python"
+          "$TOOLS/python/bin/python" -m pip install -r scripts/requirements-test.txt
+          cd "$TOOLS"
+          curl --fail --silent --show-error --location https://nodejs.org/dist/v24.22.3/node-v24.22.3-linux-x64.tar.xz -o node.tar.xz
+          curl --fail --silent --show-error --location https://registry.npmjs.org/jsdom/-/jsdom-30.0.1.tgz -o jsdom.tgz
+          curl --fail --silent --show-error --location https://raw.githubusercontent.com/jsdom/jsdom/6584485f094d5b271553005b68804c93a455c002/package-lock.json -o package-lock.json
+          sha256sum --check <<'HASHES'
+          4f2b175a6d53a5c617a80dba2676238a0688cef28c6da4eba35c7d844e66fcfb  node.tar.xz
+          a40cdb89183203cc5592195baf6f1b7051d15a9e57dba8d2f8d0f868edba066f  jsdom.tgz
+          290dec5ff68bcb161c53ff2c53264e3cbef11bf761d521f6894c19526012a829  package-lock.json
+          HASHES
+          mkdir node jsdom
+          tar -xf node.tar.xz -C node --strip-components=1
+          tar -xzf jsdom.tgz -C jsdom --strip-components=1
+          cp package-lock.json jsdom/
+          export PATH="$TOOLS/node/bin:$PATH"
+          test "$(node --version)" = v24.22.3
+          npm ci --prefix "$TOOLS/jsdom" --omit=dev --omit=optional --ignore-scripts --no-audit --no-fund
+      - name: Verify two teams, sessions and shared native state
+        run: |
+          "$TOOLS/python/bin/python" -c 'import os; assert not any(k.startswith(("AWS_", "BOTO_")) for k in os.environ), "expected a fresh runner without AWS identity configuration"'
+          binary="$PWD/dist/tenkacloud-simulator"
+          digest=$(sha256sum "$binary" | cut -d ' ' -f 1)
+          "$TOOLS/python/bin/python" -B test/e2e/simpledb_select_sessions.py \
+            --revision "$PRODUCT_REVISION" --binary "$binary" --binary-sha256 "$digest" \
+            --report "$RECEIPTS/select-sessions.json"
+          "$TOOLS/python/bin/python" -B test/e2e/simpledb_crosssurface.py \
+            --revision "$PRODUCT_REVISION" --binary "$binary" --binary-sha256 "$digest" \
+            --node "$TOOLS/node/bin/node" --jsdom "$TOOLS/jsdom" > "$RECEIPTS/crosssurface.json"
+          jq -e --arg sha "$PRODUCT_REVISION" --arg tree "$PRODUCT_TREE" --arg digest "$digest" '
+            .exact_revision == $sha and .exact_tree == $tree and .binary_sha256 == $digest and
+            .sdk_pins == {"boto3":"1.42.0","botocore":"1.41.6"} and (.tested | length == 7)
+          ' "$RECEIPTS/select-sessions.json"
+          jq -e --arg sha "$PRODUCT_REVISION" --arg tree "$PRODUCT_TREE" --arg digest "$digest" '
+            .revision == $sha and .tree == $tree and .binary_sha256 == $digest and
+            .sdk_pins == {"boto3":"1.42.0","botocore":"1.41.6"} and
+            .node_sha256 == "a7ec1b37e6ff9d187e4198c5b6df9a4eb1c74dd31804fb3bac55cc4ceca1ac01" and
+            .jsdom_manifest_sha256 == "e87940b12f720a5b735a5df82108b634a238b8c6ebced71050a346a1675575b9" and
+            .retained_after_restart == true and .independent_two_team_scopes == true and
+            .peer_and_stale_session_rejected == true and .cleaned == true and
+            [.dom_stages[].mode] == ["write","deny","delete","empty","read","empty"] and
+            all(.dom_stages[]; .node == "v24.22.3" and .jsdom == "30.0.1")
+          ' "$RECEIPTS/crosssurface.json"
+      - name: Retain source, build, SDK and Console DOM receipts
+        uses: actions/upload-artifact@v7.0.2
+        with:
+          name: simpledb-sdk-sessions-fc1938e-${{ github.run_id }}
+          path: ${{ runner.temp }}/simpledb-receipts/
+          if-no-files-found: error
           retention-days: 14
