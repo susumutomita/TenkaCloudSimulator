@@ -334,6 +334,14 @@ def exercise(native):
         assert [r["Arn"] for r in owner(SERVICE, "ListNotificationRules")["NotificationRules"]] == [
             seed
         ]
+        third = put(b"three", second)
+        assert (
+            owner("codecommit", "GetBranch", repositoryName="practice", branchName="main")[
+                "branch"
+            ]["commitId"]
+            == third
+        )
+        assert not owner("sqs", "ReceiveMessage", QueueUrl=queue, WaitTimeSeconds=2).get("Messages")
         for i in range(2):
             name = "pages-" + str(i)
             repo = owner("codecommit", "CreateRepository", repositoryName=name)[
@@ -345,6 +353,54 @@ def exercise(native):
         button(page, "Load more rules").click()
         expect(button(page, seed.rsplit("/", 1)[1])).to_be_visible()
         expect(button(page, "Load more rules")).to_have_count(0)
+
+        button(reader, "Cancel").click()
+        button(reader, "Back to rules").click()
+        expect(button(reader, "Load more rules")).to_be_visible()
+        grid = reader.get_by_role("table", name="Notification rules")
+        old_row = grid.get_by_role("button").first.inner_text()
+        control(
+            team,
+            "PUT",
+            "/_simulator/v1/iam/principals/rule-reader/policy",
+            {
+                "Version": "2012-10-17",
+                "Statement": [
+                    {
+                        "Effect": "Allow",
+                        "Action": "codestar-notifications:DescribeNotificationRule",
+                        "Resource": "*",
+                    }
+                ],
+            },
+        )
+        button(reader, "Load more rules").click()
+        expect(reader.get_by_text(re.compile("403:"))).to_be_visible()
+        expect(reader.get_by_text("Rules could not be loaded", exact=True)).to_be_visible()
+        expect(button(reader, old_row)).to_have_count(0)
+        expect(button(reader, "Load more rules")).to_have_count(0)
+        control(
+            team,
+            "PUT",
+            "/_simulator/v1/iam/principals/rule-reader/policy",
+            {
+                "Version": "2012-10-17",
+                "Statement": [
+                    {
+                        "Effect": "Allow",
+                        "Action": [
+                            "codestar-notifications:ListNotificationRules",
+                            "codestar-notifications:DescribeNotificationRule",
+                        ],
+                        "Resource": "*",
+                    }
+                ],
+            },
+        )
+        button(reader, "Refresh rules").click()
+        expect(button(reader, old_row)).to_be_visible()
+        button(reader, "Load more rules").click()
+        expect(button(reader, seed.rsplit("/", 1)[1])).to_be_visible()
         for i in range(2):
             owner("codecommit", "DeleteRepository", repositoryName="pages-" + str(i))
         owner(SERVICE, "DeleteNotificationRule", Arn=seed)
@@ -365,6 +421,8 @@ def exercise(native):
                 "canceledRead": True,
                 "scalarReadback": True,
                 "paginatedRules": 21,
+                "deniedContinuationCleared": True,
+                "postDeleteNoDelivery": True,
             }
         )
     )

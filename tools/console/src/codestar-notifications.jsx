@@ -78,7 +78,10 @@ export default function NotificationRules({region, request, onSaving}) {
       if (selected && /^404:/.test(err.message) && pending?.arn === selected) {
         setPending(null); setNotice(t('The selected rule is absent.', '選択したルールは存在しません。'));
         setRows(prior => prior.filter(row => row.Arn !== selected)); setArn('');
-      } else {setError(err.message);}
+      } else {
+        if (!selected && /^(401|403):/.test(err.message)) {setRows([]); setToken('');}
+        setError(err.message);
+      }
     } finally {end(active);}
   }
   useEffect(() => {browse();}, [api]);
@@ -141,7 +144,7 @@ export default function NotificationRules({region, request, onSaving}) {
         <Button variant="primary" disabled={locked} onClick={() => startForm('create')}>{t('Create rule', 'ルールを作成')}</Button>
       </SpaceBetween>}>{t('Rules', 'ルール')}</Header>}
       columnDefinitions={[{id:'id',header:t('Rule ID', 'ルール ID'),cell: row => <Button variant="inline-link" disabled={locked} onClick={() => browse(row.Arn)}>{row.Id}</Button>}]}
-      empty={<Box>{t('No notification rules', '通知ルールはありません')}</Box>} />}
+      empty={<Box>{error ? t('Rules could not be loaded', 'ルールを読み込めませんでした') : t('No notification rules', '通知ルールはありません')}</Box>} />}
     {!mode && !arn && token && <Button disabled={locked} onClick={() => browse('', token)}>{t('Load more rules', 'さらにルールを読み込む')}</Button>}
     {!mode && arn && <Container header={<Header variant="h2" actions={<Button disabled={locked} onClick={() => browse()}>{t('Back to rules', 'ルール一覧に戻る')}</Button>}>{detail?.Name || t('Rule details', 'ルールの詳細')}</Header>}>
       <SpaceBetween size="m">
