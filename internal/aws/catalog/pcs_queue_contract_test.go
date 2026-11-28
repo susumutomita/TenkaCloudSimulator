@@ -3,7 +3,7 @@ package catalog
 import "testing"
 
 func TestPCSCreateQueueRequiresComputeNodeGroupAssociation(t *testing.T) {
-	h := newHarness(t, pcs)
+	h := newPCSHarness(t)
 	cluster := map[string]any{"clusterName": "queue-cluster", "scheduler": map[string]any{"type": "SLURM", "version": "24.11"},
 		"size": "SMALL", "networking": map[string]any{"subnetIds": []any{"subnet-0a1b2c3d"}}}
 	expect(t, h.json1("pcs", "CreateCluster", cluster), 200, "")

@@ -237,6 +237,9 @@ func (q *request) checkRefs(res *Resource, document map[string]any) error {
 }
 
 func (q *request) checkRefsIn(db querier, res *Resource, document map[string]any) error {
+	if err := q.checkPCSQueueReferences(db, res, document); err != nil {
+		return err
+	}
 	paths := make([]string, 0, len(res.Refs))
 	for path := range res.Refs {
 		paths = append(paths, path)
@@ -335,6 +338,9 @@ func (q *request) authorize(resource string) error {
 // authorizeTarget separates an identity policy's resource from the
 // private catalog row key only when the reviewed operation requires it.
 func (q *request) authorizeTarget(resource string, parent *row) error {
+	if handled, err := q.authorizePCS(resource, parent); handled {
+		return err
+	}
 	if q.op.AuthorizeParent {
 		if parent == nil || parent.ARN == "" {
 			return fmt.Errorf("catalog %s/%s lacks a resolved authorization parent", q.b.spec.Model, q.op.Name)
@@ -467,7 +473,14 @@ func (q *request) lookup() (row, *row, error) {
 	if err != nil {
 		return row{}, nil, err
 	}
-	if err := q.authorizeTarget(found.ARN, parent); err != nil {
+	target := found.ARN
+	if q.b.spec.Model == "pcs" {
+		target, err = q.pcsStoredARN(found)
+		if err != nil {
+			return row{}, nil, err
+		}
+	}
+	if err := q.authorizeTarget(target, parent); err != nil {
 		return row{}, nil, err
 	}
 	return found, parent, nil
@@ -850,6 +863,9 @@ func (q *request) create(ecsRevision int) (map[string]any, error) {
 			return nil, err
 		}
 	}
+	if err := q.pcsAssociationContext(); err != nil {
+		return nil, err
+	}
 	if err := tx.Commit(); err != nil {
 		return nil, err
 	}
@@ -1017,6 +1033,9 @@ func (q *request) commit(change func(*sql.Tx) error) error {
 		}
 		return err
 	}
+	if err := q.pcsAssociationContext(); err != nil {
+		return err
+	}
 	return tx.Commit()
 }
 
@@ -1181,7 +1200,7 @@ func (q *request) list() (map[string]any, error) {
 			}
 		}
 	}
-	if err := q.authorize(q.formatARN(res, "*", "*", parent)); err != nil {
+	if err := q.authorizeTarget(q.formatARN(res, "*", "*", parent), parent); err != nil {
 		return nil, err
 	}
 	rows, err := list(q.e.store.db, q.b.spec.Model, q.region, res.Kind, parentID(parent))
@@ -1383,8 +1402,11 @@ func (m *Model) isTagShape(name string) bool {
 func (q *request) tagged() (row, error) {
 	arn, _ := q.input[q.op.Lookup].(string)
 	found, err := findARN(q.e.store.db, q.b.spec.Model, arn)
+	if q.b.spec.Model == "pcs" && errors.Is(err, sql.ErrNoRows) {
+		found, err = q.pcsTagAlias(arn)
+	}
 	if errors.Is(err, sql.ErrNoRows) {
-		if err := q.authorize(arn); err != nil {
+		if err := q.authorizeTarget(arn, nil); err != nil {
 			return row{}, err
 		}
 		return row{}, &fault{kind: "notfound", message: "The resource " + arn + " does not exist."}
@@ -1392,7 +1414,14 @@ func (q *request) tagged() (row, error) {
 	if err != nil {
 		return row{}, err
 	}
-	if err := q.authorize(found.ARN); err != nil {
+	target := found.ARN
+	if q.b.spec.Model == "pcs" {
+		target, err = q.pcsStoredARN(found)
+		if err != nil {
+			return row{}, err
+		}
+	}
+	if err := q.authorizeTarget(target, nil); err != nil {
 		return row{}, err
 	}
 	if found.Region != q.region {
