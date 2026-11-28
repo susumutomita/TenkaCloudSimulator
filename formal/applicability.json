@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "base_sha": "8c22f02f6b25a9897cdfbc6e8e4edd932e8bf4f7",
+  "base_sha": "a9eab8d0fc1257e3e5fa1e10f7655fa503234964",
   "changes": [
     {
       "path": ".github/workflows/ci.yml",
@@ -11,7 +11,7 @@
     },
     {
       "path": "README.md",
-      "sha256": "c21bd85e808b0680606d0f7bc08f7b228336df537b5b7599e488ad36e8d67ff4",
+      "sha256": "dbba5f95949f194593994ce7ca01b9779f060add70baab69aada92cc2b625944",
       "disposition": "documentation",
       "reason": "Describe the complete bounded native and EN/JA Console workflow and retained unsupported origin/network/platform scope.",
       "models": []
@@ -25,7 +25,7 @@
     },
     {
       "path": "docs/design/0001-go-standalone.md",
-      "sha256": "786438dc8e467b8f2c6e984f32324c5431c169a0151624fa43240db176842529",
+      "sha256": "70c344c2127ce214b0a64d33263494f9ea032ca7780597b8f85f7764af0c54df",
       "disposition": "documentation",
       "reason": "Describe the complete bounded native and EN/JA Console workflow and retained unsupported origin/network/platform scope.",
       "models": []
@@ -126,7 +126,7 @@
     },
     {
       "path": "formal/models.json",
-      "sha256": "4a57e016c1a8d894e0d9c1e34bea999dc58abc1b53c037c5e4ddb5254374d0b8",
+      "sha256": "95bcd0b3d6cb738e399d625a8a372f939cfb72d8a773bc061e1fa750155656c0",
       "disposition": "formal-infrastructure",
       "reason": "Independently protect both CloudFront models and fixed controls; run focused reference and Console client checks in normal CI.",
       "models": []
@@ -410,7 +410,7 @@
     },
     {
       "path": "internal/server/web/app.js",
-      "sha256": "c7879516114bbbaeadae81ca2f287204af60cd815c13ed4562c534fab496d363",
+      "sha256": "c9f0ed9ade79e01cd01cceaabcd6d88ac3061c9d15c8a937225d017e10bec8fd",
       "disposition": "modeled",
       "reason": "Bounded native CloudFront cache/authorization/atomicity and Console request ownership, protected content and explicit invalidation recovery. Concrete namespace and physically staged interruption tests cover wire/storage effects excluded from the finite models.",
       "models": [
@@ -474,14 +474,14 @@
     },
     {
       "path": "tools/console/bundle-digests.json",
-      "sha256": "a931f96eb115e279f04be6d77f4f730c8bbe03fd6fd5b4f241472f40b83077fd",
+      "sha256": "3b276d668501d1e9b38d1cfd523335dd683aa96d77ecc5239a4ca519bd225bf0",
       "disposition": "presentation",
       "reason": "Scoped CloudFront API reference and canonical generated assets; original protocol and content safety are retained.",
       "models": []
     },
     {
       "path": "tools/console/bundle-inputs.json",
-      "sha256": "b5ef3217dbad7eed799ed519bdd347ad46f587d63ca58b9b140b6b41c4b2e1fd",
+      "sha256": "521115e76aa8b7f774c6204025a47207f831ecb10ff21e466ced3b6d1c3cf783",
       "disposition": "presentation",
       "reason": "Scoped CloudFront API reference and canonical generated assets; original protocol and content safety are retained.",
       "models": []
