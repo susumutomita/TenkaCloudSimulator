@@ -8,11 +8,11 @@ jobs:
     runs-on: ubuntu-22.04
     timeout-minutes: 25
     env:
-      PRODUCT: ec9af0b9d1adf885dc58d8f8be178cbee40cc91a
+      PRODUCT: 1bbc39fbe20103d0c4448588054732ec3447fbbe
     steps:
       - uses: actions/checkout@v7.0.1
         with:
-          ref: ec9af0b9d1adf885dc58d8f8be178cbee40cc91a
+          ref: 1bbc39fbe20103d0c4448588054732ec3447fbbe
           persist-credentials: false
       - uses: actions/setup-go@v6.5.0
         with:
@@ -24,7 +24,7 @@ jobs:
           test "$GITHUB_REPOSITORY" = susumutomita/TenkaCloudSimulator
           test "$GITHUB_REF" = refs/heads/verify/210-b2bi-profiles
           test "$(git rev-parse HEAD)" = "$PRODUCT"
-          test "$(git rev-parse 'HEAD^{tree}')" = d5180f2eabb3b104f1cc79919d31c50d00d64716
+          test "$(git rev-parse 'HEAD^{tree}')" = a9362fb23fcf72e845f7c86fc867761abbb841e8
           test -z "$(git status --porcelain)"
           test "$(go env GOVERSION)" = go1.26.11
           test "$(id -u)" -ne 0
