@@ -1,326 +1,236 @@
 {
   "version": 1,
-  "base_sha": "fd803075c37af3faa377f550c8e1cd52b3cfbbb1",
+  "base_sha": "5b740845f4b7ffe22d451eeef1382cb43fe77cc4",
   "changes": [
     {
       "path": ".github/workflows/ci.yml",
-      "sha256": "04d945225fe7f2641ae7caf6dfbad93ad812ffc3235d6d350e387ba8759e0dcd",
+      "sha256": "cff60535e43c626fea08ac5d850e0e0c7fe481c7e61e504eb5758cde9aab96ff",
       "disposition": "formal-infrastructure",
-      "reason": "Run and check the actual changed CloudFront response protections, scoped cache eviction and same-origin reference controls without skipping existing checks.",
+      "reason": "Register independent literal model/property/mutant/source controls and run the focused Console checks in normal CI.",
       "models": []
     },
     {
       "path": "README.md",
-      "sha256": "72e41508e79540bbe9b43e97caf20a2f5132f7420ae9c33ff90d13b82f57784e",
+      "sha256": "2af6340e719a884aa7133b338f55c877ab25d6388761c14554e35cbc39f6ac11",
       "disposition": "documentation",
-      "reason": "Document the exact native and simulator-only local content boundaries, shared helper dependency and unsupported CloudFront features.",
+      "reason": "Document the actual bounded Console and safe content/invalidation workflow without CDN or configuration-editor claims.",
       "models": []
     },
     {
       "path": "docs/cloudfront-local-content.md",
-      "sha256": "48a4c06ef67f1b8dce79a6c5f07bdcd429f851d7fa485f9a41d89b411c6bcfd1",
+      "sha256": "d1cfc631608be3ceafd63b5918b5e3900eb0fe64089b4033c5341fb11f681e18",
       "disposition": "documentation",
-      "reason": "Document the exact native and simulator-only local content boundaries, shared helper dependency and unsupported CloudFront features.",
+      "reason": "Document the actual bounded Console and safe content/invalidation workflow without CDN or configuration-editor claims.",
       "models": []
     },
     {
       "path": "docs/design/0001-go-standalone.md",
-      "sha256": "3aea3d5648cb742264968079a45d70609565c9062dc4ddf591d051f215a10da7",
+      "sha256": "fa71e930c8b49b6fa66578f7bd59d30d0c74f0943b15b6a8058ad8e38ad11be5",
       "disposition": "documentation",
-      "reason": "Document the exact native and simulator-only local content boundaries, shared helper dependency and unsupported CloudFront features.",
+      "reason": "Document the actual bounded Console and safe content/invalidation workflow without CDN or configuration-editor claims.",
       "models": []
     },
     {
-      "path": "formal/CloudFrontLocalCache.cfg",
-      "sha256": "cb43301b7e4c267dc478db98dd14e3f43de194faf5010bb56ef6311562d64419",
+      "path": "formal/CloudFrontConsoleEpoch.cfg",
+      "sha256": "33e3b10974a87192cd3ce9f4d1e25016f4b23c59778376f9786c5a91965131b4",
       "disposition": "modeled",
-      "reason": "Bound the local distribution/cache transaction, joint read authorization, ETag mutation, invalidation, rollback and committed restart state; native tests separately exercise concrete protocol and SQLite behavior.",
+      "reason": "Bounded CloudFront Console request/identity ownership and explicit invalidation recovery; existing CloudFrontLocalCache also binds physically staged native interruption witnesses. Native backend semantics are unchanged except truthful Console advertisement.",
       "models": [
-        {
-          "id": "CloudFrontLocalCache",
-          "properties": [
-            "FreshJointAuthority",
-            "ExactHitIdentity",
-            "MissReadsOrigin",
-            "FailureRollsBack",
-            "RefusalUnchanged",
-            "StaleETagUnchanged",
-            "UpdateClearsCache",
-            "InvalidationClearsCache",
-            "RestartPreserves",
-            "PeerUnchanged"
-          ],
-          "limits": "Checks an atomic abstract transaction and one immutable pair of policy decisions per delivery. A bucket lifetime fingerprint is assumed distinct for the single ordinary recreation; actual wall-clock buckets.created plus region does not prove ABA resistance under clock rollback. One abstract cache line does not model concrete multi-entry quotas, exact paths, TTL seconds, SQL/triggers/locking, authentication, HTTP/XML/S3 parsing, cache buffers, ETags or Go refinement. Restart preserves abstract committed state only, not crash durability. Native and SDK tests separately cover the real implementation."
-        }
+        "CloudFrontConsoleEpoch"
       ]
     },
     {
-      "path": "formal/CloudFrontLocalCache.tla",
-      "sha256": "6c6b9cb2015d81c745883ec6d36ede60500a9ea579d6fd500ff9e4ade538e46a",
+      "path": "formal/CloudFrontConsoleEpoch.tla",
+      "sha256": "725f4350f7d2112b27df49faad60c2168ef0cdabf2ae65af9b57ab525850d411",
       "disposition": "modeled",
-      "reason": "Bound the local distribution/cache transaction, joint read authorization, ETag mutation, invalidation, rollback and committed restart state; native tests separately exercise concrete protocol and SQLite behavior.",
+      "reason": "Bounded CloudFront Console request/identity ownership and explicit invalidation recovery; existing CloudFrontLocalCache also binds physically staged native interruption witnesses. Native backend semantics are unchanged except truthful Console advertisement.",
       "models": [
-        {
-          "id": "CloudFrontLocalCache",
-          "properties": [
-            "FreshJointAuthority",
-            "ExactHitIdentity",
-            "MissReadsOrigin",
-            "FailureRollsBack",
-            "RefusalUnchanged",
-            "StaleETagUnchanged",
-            "UpdateClearsCache",
-            "InvalidationClearsCache",
-            "RestartPreserves",
-            "PeerUnchanged"
-          ],
-          "limits": "Checks an atomic abstract transaction and one immutable pair of policy decisions per delivery. A bucket lifetime fingerprint is assumed distinct for the single ordinary recreation; actual wall-clock buckets.created plus region does not prove ABA resistance under clock rollback. One abstract cache line does not model concrete multi-entry quotas, exact paths, TTL seconds, SQL/triggers/locking, authentication, HTTP/XML/S3 parsing, cache buffers, ETags or Go refinement. Restart preserves abstract committed state only, not crash durability. Native and SDK tests separately cover the real implementation."
-        }
+        "CloudFrontConsoleEpoch"
       ]
     },
     {
       "path": "formal/models.json",
-      "sha256": "8f581d7048e635975f1cdee8f4d38741bb3a814b171789c139f8ea942ccff276",
+      "sha256": "a4980ad38f591d08056675bb1fe12df7c710b2dc09c22756e736621c442a87d1",
       "disposition": "formal-infrastructure",
-      "reason": "Register the bounded local CloudFront cache model and nine targeted invariant mutations without changing historical model records.",
+      "reason": "Register independent literal model/property/mutant/source controls and run the focused Console checks in normal CI.",
       "models": []
-    },
-    {
-      "path": "internal/aws/cloudfront_distribution.go",
-      "sha256": "9b7b4f4c6952d3542c6b4e1a658c42f341c7be96a5faa50bf449f9c30206dae4",
-      "disposition": "modeled",
-      "reason": "Bound the local distribution/cache transaction, joint read authorization, ETag mutation, invalidation, rollback and committed restart state; native tests separately exercise concrete protocol and SQLite behavior.",
-      "models": [
-        {
-          "id": "CloudFrontLocalCache",
-          "properties": [
-            "FreshJointAuthority",
-            "ExactHitIdentity",
-            "MissReadsOrigin",
-            "FailureRollsBack",
-            "RefusalUnchanged",
-            "StaleETagUnchanged",
-            "UpdateClearsCache",
-            "InvalidationClearsCache",
-            "RestartPreserves",
-            "PeerUnchanged"
-          ],
-          "limits": "Checks an atomic abstract transaction and one immutable pair of policy decisions per delivery. A bucket lifetime fingerprint is assumed distinct for the single ordinary recreation; actual wall-clock buckets.created plus region does not prove ABA resistance under clock rollback. One abstract cache line does not model concrete multi-entry quotas, exact paths, TTL seconds, SQL/triggers/locking, authentication, HTTP/XML/S3 parsing, cache buffers, ETags or Go refinement. Restart preserves abstract committed state only, not crash durability. Native and SDK tests separately cover the real implementation."
-        }
-      ]
     },
     {
       "path": "internal/aws/cloudfront_distribution_http.go",
-      "sha256": "f2cc81697bee212c613d07f05f3966c87c7348d1cb6b629f472f4f7532592cb1",
+      "sha256": "d8b828129e5c5389586238ff0691ffe9106c8b1955993f0dab31e8cd1dfe0ed5",
       "disposition": "modeled",
-      "reason": "Bound the local distribution/cache transaction, joint read authorization, ETag mutation, invalidation, rollback and committed restart state; native tests separately exercise concrete protocol and SQLite behavior.",
+      "reason": "Bounded CloudFront Console request/identity ownership and explicit invalidation recovery; existing CloudFrontLocalCache also binds physically staged native interruption witnesses. Native backend semantics are unchanged except truthful Console advertisement.",
       "models": [
-        {
-          "id": "CloudFrontLocalCache",
-          "properties": [
-            "FreshJointAuthority",
-            "ExactHitIdentity",
-            "MissReadsOrigin",
-            "FailureRollsBack",
-            "RefusalUnchanged",
-            "StaleETagUnchanged",
-            "UpdateClearsCache",
-            "InvalidationClearsCache",
-            "RestartPreserves",
-            "PeerUnchanged"
-          ],
-          "limits": "Checks an atomic abstract transaction and one immutable pair of policy decisions per delivery. A bucket lifetime fingerprint is assumed distinct for the single ordinary recreation; actual wall-clock buckets.created plus region does not prove ABA resistance under clock rollback. One abstract cache line does not model concrete multi-entry quotas, exact paths, TTL seconds, SQL/triggers/locking, authentication, HTTP/XML/S3 parsing, cache buffers, ETags or Go refinement. Restart preserves abstract committed state only, not crash durability. Native and SDK tests separately cover the real implementation."
-        }
+        "CloudFrontLocalCache",
+        "CloudFrontConsoleEpoch"
       ]
     },
     {
-      "path": "internal/aws/cloudfront_distribution_list.go",
-      "sha256": "91e8e6fc791846cd91855ad33562c1ed3e2d172221a74a4388b3ab86efbca85c",
+      "path": "internal/aws/cloudfront_distribution_interrupt_test.go",
+      "sha256": "addb31f3f2ac39b8a493ba4f65beb4c275fe038e51cceee5cfdcfd6c51afabae",
       "disposition": "modeled",
-      "reason": "Bound the local distribution/cache transaction, joint read authorization, ETag mutation, invalidation, rollback and committed restart state; native tests separately exercise concrete protocol and SQLite behavior.",
+      "reason": "Bounded CloudFront Console request/identity ownership and explicit invalidation recovery; existing CloudFrontLocalCache also binds physically staged native interruption witnesses. Native backend semantics are unchanged except truthful Console advertisement.",
       "models": [
-        {
-          "id": "CloudFrontLocalCache",
-          "properties": [
-            "FreshJointAuthority",
-            "ExactHitIdentity",
-            "MissReadsOrigin",
-            "FailureRollsBack",
-            "RefusalUnchanged",
-            "StaleETagUnchanged",
-            "UpdateClearsCache",
-            "InvalidationClearsCache",
-            "RestartPreserves",
-            "PeerUnchanged"
-          ],
-          "limits": "Checks an atomic abstract transaction and one immutable pair of policy decisions per delivery. A bucket lifetime fingerprint is assumed distinct for the single ordinary recreation; actual wall-clock buckets.created plus region does not prove ABA resistance under clock rollback. One abstract cache line does not model concrete multi-entry quotas, exact paths, TTL seconds, SQL/triggers/locking, authentication, HTTP/XML/S3 parsing, cache buffers, ETags or Go refinement. Restart preserves abstract committed state only, not crash durability. Native and SDK tests separately cover the real implementation."
-        }
+        "CloudFrontLocalCache"
       ]
     },
     {
-      "path": "internal/aws/cloudfront_distribution_store.go",
-      "sha256": "2970a1cb0c45ee34657d3e2b2c57f1328db547c3e2fc00079a6c4e808b69a7fa",
+      "path": "internal/server/web/app.js",
+      "sha256": "13eadaecb1618eef31c3b0ebeb51771c7cd18236e96c4aed04ce9c3e50a0f5e3",
       "disposition": "modeled",
-      "reason": "Bound the local distribution/cache transaction, joint read authorization, ETag mutation, invalidation, rollback and committed restart state; native tests separately exercise concrete protocol and SQLite behavior.",
+      "reason": "Bounded CloudFront Console request/identity ownership and explicit invalidation recovery; existing CloudFrontLocalCache also binds physically staged native interruption witnesses. Native backend semantics are unchanged except truthful Console advertisement.",
       "models": [
-        {
-          "id": "CloudFrontLocalCache",
-          "properties": [
-            "FreshJointAuthority",
-            "ExactHitIdentity",
-            "MissReadsOrigin",
-            "FailureRollsBack",
-            "RefusalUnchanged",
-            "StaleETagUnchanged",
-            "UpdateClearsCache",
-            "InvalidationClearsCache",
-            "RestartPreserves",
-            "PeerUnchanged"
-          ],
-          "limits": "Checks an atomic abstract transaction and one immutable pair of policy decisions per delivery. A bucket lifetime fingerprint is assumed distinct for the single ordinary recreation; actual wall-clock buckets.created plus region does not prove ABA resistance under clock rollback. One abstract cache line does not model concrete multi-entry quotas, exact paths, TTL seconds, SQL/triggers/locking, authentication, HTTP/XML/S3 parsing, cache buffers, ETags or Go refinement. Restart preserves abstract committed state only, not crash durability. Native and SDK tests separately cover the real implementation."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/cloudfront_distribution_test.go",
-      "sha256": "a1b5ff703daf92721588d679154333e98c56b94c7c51ffbecd4c860a55ba462b",
-      "disposition": "test-support",
-      "reason": "Exercise real bounded distribution/cache state, stock pinned SDK lifecycle, strict errors and owned cleanup; not a whole-service or real CDN claim.",
-      "models": []
-    },
-    {
-      "path": "internal/aws/cloudfront_vpc_origin.go",
-      "sha256": "6aeda5cf138daebbea4838be8c3825a4cacbd0cba43cd65f6184cfb57f056447",
-      "disposition": "modeled",
-      "reason": "Bound the local distribution/cache transaction, joint read authorization, ETag mutation, invalidation, rollback and committed restart state; native tests separately exercise concrete protocol and SQLite behavior.",
-      "models": [
-        {
-          "id": "CloudFrontLocalCache",
-          "properties": [
-            "FreshJointAuthority",
-            "ExactHitIdentity",
-            "MissReadsOrigin",
-            "FailureRollsBack",
-            "RefusalUnchanged",
-            "StaleETagUnchanged",
-            "UpdateClearsCache",
-            "InvalidationClearsCache",
-            "RestartPreserves",
-            "PeerUnchanged"
-          ],
-          "limits": "Checks an atomic abstract transaction and one immutable pair of policy decisions per delivery. A bucket lifetime fingerprint is assumed distinct for the single ordinary recreation; actual wall-clock buckets.created plus region does not prove ABA resistance under clock rollback. One abstract cache line does not model concrete multi-entry quotas, exact paths, TTL seconds, SQL/triggers/locking, authentication, HTTP/XML/S3 parsing, cache buffers, ETags or Go refinement. Restart preserves abstract committed state only, not crash durability. Native and SDK tests separately cover the real implementation."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/ssm.go",
-      "sha256": "0d6fcceec0835e9c49b78de130aac7aa1fe54b9f6131018ae04fd64d914ac52a",
-      "disposition": "modeled",
-      "reason": "Bound the local distribution/cache transaction, joint read authorization, ETag mutation, invalidation, rollback and committed restart state; native tests separately exercise concrete protocol and SQLite behavior.",
-      "models": [
-        {
-          "id": "CloudFrontLocalCache",
-          "properties": [
-            "FreshJointAuthority",
-            "ExactHitIdentity",
-            "MissReadsOrigin",
-            "FailureRollsBack",
-            "RefusalUnchanged",
-            "StaleETagUnchanged",
-            "UpdateClearsCache",
-            "InvalidationClearsCache",
-            "RestartPreserves",
-            "PeerUnchanged"
-          ],
-          "limits": "Checks an atomic abstract transaction and one immutable pair of policy decisions per delivery. A bucket lifetime fingerprint is assumed distinct for the single ordinary recreation; actual wall-clock buckets.created plus region does not prove ABA resistance under clock rollback. One abstract cache line does not model concrete multi-entry quotas, exact paths, TTL seconds, SQL/triggers/locking, authentication, HTTP/XML/S3 parsing, cache buffers, ETags or Go refinement. Restart preserves abstract committed state only, not crash durability. Native and SDK tests separately cover the real implementation."
-        }
-      ]
-    },
-    {
-      "path": "internal/server/apidocs/cloudfront-local-init.js",
-      "sha256": "2849ed01aaa656469a1976ccabbbe28daad63eb1a580f4ca9198c352d59a9173",
-      "disposition": "presentation",
-      "reason": "Serve a same-origin native CloudFront XML reference with bounded methods, paths and normal browser session authority; no outbound origin fetch or static saved-state claim.",
-      "models": []
-    },
-    {
-      "path": "internal/server/apidocs/cloudfront-local.html",
-      "sha256": "e32b2b882be408d2c43c90a8a1dabe0c8ae6acf77a4f4d081be38e8c1ac3a49e",
-      "disposition": "presentation",
-      "reason": "Serve a same-origin native CloudFront XML reference with bounded methods, paths and normal browser session authority; no outbound origin fetch or static saved-state claim.",
-      "models": []
-    },
-    {
-      "path": "internal/server/apidocs/cloudfront-local.json",
-      "sha256": "51b777ef8f54b88fabf1b809e92110b9fe9949d371f6e737b94a9bd215d9b042",
-      "disposition": "presentation",
-      "reason": "Serve a same-origin native CloudFront XML reference with bounded methods, paths and normal browser session authority; no outbound origin fetch or static saved-state claim.",
-      "models": []
-    },
-    {
-      "path": "internal/server/cloudfront_local_content_test.go",
-      "sha256": "8c476c5d00f02edf66201fc217e9554043bc4a4efdd6ee03bea3bf054a374c5c",
-      "disposition": "test-support",
-      "reason": "Run and check the actual changed CloudFront response protections, scoped cache eviction and same-origin reference controls without skipping existing checks.",
-      "models": []
-    },
-    {
-      "path": "internal/server/server.go",
-      "sha256": "782ede54d372ad31097084d34e3ea3d34e9c9292c7e3f5cec8d17bd0ba92eb7a",
-      "disposition": "modeled",
-      "reason": "Bound the local distribution/cache transaction, joint read authorization, ETag mutation, invalidation, rollback and committed restart state; native tests separately exercise concrete protocol and SQLite behavior.",
-      "models": [
-        {
-          "id": "CloudFrontLocalCache",
-          "properties": [
-            "FreshJointAuthority",
-            "ExactHitIdentity",
-            "MissReadsOrigin",
-            "FailureRollsBack",
-            "RefusalUnchanged",
-            "StaleETagUnchanged",
-            "UpdateClearsCache",
-            "InvalidationClearsCache",
-            "RestartPreserves",
-            "PeerUnchanged"
-          ],
-          "limits": "Checks an atomic abstract transaction and one immutable pair of policy decisions per delivery. A bucket lifetime fingerprint is assumed distinct for the single ordinary recreation; actual wall-clock buckets.created plus region does not prove ABA resistance under clock rollback. One abstract cache line does not model concrete multi-entry quotas, exact paths, TTL seconds, SQL/triggers/locking, authentication, HTTP/XML/S3 parsing, cache buffers, ETags or Go refinement. Restart preserves abstract committed state only, not crash durability. Native and SDK tests separately cover the real implementation."
-        }
+        "SecretsRevealEpoch",
+        "SakuraDisksViewEpoch",
+        "DynamoDBConsoleEpoch",
+        "SecretMetadataViewEpoch",
+        "KMSAliasesViewEpoch",
+        "CatalogConsoleEpoch",
+        "LoginInputIntent",
+        "S3MultipartConsolePaging",
+        "S3MultipartPartReceipt",
+        "LambdaLogTailDisclosure",
+        "TerminalClientEpoch",
+        "EC2SecurityGroupConsoleEpoch",
+        "CloudDNSConsoleScope",
+        "SakuraServerReadEpoch",
+        "AzureBlobRowDownload",
+        "AzureQueueOwnerAccess",
+        "SNSConsoleResponseAdmission",
+        "SimpleDBConsoleEpoch",
+        "EC2RouteTableConsoleEpoch",
+        "SimpleDBSelectConsoleEpoch",
+        "EC2NativeSubnetLifecycle",
+        "EC2TemplatePreviewEpoch",
+        "EC2DetachedNetworkConsole",
+        "EC2InternetGatewayLifecycle",
+        "EC2InternetGatewayInventoryPages",
+        "EC2InternetGatewayAttachment",
+        "EC2NativeDefaultRouteLifecycle",
+        "EC2NativeIPv4RouteSet",
+        "EC2RouteTableInventoryPages",
+        "EC2NativeRouteAssociationReplacement",
+        "EC2NativeSubnetPublicIPv4",
+        "EC2DetachedSecurityGroupRules",
+        "EC2NativeVPCMainRoute",
+        "EC2InstanceStackConsole",
+        "EC2VPCCreateForm",
+        "EC2RegionalSubnetConsole",
+        "EC2VpcConsoleNavigation",
+        "EC2VpcResourceMap",
+        "EC2DetachedNetworkACLRules",
+        "EC2NativeVPCTags",
+        "EC2NativeSubnetTags",
+        "ScalingPlanConsole",
+        "CloudFrontConsoleEpoch"
       ]
     },
     {
       "path": "scripts/formal_model_gate.py",
-      "sha256": "701388bd0991502f398d8899d19505a373efc8a0a03b790ffd75655a4131b49f",
+      "sha256": "600fdbe3dc92aa3c4a1aff1b0612193a272ddb0901e3fe3d1d0c1d54cf5233bf",
       "disposition": "formal-infrastructure",
-      "reason": "Protect the registered CloudFrontLocalCache model, all eleven invariants, nine sensitivity mutants and exact source scope with independent fixed controls and explicit registry inventory; no existing control changes.",
+      "reason": "Register independent literal model/property/mutant/source controls and run the focused Console checks in normal CI.",
       "models": []
     },
     {
       "path": "scripts/test-formal-gate.py",
-      "sha256": "0b3efa7006cb1f95bfe6adbf659d887d81b9e4457374035a437a2884372c4043",
+      "sha256": "9d93efa5bcd2c4af2d746f8d6a692c54dbfeb72d2f55afb2d986063c8c22f305",
       "disposition": "formal-infrastructure",
-      "reason": "Protect the registered CloudFrontLocalCache model, all eleven invariants, nine sensitivity mutants and exact source scope with independent fixed controls and explicit registry inventory; no existing control changes.",
+      "reason": "Register independent literal model/property/mutant/source controls and run the focused Console checks in normal CI.",
       "models": []
     },
     {
-      "path": "test/console/cloudfront-local-reference.test.mjs",
-      "sha256": "10cf42555e3af01876511810d423e03d638c22e957dd76ed21f4db9f63d6f86c",
-      "disposition": "test-support",
-      "reason": "Run and check the actual changed CloudFront response protections, scoped cache eviction and same-origin reference controls without skipping existing checks.",
+      "path": "tools/console/bundle-digests.json",
+      "sha256": "3c3d9420c4dc9eef204010252c3c9724b4d740ca439aed2c391eee5ce94f0283",
+      "disposition": "presentation",
+      "reason": "Canonical embedded Console build outputs and supporting metadata for the scoped CloudFront view.",
       "models": []
     },
     {
-      "path": "test/e2e/cloudfront_local_content.py",
-      "sha256": "80ad1c99a32411ea95979b8490654e2876a835d3381fd3f8c0eafb56b19fb47e",
-      "disposition": "test-support",
-      "reason": "Exercise real bounded distribution/cache state, stock pinned SDK lifecycle, strict errors and owned cleanup; not a whole-service or real CDN claim.",
+      "path": "tools/console/bundle-inputs.json",
+      "sha256": "c21563339c9b6294f3e1532c09b97c4b151c061d8a5c26df97b3f2739a180132",
+      "disposition": "presentation",
+      "reason": "Canonical embedded Console build outputs and supporting metadata for the scoped CloudFront view.",
       "models": []
     },
     {
-      "path": "test/e2e/cloudfront_local_scalar.py",
-      "sha256": "9d9dff97a9fbf6b58ea2d2bd3476fa976ddfc1a06d0b384ceb93de8e01fc187d",
-      "disposition": "test-support",
-      "reason": "Exercise two genuine native Scalar Sends plus one explicitly simulator-only saved-content read and download over official SDK-created local state, guarded two-team authorities, reopen, denials and cleanup.",
+      "path": "tools/console/src/cloudfront-local.jsx",
+      "sha256": "45b09aeebd49da2a9881a90cc0587f64e2b8ddb8822af1e445c48fa06154d3a9",
+      "disposition": "modeled",
+      "reason": "Bounded CloudFront Console request/identity ownership and explicit invalidation recovery; existing CloudFrontLocalCache also binds physically staged native interruption witnesses. Native backend semantics are unchanged except truthful Console advertisement.",
+      "models": [
+        "CloudFrontConsoleEpoch"
+      ]
+    },
+    {
+      "path": "tools/console/src/cloudfront-local.mjs",
+      "sha256": "33d0a7cca215c6edcc6dc4bfb46a53cddca162942542eb30708548485971947a",
+      "disposition": "modeled",
+      "reason": "Bounded CloudFront Console request/identity ownership and explicit invalidation recovery; existing CloudFrontLocalCache also binds physically staged native interruption witnesses. Native backend semantics are unchanged except truthful Console advertisement.",
+      "models": [
+        "CloudFrontConsoleEpoch"
+      ]
+    },
+    {
+      "path": "tools/console/src/console-navigation.mjs",
+      "sha256": "7fb3da71ae462a0c6abc057435635d396c195e7501539a9fca160efe1287cd12",
+      "disposition": "modeled",
+      "reason": "Bounded CloudFront Console request/identity ownership and explicit invalidation recovery; existing CloudFrontLocalCache also binds physically staged native interruption witnesses. Native backend semantics are unchanged except truthful Console advertisement.",
+      "models": [
+        "CloudDNSConsoleScope",
+        "SakuraServerReadEpoch",
+        "AzureQueueOwnerAccess",
+        "SNSConsoleResponseAdmission",
+        "SimpleDBConsoleEpoch",
+        "ScalingPlanConsole",
+        "CloudFrontConsoleEpoch"
+      ]
+    },
+    {
+      "path": "tools/console/src/main.jsx",
+      "sha256": "eea2f05df55538ce79c36aeff92cbeae853d54e601b97dcf10200d26e5465fca",
+      "disposition": "modeled",
+      "reason": "Bounded CloudFront Console request/identity ownership and explicit invalidation recovery; existing CloudFrontLocalCache also binds physically staged native interruption witnesses. Native backend semantics are unchanged except truthful Console advertisement.",
+      "models": [
+        "BrowserSessions",
+        "SQSConsoleEpoch",
+        "CloudWatchLogsViewEpoch",
+        "SecretsRevealEpoch",
+        "SakuraDisksViewEpoch",
+        "DynamoDBConsoleEpoch",
+        "KMSAliasesViewEpoch",
+        "CatalogConsoleEpoch",
+        "TerminalClientEpoch",
+        "EC2SecurityGroupConsoleEpoch",
+        "CloudDNSConsoleScope",
+        "SakuraServerReadEpoch",
+        "AzureQueueOwnerAccess",
+        "SNSConsoleResponseAdmission",
+        "SimpleDBConsoleEpoch",
+        "EC2RouteTableConsoleEpoch",
+        "SimpleDBSelectConsoleEpoch",
+        "EC2NativeSubnetLifecycle",
+        "EC2TemplatePreviewEpoch",
+        "EC2DetachedNetworkConsole",
+        "EC2InternetGatewayLifecycle",
+        "EC2NativeDefaultRouteLifecycle",
+        "EC2NativeIPv4RouteSet",
+        "EC2NativeRouteAssociationReplacement",
+        "EC2NativeSubnetPublicIPv4",
+        "EC2DetachedSecurityGroupRules",
+        "EC2InstanceStackConsole",
+        "EC2VPCCreateForm",
+        "EC2RegionalSubnetConsole",
+        "EC2VpcConsoleNavigation",
+        "ScalingPlanConsole",
+        "CloudFrontConsoleEpoch"
+      ]
+    },
+    {
+      "path": "tools/console/test/cloudfront-local.test.mjs",
+      "sha256": "05f7ecff0337e10b9312988edb2dec9dc0edfa0b14fd0382bec0b8ed4e4e7694",
+      "disposition": "presentation",
+      "reason": "Canonical embedded Console build outputs and supporting metadata for the scoped CloudFront view.",
       "models": []
     }
   ]
