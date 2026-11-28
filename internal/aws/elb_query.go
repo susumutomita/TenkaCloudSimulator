@@ -241,8 +241,10 @@ func utf8Text(s string) bool {
 // Wire projections of the official ELBv2 XML shapes.
 type elbAZWire struct {
 	SubnetID string `xml:"SubnetId"`
+	ZoneName string `xml:",omitempty"`
 }
 type elbLBWire struct {
+	VPCID             string `xml:"VpcId,omitempty"`
 	LoadBalancerArn   string
 	DNSName           string
 	CreatedTime       string
@@ -308,10 +310,10 @@ type elbHealthWire struct {
 }
 
 func elbLBOut(lb ELBLoadBalancer) elbLBWire {
-	out := elbLBWire{LoadBalancerArn: lb.ARN, DNSName: lb.DNSName, CreatedTime: lb.Created, LoadBalancerName: lb.Name, Scheme: lb.Scheme, Type: "application", SecurityGroups: lb.SecurityGroups, IPAddressType: "ipv4"}
+	out := elbLBWire{VPCID: lb.VPCID, LoadBalancerArn: lb.ARN, DNSName: lb.DNSName, CreatedTime: lb.Created, LoadBalancerName: lb.Name, Scheme: lb.Scheme, Type: "application", SecurityGroups: lb.SecurityGroups, IPAddressType: "ipv4"}
 	out.State.Code = "active"
 	for _, subnet := range lb.Subnets {
-		out.AvailabilityZones = append(out.AvailabilityZones, elbAZWire{subnet})
+		out.AvailabilityZones = append(out.AvailabilityZones, elbAZWire{SubnetID: subnet, ZoneName: lb.SubnetZones[subnet]})
 	}
 	return out
 }

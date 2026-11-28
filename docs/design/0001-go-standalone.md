@@ -152,3 +152,13 @@ ingress or feeds live network/instance attachment decisions. See the
 The local SimpleDB Query reference also offers explicit PutAttributes and
 DeleteDomain practice examples. Put replaces one named attribute; whole-domain
 cleanup must target only a disposable domain owned by the caller.
+
+
+### Application Load Balancer placement
+
+The AWS regional ALB store resolves an authorized create against EC2-managed
+subnets and security groups in the team database. The selected subnets must
+share one VPC and use distinct local zones. One SQLite transaction stores the
+ALB and its references. EC2 enforces those dependencies until ALB deletion.
+Older ALBs retain their original ID-only representation. The placement describes
+configuration for the local HTTP/Lambda exercise. [ELB guide](../elb.md)

@@ -49,7 +49,7 @@ func TestVpcOriginContractStackConfigurationAndTargetTransfer(t *testing.T) {
 	if original.Config.HTTPPort != 8080 || original.Config.HTTPSPort != 8443 || protocols == nil || protocols.Quantity != 1 || len(protocols.Items) != 1 || protocols.Items[0] != "TLSv1.2" {
 		t.Fatal(original.Config)
 	}
-	newLB := elbDecode(t, h.ok("CreateLoadBalancer", "Name", "fresh-target", "Scheme", "internal", "Subnets.member.1", "subnet-0123456789abcdef0", "Subnets.member.2", "subnet-89abcdef")).LoadBalancers[0].LoadBalancerArn
+	newLB := elbDecode(t, h.ok("CreateLoadBalancer", "Name", "fresh-target", "Scheme", "internal", "Subnets.member.1", h.network.a, "Subnets.member.2", h.network.b, "SecurityGroups.member.1", h.network.group)).LoadBalancers[0].LoadBalancerArn
 	config := strings.Replace(h.config, h.alb, newLB, 1)
 	changed := h.origin(h.request("PUT", path, config, "If-Match", original.ETag), 202)
 	if changed.Config.ARN != newLB || changed.ID != original.ID || changed.ETag == original.ETag {

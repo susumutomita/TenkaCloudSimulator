@@ -18,25 +18,35 @@ being ignored. State is provider-owned SQLite, one database per team process.
 The supported slice is an Application Load Balancer whose HTTP listeners
 either return a fixed response or forward to one target group holding one
 Python Lambda function. That is the only target with a real bounded backend in
-this simulator. Instance, IP and ALB targets need EC2 instances, VPC addressing
-and packet routing, which are not available, so `TargetType` other than
-`lambda` is refused with `InvalidConfigurationRequest`.
+this simulator. Instance, IP and ALB targets require target registration and forwarding integrations beyond this exercise. Other `TargetType` values return `InvalidConfigurationRequest`.
 
 ## Resources
 
 - **Load balancers** are `application` only, `internet-facing` (default) or
   `internal`, `ipv4` only. Names are 1 to 32 alphanumeric characters or
-  hyphens, unique per region. 2 to 6 distinct subnet IDs (`subnet-` plus 8 or
-  17 hex digits) and up to 5 security group IDs (`sg-`) are required/accepted.
-  **They are recorded as syntactic references only.** Amazon VPC (#56) is not
-  on main, so they are never resolved against EC2 state: `SubnetNotFound` is
-  never returned, the two-Availability-Zone rule is approximated by two
-  distinct subnets, and responses carry `SubnetId` without `ZoneName` or
-  `VpcId`. The state is immediately `active`. `DNSName` has the form
-  `name-NNNNNNNNNN.region.elb.simulator.invalid` and does not resolve; there is
-  no `CanonicalHostedZoneId`. Repeating a create with identical settings
-  returns the existing resource, as documented; different settings return
-  `DuplicateLoadBalancerName`.
+  hyphens, unique per region. Create the EC2 VPC, subnets and security groups
+  first. Select two or three native subnets, one per local Availability Zone,
+  and one to five explicit native security groups in that same regional VPC.
+  The simulator's VPC creation has no default security group. A missing subnet
+  returns `SubnetNotFound`. Repeated zones, mixed VPCs and CloudFormation-owned
+  subnets return `InvalidSubnet`. An unknown, omitted, foreign or stack-owned
+  security group returns `InvalidSecurityGroup`.
+
+  Create and Describe report the saved `VpcId` and each `SubnetId` with its
+  actual `ZoneName`. The placement and dependency rows commit together. EC2
+  returns `DependencyViolation` for deletion of a subnet or group still in
+  use. Delete the ALB first to release its references. ALBs created by older
+  simulator versions retain their original subnet IDs and ARN on read, identical
+  create retry and deletion. Their original records contain no verified VPC
+  or zone and acquire no EC2 references during upgrade.
+
+  The state is immediately `active`. The synthetic `DNSName` has the form
+  `name-NNNNNNNNNN.region.elb.simulator.invalid`. Exercise requests use the
+  local HTTP data-plane route. This placement records configuration only.
+  DNS resolution, ENIs, IP allocation, free-IP accounting, security-group
+  traffic decisions and external reachability are outside its scope. An
+  identical create returns the existing resource; different settings for the
+  same name return `DuplicateLoadBalancerName`.
 - **Target groups** use `TargetType=lambda`. `Protocol`, `Port`, `VpcId`,
   `ProtocolVersion`, `HealthCheckProtocol`, `HealthCheckPort` and
   `IpAddressType` do not apply and are refused. Lambda defaults: health checks
@@ -162,7 +172,7 @@ SQLite database and token authority per team.
 | Dependency | Use | Status |
 |---|---|---|
 | AWS Lambda (functions, resource policies, execution role, SDK bridge) | Required for forward targets and health checks | Implemented; reused unchanged except the ELB service principal |
-| Amazon VPC subnets and security groups (#56) | Required by AWS for load balancer placement | Not on main; IDs are syntactic only, no placement |
+| Amazon VPC subnets and security groups (#56) | Required for new regional ALB placement | Verified native subnet zones and explicit security groups in one VPC; deletion follows stored dependencies. |
 | Amazon EC2 instances, IP targets | Instance/IP target types | Not implemented; refused |
 | AWS Certificate Manager | HTTPS listeners | Not used; HTTPS refused |
 | AWS WAF, Route 53 alias records, S3 access logs, CloudWatch metrics | Optional integrations | Not connected |
