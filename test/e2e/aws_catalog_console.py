@@ -10,6 +10,7 @@ import os
 from pathlib import Path
 import re
 import shutil
+import sys
 import tempfile
 from urllib.parse import parse_qs, urlsplit
 
@@ -85,25 +86,70 @@ def check_versioned_edits(page, team, field, back):
 
     video = team.client('kinesisvideo')
     name = 'catalog-edit-stream'
-    arn = video.create_stream(StreamName=name, MediaType='video/h264')['StreamARN']
+    arn = video.create_stream(StreamName=name, MediaType='video/h264', DataRetentionInHours=24)['StreamARN']
     try:
         select_service('Amazon Kinesis Video Streams')
         page.get_by_role('link', name=name, exact=True).click()
         expect(page.get_by_text('video/h264', exact=True)).to_be_visible()
+        original = video.describe_stream(StreamARN=arn)['StreamInfo']
+        video.update_stream(StreamARN=arn, CurrentVersion=original['Version'], MediaType='video/h265')
+        media = video.describe_stream(StreamARN=arn)['StreamInfo']
+        assert media['MediaType'] == 'video/h265' and media['Version'] != original['Version']
+        refused('VersionMismatchException', lambda: video.update_stream(
+            StreamARN=arn, CurrentVersion=original['Version'], MediaType='video/h266'))
+        assert video.describe_stream(StreamARN=arn)['StreamInfo'] == media
+        back()
+        page.get_by_role('link', name=name, exact=True).click()
+        expect(page.get_by_text('video/h265', exact=True)).to_be_visible()
+
         with page.expect_response(lambda response: urlsplit(response.url).path == '/describeStream') as read:
             page.get_by_role('button', name='Edit', exact=True).click()
         token = read.value.json()['StreamInfo']['Version']
-        field('MediaType').fill('video/h265')
-        written = save_when(lambda response: urlsplit(response.url).path == '/updateStream')
-        assert written.ok, written.text()
-        assert written.request.post_data_json['CurrentVersion'] == token
-        expect(page.get_by_text('Resource updated.', exact=True)).to_be_visible()
+        assert token == media['Version']
+        hours = page.get_by_role('spinbutton', name='Retention (hours)', exact=True)
+        expect(hours).to_have_value('24')
+        video.update_data_retention(StreamARN=arn, CurrentVersion=token,
+                                    Operation='INCREASE_DATA_RETENTION', DataRetentionChangeInHours=1)
+        external = video.describe_stream(StreamARN=arn)['StreamInfo']
+        assert external['DataRetentionInHours'] == 25 and external['Version'] != token
+        hours.fill('30')
+        stale = save_when(lambda response: urlsplit(response.url).path == '/updateDataRetention')
+        assert stale.status == 400, stale.text()
+        assert stale.request.post_data_json == {
+            'StreamName': name, 'CurrentVersion': token,
+            'Operation': 'INCREASE_DATA_RETENTION', 'DataRetentionChangeInHours': 6}
+        assert stale.headers.get('x-amzn-errortype') == 'VersionMismatchException'
+        expect(page.get_by_text(re.compile('read it again before retrying')).first).to_be_visible()
+        expect(hours).to_have_value('30')
+        assert video.describe_stream(StreamARN=arn)['StreamInfo'] == external
+
+        page.get_by_role('button', name='Cancel', exact=True).click()
+        with page.expect_response(lambda response: urlsplit(response.url).path == '/describeStream') as fresh:
+            page.get_by_role('button', name='Edit', exact=True).click()
+        assert fresh.value.json()['StreamInfo']['Version'] == external['Version']
+        expect(hours).to_have_value('25')
+        hours.fill('30')
+        written = save_when(lambda response: urlsplit(response.url).path == '/updateDataRetention')
+        assert written.status == 200, written.text()
+        assert written.request.post_data_json == {
+            'StreamName': name, 'CurrentVersion': external['Version'],
+            'Operation': 'INCREASE_DATA_RETENTION', 'DataRetentionChangeInHours': 5}
+        expect(page.get_by_text('Data retention period updated.', exact=True)).to_be_visible()
         expect(page.get_by_text('video/h265', exact=True)).to_be_visible()
         current = video.describe_stream(StreamARN=arn)['StreamInfo']
-        assert current['MediaType'] == 'video/h265' and current['Version'] != token
+        assert current['MediaType'] == 'video/h265' and current['DataRetentionInHours'] == 30
+        assert current['Version'] != external['Version']
         back()
     finally:
-        video.delete_stream(StreamARN=arn)
+        original_failure = sys.exception()
+        try:
+            video.delete_stream(StreamARN=arn)
+            refused('ResourceNotFoundException', lambda: video.describe_stream(StreamARN=arn))
+        except Exception:
+            if original_failure is None:
+                raise
+            original_failure.add_note('Native Kinesis Video stream cleanup also failed.')
+
 
 
 def run():
