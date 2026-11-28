@@ -329,6 +329,9 @@ func (q *request) referenced(tx *sql.Tx, res *Resource, r row) error {
 }
 
 func (q *request) authorize(resource string) error {
+	if q.b.isResourceGroupServiceAction(q.op.Name) {
+		resource = "*"
+	}
 	return q.authorizeAction(q.b.spec.IAMPrefix+":"+q.op.action(), resource)
 }
 
@@ -1329,6 +1332,12 @@ func (q *request) responseDocument(res *Resource, r row, shapeName string) map[s
 	}
 	if res.ProjectResponse != nil {
 		res.ProjectResponse(doc)
+	}
+	// ApplicationTag identifies an application group. The supported plain and
+	// query groups expose their ordinary tags through the tag operations.
+	if q.b.spec.Model == "resource-groups" && shapeName == "Group" {
+		delete(doc, "ApplicationTag")
+		return doc
 	}
 	if member := q.tagMember(shapeName); member != "" {
 		doc[member] = q.renderTags(q.b.model.shape(shapeName).Members[member].Shape, r.Tags)

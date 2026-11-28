@@ -73,7 +73,7 @@ func (b *binding) openAPI() map[string]any {
 			operation := map[string]any{"operationId": b.spec.Model + op.Name, "tags": []any{tag}, "summary": op.Name,
 				"parameters": []any{map[string]any{"name": "X-Simulator-Service", "in": "header", "required": false, "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.", "schema": map[string]any{"type": "string", "enum": []any{b.signingName()}}}},
 				"responses":  map[string]any{"200": map[string]any{"description": "Projected official output shape."}, "400": map[string]any{"description": "Modeled exception named by X-Amzn-ErrorType."}, "403": map[string]any{"description": "AccessDeniedException."}, "404": map[string]any{"description": "Not found or no matching official route."}}}
-			if b.isResourceGroupQueryOperation(op.Name) {
+			if b.usesResourceGroupForbidden(op.Name) {
 				operation["responses"].(map[string]any)["403"] = map[string]any{"description": "ForbiddenException."}
 			}
 			if official.Input != "" {

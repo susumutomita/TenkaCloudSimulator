@@ -73,6 +73,10 @@ matching repository ARNs in creation order. Creating, tagging, untagging and
 deleting a repository changes membership on the next read. `MaxResults` accepts
 1–50. Supply `NextToken` in the same region on the same group revision to continue.
 
+`CreateGroup` and `ListGroups` require their respective IAM actions with `Resource` set to `"*"`. A principal with only `ListGroups` can page through the groups in its own team and region. Permissions on a named group or a group ARN pattern apply to operations that support the group resource type. [AWS Resource Groups IAM action table](https://docs.aws.amazon.com/service-authorization/latest/reference/list_resource-groups.html) · [CreateGroup](https://docs.aws.amazon.com/ARG/latest/APIReference/API_CreateGroup.html) · [ListGroups](https://docs.aws.amazon.com/ARG/latest/APIReference/API_ListGroups.html)
+
+The group’s own tags appear in the creation response and in `GetTags`. `Tag` and `Untag` change these stored tags. The supported plain and query groups omit `Group.ApplicationTag`, which AWS reserves for application groups. [Group response shape](https://docs.aws.amazon.com/ARG/latest/APIReference/API_Group.html)
+
 Readers need `resource-groups:ListGroupResources` on the group ARN, along with
 `tag:GetResources`, `cloudformation:DescribeStacks` and `cloudformation:ListStackResources`
 on `*`. AWS lists these three additional permissions for the API. Each membership
