@@ -200,7 +200,7 @@
     {
       "path": "internal/server/apidocs/openapi.json",
       "sha256": "2686135c967cde075622d41df3a24d1a5fd549aa4902d2a4c77210faa45905b1",
-      "disposition": "documentation",
+      "disposition": "presentation",
       "reason": "Publish request and response schemas and examples for key deletion scheduling and cancellation.",
       "models": []
     },
@@ -214,9 +214,17 @@
     {
       "path": "internal/server/server.go",
       "sha256": "03e3c23b6e6c2e7e9414ba752c389c8a7b9f702dbe43c8148a2f6041e278696c",
-      "disposition": "documentation",
+      "disposition": "modeled",
       "reason": "Expose supported key states and operations in the serving capability document.",
-      "models": []
+      "models": [
+        {
+          "id": "KMSProtocolAdmission",
+          "properties": [
+            "NoAuthorityFromWireMetadata"
+          ],
+          "limits": "Discovery publishes the KMS operations and limitations. The protocol model covers the absence of authority from wire metadata, while discovery content is checked by the SDK fixture."
+        }
+      ]
     },
     {
       "path": "scripts/formal_model_gate.py",
