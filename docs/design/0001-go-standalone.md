@@ -156,3 +156,5 @@ ingress or feeds live network/instance attachment decisions. See the
 The local SimpleDB Query reference also offers explicit PutAttributes and
 DeleteDomain practice examples. Put replaces one named attribute; whole-domain
 cleanup must target only a disposable domain owned by the caller.
+
+[PCS queue associations](../pcs-queue-associations.md) resolve local group IDs in the same persisted cluster and Region inside queue write transactions. Group deletion checks referring queues in its deletion transaction. PCS IAM uses the official action/resource table, including wildcard-only actions. Parent and child checks share the existing request-scoped policy evaluator; a missing snapshot refuses the compound operation. New child ARNs include the cluster ID. Earlier flat rows are not migrated; exact canonical aliases resolve their tag operations and their IAM grants use only canonical targets derived from the actual persisted parent. These records remain configuration metadata in `CREATING`; no Slurm scheduler, instance provisioning or job execution is supplied.

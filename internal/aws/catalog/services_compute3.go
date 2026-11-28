@@ -358,11 +358,11 @@ var pcs = &Service{
 			ARNMember: "arn", NameMember: "name", IDMember: "id", Unique: true, Limit: 20, Aliases: map[string]string{"clusterName": "name"},
 			Generate: map[string]any{"status": "CREATING", "createdAt": "$now", "modifiedAt": "$now"}},
 		{Kind: "computeNodeGroup", Shape: "ComputeNodeGroup", Summary: "ComputeNodeGroupSummary", Parent: "cluster", ParentMember: "clusterId", ID: "alnum:10:pcs_",
-			ARN:       "arn:{partition}:pcs:{region}:{account}:computenodegroup/{id}",
+			ARN:       "arn:{partition}:pcs:{region}:{account}:cluster/{parent}/computenodegroup/{id}",
 			ARNMember: "arn", NameMember: "name", IDMember: "id", Unique: true, Limit: 50, Aliases: map[string]string{"computeNodeGroupName": "name"},
 			Generate: map[string]any{"clusterId": "$parentId", "status": "CREATING", "createdAt": "$now", "modifiedAt": "$now", "purchaseOption": "ONDEMAND"}},
 		{Kind: "queue", Shape: "Queue", Summary: "QueueSummary", Parent: "cluster", ParentMember: "clusterId", ID: "alnum:10:pcs_",
-			ARN:       "arn:{partition}:pcs:{region}:{account}:queue/{id}",
+			ARN:       "arn:{partition}:pcs:{region}:{account}:cluster/{parent}/queue/{id}",
 			ARNMember: "arn", NameMember: "name", IDMember: "id", Unique: true, Limit: 50, Aliases: map[string]string{"queueName": "name"},
 			Generate: map[string]any{"clusterId": "$parentId", "status": "CREATING", "createdAt": "$now", "modifiedAt": "$now"}},
 	},
@@ -377,7 +377,7 @@ var pcs = &Service{
 		{Name: "UpdateComputeNodeGroup", Kind: Update, Resource: "computeNodeGroup", Parent: "clusterIdentifier", Lookup: "computeNodeGroupIdentifier",
 			Fields: []string{"amiId", "subnetIds", "customLaunchTemplate", "purchaseOption", "spotOptions", "scalingConfiguration", "iamInstanceProfileArn", "slurmConfiguration"},
 			Accept: []string{"clientToken"}, Touch: []string{"modifiedAt"}, Merged: pcsNodeGroupMerged},
-		{Name: "DeleteComputeNodeGroup", Kind: Delete, Resource: "computeNodeGroup", Parent: "clusterIdentifier", Lookup: "computeNodeGroupIdentifier", Accept: []string{"clientToken"}},
+		{Name: "DeleteComputeNodeGroup", Kind: Delete, Resource: "computeNodeGroup", Parent: "clusterIdentifier", Lookup: "computeNodeGroupIdentifier", Accept: []string{"clientToken"}, CheckDelete: pcsCheckDeleteComputeNodeGroup},
 		{Name: "CreateQueue", Kind: Create, Resource: "queue", Parent: "clusterIdentifier", Check: pcsQueue},
 		{Name: "GetQueue", Kind: Read, Resource: "queue", Parent: "clusterIdentifier", Lookup: "queueIdentifier"},
 		{Name: "ListQueues", Kind: List, Resource: "queue", Parent: "clusterIdentifier"},
@@ -391,8 +391,8 @@ var pcs = &Service{
 	Bounds: []string{
 		"Clusters, compute node groups and queues are stored configuration records that stay CREATING: no Slurm controller, accounting database, REST endpoint, compute instance, launch or network interface exists, a cluster reports no endpoints or authKey, and no job can be submitted. RegisterComputeNodeGroupInstance, which PCS itself calls for the nodes it launches, and UpdateCluster return UnknownOperationException with HTTP 501.",
 		"UpdateCluster is not implemented because its slurmConfiguration is a partial update of nested settings (scale-down time, custom settings, accounting, Slurm REST) that the stored model would replace as a whole. Compute node group and queue updates replace each supplied member as a whole, and the cluster name or ID of a child operation may be either, as the official identifier pattern allows.",
-		"CreateQueue requires one or more computeNodeGroupConfigurations entries. UpdateQueue retains its separate replacement semantics. Subnets, security groups, launch templates, AMIs, instance profiles, instance types and the compute node groups a queue names are stored without being resolved: nothing checks that they exist, that subnets share a VPC with the cluster, or that a queue's compute node groups belong to its cluster. A compute node group's scaling minimum must not exceed its maximum, and a SPOT purchase option is the only one that accepts spotOptions. Deleting a cluster that still has compute node groups or queues, and deleting a compute node group that a queue names, behave as stored dependents: the first is refused with ConflictException, the second is not checked.",
-		"Names are 3 to 40 characters for clusters and 3 to 25 for compute node groups and queues, begin with a letter and hold letters, digits and hyphens; the official pattern's pcs_ exclusion is implied by that rule. The scheduler type is SLURM with a version stored as given. ARN shapes (cluster/pcs_id, computenodegroup/pcs_id, queue/pcs_id) are inferred. Resource counts per Region (20 clusters, 50 compute node groups and 50 queues per cluster) are local limits.",
+		"CreateQueue requires one or more computeNodeGroupConfigurations entries. UpdateQueue retains its separate replacement semantics. Subnets, security groups, launch templates, AMIs, instance profiles and instance types are stored without being resolved: nothing checks that they exist or that subnets share a VPC with the cluster. Supplied queue compute node group IDs must exist in the same stored cluster and Region; queue create/update validates these IDs in its write transaction. A compute node group's scaling minimum must not exceed its maximum, and a SPOT purchase option is the only one that accepts spotOptions. Deleting a cluster that still has compute node groups or queues, and deleting a compute node group that a queue names, behave as stored dependents: both are refused with ConflictException. An explicit empty UpdateQueue computeNodeGroupConfigurations list removes those associations.",
+		"Names are 3 to 40 characters for clusters and 3 to 25 for compute node groups and queues, begin with a letter and hold letters, digits and hyphens; the official pattern's pcs_ exclusion is implied by that rule. The scheduler type is SLURM with a version stored as given. New compute node group and queue ARNs contain their cluster ID, as the official PCS IAM resource definitions require. Valid old flat child ARNs remain stored and readable; authorization uses only the canonical hierarchical ARN, and ARN-taking tag operations also accept its exact canonical alias for those rows. Resource counts per Region (20 clusters, 50 compute node groups and 50 queues per cluster) are local limits.",
 	},
 }
 

@@ -1,0 +1,59 @@
+{
+  "version": 1,
+  "producer": {
+    "epoch": "pre-canonical candidate, not released main",
+    "sourceSha": "88c85d9dcf36417a78081c59310911707207d670",
+    "binarySha256": "dab3f5016d96de9550fdfd3ce8097090d2485e14ed166292640fe682143f41c9",
+    "goVersion": "go1.26.11",
+    "protocol": "ordinary native PCS JSON 1.0, tokenless idempotency inputs; synthetic configuration only"
+  },
+  "schema": [
+    "CREATE TABLE aws_catalog_idempotency(\n service TEXT NOT NULL, region TEXT NOT NULL, operation TEXT NOT NULL, token TEXT NOT NULL,\n fingerprint TEXT NOT NULL, arn TEXT NOT NULL, created INTEGER NOT NULL,\n PRIMARY KEY(service, region, operation, token))",
+    "CREATE TABLE aws_catalog_resources(\n service TEXT NOT NULL, region TEXT NOT NULL, kind TEXT NOT NULL, parent TEXT NOT NULL,\n id TEXT NOT NULL, name TEXT NOT NULL, arn TEXT NOT NULL, document TEXT NOT NULL,\n tags TEXT NOT NULL, seq INTEGER NOT NULL, generation INTEGER NOT NULL,\n PRIMARY KEY(service, region, kind, parent, id))",
+    "CREATE TABLE aws_catalog_sequence(id INTEGER PRIMARY KEY CHECK(id = 1), next INTEGER NOT NULL)",
+    "CREATE UNIQUE INDEX aws_catalog_resources_arn ON aws_catalog_resources(arn)",
+    "CREATE INDEX aws_catalog_resources_name ON aws_catalog_resources(service, region, kind, parent, name)"
+  ],
+  "resources": [
+    {
+      "service": "pcs",
+      "region": "us-east-1",
+      "kind": "cluster",
+      "parent": "",
+      "id": "pcs_jgslhw2s9z",
+      "name": "legacy-cluster",
+      "arn": "arn:aws:pcs:us-east-1:000000000000:cluster/pcs_jgslhw2s9z",
+      "document": "{\"arn\":\"arn:aws:pcs:us-east-1:000000000000:cluster/pcs_jgslhw2s9z\",\"createdAt\":\"2026-11-28T07:05:48.681Z\",\"id\":\"pcs_jgslhw2s9z\",\"modifiedAt\":\"2026-11-28T07:05:48.681Z\",\"name\":\"legacy-cluster\",\"networking\":{\"subnetIds\":[\"subnet-0a1b2c3d\"]},\"scheduler\":{\"type\":\"SLURM\",\"version\":\"24.11\"},\"size\":\"SMALL\",\"status\":\"CREATING\"}",
+      "tags": "{\"cluster\":\"kept\"}",
+      "seq": 1,
+      "generation": 1
+    },
+    {
+      "service": "pcs",
+      "region": "us-east-1",
+      "kind": "computeNodeGroup",
+      "parent": "pcs_jgslhw2s9z",
+      "id": "pcs_5qn1295d2x",
+      "name": "legacy-compute",
+      "arn": "arn:aws:pcs:us-east-1:000000000000:computenodegroup/pcs_5qn1295d2x",
+      "document": "{\"arn\":\"arn:aws:pcs:us-east-1:000000000000:computenodegroup/pcs_5qn1295d2x\",\"clusterId\":\"pcs_jgslhw2s9z\",\"createdAt\":\"2026-11-28T07:05:48.684Z\",\"customLaunchTemplate\":{\"id\":\"lt-0123456789abcdef0\",\"version\":\"1\"},\"iamInstanceProfileArn\":\"arn:aws:iam::000000000000:instance-profile/pcs\",\"id\":\"pcs_5qn1295d2x\",\"instanceConfigs\":[{\"instanceType\":\"c6i.large\"}],\"modifiedAt\":\"2026-11-28T07:05:48.684Z\",\"name\":\"legacy-compute\",\"purchaseOption\":\"ONDEMAND\",\"scalingConfiguration\":{\"maxInstanceCount\":2,\"minInstanceCount\":0},\"status\":\"CREATING\",\"subnetIds\":[\"subnet-0a1b2c3d\"]}",
+      "tags": "{\"group\":\"kept\"}",
+      "seq": 2,
+      "generation": 1
+    },
+    {
+      "service": "pcs",
+      "region": "us-east-1",
+      "kind": "queue",
+      "parent": "pcs_jgslhw2s9z",
+      "id": "pcs_c0iscjw5kc",
+      "name": "legacy-queue",
+      "arn": "arn:aws:pcs:us-east-1:000000000000:queue/pcs_c0iscjw5kc",
+      "document": "{\"arn\":\"arn:aws:pcs:us-east-1:000000000000:queue/pcs_c0iscjw5kc\",\"clusterId\":\"pcs_jgslhw2s9z\",\"computeNodeGroupConfigurations\":[{\"computeNodeGroupId\":\"pcs_5qn1295d2x\"}],\"createdAt\":\"2026-11-28T07:05:48.686Z\",\"id\":\"pcs_c0iscjw5kc\",\"modifiedAt\":\"2026-11-28T07:05:48.686Z\",\"name\":\"legacy-queue\",\"status\":\"CREATING\"}",
+      "tags": "{\"kept\":\"legacy\"}",
+      "seq": 3,
+      "generation": 1
+    }
+  ],
+  "nextSequence": 4
+}
