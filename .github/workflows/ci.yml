@@ -43,11 +43,12 @@ jobs:
       - name: Set up CPython for the pinned SDK and Chromium tools
         id: python
         if: ${{ !cancelled() && steps.source.outcome == 'success' }}
-        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6.3.0
-        with:
-          python-version: '3.12.16'
-          cache: pip
-          cache-dependency-path: scripts/requirements-test.txt
+        run: |
+          python="$RUNNER_TOOL_CACHE/Python/3.12.16/x64/bin/python3.12"
+          test -x "$python"
+          "$python" -c 'import sys; assert sys.version_info[:3] == (3, 12, 16)'
+          "$python" --version > "$RUNNER_TEMP/msk-batch-evidence/python.txt"
+          dirname "$python" >> "$GITHUB_PATH"
       - name: Run unfiltered make before-commit
         id: gate
         run: |
@@ -72,7 +73,7 @@ jobs:
         id: sdk_tools
         if: ${{ !cancelled() && steps.python.outcome == 'success' && steps.binary.outcome == 'success' }}
         run: |
-          python3 -m venv "$RUNNER_TEMP/msk-batch-venv"
+          "$RUNNER_TOOL_CACHE/Python/3.12.16/x64/bin/python3.12" -m venv "$RUNNER_TEMP/msk-batch-venv"
           "$RUNNER_TEMP/msk-batch-venv/bin/pip" install -r scripts/requirements-test.txt
           "$RUNNER_TEMP/msk-batch-venv/bin/python" -c 'import boto3, botocore; print(boto3.__version__, botocore.__version__)' > "$RUNNER_TEMP/msk-batch-evidence/boto-versions.txt"
       - name: Run the stock Kafka and Batch catalog fixtures on two local teams
