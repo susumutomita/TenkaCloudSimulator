@@ -106,7 +106,11 @@ class ScalarReference:
             assert set(examples) == OPERATIONS
             target = PREFIX + operation
             assert target in next(p for p in spec['parameters'] if p['name'] == 'X-Amz-Target')['schema']['enum']
-            page.get_by_role('link', name=spec['summary'], exact=True).click()
+            # Scalar decorates the operation's accessible name with its HTTP
+            # method. Bind both its exact native route and declared summary.
+            operation_link = page.locator('a[href="#tag/service-quotas/POST/"]').filter(has_text=spec['summary'])
+            expect(operation_link).to_have_count(1)
+            operation_link.click()
             page.get_by_test_id('example-picker').click()
             page.get_by_role('option', name=examples[operation]['summary'], exact=True).click()
             page.get_by_role('button', name='Test Request (post /)', exact=True).click()
