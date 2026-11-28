@@ -38,9 +38,12 @@
           !target.startsWith(prefix) || !operations.has(target.slice(prefix.length)) ||
           request.headers.get("Content-Type")?.split(";", 1)[0].trim() !== "application/x-amz-json-1.1")
         throw new Error("Select a supported Service Quotas target and its JSON 1.1 request body.");
-      if (["Authorization", "X-Simulator-Token", "X-Simulator-Principal", "X-Simulator-Access-Role"]
-          .some((header) => request.headers.has(header)))
-        throw new Error("Use your current local sign-in for this reference.");
+      const overrides = new Set([
+        "authorization", "proxy-authorization", "cookie", "x-amz-security-token",
+        "x-amz-region", "x-amz-region-set",
+      ]);
+      if ([...request.headers.keys()].some((header) => header.startsWith("x-simulator-") || overrides.has(header)))
+        throw new Error("Use your current local sign-in and the reference's fixed us-east-1 scope.");
       // Preserve the selected native target and body exactly. Body contents do
       // not select an operation, region or principal; native validation decides.
       return fetch(request, { credentials: "same-origin", redirect: "error" });
