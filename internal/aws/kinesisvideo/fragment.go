@@ -14,7 +14,7 @@ const MaxFragmentBytes = 4 << 20
 // to ParseFragment, which must remain immutable for the lifetime of the value.
 type Fragment struct {
 	header, info, tracks, cluster []byte
-	FirstFrameMilliseconds        int64
+	ClusterMilliseconds           int64
 	Frames                        int
 }
 
@@ -88,11 +88,11 @@ func ParseFragment(data []byte) (Fragment, error) {
 	if err != nil {
 		return Fragment{}, err
 	}
-	first, frames, err := readCluster(cluster.data, number, nalWidth)
+	clusterMS, frames, err := readCluster(cluster.data, number, nalWidth)
 	if err != nil {
 		return Fragment{}, err
 	}
-	return Fragment{top[0].wire, info.wire, tracks.wire, cluster.wire, first, frames}, nil
+	return Fragment{top[0].wire, info.wire, tracks.wire, cluster.wire, clusterMS, frames}, nil
 }
 
 func readTrack(data []byte) (uint64, int, error) {
@@ -244,7 +244,9 @@ func readCluster(data []byte, track uint64, nalWidth int) (int64, int, error) {
 	if frames == 0 {
 		return 0, 0, fmt.Errorf("empty video cluster")
 	}
-	return first, frames, nil
+	// Kinesis identifies a fragment by its cluster timestamp. Individual block
+	// offsets affect presentation order and remain in the encoded payload.
+	return int64(start), frames, nil
 }
 
 func checkNALs(data []byte, width int) (bool, error) {

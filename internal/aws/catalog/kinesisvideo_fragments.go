@@ -144,6 +144,40 @@ func (r kinesisReceipt) digest(owner row, media []byte) []byte {
 
 func kinesisSeconds(ms int64) string { return fmt.Sprintf("%d.%03d", ms/1000, ms%1000) }
 
+// A fragment's deadline is derived from its server capture time and its
+// physical owner's retention. Validate that relationship before using a
+// stored deadline to free space. Reads touch only the selected stream;
+// ingestion reclaims expired records across the team's shared budget.
+func pruneVideoFragments(ctx context.Context, tx *sql.Tx, streamARN string, now int64) error {
+	const inScope = "(?='' OR f.stream_arn=?)"
+	var inconsistent bool
+	err := tx.QueryRowContext(ctx, `SELECT EXISTS(SELECT 1 FROM aws_kinesisvideo_fragments f
+ LEFT JOIN aws_catalog_resources o ON o.arn=f.stream_arn AND o.seq=f.owner_seq
+ WHERE `+inScope+` AND (o.arn IS NULL OR o.service!='kinesisvideo' OR o.kind!='stream'
+ OR f.server_ms<0 OR json_type(o.document,'$.DataRetentionInHours') IS NULL
+ OR json_type(o.document,'$.DataRetentionInHours') NOT IN ('integer','real')
+ OR json_extract(o.document,'$.DataRetentionInHours') NOT BETWEEN 0 AND 87600
+ OR f.expires_ms!=f.server_ms+3600000*json_extract(o.document,'$.DataRetentionInHours')))`, streamARN, streamARN).Scan(&inconsistent)
+	if err != nil {
+		return err
+	}
+	if inconsistent {
+		return fmt.Errorf("inconsistent Kinesis fragment retention")
+	}
+	expired := inScope + " AND f.expires_ms<=?"
+	if _, err := tx.ExecContext(ctx, "DELETE FROM aws_kinesisvideo_fragments AS f WHERE "+expired, streamARN, streamARN, now); err != nil {
+		return err
+	}
+	var remaining bool
+	if err := tx.QueryRowContext(ctx, "SELECT EXISTS(SELECT 1 FROM aws_kinesisvideo_fragments f WHERE "+expired+")", streamARN, streamARN, now).Scan(&remaining); err != nil {
+		return err
+	}
+	if remaining {
+		return fmt.Errorf("expired Kinesis fragment was not removed")
+	}
+	return nil
+}
+
 func (q *request) updateVideoRetention(tx *sql.Tx, owner row) error {
 	now := q.now().UnixMilli()
 	hours, ok := Number(owner.Document["DataRetentionInHours"])
@@ -152,14 +186,25 @@ func (q *request) updateVideoRetention(tx *sql.Tx, owner row) error {
 	}
 	// Discard already-expired fragments before extending a live retention
 	// period, so a later increase cannot resurrect an expired upload.
-	if _, err := tx.ExecContext(q.ctx, "DELETE FROM aws_kinesisvideo_fragments WHERE stream_arn=? AND owner_seq=? AND (expires_ms<=? OR ?=0)", owner.ARN, owner.Seq, now, int64(hours)); err != nil {
+	if err := pruneVideoFragments(q.ctx, tx, owner.ARN, now); err != nil {
 		return err
 	}
 	if _, err := tx.ExecContext(q.ctx, "UPDATE aws_kinesisvideo_fragments SET expires_ms=server_ms+? WHERE stream_arn=? AND owner_seq=?", int64(hours)*time.Hour.Milliseconds(), owner.ARN, owner.Seq); err != nil {
 		return err
 	}
-	_, err := tx.ExecContext(q.ctx, "DELETE FROM aws_kinesisvideo_fragments WHERE stream_arn=? AND owner_seq=? AND expires_ms<=?", owner.ARN, owner.Seq, now)
-	return err
+	if _, err := tx.ExecContext(q.ctx, "DELETE FROM aws_kinesisvideo_fragments WHERE stream_arn=? AND owner_seq=? AND (expires_ms<=? OR ?=0)", owner.ARN, owner.Seq, now, int64(hours)); err != nil {
+		return err
+	}
+	var inconsistent bool
+	err := tx.QueryRowContext(q.ctx, `SELECT EXISTS(SELECT 1 FROM aws_kinesisvideo_fragments
+ WHERE stream_arn=? AND (owner_seq!=? OR expires_ms<=? OR expires_ms!=server_ms+? OR ?=0))`, owner.ARN, owner.Seq, now, int64(hours)*time.Hour.Milliseconds(), int64(hours)).Scan(&inconsistent)
+	if err != nil {
+		return err
+	}
+	if inconsistent {
+		return fmt.Errorf("Kinesis retention change did not reach the stored fragments")
+	}
+	return nil
 }
 
 // currentVideoStream rechecks the authenticated physical owner inside the same
@@ -196,7 +241,7 @@ func (e *Engine) saveVideoFragment(ctx context.Context, owner row, producerStart
 	if err != nil {
 		return empty, Failure("InvalidArgumentException", err.Error())
 	}
-	if producerStart < 0 || producerStart > math.MaxInt64-decoded.FirstFrameMilliseconds {
+	if producerStart < 0 || producerStart > math.MaxInt64-decoded.ClusterMilliseconds {
 		return empty, Failure("InvalidArgumentException", "Invalid producer start time.")
 	}
 	tx, err := e.store.db.BeginTx(ctx, nil)
@@ -208,11 +253,11 @@ func (e *Engine) saveVideoFragment(ctx context.Context, owner row, producerStart
 	if err != nil {
 		return empty, err
 	}
-	r := kinesisReceipt{producerMS: producerStart + decoded.FirstFrameMilliseconds, serverMS: e.cfg.Now().UnixMilli()}
+	r := kinesisReceipt{producerMS: producerStart + decoded.ClusterMilliseconds, serverMS: e.cfg.Now().UnixMilli()}
 	if r.serverMS < 0 || r.serverMS > math.MaxInt64-retention {
 		return empty, fmt.Errorf("invalid local server time")
 	}
-	if _, err := tx.ExecContext(ctx, "DELETE FROM aws_kinesisvideo_fragments WHERE expires_ms<=?", r.serverMS); err != nil {
+	if err := pruneVideoFragments(ctx, tx, "", r.serverMS); err != nil {
 		return empty, err
 	}
 	if retention == 0 {
@@ -246,8 +291,19 @@ func (e *Engine) saveVideoFragment(ctx context.Context, owner row, producerStart
 	if err != nil {
 		return empty, err
 	}
-	if err := exactlyOne(tx.ExecContext(ctx, "UPDATE aws_kinesisvideo_fragments SET digest=? WHERE number=? AND stream_arn=? AND owner_seq=?", r.digest(owner, media), r.number, owner.ARN, owner.Seq)); err != nil {
+	digest := r.digest(owner, media)
+	if err := exactlyOne(tx.ExecContext(ctx, "UPDATE aws_kinesisvideo_fragments SET digest=? WHERE number=? AND stream_arn=? AND owner_seq=?", digest, r.number, owner.ARN, owner.Seq)); err != nil {
 		return empty, err
+	}
+	var stored bool
+	if err := tx.QueryRowContext(ctx, `SELECT EXISTS(SELECT 1 FROM aws_kinesisvideo_fragments
+ WHERE number=? AND stream_arn=? AND owner_seq=? AND cursor=? AND producer_ms=?
+ AND server_ms=? AND expires_ms=? AND digest=? AND media=?)`, r.number, owner.ARN, owner.Seq,
+		r.cursor, r.producerMS, r.serverMS, r.serverMS+retention, digest, media).Scan(&stored); err != nil {
+		return empty, err
+	}
+	if !stored {
+		return empty, fmt.Errorf("Kinesis fragment did not reach durable storage")
 	}
 	if err := tx.Commit(); err != nil {
 		return empty, err
@@ -267,18 +323,25 @@ func (e *Engine) readVideoFragments(ctx context.Context, owner row, cursor strin
 		return nil, err
 	}
 	now := e.cfg.Now().UnixMilli()
-	if _, err := tx.ExecContext(ctx, "DELETE FROM aws_kinesisvideo_fragments WHERE expires_ms<=?", now); err != nil {
+	if err := pruneVideoFragments(ctx, tx, owner.ARN, now); err != nil {
 		return nil, err
 	}
 	var after int64
 	if cursor != "" {
-		err := tx.QueryRowContext(ctx, "SELECT number FROM aws_kinesisvideo_fragments WHERE stream_arn=? AND owner_seq=? AND cursor=?", owner.ARN, owner.Seq, cursor).Scan(&after)
+		r := kinesisReceipt{cursor: cursor}
+		var media, digest []byte
+		err := tx.QueryRowContext(ctx, `SELECT number,producer_ms,server_ms,CASE WHEN length(media) BETWEEN 1 AND ? THEN media END,digest
+ FROM aws_kinesisvideo_fragments WHERE stream_arn=? AND owner_seq=? AND cursor=?`, kinesisvideo.MaxFragmentBytes, owner.ARN, owner.Seq, cursor).Scan(&r.number, &r.producerMS, &r.serverMS, &media, &digest)
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, Failure("InvalidArgumentException", "The continuation token is not current for the selected stream.")
 		}
 		if err != nil {
 			return nil, err
 		}
+		if len(media) == 0 || r.producerMS < 0 || r.serverMS < 0 || !bytes.Equal(digest, r.digest(owner, media)) {
+			return nil, fmt.Errorf("inconsistent Kinesis continuation fragment")
+		}
+		after = r.number
 	}
 	var latest int64
 	if err := tx.QueryRowContext(ctx, `SELECT coalesce((SELECT server_ms FROM aws_kinesisvideo_fragments

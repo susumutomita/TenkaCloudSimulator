@@ -27,8 +27,8 @@ func clip(t *testing.T) []byte {
 func TestStoredMediaChunk(t *testing.T) {
 	source := clip(t)
 	f, err := ParseFragment(source)
-	if err != nil || f.Frames != 2 || f.FirstFrameMilliseconds != 0 {
-		t.Fatalf("fragment frames=%d start=%d err=%v", f.Frames, f.FirstFrameMilliseconds, err)
+	if err != nil || f.Frames != 2 || f.ClusterMilliseconds != 0 {
+		t.Fatalf("fragment frames=%d start=%d err=%v", f.Frames, f.ClusterMilliseconds, err)
 	}
 	chunk, err := f.MediaChunk("912", "11.125", "12.250", "saved-fragment-two", "17")
 	if err != nil {
@@ -140,8 +140,11 @@ func TestRejectInvalidFragment(t *testing.T) {
 	binary.BigEndian.PutUint16(late[1:3], 30)
 	early := bytes.Clone(good[1])
 	binary.BigEndian.PutUint16(early[1:3], 20)
-	data := appendElement(nil, 0xe7, []byte{0})
+	data := appendElement(nil, 0xe7, []byte{7})
 	data = appendElement(data, 0xa3, late)
+	if clusterMS, frames, err := readCluster(data, 1, 4); err != nil || clusterMS != 7 || frames != 1 {
+		t.Fatalf("block starts at 37ms, fragment starts at 7ms: %d, %d, %v", clusterMS, frames, err)
+	}
 	data = appendElement(data, 0xa3, early)
 	if _, _, err := readCluster(data, 1, 4); err == nil {
 		t.Fatal("accepted reversed relative timestamps")
