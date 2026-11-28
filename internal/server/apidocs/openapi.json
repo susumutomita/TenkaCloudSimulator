@@ -118,7 +118,8 @@
                 "secretsmanager",
                 "dynamodb",
                 "sdb",
-                "ec2"
+                "ec2",
+                "monitoring"
               ]
             },
             "description": "Optional native service hint; when supplied it must match the selected service target. iam selects IAM Query; cloudformation selects CloudFormation Query. SSM/Logs/KMS/Secrets Manager use JSON 1.1; SQS/DynamoDB use JSON 1.0. This routing hint grants no access."
@@ -700,7 +701,12 @@
                       "DescribeInstances",
                       "DescribeInternetGateways",
                       "DescribeRouteTables",
-                      "CreateDomain"
+                      "CreateDomain",
+                      "DescribeAlarms",
+                      "GetMetricStatistics",
+                      "PutMetricAlarm",
+                      "PutMetricData",
+                      "DeleteAlarms"
                     ]
                   },
                   "Version": {
@@ -709,7 +715,8 @@
                       "2010-05-15",
                       "2010-05-08",
                       "2009-04-15",
-                      "2016-11-15"
+                      "2016-11-15",
+                      "2010-08-01"
                     ]
                   },
                   "StackName": {
@@ -807,6 +814,69 @@
                     "type": "string",
                     "enum": ["true", "false"],
                     "description": "Optional for GetAttributes or Select. Keep the same value on every Select page."
+                  },
+                  "AlarmNames.member.1": {
+                    "type": "string"
+                  },
+                  "Namespace": {
+                    "type": "string"
+                  },
+                  "MetricName": {
+                    "type": "string"
+                  },
+                  "Unit": {
+                    "type": "string"
+                  },
+                  "StartTime": {
+                    "type": "string"
+                  },
+                  "EndTime": {
+                    "type": "string"
+                  },
+                  "Period": {
+                    "type": "string"
+                  },
+                  "Statistics.member.1": {
+                    "type": "string"
+                  },
+                  "AlarmName": {
+                    "type": "string"
+                  },
+                  "Statistic": {
+                    "type": "string"
+                  },
+                  "Threshold": {
+                    "type": "string"
+                  },
+                  "ComparisonOperator": {
+                    "type": "string"
+                  },
+                  "EvaluationPeriods": {
+                    "type": "string"
+                  },
+                  "MetricData.member.1.MetricName": {
+                    "type": "string"
+                  },
+                  "MetricData.member.1.Unit": {
+                    "type": "string"
+                  },
+                  "MetricData.member.1.Value": {
+                    "type": "string"
+                  },
+                  "MetricData.member.1.Timestamp": {
+                    "type": "string"
+                  },
+                  "Dimensions.member.1.Name": {
+                    "type": "string"
+                  },
+                  "Dimensions.member.1.Value": {
+                    "type": "string"
+                  },
+                  "MetricData.member.1.Dimensions.member.1.Name": {
+                    "type": "string"
+                  },
+                  "MetricData.member.1.Dimensions.member.1.Value": {
+                    "type": "string"
                   }
                 }
               },
@@ -1155,6 +1225,74 @@
                     "Action": "CreateDomain",
                     "Version": "2009-04-15",
                     "DomainName": "scalar-practice-domain"
+                  }
+                },
+                "DescribeAlarms": {
+                  "summary": "CloudWatch DescribeAlarms (read one named alarm)",
+                  "description": "Set X-Simulator-Service to monitoring, leave X-Amz-Target unset and select the local region. Enter the exact alarm name to read its current evaluated state.",
+                  "value": {
+                    "Action": "DescribeAlarms",
+                    "Version": "2010-08-01",
+                    "AlarmNames.member.1": "practice-queue-depth"
+                  }
+                },
+                "GetMetricStatistics": {
+                  "summary": "CloudWatch GetMetricStatistics (query one minute of samples)",
+                  "description": "Set X-Simulator-Service to monitoring, leave X-Amz-Target unset and select the local region. Replace StartTime and EndTime with a recent completed UTC minute. For a dimensioned metric, include its exact dimension set.",
+                  "value": {
+                    "Action": "GetMetricStatistics",
+                    "Version": "2010-08-01",
+                    "Namespace": "Training/Observability",
+                    "MetricName": "QueueDepth",
+                    "Unit": "Count",
+                    "StartTime": "2000-01-01T00:00:00Z",
+                    "EndTime": "2000-01-01T00:01:00Z",
+                    "Period": "60",
+                    "Statistics.member.1": "Average",
+                    "Dimensions.member.1.Name": "Queue",
+                    "Dimensions.member.1.Value": "practice"
+                  }
+                },
+                "PutMetricAlarm": {
+                  "summary": "CloudWatch PutMetricAlarm (create or update a metric alarm)",
+                  "description": "Set X-Simulator-Service to monitoring, leave X-Amz-Target unset and select the local region. Use a disposable alarm name. This replaces its configuration if it exists. The local evaluator compares one completed UTC minute.",
+                  "value": {
+                    "Action": "PutMetricAlarm",
+                    "Version": "2010-08-01",
+                    "AlarmName": "practice-queue-depth",
+                    "Namespace": "Training/Observability",
+                    "MetricName": "QueueDepth",
+                    "Unit": "Count",
+                    "Period": "60",
+                    "Statistic": "Average",
+                    "Threshold": "4",
+                    "ComparisonOperator": "GreaterThanThreshold",
+                    "EvaluationPeriods": "1",
+                    "Dimensions.member.1.Name": "Queue",
+                    "Dimensions.member.1.Value": "practice"
+                  }
+                },
+                "PutMetricData": {
+                  "summary": "CloudWatch PutMetricData (append one sample)",
+                  "description": "Set X-Simulator-Service to monitoring, leave X-Amz-Target unset and select the local region. Send appends a sample. Omitting its timestamp uses the current time. To measure a completed minute, set MetricData.member.1.Timestamp to a recent observation inside that minute.",
+                  "value": {
+                    "Action": "PutMetricData",
+                    "Version": "2010-08-01",
+                    "Namespace": "Training/Observability",
+                    "MetricData.member.1.MetricName": "QueueDepth",
+                    "MetricData.member.1.Unit": "Count",
+                    "MetricData.member.1.Value": "1",
+                    "MetricData.member.1.Dimensions.member.1.Name": "Queue",
+                    "MetricData.member.1.Dimensions.member.1.Value": "practice"
+                  }
+                },
+                "DeleteAlarms": {
+                  "summary": "CloudWatch DeleteAlarms (delete one named alarm)",
+                  "description": "Set X-Simulator-Service to monitoring, leave X-Amz-Target unset and select the local region. Enter the name of the disposable alarm to delete. Metric observations retain their own lifetime.",
+                  "value": {
+                    "Action": "DeleteAlarms",
+                    "Version": "2010-08-01",
+                    "AlarmNames.member.1": "practice-queue-depth"
                   }
                 }
               }

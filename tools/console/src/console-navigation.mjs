@@ -26,6 +26,7 @@ export const SERVICES = Object.freeze([
   {id: 'simpledb', provider: 'aws', label: 'SimpleDB', capability: 'simpledb', route: '/simpledb', keywords: 'database domain item attributes conditional データベース ドメイン 項目 属性'},
   {id: 'sns', provider: 'aws', label: 'SNS', capability: 'sns', route: '/sns', keywords: 'simple notification service subscription topic サブスクリプション トピック 通知'},
   {id: 'sqs', provider: 'aws', label: 'SQS', capability: 'sqs', route: '/sqs', keywords: 'queue message messaging キュー メッセージ メッセージング シンプルキューサービス'},
+  {id: 'cloudwatch', provider: 'aws', label: 'CloudWatch', capability: 'cloudwatch', route: '/cloudwatch', keywords: 'metric alarm statistics monitoring メトリクス アラーム 監視'},
   {id: 'logs', provider: 'aws', label: 'CloudWatch Logs', capability: 'logs', route: '/logs', keywords: 'log group stream monitoring ログ グループ ストリーム 監視'},
   {id: 'secretsmanager', provider: 'aws', label: 'Secrets Manager', capability: 'secretsmanager', route: '/secretsmanager', keywords: 'secret version credential credentials シークレット バージョン 秘密 認証情報'},
   {id: 'catalog', provider: 'aws', label: 'Service catalog', capability: 'catalog', route: '/catalog', keywords: 'catalog metadata control plane カタログ サービス メタデータ'},
@@ -102,6 +103,11 @@ export function serviceAvailable(id, capabilities) {
     return ec2?.console === true && Array.isArray(ec2.operations) && ['DescribeInstances','DescribeVpcs'].every(op=>ec2.operations.includes(op));
   }
   if (id === 'route53') return route53ConsoleAdvertised(capabilities);
+  if (id === 'cloudwatch') {
+    const scope = capabilities.services?.cloudwatch;
+    return scope?.console === true && scope.alarms === true && Array.isArray(scope.operations)
+      && ['DescribeAlarms', 'GetMetricStatistics'].every(action => scope.operations.includes(action));
+  }
   if (id === 'simpledb') {
     const scope = capabilities.services?.simpledb;
     return scope?.console === true && scope.region === 'us-east-1' && scope.conditionalPut === true
