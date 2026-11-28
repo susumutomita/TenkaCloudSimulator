@@ -4870,8 +4870,8 @@ SUPPORT_CASE_CONTROLS = [
     ('DisclosePeerCase', 'canRead == Authorized(g)', 'canRead == Authorized(g) \\/ (op \\in {"cases","summary"} /\\ present /\\ g = "foreign")', 'ReadProjection'),
     ('LoadFileFromExpiredSet', 'file |-> IF op = "file" THEN db.messages[slot].files[ownFile] ELSE 0', 'file |-> IF op = "file" /\\ Live THEN db.messages[slot].files[ownFile] ELSE 0', 'ReadProjection'),
     ('ReadMutatesStoredMessages', "/\\ db' = db\n    /\\ last' = Mark(op,g,db", '/\\ db\' = IF op = "messages" /\\ present THEN [db EXCEPT !.messages = <<>>] ELSE db\n    /\\ last\' = Mark(op,g,db', 'ReadProjection'),
-    ('RestartDropsAttachedMessage', "Restart ==\n /\\ db' = db", "Restart ==\n /\\ db' = IF Len(db.messages) > 0 THEN [db EXCEPT !.messages = <<>>] ELSE db", 'RestartAndClock'),
-    ('RestartExtendsDeadline', "Restart ==\n /\\ db' = db", "Restart ==\n /\\ db' = IF Live THEN [db EXCEPT !.expires = minute + 60] ELSE db", 'RestartAndClock'),
+    ('RestartDropsAttachedMessage', "Restart ==\n /\\ db' = db", "Restart ==\n /\\ db' = (IF \\E i \\in 1..Len(db.messages): Len(db.messages[i].files) > 0 THEN [db EXCEPT !.messages = <<>>] ELSE db)", 'RestartAndClock'),
+    ('RestartExtendsDeadline', "Restart ==\n /\\ db' = db", "Restart ==\n /\\ db' = (IF Live THEN [db EXCEPT !.expires = minute + 60] ELSE db)", 'RestartAndClock'),
 ]
 REQUIRED_MUTANTS['SupportCaseLifecycle'] = {entry[0] for entry in SUPPORT_CASE_CONTROLS}
 

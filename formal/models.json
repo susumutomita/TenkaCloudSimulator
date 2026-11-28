@@ -30382,7 +30382,7 @@
           "edits": [
             {
               "old": "Restart ==\n /\\ db' = db",
-              "new": "Restart ==\n /\\ db' = IF Len(db.messages) > 0 THEN [db EXCEPT !.messages = <<>>] ELSE db",
+              "new": "Restart ==\n /\\ db' = (IF \\E i \\in 1..Len(db.messages): Len(db.messages[i].files) > 0 THEN [db EXCEPT !.messages = <<>>] ELSE db)",
               "count": 1
             }
           ],
@@ -30393,7 +30393,7 @@
           "edits": [
             {
               "old": "Restart ==\n /\\ db' = db",
-              "new": "Restart ==\n /\\ db' = IF Live THEN [db EXCEPT !.expires = minute + 60] ELSE db",
+              "new": "Restart ==\n /\\ db' = (IF Live THEN [db EXCEPT !.expires = minute + 60] ELSE db)",
               "count": 1
             }
           ],
