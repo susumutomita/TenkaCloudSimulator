@@ -1,0 +1,98 @@
+name: Temporary stock E2E evidence on Jammy
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  stock-e2e:
+    name: Stock make e2e at fixed d8b8e90
+    runs-on: ubuntu-22.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          ref: d8b8e90d37f9f62e4dc91075fac8a808e298a70d
+      - name: Verify immutable product source
+        run: |
+          test "$(git rev-parse HEAD)" = d8b8e90d37f9f62e4dc91075fac8a808e298a70d
+          test "$(git rev-parse HEAD^{tree})" = ec700e8fb2cb62e1006dbe32a1088f2fdd41f7d1
+          test -z "$(git status --porcelain)"
+          mkdir -p reports/jammy-stock-e2e
+          git rev-parse HEAD HEAD^{tree} > reports/jammy-stock-e2e/source.txt
+          uname -srmo > reports/jammy-stock-e2e/platform.txt
+          test "$(id -u)" -ne 0
+      - uses: actions/setup-go@v6.5.0
+        with:
+          go-version: '1.26.11'
+          cache: true
+      - name: Prepare checked hosted CPython and pinned tools
+        run: |
+          python="$RUNNER_TOOL_CACHE/Python/3.12.16/x64/bin/python3.12"
+          test -x "$python"
+          "$python" -c 'import sys; assert sys.version_info[:3] == (3,12,16)'
+          "$python" -m venv /tmp/simulator-tests
+          /tmp/simulator-tests/bin/python -m pip install -r scripts/requirements-test.txt
+          /tmp/simulator-tests/bin/python -m pip check
+          /tmp/simulator-tests/bin/python --version > reports/jammy-stock-e2e/python.txt
+          /tmp/simulator-tests/bin/playwright install --with-deps chromium
+          /tmp/simulator-tests/bin/python scripts/get-audit-tools.py /tmp/simulator-audit
+      - name: Run every stock E2E check and preserve its exit
+        run: |
+          set +e
+          AXE_SCRIPT=/tmp/simulator-audit/axe.min.js make e2e PYTHON=/tmp/simulator-tests/bin/python 2>&1 | tee reports/jammy-stock-e2e/full.log
+          codes=("${PIPESTATUS[@]}")
+          result=${codes[0]}
+          if test "$result" -eq 0 && test "${codes[1]}" -ne 0; then result=${codes[1]}; fi
+          set -e
+          printf '%s\n' "$result" > reports/jammy-stock-e2e/make-exit.txt
+          exit "$result"
+      - name: Extract safe observed case outcomes and binary identity
+        if: always()
+        run: |
+          /tmp/simulator-tests/bin/python - <<'PY'
+          import json, re
+          from pathlib import Path
+          root = Path('reports/jammy-stock-e2e')
+          root.mkdir(parents=True, exist_ok=True)
+          log = root / 'full.log'
+          text = log.read_text(errors='replace') if log.exists() else ''
+          cases = []
+          for line in text.splitlines():
+              match = re.match(r'^(test_[A-Za-z0-9_]+) \(([^)]+)\) \.\.\.\s*(.*)$', line)
+              if match:
+                  tail = match[3].strip()
+                  outcome = tail if tail in ('ok', 'FAIL', 'ERROR') else 'started; outcome not on this line'
+                  cases.append({'test': match[1], 'class': match[2], 'observation': outcome})
+          failures = {}
+          for line in text.splitlines():
+              match = re.match(r'^(ERROR|FAIL): (test_[A-Za-z0-9_]+) \(([^)]+)\)', line)
+              if match:
+                  failures[(match[2], match[3])] = match[1]
+          for case in cases:
+              key = (case['test'], case['class'])
+              if key in failures:
+                  case['observation'] = failures[key]
+          summaries = [line for line in text.splitlines()
+                       if re.fullmatch(r'Ran \d+ tests? in [0-9.]+s', line)
+                       or re.fullmatch(r'OK(?: \(.*\))?|FAILED \(.*\)', line)]
+          result = root / 'make-exit.txt'
+          record = {'source': 'd8b8e90d37f9f62e4dc91075fac8a808e298a70d',
+                    'make_exit': int(result.read_text()) if result.exists() else None,
+                    'cases': cases, 'summaries': summaries,
+                    'scope': 'Observed stock output; started cases are not passes; no missing phase is inferred executed.'}
+          (root / 'observed-cases.json').write_text(json.dumps(record, indent=2) + '\n')
+          PY
+          if test -f dist/tenkacloud-simulator; then
+            go version -m dist/tenkacloud-simulator > reports/jammy-stock-e2e/build.txt
+            sha256sum dist/tenkacloud-simulator > reports/jammy-stock-e2e/binary.sha256
+          fi
+      - name: Retain full output and safe comparison evidence
+        if: always()
+        uses: actions/upload-artifact@v7.0.2
+        with:
+          name: jammy-stock-e2e-${{ github.run_id }}
+          path: |
+            reports/jammy-stock-e2e/
+            reports/s3-multipart-paging.json
+          if-no-files-found: error
+          retention-days: 14

@@ -1,19 +1,12 @@
 {
   "version": 1,
-  "base_sha": "8c8cc8c871f887e67845c51c0c84ccc351e05dd8",
+  "base_sha": "d8b8e90d37f9f62e4dc91075fac8a808e298a70d",
   "changes": [
     {
-      "path": ".github/workflows/ci.yml",
-      "sha256": "a77363b29a0ee6251b75aef340e2acc2ef13f055070146df2cb5a2a5b8f23fe3",
+      "path": ".github/workflows/jammy-e2e-evidence.yml",
+      "sha256": "4652b9eaf5da22a3ba1390b47ac4c55668b7e6386fabdde64ba39bd90286e19e",
       "disposition": "formal-infrastructure",
-      "reason": "Add a manual opt-in CI job running the existing isolated multipart paging fixture on a hosted Ubuntu 22.04 runner and checking a single receipt. The job changes test infrastructure only.",
-      "models": []
-    },
-    {
-      "path": "test/ci/release_pipeline.py",
-      "sha256": "e7933a18cf16df96ec578a95b27cf7bb6b253f5d6f25c3772e22cfbf27a4412f",
-      "disposition": "test-support",
-      "reason": "Require the exact Go 1.26.11 security patch in all seven CI jobs that set up Go, including the new opt-in paging job, and preserve the release workflow check.",
+      "reason": "Temporary manual-only evidence job executes unmodified fixed-source full make e2e on Ubuntu22.04 with pinned tools; preserves original failures and collects safe observed-case evidence. No model or product changes.",
       "models": []
     }
   ]
