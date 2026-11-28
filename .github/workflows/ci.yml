@@ -119,6 +119,18 @@ jobs:
             printf '%s\n' "$result" > "$RUNNER_TEMP/280-receipts/$scope.exit"
             echo "$scope fixture exit: $result"
           done
+          python - <<'PYDIAG'
+          import json, os, pathlib, re
+          root = pathlib.Path(os.environ['RUNNER_TEMP'])
+          records = {}
+          for scope in ('full', 'focused'):
+              text = (root / ('280-' + scope + '.log')).read_text(errors='replace')
+              frames = [{'file': pathlib.Path(name).name, 'line': int(line)}
+                        for name, line in re.findall(r'File "([^"\n]+)", line ([0-9]+)', text)]
+              kinds = re.findall(r'^([A-Za-z_][A-Za-z_0-9.]*(?:Error|Exception))(?::|$)', text, re.MULTILINE)
+              records[scope] = {'frames': frames[-12:], 'exception_types': kinds[-3:]}
+          (root / '280-receipts' / 'diagnostics.json').write_text(json.dumps(records, indent=2) + '\n')
+          PYDIAG
           test "$(cat "$RUNNER_TEMP/280-receipts/full.exit")" = 0 && test "$(cat "$RUNNER_TEMP/280-receipts/focused.exit")" = 0
       - name: Retain safe exact-source statuses
         if: always()
