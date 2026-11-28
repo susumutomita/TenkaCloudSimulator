@@ -31,6 +31,10 @@ func (g *Gateway) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		g.serveNotifications(w, r)
 		return
 	}
+	if isSupportRequest(r) {
+		g.serveSupport(w, r)
+		return
+	}
 	// Bedrock Runtime shares the "bedrock" signing name with the control-plane
 	// catalog, so its distinct route prefixes are recognized first.
 	if isBedrockRuntime(r) {

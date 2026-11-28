@@ -1,17 +1,17 @@
 {
   "version": 1,
-  "base_sha": "591298e6889ff15f85df789516a570eb6da25c1e",
+  "base_sha": "b723c4faf7dde03ee4addce3c6a343fb0c078a52",
   "changes": [
     {
       "path": "README.md",
-      "sha256": "fc6ecb743ee621e36eb4bc586ef6bdefd35a774dea4551f9a7327d851f285eef",
+      "sha256": "69ac2614fc4119dc4cb6e11ede9443b6ccc93c1faa981253e34ab9fe3c27e7f4",
       "disposition": "documentation",
       "reason": "Link the supported CodeCommit branch notifications and the bilingual rule management console.",
       "models": []
     },
     {
       "path": "docs/aws-catalog.md",
-      "sha256": "4710abbc8351f3d4c03162ea78270d2980027622c6cf7e521067b06067f4761a",
+      "sha256": "e4f6eb204256b52dae66cce097d04815308933608cb4d2ac16e441362916bfe8",
       "disposition": "documentation",
       "reason": "Identify the dedicated native CodeStar Notifications REST JSON behavior.",
       "models": []
@@ -32,16 +32,9 @@
     },
     {
       "path": "docs/design/0001-go-standalone.md",
-      "sha256": "87183cf8dc708cb2a2e4639048d813d1f961c11d3f9e5bf7db333775b2b466a7",
+      "sha256": "97a5689190817281fbf74259f00fb4e86a20d7f0df139fbb2d352517ba84dd4b",
       "disposition": "documentation",
       "reason": "Describe atomic Git event capture, scoped durable SNS and SQS delivery, and console and Scalar access to the same rules.",
-      "models": []
-    },
-    {
-      "path": "docs/sns.md",
-      "sha256": "de2d1065dfed2d4035834ba4a3ff4b7dead4549a2cdec83f8c58fb5a3dc5f281",
-      "disposition": "documentation",
-      "reason": "Specify the Query operations, restricted statement grammar, storage and exact IAM checks.",
       "models": []
     },
     {
@@ -122,68 +115,10 @@
       ]
     },
     {
-      "path": "formal/SNSNotificationPolicyLifetime.cfg",
-      "sha256": "f5039c650d36ed1ae07e753e5a43235902599ffe4816719aff798ef7ca144294",
-      "disposition": "modeled",
-      "reason": "Select the concrete bounded settings and invariants for the policy lifecycle.",
-      "models": [
-        {
-          "id": "SNSNotificationPolicyLifetime",
-          "properties": [
-            "SetAdmission",
-            "SetRefusalPreservesStore",
-            "NewGeneration",
-            "EditKeepsGeneration",
-            "PolicyBytesExact",
-            "DeleteFrame",
-            "PeerFrame",
-            "GetReadback",
-            "ReadsPreserveStore",
-            "ResolverAdmission",
-            "ResolverGeneration",
-            "ResolverDecision",
-            "CapturedCurrentGrant",
-            "CaptureExact",
-            "RestartPreservesStore"
-          ],
-          "limits": "Finite topic and generation bounds project request outcomes. Actual SQL, Unicode, the SNS Query wire, SDK and timestamps require independent native checks."
-        }
-      ]
-    },
-    {
-      "path": "formal/SNSNotificationPolicyLifetime.tla",
-      "sha256": "7bbd220cff10d3c0b6039c4a7bc0a8f315b43d2da6baf855cb03f4e57674ed1c",
-      "disposition": "modeled",
-      "reason": "Model the finite private topic lifetimes, persistence, exact grant lookup and refusal frames.",
-      "models": [
-        {
-          "id": "SNSNotificationPolicyLifetime",
-          "properties": [
-            "SetAdmission",
-            "SetRefusalPreservesStore",
-            "NewGeneration",
-            "EditKeepsGeneration",
-            "PolicyBytesExact",
-            "DeleteFrame",
-            "PeerFrame",
-            "GetReadback",
-            "ReadsPreserveStore",
-            "ResolverAdmission",
-            "ResolverGeneration",
-            "ResolverDecision",
-            "CapturedCurrentGrant",
-            "CaptureExact",
-            "RestartPreservesStore"
-          ],
-          "limits": "Finite topic and generation bounds project request outcomes. Actual SQL, Unicode, the SNS Query wire, SDK and timestamps require independent native checks."
-        }
-      ]
-    },
-    {
       "path": "formal/models.json",
-      "sha256": "34117b8d88afa12e0afdb26d1f3a7afad1db3f001af553baa5517e83f2dcec60",
+      "sha256": "bb11f86ebff193b8544042f60b66400dd8491087f8b9a73aa6600bba96794c25",
       "disposition": "formal-infrastructure",
-      "reason": "Register the SNS topic grant lifecycle, branch event delivery and rule console models with their invariants, negative controls and implementation paths.",
+      "reason": "Register CodeStarBranchNotificationDelivery and NotificationRuleConsole with their finite inputs, invariants, controls and implementation paths.",
       "models": []
     },
     {
@@ -206,7 +141,7 @@
     },
     {
       "path": "internal/aws/catalog/engine.go",
-      "sha256": "e45caf9a8bc2e3df762629e9213be2bd2082e0daf22c7ed1142967ed5512c0c2",
+      "sha256": "20330cdc0186b8b14975d9ceea8840918f9097240e649694b27ca64312624a77",
       "disposition": "modeled",
       "reason": "Wire the trusted reference transition into the service-owned transaction and report inability to reserve pending-work capacity.",
       "models": [
@@ -383,7 +318,7 @@
     },
     {
       "path": "internal/aws/s3.go",
-      "sha256": "ac682dc251fcc8dccd54da2c0a12f50bc000f847168253416c26ffc3ac6dce09",
+      "sha256": "3e2908a0764c65044c043531306a41db59cf190486b2c054ce836ac468ad99e9",
       "disposition": "modeled",
       "reason": "Carry the optional standalone notification store into the existing AWS gateway composition.",
       "models": [
@@ -394,23 +329,6 @@
             "WorkerDecision"
           ],
           "limits": "Finite two-target branch/rule state and representative principals, operations, destinations and faults. Native SQLite, SDK headers, exact filter pagination, physical clocks, quota magnitudes and payload bytes are checked separately."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/sns.go",
-      "sha256": "b4d953eebf6c83897f02ddcc3ca5e6e32f51841805646015384fb66a39bfb990",
-      "disposition": "modeled",
-      "reason": "Authorize each Query action and expose the policy through the actual topic attribute requests.",
-      "models": [
-        {
-          "id": "SNSNotificationPolicyLifetime",
-          "properties": [
-            "SetAdmission",
-            "GetReadback",
-            "SetRefusalPreservesStore"
-          ],
-          "limits": "Finite topic and generation bounds project request outcomes. Actual SQL, Unicode, the SNS Query wire, SDK and timestamps require independent native checks."
         }
       ]
     },
@@ -432,100 +350,8 @@
       ]
     },
     {
-      "path": "internal/aws/sns_store.go",
-      "sha256": "e3cb28dad864f59a8bf11362e0e1d5ae681c4c6389ea3b7d4765bfe6ccc5bc0a",
-      "disposition": "modeled",
-      "reason": "Install the sparse policy table and remove it with its owning topic.",
-      "models": [
-        {
-          "id": "SNSNotificationPolicyLifetime",
-          "properties": [
-            "DeleteFrame",
-            "NewGeneration",
-            "PeerFrame",
-            "RestartPreservesStore"
-          ],
-          "limits": "Finite topic and generation bounds project request outcomes. Actual SQL, Unicode, the SNS Query wire, SDK and timestamps require independent native checks."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/sns_test.go",
-      "sha256": "b511659dde0f3a13f8d5f833f96638696ab4dcff95eb0555f3761dfeaeb6908b",
-      "disposition": "modeled",
-      "reason": "Retain the unsupported Query-action regression and require native validation for malformed SetTopicAttributes.",
-      "models": [
-        {
-          "id": "SNSLifecycle",
-          "properties": [
-            "DeleteAckEmpty",
-            "DeleteRetryAcknowledged"
-          ],
-          "limits": "The native lifecycle regression checks that the deleted topic stays absent, an incomplete Set is refused, and another action remains unsupported."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/sns_topic_policy.go",
-      "sha256": "f83b4cec528f0069b1b8bb56d0493fe7a3e7307d1a6fce4691e0de5528f2046f",
-      "disposition": "modeled",
-      "reason": "Validate the policy, save exact bytes and resolve the current grant in the native database transaction.",
-      "models": [
-        {
-          "id": "SNSNotificationPolicyLifetime",
-          "properties": [
-            "SetAdmission",
-            "SetRefusalPreservesStore",
-            "NewGeneration",
-            "EditKeepsGeneration",
-            "PolicyBytesExact",
-            "DeleteFrame",
-            "PeerFrame",
-            "GetReadback",
-            "ReadsPreserveStore",
-            "ResolverAdmission",
-            "ResolverGeneration",
-            "ResolverDecision",
-            "CapturedCurrentGrant",
-            "CaptureExact",
-            "RestartPreservesStore"
-          ],
-          "limits": "Finite topic and generation bounds project request outcomes. Actual SQL, Unicode, the SNS Query wire, SDK and timestamps require independent native checks."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/sns_topic_policy_test.go",
-      "sha256": "e8088019305db5d03e9ff8585e9d16657e9166cde9b97db5a489021f56366115",
-      "disposition": "modeled",
-      "reason": "Test grammar, authority, physical storage, corrupt state, request cancellation, real deadlines and retry after reopen.",
-      "models": [
-        {
-          "id": "SNSNotificationPolicyLifetime",
-          "properties": [
-            "SetAdmission",
-            "SetRefusalPreservesStore",
-            "NewGeneration",
-            "EditKeepsGeneration",
-            "PolicyBytesExact",
-            "DeleteFrame",
-            "PeerFrame",
-            "GetReadback",
-            "ReadsPreserveStore",
-            "ResolverAdmission",
-            "ResolverGeneration",
-            "ResolverDecision",
-            "CapturedCurrentGrant",
-            "CaptureExact",
-            "RestartPreservesStore"
-          ],
-          "limits": "The Go suite exercises concrete database failures and real request clock interruptions in addition to the finite outcomes."
-        }
-      ]
-    },
-    {
       "path": "internal/aws/ssm.go",
-      "sha256": "91a665040b03d6251e44480f3813165b7b92d93caace92a60034fdedafbac779",
+      "sha256": "ea29edf48eca2af61cea2f02f4191b17187f786af1f4f28ec1fe48a8ece75d20",
       "disposition": "modeled",
       "reason": "Route the local notification service selector to the ordinary authenticated notification handler.",
       "models": [
@@ -569,18 +395,10 @@
     },
     {
       "path": "internal/server/server.go",
-      "sha256": "f91bef788ef5a90d9535797c0d45c1c56c52a2d3f92137f9d894c104a06282ca",
+      "sha256": "e51515e6b0d72db6e8309280af873964a7d35c2d6d92973fc6e19820a0226ea7",
       "disposition": "modeled",
-      "reason": "Compose SNS policy capabilities, the Git notification callback and delivery worker, and expose rule management to ordinary authenticated Console sessions.",
+      "reason": "Initialize the local rule store, Git callback and delivery worker, and expose the console service to authenticated sessions with the store installed.",
       "models": [
-        {
-          "id": "SNSQueueFanout",
-          "properties": [
-            "Authorized",
-            "DurableAck"
-          ],
-          "limits": "The capability describes existing caller-checked native fanout alongside the SNS topic policy. Actual capability metadata and Query operations require independent inspection."
-        },
         {
           "id": "CodeStarBranchNotificationDelivery",
           "properties": [
@@ -602,7 +420,7 @@
     },
     {
       "path": "internal/server/web/app.js",
-      "sha256": "9a67bd65709551e843ff4cd219e4cac610d24c491fb377bc2a6ea478f450e332",
+      "sha256": "e45bb5c6dadb28b199d992fb7f212d198ecf07a94823386e6b056e6f563ec1b4",
       "disposition": "modeled",
       "reason": "Embed the same compiled UI state machine that submits and checks the actual REST JSON requests.",
       "models": [
@@ -620,23 +438,23 @@
     },
     {
       "path": "scripts/formal_model_gate.py",
-      "sha256": "6a694a00cbcabe11b1085bcd859d46631e1875fd2206cd31a7ea990fb2c330a0",
+      "sha256": "fdc43a3ebaa99dad58a7e59ac9598cbdd19c9611127558a49936e85c5a64b4ee",
       "disposition": "formal-infrastructure",
-      "reason": "Pin the SNS policy, notification delivery and rule console model obligations, controls and source paths.",
+      "reason": "Pin the branch delivery and rule console models, their invariant and mutation sets, and their modeled paths.",
       "models": []
     },
     {
       "path": "scripts/test-formal-gate.py",
-      "sha256": "f0f2ffb998747e9415d7576bd2eb997ecc51c651c3987d69eaf822607dd0e7b1",
+      "sha256": "996f89a2d23e85f958ee3bf243e75f8ae42ff1596ba714efc2e76b6a8364fdf3",
       "disposition": "formal-infrastructure",
-      "reason": "Keep the existing registry and require all three added model inventories, including controls that reject a removed invariant or implementation binding.",
+      "reason": "Require both notification models alongside each inherited model and exercise removal of their protected controls.",
       "models": []
     },
     {
       "path": "test/e2e/check.py",
-      "sha256": "2a8e020e66f4eac34db2f83d7898477965640097f2a6b80079da5b8693ac6f1e",
+      "sha256": "ea64c832f0200df9877e9fa3ed49ccca805948af05042954b362073e7055a1d2",
       "disposition": "test-support",
-      "reason": "Run the real CodeStar branch delivery and published SNS policy fixtures in the regular standalone E2E entry point, retaining the CodeCommit content coverage.",
+      "reason": "Exercise the notification environment contract and the real branch-to-queue flow in the ordinary stock SDK conformance entry point.",
       "models": []
     },
     {
@@ -661,13 +479,6 @@
       "models": []
     },
     {
-      "path": "test/e2e/sns_notification_policy.py",
-      "sha256": "2f932c6f2bffd47e6cfd3ebc6e06760d7b8b2f68922c7cfb433731aff37a362f",
-      "disposition": "test-support",
-      "reason": "Drive actual authenticated CLI processes through the official boto3 SNS protocol, including readback, isolation and retry.",
-      "models": []
-    },
-    {
       "path": "test/e2e/test_codestar_notifications_environment.py",
       "sha256": "962094efb721c27c4376903aa57fdef9871ffab2ce518c05800b699f77f9e3ef",
       "disposition": "test-support",
@@ -676,14 +487,14 @@
     },
     {
       "path": "tools/console/bundle-digests.json",
-      "sha256": "2e479f25d1fd0a32c9d5c0912cea54448e132185a4b58f25ebdf8970bb4380a2",
+      "sha256": "558666e1cfbcd114e0aa6ec4958d07a7782475049eb6f365e457421bd7171f0b",
       "disposition": "presentation",
       "reason": "Bind the generated Cloudscape application with the existing build fingerprint.",
       "models": []
     },
     {
       "path": "tools/console/bundle-inputs.json",
-      "sha256": "0cd9797bd148c8d1f69b6d25e475aca75daf07cc7b7cef7e7b6f94d998d6f861",
+      "sha256": "217022755875762c00df03bc6e084b67312ca7e1ce070e6a0bd9b54e3a419eaf",
       "disposition": "presentation",
       "reason": "Record canonical esbuild inputs and outputs for the compiled notification rule console.",
       "models": []
@@ -728,7 +539,7 @@
     },
     {
       "path": "tools/console/src/console-navigation.mjs",
-      "sha256": "bd5e3277cef286702a4baa1fcd1ae213c22e4718bf43fdcd2ff1bf2e5e580e51",
+      "sha256": "46b11d34763de3a6bd7b925ac29957af28724b2943c529022e764c3036f11907",
       "disposition": "modeled",
       "reason": "Expose the AWS rule route with the declared protocol/operations in an ordinary session.",
       "models": [
@@ -744,7 +555,7 @@
     },
     {
       "path": "tools/console/src/main.jsx",
-      "sha256": "6f03fab5ce1b2e6c48519ce9d305fd8add3b81400bfa7b60c5d84ebd9757b978",
+      "sha256": "6ce22a9cea88609ba87911501d7ddfde3a0aca267675f4d98f2f2c50fb57d7dd",
       "disposition": "modeled",
       "reason": "Route the selected service, region and principal to a separate keyed rule component; stale completions cannot replace the new view.",
       "models": [

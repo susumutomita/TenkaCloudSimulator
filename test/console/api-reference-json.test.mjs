@@ -4,7 +4,8 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import vm from 'node:vm';
 
-const source = readFileSync(new URL('../../internal/server/apidocs/init.js', import.meta.url), 'utf8');
+const readAsset = name => readFileSync(new URL('../../internal/server/apidocs/' + name, import.meta.url), 'utf8');
+const source = readAsset('aws-json-renderer.js') + '\n' + readAsset('init.js');
 function fixture(fetch = () => { throw Error('Unexpected fetch'); }) {
   let config;
   vm.runInNewContext(source, {
