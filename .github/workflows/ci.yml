@@ -18,7 +18,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7.0.1
         with:
-          ref: 9a7151bfdaa186f0f60cbf809ce43914f25572ea
+          ref: aceac6d4ea8433a4ecfbab472b61c8fdc33088d2
           persist-credentials: false
       - uses: actions/setup-go@v6.5.0
         with:
@@ -26,8 +26,8 @@ jobs:
           cache: true
       - name: Verify the immutable source, toolchain and neutral runner
         run: |
-          test "$(git rev-parse HEAD)" = 9a7151bfdaa186f0f60cbf809ce43914f25572ea
-          test "$(git rev-parse HEAD^{tree})" = ef5bb415b906711083336cff752136bb5ec92f34
+          test "$(git rev-parse HEAD)" = aceac6d4ea8433a4ecfbab472b61c8fdc33088d2
+          test "$(git rev-parse HEAD^{tree})" = 4725611745d0389ef91021e8e1c3cd392ef3df73
           test -z "$(git status --porcelain)"
           test "$(go env GOVERSION)" = go1.26.11
           test "$(id -u)" -ne 0
@@ -68,7 +68,7 @@ jobs:
       - name: Identify the exact binary
         run: |
           go version -m dist/tenkacloud-simulator > "$RUNNER_TEMP/elb-evidence/build.txt"
-          grep -F 'vcs.revision=9a7151bfdaa186f0f60cbf809ce43914f25572ea' "$RUNNER_TEMP/elb-evidence/build.txt"
+          grep -F 'vcs.revision=aceac6d4ea8433a4ecfbab472b61c8fdc33088d2' "$RUNNER_TEMP/elb-evidence/build.txt"
           grep -F 'vcs.modified=false' "$RUNNER_TEMP/elb-evidence/build.txt"
           sha256sum dist/tenkacloud-simulator > "$RUNNER_TEMP/elb-evidence/binary.sha256"
       - name: Install the pinned SDK and Chromium
@@ -104,12 +104,15 @@ jobs:
             test "$(awk -F: "NR>2 {gsub(/ /, \"\", \$1); print \$1}" /proc/net/dev)" = lo
             test "$(awk "/^CapEff:/{print \$2}" /proc/self/status)" = 0000000000000000
             "$RUNNER_TEMP/elb-venv/bin/python" -B test/e2e/elb_console.py > "$RUNNER_TEMP/elb-console.json"
+            "$RUNNER_TEMP/elb-venv/bin/python" -B test/e2e/elb_scalar.py > "$RUNNER_TEMP/elb-scalar.json"
             "$RUNNER_TEMP/elb-venv/bin/python" -B test/e2e/elb.py > "$RUNNER_TEMP/elb-native.json"
           ' > "$RUNNER_TEMP/elb-private.log" 2>&1 || result=$?
           printf '%s\n' "$result" > "$RUNNER_TEMP/elb-evidence/sdk-exit.txt"
           test "$result" -eq 0 || exit "$result"
           jq -e '.console and .scope=="owner+peer" and .sdk and .scalar_sends==1 and .verified_and_ambiguous_writes==2 and .denied_write==1 and .real_listener_statuses==[200,404] and .owner_restart and .english_desktop and .japanese_mobile and .cleanup' "$RUNNER_TEMP/elb-console.json"
           jq -e '.elbNativeSDK and .lambdaTargetDataPlane and .periodicHealthChecks and .twoAuthenticatedProcesses and .actualCLIReopen and .copiedStandaloneWithoutExecutablesOnPath and .participantIAM and .placement.restartVerified and .teardown=="DELETED" and .counts.sends==.counts.responses and .counts.sends==.counts.calls and .counts.sends>0' "$RUNNER_TEMP/elb-native.json"
+          jq -e --arg binary "$SIMULATOR_BINARY_SHA256" '.binary==$binary and .stockSDKReadback and .reopened and .peerPreserved and .cleanup and .scalarSends==[["CreateTargetGroup",200],["DescribeLoadBalancers",200],["DescribeTargetHealth",200],["DescribeLoadBalancers",200],["DeleteTargetGroup",403]]' "$RUNNER_TEMP/elb-scalar.json"
+          jq '{stockSDKReadback,reopened,peerPreserved,cleanup,scalarSends,binary}' "$RUNNER_TEMP/elb-scalar.json" > "$RUNNER_TEMP/elb-evidence/scalar.json"
           cp "$RUNNER_TEMP/elb-console.json" "$RUNNER_TEMP/elb-evidence/console.json"
           jq '{elbNativeSDK,lambdaTargetDataPlane,periodicHealthChecks,twoAuthenticatedProcesses,actualCLIReopen,participantIAM,teardown,counts}' "$RUNNER_TEMP/elb-native.json" > "$RUNNER_TEMP/elb-evidence/native.json"
           sha256sum --check "$RUNNER_TEMP/elb-evidence/binary.sha256"
