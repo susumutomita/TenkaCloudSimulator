@@ -49,6 +49,13 @@
       ]
     },
     {
+      "path": "cmd/simulator/local_sso_bootstrap_response_test.go",
+      "models": [],
+      "disposition": "test-support",
+      "reason": "Test usable or unavailable local bootstrap responses without relaxing admission.",
+      "sha256": "16aecbe395a02b1e9d7ccda3c8e666259a6368acf4044bb6995504399f0d6a30"
+    },
+    {
       "path": "cmd/simulator/local_sso_callback_contract_test.go",
       "sha256": "0e9d6660512d6ea3fd6bf287511f0950fcc2daeb3579c75795b23804185405a5",
       "disposition": "test-support",
@@ -82,6 +89,13 @@
       "disposition": "test-support",
       "reason": "Tests launch usage, loss of a running listener, and bounded relying-party sessions and expiry without altering runtime logic.",
       "models": []
+    },
+    {
+      "path": "cmd/simulator/local_sso_local_boundaries_test.go",
+      "models": [],
+      "disposition": "test-support",
+      "reason": "Verify direct local browser routes and admission drain at shutdown.",
+      "sha256": "a2b60fba9ad3ae786453a50bff56748d022fa2c30a4813164c484245ca2aa160"
     },
     {
       "path": "cmd/simulator/local_sso_relying_party.go",
@@ -124,8 +138,8 @@
       "path": "cmd/simulator/local_sso_timing_test.go",
       "disposition": "test-support",
       "models": [],
-      "reason": "Verify the ordinary enrolled synthetic login at 105 seconds and rejection at the exact application deadline without waiting on the actual clock.",
-      "sha256": "a87d40652226108c2d72318340b7e4c0eb80a8be63358030bd893611afa92da7"
+      "reason": "Verify canonical key set at relying party using normally signed login plus real rotation and malformed provider response boundaries.",
+      "sha256": "58a53d5b5ee15c81a09b339df43736dda6657c5b40b60746e502987d5968c959"
     },
     {
       "path": "cmd/simulator/local_sso_transport_test.go",
@@ -344,6 +358,13 @@
       ]
     },
     {
+      "path": "internal/aws/cognitoidp/federation_metadata_boundaries_test.go",
+      "models": [],
+      "disposition": "test-support",
+      "reason": "Check unsupported local metadata labels and parseable legacy curve rejection.",
+      "sha256": "295d0cf7279c4bfc82cf7920b7f475f98fe1dd2e72491e2dc020bfbea011678c"
+    },
+    {
       "path": "internal/aws/cognitoidp/federation_metadata_test.go",
       "sha256": "435fda27fb62644d8890e28612ab55ca28f612fc9fc2f82d9c729249e35db556",
       "disposition": "test-support",
@@ -352,7 +373,7 @@
     },
     {
       "path": "internal/aws/cognitoidp/federation_publisher.go",
-      "sha256": "d9cd631b85c2b7ea686143f3b9d6981fdf9d25e01646c6d4714fb7705e3b1ee4",
+      "sha256": "0e0ec85750e57f802c5cd27b2ad119a192cd0f5d181898640cdda5b83824847a",
       "disposition": "modeled",
       "reason": "Give newly enrolled trust an explicit non-reused registration identity; stale or unusable registrations cannot supply the modeled ACS witness. Preserve the exact CSPRNG sizes and encodings while dropping only error branches the Go 1.26 rand.Read contract cannot return.",
       "models": [
@@ -385,6 +406,22 @@
       ]
     },
     {
+      "path": "internal/aws/cognitoidp/federation_store.go",
+      "models": [
+        {
+          "id": "CognitoFederationPoolOwnership",
+          "properties": [
+            "PeerFrame",
+            "CanonicalTransition"
+          ],
+          "limits": "Finite model ignores entropy source, SQLite implementation and randomness distribution."
+        }
+      ],
+      "disposition": "modeled",
+      "reason": "Keep same revision CSPRNG and transaction; remove the unreturnable rand.Read error branch only.",
+      "sha256": "654b8d2480c2e841d37538c1c163667d23096ffbf979f4ac5bddc90ba8e2b3c3"
+    },
+    {
       "path": "internal/aws/cognitoidp/hosted_browser.go",
       "sha256": "d76fc2d25462962642a68622fc9644d1da5032e11ffa0a1fe3083025a6ee0e9d",
       "disposition": "modeled",
@@ -409,6 +446,13 @@
       "models": []
     },
     {
+      "path": "internal/aws/cognitoidp/hosted_capacity_test.go",
+      "models": [],
+      "disposition": "test-support",
+      "reason": "Verify bounded valid login issuance and recovery after exchange.",
+      "sha256": "cf58b3fcddbd6ad686b1af369c3632b9404d6b7bcb810e92f4e6da2fca537eb6"
+    },
+    {
       "path": "internal/aws/cognitoidp/hosted_completion.go",
       "sha256": "f70de96cc815094b1574c7cc0113c0b27ad9d7b7b423888ee9c2ef8760d747b1",
       "disposition": "modeled",
@@ -423,6 +467,13 @@
           "limits": "Symbolic correspondence only: not cryptography, parsers, OAuth/SAML platform parity, concrete time/quotas, cross-run subject stability, general Keycloak compatibility, TLS/browser/Linux/macOS execution, SQL/crash races, disclosure beyond modeled stdout fields, Battle dependency compatibility, or a Go refinement proof. An independent successful callback is not an app or operator session."
         }
       ]
+    },
+    {
+      "path": "internal/aws/cognitoidp/hosted_enrollment_recovery_test.go",
+      "models": [],
+      "disposition": "test-support",
+      "reason": "Check ordinary metadata expiry before publication and restored app re-enrollment.",
+      "sha256": "fd52656591de7b4d724b004e0602dcced588c22d4a7ee440071d4c6969744296"
     },
     {
       "path": "internal/aws/cognitoidp/hosted_identity_test.go",
@@ -442,7 +493,7 @@
       "path": "internal/aws/cognitoidp/hosted_pin_expiry_test.go",
       "sha256": "4286ccd2225a685b48b42d2fb076f04352c25bf8c9f25dea1deb9e4fa931c08f",
       "disposition": "test-support",
-      "reason": "Verify a legitimately issued still-live authorization code cannot be redeemed after provider metadata expires, without invalidating the same client’s other provider.",
+      "reason": "Verify a legitimately issued still-live authorization code cannot be redeemed after provider metadata expires, without invalidating the same client\u2019s other provider.",
       "models": []
     },
     {
@@ -468,6 +519,13 @@
           "limits": "Symbolic correspondence only: not cryptography, parsers, OAuth/SAML platform parity, concrete time/quotas, cross-run subject stability, general Keycloak compatibility, TLS/browser/Linux/macOS execution, SQL/crash races, disclosure beyond modeled stdout fields, Battle dependency compatibility, or a Go refinement proof. An independent successful callback is not an app or operator session."
         }
       ]
+    },
+    {
+      "path": "internal/aws/cognitoidp/hosted_protocol_document_test.go",
+      "models": [],
+      "disposition": "test-support",
+      "reason": "Check preflight refusal of wrong protocol document shape without claiming signature verification.",
+      "sha256": "76dec0b08af653a5f79d0afa37fcb99f5886986f2e5eb580580c7489eb383fb6"
     },
     {
       "path": "internal/aws/cognitoidp/hosted_recovery_test.go",
@@ -522,6 +580,23 @@
       "disposition": "test-support",
       "reason": "Verify normal hosted login fails closed on unreadable restored state and refuses acknowledgement on mismatched persisted readback; require retry after recovery.",
       "models": []
+    },
+    {
+      "path": "internal/aws/cognitoidp/pools.go",
+      "models": [
+        {
+          "id": "CognitoUserPoolMetadata",
+          "properties": [
+            "ScopedCRUD",
+            "ExactNextToken",
+            "RestartPersistsRows"
+          ],
+          "limits": "Finite model checks input and state transitions, not CSPRNG or generated identifier distribution."
+        }
+      ],
+      "disposition": "modeled",
+      "reason": "Retain original random cursor seed and pool IDs; remove branches that Go 1.26 does not return.",
+      "sha256": "760c87447668cb6996be63b3dd79fb9b6da637c8b54019f9f1c1b0416c9b864e"
     },
     {
       "path": "internal/aws/cognitoidp/sqlite_recovery_test.go",

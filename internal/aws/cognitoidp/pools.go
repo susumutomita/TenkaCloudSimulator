@@ -76,9 +76,7 @@ func newStore(db *sql.DB, nativeFederation bool) (*Store, error) {
 		return nil, errors.New("Cognito user pools require caller-owned SQLite")
 	}
 	s := &Store{db: db, nativeFederation: nativeFederation}
-	if _, err := rand.Read(s.cursorKey[:]); err != nil {
-		return nil, err
-	}
+	rand.Read(s.cursorKey[:])
 	if _, err := db.Exec(`CREATE TABLE IF NOT EXISTS aws_cognito_user_pools (
 		account TEXT NOT NULL, region TEXT NOT NULL, pool_id TEXT NOT NULL,
 		name TEXT NOT NULL, created_ms INTEGER NOT NULL,
@@ -97,9 +95,7 @@ func (s *Store) create(ctx context.Context, scope Scope, name string) (pool, err
 		return pool{}, errInvalid
 	}
 	var nonce [8]byte
-	if _, err := rand.Read(nonce[:]); err != nil {
-		return pool{}, err
-	}
+	rand.Read(nonce[:])
 	p := pool{ID: scope.Region + "_" + hex.EncodeToString(nonce[:]), Name: name, CreatedMS: time.Now().UnixMilli()}
 	// The quota check and INSERT are one SQLite write statement, including
 	// independent provider processes that intentionally share this database.

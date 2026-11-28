@@ -234,9 +234,7 @@ func (p *federationPublisher) addClient(ctx context.Context, id string, input fe
 			}
 		}
 		var suffix [12]byte
-		if _, err := rand.Read(suffix[:]); err != nil {
-			return err
-		}
+		rand.Read(suffix[:])
 		newID := hex.EncodeToString(suffix[:])
 		if cfg.clientIndex(newID) >= 0 {
 			return errFederationDuplicate

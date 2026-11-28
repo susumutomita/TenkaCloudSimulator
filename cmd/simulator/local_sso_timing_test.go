@@ -1,8 +1,11 @@
 package main
 
 import (
+	"bytes"
 	"context"
 	"crypto/tls"
+	"encoding/base64"
+	"encoding/json"
 	"errors"
 	"html"
 	"io"
@@ -20,26 +23,40 @@ import (
 	"github.com/susumutomita/TenkaCloudSimulator/internal/server"
 )
 
+type localSSOBrowserOutcome int
+
+const (
+	localSSOAcceptBrowser localSSOBrowserOutcome = iota
+	localSSOExpireBrowser
+	localSSOReopenCognito
+)
+
 func TestLocalSSOSlowEntraEntryAndExactAppExpiry(t *testing.T) {
 	for _, scenario := range []struct {
 		name    string
-		expired bool
+		outcome localSSOBrowserOutcome
 	}{
-		{"accept code entered at 105 seconds", false},
-		{"refuse otherwise usable code at exact app deadline", true},
+		{"accept code entered at 105 seconds", localSSOAcceptBrowser},
+		{"refuse otherwise usable code at exact app deadline", localSSOExpireBrowser},
 	} {
 		t.Run(scenario.name, func(t *testing.T) {
 			synctest.Test(t, func(t *testing.T) {
-				checkLocalSSOBrowserTiming(t, scenario.expired)
+				checkLocalSSOBrowserTiming(t, scenario.outcome)
 			})
 		})
 	}
 }
 
+func TestLocalSSOReopenedCognitoRequiresCurrentSigningKeys(t *testing.T) {
+	synctest.Test(t, func(t *testing.T) {
+		checkLocalSSOBrowserTiming(t, localSSOReopenCognito)
+	})
+}
+
 // The routes and signatures are production handlers. Only the transport is
 // in-process, so the test can cross the real deadline with synctest's clock.
 // Browser TLS, cookie policy and CSP need the separate real-browser witness.
-func checkLocalSSOBrowserTiming(t *testing.T, expired bool) {
+func checkLocalSSOBrowserTiming(t *testing.T, outcome localSSOBrowserOutcome) {
 	t.Helper()
 	const (
 		private = "https://127.0.0.1:18451"
@@ -50,13 +67,16 @@ func checkLocalSSOBrowserTiming(t *testing.T, expired bool) {
 	ctx := t.Context()
 	options := server.DefaultProviderConfig()
 	options.CognitoLocalFederationConfig = true
-	pair, closeState, err := server.NewWithLocalCognitoHosted(filepath.Join(t.TempDir(), "state.sqlite"), options, cognito)
+	statePath := filepath.Join(t.TempDir(), "state.sqlite")
+	pair, closeState, err := server.NewWithLocalCognitoHosted(statePath, options, cognito)
 	if err != nil {
 		t.Fatal(err)
 	}
 	t.Cleanup(func() {
-		if err := closeState(); err != nil {
-			t.Error("could not release synthetic SQLite state", err)
+		if closeState != nil {
+			if err := closeState(); err != nil {
+				t.Error("could not release synthetic SQLite state", err)
+			}
 		}
 	})
 	secret := localSSOEntropy() + localSSOEntropy()
@@ -65,6 +85,7 @@ func checkLocalSSOBrowserTiming(t *testing.T, expired bool) {
 		t.Fatal(err)
 	}
 	tokenPosts := 0
+	var heldID string
 	transport := func(handlers map[string]http.Handler) http.RoundTripper {
 		return callbackContractRoundTrip(func(r *http.Request) (*http.Response, error) {
 			target := r.URL.Scheme + "://" + r.URL.Host
@@ -76,11 +97,37 @@ func checkLocalSSOBrowserTiming(t *testing.T, expired bool) {
 			originForm.URL.Scheme, originForm.URL.Host = "", ""
 			originForm.Host, originForm.RemoteAddr = r.URL.Host, "127.0.0.1:23111"
 			originForm.TLS = &tls.ConnectionState{Version: tls.VersionTLS13}
-			if target == cognito && r.Method == http.MethodPost && strings.HasSuffix(r.URL.Path, "/oauth2/token") {
+			tokenPost := target == cognito && r.Method == http.MethodPost && strings.HasSuffix(r.URL.Path, "/oauth2/token")
+			if tokenPost {
 				tokenPosts++
 			}
 			out := httptest.NewRecorder()
 			h.ServeHTTP(out, originForm)
+			if outcome == localSSOReopenCognito && tokenPost && out.Code == http.StatusOK {
+				if heldID != "" {
+					return nil, errors.New("unexpected second successful token exchange")
+				}
+				var issued struct {
+					ID string `json:"id_token"`
+				}
+				if err := json.Unmarshal(out.Body.Bytes(), &issued); err != nil || issued.ID == "" {
+					return nil, errors.New("normal Cognito response did not include an identity token")
+				}
+				heldID = issued.ID
+				// The app already has its real, newly issued token. Reopen
+				// before its next JWKS read, without changing either response.
+				stopOld := closeState
+				closeState = nil
+				if err := stopOld(); err != nil {
+					return nil, errors.New("could not close original Cognito store")
+				}
+				reopened, closeNew, err := server.NewWithLocalCognitoHosted(statePath, options, cognito)
+				if err != nil {
+					return nil, errors.New("could not reopen the same Cognito store")
+				}
+				closeState = closeNew
+				handlers[target] = reopened.Browser
+			}
 			return out.Result(), nil
 		})
 	}
@@ -121,7 +168,9 @@ func checkLocalSSOBrowserTiming(t *testing.T, expired bool) {
 		"AllowedOAuthFlows": []string{"code"}, "AllowedOAuthScopes": []string{"openid"},
 		"CallbackURLs": []string{app + "/callback"}, "SupportedIdentityProviders": []string{"Entra"},
 	}, &enrollment)
-	handlers[app] = newLocalSSORelyingParty(local, cognito+"/_simulator/cognito/"+p.UserPool.ID, enrollment.UserPoolClient.ClientID, app)
+	issuer := cognito + "/_simulator/cognito/" + p.UserPool.ID
+	appClient := enrollment.UserPoolClient.ClientID
+	handlers[app] = newLocalSSORelyingParty(local, issuer, appClient, app)
 	jar, err := cookiejar.New(nil)
 	if err != nil {
 		t.Fatal(err)
@@ -195,7 +244,31 @@ func checkLocalSSOBrowserTiming(t *testing.T, expired bool) {
 	signed, _ := call(http.MethodPost, markup(prompt, localSSOTestForm.FindStringSubmatch), fields, http.StatusOK)
 	completion, _ := call(http.MethodPost, markup(signed, localSSOTestForm.FindStringSubmatch), formFields(signed, "SAMLResponse", "RelayState"), http.StatusOK)
 	callback := markup(completion, localSSOTestContinue.FindStringSubmatch)
-	if !expired {
+	if outcome == localSSOReopenCognito {
+		keysURL := issuer + "/.well-known/jwks.json"
+		previousKeys, err := localSSOGet(ctx, local, keysURL)
+		if err != nil {
+			t.Fatal("could not read original published keys", err)
+		}
+		finished, _ := call(http.MethodGet, callback, nil, http.StatusBadRequest)
+		currentKeys, err := localSSOGet(ctx, local, keysURL)
+		var current struct{ Keys []struct{ Kid string } }
+		auth, parseErr := url.Parse(start.Get("Location"))
+		if err != nil || parseErr != nil || json.Unmarshal(currentKeys, &current) != nil || len(current.Keys) != 2 ||
+			!localSSOOpaque(current.Keys[0].Kid) || !localSSOOpaque(current.Keys[1].Kid) ||
+			current.Keys[0].Kid == current.Keys[1].Kid || bytes.Equal(previousKeys, currentKeys) {
+			t.Fatal("same restored pool did not publish a distinct complete current key set")
+		}
+		nonce := auth.Query().Get("nonce")
+		if tokenPosts != 1 || !localSSOVerifyJWT(previousKeys, heldID, issuer, appClient, nonce) ||
+			localSSOVerifyJWT(currentKeys, heldID, issuer, appClient, nonce) ||
+			strings.Contains(finished, "Local sign-in verified") || !strings.Contains(finished, "restart local-sso") {
+			t.Fatal("prior signed token was not verified before reopen or was accepted by the restarted issuer")
+		}
+		checkLocalSSOUnusableKeySets(t, previousKeys, heldID, issuer, appClient, nonce)
+		return
+	}
+	if outcome == localSSOAcceptBrowser {
 		<-time.After(3 * time.Second)
 		finished, _ := call(http.MethodGet, callback, nil, http.StatusOK)
 		if tokenPosts != 1 || !strings.Contains(finished, "Local sign-in verified") {
@@ -222,5 +295,57 @@ func checkLocalSSOBrowserTiming(t *testing.T, expired bool) {
 	if err != nil || refused.StatusCode != http.StatusBadRequest || tokenPosts != 0 ||
 		strings.Contains(string(body), "Local sign-in verified") || !strings.Contains(string(body), "restart local-sso") {
 		t.Fatal("expired application callback attempted redemption or gave no recovery direction")
+	}
+}
+
+// Use the issuer's original keys and valid token. The relying party must
+// reject a broken publication instead of trusting only part of the set.
+func checkLocalSSOUnusableKeySets(t *testing.T, original []byte, id, issuer, clientID, nonce string) {
+	t.Helper()
+	parts := strings.Split(id, ".")
+	if len(parts) != 3 {
+		t.Fatal("fixture did not return a JWT")
+	}
+	header, err := base64.RawURLEncoding.DecodeString(parts[0])
+	var signed struct {
+		KeyID string `json:"kid"`
+	}
+	if err != nil || json.Unmarshal(header, &signed) != nil || signed.KeyID == "" {
+		t.Fatal("fixture JWT has no signing key")
+	}
+	for _, kind := range []string{"truncated document", "missing key", "invalid modulus", "invalid exponent", "duplicate key"} {
+		var set struct {
+			Keys []map[string]string `json:"keys"`
+		}
+		if err := json.Unmarshal(original, &set); err != nil || len(set.Keys) != 2 {
+			t.Fatal("fixture did not issue a complete key set")
+		}
+		if set.Keys[1]["kid"] == signed.KeyID {
+			set.Keys[0], set.Keys[1] = set.Keys[1], set.Keys[0]
+		}
+		if set.Keys[0]["kid"] != signed.KeyID {
+			t.Fatal("fixture signing key was not published")
+		}
+		// Keep the genuine signing key intact in each incomplete-key case.
+		switch kind {
+		case "missing key":
+			set.Keys = set.Keys[:1]
+		case "invalid modulus":
+			set.Keys[1]["n"] = "%"
+		case "invalid exponent":
+			set.Keys[1]["e"] = "%"
+		case "duplicate key":
+			set.Keys[1] = set.Keys[0]
+		}
+		wire, err := json.Marshal(set)
+		if err != nil {
+			t.Fatal("could not serialize fixture JWKS")
+		}
+		if kind == "truncated document" {
+			wire = wire[:len(wire)-1]
+		}
+		if localSSOVerifyJWT(wire, id, issuer, clientID, nonce) {
+			t.Errorf("app verified a token against an unusable key set (%s)", kind)
+		}
 	}
 }
