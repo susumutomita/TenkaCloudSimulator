@@ -60,7 +60,7 @@ func (f form) namespace() (string, error) {
 	if !ok {
 		return "", missing("Namespace")
 	}
-	if !printable(n, 255) || strings.HasPrefix(n, "AWS/") {
+	if !printable(n, 255) || n[0] == ':' || strings.HasPrefix(n, "AWS/") {
 		return "", invalid("Use a printable custom namespace outside AWS/.")
 	}
 	return n, nil

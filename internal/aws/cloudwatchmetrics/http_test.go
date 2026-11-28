@@ -124,7 +124,7 @@ func TestQueryAdmissionAndGzip(t *testing.T) {
 			}
 		})
 	}
-	for _, op := range []string{"PutMetricAlarm", "DeleteMetrics", "ListMetrics", "GetMetricData"} {
+	for _, op := range []string{"PutMetricAlarm", "DeleteMetric", "ListMetrics", "GetMetricData"} {
 		f := metricWire()
 		f.Set("Action", op)
 		status, body := serve(s, request([]byte(f.Encode()), ""), true)
@@ -186,7 +186,7 @@ func TestStrictMetricFormsAndTimestampLimits(t *testing.T) {
 			t.Fatal(key)
 		}
 	}
-	for _, ns := range []string{"", "AWS/EC2", "\n", "☁"} {
+	for _, ns := range []string{"", ":Invalid", "AWS/EC2", "\n", "☁"} {
 		f := form(url.Values{"Namespace": {ns}})
 		if _, err := f.namespace(); err == nil {
 			t.Fatal(ns)
@@ -241,5 +241,51 @@ func TestDimensionIdentityAndInclusiveBodyLimit(t *testing.T) {
 	r.Header.Add("Content-Type", "application/json")
 	if _, err := readForm(r); err == nil {
 		t.Fatal("duplicate content type")
+	}
+}
+
+func TestMetricBatchValidationBoundariesAndUnusedFields(t *testing.T) {
+	for _, size := range []int{1000, 1001} {
+		f := form{}
+		for i := 1; i <= size; i++ {
+			prefix := "MetricData.member." + strconv.Itoa(i) + "."
+			f[prefix+"MetricName"] = []string{"m"}
+			f[prefix+"Value"] = []string{"0"}
+		}
+		got, err := f.samples(time.Now())
+		if (err == nil) != (size == 1000) || err == nil && len(got) != size {
+			t.Fatal(size, len(got), err)
+		}
+	}
+	for _, f := range []form{
+		{"x.member.1.Name": {"foo"}, "x.member.1.Value": {"a"}, "x.member.2.Name": {"foo"}, "x.member.2.Value": {"b"}},
+		{"x.member.1.Name": {"\x01"}, "x.member.1.Value": {"v"}},
+		{"x.member.1.Name": {"f"}, "x.member.1.Value": {"   "}},
+		{"x.member.1.Name": {strings.Repeat("x", 256)}, "x.member.1.Value": {"v"}},
+	} {
+		if _, err := f.dimensions("x"); err == nil {
+			t.Fatal(f)
+		}
+	}
+	stamp := time.Now().UTC().Truncate(time.Minute)
+	for _, field := range []string{"MetricName", "Period", "Statistics.member.1", "StartTime", "EndTime"} {
+		f := statsWire(stamp, stamp.Add(time.Minute))
+		f.Del("Namespace")
+		f.Del("Version")
+		f.Del("Action")
+		f.Del(field)
+		if _, err := form(f).query(); err == nil {
+			t.Fatal(field)
+		}
+	}
+	for k, v := range map[string]string{"Unit": "wrong", "StartTime": "bad", "EndTime": "bad", "Statistics.member.1": "Percentile"} {
+		f := statsWire(stamp, stamp.Add(time.Minute))
+		f.Del("Namespace")
+		f.Del("Version")
+		f.Del("Action")
+		f.Set(k, v)
+		if _, err := form(f).query(); err == nil {
+			t.Fatal(k)
+		}
 	}
 }

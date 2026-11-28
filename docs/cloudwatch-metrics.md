@@ -9,7 +9,7 @@ A successful write appends every raw observation to the team's SQLite database i
 | Request | Form-encoded POST to `/`, exact `Version=2010-08-01`. Put also accepts one gzip member. Both the wire and expanded body have a 1 MiB local limit and the form accepts at most 10,000 fields. |
 | Batch | 1–1,000 individual numeric `Value` samples. Values must be finite and between −2³⁶⁰ and +2³⁶⁰ inclusive. |
 | Dimension | Up to 30 distinct names. Printable ASCII names are 1–255 bytes and values are 1–1,024 bytes. Both require a non-space character. Names cannot begin with a colon. |
-| Namespace and name | A printable custom namespace of up to 255 ASCII characters outside `AWS/`. Metric names accept up to 255 Unicode characters without control characters. Both require a non-space character. |
+| Namespace and name | A printable custom namespace of up to 255 ASCII characters outside `AWS/` and without a leading colon. Metric names accept up to 255 Unicode characters without control characters. Both require a non-space character. |
 | Timestamp | RFC 3339. Each write uses one server time for omitted timestamps and accepts times from 14 days before that time through two hours after it. |
 | Resolution and unit | Standard 60-second resolution. An omitted unit becomes `None`. The native standard unit names are accepted. |
 

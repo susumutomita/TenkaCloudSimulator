@@ -245,3 +245,30 @@ func TestInflightCancellationPreservesRetentionAndEveryRow(t *testing.T) {
 		})
 	}
 }
+
+func TestScopePruningAcknowledgesDeletesAndKeepsInclusiveCutoff(t *testing.T) {
+	s, _ := testStore(t, filepath.Join(t.TempDir(), "retention.db"))
+	ctx := context.Background()
+	now := time.Now().UTC().Truncate(time.Minute)
+	cutoff := now.Add(-retention)
+	samples := []sample{observation(cutoff, 24), observation(cutoff.Add(-time.Nanosecond), 13)}
+	if err := s.put(ctx, "us-east-1", "N", samples, cutoff); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := s.db.Exec(`CREATE TRIGGER suppress_prune BEFORE DELETE ON aws_cloudwatch_samples BEGIN SELECT RAISE(IGNORE); END`); err != nil {
+		t.Fatal(err)
+	}
+	if err := s.put(ctx, "us-east-1", "N", []sample{observation(now, 7)}, now); err == nil {
+		t.Fatal("unacknowledged retention cleanup returned success")
+	}
+	if _, err := s.db.Exec("DROP TRIGGER suppress_prune"); err != nil {
+		t.Fatal(err)
+	}
+	if err := s.put(ctx, "us-east-1", "N", []sample{observation(now, 7)}, now); err != nil {
+		t.Fatal(err)
+	}
+	points, err := s.get(ctx, "us-east-1", "N", testQuery(cutoff, 60), now)
+	if err != nil || len(points) != 1 || *points[0].Sum != 24 {
+		t.Fatal(points, err)
+	}
+}
