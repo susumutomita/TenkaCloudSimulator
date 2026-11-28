@@ -4,9 +4,9 @@
   "changes": [
     {
       "path": "README.md",
-      "sha256": "47513170e6ddcc26aeac035880d7c7d81b2347117872ae7b5ec1a72301772c08",
+      "sha256": "9a9c7d95f6e64ebb616e78127b56da511f8ab16c3bd531c67fff41cba5fd9e48",
       "disposition": "documentation",
-      "reason": "Describe the six supported CodeCommit Git content and branch operations and their local limits.",
+      "reason": "Describe the native Git content and the CodeCommit repository detail workflow.",
       "models": []
     },
     {
@@ -18,17 +18,63 @@
     },
     {
       "path": "docs/aws-codecommit.md",
-      "sha256": "f11c7b8673e88a621abe1a57e491e7b31c2de6b65b5ab7b1e3dcf49df78b6991",
+      "sha256": "fe5162f32ff375ce0c5e4dc81ec9d5ab8b8aef03c888e3676b9f8bf341730f27",
       "disposition": "documentation",
-      "reason": "Document supported Git object types, revision behavior, authorization and storage limits.",
+      "reason": "Explain stored Git identities, file/branch limits, stale-parent refusal and current-state recovery in the Console.",
       "models": []
     },
     {
       "path": "docs/design/0001-go-standalone.md",
-      "sha256": "de3602465a7e86e354c1230e23ab484457681db8042d483365aad41f683270bf",
+      "sha256": "da4f2464a49de3d8d39a7285cb90dc01e8ce20e90b4a0ece5c0caa7c97f2ee0a",
       "disposition": "documentation",
-      "reason": "Record the transactional native data model and runtime dependency boundary.",
+      "reason": "Record the transactional Git store and the Console behavior at an acknowledged or uncertain write.",
       "models": []
+    },
+    {
+      "path": "formal/CodeCommitConsoleIntent.cfg",
+      "sha256": "70d23381c7dca8fbefb4d6ad320a8b368ede3850f892de36721bba5044521414",
+      "reason": "Check the finite CodeCommit Console decision, verification and recovery rules.",
+      "models": [
+        {
+          "id": "CodeCommitConsoleIntent",
+          "properties": [
+            "ChoiceAndParent",
+            "PhysicalAdmission",
+            "NoReplay",
+            "Acknowledged",
+            "SavedWhenVerified",
+            "ConflictKeepsEdit",
+            "UnknownLock",
+            "RecoveryEvidence",
+            "CurrentIsObservation"
+          ],
+          "limits": "One deliberate write from one mounted physical repository and at most two explicit recovery reads. Tree serialization, SQLite, HTTP payloads, actual request timing and replacement between separate API calls are tested separately."
+        }
+      ],
+      "disposition": "modeled"
+    },
+    {
+      "path": "formal/CodeCommitConsoleIntent.tla",
+      "sha256": "d7dd94a040a08ca18d625e87b5baeb3c5ab07c34255fdd9b298e95f2ac1630a2",
+      "reason": "Represent a mounted repository selection, exact branch parent or historical fork, true empty repository, acknowledgements and scoped explicit recovery.",
+      "models": [
+        {
+          "id": "CodeCommitConsoleIntent",
+          "properties": [
+            "ChoiceAndParent",
+            "PhysicalAdmission",
+            "NoReplay",
+            "Acknowledged",
+            "SavedWhenVerified",
+            "ConflictKeepsEdit",
+            "UnknownLock",
+            "RecoveryEvidence",
+            "CurrentIsObservation"
+          ],
+          "limits": "One deliberate write from one mounted physical repository and at most two explicit recovery reads. Tree serialization, SQLite, HTTP payloads, actual request timing and replacement between separate API calls are tested separately."
+        }
+      ],
+      "disposition": "modeled"
     },
     {
       "path": "formal/CodeCommitGitReferences.cfg",
@@ -72,9 +118,9 @@
     },
     {
       "path": "formal/models.json",
-      "sha256": "d13640be937ab73e23f5792a974e2f17421ed73b809bfb0e6211047c274b2be7",
+      "sha256": "e3fbe66543d5eea6da6fc0753d9a8107cc45af061219a53f5aa0a20a54490c02",
       "disposition": "formal-infrastructure",
-      "reason": "Register the CodeCommit leaf and its independently specified safety properties and mutation controls.",
+      "reason": "Register the native Git reference and packaged repository content intent models with finite mutation checks.",
       "models": []
     },
     {
@@ -123,6 +169,13 @@
           "limits": "Finite two-repository, two-branch schedules with abstract commit and blob identities. Actual Git serialization, SQLite, real HTTP cancellation, limits and IAM evaluation are tested separately."
         }
       ]
+    },
+    {
+      "path": "internal/aws/catalog/codecommit_stored_history_test.go",
+      "sha256": "28a1f70b361c24bcb858991d60c832a8b8b8ce5f4fc3d391bc21caff0dc78337",
+      "reason": "Read malformed digest-correct commits and trees through native APIs and verify staged blob rollback, durable owner and peer state, and a healthy retry.",
+      "models": [],
+      "disposition": "test-support"
     },
     {
       "path": "internal/aws/catalog/codecommit_transactions_test.go",
@@ -390,17 +443,40 @@
       "models": []
     },
     {
+      "path": "internal/server/web/app.js",
+      "sha256": "d2391e93c46ae7cc5612d7fe75aef318203913addd3740495e65f123e48d768f",
+      "reason": "Package the new content panel and exact native Git read and write workflow in the standalone web bundle.",
+      "models": [
+        {
+          "id": "CodeCommitConsoleIntent",
+          "properties": [
+            "ChoiceAndParent",
+            "PhysicalAdmission",
+            "NoReplay",
+            "Acknowledged",
+            "SavedWhenVerified",
+            "ConflictKeepsEdit",
+            "UnknownLock",
+            "RecoveryEvidence",
+            "CurrentIsObservation"
+          ],
+          "limits": "One deliberate write from one mounted physical repository and at most two explicit recovery reads. Tree serialization, SQLite, HTTP payloads, actual request timing and replacement between separate API calls are tested separately."
+        }
+      ],
+      "disposition": "modeled"
+    },
+    {
       "path": "scripts/formal_model_gate.py",
-      "sha256": "55f2a2fa3bb09fb6e413b2cd540ed8ee7cd377c580b68a802ac81fb179b4b059",
+      "sha256": "c0eb3d1a373240df1f8eeb4751f2699611c6f71e7210cefb93a7429fe08903b6",
       "disposition": "formal-infrastructure",
-      "reason": "Protect the finite CodeCommit model identity, checked properties, mutation controls and production source mapping.",
+      "reason": "Protect the native Git model and Console intent model identities, properties, controls and declared runtime paths.",
       "models": []
     },
     {
       "path": "scripts/test-formal-gate.py",
-      "sha256": "1657d33a092d266745527eade06440200caf20ad081f8f9d77b46d9c9e718fec",
+      "sha256": "90dfae7fc1e6021b46c5dcbb482623baf823f5c15b6cd7a3ad0f0e38bead97b2",
       "disposition": "formal-infrastructure",
-      "reason": "Verify protected inventory and fail when a required CodeCommit property, control or source mapping is removed.",
+      "reason": "Exercise complete registered model inventory and protected Git implementation properties and controls.",
       "models": []
     },
     {
@@ -412,10 +488,17 @@
     },
     {
       "path": "test/e2e/check.py",
-      "sha256": "f53ccc6c59c13bdf7f18650f4eaea9365dd2e160b62f3f20ef47b72bbe63c070",
+      "sha256": "e9d79e2d576016ee711c9a7a11eee8ea5e688579d66692eba3801c02ae4fdbf8",
       "disposition": "test-support",
-      "reason": "Run the dedicated real Git and two-authority CodeCommit regression through the normal opt-in native E2E suite.",
+      "reason": "Register real Git object validation and the SDK, Console and Scalar shared-history workflow in the ordinary opt-in suite.",
       "models": []
+    },
+    {
+      "path": "test/e2e/codecommit_console.py",
+      "sha256": "d40e46a4f5ec99f7365d27e0961f9ca13a859a170f894782c9ff816aade8ae76",
+      "reason": "Exercise a single physical history across the shipped Console, actual Scalar requests and stock SDK, including absence, conflicts, restart, denial, scoped cleanup and access to exact file bytes.",
+      "models": [],
+      "disposition": "test-support"
     },
     {
       "path": "test/e2e/codecommit_git.py",
@@ -423,6 +506,104 @@
       "disposition": "test-support",
       "reason": "Exercise pinned boto3 against two local authorities and validate canonical Git object identities with independent Git plumbing.",
       "models": []
+    },
+    {
+      "path": "tools/console/bundle-digests.json",
+      "sha256": "1cd673cfb741c57ca5c7c085d414b5eb094bcd2bea4c0aed2442094437864fb9",
+      "reason": "Record the packaged JavaScript digest after the canonical Cloudscape build.",
+      "models": [],
+      "disposition": "presentation"
+    },
+    {
+      "path": "tools/console/bundle-inputs.json",
+      "sha256": "0aabfef0e5b213018e26a0c76e85ee2c24535518391b706263e0d9ae7af5ea23",
+      "reason": "Record the canonical JavaScript inputs for the packaged repository contents panel.",
+      "models": [],
+      "disposition": "presentation"
+    },
+    {
+      "path": "tools/console/src/catalog.jsx",
+      "sha256": "52d8740255301e9b966a8b573d6bec5f0dbdb38ba9dd1000790004b11bed19f7",
+      "reason": "Mount the content panel only for the supported CodeCommit repository details and pass the selected request identity, physical repository and region.",
+      "models": [
+        {
+          "id": "CatalogConsoleEpoch",
+          "properties": [
+            "NoUnmountedAcceptance",
+            "OnlyCurrentReplies"
+          ],
+          "limits": "This existing model abstracts catalog read generations. CodeCommit parent selection and missing acknowledgements are covered by the separate one-command model."
+        },
+        {
+          "id": "CodeCommitConsoleIntent",
+          "properties": [
+            "ChoiceAndParent",
+            "PhysicalAdmission",
+            "NoReplay",
+            "Acknowledged",
+            "SavedWhenVerified",
+            "ConflictKeepsEdit",
+            "UnknownLock",
+            "RecoveryEvidence",
+            "CurrentIsObservation"
+          ],
+          "limits": "One deliberate write from one mounted physical repository and at most two explicit recovery reads. Tree serialization, SQLite, HTTP payloads, actual request timing and replacement between separate API calls are tested separately."
+        }
+      ],
+      "disposition": "modeled"
+    },
+    {
+      "path": "tools/console/src/codecommit-content.jsx",
+      "sha256": "485d5aeb2f3a08850eead5965dc9eebae76b8545623d795706d562fd91c5264e",
+      "reason": "Display and edit a specific repository using captured branch tips and fresh scoped results. Preserve explicit recovery after an uncertain write.",
+      "models": [
+        {
+          "id": "CodeCommitConsoleIntent",
+          "properties": [
+            "ChoiceAndParent",
+            "PhysicalAdmission",
+            "NoReplay",
+            "Acknowledged",
+            "SavedWhenVerified",
+            "ConflictKeepsEdit",
+            "UnknownLock",
+            "RecoveryEvidence",
+            "CurrentIsObservation"
+          ],
+          "limits": "One deliberate write from one mounted physical repository and at most two explicit recovery reads. Tree serialization, SQLite, HTTP payloads, actual request timing and replacement between separate API calls are tested separately."
+        }
+      ],
+      "disposition": "modeled"
+    },
+    {
+      "path": "tools/console/src/codecommit-content.mjs",
+      "sha256": "f9cfaa0fcd3090b9fb242c256bf2671d37fa0980bafb3f8bee7ed5305a80ad11",
+      "reason": "Encode the native AWS JSON operations and validate the selected physical repository, exact Git object IDs, path, mode and bytes before acknowledging a write.",
+      "models": [
+        {
+          "id": "CodeCommitConsoleIntent",
+          "properties": [
+            "ChoiceAndParent",
+            "PhysicalAdmission",
+            "NoReplay",
+            "Acknowledged",
+            "SavedWhenVerified",
+            "ConflictKeepsEdit",
+            "UnknownLock",
+            "RecoveryEvidence",
+            "CurrentIsObservation"
+          ],
+          "limits": "One deliberate write from one mounted physical repository and at most two explicit recovery reads. Tree serialization, SQLite, HTTP payloads, actual request timing and replacement between separate API calls are tested separately."
+        }
+      ],
+      "disposition": "modeled"
+    },
+    {
+      "path": "tools/console/test/codecommit-content.test.mjs",
+      "sha256": "d7587ac7b7e12f86316ac3519e4494b1f9c7b12cb7f5a5b0dd8466ff754f973e",
+      "reason": "Check native wire members, byte limits, path normalization, physical identity validation, and refusal versus an ambiguous reply.",
+      "models": [],
+      "disposition": "presentation"
     }
   ]
 }
