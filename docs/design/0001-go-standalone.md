@@ -20,6 +20,12 @@ SSM の [ドキュメント履歴](../ssm-documents.md) はリージョンとド
 
 SNS の HTTP/HTTPS コンソールは native Query を呼び出し、通知先 URL をローカル SQLite に記録するだけで外部に接続しない。購読属性を読む際は ARN から親トピックを特定して IAM を先に評価し、購読と親の存在およびリージョンの一致を同じ読み取りで確認する。専用 Scalar は us-east-1 固定で通常のログインセッションを使い、コンソールの演習用 ID 選択を引き継がない。[対応範囲](../sns.md)。
 
+Service Quotas の5つの読み取りは、B2B Data Interchange の Profiles に限定する。公開デフォルト5と `CreateProfile` が実際に強制する総容量を区別し、使用済みの数を上限から差し引かない。`GetServiceQuota` は対象クォータ ARN、それ以外の4操作は各 action の Resource `*` を必要とする。実在するローカルの上限定義がなければ適用値を捏造しない。[対応リージョン・空の一覧・未対応範囲](../aws-catalog.md#b2b-data-interchange-profile-quota)
+
+上限引き上げ要求はチームの SQLite に保存し、リージョン別に ID と履歴を照会できる。`SupportCaseAllowed=false` は `NOT_APPROVED`、省略または true は `PENDING` として保存する。要求を受け付けた後も B2BI の適用上限は同じ値を返す。ローカルの要求に外部サポートケースの発行や自動承認の処理はない。
+
+Cloudscape は選択中のリージョンと演習用 ID で要求を送信する。応答を受け取れなかった場合は、同じクォータの履歴を再取得できる。専用 Scalar はログイン中の ID と `us-east-1` を使い、利用者が選んだ操作と本文をそのまま送信する。
+
 AWS Resource Groups のタグクエリは、同じリージョンの ECR repository の ARN とタグをカタログの SQLite から読み取る。グループ ARN と依存する読み取り権限の認可後、保存済みクエリとリポジトリを同じスナップショットで照合する。管理画面のグループ詳細はネイティブ API から保存済みクエリとメンバーのページを取得し、タグ条件の編集も同じ API に送る。[対象と制限](../aws-catalog.md#ecr-repository-group-membership)
 
 AWS カタログの AppFlow は S3 間のフロー設定のみを保持する。[トリガー設定](https://docs.aws.amazon.com/appflow/1.0/APIReference/API_TriggerConfig.html)に従い、`CreateFlow` と `UpdateFlow` は、`OnDemand` に付けたスケジュール設定と、実行間隔の式がない（空白のみも含む）`Scheduled` の定義を `ValidationException` で拒否する。検証は保存前に行うため、拒否された要求で既存の設定は変わらない。スケジューラ、コネクタープロファイル、ジョブ実行およびオブジェクト転送は実装しない。

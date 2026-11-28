@@ -1,120 +1,537 @@
 {
   "version": 1,
-  "base_sha": "102099893c314349ad0b04e7e599e24f1f2999a3",
+  "base_sha": "f55806e861265a3dfeb7475c0e1ca7c404a6b290",
   "changes": [
     {
       "path": "README.md",
-      "sha256": "3697f2a5f68462d45960b8b6ea15a9dec525727692c302b8befcaffba0f6a3be",
-      "models": [],
+      "sha256": "8a9636d7d295f81c76e2fc51c31124c6b436bcb4f1e58380cf9e891033fab7e2",
       "disposition": "documentation",
-      "reason": "Describe how to inspect and edit the supported saved ECR repository filter and verify current membership."
+      "reason": "Document the published default, applied B2BI profile capacity, local increase requests and authorized history.",
+      "models": []
+    },
+    {
+      "path": "docs/aws-catalog-services.md",
+      "sha256": "71754765cf2eecb3c7161a876c09209916e1c235f6f797c1d13059738b056886",
+      "disposition": "documentation",
+      "reason": "Document the published default, applied B2BI profile capacity, local increase requests and authorized history.",
+      "models": []
     },
     {
       "path": "docs/aws-catalog.md",
-      "sha256": "6e35ebe6a556043166d3b4476c250d6ea38bc5008ed857400615aa0a9e9791d2",
-      "models": [],
+      "sha256": "18fbc7e49b402f891ac74474376379f27a289903a34b8ad460efa66583edf66f",
       "disposition": "documentation",
-      "reason": "Describe how to inspect and edit the supported saved ECR repository filter and verify current membership. Record the official service-wide IAM targets and the application-only tag member for the bounded local group types."
+      "reason": "Document the published default, applied B2BI profile capacity, local increase requests and authorized history.",
+      "models": []
+    },
+    {
+      "path": "docs/coverage-assessment.md",
+      "sha256": "13ec61fdaf11f0e8dd184777613f2f6722377514ade1971d52a2c21edcfdd1ba",
+      "disposition": "documentation",
+      "reason": "Document the published default, applied B2BI profile capacity, local increase requests and authorized history.",
+      "models": []
     },
     {
       "path": "docs/design/0001-go-standalone.md",
-      "sha256": "0a45cd9e136599fcf9e79ff3d75b382ee4b45c2a0f1e43cb47e4c4452da5a2b7",
-      "models": [],
+      "sha256": "1986ab16d90deb7726ed878606f98b63fdcbf24c15a80dd84c6e5de51b7008e7",
       "disposition": "documentation",
-      "reason": "Describe how to inspect and edit the supported saved ECR repository filter and verify current membership."
+      "reason": "Document the published default, applied B2BI profile capacity, local increase requests and authorized history.",
+      "models": []
+    },
+    {
+      "path": "formal/ServiceQuotaDiscovery.cfg",
+      "sha256": "29343c9ee7103f411aeca22b5d2dd1c10617b9be00dcc33c1bc49a151a5631e7",
+      "disposition": "modeled",
+      "reason": "Four wildcard-authorized discovery reads and the retained quota-ARN read have independent default/applied/region/level/token projections and unchanged read frames.",
+      "models": [
+        {
+          "id": "ServiceQuotaDiscovery",
+          "properties": [
+            "ReadPreservesFrame",
+            "ReadProjectionCorrect",
+            "PeerPreserved",
+            "RestartPreservesFrame"
+          ],
+          "limits": "Finite two-team projection oracle only; numeric JSON bounds/types, literal endpoint regions, IAM parsing/ARN formatting, SQL and real process/SDK behavior are native/stock fixture checks, not proved by this model. Abstract prior Create/Delete do not add quota write APIs."
+        }
+      ]
+    },
+    {
+      "path": "formal/ServiceQuotaDiscovery.tla",
+      "sha256": "e1cefc02c38bbc66d6865bb17ac2e889e5ad8f027cba3a37de5128da9293062e",
+      "disposition": "modeled",
+      "reason": "Four wildcard-authorized discovery reads and the retained quota-ARN read have independent default/applied/region/level/token projections and unchanged read frames.",
+      "models": [
+        {
+          "id": "ServiceQuotaDiscovery",
+          "properties": [
+            "ReadPreservesFrame",
+            "ReadProjectionCorrect",
+            "PeerPreserved",
+            "RestartPreservesFrame"
+          ],
+          "limits": "Finite two-team projection oracle only; numeric JSON bounds/types, literal endpoint regions, IAM parsing/ARN formatting, SQL and real process/SDK behavior are native/stock fixture checks, not proved by this model. Abstract prior Create/Delete do not add quota write APIs."
+        }
+      ]
+    },
+    {
+      "path": "formal/ServiceQuotaRequestConsole.cfg",
+      "sha256": "9f2ff7f84f713418a6cd14f3d051727851970ed4e2e7576bd3b55605b72b1c4c",
+      "disposition": "modeled",
+      "reason": "Bounded mounted Console write, unknown acknowledgement, explicit fresh same-scope recovery and separate user intent; property/mutant registration is not implementation or browser proof.",
+      "models": [
+        {
+          "id": "ServiceQuotaRequestConsole",
+          "properties": [
+            "SingleIntent",
+            "NoAutomaticWrite",
+            "NativeFrame",
+            "SavedExactlyOnce",
+            "Acknowledgement",
+            "FreshRecovery",
+            "ObservedOnly",
+            "SeparateIntent",
+            "RetiredRead",
+            "ScopeCleared",
+            "BlockedRetry",
+            "FreshCapacity",
+            "VisibleLookup",
+            "VisibleMount"
+          ],
+          "limits": "Finite mounted quota-request control oracle only: explicit first unfiltered ACCOUNT ByQuota recovery disarms at start and rearms only on a fresh current successful observation; failed recovery/data invalidation clears approval and saved lookup. It does not identify a lost request by matching amount/time, infer persistence from arbitrary shape-valid replies, retry writes, or promise idempotency across tabs/new mounts. No JavaScript/React/DOM/HTTP/JSON/IAM/SQL/clock/refinement proof; real fixtures independently check bytes, scope, accessibility, restart, peer and cleanup. Leaving the mounted view ends its local unknown-outcome warning."
+        }
+      ]
+    },
+    {
+      "path": "formal/ServiceQuotaRequestConsole.tla",
+      "sha256": "5339c8ef7b4640a84b761c8216881df19875113fc0ed96e6d6102c1fa4f4d79e",
+      "disposition": "modeled",
+      "reason": "Bounded mounted Console write, unknown acknowledgement, explicit fresh same-scope recovery and separate user intent; property/mutant registration is not implementation or browser proof.",
+      "models": [
+        {
+          "id": "ServiceQuotaRequestConsole",
+          "properties": [
+            "SingleIntent",
+            "NoAutomaticWrite",
+            "NativeFrame",
+            "SavedExactlyOnce",
+            "Acknowledgement",
+            "FreshRecovery",
+            "ObservedOnly",
+            "SeparateIntent",
+            "RetiredRead",
+            "ScopeCleared",
+            "BlockedRetry",
+            "FreshCapacity",
+            "VisibleLookup",
+            "VisibleMount"
+          ],
+          "limits": "Finite mounted quota-request control oracle only: explicit first unfiltered ACCOUNT ByQuota recovery disarms at start and rearms only on a fresh current successful observation; failed recovery/data invalidation clears approval and saved lookup. It does not identify a lost request by matching amount/time, infer persistence from arbitrary shape-valid replies, retry writes, or promise idempotency across tabs/new mounts. No JavaScript/React/DOM/HTTP/JSON/IAM/SQL/clock/refinement proof; real fixtures independently check bytes, scope, accessibility, restart, peer and cleanup. Leaving the mounted view ends its local unknown-outcome warning."
+        }
+      ]
+    },
+    {
+      "path": "formal/ServiceQuotaRequests.cfg",
+      "sha256": "6d7efb68660e863df8d0517194dc21e17c4d27bb3efe3c17d15cfcdcd6b3a5be",
+      "disposition": "modeled",
+      "reason": "Bind the Service Quotas operation or its model to request admission, saved state, failure outcomes and history visibility.",
+      "models": [
+        {
+          "id": "ServiceQuotaRequests",
+          "properties": [
+            "Admissions",
+            "CommitFrame",
+            "StoredFields",
+            "Capacity",
+            "Visibility",
+            "Lookup",
+            "PageScope",
+            "PrivateStage",
+            "ContenderFrame",
+            "RestartFrame"
+          ],
+          "limits": "Finite team and region scopes, admission, bounded request records and page cursors. Actual IAM targets, HTTP shape validation, persistent SQLite transactions, clock changes and cursor authentication are tested separately."
+        }
+      ]
+    },
+    {
+      "path": "formal/ServiceQuotaRequests.tla",
+      "sha256": "2bcebee936a032c98bd12f99a4000b627d211a01483c08645c9e9f7670c1cbb5",
+      "disposition": "modeled",
+      "reason": "Bind the Service Quotas operation or its model to request admission, saved state, failure outcomes and history visibility.",
+      "models": [
+        {
+          "id": "ServiceQuotaRequests",
+          "properties": [
+            "Admissions",
+            "CommitFrame",
+            "StoredFields",
+            "Capacity",
+            "Visibility",
+            "Lookup",
+            "PageScope",
+            "PrivateStage",
+            "ContenderFrame",
+            "RestartFrame"
+          ],
+          "limits": "Finite team and region scopes, admission, bounded request records and page cursors. Actual IAM targets, HTTP shape validation, persistent SQLite transactions, clock changes and cursor authentication are tested separately."
+        }
+      ]
     },
     {
       "path": "formal/models.json",
-      "sha256": "17a43a7c5eaa50502d9784e8f6082bb2d4d758309ef8e634a61437129f19d640",
-      "models": [],
+      "sha256": "d2b72bf61586966a952add636884bfc5ab07ea8ef2ee92b6f41a399fdd5ae74a",
       "disposition": "formal-infrastructure",
-      "reason": "Extend the source scope of the existing catalog console sequencing model to this group detail component."
+      "reason": "Register and independently protect the native discovery, persisted request/history and mounted non-idempotent Console recovery models; retain all older model entries, properties, controls and source scopes.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/catalog/describe.go",
+      "sha256": "006da4e78ab08177f1cda74126e54fc35325f9185ec3df4f63db902134f1735c",
+      "disposition": "modeled",
+      "reason": "Bind the regional, read-only B2BI Profiles quota and its enforced resource limit to the bounded catalog contract.",
+      "models": [
+        {
+          "id": "CatalogResourceLifecycle",
+          "properties": [
+            "AuthorizationFirst",
+            "FailureFrame",
+            "PeerFrame",
+            "QuotaBound"
+          ],
+          "limits": "The finite model abstracts regional peers, authorization and capacity. It does not model this AWS quota code, ARN construction, Go binding, SQLite, SDK response or HTTP status."
+        }
+      ]
     },
     {
       "path": "internal/aws/catalog/engine.go",
-      "sha256": "ba98d073b0ac9c911105b3da15ad767e7697c23f2c83bca6aa4a20f2d1530401",
+      "sha256": "226c14940581b3d00785453f3b4b05861173d6613711fedf52113c3d0c2b1d96",
+      "disposition": "modeled",
+      "reason": "Bind the Service Quotas operation or its model to request admission, saved state, failure outcomes and history visibility.",
       "models": [
         {
           "id": "CatalogResourceLifecycle",
           "properties": [
             "AuthorizationFirst",
             "FailureFrame",
-            "PeerFrame"
+            "PeerFrame",
+            "QuotaBound"
           ],
-          "limits": "The finite model covers authorization and refusal frames. Native and SDK checks establish the two literal IAM targets, error shapes, tag projection, pagination and real account/region state."
+          "limits": "The finite model abstracts regional peers, authorization and capacity. It does not model this AWS quota code, ARN construction, Go binding, SQLite, SDK response or HTTP status."
+        },
+        {
+          "id": "ServiceQuotaDiscovery",
+          "properties": [
+            "ReadPreservesFrame",
+            "ReadProjectionCorrect",
+            "PeerPreserved",
+            "RestartPreservesFrame"
+          ],
+          "limits": "Finite two-team projection oracle only; numeric JSON bounds/types, literal endpoint regions, IAM parsing/ARN formatting, SQL and real process/SDK behavior are native/stock fixture checks, not proved by this model. Abstract prior Create/Delete do not add quota write APIs."
+        },
+        {
+          "id": "ServiceQuotaRequests",
+          "properties": [
+            "Admissions",
+            "CommitFrame",
+            "StoredFields",
+            "Capacity",
+            "Visibility",
+            "Lookup",
+            "PageScope",
+            "PrivateStage",
+            "ContenderFrame",
+            "RestartFrame"
+          ],
+          "limits": "Finite team and region scopes, admission, bounded request records and page cursors. Actual IAM targets, HTTP shape validation, persistent SQLite transactions, clock changes and cursor authentication are tested separately."
         }
-      ],
+      ]
+    },
+    {
+      "path": "internal/aws/catalog/models/service-quotas.json",
+      "sha256": "b2eb4c3f862fd924f380d03da567c1dda0b501c3345548419ddad4203dabef96",
       "disposition": "modeled",
-      "reason": "Return the service-modeled ForbiddenException after a denied Resource Groups authorization check."
+      "reason": "Bind the Service Quotas operation or its model to request admission, saved state, failure outcomes and history visibility.",
+      "models": [
+        {
+          "id": "CatalogResourceLifecycle",
+          "properties": [
+            "AuthorizationFirst",
+            "FailureFrame",
+            "PeerFrame",
+            "QuotaBound"
+          ],
+          "limits": "Covers finite operation admission, refusal/peer frames and declared capacity. The official schema, real configured backend limit, request history and regional IAM targets require native and SDK verification."
+        },
+        {
+          "id": "ServiceQuotaRequests",
+          "properties": [
+            "Admissions",
+            "CommitFrame",
+            "StoredFields",
+            "Capacity",
+            "Visibility",
+            "Lookup",
+            "PageScope",
+            "PrivateStage",
+            "ContenderFrame",
+            "RestartFrame"
+          ],
+          "limits": "Finite team and region scopes, admission, bounded request records and page cursors. Actual IAM targets, HTTP shape validation, persistent SQLite transactions, clock changes and cursor authentication are tested separately."
+        }
+      ]
     },
     {
       "path": "internal/aws/catalog/openapi.go",
-      "sha256": "89588ed35947c30b9298ccff352002d6319a57ae3269029dc9b6a42361e53660",
+      "sha256": "64b793f7b5b47157f3d5b5eea195bbdc4a9c39313f226d4bd398f5b89c729060",
+      "disposition": "modeled",
+      "reason": "Use the declared fixed JSON inputs and service-specific denial status in the generated native catalog reference.",
       "models": [
         {
           "id": "CatalogResourceLifecycle",
           "properties": [
             "AuthorizationFirst",
             "FailureFrame",
-            "PeerFrame"
+            "PeerFrame",
+            "QuotaBound"
           ],
-          "limits": "The finite model covers authorization and refusal frames. Native and SDK checks establish the two literal IAM targets, error shapes, tag projection, pagination and real account/region state."
+          "limits": "Native HTTP status codes, JSON body examples, browser rendering and Go-to-model refinement are outside the finite lifecycle model."
         }
-      ],
+      ]
+    },
+    {
+      "path": "internal/aws/catalog/selection.json",
+      "sha256": "4e5e895fe9f238ff9b68e084c3826ac51a02ce342f3d6c14ca50988b20092e1a",
       "disposition": "modeled",
-      "reason": "Keep the 403 descriptions consistent with the eleven supported operations and their modeled error."
-    },
-    {
-      "path": "internal/aws/catalog/resource_group_iam_test.go",
-      "sha256": "44cf6e60942f0ca433a0cfd506e4a14a0352177c16fdbee586fc7091a8f31927",
-      "models": [],
-      "disposition": "test-support",
-      "reason": "Test the two service-wide targets and the six retained group-scoped native refusal envelopes, full data and allocation frames, and ordinary tags versus application membership."
-    },
-    {
-      "path": "internal/aws/catalog/resource_group_query.go",
-      "sha256": "b48ccc3e2070ca6cb5aed89697908dc4697efbae5c19b447cdc4fd1070004cf3",
+      "reason": "Retain the five pinned official default/applied discovery reads and bind four persisted increase/history operations. Native contract tests verify copied shapes and nine-operation selection; computed projections and request admission retain their separate existing model bindings.",
       "models": [
         {
           "id": "CatalogResourceLifecycle",
           "properties": [
             "AuthorizationFirst",
             "FailureFrame",
-            "PeerFrame"
+            "PeerFrame",
+            "QuotaBound"
           ],
-          "limits": "The finite model covers authorization and refusal frames. Native and SDK checks establish the two literal IAM targets, error shapes, tag projection, pagination and real account/region state."
+          "limits": "Covers finite operation admission, refusal/peer frames and declared capacity. The official schema, real configured backend limit, request history and regional IAM targets require native and SDK verification."
         }
-      ],
-      "disposition": "modeled",
-      "reason": "Identify the two service-wide IAM actions and verify the denied response type against each supported Resource Groups operation model."
+      ]
     },
     {
       "path": "internal/aws/catalog/semantics.go",
-      "sha256": "be1c236b17b8720544f1996a7c0e9e0e0fdc40bcf2376ac5c0e9ea39436ba09d",
+      "sha256": "a9bba8ff69292313dbd7228e9380a2dd78f2e63ff572319ec7a16f25c8f25e96",
+      "disposition": "modeled",
+      "reason": "Bind the Service Quotas operation or its model to request admission, saved state, failure outcomes and history visibility.",
       "models": [
         {
           "id": "CatalogResourceLifecycle",
           "properties": [
             "AuthorizationFirst",
             "FailureFrame",
-            "PeerFrame"
+            "PeerFrame",
+            "QuotaBound"
           ],
-          "limits": "The finite model covers authorization and refusal frames. Native and SDK checks establish the two literal IAM targets, error shapes, tag projection, pagination and real account/region state."
+          "limits": "The finite model abstracts regional peers, authorization and capacity. It does not model this AWS quota code, ARN construction, Go binding, SQLite, SDK response or HTTP status."
+        },
+        {
+          "id": "ServiceQuotaDiscovery",
+          "properties": [
+            "ReadPreservesFrame",
+            "ReadProjectionCorrect",
+            "PeerPreserved",
+            "RestartPreservesFrame"
+          ],
+          "limits": "Finite two-team projection oracle only; numeric JSON bounds/types, literal endpoint regions, IAM parsing/ARN formatting, SQL and real process/SDK behavior are native/stock fixture checks, not proved by this model. Abstract prior Create/Delete do not add quota write APIs."
+        },
+        {
+          "id": "ServiceQuotaRequests",
+          "properties": [
+            "Admissions",
+            "CommitFrame",
+            "StoredFields",
+            "Capacity",
+            "Visibility",
+            "Lookup",
+            "PageScope",
+            "PrivateStage",
+            "ContenderFrame",
+            "RestartFrame"
+          ],
+          "limits": "Finite team and region scopes, admission, bounded request records and page cursors. Actual IAM targets, HTTP shape validation, persistent SQLite transactions, clock changes and cursor authentication are tested separately."
         }
-      ],
-      "disposition": "modeled",
-      "reason": "Use the two correct IAM policy targets before creation or disclosure; omit application-only metadata for plain and query groups. Native tests cover projection."
+      ]
     },
     {
-      "path": "internal/server/apidocs/catalog/resource-groups.json",
-      "sha256": "5dca7935fbe75d3e272c14d7c74da1a6542e852a6a9ea78a0d0511b0f22e6073",
-      "models": [],
+      "path": "internal/aws/catalog/service_quota_interrupt_test.go",
+      "sha256": "d0ebd59714c49967c670a7d08408d86dd2ab682e297213a579b4ee03054e4356",
+      "disposition": "test-support",
+      "reason": "Verify real quota values, request history or an affected native, SDK, storage, isolation and restart contract.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/catalog/service_quota_requests.go",
+      "sha256": "83ffdfbfcc5b1951b641667bc88c8c0253245b59d426b187f8355b7647d3f4f5",
+      "disposition": "modeled",
+      "reason": "Bind the Service Quotas operation or its model to request admission, saved state, failure outcomes and history visibility.",
+      "models": [
+        {
+          "id": "ServiceQuotaRequests",
+          "properties": [
+            "Admissions",
+            "CommitFrame",
+            "StoredFields",
+            "Capacity",
+            "Visibility",
+            "Lookup",
+            "PageScope",
+            "PrivateStage",
+            "ContenderFrame",
+            "RestartFrame"
+          ],
+          "limits": "Finite team and region scopes, admission, bounded request records and page cursors. Actual IAM targets, HTTP shape validation, persistent SQLite transactions, clock changes and cursor authentication are tested separately."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/catalog/service_quota_requests_test.go",
+      "sha256": "b38bb1b7b8d492808400c8c1f2d9c5480c48368425d4f87084b9134dfd4f3150",
+      "disposition": "test-support",
+      "reason": "Verify real quota values, request history or an affected native, SDK, storage, isolation and restart contract.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/catalog/service_quotas.go",
+      "sha256": "e711d86c7081343245c56420983e5f4c415781691f33cedca79a000aa47d6005",
+      "disposition": "modeled",
+      "reason": "Bind the Service Quotas operation or its model to request admission, saved state, failure outcomes and history visibility.",
+      "models": [
+        {
+          "id": "CatalogResourceLifecycle",
+          "properties": [
+            "AuthorizationFirst",
+            "FailureFrame",
+            "PeerFrame",
+            "QuotaBound"
+          ],
+          "limits": "The finite model abstracts regional peers, authorization and capacity. It does not model this AWS quota code, ARN construction, Go binding, SQLite, SDK response or HTTP status."
+        },
+        {
+          "id": "ServiceQuotaDiscovery",
+          "properties": [
+            "ReadPreservesFrame",
+            "ReadProjectionCorrect",
+            "PeerPreserved",
+            "RestartPreservesFrame"
+          ],
+          "limits": "Finite two-team projection oracle only; numeric JSON bounds/types, literal endpoint regions, IAM parsing/ARN formatting, SQL and real process/SDK behavior are native/stock fixture checks, not proved by this model. Abstract prior Create/Delete do not add quota write APIs."
+        },
+        {
+          "id": "ServiceQuotaRequests",
+          "properties": [
+            "Admissions",
+            "CommitFrame",
+            "StoredFields",
+            "Capacity",
+            "Visibility",
+            "Lookup",
+            "PageScope",
+            "PrivateStage",
+            "ContenderFrame",
+            "RestartFrame"
+          ],
+          "limits": "Finite team and region scopes, admission, bounded request records and page cursors. Actual IAM targets, HTTP shape validation, persistent SQLite transactions, clock changes and cursor authentication are tested separately."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/catalog/service_quotas_discovery_test.go",
+      "sha256": "f3acca2efa9cb644d88af486869b5e14eea344580a4cd913c41b9e2bf1044ce8",
+      "disposition": "test-support",
+      "reason": "Verify real quota values, request history or an affected native, SDK, storage, isolation and restart contract.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/catalog/service_quotas_test.go",
+      "sha256": "264cbb7404620b1ffb275d23914656a1ef191ffa35fac0d3c7c48ae1d589c125",
+      "disposition": "test-support",
+      "reason": "Verify real quota values, request history or an affected native, SDK, storage, isolation and restart contract.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/catalog/services.go",
+      "sha256": "d4f2d822c4fafaac7db7df062609e3117402d5fd808f935133bc30dac391cb5c",
+      "disposition": "modeled",
+      "reason": "Bind the regional, read-only B2BI Profiles quota and its enforced resource limit to the bounded catalog contract.",
+      "models": [
+        {
+          "id": "CatalogResourceLifecycle",
+          "properties": [
+            "AuthorizationFirst",
+            "FailureFrame",
+            "PeerFrame",
+            "QuotaBound"
+          ],
+          "limits": "The finite model abstracts regional peers, authorization and capacity. It does not model this AWS quota code, ARN construction, Go binding, SQLite, SDK response or HTTP status."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/catalog/spec.go",
+      "sha256": "30cbb29dfcbc2d9a54c77c55bdee0424961d09312f5977d9b01900a846d970d8",
+      "disposition": "modeled",
+      "reason": "Bind the regional, read-only B2BI Profiles quota and its enforced resource limit to the bounded catalog contract.",
+      "models": [
+        {
+          "id": "CatalogResourceLifecycle",
+          "properties": [
+            "AuthorizationFirst",
+            "FailureFrame",
+            "PeerFrame",
+            "QuotaBound"
+          ],
+          "limits": "The finite model abstracts regional peers, authorization and capacity. It does not model this AWS quota code, ARN construction, Go binding, SQLite, SDK response or HTTP status."
+        }
+      ]
+    },
+    {
+      "path": "internal/server/apidocs/catalog/index.json",
+      "sha256": "8f97c44138f3f17bfdb6f60b63abef5bda899ca89216da1271df3a95621ac54e",
       "disposition": "presentation",
-      "reason": "Publish the modeled ForbiddenException on all eleven supported Resource Groups operation references."
+      "reason": "Ship the generated Service Quotas schema, fixed B2BI example and catalog index from the reviewed service binding. Regenerate only the Service Quotas reference and its operation count from the reviewed definitions; all unrelated served API descriptions remain unchanged.",
+      "models": []
+    },
+    {
+      "path": "internal/server/apidocs/catalog/service-quotas.json",
+      "sha256": "baea27dfae1c302223a378f97896cbda3947298d48bae9e3a27aaa09daedd871",
+      "disposition": "presentation",
+      "reason": "Expose real bounded example inputs, native error responses and operation targets for all nine Service Quotas operations.",
+      "models": []
+    },
+    {
+      "path": "internal/server/apidocs/service-quotas-init.js",
+      "sha256": "12e650d443e6394648d210a05efe4a46b80edf201eb0e310fd2208a0a3e810d9",
+      "disposition": "presentation",
+      "reason": "Actual Scalar uses the unchanged generated nine-operation specification, explicit chosen target and body, fixed normal us-east-1 browser credential scope, exact same-origin POST and untouched original Response; reject routing/auth overrides before fetch. Native authority and wire behavior require real SDK/browser evidence.",
+      "models": []
+    },
+    {
+      "path": "internal/server/apidocs/service-quotas-reference.css",
+      "sha256": "6bd3652692449df723939bfadd494a0244da21d6df66464cd3c9de6b740168ca",
+      "disposition": "presentation",
+      "reason": "Bounded local reference presentation/reflow only; no native behavior or authorization.",
+      "models": []
+    },
+    {
+      "path": "internal/server/apidocs/service-quotas.html",
+      "sha256": "5385b33118a887c378d8aed93c4098ee3063ab4bf8743f6dbee7906cda55416e",
+      "disposition": "presentation",
+      "reason": "Serve the dedicated local Service Quotas reference and explicit native subset/browser-credential scope; no external service endpoint or automatic write.",
+      "models": []
     },
     {
       "path": "internal/server/web/app.js",
-      "sha256": "6dcf1c3e5d6c6713ffea469549d65f29548f3517cdf8c9cc46efaedbe76f6987",
+      "sha256": "658e9c46ee8e9c8bca1911b3248d57d0ec7ae8ef1f69f0f6dab3b307b42934c5",
+      "disposition": "modeled",
+      "reason": "Canonical embedded output of the reviewed actual Console sources, preserving prior catalog behavior and adding the dedicated mounted quota/default/request workflow. Concrete compiler/bundle correspondence is checked independently, not proved by TLA.",
       "models": [
         {
           "id": "CatalogConsoleEpoch",
@@ -125,64 +542,112 @@
             "ReloadOnlyAfterAck",
             "FailureVisible"
           ],
-          "limits": "The model covers bounded reply ownership, single-writer admission, success and failure handling. Actual browser cancellation, native query syntax, pagination, authorization, persisted state and rendering require separate runtime checks."
+          "limits": "Preserved finite generic catalog epoch/write oracle only. It does not prove the dedicated Service Quotas workflow, React scheduling, DOM, request serialization, native authorization or actual browser behavior; the separate quota UI model and genuine fixtures cover distinct obligations."
+        },
+        {
+          "id": "ServiceQuotaRequestConsole",
+          "properties": [
+            "SingleIntent",
+            "NoAutomaticWrite",
+            "NativeFrame",
+            "SavedExactlyOnce",
+            "Acknowledgement",
+            "FreshRecovery",
+            "ObservedOnly",
+            "SeparateIntent",
+            "RetiredRead",
+            "ScopeCleared",
+            "BlockedRetry",
+            "FreshCapacity",
+            "VisibleLookup",
+            "VisibleMount"
+          ],
+          "limits": "Finite mounted quota-request control oracle only: explicit first unfiltered ACCOUNT ByQuota recovery disarms at start and rearms only on a fresh current successful observation; failed recovery/data invalidation clears approval and saved lookup. It does not identify a lost request by matching amount/time, infer persistence from arbitrary shape-valid replies, retry writes, or promise idempotency across tabs/new mounts. No JavaScript/React/DOM/HTTP/JSON/IAM/SQL/clock/refinement proof; real fixtures independently check bytes, scope, accessibility, restart, peer and cleanup. Leaving the mounted view ends its local unknown-outcome warning."
         }
-      ],
-      "disposition": "modeled",
-      "reason": "Use scoped request lifetimes and the catalog single-writer latch when displaying and replacing the selected group query."
+      ]
     },
     {
-      "path": "test/e2e/catalog_fixtures/resource-groups.json",
-      "sha256": "365b357be8f765365368ee8564617669e1cf4a002ce85f40b5794cfe90d2233a",
-      "models": [],
+      "path": "scripts/formal_model_gate.py",
+      "sha256": "1361b7012c697996469ec74ba7f8dfe6a55a727f9cc11a577e61aa54ef39b324",
+      "disposition": "formal-infrastructure",
+      "reason": "Register and independently protect the native discovery, persisted request/history and mounted non-idempotent Console recovery models; retain all older model entries, properties, controls and source scopes.",
+      "models": []
+    },
+    {
+      "path": "scripts/test-formal-gate.py",
+      "sha256": "00a050c12a82b29aba20c3940abae4d3e1acb034b655b850e046aa5baf6b5a92",
+      "disposition": "formal-infrastructure",
+      "reason": "Register and independently protect the native discovery, persisted request/history and mounted non-idempotent Console recovery models; retain all older model entries, properties, controls and source scopes.",
+      "models": []
+    },
+    {
+      "path": "test/console/service-quotas-reference.test.mjs",
+      "sha256": "f62b817601952132f91cbdaf48e6fc09204e0175753c6ba94c0a92ae9d012844",
       "disposition": "test-support",
-      "reason": "The existing catalog fixture requires the modeled ForbiddenException from unauthorized CreateGroup; all stock lifecycle and HTTP status checks are retained."
+      "reason": "Execute genuine customFetch guard source with exact native targets/body/origin/media/credentials negative controls; VM tests do not claim real Scalar execution.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/catalog_fixtures/service-quotas.json",
+      "sha256": "944525c43d5e09b9e03a0414db6f568d6a3f9bdc22e4c717fb8b5e3f20b20358",
+      "disposition": "test-support",
+      "reason": "Verify real quota values, request history or an affected native, SDK, storage, isolation and restart contract.",
+      "models": []
     },
     {
       "path": "test/e2e/check.py",
-      "sha256": "445ab7a1b53c37b04c950ec40956e9cc9ebc3584d4850855e298021bc5ce53c1",
-      "models": [],
+      "sha256": "66a800a1079267315e2be11caaf868533aa6d1d63cd9db528f4ade0812bf7a58",
       "disposition": "test-support",
-      "reason": "Exercise the actual catalog detail and both real loopback teams, query writes, page projection, denials, late responses and cleanup."
+      "reason": "Register the genuine native quota/default/request SDK fixtures and dedicated opt-in Console/Scalar browser entry points in the normal e2e dispatcher; execution and guards remain independent requirements.",
+      "models": []
     },
     {
-      "path": "test/e2e/resource_group_ecr_members.py",
-      "sha256": "7d5c6ae694f97226871f6b1b91bd4281cbb65edf36bdb23e9df8a29087bf3f4b",
-      "models": [],
+      "path": "test/e2e/service_quotas_console.py",
+      "sha256": "0a8a05c59f28a8762bb6303261deb2bab764090e2ddc89adf8cca648b338a5fe",
       "disposition": "test-support",
-      "reason": "Use official boto3 over two private teams and two regions to check service-wide and group-scoped IAM/refusals, tag readbacks, revision-independent lists, membership, reopen and cleanup."
+      "reason": "Opt-in unchanged official SDK and real sandboxed Cloudscape/reciprocal Scalar fixture: distinct physical requests, real history tokens/filters, committed lost ACK without blind retry, successful-then-failed recovery and repair, read retirement, partial/denied permissions, pinned axe EN/JA390, two private stores/restart/full peer frame and owned cleanup. Source registration is not an execution receipt; SDK/profile and mandatory axe guards remain intact.",
+      "models": []
     },
     {
-      "path": "test/e2e/resource_group_query_console.py",
-      "sha256": "13d60bb1f19a09313560d16a4ad4e9bfdf9bfe513c975ca711954c8dee0d40b9",
-      "models": [],
+      "path": "test/e2e/service_quotas_discovery.py",
+      "sha256": "ae23eed4b0d83d0feb898b83da484d64ee30702f6bf5df9f95aa22a8a135c55b",
       "disposition": "test-support",
-      "reason": "Exercise the actual catalog detail and both real loopback teams, query writes, page projection, denials, late responses and cleanup."
+      "reason": "Verify real quota values, request history or an affected native, SDK, storage, isolation and restart contract.",
+      "models": []
     },
     {
-      "path": "test/e2e/resource_groups_scalar.py",
+      "path": "test/e2e/service_quotas_profiles.py",
+      "sha256": "9180106150088c15bc4cd10c4961462acb38177743da7ae3ca0ce4c814f70cd2",
       "disposition": "test-support",
-      "models": [],
-      "reason": "Send actual read requests from the shipped Scalar catalog and check stored matching tags, permissions, peer state, restart and cleanup.",
-      "sha256": "514c5e0303a3e8e3a456611ce7be55b285c2d395f971b6ddf95d6ee72ed28a22"
+      "reason": "Verify real quota values, request history or an affected native, SDK, storage, isolation and restart contract.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/service_quotas_scalar.py",
+      "sha256": "9679c11718bb5afa97ab5b815603eb41d9f9a7bafc1b8b4b61162315bce775fa",
+      "disposition": "test-support",
+      "reason": "Opt-in real authenticated Scalar Sends of the nine native operations with original target/body, distinct physical requests and page tokens, SDK same-record and reciprocal Console ID readback, native mismatch refusal, scoped credentials/peer/restart and owned cleanup; no response fabrication or SDK guard override.",
+      "models": []
     },
     {
       "path": "tools/console/bundle-digests.json",
-      "sha256": "47e0c5fd1a907f0532cb0c3f344a8729360a17b2f4d2774494a70601fd03be7c",
-      "models": [],
+      "sha256": "5e9f0ee1937f6a0f7764f0c72d66393e7bc456d43daf82a235fd54fcaeb0055f",
       "disposition": "presentation",
-      "reason": "Record the reproducible Cloudscape bundle and its source graph for the group detail view."
+      "reason": "Exact generated embedded asset digests checked against the canonical reviewed build; no claim of behavioral proof from hashes.",
+      "models": []
     },
     {
       "path": "tools/console/bundle-inputs.json",
-      "sha256": "aec8be2e8be40de7966fd58cb99d5e57b94cb133656762d7903e0c8895565740",
-      "models": [],
+      "sha256": "d0d235883efdd22d74f252452938e339e0d38f198c5056d02c467053c5bea3a7",
       "disposition": "presentation",
-      "reason": "Record the reproducible Cloudscape bundle and its source graph for the group detail view."
+      "reason": "Canonical bundler input inventory for the exact reviewed Console source and pinned dependencies; metadata is not source-refinement proof.",
+      "models": []
     },
     {
       "path": "tools/console/src/catalog.jsx",
-      "sha256": "941ddbde910ed2ce34424cacc25d2a026168853bf98facef608bc00f56542d3d",
+      "sha256": "e1da63d0ee42f5e74a88c76123916e788aaccfa20a4044a5d0a2fea9487ffb89",
+      "disposition": "modeled",
+      "reason": "Retain ordinary catalog controls and select the quota-specific view only for its exact nine-operation descriptor; scope changes retire the mounted child and generic catalog reads are suppressed only for that selected model.",
       "models": [
         {
           "id": "CatalogConsoleEpoch",
@@ -193,30 +658,71 @@
             "ReloadOnlyAfterAck",
             "FailureVisible"
           ],
-          "limits": "The model covers bounded reply ownership, single-writer admission, success and failure handling. Actual browser cancellation, native query syntax, pagination, authorization, persisted state and rendering require separate runtime checks."
+          "limits": "Preserved finite generic catalog epoch/write oracle only. It does not prove the dedicated Service Quotas workflow, React scheduling, DOM, request serialization, native authorization or actual browser behavior; the separate quota UI model and genuine fixtures cover distinct obligations."
+        },
+        {
+          "id": "ServiceQuotaRequestConsole",
+          "properties": [
+            "VisibleMount",
+            "ScopeCleared",
+            "RetiredRead"
+          ],
+          "limits": "Finite mounted quota-request control oracle only: explicit first unfiltered ACCOUNT ByQuota recovery disarms at start and rearms only on a fresh current successful observation; failed recovery/data invalidation clears approval and saved lookup. It does not identify a lost request by matching amount/time, infer persistence from arbitrary shape-valid replies, retry writes, or promise idempotency across tabs/new mounts. No JavaScript/React/DOM/HTTP/JSON/IAM/SQL/clock/refinement proof; real fixtures independently check bytes, scope, accessibility, restart, peer and cleanup. Leaving the mounted view ends its local unknown-outcome warning."
         }
-      ],
-      "disposition": "modeled",
-      "reason": "Use scoped request lifetimes and the catalog single-writer latch when displaying and replacing the selected group query."
+      ]
     },
     {
-      "path": "tools/console/src/resource-group-members.jsx",
-      "sha256": "9e0efd982d2e8009f748f0f3d8380ee08efe1b2d77062dae6f9aa439fe50a2d0",
+      "path": "tools/console/src/service-quotas.jsx",
+      "sha256": "c6c254b17eddec1254a12f729c6dc57f3e82c8141fe71300cbf66bc7037c1e0f",
+      "disposition": "modeled",
+      "reason": "Real native quota/default/history view with independent read authority, synchronous write ownership, exact acknowledged scope/fields, explicit unknown-outcome recovery, invalidation of stale approval/lookup and scope retirement; no automatic retry or ID attribution from history.",
       "models": [
         {
-          "id": "CatalogConsoleEpoch",
+          "id": "ServiceQuotaRequestConsole",
           "properties": [
-            "NoUnmountedAcceptance",
-            "OnlyCurrentReplies",
-            "SingleWriter",
-            "ReloadOnlyAfterAck",
-            "FailureVisible"
+            "SingleIntent",
+            "NoAutomaticWrite",
+            "NativeFrame",
+            "SavedExactlyOnce",
+            "Acknowledgement",
+            "FreshRecovery",
+            "ObservedOnly",
+            "SeparateIntent",
+            "RetiredRead",
+            "ScopeCleared",
+            "BlockedRetry",
+            "FreshCapacity",
+            "VisibleLookup",
+            "VisibleMount"
           ],
-          "limits": "The model covers bounded reply ownership, single-writer admission, success and failure handling. Actual browser cancellation, native query syntax, pagination, authorization, persisted state and rendering require separate runtime checks."
+          "limits": "Finite mounted quota-request control oracle only: explicit first unfiltered ACCOUNT ByQuota recovery disarms at start and rearms only on a fresh current successful observation; failed recovery/data invalidation clears approval and saved lookup. It does not identify a lost request by matching amount/time, infer persistence from arbitrary shape-valid replies, retry writes, or promise idempotency across tabs/new mounts. No JavaScript/React/DOM/HTTP/JSON/IAM/SQL/clock/refinement proof; real fixtures independently check bytes, scope, accessibility, restart, peer and cleanup. Leaving the mounted view ends its local unknown-outcome warning."
         }
-      ],
+      ]
+    },
+    {
+      "path": "tools/console/src/service-quotas.mjs",
+      "sha256": "a7d8faa50c5b7dfe92a332d31bd60b66d781bb4a39f6a5783aa5227d6914010c",
       "disposition": "modeled",
-      "reason": "Use scoped request lifetimes and the catalog single-writer latch when displaying and replacing the selected group query."
+      "reason": "Exact supported JSON1.1 operation/region request construction, typed quota and physical-record validation, acknowledgement tuple checks without client/server clock synchronization, and abortable current-read ownership.",
+      "models": [
+        {
+          "id": "ServiceQuotaRequestConsole",
+          "properties": [
+            "Acknowledgement",
+            "FreshRecovery",
+            "ObservedOnly",
+            "RetiredRead"
+          ],
+          "limits": "Finite mounted quota-request control oracle only: explicit first unfiltered ACCOUNT ByQuota recovery disarms at start and rearms only on a fresh current successful observation; failed recovery/data invalidation clears approval and saved lookup. It does not identify a lost request by matching amount/time, infer persistence from arbitrary shape-valid replies, retry writes, or promise idempotency across tabs/new mounts. No JavaScript/React/DOM/HTTP/JSON/IAM/SQL/clock/refinement proof; real fixtures independently check bytes, scope, accessibility, restart, peer and cleanup. Leaving the mounted view ends its local unknown-outcome warning."
+        }
+      ]
+    },
+    {
+      "path": "tools/console/test/service-quotas.test.mjs",
+      "sha256": "edd91e23555ba3fb68f96534f761e60e998df04e5c684d96e340381b83cae624",
+      "disposition": "presentation",
+      "reason": "Development-only quota client/epoch/acknowledgement and strict-negative checks, including server timestamp skew and unsupported-operation refusal; canonical tools/console presentation classification, not runtime model implementation.",
+      "models": []
     }
   ]
 }
