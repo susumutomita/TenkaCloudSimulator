@@ -29970,6 +29970,183 @@
           "expect_invariant": "ConnectionPragmasApplied"
         }
       ]
+    },
+    {
+      "id": "CloudWatchMetricTransaction",
+      "model": "formal/CloudWatchMetricTransaction.tla",
+      "config": "formal/CloudWatchMetricTransaction.cfg",
+      "bounds": "Two abstract region/namespace scopes, two complete metric/dimension identities, two units, values1/3, stale and three integer time positions, curated one/two-observation batches, seven-row quota and four transitions. Seed includes duplicate observations and unequal per-window counts.",
+      "properties": [
+        "TypeOK",
+        "StagedInvisible",
+        "PeerPreserved",
+        "RepeatedObservationsCount",
+        "AtomicAccepted",
+        "RejectedUnchanged",
+        "ReadAndRestartPreserve",
+        "BoundedRows",
+        "ReadAggregates"
+      ],
+      "limits": "Finite normalized transaction/read contract only. Scope denotes trusted configured namespace/region isolation; one process/database is assumed. It does not prove HTTP/gzip/XML/SigV4 or IAM evaluation, input parsing/dimension canonicalization, real UTC rounding/retention durations, floating point accuracy, SQLite schema/SQL/locking/trigger behavior, actual quotas, cancellation timing, process recovery or Go refinement. Rational average comparisons model multiplicity weighting, not IEEE754. Read/restart cannot publish staged writes; independent expected aggregation uses committed oracle rows. Native SDK/database/fault tests remain required. Gateway dispatch, store initialization and server capability composition paths are mapped for integration evidence only; this model does not verify their concrete wiring.",
+      "source_scope": [
+        "internal/aws/cloudwatchmetrics/store.go",
+        "internal/aws/cloudwatchmetrics/http.go",
+        "internal/aws/cloudwatchmetrics/form.go",
+        "internal/aws/cloudwatch_metrics_gateway.go",
+        "internal/aws/s3.go",
+        "internal/aws/ssm.go",
+        "internal/server/server.go"
+      ],
+      "mutants": [
+        {
+          "id": "PublishBeforeCommit",
+          "edits": [
+            {
+              "old": "rows'=rows (* NoEarlyPublication *)",
+              "new": "rows'=Prune(rows,s) \\o batch (* NoEarlyPublication *)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "StagedInvisible"
+        },
+        {
+          "id": "RetentionDeletesPeer",
+          "edits": [
+            {
+              "old": "~(p.scope = s /\\ p.at = 0)",
+              "new": "~(p.at = 0)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PeerPreserved"
+        },
+        {
+          "id": "PartialBatchValue",
+          "edits": [
+            {
+              "old": "rows'=Prune(rows,owner) \\o staged (* WholeBatch *)",
+              "new": "rows'=Prune(rows,owner) \\o [n \\in 1..Len(staged) |-> [staged[n] EXCEPT !.value = 1]] (* WholeBatch *)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AtomicAccepted"
+        },
+        {
+          "id": "CollapseRepeatedObservations",
+          "edits": [
+            {
+              "old": "rows'=Prune(rows,owner) \\o staged (* WholeBatch *)",
+              "new": "rows'=Prune(rows,owner) \\o (IF Len(staged)=2 /\\ staged[1]=staged[2] THEN SubSeq(staged,1,1) ELSE staged) (* WholeBatch *)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "RepeatedObservationsCount"
+        },
+        {
+          "id": "CanceledRetentionCommitted",
+          "edits": [
+            {
+              "old": "rows'=rows (* RollbackRetainsOld *)",
+              "new": "rows'=(IF kind=\"Cancel\" THEN Prune(rows,owner) ELSE rows) (* RollbackRetainsOld *)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "RejectedUnchanged"
+        },
+        {
+          "id": "DeniedWriteAdmitted",
+          "edits": [
+            {
+              "old": "rows'=rows (* RejectionRetainsOld *)",
+              "new": "rows'=(IF kind=\"Denied\" THEN Prune(rows,s) \\o batch ELSE rows) (* RejectionRetainsOld *)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "RejectedUnchanged"
+        },
+        {
+          "id": "ReadSeesStaged",
+          "edits": [
+            {
+              "old": "Groups(Select(rows,s,i,u),period) (* ReadCommittedOnly *)",
+              "new": "Groups(Select(rows \\o staged,s,i,u),period) (* ReadCommittedOnly *)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadAggregates"
+        },
+        {
+          "id": "InclusiveEnd",
+          "edits": [
+            {
+              "old": "p.at<3) (* ExclusiveEnd *)",
+              "new": "p.at<=3) (* ExclusiveEnd *)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadAggregates"
+        },
+        {
+          "id": "IgnoreIdentity",
+          "edits": [
+            {
+              "old": "p.scope=s /\\ p.identity=i /\\ (u=\"all\" \\/ p.unit=u) /\\ p.at>=1 /\\ p.at<3) (* ExclusiveEnd *)",
+              "new": "p.scope=s /\\ TRUE /\\ (u=\"all\" \\/ p.unit=u) /\\ p.at>=1 /\\ p.at<3) (* ExclusiveEnd *)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadAggregates"
+        },
+        {
+          "id": "IgnoreUnitFilter",
+          "edits": [
+            {
+              "old": "p.scope=s /\\ p.identity=i /\\ (u=\"all\" \\/ p.unit=u) /\\ p.at>=1 /\\ p.at<3) (* ExclusiveEnd *)",
+              "new": "p.scope=s /\\ p.identity=i /\\ TRUE /\\ p.at>=1 /\\ p.at<3) (* ExclusiveEnd *)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadAggregates"
+        },
+        {
+          "id": "UnweightedWindowAverage",
+          "edits": [
+            {
+              "old": "AvgNum(data) == Total(data) (* WeightedNumerator *)",
+              "new": "AvgNum(data) == UnweightedNum(data) (* WeightedNumerator *)",
+              "count": 1
+            },
+            {
+              "old": "AvgDen(data) == Len(data) (* WeightedDenominator *)",
+              "new": "AvgDen(data) == UnweightedDen(data) (* WeightedDenominator *)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadAggregates"
+        },
+        {
+          "id": "QuotaIgnored",
+          "edits": [
+            {
+              "old": "Len(Prune(data,s)) + Len(batch) <= 7",
+              "new": "Len(Prune(data,s)) + Len(batch) <= 9",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "BoundedRows"
+        },
+        {
+          "id": "RestartLosesRows",
+          "edits": [
+            {
+              "old": "rows'=rows (* RestartRetainsRows *)",
+              "new": "rows'= <<>> (* RestartRetainsRows *)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadAndRestartPreserve"
+        }
+      ]
     }
   ]
 }
