@@ -158,6 +158,11 @@ func (s *SNSStore) setNotificationPolicy(ctx context.Context, arn, policy string
 		WHERE t.fifo=0 AND p.topic_arn=? AND p.generation=? AND p.policy=?`, arn, generation, policy); err != nil {
 		return err
 	}
+	// The transaction context can observe cancellation after the original HTTP context.
+	// Check the request itself once the staged policy has been verified, before commit.
+	if err := ctx.Err(); err != nil {
+		return err
+	}
 	return tx.Commit()
 }
 
