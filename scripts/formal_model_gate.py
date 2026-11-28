@@ -4817,6 +4817,26 @@ REQUIRED_SOURCE_SCOPES['StoreConnectionLifetime'] = {
     'internal/core/store.go', 'internal/core/store_connection_test.go',
 }
 
+BASE_MODELS.add('CloudTraceObservations')
+BASE_INVARIANTS['CloudTraceObservations'] = {
+    'TypeOK', 'FirstPageOrdered', 'PendingInvisible', 'AdmitEligible', 'CallerBound',
+    'ValidBatchOnly', 'ProjectBound', 'PeerUnchanged', 'AllObservationsCommitted',
+    'RollbackUnchanged', 'GetCurrent', 'NextBound', 'NextStableKey', 'NextStableBody',
+}
+REQUIRED_MUTANTS['CloudTraceObservations'] = {
+    'ArrivalOrderedPage', 'ExposePendingPrefix', 'RejectValidRepeat', 'AdmitWrongOwner',
+    'AdmitWrongProject', 'SkipFinalValidation', 'CountOnlyFirstObservation',
+    'ShareCommitWithPeer', 'CommitPrefix', 'CoalesceIdenticalObservations',
+    'CancelPublishesPrefix', 'RefusalPublishesPrefix', 'GetUsesCursorHighWater',
+    'GetDropsRepeatedSpans', 'AllowPeerContinuation', 'AcceptForeignCursor',
+    'ReuseCursorForOtherView', 'IncludeNewTraceOnNextPage', 'RepeatLastTraceOnNextPage',
+    'ProjectCurrentSpanBodies', 'ExposeMinimalSpanBodies',
+}
+REQUIRED_SOURCE_SCOPES['CloudTraceObservations'] = {
+    'internal/gcp/trace/store.go', 'internal/gcp/trace/model.go', 'internal/gcp/trace/http.go',
+    'internal/server/cloud_storage.go',
+}
+
 
 def load_registry(root, relative='formal/models.json'):
     root = Path(root)

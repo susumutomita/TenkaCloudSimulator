@@ -1,19 +1,80 @@
 {
   "version": 1,
-  "base_sha": "70695e3f5c040ea98b3132a6a097a4b7ebea31ab",
+  "base_sha": "03d71307bbe6382df16d26bcd5d26e454f5036a6",
   "changes": [
     {
-      "path": "docs/gcp-catalog.md",
-      "sha256": "068ff1d93858dc08d6f9ce7b6796a276db9134ad73ec48b362ba0195d93e5917",
-      "disposition": "documentation",
-      "reason": "Correct the Cloud Trace version inventory against the pinned Google API discovery documents.",
+      "path": "formal/CloudTraceObservations.cfg",
+      "sha256": "cc9fd22df3c5bce531b493bb8cc031b84c4b74bc8284f89adac245dda8a299d8",
+      "disposition": "modeled",
+      "reason": "Run all bounded publication, scope and read-projection invariants.",
+      "models": [
+        {
+          "id": "CloudTraceObservations",
+          "properties": [
+            "FirstPageOrdered",
+            "PendingInvisible",
+            "AdmitEligible",
+            "CallerBound",
+            "ValidBatchOnly",
+            "ProjectBound",
+            "PeerUnchanged",
+            "AllObservationsCommitted",
+            "RollbackUnchanged",
+            "GetCurrent",
+            "NextBound",
+            "NextStableKey",
+            "NextStableBody"
+          ],
+          "limits": "Finite normalized observations and one transaction at a time. Admission models whole-batch structural validation and the per-project budget. Span syntax, per-trace and HTTP limits, expiration/pruning during paging, ROOTSPAN, time-window rules, HMAC and process restart, database faults, index use, real identities, interleavings and refinement to Go or SQLite require separate evidence."
+        }
+      ]
+    },
+    {
+      "path": "formal/CloudTraceObservations.tla",
+      "sha256": "3a072665269e88a22a49b217fdd8761ecedc0f4bff5bd680af0a6401f0b34a77",
+      "disposition": "modeled",
+      "reason": "Model published trace observations, admission and rollback in two project-owner scopes, sorted snapshot paging and fresh Get.",
+      "models": [
+        {
+          "id": "CloudTraceObservations",
+          "properties": [
+            "FirstPageOrdered",
+            "PendingInvisible",
+            "AdmitEligible",
+            "CallerBound",
+            "ValidBatchOnly",
+            "ProjectBound",
+            "PeerUnchanged",
+            "AllObservationsCommitted",
+            "RollbackUnchanged",
+            "GetCurrent",
+            "NextBound",
+            "NextStableKey",
+            "NextStableBody"
+          ],
+          "limits": "Finite normalized observations and one transaction at a time. Admission models whole-batch structural validation and the per-project budget. Span syntax, per-trace and HTTP limits, expiration/pruning during paging, ROOTSPAN, time-window rules, HMAC and process restart, database faults, index use, real identities, interleavings and refinement to Go or SQLite require separate evidence."
+        }
+      ]
+    },
+    {
+      "path": "formal/models.json",
+      "sha256": "7c3c30fbaf8f31d35e01bd196f7f94dfe2e697572339e73b38f891d00f45f8d1",
+      "disposition": "formal-infrastructure",
+      "reason": "Register Cloud Trace bounded observations with executable mutation controls and explicit scope limits.",
       "models": []
     },
     {
-      "path": "docs/gcp-trace.md",
-      "sha256": "34d7aa2c38b379df8505ee3cea84b84e06b76c43e14b35b5202df974e2bf071d",
-      "disposition": "documentation",
-      "reason": "Record the published v1 operations, duplicate-span semantics, permissions and proposed local verification for issue 376.",
+      "path": "scripts/formal_model_gate.py",
+      "sha256": "aa576056b23b15ab2e3b5b2f1343c97595db6f77ed354571d4bd746b3b9c8128",
+      "disposition": "formal-infrastructure",
+      "reason": "Pin the Cloud Trace model identity, fourteen invariants, twenty-one mutation controls and four source paths.",
+      "models": []
+    },
+    {
+      "path": "scripts/test-formal-gate.py",
+      "sha256": "9eadb097a1ebece5807b92a0d1f3b287a7540b1eedd10711657347707dba7da9",
+      "disposition": "formal-infrastructure",
+      "reason": "Check removal of each Cloud Trace property, mutation and scope against the protected gates and name the model in the complete inventory.",
       "models": []
     }
   ]
