@@ -1,17 +1,17 @@
-name: Temporary exact Historical reference complete local gate evidence
+name: Temporary exact Secrets Manager guide complete local gate evidence
 on:
   workflow_dispatch:
 permissions:
   contents: read
 jobs:
   complete-before-commit:
-    name: Unfiltered standard make before-commit at 7de43f8
+    name: Unfiltered standard make before-commit at 5c08fc3
     runs-on: ubuntu-24.04
     timeout-minutes: 80
     steps:
       - uses: actions/checkout@v7.0.1
         with:
-          ref: 7de43f8ae50a761d73fc7b72fbf76c48f0d96c51
+          ref: 5c08fc3e19cc3f64387d2ebe5d891a0ceab1d977
           persist-credentials: false
       - uses: actions/setup-go@v6.5.0
         with:
@@ -19,25 +19,25 @@ jobs:
           cache: true
       - name: Verify fixed product source and ordinary runner
         run: |
-          test "$(git rev-parse HEAD)" = 7de43f8ae50a761d73fc7b72fbf76c48f0d96c51
-          test "$(git rev-parse HEAD^{tree})" = 99d34741dff6bd560e36d7ebe45b5cf3a1aa1004
+          test "$(git rev-parse HEAD)" = 5c08fc3e19cc3f64387d2ebe5d891a0ceab1d977
+          test "$(git rev-parse HEAD^{tree})" = 51963bb256578ccbbd6a80cd8b13843baba2b340
           test -z "$(git status --porcelain)"
           test "$(id -u)" -ne 0
-          mkdir -p "$RUNNER_TEMP/reference-complete-gate"
-          git rev-parse HEAD HEAD^{tree} > "$RUNNER_TEMP/reference-complete-gate/source.txt"
-          uname -srmo > "$RUNNER_TEMP/reference-complete-gate/platform.txt"
-          go version > "$RUNNER_TEMP/reference-complete-gate/go.txt"
-          python3 --version > "$RUNNER_TEMP/reference-complete-gate/python.txt"
+          mkdir -p "$RUNNER_TEMP/guide-complete-gate"
+          git rev-parse HEAD HEAD^{tree} > "$RUNNER_TEMP/guide-complete-gate/source.txt"
+          uname -srmo > "$RUNNER_TEMP/guide-complete-gate/platform.txt"
+          go version > "$RUNNER_TEMP/guide-complete-gate/go.txt"
+          python3 --version > "$RUNNER_TEMP/guide-complete-gate/python.txt"
       - name: Run original complete make before-commit
         run: |
           test -z "$(git status --porcelain --untracked-files=all)"
           set +e
-          make before-commit 2>&1 | tee "$RUNNER_TEMP/reference-complete-gate/full.log"
+          make before-commit 2>&1 | tee "$RUNNER_TEMP/guide-complete-gate/full.log"
           codes=("${PIPESTATUS[@]}")
           result=${codes[0]}
           if test "$result" -eq 0 && test "${codes[1]}" -ne 0; then result=${codes[1]}; fi
           set -e
-          printf '%s\n' "$result" > "$RUNNER_TEMP/reference-complete-gate/make-exit.txt"
+          printf '%s\n' "$result" > "$RUNNER_TEMP/guide-complete-gate/make-exit.txt"
           exit "$result"
       - name: Preserve safe coverage and package outcomes
         if: always()
@@ -45,7 +45,7 @@ jobs:
           python3 - <<'PY'
           import json, os, re
           from pathlib import Path
-          root = Path(os.environ['RUNNER_TEMP']) / 'reference-complete-gate'
+          root = Path(os.environ['RUNNER_TEMP']) / 'guide-complete-gate'
           root.mkdir(parents=True, exist_ok=True)
           log = root / 'full.log'
           text = log.read_text(errors='replace') if log.exists() else ''
@@ -55,25 +55,25 @@ jobs:
                   or 'statement coverage' in line.lower() or line.startswith('Go statements (full module)')]
           result = root / 'make-exit.txt'
           (root / 'summary.json').write_text(json.dumps({
-              'source': '7de43f8ae50a761d73fc7b72fbf76c48f0d96c51',
+              'source': '5c08fc3e19cc3f64387d2ebe5d891a0ceab1d977',
               'command': 'make before-commit',
               'make_exit': int(result.read_text()) if result.exists() else None,
               'observed_summaries': safe,
               'scope': 'Unfiltered standard command. Failure remains failure; later phases are not inferred executed.'
           }, indent=2) + '\n')
           PY
-          git status --porcelain > "$RUNNER_TEMP/reference-complete-gate/post-status.txt"
+          git status --porcelain > "$RUNNER_TEMP/guide-complete-gate/post-status.txt"
           if test -f dist/tenkacloud-simulator; then
-            go version -m dist/tenkacloud-simulator > "$RUNNER_TEMP/reference-complete-gate/build.txt"
-            sha256sum dist/tenkacloud-simulator > "$RUNNER_TEMP/reference-complete-gate/binary.sha256"
+            go version -m dist/tenkacloud-simulator > "$RUNNER_TEMP/guide-complete-gate/build.txt"
+            sha256sum dist/tenkacloud-simulator > "$RUNNER_TEMP/guide-complete-gate/binary.sha256"
           fi
       - name: Retain exact complete-gate evidence
         if: always()
         uses: actions/upload-artifact@v7.0.2
         with:
-          name: reference-complete-gate-${{ github.run_id }}
+          name: guide-complete-gate-${{ github.run_id }}
           path: |
-            ${{ runner.temp }}/reference-complete-gate/
-            !${{ runner.temp }}/reference-complete-gate/full.log
+            ${{ runner.temp }}/guide-complete-gate/
+            !${{ runner.temp }}/guide-complete-gate/full.log
           if-no-files-found: error
           retention-days: 14
