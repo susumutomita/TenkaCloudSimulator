@@ -1,6 +1,7 @@
 package catalog
 
 import (
+	"bytes"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
@@ -103,6 +104,45 @@ func TestMSKConfigurationRevisionLifecycle(t *testing.T) {
 	expect(t, h.rest("kafka", "DELETE", path, nil), 404, "NotFoundException")
 	for _, c := range []reply{second, recreated} {
 		expect(t, h.rest("kafka", "DELETE", collection+"/"+url.PathEscape(str(c.body["arn"])), nil), 200, "")
+	}
+}
+
+func TestMSKConfigurationOpaqueProperties(t *testing.T) {
+	h := newHarness(t, msk)
+	const collection = "/v1/configurations"
+	properties := []byte{'a', 0, 0xff, '\n'}
+	created := h.rest("kafka", "POST", collection, map[string]any{
+		"name": "opaque", "serverProperties": base64.StdEncoding.EncodeToString(properties),
+	})
+	expect(t, created, 200, "")
+	path := collection + "/" + url.PathEscape(str(created.body["arn"]))
+	metadata := h.rest("kafka", "GET", path, nil)
+	expect(t, metadata, 200, "")
+	list := h.rest("kafka", "GET", collection, nil)
+	expect(t, list, 200, "")
+	items := list.body["configurations"].([]any)
+	if len(items) != 1 || !reflect.DeepEqual(items[0], metadata.body) {
+		t.Fatalf("unexpected configuration list %v", items)
+	}
+	for _, result := range []map[string]any{created.body, metadata.body} {
+		for _, key := range []string{"description", "kafkaVersions", "serverProperties"} {
+			if _, present := result[key]; present {
+				t.Fatalf("unexpected %s in configuration metadata", key)
+			}
+		}
+		latest := result["latestRevision"].(map[string]any)
+		if _, present := latest["description"]; present {
+			t.Fatal("unexpected description in latest revision")
+		}
+	}
+	revision := h.rest("kafka", "GET", path+"/revisions/1", nil)
+	expect(t, revision, 200, "")
+	if _, present := revision.body["description"]; present {
+		t.Fatal("unexpected description in revision")
+	}
+	decoded, err := base64.StdEncoding.DecodeString(str(revision.body["serverProperties"]))
+	if err != nil || !bytes.Equal(decoded, properties) {
+		t.Fatalf("revision properties %x, want %x (decode error %v)", decoded, properties, err)
 	}
 }
 
