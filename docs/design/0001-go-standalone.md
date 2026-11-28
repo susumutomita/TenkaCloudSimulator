@@ -20,6 +20,8 @@ Consoleは公式Cloudscape/Reactを開発時にbundleし、fonts/assets/licenses
 
 SSM の [ドキュメント履歴](../ssm-documents.md) はリージョンとドキュメント名で検索し、1 回の SQLite 読み取りで番号順のスナップショットを返す。ページごとに IAM を評価し、続きは対象・呼出者・スナップショットに結び付く。一覧に定義本文は含めず、Console の本文比較には別の GetDocument 権限が必要。ドキュメントは実行しない。
 
+SNS の `SetTopicAttributes` は Standard トピックに CodeStar Notifications 専用の発行ポリシーを保存する。取得時はトピックとポリシー、購読数を同じ SQLite スナップショットから読み取る。ポリシーの物理識別子は同じトピックの更新では保持し、削除後に同名で作り直すと新しくなる。[SNS ポリシー](../sns.md#codestar-notifications-topic-policies)。
+
 SNS の HTTP/HTTPS コンソールは native Query を呼び出し、通知先 URL をローカル SQLite に記録するだけで外部に接続しない。購読属性を読む際は ARN から親トピックを特定して IAM を先に評価し、購読と親の存在およびリージョンの一致を同じ読み取りで確認する。専用 Scalar は us-east-1 固定で通常のログインセッションを使い、コンソールの演習用 ID 選択を引き継がない。[対応範囲](../sns.md)。
 
 AWS Resource Groups のタグクエリは、同じリージョンの ECR repository の ARN とタグをカタログの SQLite から読み取る。グループ ARN と依存する読み取り権限の認可後、保存済みクエリとリポジトリを同じスナップショットで照合する。[対象と制限](../aws-catalog.md#ecr-repository-group-membership)

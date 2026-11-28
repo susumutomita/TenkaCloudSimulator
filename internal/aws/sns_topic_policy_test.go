@@ -259,3 +259,50 @@ func TestSNSNotificationPolicyStagedInterrupt(t *testing.T) {
 		}
 	}
 }
+
+func TestSNSNotificationPolicyStorageFailures(t *testing.T) {
+	db := snsReadbackDB(t)
+	g := newSNSReadbackGateway(t, db)
+	arn := snsARN("us-east-1", "stored")
+	snsCall(t, g, "", url.Values{"Action": {"CreateTopic"}, "Name": {"stored"}}, 200, arn)
+	allow, deny := snsTestPolicy(snsPolicyStatement(arn, "Allow")), snsTestPolicy(snsPolicyStatement(arn, "Deny"))
+	snsCall(t, g, "", snsPolicySetForm(arn, allow), 200, "SetTopicAttributesResponse")
+	id := snsTestGrant(t, g, arn, true)
+	for name, trigger := range map[string]string{
+		"ignore edit":          "BEFORE UPDATE ON aws_sns_notification_policies BEGIN SELECT RAISE(IGNORE); END",
+		"change written bytes": "AFTER UPDATE ON aws_sns_notification_policies BEGIN UPDATE aws_sns_notification_policies SET policy='{}' WHERE topic_arn=NEW.topic_arn; END",
+		"remove edited row":    "AFTER UPDATE ON aws_sns_notification_policies BEGIN DELETE FROM aws_sns_notification_policies WHERE topic_arn=NEW.topic_arn; END",
+	} {
+		t.Run(name, func(t *testing.T) {
+			if _, err := db.Database().Exec("CREATE TEMP TRIGGER disrupt_policy " + trigger); err != nil {
+				t.Fatal(err)
+			}
+			snsCall(t, g, "", snsPolicySetForm(arn, deny), 500, "InternalError")
+			if _, err := db.Database().Exec("DROP TRIGGER disrupt_policy"); err != nil {
+				t.Fatal(err)
+			}
+			if value, ok := snsTestPolicyAttribute(t, g, arn); !ok || value != allow || snsTestGrant(t, g, arn, true) != id {
+				t.Fatal("failed edit changed saved policy")
+			}
+		})
+	}
+	if _, err := db.Database().Exec("UPDATE aws_sns_notification_policies SET policy='{}' WHERE topic_arn=?", arn); err != nil {
+		t.Fatal(err)
+	}
+	snsCall(t, g, "", url.Values{"Action": {"GetTopicAttributes"}, "TopicArn": {arn}}, 500, "InternalError")
+	tx, err := db.Database().BeginTx(t.Context(), nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	got, allowed, err := snsNotificationTopicGrant(t.Context(), tx, arn)
+	if err == nil || allowed || got != 0 {
+		t.Fatalf("invalid stored policy produced grant %v/%d", allowed, got)
+	}
+	if err = tx.Rollback(); err != nil {
+		t.Fatal(err)
+	}
+	snsCall(t, g, "", snsPolicySetForm(arn, deny), 200, "SetTopicAttributesResponse")
+	if snsTestGrant(t, g, arn, false) != id {
+		t.Fatal("repair changed physical identity")
+	}
+}
