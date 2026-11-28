@@ -23,6 +23,7 @@ ROOT = Path(os.environ['PRODUCT_ROOT'])
 BINARY = ROOT / 'dist/tenkacloud-simulator'
 NS = '{https://route53.amazonaws.com/doc/2013-04-01/}'
 NAMES = ('2.0.192.in-addr.arpa.', '100.51.198.in-addr.arpa.')
+PARTICIPANT = 'ptr-console-review'
 
 
 def record(name, ttl, value):
@@ -60,13 +61,12 @@ def answer(client, zone, rr):
 
 def allowed_session(origin, token, zones):
     arns = ['arn:aws:route53:::' + zone.lstrip('/') for zone in zones]
-    principal = 'ptr-console-review'
     policy = {'Version': '2012-10-17', 'Statement': [
         {'Effect': 'Allow', 'Action': 'route53:ListHostedZones', 'Resource': '*'},
         {'Effect': 'Allow', 'Action': ['route53:GetHostedZone', 'route53:ListResourceRecordSets'], 'Resource': arns},
         {'Effect': 'Allow', 'Action': 'route53:ChangeResourceRecordSets', 'Resource': arns[0]}]}
-    control(origin, token, 'PUT', '/_simulator/v1/iam/principals/' + principal + '/policy', policy)
-    return control(origin, token, 'POST', '/_simulator/v1/access', {'Principal': principal})['AccessToken']
+    control(origin, token, 'PUT', '/_simulator/v1/iam/principals/' + PARTICIPANT + '/policy', policy)
+    return control(origin, token, 'POST', '/_simulator/v1/access', {'Principal': PARTICIPANT})['AccessToken']
 
 
 def verify_reference(context, origin):
@@ -121,7 +121,8 @@ def exercise(browser, origin, participant, client, zones, baseline, siblings, wa
             assert len(writes) == i+1 and response.request is writes[-1]
             headers = response.request.all_headers()
             assert headers.get('cookie') and headers['x-simulator-service'] == 'route53'
-            assert not {'authorization', 'x-simulator-token', 'x-simulator-principal'}.intersection(headers)
+            assert headers.get('x-simulator-principal') == PARTICIPANT
+            assert not {'authorization', 'x-simulator-token', 'x-simulator-access-role'}.intersection(headers)
             body = ET.fromstring(response.request.post_data)
             changes = body.findall('./'+NS+'ChangeBatch/'+NS+'Changes/'+NS+'Change')
             assert len(changes) == 1 and changes[0].findtext(NS+'Action') == 'CREATE'
