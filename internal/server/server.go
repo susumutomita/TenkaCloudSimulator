@@ -13,6 +13,7 @@ import (
 
 	"github.com/susumutomita/TenkaCloudSimulator/internal/aws"
 	"github.com/susumutomita/TenkaCloudSimulator/internal/aws/catalog"
+	"github.com/susumutomita/TenkaCloudSimulator/internal/aws/cloudwatchmetrics"
 	"github.com/susumutomita/TenkaCloudSimulator/internal/aws/cognitoidp"
 	"github.com/susumutomita/TenkaCloudSimulator/internal/aws/simpledb"
 	"github.com/susumutomita/TenkaCloudSimulator/internal/core"
@@ -153,6 +154,12 @@ func newWithProviders(path string, options ProviderConfig, prepareCognito func(*
 		_ = store.Close()
 		return nil, nil, err
 	}
+	metrics, err := cloudwatchmetrics.NewStore(store.Database())
+	if err != nil {
+		_ = lambdas.Close()
+		_ = store.Close()
+		return nil, nil, err
+	}
 	cloudWatchLogs, err := aws.NewCloudWatchLogsStore(store.Database())
 	if err != nil {
 		_ = store.Close()
@@ -212,7 +219,7 @@ func newWithProviders(path string, options ProviderConfig, prepareCognito func(*
 			return nil, nil, err
 		}
 	}
-	gateway := &aws.Gateway{CognitoUserPools: cognitoUserPools, CognitoResourceAccount: localCognitoAccount, SimpleDB: simpleDB, SimpleDBScope: simpledb.Scope{Account: "000000000000", Region: "us-east-1"}, AutoScalingPlans: autoScalingPlans, BedrockRuntime: options.BedrockRuntime, ELB: elb, CloudFront: cloudFront, Route53: route53, WAF: waf, SNS: snsTopics, CloudWatchLogs: cloudWatchLogs, Secrets: secrets, DynamoDB: dynamodb, KMS: keys, APIGateway: apiGateway, LambdaPermissions: lambdaPermissions, Store: store, S3: s3, Identities: identities, Parameters: parameters, Queues: queues, Stacks: stacks, Lambdas: lambdas, Roles: roles, Documents: documents}
+	gateway := &aws.Gateway{CognitoUserPools: cognitoUserPools, CognitoResourceAccount: localCognitoAccount, SimpleDB: simpleDB, SimpleDBScope: simpledb.Scope{Account: "000000000000", Region: "us-east-1"}, AutoScalingPlans: autoScalingPlans, BedrockRuntime: options.BedrockRuntime, ELB: elb, CloudFront: cloudFront, Route53: route53, WAF: waf, SNS: snsTopics, CloudWatchLogs: cloudWatchLogs, CloudWatchMetrics: metrics, Secrets: secrets, DynamoDB: dynamodb, KMS: keys, APIGateway: apiGateway, LambdaPermissions: lambdaPermissions, Store: store, S3: s3, Identities: identities, Parameters: parameters, Queues: queues, Stacks: stacks, Lambdas: lambdas, Roles: roles, Documents: documents}
 	if options.commandAPI != nil {
 		gateway.Commands = options.commandAPI()
 	}
@@ -301,6 +308,10 @@ func newWithProviders(path string, options ProviderConfig, prepareCognito func(*
 		addRoute53ConsoleCapability(w, r, capabilities)
 		addEC2NetworkReadbackCapabilities(w, r, capabilities)
 		addEC2InstanceStackLaunchCapability(w, r, capabilities, options.instanceStackLaunchConfigured)
+		capabilities["services"].(map[string]any)["cloudwatch"] = map[string]any{
+			"protocol": "AWS Query/XML 2010-08-01", "operations": []string{"PutMetricData", "GetMetricStatistics"},
+			"storageResolutionSeconds": 60, "retentionDays": 15, "alarms": false, "console": false,
+		}
 		capabilities["services"].(map[string]any)["simpledb"] = map[string]any{
 			"console": true, "region": gateway.SimpleDBScope.Region, "protocol": "Query/XML 2009-04-15",
 			"operations":     []string{"CreateDomain", "ListDomains", "DeleteDomain", "DomainMetadata", "GetAttributes", "PutAttributes", "DeleteAttributes", "Select"},
