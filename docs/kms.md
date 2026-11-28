@@ -1,6 +1,6 @@
 # KMS: local symmetric keys and customer aliases
 
-Fifteen native JSON 1.1 operations use the team's SQLite database. The embedded Cloudscape console and SDK share key and alias state. Use the SDK to manage grants. Use the authenticated [CLI](start.md).
+Seventeen native JSON 1.1 operations use the team's SQLite database. The embedded Cloudscape console and SDK share key and alias state. Use the SDK to manage grants. Use the authenticated [CLI](start.md).
 Embedding hosts must wrap the unauthenticated `server.New` composition API with
 `NewAccess`. Allocate a separate process/database/token authority per team.
 
@@ -20,10 +20,12 @@ The versioned local ciphertext cannot be used with AWS KMS.
 | Operation | Native state/result | Required local identity permission |
 | --- | --- | --- |
 | CreateKey | New Enabled symmetric key, committed before acknowledgment | `kms:CreateKey` on `*` |
-| DescribeKey | Metadata only; Enabled or Disabled | `kms:DescribeKey` on concrete key ARN |
+| DescribeKey | Metadata only, including the deadline for a PendingDeletion key | `kms:DescribeKey` on concrete key ARN |
 | ListKeys | Region-local UUID/ARN page; default100, range1–1000 | `kms:ListKeys` on `*` |
 | EnableKey | Set Enabled; empty200 | `kms:EnableKey` on concrete key ARN |
 | DisableKey | Set Disabled; empty200 | `kms:DisableKey` on concrete key ARN |
+| ScheduleKeyDeletion | Schedule an Enabled or Disabled key, returning its ARN, deadline, PendingDeletion state and waiting period | `kms:ScheduleKeyDeletion` on the concrete key ARN |
+| CancelKeyDeletion | Cancel a pending deletion before the deadline and return the key ARN | `kms:CancelKeyDeletion` on the concrete key ARN |
 | GetKeyPolicy | Read immutable `default` policy | `kms:GetKeyPolicy` on concrete key ARN |
 | Encrypt | Enabled key only; ciphertext and exact-one counter increment in one transaction | `kms:Encrypt` on resolved concrete key ARN |
 | Decrypt | Enabled key only; authenticated key/region/context; no persistent mutation | `kms:Decrypt` on selected or ciphertext concrete key ARN |
@@ -53,6 +55,14 @@ Assume the grantee role using local STS, then call the SDK's `kms.describe_key(K
 Grants take effect immediately and persist when the simulator restarts with the same SQLite database. A restart requires a fresh STS session. Revoking the only matching grant removes that session's grant-derived read access. The simulator supports 50,000 grants per key, matching the published AWS default. Service principals, account principals, cross-account grants, constraints, dry runs, grant delegation, retiring principals and `RetireGrant` are outside this scope. Grant management is available in the SDK and served API reference. The key and alias console keeps its existing workflow.
 
 AWS documents the [grant workflow](https://docs.aws.amazon.com/kms/latest/developerguide/grants.html), [compatible key states](https://docs.aws.amazon.com/kms/latest/developerguide/key-state.html), [resource quotas](https://docs.aws.amazon.com/kms/latest/developerguide/resource-limits.html), [CreateGrant](https://docs.aws.amazon.com/kms/latest/APIReference/API_CreateGrant.html), [ListGrants](https://docs.aws.amazon.com/kms/latest/APIReference/API_ListGrants.html), [RevokeGrant](https://docs.aws.amazon.com/kms/latest/APIReference/API_RevokeGrant.html) and [DescribeKey](https://docs.aws.amazon.com/kms/latest/APIReference/API_DescribeKey.html).
+
+## Scheduled key deletion
+
+Use the SDK with a concrete key UUID or its ARN in the team's account and region. `PendingWindowInDays` accepts integers from 7 through 30 and defaults to 30. A successful schedule returns the same absolute UTC `DeletionDate` that DescribeKey reports until cancellation or expiration. This single-region surface exposes the waiting period in the Schedule response. IAM uses the action and concrete key ARN. The local policy grammar rejects service-specific request conditions such as `kms:ScheduleKeyDeletionPendingWindowInDays`. [ScheduleKeyDeletion](https://docs.aws.amazon.com/kms/latest/APIReference/API_ScheduleKeyDeletion.html) · [CancelKeyDeletion](https://docs.aws.amazon.com/kms/latest/APIReference/API_CancelKeyDeletion.html)
+
+A pending key remains visible to authorized metadata reads, including grant-derived DescribeKey, and supports listing or revoking its grants. Encryption, decryption, CreateGrant, EnableKey, DisableKey and another ScheduleKeyDeletion return `KMSInvalidStateException`. A pending key can lose an alias through deletion or retargeting. CreateAlias and UpdateAlias reject it as a destination. CancelKeyDeletion restores Disabled, removes the deadline and preserves the material, remaining grants and aliases. Call EnableKey to use the key for cryptography again. [AWS key states](https://docs.aws.amazon.com/kms/latest/developerguide/key-state.html)
+
+The simulator uses its process clock and persists the deadline as the scheduling time plus the requested number of 24-hour days. At equality and later, startup or admission of the next KMS operation removes the expired key row, its material, remaining target aliases and grants in one SQLite transaction. An alias previously moved to another key survives. A stopped or idle database retains rows until this check runs. The database and its backups require the same local protection as before. AWS documents a waiting period that can extend by up to 24 hours. [Deleting AWS KMS keys](https://docs.aws.amazon.com/kms/latest/developerguide/deleting-keys.html)
 
 ## Keys, crypto and alias resolution
 
@@ -131,10 +141,10 @@ markers InvalidMarkerException; caps LimitExceededException. IAM denial is403;
 storage failures are sanitized500 with no partial successful result. Strict
 single-row acknowledgments and commit checks precede success. Alias parent FKs
 and saved creation-time checks cover the current immutable-UUID key lifecycle;
-future DeleteKey/recreation and arbitrary host SQLite tampering are not promised.
+new CreateKey calls generate independent UUIDs.
 
 No AWS-managed/predefined aliases, alias ABAC, tags, custom policies/stores,
-asymmetric/HMAC/data keys, rotation, scheduled deletion, key deletion API,
+asymmetric/HMAC/data keys, rotation, immediate key deletion,
 external material, AWS-portable blobs, HSM protection, S3 SSE-KMS, SSM SecureString,
 Secrets encryption, guest-Lambda KMS or CloudFormation KMS resources are supplied.
 No Challenge problem is enabled merely by these operations.

@@ -25,6 +25,7 @@ import (
 type KMSAliasAuthorizer func(context.Context, *sql.Tx, string, string) (bool, error)
 
 type KMSAliasStore struct {
+	keys   *KMSStore
 	db     *sql.DB
 	region string
 }
@@ -124,7 +125,7 @@ func newKMSAliasStoreTx(ctx context.Context, tx *sql.Tx, keys *KMSStore, region 
 	if _, err = tx.ExecContext(ctx, `INSERT INTO aws_kms_alias_state SELECT ?,0,randomblob(32) WHERE NOT EXISTS(SELECT 1 FROM aws_kms_alias_state WHERE region=?)`, region, region); err != nil {
 		return nil, err
 	}
-	s := &KMSAliasStore{keys.db, region}
+	s := &KMSAliasStore{db: keys.db, keys: keys, region: region}
 	if _, _, err = s.stateTx(ctx, tx); err != nil {
 		return nil, err
 	}
@@ -203,7 +204,7 @@ func (s *KMSAliasStore) CreateAlias(ctx context.Context, name, target string, au
 	if !kmsCustomerAlias(name) {
 		return kmsFailure("InvalidAliasNameException", "The customer alias name is invalid.")
 	}
-	tx, err := s.db.BeginTx(ctx, nil)
+	tx, err := s.keys.begin(ctx)
 	if err != nil {
 		return err
 	}
@@ -233,6 +234,9 @@ func (s *KMSAliasStore) createAliasTx(ctx context.Context, tx *sql.Tx, name, tar
 	if err != nil {
 		return err
 	}
+	if key.metadata.KeyState == "PendingDeletion" {
+		return kmsInvalidState()
+	}
 	var count int
 	if err = tx.QueryRowContext(ctx, `SELECT count(*) FROM aws_kms_aliases WHERE region=? AND name=?`, s.region, name).Scan(&count); err != nil {
 		return err
@@ -260,7 +264,7 @@ func (s *KMSAliasStore) UpdateAlias(ctx context.Context, name, target string, au
 	if err != nil {
 		return err
 	}
-	tx, err := s.db.BeginTx(ctx, nil)
+	tx, err := s.keys.begin(ctx)
 	if err != nil {
 		return err
 	}
@@ -294,6 +298,9 @@ func (s *KMSAliasStore) updateAliasTx(ctx context.Context, tx *sql.Tx, name, tar
 	if err != nil {
 		return err
 	}
+	if next.metadata.KeyState == "PendingDeletion" {
+		return kmsInvalidState()
+	}
 	// Both native key types are currently SYMMETRIC_DEFAULT/ENCRYPT_DECRYPT.
 	prior, err := s.keyTx(ctx, tx, old.TargetKeyId)
 	if err != nil {
@@ -323,7 +330,7 @@ func (s *KMSAliasStore) DeleteAlias(ctx context.Context, name string, authorize 
 	if !kmsCustomerAlias(name) {
 		return kmsInvalid()
 	}
-	tx, err := s.db.BeginTx(ctx, nil)
+	tx, err := s.keys.begin(ctx)
 	if err != nil {
 		return err
 	}
@@ -402,7 +409,7 @@ func (s *KMSAliasStore) ListAliases(ctx context.Context, keyID string, limit int
 	}
 	// The embedded SQLite driver does not support sql.TxOptions.ReadOnly.
 	// This transaction issues only SELECTs; use the established provider BeginTx.
-	tx, err := s.db.BeginTx(ctx, nil)
+	tx, err := s.keys.begin(ctx)
 	if err != nil {
 		return result, err
 	}
@@ -511,7 +518,7 @@ func (s *KMSAliasStore) Encrypt(ctx context.Context, selected string, contextMap
 	if _, err := kmsContext(contextMap); err != nil {
 		return nil, "", err
 	}
-	tx, err := s.db.BeginTx(ctx, nil)
+	tx, err := s.keys.begin(ctx)
 	if err != nil {
 		return nil, "", err
 	}
@@ -563,7 +570,7 @@ func (s *KMSAliasStore) Decrypt(ctx context.Context, selected string, contextMap
 	if _, err = kmsContext(contextMap); err != nil {
 		return nil, "", err
 	}
-	tx, err := s.db.BeginTx(ctx, nil)
+	tx, err := s.keys.begin(ctx)
 	if err != nil {
 		return nil, "", err
 	}
@@ -629,7 +636,7 @@ func (s *KMSStore) serveAliasRequest(w http.ResponseWriter, r *http.Request, reg
 		kmsWriteError(w, kmsAliasDenied())
 		return true
 	}
-	tx, err := s.db.BeginTx(r.Context(), nil)
+	tx, err := s.begin(r.Context())
 	if err != nil {
 		kmsWriteError(w, err)
 		return true
