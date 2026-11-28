@@ -1,75 +1,47 @@
 {
   "version": 1,
-  "base_sha": "70695e3f5c040ea98b3132a6a097a4b7ebea31ab",
+  "base_sha": "8a9be8bd5a2d56959e6cbc6b5e80fb9b57e5935e",
   "changes": [
     {
-      "path": "README.md",
-      "sha256": "79578ee8af3a5c3cbea152f2f31e156b63a570392eb68dd2ca294f4327d3a5ba",
-      "disposition": "documentation",
-      "reason": "Describe the new practice-only SimpleDB API reference examples.",
-      "models": []
-    },
-    {
-      "path": "docs/design/0001-go-standalone.md",
-      "sha256": "f66de982206f237bc5de95f42b84fe804f629ab09c8faf3b59d44099fc3b9cfc",
-      "disposition": "documentation",
-      "reason": "Document the narrow local API reference contract and unchanged native service operations.",
-      "models": []
-    },
-    {
-      "path": "docs/simpledb-console.md",
-      "sha256": "152469ce1865b59bfdb2a82b99988c706ceb5a4d6a547d8a8018328658dcf779",
-      "disposition": "documentation",
-      "reason": "Document executable browser verification and the exact scope and effects of the practice examples.",
-      "models": []
-    },
-    {
-      "path": "internal/server/apidocs/openapi.json",
-      "sha256": "668bea21c075767afeb534503b8c5d6fbf7cc52ea717f4dd81871c92694eef09",
-      "disposition": "presentation",
-      "reason": "Expose the existing PutAttributes and DeleteDomain native operations through two optional form examples, preserving inherited defaults; no handler or authorization changes.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/simpledb_console.py",
-      "sha256": "f80131de5bc770147a611c258cde36d6b302d7368832d9e3a9063fe956f012ed",
+      "path": "test/e2e/api_cloud_sections_contract.py",
+      "sha256": "27e55e07a9076773010a51c224f5af67bdd2649922e204fbe0398ff4f0e1b139",
       "disposition": "test-support",
-      "reason": "Follow the actual login redirect while retaining the authenticated console workflow and readback checks.",
+      "reason": "Validate the current Sakura Server navigation and provider binding and preserve the historical method, path and operation inventory.",
       "models": []
     },
     {
-      "path": "test/e2e/simpledb_scalar_reference_live.py",
-      "sha256": "c3cac0a37b7bad5518336fd93f14bdd576101a746b83eea49c01c6056d5ed33a",
+      "path": "test/e2e/cloudwatch_logs.py",
+      "sha256": "a3ab52eebd8130d18925559a31a1a3905cd445436c2e18494ff96eee070a2532",
       "disposition": "test-support",
-      "reason": "Drive the shipped shared-endpoint example picker and form, and verify the three original live reads and their actual request and response.",
+      "reason": "Check the served inventory with the verified Sakura Server and Route 53 projections before running the existing eight native Logs examples.",
       "models": []
     },
     {
-      "path": "test/e2e/simpledb_shipped_examples_live.py",
-      "sha256": "989f74d6f036f4be06a07fed4538916cdaf25a9f617ad17ca28c7e053633b18e",
+      "path": "test/e2e/dynamodb_docs.py",
+      "sha256": "ecbd976e404f69b19578964227c8a19846235de58416281fa96cefc2b15a59af",
       "disposition": "test-support",
-      "reason": "Exercise CreateDomain, Select, DeleteAttributes, PutAttributes and DeleteDomain through the served browser client; verify exact requests, native state and cleanup.",
+      "reason": "Check the served historical inventory before executing the seven existing DynamoDB templates and SDK readbacks.",
       "models": []
     },
     {
-      "path": "test/e2e/simpledb_terraform_provider.py",
-      "sha256": "21c20925eff9a9c69c59c32db8be97dd719d88f22b9d31733c493859758f0a8c",
+      "path": "test/e2e/historical_reference_inventory.py",
+      "sha256": "292db852cd1fa1160a6ed69c2a319cc6827d4cae349f15d136096979da380ce3",
       "disposition": "test-support",
-      "reason": "Keep synthetic signing inputs in the isolated Terraform process environment. Verify the pinned provider signature before forwarding three native SimpleDB fields.",
+      "reason": "Pin the historical IDs to their HTTP methods and paths using the 66 routes from historical main and the existing multipart POST.",
       "models": []
     },
     {
-      "path": "test/e2e/test_sakura_openapi.py",
-      "sha256": "e64013a0f91f45ea17b9723c7f239cd2a53b6bc662aec60573bab200ab2080f4",
+      "path": "test/e2e/secrets_manager_docs.py",
+      "sha256": "5d04c99554f24855650d26703d41394de3ea899d451ef4022266f822aa3c95fd",
       "disposition": "test-support",
-      "reason": "Verify every inherited reference block and the precise additional read and write examples, including negative checks for changed defaults, schemas and examples.",
+      "reason": "Check the served inventory with the verified Sakura Server and Route 53 projections before running the existing seven native Secrets Manager examples.",
       "models": []
     },
     {
-      "path": "test/e2e/test_simpledb_terraform_provider.py",
-      "sha256": "b84e92193e8e7ef53c9fc4589f198eb9286d243ecf62aaaedeaa3b2e464050db",
+      "path": "test/e2e/test_storage_reference_sakura_projection.py",
+      "sha256": "f1bba14a42561d79e548dfdcc383a449b81a328f20b67a42d85f369d8bda38fc",
       "disposition": "test-support",
-      "reason": "Check process isolation and credential-free persisted configuration, independent signature vectors, strict refusal cases, and the three-field native request.",
+      "reason": "Exercise the historical fixture validators against changed native operations, paths, methods and the Sakura Server contract.",
       "models": []
     }
   ]
