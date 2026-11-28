@@ -1,4 +1,4 @@
-name: Cloud Trace v1 SDK and embedded Scalar acceptance
+name: Cloud Trace v1 SDK, Scalar and Console acceptance
 on:
   workflow_dispatch:
 permissions:
@@ -8,12 +8,12 @@ jobs:
     runs-on: ubuntu-22.04
     timeout-minutes: 30
     env:
-      SOURCE_SHA: 97720d4d617118332e5a6b3f8064979b79cb0802
+      SOURCE_SHA: f517e36087b5904de88871fd33ca3bc556eef2ad
       PYTHONPYCACHEPREFIX: /tmp/trace-v1-pycache
     steps:
       - uses: actions/checkout@v7.0.1
         with:
-          ref: 97720d4d617118332e5a6b3f8064979b79cb0802
+          ref: f517e36087b5904de88871fd33ca3bc556eef2ad
           persist-credentials: false
       - uses: actions/setup-go@v6.5.0
         with:
@@ -40,6 +40,7 @@ jobs:
         run: |
           export PATH="/tmp/trace-v1-tests/bin:$PATH"
           export SIMULATOR_BINARY="$PWD/dist/tenkacloud-simulator"
+          export SIMULATOR_BINARY_SHA256=$(cut -d " " -f 1 "$RUNNER_TEMP/trace-receipts/binary.sha256")
           export CHROMIUM_EXECUTABLE=$(python -c 'from playwright.sync_api import sync_playwright; p=sync_playwright().start(); print(p.chromium.executable_path); p.stop()')
           export TRACE_NAMESPACE_CHECK="$RUNNER_TEMP/trace-check-namespace.py"
           cat > "$TRACE_NAMESPACE_CHECK" <<'PYTHON'
@@ -50,10 +51,10 @@ jobs:
           assert all(int(status[name], 16) == 0 for name in ('CapEff', 'CapAmb', 'CapBnd'))
           assert int(status['NoNewPrivs']) == 1
           fixture = os.environ['TRACE_FIXTURE']
-          assert fixture in ('gcp_trace_sdk', 'gcp_trace_scalar')
+          assert fixture in ('gcp_trace_sdk', 'gcp_trace_scalar', 'gcp_trace_console')
           os.execv(sys.executable, [sys.executable, 'test/e2e/' + fixture + '.py'])
           PYTHON
-          for fixture in gcp_trace_sdk gcp_trace_scalar; do
+          for fixture in gcp_trace_sdk gcp_trace_scalar gcp_trace_console; do
             export TRACE_FIXTURE="$fixture"
             set +e
             unshare --user --map-current-user --net --keep-caps sh -ec 'ip link set lo up; exec setpriv --no-new-privs --inh-caps=-all --ambient-caps=-all --bounding-set=-all python "$TRACE_NAMESPACE_CHECK"' > "$RUNNER_TEMP/$fixture.log" 2>&1
@@ -67,12 +68,21 @@ jobs:
           expected = {
               'gcp_trace_sdk': 'Cloud Trace v1 append, get, three list views, duplicate spans, isolated projects, restart and cleanup passed',
               'gcp_trace_scalar': 'Cloud Trace v1: three real Scalar Sends, official SDK readback, peer isolation and cleanup passed',
-          }[name]
+          }.get(name)
           receipt = {'source': os.environ['SOURCE_SHA'], 'fixture': name, 'exit': code,
                      'binary': (root/'trace-receipts/binary.sha256').read_text().split()[0]}
           if code == 0:
-              assert text.splitlines().count(expected) == 1
-              receipt['checkedOutcome'] = expected
+              if name == 'gcp_trace_console':
+                  rendered = [json.loads(line) for line in text.splitlines() if line.startswith('{"ok":')]
+                  want = {'ok': True, 'binarySha256': receipt['binary'], 'sdkSeededTraces': 26,
+                          'duplicateSpanObservations': 3, 'paging': True, 'nativeErrorRecovery': True,
+                          'japaneseNarrow': True, 'peerUnchanged': True, 'restart': True,
+                          'participantHidden': True, 'cleanup': True, 'externalCloud': False}
+                  assert rendered == [want]
+                  receipt['checkedOutcome'] = rendered[0]
+              else:
+                  assert expected and text.splitlines().count(expected) == 1
+                  receipt['checkedOutcome'] = expected
           else:
               receipt['frames'] = [(pathlib.Path(file).name, line) for file,line in
                                    re.findall(r'File "([^"\n]+)", line ([0-9]+)', text)][-10:]
