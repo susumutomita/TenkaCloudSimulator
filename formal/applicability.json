@@ -1,26 +1,67 @@
 {
   "version": 1,
-  "base_sha": "cb062654a5712be104c584b33f679c359c35134d",
+  "base_sha": "fa06c139f93ab1e32bf8c13809ca70434464994a",
   "changes": [
     {
       "path": "README.md",
       "disposition": "documentation",
       "sha256": "fd251e07cf71ce2f1216d80fe255cccecda5d596cfef9a1cf7369e0fc3606b0a",
-      "reason": "Documents the shared SDK, console and API reference records.",
+      "reason": "Documents custom MSK configurations, immutable revision readback, cluster attachment and the shared native surface.",
+      "models": []
+    },
+    {
+      "path": "docs/aws-catalog-services.md",
+      "sha256": "0ec2cd6bc6d4e0474bf3ef771f14eea89b7554846bc922265fcb77fa344db438",
+      "disposition": "documentation",
+      "reason": "Regenerates the reviewed Kafka operations and bounds for configuration storage, attachment and deletion.",
       "models": []
     },
     {
       "path": "docs/aws-catalog.md",
       "disposition": "documentation",
       "sha256": "e4e97d2f32cd6c79b7d1fdda51c583d48cf34eb079ce546605b77375e92b85b4",
-      "reason": "Documents the runnable MSK Scalar lists and local service-header routing.",
+      "reason": "Documents Kafka configuration fields, IAM and attachment semantics, cleanup order, and same-origin unsigned Scalar routing.",
       "models": []
     },
     {
       "path": "docs/design/0001-go-standalone.md",
       "disposition": "documentation",
       "sha256": "befbcfb64e601eb2fc6337d2d16a86139aae42c262878a74b183d45d5c0af912",
-      "reason": "Records how the authenticated MSK reference selects the existing endpoint.",
+      "reason": "Records immutable storage, the transactional cluster dependency and shared authenticated reference routing.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/catalog/models/kafka.json",
+      "sha256": "7815d92ee05be295c2b86f740347ea81c4f783432eb9351814b53d7acfc799cc",
+      "disposition": "modeled",
+      "reason": "Expands the pinned Kafka model subset to include five reviewed configuration operations.",
+      "models": [
+        {
+          "id": "CatalogResourceLifecycle",
+          "properties": [
+            "AuthorizationFirst",
+            "FailureFrame",
+            "PeerFrame",
+            "UniqueNames",
+            "QuotaBound",
+            "FreshIDs"
+          ],
+          "limits": "The finite catalog model covers authorization, failed writes, peer state, unique names, quota and distinct identities. Native tests check the MSK ARN, wire encoding, revision selector, REST projections and immutable bytes."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/catalog/msk_attachment_test.go",
+      "sha256": "94c6db3fad2a3f4cb314d2359a97dbb86d5b68b8dfab582729a5d944bfafb684",
+      "disposition": "test-support",
+      "reason": "Tests both authorization targets, compatibility, projections, rollback and deterministic competing transactions.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/catalog/msk_configuration_test.go",
+      "sha256": "57b847f8a08b715cfec652693271f8921d8008b03aa44fea44f5cd247ec2ede9",
+      "disposition": "test-support",
+      "reason": "Covers immutable bytes and metadata projections, IAM resources, rejected writes, isolation, quota and cleanup.",
       "models": []
     },
     {
@@ -40,10 +81,100 @@
       ]
     },
     {
+      "path": "internal/aws/catalog/selection.json",
+      "sha256": "332b79af20516ba07006c6f221a6819e451e2cb8ef3194e037506b14f7a3815e",
+      "disposition": "modeled",
+      "reason": "Registers the five supported configuration operations in the reviewed Kafka selection.",
+      "models": [
+        {
+          "id": "CatalogResourceLifecycle",
+          "properties": [
+            "AuthorizationFirst",
+            "FailureFrame",
+            "PeerFrame",
+            "UniqueNames",
+            "QuotaBound",
+            "FreshIDs"
+          ],
+          "limits": "The finite catalog model covers authorization, failed writes, peer state, unique names, quota and distinct identities. Native tests check the MSK ARN, wire encoding, revision selector, REST projections and immutable bytes."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/catalog/semantics.go",
+      "sha256": "59cd704f2bbb5b1d054313b8284400a5450b2e5df6106e3af678b8458b6f494e",
+      "disposition": "modeled",
+      "reason": "Derives creation metadata, uses wildcard authorization for the configured list, authorizes related create resources and validates references transactionally.",
+      "models": [
+        {
+          "id": "CatalogResourceLifecycle",
+          "properties": [
+            "AuthorizationFirst",
+            "FailureFrame",
+            "PeerFrame",
+            "UniqueNames",
+            "QuotaBound",
+            "FreshIDs",
+            "ChildGuard"
+          ],
+          "limits": "The finite catalog model covers authorization, failed writes, peer state, dependency deletion, uniqueness, quota and fresh IDs. Native tests cover multi-ARN authorization, opaque bytes, projections, region and version matching and concrete SQLite interleavings."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/catalog/services_data.go",
+      "sha256": "bc0ce56cd3bb25f694c959fa74f51442a1e5390e24ae456e0e44f0ddec29cccb",
+      "disposition": "modeled",
+      "reason": "Binds the five configuration operations, native attachment and revision validation, dependency guard and tag restrictions.",
+      "models": [
+        {
+          "id": "CatalogResourceLifecycle",
+          "properties": [
+            "AuthorizationFirst",
+            "FailureFrame",
+            "PeerFrame",
+            "UniqueNames",
+            "QuotaBound",
+            "FreshIDs",
+            "ChildGuard"
+          ],
+          "limits": "The finite catalog model covers authorization, failed writes, peer state, dependency deletion, uniqueness, quota and fresh IDs. Native tests cover multi-ARN authorization, opaque bytes, projections, region and version matching and concrete SQLite interleavings."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/catalog/spec.go",
+      "sha256": "d04da59995a1905c80acd1ae406ef21b2215c4233786c5ddb6cf14105173ed88",
+      "disposition": "modeled",
+      "reason": "Declares opt-in creation metadata initialization, wildcard list authorization, create authorization on referenced ARNs and reference compatibility checks.",
+      "models": [
+        {
+          "id": "CatalogResourceLifecycle",
+          "properties": [
+            "AuthorizationFirst",
+            "FailureFrame",
+            "PeerFrame",
+            "UniqueNames",
+            "QuotaBound",
+            "FreshIDs",
+            "ChildGuard"
+          ],
+          "limits": "The finite catalog model covers authorization, failed writes, peer state, dependency deletion, uniqueness, quota and fresh IDs. Native tests cover multi-ARN authorization, opaque bytes, projections, region and version matching and concrete SQLite interleavings."
+        }
+      ]
+    },
+    {
+      "path": "internal/server/apidocs/catalog/index.json",
+      "sha256": "a411a8b0eddb498242035722817df4296c34119b6ab3ff23bafa520563420eee",
+      "disposition": "presentation",
+      "reason": "Regenerates the native catalog reference index for the additional Kafka methods.",
+      "models": []
+    },
+    {
       "path": "internal/server/apidocs/catalog/kafka.json",
       "disposition": "presentation",
       "sha256": "658caf0deb64ee54b51272377b3719a94247a57ebf51ee99d1951499a866c707",
-      "reason": "Regenerates the served MSK operations with their required local routing header.",
+      "reason": "Regenerates the served Kafka operations, attachment bounds and prefilled discriminator for unsigned reference requests.",
       "models": []
     },
     {
@@ -51,6 +182,20 @@
       "disposition": "test-support",
       "sha256": "6c85a890dd35f8c9d2225113d25e27b7298c28c05e652de98d4d7900f7b0d5e7",
       "reason": "Runs the MSK shared-state Scalar lifecycle in the existing native catalog browser suite.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/aws_catalog_fixtures.py",
+      "sha256": "035146eb787e3bf1ab84c6ae57fbc96429b6a4de06f1a4c9a86ca4ece0236b54",
+      "disposition": "test-support",
+      "reason": "Adds an explicit byte comparison for a native SDK response in an existing fixture.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/catalog_fixtures/kafka.json",
+      "sha256": "a02e5342a5d1b3f1fc2a1d91bf03e1b29c88f2b6939b1ee2953fbe1c7f9817d3",
+      "disposition": "test-support",
+      "reason": "Runs native SDK configuration and attached and unattached cluster lifecycles across independent teams, restart, refusal in use and cleanup.",
       "models": []
     },
     {
