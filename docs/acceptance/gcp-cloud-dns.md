@@ -129,7 +129,7 @@ covers production middleware/dispatcher composition through request/recorder.
 The historical socket attempt in the table used the
 [server composition test](../../internal/server/gcp_dns_test.go). Current
 [factory checks](../contributing/software-factory.md) and
-[formal validation](../formal/README.md#required-gate-and-applicability) track
+[formal validation](../../formal/README.md#required-gate-and-applicability) track
 their own source revisions. The SDK check covers one process and project.
 Issue #343 still calls for a desktop and 390px walkthrough of the owner
 Console, covering keyboard use, accessibility, and successful and refused

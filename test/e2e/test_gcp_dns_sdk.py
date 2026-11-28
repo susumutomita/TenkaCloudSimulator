@@ -25,18 +25,19 @@ class CloudDNSClientPaths(unittest.TestCase):
         records = service.resourceRecordSets()
         collection = '/_simulator/providers/gcp/dns/v1/projects/test-project/managedZones'
         zone = collection + '/test-zone'
-        for request, expected in (
-            (zones.list(project=project), collection),
-            (zones.create(project=project, body={'name': 'test-zone'}), collection),
-            (changes.create(project=project, managedZone='test-zone', body={}), zone + '/changes'),
-            (changes.get(project=project, managedZone='test-zone', changeId='1'), zone + '/changes/1'),
-            (records.get(project=project, managedZone='test-zone', name='www.example.test.', type='A'),
+        for method, request, expected in (
+            ('GET', zones.list(project=project), collection),
+            ('POST', zones.create(project=project, body={'name': 'test-zone'}), collection),
+            ('POST', changes.create(project=project, managedZone='test-zone', body={}), zone + '/changes'),
+            ('GET', changes.get(project=project, managedZone='test-zone', changeId='1'), zone + '/changes/1'),
+            ('GET', records.get(project=project, managedZone='test-zone', name='www.example.test.', type='A'),
              zone + '/rrsets/www.example.test./A'),
-            (zones.delete(project=project, managedZone='test-zone'), zone),
+            ('DELETE', zones.delete(project=project, managedZone='test-zone'), zone),
         ):
             with self.subTest(operation=request.methodId):
+                self.assertEqual(request.method, method)
                 self.assertEqual(checked_uri(request.uri, team.port, collection), expected)
-                self.assertEqual(urlsplit(request.uri).query, '' if request.method == 'DELETE' else 'alt=json')
+                self.assertEqual(urlsplit(request.uri).query, '' if method == 'DELETE' else 'alt=json')
         http.request.assert_not_called()
 
 
