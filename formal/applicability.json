@@ -321,6 +321,27 @@
       ]
     },
     {
+      "path": "internal/aws/notification_protocol_boundaries_test.go",
+      "sha256": "bebedc24d0593974fe8e2d16ce30be33960a7112d02c6b74a094c7d16f0ae608",
+      "disposition": "test-support",
+      "reason": "Exercise native protocol validation, scoped access, registration limits and an ordinary worker that resumes accepted work after its destination recovers.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/notification_storage_outages_test.go",
+      "sha256": "bb869587a66a3015a641bde0a5062352ba3d0266c2bbba7695bcf29a6e8ee23d",
+      "disposition": "test-support",
+      "reason": "Exercise failures in SQLite reads, staged writes and commits across rule, Git and fanout transactions and check the full durable database frame after repair.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/notification_target_recovery_test.go",
+      "sha256": "86ace3b8348c290c072280002a30fbb8ed76eef456e4ac1acbf90bc0a4508cdc",
+      "disposition": "test-support",
+      "reason": "Exercise original creator and destination lifetimes, failed and repaired publications and savepoints, invalid stored values, physical replacement, restart and exact persisted acknowledgements.",
+      "models": []
+    },
+    {
       "path": "internal/aws/s3.go",
       "sha256": "ac682dc251fcc8dccd54da2c0a12f50bc000f847168253416c26ffc3ac6dce09",
       "disposition": "modeled",
