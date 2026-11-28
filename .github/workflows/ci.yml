@@ -4,7 +4,7 @@ permissions:
   contents: read
 jobs:
   check:
-    name: Real ELBv2 Query reference official SDK, Scalar responses and Cloudscape console
+    name: Official ELBv2 SDK and genuine Scalar Query sends
     runs-on: ubuntu-22.04
     timeout-minutes: 25
     env:
@@ -37,7 +37,7 @@ jobs:
           "$RUNNER_TEMP/elb-query-venv/bin/pip" install -r scripts/requirements-test.txt
           "$RUNNER_TEMP/elb-query-venv/bin/pip" check
           "$RUNNER_TEMP/elb-query-venv/bin/playwright" install --with-deps chromium
-      - name: Exercise normal SDK and Console in a private loopback namespace
+      - name: Exercise the original ELBv2 SDK lifecycle and the shared Scalar reference on isolated loopback
         run: |
           python="$RUNNER_TEMP/elb-query-venv/bin/python"
           "$python" -c 'import os; assert not any(k.startswith(("AWS_", "BOTO_")) for k in os.environ)'
@@ -67,7 +67,7 @@ jobs:
       - uses: actions/upload-artifact@v7.0.2
         if: always()
         with:
-          name: elb-query-console-${{ github.run_id }}
+          name: elb-query-and-sdk-${{ github.run_id }}
           path: ${{ runner.temp }}/elb-query-receipts/
           if-no-files-found: error
           retention-days: 14
