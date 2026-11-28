@@ -2,6 +2,7 @@
 
 from contextlib import ExitStack, contextmanager
 from hashlib import file_digest
+from http.client import HTTPConnection
 import json
 import os
 from pathlib import Path
@@ -11,7 +12,6 @@ from urllib.parse import parse_qsl, urlsplit
 from playwright.sync_api import expect, sync_playwright
 
 from autoscaling_plans_console import wire
-from elb import http
 from elb_scalar import NS, SERVICE, VERSION, reference, sdk, send, setup_listener
 from gcp_dns_sdk import LocalTeam, started
 
@@ -20,6 +20,16 @@ ROUTE = '/_simulator/console/#/elasticloadbalancing'
 NAME = 'scalar-practice-alb'
 GROUP = 'scalar-linked'
 READS = ('DescribeLoadBalancers', 'DescribeListeners', 'DescribeTargetGroups', 'DescribeTargetHealth')
+
+
+def listener_response(team, suffix):
+    connection = HTTPConnection('127.0.0.1', team.port, timeout=40)
+    try:
+        connection.request('GET', '/_elb/us-east-1/' + NAME + suffix, headers={'X-Simulator-Token':team.token})
+        result = connection.getresponse()
+        return result.status, result.read()
+    finally:
+        connection.close()
 
 
 @contextmanager
@@ -214,8 +224,8 @@ def run(owner, peer, browser):
             peer_group = other.create_target_group(Name=GROUP, TargetType='lambda', HealthCheckPath='/peer')['TargetGroups'][0]
             clean.callback(other.delete_target_group, TargetGroupArn=peer_group['TargetGroupArn'])
             original = saved(elb,group)
-            assert http(owner.endpoint, owner.token, '/_elb/us-east-1/' + NAME + '/80/console')[::2] == (200,b'local')
-            assert http(owner.endpoint, owner.token, '/_elb/us-east-1/' + NAME + '/81/missing')[0] == 404
+            assert listener_response(owner, '/80/console') == (200,b'local')
+            assert listener_response(owner, '/81/missing')[0] == 404
             with console(browser,owner,owner.token,'simulator-admin') as (page, requests):
                 field = page.get_by_label('Exact load balancer name', exact=True)
                 field.fill('absent-console-alb')
@@ -287,7 +297,7 @@ def run(owner, peer, browser):
             assert saved(elb,group) == original | {'HealthCheckPath':'/after-lost-response'}
             assert saved(elb,sibling['TargetGroupArn']) == sibling
             assert saved(other,peer_group['TargetGroupArn']) == peer_group
-            assert http(owner.endpoint,owner.token,'/_elb/us-east-1/' + NAME + '/80/again')[::2] == (200,b'local')
+            assert listener_response(owner, '/80/again') == (200,b'local')
             with console(browser,owner,owner.token,'simulator-admin',japanese=True) as (mobile,_):
                 details(mobile,lb,group,function,japanese=True)
                 expect(mobile.get_by_label('ヘルスチェックパス',exact=True)).to_have_value('/after-lost-response')
