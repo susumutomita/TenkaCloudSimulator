@@ -19,13 +19,13 @@ def project_monitoring(spec):
     form = post['requestBody']['content']['application/x-www-form-urlencoded']
     props = form['schema']['properties']
     enums = next(p for p in post['parameters'] if p.get('name') == 'X-Simulator-Service')['schema']['enum']
-    assert enums.count('monitoring') == 1
+    assert enums.count('monitoring') == 1 and enums[-1] == 'monitoring'
     enums.remove('monitoring')
-    assert props['Version']['enum'].count('2010-08-01') == 1
+    assert props['Version']['enum'].count('2010-08-01') == 1 and props['Version']['enum'][-1] == '2010-08-01'
     props['Version']['enum'].remove('2010-08-01')
     actions = props['Action']['enum']
-    assert [name for name in actions if name in ACTIONS] == list(ACTIONS)
-    assert [name for name in form['examples'] if name in ACTIONS] == list(ACTIONS)
+    assert actions[-len(ACTIONS):] == list(ACTIONS) and all(actions.count(name) == 1 for name in ACTIONS)
+    assert list(form['examples'])[-len(ACTIONS):] == list(ACTIONS)
     examples = {name: form['examples'].pop(name) for name in ACTIONS}
     canonical = json.dumps(examples, sort_keys=True, separators=(',', ':'), ensure_ascii=False)
     assert hashlib.sha256(canonical.encode()).hexdigest() == '1404a695fdf67566a350fa7cd17d2f11b4387cac3d75d6231a4609c81686a7ae'

@@ -34,3 +34,10 @@ The alarm ARN is `arn:aws:cloudwatch:{region}:000000000000:alarm:{AlarmName}`. E
 Limits are 100 alarms per Region and 1,000 per team. Delete removes the selected alarm, leaving metric observations intact. Two teams use separate processes, databases, policies and cursor authorities. Restart preserves configurations and recomputes their actual local state; it does not fabricate a delivery event or support case.
 
 The native increment does not by itself establish a new Console, Scalar Send or original-game acceptance. Those entry points and required whole-source gates are verified separately before a completion claim.
+
+
+## Read metric alarms in the console and API reference
+
+Open **Services → CloudWatch** to browse metric alarms in the selected region. You can also enter an exact alarm name. Each detail view queries the native alarm and then requests its configured statistic for the same namespace, dimensions, unit and completed UTC minute. A missing datapoint and a measured zero display separately. **Refresh alarm** reads both APIs again. The alarms list requires `cloudwatch:DescribeAlarms` on `*`. An exact lookup accepts permission on that alarm ARN. The statistic read requires `cloudwatch:GetMetricStatistics` on `*`.
+
+In the API reference, open **Shared AWS JSON/Query endpoint**, select the URL-encoded request body and choose one of the five **CloudWatch** examples. Set `X-Simulator-Service` to `monitoring`, use your session’s region and clear `X-Amz-Target`. The examples share the practice series `Training/Observability / QueueDepth` with dimension `Queue=practice` and unit `Count`. Replace the statistics example's start and end with a recent completed UTC minute. Each PutMetricData Send appends another sample. DeleteAlarms removes the named alarm. Published samples age out under the metric store's retention policy. The separate CloudWatch Logs console reads events explicitly ingested into the Logs API.
