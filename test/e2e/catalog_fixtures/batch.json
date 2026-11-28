@@ -12,6 +12,7 @@
   {"op": "list_consumable_resources", "args": {}, "expect": {"consumableResources#count": 1, "consumableResources[0].consumableResourceName": "fixture-licenses"}},
   {"op": "create_compute_environment", "args": {"computeEnvironmentName": "fixture-ce", "type": "MANAGED", "computeResources": {"type": "EC2", "maxvCpus": 16, "subnets": ["subnet-0a1b2c3d"], "instanceTypes": ["optimal"]}}, "save": {"ce": "computeEnvironmentArn"}},
   {"op": "describe_compute_environments", "args": {"computeEnvironments": ["fixture-ce"]}, "expect": {"computeEnvironments[0].status": "CREATING", "computeEnvironments[0].state": "ENABLED", "computeEnvironments[0].containerOrchestrationType": "ECS"}},
+  {"op": "delete_compute_environment", "args": {"computeEnvironment": "fixture-ce"}, "error": "ClientException", "status": 400},
   {"op": "update_compute_environment", "args": {"computeEnvironment": "fixture-ce", "state": "DISABLED"}},
   {"op": "create_compute_environment", "args": {"computeEnvironmentName": "fixture-managed", "type": "MANAGED"}, "error": "ClientException"},
   {"op": "create_job_queue", "args": {"jobQueueName": "fixture-queue", "priority": 5, "schedulingPolicyArn": "${policy}", "computeEnvironmentOrder": [{"order": 1, "computeEnvironment": "${ce}"}], "jobStateTimeLimitActions": [{"action": "CANCEL", "maxTimeSeconds": 600, "state": "RUNNABLE", "reason": "CAPACITY:INSUFFICIENT_INSTANCE_CAPACITY"}]}, "save": {"queue": "jobQueueArn"}},
@@ -54,6 +55,8 @@
   {"op": "describe_job_definitions", "args": {"status": "INACTIVE"}, "expect": {"jobDefinitions#count": 1, "jobDefinitions[0].containerProperties.image": "example.invalid/other:1"}}
  ],
  "after_restart": [
+  {"op": "delete_compute_environment", "args": {"computeEnvironment": "${ce}"}, "error": "ClientException", "status": 400},
+  {"op": "describe_compute_environments", "args": {"computeEnvironments": ["${ce}"]}, "expect": {"computeEnvironments#count": 1, "computeEnvironments[0].state": "DISABLED", "computeEnvironments[0].status": "CREATING"}},
   {"op": "delete_scheduling_policy", "args": {"arn": "${policy}"}, "error": "ClientException", "status": 400},
   {"op": "describe_scheduling_policies", "args": {"arns": ["${policy}"]}, "expect": {"schedulingPolicies#count": 1, "schedulingPolicies[0].fairsharePolicy.computeReservation": 20, "schedulingPolicies[0].tags": {"team": "a"}}},
   {"op": "describe_job_queues", "args": {"jobQueues": ["fixture-queue"]}, "expect": {"jobQueues[0].state": "DISABLED", "jobQueues[0].priority": 9, "jobQueues[0].schedulingPolicyArn": "${policy}", "jobQueues[0].jobStateTimeLimitActions[0].maxTimeSeconds": 86400, "jobQueues[0].jobStateTimeLimitActions[0].action": "CANCEL"}},

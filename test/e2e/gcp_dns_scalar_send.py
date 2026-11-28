@@ -20,7 +20,7 @@ def run():
     with running(authenticated=True) as (endpoint, token), sync_playwright() as playwright:
         own = urlsplit(endpoint)
         assert own.scheme == 'http' and own.hostname == '127.0.0.1' and own.port
-        browser = playwright.chromium.launch(executable_path=str(executable), args=['--no-sandbox'])
+        browser = playwright.chromium.launch(executable_path=str(executable), chromium_sandbox=True)
         try:
             context = browser.new_context(service_workers='block')
             context.set_default_timeout(15_000)
@@ -50,6 +50,9 @@ def run():
                 assert seed.json()['name'] == ZONE
                 page = context.new_page()
                 page.on('pageerror', lambda _: errors.append(True))
+                list_requests = []
+                page.on('request', lambda req: list_requests.append(req)
+                        if req.method == 'GET' and urlsplit(req.url).path == collection else None)
                 assert page.goto(endpoint+REFERENCE).status == 200
                 expect(page.get_by_text('List managed zones', exact=True).first).to_be_visible()
                 page.get_by_role('button', name='Test Request (get /projects/{project}/managedZones)',
@@ -60,11 +63,13 @@ def run():
                     return (u.scheme, u.netloc, u.path, response.request.method) == (
                         own.scheme, own.netloc, collection, 'GET')
 
+                assert not list_requests, 'opening the reference sent a list request'
                 with page.expect_response(expected) as receipt:
                     page.get_by_role('button', name=re.compile(r'^Send get request to ')).click()
                 received = receipt.value
                 assert received.status == 200
                 assert received.request.redirected_from is None
+                assert received.request.header_value('cookie'), 'the browser session cookie was missing'
                 assert not received.request.header_value('authorization')
                 assert not received.request.header_value('x-simulator-token')
                 zones = received.json()['managedZones']
@@ -74,6 +79,7 @@ def run():
                 expect(body).to_have_count(1)
                 expect(body).to_contain_text(ZONE)
                 expect(body).to_contain_text(DNS_NAME)
+                assert len(list_requests) == 1, 'a single Send must issue one zone list request'
                 assert not outside and not errors, 'unexpected browser navigation or page error'
             finally:
                 item = endpoint+collection+'/'+quote(ZONE, safe='')
