@@ -133,7 +133,7 @@ EC2管理の既存IPv4サブネットは、正確なサブネットARNの `ec2:M
 
 CFNのDependsOn文字列/配列をimplicit Ref/GetAtt/Subと統合して事前検証し、依存順で作成・逆順で削除する。inline Pythonはindex.pyのZIPへ変換し、native saveLambdaFunctionを同じtransactionで呼び出す。新しいresource typeのclaim namespaceは未対応旧readerのIAM fallbackに一致させず、未知kindはdefault処理で削除しない。旧binaryとのDB共有/downgradeはサポートしない。
 
-Native IAMはAWS layerのrole/inline-policy tablesを所有し、信頼先とaggregate identityを同じSQLiteへ保存する。空roleはidentity policy rowを作らずimplicit Deny。旧JSON control APIのnative ownership検査と書込はAWS adapterの同一transaction内で行い、coreへAWS schemaを入れない。既存CFN roleはmetadata-only trustを保ちnativeへの暗黙移行をしない。[IAM](../iam.md)。
+Native IAMはAWS layerのrole/inline-policy tablesを所有し、信頼先とaggregate identityを同じSQLiteへ保存する。空roleはidentity policy rowを作らずimplicit Deny。旧JSON control APIのnative ownership検査と書込はAWS adapterの同一transaction内で行い、coreへAWS schemaを入れない。既存CFN roleはmetadata-only trustを保ちnativeへの暗黙移行をしない。[IAM](../iam.md)。 IAM コンソールと API リファレンスの GetRole は同じロールを表示し、STS は署名済み SDK リクエストに対して保存済みの信頼ポリシーを評価する。[STS](../sts-native.md)
 
 SDK bridgeはAWS layerの固定shimとrole-bound closureが所有し、runtimeにはAWS service/action、DB、tokenや問題IDを渡さない。guest stdoutのbounded JSON交換は権限の根拠ではなく、各native handlerでIAMを再評価する。S3は直接S3 handlerへdispatchし、bucket/keyがLambda protocol pathに似ていても別serviceへ解釈しない。
 
