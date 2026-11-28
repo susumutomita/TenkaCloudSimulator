@@ -156,9 +156,14 @@ def exercise(browser, origin, participant, client, zones, baseline, siblings, wa
                 assert rr in client.list_resource_record_sets(HostedZoneId=zone)['ResourceRecordSets']
                 page.get_by_role('button', name='Back to hosted zones', exact=True).click()
             else:
-                assert response.status == 403 and 'AccessDenied' in [e.text for e in xml.iter() if e.tag.rsplit('}', 1)[-1] == 'Code']
-                expect(page.get_by_text('Local Route 53 request failed (HTTP 403).', exact=True)).to_be_visible()
+                assert response.status == 403 and xml.tag == NS+'ErrorResponse'
+                code = xml.findtext(NS+'Error/'+NS+'Code')
+                message = xml.findtext(NS+'Error/'+NS+'Message')
+                assert (code, message) == ('AccessDenied', 'Route53 action is not permitted.')
+                expect(page.get_by_text(f'{code}: {message}', exact=True)).to_be_visible()
+                expect(page.get_by_text('No save was confirmed. Refresh the records before submitting again.', exact=True)).to_be_visible()
                 expect(page.get_by_role('button', name='Create PTR record', exact=True)).to_be_disabled()
+                assert page.get_by_text('Verified local PTR record:', exact=False).count() == 0
                 assert client.list_resource_record_sets(HostedZoneId=zone)['ResourceRecordSets'] == baseline[i]
                 assert answer(client, zone, rr) == ('NXDOMAIN', [])
             assert answer(client, zone, siblings[i]) == ('NOERROR', [siblings[i]['ResourceRecords'][0]['Value']])
