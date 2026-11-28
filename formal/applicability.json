@@ -25,10 +25,19 @@
     },
     {
       "path": "internal/aws/catalog/openapi.go",
-      "disposition": "presentation",
+      "disposition": "modeled",
       "sha256": "f3f7c949dc5e66e75846d4425707711eb2d300709b9211443b36fafb6e53a0aa",
       "reason": "Provides the Kafka routing header value to the unsigned MSK reference without changing the runtime handler.",
-      "models": []
+      "models": [
+        {
+          "id": "CatalogResourceLifecycle",
+          "properties": [
+            "AuthorizationFirst",
+            "PeerFrame"
+          ],
+          "limits": "The registry associates this file with the catalog lifecycle model. That finite model covers abstract authorization and peer isolation. The embedded reference header, browser serialization and native HTTP request require the focused real-browser and SDK checks."
+        }
+      ]
     },
     {
       "path": "internal/server/apidocs/catalog/kafka.json",
