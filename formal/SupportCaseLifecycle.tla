@@ -36,7 +36,9 @@ Stage(mode,batch,g) ==
      expected == IF expectedOK THEN
                  [db EXCEPT !.staged = db.staged + batch,
                     !.expires = IF db.expires = 0 THEN minute + 60 ELSE db.expires] ELSE db
- IN /\ db' = IF success THEN written ELSE db
+ \* A second fresh set is outside this one-set system.
+ IN /\ (~new \/ db.expires = 0)
+    /\ db' = IF success THEN written ELSE db
     /\ last' = Written(mode,g,expected,expectedOK,success)
     /\ UNCHANGED minute
 
@@ -54,8 +56,9 @@ Submit(op,setID,g) ==
      snapshot == IF setID = "local" THEN db.staged ELSE 0
      history == IF creating THEN <<Body("initial",snapshot)>> ELSE db.messages \o <<Body("reply",snapshot)>>
      expected == IF expectOK THEN [Clean EXCEPT !.status = "opened", !.messages = history] ELSE db
- \* Bound only a third successful customer communication; refusals remain observable.
- IN /\ (Len(db.messages) < 2 \/ creating \/ db.status # "opened" \/ g # "ok" \/ ~validSet)
+ \* New cases use fresh native IDs. Only the first is represented here.
+ IN /\ (~creating \/ db.status = "absent")
+    /\ (Len(db.messages) < 2 \/ creating \/ db.status # "opened" \/ g # "ok" \/ ~validSet)
     /\ db' = IF success THEN changed ELSE db
     /\ last' = Written(op,g,expected,expectOK,success)
     /\ UNCHANGED minute
@@ -104,7 +107,9 @@ Next ==
  \/ \E mode \in {"new","append"}, n \in {1,2}, g \in Outcomes: Stage(mode,n,g)
  \/ \E op \in {"create","reply"}, s \in {"none","local","missing","foreign"}, g \in Outcomes: Submit(op,s,g)
  \/ \E g \in Outcomes: Resolve(g)
- \/ \E op \in {"cases","summary","messages","file"}, f \in BOOLEAN, slot \in 1..2, g \in {"ok","denied","foreign"}: Read(op,f,slot,g)
+ \/ \E op \in {"cases","summary","messages","file"}:
+      \E f \in (IF op \in {"cases","summary"} THEN BOOLEAN ELSE {FALSE}),
+         slot \in (IF op = "file" THEN 1..2 ELSE {1}), g \in {"ok","denied","foreign"}: Read(op,f,slot,g)
  \/ \E t \in Times: Clock(t)
  \/ Restart
 
