@@ -16,6 +16,7 @@ from urllib.parse import parse_qs, urlsplit
 from playwright.sync_api import sync_playwright, expect
 from reflow import assert_reflow
 from aws_catalog import Team, refused
+from msk_configuration_scalar import check_msk_reference
 
 REPORTS = Path(os.environ.get('SIMULATOR_REPORTS', 'reports')).resolve()
 # Optional directory for the two review screenshots (RDS list, reference Send).
@@ -667,6 +668,7 @@ def run():
                 assert '<DBParameterGroupName>example</DBParameterGroupName>' in send('DescribeDBParameterGroups').text()
                 docs.get_by_role('button', name='Close Client', exact=True).click()
                 databases.delete_db_parameter_group(DBParameterGroupName='example')
+                check_msk_reference(browser)
                 browser.close()
             refused('BadRequestException', lambda: hosting.delete_app(appId=app['appId']))
             hosting.delete_branch(appId=app['appId'], branchName='main')

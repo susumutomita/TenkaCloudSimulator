@@ -158,7 +158,8 @@ console, CloudFormation adapter or Challenge integration.
   [Google Cloud](docs/gcp-catalog.md), [Azure Resource Manager](docs/azure-catalog.md).
   Amazon MSK stores custom configurations and attaches a compatible revision
   at cluster creation. Revision 1 returns the original `server.properties`
-  bytes. [Supported MSK operations and limits](docs/aws-catalog.md#msk-custom-configurations)
+  bytes. The console, SDK and MSK API reference share these records.
+  [Supported MSK operations and limits](docs/aws-catalog.md#msk-custom-configurations)
   `--rds-private-postgres-topology` optionally validates private standalone
   PostgreSQL configuration against native EC2 on authenticated loopback. It
   starts no database and returns no endpoint.
