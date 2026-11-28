@@ -96,3 +96,42 @@ python3 test/e2e/simpledb_crosssurface.py \
 This runs offline with no cloud account, external endpoint, or installed
 browser required. It verifies Console DOM controls and real HTTP replies, not
 browser rendering, layout, or clicks in the Scalar API reference.
+
+## Browser checks for the served API examples
+
+Build the simulator with `make build`. In a local test environment with the
+pinned Playwright and Chromium from `scripts/requirements-test.txt`, set
+`SIMULATOR_BINARY` to the absolute path of the build, `SIMULATOR_BINARY_SHA256`
+to its verified SHA-256 and `CHROMIUM_EXECUTABLE` to the Chromium executable.
+Run each fixture against its own temporary simulator.
+
+```sh
+python3 test/e2e/simpledb_scalar_reference_live.py
+python3 test/e2e/simpledb_shipped_examples_live.py
+```
+
+The first fixture sends ListDomains, DomainMetadata and GetAttributes. The
+second sends CreateDomain, Select, DeleteAttributes, PutAttributes and
+DeleteDomain. Both use the examples
+served on the shared AWS endpoint page and check the requests sent by the
+browser. The second fixture verifies that deleting the selected attribute
+leaves the other attribute and a second item intact. Both clean up their
+domains.
+
+## Write and clean up a practice domain in the API reference
+
+After CreateDomain, choose **SimpleDB PutAttributes (writes one practice
+attribute)** in Query `POST /`. Use your disposable domain and item, set
+`X-Simulator-Service: sdb`, clear `X-Amz-Target`, and use `us-east-1` or omit
+the Region header. Send requires `sdb:PutAttributes` on the domain ARN.
+`Attribute.1.Replace=true` replaces only that attribute's values; other
+attributes and items remain. This example is unconditional. Read the saved
+values with GetAttributes; use the console or native SDK for conditional writes.
+See [AWS PutAttributes](https://docs.aws.amazon.com/AmazonSimpleDB/latest/DeveloperGuide/SDB_API_PutAttributes.html).
+
+When finished, choose **SimpleDB DeleteDomain (deletes whole practice domain)**.
+Check the name carefully: Send removes the domain and all its items and attributes.
+It requires `sdb:DeleteDomain` on that domain ARN and the same routing headers.
+Use only your disposable domain; verify its absence with ListDomains.
+See [AWS DeleteDomain](https://docs.aws.amazon.com/AmazonSimpleDB/latest/DeveloperGuide/SDB_API_DeleteDomain.html).
+These are local native examples, not a claim of full AWS or Terraform coverage.

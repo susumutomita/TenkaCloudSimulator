@@ -700,7 +700,9 @@
                       "DescribeInstances",
                       "DescribeInternetGateways",
                       "DescribeRouteTables",
-                      "CreateDomain"
+                      "CreateDomain",
+                      "PutAttributes",
+                      "DeleteDomain"
                     ]
                   },
                   "Version": {
@@ -805,8 +807,27 @@
                   },
                   "ConsistentRead": {
                     "type": "string",
-                    "enum": ["true", "false"],
+                    "enum": [
+                      "true",
+                      "false"
+                    ],
                     "description": "Optional for GetAttributes or Select. Keep the same value on every Select page."
+                  },
+                  "Attribute.1.Name": {
+                    "type": "string",
+                    "description": "PutAttributes: one practice attribute name."
+                  },
+                  "Attribute.1.Value": {
+                    "type": "string",
+                    "description": "PutAttributes: one practice value; an empty string is a value."
+                  },
+                  "Attribute.1.Replace": {
+                    "type": "string",
+                    "enum": [
+                      "true",
+                      "false"
+                    ],
+                    "description": "PutAttributes: true replaces existing values of this attribute only; other attributes are preserved."
                   }
                 }
               },
@@ -1153,6 +1174,28 @@
                   "description": "Set X-Simulator-Service to sdb, clear X-Amz-Target, and use us-east-1 or leave X-Simulator-Region unset. Replace DomainName with a disposable local practice name (3–255 ASCII letters, digits, dots, underscores or hyphens). Send creates the domain in your local simulator using sdb:CreateDomain on the target domain ARN. Sending the same name again keeps the existing domain and items. Use the native SDK DeleteDomain only to clean up your practice domain.",
                   "value": {
                     "Action": "CreateDomain",
+                    "Version": "2009-04-15",
+                    "DomainName": "scalar-practice-domain"
+                  }
+                },
+                "PutAttributes": {
+                  "summary": "SimpleDB PutAttributes (writes one practice attribute)",
+                  "description": "Use only a disposable local domain and item that you own. Set X-Simulator-Service to sdb, clear X-Amz-Target, and use us-east-1 or leave X-Simulator-Region unset. Replace the practice names and value before Send. Requires sdb:PutAttributes on the domain ARN. Replace=true replaces values of this attribute only, preserving other attributes and items. Read back with GetAttributes. This unconditional example is not a compare-and-swap; use the console or native SDK for conditional writes.",
+                  "value": {
+                    "Action": "PutAttributes",
+                    "Version": "2009-04-15",
+                    "DomainName": "scalar-practice-domain",
+                    "ItemName": "scalar-practice-item",
+                    "Attribute.1.Name": "practice-attribute",
+                    "Attribute.1.Value": "sample-blue",
+                    "Attribute.1.Replace": "true"
+                  }
+                },
+                "DeleteDomain": {
+                  "summary": "SimpleDB DeleteDomain (deletes whole practice domain)",
+                  "description": "Destructive: deletes the named local domain and all its items and attributes. Use only your disposable practice domain, never a shared domain. Set X-Simulator-Service to sdb, clear X-Amz-Target, and use us-east-1 or leave X-Simulator-Region unset. Replace DomainName before Send. Requires sdb:DeleteDomain on that domain ARN. Verify cleanup with ListDomains; use DeleteAttributes instead to remove only an item value.",
+                  "value": {
+                    "Action": "DeleteDomain",
                     "Version": "2009-04-15",
                     "DomainName": "scalar-practice-domain"
                   }
