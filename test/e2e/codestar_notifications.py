@@ -1,7 +1,8 @@
 """Check CodeCommit branch changes through the native notifications, SNS and SQS services.
 
-The default uses pinned boto3 on a neutral host. --native sends the documented
-protocols directly for local development. All requests stay on numeric loopback.
+The default uses pinned boto3 on a neutral host. --conformance accepts the
+ordinary release suite's exact no-credential settings. --native sends the
+documented protocols directly for local development. All requests stay on numeric loopback.
 """
 
 import argparse
@@ -148,9 +149,25 @@ def expect(code, fn, *args, **kwargs):
         raise AssertionError("Expected " + code)
 
 
-def exercise(binary, native):
+def check_sdk_environment(environment, conformance):
+    expected = {}
+    if conformance:
+        expected = {
+            "AWS_CONFIG_FILE": "/dev/null",
+            "AWS_SHARED_CREDENTIALS_FILE": "/dev/null",
+            "AWS_EC2_METADATA_DISABLED": "true",
+        }
+    actual = {
+        name: value for name, value in environment.items()
+        if name.startswith(("AWS_", "BOTO_"))
+    }
+    if actual != expected:
+        raise AssertionError("The inherited SDK environment differs from the selected test mode.")
+
+
+def exercise(binary, native, conformance):
     if not native:
-        assert not any(k.startswith(("AWS_", "BOTO_")) for k in os.environ)
+        check_sdk_environment(os.environ, conformance)
         assert version("botocore") == "1.41.6" and version("boto3") == "1.42.0"
     receipt = {"stockSDK": not native, "sends": 0, "replies": 0, "delivered": []}
     cs = "codestar-notifications"
@@ -410,5 +427,8 @@ def exercise(binary, native):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--native", action="store_true")
-    exercise(Path(os.environ["SIMULATOR_BINARY"]).resolve(strict=True), parser.parse_args().native)
+    mode = parser.add_mutually_exclusive_group()
+    mode.add_argument("--native", action="store_true")
+    mode.add_argument("--conformance", action="store_true")
+    args = parser.parse_args()
+    exercise(Path(os.environ["SIMULATOR_BINARY"]).resolve(strict=True), args.native, args.conformance)
