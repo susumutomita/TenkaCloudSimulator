@@ -20,9 +20,13 @@ The capability document lists the same services under `services.catalog`,
 including every implemented operation, the number of official operations, the
 model source hash and the bounds.
 
+AWS Batch stores configuration such as compute environments, job queues,
+scheduling policies and job definition revisions. Job submission, scheduling
+and execution are outside its scope. [AWS Batch scope (#105)](https://github.com/susumutomita/TenkaCloudSimulator/issues/105).
+
 Services whose official API needs behavior the engine cannot express truthfully
 remain unimplemented rather than approximated, for example Managed Service for
-Apache Flink, AWS Data Pipeline, Amazon SWF, AWS Batch, CodeStar
+Apache Flink, AWS Data Pipeline, Amazon SWF, CodeStar
 Notifications, Amazon Managed Grafana, AWS Organizations, Service Quotas,
 Application Auto Scaling, Amazon Cognito, AWS Control
 Tower, AWS Launch Wizard, Amazon Keyspaces and Amazon Comprehend Medical.
