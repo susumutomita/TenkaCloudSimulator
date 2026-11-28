@@ -535,8 +535,15 @@
       "models": []
     },
     {
+      "path": "internal/server/web/app.css",
+      "sha256": "d61caf35e92bf28490cec99139d02deea56ee21cc0b77864ec51d1e4c41c26e7",
+      "disposition": "presentation",
+      "reason": "Ship the regenerated Cloudscape application stylesheet including the quota warning region. Color contrast and layout are exercised with the real pinned browser and axe.",
+      "models": []
+    },
+    {
       "path": "internal/server/web/app.js",
-      "sha256": "1f0ab6ac38f669838692f378c1a46ec64194d82cf1e191e80002133607015c50",
+      "sha256": "6ebddc0aac49aa8112c3e669452faca1d28c44359f817047efb0d6591521662b",
       "disposition": "modeled",
       "reason": "Canonical embedded output of the reviewed actual Console sources, preserving prior catalog behavior and adding the dedicated mounted quota/default/request workflow. Concrete compiler/bundle correspondence is checked independently, not proved by TLA.",
       "models": [
@@ -624,9 +631,9 @@
     },
     {
       "path": "test/e2e/service_quotas_console.py",
-      "sha256": "0a8a05c59f28a8762bb6303261deb2bab764090e2ddc89adf8cca648b338a5fe",
+      "sha256": "9871b9f1f438a53c7501896985aeafb32e0460f2472e1b5c230c6c0be40b2352",
       "disposition": "test-support",
-      "reason": "Opt-in unchanged official SDK and real sandboxed Cloudscape/reciprocal Scalar fixture: distinct physical requests, real history tokens/filters, committed lost ACK without blind retry, successful-then-failed recovery and repair, read retirement, partial/denied permissions, pinned axe EN/JA390, two private stores/restart/full peer frame and owned cleanup. Source registration is not an execution receipt; SDK/profile and mandatory axe guards remain intact.",
+      "reason": "Opt-in unchanged official SDK and real sandboxed Cloudscape/reciprocal Scalar fixture: distinct physical requests, real history tokens/filters, committed lost ACK without blind retry, successful-then-failed recovery and repair, read retirement, partial/denied permissions, pinned axe EN/JA390, two private stores/restart/full peer frame and owned cleanup. Source registration is not an execution receipt; SDK/profile and mandatory axe guards remain intact. Check all enabled WCAG rules and retain only rule, control and contrast measurements for an accessibility failure.",
       "models": []
     },
     {
@@ -652,14 +659,14 @@
     },
     {
       "path": "tools/console/bundle-digests.json",
-      "sha256": "d4214eefc5046ae2f74efbd25edfacf77dd9391b4becfc0046ff9b73772654b5",
+      "sha256": "f473da9411831f5d8c64100d4b0ff2a351b9337fddccaf30bc298ad9f60a6df4",
       "disposition": "presentation",
       "reason": "Exact generated embedded asset digests checked against the canonical reviewed build; no claim of behavioral proof from hashes.",
       "models": []
     },
     {
       "path": "tools/console/bundle-inputs.json",
-      "sha256": "798648850d4b758cff515c2e9ed8039d370f632d47e8adf5bb10b33bd5291cbd",
+      "sha256": "b2cf4d994b71b1324cf6bc34585ddc65fcf70ff84e73264f641bd1b6db0fe3bd",
       "disposition": "presentation",
       "reason": "Canonical bundler input inventory for the exact reviewed Console source and pinned dependencies; metadata is not source-refinement proof.",
       "models": []
@@ -693,8 +700,15 @@
       ]
     },
     {
+      "path": "tools/console/src/service-quotas.css",
+      "sha256": "3fb9fceda8e908f07eb39d4913fc243d933ede13d6aa8b53966ebd4f6b1a0df3",
+      "disposition": "presentation",
+      "reason": "Style only the quota unknown-outcome warning and its heading so a possibly committed write and the recovery controls remain readable from first paint.",
+      "models": []
+    },
+    {
       "path": "tools/console/src/service-quotas.jsx",
-      "sha256": "c6c254b17eddec1254a12f729c6dc57f3e82c8141fe71300cbf66bc7037c1e0f",
+      "sha256": "d61d7d465b2da8d1d12caef9cdab21882fbdfa261395e00753714221957f972f",
       "disposition": "modeled",
       "reason": "Real native quota/default/history view with independent read authority, synchronous write ownership, exact acknowledged scope/fields, explicit unknown-outcome recovery, invalidation of stale approval/lookup and scope retirement; no automatic retry or ID attribution from history.",
       "models": [

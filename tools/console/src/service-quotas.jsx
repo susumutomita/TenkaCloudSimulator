@@ -1,4 +1,5 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useId, useRef, useState } from "react";
+import "./service-quotas.css";
 import { useLocale } from "./i18n.jsx";
 import {
   quotaIdentity,
@@ -24,6 +25,7 @@ import Select from "@cloudscape-design/components/select";
 import SpaceBetween from "@cloudscape-design/components/space-between";
 import Table from "@cloudscape-design/components/table";
 export default function ServiceQuotas({ request, region, account }) {
+  const warningHeadingId = useId();
   const { t } = useLocale(),
     [quota, setQuota] = useState(null),
     [published, setPublished] = useState(null),
@@ -298,14 +300,19 @@ export default function ServiceQuotas({ request, region, account }) {
       </Button>
       {error && <Alert type="error">{error}</Alert>}
       {uncertain && (
-        <Alert
-          type="warning"
-          header={t("Request outcome unknown", "リクエスト結果が不明です")}
+        <section
+          className="service-quotas-unknown"
+          role="alert"
+          aria-labelledby={warningHeadingId}
         >
-          {t(
+          <h2 id={warningHeadingId}>
+            {t("Request outcome unknown", "リクエスト結果が不明です")}
+          </h2>
+          <p>{t(
             "The request may have been saved. It has no idempotency token. Do not retry it. Refresh history in this same account, Region and identity; matching amounts are not proof of the lost request ID. Leaving this view clears this local warning.",
             "リクエストが保存された可能性があります。冪等性トークンはありません。再送しないでください。同じアカウント・リージョン・IDで履歴を更新してください。同じ希望値から失われたIDを特定することはできません。この画面を離れるとローカルの警告は消えます。",
-          )}
+          )}</p>
+          <SpaceBetween direction="horizontal" size="xs">
           <Button disabled={disabled} onClick={() => history("", 0, true)}>
             {t("Refresh same-scope history", "同じスコープの履歴を更新")}
           </Button>
@@ -321,7 +328,8 @@ export default function ServiceQuotas({ request, region, account }) {
               {t("Start a separate new request", "別の新規リクエストを開始")}
             </Button>
           )}
-        </Alert>
+          </SpaceBetween>
+        </section>
       )}
       <Container
         header={
