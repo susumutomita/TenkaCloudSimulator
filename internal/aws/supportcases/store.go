@@ -12,6 +12,7 @@ import (
 )
 
 const (
+	amsIncidentCode    = "sentinel-report-incident"
 	MaxFileBytes       = 64 << 10
 	MaxFilesPerSet     = 3
 	maxStoredFileBytes = 32 << 20
@@ -65,6 +66,10 @@ CREATE TABLE IF NOT EXISTS aws_support_cases (
   status TEXT NOT NULL CHECK(status IN ('opened','resolved')),
   language TEXT NOT NULL, issue_type TEXT NOT NULL
 );
+CREATE TABLE IF NOT EXISTS aws_support_case_services (
+  case_id TEXT PRIMARY KEY NOT NULL REFERENCES aws_support_cases(case_id) ON DELETE CASCADE,
+  service_code TEXT NOT NULL CHECK(service_code = 'sentinel-report-incident')
+);
 CREATE TABLE IF NOT EXISTS aws_support_communications (
   sequence INTEGER PRIMARY KEY AUTOINCREMENT,
   case_id TEXT NOT NULL REFERENCES aws_support_cases(case_id) ON DELETE CASCADE,
@@ -102,6 +107,7 @@ type Input struct {
 	AttachmentID          string       `json:"attachmentId"`
 	Attachments           []Attachment `json:"attachments"`
 	Language              string       `json:"language"`
+	ServiceCode           string       `json:"serviceCode,omitempty"`
 	IssueType             string       `json:"issueType"`
 	IncludeResolved       bool         `json:"includeResolvedCases"`
 	IncludeCommunications *bool        `json:"includeCommunications"`

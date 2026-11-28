@@ -363,6 +363,13 @@
               "technical",
               "customer-service"
             ]
+          },
+          "serviceCode": {
+            "type": "string",
+            "enum": [
+              "sentinel-report-incident"
+            ],
+            "description": "Optional AMS Advanced incident classification for this local case."
           }
         },
         "additionalProperties": false,
@@ -597,6 +604,13 @@
           },
           "recentCommunications": {
             "$ref": "#/components/schemas/CommunicationPage"
+          },
+          "serviceCode": {
+            "type": "string",
+            "enum": [
+              "sentinel-report-incident"
+            ],
+            "description": "Optional AMS Advanced incident classification for this local case."
           }
         },
         "additionalProperties": false,

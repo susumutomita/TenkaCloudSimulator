@@ -89,6 +89,7 @@ func (s *Store) read(ctx context.Context, tx *sql.Tx, now time.Time, op, princip
 }
 
 type caseRow struct {
+	service                       sql.NullString
 	display, created              int64
 	id, subject, status, language string
 }
@@ -97,7 +98,9 @@ func (s *Store) cases(ctx context.Context, tx *sql.Tx, principal string, in Inpu
 	if len(in.CaseIDs) > 100 {
 		return nil, invalid("Provide at most 100 case IDs.")
 	}
-	query := "SELECT display_id,case_id,subject,status,language,created_us FROM aws_support_cases WHERE display_id<? AND created_us>=?"
+	query := `SELECT display_id,c.case_id,subject,status,language,created_us,service_code
+		FROM aws_support_cases AS c LEFT JOIN aws_support_case_services AS s USING(case_id)
+		WHERE display_id<? AND created_us>=?`
 	args := []any{before, oldest}
 	if !in.IncludeResolved {
 		query += " AND status<>'resolved'"
@@ -127,7 +130,7 @@ func (s *Store) cases(ctx context.Context, tx *sql.Tx, principal string, in Inpu
 	cases := []caseRow{}
 	for rows.Next() {
 		var c caseRow
-		if err := rows.Scan(&c.display, &c.id, &c.subject, &c.status, &c.language, &c.created); err != nil {
+		if err := rows.Scan(&c.display, &c.id, &c.subject, &c.status, &c.language, &c.created, &c.service); err != nil {
 			rows.Close()
 			return nil, err
 		}
@@ -147,6 +150,9 @@ func (s *Store) cases(ctx context.Context, tx *sql.Tx, principal string, in Inpu
 	items := make([]map[string]any, 0, len(cases))
 	for _, c := range cases {
 		item := map[string]any{"caseId": c.id, "displayId": strconv.FormatInt(c.display, 10), "subject": c.subject, "status": c.status, "language": c.language, "timeCreated": timestamp(c.created)}
+		if c.service.Valid {
+			item["serviceCode"] = c.service.String
+		}
 		if in.IncludeCommunications == nil || *in.IncludeCommunications {
 			communicationInput := Input{CaseID: c.id}
 			recent, err := s.communications(ctx, tx, communicationInput, 5, 1<<63-1, filterKey("DescribeCommunications", principal, communicationInput))
