@@ -9,12 +9,12 @@ jobs:
     runs-on: ubuntu-22.04
     timeout-minutes: 20
     env:
-      PRODUCT: b2bb0c42ffb448ecff3f6733038c90764ee8d09c
-      PRODUCT_TREE: cd252465105099f8a914ea248f1bc239351d31bf
+      PRODUCT: 7de43f8ae50a761d73fc7b72fbf76c48f0d96c51
+      PRODUCT_TREE: 99d34741dff6bd560e36d7ebe45b5cf3a1aa1004
     steps:
       - uses: actions/checkout@v7.0.1
         with:
-          ref: b2bb0c42ffb448ecff3f6733038c90764ee8d09c
+          ref: 7de43f8ae50a761d73fc7b72fbf76c48f0d96c51
           persist-credentials: false
       - uses: actions/setup-go@v6.5.0
         with:
@@ -101,7 +101,7 @@ jobs:
       - name: Retain product identity and native results
         uses: actions/upload-artifact@v7.0.2
         with:
-          name: native-reference-b2bb0c4-${{ github.run_id }}
+          name: native-reference-7de43f8-${{ github.run_id }}
           path: ${{ runner.temp }}/native-reference-receipts/
           if-no-files-found: error
           retention-days: 14
