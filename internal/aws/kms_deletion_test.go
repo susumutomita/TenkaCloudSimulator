@@ -1,9 +1,11 @@
 package aws
 
 import (
+	"bytes"
 	"context"
 	"database/sql"
 	"encoding/json"
+	"net/http/httptest"
 	"path/filepath"
 	"testing"
 	"time"
@@ -225,5 +227,75 @@ func TestKMSDeletionCancelAndValidation(t *testing.T) {
 			t.Fatal("accepted cancellation did not persist", err)
 		}
 		kmsGrantCall(t, g, "CancelKeyDeletion", body, 400, "KMSInvalidStateException")
+	}
+}
+
+func TestKMSPendingKeyRetainsReadGrantsAndRefusesCrypto(t *testing.T) {
+	db, store := kmsTestStore(t, "")
+	ctx := t.Context()
+	key, err := store.CreateKey(ctx, "us-east-1", "private practice key")
+	if err != nil {
+		t.Fatal(err)
+	}
+	roles, err := NewIAMRoleStore(db.Database())
+	if err != nil {
+		t.Fatal(err)
+	}
+	role, err := roles.Create(ctx, "pending-reader", stsRootTrust, "", 3600)
+	if err != nil {
+		t.Fatal(err)
+	}
+	gateway := &Gateway{KMS: store}
+	req := map[string]any{"KeyId": key.Arn, "GranteePrincipal": role.Arn, "Operations": []string{"DescribeKey"}}
+	grant := kmsGrantCall(t, gateway, "CreateGrant", req, 200, "")
+	var token string
+	if err = json.Unmarshal(grant["GrantToken"], &token); err != nil {
+		t.Fatal(err)
+	}
+	const alias = "alias/pending"
+	kmsGrantCall(t, gateway, "CreateAlias", map[string]any{"AliasName": alias, "TargetKeyId": key.KeyID}, 200, "")
+	plaintext := []byte("retained before cancellation")
+	encrypted := kmsGrantCall(t, gateway, "Encrypt", map[string]any{"KeyId": alias, "Plaintext": plaintext}, 200, "")
+	encryptedBody := map[string]any{"KeyId": alias, "CiphertextBlob": encrypted["CiphertextBlob"]}
+	schedule := kmsGrantCall(t, gateway, "ScheduleKeyDeletion", map[string]any{"KeyId": key.KeyID, "PendingWindowInDays": 14}, 200, "")
+	before := kmsStateFingerprint(t, store)
+	for _, id := range []string{key.KeyID, alias} {
+		kmsGrantCall(t, gateway, "Encrypt", map[string]any{"KeyId": id, "Plaintext": plaintext}, 400, "KMSInvalidStateException")
+		kmsGrantCall(t, gateway, "Decrypt", map[string]any{"KeyId": id, "CiphertextBlob": encrypted["CiphertextBlob"]}, 400, "KMSInvalidStateException")
+	}
+	rejected := kmsGrantCall(t, gateway, "CreateGrant", req, 400, "KMSInvalidStateException")
+	if rejected["GrantId"] != nil || rejected["GrantToken"] != nil || kmsStateFingerprint(t, store) != before {
+		t.Fatal("pending write changed key material or acknowledged authority")
+	}
+	grants := kmsGrantCall(t, gateway, "ListGrants", map[string]any{"KeyId": key.Arn}, 200, "")
+	var entries []kmsGrantEntry
+	if err = json.Unmarshal(grants["Grants"], &entries); err != nil || len(entries) != 1 || entries[0].GranteePrincipal != role.Arn {
+		t.Fatal("pending grant changed", err)
+	}
+	// Exercise provider authorization after the trusted SDK layer has bound this
+	// role generation. The standalone SDK fixture additionally checks SigV4.
+	actor := SDKIdentity{Principal: role.RoleName, ARN: "arn:aws:sts::" + kmsAccount + ":assumed-role/" + role.RoleName + "/check", Account: kmsAccount, UserID: role.RoleID + ":check", Expires: time.Now().Add(time.Hour)}
+	request := httptest.NewRequest("POST", "/", nil).WithContext(context.WithValue(context.WithValue(ctx, sdkIdentityContextKey{}, actor), sdkPolicyContextKey{}, core.Policy{}))
+	tx, err := store.begin(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	out, err := kmsDescribeAsRole(httptest.NewRecorder(), request, tx, "us-east-1", key.KeyID, kmsRequest{GrantTokens: []string{token}})
+	tx.Rollback()
+	if err != nil {
+		t.Fatal(err)
+	}
+	data := out.(map[string]any)["KeyMetadata"].(KMSKeyMetadata)
+	var date float64
+	if err = json.Unmarshal(schedule["DeletionDate"], &date); err != nil || data.KeyState != "PendingDeletion" || data.Enabled || data.DeletionDate != date {
+		t.Fatal("grant did not report saved deadline", err)
+	}
+	kmsGrantCall(t, gateway, "CancelKeyDeletion", map[string]any{"KeyId": key.Arn}, 200, "")
+	kmsGrantCall(t, gateway, "Decrypt", encryptedBody, 400, "DisabledException")
+	kmsGrantCall(t, gateway, "EnableKey", map[string]any{"KeyId": key.Arn}, 200, "")
+	recovered := kmsGrantCall(t, gateway, "Decrypt", encryptedBody, 200, "")
+	var plain []byte
+	if err = json.Unmarshal(recovered["Plaintext"], &plain); err != nil || !bytes.Equal(plain, plaintext) {
+		t.Fatal("old ciphertext lost", err)
 	}
 }
