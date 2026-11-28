@@ -108,3 +108,27 @@ test('CloudWatch preserves the existing shell navigation without duplicate JSX p
   assert.equal(createHash('sha256').update(nav.replace(added,'')).digest('hex'),
     '7fa8ca833085c1ba1c3ecad2cdeac33d15a8f1e67a3dc9e4c87ce1bc725dc0eb');
 });
+
+function assertRepoLocalConsoleInputs(graph) {
+  const names=Object.keys(graph.inputs);
+  assert.ok(names.some(name=>name.startsWith('node_modules/')));
+  assert.ok(names.some(name=>name.startsWith('src/')));
+  for(const name of names) {
+    assert.ok(name.startsWith('node_modules/') || name.startsWith('src/'), 'nonlocal input: '+name);
+    assert.ok(!name.split('/').includes('..'), 'parent input: '+name);
+  }
+  for(const input of Object.values(graph.inputs)) for(const dependency of input.imports||[]) {
+    if(!dependency.path.startsWith('data:')) {
+      assert.ok(!dependency.path.startsWith('/') && !dependency.path.split('/').includes('..'), 'nonlocal import');
+    }
+  }
+}
+test('compiled Console inputs are repository-local independent of checkout path', () => {
+  const graph=JSON.parse(readFileSync(new URL('../../tools/console/bundle-inputs.json',import.meta.url),'utf8'));
+  assertRepoLocalConsoleInputs(graph);
+  const stale=structuredClone(graph);
+  const name=Object.keys(stale.inputs).find(name=>name.startsWith('node_modules/'));
+  stale.inputs['../../../tenka-58-observability-console/tools/console/'+name]=stale.inputs[name];
+  delete stale.inputs[name];
+  assert.throws(()=>assertRepoLocalConsoleInputs(stale),/nonlocal input/);
+});
