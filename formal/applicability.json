@@ -1,12 +1,12 @@
 {
   "version": 1,
-  "base_sha": "047be001fb2b0758f3b846ead7f17654990e7a88",
+  "base_sha": "a61223dfc72b4808d5c00b721679ac76b0202afc",
   "changes": [
     {
-      "path": "test/e2e/aws_catalog_console.py",
-      "sha256": "212acee456a0dc1c830d96e8be45dd4c5b972da6acfb217344c84be2f4b282be",
-      "disposition": "test-support",
-      "reason": "The unchanged real sweep identified AppStream appBlock as a dedicated Next/review wizard. Check its named fields, review and cancellation with no CreateAppBlock request or native state change; preserve all other generic sweep controls and inventory assertions. No product or model transitions change.",
+      "path": ".github/workflows/ci.yml",
+      "sha256": "d791355dbb0e4fdf39cc3a9185f78171d66d783361d721d04cfcd30daab82721",
+      "disposition": "formal-infrastructure",
+      "reason": "Temporary manual-only exact-source hosted verification of the real catalog sweep and prior versioned-edit helper; this evidence branch is not a product merge candidate.",
       "models": []
     }
   ]
