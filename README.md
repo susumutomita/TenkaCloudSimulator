@@ -138,6 +138,7 @@ console, CloudFormation adapter or Challenge integration.
   [Azure Blob conditional and CRC64 read limits](docs/azure-blob.md#single-range-download-subset),
   [App Engine (Python 3.12 WSGI versions, traffic splits, firewall)](docs/gcp-appengine.md),
   [Cloud DNS (bounded zone and record changes; Console SRV editor)](docs/acceptance/gcp-cloud-dns.md),
+  [Cloud Trace v1 span ingestion, retrieval and paginated views](docs/gcp-trace.md),
   [Google Cloud console](docs/gcp-console.md), [Azure console](docs/azure-console.md),
   [Azure Queue Storage (bounded named-queue operations)](docs/acceptance/azure-queue.md),
   [local Entra OIDC verification fixture (not login or SAML)](docs/azure-entra-verification-fixture.md),
