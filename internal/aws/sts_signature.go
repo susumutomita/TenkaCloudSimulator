@@ -109,6 +109,10 @@ func verifySDKSignature(r *http.Request, s sdkSignature, secret string, now time
 		if !strings.HasPrefix(r.Header.Get("X-Amz-Target"), cognitoidp.TargetPrefix) || r.Header.Get("Content-Type") != cognitoidp.JSONMediaType {
 			return fail()
 		}
+	case s.service == "kms":
+		if !kmsSignedDescribeRequest(r, s.key) {
+			return fail()
+		}
 	case s.service == "ssm":
 		if !strings.HasPrefix(r.Header.Get("X-Amz-Target"), "AmazonSSM.") || r.Header.Get("Content-Type") != "application/x-amz-json-1.1" {
 			return fail()

@@ -153,7 +153,7 @@
     },
     {
       "path": "internal/aws/sts_signature.go",
-      "sha256": "ed3a19d5b77c9a5973656a7f8fcf1d3b85bf7a6b532998a89e4592503690def3",
+      "sha256": "c7177e81e5c4ff981eb474174514a6339942817fc8c5f40de7eaf7892377e45d",
       "disposition": "modeled",
       "reason": "Admit KMS signing only for a canonical assumed-role DescribeKey request with signed content type and target.",
       "models": [
@@ -212,6 +212,13 @@
       ]
     },
     {
+      "path": "internal/server/kms_grants_test.go",
+      "sha256": "41e373207a9eeb639d4d5f30b4a9642a92fe53cfeb060672d1875ee15e1faad8",
+      "disposition": "test-support",
+      "reason": "Exercise a signed KMS DescribeKey through actual Access authentication, native authorization and a saved grant.",
+      "models": []
+    },
+    {
       "path": "internal/server/kms_integration_test.go",
       "sha256": "794b7f02edffd2339b575cd043d19404850a8444099102dde5bb840db3a03cab",
       "disposition": "test-support",
@@ -239,6 +246,13 @@
           "limits": "Discovery publishes the KMS operations and limitations. The protocol model covers the absence of authority from wire metadata, while discovery content is checked by the SDK fixture."
         }
       ]
+    },
+    {
+      "path": "internal/server/ssm_session_native_route_test.go",
+      "sha256": "48a4c1493cb0c70ad0d99e6769606ee55d0e4a497bd9fcb10fd089d3443f47fd",
+      "disposition": "test-support",
+      "reason": "Share the JSON 1.1 session signer between native SSM and KMS route regressions, preserving the SSM service scope.",
+      "models": []
     },
     {
       "path": "scripts/formal_model_gate.py",
