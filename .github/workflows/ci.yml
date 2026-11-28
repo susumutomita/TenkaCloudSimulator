@@ -8,11 +8,11 @@ jobs:
     runs-on: ubuntu-22.04
     timeout-minutes: 25
     env:
-      PRODUCT: 929bc90c21ca9c05f0490ade0f7ecea54ef294fb
+      PRODUCT: 715a0b99b7369d562493800441f4923f3d672246
     steps:
       - uses: actions/checkout@v7.0.1
         with:
-          ref: 929bc90c21ca9c05f0490ade0f7ecea54ef294fb
+          ref: 715a0b99b7369d562493800441f4923f3d672246
           persist-credentials: false
       - uses: actions/setup-go@v6.5.0
         with:
@@ -21,7 +21,7 @@ jobs:
       - name: Build the exact product and provision the pinned SDK and Chromium
         run: |
           test "$GITHUB_REPOSITORY" = susumutomita/TenkaCloudSimulator
-          test "$GITHUB_REF" = refs/heads/verify/55-929bc90-native-and-console
+          test "$GITHUB_REF" = refs/heads/verify/55-715a0b9-native-and-console
           test "$(git rev-parse HEAD)" = "$PRODUCT"
           test -z "$(git status --porcelain)"
           test "$(go env GOVERSION)" = go1.26.11
