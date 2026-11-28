@@ -1,47 +1,138 @@
 {
   "version": 1,
-  "base_sha": "2c24d2bd5ae75d013fd25d3a259441f732cbf117",
+  "base_sha": "c70822a65ab85edf87cb42a9b45bb4e6ab7fb210",
   "changes": [
     {
-      "path": ".github/workflows/ci.yml",
-      "sha256": "39b95e9cecf7620b3200414111c44099ad40897a389c7405ce55211b24b43285",
-      "disposition": "formal-infrastructure",
-      "reason": "Runs the existing two-process Queue SDK oracle with the build digest on the hosted platform-audit job. No state transition, model input or model gate changes.",
-      "models": []
-    },
-    {
-      "path": "docs/acceptance/azure-queue.md",
-      "sha256": "ef8addcaec48eeef751dd3dc09584fe250a2ffdb506ea34d6d40199849b20124",
+      "path": "README.md",
+      "sha256": "883b4426574b3e7584df311eb79f7090f8da92f0f00c3355dab43beebc6c133d",
       "disposition": "documentation",
-      "reason": "Documents the SDK fixture signer, offline request capture command and hosted acceptance job.",
+      "reason": "Describes in-memory Store lifetime, cancellation and file-backed persistence for operators and maintainers.",
       "models": []
     },
     {
-      "path": "test/e2e/azure_queue_browser_capture.js",
-      "disposition": "test-support",
-      "reason": "Read a bounded clone of one matching, successful Queue response in the test browser. The simulator and the original browser Fetch request, promise and response are unchanged.",
-      "sha256": "942c7a51857fb3cdfeaaefef6b7f923f9e54607983baeebf71d0aa48ce3aceff",
+      "path": "docs/design/0001-go-standalone.md",
+      "sha256": "06dacef120c4e90f1d12d226bca223e469edbe4b92ace38a500ad44693955d9b",
+      "disposition": "documentation",
+      "reason": "Describes in-memory Store lifetime, cancellation and file-backed persistence for operators and maintainers.",
       "models": []
     },
     {
-      "path": "test/e2e/azure_queue_cli.py",
-      "sha256": "79652d32b5fdd71ba81b505d2164ebb38987daeb168ae21d4ff77d4d26778c74",
-      "disposition": "test-support",
-      "reason": "Uses a public SDK fixture signer for clients in the two-process CLI oracle. The local token, transport restrictions and assertions are unchanged.",
+      "path": "formal/StoreConnectionLifetime.cfg",
+      "sha256": "9411896e27460c096b79d224d0f679e597bd0151d191ec4ba478dcbae04835d7",
+      "disposition": "modeled",
+      "reason": "Defines the bounded connection, cancellation, committed row, isolation and disposal transitions and invariants.",
+      "models": [
+        {
+          "id": "StoreConnectionLifetime",
+          "properties": [
+            "PeerBackingUnchanged",
+            "ConnectionTurnoverPreserves",
+            "CancelDiscardsStaged",
+            "DisposedBackingReleased",
+            "ClosedStoresUnavailable",
+            "ConnectionPragmasApplied",
+            "LiveCommittedData"
+          ],
+          "limits": "Two initialized in-memory stores with one logical row each, two values and six steps. Native tests cover SQLite schema, existing file state, driver reconnection, busy timeout, foreign keys and backing release."
+        }
+      ]
+    },
+    {
+      "path": "formal/StoreConnectionLifetime.tla",
+      "sha256": "36ae769708422d165321418d9dad4d20ffa518de1d4c31adc644663caf411663",
+      "disposition": "modeled",
+      "reason": "Defines the bounded connection, cancellation, committed row, isolation and disposal transitions and invariants.",
+      "models": [
+        {
+          "id": "StoreConnectionLifetime",
+          "properties": [
+            "PeerBackingUnchanged",
+            "ConnectionTurnoverPreserves",
+            "CancelDiscardsStaged",
+            "DisposedBackingReleased",
+            "ClosedStoresUnavailable",
+            "ConnectionPragmasApplied",
+            "LiveCommittedData"
+          ],
+          "limits": "Two initialized in-memory stores with one logical row each, two values and six steps. Native tests cover SQLite schema, existing file state, driver reconnection, busy timeout, foreign keys and backing release."
+        }
+      ]
+    },
+    {
+      "path": "formal/models.json",
+      "sha256": "495eb9c1ca908f244784818f06876cba9704a6c187cc8223d1c73ec6a9bd0b03",
+      "disposition": "formal-infrastructure",
+      "reason": "Registers the bounded store model or protects its inventory, required controls and exact source paths.",
       "models": []
     },
     {
-      "path": "test/e2e/azure_queue_console_gui.py",
-      "sha256": "097f11ccc90d08191089742afc05a87ac6132db9b03be5894f7db294cf6e682c",
-      "disposition": "test-support",
-      "reason": "Check the default operator and fixed participant capabilities, use the received message controls, and validate real Peek and Receive XML without repeating either request.",
+      "path": "internal/core/store.go",
+      "sha256": "6abd6cd378ed514fd857fcd6b33788f72e241f1cc7286c8f9c4a6e97e5da5277",
+      "disposition": "modeled",
+      "reason": "The Store owns the in-memory backing across physical connection replacement, reapplies per-connection settings, and releases its private backing on close.",
+      "models": [
+        {
+          "id": "StoreConnectionLifetime",
+          "properties": [
+            "PeerBackingUnchanged",
+            "ConnectionTurnoverPreserves",
+            "CancelDiscardsStaged",
+            "DisposedBackingReleased",
+            "ClosedStoresUnavailable",
+            "ConnectionPragmasApplied",
+            "LiveCommittedData"
+          ],
+          "limits": "Two initialized in-memory stores with one logical row each, two values and six steps. Native tests cover SQLite schema, existing file state, driver reconnection, busy timeout, foreign keys and backing release."
+        },
+        {
+          "id": "ObjectStore",
+          "properties": [
+            "NoOrphans"
+          ],
+          "limits": "The abstract property covers parent/child rows. Native tests check that SQLite rejects an orphan on a replacement connection."
+        }
+      ]
+    },
+    {
+      "path": "internal/core/store_connection_test.go",
+      "sha256": "7dd7475616f7c4773bf613570043d372aa756d394f71f93c80aa43a60fd70e40",
+      "disposition": "modeled",
+      "reason": "Forces cancellation and physical connection retirement through database/sql and checks committed rows, schema, connection settings, foreign keys, independent stores and release on close.",
+      "models": [
+        {
+          "id": "StoreConnectionLifetime",
+          "properties": [
+            "PeerBackingUnchanged",
+            "ConnectionTurnoverPreserves",
+            "CancelDiscardsStaged",
+            "DisposedBackingReleased",
+            "ClosedStoresUnavailable",
+            "ConnectionPragmasApplied",
+            "LiveCommittedData"
+          ],
+          "limits": "Two initialized in-memory stores with one logical row each, two values and six steps. Native tests cover SQLite schema, existing file state, driver reconnection, busy timeout, foreign keys and backing release."
+        }
+      ]
+    },
+    {
+      "path": "scripts/formal_model_gate.py",
+      "sha256": "91dd0ddaebf98333baafd028d3bc33274af58baf8d662af192b1ad824ca7e945",
+      "disposition": "formal-infrastructure",
+      "reason": "Registers the bounded store model or protects its inventory, required controls and exact source paths.",
       "models": []
     },
     {
-      "path": "test/e2e/azure_queue_official.py",
-      "sha256": "2c46c66e25427131a472e4f6236f8f1aff97787618f233997adf824c9d5d7fdc",
-      "disposition": "test-support",
-      "reason": "Initializes the pinned SDK with a public test signer so its eight prepared requests can be compared with the existing wire oracle.",
+      "path": "scripts/test-formal-applicability.py",
+      "sha256": "7546ea5da455ad7e76a78046f3013d33dfc51f92701a5891bff51cbf13c4566c",
+      "disposition": "formal-infrastructure",
+      "reason": "Exercises both deleting a historical model-scoped source and refusing to remove the permanently protected live Store implementation. An attempted exemption of the historical source also fails.",
+      "models": []
+    },
+    {
+      "path": "scripts/test-formal-gate.py",
+      "sha256": "125bd9887869a3483db308ed0a2a942ca71acaec09a77323fb11f18eea2cf5a1",
+      "disposition": "formal-infrastructure",
+      "reason": "Registers the bounded store model or protects its inventory, required controls and exact source paths.",
       "models": []
     }
   ]
