@@ -36,7 +36,20 @@
       "disposition": "modeled",
       "reason": "Bounded CloudFront Console request/identity ownership and explicit invalidation recovery; existing CloudFrontLocalCache also binds physically staged native interruption witnesses. Native backend semantics are unchanged except truthful Console advertisement.",
       "models": [
-        "CloudFrontConsoleEpoch"
+        {
+          "id": "CloudFrontConsoleEpoch",
+          "properties": [
+            "TypeOK",
+            "CurrentContent",
+            "CurrentReceipt",
+            "ProtectedDownload",
+            "AcknowledgedReceipt",
+            "StableUnknownCaller",
+            "ExplicitWriteConfirmation",
+            "OneCurrentWrite"
+          ],
+          "limits": "Models bounded asynchronous content reads and invalidation ownership, abstract protected content, confirmation, unknown acknowledgement and stable explicit replay of fixed /* paths. One abstract scope combines identity, region, route and distribution. Does not model XML/UTF-8/DOM/React, download or OS execution, actual HTTP abort effects, IAM policy evaluation, SQLite, native cache or JavaScript/Go refinement. CloudFrontLocalCache and real SDK/browser/native tests cover separate backend behavior."
+        }
       ]
     },
     {
@@ -45,7 +58,20 @@
       "disposition": "modeled",
       "reason": "Bounded CloudFront Console request/identity ownership and explicit invalidation recovery; existing CloudFrontLocalCache also binds physically staged native interruption witnesses. Native backend semantics are unchanged except truthful Console advertisement.",
       "models": [
-        "CloudFrontConsoleEpoch"
+        {
+          "id": "CloudFrontConsoleEpoch",
+          "properties": [
+            "TypeOK",
+            "CurrentContent",
+            "CurrentReceipt",
+            "ProtectedDownload",
+            "AcknowledgedReceipt",
+            "StableUnknownCaller",
+            "ExplicitWriteConfirmation",
+            "OneCurrentWrite"
+          ],
+          "limits": "Models bounded asynchronous content reads and invalidation ownership, abstract protected content, confirmation, unknown acknowledgement and stable explicit replay of fixed /* paths. One abstract scope combines identity, region, route and distribution. Does not model XML/UTF-8/DOM/React, download or OS execution, actual HTTP abort effects, IAM policy evaluation, SQLite, native cache or JavaScript/Go refinement. CloudFrontLocalCache and real SDK/browser/native tests cover separate backend behavior."
+        }
       ]
     },
     {
@@ -61,8 +87,37 @@
       "disposition": "modeled",
       "reason": "Bounded CloudFront Console request/identity ownership and explicit invalidation recovery; existing CloudFrontLocalCache also binds physically staged native interruption witnesses. Native backend semantics are unchanged except truthful Console advertisement.",
       "models": [
-        "CloudFrontLocalCache",
-        "CloudFrontConsoleEpoch"
+        {
+          "id": "CloudFrontLocalCache",
+          "properties": [
+            "TypeOK",
+            "FreshJointAuthority",
+            "ExactHitIdentity",
+            "MissReadsOrigin",
+            "FailureRollsBack",
+            "RefusalUnchanged",
+            "StaleETagUnchanged",
+            "UpdateClearsCache",
+            "InvalidationClearsCache",
+            "RestartPreserves",
+            "PeerUnchanged"
+          ],
+          "limits": "Checks an atomic abstract transaction and one immutable pair of policy decisions per delivery. A bucket lifetime fingerprint is assumed distinct for the single ordinary recreation; actual wall-clock buckets.created plus region does not prove ABA resistance under clock rollback. One abstract cache line does not model concrete multi-entry quotas, exact paths, TTL seconds, SQL/triggers/locking, authentication, HTTP/XML/S3 parsing, cache buffers, ETags or Go refinement. Restart preserves abstract committed state only, not crash durability. Native and SDK tests separately cover the real implementation."
+        },
+        {
+          "id": "CloudFrontConsoleEpoch",
+          "properties": [
+            "TypeOK",
+            "CurrentContent",
+            "CurrentReceipt",
+            "ProtectedDownload",
+            "AcknowledgedReceipt",
+            "StableUnknownCaller",
+            "ExplicitWriteConfirmation",
+            "OneCurrentWrite"
+          ],
+          "limits": "Models bounded asynchronous content reads and invalidation ownership, abstract protected content, confirmation, unknown acknowledgement and stable explicit replay of fixed /* paths. One abstract scope combines identity, region, route and distribution. Does not model XML/UTF-8/DOM/React, download or OS execution, actual HTTP abort effects, IAM policy evaluation, SQLite, native cache or JavaScript/Go refinement. CloudFrontLocalCache and real SDK/browser/native tests cover separate backend behavior."
+        }
       ]
     },
     {
@@ -71,7 +126,23 @@
       "disposition": "modeled",
       "reason": "Bounded CloudFront Console request/identity ownership and explicit invalidation recovery; existing CloudFrontLocalCache also binds physically staged native interruption witnesses. Native backend semantics are unchanged except truthful Console advertisement.",
       "models": [
-        "CloudFrontLocalCache"
+        {
+          "id": "CloudFrontLocalCache",
+          "properties": [
+            "TypeOK",
+            "FreshJointAuthority",
+            "ExactHitIdentity",
+            "MissReadsOrigin",
+            "FailureRollsBack",
+            "RefusalUnchanged",
+            "StaleETagUnchanged",
+            "UpdateClearsCache",
+            "InvalidationClearsCache",
+            "RestartPreserves",
+            "PeerUnchanged"
+          ],
+          "limits": "Checks an atomic abstract transaction and one immutable pair of policy decisions per delivery. A bucket lifetime fingerprint is assumed distinct for the single ordinary recreation; actual wall-clock buckets.created plus region does not prove ABA resistance under clock rollback. One abstract cache line does not model concrete multi-entry quotas, exact paths, TTL seconds, SQL/triggers/locking, authentication, HTTP/XML/S3 parsing, cache buffers, ETags or Go refinement. Restart preserves abstract committed state only, not crash durability. Native and SDK tests separately cover the real implementation."
+        }
       ]
     },
     {
@@ -80,49 +151,584 @@
       "disposition": "modeled",
       "reason": "Bounded CloudFront Console request/identity ownership and explicit invalidation recovery; existing CloudFrontLocalCache also binds physically staged native interruption witnesses. Native backend semantics are unchanged except truthful Console advertisement.",
       "models": [
-        "SecretsRevealEpoch",
-        "SakuraDisksViewEpoch",
-        "DynamoDBConsoleEpoch",
-        "SecretMetadataViewEpoch",
-        "KMSAliasesViewEpoch",
-        "CatalogConsoleEpoch",
-        "LoginInputIntent",
-        "S3MultipartConsolePaging",
-        "S3MultipartPartReceipt",
-        "LambdaLogTailDisclosure",
-        "TerminalClientEpoch",
-        "EC2SecurityGroupConsoleEpoch",
-        "CloudDNSConsoleScope",
-        "SakuraServerReadEpoch",
-        "AzureBlobRowDownload",
-        "AzureQueueOwnerAccess",
-        "SNSConsoleResponseAdmission",
-        "SimpleDBConsoleEpoch",
-        "EC2RouteTableConsoleEpoch",
-        "SimpleDBSelectConsoleEpoch",
-        "EC2NativeSubnetLifecycle",
-        "EC2TemplatePreviewEpoch",
-        "EC2DetachedNetworkConsole",
-        "EC2InternetGatewayLifecycle",
-        "EC2InternetGatewayInventoryPages",
-        "EC2InternetGatewayAttachment",
-        "EC2NativeDefaultRouteLifecycle",
-        "EC2NativeIPv4RouteSet",
-        "EC2RouteTableInventoryPages",
-        "EC2NativeRouteAssociationReplacement",
-        "EC2NativeSubnetPublicIPv4",
-        "EC2DetachedSecurityGroupRules",
-        "EC2NativeVPCMainRoute",
-        "EC2InstanceStackConsole",
-        "EC2VPCCreateForm",
-        "EC2RegionalSubnetConsole",
-        "EC2VpcConsoleNavigation",
-        "EC2VpcResourceMap",
-        "EC2DetachedNetworkACLRules",
-        "EC2NativeVPCTags",
-        "EC2NativeSubnetTags",
-        "ScalingPlanConsole",
-        "CloudFrontConsoleEpoch"
+        {
+          "id": "SecretsRevealEpoch",
+          "properties": [
+            "TypeOK",
+            "NoUnmountedDisplay",
+            "FreshEmissionHistory",
+            "ReturnedARNMatches",
+            "VisibleContextMatches"
+          ],
+          "limits": "Finite explicit-retrieve/display model, not React, DOM, AbortController, memory zeroization or implementation refinement. Only the successful response path is modeled; native store/IAM must authorize before returning any secret. A returned ARN can differ and must be rejected. Retrieve, Hide and navigation invalidate epochs; unmount also clears visible state. Parent must remount on region/principal changes. Emission history captures the context at each acceptance so later Hide/navigation cannot relabel an earlier stale acceptance. Draft entry, mutation atomicity and form layout are outside this model. Parent main.jsx scope binds only Secrets routing/remount key (region/principal/navigation); the generated app.js binding is the canonical compiled artifact of those source inputs, independently checked by bundle/asset hashes. It does not model unrelated existing console services or prove JavaScript compilation."
+        },
+        {
+          "id": "SakuraDisksViewEpoch",
+          "properties": [
+            "TypeOK",
+            "AcceptedReadScope",
+            "SuccessfulReadOnly",
+            "RenderedScopeBound",
+            "RenderedResourceBound",
+            "StaleReadFrame",
+            "StaleWriteFrame",
+            "NavigationACKFrame",
+            "AckClosesForm",
+            "AckClearsDraft",
+            "ReadRetryOnly",
+            "SingleWriteSend",
+            "LocaleFrame",
+            "CancelDraftClear"
+          ],
+          "limits": "Original bounded UI safety projection only, not React/JS/AbortController scheduling or server/SQL/IAM/token authority proof. Opaque scope combines trusted principal/session/globalnavigation/endpoint; actualcredential/contextKey production remainstrustedcaller. Read responses may complete afterabort/headers, no zero-network/body-cancel guarantee. No orphan-loading/liveness/hungread promise. ACK is actual2xxresponse beforeCreatebody/metadata, not serverrollback/idempotency underunknownnetworkoutcome. Two opens/onewriteintent excludearbitrarynew-sessionwrite concurrency. Independent request/frame snapshots monitoractualpublishedview changes, not ghost-only mutations. Nativepayloadbytes/schema/confirmation/keyentropy/quota/APIwire/SDK andauthenticatedcloudvisualparity areoutside. Shared main scope is ONLY Sakura fixedcapabilityconfiguration/contextKey+request mount, notAWS/GCP/Azure behavior; shell/CSS/neutralcatalogstate not proved. The generated app.js scope binds only the canonical compiled artifact of this separately declared Sakura child/mount projection; it does not prove bundler/compiler correctness or unrelated AWS/GCP/Azure behavior."
+        },
+        {
+          "id": "DynamoDBConsoleEpoch",
+          "properties": [
+            "TypeOK",
+            "NoStalePublication",
+            "ReadGenerationVerified",
+            "DisplayedKeyBound",
+            "CancelNoOrphanLoading",
+            "AckClosesDraft",
+            "AckBelongsToCurrentView",
+            "ReadRetryNeverWrites",
+            "SingleSendBeforeACK",
+            "LocalePreservesDraft"
+          ],
+          "limits": "UI finite safety abstraction only, not JS/React/AbortController scheduling refinement, native protocol/JSON/IAM/auth/SQLite state/number/binary/size/capacity proof. TableId checks establish agreement at item-read acceptance only, not freshness after later native changes or atomic TableId-CAS on mutation; official TableName writes remain subject to recreation between preflight and send. Combined context labels abstract principal/region/remount, not credentials/tenant isolation. Stutter observation admits no liveness/hung-read progress claim. One write intent only; symbolic ACK/no automatic replay, not server rollback when an aborted request already committed. No concrete item values, missing-item/delete-confirmation semantics or arbitrary pagination. Main caller scope is limited to the DynamoDB route and its region|principal|navigation mount key/reset; embedded app.js is the canonical derived component/caller artifact. Neither binding proves other shell/components, compiler/bundler correctness or JavaScript refinement."
+        },
+        {
+          "id": "SecretMetadataViewEpoch",
+          "properties": [
+            "TypeOK",
+            "MetadataRequestsOnly",
+            "CursorRequestBound",
+            "NoStaleCallbackAcceptance",
+            "NoStaleRenderedMetadata",
+            "NoStaleRenderedError",
+            "LoadingTracksLatest",
+            "PendingClearsMetadata",
+            "NoRowsOnError",
+            "ValidatedMetadataOnly",
+            "CurrentPageOnly",
+            "LocalePreservesQuery",
+            "ParentRevealClearedForMetadata"
+          ],
+          "limits": "Scoped metadata-child contract and the parent tab-change invalidate call only. A prior-parent-reveal Boolean models clearing visible state on entry, not pending GetSecretValue replies, byte erasure, old asyncRetrieve, disclosure channels or SQL. Opaque cursor provenance is an annotation, not decoding or HMAC validation. A valid-response Boolean abstracts the concrete metadata parser. Host callback identity/remount and active scope are assumptions, not main navigation/authentication proofs. Abort leaves callbacks schedulable to check guards; actual browser Abort may prevent JavaScript delivery. Locale transitions preserve query state, not arbitrary React scheduling. Finite safety projection only: no stable history snapshot, page completeness, backend/JSON/IAM refinement, whole React proof or liveness. Source scope on the parent and bundle is limited to this tab and child projection; unrelated retrieval/mutation code is excluded."
+        },
+        {
+          "id": "KMSAliasesViewEpoch",
+          "properties": [
+            "TypeOK",
+            "CurrentListOutcome",
+            "NoCachedRowsOnFailure",
+            "CurrentTargetMetadata",
+            "ClosedFormHasNoTarget",
+            "AckClosesForm",
+            "AckClearsDraft",
+            "ReadRetryNeverWrites",
+            "OnlyVerifiedTargetSubmitted",
+            "DeleteRequiresExactConfirmation",
+            "LocalePreservesIntent"
+          ],
+          "limits": "Finite UI protocol abstraction, not JS/React/Cloudscape/HTTP/SQL/IAM/crypto refinement or liveness. Initial key-list/Describe lookup completion is abstracted because actual source disables selection until it finishes; later target reads may overlap. Target/list revisions normalized after these reads. Excludes all parser/format/pagination/permission semantics, arbitrary key sets, repeated forms beyond bound, network ambiguity without ACK and full AWS console parity. Current list outcome and target metadata are stored fields, not derived tautologies. Retired-list mutation jointly bypasses redundant captured-object/active/abort checks; submit-target mutation abstracts both button and handler defenses. Retry mutant creates actual second pending write plus request counter, not a ghost-only edit. Root parent context key/principal binding is assumed; locale frame is only this model state, not the locale provider. Parent kms.jsx/main.jsx declarations bind only the Aliases mount and supplied region/principal/key identity; other KMS/general services remain outside. app.js is the canonical compiled correspondence artifact of that component/mount, independently checked by bundle hashes, not a proof of compilation or unrelated UI."
+        },
+        {
+          "id": "CatalogConsoleEpoch",
+          "properties": [
+            "TypeOK",
+            "NoUnmountedAcceptance",
+            "OnlyCurrentReplies",
+            "SingleWriter",
+            "ReloadOnlyAfterAck",
+            "FailureVisible"
+          ],
+          "limits": "View acceptance and write sequencing only: native request results, DOM rendering, keyboard focus, accessibility, form conversion and React scheduling are covered by browser tests, not this model."
+        },
+        {
+          "id": "LoginInputIntent",
+          "properties": [
+            "TypeOK",
+            "NoEmptyPOST",
+            "NoPOSTWhileBlocked",
+            "StaleFileCompletionFrame",
+            "SubmissionSelectionExact",
+            "AdoptedValueExact",
+            "IntentInvalidatesAsync",
+            "LocaleIntentFrame"
+          ],
+          "limits": "Scoped local 15-case checking at source 7bd15bf exhausted 83 distinct baseline states (101 generated, empty queue) and observed all 14 declared noninitial counterexamples. KeyDownSkipsNativeAdoption first violated AdoptedValueExact at state 5. Historical scoped 14-case checking at model source 5b270e9 exhausted 77 distinct states and observed its 13 controls, including FocusSkipsNativeAdoption. This is scoped evidence, not full current 482-case acceptance or JavaScript/React/1Password proof. Historical 13-case checking at 28d37d1 exhausted 73 states; Combined UnmountedFileCompletionPublishes first failed the file-edit scenario and establishes StaleFileCompletionFrame sensitivity, not an isolated unmount witness. Bounded committed-state input/intent safety correspondence only; not JavaScript/React/Cloudscape/DOM/OS/event scheduling refinement, actual1Password/Dia/Safari, arbitrary focused/unfocused rerenders, clipboard/undo/IME/selection bytes, file UTF8/MIME/size/parser, authentication/HTTP/cookie/crypto/server/browser sessions, liveness or arbitrary event sequences/revision horizons. Pending explicit paste has precedence over current connected DOM. Locale protects adopted control/intent state only; unfocused unadopted DOM may reset. Independent before-state oracles observe actual token/refs/POST records; no server accepts every nonempty label. Mutation sensitivity requires real noninitial named TLC counterexamples, not static anchor counts. Generated app.js scope is ONLY the compiled login-input intent projection. The local offline rebuild of source bd135b55c79b14239130dba8b4f6ca246367b5c5 produced asset commit 5219eb1349e597306b2ef125ebf41e76188908d9 with 1353 resolved inputs and retained original notices for 22 packages; exact asset digests and input metadata are committed under tools/console. Default hosted-CI build equivalence remains to be checked. Compiler/minifier correctness, React/DOM/native input APIs and backend behavior are not refinement-proved; this binding does not prove the rest of the bundle. The focus scenario explicitly assumes a possible controlled render after focus capture resets DOM from adopted controlled state. This explores a suspected ordering hazard, not an established explanation of the actual CI response timeout. The full current 482-case gate and real Dia/1Password acceptance remain unverified. The keyboard-capture extension adds one focused already-flushed-paste/native-clear/keydown/submit scenario. It explicitly assumes a possible controlled render after key capture resets DOM from the adopted token, without establishing the actual browser failure cause. Current-key pending-paste ordering is not covered by this additional scenario. The eight invariants protect bounded token/intent/POST safety; they do not establish empty-error DOM visibility. The unchanged empty-error and no-POST browser assertions remain separate required acceptance checks. Scoped 15-case success does not replace the pending current 482-case combined gate or the unchanged actual native-clear/Enter browser assertions. Integration with main catalog models requires a new immutable 53-model/429-control/482-case gate; historical scoped Login results do not establish that combined gate. On old-base head 8149cac, both complete 62-case browser suites passed the native-clear/Enter empty-error and no-POST checks. That historical success is not acceptance of this combined main-catalog tree, whose 65-case E2E and 482-case formal gates still require fresh immutable-HEAD verification."
+        },
+        {
+          "id": "S3MultipartConsolePaging",
+          "properties": [
+            "TypeOK",
+            "OnlyCanonicalRows",
+            "OnlyProgressingCursor",
+            "OnlyCompleteListing",
+            "NoReadAfterStop"
+          ],
+          "limits": "Finite read-only console listing abstraction; models ascending unique part numbers, cursor progress, result visibility and stop semantics. Does not execute XML parsing, DOM, React scheduling, HTTP, storage, IAM, writes or AWS; does not establish implementation refinement or cover unrelated portions of the embedded bundle."
+        },
+        {
+          "id": "S3MultipartPartReceipt",
+          "properties": [
+            "TypeOK",
+            "ConfirmedReadback",
+            "CurrentViewNotice",
+            "NoMutationReplay"
+          ],
+          "limits": "Finite Console receipt/state abstraction only. A scoped terminal read summarizes live page admission; a subsequent SDK write does not invalidate an already supported observation. No proof of HTTP/XML/JavaScript/browser/SQL/MD5 refinement, consistent cross-page snapshots, real AWS behavior, or liveness."
+        },
+        {
+          "id": "LambdaLogTailDisclosure",
+          "properties": [
+            "TypeOK",
+            "ResponseOptIn",
+            "ResponseSync",
+            "ResponseAuthorized",
+            "TailBound",
+            "DisplayCurrent",
+            "DisplayHasResponse"
+          ],
+          "limits": "Finite response admission and view invalidation abstraction only. Context changes invalidate the request epoch; no extra implementation context comparison is assumed. Does not prove parsers, exact byte slicing, frame filtering, base64/UTF-8 decoding, React scheduling, authentication/IAM evaluation, WASI containment, Go/JS refinement, CloudWatch delivery or AWS equivalence. Actual native/runtime/console tests remain required. Shared app.js scope is limited to the compiled Lambda invocation/reveal view; other services retain their existing model scopes. server.go scope covers only Tail capability metadata, not native authorization correctness."
+        },
+        {
+          "id": "TerminalClientEpoch",
+          "properties": [
+            "TypeOK",
+            "ReceiptEvidence",
+            "SocketEvidence",
+            "SingleOpen",
+            "UIEvidence",
+            "DisposeNotRemoteTermination",
+            "NoAutomaticStartRetry",
+            "DiscardPreservesIdentity"
+          ],
+          "limits": "Finite client lifecycle contract, not JS/React/browser/fetch/WebSocket refinement. Single abstract remote lifecycle does not represent arbitrary concurrent sessions. Assumes authentic native response and component/channel identity checks; parsing, transport, DOM, token cryptography and guest termination are independent. Operation epoch is defense in depth under busy/permanent-disposal guards; no impossible overlapping operation is invented to produce an epoch-only counterexample."
+        },
+        {
+          "id": "EC2SecurityGroupConsoleEpoch",
+          "properties": [
+            "TypeOK",
+            "EligibleRequest",
+            "ReadOnlyOperation",
+            "OnlyCurrentScope",
+            "OnlySelectedVPC",
+            "FailuresNeverEmpty"
+          ],
+          "limits": "Finite presentation projection only. Region and identity transitions share the epoch label with VPC selection. Does not prove Access or EC2 IAM, request/abort signal implementation, XML validation, DOM, packet filtering, network liveness, SQL or Go/React refinement."
+        },
+        {
+          "id": "CloudDNSConsoleScope",
+          "properties": [
+            "TypeOK",
+            "CapabilityAuthorized",
+            "OnlyCurrentDiscovery",
+            "OnlyCurrentReadVisible",
+            "NoStaleContinuation"
+          ],
+          "limits": "Finite presentation and admission projection: backend oracle abstracts authenticated identity and existing AWS handoff, and frontend models capability epochs, read replacement and continuation. Assumes same-origin transport and effective local actor; does not execute middleware, React, DOM, HTTP, RRset data/state updates, SDK, Terraform or establish implementation refinement. Generated app.js binding is limited to this changed Cloud DNS projection."
+        },
+        {
+          "id": "SakuraServerReadEpoch",
+          "properties": [
+            "TypeOK",
+            "NoUnadvertisedMount",
+            "OnlyCurrentResult",
+            "NoDifferentServer"
+          ],
+          "limits": "Finite read-only presentation projection. Production Server capability is default-off; enabled states represent the explicitly guarded local operator opt-in after capability projection. Models descriptor/disabled/handoff admission, abstract context and list/detail request revision, and matching detail identity. Does not prove CLI validation or binding, proxy exposure, real authentication or browser authority, React/DOM/HTTP behavior, response schemas, pagination, mutations, runtime availability, SDK or Terraform. Generated bundle binding applies only to changed Server-view code."
+        },
+        {
+          "id": "AzureBlobRowDownload",
+          "properties": [
+            "TypeOK",
+            "RowIsRequestTarget",
+            "CurrentDownloadOnly",
+            "SuccessfulBytesOnly"
+          ],
+          "limits": "Models explicit row identity versus toolbar selection, one in-flight operation, a bounded two-request epoch and view retirement, and only bounded successful abstract HTTP bytes may emit a download. Does not execute DNS, React/focus, the browser/anchor, URL/path mapping, authentication, HTTP or Blob bytes and does not establish implementation refinement. Generated app.js binding covers only Azure row download behavior introduced by this change."
+        },
+        {
+          "id": "AzureQueueOwnerAccess",
+          "properties": [
+            "TypeOK",
+            "FixedParticipant",
+            "OnlyCurrentDiscovery",
+            "NewestObservationRetained",
+            "DiscoveryAuthority",
+            "PresentationOwnerOnly",
+            "ReferenceGetAuthorized",
+            "ReferenceAccountIsConfigured",
+            "NativePermissionBoundary"
+          ],
+          "limits": "Models only normalized owner/actor decisions, selected discovery epoch and matching principal, configured account projection in the dynamic spec enum/default, and native admission independent of UI visibility. Does not prove token handling, actual Go/React/SQLite refinement, URL parsing, whole schema, SDK, browser, route transport, runtime or liveness. Embedded bundle binding is the generated projection of the exact source guards, not a model of the build system or JavaScript event delivery."
+        },
+        {
+          "id": "SNSConsoleResponseAdmission",
+          "properties": [
+            "TypeOK",
+            "MountRequiresCapabilityAndNoHandoff",
+            "KeyedOwnerMatchesScope",
+            "OnlyOneCurrentFlight",
+            "NoLateVisibleEffect",
+            "AbortInhibitsCallback",
+            "OnlyCurrentTopicUpdates",
+            "OnlyCurrentTopicChoices"
+          ],
+          "limits": "Bound only visible SNS console hook state, projected typed capability and valid per-topic selection labels. Instance and topic revision are ghost labels, not invented callback-generation checks. No theorem about React or JS scheduling/code refinement, backend AWS IAM, parser/wire, final remote write outcome, shared 401 redirect/onSaving side effects, capability refresh, actual browser/keyboard, or build correctness. Scalar is signed-in session and fixed us-east-1, not Console principal/region parity; it is not modeled."
+        },
+        {
+          "id": "SimpleDBConsoleEpoch",
+          "properties": [
+            "TypeOK",
+            "VisibleRequiresCapability",
+            "OnlyCurrentScopeVisible",
+            "SingleCurrentChain",
+            "ReadbackOnlyAfterAck",
+            "WriteNoticeRequiresAck"
+          ],
+          "limits": "Symbolic local capability, React view ownership, native acknowledgements and publication only. No Go/JavaScript refinement, DOM focus, CSS/reflow, XML parsing or HTTP decoding, native IAM, transaction/SQLite proof, actual cancellation of server writes, or complete SimpleDB semantics."
+        },
+        {
+          "id": "EC2RouteTableConsoleEpoch",
+          "properties": [
+            "TypeOK",
+            "EligibleRead",
+            "FixedRead",
+            "CurrentIdentity",
+            "CurrentRegion",
+            "CurrentTarget",
+            "CurrentRevision",
+            "CurrentGate",
+            "StatusIsEvidence",
+            "DefaultIsRecorded",
+            "AssociationIsExplicit",
+            "NoImplicitMain",
+            "CurrentSubnet",
+            "ValidSubnetRequest"
+          ],
+          "limits": "Readout projection only. A change may keep identity, region, VPC, revision or availability constant, independently exercising stale responses. Bounded labels are not arbitrary refresh/ABA interleavings. Does not prove React scheduling, authentication, IAM/SQL/HTTP/XML, packet reachability, route edits, completeness or runtime refinement. Subnets and exact-match flags are symbolic. It does not prove the input parser or correlation of real transport callbacks."
+        },
+        {
+          "id": "SimpleDBSelectConsoleEpoch",
+          "properties": [
+            "TypeOK",
+            "ReadAdmission",
+            "BoundedReadRequest",
+            "SingleCurrentRead",
+            "CursorOrigin",
+            "OnlyCurrentOwner",
+            "OnlyAcceptedPages",
+            "CursorMirrorsReply",
+            "NextOfferedExactly",
+            "FailureClearsPage",
+            "EffectIsolation",
+            "ChoiceDoesNotObserve"
+          ],
+          "limits": "Abstract bounded names-only requests and React owner replacement in a finite user-visible lifecycle. One symbolic name represents an admitted page, not the 25-row payload. Does not verify native IAM, SQL, cryptographic cursor validation, actual HTTP/XML, browser cancellation at the server, React scheduling or DOM refocus, mutation acknowledgements, linearizable snapshots, Scalar, or Go/JavaScript refinement."
+        },
+        {
+          "id": "EC2NativeSubnetLifecycle",
+          "properties": [
+            "StackUnchanged",
+            "AuthorizedWrites",
+            "NativeParent",
+            "Nonoverlap",
+            "Bounded",
+            "ExactDelete",
+            "ExactRead"
+          ],
+          "limits": "Finite atomic store choices and regional read evidence only; no YAML/XML/parser/HTTP implementation, CIDR arithmetic, Windows/browser, exact timing, AWS runtime, or code-refinement proof."
+        },
+        {
+          "id": "EC2TemplatePreviewEpoch",
+          "properties": [
+            "TypeOK",
+            "OrdinaryPreview",
+            "BoundedDraft",
+            "FixedDeclarationRead",
+            "OnlyCurrentIdentity",
+            "OnlyCurrentRegion",
+            "OnlyCurrentDraft",
+            "NoClosedOrHandoffResult",
+            "EvidencePreserved",
+            "NoReturnedValues"
+          ],
+          "limits": "Finite UI declaration-preview projection only. Context changes are bounded, not arbitrary browser interleavings. Does not model actual authentication or IAM, raw HTTP, YAML/XML validation, secrets in the editable textarea, backend guest availability or code refinement."
+        },
+        {
+          "id": "EC2DetachedNetworkConsole",
+          "properties": [
+            "TypeOK",
+            "AdmittedNativeOnly",
+            "OnlyCurrentScope",
+            "VerifiedWriteOnly",
+            "ScopeChangeFenced",
+            "SiblingLeasePreserved",
+            "LeaseUntilReadback"
+          ],
+          "limits": "Native UI admission, scoped completion and aggregate write leases only. No React event ordering, layout, serialized identity API, XML parsing, SQLite, packet behavior or implementation proof. Legacy CFN read-only behavior remains separately modeled."
+        },
+        {
+          "id": "EC2InternetGatewayLifecycle",
+          "properties": [
+            "TypeOK",
+            "Authorized",
+            "TaggedCreation",
+            "NativeOwnership",
+            "DependentRowsPreserved",
+            "DurableMutation",
+            "FaithfulRead",
+            "ExactConfirmation",
+            "ConfirmedNotice"
+          ],
+          "limits": "Detached allocation and cleanup; excludes actual SQL, wire serialization, cryptography, React, attachment mutation, routing and guest behavior. No implementation refinement proof."
+        },
+        {
+          "id": "EC2InternetGatewayInventoryPages",
+          "properties": [
+            "TypeOK",
+            "PageAuthorized",
+            "PageBounded",
+            "PageFenced",
+            "ContinuationBound",
+            "CompletePublication"
+          ],
+          "limits": "Symbolic paging and selection consistency, not cryptography, overflow/serializer math, real SQL/concurrency, transport or React refinement."
+        },
+        {
+          "id": "EC2InternetGatewayAttachment",
+          "properties": [
+            "TypeOK",
+            "OneGatewayPerVPC",
+            "ExactMutation",
+            "Authority",
+            "Committed",
+            "ReadbackFence",
+            "ConfirmedNotice"
+          ],
+          "limits": "Native attachment configuration only. Prior link availability and same-region eligibility are modeled, not local IAM policy evaluation. Durability and view scopes are finite witnesses: no SQLite/JSON/Query, real concurrency, React, IP assignment, routes, RDS runtime or packet paths. No implementation refinement."
+        },
+        {
+          "id": "EC2NativeDefaultRouteLifecycle",
+          "properties": [
+            "TypeOK",
+            "OwnedGraph",
+            "GrantAndScope",
+            "AtomicEffect",
+            "ExactReadback",
+            "VerifiedNotice"
+          ],
+          "limits": "Finite native default-route configuration, dependency and console readback abstraction. No implementation refinement, real IAM evaluation, XML, SQLite, React, concurrency proof, subnet routing, or packets. The native VPC/IGW pairing is abstracted in DefaultGateway and attachments; actor/region are summarized in one scoped admission and a browser epoch."
+        },
+        {
+          "id": "EC2NativeIPv4RouteSet",
+          "properties": [
+            "TypeOK",
+            "OwnedCanonical",
+            "PerTableLimit",
+            "AtomicClass",
+            "ExactRouteEffect",
+            "CompleteReadback",
+            "ConfirmedNotice"
+          ],
+          "limits": "Finite shared-destination map, same-native-witness abstraction and exact current-readback state only. Real limit is 16. No IP arithmetic proof, actual SQLite/JSON/Query/IAM/React refinement, actor concurrency or network forwarding."
+        },
+        {
+          "id": "EC2RouteTableInventoryPages",
+          "properties": [
+            "TypeOK",
+            "PageAuthorized",
+            "PageBounds",
+            "ScopedContinuation",
+            "CurrentAssembly",
+            "CompletePublication",
+            "ExactWriteReadback"
+          ],
+          "limits": "Finite symbolic paging, exact query/binding and post-write UI completion; no cryptographic, actual SQLite, wire/byte math, React or packet refinement. A small or empty complete first page is admitted; a continued response cannot end empty."
+        },
+        {
+          "id": "EC2NativeRouteAssociationReplacement",
+          "properties": [
+            "TypeOK",
+            "ExactOutcome",
+            "NoEffectOnRefusal",
+            "OneExplicit",
+            "ExactMove",
+            "OtherStateUnchanged",
+            "ConfirmedNotice",
+            "RetiredRetryNeverApplies"
+          ],
+          "limits": "Finite association graph, normalized permission/transaction outcomes and UI acknowledgment ordering only. No cryptographic ID or lasting tombstone guarantee; actual Go, SQLite concurrency/storage quota, XML, native pagination, React, guest isolation and packet routing require separate evidence."
+        },
+        {
+          "id": "EC2NativeSubnetPublicIPv4",
+          "properties": [
+            "TypeOK",
+            "ExactAdmission",
+            "RefusalNoEffect",
+            "ExactPreference",
+            "SameFrame",
+            "CurrentConfirmedNotice",
+            "NoReplay"
+          ],
+          "limits": "Bounded normalized authorization, atomic configuration and acknowledgement only. Does not prove Go, request parser, SQL, IAM parity, Cloudscape/browser, durability or liveness; no public IP allocation, guest, reachability or forwarding behavior."
+        },
+        {
+          "id": "EC2DetachedSecurityGroupRules",
+          "properties": [
+            "TypeOK",
+            "OwnershipFrame",
+            "DirectionBounds",
+            "ExactTransition"
+          ],
+          "limits": "Abstracts XML/Query/SQLite/React mechanics, physical IP networks, timing and API edge parsing. Describes only the native group projection, not the distinct CloudFormation read protocol, no actual NIC/traffic, and no implementation refinement."
+        },
+        {
+          "id": "EC2NativeVPCMainRoute",
+          "properties": [
+            "TypeOK",
+            "AtomicPairedSlot",
+            "OwnedLocalOnly",
+            "NoImplicitWire",
+            "CountersExcludeLocal",
+            "RetainedFencesDelete",
+            "ReadInvalidRefuses",
+            "UnrelatedOwnershipUnchanged",
+            "EffectiveNeedsFreshInventories",
+            "EffectiveOnlyUnassociated"
+          ],
+          "limits": "Finite symbolic parent/child and recorded-route lifecycle, explicit filter and current effective-pane evidence only. The implementation storage bound is 1,000 and the explicit table limit is 16. No Go/SQLite, mixed-case JSON, XML or pagination/cryptography refinement; no IAM, React or browser scheduling proof, legacy migration, guest, reachability or packet routing."
+        },
+        {
+          "id": "EC2InstanceStackConsole",
+          "properties": [
+            "TypeOK",
+            "QualifiedMutation",
+            "SingleMutation",
+            "ReceiptBelongsToView",
+            "VerifiedMeansMatch",
+            "NoGuestLivenessClaim"
+          ],
+          "limits": "Finite three UX generations with one reply in flight, actor roles and a configuration observation. An admission sample does not exclude expiry between discovery and CreateStack. This models only the workflow and no replay/retarget acknowledgment, not actual token/HTTP bounds, runtime health, SQLite rollback, live guest launch or cleanup, React or browser refinement."
+        },
+        {
+          "id": "EC2VPCCreateForm",
+          "properties": [
+            "TypeOK",
+            "PairedNeedsOperator",
+            "InvalidDraftNeverWrites",
+            "NativeAndStackRemainDistinct",
+            "DiscardRetiredRead",
+            "ConfirmedBeforeSuccess"
+          ],
+          "limits": "VPC creation form only. Capability availability, draft validity and qualified native/stack readback are abstract; not a proof of CIDR/Name parsing, React or keyboard layout, cryptography, CloudFormation/SQLite or persistence semantics. Retired view checks do not cancel an accepted server-side write. No VM, packet, existing-network attachment, or AWS parity claim."
+        },
+        {
+          "id": "EC2RegionalSubnetConsole",
+          "properties": [
+            "TypeOK",
+            "OnlyNativeParentWrites",
+            "ConfirmedInventoryBeforeWrite",
+            "ReadbackBeforeDetail",
+            "CurrentScopeOnly",
+            "NoUnreconciledRetry"
+          ],
+          "limits": "Standalone subnet UI caller only. Does not refine XML, CIDR, IAM, partial two-read snapshots, SQLite, React focus, actual launch or route/ACL dataplanes. A view retirement does not reverse an already committed write. Route association readback and actual browser/API behavior are checked separately."
+        },
+        {
+          "id": "EC2VpcConsoleNavigation",
+          "properties": [
+            "TypeOK",
+            "AdvertisedOnly",
+            "CurrentRegionAndView",
+            "VerifiedDisplay",
+            "NoLocalDepartureDuringWrite",
+            "CurrentWriteOwnsLease"
+          ],
+          "limits": "Model of frontend route, local write lease and async result presentation only; no IAM, Go or persistence refinement, DOM/events, or path/XML parser proof."
+        },
+        {
+          "id": "EC2VpcResourceMap",
+          "properties": [
+            "TypeOK",
+            "AssociationQualityExact",
+            "ExplicitNeedsEvidence",
+            "MainNeedsWitness",
+            "ExactAttachedGatewayEdges",
+            "GatewayFailureNotEmpty",
+            "GatewayHoleReported"
+          ],
+          "limits": "One bounded join over already normalized read outcomes and symbolic target identities; no input parsing, cross-page protocol, atomic snapshots, real routing, DNS, IAM, Go/SQLite, React, or implementation proof. Existing separate models retain their lease/route claims."
+        },
+        {
+          "id": "EC2DetachedNetworkACLRules",
+          "properties": [
+            "TypeOK",
+            "ScopeFrame",
+            "OnlyEditablePersisted",
+            "AtomicGeneration",
+            "ExactNativeOperation",
+            "ExactReadProjection",
+            "VerifiedSelectedConsole"
+          ],
+          "limits": "Symbolic metadata configuration only. Does not model actual 20-per-direction count, full SDK/HTTP/XML/SQL or IAM parsing, real 64-bit wrap, raw CIDR/port validation or snapshot isolation, concurrency between browser pre-read and write, React lease scheduling, rollback of a committed write when UI confirmation fails, ACL creation/deletion/association, or packet behavior. No Go/JavaScript refinement proof."
+        },
+        {
+          "id": "EC2NativeVPCTags",
+          "properties": [
+            "TypeOK",
+            "ExactNativeAdmission",
+            "ExactTagEffect",
+            "AtomicTagCommit",
+            "NonTagFrame",
+            "ExactConsoleRequest",
+            "VerifiedConsoleOutcome",
+            "NoConfirmationRollback"
+          ],
+          "limits": "Local one-VPC, one-tag metadata and normalized exact selection, admission, store/commit and selected-key readback witnesses only. No raw Query/XML/Unicode grammar, IAM evaluator, full-tag snapshot or SQL isolation/crash proof, arbitrary concurrent schedules, browser lease/timing proof, offline file fingerprint, broader AWS parity, packet/traffic behavior or Go/JavaScript refinement. Console pre-read is not compare-and-set; unconfirmed does not imply rollback."
+        },
+        {
+          "id": "EC2NativeSubnetTags",
+          "properties": [
+            "TypeOK",
+            "SubnetAndParentFences",
+            "SingleDocumentCommit",
+            "UnchangedNetworkFrame",
+            "ExactNativeTagProjection",
+            "ExactSelectedSubnetRequest",
+            "ExactSelectedSubnetConfirmation",
+            "NoUnconfirmedUndo"
+          ],
+          "limits": "Additive local subnet tag metadata, independent native inventory and exact selected-row receipts only. Shared API parsing and quotas remain in EC2NativeVPCTags. Input normalization, finite ownership/main/DNS/CIDR/AZ witnesses, exact document re-read and total changed row count are abstractions, not raw SQL/parser/IAM proofs. No full regional inventory validation, filter/pagination, schedule exhaustiveness, rollback from UI, browser routing/refetch timing/capacity diagnostics, cloud parity, packet behavior or Go/JavaScript refinement."
+        },
+        {
+          "id": "ScalingPlanConsole",
+          "properties": [
+            "TypeOK",
+            "OnlyCurrentReplyPublishes",
+            "SuccessRequiresAck",
+            "RetryRequiresNamedRefresh"
+          ],
+          "limits": "Finite UI request ownership and publication within one mounted scope. A refresh is an explicit exact-name read. Does not model concurrent plan replacement, React/DOM, JavaScript or Go refinement, IAM, HTTP or storage. AutoScalingPlanTargets independently models native capacity effects."
+        },
+        {
+          "id": "CloudFrontConsoleEpoch",
+          "properties": [
+            "TypeOK",
+            "CurrentContent",
+            "CurrentReceipt",
+            "ProtectedDownload",
+            "AcknowledgedReceipt",
+            "StableUnknownCaller",
+            "ExplicitWriteConfirmation",
+            "OneCurrentWrite"
+          ],
+          "limits": "Models bounded asynchronous content reads and invalidation ownership, abstract protected content, confirmation, unknown acknowledgement and stable explicit replay of fixed /* paths. One abstract scope combines identity, region, route and distribution. Does not model XML/UTF-8/DOM/React, download or OS execution, actual HTTP abort effects, IAM policy evaluation, SQLite, native cache or JavaScript/Go refinement. CloudFrontLocalCache and real SDK/browser/native tests cover separate backend behavior."
+        }
       ]
     },
     {
@@ -159,7 +765,20 @@
       "disposition": "modeled",
       "reason": "Bounded CloudFront Console request/identity ownership and explicit invalidation recovery; existing CloudFrontLocalCache also binds physically staged native interruption witnesses. Native backend semantics are unchanged except truthful Console advertisement.",
       "models": [
-        "CloudFrontConsoleEpoch"
+        {
+          "id": "CloudFrontConsoleEpoch",
+          "properties": [
+            "TypeOK",
+            "CurrentContent",
+            "CurrentReceipt",
+            "ProtectedDownload",
+            "AcknowledgedReceipt",
+            "StableUnknownCaller",
+            "ExplicitWriteConfirmation",
+            "OneCurrentWrite"
+          ],
+          "limits": "Models bounded asynchronous content reads and invalidation ownership, abstract protected content, confirmation, unknown acknowledgement and stable explicit replay of fixed /* paths. One abstract scope combines identity, region, route and distribution. Does not model XML/UTF-8/DOM/React, download or OS execution, actual HTTP abort effects, IAM policy evaluation, SQLite, native cache or JavaScript/Go refinement. CloudFrontLocalCache and real SDK/browser/native tests cover separate backend behavior."
+        }
       ]
     },
     {
@@ -168,7 +787,20 @@
       "disposition": "modeled",
       "reason": "Bounded CloudFront Console request/identity ownership and explicit invalidation recovery; existing CloudFrontLocalCache also binds physically staged native interruption witnesses. Native backend semantics are unchanged except truthful Console advertisement.",
       "models": [
-        "CloudFrontConsoleEpoch"
+        {
+          "id": "CloudFrontConsoleEpoch",
+          "properties": [
+            "TypeOK",
+            "CurrentContent",
+            "CurrentReceipt",
+            "ProtectedDownload",
+            "AcknowledgedReceipt",
+            "StableUnknownCaller",
+            "ExplicitWriteConfirmation",
+            "OneCurrentWrite"
+          ],
+          "limits": "Models bounded asynchronous content reads and invalidation ownership, abstract protected content, confirmation, unknown acknowledgement and stable explicit replay of fixed /* paths. One abstract scope combines identity, region, route and distribution. Does not model XML/UTF-8/DOM/React, download or OS execution, actual HTTP abort effects, IAM policy evaluation, SQLite, native cache or JavaScript/Go refinement. CloudFrontLocalCache and real SDK/browser/native tests cover separate backend behavior."
+        }
       ]
     },
     {
@@ -177,13 +809,92 @@
       "disposition": "modeled",
       "reason": "Bounded CloudFront Console request/identity ownership and explicit invalidation recovery; existing CloudFrontLocalCache also binds physically staged native interruption witnesses. Native backend semantics are unchanged except truthful Console advertisement.",
       "models": [
-        "CloudDNSConsoleScope",
-        "SakuraServerReadEpoch",
-        "AzureQueueOwnerAccess",
-        "SNSConsoleResponseAdmission",
-        "SimpleDBConsoleEpoch",
-        "ScalingPlanConsole",
-        "CloudFrontConsoleEpoch"
+        {
+          "id": "CloudDNSConsoleScope",
+          "properties": [
+            "TypeOK",
+            "CapabilityAuthorized",
+            "OnlyCurrentDiscovery",
+            "OnlyCurrentReadVisible",
+            "NoStaleContinuation"
+          ],
+          "limits": "Finite presentation and admission projection: backend oracle abstracts authenticated identity and existing AWS handoff, and frontend models capability epochs, read replacement and continuation. Assumes same-origin transport and effective local actor; does not execute middleware, React, DOM, HTTP, RRset data/state updates, SDK, Terraform or establish implementation refinement. Generated app.js binding is limited to this changed Cloud DNS projection."
+        },
+        {
+          "id": "SakuraServerReadEpoch",
+          "properties": [
+            "TypeOK",
+            "NoUnadvertisedMount",
+            "OnlyCurrentResult",
+            "NoDifferentServer"
+          ],
+          "limits": "Finite read-only presentation projection. Production Server capability is default-off; enabled states represent the explicitly guarded local operator opt-in after capability projection. Models descriptor/disabled/handoff admission, abstract context and list/detail request revision, and matching detail identity. Does not prove CLI validation or binding, proxy exposure, real authentication or browser authority, React/DOM/HTTP behavior, response schemas, pagination, mutations, runtime availability, SDK or Terraform. Generated bundle binding applies only to changed Server-view code."
+        },
+        {
+          "id": "AzureQueueOwnerAccess",
+          "properties": [
+            "TypeOK",
+            "FixedParticipant",
+            "OnlyCurrentDiscovery",
+            "NewestObservationRetained",
+            "DiscoveryAuthority",
+            "PresentationOwnerOnly",
+            "ReferenceGetAuthorized",
+            "ReferenceAccountIsConfigured",
+            "NativePermissionBoundary"
+          ],
+          "limits": "Models only normalized owner/actor decisions, selected discovery epoch and matching principal, configured account projection in the dynamic spec enum/default, and native admission independent of UI visibility. Does not prove token handling, actual Go/React/SQLite refinement, URL parsing, whole schema, SDK, browser, route transport, runtime or liveness. Embedded bundle binding is the generated projection of the exact source guards, not a model of the build system or JavaScript event delivery."
+        },
+        {
+          "id": "SNSConsoleResponseAdmission",
+          "properties": [
+            "TypeOK",
+            "MountRequiresCapabilityAndNoHandoff",
+            "KeyedOwnerMatchesScope",
+            "OnlyOneCurrentFlight",
+            "NoLateVisibleEffect",
+            "AbortInhibitsCallback",
+            "OnlyCurrentTopicUpdates",
+            "OnlyCurrentTopicChoices"
+          ],
+          "limits": "Bound only visible SNS console hook state, projected typed capability and valid per-topic selection labels. Instance and topic revision are ghost labels, not invented callback-generation checks. No theorem about React or JS scheduling/code refinement, backend AWS IAM, parser/wire, final remote write outcome, shared 401 redirect/onSaving side effects, capability refresh, actual browser/keyboard, or build correctness. Scalar is signed-in session and fixed us-east-1, not Console principal/region parity; it is not modeled."
+        },
+        {
+          "id": "SimpleDBConsoleEpoch",
+          "properties": [
+            "TypeOK",
+            "VisibleRequiresCapability",
+            "OnlyCurrentScopeVisible",
+            "SingleCurrentChain",
+            "ReadbackOnlyAfterAck",
+            "WriteNoticeRequiresAck"
+          ],
+          "limits": "Symbolic local capability, React view ownership, native acknowledgements and publication only. No Go/JavaScript refinement, DOM focus, CSS/reflow, XML parsing or HTTP decoding, native IAM, transaction/SQLite proof, actual cancellation of server writes, or complete SimpleDB semantics."
+        },
+        {
+          "id": "ScalingPlanConsole",
+          "properties": [
+            "TypeOK",
+            "OnlyCurrentReplyPublishes",
+            "SuccessRequiresAck",
+            "RetryRequiresNamedRefresh"
+          ],
+          "limits": "Finite UI request ownership and publication within one mounted scope. A refresh is an explicit exact-name read. Does not model concurrent plan replacement, React/DOM, JavaScript or Go refinement, IAM, HTTP or storage. AutoScalingPlanTargets independently models native capacity effects."
+        },
+        {
+          "id": "CloudFrontConsoleEpoch",
+          "properties": [
+            "TypeOK",
+            "CurrentContent",
+            "CurrentReceipt",
+            "ProtectedDownload",
+            "AcknowledgedReceipt",
+            "StableUnknownCaller",
+            "ExplicitWriteConfirmation",
+            "OneCurrentWrite"
+          ],
+          "limits": "Models bounded asynchronous content reads and invalidation ownership, abstract protected content, confirmation, unknown acknowledgement and stable explicit replay of fixed /* paths. One abstract scope combines identity, region, route and distribution. Does not model XML/UTF-8/DOM/React, download or OS execution, actual HTTP abort effects, IAM policy evaluation, SQLite, native cache or JavaScript/Go refinement. CloudFrontLocalCache and real SDK/browser/native tests cover separate backend behavior."
+        }
       ]
     },
     {
@@ -192,38 +903,433 @@
       "disposition": "modeled",
       "reason": "Bounded CloudFront Console request/identity ownership and explicit invalidation recovery; existing CloudFrontLocalCache also binds physically staged native interruption witnesses. Native backend semantics are unchanged except truthful Console advertisement.",
       "models": [
-        "BrowserSessions",
-        "SQSConsoleEpoch",
-        "CloudWatchLogsViewEpoch",
-        "SecretsRevealEpoch",
-        "SakuraDisksViewEpoch",
-        "DynamoDBConsoleEpoch",
-        "KMSAliasesViewEpoch",
-        "CatalogConsoleEpoch",
-        "TerminalClientEpoch",
-        "EC2SecurityGroupConsoleEpoch",
-        "CloudDNSConsoleScope",
-        "SakuraServerReadEpoch",
-        "AzureQueueOwnerAccess",
-        "SNSConsoleResponseAdmission",
-        "SimpleDBConsoleEpoch",
-        "EC2RouteTableConsoleEpoch",
-        "SimpleDBSelectConsoleEpoch",
-        "EC2NativeSubnetLifecycle",
-        "EC2TemplatePreviewEpoch",
-        "EC2DetachedNetworkConsole",
-        "EC2InternetGatewayLifecycle",
-        "EC2NativeDefaultRouteLifecycle",
-        "EC2NativeIPv4RouteSet",
-        "EC2NativeRouteAssociationReplacement",
-        "EC2NativeSubnetPublicIPv4",
-        "EC2DetachedSecurityGroupRules",
-        "EC2InstanceStackConsole",
-        "EC2VPCCreateForm",
-        "EC2RegionalSubnetConsole",
-        "EC2VpcConsoleNavigation",
-        "ScalingPlanConsole",
-        "CloudFrontConsoleEpoch"
+        {
+          "id": "BrowserSessions",
+          "properties": [
+            "TypeOK",
+            "RevokedCookiesDenied",
+            "AcceptedOnlyLiveParent",
+            "SDKAuthorityPreserved",
+            "UnrelatedSessionsPreserved",
+            "NoRawSDKCookie",
+            "NoBrowserSDKAuthority",
+            "ParentLifetimeBound"
+          ],
+          "limits": "One Access authority; opaque disjoint fresh tokens abstract hash storage/randomness. Clock0..3/browserTTL2/participantTTL1 and login cutoff bound exploration, not API limits. No Go/cryptographic/locking/HTTP-Origin/TLS/cookie/UI/accessibility/cross-team refinement or liveness proof. UI and named tests are caller/correspondence seams, not code executed or proven by TLC; actual native/browser assertions independently check them."
+        },
+        {
+          "id": "SQSConsoleEpoch",
+          "properties": [
+            "TypeOK",
+            "OnlyCurrentReplies",
+            "NoUnmountedAcceptance",
+            "ReceiptCustodyBound",
+            "RawReceiptsPrivate"
+          ],
+          "limits": "Finite view acceptance/custody abstraction only, not React/AbortController/DOM/thread execution, token authentication, IAM, native receipt validity/freshness, Go/SQL, cryptography or AWS visual parity. Native requests may finish after cancellation; only current replies enter the view. Accepted history captures its original mounted/context/epoch, so later changes cannot relabel an old acceptance. Unmount epoch advance is redundant with the alive guard and the combined mutant deliberately removes both. Receipt values abstract one response identity per context/epoch; native freshness and release require actual browser/SDK tests. main.jsx source scope is only added SQS keyed-remount/navigation seam, not all other services or authentication."
+        },
+        {
+          "id": "CloudWatchLogsViewEpoch",
+          "properties": [
+            "TypeOK",
+            "FreshResults",
+            "NoUnmountedResults"
+          ],
+          "limits": "Finite async-display acceptance model, not React/AbortController/DOM execution or implementation refinement. Context abstracts a group/stream/page query; parent region/principal changes unmount the component. IAM, team authentication, page tokens, SQL state and mutation atomicity are separate backend obligations. Form input, busy indicators and navigation layout are not modeled; actual stale-reply and browser tests remain required. Shared main.jsx scope covers the added Logs identity/region/navigation remount only, not all other service views or browser authentication."
+        },
+        {
+          "id": "SecretsRevealEpoch",
+          "properties": [
+            "TypeOK",
+            "NoUnmountedDisplay",
+            "FreshEmissionHistory",
+            "ReturnedARNMatches",
+            "VisibleContextMatches"
+          ],
+          "limits": "Finite explicit-retrieve/display model, not React, DOM, AbortController, memory zeroization or implementation refinement. Only the successful response path is modeled; native store/IAM must authorize before returning any secret. A returned ARN can differ and must be rejected. Retrieve, Hide and navigation invalidate epochs; unmount also clears visible state. Parent must remount on region/principal changes. Emission history captures the context at each acceptance so later Hide/navigation cannot relabel an earlier stale acceptance. Draft entry, mutation atomicity and form layout are outside this model. Parent main.jsx scope binds only Secrets routing/remount key (region/principal/navigation); the generated app.js binding is the canonical compiled artifact of those source inputs, independently checked by bundle/asset hashes. It does not model unrelated existing console services or prove JavaScript compilation."
+        },
+        {
+          "id": "SakuraDisksViewEpoch",
+          "properties": [
+            "TypeOK",
+            "AcceptedReadScope",
+            "SuccessfulReadOnly",
+            "RenderedScopeBound",
+            "RenderedResourceBound",
+            "StaleReadFrame",
+            "StaleWriteFrame",
+            "NavigationACKFrame",
+            "AckClosesForm",
+            "AckClearsDraft",
+            "ReadRetryOnly",
+            "SingleWriteSend",
+            "LocaleFrame",
+            "CancelDraftClear"
+          ],
+          "limits": "Original bounded UI safety projection only, not React/JS/AbortController scheduling or server/SQL/IAM/token authority proof. Opaque scope combines trusted principal/session/globalnavigation/endpoint; actualcredential/contextKey production remainstrustedcaller. Read responses may complete afterabort/headers, no zero-network/body-cancel guarantee. No orphan-loading/liveness/hungread promise. ACK is actual2xxresponse beforeCreatebody/metadata, not serverrollback/idempotency underunknownnetworkoutcome. Two opens/onewriteintent excludearbitrarynew-sessionwrite concurrency. Independent request/frame snapshots monitoractualpublishedview changes, not ghost-only mutations. Nativepayloadbytes/schema/confirmation/keyentropy/quota/APIwire/SDK andauthenticatedcloudvisualparity areoutside. Shared main scope is ONLY Sakura fixedcapabilityconfiguration/contextKey+request mount, notAWS/GCP/Azure behavior; shell/CSS/neutralcatalogstate not proved. The generated app.js scope binds only the canonical compiled artifact of this separately declared Sakura child/mount projection; it does not prove bundler/compiler correctness or unrelated AWS/GCP/Azure behavior."
+        },
+        {
+          "id": "DynamoDBConsoleEpoch",
+          "properties": [
+            "TypeOK",
+            "NoStalePublication",
+            "ReadGenerationVerified",
+            "DisplayedKeyBound",
+            "CancelNoOrphanLoading",
+            "AckClosesDraft",
+            "AckBelongsToCurrentView",
+            "ReadRetryNeverWrites",
+            "SingleSendBeforeACK",
+            "LocalePreservesDraft"
+          ],
+          "limits": "UI finite safety abstraction only, not JS/React/AbortController scheduling refinement, native protocol/JSON/IAM/auth/SQLite state/number/binary/size/capacity proof. TableId checks establish agreement at item-read acceptance only, not freshness after later native changes or atomic TableId-CAS on mutation; official TableName writes remain subject to recreation between preflight and send. Combined context labels abstract principal/region/remount, not credentials/tenant isolation. Stutter observation admits no liveness/hung-read progress claim. One write intent only; symbolic ACK/no automatic replay, not server rollback when an aborted request already committed. No concrete item values, missing-item/delete-confirmation semantics or arbitrary pagination. Main caller scope is limited to the DynamoDB route and its region|principal|navigation mount key/reset; embedded app.js is the canonical derived component/caller artifact. Neither binding proves other shell/components, compiler/bundler correctness or JavaScript refinement."
+        },
+        {
+          "id": "KMSAliasesViewEpoch",
+          "properties": [
+            "TypeOK",
+            "CurrentListOutcome",
+            "NoCachedRowsOnFailure",
+            "CurrentTargetMetadata",
+            "ClosedFormHasNoTarget",
+            "AckClosesForm",
+            "AckClearsDraft",
+            "ReadRetryNeverWrites",
+            "OnlyVerifiedTargetSubmitted",
+            "DeleteRequiresExactConfirmation",
+            "LocalePreservesIntent"
+          ],
+          "limits": "Finite UI protocol abstraction, not JS/React/Cloudscape/HTTP/SQL/IAM/crypto refinement or liveness. Initial key-list/Describe lookup completion is abstracted because actual source disables selection until it finishes; later target reads may overlap. Target/list revisions normalized after these reads. Excludes all parser/format/pagination/permission semantics, arbitrary key sets, repeated forms beyond bound, network ambiguity without ACK and full AWS console parity. Current list outcome and target metadata are stored fields, not derived tautologies. Retired-list mutation jointly bypasses redundant captured-object/active/abort checks; submit-target mutation abstracts both button and handler defenses. Retry mutant creates actual second pending write plus request counter, not a ghost-only edit. Root parent context key/principal binding is assumed; locale frame is only this model state, not the locale provider. Parent kms.jsx/main.jsx declarations bind only the Aliases mount and supplied region/principal/key identity; other KMS/general services remain outside. app.js is the canonical compiled correspondence artifact of that component/mount, independently checked by bundle hashes, not a proof of compilation or unrelated UI."
+        },
+        {
+          "id": "CatalogConsoleEpoch",
+          "properties": [
+            "TypeOK",
+            "NoUnmountedAcceptance",
+            "OnlyCurrentReplies",
+            "SingleWriter",
+            "ReloadOnlyAfterAck",
+            "FailureVisible"
+          ],
+          "limits": "View acceptance and write sequencing only: native request results, DOM rendering, keyboard focus, accessibility, form conversion and React scheduling are covered by browser tests, not this model."
+        },
+        {
+          "id": "TerminalClientEpoch",
+          "properties": [
+            "TypeOK",
+            "ReceiptEvidence",
+            "SocketEvidence",
+            "SingleOpen",
+            "UIEvidence",
+            "DisposeNotRemoteTermination",
+            "NoAutomaticStartRetry",
+            "DiscardPreservesIdentity"
+          ],
+          "limits": "Finite client lifecycle contract, not JS/React/browser/fetch/WebSocket refinement. Single abstract remote lifecycle does not represent arbitrary concurrent sessions. Assumes authentic native response and component/channel identity checks; parsing, transport, DOM, token cryptography and guest termination are independent. Operation epoch is defense in depth under busy/permanent-disposal guards; no impossible overlapping operation is invented to produce an epoch-only counterexample."
+        },
+        {
+          "id": "EC2SecurityGroupConsoleEpoch",
+          "properties": [
+            "TypeOK",
+            "EligibleRequest",
+            "ReadOnlyOperation",
+            "OnlyCurrentScope",
+            "OnlySelectedVPC",
+            "FailuresNeverEmpty"
+          ],
+          "limits": "Finite presentation projection only. Region and identity transitions share the epoch label with VPC selection. Does not prove Access or EC2 IAM, request/abort signal implementation, XML validation, DOM, packet filtering, network liveness, SQL or Go/React refinement."
+        },
+        {
+          "id": "CloudDNSConsoleScope",
+          "properties": [
+            "TypeOK",
+            "CapabilityAuthorized",
+            "OnlyCurrentDiscovery",
+            "OnlyCurrentReadVisible",
+            "NoStaleContinuation"
+          ],
+          "limits": "Finite presentation and admission projection: backend oracle abstracts authenticated identity and existing AWS handoff, and frontend models capability epochs, read replacement and continuation. Assumes same-origin transport and effective local actor; does not execute middleware, React, DOM, HTTP, RRset data/state updates, SDK, Terraform or establish implementation refinement. Generated app.js binding is limited to this changed Cloud DNS projection."
+        },
+        {
+          "id": "SakuraServerReadEpoch",
+          "properties": [
+            "TypeOK",
+            "NoUnadvertisedMount",
+            "OnlyCurrentResult",
+            "NoDifferentServer"
+          ],
+          "limits": "Finite read-only presentation projection. Production Server capability is default-off; enabled states represent the explicitly guarded local operator opt-in after capability projection. Models descriptor/disabled/handoff admission, abstract context and list/detail request revision, and matching detail identity. Does not prove CLI validation or binding, proxy exposure, real authentication or browser authority, React/DOM/HTTP behavior, response schemas, pagination, mutations, runtime availability, SDK or Terraform. Generated bundle binding applies only to changed Server-view code."
+        },
+        {
+          "id": "AzureQueueOwnerAccess",
+          "properties": [
+            "TypeOK",
+            "FixedParticipant",
+            "OnlyCurrentDiscovery",
+            "NewestObservationRetained",
+            "DiscoveryAuthority",
+            "PresentationOwnerOnly",
+            "ReferenceGetAuthorized",
+            "ReferenceAccountIsConfigured",
+            "NativePermissionBoundary"
+          ],
+          "limits": "Models only normalized owner/actor decisions, selected discovery epoch and matching principal, configured account projection in the dynamic spec enum/default, and native admission independent of UI visibility. Does not prove token handling, actual Go/React/SQLite refinement, URL parsing, whole schema, SDK, browser, route transport, runtime or liveness. Embedded bundle binding is the generated projection of the exact source guards, not a model of the build system or JavaScript event delivery."
+        },
+        {
+          "id": "SNSConsoleResponseAdmission",
+          "properties": [
+            "TypeOK",
+            "MountRequiresCapabilityAndNoHandoff",
+            "KeyedOwnerMatchesScope",
+            "OnlyOneCurrentFlight",
+            "NoLateVisibleEffect",
+            "AbortInhibitsCallback",
+            "OnlyCurrentTopicUpdates",
+            "OnlyCurrentTopicChoices"
+          ],
+          "limits": "Bound only visible SNS console hook state, projected typed capability and valid per-topic selection labels. Instance and topic revision are ghost labels, not invented callback-generation checks. No theorem about React or JS scheduling/code refinement, backend AWS IAM, parser/wire, final remote write outcome, shared 401 redirect/onSaving side effects, capability refresh, actual browser/keyboard, or build correctness. Scalar is signed-in session and fixed us-east-1, not Console principal/region parity; it is not modeled."
+        },
+        {
+          "id": "SimpleDBConsoleEpoch",
+          "properties": [
+            "TypeOK",
+            "VisibleRequiresCapability",
+            "OnlyCurrentScopeVisible",
+            "SingleCurrentChain",
+            "ReadbackOnlyAfterAck",
+            "WriteNoticeRequiresAck"
+          ],
+          "limits": "Symbolic local capability, React view ownership, native acknowledgements and publication only. No Go/JavaScript refinement, DOM focus, CSS/reflow, XML parsing or HTTP decoding, native IAM, transaction/SQLite proof, actual cancellation of server writes, or complete SimpleDB semantics."
+        },
+        {
+          "id": "EC2RouteTableConsoleEpoch",
+          "properties": [
+            "TypeOK",
+            "EligibleRead",
+            "FixedRead",
+            "CurrentIdentity",
+            "CurrentRegion",
+            "CurrentTarget",
+            "CurrentRevision",
+            "CurrentGate",
+            "StatusIsEvidence",
+            "DefaultIsRecorded",
+            "AssociationIsExplicit",
+            "NoImplicitMain",
+            "CurrentSubnet",
+            "ValidSubnetRequest"
+          ],
+          "limits": "Readout projection only. A change may keep identity, region, VPC, revision or availability constant, independently exercising stale responses. Bounded labels are not arbitrary refresh/ABA interleavings. Does not prove React scheduling, authentication, IAM/SQL/HTTP/XML, packet reachability, route edits, completeness or runtime refinement. Subnets and exact-match flags are symbolic. It does not prove the input parser or correlation of real transport callbacks."
+        },
+        {
+          "id": "SimpleDBSelectConsoleEpoch",
+          "properties": [
+            "TypeOK",
+            "ReadAdmission",
+            "BoundedReadRequest",
+            "SingleCurrentRead",
+            "CursorOrigin",
+            "OnlyCurrentOwner",
+            "OnlyAcceptedPages",
+            "CursorMirrorsReply",
+            "NextOfferedExactly",
+            "FailureClearsPage",
+            "EffectIsolation",
+            "ChoiceDoesNotObserve"
+          ],
+          "limits": "Abstract bounded names-only requests and React owner replacement in a finite user-visible lifecycle. One symbolic name represents an admitted page, not the 25-row payload. Does not verify native IAM, SQL, cryptographic cursor validation, actual HTTP/XML, browser cancellation at the server, React scheduling or DOM refocus, mutation acknowledgements, linearizable snapshots, Scalar, or Go/JavaScript refinement."
+        },
+        {
+          "id": "EC2NativeSubnetLifecycle",
+          "properties": [
+            "StackUnchanged",
+            "AuthorizedWrites",
+            "NativeParent",
+            "Nonoverlap",
+            "Bounded",
+            "ExactDelete",
+            "ExactRead"
+          ],
+          "limits": "Finite atomic store choices and regional read evidence only; no YAML/XML/parser/HTTP implementation, CIDR arithmetic, Windows/browser, exact timing, AWS runtime, or code-refinement proof."
+        },
+        {
+          "id": "EC2TemplatePreviewEpoch",
+          "properties": [
+            "TypeOK",
+            "OrdinaryPreview",
+            "BoundedDraft",
+            "FixedDeclarationRead",
+            "OnlyCurrentIdentity",
+            "OnlyCurrentRegion",
+            "OnlyCurrentDraft",
+            "NoClosedOrHandoffResult",
+            "EvidencePreserved",
+            "NoReturnedValues"
+          ],
+          "limits": "Finite UI declaration-preview projection only. Context changes are bounded, not arbitrary browser interleavings. Does not model actual authentication or IAM, raw HTTP, YAML/XML validation, secrets in the editable textarea, backend guest availability or code refinement."
+        },
+        {
+          "id": "EC2DetachedNetworkConsole",
+          "properties": [
+            "TypeOK",
+            "AdmittedNativeOnly",
+            "OnlyCurrentScope",
+            "VerifiedWriteOnly",
+            "ScopeChangeFenced",
+            "SiblingLeasePreserved",
+            "LeaseUntilReadback"
+          ],
+          "limits": "Native UI admission, scoped completion and aggregate write leases only. No React event ordering, layout, serialized identity API, XML parsing, SQLite, packet behavior or implementation proof. Legacy CFN read-only behavior remains separately modeled."
+        },
+        {
+          "id": "EC2InternetGatewayLifecycle",
+          "properties": [
+            "TypeOK",
+            "Authorized",
+            "TaggedCreation",
+            "NativeOwnership",
+            "DependentRowsPreserved",
+            "DurableMutation",
+            "FaithfulRead",
+            "ExactConfirmation",
+            "ConfirmedNotice"
+          ],
+          "limits": "Detached allocation and cleanup; excludes actual SQL, wire serialization, cryptography, React, attachment mutation, routing and guest behavior. No implementation refinement proof."
+        },
+        {
+          "id": "EC2NativeDefaultRouteLifecycle",
+          "properties": [
+            "TypeOK",
+            "OwnedGraph",
+            "GrantAndScope",
+            "AtomicEffect",
+            "ExactReadback",
+            "VerifiedNotice"
+          ],
+          "limits": "Finite native default-route configuration, dependency and console readback abstraction. No implementation refinement, real IAM evaluation, XML, SQLite, React, concurrency proof, subnet routing, or packets. The native VPC/IGW pairing is abstracted in DefaultGateway and attachments; actor/region are summarized in one scoped admission and a browser epoch."
+        },
+        {
+          "id": "EC2NativeIPv4RouteSet",
+          "properties": [
+            "TypeOK",
+            "OwnedCanonical",
+            "PerTableLimit",
+            "AtomicClass",
+            "ExactRouteEffect",
+            "CompleteReadback",
+            "ConfirmedNotice"
+          ],
+          "limits": "Finite shared-destination map, same-native-witness abstraction and exact current-readback state only. Real limit is 16. No IP arithmetic proof, actual SQLite/JSON/Query/IAM/React refinement, actor concurrency or network forwarding."
+        },
+        {
+          "id": "EC2NativeRouteAssociationReplacement",
+          "properties": [
+            "TypeOK",
+            "ExactOutcome",
+            "NoEffectOnRefusal",
+            "OneExplicit",
+            "ExactMove",
+            "OtherStateUnchanged",
+            "ConfirmedNotice",
+            "RetiredRetryNeverApplies"
+          ],
+          "limits": "Finite association graph, normalized permission/transaction outcomes and UI acknowledgment ordering only. No cryptographic ID or lasting tombstone guarantee; actual Go, SQLite concurrency/storage quota, XML, native pagination, React, guest isolation and packet routing require separate evidence."
+        },
+        {
+          "id": "EC2NativeSubnetPublicIPv4",
+          "properties": [
+            "TypeOK",
+            "ExactAdmission",
+            "RefusalNoEffect",
+            "ExactPreference",
+            "SameFrame",
+            "CurrentConfirmedNotice",
+            "NoReplay"
+          ],
+          "limits": "Bounded normalized authorization, atomic configuration and acknowledgement only. Does not prove Go, request parser, SQL, IAM parity, Cloudscape/browser, durability or liveness; no public IP allocation, guest, reachability or forwarding behavior."
+        },
+        {
+          "id": "EC2DetachedSecurityGroupRules",
+          "properties": [
+            "TypeOK",
+            "OwnershipFrame",
+            "DirectionBounds",
+            "ExactTransition"
+          ],
+          "limits": "Abstracts XML/Query/SQLite/React mechanics, physical IP networks, timing and API edge parsing. Describes only the native group projection, not the distinct CloudFormation read protocol, no actual NIC/traffic, and no implementation refinement."
+        },
+        {
+          "id": "EC2InstanceStackConsole",
+          "properties": [
+            "TypeOK",
+            "QualifiedMutation",
+            "SingleMutation",
+            "ReceiptBelongsToView",
+            "VerifiedMeansMatch",
+            "NoGuestLivenessClaim"
+          ],
+          "limits": "Finite three UX generations with one reply in flight, actor roles and a configuration observation. An admission sample does not exclude expiry between discovery and CreateStack. This models only the workflow and no replay/retarget acknowledgment, not actual token/HTTP bounds, runtime health, SQLite rollback, live guest launch or cleanup, React or browser refinement."
+        },
+        {
+          "id": "EC2VPCCreateForm",
+          "properties": [
+            "TypeOK",
+            "PairedNeedsOperator",
+            "InvalidDraftNeverWrites",
+            "NativeAndStackRemainDistinct",
+            "DiscardRetiredRead",
+            "ConfirmedBeforeSuccess"
+          ],
+          "limits": "VPC creation form only. Capability availability, draft validity and qualified native/stack readback are abstract; not a proof of CIDR/Name parsing, React or keyboard layout, cryptography, CloudFormation/SQLite or persistence semantics. Retired view checks do not cancel an accepted server-side write. No VM, packet, existing-network attachment, or AWS parity claim."
+        },
+        {
+          "id": "EC2RegionalSubnetConsole",
+          "properties": [
+            "TypeOK",
+            "OnlyNativeParentWrites",
+            "ConfirmedInventoryBeforeWrite",
+            "ReadbackBeforeDetail",
+            "CurrentScopeOnly",
+            "NoUnreconciledRetry"
+          ],
+          "limits": "Standalone subnet UI caller only. Does not refine XML, CIDR, IAM, partial two-read snapshots, SQLite, React focus, actual launch or route/ACL dataplanes. A view retirement does not reverse an already committed write. Route association readback and actual browser/API behavior are checked separately."
+        },
+        {
+          "id": "EC2VpcConsoleNavigation",
+          "properties": [
+            "TypeOK",
+            "AdvertisedOnly",
+            "CurrentRegionAndView",
+            "VerifiedDisplay",
+            "NoLocalDepartureDuringWrite",
+            "CurrentWriteOwnsLease"
+          ],
+          "limits": "Model of frontend route, local write lease and async result presentation only; no IAM, Go or persistence refinement, DOM/events, or path/XML parser proof."
+        },
+        {
+          "id": "ScalingPlanConsole",
+          "properties": [
+            "TypeOK",
+            "OnlyCurrentReplyPublishes",
+            "SuccessRequiresAck",
+            "RetryRequiresNamedRefresh"
+          ],
+          "limits": "Finite UI request ownership and publication within one mounted scope. A refresh is an explicit exact-name read. Does not model concurrent plan replacement, React/DOM, JavaScript or Go refinement, IAM, HTTP or storage. AutoScalingPlanTargets independently models native capacity effects."
+        },
+        {
+          "id": "CloudFrontConsoleEpoch",
+          "properties": [
+            "TypeOK",
+            "CurrentContent",
+            "CurrentReceipt",
+            "ProtectedDownload",
+            "AcknowledgedReceipt",
+            "StableUnknownCaller",
+            "ExplicitWriteConfirmation",
+            "OneCurrentWrite"
+          ],
+          "limits": "Models bounded asynchronous content reads and invalidation ownership, abstract protected content, confirmation, unknown acknowledgement and stable explicit replay of fixed /* paths. One abstract scope combines identity, region, route and distribution. Does not model XML/UTF-8/DOM/React, download or OS execution, actual HTTP abort effects, IAM policy evaluation, SQLite, native cache or JavaScript/Go refinement. CloudFrontLocalCache and real SDK/browser/native tests cover separate backend behavior."
+        }
       ]
     },
     {
