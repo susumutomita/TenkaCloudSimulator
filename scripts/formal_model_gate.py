@@ -5171,3 +5171,10 @@ def main():
         run_suite(Path.cwd(), os.environ['TLA_JAR'], options.reports, options.registry, merge_gate=options.merge_gate, shard=shard)
     except GateError as error:
         parser.exit(1, 'Formal validation failed: ' + str(error) + '\n')
+
+
+# Independently fixed controls for the bounded local alarm transaction/evaluation scenarios.
+BASE_MODELS.add('CloudWatchAlarmEvaluation')
+BASE_INVARIANTS['CloudWatchAlarmEvaluation'] = {'AcknowledgedAtomic', 'FreshIdentity', 'PeerFrame', 'NoStagedPublish', 'TypeOK', 'MeasuredValueExact', 'RefusedFrame', 'ActualSampleState', 'UpdatePreservesState', 'DeleteKeepsSamples', 'InitialState'}
+REQUIRED_MUTANTS['CloudWatchAlarmEvaluation'] = {'MutatePeer', 'PublishFailedSamples', 'AdmitCanceledWrite', 'InventMeasuredZero', 'IncludeEndBoundary', 'ReuseRetiredIdentity', 'DeduplicateObservations', 'UnweightedAverage', 'AdmitDeniedWrite', 'PublishBeforeCommit', 'FabricateAlarm', 'SeparateSampleFromState', 'IncludeOldWindow', 'ResetStateOnUpdate', 'DeleteMetricSamples', 'EvaluateDeniedRead', 'IgnoreUnit', 'ThresholdEqualityWrong', 'IgnoreMetricScope', 'AdoptOldAlarmState'}
+REQUIRED_SOURCE_SCOPES['CloudWatchAlarmEvaluation'] = {'internal/server/server.go', 'internal/aws/cloudwatchmetrics/store.go', 'internal/aws/cloudwatch_metrics_gateway.go', 'internal/aws/cloudwatchmetrics/alarm_store.go', 'internal/aws/cloudwatchmetrics/http.go', 'internal/aws/cloudwatchmetrics/alarm_form.go', 'internal/aws/cloudwatchmetrics/alarm_http.go'}

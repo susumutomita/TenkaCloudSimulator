@@ -30147,6 +30147,262 @@
           "expect_invariant": "ReadAndRestartPreserve"
         }
       ]
+    },
+    {
+      "id": "CloudWatchAlarmEvaluation",
+      "model": "formal/CloudWatchAlarmEvaluation.tla",
+      "config": "formal/CloudWatchAlarmEvaluation.cfg",
+      "bounds": "Ten directed normalized request histories (20 equality statistic/comparison choices plus nine other histories); 29 initial scenarios, one target, one immutable populated peer, at most three raw observations, two UTC-minute classes and two physical alarm generations. Begin/stage and Commit/Cancel/Fail/Denied are distinct transitions. No arbitrary request interleavings.",
+      "properties": [
+        "TypeOK",
+        "PeerFrame",
+        "NoStagedPublish",
+        "RefusedFrame",
+        "AcknowledgedAtomic",
+        "ActualSampleState",
+        "MeasuredValueExact",
+        "InitialState",
+        "UpdatePreservesState",
+        "DeleteKeepsSamples",
+        "FreshIdentity"
+      ],
+      "limits": "Finite rational evaluation and transaction-frame scenarios only. Separate specification selector/rational oracle; multiplicities, true zero versus no value, five statistics/four comparisons, closed-window boundaries and one wrong scope/unit class. Assumes normalized requests, authentic policy decisions and atomic SQL. Does not prove Go/SQLite/HTTP/XML/IAM/decimal/float/clock refinement, numeric quotas/cursors, arbitrary concurrency, background scheduling, AWS extended lookback, delivery, browser, or entire CloudWatch coverage.",
+      "source_scope": [
+        "internal/aws/cloudwatchmetrics/alarm_form.go",
+        "internal/aws/cloudwatchmetrics/alarm_http.go",
+        "internal/aws/cloudwatchmetrics/alarm_store.go",
+        "internal/aws/cloudwatchmetrics/http.go",
+        "internal/aws/cloudwatchmetrics/store.go",
+        "internal/aws/cloudwatch_metrics_gateway.go",
+        "internal/server/server.go"
+      ],
+      "mutants": [
+        {
+          "id": "IncludeOldWindow",
+          "edits": [
+            {
+              "old": "Selected(data,w) == SelectSeq(data,LAMBDA p: p.scope = \"target\" /\\ p.unit = \"Count\" /\\ p.at >= 2*w /\\ p.at < 2*w+2)",
+              "new": "Selected(data,w) == SelectSeq(data,LAMBDA p: p.scope = \"target\" /\\ p.unit = \"Count\" /\\ p.at < 2*w+2)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ActualSampleState"
+        },
+        {
+          "id": "IncludeEndBoundary",
+          "edits": [
+            {
+              "old": "Selected(data,w) == SelectSeq(data,LAMBDA p: p.scope = \"target\" /\\ p.unit = \"Count\" /\\ p.at >= 2*w /\\ p.at < 2*w+2)",
+              "new": "Selected(data,w) == SelectSeq(data,LAMBDA p: p.scope = \"target\" /\\ p.unit = \"Count\" /\\ p.at >= 2*w /\\ p.at <= 2*w+2)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ActualSampleState"
+        },
+        {
+          "id": "IgnoreMetricScope",
+          "edits": [
+            {
+              "old": "Selected(data,w) == SelectSeq(data,LAMBDA p: p.scope = \"target\" /\\ p.unit = \"Count\" /\\ p.at >= 2*w /\\ p.at < 2*w+2)",
+              "new": "Selected(data,w) == SelectSeq(data,LAMBDA p: p.unit = \"Count\" /\\ p.at >= 2*w /\\ p.at < 2*w+2)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ActualSampleState"
+        },
+        {
+          "id": "IgnoreUnit",
+          "edits": [
+            {
+              "old": "Selected(data,w) == SelectSeq(data,LAMBDA p: p.scope = \"target\" /\\ p.unit = \"Count\" /\\ p.at >= 2*w /\\ p.at < 2*w+2)",
+              "new": "Selected(data,w) == SelectSeq(data,LAMBDA p: p.scope = \"target\" /\\ p.at >= 2*w /\\ p.at < 2*w+2)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ActualSampleState"
+        },
+        {
+          "id": "DeduplicateObservations",
+          "edits": [
+            {
+              "old": "Selected(data,w) == SelectSeq(data,LAMBDA p: p.scope = \"target\" /\\ p.unit = \"Count\" /\\ p.at >= 2*w /\\ p.at < 2*w+2)",
+              "new": "Selected(data,w) == Unique(SelectSeq(data,LAMBDA p: p.scope = \"target\" /\\ p.unit = \"Count\" /\\ p.at >= 2*w /\\ p.at < 2*w+2))",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "MeasuredValueExact"
+        },
+        {
+          "id": "UnweightedAverage",
+          "edits": [
+            {
+              "old": "c.stat \\in {\"Average\",\"Sum\"} -> Total(p)",
+              "new": "c.stat \\in {\"Average\",\"Sum\"} -> IF c.stat = \"Average\" THEN Total(Unique(p)) ELSE Total(p)",
+              "count": 1
+            },
+            {
+              "old": "  den |-> IF c.stat = \"Average\" THEN Len(p) ELSE 1]\nCompare(c,m)",
+              "new": "  den |-> IF c.stat = \"Average\" THEN Len(Unique(p)) ELSE 1]\nCompare(c,m)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ActualSampleState"
+        },
+        {
+          "id": "InventMeasuredZero",
+          "edits": [
+            {
+              "old": "!.reported = measurement",
+              "new": "!.reported = IF ~measurement.has THEN [has |-> TRUE,num |-> 0,den |-> 1] ELSE measurement",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "MeasuredValueExact"
+        },
+        {
+          "id": "FabricateAlarm",
+          "edits": [
+            {
+              "old": "ELSE IF Compare(a.config,measurement) THEN \"ALARM\" ELSE \"OK\"",
+              "new": "ELSE \"ALARM\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ActualSampleState"
+        },
+        {
+          "id": "ThresholdEqualityWrong",
+          "edits": [
+            {
+              "old": "m.num > c.threshold*m.den\n [] c.comparison",
+              "new": "m.num >= c.threshold*m.den\n [] c.comparison",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ActualSampleState"
+        },
+        {
+          "id": "PublishBeforeCommit",
+          "edits": [
+            {
+              "old": "/\\ phase' = \"pending\" /\\ raw' = raw",
+              "new": "/\\ phase' = \"pending\" /\\ raw' = (IF req.op = \"put\" THEN Append(raw,req.point) ELSE raw)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "NoStagedPublish"
+        },
+        {
+          "id": "AdmitCanceledWrite",
+          "edits": [
+            {
+              "old": "pending.request.outcome = \"Commit\"",
+              "new": "pending.request.outcome \\in {\"Commit\",\"Cancel\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "RefusedFrame"
+        },
+        {
+          "id": "PublishFailedSamples",
+          "edits": [
+            {
+              "old": "/\\ raw' = chosen.raw /\\ alarm' = chosen.alarm",
+              "new": "/\\ raw' = (IF req.outcome = \"Fail\" THEN pending.candidate.raw ELSE chosen.raw) /\\ alarm' = chosen.alarm",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "RefusedFrame"
+        },
+        {
+          "id": "AdmitDeniedWrite",
+          "edits": [
+            {
+              "old": "pending.request.allow /\\ pending.request.outcome = \"Commit\"",
+              "new": "(pending.request.allow \\/ pending.request.op = \"put\") /\\ pending.request.outcome = \"Commit\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "RefusedFrame"
+        },
+        {
+          "id": "EvaluateDeniedRead",
+          "edits": [
+            {
+              "old": "pending.request.allow /\\ pending.request.outcome = \"Commit\"",
+              "new": "(pending.request.allow \\/ pending.request.op = \"read\") /\\ pending.request.outcome = \"Commit\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "RefusedFrame"
+        },
+        {
+          "id": "SeparateSampleFromState",
+          "edits": [
+            {
+              "old": "/\\ raw' = chosen.raw /\\ alarm' = chosen.alarm",
+              "new": "/\\ raw' = chosen.raw /\\ alarm' = (IF MayPublish /\\ req.op = \"put\" THEN before.alarm ELSE chosen.alarm)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AcknowledgedAtomic"
+        },
+        {
+          "id": "ResetStateOnUpdate",
+          "edits": [
+            {
+              "old": "ELSE [alarm EXCEPT !.config = req.config]",
+              "new": "ELSE NewAlarm(req.config,alarm.id)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "UpdatePreservesState"
+        },
+        {
+          "id": "DeleteMetricSamples",
+          "edits": [
+            {
+              "old": "nextRaw == IF req.op = \"put\" THEN Append(raw,req.point) ELSE raw",
+              "new": "nextRaw == IF req.op = \"delete\" THEN <<>> ELSE IF req.op = \"put\" THEN Append(raw,req.point) ELSE raw",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "DeleteKeepsSamples"
+        },
+        {
+          "id": "ReuseRetiredIdentity",
+          "edits": [
+            {
+              "old": "[exists |-> TRUE,id |-> id, config |-> c",
+              "new": "[exists |-> TRUE,id |-> IF id > 1 THEN 1 ELSE id, config |-> c",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "FreshIdentity"
+        },
+        {
+          "id": "AdoptOldAlarmState",
+          "edits": [
+            {
+              "old": "NewAlarm(c,id) == [exists |-> TRUE,id |-> id, config |-> c, state |-> \"INSUFFICIENT_DATA\"",
+              "new": "NewAlarm(c,id) == [exists |-> TRUE,id |-> id, config |-> c, state |-> IF id > 1 THEN \"ALARM\" ELSE \"INSUFFICIENT_DATA\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "InitialState"
+        },
+        {
+          "id": "MutatePeer",
+          "edits": [
+            {
+              "old": "/\\ retired' = chosen.retired /\\ peer' = chosen.peer",
+              "new": "/\\ retired' = chosen.retired /\\ peer' = [PeerInitial EXCEPT !.state = \"OK\"]",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PeerFrame"
+        }
+      ]
     }
   ]
 }
