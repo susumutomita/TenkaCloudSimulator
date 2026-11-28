@@ -14,7 +14,7 @@ from pathlib import Path
 from xml.etree import ElementTree
 
 from simpledb_scalar_reference_live import (
-    FORM, NS, VERSION, checked_send, item_values, listed_domains, query_result,
+    NS, VERSION, ScalarQueryReference, checked_send, item_values, listed_domains, query_result,
 )
 
 CREATE = {'Action': 'CreateDomain', 'Version': VERSION, 'DomainName': 'scalar-practice-domain'}
@@ -88,58 +88,21 @@ def run():
                         page.on('pageerror', lambda _: errors.append(True))
                         page.on('request', lambda q: sends.append(q) if q.method == 'POST'
                                 and q.url.split('?', 1)[0] == endpoint + '/' else None)
-                        with page.expect_response(lambda r: r.url == endpoint + '/_simulator/docs/openapi.json') as served:
-                            page.goto(endpoint + '/_simulator/docs/')
-                        spec = served.value.json()
-                        root = spec['paths']['/']['post']
-                        presets = root['requestBody']['content'][FORM]['examples']
-                        for fields in (CREATE, SELECT, DELETE):
-                            assert presets[fields['Action']]['value'] == fields
-                        page.get_by_role('link', name='Shared AWS JSON/Query endpoint', exact=True).click()
-                        page.get_by_role('button', name='Selected Content Type: application/x-amz-json-1.1', exact=True).click()
-                        page.get_by_role('option', name=FORM, exact=True).click()
-                        picker = page.get_by_test_id('example-picker')
-                        client = page.get_by_role('dialog').filter(
-                            has=page.get_by_role('button', name='Close Client', exact=True))
-                        request_panel = client.get_by_role('region', name='Request: ' + root['summary'], exact=True)
+                        reference = ScalarQueryReference(page, endpoint, {
+                            fields['Action']: fields for fields in (CREATE, SELECT, DELETE)
+                        })
 
                         def send(fields):
                             count = len(sends)
-                            picker.click()
-                            page.get_by_role('option', name=presets[fields['Action']]['summary'], exact=True).click()
-                            page.get_by_role('button', name='Test Request (post /)', exact=True).click()
-                            expect(client).to_have_count(1)
-                            request_panel.get_by_role('tab', name='Body', exact=True).press('Enter')
-                            form = request_panel.get_by_role('button', name='Form URL Encoded', exact=True)
-                            json_body = request_panel.get_by_role('button', name='application/x-amz-json-1.1', exact=True)
-                            expect(form.or_(json_body)).to_be_visible()
-                            if not form.is_visible():
-                                json_body.click()
-                                page.get_by_role('option', name='Form URL Encoded', exact=True).click()
-                            expect(form).to_be_visible()
-                            for field in fields:
-                                request_panel.get_by_role('checkbox', name=f'Include {field} in request', exact=True).check()
-                            request_panel.get_by_role('tab', name='Headers', exact=True).press('Enter')
-                            service = request_panel.get_by_role('row', name=re.compile(r'^Include X-Simulator-Service in request '))
-                            service.get_by_role('button', name=re.compile(r'^(ssm|sdb)$')).click()
-                            page.get_by_role('menuitem', name='sdb', exact=True).click()
-                            client.get_by_role('checkbox', name='Include X-Simulator-Service in request', exact=True).check()
-                            for name in ('X-Amz-Target', 'X-Simulator-Region'):
-                                checkbox = client.get_by_role('checkbox', name=f'Include {name} in request', exact=True)
-                                if checkbox.is_checked():
-                                    checkbox.uncheck()
+                            reference.open_example(fields['Action'])
                             assert len(sends) == count, 'example editing emitted a request before Send'
-                            with page.expect_response(lambda r: r.request.method == 'POST'
-                                                      and r.url == endpoint + '/') as captured:
-                                client.get_by_role('button', name=re.compile(r'^Send post request to ')).click()
-                            response = captured.value
+                            response = reference.send()
                             checked_send(endpoint, sends[count:], response, fields)
                             assert response.headers['content-type'].split(';', 1)[0] == 'text/xml'
                             return response
 
                         def panel_text(text):
-                            panel = client.locator('.response-section-content-body').filter(
-                                has=page.get_by_role('link', name='Download Response Body', exact=True))
+                            panel = reference.response_panel
                             expect(panel).to_have_count(1)
                             expect(panel).to_contain_text(text)
 
@@ -149,7 +112,7 @@ def run():
                         panel_text('CreateDomainResponse')
                         assert listed_domains(query('ListDomains')) == [CREATE['DomainName']]
                         checked_send(endpoint, sends, created, CREATE)
-                        client.get_by_role('button', name='Close Client', exact=True).click()
+                        reference.close_client()
 
                         # Seed the exact domain named by the already shipped Select/Delete examples.
                         query('CreateDomain', DomainName=DELETE['DomainName'])
@@ -169,7 +132,7 @@ def run():
                         assert values(DELETE['ItemName']) == TARGET_VALUES
                         assert values('peer-item') == PEER_VALUES
                         checked_send(endpoint, sends[1:], selected, SELECT)
-                        client.get_by_role('button', name='Close Client', exact=True).click()
+                        reference.close_client()
 
                         deleted = send(DELETE)
                         mutation_xml(deleted.body(), 'DeleteAttributes')
