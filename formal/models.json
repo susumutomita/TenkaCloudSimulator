@@ -29975,11 +29975,14 @@
       "id": "KinesisVideoRetention",
       "model": "formal/KinesisVideoRetention.tla",
       "config": "formal/KinesisVideoRetention.cfg",
-      "bounds": "Named finite histories of two initially populated streams in one team database, up to two incarnations, three distinct payload labels, a database-global fragment serial, integer capture times and a capacity of two primary or four database rows. Output includes snapshot bytes by abstract identity, durable number and distinct success, receipt, refusal and lost-reply observations.",
+      "bounds": "Named finite histories of two initially populated streams in one team database, up to two incarnations, three distinct payload labels, a database-global fragment serial, integer capture times and a capacity of two primary or four database rows, versioned retention changes and a nonzero fragment timecode. Output includes snapshot bytes by abstract identity, durable number and distinct success, receipt, refusal and lost-reply observations.",
       "properties": [
         "TypeOK",
         "ReplyKind",
         "FragmentNumber",
+        "FragmentTimecode",
+        "RefusedFrame",
+        "RetentionVersion",
         "ReturnedMedia",
         "RetainedRows",
         "PeerRows"
@@ -30061,8 +30064,8 @@
           "id": "NumberZeroRetention",
           "edits": [
             {
-              "old": ".rows = live],Reply(\"RECEIVED\",<<>>,0)",
-              "new": ".rows = live],Reply(\"RECEIVED\",<<>>,n)",
+              "old": ".rows = live],Receipt(\"RECEIVED\",0,fragmentTime)",
+              "new": ".rows = live],Receipt(\"RECEIVED\",n,fragmentTime)",
               "count": 1
             }
           ],
@@ -30072,8 +30075,8 @@
           "id": "InventDurableReceipt",
           "edits": [
             {
-              "old": "ELSE Ack(n))",
-              "new": "ELSE Ack(n+1))",
+              "old": "ELSE Receipt(\"PERSISTED\",n,fragmentTime))",
+              "new": "ELSE Receipt(\"PERSISTED\",n+1,fragmentTime))",
               "count": 1
             }
           ],
@@ -30232,6 +30235,61 @@
             }
           ],
           "expect_invariant": "ReplyKind"
+        },
+        {
+          "id": "ConsumeNumberOnRefusal",
+          "edits": [
+            {
+              "old": "~allowed \\/ ~committed THEN Outcome(d,Refusal)",
+              "new": "~allowed \\/ ~committed THEN Outcome([d EXCEPT !.serial = @+1],Refusal)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "RefusedFrame"
+        },
+        {
+          "id": "ForgetFragmentTime",
+          "edits": [
+            {
+              "old": "fragmentTime == new.producer - 2",
+              "new": "fragmentTime == 0",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "FragmentTimecode"
+        },
+        {
+          "id": "AcceptStaleRetention",
+          "edits": [
+            {
+              "old": "IF version # d.version THEN",
+              "new": "IF FALSE THEN",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReplyKind"
+        },
+        {
+          "id": "PurgeOnInterruptedRetention",
+          "edits": [
+            {
+              "old": "~commit THEN Outcome(d,Refusal)",
+              "new": "~commit THEN Outcome(staged,Refusal)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "RefusedFrame"
+        },
+        {
+          "id": "DropRetentionVersion",
+          "edits": [
+            {
+              "old": "!.version = @+1",
+              "new": "!.version = @",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "RetentionVersion"
         },
         {
           "id": "AcceptCustomerKeyMedia",

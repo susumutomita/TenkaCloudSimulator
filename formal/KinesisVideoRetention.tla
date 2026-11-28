@@ -7,9 +7,10 @@ EXTENDS Naturals, Sequences
 Row(s,g,n,p,t,exp) == [stream |-> s, gen |-> g, num |-> n, payload |-> p,
                          server |-> t, producer |-> 9, expires |-> exp]
 Origin == [rows |-> <<Row("A",1,1,"first",1,4), Row("B",1,2,"peer",1,20)>>,
-           gen |-> 1, ttl |-> 3, now |-> 2, serial |-> 2, backed |-> TRUE]
-Reply(code, data, n) == [code |-> code, data |-> data, number |-> n]
-Ack(n) == Reply("PERSISTED", <<>>, n)
+           gen |-> 1, version |-> 1, ttl |-> 3, now |-> 2, serial |-> 2, backed |-> TRUE]
+Reply(code, data, n) == [code |-> code, data |-> data, number |-> n, timecode |-> 0]
+Receipt(code,n,t) == [Reply(code,<<>>,n) EXCEPT !.timecode = t]
+Ack(n) == Receipt("PERSISTED",n,7)
 Quiet == Reply("OK", <<>>, 0)
 Refusal == Reply("refused", <<>>, 0)
 Snapshot(data) == Reply("media", data, 0)
@@ -30,11 +31,12 @@ Put(d, op) ==
       room == Len(own) < 2 /\ Len(live) < 4
       n == d.serial + 1
       new == Row("A",d.gen,n,"second",d.now,d.now+d.ttl)
+      fragmentTime == new.producer - 2
   IN IF ~allowed \/ ~committed THEN Outcome(d,Refusal)
-     ELSE IF d.ttl = 0 THEN Outcome([d EXCEPT !.rows = live],Reply("RECEIVED",<<>>,0))
+     ELSE IF d.ttl = 0 THEN Outcome([d EXCEPT !.rows = live],Receipt("RECEIVED",0,fragmentTime))
      ELSE IF ~room THEN Outcome(d,Refusal)
      ELSE Outcome([d EXCEPT !.rows = Append(live,new), !.serial = n],
-                  IF op = "lostReply" THEN Reply("lost",<<>>,0) ELSE Ack(n))
+                  IF op = "lostReply" THEN Reply("lost",<<>>,0) ELSE Receipt("PERSISTED",n,fragmentTime))
 Read(d, op) ==
   LET live == Live(d)
       own == SelectSeq(live, LAMBDA r: Owned(r,d))
@@ -43,17 +45,22 @@ Read(d, op) ==
       after == SelectSeq(own, LAMBDA r: r.num > n)
   IN IF ~d.backed \/ op = "denyRead" \/ ~valid THEN Outcome(d,Refusal)
      ELSE Outcome([d EXCEPT !.rows = live],Snapshot(IDs(after)))
-Retention(d, ttl) ==
+Retention(d, ttl, version, commit) ==
   LET surviving == SelectSeq(d.rows, LAMBDA r: ~Owned(r,d) \/ (r.expires > d.now /\ ttl > 0 /\ r.server + ttl > d.now))
       renewed == [i \in 1..Len(surviving) |-> LET r == surviving[i] IN
                     IF Owned(r,d) THEN [r EXCEPT !.expires = r.server + ttl] ELSE r]
-  IN Outcome([d EXCEPT !.rows = renewed, !.ttl = ttl],Quiet)
+      staged == [d EXCEPT !.rows = renewed, !.ttl = ttl, !.version = @+1]
+  IN IF version # d.version THEN Outcome(d,Refusal)
+     ELSE IF ~commit THEN Outcome(d,Refusal)
+     ELSE Outcome(staged,Quiet)
 Step(d,op) ==
   CASE op \in {"put","denied","malformed","cancel","failCommit","lostReply"} -> Put(d,op)
     [] op \in {"earliest","afterFirst","afterLast","foreign","denyRead"} -> Read(d,op)
-    [] op = "short" -> Retention(d,2)
-    [] op = "zero" -> Retention(d,0)
-    [] op = "extend" -> Retention(d,7)
+    [] op = "short" -> Retention(d,2,d.version,TRUE)
+    [] op = "zero" -> Retention(d,0,d.version,TRUE)
+    [] op = "extend" -> Retention(d,7,d.version,TRUE)
+    [] op = "staleZero" -> Retention(d,0,1,TRUE)
+    [] op \in {"cancelZero","failZero"} -> Retention(d,0,d.version,FALSE)
     [] op = "tick" -> Outcome([d EXCEPT !.now = @+1],Quiet)
     [] op = "recreate" -> Outcome([d EXCEPT !.gen = @+1,
           !.rows = SelectSeq(@, LAMBDA r: r.stream # "A"), !.ttl = 3],Quiet)
@@ -77,7 +84,7 @@ Histories == {
  Case(<<"putPeer","put">>,Ack(4),<<A,E>>,<<B,<<3,1,"peer-next">>>>),
  Case(<<"putPeer","putPeer","put">>,Refusal,<<A>>,<<B,<<3,1,"peer-next">>,<<4,1,"peer-next">>>>),
  H(<<"lostReply">>,Reply("lost",<<>>,0),<<A,C>>), H(<<"lostReply","reopen","earliest">>,Snapshot(<<A,C>>),<<A,C>>),
- H(<<"zero","put">>,Reply("RECEIVED",<<>>,0),<<>>), H(<<"zero","malformed">>,Refusal,<<>>),
+ H(<<"zero","put">>,Receipt("RECEIVED",0,7),<<>>), H(<<"zero","malformed">>,Refusal,<<>>),
  H(<<"zero","extend","earliest">>,Snapshot(<<>>),<<>>),
  H(<<"tick","earliest">>,Snapshot(<<A>>),<<A>>),
  H(<<"tick","tick","earliest">>,Snapshot(<<>>),<<>>),
@@ -91,20 +98,31 @@ Histories == {
  H(<<"recreate","put">>,Ack(3),<<D>>), H(<<"recreate","put","afterFirst">>,Refusal,<<D>>),
  H(<<"recreate","put","earliest">>,Snapshot(<<D>>),<<D>>),
  H(<<"custom","extend","put">>,Refusal,<<A>>), H(<<"custom","earliest">>,Refusal,<<A>>),
- H(<<"tick","tick","denyRead">>,Refusal,<<A>>)
+ H(<<"tick","tick","denyRead">>,Refusal,<<A>>),
+ H(<<"put","extend","staleZero">>,Refusal,<<A,C>>),
+ H(<<"put","extend","staleZero","tick","tick","earliest">>,Snapshot(<<A,C>>),<<A,C>>),
+ H(<<"put","cancelZero">>,Refusal,<<A,C>>), H(<<"put","failZero">>,Refusal,<<A,C>>),
+ H(<<"put","cancelZero","tick","tick","earliest">>,Snapshot(<<C>>),<<C>>),
+ H(<<"put","failZero","earliest">>,Snapshot(<<A,C>>),<<A,C>>),
+ H(<<"failCommit","put">>,Ack(3),<<A,C>>)
 }
-VARIABLES history, pos, store, response
-vars == <<history,pos,store,response>>
-Init == /\ history \in Histories /\ pos = 0 /\ store = Origin /\ response = Quiet
+VARIABLES history, pos, store, previous, response
+vars == <<history,pos,store,previous,response>>
+Init == /\ history \in Histories /\ pos = 0 /\ store = Origin /\ previous = Origin /\ response = Quiet
 Next == IF pos < Len(history.ops)
         THEN LET result == Step(store,history.ops[pos+1]) IN
-             /\ store' = result.db /\ response' = result.reply /\ pos' = pos+1 /\ UNCHANGED history
+             /\ store' = result.db /\ previous' = store /\ response' = result.reply /\ pos' = pos+1 /\ UNCHANGED history
         ELSE UNCHANGED vars
 Spec == Init /\ [][Next]_vars
 Done == pos = Len(history.ops)
 TypeOK == pos \in 0..Len(history.ops) /\ store.gen \in {1,2} /\ store.now \in 2..5 /\ store.backed \in BOOLEAN
 ReplyKind == ~Done \/ response.code = history.ans.code
 FragmentNumber == ~Done \/ response.number = history.ans.number
+FragmentTimecode == ~Done \/ response.timecode = history.ans.timecode
+RefusedFrame == response.code # "refused" \/ store = previous
+RetentionVersion == IF pos = 0 THEN store.version = 1
+                    ELSE IF history.ops[pos] \in {"short","extend","zero"}
+                    THEN store.version = previous.version + 1 ELSE store.version = previous.version
 ReturnedMedia == ~Done \/ response.data = history.ans.data
 RetainedRows == ~Done \/ IDs(SelectSeq(store.rows, LAMBDA r: r.stream = "A")) = history.primary
 PeerRows == ~Done \/ IDs(SelectSeq(store.rows, LAMBDA r: r.stream = "B")) = history.peer
