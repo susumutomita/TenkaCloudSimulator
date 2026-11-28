@@ -1,6 +1,7 @@
 package supportcases
 
 import (
+	"bytes"
 	"database/sql"
 	"errors"
 	"path/filepath"
@@ -71,6 +72,7 @@ func TestSupportOperationsFailAtomicallyAtDatabaseAccess(t *testing.T) {
 
 			// Every reachable access in the request is denied in turn, including
 			// reads after attachment insertion and reads of nested result pages.
+			var acknowledged map[string]any
 			for cutoff := 1; ; cutoff++ {
 				if cutoff > 512 {
 					t.Fatal("could not reach end of operation")
@@ -94,6 +96,7 @@ func TestSupportOperationsFailAtomicallyAtDatabaseAccess(t *testing.T) {
 					if cutoff == 1 || err != nil || reply == nil {
 						t.Fatalf("clean retry at %d: %v", cutoff, err)
 					}
+					acknowledged = reply
 					break
 				}
 				if err == nil || reply != nil {
@@ -108,6 +111,88 @@ func TestSupportOperationsFailAtomicallyAtDatabaseAccess(t *testing.T) {
 				host, s = openTeam(t, path)
 				if !slices.Equal(before, supportDurableFrame(t, host.Database())) {
 					t.Fatalf("refusal %d changed reopened state", cutoff)
+				}
+			}
+			if err := host.Close(); err != nil {
+				t.Fatal(err)
+			}
+			host, s = openTeam(t, path)
+			after := supportRows(t, host.Database())
+			// The frame has one entry per owned physical row, followed by the
+			// sequence entry only in supportDurableFrame. A clean retry must
+			// produce exactly one operation's effects, including copied bytes.
+			deltas := map[string]int{"CreateCase": 4, "AddAttachmentsToSet": 3, "AppendToSet": 1, "AddCommunicationToCase": 3}
+			if len(after) != len(before)-1+deltas[operation] {
+				t.Fatalf("wrong number of persistent effects after retry: %d", len(after))
+			}
+			switch operation {
+			case "CreateCase", "AddCommunicationToCase":
+				target := id
+				expectedMessages := 2
+				if operation == "CreateCase" {
+					target = acknowledged["caseId"].(string)
+					expectedMessages = 1
+				} else if acknowledged["result"] != true {
+					t.Fatal("reply was not acknowledged")
+				}
+				messages := call(t, s, "DescribeCommunications", Input{CaseID: target})["communications"].([]map[string]any)
+				if len(messages) != expectedMessages || messages[0]["body"] != input.Body || messages[0]["submittedBy"] != "local-author" {
+					t.Fatal("retry returned the wrong communication")
+				}
+				saved := messages[0]["attachmentSet"].([]map[string]string)
+				if len(saved) != len(files) {
+					t.Fatal("retry did not retain both files")
+				}
+				for i, entry := range saved {
+					f := call(t, s, "DescribeAttachment", Input{AttachmentID: entry["attachmentId"]})["attachment"].(Attachment)
+					if f.Name != files[i].Name || !bytes.Equal(f.Data, files[i].Data) {
+						t.Fatal("submitted file changed after retry")
+					}
+				}
+			case "ResolveCase":
+				cases := call(t, s, "DescribeCases", Input{CaseIDs: []string{id}, IncludeResolved: true})["cases"].([]map[string]any)
+				if acknowledged["initialCaseStatus"] != "opened" || acknowledged["finalCaseStatus"] != "resolved" || len(cases) != 1 || cases[0]["status"] != "resolved" {
+					t.Fatal("retry did not persist resolution")
+				}
+			case "AddAttachmentsToSet", "AppendToSet":
+				target := acknowledged["attachmentSetId"].(string)
+				expected := files
+				if operation == "AppendToSet" {
+					if target != set {
+						t.Fatal("retry replaced the original attachment set")
+					}
+					expected = append(slices.Clone(files), files[0])
+				}
+				var n int
+				if err := host.Database().QueryRow("SELECT count(*) FROM aws_support_staged_files WHERE set_id=?", target).Scan(&n); err != nil || n != len(expected) {
+					t.Fatal("retry staged the wrong number of files", err)
+				}
+				for i, want := range expected {
+					var f Attachment
+					if err := host.Database().QueryRow("SELECT name,data FROM aws_support_staged_files WHERE set_id=? AND position=?", target, i).Scan(&f.Name, &f.Data); err != nil || f.Name != want.Name || !bytes.Equal(f.Data, want.Data) {
+						t.Fatal("retry changed staged bytes or order", err)
+					}
+				}
+			default:
+				if !slices.Equal(before, supportDurableFrame(t, host.Database())) {
+					t.Fatal("successful read mutated the owner")
+				}
+				switch operation {
+				case "DescribeAttachment":
+					f := acknowledged["attachment"].(Attachment)
+					if f.Name != files[0].Name || !bytes.Equal(f.Data, files[0].Data) {
+						t.Fatal("retry returned different attachment")
+					}
+				case "DescribeCases":
+					cases := acknowledged["cases"].([]map[string]any)
+					if len(cases) != 1 || cases[0]["caseId"] != id || cases[0]["subject"] != "target" {
+						t.Fatal("retry returned a different case")
+					}
+				case "DescribeCommunications":
+					messages := acknowledged["communications"].([]map[string]any)
+					if len(messages) != 1 || messages[0]["caseId"] != id || messages[0]["body"] != "first" {
+						t.Fatal("retry returned a different communication")
+					}
 				}
 			}
 			if !slices.Equal(peerFrame, supportDurableFrame(t, peerHost.Database())) {
