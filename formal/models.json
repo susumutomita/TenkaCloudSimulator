@@ -5967,6 +5967,7 @@
         "internal/aws/catalog/protocol.go",
         "internal/aws/catalog/redshift_tags.go",
         "internal/aws/catalog/redshift_tags_reference.go",
+        "internal/aws/catalog/resource_group_query.go",
         "internal/aws/catalog/selection.json",
         "internal/aws/catalog/semantics.go",
         "internal/aws/catalog/service_quotas.go",
@@ -6025,6 +6026,7 @@
         "internal/azure/arm/spec.go",
         "internal/azure/arm/store.go",
         "internal/azure/arm/value.go",
+        "internal/core/policy.go",
         "internal/gcp/catalog/apis.go",
         "internal/gcp/catalog/apis_analytics.go",
         "internal/gcp/catalog/apis_compute.go",
@@ -29970,6 +29972,73 @@
             }
           ],
           "expect_invariant": "ConnectionPragmasApplied"
+        }
+      ]
+    },
+    {
+      "id": "ScalingPlanConsole",
+      "model": "formal/ScalingPlanConsole.tla",
+      "config": "formal/ScalingPlanConsole.cfg",
+      "bounds": "Two mounted scopes, one selected plan, three calls, plan/target/list/named-refresh reads, writes and delayed replies. Distinct request tickets identify which result was observed.",
+      "properties": [
+        "TypeOK",
+        "OnlyCurrentReplyPublishes",
+        "SuccessRequiresAck",
+        "RetryRequiresNamedRefresh"
+      ],
+      "limits": "Finite UI request ownership and publication within one mounted scope. A refresh is an explicit exact-name read. Does not model concurrent plan replacement, React/DOM, JavaScript or Go refinement, IAM, HTTP or storage. AutoScalingPlanTargets independently models native capacity effects.",
+      "source_scope": [
+        "internal/server/server.go",
+        "internal/server/web/app.js",
+        "tools/console/src/autoscaling-plans.jsx",
+        "tools/console/src/autoscaling-plans.mjs",
+        "tools/console/src/console-navigation.mjs",
+        "tools/console/src/main.jsx"
+      ],
+      "mutants": [
+        {
+          "id": "PublishRetiredRead",
+          "edits": [
+            {
+              "old": "Publish(q) == Current(q)",
+              "new": "Publish(q) == Current(q) \\/ (q.kind \\in Reads /\\ v.active # None)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "OnlyCurrentReplyPublishes"
+        },
+        {
+          "id": "UnknownAsAcknowledged",
+          "edits": [
+            {
+              "old": "Acknowledged(status) == status = \"ok\"",
+              "new": "Acknowledged(status) == status \\in {\"ok\",\"unknown\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "SuccessRequiresAck"
+        },
+        {
+          "id": "ResendUncertainWrite",
+          "edits": [
+            {
+              "old": "MayWrite == ~v.uncertain",
+              "new": "MayWrite == TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "RetryRequiresNamedRefresh"
+        },
+        {
+          "id": "ListUnlocksWrite",
+          "edits": [
+            {
+              "old": "q.kind = \"refresh\" /\\ status = \"ok\"\n\nDeliver",
+              "new": "q.kind \\in {\"list\",\"refresh\"} /\\ status = \"ok\"\n\nDeliver",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "RetryRequiresNamedRefresh"
         }
       ]
     }

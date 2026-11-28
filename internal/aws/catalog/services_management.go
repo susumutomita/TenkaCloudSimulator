@@ -295,12 +295,16 @@ var resourceGroups = &Service{
 	Resources: []*Resource{
 		{Kind: "group", Shape: "Group", Summary: "GroupIdentifier", ID: "name", ARN: "arn:{partition}:resource-groups:{region}:{account}:group/{name}",
 			ARNMember: "GroupArn", NameMember: "Name", Unique: true, Limit: 100,
-			Generate: map[string]any{"GroupName": "$name"}},
+			Generate: map[string]any{"GroupName": "$name"}, Beside: []string{"ResourceQuery"}},
 	},
 	Ops: []Op{
 		{Name: "CreateGroup", Kind: Create, Resource: "group", Check: groupName},
+		// Keep the ordinary GetGroup/UpdateGroup descriptors as the generic console's primary actions.
+		{Name: "GetGroupQuery", Kind: Read, Resource: "group", Lookup: "Group", Check: groupIdentifier},
+		{Name: "ListGroupResources", Kind: Read, Resource: "group", Lookup: "Group", Check: groupIdentifier},
 		{Name: "GetGroup", Kind: Read, Resource: "group", Lookup: "Group", Check: groupIdentifier},
 		{Name: "ListGroups", Kind: List, Resource: "group"},
+		{Name: "UpdateGroupQuery", Kind: Update, Resource: "group", Lookup: "Group", Check: validateGroupQuery, Fields: []string{"ResourceQuery"}, CheckReplacement: requireStoredGroupQuery},
 		{Name: "UpdateGroup", Kind: Update, Resource: "group", Lookup: "Group", Check: groupIdentifier, Fields: []string{"Description", "Criticality", "Owner", "DisplayName"}},
 		{Name: "DeleteGroup", Kind: Delete, Resource: "group", Lookup: "Group", Check: groupIdentifier},
 		{Name: "Tag", Kind: Tag, Lookup: "Arn"},
@@ -308,7 +312,7 @@ var resourceGroups = &Service{
 		{Name: "GetTags", Kind: ListTags, Lookup: "Arn"},
 	},
 	Bounds: []string{
-		"Groups are stored without membership: resource queries and service configurations are refused, and resource searches, group membership, tag-sync tasks and group lifecycle events return UnknownOperationException with HTTP 501.",
+		"TAG_FILTERS_1_0 groups can match AWS::ECR::Repository in the current Region by one exact tag key and value. GetGroupQuery and UpdateGroupQuery operate on these named queries; ListGroupResources pages through current stored repository tags. Plain groups retain their metadata-only operations. Other query types, explicit membership changes, search, service configuration and tag-sync tasks are unsupported.",
 		"Groups are identified by the Group member; the deprecated GroupName member and ListGroups filters are refused. Tag, Untag and GetTags responses omit the echoed Arn and Keys members.",
 	},
 }
@@ -317,6 +321,10 @@ var resourceGroups = &Service{
 func groupName(input map[string]any) error {
 	if name, _ := input["Name"].(string); strings.HasPrefix(strings.ToLower(name), "aws") {
 		return Failure("BadRequestException", "Resource group names cannot start with AWS; that prefix is reserved.")
+	}
+	if query, present := input["ResourceQuery"]; present {
+		_, err := parsedRepositoryTagFilter(query)
+		return err
 	}
 	return nil
 }

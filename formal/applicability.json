@@ -1,24 +1,24 @@
 {
   "version": 1,
-  "base_sha": "70695e3f5c040ea98b3132a6a097a4b7ebea31ab",
+  "base_sha": "fd803075c37af3faa377f550c8e1cd52b3cfbbb1",
   "changes": [
     {
       "path": "README.md",
-      "sha256": "1b028c34400a6603efd6996c37219b6f94f842a736058146f1a78a8bbd438b53",
+      "sha256": "ee1cb3e3162df427bed8a71642a9133c0692ff7692a54669fe5a67352e277be8",
       "disposition": "documentation",
       "reason": "Describe the bounded regional B2BI Profiles applied-quota read and retained unsupported operations.",
       "models": []
     },
     {
       "path": "docs/aws-catalog-services.md",
-      "sha256": "a7ad1bbf2b6f85df8110d679c9e4bbbdf16b2bede9f7ea595887fc2c284357f8",
+      "sha256": "e77c34a5611dac16c80e33fd65d08183070cb0579515e393b120633e8217d480",
       "disposition": "documentation",
       "reason": "Describe the bounded regional B2BI Profiles applied-quota read and retained unsupported operations.",
       "models": []
     },
     {
       "path": "docs/aws-catalog.md",
-      "sha256": "88a38e4f94b8aa1ca215dc68bd7b6376d56a473ad52f1d13ae315b66d07984e2",
+      "sha256": "e77c06b85bc6fceec845f9be3cb9162949be99ed695adff021794afc3eeb0c1c",
       "disposition": "documentation",
       "reason": "Describe the bounded regional B2BI Profiles applied-quota read and retained unsupported operations.",
       "models": []
@@ -32,14 +32,14 @@
     },
     {
       "path": "docs/design/0001-go-standalone.md",
-      "sha256": "35aa0b5b9e9a738b4d0d78469327cd849731adcf1bc833d293659d283d736131",
+      "sha256": "d9c4a18ad21d5e7a663dc2fc8f6a26ab3d958a52e03ed57194643e856cc15e11",
       "disposition": "documentation",
       "reason": "Describe the bounded regional B2BI Profiles applied-quota read and retained unsupported operations.",
       "models": []
     },
     {
       "path": "formal/models.json",
-      "sha256": "380b6469e2097fddd31ed1c4d114fbcb6b9968a057d5b90ad9acd584afd0c95d",
+      "sha256": "5df86e08cde3e6c8ef74e57fa5eb88d24dbfeed66ddc382c1c4f57ca207cd2e0",
       "disposition": "formal-infrastructure",
       "reason": "Add the quota operation and extracted pinned model to the existing catalog lifecycle source scope.",
       "models": []
@@ -64,7 +64,7 @@
     },
     {
       "path": "internal/aws/catalog/engine.go",
-      "sha256": "b5026cd0d935b33e120350c33244dacef864926a8c7ba1af364b08cae0521700",
+      "sha256": "5da4b272232d030a0cb69262870f294a32e9a46ad170f675425b504465a2feb9",
       "disposition": "modeled",
       "reason": "Bind the regional, read-only B2BI Profiles quota and its enforced resource limit to the bounded catalog contract.",
       "models": [
@@ -114,11 +114,11 @@
           "limits": "Native HTTP status codes, JSON body examples, browser rendering and Go-to-model refinement are outside the finite lifecycle model."
         }
       ],
-      "sha256": "9d10e1e15fcf0e008fe2bf740de3383009b425d2bcb41b6cb4d597fc83880667"
+      "sha256": "d32c97729fa82c0d6eb2ea3d7403d1d18a0d8c4fb3393734d2b11875e2163589"
     },
     {
       "path": "internal/aws/catalog/selection.json",
-      "sha256": "d79604bde69b37cd65cf6d4f86bb1155fd87ef9493100ccf6add3db244ef5b63",
+      "sha256": "d4ae02f01b5d0e5f491f87847af150f2011e4e45bce0cb8e4f14d24ffbc5a45b",
       "disposition": "modeled",
       "reason": "Bind the regional, read-only B2BI Profiles quota and its enforced resource limit to the bounded catalog contract.",
       "models": [
@@ -136,7 +136,7 @@
     },
     {
       "path": "internal/aws/catalog/semantics.go",
-      "sha256": "d965012f83035b4c8bd2059bbdf78c0cdb915f16a73b7882460b4b8227f5d179",
+      "sha256": "ccf14a2ee482a92e88a7352a17e1e421f30f790aa2dcf18b66f6c7ae1c1cad81",
       "disposition": "modeled",
       "reason": "Bind the regional, read-only B2BI Profiles quota and its enforced resource limit to the bounded catalog contract.",
       "models": [
@@ -218,7 +218,7 @@
       "disposition": "presentation",
       "reason": "Ship the generated Service Quotas schema, fixed B2BI example and catalog index from the reviewed service binding.",
       "models": [],
-      "sha256": "8ea87c501efb07d9f3fc5e1332fa50dbe29a042e13fd41cd79be245f60e93849"
+      "sha256": "3d839c5184b3bf8db46a27c6645a687182f9002faf5a7bdde2a8bda779a5516b"
     },
     {
       "path": "internal/server/apidocs/catalog/service-quotas.json",
@@ -236,7 +236,7 @@
     },
     {
       "path": "test/e2e/check.py",
-      "sha256": "bf01caaea63ae57123a511cffa395e53c3449f229a727b51ef9f56345a6429c6",
+      "sha256": "8bfbaec7d59a76d136b9aa3d57d68e4c5bcef7b1d7b5c9a271fcfc2ad72c6f09",
       "disposition": "test-support",
       "reason": "Verify the native applied quota, B2BI profile enforcement, negative responses and isolation through the applicable test entry point.",
       "models": []
