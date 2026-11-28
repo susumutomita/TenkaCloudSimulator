@@ -1,33 +1,77 @@
 {
   "version": 1,
-  "base_sha": "8c8cc8c871f887e67845c51c0c84ccc351e05dd8",
+  "base_sha": "d7ee196310fc101deb4f4960b0f95be205507d80",
   "changes": [
     {
-      "path": ".github/workflows/ci.yml",
-      "sha256": "3d32992a4d1f593c18b6afc48334ffa6a1358d286053a150d30c4e16126513ea",
-      "disposition": "formal-infrastructure",
-      "reason": "Runs the ordinary local STS session checks against the CI build using the pinned boto3 environment and its captured binary digest.",
+      "path": "README.md",
+      "sha256": "b400a41ca5d077161c6c1e8ab913c5dfb96e69744f5b289c8537c70a911f4c62",
+      "disposition": "documentation",
+      "reason": "Describe the shared local IAM role used by the Console, reference and signed STS SDK.",
+      "models": []
+    },
+    {
+      "path": "docs/design/0001-go-standalone.md",
+      "sha256": "405937669d7c73a39e18a7d556887016e8337afaed3e10080515a81937ed7da7",
+      "disposition": "documentation",
+      "reason": "Describe the existing Console, IAM GetRole and signed STS trust boundary.",
+      "models": []
+    },
+    {
+      "path": "docs/iam.md",
+      "sha256": "c304fde2d4a79672862adc98a83cdcb10a0a70561966ca896399b83cb5f5ef4e",
+      "disposition": "documentation",
+      "reason": "Correct historical service-only trust descriptions to cover the existing native AWS principal and condition subset.",
       "models": []
     },
     {
       "path": "docs/sts-native.md",
-      "sha256": "73d264f5d14d82335336a0131e673fb193887d82a07d0fc255d8a9ccb51be352",
+      "sha256": "91b3b32f075c8850f8ecc377a310302c5c925623ced7353fcd09f4a43b06e527",
       "disposition": "documentation",
-      "reason": "Describes the exact bounded operations, local credential lifetime, IAM/trust decisions and references for the underlying AWS API.",
+      "reason": "Describe the existing Console role, API reference and official SDK workflow and its verification command.",
       "models": []
     },
     {
-      "path": "test/e2e/sts_session_lifecycle.py",
-      "sha256": "7d75ef091a0cd15844fde21f51fc938f168a8f9e9d89f7e80467920fc12ce80c",
+      "path": "internal/server/web/app.js",
+      "sha256": "1c1516a3468cb2591ede197df038231495a315e49d2db31a4eaf6e02ea28c1a3",
+      "disposition": "modeled",
+      "reason": "The rebuilt bundle includes the registered login form used to enter the IAM Console. Only IAM principal labels and help text changed in the bundle inputs.",
+      "models": [
+        {
+          "id": "LoginInputIntent",
+          "properties": [
+            "NoEmptyPOST",
+            "SubmissionSelectionExact"
+          ],
+          "limits": "The existing model describes login submission. It does not model IAM role rendering, trust evaluation or STS. The signed SDK and browser fixture exercise those operations."
+        }
+      ]
+    },
+    {
+      "path": "test/e2e/sts_iam_console.py",
+      "sha256": "8957dda21eae6e7f510028d54fa697ac0eaa3c0ab259aa0092544e5b21dcfa55",
       "disposition": "test-support",
-      "reason": "Runs two isolated local simulator authorities and verifies normal role assumption, session identity, owner restart, independent peer and cleanup.",
+      "reason": "Exercise the existing local IAM Console, cookie-authenticated Scalar GetRole and signed STS SDK against one private role, including refused writes and cleanup.",
       "models": []
     },
     {
-      "path": "test/e2e/test_sts_session_lifecycle.py",
-      "sha256": "cdbc69f44d87a71409078f1d3061589b3479795cb79ab58267e6d245d01c5419",
-      "disposition": "test-support",
-      "reason": "Checks the permitted methods, signed requests and fixed local endpoints for the development-only STS SDK fixture.",
+      "path": "tools/console/bundle-digests.json",
+      "sha256": "5393d7159183e02760596148d0ce24144ff35e69ae950108a6dff3c5aa54260a",
+      "disposition": "presentation",
+      "reason": "Record the rebuilt embedded application digest.",
+      "models": []
+    },
+    {
+      "path": "tools/console/bundle-inputs.json",
+      "sha256": "3bb25b4999735a46ce86e6ef7426fc5f53336246e7a1506a0b9dff3dbd8dc2ea",
+      "disposition": "presentation",
+      "reason": "Bind the IAM component changes in the deterministic Console build inventory.",
+      "models": []
+    },
+    {
+      "path": "tools/console/src/iam.jsx",
+      "sha256": "9b5e45d33177a549aa91c20edde2974e5c71fbbbdb70684987546fe7084bf89d",
+      "disposition": "presentation",
+      "reason": "Render existing saved AWS or Service trust principal statements with their effect and condition status; correct bilingual help and maximum session duration wording.",
       "models": []
     }
   ]
