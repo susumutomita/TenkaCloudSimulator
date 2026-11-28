@@ -1,54 +1,250 @@
 {
   "version": 1,
-  "base_sha": "4c32b71522e4af2d1f49894befed2867774539ce",
+  "base_sha": "62c4a2bc49fc0a80a8bf1bf1e4828c1d2082a17a",
   "changes": [
     {
-      "path": "README.md",
-      "sha256": "00463a27d70c504f197f00f78b06ce890c5818d683089db561238ad539ba2fc7",
+      "path": "README.ja.md",
+      "sha256": "d73bc1f0bfa7cc53295809ae83ffe9b4357278a412cdb236123ce26cb4a83559",
       "disposition": "documentation",
-      "reason": "Describe the availability of the embedded ELBv2 Query practice examples.",
+      "reason": "Document the compiled regional Console, saved health check path and shared native API scope.",
+      "models": []
+    },
+    {
+      "path": "README.md",
+      "sha256": "5efbfbf07d96e946ab97f85f0607d2b5309e243aecd0a686212a9ded3150a20c",
+      "disposition": "documentation",
+      "reason": "Document the compiled regional Console, saved health check path and shared native API scope.",
       "models": []
     },
     {
       "path": "docs/design/0001-go-standalone.md",
-      "sha256": "37a8830e0cc7c2935e7e9afe841b808ace5bbc7ee11194f65bd8df6eac3b5aee",
+      "sha256": "c45419fcee2be66a7a4d9dabfc78aea23fb42040b61598e8fa67e107e154018a",
       "disposition": "documentation",
-      "reason": "Describe the shared regional endpoint and the signed-in session used by the reference.",
+      "reason": "Document the compiled regional Console, saved health check path and shared native API scope.",
       "models": []
     },
     {
       "path": "docs/elb.md",
-      "sha256": "93303936bda471791e9e6fa235498ac2928aa862b4df26ad98c4b317dbf0141c",
+      "sha256": "497db75bbb2766c74b2fb2a62658e7b7a6902ff2efee5e928c3f70e383aba7a8",
       "disposition": "documentation",
-      "reason": "Explain how to supply owned ARNs, provision real dependencies and clean up through the reference.",
+      "reason": "Document the compiled regional Console, saved health check path and shared native API scope.",
       "models": []
     },
     {
-      "path": "internal/server/apidocs/openapi.json",
-      "sha256": "fab52106572cb0f6e45d28af839e4b6ed72cc2a6600b016d2cb836b2295dab38",
+      "path": "formal/ALBConsoleWorkflow.cfg",
+      "sha256": "aa0926f85b5ae571a5734e446b09c7afef25195925148e4ce611b0c62dd86b2c",
+      "disposition": "modeled",
+      "reason": "Bind the regional ALB Console read, action and saved-state workflow to this immutable artifact.",
+      "models": [
+        {
+          "id": "ALBConsoleWorkflow",
+          "properties": [
+            "ReadAdmission",
+            "TruthfulHealth",
+            "DeniedProjection",
+            "ScopeFrame",
+            "RetiredWriteFrame",
+            "SingleSend",
+            "NativeFrame",
+            "Acknowledgement",
+            "CompleteDetail",
+            "BoundReadback",
+            "CheckedHealth",
+            "ObservedOnly"
+          ],
+          "limits": "Finite scoped read, selected identity, write and acknowledgement states. XML bytes, IAM evaluation, browser rendering, actual isolated team processes, SDK interoperability and local listener or Lambda execution require separate native evidence."
+        }
+      ]
+    },
+    {
+      "path": "formal/ALBConsoleWorkflow.tla",
+      "sha256": "6364cc2adbf514c21fa43fc8cabb6ef4dcec6b287a214c8c25a2d44d9a918d40",
+      "disposition": "modeled",
+      "reason": "Bind the regional ALB Console read, action and saved-state workflow to this immutable artifact.",
+      "models": [
+        {
+          "id": "ALBConsoleWorkflow",
+          "properties": [
+            "ReadAdmission",
+            "TruthfulHealth",
+            "DeniedProjection",
+            "ScopeFrame",
+            "RetiredWriteFrame",
+            "SingleSend",
+            "NativeFrame",
+            "Acknowledgement",
+            "CompleteDetail",
+            "BoundReadback",
+            "CheckedHealth",
+            "ObservedOnly"
+          ],
+          "limits": "Finite scoped read, selected identity, write and acknowledgement states. XML bytes, IAM evaluation, browser rendering, actual isolated team processes, SDK interoperability and local listener or Lambda execution require separate native evidence."
+        }
+      ]
+    },
+    {
+      "path": "formal/models.json",
+      "sha256": "bedcb6c29584e766a5af1b33b7c7c1e61ec76669f0fa47a54763a67e9943c242",
+      "disposition": "formal-infrastructure",
+      "reason": "Record the exact regression fixture or bundle metadata for the verified Console artifact.",
+      "models": []
+    },
+    {
+      "path": "internal/server/server.go",
+      "sha256": "7fc01dc69e1cc40fdce21db0fbfdd4f9ffb3d27c596e1e67ad116598475ed21d",
+      "disposition": "modeled",
+      "reason": "Expose the native service only with its compiled Console and regional Query operations.",
+      "models": [
+        {
+          "id": "ALBConsoleWorkflow",
+          "properties": [
+            "ScopeFrame",
+            "ReadAdmission"
+          ],
+          "limits": "Finite scoped read, selected identity, write and acknowledgement states. XML bytes, IAM evaluation, browser rendering, actual isolated team processes, SDK interoperability and local listener or Lambda execution require separate native evidence."
+        }
+      ]
+    },
+    {
+      "path": "internal/server/web/app.js",
+      "sha256": "261eb5c89bbc2fc3de45e3988bef30e5218cd9e892eb706c89d5209029ee191f",
+      "disposition": "modeled",
+      "reason": "Bind the regional ALB Console read, action and saved-state workflow to this immutable artifact.",
+      "models": [
+        {
+          "id": "ALBConsoleWorkflow",
+          "properties": [
+            "ReadAdmission",
+            "TruthfulHealth",
+            "DeniedProjection",
+            "ScopeFrame",
+            "RetiredWriteFrame",
+            "SingleSend",
+            "NativeFrame",
+            "Acknowledgement",
+            "CompleteDetail",
+            "BoundReadback",
+            "CheckedHealth",
+            "ObservedOnly"
+          ],
+          "limits": "Finite scoped read, selected identity, write and acknowledgement states. XML bytes, IAM evaluation, browser rendering, actual isolated team processes, SDK interoperability and local listener or Lambda execution require separate native evidence."
+        }
+      ]
+    },
+    {
+      "path": "scripts/formal_model_gate.py",
+      "sha256": "92b0bd9b686a8b9d6cc75437d3bc4349d2c56047f104a6f2fcc82b6acdc17f6c",
+      "disposition": "formal-infrastructure",
+      "reason": "Record the exact regression fixture or bundle metadata for the verified Console artifact.",
+      "models": []
+    },
+    {
+      "path": "scripts/test-formal-gate.py",
+      "sha256": "22c6653d7f1a0207d837854be019ba690fcbfb101f04b0e258551331e0a1da24",
+      "disposition": "formal-infrastructure",
+      "reason": "Record the exact regression fixture or bundle metadata for the verified Console artifact.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/elb_console.py",
+      "sha256": "f363b43d3b1ecb10c70e962af05cd7a315e6bec2e5cfa6e8092ed1921c648654",
+      "disposition": "test-support",
+      "reason": "Exercise native UI and SDK behavior without changing server decisions.",
+      "models": []
+    },
+    {
+      "path": "tools/console/bundle-digests.json",
+      "sha256": "ccf6ea00ba8f4df9d4baf0066e5f6468ca552a10d4dcd3457c9c82e5c5de79bd",
       "disposition": "presentation",
-      "reason": "Present thirteen ELBv2 Query templates for existing operations. The native transitions and authority are unchanged.",
+      "reason": "Record the exact regression fixture or bundle metadata for the verified Console artifact.",
       "models": []
     },
     {
-      "path": "test/e2e/elb_scalar.py",
-      "sha256": "163f7064426f5763be4abdd20645b935b10c4a73b75db150c47024171816f3ad",
-      "disposition": "test-support",
-      "reason": "Exercise authenticated Scalar sends and compare the returned ELBv2 XML with independently read native SDK state.",
+      "path": "tools/console/bundle-inputs.json",
+      "sha256": "900ff279af97c2e7c4d3bcdcab41710894d0de3622ce329a937d11d568b97919",
+      "disposition": "presentation",
+      "reason": "Record the exact regression fixture or bundle metadata for the verified Console artifact.",
       "models": []
     },
     {
-      "path": "test/e2e/simpledb_scalar_reference_live.py",
-      "sha256": "1aac0b271c626918f98614ab7cc32583ae1177404fffd43d22b7672997c24478",
-      "disposition": "test-support",
-      "reason": "Select the desired native Query service and let tests edit an input using the actual Scalar form. The SimpleDB defaults remain intact.",
-      "models": []
+      "path": "tools/console/src/console-navigation.mjs",
+      "sha256": "cf26938b0b019444a760908dec891f56f07d72110c33d3b54dcdbc595df2b779",
+      "disposition": "modeled",
+      "reason": "Offer the service route only when the needed native capabilities are present.",
+      "models": [
+        {
+          "id": "ALBConsoleWorkflow",
+          "properties": [
+            "ReadAdmission",
+            "ScopeFrame"
+          ],
+          "limits": "Finite scoped read, selected identity, write and acknowledgement states. XML bytes, IAM evaluation, browser rendering, actual isolated team processes, SDK interoperability and local listener or Lambda execution require separate native evidence."
+        }
+      ]
     },
     {
-      "path": "test/e2e/test_sakura_openapi.py",
-      "sha256": "308644044f12dd92a9ece130a40f776770b416018ae5a965938559038250cd98",
-      "disposition": "test-support",
-      "reason": "Validate the new Query templates and fields before projecting them out of the pre-existing historical reference assertions.",
+      "path": "tools/console/src/elb.jsx",
+      "sha256": "39fe556f78fc5da1ce2cf9fa47e7b076f4d7911c5b155a1df984834ea4b1a403",
+      "disposition": "modeled",
+      "reason": "Bind the regional ALB Console read, action and saved-state workflow to this immutable artifact.",
+      "models": [
+        {
+          "id": "ALBConsoleWorkflow",
+          "properties": [
+            "ReadAdmission",
+            "DeniedProjection",
+            "TruthfulHealth",
+            "ScopeFrame",
+            "RetiredWriteFrame",
+            "SingleSend",
+            "Acknowledgement",
+            "BoundReadback",
+            "ObservedOnly"
+          ],
+          "limits": "Finite scoped read, selected identity, write and acknowledgement states. XML bytes, IAM evaluation, browser rendering, actual isolated team processes, SDK interoperability and local listener or Lambda execution require separate native evidence."
+        }
+      ]
+    },
+    {
+      "path": "tools/console/src/elb.mjs",
+      "sha256": "037ae84333b9c80cd7b9c46541ec892750271455d849c868131897def7504f9c",
+      "disposition": "modeled",
+      "reason": "Bind the regional ALB Console read, action and saved-state workflow to this immutable artifact.",
+      "models": [
+        {
+          "id": "ALBConsoleWorkflow",
+          "properties": [
+            "CompleteDetail",
+            "CheckedHealth",
+            "BoundReadback",
+            "NativeFrame",
+            "Acknowledgement"
+          ],
+          "limits": "Finite scoped read, selected identity, write and acknowledgement states. XML bytes, IAM evaluation, browser rendering, actual isolated team processes, SDK interoperability and local listener or Lambda execution require separate native evidence."
+        }
+      ]
+    },
+    {
+      "path": "tools/console/src/main.jsx",
+      "sha256": "117fad48c2eca7700dc9bcfa40ee5fc6120bdcbbc3a5c84e21b446ed4493ec78",
+      "disposition": "modeled",
+      "reason": "Mount the regional Console under the selected exercise identity and retire old mounted state.",
+      "models": [
+        {
+          "id": "ALBConsoleWorkflow",
+          "properties": [
+            "ScopeFrame",
+            "RetiredWriteFrame"
+          ],
+          "limits": "Finite scoped read, selected identity, write and acknowledgement states. XML bytes, IAM evaluation, browser rendering, actual isolated team processes, SDK interoperability and local listener or Lambda execution require separate native evidence."
+        }
+      ]
+    },
+    {
+      "path": "tools/console/test/elb.test.mjs",
+      "sha256": "07cd916b70e23e24d3b713b6fc72214cbe0b716cf750f97e8649db160977cb67",
+      "disposition": "presentation",
+      "reason": "Record the exact regression fixture or bundle metadata for the verified Console artifact.",
       "models": []
     }
   ]
