@@ -88,6 +88,13 @@
       ]
     },
     {
+      "path": "internal/aws/kms_grant_outages_test.go",
+      "sha256": "48285c9d0c603da63618e53add82a54af72640474b9c885d97890b25af705d32",
+      "disposition": "test-support",
+      "reason": "Exercise concrete grant lookups, role and signer storage failures, no acknowledgment before verified readback/commit, exact quota and recovery using unchanged native entry points.",
+      "models": []
+    },
+    {
       "path": "internal/aws/kms_grants.go",
       "sha256": "7428089db1a1f4906f6d2a7956713f86ae9d655181d45364d1b17652610ada26",
       "disposition": "modeled",
