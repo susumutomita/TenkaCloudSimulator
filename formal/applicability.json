@@ -1,47 +1,26 @@
 {
   "version": 1,
-  "base_sha": "2c24d2bd5ae75d013fd25d3a259441f732cbf117",
+  "base_sha": "c70822a65ab85edf87cb42a9b45bb4e6ab7fb210",
   "changes": [
     {
-      "path": ".github/workflows/ci.yml",
-      "sha256": "39b95e9cecf7620b3200414111c44099ad40897a389c7405ce55211b24b43285",
-      "disposition": "formal-infrastructure",
-      "reason": "Runs the existing two-process Queue SDK oracle with the build digest on the hosted platform-audit job. No state transition, model input or model gate changes.",
-      "models": []
-    },
-    {
-      "path": "docs/acceptance/azure-queue.md",
-      "sha256": "ef8addcaec48eeef751dd3dc09584fe250a2ffdb506ea34d6d40199849b20124",
+      "path": "docs/aws-catalog.md",
+      "sha256": "507325178342755de0275c89b40ba46658a05d50e569e7225aba1ff9f17beb7f",
       "disposition": "documentation",
-      "reason": "Documents the SDK fixture signer, offline request capture command and hosted acceptance job.",
+      "reason": "Records official end-of-support dates and the exact historical local scope of three AWS catalog entries.",
       "models": []
     },
     {
-      "path": "test/e2e/azure_queue_browser_capture.js",
-      "disposition": "test-support",
-      "reason": "Read a bounded clone of one matching, successful Queue response in the test browser. The simulator and the original browser Fetch request, promise and response are unchanged.",
-      "sha256": "942c7a51857fb3cdfeaaefef6b7f923f9e54607983baeebf71d0aa48ce3aceff",
+      "path": "docs/coverage-assessment.md",
+      "sha256": "2a7fc214e79f0811c9d6c076a5730ed301c4b80648b9007dc9ea7bf6af89d112",
+      "disposition": "documentation",
+      "reason": "Documents the current first-party REST contracts and prerequisites for three products absent from the pinned corpus.",
       "models": []
     },
     {
-      "path": "test/e2e/azure_queue_cli.py",
-      "sha256": "79652d32b5fdd71ba81b505d2164ebb38987daeb168ae21d4ff77d4d26778c74",
-      "disposition": "test-support",
-      "reason": "Uses a public SDK fixture signer for clients in the two-process CLI oracle. The local token, transport restrictions and assertions are unchanged.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/azure_queue_console_gui.py",
-      "sha256": "097f11ccc90d08191089742afc05a87ac6132db9b03be5894f7db294cf6e682c",
-      "disposition": "test-support",
-      "reason": "Check the default operator and fixed participant capabilities, use the received message controls, and validate real Peek and Receive XML without repeating either request.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/azure_queue_official.py",
-      "sha256": "2c46c66e25427131a472e4f6236f8f1aff97787618f233997adf824c9d5d7fdc",
-      "disposition": "test-support",
-      "reason": "Initializes the pinned SDK with a public test signer so its eight prepared requests can be compared with the existing wire oracle.",
+      "path": "docs/gcp-catalog.md",
+      "sha256": "cb4fec87a61b0bbb3bcd09a16ba136de9ac222175a15991c4901b72055f42fba",
+      "disposition": "documentation",
+      "reason": "Distinguishes the pinned discovery corpus from public Google APIs that have no local runtime.",
       "models": []
     }
   ]
