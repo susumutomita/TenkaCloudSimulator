@@ -11,121 +11,13 @@ import urllib.request
 from route53_openapi import project_before_route53
 from check import running
 from secrets_manager import client
-from test_sakura_openapi import NEW_IDS, COLLECTION, ITEM
-
-
-# Independent literal inventory from immutable main5c97dc5916fa39fd43d80ae79532d5892fcb30ea.
-# OpenAPI source SHA256 8feac717622e4e2208d82f6a497cbfe2b1d801c76d81a4c381849fe304551943.
-# Do not derive expectations from the served document under test.
-EXPECTED_OPERATION_IDS = frozenset({
-    'AddPermission',
-    'AzureCreateContainer',
-    'AzureDeleteBlob',
-    'AzureDeleteContainer',
-    'AzureGetBlob',
-    'AzureGetBlobProperties',
-    'AzureGetContainerProperties',
-    'AzureListBlobs',
-    'AzureListContainers',
-    'AzurePutBlob',
-    'Capabilities',
-    'CreateBucket',
-    'CreateDeployment',
-    'CreateFunction',
-    'CreateResource',
-    'CreateRestApi',
-    'CreateStage',
-    'DeleteBucket',
-    'DeleteFunction',
-    'DeleteIdentityPolicy',
-    'DeleteObject',
-    'DeleteResource',
-    'DeleteRestApi',
-    'DeleteStage',
-    'GCPCreateBucket',
-    'GCPDeleteBucket',
-    'GCPDeleteObject',
-    'GCPDownloadObject',
-    'GCPGetBucket',
-    'GCPGetObject',
-    'GCPListBuckets',
-    'GCPListObjects',
-    'GCPUploadObject',
-    'GetDeployment',
-    'GetFunctionConfiguration',
-    'GetIdentityPolicy',
-    'GetMethod',
-    'GetObject',
-    'GetPolicy',
-    'GetResource',
-    'GetResources',
-    'GetRestApi',
-    'GetRestApis',
-    'GetStage',
-    'HeadBucket',
-    'HeadObject',
-    'IAMRoleQueryOperation',
-    'Invoke',
-    'InvokeLocalRESTProxyGet',
-    'InvokeLocalRESTProxyPost',
-    'ListBuckets',
-    'ListFunctions',
-    'ListObjectsV2OrGetBucketLocation',
-    'ListPrincipals',
-    'PutIdentityPolicy',
-    'PutIntegration',
-    'PutMethod',
-    'PutObject',
-    'RemovePermission',
-    'UpdateFunctionCode',
-    'awsRegionalOperation',
-})
-EXPECTED_PATHS = frozenset({
-    '/',
-    '/2015-03-31/functions',
-    '/2015-03-31/functions/{FunctionName}',
-    '/2015-03-31/functions/{FunctionName}/code',
-    '/2015-03-31/functions/{FunctionName}/configuration',
-    '/2015-03-31/functions/{FunctionName}/invocations',
-    '/2015-03-31/functions/{FunctionName}/policy',
-    '/2015-03-31/functions/{FunctionName}/policy/{StatementId}',
-    '/_simulator/providers/aws/',
-    '/_simulator/providers/aws/_execute-api/{Region}/{RestApiId}/{StageName}/{ProxyPath}',
-    '/_simulator/providers/azure/{StorageAccount}',
-    '/_simulator/providers/azure/{StorageAccount}/{ContainerName}',
-    '/_simulator/providers/azure/{StorageAccount}/{ContainerName}/{BlobName}',
-    '/_simulator/providers/gcp/download/storage/v1/b/{BucketName}/o/{ObjectName}',
-    '/_simulator/providers/gcp/storage/v1/b',
-    '/_simulator/providers/gcp/storage/v1/b/{BucketName}',
-    '/_simulator/providers/gcp/storage/v1/b/{BucketName}/o',
-    '/_simulator/providers/gcp/storage/v1/b/{BucketName}/o/{ObjectName}',
-    '/_simulator/providers/gcp/upload/storage/v1/b/{BucketName}/o',
-    '/_simulator/v1/capabilities',
-    '/_simulator/v1/iam/principals',
-    '/_simulator/v1/iam/principals/{principal}/policy',
-    '/restapis',
-    '/restapis/{RestApiId}',
-    '/restapis/{RestApiId}/deployments',
-    '/restapis/{RestApiId}/deployments/{DeploymentId}',
-    '/restapis/{RestApiId}/resources',
-    '/restapis/{RestApiId}/resources/{ResourceId}',
-    '/restapis/{RestApiId}/resources/{ResourceId}/methods/{HttpMethod}',
-    '/restapis/{RestApiId}/resources/{ResourceId}/methods/{HttpMethod}/integration',
-    '/restapis/{RestApiId}/stages',
-    '/restapis/{RestApiId}/stages/{StageName}',
-    '/{bucket}',
-    '/{bucket}/{key}',
-})
+from test_sakura_openapi import project_sakura_server_list_only
+from logs_secrets_reference_inventory import verify_historical_routes
 
 
 def validate_reference_contract(spec):
-    inherited = project_before_route53(spec)
-    ids = [entry["operationId"] for path in inherited["paths"].values()
-           for entry in path.values() if isinstance(entry, dict) and "operationId" in entry]
-    assert len(ids) == len(set(ids)) == 67, "Document duplicated or omitted a native operation"
-    assert set(ids) == EXPECTED_OPERATION_IDS | NEW_IDS | {'S3MultipartUpload'}, "Served operation inventory differs from immutable main contract"
-    assert spec['paths']['/{bucket}/{key}']['post']['operationId'] == 'S3MultipartUpload', "Multipart addition moved from the native S3 object route"
-    assert len(inherited["paths"]) == 36 and set(inherited["paths"]) == EXPECTED_PATHS | {COLLECTION, ITEM}, "Served path inventory differs from immutable main contract"
+    inherited = project_sakura_server_list_only(project_before_route53(spec))
+    verify_historical_routes(inherited)
 
 
 def run():
