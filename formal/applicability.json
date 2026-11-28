@@ -1,19 +1,12 @@
 {
   "version": 1,
-  "base_sha": "fa06c139f93ab1e32bf8c13809ca70434464994a",
+  "base_sha": "5386c9829ec3c9f1ddf3b6d430083080d3c24552",
   "changes": [
     {
-      "path": "test/e2e/ec2_readonly_console.py",
-      "sha256": "f8f61a105bb0facaee32da7cfb0a97c24bfdc8a2161a0153f23f160e91aa21cb",
-      "disposition": "test-support",
-      "reason": "Scope refreshed subnet readback to exact owning association row and separately verify Saved subnets/native VPC relationship; preserve strictness and require Chromium sandbox. No product changes.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/console_language.py",
-      "sha256": "2008a04852ba244e1d6f92c3fe0a1027d34ea29fab626d289abf673200d89fd4",
-      "disposition": "test-support",
-      "reason": "Retain explicit AppEngine and CloudStorage keyboard coverage while verifying shipped CloudDNS between them with real ArrowDown/ArrowUp, and enable Chromium sandbox; retain locale/authority/native/focus/Escape/Home/End checks.",
+      "path": ".github/workflows/ci.yml",
+      "sha256": "06e12f7050295002cecce227369950c995fdab02ddff2bbb24a7f5c8c631829f",
+      "disposition": "formal-infrastructure",
+      "reason": "Temporary manual-only wrapper executes both original Console entry points against clean fixed-source product with existing pinned tools, sandbox enabled and actual exits retained.",
       "models": []
     }
   ]
