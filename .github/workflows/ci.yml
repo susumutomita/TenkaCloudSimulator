@@ -9,7 +9,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7.0.1
         with:
-          ref: 130d4443a7347727927ff0e0ea94f80e0b070867
+          ref: 555fdb81f59eac8294846837f30781b11fe2aa23
           fetch-depth: 0
           persist-credentials: false
       - uses: actions/setup-go@v6.5.0
@@ -21,8 +21,8 @@ jobs:
           set -euo pipefail
           umask 077
           test "$(id -u)" -ne 0
-          test "$(git rev-parse HEAD)" = 130d4443a7347727927ff0e0ea94f80e0b070867
-          test "$(git rev-parse HEAD^{tree})" = 97b31ac08e72574d1d4bff71e6f401cc2a3a7627
+          test "$(git rev-parse HEAD)" = 555fdb81f59eac8294846837f30781b11fe2aa23
+          test "$(git rev-parse HEAD^{tree})" = a52c1d2f147aa3bb40f0de0279eb48a0afd55aa4
           test -z "$(git status --porcelain)"
           test "$(go env GOVERSION)" = go1.26.11
           python3 - <<'PY'
@@ -37,9 +37,11 @@ jobs:
           git rev-parse HEAD HEAD^{tree} > "$RUNNER_TEMP/cw-receipts/source.txt"
           make build
           go version -m dist/tenkacloud-simulator > "$RUNNER_TEMP/cw-receipts/build.txt"
-          grep -F 'vcs.revision=130d4443a7347727927ff0e0ea94f80e0b070867' "$RUNNER_TEMP/cw-receipts/build.txt"
+          grep -F 'vcs.revision=555fdb81f59eac8294846837f30781b11fe2aa23' "$RUNNER_TEMP/cw-receipts/build.txt"
+          grep -F 'v0.2.1-0.20261128140607-555fdb81f59e' "$RUNNER_TEMP/cw-receipts/build.txt"
+          sha256sum dist/tenkacloud-simulator > "$RUNNER_TEMP/cw-receipts/observed.sha256"
           grep -F 'vcs.modified=false' "$RUNNER_TEMP/cw-receipts/build.txt"
-          echo '72f540e5138c938c4699443c09cbd01e82f44b1ae067eb2427b572edf2a3151a  dist/tenkacloud-simulator' > "$RUNNER_TEMP/cw-receipts/binary.sha256"
+          echo 'ad723f02097fc1120b006e497d1d953517cb2d91922caf00e5268d10bbec845a  dist/tenkacloud-simulator' > "$RUNNER_TEMP/cw-receipts/binary.sha256"
           sha256sum --check "$RUNNER_TEMP/cw-receipts/binary.sha256"
       - name: Install pinned SDK, browser and audit dependencies
         run: |
@@ -60,7 +62,7 @@ jobs:
           set -euo pipefail
           umask 077
           export SIMULATOR_BINARY="$PWD/dist/tenkacloud-simulator"
-          export SIMULATOR_BINARY_SHA256=72f540e5138c938c4699443c09cbd01e82f44b1ae067eb2427b572edf2a3151a
+          export SIMULATOR_BINARY_SHA256=ad723f02097fc1120b006e497d1d953517cb2d91922caf00e5268d10bbec845a
           export AXE_SCRIPT="$RUNNER_TEMP/cw-axe/axe.min.js"
           export PYTHONDONTWRITEBYTECODE=1
           chromium=("$HOME"/.cache/ms-playwright/chromium-*/chrome-linux64/chrome)
@@ -70,7 +72,8 @@ jobs:
           result=0
           unshare --user --map-current-user --net --keep-caps sh -eu -c '
             ip link set lo up
-            test "$(ls /sys/class/net | tr -d "\n")" = lo
+            test "$(ip -o link show | cut -d: -f2 | tr -d " ")" = lo
+            echo loopback-only > "$RUNNER_TEMP/cw-receipts/interfaces.txt"
             exec setpriv --inh-caps=-all --ambient-caps=-all --bounding-set=-all "$RUNNER_TEMP/cw-venv/bin/python" -B test/e2e/cloudwatch_observability_console.py
           ' > "$RUNNER_TEMP/cw-private.log" 2>&1 || result=$?
           echo "$result" > "$RUNNER_TEMP/cw-receipts/fixture.exit"
