@@ -16,6 +16,7 @@ from urllib.parse import parse_qs, urlsplit
 from playwright.sync_api import sync_playwright, expect
 from reflow import assert_reflow
 from aws_catalog import Team, refused
+from service_quotas_catalog_sweep import check_service_quotas_catalog_view
 
 REPORTS = Path(os.environ.get('SIMULATOR_REPORTS', 'reports')).resolve()
 # Optional directory for the two review screenshots (RDS list, reference Send).
@@ -600,6 +601,10 @@ def run():
                 descriptors = team.control('GET', team.control('GET', '/_simulator/v1/capabilities')['services']['catalog']['descriptors'])['services']
                 swept, failures = 0, []
                 for described in descriptors:
+                    if described['model'] == 'service-quotas':
+                        check_service_quotas_catalog_view(page, team, described, team.database)
+                        swept += len(described['resources'])
+                        continue
                     page.get_by_role('button', name=re.compile('^Catalog service')).click()
                     page.get_by_role('option', name=described['title'] + ' ' + str(len(described['operations'])) + ' / ' + str(described['officialOperations']) + ' official operations', exact=True).click()
                     tabs = page.get_by_role('tab')
