@@ -84,6 +84,12 @@ def run():
                     return context
 
                 with context_for(team.token) as context:
+                    # The Console's shipped initial selection is simulator-admin;
+                    # confirm that exact ordinary selection through fresh discovery.
+                    owner_caps = context.request.get(team.endpoint + '/_simulator/v1/capabilities',
+                                                     headers={'X-Simulator-Principal': 'simulator-admin'}).json()
+                    owner_principal = owner_caps['principal']
+                    assert owner_principal == 'simulator-admin' and owner_caps['gcpTrace']['project'] == project
                     page = context.new_page()
                     page.on('pageerror', lambda error: errors.append(type(error).__name__))
 
@@ -92,6 +98,7 @@ def run():
                         if not target.path.startswith('/_simulator/providers/'):
                             return
                         assert request.method == 'GET' and request.post_data is None
+                        assert request.header_value('x-simulator-principal') == owner_principal
                         # Choosing Google Cloud opens its existing Storage landing
                         # before the user selects Trace from Services.
                         if target.path == '/_simulator/providers/gcp/storage/v1/b':
@@ -183,6 +190,7 @@ def run():
                 team.stop()
                 team.start()
                 assert saved(api(team, team.token, project)) == before and saved(other) == peer_before
+                restart_snapshots = frame(team.database), frame(peer.database)
                 with context_for(team.token) as restarted:
                     page = restarted.new_page()
                     page.on('request', observe)
@@ -191,6 +199,8 @@ def run():
                     page.get_by_role('button', name=ids[0], exact=True).click()
                     expect(page.get_by_role('heading', name='Trace details', exact=True)).to_be_visible()
                     expect(page.get_by_role('table').get_by_role('row')).to_have_count(4)
+                assert saved(api(team, team.token, project)) == before and saved(other) == peer_before
+                assert (frame(team.database), frame(peer.database)) == restart_snapshots
                 assert not outside and not errors and wire
     assert not Path(directory).exists()
     print(json.dumps({'ok': True, 'binarySha256': digest, 'sdkSeededTraces': 26,
