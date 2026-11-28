@@ -69,6 +69,16 @@ deletes the record and zone and checks that the zone list is empty. Set
 discovery and turns off redirects and retries. Terraform provider compatibility
 is tracked separately.
 
+## List managed zones in the API reference
+
+The served Cloud DNS reference exposes a read-only **List managed zones**
+request. To verify it, set `SIMULATOR_BINARY` to the local build and
+`CHROMIUM_EXECUTABLE` to the Playwright Chromium executable, then run
+`python3 test/e2e/gcp_dns_scalar_send.py` in a loopback-only test environment
+with Chromium sandbox support. The fixture creates a disposable zone, sends
+one cookie-authenticated GET from Scalar, checks the zone in the JSON and
+rendered response, and deletes it through the native endpoint.
+
 ## Finite limits and explicit refusals
 
 Only public metadata zones are supported. Mutable record types are A, AAAA,
