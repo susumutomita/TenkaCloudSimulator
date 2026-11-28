@@ -1,90 +1,82 @@
-name: Verify native and Cloudscape CodeStar Notifications
+name: Exact CodeStar Notifications full gate
 on:
   workflow_dispatch:
 permissions:
   contents: read
 jobs:
-  notifications:
-    name: Real pinned SDK, Scalar and Cloudscape notifications on two immutable inputs
-    runs-on: ubuntu-22.04
-    timeout-minutes: 40
-    env:
-      NATIVE: d0579d3f653298293049b13890b4ae1ec64ef91b
-      NATIVE_TREE: 9b029bcafcb543e47dc53bd2ff8a79bb6a9f3bf7
-      CONSOLE: 8e18201720d59da28d06ee455a81f95a317764ee
-      CONSOLE_TREE: a55edbe7df736567c71b6846816da96ddf75e0be
+  complete-before-commit:
+    name: Unfiltered standard make before-commit at 8e18201
+    runs-on: ubuntu-24.04
+    timeout-minutes: 80
     steps:
       - uses: actions/checkout@v7.0.1
         with:
-          path: native
-          ref: d0579d3f653298293049b13890b4ae1ec64ef91b
-          persist-credentials: false
-      - uses: actions/checkout@v7.0.1
-        with:
-          path: console
           ref: 8e18201720d59da28d06ee455a81f95a317764ee
           persist-credentials: false
       - uses: actions/setup-go@v6.5.0
         with:
           go-version: '1.26.11'
-          cache-dependency-path: native/go.sum
-      - name: Build and identify clean standalone inputs
+          cache: true
+      - name: Verify fixed product source and ordinary runner
         run: |
-          test "$(go env GOVERSION)" = go1.26.11
-          mkdir "$RUNNER_TEMP/receipts"
-          build() (
-            cd "$1"
-            test "$(git rev-parse HEAD)" = "$2"
-            test "$(git rev-parse 'HEAD^{tree}')" = "$3"
-            test -z "$(git status --porcelain)"
-            make build
-            go version -m dist/tenkacloud-simulator > "$RUNNER_TEMP/receipts/$1-build.txt"
-            grep -F "vcs.revision=$2" "$RUNNER_TEMP/receipts/$1-build.txt"
-            grep -F 'vcs.modified=false' "$RUNNER_TEMP/receipts/$1-build.txt"
-            sha256sum dist/tenkacloud-simulator > "$RUNNER_TEMP/receipts/$1-binary.sha256"
-          )
-          build native "$NATIVE" "$NATIVE_TREE"
-          build console "$CONSOLE" "$CONSOLE_TREE"
-      - name: Install repository-pinned SDK, browser and accessibility audit
-        working-directory: console
-        run: |
-          "$RUNNER_TOOL_CACHE/Python/3.12.16/x64/bin/python3.12" -m venv "$RUNNER_TEMP/sdk"
-          "$RUNNER_TEMP/sdk/bin/pip" install -r scripts/requirements-test.txt
-          "$RUNNER_TEMP/sdk/bin/pip" check
-          "$RUNNER_TEMP/sdk/bin/playwright" install --with-deps chromium
-          "$RUNNER_TEMP/sdk/bin/python" scripts/get-audit-tools.py "$RUNNER_TEMP/axe"
-      - name: Verify exact SDK, Scalar and interactive Cloudscape with a private loopback
-        run: |
-          python="$RUNNER_TEMP/sdk/bin/python"
-          "$python" -c 'import os; assert not any(k.startswith(("AWS_", "BOTO_")) for k in os.environ)'
+          test "$(git rev-parse HEAD)" = 8e18201720d59da28d06ee455a81f95a317764ee
+          test "$(git rev-parse HEAD^{tree})" = a55edbe7df736567c71b6846816da96ddf75e0be
+          test -z "$(git status --porcelain)"
           test "$(id -u)" -ne 0
-          chromium=( "$HOME"/.cache/ms-playwright/chromium-*/chrome-linux64/chrome )
-          test "${#chromium[@]}" -eq 1
-          test -x "${chromium[0]}"
-          export CHROMIUM_EXECUTABLE="${chromium[0]}"
-          export AXE_SCRIPT="$RUNNER_TEMP/axe/axe.min.js"
-          unshare --user --map-current-user --net --keep-caps sh -ec '
-            ip link set lo up
-            exec setpriv --inh-caps=-all --ambient-caps=-all --bounding-set=-all "$@"
-          ' verify sh -ec '
-            test "$(awk -F: "NR>2 {gsub(/ /,\"\",\$1);print \$1}" /proc/net/dev)" = lo
-            test "$(awk "/^CapEff:/{print \$2}" /proc/self/status)" = 0000000000000000
-            python="$1"
-            status=0
-            cd native
-            export SIMULATOR_BINARY="$PWD/dist/tenkacloud-simulator"
-            "$python" -B test/e2e/codestar_notifications.py > "$RUNNER_TEMP/receipts/native-sdk.json" || status=1
-            "$python" -B test/e2e/codestar_notification_scalar.py > "$RUNNER_TEMP/receipts/native-scalar.json" || status=1
-            "$python" -B test/e2e/check.py Conformance.test_codestar_notification_rules_and_git_delivery > "$RUNNER_TEMP/receipts/regular-e2e.log" 2>&1 || status=1
-            cd ../console
-            export SIMULATOR_BINARY="$PWD/dist/tenkacloud-simulator"
-            "$python" -B test/e2e/codestar_notification_console.py > "$RUNNER_TEMP/receipts/console-sdk.json" || status=1
-            cat "$RUNNER_TEMP"/receipts/*.json
-            exit "$status"
-          ' verify "$python"
-      - uses: actions/upload-artifact@v7.0.2
+          mkdir -p "$RUNNER_TEMP/notifications-complete-gate"
+          git rev-parse HEAD HEAD^{tree} > "$RUNNER_TEMP/notifications-complete-gate/source.txt"
+          uname -srmo > "$RUNNER_TEMP/notifications-complete-gate/platform.txt"
+          go version > "$RUNNER_TEMP/notifications-complete-gate/go.txt"
+          python3 --version > "$RUNNER_TEMP/notifications-complete-gate/python.txt"
+      - name: Run original complete make before-commit
+        run: |
+          test -z "$(git status --porcelain --untracked-files=all)"
+          set +e
+          make before-commit 2>&1 | tee "$RUNNER_TEMP/notifications-full.log"
+          codes=("${PIPESTATUS[@]}")
+          result=${codes[0]}
+          if test "$result" -eq 0 && test "${codes[1]}" -ne 0; then result=${codes[1]}; fi
+          set -e
+          printf '%s\n' "$result" > "$RUNNER_TEMP/notifications-complete-gate/make-exit.txt"
+          exit "$result"
+      - name: Enforce original unfiltered statement and source-line floors
+        run: |
+          go run github.com/boumenot/gocover-cobertura@v1.4.0 < reports/coverage.out > "$RUNNER_TEMP/notifications-complete-gate/coverage.xml"
+          set -o pipefail
+          python3 scripts/check-coverage.py reports/coverage.out "$RUNNER_TEMP/notifications-complete-gate/coverage.xml" | tee "$RUNNER_TEMP/notifications-complete-gate/coverage.txt"
+      - name: Preserve safe coverage and package outcomes
         if: always()
+        run: |
+          python3 - <<'PY'
+          import json, os, re
+          from pathlib import Path
+          root = Path(os.environ['RUNNER_TEMP']) / 'notifications-complete-gate'
+          root.mkdir(parents=True, exist_ok=True)
+          log = root.parent / 'notifications-full.log'
+          text = log.read_text(errors='replace') if log.exists() else ''
+          safe = [line for line in text.splitlines()
+                  if re.match(r'^(ok\s+github\.com/|FAIL(?:\s|$)|\?\s+github\.com/|coverage:|Ran \d+ tests? in|OK$|FAILED \()', line)
+                  or 'coverage gate' in line.lower() or 'source coverage' in line.lower()
+                  or 'statement coverage' in line.lower()]
+          result = root / 'make-exit.txt'
+          (root / 'summary.json').write_text(json.dumps({
+              'source': '8e18201720d59da28d06ee455a81f95a317764ee',
+              'command': 'make before-commit',
+              'make_exit': int(result.read_text()) if result.exists() else None,
+              'observed_summaries': safe,
+              'scope': 'Unfiltered standard command. Failure remains failure; later phases are not inferred executed.'
+          }, indent=2) + '\n')
+          PY
+          git status --porcelain > "$RUNNER_TEMP/notifications-complete-gate/post-status.txt"
+          if test -f dist/tenkacloud-simulator; then
+            go version -m dist/tenkacloud-simulator > "$RUNNER_TEMP/notifications-complete-gate/build.txt"
+            sha256sum dist/tenkacloud-simulator > "$RUNNER_TEMP/notifications-complete-gate/binary.sha256"
+          fi
+      - name: Retain exact complete-gate evidence
+        if: always()
+        uses: actions/upload-artifact@v7.0.2
         with:
-          name: branch-notification-stack-${{ github.run_id }}
-          path: ${{ runner.temp }}/receipts
+          name: notifications-complete-gate-${{ github.run_id }}
+          path: ${{ runner.temp }}/notifications-complete-gate/
           if-no-files-found: error
+          retention-days: 14
