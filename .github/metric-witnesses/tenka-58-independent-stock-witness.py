@@ -6,12 +6,15 @@ import json
 import math
 from pathlib import Path
 import tempfile
+from urllib.error import HTTPError
+from urllib.parse import urlencode
+from urllib.request import Request
 
 import boto3
 import botocore
 from botocore.config import Config
 from botocore.exceptions import ClientError
-from tenka_review_loopback import running, control
+from tenka_review_loopback import running, control, local_open
 
 
 NAMESPACE = 'Independent/Statistics'
@@ -67,6 +70,22 @@ def reject(expected_status, function):
     raise AssertionError('accepted refused operation')
 
 
+def assert_outer_peer_denied(endpoint, foreign_token, t):
+    fields = {'Action': 'GetMetricStatistics', 'Version': '2010-08-01', 'Namespace': NAMESPACE,
+              'MetricName': METRIC, 'StartTime': t.isoformat(), 'EndTime': (t + timedelta(minutes=2)).isoformat(),
+              'Period': '60', 'Statistics.member.1': 'Sum'}
+    request = Request(endpoint + '/', method='POST', data=urlencode(fields).encode(),
+                      headers={'Content-Type': 'application/x-www-form-urlencoded', 'X-Simulator-Service': 'monitoring',
+                               'X-Simulator-Token': foreign_token})
+    try:
+        with local_open(request) as response:
+            raise AssertionError(('peer token accepted', response.status))
+    except HTTPError as error:
+        with error:
+            assert error.status == 401 and error.headers.get_content_type() == 'application/json'
+            assert json.load(error) == {'error': 'A valid simulator access token is required'}
+
+
 def verify_stats(sdk, t):
     v = get(sdk, t)
     assert set(v) == {(t, UNITS), (t + timedelta(minutes=1), UNITS)}
@@ -113,7 +132,7 @@ def main():
                 assert get(a,t,Unit='Bytes') == {} and get(a,t,MetricName='Unmeasured') == {}
                 assert get(a,t,Unit=None)[t,'Count']['Sum'] == 83
                 assert get(a,t,Unit=None)[t,UNITS]['Sum'] == 16
-                reject(401,lambda: get(client(b_url,a_token),t))
+                assert_outer_peer_denied(b_url,a_token,t)
                 policy = {'Version':'2012-10-17','Statement':[{'Effect':'Allow','Action':'cloudwatch:GetMetricStatistics','Resource':'*'}]}
                 path = '/_simulator/v1/iam/principals/metric-reader/policy'
                 control(a_url,a_token,path,policy)
@@ -134,7 +153,7 @@ def main():
             verify_stats(client(endpoint,token),t)
     assert not a_db.exists() and not b_db.exists()
     assert AUDIT['call'] == AUDIT['send'] == AUDIT['response']
-    print(json.dumps({'stockSDK':[boto3.__version__,botocore.__version__],'audited':AUDIT,'firstMinute':[3,16,2,10,16/3], 'fourSampleAverage':3.5,'processes':2,'databases':2,'authenticated':True,'peerToken':401,'implicitAndExplicitDenials':403,'restart':True,'cleanup':True},sort_keys=True))
+    print(json.dumps({'stockSDK':[boto3.__version__,botocore.__version__],'audited':AUDIT,'firstMinute':[3,16,2,10,16/3], 'fourSampleAverage':3.5,'processes':2,'databases':2,'authenticated':True,'peerToken':401,'peerTokenTransport':'raw protocol at simulator authentication boundary','implicitAndExplicitDenials':403,'restart':True,'cleanup':True},sort_keys=True))
 
 if __name__ == '__main__':
     main()

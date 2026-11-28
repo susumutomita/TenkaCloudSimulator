@@ -9,12 +9,12 @@ jobs:
     runs-on: ubuntu-22.04
     timeout-minutes: 25
     env:
-      PRODUCT: c128cc37d1cc4d12f5daa699863771066a4195a1
-      PRODUCT_TREE: 7a2e6fa9797808447a98a6e4e7afa928de1e9af8
+      PRODUCT: 415027c9151b1514d694afeaeabe80f4e6cd0bd4
+      PRODUCT_TREE: 1e978c73660300f8ec931fdcfe3a6a0429e527ed
     steps:
       - uses: actions/checkout@v7.0.1
         with:
-          ref: c128cc37d1cc4d12f5daa699863771066a4195a1
+          ref: 415027c9151b1514d694afeaeabe80f4e6cd0bd4
           path: product
           persist-credentials: false
       - uses: actions/checkout@v7.0.1
@@ -68,7 +68,7 @@ jobs:
             and .transport == "AWS Query 2010-08-01" and .counts.calls > 0
             and .counts.calls == .counts.sends and .counts.sends == .counts.responses
             and .contentEncodings == ["gzip","identity"] and .twoTeamState == true
-            and .restartPersisted == true and .cleanup == "owned temporary databases removed")' "$receipts/stock.json"
+            and .peerTokenHTTP == 401 and .restartPersisted == true and .cleanup == "owned temporary databases removed")' "$receipts/stock.json"
           jq -se 'length == 1 and (.[0] | .stockSDK == ["1.42.0","1.41.6"] and .fourSampleAverage == 3.5
             and .audited.call > 0 and .audited.call == .audited.send and .audited.send == .audited.response
             and .audited.plain > 0 and .audited.gzip > 0 and .databases == 2 and .processes == 2
@@ -80,7 +80,7 @@ jobs:
       - name: Retain build identity and the three SDK observations
         uses: actions/upload-artifact@v7.0.2
         with:
-          name: cloudwatch-custom-metrics-c128cc3-${{ github.run_id }}
+          name: cloudwatch-custom-metrics-415027c-${{ github.run_id }}
           path: ${{ runner.temp }}/metric-receipts/
           retention-days: 14
           if-no-files-found: error
