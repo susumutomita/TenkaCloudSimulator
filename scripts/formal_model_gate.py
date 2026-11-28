@@ -1167,6 +1167,78 @@ REQUIRED_SOURCE_SCOPES['CodeStarBranchNotificationDelivery'] = {
     'internal/aws/notification_gateway_test.go',
 }
 
+# Asynchronous read and write receipts in the notification rule Console.
+BASE_MODELS.add('NotificationRuleConsole')
+BASE_INVARIANTS['NotificationRuleConsole'] = {
+    'TypeOK',
+    'ReadFrame',
+    'CanceledRead',
+    'ScopeReset',
+    'LateWriteFrame',
+    'WriteLock',
+    'AckState',
+    'SavedState',
+    'RecoveryState',
+    'ExactReplay',
+}
+REQUIRED_MUTANTS['NotificationRuleConsole'] = {
+    'AcceptRetiredReadSameMount',
+    'AcceptPriorPrincipalSameTicket',
+    'ShowDeniedRead',
+    'ShowForeignDetailARN',
+    'PublishMalformedRead',
+    'PublishFailedRead',
+    'ShowDetailBForA',
+    'DiscardFirstPageWhileAppending',
+    'LeaveCanceledReadActive',
+    'CarryFormerRenderedData',
+    'CarryFormerCreateToken',
+    'CarryFormerPayload',
+    'CarryPriorUnknownCreate',
+    'PublishLateWriteOnNewScope',
+    'StartWhileWriteInFlight',
+    'StartBeforeDurableRead',
+    'StartDuringKnownUncertainty',
+    'StartDuringUnknownCreate',
+    'TreatSuccessAckAsVerified',
+    'TreatLostWriteAsAcknowledged',
+    'TrustMalformedAcknowledgement',
+    'ForgetPriorCreateOnRejectedRetry',
+    'InventARNForUnknownCreate',
+    'LoseKnownAffectedARN',
+    'LoseTypedCreateARN',
+    'VerifyDeleteWhenRuleSurvives',
+    'VerifyDeleteOnReadFailure',
+    'VerifyWrongSavedFields',
+    'VerifySiblingARN',
+    'VerifyMissingUpdate',
+    'VerifyDeniedReadback',
+    'OverrideUnknownCreateWithMatchedName',
+    'RecoverFromList',
+    'RecoverFromOtherARN',
+    'RecoverFromSibling404',
+    'RecoverFromDenied',
+    'RecoverFromFailure',
+    'RefuseExactKnown404',
+    'CallRecoveryAConfirmedWrite',
+    'ReplayAutomatically',
+    'ReplayAlteredBody',
+    'ReplayAlteredToken',
+    'ReplayInOtherScope',
+    'RepeatKnownWriteInsteadOfRefresh',
+    'DiscardExplicitRetry',
+    'GenerateFreshTokenForRetry',
+    'ReserializeNewBodyForRetry',
+}
+REQUIRED_SOURCE_SCOPES['NotificationRuleConsole'] = {
+    'tools/console/src/codestar-notifications.jsx',
+    'tools/console/src/codestar-notifications.mjs',
+    'tools/console/src/console-navigation.mjs',
+    'tools/console/src/main.jsx',
+    'internal/server/web/app.js',
+    'internal/server/server.go',
+}
+
 # STS guard lifecycle requirements. Existing service requirements stay intact.
 BASE_MODELS.add('STSSessionLifecycle')
 BASE_INVARIANTS['STSSessionLifecycle'] = {'UseRequiresAllGuards', 'IssueRequiresAllGuards', 'TypeOK'}
