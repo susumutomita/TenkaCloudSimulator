@@ -42,7 +42,11 @@ SQLite、テスト用 ID、署名鍵、ブラウザー用 CA は各実行で生�
 Cognito の SAML POST は同じオリジンで完了し、検証済みアプリのコールバックへ別のナビゲーションで進む。
 サンプルの成功は通常の Console の認証、実 AWS・Microsoft のアカウント、Azure OAuth/Graph/ARM を有効にしない。
 Entra の SAML コンポーネントは Cognito に依存しないが、別 SP は明示的に登録する必要がある。
-[起動手順と制約](../local-sso.md)。
+1 回の起動で生成する合成アカウントは 1 件。登録先の SP に発行する署名付き SAML アサーションには、
+テナント ID とオブジェクト ID から作った配送不能な `.invalid` アドレスを常に含める。再起動するとアドレスも変わる。
+Cognito の ID トークンにメールを載せるのは、属性マッピングを設定し、クライアントが `email` スコープを要求したときだけ。
+`email_verified` は発行せず、サンプルアプリは引き続き `openid` のみを要求する。
+[起動手順と制約](../local-sso.md)と[属性マッピング](../azure-entra-local-saml.md#using-the-synthetic-email-in-a-local-cognito-client)。
 
 [ローカル Entra OIDC 検証フィクスチャ](../azure-entra-verification-fixture.md)は、明示的な別コマンドで数値ループバックにだけ待ち受ける。通常のゲートウェイや Azure の権限は変更せず、検証用メタデータと一時公開鍵を返す。テスト用トークンは明示指定した起動出力に限り、実テナント、ログイン、SAML、HTTP発行には対応しない。
 

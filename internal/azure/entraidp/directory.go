@@ -2,7 +2,9 @@ package entraidp
 
 import (
 	"crypto/rand"
+	"errors"
 	"fmt"
+	"regexp"
 )
 
 // Directory is one disposable Azure-shaped tenant and synthetic account. These
@@ -10,10 +12,29 @@ import (
 type Directory struct {
 	TenantID string
 	ObjectID string
+	email    string
 }
 
-func newDirectory() Directory {
-	return Directory{TenantID: newGUID(), ObjectID: newGUID()}
+// Email is the immutable, non-deliverable address of the generated account.
+// It is available to the trusted fixture launcher, not a public metadata field.
+func (d Directory) Email() string { return d.email }
+
+var syntheticGUID = regexp.MustCompile(`^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$`)
+
+func syntheticEmail(tenant, object string) (string, error) {
+	if !syntheticGUID.MatchString(tenant) || !syntheticGUID.MatchString(object) {
+		return "", errors.New("noncanonical synthetic directory identity")
+	}
+	// Both UUIDs are canonical ASCII. The mailbox and DNS labels are below
+	// standard length bounds; .invalid never denotes a delivery destination.
+	return "user-" + object + "@tenant-" + tenant + ".entra.invalid", nil
+}
+
+func newDirectory() (Directory, error) {
+	d := Directory{TenantID: newGUID(), ObjectID: newGUID()}
+	var err error
+	d.email, err = syntheticEmail(d.TenantID, d.ObjectID)
+	return d, err
 }
 
 func newGUID() string {
