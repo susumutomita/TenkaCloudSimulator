@@ -29987,12 +29987,15 @@
         "BoundedRows",
         "ReadAggregates"
       ],
-      "limits": "Finite normalized transaction/read contract only. Scope denotes trusted configured namespace/region isolation; one process/database is assumed. It does not prove HTTP/gzip/XML/SigV4 or IAM evaluation, input parsing/dimension canonicalization, real UTC rounding/retention durations, floating point accuracy, SQLite schema/SQL/locking/trigger behavior, actual quotas, cancellation timing, process recovery or Go refinement. Rational average comparisons model multiplicity weighting, not IEEE754. Read/restart cannot publish staged writes; independent expected aggregation uses committed oracle rows. Native SDK/database/fault tests remain required.",
+      "limits": "Finite normalized transaction/read contract only. Scope denotes trusted configured namespace/region isolation; one process/database is assumed. It does not prove HTTP/gzip/XML/SigV4 or IAM evaluation, input parsing/dimension canonicalization, real UTC rounding/retention durations, floating point accuracy, SQLite schema/SQL/locking/trigger behavior, actual quotas, cancellation timing, process recovery or Go refinement. Rational average comparisons model multiplicity weighting, not IEEE754. Read/restart cannot publish staged writes; independent expected aggregation uses committed oracle rows. Native SDK/database/fault tests remain required. Gateway dispatch, store initialization and server capability composition paths are mapped for integration evidence only; this model does not verify their concrete wiring.",
       "source_scope": [
         "internal/aws/cloudwatchmetrics/store.go",
         "internal/aws/cloudwatchmetrics/http.go",
         "internal/aws/cloudwatchmetrics/form.go",
-        "internal/aws/cloudwatch_metrics_gateway.go"
+        "internal/aws/cloudwatch_metrics_gateway.go",
+        "internal/aws/s3.go",
+        "internal/aws/ssm.go",
+        "internal/server/server.go"
       ],
       "mutants": [
         {
@@ -30044,7 +30047,7 @@
           "edits": [
             {
               "old": "rows'=rows (* RollbackRetainsOld *)",
-              "new": "rows'=Prune(rows,owner) (* RollbackRetainsOld *)",
+              "new": "rows'=(IF kind=\"Cancel\" THEN Prune(rows,owner) ELSE rows) (* RollbackRetainsOld *)",
               "count": 1
             }
           ],
@@ -30055,7 +30058,7 @@
           "edits": [
             {
               "old": "rows'=rows (* RejectionRetainsOld *)",
-              "new": "rows'=Prune(rows,s) \\o batch (* RejectionRetainsOld *)",
+              "new": "rows'=(IF kind=\"Denied\" THEN Prune(rows,s) \\o batch ELSE rows) (* RejectionRetainsOld *)",
               "count": 1
             }
           ],
