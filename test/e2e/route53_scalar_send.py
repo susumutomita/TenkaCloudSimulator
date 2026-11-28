@@ -153,7 +153,6 @@ def run():
                         dialog = page.get_by_role('dialog').filter(
                             has=page.get_by_role('button', name='Close Client', exact=True))
                         expect(dialog).to_have_count(1)
-                        dialog.get_by_role('button', name='Query Parameters', exact=True).click()
                         for parameter in parameters:
                             name = parameter['name']
                             include = dialog.get_by_role('checkbox', name='Include ' + name + ' in request', exact=True)
