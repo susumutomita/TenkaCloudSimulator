@@ -44,6 +44,20 @@ func (q *request) execute() (map[string]any, error) {
 	if q.e.ownedPrivateRDS != nil && q.b.spec.Model == "rds" {
 		defer q.e.ownedPrivateRDS.lock(q.region, q.op.Kind)()
 	}
+	if q.b.spec.Model == "service-quotas" {
+		switch q.op.Name {
+		case "GetServiceQuota", "GetAWSDefaultServiceQuota":
+			return q.readQuota()
+		case "ListServices", "ListServiceQuotas", "ListAWSDefaultServiceQuotas":
+			return q.listQuotas()
+		case "RequestServiceQuotaIncrease":
+			return q.requestQuotaIncrease()
+		case "GetRequestedServiceQuotaChange":
+			return q.getQuotaIncrease()
+		case "ListRequestedServiceQuotaChangeHistory", "ListRequestedServiceQuotaChangeHistoryByQuota":
+			return q.listQuotaIncreaseHistory()
+		}
+	}
 	switch q.op.Kind {
 	case Create:
 		if q.isECSTaskDefinition() {
@@ -329,6 +343,9 @@ func (q *request) referenced(tx *sql.Tx, res *Resource, r row) error {
 }
 
 func (q *request) authorize(resource string) error {
+	if q.b.isResourceGroupServiceAction(q.op.Name) {
+		resource = "*"
+	}
 	return q.authorizeAction(q.b.spec.IAMPrefix+":"+q.op.action(), resource)
 }
 
@@ -860,10 +877,7 @@ func (q *request) create(ecsRevision int) (map[string]any, error) {
 }
 
 func insertNewResource(tx *sql.Tx, res *Resource, r *row, parent *row) error {
-	limit := res.Limit
-	if limit == 0 {
-		limit = defaultKindLimit
-	}
+	limit := res.liveLimit()
 	count, err := countKind(tx, r.Service, r.Region, r.Kind, r.Parent)
 	if err != nil {
 		return err
@@ -1329,6 +1343,12 @@ func (q *request) responseDocument(res *Resource, r row, shapeName string) map[s
 	}
 	if res.ProjectResponse != nil {
 		res.ProjectResponse(doc)
+	}
+	// ApplicationTag identifies an application group. The supported plain and
+	// query groups expose their ordinary tags through the tag operations.
+	if q.b.spec.Model == "resource-groups" && shapeName == "Group" {
+		delete(doc, "ApplicationTag")
+		return doc
 	}
 	if member := q.tagMember(shapeName); member != "" {
 		doc[member] = q.renderTags(q.b.model.shape(shapeName).Members[member].Shape, r.Tags)

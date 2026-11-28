@@ -1,7 +1,10 @@
+import {cloudFrontAvailable} from './cloudfront-local.mjs';
 import {elbAvailable} from './elb.mjs';
 import {scalingPlansAvailable} from './autoscaling-plans.mjs';
 import {sakuraServerEndpoint} from './sakura-server-read.mjs';
+import {supportAdvertised} from './support-client.mjs';
 import {route53ConsoleAdvertised} from './route53-console.mjs';
+import {traceConfiguration} from './gcp-trace.mjs';
 
 // Console discovery only: this catalog never grants API or exercise authority.
 export const PROVIDERS = Object.freeze([
@@ -24,9 +27,11 @@ export const SERVICES = Object.freeze([
   {id: 'cfn', provider: 'aws', label: 'CloudFormation', capability: 'cloudformation', route: '/stacks', keywords: 'stack template スタック テンプレート クラウドフォーメーション'},
   {id: 'kms', provider: 'aws', label: 'Key Management Service', capability: 'kms', route: '/kms', keywords: 'kms encryption key 暗号 キー 暗号化 キー管理'},
   {id: 'dynamodb', provider: 'aws', label: 'DynamoDB', capability: 'dynamodb', route: '/dynamodb', keywords: 'table item key-value database ddb ダイナモ ダイナモDB テーブル 項目 キー データベース'},
+  {id: 'cloudfront', provider: 'aws', label: 'CloudFront', capability: 'cloudfront', route: '/cloudfront', keywords: 'cloudfront distribution cache invalidation s3 ディストリビューション キャッシュ 無効化'},
   {id: 'elasticloadbalancing', provider: 'aws', label: 'Elastic Load Balancing', capability: 'elasticloadbalancing', route: '/elasticloadbalancing', keywords: 'ALB load balancer listeners target health ロードバランサー リスナー ターゲット'},
   {id: 'autoscaling-plans', provider: 'aws', label: 'AWS Auto Scaling Plans', capability: 'autoscaling-plans', route: '/autoscaling-plans', keywords: 'scaling plans capacity dynamodb スケーリングプラン テーブル 容量'},
   {id: 'route53', provider: 'aws', label: 'Route 53', capability: 'route53', route: '/route53', keywords: 'dns hosted zones records ptr reverse lookup 公開ホストゾーン 逆引き レコード'},
+  {id: 'support', provider: 'aws', label: 'AWS Support', capability: 'support', route: '/support', keywords: 'support cases communication attachments サポート ケース メッセージ 添付ファイル'},
   {id: 'simpledb', provider: 'aws', label: 'SimpleDB', capability: 'simpledb', route: '/simpledb', keywords: 'database domain item attributes conditional データベース ドメイン 項目 属性'},
   {id: 'sns', provider: 'aws', label: 'SNS', capability: 'sns', route: '/sns', keywords: 'simple notification service subscription topic サブスクリプション トピック 通知'},
   {id: 'sqs', provider: 'aws', label: 'SQS', capability: 'sqs', route: '/sqs', keywords: 'queue message messaging キュー メッセージ メッセージング シンプルキューサービス'},
@@ -36,6 +41,7 @@ export const SERVICES = Object.freeze([
   {id: 'gcp-storage', provider: 'gcp', label: 'Cloud Storage', route: '/gcp-storage', keywords: 'google bucket object バケット オブジェクト ストレージ クラウドストレージ'},
   {id: 'gcp-catalog', provider: 'gcp', label: 'Service catalog', route: '/gcp-catalog', keywords: 'google catalog api metadata カタログ サービス'},
   {id: 'gcp-dns', provider: 'gcp', label: 'Cloud DNS', route: '/gcp-dns', keywords: 'google cloud dns managed zones records ゾーン レコード'},
+  {id: 'gcp-trace', provider: 'gcp', label: 'Trace', route: '/gcp-trace', keywords: 'google cloud trace explorer span observations observability トレース スパン 観測'},
   {id: 'gcp-appengine', provider: 'gcp', label: 'App Engine', route: '/gcp-appengine', keywords: 'google app engine appengine gae application version traffic split firewall python wsgi アプリ アプリケーション バージョン トラフィック ファイアウォール'},
   {id: 'azure-queue', provider: 'azure', label: 'Queue Storage', route: '/azure-queue', keywords: 'azure storage queue message キュー ストレージ メッセージ'},
   {id: 'azure-blob', provider: 'azure', label: 'Blob Storage', route: '/azure-blob', keywords: 'container blob コンテナー コンテナ ブロブ ストレージ ブロブストレージ'},
@@ -84,6 +90,10 @@ export function queueCapabilitiesForPrincipal(session, epoch, principal, discove
   const queue = discovered?.epoch === epoch && discovered.principal === principal ? discovered.queue : undefined;
   return {...session, azureQueue: queue};
 }
+export function traceCapabilitiesForPrincipal(session, epoch, principal, discovered) {
+  if (!session || epoch === 0) return session;
+  return {...session, gcpTrace: discovered?.epoch === epoch && discovered.principal === principal ? discovered.trace : undefined};
+}
 export function sakuraServerConfiguration(capabilities) {
   const scope = capabilities?.sakuraServer;
   if (!Array.isArray(capabilities?.providers) || !capabilities.providers.includes('sakura')
@@ -105,9 +115,11 @@ export function serviceAvailable(id, capabilities) {
     const ec2=capabilities.services?.ec2;
     return ec2?.console === true && Array.isArray(ec2.operations) && ['DescribeInstances','DescribeVpcs'].every(op=>ec2.operations.includes(op));
   }
+  if (id === 'cloudfront') return cloudFrontAvailable(capabilities);
   if (id === 'elasticloadbalancing') return elbAvailable(capabilities);
   if (id === 'autoscaling-plans') return scalingPlansAvailable(capabilities);
   if (id === 'route53') return route53ConsoleAdvertised(capabilities);
+  if (id === 'support') return supportAdvertised(capabilities);
   if (id === 'simpledb') {
     const scope = capabilities.services?.simpledb;
     return scope?.console === true && scope.region === 'us-east-1' && scope.conditionalPut === true
@@ -131,6 +143,7 @@ export function serviceAvailable(id, capabilities) {
   if (service.id === 'gcp-appengine') return typeof capabilities.gcpAppEngine?.endpoint === 'string' && typeof capabilities.gcpAppEngine.project === 'string'
     && capabilities.gcpAppEngine.project.length > 0 && typeof capabilities.gcpAppEngine.dataPlane === 'string';
   if (service.id === 'gcp-dns') return dnsConfigured(capabilities.gcpDns);
+  if (service.id === 'gcp-trace') return traceConfiguration(capabilities.gcpTrace) !== null;
   if (service.id === 'gcp-catalog') return Array.isArray(capabilities.gcpCatalog?.apis) && capabilities.gcpCatalog.apis.length > 0;
   if (service.id === 'azure-queue') return queueConfigured(capabilities.azureQueue);
   if (service.id === 'azure-arm') return Array.isArray(capabilities.azureCatalog?.providers) && capabilities.azureCatalog.providers.length > 0

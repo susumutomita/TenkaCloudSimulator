@@ -5,15 +5,16 @@ through each service's own native protocol: JSON 1.0/1.1, REST-JSON or Query. Co
 subsets of the pinned official botocore 1.41.6 models; see
 [design 0007](design/0007-model-driven-aws-catalog.md).
 
-Every listed operation is implemented against provider-owned SQLite state. Every
-other official operation of the same service returns HTTP 501
+The catalog stores resource records in provider-owned SQLite. Service Quotas
+reads an enforced limit from the active B2BI resource definition. Every
+other official operation outside each service’s listed subset returns HTTP 501
 `UnknownOperationException`. Input members that the simulator would ignore are
 refused with the operation's own validation exception. No workload, data plane,
 network, OAuth or real AWS call is executed or simulated.
 
 ## Services
 
-The catalog serves 174 services. The [generated service table](aws-catalog-services.md)
+The catalog serves 175 services. The [generated service table](aws-catalog-services.md)
 lists each service's Issues, protocol, implemented operations and bounds; it is
 checked against the reviewed specifications by `go test ./internal/aws/catalog`.
 The capability document lists the same services under `services.catalog`,
@@ -27,7 +28,7 @@ and execution are outside its scope. [AWS Batch scope (#105)](https://github.com
 Services whose official API needs behavior the engine cannot express truthfully
 remain unimplemented rather than approximated, for example Managed Service for
 Apache Flink, AWS Data Pipeline, Amazon SWF, CodeStar
-Notifications, Amazon Managed Grafana, AWS Organizations, Service Quotas,
+Notifications, Amazon Managed Grafana, AWS Organizations,
 Application Auto Scaling, Amazon Cognito, AWS Control
 Tower, AWS Launch Wizard, Amazon Keyspaces and Amazon Comprehend Medical.
 Amazon RDS, Amazon ElastiCache, Amazon Redshift, Amazon EC2 Auto Scaling and
@@ -57,6 +58,93 @@ served.
 Products assessed as not servable at all, with evidence, are listed in the
 [coverage assessment](coverage-assessment.md).
 
+## B2B Data Interchange profile quota
+
+Five read operations expose only the B2BI Profiles quota (`b2bi/L-05F6A9EF`)
+in `us-east-1`, `us-west-2` and `eu-west-1`:
+
+| Operation | Local response | IAM Resource |
+| --- | --- | --- |
+| ListServices | One B2B Data Interchange entry in the supported regions | `*` |
+| GetAWSDefaultServiceQuota | The published AWS default, five profiles | `*` |
+| ListAWSDefaultServiceQuotas | The same single published default | `*` |
+| ListServiceQuotas | The account-level capacity enforced by the local CreateProfile | `*` |
+| GetServiceQuota | The same applied capacity by service and quota code | Quota ARN |
+
+The default and applied values have different sources. The shipped profile
+limit is five; five existing profiles fill it, and deleting one frees a slot.
+Applied reads report total capacity, never remaining slots. An embedded engine
+with a different profile bound reports that bound while the published default
+stays five. If the profile operation is not bound, applied Get returns
+`NoSuchResourceException` and the applied list is empty; the default remains
+readable. No applied value is invented from the default.
+
+The named account-level read requires `servicequotas:GetServiceQuota` on
+`arn:aws:servicequotas:<region>:<account>:b2bi/L-05F6A9EF`. The local IAM
+policy supports action and resource matching. Each of the other four operations
+requires its own action on literal `*`; a quota-ARN-only grant does not authorize
+those operations. The
+`servicequotas:service` condition key is outside the local policy contract.
+
+The three lists accept `MaxResults` from 1 to 100. This singleton inventory never
+emits a `NextToken`; a supplied foreign token is `InvalidPaginationTokenException`,
+not a fabricated page. `ListServiceQuotas` accepts an exact `QuotaCode` filter
+and ACCOUNT/ALL/RESOURCE levels. ACCOUNT, ALL and omission return the same
+account-level row; RESOURCE returns `Quotas: []`. Unknown valid service names
+return `NoSuchResourceException` on quota reads. In Tokyo, `ListServices` returns
+`Services: []`, and the scoped quota lists and Gets return `NoSuchResourceException`.
+This does not assert a universal AWS service inventory. The separate local B2BI
+metadata catalog can still store profiles in Tokyo.
+
+AWS lists Profiles as adjustable. `RequestServiceQuotaIncrease` accepts a desired
+value above the enforced limit. With `SupportCaseAllowed=false` it saves a
+`NOT_APPROVED` request. With true or the default it saves a local `PENDING`
+request. A team can have one pending request per region and retain up to 1,000
+requests across regions. The simulator never opens an external Support case or
+raises the profile limit. The API has no client token. If the response is lost,
+check history before submitting again.
+
+`GetRequestedServiceQuotaChange` retrieves the saved ID.
+`ListRequestedServiceQuotaChangeHistory` lists the last 90 days.
+`ListRequestedServiceQuotaChangeHistoryByQuota` includes older requests for
+this quota. Both lists return newest submissions first, accept status and
+account/resource-level filters, and evaluate the caller's current IAM permission
+on every page. The requests here are account-level. Page tokens belong to the
+process, caller, region, operation and filters that issued them. Persisted
+request IDs survive restart. Creating a request and listing by quota require
+the operation's IAM action on the regional quota ARN. Looking up an ID and
+listing the general history require their respective actions on `*`.
+
+In **AWS service catalog**, choose **Service Quotas** to see the published
+default and the applied account capacity in the selected region. Enter a
+desired value to submit an increase request. **Refresh history** shows stored
+requests and their IDs. If the submit response is lost, choose **Refresh
+same-scope history** before starting a separate request. Several requests
+can have the same desired value.
+
+Open **Service Quotas API reference** at `/_simulator/docs/service-quotas.html`
+to send the same operations in `us-east-1`. It uses the signed-in browser
+identity. Select the operation's `X-Amz-Target` and its JSON body before
+sending. Paste the returned request ID into `GetRequestedServiceQuotaChange`
+to inspect the saved record.
+
+Resource contexts, usage metrics and general quota inventory remain outside the supported scope.
+[B2BI endpoints and quotas](https://docs.aws.amazon.com/general/latest/gr/b2bi-service.html) ·
+[GetServiceQuota](https://docs.aws.amazon.com/servicequotas/2019-06-24/apireference/API_GetServiceQuota.html) ·
+[ListServices](https://docs.aws.amazon.com/servicequotas/2019-06-24/apireference/API_ListServices.html) ·
+[GetAWSDefaultServiceQuota](https://docs.aws.amazon.com/servicequotas/2019-06-24/apireference/API_GetAWSDefaultServiceQuota.html) ·
+[ListAWSDefaultServiceQuotas](https://docs.aws.amazon.com/servicequotas/2019-06-24/apireference/API_ListAWSDefaultServiceQuotas.html) ·
+[ListServiceQuotas](https://docs.aws.amazon.com/servicequotas/2019-06-24/apireference/API_ListServiceQuotas.html) ·
+[RequestServiceQuotaIncrease](https://docs.aws.amazon.com/servicequotas/2019-06-24/apireference/API_RequestServiceQuotaIncrease.html) ·
+[ListRequestedServiceQuotaChangeHistory](https://docs.aws.amazon.com/servicequotas/2019-06-24/apireference/API_ListRequestedServiceQuotaChangeHistory.html) ·
+[Service Quotas IAM](https://docs.aws.amazon.com/service-authorization/latest/reference/list_service-quotas.html).
+
+`test/e2e/service_quotas_profiles.py` checks requests and history alongside the applied quota and actual B2BI profile admission. `service_quotas_discovery.py` adds the four reads through two real
+team processes, native IAM refusals, full-capacity replacement, reopening and
+cleanup. The finite `ServiceQuotaDiscovery` model checks read projections and
+unchanged abstract frames; native tests check JSON types, concrete region names
+and page-size bounds. Neither is an AWS comparison or implementation proof.
+
 ## ECR repository group membership
 
 `CreateGroup` accepts `ResourceQuery.Type` equal to `TAG_FILTERS_1_0` and a
@@ -73,10 +161,18 @@ matching repository ARNs in creation order. Creating, tagging, untagging and
 deleting a repository changes membership on the next read. `MaxResults` accepts
 1–50. Supply `NextToken` in the same region on the same group revision to continue.
 
+`CreateGroup` and `ListGroups` require their respective IAM actions with `Resource` set to `"*"`. A principal with only `ListGroups` can page through the groups in its own team and region. Permissions on a named group or a group ARN pattern apply to operations that support the group resource type. [AWS Resource Groups IAM action table](https://docs.aws.amazon.com/service-authorization/latest/reference/list_resource-groups.html) · [CreateGroup](https://docs.aws.amazon.com/ARG/latest/APIReference/API_CreateGroup.html) · [ListGroups](https://docs.aws.amazon.com/ARG/latest/APIReference/API_ListGroups.html)
+
+The eleven supported operations return the modeled HTTP `403 ForbiddenException` when the local IAM policy denies the request. The group-scoped operations check the target ARN before disclosing whether it exists. [AWS Resource Groups API](https://docs.aws.amazon.com/ARG/latest/APIReference/API_Operations.html)
+
+The group’s own tags appear in the creation response and in `GetTags`. `Tag` and `Untag` change these stored tags. The supported plain and query groups omit `Group.ApplicationTag`, which AWS reserves for application groups. [Group response shape](https://docs.aws.amazon.com/ARG/latest/APIReference/API_Group.html)
+
 Readers need `resource-groups:ListGroupResources` on the group ARN, along with
 `tag:GetResources`, `cloudformation:DescribeStacks` and `cloudformation:ListStackResources`
 on `*`. AWS lists these three additional permissions for the API. Each membership
 page checks all four against one fresh principal policy snapshot. Queryless groups retain their metadata and tag operations.
+In the Cloudscape service catalog, select **AWS Resource Groups** and open a group to view its saved filter, page through matching repository ARNs, or edit the tag key and value of an existing query. **Refresh query and members** reads current repository tags and permissions again.
+
 Search, explicit member management, CloudFormation queries, service configurations,
 extra tag filters and other resource types remain outside this slice. [AWS supported resource types](https://docs.aws.amazon.com/ARG/latest/userguide/supported-resources.html) ·
 [resource query formats](https://docs.aws.amazon.com/ARG/latest/userguide/gettingstarted-query.html) ·

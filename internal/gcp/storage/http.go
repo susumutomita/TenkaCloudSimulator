@@ -15,6 +15,8 @@ import (
 	"strconv"
 	"strings"
 	"unicode/utf8"
+
+	"github.com/susumutomita/TenkaCloudSimulator/internal/gcp/internal/jsonwire"
 )
 
 var scopePattern = regexp.MustCompile(`^[A-Za-z0-9_-]{1,64}$`)
@@ -58,7 +60,7 @@ type objectInput struct {
 // strictJSON rejects duplicate keys, null, non-string metadata and unknown
 // struct fields before execution. It never invokes a caller-provided decoder.
 func strictJSON(data []byte, target any) error {
-	if !utf8.Valid(data) || !validJSONEscapes(data) {
+	if !jsonwire.ValidUnicode(data) {
 		return invalid("JSON must preserve valid UTF-8 scalar values.")
 	}
 	decoder := json.NewDecoder(bytes.NewReader(data))
@@ -138,45 +140,6 @@ func strictJSON(data []byte, target any) error {
 		return invalid("Invalid or unsupported JSON field.")
 	}
 	return nil
-}
-
-// encoding/json replaces lone UTF-16 surrogates. Reject those instead so two
-// distinct supplied names cannot silently become one replacement-character key.
-func validJSONEscapes(data []byte) bool {
-	for i := 0; i < len(data); i++ {
-		if data[i] != '\\' {
-			continue
-		}
-		i++
-		if i >= len(data) {
-			return false
-		}
-		if data[i] != 'u' {
-			continue
-		}
-		if i+4 >= len(data) {
-			return false
-		}
-		n, err := strconv.ParseUint(string(data[i+1:i+5]), 16, 16)
-		if err != nil {
-			return false
-		}
-		i += 4
-		if n >= 0xdc00 && n <= 0xdfff {
-			return false
-		}
-		if n >= 0xd800 && n <= 0xdbff {
-			if i+6 >= len(data) || data[i+1] != '\\' || data[i+2] != 'u' {
-				return false
-			}
-			low, err := strconv.ParseUint(string(data[i+3:i+7]), 16, 16)
-			if err != nil || low < 0xdc00 || low > 0xdfff {
-				return false
-			}
-			i += 6
-		}
-	}
-	return true
 }
 
 func (s *Store) ServeHTTP(w http.ResponseWriter, r *http.Request) {

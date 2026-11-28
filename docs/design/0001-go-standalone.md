@@ -1,8 +1,14 @@
 # Go単一バイナリの設計
 
+[AWS Support の練習用ケース](../aws-support.md)は、チームの SQLite にメッセージ、解決状態、添付ファイルを保存する。参加者は通常のローカル認証を使い、7つの AWS JSON 操作ごとに IAM 権限を評価する。AWS やメールへの外部送信は行わない。
+
 `cmd/simulator`はCLI、numeric loopback listener、token-file、shutdownを所有する。`internal/server`は埋込Cloudscape/Scalar、local token境界、能力表、identity control APIを提供する。`internal/provider`はprovider dispatch、`internal/core`はprovider中立のSQLite object stateと限定identity-policy評価。`internal/aws`はS3 REST/XML、SSM JSON 1.1、CloudFormation Query/XMLとAWS所有テーブルを持つ。
 
 `core.Store` はインメモリ起動時に専用の SQLite データベースを所有する。要求の取り消しで接続が入れ替わっても、コミット済みのプロバイダーのテーブルと行を次の接続から参照できる。未コミットの書き込みはロールバックされ、メモリ上のデータベースはストアを閉じた時点で解放される。メモリとファイルのどちらでも、接続ごとに外部キー制約と 5 秒のロック待機時間を設定する。
+
+KMS のグラントはリージョン内の具体的なキーと IAM ロールの世代 ID を SQLite に保存する。署名済み STS セッションの `DescribeKey` が、その世代・ロールポリシー・グラントの実際の状態を検証する。失効したグラントによる読み取りは拒否する。 [KMS の範囲](../kms.md#grants-for-a-local-iam-role)
+
+KMS の削除予約は SQLite に UTC の期限を保存する。期限前の取り消しはキーを Disabled に戻す。次のプロセス起動または KMS 操作時に、期限を過ぎたキーと残存するエイリアスおよびグラントを同じトランザクションで削除する。 [削除予約](../kms.md#scheduled-key-deletion)
 
 Coreは問題ID/採点を知らない。SSM・stack/ownershipのschemaはAWS layerがcoreの共有DBを使用して初期化する。CFNはcompileで全リソースと参照を検証後、stack、ownership claim、parameter、identity、S3 bucket/config/tagsを単一transactionで作成。削除でも同一transaction。手動削除されたparameterのclaimを残し、他stackが再取得して旧stackのcleanupで消される事故を防ぐ。role/bucket namespaceはglobal、SSM/stackはregion別、Lambda claimはlambda:<region>。
 
@@ -14,11 +20,21 @@ Consoleは公式Cloudscape/Reactを開発時にbundleし、fonts/assets/licenses
 
 [AWS Auto Scaling Plans のコンソール](../autoscaling-plans.md)は選択リージョンの共有 JSON API でプランを作成し、既存の DynamoDB テーブルに対する読み込みまたは書き込みの容量範囲を更新する。プラン状態は Scaling Plans から、実際の両方の容量は DynamoDB DescribeTable から読み戻す。プランの削除後もテーブルと容量は維持される。
 
+CloudFront の [ローカル distribution](../cloudfront-local-content.md) は、同じ SQLite の保存済み S3 オブジェクトだけを読み、DefaultTTL に従う有界キャッシュと native invalidation を提供する。専用の simulator GET/HEAD は、キャッシュの hit を含めて一つの新しい policy snapshot から distribution と S3 オブジェクトの権限を確認する。Cloudscape は native の一覧・詳細・ローカルデータの安全なダウンロード・無効化を同じ状態に対して行う。本文は実行せず、古いスコープの応答を破棄する。不確定な無効化は同じ caller reference と paths の明示的な再送だけで確認する。外部 origin・DNS・VPC Origin の通信、CDN edge、distribution の CloudFormation は追加しない。
+
 SSM の [ドキュメント履歴](../ssm-documents.md) はリージョンとドキュメント名で検索し、1 回の SQLite 読み取りで番号順のスナップショットを返す。ページごとに IAM を評価し、続きは対象・呼出者・スナップショットに結び付く。一覧に定義本文は含めず、Console の本文比較には別の GetDocument 権限が必要。ドキュメントは実行しない。
 
 SNS の HTTP/HTTPS コンソールは native Query を呼び出し、通知先 URL をローカル SQLite に記録するだけで外部に接続しない。購読属性を読む際は ARN から親トピックを特定して IAM を先に評価し、購読と親の存在およびリージョンの一致を同じ読み取りで確認する。専用 Scalar は us-east-1 固定で通常のログインセッションを使い、コンソールの演習用 ID 選択を引き継がない。[対応範囲](../sns.md)。
 
-AWS Resource Groups のタグクエリは、同じリージョンの ECR repository の ARN とタグをカタログの SQLite から読み取る。グループ ARN と依存する読み取り権限の認可後、保存済みクエリとリポジトリを同じスナップショットで照合する。[対象と制限](../aws-catalog.md#ecr-repository-group-membership)
+Service Quotas の5つの読み取りは、B2B Data Interchange の Profiles に限定する。公開デフォルト5と `CreateProfile` が実際に強制する総容量を区別し、使用済みの数を上限から差し引かない。`GetServiceQuota` は対象クォータ ARN、それ以外の4操作は各 action の Resource `*` を必要とする。実在するローカルの上限定義がなければ適用値を捏造しない。[対応リージョン・空の一覧・未対応範囲](../aws-catalog.md#b2b-data-interchange-profile-quota)
+
+上限引き上げ要求はチームの SQLite に保存し、リージョン別に ID と履歴を照会できる。`SupportCaseAllowed=false` は `NOT_APPROVED`、省略または true は `PENDING` として保存する。要求を受け付けた後も B2BI の適用上限は同じ値を返す。ローカルの要求に外部サポートケースの発行や自動承認の処理はない。
+
+Cloudscape は選択中のリージョンと演習用 ID で要求を送信する。応答を受け取れなかった場合は、同じクォータの履歴を再取得できる。専用 Scalar はログイン中の ID と `us-east-1` を使い、利用者が選んだ操作と本文をそのまま送信する。
+
+AWS Resource Groups のタグクエリは、同じリージョンの ECR repository の ARN とタグをカタログの SQLite から読み取る。グループ ARN と依存する読み取り権限の認可後、保存済みクエリとリポジトリを同じスナップショットで照合する。管理画面のグループ詳細はネイティブ API から保存済みクエリとメンバーのページを取得し、タグ条件の編集も同じ API に送る。
+
+`CreateGroup` と `ListGroups` はリソースを指定できないため、ポリシーの `Resource` には `"*"` が必要になる。グループ ARN や `group/*` のみを許可する既存ポリシーでは、この2操作は拒否される。名前を指定する操作は対象グループの ARN を照合し、対応する11操作すべてで IAM 拒否を HTTP 403 の `ForbiddenException` として返す。通常グループとタグクエリグループの `Group` 応答はアプリケーショングループ用の `ApplicationTag` を省略し、利用者のタグは `GetTags` で取得できる。[対象と制限](../aws-catalog.md#ecr-repository-group-membership)
 
 AWS カタログの AppFlow は S3 間のフロー設定のみを保持する。[トリガー設定](https://docs.aws.amazon.com/appflow/1.0/APIReference/API_TriggerConfig.html)に従い、`CreateFlow` と `UpdateFlow` は、`OnDemand` に付けたスケジュール設定と、実行間隔の式がない（空白のみも含む）`Scheduled` の定義を `ValidationException` で拒否する。検証は保存前に行うため、拒否された要求で既存の設定は変わらない。スケジューラ、コネクタープロファイル、ジョブ実行およびオブジェクト転送は実装しない。
 
@@ -103,7 +119,7 @@ API Reference の EC2 用プリセットは、既存の Query API の `DescribeI
 
 EC2 インスタンス一覧の作成は、テンプレートプレビューと別の操作。認証済みループバックの管理者が管理者 ID を選択し、明示的な Battle VM 実行環境が作成を受け付ける場合だけ利用できる。同一スタックに受信ルールのないネットワークと IAM ロール／プロファイルを含む固定構成を生成し、設定済み AMI エイリアスで既存の `CreateStack` に送る。権限評価や実行経路は変えない。応答した Stack ID の `CREATE_COMPLETE` と対応するリージョンの EC2 保存行を照合し、未確認時に作成を再送しない。保存済みの状態はゲストの現在の稼働確認ではない。
 
-Protocol/API subsetと制限は[README](../../README.md)。限定的なGoogle Cloud Storage/Azure Blob Storageを独立providerとして接続し、認証済みActorから固定project/account所有者へ写像する。[Cloud DNS](../acceptance/gcp-cloud-dns.md) は同じproject所有者の範囲でSRVを含むRRsetの変更と参照を提供する。所有者コンソールではSRVの追加・置換・削除を変更受領証と再読で確認する。SRVの優先度・重み・ポートは保存するが、名前解決や接続先の選択は行わない。AWS IAMの権限を継承せず、owner-onlyローカル認可と公式SDKの検証範囲は[マルチクラウドストレージ](../multicloud-storage.md)に記す。旧Python world/deploy/grading protocolは復活させず、必要なSSM/CFNの知識だけGoへ移行。問題取り込み・採点はTenkaCloud/Challenge責務とする。
+Protocol/API subsetと制限は[README](../../README.md)。限定的なGoogle Cloud Storage/Azure Blob Storageを独立providerとして接続し、認証済みActorから固定project/account所有者へ写像する。[Cloud DNS](../acceptance/gcp-cloud-dns.md) は同じproject所有者の範囲でSRVを含むRRsetの変更と参照を提供する。所有者コンソールではSRVの追加・置換・削除を変更受領証と再読で確認する。SRVの優先度・重み・ポートは保存するが、名前解決や接続先の選択は行わない。[Cloud Trace v1](../gcp-trace.md) は固定projectの所有者にスパンの一括追記、traceの取得、期間指定の一覧を提供する。同じspan IDの観測もSQLiteに順序を保って保存し、公式SDK、Scalar、Google CloudコンソールのTrace explorerが同じデータを参照する。AWS IAMの権限を継承せず、owner-onlyローカル認可と公式SDKの検証範囲は[マルチクラウドストレージ](../multicloud-storage.md)に記す。旧Python world/deploy/grading protocolは復活させず、必要なSSM/CFNの知識だけGoへ移行。問題取り込み・採点はTenkaCloud/Challenge責務とする。
 
 Azure Blobの通常APIは `2023-11-03` に固定する。BlobのGET/HEADでは単一の `If-Modified-Since` を扱い、通常のGETには有界の単一範囲CRC64がある。明示的にネゴシエートした `2025-01-05` のGet Blobだけで、最大4 MiBの単一セグメントを構造化CRC64として返す。共通のローカル所有者・読み取り条件を適用し、通常の範囲チェックサムヘッダーと併用しない。それ以外の同バージョン操作やSDK全体の互換性は対象外。[Azure Blobの条件付き読み取りとチェックサムの詳細](../azure-blob.md#single-range-download-subset)。
 

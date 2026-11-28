@@ -221,5 +221,5 @@ SQLite database and token authority per team.
 - [Elastic Load Balancing API Reference](https://docs.aws.amazon.com/elasticloadbalancing/latest/APIReference/Welcome.html); the operation, shape, error code and HTTP status contract was fixed from the official botocore 1.41.6 `elbv2/2015-12-01` model already pinned by this repository.
 - [Lambda functions as targets](https://docs.aws.amazon.com/elasticloadbalancing/latest/application/lambda-functions.html): event, response, permission and health check behavior.
 - [Target group health checks](https://docs.aws.amazon.com/elasticloadbalancing/latest/application/target-group-health-checks.html): states, reason codes and fail-open routing.
-- [Actions, resources and condition keys for Elastic Load Balancing](https://docs.aws.amazon.com/service-authorization/latest/reference/list_awselasticloadbalancing.html).
+- [Actions, resources and condition keys for Elastic Load Balancing V2](https://docs.aws.amazon.com/service-authorization/latest/reference/list_elb-v2.html).
 - [Elastic Load Balancing endpoints and quotas](https://docs.aws.amazon.com/general/latest/gr/elb.html).

@@ -1,0 +1,43 @@
+# Cloud Trace v1 span ingestion and retrieval
+
+Issue #376 covers trace data. The standalone simulator serves the three Cloud Trace v1 methods through a dedicated local handler. Google publishes three v1 methods and two v2 methods in the discovery documents bundled with the repository's pinned `google-api-python-client==2.199.0`. Both documents report revision `20260724`. [v1 discovery](https://github.com/googleapis/google-api-python-client/blob/v2.199.0/googleapiclient/discovery_cache/documents/cloudtrace.v1.json) · [v2 discovery](https://github.com/googleapis/google-api-python-client/blob/v2.199.0/googleapiclient/discovery_cache/documents/cloudtrace.v2.json)
+
+## Published v1 API
+
+| Method | HTTP and body | Result | Google IAM permission |
+| --- | --- | --- | --- |
+| `projects.patchTraces` | `PATCH /v1/projects/{projectId}/traces` with a `Traces` object containing a `traces` array | Appends span observations and returns `{}`. Sending the same trace ID and span ID again stores an additional copy. | `cloudtrace.traces.patch` |
+| `projects.traces.get` | `GET /v1/projects/{projectId}/traces/{traceId}` | A `Trace` containing its project ID, trace ID and stored spans. | `cloudtrace.traces.get` |
+| `projects.traces.list` | `GET /v1/projects/{projectId}/traces` with required inclusive `startTime` and `endTime` | A `ListTracesResponse` with trace records and, when there is another page, `nextPageToken`. | `cloudtrace.traces.list` |
+
+The write accepts OAuth scope `trace.append` or `cloud-platform`. Reads accept `trace.readonly` or `cloud-platform`. Google lists each under `https://www.googleapis.com/auth/`. The v2 methods `projects.traces.batchWrite` and `projects.traces.spans.createSpan` have their own paths and message types. [PatchTraces](https://docs.cloud.google.com/trace/docs/reference/v1/rest/v1/projects/patchTraces) · [GetTrace](https://docs.cloud.google.com/trace/docs/reference/v1/rest/v1/projects.traces/get) · [ListTraces](https://docs.cloud.google.com/trace/docs/reference/v1/rest/v1/projects.traces/list) · [IAM permissions](https://docs.cloud.google.com/iam/docs/roles-permissions/cloudtrace)
+
+A trace has a project ID and a nonzero 128-bit trace ID encoded as 32 hexadecimal characters. Each span has a name shorter than 128 bytes, a nonzero 64-bit span ID encoded as a decimal JSON **string**, and start and end timestamps. A parent span ID uses the same string representation. V1 also defines span kinds and string labels. The default list view, `MINIMAL`, returns project and trace IDs. `ROOTSPAN` adds root spans, and `COMPLETE` returns the same trace data as an individual GetTrace call for each result. Google limits GetTrace to 10,000 spans per call and PatchTraces to 25,000 spans per call. The service offers filtering and sorting. List pages can contain up to 100 traces for `COMPLETE` and 1,000 for `MINIMAL` or `ROOTSPAN`. [Trace and TraceSpan](https://docs.cloud.google.com/trace/docs/reference/v1/rest/v1/projects.traces) · [List views and query parameters](https://docs.cloud.google.com/trace/docs/reference/v1/rest/v1/projects.traces/list) · [Service quotas](https://docs.cloud.google.com/trace/docs/quotas)
+
+### Endpoint, project and dependencies
+
+The published v1 discovery client targets `https://cloudtrace.googleapis.com/`. The three method paths name a Google Cloud project, with no region or zone parameter. A trace ID is interpreted within that project. The simulator serves one local endpoint for the configured project. It implements neither regional residency nor project, folder or organization administration.
+
+Google Cloud's setup guide says that new projects normally have the Cloud Trace API and Telemetry API enabled. An organization can disable them. Direct v1 writes need the Cloud Trace API, credentials and permission to write to the target project. Google lists the project-level Cloud Trace Agent role (`roles/cloudtrace.agent`) for writing and Cloud Trace User (`roles/cloudtrace.user`) for viewing traces. Applications can submit synthetic spans directly. OpenTelemetry instrumentation, a collector, the Ops Agent and the separate Telemetry API are optional ingestion choices. The simulator uses its existing local project-owner binding and accepts native spans directly. It performs no API activation or remote authentication. [Trace setup and roles](https://docs.cloud.google.com/trace/docs/setup) · [Trace access control](https://docs.cloud.google.com/trace/docs/iam) · [PatchTraces HTTP endpoint](https://docs.cloud.google.com/trace/docs/reference/v1/rest/v1/projects/patchTraces)
+
+## Local endpoint and stored observations
+
+The authenticated owner of the configured project uses `/_simulator/providers/gcp/cloudtrace/v1/projects/{projectId}/traces`. The owner capability `gcpTrace` publishes its project, endpoint, methods, views and embedded [Scalar reference](/_simulator/docs/gcp-trace.html). Browser requests use the existing simulator session. The official Python v1 discovery client uses a numeric-loopback endpoint and the simulator's local token. Each team has its own process, credentials and SQLite state. Google IAM, OAuth and live project provisioning are outside this local implementation.
+
+A PATCH accepts a JSON object with a nonempty `traces` array. Every trace supplies the configured `projectId`, a nonzero lowercase 32-digit hexadecimal `traceId` and at least one span. For each span, supply a decimal uint64 string `spanId`, a name of 1–127 UTF-8 bytes and RFC 3339 `startTime` and `endTime` with at most nine fractional digits. Escaped Unicode characters must represent complete scalar values. An optional `parentSpanId` of `"0"` also marks a root. The supported kinds are `SPAN_KIND_UNSPECIFIED`, `RPC_SERVER` and `RPC_CLIENT`. Each span can include up to 16 string labels. Keys have 1–127 UTF-8 bytes and values up to 1,024 bytes. An accepted batch appends every observation in order in one transaction, including repeated observations with the same IDs. Invalid input, denied requests and failed writes leave existing observations intact.
+
+| Local limit or query | Behavior |
+| --- | --- |
+| Ingestion | Up to 256 KiB and 100 spans per request, 128 stored observations per trace, 1,024 per project. The span interval must be ordered, starting within the preceding 14 days and ending within the following 3 days. |
+| Retention | Observations expire 30 days after local ingestion. Reads exclude expired rows. The next successful append reclaims expired rows in its transaction. |
+| Get | Returns every retained observation for the trace in ingestion order. A stored span ID remains a decimal JSON string, including values above JavaScript's safe integer range. |
+| List | Both timestamps are required. A trace matches if any retained span intersects the inclusive interval. Trace IDs are ordered ascending. The default page has 25 traces, and a positive page size is capped at 50. |
+| Views | `MINIMAL` returns only project and trace IDs. `ROOTSPAN` returns roots. `COMPLETE` includes every retained span for a matching trace, including spans outside the query interval. |
+| Continuation | Use `nextPageToken` with the same interval, view and effective page size. Later appends are excluded from both the membership and the returned spans on subsequent pages. Retention still applies. Restarting the process invalidates its page tokens. |
+| Errors | Invalid input or cursor returns 400, another project or authenticated nonowner receives 403, a missing trace receives 404 and capacity exhaustion returns 429. Unsupported paths, list filters and ordering other than `trace_id` return 501. |
+
+### View a saved trace
+
+In the simulator Console, select **Google Cloud → Trace → Trace explorer** while acting as the configured project owner. Enter an RFC 3339 start and end time and choose **Search traces**. The viewer lists up to 25 trace IDs per page. Open a trace to see its span observations in ingestion order, including exact decimal span and parent IDs, timestamps, kind, name and labels. Repeated observations appear as separate rows. Use the v1 SDK or the embedded Scalar PATCH operation to ingest spans. The viewer reads the same local state.
+
+The v2 write methods, agents, exporters, external telemetry and service-wide monitoring are outside this subset. Cloud Trace v1 defines no per-trace delete operation. The [official SDK acceptance](../test/e2e/gcp_trace_sdk.py) creates isolated temporary databases, verifies state across restart and removes both teams' state after shutdown. [Issue #376](https://github.com/susumutomita/TenkaCloudSimulator/issues/376)

@@ -30,6 +30,10 @@ func (*nativeSessionRouteBackend) OpenSessionChannel(context.Context, aws.SSMSes
 // This signs the real Access boundary, not an injected SDK context. The backend
 // deliberately refuses acquisition: this is routing/authentication evidence only.
 func signedNativeSession(c aws.STSCredentials, target, body string) *http.Request {
+	return signedJSON11Session(c, "ssm", target, body)
+}
+
+func signedJSON11Session(c aws.STSCredentials, service, target, body string) *http.Request {
 	r := httptest.NewRequest("POST", "http://127.0.0.1:4566/", strings.NewReader(body))
 	now := time.Now().UTC()
 	stamp := now.Format("20060102T150405Z")
@@ -41,13 +45,13 @@ func signedNativeSession(c aws.STSCredentials, target, body string) *http.Reques
 	canonical := "content-type:application/x-amz-json-1.1\nhost:" + r.Host + "\nx-amz-date:" + stamp + "\nx-amz-security-token:" + c.SessionToken + "\nx-amz-target:" + target + "\n"
 	payload := sha256.Sum256([]byte(body))
 	digest := sha256.Sum256([]byte("POST\n/\n\n" + canonical + "\n" + names + "\n" + hex.EncodeToString(payload[:])))
-	scope := now.Format("20060102") + "/us-east-1/ssm/aws4_request"
+	scope := now.Format("20060102") + "/us-east-1/" + service + "/aws4_request"
 	mac := func(key []byte, value string) []byte {
 		h := hmac.New(sha256.New, key)
 		_, _ = h.Write([]byte(value))
 		return h.Sum(nil)
 	}
-	key := mac(mac(mac(mac([]byte("AWS4"+c.SecretAccessKey), now.Format("20060102")), "us-east-1"), "ssm"), "aws4_request")
+	key := mac(mac(mac(mac([]byte("AWS4"+c.SecretAccessKey), now.Format("20060102")), "us-east-1"), service), "aws4_request")
 	sig := mac(key, "AWS4-HMAC-SHA256\n"+stamp+"\n"+scope+"\n"+hex.EncodeToString(digest[:]))
 	r.Header.Set("Authorization", fmt.Sprintf("AWS4-HMAC-SHA256 Credential=%s/%s, SignedHeaders=%s, Signature=%x", c.AccessKeyID, scope, names, sig))
 	return r

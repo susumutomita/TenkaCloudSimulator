@@ -12,7 +12,10 @@ import (
 	"time"
 )
 
-type KMSStore struct{ db *sql.DB }
+type KMSStore struct {
+	db  *sql.DB
+	now func() time.Time
+}
 type kmsStored struct {
 	metadata    KMSKeyMetadata
 	material    []byte
@@ -20,16 +23,40 @@ type kmsStored struct {
 }
 
 func NewKMSStore(db *sql.DB) (*KMSStore, error) {
-	if db == nil {
+	return newKMSStore(db, time.Now)
+}
+
+func newKMSStore(db *sql.DB, now func() time.Time) (*KMSStore, error) {
+	if db == nil || now == nil {
 		return nil, errors.New("KMS requires a SQLite database")
 	}
-	_, err := db.Exec(`CREATE TABLE IF NOT EXISTS aws_kms_keys (
+	tx, err := db.Begin()
+	if err != nil {
+		return nil, err
+	}
+	defer tx.Rollback()
+	_, err = tx.Exec(`CREATE TABLE IF NOT EXISTS aws_kms_keys (
  region TEXT NOT NULL,key_id TEXT NOT NULL,description TEXT NOT NULL,created REAL NOT NULL,
  state TEXT NOT NULL CHECK(state IN ('Enabled','Disabled')),
  material BLOB NOT NULL CHECK(typeof(material)='blob' AND length(material)=32),
  encryptions INTEGER NOT NULL CHECK(encryptions>=0 AND encryptions<=4294967296),policy TEXT NOT NULL,
  PRIMARY KEY(region,key_id));`)
-	return &KMSStore{db}, err
+	if err == nil {
+		_, err = tx.Exec(kmsGrantSchema)
+	}
+	if err == nil {
+		_, err = tx.Exec(kmsDeletionSchema)
+	}
+	if err == nil {
+		_, err = kmsReapDue(context.Background(), tx, now().UTC().UnixMilli())
+	}
+	if err == nil {
+		err = tx.Commit()
+	}
+	if err != nil {
+		return nil, err
+	}
+	return &KMSStore{db: db, now: now}, nil
 }
 func kmsRead(ctx context.Context, q interface {
 	QueryRowContext(context.Context, string, ...any) *sql.Row
@@ -37,7 +64,8 @@ func kmsRead(ctx context.Context, q interface {
 	var row kmsStored
 	var description, state, policy string
 	var created float64
-	err := q.QueryRowContext(ctx, `SELECT description,created,state,material,encryptions,policy FROM aws_kms_keys WHERE region=? AND key_id=?`, region, id).Scan(&description, &created, &state, &row.material, &row.encryptions, &policy)
+	var due sql.NullInt64
+	err := q.QueryRowContext(ctx, `SELECT k.description,k.created,k.state,k.material,k.encryptions,k.policy,d.due_ms FROM aws_kms_keys k LEFT JOIN aws_kms_pending_deletions d USING(region,key_id) WHERE k.region=? AND k.key_id=?`, region, id).Scan(&description, &created, &state, &row.material, &row.encryptions, &policy, &due)
 	if errors.Is(err, sql.ErrNoRows) {
 		return row, kmsFailure("NotFoundException", "KMS key does not exist in this local region.")
 	}
@@ -48,6 +76,13 @@ func kmsRead(ctx context.Context, q interface {
 		return kmsStored{}, kmsCorrupt("key state")
 	}
 	row.metadata = kmsMetadata(region, id, description, state, created)
+	if due.Valid {
+		if due.Int64 <= 0 || state != "Disabled" {
+			return kmsStored{}, kmsCorrupt("pending deletion")
+		}
+		row.metadata.DeletionDate = float64(due.Int64) / 1000
+		row.metadata.KeyState = "PendingDeletion"
+	}
 	return row, nil
 }
 func (s *KMSStore) CreateKey(ctx context.Context, region, description string) (KMSKeyMetadata, error) {
@@ -66,7 +101,7 @@ func (s *KMSStore) CreateKey(ctx context.Context, region, description string) (K
 	uuid[8] = (uuid[8] & 63) | 128
 	id := fmt.Sprintf("%x-%x-%x-%x-%x", uuid[0:4], uuid[4:6], uuid[6:8], uuid[8:10], uuid[10:16])
 	created := float64(time.Now().UnixMilli()) / 1000
-	tx, err := s.db.BeginTx(ctx, nil)
+	tx, err := s.begin(ctx)
 	if err != nil {
 		return KMSKeyMetadata{}, err
 	}
@@ -92,21 +127,36 @@ func (s *KMSStore) DescribeKey(ctx context.Context, region, id string) (KMSKeyMe
 	if err != nil {
 		return KMSKeyMetadata{}, err
 	}
-	row, err := kmsRead(ctx, s.db, region, parsed)
-	return row.metadata, err
+	tx, err := s.begin(ctx)
+	if err != nil {
+		return KMSKeyMetadata{}, err
+	}
+	defer tx.Rollback()
+	row, err := kmsRead(ctx, tx, region, parsed)
+	if err != nil {
+		return KMSKeyMetadata{}, err
+	}
+	if err = tx.Commit(); err != nil {
+		return KMSKeyMetadata{}, err
+	}
+	return row.metadata, nil
 }
 func (s *KMSStore) SetEnabled(ctx context.Context, region, id string, enabled bool) error {
 	parsed, err := kmsID(region, id)
 	if err != nil {
 		return err
 	}
-	tx, err := s.db.BeginTx(ctx, nil)
+	tx, err := s.begin(ctx)
 	if err != nil {
 		return err
 	}
 	defer tx.Rollback()
-	if _, err = kmsRead(ctx, tx, region, parsed); err != nil {
+	row, err := kmsRead(ctx, tx, region, parsed)
+	if err != nil {
 		return err
+	}
+	if row.metadata.KeyState == "PendingDeletion" {
+		return kmsInvalidState()
 	}
 	state := "Disabled"
 	if enabled {
@@ -142,7 +192,12 @@ func (s *KMSStore) ListKeys(ctx context.Context, region string, limit int, marke
 		}
 		after = parts[1]
 	}
-	rows, err := s.db.QueryContext(ctx, "SELECT key_id FROM aws_kms_keys WHERE region=? AND key_id>? ORDER BY key_id LIMIT ?", region, after, limit+1)
+	tx, err := s.begin(ctx)
+	if err != nil {
+		return result, err
+	}
+	defer tx.Rollback()
+	rows, err := tx.QueryContext(ctx, "SELECT key_id FROM aws_kms_keys WHERE region=? AND key_id>? ORDER BY key_id LIMIT ?", region, after, limit+1)
 	if err != nil {
 		return result, err
 	}
@@ -165,6 +220,9 @@ func (s *KMSStore) ListKeys(ctx context.Context, region string, limit int, marke
 		result.Truncated = true
 		result.NextMarker = "kms1." + base64.RawURLEncoding.EncodeToString([]byte(region+"\x00"+result.Keys[limit-1].KeyID))
 	}
+	if err = tx.Commit(); err != nil {
+		return KMSKeyList{}, err
+	}
 	return result, nil
 }
 func (s *KMSStore) Encrypt(ctx context.Context, region, id string, contextMap map[string]string, plaintext []byte) ([]byte, string, error) {
@@ -178,7 +236,7 @@ func (s *KMSStore) Encrypt(ctx context.Context, region, id string, contextMap ma
 	if _, err = kmsContext(contextMap); err != nil {
 		return nil, "", err
 	}
-	tx, err := s.db.BeginTx(ctx, nil)
+	tx, err := s.begin(ctx)
 	if err != nil {
 		return nil, "", err
 	}
@@ -200,6 +258,9 @@ func kmsEncryptTx(ctx context.Context, tx *sql.Tx, region, parsed string, contex
 	row, err := kmsRead(ctx, tx, region, parsed)
 	if err != nil {
 		return nil, "", err
+	}
+	if row.metadata.KeyState == "PendingDeletion" {
+		return nil, "", kmsInvalidState()
 	}
 	if !row.metadata.Enabled {
 		return nil, "", kmsFailure("DisabledException", "KMS key is disabled.")
@@ -236,7 +297,7 @@ func (s *KMSStore) Decrypt(ctx context.Context, region, requestedID string, cont
 	if _, err = kmsContext(contextMap); err != nil {
 		return nil, "", err
 	}
-	tx, err := s.db.BeginTx(ctx, nil)
+	tx, err := s.begin(ctx)
 	if err != nil {
 		return nil, "", err
 	}
@@ -257,6 +318,9 @@ func kmsDecryptTx(ctx context.Context, tx *sql.Tx, region, id string, contextMap
 	row, err := kmsRead(ctx, tx, region, id)
 	if err != nil {
 		return nil, "", err
+	}
+	if row.metadata.KeyState == "PendingDeletion" {
+		return nil, "", kmsInvalidState()
 	}
 	if !row.metadata.Enabled {
 		return nil, "", kmsFailure("DisabledException", "KMS key is disabled.")
