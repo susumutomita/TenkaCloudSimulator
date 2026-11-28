@@ -1,20 +1,20 @@
-name: Logs and Secrets Manager reference candidate verification
+name: Native historical reference candidate verification
 on:
   workflow_dispatch:
 permissions:
   contents: read
 jobs:
   native-reference:
-    name: Native Logs and Secrets Manager reference workflows
+    name: Native Logs, Secrets Manager, DynamoDB and navigation references
     runs-on: ubuntu-22.04
     timeout-minutes: 20
     env:
-      PRODUCT: 9f2df4ff95516d0bdce8b96bbfa7f60bb33f3a7a
-      PRODUCT_TREE: 512cd241021a8acfc569d613366fc410c0c9c548
+      PRODUCT: b2bb0c42ffb448ecff3f6733038c90764ee8d09c
+      PRODUCT_TREE: cd252465105099f8a914ea248f1bc239351d31bf
     steps:
       - uses: actions/checkout@v7.0.1
         with:
-          ref: 9f2df4ff95516d0bdce8b96bbfa7f60bb33f3a7a
+          ref: b2bb0c42ffb448ecff3f6733038c90764ee8d09c
           persist-credentials: false
       - uses: actions/setup-go@v6.5.0
         with:
@@ -37,7 +37,27 @@ jobs:
           "$RUNNER_TOOL_CACHE/Python/3.12.16/x64/bin/python3.12" -m venv /tmp/native-reference-sdk
           /tmp/native-reference-sdk/bin/python -m pip install -r scripts/requirements-test.txt
           /tmp/native-reference-sdk/bin/python -m pip check
-      - name: Run both stock fixtures and inventory regressions on isolated loopback
+          cat > "$RUNNER_TEMP/native-navigation-check.py" <<'PYTHON'
+          import json
+          import urllib.request
+          from pathlib import Path
+
+          from api_cloud_sections_contract import compare_native, validate_document
+          from check import running
+
+          source = json.loads(Path('internal/server/apidocs/openapi.json').read_text())
+          with running(authenticated=True) as (endpoint, token):
+              opener = urllib.request.build_opener(urllib.request.ProxyHandler({}))
+              request = urllib.request.Request(endpoint + '/_simulator/docs/openapi.json',
+                                               headers={'X-Simulator-Token': token})
+              with opener.open(request, timeout=5) as response:
+                  assert response.status == 200
+                  served = json.load(response)
+              assert source == served
+              compare_native(served, source)
+              print(json.dumps(validate_document(served)))
+          PYTHON
+      - name: Run the stock native fixtures and reference regressions on isolated loopback
         run: |
           /tmp/native-reference-sdk/bin/python -c 'import os; assert not any(k.startswith(("AWS_", "BOTO_")) for k in os.environ)'
           export SIMULATOR_BINARY="$PWD/dist/tenkacloud-simulator"
@@ -49,6 +69,11 @@ jobs:
           ' isolated sh -ec '
             python=/tmp/native-reference-sdk/bin/python
             "$python" -B test/e2e/test_storage_reference_sakura_projection.py -v
+            "$python" -B test/e2e/test_route53_reference_adapters.py -v
+            "$python" -B test/e2e/test_openapi_json10.py -v
+            "$python" -B test/e2e/api_cloud_sections_contract.py --self-test
+            PYTHONPATH="$PWD/test/e2e" "$python" -B "$RUNNER_TEMP/native-navigation-check.py" > "$1/navigation.json"
+            "$python" -B test/e2e/dynamodb_docs.py > "$1/dynamodb.json"
             "$python" -B test/e2e/cloudwatch_logs.py > "$1/logs.json"
             "$python" -B test/e2e/secrets_manager_docs.py > "$1/secrets.txt"
           ' fixtures "$receipts"
@@ -61,11 +86,22 @@ jobs:
             and .reference.sharedRootExamplesExecuted == 8 and .reference.SDKSameSQLiteBytes == true
             and .reference.cleanup == "DELETED")' "$receipts/logs.json"
           grep -Fx 'Secrets Manager served OpenAPI seven real HTTP examples/native SDK shared-state PASS' "$receipts/secrets.txt"
+          jq -se 'length == 1 and (.[0] | .paths == 36 and .operationIDs == 67
+            and .cloudGroups == ["AWS", "Google Cloud", "Azure", "Sakura Cloud"]
+            and .controlGroup == "Simulator" and .documentationOnlyServiceGuides == 7
+            and .SakuraOperations == 5)' "$receipts/navigation.json"
+          jq -se 'length == 1 and (.[0] | .servedSevenTemplates ==
+            ["CreateTable", "ListTables", "DescribeTable", "PutItem", "GetItem", "DeleteItem", "DeleteTable"]
+            and .mainPaths == 36 and .mainOperationIDs == 67 and .nativeHTTPCounts == {"calls":7,"responses":7}
+            and .SDKCounts.calls > 0 and .SDKCounts.calls == .SDKCounts.sends
+            and .SDKCounts.sends == .SDKCounts.responses and .sharedSQLiteConfirmed == true
+            and .sourceEqualsServed == true and .schemaValidatedNativeResponses == 7
+            and .cleanup == "DELETED" and .realAWS == false)' "$receipts/dynamodb.json"
           sha256sum --check "$receipts/binary.sha256"
       - name: Retain product identity and native results
         uses: actions/upload-artifact@v7.0.2
         with:
-          name: native-reference-9f2df4f-${{ github.run_id }}
+          name: native-reference-b2bb0c4-${{ github.run_id }}
           path: ${{ runner.temp }}/native-reference-receipts/
           if-no-files-found: error
           retention-days: 14
