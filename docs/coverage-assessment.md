@@ -20,6 +20,12 @@ Pinned sources:
 | #288 | Amazon Lookout for Equipment | AWS ended support on 2026-10-07 (<https://aws.amazon.com/lookout-for-equipment>). It stopped accepting new customers on 2024-10-17. |
 | #89 | Amazon Chime (application) | AWS ended support on 2026-02-20 (<https://docs.aws.amazon.com/chime/latest/ag/amazon-chime-transition-features.html>). The Chime SDK (#90) is unaffected and is served. |
 
+## AWS Managed Services Advanced (#120)
+
+AWS publishes a Change Management API for creating, reading, updating and canceling requests for change (RFCs). The official `amscm` and `amsskms` SDK models are distributed through the AMS console Developer’s Resources page. Both are absent from the repository’s pinned botocore 1.41.6 package. The local simulator has no verified RFC approval or execution workflow. [Change Management API](https://docs.aws.amazon.com/managedservices/latest/ApiReference-cm/Welcome.html) · [SDK distribution](https://docs.aws.amazon.com/managedservices/latest/onboardingguide/install-cli.html)
+
+The official incident-reporting workflow uses an AWS Support case with `serviceCode` set to `sentinel-report-incident`. AWS has announced that AMS Advanced will end support on June 30, 2027. Its transition guide identifies AMS Accelerate as a separate option. [Incident reporting](https://docs.aws.amazon.com/managedservices/latest/userguide/report-manage-incidents-api.html) · [AMS Advanced end of support](https://docs.aws.amazon.com/managedservices/latest/userguide/SunsetPlan.html)
+
 ## No public API in the pinned official models
 
 | Issue | Product | Finding |
@@ -43,7 +49,6 @@ Pinned sources:
 | #191 | AWS Security Agent | No botocore model. |
 | #209 | AWS Service Management Connector | No botocore model; it is distributed as an integration package. |
 | #192 | AWS Assurance | No botocore model. |
-| #120 | AWS Managed Services | No botocore model. |
 | #267 | AWS Continuum | No botocore model. |
 | #245 | AWS Network Security Manager | No botocore model. |
 | #244 | AWS Interconnect | No botocore model. |
