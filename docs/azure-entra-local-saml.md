@@ -19,8 +19,9 @@ isolated browser context with explicit test CA trust.
 
 The resulting handler and its `Public()` descriptor can be reused wherever a
 local Azure exercise needs a SAML IdP. The descriptor contains only the
-generated tenant and object IDs, issuer, metadata and sign-in URLs, and
-public signing certificate. The launcher installs the narrowly scoped IdP
+generated tenant and object IDs, synthetic email (via `Public().Email()`),
+issuer, metadata and sign-in URLs, and public signing certificate. The email
+is not in the served federation metadata. The launcher installs the narrowly scoped IdP
 trust into the chosen SP from that descriptor. Each side keeps its own
 signing key. The SP does not receive an account secret, a simulator operator
 credential, or authority to issue SAML.
@@ -31,7 +32,8 @@ sign-in code. Hand it to the local tester through a private per-run file
 argument, console log or SP registration. There is no default credential,
 HTTP user registration, host SSO, company account or reusable login session.
 Destroy the file and close the fixture at launcher shutdown. A restart
-creates new identities, one-use code and keys; local trust must be rebuilt.
+creates a new identity and address, one-use code and keys; local trust
+must be rebuilt.
 This package does not start a listener or change the ordinary simulator
 runtime on import.
 
@@ -63,10 +65,29 @@ sample application), see [local SSO startup](local-sso.md).
 - On success, the browser posts a signed SAML Response to the registered
   ACS. The signed assertion carries exact audience, recipient and
   `InResponseTo`, a persistent NameID, and the generated `objectidentifier`
-  and `tenantid` GUIDs. There is no credential, email, group or role claim.
+  and `tenantid` GUIDs. Every successful assertion to this one enrolled SP
+  also includes the signed synthetic email attribute,
+  `http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress`. The
+  non-deliverable `.invalid` address is bound to the generated tenant and
+  object IDs at provisioning; no browser field can choose it. There is no
+  `email_verified`, credential, group, or role assertion.
   Assertion validity is capped at one minute and cannot exceed fixture
   lifetime. The SP must independently verify the pin, binding, time and
   replay; closing the fixture does not revoke already issued assertions.
+
+## Using the synthetic email in a local Cognito client
+
+Register the explicit SAML mapping
+`{"email":"http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"}`.
+Enable and request `openid email` for that app client to get the mapped
+address in its ID token. The access token does not contain email. The
+`local-sso` sample still requests only `openid` and does not return an
+email to its relying party. Email is not the stable subject, does not
+assert control of a mailbox, and must not be used as a real-world identity
+or granted access to any real resource. Do not configure an
+`email_verified` mapping to this fixture: it has no such assertion.
+See [Cognito SAML attribute mapping](https://docs.aws.amazon.com/cognito/latest/developerguide/cognito-user-pools-managing-saml-idp.html)
+and [OpenID Connect standard claims](https://openid.net/specs/openid-connect-core-1_0.html#StandardClaims).
 
 This deliberately narrow developer profile excludes unsigned or
 IdP-initiated login, passive login, alternative bindings, bearer codes

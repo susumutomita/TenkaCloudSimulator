@@ -101,7 +101,10 @@ func New(config Config) (*Fixture, string, error) {
 	if !validEntityID(config.ServiceProvider.EntityID) {
 		return nil, "", errors.New("an exact local or opaque URN service-provider entity ID is required")
 	}
-	dir := newDirectory()
+	dir, err := newDirectory()
+	if err != nil {
+		return nil, "", err
+	}
 	now := time.Now().UTC()
 	code := randomOpaque()
 	f := &Fixture{origin: config.Origin, acs: config.ServiceProvider.ACS, acsOrigin: "https://" + acs.Host,

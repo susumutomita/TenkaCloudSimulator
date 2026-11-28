@@ -96,7 +96,7 @@ func newSPFixture(t *testing.T) (*Fixture, string, *saml.ServiceProvider) {
 		role.SingleSignOnServices[0].Binding != saml.HTTPRedirectBinding ||
 		len(role.KeyDescriptors) != 1 || role.KeyDescriptors[0].Use != "signing" ||
 		role.KeyDescriptors[0].KeyInfo.X509Data.X509Certificates[0].Data != base64.StdEncoding.EncodeToString(p.SigningCertificateDER) ||
-		strings.Contains(response.Body.String(), code) {
+		strings.Contains(response.Body.String(), code) || strings.Contains(response.Body.String(), p.Email()) {
 		t.Fatal("unavailable features or secret in registration metadata")
 	}
 	a, _ := url.Parse(acs)
@@ -182,6 +182,20 @@ func TestLocalSAMLResponseAndClaimScope(t *testing.T) {
 	if got := serve(f, complete(t, f, ticket, randomOpaque())).Code; got != 400 {
 		t.Fatal("unbound code accepted", got)
 	}
+	// The sign-in form is not an account or claims provisioning endpoint.
+	extra := incoming(t, http.MethodPost, f.Public().SSOURL, url.Values{
+		"flow": {ticket.flow}, "code": {code}, "email": {"other@fixture.invalid"},
+	})
+	extra.AddCookie(ticket.cookie)
+	if out := serve(f, extra); out.Code != 400 || strings.Contains(out.Body.String(), "SAMLResponse") {
+		t.Fatal("login form with an unknown field must not issue an assertion", out.Code)
+	}
+	p := f.Public()
+	descriptorCopy := p
+	descriptorCopy.Directory.email = "changed@fixture.invalid"
+	if descriptorCopy.Email() == p.Email() || f.Public().Email() != p.Email() {
+		t.Fatal("mutating a descriptor copy changed the provisioned identity")
+	}
 	w := serve(f, complete(t, f, ticket, code))
 	if w.Code != 200 || strings.Contains(w.Body.String(), code) || w.Header().Get("Referrer-Policy") != "origin" {
 		t.Fatal("approved login not accepted or code echoed", w.Code)
@@ -206,7 +220,6 @@ func TestLocalSAMLResponseAndClaimScope(t *testing.T) {
 		}
 		t.Fatal("generic SAML SP did not verify the actual response", err)
 	}
-	p := f.Public()
 	if parsed.Issuer.Value != p.Issuer || parsed.Subject.NameID.Value != p.ObjectID ||
 		parsed.Subject.NameID.NameQualifier != p.Issuer || parsed.Subject.NameID.SPNameQualifier != entity ||
 		parsed.Subject.NameID.Format != string(saml.PersistentNameIDFormat) ||
@@ -216,9 +229,11 @@ func TestLocalSAMLResponseAndClaimScope(t *testing.T) {
 		t.Fatal("verified assertion differs from its limited scope")
 	}
 	attrs := parsed.AttributeStatements[0].Attributes
-	if len(attrs) != 2 || attrs[0].Name != oidClaim || len(attrs[0].Values) != 1 || attrs[0].Values[0].Value != p.ObjectID ||
-		attrs[1].Name != tenantClaim || len(attrs[1].Values) != 1 || attrs[1].Values[0].Value != p.TenantID {
-		t.Fatal("unexpected claims")
+	if len(attrs) != 3 || attrs[0].Name != oidClaim || len(attrs[0].Values) != 1 || attrs[0].Values[0].Value != p.ObjectID ||
+		attrs[1].Name != tenantClaim || len(attrs[1].Values) != 1 || attrs[1].Values[0].Value != p.TenantID ||
+		attrs[2].Name != EmailClaimURI || attrs[2].NameFormat != "urn:oasis:names:tc:SAML:2.0:attrname-format:uri" ||
+		len(attrs[2].Values) != 1 || attrs[2].Values[0].Value != p.Email() {
+		t.Fatal("expected only signed object ID, tenant ID and synthetic email")
 	}
 	if got := serve(f, complete(t, f, ticket, code)).Code; got != 400 {
 		t.Fatal("one-time login allowed replay", got)

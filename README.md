@@ -55,6 +55,12 @@ With this source's built binary, run `./dist/tenkacloud-simulator local-sso`
 to try one synthetic sign-in through the built-in Entra SAML and Cognito
 components. An isolated browser trust store is required. It does not replace
 ordinary Simulator sign-in. See the [local SSO guide](docs/local-sso.md).
+The IdP creates one synthetic account per run. Every successful SAML
+assertion to its one enrolled SP carries a synthetic `.invalid` email.
+A configured Cognito client receives it in the ID token only with an
+explicit mapping and `email` scope; the sample still uses `openid` only.
+There is no verification claim, and a restart creates a different address.
+See [local SAML mapping](docs/azure-entra-local-saml.md#using-the-synthetic-email-in-a-local-cognito-client).
 
 ## Try it: run a Python Lambda and read its output
 

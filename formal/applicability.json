@@ -1,139 +1,98 @@
 {
   "version": 1,
-  "base_sha": "c70822a65ab85edf87cb42a9b45bb4e6ab7fb210",
+  "base_sha": "ba506afcf994ee7a7fc55246a2688c7987e79c64",
   "changes": [
     {
       "path": "README.md",
-      "sha256": "883b4426574b3e7584df311eb79f7090f8da92f0f00c3355dab43beebc6c133d",
+      "sha256": "1b4049b2d06753cf92cac5d8aa32ecba6e72b130b04722e1d16e25b7fbb8b340",
       "disposition": "documentation",
-      "reason": "Describes in-memory Store lifetime, cancellation and file-backed persistence for operators and maintainers.",
+      "reason": "Documents the bounded local fixture, SAML attribute, and requested ID-token claim; no runtime changes in this file.",
+      "models": []
+    },
+    {
+      "path": "docs/azure-entra-local-saml.md",
+      "sha256": "f06bfa714b8b2acb19e68d3afd58dbdee94bdbdf813db4222128420df5555a1b",
+      "disposition": "documentation",
+      "reason": "Documents the bounded local fixture, SAML attribute, and requested ID-token claim; no runtime changes in this file.",
       "models": []
     },
     {
       "path": "docs/design/0001-go-standalone.md",
-      "sha256": "06dacef120c4e90f1d12d226bca223e469edbe4b92ace38a500ad44693955d9b",
+      "sha256": "75ff302c99cccef3b48dff9df8dd42fd6a5508dd8dfdcf7c110417cb09ccf759",
       "disposition": "documentation",
-      "reason": "Describes in-memory Store lifetime, cancellation and file-backed persistence for operators and maintainers.",
+      "reason": "Documents the bounded local fixture, SAML attribute, and requested ID-token claim; no runtime changes in this file.",
       "models": []
     },
     {
-      "path": "formal/StoreConnectionLifetime.cfg",
-      "sha256": "9411896e27460c096b79d224d0f679e597bd0151d191ec4ba478dcbae04835d7",
+      "path": "internal/aws/cognitoidp/hosted_entra_email_test.go",
+      "sha256": "2138802d0fa73c324daf412b660f23ab70ea08c6e36d3b6883e975143544a18c",
+      "disposition": "test-support",
+      "reason": "Checks exact synthetic account and signed SAML-to-OIDC claim behavior without expanding the runtime trust boundary.",
+      "models": []
+    },
+    {
+      "path": "internal/azure/entraidp/directory.go",
+      "sha256": "6d8a355dedf65dfb3eeb2338d1ac4fee13562dae3b1834d539c2190215efec9a",
       "disposition": "modeled",
-      "reason": "Defines the bounded connection, cancellation, committed row, isolation and disposal transitions and invariants.",
+      "reason": "Carries the fixture-owned subject through existing enrolled relying-party and verified login rules; Go validates the synthetic email derivation and signed claim.",
       "models": [
         {
-          "id": "StoreConnectionLifetime",
+          "id": "LocalSSOSyntheticLifecycle",
           "properties": [
-            "PeerBackingUnchanged",
-            "ConnectionTurnoverPreserves",
-            "CancelDiscardsStaged",
-            "DisposedBackingReleased",
-            "ClosedStoresUnavailable",
-            "ConnectionPragmasApplied",
-            "LiveCommittedData"
+            "IssuanceBoundToBrowserAndCode",
+            "ExactACSWitness"
           ],
-          "limits": "Two initialized in-memory stores with one logical row each, two values and six steps. Native tests cover SQLite schema, existing file state, driver reconnection, busy timeout, foreign keys and backing release."
+          "limits": "Symbolic correspondence only: not cryptography, parsers, OAuth/SAML platform parity, concrete time/quotas, cross-run subject stability, general Keycloak compatibility, TLS/browser/Linux/macOS execution, SQL/crash races, disclosure beyond modeled stdout fields, Battle dependency compatibility, or a Go refinement proof. An independent successful callback is not an app or operator session. The model does not prove synthetic email derivation/provenance, SAML attribute disclosure, token claim projection, scope checks, or address changes across fixture restarts; these are checked separately in Go."
         }
       ]
     },
     {
-      "path": "formal/StoreConnectionLifetime.tla",
-      "sha256": "36ae769708422d165321418d9dad4d20ffa518de1d4c31adc644663caf411663",
+      "path": "internal/azure/entraidp/directory_test.go",
+      "sha256": "b666399a8c54ee208659889bdd991b81f4cacaeb431a5379731d1d608d69d239",
+      "disposition": "test-support",
+      "reason": "Checks exact synthetic account and signed SAML-to-OIDC claim behavior without expanding the runtime trust boundary.",
+      "models": []
+    },
+    {
+      "path": "internal/azure/entraidp/fixture.go",
+      "sha256": "73411869b59e87c527d131f4be33789c7522befd99f239cb60b072cbb77d13fe",
       "disposition": "modeled",
-      "reason": "Defines the bounded connection, cancellation, committed row, isolation and disposal transitions and invariants.",
+      "reason": "Carries the fixture-owned subject through existing enrolled relying-party and verified login rules; Go validates the synthetic email derivation and signed claim.",
       "models": [
         {
-          "id": "StoreConnectionLifetime",
+          "id": "LocalSSOSyntheticLifecycle",
           "properties": [
-            "PeerBackingUnchanged",
-            "ConnectionTurnoverPreserves",
-            "CancelDiscardsStaged",
-            "DisposedBackingReleased",
-            "ClosedStoresUnavailable",
-            "ConnectionPragmasApplied",
-            "LiveCommittedData"
+            "PinnedPromptOnly",
+            "OneShotPerFixture",
+            "IssuanceBoundToBrowserAndCode",
+            "RetiredHasNoLiveState"
           ],
-          "limits": "Two initialized in-memory stores with one logical row each, two values and six steps. Native tests cover SQLite schema, existing file state, driver reconnection, busy timeout, foreign keys and backing release."
+          "limits": "Symbolic correspondence only: not cryptography, parsers, OAuth/SAML platform parity, concrete time/quotas, cross-run subject stability, general Keycloak compatibility, TLS/browser/Linux/macOS execution, SQL/crash races, disclosure beyond modeled stdout fields, Battle dependency compatibility, or a Go refinement proof. An independent successful callback is not an app or operator session. The model does not prove synthetic email derivation/provenance, SAML attribute disclosure, token claim projection, scope checks, or address changes across fixture restarts; these are checked separately in Go."
         }
       ]
     },
     {
-      "path": "formal/models.json",
-      "sha256": "495eb9c1ca908f244784818f06876cba9704a6c187cc8223d1c73ec6a9bd0b03",
-      "disposition": "formal-infrastructure",
-      "reason": "Registers the bounded store model or protects its inventory, required controls and exact source paths.",
+      "path": "internal/azure/entraidp/fixture_test.go",
+      "sha256": "20aaa28caa22e7238829b32bcf4fe7f7fdc60cb4683cfadd5393667ba6865afc",
+      "disposition": "test-support",
+      "reason": "Checks exact synthetic account and signed SAML-to-OIDC claim behavior without expanding the runtime trust boundary.",
       "models": []
     },
     {
-      "path": "internal/core/store.go",
-      "sha256": "6abd6cd378ed514fd857fcd6b33788f72e241f1cc7286c8f9c4a6e97e5da5277",
+      "path": "internal/azure/entraidp/saml.go",
+      "sha256": "9715f5d91f47adde5042459c3970ad57489e8f20c3e0bf873eb9895a88176221",
       "disposition": "modeled",
-      "reason": "The Store owns the in-memory backing across physical connection replacement, reapplies per-connection settings, and releases its private backing on close.",
+      "reason": "Carries the fixture-owned subject through existing enrolled relying-party and verified login rules; Go validates the synthetic email derivation and signed claim.",
       "models": [
         {
-          "id": "StoreConnectionLifetime",
+          "id": "LocalSSOSyntheticLifecycle",
           "properties": [
-            "PeerBackingUnchanged",
-            "ConnectionTurnoverPreserves",
-            "CancelDiscardsStaged",
-            "DisposedBackingReleased",
-            "ClosedStoresUnavailable",
-            "ConnectionPragmasApplied",
-            "LiveCommittedData"
+            "PinnedPromptOnly",
+            "ExactACSWitness"
           ],
-          "limits": "Two initialized in-memory stores with one logical row each, two values and six steps. Native tests cover SQLite schema, existing file state, driver reconnection, busy timeout, foreign keys and backing release."
-        },
-        {
-          "id": "ObjectStore",
-          "properties": [
-            "NoOrphans"
-          ],
-          "limits": "The abstract property covers parent/child rows. Native tests check that SQLite rejects an orphan on a replacement connection."
+          "limits": "Symbolic correspondence only: not cryptography, parsers, OAuth/SAML platform parity, concrete time/quotas, cross-run subject stability, general Keycloak compatibility, TLS/browser/Linux/macOS execution, SQL/crash races, disclosure beyond modeled stdout fields, Battle dependency compatibility, or a Go refinement proof. An independent successful callback is not an app or operator session. The model does not prove synthetic email derivation/provenance, SAML attribute disclosure, token claim projection, scope checks, or address changes across fixture restarts; these are checked separately in Go."
         }
       ]
-    },
-    {
-      "path": "internal/core/store_connection_test.go",
-      "sha256": "7dd7475616f7c4773bf613570043d372aa756d394f71f93c80aa43a60fd70e40",
-      "disposition": "modeled",
-      "reason": "Forces cancellation and physical connection retirement through database/sql and checks committed rows, schema, connection settings, foreign keys, independent stores and release on close.",
-      "models": [
-        {
-          "id": "StoreConnectionLifetime",
-          "properties": [
-            "PeerBackingUnchanged",
-            "ConnectionTurnoverPreserves",
-            "CancelDiscardsStaged",
-            "DisposedBackingReleased",
-            "ClosedStoresUnavailable",
-            "ConnectionPragmasApplied",
-            "LiveCommittedData"
-          ],
-          "limits": "Two initialized in-memory stores with one logical row each, two values and six steps. Native tests cover SQLite schema, existing file state, driver reconnection, busy timeout, foreign keys and backing release."
-        }
-      ]
-    },
-    {
-      "path": "scripts/formal_model_gate.py",
-      "sha256": "91dd0ddaebf98333baafd028d3bc33274af58baf8d662af192b1ad824ca7e945",
-      "disposition": "formal-infrastructure",
-      "reason": "Registers the bounded store model or protects its inventory, required controls and exact source paths.",
-      "models": []
-    },
-    {
-      "path": "scripts/test-formal-applicability.py",
-      "sha256": "7546ea5da455ad7e76a78046f3013d33dfc51f92701a5891bff51cbf13c4566c",
-      "disposition": "formal-infrastructure",
-      "reason": "Exercises both deleting a historical model-scoped source and refusing to remove the permanently protected live Store implementation. An attempted exemption of the historical source also fails.",
-      "models": []
-    },
-    {
-      "path": "scripts/test-formal-gate.py",
-      "sha256": "125bd9887869a3483db308ed0a2a942ca71acaec09a77323fb11f18eea2cf5a1",
-      "disposition": "formal-infrastructure",
-      "reason": "Registers the bounded store model or protects its inventory, required controls and exact source paths.",
-      "models": []
     }
   ]
 }

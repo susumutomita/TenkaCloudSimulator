@@ -20,6 +20,10 @@ import (
 	dsig "github.com/russellhaering/goxmldsig"
 )
 
+// EmailClaimURI is the SAML attribute a relying party maps to its email
+// field. It is not NameID and does not attest to mailbox verification.
+const EmailClaimURI = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
+
 const (
 	protocolNamespace = "urn:oasis:names:tc:SAML:2.0:protocol"
 	oidClaim          = "http://schemas.microsoft.com/identity/claims/objectidentifier"
@@ -203,6 +207,8 @@ func (f *Fixture) response(req *saml.IdpAuthnRequest, now time.Time) (saml.IdpAu
 		AttributeStatements: []saml.AttributeStatement{{Attributes: []saml.Attribute{
 			{Name: oidClaim, Values: []saml.AttributeValue{{Value: f.public.ObjectID}}},
 			{Name: tenantClaim, Values: []saml.AttributeValue{{Value: f.public.TenantID}}},
+			{Name: EmailClaimURI, NameFormat: "urn:oasis:names:tc:SAML:2.0:attrname-format:uri",
+				Values: []saml.AttributeValue{{Value: f.public.Email()}}},
 		}}},
 	}
 	// Generic XMLDSig signs both the assertion and the response. No
