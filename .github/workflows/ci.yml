@@ -4,6 +4,11 @@ on:
     branches: [main]
   pull_request:
   workflow_dispatch:
+    inputs:
+      sts_iam_console:
+        description: Verify the reviewed IAM Console role with Scalar and the STS SDK
+        type: boolean
+        default: false
   workflow_call:
 permissions:
   contents: read
@@ -358,4 +363,59 @@ jobs:
             reports/login-paste-*.png
             reports/language-login-ja-*.png
           if-no-files-found: warn
+          retention-days: 14
+
+  sts-iam-console:
+    name: IAM Console role, Scalar GetRole and signed STS SDK
+    if: github.event_name == 'workflow_dispatch' && inputs.sts_iam_console
+    runs-on: ubuntu-22.04
+    timeout-minutes: 25
+    env:
+      PRODUCT: 1f1f96fdf5eb56112a916dc6a830fa767f732fc7
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          ref: 1f1f96fdf5eb56112a916dc6a830fa767f732fc7
+          persist-credentials: false
+      - name: Select the repository CI toolchain
+        run: echo 1.26.11 > "$RUNNER_TEMP/.go-version"
+      - uses: actions/setup-go@v6.5.0
+        with:
+          go-version-file: ${{ runner.temp }}/.go-version
+          cache: true
+      - name: Build the reviewed product and install the pinned test tools
+        run: |
+          test "$(id -u)" -ne 0
+          test "$(go env GOVERSION)" = go1.26.11
+          test "$(git rev-parse HEAD)" = "$PRODUCT"
+          test -z "$(git status --porcelain)"
+          make build
+          mkdir "$RUNNER_TEMP/sts-p2-receipts"
+          go version -m dist/tenkacloud-simulator > "$RUNNER_TEMP/sts-p2-receipts/build.txt"
+          grep -F "vcs.revision=$PRODUCT" "$RUNNER_TEMP/sts-p2-receipts/build.txt"
+          grep -F 'vcs.modified=false' "$RUNNER_TEMP/sts-p2-receipts/build.txt"
+          "$RUNNER_TOOL_CACHE/Python/3.12.16/x64/bin/python3.12" -m venv /tmp/sts-p2-tests
+          /tmp/sts-p2-tests/bin/python -m pip install -r scripts/requirements-test.txt
+          /tmp/sts-p2-tests/bin/playwright install --with-deps chromium
+      - name: Verify the production Console, Scalar response and signed SDK session on loopback
+        run: |
+          /tmp/sts-p2-tests/bin/python -c 'import os; assert not any(k.startswith(("AWS_", "BOTO_")) for k in os.environ)'
+          binary="$PWD/dist/tenkacloud-simulator"
+          digest=$(sha256sum "$binary" | cut -d ' ' -f 1)
+          receipt="$RUNNER_TEMP/sts-p2-receipts/role.json"
+          unshare --user --map-current-user --net --keep-caps sh -ec '
+            ip link set lo up
+            exec setpriv --inh-caps=-all --ambient-caps=-all --bounding-set=-all "$@"
+          ' sts-p2 /tmp/sts-p2-tests/bin/python -B test/e2e/sts_iam_console.py --binary "$binary" --binary-sha256 "$digest" > "$receipt"
+          jq -se --arg digest "$digest" 'length == 1 and (.[0] | .binary_sha256 == $digest and
+            .console_create_edit_delete == true and .scalar_cookie_get_role == true and
+            .signed_sdk_role_session == true and .read_only_participant_refused == true and
+            .cancel_preserved_trust == true and .changed_trust_refused_new_session == true and
+            .owned_role_cleanup == true)' "$receipt"
+      - name: Retain the exact browser and SDK result
+        uses: actions/upload-artifact@v7.0.2
+        with:
+          name: sts-iam-console-1f1f96f-${{ github.run_id }}
+          path: ${{ runner.temp }}/sts-p2-receipts/
+          if-no-files-found: error
           retention-days: 14
