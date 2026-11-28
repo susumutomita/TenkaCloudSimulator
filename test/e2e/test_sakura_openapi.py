@@ -46,7 +46,7 @@ def project_simpledb_write_cleanup(spec):
     del actions[-2:]
     assert next(iter(form['examples'])) == 'DescribeStacks', 'Default Query example changed'
     examples = {k: form['examples'].pop(k, None) for k in ('PutAttributes', 'DeleteDomain')}
-    assert digest(examples) == 'd9adae035cdf873531bc4ad7b7d258f22187673db820f0b446bea4394f93701c', 'SimpleDB write presets changed'
+    assert digest(examples) == '90a08915badff0c9cdef93abc0e81ec9fceb8509f518c4398e67fc7893b61f9f', 'SimpleDB write presets changed'
     fields = {k: props.pop(k, None) for k in ('Attribute.1.Name', 'Attribute.1.Value', 'Attribute.1.Replace')}
     assert digest(fields) == 'bb4261ea7d0fe27a84acff96ce4b4dd8b6936318b921012a6c0f199e53b20b1a', 'SimpleDB write fields changed'
 

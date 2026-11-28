@@ -25,7 +25,7 @@
     },
     {
       "path": "internal/server/apidocs/openapi.json",
-      "sha256": "59dc4b01d9c4739306b6ec2a907aabf4ac49354f5cbcfd9c99d419875e9f3c0d",
+      "sha256": "668bea21c075767afeb534503b8c5d6fbf7cc52ea717f4dd81871c92694eef09",
       "disposition": "presentation",
       "reason": "Expose the existing PutAttributes and DeleteDomain native operations through two optional form examples, preserving inherited defaults; no handler or authorization changes.",
       "models": []
@@ -46,14 +46,14 @@
     },
     {
       "path": "test/e2e/simpledb_shipped_examples_live.py",
-      "sha256": "96a0f853fbf1624310cf53a361389c0b0ab0463cb6f186ee681064997ca3b2e5",
+      "sha256": "989f74d6f036f4be06a07fed4538916cdaf25a9f617ad17ca28c7e053633b18e",
       "disposition": "test-support",
       "reason": "Exercise CreateDomain, Select, DeleteAttributes, PutAttributes and DeleteDomain through the served browser client; verify exact requests, native state and cleanup.",
       "models": []
     },
     {
       "path": "test/e2e/test_sakura_openapi.py",
-      "sha256": "74b2bf13ce245b5800de2cbc7ee8adf55c424f424181460a5849aa23dea02c79",
+      "sha256": "e64013a0f91f45ea17b9723c7f239cd2a53b6bc662aec60573bab200ab2080f4",
       "disposition": "test-support",
       "reason": "Verify every inherited reference block and the precise additional read and write examples, including negative checks for changed defaults, schemas and examples.",
       "models": []

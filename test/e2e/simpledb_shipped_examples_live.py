@@ -27,7 +27,7 @@ DELETE = {'Action': 'DeleteAttributes', 'Version': VERSION, 'DomainName': 'examp
           'Expected.Value': 'replace-with-current-value'}
 PUT = {'Action': 'PutAttributes', 'Version': VERSION, 'DomainName': 'scalar-practice-domain',
        'ItemName': 'scalar-practice-item', 'Attribute.1.Name': 'practice-attribute',
-       'Attribute.1.Value': 'practice-value', 'Attribute.1.Replace': 'true'}
+       'Attribute.1.Value': 'sample-blue', 'Attribute.1.Replace': 'true'}
 DELETE_DOMAIN = {'Action': 'DeleteDomain', 'Version': VERSION, 'DomainName': 'scalar-practice-domain'}
 PRESETS = (CREATE, SELECT, DELETE, PUT, DELETE_DOMAIN)
 TARGET_VALUES = [('example-attribute', DELETE['Attribute.1.Value']), ('retained', 'committed + & 値')]
