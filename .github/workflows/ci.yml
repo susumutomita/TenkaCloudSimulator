@@ -8,11 +8,11 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 60
     env:
-      PRODUCT: ec9af0b9d1adf885dc58d8f8be178cbee40cc91a
+      PRODUCT: 1bbc39fbe20103d0c4448588054732ec3447fbbe
     steps:
       - uses: actions/checkout@v7.0.1
         with:
-          ref: ec9af0b9d1adf885dc58d8f8be178cbee40cc91a
+          ref: 1bbc39fbe20103d0c4448588054732ec3447fbbe
           fetch-depth: 0
           persist-credentials: false
       - uses: actions/setup-go@v6.5.0
@@ -25,12 +25,12 @@ jobs:
           test "$GITHUB_REPOSITORY" = susumutomita/TenkaCloudSimulator
           test "$GITHUB_REF" = refs/heads/verify/210-b2bi-normal-gate
           test "$(git rev-parse HEAD)" = "$PRODUCT"
-          test "$(git rev-parse 'HEAD^{tree}')" = d5180f2eabb3b104f1cc79919d31c50d00d64716
+          test "$(git rev-parse 'HEAD^{tree}')" = a9362fb23fcf72e845f7c86fc867761abbb841e8
           test -z "$(git status --porcelain)"
           test "$(go env GOVERSION)" = go1.26.11
           test "$(id -u)" -ne 0
           mkdir "$RUNNER_TEMP/receipts"
-          PYTHONPYCACHEPREFIX="$RUNNER_TEMP/pycache" python3 scripts/check-formal-applicability.py check --base 6eba31db4e017cdb1c591b0c5af1ca4426acc1cf
+          PYTHONPYCACHEPREFIX="$RUNNER_TEMP/pycache" python3 scripts/check-formal-applicability.py check --base 70695e3f5c040ea98b3132a6a097a4b7ebea31ab
           make before-commit 2>&1 | tee "$RUNNER_TEMP/receipts/before-commit.log"
           test -z "$(git status --porcelain)"
           go version -m dist/tenkacloud-simulator > "$RUNNER_TEMP/receipts/build.txt"
