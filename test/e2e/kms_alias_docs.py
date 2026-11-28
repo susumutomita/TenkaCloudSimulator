@@ -78,7 +78,8 @@ def main():
         assert len(caps['operations']) == 15 and len(set(caps['operations'])) == 15 and set(caps['operations']) == EXPECTED
         assert caps['aliasLimit'] == 1000 and caps['aliasesPerKey'] == 50 and caps['aliasNameCharacters'] == 256
         assert caps['aliasListDefault'] == 50 and caps['aliasListMaximum'] == 100 and caps['aliasCryptoIdentifiers'] == ['Encrypt', 'Decrypt']
-        assert {'AWS-managed/predefined aliases', 'alias-based policy conditions', 'grants'} <= set(caps['unsupported'])
+        assert {'AWS-managed/predefined aliases', 'alias-based policy conditions', 'RetireGrant and other grant operations or grantee types'} <= set(caps['unsupported'])
+        assert caps['grantOperations'] == ['DescribeKey']
         op = spec['paths']['/']['post']
         templates = op['requestBody']['content']['application/x-amz-json-1.1']['examples']
         mapping = op['x-simulator-kms-operation-schemas']
