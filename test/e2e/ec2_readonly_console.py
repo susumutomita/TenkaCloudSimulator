@@ -26,7 +26,7 @@ with running(authenticated=True) as (endpoint, operator), sync_playwright() as p
     assert len(vpcs)==1
     vpc_id=vpcs[0]['VpcId']
     assert client('ec2','ap-northeast-1').describe_vpcs()['Vpcs']==[]
-    browser=p.chromium.launch(executable_path=os.environ.get('CHROMIUM_EXECUTABLE') or shutil.which('chromium'),args=['--no-sandbox'])
+    browser=p.chromium.launch(executable_path=os.environ.get('CHROMIUM_EXECUTABLE') or shutil.which('chromium'),chromium_sandbox=True)
     page=browser.new_page(viewport={'width':1100,'height':800})
     page.goto(endpoint+'/_simulator/console/#/vpc')
     page.get_by_label('Access token',exact=True).fill(operator)
@@ -49,7 +49,13 @@ with running(authenticated=True) as (endpoint, operator), sync_playwright() as p
                  route['DestinationCidrBlock'], route['GatewayId'], 'Purpose', 'Browser readback'):
         expect(page.get_by_text(text,exact=True).first).to_be_visible()
     page.get_by_role('button',name='Refresh route tables',exact=True).click()
-    expect(page.get_by_text(association['SubnetId'],exact=True)).to_be_visible()
+    # The subnet also appears in Saved subnets. Verify the refreshed association row.
+    association_row=page.get_by_role('row').filter(has=page.get_by_text(association['RouteTableAssociationId'],exact=True))
+    expect(association_row).to_have_count(1)
+    expect(association_row.get_by_text(association['SubnetId'],exact=True)).to_be_visible()
+    saved_subnet,=client('ec2').describe_subnets(SubnetIds=[association['SubnetId']])['Subnets']
+    assert saved_subnet['SubnetId']==association['SubnetId'] and saved_subnet['VpcId']==vpc_id
+    expect(page.get_by_role('table',name='Saved subnets',exact=True).get_by_text(saved_subnet['SubnetId'],exact=True)).to_be_visible()
     expect(page.get_by_role('button',name='Start instance',exact=True)).to_have_count(0)
     # A CloudFormation-owned VPC is deleted with its stack, never from this view.
     expect(page.get_by_text('CloudFormation',exact=True).first).to_be_visible()
