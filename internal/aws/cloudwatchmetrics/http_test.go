@@ -289,3 +289,49 @@ func TestMetricBatchValidationBoundariesAndUnusedFields(t *testing.T) {
 		}
 	}
 }
+
+func TestStockEmptyDimensionListAndMixedMarkers(t *testing.T) {
+	now := time.Now().UTC().Truncate(time.Minute)
+	for _, action := range []string{"PutMetricData", "GetMetricStatistics"} {
+		for _, tc := range []struct {
+			value                   string
+			present, member, accept bool
+		}{
+			{"", false, false, true}, {"", true, false, true}, {"unexpected", true, false, false}, {"", true, true, false},
+		} {
+			isPut := action == "PutMetricData"
+			fields := statsWire(now, now.Add(time.Minute))
+			prefix := "Dimensions"
+			if isPut {
+				fields = metricWire()
+				prefix = "MetricData.member.1.Dimensions"
+			}
+			fields.Del("Action")
+			fields.Del("Version")
+			fields.Del("Namespace")
+			if tc.present {
+				fields.Set(prefix, tc.value)
+			}
+			if tc.member {
+				fields.Set(prefix+".member.1.Name", "Host")
+				fields.Set(prefix+".member.1.Value", "example")
+			}
+			var dimensions string
+			var err error
+			if isPut {
+				var batch []sample
+				batch, err = form(fields).samples(now)
+				if err == nil {
+					dimensions = batch[0].dimensions
+				}
+			} else {
+				var q query
+				q, err = form(fields).query()
+				dimensions = q.dimensions
+			}
+			if (err == nil) != tc.accept || tc.accept && dimensions != "{}" {
+				t.Fatalf("%s %+v: %q, %v", action, tc, dimensions, err)
+			}
+		}
+	}
+}

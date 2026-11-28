@@ -67,6 +67,14 @@ func (f form) namespace() (string, error) {
 }
 
 func (f form) dimensions(prefix string) (string, error) {
+	// The AWS Query serializer emits an explicit empty list as the bare key.
+	// Any accompanying numbered members remain unconsumed and fail admission.
+	if literal, present := f.take(prefix); present {
+		if literal != "" {
+			return "", invalid("Dimension lists use numbered members or an empty value.")
+		}
+		return "{}", nil
+	}
 	dims := make(map[string]string)
 	for i := 1; ; i++ {
 		p := prefix + ".member." + strconv.Itoa(i) + "."
