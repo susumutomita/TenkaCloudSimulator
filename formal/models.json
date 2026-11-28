@@ -30197,6 +30197,312 @@
           "expect_invariant": "DeleteFrame"
         }
       ]
+    },
+    {
+      "id": "SESLocalMailbox",
+      "model": "formal/SESLocalMailbox.tla",
+      "config": "formal/SESLocalMailbox.cfg",
+      "bounds": "Two independently populated team/region scopes, two slots per scope, monotonically issued local identifiers, two MIME payload classes and one missing local mailbox. Six finite write schedules with arbitrary authorized/unauthorized read interleavings. Current-proof and per-operation authorization classes are sampled as finite admission inputs.",
+      "properties": [
+        "TypeOK",
+        "Publication",
+        "ContentBinding",
+        "UnpublishedFrame",
+        "Admission",
+        "NoFalseAck",
+        "Capacity",
+        "Deletion",
+        "ReadProjection"
+      ],
+      "limits": "Checks acceptance versus local delivery, exact receipt and symbolic payload membership, interrupted transactions, two-slot cap, operator access and acknowledgement loss under explicit histories. Does not model SMTP, AWS delivery, DNS encoding, SQLite implementation, MIME, randomness, IAM policy parsing, a client retry guarantee or arbitrary interleavings of writes.",
+      "source_scope": [
+        "internal/aws/catalog/ses_sink.go",
+        "internal/aws/catalog/ses_sink_receipts.go",
+        "internal/aws/catalog/ses_domain_identity.go",
+        "internal/aws/catalog/ses_template_preview.go",
+        "internal/aws/catalog/engine.go",
+        "internal/aws/catalog/semantics.go",
+        "internal/core/policy.go",
+        "internal/server/ses_sink.go",
+        "internal/server/server.go"
+      ],
+      "mutants": [
+        {
+          "id": "IgnoreAddress",
+          "edits": [
+            {
+              "old": "m # \"outside\"",
+              "new": "TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "Admission"
+        },
+        {
+          "id": "IgnoreDNS",
+          "edits": [
+            {
+              "old": "m # \"noProof\"",
+              "new": "TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "Admission"
+        },
+        {
+          "id": "IgnoreSender",
+          "edits": [
+            {
+              "old": "m # \"noSender\"",
+              "new": "TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "Admission"
+        },
+        {
+          "id": "IgnoreTemplate",
+          "edits": [
+            {
+              "old": "m # \"noTemplate\"",
+              "new": "TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "Admission"
+        },
+        {
+          "id": "AdmitThirdReceipt",
+          "edits": [
+            {
+              "old": "Cardinality(ForTeam(rows,a.team))<2",
+              "new": "Cardinality(ForTeam(rows,a.team))<=2",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "Admission"
+        },
+        {
+          "id": "PublishAtStage",
+          "edits": [
+            {
+              "old": "rows'=IF commit",
+              "new": "rows'=IF start /\\ eligible /\\ a.mode=\"missing\" THEN rows \\cup {Candidate(a.team,NextID(a.team,issued[a.team]),a.mode)} ELSE IF commit",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "UnpublishedFrame"
+        },
+        {
+          "id": "PublishOnCancel",
+          "edits": [
+            {
+              "old": "{\"commit\",\"lost\"} /\\ staged # None",
+              "new": "{\"commit\",\"lost\",\"cancel\"} /\\ staged # None",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "UnpublishedFrame"
+        },
+        {
+          "id": "PublishOnVeto",
+          "edits": [
+            {
+              "old": "{\"commit\",\"lost\"} /\\ staged # None",
+              "new": "{\"commit\",\"lost\",\"veto\"} /\\ staged # None",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "UnpublishedFrame"
+        },
+        {
+          "id": "DiscardLostSubmission",
+          "edits": [
+            {
+              "old": "{\"commit\",\"lost\"} /\\ staged # None",
+              "new": "{\"commit\"} /\\ staged # None",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "Publication"
+        },
+        {
+          "id": "EchoLostIdentifier",
+          "edits": [
+            {
+              "old": "THEN Reply(\"unknown\",{})",
+              "new": "THEN Reply(\"accepted\",{staged.id})",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "NoFalseAck"
+        },
+        {
+          "id": "ReturnStagedIdentifier",
+          "edits": [
+            {
+              "old": "IF eligible THEN \"staged\" ELSE \"refused\",{}",
+              "new": "IF eligible THEN \"staged\" ELSE \"refused\",IF eligible THEN {NextID(a.team,issued[a.team])} ELSE {}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "Admission"
+        },
+        {
+          "id": "InventMissingBytes",
+          "edits": [
+            {
+              "old": "commit /\\ staged.mode # \"missing\"",
+              "new": "commit",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ContentBinding"
+        },
+        {
+          "id": "StoreWrongTemplate",
+          "edits": [
+            {
+              "old": "{Content(staged)}",
+              "new": "{[Content(staged) EXCEPT !.bytes=\"literal-text\"]}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ContentBinding"
+        },
+        {
+          "id": "AttachPriorIdentifier",
+          "edits": [
+            {
+              "old": "{Content(staged)}",
+              "new": "{[Content(staged) EXCEPT !.id=1]}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ContentBinding"
+        },
+        {
+          "id": "PurgePeerBytes",
+          "edits": [
+            {
+              "old": "bodies \\ At(bodies,a.team,a.id)",
+              "new": "{}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ContentBinding"
+        },
+        {
+          "id": "AdmitUnprivilegedPurge",
+          "edits": [
+            {
+              "old": "a.kind=\"purge\" /\\ a.operator /\\ At(rows",
+              "new": "a.kind=\"purge\" /\\ At(rows",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "Deletion"
+        },
+        {
+          "id": "PurgeSameTeamSibling",
+          "edits": [
+            {
+              "old": "rows \\ At(rows,a.team,a.id)",
+              "new": "rows \\ ForTeam(rows,a.team)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "Deletion"
+        },
+        {
+          "id": "RestartDropsEntries",
+          "edits": [
+            {
+              "old": "ELSE rows\n    /\\ bodies'",
+              "new": "ELSE IF a.kind=\"restart\" THEN {} ELSE rows\n    /\\ bodies'",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ContentBinding"
+        },
+        {
+          "id": "InspectAsSender",
+          "edits": [
+            {
+              "old": "IF ~a.operator THEN Reply(\"denied\",{})",
+              "new": "IF FALSE THEN Reply(\"denied\",{})",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadProjection"
+        },
+        {
+          "id": "ReadPeerContent",
+          "edits": [
+            {
+              "old": "At(f.bodies,a.team,a.id)",
+              "new": "{v \\in f.bodies:v.id=a.id}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadProjection"
+        },
+        {
+          "id": "ReturnDifferentBytes",
+          "edits": [
+            {
+              "old": "ELSE \"bytes\",saved",
+              "new": "ELSE \"bytes\",IF saved={} THEN {} ELSE ForTeam(f.bodies,a.team)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadProjection"
+        },
+        {
+          "id": "InventRejectedDownload",
+          "edits": [
+            {
+              "old": "IF saved={} THEN \"absent\" ELSE \"bytes\"",
+              "new": "IF saved={} /\\ At(f.rows,a.team,a.id)={} THEN \"absent\" ELSE \"bytes\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadProjection"
+        },
+        {
+          "id": "ExposeForeignReceipts",
+          "edits": [
+            {
+              "old": "Reply(\"listed\",ForTeam(f.rows,a.team))",
+              "new": "Reply(\"listed\",f.rows)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadProjection"
+        },
+        {
+          "id": "ListWithPendingRow",
+          "edits": [
+            {
+              "old": "ReadAnswer(Current,a)",
+              "new": "ReadAnswer(IF staged=None THEN Current ELSE [Current EXCEPT !.rows=@ \\cup {Envelope(staged)}],a)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadProjection"
+        },
+        {
+          "id": "ReissueOlderID",
+          "edits": [
+            {
+              "old": "Candidate(a.team,NextID(a.team,issued[a.team]),a.mode)",
+              "new": "Candidate(a.team,NextID(a.team,0),a.mode)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "Admission"
+        }
+      ]
     }
   ]
 }

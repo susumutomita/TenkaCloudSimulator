@@ -4865,6 +4865,58 @@ REQUIRED_SOURCE_SCOPES['SESLocalDomainProof'] = {
 }
 
 
+BASE_MODELS.add('SESLocalMailbox')
+BASE_INVARIANTS['SESLocalMailbox'] = {
+    'Admission',
+    'Capacity',
+    'ContentBinding',
+    'Deletion',
+    'NoFalseAck',
+    'Publication',
+    'ReadProjection',
+    'TypeOK',
+    'UnpublishedFrame',
+}
+REQUIRED_MUTANTS['SESLocalMailbox'] = {
+    'AdmitThirdReceipt',
+    'AdmitUnprivilegedPurge',
+    'AttachPriorIdentifier',
+    'DiscardLostSubmission',
+    'EchoLostIdentifier',
+    'ExposeForeignReceipts',
+    'IgnoreAddress',
+    'IgnoreDNS',
+    'IgnoreSender',
+    'IgnoreTemplate',
+    'InspectAsSender',
+    'InventMissingBytes',
+    'InventRejectedDownload',
+    'ListWithPendingRow',
+    'PublishAtStage',
+    'PublishOnCancel',
+    'PublishOnVeto',
+    'PurgePeerBytes',
+    'PurgeSameTeamSibling',
+    'ReadPeerContent',
+    'ReissueOlderID',
+    'RestartDropsEntries',
+    'ReturnDifferentBytes',
+    'ReturnStagedIdentifier',
+    'StoreWrongTemplate',
+}
+REQUIRED_SOURCE_SCOPES['SESLocalMailbox'] = {
+    'internal/aws/catalog/engine.go',
+    'internal/aws/catalog/semantics.go',
+    'internal/aws/catalog/ses_domain_identity.go',
+    'internal/aws/catalog/ses_sink.go',
+    'internal/aws/catalog/ses_sink_receipts.go',
+    'internal/aws/catalog/ses_template_preview.go',
+    'internal/core/policy.go',
+    'internal/server/server.go',
+    'internal/server/ses_sink.go',
+}
+
+
 def load_registry(root, relative='formal/models.json'):
     root = Path(root)
     registry_path = asset(root, relative)
