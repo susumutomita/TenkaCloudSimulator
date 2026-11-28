@@ -36,4 +36,8 @@ A PATCH accepts a JSON object with a nonempty `traces` array. Every trace suppli
 | Continuation | Use `nextPageToken` with the same interval, view and effective page size. Later appends are excluded from both the membership and the returned spans on subsequent pages. Retention still applies. Restarting the process invalidates its page tokens. |
 | Errors | Invalid input or cursor returns 400, another project or authenticated nonowner receives 403, a missing trace receives 404 and capacity exhaustion returns 429. Unsupported paths, list filters and ordering other than `trace_id` return 501. |
 
+### View a saved trace
+
+In the simulator Console, select **Google Cloud → Trace → Trace explorer** while acting as the configured project owner. Enter an RFC 3339 start and end time and choose **Search traces**. The viewer lists up to 25 trace IDs per page. Open a trace to see its span observations in ingestion order, including exact decimal span and parent IDs, timestamps, kind, name and labels. Repeated observations appear as separate rows. Use the v1 SDK or the embedded Scalar PATCH operation to ingest spans. The viewer reads the same local state.
+
 The v2 write methods, agents, exporters, external telemetry and service-wide monitoring are outside this subset. Cloud Trace v1 defines no per-trace delete operation. The [official SDK acceptance](../test/e2e/gcp_trace_sdk.py) creates isolated temporary databases, verifies state across restart and removes both teams' state after shutdown. [Issue #376](https://github.com/susumutomita/TenkaCloudSimulator/issues/376)

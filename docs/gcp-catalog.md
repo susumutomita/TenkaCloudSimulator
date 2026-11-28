@@ -266,7 +266,7 @@ single permanent application and runs Python code deployments. [App Engine guide
 | #370 | Telecom Network Automation | No discovery document in the pinned corpus |
 | #373 | Error Reporting | No create method: groups come from reported events (`events.report`), and `groups.update` only changes their tracking state |
 | #375 | Cloud Profiler | `profiles.create` and `createOffline` collect profile data from a profiling agent; there is no configuration resource |
-| #376 | Cloud Trace | The dedicated v1 handler appends span observations and serves complete get and paged MINIMAL, ROOTSPAN and COMPLETE list views for the local project owner. [Native data contract and implementation scope](gcp-trace.md) |
+| #376 | Cloud Trace | The dedicated v1 handler appends span observations and serves complete get and paged MINIMAL, ROOTSPAN and COMPLETE list views for the local project owner. The Trace explorer reads the same stored spans. [Native data contract and implementation scope](gcp-trace.md) |
 | #378 | Android Device Streaming | `testing.v1` `deviceSessions.create` opens a streaming session on a test device |
 | #380 | Assured Open Source Software | No discovery document in the pinned corpus |
 | #383 | Cloud Source Repositories | The pinned discovery document marks the service end of sales from June 17, 2024 |

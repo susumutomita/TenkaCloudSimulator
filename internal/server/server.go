@@ -444,6 +444,7 @@ func addGCPTraceCapability(r *http.Request, capabilities map[string]any, cfg Clo
 		return
 	}
 	capabilities["gcpTrace"] = map[string]any{
+		"console":   true,
 		"project":   cfg.GCPProject,
 		"endpoint":  "/_simulator/providers/gcp/cloudtrace/v1",
 		"methods":   []string{"patchTraces", "get", "list"},

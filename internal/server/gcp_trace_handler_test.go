@@ -58,8 +58,11 @@ func TestGCPTraceUsesEachConfiguredProjectAndTrustedOwner(t *testing.T) {
 		if visible != check.visible {
 			t.Fatalf("wrong Trace capability visibility: %v", visible)
 		}
-		if visible && value.(map[string]any)["project"] != first.project {
-			t.Fatal(value)
+		if visible {
+			trace := value.(map[string]any)
+			if trace["project"] != first.project || trace["console"] != true {
+				t.Fatal(value)
+			}
 		}
 	}
 	req := httptest.NewRequest(http.MethodGet, caps, nil)
