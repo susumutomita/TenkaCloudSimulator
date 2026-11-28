@@ -347,6 +347,9 @@ def exercise(binary, use_sdk, axe):
                 assert api('GetCommit',commitId=boundary['commitId'])['commit']['parents']==[second]
                 button(pane,'Add or edit file').click()
                 pane.get_by_label('Commit file path',exact=True).fill('held-draft.txt')
+                pane.get_by_label('Upload file',exact=True).set_input_files(
+                    {'name':'held-draft.txt','mimeType':'text/plain','buffer':b'held before repository replacement'})
+                expect(button(pane,'Commit file')).to_be_enabled()
                 assert api('DeleteRepository')['repositoryId']==ids[0]
                 replacement=api('CreateRepository')['repositoryMetadata']['repositoryId']
                 assert replacement!=ids[0]
