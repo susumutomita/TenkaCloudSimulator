@@ -309,8 +309,9 @@ func newWithProviders(path string, options ProviderConfig, prepareCognito func(*
 		addEC2NetworkReadbackCapabilities(w, r, capabilities)
 		addEC2InstanceStackLaunchCapability(w, r, capabilities, options.instanceStackLaunchConfigured)
 		capabilities["services"].(map[string]any)["cloudwatch"] = map[string]any{
-			"protocol": "AWS Query/XML 2010-08-01", "operations": []string{"PutMetricData", "GetMetricStatistics"},
-			"storageResolutionSeconds": 60, "retentionDays": 15, "alarms": false, "console": false,
+			"protocol": "AWS Query/XML 2010-08-01", "operations": []string{"PutMetricData", "GetMetricStatistics", "PutMetricAlarm", "DescribeAlarms", "DeleteAlarms"},
+			"storageResolutionSeconds": 60, "retentionDays": 15, "alarms": true, "console": false,
+			"alarmProfile": "single completed UTC minute, explicit unit, opportunistic sample/write/read/startup evaluation", "alarmActions": false,
 		}
 		capabilities["services"].(map[string]any)["simpledb"] = map[string]any{
 			"console": true, "region": gateway.SimpleDBScope.Region, "protocol": "Query/XML 2009-04-15",
