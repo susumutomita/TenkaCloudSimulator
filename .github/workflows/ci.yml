@@ -12,7 +12,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7.0.1
         with:
-          ref: 05f7bc6a2adbdc60fa98ea9b4a58f42219f277c0
+          ref: d696c0f5c364d19a45e1cc4c13aecd8da7b674b6
           persist-credentials: false
       - uses: actions/setup-go@v6.5.0
         with:
@@ -21,20 +21,48 @@ jobs:
       - name: Build the clean immutable product before receipts
         run: |
           test "$(id -u)" -ne 0
-          test "$(git rev-parse HEAD)" = 05f7bc6a2adbdc60fa98ea9b4a58f42219f277c0
-          test "$(git rev-parse 'HEAD^{tree}')" = 1fd787ea80aea7f88e511574ccc1d6963d443e76
+          test "$(git rev-parse HEAD)" = d696c0f5c364d19a45e1cc4c13aecd8da7b674b6
+          test "$(git rev-parse 'HEAD^{tree}')" = 0f5776bef7e66bd003d8d628f78c564723efa7db
           test -z "$(git status --porcelain)"
           make build
           mkdir -p "$RUNNER_TEMP/route53-receipts"
           go version -m dist/tenkacloud-simulator > "$RUNNER_TEMP/route53-receipts/build.txt"
-          grep -F 'vcs.revision=05f7bc6a2adbdc60fa98ea9b4a58f42219f277c0' "$RUNNER_TEMP/route53-receipts/build.txt"
+          grep -F 'vcs.revision=d696c0f5c364d19a45e1cc4c13aecd8da7b674b6' "$RUNNER_TEMP/route53-receipts/build.txt"
           grep -F 'vcs.modified=false' "$RUNNER_TEMP/route53-receipts/build.txt"
           sha256sum dist/tenkacloud-simulator > "$RUNNER_TEMP/route53-receipts/binary.sha256"
-      - name: Prepare pinned SDK-free fixture dependencies and Chromium
+      - name: Prepare the pinned SDK and sandboxed Chromium
         run: |
           "$RUNNER_TOOL_CACHE/Python/3.12.16/x64/bin/python3.12" -m venv /tmp/route53-tests
           /tmp/route53-tests/bin/python -m pip install -r scripts/requirements-test.txt
           /tmp/route53-tests/bin/playwright install --with-deps chromium
+      - name: Exercise the stock SDK workflow and all historical reference adapters
+        run: |
+          export PATH="/tmp/route53-tests/bin:$PATH"
+          export SIMULATOR_BINARY="$PWD/dist/tenkacloud-simulator"
+          python - <<'PYTHON'
+          import os, pathlib
+          assert not any(k.startswith(('AWS_', 'BOTO_')) for k in os.environ)
+          assert not any(os.path.lexists(p) for p in (pathlib.Path.home()/'.aws', pathlib.Path.home()/'.boto', '/etc/boto.cfg'))
+          PYTHON
+          export ROUTE53_CHECK="$RUNNER_TEMP/stock-route53-verification.py"
+          cat > "$ROUTE53_CHECK" <<'PYTHON'
+          import json, os, pathlib, socket, subprocess, sys
+          assert os.geteuid() != 0 and [n for _, n in socket.if_nameindex()] == ['lo']
+          status = dict(line.split(':', 1) for line in pathlib.Path('/proc/self/status').read_text().splitlines() if ':' in line)
+          assert all(int(status[k], 16) == 0 for k in ('CapEff','CapBnd','CapAmb'))
+          assert int(status['NoNewPrivs']) == 1
+          cases = ('test_autoscaling_plans_openapi test_openapi_json10 test_openapi_parameters test_route53_openapi test_route53_reference_adapters test_sakura_openapi test_ssm_batch_reference test_ssm_command_reference test_ssm_document_reference test_storage_reference_sakura_projection').split()
+          ref = subprocess.run([sys.executable, '-m', 'unittest', '-v', *cases], cwd='test/e2e', capture_output=True,text=True)
+          assert ref.returncode == 0 and 'Ran 79 tests in' in ref.stderr and ref.stderr.rstrip().endswith('OK'), 'reference regressions failed'
+          sdk = subprocess.run([sys.executable, 'test/e2e/route53.py'], capture_output=True, text=True)
+          assert sdk.returncode == 0, 'stock Route53 SDK verification failed'
+          expected = {'route53NativeSDK': True, 'atomicSavedStateAnswers': True, 'twoAuthenticatedProcesses': True, 'actualCLIReopen': True, 'participantIAM': True, 'teardown': 'DELETED', 'realAWS': False}
+          actual = [json.loads(row) for row in sdk.stdout.splitlines() if row.startswith('{"route53NativeSDK":')]
+          assert actual == [expected]
+          dest = pathlib.Path(os.environ['RUNNER_TEMP'])/'route53-receipts'
+          dest.joinpath('native.json').write_text(json.dumps({'sdk': actual[0], 'referenceTests':79,'modules':cases}, indent=2) + chr(10))
+          PYTHON
+          unshare --user --map-current-user --net --keep-caps sh -ec 'ip link set lo up; exec setpriv --no-new-privs --inh-caps=-all --ambient-caps=-all --bounding-set=-all python "$ROUTE53_CHECK"'
       - name: Run the genuine saved-answer Scalar Send in loopback-only isolation
         run: |
           export PATH="/tmp/route53-tests/bin:$PATH"
@@ -51,7 +79,7 @@ jobs:
           root = pathlib.Path(os.environ['RUNNER_TEMP'])
           text = (root / 'route53-private.log').read_text(errors='replace')
           result = int(os.environ['ROUTE53_FIXTURE_EXIT'])
-          receipt = {'fixtureExit': result, 'sourceSha': '05f7bc6a2adbdc60fa98ea9b4a58f42219f277c0'}
+          receipt = {'fixtureExit': result, 'sourceSha': 'd696c0f5c364d19a45e1cc4c13aecd8da7b674b6'}
           if result == 0:
               records = [json.loads(line) for line in text.splitlines() if line.startswith('{"route53ScalarSend":')]
               assert len(records) == 1
@@ -73,7 +101,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v7.0.2
         with:
-          name: route53-scalar-05f7bc6a2adbdc60fa98ea9b4a58f42219f277c0
+          name: route53-scalar-d696c0f5c364d19a45e1cc4c13aecd8da7b674b6
           path: ${{ runner.temp }}/route53-receipts/
           if-no-files-found: error
           retention-days: 7
