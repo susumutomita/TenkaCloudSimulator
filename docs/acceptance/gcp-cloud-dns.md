@@ -28,6 +28,16 @@ project ownership. This is local owner-only authorization, not Google IAM.
 Hosts allocate separate processes, SQLite databases and token authorities per team.
 Use only disposable local access tokens and practice values, never cloud credentials.
 
+Google's public-zone workflow starts with a project, an enabled Cloud DNS API
+and permissions for the operation. In the Google Cloud Console, open Cloud DNS,
+create a public zone, then open the zone to add or edit record sets. The local
+Console follows that order. It uses a preconfigured project owner and stores
+zone and record metadata in SQLite. Optional private networking, public
+delegation and DNS resolution are outside this workflow.
+[Zone guide](https://docs.cloud.google.com/dns/docs/zones) ·
+[Record guide](https://docs.cloud.google.com/dns/docs/records) ·
+[Google roles and permissions](https://docs.cloud.google.com/dns/docs/access-control)
+
 ## Conceptual local CRUD sequence
 
 1. Start a local instance using the normal [startup guide](../start.md) and its
@@ -122,7 +132,7 @@ collection and filters. Traversal is offset-based and does not guarantee a
 stable snapshot across concurrent changes. No cloud consistency or SQL/Go
 formal refinement proof is claimed.
 
-## Existing evidence and remaining acceptance
+## Acceptance evidence
 
 | Exact revision | Observed result |
 | --- | --- |
@@ -140,7 +150,15 @@ The historical socket attempt in the table used the
 [server composition test](../../internal/server/gcp_dns_test.go). Current
 [factory checks](../contributing/software-factory.md) and
 [formal validation](../../formal/README.md#required-gate-and-applicability) track
-their own source revisions. The SDK check covers one process and project.
-Issue #343 still calls for a desktop and 390px walkthrough of the owner
-Console, covering keyboard use, accessibility, and successful and refused
-record changes.
+their own source revisions.
+
+On `7ed6a01afce07140bac0c0553e52968b24c61bd5`, the pinned Google SDK, the
+Console and the read-only Scalar Send all exercised a clean local build.
+A separate two-process check created independent same-name zones, rejected a
+peer token, read the saved records and change receipts after restart, and
+removed both zones. The browser walkthrough covered keyboard operation and
+SRV changes at 1365 and 390 CSS pixels. Participant requests returned 403
+and a stale edit returned 412. Four pages at each width fit the viewport and
+passed the exercised axe 4.11.0 WCAG A/AA rules. The walkthrough used the
+local Console. The public Google guides above supply the workflow reference.
+[Verification record](https://github.com/susumutomita/TenkaCloudSimulator/pull/621)
