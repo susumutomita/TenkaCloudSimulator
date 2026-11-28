@@ -1,435 +1,160 @@
-name: ci
+name: CloudFront private local-content verification
 on:
-  push:
-    branches: [main]
-  pull_request:
   workflow_dispatch:
-    inputs:
-      s3_paging_trial:
-        description: Run the isolated S3 1,001-part browser check on Ubuntu 22.04
-        type: boolean
-        default: false
-  workflow_call:
 permissions:
   contents: read
 jobs:
-  console-acceptance:
-    name: Japanese service console acceptance
-    runs-on: ubuntu-latest
-    timeout-minutes: 30
-    steps:
-      - uses: actions/checkout@v7.0.1
-        with:
-          ref: ${{ github.event.pull_request.head.sha || github.sha }}
-      - uses: actions/setup-go@v6.5.0
-        with:
-          go-version: '1.26.11'
-          cache: true
-      - name: Build the actual embedded simulator
-        run: make build
-      - name: Install pinned Python SDK and browser tools
-        timeout-minutes: 3
-        run: |
-          python3 -m venv /tmp/simulator-tests
-          /tmp/simulator-tests/bin/pip install -r scripts/requirements-test.txt
-      - name: Install full Chromium system dependencies
-        timeout-minutes: 12
-        run: /tmp/simulator-tests/bin/playwright install-deps chromium
-      - name: Install pinned Chromium browser
-        timeout-minutes: 5
-        run: /tmp/simulator-tests/bin/playwright install chromium
-      - name: Check S3 multipart launcher refusals offline
-        timeout-minutes: 6
-        run: /tmp/simulator-tests/bin/python test/e2e/test_s3_multipart_paging_launcher.py
-      - name: Check native discovery, Japanese operations and desktop/mobile layouts
-        run: |
-          /tmp/simulator-tests/bin/python test/e2e/service_locale.py
-          /tmp/simulator-tests/bin/python test/e2e/scalar_aws_json.py
-      - name: Check Secrets disclosure boundaries and actual metadata accessibility
-        run: |
-          /tmp/simulator-tests/bin/python scripts/get-audit-tools.py /tmp/simulator-console-audit
-          AXE_SCRIPT=/tmp/simulator-console-audit/axe.min.js /tmp/simulator-tests/bin/python test/e2e/secrets_manager_console.py
-      - name: Check inline Lambda editor and strict CSP in the real browser
-        run: /tmp/simulator-tests/bin/python test/e2e/lambda_inline_editor.py
-      - name: Retain focused service console evidence
-        if: always()
-        uses: actions/upload-artifact@v7.0.2
-        with:
-          name: service-console-focused-${{ github.event.pull_request.head.sha || github.sha }}
-          path: |
-            reports/lambda-inline-*.png
-            reports/service-locale-*.png
-            reports/scalar-aws-json.json
-            reports/secrets-metadata-*.png
-            reports/secrets-a11y-summary.json
-          if-no-files-found: warn
-          retention-days: 14
-  checks:
-    name: Static checks, builds and audits
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
-    steps:
-      - uses: actions/checkout@v7.0.1
-        with:
-          ref: ${{ github.event.pull_request.head.sha || github.sha }}
-      - uses: actions/setup-go@v6.5.0
-        with:
-          go-version: '1.26.11'
-          cache: true
-      - name: Rebuild the API reference without the excluded color picker
-        run: |
-          npm ci --prefix tools/scalar --ignore-scripts --no-audit --no-fund
-          node tools/scalar/build.mjs
-          python3 tools/scalar/notices.py
-          git diff --exit-code -- internal/server/apidocs third_party/scalar.json third_party/scalar-bundled-packages.json third_party/SCALAR-BUNDLED-NOTICES.txt internal/legal/assets/SCALAR-BUNDLED-NOTICES.txt tools/scalar/bundle-inputs.json tools/scalar/bundle-digests.json third_party/color-picker-removal.json
-      - name: Rebuild official Cloudscape console and original notices
-        run: |
-          npm ci --prefix tools/console --ignore-scripts --no-audit --no-fund
-          node tools/console/build.mjs
-          node --test tools/console/test/gcp-dns*.test.mjs tools/console/test/simpledb-client.test.mjs tools/console/test/ec2-security-groups.test.mjs
-          git diff --exit-code -- internal/server/web internal/legal/assets/CONSOLE-NOTICES.txt third_party/CONSOLE-NOTICES.txt third_party/console-packages.json tools/console/bundle-inputs.json tools/console/bundle-digests.json
-          npm audit --prefix tools/console --audit-level=high
-      - name: Check secret description console and preserved disclosure contracts
-        run: node --test tools/console/tests/secret-description.test.mjs tools/console/tests/secrets-manager-locale.test.mjs
-      - name: Check Lambda source draft and deploy boundaries
-        run: node --test tools/console/tests/lambda-*.test.mjs
-      - name: Check App Engine console request, split and URL helpers
-        run: node --test tools/console/tests/gcp-appengine.test.mjs
-      - name: Check immutable release packaging and refusal regressions
-        run: python3 test/ci/release_pipeline.py
-      - name: Check bounded SNS Console and reference request contracts
-        run: node --test test/console/sns-subscriptions.test.mjs test/console/sns-http-reference.test.mjs test/console/cloudfront-local-reference.test.mjs
-      - name: Check native input and bounded EC2 console regressions
-        run: >-
-          node --test test/console/login-native-input.test.mjs test/console/api-reference-json.test.mjs
-          tools/console/test/ec2-readonly.test.mjs tools/console/test/ec2-response.test.mjs
-          tools/console/test/ec2-template-preview.test.mjs tools/console/test/ec2-native-subnets.test.mjs
-      - name: Check Go format, vet, modules, embedded assets and script gates
-        run: |
-          make format-check vet verify-assets test-scripts
-          go mod verify
-      - name: Build the static binary and compile all supported targets
-        run: make build cross-check
-      - name: Audit the locked API-reference build dependencies
-        run: npm audit --prefix tools/scalar --audit-level=high
-      - name: Check Go vulnerabilities against the canonical service
-        run: go run golang.org/x/vuln/cmd/govulncheck@v1.1.4 ./...
-  go-test:
-    name: Go race tests (${{ matrix.shard }})
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - shard: server-a
-            packages: ./internal/server
-            part: 0/2
-          - shard: server-b
-            packages: ./internal/server
-            part: 1/2
-          - shard: aws-a
-            packages: ./internal/aws
-            part: 0/2
-          - shard: aws-b
-            packages: ./internal/aws
-            part: 1/2
-          - shard: workloads
-            packages: ./internal/workload/python ./internal/workload/guesttcp
-          - shard: catalogs
-            packages: ./internal/gcp/appengine ./internal/gcp/catalog ./internal/aws/catalog
-          - shard: rest
-            exclude: ./internal/server ./internal/aws ./internal/workload/python ./internal/workload/guesttcp ./internal/gcp/appengine ./internal/gcp/catalog ./internal/aws/catalog
-    steps:
-      - uses: actions/checkout@v7.0.1
-        with:
-          ref: ${{ github.event.pull_request.head.sha || github.sha }}
-      - uses: actions/setup-go@v6.5.0
-        with:
-          go-version: '1.26.11'
-          cache: true
-      - name: Run this shard under the race detector with full-module coverage
-        shell: bash
-        env:
-          SHARD: ${{ matrix.shard }}
-          PACKAGES: ${{ matrix.packages }}
-          EXCLUDE: ${{ matrix.exclude }}
-          PART: ${{ matrix.part }}
-        run: |
-          mkdir -p reports/shard
-          if [ -n "$PACKAGES" ]; then
-            go list $PACKAGES > reports/shard/packages.txt
-          else
-            go list $EXCLUDE > reports/shard/excluded.txt
-            go list ./... | grep -vxF -f reports/shard/excluded.txt > reports/shard/packages.txt
-          fi
-          packages="$(tr '\n' ' ' < reports/shard/packages.txt)"
-          if [ -n "$PART" ]; then
-            go test -race -coverpkg=./... -list '.*' $packages | { grep -E '^(Test|Example|Fuzz)' || true; } | sort > reports/shard/listed.txt
-            awk -v index_="${PART%/*}" -v count="${PART#*/}" '(NR - 1) % count == index_' reports/shard/listed.txt > reports/shard/tests.txt
-            test -s reports/shard/tests.txt
-            names="$(paste -sd'|' reports/shard/tests.txt)"
-            printf '^(%s)$' "$names" > reports/shard/run.txt
-            make test-go GO_TEST_PACKAGES="$packages" COVERAGE_PROFILE="reports/shard/coverage-$SHARD.out" GO_TEST_RUN_FILE=reports/shard/run.txt | tee reports/shard/test.log
-            { grep -E '^=== RUN   [^/ ]+$' reports/shard/test.log || true; } | sed 's/^=== RUN   //' | sort -u > reports/shard/ran.txt
-            diff reports/shard/tests.txt reports/shard/ran.txt
-          else
-            make test-go GO_TEST_PACKAGES="$packages" COVERAGE_PROFILE="reports/shard/coverage-$SHARD.out"
-          fi
-          if [ -n "$PART" ]; then
-            jq -n --arg index "${PART%/*}" --arg count "${PART#*/}" --rawfile listed reports/shard/listed.txt --rawfile tests reports/shard/tests.txt \
-              '{index: ($index | tonumber), count: ($count | tonumber), listed: ($listed | split("\n") | map(select(length > 0))), tests: ($tests | split("\n") | map(select(length > 0)))}' > reports/shard/part.json
-          else
-            echo null > reports/shard/part.json
-          fi
-          jq -n --arg head "$(git rev-parse HEAD)" --arg profile "coverage-$SHARD.out" --rawfile packages reports/shard/packages.txt --slurpfile part reports/shard/part.json \
-            '{head: $head, profile: $profile, packages: ($packages | split("\n") | map(select(length > 0)))} + (if $part[0] == null then {} else {part: $part[0]} end)' > "reports/shard/$SHARD.json"
-      - name: Retain this shard's coverage and package manifest
-        uses: actions/upload-artifact@v7.0.2
-        with:
-          name: go-coverage-shard-${{ matrix.shard }}-${{ github.event.pull_request.head.sha || github.sha }}
-          path: |
-            reports/shard/${{ matrix.shard }}.json
-            reports/shard/coverage-${{ matrix.shard }}.out
-          if-no-files-found: error
-          retention-days: 14
-  platform-audit:
-    name: Platform lifecycle and console audit
-    runs-on: ubuntu-latest
-    timeout-minutes: 30
-    steps:
-      - uses: actions/checkout@v7.0.1
-        with:
-          ref: ${{ github.event.pull_request.head.sha || github.sha }}
-      - uses: actions/setup-go@v6.5.0
-        with:
-          go-version: '1.26.11'
-          cache: true
-      - name: Build the actual embedded simulator
-        run: |
-          make build
-          sha256sum dist/tenkacloud-simulator > "$RUNNER_TEMP/platform-simulator.sha256"
-      - name: Install Python SDK and browser tools
-        timeout-minutes: 3
-        run: |
-          python3 -m venv /tmp/simulator-tests
-          /tmp/simulator-tests/bin/pip install -r scripts/requirements-test.txt
-      - name: Exercise Azure Queue Storage with the official SDK across two simulator processes
-        timeout-minutes: 3
-        run: |
-          /tmp/simulator-tests/bin/pip install --require-hashes --only-binary=:all: --no-deps -r scripts/requirements-azure-queue-test.txt
-          /tmp/simulator-tests/bin/pip check
-          read -r binary_sha _ < "$RUNNER_TEMP/platform-simulator.sha256"
-          /tmp/simulator-tests/bin/python test/e2e/azure_queue_cli.py --binary "$PWD/dist/tenkacloud-simulator" --binary-sha256 "$binary_sha"
-      - name: Verify local STS session invalidation and team isolation with boto3
-        timeout-minutes: 3
-        run: |
-          /tmp/simulator-tests/bin/python test/e2e/test_sts_session_lifecycle.py
-          read -r binary_sha _ < "$RUNNER_TEMP/platform-simulator.sha256"
-          /tmp/simulator-tests/bin/python test/e2e/sts_session_lifecycle.py --binary "$PWD/dist/tenkacloud-simulator" --binary-sha256 "$binary_sha"
-      - name: Install full Chromium system dependencies
-        timeout-minutes: 12
-        run: /tmp/simulator-tests/bin/playwright install-deps chromium
-      - name: Install pinned Chromium browser
-        timeout-minutes: 5
-        run: /tmp/simulator-tests/bin/playwright install chromium
-      - name: Prepare pinned axe-core for mandatory browser accessibility checks
-        run: /tmp/simulator-tests/bin/python scripts/get-audit-tools.py /tmp/simulator-audit
-      - name: Run the actual platform hello-world lifecycle and participant browser
-        run: |
-          git init /tmp/simulator-platform
-          git -C /tmp/simulator-platform remote add origin https://github.com/susumutomita/TenkaCloud.git
-          git -C /tmp/simulator-platform fetch --depth=1 origin f99b3d9a00076a2a5e97f1d4d9b0b20a7e02245c
-          git -C /tmp/simulator-platform checkout --detach FETCH_HEAD
-          git init /tmp/simulator-challenges
-          git -C /tmp/simulator-challenges remote add origin https://github.com/susumutomita/TenkaCloudChallenge.git
-          git -C /tmp/simulator-challenges fetch --depth=1 origin a749b142416770abee3f173673702c55df3856aa
-          git -C /tmp/simulator-challenges checkout --detach FETCH_HEAD
-          npm ci --prefix tools/platform --ignore-scripts --no-audit --no-fund
-          npm audit --prefix tools/platform --audit-level=high
-          node tools/platform/setup.mjs /tmp/simulator-platform
-          python3 scripts/catalog-matrix.py /tmp/simulator-challenges
-          git diff --exit-code -- docs/catalog.md
-          export TENKACLOUD_ROOT=/tmp/simulator-platform CHALLENGE_ROOT=/tmp/simulator-challenges
-          export BUN="$PWD/tools/platform/node_modules/@oven/bun-linux-x64/bin/bun"
-          "$BUN" test/platform/hello-world.ts
-          /tmp/simulator-tests/bin/python test/platform/browser.py
-      - name: Verify CloudFormation rejection and the SDK application lifecycle
-        run: /tmp/simulator-tests/bin/python test/platform/sdk-lifecycle.py -v
-      - name: Check responsive reflow and the start command's token handling
-        run: |
-          /tmp/simulator-tests/bin/python test/e2e/reflow_test.py
-          make test-start PYTHON=/tmp/simulator-tests/bin/python
-      - name: Inspect console flow, keyboard behavior, and accessible contrast
-        run: |
-          AXE_SCRIPT=/tmp/simulator-audit/axe.min.js make audit PYTHON=/tmp/simulator-tests/bin/python
-          AXE_SCRIPT_PATH=/tmp/simulator-audit/axe.min.js /tmp/simulator-tests/bin/python test/e2e/wafv2_console.py
-  ci:
-    name: ci
-    needs: [console-acceptance, checks, go-test, platform-audit]
-    if: always()
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    steps:
-      - name: Require every gate job to succeed
-        env:
-          CONSOLE_ACCEPTANCE: ${{ needs.console-acceptance.result }}
-          CHECKS: ${{ needs.checks.result }}
-          GO_TEST: ${{ needs.go-test.result }}
-          PLATFORM_AUDIT: ${{ needs.platform-audit.result }}
-        run: |
-          echo "console-acceptance=$CONSOLE_ACCEPTANCE checks=$CHECKS go-test=$GO_TEST platform-audit=$PLATFORM_AUDIT"
-          test "$CONSOLE_ACCEPTANCE" = success && test "$CHECKS" = success && test "$GO_TEST" = success && test "$PLATFORM_AUDIT" = success
-      - uses: actions/checkout@v7.0.1
-        with:
-          ref: ${{ github.event.pull_request.head.sha || github.sha }}
-      - uses: actions/setup-go@v6.5.0
-        with:
-          go-version: '1.26.11'
-          cache: true
-      - uses: actions/download-artifact@v8.0.2
-        with:
-          pattern: go-coverage-shard-*-${{ github.event.pull_request.head.sha || github.sha }}
-          path: reports/shard
-          merge-multiple: true
-      - name: Merge shard coverage only when every package ran exactly once at this head
-        run: |
-          go list ./... > reports/expected-packages.txt
-          python3 scripts/check-coverage.py merge reports/coverage.out reports/expected-packages.txt "$(git rev-parse HEAD)" reports/shard/*.json
-      - name: Generate coverage views and enforce both 90% floors
-        run: |
-          go run github.com/boumenot/gocover-cobertura@v1.4.0 < reports/coverage.out > reports/coverage.xml
-          go tool cover -html=reports/coverage.out -o reports/coverage.html
-          python3 scripts/check-coverage.py reports/coverage.out reports/coverage.xml
-      - name: Retain coverage evidence
-        if: always()
-        uses: actions/upload-artifact@v7.0.2
-        with:
-          name: go-coverage-${{ github.event.pull_request.head.sha || github.sha }}
-          path: |
-            reports/coverage.out
-            reports/coverage.xml
-            reports/coverage.html
-            reports/coverage-summary.md
-          if-no-files-found: error
-          retention-days: 14
-  e2e:
-    name: Real binary, SDK, console and API reference E2E
-    if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch'
-    runs-on: ubuntu-22.04
-    timeout-minutes: 45
-    steps:
-      - uses: actions/checkout@v7.0.1
-        with:
-          ref: ${{ github.event.pull_request.head.sha || github.sha }}
-      - uses: actions/setup-go@v6.5.0
-        with:
-          go-version: '1.26.11'
-          cache: true
-      - name: Install Python SDK and browser tools
-        timeout-minutes: 3
-        run: |
-          python="$RUNNER_TOOL_CACHE/Python/3.12.16/x64/bin/python3.12"
-          "$python" -c 'import sys; assert sys.version_info[:3] == (3, 12, 16)'
-          "$python" -m venv /tmp/simulator-tests
-          /tmp/simulator-tests/bin/pip install -r scripts/requirements-test.txt
-      - name: Install full Chromium system dependencies
-        timeout-minutes: 12
-        run: /tmp/simulator-tests/bin/playwright install-deps chromium
-      - name: Install pinned Chromium browser
-        timeout-minutes: 5
-        run: /tmp/simulator-tests/bin/playwright install chromium
-      - name: Prepare pinned axe-core for mandatory browser accessibility checks
-        run: /tmp/simulator-tests/bin/python scripts/get-audit-tools.py /tmp/simulator-audit
-      - name: Verify real binary, SDK, console, and offline API reference
-        id: conformance
-        run: |
-          test -z "$(git status --porcelain)"
-          AXE_SCRIPT=/tmp/simulator-audit/axe.min.js make e2e PYTHON=/tmp/simulator-tests/bin/python
-      - name: Identify the binary exercised by the S3 paging fixture
-        if: "!cancelled() && steps.conformance.outcome != 'skipped'"
-        run: |
-          mkdir -p reports
-          go version -m dist/tenkacloud-simulator > reports/s3-multipart-paging-build.txt
-          grep -F "vcs.revision=$(git rev-parse HEAD)" reports/s3-multipart-paging-build.txt
-          grep -F 'vcs.modified=false' reports/s3-multipart-paging-build.txt
-          sha256sum dist/tenkacloud-simulator > reports/s3-multipart-paging.sha256
-          digest=$(cut -d ' ' -f 1 reports/s3-multipart-paging.sha256)
-          jq -se --arg digest "$digest" 'length == 1 and (.[0] | .binarySha256 == $digest and .parts == 1001)' reports/s3-multipart-paging.json
-      - name: Retain service console screenshots and safe audit evidence
-        if: always()
-        uses: actions/upload-artifact@v7.0.2
-        with:
-          name: service-console-${{ github.event.pull_request.head.sha || github.sha }}
-          path: |
-            reports/lambda-inline-*.png
-            reports/service-locale-*.png
-            reports/scalar-aws-json.json
-            reports/s3-multipart-paging.json
-            reports/s3-multipart-paging-build.txt
-            reports/s3-multipart-paging.sha256
-            reports/secrets-metadata-*.png
-            reports/secrets-a11y-summary.json
-            reports/landing-topology/**
-            reports/login-first-native-failure.json
-            reports/login-first-native-observer-status.json
-            reports/login-second-native-clear-failure.json
-            reports/login-second-native-clear-observer-status.json
-            reports/cloudformation-events-*.png
-            reports/participant-console-home-*.png
-            reports/participant-ssm-list-*.png
-            reports/login-paste-*.png
-            reports/language-login-ja-*.png
-          if-no-files-found: warn
-          retention-days: 14
-  s3-multipart-paging-trial:
-    name: Isolated S3 multipart paging on Ubuntu 22.04
-    if: github.event_name == 'workflow_dispatch' && inputs.s3_paging_trial
+  sdk-and-scalar:
     runs-on: ubuntu-22.04
     timeout-minutes: 35
+    env:
+      PYTHONPYCACHEPREFIX: /tmp/cloudfront-python-cache
     steps:
       - uses: actions/checkout@v7.0.1
         with:
-          ref: ${{ github.sha }}
+          ref: 5b740845f4b7ffe22d451eeef1382cb43fe77cc4
+          fetch-depth: 0
+          persist-credentials: false
       - uses: actions/setup-go@v6.5.0
         with:
           go-version: '1.26.11'
           cache: true
-      - name: Build and identify the dispatched simulator
+      - name: Build the clean immutable composed product
         run: |
           test "$(id -u)" -ne 0
-          test "$(uname -m)" = x86_64
-          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          test "$(git rev-parse HEAD)" = 5b740845f4b7ffe22d451eeef1382cb43fe77cc4
+          test -z "$(git status --porcelain)"
           make build
-          mkdir -p reports/s3-paging-trial
-          go version -m dist/tenkacloud-simulator > reports/s3-paging-trial/build.txt
-          grep -F "vcs.revision=$GITHUB_SHA" reports/s3-paging-trial/build.txt
-          grep -F 'vcs.modified=false' reports/s3-paging-trial/build.txt
-      - name: Prepare pinned SDK and Chromium with the hosted CPython 3.12
+          mkdir -p "$RUNNER_TEMP/cloudfront-receipts"
+          go version -m dist/tenkacloud-simulator > "$RUNNER_TEMP/cloudfront-receipts/build.txt"
+          grep -F 'vcs.revision=5b740845f4b7ffe22d451eeef1382cb43fe77cc4' "$RUNNER_TEMP/cloudfront-receipts/build.txt"
+          grep -F 'vcs.modified=false' "$RUNNER_TEMP/cloudfront-receipts/build.txt"
+          sha256sum dist/tenkacloud-simulator > "$RUNNER_TEMP/cloudfront-receipts/binary.sha256"
+      - name: Install stock pinned SDK and Chromium dependencies
         run: |
-          "$RUNNER_TOOL_CACHE/Python/3.12.16/x64/bin/python3.12" -m venv /tmp/s3-paging-tests
-          /tmp/s3-paging-tests/bin/python -m pip install -r scripts/requirements-test.txt
-          /tmp/s3-paging-tests/bin/playwright install --with-deps chromium
-      - name: Verify isolation refusals and run the native browser fixture
-        env:
-          RECEIPT: reports/s3-paging-trial/paging.json
+          "$RUNNER_TOOL_CACHE/Python/3.12.16/x64/bin/python3.12" -m venv /tmp/cloudfront-tests
+          /tmp/cloudfront-tests/bin/python -m pip install -r scripts/requirements-test.txt
+          /tmp/cloudfront-tests/bin/playwright install --with-deps chromium
+      - name: Run both unchanged fixtures in nonroot loopback-only isolation
         run: |
-          /tmp/s3-paging-tests/bin/python test/e2e/test_s3_multipart_paging_launcher.py
-          /tmp/s3-paging-tests/bin/python test/e2e/run_s3_multipart_paging.py \
-            --binary "$PWD/dist/tenkacloud-simulator" > "$RECEIPT"
-          digest=$(sha256sum dist/tenkacloud-simulator | cut -d ' ' -f 1)
-          jq -se --arg digest "$digest" '
-            length == 1 and (.[0] |
-            .binarySha256 == $digest and .parts == 1001 and
-            .nativeBrowserListMarkers == [[0,1000],[0,1000],[0,1000],[0,1000]] and
-            .staleReviewNoPost == true and .completePostIncludesAllParts == true and
-            .nativeSizeRefusalPreservedUpload == true and .nativeBrowserPartSave == true and
-            .visibleFinalPartRefresh == true and .nativeAbortAndDelete == true and .realAWS == false)
-          ' "$RECEIPT"
-      - name: Retain the build and paging receipt
+          export PATH="/tmp/cloudfront-tests/bin:$PATH"
+          export SIMULATOR_BINARY="$PWD/dist/tenkacloud-simulator"
+          export SIMULATOR_BINARY_SHA256=$(cut -d ' ' -f 1 "$RUNNER_TEMP/cloudfront-receipts/binary.sha256")
+          export CHROMIUM_EXECUTABLE=$(python -c 'from playwright.sync_api import sync_playwright; p=sync_playwright().start(); print(p.chromium.executable_path); p.stop()')
+          for case in sdk scalar; do
+            set +e
+            if [ "$case" = sdk ]; then
+              unshare --user --map-current-user --net --keep-caps sh -eu -c 'ip link set lo up; exec setpriv --inh-caps=-all --ambient-caps=-all --bounding-set=-all python test/e2e/cloudfront_local_content.py --binary "$SIMULATOR_BINARY" --binary-sha256 "$SIMULATOR_BINARY_SHA256"' > "$RUNNER_TEMP/cloudfront-$case-private.log" 2>&1
+            else
+              unshare --user --map-current-user --net --keep-caps sh -eu -c 'ip link set lo up; exec setpriv --inh-caps=-all --ambient-caps=-all --bounding-set=-all python test/e2e/cloudfront_local_scalar.py' > "$RUNNER_TEMP/cloudfront-$case-private.log" 2>&1
+            fi
+            result=$?
+            set -e
+            echo "$result" > "$RUNNER_TEMP/cloudfront-receipts/$case.exit"
+            export CLOUDFRONT_CASE="$case" CLOUDFRONT_EXIT="$result"
+            python - <<'PY'
+          import json, os, pathlib, re
+          root = pathlib.Path(os.environ['RUNNER_TEMP'])
+          case, result = os.environ['CLOUDFRONT_CASE'], int(os.environ['CLOUDFRONT_EXIT'])
+          text = (root / f'cloudfront-{case}-private.log').read_text(errors='replace')
+          receipt = {'sourceSha': '5b740845f4b7ffe22d451eeef1382cb43fe77cc4', 'case': case, 'fixtureExit': result}
+          if result == 0:
+              records = [json.loads(line) for line in text.splitlines() if line.startswith('{"ok":')]
+              expected = ({'ok': True, 'nativeCloudFrontOperations': 8, 'origin': 'saved local S3 bytes',
+                           'cacheHitAndInvalidation': True, 'freshHitAuthorization': True, 'peerUnchanged': True,
+                           'restart': True, 'cleanup': True, 'externalOriginFetch': False} if case == 'sdk' else
+                          {'ok': True, 'binarySha256': os.environ['SIMULATOR_BINARY_SHA256'], 'nativeCloudFrontSends': 2,
+                           'simulatorOnlyContentSends': 1, 'freshVisibleDownloadedBytes': True, 'freshHitDenial': True,
+                           'peerUnchangedAcrossReopen': True, 'cleanup': True, 'outsideRequests': 0, 'externalOriginFetch': False})
+              assert records == [expected]
+              receipt['verifiedFixture'] = records[0]
+          else:
+              receipt['frames'] = [{'file': pathlib.Path(name).name, 'line': int(line)}
+                  for name, line in re.findall(r'File "([^"\n]+)", line ([0-9]+)', text)][-12:]
+              receipt['exceptionTypes'] = re.findall(r'^([A-Za-z_][A-Za-z_0-9.]*(?:Error|Exception))(?::|$)', text, re.MULTILINE)[-3:]
+              receipt['nativeErrors'] = [{'code': code, 'operation': operation} for code, operation in
+                  re.findall(r'An error occurred \(([A-Za-z0-9_]{1,80})\) when calling the ([A-Za-z0-9_]{1,80}) operation', text)][-3:]
+          (root / 'cloudfront-receipts' / f'{case}.json').write_text(json.dumps(receipt, indent=2) + '\n')
+          print('CloudFront fixture', case, 'exit', result)
+          PY
+          done
+          test -z "$(git status --porcelain)"
+          test "$(cat "$RUNNER_TEMP/cloudfront-receipts/sdk.exit")" -eq 0
+          test "$(cat "$RUNNER_TEMP/cloudfront-receipts/scalar.exit")" -eq 0
+      - name: Retain only safe immutable source and fixture receipts
+        if: always()
         uses: actions/upload-artifact@v7.0.2
         with:
-          name: s3-multipart-paging-${{ github.sha }}
-          path: reports/s3-paging-trial/
+          name: cloudfront-runtime-5b740845f4b7ffe22d451eeef1382cb43fe77cc4
+          path: ${{ runner.temp }}/cloudfront-receipts/
           if-no-files-found: error
-          retention-days: 14
+          retention-days: 7
+  whole-standard-gate:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 90
+    env:
+      GOMAXPROCS: '1'
+      PYTHONPYCACHEPREFIX: /tmp/cloudfront-gate-python-cache
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          ref: 5b740845f4b7ffe22d451eeef1382cb43fe77cc4
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-go@v6.5.0
+        with:
+          go-version: '1.26.11'
+          cache: true
+      - name: Build the clean source and install stock pinned test requirements
+        run: |
+          test "$(id -u)" -ne 0
+          test "$(git rev-parse HEAD)" = 5b740845f4b7ffe22d451eeef1382cb43fe77cc4
+          test -z "$(git status --porcelain)"
+          make build
+          mkdir -p "$RUNNER_TEMP/cloudfront-gate-receipts"
+          go version -m dist/tenkacloud-simulator > "$RUNNER_TEMP/cloudfront-gate-receipts/build.txt"
+          grep -F 'vcs.revision=5b740845f4b7ffe22d451eeef1382cb43fe77cc4' "$RUNNER_TEMP/cloudfront-gate-receipts/build.txt"
+          grep -F 'vcs.modified=false' "$RUNNER_TEMP/cloudfront-gate-receipts/build.txt"
+          sha256sum dist/tenkacloud-simulator > "$RUNNER_TEMP/cloudfront-gate-receipts/binary.sha256"
+          "$RUNNER_TOOL_CACHE/Python/3.12.16/x64/bin/python3.12" -m venv /tmp/cloudfront-gate-tests
+          /tmp/cloudfront-gate-tests/bin/python -m pip install -r scripts/requirements-test.txt
+      - name: Run the complete standard gate without test selection or skips
+        run: |
+          export PATH="/tmp/cloudfront-gate-tests/bin:$PATH"
+          export SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt
+          test -r "$SSL_CERT_FILE"
+          python -c 'import ssl; context = ssl.create_default_context(); assert context.get_ca_certs(); assert context.verify_mode == ssl.CERT_REQUIRED and context.check_hostname'
+          set +e
+          make before-commit > "$RUNNER_TEMP/cloudfront-whole-private.log" 2>&1
+          result=$?
+          set -e
+          export CLOUDFRONT_GATE_EXIT="$result"
+          python - <<'PY'
+          import json, os, pathlib, re
+          root = pathlib.Path(os.environ['RUNNER_TEMP'])
+          text = (root / 'cloudfront-whole-private.log').read_text(errors='replace')
+          receipt = {'sourceSha': '5b740845f4b7ffe22d451eeef1382cb43fe77cc4', 'command': 'make before-commit',
+                     'exit': int(os.environ['CLOUDFRONT_GATE_EXIT']),
+                     'packages': re.findall(r'^(?:ok|FAIL)\s+(github\.com/susumutomita/TenkaCloudSimulator/[A-Za-z0-9_/.-]+)', text, re.MULTILINE),
+                     'failedTests': re.findall(r'^--- FAIL: (Test[A-Za-z0-9_]+)', text, re.MULTILINE),
+                     'coverage': re.findall(r'^.*?(?:coverage|Coverage)[^\n]*?([0-9]+(?:\.[0-9]+)?%)', text, re.MULTILINE)}
+          receipt['failedMakeTargets'] = [{'line': int(line), 'target': target} for line, target in
+              re.findall(r'^make(?:\[[0-9]+\])?: \*\*\* \[Makefile:([0-9]+): ([A-Za-z0-9_-]+)\]', text, re.MULTILINE)]
+          receipt['frames'] = [{'file': pathlib.Path(name).name, 'line': int(line)}
+              for name, line in re.findall(r'File "([^"\n]+)", line ([0-9]+)', text)][-12:]
+          receipt['exceptionTypes'] = re.findall(r'^([A-Za-z_][A-Za-z_0-9.]*(?:Error|Exception))(?::|$)', text, re.MULTILINE)[-3:]
+          receipt['goLocations'] = [{'file': pathlib.Path(name).name, 'line': int(line)} for name, line in
+              re.findall(r'^([A-Za-z0-9_/.-]+\.go):([0-9]+):', text, re.MULTILINE)][-12:]
+          (root / 'cloudfront-gate-receipts' / 'whole.json').write_text(json.dumps(receipt, indent=2) + '\n')
+          print('Complete CloudFront private gate exit:', receipt['exit'])
+          PY
+          test -z "$(git status --porcelain)"
+          test "$result" -eq 0
+      - name: Retain safe whole-gate status and exact build identity
+        if: always()
+        uses: actions/upload-artifact@v7.0.2
+        with:
+          name: cloudfront-whole-5b740845f4b7ffe22d451eeef1382cb43fe77cc4
+          path: ${{ runner.temp }}/cloudfront-gate-receipts/
+          if-no-files-found: error
+          retention-days: 7
