@@ -32600,6 +32600,102 @@
       ],
       "format": "esm"
     },
+    "src/codestar-notifications.mjs": {
+      "bytes": 4934,
+      "imports": [],
+      "format": "esm"
+    },
+    "src/codestar-notifications.jsx": {
+      "bytes": 11936,
+      "imports": [
+        {
+          "path": "node_modules/react/index.js",
+          "kind": "import-statement",
+          "original": "react"
+        },
+        {
+          "path": "node_modules/@cloudscape-design/components/alert/index.js",
+          "kind": "import-statement",
+          "original": "@cloudscape-design/components/alert"
+        },
+        {
+          "path": "node_modules/@cloudscape-design/components/box/index.js",
+          "kind": "import-statement",
+          "original": "@cloudscape-design/components/box"
+        },
+        {
+          "path": "node_modules/@cloudscape-design/components/button/index.js",
+          "kind": "import-statement",
+          "original": "@cloudscape-design/components/button"
+        },
+        {
+          "path": "node_modules/@cloudscape-design/components/checkbox/index.js",
+          "kind": "import-statement",
+          "original": "@cloudscape-design/components/checkbox"
+        },
+        {
+          "path": "node_modules/@cloudscape-design/components/container/index.js",
+          "kind": "import-statement",
+          "original": "@cloudscape-design/components/container"
+        },
+        {
+          "path": "node_modules/@cloudscape-design/components/content-layout/index.js",
+          "kind": "import-statement",
+          "original": "@cloudscape-design/components/content-layout"
+        },
+        {
+          "path": "node_modules/@cloudscape-design/components/form/index.js",
+          "kind": "import-statement",
+          "original": "@cloudscape-design/components/form"
+        },
+        {
+          "path": "node_modules/@cloudscape-design/components/form-field/index.js",
+          "kind": "import-statement",
+          "original": "@cloudscape-design/components/form-field"
+        },
+        {
+          "path": "node_modules/@cloudscape-design/components/header/index.js",
+          "kind": "import-statement",
+          "original": "@cloudscape-design/components/header"
+        },
+        {
+          "path": "node_modules/@cloudscape-design/components/input/index.js",
+          "kind": "import-statement",
+          "original": "@cloudscape-design/components/input"
+        },
+        {
+          "path": "node_modules/@cloudscape-design/components/key-value-pairs/index.js",
+          "kind": "import-statement",
+          "original": "@cloudscape-design/components/key-value-pairs"
+        },
+        {
+          "path": "node_modules/@cloudscape-design/components/space-between/index.js",
+          "kind": "import-statement",
+          "original": "@cloudscape-design/components/space-between"
+        },
+        {
+          "path": "node_modules/@cloudscape-design/components/table/index.js",
+          "kind": "import-statement",
+          "original": "@cloudscape-design/components/table"
+        },
+        {
+          "path": "node_modules/@cloudscape-design/components/textarea/index.js",
+          "kind": "import-statement",
+          "original": "@cloudscape-design/components/textarea"
+        },
+        {
+          "path": "src/codestar-notifications.mjs",
+          "kind": "import-statement",
+          "original": "./codestar-notifications.mjs"
+        },
+        {
+          "path": "src/i18n.jsx",
+          "kind": "import-statement",
+          "original": "./i18n.jsx"
+        }
+      ],
+      "format": "esm"
+    },
     "src/autoscaling-plans.mjs": {
       "bytes": 6159,
       "imports": [],
@@ -35429,8 +35525,13 @@
       "format": "esm"
     },
     "src/console-navigation.mjs": {
-      "bytes": 15214,
+      "bytes": 15624,
       "imports": [
+        {
+          "path": "src/codestar-notifications.mjs",
+          "kind": "import-statement",
+          "original": "./codestar-notifications.mjs"
+        },
         {
           "path": "src/autoscaling-plans.mjs",
           "kind": "import-statement",
@@ -36510,7 +36611,7 @@
       "format": "esm"
     },
     "src/main.jsx": {
-      "bytes": 61280,
+      "bytes": 61706,
       "imports": [
         {
           "path": "src/ssm-terminal.jsx",
@@ -36766,6 +36867,11 @@
           "path": "src/dynamodb.jsx",
           "kind": "import-statement",
           "original": "./dynamodb.jsx"
+        },
+        {
+          "path": "src/codestar-notifications.jsx",
+          "kind": "import-statement",
+          "original": "./codestar-notifications.jsx"
         },
         {
           "path": "src/autoscaling-plans.jsx",
@@ -37586,7 +37692,7 @@
           "bytesInOutput": 0
         },
         "src/main.jsx": {
-          "bytesInOutput": 51477
+          "bytesInOutput": 51795
         },
         "node_modules/@cloudscape-design/global-styles/index.css": {
           "bytesInOutput": 0
@@ -38231,7 +38337,7 @@
           "bytesInOutput": 2927
         },
         "node_modules/@dnd-kit/core/dist/core.esm.js": {
-          "bytesInOutput": 39417
+          "bytesInOutput": 39435
         },
         "node_modules/@dnd-kit/utilities/dist/utilities.esm.js": {
           "bytesInOutput": 3220
@@ -39871,6 +39977,12 @@
         "src/dynamodb.jsx": {
           "bytesInOutput": 25811
         },
+        "src/codestar-notifications.jsx": {
+          "bytesInOutput": 9090
+        },
+        "src/codestar-notifications.mjs": {
+          "bytesInOutput": 3114
+        },
         "src/autoscaling-plans.jsx": {
           "bytesInOutput": 11531
         },
@@ -40136,7 +40248,7 @@
           "bytesInOutput": 5687
         },
         "src/console-navigation.mjs": {
-          "bytesInOutput": 12438
+          "bytesInOutput": 12746
         },
         "src/console-home.jsx": {
           "bytesInOutput": 9688
@@ -40235,7 +40347,7 @@
           "bytesInOutput": 10107
         }
       },
-      "bytes": 2895147
+      "bytes": 2907995
     },
     "../../internal/server/web/app.css.LEGAL.txt": {
       "imports": [],
