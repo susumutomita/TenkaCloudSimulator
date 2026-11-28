@@ -215,6 +215,7 @@ def run():
                     try:
                         view.click('Refresh same-scope history', 'ListRequestedServiceQuotaChangeHistoryByQuota', 500)
                         expect(page.get_by_role('button', name='Start a separate new request', exact=True)).to_have_count(0)
+                        expect(page.get_by_role('textbox', name='Request ID', exact=True)).to_have_value('')
                         expect(page.get_by_role('button', name='Submit increase request', exact=True)).to_be_disabled()
                         expect(page.get_by_text('Request outcome unknown', exact=True)).to_be_visible()
                     finally:
