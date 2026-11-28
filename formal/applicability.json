@@ -1,54 +1,232 @@
 {
   "version": 1,
-  "base_sha": "b97ddbd26f3e78905bd8e26a944fb7f0a28d8a42",
+  "base_sha": "17e30e18d0eb2216961158ae48f8ef42a20225e8",
   "changes": [
     {
-      "path": "internal/server/apidocs/openapi.json",
-      "sha256": "6120545bfb231765db2a60ebb589674906289aeaeffa71732ee91db13450bb64",
+      "path": "README.ja.md",
+      "sha256": "58305d5bfe970ca9f7ce879c8479fe3f95018859e76018455d30328682d9122f",
+      "disposition": "documentation",
+      "reason": "Link the localized scaling plan workflow and its observable DynamoDB capacity effect.",
+      "models": []
+    },
+    {
+      "path": "README.md",
+      "sha256": "0cd9ec48c2711bec2258f3e3045c99f64474b331ce9bda53f0b10fcfc987bce0",
+      "disposition": "documentation",
+      "reason": "Link the Console scaling plan workflow and its observable DynamoDB capacity effect.",
+      "models": []
+    },
+    {
+      "path": "docs/autoscaling-plans.md",
+      "sha256": "d318c80cb54bc966c95e544decc2b3cfd556a4cccdd265d8ff0e632f3f12ebfc",
+      "disposition": "documentation",
+      "reason": "Document the bounded UI workflow, permissions, observed capacities and uncertain outcomes.",
+      "models": []
+    },
+    {
+      "path": "docs/design/0001-go-standalone.md",
+      "sha256": "735de1b16a32336b89c0b62fb1a1bf7e86b28bb3f38c8bb7c851117d6cf3abc7",
+      "disposition": "documentation",
+      "reason": "Describe shared native plan and target observations in the embedded Console.",
+      "models": []
+    },
+    {
+      "path": "formal/ScalingPlanConsole.cfg",
+      "sha256": "7b1e02ab20d8589c4e64881af21ae63e3285655075b6116b1b5788cb1d91f8c7",
+      "disposition": "modeled",
+      "reason": "Bound the mounted Console model and declare its safety invariants.",
+      "models": [
+        {
+          "id": "ScalingPlanConsole",
+          "properties": [
+            "OnlyCurrentReplyPublishes",
+            "SuccessRequiresAck",
+            "RetryRequiresNamedRefresh"
+          ],
+          "limits": "Finite UI request ownership and publication within one mounted scope. A refresh is an explicit exact-name read. Does not model concurrent plan replacement, React/DOM, JavaScript or Go refinement, IAM, HTTP or storage. AutoScalingPlanTargets independently models native capacity effects."
+        }
+      ]
+    },
+    {
+      "path": "formal/ScalingPlanConsole.tla",
+      "sha256": "e25f1305ce13f66d30b46d86b646bdec144ad838cd102b5bd81c9ef2d8f16958",
+      "disposition": "modeled",
+      "reason": "Check finite request ownership, acknowledgement and reconciliation across scoped changes.",
+      "models": [
+        {
+          "id": "ScalingPlanConsole",
+          "properties": [
+            "OnlyCurrentReplyPublishes",
+            "SuccessRequiresAck",
+            "RetryRequiresNamedRefresh"
+          ],
+          "limits": "Finite UI request ownership and publication within one mounted scope. A refresh is an explicit exact-name read. Does not model concurrent plan replacement, React/DOM, JavaScript or Go refinement, IAM, HTTP or storage. AutoScalingPlanTargets independently models native capacity effects."
+        }
+      ]
+    },
+    {
+      "path": "formal/models.json",
+      "sha256": "2a60bd235de500b832ea4fe9cc22503efdbe9e16624322920b6b37a3cefee237",
+      "disposition": "formal-infrastructure",
+      "reason": "Register the focused Console model, scope and four executable mutation controls.",
+      "models": []
+    },
+    {
+      "path": "internal/server/autoscalingplans_composition_test.go",
+      "sha256": "f34715016baa2b40bdf50ecdad53e4ec4fa3fa4dd79cf9ee99ab37060776be11",
+      "disposition": "test-support",
+      "reason": "Assert the five-operation capability advertises the implemented Console.",
+      "models": []
+    },
+    {
+      "path": "internal/server/server.go",
+      "sha256": "2d66c7db8aade9638684f4275f6ee9d1fc1d46cf1902535cf528555cffa07e03",
+      "disposition": "modeled",
+      "reason": "Advertise the implemented Console and the native plan-capacity contract.",
+      "models": [
+        {
+          "id": "ScalingPlanConsole",
+          "properties": [
+            "OnlyCurrentReplyPublishes",
+            "SuccessRequiresAck",
+            "RetryRequiresNamedRefresh"
+          ],
+          "limits": "Finite UI request ownership and publication within one mounted scope. A refresh is an explicit exact-name read. Does not model concurrent plan replacement, React/DOM, JavaScript or Go refinement, IAM, HTTP or storage. AutoScalingPlanTargets independently models native capacity effects."
+        }
+      ]
+    },
+    {
+      "path": "internal/server/web/app.js",
+      "sha256": "883321cfcd39963142ce40bfc2fb7a0b8c980c4cdf9b4fcffa0a00ece38dea0e",
+      "disposition": "modeled",
+      "reason": "Embed the canonically built, localized Console workflow with separate native plan and target reads.",
+      "models": [
+        {
+          "id": "ScalingPlanConsole",
+          "properties": [
+            "OnlyCurrentReplyPublishes",
+            "SuccessRequiresAck",
+            "RetryRequiresNamedRefresh"
+          ],
+          "limits": "Finite UI request ownership and publication within one mounted scope. A refresh is an explicit exact-name read. Does not model concurrent plan replacement, React/DOM, JavaScript or Go refinement, IAM, HTTP or storage. AutoScalingPlanTargets independently models native capacity effects."
+        }
+      ]
+    },
+    {
+      "path": "scripts/formal_model_gate.py",
+      "sha256": "6c1a7ba514b17e4f69f9971f58571400bb80a0a5876f230e8d09f3aa3f189874",
+      "disposition": "formal-infrastructure",
+      "reason": "Independently pin the new model, four invariants, four controls and six mapped files.",
+      "models": []
+    },
+    {
+      "path": "scripts/test-formal-gate.py",
+      "sha256": "7033aad08229af6afb4627ef415551bbcde655678d8ff66703c512b0fc85cc7f",
+      "disposition": "formal-infrastructure",
+      "reason": "Require the new model among all existing protected models.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/autoscaling_plans_console.py",
+      "sha256": "cf219a2a508210a1814e6cd433a198d14e1b68142e7c9e1beab107841b7a31e5",
+      "disposition": "test-support",
+      "reason": "Exercise the actual embedded Console, exact target capacity, two authorities, restart, refusal, acknowledgement loss, cancellation and cleanup.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/check.py",
+      "sha256": "937621995585279fc80c5cebacf8155078f73c7e414614573d8597aa16d37367",
+      "disposition": "test-support",
+      "reason": "Register the ordinary stock SDK and Console integration fixture with the existing E2E runner.",
+      "models": []
+    },
+    {
+      "path": "tools/console/bundle-digests.json",
+      "sha256": "e9441b68fec1208e25ee19061aaeba100734ef8ad5a6989b0b96b8f7c80541c3",
       "disposition": "presentation",
-      "reason": "Correct only the Route53 tag exclusion to acknowledge the already shipped dedicated Console; all paths, queries, examples and schemas remain unchanged.",
+      "reason": "Pin the canonical embedded Console output hashes.",
       "models": []
     },
     {
-      "path": "test/e2e/route53_openapi.py",
-      "sha256": "54a383e898b33f26041278720e61e72e2554daeb4dd21e3903be2af6f3b91d8a",
-      "disposition": "test-support",
-      "reason": "Keep the exact current Route53 tag guard in sync with the corrected documentation while preserving the path contract hash and every historical projection.",
+      "path": "tools/console/bundle-inputs.json",
+      "sha256": "c3bb9f9fc6e9014c1d75b085b72bc64c6b33584bc175ea5a36e960521a0eaec6",
+      "disposition": "presentation",
+      "reason": "Record canonical esbuild metadata for the actual embedded Console inputs.",
       "models": []
     },
     {
-      "path": "test/e2e/route53_scalar_send.py",
-      "sha256": "179dd84f63a29311df9c43ce4f55b7f43c0649e63a939039e4524f4395b7fdd6",
-      "disposition": "test-support",
-      "reason": "One genuine cookie-only Scalar TestDNSAnswer GET derived from the served specification and actual owned native records, with read-only owner and peer snapshots and native cleanup. No external DNS or SDK compatibility claim.",
-      "models": []
+      "path": "tools/console/src/autoscaling-plans.jsx",
+      "sha256": "8d39433ae226450837bc20c7cd2389d7e49f899d17a65e195eaf3a3bb0973ed5",
+      "disposition": "modeled",
+      "reason": "Bound each visible plan or capacity read to its request owner. Confirm writes and reconcile an ambiguous result by exact name.",
+      "models": [
+        {
+          "id": "ScalingPlanConsole",
+          "properties": [
+            "OnlyCurrentReplyPublishes",
+            "SuccessRequiresAck",
+            "RetryRequiresNamedRefresh"
+          ],
+          "limits": "Finite UI request ownership and publication within one mounted scope. A refresh is an explicit exact-name read. Does not model concurrent plan replacement, React/DOM, JavaScript or Go refinement, IAM, HTTP or storage. AutoScalingPlanTargets independently models native capacity effects."
+        }
+      ]
     },
     {
-      "path": "test/e2e/test_route53_openapi.py",
-      "sha256": "fb45a2580aad66f4f39ad6fd7854a9c944a24fac38b25a5c2b1a3c79a5f88a06",
-      "disposition": "test-support",
-      "reason": "Positive current-tag and negative stale or broadened-tag controls; explicitly retain the exact inherited path digest.",
-      "models": []
+      "path": "tools/console/src/autoscaling-plans.mjs",
+      "sha256": "215140b7466a548a3178f7025b3e3dad3668b3effb3eccc7350e0ce75724a775",
+      "disposition": "modeled",
+      "reason": "Send exact native plan and table requests and validate operation-specific replies before publication.",
+      "models": [
+        {
+          "id": "ScalingPlanConsole",
+          "properties": [
+            "OnlyCurrentReplyPublishes",
+            "SuccessRequiresAck",
+            "RetryRequiresNamedRefresh"
+          ],
+          "limits": "Finite UI request ownership and publication within one mounted scope. A refresh is an explicit exact-name read. Does not model concurrent plan replacement, React/DOM, JavaScript or Go refinement, IAM, HTTP or storage. AutoScalingPlanTargets independently models native capacity effects."
+        }
+      ]
     },
     {
-      "path": "test/e2e/test_sakura_openapi.py",
-      "sha256": "3308354e92616185982e4e07e2083a3dcf42fe341a67ac30ca95348eea626c73",
-      "disposition": "test-support",
-      "reason": "Validate the current Route53 tag before projecting the one historical description on a copy for the unchanged whole-document hash.",
-      "models": []
+      "path": "tools/console/src/console-navigation.mjs",
+      "sha256": "2cf79b1dc466e3a3e96e96376b9fc270e43c71ae8b2098bd1bc0cfd9f411109f",
+      "disposition": "modeled",
+      "reason": "Discover the AWS scaling planner only when the normal plan operations and native DynamoDB readback are available.",
+      "models": [
+        {
+          "id": "ScalingPlanConsole",
+          "properties": [
+            "OnlyCurrentReplyPublishes",
+            "SuccessRequiresAck",
+            "RetryRequiresNamedRefresh"
+          ],
+          "limits": "Finite UI request ownership and publication within one mounted scope. A refresh is an explicit exact-name read. Does not model concurrent plan replacement, React/DOM, JavaScript or Go refinement, IAM, HTTP or storage. AutoScalingPlanTargets independently models native capacity effects."
+        }
+      ]
     },
     {
-      "path": "test/e2e/test_ssm_command_reference.py",
-      "sha256": "de316ca3d89664ddd54d6afec29a9f6358c77d13e0ea4b8a88a837a2bf117e99",
-      "disposition": "test-support",
-      "reason": "Validate the current Route53 tag before projecting the one historical description on a copy for the unchanged whole-document hash.",
-      "models": []
+      "path": "tools/console/src/main.jsx",
+      "sha256": "b11b7c11d6a32d2fd3acc9378c577f3c28cb27189a574f29cd6707077b278358",
+      "disposition": "modeled",
+      "reason": "Mount the scaling planner under the selected AWS region, principal and navigation lifetime.",
+      "models": [
+        {
+          "id": "ScalingPlanConsole",
+          "properties": [
+            "OnlyCurrentReplyPublishes",
+            "SuccessRequiresAck",
+            "RetryRequiresNamedRefresh"
+          ],
+          "limits": "Finite UI request ownership and publication within one mounted scope. A refresh is an explicit exact-name read. Does not model concurrent plan replacement, React/DOM, JavaScript or Go refinement, IAM, HTTP or storage. AutoScalingPlanTargets independently models native capacity effects."
+        }
+      ]
     },
     {
-      "path": "test/e2e/test_ssm_document_reference.py",
-      "sha256": "fa4f5ddc2a0c286c1bd43cc9527357dd38c755e16fe2de4e7de34b8012f2178a",
-      "disposition": "test-support",
-      "reason": "Validate the current Route53 tag before projecting the one historical description on a copy for the unchanged whole-document hash.",
+      "path": "tools/console/test/autoscaling-plans.test.mjs",
+      "sha256": "6572dc64b32d400087856ad932c2c18647ed77a76d4c5ae8bde6227939775d7a",
+      "disposition": "presentation",
+      "reason": "Regression checks for normal Cloudscape routing, both wire protocols, target identity, cancellation and saved policy preservation.",
       "models": []
     }
   ]
