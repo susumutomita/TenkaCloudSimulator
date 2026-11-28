@@ -2,6 +2,8 @@
 import json
 import time
 
+from playwright.sync_api import expect
+
 from codestar_notification_scalar import NotificationReference
 from codestar_notifications import ACCOUNT, CREATED, REGION, UPDATED, Refusal, clients
 
@@ -42,7 +44,35 @@ class BranchNotificationWitness:
         assert saved['Targets'] == [{'TargetType': 'SNS', 'TargetAddress': self.topic,
                                      'TargetStatus': 'ACTIVE'}]
         self.result['rule'] = self.rule
+        self.result['notificationConsole'] = []
+        self.observe_rule(reference, 'ENABLED')
         self.refusal(self.client(peer, peer.token), 404, 'ResourceNotFoundException')
+
+    def observe_rule(self, reference, status):
+        page = reference.context.new_page()
+        try:
+            page.goto(reference.origin + '/_simulator/console/#/codestar-notifications')
+            entry = page.get_by_role('button', name=self.rule.rsplit('/', 1)[1], exact=True)
+            with page.expect_response(lambda response: response.url == reference.origin + '/describeNotificationRule') as sent:
+                entry.click()
+            response = sent.value
+            assert response.status == 200 and response.request.method == 'POST'
+            assert response.request.post_data_json == {'Arn': self.rule}
+            headers = response.request.all_headers()
+            assert headers['x-simulator-service'] == SERVICE and headers['x-simulator-region'] == REGION
+            assert headers.get('cookie') and 'x-simulator-token' not in headers
+            detail = response.json()
+            assert detail['Arn'] == self.rule and detail['Resource'] == self.source
+            assert detail['Status'] == status
+            assert detail['Targets'] == [{'TargetType': 'SNS', 'TargetAddress': self.topic,
+                                          'TargetStatus': 'ACTIVE'}]
+            expect(page.get_by_role('heading', name='Git Console changes', exact=True)).to_be_visible()
+            for value in (self.rule, self.source, self.topic, status):
+                expect(page.get_by_text(value, exact=True)).to_be_visible()
+            self.result['notificationConsole'].append({'rule': self.rule, 'source': self.source,
+                                                       'topic': self.topic, 'status': status})
+        finally:
+            page.close()
 
     def client(self, team, token):
         return clients(team, token, self.stack, not self.use_sdk, self.result)
@@ -103,6 +133,7 @@ class BranchNotificationWitness:
         reference = NotificationReference(browser, self.team, self.team.token, self.stack)
         saved = reference.send('DescribeNotificationRule', {'Arn': self.rule}, 200, 'Git Console changes')
         assert saved['Resource'] == self.source and saved['Status'] == 'DISABLED'
+        self.observe_rule(reference, 'DISABLED')
         assert reference.send('DeleteNotificationRule', {'Arn': self.rule}, 200)['Arn'] == self.rule
         self.refusal(self.api, 404, 'ResourceNotFoundException')
         self.result['ruleReopenedAndDeleted'] = True
