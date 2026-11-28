@@ -27,6 +27,9 @@ const (
 // rendered when the official list output is a list of strings.
 type Op struct {
 	Name string
+	// Handle implements a service-owned operation against its own state.
+	// Such operations are advertised separately from generic resource CRUD.
+	Handle func(*request) (map[string]any, error)
 	// Merged runs on the merged stored document of an update before it is
 	// committed, with the members the request supplied. It may normalize the
 	// document (for example drop settings a transition makes inapplicable)

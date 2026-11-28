@@ -67,6 +67,11 @@ func New(db *sql.DB, cfg Config, services []*Service) (*Engine, error) {
 			return nil, fmt.Errorf("catalog service %s is registered twice", spec.Model)
 		}
 		seen[spec.Model] = true
+		if spec.Model == "codecommit" {
+			if _, err := db.Exec(gitSchema); err != nil {
+				return nil, err
+			}
+		}
 		b, err := bind(spec)
 		if err != nil {
 			return nil, err

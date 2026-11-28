@@ -1,5 +1,7 @@
 # Go単一バイナリの設計
 
+[AWS CodeCommit](../aws-codecommit.md) は、チーム別の SQLite にリポジトリごとの Git オブジェクトとブランチを保存する。ファイル更新では、親コミットの照合、オブジェクトの追加、ブランチ先端と既定ブランチの更新を同じトランザクションで行う。Go の実装が Git オブジェクトを直接符号化する。
+
 `cmd/simulator`はCLI、numeric loopback listener、token-file、shutdownを所有する。`internal/server`は埋込Cloudscape/Scalar、local token境界、能力表、identity control APIを提供する。`internal/provider`はprovider dispatch、`internal/core`はprovider中立のSQLite object stateと限定identity-policy評価。`internal/aws`はS3 REST/XML、SSM JSON 1.1、CloudFormation Query/XMLとAWS所有テーブルを持つ。
 
 `core.Store` はインメモリ起動時に専用の SQLite データベースを所有する。要求の取り消しで接続が入れ替わっても、コミット済みのプロバイダーのテーブルと行を次の接続から参照できる。未コミットの書き込みはロールバックされ、メモリ上のデータベースはストアを閉じた時点で解放される。メモリとファイルのどちらでも、接続ごとに外部キー制約と 5 秒のロック待機時間を設定する。

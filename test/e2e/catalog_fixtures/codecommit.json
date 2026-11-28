@@ -10,7 +10,13 @@
   {"op": "tag_resource", "args": {"resourceArn": "${repo}", "tags": {"k": "v"}}},
   {"op": "untag_resource", "args": {"resourceArn": "${repo}", "tagKeys": ["k"]}},
   {"op": "list_tags_for_resource", "args": {"resourceArn": "${repo}"}, "expect": {"tags": {"team": "a"}}},
-  {"op": "list_branches", "args": {"repositoryName": "fixture-repo"}, "error": "UnknownOperationException", "status": 501},
+  {"op": "list_branches", "args": {"repositoryName": "fixture-repo"}, "expect": {"branches#count": 0}},
+  {"op": "put_file", "args": {"repositoryName": "fixture-repo", "branchName": "main", "filePath": "docs/readme.txt", "fileContent": "Local content"}, "save": {"commit": "commitId", "tree": "treeId", "blob": "blobId"}},
+  {"op": "get_file", "args": {"repositoryName": "fixture-repo", "filePath": "docs/readme.txt"}, "expect": {"fileSize": 13, "commitId": "${commit}", "blobId": "${blob}"}},
+  {"op": "get_commit", "args": {"repositoryName": "fixture-repo", "commitId": "${commit}"}, "expect": {"commit.treeId": "${tree}", "commit.parents#count": 0}},
+  {"op": "create_branch", "args": {"repositoryName": "fixture-repo", "branchName": "review", "commitId": "${commit}"}},
+  {"op": "get_branch", "args": {"repositoryName": "fixture-repo", "branchName": "review"}, "expect": {"branch.commitId": "${commit}"}},
+  {"op": "list_pull_requests", "args": {"repositoryName": "fixture-repo"}, "error": "UnknownOperationException", "status": 501},
   {"op": "list_tags_for_resource", "args": {"resourceArn": "arn:aws:codecommit:us-east-1:000000000000:missing"}, "error": "RepositoryDoesNotExistException"}
  ],
  "isolation": [

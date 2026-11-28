@@ -527,6 +527,12 @@ var codeCommit = &Service{
 				"cloneUrlSsh":  "$fmt:ssh://git-codecommit.{region}.amazonaws.com/v1/repos/{name}"}},
 	},
 	Ops: []Op{
+		{Name: "PutFile", Kind: Put, Resource: "repository", Lookup: "repositoryName", Handle: (*request).codeCommitContent},
+		{Name: "GetFile", Kind: Read, Resource: "repository", Lookup: "repositoryName", Handle: (*request).codeCommitContent},
+		{Name: "GetCommit", Kind: Read, Resource: "repository", Lookup: "repositoryName", Handle: (*request).codeCommitContent},
+		{Name: "GetBranch", Kind: Read, Resource: "repository", Lookup: "repositoryName", Handle: (*request).codeCommitContent},
+		{Name: "ListBranches", Kind: List, Resource: "repository", Lookup: "repositoryName", Handle: (*request).codeCommitContent},
+		{Name: "CreateBranch", Kind: Create, Resource: "repository", Lookup: "repositoryName", Handle: (*request).codeCommitContent},
 		{Name: "CreateRepository", Kind: Create, Resource: "repository", Check: codeCommitName},
 		{Name: "GetRepository", Kind: Read, Resource: "repository", Lookup: "repositoryName"},
 		{Name: "ListRepositories", Kind: List, Resource: "repository"},
@@ -538,7 +544,7 @@ var codeCommit = &Service{
 		{Name: "ListTagsForResource", Kind: ListTags, Lookup: "resourceArn"},
 	},
 	Bounds: []string{
-		"Repositories are configuration metadata without Git data: no Git endpoint is served at the official clone URLs, and branches, commits, files, pull requests, comments, merges and triggers return UnknownOperationException with HTTP 501. KMS key identifiers are stored without resolving them.",
+		"PutFile stores binary files as Git blobs, trees and single-parent commits. The first commit creates the default branch. CreateBranch can fork another branch from a stored commit. GetFile accepts the default branch, a branch name, refs/heads/name or a full commit ID. GetCommit reads an immutable revision. The local subset accepts regular and executable files up to 64 KiB, paths up to 256 bytes and eight components, 32 branches and 512 objects per repository, and 32 MiB of objects per team. ListBranches returns up to ten branch names per page. Clone and push transports, tags as Git references, pull requests, comments, merges, triggers and notification delivery are outside this subset. Content operations refuse repositories configured with a customer KMS key.",
 		"Repositories cannot be renamed. Deleting a missing repository fails instead of returning an empty result, and sortBy/order are refused.",
 	},
 }
