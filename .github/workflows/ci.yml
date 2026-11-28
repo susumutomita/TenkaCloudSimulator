@@ -8,12 +8,12 @@ jobs:
     runs-on: ubuntu-22.04
     timeout-minutes: 25
     env:
-      PRODUCT: ef2dfd238a87646b6d97400b7b4feccdaca415d1
-      PRODUCT_TREE: a558d293b749c7c7e43a0a8c245f27d27b196fe4
+      PRODUCT: 0d75de0c64af561a6d95611620aec17dbc3b1dcf
+      PRODUCT_TREE: dc9016f1da1760e0af03a0527164a6e97851c325
     steps:
       - uses: actions/checkout@v7.0.1
         with:
-          ref: ef2dfd238a87646b6d97400b7b4feccdaca415d1
+          ref: 0d75de0c64af561a6d95611620aec17dbc3b1dcf
           persist-credentials: false
       - uses: actions/setup-go@v6.5.0
         with:
