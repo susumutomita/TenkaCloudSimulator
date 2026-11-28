@@ -1,5 +1,6 @@
 import {scalingPlansAvailable} from './autoscaling-plans.mjs';
 import {sakuraServerEndpoint} from './sakura-server-read.mjs';
+import {supportAdvertised} from './support-client.mjs';
 import {route53ConsoleAdvertised} from './route53-console.mjs';
 import {traceConfiguration} from './gcp-trace.mjs';
 
@@ -26,6 +27,7 @@ export const SERVICES = Object.freeze([
   {id: 'dynamodb', provider: 'aws', label: 'DynamoDB', capability: 'dynamodb', route: '/dynamodb', keywords: 'table item key-value database ddb ダイナモ ダイナモDB テーブル 項目 キー データベース'},
   {id: 'autoscaling-plans', provider: 'aws', label: 'AWS Auto Scaling Plans', capability: 'autoscaling-plans', route: '/autoscaling-plans', keywords: 'scaling plans capacity dynamodb スケーリングプラン テーブル 容量'},
   {id: 'route53', provider: 'aws', label: 'Route 53', capability: 'route53', route: '/route53', keywords: 'dns hosted zones records ptr reverse lookup 公開ホストゾーン 逆引き レコード'},
+  {id: 'support', provider: 'aws', label: 'AWS Support', capability: 'support', route: '/support', keywords: 'support cases communication attachments サポート ケース メッセージ 添付ファイル'},
   {id: 'simpledb', provider: 'aws', label: 'SimpleDB', capability: 'simpledb', route: '/simpledb', keywords: 'database domain item attributes conditional データベース ドメイン 項目 属性'},
   {id: 'sns', provider: 'aws', label: 'SNS', capability: 'sns', route: '/sns', keywords: 'simple notification service subscription topic サブスクリプション トピック 通知'},
   {id: 'sqs', provider: 'aws', label: 'SQS', capability: 'sqs', route: '/sqs', keywords: 'queue message messaging キュー メッセージ メッセージング シンプルキューサービス'},
@@ -111,6 +113,7 @@ export function serviceAvailable(id, capabilities) {
   }
   if (id === 'autoscaling-plans') return scalingPlansAvailable(capabilities);
   if (id === 'route53') return route53ConsoleAdvertised(capabilities);
+  if (id === 'support') return supportAdvertised(capabilities);
   if (id === 'simpledb') {
     const scope = capabilities.services?.simpledb;
     return scope?.console === true && scope.region === 'us-east-1' && scope.conditionalPut === true

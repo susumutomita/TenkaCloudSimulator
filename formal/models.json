@@ -30041,6 +30041,440 @@
       ]
     },
     {
+      "id": "SupportCaseLifecycle",
+      "model": "formal/SupportCaseLifecycle.tla",
+      "config": "formal/SupportCaseLifecycle.cfg",
+      "bounds": "One customer case and its retained peer in a separate authority, initial message and one follow-up, one staged set with up to three distinct synthetic file identities. Minute samples 0, 1, 59, 60 and 61 exercise the one-hour boundary, including equality. Further fresh case/set allocations are outside this system; ordered file identities represent immutable name/data pairs.",
+      "properties": [
+        "TypeOK",
+        "PeerFrame",
+        "StageContract",
+        "SubmissionContract",
+        "ResolutionContract",
+        "ReadProjection",
+        "RestartAndClock"
+      ],
+      "limits": "Checks observable atomic writes, denial and cancellation frames, original set deadline, copying files into durable messages, resolved visibility, refusal of a resolved-case reply and monotone time/restart. Attachment reads select the last ordinal of either saved communication. Native tests check actual arbitrary file names and bytes. The model assumes the gateway selects the Support operation and the server supplies its team database and authenticated actor. Native route tests verify this wiring, authorization headers and the served capability. Inputs abstract request validation, storage failures and the local clock. Repeated generated case IDs, multiple sets per team, content encoding, byte quotas, long-term retention, pagination, concurrency, SQLite implementation, wire shapes and UI require native tests. It models no external responder, email, response time or AWS support plan.",
+      "source_scope": [
+        "internal/aws/s3.go",
+        "internal/aws/ssm.go",
+        "internal/aws/support_gateway.go",
+        "internal/aws/supportcases/mutate.go",
+        "internal/aws/supportcases/read.go",
+        "internal/aws/supportcases/store.go",
+        "internal/server/server.go"
+      ],
+      "mutants": [
+        {
+          "id": "ExtendExpiryOnAppend",
+          "edits": [
+            {
+              "old": "!.expires = IF new THEN minute + 60 ELSE @",
+              "new": "!.expires = minute + 60",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "StageContract"
+        },
+        {
+          "id": "ShortenOriginalHour",
+          "edits": [
+            {
+              "old": "!.expires = IF new THEN minute + 60 ELSE @",
+              "new": "!.expires = IF new THEN minute + 59 ELSE @",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "StageContract"
+        },
+        {
+          "id": "AppendAtExpiry",
+          "edits": [
+            {
+              "old": "eligible == IF new THEN db.expires = 0 ELSE Live",
+              "new": "eligible == IF new THEN db.expires = 0 ELSE db.expires > 0 /\\ minute <= db.expires",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "StageContract"
+        },
+        {
+          "id": "AllowFourthFile",
+          "edits": [
+            {
+              "old": "valid == eligible /\\ db.staged + batch <= 3",
+              "new": "valid == eligible /\\ db.staged + batch <= 4",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "StageContract"
+        },
+        {
+          "id": "AppendLostFiles",
+          "edits": [
+            {
+              "old": "!.staged = @ + batch, !.expires",
+              "new": "!.staged = batch, !.expires",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "StageContract"
+        },
+        {
+          "id": "StageAfterCancellation",
+          "edits": [
+            {
+              "old": "success == Authorized(g) /\\ valid /\\ Commit(g)",
+              "new": "success == Authorized(g) /\\ valid /\\ (Commit(g) \\/ g = \"cancel\")",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "StageContract"
+        },
+        {
+          "id": "PersistFirstFileOfInvalidBatch",
+          "edits": [
+            {
+              "old": "IF success THEN written ELSE db",
+              "new": "IF success THEN written ELSE IF valid /\\ batch = 2 /\\ g = \"late invalid\" THEN [db EXCEPT !.staged = @ + 1] ELSE db",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "StageContract"
+        },
+        {
+          "id": "CreateWithoutInitialBody",
+          "edits": [
+            {
+              "old": "!.messages = Append(@,Body(text,count))",
+              "new": "!.messages = IF creating THEN @ ELSE Append(@,Body(text,count))",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "SubmissionContract"
+        },
+        {
+          "id": "DuplicateInitialMessage",
+          "edits": [
+            {
+              "old": "!.messages = Append(@,Body(text,count))",
+              "new": "!.messages = IF creating THEN <<Body(text,count),Body(text,count)>> ELSE Append(@,Body(text,count))",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "SubmissionContract"
+        },
+        {
+          "id": "ReplaceInitialWithReply",
+          "edits": [
+            {
+              "old": "!.messages = Append(@,Body(text,count))",
+              "new": "!.messages = IF creating THEN Append(@,Body(text,count)) ELSE <<Body(text,count)>>",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "SubmissionContract"
+        },
+        {
+          "id": "DropCommittedFile",
+          "edits": [
+            {
+              "old": "count == IF setID = \"none\" THEN 0 ELSE db.staged",
+              "new": "count == 0",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "SubmissionContract"
+        },
+        {
+          "id": "AcceptExpiredAttachment",
+          "edits": [
+            {
+              "old": "validSet == setID = \"none\" \\/ (setID = \"local\" /\\ Live)",
+              "new": "validSet == setID = \"none\" \\/ (setID = \"local\" /\\ db.expires > 0 /\\ minute <= db.expires)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "SubmissionContract"
+        },
+        {
+          "id": "AcceptMissingAttachmentSet",
+          "edits": [
+            {
+              "old": "validSet == setID = \"none\" \\/",
+              "new": "validSet == setID \\in {\"none\",\"missing\"} \\/",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "SubmissionContract"
+        },
+        {
+          "id": "AcceptPeerAttachmentSet",
+          "edits": [
+            {
+              "old": "validSet == setID = \"none\" \\/",
+              "new": "validSet == setID \\in {\"none\",\"foreign\"} \\/",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "SubmissionContract"
+        },
+        {
+          "id": "CreateCaseAfterDenial",
+          "edits": [
+            {
+              "old": "success == Authorized(g) /\\ validCase /\\ validSet /\\ Commit(g)",
+              "new": "success == (Authorized(g) \\/ (creating /\\ g = \"denied\")) /\\ validCase /\\ validSet /\\ Commit(g)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "SubmissionContract"
+        },
+        {
+          "id": "ReplyAfterResolve",
+          "edits": [
+            {
+              "old": "validCase == IF creating THEN db.status = \"absent\" ELSE db.status = \"opened\"",
+              "new": "validCase == IF creating THEN db.status = \"absent\" ELSE db.status # \"absent\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "SubmissionContract"
+        },
+        {
+          "id": "ReplyThroughForeignScope",
+          "edits": [
+            {
+              "old": "success == Authorized(g) /\\ validCase /\\ validSet /\\ Commit(g)",
+              "new": "success == (Authorized(g) \\/ (~creating /\\ g = \"foreign\")) /\\ validCase /\\ validSet /\\ Commit(g)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "SubmissionContract"
+        },
+        {
+          "id": "CreateSurvivesLateAttachmentFailure",
+          "edits": [
+            {
+              "old": "IF success THEN changed ELSE db",
+              "new": "IF success THEN changed ELSE IF creating /\\ validCase /\\ setID = \"local\" /\\ Live /\\ g = \"late invalid\" THEN [db EXCEPT !.status = \"opened\"] ELSE db",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "SubmissionContract"
+        },
+        {
+          "id": "ReplySurvivesLateAttachmentFailure",
+          "edits": [
+            {
+              "old": "IF success THEN changed ELSE db",
+              "new": "IF success THEN changed ELSE IF ~creating /\\ validCase /\\ setID = \"local\" /\\ Live /\\ g = \"late invalid\" THEN [db EXCEPT !.messages = Append(@,Body(\"reply\",0))] ELSE db",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "SubmissionContract"
+        },
+        {
+          "id": "CommitCancelledSubmission",
+          "edits": [
+            {
+              "old": "IF success THEN changed ELSE db",
+              "new": "IF success \\/ (validCase /\\ validSet /\\ g = \"cancel\") THEN changed ELSE db",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "SubmissionContract"
+        },
+        {
+          "id": "CommitFailedSubmission",
+          "edits": [
+            {
+              "old": "IF success THEN changed ELSE db",
+              "new": "IF success \\/ (validCase /\\ validSet /\\ g = \"fault\") THEN changed ELSE db",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "SubmissionContract"
+        },
+        {
+          "id": "ResolveMissingCase",
+          "edits": [
+            {
+              "old": "success == Authorized(g) /\\ db.status # \"absent\" /\\ Commit(g)",
+              "new": "success == Authorized(g) /\\ Commit(g)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ResolutionContract"
+        },
+        {
+          "id": "ResolveAfterDenial",
+          "edits": [
+            {
+              "old": "success == Authorized(g) /\\ db.status # \"absent\" /\\ Commit(g)",
+              "new": "success == (Authorized(g) \\/ g = \"denied\") /\\ db.status # \"absent\" /\\ Commit(g)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ResolutionContract"
+        },
+        {
+          "id": "ResolveDropsCommunications",
+          "edits": [
+            {
+              "old": "updated == [Clean EXCEPT !.status = \"resolved\"]",
+              "new": "updated == [Clean EXCEPT !.status = \"resolved\", !.messages = <<>>]",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ResolutionContract"
+        },
+        {
+          "id": "ResolveForgesAgentReply",
+          "edits": [
+            {
+              "old": "updated == [Clean EXCEPT !.status = \"resolved\"]",
+              "new": "updated == [Clean EXCEPT !.status = \"resolved\", !.messages = Append(@,Body(\"agent\",0))]",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ResolutionContract"
+        },
+        {
+          "id": "ResolveMutatesPeer",
+          "edits": [
+            {
+              "old": "updated == [Clean EXCEPT !.status = \"resolved\"]",
+              "new": "updated == [Clean EXCEPT !.status = \"resolved\", !.peer.status = \"resolved\"]",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PeerFrame"
+        },
+        {
+          "id": "FailedUploadMutatesPeer",
+          "edits": [
+            {
+              "old": "IF success THEN written ELSE db",
+              "new": "IF success THEN written ELSE IF g = \"fault\" /\\ valid THEN [db EXCEPT !.peer.staging = 0] ELSE db",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PeerFrame"
+        },
+        {
+          "id": "ExposeResolvedByDefault",
+          "edits": [
+            {
+              "old": "(flag /\\ db.status = \"resolved\")",
+              "new": "db.status = \"resolved\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadProjection"
+        },
+        {
+          "id": "HideExplicitResolved",
+          "edits": [
+            {
+              "old": "(flag /\\ db.status = \"resolved\")",
+              "new": "FALSE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadProjection"
+        },
+        {
+          "id": "IncludeSuppressedCommunications",
+          "edits": [
+            {
+              "old": "IF shown /\\ op \\in {\"cases\",\"messages\"} THEN history",
+              "new": "IF shown /\\ op \\in {\"cases\",\"summary\",\"messages\"} THEN history",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadProjection"
+        },
+        {
+          "id": "SuppressDefaultCommunications",
+          "edits": [
+            {
+              "old": "IF shown /\\ op \\in {\"cases\",\"messages\"} THEN history",
+              "new": "IF shown /\\ op = \"messages\" THEN history",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadProjection"
+        },
+        {
+          "id": "DiscloseAttachmentWithoutPermission",
+          "edits": [
+            {
+              "old": "canRead == Authorized(g)",
+              "new": "canRead == Authorized(g) \\/ (op = \"file\" /\\ g = \"denied\")",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadProjection"
+        },
+        {
+          "id": "DisclosePeerCase",
+          "edits": [
+            {
+              "old": "canRead == Authorized(g)",
+              "new": "canRead == Authorized(g) \\/ (op \\in {\"cases\",\"summary\"} /\\ present /\\ g = \"foreign\")",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadProjection"
+        },
+        {
+          "id": "LoadFileFromExpiredSet",
+          "edits": [
+            {
+              "old": "file |-> IF op = \"file\" THEN db.messages[slot].files[ownFile] ELSE 0",
+              "new": "file |-> IF op = \"file\" /\\ Live THEN db.messages[slot].files[ownFile] ELSE 0",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadProjection"
+        },
+        {
+          "id": "ReadMutatesStoredMessages",
+          "edits": [
+            {
+              "old": "/\\ db' = db\n    /\\ last' = Mark(op,g,db",
+              "new": "/\\ db' = IF op = \"messages\" /\\ present THEN [db EXCEPT !.messages = <<>>] ELSE db\n    /\\ last' = Mark(op,g,db",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadProjection"
+        },
+        {
+          "id": "RestartDropsAttachedMessage",
+          "edits": [
+            {
+              "old": "Restart ==\n /\\ db' = db",
+              "new": "Restart ==\n /\\ db' = (IF \\E i \\in 1..Len(db.messages): Len(db.messages[i].files) > 0 THEN [db EXCEPT !.messages = <<>>] ELSE db)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "RestartAndClock"
+        },
+        {
+          "id": "RestartExtendsDeadline",
+          "edits": [
+            {
+              "old": "Restart ==\n /\\ db' = db",
+              "new": "Restart ==\n /\\ db' = (IF Live THEN [db EXCEPT !.expires = minute + 60] ELSE db)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "RestartAndClock"
+        }
+      ]
+    },
+    {
       "id": "CloudTraceObservations",
       "model": "formal/CloudTraceObservations.tla",
       "config": "formal/CloudTraceObservations.cfg",

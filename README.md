@@ -107,6 +107,7 @@ console, CloudFormation adapter or Challenge integration.
 - **Functions and messaging:** [Lambda](docs/lambda.md), [API Gateway](docs/apigateway.md),
   [SQS](docs/sqs.md), [SNS](docs/sns.md) (local HTTP/HTTPS subscription Console and reference; no external delivery),
   [CloudWatch Logs](docs/cloudwatch-logs.md).
+- [AWS Support](docs/aws-support.md) stores practice cases, follow-up messages and small attachments in the team's local database.
 - **Identity and secrets:** [IAM](docs/iam.md), [native SDK / STS](docs/sts-native.md),
   [Secrets Manager](docs/secrets-manager.md), [KMS](docs/kms.md), [WAFv2](docs/wafv2.md).
   Manage role trust in the IAM Console, read the role in the API reference and

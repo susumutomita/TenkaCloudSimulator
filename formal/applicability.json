@@ -1,24 +1,24 @@
 {
   "version": 1,
-  "base_sha": "fd803075c37af3faa377f550c8e1cd52b3cfbbb1",
+  "base_sha": "0a9da347b430020663201756123496b9bb550308",
   "changes": [
     {
       "path": ".github/workflows/ci.yml",
-      "sha256": "dede83f7d97c093de0c77a0e4d96bb5f53fda13d1f540756526991e5492e8564",
+      "sha256": "471bf5d15ece043148b4ba435abe0391f6f039e224349ca18806b179b27c1d16",
       "disposition": "formal-infrastructure",
       "reason": "Run the new Trace viewer helper tests alongside the existing Google and Console client regressions in ordinary CI.",
       "models": []
     },
     {
       "path": "README.md",
-      "sha256": "242400a06383cb69af17410b280e5a3c2cb600e9708f6bd1d02f1588f17db503",
+      "sha256": "46f111db7186dbef23060073ca983dbc3ef15d809f5d849f106e2bd0ee269d72",
       "disposition": "documentation",
       "reason": "Document the published and local API contracts, persistence, entry points, isolation and unsupported operations.",
       "models": []
     },
     {
       "path": "docs/design/0001-go-standalone.md",
-      "sha256": "e0f09cabdbb9a8b1fcf0f497d2cdc31ee1828bb6c212c1dc541cd4bddb4306f0",
+      "sha256": "959f027170a83fcf4fb6e494a8aa18e3d93cebb4c992a308b797327664a11404",
       "disposition": "documentation",
       "reason": "Document the published and local API contracts, persistence, entry points, isolation and unsupported operations.",
       "models": []
@@ -100,7 +100,7 @@
     },
     {
       "path": "formal/models.json",
-      "sha256": "733f187b0958d21ee1dd2085b891c47d89e1a1a46ca2804dd3e4c71d265fec31",
+      "sha256": "33314e920384295fca25e12837ddc18bc01b8bd5f90ffec06fa5804502916288",
       "disposition": "formal-infrastructure",
       "reason": "Register and independently check the finite Cloud Trace model, its source bindings and specific mutation controls.",
       "models": []
@@ -307,9 +307,9 @@
     },
     {
       "path": "internal/server/server.go",
-      "sha256": "2a8a289404aa1e6e7178eb9d8953c711a3fbbe5a2947fe54a80157b2d4617608",
+      "sha256": "70747d47ee991cee42c5d0789ed9504fef8b3aae1f0b6c5785ef41f2d8185f85",
       "disposition": "modeled",
-      "reason": "Expose trace configuration only to the authenticated local project owner.",
+      "reason": "Expose trace configuration only to the authenticated local project owner. Preserve the separately authorized AWS Support capability alongside the Google project capability.",
       "models": [
         {
           "id": "ProjectAuthority",
@@ -324,7 +324,7 @@
     },
     {
       "path": "internal/server/web/app.js",
-      "sha256": "1e6b7b596d155bfc4a8efe013cd921086303b4905c17ae27fe2e05bb060d4787",
+      "sha256": "7ce7596e6dc97e40ea9d44c28b3811e18ca2a0843a6ae3c1828bf0a4e3adc986",
       "disposition": "modeled",
       "reason": "Extend the existing Google Console discovery and guarded navigation to project Trace reads. Runtime and browser tests check the actual viewer.",
       "models": [
@@ -342,14 +342,14 @@
     },
     {
       "path": "scripts/formal_model_gate.py",
-      "sha256": "a16d09a125afae168b81bf28b3a6dc97489637cfe38f95a3ac3b486c98eb74c4",
+      "sha256": "b6a90e11126a63f41afdaeeea19b709c0c3bef6eb33c1f9a5085da8906284868",
       "disposition": "formal-infrastructure",
       "reason": "Register and independently check the finite Cloud Trace model, its source bindings and specific mutation controls.",
       "models": []
     },
     {
       "path": "scripts/test-formal-gate.py",
-      "sha256": "f4b218d31f117d5e1f47207c16d60c68a8589a13e1aa1f4b443246f0e60766e5",
+      "sha256": "dcf68fc68ad4014e6046c787930b65d7522d036a2df7960668b443f07bb78c7c",
       "disposition": "formal-infrastructure",
       "reason": "Register and independently check the finite Cloud Trace model, its source bindings and specific mutation controls.",
       "models": []
@@ -384,21 +384,21 @@
     },
     {
       "path": "tools/console/bundle-digests.json",
-      "sha256": "a5417131ae79e727c57708c2a4cbd689cd238997429016ff27ffcfbeb1ca276e",
+      "sha256": "c00598cc33e7b7d916502ba4039db5c1878a40a50185e7538b18c9f0478573e7",
       "disposition": "presentation",
       "reason": "Regenerate the regular Console input or artifact manifest for the embedded Trace viewer.",
       "models": []
     },
     {
       "path": "tools/console/bundle-inputs.json",
-      "sha256": "29429a3dee36a067aefaef94ef5094685917a74f1aab664d51a07ad1ab4a3b89",
+      "sha256": "c8a9e421f25ac0035f37cb23df2ebff585c6df86f8d2bba674dff6e187d330c7",
       "disposition": "presentation",
       "reason": "Regenerate the regular Console input or artifact manifest for the embedded Trace viewer.",
       "models": []
     },
     {
       "path": "tools/console/src/console-navigation.mjs",
-      "sha256": "47ee1cf7ad5d220baf8beb4df9e29c2b3b5f872896a7d6a3638d0737808ef4e0",
+      "sha256": "c352dcabc2c42006425b8e84e63195c7318ade9c15639f3b339c71ac4be7b486",
       "disposition": "modeled",
       "reason": "Extend the existing Google Console discovery and guarded navigation to project Trace reads. Runtime and browser tests check the actual viewer.",
       "models": [
@@ -430,9 +430,9 @@
     },
     {
       "path": "tools/console/src/main.jsx",
-      "sha256": "7e243379171a1feb87eda5dc78b3fe8b0bc8c9b24a93971b1644259f1e52d64e",
+      "sha256": "bafb1207e2262f483d51c47d0744c24014fd8e5cfae5afce5a97a9f1f93b1f68",
       "disposition": "modeled",
-      "reason": "Extend the existing Google Console discovery and guarded navigation to project Trace reads. Runtime and browser tests check the actual viewer.",
+      "reason": "Extend the existing Google Console discovery and guarded navigation to project Trace reads. Runtime and browser tests check the actual viewer. Preserve the AWS Support entry and its existing identity-scoped rendering on main.",
       "models": [
         {
           "id": "CloudDNSConsoleScope",
