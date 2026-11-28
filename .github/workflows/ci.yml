@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-22.04
     timeout-minutes: 25
     env:
-      PYTHONPYCACHEPREFIX: ${{ runner.temp }}/route53-python-cache
+      PYTHONPYCACHEPREFIX: /tmp/route53-python-cache
     steps:
       - uses: actions/checkout@v7.0.1
         with:
