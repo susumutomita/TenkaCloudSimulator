@@ -76,6 +76,11 @@ func New(db *sql.DB, cfg Config, services []*Service) (*Engine, error) {
 		}
 	}
 	sort.Slice(e.bindings, func(i, j int) bool { return e.bindings[i].spec.Model < e.bindings[j].spec.Model })
+	if len(e.bySigning["kinesisvideo"]) != 0 {
+		if err := e.openKinesisMedia(); err != nil {
+			return nil, err
+		}
+	}
 	return e, nil
 }
 
@@ -279,6 +284,9 @@ func credentialService(r *http.Request) string {
 
 // ServeHTTP decodes, authorizes, executes and encodes one catalog request.
 func (e *Engine) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	if e.serveKinesisVideoMedia(w, r) {
+		return
+	}
 	if b := e.queryBinding(r); b != nil {
 		e.serveQuery(w, r, b)
 		return

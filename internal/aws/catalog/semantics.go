@@ -52,6 +52,9 @@ func (q *request) execute() (map[string]any, error) {
 		if q.isBatchJobDefinition() {
 			return q.registerBatchDefinition()
 		}
+		if q.isVideoStreamCreate() {
+			return q.createVideoStream()
+		}
 		return q.create(0)
 	case Read:
 		return q.read()
@@ -769,6 +772,13 @@ func (q *request) create(ecsRevision int) (map[string]any, error) {
 	}
 	res := q.resource()
 	tokenMember := idempotencyMember(q.b.model.shape(q.official.Input))
+	var videoTime int64
+	if q.isVideoStreamCreate() {
+		videoTime, err = q.videoCreationTime(&r)
+		if err != nil {
+			return nil, err
+		}
+	}
 	if err := q.authorizeTarget(r.ARN, parent); err != nil {
 		return nil, err
 	}
@@ -809,6 +819,19 @@ func (q *request) create(ecsRevision int) (map[string]any, error) {
 	}
 	if err := q.checkRDSPrivatePostgresTopology(tx, r); err != nil {
 		return nil, err
+	}
+	if videoTime != 0 {
+		result, err := tx.ExecContext(q.ctx, "UPDATE aws_kinesisvideo_creation_clock SET last_ms=? WHERE singleton=1 AND last_ms<?", videoTime, videoTime)
+		if err != nil {
+			return nil, err
+		}
+		updated, err := result.RowsAffected()
+		if err != nil {
+			return nil, err
+		}
+		if updated == 0 {
+			return nil, errVideoClockChanged
+		}
 	}
 	if err := insertNewResource(tx, res, &r, parent); err != nil {
 		return nil, err
@@ -971,6 +994,11 @@ func (q *request) update() (map[string]any, error) {
 				if err := q.op.CheckReplacement(previous.Document, r.Document); err != nil {
 					return err
 				}
+			}
+		}
+		if r.Service == "kinesisvideo" && q.op.Name == "UpdateDataRetention" {
+			if err := q.updateVideoRetention(tx, r); err != nil {
+				return err
 			}
 		}
 		return updateRow(tx, r)
