@@ -77,6 +77,9 @@ func readAlarm(ctx context.Context, tx *sql.Tx, region, name string) (metricAlar
 	if decoder.Decode(&a) != nil || decoder.Decode(new(any)) != io.EOF || !validSavedAlarm(a) || a.AlarmName != name || a.AlarmArn != alarmARN(region, name) || a.Generation != generation || len(generation) != 32 {
 		return a, errors.New("invalid saved alarm identity")
 	}
+	if raw, err := hex.DecodeString(generation); err != nil || len(raw) != 16 {
+		return a, errors.New("invalid saved alarm generation")
+	}
 	return a, nil
 }
 func storeAlarm(ctx context.Context, tx *sql.Tx, region string, a metricAlarm, create bool) error {

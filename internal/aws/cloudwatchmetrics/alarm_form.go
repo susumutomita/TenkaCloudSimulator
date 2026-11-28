@@ -1,12 +1,14 @@
 package cloudwatchmetrics
 
 import (
+	"bytes"
 	"encoding/json"
 	"encoding/xml"
 	"math"
 	"slices"
 	"strconv"
 	"strings"
+	"time"
 	"unicode"
 	"unicode/utf8"
 )
@@ -218,5 +220,55 @@ func validSavedAlarm(a metricAlarm) bool {
 	if string(old) != string(checked) {
 		return false
 	}
-	return slices.Contains([]string{"OK", "ALARM", "INSUFFICIENT_DATA"}, a.StateValue) && a.StateReason != "" && json.Valid([]byte(a.StateReasonData))
+	if !slices.Contains([]string{"OK", "ALARM", "INSUFFICIENT_DATA"}, a.StateValue) || a.StateReason == "" {
+		return false
+	}
+	for _, timestamp := range []string{a.AlarmConfigurationUpdatedTimestamp, a.StateUpdatedTimestamp, a.StateTransitionedTimestamp} {
+		if _, err := time.Parse(time.RFC3339Nano, timestamp); err != nil {
+			return false
+		}
+	}
+	return validAlarmReasonData(a)
+}
+
+// Reason data is provider-owned persisted evidence, not caller-supplied state.
+func validAlarmReasonData(a metricAlarm) bool {
+	var fields map[string]json.RawMessage
+	if json.Unmarshal([]byte(a.StateReasonData), &fields) != nil || len(fields) == 0 {
+		return false
+	}
+	if len(fields) == 2 && string(fields["version"]) == `"1.0"` && string(fields["reason"]) == `"created"` {
+		return a.StateValue == "INSUFFICIENT_DATA"
+	}
+	if len(fields) != 7 {
+		return false
+	}
+	for _, key := range []string{"Version", "Start", "End", "Statistic", "SampleCount", "Value", "Threshold"} {
+		if _, ok := fields[key]; !ok {
+			return false
+		}
+	}
+	var data struct {
+		Version, Start, End, Statistic string
+		SampleCount                    int
+		Value                          *float64
+		Threshold                      float64
+	}
+	decoder := json.NewDecoder(bytes.NewReader([]byte(a.StateReasonData)))
+	decoder.DisallowUnknownFields()
+	if decoder.Decode(&data) != nil || data.Version != "1.0" || !slices.Contains(statistics, data.Statistic) || data.SampleCount < 0 || data.SampleCount > maxNamespaceSamples || math.IsNaN(data.Threshold) || math.IsInf(data.Threshold, 0) || math.Abs(data.Threshold) > math.Exp2(360) {
+		return false
+	}
+	start, err := time.Parse(time.RFC3339, data.Start)
+	if err != nil || !start.Equal(start.Truncate(time.Minute)) {
+		return false
+	}
+	end, err := time.Parse(time.RFC3339, data.End)
+	if err != nil || end.Sub(start) != time.Minute {
+		return false
+	}
+	if data.SampleCount == 0 {
+		return data.Value == nil && a.StateValue == "INSUFFICIENT_DATA"
+	}
+	return data.Value != nil && !math.IsInf(*data.Value, 0) && !math.IsNaN(*data.Value) && a.StateValue != "INSUFFICIENT_DATA"
 }
