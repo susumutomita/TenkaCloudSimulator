@@ -1,0 +1,85 @@
+{
+  "artifactURL": "https://github.com/susumutomita/TenkaCloudSimulator/actions/runs/46108834461/artifacts/15249080577",
+  "binaryBytes": 50659490,
+  "binarySHA256": "0c8052da2f92cbb8020607d33f08ab0743fca5c061d93f2cf687e311e03da025",
+  "commands": [
+    "git fetch --depth=1 origin d95f8dbc3e6ddec4c65bc9d5e0124616a0e591da",
+    "git checkout --detach d95f8dbc3e6ddec4c65bc9d5e0124616a0e591da",
+    "git rev-parse HEAD HEAD^{tree}",
+    "go mod download",
+    "go mod verify",
+    "make build",
+    "go version -m dist/tenkacloud-simulator",
+    "readelf -h dist/tenkacloud-simulator",
+    "sha256sum dist/tenkacloud-simulator"
+  ],
+  "comparison": "Rebuilt executable was compared byte for byte against the only regular member of the verified GitHub artifact. Independently generated tar/gzip SHA256 matches hosted archive. Go build information and ELF header match.",
+  "decision": "Accepted as reproduced provenance for the designated local validation only.",
+  "hashicorpReleaseVerification": [
+    {
+      "binaryBytes": 90579096,
+      "binarySHA256": "268000fca5c61021c6396893d9483007ba589ad9d0aaccbd7dfa8c78bf7dbe23",
+      "manifestSHA256": "615324e1740eea679ddfab59c7e5ea351d485eaee67d395a7c5d53c650177cd0",
+      "manifestURL": "https://releases.hashicorp.com/terraform/1.11.4/terraform_1.11.4_SHA256SUMS",
+      "member": "terraform",
+      "name": "terraform",
+      "signatures": [
+        {
+          "date": "2025-04-09",
+          "primary": "C874011F0AB405110D02105534365D9472D7468F",
+          "signing": "374EC75B485913604A831CC7C820C6D5CD27AB87"
+        },
+        {
+          "date": "2025-04-09",
+          "primary": "C874011F0AB405110D02105534365D9472D7468F",
+          "signing": "374EC75B485913604A831CC7C820C6D5CD27AB87"
+        }
+      ],
+      "version": "1.11.4",
+      "zipSHA256": "1ce994251c00281d6845f0f268637ba50c0005657eb3cf096b92f753b42ef4dc"
+    },
+    {
+      "binaryBytes": 706945176,
+      "binarySHA256": "8cb98768bcea942df561a918d65a8751f787ab348f7498bdfe6667dffcebd528",
+      "manifestSHA256": "43e80a4c7d3e7c0146429c0dd6cf7a3a372420f1aca6eecd6b81451501d27b71",
+      "manifestURL": "https://releases.hashicorp.com/terraform-provider-aws/5.100.0/terraform-provider-aws_5.100.0_SHA256SUMS",
+      "member": "terraform-provider-aws_v5.100.0_x5",
+      "name": "terraform-provider-aws",
+      "signatures": [
+        {
+          "date": "2025-06-12",
+          "primary": "C874011F0AB405110D02105534365D9472D7468F",
+          "signing": "374EC75B485913604A831CC7C820C6D5CD27AB87"
+        },
+        {
+          "date": "2025-06-12",
+          "primary": "C874011F0AB405110D02105534365D9472D7468F",
+          "signing": "374EC75B485913604A831CC7C820C6D5CD27AB87"
+        }
+      ],
+      "version": "5.100.0",
+      "zipSHA256": "1589a2266af699cbd5d80737a0fe02e54ec9cf2ca54e7e00ac51c7359056f274"
+    }
+  ],
+  "limits": "Source was identified via canonical GitHub commit/tree and merged PR. Commit itself was unsigned. This checks provenance and byte identity. No simulator, Terraform CLI or provider binary was run.",
+  "localBuild": "Fresh canonical upstream shallow Git repository on Linux/amd64. Clean status before and after build. Shared module/build caches. CGO=0 GOAMD64=v1 GOTOOLCHAIN=local. Dependency checks passed.",
+  "reviewer": "Codex independent build verifier simpledb_provenance (separate from workflow author)",
+  "scope": "Independent historical Linux simulator build and HashiCorp release provenance for the bounded SimpleDB local Terraform fixture.",
+  "sourceEvidence": [
+    "https://github.com/susumutomita/TenkaCloudSimulator/commit/d95f8dbc3e6ddec4c65bc9d5e0124616a0e591da",
+    "https://github.com/susumutomita/TenkaCloudSimulator/pull/509/commits/d95f8dbc3e6ddec4c65bc9d5e0124616a0e591da"
+  ],
+  "sourceRepository": "https://github.com/susumutomita/TenkaCloudSimulator",
+  "sourceRevision": "d95f8dbc3e6ddec4c65bc9d5e0124616a0e591da",
+  "sourceTree": "9d4033d72d242d7d8c7483bd594c43426609b60c",
+  "tarGzipSHA256": "cdd563cf8abc67f2f13a2a1abc79f3af214fcaf2ed2128e4849b38186e59173b",
+  "toolchain": "go1.26.11",
+  "toolchainArchiveSHA256": "9849f4e04ee35303714e34fbc3ac8ab44ea3e448a95aa182f91e3b9b79c710ec",
+  "toolchainArchiveSource": "https://go.dev/dl/?mode=json&include=all",
+  "toolchainInstalledFilesVerified": 15048,
+  "workflowJob": "https://github.com/susumutomita/TenkaCloudSimulator/actions/runs/46108834461/job/140867581379",
+  "workflowRevision": "0203013076e87f74284b91949c334b37c2b8d1c5",
+  "workflowRun": "https://github.com/susumutomita/TenkaCloudSimulator/actions/runs/46108834461/attempts/1",
+  "workflowSHA256": "27b5fbf51ebca62542a864f47a63e2a743f57b354f817b1e3fad00f7c726eba3",
+  "zipSHA256": "sha256:1dba58a1409716634fd0d0cc1bd750a793d2b2d613059cff0587793a529cb750"
+}
