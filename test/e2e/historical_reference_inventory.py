@@ -1,4 +1,4 @@
-"""Frozen operation routes shared by the Logs and Secrets Manager reference fixtures."""
+"""Frozen native route bindings for the historical 36-path reference fixtures."""
 
 # main d166f569772de7f45d98e31e9971eeb33b903763 supplied 66 operations.
 # The only subsequent addition in this inventory is S3MultipartUpload on POST /{bucket}/{key}.

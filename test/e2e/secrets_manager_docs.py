@@ -12,7 +12,7 @@ from route53_openapi import project_before_route53
 from check import running
 from secrets_manager import client
 from test_sakura_openapi import project_sakura_server_list_only
-from logs_secrets_reference_inventory import verify_historical_routes
+from historical_reference_inventory import verify_historical_routes
 
 
 def validate_reference_contract(spec):
