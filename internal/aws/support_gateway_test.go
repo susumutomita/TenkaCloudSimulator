@@ -97,3 +97,69 @@ func TestSupportGatewayRejectsWrongProtocolBeforeMutation(t *testing.T) {
 		t.Fatalf("failed requests must preserve empty state: %d %s", w.Code, w.Body.String())
 	}
 }
+
+func TestSupportGatewayReturnsOnlyAuthorizedCompleteResponses(t *testing.T) {
+	team, err := core.New("")
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { team.Close() })
+	service, err := supportcases.New(team.Database())
+	if err != nil {
+		t.Fatal(err)
+	}
+	g := &Gateway{Identities: core.NewIdentities(team), Support: service}
+	editor := "case-author"
+	policy, err := core.ParsePolicy([]byte(`{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Action":["support:CreateCase","support:DescribeCases"],"Resource":"*"}]}`))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := g.Identities.Set(editor, policy); err != nil {
+		t.Fatal(err)
+	}
+	request := func(gateway *Gateway, actor, op, body string, want int, code string) map[string]any {
+		t.Helper()
+		r := httptest.NewRequest("POST", "/", strings.NewReader(body))
+		r.Header.Set("Content-Type", "application/x-amz-json-1.1")
+		r.Header.Set("X-Amz-Target", supportTarget+op)
+		if actor != "" {
+			r = r.WithContext(provider.WithActor(r.Context(), provider.Actor{CredentialRole: provider.CredentialParticipant, CredentialIdentity: actor, ExerciseIdentity: actor}))
+		}
+		w := httptest.NewRecorder()
+		gateway.serveSupport(w, r)
+		var out map[string]any
+		if w.Code != want || json.Unmarshal(w.Body.Bytes(), &out) != nil || w.Header().Get("X-Amzn-Errortype") != code {
+			t.Fatalf("%s status=%d type=%q", op, w.Code, w.Header().Get("X-Amzn-Errortype"))
+		}
+		if code != "" && (out["__type"] != code || out["message"] == "" || out["cases"] != nil || out["caseId"] != nil || strings.Contains(w.Body.String(), "sqlite")) {
+			t.Fatal("partial data or internal error details in public response")
+		}
+		return out
+	}
+	create := `{"subject":"Target","communicationBody":"Created by the exercise identity"}`
+	request(g, "", "CreateCase", create, 403, "AccessDeniedException")
+	request(g, "unprivileged", "CreateCase", `{"subject":null}`, 403, "AccessDeniedException")
+	request(g, editor, "CreateCase", `{"subject":"wrong","subject":"second"}`, 400, "ValidationException")
+	request(g, editor, "CreateCase", strings.Repeat(" ", (288<<10)+1), 400, "ValidationException")
+	request(g, editor, "CreateCase", `{"subject":"missing communication"}`, 400, "ValidationException")
+	request(g, core.Administrator, "DescribeAttachment", "{}", 400, "ValidationException")
+	request(g, core.Administrator, "DescribeCommunications", "{}", 400, "ValidationException")
+	request(&Gateway{Identities: g.Identities}, editor, "CreateCase", create, 500, "InternalServerError")
+	if cases := request(g, editor, "DescribeCases", "{}", 200, "")["cases"].([]any); len(cases) != 0 {
+		t.Fatal("failed submissions created cases")
+	}
+	id := request(g, editor, "CreateCase", create, 200, "")["caseId"].(string)
+	cases := request(g, editor, "DescribeCases", "{}", 200, "")["cases"].([]any)
+	if len(cases) != 1 {
+		t.Fatal("expected one authorized case")
+	}
+	saved := cases[0].(map[string]any)
+	reply := saved["recentCommunications"].(map[string]any)["communications"].([]any)[0].(map[string]any)
+	if saved["caseId"] != id || reply["submittedBy"] != editor || reply["body"] != "Created by the exercise identity" {
+		t.Fatal("identity or authored data changed")
+	}
+	if err := team.Close(); err != nil {
+		t.Fatal(err)
+	}
+	request(g, editor, "DescribeCases", "{}", 500, "InternalServerError")
+}

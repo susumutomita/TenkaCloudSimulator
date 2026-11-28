@@ -137,7 +137,7 @@
     },
     {
       "path": "internal/aws/support_gateway_test.go",
-      "sha256": "1d13ec8121fd2dad2cfa83c56be48bfd019e2101893388eec9a5976df253af91",
+      "sha256": "87279fae501f910da4275abaf7b87e13626c9b1d7ff1f74ff091c54539cc6905",
       "disposition": "test-support",
       "reason": "Exercise native protocol, payload and request admission through the gateway.",
       "models": []
@@ -196,6 +196,13 @@
       "sha256": "b229462959e5df158aa4f0bae0cc85c10df4a9b1a40ea5d4df9b6e7d1e015d75",
       "disposition": "test-support",
       "reason": "Verify real stage expiry and rollback plus canceled connection waits using persistent SQLite.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/supportcases/storage_faults_test.go",
+      "sha256": "0647311076daa093e017d31f2d322034274a27e531420248c01efa58887e3c49",
+      "disposition": "test-support",
+      "reason": "Verify the native store rejects each reached database error without a partial response or a durable change to cases, messages, attachment bytes, and identifier sequences.",
       "models": []
     },
     {
