@@ -1040,6 +1040,8 @@ REQUIRED_SOURCE_SCOPES['SNSNotificationPolicyLifetime'] = {
 # CodeCommit's native branch change and CodeStar Notifications delivery transaction.
 BASE_MODELS.add('CodeStarBranchNotificationDelivery')
 BASE_INVARIANTS['CodeStarBranchNotificationDelivery'] = {
+    'ListReadFrame',
+    'ListReadResult',
     'RetryEligibility',
     'TypeOK',
     'GitAdmission',
@@ -1120,6 +1122,32 @@ REQUIRED_MUTANTS['CodeStarBranchNotificationDelivery'] = {
     'RetainPendingAfterRuleDisable',
     'RetainPendingAfterRuleDelete',
     'LosePendingAfterFailedRuleChange',
+    'ListClaimsForeignSelector',
+    'RefuseSignedList',
+    'RefuseServiceHintList',
+    'ListWithoutActor',
+    'ListAllowsUnsupportedSession',
+    'ListDespiteWildcardDeny',
+    'AllowRuleARNInsteadOfWildcard',
+    'AcceptAnotherActorCursor',
+    'AcceptAnotherRegionCursor',
+    'AcceptAnotherFilterCursor',
+    'IgnorePageLimit',
+    'IgnoreInvalidListFilter',
+    'ReturnWrongFilter',
+    'IgnoreDistinctFilterGroup',
+    'RepeatRowAfterCursor',
+    'ListMalformedWire',
+    'ListWithoutStore',
+    'ListForeignRule',
+    'HideDisabledRule',
+    'ListDeletedRule',
+    'LimitListToRuleOwner',
+    'IntersectRepeatedFilterValues',
+    'RejectMatchingScopedCursor',
+    'ClearPendingOnDeniedList',
+    'LosePriorReceiptOnInvalidList',
+    'DeleteRuleDuringList',
 }
 REQUIRED_SOURCE_SCOPES['CodeStarBranchNotificationDelivery'] = {
     'internal/aws/catalog/codecommit_content.go',
@@ -1133,6 +1161,10 @@ REQUIRED_SOURCE_SCOPES['CodeStarBranchNotificationDelivery'] = {
     'internal/aws/sns_sqs_fanout.go',
     'internal/server/server.go',
     'internal/aws/notification_delivery_test.go',
+    'internal/aws/codestarnotifications/list.go',
+    'internal/aws/s3.go',
+    'internal/aws/ssm.go',
+    'internal/aws/notification_gateway_test.go',
 }
 
 # STS guard lifecycle requirements. Existing service requirements stay intact.
