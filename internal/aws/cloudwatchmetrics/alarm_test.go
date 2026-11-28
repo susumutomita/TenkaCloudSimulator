@@ -4,6 +4,7 @@ import (
 	"encoding/xml"
 	"fmt"
 	"github.com/susumutomita/TenkaCloudSimulator/internal/core"
+	"io"
 	"net/http/httptest"
 	"net/url"
 	"path/filepath"
@@ -216,5 +217,69 @@ func TestAlarmPaginationScopesAndDeniedReadFrame(t *testing.T) {
 	alarmServe(t, s, "us-east-1", "DescribeAlarms", url.Values{"AlarmNames": {""}, "AlarmNames.member.1": {"a"}}, allow, 400)
 	if !reflect.DeepEqual(peerBefore, alarmFrame(t, peer.db)) {
 		t.Fatal("host queries changed populated peer")
+	}
+}
+
+func TestAlarmNativeRegionAndTeamCapsRetainUpdateAndPeer(t *testing.T) {
+	s, _ := testStore(t, "")
+	peer, _ := testStore(t, "")
+	allow := func(string, string) bool { return true }
+	now := time.Now().UTC()
+	s.now = func() time.Time { return now }
+	peer.now = s.now
+	alarmServe(t, peer, "us-east-1", "PutMetricAlarm", alarmWire("independent"), allow, 200)
+	peerBefore := alarmFrame(t, peer.db)
+	regions := []string{"us-east-1", "us-west-2", "eu-west-1", "eu-west-2", "eu-central-1", "ap-northeast-1", "ap-northeast-2", "ap-south-1", "ap-southeast-1", "ap-southeast-2"}
+	for _, region := range regions {
+		for i := 0; i < 100; i++ {
+			alarmServe(t, s, region, "PutMetricAlarm", alarmWire(fmt.Sprintf("alarm-%03d", i)), allow, 200)
+		}
+	}
+	before := alarmFrame(t, s.db)
+	for _, region := range []string{"us-east-1", "ca-central-1"} {
+		body := alarmServe(t, s, region, "PutMetricAlarm", alarmWire("overflow"), allow, 400)
+		if !strings.Contains(body, "<Code>LimitExceeded</Code>") {
+			t.Fatal("quota refusal was not native", body)
+		}
+	}
+	if !reflect.DeepEqual(before, alarmFrame(t, s.db)) {
+		t.Fatal("capacity refusal changed an existing alarm")
+	}
+	update := alarmWire("alarm-000")
+	update.Set("Threshold", "8")
+	alarmServe(t, s, "us-east-1", "PutMetricAlarm", update, allow, 200)
+	alarmServe(t, s, "us-east-1", "DeleteAlarms", url.Values{"AlarmNames.member.1": {"alarm-001"}}, allow, 200)
+	alarmServe(t, s, "ca-central-1", "PutMetricAlarm", alarmWire("freed-slot"), allow, 200)
+	if !reflect.DeepEqual(peerBefore, alarmFrame(t, peer.db)) {
+		t.Fatal("capacity, update or cleanup affected populated peer")
+	}
+}
+
+func TestAlarmNativeXMLNamespaceEveryElement(t *testing.T) {
+	s, _ := testStore(t, "")
+	allow := func(string, string) bool { return true }
+	alarmServe(t, s, "us-east-1", "PutMetricAlarm", alarmWire("wire"), allow, 200)
+	for _, fields := range []url.Values{{}, {"AlarmNames.member.1": {"wire"}}} {
+		body := alarmServe(t, s, "us-east-1", "DescribeAlarms", fields, allow, 200)
+		decoder := xml.NewDecoder(strings.NewReader(body))
+		count := 0
+		for {
+			token, err := decoder.Token()
+			if err == io.EOF {
+				break
+			}
+			if err != nil {
+				t.Fatal(err)
+			}
+			if element, ok := token.(xml.StartElement); ok {
+				count++
+				if element.Name.Space != xmlNamespace {
+					t.Fatalf("native DescribeAlarms element %s reset namespace to %q", element.Name.Local, element.Name.Space)
+				}
+			}
+		}
+		if count < 10 {
+			t.Fatal("missing actual native alarm tree")
+		}
 	}
 }
