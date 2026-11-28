@@ -31344,6 +31344,479 @@
           "expect_invariant": "CurrentIsObservation"
         }
       ]
+    },
+    {
+      "id": "SNSNotificationPolicyLifetime",
+      "model": "formal/SNSNotificationPolicyLifetime.tla",
+      "config": "formal/SNSNotificationPolicyLifetime.cfg",
+      "bounds": "One evolving logical ARN in one database, a populated same-ARN peer in another database (its generation is 1), missing/Standard/FIFO, generations 1 and 2 in the primary store, five representative accepted policy documents, seven write and five resolver outcomes, one previously captured local grant. New policy allocation beyond the finite bound is disabled; policy edits and all remaining operations remain available.",
+      "properties": [
+        "TypeOK",
+        "SetAdmission",
+        "SetRefusalPreservesStore",
+        "NewGeneration",
+        "EditKeepsGeneration",
+        "PolicyBytesExact",
+        "DeleteFrame",
+        "PeerFrame",
+        "GetReadback",
+        "ReadsPreserveStore",
+        "ResolverAdmission",
+        "ResolverGeneration",
+        "ResolverDecision",
+        "CapturedCurrentGrant",
+        "CaptureExact",
+        "RestartPreservesStore"
+      ],
+      "limits": "Representative policy strings distinguish exact readback, two different Allow encodings, Deny, and both Allow/Deny orders. The model abstracts the JSON grammar, SQL transaction, Query protocol, IAM and context into decisions. The peer is a fixed live scope. Captured-grant comparison describes a consuming worker obligation; delivery, outbox/retry, SQS, cancellation timing, raw SQL faults, unbounded identifier allocation and actual process/SDK behavior require separate implementation evidence.",
+      "source_scope": [
+        "internal/aws/sns.go",
+        "internal/aws/sns_store.go",
+        "internal/aws/sns_topic_policy.go",
+        "internal/aws/sns_topic_policy_test.go"
+      ],
+      "mutants": [
+        {
+          "id": "SetOnMissingTopic",
+          "edits": [
+            {
+              "old": "CanSet(m) == topic = \"standard\" /\\ m # \"denied\" /\\ m # \"invalid\" /\\ m # \"foreignARN\"",
+              "new": "CanSet(m) == topic # \"fifo\" /\\ m # \"denied\" /\\ m # \"invalid\" /\\ m # \"foreignARN\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "SetAdmission"
+        },
+        {
+          "id": "SetOnFIFOTopic",
+          "edits": [
+            {
+              "old": "CanSet(m) == topic = \"standard\" /\\ m # \"denied\" /\\ m # \"invalid\" /\\ m # \"foreignARN\"",
+              "new": "CanSet(m) == topic # \"missing\" /\\ m # \"denied\" /\\ m # \"invalid\" /\\ m # \"foreignARN\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "SetAdmission"
+        },
+        {
+          "id": "SkipSetIAM",
+          "edits": [
+            {
+              "old": "CanSet(m) == topic = \"standard\" /\\ m # \"denied\" /\\ m # \"invalid\" /\\ m # \"foreignARN\"",
+              "new": "CanSet(m) == topic = \"standard\" /\\ m # \"invalid\" /\\ m # \"foreignARN\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "SetAdmission"
+        },
+        {
+          "id": "AcceptInvalidInput",
+          "edits": [
+            {
+              "old": "CanSet(m) == topic = \"standard\" /\\ m # \"denied\" /\\ m # \"invalid\" /\\ m # \"foreignARN\"",
+              "new": "CanSet(m) == topic = \"standard\" /\\ m # \"denied\" /\\ m # \"foreignARN\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "SetAdmission"
+        },
+        {
+          "id": "AcceptForeignARN",
+          "edits": [
+            {
+              "old": "CanSet(m) == topic = \"standard\" /\\ m # \"denied\" /\\ m # \"invalid\" /\\ m # \"foreignARN\"",
+              "new": "CanSet(m) == topic = \"standard\" /\\ m # \"denied\" /\\ m # \"invalid\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "SetAdmission"
+        },
+        {
+          "id": "AcknowledgeFailedCommit",
+          "edits": [
+            {
+              "old": "Commit(m) == m \\notin {\"failedCommit\", \"canceled\", \"deadline\"}",
+              "new": "Commit(m) == m \\notin {\"canceled\", \"deadline\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "SetAdmission"
+        },
+        {
+          "id": "AcknowledgeCancellation",
+          "edits": [
+            {
+              "old": "Commit(m) == m \\notin {\"failedCommit\", \"canceled\", \"deadline\"}",
+              "new": "Commit(m) == m \\notin {\"failedCommit\", \"deadline\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "SetAdmission"
+        },
+        {
+          "id": "AcknowledgeElapsedDeadline",
+          "edits": [
+            {
+              "old": "Commit(m) == m \\notin {\"failedCommit\", \"canceled\", \"deadline\"}",
+              "new": "Commit(m) == m \\notin {\"failedCommit\", \"canceled\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "SetAdmission"
+        },
+        {
+          "id": "PersistRejectedInput",
+          "edits": [
+            {
+              "old": "row' = IF accepted THEN [gen |-> gen, doc |-> doc] ELSE row",
+              "new": "row' = IF accepted \\/ (m = \"invalid\" /\\ topic = \"standard\") THEN [gen |-> gen, doc |-> doc] ELSE row",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "SetRefusalPreservesStore"
+        },
+        {
+          "id": "ReuseAllocatorOnInsert",
+          "edits": [
+            {
+              "old": "THEN high + 1 ELSE row.gen",
+              "new": "THEN (IF high = 0 THEN 1 ELSE high) ELSE row.gen",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "NewGeneration"
+        },
+        {
+          "id": "ReplaceIdentityOnEdit",
+          "edits": [
+            {
+              "old": "THEN high + 1 ELSE row.gen",
+              "new": "THEN high + 1 ELSE (IF row.gen < MaxGen THEN row.gen + 1 ELSE row.gen)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "EditKeepsGeneration"
+        },
+        {
+          "id": "ReidentifySameBytes",
+          "edits": [
+            {
+              "old": "gen == NextGeneration",
+              "new": "gen == IF row.gen > 0 /\\ row.gen < MaxGen /\\ (doc = row.doc) THEN row.gen + 1 ELSE NextGeneration",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "EditKeepsGeneration"
+        },
+        {
+          "id": "ReidentifyRevocation",
+          "edits": [
+            {
+              "old": "gen == NextGeneration",
+              "new": "gen == IF row.gen > 0 /\\ row.gen < MaxGen /\\ (Grant(row.doc) /\\ ~Grant(doc)) THEN row.gen + 1 ELSE NextGeneration",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "EditKeepsGeneration"
+        },
+        {
+          "id": "ReidentifyRepair",
+          "edits": [
+            {
+              "old": "gen == NextGeneration",
+              "new": "gen == IF row.gen > 0 /\\ row.gen < MaxGen /\\ (~Grant(row.doc) /\\ Grant(doc)) THEN row.gen + 1 ELSE NextGeneration",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "EditKeepsGeneration"
+        },
+        {
+          "id": "NormalizeDistinctAllowBytes",
+          "edits": [
+            {
+              "old": "THEN [gen |-> gen, doc |-> doc] ELSE row",
+              "new": "THEN [gen |-> gen, doc |-> IF doc = \"allowB\" THEN \"allowA\" ELSE doc] ELSE row",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PolicyBytesExact"
+        },
+        {
+          "id": "LeavePolicyOnDelete",
+          "edits": [
+            {
+              "old": "row' = IF removed THEN Absent ELSE row",
+              "new": "row' = row",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "DeleteFrame"
+        },
+        {
+          "id": "ResetAllocatorOnDelete",
+          "edits": [
+            {
+              "old": "high' = high\n          /\\ last' = Notice(\"delete\"",
+              "new": "high' = IF removed THEN 0 ELSE high\n          /\\ last' = Notice(\"delete\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "DeleteFrame"
+        },
+        {
+          "id": "ClearPeerOnDelete",
+          "edits": [
+            {
+              "old": "peer' = peer",
+              "new": "peer' = IF removed THEN Absent ELSE peer",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PeerFrame"
+        },
+        {
+          "id": "DeleteOnFailedCommit",
+          "edits": [
+            {
+              "old": "removed == m = \"ok\"",
+              "new": "removed == TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "DeleteFrame"
+        },
+        {
+          "id": "LeakDeniedGetPolicy",
+          "edits": [
+            {
+              "old": "visible == IF ok THEN row.doc ELSE \"none\"",
+              "new": "visible == row.doc",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "GetReadback"
+        },
+        {
+          "id": "LoseSecondAllowOnRead",
+          "edits": [
+            {
+              "old": "visible == IF ok THEN row.doc ELSE \"none\"",
+              "new": "visible == IF ok /\\ row.doc # \"allowB\" THEN row.doc ELSE \"none\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "GetReadback"
+        },
+        {
+          "id": "TreatCallerAsInternal",
+          "edits": [
+            {
+              "old": "Inspect(m) == topic = \"standard\" /\\ m = \"ok\"",
+              "new": "Inspect(m) == topic = \"standard\" /\\ m \\in {\"ok\", \"caller\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ResolverAdmission"
+        },
+        {
+          "id": "IgnoreLookupARN",
+          "edits": [
+            {
+              "old": "Inspect(m) == topic = \"standard\" /\\ m = \"ok\"",
+              "new": "Inspect(m) == topic = \"standard\" /\\ m \\in {\"ok\", \"foreignARN\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ResolverAdmission"
+        },
+        {
+          "id": "AcceptCorruptSavedRow",
+          "edits": [
+            {
+              "old": "Inspect(m) == topic = \"standard\" /\\ m = \"ok\"",
+              "new": "Inspect(m) == topic = \"standard\" /\\ (m = \"ok\" \\/ (m = \"badRow\" /\\ row.gen > 0))",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ResolverAdmission"
+        },
+        {
+          "id": "IgnoreReadFailure",
+          "edits": [
+            {
+              "old": "Inspect(m) == topic = \"standard\" /\\ m = \"ok\"",
+              "new": "Inspect(m) == topic = \"standard\" /\\ m \\in {\"ok\", \"readError\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ResolverAdmission"
+        },
+        {
+          "id": "ResolveMissingTopic",
+          "edits": [
+            {
+              "old": "Inspect(m) == topic = \"standard\" /\\ m = \"ok\"",
+              "new": "Inspect(m) == topic # \"fifo\" /\\ m = \"ok\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ResolverAdmission"
+        },
+        {
+          "id": "ResolveFIFOTopic",
+          "edits": [
+            {
+              "old": "Inspect(m) == topic = \"standard\" /\\ m = \"ok\"",
+              "new": "Inspect(m) == topic # \"missing\" /\\ m = \"ok\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ResolverAdmission"
+        },
+        {
+          "id": "OmitDeniedRowGeneration",
+          "edits": [
+            {
+              "old": "IF readable THEN row.gen ELSE 0",
+              "new": "IF readable /\\ Grant(row.doc) THEN row.gen ELSE 0",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ResolverGeneration"
+        },
+        {
+          "id": "PreferLeadingAllow",
+          "edits": [
+            {
+              "old": "allowed == readable /\\ Grant(row.doc)",
+              "new": "allowed == readable /\\ (Grant(row.doc) \\/ row.doc = \"allowDeny\")",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ResolverDecision"
+        },
+        {
+          "id": "PreferTrailingAllow",
+          "edits": [
+            {
+              "old": "allowed == readable /\\ Grant(row.doc)",
+              "new": "allowed == readable /\\ (Grant(row.doc) \\/ row.doc = \"denyAllow\")",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ResolverDecision"
+        },
+        {
+          "id": "TreatDenyAsAllow",
+          "edits": [
+            {
+              "old": "allowed == readable /\\ Grant(row.doc)",
+              "new": "allowed == readable /\\ (Grant(row.doc) \\/ row.doc = \"deny\")",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ResolverDecision"
+        },
+        {
+          "id": "SynthesizeMissingGrant",
+          "edits": [
+            {
+              "old": "allowed == readable /\\ Grant(row.doc)",
+              "new": "allowed == readable /\\ (Grant(row.doc) \\/ row.doc = \"none\")",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ResolverDecision"
+        },
+        {
+          "id": "DenyMatchingServiceGrant",
+          "edits": [
+            {
+              "old": "allowed == readable /\\ Grant(row.doc)",
+              "new": "allowed == FALSE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ResolverDecision"
+        },
+        {
+          "id": "ClearPolicyOnCorruptRead",
+          "edits": [
+            {
+              "old": "/\\ UNCHANGED <<topic, row, high, peer, captured>>\n\nCapture ==",
+              "new": "/\\ row' = IF m = \"badRow\" THEN Absent ELSE row\n       /\\ UNCHANGED <<topic, high, peer, captured>>\n\nCapture ==",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadsPreserveStore"
+        },
+        {
+          "id": "CaptureWrongGeneration",
+          "edits": [
+            {
+              "old": "captured' = row.gen",
+              "new": "captured' = 0",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CaptureExact"
+        },
+        {
+          "id": "AcceptPeerWithEqualGeneration",
+          "edits": [
+            {
+              "old": "OwnTicket(source) == source = \"own\"",
+              "new": "OwnTicket(source) == TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CapturedCurrentGrant"
+        },
+        {
+          "id": "ReuseCaptureAcrossRecreation",
+          "edits": [
+            {
+              "old": "generation = row.gen /\\ Grant(row.doc)",
+              "new": "row.gen # 0 /\\ Grant(row.doc)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CapturedCurrentGrant"
+        },
+        {
+          "id": "UseRevokedCapture",
+          "edits": [
+            {
+              "old": "generation = row.gen /\\ Grant(row.doc)",
+              "new": "generation = row.gen",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CapturedCurrentGrant"
+        },
+        {
+          "id": "LosePolicyOnRestart",
+          "edits": [
+            {
+              "old": "Restart ==\n    /\\ row' = row",
+              "new": "Restart ==\n    /\\ row' = Absent",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "RestartPreservesStore"
+        },
+        {
+          "id": "LoseAllocatorOnRestart",
+          "edits": [
+            {
+              "old": "Restart ==\n    /\\ row' = row\n    /\\ high' = high",
+              "new": "Restart ==\n    /\\ row' = row\n    /\\ high' = 0",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "RestartPreservesStore"
+        }
+      ]
     }
   ]
 }
