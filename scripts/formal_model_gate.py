@@ -4802,6 +4802,22 @@ REQUIRED_SOURCE_SCOPES['LocalSSOSyntheticLifecycle'] = {
     'internal/server/server.go',
 }
 
+BASE_MODELS.add('StoreConnectionLifetime')
+BASE_INVARIANTS['StoreConnectionLifetime'] = {
+    'TypeOK', 'PeerBackingUnchanged', 'ConnectionTurnoverPreserves',
+    'CancelDiscardsStaged', 'DisposedBackingReleased', 'ClosedStoresUnavailable',
+    'ConnectionPragmasApplied', 'LiveCommittedData',
+}
+REQUIRED_MUTANTS['StoreConnectionLifetime'] = {
+    'ConnectionOwnsBacking', 'CanceledWriteCommitted', 'CanceledStageRetained',
+    'SharedStoreBacking', 'DisposedBackingRetained', 'ReconnectClosedStore',
+    'MissingReconnectPragmas',
+}
+REQUIRED_SOURCE_SCOPES['StoreConnectionLifetime'] = {
+    'internal/core/store.go', 'internal/core/store_connection_test.go',
+}
+
+
 def load_registry(root, relative='formal/models.json'):
     root = Path(root)
     registry_path = asset(root, relative)
