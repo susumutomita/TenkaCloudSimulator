@@ -10,6 +10,7 @@ import socket
 import subprocess
 import tempfile
 import time
+import urllib.error
 import urllib.request
 
 import boto3
@@ -177,7 +178,24 @@ def run():
             writer = client(stack, owner, counts, encodings, token=writer_token)
             denied(403, writer.get_metric_statistics, **query)
             writer.put_metric_data(Namespace=NAMESPACE, MetricData=[dict(MetricName='Writer', Value=5)])
-            denied(401, client(stack, peer, counts, encodings, token=owner.token).get_metric_statistics, **query)
+            # Token authentication precedes AWS Query. Its 401 response uses
+            # the simulator's JSON envelope and cannot be parsed as Query XML.
+            wrong_team = urllib.request.Request(
+                peer.origin + '/', method='POST',
+                headers={'Content-Type': 'application/x-www-form-urlencoded',
+                         'X-Simulator-Service': 'monitoring', 'X-Simulator-Token': owner.token},
+                data=b'Action=PutMetricData&Version=2010-08-01&Namespace=WrongTeam&'
+                     b'MetricData.member.1.MetricName=Rejected&MetricData.member.1.Value=1')
+            try:
+                OPENER.open(wrong_team, timeout=5).close()
+            except urllib.error.HTTPError as error:
+                with error:
+                    assert error.code == 401 and 'error' in json.load(error)
+            else:
+                raise AssertionError('Team A token reached Team B metrics')
+            assert not b.get_metric_statistics(**{**query, 'Namespace': 'WrongTeam',
+                'MetricName': 'Rejected', 'Dimensions': [], 'Unit': 'None',
+                'EndTime': datetime.now(timezone.utc) + timedelta(minutes=1)})['Datapoints']
             denied(400, a.put_metric_data, Namespace=NAMESPACE, MetricData=[datum(25, 0), datum(0, 0) | {'StorageResolution': 1}])
             assert get(a) == points
         with team('a') as restarted:
@@ -187,7 +205,7 @@ def run():
     assert counts['calls'] == counts['sends'] == counts['responses'] > 0
     print(json.dumps({'operations': ['PutMetricData', 'GetMetricStatistics'], 'transport': 'AWS Query 2010-08-01',
                       'counts': dict(counts), 'contentEncodings': sorted(encodings),
-                      'twoTeamState': True, 'restartPersisted': True, 'cleanup': 'owned temporary databases removed'}))
+                      'twoTeamState': True, 'peerTokenHTTP': 401, 'restartPersisted': True, 'cleanup': 'owned temporary databases removed'}))
 
 
 if __name__ == '__main__':
