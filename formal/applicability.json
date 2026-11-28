@@ -25,14 +25,14 @@
     },
     {
       "path": "docs/elb.md",
-      "sha256": "497db75bbb2766c74b2fb2a62658e7b7a6902ff2efee5e928c3f70e383aba7a8",
+      "sha256": "6bdebd93ef76d89f82314235330c3d925614654c8f55834297d34eddd099e60e",
       "disposition": "documentation",
       "reason": "Document the compiled regional Console, saved health check path and shared native API scope.",
       "models": []
     },
     {
       "path": "formal/ALBConsoleWorkflow.cfg",
-      "sha256": "aa0926f85b5ae571a5734e446b09c7afef25195925148e4ce611b0c62dd86b2c",
+      "sha256": "c8da47d50187570e352bcecc28f8ef562cec1fe80e320b7f95adb5ffe786273f",
       "disposition": "modeled",
       "reason": "Bind the regional ALB Console read, action and saved-state workflow to this immutable artifact.",
       "models": [
@@ -50,7 +50,9 @@
             "CompleteDetail",
             "BoundReadback",
             "CheckedHealth",
-            "ObservedOnly"
+            "ObservedOnly",
+            "LinkFrame",
+            "PreflightAdmission"
           ],
           "limits": "Finite scoped read, selected identity, write and acknowledgement states. XML bytes, IAM evaluation, browser rendering, actual isolated team processes, SDK interoperability and local listener or Lambda execution require separate native evidence."
         }
@@ -58,7 +60,7 @@
     },
     {
       "path": "formal/ALBConsoleWorkflow.tla",
-      "sha256": "6364cc2adbf514c21fa43fc8cabb6ef4dcec6b287a214c8c25a2d44d9a918d40",
+      "sha256": "8f9b887aa0d14ecd8ec0d58b9020de839be49d925812de9a12f5f17e56f61aa8",
       "disposition": "modeled",
       "reason": "Bind the regional ALB Console read, action and saved-state workflow to this immutable artifact.",
       "models": [
@@ -76,7 +78,9 @@
             "CompleteDetail",
             "BoundReadback",
             "CheckedHealth",
-            "ObservedOnly"
+            "ObservedOnly",
+            "LinkFrame",
+            "PreflightAdmission"
           ],
           "limits": "Finite scoped read, selected identity, write and acknowledgement states. XML bytes, IAM evaluation, browser rendering, actual isolated team processes, SDK interoperability and local listener or Lambda execution require separate native evidence."
         }
@@ -84,7 +88,7 @@
     },
     {
       "path": "formal/models.json",
-      "sha256": "bedcb6c29584e766a5af1b33b7c7c1e61ec76669f0fa47a54763a67e9943c242",
+      "sha256": "245c1f2217f6efba6902f5bb63a71375225217f3f724abb1b506d433602e580b",
       "disposition": "formal-infrastructure",
       "reason": "Record the exact regression fixture or bundle metadata for the verified Console artifact.",
       "models": []
@@ -107,7 +111,7 @@
     },
     {
       "path": "internal/server/web/app.js",
-      "sha256": "261eb5c89bbc2fc3de45e3988bef30e5218cd9e892eb706c89d5209029ee191f",
+      "sha256": "a85a4cdf20bca193c739d907ca86b420357e1600cffc863aecbc4d7858dc75fc",
       "disposition": "modeled",
       "reason": "Bind the regional ALB Console read, action and saved-state workflow to this immutable artifact.",
       "models": [
@@ -125,7 +129,9 @@
             "CompleteDetail",
             "BoundReadback",
             "CheckedHealth",
-            "ObservedOnly"
+            "ObservedOnly",
+            "LinkFrame",
+            "PreflightAdmission"
           ],
           "limits": "Finite scoped read, selected identity, write and acknowledgement states. XML bytes, IAM evaluation, browser rendering, actual isolated team processes, SDK interoperability and local listener or Lambda execution require separate native evidence."
         }
@@ -133,7 +139,7 @@
     },
     {
       "path": "scripts/formal_model_gate.py",
-      "sha256": "92b0bd9b686a8b9d6cc75437d3bc4349d2c56047f104a6f2fcc82b6acdc17f6c",
+      "sha256": "dc2bbe55715f9e0a6a0ac0c6931670e8d594eafbb837b6aeebc9ba3a7916c04e",
       "disposition": "formal-infrastructure",
       "reason": "Record the exact regression fixture or bundle metadata for the verified Console artifact.",
       "models": []
@@ -147,21 +153,21 @@
     },
     {
       "path": "test/e2e/elb_console.py",
-      "sha256": "f363b43d3b1ecb10c70e962af05cd7a315e6bec2e5cfa6e8092ed1921c648654",
+      "sha256": "f969527a52b3df67d09001c17359ffba9837d4a7c2e2eda6c03367020a80918e",
       "disposition": "test-support",
       "reason": "Exercise native UI and SDK behavior without changing server decisions.",
       "models": []
     },
     {
       "path": "tools/console/bundle-digests.json",
-      "sha256": "ccf6ea00ba8f4df9d4baf0066e5f6468ca552a10d4dcd3457c9c82e5c5de79bd",
+      "sha256": "a67eac82563c8bfbeb8ea1d5f901a9bbdad4f20de0fff21e0ab0c2fabc21987a",
       "disposition": "presentation",
       "reason": "Record the exact regression fixture or bundle metadata for the verified Console artifact.",
       "models": []
     },
     {
       "path": "tools/console/bundle-inputs.json",
-      "sha256": "900ff279af97c2e7c4d3bcdcab41710894d0de3622ce329a937d11d568b97919",
+      "sha256": "9889b11ce1b643cfc3e621a426b3b93a640003e342250235390f996814303b5a",
       "disposition": "presentation",
       "reason": "Record the exact regression fixture or bundle metadata for the verified Console artifact.",
       "models": []
@@ -184,7 +190,7 @@
     },
     {
       "path": "tools/console/src/elb.jsx",
-      "sha256": "39fe556f78fc5da1ce2cf9fa47e7b076f4d7911c5b155a1df984834ea4b1a403",
+      "sha256": "5a9ede4a9881572b0bb8a3c7e7d1d7d0b4042bd5993e0a254933c7f746e36629",
       "disposition": "modeled",
       "reason": "Bind the regional ALB Console read, action and saved-state workflow to this immutable artifact.",
       "models": [
@@ -207,7 +213,7 @@
     },
     {
       "path": "tools/console/src/elb.mjs",
-      "sha256": "037ae84333b9c80cd7b9c46541ec892750271455d849c868131897def7504f9c",
+      "sha256": "2a4afd2b13aba4938f6edbfb87e689ef1cf431d77fa348106daaca2dcb9285cc",
       "disposition": "modeled",
       "reason": "Bind the regional ALB Console read, action and saved-state workflow to this immutable artifact.",
       "models": [
@@ -242,7 +248,7 @@
     },
     {
       "path": "tools/console/test/elb.test.mjs",
-      "sha256": "07cd916b70e23e24d3b713b6fc72214cbe0b716cf750f97e8649db160977cb67",
+      "sha256": "8c4f0a10a003d47fc892ce0f325a4235169f2ded11c1f2852b6b9c877ce23aab",
       "disposition": "presentation",
       "reason": "Record the exact regression fixture or bundle metadata for the verified Console artifact.",
       "models": []
