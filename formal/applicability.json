@@ -1,232 +1,213 @@
 {
   "version": 1,
-  "base_sha": "17e30e18d0eb2216961158ae48f8ef42a20225e8",
+  "base_sha": "fd803075c37af3faa377f550c8e1cd52b3cfbbb1",
   "changes": [
     {
-      "path": "README.ja.md",
-      "sha256": "58305d5bfe970ca9f7ce879c8479fe3f95018859e76018455d30328682d9122f",
-      "disposition": "documentation",
-      "reason": "Link the localized scaling plan workflow and its observable DynamoDB capacity effect.",
-      "models": []
-    },
-    {
       "path": "README.md",
-      "sha256": "0cd9ec48c2711bec2258f3e3045c99f64474b331ce9bda53f0b10fcfc987bce0",
+      "sha256": "990be306029a0ba9e9d1150551b30f875e2c8fced1364f3efdcaefea02bae9b1",
       "disposition": "documentation",
-      "reason": "Link the Console scaling plan workflow and its observable DynamoDB capacity effect.",
-      "models": []
-    },
-    {
-      "path": "docs/autoscaling-plans.md",
-      "sha256": "d318c80cb54bc966c95e544decc2b3cfd556a4cccdd265d8ff0e632f3f12ebfc",
-      "disposition": "documentation",
-      "reason": "Document the bounded UI workflow, permissions, observed capacities and uncertain outcomes.",
+      "reason": "Link the native SNS topic policy contract from the service list.",
       "models": []
     },
     {
       "path": "docs/design/0001-go-standalone.md",
-      "sha256": "735de1b16a32336b89c0b62fb1a1bf7e86b28bb3f38c8bb7c851117d6cf3abc7",
+      "sha256": "b105eefd0a2fea3792ebf06c2349e4f71c568a990e1255aae160de60a11c5131",
       "disposition": "documentation",
-      "reason": "Describe shared native plan and target observations in the embedded Console.",
+      "reason": "Document local topic ownership, consistent policy reads and physical identity across recreation.",
       "models": []
     },
     {
-      "path": "formal/ScalingPlanConsole.cfg",
-      "sha256": "7b1e02ab20d8589c4e64881af21ae63e3285655075b6116b1b5788cb1d91f8c7",
+      "path": "docs/sns.md",
+      "sha256": "de2d1065dfed2d4035834ba4a3ff4b7dead4549a2cdec83f8c58fb5a3dc5f281",
+      "disposition": "documentation",
+      "reason": "Specify the Query operations, restricted statement grammar, storage and exact IAM checks.",
+      "models": []
+    },
+    {
+      "path": "formal/SNSNotificationPolicyLifetime.cfg",
+      "sha256": "f5039c650d36ed1ae07e753e5a43235902599ffe4816719aff798ef7ca144294",
       "disposition": "modeled",
-      "reason": "Bound the mounted Console model and declare its safety invariants.",
+      "reason": "Select the concrete bounded settings and invariants for the policy lifecycle.",
       "models": [
         {
-          "id": "ScalingPlanConsole",
+          "id": "SNSNotificationPolicyLifetime",
           "properties": [
-            "OnlyCurrentReplyPublishes",
-            "SuccessRequiresAck",
-            "RetryRequiresNamedRefresh"
+            "SetAdmission",
+            "SetRefusalPreservesStore",
+            "NewGeneration",
+            "EditKeepsGeneration",
+            "PolicyBytesExact",
+            "DeleteFrame",
+            "PeerFrame",
+            "GetReadback",
+            "ReadsPreserveStore",
+            "ResolverAdmission",
+            "ResolverGeneration",
+            "ResolverDecision",
+            "CapturedCurrentGrant",
+            "CaptureExact",
+            "RestartPreservesStore"
           ],
-          "limits": "Finite UI request ownership and publication within one mounted scope. A refresh is an explicit exact-name read. Does not model concurrent plan replacement, React/DOM, JavaScript or Go refinement, IAM, HTTP or storage. AutoScalingPlanTargets independently models native capacity effects."
+          "limits": "Finite topic and generation bounds project request outcomes. Actual SQL, Unicode, the SNS Query wire, SDK and timestamps require independent native checks."
         }
       ]
     },
     {
-      "path": "formal/ScalingPlanConsole.tla",
-      "sha256": "e25f1305ce13f66d30b46d86b646bdec144ad838cd102b5bd81c9ef2d8f16958",
+      "path": "formal/SNSNotificationPolicyLifetime.tla",
+      "sha256": "7bbd220cff10d3c0b6039c4a7bc0a8f315b43d2da6baf855cb03f4e57674ed1c",
       "disposition": "modeled",
-      "reason": "Check finite request ownership, acknowledgement and reconciliation across scoped changes.",
+      "reason": "Model the finite private topic lifetimes, persistence, exact grant lookup and refusal frames.",
       "models": [
         {
-          "id": "ScalingPlanConsole",
+          "id": "SNSNotificationPolicyLifetime",
           "properties": [
-            "OnlyCurrentReplyPublishes",
-            "SuccessRequiresAck",
-            "RetryRequiresNamedRefresh"
+            "SetAdmission",
+            "SetRefusalPreservesStore",
+            "NewGeneration",
+            "EditKeepsGeneration",
+            "PolicyBytesExact",
+            "DeleteFrame",
+            "PeerFrame",
+            "GetReadback",
+            "ReadsPreserveStore",
+            "ResolverAdmission",
+            "ResolverGeneration",
+            "ResolverDecision",
+            "CapturedCurrentGrant",
+            "CaptureExact",
+            "RestartPreservesStore"
           ],
-          "limits": "Finite UI request ownership and publication within one mounted scope. A refresh is an explicit exact-name read. Does not model concurrent plan replacement, React/DOM, JavaScript or Go refinement, IAM, HTTP or storage. AutoScalingPlanTargets independently models native capacity effects."
+          "limits": "Finite topic and generation bounds project request outcomes. Actual SQL, Unicode, the SNS Query wire, SDK and timestamps require independent native checks."
         }
       ]
     },
     {
       "path": "formal/models.json",
-      "sha256": "2a60bd235de500b832ea4fe9cc22503efdbe9e16624322920b6b37a3cefee237",
+      "sha256": "660e7e32fa4d9b4bbaf057c877cd792cfd83606db46dabf3f4cb66c18063e231",
       "disposition": "formal-infrastructure",
-      "reason": "Register the focused Console model, scope and four executable mutation controls.",
+      "reason": "Register the SNS policy transition model and its independent fixed controls.",
       "models": []
     },
     {
-      "path": "internal/server/autoscalingplans_composition_test.go",
-      "sha256": "f34715016baa2b40bdf50ecdad53e4ec4fa3fa4dd79cf9ee99ab37060776be11",
-      "disposition": "test-support",
-      "reason": "Assert the five-operation capability advertises the implemented Console.",
-      "models": []
-    },
-    {
-      "path": "internal/server/server.go",
-      "sha256": "2d66c7db8aade9638684f4275f6ee9d1fc1d46cf1902535cf528555cffa07e03",
+      "path": "internal/aws/sns.go",
+      "sha256": "b4d953eebf6c83897f02ddcc3ca5e6e32f51841805646015384fb66a39bfb990",
       "disposition": "modeled",
-      "reason": "Advertise the implemented Console and the native plan-capacity contract.",
+      "reason": "Authorize each Query action and expose the policy through the actual topic attribute requests.",
       "models": [
         {
-          "id": "ScalingPlanConsole",
+          "id": "SNSNotificationPolicyLifetime",
           "properties": [
-            "OnlyCurrentReplyPublishes",
-            "SuccessRequiresAck",
-            "RetryRequiresNamedRefresh"
+            "SetAdmission",
+            "GetReadback",
+            "SetRefusalPreservesStore"
           ],
-          "limits": "Finite UI request ownership and publication within one mounted scope. A refresh is an explicit exact-name read. Does not model concurrent plan replacement, React/DOM, JavaScript or Go refinement, IAM, HTTP or storage. AutoScalingPlanTargets independently models native capacity effects."
+          "limits": "Finite topic and generation bounds project request outcomes. Actual SQL, Unicode, the SNS Query wire, SDK and timestamps require independent native checks."
         }
       ]
     },
     {
-      "path": "internal/server/web/app.js",
-      "sha256": "883321cfcd39963142ce40bfc2fb7a0b8c980c4cdf9b4fcffa0a00ece38dea0e",
+      "path": "internal/aws/sns_store.go",
+      "sha256": "e3cb28dad864f59a8bf11362e0e1d5ae681c4c6389ea3b7d4765bfe6ccc5bc0a",
       "disposition": "modeled",
-      "reason": "Embed the canonically built, localized Console workflow with separate native plan and target reads.",
+      "reason": "Install the sparse policy table and remove it with its owning topic.",
       "models": [
         {
-          "id": "ScalingPlanConsole",
+          "id": "SNSNotificationPolicyLifetime",
           "properties": [
-            "OnlyCurrentReplyPublishes",
-            "SuccessRequiresAck",
-            "RetryRequiresNamedRefresh"
+            "DeleteFrame",
+            "NewGeneration",
+            "PeerFrame",
+            "RestartPreservesStore"
           ],
-          "limits": "Finite UI request ownership and publication within one mounted scope. A refresh is an explicit exact-name read. Does not model concurrent plan replacement, React/DOM, JavaScript or Go refinement, IAM, HTTP or storage. AutoScalingPlanTargets independently models native capacity effects."
+          "limits": "Finite topic and generation bounds project request outcomes. Actual SQL, Unicode, the SNS Query wire, SDK and timestamps require independent native checks."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/sns_test.go",
+      "sha256": "b511659dde0f3a13f8d5f833f96638696ab4dcff95eb0555f3761dfeaeb6908b",
+      "disposition": "test-support",
+      "reason": "Retain the unsupported Query-action regression and require native validation for malformed SetTopicAttributes.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/sns_topic_policy.go",
+      "sha256": "c590b2b821cc22e123cdae7f2bc6321e4af260fb1b46d45b9a3f141acf774a22",
+      "disposition": "modeled",
+      "reason": "Validate the policy, save exact bytes and resolve the current grant in the native database transaction.",
+      "models": [
+        {
+          "id": "SNSNotificationPolicyLifetime",
+          "properties": [
+            "SetAdmission",
+            "SetRefusalPreservesStore",
+            "NewGeneration",
+            "EditKeepsGeneration",
+            "PolicyBytesExact",
+            "DeleteFrame",
+            "PeerFrame",
+            "GetReadback",
+            "ReadsPreserveStore",
+            "ResolverAdmission",
+            "ResolverGeneration",
+            "ResolverDecision",
+            "CapturedCurrentGrant",
+            "CaptureExact",
+            "RestartPreservesStore"
+          ],
+          "limits": "Finite topic and generation bounds project request outcomes. Actual SQL, Unicode, the SNS Query wire, SDK and timestamps require independent native checks."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/sns_topic_policy_test.go",
+      "sha256": "0e4f07286981094bb827118b66afc0197070db9a201b11a7f919e226cbeba359",
+      "disposition": "test-support",
+      "reason": "Test grammar, authority, physical storage, corrupt state, request cancellation, real deadlines and retry after reopen.",
+      "models": []
+    },
+    {
+      "path": "internal/server/server.go",
+      "sha256": "9e0a7f6f43f75848d8077ea41cc2fd6d7fb76f17af0bd9e9b9ca0f46ae1db913",
+      "disposition": "modeled",
+      "reason": "Announce the bounded SNS Policy operation on the native provider capability route.",
+      "models": [
+        {
+          "id": "SNSNotificationPolicyLifetime",
+          "properties": [
+            "SetAdmission",
+            "GetReadback"
+          ],
+          "limits": "Finite topic and generation bounds project request outcomes. Actual SQL, Unicode, the SNS Query wire, SDK and timestamps require independent native checks."
         }
       ]
     },
     {
       "path": "scripts/formal_model_gate.py",
-      "sha256": "6c1a7ba514b17e4f69f9971f58571400bb80a0a5876f230e8d09f3aa3f189874",
+      "sha256": "484a812b011090a72e5e5774c1804a0a99b0572f72cfedb27ca4c14dafb2f9a5",
       "disposition": "formal-infrastructure",
-      "reason": "Independently pin the new model, four invariants, four controls and six mapped files.",
+      "reason": "Require each topic policy property, control and source path independently of its manifest record.",
       "models": []
     },
     {
       "path": "scripts/test-formal-gate.py",
-      "sha256": "7033aad08229af6afb4627ef415551bbcde655678d8ff66703c512b0fc85cc7f",
+      "sha256": "46237f0180b1bc8780c2fa6c13427c7a1b5c4da28bb0fdd09e680ec5ed384ff6",
       "disposition": "formal-infrastructure",
-      "reason": "Require the new model among all existing protected models.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/autoscaling_plans_console.py",
-      "sha256": "cf219a2a508210a1814e6cd433a198d14e1b68142e7c9e1beab107841b7a31e5",
-      "disposition": "test-support",
-      "reason": "Exercise the actual embedded Console, exact target capacity, two authorities, restart, refusal, acknowledgement loss, cancellation and cleanup.",
+      "reason": "Include the new SNS policy model in the independent registry inventory.",
       "models": []
     },
     {
       "path": "test/e2e/check.py",
-      "sha256": "937621995585279fc80c5cebacf8155078f73c7e414614573d8597aa16d37367",
+      "sha256": "41e5fa491a92afeaf5e41982d6d9c15e1720cab46d39d7cd2b0c1edd394b1b07",
       "disposition": "test-support",
-      "reason": "Register the ordinary stock SDK and Console integration fixture with the existing E2E runner.",
+      "reason": "Run the local official-SDK notification policy acceptance through the existing E2E entry point.",
       "models": []
     },
     {
-      "path": "tools/console/bundle-digests.json",
-      "sha256": "e9441b68fec1208e25ee19061aaeba100734ef8ad5a6989b0b96b8f7c80541c3",
-      "disposition": "presentation",
-      "reason": "Pin the canonical embedded Console output hashes.",
-      "models": []
-    },
-    {
-      "path": "tools/console/bundle-inputs.json",
-      "sha256": "c3bb9f9fc6e9014c1d75b085b72bc64c6b33584bc175ea5a36e960521a0eaec6",
-      "disposition": "presentation",
-      "reason": "Record canonical esbuild metadata for the actual embedded Console inputs.",
-      "models": []
-    },
-    {
-      "path": "tools/console/src/autoscaling-plans.jsx",
-      "sha256": "8d39433ae226450837bc20c7cd2389d7e49f899d17a65e195eaf3a3bb0973ed5",
-      "disposition": "modeled",
-      "reason": "Bound each visible plan or capacity read to its request owner. Confirm writes and reconcile an ambiguous result by exact name.",
-      "models": [
-        {
-          "id": "ScalingPlanConsole",
-          "properties": [
-            "OnlyCurrentReplyPublishes",
-            "SuccessRequiresAck",
-            "RetryRequiresNamedRefresh"
-          ],
-          "limits": "Finite UI request ownership and publication within one mounted scope. A refresh is an explicit exact-name read. Does not model concurrent plan replacement, React/DOM, JavaScript or Go refinement, IAM, HTTP or storage. AutoScalingPlanTargets independently models native capacity effects."
-        }
-      ]
-    },
-    {
-      "path": "tools/console/src/autoscaling-plans.mjs",
-      "sha256": "215140b7466a548a3178f7025b3e3dad3668b3effb3eccc7350e0ce75724a775",
-      "disposition": "modeled",
-      "reason": "Send exact native plan and table requests and validate operation-specific replies before publication.",
-      "models": [
-        {
-          "id": "ScalingPlanConsole",
-          "properties": [
-            "OnlyCurrentReplyPublishes",
-            "SuccessRequiresAck",
-            "RetryRequiresNamedRefresh"
-          ],
-          "limits": "Finite UI request ownership and publication within one mounted scope. A refresh is an explicit exact-name read. Does not model concurrent plan replacement, React/DOM, JavaScript or Go refinement, IAM, HTTP or storage. AutoScalingPlanTargets independently models native capacity effects."
-        }
-      ]
-    },
-    {
-      "path": "tools/console/src/console-navigation.mjs",
-      "sha256": "2cf79b1dc466e3a3e96e96376b9fc270e43c71ae8b2098bd1bc0cfd9f411109f",
-      "disposition": "modeled",
-      "reason": "Discover the AWS scaling planner only when the normal plan operations and native DynamoDB readback are available.",
-      "models": [
-        {
-          "id": "ScalingPlanConsole",
-          "properties": [
-            "OnlyCurrentReplyPublishes",
-            "SuccessRequiresAck",
-            "RetryRequiresNamedRefresh"
-          ],
-          "limits": "Finite UI request ownership and publication within one mounted scope. A refresh is an explicit exact-name read. Does not model concurrent plan replacement, React/DOM, JavaScript or Go refinement, IAM, HTTP or storage. AutoScalingPlanTargets independently models native capacity effects."
-        }
-      ]
-    },
-    {
-      "path": "tools/console/src/main.jsx",
-      "sha256": "b11b7c11d6a32d2fd3acc9378c577f3c28cb27189a574f29cd6707077b278358",
-      "disposition": "modeled",
-      "reason": "Mount the scaling planner under the selected AWS region, principal and navigation lifetime.",
-      "models": [
-        {
-          "id": "ScalingPlanConsole",
-          "properties": [
-            "OnlyCurrentReplyPublishes",
-            "SuccessRequiresAck",
-            "RetryRequiresNamedRefresh"
-          ],
-          "limits": "Finite UI request ownership and publication within one mounted scope. A refresh is an explicit exact-name read. Does not model concurrent plan replacement, React/DOM, JavaScript or Go refinement, IAM, HTTP or storage. AutoScalingPlanTargets independently models native capacity effects."
-        }
-      ]
-    },
-    {
-      "path": "tools/console/test/autoscaling-plans.test.mjs",
-      "sha256": "6572dc64b32d400087856ad932c2c18647ed77a76d4c5ae8bde6227939775d7a",
-      "disposition": "presentation",
-      "reason": "Regression checks for normal Cloudscape routing, both wire protocols, target identity, cancellation and saved policy preservation.",
+      "path": "test/e2e/sns_notification_policy.py",
+      "sha256": "2f932c6f2bffd47e6cfd3ebc6e06760d7b8b2f68922c7cfb433731aff37a362f",
+      "disposition": "test-support",
+      "reason": "Drive actual authenticated CLI processes through the official boto3 SNS protocol, including readback, isolation and retry.",
       "models": []
     }
   ]
