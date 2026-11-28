@@ -1,17 +1,17 @@
 {
   "version": 1,
-  "base_sha": "05373eeb6653ffa6a705f3d7308a3594c571750f",
+  "base_sha": "73d50045611e0dd77755cae8eb4ef2ae990d475e",
   "changes": [
     {
       "path": "README.md",
-      "sha256": "5a8534b086b8a0dd222f518845cee15fef5c595bec7f87d3b341802042e6384c",
+      "sha256": "98c23feac1362fdc790c1ded23fea5b1f97ef81ef068499defd7e745e0901a94",
       "disposition": "documentation",
       "reason": "Link the shipped KMS role grants and scheduled deletion lifecycle.",
       "models": []
     },
     {
       "path": "docs/design/0001-go-standalone.md",
-      "sha256": "39f5784cd9bd6a7b59f3f96b93e1b8d7e20b167abbb3ab95eb01475eb9b9a7e5",
+      "sha256": "8aba03d73c7de2da96078ec47e838becdea2281c6d02905a9c77a81e8f3f150f",
       "disposition": "documentation",
       "reason": "Document private KMS grant authority, key generations and the local pending-deletion lifecycle.",
       "models": []
@@ -103,7 +103,7 @@
     },
     {
       "path": "formal/models.json",
-      "sha256": "522948c2d2c8363eb27b3c5e0afaf076a7d08a95838f3840f0aaf8855607fcd0",
+      "sha256": "076d122adf6d21878a969049c826f95992af38c099177de42b433bf366586b2d",
       "disposition": "formal-infrastructure",
       "reason": "Register both bounded models and the corresponding invariants, source bindings and mutation controls.",
       "models": []
@@ -398,7 +398,7 @@
     },
     {
       "path": "internal/server/server.go",
-      "sha256": "4dafb271f89cfdea54ed17f17d86d3c6a16a43ca680c611cd655144f19d043dc",
+      "sha256": "08db53e73fb7b3f8db22e3c94afd3573ffcb47f03fbe76eb3bcd98702ab4c597",
       "disposition": "modeled",
       "reason": "Advertise scoped KMS grant, authority and deletion behavior through the existing service capability endpoint.",
       "models": [
@@ -420,14 +420,14 @@
     },
     {
       "path": "scripts/formal_model_gate.py",
-      "sha256": "9a187c81842095a65fb4abd894281030ba8e9540c21008619b58f46ef6f6be4f",
+      "sha256": "976145f94f09fa9c8e593de03bc3c670378921de1fd8a4d29b726f1b27bfabc8",
       "disposition": "formal-infrastructure",
       "reason": "Require the registry entries, native source scope and mutation controls for both KMS lifecycle models.",
       "models": []
     },
     {
       "path": "scripts/test-formal-gate.py",
-      "sha256": "1b3b06ad12013fd2677ea18d6783e3ea67504fc57acd651d68bbac1d2d692f12",
+      "sha256": "84fdfb5ecc8398fdded0dcc45782525b4e67e01715b08089f32cc129e911b4f4",
       "disposition": "formal-infrastructure",
       "reason": "Require both new KMS lifecycle models in the complete independent model inventory.",
       "models": []

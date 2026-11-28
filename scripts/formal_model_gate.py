@@ -4914,6 +4914,221 @@ SUPPORT_CASE_CONTROLS = [
 REQUIRED_MUTANTS['SupportCaseLifecycle'] = {entry[0] for entry in SUPPORT_CASE_CONTROLS}
 
 
+# Independent local CloudFront delivery and invalidation controls. Keep these
+# literal sets separate from the mutable model registry they protect.
+BASE_MODELS.add('CloudFrontLocalCache')
+BASE_INVARIANTS['CloudFrontLocalCache'] = {
+    'TypeOK', 'FreshJointAuthority', 'ExactHitIdentity', 'MissReadsOrigin',
+    'FailureRollsBack', 'RefusalUnchanged', 'StaleETagUnchanged',
+    'UpdateClearsCache', 'InvalidationClearsCache', 'RestartPreserves', 'PeerUnchanged',
+}
+REQUIRED_MUTANTS['CloudFrontLocalCache'] = {
+    'MissingObjectGrant', 'MissingDistributionGrant', 'WrongOriginLifetime',
+    'CrossActorHit', 'ExpiredHit', 'IgnoreETag', 'UpdateRetainsCache',
+    'InvalidationRetainsCache', 'FailedInvalidationEvicts',
+}
+REQUIRED_SOURCE_SCOPES['CloudFrontLocalCache'] = {
+    'internal/aws/cloudfront_distribution.go', 'internal/aws/cloudfront_distribution_store.go',
+    'internal/aws/cloudfront_distribution_http.go', 'internal/aws/cloudfront_distribution_list.go',
+    'internal/aws/cloudfront_vpc_origin.go', 'internal/aws/ssm.go', 'internal/server/server.go',
+    'internal/aws/cloudfront_distribution_interrupt_test.go',
+}
+
+BASE_MODELS.add('CloudFrontConsoleEpoch')
+BASE_INVARIANTS['CloudFrontConsoleEpoch'] = {'StableUnknownCaller', 'ProtectedDownload', 'CurrentReceipt', 'TypeOK', 'OneCurrentWrite', 'ExplicitWriteConfirmation', 'CurrentContent', 'AcknowledgedReceipt'}
+REQUIRED_MUTANTS['CloudFrontConsoleEpoch'] = {'UnconfirmedWrite', 'PublishOldRead', 'RetainOldContent', 'ReplayDifferentCaller', 'OldReadUnlocksWrite', 'FreshCallerWhileUnknown', 'UnknownAcknowledged', 'UnsafeContent', 'PublishOldReceipt'}
+REQUIRED_SOURCE_SCOPES['CloudFrontConsoleEpoch'] = {'internal/aws/cloudfront_distribution_http.go', 'tools/console/src/cloudfront-local.jsx', 'tools/console/src/cloudfront-local.mjs', 'internal/server/web/app.js', 'tools/console/src/console-navigation.mjs', 'tools/console/src/main.jsx'}
+REQUIRED_SOURCE_SCOPES['CloudFrontConsoleEpoch'].add('tools/console/src/console-home.jsx')
+
+
+# Native B2BI quota discovery uses a computed read projection, not stored CRUD.
+BASE_MODELS.add('ServiceQuotaDiscovery')
+BASE_INVARIANTS['ServiceQuotaDiscovery'] = {'TypeOK', 'RestartPreservesFrame', 'ReadPreservesFrame', 'PeerPreserved', 'ReadProjectionCorrect'}
+REQUIRED_MUTANTS['ServiceQuotaDiscovery'] = {'AppliedUsesPublishedDefault', 'AppliedGetRequiresWildcard', 'ResourceLevelIgnored', 'PeerCapacityReturned', 'UnavailableRegionAdvertised', 'UnknownServiceProjected', 'UnknownQuotaProjected', 'SingleRowInventsCursor', 'ReadChangesSelectedUsage', 'ReadChangesPeerUsage', 'AppliedReportsRemaining', 'ForeignTokenAccepted', 'DefaultUsesApplied', 'WildcardReadsUseQuotaARN', 'DefaultInventsQuotaARN', 'UnrelatedActionAllowed', 'ExplicitDenyIgnored', 'AbsentBindingFallsBackToDefault'}
+REQUIRED_SOURCE_SCOPES['ServiceQuotaDiscovery'] = {'internal/aws/catalog/engine.go', 'internal/aws/catalog/services_business.go', 'internal/aws/catalog/semantics.go', 'internal/aws/catalog/service_quotas.go'}
+
+
+BASE_MODELS.add('ServiceQuotaRequests')
+BASE_INVARIANTS['ServiceQuotaRequests'] = {
+    'TypeOK',
+    'Admissions',
+    'CommitFrame',
+    'StoredFields',
+    'Capacity',
+    'Visibility',
+    'Lookup',
+    'PageScope',
+    'PrivateStage',
+    'ContenderFrame',
+    'RestartFrame',
+}
+REQUIRED_MUTANTS['ServiceQuotaRequests'] = {
+    'AdmitDenied',
+    'AdmitNonIncrease',
+    'AdmitOversize',
+    'AdmitWrongLevel',
+    'AdmitUnsupportedScope',
+    'AllowAnotherPending',
+    'RefuseIndependentRegion',
+    'RefuseOtherTeamDueToPeer',
+    'CountOnlyThisRegion',
+    'CountBothTeamDatabases',
+    'MissAQueuedPendingWinner',
+    'RejectContenderAfterRollback',
+    'RivalErasesPrivateStage',
+    'PublishSpeculativeData',
+    'KeepCanceledRequest',
+    'KeepTimedOutRequest',
+    'KeepFaultedRequest',
+    'KeepMismatchedReadback',
+    'KeepFailedCommit',
+    'LoseCommittedButUnacknowledged',
+    'AcknowledgeWithoutRow',
+    'ReportIdAfterLostReply',
+    'KeepPrivateRowAfterCancellation',
+    'DeletePeerHistoryWhenCommitting',
+    'RaiseAppliedQuotaOnRequest',
+    'RequestConsumesProfileSlot',
+    'TurnFalseIntoPending',
+    'ApproveOmitted',
+    'CreateSyntheticSupportCase',
+    'StoreWrongApplicant',
+    'StoreAppliedInsteadOfDesired',
+    'ReturnAnotherTeamId',
+    'ReturnOnlyAvailableSlots',
+    'BlockLastProfileSlot',
+    'CannotReuseReleasedProfile',
+    'OtherScopeGet',
+    'AgeOutDirectRequest',
+    'DiscloseDeniedLookup',
+    'ListOlderThanNinetyDays',
+    'DropAtCurrentInstant',
+    'ReturnOldestFirst',
+    'DropExactNinetiethDay',
+    'AgeOutByQuota',
+    'LeakFutureGeneralAfterClockRollback',
+    'DropFutureByQuotaAfterClockRollback',
+    'HideFutureExactLookupAfterClockRollback',
+    'ListPeerRegion',
+    'ListOtherDatabase',
+    'IgnoreTerminalFilter',
+    'IgnorePendingFilter',
+    'ReportUnobservedApproval',
+    'ReportResourceScopedQuota',
+    'ReportOtherServiceQuota',
+    'IgnoreListAuthority',
+    'ContinueWithoutFreshAuthority',
+    'AcceptOtherScopeCursor',
+    'AcceptOtherActorCursor',
+    'AcceptOtherOperationCursor',
+    'AcceptChangedFilterCursor',
+    'AcceptPriorProcessCursor',
+    'AcceptBadToken',
+    'RepeatBoundaryRow',
+    'UseTimestampInCursor',
+    'EmitLastPageCursor',
+    'LoseRealContinuation',
+    'DiscardHistoryOnReopen',
+    'RetainCursorAuthorityOnRestart',
+    'PruneByGeneralAgeOnRead',
+    'RequireWildcardForRequest',
+    'RequireWildcardForByquota',
+    'UseNamedQuotaForGeneral',
+    'UseNamedQuotaForGet',
+    'AdmitOtherQuotaARN',
+    'OverrideExplicitRequestDeny',
+    'AcceptNamedGrantOnGenericContinuation',
+}
+REQUIRED_SOURCE_SCOPES['ServiceQuotaRequests'] = {
+    'internal/aws/catalog/engine.go',
+    'internal/aws/catalog/models/service-quotas.json',
+    'internal/aws/catalog/semantics.go',
+    'internal/aws/catalog/service_quota_requests.go',
+    'internal/aws/catalog/service_quotas.go',
+}
+
+
+BASE_MODELS.add('ServiceQuotaRequestConsole')
+BASE_INVARIANTS['ServiceQuotaRequestConsole'] = {
+    'SingleIntent',
+    'NoAutomaticWrite',
+    'NativeFrame',
+    'SavedExactlyOnce',
+    'Acknowledgement',
+    'FreshRecovery',
+    'ObservedOnly',
+    'SeparateIntent',
+    'RetiredRead',
+    'ScopeCleared',
+    'BlockedRetry',
+    'FreshCapacity',
+    'VisibleLookup',
+    'VisibleMount',
+}
+REQUIRED_MUTANTS['ServiceQuotaRequestConsole'] = {
+    'SubmitUnknownAgain',
+    'SendWithoutAppliedCapacity',
+    'SubmitWithWrongPrincipal',
+    'SendFromWrongMountedGeneration',
+    'CommitToAnotherRegion',
+    'CollapseTwoTerminalIDs',
+    'RepeatPendingAfterSeparateIntent',
+    'LoseEarlierSameAmountHolder',
+    'AcknowledgeAnUnstoredRow',
+    'TreatSavedTransportLossAsConfirmed',
+    'TreatUnknownLossAsRefusal',
+    'TreatDefinitiveRefusalAsUnknown',
+    'ConfirmBadBody',
+    'ConfirmWrongAmount',
+    'ConfirmWrongStatus',
+    'ConfirmWrongArn',
+    'BindOldIdenticalRowToLostSubmit',
+    'PublishRetiredAckAcrossScope',
+    'PublishOldUnknownAcrossRemount',
+    'KeepArmedWhileNewRecoveryBegins',
+    'KeepArmedAcrossCapacityClear',
+    'ArmFromOrdinaryByQuota',
+    'ArmFromGeneral',
+    'ArmFromFiltered',
+    'ArmFromResource',
+    'ArmFromNext',
+    'ArmFromAuto',
+    'ArmFromInspect',
+    'ArmFromCapacity',
+    'ArmAfterDenied',
+    'ArmAfterFailed',
+    'ArmAfterWrongOwner',
+    'ArmAfterMalformed',
+    'RetainArmAfterPermissionLoss',
+    'InferFromCurrentMatchingAmount',
+    'GroupReadShowsPeerRow',
+    'PermitEvenWhenExplicitReadFailed',
+    'SeparateClickSendsAgain',
+    'RecoverySilentlyResends',
+    'BackfillCaseDuringRecovery',
+    'TreatSavedHistoryAsConfirmedOutcome',
+    'BlindRetryAfterLostAck',
+    'ReleaseOnBlockedClick',
+    'CarryUnknownAcrossNewMount',
+    'SameTileRetiredSuccessArmsNewMount',
+    'StaleDenialErasesNewlyArmedView',
+    'RetainAppliedCapacityAfter403',
+    'ReopenEditorWithoutFreshCapacity',
+    'DisplayFirstPageAsRealContinuation',
+    'KeepPriorLookupAfterNativeDenial',
+    'GuessLostLookupFromHistory',
+    'ShowQuotaInHiddenView',
+    'ReturningToViewInheritsOldPermit',
+}
+REQUIRED_SOURCE_SCOPES['ServiceQuotaRequestConsole'] = {
+    'tools/console/src/catalog.jsx',
+    'tools/console/src/main.jsx',
+    'tools/console/src/service-quotas.jsx',
+    'tools/console/src/service-quotas.mjs',
+    'internal/server/web/app.js',
+}
+
+
 # Pin the KMS effective-grant controls independently of the editable registry.
 BASE_MODELS.add('KMSRoleGrantLifecycle')
 BASE_INVARIANTS['KMSRoleGrantLifecycle'] = {

@@ -47,6 +47,7 @@ type Engine struct {
 	bySigning map[string][]*binding
 	// byQuery maps the signing name of each Query protocol service.
 	byQuery         map[string]*binding
+	quotaHistoryKey [32]byte
 	ownedPrivateRDS privateRDSLifecycle // installed only by trusted native composition
 }
 
@@ -75,6 +76,11 @@ func New(db *sql.DB, cfg Config, services []*Service) (*Engine, error) {
 			return nil, err
 		}
 		if err := e.add(b); err != nil {
+			return nil, err
+		}
+	}
+	if seen["service-quotas"] {
+		if err := e.initQuotaRequestHistory(); err != nil {
 			return nil, err
 		}
 	}
@@ -326,6 +332,12 @@ func (e *Engine) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 // run validates a decoded raw input tree against the official input shape,
 // then authorizes, executes and encodes one operation in any protocol.
 func (e *Engine) run(w http.ResponseWriter, r *http.Request, b *binding, op *Op, region string, raw map[string]any) {
+	if b.spec.Model == "service-quotas" {
+		if err := validateQuotaJSON(raw); err != nil {
+			e.fail(w, b, op, err)
+			return
+		}
+	}
 	official := b.model.Operations[op.Name]
 	input := map[string]any{}
 	if official.Input != "" {
@@ -568,6 +580,11 @@ func pick(errors, candidates []string, kind string) (string, bool) {
 }
 
 func (b *binding) status(code, kind string) int {
+	// Service Quotas documents AccessDeniedException as HTTP 400. The JSON 1.1
+	// model names the exception without recording its HTTP status.
+	if b.spec.Model == "service-quotas" && code == "AccessDeniedException" {
+		return http.StatusBadRequest
+	}
 	if shape := b.model.Shapes[code]; shape != nil && shape.Error != nil && shape.Error.HTTPStatus != 0 {
 		return shape.Error.HTTPStatus
 	}

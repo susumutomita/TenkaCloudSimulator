@@ -20,9 +20,17 @@ Consoleは公式Cloudscape/Reactを開発時にbundleし、fonts/assets/licenses
 
 [AWS Auto Scaling Plans のコンソール](../autoscaling-plans.md)は選択リージョンの共有 JSON API でプランを作成し、既存の DynamoDB テーブルに対する読み込みまたは書き込みの容量範囲を更新する。プラン状態は Scaling Plans から、実際の両方の容量は DynamoDB DescribeTable から読み戻す。プランの削除後もテーブルと容量は維持される。
 
+CloudFront の [ローカル distribution](../cloudfront-local-content.md) は、同じ SQLite の保存済み S3 オブジェクトだけを読み、DefaultTTL に従う有界キャッシュと native invalidation を提供する。専用の simulator GET/HEAD は、キャッシュの hit を含めて一つの新しい policy snapshot から distribution と S3 オブジェクトの権限を確認する。Cloudscape は native の一覧・詳細・ローカルデータの安全なダウンロード・無効化を同じ状態に対して行う。本文は実行せず、古いスコープの応答を破棄する。不確定な無効化は同じ caller reference と paths の明示的な再送だけで確認する。外部 origin・DNS・VPC Origin の通信、CDN edge、distribution の CloudFormation は追加しない。
+
 SSM の [ドキュメント履歴](../ssm-documents.md) はリージョンとドキュメント名で検索し、1 回の SQLite 読み取りで番号順のスナップショットを返す。ページごとに IAM を評価し、続きは対象・呼出者・スナップショットに結び付く。一覧に定義本文は含めず、Console の本文比較には別の GetDocument 権限が必要。ドキュメントは実行しない。
 
 SNS の HTTP/HTTPS コンソールは native Query を呼び出し、通知先 URL をローカル SQLite に記録するだけで外部に接続しない。購読属性を読む際は ARN から親トピックを特定して IAM を先に評価し、購読と親の存在およびリージョンの一致を同じ読み取りで確認する。専用 Scalar は us-east-1 固定で通常のログインセッションを使い、コンソールの演習用 ID 選択を引き継がない。[対応範囲](../sns.md)。
+
+Service Quotas の5つの読み取りは、B2B Data Interchange の Profiles に限定する。公開デフォルト5と `CreateProfile` が実際に強制する総容量を区別し、使用済みの数を上限から差し引かない。`GetServiceQuota` は対象クォータ ARN、それ以外の4操作は各 action の Resource `*` を必要とする。実在するローカルの上限定義がなければ適用値を捏造しない。[対応リージョン・空の一覧・未対応範囲](../aws-catalog.md#b2b-data-interchange-profile-quota)
+
+上限引き上げ要求はチームの SQLite に保存し、リージョン別に ID と履歴を照会できる。`SupportCaseAllowed=false` は `NOT_APPROVED`、省略または true は `PENDING` として保存する。要求を受け付けた後も B2BI の適用上限は同じ値を返す。ローカルの要求に外部サポートケースの発行や自動承認の処理はない。
+
+Cloudscape は選択中のリージョンと演習用 ID で要求を送信する。応答を受け取れなかった場合は、同じクォータの履歴を再取得できる。専用 Scalar はログイン中の ID と `us-east-1` を使い、利用者が選んだ操作と本文をそのまま送信する。
 
 AWS Resource Groups のタグクエリは、同じリージョンの ECR repository の ARN とタグをカタログの SQLite から読み取る。グループ ARN と依存する読み取り権限の認可後、保存済みクエリとリポジトリを同じスナップショットで照合する。管理画面のグループ詳細はネイティブ API から保存済みクエリとメンバーのページを取得し、タグ条件の編集も同じ API に送る。
 
