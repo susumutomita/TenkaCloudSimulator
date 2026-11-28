@@ -335,6 +335,9 @@ func (e *Engine) run(w http.ResponseWriter, r *http.Request, b *binding, op *Op,
 	input := map[string]any{}
 	if official.Input != "" {
 		d := &decoder{model: b.model}
+		if b.spec.Model == "codecommit" && op.Handle != nil {
+			d.requiredErrors = gitRequiredErrors
+		}
 		decoded, err := d.decode(official.Input, raw, official.Input, 0)
 		if err != nil {
 			e.fail(w, b, op, err)

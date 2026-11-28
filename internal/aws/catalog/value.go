@@ -49,8 +49,9 @@ func compiledPattern(pattern string) *regexp.Regexp {
 
 // decoder validates a JSON-decoded tree against official shapes.
 type decoder struct {
-	model *Model
-	nodes int
+	model          *Model
+	nodes          int
+	requiredErrors map[string]string // optional modeled exceptions for omitted top-level input fields
 }
 
 // decode converts raw (decoded with UseNumber) into canonical values:
@@ -85,7 +86,7 @@ func (d *decoder) decode(shapeName string, raw any, at string, depth int) (any, 
 			}
 			out[name] = converted
 		}
-		if err := d.structureRules(shape, out, at); err != nil {
+		if err := d.structureRules(shape, out, at, depth); err != nil {
 			return nil, err
 		}
 		return out, nil
@@ -199,10 +200,14 @@ func (d *decoder) document(raw any, at string, depth int) (any, error) {
 	}
 }
 
-func (d *decoder) structureRules(shape *Shape, out map[string]any, at string) error {
+func (d *decoder) structureRules(shape *Shape, out map[string]any, at string, depth int) error {
 	for _, name := range shape.Required {
 		if _, ok := out[name]; !ok {
-			return invalid("Missing required member %s.%s.", at, name)
+			f := invalid("Missing required member %s.%s.", at, name)
+			if depth == 0 {
+				f.code = d.requiredErrors[name]
+			}
+			return f
 		}
 	}
 	if shape.Union && len(out) != 1 {
