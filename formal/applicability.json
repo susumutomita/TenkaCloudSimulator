@@ -4,37 +4,108 @@
   "changes": [
     {
       "path": "README.md",
-      "sha256": "4cdbab861f44459c376291dad827b37c1ebab85e1a4a3b0a70f177c2b43835fc",
+      "sha256": "1dfee82057efd349a4beee1fe69d3f61466b3fb411a01df11c777129d1f023fe",
       "disposition": "documentation",
-      "reason": "Describe the SES v2 MIME preview entry point and its local sending boundary.",
+      "reason": "List the stored template MIME preview and the regional local DNS ownership workflow.",
       "models": []
     },
     {
       "path": "docs/aws-catalog-services.md",
-      "sha256": "11a8f4dd341144598b45c9b5eb1c0fe2168f1f508cb43f9df0c23181d4faef1e",
+      "sha256": "45c763612f8686173e252236d019d5cf10bf58315e9f5d5b3644eb71a2144ac5",
       "disposition": "documentation",
       "reason": "Regenerate the SES v2 operation list and limits from its service descriptor.",
       "models": []
     },
     {
       "path": "docs/design/0001-go-standalone.md",
-      "sha256": "97931075bdbed12a0ad04900f22abbdee8a1a6bb7ce88e6a728c429228934e45",
+      "sha256": "9e2499dbe11e5fada0335fa9995b013ff62bf80dbfedf56142e6fef8c186273e",
       "disposition": "documentation",
-      "reason": "Specify regional template authorization, simple string substitution, limits and read-only MIME output.",
+      "reason": "Describe template preview and physical-zone-bound SES verification without external delivery.",
       "models": []
+    },
+    {
+      "path": "docs/route53.md",
+      "models": [],
+      "disposition": "documentation",
+      "sha256": "35f20d9e7e38a204b95ed612d808eb71648f07a7b25e037446399664e1e0dfce",
+      "reason": "Document the specifically admitted SES CNAME owner syntax and continued zone-name restrictions."
+    },
+    {
+      "path": "docs/ses-domain-identities.md",
+      "models": [],
+      "disposition": "documentation",
+      "sha256": "15e4267229db7c1039604c9fa5ba249b2c787b905fb27a9fb4ab219e42265771",
+      "reason": "Describe real identity creation, DNS changes, scoped observation and independent cleanup."
+    },
+    {
+      "path": "formal/SESLocalDomainProof.cfg",
+      "models": [
+        {
+          "id": "SESLocalDomainProof",
+          "properties": [
+            "ReadCurrentProof",
+            "Rights",
+            "RefusalFrame",
+            "FreshGeneration",
+            "PhysicalZoneCapture"
+          ],
+          "limits": "The finite histories check current exact DNS proof, authorization classes, generation and refusal frames. Native tests handle HTTP, real SQLite, pagination, DNS encoding and cancellation. It does not model signatures, randomness or delivery."
+        }
+      ],
+      "disposition": "modeled",
+      "sha256": "ae228a0e65b7cfa3bd1a0a63a8289ac382c6297d484fb72c7670d4239f5c9ac7",
+      "reason": "Set the finite local-DNS verification safety checks."
+    },
+    {
+      "path": "formal/SESLocalDomainProof.tla",
+      "models": [
+        {
+          "id": "SESLocalDomainProof",
+          "properties": [
+            "ReadCurrentProof",
+            "Rights",
+            "RefusalFrame",
+            "FreshGeneration",
+            "PhysicalZoneCapture"
+          ],
+          "limits": "The finite histories check current exact DNS proof, authorization classes, generation and refusal frames. Native tests handle HTTP, real SQLite, pagination, DNS encoding and cancellation. It does not model signatures, randomness or delivery."
+        }
+      ],
+      "disposition": "modeled",
+      "sha256": "c52139add6ecf60b70cacbdac50d91eaeb3a8a80eb0ca504a25835b52f953e09",
+      "reason": "Model local identity generations and fresh reads of the captured zone and three DNS records."
     },
     {
       "path": "formal/models.json",
-      "sha256": "14df16b55496e1ecad1ed9601b862a6d04d443bec5ed9d575cc94eb492252374",
+      "sha256": "2ee12b06b923ddf0241f2f508edead0b87f2b991a837edd4afe2f4cf9599af89",
       "disposition": "formal-infrastructure",
-      "reason": "Register the SES preview implementation in the shared catalog lifecycle source scope.",
+      "reason": "Register the new DNS proof model while retaining the original template-preview binding.",
       "models": []
     },
     {
-      "path": "internal/aws/catalog/models/sesv2.json",
-      "sha256": "7608baffabdbcca698c67baa0351de2b4064d01970471384ffe964ce68a88bc0",
+      "path": "internal/aws/catalog/engine.go",
+      "models": [
+        {
+          "id": "SESLocalDomainProof",
+          "properties": [
+            "ReadCurrentProof",
+            "Rights",
+            "RefusalFrame",
+            "FreshGeneration",
+            "PhysicalZoneCapture"
+          ],
+          "limits": "The finite histories check current exact DNS proof, authorization classes, generation and refusal frames. Native tests handle HTTP, real SQLite, pagination, DNS encoding and cancellation. It does not model signatures, randomness or delivery."
+        }
+      ],
       "disposition": "modeled",
-      "reason": "Expose the pinned official SES v2 template render input, output and wire route to the catalog.",
+      "sha256": "c986f6dd31e37af2427c46e1209b8e6339e5fe3014e6f1fb8d4bec5b69dd224e",
+      "reason": "Register the SES domain table and a trusted same-transaction DNS read."
+    },
+    {
+      "path": "internal/aws/catalog/models/sesv2.json",
+      "sha256": "abc1c584a7e7856af01639cc8441507ae6aee7708a17c9cbcf635e2724739475",
+      "disposition": "modeled",
+      "reason": "Add only pinned SES v2 operation and shape projections to the existing preview model.",
       "models": [
         {
           "id": "CatalogResourceLifecycle",
@@ -44,14 +115,25 @@
             "PeerFrame"
           ],
           "limits": "The model covers abstract catalog authorization and unchanged state on refusal or in a peer. Native tests cover the SES route, regional template ARN, string substitutions, MIME encoding and byte limits."
+        },
+        {
+          "id": "SESLocalDomainProof",
+          "properties": [
+            "ReadCurrentProof",
+            "Rights",
+            "RefusalFrame",
+            "FreshGeneration",
+            "PhysicalZoneCapture"
+          ],
+          "limits": "The finite histories check current exact DNS proof, authorization classes, generation and refusal frames. Native tests handle HTTP, real SQLite, pagination, DNS encoding and cancellation. It does not model signatures, randomness or delivery."
         }
       ]
     },
     {
       "path": "internal/aws/catalog/selection.json",
-      "sha256": "9227da4289fa03b2943226765e3003e064236f8b00390cfab14d4c857f2e24ba",
+      "sha256": "10fcf45f9c4e0d85e936576c9132a2949b047e8a925f46530237d0ffa2aafabc",
       "disposition": "modeled",
-      "reason": "Select the SES v2 read operation against the existing stored email template.",
+      "reason": "Bind the selected preview and four domain operations to their official protocol inputs and outputs.",
       "models": [
         {
           "id": "CatalogResourceLifecycle",
@@ -61,14 +143,25 @@
             "PeerFrame"
           ],
           "limits": "The model covers abstract catalog authorization and unchanged state on refusal or in a peer. Native tests cover the SES route, regional template ARN, string substitutions, MIME encoding and byte limits."
+        },
+        {
+          "id": "SESLocalDomainProof",
+          "properties": [
+            "ReadCurrentProof",
+            "Rights",
+            "RefusalFrame",
+            "FreshGeneration",
+            "PhysicalZoneCapture"
+          ],
+          "limits": "The finite histories check current exact DNS proof, authorization classes, generation and refusal frames. Native tests handle HTTP, real SQLite, pagination, DNS encoding and cancellation. It does not model signatures, randomness or delivery."
         }
       ]
     },
     {
       "path": "internal/aws/catalog/semantics.go",
-      "sha256": "2fb58c21de5169014e50584517ebb1ff2f979d2694e74547cfa4c9fe9c0efecf",
+      "sha256": "a598288cced238e2855ac74fb8c2d8e2a6a25a40b12ccb06206c6b9b18bc11fb",
       "disposition": "modeled",
-      "reason": "Dispatch SES preview only after the existing identified-resource lookup and authorization.",
+      "reason": "Keep native template preview and dispatch the four regional identity operations; reject unsupported identity tags.",
       "models": [
         {
           "id": "CatalogResourceLifecycle",
@@ -78,14 +171,25 @@
             "PeerFrame"
           ],
           "limits": "The model covers abstract catalog authorization and unchanged state on refusal or in a peer. Native tests cover the SES route, regional template ARN, string substitutions, MIME encoding and byte limits."
+        },
+        {
+          "id": "SESLocalDomainProof",
+          "properties": [
+            "ReadCurrentProof",
+            "Rights",
+            "RefusalFrame",
+            "FreshGeneration",
+            "PhysicalZoneCapture"
+          ],
+          "limits": "The finite histories check current exact DNS proof, authorization classes, generation and refusal frames. Native tests handle HTTP, real SQLite, pagination, DNS encoding and cancellation. It does not model signatures, randomness or delivery."
         }
       ]
     },
     {
       "path": "internal/aws/catalog/services_integration.go",
-      "sha256": "2707d957b3fed8e98d06a3e56e3604fb22036df1549b709c04740bca1be47b98",
+      "sha256": "49ee8a78b503c549ecf45a75127e6a41f1ebc2b3f2ffa216f36c0e81009324fd",
       "disposition": "modeled",
-      "reason": "Bind preview to the existing regional email template, while retaining GetEmailTemplate as the Console detail read.",
+      "reason": "Declare the four identity operations alongside existing template and other SES resources.",
       "models": [
         {
           "id": "CatalogResourceLifecycle",
@@ -95,8 +199,38 @@
             "PeerFrame"
           ],
           "limits": "The model covers abstract catalog authorization and unchanged state on refusal or in a peer. Native tests cover the SES route, regional template ARN, string substitutions, MIME encoding and byte limits."
+        },
+        {
+          "id": "SESLocalDomainProof",
+          "properties": [
+            "ReadCurrentProof",
+            "Rights",
+            "RefusalFrame",
+            "FreshGeneration",
+            "PhysicalZoneCapture"
+          ],
+          "limits": "The finite histories check current exact DNS proof, authorization classes, generation and refusal frames. Native tests handle HTTP, real SQLite, pagination, DNS encoding and cancellation. It does not model signatures, randomness or delivery."
         }
       ]
+    },
+    {
+      "path": "internal/aws/catalog/ses_domain_identity.go",
+      "models": [
+        {
+          "id": "SESLocalDomainProof",
+          "properties": [
+            "ReadCurrentProof",
+            "Rights",
+            "RefusalFrame",
+            "FreshGeneration",
+            "PhysicalZoneCapture"
+          ],
+          "limits": "The finite histories check current exact DNS proof, authorization classes, generation and refusal frames. Native tests handle HTTP, real SQLite, pagination, DNS encoding and cancellation. It does not model signatures, randomness or delivery."
+        }
+      ],
+      "disposition": "modeled",
+      "sha256": "dce14c3cdbb7edcb280fc8863ba37081779757c90be063baf4566ea359e6bf71",
+      "reason": "Store scoped identity generations and three verification selectors and project current DNS state."
     },
     {
       "path": "internal/aws/catalog/ses_template_preview.go",
@@ -123,18 +257,133 @@
       "models": []
     },
     {
+      "path": "internal/aws/route53_http.go",
+      "models": [
+        {
+          "id": "SESLocalDomainProof",
+          "properties": [
+            "ReadCurrentProof",
+            "Rights",
+            "RefusalFrame",
+            "FreshGeneration",
+            "PhysicalZoneCapture"
+          ],
+          "limits": "The finite histories check current exact DNS proof, authorization classes, generation and refusal frames. Native tests handle HTTP, real SQLite, pagination, DNS encoding and cancellation. It does not model signatures, randomness or delivery."
+        },
+        {
+          "id": "Route53AtomicBatch",
+          "properties": [
+            "AtomicPair",
+            "OnlyAuthorizedValid",
+            "PendingInvisible"
+          ],
+          "limits": "Existing abstract Route 53 batch protection. The native RRset tests cover actual CNAME owner syntax, TTL, input admission and SQLite state."
+        }
+      ],
+      "disposition": "modeled",
+      "sha256": "f5b65ec650aac83a1bcadb8167500c4a19f4bdc2be1484707c5b0325eae315e9",
+      "reason": "Use the same canonical record-owner validation for DNS answer and list start inputs."
+    },
+    {
+      "path": "internal/aws/route53_ses_identity.go",
+      "models": [
+        {
+          "id": "SESLocalDomainProof",
+          "properties": [
+            "ReadCurrentProof",
+            "Rights",
+            "RefusalFrame",
+            "FreshGeneration",
+            "PhysicalZoneCapture"
+          ],
+          "limits": "The finite histories check current exact DNS proof, authorization classes, generation and refusal frames. Native tests handle HTTP, real SQLite, pagination, DNS encoding and cancellation. It does not model signatures, randomness or delivery."
+        }
+      ],
+      "disposition": "modeled",
+      "sha256": "6a35edee798931bb81a83295010c75e77a835ff52a2c88b992007f6e65d07719",
+      "reason": "Read exact saved record sets for the one captured local zone and admit narrowly bounded DKIM owners."
+    },
+    {
+      "path": "internal/aws/route53_store.go",
+      "models": [
+        {
+          "id": "SESLocalDomainProof",
+          "properties": [
+            "ReadCurrentProof",
+            "Rights",
+            "RefusalFrame",
+            "FreshGeneration",
+            "PhysicalZoneCapture"
+          ],
+          "limits": "The finite histories check current exact DNS proof, authorization classes, generation and refusal frames. Native tests handle HTTP, real SQLite, pagination, DNS encoding and cancellation. It does not model signatures, randomness or delivery."
+        },
+        {
+          "id": "Route53AtomicBatch",
+          "properties": [
+            "AtomicPair",
+            "OnlyAuthorizedValid",
+            "PendingInvisible"
+          ],
+          "limits": "Existing abstract Route 53 batch protection. The native RRset tests cover actual CNAME owner syntax, TTL, input admission and SQLite state."
+        }
+      ],
+      "disposition": "modeled",
+      "sha256": "b4cccb9f521ce1893ac8177eb9b0450fd7c79596a78db02b938224d90db9a2a3",
+      "reason": "Validate the CNAME record owner separately from hosted-zone and target names."
+    },
+    {
       "path": "internal/server/apidocs/catalog/index.json",
-      "sha256": "f8a264d0cad468b1fe81df22358f366b53c7131693a73513e924e2b7d6ef4247",
+      "sha256": "ceb132f661b5661698be49021bbad5b53888d1ddc441ceb0f145828f4b432011",
       "disposition": "presentation",
-      "reason": "Refresh the served count of SES v2 operations.",
+      "reason": "Expose bounded regional SES identity and stored template operations in the served index.",
       "models": []
     },
     {
       "path": "internal/server/apidocs/catalog/sesv2.json",
-      "sha256": "12901039f7638e034b474d600c8d11e0eba6f2b282add2c22bacf41cec920af7",
+      "sha256": "f81e8399e657db49e6b148c3281bfd80153286b292167a4f83a9bec5654cf510",
       "disposition": "presentation",
-      "reason": "Publish the modeled native SES v2 render route and its fields in the served reference.",
+      "reason": "Serve the selected official SES protocol paths, members and declared operation boundaries.",
       "models": []
+    },
+    {
+      "path": "internal/server/server.go",
+      "models": [
+        {
+          "id": "SESLocalDomainProof",
+          "properties": [
+            "ReadCurrentProof",
+            "Rights",
+            "RefusalFrame",
+            "FreshGeneration",
+            "PhysicalZoneCapture"
+          ],
+          "limits": "The finite histories check current exact DNS proof, authorization classes, generation and refusal frames. Native tests handle HTTP, real SQLite, pagination, DNS encoding and cancellation. It does not model signatures, randomness or delivery."
+        }
+      ],
+      "disposition": "modeled",
+      "sha256": "2a67643fe8a2478b990514710ce39b74dbc5a1692eb8454a84bb4f21fd3092f4",
+      "reason": "Wire SES to local Route 53 using the existing per-team SQLite transaction."
+    },
+    {
+      "path": "internal/server/ses_domain_identity_test.go",
+      "models": [],
+      "disposition": "test-support",
+      "sha256": "25cef332be48c8e4f1abdca4e71bc7c354308516507fa8fb0817b0417ddcc3c3",
+      "reason": "Exercise real SES and Route 53 HTTP, scoped IAM, page tokens, reopen and physical-write interruptions."
+    },
+    {
+      "path": "scripts/formal_model_gate.py",
+      "models": [],
+      "disposition": "formal-infrastructure",
+      "sha256": "1c4feee45c695f992f63a4c55a14c6419ccf5254705502f269061e049045e96f",
+      "reason": "Protect the new model, its safety properties, sensitivity cases and production sources."
+    },
+    {
+      "path": "scripts/test-formal-gate.py",
+      "models": [],
+      "disposition": "formal-infrastructure",
+      "sha256": "d5b80f09655b9cca546be80a4ec128b159a670648f95a7e865f4be6adbebab35",
+      "reason": "Require model inventory and independently reject removal of its DNS and generation checks."
     },
     {
       "path": "test/e2e/aws_catalog_fixtures.py",
@@ -149,6 +398,13 @@
       "disposition": "test-support",
       "reason": "Exercise stock SES v2 template rendering, validation, peer isolation, update, restart and cleanup.",
       "models": []
+    },
+    {
+      "path": "test/e2e/ses_domain_identity.py",
+      "models": [],
+      "disposition": "test-support",
+      "sha256": "572f8b4a4b07ae4f03227d5f8573b9f53868f39dd6159fc89b062288acedfefb",
+      "reason": "Use the pinned stock SES and Route 53 clients on two local CLI authorities."
     }
   ]
 }

@@ -4818,6 +4818,53 @@ REQUIRED_SOURCE_SCOPES['StoreConnectionLifetime'] = {
 }
 
 
+BASE_MODELS.add('SESLocalDomainProof')
+BASE_INVARIANTS['SESLocalDomainProof'] = {
+    'AbortVisible',
+    'DNSWriteFrame',
+    'DeleteFrame',
+    'FreshGeneration',
+    'PeerIdentityFrame',
+    'PhysicalZoneCapture',
+    'ReadCurrentProof',
+    'ReadRestartFrame',
+    'RefusalFrame',
+    'Rights',
+    'TypeOK',
+}
+REQUIRED_MUTANTS['SESLocalDomainProof'] = {
+    'AcceptDuplicateZone',
+    'AcceptTwoRecords',
+    'AdoptReplacementZone',
+    'AlwaysCaptureFirstZone',
+    'BorrowOtherRegionSelectors',
+    'BorrowPeerDNS',
+    'CacheAfterRecordRemoval',
+    'CancelCreatesIdentity',
+    'CanceledDeleteAcknowledged',
+    'CreateAdoptsPeerIdentity',
+    'DeleteRemovesDNS',
+    'DeniedDeleteChangesState',
+    'IgnoreWrongOwner',
+    'IgnoreWrongTarget',
+    'NamedGrantLists',
+    'RecreateReusesTokens',
+    'ReissueTokensOnRestart',
+}
+REQUIRED_SOURCE_SCOPES['SESLocalDomainProof'] = {
+    'internal/aws/catalog/engine.go',
+    'internal/aws/catalog/models/sesv2.json',
+    'internal/aws/catalog/selection.json',
+    'internal/aws/catalog/semantics.go',
+    'internal/aws/catalog/services_integration.go',
+    'internal/aws/catalog/ses_domain_identity.go',
+    'internal/aws/route53_http.go',
+    'internal/aws/route53_ses_identity.go',
+    'internal/aws/route53_store.go',
+    'internal/server/server.go',
+}
+
+
 def load_registry(root, relative='formal/models.json'):
     root = Path(root)
     registry_path = asset(root, relative)

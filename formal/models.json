@@ -29971,6 +29971,232 @@
           "expect_invariant": "ConnectionPragmasApplied"
         }
       ]
+    },
+    {
+      "id": "SESLocalDomainProof",
+      "model": "formal/SESLocalDomainProof.tla",
+      "config": "formal/SESLocalDomainProof.cfg",
+      "bounds": "Two teams, two regions for one team, one domain, two physical zones and identity generations, and three selector positions. Eight scheduled mutation histories allow any scoped Get/List and any of three grant classes between steps.",
+      "properties": [
+        "TypeOK",
+        "ReadCurrentProof",
+        "Rights",
+        "RefusalFrame",
+        "ReadRestartFrame",
+        "PeerIdentityFrame",
+        "FreshGeneration",
+        "DeleteFrame",
+        "AbortVisible",
+        "PhysicalZoneCapture",
+        "DNSWriteFrame"
+      ],
+      "limits": "Finite local DNS ownership projection over normalized values. Missing/wrong records revoke status at read time. Restart preserves the abstract frame. DNS syntax, TTL, UUID/selector generation and entropy, SDK encoding, signed requests, SQLite isolation/failure timing and durable I/O, IAM evaluation, pagination and Go refinement are tested separately or outside the model. No Internet DNS, DKIM signatures, address verification, email sending or delivery.",
+      "source_scope": [
+        "internal/aws/catalog/ses_domain_identity.go",
+        "internal/aws/catalog/engine.go",
+        "internal/aws/catalog/semantics.go",
+        "internal/aws/catalog/services_integration.go",
+        "internal/aws/catalog/models/sesv2.json",
+        "internal/aws/catalog/selection.json",
+        "internal/aws/route53_store.go",
+        "internal/aws/route53_http.go",
+        "internal/aws/route53_ses_identity.go",
+        "internal/server/server.go"
+      ],
+      "mutants": [
+        {
+          "id": "AcceptTwoRecords",
+          "edits": [
+            {
+              "old": "\\A k \\in Slots: \\E r \\in dns:",
+              "new": "\\A k \\in {1,2}: \\E r \\in dns:",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadCurrentProof"
+        },
+        {
+          "id": "IgnoreWrongTarget",
+          "edits": [
+            {
+              "old": "/\\ r.slot = k /\\ r.ownerOK /\\ r.targetOK",
+              "new": "/\\ r.slot = k /\\ r.ownerOK",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadCurrentProof"
+        },
+        {
+          "id": "IgnoreWrongOwner",
+          "edits": [
+            {
+              "old": "/\\ r.slot = k /\\ r.ownerOK /\\ r.targetOK",
+              "new": "/\\ r.slot = k /\\ r.targetOK",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadCurrentProof"
+        },
+        {
+          "id": "BorrowPeerDNS",
+          "edits": [
+            {
+              "old": "r.team = Team(s) /\\ r.zone = i.zone",
+              "new": "r.zone = i.zone",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadCurrentProof"
+        },
+        {
+          "id": "BorrowOtherRegionSelectors",
+          "edits": [
+            {
+              "old": "r.selectorScope = s /\\ r.gen = i.gen",
+              "new": "(r.selectorScope = s \\/ {r.selectorScope,s} = {\"east\",\"west\"}) /\\ r.gen = i.gen",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadCurrentProof"
+        },
+        {
+          "id": "AcceptDuplicateZone",
+          "edits": [
+            {
+              "old": "i.gen > 0 /\\ zones[Team(s)] = {i.zone}",
+              "new": "i.gen > 0 /\\ i.zone \\in zones[Team(s)]",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadCurrentProof"
+        },
+        {
+          "id": "AdoptReplacementZone",
+          "edits": [
+            {
+              "old": "i.gen > 0 /\\ zones[Team(s)] = {i.zone}",
+              "new": "i.gen > 0 /\\ Cardinality(zones[Team(s)]) = 1",
+              "count": 1
+            },
+            {
+              "old": "r.zone = i.zone",
+              "new": "r.zone \\in zones[Team(s)]",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadCurrentProof"
+        },
+        {
+          "id": "CacheAfterRecordRemoval",
+          "edits": [
+            {
+              "old": "ELSE IF Proof(a.scope) THEN \"success\"",
+              "new": "ELSE IF Proof(a.scope) \\/ (last.kind = \"Drop\" /\\ last.scope = a.scope) THEN \"success\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadCurrentProof"
+        },
+        {
+          "id": "NamedGrantLists",
+          "edits": [
+            {
+              "old": "a.grant = \"named\" /\\ a.kind # \"List\"",
+              "new": "a.grant = \"named\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "Rights"
+        },
+        {
+          "id": "DeniedDeleteChangesState",
+          "edits": [
+            {
+              "old": "ELSE IF allowed /\\ a.kind = \"Delete\" THEN",
+              "new": "ELSE IF a.live /\\ a.kind = \"Delete\" THEN",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "RefusalFrame"
+        },
+        {
+          "id": "CancelCreatesIdentity",
+          "edits": [
+            {
+              "old": "allowed == Can(a) /\\ a.live",
+              "new": "allowed == Can(a) /\\ (a.live \\/ a.kind = \"Create\")",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "RefusalFrame"
+        },
+        {
+          "id": "CanceledDeleteAcknowledged",
+          "edits": [
+            {
+              "old": "ELSE IF ~a.live THEN \"abort\"",
+              "new": "ELSE IF ~a.live THEN IF a.kind = \"Delete\" THEN \"ack\" ELSE \"abort\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AbortVisible"
+        },
+        {
+          "id": "ReissueTokensOnRestart",
+          "edits": [
+            {
+              "old": "= Empty] ELSE ids",
+              "new": "= Empty] ELSE IF a.kind = \"Restart\" THEN [ids EXCEPT ![s].gen = 2] ELSE ids",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadRestartFrame"
+        },
+        {
+          "id": "RecreateReusesTokens",
+          "edits": [
+            {
+              "old": "issued == generations[s]+1",
+              "new": "issued == 1",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "FreshGeneration"
+        },
+        {
+          "id": "AlwaysCaptureFirstZone",
+          "edits": [
+            {
+              "old": "zone |-> CHOOSE z \\in zones[team]: TRUE",
+              "new": "zone |-> 1",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PhysicalZoneCapture"
+        },
+        {
+          "id": "CreateAdoptsPeerIdentity",
+          "edits": [
+            {
+              "old": "[ids EXCEPT ![s] = [gen |-> issued, zone |-> CHOOSE z \\in zones[team]: TRUE]]",
+              "new": "[ids EXCEPT ![s] = [gen |-> issued, zone |-> CHOOSE z \\in zones[team]: TRUE], ![IF s = \"peer\" THEN \"east\" ELSE \"peer\"] = [gen |-> issued, zone |-> 1]]",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PeerIdentityFrame"
+        },
+        {
+          "id": "DeleteRemovesDNS",
+          "edits": [
+            {
+              "old": "THEN dns \\ key ELSE dns",
+              "new": "THEN dns \\ key ELSE IF allowed /\\ a.kind = \"Delete\" THEN {} ELSE dns",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "DeleteFrame"
+        }
+      ]
     }
   ]
 }
