@@ -147,6 +147,7 @@ def run():
                                 if urlsplit(request.url).path.startswith(PREFIX) else None)
                         assert page.goto(owner.origin + '/_simulator/docs/').status == 200
                         page.get_by_role('link', name='Route53 public hosted zones', exact=True).click()
+                        page.get_by_role('link', name=operation['summary'], exact=True).click()
                         page.get_by_role('button', name='Test Request (get ' + path + ')', exact=True).click()
                         dialog = page.get_by_role('dialog').filter(
                             has=page.get_by_role('button', name='Close Client', exact=True))
