@@ -103,6 +103,28 @@ jobs:
               return launch(self, **kwargs)
           BrowserType.launch = sandboxed
           sys.path.insert(0, str(Path.cwd() / 'test/e2e'))
+          def sweep_trace(frame, event, arg):
+              if not frame.f_code.co_filename.endswith('/aws_catalog_console.py'):
+                  return None
+              if frame.f_code.co_name != 'run':
+                  return None
+              if event == 'exception' and frame.f_lineno == 670:
+                  import json
+                  values = frame.f_locals
+                  described, kind, page = values['described'], values['kind'], values['page']
+                  record = {'service': described['model'], 'kind': kind['kind'],
+                            'operation': kind['operations']['create']['name'], 'expected_button': 'Create'}
+                  try:
+                      record['accessible_buttons'] = {name: page.get_by_role('button', name=name, exact=True).count()
+                          for name in ('Create', 'Next', 'Create app block', 'Previous', 'Cancel')}
+                      record['generic_fields'] = page.locator('[id^="catalog-field-"]').count()
+                      record['app_block_name_fields'] = page.locator('#appblock-name').count()
+                  except Exception as error:
+                      record['observation_error_type'] = type(error).__name__
+                  destination = Path(os.environ['RUNNER_TEMP']) / '280-receipts' / 'sweep-context.json'
+                  destination.write_text(json.dumps(record, indent=2) + '\n')
+              return sweep_trace
+          sys.settrace(sweep_trace)
           runpy.run_path('test/e2e/aws_catalog_console.py', run_name='__main__')
           PY
           export SIMULATOR_BINARY="$PWD/dist/tenkacloud-simulator"
