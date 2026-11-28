@@ -30329,7 +30329,7 @@
           "edits": [
             {
               "old": "Inspect(m) == topic = \"standard\" /\\ m = \"ok\"",
-              "new": "Inspect(m) == topic = \"standard\" /\\ m \\in {\"ok\", \"badRow\"}",
+              "new": "Inspect(m) == topic = \"standard\" /\\ (m = \"ok\" \\/ (m = \"badRow\" /\\ row.gen > 0))",
               "count": 1
             }
           ],
