@@ -279,7 +279,7 @@ def fixture(port, domain):
         "terraform": {"required_version": "= " + TF, "required_providers":
                       {"aws": {"source": "hashicorp/aws", "version": "= " + PROVIDER}}},
         "provider": {"aws": {
-            "region": "us-east-1", "access_key": FIXTURE_KEY, "secret_key": FIXTURE_SECRET,
+            "region": "us-east-1",
             "skip_credentials_validation": True, "skip_requesting_account_id": True,
             "skip_metadata_api_check": True, "skip_region_validation": True, "max_retries": 0,
             "endpoints": {"simpledb": f"http://{ADDR}:{port}"},
@@ -311,9 +311,11 @@ def run():
         env = {"HOME": str(home), "PATH": "/nonexistent", "TF_CLI_CONFIG_FILE": str(config),
                "TF_IN_AUTOMATION": "1", "CHECKPOINT_DISABLE": "1", "AWS_EC2_METADATA_DISABLED": "true",
                "AWS_CONFIG_FILE": "/dev/null", "AWS_SHARED_CREDENTIALS_FILE": "/dev/null"}
+        # The local provider needs the signing pair only while Terraform runs.
+        terraform_env = dict(env, AWS_ACCESS_KEY_ID=FIXTURE_KEY, AWS_SECRET_ACCESS_KEY=FIXTURE_SECRET)
 
         def terraform(*args, expected=0):
-            child = subprocess.run([str(cli), *args], cwd=root, env=env, capture_output=True, timeout=90)
+            child = subprocess.run([str(cli), *args], cwd=root, env=terraform_env, capture_output=True, timeout=90)
             need(child.returncode == expected, f"Terraform {args[0]} failed ({child.returncode})")
             return child.stdout
 

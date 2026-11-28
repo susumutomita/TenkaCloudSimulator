@@ -9,8 +9,8 @@ import unittest
 from urllib.parse import urlencode
 
 from simpledb_terraform_provider import (
-    BASE, TF, PROVIDER, VERSION, adapter, approved_simulator_digest, decode_request, fixture, native, run,
-    verify_copy, verify_terraform_state, verify_unauthenticated_metadata,
+    BASE, TF, PROVIDER, VERSION, FIXTURE_KEY, FIXTURE_SECRET, adapter, approved_simulator_digest,
+    decode_request, fixture, native, run, verify_copy, verify_terraform_state, verify_unauthenticated_metadata,
 )
 
 
@@ -218,8 +218,32 @@ class AcceptanceBoundaries(unittest.TestCase):
             with self.subTest(state=state, claim=claim), self.assertRaises(RuntimeError):
                 verify_terraform_state(state, domain=claim)
 
+    def test_only_terraform_receives_the_fixture_signing_pair(self):
+        version = json.dumps({"terraform_version": TF, "platform": "linux_amd64"}).encode()
+        with (
+            patch.dict("os.environ", {"TCSIM_RUN_SIMPLEDB_TERRAFORM": BASE, "AWS_PROFILE": "unused"}, clear=True),
+            patch("simpledb_terraform_provider.os.uname", return_value=Mock(sysname="Linux", machine="x86_64")),
+            patch("simpledb_terraform_provider.socket.if_nameindex", return_value=[(1, "lo")]),
+            patch("simpledb_terraform_provider.verify_copy"),
+            patch("simpledb_terraform_provider.approved_simulator_digest"),
+            patch("simpledb_terraform_provider.subprocess.run", return_value=Mock(returncode=0, stdout=version)) as cli,
+            patch("simpledb_terraform_provider.simulator", side_effect=RuntimeError("simulator handoff")) as server,
+        ):
+            with self.assertRaisesRegex(RuntimeError, "simulator handoff"):
+                run()
+        simulator_env = server.call_args.args[2]
+        provider_env = cli.call_args.kwargs["env"]
+        self.assertNotIn("AWS_PROFILE", provider_env)
+        self.assertNotIn("AWS_ACCESS_KEY_ID", simulator_env)
+        self.assertNotIn("AWS_SECRET_ACCESS_KEY", simulator_env)
+        expected = dict(simulator_env, AWS_ACCESS_KEY_ID=FIXTURE_KEY, AWS_SECRET_ACCESS_KEY=FIXTURE_SECRET)
+        self.assertTrue(provider_env == expected, "Unexpected provider process environment")
+
     def test_artifact_and_fixture_pins(self):
         d = fixture(51723, self.domain)
+        serialized = json.dumps(d)
+        for signing_field in ('"access_key"', '"secret_key"', FIXTURE_KEY, FIXTURE_SECRET):
+            self.assertTrue(signing_field not in serialized, "Signing material appeared in the Terraform configuration")
         self.assertEqual(d["terraform"]["required_version"], "= " + TF)
         self.assertEqual(d["terraform"]["required_providers"]["aws"]["version"], "= " + PROVIDER)
         self.assertEqual(d["provider"]["aws"]["endpoints"], {"simpledb": "http://127.0.0.1:51723"})

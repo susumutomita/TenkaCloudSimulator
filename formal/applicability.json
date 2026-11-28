@@ -53,9 +53,9 @@
     },
     {
       "path": "test/e2e/simpledb_terraform_provider.py",
-      "sha256": "e3084f3d4005fc97fe4045c052b6aedc2f7bf9ec476ed0504ec14c7da6969f28",
+      "sha256": "21c20925eff9a9c69c59c32db8be97dd719d88f22b9d31733c493859758f0a8c",
       "disposition": "test-support",
-      "reason": "Verify the pinned Terraform provider's signed loopback form and forward only the three validated native SimpleDB fields during the existing acceptance fixture.",
+      "reason": "Keep synthetic signing inputs in the isolated Terraform process environment. Verify the pinned provider signature before forwarding three native SimpleDB fields.",
       "models": []
     },
     {
@@ -67,9 +67,9 @@
     },
     {
       "path": "test/e2e/test_simpledb_terraform_provider.py",
-      "sha256": "80d7e1e9a1ac83a4f6aa9b8e7f8d67acc128b766b6b49130fd43da4564cc2078",
+      "sha256": "b84e92193e8e7ef53c9fc4589f198eb9286d243ecf62aaaedeaa3b2e464050db",
       "disposition": "test-support",
-      "reason": "Check independent fixture signature vectors, reject invalid signing, framing and authority, and verify only the three native fields are forwarded.",
+      "reason": "Check process isolation and credential-free persisted configuration, independent signature vectors, strict refusal cases, and the three-field native request.",
       "models": []
     }
   ]
