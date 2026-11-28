@@ -197,9 +197,9 @@ func (q *request) groupMembersPage(group row, filter repositoryTagFilter, rows [
 			return nil, invalid("Invalid membership pagination token for this group and query.")
 		}
 	}
-	limit := 50
+	limit := int64(50)
 	if count, ok := q.input["MaxResults"].(int64); ok {
-		limit = int(count)
+		limit = count
 	}
 	members, identifiers := []any{}, []any{}
 	output := map[string]any{}
@@ -208,7 +208,7 @@ func (q *request) groupMembersPage(group row, filter repositoryTagFilter, rows [
 		if r.Seq <= after || r.Tags[filter.key] != filter.value {
 			continue
 		}
-		if len(members) == limit {
+		if int64(len(members)) == limit {
 			output["NextToken"] = pageToken(q.op.Name, q.region, scope, last)
 			break
 		}

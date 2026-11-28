@@ -69,6 +69,10 @@ func TestNamedGroupQueryTracksOnlyRealLocalECRResources(t *testing.T) {
 		}
 	}
 	members(listMembers(q(arn)), one, two)
+	members(listMembers(map[string]any{"Group": arn, "MaxResults": 50}), one, two)
+	for _, size := range []int{0, 51} {
+		expect(t, listMembers(map[string]any{"Group": arn, "MaxResults": size}), 400, "BadRequestException")
+	}
 	page := listMembers(map[string]any{"Group": arn, "MaxResults": 1})
 	members(page, one)
 	token := str(page.body["NextToken"])
