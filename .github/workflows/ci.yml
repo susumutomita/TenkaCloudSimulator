@@ -394,12 +394,13 @@ jobs:
           /tmp/s3-paging-tests/bin/python test/e2e/run_s3_multipart_paging.py \
             --binary "$PWD/dist/tenkacloud-simulator" > "$RECEIPT"
           digest=$(sha256sum dist/tenkacloud-simulator | cut -d ' ' -f 1)
-          jq -e --arg digest "$digest" '
+          jq -se --arg digest "$digest" '
+            length == 1 and (.[0] |
             .binarySha256 == $digest and .parts == 1001 and
             .nativeBrowserListMarkers == [[0,1000],[0,1000],[0,1000],[0,1000]] and
             .staleReviewNoPost == true and .completePostIncludesAllParts == true and
             .nativeSizeRefusalPreservedUpload == true and .nativeBrowserPartSave == true and
-            .visibleFinalPartRefresh == true and .nativeAbortAndDelete == true and .realAWS == false
+            .visibleFinalPartRefresh == true and .nativeAbortAndDelete == true and .realAWS == false)
           ' "$RECEIPT"
       - name: Retain the build and paging receipt
         uses: actions/upload-artifact@v7.0.2
