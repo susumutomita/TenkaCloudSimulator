@@ -12,7 +12,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7.0.1
         with:
-          ref: 5b740845f4b7ffe22d451eeef1382cb43fe77cc4
+          ref: 3cc5fec741af71401550d44b5137fe68a4ce098f
           fetch-depth: 0
           persist-credentials: false
       - uses: actions/setup-go@v6.5.0
@@ -22,12 +22,12 @@ jobs:
       - name: Build the clean immutable composed product
         run: |
           test "$(id -u)" -ne 0
-          test "$(git rev-parse HEAD)" = 5b740845f4b7ffe22d451eeef1382cb43fe77cc4
+          test "$(git rev-parse HEAD)" = 3cc5fec741af71401550d44b5137fe68a4ce098f
           test -z "$(git status --porcelain)"
           make build
           mkdir -p "$RUNNER_TEMP/cloudfront-receipts"
           go version -m dist/tenkacloud-simulator > "$RUNNER_TEMP/cloudfront-receipts/build.txt"
-          grep -F 'vcs.revision=5b740845f4b7ffe22d451eeef1382cb43fe77cc4' "$RUNNER_TEMP/cloudfront-receipts/build.txt"
+          grep -F 'vcs.revision=3cc5fec741af71401550d44b5137fe68a4ce098f' "$RUNNER_TEMP/cloudfront-receipts/build.txt"
           grep -F 'vcs.modified=false' "$RUNNER_TEMP/cloudfront-receipts/build.txt"
           sha256sum dist/tenkacloud-simulator > "$RUNNER_TEMP/cloudfront-receipts/binary.sha256"
       - name: Install stock pinned SDK and Chromium dependencies
@@ -57,7 +57,7 @@ jobs:
           root = pathlib.Path(os.environ['RUNNER_TEMP'])
           case, result = os.environ['CLOUDFRONT_CASE'], int(os.environ['CLOUDFRONT_EXIT'])
           text = (root / f'cloudfront-{case}-private.log').read_text(errors='replace')
-          receipt = {'sourceSha': '5b740845f4b7ffe22d451eeef1382cb43fe77cc4', 'case': case, 'fixtureExit': result}
+          receipt = {'sourceSha': '3cc5fec741af71401550d44b5137fe68a4ce098f', 'case': case, 'fixtureExit': result}
           if result == 0:
               records = [json.loads(line) for line in text.splitlines() if line.startswith('{"ok":')]
               expected = ({'ok': True, 'nativeCloudFrontOperations': 8, 'origin': 'saved local S3 bytes',
@@ -85,7 +85,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v7.0.2
         with:
-          name: cloudfront-runtime-5b740845f4b7ffe22d451eeef1382cb43fe77cc4
+          name: cloudfront-runtime-3cc5fec741af71401550d44b5137fe68a4ce098f
           path: ${{ runner.temp }}/cloudfront-receipts/
           if-no-files-found: error
           retention-days: 7
@@ -98,7 +98,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7.0.1
         with:
-          ref: 5b740845f4b7ffe22d451eeef1382cb43fe77cc4
+          ref: 3cc5fec741af71401550d44b5137fe68a4ce098f
           fetch-depth: 0
           persist-credentials: false
       - uses: actions/setup-go@v6.5.0
@@ -108,12 +108,12 @@ jobs:
       - name: Build the clean source and install stock pinned test requirements
         run: |
           test "$(id -u)" -ne 0
-          test "$(git rev-parse HEAD)" = 5b740845f4b7ffe22d451eeef1382cb43fe77cc4
+          test "$(git rev-parse HEAD)" = 3cc5fec741af71401550d44b5137fe68a4ce098f
           test -z "$(git status --porcelain)"
           make build
           mkdir -p "$RUNNER_TEMP/cloudfront-gate-receipts"
           go version -m dist/tenkacloud-simulator > "$RUNNER_TEMP/cloudfront-gate-receipts/build.txt"
-          grep -F 'vcs.revision=5b740845f4b7ffe22d451eeef1382cb43fe77cc4' "$RUNNER_TEMP/cloudfront-gate-receipts/build.txt"
+          grep -F 'vcs.revision=3cc5fec741af71401550d44b5137fe68a4ce098f' "$RUNNER_TEMP/cloudfront-gate-receipts/build.txt"
           grep -F 'vcs.modified=false' "$RUNNER_TEMP/cloudfront-gate-receipts/build.txt"
           sha256sum dist/tenkacloud-simulator > "$RUNNER_TEMP/cloudfront-gate-receipts/binary.sha256"
           "$RUNNER_TOOL_CACHE/Python/3.12.16/x64/bin/python3.12" -m venv /tmp/cloudfront-gate-tests
@@ -133,7 +133,7 @@ jobs:
           import json, os, pathlib, re
           root = pathlib.Path(os.environ['RUNNER_TEMP'])
           text = (root / 'cloudfront-whole-private.log').read_text(errors='replace')
-          receipt = {'sourceSha': '5b740845f4b7ffe22d451eeef1382cb43fe77cc4', 'command': 'make before-commit',
+          receipt = {'sourceSha': '3cc5fec741af71401550d44b5137fe68a4ce098f', 'command': 'make before-commit',
                      'exit': int(os.environ['CLOUDFRONT_GATE_EXIT']),
                      'packages': re.findall(r'^(?:ok|FAIL)\s+(github\.com/susumutomita/TenkaCloudSimulator/[A-Za-z0-9_/.-]+)', text, re.MULTILINE),
                      'failedTests': re.findall(r'^--- FAIL: (Test[A-Za-z0-9_]+)', text, re.MULTILINE),
@@ -154,7 +154,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v7.0.2
         with:
-          name: cloudfront-whole-5b740845f4b7ffe22d451eeef1382cb43fe77cc4
+          name: cloudfront-whole-3cc5fec741af71401550d44b5137fe68a4ce098f
           path: ${{ runner.temp }}/cloudfront-gate-receipts/
           if-no-files-found: error
           retention-days: 7

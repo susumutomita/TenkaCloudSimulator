@@ -201,6 +201,7 @@ func cfCreateInvalidation(ctx context.Context, tx *sql.Tx, id string, batch cfIn
 			return result, cfFailure{400, "InvalidationBatchAlreadyExists", "That caller reference was used with different paths."}
 		}
 		result.XMLNS = cloudFrontNS
+		result.InvalidationBatch.XMLNS = cloudFrontNS
 		return result, nil
 	}
 	if !errors.Is(err, sql.ErrNoRows) {
