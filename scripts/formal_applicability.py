@@ -56,10 +56,11 @@ NONFORMAL = {
          'guest/ssm-relay/README.md', 'scripts/guest-image/SESSION-IMAGE.md', 'internal/aws/testdata/sts-original/README.md',
                       'internal/aws/testdata/sts-original/LICENSE', 'README.md', 'README.ja.md', 'SECURITY.md', 'AGENTS.md', 'docs/**', 'formal/README.md',
                       'LICENSE', 'NOTICE', 'third_party/**', 'internal/legal/assets/**'],
-    'presentation': ['tools/console/**', 'tools/scalar/**', 'internal/server/web/**',
+    'presentation': ['internal/aws/catalog/kinesisvideo_reference.go', 'tools/console/**', 'tools/scalar/**', 'internal/server/web/**',
                      'internal/server/apidocs/**',
                      'internal/server/landing/index.html', 'internal/server/landing/landing.css'],
     'test-support': [
+        'internal/aws/kinesisvideo/testdata/two-frames.mkv',
         'scripts/verification/test_adapter.py',
         'tools/mac-hvf-probe/test_boot_probe.py',
         'tools/mac-hvf-probe/test_builder_launch.py',

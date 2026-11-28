@@ -75,6 +75,9 @@ func (q *request) execute() (map[string]any, error) {
 		if q.isBatchJobDefinition() {
 			return q.registerBatchDefinition()
 		}
+		if q.isVideoStreamCreate() {
+			return q.createVideoStream()
+		}
 		return q.create(0)
 	case Read:
 		if q.b.spec.Model == "resource-groups" {
@@ -823,6 +826,13 @@ func (q *request) create(ecsRevision int) (map[string]any, error) {
 	}
 	res := q.resource()
 	tokenMember := idempotencyMember(q.b.model.shape(q.official.Input))
+	var videoTime int64
+	if q.isVideoStreamCreate() {
+		videoTime, err = q.videoCreationTime(&r)
+		if err != nil {
+			return nil, err
+		}
+	}
 	if q.b.spec.Model == "kafka" && q.op.Name == "CreateCluster" {
 		if err := q.authorizeMSKCreate(r); err != nil {
 			return nil, err
@@ -867,6 +877,19 @@ func (q *request) create(ecsRevision int) (map[string]any, error) {
 	}
 	if err := q.checkRDSPrivatePostgresTopology(tx, r); err != nil {
 		return nil, err
+	}
+	if videoTime != 0 {
+		result, err := tx.ExecContext(q.ctx, "UPDATE aws_kinesisvideo_creation_clock SET last_ms=? WHERE singleton=1 AND last_ms<?", videoTime, videoTime)
+		if err != nil {
+			return nil, err
+		}
+		updated, err := result.RowsAffected()
+		if err != nil {
+			return nil, err
+		}
+		if updated == 0 {
+			return nil, errVideoClockChanged
+		}
 	}
 	if err := insertNewResource(tx, res, &r, parent); err != nil {
 		return nil, err
@@ -1031,6 +1054,11 @@ func (q *request) update() (map[string]any, error) {
 				}
 			}
 		}
+		if r.Service == "kinesisvideo" && q.op.Name == "UpdateDataRetention" {
+			if err := q.updateVideoRetention(tx, r); err != nil {
+				return err
+			}
+		}
 		return updateRow(tx, r)
 	}); err != nil {
 		return nil, err
@@ -1038,10 +1066,10 @@ func (q *request) update() (map[string]any, error) {
 	return q.output(r, parent), nil
 }
 
-// Resource Groups and MSK writes are entirely transactional. Other catalogs retain
+// Resource Groups, MSK and Kinesis Video writes are entirely transactional. Other catalogs retain
 // their existing lifecycle, including RDS teardown before the SQLite write.
 func (q *request) beginMutation() (*sql.Tx, error) {
-	if q.b.spec.Model == "resource-groups" || q.b.spec.Model == "kafka" {
+	if q.b.spec.Model == "resource-groups" || q.b.spec.Model == "kafka" || q.b.spec.Model == "kinesisvideo" {
 		return q.e.store.db.BeginTx(q.ctx, nil)
 	}
 	return q.e.store.db.Begin()

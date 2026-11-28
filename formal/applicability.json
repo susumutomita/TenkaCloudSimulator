@@ -1,747 +1,643 @@
 {
   "version": 1,
-  "base_sha": "cfc0c4d73d62e1b3bea76817789cc770a0ca2024",
+  "base_sha": "fdb5a77ac720783e76a1f546aa3541e5f701a608",
   "changes": [
     {
+      "path": ".github/workflows/ci.yml",
+      "sha256": "bebacc5144facd3a4779a7893ccb2d59b966c8d6095c8bf1f8ae98426143f0c3",
+      "disposition": "formal-infrastructure",
+      "reason": "Registers guarded Kinesis acceptance and its model or client checks in the existing release tooling.",
+      "models": []
+    },
+    {
+      "path": "Makefile",
+      "sha256": "c45d26b3bc1aeeb0c3faf33c0d0df28f2ad444def0839537666b6ebb41664284",
+      "disposition": "build-metadata",
+      "reason": "Registers guarded Kinesis acceptance and its model or client checks in the existing release tooling.",
+      "models": []
+    },
+    {
       "path": "README.md",
-      "sha256": "ef1cb8b7731347f8657c6331e51425d0ce00d6cb7eaa87a46569d703e0235626",
+      "sha256": "522dcfd94600ce5a120346394b5f2749c7aa4b3c873252fd5c2b2bf921203ba6",
       "disposition": "documentation",
-      "reason": "Describe the selected native SES template, verified domain, and local sink workflow.",
+      "reason": "Documents the local stream format, retention behavior, real client prerequisites or the generated service contract.",
       "models": []
     },
     {
       "path": "docs/aws-catalog-services.md",
-      "sha256": "f8c79dae88354d2668e412dfd5d873f172db98f8e0fef5db5daa16654610a320",
+      "sha256": "c958be9d654d11acb91941f850adc193b16108b4d9ebd4f7a2a09a1173fb3099",
       "disposition": "documentation",
-      "reason": "Regenerate the SES v2 operation list and limits from its service descriptor.",
+      "reason": "Documents the local stream format, retention behavior, real client prerequisites or the generated service contract.",
+      "models": []
+    },
+    {
+      "path": "docs/aws-catalog.md",
+      "sha256": "bed378d28ecc297d2f344715f7b7a5dacbcf0c05e845e48c9bb7fb5bcc0419fd",
+      "disposition": "documentation",
+      "reason": "Documents the local stream format, retention behavior, real client prerequisites or the generated service contract.",
       "models": []
     },
     {
       "path": "docs/design/0001-go-standalone.md",
-      "sha256": "f35e2d340a4f768246c1b6846c823566db16d015dfde5fdd00b753eea397ffc3",
+      "sha256": "a5e7e66fbb8fff8d4ba7888ba0d49bea67eeacc856e7c5f315f7ea0ba90944bb",
       "disposition": "documentation",
-      "reason": "Document the private local mailbox and stored receipts.",
+      "reason": "Documents the local stream format, retention behavior, real client prerequisites or the generated service contract.",
       "models": []
     },
     {
-      "path": "docs/route53.md",
-      "models": [],
+      "path": "docs/kinesis-video-media.md",
+      "sha256": "1707fed147ebad0f0e485af1b91b7d3b1cb95777c43f0666e027e6fce7221ebf",
       "disposition": "documentation",
-      "sha256": "35f20d9e7e38a204b95ed612d808eb71648f07a7b25e037446399664e1e0dfce",
-      "reason": "Document the specifically admitted SES CNAME owner syntax and continued zone-name restrictions."
+      "reason": "Documents the local stream format, retention behavior, real client prerequisites or the generated service contract.",
+      "models": []
     },
     {
-      "path": "docs/ses-domain-identities.md",
-      "models": [],
-      "disposition": "documentation",
-      "sha256": "68721fc9752b16df89df9ef220fceefc88d186f421631287e214a4f255ec6dd0",
-      "reason": "Document the live DNS proof, accepted submission, local delivery or missing mailbox, and operator workflow."
-    },
-    {
-      "path": "formal/SESLocalDomainProof.cfg",
-      "models": [
-        {
-          "id": "SESLocalDomainProof",
-          "properties": [
-            "ReadCurrentProof",
-            "Rights",
-            "RefusalFrame",
-            "FreshGeneration",
-            "PhysicalZoneCapture"
-          ],
-          "limits": "The finite histories check current exact DNS proof, authorization classes, generation and refusal frames. Native tests handle HTTP, real SQLite, pagination, DNS encoding and cancellation. It does not model signatures, randomness or delivery."
-        }
-      ],
+      "path": "formal/KinesisVideoConsole.cfg",
+      "sha256": "c5fe900599efe101a3abb1f5016e96cc949b730a55bd3d31873079020ae94f20",
       "disposition": "modeled",
-      "sha256": "ae228a0e65b7cfa3bd1a0a63a8289ac382c6297d484fb72c7670d4239f5c9ac7",
-      "reason": "Set the finite local-DNS verification safety checks."
-    },
-    {
-      "path": "formal/SESLocalDomainProof.tla",
+      "reason": "Connects the mounted Kinesis media panel, selected stream and observable reads to the real request path.",
       "models": [
         {
-          "id": "SESLocalDomainProof",
+          "id": "KinesisVideoConsole",
           "properties": [
-            "ReadCurrentProof",
-            "Rights",
-            "RefusalFrame",
-            "FreshGeneration",
-            "PhysicalZoneCapture"
-          ],
-          "limits": "The finite histories check current exact DNS proof, authorization classes, generation and refusal frames. Native tests handle HTTP, real SQLite, pagination, DNS encoding and cancellation. It does not model signatures, randomness or delivery."
-        }
-      ],
-      "disposition": "modeled",
-      "sha256": "c52139add6ecf60b70cacbdac50d91eaeb3a8a80eb0ca504a25835b52f953e09",
-      "reason": "Model local identity generations and fresh reads of the captured zone and three DNS records."
-    },
-    {
-      "path": "formal/SESLocalMailbox.cfg",
-      "models": [
-        {
-          "id": "SESLocalMailbox",
-          "properties": [
-            "Admission",
-            "Publication",
-            "ContentBinding",
-            "UnpublishedFrame",
-            "NoFalseAck",
+            "PhysicalSend",
+            "RetiredReply",
+            "FreshMount",
+            "UnknownResult",
+            "CancelBoundary",
+            "ExplicitRecovery",
+            "ConfirmedOutcome",
             "ReadProjection"
           ],
-          "limits": "Finite scoped acceptance and receipt/MIME correspondence. The concrete wire, rendering, SQLite, DNS and policy timing are covered by separate native tests."
+          "limits": "Finite mounted request and response histories. React rendering, access decisions, native storage and physical media decoding have separate checks."
         }
-      ],
-      "disposition": "modeled",
-      "sha256": "1447a8e3b019bf0562e2f26d9aa1b811e2dfb7c86e89127f709961d4a0f3f4de",
-      "reason": "Specify the finite acceptance, content and failure frames for the local mailbox."
+      ]
     },
     {
-      "path": "formal/SESLocalMailbox.tla",
+      "path": "formal/KinesisVideoConsole.tla",
+      "sha256": "c81475d5053d28634cb9f14dc06bd3b81f194c72ff52d99f35c596fcd190a884",
+      "disposition": "modeled",
+      "reason": "Connects the mounted Kinesis media panel, selected stream and observable reads to the real request path.",
       "models": [
         {
-          "id": "SESLocalMailbox",
+          "id": "KinesisVideoConsole",
           "properties": [
-            "Admission",
-            "Publication",
-            "ContentBinding",
-            "UnpublishedFrame",
-            "NoFalseAck",
+            "PhysicalSend",
+            "RetiredReply",
+            "FreshMount",
+            "UnknownResult",
+            "CancelBoundary",
+            "ExplicitRecovery",
+            "ConfirmedOutcome",
             "ReadProjection"
           ],
-          "limits": "Finite scoped acceptance and receipt/MIME correspondence. The concrete wire, rendering, SQLite, DNS and policy timing are covered by separate native tests."
+          "limits": "Finite mounted request and response histories. React rendering, access decisions, native storage and physical media decoding have separate checks."
         }
-      ],
+      ]
+    },
+    {
+      "path": "formal/KinesisVideoRetention.cfg",
+      "sha256": "72bbd83f636848e1efb0cbb87a035854b736cea5817e67e7ba6774cb387dda07",
       "disposition": "modeled",
-      "sha256": "b25c095462676a27c184ac9045a65aaa497a60888b9da4ecdf193eeeaaee2c47",
-      "reason": "Specify the finite acceptance, content and failure frames for the local mailbox."
+      "reason": "Implements or exercises Kinesis stream admission, receipt selection and durable retained observations.",
+      "models": [
+        {
+          "id": "KinesisVideoRetention",
+          "properties": [
+            "ReplyKind",
+            "ReturnedMedia",
+            "RetainedRows",
+            "PeerRows",
+            "RefusedFrame",
+            "RetentionVersion",
+            "FragmentNumber",
+            "FragmentTimecode"
+          ],
+          "limits": "Finite receipt and retention histories; codec parsing, actual SQL fault injection, deadlines and SigV4 transport have separate physical tests."
+        }
+      ]
+    },
+    {
+      "path": "formal/KinesisVideoRetention.tla",
+      "sha256": "9886d1452734ecef99d3810f815e1ac44bc898cb2b872f8535b990746f2b7bd6",
+      "disposition": "modeled",
+      "reason": "Implements or exercises Kinesis stream admission, receipt selection and durable retained observations.",
+      "models": [
+        {
+          "id": "KinesisVideoRetention",
+          "properties": [
+            "ReplyKind",
+            "ReturnedMedia",
+            "RetainedRows",
+            "PeerRows",
+            "RefusedFrame",
+            "RetentionVersion",
+            "FragmentNumber",
+            "FragmentTimecode"
+          ],
+          "limits": "Finite receipt and retention histories; codec parsing, actual SQL fault injection, deadlines and SigV4 transport have separate physical tests."
+        }
+      ]
     },
     {
       "path": "formal/models.json",
-      "sha256": "d700b3ab6e5ab720b016c4b8028bec6e904823cb55db598a281515eb2be26d24",
+      "sha256": "96c8e150860f25462ac058903e8f76b6f446792f33fa727bd16eb8afbc2fb956",
       "disposition": "formal-infrastructure",
-      "reason": "Preserve existing models and register the two bounded SES safety leaves.",
+      "reason": "Registers guarded Kinesis acceptance and its model or client checks in the existing release tooling.",
       "models": []
     },
     {
       "path": "internal/aws/catalog/engine.go",
+      "sha256": "9eab16820755bee7644f8e2f433bdc80e02ff6db79afc531895c384852870ad7",
+      "disposition": "modeled",
+      "reason": "Implements or exercises Kinesis stream admission, receipt selection and durable retained observations.",
       "models": [
         {
-          "id": "SESLocalDomainProof",
+          "id": "KinesisVideoRetention",
           "properties": [
-            "ReadCurrentProof",
-            "Rights",
-            "RefusalFrame",
-            "FreshGeneration",
-            "PhysicalZoneCapture"
+            "ReplyKind",
+            "ReturnedMedia",
+            "RetainedRows",
+            "PeerRows",
+            "RefusedFrame",
+            "RetentionVersion",
+            "FragmentNumber",
+            "FragmentTimecode"
           ],
-          "limits": "The finite histories check current exact DNS proof, authorization classes, generation and refusal frames. Native tests handle HTTP, real SQLite, pagination, DNS encoding and cancellation. It does not model signatures, randomness or delivery."
-        },
-        {
-          "id": "SESLocalMailbox",
-          "properties": [
-            "Admission",
-            "Publication",
-            "ContentBinding",
-            "UnpublishedFrame",
-            "NoFalseAck",
-            "ReadProjection"
-          ],
-          "limits": "Finite scoped acceptance and receipt/MIME correspondence. The concrete wire, rendering, SQLite, DNS and policy timing are covered by separate native tests."
+          "limits": "Finite receipt and retention histories; codec parsing, actual SQL fault injection, deadlines and SigV4 transport have separate physical tests."
         }
-      ],
-      "disposition": "modeled",
-      "sha256": "3d4ac894835dc19bea5cd1974f6c17ebd6f6f56fcfa5242faf81c95e4cdbac55",
-      "reason": "Compose trusted DNS and scoped policy dependencies and initialize SES storage."
+      ]
     },
     {
-      "path": "internal/aws/catalog/models/sesv2.json",
-      "sha256": "1be20cc70e5a4704cd36b76cec896ee0c6a3b0cde99eb263d31dbb73aadd3f1c",
+      "path": "internal/aws/catalog/kinesisvideo_fragments.go",
+      "sha256": "4afc94c29887503675e36b95dbe3ff6a1e95586a9a42f9bb78ec0924befb3a91",
       "disposition": "modeled",
-      "reason": "Project the pinned official SESv2 preview, identity and SendEmail wire shapes.",
+      "reason": "Implements or exercises Kinesis stream admission, receipt selection and durable retained observations.",
+      "models": [
+        {
+          "id": "KinesisVideoRetention",
+          "properties": [
+            "ReplyKind",
+            "ReturnedMedia",
+            "RetainedRows",
+            "PeerRows",
+            "RefusedFrame",
+            "RetentionVersion",
+            "FragmentNumber",
+            "FragmentTimecode"
+          ],
+          "limits": "Finite receipt and retention histories; codec parsing, actual SQL fault injection, deadlines and SigV4 transport have separate physical tests."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/catalog/kinesisvideo_http.go",
+      "sha256": "208936624745ba6353503c7943bef2596b4069efc63ee2dfceaa9612a2ef7a0a",
+      "disposition": "modeled",
+      "reason": "Implements or exercises Kinesis stream admission, receipt selection and durable retained observations.",
+      "models": [
+        {
+          "id": "KinesisVideoRetention",
+          "properties": [
+            "ReplyKind",
+            "ReturnedMedia",
+            "RetainedRows",
+            "PeerRows",
+            "RefusedFrame",
+            "RetentionVersion",
+            "FragmentNumber",
+            "FragmentTimecode"
+          ],
+          "limits": "Finite receipt and retention histories; codec parsing, actual SQL fault injection, deadlines and SigV4 transport have separate physical tests."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/catalog/kinesisvideo_media_store_test.go",
+      "sha256": "85235ec9be290e7de6dd9d6c0c7c03b0d2dbafaa35bada37c9ec78c511e7b045",
+      "disposition": "modeled",
+      "reason": "Implements or exercises Kinesis stream admission, receipt selection and durable retained observations.",
+      "models": [
+        {
+          "id": "KinesisVideoRetention",
+          "properties": [
+            "ReplyKind",
+            "ReturnedMedia",
+            "RetainedRows",
+            "PeerRows",
+            "RefusedFrame",
+            "RetentionVersion",
+            "FragmentNumber",
+            "FragmentTimecode"
+          ],
+          "limits": "Finite receipt and retention histories; codec parsing, actual SQL fault injection, deadlines and SigV4 transport have separate physical tests."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/catalog/kinesisvideo_media_test.go",
+      "sha256": "50d5b4621a66c950545c7d6e7f80925b58c833e2289150d7cdce15cc5a304e2e",
+      "disposition": "modeled",
+      "reason": "Implements or exercises Kinesis stream admission, receipt selection and durable retained observations.",
+      "models": [
+        {
+          "id": "KinesisVideoRetention",
+          "properties": [
+            "ReplyKind",
+            "ReturnedMedia",
+            "RetainedRows",
+            "PeerRows",
+            "RefusedFrame",
+            "RetentionVersion",
+            "FragmentNumber",
+            "FragmentTimecode"
+          ],
+          "limits": "Finite receipt and retention histories; codec parsing, actual SQL fault injection, deadlines and SigV4 transport have separate physical tests."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/catalog/kinesisvideo_reference.go",
+      "sha256": "b9cef8bb9c083cfe07b5b8478ceb3a069584a1de6e43ba11a37583ed768501d4",
+      "disposition": "presentation",
+      "reason": "Publishes or verifies the served media schemas and canonical assets. Real HTTP and browser checks cover their user-visible behavior.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/catalog/kinesisvideo_reference_test.go",
+      "sha256": "8ef6a9b0ebef98e7ec5e01b190485200cea2dcaf7fbe4b97e9bdf3f9f52ea753",
+      "disposition": "test-support",
+      "reason": "Supplies the independent Kinesis client, real video fixture, native fault/compatibility controls or the existing catalog operation sweep.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/catalog/models/kinesisvideo.json",
+      "sha256": "0e46d3ca08208dcd9fe5c60a7dfc31f3b99c21e6ef62d34b56dd4fa7d5593bd1",
+      "disposition": "modeled",
+      "reason": "Declares or publishes the real AWS stream control operation while preserving the resource lifetime and existing describe operation.",
       "models": [
         {
           "id": "CatalogResourceLifecycle",
           "properties": [
             "AuthorizationFirst",
             "FailureFrame",
-            "PeerFrame"
+            "PeerFrame",
+            "FreshIDs"
           ],
-          "limits": "The model covers abstract catalog authorization and unchanged state on refusal or in a peer. Native tests cover the SES route, regional template ARN, string substitutions, MIME encoding and byte limits."
-        },
-        {
-          "id": "SESLocalDomainProof",
-          "properties": [
-            "ReadCurrentProof",
-            "Rights",
-            "RefusalFrame",
-            "FreshGeneration",
-            "PhysicalZoneCapture"
-          ],
-          "limits": "The finite histories check current exact DNS proof, authorization classes, generation and refusal frames. Native tests handle HTTP, real SQLite, pagination, DNS encoding and cancellation. It does not model signatures, randomness or delivery."
+          "limits": "Bounds the catalog stream-resource lifecycle; the embedded botocore and OpenAPI wire shape, endpoint origin and physical fragment bytes are tested independently."
         }
       ]
     },
     {
       "path": "internal/aws/catalog/openapi.go",
+      "sha256": "86c8d1a4db163db5dde8170c75260630731340487f6e43bd7c6288f050008c9a",
+      "disposition": "modeled",
+      "reason": "Declares or publishes the real AWS stream control operation while preserving the resource lifetime and existing describe operation.",
       "models": [
         {
           "id": "CatalogResourceLifecycle",
           "properties": [
             "AuthorizationFirst",
             "FailureFrame",
-            "PeerFrame"
+            "PeerFrame",
+            "FreshIDs"
           ],
-          "limits": "Bounds existing catalog composition and request failure. The rendered service-specific request example is verified by the generated document and a real Scalar Send."
+          "limits": "Bounds the catalog stream-resource lifecycle; the embedded botocore and OpenAPI wire shape, endpoint origin and physical fragment bytes are tested independently."
         }
-      ],
-      "disposition": "modeled",
-      "sha256": "65590b773ab8c494841e5d42133b23e9e6edc50c41f9717edadd2f8b1b08a2cd",
-      "reason": "Render a concrete SendEmail example and require the local service route on unsigned SES reference requests."
+      ]
     },
     {
       "path": "internal/aws/catalog/selection.json",
-      "sha256": "32b99bbcdaf62ff0a75a82ff30fcc85abc8d6c3572316fa8ddaa1c4816a99053",
+      "sha256": "0f2f2e486e5685f62161164d4d665815b29a835c8eb052cdebb79925e988656c",
       "disposition": "modeled",
-      "reason": "Select the official SESv2 stored preview, identities and local submission APIs.",
+      "reason": "Declares or publishes the real AWS stream control operation while preserving the resource lifetime and existing describe operation.",
       "models": [
         {
           "id": "CatalogResourceLifecycle",
           "properties": [
             "AuthorizationFirst",
             "FailureFrame",
-            "PeerFrame"
+            "PeerFrame",
+            "FreshIDs"
           ],
-          "limits": "The model covers abstract catalog authorization and unchanged state on refusal or in a peer. Native tests cover the SES route, regional template ARN, string substitutions, MIME encoding and byte limits."
-        },
-        {
-          "id": "SESLocalDomainProof",
-          "properties": [
-            "ReadCurrentProof",
-            "Rights",
-            "RefusalFrame",
-            "FreshGeneration",
-            "PhysicalZoneCapture"
-          ],
-          "limits": "The finite histories check current exact DNS proof, authorization classes, generation and refusal frames. Native tests handle HTTP, real SQLite, pagination, DNS encoding and cancellation. It does not model signatures, randomness or delivery."
+          "limits": "Bounds the catalog stream-resource lifecycle; the embedded botocore and OpenAPI wire shape, endpoint origin and physical fragment bytes are tested independently."
         }
       ]
     },
     {
       "path": "internal/aws/catalog/semantics.go",
-      "sha256": "c273d2f36961d90f721b215e6fab96170534989a328a9e2dae9865d26d5cc4dd",
+      "sha256": "330cf9d00499e343aa87d2861bb1aea3c2e7fccd70257aa3c05475dc42b6d9fc",
       "disposition": "modeled",
-      "reason": "Dispatch stored template preview, verified identities and accepted local SES submissions.",
+      "reason": "Implements or exercises Kinesis stream admission, receipt selection and durable retained observations.",
+      "models": [
+        {
+          "id": "KinesisVideoRetention",
+          "properties": [
+            "ReplyKind",
+            "ReturnedMedia",
+            "RetainedRows",
+            "PeerRows",
+            "RefusedFrame",
+            "RetentionVersion",
+            "FragmentNumber",
+            "FragmentTimecode"
+          ],
+          "limits": "Finite receipt and retention histories; codec parsing, actual SQL fault injection, deadlines and SigV4 transport have separate physical tests."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/catalog/services_network2.go",
+      "sha256": "0f72a514e6faed65940784f6f3eed4fe42e8d7bd8a8a2126f2556a94cb4eb756",
+      "disposition": "modeled",
+      "reason": "Declares or publishes the real AWS stream control operation while preserving the resource lifetime and existing describe operation.",
       "models": [
         {
           "id": "CatalogResourceLifecycle",
           "properties": [
             "AuthorizationFirst",
             "FailureFrame",
-            "PeerFrame"
+            "PeerFrame",
+            "FreshIDs"
           ],
-          "limits": "The model covers abstract catalog authorization and unchanged state on refusal or in a peer. Native tests cover the SES route, regional template ARN, string substitutions, MIME encoding and byte limits."
-        },
-        {
-          "id": "SESLocalDomainProof",
-          "properties": [
-            "ReadCurrentProof",
-            "Rights",
-            "RefusalFrame",
-            "FreshGeneration",
-            "PhysicalZoneCapture"
-          ],
-          "limits": "The finite histories check current exact DNS proof, authorization classes, generation and refusal frames. Native tests handle HTTP, real SQLite, pagination, DNS encoding and cancellation. It does not model signatures, randomness or delivery."
-        },
-        {
-          "id": "SESLocalMailbox",
-          "properties": [
-            "Admission",
-            "Publication",
-            "ContentBinding",
-            "UnpublishedFrame",
-            "NoFalseAck",
-            "ReadProjection"
-          ],
-          "limits": "Finite scoped acceptance and receipt/MIME correspondence. The concrete wire, rendering, SQLite, DNS and policy timing are covered by separate native tests."
+          "limits": "Bounds the catalog stream-resource lifecycle; the embedded botocore and OpenAPI wire shape, endpoint origin and physical fragment bytes are tested independently."
         }
       ]
     },
     {
-      "path": "internal/aws/catalog/services_integration.go",
-      "sha256": "92c28c81df34071b3590b8eaf845b6e9ca2e5c0dea26cc7719e47f8e5f39359e",
-      "disposition": "modeled",
-      "reason": "Register the selected official operations and their bounded local SES behavior.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "FailureFrame",
-            "PeerFrame"
-          ],
-          "limits": "The model covers abstract catalog authorization and unchanged state on refusal or in a peer. Native tests cover the SES route, regional template ARN, string substitutions, MIME encoding and byte limits."
-        },
-        {
-          "id": "SESLocalDomainProof",
-          "properties": [
-            "ReadCurrentProof",
-            "Rights",
-            "RefusalFrame",
-            "FreshGeneration",
-            "PhysicalZoneCapture"
-          ],
-          "limits": "The finite histories check current exact DNS proof, authorization classes, generation and refusal frames. Native tests handle HTTP, real SQLite, pagination, DNS encoding and cancellation. It does not model signatures, randomness or delivery."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/catalog/ses_domain_identity.go",
-      "models": [
-        {
-          "id": "SESLocalDomainProof",
-          "properties": [
-            "ReadCurrentProof",
-            "Rights",
-            "RefusalFrame",
-            "FreshGeneration",
-            "PhysicalZoneCapture"
-          ],
-          "limits": "The finite histories check current exact DNS proof, authorization classes, generation and refusal frames. Native tests handle HTTP, real SQLite, pagination, DNS encoding and cancellation. It does not model signatures, randomness or delivery."
-        },
-        {
-          "id": "SESLocalMailbox",
-          "properties": [
-            "Admission",
-            "Publication",
-            "ContentBinding",
-            "UnpublishedFrame",
-            "NoFalseAck",
-            "ReadProjection"
-          ],
-          "limits": "Finite scoped acceptance and receipt/MIME correspondence. The concrete wire, rendering, SQLite, DNS and policy timing are covered by separate native tests."
-        }
-      ],
-      "disposition": "modeled",
-      "sha256": "dce14c3cdbb7edcb280fc8863ba37081779757c90be063baf4566ea359e6bf71",
-      "reason": "Store scoped identity generations and three verification selectors and project current DNS state."
-    },
-    {
-      "path": "internal/aws/catalog/ses_message_wire.go",
-      "models": [
-        {
-          "id": "SESLocalMailbox",
-          "properties": [
-            "Admission",
-            "Publication",
-            "ContentBinding",
-            "UnpublishedFrame",
-            "NoFalseAck",
-            "ReadProjection"
-          ],
-          "limits": "Finite scoped acceptance and receipt/MIME correspondence. The concrete wire, rendering, SQLite, DNS and policy timing are covered by separate native tests."
-        }
-      ],
-      "disposition": "modeled",
-      "sha256": "70bc74340820dbdd2b22ef1d2fe985156bfa672cde8e2705deeccbe5d2b011b6",
-      "reason": "Reject malformed native SendEmail documents before they can enter admission."
-    },
-    {
-      "path": "internal/aws/catalog/ses_sink.go",
-      "models": [
-        {
-          "id": "SESLocalMailbox",
-          "properties": [
-            "Admission",
-            "Publication",
-            "ContentBinding",
-            "UnpublishedFrame",
-            "NoFalseAck",
-            "ReadProjection"
-          ],
-          "limits": "Finite scoped acceptance and receipt/MIME correspondence. The concrete wire, rendering, SQLite, DNS and policy timing are covered by separate native tests."
-        }
-      ],
-      "disposition": "modeled",
-      "sha256": "c359fdc293b1e7b66dfed5d426ccdef5309d2a7cd14db3b97fcfaddf7d3286b3",
-      "reason": "Authorize the scoped submitted message and commit its envelope and actual local receiving result atomically."
-    },
-    {
-      "path": "internal/aws/catalog/ses_sink_receipts.go",
-      "models": [
-        {
-          "id": "SESLocalMailbox",
-          "properties": [
-            "Admission",
-            "Publication",
-            "ContentBinding",
-            "UnpublishedFrame",
-            "NoFalseAck",
-            "ReadProjection"
-          ],
-          "limits": "Finite scoped acceptance and receipt/MIME correspondence. The concrete wire, rendering, SQLite, DNS and policy timing are covered by separate native tests."
-        }
-      ],
-      "disposition": "modeled",
-      "sha256": "b71ec0ee464e7eed3aa92ce689020225134de2d5937e108a467a85d3dbc44e76",
-      "reason": "Read receipts and exact generated MIME by scoped identity and atomically purge the addressed row."
-    },
-    {
-      "path": "internal/aws/catalog/ses_template_preview.go",
-      "sha256": "e03b1c2beb9cd246882c7592eb9e9342d36a6a0e3fe8e5eff92536eb5e709dde",
-      "disposition": "modeled",
-      "reason": "Render bounded MIME from the authorized template snapshot and reject invalid input without a state write.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "FailureFrame",
-            "PeerFrame"
-          ],
-          "limits": "The model covers abstract catalog authorization and unchanged state on refusal or in a peer. Native tests cover the SES route, regional template ARN, string substitutions, MIME encoding and byte limits."
-        },
-        {
-          "id": "SESLocalMailbox",
-          "properties": [
-            "Admission",
-            "Publication",
-            "ContentBinding",
-            "UnpublishedFrame",
-            "NoFalseAck",
-            "ReadProjection"
-          ],
-          "limits": "Finite scoped acceptance and receipt/MIME correspondence. The concrete wire, rendering, SQLite, DNS and policy timing are covered by separate native tests."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/catalog/ses_template_preview_test.go",
-      "sha256": "30839018432a61ac75ac5d212ff427bb2059dacc445b68e04f8765476f49085a",
+      "path": "internal/aws/catalog/services_network2_test.go",
+      "sha256": "01b61b5310a0d646b00a4b40c048691bcb5b5262eba717159dd2b541cba52bcd",
       "disposition": "test-support",
-      "reason": "Parse actual native SES MIME responses and exercise regional authorization, refusal, state retention, cancellation and limits.",
+      "reason": "Supplies the independent Kinesis client, real video fixture, native fault/compatibility controls or the existing catalog operation sweep.",
       "models": []
     },
     {
-      "path": "internal/aws/jsonwire/unicode.go",
+      "path": "internal/aws/kinesisvideo/ebml.go",
+      "sha256": "91ceab7315e336088922b5d22c7f6edfe96e539830371a93c493b4e37b040f94",
+      "disposition": "modeled",
+      "reason": "Implements or exercises Kinesis stream admission, receipt selection and durable retained observations.",
       "models": [
         {
-          "id": "SESLocalMailbox",
+          "id": "KinesisVideoRetention",
           "properties": [
-            "Admission",
-            "Publication",
-            "ContentBinding",
-            "UnpublishedFrame",
-            "NoFalseAck",
-            "ReadProjection"
+            "ReplyKind",
+            "ReturnedMedia",
+            "RetainedRows",
+            "PeerRows",
+            "RefusedFrame",
+            "RetentionVersion",
+            "FragmentNumber",
+            "FragmentTimecode"
           ],
-          "limits": "Finite scoped acceptance and receipt/MIME correspondence. The concrete wire, rendering, SQLite, DNS and policy timing are covered by separate native tests."
+          "limits": "Finite receipt and retention histories; codec parsing, actual SQL fault injection, deadlines and SigV4 transport have separate physical tests."
         }
-      ],
-      "disposition": "modeled",
-      "sha256": "0e8dd319e57b53f42c0775b3d401f7a27d87a2cd1bb55b1ff4ce335d0b8db9f1",
-      "reason": "Share the strict JSON scalar validation used before SES admission and existing Secrets Manager parsing."
+      ]
     },
     {
-      "path": "internal/aws/route53_http.go",
+      "path": "internal/aws/kinesisvideo/fragment.go",
+      "sha256": "7265747095dab33ec2c8a497bd4ea7adb2b99b693db51072b3e0d65ecfe0789e",
+      "disposition": "modeled",
+      "reason": "Implements or exercises Kinesis stream admission, receipt selection and durable retained observations.",
       "models": [
         {
-          "id": "SESLocalDomainProof",
+          "id": "KinesisVideoRetention",
           "properties": [
-            "ReadCurrentProof",
-            "Rights",
-            "RefusalFrame",
-            "FreshGeneration",
-            "PhysicalZoneCapture"
+            "ReplyKind",
+            "ReturnedMedia",
+            "RetainedRows",
+            "PeerRows",
+            "RefusedFrame",
+            "RetentionVersion",
+            "FragmentNumber",
+            "FragmentTimecode"
           ],
-          "limits": "The finite histories check current exact DNS proof, authorization classes, generation and refusal frames. Native tests handle HTTP, real SQLite, pagination, DNS encoding and cancellation. It does not model signatures, randomness or delivery."
-        },
-        {
-          "id": "Route53AtomicBatch",
-          "properties": [
-            "AtomicPair",
-            "OnlyAuthorizedValid",
-            "PendingInvisible"
-          ],
-          "limits": "Existing abstract Route 53 batch protection. The native RRset tests cover actual CNAME owner syntax, TTL, input admission and SQLite state."
+          "limits": "Finite receipt and retention histories; codec parsing, actual SQL fault injection, deadlines and SigV4 transport have separate physical tests."
         }
-      ],
-      "disposition": "modeled",
-      "sha256": "f5b65ec650aac83a1bcadb8167500c4a19f4bdc2be1484707c5b0325eae315e9",
-      "reason": "Use the same canonical record-owner validation for DNS answer and list start inputs."
+      ]
     },
     {
-      "path": "internal/aws/route53_ses_identity.go",
-      "models": [
-        {
-          "id": "SESLocalDomainProof",
-          "properties": [
-            "ReadCurrentProof",
-            "Rights",
-            "RefusalFrame",
-            "FreshGeneration",
-            "PhysicalZoneCapture"
-          ],
-          "limits": "The finite histories check current exact DNS proof, authorization classes, generation and refusal frames. Native tests handle HTTP, real SQLite, pagination, DNS encoding and cancellation. It does not model signatures, randomness or delivery."
-        }
-      ],
-      "disposition": "modeled",
-      "sha256": "6a35edee798931bb81a83295010c75e77a835ff52a2c88b992007f6e65d07719",
-      "reason": "Read exact saved record sets for the one captured local zone and admit narrowly bounded DKIM owners."
+      "path": "internal/aws/kinesisvideo/fragment_test.go",
+      "sha256": "365e39ec7824869cbbbfaf5cfc5db17017dc06d669386d9fd3ea14d0a5e8d96b",
+      "disposition": "test-support",
+      "reason": "Supplies the independent Kinesis client, real video fixture, native fault/compatibility controls or the existing catalog operation sweep.",
+      "models": []
     },
     {
-      "path": "internal/aws/route53_store.go",
-      "models": [
-        {
-          "id": "SESLocalDomainProof",
-          "properties": [
-            "ReadCurrentProof",
-            "Rights",
-            "RefusalFrame",
-            "FreshGeneration",
-            "PhysicalZoneCapture"
-          ],
-          "limits": "The finite histories check current exact DNS proof, authorization classes, generation and refusal frames. Native tests handle HTTP, real SQLite, pagination, DNS encoding and cancellation. It does not model signatures, randomness or delivery."
-        },
-        {
-          "id": "Route53AtomicBatch",
-          "properties": [
-            "AtomicPair",
-            "OnlyAuthorizedValid",
-            "PendingInvisible"
-          ],
-          "limits": "Existing abstract Route 53 batch protection. The native RRset tests cover actual CNAME owner syntax, TTL, input admission and SQLite state."
-        }
-      ],
-      "disposition": "modeled",
-      "sha256": "b4cccb9f521ce1893ac8177eb9b0450fd7c79596a78db02b938224d90db9a2a3",
-      "reason": "Validate the CNAME record owner separately from hosted-zone and target names."
-    },
-    {
-      "path": "internal/aws/secret_http.go",
-      "models": [
-        {
-          "id": "SecretsDisclosureChannels",
-          "properties": [
-            "RawRequiresAuthorizedGet",
-            "DeniedNoRaw"
-          ],
-          "limits": "Preserves the existing secret disclosure boundary; Unicode wire validation is verified by concrete tests."
-        }
-      ],
-      "disposition": "modeled",
-      "sha256": "796b42128a17740c27409751f0a9648b11c3b5721a532b156a94d5b49ac44901",
-      "reason": "Call the common strict Unicode escape check without changing Secrets Manager receipt or disclosure logic."
+      "path": "internal/aws/kinesisvideo/testdata/two-frames.mkv",
+      "sha256": "8641f34746c64fdd20c72c6374f2d6b86e179fe76ac22d69c2c3dbd3038fdd9f",
+      "disposition": "test-support",
+      "reason": "Supplies the independent Kinesis client, real video fixture, native fault/compatibility controls or the existing catalog operation sweep.",
+      "models": []
     },
     {
       "path": "internal/server/apidocs/catalog/index.json",
-      "sha256": "aefdd62ede286169f5a702b07c11ef23018fd011647e21b24d1437258ad4a4d1",
+      "sha256": "c9711af12eb7044a931fb22ae75f57438e101476a732777d6ad8e5351f6584c3",
       "disposition": "presentation",
-      "reason": "Publish the updated SES native operation count and limits.",
+      "reason": "Publishes or verifies the served media schemas and canonical assets. Real HTTP and browser checks cover their user-visible behavior.",
       "models": []
     },
     {
-      "path": "internal/server/apidocs/catalog/sesv2.json",
-      "sha256": "4966b7466ab759a625288aa3e4956cac5ab6d6b48933e4a4e243a1fc900c45e8",
+      "path": "internal/server/apidocs/catalog/kinesisvideo.json",
+      "sha256": "f2001e33945d4b1f8ccd5ffbf54ca49e11e32333195beedc464eec0f781e5f86",
       "disposition": "presentation",
-      "reason": "Serve the exact native SESv2 paths, request and response shapes and an executable local send example.",
+      "reason": "Publishes or verifies the served media schemas and canonical assets. Real HTTP and browser checks cover their user-visible behavior.",
       "models": []
-    },
-    {
-      "path": "internal/server/server.go",
-      "models": [
-        {
-          "id": "SESLocalDomainProof",
-          "properties": [
-            "ReadCurrentProof",
-            "Rights",
-            "RefusalFrame",
-            "FreshGeneration",
-            "PhysicalZoneCapture"
-          ],
-          "limits": "The finite histories check current exact DNS proof, authorization classes, generation and refusal frames. Native tests handle HTTP, real SQLite, pagination, DNS encoding and cancellation. It does not model signatures, randomness or delivery."
-        },
-        {
-          "id": "SESLocalMailbox",
-          "properties": [
-            "Admission",
-            "Publication",
-            "ContentBinding",
-            "UnpublishedFrame",
-            "NoFalseAck",
-            "ReadProjection"
-          ],
-          "limits": "Finite scoped acceptance and receipt/MIME correspondence. The concrete wire, rendering, SQLite, DNS and policy timing are covered by separate native tests."
-        }
-      ],
-      "disposition": "modeled",
-      "sha256": "d740693b6184da5ee639c7aa60d88eaf5d0149e9da70994e48dac2052505df49",
-      "reason": "Wire SES to local Route 53, the scoped policy and the authenticated operator receipt surface."
-    },
-    {
-      "path": "internal/server/ses_domain_identity_test.go",
-      "models": [],
-      "disposition": "test-support",
-      "sha256": "25cef332be48c8e4f1abdca4e71bc7c354308516507fa8fb0817b0417ddcc3c3",
-      "reason": "Exercise real SES and Route 53 HTTP, scoped IAM, page tokens, reopen and physical-write interruptions."
-    },
-    {
-      "path": "internal/server/ses_sink.go",
-      "models": [
-        {
-          "id": "SESLocalMailbox",
-          "properties": [
-            "Admission",
-            "Publication",
-            "ContentBinding",
-            "UnpublishedFrame",
-            "NoFalseAck",
-            "ReadProjection"
-          ],
-          "limits": "Finite scoped acceptance and receipt/MIME correspondence. The concrete wire, rendering, SQLite, DNS and policy timing are covered by separate native tests."
-        }
-      ],
-      "disposition": "modeled",
-      "sha256": "1b489ef5874bb52dffa6a3908ebffff5b7c98272fe2b60a448aaaf716f3aa347",
-      "reason": "Restrict regional sink listing, content downloads and purge to the authenticated team operator."
-    },
-    {
-      "path": "internal/server/ses_sink_test.go",
-      "models": [],
-      "disposition": "test-support",
-      "sha256": "e65e1b9d7be13b547c8c4a324a9eb5d9968a7552d2644b552633d6f09ca8ea60",
-      "reason": "Check coherent authority, template rendering, MIME bytes, recipient outcomes, regional limits, reopen and cleanup."
-    },
-    {
-      "path": "internal/server/ses_sink_transaction_test.go",
-      "models": [],
-      "disposition": "test-support",
-      "sha256": "26f19c285b05fa9f28e0385e9938910d33134bcf90e20bd17292b283c55a5deb",
-      "reason": "Inject real database write interruptions, storage mix-ups and capacity faults, then reopen and retry."
     },
     {
       "path": "internal/server/web/app.js",
+      "sha256": "cc0c37082e574a81b654039c7ce033bb4d4818fc6fd0c597335844a7a6680edb",
+      "disposition": "modeled",
+      "reason": "Regenerates the embedded Cloudscape client with the mounted media workflow.",
       "models": [
         {
           "id": "CatalogConsoleEpoch",
           "properties": [
             "NoUnmountedAcceptance",
             "OnlyCurrentReplies",
-            "SingleWriter"
+            "ReloadOnlyAfterAck"
           ],
-          "limits": "The shared Catalog mount retires and checks scoped work. The new SES live-view unknown acknowledgement and readback are tested directly in the browser."
+          "limits": "The catalog mount and reply lifetime are abstract; actual Kinesis controls, Scalar and download decoding are covered by an end-to-end browser run."
         }
-      ],
-      "disposition": "modeled",
-      "sha256": "b443d942a848171eb2d041e1be248f1196b2839c23e0a8522d71a9274bac3040",
-      "reason": "Regenerate the authenticated Console bundle and its checked source inputs."
+      ]
+    },
+    {
+      "path": "scripts/formal_applicability.py",
+      "sha256": "0bc5489f6661ac3222897817db9139fe7b58a5b21db1f2d2f9442c3128dc1eb1",
+      "disposition": "formal-infrastructure",
+      "reason": "Registers guarded Kinesis acceptance and its model or client checks in the existing release tooling.",
+      "models": []
     },
     {
       "path": "scripts/formal_model_gate.py",
-      "models": [],
+      "sha256": "5170de815bf02e833920b6ea454a96bf85d05b7a54f0d0a205d88eabd8c8c071",
       "disposition": "formal-infrastructure",
-      "sha256": "caa8cd06c74843f02bb4b4c4a6aaa4ffb88f6c121f4141aca66989357c5284a5",
-      "reason": "Protect exact SES source scopes, safety properties and mutation control sets."
+      "reason": "Registers guarded Kinesis acceptance and its model or client checks in the existing release tooling.",
+      "models": []
     },
     {
       "path": "scripts/test-formal-gate.py",
-      "models": [],
+      "sha256": "047473c4ada5769f41b57f1576659a9bf88075ff417a58554eaa2733be656e42",
       "disposition": "formal-infrastructure",
-      "sha256": "523f7c92d73eaecca13f5ac4fa4950765e4300c8e486099d7de54c04dd6952ee",
-      "reason": "Enforce the complete model inventory and independently reject dropped SES control and source bindings."
+      "reason": "Registers guarded Kinesis acceptance and its model or client checks in the existing release tooling.",
+      "models": []
     },
     {
       "path": "test/e2e/aws_catalog_fixtures.py",
-      "sha256": "8b14064784ff06e0a82060d9d6a8e0f91d5e352c1700678a776d526125e8e766",
+      "sha256": "d5f459d59fa7032dbde180a7456615594fdd5737a58ccc74d8b162ace019dab5",
       "disposition": "test-support",
-      "reason": "Allow the real Route 53 dependency in catalog fixture steps without counting it as an SES operation; remove the stored receipt.",
+      "reason": "Supplies the independent Kinesis client, real video fixture, native fault/compatibility controls or the existing catalog operation sweep.",
       "models": []
     },
     {
-      "path": "test/e2e/catalog_fixtures/sesv2.json",
-      "sha256": "272b4f39a93b3020e6af04ca4ebdd649c8ef85ab8115a20e278ed49680a6cdb8",
+      "path": "test/e2e/catalog_fixtures/kinesisvideo.json",
+      "sha256": "bc7a73b0725ca8b102b701f81f2b6aff5078332309e17b993976f55dcefb0fdc",
       "disposition": "test-support",
-      "reason": "Exercise the complete existing catalog operation set including the three required DNS records and accepted SendEmail.",
+      "reason": "Supplies the independent Kinesis client, real video fixture, native fault/compatibility controls or the existing catalog operation sweep.",
       "models": []
     },
     {
-      "path": "test/e2e/check.py",
-      "models": [],
+      "path": "test/e2e/kinesis_video/KinesisVideoProducer.java",
+      "sha256": "b36f65c09e7a11c1368f4f3015b63714c76536bc8e943fc597720f58ea8bff85",
       "disposition": "test-support",
-      "sha256": "d9fdd08382fe69e7ccdd660ba544d313911e575517c41a12b051897c562d755b",
-      "reason": "Register the shared SES native SDK, Console and served-reference workflow in ordinary end-to-end tests."
+      "reason": "Supplies the independent Kinesis client, real video fixture, native fault/compatibility controls or the existing catalog operation sweep.",
+      "models": []
     },
     {
-      "path": "test/e2e/ses_domain_identity.py",
-      "models": [],
+      "path": "test/e2e/kinesis_video/maven.sha256",
+      "sha256": "9ad2b9693b047e07e35853fec1bc54a2837ec28c6135b10b6991bc63f8508f64",
       "disposition": "test-support",
-      "sha256": "572f8b4a4b07ae4f03227d5f8573b9f53868f39dd6159fc89b062288acedfefb",
-      "reason": "Use the pinned stock SES and Route 53 clients on two local CLI authorities."
+      "reason": "Supplies the independent Kinesis client, real video fixture, native fault/compatibility controls or the existing catalog operation sweep.",
+      "models": []
     },
     {
-      "path": "test/e2e/ses_local_mail.py",
-      "models": [],
+      "path": "test/e2e/kinesis_video_fragments.py",
+      "sha256": "c4684053ab7b1a6630742b9285d4ea23b10787cce510d474d43cabc73d39dd77",
       "disposition": "test-support",
-      "sha256": "df64f872c2fc50839b6dce9b617b5204ea96853dd0567b7c90b5eab1e9b2e232",
-      "reason": "Run the actual submitted envelope, local receipt and authorization lifecycle on two independent CLI databases."
+      "reason": "Supplies the independent Kinesis client, real video fixture, native fault/compatibility controls or the existing catalog operation sweep.",
+      "models": []
     },
     {
-      "path": "test/e2e/ses_local_mail_console.py",
-      "models": [],
+      "path": "test/e2e/kinesis_video_media_console.py",
+      "sha256": "129bacace6aad441222d21eb0b32642d35835f1e50a17fa3e4d5ae65951bb8bc",
       "disposition": "test-support",
-      "sha256": "e38d53435097c628d541a0cb5bf14c75b18987f07a67c4e337498f08a2c9e8a3",
-      "reason": "Exercise the shipped SES Console and Scalar using the same verified domain, accepted IDs and local mailbox."
+      "reason": "Supplies the independent Kinesis client, real video fixture, native fault/compatibility controls or the existing catalog operation sweep.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/run_kinesis_video.py",
+      "sha256": "6ef822f434da3581bd48ae0ca2b10073383e1d16e0d524e913f3983f1ef8e41d",
+      "disposition": "test-support",
+      "reason": "Supplies the independent Kinesis client, real video fixture, native fault/compatibility controls or the existing catalog operation sweep.",
+      "models": []
     },
     {
       "path": "tools/console/bundle-digests.json",
-      "models": [],
+      "sha256": "99caf3635ee842a0737a25731b4a775ce6c698754c2bdd821c5a97eadffa3885",
       "disposition": "presentation",
-      "sha256": "2a4d2af9edf16e8fc79b23caba90f2f400ab04eb14b8845d5ea0782dfc1f7bcc",
-      "reason": "Regenerate the authenticated Console bundle and its checked source inputs."
+      "reason": "Publishes or verifies the served media schemas and canonical assets. Real HTTP and browser checks cover their user-visible behavior.",
+      "models": []
     },
     {
       "path": "tools/console/bundle-inputs.json",
-      "models": [],
+      "sha256": "b027e2a5eb480e8b1bcf3fa3da99da16d60ce20488774ad588a3db3b73bc2155",
       "disposition": "presentation",
-      "sha256": "27c8e4e8bf29e46b316f2fb8948fd56b0440c459a9c9bca4f374b541ef67dee1",
-      "reason": "Regenerate the authenticated Console bundle and its checked source inputs."
+      "reason": "Publishes or verifies the served media schemas and canonical assets. Real HTTP and browser checks cover their user-visible behavior.",
+      "models": []
     },
     {
       "path": "tools/console/src/catalog.jsx",
+      "sha256": "aea14552378e2cd572420ef8bf69585c20ac154a01e930a779d73f46632e1e90",
+      "disposition": "modeled",
+      "reason": "Connects the mounted Kinesis media panel, selected stream and observable reads to the real request path.",
       "models": [
         {
-          "id": "CatalogConsoleEpoch",
+          "id": "KinesisVideoConsole",
           "properties": [
-            "NoUnmountedAcceptance",
-            "OnlyCurrentReplies",
-            "SingleWriter"
+            "PhysicalSend",
+            "RetiredReply",
+            "FreshMount",
+            "UnknownResult",
+            "CancelBoundary",
+            "ExplicitRecovery",
+            "ConfirmedOutcome",
+            "ReadProjection"
           ],
-          "limits": "The shared Catalog mount retires and checks scoped work. The new SES live-view unknown acknowledgement and readback are tested directly in the browser."
+          "limits": "Finite mounted request and response histories. React rendering, access decisions, native storage and physical media decoding have separate checks."
         }
-      ],
+      ]
+    },
+    {
+      "path": "tools/console/src/kinesis-video-media.jsx",
+      "sha256": "2daffe98223483edb854901d30fdebde59924e696de450597ff6f21966f8af33",
       "disposition": "modeled",
-      "sha256": "148d616957036eb99b8f32eae1d0466b2d95b82f40254b505851ee4c6fa79d2d",
-      "reason": "Mount the SES mail workflow alongside existing catalog resources and retire it with the current scope."
+      "reason": "Connects the mounted Kinesis media panel, selected stream and observable reads to the real request path.",
+      "models": [
+        {
+          "id": "KinesisVideoConsole",
+          "properties": [
+            "PhysicalSend",
+            "RetiredReply",
+            "FreshMount",
+            "UnknownResult",
+            "CancelBoundary",
+            "ExplicitRecovery",
+            "ConfirmedOutcome",
+            "ReadProjection"
+          ],
+          "limits": "Finite mounted request and response histories. React rendering, access decisions, native storage and physical media decoding have separate checks."
+        }
+      ]
     },
     {
-      "path": "tools/console/src/ses-mail.jsx",
-      "models": [],
-      "disposition": "presentation",
-      "sha256": "5b4d6b1e5af34910454b2f60fdb1a198d5ed92529b106b53d02a260bcde78941",
-      "reason": "Implement the bounded local mail operator workflow and validate native responses before displaying them."
+      "path": "tools/console/src/kinesis-video-media.mjs",
+      "sha256": "8236d26ab1d01a004d130763f1008af9e269eed0942524abe1841aa29f75c07d",
+      "disposition": "modeled",
+      "reason": "Connects the mounted Kinesis media panel, selected stream and observable reads to the real request path.",
+      "models": [
+        {
+          "id": "KinesisVideoConsole",
+          "properties": [
+            "PhysicalSend",
+            "RetiredReply",
+            "FreshMount",
+            "UnknownResult",
+            "CancelBoundary",
+            "ExplicitRecovery",
+            "ConfirmedOutcome",
+            "ReadProjection"
+          ],
+          "limits": "Finite mounted request and response histories. React rendering, access decisions, native storage and physical media decoding have separate checks."
+        }
+      ]
     },
     {
-      "path": "tools/console/src/ses-mail.mjs",
-      "models": [],
-      "disposition": "presentation",
-      "sha256": "b4e2575a2ab894e287aff1bb47e971b42ea9d459feeabc6e7cd651c7d1c5af31",
-      "reason": "Implement the bounded local mail operator workflow and validate native responses before displaying them."
+      "path": "tools/console/src/main.jsx",
+      "sha256": "9b5dd4a110f7f2f9ccfb3f833ccce49072f861ccae7d45456c3eef835d45090f",
+      "disposition": "modeled",
+      "reason": "Connects the mounted Kinesis media panel, selected stream and observable reads to the real request path.",
+      "models": [
+        {
+          "id": "KinesisVideoConsole",
+          "properties": [
+            "PhysicalSend",
+            "RetiredReply",
+            "FreshMount",
+            "UnknownResult",
+            "CancelBoundary",
+            "ExplicitRecovery",
+            "ConfirmedOutcome",
+            "ReadProjection"
+          ],
+          "limits": "Finite mounted request and response histories. React rendering, access decisions, native storage and physical media decoding have separate checks."
+        }
+      ]
     },
     {
-      "path": "tools/console/test/ses-mail.test.mjs",
-      "models": [],
+      "path": "tools/console/tests/kinesis-video-media.test.mjs",
+      "sha256": "acce08264ceb7a663d524d252c93a255652ea7a47bacbcd69e728ee812dff488",
       "disposition": "presentation",
-      "sha256": "25cbcb993fcb9bff15df11ac7386e57d014b7796ff2d46d9f5e6adf7891c39fe",
-      "reason": "Check trusted DNS responses, exact submission identifiers and disjoint delivered and rejected mailbox states."
+      "reason": "Publishes or verifies the served media schemas and canonical assets. Real HTTP and browser checks cover their user-visible behavior.",
+      "models": []
     }
   ]
 }

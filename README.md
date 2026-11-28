@@ -212,6 +212,8 @@ Examples are static; **Test Request → Send** makes a live local request.
 See [API navigation](docs/api-reference.md) and [SDK connection examples](test/platform/README.md).
 Use an explicit local endpoint and the guide's local authentication, never real cloud credentials.
 
+- Kinesis Video Streams accepts bounded local Matroska/AVC uploads. Use the native media endpoint to store fragments and read back their original encoded frames across restarts. [Local video media](docs/kinesis-video-media.md)
+
 ## Before using it with others
 
 - This is a learning simulator, not a production cloud replacement. Cloud APIs,

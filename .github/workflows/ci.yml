@@ -5,6 +5,10 @@ on:
   pull_request:
   workflow_dispatch:
     inputs:
+      kinesis_video:
+        description: Run the isolated Kinesis Video SDK and browser acceptance
+        type: boolean
+        default: false
       s3_paging_trial:
         description: Run the isolated S3 1,001-part browser check on Ubuntu 22.04
         type: boolean
@@ -433,3 +437,43 @@ jobs:
           path: reports/s3-paging-trial/
           if-no-files-found: error
           retention-days: 14
+
+  kinesis-video-e2e:
+    name: Isolated Kinesis Video SDK, browser and catalog
+    if: github.event_name == 'workflow_dispatch' && inputs.kinesis_video
+    runs-on: ubuntu-22.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-go@v6.5.0
+        with:
+          go-version: '1.26.11'
+          cache: true
+      - name: Prepare pinned clients, browser, codecs and accessibility tools
+        run: |
+          set -euo pipefail
+          python="$RUNNER_TOOL_CACHE/Python/3.12.16/x64/bin/python3.12"
+          "$python" -m venv "$RUNNER_TEMP/video-python"
+          "$RUNNER_TEMP/video-python/bin/pip" install -r scripts/requirements-test.txt
+          "$RUNNER_TEMP/video-python/bin/playwright" install --with-deps chromium
+          if ! command -v ffmpeg || ! command -v ffprobe; then
+            sudo apt-get update
+            sudo apt-get install --yes ffmpeg
+          fi
+          "$RUNNER_TEMP/video-python/bin/python" scripts/get-audit-tools.py "$RUNNER_TEMP/video-audit"
+          make prepare-kinesis-video-java PYTHON="$RUNNER_TEMP/video-python/bin/python" KINESIS_VIDEO_JARS="$RUNNER_TEMP/video-jars"
+      - name: Run the three fixtures against the same build
+        run: |
+          set -euo pipefail
+          export PATH="$JAVA_HOME_17_X64/bin:$PATH"
+          export AXE_SCRIPT="$RUNNER_TEMP/video-audit/axe.min.js"
+          export KINESIS_VIDEO_RECEIPT="$RUNNER_TEMP/kinesis-video-e2e.json"
+          make e2e-kinesis-video PYTHON="$RUNNER_TEMP/video-python/bin/python" KINESIS_VIDEO_JARS="$RUNNER_TEMP/video-jars"
+      - uses: actions/upload-artifact@v7.0.2
+        with:
+          name: kinesis-video-e2e-${{ github.sha }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/kinesis-video-e2e.json
+          if-no-files-found: error
+          retention-days: 7

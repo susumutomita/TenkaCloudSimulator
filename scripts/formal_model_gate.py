@@ -5880,6 +5880,118 @@ REQUIRED_SOURCE_SCOPES['SESLocalMailbox'] = {
 }
 
 
+BASE_MODELS.add('KinesisVideoRetention')
+BASE_INVARIANTS['KinesisVideoRetention'] = {
+    'FragmentNumber',
+    'FragmentTimecode',
+    'PeerRows',
+    'RefusedFrame',
+    'ReplyKind',
+    'RetainedRows',
+    'RetentionVersion',
+    'ReturnedMedia',
+    'TypeOK',
+}
+REQUIRED_MUTANTS['KinesisVideoRetention'] = {
+    'KeepExpiredPeerOnPut',
+    'ReapPeerOnRead',
+    'AcceptCustomerKeyMedia',
+    'AcceptExpiredOrRetiredCursor',
+    'AcceptMalformedMedia',
+    'AcceptStaleRetention',
+    'AcknowledgeFailedCommit',
+    'ConsumeNumberOnRefusal',
+    'DeletePeerOnRecreate',
+    'DiscloseDeniedRead',
+    'DropLostCommit',
+    'DropRetentionVersion',
+    'ExtendExpiredRow',
+    'ForgetFragmentTime',
+    'HonorForeignCursor',
+    'IgnoreDatabaseBudget',
+    'IgnoreStreamBudget',
+    'IgnoreWriterDeny',
+    'InventDurableReceipt',
+    'KeepCanceledWrite',
+    'KeepFragmentAtExpiry',
+    'LeakPeerThroughRead',
+    'NumberZeroRetention',
+    'ProducerTimeControlsExpiry',
+    'PurgeOnInterruptedRetention',
+    'ReplayOnReopen',
+    'RestartRetentionOnChange',
+    'ResumeInclusively',
+    'ReuseStreamGeneration',
+    'SubstitutePayload',
+}
+REQUIRED_SOURCE_SCOPES['KinesisVideoRetention'] = {
+    'internal/aws/catalog/engine.go',
+    'internal/aws/catalog/kinesisvideo_fragments.go',
+    'internal/aws/catalog/kinesisvideo_http.go',
+    'internal/aws/catalog/kinesisvideo_media_store_test.go',
+    'internal/aws/catalog/kinesisvideo_media_test.go',
+    'internal/aws/catalog/semantics.go',
+    'internal/aws/kinesisvideo/ebml.go',
+    'internal/aws/kinesisvideo/fragment.go',
+}
+
+
+BASE_MODELS.add('KinesisVideoConsole')
+BASE_INVARIANTS['KinesisVideoConsole'] = {
+    'CancelBoundary',
+    'ClearRead',
+    'ConfirmedOutcome',
+    'ExplicitRecovery',
+    'FreshMount',
+    'OneCommand',
+    'PhysicalSend',
+    'ReadProjection',
+    'RetiredReply',
+    'StoreFrame',
+    'TypeOK',
+    'UnknownResult',
+}
+REQUIRED_MUTANTS['KinesisVideoConsole'] = {
+    'AcceptDeniedRetentionAfterShort',
+    'AcceptForeignEndpoint',
+    'AcceptForeignZeroAfterShort',
+    'AcceptLateReadIgnoringGeneration',
+    'AcceptLateReadIgnoringRegion',
+    'AcceptLateReadIgnoringRequestTicket',
+    'AcceptLateReadIgnoringStream',
+    'AcceptLateReadIgnoringTeam',
+    'AcceptPositiveRetentionAfterShort',
+    'AdoptPeerRows',
+    'AutomaticallyResendOnLostReply',
+    'ExposeRowsOnReadDenial',
+    'IgnoreContinuation',
+    'IssuePutForRetiredDiscovery',
+    'KeepCursorDuringRead',
+    'KeepPickedFileOnMount',
+    'KeepVisibleChunksOnMount',
+    'LostReplyInventsReceipt',
+    'PartialNumberedAckAsPersistence',
+    'PersistThroughPeer',
+    'PickWhileUnknown',
+    'PostsendCancelDefinitive',
+    'PresendCancelCreatesUncertainty',
+    'PublishCanceledWriteReceipt',
+    'ReadCreditsPriorWrite',
+    'RecoverAfterDeniedEarliest',
+    'ShortAcknowledgedImmediately',
+    'StartSecondCommand',
+    'UnlockOnRetiredZeroCheck',
+    'WrongPersistedNumber',
+    'ZeroReportsDurableReceipt',
+}
+REQUIRED_SOURCE_SCOPES['KinesisVideoConsole'] = {
+    'tools/console/src/catalog.jsx',
+    'tools/console/src/kinesis-video-media.jsx',
+    'tools/console/src/kinesis-video-media.mjs',
+    'tools/console/src/main.jsx',
+}
+
+
 def load_registry(root, relative='formal/models.json'):
     root = Path(root)
     registry_path = asset(root, relative)

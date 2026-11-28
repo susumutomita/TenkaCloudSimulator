@@ -9,6 +9,8 @@ import CodeCommitContent from './codecommit-content.jsx';
 import {contentOperations} from './codecommit-content.mjs';
 import ServiceQuotas from './service-quotas.jsx';
 import {quotaConsoleAvailable} from './service-quotas.mjs';
+import KinesisVideoMedia from './kinesis-video-media.jsx';
+import {currentStream} from './kinesis-video-media.mjs';
 import KinesisVideoRetention from './kinesis-video-retention.jsx';
 import {isKinesisVideoRetention,kinesisRetentionEdit,kinesisRetentionUpdate} from './kinesis-video-retention.mjs';
 import {appStreamAppBlockDetailInput,isAppStreamAppBlock} from './appstream-app-block.mjs';
@@ -156,7 +158,7 @@ function resourceGroupDetail(service, resource, detail, region) {
   return !!detail?.Name && detail.GroupArn === 'arn:aws:resource-groups:' + region + ':' + service.account + ':group/' + detail.Name;
 }
 
-export default function CatalogView({region,request,catalog,onSaving}){
+export default function CatalogView({region,request,mediaRequest,catalog,onSaving}){
  const {t}=useLocale();
  // Capabilities list compact summaries; the full native descriptors are
  // served separately so the capability document stays bounded.
@@ -546,6 +548,7 @@ export default function CatalogView({region,request,catalog,onSaving}){
     {!loading&&service.model==='codecommit'&&resource.kind==='repository'&&detail?.repositoryId&&detail.repositoryName&&
       contentOperations.every(operation=>service.operations.includes(operation))&&<CodeCommitContent key={region+'-'+detail.repositoryId}
         request={request} region={region} repository={detail} onSaving={value=>{setBusy(value);onSaving(value)}}/>}
+    {!loading&&page==='detail'&&service.model==='kinesisvideo'&&resource.kind==='stream'&&currentStream(detail,region)&&<KinesisVideoMedia key={region+'|'+detail.StreamARN} stream={detail} region={region} mediaRequest={mediaRequest} t={t}/>}
     {!loading&&complex.map(([k,v])=>section(k,v))}
     {!loading&&resourceGroupDetail(service,resource,detail,region)&&<ResourceGroupMembers key={detail.GroupArn}
       name={detail.Name} arn={detail.GroupArn} region={region} request={request} busy={busy} t={t}

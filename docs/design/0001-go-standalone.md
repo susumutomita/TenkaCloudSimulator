@@ -214,3 +214,7 @@ CloudWatch metric alarms store one standard-resolution metric configuration and 
 
 
 The CloudWatch alarm console reads the configured series and evaluation minute through the native monitoring Query endpoint. The authenticated API reference uses the same endpoint for its five metric and alarm examples. CloudWatch Logs events remain independently sourced.
+
+### Local Kinesis video fragments
+
+The AWS provider stores finite AVC/Matroska fragments in the same SQLite database as their stream. Each receipt binds the stream incarnation, fragment number, cursor, times and media bytes. The data endpoint comes from the accepted numeric-loopback socket. The standalone binary validates the container and emits original encoded frames with Kinesis metadata. Decoding and the producer SDK run in the client. [Media scope](../kinesis-video-media.md)

@@ -38180,6 +38180,736 @@
           "expect_invariant": "Admission"
         }
       ]
+    },
+    {
+      "id": "KinesisVideoRetention",
+      "model": "formal/KinesisVideoRetention.tla",
+      "config": "formal/KinesisVideoRetention.cfg",
+      "bounds": "Named finite histories of two initially populated streams in one team database, up to two incarnations, three distinct payload labels, a database-global fragment serial, integer capture times and a capacity of two primary or four database rows, versioned retention changes and a nonzero fragment timecode. Output includes snapshot bytes by abstract identity, durable number and distinct success, receipt, refusal and lost-reply observations.",
+      "properties": [
+        "TypeOK",
+        "ReplyKind",
+        "FragmentNumber",
+        "FragmentTimecode",
+        "RefusedFrame",
+        "RetentionVersion",
+        "ReturnedMedia",
+        "RetainedRows",
+        "PeerRows"
+      ],
+      "limits": "The model examines only its enumerated histories. Capacity is by reduced row counts. Byte budgets, another team process, corruption, cryptographic cursor generation, real SQL cancellation, scheduling, actual IAM, codec validation, streaming transport and restart persistence are exercised separately in native checks. The model does not prove the Go implementation. Reads reclaim only the addressed stream; successful uploads can reclaim expired rows across the team. ACK observations distinguish the terminal response and fragment timecode; native tests check every newline-delimited wire event.",
+      "source_scope": [
+        "internal/aws/catalog/engine.go",
+        "internal/aws/catalog/kinesisvideo_fragments.go",
+        "internal/aws/catalog/kinesisvideo_http.go",
+        "internal/aws/catalog/kinesisvideo_media_store_test.go",
+        "internal/aws/catalog/kinesisvideo_media_test.go",
+        "internal/aws/catalog/semantics.go",
+        "internal/aws/kinesisvideo/ebml.go",
+        "internal/aws/kinesisvideo/fragment.go"
+      ],
+      "mutants": [
+        {
+          "id": "IgnoreWriterDeny",
+          "edits": [
+            {
+              "old": "op # \"denied\" /\\ op # \"malformed\"",
+              "new": "op # \"malformed\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReplyKind"
+        },
+        {
+          "id": "AcceptMalformedMedia",
+          "edits": [
+            {
+              "old": "op # \"denied\" /\\ op # \"malformed\"",
+              "new": "op # \"denied\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReplyKind"
+        },
+        {
+          "id": "KeepCanceledWrite",
+          "edits": [
+            {
+              "old": "op # \"cancel\" /\\ op # \"failCommit\"",
+              "new": "op # \"failCommit\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReplyKind"
+        },
+        {
+          "id": "AcknowledgeFailedCommit",
+          "edits": [
+            {
+              "old": "op # \"cancel\" /\\ op # \"failCommit\"",
+              "new": "op # \"cancel\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReplyKind"
+        },
+        {
+          "id": "IgnoreStreamBudget",
+          "edits": [
+            {
+              "old": "Len(own) < 2 /\\ Len(live) < 4",
+              "new": "Len(live) < 4",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReplyKind"
+        },
+        {
+          "id": "IgnoreDatabaseBudget",
+          "edits": [
+            {
+              "old": "Len(own) < 2 /\\ Len(live) < 4",
+              "new": "Len(own) < 2",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReplyKind"
+        },
+        {
+          "id": "NumberZeroRetention",
+          "edits": [
+            {
+              "old": ".rows = live],Receipt(\"RECEIVED\",0,fragmentTime)",
+              "new": ".rows = live],Receipt(\"RECEIVED\",n,fragmentTime)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "FragmentNumber"
+        },
+        {
+          "id": "InventDurableReceipt",
+          "edits": [
+            {
+              "old": "ELSE Receipt(\"PERSISTED\",n,fragmentTime))",
+              "new": "ELSE Receipt(\"PERSISTED\",n+1,fragmentTime))",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "FragmentNumber"
+        },
+        {
+          "id": "DropLostCommit",
+          "edits": [
+            {
+              "old": "!.rows = Append(live,new)",
+              "new": "!.rows = IF op = \"lostReply\" THEN live ELSE Append(live,new)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "RetainedRows"
+        },
+        {
+          "id": "ReplayOnReopen",
+          "edits": [
+            {
+              "old": "op = \"reopen\" -> Outcome(d,Quiet)",
+              "new": "op = \"reopen\" -> Outcome([d EXCEPT !.rows = Append(@,Row(\"A\",d.gen,d.serial+1,\"second\",d.now,d.now+d.ttl))],Quiet)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReturnedMedia"
+        },
+        {
+          "id": "SubstitutePayload",
+          "edits": [
+            {
+              "old": "new == Row(\"A\",d.gen,n,\"second\"",
+              "new": "new == Row(\"A\",d.gen,n,\"first\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "RetainedRows"
+        },
+        {
+          "id": "ProducerTimeControlsExpiry",
+          "edits": [
+            {
+              "old": "d.now,d.now+d.ttl)",
+              "new": "d.now,9+d.ttl)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReturnedMedia"
+        },
+        {
+          "id": "KeepFragmentAtExpiry",
+          "edits": [
+            {
+              "old": "~Owned(r,d) \\/ r.expires > d.now)",
+              "new": "~Owned(r,d) \\/ r.expires >= d.now)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReturnedMedia"
+        },
+        {
+          "id": "ExtendExpiredRow",
+          "edits": [
+            {
+              "old": "r.expires > d.now /\\ ttl > 0",
+              "new": "TRUE /\\ ttl > 0",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReturnedMedia"
+        },
+        {
+          "id": "RestartRetentionOnChange",
+          "edits": [
+            {
+              "old": "!.expires = r.server + ttl",
+              "new": "!.expires = d.now + ttl",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReturnedMedia"
+        },
+        {
+          "id": "LeakPeerThroughRead",
+          "edits": [
+            {
+              "old": "after == SelectSeq(own",
+              "new": "after == SelectSeq(live",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReturnedMedia"
+        },
+        {
+          "id": "HonorForeignCursor",
+          "edits": [
+            {
+              "old": "i \\in 1..Len(own): own[i].num = n",
+              "new": "i \\in 1..Len(live): live[i].num = n",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReplyKind"
+        },
+        {
+          "id": "ResumeInclusively",
+          "edits": [
+            {
+              "old": "LAMBDA r: r.num > n",
+              "new": "LAMBDA r: r.num >= n",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReturnedMedia"
+        },
+        {
+          "id": "AcceptExpiredOrRetiredCursor",
+          "edits": [
+            {
+              "old": "IF ~d.backed \\/ op = \"denyRead\" \\/ ~valid",
+              "new": "IF ~d.backed \\/ op = \"denyRead\" \\/ (~valid /\\ n # 1)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReplyKind"
+        },
+        {
+          "id": "DeletePeerOnRecreate",
+          "edits": [
+            {
+              "old": "SelectSeq(@, LAMBDA r: r.stream # \"A\")",
+              "new": "<<>>",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PeerRows"
+        },
+        {
+          "id": "ReuseStreamGeneration",
+          "edits": [
+            {
+              "old": "!.gen = @+1",
+              "new": "!.gen = @",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "RetainedRows"
+        },
+        {
+          "id": "DiscloseDeniedRead",
+          "edits": [
+            {
+              "old": "~d.backed \\/ op = \"denyRead\" \\/ ~valid",
+              "new": "~d.backed \\/ ~valid",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReplyKind"
+        },
+        {
+          "id": "ConsumeNumberOnRefusal",
+          "edits": [
+            {
+              "old": "~allowed \\/ ~committed THEN Outcome(d,Refusal)",
+              "new": "~allowed \\/ ~committed THEN Outcome([d EXCEPT !.serial = @+1],Refusal)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "RefusedFrame"
+        },
+        {
+          "id": "ForgetFragmentTime",
+          "edits": [
+            {
+              "old": "fragmentTime == new.producer - 2",
+              "new": "fragmentTime == 0",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "FragmentTimecode"
+        },
+        {
+          "id": "AcceptStaleRetention",
+          "edits": [
+            {
+              "old": "IF version # d.version THEN",
+              "new": "IF FALSE THEN",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReplyKind"
+        },
+        {
+          "id": "PurgeOnInterruptedRetention",
+          "edits": [
+            {
+              "old": "~commit THEN Outcome(d,Refusal)",
+              "new": "~commit THEN Outcome(staged,Refusal)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "RefusedFrame"
+        },
+        {
+          "id": "DropRetentionVersion",
+          "edits": [
+            {
+              "old": "!.version = @+1",
+              "new": "!.version = @",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "RetentionVersion"
+        },
+        {
+          "id": "AcceptCustomerKeyMedia",
+          "edits": [
+            {
+              "old": "op # \"malformed\" /\\ d.backed",
+              "new": "op # \"malformed\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReplyKind"
+        },
+        {
+          "id": "ReapPeerOnRead",
+          "edits": [
+            {
+              "old": "live == SelectSeq(d.rows, LAMBDA r: ~Owned(r,d) \\/ r.expires > d.now)",
+              "new": "live == Live(d)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PeerRows"
+        },
+        {
+          "id": "KeepExpiredPeerOnPut",
+          "edits": [
+            {
+              "old": "LET live == Live(d)",
+              "new": "LET live == SelectSeq(d.rows, LAMBDA r: ~Owned(r,d) \\/ r.expires > d.now)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PeerRows"
+        }
+      ]
+    },
+    {
+      "id": "KinesisVideoConsole",
+      "model": "formal/KinesisVideoConsole.tla",
+      "config": "formal/KinesisVideoConsole.cfg",
+      "bounds": "Twenty-five finite mounted-component schedules, including one independent replacement for team, region, immutable stream, or same-scope remount; at most two deliberate PutMedia requests, one active operation and one retired callback, at most three symbolic fragment numbers, one observed cursor. The store is ghost state revealed only through a completed read.",
+      "properties": [
+        "TypeOK",
+        "OneCommand",
+        "PhysicalSend",
+        "RetiredReply",
+        "FreshMount",
+        "UnknownResult",
+        "CancelBoundary",
+        "ExplicitRecovery",
+        "ConfirmedOutcome",
+        "ReadProjection",
+        "ClearRead",
+        "StoreFrame"
+      ],
+      "limits": "Models the selected mounted Console protocol after physical ARN and endpoint validation. A fresh mount may issue a new user command. An observed read never identifies an earlier unacknowledged write. Resume is user-reachable only with a visible cursor; the one cursor represents a chosen returned segment. Positive and negative controls assume categorized native responses and loss/retention readback. This does not prove React scheduling, URL parsing, IAM, cookies, SDK signing, SQLite transactions, Matroska decoding, real retention time, accessibility or all possible schedules.",
+      "source_scope": [
+        "tools/console/src/kinesis-video-media.jsx",
+        "tools/console/src/kinesis-video-media.mjs",
+        "tools/console/src/catalog.jsx",
+        "tools/console/src/main.jsx"
+      ],
+      "mutants": [
+        {
+          "id": "StartSecondCommand",
+          "edits": [
+            {
+              "old": "BusyOK(v) == v.phase=\"idle\"",
+              "new": "BusyOK(v) == TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "OneCommand"
+        },
+        {
+          "id": "AcceptLateReadIgnoringTeam",
+          "edits": [
+            {
+              "old": "IF Match(ticket,v) /\\ v.phase=\"reading\" THEN",
+              "new": "IF (v.phase#\"idle\" /\\ ticket.site[2]=v.site[2] /\\ ticket.site[3]=v.site[3] /\\ ticket.generation=v.generation /\\ ticket.serial=v.active.serial) /\\ v.phase=\"reading\" THEN",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "RetiredReply"
+        },
+        {
+          "id": "AcceptLateReadIgnoringRegion",
+          "edits": [
+            {
+              "old": "IF Match(ticket,v) /\\ v.phase=\"reading\" THEN",
+              "new": "IF (v.phase#\"idle\" /\\ ticket.site[1]=v.site[1] /\\ ticket.site[3]=v.site[3] /\\ ticket.generation=v.generation /\\ ticket.serial=v.active.serial) /\\ v.phase=\"reading\" THEN",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "RetiredReply"
+        },
+        {
+          "id": "AcceptLateReadIgnoringStream",
+          "edits": [
+            {
+              "old": "IF Match(ticket,v) /\\ v.phase=\"reading\" THEN",
+              "new": "IF (v.phase#\"idle\" /\\ ticket.site[1]=v.site[1] /\\ ticket.site[2]=v.site[2] /\\ ticket.generation=v.generation /\\ ticket.serial=v.active.serial) /\\ v.phase=\"reading\" THEN",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "RetiredReply"
+        },
+        {
+          "id": "AcceptLateReadIgnoringGeneration",
+          "edits": [
+            {
+              "old": "IF Match(ticket,v) /\\ v.phase=\"reading\" THEN",
+              "new": "IF (v.phase#\"idle\" /\\ ticket.site[1]=v.site[1] /\\ ticket.site[2]=v.site[2] /\\ ticket.site[3]=v.site[3] /\\ ticket.serial=v.active.serial) /\\ v.phase=\"reading\" THEN",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "RetiredReply"
+        },
+        {
+          "id": "AcceptLateReadIgnoringRequestTicket",
+          "edits": [
+            {
+              "old": "IF Match(ticket,v) /\\ v.phase=\"reading\" THEN",
+              "new": "IF (v.phase#\"idle\" /\\ ticket.site[1]=v.site[1] /\\ ticket.site[2]=v.site[2] /\\ ticket.site[3]=v.site[3] /\\ ticket.generation=v.generation) /\\ v.phase=\"reading\" THEN",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "RetiredReply"
+        },
+        {
+          "id": "IssuePutForRetiredDiscovery",
+          "edits": [
+            {
+              "old": "[] ev=\"lateEndpoint\" -> Dispatch(v,v.old)",
+              "new": "[] ev=\"lateEndpoint\" -> IF v.phase=\"discovery\" THEN Dispatch(v,v.active) ELSE v",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PhysicalSend"
+        },
+        {
+          "id": "PublishCanceledWriteReceipt",
+          "edits": [
+            {
+              "old": "[] ev=\"latePersist\" -> Saved(v,v.old)",
+              "new": "[] ev=\"latePersist\" -> [v EXCEPT !.receipt=v.sends+1,!.notice=\"persisted\"]",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "RetiredReply"
+        },
+        {
+          "id": "UnlockOnRetiredZeroCheck",
+          "edits": [
+            {
+              "old": "[] ev=\"lateZero\" -> Confirm(v,\"zero\",v.old)",
+              "new": "[] ev=\"lateZero\" -> [v EXCEPT !.uncertain=FALSE,!.notice=\"received\"]",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "RetiredReply"
+        },
+        {
+          "id": "KeepPickedFileOnMount",
+          "edits": [
+            {
+              "old": "!.picked=FALSE, !.rows={}, !.cursor=0, !.uncertain=FALSE",
+              "new": "!.picked=v.picked, !.rows={}, !.cursor=0, !.uncertain=FALSE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "FreshMount"
+        },
+        {
+          "id": "KeepVisibleChunksOnMount",
+          "edits": [
+            {
+              "old": "!.picked=FALSE, !.rows={}, !.cursor=0, !.uncertain=FALSE",
+              "new": "!.picked=FALSE, !.rows=v.rows, !.cursor=v.cursor, !.uncertain=FALSE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "FreshMount"
+        },
+        {
+          "id": "PresendCancelCreatesUncertainty",
+          "edits": [
+            {
+              "old": "ELSE Retire(v)",
+              "new": "ELSE IF v.phase=\"discovery\" THEN Uncertain(Retire(v)) ELSE Retire(v)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CancelBoundary"
+        },
+        {
+          "id": "PostsendCancelDefinitive",
+          "edits": [
+            {
+              "old": "THEN Uncertain(Retire(v)) ELSE Retire(v)",
+              "new": "THEN Retire(v) ELSE Retire(v)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CancelBoundary"
+        },
+        {
+          "id": "ShortAcknowledgedImmediately",
+          "edits": [
+            {
+              "old": "Short(v) == [v EXCEPT !.phase=\"checkingZero\"]",
+              "new": "Short(v) == [v EXCEPT !.phase=\"idle\",!.notice=\"received\"]",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ConfirmedOutcome"
+        },
+        {
+          "id": "AcceptForeignZeroAfterShort",
+          "edits": [
+            {
+              "old": "IsConfirmedZero(ev) == ev=\"zero\"",
+              "new": "IsConfirmedZero(ev) == ev \\in {\"zero\",\"foreignZero\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "UnknownResult"
+        },
+        {
+          "id": "AcceptPositiveRetentionAfterShort",
+          "edits": [
+            {
+              "old": "IsConfirmedZero(ev) == ev=\"zero\"",
+              "new": "IsConfirmedZero(ev) == ev \\in {\"zero\",\"positive\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "UnknownResult"
+        },
+        {
+          "id": "AcceptDeniedRetentionAfterShort",
+          "edits": [
+            {
+              "old": "IsConfirmedZero(ev) == ev=\"zero\"",
+              "new": "IsConfirmedZero(ev) == ev \\in {\"zero\",\"retentionDenied\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "UnknownResult"
+        },
+        {
+          "id": "PartialNumberedAckAsPersistence",
+          "edits": [
+            {
+              "old": "ev \\in {\"lost\",\"partial\"} -> Uncertain(v)",
+              "new": "ev=\"lost\" -> Uncertain(v)\n [] ev=\"partial\" -> Saved(v,v.active)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "UnknownResult"
+        },
+        {
+          "id": "LostReplyInventsReceipt",
+          "edits": [
+            {
+              "old": "ev \\in {\"lost\",\"partial\"} -> Uncertain(v)",
+              "new": "ev=\"partial\" -> Uncertain(v)\n [] ev=\"lost\" -> [Uncertain(v) EXCEPT !.receipt=v.sends+1]",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "UnknownResult"
+        },
+        {
+          "id": "AutomaticallyResendOnLostReply",
+          "edits": [
+            {
+              "old": "ev \\in {\"lost\",\"partial\"} -> Uncertain(v)",
+              "new": "ev=\"partial\" -> Uncertain(v)\n [] ev=\"lost\" -> [Uncertain(v) EXCEPT !.sends=@+1]",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PhysicalSend"
+        },
+        {
+          "id": "RecoverAfterDeniedEarliest",
+          "edits": [
+            {
+              "old": "-> Refusal(v)\n [] ev=\"cancel\"",
+              "new": "-> IF ev=\"readDenied\" THEN [Refusal(v) EXCEPT !.uncertain=FALSE] ELSE Refusal(v)\n [] ev=\"cancel\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExplicitRecovery"
+        },
+        {
+          "id": "PickWhileUnknown",
+          "edits": [
+            {
+              "old": "CanPick(v) == ~v.uncertain /\\ BusyOK(v)",
+              "new": "CanPick(v) == BusyOK(v)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExplicitRecovery"
+        },
+        {
+          "id": "WrongPersistedNumber",
+          "edits": [
+            {
+              "old": "!.notice=\"persisted\", !.receipt=v.sends+1",
+              "new": "!.notice=\"persisted\", !.receipt=1",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ConfirmedOutcome"
+        },
+        {
+          "id": "ZeroReportsDurableReceipt",
+          "edits": [
+            {
+              "old": "!.notice=\"received\", !.receipt=0",
+              "new": "!.notice=\"received\", !.receipt=1",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ConfirmedOutcome"
+        },
+        {
+          "id": "ReadCreditsPriorWrite",
+          "edits": [
+            {
+              "old": "!.notice=\"observed\", !.receipt=0,",
+              "new": "!.notice=\"observed\", !.receipt=IF v.uncertain THEN 1 ELSE 0,",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExplicitRecovery"
+        },
+        {
+          "id": "IgnoreContinuation",
+          "edits": [
+            {
+              "old": "Observed(v,ticket) == {n \\in v.db[ticket.site]: n>ticket.after}",
+              "new": "Observed(v,ticket) == v.db[ticket.site]",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadProjection"
+        },
+        {
+          "id": "AdoptPeerRows",
+          "edits": [
+            {
+              "old": "LET found == Observed(v,ticket) IN",
+              "new": "LET found == IF ticket.site#Origin THEN v.db[Origin] ELSE Observed(v,ticket) IN",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadProjection"
+        },
+        {
+          "id": "ExposeRowsOnReadDenial",
+          "edits": [
+            {
+              "old": "-> Refusal(v)\n [] ev=\"cancel\"",
+              "new": "-> IF ev=\"readDenied\" THEN [Refusal(v) EXCEPT !.rows=v.db[v.site]] ELSE Refusal(v)\n [] ev=\"cancel\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ClearRead"
+        },
+        {
+          "id": "KeepCursorDuringRead",
+          "edits": [
+            {
+              "old": "ELSE @, !.rows={}, !.cursor=0,",
+              "new": "ELSE @, !.rows={}, !.cursor=v.cursor,",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ClearRead"
+        },
+        {
+          "id": "AcceptForeignEndpoint",
+          "edits": [
+            {
+              "old": "-> Refusal(v)\n [] ev=\"cancel\"",
+              "new": "-> IF ev=\"badEndpoint\" THEN Dispatch(v,v.active) ELSE Refusal(v)\n [] ev=\"cancel\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PhysicalSend"
+        },
+        {
+          "id": "PersistThroughPeer",
+          "edits": [
+            {
+              "old": "!.db[v.active.site]=@ \\cup {v.sends+1}",
+              "new": "!.db[IF v.active.site=Origin THEN <<1,0,0>> ELSE Origin]=@ \\cup {v.sends+1}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "StoreFrame"
+        }
+      ]
     }
   ]
 }

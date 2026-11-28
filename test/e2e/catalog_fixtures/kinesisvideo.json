@@ -3,7 +3,7 @@
  "denied_status": 401,
  "steps": [
   {"op": "create_stream", "args": {"StreamName": "fixture-camera", "DeviceName": "cam-1", "MediaType": "video/h264", "DataRetentionInHours": 24, "Tags": {"team": "a"}}, "save": {"stream": "StreamARN"}},
-  {"op": "describe_stream", "args": {"StreamName": "fixture-camera"}, "save": {"version": "StreamInfo.Version"}, "expect": {"StreamInfo.StreamARN": "${stream}", "StreamInfo.Status": "CREATING", "StreamInfo.DataRetentionInHours": 24, "StreamInfo.DeviceName": "cam-1"}},
+  {"op": "describe_stream", "args": {"StreamName": "fixture-camera"}, "save": {"version": "StreamInfo.Version"}, "expect": {"StreamInfo.StreamARN": "${stream}", "StreamInfo.Status": "ACTIVE", "StreamInfo.DataRetentionInHours": 24, "StreamInfo.DeviceName": "cam-1"}},
   {"op": "describe_stream", "args": {"StreamARN": "${stream}"}, "expect": {"StreamInfo.StreamName": "fixture-camera"}},
   {"op": "list_streams", "args": {}, "expect": {"StreamInfoList#count": 1}},
   {"op": "update_stream", "args": {"StreamName": "fixture-camera", "CurrentVersion": "stale", "MediaType": "video/h265"}, "error": "VersionMismatchException", "status": 400},
@@ -22,7 +22,9 @@
   {"op": "describe_signaling_channel", "args": {"ChannelARN": "${channel}"}, "expect": {"ChannelInfo.SingleMasterConfiguration.MessageTtlSeconds": 90}},
   {"op": "update_signaling_channel", "args": {"ChannelARN": "${channel}", "CurrentVersion": "${channelVersion}", "SingleMasterConfiguration": {"MessageTtlSeconds": 30}}, "error": "VersionMismatchException", "status": 400},
   {"op": "delete_signaling_channel", "args": {"ChannelARN": "${channel}", "CurrentVersion": "${channelVersion}"}, "error": "VersionMismatchException", "status": 400},
-  {"op": "get_data_endpoint", "args": {"StreamName": "fixture-camera", "APIName": "PUT_MEDIA"}, "error": "UnknownOperationException", "status": 501},
+  {"op": "get_data_endpoint", "args": {"StreamName": "fixture-camera", "APIName": "PUT_MEDIA"}, "expect": {"DataEndpoint": "${team_endpoint}"}},
+  {"op": "get_data_endpoint", "args": {"StreamARN": "${stream}", "APIName": "GET_MEDIA"}, "expect": {"DataEndpoint": "${team_endpoint}"}},
+  {"op": "get_data_endpoint", "args": {"StreamARN": "${stream}", "APIName": "GET_HLS_STREAMING_SESSION_URL"}, "error": "InvalidArgumentException", "status": 400},
   {"op": "describe_stream", "args": {"StreamName": "missing-camera"}, "error": "ResourceNotFoundException", "status": 404}
  ],
  "isolation": [
@@ -30,6 +32,7 @@
   {"op": "list_signaling_channels", "args": {}, "expect": {"ChannelInfoList#count": 0}}
  ],
  "after_restart": [
+  {"op": "get_data_endpoint", "args": {"StreamARN": "${stream}", "APIName": "GET_MEDIA"}, "expect": {"DataEndpoint": "${team_endpoint}"}},
   {"op": "describe_stream", "args": {"StreamARN": "${stream}"}, "expect": {"StreamInfo.DataRetentionInHours": 20}}
  ],
  "cleanup": [

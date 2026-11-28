@@ -6,6 +6,7 @@ START_STATE ?= ./practice.db
 START_TOKEN_FILE ?= ./simulator-token
 GO_TEST_PACKAGES ?= ./...
 COVERAGE_PROFILE ?= reports/coverage.out
+KINESIS_VIDEO_JARS ?= $(CURDIR)/dist/kinesis-video-jars
 export GO START_LISTEN START_STATE START_TOKEN_FILE
 
 .PHONY: build dev start test-start test test-scripts test-go vet format-check before-commit e2e formal verify-assets cross-check
@@ -73,6 +74,15 @@ e2e: build
 	$(PYTHON) test/e2e/reflow_test.py
 	$(PYTHON) test/e2e/check.py
 	$(MAKE) test-start
+
+# Optional Linux video acceptance. Provision dependencies before entering the
+# loopback-only namespace; the standard E2E sweep still covers the catalog API.
+.PHONY: prepare-kinesis-video-java e2e-kinesis-video
+prepare-kinesis-video-java:
+	$(PYTHON) -B test/e2e/kinesis_video_fragments.py --prepare-java "$(KINESIS_VIDEO_JARS)"
+
+e2e-kinesis-video: build
+	$(PYTHON) -B test/e2e/run_kinesis_video.py "$(BINARY)" "$(KINESIS_VIDEO_JARS)"
 
 formal:
 	$(PYTHON) scripts/check-formal.py

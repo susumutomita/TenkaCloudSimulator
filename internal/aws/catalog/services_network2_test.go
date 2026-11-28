@@ -5,6 +5,7 @@ import (
 	"errors"
 	"net/url"
 	"reflect"
+	"strconv"
 	"strings"
 	"testing"
 )
@@ -280,12 +281,12 @@ func TestKinesisVideoStreamLifecycle(t *testing.T) {
 	created := h.rest("kinesisvideo", "POST", "/createStream", map[string]any{"StreamName": "front-door", "DeviceName": "cam-1", "MediaType": "video/h264", "DataRetentionInHours": 24, "Tags": map[string]any{"site": "hq"}})
 	expect(t, created, 200, "")
 	arn := str(created.body["StreamARN"])
-	if arn != "arn:aws:kinesisvideo:us-east-1:000000000000:stream/front-door/1" {
+	if arn != "arn:aws:kinesisvideo:us-east-1:000000000000:stream/front-door/"+strconv.FormatInt(h.now.UnixMilli(), 10) {
 		t.Fatalf("stream ARN %q", arn)
 	}
 	for _, request := range []map[string]any{{"StreamName": "front-door"}, {"StreamARN": arn}} {
 		info := h.rest("kinesisvideo", "POST", "/describeStream", request).body["StreamInfo"].(map[string]any)
-		if info["Status"] != "CREATING" || info["DataRetentionInHours"] != json.Number("24") || info["DeviceName"] != "cam-1" || info["MediaType"] != "video/h264" ||
+		if info["Status"] != "ACTIVE" || info["DataRetentionInHours"] != json.Number("24") || info["DeviceName"] != "cam-1" || info["MediaType"] != "video/h264" ||
 			info["KmsKeyId"] != "alias/aws/kinesisvideo" || len(str(info["Version"])) != 20 || info["StreamARN"] != arn || info["CreationTime"] == nil {
 			t.Fatalf("stream info %v", info)
 		}
@@ -388,7 +389,8 @@ func TestKinesisVideoSignalingChannelLifecycle(t *testing.T) {
 
 func TestKinesisVideoUnboundOperationsReturn501(t *testing.T) {
 	h := newHarness(t, kinesisVideo)
-	for _, path := range []string{"/getDataEndpoint", "/getSignalingChannelEndpoint", "/tagStream", "/untagStream", "/listTagsForStream",
+	expect(t, h.rest("kinesisvideo", "POST", "/getDataEndpoint", map[string]any{}), 400, "InvalidArgumentException")
+	for _, path := range []string{"/getSignalingChannelEndpoint", "/tagStream", "/untagStream", "/listTagsForStream",
 		"/updateStreamStorageConfiguration", "/describeNotificationConfiguration", "/updateImageGenerationConfiguration"} {
 		expect(t, h.rest("kinesisvideo", "POST", path, map[string]any{}), 501, "UnknownOperationException")
 	}

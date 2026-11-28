@@ -9,8 +9,10 @@ The catalog stores resource records in provider-owned SQLite. Service Quotas
 reads an enforced limit from the active B2BI resource definition. Every
 other official operation outside each service’s listed subset returns HTTP 501
 `UnknownOperationException`. Input members that the simulator would ignore are
-refused with the operation's own validation exception. No workload, data plane,
-network, OAuth or real AWS call is executed or simulated.
+refused with the operation's own validation exception. Catalog metadata operations
+stay local and do not execute workloads, network traffic, OAuth or real AWS calls.
+The Kinesis Video Streams data plane stores and serves bounded local media through
+two additional native HTTP operations. [Media scope](kinesis-video-media.md)
 
 ## Services
 
