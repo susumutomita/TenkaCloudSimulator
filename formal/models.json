@@ -31120,6 +31120,621 @@
           "expect_invariant": "PageScope"
         }
       ]
+    },
+    {
+      "id": "ServiceQuotaRequestConsole",
+      "model": "formal/ServiceQuotaRequestConsole.tla",
+      "config": "formal/ServiceQuotaRequestConsole.cfg",
+      "bounds": "One editable account quota with two eligible user submissions, up to four reads per mount, a preexisting equal-value terminal request and a private peer. A second trial allows one team/account/region/principal change, an equivalent remount, or a hidden section/capability followed by one fresh visible mount, with a retired native response. Initial quota availability and returning to an available editor abstract a successful applied-capacity read. A genuine server write may commit despite response loss.",
+      "properties": [
+        "SingleIntent",
+        "NoAutomaticWrite",
+        "NativeFrame",
+        "SavedExactlyOnce",
+        "Acknowledgement",
+        "FreshRecovery",
+        "ObservedOnly",
+        "SeparateIntent",
+        "RetiredRead",
+        "ScopeCleared",
+        "BlockedRetry",
+        "FreshCapacity",
+        "VisibleLookup",
+        "VisibleMount"
+      ],
+      "limits": "Finite mounted UI control and response semantics, complementing CatalogConsoleEpoch and the native request lifecycle. A valid recovery observes the first unfiltered ACCOUNT ByQuota page in the same current view. It neither supplies the lost submission ID nor retries it; only a separate user choice permits a fresh submission. A physical request/record and two result classes abstract native state. Historical pages and by-ID detail can show preexisting records without attributing their IDs to the latest write. The model does not define global idempotency across tabs, concurrent writes across new mounts, AWS policy evaluation, SQL rollback, actual DOM focus or response bytes. Current permission/prefix, account values, equality, and retained states are separately checked in native and browser fixtures.",
+      "source_scope": [
+        "tools/console/src/catalog.jsx",
+        "tools/console/src/main.jsx",
+        "tools/console/src/service-quotas.jsx",
+        "tools/console/src/service-quotas.mjs",
+        "internal/server/web/app.js"
+      ],
+      "mutants": [
+        {
+          "id": "SubmitUnknownAgain",
+          "edits": [
+            {
+              "old": "st.phase \\in {\"idle\",\"confirmed\",\"refused\"}",
+              "new": "st.phase \\in {\"idle\",\"confirmed\",\"refused\",\"unknown\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "SingleIntent"
+        },
+        {
+          "id": "SendWithoutAppliedCapacity",
+          "edits": [
+            {
+              "old": "/\\ st.quota /\\ st.sent<2",
+              "new": "/\\ st.sent<2",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "SingleIntent"
+        },
+        {
+          "id": "SubmitWithWrongPrincipal",
+          "edits": [
+            {
+              "old": "scope |-> st.scope,mount |-> st.mount,o |-> o",
+              "new": "scope |-> Move(st.scope,\"principal\"),mount |-> st.mount,o |-> o",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "SingleIntent"
+        },
+        {
+          "id": "SendFromWrongMountedGeneration",
+          "edits": [
+            {
+              "old": "scope |-> st.scope,mount |-> st.mount,o |-> o",
+              "new": "scope |-> st.scope,mount |-> st.mount+1,o |-> o",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "SingleIntent"
+        },
+        {
+          "id": "CommitToAnotherRegion",
+          "edits": [
+            {
+              "old": "Append(@,Row(w.scope,id,w.o))",
+              "new": "Append(@,Row(Move(w.scope,\"region\"),id,w.o))",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "SavedExactlyOnce"
+        },
+        {
+          "id": "CollapseTwoTerminalIDs",
+          "edits": [
+            {
+              "old": "id == IF saved THEN Len(st.db)+1 ELSE 0",
+              "new": "id == IF saved THEN IF st.sent=2 /\\ w.o=\"false\" /\\ Len(Owned(st.db,w.scope))>1 THEN Owned(st.db,w.scope)[Len(Owned(st.db,w.scope))].id ELSE Len(st.db)+1 ELSE 0",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "SavedExactlyOnce"
+        },
+        {
+          "id": "RepeatPendingAfterSeparateIntent",
+          "edits": [
+            {
+              "old": "saved == result=\"save\" /\\ ~Pending(st.db,w.scope)",
+              "new": "saved == result=\"save\" /\\ (~Pending(st.db,w.scope) \\/ st.separateUsed)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "SavedExactlyOnce"
+        },
+        {
+          "id": "LoseEarlierSameAmountHolder",
+          "edits": [
+            {
+              "old": "Append(@,Row(w.scope,id,w.o))",
+              "new": "Append(SelectSeq(@,LAMBDA z : z.owner#Key(w.scope)),Row(w.scope,id,w.o))",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "SavedExactlyOnce"
+        },
+        {
+          "id": "AcknowledgeAnUnstoredRow",
+          "edits": [
+            {
+              "old": "success => w.server=\"saved\"",
+              "new": "success => TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "Acknowledgement"
+        },
+        {
+          "id": "TreatSavedTransportLossAsConfirmed",
+          "edits": [
+            {
+              "old": "success == k=\"match\"",
+              "new": "success == k=\"match\" \\/ (k=\"lost\" /\\ w.server=\"saved\")",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "Acknowledgement"
+        },
+        {
+          "id": "TreatUnknownLossAsRefusal",
+          "edits": [
+            {
+              "old": "known == k \\in {\"knownRefusal\",\"forbidden\"}",
+              "new": "known == k \\in {\"knownRefusal\",\"forbidden\"} \\/ (k=\"lost\" /\\ w.server=\"refused\")",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "Acknowledgement"
+        },
+        {
+          "id": "TreatDefinitiveRefusalAsUnknown",
+          "edits": [
+            {
+              "old": "known == k \\in {\"knownRefusal\",\"forbidden\"}",
+              "new": "known == FALSE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "Acknowledgement"
+        },
+        {
+          "id": "ConfirmBadBody",
+          "edits": [
+            {
+              "old": "success == k=\"match\"",
+              "new": "success == k=\"match\" \\/ k=\"badBody\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "Acknowledgement"
+        },
+        {
+          "id": "ConfirmWrongAmount",
+          "edits": [
+            {
+              "old": "success == k=\"match\"",
+              "new": "success == k=\"match\" \\/ k=\"wrongAmount\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "Acknowledgement"
+        },
+        {
+          "id": "ConfirmWrongStatus",
+          "edits": [
+            {
+              "old": "success == k=\"match\"",
+              "new": "success == k=\"match\" \\/ k=\"wrongStatus\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "Acknowledgement"
+        },
+        {
+          "id": "ConfirmWrongArn",
+          "edits": [
+            {
+              "old": "success == k=\"match\"",
+              "new": "success == k=\"match\" \\/ k=\"wrongArn\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "Acknowledgement"
+        },
+        {
+          "id": "BindOldIdenticalRowToLostSubmit",
+          "edits": [
+            {
+              "old": "!.record=IF success THEN w.id ELSE 0",
+              "new": "!.record=IF k=\"lost\" /\\ Len(Owned(st.db,w.scope))>0 THEN Owned(st.db,w.scope)[1].id ELSE IF success THEN w.id ELSE 0",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "Acknowledgement"
+        },
+        {
+          "id": "PublishRetiredAckAcrossScope",
+          "edits": [
+            {
+              "old": "IF ~same THEN [st EXCEPT !.pending= <<>>]",
+              "new": "IF ~same /\\ k#\"match\" THEN [st EXCEPT !.pending= <<>>]",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "Acknowledgement"
+        },
+        {
+          "id": "PublishOldUnknownAcrossRemount",
+          "edits": [
+            {
+              "old": "IF ~same THEN [st EXCEPT !.pending= <<>>]",
+              "new": "IF ~same /\\ (k#\"lost\" \\/ w.scope#st.scope) THEN [st EXCEPT !.pending= <<>>]",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "Acknowledgement"
+        },
+        {
+          "id": "KeepArmedWhileNewRecoveryBegins",
+          "edits": [
+            {
+              "old": "k \\in {\"recover\",\"capacity\"} THEN FALSE",
+              "new": "k=\"capacity\" THEN FALSE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "FreshRecovery"
+        },
+        {
+          "id": "KeepArmedAcrossCapacityClear",
+          "edits": [
+            {
+              "old": "k \\in {\"recover\",\"capacity\"} THEN FALSE",
+              "new": "k=\"recover\" THEN FALSE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "FreshRecovery"
+        },
+        {
+          "id": "ArmFromOrdinaryByQuota",
+          "edits": [
+            {
+              "old": "recovered == t.kind=\"recover\" /\\ valid",
+              "new": "recovered == t.kind \\in {\"recover\",\"ordinaryByQuota\"} /\\ valid",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ObservedOnly"
+        },
+        {
+          "id": "ArmFromGeneral",
+          "edits": [
+            {
+              "old": "recovered == t.kind=\"recover\" /\\ valid",
+              "new": "recovered == t.kind \\in {\"recover\",\"general\"} /\\ valid",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ObservedOnly"
+        },
+        {
+          "id": "ArmFromFiltered",
+          "edits": [
+            {
+              "old": "recovered == t.kind=\"recover\" /\\ valid",
+              "new": "recovered == t.kind \\in {\"recover\",\"filtered\"} /\\ valid",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ObservedOnly"
+        },
+        {
+          "id": "ArmFromResource",
+          "edits": [
+            {
+              "old": "recovered == t.kind=\"recover\" /\\ valid",
+              "new": "recovered == t.kind \\in {\"recover\",\"resource\"} /\\ valid",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ObservedOnly"
+        },
+        {
+          "id": "ArmFromNext",
+          "edits": [
+            {
+              "old": "recovered == t.kind=\"recover\" /\\ valid",
+              "new": "recovered == t.kind \\in {\"recover\",\"next\"} /\\ valid",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ObservedOnly"
+        },
+        {
+          "id": "ArmFromAuto",
+          "edits": [
+            {
+              "old": "recovered == t.kind=\"recover\" /\\ valid",
+              "new": "recovered == t.kind \\in {\"recover\",\"auto\"} /\\ valid",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ObservedOnly"
+        },
+        {
+          "id": "ArmFromInspect",
+          "edits": [
+            {
+              "old": "recovered == t.kind=\"recover\" /\\ valid",
+              "new": "recovered == t.kind \\in {\"recover\",\"inspect\"} /\\ valid",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ObservedOnly"
+        },
+        {
+          "id": "ArmFromCapacity",
+          "edits": [
+            {
+              "old": "recovered == t.kind=\"recover\" /\\ valid",
+              "new": "recovered == t.kind \\in {\"recover\",\"capacity\"} /\\ valid",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ObservedOnly"
+        },
+        {
+          "id": "ArmAfterDenied",
+          "edits": [
+            {
+              "old": "[DropData(st) EXCEPT !.active= <<>>]",
+              "new": "[DropData(st) EXCEPT !.active= <<>>, !.armed=IF outcome=\"denied\" /\\ t.kind=\"recover\" THEN TRUE ELSE @]",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ObservedOnly"
+        },
+        {
+          "id": "ArmAfterFailed",
+          "edits": [
+            {
+              "old": "[DropData(st) EXCEPT !.active= <<>>]",
+              "new": "[DropData(st) EXCEPT !.active= <<>>, !.armed=IF outcome=\"failed\" /\\ t.kind=\"recover\" THEN TRUE ELSE @]",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ObservedOnly"
+        },
+        {
+          "id": "ArmAfterWrongOwner",
+          "edits": [
+            {
+              "old": "[DropData(st) EXCEPT !.active= <<>>]",
+              "new": "[DropData(st) EXCEPT !.active= <<>>, !.armed=IF outcome=\"wrongOwner\" /\\ t.kind=\"recover\" THEN TRUE ELSE @]",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ObservedOnly"
+        },
+        {
+          "id": "ArmAfterMalformed",
+          "edits": [
+            {
+              "old": "[DropData(st) EXCEPT !.active= <<>>]",
+              "new": "[DropData(st) EXCEPT !.active= <<>>, !.armed=IF outcome=\"malformed\" /\\ t.kind=\"recover\" THEN TRUE ELSE @]",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ObservedOnly"
+        },
+        {
+          "id": "RetainArmAfterPermissionLoss",
+          "edits": [
+            {
+              "old": "[DropData(st) EXCEPT !.active= <<>>]",
+              "new": "[DropData(st) EXCEPT !.active= <<>>, !.armed=IF outcome=\"denied\" THEN st.armed ELSE @]",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ObservedOnly"
+        },
+        {
+          "id": "InferFromCurrentMatchingAmount",
+          "edits": [
+            {
+              "old": "!.active= <<>>, !.data=observed",
+              "new": "!.active= <<>>, !.record=IF recovered /\\ Len(observed)>0 THEN observed[1].id ELSE @, !.data=observed",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ObservedOnly"
+        },
+        {
+          "id": "GroupReadShowsPeerRow",
+          "edits": [
+            {
+              "old": "Selected(db,t) == Owned(db,t.scope)",
+              "new": "Selected(db,t) == db",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ObservedOnly"
+        },
+        {
+          "id": "PermitEvenWhenExplicitReadFailed",
+          "edits": [
+            {
+              "old": "st.phase=\"unknown\" /\\ st.armed /\\ st.active= <<>>",
+              "new": "st.phase=\"unknown\" /\\ (st.armed \\/ (last.kind=\"receive\" /\\ last.arg=\"failed\")) /\\ st.active= <<>>",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "SeparateIntent"
+        },
+        {
+          "id": "SeparateClickSendsAgain",
+          "edits": [
+            {
+              "old": "[st EXCEPT !.phase=\"idle\", !.armed=FALSE, !.separateUsed=TRUE]",
+              "new": "[st EXCEPT !.phase=\"idle\", !.armed=FALSE, !.separateUsed=TRUE, !.sent=@+1]",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "NoAutomaticWrite"
+        },
+        {
+          "id": "RecoverySilentlyResends",
+          "edits": [
+            {
+              "old": "!.active= <<>>, !.data=observed",
+              "new": "!.active= <<>>, !.sent=IF recovered THEN @+1 ELSE @, !.data=observed",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "NoAutomaticWrite"
+        },
+        {
+          "id": "BackfillCaseDuringRecovery",
+          "edits": [
+            {
+              "old": "!.active= <<>>, !.data=observed",
+              "new": "!.active= <<>>, !.db=IF recovered THEN Append(@,Row(t.scope,Len(@)+1,\"false\")) ELSE @, !.data=observed",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "NativeFrame"
+        },
+        {
+          "id": "TreatSavedHistoryAsConfirmedOutcome",
+          "edits": [
+            {
+              "old": "!.active= <<>>, !.data=observed",
+              "new": "!.active= <<>>, !.phase=IF recovered THEN \"confirmed\" ELSE @, !.data=observed",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ObservedOnly"
+        },
+        {
+          "id": "BlindRetryAfterLostAck",
+          "edits": [
+            {
+              "old": "st'=st /\\ last'=Note(\"try\",\"\")",
+              "new": "st'=(IF st.phase=\"unknown\" THEN [st EXCEPT !.sent=@+1] ELSE st) /\\ last'=Note(\"try\",\"\")",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "NoAutomaticWrite"
+        },
+        {
+          "id": "ReleaseOnBlockedClick",
+          "edits": [
+            {
+              "old": "st'=st /\\ last'=Note(\"try\",\"\")",
+              "new": "st'=(IF st.phase=\"unknown\" THEN [st EXCEPT !.phase=\"idle\"] ELSE st) /\\ last'=Note(\"try\",\"\")",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "BlockedRetry"
+        },
+        {
+          "id": "CarryUnknownAcrossNewMount",
+          "edits": [
+            {
+              "old": "!.phase=IF a=\"hidden\" THEN \"off\" ELSE \"idle\"",
+              "new": "!.phase=IF a=\"hidden\" THEN \"off\" ELSE IF st.phase=\"unknown\" THEN \"unknown\" ELSE \"idle\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ScopeCleared"
+        },
+        {
+          "id": "SameTileRetiredSuccessArmsNewMount",
+          "edits": [
+            {
+              "old": "current == t.scope=st.scope /\\ t.mount=st.mount",
+              "new": "current == t.scope=st.scope /\\ (t.mount=st.mount \\/ (k=\"ok\" /\\ st.phase=\"unknown\" /\\ st.reads>0 /\\ ~st.armed))",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "RetiredRead"
+        },
+        {
+          "id": "StaleDenialErasesNewlyArmedView",
+          "edits": [
+            {
+              "old": "current == t.scope=st.scope /\\ t.mount=st.mount",
+              "new": "current == (t.scope=st.scope /\\ t.mount=st.mount) \\/ (k=\"denied\" /\\ st.armed)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "RetiredRead"
+        },
+        {
+          "id": "RetainAppliedCapacityAfter403",
+          "edits": [
+            {
+              "old": "!.quota=IF k=\"forbidden\" THEN FALSE ELSE @",
+              "new": "!.quota=@",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "Acknowledgement"
+        },
+        {
+          "id": "ReopenEditorWithoutFreshCapacity",
+          "edits": [
+            {
+              "old": "[st EXCEPT !.quota=TRUE] /\\ last'=Note(\"restore\",\"\")",
+              "new": "[st EXCEPT !.quota=TRUE, !.armed=TRUE] /\\ last'=Note(\"restore\",\"\")",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "FreshCapacity"
+        },
+        {
+          "id": "DisplayFirstPageAsRealContinuation",
+          "edits": [
+            {
+              "old": "i == IF t.kind=\"next\" THEN Len(rows)-1 ELSE Len(rows)",
+              "new": "i == Len(rows)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ObservedOnly"
+        },
+        {
+          "id": "KeepPriorLookupAfterNativeDenial",
+          "edits": [
+            {
+              "old": "[DropData(st) EXCEPT !.active= <<>>]",
+              "new": "[DropData(st) EXCEPT !.active= <<>>, !.lookup=IF outcome=\"denied\" THEN st.lookup ELSE @]",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "VisibleLookup"
+        },
+        {
+          "id": "GuessLostLookupFromHistory",
+          "edits": [
+            {
+              "old": "!.active= <<>>, !.data=observed",
+              "new": "!.active= <<>>, !.lookup=IF recovered /\\ Len(observed)>0 THEN observed[1].id ELSE @, !.data=observed",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "VisibleLookup"
+        },
+        {
+          "id": "ShowQuotaInHiddenView",
+          "edits": [
+            {
+              "old": "!.quota=a#\"hidden\", !.lookup=0",
+              "new": "!.quota=TRUE, !.lookup=0",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "VisibleMount"
+        },
+        {
+          "id": "ReturningToViewInheritsOldPermit",
+          "edits": [
+            {
+              "old": "st'=[st EXCEPT !.visible=TRUE, !.mount=2, !.phase=\"idle\", !.quota=TRUE]",
+              "new": "st'=[st EXCEPT !.visible=TRUE, !.armed=TRUE, !.mount=2, !.phase=\"idle\", !.quota=TRUE]",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "VisibleMount"
+        }
+      ]
     }
   ]
 }
