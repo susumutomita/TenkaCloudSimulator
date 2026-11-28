@@ -12,9 +12,18 @@
     {
       "path": "Makefile",
       "sha256": "c45d26b3bc1aeeb0c3faf33c0d0df28f2ad444def0839537666b6ebb41664284",
-      "disposition": "build-metadata",
-      "reason": "Registers guarded Kinesis acceptance and its model or client checks in the existing release tooling.",
-      "models": []
+      "disposition": "modeled",
+      "reason": "Adds targets for preparing pinned clients and exercising authenticated local team processes with operator-owned token files.",
+      "models": [
+        {
+          "id": "StartupTokenVisibility",
+          "properties": [
+            "CreatedFilePrivate",
+            "InvalidFileNeverEmits"
+          ],
+          "limits": "The unchanged standard startup contract governs the two real team processes; the new setup and media client target is verified by its isolated workflow."
+        }
+      ]
     },
     {
       "path": "README.md",
