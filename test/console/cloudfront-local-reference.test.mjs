@@ -8,23 +8,30 @@ const collection = '/2020-05-31/distribution';
 const id = 'D' + 'a'.repeat(24), invalidation = 'I' + 'b'.repeat(24);
 const asset = name => new URL('../../internal/server/apidocs/' + name, import.meta.url);
 const spec = JSON.parse(readFileSync(asset('cloudfront-local.json'), 'utf8'));
-function load() {
+async function load() {
   let options;
   const calls = [];
-  vm.runInNewContext(readFileSync(asset('cloudfront-local-init.js'), 'utf8'), {
+  await vm.runInNewContext(readFileSync(asset('cloudfront-local-init.js'), 'utf8'), {
     Request, URL, location: new URL(origin + '/_simulator/docs/cloudfront-local.html'),
     Scalar: {createApiReference(selector, value) { assert.equal(selector, '#reference'); options = value; }},
-    fetch(url, init) { calls.push([url, init]); return Promise.resolve({status: 200}); },
+    fetch(url, init) { calls.push([url, init]); return Promise.resolve({ok: true, status: 200, json: async () => structuredClone(spec)}); },
   });
+  assert.equal(calls.length, 1);
+  assert.equal(calls[0][0], '/_simulator/docs/cloudfront-local.json');
+  assert.equal(calls[0][1].credentials, 'same-origin'); assert.equal(calls[0][1].redirect, 'error');
+  assert.deepEqual(JSON.parse(options.content).servers, [{url: origin, description: 'This simulator only'}]);
+  calls.length = 0;
   return {options, calls};
 }
 
 test('the separate reference contains exactly eight native CloudFront operations', () => {
-  const names = Object.values(spec.paths).flatMap(path => Object.values(path).map(operation => operation.operationId));
+  const operations = Object.values(spec.paths).flatMap(path => Object.values(path));
+  const names = operations.filter(operation => !operation['x-simulator-only']).map(operation => operation.operationId);
   assert.deepEqual(names.sort(), ['CreateDistribution', 'GetDistribution', 'GetDistributionConfig', 'UpdateDistribution',
     'DeleteDistribution', 'ListDistributions', 'CreateInvalidation', 'GetInvalidation'].sort());
   assert.deepEqual(spec.servers, [{url: '/'}]);
-  for (const path of Object.values(spec.paths)) for (const operation of Object.values(path)) {
+  assert.equal(operations.filter(operation => operation['x-simulator-only']).length, 1);
+  for (const operation of operations.filter(operation => !operation['x-simulator-only'])) {
     const route = operation.parameters.filter(parameter => parameter.name === 'X-Simulator-Service');
     assert.equal(route.length, 1); assert.equal(route[0].required, true);
     assert.deepEqual(route[0].schema.enum, ['cloudfront']);
@@ -34,7 +41,7 @@ test('the separate reference contains exactly eight native CloudFront operations
 });
 
 test('actual native methods preserve body and If-Match while replacing authority with only the browser session', async () => {
-  const {options, calls} = load();
+  const {options, calls} = await load();
   assert.equal(options.persistAuth, false); assert.equal(options.telemetry, false); assert.equal(options.proxyUrl, '');
   const cases = [
     ['POST', collection], ['GET', collection + '?MaxItems=1&Marker=' + id],
@@ -64,11 +71,25 @@ test('unrelated native paths, methods, origins and list query overrides never di
     ['https://example.invalid' + collection, 'GET'], [collection + '?MaxItems=1&MaxItems=2', 'GET'],
     [collection + '?unexpected=value', 'GET'], [collection + '/' + id + '?MaxItems=1', 'GET'],
     [collection, 'PATCH'], [collection + '/' + id + '/invalidation', 'GET'],
-    ['/_simulator/cloudfront/distributions/' + id + '/objects/asset.txt', 'GET'],
+    ['/_simulator/cloudfront/distributions/' + id + '/objects/asset.txt', 'POST'],
+    ['/_simulator/cloudfront/distributions/' + id + '/objects/asset%2Fother.txt', 'GET'],
     ['/_simulator/v1/access', 'POST'], ['/2020-05-31/vpc-origin', 'POST'],
   ]) {
-    const {options, calls} = load();
+    const {options, calls} = await load();
     await assert.rejects(options.customFetch(url.startsWith('/') ? origin + url : url, {method}));
     assert.equal(calls.length, 0);
   }
+});
+
+test('the explicit simulator-only GET preserves the native response and uses no supplied authority headers', async () => {
+  const {options, calls} = await load();
+  const path = '/_simulator/cloudfront/distributions/' + id + '/objects/asset.txt';
+  const response = await options.customFetch(origin + path, {headers: {
+    Authorization: 'discard', 'X-Simulator-Token': 'discard', 'X-Simulator-Principal': 'discard',
+    'X-Simulator-Service': 'discard',
+  }});
+  assert.equal(response.status, 200);
+  assert.equal(calls.length, 1); assert.equal(calls[0][0].href, origin + path);
+  assert.equal(calls[0][1].method, 'GET'); assert.equal(calls[0][1].credentials, 'same-origin');
+  assert.equal(calls[0][1].redirect, 'error'); assert.equal(calls[0][1].headers, undefined);
 });

@@ -18,7 +18,7 @@
     },
     {
       "path": "docs/cloudfront-local-content.md",
-      "sha256": "27ad8a89e17fbaecfb38fde49978fa710ddeefa8611e28a270ad9f107bdb1fb4",
+      "sha256": "48a4c06ef67f1b8dce79a6c5f07bdcd429f851d7fa485f9a41d89b411c6bcfd1",
       "disposition": "documentation",
       "reason": "Document the exact native and simulator-only local content boundaries, shared helper dependency and unsupported CloudFront features.",
       "models": []
@@ -238,7 +238,7 @@
     },
     {
       "path": "internal/server/apidocs/cloudfront-local-init.js",
-      "sha256": "91d99ca5ebda39f926c8986f56ac120cd76d16aba2d6c5f92777efc181e4876a",
+      "sha256": "2849ed01aaa656469a1976ccabbbe28daad63eb1a580f4ca9198c352d59a9173",
       "disposition": "presentation",
       "reason": "Serve a same-origin native CloudFront XML reference with bounded methods, paths and normal browser session authority; no outbound origin fetch or static saved-state claim.",
       "models": []
@@ -252,7 +252,7 @@
     },
     {
       "path": "internal/server/apidocs/cloudfront-local.json",
-      "sha256": "16a85b4ce64915431d3b4f7517bc75ae702c24f9fbef90f441dbb8ef4db2ce56",
+      "sha256": "51b777ef8f54b88fabf1b809e92110b9fe9949d371f6e737b94a9bd215d9b042",
       "disposition": "presentation",
       "reason": "Serve a same-origin native CloudFront XML reference with bounded methods, paths and normal browser session authority; no outbound origin fetch or static saved-state claim.",
       "models": []
@@ -290,16 +290,23 @@
     },
     {
       "path": "test/console/cloudfront-local-reference.test.mjs",
-      "sha256": "8f83c9ce4b9261c6b9265fd10dd2a6e9a83a11435d654d30200febf104db7e6b",
+      "sha256": "10cf42555e3af01876511810d423e03d638c22e957dd76ed21f4db9f63d6f86c",
       "disposition": "test-support",
       "reason": "Run and check the actual changed CloudFront response protections, scoped cache eviction and same-origin reference controls without skipping existing checks.",
       "models": []
     },
     {
       "path": "test/e2e/cloudfront_local_content.py",
-      "sha256": "94d4f7f71ca7a6313ca82b3450d9e1cb8f53c298ae66750ef123e0c1165dd305",
+      "sha256": "517af41a5c4f128d3f7f071616669d2458ff998669c8f77ab87d233776bbc7bc",
       "disposition": "test-support",
       "reason": "Exercise real bounded distribution/cache state, stock pinned SDK lifecycle, strict errors and owned cleanup; not a whole-service or real CDN claim.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/cloudfront_local_scalar.py",
+      "sha256": "f1f24f3d36e1bde56cd6d9b0c56551f9ca678cbdae08a01bbb13324cced8b907",
+      "disposition": "test-support",
+      "reason": "Exercise two genuine native Scalar Sends plus one explicitly simulator-only saved-content read and download over official SDK-created local state, guarded two-team authorities, reopen, denials and cleanup.",
       "models": []
     }
   ]

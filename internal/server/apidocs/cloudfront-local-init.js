@@ -1,10 +1,16 @@
 "use strict";
 
-(() => {
+(async () => {
   const specPath = "/_simulator/docs/cloudfront-local.json";
   const collection = "/2020-05-31/distribution";
+  const response = await fetch(specPath, { credentials: "same-origin", redirect: "error" });
+  if (!response.ok) throw new Error("The local CloudFront reference is unavailable.");
+  const spec = await response.json();
+  // Give Scalar the exact visible local origin, without a trailing slash.
+  // The native operation path already begins with '/'.
+  spec.servers = [{ url: location.origin, description: "This simulator only" }];
   Scalar.createApiReference("#reference", {
-    url: specPath,
+    content: JSON.stringify(spec),
     withDefaultFonts: false,
     persistAuth: false,
     telemetry: false,
@@ -17,6 +23,13 @@
         throw new Error("Only this simulator's local CloudFront API is available.");
       if (request.method === "GET" && url.pathname === specPath && !url.search)
         return fetch(url, { credentials: "same-origin", redirect: "error", signal: request.signal });
+      const local = url.pathname.match(/^\/_simulator\/cloudfront\/distributions\/D[a-f0-9]{24}\/objects\/([a-zA-Z0-9][a-zA-Z0-9._/-]*)$/);
+      if (local) {
+        if (request.method !== "GET" || url.search || local[1].length > 1024 ||
+            local[1].split("/").some(part => !part || part === "." || part === ".."))
+          throw new Error("Unsupported simulator-only object read.");
+        return fetch(url, { method: "GET", credentials: "same-origin", redirect: "error", signal: request.signal });
+      }
       const suffix = url.pathname.slice(collection.length);
       const valid = url.pathname === collection ? ["GET", "POST"].includes(request.method)
         : url.pathname.startsWith(collection + "/") && (
@@ -40,4 +53,9 @@
       return fetch(url, options);
     }
   });
-})();
+})().catch(error => {
+  const message = document.createElement("p");
+  message.setAttribute("role", "alert");
+  message.textContent = error.message;
+  document.getElementById("reference").replaceChildren(message);
+});

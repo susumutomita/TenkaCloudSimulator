@@ -56,7 +56,7 @@ def local(team, method, path, status, body=None, token=None):
         connection.close()
 
 
-def client(session, service, team, stack, settings, stats):
+def client(session, service, team, stack, settings, stats, key=KEY):
     assert service in ('cloudfront', 's3')
     result = session.client(service, endpoint_url=team.endpoint, region_name='us-east-1', config=settings,
                             aws_access_key_id='TCSIMLOCALCONTENT', aws_secret_access_key='local-fixture-only')
@@ -71,7 +71,7 @@ def client(session, service, team, stack, settings, stats):
         if service == 'cloudfront':
             assert target.path == PREFIX or target.path.startswith(PREFIX + '/')
         else:
-            assert target.path in ('/' + BUCKET, '/' + BUCKET + '/' + KEY)
+            assert target.path in ('/' + BUCKET, '/' + BUCKET + '/' + key)
         headers = {name.lower(): value for name, value in request.headers.items()}
         assert 'x-simulator-token' in headers and 'authorization' in headers
         assert not {'cookie', 'x-simulator-principal', 'x-amz-security-token'} & headers.keys()
@@ -87,14 +87,14 @@ def client(session, service, team, stack, settings, stats):
     return result
 
 
-def cleanup(front, s3, identifier):
+def cleanup(front, s3, identifier, key=KEY):
     current = successful(front.get_distribution_config, Id=identifier)
     value = current['DistributionConfig']
     value['Enabled'] = False
     disabled = successful(front.update_distribution, Id=identifier, IfMatch=current['ETag'], DistributionConfig=value)
     successful(front.delete_distribution, status=204, Id=identifier, IfMatch=disabled['ETag'])
     assert not successful(front.list_distributions)['DistributionList'].get('Items', [])
-    successful(s3.delete_object, status=204, Bucket=BUCKET, Key=KEY)
+    successful(s3.delete_object, status=204, Bucket=BUCKET, Key=key)
     successful(s3.delete_bucket, status=204, Bucket=BUCKET)
 
 
@@ -158,11 +158,7 @@ def exercise(session, settings, binary, directory, stack):
     assert stats['sends'] == stats['responses'] and stats['sends'] > 0
 
 
-def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--binary', required=True, type=Path)
-    parser.add_argument('--binary-sha256', required=True)
-    args = parser.parse_args()
+def ordinary_session():
     # Keep ordinary SDK configuration guards. Do not sanitize inherited profiles.
     assert not any(key.startswith(('AWS_', 'BOTO_')) for key in os.environ)
     assert all(not path.exists() and not path.is_symlink() for path in (
@@ -170,12 +166,19 @@ def main():
     assert version('boto3') == '1.42.0' and version('botocore') == '1.41.6'
     import boto3
     from botocore.config import Config
+    return boto3.Session(), Config(connect_timeout=3, read_timeout=5, retries={'max_attempts': 0}, proxies={},
+                                   s3={'addressing_style': 'path'})
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--binary', required=True, type=Path)
+    parser.add_argument('--binary-sha256', required=True)
+    args = parser.parse_args()
+    session, settings = ordinary_session()
     binary = args.binary.resolve(strict=True)
     with binary.open('rb') as data:
         assert hashlib.file_digest(data, 'sha256').hexdigest() == args.binary_sha256
-    session = boto3.Session()
-    settings = Config(connect_timeout=3, read_timeout=5, retries={'max_attempts': 0}, proxies={},
-                      s3={'addressing_style': 'path'})
     with tempfile.TemporaryDirectory(prefix='cloudfront-local-sdk-') as directory, ExitStack() as stack:
         exercise(session, settings, binary, directory, stack)
     assert not Path(directory).exists()

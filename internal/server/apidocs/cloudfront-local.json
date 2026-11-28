@@ -16,6 +16,9 @@
     },
     {
       "name": "Invalidations"
+    },
+    {
+      "name": "Simulator-only content"
     }
   ],
   "paths": {
@@ -562,6 +565,93 @@
           },
           "500": {
             "description": "State failure; transaction is rolled back."
+          }
+        }
+      }
+    },
+    "/_simulator/cloudfront/distributions/{Id}/objects/{ObjectKey}": {
+      "get": {
+        "operationId": "GetLocalDistributionObject",
+        "summary": "Read saved local content (simulator-only)",
+        "tags": [
+          "Simulator-only content"
+        ],
+        "x-simulator-only": true,
+        "description": "Not an AWS CloudFront wire operation. Authenticated GET of the current local distribution cache/origin snapshot, with fresh cloudfront:GetDistribution and s3:GetObject permission checks on every read. The safe-download response preserves attachment, sandbox CSP and nosniff. Use a canonical ASCII key; this reference example uses one segment.",
+        "parameters": [
+          {
+            "name": "Id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^D[a-f0-9]{24}$"
+            }
+          },
+          {
+            "name": "ObjectKey",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-zA-Z0-9][a-zA-Z0-9._-]*$"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Actual saved bytes; GET only. No external fetch.",
+            "headers": {
+              "ETag": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "Content-Disposition": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "Content-Security-Policy": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-Content-Type-Options": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-Cache": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "Age": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Unsupported path/conditional/body."
+          },
+          "401": {
+            "description": "Local credential is required."
+          },
+          "403": {
+            "description": "Either joint permission is denied or distribution disabled."
+          },
+          "404": {
+            "description": "No matching live local distribution/origin/object."
           }
         }
       }
