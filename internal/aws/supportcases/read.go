@@ -169,24 +169,31 @@ type messageRow struct {
 func (s *Store) communications(ctx context.Context, tx *sql.Tx, in Input, limit int, before int64, filter [sha256.Size]byte) (map[string]any, error) {
 	query := "SELECT sequence,created_us,body,author FROM aws_support_communications WHERE case_id=? AND sequence<?"
 	args := []any{in.CaseID, before}
-	var afterTime, beforeTime time.Time
-	for _, bound := range []struct {
-		value, predicate string
-		save             *time.Time
-	}{{in.AfterTime, " AND created_us>=?", &afterTime}, {in.BeforeTime, " AND created_us<=?", &beforeTime}} {
-		if bound.value == "" {
-			continue
-		}
-		t, err := time.Parse(time.RFC3339Nano, bound.value)
+	var afterTime time.Time
+	if in.AfterTime != "" {
+		lower, err := time.Parse(time.RFC3339Nano, in.AfterTime)
 		if err != nil {
 			return nil, invalid("Timestamps must be in RFC 3339 format.")
 		}
-		*bound.save = t
-		query += bound.predicate
-		args = append(args, t.UnixMicro())
+		afterTime = lower
+		// Storage uses integer microseconds. The inclusive lower bound rounds up.
+		micros := lower.UnixMicro()
+		if lower.Nanosecond()%1000 != 0 {
+			micros++
+		}
+		query += " AND created_us>=?"
+		args = append(args, micros)
 	}
-	if !afterTime.IsZero() && !beforeTime.IsZero() && afterTime.After(beforeTime) {
-		return nil, invalid("afterTime must not be later than beforeTime.")
+	if in.BeforeTime != "" {
+		upper, err := time.Parse(time.RFC3339Nano, in.BeforeTime)
+		if err != nil {
+			return nil, invalid("Timestamps must be in RFC 3339 format.")
+		}
+		if in.AfterTime != "" && afterTime.After(upper) {
+			return nil, invalid("afterTime must not be later than beforeTime.")
+		}
+		query += " AND created_us<=?"
+		args = append(args, upper.UnixMicro())
 	}
 	query += " ORDER BY sequence DESC LIMIT ?"
 	rows, err := tx.QueryContext(ctx, query, append(args, limit+1)...)

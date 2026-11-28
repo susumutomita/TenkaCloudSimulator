@@ -12,6 +12,7 @@
   document.servers = [{ url: location.origin }];
   Scalar.createApiReference("#reference", {
     content: JSON.stringify(document),
+    plugins: [SimulatorAWSJSONRenderer],
     withDefaultFonts: false,
     persistAuth: false,
     telemetry: false,
