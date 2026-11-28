@@ -12,6 +12,7 @@ jobs:
       - uses: actions/checkout@v7.0.1
         with:
           ref: 1f1f96fdf5eb56112a916dc6a830fa767f732fc7
+          persist-credentials: false
       - uses: actions/setup-go@v6.5.0
         with:
           go-version: '1.26.11'
@@ -22,28 +23,29 @@ jobs:
           test "$(git rev-parse HEAD^{tree})" = 5d979991c21ed2b99e5f2ce767c25be8449e6a35
           test -z "$(git status --porcelain)"
           test "$(id -u)" -ne 0
-          mkdir -p reports/complete-gate-evidence
-          git rev-parse HEAD HEAD^{tree} > reports/complete-gate-evidence/source.txt
-          uname -srmo > reports/complete-gate-evidence/platform.txt
-          go version > reports/complete-gate-evidence/go.txt
-          python3 --version > reports/complete-gate-evidence/python.txt
+          mkdir -p "$RUNNER_TEMP/sts-complete-gate"
+          git rev-parse HEAD HEAD^{tree} > "$RUNNER_TEMP/sts-complete-gate/source.txt"
+          uname -srmo > "$RUNNER_TEMP/sts-complete-gate/platform.txt"
+          go version > "$RUNNER_TEMP/sts-complete-gate/go.txt"
+          python3 --version > "$RUNNER_TEMP/sts-complete-gate/python.txt"
       - name: Run original complete make before-commit
         run: |
+          test -z "$(git status --porcelain --untracked-files=all)"
           set +e
-          make before-commit 2>&1 | tee reports/complete-gate-evidence/full.log
+          make before-commit 2>&1 | tee "$RUNNER_TEMP/sts-complete-gate/full.log"
           codes=("${PIPESTATUS[@]}")
           result=${codes[0]}
           if test "$result" -eq 0 && test "${codes[1]}" -ne 0; then result=${codes[1]}; fi
           set -e
-          printf '%s\n' "$result" > reports/complete-gate-evidence/make-exit.txt
+          printf '%s\n' "$result" > "$RUNNER_TEMP/sts-complete-gate/make-exit.txt"
           exit "$result"
       - name: Preserve safe coverage and package outcomes
         if: always()
         run: |
           python3 - <<'PY'
-          import json, re
+          import json, os, re
           from pathlib import Path
-          root = Path('reports/complete-gate-evidence')
+          root = Path(os.environ['RUNNER_TEMP']) / 'sts-complete-gate'
           root.mkdir(parents=True, exist_ok=True)
           log = root / 'full.log'
           text = log.read_text(errors='replace') if log.exists() else ''
@@ -60,16 +62,16 @@ jobs:
               'scope': 'Unfiltered standard command. Failure remains failure; later phases are not inferred executed.'
           }, indent=2) + '\n')
           PY
-          git status --porcelain > reports/complete-gate-evidence/post-status.txt
+          git status --porcelain > "$RUNNER_TEMP/sts-complete-gate/post-status.txt"
           if test -f dist/tenkacloud-simulator; then
-            go version -m dist/tenkacloud-simulator > reports/complete-gate-evidence/build.txt
-            sha256sum dist/tenkacloud-simulator > reports/complete-gate-evidence/binary.sha256
+            go version -m dist/tenkacloud-simulator > "$RUNNER_TEMP/sts-complete-gate/build.txt"
+            sha256sum dist/tenkacloud-simulator > "$RUNNER_TEMP/sts-complete-gate/binary.sha256"
           fi
       - name: Retain exact complete-gate evidence
         if: always()
         uses: actions/upload-artifact@v7.0.2
         with:
           name: sts-complete-gate-${{ github.run_id }}
-          path: reports/complete-gate-evidence/
+          path: ${{ runner.temp }}/sts-complete-gate/
           if-no-files-found: error
           retention-days: 14
