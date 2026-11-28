@@ -640,8 +640,18 @@
     },
     {
       "path": "internal/server/web/app.js",
-      "models": [],
-      "disposition": "presentation",
+      "models": [
+        {
+          "id": "CatalogConsoleEpoch",
+          "properties": [
+            "NoUnmountedAcceptance",
+            "OnlyCurrentReplies",
+            "SingleWriter"
+          ],
+          "limits": "The shared Catalog mount retires and checks scoped work. The new SES live-view unknown acknowledgement and readback are tested directly in the browser."
+        }
+      ],
+      "disposition": "modeled",
       "sha256": "c175fb645fcc3b53d0e2f96c9468d05b1a699d54a9e5c87ffd084b26f595e5f0",
       "reason": "Regenerate the authenticated Console bundle and its checked source inputs."
     },
