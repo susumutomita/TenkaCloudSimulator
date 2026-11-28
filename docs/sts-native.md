@@ -30,7 +30,7 @@ separate process, SQLite, endpoint, credential authority and host authorization.
   and console or terminal boundary are never carried into them. A browser
   session bound to one SSM parameter cannot reach Lambda.
 - The authenticated capability document advertises `nativeSdk: {version: 1,
-  services: [...]}` with exactly the signing services above, so a host can
+  services: [...]}` with the enabled signing services, so a host can
   check for `lambda` before offering a problem that needs it. An embedding
   without the Access wrapper advertises none.
 - `GetCallerIdentity` and `AssumeRole`, with ordinary official SDK request and
@@ -57,6 +57,51 @@ snapshot, so an old credential cannot inherit a deleted/recreated role's new
 permissions. A request already authenticated against a generation may complete
 under that snapshot; later requests see deletion or policy changes. Stored
 credentials and signing secrets are process-local and never included in reports.
+
+## STS Query contract
+
+Send a form-encoded body of at most 32 KiB with one value per field,
+`Action` and `Version=2011-06-15`. Sign for `sts` in `us-east-1`,
+`us-west-2`, `ap-northeast-1` or `eu-west-1` at the same local endpoint.
+Roles and sessions are shared across those signing Regions within one process.
+Successful responses include `ResponseMetadata.RequestId`. AWS publishes its
+own regional and global endpoints. [AWS STS endpoints and quotas](https://docs.aws.amazon.com/general/latest/gr/sts.html)
+
+| Operation | Local request | HTTP 200 XML result |
+| --- | --- | --- |
+| [GetCallerIdentity](https://docs.aws.amazon.com/STS/latest/APIReference/API_GetCallerIdentity.html) | Only the two common fields. AWS requires no IAM permission for this call. The simulator authenticates the signing credentials and performs no additional IAM action check. | `Account`, `Arn` and `UserId` identify the signer. The operator has the root ARN of `999999999999` and user ID `simulator-admin`. An assumed role has account `000000000000`, an STS `assumed-role/<role>/<session>` ARN and user ID `<role-id>:<session>`. |
+| [AssumeRole](https://docs.aws.amazon.com/STS/latest/APIReference/API_AssumeRole.html) | Requires `RoleArn` and `RoleSessionName`. Accepts `DurationSeconds` and `ExternalId`. All other fields are rejected, including session policies, tags, MFA, `SourceIdentity`, `ProvidedContexts` and `MinimumSessionTokenSize`. | `Credentials` contains `AccessKeyId`, `SecretAccessKey`, `SessionToken` and `Expiration`. `AssumedRoleUser` contains the session's `Arn` and `AssumedRoleId`. |
+
+The target ARN is `arn:aws:iam::000000000000:role/<name>`. The role name
+syntax is 1–64 ASCII letters, digits, underscores or hyphens. `RoleSessionName`
+accepts 2–64 ASCII letters, digits or `_+=,.@-`. `ExternalId` accepts
+2–1,224 of the same characters plus `:/`. `DurationSeconds` defaults to
+3,600 and accepts integers from 900 through 43,200. The role's
+`MaxSessionDuration` caps the request (default 3,600, configurable up to
+43,200). Role chaining further caps it at 3,600.
+
+AWS permits a same-account IAM user explicitly named in a role's trust policy
+to assume it without a separate identity-policy grant. The local caller must
+pass a decision for `sts:AssumeRole` on the target ARN and match its trust
+policy. The built-in operator passes the caller decision. A chained session
+uses its current role policy and matches trust as its IAM role. A matching
+trust `Deny` wins. Native IAM or CloudFormation supplies the stored target
+role. Sessions are held by one process, up to 1,000 unexpired sessions across
+its signing Regions. With a file-backed database, restarting preserves role
+definitions and discards sessions. AWS credentials expire at the returned time.
+An authorized caller can request fresh credentials. [AWS temporary credentials](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_temp.html)
+
+| Local failure | HTTP status and STS code |
+| --- | --- |
+| Invalid or expired local SDK credentials | 403 `InvalidClientTokenId` |
+| Malformed form, wrong version, duplicate or unsupported field, invalid session name, external ID or duration, or invalid stored trust document | 400 `ValidationError` |
+| Missing or unavailable role ARN, caller or trust denial (including an unmet external ID condition), or session issuance failure such as the 1,000-session limit | 403 `AccessDenied` |
+| Another STS action in an authenticated Query request, including `GetSessionToken` or `AssumeRoleWithSAML` | 501 `NotImplemented` |
+
+AWS also documents errors for features outside this surface, such as
+`PackedPolicyTooLarge` for session policies and tags. The local mappings follow
+the [Query handler](../internal/aws/sts.go), [role and trust checks](../internal/aws/sts_roles.go)
+and [SDK authentication wrapper](../internal/server/access_sdk.go).
 
 ## Verification and limits
 
