@@ -142,6 +142,13 @@
       "models": []
     },
     {
+      "path": "internal/aws/catalog/pcs_saved_identity_refusal_test.go",
+      "sha256": "95fb87e899e3f5800c4939fd428ff35c10cc0f8e873a137340cc2c1717fb358f",
+      "disposition": "test-support",
+      "reason": "Defensive ordinary native PCS refusal/repair tests for saved parent and child identities, canonical legacy aliases, referenced-group parent consistency and an existing resource addressed from a different Region. Preserve complete catalog resource/token/sequence frames and an independent populated peer; distinguish native typed storage failure from missing-resource refusal. No new operations, status transition, dependency backend or scheduler claim.",
+      "models": []
+    },
+    {
       "path": "internal/aws/catalog/pcs_snapshot_test.go",
       "sha256": "c5ce1c0b7fbbad67425da3622388706c33695f8ccf2cd7c29201412ff4816602",
       "disposition": "test-support",
