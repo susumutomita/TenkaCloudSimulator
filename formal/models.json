@@ -31764,7 +31764,7 @@
           "edits": [
             {
               "old": "pending' = pending /\\ receipts' = receipts /\\ ruleState' = ruleState",
-              "new": "pending' = IF m = \"wildcardDeny\" THEN {} ELSE pending /\\ receipts' = receipts /\\ ruleState' = ruleState",
+              "new": "pending' = (IF m = \"wildcardDeny\" THEN {} ELSE pending) /\\ receipts' = receipts /\\ ruleState' = ruleState",
               "count": 1
             }
           ],
@@ -31775,7 +31775,7 @@
           "edits": [
             {
               "old": "pending' = pending /\\ receipts' = receipts /\\ ruleState' = ruleState",
-              "new": "pending' = pending /\\ receipts' = IF m = \"tokenOtherActor\" THEN {} ELSE receipts /\\ ruleState' = ruleState",
+              "new": "pending' = pending /\\ receipts' = (IF m = \"tokenOtherActor\" THEN {} ELSE receipts) /\\ ruleState' = ruleState",
               "count": 1
             }
           ],
@@ -31786,7 +31786,7 @@
           "edits": [
             {
               "old": "pending' = pending /\\ receipts' = receipts /\\ ruleState' = ruleState",
-              "new": "pending' = pending /\\ receipts' = receipts /\\ ruleState' = IF m = \"signedRoute\" THEN \"absent\" ELSE ruleState",
+              "new": "pending' = pending /\\ receipts' = receipts /\\ ruleState' = (IF m = \"signedRoute\" THEN \"absent\" ELSE ruleState)",
               "count": 1
             }
           ],
