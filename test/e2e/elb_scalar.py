@@ -1,4 +1,5 @@
 """Exercise the shared ELBv2 Query forms in Scalar against two actual local teams."""
+
 import hashlib
 import io
 import json
@@ -16,6 +17,7 @@ import boto3
 from botocore.config import Config
 from playwright.sync_api import expect, sync_playwright
 
+from autoscaling_plans_console import wire
 from gcp_dns_sdk import LocalTeam, started
 from simpledb_scalar_reference_live import ScalarQueryReference
 
@@ -35,13 +37,22 @@ PRESETS = {action: {'Action': action, 'Version': VERSION, **fields} for action, 
 
 
 def sdk(stack, team, service):
-    client = stack.enter_context(boto3.client(service, endpoint_url=team.endpoint, region_name='us-east-1',
-        aws_access_key_id='TCSIMLOCAL', aws_secret_access_key='dummy',
-        config=Config(proxies={}, retries={'total_max_attempts': 1})))
-    client.meta.events.register('before-sign', lambda request, **_: request.headers.add_header('X-Simulator-Token', team.token))
+    client = boto3.client(
+        service,
+        endpoint_url=team.endpoint,
+        region_name='us-east-1',
+        aws_access_key_id='TCSIMLOCAL',
+        aws_secret_access_key='dummy',
+        config=Config(proxies={}, retries={'total_max_attempts': 1}),
+    )
+    stack.callback(client.close)
+    client.meta.events.register(
+        'before-sign', lambda request, **_: request.headers.add_header('X-Simulator-Token', team.token)
+    )
 
     def verify_origin(request, **_):
         assert request.url.startswith(team.endpoint + '/')
+
     client.meta.events.register('before-send', verify_origin)
     return client
 
@@ -51,12 +62,14 @@ def reference(browser, team, token):
     ctx = browser.new_context(service_workers='block')
     outside, errors, requests = [], [], []
     try:
+
         def local(route):
             if route.request.url.startswith(team.endpoint + '/'):
                 route.continue_()
             else:
                 outside.append(route.request.resource_type)
                 route.abort()
+
         ctx.route('**/*', local)
         page = ctx.new_page()
         page.on('pageerror', lambda err: errors.append(str(err)))
@@ -64,7 +77,10 @@ def reference(browser, team, token):
         page.get_by_label('Access token', exact=True).fill(token)
         page.get_by_role('button', name='Open sandbox', exact=True).click()
         expect(page.get_by_role('button', name='Services', exact=True)).to_be_visible()
-        page.on('request', lambda r: requests.append(r) if r.method == 'POST' and r.url == team.endpoint + '/' else None)
+        page.on(
+            'request',
+            lambda r: requests.append(r) if r.method == 'POST' and r.url == team.endpoint + '/' else None,
+        )
         yield ScalarQueryReference(page, team.endpoint, PRESETS), requests
         assert not outside and not errors, (outside, errors)
     finally:
@@ -95,7 +111,9 @@ def send(ref, requests, action, edits, status, report):
         expect(ref.response_panel).to_contain_text('AccessDenied')
     else:
         assert root.tag == '{' + NS['e'] + '}' + action + 'Response'
-        assert re.fullmatch(r'elb-local-[a-f0-9]{16}', root.findtext('e:ResponseMetadata/e:RequestId', namespaces=NS))
+        assert re.fullmatch(
+            r'elb-local-[a-f0-9]{16}', root.findtext('e:ResponseMetadata/e:RequestId', namespaces=NS)
+        )
     assert requests[start:] == [request]
     report.append([action, status])
     return root.find('e:' + action + 'Result', NS)
@@ -106,32 +124,58 @@ def setup_listener(clean, elb, ec2, iam, lambdas):
     clean.callback(ec2.delete_vpc, VpcId=vpc)
     subnets = []
     for n, zone in ((1, 'us-east-1a'), (2, 'us-east-1b')):
-        subnet = ec2.create_subnet(VpcId=vpc, CidrBlock=f'10.24.{n}.0/24', AvailabilityZone=zone)['Subnet']['SubnetId']
+        subnet = ec2.create_subnet(VpcId=vpc, CidrBlock=f'10.24.{n}.0/24', AvailabilityZone=zone)['Subnet'][
+            'SubnetId'
+        ]
         clean.callback(ec2.delete_subnet, SubnetId=subnet)
         subnets.append(subnet)
     sg = ec2.create_security_group(VpcId=vpc, GroupName='scalar-elb', Description='local group')['GroupId']
     clean.callback(ec2.delete_security_group, GroupId=sg)
-    lb = elb.create_load_balancer(Name='scalar-practice-alb', Subnets=subnets, SecurityGroups=[sg])['LoadBalancers'][0]
+    lb = elb.create_load_balancer(Name='scalar-practice-alb', Subnets=subnets, SecurityGroups=[sg])[
+        'LoadBalancers'
+    ][0]
     clean.callback(elb.delete_load_balancer, LoadBalancerArn=lb['LoadBalancerArn'])
-    trust = {'Version':'2012-10-17', 'Statement':[{'Effect':'Allow','Principal':{'Service':'lambda.amazonaws.com'},
-                                                   'Action':'sts:AssumeRole'}]}
+    trust = {
+        'Version': '2012-10-17',
+        'Statement': [
+            {'Effect': 'Allow', 'Principal': {'Service': 'lambda.amazonaws.com'}, 'Action': 'sts:AssumeRole'}
+        ],
+    }
     role = iam.create_role(RoleName='scalar-elb-role', AssumeRolePolicyDocument=json.dumps(trust))['Role']
     clean.callback(iam.delete_role, RoleName=role['RoleName'])
     archive = io.BytesIO()
     with zipfile.ZipFile(archive, 'w') as script:
-        script.writestr('app.py', 'def handler(event, context):\n    return {"statusCode": 200, "body": "local"}\n')
+        script.writestr(
+            'app.py', 'def handler(event, context):\n    return {"statusCode": 200, "body": "local"}\n'
+        )
     name = 'scalar-elb-function'
-    fn = lambdas.create_function(FunctionName=name, Runtime='python3.12', Role=role['Arn'], Handler='app.handler',
-                                 Code={'ZipFile':archive.getvalue()})['FunctionArn']
+    fn = lambdas.create_function(
+        FunctionName=name,
+        Runtime='python3.12',
+        Role=role['Arn'],
+        Handler='app.handler',
+        Code={'ZipFile': archive.getvalue()},
+    )['FunctionArn']
     clean.callback(lambdas.delete_function, FunctionName=name)
-    tg = elb.create_target_group(Name='scalar-linked', TargetType='lambda')['TargetGroups'][0]['TargetGroupArn']
+    tg = elb.create_target_group(Name='scalar-linked', TargetType='lambda')['TargetGroups'][0][
+        'TargetGroupArn'
+    ]
     clean.callback(elb.delete_target_group, TargetGroupArn=tg)
-    lambdas.add_permission(FunctionName=name, StatementId='local-alb', Action='lambda:InvokeFunction',
-                           Principal='elasticloadbalancing.amazonaws.com', SourceArn=tg)
-    elb.register_targets(TargetGroupArn=tg, Targets=[{'Id':fn}])
-    clean.callback(elb.deregister_targets, TargetGroupArn=tg, Targets=[{'Id':fn}])
-    listener = elb.create_listener(LoadBalancerArn=lb['LoadBalancerArn'], Protocol='HTTP', Port=80,
-                                   DefaultActions=[{'Type':'forward','TargetGroupArn':tg}])['Listeners'][0]
+    lambdas.add_permission(
+        FunctionName=name,
+        StatementId='local-alb',
+        Action='lambda:InvokeFunction',
+        Principal='elasticloadbalancing.amazonaws.com',
+        SourceArn=tg,
+    )
+    elb.register_targets(TargetGroupArn=tg, Targets=[{'Id': fn}])
+    clean.callback(elb.deregister_targets, TargetGroupArn=tg, Targets=[{'Id': fn}])
+    listener = elb.create_listener(
+        LoadBalancerArn=lb['LoadBalancerArn'],
+        Protocol='HTTP',
+        Port=80,
+        DefaultActions=[{'Type': 'forward', 'TargetGroupArn': tg}],
+    )['Listeners'][0]
     clean.callback(elb.delete_listener, ListenerArn=listener['ListenerArn'])
     return lb, tg, fn
 
@@ -144,79 +188,134 @@ def check_placement(result, ref, actual):
         assert row.findtext('e:' + key, namespaces=NS) == actual[key]
         expect(ref.response_panel).to_contain_text(actual[key])
     assert [sg.text for sg in row.findall('e:SecurityGroups/e:member', NS)] == actual['SecurityGroups']
-    zones = {(z.findtext('e:SubnetId', namespaces=NS),z.findtext('e:ZoneName', namespaces=NS))
-             for z in row.findall('e:AvailabilityZones/e:member', NS)}
-    assert len(zones) == 2 and zones == {(z['SubnetId'],z['ZoneName']) for z in actual['AvailabilityZones']}
+    zones = {
+        (z.findtext('e:SubnetId', namespaces=NS), z.findtext('e:ZoneName', namespaces=NS))
+        for z in row.findall('e:AvailabilityZones/e:member', NS)
+    }
+    assert len(zones) == 2 and zones == {(z['SubnetId'], z['ZoneName']) for z in actual['AvailabilityZones']}
 
 
 def exercise(team, peer, browser):
     sends = []
     with ExitStack() as clients:
-        elb, ec2, iam, lambdas = [sdk(clients, team, s) for s in ('elbv2','ec2','iam','lambda')]
+        elb, ec2, iam, lambdas = [sdk(clients, team, s) for s in ('elbv2', 'ec2', 'iam', 'lambda')]
         other = sdk(clients, peer, 'elbv2')
         with ExitStack() as clean:
-            peer_group = other.create_target_group(Name=NAME, TargetType='lambda', HealthCheckEnabled=True)['TargetGroups'][0]
+            peer_group = other.create_target_group(Name=NAME, TargetType='lambda', HealthCheckEnabled=True)[
+                'TargetGroups'
+            ][0]
             clean.callback(other.delete_target_group, TargetGroupArn=peer_group['TargetGroupArn'])
             lb, linked, fn = setup_listener(clean, elb, ec2, iam, lambdas)
             lb_args = {'LoadBalancerArns.member.1': lb['LoadBalancerArn']}
             with reference(browser, team, team.token) as (ref, requests):
-                created = send(ref,requests,'CreateTargetGroup',{},200,sends)
+                created = send(ref, requests, 'CreateTargetGroup', {}, 200, sends)
                 target = created.findtext('e:TargetGroups/e:member/e:TargetGroupArn', namespaces=NS)
                 assert target
-                clean.callback(elb.delete_target_group,TargetGroupArn=target)
+                clean.callback(elb.delete_target_group, TargetGroupArn=target)
                 expect(ref.response_panel).to_contain_text(target)
                 native = elb.describe_target_groups(TargetGroupArns=[target])['TargetGroups'][0]
-                assert native['TargetGroupName'] == NAME and native['TargetType'] == 'lambda' and not native['HealthCheckEnabled']
-                for key in ('TargetGroupName','TargetGroupArn','TargetType'):
-                    assert created.findtext('e:TargetGroups/e:member/e:'+key,namespaces=NS) == native[key]
+                assert (
+                    native['TargetGroupName'] == NAME
+                    and native['TargetType'] == 'lambda'
+                    and not native['HealthCheckEnabled']
+                )
+                for key in ('TargetGroupName', 'TargetGroupArn', 'TargetType'):
+                    assert created.findtext('e:TargetGroups/e:member/e:' + key, namespaces=NS) == native[key]
                 ref.close_client()
-                content = send(ref,requests,'DescribeLoadBalancers',lb_args,200,sends)
-                check_placement(content,ref,elb.describe_load_balancers(LoadBalancerArns=[lb['LoadBalancerArn']])['LoadBalancers'][0])
+                content = send(ref, requests, 'DescribeLoadBalancers', lb_args, 200, sends)
+                check_placement(
+                    content,
+                    ref,
+                    elb.describe_load_balancers(LoadBalancerArns=[lb['LoadBalancerArn']])['LoadBalancers'][0],
+                )
                 ref.close_client()
-                result = send(ref,requests,'DescribeTargetHealth',{'TargetGroupArn':linked},200,sends)
+                result = send(ref, requests, 'DescribeTargetHealth', {'TargetGroupArn': linked}, 200, sends)
                 health = elb.describe_target_health(TargetGroupArn=linked)['TargetHealthDescriptions']
-                assert len(health)==1 and health[0]['Target']['Id']==fn
-                assert result.findtext('e:TargetHealthDescriptions/e:member/e:Target/e:Id',namespaces=NS)==fn
-                for key,value in (('State','unavailable'),('Reason','Target.HealthCheckDisabled')):
-                    assert result.findtext('e:TargetHealthDescriptions/e:member/e:TargetHealth/e:'+key,namespaces=NS)==health[0]['TargetHealth'][key]==value
+                assert len(health) == 1 and health[0]['Target']['Id'] == fn
+                assert (
+                    result.findtext('e:TargetHealthDescriptions/e:member/e:Target/e:Id', namespaces=NS) == fn
+                )
+                for key, value in (('State', 'unavailable'), ('Reason', 'Target.HealthCheckDisabled')):
+                    assert (
+                        result.findtext(
+                            'e:TargetHealthDescriptions/e:member/e:TargetHealth/e:' + key, namespaces=NS
+                        )
+                        == health[0]['TargetHealth'][key]
+                        == value
+                    )
                     expect(ref.response_panel).to_contain_text(value)
                 expect(ref.response_panel).to_contain_text(fn)
             principal = 'scalar-elb-reader'
-            team.control('PUT','/_simulator/v1/iam/principals/'+principal+'/policy',{'Version':'2012-10-17','Statement':[
-                {'Effect':'Allow','Action':'elasticloadbalancing:DescribeLoadBalancers','Resource':'*'}]})
-            token = team.control('POST','/_simulator/v1/access',{'Principal':principal})['AccessToken']
-            with reference(browser, team, token) as (ref,requests):
-                result = send(ref,requests,'DescribeLoadBalancers',lb_args,200,sends)
-                check_placement(result,ref,lb)
+            wire(
+                team,
+                'PUT',
+                '/_simulator/v1/iam/principals/' + principal + '/policy',
+                {
+                    'Version': '2012-10-17',
+                    'Statement': [
+                        {
+                            'Effect': 'Allow',
+                            'Action': 'elasticloadbalancing:DescribeLoadBalancers',
+                            'Resource': '*',
+                        }
+                    ],
+                },
+            )
+            token = wire(team, 'POST', '/_simulator/v1/access', {'Principal': principal})['AccessToken']
+            with reference(browser, team, token) as (ref, requests):
+                result = send(ref, requests, 'DescribeLoadBalancers', lb_args, 200, sends)
+                check_placement(result, ref, lb)
                 ref.close_client()
-                send(ref,requests,'DeleteTargetGroup',{'TargetGroupArn':target},403,sends)
+                send(ref, requests, 'DeleteTargetGroup', {'TargetGroupArn': target}, 403, sends)
             team.stop()
             team.start()
-            assert elb.describe_target_groups(TargetGroupArns=[target])['TargetGroups']==[native]
-            assert other.describe_target_groups(Names=[NAME])['TargetGroups']==[peer_group]
-            assert elb.describe_listeners(LoadBalancerArn=lb['LoadBalancerArn'])['Listeners'][0]['DefaultActions'][0]['TargetGroupArn']==linked
-        assert elb.describe_target_groups()['TargetGroups']==[] and other.describe_target_groups()['TargetGroups']==[]
-        assert elb.describe_load_balancers()['LoadBalancers']==[]
+            assert elb.describe_target_groups(TargetGroupArns=[target])['TargetGroups'] == [native]
+            assert other.describe_target_groups(Names=[NAME])['TargetGroups'] == [peer_group]
+            assert (
+                elb.describe_listeners(LoadBalancerArn=lb['LoadBalancerArn'])['Listeners'][0][
+                    'DefaultActions'
+                ][0]['TargetGroupArn']
+                == linked
+            )
+        assert (
+            elb.describe_target_groups()['TargetGroups'] == []
+            and other.describe_target_groups()['TargetGroups'] == []
+        )
+        assert elb.describe_load_balancers()['LoadBalancers'] == []
     return sends
 
 
 def main():
-    binary=Path(os.environ['SIMULATOR_BINARY']).resolve(strict=True)
+    binary = Path(os.environ['SIMULATOR_BINARY']).resolve(strict=True)
     with binary.open('rb') as f:
-        digest=hashlib.file_digest(f,'sha256').hexdigest()
-    assert digest==os.environ['SIMULATOR_BINARY_SHA256']
-    with tempfile.TemporaryDirectory(prefix='elb-scalar-') as directory,sync_playwright() as pw:
-        root=Path(directory)
-        for name in ('owner','peer'):
-            (root/name).mkdir()
-        owner,peer=[LocalTeam(root/name,binary) for name in ('owner','peer')]
-        exe=os.environ.get('CHROMIUM_EXECUTABLE') or shutil.which('chromium')
-        with started(owner),started(peer),pw.chromium.launch(executable_path=exe,chromium_sandbox=True) as browser:
-            sends=exercise(owner,peer,browser)
+        digest = hashlib.file_digest(f, 'sha256').hexdigest()
+    assert digest == os.environ['SIMULATOR_BINARY_SHA256']
+    with tempfile.TemporaryDirectory(prefix='elb-scalar-') as directory, sync_playwright() as pw:
+        root = Path(directory)
+        for name in ('owner', 'peer'):
+            (root / name).mkdir()
+        owner, peer = [LocalTeam(root / name, binary) for name in ('owner', 'peer')]
+        exe = os.environ.get('CHROMIUM_EXECUTABLE') or shutil.which('chromium')
+        with (
+            started(owner),
+            started(peer),
+            pw.chromium.launch(executable_path=exe, chromium_sandbox=True) as browser,
+        ):
+            sends = exercise(owner, peer, browser)
     assert not Path(directory).exists()
-    print(json.dumps({'binary':digest,'scalarSends':sends,'stockSDKReadback':True,'peerPreserved':True,
-                      'reopened':True,'cleanup':True}))
+    print(
+        json.dumps(
+            {
+                'binary': digest,
+                'scalarSends': sends,
+                'stockSDKReadback': True,
+                'peerPreserved': True,
+                'reopened': True,
+                'cleanup': True,
+            }
+        )
+    )
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     main()
