@@ -533,26 +533,6 @@
       "reason": "Call the common strict Unicode escape check without changing Secrets Manager receipt or disclosure logic."
     },
     {
-      "path": "internal/core/policy.go",
-      "models": [
-        {
-          "id": "SESLocalMailbox",
-          "properties": [
-            "Admission",
-            "Publication",
-            "ContentBinding",
-            "UnpublishedFrame",
-            "NoFalseAck",
-            "ReadProjection"
-          ],
-          "limits": "Finite scoped acceptance and receipt/MIME correspondence. The concrete wire, rendering, SQLite, DNS and policy timing are covered by separate native tests."
-        }
-      ],
-      "disposition": "modeled",
-      "sha256": "c19d712a2b971ccf12d295271bfd46d95703f6591c04cf277e9b2981a2488dcc",
-      "reason": "Capture one consistent local policy decision context for both sender and saved template rights."
-    },
-    {
       "path": "internal/server/apidocs/catalog/index.json",
       "sha256": "aefdd62ede286169f5a702b07c11ef23018fd011647e21b24d1437258ad4a4d1",
       "disposition": "presentation",
