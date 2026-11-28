@@ -1,435 +1,255 @@
-name: ci
+name: Verify nine real Secrets Manager Scalar Sends and same-resource Console readback
 on:
-  push:
-    branches: [main]
-  pull_request:
   workflow_dispatch:
-    inputs:
-      s3_paging_trial:
-        description: Run the isolated S3 1,001-part browser check on Ubuntu 22.04
-        type: boolean
-        default: false
-  workflow_call:
 permissions:
   contents: read
 jobs:
-  console-acceptance:
-    name: Japanese service console acceptance
-    runs-on: ubuntu-latest
-    timeout-minutes: 30
-    steps:
-      - uses: actions/checkout@v7.0.1
-        with:
-          ref: ${{ github.event.pull_request.head.sha || github.sha }}
-      - uses: actions/setup-go@v6.5.0
-        with:
-          go-version: '1.26.11'
-          cache: true
-      - name: Build the actual embedded simulator
-        run: make build
-      - name: Install pinned Python SDK and browser tools
-        timeout-minutes: 3
-        run: |
-          python3 -m venv /tmp/simulator-tests
-          /tmp/simulator-tests/bin/pip install -r scripts/requirements-test.txt
-      - name: Install full Chromium system dependencies
-        timeout-minutes: 12
-        run: /tmp/simulator-tests/bin/playwright install-deps chromium
-      - name: Install pinned Chromium browser
-        timeout-minutes: 5
-        run: /tmp/simulator-tests/bin/playwright install chromium
-      - name: Check S3 multipart launcher refusals offline
-        timeout-minutes: 6
-        run: /tmp/simulator-tests/bin/python test/e2e/test_s3_multipart_paging_launcher.py
-      - name: Check native discovery, Japanese operations and desktop/mobile layouts
-        run: |
-          /tmp/simulator-tests/bin/python test/e2e/service_locale.py
-          /tmp/simulator-tests/bin/python test/e2e/scalar_aws_json.py
-      - name: Check Secrets disclosure boundaries and actual metadata accessibility
-        run: |
-          /tmp/simulator-tests/bin/python scripts/get-audit-tools.py /tmp/simulator-console-audit
-          AXE_SCRIPT=/tmp/simulator-console-audit/axe.min.js /tmp/simulator-tests/bin/python test/e2e/secrets_manager_console.py
-      - name: Check inline Lambda editor and strict CSP in the real browser
-        run: /tmp/simulator-tests/bin/python test/e2e/lambda_inline_editor.py
-      - name: Retain focused service console evidence
-        if: always()
-        uses: actions/upload-artifact@v7.0.2
-        with:
-          name: service-console-focused-${{ github.event.pull_request.head.sha || github.sha }}
-          path: |
-            reports/lambda-inline-*.png
-            reports/service-locale-*.png
-            reports/scalar-aws-json.json
-            reports/secrets-metadata-*.png
-            reports/secrets-a11y-summary.json
-          if-no-files-found: warn
-          retention-days: 14
-  checks:
-    name: Static checks, builds and audits
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
-    steps:
-      - uses: actions/checkout@v7.0.1
-        with:
-          ref: ${{ github.event.pull_request.head.sha || github.sha }}
-      - uses: actions/setup-go@v6.5.0
-        with:
-          go-version: '1.26.11'
-          cache: true
-      - name: Rebuild the API reference without the excluded color picker
-        run: |
-          npm ci --prefix tools/scalar --ignore-scripts --no-audit --no-fund
-          node tools/scalar/build.mjs
-          python3 tools/scalar/notices.py
-          git diff --exit-code -- internal/server/apidocs third_party/scalar.json third_party/scalar-bundled-packages.json third_party/SCALAR-BUNDLED-NOTICES.txt internal/legal/assets/SCALAR-BUNDLED-NOTICES.txt tools/scalar/bundle-inputs.json tools/scalar/bundle-digests.json third_party/color-picker-removal.json
-      - name: Rebuild official Cloudscape console and original notices
-        run: |
-          npm ci --prefix tools/console --ignore-scripts --no-audit --no-fund
-          node tools/console/build.mjs
-          node --test tools/console/test/gcp-dns*.test.mjs tools/console/test/simpledb-client.test.mjs tools/console/test/ec2-security-groups.test.mjs
-          git diff --exit-code -- internal/server/web internal/legal/assets/CONSOLE-NOTICES.txt third_party/CONSOLE-NOTICES.txt third_party/console-packages.json tools/console/bundle-inputs.json tools/console/bundle-digests.json
-          npm audit --prefix tools/console --audit-level=high
-      - name: Check secret description console and preserved disclosure contracts
-        run: node --test tools/console/tests/secret-description.test.mjs tools/console/tests/secrets-manager-locale.test.mjs
-      - name: Check Lambda source draft and deploy boundaries
-        run: node --test tools/console/tests/lambda-*.test.mjs
-      - name: Check App Engine console request, split and URL helpers
-        run: node --test tools/console/tests/gcp-appengine.test.mjs
-      - name: Check immutable release packaging and refusal regressions
-        run: python3 test/ci/release_pipeline.py
-      - name: Check bounded SNS Console and reference request contracts
-        run: node --test test/console/sns-subscriptions.test.mjs test/console/sns-http-reference.test.mjs
-      - name: Check native input and bounded EC2 console regressions
-        run: >-
-          node --test test/console/login-native-input.test.mjs test/console/api-reference-json.test.mjs
-          tools/console/test/ec2-readonly.test.mjs tools/console/test/ec2-response.test.mjs
-          tools/console/test/ec2-template-preview.test.mjs tools/console/test/ec2-native-subnets.test.mjs
-      - name: Check Go format, vet, modules, embedded assets and script gates
-        run: |
-          make format-check vet verify-assets test-scripts
-          go mod verify
-      - name: Build the static binary and compile all supported targets
-        run: make build cross-check
-      - name: Audit the locked API-reference build dependencies
-        run: npm audit --prefix tools/scalar --audit-level=high
-      - name: Check Go vulnerabilities against the canonical service
-        run: go run golang.org/x/vuln/cmd/govulncheck@v1.1.4 ./...
-  go-test:
-    name: Go race tests (${{ matrix.shard }})
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - shard: server-a
-            packages: ./internal/server
-            part: 0/2
-          - shard: server-b
-            packages: ./internal/server
-            part: 1/2
-          - shard: aws-a
-            packages: ./internal/aws
-            part: 0/2
-          - shard: aws-b
-            packages: ./internal/aws
-            part: 1/2
-          - shard: workloads
-            packages: ./internal/workload/python ./internal/workload/guesttcp
-          - shard: catalogs
-            packages: ./internal/gcp/appengine ./internal/gcp/catalog ./internal/aws/catalog
-          - shard: rest
-            exclude: ./internal/server ./internal/aws ./internal/workload/python ./internal/workload/guesttcp ./internal/gcp/appengine ./internal/gcp/catalog ./internal/aws/catalog
-    steps:
-      - uses: actions/checkout@v7.0.1
-        with:
-          ref: ${{ github.event.pull_request.head.sha || github.sha }}
-      - uses: actions/setup-go@v6.5.0
-        with:
-          go-version: '1.26.11'
-          cache: true
-      - name: Run this shard under the race detector with full-module coverage
-        shell: bash
-        env:
-          SHARD: ${{ matrix.shard }}
-          PACKAGES: ${{ matrix.packages }}
-          EXCLUDE: ${{ matrix.exclude }}
-          PART: ${{ matrix.part }}
-        run: |
-          mkdir -p reports/shard
-          if [ -n "$PACKAGES" ]; then
-            go list $PACKAGES > reports/shard/packages.txt
-          else
-            go list $EXCLUDE > reports/shard/excluded.txt
-            go list ./... | grep -vxF -f reports/shard/excluded.txt > reports/shard/packages.txt
-          fi
-          packages="$(tr '\n' ' ' < reports/shard/packages.txt)"
-          if [ -n "$PART" ]; then
-            go test -race -coverpkg=./... -list '.*' $packages | { grep -E '^(Test|Example|Fuzz)' || true; } | sort > reports/shard/listed.txt
-            awk -v index_="${PART%/*}" -v count="${PART#*/}" '(NR - 1) % count == index_' reports/shard/listed.txt > reports/shard/tests.txt
-            test -s reports/shard/tests.txt
-            names="$(paste -sd'|' reports/shard/tests.txt)"
-            printf '^(%s)$' "$names" > reports/shard/run.txt
-            make test-go GO_TEST_PACKAGES="$packages" COVERAGE_PROFILE="reports/shard/coverage-$SHARD.out" GO_TEST_RUN_FILE=reports/shard/run.txt | tee reports/shard/test.log
-            { grep -E '^=== RUN   [^/ ]+$' reports/shard/test.log || true; } | sed 's/^=== RUN   //' | sort -u > reports/shard/ran.txt
-            diff reports/shard/tests.txt reports/shard/ran.txt
-          else
-            make test-go GO_TEST_PACKAGES="$packages" COVERAGE_PROFILE="reports/shard/coverage-$SHARD.out"
-          fi
-          if [ -n "$PART" ]; then
-            jq -n --arg index "${PART%/*}" --arg count "${PART#*/}" --rawfile listed reports/shard/listed.txt --rawfile tests reports/shard/tests.txt \
-              '{index: ($index | tonumber), count: ($count | tonumber), listed: ($listed | split("\n") | map(select(length > 0))), tests: ($tests | split("\n") | map(select(length > 0)))}' > reports/shard/part.json
-          else
-            echo null > reports/shard/part.json
-          fi
-          jq -n --arg head "$(git rev-parse HEAD)" --arg profile "coverage-$SHARD.out" --rawfile packages reports/shard/packages.txt --slurpfile part reports/shard/part.json \
-            '{head: $head, profile: $profile, packages: ($packages | split("\n") | map(select(length > 0)))} + (if $part[0] == null then {} else {part: $part[0]} end)' > "reports/shard/$SHARD.json"
-      - name: Retain this shard's coverage and package manifest
-        uses: actions/upload-artifact@v7.0.2
-        with:
-          name: go-coverage-shard-${{ matrix.shard }}-${{ github.event.pull_request.head.sha || github.sha }}
-          path: |
-            reports/shard/${{ matrix.shard }}.json
-            reports/shard/coverage-${{ matrix.shard }}.out
-          if-no-files-found: error
-          retention-days: 14
-  platform-audit:
-    name: Platform lifecycle and console audit
-    runs-on: ubuntu-latest
-    timeout-minutes: 30
-    steps:
-      - uses: actions/checkout@v7.0.1
-        with:
-          ref: ${{ github.event.pull_request.head.sha || github.sha }}
-      - uses: actions/setup-go@v6.5.0
-        with:
-          go-version: '1.26.11'
-          cache: true
-      - name: Build the actual embedded simulator
-        run: |
-          make build
-          sha256sum dist/tenkacloud-simulator > "$RUNNER_TEMP/platform-simulator.sha256"
-      - name: Install Python SDK and browser tools
-        timeout-minutes: 3
-        run: |
-          python3 -m venv /tmp/simulator-tests
-          /tmp/simulator-tests/bin/pip install -r scripts/requirements-test.txt
-      - name: Exercise Azure Queue Storage with the official SDK across two simulator processes
-        timeout-minutes: 3
-        run: |
-          /tmp/simulator-tests/bin/pip install --require-hashes --only-binary=:all: --no-deps -r scripts/requirements-azure-queue-test.txt
-          /tmp/simulator-tests/bin/pip check
-          read -r binary_sha _ < "$RUNNER_TEMP/platform-simulator.sha256"
-          /tmp/simulator-tests/bin/python test/e2e/azure_queue_cli.py --binary "$PWD/dist/tenkacloud-simulator" --binary-sha256 "$binary_sha"
-      - name: Verify local STS session invalidation and team isolation with boto3
-        timeout-minutes: 3
-        run: |
-          /tmp/simulator-tests/bin/python test/e2e/test_sts_session_lifecycle.py
-          read -r binary_sha _ < "$RUNNER_TEMP/platform-simulator.sha256"
-          /tmp/simulator-tests/bin/python test/e2e/sts_session_lifecycle.py --binary "$PWD/dist/tenkacloud-simulator" --binary-sha256 "$binary_sha"
-      - name: Install full Chromium system dependencies
-        timeout-minutes: 12
-        run: /tmp/simulator-tests/bin/playwright install-deps chromium
-      - name: Install pinned Chromium browser
-        timeout-minutes: 5
-        run: /tmp/simulator-tests/bin/playwright install chromium
-      - name: Prepare pinned axe-core for mandatory browser accessibility checks
-        run: /tmp/simulator-tests/bin/python scripts/get-audit-tools.py /tmp/simulator-audit
-      - name: Run the actual platform hello-world lifecycle and participant browser
-        run: |
-          git init /tmp/simulator-platform
-          git -C /tmp/simulator-platform remote add origin https://github.com/susumutomita/TenkaCloud.git
-          git -C /tmp/simulator-platform fetch --depth=1 origin f99b3d9a00076a2a5e97f1d4d9b0b20a7e02245c
-          git -C /tmp/simulator-platform checkout --detach FETCH_HEAD
-          git init /tmp/simulator-challenges
-          git -C /tmp/simulator-challenges remote add origin https://github.com/susumutomita/TenkaCloudChallenge.git
-          git -C /tmp/simulator-challenges fetch --depth=1 origin a749b142416770abee3f173673702c55df3856aa
-          git -C /tmp/simulator-challenges checkout --detach FETCH_HEAD
-          npm ci --prefix tools/platform --ignore-scripts --no-audit --no-fund
-          npm audit --prefix tools/platform --audit-level=high
-          node tools/platform/setup.mjs /tmp/simulator-platform
-          python3 scripts/catalog-matrix.py /tmp/simulator-challenges
-          git diff --exit-code -- docs/catalog.md
-          export TENKACLOUD_ROOT=/tmp/simulator-platform CHALLENGE_ROOT=/tmp/simulator-challenges
-          export BUN="$PWD/tools/platform/node_modules/@oven/bun-linux-x64/bin/bun"
-          "$BUN" test/platform/hello-world.ts
-          /tmp/simulator-tests/bin/python test/platform/browser.py
-      - name: Verify CloudFormation rejection and the SDK application lifecycle
-        run: /tmp/simulator-tests/bin/python test/platform/sdk-lifecycle.py -v
-      - name: Check responsive reflow and the start command's token handling
-        run: |
-          /tmp/simulator-tests/bin/python test/e2e/reflow_test.py
-          make test-start PYTHON=/tmp/simulator-tests/bin/python
-      - name: Inspect console flow, keyboard behavior, and accessible contrast
-        run: |
-          AXE_SCRIPT=/tmp/simulator-audit/axe.min.js make audit PYTHON=/tmp/simulator-tests/bin/python
-          AXE_SCRIPT_PATH=/tmp/simulator-audit/axe.min.js /tmp/simulator-tests/bin/python test/e2e/wafv2_console.py
-  ci:
-    name: ci
-    needs: [console-acceptance, checks, go-test, platform-audit]
-    if: always()
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    steps:
-      - name: Require every gate job to succeed
-        env:
-          CONSOLE_ACCEPTANCE: ${{ needs.console-acceptance.result }}
-          CHECKS: ${{ needs.checks.result }}
-          GO_TEST: ${{ needs.go-test.result }}
-          PLATFORM_AUDIT: ${{ needs.platform-audit.result }}
-        run: |
-          echo "console-acceptance=$CONSOLE_ACCEPTANCE checks=$CHECKS go-test=$GO_TEST platform-audit=$PLATFORM_AUDIT"
-          test "$CONSOLE_ACCEPTANCE" = success && test "$CHECKS" = success && test "$GO_TEST" = success && test "$PLATFORM_AUDIT" = success
-      - uses: actions/checkout@v7.0.1
-        with:
-          ref: ${{ github.event.pull_request.head.sha || github.sha }}
-      - uses: actions/setup-go@v6.5.0
-        with:
-          go-version: '1.26.11'
-          cache: true
-      - uses: actions/download-artifact@v8.0.2
-        with:
-          pattern: go-coverage-shard-*-${{ github.event.pull_request.head.sha || github.sha }}
-          path: reports/shard
-          merge-multiple: true
-      - name: Merge shard coverage only when every package ran exactly once at this head
-        run: |
-          go list ./... > reports/expected-packages.txt
-          python3 scripts/check-coverage.py merge reports/coverage.out reports/expected-packages.txt "$(git rev-parse HEAD)" reports/shard/*.json
-      - name: Generate coverage views and enforce both 90% floors
-        run: |
-          go run github.com/boumenot/gocover-cobertura@v1.4.0 < reports/coverage.out > reports/coverage.xml
-          go tool cover -html=reports/coverage.out -o reports/coverage.html
-          python3 scripts/check-coverage.py reports/coverage.out reports/coverage.xml
-      - name: Retain coverage evidence
-        if: always()
-        uses: actions/upload-artifact@v7.0.2
-        with:
-          name: go-coverage-${{ github.event.pull_request.head.sha || github.sha }}
-          path: |
-            reports/coverage.out
-            reports/coverage.xml
-            reports/coverage.html
-            reports/coverage-summary.md
-          if-no-files-found: error
-          retention-days: 14
-  e2e:
-    name: Real binary, SDK, console and API reference E2E
-    if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch'
-    runs-on: ubuntu-22.04
-    timeout-minutes: 45
-    steps:
-      - uses: actions/checkout@v7.0.1
-        with:
-          ref: ${{ github.event.pull_request.head.sha || github.sha }}
-      - uses: actions/setup-go@v6.5.0
-        with:
-          go-version: '1.26.11'
-          cache: true
-      - name: Install Python SDK and browser tools
-        timeout-minutes: 3
-        run: |
-          python="$RUNNER_TOOL_CACHE/Python/3.12.16/x64/bin/python3.12"
-          "$python" -c 'import sys; assert sys.version_info[:3] == (3, 12, 16)'
-          "$python" -m venv /tmp/simulator-tests
-          /tmp/simulator-tests/bin/pip install -r scripts/requirements-test.txt
-      - name: Install full Chromium system dependencies
-        timeout-minutes: 12
-        run: /tmp/simulator-tests/bin/playwright install-deps chromium
-      - name: Install pinned Chromium browser
-        timeout-minutes: 5
-        run: /tmp/simulator-tests/bin/playwright install chromium
-      - name: Prepare pinned axe-core for mandatory browser accessibility checks
-        run: /tmp/simulator-tests/bin/python scripts/get-audit-tools.py /tmp/simulator-audit
-      - name: Verify real binary, SDK, console, and offline API reference
-        id: conformance
-        run: |
-          test -z "$(git status --porcelain)"
-          AXE_SCRIPT=/tmp/simulator-audit/axe.min.js make e2e PYTHON=/tmp/simulator-tests/bin/python
-      - name: Identify the binary exercised by the S3 paging fixture
-        if: "!cancelled() && steps.conformance.outcome != 'skipped'"
-        run: |
-          mkdir -p reports
-          go version -m dist/tenkacloud-simulator > reports/s3-multipart-paging-build.txt
-          grep -F "vcs.revision=$(git rev-parse HEAD)" reports/s3-multipart-paging-build.txt
-          grep -F 'vcs.modified=false' reports/s3-multipart-paging-build.txt
-          sha256sum dist/tenkacloud-simulator > reports/s3-multipart-paging.sha256
-          digest=$(cut -d ' ' -f 1 reports/s3-multipart-paging.sha256)
-          jq -se --arg digest "$digest" 'length == 1 and (.[0] | .binarySha256 == $digest and .parts == 1001)' reports/s3-multipart-paging.json
-      - name: Retain service console screenshots and safe audit evidence
-        if: always()
-        uses: actions/upload-artifact@v7.0.2
-        with:
-          name: service-console-${{ github.event.pull_request.head.sha || github.sha }}
-          path: |
-            reports/lambda-inline-*.png
-            reports/service-locale-*.png
-            reports/scalar-aws-json.json
-            reports/s3-multipart-paging.json
-            reports/s3-multipart-paging-build.txt
-            reports/s3-multipart-paging.sha256
-            reports/secrets-metadata-*.png
-            reports/secrets-a11y-summary.json
-            reports/landing-topology/**
-            reports/login-first-native-failure.json
-            reports/login-first-native-observer-status.json
-            reports/login-second-native-clear-failure.json
-            reports/login-second-native-clear-observer-status.json
-            reports/cloudformation-events-*.png
-            reports/participant-console-home-*.png
-            reports/participant-ssm-list-*.png
-            reports/login-paste-*.png
-            reports/language-login-ja-*.png
-          if-no-files-found: warn
-          retention-days: 14
-  s3-multipart-paging-trial:
-    name: Isolated S3 multipart paging on Ubuntu 22.04
-    if: github.event_name == 'workflow_dispatch' && inputs.s3_paging_trial
+  secrets:
     runs-on: ubuntu-22.04
     timeout-minutes: 35
+    env:
+      PRODUCT: 7de43f8ae50a761d73fc7b72fbf76c48f0d96c51
     steps:
       - uses: actions/checkout@v7.0.1
         with:
-          ref: ${{ github.sha }}
+          ref: 7de43f8ae50a761d73fc7b72fbf76c48f0d96c51
+          persist-credentials: false
       - uses: actions/setup-go@v6.5.0
         with:
           go-version: '1.26.11'
           cache: true
-      - name: Build and identify the dispatched simulator
+      - name: Build the exact product and provision its pinned Chromium
         run: |
+          test "$GITHUB_REPOSITORY" = susumutomita/TenkaCloudSimulator
+          test "$GITHUB_REF" = refs/heads/verify/266-secrets-scalar-nine
+          test "$(git rev-parse HEAD)" = "$PRODUCT"
+          test "$(git rev-parse 'HEAD^{tree}')" = 99d34741dff6bd560e36d7ebe45b5cf3a1aa1004
+          test -z "$(git status --porcelain)"
+          test "$(go env GOVERSION)" = go1.26.11
           test "$(id -u)" -ne 0
-          test "$(uname -m)" = x86_64
-          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          umask 077
+          mkdir "$RUNNER_TEMP/secrets-receipts" "$RUNNER_TEMP/secrets-private"
           make build
-          mkdir -p reports/s3-paging-trial
-          go version -m dist/tenkacloud-simulator > reports/s3-paging-trial/build.txt
-          grep -F "vcs.revision=$GITHUB_SHA" reports/s3-paging-trial/build.txt
-          grep -F 'vcs.modified=false' reports/s3-paging-trial/build.txt
-      - name: Prepare pinned SDK and Chromium with the hosted CPython 3.12
+          go version -m dist/tenkacloud-simulator > "$RUNNER_TEMP/secrets-receipts/build.txt"
+          grep -Fx "$(printf '\tbuild\tvcs.revision=%s' "$PRODUCT")" "$RUNNER_TEMP/secrets-receipts/build.txt"
+          grep -Fx "$(printf '\tbuild\tvcs.modified=false')" "$RUNNER_TEMP/secrets-receipts/build.txt"
+          python="$RUNNER_TOOL_CACHE/Python/3.12.16/x64/bin/python3.12"
+          test "$("$python" --version)" = "Python 3.12.16"
+          "$python" -m venv "$RUNNER_TEMP/secrets-tools"
+          test "$(grep -Fx playwright==1.62.0 scripts/requirements-test.txt)" = playwright==1.62.0
+          "$RUNNER_TEMP/secrets-tools/bin/python" -m pip install playwright==1.62.0
+          "$RUNNER_TEMP/secrets-tools/bin/playwright" install --with-deps chromium
+      - name: Run the original nine browser sends against the merged examples
         run: |
-          "$RUNNER_TOOL_CACHE/Python/3.12.16/x64/bin/python3.12" -m venv /tmp/s3-paging-tests
-          /tmp/s3-paging-tests/bin/python -m pip install -r scripts/requirements-test.txt
-          /tmp/s3-paging-tests/bin/playwright install --with-deps chromium
-      - name: Verify isolation refusals and run the native browser fixture
-        env:
-          RECEIPT: reports/s3-paging-trial/paging.json
-        run: |
-          /tmp/s3-paging-tests/bin/python test/e2e/test_s3_multipart_paging_launcher.py
-          /tmp/s3-paging-tests/bin/python test/e2e/run_s3_multipart_paging.py \
-            --binary "$PWD/dist/tenkacloud-simulator" > "$RECEIPT"
-          digest=$(sha256sum dist/tenkacloud-simulator | cut -d ' ' -f 1)
-          jq -se --arg digest "$digest" '
-            length == 1 and (.[0] |
-            .binarySha256 == $digest and .parts == 1001 and
-            .nativeBrowserListMarkers == [[0,1000],[0,1000],[0,1000],[0,1000]] and
-            .staleReviewNoPost == true and .completePostIncludesAllParts == true and
-            .nativeSizeRefusalPreservedUpload == true and .nativeBrowserPartSave == true and
-            .visibleFinalPartRefresh == true and .nativeAbortAndDelete == true and .realAWS == false)
-          ' "$RECEIPT"
-      - name: Retain the build and paging receipt
+          set -euo pipefail
+          umask 077
+          python="$RUNNER_TEMP/secrets-tools/bin/python"
+          "$python" -I -c 'import os; from pathlib import Path; assert not any(k.startswith(("AWS_", "BOTO_")) for k in os.environ); assert not any(os.path.lexists(p) for p in (Path.home()/".aws", Path.home()/".boto", "/etc/boto.cfg")); assert "CHROMIUM_EXECUTABLE" not in os.environ'
+          cat > "$RUNNER_TEMP/secrets-private/scalar_nine_console.py" <<'PYTHON'
+          """Private same-team #630 witness. Emit only checked operation names, states and no values."""
+          import hashlib, json, os, re, socket, subprocess, tempfile, time, traceback
+          from pathlib import Path
+          from urllib.error import HTTPError
+          from urllib.request import build_opener, Request, ProxyHandler
+          from playwright.sync_api import sync_playwright, expect
+
+          BINARY=Path.cwd()/'dist/tenkacloud-simulator'
+          DIGEST='1622dcf248d4c2198de7f554009c34c9e978018fae5ecc75ac658d25ed179035'
+          BASE='7de43f8ae50a761d73fc7b72fbf76c48f0d96c51'
+          PLACE=Path(os.environ['RUNNER_TEMP'])/'secrets-private'
+          MEDIA='application/x-amz-json-1.1'
+          ACTIONS=['CreateSecret','ListSecrets','DescribeSecret','PutSecretValue','GetSecretValue','ListSecretVersionIds','UpdateSecretVersionStage','UpdateSecret','DeleteSecret']
+          ROTATION={'RotationEnabled','RotationRules','RotationLambdaARN','LastRotatedDate','NextRotationDate'}
+          stage='preflight'
+          receipt={'source':BASE,'binarySHA256':DIGEST,'browserSends':[]}
+
+          def required(x,reason):
+              if not x: raise ValueError(reason)
+
+          def run():
+              global stage
+              with BINARY.open('rb') as stream: required(hashlib.file_digest(stream,'sha256').hexdigest()==DIGEST,'source')
+              required(os.geteuid()>0 and tuple(n for _,n in socket.if_nameindex())==('lo',),'namespace')
+              with tempfile.TemporaryDirectory(dir=PLACE) as tmp, socket.socket() as reserved:
+                  p=Path(tmp); tok=p/'operator-token'
+                  reserved.bind(('127.0.0.1',0)); port=reserved.getsockname()[1];reserved.close()
+                  url=f'http://127.0.0.1:{port}'; http=build_opener(ProxyHandler({}))
+                  process=subprocess.Popen([BINARY,'--listen',f'127.0.0.1:{port}','--state',p/'state.db','--token-file',tok],stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL)
+                  arn=None; deleted=False
+                  try:
+                      for _ in range(160):
+                          try:
+                              token=tok.read_text().strip()
+                              with http.open(Request(url+'/_simulator/health',headers={'X-Simulator-Token':token}),timeout=1) as r:required(r.status==200,'health')
+                              break
+                          except OSError:time.sleep(.1)
+                      else:raise ValueError('startup')
+                      def native(op,params):
+                          hdr={'Content-Type':MEDIA,'X-Simulator-Token':token,'X-Simulator-Service':'secretsmanager','X-Simulator-Region':'us-east-1','X-Amz-Target':'secretsmanager.'+op}
+                          with http.open(Request(url+'/',method='POST',data=json.dumps(params).encode(),headers=hdr),timeout=3) as response:
+                              required(response.status==200,'native');return json.load(response)
+                      def metadata(v):
+                          public=json.dumps(v)
+                          required('SecretString' not in public and 'SecretBinary' not in public and 'DUMMY-secret-' not in public,'redaction')
+                      with sync_playwright() as pw:
+                          browser=pw.chromium.launch(chromium_sandbox=True)
+                          outside=[]; ctx=browser.new_context(service_workers='block',locale='en-US')
+                          def guard(route):
+                              if route.request.url.startswith(url+'/'):route.continue_()
+                              else:outside.append(True);route.abort()
+                          ctx.route('**/*',guard); login=ctx.new_page()
+                          login.goto(url+'/_simulator/console/')
+                          login.get_by_label('Access token',exact=True).fill(token);login.get_by_role('button',name='Open sandbox',exact=True).click()
+                          expect(login.get_by_role('button',name='Services',exact=True)).to_be_visible()
+                          cookies=ctx.cookies();capture=ctx.new_page()
+                          with capture.expect_response(lambda r:r.url==url+'/_simulator/docs/openapi.json') as snap:capture.goto(url+'/_simulator/docs/')
+                          spec=snap.value.json(); root=spec['paths']['/']['post'];examples=root['requestBody']['content'][MEDIA]['examples']
+                          required(root['operationId']=='awsRegionalOperation' and set(ACTIONS)<=examples.keys(),'served examples')
+                          name=examples['CreateSecret']['value']['Name'];first=None;second=None
+                          for op in ACTIONS:
+                              stage=op+'-open'
+                              fresh=browser.new_context(service_workers='block',locale='en-US',storage_state={'cookies':cookies,'origins':[]})
+                              try:
+                                  fresh.route('**/*',guard);page=fresh.new_page();page.set_default_timeout(7500)
+                                  posts=[];page.on('request',lambda req:posts.append(req) if req.method=='POST' and req.url==url+'/' else None)
+                                  page.goto(url+'/_simulator/docs/')
+                                  page.get_by_role('link',name='Shared AWS JSON/Query endpoint',exact=True).click()
+                                  page.get_by_test_id('example-picker').click()
+                                  page.get_by_role('option',name=examples[op]['summary'],exact=True).click()
+                                  page.get_by_role('button',name='Test Request (post /)',exact=True).click()
+                                  dialog=page.get_by_role('dialog').filter(has=page.get_by_role('button',name='Close Client',exact=True))
+                                  request=dialog.get_by_role('region',name='Request: '+root['summary'],exact=True)
+                                  stage=op+'-body'
+                                  request.get_by_role('tab',name='Body',exact=True).press('Enter')
+                                  editor=request.locator('.cm-content[contenteditable=true]:visible')
+                                  example=examples[op]['value'].copy()
+                                  required(json.loads(editor.inner_text())==example,'selected example body')
+                                  payload=example.copy()
+                                  if 'SecretId' in payload:payload['SecretId']=arn
+                                  if op=='UpdateSecretVersionStage':
+                                      payload['MoveToVersionId']=first;payload['RemoveFromVersionId']=second
+                                  if payload!=example:
+                                      editor.click();editor.press('ControlOrMeta+a');page.keyboard.insert_text(json.dumps(payload))
+                                      required(json.loads(editor.inner_text())==payload,'editor body')
+                                  stage=op+'-headers'
+                                  request.get_by_role('tab',name='Headers',exact=True).press('Enter')
+                                  service=request.get_by_role('row',name=re.compile('^Include X-Simulator-Service in request '))
+                                  service.get_by_role('button',name=re.compile('^(ssm|secretsmanager)$')).click()
+                                  page.get_by_role('menuitem',name='secretsmanager',exact=True).click()
+                                  service.get_by_role('checkbox').check()
+                                  target=request.get_by_role('row',name=re.compile('^Include X-Amz-Target in request '))
+                                  target.locator('[contenteditable=true][aria-label=" Value"]').fill('secretsmanager.'+op)
+                                  target.get_by_role('checkbox').check()
+                                  request.get_by_role('checkbox',name='Include X-Simulator-Region in request',exact=True).uncheck()
+                                  required(not posts,'early request')
+                                  stage=op+'-send'
+                                  with page.expect_response(lambda r:r.request.method=='POST' and r.url==url+'/') as resp:
+                                      dialog.get_by_role('button',name=re.compile('^Send post request to ')).click()
+                                  response=resp.value;wire=response.request
+                                  required(posts==[wire] and wire.post_data_json==payload,'observed request')
+                                  heads=wire.all_headers()
+                                  required(bool(heads.get('cookie')) and heads.get('x-simulator-service')=='secretsmanager' and heads.get('x-amz-target')=='secretsmanager.'+op and heads['content-type'].split(';')[0]==MEDIA,'headers')
+                                  required(not {'x-simulator-token','x-simulator-principal','authorization'}&heads.keys(),'authority')
+                                  required(response.status==200 and response.headers.get('cache-control')=='no-store' and response.headers.get('x-simulator-encryption')=='none','response status')
+                                  value=response.json()
+                                  if op=='CreateSecret':arn=value['ARN']
+                                  panel=dialog.locator('.response-section-content-body').filter(has=page.get_by_role('link',name='Download Response Body',exact=True))
+                                  expect(panel).to_be_visible()
+                                  if op!='GetSecretValue':metadata(value)
+                                  stage=op+'-state'
+                                  if op=='CreateSecret':
+                                      arn=value['ARN'];first=value['VersionId'];required(value['Name']==name and first==payload['ClientRequestToken'],'create')
+                                  elif op=='ListSecrets':
+                                      item=next(i for i in value['SecretList'] if i['ARN']==arn)
+                                      required(not ROTATION&item.keys() and item['SecretVersionsToStages']=={first:['AWSCURRENT']},'list')
+                                  elif op=='DescribeSecret':
+                                      required(value['ARN']==arn and not ROTATION&value.keys() and value['VersionIdsToStages']=={first:['AWSCURRENT']},'describe')
+                                  elif op=='PutSecretValue':
+                                      second=value['VersionId'];required(first!=second and second==payload['ClientRequestToken'],'put')
+                                  elif op=='GetSecretValue':
+                                      selected=native('DescribeSecret',{'SecretId':arn})['VersionIdsToStages']
+                                      version=next(k for k,v in selected.items() if payload.get('VersionStage','AWSCURRENT') in v)
+                                      expected=examples['PutSecretValue' if version==second else 'CreateSecret']['value']['SecretString']
+                                      required(value['VersionId']==version and value['SecretString']==expected,'get')
+                                  elif op=='ListSecretVersionIds':
+                                      required(value['ARN']==arn and {v['VersionId'] for v in value['Versions']}=={first,second},'version list')
+                                  elif op=='UpdateSecretVersionStage':
+                                      required(native('DescribeSecret',{'SecretId':arn})['VersionIdsToStages']=={first:['AWSCURRENT'],second:['AWSPREVIOUS']},'labels')
+                                  elif op=='UpdateSecret':
+                                      obj=native('DescribeSecret',{'SecretId':arn})
+                                      required(set(value)=={'ARN','Name'} and value['ARN']==arn and obj['Description']==payload['Description'] and set(obj['VersionIdsToStages'])=={first,second},'description')
+                                      stage='UpdateSecret-console-readback'
+                                      login.goto(url+'/_simulator/console/#/secretsmanager')
+                                      login.get_by_role('tab',name='Edit description',exact=True).click()
+                                      login.get_by_label('Secret ARN for description',exact=True).fill(arn)
+                                      with login.expect_response(lambda rr:rr.url==url+'/' and rr.request.headers.get('x-amz-target')=='secretsmanager.DescribeSecret') as update_view:
+                                          login.get_by_role('button',name='Refresh description metadata',exact=True).click()
+                                      view=update_view.value; observed=view.json()
+                                      required(view.status==200 and observed['ARN']==arn and observed['Description']==payload['Description'],'description')
+                                      metadata(observed)
+                                      expect(login.get_by_label('Current saved description',exact=True)).to_have_value(payload['Description'])
+                                      receipt['sameResourceConsoleReadback']=True
+                                  elif op=='DeleteSecret':
+                                      required(value['ARN']==arn and native('ListSecrets',{})['SecretList']==[],'delete')
+                                      try:native('DescribeSecret',{'SecretId':arn})
+                                      except HTTPError as err:required(err.code==400 and 'ResourceNotFoundException' in err.headers.get('x-amzn-errortype',''),'absence')
+                                      else:raise ValueError('still exists')
+                                      deleted=True
+                                  receipt['browserSends'].append({'target':op,'httpStatus':response.status,'received':1})
+                                  print('checked',op,flush=True)
+                              finally:fresh.close()
+                          required(not outside and len(receipt['browserSends'])==9,'completion')
+                          ctx.close();browser.close()
+                  finally:
+                      if arn and not deleted:
+                          try:native('DeleteSecret',{'SecretId':arn,'ForceDeleteWithoutRecovery':True})
+                          except Exception:pass
+                      process.terminate();process.wait(timeout=10)
+              required(not Path(tmp).exists(),'temporary cleanup')
+              receipt.update(checkedContent=True,ownedSecretAbsent=True,temporaryStateRemoved=True,outsideRequests=0,isolatedBrowserSandbox=True)
+          if __name__=='__main__':
+              try:run()
+              except Exception as e:
+                  loc=[f.lineno for f in traceback.extract_tb(e.__traceback__) if f.filename==__file__]
+                  receipt.update(failure={'stage':stage,'class':type(e).__name__,'frames':loc,'reason':str(e) if type(e) is ValueError and str(e) in ['source','namespace','health','startup','native','redaction','served examples','selected example body','editor body','early request','observed request','headers','authority','response status','create','list','describe','put','get','version list','labels','description','delete','absence','still exists','completion','temporary cleanup'] else 'unclassified'})
+              (PLACE/'scalar-console-receipt.json').write_text(json.dumps(receipt,indent=2)+'\n')
+              print(json.dumps(receipt,indent=2));raise SystemExit('failure' in receipt)
+          PYTHON
+          sha256sum "$RUNNER_TEMP/secrets-private/scalar_nine_console.py" | cut -d ' ' -f 1 > "$RUNNER_TEMP/secrets-receipts/witness.sha256"
+          test "$(cat "$RUNNER_TEMP/secrets-receipts/witness.sha256")" = d968a3b96a5aa8a478d3498b0becc46930f5e68dda1dea897fe09b84f8433088
+          cat > "$RUNNER_TEMP/secrets-private/run.py" <<'PYTHON'
+          import hashlib, json, os, runpy, socket, sys
+          from importlib.metadata import version
+          from pathlib import Path
+          import playwright
+          sys.path.insert(0, str(Path.cwd() / 'test/e2e'))
+          import run_s3_multipart_paging as guard
+          uid, net, user = map(int, sys.argv[1:])
+          status = Path('/proc/self/status').read_text()
+          guard.validate_inside_context(uid, net, user, uid=os.getuid(), euid=os.geteuid(), net=guard.namespace_inode('net'), user=guard.namespace_inode('user'), status=status, interfaces=[n for _, n in socket.if_nameindex()], lo_up=guard.loopback_up())
+          assert next(r.split()[1] for r in status.splitlines() if r.startswith('CapBnd:')) == '0000000000000000'
+          assert version('playwright') == '1.62.0'
+          versions = json.loads((Path(playwright.__file__).parent / 'driver/package/browsers.json').read_text())
+          browser = next(b for b in versions['browsers'] if b['name']=='chromium-headless-shell')
+          evidence = Path(os.environ['RUNNER_TEMP']) / 'secrets-receipts'
+          (evidence/'browser.json').write_text(json.dumps({'playwright':version('playwright'), 'browser':browser, 'privateLoopback':True,'zeroCapabilities':True}) + chr(10))
+          runpy.run_path(str(Path(__file__).with_name('scalar_nine_console.py')), run_name='__main__')
+          PYTHON
+          result=0
+          unshare --user --map-current-user --net --keep-caps sh -ec '
+            ip link set lo up
+            exec setpriv --inh-caps=-all --ambient-caps=-all --bounding-set=-all "$@"
+          ' secrets "$python" -IB "$RUNNER_TEMP/secrets-private/run.py" "$(id -u)" "$(stat -Lc %i /proc/self/ns/net)" "$(stat -Lc %i /proc/self/ns/user)" || result=$?
+          if test -f "$RUNNER_TEMP/secrets-private/scalar-console-receipt.json"; then
+            cp "$RUNNER_TEMP/secrets-private/scalar-console-receipt.json" "$RUNNER_TEMP/secrets-receipts/"
+          fi
+          test "$result" -eq 0
+          test -z "$(git status --porcelain)"
+      - name: Retain sanitized operation, cleanup and provenance receipts
+        if: always()
         uses: actions/upload-artifact@v7.0.2
         with:
-          name: s3-multipart-paging-${{ github.sha }}
-          path: reports/s3-paging-trial/
+          name: secrets-nine-scalar-console-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/secrets-receipts/
           if-no-files-found: error
           retention-days: 14
