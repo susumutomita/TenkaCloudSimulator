@@ -294,19 +294,29 @@ func (s *Store) describe(ctx context.Context, tx *sql.Tx, r Rule) (map[string]an
 		return nil, err
 	}
 	targets := make([]map[string]string, 0, len(saved))
+	decide, ownerExists, err := ownerPolicy(ctx, tx, r.ARN, r.Owner)
+	if err != nil {
+		return nil, err
+	}
 	for _, t := range saved {
 		generation, allowed, err := s.grant(ctx, tx, t.arn)
 		if err != nil {
 			return nil, err
 		}
 		ts := "UNREACHABLE"
-		if allowed && generation == t.generation {
+		if ownerExists && allowed && generation == t.generation {
 			topology, err := destinations(ctx, tx, r.Region, t.arn, false)
 			if err != nil {
 				return nil, err
 			}
-			if topology != "" && topology != "[]" {
-				ts = "ACTIVE"
+			if topology != "" {
+				queues, err := permittedQueues(decide, topology)
+				if err != nil {
+					return nil, err
+				}
+				if len(queues) > 0 {
+					ts = "ACTIVE"
+				}
 			}
 		}
 		if ts == "ACTIVE" {

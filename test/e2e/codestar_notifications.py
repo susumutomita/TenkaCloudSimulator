@@ -176,6 +176,32 @@ def exercise(binary, native):
             and peer_meta["repositoryId"] != metadata["repositoryId"]
         )
         source = metadata["Arn"]
+        west = clients(team, team.token, stack, native, receipt, region="us-west-2")
+        west_repo = west("codecommit", "CreateRepository", repositoryName=repo)[
+            "repositoryMetadata"
+        ]
+        assert west_repo["repositoryId"] != metadata["repositoryId"] and west_repo["Arn"] != source
+        west_rule = west(
+            cs,
+            "CreateNotificationRule",
+            Name="Branches",
+            Resource=west_repo["Arn"],
+            Targets=[],
+            DetailType="BASIC",
+            EventTypeIds=[CREATED],
+        )["Arn"]
+        expect(
+            "ValidationException",
+            west,
+            cs,
+            "CreateNotificationRule",
+            Name="Foreign source",
+            Resource=source,
+            Targets=[],
+            DetailType="BASIC",
+            EventTypeIds=[CREATED],
+        )
+
         topic = owner("sns", "CreateTopic", Name="branch-events")["TopicArn"]
         url = owner("sqs", "CreateQueue", QueueName="branch-events")["QueueUrl"]
         queue = owner("sqs", "GetQueueAttributes", QueueUrl=url, AttributeNames=["QueueArn"])[
@@ -330,6 +356,12 @@ def exercise(binary, native):
         policy("Allow")
         receive("main", second, first)
         install("rule-owner", rule_policy)
+        # The current grant is visible even before another Git event or worker attempt.
+        assert (
+            owner(cs, "DescribeNotificationRule", Arn=rule)["Targets"][0]["TargetStatus"]
+            == "UNREACHABLE"
+        )
+
         writer(
             "codecommit", "CreateBranch", repositoryName=repo, branchName="review", commitId=first
         )
@@ -350,13 +382,30 @@ def exercise(binary, native):
         assert not owner("sqs", "ReceiveMessage", QueueUrl=url).get("Messages")
         assert owner(cs, "DeleteNotificationRule", Arn=rule)["Arn"] == rule
         assert not owner(cs, "ListNotificationRules")["NotificationRules"]
+        assert [r["Arn"] for r in west(cs, "ListNotificationRules")["NotificationRules"]] == [
+            west_rule
+        ]
+        assert west(cs, "DescribeNotificationRule", Arn=west_rule)["Resource"] == west_repo["Arn"]
+        assert west(cs, "DeleteNotificationRule", Arn=west_rule)["Arn"] == west_rule
+        west("codecommit", "DeleteRepository", repositoryName=repo)
         owner("sns", "Unsubscribe", SubscriptionArn=sub)
         owner("sqs", "DeleteQueue", QueueUrl=url)
         owner("sns", "DeleteTopic", TopicArn=topic)
         owner("codecommit", "DeleteRepository", repositoryName=repo)
         other("codecommit", "DeleteRepository", repositoryName=repo)
     assert not Path(tmp).exists() and receipt["sends"] == receipt["replies"]
-    print(json.dumps({**receipt, "restart": True, "twoTeams": True, "cleanup": True}))
+    print(
+        json.dumps(
+            {
+                **receipt,
+                "restart": True,
+                "twoTeams": True,
+                "twoRegions": True,
+                "targetStatusBeforeEvent": True,
+                "cleanup": True,
+            }
+        )
+    )
 
 
 if __name__ == "__main__":

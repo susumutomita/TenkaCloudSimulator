@@ -24,13 +24,13 @@ type delivery struct {
 
 // The sparse owner binding is lost when the original principal is deleted.
 // Recreating a principal with an identical name cannot revive an old grant.
-func ownerPolicy(ctx context.Context, tx *sql.Tx, d delivery) (Decision, bool, error) {
-	if d.owner == core.Administrator {
+func ownerPolicy(ctx context.Context, tx *sql.Tx, rule, owner string) (Decision, bool, error) {
+	if owner == core.Administrator {
 		return func(string, string) string { return "allowed" }, true, nil
 	}
 	var raw []byte
 	err := tx.QueryRowContext(ctx, `SELECT p.document FROM aws_notification_owners o JOIN identity_policies p ON p.name=o.principal
-		WHERE o.rule_arn=? AND o.principal=?`, d.Rule, d.owner).Scan(&raw)
+		WHERE o.rule_arn=? AND o.principal=?`, rule, owner).Scan(&raw)
 	if errors.Is(err, sql.ErrNoRows) {
 		return nil, false, nil
 	}
@@ -42,6 +42,23 @@ func ownerPolicy(ctx context.Context, tx *sql.Tx, d delivery) (Decision, bool, e
 		return nil, false, err
 	}
 	return func(action, resource string) string { return core.Evaluate(p, action, resource) }, true, nil
+}
+
+// permittedQueues evaluates every physical destination against one captured
+// creator policy. An empty result means the target cannot currently publish.
+func permittedQueues(decide Decision, topology string) (map[string]bool, error) {
+	var recipients []destination
+	if err := json.Unmarshal([]byte(topology), &recipients); err != nil {
+		return nil, err
+	}
+	allowed := make(map[string]bool, len(recipients))
+	for _, recipient := range recipients {
+		if decide("sqs:SendMessage", recipient.Queue) != "allowed" {
+			return nil, nil
+		}
+		allowed[recipient.Queue] = true
+	}
+	return allowed, nil
 }
 
 // DeliverOne makes one eligible target attempt. A failed publish rolls back
@@ -100,23 +117,19 @@ func (s *Store) DeliverOne(ctx context.Context, publish Publish) (bool, error) {
 	if current != d.topology {
 		return finish()
 	}
-	decide, exists, err := ownerPolicy(ctx, tx, d)
+	decide, exists, err := ownerPolicy(ctx, tx, d.Rule, d.owner)
 	if err != nil {
 		return false, err
 	}
 	if !exists {
 		return finish()
 	}
-	var recipients []destination
-	if err = json.Unmarshal([]byte(current), &recipients); err != nil {
+	allowed, err := permittedQueues(decide, current)
+	if err != nil {
 		return false, err
 	}
-	allowed := make(map[string]bool, len(recipients))
-	for _, recipient := range recipients {
-		if decide("sqs:SendMessage", recipient.Queue) != "allowed" {
-			return retry()
-		}
-		allowed[recipient.Queue] = true
+	if len(allowed) == 0 {
+		return retry()
 	}
 	if _, err = tx.ExecContext(ctx, "SAVEPOINT notification_publish"); err != nil {
 		return false, err

@@ -18,7 +18,7 @@
     },
     {
       "path": "docs/aws-codestar-notifications.md",
-      "sha256": "8f99c7b2d99c1a263683c338b54d0233b35f5a8a1e4c43e9edc5663c6c9c3b22",
+      "sha256": "e21629d5b22214e64731aa11649ac5d32a1aa7c3d48014c9cfb6a94066d301f9",
       "disposition": "documentation",
       "reason": "Specify the local branch producer, required identities, Standard destinations, operations, capacity and retry lifecycle.",
       "models": []
@@ -183,7 +183,7 @@
     },
     {
       "path": "internal/aws/codestarnotifications/delivery.go",
-      "sha256": "69ca3812e6bb40ff583964f8dae0a992a5a2a956d1a24adadc5bb215dcbd6a30",
+      "sha256": "ea6b16d9a811aa68230d1ed5f92933b3db7c60b98c9e3770841d19c752f4aa71",
       "disposition": "modeled",
       "reason": "Resolve durable grant and destination lifetimes, atomically publish, retry a failed sink and retire the matching intent.",
       "models": [
@@ -235,7 +235,7 @@
     },
     {
       "path": "internal/aws/codestarnotifications/rules.go",
-      "sha256": "629289465a0cc59ad93a1d99e3a86505f1c3adf5c0050ccb67855934e3554143",
+      "sha256": "da700e32718fc7ac95126f822160fa4b1cb61911d0a6bfb8292e7c6a39709c3c",
       "disposition": "modeled",
       "reason": "Admit local rule registration, fence target lifetimes and retire pending work after reconfiguration.",
       "models": [
@@ -269,7 +269,7 @@
     },
     {
       "path": "internal/aws/notification_delivery_test.go",
-      "sha256": "72b30a4b0e297845978f05bc75d7fa8beea297836544184ab3dd2459484dcb0c",
+      "sha256": "f85ed0c262fcb41710c822d9eeee122a4e2fa3d28e0244ad0627acfc07cc1120",
       "disposition": "modeled",
       "reason": "Exercise the native counterpart of atomic capture, current permission, queue lifetime, target rollback, read-only paging and deduplication.",
       "models": [
@@ -546,7 +546,7 @@
     },
     {
       "path": "test/e2e/codestar_notifications.py",
-      "sha256": "fca263543bf7b3492a580a13d3c6a1fe99abbc3a6cab9fc77f8c32b41aebe479",
+      "sha256": "d1758a9a83aa2471e25d3cc231d5ec5d80d8176ad9816a323630c3c016d07b8b",
       "disposition": "test-support",
       "reason": "Exercise the normally built standalone authorities using actual CodeCommit, notification, SNS and SQS operations with restart and policy repair.",
       "models": []
