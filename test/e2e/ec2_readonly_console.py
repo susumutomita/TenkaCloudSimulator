@@ -2,7 +2,9 @@
 import json
 import os
 import shutil
-from check import running, boto3, Config, sync_playwright, expect
+from check import running, boto3, Config, ClientError, sync_playwright, expect
+from urllib.parse import parse_qs
+from xml.etree import ElementTree
 from reflow import assert_reflow
 
 with running(authenticated=True) as (endpoint, operator), sync_playwright() as p:
@@ -36,7 +38,7 @@ with running(authenticated=True) as (endpoint, operator), sync_playwright() as p
     page.get_by_role('menuitem',name='VPC',exact=True).click()
     # Both the service navigation and page title say VPC; assert the main h1.
     expect(page.get_by_role('heading',name='VPC',level=1,exact=True)).to_be_visible()
-    expect(page.get_by_text(vpc_id,exact=True)).to_be_visible()
+    expect(page.get_by_role('table',name='VPCs',exact=True).get_by_text(vpc_id,exact=True)).to_be_visible()
     page.get_by_role('radio',name='Select '+vpc_id,exact=True).check()
     expect(page.get_by_role('heading',name='Resource details',exact=True)).to_be_visible()
     # Read the same real CFN-owned route table through the Console and native EC2 API.
@@ -66,10 +68,50 @@ with running(authenticated=True) as (endpoint, operator), sync_playwright() as p
     page.get_by_role('button',name='Create VPC',exact=True).click()
     expect(page.get_by_role('heading',name='Create VPC',level=1,exact=True)).to_be_visible()
     page.get_by_label('Name tag - optional',exact=True).fill('Console VPC 日本語')
+    creates=[]
+    page.on('request',lambda request: creates.append(request) if request.method=='POST' and
+            parse_qs(request.post_data or '').get('Action')==['CreateVpc'] else None)
     page.get_by_label('IPv4 CIDR',exact=True).fill('10.0.0.0/8')
-    page.get_by_role('button',name='Create VPC',exact=True).click()
-    # The server's refusal is shown as an error; nothing is created.
-    expect(page.get_by_text('InvalidVpc.Range',exact=False).first).to_be_visible()
+    expect(page.get_by_role('button',name='Create VPC',exact=True)).to_be_disabled()
+    expect(page.get_by_text('Enter a valid IPv4 CIDR between /16 and /28.',exact=True)).to_be_visible()
+    assert creates==[], 'Invalid form emitted CreateVpc'
+    try:
+        ec2.create_vpc(CidrBlock='10.0.0.0/8')
+    except ClientError as error:
+        assert error.response['Error']['Code']=='InvalidVpc.Range'
+    else:
+        raise AssertionError('Native CreateVpc accepted /8')
+    # A valid form can reach a real permission refusal; validation is not bypassed.
+    principal='vpc-browser-readonly'
+    control=endpoint+'/_simulator/v1/'
+    policy={'Version':'2012-10-17','Statement':[{'Effect':'Allow','Action':'ec2:DescribeVpcs','Resource':'*'}]}
+    assert page.request.put(control+'iam/principals/'+principal+'/policy',data=policy).status==200
+    try:
+        access=page.request.post(control+'access',data={'Principal':principal})
+        assert access.status==200
+        participant=browser.new_context()
+        try:
+            denied=participant.new_page()
+            denied.goto(endpoint+'/_simulator/console/')
+            denied.get_by_label('Access token',exact=True).fill(access.json()['AccessToken'])
+            denied.get_by_role('button',name='Open sandbox',exact=True).click()
+            denied.get_by_role('button',name='Services',exact=True).click()
+            denied.get_by_role('menuitem',name='VPC',exact=True).click()
+            denied.get_by_role('button',name='Create VPC',exact=True).click()
+            denied.get_by_label('IPv4 CIDR',exact=True).fill('10.25.0.0/16')
+            with denied.expect_response(lambda response: response.request.method=='POST' and
+                    parse_qs(response.request.post_data or '').get('Action')==['CreateVpc']) as refused:
+                denied.get_by_role('button',name='Create VPC',exact=True).click()
+            assert refused.value.status==403
+            failure=ElementTree.fromstring(refused.value.body()).find('.//{*}Error')
+            assert failure is not None and failure.findtext('{*}Code')=='UnauthorizedOperation'
+            expect(denied.get_by_text('UnauthorizedOperation: '+failure.findtext('{*}Message'),exact=True)).to_be_visible()
+        finally:
+            participant.close()
+    finally:
+        assert page.request.delete(control+'iam/principals/'+principal+'/policy').status==204
+        assert page.request.get(control+'iam/principals/'+principal+'/policy').status==404
+    assert creates==[], 'Invalid owner form emitted a delayed CreateVpc'
     assert [v['VpcId'] for v in ec2.describe_vpcs()['Vpcs']]==[vpc_id]
     page.get_by_label('IPv4 CIDR',exact=True).fill('10.24.0.0/16')
     page.get_by_role('button',name='Create VPC',exact=True).click()
@@ -77,6 +119,7 @@ with running(authenticated=True) as (endpoint, operator), sync_playwright() as p
     native=[v for v in ec2.describe_vpcs()['Vpcs'] if v['VpcId']!=vpc_id]
     assert len(native)==1 and native[0]['CidrBlock']=='10.24.0.0/16' and native[0]['Tags']==[{'Key':'Name','Value':'Console VPC 日本語'}],native
     native_id=native[0]['VpcId']
+    assert len(creates)==1, 'Valid owner form did not emit exactly one CreateVpc'
     expect(page.get_by_text('You successfully created '+native_id,exact=True)).to_be_visible()
     expect(page.get_by_text('Console VPC 日本語',exact=True).first).to_be_visible()
     # The created VPC is selected; its delete requires typing delete.
@@ -86,7 +129,7 @@ with running(authenticated=True) as (endpoint, operator), sync_playwright() as p
     assert primary['Main'] and primary['RouteTableId']==main['RouteTableId'] and 'SubnetId' not in primary
     assert main['Routes']==[{'DestinationCidrBlock':'10.24.0.0/16','GatewayId':'local',
                              'Origin':'CreateRouteTable','State':'active'}]
-    main_row=page.get_by_role('row').filter(has_text=main['RouteTableId'])
+    main_row=page.get_by_role('row').filter(has=page.get_by_text(main['RouteTableId'],exact=True))
     expect(main_row).to_contain_text(' · Main')
     expect(main_row).to_contain_text('local · Read-only')
     expect(main_row.get_by_role('button',name='Delete route table: '+main['RouteTableId'],exact=True)).to_be_disabled()
@@ -99,16 +142,16 @@ with running(authenticated=True) as (endpoint, operator), sync_playwright() as p
     dialog.get_by_label('To confirm deletion, type delete in the field.',exact=True).fill('delete')
     dialog.get_by_role('button',name='Delete',exact=True).click()
     expect(page.get_by_text('Deleted '+native_id,exact=True)).to_be_visible()
-    expect(page.get_by_text(native_id,exact=True)).to_have_count(0)
+    expect(page.get_by_role('table',name='VPCs',exact=True).get_by_text(native_id,exact=True)).to_have_count(0)
     assert [v['VpcId'] for v in ec2.describe_vpcs()['Vpcs']]==[vpc_id]
     assert ec2.describe_route_tables()['RouteTables']==[table]
     page.get_by_role('button',name='Refresh',exact=True).click()
-    expect(page.get_by_text(vpc_id,exact=True)).to_be_visible()
+    expect(page.get_by_role('table',name='VPCs',exact=True).get_by_text(vpc_id,exact=True)).to_be_visible()
     page.get_by_label('Filter resources',exact=True).fill('does-not-match-any-resource')
     expect(page.get_by_text('No resources match your filter.',exact=True)).to_be_visible()
     expect(page.get_by_text('No resources found in this region.',exact=True)).to_have_count(0)
     page.get_by_role('button',name='Clear filter',exact=True).click()
-    expect(page.get_by_text(vpc_id,exact=True)).to_be_visible()
+    expect(page.get_by_role('table',name='VPCs',exact=True).get_by_text(vpc_id,exact=True)).to_be_visible()
     def malformed(route):
         if 'Action=DescribeVpcs' in (route.request.post_data or ''):
             route.fulfill(status=200,content_type='text/xml',body='<DescribeVpcsResponse xmlns="http://ec2.amazonaws.com/doc/2016-11-15/"/>')
@@ -118,14 +161,14 @@ with running(authenticated=True) as (endpoint, operator), sync_playwright() as p
     page.get_by_role('button',name='Refresh',exact=True).click()
     # Cloudscape Alert renders its header as text, not a heading element.
     expect(page.get_by_text('Could not load resources',exact=True)).to_be_visible()
-    expect(page.get_by_text(vpc_id,exact=True)).to_have_count(0)
+    expect(page.get_by_role('table',name='VPCs',exact=True).get_by_text(vpc_id,exact=True)).to_have_count(0)
     expect(page.get_by_text('No resources found in this region.',exact=True)).to_have_count(0)
     page.unroute('**/*',malformed)
     page.get_by_role('button',name='Refresh',exact=True).click()
-    expect(page.get_by_text(vpc_id,exact=True)).to_be_visible()
+    expect(page.get_by_role('table',name='VPCs',exact=True).get_by_text(vpc_id,exact=True)).to_be_visible()
     page.get_by_label('Language',exact=True).select_option('ja')
     expect(page.get_by_role('heading',name='VPC',level=1,exact=True)).to_be_visible()
-    expect(page.get_by_role('columnheader',name='名前',exact=True)).to_be_visible()
+    expect(page.get_by_role('table',name='VPC 一覧',exact=True).get_by_role('columnheader',name='名前',exact=True)).to_be_visible()
     page.set_viewport_size({'width':390,'height':844});assert_reflow(page)
     page.get_by_role('button',name='VPC を作成',exact=True).click()
     expect(page.get_by_role('heading',name='VPC を作成',level=1,exact=True)).to_be_visible()
@@ -138,4 +181,6 @@ with running(authenticated=True) as (endpoint, operator), sync_playwright() as p
     expect(page.get_by_text('このリージョンには該当するリソースがありません。',exact=True)).to_be_visible()
     browser.close()
     cfn.delete_stack(StackName='readonly-console-vpc')
+    assert ec2.describe_vpcs()['Vpcs']==[] and ec2.describe_subnets()['Subnets']==[]
+    assert ec2.describe_route_tables()['RouteTables']==[]
 print('EC2/VPC console reads and creates/deletes VPCs through real local API state')
