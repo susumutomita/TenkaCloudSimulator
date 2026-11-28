@@ -1,40 +1,19 @@
 {
   "version": 1,
-  "base_sha": "fa06c139f93ab1e32bf8c13809ca70434464994a",
+  "base_sha": "d64ec74e4d9927b93bbb2f49e0ca03050eca7490",
   "changes": [
     {
-      "path": "docs/acceptance/gcp-cloud-dns.md",
-      "sha256": "cc53e8e4c2fcbb9a45ab811119cbf6153d4805e2f58f04410210bca36a49eaff",
-      "disposition": "documentation",
-      "reason": "Document the Cloud DNS provider root, official workflow and local scope, read-only Scalar request, and the observed SDK and browser results.",
+      "path": ".github/workflows/ci.yml",
+      "sha256": "dda1eb9841b66c247bc5c53dc4afce55b6490b19c79b5ea31a15f85076ddedc8",
+      "disposition": "formal-infrastructure",
+      "reason": "Use the hosted Ubuntu 22.04 and Python 3.12.16 environment for the stock tag/manual E2E suite and the opt-in S3 paging trial. Bind both native paging receipts to their clean binary builds.",
       "models": []
     },
     {
-      "path": "test/e2e/gcp_dns_console_gui.py",
-      "sha256": "78c86d152033747d527d96d6e2df1fc56263929d63df0f69fbe461926c12f044",
+      "path": "test/ci/release_pipeline.py",
+      "sha256": "283562e41defaea533d78c64b1a2bcebddb498a0cb3869ae8169e735d2189489",
       "disposition": "test-support",
-      "reason": "Check the default operator context and identity-selection capability, then exercise the existing authenticated Cloud DNS Console flow.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/gcp_dns_scalar_send.py",
-      "sha256": "841f7bf8da4b5715258d26e984dbb5e4cd3449e36957748d516dcb13699eab9a",
-      "disposition": "test-support",
-      "reason": "Run the real Chromium sandbox and check that the List action sends one cookie-authenticated GET from the served reference, with native state cleanup.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/gcp_dns_sdk.py",
-      "sha256": "520f58c0eb3c65cfed97a32414b7ea9fff412ddb0224e8f596036ab3c439eaa2",
-      "disposition": "test-support",
-      "reason": "Give the pinned discovery client the owned provider root. Its discovery document supplies the versioned method path. The existing loopback, request and response checks are preserved.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/test_gcp_dns_sdk.py",
-      "sha256": "94a1d6fa2c1362cff660f57bae9afe54c7e74db9f153ebceae84a438a80a2c8b",
-      "disposition": "test-support",
-      "reason": "Check the prepared methods, target paths and queries for six calls without performing any network request.",
+      "reason": "Pin the seven CI Go toolchain versions and check the canonical E2E job retains its release/manual conditions, tested runner and Python, production test command, browser setup and paging evidence.",
       "models": []
     }
   ]
