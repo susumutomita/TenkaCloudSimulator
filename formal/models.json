@@ -32431,7 +32431,7 @@
           "edits": [
             {
               "old": "IF ui.sends = 0 THEN \"T\" ELSE \"T2\"",
-              "new": "\"T\"",
+              "new": "IF ui.sends = 0 \\/ (k = \"create\" /\\ ui.op = \"create\" /\\ ui.stage \\in {\"done\",\"observed\",\"rejected\"} /\\ ui.token = \"T\" /\\ ui.body = \"original\") THEN \"T\" ELSE \"T2\"",
               "count": 1
             }
           ],
@@ -32442,7 +32442,7 @@
           "edits": [
             {
               "old": "IF ui.sends = 0 THEN \"original\" ELSE \"newBody\"",
-              "new": "\"original\"",
+              "new": "IF ui.sends = 0 \\/ (k = \"create\" /\\ ui.op = \"create\" /\\ ui.stage \\in {\"done\",\"observed\",\"rejected\"} /\\ ui.token = \"T\" /\\ ui.body = \"original\") THEN \"original\" ELSE \"newBody\"",
               "count": 1
             }
           ],
@@ -32464,7 +32464,7 @@
           "edits": [
             {
               "old": "IF status \\in {\"empty\",\"ok\"} THEN \"ready\" ELSE \"unavailable\"",
-              "new": "IF status \\in {\"empty\",\"ok\"} \\/ deniedList THEN \"ready\" ELSE \"unavailable\"",
+              "new": "IF status \\in {\"empty\",\"ok\"} \\/ (deniedList /\\ q.kind = \"nextPage\") THEN \"ready\" ELSE \"unavailable\"",
               "count": 1
             }
           ],
