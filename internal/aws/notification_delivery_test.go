@@ -5,10 +5,16 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
+	"errors"
+	"fmt"
 	"net/http/httptest"
 	"path/filepath"
 	"slices"
 	"testing"
+	"time"
+
+	"github.com/ncruces/go-sqlite3"
+	sqlitedriver "github.com/ncruces/go-sqlite3/driver"
 
 	"github.com/susumutomita/TenkaCloudSimulator/internal/aws/catalog"
 	"github.com/susumutomita/TenkaCloudSimulator/internal/aws/codestarnotifications"
@@ -56,6 +62,11 @@ func branchFixture(t *testing.T, path string) *branchNotifyFixture {
 
 func (f *branchNotifyFixture) git(op string, in map[string]any, want int) map[string]any {
 	f.t.Helper()
+	return f.gitContext(f.t.Context(), op, in, want)
+}
+
+func (f *branchNotifyFixture) gitContext(ctx context.Context, op string, in map[string]any, want int) map[string]any {
+	f.t.Helper()
 	if in == nil {
 		in = map[string]any{}
 	}
@@ -64,7 +75,7 @@ func (f *branchNotifyFixture) git(op string, in map[string]any, want int) map[st
 	if err != nil {
 		f.t.Fatal(err)
 	}
-	r := httptest.NewRequest("POST", "/", bytes.NewReader(b))
+	r := httptest.NewRequestWithContext(ctx, "POST", "/", bytes.NewReader(b))
 	r.Header.Set("X-Amz-Target", "CodeCommit_20150413."+op)
 	r.Header.Set("Content-Type", "application/x-amz-json-1.1")
 	r.Header.Set("X-Simulator-Region", f.region)
@@ -285,5 +296,213 @@ func TestNotificationClientBodyAdmission(t *testing.T) {
 		if len(notificationFields[op]) == 0 {
 			t.Fatal(op)
 		}
+	}
+}
+
+func TestNotificationPendingCapacityAndResume(t *testing.T) {
+	f := branchFixture(t, filepath.Join(t.TempDir(), "capacity.db"))
+	f.createResources()
+	other, _, err := f.sns.CreateTopic(f.region, "audit", "", false)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := f.sns.setNotificationPolicy(t.Context(), other.ARN, snsTestPolicy(snsPolicyStatement(other.ARN, "Allow"))); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := f.sns.subscribeQueue(t.Context(), f.queues, other, f.subs[0].Endpoint); err != nil {
+		t.Fatal(err)
+	}
+	targets := []codestarnotifications.Target{{Type: "SNS", Address: f.topic.ARN}, {Type: "SNS", Address: other.ARN}}
+	for i := 0; i < 8; i++ {
+		arn := f.rule
+		if i > 0 {
+			arn = f.createRule(fmt.Sprintf("Rule%d", i))
+		}
+		f.ruleCall("UpdateNotificationRule", codestarnotifications.Input{ARN: arn, Targets: &targets})
+	}
+	var tip string
+	for i := 0; i < 128; i++ {
+		tip = f.put(fmt.Sprintf("content%d", i), tip, 200)["commitId"].(string)
+	}
+	before := f.counts()
+	if before[2] != 2048 {
+		t.Fatal("did not fill exact pending target capacity", before)
+	}
+	response := f.put("next content", tip, 503)
+	if response["__type"] != "ServiceUnavailable" || !slices.Equal(before, f.counts()) {
+		t.Fatal("capacity ref refusal", response, f.counts())
+	}
+	after := f.git("GetBranch", map[string]any{"branchName": "main"}, 200)["branch"].(map[string]any)
+	if after["commitId"] != tip {
+		t.Fatal(after)
+	}
+	for range 16 {
+		ok, err := f.rules.DeliverOne(t.Context(), func(ctx context.Context, tx *sql.Tx, arn, body string, allow func(string) error) (string, error) {
+			topic := f.topic
+			if arn == other.ARN {
+				topic = other
+			}
+			return snsPublishQueuesTx(tx, topic, body, "", allow)
+		})
+		if !ok || err != nil {
+			t.Fatal("failed pending delivery", ok, err)
+		}
+	}
+	result := f.put("next content", tip, 200)
+	if result["commitId"] == tip || f.count("aws_notification_outbox") != 2048 || f.count("aws_notification_deliveries") != 16 {
+		t.Fatal(result, f.counts())
+	}
+}
+
+func TestNotificationStoredFrameReadback(t *testing.T) {
+	f := branchFixture(t, filepath.Join(t.TempDir(), "frame.db"))
+	f.createResources()
+	name := "Wanted"
+	f.execute(`CREATE TEMP TRIGGER rename_rule AFTER UPDATE ON aws_notification_rules BEGIN UPDATE aws_notification_rules SET name='Other' WHERE arn=NEW.arn; END`)
+	_, err := f.rules.Run(t.Context(), "UpdateNotificationRule", f.region, core.Administrator, codestarnotifications.Input{ARN: f.rule, Name: &name}, func(string, string) string { return "allowed" })
+	if err == nil {
+		t.Fatal("wrong saved name acknowledged")
+	}
+	f.execute("DROP TRIGGER rename_rule")
+	if got := f.ruleCall("DescribeNotificationRule", codestarnotifications.Input{ARN: f.rule})["Name"]; got != "Branches" {
+		t.Fatal("old name changed", got)
+	}
+	f.execute(`CREATE TEMP TRIGGER change_envelope AFTER INSERT ON aws_notification_outbox BEGIN UPDATE aws_notification_outbox SET envelope='{}' WHERE seq=NEW.seq; END`)
+	before := f.counts()
+	f.put("first", "", 500)
+	if !slices.Equal(before, f.counts()) {
+		t.Fatal("altered envelope committed", f.counts())
+	}
+	f.execute("DROP TRIGGER change_envelope")
+	f.put("first", "", 200)
+	before = f.counts()
+	f.execute(`CREATE TEMP TRIGGER restore_pending AFTER DELETE ON aws_notification_outbox BEGIN
+	INSERT INTO aws_notification_outbox(rule_arn,rule_generation,topic_arn,topic_generation,event_id,envelope,topology)
+	VALUES(OLD.rule_arn,OLD.rule_generation,OLD.topic_arn,OLD.topic_generation,OLD.event_id,OLD.envelope,OLD.topology); END`)
+	if ok, err := f.deliver(t.Context()); ok || err == nil || !slices.Equal(before, f.counts()) {
+		t.Fatal("restored pending row double-delivery", ok, err, f.counts())
+	}
+	f.execute("DROP TRIGGER restore_pending")
+	if ok, err := f.deliver(t.Context()); !ok || err != nil {
+		t.Fatal(ok, err)
+	}
+	if ok, err := f.deliver(t.Context()); ok || err != nil {
+		t.Fatal("duplicate delivery", ok, err)
+	}
+}
+
+func TestNotificationInFlightRollback(t *testing.T) {
+	for _, phase := range []string{"capture", "publish"} {
+		for _, cause := range []error{context.Canceled, context.DeadlineExceeded} {
+			t.Run(phase+"/"+cause.Error(), func(t *testing.T) {
+				path := filepath.Join(t.TempDir(), "team.db")
+				f := branchFixture(t, path)
+				f.createResources()
+				tip := f.put("first", "", 200)["commitId"].(string)
+				before := f.counts()
+				var ctx context.Context
+				var cancel context.CancelFunc
+				var witnessed bool
+				hook := "CREATE TEMP TRIGGER interrupt_target AFTER INSERT ON aws_notification_outbox BEGIN SELECT interrupt_notification(" +
+					"(SELECT count(*) FROM aws_notification_outbox)=2 AND EXISTS(SELECT 1 FROM aws_codecommit_branches WHERE tip=json_extract(NEW.envelope,'$.detail.commitId'))); END"
+				if phase == "publish" {
+					hook = "CREATE TEMP TRIGGER interrupt_target AFTER INSERT ON aws_notification_deliveries BEGIN SELECT interrupt_notification(" +
+						"(SELECT count(*) FROM aws_sqs_messages)=2 AND (SELECT count(*) FROM aws_sns_deliveries)=2 AND EXISTS(SELECT 1 FROM aws_sns_messages WHERE id=NEW.message_id)); END"
+				}
+				conn, err := f.team.Database().Conn(t.Context())
+				if err != nil {
+					t.Fatal(err)
+				}
+				err = conn.Raw(func(raw any) error {
+					return raw.(sqlitedriver.Conn).Raw().CreateFunction("interrupt_notification", 1, 0, func(rc sqlite3.Context, a ...sqlite3.Value) {
+						witnessed = a[0].Bool()
+						if cause == context.Canceled {
+							cancel()
+						}
+						select {
+						case <-ctx.Done():
+							rc.ResultNull()
+						case <-time.After(5 * time.Second):
+							rc.ResultError(errors.New("request deadline did not fire"))
+						}
+					})
+				})
+				if err == nil {
+					_, err = conn.ExecContext(t.Context(), hook)
+				}
+				conn.Close()
+				if err != nil {
+					t.Fatal(err)
+				}
+				if cause == context.Canceled {
+					ctx, cancel = context.WithCancel(t.Context())
+				} else {
+					ctx, cancel = context.WithTimeout(t.Context(), 450*time.Millisecond)
+				}
+				defer cancel()
+				if phase == "capture" {
+					f.gitContext(ctx, "PutFile", map[string]any{"branchName": "main", "filePath": "note.txt", "fileContent": []byte("second"), "parentCommitId": tip}, 500)
+				} else {
+					ok, err := f.deliver(ctx)
+					if ok || err == nil {
+						t.Fatal("publisher acknowledged interrupted delivery", ok, err)
+					}
+				}
+				if !witnessed || !errors.Is(ctx.Err(), cause) {
+					t.Fatal("wrong transaction phase", witnessed, ctx.Err())
+				}
+				f.team.Close()
+				g := branchFixture(t, path)
+				g.topic = f.topic
+				if !slices.Equal(before, g.counts()) {
+					t.Fatal("interrupted transaction changed durable rows", before, g.counts())
+				}
+				current := g.git("GetBranch", map[string]any{"branchName": "main"}, 200)["branch"].(map[string]any)
+				if current["commitId"] != tip {
+					t.Fatal("tip changed", current)
+				}
+				if phase == "capture" {
+					g.put("second", tip, 200)
+				}
+				for n := g.count("aws_notification_outbox"); n > 0; n-- {
+					if ok, err := g.deliver(t.Context()); !ok || err != nil {
+						t.Fatal(ok, err)
+					}
+				}
+				expected := 1
+				if phase == "capture" {
+					expected = 2
+				}
+				if g.count("aws_sns_messages") != expected || g.count("aws_sqs_messages") != 2*expected || g.count("aws_notification_deliveries") != expected {
+					t.Fatal(g.counts())
+				}
+			})
+		}
+	}
+}
+
+func TestNotificationFilterPagination(t *testing.T) {
+	f := branchFixture(t, filepath.Join(t.TempDir(), "filter.db"))
+	f.createResources()
+	rules := []string{f.rule, f.createRule("Second"), f.createRule("Third")}
+	filter := []codestarnotifications.Filter{{Name: "RESOURCE", Value: "missing"}, {Name: "RESOURCE", Value: f.source}, {Name: "CREATED_BY", Value: core.Administrator}, {Name: "EVENT_TYPE_ID", Value: codestarnotifications.BranchUpdated}}
+	one := 1
+	in := codestarnotifications.Input{Filters: filter, MaxResults: &one}
+	for index := len(rules) - 1; index >= 0; index-- {
+		page := f.ruleCall("ListNotificationRules", in)
+		items := page["NotificationRules"].([]map[string]string)
+		if len(items) != 1 || items[0]["Arn"] != rules[index] {
+			t.Fatal(page)
+		}
+		token, _ := page["NextToken"].(string)
+		if (index == 0) != (token == "") {
+			t.Fatal(page)
+		}
+		in.NextToken = token
+		slices.Reverse(filter)
+	}
+	in.Filters = []codestarnotifications.Filter{{Name: "RESOURCE", Value: f.source}, {Name: "CREATED_BY", Value: "nobody"}}
+	if result := f.ruleCall("ListNotificationRules", in)["NotificationRules"].([]map[string]string); len(result) != 0 {
+		t.Fatal(result)
 	}
 }

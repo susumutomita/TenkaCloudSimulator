@@ -156,6 +156,16 @@ func (s *Store) create(ctx context.Context, tx *sql.Tx, region, actor string, in
 	if err = s.replaceTargets(ctx, tx, region, arn, *in.Targets); err != nil {
 		return nil, err
 	}
+	if err = requireCount(ctx, tx, 1, `SELECT count(*) FROM aws_notification_rules WHERE arn=? AND region=? AND name=? AND owner=?
+		AND source=? AND repository_id=? AND created_ms=? AND updated_ms=? AND generation=1 AND enabled=? AND events=? AND token IS ? AND fingerprint=?`,
+		arn, region, *in.Name, actor, in.Source, repoID, now, now, enabled, normalizedEvents(*in.Events), token, fingerprint); err != nil {
+		return nil, err
+	}
+	if actor != core.Administrator {
+		if err = requireCount(ctx, tx, 1, "SELECT count(*) FROM aws_notification_owners WHERE rule_arn=? AND principal=?", arn, actor); err != nil {
+			return nil, err
+		}
+	}
 	return map[string]any{"Arn": arn}, nil
 }
 
@@ -198,8 +208,11 @@ func (s *Store) replaceTargets(ctx context.Context, tx *sql.Tx, region, rule str
 		if err := checkedExec(ctx, tx, 1, "INSERT INTO aws_notification_targets(rule_arn,topic_arn,generation) VALUES(?,?,?)", rule, target.Address, generation); err != nil {
 			return err
 		}
+		if err := requireCount(ctx, tx, 1, "SELECT count(*) FROM aws_notification_targets WHERE rule_arn=? AND topic_arn=? AND generation=?", rule, target.Address, generation); err != nil {
+			return err
+		}
 	}
-	return nil
+	return requireCount(ctx, tx, len(targets), "SELECT count(*) FROM aws_notification_targets WHERE rule_arn=?", rule)
 }
 
 func (s *Store) update(ctx context.Context, tx *sql.Tx, r Rule, in Input, decide Decision) (map[string]any, error) {
@@ -229,8 +242,18 @@ func (s *Store) update(ctx context.Context, tx *sql.Tx, r Rule, in Input, decide
 	if _, err := tx.ExecContext(ctx, "DELETE FROM aws_notification_outbox WHERE rule_arn=?", r.ARN); err != nil {
 		return nil, err
 	}
+	if err := requireCount(ctx, tx, 0, "SELECT count(*) FROM aws_notification_outbox WHERE rule_arn=?", r.ARN); err != nil {
+		return nil, err
+	}
+	now := s.now().UTC().UnixMilli()
 	err := checkedExec(ctx, tx, 1, `UPDATE aws_notification_rules SET name=?,updated_ms=?,enabled=?,events=?,generation=generation+1 WHERE arn=? AND generation=?`,
-		r.Name, s.now().UTC().UnixMilli(), r.Enabled, normalizedEvents(r.Events), r.ARN, r.Generation)
+		r.Name, now, r.Enabled, normalizedEvents(r.Events), r.ARN, r.Generation)
+	if err != nil {
+		return nil, err
+	}
+	err = requireCount(ctx, tx, 1, `SELECT count(*) FROM aws_notification_rules WHERE arn=? AND seq=? AND region=? AND name=? AND owner=?
+		AND source=? AND repository_id=? AND created_ms=? AND updated_ms=? AND generation=? AND enabled=? AND events=?`,
+		r.ARN, r.Seq, r.Region, r.Name, r.Owner, r.Source, r.RepositoryID, r.Created, now, r.Generation+1, r.Enabled, normalizedEvents(r.Events))
 	return map[string]any{}, err
 }
 

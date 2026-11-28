@@ -222,3 +222,14 @@ func checkedExec(ctx context.Context, tx *sql.Tx, expected int64, query string, 
 	}
 	return nil
 }
+
+func requireCount(ctx context.Context, tx *sql.Tx, want int, query string, args ...any) error {
+	var n int
+	if err := tx.QueryRowContext(ctx, query, args...).Scan(&n); err != nil {
+		return err
+	}
+	if n != want {
+		return fmt.Errorf("notification storage read back %d records, expected %d", n, want)
+	}
+	return nil
+}

@@ -1,5 +1,7 @@
 # Go単一バイナリの設計
 
+[AWS CodeStar Notifications](../aws-codestar-notifications.md) は、CodeCommit のブランチ更新と配信待ち記録を同じチームの SQLite トランザクションに保存する。ワーカーは SNS トピックのサービスポリシーとルール作成者の現在のキュー権限を確認し、SNS 配信記録、SQS メッセージ、重複防止記録をまとめて確定する。再起動後は未配信の記録から再開する。
+
 [AWS CodeCommit](../aws-codecommit.md) は、チーム別の SQLite にリポジトリごとの Git オブジェクトとブランチを保存する。ファイル更新では、親コミットの照合、オブジェクトの追加、ブランチ先端と既定ブランチの更新を同じトランザクションで行う。Go の実装が Git オブジェクトを直接符号化する。
 
 `cmd/simulator`はCLI、numeric loopback listener、token-file、shutdownを所有する。`internal/server`は埋込Cloudscape/Scalar、local token境界、能力表、identity control APIを提供する。`internal/provider`はprovider dispatch、`internal/core`はprovider中立のSQLite object stateと限定identity-policy評価。`internal/aws`はS3 REST/XML、SSM JSON 1.1、CloudFormation Query/XMLとAWS所有テーブルを持つ。

@@ -69,6 +69,9 @@ func (s *Store) DeliverOne(ctx context.Context, publish Publish) (bool, error) {
 		if err := checkedExec(ctx, tx, 1, "DELETE FROM aws_notification_outbox WHERE seq=?", d.seq); err != nil {
 			return false, err
 		}
+		if err := requireCount(ctx, tx, 0, "SELECT count(*) FROM aws_notification_outbox WHERE seq=? OR (rule_arn=? AND topic_arn=? AND event_id=?)", d.seq, d.Rule, d.Topic, d.event); err != nil {
+			return false, err
+		}
 		return true, tx.Commit()
 	}
 	retry := func() (bool, error) {
@@ -141,6 +144,9 @@ func (s *Store) DeliverOne(ctx context.Context, publish Publish) (bool, error) {
 	}
 	if err = checkedExec(ctx, tx, 1, `INSERT INTO aws_notification_deliveries(rule_arn,topic_arn,event_id,message_id)
 		SELECT ?,?,?,id FROM aws_sns_messages WHERE id=? AND topic_arn=? AND message=?`, d.Rule, d.Topic, d.event, id, d.Topic, d.body); err != nil {
+		return false, err
+	}
+	if err = requireCount(ctx, tx, 1, "SELECT count(*) FROM aws_notification_deliveries WHERE rule_arn=? AND topic_arn=? AND event_id=? AND message_id=?", d.Rule, d.Topic, d.event, id); err != nil {
 		return false, err
 	}
 	return finish()

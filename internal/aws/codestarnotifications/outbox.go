@@ -143,7 +143,7 @@ func (s *Store) RecordRef(ctx context.Context, tx *sql.Tx, c catalog.CodeCommitR
 		return err
 	}
 	if count+len(targets) > maxPendingTargets {
-		return Fault{"LimitExceededException", "The local pending notification capacity has been reached."}
+		return catalog.ErrCodeCommitRefCapacity
 	}
 	detail := map[string]string{"event": eventName, "repositoryName": strings.TrimPrefix(c.RepositoryARN, prefix("codecommit", c.Region)),
 		"repositoryId": c.RepositoryID, "referenceType": "branch", "referenceName": c.Branch, "referenceFullName": "refs/heads/" + c.Branch, "commitId": c.Commit}
@@ -167,6 +167,11 @@ func (s *Store) RecordRef(ctx context.Context, tx *sql.Tx, c catalog.CodeCommitR
 			t.Rule, t.RuleGeneration, t.Topic, t.TopicGeneration, id, string(body), topology); err != nil {
 			return err
 		}
+		if err := requireCount(ctx, tx, 1, `SELECT count(*) FROM aws_notification_outbox WHERE
+			rule_arn=? AND rule_generation=? AND topic_arn=? AND topic_generation=? AND event_id=? AND envelope=? AND topology=? AND retry_ms=0`,
+			t.Rule, t.RuleGeneration, t.Topic, t.TopicGeneration, id, string(body), topology); err != nil {
+			return err
+		}
 	}
-	return nil
+	return requireCount(ctx, tx, len(targets), "SELECT count(*) FROM aws_notification_outbox WHERE event_id=?", id)
 }

@@ -9,6 +9,7 @@ import (
 	"encoding/binary"
 	"encoding/json"
 	"math"
+	"slices"
 	"strings"
 )
 
@@ -20,32 +21,48 @@ func (s *Store) list(ctx context.Context, tx *sql.Tx, region, actor string, in I
 	if limit < 1 || limit > 100 {
 		return nil, invalid("MaxResults must be from 1 to 100.")
 	}
-	if len(in.Filters) > 1 {
-		return nil, invalid("This local listing supports one filter at a time.")
+	// Same-name filters are alternatives; distinct names constrain one another.
+	if len(in.Filters) > 10 {
+		return nil, invalid("Use at most ten notification rule filters per local query.")
 	}
-	filter := Filter{}
-	query := `SELECT seq,arn FROM aws_notification_rules WHERE region=? AND seq<?`
-	args := []any{region, int64(math.MaxInt64)}
-	if len(in.Filters) == 1 {
-		filter = in.Filters[0]
+	grouped := make(map[string][]string)
+	for _, filter := range in.Filters {
 		if filter.Value == "" {
 			return nil, invalid("A filter requires a value.")
 		}
 		switch filter.Name {
-		case "RESOURCE":
-			query += " AND source=?"
-		case "CREATED_BY":
-			query += " AND owner=?"
-		case "EVENT_TYPE_ID":
-			query += " AND instr(','||events||',', ','||?||',')>0"
-		case "TARGET_ADDRESS":
-			query += " AND EXISTS(SELECT 1 FROM aws_notification_targets t WHERE rule_arn=aws_notification_rules.arn AND topic_arn=?)"
+		case "RESOURCE", "CREATED_BY", "EVENT_TYPE_ID", "TARGET_ADDRESS":
+			grouped[filter.Name] = append(grouped[filter.Name], filter.Value)
 		default:
 			return nil, invalid("Unsupported notification rule filter.")
 		}
-		args = append(args, filter.Value)
 	}
-	scope, _ := json.Marshal([]string{region, actor, filter.Name, filter.Value})
+	query := `SELECT seq,arn FROM aws_notification_rules WHERE region=? AND seq<?`
+	args := []any{region, int64(math.MaxInt64)}
+	for _, group := range []struct{ name, condition string }{
+		{"RESOURCE", "source=?"}, {"CREATED_BY", "owner=?"},
+		{"EVENT_TYPE_ID", "instr(','||events||',', ','||?||',')>0"},
+		{"TARGET_ADDRESS", "EXISTS(SELECT 1 FROM aws_notification_targets t WHERE rule_arn=aws_notification_rules.arn AND topic_arn=?)"},
+	} {
+		values := grouped[group.name]
+		if len(values) == 0 {
+			continue
+		}
+		slices.Sort(values)
+		values = slices.Compact(values)
+		grouped[group.name] = values
+		clauses := make([]string, 0, len(values))
+		for _, value := range values {
+			if group.name == "EVENT_TYPE_ID" && value != BranchCreated && value != BranchUpdated {
+				clauses = append(clauses, "0")
+				continue
+			}
+			clauses = append(clauses, group.condition)
+			args = append(args, value)
+		}
+		query += " AND (" + strings.Join(clauses, " OR ") + ")"
+	}
+	scope, _ := json.Marshal([]any{region, actor, grouped})
 	if in.NextToken != "" {
 		token, err := base64.RawURLEncoding.Strict().DecodeString(in.NextToken)
 		if err != nil || len(token) != 8+sha256.Size || strings.ContainsAny(in.NextToken, "\r\n") || !hmac.Equal(token[8:], s.tokenMAC(scope, token[:8])) {

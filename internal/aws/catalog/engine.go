@@ -451,6 +451,10 @@ func (e *Engine) region(r *http.Request, b *binding) (string, error) {
 // operation (a Query request whose Action is not yet known) uses the
 // protocol's common error for the failure family.
 func (e *Engine) fail(w http.ResponseWriter, b *binding, op *Op, err error) {
+	if errors.Is(err, ErrCodeCommitRefCapacity) {
+		writeError(w, b.model, "ServiceUnavailable", http.StatusServiceUnavailable, err.Error())
+		return
+	}
 	var f *fault
 	if !errors.As(err, &f) {
 		f = &fault{kind: "internal", message: "Simulator catalog state operation failed."}

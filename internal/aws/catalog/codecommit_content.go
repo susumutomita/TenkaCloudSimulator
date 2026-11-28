@@ -383,6 +383,9 @@ func (q *request) gitPut(g gitStore, r row) (map[string]any, error) {
 	return map[string]any{"commitId": commit, "treeId": c.tree, "blobId": blob}, nil
 }
 
+// ErrCodeCommitRefCapacity signals exhaustion of durable event admission.
+var ErrCodeCommitRefCapacity = errors.New("The local pending notification capacity is exhausted. Try again after deliveries drain.")
+
 func (q *request) recordRef(g gitStore, r row, branch, previous, commit string) error {
 	if q.e.cfg.RecordCodeCommitRef == nil {
 		return nil

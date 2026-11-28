@@ -459,12 +459,6 @@ General notes: REST-JSON services sharing a signing name are supported (bySignin
   4. A required reference to a resource in another service (ECS service, DynamoDB table, ...).
 - Not servable: scaling activities and the predictive forecast (GetPredictiveScalingForecast) are evaluation outputs.
 
-### #298 AWS CodeStar Notifications — B
-- Model codestar-notifications, rest-json, signing name codestar-notifications. No collision (the codestar-connections model is a different product, already served as codeconnections). Already listed as inexpressible in docs/aws-catalog.md.
-- Config resource: notification rule (CreateNotificationRule, DescribeNotificationRule, ListNotificationRules, UpdateNotificationRule, DeleteNotificationRule) plus Subscribe, Unsubscribe and DeleteTarget, and tags.
-- Missing features:
-  1. Create takes EventTypeIds (strings), but Describe returns EventTypeSummary objects built from the AWS-owned event-type catalog (ListEventTypes). The stored member cannot be projected without that data.
-  2. Targets carry TargetStatus (PENDING/ACTIVE/...) that depends on the target service, and Resource must name a live CodeCommit, CodePipeline or similar resource in another service.
-  3. List filters are nested structures.
-- ListEventTypes stays unbound (AWS-owned).
+### #298 AWS CodeStar Notifications
 
+Five native rule operations now link local CodeCommit branch creation and updates to configured Standard SNS topics and SQS subscriptions. The standalone service owns rule identity, filter traversal, pending delivery and retry. Event catalogs for additional providers, tags, independent target management, FULL detail and external notification endpoints remain open. [Local behavior and limits](aws-codestar-notifications.md)
