@@ -1,5 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+import {createHash} from 'node:crypto';
 import {alarmPageSize, cloudWatchMetrics} from '../../tools/console/src/cloudwatch-metrics.mjs';
 import {serviceAvailable} from '../../tools/console/src/console-navigation.mjs';
 
@@ -89,4 +91,20 @@ test('capability and aborted read never issue an unadvertised or retired request
   const {api,sent}=setup(null);
   await assert.rejects(api.list('',AbortSignal.abort()));
   assert.equal(sent.length,0);
+});
+
+// The cumulative shell must retain one semantic navigation/breadcrumb owner.
+test('CloudWatch preserves the existing shell navigation without duplicate JSX props', () => {
+  const shell=readFileSync(new URL('../../tools/console/src/main.jsx',import.meta.url),'utf8');
+  const layout=shell.slice(shell.indexOf('<AppLayout'),shell.indexOf('content={!ready'));
+  assert.equal((layout.match(/\bnavigation=\{/g)||[]).length,1);
+  assert.equal((layout.match(/\bbreadcrumbs=\{/g)||[]).length,1);
+  for(const id of ['cloudwatch','codestar-notifications','cloudfront','elasticloadbalancing','autoscaling-plans','support','gcp-trace']) {
+    assert.ok(shell.includes("service==='"+id+"'"),id+' view is retained');
+  }
+  const nav=layout.split('\n').find(line=>line.trimStart().startsWith('navigation={')).trim();
+  const added="service==='cloudwatch'?[{type:'link',text:t('Metric alarms','メトリクスアラーム'),href:'#/cloudwatch'}]:";
+  assert.equal(nav.split(added).length,2);
+  assert.equal(createHash('sha256').update(nav.replace(added,'')).digest('hex'),
+    '7fa8ca833085c1ba1c3ecad2cdeac33d15a8f1e67a3dc9e4c87ce1bc725dc0eb');
 });
