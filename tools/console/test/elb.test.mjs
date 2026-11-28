@@ -33,8 +33,8 @@ test('only exact missing-name filter maps to an empty page, and writes preserve 
   const signal = new AbortController().signal;
   assert.deepEqual(await api.list('practice','',signal),{rows:[],next:''});
   await assert.rejects(api.list('practice','cursor',signal),/LoadBalancerNotFound/);
-  await assert.rejects(api.modify('arn:example','/health',signal),/AccessDenied/);
-  await assert.rejects(api.modify('arn:example','bad',signal),/Invalid health/);
+  await assert.rejects(api.modify('arn:example','arn:parent','/health',signal),/AccessDenied/);
+  await assert.rejects(api.modify('arn:example','arn:parent','bad',signal),/Invalid health/);
   assert.equal(calls.length,3);
   const [path,options]=calls[2];
   assert.equal(path,'/');

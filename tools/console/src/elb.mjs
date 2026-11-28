@@ -13,6 +13,8 @@ export function validHealthPath(value) {
   return typeof value === 'string' && value.startsWith('/') && value.length <= 1024 && /^[!-~]+$/.test(value);
 }
 
+export class TargetGroupUnlinked extends Error {}
+
 const invalid = () => { throw Error('Invalid Elastic Load Balancing response.'); };
 function children(node, name) {
   const matches = [...node.children].filter(child => child.localName === name);
@@ -66,7 +68,19 @@ export function elbClient(request, region) {
   function targetGroup(node) {
     const enabled = value(node, 'HealthCheckEnabled'), path = value(node, 'HealthCheckPath');
     if (!['true','false'].includes(enabled) || !validHealthPath(path) || value(node, 'TargetType') !== 'lambda') invalid();
-    return {arn: identifier(node, 'TargetGroupArn', 'targetgroup'), name: value(node, 'TargetGroupName'), path, enabled: enabled === 'true'};
+    const parents = members(node, 'LoadBalancerArns');
+    if (parents.length > 1) invalid();
+    const parent = parents[0]?.textContent ?? '';
+    if (parents.length && (parents[0].children.length || !parent.startsWith(prefix + 'loadbalancer/app/'))) invalid();
+    return {arn: identifier(node, 'TargetGroupArn', 'targetgroup'), name: value(node, 'TargetGroupName'), path, enabled: enabled === 'true', parent};
+  }
+  function linked(group, parent) {
+    if (group.parent !== parent) throw new TargetGroupUnlinked();
+    return group;
+  }
+  async function linkedGroup(arn, parent, signal) {
+    const result = await call('DescribeTargetGroups', {'TargetGroupArns.member.1': arn}, signal);
+    return linked(exactly(members(result, 'TargetGroups').map(targetGroup), arn), parent);
   }
   function listener(node, arn) {
     if (value(node, 'LoadBalancerArn') !== arn) invalid();
@@ -79,6 +93,7 @@ export function elbClient(request, region) {
         : value(child(action[0], 'FixedResponseConfig'), 'StatusCode')};
   }
   return {
+    linkedGroup,
     async list(name, marker, signal) {
       const fields = {PageSize: '20'};
       if (name) fields['Names.member.1'] = name;
@@ -102,14 +117,13 @@ export function elbClient(request, region) {
       if ([lbs, listeners, groups].some(result => value(result, 'NextMarker', true))) invalid();
       return {lb: exactly(members(lbs,'LoadBalancers').map(loadBalancer),arn),
         listeners: members(listeners, 'Listeners').map(item => listener(item, arn)),
-        groups: members(groups, 'TargetGroups').map(targetGroup)};
+        groups: members(groups, 'TargetGroups').map(node => linked(targetGroup(node), arn))};
     },
-    async group(arn, signal) {
-      const [groups, targets] = await Promise.all([
-        call('DescribeTargetGroups', {'TargetGroupArns.member.1': arn}, signal),
+    async group(arn, parent, signal) {
+      const [group, targets] = await Promise.all([
+        linkedGroup(arn, parent, signal),
         call('DescribeTargetHealth', {TargetGroupArn: arn}, signal),
       ]);
-      const group = exactly(members(groups, 'TargetGroups').map(targetGroup), arn);
       const health = members(targets,'TargetHealthDescriptions').map(item => {
         const id = value(child(item, 'Target'), 'Id'), result = child(item, 'TargetHealth');
         if (!id.startsWith('arn:aws:lambda:' + region + ':000000000000:function:')) invalid();
@@ -117,10 +131,10 @@ export function elbClient(request, region) {
       });
       return {...group, health};
     },
-    async modify(arn, path, signal) {
+    async modify(arn, parent, path, signal) {
       if (!validHealthPath(path)) throw Error('Invalid health check path.');
       const result = await call('ModifyTargetGroup',{TargetGroupArn: arn, HealthCheckPath: path},signal);
-      if (exactly(members(result,'TargetGroups').map(targetGroup),arn).path !== path) invalid();
+      if (linked(exactly(members(result,'TargetGroups').map(targetGroup),arn), parent).path !== path) invalid();
     },
   };
 }

@@ -10,7 +10,7 @@ import KeyValuePairs from '@cloudscape-design/components/key-value-pairs';
 import SpaceBetween from '@cloudscape-design/components/space-between';
 import StatusIndicator from '@cloudscape-design/components/status-indicator';
 import Table from '@cloudscape-design/components/table';
-import {elbClient, validHealthPath} from './elb.mjs';
+import {elbClient, TargetGroupUnlinked, validHealthPath} from './elb.mjs';
 import {useLocale} from './i18n.jsx';
 
 const inventory = {kind: 'list', name: ''};
@@ -29,6 +29,11 @@ export default function ElasticLoadBalancing({region, request, onSaving}) {
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
 
+  function message(err) {
+    return err instanceof TargetGroupUnlinked
+      ? t('This target group is no longer linked to the selected load balancer.', 'このターゲットグループは選択したロードバランサーに関連付けられていません。')
+      : err.message;
+  }
   function begin(kind) {
     task.current?.abort();
     const active = new AbortController();
@@ -51,16 +56,16 @@ export default function ElasticLoadBalancing({region, request, onSaving}) {
       } else if (destination.kind === 'lb') {
         next = await client.balancer(destination.arn, active.signal);
       } else {
-        next = await client.group(destination.arn, active.signal);
+        next = await client.group(destination.arn, destination.lb, active.signal);
       }
       if (task.current !== active) return;
       setData(next);
       if (destination.kind === 'group') {setPath(next.path); setUncertain(false);}
     } catch (err) {
       if (task.current !== active) return;
-      setError(err.message);
-      // Confirmed deletion can release an uncertain write without claiming it succeeded.
-      if (destination.kind === 'group' && /^TargetGroupNotFound:/.test(err.message)) setUncertain(false);
+      setError(message(err));
+      // A fresh observation of deletion or reassociation releases the view without confirming the write.
+      if (destination.kind === 'group' && (err instanceof TargetGroupUnlinked || /^TargetGroupNotFound:/.test(err.message))) setUncertain(false);
     } finally {finish(active);}
   }
   useLayoutEffect(() => () => {task.current?.abort(); task.current = null; onSaving(false);}, [client,onSaving]);
@@ -71,18 +76,20 @@ export default function ElasticLoadBalancing({region, request, onSaving}) {
   async function save() {
     if (task.current || uncertain || screen.kind !== 'group' || !data || path === data.path || !validHealthPath(path)) return;
     const active = begin('write'), wanted = path, arn = data.arn;
-    let acknowledged = false;
+    let sent = false, acknowledged = false;
     try {
-      await client.modify(arn, wanted, active.signal);
+      await client.linkedGroup(arn, screen.lb, active.signal);
+      sent = true;
+      await client.modify(arn, screen.lb, wanted, active.signal);
       acknowledged = true;
-      const current = await client.group(arn, active.signal);
+      const current = await client.group(arn, screen.lb, active.signal);
       if (task.current !== active) return;
       if (current.path !== wanted) throw Error(t('The saved path differs from the request.', '保存されたパスがリクエストと一致しません。'));
       setData(current); setPath(current.path); setNotice(t('Saved health check path verified.', '保存したヘルスチェックパスを確認しました。'));
     } catch (err) {
       if (task.current !== active) return;
-      setData(null); setPath(''); setError(err.message);
-      setUncertain(acknowledged || !definitive.test(err.message));
+      setData(null); setPath(''); setError(message(err));
+      setUncertain(sent && (acknowledged || !definitive.test(err.message)));
     } finally {finish(active);}
   }
 

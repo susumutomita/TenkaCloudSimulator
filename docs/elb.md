@@ -33,7 +33,10 @@ registered function, target state and reason returned by `DescribeTargetHealth`.
 
 Edit **Health check path** to submit one `ModifyTargetGroup` request for that
 group. Saving requires the named target-group action on its ARN and the
-Describe permissions needed to read back the saved path and current health.
+Describe permissions needed to verify the saved path and current health. The Console
+checks the selected load balancer association before sending the change and again
+in the returned group and fresh read. The native write addresses the target group
+ARN. Another caller can move the group between these requests.
 If the acknowledgement is lost, choose **Refresh affected target group** to
 inspect its current state before making another change. A disabled health
 check can retain a path. Exercise the authenticated listener separately to
