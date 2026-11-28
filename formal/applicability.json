@@ -1,255 +1,208 @@
 {
   "version": 1,
-  "base_sha": "70695e3f5c040ea98b3132a6a097a4b7ebea31ab",
+  "base_sha": "7918c50d9ad2d97998df30fbde462bbcdd770bee",
   "changes": [
     {
       "path": "README.md",
-      "sha256": "c2edb749061d0b081c3ba251714f96b362759a0c7810ee51ce29a5a43fe6e026",
+      "sha256": "3e7b04e9897cac508496740d46d8fe07d820b9adb3e5232ba801dd6209df8474",
       "disposition": "documentation",
-      "reason": "Link the native custom metric workflow from the AWS service list.",
-      "models": []
-    },
-    {
-      "path": "docs/cloudwatch-logs.md",
-      "sha256": "0d9f6a01afd1224cc94c76d1408e1aea61bf6349a64de13aeb395b320115b430",
-      "disposition": "documentation",
-      "reason": "Point readers of the historical Logs contract to the separate supported custom metric workflow.",
+      "reason": "Expose the CloudWatch Console and monitoring reference alongside the existing service guide.",
       "models": []
     },
     {
       "path": "docs/cloudwatch-metrics.md",
-      "sha256": "addec533600b3f48c85f690ae14b03ee2fad43d4a9d1b517ac6dc990c8ac485f",
+      "sha256": "92c025ba63b38da5a308db527b73ca5e03a4f5a06526cf0a74dd35f3d2e4ecd8",
       "disposition": "documentation",
-      "reason": "Document the actual native Query operations, IAM actions, scope, input bounds, storage and time-bucket behavior.",
+      "reason": "Explain scoped UI reads and the exact native Query examples, retention and evaluator boundaries.",
       "models": []
     },
     {
       "path": "docs/design/0001-go-standalone.md",
-      "sha256": "2f48920f44ad72ca89bc57e7bd5fdb894f0f4963a0c1f41d12f7567741b075af",
+      "sha256": "36a4fdbc09df106335add36a70cf01fd4b9d1ed5c0368c05f5cb6b0df3afe449",
       "disposition": "documentation",
-      "reason": "Describe the bounded metric ledger in the existing standalone simulator.",
+      "reason": "Describe how the embedded Console and Scalar use the same native CloudWatch state.",
       "models": []
-    },
-    {
-      "path": "formal/CloudWatchMetricTransaction.cfg",
-      "sha256": "dfe23637d8c23b72a03ffe77d1d1bf9a94c9a09eb945b95c2e02fb9a59babf25",
-      "disposition": "modeled",
-      "reason": "Check the metric transaction invariants and read correspondence within the declared finite bounds.",
-      "models": [
-        {
-          "id": "CloudWatchMetricTransaction",
-          "properties": [
-            "TypeOK",
-            "StagedInvisible",
-            "PeerPreserved",
-            "RepeatedObservationsCount",
-            "AtomicAccepted",
-            "RejectedUnchanged",
-            "ReadAndRestartPreserve",
-            "BoundedRows",
-            "ReadAggregates"
-          ],
-          "limits": "Finite normalized transaction/read contract only. Scope denotes trusted configured namespace/region isolation; one process/database is assumed. It does not prove HTTP/gzip/XML/SigV4 or IAM evaluation, input parsing/dimension canonicalization, real UTC rounding/retention durations, floating point accuracy, SQLite schema/SQL/locking/trigger behavior, actual quotas, cancellation timing, process recovery or Go refinement. Rational average comparisons model multiplicity weighting, not IEEE754. Read/restart cannot publish staged writes; independent expected aggregation uses committed oracle rows. Native SDK/database/fault tests remain required. Gateway dispatch, store initialization and server capability composition paths are mapped for integration evidence only; this model does not verify their concrete wiring."
-        }
-      ]
-    },
-    {
-      "path": "formal/CloudWatchMetricTransaction.tla",
-      "sha256": "4bfd8e85abfec4157bc7ccf7d7764989b137f6ddb42457af733263a9a47ebe90",
-      "disposition": "modeled",
-      "reason": "Specify atomic batch commit, retention, denial, cancellation, repeated observations and weighted aggregation over finite scopes.",
-      "models": [
-        {
-          "id": "CloudWatchMetricTransaction",
-          "properties": [
-            "TypeOK",
-            "StagedInvisible",
-            "PeerPreserved",
-            "RepeatedObservationsCount",
-            "AtomicAccepted",
-            "RejectedUnchanged",
-            "ReadAndRestartPreserve",
-            "BoundedRows",
-            "ReadAggregates"
-          ],
-          "limits": "Finite normalized transaction/read contract only. Scope denotes trusted configured namespace/region isolation; one process/database is assumed. It does not prove HTTP/gzip/XML/SigV4 or IAM evaluation, input parsing/dimension canonicalization, real UTC rounding/retention durations, floating point accuracy, SQLite schema/SQL/locking/trigger behavior, actual quotas, cancellation timing, process recovery or Go refinement. Rational average comparisons model multiplicity weighting, not IEEE754. Read/restart cannot publish staged writes; independent expected aggregation uses committed oracle rows. Native SDK/database/fault tests remain required. Gateway dispatch, store initialization and server capability composition paths are mapped for integration evidence only; this model does not verify their concrete wiring."
-        }
-      ]
     },
     {
       "path": "formal/models.json",
-      "sha256": "6ca7eb8266af572edb71d579513062d13a841379b1dfd1a43f7e5cdfbc6cde2f",
+      "sha256": "d74ea7522f7ce2a29a8a3b49b756a61c091296d1380241b13561d6a788aad374",
       "disposition": "formal-infrastructure",
-      "reason": "Register the bounded transaction and aggregation model and its individual behavioral controls.",
+      "reason": "Extend the existing service and read epoch binding only to the CloudWatch UI read lifecycle.",
       "models": []
     },
     {
-      "path": "internal/aws/cloudwatch_metrics_gateway.go",
-      "sha256": "7b809957c2cc2b1466690ad317196ff386656f4c3ce50d40904645e5722915ae",
-      "disposition": "modeled",
-      "reason": "Select monitoring Query requests and apply the trusted actor’s separate action decision for the local resource.",
-      "models": [
-        {
-          "id": "CloudWatchMetricTransaction",
-          "properties": [
-            "RejectedUnchanged",
-            "PeerPreserved"
-          ],
-          "limits": "Scope and access are symbolic inputs. HTTP routing, token validation and concrete IAM evaluation require native tests."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/cloudwatchmetrics/form.go",
-      "sha256": "6b1bdbae50b24884ceb7740235c05bca18cf0b77fca5109c173ac890602a1d14",
-      "disposition": "modeled",
-      "reason": "Parse bounded raw sample batches and basic statistics parameters before admission.",
-      "models": [
-        {
-          "id": "CloudWatchMetricTransaction",
-          "properties": [
-            "RejectedUnchanged",
-            "PeerPreserved"
-          ],
-          "limits": "Well-formedness and normalized inputs are symbolic. The model does not verify field parsing, time formats, dimensions or limits on wire input."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/cloudwatchmetrics/http.go",
-      "sha256": "5f81f3d91ae5a4c7ca53357a49e034b519c167f89bf527651032983c7334160c",
-      "disposition": "modeled",
-      "reason": "Decode the Query envelope, route the two operations and emit native XML responses.",
-      "models": [
-        {
-          "id": "CloudWatchMetricTransaction",
-          "properties": [
-            "RejectedUnchanged",
-            "PeerPreserved"
-          ],
-          "limits": "Admission outcomes are symbolic. The model does not verify transport, gzip, action decoding, response formatting or IAM."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/cloudwatchmetrics/http_test.go",
-      "sha256": "ba5980de73b5b48a0da48094c8f65f863264b375e3660a2354ce3ead10a93a4d",
-      "disposition": "test-support",
-      "reason": "Cover normal and rejected Query requests, gzip and malformed or out-of-bounds parameters.",
-      "models": []
-    },
-    {
-      "path": "internal/aws/cloudwatchmetrics/store.go",
-      "sha256": "117f92ccfcf4d7cd8db4d41c3a22bdc40345b337cc0f39ff5ba82ba7b83fea6d",
-      "disposition": "modeled",
-      "reason": "Keep samples in SQLite, atomically prune scoped rows and admit batches, and aggregate committed observations.",
-      "models": [
-        {
-          "id": "CloudWatchMetricTransaction",
-          "properties": [
-            "TypeOK",
-            "StagedInvisible",
-            "PeerPreserved",
-            "RepeatedObservationsCount",
-            "AtomicAccepted",
-            "RejectedUnchanged",
-            "ReadAndRestartPreserve",
-            "BoundedRows",
-            "ReadAggregates"
-          ],
-          "limits": "Finite normalized transaction/read contract only. Scope denotes trusted configured namespace/region isolation; one process/database is assumed. It does not prove HTTP/gzip/XML/SigV4 or IAM evaluation, input parsing/dimension canonicalization, real UTC rounding/retention durations, floating point accuracy, SQLite schema/SQL/locking/trigger behavior, actual quotas, cancellation timing, process recovery or Go refinement. Rational average comparisons model multiplicity weighting, not IEEE754. Read/restart cannot publish staged writes; independent expected aggregation uses committed oracle rows. Native SDK/database/fault tests remain required. Gateway dispatch, store initialization and server capability composition paths are mapped for integration evidence only; this model does not verify their concrete wiring."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/cloudwatchmetrics/store_test.go",
-      "sha256": "d785b12a521abbabfe2ee05afea5e706af8bdf981360824f38dc7ea32cae2cb3",
-      "disposition": "test-support",
-      "reason": "Exercise actual transaction failures, cancellation, quota/retention boundaries, scope isolation, weighted statistics and restart.",
-      "models": []
-    },
-    {
-      "path": "internal/aws/s3.go",
-      "sha256": "8d1e769bdb27e3651aa809a6b594ff57eeda6dde2d89bf71eb95321566da07ab",
-      "disposition": "modeled",
-      "reason": "Add the metric store reference to the AWS gateway used by the existing provider registry.",
-      "models": [
-        {
-          "id": "CloudWatchMetricTransaction",
-          "properties": [
-            "PeerPreserved",
-            "ReadAndRestartPreserve"
-          ],
-          "limits": "The model assumes an owned store and a trusted scope. Go gateway field wiring is exercised by integration tests."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/ssm.go",
-      "sha256": "9823d3fb94487940f5bb488420f3ec03e3fea21e2b5dd4c73c3bad05a104ac0e",
-      "disposition": "modeled",
-      "reason": "Route monitoring requests at the shared AWS gateway to the CloudWatch Metrics adapter.",
-      "models": [
-        {
-          "id": "CloudWatchMetricTransaction",
-          "properties": [
-            "RejectedUnchanged",
-            "PeerPreserved"
-          ],
-          "limits": "The model assumes correct admission to the addressed scope. Actual service selection and inherited protocols require gateway tests."
-        }
-      ]
-    },
-    {
-      "path": "internal/server/cloudwatch_metrics_composition_test.go",
-      "sha256": "bfbf8075a3237d4b35c9608dc489ccc3bd0a96a3755ab6edc9eea8745d83fddd",
-      "disposition": "test-support",
-      "reason": "Exercise the authenticated provider alias, shared AWS root, routing and protocol checks.",
+      "path": "internal/server/apidocs/openapi.json",
+      "sha256": "48b12423da7d0a878f73292bf5f11f2538886c34727d8d0d750a23ff4384ada8",
+      "disposition": "presentation",
+      "reason": "Provide five editable monitoring Query examples on the existing native root.",
       "models": []
     },
     {
       "path": "internal/server/server.go",
-      "sha256": "04371ca87f90ebd2c88b76463b1004b690ed8ea1bd5dcd9f863aca76ace739d6",
+      "sha256": "3af8620c29024eb9798f6d94538c98b54d3ceb56f6088d9ce81bbf882c5f473b",
       "disposition": "modeled",
-      "reason": "Initialize the metric store for the team database and declare the two native operations in capabilities.",
+      "reason": "Advertise the compiled read-only CloudWatch UI for the already-served alarm and statistic operations.",
       "models": [
         {
           "id": "CloudWatchMetricTransaction",
           "properties": [
-            "PeerPreserved",
-            "ReadAndRestartPreserve"
+            "ReadAggregates"
           ],
-          "limits": "The model assumes one team database and configured scope. Construction, capability JSON and provider registration are outside its scope."
+          "limits": "The existing model covers exposed metric reads. Alarm evaluation, discovery metadata and the browser are verified separately."
         }
       ]
     },
     {
-      "path": "scripts/formal_model_gate.py",
-      "sha256": "8c8433a8fb475e5db551e99aa83c339fb992725d42e44dee0737e571574238c5",
-      "disposition": "formal-infrastructure",
-      "reason": "Pin the reviewed metric model, nine invariants, thirteen mutation controls and seven exact source paths in the full formal gate.",
-      "models": []
+      "path": "internal/server/web/app.js",
+      "sha256": "195e315e7f53ee8546fdeb70c3d0bd71d3d6832d10de7b83b655e69a50850b21",
+      "disposition": "modeled",
+      "reason": "Embed the scoped native alarm list, selected alarm and statistics read lifecycle.",
+      "models": [
+        {
+          "id": "CatalogConsoleEpoch",
+          "properties": [
+            "OnlyCurrentReplies",
+            "NoUnmountedAcceptance"
+          ],
+          "limits": "Models mounted service and read epochs only. Native XML, IAM, pagination, alarms, closed-minute statistics and browser accessibility are separate checks."
+        }
+      ]
     },
     {
-      "path": "scripts/test-formal-gate.py",
-      "sha256": "7ffde0949ddbed8d84e53fc21e1d1daf95d793082b5872e542b47e88c6ad6d55",
-      "disposition": "formal-infrastructure",
-      "reason": "Exercise model, invariant and source removal and include the metric model in the independent full inventory test.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/check.py",
-      "sha256": "85f363fdd3cc243c8fb40b7c65fa07e2acad82dacfaf36ebfe28257558e6211b",
+      "path": "test/console/cloudwatch-metrics.test.mjs",
+      "sha256": "dd6870e9e56d2fa16be9843e85b6f4de80e171ecff66f765212ada879919812c",
       "disposition": "test-support",
-      "reason": "Include the stock custom metrics SDK fixture in the full E2E suite.",
+      "reason": "Check XML operation/result scope, exact series, missing and measured zero, retired requests and availability.",
       "models": []
     },
     {
-      "path": "test/e2e/cloudwatch_metrics.py",
-      "sha256": "26a05f106e8f3075ecea59f21f205260e6646300567c9d5a26819eaafcc410a3",
+      "path": "test/e2e/cloudwatch_observability_console.py",
+      "sha256": "d8fa6e1e2645f6200632ff8fe284da424c55ebee68894d6031923e8cb47dadad",
       "disposition": "test-support",
-      "reason": "Exercise the two native operations with the pinned SDK, explicit local credentials, successful gzip ingest, two teams, IAM and restart.",
+      "reason": "Exercise the ordinary SDK, authenticated Cloudscape and actual Scalar using two owned processes, restart, policy and cleanup.",
       "models": []
+    },
+    {
+      "path": "test/e2e/cloudwatch_reference_projection.py",
+      "sha256": "887eeac49228a9802488d109d49f1696d3e88b92f5ec081ae4e41c7d2613e821",
+      "disposition": "test-support",
+      "reason": "Validate only five reviewed monitoring additions before projecting to unchanged older reference guards.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/simpledb_scalar_reference_live.py",
+      "sha256": "1aac0b271c626918f98614ab7cc32583ae1177404fffd43d22b7672997c24478",
+      "disposition": "test-support",
+      "reason": "Reuse the previously reviewed optional service selector and editable form helper while preserving its SimpleDB defaults.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/test_cloudwatch_monitoring_reference.py",
+      "sha256": "fdd6db875a23b9bc76ec6b466acfc7b553db1fdf1501c9dda8e341eea5ce28df",
+      "disposition": "test-support",
+      "reason": "Check all new forms and complete ordered values of the 39 historical Query presets with mutation controls.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/test_sakura_openapi.py",
+      "sha256": "23bc383df03ad6d42f15c06293bbc6566c39a4a440b4d391e8f387fce995586d",
+      "disposition": "test-support",
+      "reason": "Apply the separate narrow CloudWatch projector before the existing independent contract checks.",
+      "models": []
+    },
+    {
+      "path": "tools/console/bundle-digests.json",
+      "sha256": "511ddeddce838b5f86f839d9873e0db1792a5ade61bb75d9d7bccfa3ce819560",
+      "disposition": "presentation",
+      "reason": "Record the canonical embedded alarm browser asset digests.",
+      "models": []
+    },
+    {
+      "path": "tools/console/bundle-inputs.json",
+      "sha256": "0c59cdc3b637f898d0b4db24aa6516a4bd42619b84bbc798ace63ae1a72fb545",
+      "disposition": "presentation",
+      "reason": "Record actual compiled inputs to the embedded Cloudscape bundle.",
+      "models": []
+    },
+    {
+      "path": "tools/console/src/cloudwatch-logs.jsx",
+      "sha256": "f0480a9c33136d3642b650201d90126cc291f0f6557fa6d595ddb261f2687340",
+      "disposition": "modeled",
+      "reason": "Correct the existing Logs scope description while preserving the Logs read epoch and server responses.",
+      "models": [
+        {
+          "id": "CloudWatchLogsViewEpoch",
+          "properties": [
+            "FreshResults",
+            "NoUnmountedResults"
+          ],
+          "limits": "Only prior Logs query lifetimes are modeled. This copy change advertises the actual Logs scope."
+        }
+      ]
+    },
+    {
+      "path": "tools/console/src/cloudwatch-metrics.jsx",
+      "sha256": "e04ffa3f0d7a4a8da9fcf4e7e9863faf3d6367de1d114813cb7d979e4df34b09",
+      "disposition": "modeled",
+      "reason": "Retire earlier alarm/statistic requests when another selected resource or mount replaces them.",
+      "models": [
+        {
+          "id": "CatalogConsoleEpoch",
+          "properties": [
+            "OnlyCurrentReplies",
+            "NoUnmountedAcceptance"
+          ],
+          "limits": "Models mounted service and read epochs only. Native XML, IAM, pagination, alarms, closed-minute statistics and browser accessibility are separate checks."
+        }
+      ]
+    },
+    {
+      "path": "tools/console/src/cloudwatch-metrics.mjs",
+      "sha256": "256e0a6062e60b35ebe61263cf937abc4a84183920b47bccf32bfdda402dfb1f",
+      "disposition": "modeled",
+      "reason": "After reading the real XML, reject superseded requests and match selected ARN, dimensions, unit and UTC window.",
+      "models": [
+        {
+          "id": "CatalogConsoleEpoch",
+          "properties": [
+            "OnlyCurrentReplies",
+            "NoUnmountedAcceptance"
+          ],
+          "limits": "Models mounted service and read epochs only. Native XML, IAM, pagination, alarms, closed-minute statistics and browser accessibility are separate checks."
+        }
+      ]
+    },
+    {
+      "path": "tools/console/src/console-navigation.mjs",
+      "sha256": "9f83a9197e4dd724f160eb22969bd743fc027a6be7dee08ed3f7c5e004c7c5f4",
+      "disposition": "modeled",
+      "reason": "Mount CloudWatch only when both actual alarm and metric reads and its Console capability are advertised.",
+      "models": [
+        {
+          "id": "CatalogConsoleEpoch",
+          "properties": [
+            "OnlyCurrentReplies",
+            "NoUnmountedAcceptance"
+          ],
+          "limits": "Models mounted service and read epochs only. Native XML, IAM, pagination, alarms, closed-minute statistics and browser accessibility are separate checks."
+        }
+      ]
+    },
+    {
+      "path": "tools/console/src/main.jsx",
+      "sha256": "076eb352b89139de88b0aec0ac18d37c942ce704df2144a32a330476ae4c9136",
+      "disposition": "modeled",
+      "reason": "Bind the service mount to region, selected principal and navigation generation.",
+      "models": [
+        {
+          "id": "CatalogConsoleEpoch",
+          "properties": [
+            "OnlyCurrentReplies",
+            "NoUnmountedAcceptance"
+          ],
+          "limits": "Models mounted service and read epochs only. Native XML, IAM, pagination, alarms, closed-minute statistics and browser accessibility are separate checks."
+        }
+      ]
     }
   ]
 }

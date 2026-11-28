@@ -17,7 +17,7 @@ A statistics query rounds its start down to the nearest UTC minute, includes tha
 
 Raw samples are queryable for 15 days. An authorized successful write prunes older rows in the same region and namespace. Queries, denied requests and failed batches preserve stored rows. Local limits are 10,000 stored samples per region/namespace and 100,000 stored samples per team database. Expired rows in other namespaces still occupy the team quota until a successful write prunes that scope. Teams can dispose of their own simulator database to clean up a practice run.
 
-The supported entry points are the Query SDK and HTTP API. ListMetrics, GetMetricData, dashboards, Insights, metric math, percentile and statistic-set ingestion, Values/Counts arrays, entities, high resolution, automatic collection and long-term rollups are outside this subset. CloudWatch Logs uses its own API and storage. [CloudWatch Logs](cloudwatch-logs.md)
+The native Query SDK and HTTP API support both publishing and reading samples. ListMetrics, GetMetricData, dashboards, Insights, metric math, percentile and statistic-set ingestion, Values/Counts arrays, entities, high resolution, automatic collection and long-term rollups are outside this subset. CloudWatch Logs uses its own API and storage. [CloudWatch Logs](cloudwatch-logs.md)
 
 ## Local metric alarms
 
@@ -33,6 +33,12 @@ The alarm ARN is `arn:aws:cloudwatch:{region}:000000000000:alarm:{AlarmName}`. E
 
 Limits are 100 alarms per Region and 1,000 per team. Delete removes the selected alarm, leaving metric observations intact. Two teams use separate processes, databases, policies and cursor authorities. Restart preserves configurations and recomputes their actual local state; it does not fabricate a delivery event or support case.
 
-The native increment does not by itself establish a new Console, Scalar Send or original-game acceptance. Those entry points and required whole-source gates are verified separately before a completion claim.
-
 The finite `CloudWatchAlarmEvaluation` model separately checks scenario-bounded transaction frames and rational evaluation. It covers weighted multiplicities, measured zero versus no value, all five statistics/four comparisons at equality, minute start/end/old data, an independently wrong metric scope/unit, distinct canceled/failed/denied outcomes, configuration updates and retirement/recreation. Its independent oracle uses exact rational comparisons; it is not a proof of Go floating-point arithmetic, SQL/HTTP/IAM/codec refinement, quotas/cursors, arbitrary concurrent histories, a background scheduler or AWS extended-range parity. Concrete native tests exercise real SQLite staged cancellation/deadlines, persisted frames, failure/retry and actual numeric boundaries.
+
+The simulator evaluates alarms from explicitly published observations. Native alarm actions and notification delivery are outside this threshold-evaluation workflow.
+
+## Read metric alarms in the console and API reference
+
+Open **Services → CloudWatch** to browse metric alarms in the selected region. You can also enter an exact alarm name. Each detail view queries the native alarm and then requests its configured statistic for the same namespace, dimensions, unit and completed UTC minute. A missing datapoint and a measured zero display separately. **Refresh alarm** reads both APIs again. The alarms list requires `cloudwatch:DescribeAlarms` on `*`. An exact lookup accepts permission on that alarm ARN. The statistic read requires `cloudwatch:GetMetricStatistics` on `*`.
+
+In the API reference, open **Shared AWS JSON/Query endpoint**, select the URL-encoded request body and choose one of the five **CloudWatch** examples. Set `X-Simulator-Service` to `monitoring`, use your session’s region and clear `X-Amz-Target`. The examples share the practice series `Training/Observability / QueueDepth` with dimension `Queue=practice` and unit `Count`. Replace the statistics example's start and end with a recent completed UTC minute. Each PutMetricData Send appends another sample. DeleteAlarms removes the named alarm. Published samples age out under the metric store's retention policy. The separate CloudWatch Logs console reads events explicitly ingested into the Logs API.

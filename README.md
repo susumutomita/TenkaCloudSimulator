@@ -106,7 +106,7 @@ console, CloudFormation adapter or Challenge integration.
   This does not execute the documents.
 - **Functions and messaging:** [Lambda](docs/lambda.md), [API Gateway](docs/apigateway.md),
   [SQS](docs/sqs.md), [SNS](docs/sns.md) (local HTTP/HTTPS subscription Console and reference; no external delivery),
-  [CloudWatch Logs](docs/cloudwatch-logs.md), and [CloudWatch custom samples, statistics and local threshold alarms](docs/cloudwatch-metrics.md).
+  [CloudWatch Logs](docs/cloudwatch-logs.md), and [CloudWatch custom samples, statistics and local threshold alarms](docs/cloudwatch-metrics.md). The CloudWatch console reads evaluated metric alarms and their samples; five monitoring Query examples are available in the API reference.
 - **Identity and secrets:** [IAM](docs/iam.md), [native SDK / STS](docs/sts-native.md),
   [Secrets Manager](docs/secrets-manager.md), [KMS](docs/kms.md), [WAFv2](docs/wafv2.md).
   Manage role trust in the IAM Console, read the role in the API reference and
@@ -236,3 +236,7 @@ The identified runtime portions were independently reimplemented against public
 AWS contracts. We retain the [original MIT notice](third_party/KUMO-LICENSE.txt)
 and [reviewed replacement scope](third_party/independent-native-source.json).
 These records are not a clean-room or legal certification.
+
+The local SimpleDB Query reference also offers explicit PutAttributes and
+DeleteDomain practice examples. Put replaces one named attribute; whole-domain
+cleanup must target only a disposable domain owned by the caller.
