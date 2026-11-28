@@ -8,11 +8,11 @@ jobs:
     runs-on: ubuntu-22.04
     timeout-minutes: 25
     env:
-      PRODUCT: fe58811d6a8750399bbf7f4945b9a7e4a24b2e3a
+      PRODUCT: fd5fd32fa6151a74c1c8b39f2c29bcfc800b10f4
     steps:
       - uses: actions/checkout@v7.0.1
         with:
-          ref: fe58811d6a8750399bbf7f4945b9a7e4a24b2e3a
+          ref: fd5fd32fa6151a74c1c8b39f2c29bcfc800b10f4
           persist-credentials: false
       - uses: actions/setup-go@v6.5.0
         with:
@@ -24,7 +24,7 @@ jobs:
           test "$GITHUB_REPOSITORY" = susumutomita/TenkaCloudSimulator
           test "$GITHUB_REF" = refs/heads/verify/207-ecr-membership
           test "$(git rev-parse HEAD)" = "$PRODUCT"
-          test "$(git rev-parse 'HEAD^{tree}')" = b4c5b503c1fe5ea8c1f10926aa6c6f1b673a6ce4
+          test "$(git rev-parse 'HEAD^{tree}')" = 2a1cbb1c7c1440a48ae4865e1468438d986f137c
           test -z "$(git status --porcelain)"
           test "$(go env GOVERSION)" = go1.26.11
           test "$(id -u)" -ne 0
@@ -162,11 +162,11 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 60
     env:
-      PRODUCT: fe58811d6a8750399bbf7f4945b9a7e4a24b2e3a
+      PRODUCT: fd5fd32fa6151a74c1c8b39f2c29bcfc800b10f4
     steps:
       - uses: actions/checkout@v7.0.1
         with:
-          ref: fe58811d6a8750399bbf7f4945b9a7e4a24b2e3a
+          ref: fd5fd32fa6151a74c1c8b39f2c29bcfc800b10f4
           fetch-depth: 0
           persist-credentials: false
       - uses: actions/setup-go@v6.5.0
@@ -179,7 +179,7 @@ jobs:
           test "$GITHUB_REPOSITORY" = susumutomita/TenkaCloudSimulator
           test "$GITHUB_REF" = refs/heads/verify/207-ecr-membership
           test "$(git rev-parse HEAD)" = "$PRODUCT"
-          test "$(git rev-parse 'HEAD^{tree}')" = b4c5b503c1fe5ea8c1f10926aa6c6f1b673a6ce4
+          test "$(git rev-parse 'HEAD^{tree}')" = 2a1cbb1c7c1440a48ae4865e1468438d986f137c
           test -z "$(git status --porcelain)"
           test "$(go env GOVERSION)" = go1.26.11
           test "$(id -u)" -ne 0
