@@ -4830,10 +4830,13 @@ BASE_INVARIANTS['SupportCaseLifecycle'] = {
     'RestartAndClock',
 }
 REQUIRED_SOURCE_SCOPES['SupportCaseLifecycle'] = {
+    'internal/aws/s3.go',
+    'internal/aws/ssm.go',
     'internal/aws/support_gateway.go',
     'internal/aws/supportcases/mutate.go',
     'internal/aws/supportcases/read.go',
     'internal/aws/supportcases/store.go',
+    'internal/server/server.go',
 }
 SUPPORT_CASE_CONTROLS = [
     ('ExtendExpiryOnAppend', '!.expires = IF new THEN minute + 60 ELSE @', '!.expires = minute + 60', 'StageContract'),
