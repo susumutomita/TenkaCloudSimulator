@@ -5,11 +5,14 @@ other interfaces, with separately authorized and provenance-verified executable
 artifacts. No installers, external endpoints, real credentials, or shared state.
 This does not test direct AWS SigV4 authentication or implement an AWS proxy.
 """
+from base64 import b64encode
 from contextlib import contextmanager
+from datetime import datetime, timezone
 from hashlib import file_digest, sha256
 from http.client import HTTPConnection
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from pathlib import Path
+import hmac
 import json
 import os
 import re
@@ -19,7 +22,7 @@ import subprocess
 import tempfile
 import threading
 import time
-from urllib.parse import parse_qsl, urlencode
+from urllib.parse import parse_qsl, quote, urlencode
 from uuid import uuid4
 from xml.etree import ElementTree
 
@@ -33,6 +36,10 @@ XMLNS = "{http://sdb.amazonaws.com/doc/2009-04-15/}"
 STATS = {"ItemCount", "ItemNamesSizeBytes", "AttributeNameCount",
          "AttributeNamesSizeBytes", "AttributeValueCount", "AttributeValuesSizeBytes"}
 ACTIONS = {"CreateDomain", "DomainMetadata", "DeleteDomain"}
+NATIVE_FIELDS = {"Action", "Version", "DomainName"}
+SIGNED_FIELDS = NATIVE_FIELDS | {"AWSAccessKeyId", "SignatureVersion", "SignatureMethod", "Timestamp", "Signature"}
+FIXTURE_KEY = "TCSIMTESTDUMMYONLY"
+FIXTURE_SECRET = "simulator-only"
 
 
 def need(condition, message):
@@ -40,20 +47,35 @@ def need(condition, message):
         raise RuntimeError(message)
 
 
-def decode_request(method, path, content_type, length, raw, domain):
+def decode_request(method, path, content_type, length, raw, domain, *, listener_port=None):
     need(method == "POST" and path == "/", "unexpected method or path")
     need(content_type.split(";", 1)[0].strip().lower() == "application/x-www-form-urlencoded",
          "unexpected content type")
     need(length.isascii() and length.isdecimal() and 0 < len(length) <= 5,
          "invalid Content-Length")
     need(0 < int(length) == len(raw) <= LIMIT, "unexpected body size")
-    pairs = parse_qsl(raw.decode("ascii"), strict_parsing=True, max_num_fields=3,
-                      encoding="utf-8", errors="strict")
+    fields = NATIVE_FIELDS if listener_port is None else SIGNED_FIELDS
+    pairs = parse_qsl(raw.decode("ascii"), strict_parsing=True, keep_blank_values=True,
+                      max_num_fields=len(fields), encoding="utf-8", errors="strict")
     data = dict(pairs)
-    need(len(pairs) == len(data) == 3 and set(data) == {"Action", "Version", "DomainName"},
+    need(len(pairs) == len(data) == len(fields) and set(data) == fields,
          "unexpected or duplicate query fields")
     need(data["Action"] in ACTIONS and data["Version"] == VERSION and data["DomainName"] == domain,
          "outside fixed fixture scope")
+    if listener_port is not None:
+        # The provider pins aws-sdk-go v1.55.7, whose SimpleDB client uses the private/signer/v2 POST signer.
+        need(data["AWSAccessKeyId"] == FIXTURE_KEY and data["SignatureVersion"] == "2" and
+             data["SignatureMethod"] == "HmacSHA256", "unexpected fixture signing identity or algorithm")
+        timestamp = datetime.strptime(data["Timestamp"], "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc)
+        need(timestamp.strftime("%Y-%m-%dT%H:%M:%SZ") == data["Timestamp"] and
+             abs(time.time() - timestamp.timestamp()) <= 300, "invalid fixture signing time")
+        need(raw == urlencode(sorted(data.items())).encode("ascii"), "noncanonical signed form")
+        signature = data.pop("Signature")
+        need(re.fullmatch(r"[A-Za-z0-9+/]{43}=", signature), "invalid fixture signature")
+        query = urlencode(sorted(data.items()), quote_via=quote)
+        canonical = f"POST\n{ADDR}:{listener_port}\n/\n{query}".encode("ascii")
+        expected = b64encode(hmac.digest(FIXTURE_SECRET.encode("ascii"), canonical, "sha256")).decode("ascii")
+        need(hmac.compare_digest(signature, expected), "invalid fixture signature")
     return data["Action"]
 
 
@@ -95,10 +117,15 @@ def adapter(upstream_port, operator_token, domain):
                      and 0 < int(length) <= LIMIT, "invalid Content-Length")
                 self.connection.settimeout(5)
                 body = self.rfile.read(int(length))
-                action = decode_request(self.command, self.path, types[0], length, body, domain)
-                # The local simulator authenticates a test capability, not AWS signing.
-                # Forward exactly the validated form; no inbound headers or endpoint options.
-                status, xml = native(upstream_port, operator_token, data=body)
+                port = self.server.server_port
+                need(self.headers.get_all("Host") == [f"{ADDR}:{port}"], "unexpected fixture authority")
+                need(not any(self.headers.get_all(key) for key in ("Authorization", "Proxy-Authorization",
+                         "X-Amz-Security-Token", "X-Simulator-Token", "X-Simulator-Service")),
+                     "unexpected inbound authorization")
+                action = decode_request(self.command, self.path, types[0], length, body, domain, listener_port=port)
+                # The native simulator receives only the three validated fields and its own local authorization.
+                form = urlencode({"Action": action, "Version": VERSION, "DomainName": domain}).encode("ascii")
+                status, xml = native(upstream_port, operator_token, data=form)
                 if status == 200 and action == "DomainMetadata":
                     result = ElementTree.fromstring(xml).find(XMLNS + "DomainMetadataResult")
                     need(result is not None and all(result.findtext(XMLNS + stat) == "0" for stat in STATS),
@@ -252,7 +279,7 @@ def fixture(port, domain):
         "terraform": {"required_version": "= " + TF, "required_providers":
                       {"aws": {"source": "hashicorp/aws", "version": "= " + PROVIDER}}},
         "provider": {"aws": {
-            "region": "us-east-1", "access_key": "TCSIMTESTDUMMYONLY", "secret_key": "simulator-only",
+            "region": "us-east-1", "access_key": FIXTURE_KEY, "secret_key": FIXTURE_SECRET,
             "skip_credentials_validation": True, "skip_requesting_account_id": True,
             "skip_metadata_api_check": True, "skip_region_validation": True, "max_retries": 0,
             "endpoints": {"simpledb": f"http://{ADDR}:{port}"},
