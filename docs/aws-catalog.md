@@ -88,6 +88,16 @@ Products assessed as not servable at all, with evidence, are listed in the
 - Regions follow the credential scope or `X-Simulator-Region`; each region is a
   separate scope. The account is always `000000000000`.
 
+## Historical AWS services
+
+Three entries in the local catalog use AWS API models for services that have ended. The simulator can still read and write their supported configuration records with the pinned API shapes. AWS records the retirement dates in its [full shutdown list](https://docs.aws.amazon.com/general/latest/gr/full_shutdown_services.html).
+
+| Service | AWS end of support | Local scope and service boundary |
+| --- | --- | --- |
+| AWS App Mesh (#236) | September 30, 2026 | The catalog stores mesh configuration. It does not run Envoy or route traffic. [AWS App Mesh notice](https://docs.aws.amazon.com/app-mesh/latest/userguide/what-is-app-mesh.html) |
+| AWS Proton (#204) | October 7, 2026 | The catalog stores service and environment template metadata. AWS states that infrastructure previously deployed through Proton remains in place. [AWS Proton notice](https://docs.aws.amazon.com/proton/latest/userguide/Welcome.html) |
+| Amazon Pinpoint (#97) | October 30, 2026 | The catalog stores project metadata. AWS retired Pinpoint endpoints, segments, campaigns, journeys and analytics. AWS End User Messaging continues to support SMS, voice, mobile push, OTP and phone number validation. [Amazon Pinpoint notice](https://docs.aws.amazon.com/pinpoint/latest/userguide/welcome.html) |
+
 ## Limits
 
 Requests are limited to 256 KiB, stored resource descriptions to 64 KiB, all
