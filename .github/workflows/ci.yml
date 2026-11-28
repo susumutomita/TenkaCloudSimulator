@@ -12,7 +12,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7.0.1
         with:
-          ref: 85f46f37d37c283a66812e93a548fc8b919b31ab
+          ref: fe5420a08efef351b09760f48ba93f1d2cfdb89a
           fetch-depth: 0
           persist-credentials: false
       - uses: actions/setup-go@v6.5.0
@@ -22,12 +22,12 @@ jobs:
       - name: Build the clean immutable composed product
         run: |
           test "$(id -u)" -ne 0
-          test "$(git rev-parse HEAD)" = 85f46f37d37c283a66812e93a548fc8b919b31ab
+          test "$(git rev-parse HEAD)" = fe5420a08efef351b09760f48ba93f1d2cfdb89a
           test -z "$(git status --porcelain)"
           make build
           mkdir -p "$RUNNER_TEMP/cloudfront-receipts"
           go version -m dist/tenkacloud-simulator > "$RUNNER_TEMP/cloudfront-receipts/build.txt"
-          grep -F 'vcs.revision=85f46f37d37c283a66812e93a548fc8b919b31ab' "$RUNNER_TEMP/cloudfront-receipts/build.txt"
+          grep -F 'vcs.revision=fe5420a08efef351b09760f48ba93f1d2cfdb89a' "$RUNNER_TEMP/cloudfront-receipts/build.txt"
           grep -F 'vcs.modified=false' "$RUNNER_TEMP/cloudfront-receipts/build.txt"
           sha256sum dist/tenkacloud-simulator > "$RUNNER_TEMP/cloudfront-receipts/binary.sha256"
       - name: Install stock pinned SDK and Chromium dependencies
@@ -57,7 +57,7 @@ jobs:
           root = pathlib.Path(os.environ['RUNNER_TEMP'])
           case, result = os.environ['CLOUDFRONT_CASE'], int(os.environ['CLOUDFRONT_EXIT'])
           text = (root / f'cloudfront-{case}-private.log').read_text(errors='replace')
-          receipt = {'sourceSha': '85f46f37d37c283a66812e93a548fc8b919b31ab', 'case': case, 'fixtureExit': result}
+          receipt = {'sourceSha': 'fe5420a08efef351b09760f48ba93f1d2cfdb89a', 'case': case, 'fixtureExit': result}
           if result == 0:
               records = [json.loads(line) for line in text.splitlines() if line.startswith('{"ok":')]
               expected = ({'ok': True, 'nativeCloudFrontOperations': 8, 'origin': 'saved local S3 bytes',
@@ -72,6 +72,8 @@ jobs:
               receipt['frames'] = [{'file': pathlib.Path(name).name, 'line': int(line)}
                   for name, line in re.findall(r'File "([^"\n]+)", line ([0-9]+)', text)][-12:]
               receipt['exceptionTypes'] = re.findall(r'^([A-Za-z_][A-Za-z_0-9.]*(?:Error|Exception))(?::|$)', text, re.MULTILINE)[-3:]
+              receipt['nativeErrors'] = [{'code': code, 'operation': operation} for code, operation in
+                  re.findall(r'An error occurred \(([A-Za-z0-9_]{1,80})\) when calling the ([A-Za-z0-9_]{1,80}) operation', text)][-3:]
           (root / 'cloudfront-receipts' / f'{case}.json').write_text(json.dumps(receipt, indent=2) + '\n')
           print('CloudFront fixture', case, 'exit', result)
           PY
@@ -83,7 +85,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v7.0.2
         with:
-          name: cloudfront-runtime-85f46f37d37c283a66812e93a548fc8b919b31ab
+          name: cloudfront-runtime-fe5420a08efef351b09760f48ba93f1d2cfdb89a
           path: ${{ runner.temp }}/cloudfront-receipts/
           if-no-files-found: error
           retention-days: 7
@@ -96,7 +98,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7.0.1
         with:
-          ref: 85f46f37d37c283a66812e93a548fc8b919b31ab
+          ref: fe5420a08efef351b09760f48ba93f1d2cfdb89a
           fetch-depth: 0
           persist-credentials: false
       - uses: actions/setup-go@v6.5.0
@@ -106,12 +108,12 @@ jobs:
       - name: Build the clean source and install stock pinned test requirements
         run: |
           test "$(id -u)" -ne 0
-          test "$(git rev-parse HEAD)" = 85f46f37d37c283a66812e93a548fc8b919b31ab
+          test "$(git rev-parse HEAD)" = fe5420a08efef351b09760f48ba93f1d2cfdb89a
           test -z "$(git status --porcelain)"
           make build
           mkdir -p "$RUNNER_TEMP/cloudfront-gate-receipts"
           go version -m dist/tenkacloud-simulator > "$RUNNER_TEMP/cloudfront-gate-receipts/build.txt"
-          grep -F 'vcs.revision=85f46f37d37c283a66812e93a548fc8b919b31ab' "$RUNNER_TEMP/cloudfront-gate-receipts/build.txt"
+          grep -F 'vcs.revision=fe5420a08efef351b09760f48ba93f1d2cfdb89a' "$RUNNER_TEMP/cloudfront-gate-receipts/build.txt"
           grep -F 'vcs.modified=false' "$RUNNER_TEMP/cloudfront-gate-receipts/build.txt"
           sha256sum dist/tenkacloud-simulator > "$RUNNER_TEMP/cloudfront-gate-receipts/binary.sha256"
           "$RUNNER_TOOL_CACHE/Python/3.12.16/x64/bin/python3.12" -m venv /tmp/cloudfront-gate-tests
@@ -128,11 +130,18 @@ jobs:
           import json, os, pathlib, re
           root = pathlib.Path(os.environ['RUNNER_TEMP'])
           text = (root / 'cloudfront-whole-private.log').read_text(errors='replace')
-          receipt = {'sourceSha': '85f46f37d37c283a66812e93a548fc8b919b31ab', 'command': 'make before-commit',
+          receipt = {'sourceSha': 'fe5420a08efef351b09760f48ba93f1d2cfdb89a', 'command': 'make before-commit',
                      'exit': int(os.environ['CLOUDFRONT_GATE_EXIT']),
                      'packages': re.findall(r'^(?:ok|FAIL)\s+(github\.com/susumutomita/TenkaCloudSimulator/[A-Za-z0-9_/.-]+)', text, re.MULTILINE),
                      'failedTests': re.findall(r'^--- FAIL: (Test[A-Za-z0-9_]+)', text, re.MULTILINE),
                      'coverage': re.findall(r'^.*?(?:coverage|Coverage)[^\n]*?([0-9]+(?:\.[0-9]+)?%)', text, re.MULTILINE)}
+          receipt['failedMakeTargets'] = [{'line': int(line), 'target': target} for line, target in
+              re.findall(r'^make(?:\[[0-9]+\])?: \*\*\* \[Makefile:([0-9]+): ([A-Za-z0-9_-]+)\]', text, re.MULTILINE)]
+          receipt['frames'] = [{'file': pathlib.Path(name).name, 'line': int(line)}
+              for name, line in re.findall(r'File "([^"\n]+)", line ([0-9]+)', text)][-12:]
+          receipt['exceptionTypes'] = re.findall(r'^([A-Za-z_][A-Za-z_0-9.]*(?:Error|Exception))(?::|$)', text, re.MULTILINE)[-3:]
+          receipt['goLocations'] = [{'file': pathlib.Path(name).name, 'line': int(line)} for name, line in
+              re.findall(r'^([A-Za-z0-9_/.-]+\.go):([0-9]+):', text, re.MULTILINE)][-12:]
           (root / 'cloudfront-gate-receipts' / 'whole.json').write_text(json.dumps(receipt, indent=2) + '\n')
           print('Complete CloudFront private gate exit:', receipt['exit'])
           PY
@@ -142,7 +151,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v7.0.2
         with:
-          name: cloudfront-whole-85f46f37d37c283a66812e93a548fc8b919b31ab
+          name: cloudfront-whole-fe5420a08efef351b09760f48ba93f1d2cfdb89a
           path: ${{ runner.temp }}/cloudfront-gate-receipts/
           if-no-files-found: error
           retention-days: 7

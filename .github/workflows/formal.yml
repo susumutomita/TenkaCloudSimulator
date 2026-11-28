@@ -12,7 +12,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7.0.1
         with:
-          ref: 85f46f37d37c283a66812e93a548fc8b919b31ab
+          ref: fe5420a08efef351b09760f48ba93f1d2cfdb89a
           fetch-depth: 0
           persist-credentials: false
       - name: Exercise applicability and gate negative controls
@@ -35,7 +35,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7.0.1
         with:
-          ref: 85f46f37d37c283a66812e93a548fc8b919b31ab
+          ref: fe5420a08efef351b09760f48ba93f1d2cfdb89a
           persist-credentials: false
       - name: Run this shard of the finite models and required invariant counterexamples
         env:
@@ -65,7 +65,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7.0.1
         with:
-          ref: 85f46f37d37c283a66812e93a548fc8b919b31ab
+          ref: fe5420a08efef351b09760f48ba93f1d2cfdb89a
           fetch-depth: 0
           persist-credentials: false
       - name: Validate exact changed blobs and declared model applicability

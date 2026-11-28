@@ -58,6 +58,11 @@ def local(team, method, path, status, body=None, token=None):
 
 def client(session, service, team, stack, settings, stats, key=KEY):
     assert service in ('cloudfront', 's3')
+    if service == 's3':
+        from botocore.config import Config
+        # Match the existing S3 fixture subset: optional GetObject ChecksumMode
+        # is unsupported. Keep normal SDK serialization and exact byte readback.
+        settings = settings.merge(Config(response_checksum_validation='when_required'))
     result = session.client(service, endpoint_url=team.endpoint, region_name='us-east-1', config=settings,
                             aws_access_key_id='TCSIMLOCALCONTENT', aws_secret_access_key='local-fixture-only')
     stack.callback(result.close)
