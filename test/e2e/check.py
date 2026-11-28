@@ -739,6 +739,9 @@ def handler(event,context):
  def test_aws_catalog_console_reference_and_shared_native_state(self):
   subprocess.run([sys.executable, str(Path(__file__).with_name('aws_catalog_console.py'))], check=True, timeout=900)
 
+ def test_codecommit_native_git_history_and_repository_isolation(self):
+  subprocess.run([sys.executable, str(Path(__file__).with_name('codecommit_git.py'))], check=True, timeout=120)
+
  def test_aws_catalog_fixture_lifecycles_cover_every_bound_operation(self):
   subprocess.run([sys.executable, str(Path(__file__).with_name('aws_catalog_fixtures.py'))], check=True, timeout=900)
 

@@ -9,6 +9,16 @@ import (
 	"unicode/utf8"
 )
 
+// These operations model field-specific exceptions for omitted inputs. An
+// explicitly supplied empty blob remains valid Git content.
+var gitRequiredErrors = map[string]string{
+	"repositoryName": "RepositoryNameRequiredException",
+	"branchName":     "BranchNameRequiredException",
+	"commitId":       "CommitIdRequiredException",
+	"filePath":       "PathRequiredException",
+	"fileContent":    "FileContentRequiredException",
+}
+
 // The official decoder has already checked concrete wire types. An omitted
 // optional string is absent from the input map and reads as its zero value.
 func gitString(value any) string {

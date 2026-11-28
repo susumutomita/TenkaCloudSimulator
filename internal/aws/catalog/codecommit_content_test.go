@@ -337,3 +337,51 @@ func TestCodeCommitCorruptStorageIsPreserved(t *testing.T) {
 	expect(t, gitCall(h, "repo", "GetBranch", nil), 400, "BranchNameRequiredException")
 	expect(t, gitCall(h, "missing", "ListBranches", nil), 400, "RepositoryDoesNotExistException")
 }
+
+func TestCodeCommitMissingGitInputsUseDeclaredException(t *testing.T) {
+	h := newHarness(t, codeCommit)
+	expect(t, gitCall(h, "owner", "CreateRepository", nil), 200, "")
+	expect(t, gitCall(h, "other", "CreateRepository", nil), 200, "")
+	initial := gitCall(h, "owner", "PutFile", map[string]any{"branchName": "main", "filePath": "saved", "fileContent": "AP8="})
+	expect(t, initial, 200, "")
+	expect(t, gitCall(h, "other", "PutFile", map[string]any{"branchName": "keep", "filePath": "unrelated", "fileContent": "AA=="}), 200, "")
+	before := codeCommitSnapshot(t, h.db)
+	parent := initial.body["commitId"].(string)
+	for _, tc := range []struct {
+		op     string
+		fields map[string]any
+	}{
+		{"PutFile", map[string]any{"repositoryName": "owner", "branchName": "main", "filePath": "new", "fileContent": "", "parentCommitId": parent}},
+		{"GetFile", map[string]any{"repositoryName": "owner", "filePath": "saved"}},
+		{"GetCommit", map[string]any{"repositoryName": "owner", "commitId": parent}},
+		{"CreateBranch", map[string]any{"repositoryName": "owner", "branchName": "fork", "commitId": parent}},
+		{"GetBranch", map[string]any{"repositoryName": "owner", "branchName": "main"}},
+		{"ListBranches", map[string]any{"repositoryName": "owner"}},
+	} {
+		t.Run(tc.op, func(t *testing.T) {
+			for field, code := range map[string]string{"repositoryName": "RepositoryNameRequiredException", "branchName": "BranchNameRequiredException", "filePath": "PathRequiredException", "fileContent": "FileContentRequiredException", "commitId": "CommitIdRequiredException"} {
+				if _, ok := tc.fields[field]; !ok {
+					continue
+				}
+				body := maps.Clone(tc.fields)
+				delete(body, field)
+				expect(t, h.json1("codecommit", tc.op, body), 400, code)
+			}
+		})
+	}
+	for _, invalid := range []any{nil, "invalid base64!"} {
+		expect(t, gitCall(h, "owner", "PutFile", map[string]any{"branchName": "main", "filePath": "new", "parentCommitId": parent, "fileContent": invalid}), 400, "ValidationException")
+	}
+	expect(t, h.json1("codecommit", "GetFile", map[string]any{"repositoryName": "owner", "filePath": "saved", "unknown": true}), 400, "ValidationException")
+	expect(t, h.json1("codecommit", "CreateRepository", map[string]any{}), 400, "ValidationException")
+	if !slices.Equal(before, codeCommitSnapshot(t, h.db)) {
+		t.Fatal("invalid raw inputs changed Git state")
+	}
+	repaired := gitCall(h, "owner", "PutFile", map[string]any{"branchName": "main", "filePath": "new", "fileContent": "", "parentCommitId": parent})
+	expect(t, repaired, 200, "")
+	file := gitCall(h, "owner", "GetFile", map[string]any{"filePath": "new"})
+	expect(t, file, 200, "")
+	if file.body["fileContent"] != "" || file.body["commitId"] != repaired.body["commitId"] || file.body["blobId"] != "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391" {
+		t.Fatal("submitted empty content was not preserved")
+	}
+}
