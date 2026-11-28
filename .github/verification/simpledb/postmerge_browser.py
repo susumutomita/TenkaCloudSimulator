@@ -61,6 +61,7 @@ def run():
             raise SystemExit(result.returncode)
         if name.startswith('console'):
             d=json.loads(result.stdout)
+            assert d['simpledbConsole'] and d['liveReadback'] and d['mobileReflow']
             assert d['closedAndCleaned'] and d['roleDenied'] and d['conditionalWrites']==4 and d['realAWS'] is False
             (folder/'console.json').write_text(json.dumps(dict(d,binary_sha256=digest),indent=2)+'\n')
         else:
@@ -74,6 +75,8 @@ def run():
             else:
                 expected=['CreateDomain','Select','DeleteAttributes','PutAttributes','DeleteDomain']
                 assert d['nativeReadback'] and d['oneCookieSendPerPreset'] and d['liveXmlAndRenderedResult'] and d['freshDomainsDeleted']
+                assert d['putReplacesAllOldValuesAndPreservesPeers'] and d['targetedDeletePreservesPeerValue']
+                assert d['deleteDomainPreservesOtherDomainAndItems']
             assert d['servedPresets']==expected and d['nativeStatuses']=={op:200 for op in expected}
         print(name, 'passed', flush=True)
     assert not subprocess.check_output(['git','-C',str(product),'status','--porcelain'])
