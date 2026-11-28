@@ -127,6 +127,8 @@ exampleは静的な説明です。**Test Request → Send**で、ローカルの
 
 ## 開発する
 
+- [ブラウザーから教材を始めるための要件案（Web 常設・教材リンク・学習記録）](docs/design/browser-learning-access.md)。
+
 - [作業ルール](AGENTS.md)、[設計](docs/design/0001-go-standalone.md)、
   [並行開発](docs/contributing/parallel-development.md)、[開発状況](docs/development-status.md)。
 - [CI・必要な検査](docs/ci.md)、[形式検査](formal/README.md)、
