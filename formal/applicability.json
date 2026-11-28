@@ -4,23 +4,23 @@
   "changes": [
     {
       "path": "README.md",
-      "sha256": "1dfee82057efd349a4beee1fe69d3f61466b3fb411a01df11c777129d1f023fe",
+      "sha256": "f3a5f8fac7c7e3f5b94f18570f5e010b6e1ecd1e2078cdf75193841a97392fa7",
       "disposition": "documentation",
-      "reason": "List the stored template MIME preview and the regional local DNS ownership workflow.",
+      "reason": "Describe the selected native SES template, verified domain, and local sink workflow.",
       "models": []
     },
     {
       "path": "docs/aws-catalog-services.md",
-      "sha256": "45c763612f8686173e252236d019d5cf10bf58315e9f5d5b3644eb71a2144ac5",
+      "sha256": "36e47a8aaefbfcfa45571aeee6c8146a5a0a20dcb57198fe5bf1ca756d0ab2bd",
       "disposition": "documentation",
       "reason": "Regenerate the SES v2 operation list and limits from its service descriptor.",
       "models": []
     },
     {
       "path": "docs/design/0001-go-standalone.md",
-      "sha256": "9e2499dbe11e5fada0335fa9995b013ff62bf80dbfedf56142e6fef8c186273e",
+      "sha256": "5093c2c2ba0c1b69f6cb0240c4c9b7e89c34f379a7d494bffee3d0959e3a76fb",
       "disposition": "documentation",
-      "reason": "Describe template preview and physical-zone-bound SES verification without external delivery.",
+      "reason": "Document the private local mailbox and stored receipts.",
       "models": []
     },
     {
@@ -34,8 +34,8 @@
       "path": "docs/ses-domain-identities.md",
       "models": [],
       "disposition": "documentation",
-      "sha256": "15e4267229db7c1039604c9fa5ba249b2c787b905fb27a9fb4ab219e42265771",
-      "reason": "Describe real identity creation, DNS changes, scoped observation and independent cleanup."
+      "sha256": "68721fc9752b16df89df9ef220fceefc88d186f421631287e214a4f255ec6dd0",
+      "reason": "Document the live DNS proof, accepted submission, local delivery or missing mailbox, and operator workflow."
     },
     {
       "path": "formal/SESLocalDomainProof.cfg",
@@ -76,10 +76,50 @@
       "reason": "Model local identity generations and fresh reads of the captured zone and three DNS records."
     },
     {
+      "path": "formal/SESLocalMailbox.cfg",
+      "models": [
+        {
+          "id": "SESLocalMailbox",
+          "properties": [
+            "Admission",
+            "Publication",
+            "ContentBinding",
+            "UnpublishedFrame",
+            "NoFalseAck",
+            "ReadProjection"
+          ],
+          "limits": "Finite scoped acceptance and receipt/MIME correspondence. The concrete wire, rendering, SQLite, DNS and policy timing are covered by separate native tests."
+        }
+      ],
+      "disposition": "modeled",
+      "sha256": "1447a8e3b019bf0562e2f26d9aa1b811e2dfb7c86e89127f709961d4a0f3f4de",
+      "reason": "Specify the finite acceptance, content and failure frames for the local mailbox."
+    },
+    {
+      "path": "formal/SESLocalMailbox.tla",
+      "models": [
+        {
+          "id": "SESLocalMailbox",
+          "properties": [
+            "Admission",
+            "Publication",
+            "ContentBinding",
+            "UnpublishedFrame",
+            "NoFalseAck",
+            "ReadProjection"
+          ],
+          "limits": "Finite scoped acceptance and receipt/MIME correspondence. The concrete wire, rendering, SQLite, DNS and policy timing are covered by separate native tests."
+        }
+      ],
+      "disposition": "modeled",
+      "sha256": "b25c095462676a27c184ac9045a65aaa497a60888b9da4ecdf193eeeaaee2c47",
+      "reason": "Specify the finite acceptance, content and failure frames for the local mailbox."
+    },
+    {
       "path": "formal/models.json",
-      "sha256": "2ee12b06b923ddf0241f2f508edead0b87f2b991a837edd4afe2f4cf9599af89",
+      "sha256": "56f61a1a7883d3388537279a4e2421a19b85ed9b4c6326323101ee9208024da3",
       "disposition": "formal-infrastructure",
-      "reason": "Register the new DNS proof model while retaining the original template-preview binding.",
+      "reason": "Preserve existing models and register the two bounded SES safety leaves.",
       "models": []
     },
     {
@@ -95,17 +135,29 @@
             "PhysicalZoneCapture"
           ],
           "limits": "The finite histories check current exact DNS proof, authorization classes, generation and refusal frames. Native tests handle HTTP, real SQLite, pagination, DNS encoding and cancellation. It does not model signatures, randomness or delivery."
+        },
+        {
+          "id": "SESLocalMailbox",
+          "properties": [
+            "Admission",
+            "Publication",
+            "ContentBinding",
+            "UnpublishedFrame",
+            "NoFalseAck",
+            "ReadProjection"
+          ],
+          "limits": "Finite scoped acceptance and receipt/MIME correspondence. The concrete wire, rendering, SQLite, DNS and policy timing are covered by separate native tests."
         }
       ],
       "disposition": "modeled",
-      "sha256": "c986f6dd31e37af2427c46e1209b8e6339e5fe3014e6f1fb8d4bec5b69dd224e",
-      "reason": "Register the SES domain table and a trusted same-transaction DNS read."
+      "sha256": "585e699b2369facaf15cbc8a3443f66f94b7e1fba69a90efc194fbf1e4adec58",
+      "reason": "Compose trusted DNS and scoped policy dependencies and initialize SES storage."
     },
     {
       "path": "internal/aws/catalog/models/sesv2.json",
-      "sha256": "abc1c584a7e7856af01639cc8441507ae6aee7708a17c9cbcf635e2724739475",
+      "sha256": "1be20cc70e5a4704cd36b76cec896ee0c6a3b0cde99eb263d31dbb73aadd3f1c",
       "disposition": "modeled",
-      "reason": "Add only pinned SES v2 operation and shape projections to the existing preview model.",
+      "reason": "Project the pinned official SESv2 preview, identity and SendEmail wire shapes.",
       "models": [
         {
           "id": "CatalogResourceLifecycle",
@@ -130,10 +182,27 @@
       ]
     },
     {
-      "path": "internal/aws/catalog/selection.json",
-      "sha256": "10fcf45f9c4e0d85e936576c9132a2949b047e8a925f46530237d0ffa2aafabc",
+      "path": "internal/aws/catalog/openapi.go",
+      "models": [
+        {
+          "id": "CatalogResourceLifecycle",
+          "properties": [
+            "AuthorizationFirst",
+            "FailureFrame",
+            "PeerFrame"
+          ],
+          "limits": "Bounds existing catalog composition and request failure. The rendered service-specific request example is verified by the generated document and a real Scalar Send."
+        }
+      ],
       "disposition": "modeled",
-      "reason": "Bind the selected preview and four domain operations to their official protocol inputs and outputs.",
+      "sha256": "3bd588a413156e46d01c0b37fcfb4264285c15c18f8567b622eb09b0611dc4f0",
+      "reason": "Render a concrete SendEmail example and require the local service route on unsigned SES reference requests."
+    },
+    {
+      "path": "internal/aws/catalog/selection.json",
+      "sha256": "eb847889890fe38aa31717259c41ecf711dbaa080ab242c64d3e08b7e9371858",
+      "disposition": "modeled",
+      "reason": "Select the official SESv2 stored preview, identities and local submission APIs.",
       "models": [
         {
           "id": "CatalogResourceLifecycle",
@@ -159,9 +228,9 @@
     },
     {
       "path": "internal/aws/catalog/semantics.go",
-      "sha256": "a598288cced238e2855ac74fb8c2d8e2a6a25a40b12ccb06206c6b9b18bc11fb",
+      "sha256": "b7b7cad96eb0b4ea8735902ef02bcabcbd51f0843e1305654cfec242b3cdf59c",
       "disposition": "modeled",
-      "reason": "Keep native template preview and dispatch the four regional identity operations; reject unsupported identity tags.",
+      "reason": "Dispatch stored template preview, verified identities and accepted local SES submissions.",
       "models": [
         {
           "id": "CatalogResourceLifecycle",
@@ -182,14 +251,26 @@
             "PhysicalZoneCapture"
           ],
           "limits": "The finite histories check current exact DNS proof, authorization classes, generation and refusal frames. Native tests handle HTTP, real SQLite, pagination, DNS encoding and cancellation. It does not model signatures, randomness or delivery."
+        },
+        {
+          "id": "SESLocalMailbox",
+          "properties": [
+            "Admission",
+            "Publication",
+            "ContentBinding",
+            "UnpublishedFrame",
+            "NoFalseAck",
+            "ReadProjection"
+          ],
+          "limits": "Finite scoped acceptance and receipt/MIME correspondence. The concrete wire, rendering, SQLite, DNS and policy timing are covered by separate native tests."
         }
       ]
     },
     {
       "path": "internal/aws/catalog/services_integration.go",
-      "sha256": "49ee8a78b503c549ecf45a75127e6a41f1ebc2b3f2ffa216f36c0e81009324fd",
+      "sha256": "92c28c81df34071b3590b8eaf845b6e9ca2e5c0dea26cc7719e47f8e5f39359e",
       "disposition": "modeled",
-      "reason": "Declare the four identity operations alongside existing template and other SES resources.",
+      "reason": "Register the selected official operations and their bounded local SES behavior.",
       "models": [
         {
           "id": "CatalogResourceLifecycle",
@@ -226,6 +307,18 @@
             "PhysicalZoneCapture"
           ],
           "limits": "The finite histories check current exact DNS proof, authorization classes, generation and refusal frames. Native tests handle HTTP, real SQLite, pagination, DNS encoding and cancellation. It does not model signatures, randomness or delivery."
+        },
+        {
+          "id": "SESLocalMailbox",
+          "properties": [
+            "Admission",
+            "Publication",
+            "ContentBinding",
+            "UnpublishedFrame",
+            "NoFalseAck",
+            "ReadProjection"
+          ],
+          "limits": "Finite scoped acceptance and receipt/MIME correspondence. The concrete wire, rendering, SQLite, DNS and policy timing are covered by separate native tests."
         }
       ],
       "disposition": "modeled",
@@ -233,8 +326,68 @@
       "reason": "Store scoped identity generations and three verification selectors and project current DNS state."
     },
     {
+      "path": "internal/aws/catalog/ses_message_wire.go",
+      "models": [
+        {
+          "id": "SESLocalMailbox",
+          "properties": [
+            "Admission",
+            "Publication",
+            "ContentBinding",
+            "UnpublishedFrame",
+            "NoFalseAck",
+            "ReadProjection"
+          ],
+          "limits": "Finite scoped acceptance and receipt/MIME correspondence. The concrete wire, rendering, SQLite, DNS and policy timing are covered by separate native tests."
+        }
+      ],
+      "disposition": "modeled",
+      "sha256": "70bc74340820dbdd2b22ef1d2fe985156bfa672cde8e2705deeccbe5d2b011b6",
+      "reason": "Reject malformed native SendEmail documents before they can enter admission."
+    },
+    {
+      "path": "internal/aws/catalog/ses_sink.go",
+      "models": [
+        {
+          "id": "SESLocalMailbox",
+          "properties": [
+            "Admission",
+            "Publication",
+            "ContentBinding",
+            "UnpublishedFrame",
+            "NoFalseAck",
+            "ReadProjection"
+          ],
+          "limits": "Finite scoped acceptance and receipt/MIME correspondence. The concrete wire, rendering, SQLite, DNS and policy timing are covered by separate native tests."
+        }
+      ],
+      "disposition": "modeled",
+      "sha256": "c359fdc293b1e7b66dfed5d426ccdef5309d2a7cd14db3b97fcfaddf7d3286b3",
+      "reason": "Authorize the scoped submitted message and commit its envelope and actual local receiving result atomically."
+    },
+    {
+      "path": "internal/aws/catalog/ses_sink_receipts.go",
+      "models": [
+        {
+          "id": "SESLocalMailbox",
+          "properties": [
+            "Admission",
+            "Publication",
+            "ContentBinding",
+            "UnpublishedFrame",
+            "NoFalseAck",
+            "ReadProjection"
+          ],
+          "limits": "Finite scoped acceptance and receipt/MIME correspondence. The concrete wire, rendering, SQLite, DNS and policy timing are covered by separate native tests."
+        }
+      ],
+      "disposition": "modeled",
+      "sha256": "b71ec0ee464e7eed3aa92ce689020225134de2d5937e108a467a85d3dbc44e76",
+      "reason": "Read receipts and exact generated MIME by scoped identity and atomically purge the addressed row."
+    },
+    {
       "path": "internal/aws/catalog/ses_template_preview.go",
-      "sha256": "8ea89734e73b8d87b56c233713641e8128cd7729b6c4e963cf95548d308a4ec0",
+      "sha256": "e03b1c2beb9cd246882c7592eb9e9342d36a6a0e3fe8e5eff92536eb5e709dde",
       "disposition": "modeled",
       "reason": "Render bounded MIME from the authorized template snapshot and reject invalid input without a state write.",
       "models": [
@@ -246,6 +399,18 @@
             "PeerFrame"
           ],
           "limits": "The model covers abstract catalog authorization and unchanged state on refusal or in a peer. Native tests cover the SES route, regional template ARN, string substitutions, MIME encoding and byte limits."
+        },
+        {
+          "id": "SESLocalMailbox",
+          "properties": [
+            "Admission",
+            "Publication",
+            "ContentBinding",
+            "UnpublishedFrame",
+            "NoFalseAck",
+            "ReadProjection"
+          ],
+          "limits": "Finite scoped acceptance and receipt/MIME correspondence. The concrete wire, rendering, SQLite, DNS and policy timing are covered by separate native tests."
         }
       ]
     },
@@ -255,6 +420,26 @@
       "disposition": "test-support",
       "reason": "Parse actual native SES MIME responses and exercise regional authorization, refusal, state retention, cancellation and limits.",
       "models": []
+    },
+    {
+      "path": "internal/aws/jsonwire/unicode.go",
+      "models": [
+        {
+          "id": "SESLocalMailbox",
+          "properties": [
+            "Admission",
+            "Publication",
+            "ContentBinding",
+            "UnpublishedFrame",
+            "NoFalseAck",
+            "ReadProjection"
+          ],
+          "limits": "Finite scoped acceptance and receipt/MIME correspondence. The concrete wire, rendering, SQLite, DNS and policy timing are covered by separate native tests."
+        }
+      ],
+      "disposition": "modeled",
+      "sha256": "0e8dd319e57b53f42c0775b3d401f7a27d87a2cd1bb55b1ff4ce335d0b8db9f1",
+      "reason": "Share the strict JSON scalar validation used before SES admission and existing Secrets Manager parsing."
     },
     {
       "path": "internal/aws/route53_http.go",
@@ -332,17 +517,53 @@
       "reason": "Validate the CNAME record owner separately from hosted-zone and target names."
     },
     {
+      "path": "internal/aws/secret_http.go",
+      "models": [
+        {
+          "id": "SecretsDisclosureChannels",
+          "properties": [
+            "RawRequiresAuthorizedGet",
+            "DeniedNoRaw"
+          ],
+          "limits": "Preserves the existing secret disclosure boundary; Unicode wire validation is verified by concrete tests."
+        }
+      ],
+      "disposition": "modeled",
+      "sha256": "796b42128a17740c27409751f0a9648b11c3b5721a532b156a94d5b49ac44901",
+      "reason": "Call the common strict Unicode escape check without changing Secrets Manager receipt or disclosure logic."
+    },
+    {
+      "path": "internal/core/policy.go",
+      "models": [
+        {
+          "id": "SESLocalMailbox",
+          "properties": [
+            "Admission",
+            "Publication",
+            "ContentBinding",
+            "UnpublishedFrame",
+            "NoFalseAck",
+            "ReadProjection"
+          ],
+          "limits": "Finite scoped acceptance and receipt/MIME correspondence. The concrete wire, rendering, SQLite, DNS and policy timing are covered by separate native tests."
+        }
+      ],
+      "disposition": "modeled",
+      "sha256": "c19d712a2b971ccf12d295271bfd46d95703f6591c04cf277e9b2981a2488dcc",
+      "reason": "Capture one consistent local policy decision context for both sender and saved template rights."
+    },
+    {
       "path": "internal/server/apidocs/catalog/index.json",
-      "sha256": "ceb132f661b5661698be49021bbad5b53888d1ddc441ceb0f145828f4b432011",
+      "sha256": "b6817ac3d25e10d4a6eb1abc8a30dbe0b390ed9376b3dbc371712d5dc8066265",
       "disposition": "presentation",
-      "reason": "Expose bounded regional SES identity and stored template operations in the served index.",
+      "reason": "Publish the updated SES native operation count and limits.",
       "models": []
     },
     {
       "path": "internal/server/apidocs/catalog/sesv2.json",
-      "sha256": "f81e8399e657db49e6b148c3281bfd80153286b292167a4f83a9bec5654cf510",
+      "sha256": "4966b7466ab759a625288aa3e4956cac5ab6d6b48933e4a4e243a1fc900c45e8",
       "disposition": "presentation",
-      "reason": "Serve the selected official SES protocol paths, members and declared operation boundaries.",
+      "reason": "Serve the exact native SESv2 paths, request and response shapes and an executable local send example.",
       "models": []
     },
     {
@@ -358,11 +579,23 @@
             "PhysicalZoneCapture"
           ],
           "limits": "The finite histories check current exact DNS proof, authorization classes, generation and refusal frames. Native tests handle HTTP, real SQLite, pagination, DNS encoding and cancellation. It does not model signatures, randomness or delivery."
+        },
+        {
+          "id": "SESLocalMailbox",
+          "properties": [
+            "Admission",
+            "Publication",
+            "ContentBinding",
+            "UnpublishedFrame",
+            "NoFalseAck",
+            "ReadProjection"
+          ],
+          "limits": "Finite scoped acceptance and receipt/MIME correspondence. The concrete wire, rendering, SQLite, DNS and policy timing are covered by separate native tests."
         }
       ],
       "disposition": "modeled",
-      "sha256": "2a67643fe8a2478b990514710ce39b74dbc5a1692eb8454a84bb4f21fd3092f4",
-      "reason": "Wire SES to local Route 53 using the existing per-team SQLite transaction."
+      "sha256": "58f10e629ac72a24c5f80f8c054a2fc5debbbc4ec50c1d937e65b828bba9ab2d",
+      "reason": "Wire SES to local Route 53, the scoped policy and the authenticated operator receipt surface."
     },
     {
       "path": "internal/server/ses_domain_identity_test.go",
@@ -372,32 +605,80 @@
       "reason": "Exercise real SES and Route 53 HTTP, scoped IAM, page tokens, reopen and physical-write interruptions."
     },
     {
+      "path": "internal/server/ses_sink.go",
+      "models": [
+        {
+          "id": "SESLocalMailbox",
+          "properties": [
+            "Admission",
+            "Publication",
+            "ContentBinding",
+            "UnpublishedFrame",
+            "NoFalseAck",
+            "ReadProjection"
+          ],
+          "limits": "Finite scoped acceptance and receipt/MIME correspondence. The concrete wire, rendering, SQLite, DNS and policy timing are covered by separate native tests."
+        }
+      ],
+      "disposition": "modeled",
+      "sha256": "1b489ef5874bb52dffa6a3908ebffff5b7c98272fe2b60a448aaaf716f3aa347",
+      "reason": "Restrict regional sink listing, content downloads and purge to the authenticated team operator."
+    },
+    {
+      "path": "internal/server/ses_sink_test.go",
+      "models": [],
+      "disposition": "test-support",
+      "sha256": "e65e1b9d7be13b547c8c4a324a9eb5d9968a7552d2644b552633d6f09ca8ea60",
+      "reason": "Check coherent authority, template rendering, MIME bytes, recipient outcomes, regional limits, reopen and cleanup."
+    },
+    {
+      "path": "internal/server/ses_sink_transaction_test.go",
+      "models": [],
+      "disposition": "test-support",
+      "sha256": "26f19c285b05fa9f28e0385e9938910d33134bcf90e20bd17292b283c55a5deb",
+      "reason": "Inject real database write interruptions, storage mix-ups and capacity faults, then reopen and retry."
+    },
+    {
+      "path": "internal/server/web/app.js",
+      "models": [],
+      "disposition": "presentation",
+      "sha256": "c175fb645fcc3b53d0e2f96c9468d05b1a699d54a9e5c87ffd084b26f595e5f0",
+      "reason": "Regenerate the authenticated Console bundle and its checked source inputs."
+    },
+    {
       "path": "scripts/formal_model_gate.py",
       "models": [],
       "disposition": "formal-infrastructure",
-      "sha256": "1c4feee45c695f992f63a4c55a14c6419ccf5254705502f269061e049045e96f",
-      "reason": "Protect the new model, its safety properties, sensitivity cases and production sources."
+      "sha256": "83e8dd339b69be4f1b91f48366cbe55c7f34b2db3d60cb8f8cf8d8b9a2226ba1",
+      "reason": "Protect exact SES source scopes, safety properties and mutation control sets."
     },
     {
       "path": "scripts/test-formal-gate.py",
       "models": [],
       "disposition": "formal-infrastructure",
-      "sha256": "d5b80f09655b9cca546be80a4ec128b159a670648f95a7e865f4be6adbebab35",
-      "reason": "Require model inventory and independently reject removal of its DNS and generation checks."
+      "sha256": "d639048122dcfc382ffd6b6afe56a21c9e4630d9c7dd3f81a1cad3ae09f9390f",
+      "reason": "Enforce the complete model inventory and independently reject dropped SES control and source bindings."
     },
     {
       "path": "test/e2e/aws_catalog_fixtures.py",
-      "sha256": "eef614d19df55440df1c3dea50e33638e1193d4953d0528d6801fa8d19cb4a6a",
+      "sha256": "aee19d9c9d7d94cc348df014eb509abe76281bf21cbe4cd0ec99ffbab51905e7",
       "disposition": "test-support",
-      "reason": "Parse returned MIME when a catalog fixture declares expected subject and decoded parts.",
+      "reason": "Allow the real Route 53 dependency in catalog fixture steps without counting it as an SES operation; remove the stored receipt.",
       "models": []
     },
     {
       "path": "test/e2e/catalog_fixtures/sesv2.json",
-      "sha256": "c60eac77ef1bc213a2433a811e4078b8066644e710b4dd7cfc44c47738f4bd2d",
+      "sha256": "272b4f39a93b3020e6af04ca4ebdd649c8ef85ab8115a20e278ed49680a6cdb8",
       "disposition": "test-support",
-      "reason": "Exercise stock SES v2 template rendering, validation, peer isolation, update, restart and cleanup.",
+      "reason": "Exercise the complete existing catalog operation set including the three required DNS records and accepted SendEmail.",
       "models": []
+    },
+    {
+      "path": "test/e2e/check.py",
+      "models": [],
+      "disposition": "test-support",
+      "sha256": "f51ba8850c0f3fe1c8a3433e61e5f7d2d01a6e008bc075acc962dc7b1813b6a6",
+      "reason": "Register the shared SES native SDK, Console and served-reference workflow in ordinary end-to-end tests."
     },
     {
       "path": "test/e2e/ses_domain_identity.py",
@@ -405,6 +686,72 @@
       "disposition": "test-support",
       "sha256": "572f8b4a4b07ae4f03227d5f8573b9f53868f39dd6159fc89b062288acedfefb",
       "reason": "Use the pinned stock SES and Route 53 clients on two local CLI authorities."
+    },
+    {
+      "path": "test/e2e/ses_local_mail.py",
+      "models": [],
+      "disposition": "test-support",
+      "sha256": "df64f872c2fc50839b6dce9b617b5204ea96853dd0567b7c90b5eab1e9b2e232",
+      "reason": "Run the actual submitted envelope, local receipt and authorization lifecycle on two independent CLI databases."
+    },
+    {
+      "path": "test/e2e/ses_local_mail_console.py",
+      "models": [],
+      "disposition": "test-support",
+      "sha256": "e38d53435097c628d541a0cb5bf14c75b18987f07a67c4e337498f08a2c9e8a3",
+      "reason": "Exercise the shipped SES Console and Scalar using the same verified domain, accepted IDs and local mailbox."
+    },
+    {
+      "path": "tools/console/bundle-digests.json",
+      "models": [],
+      "disposition": "presentation",
+      "sha256": "e7b7bdf9e8679eb851dbe7376d0e169fc8b25cf79f38c912c704ff39a0d0ae2a",
+      "reason": "Regenerate the authenticated Console bundle and its checked source inputs."
+    },
+    {
+      "path": "tools/console/bundle-inputs.json",
+      "models": [],
+      "disposition": "presentation",
+      "sha256": "89494a0a55c80dffb2ec58d31085bedebd4216215c157d5a4676fb1a13f18065",
+      "reason": "Regenerate the authenticated Console bundle and its checked source inputs."
+    },
+    {
+      "path": "tools/console/src/catalog.jsx",
+      "models": [
+        {
+          "id": "CatalogConsoleEpoch",
+          "properties": [
+            "NoUnmountedAcceptance",
+            "OnlyCurrentReplies",
+            "SingleWriter"
+          ],
+          "limits": "The shared Catalog mount retires and checks scoped work. The new SES live-view unknown acknowledgement and readback are tested directly in the browser."
+        }
+      ],
+      "disposition": "modeled",
+      "sha256": "69c9b04ffb9d2f75f93383bf0737fa7d99d6de371aa787a9f59a8a5bb7d0f81a",
+      "reason": "Mount the SES mail workflow alongside existing catalog resources and retire it with the current scope."
+    },
+    {
+      "path": "tools/console/src/ses-mail.jsx",
+      "models": [],
+      "disposition": "presentation",
+      "sha256": "5b4d6b1e5af34910454b2f60fdb1a198d5ed92529b106b53d02a260bcde78941",
+      "reason": "Implement the bounded local mail operator workflow and validate native responses before displaying them."
+    },
+    {
+      "path": "tools/console/src/ses-mail.mjs",
+      "models": [],
+      "disposition": "presentation",
+      "sha256": "b4e2575a2ab894e287aff1bb47e971b42ea9d459feeabc6e7cd651c7d1c5af31",
+      "reason": "Implement the bounded local mail operator workflow and validate native responses before displaying them."
+    },
+    {
+      "path": "tools/console/test/ses-mail.test.mjs",
+      "models": [],
+      "disposition": "presentation",
+      "sha256": "25cbcb993fcb9bff15df11ac7386e57d014b7796ff2d46d9f5e6adf7891c39fe",
+      "reason": "Check trusted DNS responses, exact submission identifiers and disjoint delivered and rejected mailbox states."
     }
   ]
 }
