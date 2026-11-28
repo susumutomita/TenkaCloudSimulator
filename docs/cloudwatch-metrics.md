@@ -33,7 +33,7 @@ The alarm ARN is `arn:aws:cloudwatch:{region}:000000000000:alarm:{AlarmName}`. E
 
 Limits are 100 alarms per Region and 1,000 per team. Delete removes the selected alarm, leaving metric observations intact. Two teams use separate processes, databases, policies and cursor authorities. Restart preserves configurations and recomputes their actual local state; it does not fabricate a delivery event or support case.
 
-The native increment does not by itself establish a new Console, Scalar Send or original-game acceptance. Those entry points and required whole-source gates are verified separately before a completion claim.
+The simulator evaluates alarms from explicitly published observations. Native alarm actions and notification delivery are outside this threshold-evaluation workflow.
 
 ## Read metric alarms in the console and API reference
 

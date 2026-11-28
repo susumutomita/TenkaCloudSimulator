@@ -9,14 +9,16 @@ from pathlib import Path
 import re
 import tempfile
 import time
+from urllib.error import HTTPError
 from urllib.parse import parse_qsl, urlsplit
+from urllib.request import Request
 from xml.etree import ElementTree
 
 import boto3
 from playwright.sync_api import expect, sync_playwright
 
 from botocore.config import Config
-from cloudwatch_metrics import BINARY, client, control, running
+from cloudwatch_metrics import BINARY, OPENER, client, control, running
 from simpledb_scalar_reference_live import ScalarQueryReference
 
 
@@ -120,11 +122,18 @@ def inspect(page, name, state, measured):
 
 def send(ref, requests, action, edits, status):
     start = len(requests)
-    ref.open_example(action, service='monitoring', replacements=edits)
+    fields = ref.examples[action]['value']
+    previous = getattr(ref, 'edited_fields', {}).get(action, set())
+    replacements = {key: edits.get(key, fields[key]) for key in previous | set(edits)}
+    ref.open_example(action, service='monitoring', replacements=replacements)
+    if not hasattr(ref, 'edited_fields'):
+        ref.edited_fields = {}
+    ref.edited_fields[action] = set(edits)
     assert len(requests) == start, 'Draft edits must not issue a request'
     response = ref.send()
     request = response.request
-    assert requests[start:] == [request] and response.status == status
+    assert requests[start:] == [request], (action, len(requests[start:]))
+    assert response.status == status, (action, response.status, status)
     assert request.url == response.url == ref.endpoint + '/' and request.method == 'POST'
     assert request.redirected_from is None and request.redirected_to is None
     headers = request.all_headers()
@@ -267,6 +276,16 @@ def exercise(browser, directory):
             with running(directory/'owner') as owner, ExitStack() as stack:
                 sdk, logs = clients(stack, owner, counts)
                 try:
+                    assert owner.token != peer.token and owner.db != peer.db
+                    foreign = Request(peer.origin+'/', b'Action=DescribeAlarms&Version=2010-08-01', {
+                        'Content-Type':'application/x-www-form-urlencoded', 'X-Simulator-Service':'monitoring',
+                        'X-Simulator-Token':owner.token})
+                    try:
+                        with OPENER.open(foreign, timeout=5):
+                            raise AssertionError('A team token was accepted by another process')
+                    except HTTPError as error:
+                        assert error.code == 401
+                    peer_unchanged()
                     populate_logs(logs, MESSAGE)
                     for name in pages:
                         sdk.put_metric_alarm(**alarm(name, 'UnrelatedMetric'))
@@ -340,6 +359,11 @@ def exercise(browser, directory):
                         expect(console.get_by_text('Measured statistic', exact=True)).to_be_visible()
                         audit_view(console)
                         console.set_viewport_size({'width':390,'height':844})
+                        console.reload()
+                        expect(console.get_by_role('heading', name='Metric alarms', exact=True)).to_be_visible()
+                        console.get_by_label('Exact alarm name', exact=True).fill(ALARM)
+                        console.get_by_role('button', name='View alarm', exact=True).click()
+                        expect(console.get_by_text('Measured statistic', exact=True)).to_be_visible()
                         audit_view(console)
                         assert len(sends) == 5
                         peer_unchanged()
