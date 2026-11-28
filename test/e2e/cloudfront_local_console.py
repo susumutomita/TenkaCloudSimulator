@@ -162,7 +162,7 @@ class Console:
                 observed = capture.evaluate('capture => capture.text')
                 assert observed is not None and observed.encode('utf-8') == body
             else:
-                self.page.wait_for_function('window.__cfObservation.ready')
+                self.page.wait_for_function('() => window.__cfObservation.ready')
                 error_body = self.page.evaluate('window.__cfObservation.body')
         finally:
             if capture is not None:
@@ -198,7 +198,7 @@ class Console:
                 dialog.get_by_role('button', name='Invalidate all objects', exact=True).click()
             response = fetched.value
             assert response.status == status
-            self.page.wait_for_function('window.__cfObservation.ready')
+            self.page.wait_for_function('() => window.__cfObservation.ready')
             observed = self.page.evaluate('window.__cfObservation.body')
             assert response.request.post_data and response.request.method == 'POST'
             root = ET.fromstring(response.request.post_data)
@@ -344,7 +344,7 @@ def browser_checks(browser, owner, saved, all_ids, replace_object, get_receipt, 
             before_count = receipt_count(owner, identifier)
             third, original, committed_body = surface.submit(identifier, dialog, 201, lost_ack=True)
             assert original == caller
-            surface.page.wait_for_function('window.__cfObservation.ready')
+            surface.page.wait_for_function('() => window.__cfObservation.ready')
             observation = surface.page.evaluate('({status:window.__cfObservation.status,body:window.__cfObservation.body,unused:!window.__cfObservation.response.bodyUsed})')
             assert observation['status'] == 201 and observation['unused']
             observed = ET.fromstring(observation['body'])
@@ -365,7 +365,7 @@ def browser_checks(browser, owner, saved, all_ids, replace_object, get_receipt, 
         install_observer(surface, path, 'GET', 'hold')
         try:
             surface.page.get_by_role('button', name='Read local content', exact=True).click()
-            surface.page.wait_for_function('window.__cfObservation.ready')
+            surface.page.wait_for_function('() => window.__cfObservation.ready')
             assert surface.page.evaluate('window.__cfObservation.status') == 200
             assert surface.page.evaluate('window.__cfObservation.body') == FRESH.decode()
             surface.page.get_by_role('button', name='Account menu', exact=True).click()
@@ -376,7 +376,7 @@ def browser_checks(browser, owner, saved, all_ids, replace_object, get_receipt, 
             identity.get_by_role('button', name='Choose identity', exact=True).click()
             expect(surface.page.get_by_role('table', name='Distributions', exact=True)).to_be_visible()
             surface.page.evaluate('window.__cfObservation.release()')
-            surface.page.wait_for_function('window.__cfObservation.returned')
+            surface.page.wait_for_function('() => window.__cfObservation.returned')
             surface.page.evaluate('() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))')
             expect(surface.page.get_by_text(FRESH.decode(), exact=True)).to_have_count(0)
             expect(surface.page.get_by_text(third, exact=True)).to_have_count(0)
@@ -493,6 +493,16 @@ def run():
                     expect(reopened.page.get_by_role('heading', name='ディストリビューションの詳細', exact=True)).to_be_visible()
                     assert reopened.read(target['Id'], FRESH, japanese=True).headers['x-cache'].startswith('Hit')
                     assert reopened.page.evaluate('document.documentElement.scrollWidth <= innerWidth + 1')
+                    writes = len([request for request in reopened.requests if request.method == 'POST'])
+                    reopened.page.get_by_role('button', name='無効化を作成', exact=True).click()
+                    modal = reopened.page.get_by_role('dialog', name='無効化を確認', exact=True)
+                    expect(modal).to_be_visible()
+                    action = modal.get_by_role('button', name='すべてのオブジェクトを無効化', exact=True)
+                    expect(action).to_be_disabled()
+                    bounds = action.bounding_box()
+                    assert bounds['x'] >= -1 and bounds['x'] + bounds['width'] <= 391
+                    modal.get_by_role('button', name='キャンセル', exact=True).click()
+                    assert len([request for request in reopened.requests if request.method == 'POST']) == writes
                 finally:
                     reopened.close()
                 assert frame(peer.database) == peer_before
