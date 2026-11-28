@@ -6,7 +6,7 @@ ScalarにはIAM roles専用のPOST `/_simulator/providers/aws/` があり、IAM 
 
 ## コンソール
 
-Services→IAM→Roles→Create role。公式Cloudscape WizardでSelect trusted entity→Add permissions→Name, review, and createへ進む。AWS serviceのLambdaを選ぶと`lambda.amazonaws.com`を信頼する。Custom trust policyは限定service-principal JSONを受け付ける。作成直後はservice権限がなくimplicit Deny。Permissions→Create inline policyで必要なAction/Resourceを指定し、Trust relationshipsで信頼先を確認・編集する。
+Services→IAM→Roles→Create role。公式Cloudscape WizardでSelect trusted entity→Add permissions→Name, review, and createへ進む。AWS serviceのLambdaを選ぶと`lambda.amazonaws.com`を信頼する。Custom trust policy では Service または AWS プリンシパルを明示する。ロール一覧にはステートメントごとの許可・拒否と条件の有無が表示される。作成直後はservice権限がなくimplicit Deny。Permissions→Create inline policyで必要なAction/Resourceを指定し、Trust relationshipsで信頼先を確認・編集する。
 
 Create a Lambda function→Create function→Existing roleで空の権限のロールも選べる。Code→ZIP Deploy→Testで実Pythonを実行する。関数作成者には`lambda:CreateFunction`と当該ARNの`iam:PassRole`が必要。ネイティブロールは作成時・実行開始時にLambda serviceの信頼を要求する。信頼を外したロール、削除済みロール、ARNの大文字小文字を変えた参照は実行しない。STSによるsession発行ではない。
 
@@ -18,7 +18,7 @@ Create a Lambda function→Create function→Existing roleで空の権限のロ�
 | --- | --- |
 | scope/name | Global、root pathのみ。role名は1–64の英数字・`_`・`-`。AWSが許す他の記号と非root pathは未対応 |
 | 名前の同一性 | role名はcase insensitive。一意なRoleId、作成日時、ARN、description、MaxSessionDurationを保持 |
-| trust | JSON keyはVersion/Statement/Sid/Effect/Action/Principal/Serviceの正確な綴りを要求。Version2012-10-17、1–10 statements、Allow/Deny、Action sts:AssumeRole、明示Service principalのみ。lambda.amazonaws.comへのAllowが必要、Deny優先。32KiBまで |
+| trust | Version 2012-10-17、1～10 ステートメント、32 KiB まで。各ステートメントは Allow または Deny、Action は sts:AssumeRole。Service または AWS プリンシパルを明示する。AWS プリンシパルは StringEquals による sts:ExternalId 条件を指定できる。Lambda 実行には lambda.amazonaws.com に対する許可が必要。明示 Deny が優先される |
 | inline permissions | identity policy subset、最大10policy/100aggregate statements/32KiB。未知のCondition等は拒否。明示Deny優先 |
 | pagination | ListRoles/ListRolePoliciesのMaxItems1–1000、返却Markerで継続 |
 | limits | Query本文128KiB。active+retired role名1000まで。削除ロールのnative再作成は新RoleIdを発行 |
