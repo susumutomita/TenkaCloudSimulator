@@ -42,8 +42,24 @@ func cfDistributionOne(ctx context.Context, tx *sql.Tx, query string, args ...an
 	return err
 }
 func cfClearCache(ctx context.Context, tx *sql.Tx, id string) error {
-	_, err := cfDistributionWrite(ctx, tx, "DELETE FROM aws_cloudfront_cache WHERE distribution=?", id)
-	return err
+	return cfEvictCache(ctx, tx, "distribution=?", id)
+}
+
+// A storage layer may ignore a DELETE without reporting an error. Confirm the
+// addressed set is empty, including when RowsAffected reports zero.
+// Only fixed provider-owned predicates reach this helper.
+func cfEvictCache(ctx context.Context, tx *sql.Tx, where string, args ...any) error {
+	if _, err := cfDistributionWrite(ctx, tx, "DELETE FROM aws_cloudfront_cache WHERE "+where, args...); err != nil {
+		return err
+	}
+	var remains bool
+	if err := tx.QueryRowContext(ctx, "SELECT EXISTS(SELECT 1 FROM aws_cloudfront_cache WHERE "+where+")", args...).Scan(&remains); err != nil {
+		return err
+	}
+	if remains {
+		return errors.New("CloudFront cache eviction readback mismatch")
+	}
+	return nil
 }
 func cfSaveDistribution(ctx context.Context, tx *sql.Tx, id, match string, create bool, c cfDistributionConfig, bucket string) (cfDistributionRow, error) {
 	var row cfDistributionRow
@@ -201,7 +217,7 @@ func cfCreateInvalidation(ctx context.Context, tx *sql.Tx, id string, batch cfIn
 		if path == "/*" {
 			err = cfClearCache(ctx, tx, id)
 		} else {
-			_, err = cfDistributionWrite(ctx, tx, "DELETE FROM aws_cloudfront_cache WHERE distribution=? AND object_key=?", id, path[1:])
+			err = cfEvictCache(ctx, tx, "distribution=? AND object_key=?", id, path[1:])
 		}
 		if err != nil {
 			return result, err
@@ -268,7 +284,7 @@ func cfDeliver(ctx context.Context, tx *sql.Tx, id, principal, key string, allow
 	if err != nil && !errors.Is(err, sql.ErrNoRows) {
 		return result, err
 	}
-	if _, err = cfDistributionWrite(ctx, tx, "DELETE FROM aws_cloudfront_cache WHERE expires<=? OR inserted>?", seconds, seconds); err != nil {
+	if err = cfEvictCache(ctx, tx, "expires<=? OR inserted>?", seconds, seconds); err != nil {
 		return result, err
 	}
 	err = tx.QueryRowContext(ctx, "SELECT data,content_type,etag FROM objects WHERE bucket=? AND key=?", row.bucket, key).Scan(&result.data, &result.contentType, &result.etag)

@@ -243,13 +243,26 @@ func (s *CloudFrontStore) serveDistribution(g *Gateway, w http.ResponseWriter, r
 
 func (s *CloudFrontStore) serveDistributionContent(w http.ResponseWriter, r *http.Request, principal string, decision func(string, string) string) {
 	parts := strings.SplitN(strings.TrimPrefix(r.URL.Path, cfDeliveryPath), "/objects/", 2)
-	if len(parts) != 2 || !cfDistributionID.MatchString(parts[0]) || !cfValidLocalKey(parts[1]) || r.URL.RawPath != "" || r.URL.RawQuery != "" || r.URL.ForceQuery || (r.Method != "GET" && r.Method != "HEAD") || r.Header.Get("Range") != "" || r.Header.Get("If-None-Match") != "" || r.Header.Get("If-Modified-Since") != "" {
+	if len(parts) != 2 || !cfDistributionID.MatchString(parts[0]) || !cfValidLocalKey(parts[1]) || r.URL.RawPath != "" || r.URL.RawQuery != "" || r.URL.ForceQuery || (r.Method != "GET" && r.Method != "HEAD") {
 		cfError(w, cfInvalid("Use a canonical local GET/HEAD object path without queries, range or conditional headers."))
 		return
+	}
+	for _, header := range []string{"Range", "If-None-Match", "If-Modified-Since", "If-Match", "If-Unmodified-Since", "If-Range"} {
+		if len(r.Header.Values(header)) != 0 {
+			cfError(w, cfInvalid("Range and conditional object requests are unsupported."))
+			return
+		}
 	}
 	if r.ContentLength > 0 {
 		cfError(w, cfInvalid("Object reads do not accept a body."))
 		return
+	}
+	if r.Body != nil {
+		body, readErr := io.ReadAll(io.LimitReader(r.Body, 1))
+		if readErr != nil || len(body) != 0 {
+			cfError(w, cfInvalid("Object reads do not accept a body."))
+			return
+		}
 	}
 	tx, err := s.db.BeginTx(r.Context(), nil)
 	if err != nil {
@@ -266,6 +279,9 @@ func (s *CloudFrontStore) serveDistributionContent(w http.ResponseWriter, r *htt
 		return
 	}
 	w.Header().Set("Cache-Control", "no-store")
+	w.Header().Set("Content-Disposition", "attachment")
+	w.Header().Set("Content-Security-Policy", "sandbox; default-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'")
+	w.Header().Set("X-Content-Type-Options", "nosniff")
 	w.Header().Set("Content-Type", result.contentType)
 	w.Header().Set("ETag", result.etag)
 	w.Header().Set("Content-Length", strconv.Itoa(len(result.data)))

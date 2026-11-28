@@ -3,6 +3,13 @@
   "base_sha": "b97ddbd26f3e78905bd8e26a944fb7f0a28d8a42",
   "changes": [
     {
+      "path": ".github/workflows/ci.yml",
+      "sha256": "04d945225fe7f2641ae7caf6dfbad93ad812ffc3235d6d350e387ba8759e0dcd",
+      "disposition": "formal-infrastructure",
+      "reason": "Run and check the actual changed CloudFront response protections, scoped cache eviction and same-origin reference controls without skipping existing checks.",
+      "models": []
+    },
+    {
       "path": "README.md",
       "sha256": "42724bb96f2f348e8c50ad5ddd92d8250fa0a68fbf05b5ee38d0812672ad4bcb",
       "disposition": "documentation",
@@ -11,7 +18,7 @@
     },
     {
       "path": "docs/cloudfront-local-content.md",
-      "sha256": "34247034fbe4ca39736024ca45c59b5071018ba7a4508fb25eb4e8b211262773",
+      "sha256": "27ad8a89e17fbaecfb38fde49978fa710ddeefa8611e28a270ad9f107bdb1fb4",
       "disposition": "documentation",
       "reason": "Document the exact native and simulator-only local content boundaries, shared helper dependency and unsupported CloudFront features.",
       "models": []
@@ -104,7 +111,7 @@
     },
     {
       "path": "internal/aws/cloudfront_distribution_http.go",
-      "sha256": "1340da8f2d386751cd873c6a230f827776754e144ffefc38557eaede1bc31c14",
+      "sha256": "f2cc81697bee212c613d07f05f3966c87c7348d1cb6b629f472f4f7532592cb1",
       "disposition": "modeled",
       "reason": "Bound the local distribution/cache transaction, joint read authorization, ETag mutation, invalidation, rollback and committed restart state; native tests separately exercise concrete protocol and SQLite behavior.",
       "models": [
@@ -152,7 +159,7 @@
     },
     {
       "path": "internal/aws/cloudfront_distribution_store.go",
-      "sha256": "ca266600c2de9c562480756222f8d8d5beb412061dfed5883dc8d2d285a5b46e",
+      "sha256": "2970a1cb0c45ee34657d3e2b2c57f1328db547c3e2fc00079a6c4e808b69a7fa",
       "disposition": "modeled",
       "reason": "Bound the local distribution/cache transaction, joint read authorization, ETag mutation, invalidation, rollback and committed restart state; native tests separately exercise concrete protocol and SQLite behavior.",
       "models": [
@@ -176,7 +183,7 @@
     },
     {
       "path": "internal/aws/cloudfront_distribution_test.go",
-      "sha256": "8077a36fbec32c0c24e9f8a6626a9d477d24b0fd777eef8564dae2c6ec53ffb7",
+      "sha256": "32d7971b1dc11451bc0b1fa2bf16ac6243dc593c25ee38020007db0079101d6e",
       "disposition": "test-support",
       "reason": "Exercise real bounded distribution/cache state, stock pinned SDK lifecycle, strict errors and owned cleanup; not a whole-service or real CDN claim.",
       "models": []
@@ -251,6 +258,13 @@
       "models": []
     },
     {
+      "path": "internal/server/cloudfront_local_content_test.go",
+      "sha256": "47ff5175baf12cc858785a22056c4403e2e81a78b657b9054c5c58329e8bd62c",
+      "disposition": "test-support",
+      "reason": "Run and check the actual changed CloudFront response protections, scoped cache eviction and same-origin reference controls without skipping existing checks.",
+      "models": []
+    },
+    {
       "path": "internal/server/server.go",
       "sha256": "acb380c328cb4eb5e911a8e3db5e293e6a0530bad038270064e77b8964208993",
       "disposition": "modeled",
@@ -275,8 +289,15 @@
       ]
     },
     {
+      "path": "test/console/cloudfront-local-reference.test.mjs",
+      "sha256": "8f83c9ce4b9261c6b9265fd10dd2a6e9a83a11435d654d30200febf104db7e6b",
+      "disposition": "test-support",
+      "reason": "Run and check the actual changed CloudFront response protections, scoped cache eviction and same-origin reference controls without skipping existing checks.",
+      "models": []
+    },
+    {
       "path": "test/e2e/cloudfront_local_content.py",
-      "sha256": "4e825b94b587483c51f6661634a48e175195089e5ae04011eda4a509bf69c284",
+      "sha256": "94d4f7f71ca7a6313ca82b3450d9e1cb8f53c298ae66750ef123e0c1165dd305",
       "disposition": "test-support",
       "reason": "Exercise real bounded distribution/cache state, stock pinned SDK lifecycle, strict errors and owned cleanup; not a whole-service or real CDN claim.",
       "models": []

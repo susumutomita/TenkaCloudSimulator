@@ -118,6 +118,8 @@ def exercise(session, settings, binary, directory, stack):
         path = f'/_simulator/cloudfront/distributions/{identifier}/objects/{KEY}'
         first, headers = local(team, 'GET', path, 200)
         assert first == payload and headers['x-cache'].startswith('Miss') and headers['cache-control'] == 'no-store'
+        assert headers['content-disposition'] == 'attachment' and headers['x-content-type-options'] == 'nosniff'
+        assert headers['content-security-policy'] == "sandbox; default-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'"
         teams.append((team, s3, front, identifier, path, created['Distribution']))
     owner, s3, front, identifier, path, saved = teams[0]
     peer, _, peer_front, peer_id, peer_path, peer_saved = teams[1]
@@ -135,6 +137,8 @@ def exercise(session, settings, binary, directory, stack):
     assert local(owner, 'GET', path, 200)[0] == b'fresh owner'
     body, head = local(owner, 'HEAD', path, 200)
     assert body == b'' and head['content-length'] == str(len(b'fresh owner')) and head['x-cache'].startswith('Hit')
+    assert head['content-disposition'] == 'attachment' and head['x-content-type-options'] == 'nosniff'
+    assert head['content-security-policy'] == "sandbox; default-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'"
     resource = saved['ARN']
     policy = {'Version': '2012-10-17', 'Statement': [
         {'Effect': 'Allow', 'Action': 'cloudfront:GetDistribution', 'Resource': resource},
