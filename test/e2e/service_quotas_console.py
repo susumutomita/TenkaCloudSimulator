@@ -17,7 +17,7 @@ from urllib.parse import urlsplit
 import boto3
 from botocore.config import Config
 from playwright.sync_api import sync_playwright, expect
-from service_quotas_discovery import Team, KEY, participant
+from service_quotas_discovery import BINARY, Team, KEY, participant
 
 
 def client(team):
@@ -135,7 +135,7 @@ def run():
         peer_before = full_frame(peer)
         preexisting = sdk.request_service_quota_increase(**KEY, DesiredValue=8, SupportCaseAllowed=False)['RequestedQuota']['Id']
         with sync_playwright() as playwright:
-            browser = playwright.chromium.launch(executable_path=os.environ['CHROMIUM_EXECUTABLE'], chromium_sandbox=True)
+            browser = playwright.chromium.launch(executable_path=os.environ.get('CHROMIUM_EXECUTABLE') or playwright.chromium.executable_path, chromium_sandbox=True)
             try:
                 view = Console(browser, owner)
                 try:
@@ -203,6 +203,26 @@ def run():
                     assert view.requests[-1][1]['QuotaRequestedAtLevel'] == 'RESOURCE'
                     view.click('Refresh same-scope history', 'ListRequestedServiceQuotaChangeHistoryByQuota')
                     assert view.requests[-1][1] == {**KEY, 'MaxResults': 1, 'QuotaRequestedAtLevel': 'ACCOUNT'}
+                    assert frame(owner) == after
+                    expect(page.get_by_role('button', name='Start a separate new request', exact=True)).to_be_visible()
+                    # Successful recovery cannot remain armed after a later
+                    # real storage refusal clears its displayed saved history.
+                    with sqlite3.connect(owner.directory / 'state.db') as db:
+                        db.execute('ALTER TABLE aws_b2bi_profile_quota_requests RENAME TO quota_history_held')
+                    def restore_history():
+                        with sqlite3.connect(owner.directory / 'state.db') as db:
+                            db.execute('ALTER TABLE quota_history_held RENAME TO aws_b2bi_profile_quota_requests')
+                    try:
+                        view.click('Refresh same-scope history', 'ListRequestedServiceQuotaChangeHistoryByQuota', 500)
+                        expect(page.get_by_role('button', name='Start a separate new request', exact=True)).to_have_count(0)
+                        expect(page.get_by_role('button', name='Submit increase request', exact=True)).to_be_disabled()
+                        expect(page.get_by_text('Request outcome unknown', exact=True)).to_be_visible()
+                    finally:
+                        cleanup(restore_history)
+                    assert frame(owner) == after
+                    view.click('Refresh quota', 'GetServiceQuota')
+                    expect(page.get_by_role('button', name='Start a separate new request', exact=True)).to_have_count(0)
+                    view.click('Refresh same-scope history', 'ListRequestedServiceQuotaChangeHistoryByQuota')
                     assert frame(owner) == after
                     page.get_by_role('button', name='Start a separate new request', exact=True).click()
                     page.get_by_role('checkbox', name='Allow support case (stored PENDING locally only)', exact=True).check()
@@ -303,7 +323,7 @@ def run():
     assert not Path(directory.name).exists()
     print(json.dumps({'ok': True, 'serviceQuotasConsole': True, 'physicalHistoryAndLostAcknowledgement': True,
                       'peerRestartCleanup': True, 'japaneseWidth': 390,
-                      'binarySha256': hashlib.sha256(Path(os.environ['SIMULATOR_BINARY']).read_bytes()).hexdigest()}))
+                      'binarySha256': hashlib.sha256(BINARY.read_bytes()).hexdigest()}))
 
 
 if __name__ == '__main__':

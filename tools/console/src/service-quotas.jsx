@@ -57,6 +57,7 @@ export default function ServiceQuotas({ request, region, account }) {
     [],
   );
   function clear() {
+    setAcknowledged(false);
     setQuota(null);
     setPublished(null);
     setRows([]);
@@ -128,6 +129,7 @@ export default function ServiceQuotas({ request, region, account }) {
     refreshQuota();
   }, [region, request]);
   async function history(token = "", page = 0, recovery = false) {
+    if (recovery) setAcknowledged(false);
     const task = reads.current.begin();
     setRows([]);
     setRecord(null);
