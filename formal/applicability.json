@@ -114,6 +114,13 @@
       "models": []
     },
     {
+      "path": "internal/aws/catalog/resource_group_transaction_test.go",
+      "sha256": "9d87494aade4d6105592c26c6692efa2db8efdaffeb89336425d7a6c8e4a77d0",
+      "disposition": "test-support",
+      "reason": "Observe actual SQLite writes before cancel or deadline, reopen both group and repository state, and verify a single successful retry.",
+      "models": []
+    },
+    {
       "path": "internal/aws/catalog/selection.json",
       "sha256": "b90d4c0a08a7abae677a9d8d6ab5f102e98c69f0a95b5c59943a4684e4de3a1d",
       "disposition": "modeled",
@@ -133,9 +140,9 @@
     },
     {
       "path": "internal/aws/catalog/semantics.go",
-      "sha256": "5b4c44e0a4cc3d7701bcc42e29a8471bab5c642167dfa892f4551a4dff926afa",
+      "sha256": "ee9c353918cd40049530bce283eb93563c3171c12ec0c1bcecb03c1a30c009fd",
       "disposition": "modeled",
-      "reason": "Bind named ECR tag-query groups and their guarded regional collection read to the bounded catalog lifecycle.",
+      "reason": "Bind the guarded regional catalog reads and request-owned Resource Groups mutations to the bounded catalog lifecycle.",
       "models": [
         {
           "id": "CatalogResourceLifecycle",
@@ -145,7 +152,7 @@
             "PeerFrame",
             "StaleWriteRejected"
           ],
-          "limits": "The model abstracts guarded reads/writes, failed writes and peer frames. It does not model serialized query syntax, ECR tag matching, multi-action IAM, pagination, HTTP or SQLite snapshots."
+          "limits": "The model abstracts guarded reads/writes, failed writes and peer frames. It does not model serialized query syntax, ECR tag matching, multi-action IAM, pagination, HTTP or SQLite snapshots. Request lifetimes, SQL commit timing and physical runtime cleanup require native tests."
         }
       ]
     },

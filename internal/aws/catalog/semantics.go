@@ -794,7 +794,7 @@ func (q *request) create(ecsRevision int) (map[string]any, error) {
 	}
 	token, _ := q.input[tokenMember].(string)
 	request := fingerprint(q.input, tokenMember)
-	tx, err := q.e.store.db.Begin()
+	tx, err := q.beginMutation()
 	if err != nil {
 		return nil, err
 	}
@@ -992,8 +992,17 @@ func (q *request) update() (map[string]any, error) {
 	return q.output(r, parent), nil
 }
 
+// Resource Groups writes are entirely transactional. Other catalogs retain
+// their existing lifecycle, including RDS teardown before the SQLite write.
+func (q *request) beginMutation() (*sql.Tx, error) {
+	if q.b.spec.Model == "resource-groups" {
+		return q.e.store.db.BeginTx(q.ctx, nil)
+	}
+	return q.e.store.db.Begin()
+}
+
 func (q *request) commit(change func(*sql.Tx) error) error {
-	tx, err := q.e.store.db.Begin()
+	tx, err := q.beginMutation()
 	if err != nil {
 		return err
 	}
