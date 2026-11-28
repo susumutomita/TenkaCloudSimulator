@@ -8,12 +8,12 @@ jobs:
     runs-on: ubuntu-22.04
     timeout-minutes: 25
     env:
-      PRODUCT: 069a79b9be3c4973b7c246cc4a6bf666402e0d56
-      PRODUCT_TREE: c43224ef3685627ec7154825f01a62dca279d578
+      PRODUCT: f85a8379bd07724e00f88d87e07899cceab9cae7
+      PRODUCT_TREE: 320c47b1a9af9353e5b4c1e951b4980c02f06bf1
     steps:
       - uses: actions/checkout@v7.0.1
         with:
-          ref: 069a79b9be3c4973b7c246cc4a6bf666402e0d56
+          ref: f85a8379bd07724e00f88d87e07899cceab9cae7
           persist-credentials: false
       - uses: actions/setup-go@v6.5.0
         with:
@@ -72,13 +72,13 @@ jobs:
           if-no-files-found: error
           retention-days: 14
   complete-before-commit:
-    name: Unfiltered standard make before-commit at 069a79b
+    name: Unfiltered standard make before-commit at f85a837
     runs-on: ubuntu-24.04
     timeout-minutes: 80
     steps:
       - uses: actions/checkout@v7.0.1
         with:
-          ref: 069a79b9be3c4973b7c246cc4a6bf666402e0d56
+          ref: f85a8379bd07724e00f88d87e07899cceab9cae7
           persist-credentials: false
       - uses: actions/setup-go@v6.5.0
         with:
@@ -86,8 +86,8 @@ jobs:
           cache: true
       - name: Verify fixed product source and ordinary runner
         run: |
-          test "$(git rev-parse HEAD)" = 069a79b9be3c4973b7c246cc4a6bf666402e0d56
-          test "$(git rev-parse HEAD^{tree})" = c43224ef3685627ec7154825f01a62dca279d578
+          test "$(git rev-parse HEAD)" = f85a8379bd07724e00f88d87e07899cceab9cae7
+          test "$(git rev-parse HEAD^{tree})" = 320c47b1a9af9353e5b4c1e951b4980c02f06bf1
           test -z "$(git status --porcelain)"
           test "$(id -u)" -ne 0
           mkdir -p "$RUNNER_TEMP/elb-query-complete-gate"
@@ -122,7 +122,7 @@ jobs:
                   or 'statement coverage' in line.lower() or line.startswith('Go statements (full module)')]
           result = root / 'make-exit.txt'
           (root / 'summary.json').write_text(json.dumps({
-              'source': '069a79b9be3c4973b7c246cc4a6bf666402e0d56',
+              'source': 'f85a8379bd07724e00f88d87e07899cceab9cae7',
               'command': 'make before-commit',
               'make_exit': int(result.read_text()) if result.exists() else None,
               'observed_summaries': safe,
