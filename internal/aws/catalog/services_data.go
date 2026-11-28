@@ -737,7 +737,7 @@ func mskTagTarget(input map[string]any) error {
 // version as the official current broker software.
 func mskCreateCluster(input map[string]any) error {
 	if _, ok := input["ConfigurationInfo"]; ok {
-		return Failure("BadRequestException", "MSK configurations are not supported by the simulator; omit ConfigurationInfo.")
+		return Failure("BadRequestException", "Attaching an MSK configuration to a cluster is not supported. Omit ConfigurationInfo.")
 	}
 	group, _ := input["BrokerNodeGroupInfo"].(map[string]any)
 	subnets, _ := group["ClientSubnets"].([]any)
