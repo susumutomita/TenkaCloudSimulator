@@ -83,6 +83,9 @@ func (b *binding) openAPI() map[string]any {
 			operation := map[string]any{"operationId": b.spec.Model + op.Name, "tags": []any{tag}, "summary": op.Name,
 				"parameters": []any{routeHeader},
 				"responses":  map[string]any{"200": map[string]any{"description": "Projected official output shape."}, "400": map[string]any{"description": "Modeled exception named by X-Amzn-ErrorType."}, "403": map[string]any{"description": "AccessDeniedException."}, "404": map[string]any{"description": "Not found or no matching official route."}}}
+			if b.usesResourceGroupForbidden(op.Name) {
+				operation["responses"].(map[string]any)["403"] = map[string]any{"description": "ForbiddenException."}
+			}
 			if official.Input != "" {
 				shape := m.shape(official.Input)
 				params := operation["parameters"].([]any)

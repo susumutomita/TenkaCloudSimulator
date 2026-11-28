@@ -107,8 +107,11 @@ console, CloudFormation adapter or Challenge integration.
 - **Functions and messaging:** [Lambda](docs/lambda.md), [API Gateway](docs/apigateway.md),
   [SQS](docs/sqs.md), [SNS](docs/sns.md) (local HTTP/HTTPS subscription Console and reference; no external delivery),
   [CloudWatch Logs](docs/cloudwatch-logs.md).
+- [AWS Support](docs/aws-support.md) stores practice cases, follow-up messages and small attachments in the team's local database.
 - **Identity and secrets:** [IAM](docs/iam.md), [native SDK / STS](docs/sts-native.md),
   [Secrets Manager](docs/secrets-manager.md), [KMS](docs/kms.md), [WAFv2](docs/wafv2.md).
+  Manage role trust in the IAM Console, read the role in the API reference and
+  assume it through the local STS SDK.
 - **Networking:** [read-only EC2 instance discovery in the API Reference](docs/api-reference.md#aws-services-and-the-shared-endpoint),
   [EC2/VPC discovery and VPC create/delete](docs/ec2-read-discovery.md),
   [EC2-managed VPC Name and tags API](docs/ec2-read-discovery.md#native-vpc-tag-editing),
@@ -124,7 +127,7 @@ console, CloudFormation adapter or Challenge integration.
   [regional VPC console pages and saved-resource links](docs/ec2-vpc-console.md),
   [Elastic Load Balancing](docs/elb.md) (Lambda targets),
   [CloudFront VPC origins](docs/cloudfront-vpc-origin.md), [Route 53 public zones and one-PTR Console](docs/route53.md#console-browse-public-zones-and-create-one-ptr).
-- **Scaling:** [Auto Scaling plans for local DynamoDB tables](docs/autoscaling-plans.md).
+- **Scaling:** [Create a scaling plan in the Console and read back local DynamoDB table capacity](docs/autoscaling-plans.md).
 - **Infrastructure:** [CloudFormation](docs/cloudformation-rest.md),
   [EC2 template preview and opt-in local instance creation in the Console](docs/ec2-read-discovery.md#instance-launch-preview-is-not-a-launch),
   [SSM value parameters](docs/cloudformation-ssm-parameters.md),
@@ -136,6 +139,7 @@ console, CloudFormation adapter or Challenge integration.
   [Azure Blob conditional and CRC64 read limits](docs/azure-blob.md#single-range-download-subset),
   [App Engine (Python 3.12 WSGI versions, traffic splits, firewall)](docs/gcp-appengine.md),
   [Cloud DNS (bounded zone and record changes; Console SRV editor)](docs/acceptance/gcp-cloud-dns.md),
+  [Cloud Trace v1 ingestion, Trace explorer and paginated views](docs/gcp-trace.md),
   [Google Cloud console](docs/gcp-console.md), [Azure console](docs/azure-console.md),
   [Azure Queue Storage (bounded named-queue operations)](docs/acceptance/azure-queue.md),
   [local Entra OIDC verification fixture (not login or SAML)](docs/azure-entra-verification-fixture.md),
@@ -181,6 +185,8 @@ console, CloudFormation adapter or Challenge integration.
   To delete a compute environment, disable it and remove it from every job queue in the same Region.
   Batch also stores and deregisters bounded EC2 single-container job definition
   revisions; it does not pull images, run containers, or submit jobs.
+  Resource Groups shows local ECR repository ARNs matching a named group’s tag key and value. Open the group in the service catalog to edit its saved filter.
+  Policies for `CreateGroup` and `ListGroups` require `Resource: "*"`, including when all groups share an ARN pattern. All eleven supported operations return HTTP 403 `ForbiddenException` on IAM denial. Plain and tag-query groups omit `ApplicationTag`. [Resource Groups workflow and IAM requirements](docs/aws-catalog.md#ecr-repository-group-membership)
   The AWS catalog console registers a name, image name, vCPUs and memory,
   and deregisters exact revision ARNs without deleting inactive history.
   Redshift can read tags on one existing stored resource ARN; it does not
@@ -238,3 +244,7 @@ The identified runtime portions were independently reimplemented against public
 AWS contracts. We retain the [original MIT notice](third_party/KUMO-LICENSE.txt)
 and [reviewed replacement scope](third_party/independent-native-source.json).
 These records are not a clean-room or legal certification.
+
+The local SimpleDB Query reference also offers explicit PutAttributes and
+DeleteDomain practice examples. Put replaces one named attribute; whole-domain
+cleanup must target only a disposable domain owned by the caller.

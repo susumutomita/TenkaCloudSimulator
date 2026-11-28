@@ -41,9 +41,9 @@ revert capacity; the AWS model notes that resources a plan launched must be
 deleted separately.
 
 Target tracking configurations are validated, stored and returned as
-`TargetTrackingScaling` policies, but **never evaluated**: the simulator has no
-CloudWatch metrics, alarms or scaling activities. Capacity changes only at
-create/update. This is not dynamic scaling.
+`TargetTrackingScaling` policies. Scaling Plans records the configurations and applies capacity bounds only
+at create or update. The planner does not evaluate metrics, generate alarms or run
+background scaling activities.
 
 ### Statuses
 
@@ -144,11 +144,33 @@ credentials. Session tokens, conflicting `X-Simulator-Service`/region selectors
 and duplicate routing headers are rejected. Startup refuses orphaned plan
 resources without modifying them.
 
-Not included: Cloudscape console, CloudFormation resources, the Lambda execution
+Not included: CloudFormation resources, the Lambda execution
 role SDK bridge, predictive scaling, forecasts, resource discovery, scaling
 activities and EC2/ECS/RDS/Spot targets. The API reference documents the five
 operations under **AWS Auto Scaling plans**; its templates assume a PROVISIONED
 table named `autoscaling-practice`.
+
+## Console workflow
+
+Open **Services → AWS Auto Scaling Plans** in the target AWS region. Choose
+**Create scaling plan**, name an existing PROVISIONED table, enter one source
+tag key and value, select read or write capacity, and enter both bounds. For
+example, a table starting at 2 read and 9 write units becomes 5/9 after a read
+plan with bounds 5–8. Choose **Read capacity** in the resource row to verify
+both values with DynamoDB DescribeTable. The plan and resource details come
+from the two corresponding Scaling Plans describe operations.
+
+**Edit capacity bounds** on a single-instruction plan preserves its target and
+stored configurations. Changing that example to 2–3 gives 3/9. SDK-created
+multi-instruction plans expose every resource for inspection. Use the API to
+change a multi-instruction list. **Delete plan** requires the exact name and
+keeps the target table at its last capacity.
+
+The signed-in Console uses the same caller policy as the API. Reading capacity
+requires DynamoDB DescribeTable on the table even if the participant can
+describe the plan. Switching region or identity discards pending view data.
+Inside the current view, an interrupted write with an unknown outcome requires
+an explicit refresh of that plan before another change.
 
 ## Verification
 
@@ -158,7 +180,13 @@ table named `autoscaling-practice`.
   status, storage faults, restart, participant tokens and two teams).
 - SDK: `test/e2e/autoscaling_plans.py` with boto3 against two authenticated CLI
   processes, including the served templates and an actual reopen.
-- Formal: `formal/AutoScalingPlanTargets.tla` is a finite two-team model of
+- Console: `test/e2e/autoscaling_plans_console.py --sdk` checks the actual
+  Cloudscape workflow, independent SDK capacity readback, participant denial,
+  two process authorities, restart and cleanup. Set `AXE_SCRIPT` to the pinned
+  axe-core file to audit the English desktop and Japanese narrow layouts.
+- Formal: `formal/ScalingPlanConsole.tla` checks late replies, write
+  acknowledgement and named reconciliation in a bounded mounted view.
+  `formal/AutoScalingPlanTargets.tla` is a finite two-team model of
   capacity bounds, ownership, authority, rollback and team frames with eleven
   mutation controls. It is bounded checking, not a proof of the Go/SQL code.
 

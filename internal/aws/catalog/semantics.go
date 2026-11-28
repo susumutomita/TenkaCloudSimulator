@@ -54,6 +54,14 @@ func (q *request) execute() (map[string]any, error) {
 		}
 		return q.create(0)
 	case Read:
+		if q.b.spec.Model == "resource-groups" {
+			switch q.op.Name {
+			case "GetGroupQuery":
+				return q.getGroupQuery()
+			case "ListGroupResources":
+				return q.listGroupResources()
+			}
+		}
 		return q.read()
 	case List:
 		if q.isBatchJobDefinition() {
@@ -326,6 +334,9 @@ func (q *request) referenced(tx *sql.Tx, res *Resource, r row) error {
 }
 
 func (q *request) authorize(resource string) error {
+	if q.b.isResourceGroupServiceAction(q.op.Name) {
+		resource = "*"
+	}
 	return q.authorizeAction(q.b.spec.IAMPrefix+":"+q.op.action(), resource)
 }
 
@@ -346,6 +357,10 @@ func (q *request) authorizeAction(action, resource string) error {
 	if err != nil {
 		return err
 	}
+	return q.checkDecision(decision)
+}
+
+func (q *request) checkDecision(decision string) error {
 	q.w.Header().Set("X-Simulator-IAM-Decision", decision)
 	if decision != "allowed" {
 		return &fault{kind: "denied", message: "IAM evaluation: " + decision}
@@ -799,7 +814,7 @@ func (q *request) create(ecsRevision int) (map[string]any, error) {
 	}
 	token, _ := q.input[tokenMember].(string)
 	request := fingerprint(q.input, tokenMember)
-	tx, err := q.e.store.db.Begin()
+	tx, err := q.beginMutation()
 	if err != nil {
 		return nil, err
 	}
@@ -997,8 +1012,17 @@ func (q *request) update() (map[string]any, error) {
 	return q.output(r, parent), nil
 }
 
+// Resource Groups writes are entirely transactional. Other catalogs retain
+// their existing lifecycle, including RDS teardown before the SQLite write.
+func (q *request) beginMutation() (*sql.Tx, error) {
+	if q.b.spec.Model == "resource-groups" {
+		return q.e.store.db.BeginTx(q.ctx, nil)
+	}
+	return q.e.store.db.Begin()
+}
+
 func (q *request) commit(change func(*sql.Tx) error) error {
-	tx, err := q.e.store.db.Begin()
+	tx, err := q.beginMutation()
 	if err != nil {
 		return err
 	}
@@ -1330,6 +1354,12 @@ func (q *request) responseDocument(res *Resource, r row, shapeName string) map[s
 	if res.ProjectResponse != nil {
 		res.ProjectResponse(doc)
 	}
+	// ApplicationTag identifies an application group. The supported plain and
+	// query groups expose their ordinary tags through the tag operations.
+	if q.b.spec.Model == "resource-groups" && shapeName == "Group" {
+		delete(doc, "ApplicationTag")
+		return doc
+	}
 	if member := q.tagMember(shapeName); member != "" {
 		doc[member] = q.renderTags(q.b.model.shape(shapeName).Members[member].Shape, r.Tags)
 	}
@@ -1338,6 +1368,9 @@ func (q *request) responseDocument(res *Resource, r row, shapeName string) map[s
 
 // output projects a resource onto the operation's official output shape.
 func (q *request) output(r row, parent *row) map[string]any {
+	if q.b.spec.Model == "resource-groups" && q.op.Name == "UpdateGroupQuery" {
+		return groupQueryOutput(r)
+	}
 	out := map[string]any{}
 	if q.official.Output == "" {
 		return out

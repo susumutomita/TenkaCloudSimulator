@@ -4,6 +4,11 @@ on:
     branches: [main]
   pull_request:
   workflow_dispatch:
+    inputs:
+      s3_paging_trial:
+        description: Run the isolated S3 1,001-part browser check on Ubuntu 22.04
+        type: boolean
+        default: false
   workflow_call:
 permissions:
   contents: read
@@ -81,7 +86,7 @@ jobs:
         run: |
           npm ci --prefix tools/console --ignore-scripts --no-audit --no-fund
           node tools/console/build.mjs
-          node --test tools/console/test/gcp-dns*.test.mjs tools/console/test/simpledb-client.test.mjs tools/console/test/ec2-security-groups.test.mjs
+          node --test tools/console/test/gcp-dns*.test.mjs tools/console/test/simpledb-client.test.mjs tools/console/test/ec2-security-groups.test.mjs tools/console/test/support-client.test.mjs tools/console/tests/gcp-trace.test.mjs
           git diff --exit-code -- internal/server/web internal/legal/assets/CONSOLE-NOTICES.txt third_party/CONSOLE-NOTICES.txt third_party/console-packages.json tools/console/bundle-inputs.json tools/console/bundle-digests.json
           npm audit --prefix tools/console --audit-level=high
       - name: Check secret description console and preserved disclosure contracts
@@ -203,7 +208,7 @@ jobs:
       - name: Build the actual embedded simulator
         run: |
           make build
-          sha256sum dist/tenkacloud-simulator > "$RUNNER_TEMP/queue-simulator.sha256"
+          sha256sum dist/tenkacloud-simulator > "$RUNNER_TEMP/platform-simulator.sha256"
       - name: Install Python SDK and browser tools
         timeout-minutes: 3
         run: |
@@ -214,8 +219,14 @@ jobs:
         run: |
           /tmp/simulator-tests/bin/pip install --require-hashes --only-binary=:all: --no-deps -r scripts/requirements-azure-queue-test.txt
           /tmp/simulator-tests/bin/pip check
-          read -r binary_sha _ < "$RUNNER_TEMP/queue-simulator.sha256"
+          read -r binary_sha _ < "$RUNNER_TEMP/platform-simulator.sha256"
           /tmp/simulator-tests/bin/python test/e2e/azure_queue_cli.py --binary "$PWD/dist/tenkacloud-simulator" --binary-sha256 "$binary_sha"
+      - name: Verify local STS session invalidation and team isolation with boto3
+        timeout-minutes: 3
+        run: |
+          /tmp/simulator-tests/bin/python test/e2e/test_sts_session_lifecycle.py
+          read -r binary_sha _ < "$RUNNER_TEMP/platform-simulator.sha256"
+          /tmp/simulator-tests/bin/python test/e2e/sts_session_lifecycle.py --binary "$PWD/dist/tenkacloud-simulator" --binary-sha256 "$binary_sha"
       - name: Install full Chromium system dependencies
         timeout-minutes: 12
         run: /tmp/simulator-tests/bin/playwright install-deps chromium
@@ -305,7 +316,7 @@ jobs:
   e2e:
     name: Real binary, SDK, console and API reference E2E
     if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     timeout-minutes: 45
     steps:
       - uses: actions/checkout@v7.0.1
@@ -318,7 +329,9 @@ jobs:
       - name: Install Python SDK and browser tools
         timeout-minutes: 3
         run: |
-          python3 -m venv /tmp/simulator-tests
+          python="$RUNNER_TOOL_CACHE/Python/3.12.16/x64/bin/python3.12"
+          "$python" -c 'import sys; assert sys.version_info[:3] == (3, 12, 16)'
+          "$python" -m venv /tmp/simulator-tests
           /tmp/simulator-tests/bin/pip install -r scripts/requirements-test.txt
       - name: Install full Chromium system dependencies
         timeout-minutes: 12
@@ -329,7 +342,20 @@ jobs:
       - name: Prepare pinned axe-core for mandatory browser accessibility checks
         run: /tmp/simulator-tests/bin/python scripts/get-audit-tools.py /tmp/simulator-audit
       - name: Verify real binary, SDK, console, and offline API reference
-        run: AXE_SCRIPT=/tmp/simulator-audit/axe.min.js make e2e PYTHON=/tmp/simulator-tests/bin/python
+        id: conformance
+        run: |
+          test -z "$(git status --porcelain)"
+          AXE_SCRIPT=/tmp/simulator-audit/axe.min.js make e2e PYTHON=/tmp/simulator-tests/bin/python
+      - name: Identify the binary exercised by the S3 paging fixture
+        if: "!cancelled() && steps.conformance.outcome != 'skipped'"
+        run: |
+          mkdir -p reports
+          go version -m dist/tenkacloud-simulator > reports/s3-multipart-paging-build.txt
+          grep -F "vcs.revision=$(git rev-parse HEAD)" reports/s3-multipart-paging-build.txt
+          grep -F 'vcs.modified=false' reports/s3-multipart-paging-build.txt
+          sha256sum dist/tenkacloud-simulator > reports/s3-multipart-paging.sha256
+          digest=$(cut -d ' ' -f 1 reports/s3-multipart-paging.sha256)
+          jq -se --arg digest "$digest" 'length == 1 and (.[0] | .binarySha256 == $digest and .parts == 1001)' reports/s3-multipart-paging.json
       - name: Retain service console screenshots and safe audit evidence
         if: always()
         uses: actions/upload-artifact@v7.0.2
@@ -339,6 +365,9 @@ jobs:
             reports/lambda-inline-*.png
             reports/service-locale-*.png
             reports/scalar-aws-json.json
+            reports/s3-multipart-paging.json
+            reports/s3-multipart-paging-build.txt
+            reports/s3-multipart-paging.sha256
             reports/secrets-metadata-*.png
             reports/secrets-a11y-summary.json
             reports/landing-topology/**
@@ -352,4 +381,55 @@ jobs:
             reports/login-paste-*.png
             reports/language-login-ja-*.png
           if-no-files-found: warn
+          retention-days: 14
+  s3-multipart-paging-trial:
+    name: Isolated S3 multipart paging on Ubuntu 22.04
+    if: github.event_name == 'workflow_dispatch' && inputs.s3_paging_trial
+    runs-on: ubuntu-22.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          ref: ${{ github.sha }}
+      - uses: actions/setup-go@v6.5.0
+        with:
+          go-version: '1.26.11'
+          cache: true
+      - name: Build and identify the dispatched simulator
+        run: |
+          test "$(id -u)" -ne 0
+          test "$(uname -m)" = x86_64
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          make build
+          mkdir -p reports/s3-paging-trial
+          go version -m dist/tenkacloud-simulator > reports/s3-paging-trial/build.txt
+          grep -F "vcs.revision=$GITHUB_SHA" reports/s3-paging-trial/build.txt
+          grep -F 'vcs.modified=false' reports/s3-paging-trial/build.txt
+      - name: Prepare pinned SDK and Chromium with the hosted CPython 3.12
+        run: |
+          "$RUNNER_TOOL_CACHE/Python/3.12.16/x64/bin/python3.12" -m venv /tmp/s3-paging-tests
+          /tmp/s3-paging-tests/bin/python -m pip install -r scripts/requirements-test.txt
+          /tmp/s3-paging-tests/bin/playwright install --with-deps chromium
+      - name: Verify isolation refusals and run the native browser fixture
+        env:
+          RECEIPT: reports/s3-paging-trial/paging.json
+        run: |
+          /tmp/s3-paging-tests/bin/python test/e2e/test_s3_multipart_paging_launcher.py
+          /tmp/s3-paging-tests/bin/python test/e2e/run_s3_multipart_paging.py \
+            --binary "$PWD/dist/tenkacloud-simulator" > "$RECEIPT"
+          digest=$(sha256sum dist/tenkacloud-simulator | cut -d ' ' -f 1)
+          jq -se --arg digest "$digest" '
+            length == 1 and (.[0] |
+            .binarySha256 == $digest and .parts == 1001 and
+            .nativeBrowserListMarkers == [[0,1000],[0,1000],[0,1000],[0,1000]] and
+            .staleReviewNoPost == true and .completePostIncludesAllParts == true and
+            .nativeSizeRefusalPreservedUpload == true and .nativeBrowserPartSave == true and
+            .visibleFinalPartRefresh == true and .nativeAbortAndDelete == true and .realAWS == false)
+          ' "$RECEIPT"
+      - name: Retain the build and paging receipt
+        uses: actions/upload-artifact@v7.0.2
+        with:
+          name: s3-multipart-paging-${{ github.sha }}
+          path: reports/s3-paging-trial/
+          if-no-files-found: error
           retention-days: 14

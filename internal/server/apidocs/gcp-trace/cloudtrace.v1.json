@@ -1,0 +1,391 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Cloud Trace v1",
+    "version": "v1",
+    "description": "Google Cloud Trace observations on the local simulator. The configured project owner can read or append spans."
+  },
+  "servers": [
+    {
+      "url": "/_simulator/providers/gcp/cloudtrace/v1"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Traces"
+    }
+  ],
+  "paths": {
+    "/projects/{projectId}/traces": {
+      "patch": {
+        "operationId": "patchTraces",
+        "summary": "Append span observations",
+        "description": "Appends observations atomically. Repeated trace and span IDs add another observation.",
+        "tags": [
+          "Traces"
+        ],
+        "parameters": [
+          {
+            "name": "projectId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Configured local project ID."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful local Trace operation.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {},
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Project, validation, query, capacity or storage error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Traces"
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "operationId": "list",
+        "summary": "List traces",
+        "description": "Inclusive interval overlap with any stored span. Trace IDs are sorted in ascending order. MINIMAL returns IDs. ROOTSPAN shows roots, and COMPLETE shows stored observations.",
+        "tags": [
+          "Traces"
+        ],
+        "parameters": [
+          {
+            "name": "projectId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Configured local project ID."
+          },
+          {
+            "name": "startTime",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "endTime",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "view",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "MINIMAL",
+              "enum": [
+                "MINIMAL",
+                "ROOTSPAN",
+                "COMPLETE"
+              ]
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "description": "Default 25. The server returns at most 50."
+            }
+          },
+          {
+            "name": "pageToken",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "orderBy",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "trace_id"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful local Trace operation.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListTracesResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Project, validation, query, capacity or storage error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/projects/{projectId}/traces/{traceId}": {
+      "get": {
+        "operationId": "get",
+        "summary": "Get one trace",
+        "description": "Returns stored observations in ingestion order.",
+        "tags": [
+          "Traces"
+        ],
+        "parameters": [
+          {
+            "name": "projectId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Configured local project ID."
+          },
+          {
+            "name": "traceId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{32}$",
+              "example": "18ef054b00874c78a43cedf89eaf0042"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful local Trace operation.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Trace"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Project, validation, query, capacity or storage error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "TraceSpan": {
+        "type": "object",
+        "properties": {
+          "spanId": {
+            "type": "string",
+            "pattern": "^[1-9][0-9]{0,19}$",
+            "description": "Canonical nonzero decimal uint64 string, up to 18446744073709551615."
+          },
+          "parentSpanId": {
+            "type": "string",
+            "pattern": "^(0|[1-9][0-9]{0,19})$",
+            "description": "Canonical decimal uint64 string. An absent parent or the string 0 indicates a root."
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "SPAN_KIND_UNSPECIFIED",
+              "RPC_CLIENT",
+              "RPC_SERVER"
+            ]
+          },
+          "name": {
+            "type": "string",
+            "description": "1 to 127 UTF-8 bytes."
+          },
+          "startTime": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "endTime": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "labels": {
+            "type": "object",
+            "maxProperties": 16,
+            "additionalProperties": {
+              "type": "string"
+            }
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "spanId",
+          "name",
+          "startTime",
+          "endTime"
+        ]
+      },
+      "Trace": {
+        "type": "object",
+        "properties": {
+          "projectId": {
+            "type": "string"
+          },
+          "traceId": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{32}$",
+            "example": "18ef054b00874c78a43cedf89eaf0042"
+          },
+          "spans": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TraceSpan"
+            }
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "projectId",
+          "traceId"
+        ]
+      },
+      "Traces": {
+        "type": "object",
+        "properties": {
+          "traces": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/InputTrace"
+            },
+            "minItems": 1,
+            "maxItems": 100
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "traces"
+        ],
+        "description": "One to 100 span observations in total, across all traces."
+      },
+      "ListTracesResponse": {
+        "type": "object",
+        "properties": {
+          "traces": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Trace"
+            }
+          },
+          "nextPageToken": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "traces"
+        ]
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer"
+              },
+              "message": {
+                "type": "string"
+              },
+              "status": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "code",
+              "message",
+              "status"
+            ]
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "error"
+        ]
+      },
+      "InputTrace": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Trace"
+          },
+          {
+            "type": "object",
+            "required": [
+              "spans"
+            ],
+            "properties": {
+              "spans": {
+                "type": "array",
+                "minItems": 1,
+                "maxItems": 100
+              }
+            }
+          }
+        ]
+      }
+    }
+  }
+}
