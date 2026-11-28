@@ -201,9 +201,10 @@
           "properties": [
             "AuthorizationFirst",
             "FailureFrame",
-            "PeerFrame"
+            "PeerFrame",
+            "QuotaBound"
           ],
-          "limits": "Retain the existing catalog admission/state-frame abstraction for operation/model declarations. It does not prove these JSON codecs or computed read outputs; ServiceQuotaDiscovery and native tests cover their separately stated finite projection and executable contracts."
+          "limits": "Covers finite operation admission, refusal/peer frames and declared capacity. The official schema, real configured backend limit, request history and regional IAM targets require native and SDK verification."
         },
         {
           "id": "ServiceQuotaRequests",
@@ -252,9 +253,10 @@
           "properties": [
             "AuthorizationFirst",
             "FailureFrame",
-            "PeerFrame"
+            "PeerFrame",
+            "QuotaBound"
           ],
-          "limits": "Retain the existing catalog admission/state-frame abstraction for operation/model declarations. It does not prove these JSON codecs or computed read outputs; ServiceQuotaDiscovery and native tests cover their separately stated finite projection and executable contracts."
+          "limits": "Covers finite operation admission, refusal/peer frames and declared capacity. The official schema, real configured backend limit, request history and regional IAM targets require native and SDK verification."
         }
       ]
     },
