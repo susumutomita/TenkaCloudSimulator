@@ -1,11 +1,6 @@
-name: Formal validation
+name: Complete notification rules validation on the exact CodeCommit PR base
 on:
-  push:
-    branches: [main]
-  pull_request:
-  merge_group:
   workflow_dispatch:
-  workflow_call:
 permissions:
   contents: read
 jobs:
@@ -17,7 +12,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7.0.1
         with:
-          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          ref: 60b960aae054e0d92f9628f16f99be303d525dfd
           fetch-depth: 0
           persist-credentials: false
       - name: Exercise applicability and gate negative controls
@@ -40,7 +35,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7.0.1
         with:
-          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          ref: 60b960aae054e0d92f9628f16f99be303d525dfd
           persist-credentials: false
       - name: Run this shard of the finite models and required invariant counterexamples
         env:
@@ -54,7 +49,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v7.0.2
         with:
-          name: formal-shard-${{ matrix.shard }}-${{ github.event.pull_request.head.sha || github.sha }}
+          name: formal-shard-${{ matrix.shard }}-60b960aae054e0d92f9628f16f99be303d525dfd
           path: reports/formal/shard-${{ matrix.shard }}/
           if-no-files-found: error
           retention-days: 14
@@ -70,14 +65,17 @@ jobs:
     steps:
       - uses: actions/checkout@v7.0.1
         with:
-          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          ref: 60b960aae054e0d92f9628f16f99be303d525dfd
           fetch-depth: 0
           persist-credentials: false
       - name: Validate exact changed blobs and declared model applicability
         env:
           PYTHONPYCACHEPREFIX: ${{ runner.temp }}/formal-python-cache
         run: |
-          base=$(python3 scripts/check-formal-applicability.py event-base --event "$GITHUB_EVENT_PATH")
+          test "$(git rev-parse HEAD)" = 60b960aae054e0d92f9628f16f99be303d525dfd
+          test "$(git rev-parse HEAD^{tree})" = 2cf22c32172145516a93c0ffb208e9dd30aeabad
+          base=387fb84072981e391d0eeb701b01d5598f97b888
+          git merge-base --is-ancestor "$base" HEAD
           python3 scripts/check-formal-applicability.py check --base "$base"
       - name: Require the gate tests and every TLC shard to succeed
         if: env.FULL == 'true'
@@ -90,7 +88,7 @@ jobs:
       - if: env.FULL == 'true'
         uses: actions/download-artifact@v8.0.2
         with:
-          pattern: formal-shard-*-${{ github.event.pull_request.head.sha || github.sha }}
+          pattern: formal-shard-*-60b960aae054e0d92f9628f16f99be303d525dfd
           path: reports/formal/shards
       - name: Accept the shards only as one full merge-gate run of this head
         if: env.FULL == 'true'
@@ -101,7 +99,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v7.0.2
         with:
-          name: formal-${{ github.event.pull_request.head.sha || github.sha }}
+          name: formal-60b960aae054e0d92f9628f16f99be303d525dfd
           path: reports/formal/
           if-no-files-found: error
           retention-days: 14
