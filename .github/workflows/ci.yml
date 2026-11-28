@@ -1,6 +1,12 @@
 name: MSK and Batch complete gate and stock SDK evidence
 on:
   workflow_dispatch:
+    inputs:
+      scope:
+        description: 'Run the complete gate alone or together with the client fixtures'
+        type: choice
+        default: full-and-clients
+        options: [full-and-clients, full-gate]
 permissions:
   contents: read
 jobs:
@@ -53,13 +59,18 @@ jobs:
         id: gate
         run: |
           umask 077
+          python3 -c 'import sys; print(sys.version.split()[0], sys.executable)' > "$RUNNER_TEMP/msk-batch-evidence/gate-python.txt"
+          git rev-parse --is-shallow-repository > "$RUNNER_TEMP/msk-batch-evidence/shallow.txt"
+          df -Pk . "$RUNNER_TEMP" | awk 'NR > 1 {print $4}' > "$RUNNER_TEMP/msk-batch-evidence/free-kib-before.txt"
           result=0
           make before-commit > "$RUNNER_TEMP/msk-batch-make.log" 2>&1 || result=$?
           printf '%s\n' "$result" > "$RUNNER_TEMP/msk-batch-evidence/make-exit.txt"
+          df -Pk . "$RUNNER_TEMP" | awk 'NR > 1 {print $4}' > "$RUNNER_TEMP/msk-batch-evidence/free-kib-after.txt"
+          git status --porcelain | wc -l > "$RUNNER_TEMP/msk-batch-evidence/post-gate-change-count.txt"
           exit "$result"
       - name: Verify the binary for the stock catalog fixtures
         id: binary
-        if: ${{ !cancelled() && steps.source.outcome == 'success' }}
+        if: ${{ !cancelled() && steps.source.outcome == 'success' && (steps.gate.outcome == 'success' || inputs.scope == 'full-and-clients') }}
         run: |
           test -z "$(git status --porcelain)"
           # The standard gate builds last. If it stopped earlier, still exercise
@@ -71,7 +82,7 @@ jobs:
           sha256sum dist/tenkacloud-simulator > "$RUNNER_TEMP/msk-batch-evidence/binary.sha256"
       - name: Install the checked-in SDK requirements
         id: sdk_tools
-        if: ${{ !cancelled() && steps.python.outcome == 'success' && steps.binary.outcome == 'success' }}
+        if: ${{ !cancelled() && inputs.scope == 'full-and-clients' && steps.python.outcome == 'success' && steps.binary.outcome == 'success' }}
         run: |
           "$RUNNER_TOOL_CACHE/Python/3.12.16/x64/bin/python3.12" -m venv "$RUNNER_TEMP/msk-batch-venv"
           "$RUNNER_TEMP/msk-batch-venv/bin/pip" install -r scripts/requirements-test.txt
@@ -148,7 +159,7 @@ jobs:
           SCALAR_OUTCOME: ${{ steps.scalar.outcome }}
         run: |
           python3 - <<'PY'
-          import json, os, re
+          import json, os, re, subprocess
           from pathlib import Path
           temp = Path(os.environ['RUNNER_TEMP'])
           evidence = temp / 'msk-batch-evidence'
@@ -165,7 +176,51 @@ jobs:
           def exit_code(name):
               path = evidence / name
               return int(path.read_text()) if path.is_file() else None
+          # Retain stage identifiers and locations from this pinned checkout.
+          # Raw diagnostics, source lines, exception details and environment stay private.
+          markers = {
+              'vet': 'go vet ./...', 'assets': 'python3 scripts/check-assets.py',
+              'modules': 'go mod verify', 'recursive-test-build': 'make test build',
+              'verification-tests': 'python3 -m unittest discover -s scripts/verification',
+              'battle-tests': 'python3 -m unittest discover -s test/battle/image',
+              'smithy-check': 'python3 scripts/smithy-contracts.py --check',
+              'smithy-tests': 'python3 scripts/test-smithy-contracts.py',
+              'factory-tests': 'python3 scripts/test-software-factory.py',
+              'factory-acceptance-tests': 'python3 scripts/test-factory-acceptance.py',
+              'factory-acceptance': 'python3 scripts/factory_acceptance.py',
+              'coverage-tests': 'python3 scripts/test-coverage-gate.py',
+              'go-race-coverage': 'go test -p 1 -race -coverpkg=./...',
+              'coverage-gate': 'python3 scripts/check-coverage.py', 'build': 'CGO_ENABLED=0 go build',
+          }
+          lines = text.splitlines()
+          entered = [name for name, command in markers.items() if any(line.startswith(command) for line in lines)]
+          allowed_targets = {'format-check','vet','verify-assets','before-commit','test','test-scripts','test-go','build'}
+          failed_targets = [{'line': int(number), 'target': target} for number, target in
+                            re.findall(r'\[Makefile:(\d+): ([a-z-]+)\] Error', text) if target in allowed_targets]
+          signals = {
+              'dirty-checkout': 'dirty/untracked work is not exact HEAD',
+              'factory-blocked': 'factory acceptance blocked:', 'formatted-files': 'Go formatting changed',
+              'disk-full': 'no space left on device', 'permission-denied': 'permission denied',
+              'missing-executable': 'executable file not found', 'missing-module': 'No module named',
+              'offline-module-lookup': 'module lookup disabled by GOPROXY=off',
+              'deadline': 'context deadline exceeded', 'killed': 'signal: killed',
+              'invalid-git-object': 'not a valid object name', 'unavailable-git-object': 'bad object',
+              'assertion': 'AssertionError', 'called-process-error': 'CalledProcessError',
+              'git-identity': 'Author identity unknown', 'unrecognized-argument': 'unrecognized arguments:',
+          }
+          tracked = set(subprocess.check_output(['git', 'ls-files'], text=True).splitlines())
+          workspace = str(Path.cwd())+'/'
+          locations = []
+          for file, number in re.findall(r'^\s*File "([^"\n]+)", line (\d+)', text, re.M):
+              relative = file.removeprefix(workspace)
+              if relative in tracked and relative.endswith('.py'):
+                  location = {'path': relative, 'line': int(number)}
+                  if location not in locations: locations.append(location)
           summary = {
+              'entered_make_phases': entered, 'failed_make_targets': failed_targets,
+              'classified_make_signals': [name for name, marker in signals.items() if marker in text],
+              'tracked_python_trace_locations': locations[-16:],
+              'passing_python_suite_counts': [int(n) for n in re.findall(r'^Ran (\d+) tests? in [0-9.]+s\s+OK$', text, re.M)],
               'steps': {step: os.environ[step+'_OUTCOME'] for step in ('SOURCE','GATE','BUILD','SDK_TOOLS','SDK','BROWSER','SCALAR')},
               'make_exit': exit_code('make-exit.txt'), 'sdk_exit': exit_code('sdk-exit.txt'), 'scalar_exit': exit_code('scalar-exit.txt'),
               'failed_packages': re.findall(r'^FAIL\s+(github\.com/susumutomita/TenkaCloudSimulator/[\w./-]+)', text, re.M),
