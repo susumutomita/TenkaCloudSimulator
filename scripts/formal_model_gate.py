@@ -4834,7 +4834,7 @@ REQUIRED_MUTANTS['CloudTraceObservations'] = {
 }
 REQUIRED_SOURCE_SCOPES['CloudTraceObservations'] = {
     'internal/gcp/trace/store.go', 'internal/gcp/trace/model.go', 'internal/gcp/trace/http.go',
-    'internal/server/cloud_storage.go',
+    'internal/server/cloud_storage.go', 'internal/gcp/internal/jsonwire/unicode.go',
 }
 
 

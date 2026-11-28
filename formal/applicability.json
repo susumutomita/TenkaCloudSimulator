@@ -3,10 +3,38 @@
   "base_sha": "03d71307bbe6382df16d26bcd5d26e454f5036a6",
   "changes": [
     {
+      "path": "README.md",
+      "sha256": "88c968f92b1369cd5b2862f19960182510a592933a90ea5a719fb87006af6934",
+      "disposition": "documentation",
+      "reason": "Document the published and local API contracts, persistence, entry points, isolation and unsupported operations.",
+      "models": []
+    },
+    {
+      "path": "docs/design/0001-go-standalone.md",
+      "sha256": "85a92fe8de58dbd5a4e103f7446edf49b509e5303e4841760b2168c599def42a",
+      "disposition": "documentation",
+      "reason": "Document the published and local API contracts, persistence, entry points, isolation and unsupported operations.",
+      "models": []
+    },
+    {
+      "path": "docs/gcp-catalog.md",
+      "sha256": "097918ffc811485dd237f267b83030bcf95b6b8c042f26bf7c62577fcd6607da",
+      "disposition": "documentation",
+      "reason": "Document the published and local API contracts, persistence, entry points, isolation and unsupported operations.",
+      "models": []
+    },
+    {
+      "path": "docs/gcp-trace.md",
+      "sha256": "36a764081d97e326f7dd8805b8cd82ddadee14f1593c973047954983a18f6970",
+      "disposition": "documentation",
+      "reason": "Document the published and local API contracts, persistence, entry points, isolation and unsupported operations.",
+      "models": []
+    },
+    {
       "path": "formal/CloudTraceObservations.cfg",
       "sha256": "cc9fd22df3c5bce531b493bb8cc031b84c4b74bc8284f89adac245dda8a299d8",
       "disposition": "modeled",
-      "reason": "Run all bounded publication, scope and read-projection invariants.",
+      "reason": "Bind observed spans, trusted project membership, atomic admission and paged snapshots to the checked abstract state. Native tests cover concrete parsing and persistence.",
       "models": [
         {
           "id": "CloudTraceObservations",
@@ -33,7 +61,7 @@
       "path": "formal/CloudTraceObservations.tla",
       "sha256": "3a072665269e88a22a49b217fdd8761ecedc0f4bff5bd680af0a6401f0b34a77",
       "disposition": "modeled",
-      "reason": "Model published trace observations, admission and rollback in two project-owner scopes, sorted snapshot paging and fresh Get.",
+      "reason": "Bind observed spans, trusted project membership, atomic admission and paged snapshots to the checked abstract state. Native tests cover concrete parsing and persistence.",
       "models": [
         {
           "id": "CloudTraceObservations",
@@ -58,23 +86,240 @@
     },
     {
       "path": "formal/models.json",
-      "sha256": "7c3c30fbaf8f31d35e01bd196f7f94dfe2e697572339e73b38f891d00f45f8d1",
+      "sha256": "3d35adafd3c18ce950619ebf8188b6bf5d2fc15e3a573fcc19d12110cacffc4f",
       "disposition": "formal-infrastructure",
-      "reason": "Register Cloud Trace bounded observations with executable mutation controls and explicit scope limits.",
+      "reason": "Register and independently check the finite Cloud Trace model, its source bindings and specific mutation controls.",
       "models": []
     },
     {
+      "path": "internal/gcp/internal/jsonwire/unicode.go",
+      "sha256": "99f3b294447bb2f7c6d6c82b280b182c2040c5ff8d7e014b54f5da97edc2d5ee",
+      "disposition": "modeled",
+      "reason": "Bind observed spans, trusted project membership, atomic admission and paged snapshots to the checked abstract state. Native tests cover concrete parsing and persistence.",
+      "models": [
+        {
+          "id": "CloudTraceObservations",
+          "properties": [
+            "FirstPageOrdered",
+            "PendingInvisible",
+            "AdmitEligible",
+            "CallerBound",
+            "ValidBatchOnly",
+            "ProjectBound",
+            "PeerUnchanged",
+            "AllObservationsCommitted",
+            "RollbackUnchanged",
+            "GetCurrent",
+            "NextBound",
+            "NextStableKey",
+            "NextStableBody"
+          ],
+          "limits": "Finite normalized observations and one transaction at a time. Admission models whole-batch structural validation and the per-project budget. Span syntax, per-trace and HTTP limits, expiration/pruning during paging, ROOTSPAN, time-window rules, HMAC and process restart, database faults, index use, real identities, interleavings and refinement to Go or SQLite require separate evidence."
+        }
+      ]
+    },
+    {
+      "path": "internal/gcp/storage/http.go",
+      "sha256": "5c41c614eb6e3127e83d5dfc2b43383dfe6cb366422ac18f29ea8d713ad7c088",
+      "disposition": "modeled",
+      "reason": "Keep the existing Cloud Storage Unicode boundary while sharing its wire validation with the Trace parser.",
+      "models": [
+        {
+          "id": "GCPStorageState",
+          "properties": [
+            "DeniedFrame",
+            "OtherProjectUnchanged"
+          ],
+          "limits": "The finite storage model checks state isolation and unchanged refusals. The actual Go parser and valid Unicode encodings are tested separately."
+        }
+      ]
+    },
+    {
+      "path": "internal/gcp/trace/http.go",
+      "sha256": "56ca91ab60308f70e4124b2568d54401c6279a5209cfb1af29c7f2d91f4ab3c3",
+      "disposition": "modeled",
+      "reason": "Bind observed spans, trusted project membership, atomic admission and paged snapshots to the checked abstract state. Native tests cover concrete parsing and persistence.",
+      "models": [
+        {
+          "id": "CloudTraceObservations",
+          "properties": [
+            "FirstPageOrdered",
+            "PendingInvisible",
+            "AdmitEligible",
+            "CallerBound",
+            "ValidBatchOnly",
+            "ProjectBound",
+            "PeerUnchanged",
+            "AllObservationsCommitted",
+            "RollbackUnchanged",
+            "GetCurrent",
+            "NextBound",
+            "NextStableKey",
+            "NextStableBody"
+          ],
+          "limits": "Finite normalized observations and one transaction at a time. Admission models whole-batch structural validation and the per-project budget. Span syntax, per-trace and HTTP limits, expiration/pruning during paging, ROOTSPAN, time-window rules, HMAC and process restart, database faults, index use, real identities, interleavings and refinement to Go or SQLite require separate evidence."
+        }
+      ]
+    },
+    {
+      "path": "internal/gcp/trace/model.go",
+      "sha256": "924bfd1c40958c1e151d08f4bba36951cd000329287d127d8829b70697815ea1",
+      "disposition": "modeled",
+      "reason": "Bind observed spans, trusted project membership, atomic admission and paged snapshots to the checked abstract state. Native tests cover concrete parsing and persistence.",
+      "models": [
+        {
+          "id": "CloudTraceObservations",
+          "properties": [
+            "FirstPageOrdered",
+            "PendingInvisible",
+            "AdmitEligible",
+            "CallerBound",
+            "ValidBatchOnly",
+            "ProjectBound",
+            "PeerUnchanged",
+            "AllObservationsCommitted",
+            "RollbackUnchanged",
+            "GetCurrent",
+            "NextBound",
+            "NextStableKey",
+            "NextStableBody"
+          ],
+          "limits": "Finite normalized observations and one transaction at a time. Admission models whole-batch structural validation and the per-project budget. Span syntax, per-trace and HTTP limits, expiration/pruning during paging, ROOTSPAN, time-window rules, HMAC and process restart, database faults, index use, real identities, interleavings and refinement to Go or SQLite require separate evidence."
+        }
+      ]
+    },
+    {
+      "path": "internal/gcp/trace/store.go",
+      "sha256": "bd247d35c4134794cb94235ce95572ab7c04c1b3429d23bec2700ed54ce158e4",
+      "disposition": "modeled",
+      "reason": "Bind observed spans, trusted project membership, atomic admission and paged snapshots to the checked abstract state. Native tests cover concrete parsing and persistence.",
+      "models": [
+        {
+          "id": "CloudTraceObservations",
+          "properties": [
+            "FirstPageOrdered",
+            "PendingInvisible",
+            "AdmitEligible",
+            "CallerBound",
+            "ValidBatchOnly",
+            "ProjectBound",
+            "PeerUnchanged",
+            "AllObservationsCommitted",
+            "RollbackUnchanged",
+            "GetCurrent",
+            "NextBound",
+            "NextStableKey",
+            "NextStableBody"
+          ],
+          "limits": "Finite normalized observations and one transaction at a time. Admission models whole-batch structural validation and the per-project budget. Span syntax, per-trace and HTTP limits, expiration/pruning during paging, ROOTSPAN, time-window rules, HMAC and process restart, database faults, index use, real identities, interleavings and refinement to Go or SQLite require separate evidence."
+        }
+      ]
+    },
+    {
+      "path": "internal/gcp/trace/trace_test.go",
+      "sha256": "28d66b8d199c2a64bfc226508ce110ed9931381244e632ee0e120eeee3e9e6f0",
+      "disposition": "test-support",
+      "reason": "Exercise the local Trace implementation, rollback or native operations through an ordinary product entry point.",
+      "models": []
+    },
+    {
+      "path": "internal/server/apidocs/gcp-trace-init.js",
+      "sha256": "f3fc2ab4255096290e5a26d9c8f10630f0ade975d00389181a603151839c143b",
+      "disposition": "presentation",
+      "reason": "Serve the documented bounded operations through the packaged local reference. Browser behavior is exercised through the embedded application.",
+      "models": []
+    },
+    {
+      "path": "internal/server/apidocs/gcp-trace.html",
+      "sha256": "d84cf1aa86dac6607220fb257c0f345083d92d8b40120d60c88a024308537cb6",
+      "disposition": "presentation",
+      "reason": "Serve the documented bounded operations through the packaged local reference. Browser behavior is exercised through the embedded application.",
+      "models": []
+    },
+    {
+      "path": "internal/server/apidocs/gcp-trace/cloudtrace.v1.json",
+      "sha256": "b8948e7f227bd4216751adb01855d6c10add90064a900519274741d4c857978b",
+      "disposition": "presentation",
+      "reason": "Serve the documented bounded operations through the packaged local reference. Browser behavior is exercised through the embedded application.",
+      "models": []
+    },
+    {
+      "path": "internal/server/cloud_storage.go",
+      "sha256": "8e29f27927e2da555e13ceffcd2e2615d41cbb4ce4d59228bef6f4427eb9c9ae",
+      "disposition": "modeled",
+      "reason": "Bind observed spans, trusted project membership, atomic admission and paged snapshots to the checked abstract state. Native tests cover concrete parsing and persistence.",
+      "models": [
+        {
+          "id": "CloudTraceObservations",
+          "properties": [
+            "FirstPageOrdered",
+            "PendingInvisible",
+            "AdmitEligible",
+            "CallerBound",
+            "ValidBatchOnly",
+            "ProjectBound",
+            "PeerUnchanged",
+            "AllObservationsCommitted",
+            "RollbackUnchanged",
+            "GetCurrent",
+            "NextBound",
+            "NextStableKey",
+            "NextStableBody"
+          ],
+          "limits": "Finite normalized observations and one transaction at a time. Admission models whole-batch structural validation and the per-project budget. Span syntax, per-trace and HTTP limits, expiration/pruning during paging, ROOTSPAN, time-window rules, HMAC and process restart, database faults, index use, real identities, interleavings and refinement to Go or SQLite require separate evidence."
+        }
+      ]
+    },
+    {
+      "path": "internal/server/server.go",
+      "sha256": "d452eaaa2fc3fe11a86fcf243ba576186fa9e9ea1669c426349660ad91d62c41",
+      "disposition": "modeled",
+      "reason": "Expose trace configuration only to the authenticated local project owner.",
+      "models": [
+        {
+          "id": "ProjectAuthority",
+          "properties": [
+            "OwnerBindingFrozen",
+            "ActorUsesPersistedProject",
+            "OnlyActualOwnerAuthorized"
+          ],
+          "limits": "The model covers configured identity and project ownership. The concrete HTTP capability and browser presentation require separate checks."
+        }
+      ]
+    },
+    {
       "path": "scripts/formal_model_gate.py",
-      "sha256": "aa576056b23b15ab2e3b5b2f1343c97595db6f77ed354571d4bd746b3b9c8128",
+      "sha256": "0177281b88d14189cffa323cac60f6ebd0069702ae8c3a0033de1ffdfeabbe2d",
       "disposition": "formal-infrastructure",
-      "reason": "Pin the Cloud Trace model identity, fourteen invariants, twenty-one mutation controls and four source paths.",
+      "reason": "Register and independently check the finite Cloud Trace model, its source bindings and specific mutation controls.",
       "models": []
     },
     {
       "path": "scripts/test-formal-gate.py",
       "sha256": "9eadb097a1ebece5807b92a0d1f3b287a7540b1eedd10711657347707dba7da9",
       "disposition": "formal-infrastructure",
-      "reason": "Check removal of each Cloud Trace property, mutation and scope against the protected gates and name the model in the complete inventory.",
+      "reason": "Register and independently check the finite Cloud Trace model, its source bindings and specific mutation controls.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/check.py",
+      "sha256": "5e594b55c740bed9a2c48ca4e7d56e938c9ed2640f7ddea7a785facb832085e9",
+      "disposition": "test-support",
+      "reason": "Exercise the local Trace implementation, rollback or native operations through an ordinary product entry point.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/gcp_trace_scalar.py",
+      "sha256": "f645296f09f9a126ef26cbb55af0875ed89a0e1acf443f875014c3b063055a52",
+      "disposition": "test-support",
+      "reason": "Exercise the local Trace implementation, rollback or native operations through an ordinary product entry point.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/gcp_trace_sdk.py",
+      "sha256": "e95e82bb2f0d7782ce476f987f161553a1af60fbac77695682cc908d1f1953d6",
+      "disposition": "test-support",
+      "reason": "Exercise the local Trace implementation, rollback or native operations through an ordinary product entry point.",
       "models": []
     }
   ]
