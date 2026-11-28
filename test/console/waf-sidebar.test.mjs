@@ -2,6 +2,8 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import vm from 'node:vm';
+import {serviceAvailable,serviceFromHash} from '../../tools/console/src/console-navigation.mjs';
+import {vpcConsoleRoute} from '../../tools/console/src/ec2-vpc-navigation.mjs';
 
 // Execute the actual sidebar expressions without replacing React/Cloudscape UI
 // acceptance. Keep the service menu independent from optional identity controls.
@@ -10,9 +12,9 @@ const line=source.split('\n').find(line=>line.includes('navigation={<SideNavigat
 assert.ok(line);
 const items=line.match(/ items=\{(\[.*\])\}\/?>/)[1];
 const follow=line.match(/ onFollow=\{(e=>\{.*?\})\} items=/)[1];
-function sidebar(service,identitySelection){
+function sidebar(service,identitySelection,capabilities={}){
  const destinations=[],opened=[];
- const context=vm.createContext({service,identitySelection,principal:'dummy',t:english=>english,
+ const context=vm.createContext({service,identitySelection,capabilities,serviceAvailable,serviceFromHash,vpcConsoleRoute,principal:'dummy',t:english=>english,
   navigate:value=>destinations.push(value),open:(...args)=>opened.push(args)});
  return {items:JSON.parse(JSON.stringify(vm.runInContext(items,context))),
   follow:vm.runInContext('('+follow+')',context),destinations,opened};
@@ -28,7 +30,13 @@ for(const identitySelection of [true,false]){
   assert.equal(prevented,2);
   assert.deepEqual(s.destinations,['wafv2','wafv2']);
   assert.deepEqual(s.opened,[]);
-  for(const [service,href] of [['ssm','#/ssm'],['cfn','#/cfn'],['apigateway','#/apigateway']]){
+  const parameters=sidebar('ssm',identitySelection);
+  for(const href of ['#/ssm','#/parameters'])parameters.follow({preventDefault(){},detail:{href}});
+  assert.deepEqual(parameters.destinations,['ssm','ssm']);
+  assert.equal(parameters.items.some(item=>item.href==='#/ssm-documents'),false);
+  const capabilities={services:{ssm:{documentManagement:{definitionOnly:true,execution:false,operations:['ListDocuments','ListDocumentVersions','GetDocument']}}}};
+  assert.equal(sidebar('ssm',identitySelection,capabilities).items.some(item=>item.href==='#/ssm-documents'),true);
+  for(const [service,href] of [['ssm','#/parameters'],['cfn','#/cfn'],['apigateway','#/apigateway']]){
    assert.equal(sidebar(service,identitySelection).items[0].href,href);
   }
  });
