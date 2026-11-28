@@ -1,0 +1,21 @@
+# Cloud Trace v1 span ingestion and retrieval
+
+Issue #376 covers trace data. The simulator currently serves no Cloud Trace route. Google publishes three v1 methods and two v2 methods in the discovery documents bundled with the repository's pinned `google-api-python-client==2.199.0`. Both documents report revision `20260724`. [v1 discovery](https://github.com/googleapis/google-api-python-client/blob/v2.199.0/googleapiclient/discovery_cache/documents/cloudtrace.v1.json) · [v2 discovery](https://github.com/googleapis/google-api-python-client/blob/v2.199.0/googleapiclient/discovery_cache/documents/cloudtrace.v2.json)
+
+## Published v1 API
+
+| Method | HTTP and body | Result | Google IAM permission |
+| --- | --- | --- | --- |
+| `projects.patchTraces` | `PATCH /v1/projects/{projectId}/traces` with a `Traces` object containing a `traces` array | Appends span observations and returns `{}`. Sending the same trace ID and span ID again stores an additional copy. | `cloudtrace.traces.patch` |
+| `projects.traces.get` | `GET /v1/projects/{projectId}/traces/{traceId}` | A `Trace` containing its project ID, trace ID and stored spans. | `cloudtrace.traces.get` |
+| `projects.traces.list` | `GET /v1/projects/{projectId}/traces` with required inclusive `startTime` and `endTime` | A `ListTracesResponse` with trace records and, when there is another page, `nextPageToken`. | `cloudtrace.traces.list` |
+
+The write accepts OAuth scope `trace.append` or `cloud-platform`. Reads accept `trace.readonly` or `cloud-platform`. Google lists each under `https://www.googleapis.com/auth/`. The v2 methods `projects.traces.batchWrite` and `projects.traces.spans.createSpan` have their own paths and message types. [PatchTraces](https://docs.cloud.google.com/trace/docs/reference/v1/rest/v1/projects/patchTraces) · [GetTrace](https://docs.cloud.google.com/trace/docs/reference/v1/rest/v1/projects.traces/get) · [ListTraces](https://docs.cloud.google.com/trace/docs/reference/v1/rest/v1/projects.traces/list) · [IAM permissions](https://docs.cloud.google.com/iam/docs/roles-permissions/cloudtrace)
+
+A trace has a project ID and a nonzero 128-bit trace ID encoded as 32 hexadecimal characters. Each span has a name shorter than 128 bytes, a nonzero 64-bit span ID encoded as a decimal JSON **string**, and start and end timestamps. A parent span ID uses the same string representation. V1 also defines span kinds and string labels. The default list view, `MINIMAL`, returns project and trace IDs. `ROOTSPAN` adds root spans, and `COMPLETE` returns all spans as GetTrace does. The Google service offers filtering and sorting, and limits a single PatchTraces call to 25,000 spans. [Trace and TraceSpan](https://docs.cloud.google.com/trace/docs/reference/v1/rest/v1/projects.traces) · [List views and query parameters](https://docs.cloud.google.com/trace/docs/reference/v1/rest/v1/projects.traces/list) · [Service quotas](https://docs.cloud.google.com/trace/docs/quotas)
+
+## Proposed simulator acceptance
+
+The first implementation should use the configured Google Cloud project and its authenticated owner, a Google-specific SQLite store, and the existing local Google provider prefix. A dedicated test project can supply synthetic named spans directly through the official discovery client. The proposed scope requires a single atomic append per accepted request, retained duplicate observations, a complete get, and paged list results for a bounded time window. It requires explicit errors for invalid input, an unknown trace, a denied project, an unsupported query or view, and exhausted local capacity. Any simulator-specific storage, response or retention limits must be stated alongside the implemented behavior.
+
+A test should submit a trace with a parent and child, append another observation with the same span ID, and verify all observations after a restart. A malformed later span in one request must leave the earlier data intact. A second process with its own project store and token should see only its own data. V1 defines no per-trace delete method. Verification can remove its own stopped simulator and temporary database for cleanup. A later implementation must publish which list views and options it actually supports and demonstrate them through the shipped entry points. [Issue #376](https://github.com/susumutomita/TenkaCloudSimulator/issues/376)
