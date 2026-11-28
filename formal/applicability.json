@@ -1,249 +1,326 @@
 {
   "version": 1,
-  "base_sha": "64e5dd28dbe43f43480dfab555ffdd9aff572eb0",
+  "base_sha": "fd803075c37af3faa377f550c8e1cd52b3cfbbb1",
   "changes": [
     {
+      "path": ".github/workflows/ci.yml",
+      "sha256": "04d945225fe7f2641ae7caf6dfbad93ad812ffc3235d6d350e387ba8759e0dcd",
+      "disposition": "formal-infrastructure",
+      "reason": "Run and check the actual changed CloudFront response protections, scoped cache eviction and same-origin reference controls without skipping existing checks.",
+      "models": []
+    },
+    {
       "path": "README.md",
-      "sha256": "91a6c671db2575ddbb915f161bcabf3e85da00bba867abe5f9ca738ca990dede",
+      "sha256": "72e41508e79540bbe9b43e97caf20a2f5132f7420ae9c33ff90d13b82f57784e",
       "disposition": "documentation",
-      "reason": "Document the stored ECR tag query, real membership and bounded native APIs.",
+      "reason": "Document the exact native and simulator-only local content boundaries, shared helper dependency and unsupported CloudFront features.",
       "models": []
     },
     {
-      "path": "docs/aws-catalog-services.md",
-      "sha256": "5a91be06b1db5b3ac2f5d185f91600cc2d8be443c50540a8aef683e09ad16077",
+      "path": "docs/cloudfront-local-content.md",
+      "sha256": "48a4c06ef67f1b8dce79a6c5f07bdcd429f851d7fa485f9a41d89b411c6bcfd1",
       "disposition": "documentation",
-      "reason": "Document the stored ECR tag query, real membership and bounded native APIs.",
-      "models": []
-    },
-    {
-      "path": "docs/aws-catalog.md",
-      "sha256": "164ca728df92aeec3e1f6530fee74597a14e0af50d4b487cef52eb59e1dd6e42",
-      "disposition": "documentation",
-      "reason": "Document the stored ECR tag query, real membership and bounded native APIs.",
+      "reason": "Document the exact native and simulator-only local content boundaries, shared helper dependency and unsupported CloudFront features.",
       "models": []
     },
     {
       "path": "docs/design/0001-go-standalone.md",
-      "sha256": "0b261b70b66ef976fa37a0b03411043ade931f3d903d7438f0eb23b3cfd64fdb",
+      "sha256": "3aea3d5648cb742264968079a45d70609565c9062dc4ddf591d051f215a10da7",
       "disposition": "documentation",
-      "reason": "Document the stored ECR tag query, real membership and bounded native APIs.",
+      "reason": "Document the exact native and simulator-only local content boundaries, shared helper dependency and unsupported CloudFront features.",
       "models": []
+    },
+    {
+      "path": "formal/CloudFrontLocalCache.cfg",
+      "sha256": "cb43301b7e4c267dc478db98dd14e3f43de194faf5010bb56ef6311562d64419",
+      "disposition": "modeled",
+      "reason": "Bound the local distribution/cache transaction, joint read authorization, ETag mutation, invalidation, rollback and committed restart state; native tests separately exercise concrete protocol and SQLite behavior.",
+      "models": [
+        {
+          "id": "CloudFrontLocalCache",
+          "properties": [
+            "FreshJointAuthority",
+            "ExactHitIdentity",
+            "MissReadsOrigin",
+            "FailureRollsBack",
+            "RefusalUnchanged",
+            "StaleETagUnchanged",
+            "UpdateClearsCache",
+            "InvalidationClearsCache",
+            "RestartPreserves",
+            "PeerUnchanged"
+          ],
+          "limits": "Checks an atomic abstract transaction and one immutable pair of policy decisions per delivery. A bucket lifetime fingerprint is assumed distinct for the single ordinary recreation; actual wall-clock buckets.created plus region does not prove ABA resistance under clock rollback. One abstract cache line does not model concrete multi-entry quotas, exact paths, TTL seconds, SQL/triggers/locking, authentication, HTTP/XML/S3 parsing, cache buffers, ETags or Go refinement. Restart preserves abstract committed state only, not crash durability. Native and SDK tests separately cover the real implementation."
+        }
+      ]
+    },
+    {
+      "path": "formal/CloudFrontLocalCache.tla",
+      "sha256": "6c6b9cb2015d81c745883ec6d36ede60500a9ea579d6fd500ff9e4ade538e46a",
+      "disposition": "modeled",
+      "reason": "Bound the local distribution/cache transaction, joint read authorization, ETag mutation, invalidation, rollback and committed restart state; native tests separately exercise concrete protocol and SQLite behavior.",
+      "models": [
+        {
+          "id": "CloudFrontLocalCache",
+          "properties": [
+            "FreshJointAuthority",
+            "ExactHitIdentity",
+            "MissReadsOrigin",
+            "FailureRollsBack",
+            "RefusalUnchanged",
+            "StaleETagUnchanged",
+            "UpdateClearsCache",
+            "InvalidationClearsCache",
+            "RestartPreserves",
+            "PeerUnchanged"
+          ],
+          "limits": "Checks an atomic abstract transaction and one immutable pair of policy decisions per delivery. A bucket lifetime fingerprint is assumed distinct for the single ordinary recreation; actual wall-clock buckets.created plus region does not prove ABA resistance under clock rollback. One abstract cache line does not model concrete multi-entry quotas, exact paths, TTL seconds, SQL/triggers/locking, authentication, HTTP/XML/S3 parsing, cache buffers, ETags or Go refinement. Restart preserves abstract committed state only, not crash durability. Native and SDK tests separately cover the real implementation."
+        }
+      ]
     },
     {
       "path": "formal/models.json",
-      "sha256": "f3d09efb10df838c9e9297378998ff088e18df22ce43d5ac6b6e4d68664bf6dc",
+      "sha256": "8f581d7048e635975f1cdee8f4d38741bb3a814b171789c139f8ea942ccff276",
       "disposition": "formal-infrastructure",
-      "reason": "Associate the query and membership implementation with the existing catalog lifecycle model.",
+      "reason": "Register the bounded local CloudFront cache model and nine targeted invariant mutations without changing historical model records.",
       "models": []
     },
     {
-      "path": "internal/aws/catalog/engine.go",
-      "sha256": "85d6f6348c233118f6039c7cd6228f1f14a6988f98bf30a771054e9cab5dbbe6",
+      "path": "internal/aws/cloudfront_distribution.go",
+      "sha256": "9b7b4f4c6952d3542c6b4e1a658c42f341c7be96a5faa50bf449f9c30206dae4",
       "disposition": "modeled",
-      "reason": "Bind named ECR tag-query groups and their guarded regional collection read to the bounded catalog lifecycle.",
+      "reason": "Bound the local distribution/cache transaction, joint read authorization, ETag mutation, invalidation, rollback and committed restart state; native tests separately exercise concrete protocol and SQLite behavior.",
       "models": [
         {
-          "id": "CatalogResourceLifecycle",
+          "id": "CloudFrontLocalCache",
           "properties": [
-            "AuthorizationFirst",
-            "FailureFrame",
-            "PeerFrame",
-            "StaleWriteRejected"
+            "FreshJointAuthority",
+            "ExactHitIdentity",
+            "MissReadsOrigin",
+            "FailureRollsBack",
+            "RefusalUnchanged",
+            "StaleETagUnchanged",
+            "UpdateClearsCache",
+            "InvalidationClearsCache",
+            "RestartPreserves",
+            "PeerUnchanged"
           ],
-          "limits": "The model abstracts guarded reads/writes, failed writes and peer frames. It does not model serialized query syntax, ECR tag matching, multi-action IAM, pagination, HTTP or SQLite snapshots."
+          "limits": "Checks an atomic abstract transaction and one immutable pair of policy decisions per delivery. A bucket lifetime fingerprint is assumed distinct for the single ordinary recreation; actual wall-clock buckets.created plus region does not prove ABA resistance under clock rollback. One abstract cache line does not model concrete multi-entry quotas, exact paths, TTL seconds, SQL/triggers/locking, authentication, HTTP/XML/S3 parsing, cache buffers, ETags or Go refinement. Restart preserves abstract committed state only, not crash durability. Native and SDK tests separately cover the real implementation."
         }
       ]
     },
     {
-      "path": "internal/aws/catalog/models/resource-groups.json",
-      "sha256": "bfc3382f6504cbb80eb22deebdd1ad4b3b248f545c5b3a80fcd70127a0be4a01",
+      "path": "internal/aws/cloudfront_distribution_http.go",
+      "sha256": "f2cc81697bee212c613d07f05f3966c87c7348d1cb6b629f472f4f7532592cb1",
       "disposition": "modeled",
-      "reason": "Bind named ECR tag-query groups and their guarded regional collection read to the bounded catalog lifecycle.",
+      "reason": "Bound the local distribution/cache transaction, joint read authorization, ETag mutation, invalidation, rollback and committed restart state; native tests separately exercise concrete protocol and SQLite behavior.",
       "models": [
         {
-          "id": "CatalogResourceLifecycle",
+          "id": "CloudFrontLocalCache",
           "properties": [
-            "AuthorizationFirst",
-            "FailureFrame",
-            "PeerFrame",
-            "StaleWriteRejected"
+            "FreshJointAuthority",
+            "ExactHitIdentity",
+            "MissReadsOrigin",
+            "FailureRollsBack",
+            "RefusalUnchanged",
+            "StaleETagUnchanged",
+            "UpdateClearsCache",
+            "InvalidationClearsCache",
+            "RestartPreserves",
+            "PeerUnchanged"
           ],
-          "limits": "The model abstracts guarded reads/writes, failed writes and peer frames. It does not model serialized query syntax, ECR tag matching, multi-action IAM, pagination, HTTP or SQLite snapshots."
+          "limits": "Checks an atomic abstract transaction and one immutable pair of policy decisions per delivery. A bucket lifetime fingerprint is assumed distinct for the single ordinary recreation; actual wall-clock buckets.created plus region does not prove ABA resistance under clock rollback. One abstract cache line does not model concrete multi-entry quotas, exact paths, TTL seconds, SQL/triggers/locking, authentication, HTTP/XML/S3 parsing, cache buffers, ETags or Go refinement. Restart preserves abstract committed state only, not crash durability. Native and SDK tests separately cover the real implementation."
         }
       ]
     },
     {
-      "path": "internal/aws/catalog/openapi.go",
+      "path": "internal/aws/cloudfront_distribution_list.go",
+      "sha256": "91e8e6fc791846cd91855ad33562c1ed3e2d172221a74a4388b3ab86efbca85c",
       "disposition": "modeled",
-      "reason": "Expose the three new routes\u2019 native ForbiddenException denial name in their served reference.",
+      "reason": "Bound the local distribution/cache transaction, joint read authorization, ETag mutation, invalidation, rollback and committed restart state; native tests separately exercise concrete protocol and SQLite behavior.",
       "models": [
         {
-          "id": "CatalogResourceLifecycle",
+          "id": "CloudFrontLocalCache",
           "properties": [
-            "AuthorizationFirst"
+            "FreshJointAuthority",
+            "ExactHitIdentity",
+            "MissReadsOrigin",
+            "FailureRollsBack",
+            "RefusalUnchanged",
+            "StaleETagUnchanged",
+            "UpdateClearsCache",
+            "InvalidationClearsCache",
+            "RestartPreserves",
+            "PeerUnchanged"
           ],
-          "limits": "The catalog model abstracts authorization before observation. It does not represent policy revisions, specific dependent IAM actions, database reads or generated reference text."
-        }
-      ],
-      "sha256": "32e976fb1d84ca5494e693fb36eb6b6dbd1c6f48c78d75cd966402e9abd79885"
-    },
-    {
-      "path": "internal/aws/catalog/resource_group_query.go",
-      "sha256": "389ae1528fb8bd1a2d71d471639d75989111dd168c1f61be115be31a04b6b047",
-      "disposition": "modeled",
-      "reason": "Bind named ECR tag-query groups and their guarded regional collection read to the bounded catalog lifecycle.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "FailureFrame",
-            "PeerFrame",
-            "StaleWriteRejected"
-          ],
-          "limits": "The model abstracts guarded reads/writes, failed writes and peer frames. It does not model serialized query syntax, ECR tag matching, multi-action IAM, pagination, HTTP or SQLite snapshots."
+          "limits": "Checks an atomic abstract transaction and one immutable pair of policy decisions per delivery. A bucket lifetime fingerprint is assumed distinct for the single ordinary recreation; actual wall-clock buckets.created plus region does not prove ABA resistance under clock rollback. One abstract cache line does not model concrete multi-entry quotas, exact paths, TTL seconds, SQL/triggers/locking, authentication, HTTP/XML/S3 parsing, cache buffers, ETags or Go refinement. Restart preserves abstract committed state only, not crash durability. Native and SDK tests separately cover the real implementation."
         }
       ]
     },
     {
-      "path": "internal/aws/catalog/resource_group_query_test.go",
-      "sha256": "1c6ef61f14e122c61883d4051b8fb173c3326de960914ad6832c1f5602ae09a2",
+      "path": "internal/aws/cloudfront_distribution_store.go",
+      "sha256": "2970a1cb0c45ee34657d3e2b2c57f1328db547c3e2fc00079a6c4e808b69a7fa",
+      "disposition": "modeled",
+      "reason": "Bound the local distribution/cache transaction, joint read authorization, ETag mutation, invalidation, rollback and committed restart state; native tests separately exercise concrete protocol and SQLite behavior.",
+      "models": [
+        {
+          "id": "CloudFrontLocalCache",
+          "properties": [
+            "FreshJointAuthority",
+            "ExactHitIdentity",
+            "MissReadsOrigin",
+            "FailureRollsBack",
+            "RefusalUnchanged",
+            "StaleETagUnchanged",
+            "UpdateClearsCache",
+            "InvalidationClearsCache",
+            "RestartPreserves",
+            "PeerUnchanged"
+          ],
+          "limits": "Checks an atomic abstract transaction and one immutable pair of policy decisions per delivery. A bucket lifetime fingerprint is assumed distinct for the single ordinary recreation; actual wall-clock buckets.created plus region does not prove ABA resistance under clock rollback. One abstract cache line does not model concrete multi-entry quotas, exact paths, TTL seconds, SQL/triggers/locking, authentication, HTTP/XML/S3 parsing, cache buffers, ETags or Go refinement. Restart preserves abstract committed state only, not crash durability. Native and SDK tests separately cover the real implementation."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/cloudfront_distribution_test.go",
+      "sha256": "a1b5ff703daf92721588d679154333e98c56b94c7c51ffbecd4c860a55ba462b",
       "disposition": "test-support",
-      "reason": "Exercise real named-group query operations and preservation, authorization and ECR membership behavior through the relevant test entry point.",
+      "reason": "Exercise real bounded distribution/cache state, stock pinned SDK lifecycle, strict errors and owned cleanup; not a whole-service or real CDN claim.",
       "models": []
     },
     {
-      "path": "internal/aws/catalog/resource_group_transaction_test.go",
-      "sha256": "9d87494aade4d6105592c26c6692efa2db8efdaffeb89336425d7a6c8e4a77d0",
-      "disposition": "test-support",
-      "reason": "Observe actual SQLite writes before cancel or deadline, reopen both group and repository state, and verify a single successful retry.",
-      "models": []
-    },
-    {
-      "path": "internal/aws/catalog/selection.json",
-      "sha256": "b90d4c0a08a7abae677a9d8d6ab5f102e98c69f0a95b5c59943a4684e4de3a1d",
+      "path": "internal/aws/cloudfront_vpc_origin.go",
+      "sha256": "6aeda5cf138daebbea4838be8c3825a4cacbd0cba43cd65f6184cfb57f056447",
       "disposition": "modeled",
-      "reason": "Bind named ECR tag-query groups and their guarded regional collection read to the bounded catalog lifecycle.",
+      "reason": "Bound the local distribution/cache transaction, joint read authorization, ETag mutation, invalidation, rollback and committed restart state; native tests separately exercise concrete protocol and SQLite behavior.",
       "models": [
         {
-          "id": "CatalogResourceLifecycle",
+          "id": "CloudFrontLocalCache",
           "properties": [
-            "AuthorizationFirst",
-            "FailureFrame",
-            "PeerFrame",
-            "StaleWriteRejected"
+            "FreshJointAuthority",
+            "ExactHitIdentity",
+            "MissReadsOrigin",
+            "FailureRollsBack",
+            "RefusalUnchanged",
+            "StaleETagUnchanged",
+            "UpdateClearsCache",
+            "InvalidationClearsCache",
+            "RestartPreserves",
+            "PeerUnchanged"
           ],
-          "limits": "The model abstracts guarded reads/writes, failed writes and peer frames. It does not model serialized query syntax, ECR tag matching, multi-action IAM, pagination, HTTP or SQLite snapshots."
+          "limits": "Checks an atomic abstract transaction and one immutable pair of policy decisions per delivery. A bucket lifetime fingerprint is assumed distinct for the single ordinary recreation; actual wall-clock buckets.created plus region does not prove ABA resistance under clock rollback. One abstract cache line does not model concrete multi-entry quotas, exact paths, TTL seconds, SQL/triggers/locking, authentication, HTTP/XML/S3 parsing, cache buffers, ETags or Go refinement. Restart preserves abstract committed state only, not crash durability. Native and SDK tests separately cover the real implementation."
         }
       ]
     },
     {
-      "path": "internal/aws/catalog/semantics.go",
-      "sha256": "ee9c353918cd40049530bce283eb93563c3171c12ec0c1bcecb03c1a30c009fd",
+      "path": "internal/aws/ssm.go",
+      "sha256": "0d6fcceec0835e9c49b78de130aac7aa1fe54b9f6131018ae04fd64d914ac52a",
       "disposition": "modeled",
-      "reason": "Bind the guarded regional catalog reads and request-owned Resource Groups mutations to the bounded catalog lifecycle.",
+      "reason": "Bound the local distribution/cache transaction, joint read authorization, ETag mutation, invalidation, rollback and committed restart state; native tests separately exercise concrete protocol and SQLite behavior.",
       "models": [
         {
-          "id": "CatalogResourceLifecycle",
+          "id": "CloudFrontLocalCache",
           "properties": [
-            "AuthorizationFirst",
-            "FailureFrame",
-            "PeerFrame",
-            "StaleWriteRejected"
+            "FreshJointAuthority",
+            "ExactHitIdentity",
+            "MissReadsOrigin",
+            "FailureRollsBack",
+            "RefusalUnchanged",
+            "StaleETagUnchanged",
+            "UpdateClearsCache",
+            "InvalidationClearsCache",
+            "RestartPreserves",
+            "PeerUnchanged"
           ],
-          "limits": "The model abstracts guarded reads/writes, failed writes and peer frames. It does not model serialized query syntax, ECR tag matching, multi-action IAM, pagination, HTTP or SQLite snapshots. Request lifetimes, SQL commit timing and physical runtime cleanup require native tests."
+          "limits": "Checks an atomic abstract transaction and one immutable pair of policy decisions per delivery. A bucket lifetime fingerprint is assumed distinct for the single ordinary recreation; actual wall-clock buckets.created plus region does not prove ABA resistance under clock rollback. One abstract cache line does not model concrete multi-entry quotas, exact paths, TTL seconds, SQL/triggers/locking, authentication, HTTP/XML/S3 parsing, cache buffers, ETags or Go refinement. Restart preserves abstract committed state only, not crash durability. Native and SDK tests separately cover the real implementation."
         }
       ]
     },
     {
-      "path": "internal/aws/catalog/services_management.go",
-      "sha256": "6647cf31b87191aee497b175a83e901a0113b3f875e0aee32fbc266fce8b4884",
-      "disposition": "modeled",
-      "reason": "Bind named ECR tag-query groups and their guarded regional collection read to the bounded catalog lifecycle.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "FailureFrame",
-            "PeerFrame",
-            "StaleWriteRejected"
-          ],
-          "limits": "The model abstracts guarded reads/writes, failed writes and peer frames. It does not model serialized query syntax, ECR tag matching, multi-action IAM, pagination, HTTP or SQLite snapshots."
-        }
-      ]
-    },
-    {
-      "path": "internal/core/policy.go",
-      "disposition": "modeled",
-      "reason": "Capture the caller policy once so all related conditions use the same revision.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst"
-          ],
-          "limits": "The catalog model abstracts authorization before observation. It does not represent policy revisions, specific dependent IAM actions, database reads or generated reference text."
-        }
-      ],
-      "sha256": "c19d712a2b971ccf12d295271bfd46d95703f6591c04cf277e9b2981a2488dcc"
-    },
-    {
-      "path": "internal/core/policy_test.go",
-      "sha256": "ee8b3e44cf740a5e65d0b4ad7769d2d1cd7bd03215ca5a468962737fa1570043",
-      "disposition": "test-support",
-      "reason": "Check policy replacement, explicit deny, missing principals and administrator through real identity snapshots.",
-      "models": []
-    },
-    {
-      "path": "internal/server/apidocs/catalog/index.json",
-      "sha256": "ef37ca4add0d86bf84370e8f6ee564d4743b3b6eb6dd2b6f2737683d6eaf72fd",
+      "path": "internal/server/apidocs/cloudfront-local-init.js",
+      "sha256": "2849ed01aaa656469a1976ccabbbe28daad63eb1a580f4ca9198c352d59a9173",
       "disposition": "presentation",
-      "reason": "Ship the generated operation shapes and model index for Resource Groups query operations.",
+      "reason": "Serve a same-origin native CloudFront XML reference with bounded methods, paths and normal browser session authority; no outbound origin fetch or static saved-state claim.",
       "models": []
     },
     {
-      "path": "internal/server/apidocs/catalog/resource-groups.json",
-      "sha256": "15f26ed36e28cd1111654fbaec27f5399d1ce31605d345c04e5e5818fe703436",
+      "path": "internal/server/apidocs/cloudfront-local.html",
+      "sha256": "e32b2b882be408d2c43c90a8a1dabe0c8ae6acf77a4f4d081be38e8c1ac3a49e",
       "disposition": "presentation",
-      "reason": "Ship the generated operation shapes and model index for Resource Groups query operations.",
+      "reason": "Serve a same-origin native CloudFront XML reference with bounded methods, paths and normal browser session authority; no outbound origin fetch or static saved-state claim.",
+      "models": []
+    },
+    {
+      "path": "internal/server/apidocs/cloudfront-local.json",
+      "sha256": "51b777ef8f54b88fabf1b809e92110b9fe9949d371f6e737b94a9bd215d9b042",
+      "disposition": "presentation",
+      "reason": "Serve a same-origin native CloudFront XML reference with bounded methods, paths and normal browser session authority; no outbound origin fetch or static saved-state claim.",
+      "models": []
+    },
+    {
+      "path": "internal/server/cloudfront_local_content_test.go",
+      "sha256": "8c476c5d00f02edf66201fc217e9554043bc4a4efdd6ee03bea3bf054a374c5c",
+      "disposition": "test-support",
+      "reason": "Run and check the actual changed CloudFront response protections, scoped cache eviction and same-origin reference controls without skipping existing checks.",
       "models": []
     },
     {
       "path": "internal/server/server.go",
+      "sha256": "782ede54d372ad31097084d34e3ea3d34e9c9292c7e3f5cec8d17bd0ba92eb7a",
       "disposition": "modeled",
-      "reason": "Supply the existing identities store snapshot method to catalog membership requests.",
+      "reason": "Bound the local distribution/cache transaction, joint read authorization, ETag mutation, invalidation, rollback and committed restart state; native tests separately exercise concrete protocol and SQLite behavior.",
       "models": [
         {
-          "id": "CatalogResourceLifecycle",
+          "id": "CloudFrontLocalCache",
           "properties": [
-            "AuthorizationFirst"
+            "FreshJointAuthority",
+            "ExactHitIdentity",
+            "MissReadsOrigin",
+            "FailureRollsBack",
+            "RefusalUnchanged",
+            "StaleETagUnchanged",
+            "UpdateClearsCache",
+            "InvalidationClearsCache",
+            "RestartPreserves",
+            "PeerUnchanged"
           ],
-          "limits": "The catalog model abstracts authorization before observation. It does not represent policy revisions, specific dependent IAM actions, database reads or generated reference text."
+          "limits": "Checks an atomic abstract transaction and one immutable pair of policy decisions per delivery. A bucket lifetime fingerprint is assumed distinct for the single ordinary recreation; actual wall-clock buckets.created plus region does not prove ABA resistance under clock rollback. One abstract cache line does not model concrete multi-entry quotas, exact paths, TTL seconds, SQL/triggers/locking, authentication, HTTP/XML/S3 parsing, cache buffers, ETags or Go refinement. Restart preserves abstract committed state only, not crash durability. Native and SDK tests separately cover the real implementation."
         }
-      ],
-      "sha256": "0cacfd941e66bc319cbee33dabff57b31997dd3d089fa576c4780ec2898d9123"
+      ]
     },
     {
-      "path": "test/e2e/catalog_fixtures/resource-groups.json",
-      "sha256": "c0ca049b51977182d46e10fe21a7693581e562a5ef1aeb7f9c6feb1f5d9b8289",
-      "disposition": "test-support",
-      "reason": "Exercise real named-group query operations and preservation, authorization and ECR membership behavior through the relevant test entry point.",
+      "path": "scripts/formal_model_gate.py",
+      "sha256": "701388bd0991502f398d8899d19505a373efc8a0a03b790ffd75655a4131b49f",
+      "disposition": "formal-infrastructure",
+      "reason": "Protect the registered CloudFrontLocalCache model, all eleven invariants, nine sensitivity mutants and exact source scope with independent fixed controls and explicit registry inventory; no existing control changes.",
       "models": []
     },
     {
-      "path": "test/e2e/check.py",
-      "sha256": "520678b5da4cf2b4d794c6e39972eeb3be1c9ab0da4bda6b9bcf4008752cdf82",
-      "disposition": "test-support",
-      "reason": "Exercise real named-group query operations and preservation, authorization and ECR membership behavior through the relevant test entry point.",
+      "path": "scripts/test-formal-gate.py",
+      "sha256": "0b3efa7006cb1f95bfe6adbf659d887d81b9e4457374035a437a2884372c4043",
+      "disposition": "formal-infrastructure",
+      "reason": "Protect the registered CloudFrontLocalCache model, all eleven invariants, nine sensitivity mutants and exact source scope with independent fixed controls and explicit registry inventory; no existing control changes.",
       "models": []
     },
     {
-      "path": "test/e2e/resource_group_ecr_members.py",
-      "sha256": "e49681678463371e3cfb5c7359d9a8112ff3e290fac06efa58b575a2df943c0a",
+      "path": "test/console/cloudfront-local-reference.test.mjs",
+      "sha256": "10cf42555e3af01876511810d423e03d638c22e957dd76ed21f4db9f63d6f86c",
       "disposition": "test-support",
-      "reason": "Exercise real named-group query operations and preservation, authorization and ECR membership behavior through the relevant test entry point.",
+      "reason": "Run and check the actual changed CloudFront response protections, scoped cache eviction and same-origin reference controls without skipping existing checks.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/cloudfront_local_content.py",
+      "sha256": "80ad1c99a32411ea95979b8490654e2876a835d3381fd3f8c0eafb56b19fb47e",
+      "disposition": "test-support",
+      "reason": "Exercise real bounded distribution/cache state, stock pinned SDK lifecycle, strict errors and owned cleanup; not a whole-service or real CDN claim.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/cloudfront_local_scalar.py",
+      "sha256": "9d9dff97a9fbf6b58ea2d2bd3476fa976ddfc1a06d0b384ceb93de8e01fc187d",
+      "disposition": "test-support",
+      "reason": "Exercise two genuine native Scalar Sends plus one explicitly simulator-only saved-content read and download over official SDK-created local state, guarded two-team authorities, reopen, denials and cleanup.",
       "models": []
     }
   ]

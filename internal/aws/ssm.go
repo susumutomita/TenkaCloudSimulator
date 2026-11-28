@@ -47,6 +47,10 @@ func (g *Gateway) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		g.serveEC2(w, r)
 		return
 	}
+	if isCFDistribution(r) {
+		g.CloudFront.serveDistribution(g, w, r)
+		return
+	}
 	if isCloudFrontVpcOrigin(r) {
 		g.CloudFront.ServeHTTP(g, w, r)
 		return

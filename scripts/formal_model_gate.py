@@ -4832,6 +4832,26 @@ REQUIRED_SOURCE_SCOPES['StoreConnectionLifetime'] = {
 }
 
 
+# Independent local CloudFront delivery and invalidation controls. Keep these
+# literal sets separate from the mutable model registry they protect.
+BASE_MODELS.add('CloudFrontLocalCache')
+BASE_INVARIANTS['CloudFrontLocalCache'] = {
+    'TypeOK', 'FreshJointAuthority', 'ExactHitIdentity', 'MissReadsOrigin',
+    'FailureRollsBack', 'RefusalUnchanged', 'StaleETagUnchanged',
+    'UpdateClearsCache', 'InvalidationClearsCache', 'RestartPreserves', 'PeerUnchanged',
+}
+REQUIRED_MUTANTS['CloudFrontLocalCache'] = {
+    'MissingObjectGrant', 'MissingDistributionGrant', 'WrongOriginLifetime',
+    'CrossActorHit', 'ExpiredHit', 'IgnoreETag', 'UpdateRetainsCache',
+    'InvalidationRetainsCache', 'FailedInvalidationEvicts',
+}
+REQUIRED_SOURCE_SCOPES['CloudFrontLocalCache'] = {
+    'internal/aws/cloudfront_distribution.go', 'internal/aws/cloudfront_distribution_store.go',
+    'internal/aws/cloudfront_distribution_http.go', 'internal/aws/cloudfront_distribution_list.go',
+    'internal/aws/cloudfront_vpc_origin.go', 'internal/aws/ssm.go', 'internal/server/server.go',
+}
+
+
 def load_registry(root, relative='formal/models.json'):
     root = Path(root)
     registry_path = asset(root, relative)
