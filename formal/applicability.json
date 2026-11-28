@@ -1,138 +1,26 @@
 {
   "version": 1,
-  "base_sha": "c70822a65ab85edf87cb42a9b45bb4e6ab7fb210",
+  "base_sha": "ba506afcf994ee7a7fc55246a2688c7987e79c64",
   "changes": [
     {
-      "path": "README.md",
-      "sha256": "883b4426574b3e7584df311eb79f7090f8da92f0f00c3355dab43beebc6c133d",
+      "path": "docs/aws-catalog.md",
+      "sha256": "507325178342755de0275c89b40ba46658a05d50e569e7225aba1ff9f17beb7f",
       "disposition": "documentation",
-      "reason": "Describes in-memory Store lifetime, cancellation and file-backed persistence for operators and maintainers.",
+      "reason": "Records official end-of-support dates and the exact historical local scope of three AWS catalog entries.",
       "models": []
     },
     {
-      "path": "docs/design/0001-go-standalone.md",
-      "sha256": "06dacef120c4e90f1d12d226bca223e469edbe4b92ace38a500ad44693955d9b",
+      "path": "docs/coverage-assessment.md",
+      "sha256": "2a7fc214e79f0811c9d6c076a5730ed301c4b80648b9007dc9ea7bf6af89d112",
       "disposition": "documentation",
-      "reason": "Describes in-memory Store lifetime, cancellation and file-backed persistence for operators and maintainers.",
+      "reason": "Documents the current first-party REST contracts and prerequisites for three products absent from the pinned corpus.",
       "models": []
     },
     {
-      "path": "formal/StoreConnectionLifetime.cfg",
-      "sha256": "9411896e27460c096b79d224d0f679e597bd0151d191ec4ba478dcbae04835d7",
-      "disposition": "modeled",
-      "reason": "Defines the bounded connection, cancellation, committed row, isolation and disposal transitions and invariants.",
-      "models": [
-        {
-          "id": "StoreConnectionLifetime",
-          "properties": [
-            "PeerBackingUnchanged",
-            "ConnectionTurnoverPreserves",
-            "CancelDiscardsStaged",
-            "DisposedBackingReleased",
-            "ClosedStoresUnavailable",
-            "ConnectionPragmasApplied",
-            "LiveCommittedData"
-          ],
-          "limits": "Two initialized in-memory stores with one logical row each, two values and six steps. Native tests cover SQLite schema, existing file state, driver reconnection, busy timeout, foreign keys and backing release."
-        }
-      ]
-    },
-    {
-      "path": "formal/StoreConnectionLifetime.tla",
-      "sha256": "36ae769708422d165321418d9dad4d20ffa518de1d4c31adc644663caf411663",
-      "disposition": "modeled",
-      "reason": "Defines the bounded connection, cancellation, committed row, isolation and disposal transitions and invariants.",
-      "models": [
-        {
-          "id": "StoreConnectionLifetime",
-          "properties": [
-            "PeerBackingUnchanged",
-            "ConnectionTurnoverPreserves",
-            "CancelDiscardsStaged",
-            "DisposedBackingReleased",
-            "ClosedStoresUnavailable",
-            "ConnectionPragmasApplied",
-            "LiveCommittedData"
-          ],
-          "limits": "Two initialized in-memory stores with one logical row each, two values and six steps. Native tests cover SQLite schema, existing file state, driver reconnection, busy timeout, foreign keys and backing release."
-        }
-      ]
-    },
-    {
-      "path": "formal/models.json",
-      "sha256": "495eb9c1ca908f244784818f06876cba9704a6c187cc8223d1c73ec6a9bd0b03",
-      "disposition": "formal-infrastructure",
-      "reason": "Registers the bounded store model or protects its inventory, required controls and exact source paths.",
-      "models": []
-    },
-    {
-      "path": "internal/core/store.go",
-      "sha256": "6abd6cd378ed514fd857fcd6b33788f72e241f1cc7286c8f9c4a6e97e5da5277",
-      "disposition": "modeled",
-      "reason": "The Store owns the in-memory backing across physical connection replacement, reapplies per-connection settings, and releases its private backing on close.",
-      "models": [
-        {
-          "id": "StoreConnectionLifetime",
-          "properties": [
-            "PeerBackingUnchanged",
-            "ConnectionTurnoverPreserves",
-            "CancelDiscardsStaged",
-            "DisposedBackingReleased",
-            "ClosedStoresUnavailable",
-            "ConnectionPragmasApplied",
-            "LiveCommittedData"
-          ],
-          "limits": "Two initialized in-memory stores with one logical row each, two values and six steps. Native tests cover SQLite schema, existing file state, driver reconnection, busy timeout, foreign keys and backing release."
-        },
-        {
-          "id": "ObjectStore",
-          "properties": [
-            "NoOrphans"
-          ],
-          "limits": "The abstract property covers parent/child rows. Native tests check that SQLite rejects an orphan on a replacement connection."
-        }
-      ]
-    },
-    {
-      "path": "internal/core/store_connection_test.go",
-      "sha256": "7dd7475616f7c4773bf613570043d372aa756d394f71f93c80aa43a60fd70e40",
-      "disposition": "modeled",
-      "reason": "Forces cancellation and physical connection retirement through database/sql and checks committed rows, schema, connection settings, foreign keys, independent stores and release on close.",
-      "models": [
-        {
-          "id": "StoreConnectionLifetime",
-          "properties": [
-            "PeerBackingUnchanged",
-            "ConnectionTurnoverPreserves",
-            "CancelDiscardsStaged",
-            "DisposedBackingReleased",
-            "ClosedStoresUnavailable",
-            "ConnectionPragmasApplied",
-            "LiveCommittedData"
-          ],
-          "limits": "Two initialized in-memory stores with one logical row each, two values and six steps. Native tests cover SQLite schema, existing file state, driver reconnection, busy timeout, foreign keys and backing release."
-        }
-      ]
-    },
-    {
-      "path": "scripts/formal_model_gate.py",
-      "sha256": "91dd0ddaebf98333baafd028d3bc33274af58baf8d662af192b1ad824ca7e945",
-      "disposition": "formal-infrastructure",
-      "reason": "Registers the bounded store model or protects its inventory, required controls and exact source paths.",
-      "models": []
-    },
-    {
-      "path": "scripts/test-formal-applicability.py",
-      "sha256": "7546ea5da455ad7e76a78046f3013d33dfc51f92701a5891bff51cbf13c4566c",
-      "disposition": "formal-infrastructure",
-      "reason": "Exercises both deleting a historical model-scoped source and refusing to remove the permanently protected live Store implementation. An attempted exemption of the historical source also fails.",
-      "models": []
-    },
-    {
-      "path": "scripts/test-formal-gate.py",
-      "sha256": "125bd9887869a3483db308ed0a2a942ca71acaec09a77323fb11f18eea2cf5a1",
-      "disposition": "formal-infrastructure",
-      "reason": "Registers the bounded store model or protects its inventory, required controls and exact source paths.",
+      "path": "docs/gcp-catalog.md",
+      "sha256": "6a63b2eb50f183528b1838c2e52aa276180569acd1c2b0afffff2be2d639daf5",
+      "disposition": "documentation",
+      "reason": "Distinguishes the pinned discovery corpus from three public Google APIs and identifies the native Cloud DNS provider outside the generic catalog.",
       "models": []
     }
   ]
