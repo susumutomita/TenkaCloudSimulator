@@ -5,15 +5,16 @@ through each service's own native protocol: JSON 1.0/1.1, REST-JSON or Query. Co
 subsets of the pinned official botocore 1.41.6 models; see
 [design 0007](design/0007-model-driven-aws-catalog.md).
 
-Every listed operation is implemented against provider-owned SQLite state. Every
-other official operation of the same service returns HTTP 501
+The catalog stores resource records in provider-owned SQLite. Service Quotas
+reads an enforced limit from the active B2BI resource definition. Every
+other official operation outside each service’s listed subset returns HTTP 501
 `UnknownOperationException`. Input members that the simulator would ignore are
 refused with the operation's own validation exception. No workload, data plane,
 network, OAuth or real AWS call is executed or simulated.
 
 ## Services
 
-The catalog serves 174 services. The [generated service table](aws-catalog-services.md)
+The catalog serves 175 services. The [generated service table](aws-catalog-services.md)
 lists each service's Issues, protocol, implemented operations and bounds; it is
 checked against the reviewed specifications by `go test ./internal/aws/catalog`.
 The capability document lists the same services under `services.catalog`,
@@ -27,7 +28,7 @@ and execution are outside its scope. [AWS Batch scope (#105)](https://github.com
 Services whose official API needs behavior the engine cannot express truthfully
 remain unimplemented rather than approximated, for example Managed Service for
 Apache Flink, AWS Data Pipeline, Amazon SWF, CodeStar
-Notifications, Amazon Managed Grafana, AWS Organizations, Service Quotas,
+Notifications, Amazon Managed Grafana, AWS Organizations,
 Application Auto Scaling, Amazon Cognito, AWS Control
 Tower, AWS Launch Wizard, Amazon Keyspaces and Amazon Comprehend Medical.
 Amazon RDS, Amazon ElastiCache, Amazon Redshift, Amazon EC2 Auto Scaling and
@@ -56,6 +57,26 @@ without being checked. The RDS entry in the
 served.
 Products assessed as not servable at all, with evidence, are listed in the
 [coverage assessment](coverage-assessment.md).
+
+## B2B Data Interchange profile quota
+
+`GetServiceQuota` accepts `ServiceCode=b2bi` and `QuotaCode=L-05F6A9EF` in
+`us-east-1`, `us-west-2` and `eu-west-1`. It reads the total number of profiles
+allowed per account in that region from the same limit that `CreateProfile`
+enforces. Five profiles fill the quota. Deleting one frees a slot. The response
+continues to report five throughout. The account-level read requires
+`servicequotas:GetServiceQuota` on
+`arn:aws:servicequotas:<region>:<account>:b2bi/L-05F6A9EF`. The local IAM
+policy supports action and resource matching for this operation. The
+`servicequotas:service` condition key is outside the local policy contract.
+
+AWS lists Profiles as adjustable. This simulator supports reading the applied
+value. Quota increases, defaults, listings, resource contexts and usage metrics
+are outside this operation. The local B2BI catalog also works in Tokyo, where
+AWS does not list a B2BI endpoint. The quota read returns `NoSuchResourceException`
+there. [B2BI endpoints and quotas](https://docs.aws.amazon.com/general/latest/gr/b2bi-service.html) ·
+[GetServiceQuota](https://docs.aws.amazon.com/servicequotas/2019-06-24/apireference/API_GetServiceQuota.html) ·
+[Service Quotas IAM](https://docs.aws.amazon.com/service-authorization/latest/reference/list_servicequotas.html).
 
 ## Routing and authorization
 

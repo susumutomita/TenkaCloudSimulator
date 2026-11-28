@@ -54,6 +54,9 @@ func (q *request) execute() (map[string]any, error) {
 		}
 		return q.create(0)
 	case Read:
+		if q.b.spec.Model == "service-quotas" && q.op.Name == "GetServiceQuota" {
+			return q.getServiceQuota()
+		}
 		return q.read()
 	case List:
 		if q.isBatchJobDefinition() {
@@ -848,10 +851,7 @@ func (q *request) create(ecsRevision int) (map[string]any, error) {
 }
 
 func insertNewResource(tx *sql.Tx, res *Resource, r *row, parent *row) error {
-	limit := res.Limit
-	if limit == 0 {
-		limit = defaultKindLimit
-	}
+	limit := res.liveLimit()
 	count, err := countKind(tx, r.Service, r.Region, r.Kind, r.Parent)
 	if err != nil {
 		return err

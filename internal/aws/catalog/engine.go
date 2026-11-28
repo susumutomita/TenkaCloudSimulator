@@ -558,6 +558,11 @@ func pick(errors, candidates []string, kind string) (string, bool) {
 }
 
 func (b *binding) status(code, kind string) int {
+	// Service Quotas documents AccessDeniedException as HTTP 400. The JSON 1.1
+	// model names the exception without recording its HTTP status.
+	if b.spec.Model == "service-quotas" && code == "AccessDeniedException" {
+		return http.StatusBadRequest
+	}
 	if shape := b.model.Shapes[code]; shape != nil && shape.Error != nil && shape.Error.HTTPStatus != 0 {
 		return shape.Error.HTTPStatus
 	}

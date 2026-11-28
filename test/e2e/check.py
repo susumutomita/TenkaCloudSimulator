@@ -735,6 +735,9 @@ def handler(event,context):
  def test_aws_catalog_fixture_lifecycles_cover_every_bound_operation(self):
   subprocess.run([sys.executable, str(Path(__file__).with_name('aws_catalog_fixtures.py'))], check=True, timeout=900)
 
+ def test_service_quotas_reads_applied_b2bi_profile_limit(self):
+  subprocess.run([sys.executable, str(Path(__file__).with_name('service_quotas_profiles.py'))], check=True, timeout=120)
+
  def test_gcp_catalog_discovery_client_two_teams_owner_restart_and_cleanup(self):
   subprocess.run([sys.executable, str(Path(__file__).with_name('gcp_catalog_fixtures.py'))], check=True, timeout=600)
 

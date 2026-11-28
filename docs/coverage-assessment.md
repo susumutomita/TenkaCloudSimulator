@@ -124,7 +124,6 @@ and [onboarding guide](https://docs.cloud.google.com/universal-ledger/getting-st
 | #213 | AWS Trusted Advisor | Checks and recommendations are AWS-owned data. |
 | #198 | AWS Health | Events and entities are AWS-owned data; the rest is organization-level. |
 | #217 | AWS Marketplace | Catalog change sets are listing requests reviewed by AWS; agreements and entitlements are purchases. |
-| #210 | Service Quotas | Quotas, AWS default values and the service list are AWS-owned data. Increase requests and support cases are sent to AWS, request templates need an AWS Organizations management account, and automatic management starts AWS-side utilization monitoring and notifications. |
 | #301 | AWS Support | Cases are real support requests to AWS. |
 | #195 | AWS Control Tower | Landing zones, controls and baselines deploy across an AWS Organizations organization; catalogs are AWS-owned. |
 | #199 | AWS Launch Wizard | Deployments provision workloads; workloads and patterns are AWS-owned catalogs. |
@@ -140,3 +139,9 @@ and [onboarding guide](https://docs.cloud.google.com/universal-ledger/getting-st
 | #346 | Dedicated Interconnect | `compute.v1` `interconnects.insert` orders physical links (`requestedLinkCount`) at an interconnect location. Partner Interconnect attachments (#347) are served. |
 | #348 | Cross-Cloud Interconnect | The same `interconnects.insert` orders physical links to another cloud provider. |
 | #349 | Cross-Site Interconnect | `compute.v1` `wireGroups` group the physical wires between interconnect locations. |
+
+## Service Quotas
+
+[#210](https://github.com/susumutomita/TenkaCloudSimulator/issues/210) now serves
+`GetServiceQuota` for the [regional B2BI Profiles limit](aws-catalog.md#b2b-data-interchange-profile-quota).
+The wider inventory, AWS defaults, support requests and quota increases remain open.
