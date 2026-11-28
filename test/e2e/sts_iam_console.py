@@ -46,7 +46,7 @@ def console_context(browser, team, token, outside):
     page.get_by_role('button', name='Open sandbox', exact=True).click()
     page.get_by_role('button', name='Services', exact=True).click()
     page.get_by_role('menuitem', name='IAM', exact=True).click()
-    expect(page.get_by_role('heading', name='Roles', exact=True)).to_be_visible()
+    expect(page.get_by_role('table', name='IAM roles', exact=True)).to_be_visible()
     return context, page
 
 
@@ -75,24 +75,27 @@ def get_role_send(context, endpoint):
     example = served.value.json()['paths']['/']['post']['requestBody']['content'][FORM]['examples']['GetRole']
     fields = {'Action': 'GetRole', 'Version': '2010-05-08', 'RoleName': ROLE}
     need(example['value'] == fields, 'served GetRole example changed')
+    page.get_by_role('link', name='Shared AWS JSON/Query endpoint', exact=True).click()
+    page.get_by_role('button', name='Selected Content Type: application/x-amz-json-1.1', exact=True).click()
+    page.get_by_role('option', name=FORM, exact=True).click()
+    page.get_by_test_id('example-picker').click()
+    page.get_by_role('option', name=example['summary'], exact=True).click()
     page.get_by_role('button', name='Test Request (post /)', exact=True).click()
     dialog = page.get_by_role('dialog').filter(has=page.get_by_role('button', name='Close Client', exact=True))
-    dialog.get_by_role('button', name='Body', exact=True).click()
-    media = dialog.get_by_role('button', name=re.compile(
-        r'^(application/x-amz-json-1\.[01]|application/x-www-form-urlencoded|Form URL Encoded)$'))
-    if media.inner_text().strip() not in (FORM, 'Form URL Encoded'):
-        media.click()
+    request = dialog.get_by_role('region', name='Request: ' + served.value.json()['paths']['/']['post']['summary'], exact=True)
+    request.get_by_role('tab', name='Body', exact=True).press('Enter')
+    form = request.get_by_role('button', name='Form URL Encoded', exact=True)
+    json_body = request.get_by_role('button', name='application/x-amz-json-1.1', exact=True)
+    expect(form.or_(json_body)).to_be_visible()
+    if not form.is_visible():
+        json_body.click()
         page.get_by_role('option', name='Form URL Encoded', exact=True).click()
-    dialog.get_by_test_id('example-picker').click()
-    page.get_by_role('option', name=example['summary'], exact=True).click()
     for key in fields:
-        box = dialog.get_by_role('checkbox', name='Include ' + key + ' in request', exact=True)
-        if box.count() and not box.is_checked():
-            box.check()
-    dialog.get_by_role('button', name='Headers', exact=True).click()
-    service = dialog.get_by_label('X-Simulator-Service Value', exact=True)
-    service.fill('iam')
-    service.press('Tab')
+        request.get_by_role('checkbox', name='Include ' + key + ' in request', exact=True).check()
+    request.get_by_role('tab', name='Headers', exact=True).press('Enter')
+    service = request.get_by_role('row', name=re.compile(r'^Include X-Simulator-Service in request '))
+    service.get_by_role('button', name=re.compile(r'^(ssm|iam)$')).click()
+    page.get_by_role('menuitem', name='iam', exact=True).click()
     dialog.get_by_role('checkbox', name='Include X-Simulator-Service in request', exact=True).check()
     for header in ('X-Amz-Target', 'X-Simulator-Region'):
         dialog.get_by_role('checkbox', name='Include ' + header + ' in request', exact=True).uncheck()
@@ -113,7 +116,8 @@ def get_role_send(context, endpoint):
          'the reference did not return the role created by the Console')
     role_id = role.findtext('{*}RoleId')
     need(role_id, 'the saved IAM role has no ID')
-    panel = dialog.locator('.response-section-content-body').filter(has_text='GetRoleResponse')
+    panel = dialog.locator('.response-section-content-body').filter(
+        has=page.get_by_role('link', name='Download Response Body', exact=True))
     expect(panel).to_contain_text(role_id)
     need(len(sends) == 1, 'the reference repeated GetRole')
     page.close()
@@ -125,6 +129,36 @@ def edit_trust(page, save):
     page.get_by_role('button', name='Edit trust policy', exact=True).click()
     page.get_by_label('Trust policy JSON', exact=True).fill(json.dumps(DENIED))
     page.get_by_role('button', name='Save changes' if save else 'Cancel', exact=True).click()
+
+
+def reader_cannot_edit(browser, owner, team, outside):
+    name = 'sts-console-reader'
+    document = {'Version': '2012-10-17', 'Statement': [
+        {'Effect': 'Allow', 'Action': 'iam:ListRoles', 'Resource': '*'},
+        {'Effect': 'Allow', 'Action': ['iam:GetRole', 'iam:ListRolePolicies', 'iam:ListAttachedRolePolicies'],
+         'Resource': ARN},
+    ]}
+    control = team.endpoint + '/_simulator/v1/'
+    path = control + 'iam/principals/' + name + '/policy'
+    policy = owner.request.put(path, data=document, headers={'If-None-Match': '*'}, max_redirects=0)
+    need(policy.ok, 'cannot create the synthetic read-only principal')
+    try:
+        access = owner.request.post(control + 'access', data={'Principal': name}, max_redirects=0)
+        need(access.ok, 'cannot issue the synthetic participant login')
+        participant, page = console_context(browser, team, access.json()['AccessToken'], outside)
+        try:
+            page.get_by_role('link', name=ROLE, exact=True).click()
+            with page.expect_response(lambda response: response.url == team.endpoint + '/'
+                                      and form_action(response.request) == 'UpdateAssumeRolePolicy') as saved:
+                edit_trust(page, True)
+            need(saved.value.status == 403, 'read-only participant could edit the trust policy')
+            code = ElementTree.fromstring(saved.value.body()).findtext('{*}Error/{*}Code')
+            need(code == 'AccessDenied', 'unexpected participant IAM error')
+        finally:
+            participant.close()
+    finally:
+        need(owner.request.delete(path, max_redirects=0).status == 204, 'participant policy cleanup failed')
+        need(owner.request.get(path, max_redirects=0).status == 404, 'participant policy still exists')
 
 
 def delete_role(page):
@@ -145,7 +179,7 @@ def refused(call, code):
         raise AssertionError('expected a native SDK refusal')
 
 
-def exercise(team, context, page, clients):
+def exercise(team, browser, context, page, clients, outside):
     iam, sts = clients.client('iam'), clients.client('sts')
     need(successful(iam.list_roles)['Roles'] == [], 'expected a fresh IAM store')
     mutations = Counter()
@@ -172,6 +206,8 @@ def exercise(team, context, page, clients):
         identity = successful(assumed.get_caller_identity)
         need(identity['Arn'] == 'arn:aws:sts::000000000000:assumed-role/' + ROLE + '/' + SESSION
              and identity['UserId'] == role_id + ':' + SESSION, 'session identity did not match the role')
+        reader_cannot_edit(browser, context, team, outside)
+        need(successful(iam.get_role, RoleName=ROLE)['Role'] == role, 'denied participant changed the role')
         edit_trust(page, False)
         expect(page.get_by_role('button', name='Edit trust policy', exact=True)).to_be_visible()
         need(successful(iam.get_role, RoleName=ROLE)['Role'] == role and mutations == {'CreateRole': 1},
@@ -218,11 +254,12 @@ def main():
         outside = []
         context, page = console_context(browser, team, team.token, outside)
         stack.callback(context.close)
-        exercise(team, context, page, LocalClients(session, team, stack, config))
-        need(not outside and team.sends == team.responses, 'a browser or SDK request left its expected scope')
+        exercise(team, browser, context, page, LocalClients(session, team, stack, config), outside)
+        need(not outside and team.sends > 0 and team.sends == team.responses, 'unexpected browser or SDK traffic')
+    need(not Path(directory).exists(), 'temporary state still exists')
     print(json.dumps({'binary_sha256': args.binary_sha256, 'console_create_edit_delete': True,
                       'scalar_cookie_get_role': True, 'signed_sdk_role_session': True,
-                      'cancel_preserved_trust': True, 'changed_trust_refused_new_session': True,
+                      'read_only_participant_refused': True, 'cancel_preserved_trust': True, 'changed_trust_refused_new_session': True,
                       'owned_role_cleanup': True}))
 
 

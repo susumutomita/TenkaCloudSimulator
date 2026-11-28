@@ -103,6 +103,25 @@ AWS also documents errors for features outside this surface, such as
 the [Query handler](../internal/aws/sts.go), [role and trust checks](../internal/aws/sts_roles.go)
 and [SDK authentication wrapper](../internal/server/access_sdk.go).
 
+## Use the role created in the IAM Console
+
+Under IAM → Roles, select **Create role** and **Custom trust policy**. An AWS
+principal in the trust document can assume the saved role through the signed
+STS SDK when the caller's permissions also allow it. The Console's
+**Trust relationships** tab and the API reference's **GetRole** example read
+that same IAM role. The role's maximum session duration limits new SDK sessions.
+
+The browser fixture creates a disposable role, reads it through Scalar,
+checks its assumed identity with boto3, and then changes the role's trust in
+the Console. It checks cancellation, a read-only participant, refusal of a
+new SDK assumption and cleanup. Use the pinned test dependencies and Chromium
+in a loopback-only Linux test environment with Chromium sandbox support.
+
+```sh
+python test/e2e/sts_iam_console.py --binary /path/to/tenkacloud-simulator \
+  --binary-sha256 <verified-sha256>
+```
+
 ## Verification and limits
 
 `test/e2e/sts_sdk.py` uses the official boto3 client without custom auth hooks.
