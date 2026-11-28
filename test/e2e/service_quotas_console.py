@@ -115,7 +115,26 @@ def audit(page):
     assert hashlib.sha256(script.read_bytes()).hexdigest() == provenance['bundleSha256']
     page.evaluate(script.read_text())
     result = page.evaluate("async () => await axe.run(document,{runOnly:{type:'tag',values:['wcag2a','wcag2aa','wcag21a','wcag21aa']}})")
-    assert not result['violations'], [item['id'] for item in result['violations']]
+    # Only fixed control labels and visual measurements may enter a failure
+    # receipt. Never serialize axe HTML, request data, or arbitrary page text.
+    diagnostics = page.evaluate("""violations => violations.map(item => ({
+        rule: item.id,
+        nodes: item.nodes.map(node => {
+            const element = typeof node.target[0] === 'string'
+                ? document.querySelector(node.target[0]) : null;
+            const button = element?.closest('button');
+            const labels = ['Refresh same-scope history', 'Start a separate new request',
+                '同じスコープの履歴を更新', '別の新規リクエストを開始'];
+            return {tag: element?.tagName || 'unknown',
+                area: element?.closest('.service-quotas-unknown') ? 'unknown-outcome-warning' : 'other',
+                control: labels.includes(button?.innerText) ? button.innerText : 'other',
+                contrast: node.any.filter(check => check.id === 'color-contrast').map(check => ({
+                    foreground: check.data?.fgColor, background: check.data?.bgColor,
+                    ratio: check.data?.contrastRatio, required: check.data?.expectedContrastRatio,
+                }))};
+        }),
+    }))""", result['violations'])
+    assert not result['violations'], diagnostics
     assert page.evaluate('document.documentElement.scrollWidth <= innerWidth + 1')
 
 
