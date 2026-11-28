@@ -111,6 +111,10 @@ class Conformance(unittest.TestCase):
  def test_sns_notification_topic_policy(self):
   subprocess.run([sys.executable,str(Path(__file__).with_name('sns_notification_policy.py'))],check=True,timeout=180)
 
+ def test_codestar_notification_rules_and_git_delivery(self):
+  subprocess.run([sys.executable, str(Path(__file__).with_name('codestar_notifications.py'))],
+                 env={**os.environ, 'SIMULATOR_BINARY':str(BINARY)}, check=True, timeout=180)
+
  def test_scalar_aws_json_live_response_display(self):
   subprocess.run([sys.executable,str(Path(__file__).with_name('scalar_aws_json.py'))],check=True,timeout=180)
 
