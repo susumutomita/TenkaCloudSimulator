@@ -27,6 +27,23 @@ func TestPCSSavedIdentityRefusalAndRepair(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			host, peer := newPCSHarness(t), newPCSHarness(t)
 			cluster, group, queue := pcsIAMSeed(t, host)
+			if test.operation == "UpdateQueue" {
+				originalGroup, err := find(host.db, "pcs", "us-east-1", "computeNodeGroup", cluster, group)
+				if err != nil {
+					t.Fatal(err)
+				}
+				input := map[string]any{"clusterIdentifier": cluster, "computeNodeGroupName": "replacement"}
+				for _, member := range []string{"subnetIds", "customLaunchTemplate", "iamInstanceProfileArn", "scalingConfiguration", "instanceConfigs"} {
+					input[member] = originalGroup.Document[member]
+				}
+				created := host.json1("pcs", "CreateComputeNodeGroup", input)
+				expect(t, created, 200, "")
+				replacement := str(created.body["computeNodeGroup"].(map[string]any)["id"])
+				if replacement == group {
+					t.Fatal("replacement group reused original identity")
+				}
+				group = replacement
+			}
 			pcsIAMSeed(t, peer)
 			peerBefore := groupCatalogFrame(t, peer.db)
 			id := map[string]string{"cluster": cluster, "computeNodeGroup": group, "queue": queue}[test.kind]
@@ -73,7 +90,26 @@ func TestPCSSavedIdentityRefusalAndRepair(t *testing.T) {
 			if _, err = host.db.Exec("UPDATE aws_catalog_resources SET document=? WHERE service='pcs' AND kind=? AND id=?", original, test.kind, id); err != nil {
 				t.Fatal(err)
 			}
-			expect(t, host.json1("pcs", test.operation, input), 200, "")
+			recovered := host.json1("pcs", test.operation, input)
+			expect(t, recovered, 200, "")
+			if test.operation == "UpdateQueue" {
+				want := []any{map[string]any{"computeNodeGroupId": group}}
+				if !reflect.DeepEqual(recovered.body["queue"].(map[string]any)["computeNodeGroupConfigurations"], want) {
+					t.Fatal("repair did not return the replacement association")
+				}
+				fresh := host.json1("pcs", "GetQueue", map[string]any{"clusterIdentifier": cluster, "queueIdentifier": queue})
+				expect(t, fresh, 200, "")
+				if !reflect.DeepEqual(fresh.body["queue"].(map[string]any)["computeNodeGroupConfigurations"], want) {
+					t.Fatal("replacement association was not saved")
+				}
+			}
+			if test.operation == "TagResource" {
+				listed := host.json1("pcs", "ListTagsForResource", map[string]any{"resourceArn": input["resourceArn"]})
+				expect(t, listed, 200, "")
+				if listed.body["tags"].(map[string]any)["repaired"] != "yes" {
+					t.Fatal("repair did not save target tag")
+				}
+			}
 			if !reflect.DeepEqual(peerBefore, groupCatalogFrame(t, peer.db)) {
 				t.Fatal("repair retry changed peer")
 			}
@@ -143,6 +179,11 @@ func TestPCSNativeTagRegionAndLegacyAliasRefusal(t *testing.T) {
 			t.Fatal(err)
 		}
 		expect(t, host.json1("pcs", "TagResource", input), 200, "")
+		listed := host.json1("pcs", "ListTagsForResource", map[string]any{"resourceArn": canonical})
+		expect(t, listed, 200, "")
+		if listed.body["tags"].(map[string]any)["repaired"] != "yes" {
+			t.Fatal("canonical alias repair did not save historical target tag")
+		}
 		saved, err := find(host.db, "pcs", "us-east-1", "queue", cluster, queue)
 		if err != nil || saved.ARN != "arn:aws:pcs:us-east-1:000000000000:queue/"+queue || saved.Document["arn"] != saved.ARN {
 			t.Fatal("repair retry migrated historical identity", err)
