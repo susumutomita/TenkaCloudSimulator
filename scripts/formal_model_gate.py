@@ -4914,6 +4914,33 @@ SUPPORT_CASE_CONTROLS = [
 REQUIRED_MUTANTS['SupportCaseLifecycle'] = {entry[0] for entry in SUPPORT_CASE_CONTROLS}
 
 
+# Independent local CloudFront delivery and invalidation controls. Keep these
+# literal sets separate from the mutable model registry they protect.
+BASE_MODELS.add('CloudFrontLocalCache')
+BASE_INVARIANTS['CloudFrontLocalCache'] = {
+    'TypeOK', 'FreshJointAuthority', 'ExactHitIdentity', 'MissReadsOrigin',
+    'FailureRollsBack', 'RefusalUnchanged', 'StaleETagUnchanged',
+    'UpdateClearsCache', 'InvalidationClearsCache', 'RestartPreserves', 'PeerUnchanged',
+}
+REQUIRED_MUTANTS['CloudFrontLocalCache'] = {
+    'MissingObjectGrant', 'MissingDistributionGrant', 'WrongOriginLifetime',
+    'CrossActorHit', 'ExpiredHit', 'IgnoreETag', 'UpdateRetainsCache',
+    'InvalidationRetainsCache', 'FailedInvalidationEvicts',
+}
+REQUIRED_SOURCE_SCOPES['CloudFrontLocalCache'] = {
+    'internal/aws/cloudfront_distribution.go', 'internal/aws/cloudfront_distribution_store.go',
+    'internal/aws/cloudfront_distribution_http.go', 'internal/aws/cloudfront_distribution_list.go',
+    'internal/aws/cloudfront_vpc_origin.go', 'internal/aws/ssm.go', 'internal/server/server.go',
+    'internal/aws/cloudfront_distribution_interrupt_test.go',
+}
+
+BASE_MODELS.add('CloudFrontConsoleEpoch')
+BASE_INVARIANTS['CloudFrontConsoleEpoch'] = {'StableUnknownCaller', 'ProtectedDownload', 'CurrentReceipt', 'TypeOK', 'OneCurrentWrite', 'ExplicitWriteConfirmation', 'CurrentContent', 'AcknowledgedReceipt'}
+REQUIRED_MUTANTS['CloudFrontConsoleEpoch'] = {'UnconfirmedWrite', 'PublishOldRead', 'RetainOldContent', 'ReplayDifferentCaller', 'OldReadUnlocksWrite', 'FreshCallerWhileUnknown', 'UnknownAcknowledged', 'UnsafeContent', 'PublishOldReceipt'}
+REQUIRED_SOURCE_SCOPES['CloudFrontConsoleEpoch'] = {'internal/aws/cloudfront_distribution_http.go', 'tools/console/src/cloudfront-local.jsx', 'tools/console/src/cloudfront-local.mjs', 'internal/server/web/app.js', 'tools/console/src/console-navigation.mjs', 'tools/console/src/main.jsx'}
+REQUIRED_SOURCE_SCOPES['CloudFrontConsoleEpoch'].add('tools/console/src/console-home.jsx')
+
+
 def load_registry(root, relative='formal/models.json'):
     root = Path(root)
     registry_path = asset(root, relative)
