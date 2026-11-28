@@ -105,7 +105,7 @@ Aux(op) ==
                              !.state = CASE op = "enable" -> "Enabled" [] op = "disable" -> "Disabled" [] OTHER -> @]
  IN /\ ~Due
     /\ db' = IF allowed THEN change ELSE db
-    /\ last' = Note("operation",expected,expectedOK,allowed)
+    /\ last' = Note(op,expected,expectedOK,allowed)
     /\ UNCHANGED day
 
 Clock(t) ==
@@ -134,7 +134,7 @@ ScheduleContract == last.kind # "schedule" \/ (last.ok = last.want /\ db = last.
 CancelContract == last.kind # "cancel" \/ (last.ok = last.want /\ db = last.expect)
 ExpiryBoundary == last.kind # "reap" \/ last.ok = last.want
 AtomicExpiry == last.kind # "reap" \/ db = last.expect
-OperationMatrix == last.kind # "operation" \/ (last.ok = last.want /\ db = last.expect)
+OperationMatrix == last.kind \notin Operations \/ (last.ok = last.want /\ db = last.expect)
 RestartPreservesDeadline == last.kind # "restart" \/ db = last.expect
 TimePreservesStorage == last.kind # "clock" \/ db = last.expect
 =============================================================================

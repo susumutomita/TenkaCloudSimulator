@@ -30473,7 +30473,7 @@
           "edits": [
             {
               "old": "crossed == Waiting /\\ day >= db.deadline",
-              "new": "crossed == db.state # \"Gone\" /\\ day >= db.deadline",
+              "new": "crossed == (Waiting /\\ day >= db.deadline) \\/ (last.kind = \"cancel\" /\\ last.ok /\\ db.state = \"Disabled\")",
               "count": 1
             }
           ],
@@ -30583,7 +30583,7 @@
           "edits": [
             {
               "old": "IN /\\ ~Due\n    /\\ db' = IF allowed THEN change ELSE db",
-              "new": "IN /\\ TRUE\n    /\\ db' = IF allowed THEN change ELSE db",
+              "new": "IN /\\ (~Due \\/ op = \"read\")\n    /\\ db' = IF allowed THEN change ELSE db",
               "count": 1
             }
           ],
@@ -30594,7 +30594,7 @@
           "edits": [
             {
               "old": "op = \"crypto\" -> db.state = \"Enabled\"",
-              "new": "op = \"crypto\" -> db.state # \"Gone\"",
+              "new": "op = \"crypto\" -> db.state \\in {\"Enabled\",\"Pending\"}",
               "count": 1
             }
           ],
@@ -30616,7 +30616,7 @@
           "edits": [
             {
               "old": "op = \"createGrant\" -> db.state = \"Enabled\" /\\ ~db.grant",
-              "new": "op = \"createGrant\" -> present /\\ ~db.grant",
+              "new": "op = \"createGrant\" -> db.state \\in {\"Enabled\",\"Pending\"} /\\ ~db.grant",
               "count": 1
             }
           ],
