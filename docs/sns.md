@@ -3,7 +3,7 @@
 TenkaCloudSimulator implements a deliberately small, local subset of the
 Amazon SNS Query API (version `2010-03-31`, XML responses, namespace
 `http://sns.amazonaws.com/doc/2010-03-31/`). State lives in the same SQLite
-database as the other services (`aws_sns_topics`, `aws_sns_subscriptions`,
+database as the other services (`aws_sns_topics`, `aws_sns_notification_policies`, `aws_sns_subscriptions`,
 `aws_sns_messages`, `aws_sns_deliveries`) and survives restarts when the
 simulator runs with `--state`.
 
@@ -13,7 +13,8 @@ simulator runs with `--state`.
 | --- | --- |
 | CreateTopic | Idempotent like real SNS. `Name` plus `Attributes.entry.N` for `DisplayName` and `FifoTopic` only. FIFO names must end in `.fifo`. |
 | ListTopics | Per region, scoped `NextToken` pagination bound to operation, region and topic (page size 100). |
-| GetTopicAttributes | TopicArn, Owner, DisplayName, subscription counts, FifoTopic. |
+| GetTopicAttributes | TopicArn, Owner, DisplayName, subscription counts, FifoTopic, and the exact Policy string when configured. |
+| SetTopicAttributes | Set the Policy attribute on an existing Standard topic for the notification service described below. |
 | DeleteTopic | Removes the topic, subscriptions, messages and all delivery records in one transaction, including history from removed subscriptions. A valid, authorized deletion of an absent topic succeeds without changing state; retries are idempotent. |
 | Subscribe | Protocols: sqs, http, https, email, email-json, sms, lambda, application, firehose. SQS requires a same-region Standard queue and caller SendMessage permission. Duplicate (topic, protocol, endpoint) returns the existing subscription. |
 | GetSubscriptionAttributes | Read the retained subscription by ARN in the selected region, with IAM on its topic. |
@@ -41,6 +42,38 @@ These are local simulator limits and do not claim AWS quotas or process RSS. Err
 `ValidationError`, `InvalidParameter`, `InvalidAction` for
 unimplemented operations (HTTP 400), `NotFound` (404),
 `AuthorizationError` (403), `LimitExceededException` (409).
+
+## CodeStar Notifications topic policies
+
+On an existing Standard topic, send an authenticated SNS Query
+`SetTopicAttributes` with its `TopicArn`, `AttributeName=Policy` and a JSON
+policy string in `AttributeValue`. The AWS notification guide uses this
+statement for an existing topic:
+
+```json
+{"Version":"2008-10-17","Statement":[{"Sid":"AWSCodeStarNotifications_publish","Effect":"Allow","Principal":{"Service":["codestar-notifications.amazonaws.com"]},"Action":"SNS:Publish","Resource":"arn:aws:sns:us-east-1:000000000000:events"}]}
+```
+
+`GetTopicAttributes` returns the saved string verbatim. Each operation requires its
+own IAM action on the topic ARN. An existing topic without a saved policy omits
+the attribute and grants no service access. A policy edit keeps the topic's
+internal identity. Deleting a topic retires its identity and policy. A newly
+created topic with the same ARN starts without a policy.
+
+The document accepts versions `2008-10-17` and `2012-10-17`. `Statement` can
+be an object or a list of one to eight objects. Each statement applies only
+to the exact local topic ARN, service principal and publish action shown above.
+The three values accept either a string or a singleton string list. Action
+names are ASCII case-insensitive. Optional document `Id` and statement `Sid`
+contain 1–128 bytes of printable UTF-8. Statement identifiers must be unique.
+An explicit `Deny` overrides any `Allow`. The local size limit is 8192 bytes
+per document. Other principals, actions, resources, conditions and wildcard
+values return `InvalidParameter`. The simulator checks ordinary callers and
+SQS queue access through their existing IAM policies.
+
+[SetTopicAttributes](https://docs.aws.amazon.com/sns/latest/api/API_SetTopicAttributes.html) ·
+[GetTopicAttributes](https://docs.aws.amazon.com/sns/latest/api/API_GetTopicAttributes.html) ·
+[Configuring an SNS target for notifications](https://docs.aws.amazon.com/dtconsole/latest/userguide/set-up-sns.html)
 
 ## Deliberate deviations — read before relying on behavior
 
@@ -88,10 +121,10 @@ unimplemented operations (HTTP 400), `NotFound` (404),
 - SNS-to-Lambda invocation is likewise not performed; `lambda` protocol
   subscriptions are stored (endpoint must be a Lambda function ARN) and
   receive only local delivery records.
-- No topic policies, tags, SMS sandbox, mobile push credential management,
+- General topic policies, tags, SMS sandbox, mobile push credential management,
   message attributes, message structure JSON, FIFO deduplication/ordering
-  semantics, or CloudFormation `AWS::SNS::Topic` support. Unsupported
-  fields and attributes are rejected rather than ignored.
+  semantics, and CloudFormation `AWS::SNS::Topic` are unsupported. Unsupported
+  fields and attributes are rejected.
 - The local Cloudscape SNS page provides bounded HTTP/HTTPS subscriptions.
   Topic creation and attribute-policy editing are not provided by this view.
   The local Scalar reference only sends Subscribe, in us-east-1 under the signed-in
