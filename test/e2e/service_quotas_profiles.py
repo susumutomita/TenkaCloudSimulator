@@ -48,6 +48,11 @@ def participant(team, name, statements):
 
 def exercise(a, b):
     east, west = 'us-east-1', 'us-west-2'
+    document = a.control('GET', '/_simulator/docs/catalog/service-quotas.json')
+    post = document['paths']['/']['post']
+    example = post['requestBody']['content']['application/x-amz-json-1.1']['examples']['GetServiceQuota']['value']
+    assert example == QUOTA and '400' in post['responses'] and '403' not in post['responses']
+    assert a.client('service-quotas', region=east).get_service_quota(**example)['Quota']['Value'] == 5
     allow = {'Effect': 'Allow', 'Action': ACTION, 'Resource': quota_arn(east)}
     reader = participant(a, 'quota-east-reader', [allow])
     read(a, east, reader)

@@ -39,7 +39,11 @@ func (b *binding) openAPI() map[string]any {
 			official := m.Operations[op.Name]
 			target := m.Metadata.TargetPrefix + "." + op.Name
 			targets = append(targets, target)
-			examples[op.Name] = map[string]any{"summary": "X-Amz-Target: " + target, "value": map[string]any{}}
+			body := op.Fixed
+			if body == nil {
+				body = map[string]any{}
+			}
+			examples[op.Name] = map[string]any{"summary": "X-Amz-Target: " + target, "value": body}
 			if official.Input != "" {
 				b.schema(official.Input, schemas, 0)
 			}
@@ -48,17 +52,22 @@ func (b *binding) openAPI() map[string]any {
 			}
 		}
 		media := "application/x-amz-json-" + m.Metadata.JSONVersion
+		responses := map[string]any{
+			"200": map[string]any{"description": "Projected official output shape.", "content": map[string]any{media: map[string]any{"schema": map[string]any{"type": "object"}}}},
+			"400": map[string]any{"description": "Modeled exception in __type."},
+			"403": map[string]any{"description": "AccessDeniedException from local identity policy evaluation."},
+			"501": map[string]any{"description": "Official operation not implemented by the simulator."},
+		}
+		if b.spec.Model == "service-quotas" {
+			delete(responses, "403")
+			responses["400"] = map[string]any{"description": "AccessDeniedException, IllegalArgumentException or NoSuchResourceException in __type."}
+		}
 		paths["/"] = map[string]any{"post": map[string]any{
 			"operationId": b.spec.Model + "JSONOperation", "tags": []any{tag}, "summary": tag + " JSON " + m.Metadata.JSONVersion + " operations",
 			"description": "Choose the X-Amz-Target of one implemented operation. Request and response members follow the linked official input/output schemas.",
 			"parameters":  []any{map[string]any{"name": "X-Amz-Target", "in": "header", "required": true, "schema": map[string]any{"type": "string", "enum": targets}}},
 			"requestBody": map[string]any{"required": true, "content": map[string]any{media: map[string]any{"schema": map[string]any{"type": "object"}, "examples": examples}}},
-			"responses": map[string]any{
-				"200": map[string]any{"description": "Projected official output shape.", "content": map[string]any{media: map[string]any{"schema": map[string]any{"type": "object"}}}},
-				"400": map[string]any{"description": "Modeled exception in __type."},
-				"403": map[string]any{"description": "AccessDeniedException from local identity policy evaluation."},
-				"501": map[string]any{"description": "Official operation not implemented by the simulator."},
-			},
+			"responses":   responses,
 		}}
 	} else {
 		for _, op := range ops {

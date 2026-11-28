@@ -208,7 +208,7 @@ jobs:
       - name: Build the actual embedded simulator
         run: |
           make build
-          sha256sum dist/tenkacloud-simulator > "$RUNNER_TEMP/queue-simulator.sha256"
+          sha256sum dist/tenkacloud-simulator > "$RUNNER_TEMP/platform-simulator.sha256"
       - name: Install Python SDK and browser tools
         timeout-minutes: 3
         run: |
@@ -219,8 +219,14 @@ jobs:
         run: |
           /tmp/simulator-tests/bin/pip install --require-hashes --only-binary=:all: --no-deps -r scripts/requirements-azure-queue-test.txt
           /tmp/simulator-tests/bin/pip check
-          read -r binary_sha _ < "$RUNNER_TEMP/queue-simulator.sha256"
+          read -r binary_sha _ < "$RUNNER_TEMP/platform-simulator.sha256"
           /tmp/simulator-tests/bin/python test/e2e/azure_queue_cli.py --binary "$PWD/dist/tenkacloud-simulator" --binary-sha256 "$binary_sha"
+      - name: Verify local STS session invalidation and team isolation with boto3
+        timeout-minutes: 3
+        run: |
+          /tmp/simulator-tests/bin/python test/e2e/test_sts_session_lifecycle.py
+          read -r binary_sha _ < "$RUNNER_TEMP/platform-simulator.sha256"
+          /tmp/simulator-tests/bin/python test/e2e/sts_session_lifecycle.py --binary "$PWD/dist/tenkacloud-simulator" --binary-sha256 "$binary_sha"
       - name: Install full Chromium system dependencies
         timeout-minutes: 12
         run: /tmp/simulator-tests/bin/playwright install-deps chromium

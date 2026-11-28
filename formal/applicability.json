@@ -1,10 +1,10 @@
 {
   "version": 1,
-  "base_sha": "6eba31db4e017cdb1c591b0c5af1ca4426acc1cf",
+  "base_sha": "70695e3f5c040ea98b3132a6a097a4b7ebea31ab",
   "changes": [
     {
       "path": "README.md",
-      "sha256": "65cf59494be5b8e00298e1407fd9447a4487b25608320352a7e6aad9764ea436",
+      "sha256": "1b028c34400a6603efd6996c37219b6f94f842a736058146f1a78a8bbd438b53",
       "disposition": "documentation",
       "reason": "Describe the bounded regional B2BI Profiles applied-quota read and retained unsupported operations.",
       "models": []
@@ -32,7 +32,7 @@
     },
     {
       "path": "docs/design/0001-go-standalone.md",
-      "sha256": "b0b34702abcaf8c7d6329fcf9f2ee44357852b53a620167a2eb62aa53ce43874",
+      "sha256": "35aa0b5b9e9a738b4d0d78469327cd849731adcf1bc833d293659d283d736131",
       "disposition": "documentation",
       "reason": "Describe the bounded regional B2BI Profiles applied-quota read and retained unsupported operations.",
       "models": []
@@ -97,6 +97,24 @@
           "limits": "The finite model abstracts regional peers, authorization and capacity. It does not model this AWS quota code, ARN construction, Go binding, SQLite, SDK response or HTTP status."
         }
       ]
+    },
+    {
+      "path": "internal/aws/catalog/openapi.go",
+      "disposition": "modeled",
+      "reason": "Use the declared fixed JSON inputs and service-specific denial status in the generated native catalog reference.",
+      "models": [
+        {
+          "id": "CatalogResourceLifecycle",
+          "properties": [
+            "AuthorizationFirst",
+            "FailureFrame",
+            "PeerFrame",
+            "QuotaBound"
+          ],
+          "limits": "Native HTTP status codes, JSON body examples, browser rendering and Go-to-model refinement are outside the finite lifecycle model."
+        }
+      ],
+      "sha256": "9d10e1e15fcf0e008fe2bf740de3383009b425d2bcb41b6cb4d597fc83880667"
     },
     {
       "path": "internal/aws/catalog/selection.json",
@@ -196,6 +214,20 @@
       ]
     },
     {
+      "path": "internal/server/apidocs/catalog/index.json",
+      "disposition": "presentation",
+      "reason": "Ship the generated Service Quotas schema, fixed B2BI example and catalog index from the reviewed service binding.",
+      "models": [],
+      "sha256": "8ea87c501efb07d9f3fc5e1332fa50dbe29a042e13fd41cd79be245f60e93849"
+    },
+    {
+      "path": "internal/server/apidocs/catalog/service-quotas.json",
+      "disposition": "presentation",
+      "reason": "Ship the generated Service Quotas schema, fixed B2BI example and catalog index from the reviewed service binding.",
+      "models": [],
+      "sha256": "4c16a3e116b070f012ebe755d93f992bfdcbed62b7d21f6fa22c4ef3b09dcda2"
+    },
+    {
       "path": "test/e2e/catalog_fixtures/service-quotas.json",
       "sha256": "4fd277f257ca7f4fc44486a2500cbdb42727e449d34beb3036eeb1c5c7939dc6",
       "disposition": "test-support",
@@ -211,7 +243,7 @@
     },
     {
       "path": "test/e2e/service_quotas_profiles.py",
-      "sha256": "03c61d52bc619ddcf60f004cc2b575fb55105f14d43fcf5d39e080d57a5d3161",
+      "sha256": "ec7c54ffc9be15aaf8a1557f90de82a28b5ab93604cba8a89109772bf648a9c4",
       "disposition": "test-support",
       "reason": "Verify the native applied quota, B2BI profile enforcement, negative responses and isolation through the applicable test entry point.",
       "models": []
