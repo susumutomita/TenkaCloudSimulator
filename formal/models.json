@@ -30270,7 +30270,7 @@
       "id": "ALBConsoleWorkflow",
       "model": "formal/ALBConsoleWorkflow.tla",
       "config": "formal/ALBConsoleWorkflow.cfg",
-      "bounds": "Separate read and write trials. At most three read tasks, one active task and one retired result; one scope change may reuse a ticket number. Two symbolic balancer and group identifiers, with independently changing selections. A write trial begins at one selected saved Lambda target group. One explicit ModifyTargetGroup with two possible store outcomes, one independent group removal and arbitrary repeat observations within the finite graph.",
+      "bounds": "Separate read and write trials. At most three read tasks, one active task and one retired result; one scope change may reuse a ticket number. Two symbolic balancer and group identifiers, with independently changing selections. A write trial begins at one selected saved Lambda target group. One explicit ModifyTargetGroup with two possible store outcomes, one independent group removal, one listener detach and reassignment to a second balancer, and arbitrary repeat observations within the finite graph.",
       "properties": [
         "TypeOK",
         "ReadAdmission",
@@ -30284,9 +30284,11 @@
         "CompleteDetail",
         "BoundReadback",
         "CheckedHealth",
-        "ObservedOnly"
+        "ObservedOnly",
+        "LinkFrame",
+        "PreflightAdmission"
       ],
-      "limits": "Scope and task identity abstract the request source, section, principal, region, selected ARN and mount. A detail is published only after its required native results are available. Path and health checks express logical requirements of one joined read; the model does not impose a transport completion order. A recovery reread observes the current group path or modeled absence without verifying the past write. The interlock belongs to that mounted scope. Placement, listener and target fields are represented by typed symbolic outcomes. Explicit reads seeded at a selected resource do not model navigation reachability, React, XML decoding, IAM, HTTP delivery, physical deployment, native concurrency or actual listener traffic. Routing and bundle bindings concern component selection and retirement only.",
+      "limits": "Scope and task identity abstract the request source, section, principal, region, selected ARN and mount. A detail is published only after its required native results are available. Path and health checks express logical requirements of one joined read; the model does not impose a transport completion order. A preflight on the group verifies the selected balancer before sending. Reassociation after that check can still affect the native request: ModifyTargetGroup has no atomic balancer precondition. Recovery may observe the current linked group, its loss of association, or its absence without verifying the previous write. The interlock belongs to that mounted scope. Placement, listener and target fields are represented by typed symbolic outcomes. Explicit reads seeded at a selected resource do not model navigation reachability, React, XML decoding, IAM, HTTP delivery, physical deployment, native concurrency or actual listener traffic. Routing and bundle bindings concern component selection and retirement only.",
       "source_scope": [
         "internal/server/server.go",
         "internal/server/web/app.js",
@@ -30812,6 +30814,149 @@
             }
           ],
           "expect_invariant": "ObservedOnly"
+        },
+        {
+          "id": "SendAfterDetachment",
+          "edits": [
+            {
+              "old": "LET linked == r = \"current\" /\\ ui.parent = ui.scope.alb",
+              "new": "LET linked == (r = \"current\" /\\ ui.parent = ui.scope.alb) \\/ (r = \"current\" /\\ ui.parent = \"detached\")",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PreflightAdmission"
+        },
+        {
+          "id": "SendAfterMoveToDifferentBalancer",
+          "edits": [
+            {
+              "old": "LET linked == r = \"current\" /\\ ui.parent = ui.scope.alb",
+              "new": "LET linked == (r = \"current\" /\\ ui.parent = ui.scope.alb) \\/ (r = \"current\" /\\ ui.parent = \"B\")",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PreflightAdmission"
+        },
+        {
+          "id": "PreflightWrongGroup",
+          "edits": [
+            {
+              "old": "LET linked == r = \"current\" /\\ ui.parent = ui.scope.alb",
+              "new": "LET linked == r \\in {\"current\",\"wrongArn\"} /\\ ui.parent = ui.scope.alb",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PreflightAdmission"
+        },
+        {
+          "id": "PreflightPermissionLoss",
+          "edits": [
+            {
+              "old": "LET linked == r = \"current\" /\\ ui.parent = ui.scope.alb",
+              "new": "LET linked == r \\in {\"current\",\"denied\"} /\\ ui.parent = ui.scope.alb",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PreflightAdmission"
+        },
+        {
+          "id": "PreflightUnavailable",
+          "edits": [
+            {
+              "old": "LET linked == r = \"current\" /\\ ui.parent = ui.scope.alb",
+              "new": "LET linked == r \\in {\"current\",\"failed\"} /\\ ui.parent = ui.scope.alb",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PreflightAdmission"
+        },
+        {
+          "id": "ConfirmResponseFromChangedParent",
+          "edits": [
+            {
+              "old": "r = \"matching\" -> \"checkingPath\"",
+              "new": "r \\in {\"matching\",\"wrongParent\"} -> \"checkingPath\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "Acknowledgement"
+        },
+        {
+          "id": "ReadReassociatedGroupAsLinked",
+          "edits": [
+            {
+              "old": "IF r = \"matching\" THEN \"checkingHealth\" ELSE \"uncertain\"",
+              "new": "IF r \\in {\"matching\",\"wrongParent\"} THEN \"checkingHealth\" ELSE \"uncertain\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "BoundReadback"
+        },
+        {
+          "id": "ExposeMismatchedLinkedRows",
+          "edits": [
+            {
+              "old": "   [] OTHER -> EmptyView",
+              "new": "   [] r = \"wrongParent\" /\\ k = \"balancerDetail\" -> Ready(k,FALSE)\n   [] OTHER -> EmptyView",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CompleteDetail"
+        },
+        {
+          "id": "ExposeMismatchedGroupDetail",
+          "edits": [
+            {
+              "old": "   [] OTHER -> EmptyView",
+              "new": "   [] r = \"wrongParent\" /\\ k = \"groupDetail\" -> Ready(\"healthy\",FALSE)\n   [] OTHER -> EmptyView",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "TruthfulHealth"
+        },
+        {
+          "id": "ExposeMovedGroupPathAfterLostAck",
+          "edits": [
+            {
+              "old": "!.w.phase = \"unavailable\", !.w.seenPath = \"none\", !.w.health = \"none\"",
+              "new": "!.w.phase = \"unavailable\", !.w.seenPath = IF ui.parent = \"B\" /\\ last.step = \"ack\" /\\ last.result = \"lost\" THEN ui.target ELSE \"none\", !.w.health = \"none\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ObservedOnly"
+        },
+        {
+          "id": "KeepDetachedGroupLockedAfterExactRefresh",
+          "edits": [
+            {
+              "old": "!.w.phase = \"unavailable\", !.w.seenPath = \"none\", !.w.health = \"none\"",
+              "new": "!.w.phase = IF ui.parent = \"detached\" THEN \"uncertain\" ELSE \"unavailable\", !.w.seenPath = \"none\", !.w.health = \"none\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ObservedOnly"
+        },
+        {
+          "id": "CallReassociationAConfirmedSave",
+          "edits": [
+            {
+              "old": "!.w.phase = \"unavailable\", !.w.seenPath = \"none\", !.w.health = \"none\"",
+              "new": "!.w.phase = \"unavailable\", !.w.seenPath = \"none\", !.w.health = \"none\", !.w.verified = TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ObservedOnly"
+        },
+        {
+          "id": "ChangeRequestedPathWhenMovingListener",
+          "edits": [
+            {
+              "old": "[ui EXCEPT !.parent = p]",
+              "new": "[ui EXCEPT !.parent = p, !.target = \"desired\"]",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "LinkFrame"
         }
       ]
     }

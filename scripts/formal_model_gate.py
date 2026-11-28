@@ -4889,6 +4889,8 @@ BASE_INVARIANTS['ALBConsoleWorkflow'] = {
     'BoundReadback',
     'CheckedHealth',
     'ObservedOnly',
+    'LinkFrame',
+    'PreflightAdmission',
 }
 REQUIRED_MUTANTS['ALBConsoleWorkflow'] = {
     'ReuseTicketAcrossSource',
@@ -4938,6 +4940,19 @@ REQUIRED_MUTANTS['ALBConsoleWorkflow'] = {
     'IgnoreConfirmedGroupAbsence',
     'ResendAfterLostAck',
     'RetryAutomaticallyAfterLostAck',
+    'SendAfterDetachment',
+    'SendAfterMoveToDifferentBalancer',
+    'PreflightWrongGroup',
+    'PreflightPermissionLoss',
+    'PreflightUnavailable',
+    'ConfirmResponseFromChangedParent',
+    'ReadReassociatedGroupAsLinked',
+    'ExposeMismatchedLinkedRows',
+    'ExposeMismatchedGroupDetail',
+    'ExposeMovedGroupPathAfterLostAck',
+    'KeepDetachedGroupLockedAfterExactRefresh',
+    'CallReassociationAConfirmedSave',
+    'ChangeRequestedPathWhenMovingListener',
 }
 REQUIRED_SOURCE_SCOPES['ALBConsoleWorkflow'] = {
     'internal/server/server.go',
