@@ -1,273 +1,291 @@
 {
   "version": 1,
-  "base_sha": "fd803075c37af3faa377f550c8e1cd52b3cfbbb1",
+  "base_sha": "4c32b71522e4af2d1f49894befed2867774539ce",
   "changes": [
     {
       "path": "README.ja.md",
-      "sha256": "b6941d62d812795387029b8ac62582b023b445fb4de8f281585ccc5d60f3eb0a",
+      "sha256": "d73bc1f0bfa7cc53295809ae83ffe9b4357278a412cdb236123ce26cb4a83559",
       "disposition": "documentation",
-      "reason": "Describe the regional native EC2 placement dependency in Japanese.",
+      "reason": "Document the compiled regional Console, saved health check path and shared native API scope.",
       "models": []
     },
     {
       "path": "README.md",
-      "sha256": "2294ec7c1fdd7b5d12735db19048d556768695b51964b2f4a1bef38a138e1409",
+      "sha256": "5efbfbf07d96e946ab97f85f0607d2b5309e243aecd0a686212a9ded3150a20c",
       "disposition": "documentation",
-      "reason": "Describe the supported local ALB placement workflow and legacy compatibility.",
+      "reason": "Document shared regional ELBv2 resources, the authenticated Console health editor and the served Scalar Query examples.",
       "models": []
     },
     {
       "path": "docs/design/0001-go-standalone.md",
-      "sha256": "d051fdb55085ab58fdd310b4ac0e112b19a7124e09390f49375f1fe8043c0171",
+      "sha256": "c45419fcee2be66a7a4d9dabfc78aea23fb42040b61598e8fa67e107e154018a",
       "disposition": "documentation",
-      "reason": "Document transactional placement and existing load-balancer compatibility in the standalone architecture.",
-      "models": []
-    },
-    {
-      "path": "docs/ec2-native-subnet.md",
-      "sha256": "ae3783e995dbce9bbb719fa04e12df6ccf215b22180e1076927d2d36612abe9b",
-      "disposition": "documentation",
-      "reason": "Record the native ALB dependency on existing subnets and its delete behavior.",
-      "models": []
-    },
-    {
-      "path": "docs/ec2-read-discovery.md",
-      "sha256": "1ea25e266bf57ff44759d9e90dcf0723979318f873f4ddcbfd6cba0d6ecef343",
-      "disposition": "documentation",
-      "reason": "Describe the explicit ALB security-group dependency and delete fence.",
+      "reason": "Document shared regional ELBv2 resources, the authenticated Console health editor and the served Scalar Query examples.",
       "models": []
     },
     {
       "path": "docs/elb.md",
-      "sha256": "1f5120d19b1a0be86f65850ae3cd28666e069fc1908feaab841453580115aa7d",
+      "sha256": "6bdebd93ef76d89f82314235330c3d925614654c8f55834297d34eddd099e60e",
       "disposition": "documentation",
-      "reason": "Document admitted placements, legacy rows, linked deletion and the scope of local networking.",
+      "reason": "Document shared regional ELBv2 resources, the authenticated Console health editor and the served Scalar Query examples.",
       "models": []
     },
     {
-      "path": "formal/ALBNativePlacement.cfg",
-      "sha256": "44300823d05c014fffef0422885667590459892d89f3c36e64274887d9770cdb",
+      "path": "formal/ALBConsoleWorkflow.cfg",
+      "sha256": "c8da47d50187570e352bcecc28f8ef562cec1fe80e320b7f95adb5ffe786273f",
       "disposition": "modeled",
-      "reason": "Run the finite normalized placement invariants over two new ALBs and one legacy row.",
+      "reason": "Bind the regional ALB Console read, action and saved-state workflow to this immutable artifact.",
       "models": [
         {
-          "id": "ALBNativePlacement",
+          "id": "ALBConsoleWorkflow",
           "properties": [
-            "TypeOK",
-            "AdmittedPlacement",
-            "CanceledUnchanged",
-            "ReopenUnchanged",
-            "StageInvisible",
-            "LegacyUnbound",
-            "ProjectionExact",
-            "CompleteReferences",
-            "ReferencesExist"
+            "ReadAdmission",
+            "TruthfulHealth",
+            "DeniedProjection",
+            "ScopeFrame",
+            "RetiredWriteFrame",
+            "SingleSend",
+            "NativeFrame",
+            "Acknowledgement",
+            "CompleteDetail",
+            "BoundReadback",
+            "CheckedHealth",
+            "ObservedOnly",
+            "LinkFrame",
+            "PreflightAdmission"
           ],
-          "limits": "Checks normalized placement admission, exact stored VPC/zone projection, complete per-ALB ownership, canceled staging, legacy replay, peer-owner retention during deletion, removal of unbound resources and reopen. The model serializes transaction boundaries and abstracts immutable resource metadata. It does not establish SQL or Go refinement, locking, HTTP or SDK behavior, process durability, concrete IAM, CloudFormation behavior, IP/ENI allocation, DNS or network reachability. Team/region are normalized ownership tags, not independent simulated processes."
+          "limits": "Finite scoped read, selected identity, write and acknowledgement states. XML bytes, IAM evaluation, browser rendering, actual isolated team processes, SDK interoperability and local listener or Lambda execution require separate native evidence."
         }
       ]
     },
     {
-      "path": "formal/ALBNativePlacement.tla",
-      "sha256": "ec2c6817925041436a4f6ef677f1f83b6e0f56e15f52ebb53274d04915c8fa89",
+      "path": "formal/ALBConsoleWorkflow.tla",
+      "sha256": "8f9b887aa0d14ecd8ec0d58b9020de839be49d925812de9a12f5f17e56f61aa8",
       "disposition": "modeled",
-      "reason": "Model atomic placement admission, rollback, release, shared ownership and legacy replay.",
+      "reason": "Bind the regional ALB Console read, action and saved-state workflow to this immutable artifact.",
       "models": [
         {
-          "id": "ALBNativePlacement",
+          "id": "ALBConsoleWorkflow",
           "properties": [
-            "TypeOK",
-            "AdmittedPlacement",
-            "CanceledUnchanged",
-            "ReopenUnchanged",
-            "StageInvisible",
-            "LegacyUnbound",
-            "ProjectionExact",
-            "CompleteReferences",
-            "ReferencesExist"
+            "ReadAdmission",
+            "TruthfulHealth",
+            "DeniedProjection",
+            "ScopeFrame",
+            "RetiredWriteFrame",
+            "SingleSend",
+            "NativeFrame",
+            "Acknowledgement",
+            "CompleteDetail",
+            "BoundReadback",
+            "CheckedHealth",
+            "ObservedOnly",
+            "LinkFrame",
+            "PreflightAdmission"
           ],
-          "limits": "Checks normalized placement admission, exact stored VPC/zone projection, complete per-ALB ownership, canceled staging, legacy replay, peer-owner retention during deletion, removal of unbound resources and reopen. The model serializes transaction boundaries and abstracts immutable resource metadata. It does not establish SQL or Go refinement, locking, HTTP or SDK behavior, process durability, concrete IAM, CloudFormation behavior, IP/ENI allocation, DNS or network reachability. Team/region are normalized ownership tags, not independent simulated processes."
+          "limits": "Finite scoped read, selected identity, write and acknowledgement states. XML bytes, IAM evaluation, browser rendering, actual isolated team processes, SDK interoperability and local listener or Lambda execution require separate native evidence."
         }
       ]
     },
     {
       "path": "formal/models.json",
-      "sha256": "07ed33b8de21546936173111c1232fb2473c43d984677124f94b82ca14f0b88f",
+      "sha256": "245c1f2217f6efba6902f5bb63a71375225217f3f724abb1b506d433602e580b",
       "disposition": "formal-infrastructure",
-      "reason": "Register the native placement model, bounded claims and reason-specific mutation controls.",
+      "reason": "Register the ALB Console state model, its required source decisions and the independent negative controls.",
       "models": []
     },
     {
-      "path": "internal/aws/cloudfront_vpc_origin_contract_test.go",
-      "sha256": "4c9712e48a8d5155a5865e12ce3b025d1936b1f678eabdae2ea3996708efd045",
-      "disposition": "test-support",
-      "reason": "Create actual native placement for the existing CloudFront VPC origin contract checks.",
-      "models": []
-    },
-    {
-      "path": "internal/aws/cloudfront_vpc_origin_test.go",
-      "sha256": "564adf75b360623a5b84eda607b3cf07f40330b9f4c40f397926b31f0ffc1bb6",
-      "disposition": "test-support",
-      "reason": "Bind existing origin lifecycle fixtures to actual regional load balancers.",
-      "models": []
-    },
-    {
-      "path": "internal/aws/ec2_security_groups_native_store.go",
-      "sha256": "43a43b7816658e5acc557f1920c4bf4717235cfa118232012578d80bbceedb96",
-      "disposition": "modeled",
-      "reason": "Refuse deletion of an attached native security group in its transaction.",
-      "models": [
-        {
-          "id": "ALBNativePlacement",
-          "properties": [
-            "CompleteReferences",
-            "ReferencesExist"
-          ],
-          "limits": "Checks normalized placement admission, exact stored VPC/zone projection, complete per-ALB ownership, canceled staging, legacy replay, peer-owner retention during deletion, removal of unbound resources and reopen. The model serializes transaction boundaries and abstracts immutable resource metadata. It does not establish SQL or Go refinement, locking, HTTP or SDK behavior, process durability, concrete IAM, CloudFormation behavior, IP/ENI allocation, DNS or network reachability. Team/region are normalized ownership tags, not independent simulated processes."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/ec2_subnet_native.go",
-      "sha256": "bc0db54dc935532402c4ceed2ba78fecd5f9be182e7840ebe18bdae0bf0f877c",
-      "disposition": "modeled",
-      "reason": "Include native ALB references in the subnet deletion dependency decision.",
-      "models": [
-        {
-          "id": "ALBNativePlacement",
-          "properties": [
-            "CompleteReferences",
-            "ReferencesExist"
-          ],
-          "limits": "Checks normalized placement admission, exact stored VPC/zone projection, complete per-ALB ownership, canceled staging, legacy replay, peer-owner retention during deletion, removal of unbound resources and reopen. The model serializes transaction boundaries and abstracts immutable resource metadata. It does not establish SQL or Go refinement, locking, HTTP or SDK behavior, process durability, concrete IAM, CloudFormation behavior, IP/ENI allocation, DNS or network reachability. Team/region are normalized ownership tags, not independent simulated processes."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/elb_placement.go",
-      "sha256": "14fd6e0d0b1d4fe45bc13380da055353131602a6576ce13704ccdc5371bd8549",
-      "disposition": "modeled",
-      "reason": "Resolve actual native subnets, groups, zones and VPC, verifying the committed owner projection.",
-      "models": [
-        {
-          "id": "ALBNativePlacement",
-          "properties": [
-            "TypeOK",
-            "AdmittedPlacement",
-            "CanceledUnchanged",
-            "ReopenUnchanged",
-            "StageInvisible",
-            "LegacyUnbound",
-            "ProjectionExact",
-            "CompleteReferences",
-            "ReferencesExist"
-          ],
-          "limits": "Checks normalized placement admission, exact stored VPC/zone projection, complete per-ALB ownership, canceled staging, legacy replay, peer-owner retention during deletion, removal of unbound resources and reopen. The model serializes transaction boundaries and abstracts immutable resource metadata. It does not establish SQL or Go refinement, locking, HTTP or SDK behavior, process durability, concrete IAM, CloudFormation behavior, IP/ENI allocation, DNS or network reachability. Team/region are normalized ownership tags, not independent simulated processes."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/elb_placement_test.go",
-      "sha256": "acf8a889ef8e8ff7aad1f5af151c72b5dcbca227e0d0fcef767dc552a0c65e20",
-      "disposition": "test-support",
-      "reason": "Exercise native and historical placement, two owners, readback, partial writes, cancellation and concurrent dependency deletion.",
-      "models": []
-    },
-    {
-      "path": "internal/aws/elb_query.go",
-      "sha256": "e05b20beee4d22163ab08ae698cb98f680b39921ec67c6c4bcf532f987f18b2b",
-      "disposition": "modeled",
-      "reason": "Project the bound VPC and zone for each native subnet in the existing ELB Query wire shape.",
-      "models": [
-        {
-          "id": "ALBNativePlacement",
-          "properties": [
-            "ProjectionExact",
-            "LegacyUnbound"
-          ],
-          "limits": "Checks normalized placement admission, exact stored VPC/zone projection, complete per-ALB ownership, canceled staging, legacy replay, peer-owner retention during deletion, removal of unbound resources and reopen. The model serializes transaction boundaries and abstracts immutable resource metadata. It does not establish SQL or Go refinement, locking, HTTP or SDK behavior, process durability, concrete IAM, CloudFormation behavior, IP/ENI allocation, DNS or network reachability. Team/region are normalized ownership tags, not independent simulated processes."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/elb_storage_faults_test.go",
-      "sha256": "cef5d6ec0a4654ad5a6ce160f63a8424b3dbe0fb0ce1990f872133ce0796ac19",
-      "disposition": "test-support",
-      "reason": "Retain real SQL fault sweeps using native placement resources.",
-      "models": []
-    },
-    {
-      "path": "internal/aws/elb_store.go",
-      "sha256": "93a3f45a5e6338603c7faa66f9ca2b5fc161bf8c940d22c74991c3c05f67e373",
-      "disposition": "modeled",
-      "reason": "Commit and verify the allocated load balancer and complete indexed network references atomically.",
-      "models": [
-        {
-          "id": "ALBNativePlacement",
-          "properties": [
-            "TypeOK",
-            "AdmittedPlacement",
-            "CanceledUnchanged",
-            "ReopenUnchanged",
-            "StageInvisible",
-            "LegacyUnbound",
-            "ProjectionExact",
-            "CompleteReferences",
-            "ReferencesExist"
-          ],
-          "limits": "Checks normalized placement admission, exact stored VPC/zone projection, complete per-ALB ownership, canceled staging, legacy replay, peer-owner retention during deletion, removal of unbound resources and reopen. The model serializes transaction boundaries and abstracts immutable resource metadata. It does not establish SQL or Go refinement, locking, HTTP or SDK behavior, process durability, concrete IAM, CloudFormation behavior, IP/ENI allocation, DNS or network reachability. Team/region are normalized ownership tags, not independent simulated processes."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/elb_test.go",
-      "sha256": "9c51c8b103ae195620a0a34e83471cf56afdaa9d5ec541da748c69bfca2d0dd2",
-      "disposition": "test-support",
-      "reason": "Retain native ELB action, health, IAM and error assertions with verified placement resources.",
+      "path": "internal/server/apidocs/openapi.json",
+      "sha256": "fab52106572cb0f6e45d28af839e4b6ed72cc2a6600b016d2cb836b2295dab38",
+      "disposition": "presentation",
+      "reason": "Present thirteen ELBv2 Query templates for existing operations. The native transitions and authority are unchanged.",
       "models": []
     },
     {
       "path": "internal/server/elb_composition_test.go",
-      "sha256": "8d6711e0b1dfdf77440b0b3f24566621be7d4f94b5de16b10739493defada64f",
+      "sha256": "b9d081cd63a1be0bae1151c6411b1397ad4391133fbadd3840b4fe981f789c6e",
       "disposition": "test-support",
-      "reason": "Exercise native EC2 setup through the shared authenticated server before checking existing ELB behavior.",
+      "reason": "Assert the shipped ELBv2 Console capability alongside the existing native operation and Lambda target limits after reopening its database.",
       "models": []
     },
     {
       "path": "internal/server/server.go",
-      "sha256": "9c306eb79f2b00f6cdbff26153fbbbbb390a217198c4335b30db936ba89f2afb",
+      "sha256": "7fc01dc69e1cc40fdce21db0fbfdd4f9ffb3d27c596e1e67ad116598475ed21d",
       "disposition": "modeled",
-      "reason": "Describe the placement dependency in the existing ELB capability response.",
+      "reason": "Expose the native service only with its compiled Console and regional Query operations.",
       "models": [
         {
-          "id": "ALBNativePlacement",
+          "id": "ALBConsoleWorkflow",
           "properties": [
-            "AdmittedPlacement",
-            "LegacyUnbound"
+            "ScopeFrame",
+            "ReadAdmission"
           ],
-          "limits": "Checks normalized placement admission, exact stored VPC/zone projection, complete per-ALB ownership, canceled staging, legacy replay, peer-owner retention during deletion, removal of unbound resources and reopen. The model serializes transaction boundaries and abstracts immutable resource metadata. It does not establish SQL or Go refinement, locking, HTTP or SDK behavior, process durability, concrete IAM, CloudFormation behavior, IP/ENI allocation, DNS or network reachability. Team/region are normalized ownership tags, not independent simulated processes."
+          "limits": "Finite scoped read, selected identity, write and acknowledgement states. XML bytes, IAM evaluation, browser rendering, actual isolated team processes, SDK interoperability and local listener or Lambda execution require separate native evidence."
+        }
+      ]
+    },
+    {
+      "path": "internal/server/web/app.js",
+      "sha256": "a85a4cdf20bca193c739d907ca86b420357e1600cffc863aecbc4d7858dc75fc",
+      "disposition": "modeled",
+      "reason": "Bind the regional ALB Console read, action and saved-state workflow to this immutable artifact.",
+      "models": [
+        {
+          "id": "ALBConsoleWorkflow",
+          "properties": [
+            "ReadAdmission",
+            "TruthfulHealth",
+            "DeniedProjection",
+            "ScopeFrame",
+            "RetiredWriteFrame",
+            "SingleSend",
+            "NativeFrame",
+            "Acknowledgement",
+            "CompleteDetail",
+            "BoundReadback",
+            "CheckedHealth",
+            "ObservedOnly",
+            "LinkFrame",
+            "PreflightAdmission"
+          ],
+          "limits": "Finite scoped read, selected identity, write and acknowledgement states. XML bytes, IAM evaluation, browser rendering, actual isolated team processes, SDK interoperability and local listener or Lambda execution require separate native evidence."
         }
       ]
     },
     {
       "path": "scripts/formal_model_gate.py",
-      "sha256": "7de9c174ab48d339e9dfa0076b284a9b71aa48c278cb848a439b920dd5ec104a",
+      "sha256": "dc2bbe55715f9e0a6a0ac0c6931670e8d594eafbb837b6aeebc9ba3a7916c04e",
       "disposition": "formal-infrastructure",
-      "reason": "Require the registered bounded placement model, its exact scope, invariants and mutation identities.",
+      "reason": "Register the ALB Console state model, its required source decisions and the independent negative controls.",
       "models": []
     },
     {
       "path": "scripts/test-formal-gate.py",
-      "sha256": "1ebb0b79d7d26467e0c6e7f49fa37f7dbc5c9e68bf7decfac1261de9c80e586b",
+      "sha256": "22c6653d7f1a0207d837854be019ba690fcbfb101f04b0e258551331e0a1da24",
       "disposition": "formal-infrastructure",
-      "reason": "Protect the complete model inventory after adding the placement model.",
+      "reason": "Register the ALB Console state model, its required source decisions and the independent negative controls.",
       "models": []
     },
     {
-      "path": "test/e2e/elb.py",
-      "sha256": "fbc2c705aeabe3322911f1a2b686008ed21b285d70f3ce2780764d3cf9d0fa2b",
+      "path": "test/e2e/elb_console.py",
+      "sha256": "f969527a52b3df67d09001c17359ffba9837d4a7c2e2eda6c03367020a80918e",
       "disposition": "test-support",
-      "reason": "Exercise the ordinary stock SDK on two authenticated loopback CLIs, held network dependencies, persisted placement, original Lambda lifecycle and actual cleanup.",
+      "reason": "Exercise native UI and SDK behavior without changing server decisions.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/elb_scalar.py",
+      "sha256": "163f7064426f5763be4abdd20645b935b10c4a73b75db150c47024171816f3ad",
+      "disposition": "test-support",
+      "reason": "Exercise authenticated Scalar sends and compare the returned ELBv2 XML with independently read native SDK state.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/simpledb_scalar_reference_live.py",
+      "sha256": "1aac0b271c626918f98614ab7cc32583ae1177404fffd43d22b7672997c24478",
+      "disposition": "test-support",
+      "reason": "Select the desired native Query service and let tests edit an input using the actual Scalar form. The SimpleDB defaults remain intact.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/test_sakura_openapi.py",
+      "sha256": "308644044f12dd92a9ece130a40f776770b416018ae5a965938559038250cd98",
+      "disposition": "test-support",
+      "reason": "Validate the new Query templates and fields before projecting them out of the pre-existing historical reference assertions.",
+      "models": []
+    },
+    {
+      "path": "tools/console/bundle-digests.json",
+      "sha256": "a67eac82563c8bfbeb8ea1d5f901a9bbdad4f20de0fff21e0ab0c2fabc21987a",
+      "disposition": "presentation",
+      "reason": "Record the source inputs and digests used to produce the shipped Console bundle.",
+      "models": []
+    },
+    {
+      "path": "tools/console/bundle-inputs.json",
+      "sha256": "9889b11ce1b643cfc3e621a426b3b93a640003e342250235390f996814303b5a",
+      "disposition": "presentation",
+      "reason": "Record the source inputs and digests used to produce the shipped Console bundle.",
+      "models": []
+    },
+    {
+      "path": "tools/console/src/console-navigation.mjs",
+      "sha256": "cf26938b0b019444a760908dec891f56f07d72110c33d3b54dcdbc595df2b779",
+      "disposition": "modeled",
+      "reason": "Offer the service route only when the needed native capabilities are present.",
+      "models": [
+        {
+          "id": "ALBConsoleWorkflow",
+          "properties": [
+            "ReadAdmission",
+            "ScopeFrame"
+          ],
+          "limits": "Finite scoped read, selected identity, write and acknowledgement states. XML bytes, IAM evaluation, browser rendering, actual isolated team processes, SDK interoperability and local listener or Lambda execution require separate native evidence."
+        }
+      ]
+    },
+    {
+      "path": "tools/console/src/elb.jsx",
+      "sha256": "5a9ede4a9881572b0bb8a3c7e7d1d7d0b4042bd5993e0a254933c7f746e36629",
+      "disposition": "modeled",
+      "reason": "Bind the regional ALB Console read, action and saved-state workflow to this immutable artifact.",
+      "models": [
+        {
+          "id": "ALBConsoleWorkflow",
+          "properties": [
+            "ReadAdmission",
+            "DeniedProjection",
+            "TruthfulHealth",
+            "ScopeFrame",
+            "RetiredWriteFrame",
+            "SingleSend",
+            "Acknowledgement",
+            "BoundReadback",
+            "ObservedOnly"
+          ],
+          "limits": "Finite scoped read, selected identity, write and acknowledgement states. XML bytes, IAM evaluation, browser rendering, actual isolated team processes, SDK interoperability and local listener or Lambda execution require separate native evidence."
+        }
+      ]
+    },
+    {
+      "path": "tools/console/src/elb.mjs",
+      "sha256": "2a4afd2b13aba4938f6edbfb87e689ef1cf431d77fa348106daaca2dcb9285cc",
+      "disposition": "modeled",
+      "reason": "Bind the regional ALB Console read, action and saved-state workflow to this immutable artifact.",
+      "models": [
+        {
+          "id": "ALBConsoleWorkflow",
+          "properties": [
+            "CompleteDetail",
+            "CheckedHealth",
+            "BoundReadback",
+            "NativeFrame",
+            "Acknowledgement"
+          ],
+          "limits": "Finite scoped read, selected identity, write and acknowledgement states. XML bytes, IAM evaluation, browser rendering, actual isolated team processes, SDK interoperability and local listener or Lambda execution require separate native evidence."
+        }
+      ]
+    },
+    {
+      "path": "tools/console/src/main.jsx",
+      "sha256": "117fad48c2eca7700dc9bcfa40ee5fc6120bdcbbc3a5c84e21b446ed4493ec78",
+      "disposition": "modeled",
+      "reason": "Mount the regional Console under the selected exercise identity and retire old mounted state.",
+      "models": [
+        {
+          "id": "ALBConsoleWorkflow",
+          "properties": [
+            "ScopeFrame",
+            "RetiredWriteFrame"
+          ],
+          "limits": "Finite scoped read, selected identity, write and acknowledgement states. XML bytes, IAM evaluation, browser rendering, actual isolated team processes, SDK interoperability and local listener or Lambda execution require separate native evidence."
+        }
+      ]
+    },
+    {
+      "path": "tools/console/test/elb.test.mjs",
+      "sha256": "8c4f0a10a003d47fc892ce0f325a4235169f2ded11c1f2852b6b9c877ce23aab",
+      "disposition": "presentation",
+      "reason": "Record the exact regression fixture or bundle metadata for the verified Console artifact.",
       "models": []
     }
   ]

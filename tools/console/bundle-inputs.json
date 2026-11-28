@@ -32600,6 +32600,87 @@
       ],
       "format": "esm"
     },
+    "src/elb.mjs": {
+      "bytes": 7211,
+      "imports": [],
+      "format": "esm"
+    },
+    "src/elb.jsx": {
+      "bytes": 10924,
+      "imports": [
+        {
+          "path": "node_modules/react/index.js",
+          "kind": "import-statement",
+          "original": "react"
+        },
+        {
+          "path": "node_modules/@cloudscape-design/components/alert/index.js",
+          "kind": "import-statement",
+          "original": "@cloudscape-design/components/alert"
+        },
+        {
+          "path": "node_modules/@cloudscape-design/components/box/index.js",
+          "kind": "import-statement",
+          "original": "@cloudscape-design/components/box"
+        },
+        {
+          "path": "node_modules/@cloudscape-design/components/button/index.js",
+          "kind": "import-statement",
+          "original": "@cloudscape-design/components/button"
+        },
+        {
+          "path": "node_modules/@cloudscape-design/components/container/index.js",
+          "kind": "import-statement",
+          "original": "@cloudscape-design/components/container"
+        },
+        {
+          "path": "node_modules/@cloudscape-design/components/form-field/index.js",
+          "kind": "import-statement",
+          "original": "@cloudscape-design/components/form-field"
+        },
+        {
+          "path": "node_modules/@cloudscape-design/components/header/index.js",
+          "kind": "import-statement",
+          "original": "@cloudscape-design/components/header"
+        },
+        {
+          "path": "node_modules/@cloudscape-design/components/input/index.js",
+          "kind": "import-statement",
+          "original": "@cloudscape-design/components/input"
+        },
+        {
+          "path": "node_modules/@cloudscape-design/components/key-value-pairs/index.js",
+          "kind": "import-statement",
+          "original": "@cloudscape-design/components/key-value-pairs"
+        },
+        {
+          "path": "node_modules/@cloudscape-design/components/space-between/index.js",
+          "kind": "import-statement",
+          "original": "@cloudscape-design/components/space-between"
+        },
+        {
+          "path": "node_modules/@cloudscape-design/components/status-indicator/index.js",
+          "kind": "import-statement",
+          "original": "@cloudscape-design/components/status-indicator"
+        },
+        {
+          "path": "node_modules/@cloudscape-design/components/table/index.js",
+          "kind": "import-statement",
+          "original": "@cloudscape-design/components/table"
+        },
+        {
+          "path": "src/elb.mjs",
+          "kind": "import-statement",
+          "original": "./elb.mjs"
+        },
+        {
+          "path": "src/i18n.jsx",
+          "kind": "import-statement",
+          "original": "./i18n.jsx"
+        }
+      ],
+      "format": "esm"
+    },
     "src/autoscaling-plans.mjs": {
       "bytes": 6159,
       "imports": [],
@@ -35429,8 +35510,13 @@
       "format": "esm"
     },
     "src/console-navigation.mjs": {
-      "bytes": 15214,
+      "bytes": 15585,
       "imports": [
+        {
+          "path": "src/elb.mjs",
+          "kind": "import-statement",
+          "original": "./elb.mjs"
+        },
         {
           "path": "src/autoscaling-plans.mjs",
           "kind": "import-statement",
@@ -36510,7 +36596,7 @@
       "format": "esm"
     },
     "src/main.jsx": {
-      "bytes": 61280,
+      "bytes": 61555,
       "imports": [
         {
           "path": "src/ssm-terminal.jsx",
@@ -36766,6 +36852,11 @@
           "path": "src/dynamodb.jsx",
           "kind": "import-statement",
           "original": "./dynamodb.jsx"
+        },
+        {
+          "path": "src/elb.jsx",
+          "kind": "import-statement",
+          "original": "./elb.jsx"
         },
         {
           "path": "src/autoscaling-plans.jsx",
@@ -37586,7 +37677,7 @@
           "bytesInOutput": 0
         },
         "src/main.jsx": {
-          "bytesInOutput": 51477
+          "bytesInOutput": 51648
         },
         "node_modules/@cloudscape-design/global-styles/index.css": {
           "bytesInOutput": 0
@@ -38231,7 +38322,7 @@
           "bytesInOutput": 2927
         },
         "node_modules/@dnd-kit/core/dist/core.esm.js": {
-          "bytesInOutput": 39417
+          "bytesInOutput": 39445
         },
         "node_modules/@dnd-kit/utilities/dist/utilities.esm.js": {
           "bytesInOutput": 3220
@@ -38246,7 +38337,7 @@
           "bytesInOutput": 183
         },
         "node_modules/@cloudscape-design/components/internal/components/sortable-area/use-drag-and-drop-reorder.js": {
-          "bytesInOutput": 1702
+          "bytesInOutput": 1704
         },
         "node_modules/@cloudscape-design/components/internal/components/sortable-area/keyboard-sensor/defaults.js": {
           "bytesInOutput": 75
@@ -39871,6 +39962,12 @@
         "src/dynamodb.jsx": {
           "bytesInOutput": 25811
         },
+        "src/elb.jsx": {
+          "bytesInOutput": 9152
+        },
+        "src/elb.mjs": {
+          "bytesInOutput": 4310
+        },
         "src/autoscaling-plans.jsx": {
           "bytesInOutput": 11531
         },
@@ -40136,7 +40233,7 @@
           "bytesInOutput": 5687
         },
         "src/console-navigation.mjs": {
-          "bytesInOutput": 12438
+          "bytesInOutput": 12778
         },
         "src/console-home.jsx": {
           "bytesInOutput": 9688
@@ -40235,7 +40332,7 @@
           "bytesInOutput": 10107
         }
       },
-      "bytes": 2895147
+      "bytes": 2909150
     },
     "../../internal/server/web/app.css.LEGAL.txt": {
       "imports": [],

@@ -125,8 +125,8 @@ func TestELBCompositionTokenPersistenceDataPlaneAndCapabilities(t *testing.T) {
 		t.Fatal(e)
 	}
 	elb := caps.Services["elasticloadbalancing"]
-	if len(elb.Operations) != 13 || len(elb.TargetTypes) != 1 || elb.TargetTypes[0] != "lambda" || elb.Console {
-		t.Fatal(w.Body.String())
+	if len(elb.Operations) != 13 || len(elb.TargetTypes) != 1 || elb.TargetTypes[0] != "lambda" || !elb.Console {
+		t.Fatalf("unexpected ELBv2 capabilities: operations=%v targetTypes=%v console=%v", elb.Operations, elb.TargetTypes, elb.Console)
 	}
 	if w = elbComposedCall(access, token, url.Values{"Action": {"DeleteLoadBalancer"}, "LoadBalancerArn": {created.ARN}}); w.Code != 200 {
 		t.Fatal(w.Code, w.Body.String())

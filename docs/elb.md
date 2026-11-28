@@ -22,6 +22,44 @@ this simulator. Instance, IP and ALB targets require target registration and for
 
 ## Resources
 
+### Use the Console
+
+Open **Elastic Load Balancing** in the AWS Console and choose the region of
+your load balancer. Filter by its exact name or load another page. Its detail
+view reads the saved VPC, subnet IDs and Availability Zones, security groups,
+listeners and linked target groups. Older ID-only placements display the
+available IDs. Under a linked Lambda target group, the Console shows the
+registered function, target state and reason returned by `DescribeTargetHealth`.
+
+Edit **Health check path** to submit one `ModifyTargetGroup` request for that
+group. Saving requires the named target-group action on its ARN and the
+Describe permissions needed to verify the saved path and current health. The Console
+checks the selected load balancer association before sending the change and again
+in the returned group and fresh read. The native write addresses the target group
+ARN. Another caller can move the group between these requests.
+If the acknowledgement is lost, choose **Refresh affected target group** to
+inspect its current state before making another change. A disabled health
+check can retain a path. Exercise the authenticated listener separately to
+observe the actual response. [ModifyTargetGroup](https://docs.aws.amazon.com/elasticloadbalancing/latest/APIReference/API_ModifyTargetGroup.html)
+
+## Use the API reference
+
+After signing in, open **API Reference → Shared AWS JSON/Query endpoint**.
+Select `application/x-www-form-urlencoded` and one of the thirteen **ELBv2**
+examples. In **Test Request**, select the `elasticloadbalancing` value for
+`X-Simulator-Service`, clear `X-Amz-Target`, and choose the region that
+contains your resources. Include the form fields for that operation. All
+ELBv2 examples use `Version=2015-12-01`.
+
+`CreateTargetGroup` can create a disposable Lambda target group in an empty
+region. Copy its `TargetGroupArn` from the XML response, then use it in
+`DescribeTargetHealth`. A registered function and its listener let you
+inspect the target's actual status. For `CreateLoadBalancer`, paste two
+subnet IDs and a security group ID from the same VPC. Paste the returned
+load balancer ARN into `DescribeLoadBalancers` to inspect its zones and VPC.
+The `REPLACE_WITH_…` fields are editable placeholders. Clean up using the
+ARNs of your disposable resources, removing listeners before target groups.
+
 - **Load balancers** are `application` only, `internet-facing` (default) or
   `internal`, `ipv4` only. Names are 1 to 32 alphanumeric characters or
   hyphens, unique per region. Create the EC2 VPC, subnets and security groups
@@ -177,8 +215,6 @@ SQLite database and token authority per team.
 | AWS Certificate Manager | HTTPS listeners | Not used; HTTPS refused |
 | AWS WAF, Route 53 alias records, S3 access logs, CloudWatch metrics | Optional integrations | Not connected |
 | CloudFormation `AWS::ElasticLoadBalancingV2::*` | Optional provisioning | Not supported |
-
-There is no console page or API-reference page for this service yet.
 
 ## References
 
