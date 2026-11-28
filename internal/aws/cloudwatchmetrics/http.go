@@ -55,7 +55,7 @@ func readForm(r *http.Request) (form, error) {
 		len(params) > 1 || len(params) == 1 && !strings.EqualFold(params["charset"], "utf-8") {
 		return nil, invalid("Expected a URL-encoded Query request.")
 	}
-	if r.Method != "POST" || r.URL.Path != "/" || r.URL.RawPath != "" || r.URL.RawQuery != "" || r.URL.ForceQuery || r.Header.Get("X-Amz-Target") != "" {
+	if r.Method != "POST" || r.URL.Path != "/" || (r.URL.RawPath != "" && r.URL.RawPath != "/") || r.URL.RawQuery != "" || r.URL.ForceQuery || r.Header.Get("X-Amz-Target") != "" {
 		return nil, invalid("Use Query POST / without a target or query string.")
 	}
 	if len(r.Header.Values("Content-Type")) != 1 || len(r.Header.Values("Content-Encoding")) > 1 {
