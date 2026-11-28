@@ -424,11 +424,21 @@ class ApplicabilityTests(unittest.TestCase):
             validate_record(self.root, self.base)
 
     def test_deleted_state_file_stays_bound_to_prior_model_scope(self):
-        git(self.root, 'rm', 'internal/core/store.go')
+        # A removable historical source exercises prior-scope binding independently
+        # of the permanent policy protecting today's core/store.go.
+        path = 'internal/core/legacy_store.go'
         registry = copy.deepcopy(self.registry)
-        for model in registry['models']:
-            model['source_scope'] = [p for p in model['source_scope'] if p != 'internal/core/store.go']
-        (self.root / 'formal/models.json').write_text(json.dumps(registry))
+        object_store = next(m for m in registry['models'] if m['id'] == 'ObjectStore')
+        object_store['source_scope'].append(path)
+        (self.root / path).write_text('package core\n')
+        registry_path = self.root / 'formal/models.json'
+        registry_path.write_text(json.dumps(registry))
+        self.commit('model the historical source in the baseline')
+        self.base = git(self.root, 'rev-parse', 'HEAD').decode().strip()
+
+        git(self.root, 'rm', path)
+        object_store['source_scope'].remove(path)
+        registry_path.write_text(json.dumps(registry))
         git(self.root, 'add', 'formal/models.json')
         initialize(self.root, self.base)
         record = json.loads((self.root / RECORD).read_text())
@@ -443,6 +453,25 @@ class ApplicabilityTests(unittest.TestCase):
         self.write_record(record)
         self.commit('explicitly bound deletion')
         validate_record(self.root, self.base)
+
+        deleted = next(item for item in record['changes'] if item['path'] == path)
+        deleted.update(disposition='documentation', models=[])
+        self.write_record(record)
+        self.commit('try to exempt the deleted source from the prior model')
+        with self.assertRaisesRegex(GateError, 'declared state/model scope requires a modeled disposition'):
+            validate_record(self.root, self.base)
+
+    def test_deleting_the_live_store_cannot_drop_its_required_scope(self):
+        path = 'internal/core/store.go'
+        git(self.root, 'rm', path)
+        registry = copy.deepcopy(self.registry)
+        for model in registry['models']:
+            if path in model['source_scope']:
+                model['source_scope'].remove(path)
+        (self.root / 'formal/models.json').write_text(json.dumps(registry))
+        self.commit('try to remove a protected storage implementation')
+        with self.assertRaisesRegex(GateError, 'required exact source scope changed'):
+            load_registry(self.root)
 
     def test_dirty_and_staged_inputs_do_not_validate_committed_receipts(self):
         self.prepare()
