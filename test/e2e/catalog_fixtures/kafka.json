@@ -11,6 +11,10 @@
   {"op": "get_bootstrap_brokers", "args": {"ClusterArn": "${cluster}"}, "error": "UnknownOperationException", "status": 501},
   {"op": "describe_cluster", "args": {"ClusterArn": "arn:aws:kafka:us-east-1:000000000000:cluster/missing/00000000-0000-0000-0000-000000000000"}, "error": "NotFoundException"},
   {"op": "create_configuration", "args": {"Name": "fixture-configuration", "Description": "Immutable practice revision", "KafkaVersions": ["3.6.0"], "ServerProperties": "auto.create.topics.enable=false\n"}, "save": {"configuration": "Arn", "created": "CreationTime"}, "expect": {"Name": "fixture-configuration", "State": "ACTIVE", "LatestRevision.Revision": 1, "LatestRevision.CreationTime": "${created}", "LatestRevision.Description": "Immutable practice revision"}},
+  {"op": "create_cluster", "args": {"ClusterName": "fixture-attached", "KafkaVersion": "3.6.0", "NumberOfBrokerNodes": 2, "BrokerNodeGroupInfo": {"InstanceType": "kafka.m5.large", "ClientSubnets": ["subnet-0a1b2c3d", "subnet-4e5f6a7b"]}, "Tags": {"team": "a"}, "ConfigurationInfo": {"Arn": "${configuration}", "Revision": 1}}, "save": {"attached": "ClusterArn"}, "expect": {"State": "CREATING"}},
+  {"op": "describe_cluster", "args": {"ClusterArn": "${attached}"}, "expect": {"ClusterInfo.CurrentBrokerSoftwareInfo.KafkaVersion": "3.6.0", "ClusterInfo.CurrentBrokerSoftwareInfo.ConfigurationArn": "${configuration}", "ClusterInfo.CurrentBrokerSoftwareInfo.ConfigurationRevision": 1}},
+  {"op": "list_clusters", "args": {}, "expect": {"ClusterInfoList#count": 2, "ClusterInfoList[1].CurrentBrokerSoftwareInfo.ConfigurationArn": "${configuration}", "ClusterInfoList[1].CurrentBrokerSoftwareInfo.ConfigurationRevision": 1}},
+  {"op": "delete_configuration", "args": {"Arn": "${configuration}"}, "error": "BadRequestException", "status": 400},
   {"op": "describe_configuration", "args": {"Arn": "${configuration}"}, "expect": {"KafkaVersions": ["3.6.0"], "Description": "Immutable practice revision", "CreationTime": "${created}"}},
   {"op": "list_configurations", "args": {}, "expect": {"Configurations#count": 1, "Configurations[0].Arn": "${configuration}"}},
   {"op": "describe_configuration_revision", "args": {"Arn": "${configuration}", "Revision": 1}, "expect": {"Arn": "${configuration}", "Revision": 1, "CreationTime": "${created}", "Description": "Immutable practice revision"}, "expect_utf8_bytes": {"ServerProperties": "auto.create.topics.enable=false\n"}},
@@ -27,9 +31,12 @@
  ],
  "after_restart": [
   {"op": "describe_cluster", "args": {"ClusterArn": "${cluster}"}, "expect": {"ClusterInfo.BrokerNodeGroupInfo.InstanceType": "kafka.m5.large"}},
-  {"op": "describe_configuration_revision", "args": {"Arn": "${configuration}", "Revision": 1}, "expect": {"Arn": "${configuration}", "CreationTime": "${created}"}, "expect_utf8_bytes": {"ServerProperties": "auto.create.topics.enable=false\n"}}
+  {"op": "describe_configuration_revision", "args": {"Arn": "${configuration}", "Revision": 1}, "expect": {"Arn": "${configuration}", "CreationTime": "${created}"}, "expect_utf8_bytes": {"ServerProperties": "auto.create.topics.enable=false\n"}},
+  {"op": "describe_cluster", "args": {"ClusterArn": "${attached}"}, "expect": {"ClusterInfo.CurrentBrokerSoftwareInfo.KafkaVersion": "3.6.0", "ClusterInfo.CurrentBrokerSoftwareInfo.ConfigurationArn": "${configuration}", "ClusterInfo.CurrentBrokerSoftwareInfo.ConfigurationRevision": 1}},
+  {"op": "delete_configuration", "args": {"Arn": "${configuration}"}, "error": "BadRequestException", "status": 400}
  ],
  "cleanup": [
+  {"op": "delete_cluster", "args": {"ClusterArn": "${attached}"}, "expect": {"State": "DELETING"}},
   {"op": "delete_configuration", "args": {"Arn": "${configuration}"}, "expect": {"Arn": "${configuration}", "State": "DELETING"}},
   {"op": "describe_configuration", "args": {"Arn": "${configuration}"}, "error": "NotFoundException"},
   {"op": "list_configurations", "args": {}, "expect": {"Configurations#count": 0}},

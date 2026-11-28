@@ -670,15 +670,16 @@ var msk = &Service{
 	Resources: []*Resource{
 		{Kind: "cluster", Shape: "ClusterInfo", ID: "uuid", ARN: "arn:{partition}:kafka:{region}:{account}:cluster/{name}/{id}",
 			ARNMember: "ClusterArn", NameMember: "ClusterName", Unique: true, Limit: 20,
+			Refs: map[string]string{"CurrentBrokerSoftwareInfo.ConfigurationArn": "configuration"}, CheckRef: mskClusterConfiguration,
 			Generate: map[string]any{"State": "CREATING", "CreationTime": "$now", "CurrentVersion": mskClusterVersion, "EnhancedMonitoring": "DEFAULT", "StorageMode": "LOCAL",
 				"EncryptionInfo": map[string]any{"EncryptionInTransit": map[string]any{"ClientBroker": "TLS_PLAINTEXT", "InCluster": true}}}},
 		{Kind: "configuration", Shape: "Configuration", ID: "uuid", ARN: "arn:{partition}:kafka:{region}:{account}:configuration/{name}/{id}",
 			ARNMember: "Arn", NameMember: "Name", Unique: true, Limit: 100,
 			Beside: []string{"ServerProperties", "Revision"}, Generate: map[string]any{"State": "ACTIVE", "CreationTime": "$now", "Revision": 1},
-			InitDocument: mskFirstConfigurationRevision},
+			InitDocument: mskFirstConfigurationRevision, InUse: "BadRequestException", InUseMessage: "This configuration is attached to a cluster."},
 	},
 	Ops: []Op{
-		{Name: "CreateCluster", Kind: Create, Resource: "cluster", Check: mskCreateCluster},
+		{Name: "CreateCluster", Kind: Create, Resource: "cluster", Check: mskCreateCluster, AuthorizeCreateRefs: true},
 		{Name: "DescribeCluster", Kind: Read, Resource: "cluster", Lookup: "ClusterArn"},
 		{Name: "ListClusters", Kind: List, Resource: "cluster"},
 		{Name: "DeleteCluster", Kind: Delete, Resource: "cluster", Lookup: "ClusterArn", Accept: []string{"CurrentVersion"}, Check: mskCurrentVersion,
@@ -694,7 +695,7 @@ var msk = &Service{
 	},
 	Bounds: []string{
 		"Provisioned clusters are configuration records that stay CREATING: no broker, ZooKeeper or KRaft controller, topic, bootstrap endpoint or network interface exists, no record is produced or consumed, and GetBootstrapBrokers, topic, replicator, VPC connection and SCRAM secret APIs return UnknownOperationException with HTTP 501.",
-		"Custom configurations store one immutable revision. DescribeConfigurationRevision returns the original server.properties bytes. The 64 KiB catalog record limit includes the base64 content and metadata. A configuration can be deleted immediately, with a DELETING acknowledgement. UpdateConfiguration, ListConfigurationRevisions and attaching a configuration to a cluster are unavailable.",
+		"Custom configurations store one immutable revision. DescribeConfigurationRevision returns the original server.properties bytes. The 64 KiB catalog record limit includes the base64 content and metadata. CreateCluster can attach revision 1 of a compatible configuration in the same account and Region. DescribeCluster and ListClusters return its ARN and revision. DeleteConfiguration requires all attached clusters to be deleted first. UpdateConfiguration and ListConfigurationRevisions are unavailable.",
 		"The V2 and serverless APIs, cluster policies and every cluster update operation are not implemented. CurrentVersion is the constant K1 because no update is possible, and DeleteCluster refuses any other version.",
 		"NumberOfBrokerNodes must be a multiple of the number of client subnets; subnets, security groups, certificate authorities, KMS keys and log destinations are stored without being checked. ListClusters refuses ClusterNameFilter.",
 	},
@@ -733,20 +734,47 @@ func mskTagTarget(input map[string]any) error {
 	return nil
 }
 
-// mskCreateCluster checks the broker layout and stores the requested Kafka
-// version as the official current broker software.
+// mskCreateCluster projects the selected Kafka version and optional custom
+// configuration into the broker software metadata returned by Describe/List.
 func mskCreateCluster(input map[string]any) error {
-	if _, ok := input["ConfigurationInfo"]; ok {
-		return Failure("BadRequestException", "Attaching an MSK configuration to a cluster is not supported. Omit ConfigurationInfo.")
-	}
 	group, _ := input["BrokerNodeGroupInfo"].(map[string]any)
 	subnets, _ := group["ClientSubnets"].([]any)
 	brokers, _ := input["NumberOfBrokerNodes"].(int64)
 	if len(subnets) == 0 || brokers%int64(len(subnets)) != 0 {
 		return Failure("BadRequestException", "NumberOfBrokerNodes must be a multiple of the number of client subnets.")
 	}
-	input["CurrentBrokerSoftwareInfo"] = map[string]any{"KafkaVersion": input["KafkaVersion"]}
+	software := map[string]any{"KafkaVersion": input["KafkaVersion"]}
+	if info, supplied := input["ConfigurationInfo"].(map[string]any); supplied {
+		if err := mskConfigurationARN(info); err != nil {
+			return err
+		}
+		if info["Revision"] != int64(1) {
+			return Failure("BadRequestException", "Only configuration revision 1 is available.")
+		}
+		software["ConfigurationArn"] = info["Arn"]
+		software["ConfigurationRevision"] = info["Revision"]
+		delete(input, "ConfigurationInfo")
+	}
+	input["CurrentBrokerSoftwareInfo"] = software
 	delete(input, "KafkaVersion")
+	return nil
+}
+
+func mskClusterConfiguration(region, account string, document map[string]any, configuration row) error {
+	if configuration.Region != region || !strings.HasPrefix(configuration.ARN, "arn:aws:kafka:"+region+":"+account+":configuration/") {
+		return Failure("BadRequestException", "Supply a configuration from this account and Region.")
+	}
+	revision, err := integerValue(configuration.Document["Revision"], "Revision")
+	if err != nil || revision != 1 {
+		return Failure("BadRequestException", "The selected configuration revision is unavailable.")
+	}
+	if versions, supplied := configuration.Document["KafkaVersions"]; supplied {
+		allowed, ok := versions.([]any)
+		software := document["CurrentBrokerSoftwareInfo"].(map[string]any)
+		if !ok || !slices.Contains(allowed, software["KafkaVersion"]) {
+			return Failure("BadRequestException", "The configuration does not support the requested Kafka version.")
+		}
+	}
 	return nil
 }
 

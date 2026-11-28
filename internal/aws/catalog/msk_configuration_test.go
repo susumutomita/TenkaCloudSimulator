@@ -29,15 +29,6 @@ func TestMSKConfigurationRevisionLifecycle(t *testing.T) {
 	if !slices.Contains(h.policy.calls, "simulator-admin kafka:CreateConfiguration "+arn) {
 		t.Fatalf("creation did not authorize the generated configuration ARN")
 	}
-	attach := h.rest("kafka", "POST", "/v1/clusters", map[string]any{
-		"clusterName": "practice-cluster", "kafkaVersion": "3.6.0", "numberOfBrokerNodes": 2,
-		"brokerNodeGroupInfo": map[string]any{"instanceType": "kafka.m5.large", "clientSubnets": []any{"subnet-a", "subnet-b"}},
-		"configurationInfo":   map[string]any{"arn": arn, "revision": 1},
-	})
-	expect(t, attach, 400, "BadRequestException")
-	if !strings.Contains(attach.raw, "Attaching an MSK configuration to a cluster is not supported.") {
-		t.Fatalf("unexpected cluster attachment error: %s", attach.raw)
-	}
 	path := collection + "/" + url.PathEscape(arn)
 	latest := map[string]any{"revision": json.Number("1"), "creationTime": created.body["creationTime"], "description": "first revision"}
 	if created.body["state"] != "ACTIVE" || str(created.body["creationTime"]) == "" || !reflect.DeepEqual(created.body["latestRevision"], latest) || created.body["serverProperties"] != nil {

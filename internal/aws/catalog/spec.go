@@ -49,6 +49,9 @@ type Op struct {
 	// AuthorizeParent binds a child Read/Put to its resolved parent's ARN.
 	// The child ARN remains an internal storage identity, not an IAM target.
 	AuthorizeParent bool
+	// AuthorizeCreateRefs requires this create action on the ARNs in Refs
+	// in addition to authorization on the resource created.
+	AuthorizeCreateRefs bool
 	// ListRequiresWildcard marks a list action whose IAM resource must be "*".
 	ListRequiresWildcard bool
 	// Touch lists stored members set to the current time by this operation.
@@ -157,6 +160,9 @@ type Resource struct {
 	// for each element of a list (Policy.RuleGroupReferences[].ResourceArn,
 	// DatasetArns[]).
 	Refs map[string]string
+	// CheckRef checks service-specific compatibility with the resolved reference
+	// before a write and again in the transaction that commits the reference.
+	CheckRef func(region, account string, document map[string]any, target row) error
 	// InUse refuses deleting this resource while a Refs member of another
 	// live resource of the service names it; the value is the official
 	// exception code reported (the dependents family when the operation

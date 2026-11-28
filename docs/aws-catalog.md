@@ -111,19 +111,32 @@ region (for example 25 Amplify apps). These are local limits, not AWS quotas.
 bytes, and optional `Description` and `KafkaVersions`. The catalog stores up to
 100 configurations per Region. The 64 KiB record limit includes the base64
 encoding of the properties and the metadata. The local `ACTIVE` state means the
-configuration is available to read. Kafka property validation, version compatibility
-checks, cluster attachment and broker execution are outside this surface.
+configuration is available to read. The simulator stores the property bytes
+without running brokers or validating Kafka properties.
 [AWS configuration API](https://docs.aws.amazon.com/msk/1.0/apireference/configurations.html)
 
 `DescribeConfiguration` and paged `ListConfigurations` return metadata.
 `DescribeConfigurationRevision` with the configuration ARN and revision `1`
 returns the original bytes. The ARN scopes create, describe, revision read and
 delete authorization. List requires `kafka:ListConfigurations` on `*`.
-`DeleteConfiguration` returns `DELETING` and removes the record immediately.
+`DeleteConfiguration` refuses an attached configuration with `BadRequestException`.
+After all attached clusters have been deleted, it returns `DELETING` and removes the record immediately.
 Revision listing, updates and configuration tags are unavailable.
 [Metadata and deletion](https://docs.aws.amazon.com/msk/1.0/apireference/configurations-arn.html),
 [revision read](https://docs.aws.amazon.com/msk/1.0/apireference/configurations-arn-revisions-revision.html)
 and [MSK IAM actions](https://docs.aws.amazon.com/service-authorization/latest/reference/list_kafka.html)
+
+`CreateCluster` accepts `ConfigurationInfo` with a saved configuration's ARN and
+revision `1` in the same account and Region. It evaluates `kafka:CreateCluster`
+on both the new cluster ARN and the selected configuration ARN. A supplied
+`KafkaVersions` list must contain the cluster's `KafkaVersion`. Locally, omitting
+the list leaves the version unrestricted, and an explicit empty list matches no
+version. `DescribeCluster` and `ListClusters` return the selected configuration
+ARN and revision in `CurrentBrokerSoftwareInfo`. Clusters without a custom
+configuration continue to return only the Kafka version in that structure.
+The cluster record stays `CREATING` and its attachment is immutable.
+[Cluster API](https://docs.aws.amazon.com/msk/1.0/apireference/clusters.html) and
+[configuration deletion](https://docs.aws.amazon.com/msk/latest/developerguide/msk-configuration-operations-delete.html)
 
 ## Console and API reference
 
