@@ -269,7 +269,7 @@ func TestOutpostsSitesAndOutpostsAreStoredRecords(t *testing.T) {
 }
 
 func TestPCSClustersNodeGroupsAndQueues(t *testing.T) {
-	h := newHarness(t, pcs)
+	h := newPCSHarness(t)
 	cluster := map[string]any{"clusterName": "hpc", "scheduler": map[string]any{"type": "SLURM", "version": "24.11"}, "size": "SMALL",
 		"networking": map[string]any{"subnetIds": []any{"subnet-0a1b2c3d"}}, "tags": map[string]any{"team": "a"}}
 	created := h.json1("pcs", "CreateCluster", cluster)

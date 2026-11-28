@@ -183,6 +183,7 @@ console, CloudFormation adapter or Challenge integration.
   To delete a compute environment, disable it and remove it from every job queue in the same Region.
   Batch also stores and deregisters bounded EC2 single-container job definition
   revisions; it does not pull images, run containers, or submit jobs.
+  [Resource Groups](docs/aws-catalog.md#ecr-repository-group-membership) finds local ECR repositories matching a named group’s exact tag key and value.
   The AWS catalog console registers a name, image name, vCPUs and memory,
   and deregisters exact revision ARNs without deleting inactive history.
   Redshift can read tags on one existing stored resource ARN; it does not
@@ -240,3 +241,7 @@ The identified runtime portions were independently reimplemented against public
 AWS contracts. We retain the [original MIT notice](third_party/KUMO-LICENSE.txt)
 and [reviewed replacement scope](third_party/independent-native-source.json).
 These records are not a clean-room or legal certification.
+
+The local SimpleDB Query reference also offers explicit PutAttributes and
+DeleteDomain practice examples. Put replaces one named attribute; whole-domain
+cleanup must target only a disposable domain owned by the caller.

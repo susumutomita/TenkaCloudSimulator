@@ -26,14 +26,27 @@ func (q *request) authorizePCS(resource string, parent *row) (bool, error) {
 		if err != nil {
 			return true, err
 		}
-		if err := q.authorize(parentARN); err != nil {
-			return true, err
-		}
 		canonical, err := q.pcsChildARN(resource, parent)
 		if err != nil {
 			return true, err
 		}
-		return true, q.authorize(canonical)
+		if q.e.cfg.AuthorizeSnapshot == nil {
+			return true, fmt.Errorf("PCS compound authorization requires a policy snapshot")
+		}
+		decide, err := q.e.cfg.AuthorizeSnapshot(q.ctx, q.principal)
+		if err != nil {
+			return true, err
+		}
+		if decide == nil {
+			return true, fmt.Errorf("PCS compound authorization received an empty policy snapshot")
+		}
+		action := q.b.spec.IAMPrefix + ":" + q.op.action()
+		for _, target := range []string{parentARN, canonical} {
+			if err := q.checkDecision(decide(action, target)); err != nil {
+				return true, err
+			}
+		}
+		return true, nil
 	case "TagResource", "UntagResource":
 		// tagged resolves and validates the stored identity first.
 		return true, q.authorize(resource)

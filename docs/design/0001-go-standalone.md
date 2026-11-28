@@ -16,6 +16,8 @@ SSM の [ドキュメント履歴](../ssm-documents.md) はリージョンとド
 
 SNS の HTTP/HTTPS コンソールは native Query を呼び出し、通知先 URL をローカル SQLite に記録するだけで外部に接続しない。購読属性を読む際は ARN から親トピックを特定して IAM を先に評価し、購読と親の存在およびリージョンの一致を同じ読み取りで確認する。専用 Scalar は us-east-1 固定で通常のログインセッションを使い、コンソールの演習用 ID 選択を引き継がない。[対応範囲](../sns.md)。
 
+AWS Resource Groups のタグクエリは、同じリージョンの ECR repository の ARN とタグをカタログの SQLite から読み取る。グループ ARN と依存する読み取り権限の認可後、保存済みクエリとリポジトリを同じスナップショットで照合する。[対象と制限](../aws-catalog.md#ecr-repository-group-membership)
+
 AWS カタログの AppFlow は S3 間のフロー設定のみを保持する。[トリガー設定](https://docs.aws.amazon.com/appflow/1.0/APIReference/API_TriggerConfig.html)に従い、`CreateFlow` と `UpdateFlow` は、`OnDemand` に付けたスケジュール設定と、実行間隔の式がない（空白のみも含む）`Scheduled` の定義を `ValidationException` で拒否する。検証は保存前に行うため、拒否された要求で既存の設定は変わらない。スケジューラ、コネクタープロファイル、ジョブ実行およびオブジェクト転送は実装しない。
 
 AWS Batch のジョブキューは、先頭ジョブのタイムアウト設定のみを保存する。設定できる時間は 600～86,400 秒で、コンテナ系では `CANCEL`、SageMaker Training では `TERMINATE` を受け付ける。更新時は変更後のキュー種別とアクションの組み合わせを検証し、拒否された要求で既存設定は変わらない。タイマーやジョブの実行・終了処理は実装しない。
@@ -149,4 +151,8 @@ readback. This separate detached state never modifies CloudFormation-owned
 ingress or feeds live network/instance attachment decisions. See the
 [security group subset](../ec2-read-discovery.md#security-group-readback).
 
-[PCS queue associations](../pcs-queue-associations.md) resolve local group IDs in the same persisted cluster and Region inside queue write transactions. Group deletion checks referring queues in its deletion transaction. PCS IAM uses the official action/resource table, including wildcard-only actions. New child ARNs include the cluster ID. Earlier flat rows are not migrated; exact canonical aliases resolve their tag operations and their IAM grants use only canonical targets derived from the actual persisted parent. These records remain configuration metadata in `CREATING`; no Slurm scheduler, instance provisioning or job execution is supplied.
+The local SimpleDB Query reference also offers explicit PutAttributes and
+DeleteDomain practice examples. Put replaces one named attribute; whole-domain
+cleanup must target only a disposable domain owned by the caller.
+
+[PCS queue associations](../pcs-queue-associations.md) resolve local group IDs in the same persisted cluster and Region inside queue write transactions. Group deletion checks referring queues in its deletion transaction. PCS IAM uses the official action/resource table, including wildcard-only actions. Parent and child checks share the existing request-scoped policy evaluator; a missing snapshot refuses the compound operation. New child ARNs include the cluster ID. Earlier flat rows are not migrated; exact canonical aliases resolve their tag operations and their IAM grants use only canonical targets derived from the actual persisted parent. These records remain configuration metadata in `CREATING`; no Slurm scheduler, instance provisioning or job execution is supplied.

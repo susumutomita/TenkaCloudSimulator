@@ -41,6 +41,10 @@ foreign row or a different resource kind. `ListTagsForResource` still requires
 policy Resource `*`, even though its request identifies one actual resource.
 Resolving a queue's group does not introduce a separate IAM action on that
 reference.
+Parent and child checks use one immutable policy snapshot for the request;
+separate policy revisions cannot contribute one grant each. Trusted catalog
+adapters must supply `AuthorizeSnapshot`; compound requests fail closed without
+a valid evaluator. The standalone server supplies the shared identity snapshot.
 
 Local identity-policy denials retain the simulator's HTTP 403 boundary. The
 PCS API reference also defines a service `AccessDeniedException` with HTTP 400;

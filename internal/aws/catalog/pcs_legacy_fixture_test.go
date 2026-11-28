@@ -88,6 +88,7 @@ func pcsHistoricalHarness(t *testing.T) (*harness, string, string, string) {
 	if err := h.db.QueryRow("SELECT next FROM aws_catalog_sequence WHERE id=1").Scan(&next); err != nil || next != fixture.NextSequence {
 		t.Fatal("opening changed historical sequence", err)
 	}
+	h.engine.cfg.AuthorizeSnapshot = pcsPolicySnapshot(h.policy)
 	return h, ids["cluster"], ids["computeNodeGroup"], ids["queue"]
 }
 

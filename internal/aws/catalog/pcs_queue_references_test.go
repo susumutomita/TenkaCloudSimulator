@@ -21,7 +21,7 @@ func pcsAssociationSeed(t *testing.T, h *harness, name string) (string, string) 
 }
 
 func TestPCSQueueReferenceOwnershipAndDeletion(t *testing.T) {
-	h := newHarness(t, pcs)
+	h := newPCSHarness(t)
 	cluster, group := pcsAssociationSeed(t, h, "first")
 	_, other := pcsAssociationSeed(t, h, "second")
 	refs := func(ids ...string) []any {
@@ -65,7 +65,7 @@ func TestPCSQueueReferenceOwnershipAndDeletion(t *testing.T) {
 }
 
 func TestPCSQueueAssociationIAMResources(t *testing.T) {
-	h := newHarness(t, pcs)
+	h := newPCSHarness(t)
 	cluster, group := pcsAssociationSeed(t, h, "authorize")
 	clusterARN := "arn:aws:pcs:us-east-1:000000000000:cluster/" + cluster
 	groupARN := "arn:aws:pcs:us-east-1:000000000000:cluster/" + cluster + "/computenodegroup/" + group
@@ -93,7 +93,7 @@ func TestPCSQueueAssociationIAMResources(t *testing.T) {
 }
 
 func TestPCSQueueReferencesAreRecheckedInTransaction(t *testing.T) {
-	h := newHarness(t, pcs)
+	h := newPCSHarness(t)
 	cluster, group := pcsAssociationSeed(t, h, "transaction")
 	b := h.binding("pcs")
 	q := request{e: h.engine, b: b, region: "us-east-1"}
@@ -113,9 +113,9 @@ func TestPCSQueueReferencesAreRecheckedInTransaction(t *testing.T) {
 }
 
 func TestPCSAssociationIndependentStoreAndRegion(t *testing.T) {
-	h := newHarness(t, pcs)
+	h := newPCSHarness(t)
 	cluster, group := pcsAssociationSeed(t, h, "isolate")
-	peer := newHarness(t, pcs)
+	peer := newPCSHarness(t)
 	peerCluster, _ := pcsAssociationSeed(t, peer, "isolate")
 	expect(t, peer.json1("pcs", "CreateQueue", map[string]any{"clusterIdentifier": peerCluster, "queueName": "missingpeer", "computeNodeGroupConfigurations": []any{map[string]any{"computeNodeGroupId": group}}}), 400, "ResourceNotFoundException")
 	b := h.binding("pcs")
@@ -127,7 +127,7 @@ func TestPCSAssociationIndependentStoreAndRegion(t *testing.T) {
 }
 
 func TestPCSQueueCanceledAndFailedWritePreservesRows(t *testing.T) {
-	h := newHarness(t, pcs)
+	h := newPCSHarness(t)
 	cluster, group := pcsAssociationSeed(t, h, "rollback")
 	input := map[string]any{"clusterIdentifier": cluster, "queueName": "cancelqueue", "computeNodeGroupConfigurations": []any{map[string]any{"computeNodeGroupId": group}}}
 	before, err := listKind(h.db, "pcs", "computeNodeGroup")
@@ -174,9 +174,10 @@ func TestPCSQueueCanceledAndFailedWritePreservesRows(t *testing.T) {
 func TestPCSCompetingAssociationOrders(t *testing.T) {
 	for _, deleteFirst := range []bool{true, false} {
 		t.Run(fmt.Sprint(deleteFirst), func(t *testing.T) {
-			h := newHarness(t, pcs)
+			h := newPCSHarness(t)
 			cluster, group := pcsAssociationSeed(t, h, "ordering")
 			original := h.engine.cfg.Authorize
+			originalSnapshot := h.engine.cfg.AuthorizeSnapshot
 			intervened := false
 			attach := func() reply {
 				return h.json1("pcs", "CreateQueue", map[string]any{"clusterIdentifier": cluster, "queueName": "competing", "computeNodeGroupConfigurations": []any{map[string]any{"computeNodeGroupId": group}}})
@@ -199,6 +200,19 @@ func TestPCSCompetingAssociationOrders(t *testing.T) {
 				}
 				return original(ctx, principal, action, resource)
 			}
+			h.engine.cfg.AuthorizeSnapshot = func(ctx context.Context, principal string) (func(string, string) string, error) {
+				decide, err := originalSnapshot(ctx, principal)
+				if err != nil {
+					return nil, err
+				}
+				return func(action, resource string) string {
+					if !deleteFirst && action == "pcs:DeleteComputeNodeGroup" && !intervened {
+						intervened = true
+						expect(t, attach(), 200, "")
+					}
+					return decide(action, resource)
+				}, nil
+			}
 			if deleteFirst {
 				expect(t, attach(), 400, "ResourceNotFoundException")
 			} else {
@@ -212,7 +226,7 @@ func TestPCSCompetingAssociationOrders(t *testing.T) {
 }
 
 func TestPCSQueueAssociationRejectsCorruptParentIdentity(t *testing.T) {
-	h := newHarness(t, pcs)
+	h := newPCSHarness(t)
 	cluster, group := pcsAssociationSeed(t, h, "canonical")
 	other, _ := pcsAssociationSeed(t, h, "different")
 	made := h.json1("pcs", "CreateQueue", map[string]any{"clusterIdentifier": cluster, "queueName": "canonicalqueue", "computeNodeGroupConfigurations": []any{map[string]any{"computeNodeGroupId": group}}})

@@ -9,16 +9,19 @@ import (
 )
 
 func pcsGrantOnly(h *harness, action string, resources ...string) {
-	h.engine.cfg.Authorize = func(_ context.Context, _, actual, target string) (string, error) {
+	resources = append([]string(nil), resources...)
+	decide := func(actual, target string) string {
 		if actual == "pcs:"+action {
 			for _, allowed := range resources {
 				if target == allowed {
-					return "allowed", nil
+					return "allowed"
 				}
 			}
 		}
-		return "implicit-deny", nil
+		return "implicit-deny"
 	}
+	h.engine.cfg.Authorize = func(_ context.Context, _, actual, target string) (string, error) { return decide(actual, target), nil }
+	h.engine.cfg.AuthorizeSnapshot = func(context.Context, string) (func(string, string) string, error) { return decide, nil }
 }
 
 func pcsIAMSeed(t *testing.T, h *harness) (string, string, string) {
@@ -45,7 +48,7 @@ func TestPCSOfficialActionResourceTable(t *testing.T) {
 	}
 	for _, operation := range actions {
 		t.Run(operation, func(t *testing.T) {
-			h := newHarness(t, pcs)
+			h := newPCSHarness(t)
 			cluster, group, queue := pcsIAMSeed(t, h)
 			other, _ := pcsAssociationSeed(t, h, "other-real")
 			parent := "arn:aws:pcs:us-east-1:000000000000:cluster/" + cluster
@@ -221,7 +224,7 @@ func TestPCSLegacyFlatARNCanonicalPoliciesAndReopen(t *testing.T) {
 }
 
 func TestPCSCanonicalIAMRefusesRetargetedStoredARN(t *testing.T) {
-	h := newHarness(t, pcs)
+	h := newPCSHarness(t)
 	cluster, _, queue := pcsIAMSeed(t, h)
 	other, _ := pcsAssociationSeed(t, h, "real-other")
 	parent := "arn:aws:pcs:us-east-1:000000000000:cluster/" + cluster
