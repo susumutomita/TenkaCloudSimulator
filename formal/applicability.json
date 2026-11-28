@@ -1,427 +1,561 @@
 {
   "version": 1,
-  "base_sha": "fd803075c37af3faa377f550c8e1cd52b3cfbbb1",
+  "base_sha": "591298e6889ff15f85df789516a570eb6da25c1e",
   "changes": [
     {
       "path": "README.md",
-      "sha256": "47513170e6ddcc26aeac035880d7c7d81b2347117872ae7b5ec1a72301772c08",
+      "sha256": "bdd125c30c6ff8924e5a7f7c389af57587777f66ba770220565dff0788041824",
       "disposition": "documentation",
-      "reason": "Describe the six supported CodeCommit Git content and branch operations and their local limits.",
+      "reason": "Link the standalone CodeCommit branch notification slice and its AWS SNS service policy.",
       "models": []
     },
     {
-      "path": "docs/aws-catalog-services.md",
-      "sha256": "cc3bde999b8f8b07e19c17a1f499d37dada95b651b7e210400faa698d83250eb",
+      "path": "docs/aws-catalog.md",
+      "sha256": "4710abbc8351f3d4c03162ea78270d2980027622c6cf7e521067b06067f4761a",
       "disposition": "documentation",
-      "reason": "Regenerate the published CodeCommit operation inventory and bounds.",
+      "reason": "Identify the dedicated native CodeStar Notifications REST JSON behavior.",
       "models": []
     },
     {
-      "path": "docs/aws-codecommit.md",
-      "sha256": "f11c7b8673e88a621abe1a57e491e7b31c2de6b65b5ab7b1e3dcf49df78b6991",
+      "path": "docs/aws-codestar-notifications.md",
+      "sha256": "8f99c7b2d99c1a263683c338b54d0233b35f5a8a1e4c43e9edc5663c6c9c3b22",
       "disposition": "documentation",
-      "reason": "Document supported Git object types, revision behavior, authorization and storage limits.",
+      "reason": "Specify the local branch producer, required identities, Standard destinations, operations, capacity and retry lifecycle.",
+      "models": []
+    },
+    {
+      "path": "docs/catalog-backlog-assessment.md",
+      "sha256": "f90b7e7ab585122dd0ad14f0911825ec6ff5ec60eb56e36468021e0572c9b721",
+      "disposition": "documentation",
+      "reason": "Record the implemented two-event branch slice and identify the remaining provider-dependent scope.",
       "models": []
     },
     {
       "path": "docs/design/0001-go-standalone.md",
-      "sha256": "de3602465a7e86e354c1230e23ab484457681db8042d483365aad41f683270bf",
+      "sha256": "1d7a4e863484219ef2f493b35ef042a1ba7a7f10669f5ac6c4013246deaba1b0",
       "disposition": "documentation",
-      "reason": "Record the transactional native data model and runtime dependency boundary.",
+      "reason": "Explain same-transaction Git capture, separate durable publication and native topic policy composition.",
       "models": []
     },
     {
-      "path": "formal/CodeCommitGitReferences.cfg",
-      "sha256": "1c7c2484546fc40216e13f85c807b5251e548d774a727d7c56c35d6aef051089",
+      "path": "docs/sns.md",
+      "sha256": "de2d1065dfed2d4035834ba4a3ff4b7dead4549a2cdec83f8c58fb5a3dc5f281",
+      "disposition": "documentation",
+      "reason": "Specify the Query operations, restricted statement grammar, storage and exact IAM checks.",
+      "models": []
+    },
+    {
+      "path": "formal/CodeStarBranchNotificationDelivery.cfg",
+      "sha256": "395f2cac74510c8761ff7d7f76aa17dffc867fc131701abf2c49a17fb7b1d3ad",
       "disposition": "modeled",
-      "reason": "Run the finite repository lifetime, competing-writer, fork, cancellation and historical-read scenarios.",
+      "reason": "Check the bounded action and outcome invariants for Git, durable fanout, cancellation and list selection.",
       "models": [
         {
-          "id": "CodeCommitGitReferences",
+          "id": "CodeStarBranchNotificationDelivery",
           "properties": [
-            "AtomicVisibility",
-            "CASExpectedParent",
-            "LifetimeIsolation",
-            "ForkIsolation",
-            "HistoryRetained",
-            "PeerFrame"
+            "GitAtomicFailure",
+            "WorkerDecision",
+            "PublicationAtomic",
+            "ListReadResult"
           ],
-          "limits": "Finite two-repository, two-branch schedules with abstract commit and blob identities. Actual Git serialization, SQLite, real HTTP cancellation, limits and IAM evaluation are tested separately."
+          "limits": "Finite two-target branch/rule state and representative principals, operations, destinations and faults. Native SQLite, SDK headers, exact filter pagination, physical clocks, quota magnitudes and payload bytes are checked separately."
         }
       ]
     },
     {
-      "path": "formal/CodeCommitGitReferences.tla",
-      "sha256": "2b4357b38ecdd15854aab708a5686f78f13a1880e7c7932f6e3d5ee55f31239b",
+      "path": "formal/CodeStarBranchNotificationDelivery.tla",
+      "sha256": "7db13fed3c12a534e9cbf8fd3f71db85789e8db10b1af81657de43d660b55ca9",
       "disposition": "modeled",
-      "reason": "Describe staged Git ref advancement, immutable retained history and repository lifetime isolation.",
+      "reason": "Model atomic Git capture, physical target lifetimes, current creator permissions, read-only projection, restart and at-most-once native fanout.",
       "models": [
         {
-          "id": "CodeCommitGitReferences",
+          "id": "CodeStarBranchNotificationDelivery",
           "properties": [
-            "AtomicVisibility",
-            "CASExpectedParent",
-            "LifetimeIsolation",
-            "ForkIsolation",
-            "HistoryRetained",
-            "PeerFrame"
+            "GitCommitExact",
+            "EventExact",
+            "WorkerDecision",
+            "AtMostOnce",
+            "ListReadFrame"
           ],
-          "limits": "Finite two-repository, two-branch schedules with abstract commit and blob identities. Actual Git serialization, SQLite, real HTTP cancellation, limits and IAM evaluation are tested separately."
+          "limits": "Finite two-target branch/rule state and representative principals, operations, destinations and faults. Native SQLite, SDK headers, exact filter pagination, physical clocks, quota magnitudes and payload bytes are checked separately."
+        }
+      ]
+    },
+    {
+      "path": "formal/SNSNotificationPolicyLifetime.cfg",
+      "sha256": "f5039c650d36ed1ae07e753e5a43235902599ffe4816719aff798ef7ca144294",
+      "disposition": "modeled",
+      "reason": "Select the concrete bounded settings and invariants for the policy lifecycle.",
+      "models": [
+        {
+          "id": "SNSNotificationPolicyLifetime",
+          "properties": [
+            "SetAdmission",
+            "SetRefusalPreservesStore",
+            "NewGeneration",
+            "EditKeepsGeneration",
+            "PolicyBytesExact",
+            "DeleteFrame",
+            "PeerFrame",
+            "GetReadback",
+            "ReadsPreserveStore",
+            "ResolverAdmission",
+            "ResolverGeneration",
+            "ResolverDecision",
+            "CapturedCurrentGrant",
+            "CaptureExact",
+            "RestartPreservesStore"
+          ],
+          "limits": "Finite topic and generation bounds project request outcomes. Actual SQL, Unicode, the SNS Query wire, SDK and timestamps require independent native checks."
+        }
+      ]
+    },
+    {
+      "path": "formal/SNSNotificationPolicyLifetime.tla",
+      "sha256": "7bbd220cff10d3c0b6039c4a7bc0a8f315b43d2da6baf855cb03f4e57674ed1c",
+      "disposition": "modeled",
+      "reason": "Model the finite private topic lifetimes, persistence, exact grant lookup and refusal frames.",
+      "models": [
+        {
+          "id": "SNSNotificationPolicyLifetime",
+          "properties": [
+            "SetAdmission",
+            "SetRefusalPreservesStore",
+            "NewGeneration",
+            "EditKeepsGeneration",
+            "PolicyBytesExact",
+            "DeleteFrame",
+            "PeerFrame",
+            "GetReadback",
+            "ReadsPreserveStore",
+            "ResolverAdmission",
+            "ResolverGeneration",
+            "ResolverDecision",
+            "CapturedCurrentGrant",
+            "CaptureExact",
+            "RestartPreservesStore"
+          ],
+          "limits": "Finite topic and generation bounds project request outcomes. Actual SQL, Unicode, the SNS Query wire, SDK and timestamps require independent native checks."
         }
       ]
     },
     {
       "path": "formal/models.json",
-      "sha256": "d13640be937ab73e23f5792a974e2f17421ed73b809bfb0e6211047c274b2be7",
+      "sha256": "931cfc4672b6b9c4e3237844049590cbd4e995e5725f140b9ce43447958395f9",
       "disposition": "formal-infrastructure",
-      "reason": "Register the CodeCommit leaf and its independently specified safety properties and mutation controls.",
+      "reason": "Register finite bounds, invariants, intended mutations and actual paths for both new models.",
       "models": []
     },
     {
       "path": "internal/aws/catalog/codecommit_content.go",
-      "sha256": "5e71796411b0afdd2216d1eddf590c25d7f660855959448a305b7a9a6c02baf3",
+      "sha256": "e4d9b5cf9528e6633fa42e73aa930a3580f5561260f123ef410572b1245a6e1c",
       "disposition": "modeled",
-      "reason": "Resolve the concrete repository lifetime and atomically service six Git content and branch actions.",
+      "reason": "Record the real old and new references after native object/branch staging and before the source commit.",
       "models": [
         {
-          "id": "CodeCommitGitReferences",
+          "id": "CodeStarBranchNotificationDelivery",
           "properties": [
-            "AtomicVisibility",
-            "CASExpectedParent",
-            "LifetimeIsolation",
-            "ForkIsolation",
-            "HistoryRetained",
-            "PeerFrame"
+            "GitAdmission",
+            "GitCommitExact",
+            "GitAtomicFailure",
+            "EventExact"
           ],
-          "limits": "Finite two-repository, two-branch schedules with abstract commit and blob identities. Actual Git serialization, SQLite, real HTTP cancellation, limits and IAM evaluation are tested separately."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/catalog/codecommit_content_test.go",
-      "sha256": "50bf11066387189d35b89cbe7e4fdbbb344dbb65d49aedd0c3da982d8c334801",
-      "disposition": "test-support",
-      "reason": "Exercise Git hashes, historical reads, authenticated scope, ref collisions, corruption and physical size bounds.",
-      "models": []
-    },
-    {
-      "path": "internal/aws/catalog/codecommit_objects.go",
-      "sha256": "57f47dfa83b1e9bc96604c276e7a7e49ea1e84ebef935d5e0894695c13952e75",
-      "disposition": "modeled",
-      "reason": "Persist and traverse canonical Git blobs, trees, commits and branch tips in the owning repository.",
-      "models": [
-        {
-          "id": "CodeCommitGitReferences",
-          "properties": [
-            "AtomicVisibility",
-            "CASExpectedParent",
-            "LifetimeIsolation",
-            "ForkIsolation",
-            "HistoryRetained",
-            "PeerFrame"
-          ],
-          "limits": "Finite two-repository, two-branch schedules with abstract commit and blob identities. Actual Git serialization, SQLite, real HTTP cancellation, limits and IAM evaluation are tested separately."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/catalog/codecommit_transactions_test.go",
-      "sha256": "b82665000893b2acc719b0df91687131fd14c4181ae0c573f1dfb9d6d93201ed",
-      "disposition": "test-support",
-      "reason": "Interrupt physically staged writes, race real writers, replace a repository during authorization and verify durable recovery after SQLite failures.",
-      "models": []
-    },
-    {
-      "path": "internal/aws/catalog/describe.go",
-      "sha256": "744b6c3ae87cbae385f2c264253e819528559580381a39f05518abcba01f21db",
-      "disposition": "modeled",
-      "reason": "Keep dedicated Git data operations out of generic repository metadata forms.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "FailureFrame",
-            "PeerFrame"
-          ],
-          "limits": "The generic model covers abstract catalog admission, failure and ownership. It does not model canonical Git or CodeCommit request decoding."
+          "limits": "Finite two-target branch/rule state and representative principals, operations, destinations and faults. Native SQLite, SDK headers, exact filter pagination, physical clocks, quota magnitudes and payload bytes are checked separately."
         }
       ]
     },
     {
       "path": "internal/aws/catalog/engine.go",
-      "sha256": "2a5eecdb56206644a5fb0751c83d6df7ce31ca18a9d313bab1c7a5109cf48274",
+      "sha256": "e45caf9a8bc2e3df762629e9213be2bd2082e0daf22c7ed1142967ed5512c0c2",
       "disposition": "modeled",
-      "reason": "Install the two repository-owned Git tables in the catalog database.",
+      "reason": "Wire the trusted reference transition into the service-owned transaction and report inability to reserve pending-work capacity.",
       "models": [
         {
-          "id": "CatalogResourceLifecycle",
+          "id": "CodeStarBranchNotificationDelivery",
           "properties": [
-            "AuthorizationFirst",
-            "FailureFrame",
-            "PeerFrame"
+            "GitAdmission",
+            "GitAtomicFailure",
+            "EventExact"
           ],
-          "limits": "The generic model covers abstract catalog admission, failure and ownership. It does not model canonical Git or CodeCommit request decoding."
-        },
-        {
-          "id": "SARPolicyAuthorizationTarget",
-          "properties": [
-            "NoUnpermittedEffects",
-            "ResolvedParentTarget"
-          ],
-          "limits": "Prior SAR target semantics are unchanged in shared catalog files. This model does not evaluate CodeCommit IAM decisions."
-        },
-        {
-          "id": "RDSPrivatePostgresTopology",
-          "properties": [
-            "OwnedTopologyBeforeWrite",
-            "AtomicRefusal"
-          ],
-          "limits": "The existing RDS topology path remains unchanged in this shared catalog file. PostgreSQL is outside the Git model."
-        },
-        {
-          "id": "RDSOwnedGenerationFence",
-          "properties": [
-            "AttachNeedsCurrent",
-            "FencedGenerationCannotChange"
-          ],
-          "limits": "The separate RDS process ownership contract remains unchanged. Its model does not execute CodeCommit transactions."
-        },
-        {
-          "id": "CodeCommitGitReferences",
-          "properties": [
-            "AtomicVisibility",
-            "CASExpectedParent",
-            "LifetimeIsolation",
-            "ForkIsolation",
-            "HistoryRetained",
-            "PeerFrame"
-          ],
-          "limits": "Finite two-repository, two-branch schedules with abstract commit and blob identities. Actual Git serialization, SQLite, real HTTP cancellation, limits and IAM evaluation are tested separately."
+          "limits": "Finite two-target branch/rule state and representative principals, operations, destinations and faults. Native SQLite, SDK headers, exact filter pagination, physical clocks, quota magnitudes and payload bytes are checked separately."
         }
       ]
     },
     {
-      "path": "internal/aws/catalog/models/codecommit.json",
-      "sha256": "20673b093f8c265781f73e9d1f8a56a6ba7b7c6dfa1c993ab4f6eedffb828dd4",
+      "path": "internal/aws/codestarnotifications/delivery.go",
+      "sha256": "69ca3812e6bb40ff583964f8dae0a992a5a2a956d1a24adadc5bb215dcbd6a30",
       "disposition": "modeled",
-      "reason": "Retain official pinned CodeCommit shapes for the six supported Git operations.",
+      "reason": "Resolve durable grant and destination lifetimes, atomically publish, retry a failed sink and retire the matching intent.",
       "models": [
         {
-          "id": "CatalogResourceLifecycle",
+          "id": "CodeStarBranchNotificationDelivery",
           "properties": [
-            "AuthorizationFirst",
-            "FailureFrame",
-            "PeerFrame"
+            "RetryEligibility",
+            "WorkerDecision",
+            "PublicationAtomic",
+            "FailureHasNoPublication",
+            "AtMostOnce"
           ],
-          "limits": "The generic model covers abstract catalog admission, failure and ownership. It does not model canonical Git or CodeCommit request decoding."
+          "limits": "Finite two-target branch/rule state and representative principals, operations, destinations and faults. Native SQLite, SDK headers, exact filter pagination, physical clocks, quota magnitudes and payload bytes are checked separately."
         }
       ]
     },
     {
-      "path": "internal/aws/catalog/selection.json",
-      "sha256": "dcd1f121bd0e27f8fd11e162577a2ed6574e7b1ec954580968bed1afbdf916d0",
+      "path": "internal/aws/codestarnotifications/list.go",
+      "sha256": "12c79c4a0f911ec04cb035fe4cade6b5a485ea1a85dc63d231a9e67b2c67f68a",
       "disposition": "modeled",
-      "reason": "Select the six native operations from the pinned AWS service model.",
+      "reason": "Read persisted regional rules under the wildcard List decision and scope filter and continuation traversal to the caller.",
       "models": [
         {
-          "id": "CatalogResourceLifecycle",
+          "id": "CodeStarBranchNotificationDelivery",
           "properties": [
-            "AuthorizationFirst",
-            "FailureFrame",
-            "PeerFrame"
+            "ListReadFrame",
+            "ListReadResult"
           ],
-          "limits": "The generic model covers abstract catalog admission, failure and ownership. It does not model canonical Git or CodeCommit request decoding."
+          "limits": "Finite two-target branch/rule state and representative principals, operations, destinations and faults. Native SQLite, SDK headers, exact filter pagination, physical clocks, quota magnitudes and payload bytes are checked separately."
         }
       ]
     },
     {
-      "path": "internal/aws/catalog/semantics.go",
-      "sha256": "4631dffe8f1d1ca7f576d0f99012efb44ac090d22e4a02bc9ce0fcd074ca490e",
+      "path": "internal/aws/codestarnotifications/outbox.go",
+      "sha256": "9969d457ea25bd26a110ee5580a11c1a91fa3030e2740dcfd08a5351b878597a",
       "disposition": "modeled",
-      "reason": "Dispatch an explicitly handled operation to its CodeCommit transaction implementation.",
+      "reason": "Capture matched event/target pairs, freeze the queue/subscription lifetimes and reserve finite capacity in the Git transaction.",
       "models": [
         {
-          "id": "CatalogResourceLifecycle",
+          "id": "CodeStarBranchNotificationDelivery",
           "properties": [
-            "AuthorizationFirst",
-            "FailureFrame",
-            "PeerFrame"
+            "GitAdmission",
+            "GitAtomicFailure",
+            "EventExact"
           ],
-          "limits": "The generic model covers abstract catalog admission, failure and ownership. It does not model canonical Git or CodeCommit request decoding."
-        },
-        {
-          "id": "ECSTaskRevisionLifecycle",
-          "properties": [
-            "HistoryImmutable",
-            "CommitRequiresAdmission"
-          ],
-          "limits": "The existing ECS task revision property remains applicable to separate ECS paths in this file. It does not characterize CodeCommit history."
-        },
-        {
-          "id": "SARPolicyAuthorizationTarget",
-          "properties": [
-            "NoUnpermittedEffects",
-            "ResolvedParentTarget"
-          ],
-          "limits": "Prior SAR target semantics are unchanged in shared catalog files. This model does not evaluate CodeCommit IAM decisions."
-        },
-        {
-          "id": "RDSPrivatePostgresTopology",
-          "properties": [
-            "OwnedTopologyBeforeWrite",
-            "AtomicRefusal"
-          ],
-          "limits": "The existing RDS topology path remains unchanged in this shared catalog file. PostgreSQL is outside the Git model."
-        },
-        {
-          "id": "RDSOwnedGenerationFence",
-          "properties": [
-            "AttachNeedsCurrent",
-            "FencedGenerationCannotChange"
-          ],
-          "limits": "The separate RDS process ownership contract remains unchanged. Its model does not execute CodeCommit transactions."
-        },
-        {
-          "id": "CodeCommitGitReferences",
-          "properties": [
-            "AtomicVisibility",
-            "CASExpectedParent",
-            "LifetimeIsolation",
-            "ForkIsolation",
-            "HistoryRetained",
-            "PeerFrame"
-          ],
-          "limits": "Finite two-repository, two-branch schedules with abstract commit and blob identities. Actual Git serialization, SQLite, real HTTP cancellation, limits and IAM evaluation are tested separately."
+          "limits": "Finite two-target branch/rule state and representative principals, operations, destinations and faults. Native SQLite, SDK headers, exact filter pagination, physical clocks, quota magnitudes and payload bytes are checked separately."
         }
       ]
     },
     {
-      "path": "internal/aws/catalog/services_compute.go",
-      "sha256": "8dc10a758c9d983cc07a985cd4955b55013cbc28904ba4e7bbf2c21a750a9c60",
+      "path": "internal/aws/codestarnotifications/rules.go",
+      "sha256": "629289465a0cc59ad93a1d99e3a86505f1c3adf5c0050ccb67855934e3554143",
       "disposition": "modeled",
-      "reason": "Register CodeCommit Git handlers and declare their simulator bounds.",
+      "reason": "Admit local rule registration, fence target lifetimes and retire pending work after reconfiguration.",
       "models": [
         {
-          "id": "CatalogResourceLifecycle",
+          "id": "CodeStarBranchNotificationDelivery",
           "properties": [
-            "AuthorizationFirst",
-            "FailureFrame",
-            "PeerFrame"
+            "RuleChangeAtomic",
+            "TargetRetirement",
+            "WorkerDecision"
           ],
-          "limits": "The generic model covers abstract catalog admission, failure and ownership. It does not model canonical Git or CodeCommit request decoding."
-        },
-        {
-          "id": "ECSTaskRevisionLifecycle",
-          "properties": [
-            "HistoryImmutable",
-            "CommitRequiresAdmission"
-          ],
-          "limits": "The existing ECS task revision property remains applicable to separate ECS paths in this file. It does not characterize CodeCommit history."
-        },
-        {
-          "id": "CodeCommitGitReferences",
-          "properties": [
-            "AtomicVisibility",
-            "CASExpectedParent",
-            "LifetimeIsolation",
-            "ForkIsolation",
-            "HistoryRetained",
-            "PeerFrame"
-          ],
-          "limits": "Finite two-repository, two-branch schedules with abstract commit and blob identities. Actual Git serialization, SQLite, real HTTP cancellation, limits and IAM evaluation are tested separately."
+          "limits": "Finite two-target branch/rule state and representative principals, operations, destinations and faults. Native SQLite, SDK headers, exact filter pagination, physical clocks, quota magnitudes and payload bytes are checked separately."
         }
       ]
     },
     {
-      "path": "internal/aws/catalog/spec.go",
-      "sha256": "1c4619aa740f9385b7d11ab8c0e51fb7e84a6f2f7c5a6cf0158e195406c5d5d6",
+      "path": "internal/aws/codestarnotifications/store.go",
+      "sha256": "747fdd10ee5d71c6a0f5dcf4e28a1f4aa52b46a1f30a51854adbaf7696dc71e7",
       "disposition": "modeled",
-      "reason": "Represent the dedicated data-operation handler in existing catalog operation descriptions.",
+      "reason": "Persist scoped rules and target, queue, subscription, pending and delivery identities in the team database.",
       "models": [
         {
-          "id": "CatalogResourceLifecycle",
+          "id": "CodeStarBranchNotificationDelivery",
           "properties": [
-            "AuthorizationFirst",
-            "FailureFrame",
-            "PeerFrame"
+            "AtMostOnce",
+            "TargetRetirement",
+            "RestartExact"
           ],
-          "limits": "The generic model covers abstract catalog admission, failure and ownership. It does not model canonical Git or CodeCommit request decoding."
-        },
-        {
-          "id": "SARPolicyAuthorizationTarget",
-          "properties": [
-            "NoUnpermittedEffects",
-            "ResolvedParentTarget"
-          ],
-          "limits": "Prior SAR target semantics are unchanged in shared catalog files. This model does not evaluate CodeCommit IAM decisions."
+          "limits": "Finite two-target branch/rule state and representative principals, operations, destinations and faults. Native SQLite, SDK headers, exact filter pagination, physical clocks, quota magnitudes and payload bytes are checked separately."
         }
       ]
     },
     {
-      "path": "internal/aws/catalog/value.go",
-      "sha256": "4cda69b41697ae692c20a756d9741d37efc5899668ea722a49b8e70b73ed487e",
+      "path": "internal/aws/notification_delivery_test.go",
+      "sha256": "72b30a4b0e297845978f05bc75d7fa8beea297836544184ab3dd2459484dcb0c",
       "disposition": "modeled",
-      "reason": "Preserve normal shape validation and attach optional declared exceptions to omitted top-level fields on CodeCommit Git operations.",
+      "reason": "Exercise the native counterpart of atomic capture, current permission, queue lifetime, target rollback, read-only paging and deduplication.",
       "models": [
         {
-          "id": "CatalogResourceLifecycle",
+          "id": "CodeStarBranchNotificationDelivery",
           "properties": [
-            "AuthorizationFirst",
-            "FailureFrame",
-            "PeerFrame"
+            "GitAtomicFailure",
+            "PublicationAtomic",
+            "TargetRetirement",
+            "ListReadFrame",
+            "AtMostOnce"
           ],
-          "limits": "The generic model covers abstract catalog admission, failure and ownership. It does not model canonical Git or CodeCommit request decoding."
+          "limits": "Finite two-target branch/rule state and representative principals, operations, destinations and faults. Native SQLite, SDK headers, exact filter pagination, physical clocks, quota magnitudes and payload bytes are checked separately."
         }
       ]
     },
     {
-      "path": "internal/server/apidocs/catalog/codecommit.json",
-      "sha256": "fc893116af4e52ea1357de2e1808ec4c8dde6750de684dcaa75ea02dcfbd844b",
+      "path": "internal/aws/notification_gateway.go",
+      "sha256": "b65f40534754d677ad2aeb0b77d40a2f61a64ef8da773d6a38c8e3ed5367dd0c",
+      "disposition": "modeled",
+      "reason": "Normalize the native rule request and current exercise identity, then use the native SNS grant and publication adapters.",
+      "models": [
+        {
+          "id": "CodeStarBranchNotificationDelivery",
+          "properties": [
+            "ListReadResult",
+            "WorkerDecision",
+            "PublicationAtomic"
+          ],
+          "limits": "Finite two-target branch/rule state and representative principals, operations, destinations and faults. Native SQLite, SDK headers, exact filter pagination, physical clocks, quota magnitudes and payload bytes are checked separately."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/notification_gateway_test.go",
+      "sha256": "0e3af6299661205002dcd38f35a83bb65c29c46a14df728859f2423fbed5bf75",
+      "disposition": "modeled",
+      "reason": "Exercise actual local rule gateway admission, create/update/delete and read back normalized rule details.",
+      "models": [
+        {
+          "id": "CodeStarBranchNotificationDelivery",
+          "properties": [
+            "RuleChangeAtomic",
+            "ListReadFrame",
+            "ListReadResult"
+          ],
+          "limits": "Finite two-target branch/rule state and representative principals, operations, destinations and faults. Native SQLite, SDK headers, exact filter pagination, physical clocks, quota magnitudes and payload bytes are checked separately."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/s3.go",
+      "sha256": "ac682dc251fcc8dccd54da2c0a12f50bc000f847168253416c26ffc3ac6dce09",
+      "disposition": "modeled",
+      "reason": "Carry the optional standalone notification store into the existing AWS gateway composition.",
+      "models": [
+        {
+          "id": "CodeStarBranchNotificationDelivery",
+          "properties": [
+            "ListReadResult",
+            "WorkerDecision"
+          ],
+          "limits": "Finite two-target branch/rule state and representative principals, operations, destinations and faults. Native SQLite, SDK headers, exact filter pagination, physical clocks, quota magnitudes and payload bytes are checked separately."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/sns.go",
+      "sha256": "b4d953eebf6c83897f02ddcc3ca5e6e32f51841805646015384fb66a39bfb990",
+      "disposition": "modeled",
+      "reason": "Authorize each Query action and expose the policy through the actual topic attribute requests.",
+      "models": [
+        {
+          "id": "SNSNotificationPolicyLifetime",
+          "properties": [
+            "SetAdmission",
+            "GetReadback",
+            "SetRefusalPreservesStore"
+          ],
+          "limits": "Finite topic and generation bounds project request outcomes. Actual SQL, Unicode, the SNS Query wire, SDK and timestamps require independent native checks."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/sns_sqs_fanout.go",
+      "sha256": "bba1182387f37536b6bce70497ed265b5d1d2c1b630fe626cd8e0ab28fafb5f8",
+      "disposition": "modeled",
+      "reason": "Execute the same native SNS publication and authorized SQS enqueues under the caller-owned delivery transaction.",
+      "models": [
+        {
+          "id": "CodeStarBranchNotificationDelivery",
+          "properties": [
+            "PublicationAtomic",
+            "AtMostOnce",
+            "FailureHasNoPublication"
+          ],
+          "limits": "Finite two-target branch/rule state and representative principals, operations, destinations and faults. Native SQLite, SDK headers, exact filter pagination, physical clocks, quota magnitudes and payload bytes are checked separately."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/sns_store.go",
+      "sha256": "e3cb28dad864f59a8bf11362e0e1d5ae681c4c6389ea3b7d4765bfe6ccc5bc0a",
+      "disposition": "modeled",
+      "reason": "Install the sparse policy table and remove it with its owning topic.",
+      "models": [
+        {
+          "id": "SNSNotificationPolicyLifetime",
+          "properties": [
+            "DeleteFrame",
+            "NewGeneration",
+            "PeerFrame",
+            "RestartPreservesStore"
+          ],
+          "limits": "Finite topic and generation bounds project request outcomes. Actual SQL, Unicode, the SNS Query wire, SDK and timestamps require independent native checks."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/sns_test.go",
+      "sha256": "b511659dde0f3a13f8d5f833f96638696ab4dcff95eb0555f3761dfeaeb6908b",
+      "disposition": "modeled",
+      "reason": "Retain the unsupported Query-action regression and require native validation for malformed SetTopicAttributes.",
+      "models": [
+        {
+          "id": "SNSLifecycle",
+          "properties": [
+            "DeleteAckEmpty",
+            "DeleteRetryAcknowledged"
+          ],
+          "limits": "The native lifecycle regression checks that the deleted topic stays absent, an incomplete Set is refused, and another action remains unsupported."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/sns_topic_policy.go",
+      "sha256": "c590b2b821cc22e123cdae7f2bc6321e4af260fb1b46d45b9a3f141acf774a22",
+      "disposition": "modeled",
+      "reason": "Validate the policy, save exact bytes and resolve the current grant in the native database transaction.",
+      "models": [
+        {
+          "id": "SNSNotificationPolicyLifetime",
+          "properties": [
+            "SetAdmission",
+            "SetRefusalPreservesStore",
+            "NewGeneration",
+            "EditKeepsGeneration",
+            "PolicyBytesExact",
+            "DeleteFrame",
+            "PeerFrame",
+            "GetReadback",
+            "ReadsPreserveStore",
+            "ResolverAdmission",
+            "ResolverGeneration",
+            "ResolverDecision",
+            "CapturedCurrentGrant",
+            "CaptureExact",
+            "RestartPreservesStore"
+          ],
+          "limits": "Finite topic and generation bounds project request outcomes. Actual SQL, Unicode, the SNS Query wire, SDK and timestamps require independent native checks."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/sns_topic_policy_test.go",
+      "sha256": "0e4f07286981094bb827118b66afc0197070db9a201b11a7f919e226cbeba359",
+      "disposition": "modeled",
+      "reason": "Test grammar, authority, physical storage, corrupt state, request cancellation, real deadlines and retry after reopen.",
+      "models": [
+        {
+          "id": "SNSNotificationPolicyLifetime",
+          "properties": [
+            "SetAdmission",
+            "SetRefusalPreservesStore",
+            "NewGeneration",
+            "EditKeepsGeneration",
+            "PolicyBytesExact",
+            "DeleteFrame",
+            "PeerFrame",
+            "GetReadback",
+            "ReadsPreserveStore",
+            "ResolverAdmission",
+            "ResolverGeneration",
+            "ResolverDecision",
+            "CapturedCurrentGrant",
+            "CaptureExact",
+            "RestartPreservesStore"
+          ],
+          "limits": "The Go suite exercises concrete database failures and real request clock interruptions in addition to the finite outcomes."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/ssm.go",
+      "sha256": "91a665040b03d6251e44480f3813165b7b92d93caace92a60034fdedafbac779",
+      "disposition": "modeled",
+      "reason": "Route the local notification service selector to the ordinary authenticated notification handler.",
+      "models": [
+        {
+          "id": "CodeStarBranchNotificationDelivery",
+          "properties": [
+            "ListReadResult",
+            "ListReadFrame"
+          ],
+          "limits": "Finite two-target branch/rule state and representative principals, operations, destinations and faults. Native SQLite, SDK headers, exact filter pagination, physical clocks, quota magnitudes and payload bytes are checked separately."
+        }
+      ]
+    },
+    {
+      "path": "internal/server/apidocs/codestar-notifications-init.js",
+      "sha256": "3854bb38fe2b890375d1ccfefbabde1ef2baa40460ec623c9c669c65b2c78874",
       "disposition": "presentation",
-      "reason": "Regenerate the embedded CodeCommit request and response schemas and operation list.",
+      "reason": "Submit a selected documented local operation through Scalar to the current authority and region.",
       "models": []
     },
     {
-      "path": "internal/server/apidocs/catalog/index.json",
-      "sha256": "f6e6a626218c3231563b245fb8e44e00381834d57112acf960b5f19e9928b7ee",
+      "path": "internal/server/apidocs/codestar-notifications.html",
+      "sha256": "b3716f1dfb0ed23db4458da280d5a42d87426176f8c2baeb6559336c22f5af3d",
       "disposition": "presentation",
-      "reason": "Regenerate the catalog reference count for CodeCommit.",
+      "reason": "Load the local notification reference and its bundled Scalar renderer.",
       "models": []
+    },
+    {
+      "path": "internal/server/apidocs/codestar-notifications.json",
+      "sha256": "8d273e51a41e449baac5aa61275bffbe27355a6d1d2d9b0088329acbc2999822",
+      "disposition": "presentation",
+      "reason": "Describe the five regional REST JSON routes, request types, native responses and supported local input scope.",
+      "models": []
+    },
+    {
+      "path": "internal/server/server.go",
+      "sha256": "a8fa947f0e72b3aa8bf9163c9f00fc652d9cd202c434b799182d2857a60e76c3",
+      "disposition": "modeled",
+      "reason": "Compose the normal standalone scoped store, trusted Git callback, worker lifecycle and existing SNS policy capabilities.",
+      "models": [
+        {
+          "id": "CodeStarBranchNotificationDelivery",
+          "properties": [
+            "GitCommitExact",
+            "RestartExact",
+            "WorkerDecision"
+          ],
+          "limits": "Finite two-target branch/rule state and representative principals, operations, destinations and faults. Native SQLite, SDK headers, exact filter pagination, physical clocks, quota magnitudes and payload bytes are checked separately."
+        }
+      ]
     },
     {
       "path": "scripts/formal_model_gate.py",
-      "sha256": "55f2a2fa3bb09fb6e413b2cd540ed8ee7cd377c580b68a802ac81fb179b4b059",
+      "sha256": "fffa8fe2203be965830a04918b690e97f62c405fa3d02de0cbe506055698a4ec",
       "disposition": "formal-infrastructure",
-      "reason": "Protect the finite CodeCommit model identity, checked properties, mutation controls and production source mapping.",
+      "reason": "Pin the two additive finite models and their individual obligations in the official gate.",
       "models": []
     },
     {
       "path": "scripts/test-formal-gate.py",
-      "sha256": "1657d33a092d266745527eade06440200caf20ad081f8f9d77b46d9c9e718fec",
+      "sha256": "dc1c2d0615a4cd22dc7d91dc2e857a8e2aa7fc520ba98a832d19cfe296097618",
       "disposition": "formal-infrastructure",
-      "reason": "Verify protected inventory and fail when a required CodeCommit property, control or source mapping is removed.",
-      "models": []
-    },
-    {
-      "path": "test/e2e/catalog_fixtures/codecommit.json",
-      "sha256": "c472771465eaadecfc060be690e20232a3cd5f0d139095989213f0cba70f6a44",
-      "disposition": "test-support",
-      "reason": "Exercise all six new native operations alongside the eight original metadata and tag operations.",
+      "reason": "Require preservation of the existing model inventory and both additive entries.",
       "models": []
     },
     {
       "path": "test/e2e/check.py",
-      "sha256": "f53ccc6c59c13bdf7f18650f4eaea9365dd2e160b62f3f20ef47b72bbe63c070",
+      "sha256": "750cc62e4d50993f585a936e2d674f90d4c9348e49819c9101fc321e5a625a82",
       "disposition": "test-support",
-      "reason": "Run the dedicated real Git and two-authority CodeCommit regression through the normal opt-in native E2E suite.",
+      "reason": "Add the published SNS policy fixture to the regular standalone E2E entry point while retaining CodeCommit content coverage.",
       "models": []
     },
     {
-      "path": "test/e2e/codecommit_git.py",
-      "sha256": "59152efaa47a3dc0672620b7f6421f1391d3675d90522c6aaf0d502fcef16f3b",
+      "path": "test/e2e/codestar_notification_scalar.py",
+      "sha256": "eb50ac120de9d6406af476f0bcdb91841c1e79661aff885f8ebbad68783ab8b0",
       "disposition": "test-support",
-      "reason": "Exercise pinned boto3 against two local authorities and validate canonical Git object identities with independent Git plumbing.",
+      "reason": "Exercise user-triggered sends and rendered results from the real served notification-rule reference and independently read back persisted rules.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/codestar_notifications.py",
+      "sha256": "fca263543bf7b3492a580a13d3c6a1fe99abbc3a6cab9fc77f8c32b41aebe479",
+      "disposition": "test-support",
+      "reason": "Exercise the normally built standalone authorities using actual CodeCommit, notification, SNS and SQS operations with restart and policy repair.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/sns_notification_policy.py",
+      "sha256": "2f932c6f2bffd47e6cfd3ebc6e06760d7b8b2f68922c7cfb433731aff37a362f",
+      "disposition": "test-support",
+      "reason": "Drive actual authenticated CLI processes through the official boto3 SNS protocol, including readback, isolation and retry.",
       "models": []
     }
   ]
