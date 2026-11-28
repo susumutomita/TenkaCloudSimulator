@@ -10,6 +10,13 @@
       "models": []
     },
     {
+      "path": "docs/cloudwatch-logs.md",
+      "sha256": "0d9f6a01afd1224cc94c76d1408e1aea61bf6349a64de13aeb395b320115b430",
+      "disposition": "documentation",
+      "reason": "Point readers of the historical Logs contract to the separate supported custom metric workflow.",
+      "models": []
+    },
+    {
       "path": "docs/cloudwatch-metrics.md",
       "sha256": "addec533600b3f48c85f690ae14b03ee2fad43d4a9d1b517ac6dc990c8ac485f",
       "disposition": "documentation",
@@ -80,7 +87,7 @@
       "path": "internal/aws/cloudwatch_metrics_gateway.go",
       "sha256": "7b809957c2cc2b1466690ad317196ff386656f4c3ce50d40904645e5722915ae",
       "disposition": "modeled",
-      "reason": "Select monitoring Query requests and apply the trusted actor\u2019s separate action decision for the local resource.",
+      "reason": "Select monitoring Query requests and apply the trusted actor’s separate action decision for the local resource.",
       "models": [
         {
           "id": "CloudWatchMetricTransaction",
@@ -202,7 +209,7 @@
     },
     {
       "path": "internal/server/server.go",
-      "sha256": "a39a63856c36de05f8c48caa81f1457852e917eaf6ebdbd417d966bc5a650a9e",
+      "sha256": "04371ca87f90ebd2c88b76463b1004b690ed8ea1bd5dcd9f863aca76ace739d6",
       "disposition": "modeled",
       "reason": "Initialize the metric store for the team database and declare the two native operations in capabilities.",
       "models": [
@@ -225,7 +232,7 @@
     },
     {
       "path": "test/e2e/cloudwatch_metrics.py",
-      "sha256": "ada3e089bbaa7dbda0957d9b597a496c1692a3c2358e9ea0a588981fffe79ac3",
+      "sha256": "6f6f58675843bda702216998170b38434cbdc013569089363097ca099e0c5ca8",
       "disposition": "test-support",
       "reason": "Exercise the two native operations with the pinned SDK, explicit local credentials, successful gzip ingest, two teams, IAM and restart.",
       "models": []
