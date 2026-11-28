@@ -147,7 +147,8 @@ def console_detach(endpoint, token, cluster, queue_id, c):
             assert headers['x-amz-target'] == c.meta.service_model.metadata['targetPrefix'] + '.UpdateQueue'
             assert headers['content-type'].split(';', 1)[0] == 'application/x-amz-json-1.0'
             assert request.redirected_from is None and request.redirected_to is None
-            assert headers.get('cookie') and not {'authorization', 'x-simulator-token', 'x-simulator-principal'}.intersection(headers)
+            assert headers['x-simulator-principal'] == 'simulator-admin'
+            assert headers.get('cookie') and not {'authorization', 'x-simulator-token', 'x-simulator-access-role', 'x-simulator-role'}.intersection(headers)
             assert c.get_queue(clusterIdentifier=cluster, queueIdentifier=queue_id)['queue']['computeNodeGroupConfigurations'] == []
             assert not outside and not errors
             context.close()
