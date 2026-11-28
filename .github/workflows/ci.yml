@@ -67,7 +67,8 @@ jobs:
             ip link set lo up
             exec setpriv --inh-caps=-all --ambient-caps=-all --bounding-set=-all "$@"
           ' verify sh -ec '
-            test "$(ls /sys/class/net)" = lo
+            actual_ifaces=$(awk -F: "NR>2 {gsub(/ /, \"\", \$1); print \$1}" /proc/net/dev)
+            test "$actual_ifaces" = lo
             test "$(awk "/^CapEff:/{print \$2}" /proc/self/status)" = 0000000000000000
             "$1" -B test/e2e/sns_notification_policy.py --previous-binary "$2" > "$3/receipt.json"
           ' verify "$sdk_python" "$PWD/../historical/dist/tenkacloud-simulator" "$RUNNER_TEMP/sns-policy-receipts"
