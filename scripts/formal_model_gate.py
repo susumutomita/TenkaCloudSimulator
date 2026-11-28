@@ -4828,6 +4828,7 @@ REQUIRED_MUTANTS['PCSQueueAssociations'] = {
     'DeniedMutation', 'CanceledMutation',
 }
 REQUIRED_SOURCE_SCOPES['PCSQueueAssociations'] = {
+    'internal/aws/catalog/pcs_authorization.go',
     'internal/aws/catalog/pcs_queue_references.go',
     'internal/aws/catalog/semantics.go', 'internal/aws/catalog/services_compute3.go',
 }

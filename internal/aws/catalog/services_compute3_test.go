@@ -305,7 +305,7 @@ func TestPCSClustersNodeGroupsAndQueues(t *testing.T) {
 	expect(t, made, 200, "")
 	g := made.body["computeNodeGroup"].(map[string]any)
 	gid := str(g["id"])
-	if g["clusterId"] != id || g["status"] != "CREATING" || g["purchaseOption"] != "ONDEMAND" || g["arn"] != "arn:aws:pcs:us-east-1:000000000000:computenodegroup/"+gid {
+	if g["clusterId"] != id || g["status"] != "CREATING" || g["purchaseOption"] != "ONDEMAND" || g["arn"] != "arn:aws:pcs:us-east-1:000000000000:cluster/"+id+"/computenodegroup/"+gid {
 		t.Fatalf("group %v", g)
 	}
 	expect(t, h.json1("pcs", "CreateComputeNodeGroup", group), 200, "")
@@ -351,7 +351,7 @@ func TestPCSClustersNodeGroupsAndQueues(t *testing.T) {
 	expect(t, queue, 200, "")
 	q := queue.body["queue"].(map[string]any)
 	qid := str(q["id"])
-	if q["clusterId"] != id || q["status"] != "CREATING" || q["arn"] != "arn:aws:pcs:us-east-1:000000000000:queue/"+qid {
+	if q["clusterId"] != id || q["status"] != "CREATING" || q["arn"] != "arn:aws:pcs:us-east-1:000000000000:cluster/"+id+"/queue/"+qid {
 		t.Fatalf("queue %v", q)
 	}
 	expect(t, h.json1("pcs", "CreateQueue", map[string]any{"clusterIdentifier": "hpc", "queueName": "main",

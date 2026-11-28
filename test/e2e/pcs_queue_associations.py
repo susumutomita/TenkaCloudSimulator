@@ -84,11 +84,13 @@ def client(endpoint, token, region='us-east-1'):
     return c
 
 
-def refused(code, call):
+def refused(code, call, status=None):
     try:
         call()
     except ClientError as error:
         assert error.response['Error']['Code'] == code
+        if status is not None:
+            assert error.response['ResponseMetadata']['HTTPStatusCode'] == status
     else:
         raise AssertionError('required native refusal missing')
 
@@ -102,8 +104,81 @@ def seed(c, name):
                                        customLaunchTemplate={'id': 'lt-0123456789abcdef0', 'version': '1'},
                                        iamInstanceProfileArn='arn:aws:iam::000000000000:instance-profile/pcs')['computeNodeGroup']
     assert cluster['status'] == group['status'] == 'CREATING'
+    assert cluster['arn'] == 'arn:aws:pcs:us-east-1:000000000000:cluster/' + cluster['id']
+    assert group['arn'] == cluster['arn'] + '/computenodegroup/' + group['id']
     assert not cluster.get('endpoints') and not cluster.get('authKey')
     return cluster['id'], group['id']
+
+
+def scoped_sdk_permissions(endpoint, token, cluster, group, queue, owner):
+    """Ordinary operator-issued participant; no principal/role override headers."""
+    policy_path = '/_simulator/v1/iam/principals/pcs-scoped/policy'
+    parent = 'arn:aws:pcs:us-east-1:000000000000:cluster/' + cluster
+    canonical = parent + '/queue/' + queue
+
+    def control(method, path, data):
+        request = urllib.request.Request(endpoint + path, data=json.dumps(data).encode(), method=method,
+                                         headers={'X-Simulator-Token': token, 'Content-Type': 'application/json'})
+        with urllib.request.urlopen(request, timeout=5) as response:
+            assert response.status == 200
+            body = response.read(16385)
+            assert len(body) <= 16384
+            return json.loads(body) if body else {}
+
+    def policy(statements):
+        control('PUT', policy_path, {'Version': '2012-10-17', 'Statement': statements})
+
+    def allow(action, resources):
+        return {'Effect': 'Allow', 'Action': action, 'Resource': resources}
+
+    extra = None
+    try:
+        policy([allow('pcs:CreateQueue', parent)])
+        participant = control('POST', '/_simulator/v1/access', {'Principal': 'pcs-scoped'})['AccessToken']
+        limited = client(endpoint, participant)
+        extra = limited.create_queue(clusterIdentifier=cluster, queueName='scoped-queue',
+                                     computeNodeGroupConfigurations=[{'computeNodeGroupId': group}])['queue']
+        assert extra['arn'] == parent + '/queue/' + extra['id']
+        before = owner.get_queue(clusterIdentifier=cluster, queueIdentifier=extra['id'])['queue']
+        for incomplete in (parent, extra['arn']):
+            policy([allow('pcs:DeleteQueue', incomplete)])
+            refused('AccessDeniedException', lambda: limited.delete_queue(clusterIdentifier=cluster, queueIdentifier=extra['id']), 403)
+            assert owner.get_queue(clusterIdentifier=cluster, queueIdentifier=extra['id'])['queue'] == before
+        policy([allow('pcs:DeleteQueue', [parent, extra['arn']])])
+        limited.delete_queue(clusterIdentifier=cluster, queueIdentifier=extra['id'])
+        refused('ResourceNotFoundException', lambda: owner.get_queue(clusterIdentifier=cluster, queueIdentifier=extra['id']), 400)
+        extra = None
+        read = allow('pcs:GetQueue', [parent, canonical])
+        policy([read])
+        assert limited.get_queue(clusterIdentifier=cluster, queueIdentifier=queue)['queue']['arn'] == canonical
+        for denied in (parent, canonical):
+            policy([read, {'Effect': 'Deny', 'Action': 'pcs:GetQueue', 'Resource': denied}])
+            refused('AccessDeniedException', lambda: limited.get_queue(clusterIdentifier=cluster, queueIdentifier=queue), 403)
+        policy([read, allow('pcs:TagResource', canonical), allow('pcs:ListTagsForResource', canonical)])
+        limited.tag_resource(resourceArn=canonical, tags={'authorization': 'checked'})
+        refused('AccessDeniedException', lambda: limited.list_tags_for_resource(resourceArn=canonical), 403)
+        assert owner.list_tags_for_resource(resourceArn=canonical)['tags'] == {'authorization': 'checked'}
+        policy([read, allow('pcs:ListTagsForResource', '*'), allow('pcs:UntagResource', canonical)])
+        assert limited.list_tags_for_resource(resourceArn=canonical)['tags'] == {'authorization': 'checked'}
+        limited.untag_resource(resourceArn=canonical, tagKeys=['authorization'])
+        assert owner.list_tags_for_resource(resourceArn=canonical)['tags'] == {}
+    finally:
+        original, failures = sys.exception(), []
+        if extra is not None:
+            try:
+                owner.delete_queue(clusterIdentifier=cluster, queueIdentifier=extra['id'])
+            except Exception as error:
+                failures.append(type(error).__name__)
+        try:
+            policy([{'Effect': 'Deny', 'Action': '*', 'Resource': '*'}])
+        except Exception as error:
+            failures.append(type(error).__name__)
+        if failures:
+            if original is not None:
+                original.add_note('Owned PCS permission fixture cleanup failed: ' + ', '.join(failures))
+            else:
+                raise AssertionError('Owned PCS permission fixture cleanup failed: ' + ', '.join(failures))
+    refused('AccessDeniedException', lambda: limited.get_queue(clusterIdentifier=cluster, queueIdentifier=queue), 403)
 
 
 def console_detach(endpoint, token, cluster, queue_id, c):
@@ -180,11 +255,20 @@ def main():
                 refused('ResourceNotFoundException', lambda: c.create_queue(clusterIdentifier=cluster, queueName='foreign-queue', computeNodeGroupConfigurations=[{'computeNodeGroupId': foreign}]))
                 queue = c.create_queue(clusterIdentifier=cluster, queueName='owner-queue', computeNodeGroupConfigurations=group_ref)['queue']
                 assert queue['clusterId'] == cluster and queue['status'] == 'CREATING'
+                assert queue['arn'] == 'arn:aws:pcs:us-east-1:000000000000:cluster/' + cluster + '/queue/' + queue['id']
                 snapshot = c.get_queue(clusterIdentifier=cluster, queueIdentifier=queue['id'])['queue']
                 refused('ResourceNotFoundException', lambda: c.update_queue(clusterIdentifier=cluster, queueIdentifier=queue['id'], computeNodeGroupConfigurations=group_ref + [{'computeNodeGroupId': foreign}]))
                 assert c.get_queue(clusterIdentifier=cluster, queueIdentifier=queue['id'])['queue'] == snapshot
+                scoped_sdk_permissions(endpoint, token, cluster, group, queue['id'], c)
+                assert c.get_queue(clusterIdentifier=cluster, queueIdentifier=queue['id'])['queue'] == snapshot
                 refused('ConflictException', lambda: c.delete_compute_node_group(clusterIdentifier=cluster, computeNodeGroupIdentifier=group))
                 refused('ResourceNotFoundException', lambda: peer_client.get_cluster(clusterIdentifier=cluster))
+                try:
+                    client(peer_endpoint, token).get_cluster(clusterIdentifier=peer_cluster)
+                except ClientError as error:
+                    assert error.response['ResponseMetadata']['HTTPStatusCode'] == 401
+                else:
+                    raise AssertionError('A token from the owner process was accepted by its peer')
                 assert peer_client.get_queue(clusterIdentifier=peer_cluster, queueIdentifier=peer_queue['id'])['queue'] == peer_snapshot
                 refused('ResourceNotFoundException', lambda: client(endpoint, token, 'ap-northeast-1').get_cluster(clusterIdentifier=cluster))
                 c.delete_compute_node_group(clusterIdentifier=other, computeNodeGroupIdentifier=foreign)

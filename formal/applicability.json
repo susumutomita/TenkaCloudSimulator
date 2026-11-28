@@ -4,37 +4,37 @@
   "changes": [
     {
       "path": "README.md",
-      "sha256": "f8ebdc78af8b518f84ba4e7d457225b90168675d504b7b6e40a2a865fd2a9500",
+      "sha256": "c0cd9712b8f71b0d422680339ade057f597ef6679fc32bbabcd0c86c5d7cbe3d",
       "disposition": "documentation",
-      "reason": "Bounded PCS queue ID association validation, transactional deletion protection and exact native/Console test controls; no scheduler or provisioned lifecycle support.",
+      "reason": "Bounded PCS native association integrity, official hierarchical child ARNs and action/resource authorization, valid flat-row compatibility without migration, and ordinary native/SDK/Console acceptance. No scheduler or provisioned compute.",
       "models": []
     },
     {
       "path": "docs/aws-catalog-services.md",
-      "sha256": "3ed05046ec5497472a8dd1a5af85d3ed3cb2331f8c05a63ad231f3c9baf8b295",
+      "sha256": "63d4665e63d56e4115dbe7ad1cb66797cc3f3079babfb0e0f21872141ea6e449",
       "disposition": "documentation",
-      "reason": "Bounded PCS queue ID association validation, transactional deletion protection and exact native/Console test controls; no scheduler or provisioned lifecycle support.",
+      "reason": "Bounded PCS native association integrity, official hierarchical child ARNs and action/resource authorization, valid flat-row compatibility without migration, and ordinary native/SDK/Console acceptance. No scheduler or provisioned compute.",
       "models": []
     },
     {
       "path": "docs/design/0001-go-standalone.md",
-      "sha256": "18eef86bc3cb8a5a98b2a5864d021f315c289bb302ddf1547784955469d5e123",
+      "sha256": "0d56e67d7116671aae151618a20153fb4f23e062700f446c07e7b4f53670d1b6",
       "disposition": "documentation",
-      "reason": "Bounded PCS queue ID association validation, transactional deletion protection and exact native/Console test controls; no scheduler or provisioned lifecycle support.",
+      "reason": "Bounded PCS native association integrity, official hierarchical child ARNs and action/resource authorization, valid flat-row compatibility without migration, and ordinary native/SDK/Console acceptance. No scheduler or provisioned compute.",
       "models": []
     },
     {
       "path": "docs/pcs-queue-associations.md",
-      "sha256": "70c9ed6176e234e724c0e37e2973b65ebc5b23cc1c3a85960ffd96726874d454",
+      "sha256": "1d3e56654fb1b4e7a184b4659f1e703fd28e35f86816a28d43416ebd15ba7906",
       "disposition": "documentation",
-      "reason": "Bounded PCS queue ID association validation, transactional deletion protection and exact native/Console test controls; no scheduler or provisioned lifecycle support.",
+      "reason": "Bounded PCS native association integrity, official hierarchical child ARNs and action/resource authorization, valid flat-row compatibility without migration, and ordinary native/SDK/Console acceptance. No scheduler or provisioned compute.",
       "models": []
     },
     {
       "path": "formal/PCSQueueAssociations.cfg",
       "sha256": "8f5fc9264c5145f23d20dadb69fdeb1572218e55d74967e586eaf7cbc75b5402",
       "disposition": "modeled",
-      "reason": "Bounded PCS queue ID association validation, transactional deletion protection and exact native/Console test controls; no scheduler or provisioned lifecycle support.",
+      "reason": "Bounded PCS native association integrity, official hierarchical child ARNs and action/resource authorization, valid flat-row compatibility without migration, and ordinary native/SDK/Console acceptance. No scheduler or provisioned compute.",
       "models": [
         {
           "id": "PCSQueueAssociations",
@@ -45,7 +45,7 @@
             "CanceledUnchanged",
             "DeletionGuard"
           ],
-          "limits": "Finite abstract metadata reference admission and deletion only; not Go, SQLite, HTTP, IAM matching, cancellation timing, real cloud lifecycle or refinement proof."
+          "limits": "Finite committed queue-reference admission and deletion, with abstract Boolean permission/cancellation only. No proof of ARN parsing, action/resource tables, legacy data, Go, SQLite, clocks, codec or implementation refinement; exact native and SDK tests are separate."
         }
       ]
     },
@@ -53,7 +53,7 @@
       "path": "formal/PCSQueueAssociations.tla",
       "sha256": "b523e3aede244565e4d16a71a6ceb96d427f39188a737e9468c54eae4ea20edc",
       "disposition": "modeled",
-      "reason": "Bounded PCS queue ID association validation, transactional deletion protection and exact native/Console test controls; no scheduler or provisioned lifecycle support.",
+      "reason": "Bounded PCS native association integrity, official hierarchical child ARNs and action/resource authorization, valid flat-row compatibility without migration, and ordinary native/SDK/Console acceptance. No scheduler or provisioned compute.",
       "models": [
         {
           "id": "PCSQueueAssociations",
@@ -64,22 +64,55 @@
             "CanceledUnchanged",
             "DeletionGuard"
           ],
-          "limits": "Finite abstract metadata reference admission and deletion only; not Go, SQLite, HTTP, IAM matching, cancellation timing, real cloud lifecycle or refinement proof."
+          "limits": "Finite committed queue-reference admission and deletion, with abstract Boolean permission/cancellation only. No proof of ARN parsing, action/resource tables, legacy data, Go, SQLite, clocks, codec or implementation refinement; exact native and SDK tests are separate."
         }
       ]
     },
     {
       "path": "formal/models.json",
-      "sha256": "dc0c898c812d3f429af6f6b0c6469680736d133b70570e9e366f9ad220688443",
+      "sha256": "a315f5d26c3ecd2624652c770a7fc1527cbaa96ad403fec8f1a9c35c111ce4d6",
       "disposition": "formal-infrastructure",
-      "reason": "Bounded PCS queue ID association validation, transactional deletion protection and exact native/Console test controls; no scheduler or provisioned lifecycle support.",
+      "reason": "Bounded PCS native association integrity, official hierarchical child ARNs and action/resource authorization, valid flat-row compatibility without migration, and ordinary native/SDK/Console acceptance. No scheduler or provisioned compute.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/catalog/pcs_authorization.go",
+      "sha256": "5fd36620799d43aa50371ccf82e463c6d8e9dd546cb379048b51c624869e5187",
+      "disposition": "modeled",
+      "reason": "Bounded PCS native association integrity, official hierarchical child ARNs and action/resource authorization, valid flat-row compatibility without migration, and ordinary native/SDK/Console acceptance. No scheduler or provisioned compute.",
+      "models": [
+        {
+          "id": "PCSQueueAssociations",
+          "properties": [
+            "NoDanglingReferences",
+            "SameScope",
+            "DeniedUnchanged",
+            "CanceledUnchanged",
+            "DeletionGuard"
+          ],
+          "limits": "Finite committed queue-reference admission and deletion, with abstract Boolean permission/cancellation only. No proof of ARN parsing, action/resource tables, legacy data, Go, SQLite, clocks, codec or implementation refinement; exact native and SDK tests are separate."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/catalog/pcs_authorization_test.go",
+      "sha256": "6e5b6cd0d4269c82a9b14c01bac885f98429199b62f36d42243ce70793be23da",
+      "disposition": "test-support",
+      "reason": "Bounded PCS native association integrity, official hierarchical child ARNs and action/resource authorization, valid flat-row compatibility without migration, and ordinary native/SDK/Console acceptance. No scheduler or provisioned compute.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/catalog/pcs_legacy_fixture_test.go",
+      "sha256": "6f2d145246d4a25c6e15a336ea8b60de2e031ba2a38cead355b593017697e6d8",
+      "disposition": "test-support",
+      "reason": "Bounded PCS native association integrity, official hierarchical child ARNs and action/resource authorization, valid flat-row compatibility without migration, and ordinary native/SDK/Console acceptance. No scheduler or provisioned compute.",
       "models": []
     },
     {
       "path": "internal/aws/catalog/pcs_queue_references.go",
       "sha256": "e0cf3016a9582354e53acf4f1211ceb607d91d0d659f7fc673404c8c54eea0a1",
       "disposition": "modeled",
-      "reason": "Bounded PCS queue ID association validation, transactional deletion protection and exact native/Console test controls; no scheduler or provisioned lifecycle support.",
+      "reason": "Bounded PCS native association integrity, official hierarchical child ARNs and action/resource authorization, valid flat-row compatibility without migration, and ordinary native/SDK/Console acceptance. No scheduler or provisioned compute.",
       "models": [
         {
           "id": "PCSQueueAssociations",
@@ -90,22 +123,22 @@
             "CanceledUnchanged",
             "DeletionGuard"
           ],
-          "limits": "Finite abstract metadata reference admission and deletion only; not Go, SQLite, HTTP, IAM matching, cancellation timing, real cloud lifecycle or refinement proof."
+          "limits": "Finite committed queue-reference admission and deletion, with abstract Boolean permission/cancellation only. No proof of ARN parsing, action/resource tables, legacy data, Go, SQLite, clocks, codec or implementation refinement; exact native and SDK tests are separate."
         }
       ]
     },
     {
       "path": "internal/aws/catalog/pcs_queue_references_test.go",
-      "sha256": "cf6f5f72a08ae125ced4c4ecdd7398bcb2c916b35255a0f8ad033e55c9c661aa",
+      "sha256": "d331f3f062de07dd58e7e8bf39a781a2917234365188e265b7025eaf1d99c43a",
       "disposition": "test-support",
-      "reason": "Bounded PCS queue ID association validation, transactional deletion protection and exact native/Console test controls; no scheduler or provisioned lifecycle support.",
+      "reason": "Bounded PCS native association integrity, official hierarchical child ARNs and action/resource authorization, valid flat-row compatibility without migration, and ordinary native/SDK/Console acceptance. No scheduler or provisioned compute.",
       "models": []
     },
     {
       "path": "internal/aws/catalog/semantics.go",
-      "sha256": "0b646a3dbfddfc3066a021925c4c3cf40d9bee212277e198d501c42c22fe9ff7",
+      "sha256": "7d0f0783e9af878f8f1b854299fd9303143e836a20e6bf236b0707228fcb0023",
       "disposition": "modeled",
-      "reason": "Bounded PCS queue ID association validation, transactional deletion protection and exact native/Console test controls; no scheduler or provisioned lifecycle support.",
+      "reason": "Bounded PCS native association integrity, official hierarchical child ARNs and action/resource authorization, valid flat-row compatibility without migration, and ordinary native/SDK/Console acceptance. No scheduler or provisioned compute.",
       "models": [
         {
           "id": "PCSQueueAssociations",
@@ -116,15 +149,15 @@
             "CanceledUnchanged",
             "DeletionGuard"
           ],
-          "limits": "Finite abstract metadata reference admission and deletion only; not Go, SQLite, HTTP, IAM matching, cancellation timing, real cloud lifecycle or refinement proof."
+          "limits": "Finite committed queue-reference admission and deletion, with abstract Boolean permission/cancellation only. No proof of ARN parsing, action/resource tables, legacy data, Go, SQLite, clocks, codec or implementation refinement; exact native and SDK tests are separate."
         }
       ]
     },
     {
       "path": "internal/aws/catalog/services_compute3.go",
-      "sha256": "c69f5d4cf0e790881688c5bdae693c766f82ebee4f3b134fd1997a19064236cd",
+      "sha256": "0bb689ce5b7fd70eea12721ecb8a0d4a2552b39eebe325fe4dfb26d7c43bd1b5",
       "disposition": "modeled",
-      "reason": "Bounded PCS queue ID association validation, transactional deletion protection and exact native/Console test controls; no scheduler or provisioned lifecycle support.",
+      "reason": "Bounded PCS native association integrity, official hierarchical child ARNs and action/resource authorization, valid flat-row compatibility without migration, and ordinary native/SDK/Console acceptance. No scheduler or provisioned compute.",
       "models": [
         {
           "id": "PCSQueueAssociations",
@@ -135,36 +168,50 @@
             "CanceledUnchanged",
             "DeletionGuard"
           ],
-          "limits": "Finite abstract metadata reference admission and deletion only; not Go, SQLite, HTTP, IAM matching, cancellation timing, real cloud lifecycle or refinement proof."
+          "limits": "Finite committed queue-reference admission and deletion, with abstract Boolean permission/cancellation only. No proof of ARN parsing, action/resource tables, legacy data, Go, SQLite, clocks, codec or implementation refinement; exact native and SDK tests are separate."
         }
       ]
     },
     {
+      "path": "internal/aws/catalog/services_compute3_test.go",
+      "sha256": "b621ec76b3aefd1191529a8449b20665da2f432d991a3ae11973981def4aacc4",
+      "disposition": "test-support",
+      "reason": "Bounded PCS native association integrity, official hierarchical child ARNs and action/resource authorization, valid flat-row compatibility without migration, and ordinary native/SDK/Console acceptance. No scheduler or provisioned compute.",
+      "models": []
+    },
+    {
       "path": "internal/server/apidocs/catalog/pcs.json",
-      "sha256": "b644e6f928d57c7bb36b55a2d97f23c77bc15d9edba5e1d7477814b18cd462e8",
+      "sha256": "508dd5fa3cc54bd177440603e8c7afc53f33774dcadfa42fdafe0236d95908b5",
       "disposition": "presentation",
-      "reason": "Regenerate only the PCS served reference bounds from reviewed descriptors; preserve all operation paths, payloads, optional fields and other service documents.",
+      "reason": "Bounded PCS native association integrity, official hierarchical child ARNs and action/resource authorization, valid flat-row compatibility without migration, and ordinary native/SDK/Console acceptance. No scheduler or provisioned compute.",
       "models": []
     },
     {
       "path": "scripts/formal_model_gate.py",
-      "sha256": "079b273b2a4a5f0ee2fc56cd0c8efb5db791755b7af0b598816b9e80ea698e96",
+      "sha256": "016ecb42fd04826229197ef2f1fb72fd6f3ab4e1becc8063fac2274923259800",
       "disposition": "formal-infrastructure",
-      "reason": "Bounded PCS queue ID association validation, transactional deletion protection and exact native/Console test controls; no scheduler or provisioned lifecycle support.",
+      "reason": "Bounded PCS native association integrity, official hierarchical child ARNs and action/resource authorization, valid flat-row compatibility without migration, and ordinary native/SDK/Console acceptance. No scheduler or provisioned compute.",
       "models": []
     },
     {
       "path": "scripts/test-formal-gate.py",
       "sha256": "97677555b6d2601a5a5ef825c175bd2795da69d8e59040f20c330a12fb165773",
       "disposition": "formal-infrastructure",
-      "reason": "Bounded PCS queue ID association validation, transactional deletion protection and exact native/Console test controls; no scheduler or provisioned lifecycle support.",
+      "reason": "Bounded PCS native association integrity, official hierarchical child ARNs and action/resource authorization, valid flat-row compatibility without migration, and ordinary native/SDK/Console acceptance. No scheduler or provisioned compute.",
       "models": []
     },
     {
       "path": "test/e2e/pcs_queue_associations.py",
-      "sha256": "21f7ce5bb153f6f8d49892ac7ac4a2e80b7ddb9f96c02f47cf7f0ca895b19758",
+      "sha256": "482a57629b5b4f7a9325cb195555c17cc14c325bda199e77202c3b49547e81da",
       "disposition": "test-support",
-      "reason": "Stock SDK and sandboxed cookie-authenticated Console share actual PCS metadata; seeded immutable peer remains live across owner restart/detach/deletion, with native cleanup and guarded SDK identity.",
+      "reason": "Bounded PCS native association integrity, official hierarchical child ARNs and action/resource authorization, valid flat-row compatibility without migration, and ordinary native/SDK/Console acceptance. No scheduler or provisioned compute.",
+      "models": []
+    },
+    {
+      "path": "test/fixtures/pcs-flat-88c85d9.json",
+      "sha256": "91e5d62fe7c40441b41ea4169c8acc126e3cc599349967ba61980446c52a92fd",
+      "disposition": "test-support",
+      "reason": "Bounded PCS native association integrity, official hierarchical child ARNs and action/resource authorization, valid flat-row compatibility without migration, and ordinary native/SDK/Console acceptance. No scheduler or provisioned compute.",
       "models": []
     }
   ]

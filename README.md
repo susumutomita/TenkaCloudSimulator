@@ -159,7 +159,9 @@ console, CloudFormation adapter or Challenge integration.
 - **Configuration-only catalogs:** [AWS](docs/aws-catalog.md),
   [Google Cloud](docs/gcp-catalog.md), [Azure Resource Manager](docs/azure-catalog.md).
   [PCS queue associations](docs/pcs-queue-associations.md) validate local group IDs
-  within their stored cluster and protect referenced group deletion.
+  within their stored cluster and protect referenced group deletion. New child
+  ARNs follow the official hierarchy; old saved rows retain their identities
+  while IAM uses canonical targets.
   `--rds-private-postgres-topology` optionally validates private standalone
   PostgreSQL configuration against native EC2 on authenticated loopback. It
   starts no database and returns no endpoint.

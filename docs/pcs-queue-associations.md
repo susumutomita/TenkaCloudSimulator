@@ -19,10 +19,32 @@ cluster names its ID. This check runs in the deleting transaction. Remove all
 associations through queue updates or delete the referencing queues before
 deleting the group. Multiple queues can name the same group.
 
-Authorization uses `pcs:CreateQueue` on the parent cluster ARN,
-`pcs:UpdateQueue` on both the parent cluster and queue ARN, and
-`pcs:DeleteComputeNodeGroup` on both the parent cluster and group ARN. Resolving
-a group does not introduce an extra IAM action on that reference.
+PCS IAM uses the official action/resource table:
+
+| Operations | Required policy resources |
+| --- | --- |
+| `CreateCluster`, `ListClusters`, `ListTagsForResource` | `*` |
+| `GetCluster`, `DeleteCluster` | The exact cluster ARN |
+| Create or list compute node groups and queues | The exact parent cluster ARN |
+| Get, update or delete a compute node group or queue | Both exact parent cluster and child ARNs |
+| `TagResource`, `UntagResource` | The actual resource's exact ARN |
+
+New child ARNs are `arn:aws:pcs:<region>:<account>:cluster/<clusterId>/computenodegroup/<groupId>`
+and `arn:aws:pcs:<region>:<account>:cluster/<clusterId>/queue/<queueId>`.
+Valid earlier flat child ARNs remain in their original stored rows and responses,
+including after restart and ordinary updates. No migration rewrites them.
+Authorization nevertheless evaluates only their canonical hierarchical ARN,
+never a flat ARN as an alternate policy grant. ARN-taking tag operations accept
+the stored legacy ARN or its exact canonical alias, resolved to the same real
+row in the same account, Region and parent cluster. An alias cannot select a
+foreign row or a different resource kind. `ListTagsForResource` still requires
+policy Resource `*`, even though its request identifies one actual resource.
+Resolving a queue's group does not introduce a separate IAM action on that
+reference.
+
+Local identity-policy denials retain the simulator's HTTP 403 boundary. The
+PCS API reference also defines a service `AccessDeniedException` with HTTP 400;
+those additional service-side failure conditions are not all reproduced here.
 
 `UpdateCluster` remains unsupported. The official operation permits only
 `ACTIVE`, `UPDATE_FAILED`, or `SUSPENDED` clusters with `ACTIVE` child resources;

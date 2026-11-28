@@ -68,7 +68,7 @@ func TestPCSQueueAssociationIAMResources(t *testing.T) {
 	h := newHarness(t, pcs)
 	cluster, group := pcsAssociationSeed(t, h, "authorize")
 	clusterARN := "arn:aws:pcs:us-east-1:000000000000:cluster/" + cluster
-	groupARN := "arn:aws:pcs:us-east-1:000000000000:computenodegroup/" + group
+	groupARN := "arn:aws:pcs:us-east-1:000000000000:cluster/" + cluster + "/computenodegroup/" + group
 	input := map[string]any{"clusterIdentifier": cluster, "queueName": "workqueue", "computeNodeGroupConfigurations": []any{map[string]any{"computeNodeGroupId": group}}}
 	h.policy.deny["pcs:CreateQueue "+clusterARN] = true
 	expect(t, h.json1("pcs", "CreateQueue", input), 403, "AccessDeniedException")
@@ -222,7 +222,7 @@ func TestPCSQueueAssociationRejectsCorruptParentIdentity(t *testing.T) {
 		t.Run(kind, func(t *testing.T) {
 			arn := queueARN
 			if kind == "computeNodeGroup" {
-				arn = "arn:aws:pcs:us-east-1:000000000000:computenodegroup/" + group
+				arn = "arn:aws:pcs:us-east-1:000000000000:cluster/" + cluster + "/computenodegroup/" + group
 			}
 			saved, err := findARN(h.db, "pcs", arn)
 			if err != nil {
