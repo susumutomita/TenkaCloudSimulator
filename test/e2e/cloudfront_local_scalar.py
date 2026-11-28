@@ -36,6 +36,10 @@ def send(context, team, method, template, identifier, spec, expected_path, expec
     try:
         assert page.goto(team.endpoint + '/_simulator/docs/cloudfront-local.html').status == 200
         sidebar = page.get_by_role('complementary', name='Sidebar for Local CloudFront distributions', exact=True)
+        # Scalar initially expands the first tag; open either other named group
+        # through its real sidebar link before selecting the operation.
+        if tag != 'distributions':
+            sidebar.locator(f'a[href="#tag/{tag}"]').click()
         sidebar.locator(f'a[href="#tag/{tag}/{method}{template}"]').click()
         page.get_by_role('button', name=f'Test Request ({method.lower()} {template})', exact=True).click()
         dialog = page.get_by_role('dialog').filter(has=page.get_by_role('button', name='Close Client', exact=True))
@@ -48,10 +52,13 @@ def send(context, team, method, template, identifier, spec, expected_path, expec
             expect(field).to_have_count(1)
             include.check()
             field.fill(value)
+            field.press('Tab')
             expect(field).to_have_text(value)
         assert not requests
         target = team.endpoint + expected_path
-        action = dialog.get_by_role('button', name=f'Send {method.lower()} request to {target}', exact=True)
+        # Scalar labels this button with the operation template; substitution
+        # is checked independently on the original emitted HTTP request.
+        action = dialog.get_by_role('button', name=f'Send {method.lower()} request to {team.endpoint}{template}', exact=True)
         expect(action).to_have_count(1)
         with page.expect_response(lambda response: response.url == target and response.request.method == method) as observed:
             action.click()
