@@ -11,6 +11,7 @@ import socket
 import subprocess
 import sys
 import tarfile
+import time
 import zipfile
 
 HERE = Path(__file__).resolve().parent
@@ -123,7 +124,7 @@ def prepare_release(inputs, release):
             extract_verified(stream, inputs / release["member"], release["binaryBytes"], release["binarySHA256"])
 
 
-def inside(inputs, reviewed, uid, parent_net, parent_user):
+def inside(inputs, reviewed, mode, uid, parent_net, parent_user):
     preflight()
     # Reuse the committed stock host isolation checks; this fixture also requires an empty bounding set.
     sys.path.insert(0, str(TESTS))
@@ -137,7 +138,7 @@ def inside(inputs, reviewed, uid, parent_net, parent_user):
     require(re.findall(r"^CapBnd:\s*(\w+)$", status, re.M) == ["0000000000000000"] and
             re.findall(r"^NoNewPrivs:\s*(\d+)$", status, re.M) == ["1"], "unexpected privilege state")
     cli, provider = reviewed["hashicorpReleaseVerification"]
-    fixture_temp = inputs / "fixture-temp"
+    fixture_temp = inputs / ("fixture-temp" if mode == "inside" else "diagnostic-temp")
     fixture_temp.mkdir(mode=0o700)
     options = {
         "TMPDIR": str(fixture_temp),
@@ -151,11 +152,24 @@ def inside(inputs, reviewed, uid, parent_net, parent_user):
         "TCSIM_TERRAFORM_AWS_PROVIDER": str(inputs / provider["member"]),
         "TCSIM_TERRAFORM_AWS_PROVIDER_SHA256": provider["binarySHA256"],
     }
-    result = subprocess.run([sys.executable, "-IB", str(FIXTURE)], capture_output=True,
-                            env=os.environ | options, timeout=690)
+    argv = [sys.executable, "-IB", str(FIXTURE)]
+    if mode == "diagnose":
+        argv = [sys.executable, "-IB", str(HERE / "observe.py")]
+    started = time.monotonic()
+    result = subprocess.run(argv, capture_output=True, env=os.environ | options, timeout=690)
+    elapsed = round(time.monotonic() - started, 3)
     cleaned = not any(fixture_temp.iterdir())
     if cleaned:
         fixture_temp.rmdir()
+    if mode == "diagnose":
+        # An observer result cannot turn a failed direct run into an acceptance pass.
+        path = inputs.parent / "simpledb-verdict" / "diagnostic.json"
+        require(path.is_file(), "separate observer did not record a diagnostic")
+        report = json.loads(path.read_bytes())
+        report.update(processExit=result.returncode, workDirectoryRemoved=cleaned, durationSeconds=elapsed)
+        path.write_text(json.dumps(report, indent=2) + "\n")
+        require(cleaned, "diagnostic work directory cleanup failed")
+        return
     verdict = {
         "workflowRevision": os.environ["GITHUB_SHA"], "fixtureRevision": os.environ["FIXTURE_REVISION"],
         "fixtureSHA256": FIXTURE_HASH, "simulatorSource": reviewed["sourceRevision"],
@@ -165,7 +179,7 @@ def inside(inputs, reviewed, uid, parent_net, parent_user):
         "reviewedReceiptSHA256": RECEIPT_HASH, "terraformSHA256": cli["binarySHA256"],
         "providerSHA256": provider["binarySHA256"], "python": platform.python_version(),
         "isolation": "separate user and network namespaces, same nonroot UID, loopback only, no capabilities, no_new_privs",
-        "fixtureExit": result.returncode, "workDirectoryRemoved": cleaned,
+        "fixtureExit": result.returncode, "workDirectoryRemoved": cleaned, "durationSeconds": elapsed,
     }
     dest = inputs.parent / "simpledb-verdict" / "fixture.json"
     if not cleaned or result.returncode or result.stdout.splitlines() != [SUCCESS.encode("ascii")]:
@@ -179,6 +193,19 @@ def inside(inputs, reviewed, uid, parent_net, parent_user):
                      "metadata did not confirm deletion", "Terraform state does not match the live fixture domain"):
             if b"RuntimeError: " + text.encode("ascii") in result.stderr.splitlines():
                 reason = text
+        frames = re.findall(rb'(?m)^\s*File "[^"\n]*?/simpledb_terraform_provider\.py", line (\d{1,3}), in (\w+|<module>)$', result.stderr)
+        allowed = {"<module>", "run", "terraform", "need", "native", "simulator", "adapter", "verify_terraform_state",
+                   "verify_unauthenticated_metadata", "verify_copy", "approved_simulator_digest"}
+        verdict["stockFrames"] = [{"line": int(line), "function": name.decode("ascii")} for line, name in frames
+                                  if name.decode("ascii") in allowed][:12]
+        last_line = result.stderr.splitlines()[-1] if result.stderr else b""
+        error = re.match(rb"(subprocess\.TimeoutExpired|RuntimeError|TimeoutError|OSError|ValueError|AssertionError|ConnectionRefusedError):", last_line)
+        verdict["exceptionClass"] = error[1].decode("ascii") if error else "unclassified"
+        if verdict["exceptionClass"] == "subprocess.TimeoutExpired":
+            phase = re.search(rb"/terraform', '(version|init|apply|show|plan|destroy)'", last_line)
+            reason = "stock Terraform command timed out" if phase else "stock subprocess timed out"
+            if phase:
+                verdict["terraformPhase"] = phase[1].decode("ascii")
         verdict["failure"] = reason
         dest.write_text(json.dumps(verdict, indent=2) + "\n")
         raise RuntimeError(reason)
@@ -201,7 +228,7 @@ if __name__ == "__main__":
         prepare_simulator(inputs, reviewed)
         for release in reviewed["hashicorpReleaseVerification"]:
             prepare_release(inputs, release)
-    elif len(sys.argv) == 5 and sys.argv[1] == "inside":
-        inside(inputs, reviewed, *(int(arg) for arg in sys.argv[2:]))
+    elif len(sys.argv) == 5 and sys.argv[1] in {"inside", "diagnose"}:
+        inside(inputs, reviewed, sys.argv[1], *(int(arg) for arg in sys.argv[2:]))
     else:
         sys.exit("unexpected arguments")
