@@ -8,8 +8,8 @@ jobs:
     runs-on: ubuntu-22.04
     timeout-minutes: 25
     env:
-      PRODUCT: 4df8ac1d11d36348b99f8b60daecda1737c64193
-      PRODUCT_TREE: bb4428c78684aca2f07be31a45a685ffacc705d3
+      PRODUCT: 9d2abcd46ef341dd80ef3feb54de6914cd6d6113
+      PRODUCT_TREE: 386a048b53eee6c9a95ceb6748614b58f73a1c53
     defaults:
       run:
         working-directory: candidate
@@ -17,12 +17,12 @@ jobs:
       - uses: actions/checkout@v7.0.1
         with:
           path: candidate
-          ref: 4df8ac1d11d36348b99f8b60daecda1737c64193
+          ref: 9d2abcd46ef341dd80ef3feb54de6914cd6d6113
           persist-credentials: false
       - uses: actions/checkout@v7.0.1
         with:
           path: prior
-          ref: f0dbe8e23ded740f3e6a2a08d0603827580d71fe
+          ref: 0a9da347b430020663201756123496b9bb550308
           persist-credentials: false
       - uses: actions/setup-go@v6.5.0
         with:
@@ -43,12 +43,12 @@ jobs:
       - name: Build the clean previous version for authentic database migration
         working-directory: prior
         run: |
-          test "$(git rev-parse HEAD)" = "f0dbe8e23ded740f3e6a2a08d0603827580d71fe"
+          test "$(git rev-parse HEAD)" = "0a9da347b430020663201756123496b9bb550308"
           test "$(git rev-parse 'HEAD^{tree}')" = "122e34bb73b6bc4af405af5456244161d6655271"
           test -z "$(git status --porcelain)"
           make build
           go version -m dist/tenkacloud-simulator > "$RUNNER_TEMP/support-receipts/previous-build.txt"
-          grep -F 'vcs.revision=f0dbe8e23ded740f3e6a2a08d0603827580d71fe' "$RUNNER_TEMP/support-receipts/previous-build.txt"
+          grep -F 'vcs.revision=0a9da347b430020663201756123496b9bb550308' "$RUNNER_TEMP/support-receipts/previous-build.txt"
           grep -F 'vcs.modified=false' "$RUNNER_TEMP/support-receipts/previous-build.txt"
           sha256sum dist/tenkacloud-simulator > "$RUNNER_TEMP/support-receipts/previous-binary.sha256"
       - name: Install the repository-pinned tools in the development runner
