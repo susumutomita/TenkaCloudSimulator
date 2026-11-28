@@ -27,11 +27,15 @@ func cfDistHarnessFor(t *testing.T, path string) *cfDistHarness {
 		t.Fatal(err)
 	}
 	t.Cleanup(func() { _ = store.Close() })
+	s3, err := NewS3Store(store.Database())
+	if err != nil {
+		t.Fatal(err)
+	}
 	front, err := NewCloudFrontStore(store.Database())
 	if err != nil {
 		t.Fatal(err)
 	}
-	return &cfDistHarness{t, store, &Gateway{Store: store, Identities: core.NewIdentities(store), CloudFront: front}}
+	return &cfDistHarness{t, store, &Gateway{Store: store, S3: s3, Identities: core.NewIdentities(store), CloudFront: front}}
 }
 func cfDistConfig(caller, bucket string, enabled bool, ttl int) string {
 	return fmt.Sprintf(`<DistributionConfig xmlns="%s"><CallerReference>%s</CallerReference><Origins><Quantity>1</Quantity><Items><Origin><Id>saved</Id><DomainName>%s.s3.amazonaws.com</DomainName><S3OriginConfig><OriginAccessIdentity></OriginAccessIdentity></S3OriginConfig></Origin></Items></Origins><DefaultCacheBehavior><TargetOriginId>saved</TargetOriginId><ViewerProtocolPolicy>allow-all</ViewerProtocolPolicy><AllowedMethods><Quantity>2</Quantity><Items><Method>GET</Method><Method>HEAD</Method></Items><CachedMethods><Quantity>2</Quantity><Items><Method>GET</Method><Method>HEAD</Method></Items></CachedMethods></AllowedMethods><ForwardedValues><QueryString>false</QueryString><Cookies><Forward>none</Forward></Cookies></ForwardedValues><MinTTL>0</MinTTL><DefaultTTL>%d</DefaultTTL><MaxTTL>86400</MaxTTL></DefaultCacheBehavior><Comment>local only</Comment><Enabled>%t</Enabled></DistributionConfig>`, cloudFrontNS, caller, bucket, ttl, enabled)
@@ -67,14 +71,14 @@ func (h *cfDistHarness) create(caller, bucket string) (cfDistribution, string) {
 }
 func (h *cfDistHarness) seed(bucket, body string) {
 	h.t.Helper()
-	if err := h.store.Create(bucket, "us-east-1"); err != nil {
+	if err := h.gateway.S3.Create(bucket, "us-east-1"); err != nil {
 		h.t.Fatal(err)
 	}
 	h.put(bucket, body)
 }
 func (h *cfDistHarness) put(bucket, body string) {
 	h.t.Helper()
-	if _, err := h.store.Put(bucket, "asset.txt", "text/plain", []byte(body), "", ""); err != nil {
+	if _, err := h.gateway.S3.PutContext(h.t.Context(), bucket, "asset.txt", "text/plain", []byte(body), "", ""); err != nil {
 		h.t.Fatal(err)
 	}
 }
@@ -146,10 +150,10 @@ func TestCloudFrontDistributionNativeCacheInvalidationLifecycle(t *testing.T) {
 			t.Fatal("distribution cleanup left rows", table, err)
 		}
 	}
-	if err := h.store.Delete("local-origin", "asset.txt"); err != nil {
+	if _, err := h.gateway.S3.DeleteContext(t.Context(), "local-origin", "asset.txt", ""); err != nil {
 		t.Fatal(err)
 	}
-	if err := h.store.DeleteBucket("local-origin"); err != nil {
+	if err := h.gateway.S3.DeleteBucket("local-origin"); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -183,10 +187,10 @@ func TestCloudFrontDistributionFreshJointPolicyAndOriginLifetime(t *testing.T) {
 	if w := h.call("GET", view, "", "reader", "", 200); !strings.HasPrefix(w.Header().Get("X-Cache"), "Hit") {
 		t.Fatal("permission changes incorrectly cleared cached bytes")
 	}
-	if err := h.store.Delete("local-origin", "asset.txt"); err != nil {
+	if _, err := h.gateway.S3.DeleteContext(t.Context(), "local-origin", "asset.txt", ""); err != nil {
 		t.Fatal(err)
 	}
-	if err := h.store.DeleteBucket("local-origin"); err != nil {
+	if err := h.gateway.S3.DeleteBucket("local-origin"); err != nil {
 		t.Fatal(err)
 	}
 	h.call("GET", view, "", "reader", "", 404)
