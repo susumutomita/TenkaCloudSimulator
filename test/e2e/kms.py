@@ -73,7 +73,8 @@ with tempfile.TemporaryDirectory(prefix='kms-sdk-') as d:
   # Native option rejection is verified without changing the protocol or granting success.
   denied('ValidationException',lambda:kms.create_key(Tags=[{'TagKey':'x','TagValue':'y'}]))
   denied('ValidationException',lambda:kms.create_key(Policy='{}'))
-  denied('UnknownOperationException',lambda:kms.create_grant(KeyId=kid,GranteePrincipal='arn:aws:iam::000000000000:role/unsupported',Operations=['Encrypt']))
+  denied('ValidationException',lambda:kms.create_grant(KeyId=kid,GranteePrincipal='arn:aws:iam::000000000000:role/unsupported',Operations=['Encrypt']))
+  denied('UnknownOperationException',lambda:kms.retire_grant(KeyId=kid,GrantId='0'*64))
   iam.delete_role_policy(RoleName=role['RoleName'],PolicyName='KeyDeny');iam.delete_role_policy(RoleName=role['RoleName'],PolicyName='KeyUse');iam.delete_role(RoleName=role['RoleName'])
  with running(state,authenticated=True) as (endpoint,new_operator):
   resumed=client('kms',endpoint,new_operator);assert resumed.decrypt(CiphertextBlob=blob,EncryptionContext=ctx)['Plaintext']==plain
