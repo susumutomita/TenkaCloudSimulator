@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "base_sha": "fa06c139f93ab1e32bf8c13809ca70434464994a",
+  "base_sha": "d64ec74e4d9927b93bbb2f49e0ca03050eca7490",
   "changes": [
     {
       "path": "README.md",
@@ -52,10 +52,24 @@
       "models": []
     },
     {
+      "path": "test/e2e/simpledb_terraform_provider.py",
+      "sha256": "e3084f3d4005fc97fe4045c052b6aedc2f7bf9ec476ed0504ec14c7da6969f28",
+      "disposition": "test-support",
+      "reason": "Verify the pinned Terraform provider's signed loopback form and forward only the three validated native SimpleDB fields during the existing acceptance fixture.",
+      "models": []
+    },
+    {
       "path": "test/e2e/test_sakura_openapi.py",
       "sha256": "e64013a0f91f45ea17b9723c7f239cd2a53b6bc662aec60573bab200ab2080f4",
       "disposition": "test-support",
       "reason": "Verify every inherited reference block and the precise additional read and write examples, including negative checks for changed defaults, schemas and examples.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/test_simpledb_terraform_provider.py",
+      "sha256": "80d7e1e9a1ac83a4f6aa9b8e7f8d67acc128b766b6b49130fd43da4564cc2078",
+      "disposition": "test-support",
+      "reason": "Check independent fixture signature vectors, reject invalid signing, framing and authority, and verify only the three native fields are forwarded.",
       "models": []
     }
   ]

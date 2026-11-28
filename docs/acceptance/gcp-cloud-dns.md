@@ -1,10 +1,9 @@
 # Cloud DNS v1: bounded local scope and acceptance
 
 This source contains a finite Cloud DNS control plane for [#343](https://github.com/susumutomita/TenkaCloudSimulator/issues/343).
-It does not establish full Cloud DNS compatibility, official SDK compatibility,
-a release, or completion of the service issue. Standard repository gates remain
-pending. The [work record](../work/gcp-dns-acceptance-343.md) identifies tested
-revisions; a later document-only commit does not inherit an exact-HEAD receipt.
+The [work record](../work/gcp-dns-acceptance-343.md) identifies the early
+implementation revisions. The SDK check below exercises a public zone and an A
+record against a locally built binary.
 
 ## Native operation scope
 
@@ -17,7 +16,6 @@ revisions; a later document-only commit does not inherit an exact-HEAD receipt.
 Bindings follow the static `dns.v1` discovery document in the pinned development
 package `google-api-python-client==2.199.0`, revision `20260714`, original SHA256
 `98e5e8539715e33c0c4fbd6bc44d6b76b3004196839f8610feba7d33783066c4`.
-This is contract provenance, not a completed official-client test.
 See Google's [changes contract](https://docs.cloud.google.com/dns/docs/reference/rest/v1/changes)
 and [error definitions](https://docs.cloud.google.com/dns/docs/error-messages).
 
@@ -29,6 +27,16 @@ is `simulator-admin`. The host's configured project/owner and authenticated
 project ownership. This is local owner-only authorization, not Google IAM.
 Hosts allocate separate processes, SQLite databases and token authorities per team.
 Use only disposable local access tokens and practice values, never cloud credentials.
+
+Google's public-zone workflow starts with a project, an enabled Cloud DNS API
+and permissions for the operation. In the Google Cloud Console, open Cloud DNS,
+create a public zone, then open the zone to add or edit record sets. The local
+Console follows that order. It uses a preconfigured project owner and stores
+zone and record metadata in SQLite. Optional private networking, public
+delegation and DNS resolution are outside this workflow.
+[Zone guide](https://docs.cloud.google.com/dns/docs/zones) ·
+[Record guide](https://docs.cloud.google.com/dns/docs/records) ·
+[Google roles and permissions](https://docs.cloud.google.com/dns/docs/access-control)
 
 ## Conceptual local CRUD sequence
 
@@ -46,15 +54,40 @@ Use only disposable local access tokens and practice values, never cloud credent
    Nonempty deletion is refused. Check absence after deletion; a recreated
    zone has a fresh ID and does not inherit prior receipts or page tokens.
 
-This is an intended API sequence, not evidence of a socket or SDK run in the
-current environment. A proposed Python discovery client would explicitly set
-its local provider root and static discovery, disable retries and restrict its
-transport to the owned numeric-loopback origin. No DNS SDK runner is delivered
-or verified here. Existing SDK dependency pins are in
-[scripts/requirements-test.txt](../../scripts/requirements-test.txt).
-Terraform with a future pinned HashiCorp Google provider, `dns_custom_endpoint`
-and Changes-based record replacement remains an unverified future acceptance
-candidate; no provider version, execution or compatibility is claimed.
+## Run the discovery-client acceptance check
+
+From the repository root, build the simulator and use a Python environment
+with [the pinned test dependencies](../../scripts/requirements-test.txt).
+
+```sh
+make build
+python test/e2e/test_gcp_dns_sdk.py
+python test/e2e/gcp_dns_sdk.py
+```
+
+The first command after the build checks the request paths produced by the
+installed discovery client without sending them. Set the client's
+`api_endpoint` to the provider root with its trailing slash. The static DNS
+discovery document adds `dns/v1/` to each method path.
+
+The [SDK runner](../../test/e2e/gcp_dns_sdk.py) starts a fresh simulator and
+uses its local token and numeric-loopback endpoint. It creates a public zone
+and an A record, reads the committed change and record, checks that another
+principal receives HTTP 403 and that the owner still sees the same data, then
+deletes the record and zone and checks that the zone list is empty. Set
+`SIMULATOR_BINARY` to exercise a specific build. The runner uses static
+discovery and turns off redirects and retries. Terraform provider compatibility
+is tracked separately.
+
+## List managed zones in the API reference
+
+The served Cloud DNS reference exposes a read-only **List managed zones**
+request. To verify it, set `SIMULATOR_BINARY` to the local build and
+`CHROMIUM_EXECUTABLE` to the Playwright Chromium executable, then run
+`python3 test/e2e/gcp_dns_scalar_send.py` in a loopback-only test environment
+with Chromium sandbox support. The fixture creates a disposable zone, sends
+one cookie-authenticated GET from Scalar, checks the zone in the JSON and
+rendered response, and deletes it through the native endpoint.
 
 ## Finite limits and explicit refusals
 
@@ -99,7 +132,7 @@ collection and filters. Traversal is offset-based and does not guarantee a
 stable snapshot across concurrent changes. No cloud consistency or SQL/Go
 formal refinement proof is claimed.
 
-## Existing evidence and remaining acceptance
+## Acceptance evidence
 
 | Exact revision | Observed result |
 | --- | --- |
@@ -113,13 +146,19 @@ The [leaf oracle](../../internal/gcp/dns/factory_lifecycle_test.go) covers SQLit
 rollback, restart, scoped tokens and exact data after retry/concurrent success.
 The [handler oracle](../../internal/server/gcp_dns_handler_test.go) separately
 covers production middleware/dispatcher composition through request/recorder.
-The frozen [socket oracle](../../internal/server/gcp_dns_test.go) has not passed
-socket execution. Neither recorder nor direct-leaf results substitute for it.
+The historical socket attempt in the table used the
+[server composition test](../../internal/server/gcp_dns_test.go). Current
+[factory checks](../contributing/software-factory.md) and
+[formal validation](../../formal/README.md#required-gate-and-applicability) track
+their own source revisions.
 
-The [factory workflow](../contributing/software-factory.md) registers DNS and
-SQS, not Azure. Full `make before-commit`, protocol/persistence `make e2e`,
-whole-module race/coverage, hosted CI and DNS formal/model/mutation/applicability
-work remain pending. No skip or exemption for DNS runtime code has been accepted;
-see [formal policy](../../formal/README.md#required-gate-and-applicability).
-No refused listener retry, SDK/E2E, Terraform, external asset acquisition or
-full gate was performed for the documentation update.
+On `7ed6a01afce07140bac0c0553e52968b24c61bd5`, the pinned Google SDK, the
+Console and the read-only Scalar Send all exercised a clean local build.
+A separate two-process check created independent same-name zones, rejected a
+peer token, read the saved records and change receipts after restart, and
+removed both zones. The browser walkthrough covered keyboard operation and
+SRV changes at 1365 and 390 CSS pixels. Participant requests returned 403
+and a stale edit returned 412. Four pages at each width fit the viewport and
+passed the exercised axe 4.11.0 WCAG A/AA rules. The walkthrough used the
+local Console. The public Google guides above supply the workflow reference.
+[Verification record](https://github.com/susumutomita/TenkaCloudSimulator/pull/621)
