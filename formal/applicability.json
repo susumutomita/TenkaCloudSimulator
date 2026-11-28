@@ -4,16 +4,16 @@
   "changes": [
     {
       "path": ".github/workflows/ci.yml",
-      "sha256": "a77363b29a0ee6251b75aef340e2acc2ef13f055070146df2cb5a2a5b8f23fe3",
+      "sha256": "dda1eb9841b66c247bc5c53dc4afce55b6490b19c79b5ea31a15f85076ddedc8",
       "disposition": "formal-infrastructure",
-      "reason": "Add a manual opt-in CI job running the existing isolated multipart paging fixture on a hosted Ubuntu 22.04 runner and checking a single receipt. The job changes test infrastructure only.",
+      "reason": "Use the hosted Ubuntu 22.04 and Python 3.12.16 environment for the stock tag/manual E2E suite and the opt-in S3 paging trial. Bind both native paging receipts to their clean binary builds.",
       "models": []
     },
     {
       "path": "test/ci/release_pipeline.py",
-      "sha256": "e7933a18cf16df96ec578a95b27cf7bb6b253f5d6f25c3772e22cfbf27a4412f",
+      "sha256": "283562e41defaea533d78c64b1a2bcebddb498a0cb3869ae8169e735d2189489",
       "disposition": "test-support",
-      "reason": "Require the exact Go 1.26.11 security patch in all seven CI jobs that set up Go, including the new opt-in paging job, and preserve the release workflow check.",
+      "reason": "Pin the seven CI Go toolchain versions and check the canonical E2E job retains its release/manual conditions, tested runner and Python, production test command, browser setup and paging evidence.",
       "models": []
     }
   ]
