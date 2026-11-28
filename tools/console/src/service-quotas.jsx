@@ -58,6 +58,7 @@ export default function ServiceQuotas({ request, region, account }) {
   );
   function clear() {
     setAcknowledged(false);
+    setLookup("");
     setQuota(null);
     setPublished(null);
     setRows([]);
