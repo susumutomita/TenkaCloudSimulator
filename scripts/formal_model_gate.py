@@ -4832,6 +4832,50 @@ REQUIRED_SOURCE_SCOPES['StoreConnectionLifetime'] = {
 }
 
 
+
+BASE_MODELS.add('CodeCommitGitReferences')
+BASE_INVARIANTS['CodeCommitGitReferences'] = {
+    'AtomicVisibility',
+    'CASExpectedParent',
+    'DefaultBranchCorrect',
+    'ForkIsolation',
+    'HistoryRetained',
+    'LegacyMetadataPreserved',
+    'LifetimeIsolation',
+    'PeerFrame',
+    'ReadExact',
+    'ReferenceIntegrity',
+    'TypeOK',
+}
+REQUIRED_MUTANTS['CodeCommitGitReferences'] = {
+    'AcceptOldLifetimeAdvance',
+    'AcceptOldLifetimeFirst',
+    'AdoptForeignCommit',
+    'CancelPublishes',
+    'DeniedPublishes',
+    'DropHistoricalCommits',
+    'ExposeStagedObjects',
+    'FailurePublishes',
+    'ForkChangesDefault',
+    'ForkMovesExistingTip',
+    'MutatePeerReference',
+    'PartialObjectPublication',
+    'ReadLatestInsteadOfHistory',
+    'ReadStagedObject',
+    'ReplaceLegacyMetadata',
+    'SameARNHistoryAdoption',
+    'StaleParentOverwrite',
+    'WrongFirstDefault',
+}
+REQUIRED_SOURCE_SCOPES['CodeCommitGitReferences'] = {
+    'internal/aws/catalog/codecommit_content.go',
+    'internal/aws/catalog/codecommit_objects.go',
+    'internal/aws/catalog/engine.go',
+    'internal/aws/catalog/semantics.go',
+    'internal/aws/catalog/services_compute.go',
+}
+
+
 def load_registry(root, relative='formal/models.json'):
     root = Path(root)
     registry_path = asset(root, relative)

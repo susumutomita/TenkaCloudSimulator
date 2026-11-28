@@ -21,14 +21,16 @@ type CodeCommitRefChange struct {
 
 // Config is trusted composition input supplied by the AWS provider.
 type Config struct {
-	// RecordCodeCommitRef records an actual new or changed branch in the same
-	// SQLite transaction. Reading a commit never invokes this callback.
+	// RecordCodeCommitRef records a real branch change before the Git commit.
 	RecordCodeCommitRef func(context.Context, *sql.Tx, CodeCommitRefChange) error
 	Regions             []string
 	Account             string
 	DefaultPrincipal    string
 	Authorize           Authorizer
-	Now                 func() time.Time
+	// AuthorizeSnapshot returns one evaluator for an operation with several
+	// dependent IAM checks. Every membership page requests a fresh evaluator.
+	AuthorizeSnapshot func(context.Context, string) (func(action, resource string) string, error)
+	Now               func() time.Time
 	// ValidateRDSPrivatePostgres is optional trusted native EC2 composition.
 	// Run only for authorized, explicitly private standalone PostgreSQL writes.
 	ValidateRDSPrivatePostgres func(context.Context, *sql.Tx, RDSPrivatePostgresRefs) error
@@ -314,6 +316,10 @@ func (e *Engine) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		e.fail(w, b, op, err)
 		return
 	}
+	if (b.spec.Model == "resource-groups" && op.Name == "CreateGroup" || b.isResourceGroupQueryOperation(op.Name)) && !uniqueGroupJSON(body) {
+		e.fail(w, b, op, invalid("Expected one JSON request without duplicate fields."))
+		return
+	}
 	official := b.model.Operations[op.Name]
 	var raw map[string]any
 	if b.model.Metadata.Protocol == "json" {
@@ -454,6 +460,9 @@ func (e *Engine) fail(w http.ResponseWriter, b *binding, op *Op, err error) {
 		name = op.Name
 	}
 	code, status := b.errorCode(name, f.kind)
+	if f.kind == "denied" && b.isResourceGroupQueryOperation(name) {
+		code, status = "ForbiddenException", http.StatusForbidden
+	}
 	if official := b.model.Operations[name]; f.code != "" && official != nil {
 		for _, name := range official.Errors {
 			if name == f.code {

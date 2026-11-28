@@ -1,232 +1,403 @@
 {
   "version": 1,
-  "base_sha": "17e30e18d0eb2216961158ae48f8ef42a20225e8",
+  "base_sha": "fd803075c37af3faa377f550c8e1cd52b3cfbbb1",
   "changes": [
     {
-      "path": "README.ja.md",
-      "sha256": "58305d5bfe970ca9f7ce879c8479fe3f95018859e76018455d30328682d9122f",
-      "disposition": "documentation",
-      "reason": "Link the localized scaling plan workflow and its observable DynamoDB capacity effect.",
-      "models": []
-    },
-    {
       "path": "README.md",
-      "sha256": "0cd9ec48c2711bec2258f3e3045c99f64474b331ce9bda53f0b10fcfc987bce0",
+      "sha256": "47513170e6ddcc26aeac035880d7c7d81b2347117872ae7b5ec1a72301772c08",
       "disposition": "documentation",
-      "reason": "Link the Console scaling plan workflow and its observable DynamoDB capacity effect.",
+      "reason": "Describe the six supported CodeCommit Git content and branch operations and their local limits.",
       "models": []
     },
     {
-      "path": "docs/autoscaling-plans.md",
-      "sha256": "d318c80cb54bc966c95e544decc2b3cfd556a4cccdd265d8ff0e632f3f12ebfc",
+      "path": "docs/aws-catalog-services.md",
+      "sha256": "cc3bde999b8f8b07e19c17a1f499d37dada95b651b7e210400faa698d83250eb",
       "disposition": "documentation",
-      "reason": "Document the bounded UI workflow, permissions, observed capacities and uncertain outcomes.",
+      "reason": "Regenerate the published CodeCommit operation inventory and bounds.",
+      "models": []
+    },
+    {
+      "path": "docs/aws-codecommit.md",
+      "sha256": "f11c7b8673e88a621abe1a57e491e7b31c2de6b65b5ab7b1e3dcf49df78b6991",
+      "disposition": "documentation",
+      "reason": "Document supported Git object types, revision behavior, authorization and storage limits.",
       "models": []
     },
     {
       "path": "docs/design/0001-go-standalone.md",
-      "sha256": "735de1b16a32336b89c0b62fb1a1bf7e86b28bb3f38c8bb7c851117d6cf3abc7",
+      "sha256": "de3602465a7e86e354c1230e23ab484457681db8042d483365aad41f683270bf",
       "disposition": "documentation",
-      "reason": "Describe shared native plan and target observations in the embedded Console.",
+      "reason": "Record the transactional native data model and runtime dependency boundary.",
       "models": []
     },
     {
-      "path": "formal/ScalingPlanConsole.cfg",
-      "sha256": "7b1e02ab20d8589c4e64881af21ae63e3285655075b6116b1b5788cb1d91f8c7",
+      "path": "formal/CodeCommitGitReferences.cfg",
+      "sha256": "1c7c2484546fc40216e13f85c807b5251e548d774a727d7c56c35d6aef051089",
       "disposition": "modeled",
-      "reason": "Bound the mounted Console model and declare its safety invariants.",
+      "reason": "Run the finite repository lifetime, competing-writer, fork, cancellation and historical-read scenarios.",
       "models": [
         {
-          "id": "ScalingPlanConsole",
+          "id": "CodeCommitGitReferences",
           "properties": [
-            "OnlyCurrentReplyPublishes",
-            "SuccessRequiresAck",
-            "RetryRequiresNamedRefresh"
+            "AtomicVisibility",
+            "CASExpectedParent",
+            "LifetimeIsolation",
+            "ForkIsolation",
+            "HistoryRetained",
+            "PeerFrame"
           ],
-          "limits": "Finite UI request ownership and publication within one mounted scope. A refresh is an explicit exact-name read. Does not model concurrent plan replacement, React/DOM, JavaScript or Go refinement, IAM, HTTP or storage. AutoScalingPlanTargets independently models native capacity effects."
+          "limits": "Finite two-repository, two-branch schedules with abstract commit and blob identities. Actual Git serialization, SQLite, real HTTP cancellation, limits and IAM evaluation are tested separately."
         }
       ]
     },
     {
-      "path": "formal/ScalingPlanConsole.tla",
-      "sha256": "e25f1305ce13f66d30b46d86b646bdec144ad838cd102b5bd81c9ef2d8f16958",
+      "path": "formal/CodeCommitGitReferences.tla",
+      "sha256": "2b4357b38ecdd15854aab708a5686f78f13a1880e7c7932f6e3d5ee55f31239b",
       "disposition": "modeled",
-      "reason": "Check finite request ownership, acknowledgement and reconciliation across scoped changes.",
+      "reason": "Describe staged Git ref advancement, immutable retained history and repository lifetime isolation.",
       "models": [
         {
-          "id": "ScalingPlanConsole",
+          "id": "CodeCommitGitReferences",
           "properties": [
-            "OnlyCurrentReplyPublishes",
-            "SuccessRequiresAck",
-            "RetryRequiresNamedRefresh"
+            "AtomicVisibility",
+            "CASExpectedParent",
+            "LifetimeIsolation",
+            "ForkIsolation",
+            "HistoryRetained",
+            "PeerFrame"
           ],
-          "limits": "Finite UI request ownership and publication within one mounted scope. A refresh is an explicit exact-name read. Does not model concurrent plan replacement, React/DOM, JavaScript or Go refinement, IAM, HTTP or storage. AutoScalingPlanTargets independently models native capacity effects."
+          "limits": "Finite two-repository, two-branch schedules with abstract commit and blob identities. Actual Git serialization, SQLite, real HTTP cancellation, limits and IAM evaluation are tested separately."
         }
       ]
     },
     {
       "path": "formal/models.json",
-      "sha256": "2a60bd235de500b832ea4fe9cc22503efdbe9e16624322920b6b37a3cefee237",
+      "sha256": "d13640be937ab73e23f5792a974e2f17421ed73b809bfb0e6211047c274b2be7",
       "disposition": "formal-infrastructure",
-      "reason": "Register the focused Console model, scope and four executable mutation controls.",
+      "reason": "Register the CodeCommit leaf and its independently specified safety properties and mutation controls.",
       "models": []
     },
     {
-      "path": "internal/server/autoscalingplans_composition_test.go",
-      "sha256": "f34715016baa2b40bdf50ecdad53e4ec4fa3fa4dd79cf9ee99ab37060776be11",
+      "path": "internal/aws/catalog/codecommit_content.go",
+      "sha256": "c15ad8e9c3fc2f10246cb85b957da845f770c3ce5b49a8b5117deaf3eb563424",
+      "disposition": "modeled",
+      "reason": "Resolve the concrete repository lifetime and atomically service six Git content and branch actions.",
+      "models": [
+        {
+          "id": "CodeCommitGitReferences",
+          "properties": [
+            "AtomicVisibility",
+            "CASExpectedParent",
+            "LifetimeIsolation",
+            "ForkIsolation",
+            "HistoryRetained",
+            "PeerFrame"
+          ],
+          "limits": "Finite two-repository, two-branch schedules with abstract commit and blob identities. Actual Git serialization, SQLite, real HTTP cancellation, limits and IAM evaluation are tested separately."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/catalog/codecommit_content_test.go",
+      "sha256": "e5e2984927e33c83e22ad724f622bfa60052b755201eea4d09bf4454b6a0a409",
       "disposition": "test-support",
-      "reason": "Assert the five-operation capability advertises the implemented Console.",
+      "reason": "Exercise Git hashes, historical reads, authenticated scope, ref collisions, corruption and physical size bounds.",
       "models": []
     },
     {
-      "path": "internal/server/server.go",
-      "sha256": "2d66c7db8aade9638684f4275f6ee9d1fc1d46cf1902535cf528555cffa07e03",
+      "path": "internal/aws/catalog/codecommit_objects.go",
+      "sha256": "57f47dfa83b1e9bc96604c276e7a7e49ea1e84ebef935d5e0894695c13952e75",
       "disposition": "modeled",
-      "reason": "Advertise the implemented Console and the native plan-capacity contract.",
+      "reason": "Persist and traverse canonical Git blobs, trees, commits and branch tips in the owning repository.",
       "models": [
         {
-          "id": "ScalingPlanConsole",
+          "id": "CodeCommitGitReferences",
           "properties": [
-            "OnlyCurrentReplyPublishes",
-            "SuccessRequiresAck",
-            "RetryRequiresNamedRefresh"
+            "AtomicVisibility",
+            "CASExpectedParent",
+            "LifetimeIsolation",
+            "ForkIsolation",
+            "HistoryRetained",
+            "PeerFrame"
           ],
-          "limits": "Finite UI request ownership and publication within one mounted scope. A refresh is an explicit exact-name read. Does not model concurrent plan replacement, React/DOM, JavaScript or Go refinement, IAM, HTTP or storage. AutoScalingPlanTargets independently models native capacity effects."
+          "limits": "Finite two-repository, two-branch schedules with abstract commit and blob identities. Actual Git serialization, SQLite, real HTTP cancellation, limits and IAM evaluation are tested separately."
         }
       ]
     },
     {
-      "path": "internal/server/web/app.js",
-      "sha256": "883321cfcd39963142ce40bfc2fb7a0b8c980c4cdf9b4fcffa0a00ece38dea0e",
+      "path": "internal/aws/catalog/codecommit_transactions_test.go",
+      "sha256": "b82665000893b2acc719b0df91687131fd14c4181ae0c573f1dfb9d6d93201ed",
+      "disposition": "test-support",
+      "reason": "Interrupt physically staged writes, race real writers, replace a repository during authorization and verify durable recovery after SQLite failures.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/catalog/describe.go",
+      "sha256": "744b6c3ae87cbae385f2c264253e819528559580381a39f05518abcba01f21db",
       "disposition": "modeled",
-      "reason": "Embed the canonically built, localized Console workflow with separate native plan and target reads.",
+      "reason": "Keep dedicated Git data operations out of generic repository metadata forms.",
       "models": [
         {
-          "id": "ScalingPlanConsole",
+          "id": "CatalogResourceLifecycle",
           "properties": [
-            "OnlyCurrentReplyPublishes",
-            "SuccessRequiresAck",
-            "RetryRequiresNamedRefresh"
+            "AuthorizationFirst",
+            "FailureFrame",
+            "PeerFrame"
           ],
-          "limits": "Finite UI request ownership and publication within one mounted scope. A refresh is an explicit exact-name read. Does not model concurrent plan replacement, React/DOM, JavaScript or Go refinement, IAM, HTTP or storage. AutoScalingPlanTargets independently models native capacity effects."
+          "limits": "The generic model covers abstract catalog admission, failure and ownership. It does not model canonical Git or CodeCommit request decoding."
         }
       ]
+    },
+    {
+      "path": "internal/aws/catalog/engine.go",
+      "sha256": "cc7b8820962b648b7331e377bcfe9f92dc977312f219e9aeedfe685fd0ad7ca3",
+      "disposition": "modeled",
+      "reason": "Install the two repository-owned Git tables in the catalog database.",
+      "models": [
+        {
+          "id": "CatalogResourceLifecycle",
+          "properties": [
+            "AuthorizationFirst",
+            "FailureFrame",
+            "PeerFrame"
+          ],
+          "limits": "The generic model covers abstract catalog admission, failure and ownership. It does not model canonical Git or CodeCommit request decoding."
+        },
+        {
+          "id": "SARPolicyAuthorizationTarget",
+          "properties": [
+            "NoUnpermittedEffects",
+            "ResolvedParentTarget"
+          ],
+          "limits": "Prior SAR target semantics are unchanged in shared catalog files. This model does not evaluate CodeCommit IAM decisions."
+        },
+        {
+          "id": "RDSPrivatePostgresTopology",
+          "properties": [
+            "OwnedTopologyBeforeWrite",
+            "AtomicRefusal"
+          ],
+          "limits": "The existing RDS topology path remains unchanged in this shared catalog file. PostgreSQL is outside the Git model."
+        },
+        {
+          "id": "RDSOwnedGenerationFence",
+          "properties": [
+            "AttachNeedsCurrent",
+            "FencedGenerationCannotChange"
+          ],
+          "limits": "The separate RDS process ownership contract remains unchanged. Its model does not execute CodeCommit transactions."
+        },
+        {
+          "id": "CodeCommitGitReferences",
+          "properties": [
+            "AtomicVisibility",
+            "CASExpectedParent",
+            "LifetimeIsolation",
+            "ForkIsolation",
+            "HistoryRetained",
+            "PeerFrame"
+          ],
+          "limits": "Finite two-repository, two-branch schedules with abstract commit and blob identities. Actual Git serialization, SQLite, real HTTP cancellation, limits and IAM evaluation are tested separately."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/catalog/models/codecommit.json",
+      "sha256": "20673b093f8c265781f73e9d1f8a56a6ba7b7c6dfa1c993ab4f6eedffb828dd4",
+      "disposition": "modeled",
+      "reason": "Retain official pinned CodeCommit shapes for the six supported Git operations.",
+      "models": [
+        {
+          "id": "CatalogResourceLifecycle",
+          "properties": [
+            "AuthorizationFirst",
+            "FailureFrame",
+            "PeerFrame"
+          ],
+          "limits": "The generic model covers abstract catalog admission, failure and ownership. It does not model canonical Git or CodeCommit request decoding."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/catalog/selection.json",
+      "sha256": "dcd1f121bd0e27f8fd11e162577a2ed6574e7b1ec954580968bed1afbdf916d0",
+      "disposition": "modeled",
+      "reason": "Select the six native operations from the pinned AWS service model.",
+      "models": [
+        {
+          "id": "CatalogResourceLifecycle",
+          "properties": [
+            "AuthorizationFirst",
+            "FailureFrame",
+            "PeerFrame"
+          ],
+          "limits": "The generic model covers abstract catalog admission, failure and ownership. It does not model canonical Git or CodeCommit request decoding."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/catalog/semantics.go",
+      "sha256": "4631dffe8f1d1ca7f576d0f99012efb44ac090d22e4a02bc9ce0fcd074ca490e",
+      "disposition": "modeled",
+      "reason": "Dispatch an explicitly handled operation to its CodeCommit transaction implementation.",
+      "models": [
+        {
+          "id": "CatalogResourceLifecycle",
+          "properties": [
+            "AuthorizationFirst",
+            "FailureFrame",
+            "PeerFrame"
+          ],
+          "limits": "The generic model covers abstract catalog admission, failure and ownership. It does not model canonical Git or CodeCommit request decoding."
+        },
+        {
+          "id": "ECSTaskRevisionLifecycle",
+          "properties": [
+            "HistoryImmutable",
+            "CommitRequiresAdmission"
+          ],
+          "limits": "The existing ECS task revision property remains applicable to separate ECS paths in this file. It does not characterize CodeCommit history."
+        },
+        {
+          "id": "SARPolicyAuthorizationTarget",
+          "properties": [
+            "NoUnpermittedEffects",
+            "ResolvedParentTarget"
+          ],
+          "limits": "Prior SAR target semantics are unchanged in shared catalog files. This model does not evaluate CodeCommit IAM decisions."
+        },
+        {
+          "id": "RDSPrivatePostgresTopology",
+          "properties": [
+            "OwnedTopologyBeforeWrite",
+            "AtomicRefusal"
+          ],
+          "limits": "The existing RDS topology path remains unchanged in this shared catalog file. PostgreSQL is outside the Git model."
+        },
+        {
+          "id": "RDSOwnedGenerationFence",
+          "properties": [
+            "AttachNeedsCurrent",
+            "FencedGenerationCannotChange"
+          ],
+          "limits": "The separate RDS process ownership contract remains unchanged. Its model does not execute CodeCommit transactions."
+        },
+        {
+          "id": "CodeCommitGitReferences",
+          "properties": [
+            "AtomicVisibility",
+            "CASExpectedParent",
+            "LifetimeIsolation",
+            "ForkIsolation",
+            "HistoryRetained",
+            "PeerFrame"
+          ],
+          "limits": "Finite two-repository, two-branch schedules with abstract commit and blob identities. Actual Git serialization, SQLite, real HTTP cancellation, limits and IAM evaluation are tested separately."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/catalog/services_compute.go",
+      "sha256": "8dc10a758c9d983cc07a985cd4955b55013cbc28904ba4e7bbf2c21a750a9c60",
+      "disposition": "modeled",
+      "reason": "Register CodeCommit Git handlers and declare their simulator bounds.",
+      "models": [
+        {
+          "id": "CatalogResourceLifecycle",
+          "properties": [
+            "AuthorizationFirst",
+            "FailureFrame",
+            "PeerFrame"
+          ],
+          "limits": "The generic model covers abstract catalog admission, failure and ownership. It does not model canonical Git or CodeCommit request decoding."
+        },
+        {
+          "id": "ECSTaskRevisionLifecycle",
+          "properties": [
+            "HistoryImmutable",
+            "CommitRequiresAdmission"
+          ],
+          "limits": "The existing ECS task revision property remains applicable to separate ECS paths in this file. It does not characterize CodeCommit history."
+        },
+        {
+          "id": "CodeCommitGitReferences",
+          "properties": [
+            "AtomicVisibility",
+            "CASExpectedParent",
+            "LifetimeIsolation",
+            "ForkIsolation",
+            "HistoryRetained",
+            "PeerFrame"
+          ],
+          "limits": "Finite two-repository, two-branch schedules with abstract commit and blob identities. Actual Git serialization, SQLite, real HTTP cancellation, limits and IAM evaluation are tested separately."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/catalog/spec.go",
+      "sha256": "1c4619aa740f9385b7d11ab8c0e51fb7e84a6f2f7c5a6cf0158e195406c5d5d6",
+      "disposition": "modeled",
+      "reason": "Represent the dedicated data-operation handler in existing catalog operation descriptions.",
+      "models": [
+        {
+          "id": "CatalogResourceLifecycle",
+          "properties": [
+            "AuthorizationFirst",
+            "FailureFrame",
+            "PeerFrame"
+          ],
+          "limits": "The generic model covers abstract catalog admission, failure and ownership. It does not model canonical Git or CodeCommit request decoding."
+        },
+        {
+          "id": "SARPolicyAuthorizationTarget",
+          "properties": [
+            "NoUnpermittedEffects",
+            "ResolvedParentTarget"
+          ],
+          "limits": "Prior SAR target semantics are unchanged in shared catalog files. This model does not evaluate CodeCommit IAM decisions."
+        }
+      ]
+    },
+    {
+      "path": "internal/server/apidocs/catalog/codecommit.json",
+      "sha256": "fc893116af4e52ea1357de2e1808ec4c8dde6750de684dcaa75ea02dcfbd844b",
+      "disposition": "presentation",
+      "reason": "Regenerate the embedded CodeCommit request and response schemas and operation list.",
+      "models": []
+    },
+    {
+      "path": "internal/server/apidocs/catalog/index.json",
+      "sha256": "f6e6a626218c3231563b245fb8e44e00381834d57112acf960b5f19e9928b7ee",
+      "disposition": "presentation",
+      "reason": "Regenerate the catalog reference count for CodeCommit.",
+      "models": []
     },
     {
       "path": "scripts/formal_model_gate.py",
-      "sha256": "6c1a7ba514b17e4f69f9971f58571400bb80a0a5876f230e8d09f3aa3f189874",
+      "sha256": "55f2a2fa3bb09fb6e413b2cd540ed8ee7cd377c580b68a802ac81fb179b4b059",
       "disposition": "formal-infrastructure",
-      "reason": "Independently pin the new model, four invariants, four controls and six mapped files.",
+      "reason": "Protect the finite CodeCommit model identity, checked properties, mutation controls and production source mapping.",
       "models": []
     },
     {
       "path": "scripts/test-formal-gate.py",
-      "sha256": "7033aad08229af6afb4627ef415551bbcde655678d8ff66703c512b0fc85cc7f",
+      "sha256": "1657d33a092d266745527eade06440200caf20ad081f8f9d77b46d9c9e718fec",
       "disposition": "formal-infrastructure",
-      "reason": "Require the new model among all existing protected models.",
+      "reason": "Verify protected inventory and fail when a required CodeCommit property, control or source mapping is removed.",
       "models": []
     },
     {
-      "path": "test/e2e/autoscaling_plans_console.py",
-      "sha256": "cf219a2a508210a1814e6cd433a198d14e1b68142e7c9e1beab107841b7a31e5",
+      "path": "test/e2e/catalog_fixtures/codecommit.json",
+      "sha256": "c472771465eaadecfc060be690e20232a3cd5f0d139095989213f0cba70f6a44",
       "disposition": "test-support",
-      "reason": "Exercise the actual embedded Console, exact target capacity, two authorities, restart, refusal, acknowledgement loss, cancellation and cleanup.",
+      "reason": "Exercise all six new native operations alongside the eight original metadata and tag operations.",
       "models": []
     },
     {
-      "path": "test/e2e/check.py",
-      "sha256": "937621995585279fc80c5cebacf8155078f73c7e414614573d8597aa16d37367",
+      "path": "test/e2e/codecommit_git.py",
+      "sha256": "59152efaa47a3dc0672620b7f6421f1391d3675d90522c6aaf0d502fcef16f3b",
       "disposition": "test-support",
-      "reason": "Register the ordinary stock SDK and Console integration fixture with the existing E2E runner.",
-      "models": []
-    },
-    {
-      "path": "tools/console/bundle-digests.json",
-      "sha256": "e9441b68fec1208e25ee19061aaeba100734ef8ad5a6989b0b96b8f7c80541c3",
-      "disposition": "presentation",
-      "reason": "Pin the canonical embedded Console output hashes.",
-      "models": []
-    },
-    {
-      "path": "tools/console/bundle-inputs.json",
-      "sha256": "c3bb9f9fc6e9014c1d75b085b72bc64c6b33584bc175ea5a36e960521a0eaec6",
-      "disposition": "presentation",
-      "reason": "Record canonical esbuild metadata for the actual embedded Console inputs.",
-      "models": []
-    },
-    {
-      "path": "tools/console/src/autoscaling-plans.jsx",
-      "sha256": "8d39433ae226450837bc20c7cd2389d7e49f899d17a65e195eaf3a3bb0973ed5",
-      "disposition": "modeled",
-      "reason": "Bound each visible plan or capacity read to its request owner. Confirm writes and reconcile an ambiguous result by exact name.",
-      "models": [
-        {
-          "id": "ScalingPlanConsole",
-          "properties": [
-            "OnlyCurrentReplyPublishes",
-            "SuccessRequiresAck",
-            "RetryRequiresNamedRefresh"
-          ],
-          "limits": "Finite UI request ownership and publication within one mounted scope. A refresh is an explicit exact-name read. Does not model concurrent plan replacement, React/DOM, JavaScript or Go refinement, IAM, HTTP or storage. AutoScalingPlanTargets independently models native capacity effects."
-        }
-      ]
-    },
-    {
-      "path": "tools/console/src/autoscaling-plans.mjs",
-      "sha256": "215140b7466a548a3178f7025b3e3dad3668b3effb3eccc7350e0ce75724a775",
-      "disposition": "modeled",
-      "reason": "Send exact native plan and table requests and validate operation-specific replies before publication.",
-      "models": [
-        {
-          "id": "ScalingPlanConsole",
-          "properties": [
-            "OnlyCurrentReplyPublishes",
-            "SuccessRequiresAck",
-            "RetryRequiresNamedRefresh"
-          ],
-          "limits": "Finite UI request ownership and publication within one mounted scope. A refresh is an explicit exact-name read. Does not model concurrent plan replacement, React/DOM, JavaScript or Go refinement, IAM, HTTP or storage. AutoScalingPlanTargets independently models native capacity effects."
-        }
-      ]
-    },
-    {
-      "path": "tools/console/src/console-navigation.mjs",
-      "sha256": "2cf79b1dc466e3a3e96e96376b9fc270e43c71ae8b2098bd1bc0cfd9f411109f",
-      "disposition": "modeled",
-      "reason": "Discover the AWS scaling planner only when the normal plan operations and native DynamoDB readback are available.",
-      "models": [
-        {
-          "id": "ScalingPlanConsole",
-          "properties": [
-            "OnlyCurrentReplyPublishes",
-            "SuccessRequiresAck",
-            "RetryRequiresNamedRefresh"
-          ],
-          "limits": "Finite UI request ownership and publication within one mounted scope. A refresh is an explicit exact-name read. Does not model concurrent plan replacement, React/DOM, JavaScript or Go refinement, IAM, HTTP or storage. AutoScalingPlanTargets independently models native capacity effects."
-        }
-      ]
-    },
-    {
-      "path": "tools/console/src/main.jsx",
-      "sha256": "b11b7c11d6a32d2fd3acc9378c577f3c28cb27189a574f29cd6707077b278358",
-      "disposition": "modeled",
-      "reason": "Mount the scaling planner under the selected AWS region, principal and navigation lifetime.",
-      "models": [
-        {
-          "id": "ScalingPlanConsole",
-          "properties": [
-            "OnlyCurrentReplyPublishes",
-            "SuccessRequiresAck",
-            "RetryRequiresNamedRefresh"
-          ],
-          "limits": "Finite UI request ownership and publication within one mounted scope. A refresh is an explicit exact-name read. Does not model concurrent plan replacement, React/DOM, JavaScript or Go refinement, IAM, HTTP or storage. AutoScalingPlanTargets independently models native capacity effects."
-        }
-      ]
-    },
-    {
-      "path": "tools/console/test/autoscaling-plans.test.mjs",
-      "sha256": "6572dc64b32d400087856ad932c2c18647ed77a76d4c5ae8bde6227939775d7a",
-      "disposition": "presentation",
-      "reason": "Regression checks for normal Cloudscape routing, both wire protocols, target identity, cancellation and saved policy preservation.",
+      "reason": "Exercise pinned boto3 against two local authorities and validate canonical Git object identities with independent Git plumbing.",
       "models": []
     }
   ]

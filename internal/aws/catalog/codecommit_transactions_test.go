@@ -6,8 +6,10 @@ import (
 	"database/sql"
 	"encoding/json"
 	"errors"
+	"net/http"
 	"net/http/httptest"
 	"path/filepath"
+	"reflect"
 	"slices"
 	"sync"
 	"testing"
@@ -98,8 +100,12 @@ func TestCodeCommitInterruptedGitWrite(t *testing.T) {
 						if cause == context.Canceled {
 							stop()
 						}
-						<-ctx.Done()
-						rc.ResultNull()
+						select {
+						case <-ctx.Done():
+							rc.ResultNull()
+						case <-time.After(5 * time.Second):
+							rc.ResultError(errors.New("real request lifetime did not expire"))
+						}
 					})
 				})
 				if err == nil {
@@ -115,24 +121,53 @@ SELECT interrupt_git_write(json_extract(NEW.document,'$.defaultBranch'),
 				if err != nil || closeErr != nil {
 					t.Fatal(err, closeErr)
 				}
-				if cause == context.Canceled {
-					ctx, stop = context.WithCancel(t.Context())
-				} else {
-					ctx, stop = context.WithTimeout(t.Context(), time.Second)
-				}
-				defer stop()
+				clientContext, cancelClient := context.WithCancel(t.Context())
+				defer cancelClient()
+				stop = cancelClient
+				finished := make(chan *httptest.ResponseRecorder, 1)
+				server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+					ctx = r.Context()
+					if cause == context.DeadlineExceeded {
+						var cancelDeadline context.CancelFunc
+						ctx, cancelDeadline = context.WithTimeout(ctx, time.Second)
+						defer cancelDeadline()
+					}
+					record := httptest.NewRecorder()
+					h.engine.ServeHTTP(record, r.WithContext(ctx))
+					w.WriteHeader(record.Code)
+					_, _ = w.Write(record.Body.Bytes())
+					finished <- record
+				}))
+				defer server.Close()
 				put["repositoryName"] = "target"
 				data, err := json.Marshal(put)
 				if err != nil {
 					t.Fatal(err)
 				}
-				req := httptest.NewRequestWithContext(ctx, "POST", "/", bytes.NewReader(data))
+				req, err := http.NewRequestWithContext(clientContext, "POST", server.URL+"/", bytes.NewReader(data))
+				if err != nil {
+					t.Fatal(err)
+				}
 				req.Header.Set("Content-Type", "application/x-amz-json-1.1")
 				req.Header.Set("X-Amz-Target", "CodeCommit_20150413.PutFile")
 				sign(req, "codecommit", "us-east-1")
-				got := h.do(req)
-				if hits != 1 || staged == "" || !errors.Is(ctx.Err(), cause) || got.status < 400 || got.body["commitId"] != nil {
-					t.Fatalf("interruption phase hits=%d staged=%q cause=%v status=%d", hits, staged, ctx.Err(), got.status)
+				response, sendErr := server.Client().Do(req)
+				if response != nil {
+					response.Body.Close()
+				}
+				record := <-finished
+				if cause == context.Canceled && !errors.Is(sendErr, context.Canceled) {
+					t.Fatal("client did not disconnect", sendErr)
+				}
+				if cause == context.DeadlineExceeded && (sendErr != nil || response.StatusCode != record.Code) {
+					t.Fatal("elapsed handler deadline did not reach client", sendErr)
+				}
+				var result map[string]any
+				if err := json.Unmarshal(record.Body.Bytes(), &result); err != nil {
+					t.Fatal(err)
+				}
+				if hits != 1 || staged == "" || !errors.Is(ctx.Err(), cause) || record.Code < 400 || result["__type"] == nil || result["commitId"] != nil {
+					t.Fatalf("interruption phase hits=%d staged=%q cause=%v status=%d", hits, staged, ctx.Err(), record.Code)
 				}
 				if err := host.Close(); err != nil {
 					t.Fatal(err)
@@ -217,4 +252,134 @@ func TestCodeCommitPendingAuthorizationCannotAdoptReplacement(t *testing.T) {
 		t.Fatalf("old request adopted another repository: HTTP %d", stale.status)
 	}
 	expect(t, gitCall(h, "target", "PutFile", body), 200, "")
+}
+
+// Deny each physical access in turn, including the last COMMIT. Both a refusal
+// and a later successful response must agree with the reopened database.
+func TestCodeCommitGitStorageFailureAndRetry(t *testing.T) {
+	for _, scenario := range []string{"FirstPutFile", "PutFile", "CreateBranch", "GetBranch", "ListBranches", "GetCommit", "GetFile"} {
+		t.Run(scenario, func(t *testing.T) {
+			path := filepath.Join(t.TempDir(), "owner.db")
+			host, h := openGitTeam(t, path)
+			peerHost, peer := openGitTeam(t, filepath.Join(t.TempDir(), "peer.db"))
+			initial := map[string]any{"branchName": "main", "filePath": "old/file", "fileContent": "AP8="}
+			for _, seed := range []struct {
+				h    *harness
+				name string
+			}{{h, "sibling"}, {peer, "target"}} {
+				expect(t, gitCall(seed.h, seed.name, "CreateRepository", nil), 200, "")
+				expect(t, gitCall(seed.h, seed.name, "PutFile", initial), 200, "")
+			}
+			expect(t, gitCall(h, "target", "CreateRepository", nil), 200, "")
+			var old string
+			if scenario != "FirstPutFile" {
+				p := gitCall(h, "target", "PutFile", initial)
+				expect(t, p, 200, "")
+				old = p.body["commitId"].(string)
+			}
+			op := scenario
+			input := map[string]any{}
+			switch scenario {
+			case "FirstPutFile", "PutFile":
+				op = "PutFile"
+				input = map[string]any{"branchName": "main", "filePath": "new/file", "fileContent": "AQII"}
+				if old != "" {
+					input["parentCommitId"] = old
+				}
+			case "CreateBranch":
+				input = map[string]any{"branchName": "fork", "commitId": old}
+			case "GetBranch":
+				input["branchName"] = "main"
+			case "GetFile":
+				input["filePath"] = "old/file"
+			case "GetCommit":
+				input["commitId"] = old
+			}
+			before, foreign := codeCommitSnapshot(t, h.db), codeCommitSnapshot(t, peerHost.Database())
+			setAuthorizer := func(fn func(sqlite3.AuthorizerActionCode, string, string, string, string) sqlite3.AuthorizerReturnCode) {
+				t.Helper()
+				conn, err := h.db.Conn(t.Context())
+				if err != nil {
+					t.Fatal(err)
+				}
+				defer conn.Close()
+				if err := conn.Raw(func(raw any) error { return raw.(sqlitedriver.Conn).Raw().SetAuthorizer(fn) }); err != nil {
+					t.Fatal(err)
+				}
+			}
+			var success reply
+			var sawCommit bool
+			for at := 1; ; at++ {
+				if at > 256 {
+					t.Fatal("no end of SQL operation")
+				}
+				seen, rejected := 0, false
+				setAuthorizer(func(action sqlite3.AuthorizerActionCode, table, _, _, _ string) sqlite3.AuthorizerReturnCode {
+					if table == "aws_catalog_resources" || table == "aws_codecommit_objects" || table == "aws_codecommit_branches" || action == sqlite3.AUTH_TRANSACTION {
+						seen++
+						if seen == at {
+							rejected = true
+							if action == sqlite3.AUTH_TRANSACTION && table == "COMMIT" {
+								sawCommit = true
+							}
+							return sqlite3.AUTH_DENY
+						}
+					}
+					return sqlite3.AUTH_OK
+				})
+				res := gitCall(h, "target", op, input)
+				setAuthorizer(nil)
+				if !rejected {
+					expect(t, res, 200, "")
+					if !sawCommit {
+						t.Fatal("no physical COMMIT fault")
+					}
+					success = res
+					break
+				}
+				if res.status != 500 || res.body["commitId"] != nil || res.body["fileContent"] != nil || res.body["branches"] != nil || res.body["branch"] != nil || res.body["commit"] != nil {
+					t.Fatalf("SQL fault %d exposed a result: %d %v", at, res.status, res.body)
+				}
+				if !slices.Equal(before, codeCommitSnapshot(t, h.db)) {
+					t.Fatalf("SQL fault %d changed Git storage", at)
+				}
+			}
+			if err := host.Close(); err != nil {
+				t.Fatal(err)
+			}
+			_, h = openGitTeam(t, path)
+			if !slices.Equal(foreign, codeCommitSnapshot(t, peerHost.Database())) {
+				t.Fatal("separate repository authority changed")
+			}
+			fetch := func(op string, args map[string]any) map[string]any {
+				t.Helper()
+				res := gitCall(h, "target", op, args)
+				expect(t, res, 200, "")
+				return res.body
+			}
+			switch scenario {
+			case "FirstPutFile", "PutFile":
+				current := fetch("GetFile", map[string]any{"filePath": "new/file"})
+				if current["fileContent"] != "AQII" || current["blobId"] != success.body["blobId"] || current["commitId"] != success.body["commitId"] {
+					t.Fatal("retried file or tip changed")
+				}
+				if old != "" && fetch("GetFile", map[string]any{"filePath": "old/file", "commitSpecifier": old})["fileContent"] != "AP8=" {
+					t.Fatal("lost original file")
+				}
+			case "CreateBranch":
+				if fetch("GetBranch", map[string]any{"branchName": "fork"})["branch"].(map[string]any)["commitId"] != old {
+					t.Fatal("fork missing after retry")
+				}
+			default:
+				if !slices.Equal(before, codeCommitSnapshot(t, h.db)) || !reflect.DeepEqual(fetch(op, input), success.body) {
+					t.Fatal("read retry disagrees with reopened storage")
+				}
+			}
+			res := gitCall(h, "sibling", "GetFile", map[string]any{"filePath": "old/file"})
+			expect(t, res, 200, "")
+			if res.body["fileContent"] != "AP8=" {
+				t.Fatal("sibling file changed")
+			}
+		})
+	}
 }
