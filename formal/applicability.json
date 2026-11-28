@@ -33,9 +33,18 @@
     {
       "path": "internal/server/web/app.js",
       "sha256": "1c1516a3468cb2591ede197df038231495a315e49d2db31a4eaf6e02ea28c1a3",
-      "disposition": "presentation",
-      "reason": "Rebuild the embedded Console with accurate IAM trust and session help and principal list text.",
-      "models": []
+      "disposition": "modeled",
+      "reason": "The rebuilt bundle includes the registered login form used to enter the IAM Console. Only IAM principal labels and help text changed in the bundle inputs.",
+      "models": [
+        {
+          "id": "LoginInputIntent",
+          "properties": [
+            "NoEmptyPOST",
+            "SubmissionSelectionExact"
+          ],
+          "limits": "The existing model describes login submission. It does not model IAM role rendering, trust evaluation or STS. The signed SDK and browser fixture exercise those operations."
+        }
+      ]
     },
     {
       "path": "test/e2e/sts_iam_console.py",
