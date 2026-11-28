@@ -1,10 +1,10 @@
 {
   "version": 1,
-  "base_sha": "fd803075c37af3faa377f550c8e1cd52b3cfbbb1",
+  "base_sha": "f55806e861265a3dfeb7475c0e1ca7c404a6b290",
   "changes": [
     {
       "path": "README.md",
-      "sha256": "9a9c7d95f6e64ebb616e78127b56da511f8ab16c3bd531c67fff41cba5fd9e48",
+      "sha256": "11246e4581e64692db25437bfd63fce49bbf8dc97f9db5b657be9ce4e8b1589e",
       "disposition": "documentation",
       "reason": "Describe the native Git content and the CodeCommit repository detail workflow.",
       "models": []
@@ -25,7 +25,7 @@
     },
     {
       "path": "docs/design/0001-go-standalone.md",
-      "sha256": "da4f2464a49de3d8d39a7285cb90dc01e8ce20e90b4a0ece5c0caa7c97f2ee0a",
+      "sha256": "212cd39ad050b55345f08e306327153dc5c9c9efeb3909ad5ee339d33cb00f4f",
       "disposition": "documentation",
       "reason": "Record the transactional Git store and the Console behavior at an acknowledged or uncertain write.",
       "models": []
@@ -118,7 +118,7 @@
     },
     {
       "path": "formal/models.json",
-      "sha256": "e3fbe66543d5eea6da6fc0753d9a8107cc45af061219a53f5aa0a20a54490c02",
+      "sha256": "d92469eae714b57ae6795205d6d8f27576f4a6f058b6bb51998d25003262e28d",
       "disposition": "formal-infrastructure",
       "reason": "Register the native Git reference and packaged repository content intent models with finite mutation checks.",
       "models": []
@@ -203,7 +203,7 @@
     },
     {
       "path": "internal/aws/catalog/engine.go",
-      "sha256": "2a5eecdb56206644a5fb0751c83d6df7ce31ca18a9d313bab1c7a5109cf48274",
+      "sha256": "c2d6b154092998d8b5d92e4ae12c4066e76cdd22420f0787e40811e70645acf8",
       "disposition": "modeled",
       "reason": "Install the two repository-owned Git tables in the catalog database.",
       "models": [
@@ -290,7 +290,7 @@
     },
     {
       "path": "internal/aws/catalog/semantics.go",
-      "sha256": "4631dffe8f1d1ca7f576d0f99012efb44ac090d22e4a02bc9ce0fcd074ca490e",
+      "sha256": "f192b7d6847626ba2aff20f082e5b2d404ae2d201bd800e3f3d4f0dd843e0340",
       "disposition": "modeled",
       "reason": "Dispatch an explicitly handled operation to its CodeCommit transaction implementation.",
       "models": [
@@ -444,7 +444,7 @@
     },
     {
       "path": "internal/server/web/app.js",
-      "sha256": "d2391e93c46ae7cc5612d7fe75aef318203913addd3740495e65f123e48d768f",
+      "sha256": "3e326bb241f16f1ed6191d87fbe303e9b938c548ea5440674874c3bc9f30a389",
       "reason": "Package the new content panel and exact native Git read and write workflow in the standalone web bundle.",
       "models": [
         {
@@ -467,14 +467,14 @@
     },
     {
       "path": "scripts/formal_model_gate.py",
-      "sha256": "c0eb3d1a373240df1f8eeb4751f2699611c6f71e7210cefb93a7429fe08903b6",
+      "sha256": "0988d4f3154e002463d6e5c39150ade3bc2259c6020f391d26c66f351a92be44",
       "disposition": "formal-infrastructure",
       "reason": "Protect the native Git model and Console intent model identities, properties, controls and declared runtime paths.",
       "models": []
     },
     {
       "path": "scripts/test-formal-gate.py",
-      "sha256": "90dfae7fc1e6021b46c5dcbb482623baf823f5c15b6cd7a3ad0f0e38bead97b2",
+      "sha256": "e575803bf81cafce116c5f5df5da53713b81cf708baa58266cbe2d3e83b027ad",
       "disposition": "formal-infrastructure",
       "reason": "Exercise complete registered model inventory and protected Git implementation properties and controls.",
       "models": []
@@ -488,7 +488,7 @@
     },
     {
       "path": "test/e2e/check.py",
-      "sha256": "e9d79e2d576016ee711c9a7a11eee8ea5e688579d66692eba3801c02ae4fdbf8",
+      "sha256": "f1f5be2b65f88bf015a13a0f661eee8fc101645415e0dd37ce86b4aaf2556014",
       "disposition": "test-support",
       "reason": "Register real Git object validation and the SDK, Console and Scalar shared-history workflow in the ordinary opt-in suite.",
       "models": []
@@ -509,21 +509,21 @@
     },
     {
       "path": "tools/console/bundle-digests.json",
-      "sha256": "1cd673cfb741c57ca5c7c085d414b5eb094bcd2bea4c0aed2442094437864fb9",
+      "sha256": "27605e7c0eac0786e19a4f41f89f9641fc7638cfd313f9d726d4ed1e0113c434",
       "reason": "Record the packaged JavaScript digest after the canonical Cloudscape build.",
       "models": [],
       "disposition": "presentation"
     },
     {
       "path": "tools/console/bundle-inputs.json",
-      "sha256": "0aabfef0e5b213018e26a0c76e85ee2c24535518391b706263e0d9ae7af5ea23",
+      "sha256": "b34d7879ef90e62eff9ccff3b49f1188f9055e311b6d7b8932cbc08c89c79f8f",
       "reason": "Record the canonical JavaScript inputs for the packaged repository contents panel.",
       "models": [],
       "disposition": "presentation"
     },
     {
       "path": "tools/console/src/catalog.jsx",
-      "sha256": "52d8740255301e9b966a8b573d6bec5f0dbdb38ba9dd1000790004b11bed19f7",
+      "sha256": "c61b4ec7b41233313d0daac8e58abd4e4022e298e8ffeb10c80c23a078f98060",
       "reason": "Mount the content panel only for the supported CodeCommit repository details and pass the selected request identity, physical repository and region.",
       "models": [
         {

@@ -14,6 +14,7 @@ import (
 	gcpcatalog "github.com/susumutomita/TenkaCloudSimulator/internal/gcp/catalog"
 	gcpdns "github.com/susumutomita/TenkaCloudSimulator/internal/gcp/dns"
 	gcpstorage "github.com/susumutomita/TenkaCloudSimulator/internal/gcp/storage"
+	gcptrace "github.com/susumutomita/TenkaCloudSimulator/internal/gcp/trace"
 	"github.com/susumutomita/TenkaCloudSimulator/internal/provider"
 )
 
@@ -67,6 +68,16 @@ func registerCloudStorage(db *sql.DB, registry *provider.Registry, cfg CloudStor
 	if err != nil {
 		return nil, nil, err
 	}
+	trace, err := gcptrace.New(db, gcptrace.Config{
+		Project: cfg.GCPProject, Owner: cfg.GCPOwner,
+		Subject: func(ctx context.Context) (string, bool) {
+			actor, ok := provider.ActorFromContext(ctx)
+			return actor.ExerciseIdentity, ok
+		},
+	})
+	if err != nil {
+		return nil, nil, err
+	}
 	// App Engine shares the configured project and owner. Deployments copy
 	// Python sources from Cloud Storage objects of that project.
 	appEngine, err := gcpappengine.New(db, gcpappengine.Config{Project: cfg.GCPProject, Owner: cfg.GCPOwner,
@@ -94,6 +105,8 @@ func registerCloudStorage(db *sql.DB, registry *provider.Registry, cfg CloudStor
 		// the leaf to validate. Lookalike names/versions retain existing routing.
 		case r.URL.EscapedPath() == "/dns/v1" || strings.HasPrefix(r.URL.EscapedPath(), "/dns/v1/"):
 			dns.ServeHTTP(w, r)
+		case r.URL.EscapedPath() == "/cloudtrace" || strings.HasPrefix(r.URL.EscapedPath(), "/cloudtrace/"):
+			trace.ServeHTTP(w, r)
 		case appEngine.Owns(r):
 			appEngine.ServeHTTP(w, r)
 		case catalog.Owns(r):

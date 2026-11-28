@@ -457,7 +457,7 @@ func (e *Engine) fail(w http.ResponseWriter, b *binding, op *Op, err error) {
 		name = op.Name
 	}
 	code, status := b.errorCode(name, f.kind)
-	if f.kind == "denied" && b.isResourceGroupQueryOperation(name) {
+	if f.kind == "denied" && b.usesResourceGroupForbidden(name) {
 		code, status = "ForbiddenException", http.StatusForbidden
 	}
 	if official := b.model.Operations[name]; f.code != "" && official != nil {

@@ -1,5 +1,6 @@
 {
  "client": "resource-groups",
+ "denied": "ForbiddenException",
  "steps": [
   {"op": "create_group", "args": {"Name": "fixture-group", "Description": "fixture", "Owner": "platform", "Tags": {"team": "a"}}, "save": {"group": "Group.GroupArn"}, "expect": {"Tags": {"team": "a"}, "Group.Name": "fixture-group"}},
   {"op": "get_group", "args": {"Group": "fixture-group"}, "expect": {"Group.Owner": "platform", "Group.GroupArn": "${group}"}},
