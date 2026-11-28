@@ -3,6 +3,13 @@
   "base_sha": "03d71307bbe6382df16d26bcd5d26e454f5036a6",
   "changes": [
     {
+      "path": ".github/workflows/ci.yml",
+      "sha256": "dede83f7d97c093de0c77a0e4d96bb5f53fda13d1f540756526991e5492e8564",
+      "disposition": "formal-infrastructure",
+      "reason": "Run the new Trace viewer helper tests alongside the existing Google and Console client regressions in ordinary CI.",
+      "models": []
+    },
+    {
       "path": "README.md",
       "sha256": "2b00b68fd707a2042e4f7a13033a56d2633135ea88a8f9b8d60df5f2d8db31de",
       "disposition": "documentation",
@@ -196,6 +203,13 @@
       ]
     },
     {
+      "path": "internal/gcp/trace/storage_fault_test.go",
+      "sha256": "e769e581161552257c533e05deff1633e1709dce2c7df85caaa2d845793e16e0",
+      "disposition": "test-support",
+      "reason": "Exercise the local Trace implementation, rollback or native operations through an ordinary product entry point.",
+      "models": []
+    },
+    {
       "path": "internal/gcp/trace/store.go",
       "sha256": "bd247d35c4134794cb94235ce95572ab7c04c1b3429d23bec2700ed54ce158e4",
       "disposition": "modeled",
@@ -343,6 +357,13 @@
     {
       "path": "test/e2e/check.py",
       "sha256": "5e594b55c740bed9a2c48ca4e7d56e938c9ed2640f7ddea7a785facb832085e9",
+      "disposition": "test-support",
+      "reason": "Exercise the local Trace implementation, rollback or native operations through an ordinary product entry point.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/gcp_trace_console.py",
+      "sha256": "241b5e6dd7ed2a1620fd4a5a3bfbdbe7fd676916ff59971a85a8a38a8f7b208b",
       "disposition": "test-support",
       "reason": "Exercise the local Trace implementation, rollback or native operations through an ordinary product entry point.",
       "models": []
