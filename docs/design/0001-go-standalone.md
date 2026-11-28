@@ -20,6 +20,8 @@ SNS の HTTP/HTTPS コンソールは native Query を呼び出し、通知先 U
 
 Service Quotas の `GetServiceQuota` は、B2B Data Interchange の `CreateProfile` がリージョン単位で強制している上限を同じ定義から読み取る。呼出元には対象リージョン・アカウントのクォータ ARN に対する `servicequotas:GetServiceQuota` が必要となる。[対応リージョンと API の範囲](../aws-catalog.md#b2b-data-interchange-profile-quota)
 
+上限引き上げ要求はチームの SQLite に保存し、リージョン別に ID と履歴を照会できる。`SupportCaseAllowed=false` は `NOT_APPROVED`、省略または true は `PENDING` として保存する。要求を受け付けた後も B2BI の適用上限は同じ値を返す。ローカルの要求に外部サポートケースの発行や自動承認の処理はない。
+
 AWS Resource Groups のタグクエリは、同じリージョンの ECR repository の ARN とタグをカタログの SQLite から読み取る。グループ ARN と依存する読み取り権限の認可後、保存済みクエリとリポジトリを同じスナップショットで照合する。[対象と制限](../aws-catalog.md#ecr-repository-group-membership)
 
 AWS カタログの AppFlow は S3 間のフロー設定のみを保持する。[トリガー設定](https://docs.aws.amazon.com/appflow/1.0/APIReference/API_TriggerConfig.html)に従い、`CreateFlow` と `UpdateFlow` は、`OnDemand` に付けたスケジュール設定と、実行間隔の式がない（空白のみも含む）`Scheduled` の定義を `ValidationException` で拒否する。検証は保存前に行うため、拒否された要求で既存の設定は変わらない。スケジューラ、コネクタープロファイル、ジョブ実行およびオブジェクト転送は実装しない。

@@ -11,11 +11,15 @@ var serviceQuotas = &Service{
 			ARN: "arn:{partition}:servicequotas:{region}:{account}:{member:ServiceCode}/{member:QuotaCode}", ARNMember: "QuotaArn", NameMember: "QuotaName"},
 	},
 	Ops: []Op{
+		{Name: "RequestServiceQuotaIncrease", Kind: Create, Resource: "quota", Fixed: map[string]any{"ServiceCode": "b2bi", "QuotaCode": b2biProfilesQuota, "DesiredValue": 8, "SupportCaseAllowed": false}},
+		{Name: "GetRequestedServiceQuotaChange", Kind: Read, Resource: "quota", Lookup: "RequestId", Fixed: map[string]any{"RequestId": "REPLACE-WITH-REQUEST-ID"}},
+		{Name: "ListRequestedServiceQuotaChangeHistory", Kind: List, Resource: "quota"},
+		{Name: "ListRequestedServiceQuotaChangeHistoryByQuota", Kind: List, Resource: "quota", Fixed: map[string]any{"ServiceCode": "b2bi", "QuotaCode": b2biProfilesQuota}},
 		{Name: "GetServiceQuota", Kind: Read, Resource: "quota", Fixed: map[string]any{"ServiceCode": "b2bi", "QuotaCode": b2biProfilesQuota}},
 	},
 	Bounds: []string{
 		"GetServiceQuota reads the enforced B2B Data Interchange Profiles limit (b2bi/L-05F6A9EF) in us-east-1, us-west-2 and eu-west-1. Value is total capacity, including profiles already created.",
-		"Adjustable describes the AWS quota. The simulator serves only account-level reads of this quota. Defaults, quota discovery, usage, resource contexts and increase requests are unsupported.",
+		"Adjustable describes the AWS quota. An increase request is stored against current account capacity. SupportCaseAllowed=false records NOT_APPROVED. Omitted or true records PENDING locally, with at most one outstanding request per quota and Region. No support case is opened and the local profile limit is unchanged.",
 	},
 }
 

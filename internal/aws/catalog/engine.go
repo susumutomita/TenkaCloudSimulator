@@ -3,6 +3,7 @@ package catalog
 import (
 	"context"
 	"database/sql"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
@@ -47,6 +48,7 @@ type Engine struct {
 	bySigning map[string][]*binding
 	// byQuery maps the signing name of each Query protocol service.
 	byQuery         map[string]*binding
+	quotaHistoryKey [32]byte
 	ownedPrivateRDS privateRDSLifecycle // installed only by trusted native composition
 }
 
@@ -75,6 +77,11 @@ func New(db *sql.DB, cfg Config, services []*Service) (*Engine, error) {
 			return nil, err
 		}
 		if err := e.add(b); err != nil {
+			return nil, err
+		}
+	}
+	if seen["service-quotas"] {
+		if err := e.initQuotaRequestHistory(); err != nil {
 			return nil, err
 		}
 	}
@@ -326,6 +333,16 @@ func (e *Engine) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 // run validates a decoded raw input tree against the official input shape,
 // then authorizes, executes and encodes one operation in any protocol.
 func (e *Engine) run(w http.ResponseWriter, r *http.Request, b *binding, op *Op, region string, raw map[string]any) {
+	if b.spec.Model == "service-quotas" {
+		for _, field := range []string{"DesiredValue", "MaxResults"} {
+			if value, supplied := raw[field]; supplied {
+				if _, ok := value.(json.Number); !ok {
+					e.fail(w, b, op, invalid("%s must be a JSON number.", field))
+					return
+				}
+			}
+		}
+	}
 	official := b.model.Operations[op.Name]
 	input := map[string]any{}
 	if official.Input != "" {

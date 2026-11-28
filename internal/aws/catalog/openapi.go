@@ -60,7 +60,8 @@ func (b *binding) openAPI() map[string]any {
 		}
 		if b.spec.Model == "service-quotas" {
 			delete(responses, "403")
-			responses["400"] = map[string]any{"description": "AccessDeniedException, IllegalArgumentException or NoSuchResourceException in __type."}
+			responses["400"] = map[string]any{"description": "Modeled Service Quotas exception in __type, including AccessDeniedException, IllegalArgumentException, NoSuchResourceException, InvalidPaginationTokenException, ResourceAlreadyExistsException and QuotaExceededException."}
+			responses["500"] = map[string]any{"description": "ServiceException when the local quota operation cannot complete."}
 		}
 		paths["/"] = map[string]any{"post": map[string]any{
 			"operationId": b.spec.Model + "JSONOperation", "tags": []any{tag}, "summary": tag + " JSON " + m.Metadata.JSONVersion + " operations",

@@ -5,12 +5,22 @@
   {"op": "get_service_quota", "args": {"ServiceCode": "b2bi", "QuotaCode": "L-05F6A9EF"}, "expect": {"Quota.Value": 5, "Quota.QuotaName": "Profiles", "Quota.QuotaAppliedAtLevel": "ACCOUNT", "Quota.Adjustable": true, "Quota.GlobalQuota": false, "Quota.QuotaArn": "arn:aws:servicequotas:us-east-1:000000000000:b2bi/L-05F6A9EF"}},
   {"op": "get_service_quota", "args": {"ServiceCode": "b2bi", "QuotaCode": "L-00000000"}, "error": "NoSuchResourceException", "status": 400},
   {"op": "get_service_quota", "args": {"ServiceCode": "b2bi", "QuotaCode": "L-05F6A9EF", "ContextId": "arn:aws:b2bi:us-east-1:000000000000:profiles/fixture"}, "error": "IllegalArgumentException", "status": 400},
-  {"op": "request_service_quota_increase", "args": {"ServiceCode": "b2bi", "QuotaCode": "L-05F6A9EF", "DesiredValue": 10}, "error": "UnknownOperationException", "status": 501}
+  {"op": "request_service_quota_increase", "args": {"ServiceCode": "b2bi", "QuotaCode": "L-05F6A9EF", "DesiredValue": 6.5, "SupportCaseAllowed": false}, "save": {"declined": "RequestedQuota.Id"}, "expect": {"RequestedQuota.Status": "NOT_APPROVED", "RequestedQuota.DesiredValue": 6.5}},
+  {"op": "get_requested_service_quota_change", "args": {"RequestId": "${declined}"}, "expect": {"RequestedQuota.Id": "${declined}", "RequestedQuota.Status": "NOT_APPROVED"}},
+  {"op": "request_service_quota_increase", "args": {"ServiceCode": "b2bi", "QuotaCode": "L-05F6A9EF", "DesiredValue": 10}, "save": {"pending": "RequestedQuota.Id"}, "expect": {"RequestedQuota.Status": "PENDING"}},
+  {"op": "list_requested_service_quota_change_history", "args": {"MaxResults": 1}, "save": {"page": "NextToken"}, "expect": {"RequestedQuotas#count": 1, "RequestedQuotas[0].Id": "${pending}"}},
+  {"op": "list_requested_service_quota_change_history", "args": {"NextToken": "${page}"}, "expect": {"RequestedQuotas#count": 1, "RequestedQuotas[0].Id": "${declined}"}},
+  {"op": "list_requested_service_quota_change_history_by_quota", "args": {"ServiceCode": "b2bi", "QuotaCode": "L-05F6A9EF", "Status": "PENDING"}, "expect": {"RequestedQuotas#count": 1, "RequestedQuotas[0].Id": "${pending}"}},
+  {"op": "request_service_quota_increase", "args": {"ServiceCode": "b2bi", "QuotaCode": "L-05F6A9EF", "DesiredValue": 11}, "error": "ResourceAlreadyExistsException", "status": 400},
+  {"op": "get_service_quota_increase_request_from_template", "args": {"ServiceCode": "b2bi", "QuotaCode": "L-05F6A9EF", "AwsRegion": "us-east-1"}, "error": "UnknownOperationException", "status": 501}
  ],
  "isolation": [
+  {"op": "list_requested_service_quota_change_history", "expect": {"RequestedQuotas#count": 0}},
   {"op": "get_service_quota", "args": {"ServiceCode": "b2bi", "QuotaCode": "L-05F6A9EF"}, "expect": {"Quota.Value": 5}}
  ],
  "after_restart": [
+  {"op": "get_requested_service_quota_change", "args": {"RequestId": "${pending}"}, "expect": {"RequestedQuota.Status": "PENDING", "RequestedQuota.DesiredValue": 10}},
+  {"op": "get_requested_service_quota_change", "args": {"RequestId": "${declined}"}, "expect": {"RequestedQuota.Status": "NOT_APPROVED", "RequestedQuota.DesiredValue": 6.5}},
   {"op": "get_service_quota", "args": {"ServiceCode": "b2bi", "QuotaCode": "L-05F6A9EF"}, "expect": {"Quota.Value": 5}}
  ]
 }

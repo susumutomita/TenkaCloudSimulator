@@ -44,6 +44,16 @@ func (q *request) execute() (map[string]any, error) {
 	if q.e.ownedPrivateRDS != nil && q.b.spec.Model == "rds" {
 		defer q.e.ownedPrivateRDS.lock(q.region, q.op.Kind)()
 	}
+	if q.b.spec.Model == "service-quotas" {
+		switch q.op.Name {
+		case "RequestServiceQuotaIncrease":
+			return q.requestQuotaIncrease()
+		case "GetRequestedServiceQuotaChange":
+			return q.getQuotaIncrease()
+		case "ListRequestedServiceQuotaChangeHistory", "ListRequestedServiceQuotaChangeHistoryByQuota":
+			return q.listQuotaIncreaseHistory()
+		}
+	}
 	switch q.op.Kind {
 	case Create:
 		if q.isECSTaskDefinition() {

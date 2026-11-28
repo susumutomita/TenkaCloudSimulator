@@ -77,7 +77,7 @@ func TestServiceQuotaReadsEnforcedRegionalB2BIProfileLimit(t *testing.T) {
 	h.policy.deny["servicequotas:GetServiceQuota "+arn] = true
 	expect(t, call("service-quotas", "GetServiceQuota", "us-east-1", args), 400, "AccessDeniedException")
 	read("us-west-2")
-	expect(t, call("service-quotas", "RequestServiceQuotaIncrease", "us-east-1", map[string]any{"ServiceCode": "b2bi", "QuotaCode": "L-05F6A9EF", "DesiredValue": 10}), 501, "UnknownOperationException")
+	expect(t, call("service-quotas", "GetServiceQuotaIncreaseRequestFromTemplate", "us-east-1", map[string]any{"ServiceCode": "b2bi", "QuotaCode": b2biProfilesQuota, "AwsRegion": "us-east-1"}), 501, "UnknownOperationException")
 	for _, id := range east {
 		remove("us-east-1", id)
 	}

@@ -19,6 +19,29 @@
     },
     "type": "object"
    },
+   "GetRequestedServiceQuotaChangeRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "RequestId": {
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "RequestId"
+    ],
+    "type": "object"
+   },
+   "GetRequestedServiceQuotaChangeResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "RequestedQuota": {
+      "$ref": "#/components/schemas/RequestedServiceQuotaChange"
+     }
+    },
+    "type": "object"
+   },
    "GetServiceQuotaRequest": {
     "additionalProperties": false,
     "properties": {
@@ -47,6 +70,127 @@
     "properties": {
      "Quota": {
       "$ref": "#/components/schemas/ServiceQuota"
+     }
+    },
+    "type": "object"
+   },
+   "ListRequestedServiceQuotaChangeHistoryByQuotaRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "MaxResults": {
+      "maximum": 100,
+      "minimum": 1,
+      "type": "integer"
+     },
+     "NextToken": {
+      "maxLength": 2048,
+      "type": "string"
+     },
+     "QuotaCode": {
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string"
+     },
+     "QuotaRequestedAtLevel": {
+      "enum": [
+       "ACCOUNT",
+       "RESOURCE",
+       "ALL"
+      ],
+      "type": "string"
+     },
+     "ServiceCode": {
+      "maxLength": 63,
+      "minLength": 1,
+      "type": "string"
+     },
+     "Status": {
+      "enum": [
+       "PENDING",
+       "CASE_OPENED",
+       "APPROVED",
+       "DENIED",
+       "CASE_CLOSED",
+       "NOT_APPROVED",
+       "INVALID_REQUEST"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "ServiceCode",
+     "QuotaCode"
+    ],
+    "type": "object"
+   },
+   "ListRequestedServiceQuotaChangeHistoryByQuotaResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "NextToken": {
+      "maxLength": 2048,
+      "type": "string"
+     },
+     "RequestedQuotas": {
+      "items": {
+       "$ref": "#/components/schemas/RequestedServiceQuotaChange"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "ListRequestedServiceQuotaChangeHistoryRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "MaxResults": {
+      "maximum": 100,
+      "minimum": 1,
+      "type": "integer"
+     },
+     "NextToken": {
+      "maxLength": 2048,
+      "type": "string"
+     },
+     "QuotaRequestedAtLevel": {
+      "enum": [
+       "ACCOUNT",
+       "RESOURCE",
+       "ALL"
+      ],
+      "type": "string"
+     },
+     "ServiceCode": {
+      "maxLength": 63,
+      "minLength": 1,
+      "type": "string"
+     },
+     "Status": {
+      "enum": [
+       "PENDING",
+       "CASE_OPENED",
+       "APPROVED",
+       "DENIED",
+       "CASE_CLOSED",
+       "NOT_APPROVED",
+       "INVALID_REQUEST"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ListRequestedServiceQuotaChangeHistoryResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "NextToken": {
+      "maxLength": 2048,
+      "type": "string"
+     },
+     "RequestedQuotas": {
+      "items": {
+       "$ref": "#/components/schemas/RequestedServiceQuotaChange"
+      },
+      "type": "array"
      }
     },
     "type": "object"
@@ -111,6 +255,131 @@
      },
      "PeriodValue": {
       "type": "integer"
+     }
+    },
+    "type": "object"
+   },
+   "RequestServiceQuotaIncreaseRequest": {
+    "additionalProperties": false,
+    "properties": {
+     "ContextId": {
+      "type": "string"
+     },
+     "DesiredValue": {
+      "maximum": 10000000000,
+      "minimum": 0,
+      "type": "number"
+     },
+     "QuotaCode": {
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string"
+     },
+     "ServiceCode": {
+      "maxLength": 63,
+      "minLength": 1,
+      "type": "string"
+     },
+     "SupportCaseAllowed": {
+      "type": "boolean"
+     }
+    },
+    "required": [
+     "ServiceCode",
+     "QuotaCode",
+     "DesiredValue"
+    ],
+    "type": "object"
+   },
+   "RequestServiceQuotaIncreaseResponse": {
+    "additionalProperties": false,
+    "properties": {
+     "RequestedQuota": {
+      "$ref": "#/components/schemas/RequestedServiceQuotaChange"
+     }
+    },
+    "type": "object"
+   },
+   "RequestedServiceQuotaChange": {
+    "additionalProperties": false,
+    "properties": {
+     "CaseId": {
+      "type": "string"
+     },
+     "Created": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "DesiredValue": {
+      "maximum": 10000000000,
+      "minimum": 0,
+      "type": "number"
+     },
+     "GlobalQuota": {
+      "type": "boolean"
+     },
+     "Id": {
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string"
+     },
+     "LastUpdated": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "QuotaArn": {
+      "type": "string"
+     },
+     "QuotaCode": {
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string"
+     },
+     "QuotaContext": {
+      "$ref": "#/components/schemas/QuotaContextInfo"
+     },
+     "QuotaName": {
+      "type": "string"
+     },
+     "QuotaRequestedAtLevel": {
+      "enum": [
+       "ACCOUNT",
+       "RESOURCE",
+       "ALL"
+      ],
+      "type": "string"
+     },
+     "Requester": {
+      "type": "string"
+     },
+     "ServiceCode": {
+      "maxLength": 63,
+      "minLength": 1,
+      "type": "string"
+     },
+     "ServiceName": {
+      "type": "string"
+     },
+     "Status": {
+      "enum": [
+       "PENDING",
+       "CASE_OPENED",
+       "APPROVED",
+       "DENIED",
+       "CASE_CLOSED",
+       "NOT_APPROVED",
+       "INVALID_REQUEST"
+      ],
+      "type": "string"
+     },
+     "Unit": {
+      "type": "string"
      }
     },
     "type": "object"
@@ -182,7 +451,7 @@
   }
  },
  "info": {
-  "description": "Bounded simulator subset of the official Service Quotas API (2019-06-24). Every other official operation returns HTTP 501 UnknownOperationException. GetServiceQuota reads the enforced B2B Data Interchange Profiles limit (b2bi/L-05F6A9EF) in us-east-1, us-west-2 and eu-west-1. Value is total capacity, including profiles already created. Adjustable describes the AWS quota. The simulator serves only account-level reads of this quota. Defaults, quota discovery, usage, resource contexts and increase requests are unsupported.",
+  "description": "Bounded simulator subset of the official Service Quotas API (2019-06-24). Every other official operation returns HTTP 501 UnknownOperationException. GetServiceQuota reads the enforced B2B Data Interchange Profiles limit (b2bi/L-05F6A9EF) in us-east-1, us-west-2 and eu-west-1. Value is total capacity, including profiles already created. Adjustable describes the AWS quota. An increase request is stored against current account capacity. SupportCaseAllowed=false records NOT_APPROVED. Omitted or true records PENDING locally, with at most one outstanding request per quota and Region. No support case is opened and the local profile limit is unchanged.",
   "title": "Service Quotas (simulator catalog)",
   "version": "2019-06-24"
  },
@@ -199,7 +468,11 @@
       "required": true,
       "schema": {
        "enum": [
-        "ServiceQuotasV20190624.GetServiceQuota"
+        "ServiceQuotasV20190624.GetRequestedServiceQuotaChange",
+        "ServiceQuotasV20190624.GetServiceQuota",
+        "ServiceQuotasV20190624.ListRequestedServiceQuotaChangeHistory",
+        "ServiceQuotasV20190624.ListRequestedServiceQuotaChangeHistoryByQuota",
+        "ServiceQuotasV20190624.RequestServiceQuotaIncrease"
        ],
        "type": "string"
       }
@@ -209,11 +482,37 @@
      "content": {
       "application/x-amz-json-1.1": {
        "examples": {
+        "GetRequestedServiceQuotaChange": {
+         "summary": "X-Amz-Target: ServiceQuotasV20190624.GetRequestedServiceQuotaChange",
+         "value": {
+          "RequestId": "REPLACE-WITH-REQUEST-ID"
+         }
+        },
         "GetServiceQuota": {
          "summary": "X-Amz-Target: ServiceQuotasV20190624.GetServiceQuota",
          "value": {
           "QuotaCode": "L-05F6A9EF",
           "ServiceCode": "b2bi"
+         }
+        },
+        "ListRequestedServiceQuotaChangeHistory": {
+         "summary": "X-Amz-Target: ServiceQuotasV20190624.ListRequestedServiceQuotaChangeHistory",
+         "value": {}
+        },
+        "ListRequestedServiceQuotaChangeHistoryByQuota": {
+         "summary": "X-Amz-Target: ServiceQuotasV20190624.ListRequestedServiceQuotaChangeHistoryByQuota",
+         "value": {
+          "QuotaCode": "L-05F6A9EF",
+          "ServiceCode": "b2bi"
+         }
+        },
+        "RequestServiceQuotaIncrease": {
+         "summary": "X-Amz-Target: ServiceQuotasV20190624.RequestServiceQuotaIncrease",
+         "value": {
+          "DesiredValue": 8,
+          "QuotaCode": "L-05F6A9EF",
+          "ServiceCode": "b2bi",
+          "SupportCaseAllowed": false
          }
         }
        },
@@ -236,7 +535,10 @@
       "description": "Projected official output shape."
      },
      "400": {
-      "description": "AccessDeniedException, IllegalArgumentException or NoSuchResourceException in __type."
+      "description": "Modeled Service Quotas exception in __type, including AccessDeniedException, IllegalArgumentException, NoSuchResourceException, InvalidPaginationTokenException, ResourceAlreadyExistsException and QuotaExceededException."
+     },
+     "500": {
+      "description": "ServiceException when the local quota operation cannot complete."
      },
      "501": {
       "description": "Official operation not implemented by the simulator."
@@ -257,7 +559,7 @@
  ],
  "tags": [
   {
-   "description": "Bounded simulator subset of the official Service Quotas API (2019-06-24). Every other official operation returns HTTP 501 UnknownOperationException. GetServiceQuota reads the enforced B2B Data Interchange Profiles limit (b2bi/L-05F6A9EF) in us-east-1, us-west-2 and eu-west-1. Value is total capacity, including profiles already created. Adjustable describes the AWS quota. The simulator serves only account-level reads of this quota. Defaults, quota discovery, usage, resource contexts and increase requests are unsupported.",
+   "description": "Bounded simulator subset of the official Service Quotas API (2019-06-24). Every other official operation returns HTTP 501 UnknownOperationException. GetServiceQuota reads the enforced B2B Data Interchange Profiles limit (b2bi/L-05F6A9EF) in us-east-1, us-west-2 and eu-west-1. Value is total capacity, including profiles already created. Adjustable describes the AWS quota. An increase request is stored against current account capacity. SupportCaseAllowed=false records NOT_APPROVED. Omitted or true records PENDING locally, with at most one outstanding request per quota and Region. No support case is opened and the local profile limit is unchanged.",
    "name": "Service Quotas"
   }
  ],

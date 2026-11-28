@@ -70,12 +70,31 @@ continues to report five throughout. The account-level read requires
 policy supports action and resource matching for this operation. The
 `servicequotas:service` condition key is outside the local policy contract.
 
-AWS lists Profiles as adjustable. This simulator supports reading the applied
-value. Quota increases, defaults, listings, resource contexts and usage metrics
-are outside this operation. The local B2BI catalog also works in Tokyo, where
+AWS lists Profiles as adjustable. `RequestServiceQuotaIncrease` accepts a desired
+value above the enforced limit. With `SupportCaseAllowed=false` it saves a
+`NOT_APPROVED` request. With true or the default it saves a local `PENDING`
+request. A team can have one pending request per region and retain up to 1,000
+requests across regions. The simulator never opens an external Support case or
+raises the profile limit. The API has no client token. If the response is lost,
+check history before submitting again.
+
+`GetRequestedServiceQuotaChange` retrieves the saved ID.
+`ListRequestedServiceQuotaChangeHistory` lists the last 90 days.
+`ListRequestedServiceQuotaChangeHistoryByQuota` includes older requests for
+this quota. Both lists return newest submissions first, accept status and
+account/resource-level filters, and evaluate the caller's current IAM permission
+on every page. The requests here are account-level. Page tokens belong to the
+process, caller, region, operation and filters that issued them. Persisted
+request IDs survive restart. Creating a request and listing by quota require
+the operation's IAM action on the regional quota ARN. Looking up an ID and
+listing the general history require their respective actions on `*`.
+
+The local B2BI catalog also works in Tokyo, where
 AWS does not list a B2BI endpoint. The quota read returns `NoSuchResourceException`
 there. [B2BI endpoints and quotas](https://docs.aws.amazon.com/general/latest/gr/b2bi-service.html) ·
 [GetServiceQuota](https://docs.aws.amazon.com/servicequotas/2019-06-24/apireference/API_GetServiceQuota.html) ·
+[RequestServiceQuotaIncrease](https://docs.aws.amazon.com/servicequotas/2019-06-24/apireference/API_RequestServiceQuotaIncrease.html) ·
+[ListRequestedServiceQuotaChangeHistory](https://docs.aws.amazon.com/servicequotas/2019-06-24/apireference/API_ListRequestedServiceQuotaChangeHistory.html) ·
 [Service Quotas IAM](https://docs.aws.amazon.com/service-authorization/latest/reference/list_servicequotas.html).
 
 ## ECR repository group membership
