@@ -7,6 +7,9 @@ import urllib.request
 from pathlib import Path
 
 from check import Config, ClientError, boto3, running
+from historical_reference_inventory import verify_historical_routes
+from route53_openapi import project_before_route53
+from test_sakura_openapi import project_sakura_server_list_only
 
 
 def client(endpoint, token, region="us-east-1", audit=None):
@@ -51,13 +54,9 @@ def control(endpoint, token, path, body):
         return json.load(response)
 
 
-# Independent exact main d166f56 inventory plus the bounded S3 multipart POST.
-# Never derive these expectations from the served document being checked.
-from test_sakura_openapi import NEW_IDS, COLLECTION, ITEM
-from route53_openapi import project_before_route53
-
-MAIN_OPERATION_IDS = {'AzureListBlobs', 'DeleteIdentityPolicy', 'ListObjectsV2OrGetBucketLocation', 'UpdateFunctionCode', 'AzureDeleteContainer', 'InvokeLocalRESTProxyPost', 'DeleteResource', 'GCPCreateBucket', 'GetRestApis', 'ListPrincipals', 'GetRestApi', 'AzureDeleteBlob', 'GCPUploadObject', 'ListBuckets', 'DeleteFunction', 'AzureGetContainerProperties', 'GetFunctionConfiguration', 'Invoke', 'GCPGetObject', 'GetPolicy', 'HeadObject', 'PutMethod', 'GetResource', 'InvokeLocalRESTProxyGet', 'GetObject', 'GetStage', 'RemovePermission', 'AzureCreateContainer', 'GCPDownloadObject', 'HeadBucket', 'DeleteRestApi', 'PutObject', 'AzureGetBlob', 'CreateFunction', 'GCPListBuckets', 'GCPGetBucket', 'GCPDeleteBucket', 'CreateRestApi', 'GCPDeleteObject', 'CreateBucket', 'DeleteStage', 'CreateStage', 'GetResources', 'AzurePutBlob', 'GetDeployment', 'GetMethod', 'AzureGetBlobProperties', 'CreateDeployment', 'IAMRoleQueryOperation', 'PutIdentityPolicy', 'CreateResource', 'AzureListContainers', 'Capabilities', 'DeleteObject', 'PutIntegration', 'GCPListObjects', 'GetIdentityPolicy', 'AddPermission', 'DeleteBucket', 'awsRegionalOperation', 'ListFunctions', 'S3MultipartUpload'}
-MAIN_PATHS = {'/2015-03-31/functions/{FunctionName}/code', '/_simulator/providers/gcp/storage/v1/b/{BucketName}/o', '/restapis/{RestApiId}/resources/{ResourceId}/methods/{HttpMethod}/integration', '/restapis/{RestApiId}/deployments/{DeploymentId}', '/_simulator/providers/aws/_execute-api/{Region}/{RestApiId}/{StageName}/{ProxyPath}', '/_simulator/providers/azure/{StorageAccount}', '/_simulator/v1/iam/principals', '/_simulator/providers/gcp/storage/v1/b', '/restapis/{RestApiId}/stages', '/restapis/{RestApiId}/resources', '/2015-03-31/functions/{FunctionName}/invocations', '/_simulator/providers/gcp/upload/storage/v1/b/{BucketName}/o', '/2015-03-31/functions', '/_simulator/v1/iam/principals/{principal}/policy', '/{bucket}/{key}', '/_simulator/providers/azure/{StorageAccount}/{ContainerName}/{BlobName}', '/_simulator/v1/capabilities', '/2015-03-31/functions/{FunctionName}/configuration', '/2015-03-31/functions/{FunctionName}/policy', '/restapis/{RestApiId}', '/_simulator/providers/gcp/storage/v1/b/{BucketName}', '/{bucket}', '/', '/2015-03-31/functions/{FunctionName}/policy/{StatementId}', '/2015-03-31/functions/{FunctionName}', '/restapis/{RestApiId}/stages/{StageName}', '/restapis/{RestApiId}/resources/{ResourceId}/methods/{HttpMethod}', '/restapis/{RestApiId}/deployments', '/restapis/{RestApiId}/resources/{ResourceId}', '/_simulator/providers/azure/{StorageAccount}/{ContainerName}', '/restapis', '/_simulator/providers/gcp/download/storage/v1/b/{BucketName}/o/{ObjectName}', '/_simulator/providers/aws/', '/_simulator/providers/gcp/storage/v1/b/{BucketName}/o/{ObjectName}'}
+def validate_reference_contract(spec):
+    inherited = project_sakura_server_list_only(project_before_route53(spec))
+    verify_historical_routes(inherited)
 
 
 def verify_served_reference(endpoint, token, sdk):
@@ -66,12 +65,8 @@ def verify_served_reference(endpoint, token, sdk):
         with urllib.request.urlopen(request, timeout=5) as response:
             assert response.status == 200
             return json.load(response)
-    spec = project_before_route53(read("/_simulator/docs/openapi.json"))
-    identities = [item["operationId"] for path in spec["paths"].values() for item in path.values()
-                  if isinstance(item, dict) and "operationId" in item]
-    assert len(identities) == len(set(identities)) == 67, "Duplicated/missing operation ID"
-    assert set(identities) == MAIN_OPERATION_IDS | NEW_IDS, "Existing main operation inventory changed"
-    assert set(spec["paths"]) == MAIN_PATHS | {COLLECTION, ITEM} and len(spec["paths"]) == 36, "Existing main path inventory changed"
+    spec = read("/_simulator/docs/openapi.json")
+    validate_reference_contract(spec)
     assert not any("logs" in path.lower() for path in spec["paths"]), "Do not invent a Logs URL"
     examples = spec["paths"]["/"]["post"]["requestBody"]["content"]["application/x-amz-json-1.1"]["examples"]
     required = {"CreateLogGroup", "DescribeLogGroups", "DeleteLogGroup", "CreateLogStream", "DeleteLogStream", "DescribeLogStreams", "PutLogEvents", "GetLogEvents"}

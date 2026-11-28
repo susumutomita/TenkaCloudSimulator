@@ -5,6 +5,7 @@ from jsonschema import Draft202012Validator,ValidationError
 from autoscaling_plans_openapi import project_before_autoscaling_plans
 from ssm_command_reference import project_ssm_commands,OPS
 from ssm_document_reference import project_before_ssm_document_versions
+from route53_openapi import project_before_route53_console
 from test_sakura_openapi import project_server_list
 from openapi_json10 import validator
 ROOT=Path(__file__).resolve().parents[2]
@@ -13,6 +14,7 @@ BASE_HASH='a476756f5844114b6f5f45c4652da5c1fd6812b8488af674e19c94b64d2aed53'
 
 def inherited_reference(spec):
     projected = project_before_autoscaling_plans(project_server_list(spec))
+    project_before_route53_console(projected)
     project_ssm_commands(projected)
     # The pinned RunCommand baseline also predates ListDocumentVersions.
     project_before_ssm_document_versions(projected)
