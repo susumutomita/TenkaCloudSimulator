@@ -83,6 +83,7 @@ func TestBatchDeleteJobQueueRequiresDisabledState(t *testing.T) {
 		t.Fatal("deleting the disabled queue changed its references or the other queue")
 	}
 	call("deletejobqueue", map[string]any{"jobQueue": other}, 200, "")
+	call("updatecomputeenvironment", map[string]any{"computeEnvironment": environment, "state": "DISABLED"}, 200, "")
 	call("deletecomputeenvironment", map[string]any{"computeEnvironment": environment}, 200, "")
 	call("deleteschedulingpolicy", map[string]any{"arn": policy}, 200, "")
 }
