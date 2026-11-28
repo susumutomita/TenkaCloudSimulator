@@ -31,6 +31,13 @@
       "disposition": "presentation",
       "reason": "Correct existing RDS documentation to separate metadata-only defaults from the already implemented opt-in owned PostgreSQL fixed-probe path, preserving snapshot/guest/public SQL/readiness limitations and every wire operation/schema.",
       "models": []
+    },
+    {
+      "path": "tools/console/tests/fixtures/catalog-descriptors.json",
+      "sha256": "f6f755f80e9881c174113e5c38ee183d4887a1ff637bc4c930ce78cf01c9e79b",
+      "disposition": "presentation",
+      "reason": "Regenerate the existing Console descriptor preservation fixture from the same corrected RDS Bounds. Only the RDS bounds array changes; all other descriptor fields and service records remain identical. No UI or runtime behavior is added.",
+      "models": []
     }
   ]
 }
