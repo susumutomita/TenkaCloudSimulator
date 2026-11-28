@@ -277,6 +277,22 @@ func (i *Identities) Names() ([]string, error) {
 	}
 	return names, rows.Err()
 }
+
+// DecisionSnapshot reads one principal policy for a group of related checks.
+func (i *Identities) DecisionSnapshot(ctx context.Context, name string) (func(action, resource string) string, error) {
+	if name == Administrator {
+		return func(string, string) string { return "allowed" }, nil
+	}
+	policy, found, err := i.PolicyContext(ctx, name)
+	if err != nil {
+		return nil, err
+	}
+	if !found {
+		return func(string, string) string { return "implicitDeny" }, nil
+	}
+	return func(action, resource string) string { return Evaluate(policy, action, resource) }, nil
+}
+
 func (i *Identities) Decision(name, action, resource string) (string, error) {
 	return i.DecisionContext(context.Background(), name, action, resource)
 }

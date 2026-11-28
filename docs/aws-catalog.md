@@ -57,6 +57,31 @@ served.
 Products assessed as not servable at all, with evidence, are listed in the
 [coverage assessment](coverage-assessment.md).
 
+## ECR repository group membership
+
+`CreateGroup` accepts `ResourceQuery.Type` equal to `TAG_FILTERS_1_0` and a
+`Query` string containing this JSON object. It matches one exact tag key and
+one exact value on local private ECR repositories in the group's region.
+
+```json
+{"ResourceTypeFilters":["AWS::ECR::Repository"],"TagFilters":[{"Key":"Team","Values":["blue"]}]}
+```
+
+`GetGroupQuery` reads the stored definition by group name or ARN. `UpdateGroupQuery`
+replaces it on an existing query group. `ListGroupResources` returns the current
+matching repository ARNs in creation order. Creating, tagging, untagging and
+deleting a repository changes membership on the next read. `MaxResults` accepts
+1–50. Supply `NextToken` in the same region on the same group revision to continue.
+
+Readers need `resource-groups:ListGroupResources` on the group ARN, along with
+`tag:GetResources`, `cloudformation:DescribeStacks` and `cloudformation:ListStackResources`
+on `*`. AWS lists these three additional permissions for the API. Each membership
+page checks all four against one fresh principal policy snapshot. Queryless groups retain their metadata and tag operations.
+Search, explicit member management, CloudFormation queries, service configurations,
+extra tag filters and other resource types remain outside this slice. [AWS supported resource types](https://docs.aws.amazon.com/ARG/latest/userguide/supported-resources.html) ·
+[resource query formats](https://docs.aws.amazon.com/ARG/latest/userguide/gettingstarted-query.html) ·
+[ListGroupResources permissions and response](https://docs.aws.amazon.com/ARG/latest/APIReference/API_ListGroupResources.html).
+
 ## Routing and authorization
 
 - JSON protocols are routed by the official `X-Amz-Target` prefix.
