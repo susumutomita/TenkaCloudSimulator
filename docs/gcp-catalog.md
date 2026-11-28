@@ -243,10 +243,9 @@ discovery subsets.
 
 ## Not served
 
-These open Google Cloud Issues have no catalog API. The reason is either the
-pinned corpus or the service itself. App Engine (#318) is not a catalog API:
-its single permanent application and code deployments are served by the native
-[App Engine provider](gcp-appengine.md), which runs Python versions.
+The table records why each product is outside the generic catalog and identifies
+its native provider when one exists. The native App Engine provider serves its
+single permanent application and runs Python code deployments. [App Engine guide](gcp-appengine.md)
 
 | Issue | Service | Reason |
 | --- | --- | --- |
@@ -258,7 +257,7 @@ its single permanent application and code deployments are served by the native
 | #334 | Cloud Storage for Firebase | `firebasestorage.v1beta` only links Cloud Storage buckets to Firebase; those buckets belong to the native Cloud Storage provider |
 | #337 | Bigtable | `instances.create` creates an instance and its map of clusters in one request, which the one-resource create cannot represent |
 | #341 | Cloud SQL | `sqladmin.v1` flat paths have no `global`, `regions` or `zones` scope, which the flat conventions require, and many instance methods are lifecycle actions (`restart`, `failover`, `clone`, `import`, `executeSql`) |
-| #343 | Cloud DNS | `dns.v1` flat paths have no `global`, `regions` or `zones` scope, and a record set is named by two segments (`rrsets/{name}/{type}`) |
+| #343 | Cloud DNS | The native Cloud DNS provider serves public managed zones, change batches and record sets with the `dns.v1` paths. [Cloud DNS operations and limits](acceptance/gcp-cloud-dns.md) |
 | #346, #348, #349 | Dedicated, Cross-Cloud and Cross-Site Interconnect | `interconnects.insert` orders a physical circuit at an interconnect location, and Cross-Site Interconnect uses wire groups; only Partner Interconnect attachments are served |
 | #352 | Cloud Network Insights | No discovery document in the pinned corpus |
 | #360 | Media CDN | The `edgeCache*` resources of `networkservices.v1` expose only IAM policy methods |
