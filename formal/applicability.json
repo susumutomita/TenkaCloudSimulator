@@ -1,10 +1,10 @@
 {
   "version": 1,
-  "base_sha": "b97ddbd26f3e78905bd8e26a944fb7f0a28d8a42",
+  "base_sha": "64e5dd28dbe43f43480dfab555ffdd9aff572eb0",
   "changes": [
     {
       "path": "README.md",
-      "sha256": "05b54c1dbd165109f44426968ab7fb0b8f4f1a0f56879ed89b03dfea16fdcf6a",
+      "sha256": "91a6c671db2575ddbb915f161bcabf3e85da00bba867abe5f9ca738ca990dede",
       "disposition": "documentation",
       "reason": "Document the stored ECR tag query, real membership and bounded native APIs.",
       "models": []
@@ -25,14 +25,14 @@
     },
     {
       "path": "docs/design/0001-go-standalone.md",
-      "sha256": "1e88ca1cd4d2ae46bcc99f222754734102ab4e1fbd8fa775e8fab4493388b3fe",
+      "sha256": "0b261b70b66ef976fa37a0b03411043ade931f3d903d7438f0eb23b3cfd64fdb",
       "disposition": "documentation",
       "reason": "Document the stored ECR tag query, real membership and bounded native APIs.",
       "models": []
     },
     {
       "path": "formal/models.json",
-      "sha256": "30eabb14062c7c07c01aa5c25938c50a3e6d7da86d48f3c4c932c01bd04fab46",
+      "sha256": "f3d09efb10df838c9e9297378998ff088e18df22ce43d5ac6b6e4d68664bf6dc",
       "disposition": "formal-infrastructure",
       "reason": "Associate the query and membership implementation with the existing catalog lifecycle model.",
       "models": []
@@ -216,7 +216,7 @@
           "limits": "The catalog model abstracts authorization before observation. It does not represent policy revisions, specific dependent IAM actions, database reads or generated reference text."
         }
       ],
-      "sha256": "a92966ab3d4c1c7ab4f35bf404e6a607e87f37e71c392f3ffbdc9c6dd01361a1"
+      "sha256": "0cacfd941e66bc319cbee33dabff57b31997dd3d089fa576c4780ec2898d9123"
     },
     {
       "path": "test/e2e/catalog_fixtures/resource-groups.json",
@@ -227,7 +227,7 @@
     },
     {
       "path": "test/e2e/check.py",
-      "sha256": "419b9482f62f60eba3d58069870127b5df79a573de56e271607bd0cab577f51d",
+      "sha256": "520678b5da4cf2b4d794c6e39972eeb3be1c9ab0da4bda6b9bcf4008752cdf82",
       "disposition": "test-support",
       "reason": "Exercise real named-group query operations and preservation, authorization and ECR membership behavior through the relevant test entry point.",
       "models": []

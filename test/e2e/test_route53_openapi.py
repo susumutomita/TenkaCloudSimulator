@@ -20,6 +20,48 @@ class Route53Reference(unittest.TestCase):
         projected=project_before_route53(self.spec)
         self.assertEqual(set(self.spec['paths'])-set(projected['paths']),ROUTE53_PATHS)
 
+    def test_console_tag_correction_is_exact_and_preserves_path_hashes(self):
+        import route53_openapi
+        validate_route53(self.spec)
+        self.assertEqual(route53_openapi.CONTRACT_SHA256,
+                         '1210ce75c2af0b81df6acb18207f1a027627d48c0c75932b34a9792d154e7388')
+        current = next(tag for tag in self.spec['tags'] if tag['name'] == route53_openapi.TAG)
+        self.assertIn('A dedicated Route53 Console is available.', current['description'])
+        stale = 'Bounded public zones and saved-state answers only. No external DNS, private VPC zones, aliases, routing policies, console or CloudFormation.'
+        for description in (stale, current['description'] + ' External DNS is available.'):
+            broken = copy.deepcopy(self.spec)
+            next(tag for tag in broken['tags'] if tag['name'] == route53_openapi.TAG)['description'] = description
+            with self.subTest(description=description), self.assertRaises(AssertionError):
+                validate_route53(broken)
+
+    def test_historical_console_tag_projection_checks_current_contract(self):
+        from route53_openapi import TAG, PRE_CONSOLE_DESCRIPTION, project_before_route53_console
+        from test_sakura_openapi import project_server_list
+
+        document = copy.deepcopy(self.spec)
+        live = project_server_list(document)
+        self.assertEqual(document, self.spec)
+        self.assertEqual(live['tags'], [tag for tag in document['tags'] if tag['name'] != 'Sakura Server metadata'])
+        expected = copy.deepcopy(document)
+        tag = next(tag for tag in expected['tags'] if tag['name'] == TAG)
+        tag['description'] = PRE_CONSOLE_DESCRIPTION
+        project_before_route53_console(document)
+        self.assertEqual(document, expected)
+
+        for mutation in ('missing', 'duplicate', 'stale', 'extra field'):
+            candidate = copy.deepcopy(self.spec)
+            tag = next(tag for tag in candidate['tags'] if tag['name'] == TAG)
+            if mutation == 'missing':
+                candidate['tags'].remove(tag)
+            elif mutation == 'duplicate':
+                candidate['tags'].append(copy.deepcopy(tag))
+            elif mutation == 'stale':
+                tag['description'] = PRE_CONSOLE_DESCRIPTION
+            else:
+                tag['unexpected'] = True
+            with self.subTest(mutation=mutation), self.assertRaises(AssertionError):
+                project_before_route53_console(candidate)
+
     @staticmethod
     def remove_ptr_descriptor(spec):
         changes = spec['paths']['/2013-04-01/hostedzone/{Id}/rrset']['post']
