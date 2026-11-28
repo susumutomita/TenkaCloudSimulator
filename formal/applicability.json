@@ -6,35 +6,35 @@
       "path": "README.md",
       "sha256": "afa031ce66bc73a933eb35bf3fa7a65919c7b5186a69fa85c76eb833a03de57e",
       "disposition": "documentation",
-      "reason": "Bounded PCS queue ID association validation and referenced group deletion; no scheduler or provisioned lifecycle support.",
+      "reason": "Bounded PCS queue ID association validation, transactional deletion protection and exact native/Console test controls; no scheduler or provisioned lifecycle support.",
       "models": []
     },
     {
       "path": "docs/aws-catalog-services.md",
       "sha256": "3ed05046ec5497472a8dd1a5af85d3ed3cb2331f8c05a63ad231f3c9baf8b295",
       "disposition": "documentation",
-      "reason": "Bounded PCS queue ID association validation and referenced group deletion; no scheduler or provisioned lifecycle support.",
+      "reason": "Bounded PCS queue ID association validation, transactional deletion protection and exact native/Console test controls; no scheduler or provisioned lifecycle support.",
       "models": []
     },
     {
       "path": "docs/design/0001-go-standalone.md",
       "sha256": "a3a37eb25b7da84a6baf7da8a1a647276987a80674e9bc134044311fe86f635a",
       "disposition": "documentation",
-      "reason": "Bounded PCS queue ID association validation and referenced group deletion; no scheduler or provisioned lifecycle support.",
+      "reason": "Bounded PCS queue ID association validation, transactional deletion protection and exact native/Console test controls; no scheduler or provisioned lifecycle support.",
       "models": []
     },
     {
       "path": "docs/pcs-queue-associations.md",
       "sha256": "70c9ed6176e234e724c0e37e2973b65ebc5b23cc1c3a85960ffd96726874d454",
       "disposition": "documentation",
-      "reason": "Bounded PCS queue ID association validation and referenced group deletion; no scheduler or provisioned lifecycle support.",
+      "reason": "Bounded PCS queue ID association validation, transactional deletion protection and exact native/Console test controls; no scheduler or provisioned lifecycle support.",
       "models": []
     },
     {
       "path": "formal/PCSQueueAssociations.cfg",
       "sha256": "8f5fc9264c5145f23d20dadb69fdeb1572218e55d74967e586eaf7cbc75b5402",
       "disposition": "modeled",
-      "reason": "Bounded PCS queue ID association validation and referenced group deletion; no scheduler or provisioned lifecycle support.",
+      "reason": "Bounded PCS queue ID association validation, transactional deletion protection and exact native/Console test controls; no scheduler or provisioned lifecycle support.",
       "models": [
         {
           "id": "PCSQueueAssociations",
@@ -53,7 +53,7 @@
       "path": "formal/PCSQueueAssociations.tla",
       "sha256": "b523e3aede244565e4d16a71a6ceb96d427f39188a737e9468c54eae4ea20edc",
       "disposition": "modeled",
-      "reason": "Bounded PCS queue ID association validation and referenced group deletion; no scheduler or provisioned lifecycle support.",
+      "reason": "Bounded PCS queue ID association validation, transactional deletion protection and exact native/Console test controls; no scheduler or provisioned lifecycle support.",
       "models": [
         {
           "id": "PCSQueueAssociations",
@@ -72,14 +72,14 @@
       "path": "formal/models.json",
       "sha256": "dc0c898c812d3f429af6f6b0c6469680736d133b70570e9e366f9ad220688443",
       "disposition": "formal-infrastructure",
-      "reason": "Bounded PCS queue ID association validation and referenced group deletion; no scheduler or provisioned lifecycle support.",
+      "reason": "Bounded PCS queue ID association validation, transactional deletion protection and exact native/Console test controls; no scheduler or provisioned lifecycle support.",
       "models": []
     },
     {
       "path": "internal/aws/catalog/pcs_queue_references.go",
-      "sha256": "30e1edfccfb6443666ffc0d21ff7be8d92a3057a368dbb6a9a7375a22e2158a6",
+      "sha256": "e0cf3016a9582354e53acf4f1211ceb607d91d0d659f7fc673404c8c54eea0a1",
       "disposition": "modeled",
-      "reason": "Bounded PCS queue ID association validation and referenced group deletion; no scheduler or provisioned lifecycle support.",
+      "reason": "Bounded PCS queue ID association validation, transactional deletion protection and exact native/Console test controls; no scheduler or provisioned lifecycle support.",
       "models": [
         {
           "id": "PCSQueueAssociations",
@@ -96,16 +96,16 @@
     },
     {
       "path": "internal/aws/catalog/pcs_queue_references_test.go",
-      "sha256": "6bc0d2b4f677bb8e471f7e21e4628446a6ca507984310927cd6f2062d7f4beb2",
+      "sha256": "cf6f5f72a08ae125ced4c4ecdd7398bcb2c916b35255a0f8ad033e55c9c661aa",
       "disposition": "test-support",
-      "reason": "Bounded PCS queue ID association validation and referenced group deletion; no scheduler or provisioned lifecycle support.",
+      "reason": "Bounded PCS queue ID association validation, transactional deletion protection and exact native/Console test controls; no scheduler or provisioned lifecycle support.",
       "models": []
     },
     {
       "path": "internal/aws/catalog/semantics.go",
       "sha256": "0b646a3dbfddfc3066a021925c4c3cf40d9bee212277e198d501c42c22fe9ff7",
       "disposition": "modeled",
-      "reason": "Bounded PCS queue ID association validation and referenced group deletion; no scheduler or provisioned lifecycle support.",
+      "reason": "Bounded PCS queue ID association validation, transactional deletion protection and exact native/Console test controls; no scheduler or provisioned lifecycle support.",
       "models": [
         {
           "id": "PCSQueueAssociations",
@@ -124,7 +124,7 @@
       "path": "internal/aws/catalog/services_compute3.go",
       "sha256": "c69f5d4cf0e790881688c5bdae693c766f82ebee4f3b134fd1997a19064236cd",
       "disposition": "modeled",
-      "reason": "Bounded PCS queue ID association validation and referenced group deletion; no scheduler or provisioned lifecycle support.",
+      "reason": "Bounded PCS queue ID association validation, transactional deletion protection and exact native/Console test controls; no scheduler or provisioned lifecycle support.",
       "models": [
         {
           "id": "PCSQueueAssociations",
@@ -138,6 +138,27 @@
           "limits": "Finite abstract metadata reference admission and deletion only; not Go, SQLite, HTTP, IAM matching, cancellation timing, real cloud lifecycle or refinement proof."
         }
       ]
+    },
+    {
+      "path": "scripts/formal_model_gate.py",
+      "sha256": "079b273b2a4a5f0ee2fc56cd0c8efb5db791755b7af0b598816b9e80ea698e96",
+      "disposition": "formal-infrastructure",
+      "reason": "Bounded PCS queue ID association validation, transactional deletion protection and exact native/Console test controls; no scheduler or provisioned lifecycle support.",
+      "models": []
+    },
+    {
+      "path": "scripts/test-formal-gate.py",
+      "sha256": "97677555b6d2601a5a5ef825c175bd2795da69d8e59040f20c330a12fb165773",
+      "disposition": "formal-infrastructure",
+      "reason": "Bounded PCS queue ID association validation, transactional deletion protection and exact native/Console test controls; no scheduler or provisioned lifecycle support.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/pcs_queue_associations.py",
+      "sha256": "4788649922a8870cd8553129d9f09fd951a70178c040f417e076a34deb2c1060",
+      "disposition": "test-support",
+      "reason": "Bounded PCS queue ID association validation, transactional deletion protection and exact native/Console test controls; no scheduler or provisioned lifecycle support.",
+      "models": []
     }
   ]
 }

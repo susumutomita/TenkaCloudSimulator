@@ -3,6 +3,7 @@ package catalog
 import (
 	"database/sql"
 	"errors"
+	"fmt"
 )
 
 // PCS uses compute node group IDs, rather than the ARN references used by
@@ -13,6 +14,19 @@ func (q *request) checkPCSQueueReferences(db querier, res *Resource, document ma
 		return nil
 	}
 	parent, _ := document["clusterId"].(string)
+	if q.op != nil {
+		identifier, _ := q.input[q.op.Parent].(string)
+		cluster, err := find(db, "pcs", q.region, "cluster", "", identifier)
+		if errors.Is(err, sql.ErrNoRows) {
+			return &fault{kind: "notfound", message: "The queue cluster does not exist."}
+		}
+		if err != nil {
+			return err
+		}
+		if parent != cluster.ID {
+			return fmt.Errorf("PCS queue cluster identity is inconsistent; saved state preserved")
+		}
+	}
 	configurations, _ := document["computeNodeGroupConfigurations"].([]any)
 	for _, entry := range configurations {
 		configuration, _ := entry.(map[string]any)
@@ -27,6 +41,9 @@ func (q *request) checkPCSQueueReferences(db querier, res *Resource, document ma
 		}
 		if err != nil {
 			return err
+		}
+		if found.Document["clusterId"] != parent {
+			return fmt.Errorf("PCS compute node group cluster identity is inconsistent; saved state preserved")
 		}
 	}
 	return nil

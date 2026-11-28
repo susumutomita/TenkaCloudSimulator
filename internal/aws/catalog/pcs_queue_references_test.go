@@ -210,3 +210,41 @@ func TestPCSCompetingAssociationOrders(t *testing.T) {
 		})
 	}
 }
+
+func TestPCSQueueAssociationRejectsCorruptParentIdentity(t *testing.T) {
+	h := newHarness(t, pcs)
+	cluster, group := pcsAssociationSeed(t, h, "canonical")
+	other, _ := pcsAssociationSeed(t, h, "different")
+	made := h.json1("pcs", "CreateQueue", map[string]any{"clusterIdentifier": cluster, "queueName": "canonicalqueue", "computeNodeGroupConfigurations": []any{map[string]any{"computeNodeGroupId": group}}})
+	expect(t, made, 200, "")
+	queueARN := str(made.body["queue"].(map[string]any)["arn"])
+	for _, kind := range []string{"queue", "computeNodeGroup"} {
+		t.Run(kind, func(t *testing.T) {
+			arn := queueARN
+			if kind == "computeNodeGroup" {
+				arn = "arn:aws:pcs:us-east-1:000000000000:computenodegroup/" + group
+			}
+			saved, err := findARN(h.db, "pcs", arn)
+			if err != nil {
+				t.Fatal(err)
+			}
+			original, _ := json.Marshal(saved.Document)
+			saved.Document["clusterId"] = other
+			corrupt, _ := json.Marshal(saved.Document)
+			if _, err := h.db.Exec("UPDATE aws_catalog_resources SET document=? WHERE arn=?", string(corrupt), arn); err != nil {
+				t.Fatal(err)
+			}
+			result := h.json1("pcs", "UpdateQueue", map[string]any{"clusterIdentifier": cluster, "queueIdentifier": "canonicalqueue", "computeNodeGroupConfigurations": []any{map[string]any{"computeNodeGroupId": group}}})
+			if result.status != 500 {
+				t.Fatalf("corrupt identity admitted: %d", result.status)
+			}
+			var after string
+			if err := h.db.QueryRow("SELECT document FROM aws_catalog_resources WHERE arn=?", arn).Scan(&after); err != nil || after != string(corrupt) {
+				t.Fatal("corrupt state rewritten", err)
+			}
+			if _, err := h.db.Exec("UPDATE aws_catalog_resources SET document=? WHERE arn=?", string(original), arn); err != nil {
+				t.Fatal(err)
+			}
+		})
+	}
+}

@@ -4818,6 +4818,21 @@ REQUIRED_SOURCE_SCOPES['StoreConnectionLifetime'] = {
 }
 
 
+BASE_MODELS.add('PCSQueueAssociations')
+BASE_INVARIANTS['PCSQueueAssociations'] = {
+    'TypeOK', 'DeletionGuard', 'NoDanglingReferences', 'SameScope',
+    'DeniedUnchanged', 'CanceledUnchanged', 'RejectedUnchanged',
+}
+REQUIRED_MUTANTS['PCSQueueAssociations'] = {
+    'MissingLiveReference', 'CrossClusterReference', 'DeleteReferencedGroup',
+    'DeniedMutation', 'CanceledMutation',
+}
+REQUIRED_SOURCE_SCOPES['PCSQueueAssociations'] = {
+    'internal/aws/catalog/pcs_queue_references.go',
+    'internal/aws/catalog/semantics.go', 'internal/aws/catalog/services_compute3.go',
+}
+
+
 def load_registry(root, relative='formal/models.json'):
     root = Path(root)
     registry_path = asset(root, relative)
