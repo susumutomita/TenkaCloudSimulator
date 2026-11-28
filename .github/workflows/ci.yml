@@ -3,16 +3,16 @@ on:
   workflow_dispatch:
     inputs:
       scope:
-        description: 'Run the complete gate alone or together with the client fixtures'
+        description: 'Choose the complete gate on Ubuntu 24.04 or the SDK/Chromium fixtures on Ubuntu 22.04'
         type: choice
-        default: full-and-clients
-        options: [full-and-clients, full-gate]
+        default: full-gate
+        options: [full-gate, clients]
 permissions:
   contents: read
 jobs:
   complete-gate-and-stock-sdk:
     name: Complete gate, Kafka and Batch SDK, and MSK Scalar at 1478bba
-    runs-on: ubuntu-22.04
+    runs-on: ${{ inputs.scope == 'clients' && 'ubuntu-22.04' || 'ubuntu-24.04' }}
     timeout-minutes: 115
     steps:
       - uses: actions/checkout@v7.0.1
@@ -48,7 +48,7 @@ jobs:
           PY
       - name: Set up CPython for the pinned SDK and Chromium tools
         id: python
-        if: ${{ !cancelled() && steps.source.outcome == 'success' }}
+        if: ${{ !cancelled() && inputs.scope == 'clients' && steps.source.outcome == 'success' }}
         run: |
           python="$RUNNER_TOOL_CACHE/Python/3.12.16/x64/bin/python3.12"
           test -x "$python"
@@ -56,6 +56,7 @@ jobs:
           "$python" --version > "$RUNNER_TEMP/msk-batch-evidence/python.txt"
       - name: Run unfiltered make before-commit
         id: gate
+        if: ${{ !cancelled() && inputs.scope == 'full-gate' && steps.source.outcome == 'success' }}
         env:
           # Use Ubuntu's interpreter and native trust store for the standard
           # repository gate. The browser and SDK keep their separately pinned venv.
@@ -63,8 +64,7 @@ jobs:
         run: |
           umask 077
           "$PYTHON" -c 'import sys; print(sys.version.split()[0], sys.executable)' > "$RUNNER_TEMP/msk-batch-evidence/gate-python.txt"
-          for interpreter in "$PYTHON" "$RUNNER_TOOL_CACHE/Python/3.12.16/x64/bin/python3.12"; do
-            "$interpreter" - <<'TRUST' >> "$RUNNER_TEMP/msk-batch-evidence/python-trust.jsonl"
+          "$PYTHON" - <<'TRUST' > "$RUNNER_TEMP/msk-batch-evidence/python-trust.jsonl"
           import json, os, ssl, sys
           context = ssl.create_default_context()
           print(json.dumps({'interpreter': sys.executable, 'version': sys.version.split()[0],
@@ -74,7 +74,6 @@ jobs:
                             'ca_file_override_present': 'SSL_CERT_FILE' in os.environ,
                             'ca_dir_override_present': 'SSL_CERT_DIR' in os.environ}))
           TRUST
-          done
           git rev-parse --is-shallow-repository > "$RUNNER_TEMP/msk-batch-evidence/shallow.txt"
           df -Pk . "$RUNNER_TEMP" | awk 'NR > 1 {print $4}' > "$RUNNER_TEMP/msk-batch-evidence/free-kib-before.txt"
           result=0
@@ -85,11 +84,11 @@ jobs:
           exit "$result"
       - name: Verify the binary for the stock catalog fixtures
         id: binary
-        if: ${{ !cancelled() && steps.source.outcome == 'success' && (steps.gate.outcome == 'success' || inputs.scope == 'full-and-clients') }}
+        if: ${{ !cancelled() && steps.source.outcome == 'success' && (steps.gate.outcome == 'success' || inputs.scope == 'clients') }}
         run: |
           test -z "$(git status --porcelain)"
-          # The standard gate builds last. If it stopped earlier, still exercise
-          # the SDK on a freshly built binary and preserve the original gate exit.
+          # The complete gate builds last. A separately selected client run
+          # builds the same fixed source on the Chromium-supported Jammy image.
           if test ! -x dist/tenkacloud-simulator; then make build; fi
           go version -m dist/tenkacloud-simulator > "$RUNNER_TEMP/msk-batch-evidence/build.txt"
           grep -Fq 'vcs.revision=1478bbacf026b2d5924dc6e20a1fe8f953d7c22f' "$RUNNER_TEMP/msk-batch-evidence/build.txt"
@@ -97,7 +96,7 @@ jobs:
           sha256sum dist/tenkacloud-simulator > "$RUNNER_TEMP/msk-batch-evidence/binary.sha256"
       - name: Install the checked-in SDK requirements
         id: sdk_tools
-        if: ${{ !cancelled() && inputs.scope == 'full-and-clients' && steps.python.outcome == 'success' && steps.binary.outcome == 'success' }}
+        if: ${{ !cancelled() && inputs.scope == 'clients' && steps.python.outcome == 'success' && steps.binary.outcome == 'success' }}
         run: |
           "$RUNNER_TOOL_CACHE/Python/3.12.16/x64/bin/python3.12" -m venv "$RUNNER_TEMP/msk-batch-venv"
           "$RUNNER_TEMP/msk-batch-venv/bin/pip" install -r scripts/requirements-test.txt
@@ -207,7 +206,7 @@ jobs:
               'go-race-coverage': 'go test -p 1 -race -coverpkg=./...',
               'coverage-gate': 'python3 scripts/check-coverage.py', 'build': 'CGO_ENABLED=0 go build',
           }
-          lines = text.splitlines()
+          lines = [re.sub(r'^/usr/bin/python3(?= )', 'python3', line) for line in text.splitlines()]
           entered = [name for name, command in markers.items() if any(line.startswith(command) for line in lines)]
           allowed_targets = {'format-check','vet','verify-assets','before-commit','test','test-scripts','test-go','build'}
           failed_targets = [{'line': int(number), 'target': target} for number, target in

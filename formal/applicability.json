@@ -4,9 +4,9 @@
   "changes": [
     {
       "path": ".github/workflows/ci.yml",
-      "sha256": "54df079039104cbf5f17c97e5045419898ee77f70624ab5b743d88a9824e145b",
+      "sha256": "ab3d6d93328632e7a1ac1a570cd70b8e44b6ae9a3a8a4277ba2a163edcba491e",
       "disposition": "formal-infrastructure",
-      "reason": "Manual-only verification checks out the immutable reviewed MSK source, runs the complete default gate plus stock Kafka/Batch and sandboxed SDK/Cloudscape/Scalar lifecycles on Ubuntu 22.04, and retains classified evidence outside the product checkout.",
+      "reason": "Manual-only fixed-source verification uses the Ubuntu 24.04 system trust store for the original complete gate and the supported Ubuntu 22.04 browser image for selectable stock Kafka, Batch and Scalar fixtures, retaining classified outcomes outside the checkout.",
       "models": []
     }
   ]
