@@ -200,6 +200,9 @@
                     "$ref": "#/components/schemas/KMSRevokeGrantInput"
                   },
                   {
+                    "$ref": "#/components/schemas/KMSScheduleKeyDeletionInput"
+                  },
+                  {
                     "$ref": "#/components/schemas/SecretsListSecretVersionIdsInput"
                   },
                   {
@@ -532,6 +535,21 @@
                   "value": {
                     "KeyId": "11111111-1111-4111-8111-111111111111",
                     "GrantId": "0000000000000000000000000000000000000000000000000000000000000000"
+                  }
+                },
+                "KMSScheduleKeyDeletion": {
+                  "summary": "X-Amz-Target: TrentService.ScheduleKeyDeletion",
+                  "description": "Replace KeyId with the ID or ARN of your own local practice key.",
+                  "value": {
+                    "KeyId": "11111111-1111-4111-8111-111111111111",
+                    "PendingWindowInDays": 7
+                  }
+                },
+                "KMSCancelKeyDeletion": {
+                  "summary": "X-Amz-Target: TrentService.CancelKeyDeletion",
+                  "description": "Replace KeyId with the ID or ARN of your own local practice key.",
+                  "value": {
+                    "KeyId": "11111111-1111-4111-8111-111111111111"
                   }
                 },
                 "ListSecretVersionIds": {
@@ -1618,6 +1636,12 @@
                       "$ref": "#/components/schemas/KMSGrantPage"
                     },
                     {
+                      "$ref": "#/components/schemas/KMSScheduledDeletion"
+                    },
+                    {
+                      "$ref": "#/components/schemas/KMSCanceledDeletion"
+                    },
+                    {
                       "type": "object"
                     },
                     {
@@ -2150,6 +2174,24 @@
             },
             "response": {
               "description": "empty HTTP200 body"
+            }
+          },
+          "ScheduleKeyDeletion": {
+            "target": "TrentService.ScheduleKeyDeletion",
+            "request": {
+              "$ref": "#/components/schemas/KMSScheduleKeyDeletionInput"
+            },
+            "response": {
+              "$ref": "#/components/schemas/KMSScheduledDeletion"
+            }
+          },
+          "CancelKeyDeletion": {
+            "target": "TrentService.CancelKeyDeletion",
+            "request": {
+              "$ref": "#/components/schemas/KMSKeyInput"
+            },
+            "response": {
+              "$ref": "#/components/schemas/KMSCanceledDeletion"
             }
           }
         },
@@ -15965,6 +16007,10 @@
           "CreationDate": {
             "type": "number"
           },
+          "DeletionDate": {
+            "type": "number",
+            "description": "UTC deadline in seconds since the Unix epoch, present while PendingDeletion."
+          },
           "Enabled": {
             "type": "boolean"
           },
@@ -15979,7 +16025,8 @@
             "type": "string",
             "enum": [
               "Enabled",
-              "Disabled"
+              "Disabled",
+              "PendingDeletion"
             ]
           },
           "Origin": {
@@ -17889,6 +17936,69 @@
         "required": [
           "Grants",
           "Truncated"
+        ],
+        "additionalProperties": false
+      },
+      "KMSScheduleKeyDeletionInput": {
+        "type": "object",
+        "properties": {
+          "KeyId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2048,
+            "description": "Local UUID key ID or full same-region/account ARN. Replace example IDs with CreateKey output. Aliases and cross-account keys are unsupported."
+          },
+          "PendingWindowInDays": {
+            "type": "integer",
+            "minimum": 7,
+            "maximum": 30,
+            "default": 30
+          }
+        },
+        "required": [
+          "KeyId"
+        ],
+        "additionalProperties": false
+      },
+      "KMSScheduledDeletion": {
+        "type": "object",
+        "properties": {
+          "KeyId": {
+            "type": "string",
+            "description": "Full canonical ARN of the local KMS key."
+          },
+          "DeletionDate": {
+            "type": "number"
+          },
+          "KeyState": {
+            "type": "string",
+            "const": "PendingDeletion"
+          },
+          "PendingWindowInDays": {
+            "type": "integer",
+            "minimum": 7,
+            "maximum": 30,
+            "default": 30
+          }
+        },
+        "required": [
+          "KeyId",
+          "DeletionDate",
+          "KeyState",
+          "PendingWindowInDays"
+        ],
+        "additionalProperties": false
+      },
+      "KMSCanceledDeletion": {
+        "type": "object",
+        "properties": {
+          "KeyId": {
+            "type": "string",
+            "description": "Full canonical ARN of the local KMS key."
+          }
+        },
+        "required": [
+          "KeyId"
         ],
         "additionalProperties": false
       },

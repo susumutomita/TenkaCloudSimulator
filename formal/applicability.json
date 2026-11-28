@@ -1,249 +1,242 @@
 {
   "version": 1,
-  "base_sha": "110354ea421d576f12b9452e0d472eda2077cc11",
+  "base_sha": "075d801bdb955bbf0269118ab64afe2cc7946b54",
   "changes": [
     {
       "path": "README.md",
-      "sha256": "4a340e879120a2f35b545ca84903cda8b81630463fa183fc0700608bacf92b76",
+      "sha256": "aeca68a05f6f2a61268770f6a89e9965c60bd9bac3fe16a701cf2a25d88d4aad",
       "disposition": "documentation",
-      "reason": "Introduce the scoped local KMS role grant workflow.",
+      "reason": "Link users to the supported bounded KMS key deletion lifecycle.",
       "models": []
     },
     {
       "path": "docs/design/0001-go-standalone.md",
-      "sha256": "c49a6977448f1059f7b8471a304407feb02d59f97ee120c6f1ef2a21aeb781db",
+      "sha256": "1d04e589fd09943e4729fde6940eeb2fda73f6ac5c1f7470e9e239a22ff147ec",
       "disposition": "documentation",
-      "reason": "Describe key-scoped grant persistence and verified role generation.",
+      "reason": "Describe UTC-backed expiry and transactional dependent-record cleanup.",
       "models": []
     },
     {
       "path": "docs/kms.md",
-      "sha256": "f27c93b2327d2d7e4616631a57f489873aa15a6d95617bed5a4322659fbd7ced",
+      "sha256": "f4d68dec77c8c3912a47d003823ea9da04d53046e78f50baba43c9ced6f5cb59",
       "disposition": "documentation",
-      "reason": "Publish per-operation grant fields, role and token authorization, quotas, disabled-state behavior and scope.",
+      "reason": "Document KMS operation, state, timing, authorization and persistence contracts. Describe the seventeen shipped KMS presets, pending grant reads and real Console/Scalar/SDK workflow.",
       "models": []
     },
     {
-      "path": "formal/KMSRoleGrantLifecycle.cfg",
-      "sha256": "fbd45f5391e3c3da4ef6d8f7846be21510270e65c26b8d94313f6f1a586d6cb9",
+      "path": "formal/KMSScheduledDeletion.cfg",
+      "sha256": "8d93c6c90c7c21a1716e0056aeb96bcd4329c13decf814a4cafec85281a30975",
       "disposition": "modeled",
-      "reason": "Set the finite state bounds and invariants for generation-bound role grants.",
+      "reason": "Register bounded state and transition checks for scheduled keys.",
       "models": [
         {
-          "id": "KMSRoleGrantLifecycle",
+          "id": "KMSScheduledDeletion",
           "properties": [
-            "ManagementAuthorized",
-            "GrantToLiveRole",
-            "VerifiedDescribe",
-            "ExplicitDenyWins",
-            "GrantWriteFrame"
+            "ScheduleContract",
+            "CancelContract",
+            "ExpiryBoundary",
+            "AtomicExpiry",
+            "OperationMatrix",
+            "RestartPreservesDeadline"
           ],
-          "limits": "Finite model of stable role generations, key/grant/session state, effective DescribeKey and failure frames. Native tests cover wire parsing, SQLite transactions, authorization output, pagination and opaque tokens."
+          "limits": "Checks persisted deadline, schedule/cancel state, serial boundary winners, ordered access after expiry, affected-only atomic removal, restart, rollback and representative pending operations. A storage failure abstracts transaction rollback. No real-time liveness, background job, wire timestamps, cryptographic erasure, all data sizes, authenticated identities, SQLite interleavings or AWS timing are proved. Native clock, database, signing, restart and SDK fixtures supply those observations."
         }
       ]
     },
     {
-      "path": "formal/KMSRoleGrantLifecycle.tla",
-      "sha256": "20a6a061e1f7984c2ad68fd14037230a663520621f97a6522ac1f5aca8df4cb2",
+      "path": "formal/KMSScheduledDeletion.tla",
+      "sha256": "02dd8f30187d61bb701c6d84b91c15e9248c2e055d6e6cc7e1a243c18681c078",
       "disposition": "modeled",
-      "reason": "Model exact key and generation grant authority, management, read decisions and failure frames.",
+      "reason": "Model eligible scheduling, cancellation, exact expiry and dependent-object frames.",
       "models": [
         {
-          "id": "KMSRoleGrantLifecycle",
+          "id": "KMSScheduledDeletion",
           "properties": [
-            "ManagementAuthorized",
-            "GrantToLiveRole",
-            "VerifiedDescribe",
-            "ExplicitDenyWins",
-            "GrantWriteFrame"
+            "ScheduleContract",
+            "CancelContract",
+            "ExpiryBoundary",
+            "AtomicExpiry",
+            "OperationMatrix",
+            "RestartPreservesDeadline"
           ],
-          "limits": "Finite model of stable role generations, key/grant/session state, effective DescribeKey and failure frames. Native tests cover wire parsing, SQLite transactions, authorization output, pagination and opaque tokens."
+          "limits": "Checks persisted deadline, schedule/cancel state, serial boundary winners, ordered access after expiry, affected-only atomic removal, restart, rollback and representative pending operations. A storage failure abstracts transaction rollback. No real-time liveness, background job, wire timestamps, cryptographic erasure, all data sizes, authenticated identities, SQLite interleavings or AWS timing are proved. Native clock, database, signing, restart and SDK fixtures supply those observations."
         }
       ]
     },
     {
       "path": "formal/models.json",
-      "sha256": "a13d74d8bb83f5bf8d31841849050c671d5c02bc5672a073f90d914dd0f8bf27",
+      "sha256": "77c6b31d5bedd35b7745228f332ce01429f9645c850b84f0077140a16b684a20",
       "disposition": "formal-infrastructure",
-      "reason": "Register KMS role grant lifecycle, fixed mutants, read/write witnesses and scope.",
+      "reason": "Register the deletion model and its fixed negative controls without touching previous models.",
       "models": []
     },
     {
-      "path": "internal/aws/kms_dispatch.go",
-      "sha256": "3a586f546a201d20ce924d9ea3abcff9b9b6eea1d77ea157ff4ac8dc7798a3c8",
+      "path": "internal/aws/kms_aliases.go",
+      "sha256": "8a4efb3fc859424434c6b6bf2144afaa14017aea8f021616345bb635cedbd2cd",
       "disposition": "modeled",
-      "reason": "Select the verified signed DescribeKey path without replacing the established participant authority.",
+      "reason": "Enforce pending destination restrictions and observe expiry before alias operations.",
       "models": [
         {
-          "id": "KMSRoleGrantLifecycle",
+          "id": "KMSScheduledDeletion",
           "properties": [
-            "ManagementAuthorized",
-            "GrantToLiveRole",
-            "VerifiedDescribe",
-            "ExplicitDenyWins",
-            "GrantWriteFrame"
+            "ScheduleContract",
+            "CancelContract",
+            "ExpiryBoundary",
+            "AtomicExpiry",
+            "OperationMatrix",
+            "RestartPreservesDeadline"
           ],
-          "limits": "Finite model of stable role generations, key/grant/session state, effective DescribeKey and failure frames. Native tests cover wire parsing, SQLite transactions, authorization output, pagination and opaque tokens."
+          "limits": "Checks persisted deadline, schedule/cancel state, serial boundary winners, ordered access after expiry, affected-only atomic removal, restart, rollback and representative pending operations. A storage failure abstracts transaction rollback. No real-time liveness, background job, wire timestamps, cryptographic erasure, all data sizes, authenticated identities, SQLite interleavings or AWS timing are proved. Native clock, database, signing, restart and SDK fixtures supply those observations."
         }
       ]
     },
     {
-      "path": "internal/aws/kms_grant_outages_test.go",
-      "sha256": "48285c9d0c603da63618e53add82a54af72640474b9c885d97890b25af705d32",
+      "path": "internal/aws/kms_deletion.go",
+      "sha256": "f1e4f0abb50af652ed520b1c17a422bb6ccd4783ea8a1ac7067cbd2ca4195260",
+      "disposition": "modeled",
+      "reason": "Atomically persist or cancel the waiting period, expire precisely due keys and their current aliases and grants.",
+      "models": [
+        {
+          "id": "KMSScheduledDeletion",
+          "properties": [
+            "ScheduleContract",
+            "CancelContract",
+            "ExpiryBoundary",
+            "AtomicExpiry",
+            "OperationMatrix",
+            "RestartPreservesDeadline"
+          ],
+          "limits": "Checks persisted deadline, schedule/cancel state, serial boundary winners, ordered access after expiry, affected-only atomic removal, restart, rollback and representative pending operations. A storage failure abstracts transaction rollback. No real-time liveness, background job, wire timestamps, cryptographic erasure, all data sizes, authenticated identities, SQLite interleavings or AWS timing are proved. Native clock, database, signing, restart and SDK fixtures supply those observations."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/kms_deletion_store_failure_test.go",
+      "sha256": "a1c886bb9d7924f7090d5cb841c7fdb0ed8068cfa519167e5450d3b075a1c7cc",
       "disposition": "test-support",
-      "reason": "Exercise concrete grant lookups, role and signer storage failures, no acknowledgment before verified readback/commit, exact quota and recovery using unchanged native entry points.",
+      "reason": "Exercise real SQLite failures and cancellation during schedule, cancel and expiry, check the complete transaction rollback and retry.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/kms_deletion_test.go",
+      "sha256": "3140ec9632e8cf21a8dd22a9611af9268c294c9f7e676783ae8585e52be49ec6",
+      "disposition": "test-support",
+      "reason": "Check clock boundaries, persistence, child cleanup, failure rollback, cancellation and wire errors.",
       "models": []
     },
     {
       "path": "internal/aws/kms_grants.go",
-      "sha256": "7428089db1a1f4906f6d2a7956713f86ae9d655181d45364d1b17652610ada26",
+      "sha256": "c0c3fc732aa09d685926c65e0b787c4e5cb70f1879213c1b02e3335703806f60",
       "disposition": "modeled",
-      "reason": "Validate, persist, list and revoke real KMS grants and evaluate role DescribeKey against a transactional key/grant snapshot.",
+      "reason": "Apply expiry to the native grant transaction and refuse new grants on pending keys.",
       "models": [
         {
-          "id": "KMSRoleGrantLifecycle",
+          "id": "KMSScheduledDeletion",
           "properties": [
-            "ManagementAuthorized",
-            "GrantToLiveRole",
-            "VerifiedDescribe",
-            "ExplicitDenyWins",
-            "GrantWriteFrame"
+            "ScheduleContract",
+            "CancelContract",
+            "ExpiryBoundary",
+            "AtomicExpiry",
+            "OperationMatrix",
+            "RestartPreservesDeadline"
           ],
-          "limits": "Finite model of stable role generations, key/grant/session state, effective DescribeKey and failure frames. Native tests cover wire parsing, SQLite transactions, authorization output, pagination and opaque tokens."
+          "limits": "Checks persisted deadline, schedule/cancel state, serial boundary winners, ordered access after expiry, affected-only atomic removal, restart, rollback and representative pending operations. A storage failure abstracts transaction rollback. No real-time liveness, background job, wire timestamps, cryptographic erasure, all data sizes, authenticated identities, SQLite interleavings or AWS timing are proved. Native clock, database, signing, restart and SDK fixtures supply those observations."
         }
       ]
     },
     {
-      "path": "internal/aws/kms_grants_test.go",
-      "sha256": "eabbc3de6e2215d25d1b77e8cbd54d83ce07f9553ba83709abc45a515f952168",
-      "disposition": "test-support",
-      "reason": "Exercise grant management, row/ledger readback, rollback, token and pagination bounds, IAM decisions and role recreation.",
-      "models": []
-    },
-    {
       "path": "internal/aws/kms_http.go",
-      "sha256": "5ff65eb3796f95f3815925e44933be1fe82fa01f3ad0496d157ac962d3e1077e",
+      "sha256": "d3efe4ac076ef171c3db16ae68a9b0df02cec214dba45e8a4cc53d7b960be09e",
       "disposition": "modeled",
-      "reason": "Add strict official KMS grant fields, pagination options and narrow native request dispatch.",
+      "reason": "Validate and dispatch concrete key scheduling and cancellation on the native endpoint.",
       "models": [
         {
-          "id": "KMSRoleGrantLifecycle",
+          "id": "KMSScheduledDeletion",
           "properties": [
-            "ManagementAuthorized",
-            "GrantToLiveRole",
-            "VerifiedDescribe",
-            "ExplicitDenyWins",
-            "GrantWriteFrame"
+            "ScheduleContract",
+            "CancelContract",
+            "ExpiryBoundary",
+            "AtomicExpiry",
+            "OperationMatrix",
+            "RestartPreservesDeadline"
           ],
-          "limits": "Finite model of stable role generations, key/grant/session state, effective DescribeKey and failure frames. Native tests cover wire parsing, SQLite transactions, authorization output, pagination and opaque tokens."
+          "limits": "Checks persisted deadline, schedule/cancel state, serial boundary winners, ordered access after expiry, affected-only atomic removal, restart, rollback and representative pending operations. A storage failure abstracts transaction rollback. No real-time liveness, background job, wire timestamps, cryptographic erasure, all data sizes, authenticated identities, SQLite interleavings or AWS timing are proved. Native clock, database, signing, restart and SDK fixtures supply those observations."
         }
       ]
     },
     {
       "path": "internal/aws/kms_store.go",
-      "sha256": "c7debf4b92694cc528665369d4ae27a757f79fba6bd9cf301378bf5b98ad5778",
+      "sha256": "b2993244395c4e638b0bbebc38454895dbb885796f8407a2aa7ec6fd732de660",
       "disposition": "modeled",
-      "reason": "Add the key-scoped grant schema and persisted token signer in a single bootstrap transaction.",
+      "reason": "Project persisted pending metadata, apply key state restrictions and reap at startup or operation admission.",
       "models": [
         {
-          "id": "KMSRoleGrantLifecycle",
+          "id": "KMSScheduledDeletion",
           "properties": [
-            "ManagementAuthorized",
-            "GrantToLiveRole",
-            "VerifiedDescribe",
-            "ExplicitDenyWins",
-            "GrantWriteFrame"
+            "ScheduleContract",
+            "CancelContract",
+            "ExpiryBoundary",
+            "AtomicExpiry",
+            "OperationMatrix",
+            "RestartPreservesDeadline"
           ],
-          "limits": "Finite model of stable role generations, key/grant/session state, effective DescribeKey and failure frames. Native tests cover wire parsing, SQLite transactions, authorization output, pagination and opaque tokens."
+          "limits": "Checks persisted deadline, schedule/cancel state, serial boundary winners, ordered access after expiry, affected-only atomic removal, restart, rollback and representative pending operations. A storage failure abstracts transaction rollback. No real-time liveness, background job, wire timestamps, cryptographic erasure, all data sizes, authenticated identities, SQLite interleavings or AWS timing are proved. Native clock, database, signing, restart and SDK fixtures supply those observations."
         }
       ]
     },
     {
-      "path": "internal/aws/sts_signature.go",
-      "sha256": "c7177e81e5c4ff981eb474174514a6339942817fc8c5f40de7eaf7892377e45d",
-      "disposition": "modeled",
-      "reason": "Admit KMS signing only for a canonical assumed-role DescribeKey request with signed content type and target.",
-      "models": [
-        {
-          "id": "KMSRoleGrantLifecycle",
-          "properties": [
-            "ManagementAuthorized",
-            "GrantToLiveRole",
-            "VerifiedDescribe",
-            "ExplicitDenyWins",
-            "GrantWriteFrame"
-          ],
-          "limits": "Finite model of stable role generations, key/grant/session state, effective DescribeKey and failure frames. Native tests cover wire parsing, SQLite transactions, authorization output, pagination and opaque tokens."
-        }
-      ]
+      "path": "internal/aws/kms_surface_deadline_test.go",
+      "sha256": "f6c037ecee99311ec97e1f5699b7145ac90c6f788c7bee6fe5bc8681ca278cd6",
+      "disposition": "test-support",
+      "reason": "Exercise actual elapsed request deadlines after four native SQLite writes, whole-database rollback, and healthy retries.",
+      "models": []
     },
     {
-      "path": "internal/server/access_sdk.go",
-      "sha256": "cbb59b195075dda2c0e0c857686b9b79f0e2484acda39cc3b7110e0eeb04608d",
+      "path": "internal/aws/kms_types.go",
+      "sha256": "3cc5718fed8d8a67204a11928813b44766ac5987e83506bbd54d6c357a4dcedb",
       "disposition": "modeled",
-      "reason": "Return the JSON protocol authentication failure for rejected native KMS signatures.",
+      "reason": "Expose an optional pending-only UTC deletion deadline in key metadata.",
       "models": [
         {
-          "id": "KMSRoleGrantLifecycle",
+          "id": "KMSScheduledDeletion",
           "properties": [
-            "ManagementAuthorized",
-            "GrantToLiveRole",
-            "VerifiedDescribe",
-            "ExplicitDenyWins",
-            "GrantWriteFrame"
+            "ScheduleContract",
+            "CancelContract",
+            "ExpiryBoundary",
+            "AtomicExpiry",
+            "OperationMatrix",
+            "RestartPreservesDeadline"
           ],
-          "limits": "Finite model of stable role generations, key/grant/session state, effective DescribeKey and failure frames. Native tests cover wire parsing, SQLite transactions, authorization output, pagination and opaque tokens."
+          "limits": "Checks persisted deadline, schedule/cancel state, serial boundary winners, ordered access after expiry, affected-only atomic removal, restart, rollback and representative pending operations. A storage failure abstracts transaction rollback. No real-time liveness, background job, wire timestamps, cryptographic erasure, all data sizes, authenticated identities, SQLite interleavings or AWS timing are proved. Native clock, database, signing, restart and SDK fixtures supply those observations."
         }
       ]
     },
     {
       "path": "internal/server/apidocs/openapi.json",
-      "sha256": "da2d8b0b122d24b51da37cf3f8d8f501b24602a4dea9e1bb78b232e1cfc60200",
+      "sha256": "2686135c967cde075622d41df3a24d1a5fd549aa4902d2a4c77210faa45905b1",
       "disposition": "presentation",
-      "reason": "Describe the scoped KMS operations, schemas, constraints and examples in the served reference.",
-      "models": []
-    },
-    {
-      "path": "internal/server/console_handoff_test.go",
-      "sha256": "bda5ebadaf2de6c8695cfedc781ac9fe39af1afedf118367779c3930f52e2225",
-      "disposition": "modeled",
-      "reason": "Check that discovery advertises the new signed KMS service while preserving access requirements.",
-      "models": [
-        {
-          "id": "ConsoleHandoff",
-          "properties": [
-            "SDKAuthorityPreserved"
-          ],
-          "limits": "The formal model checks independent SDK authority preservation. The exact advertised service list is checked in the native test."
-        }
-      ]
-    },
-    {
-      "path": "internal/server/kms_grants_test.go",
-      "sha256": "41e373207a9eeb639d4d5f30b4a9642a92fe53cfeb060672d1875ee15e1faad8",
-      "disposition": "test-support",
-      "reason": "Exercise a signed KMS DescribeKey through actual Access authentication, native authorization and a saved grant.",
+      "reason": "Publish request and response schemas and examples for key deletion scheduling and cancellation.",
       "models": []
     },
     {
       "path": "internal/server/kms_integration_test.go",
-      "sha256": "794b7f02edffd2339b575cd043d19404850a8444099102dde5bb840db3a03cab",
+      "sha256": "343bf385c36826f56473f3310b38666c5355bbb6c295a98b648f0d9ec51a6798",
       "disposition": "test-support",
-      "reason": "Check the exact fifteen native KMS operations while preserving existing key, alias and provider capability assertions.",
+      "reason": "Check that the actual KMS capability listing includes both deletion operations.",
       "models": []
     },
     {
       "path": "internal/server/sakura_provider_test.go",
-      "sha256": "53473d0c708f26747b0ee53851cb9c2ddc2e1deb9f8c6a0a3e36b6b9b576d2c2",
+      "sha256": "b25f233be72bb1b8af0f41683efbfddd2fe3f8a4f7100de48fe1d0e7bd78114b",
       "disposition": "test-support",
-      "reason": "Check the exact fifteen native KMS operations while preserving existing key, alias and provider capability assertions.",
+      "reason": "Preserve the strict, ordered peer capability assertion across Sakura configurations while including both supported KMS deletion operations.",
       "models": []
     },
     {
       "path": "internal/server/server.go",
-      "sha256": "23c8e1525e25f6dea67c1de1de17a185226f4f6f48990a061f554a6bf4af8a90",
+      "sha256": "03e3c23b6e6c2e7e9414ba752c389c8a7b9f702dbe43c8148a2f6041e278696c",
       "disposition": "modeled",
-      "reason": "Advertise the three implemented grant operations and bounded supported grantee and permission.",
+      "reason": "Expose supported key states and operations in the serving capability document.",
       "models": [
         {
           "id": "KMSProtocolAdmission",
@@ -255,45 +248,87 @@
       ]
     },
     {
-      "path": "internal/server/ssm_session_native_route_test.go",
-      "sha256": "48a4c1493cb0c70ad0d99e6769606ee55d0e4a497bd9fcb10fd089d3443f47fd",
-      "disposition": "test-support",
-      "reason": "Share the JSON 1.1 session signer between native SSM and KMS route regressions, preserving the SSM service scope.",
-      "models": []
-    },
-    {
       "path": "scripts/formal_model_gate.py",
-      "sha256": "f1a1424bf05ef2a5f3903ec564b6d1607332edff57e28ce1f24beae1312ce7e0",
+      "sha256": "670ffaf43c0affa56ae7126bf7556e08339feaedce65d607eeae8c8454dadfd1",
       "disposition": "formal-infrastructure",
-      "reason": "Bind the new KMS grant model to fixed properties, mutation controls and model-owned source paths.",
+      "reason": "Validate required KMS scheduled deletion bounds and negative controls.",
       "models": []
     },
     {
       "path": "scripts/test-formal-gate.py",
-      "sha256": "33cb325259349078d4db900bd26b1f62658bf5337b71c515f01e1f493e07d96a",
+      "sha256": "05e48f56172f66306204c98fa493eee19c37a56cfe6c504e1da4a5ebec879572",
       "disposition": "formal-infrastructure",
-      "reason": "Verify the grant lifecycle model registry and required controls.",
+      "reason": "Check that the formal registry requires the deletion contracts.",
       "models": []
     },
     {
       "path": "test/e2e/kms.py",
-      "sha256": "e53205807fd6428214705215b25eed445d1a327ee95e83514006bb806d7df542",
+      "sha256": "dd40db512a467639ddad3f01d956218163d378ec0cf30ee2f680fc4ec4af3a5d",
       "disposition": "test-support",
-      "reason": "Preserve the existing eight native key/crypto verifications while requiring all fifteen served KMS operations.",
+      "reason": "Preserve original key SDK workflows and validate the updated operation inventory.",
       "models": []
     },
     {
       "path": "test/e2e/kms_alias_docs.py",
-      "sha256": "ed572b4a05d7f6251222c6b3963b8ee91f84058323e1adf0e034803150484073",
+      "sha256": "1ce63cd8af2d7c2e00332e1e92b26bdf39d2fda31055863af4989d0941b87905",
       "disposition": "test-support",
-      "reason": "Preserve all four existing alias examples while checking the updated exact set of served operations.",
+      "reason": "Preserve alias behavior while requiring the exact expanded set of served operations.",
       "models": []
     },
     {
-      "path": "test/e2e/kms_grants.py",
-      "sha256": "db0119d0ea918b8d53f3bdab1ed87a01fad1757d8e70dc86cb459e930dad7db2",
+      "path": "test/e2e/kms_console.py",
+      "sha256": "e2e8ba411aea582964e31d8b82191afd57c062ff683e316fdff2c5ee8d033f01",
       "disposition": "test-support",
-      "reason": "Exercise two real local SDK processes, verified assumed roles, grants, restart, explicit denial and cleanup.",
+      "reason": "Describe the existing browser fixture cleanup accurately with native scheduling available.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/kms_key_deletion.py",
+      "sha256": "981bfaa9ee78d10be408e727ed84161b2dd6229593d7341e90014d117b5f292d",
+      "disposition": "test-support",
+      "reason": "Drive actual SDK schedule, cancel and past-due restart with an isolated peer and verified cleanup.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/kms_surface_lifecycle.py",
+      "sha256": "34dc7b0163da2009484a510d03b5e000dc2c2b27fee52303e4879d47e22d8db1",
+      "disposition": "test-support",
+      "reason": "Drive the shipped KMS Console and Scalar with a scoped browser participant, verify saved state with the official SDK and real STS across two processes and an owner restart.",
+      "models": []
+    },
+    {
+      "path": "third_party/independent-native-source.json",
+      "sha256": "14a742ba1199c5834ffa32aab5c0b5e330ca4550ace7aaac61792945db6d4e60",
+      "disposition": "documentation",
+      "reason": "Bind the renewed independent seven-source review to the one changed KMS metadata projection. Preserve historical adaptation and runtime identities, notices and scope.",
+      "models": []
+    },
+    {
+      "path": "third_party/kumo-apigateway.json",
+      "sha256": "c097c47a12d860b852c910c509be09dbeac8c9ef227883a48dfbd151158799a6",
+      "disposition": "documentation",
+      "reason": "Bind the renewed independent seven-source review to the one changed KMS metadata projection. Preserve historical adaptation and runtime identities, notices and scope.",
+      "models": []
+    },
+    {
+      "path": "third_party/kumo-cloudwatch-logs.json",
+      "sha256": "df123eae042088024f57d7ce0dbac73dbea0c8524f20f0842f20c2e2f36e8b6a",
+      "disposition": "documentation",
+      "reason": "Bind the renewed independent seven-source review to the one changed KMS metadata projection. Preserve historical adaptation and runtime identities, notices and scope.",
+      "models": []
+    },
+    {
+      "path": "third_party/kumo-iam.json",
+      "sha256": "24fcaa028b598cd320d27c04cc69a65b2e17edf302dcb66c8ef37d66d9d0d027",
+      "disposition": "documentation",
+      "reason": "Bind the renewed independent seven-source review to the one changed KMS metadata projection. Preserve historical adaptation and runtime identities, notices and scope.",
+      "models": []
+    },
+    {
+      "path": "third_party/kumo-kms.json",
+      "sha256": "04357b2cb40b7d042ccb6c8587da0c9dfec26a99de136c24129ce4c8e39a3850",
+      "disposition": "documentation",
+      "reason": "Bind the renewed independent seven-source review to the one changed KMS metadata projection. Preserve historical adaptation and runtime identities, notices and scope.",
       "models": []
     }
   ]

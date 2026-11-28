@@ -92,4 +92,4 @@ with running(authenticated=True) as (endpoint,operator),sync_playwright() as p:
  kms.close()
  assert not errors and not outside,(errors,outside)
  browser.close()
- print(json.dumps({'nativeCreatePolicyEncryptDecrypt':True,'cancelCreatesNothing':True,'SDKConfirmsUIState':True,'wrongContextRejected':True,'disabledGuard':True,'keyboard':True,'PC390AxeReflow':True,'regionRemount':True,'staleRefreshErrorIgnored':True,'principalClearAndIAMDenied':True,'logoutPreservesSDK':True,'positiveCurrent500Recovered':True,'outside':0,'pageerrors':0,'cleanup':'temporary process/DB removed; key scheduled deletion unsupported'}))
+ print(json.dumps({'nativeCreatePolicyEncryptDecrypt':True,'cancelCreatesNothing':True,'SDKConfirmsUIState':True,'wrongContextRejected':True,'disabledGuard':True,'keyboard':True,'PC390AxeReflow':True,'regionRemount':True,'staleRefreshErrorIgnored':True,'principalClearAndIAMDenied':True,'logoutPreservesSDK':True,'positiveCurrent500Recovered':True,'outside':0,'pageerrors':0,'cleanup':'temporary process/DB removed'}))

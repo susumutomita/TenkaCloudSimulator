@@ -12,6 +12,7 @@ import (
 )
 
 type kmsRequest struct {
+	PendingWindowInDays int
 	GranteePrincipal    string
 	Operations          []string
 	GrantId             string
@@ -35,6 +36,7 @@ type kmsRequest struct {
 }
 
 var kmsFields = map[string][]string{
+	"ScheduleKeyDeletion": {"KeyId", "PendingWindowInDays"}, "CancelKeyDeletion": {"KeyId"},
 	"CreateKey":   {"Description", "KeySpec", "KeyUsage", "Origin", "MultiRegion"},
 	"CreateGrant": {"KeyId", "GranteePrincipal", "Operations", "Name"},
 	"ListGrants":  {"KeyId", "Limit", "Marker", "GranteePrincipal", "GrantId"},
@@ -250,6 +252,14 @@ func kmsDecode(data []byte, op string) (kmsRequest, error) {
 			return request, kmsInvalid()
 		}
 	}
+	if op == "ScheduleKeyDeletion" {
+		if _, present := raw["PendingWindowInDays"]; !present {
+			request.PendingWindowInDays = 30
+		}
+		if request.PendingWindowInDays < 7 || request.PendingWindowInDays > 30 {
+			return request, kmsInvalid()
+		}
+	}
 	if op == "ListAliases" || op == "ListGrants" {
 		if _, present := raw["Limit"]; !present {
 			request.Limit = 50
@@ -335,6 +345,12 @@ func (s *KMSStore) ServeHTTP(w http.ResponseWriter, r *http.Request, region stri
 		var key KMSKeyMetadata
 		key, err = s.DescribeKey(r.Context(), region, request.KeyId)
 		response = map[string]any{"KeyMetadata": key}
+	case "ScheduleKeyDeletion":
+		response, err = s.scheduleDeletion(r.Context(), region, request.KeyId, request.PendingWindowInDays)
+	case "CancelKeyDeletion":
+		var arn string
+		arn, err = s.cancelDeletion(r.Context(), region, request.KeyId)
+		response = map[string]string{"KeyId": arn}
 	case "ListKeys":
 		response, err = s.ListKeys(r.Context(), region, request.Limit, request.Marker)
 	case "EnableKey", "DisableKey":

@@ -126,6 +126,9 @@ func kmsCreateGrant(ctx context.Context, tx *sql.Tx, region, id string, request 
 	if err != nil {
 		return nil, err
 	}
+	if key.metadata.KeyState == "PendingDeletion" {
+		return nil, kmsInvalidState()
+	}
 	if !key.metadata.Enabled {
 		return nil, kmsFailure("DisabledException", "The KMS key is disabled.")
 	}
@@ -357,7 +360,7 @@ func (s *KMSStore) serveGrantRequest(w http.ResponseWriter, r *http.Request, reg
 		return true
 	}
 	ctx := r.Context()
-	tx, err := s.db.BeginTx(ctx, nil)
+	tx, err := s.begin(ctx)
 	if err != nil {
 		kmsWriteError(w, err)
 		return true
