@@ -32,3 +32,7 @@ The simulator evaluates `ses:SendEmail` on the verified domain identity ARN and 
 The endpoint requires this team's operator credential and operator identity. Participant sessions cannot inspect or delete envelopes. The in-process sink opens no SMTP connection. It supplies no AWS delivery, bounce, tracking or Virtual Deliverability Manager events.
 
 [AWS SendEmail](https://docs.aws.amazon.com/ses/latest/APIReference-V2/API_SendEmail.html) · [AWS message insights events](https://docs.aws.amazon.com/ses/latest/APIReference-V2/API_InsightsEvent.html)
+
+In the AWS service catalog, select **Amazon Simple Email Service** and open **Local email**. Create the sender domain, add the three displayed CNAME records through Route 53, and choose **Check DNS proof**. The compose form accepts plain text, HTML, or a named saved template with JSON substitution data. **Refresh receipts** shows the local outcome for each accepted message ID. Open a delivered receipt to download its MIME or remove the receipt. After a lost acknowledgement the form requires an explicit read of the current state before another send. Matching content alone cannot establish which message ID the original request produced.
+
+The served SES reference includes a runnable SendEmail example for a verified `owned.test` identity. Its signing-service routing hint selects SES on the local unsigned HTTP request. Stock clients use their normal signed service scope.

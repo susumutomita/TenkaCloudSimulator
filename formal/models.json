@@ -30202,7 +30202,7 @@
       "id": "SESLocalMailbox",
       "model": "formal/SESLocalMailbox.tla",
       "config": "formal/SESLocalMailbox.cfg",
-      "bounds": "Two independently populated team/region scopes, two slots per scope, monotonically issued local identifiers, two MIME payload classes and one missing local mailbox. Six finite write schedules with arbitrary authorized/unauthorized read interleavings. Current-proof and per-operation authorization classes are sampled as finite admission inputs.",
+      "bounds": "Two independently populated team/region scopes, two slots per scope, monotonically issued local identifiers, two MIME payload classes and one missing local mailbox. Six finite write schedules with arbitrary authorized/unauthorized read interleavings. Admission samples authorization and DNS booleans together. In production the policy snapshot precedes the SQLite transaction and the physical-zone proof is reread inside it; this leaf abstracts that ordering.",
       "properties": [
         "TypeOK",
         "Publication",
@@ -30224,7 +30224,9 @@
         "internal/aws/catalog/semantics.go",
         "internal/core/policy.go",
         "internal/server/ses_sink.go",
-        "internal/server/server.go"
+        "internal/server/server.go",
+        "internal/aws/catalog/ses_message_wire.go",
+        "internal/aws/jsonwire/unicode.go"
       ],
       "mutants": [
         {
@@ -30375,7 +30377,7 @@
           "edits": [
             {
               "old": "{Content(staged)}",
-              "new": "{[Content(staged) EXCEPT !.id=1]}",
+              "new": "{IF staged.team=\"A\" /\\ staged.mode=\"template\" /\\ At(bodies,\"A\",1)#{} THEN [Content(staged) EXCEPT !.id=1] ELSE Content(staged)}",
               "count": 1
             }
           ],
@@ -30430,7 +30432,7 @@
           "edits": [
             {
               "old": "IF ~a.operator THEN Reply(\"denied\",{})",
-              "new": "IF FALSE THEN Reply(\"denied\",{})",
+              "new": "IF ~a.operator /\\ ~(a.kind=\"content\" /\\ At(f.bodies,a.team,a.id)#{}) THEN Reply(\"denied\",{})",
               "count": 1
             }
           ],
@@ -30485,7 +30487,7 @@
           "edits": [
             {
               "old": "ReadAnswer(Current,a)",
-              "new": "ReadAnswer(IF staged=None THEN Current ELSE [Current EXCEPT !.rows=@ \\cup {Envelope(staged)}],a)",
+              "new": "ReadAnswer(IF staged=None \\/ a.kind # \"list\" THEN Current ELSE [Current EXCEPT !.rows=@ \\cup {Envelope(staged)}],a)",
               "count": 1
             }
           ],

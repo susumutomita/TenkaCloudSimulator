@@ -4905,6 +4905,8 @@ REQUIRED_MUTANTS['SESLocalMailbox'] = {
     'StoreWrongTemplate',
 }
 REQUIRED_SOURCE_SCOPES['SESLocalMailbox'] = {
+    'internal/aws/catalog/ses_message_wire.go',
+    'internal/aws/jsonwire/unicode.go',
     'internal/aws/catalog/engine.go',
     'internal/aws/catalog/semantics.go',
     'internal/aws/catalog/ses_domain_identity.go',
