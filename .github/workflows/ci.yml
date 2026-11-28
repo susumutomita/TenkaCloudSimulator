@@ -12,7 +12,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7.0.1
         with:
-          ref: f517e36087b5904de88871fd33ca3bc556eef2ad
+          ref: 1b99c0a4615d2d4a87ab6a7c5a81d1e975f226b7
           fetch-depth: 0
           persist-credentials: false
       - name: Exercise applicability and gate negative controls
@@ -35,7 +35,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7.0.1
         with:
-          ref: f517e36087b5904de88871fd33ca3bc556eef2ad
+          ref: 1b99c0a4615d2d4a87ab6a7c5a81d1e975f226b7
           persist-credentials: false
       - name: Run this shard of the finite models and required invariant counterexamples
         env:
@@ -49,7 +49,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v7.0.2
         with:
-          name: formal-shard-${{ matrix.shard }}-f517e36087b5904de88871fd33ca3bc556eef2ad
+          name: formal-shard-${{ matrix.shard }}-1b99c0a4615d2d4a87ab6a7c5a81d1e975f226b7
           path: reports/formal/shard-${{ matrix.shard }}/
           if-no-files-found: error
           retention-days: 14
@@ -65,14 +65,14 @@ jobs:
     steps:
       - uses: actions/checkout@v7.0.1
         with:
-          ref: f517e36087b5904de88871fd33ca3bc556eef2ad
+          ref: 1b99c0a4615d2d4a87ab6a7c5a81d1e975f226b7
           fetch-depth: 0
           persist-credentials: false
       - name: Validate exact changed blobs and declared model applicability
         env:
           PYTHONPYCACHEPREFIX: ${{ runner.temp }}/formal-python-cache
         run: |
-          test "$(git rev-parse HEAD)" = f517e36087b5904de88871fd33ca3bc556eef2ad
+          test "$(git rev-parse HEAD)" = 1b99c0a4615d2d4a87ab6a7c5a81d1e975f226b7
           base=03d71307bbe6382df16d26bcd5d26e454f5036a6
           git merge-base --is-ancestor "$base" HEAD
           python3 scripts/check-formal-applicability.py check --base "$base"
@@ -87,7 +87,7 @@ jobs:
       - if: env.FULL == 'true'
         uses: actions/download-artifact@v8.0.2
         with:
-          pattern: formal-shard-*-f517e36087b5904de88871fd33ca3bc556eef2ad
+          pattern: formal-shard-*-1b99c0a4615d2d4a87ab6a7c5a81d1e975f226b7
           path: reports/formal/shards
       - name: Accept the shards only as one full merge-gate run of this head
         if: env.FULL == 'true'
@@ -98,7 +98,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v7.0.2
         with:
-          name: formal-f517e36087b5904de88871fd33ca3bc556eef2ad
+          name: formal-1b99c0a4615d2d4a87ab6a7c5a81d1e975f226b7
           path: reports/formal/
           if-no-files-found: error
           retention-days: 14
