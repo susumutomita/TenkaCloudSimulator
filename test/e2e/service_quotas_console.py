@@ -65,6 +65,8 @@ class Console:
         self.page.goto(team.endpoint + '/_simulator/console/#/catalog')
         self.page.get_by_label('Access token', exact=True).fill(token or team.token)
         self.page.get_by_role('button', name='Open sandbox', exact=True).click()
+        self.page.get_by_role('button', name='Services', exact=True).click()
+        self.page.get_by_role('menuitem', name='Service catalog', exact=True).click()
         self.page.get_by_role('button', name=re.compile('^Catalog service')).click()
         self.page.get_by_role('option', name=re.compile('^Service Quotas')).click()
         expect(self.page.get_by_role('heading', name='Service Quotas', exact=True)).to_be_visible()
@@ -119,12 +121,18 @@ def run():
                         identifier = added.pop(); ids.add(identifier)
                         expect(page.get_by_text(identifier, exact=True)).to_be_visible()
                         assert sdk.get_requested_service_quota_change(RequestId=identifier)['RequestedQuota']['Status'] == 'NOT_APPROVED'
+                    page.get_by_role('textbox', name='Request ID', exact=True).fill(identifier)
+                    view.click('Get request', 'GetRequestedServiceQuotaChange')
+                    expect(page.get_by_text(identifier, exact=True)).to_be_visible()
                     view.click('Refresh history', 'ListRequestedServiceQuotaChangeHistoryByQuota')
                     view.click('Next history page', 'ListRequestedServiceQuotaChangeHistoryByQuota')
                     assert any(body.get('NextToken') for op, body in view.requests if op == 'ListRequestedServiceQuotaChangeHistoryByQuota')
                     view.click('Previous history page', 'ListRequestedServiceQuotaChangeHistoryByQuota')
                     # Original request commits; only its acknowledgement to this view is lost.
                     page.evaluate("""() => {const original=window.fetch; window.__quotaLost={original}; window.fetch=async function(input,options){const response=await original.apply(this,arguments); if(options?.headers?.['X-Amz-Target']==='ServiceQuotasV20190624.RequestServiceQuotaIncrease'){window.fetch=original; window.__quotaLost.status=response.status; throw new TypeError('deliberately lost local acknowledgement');} return response;};} """)
+                    # A filtered RESOURCE page must never unlock unknown-write recovery.
+                    page.get_by_role('button', name=re.compile('^QuotaRequestedAtLevel')).click()
+                    page.get_by_role('option', name='RESOURCE', exact=True).click()
                     before = frame(owner)
                     page.get_by_role('spinbutton', name='Desired value', exact=True).fill('8')
                     view.click('Submit increase request', 'RequestServiceQuotaIncrease')
@@ -133,7 +141,11 @@ def run():
                     after = frame(owner)
                     assert len(after) == len(before) + 1
                     assert page.evaluate('window.__quotaLost.status') == 200
+                    view.click('Refresh history', 'ListRequestedServiceQuotaChangeHistoryByQuota')
+                    expect(page.get_by_role('button', name='Start a separate new request', exact=True)).to_have_count(0)
+                    assert view.requests[-1][1]['QuotaRequestedAtLevel'] == 'RESOURCE'
                     view.click('Refresh same-scope history', 'ListRequestedServiceQuotaChangeHistoryByQuota')
+                    assert view.requests[-1][1] == {**KEY, 'MaxResults': 1, 'QuotaRequestedAtLevel': 'ACCOUNT'}
                     assert frame(owner) == after
                     page.get_by_role('button', name='Start a separate new request', exact=True).click()
                     page.get_by_role('checkbox', name='Allow support case (stored PENDING locally only)', exact=True).check()
@@ -145,6 +157,16 @@ def run():
                     view.click('Submit increase request', 'RequestServiceQuotaIncrease', 400)
                     assert frame(owner) == before and sdk.get_service_quota(**KEY)['Quota']['Value'] == 5
                     assert len([op for op, _ in view.requests if op == 'RequestServiceQuotaIncrease']) == 5
+                    page.get_by_role('button', name=re.compile('^Status filter')).click()
+                    page.get_by_role('option', name='PENDING', exact=True).click()
+                    view.click('Refresh history', 'ListRequestedServiceQuotaChangeHistoryByQuota')
+                    expect(page.get_by_role('link', name=pending[0]['Id'], exact=True)).to_be_visible()
+                    assert view.requests[-1][1]['Status'] == 'PENDING'
+                    page.get_by_role('button', name=re.compile('^History scope')).click()
+                    page.get_by_role('option', name='Service', exact=True).click()
+                    view.click('Refresh history', 'ListRequestedServiceQuotaChangeHistory')
+                    assert view.requests[-1][1]['Status'] == 'PENDING'
+
                 finally:
                     view.close()
                 owner.stop(); owner.start()
@@ -156,6 +178,19 @@ def run():
                     assert sdk.get_requested_service_quota_change(RequestId=pending[0]['Id'])['RequestedQuota']['Status'] == 'PENDING'
                 finally:
                     reopened.close()
+                arn = 'arn:aws:servicequotas:us-east-1:000000000000:b2bi/L-05F6A9EF'
+                scoped = participant(owner, 'quota-named-reader', [{'Effect': 'Allow', 'Action': ['servicequotas:GetServiceQuota'], 'Resource': arn}])
+                restricted = Console(browser, owner, token=scoped)
+                try:
+                    expect(restricted.page.get_by_role('button', name='Submit increase request', exact=True)).to_be_enabled()
+                    expect(restricted.page.get_by_text('GetAWSDefaultServiceQuota:', exact=False)).to_be_visible()
+                    owner.control('PUT', '/_simulator/v1/iam/principals/quota-named-reader/policy', {'Version': '2012-10-17', 'Statement': [{'Effect': 'Deny', 'Action': '*', 'Resource': '*'}]})
+                    restricted.click('Refresh quota', 'GetServiceQuota', 400)
+                    expect(restricted.page.get_by_role('button', name='Submit increase request', exact=True)).to_be_disabled()
+                    expect(restricted.page.get_by_text('Not loaded', exact=True)).to_have_count(2)
+                    expect(restricted.page.get_by_text(pending[0]['Id'], exact=True)).to_have_count(0)
+                finally:
+                    restricted.close()
                 assert frame(peer) == peer_before
             finally:
                 browser.close()
