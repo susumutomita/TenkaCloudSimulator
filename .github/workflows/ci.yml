@@ -8,11 +8,11 @@ jobs:
     runs-on: ubuntu-22.04
     timeout-minutes: 35
     env:
-      PRODUCT: 7de43f8ae50a761d73fc7b72fbf76c48f0d96c51
+      PRODUCT: b97ddbd26f3e78905bd8e26a944fb7f0a28d8a42
     steps:
       - uses: actions/checkout@v7.0.1
         with:
-          ref: 7de43f8ae50a761d73fc7b72fbf76c48f0d96c51
+          ref: b97ddbd26f3e78905bd8e26a944fb7f0a28d8a42
           persist-credentials: false
       - uses: actions/setup-go@v6.5.0
         with:
@@ -21,9 +21,9 @@ jobs:
       - name: Build the exact product and provision its pinned Chromium
         run: |
           test "$GITHUB_REPOSITORY" = susumutomita/TenkaCloudSimulator
-          test "$GITHUB_REF" = refs/heads/verify/266-secrets-scalar-nine
+          test "$GITHUB_REF" = refs/heads/verify/266-final-main-scalar
           test "$(git rev-parse HEAD)" = "$PRODUCT"
-          test "$(git rev-parse 'HEAD^{tree}')" = 99d34741dff6bd560e36d7ebe45b5cf3a1aa1004
+          test "$(git rev-parse 'HEAD^{tree}')" = 51963bb256578ccbbd6a80cd8b13843baba2b340
           test -z "$(git status --porcelain)"
           test "$(go env GOVERSION)" = go1.26.11
           test "$(id -u)" -ne 0
@@ -54,8 +54,8 @@ jobs:
           from playwright.sync_api import sync_playwright, expect
 
           BINARY=Path.cwd()/'dist/tenkacloud-simulator'
-          DIGEST='1622dcf248d4c2198de7f554009c34c9e978018fae5ecc75ac658d25ed179035'
-          BASE='7de43f8ae50a761d73fc7b72fbf76c48f0d96c51'
+          DIGEST='bbeb5ea2f939e98df573ca6e84a217ef4ac4ab0efc275c38526854c78590db82'
+          BASE='b97ddbd26f3e78905bd8e26a944fb7f0a28d8a42'
           PLACE=Path(os.environ['RUNNER_TEMP'])/'secrets-private'
           MEDIA='application/x-amz-json-1.1'
           ACTIONS=['CreateSecret','ListSecrets','DescribeSecret','PutSecretValue','GetSecretValue','ListSecretVersionIds','UpdateSecretVersionStage','UpdateSecret','DeleteSecret']
@@ -216,7 +216,7 @@ jobs:
               print(json.dumps(receipt,indent=2));raise SystemExit('failure' in receipt)
           PYTHON
           sha256sum "$RUNNER_TEMP/secrets-private/scalar_nine_console.py" | cut -d ' ' -f 1 > "$RUNNER_TEMP/secrets-receipts/witness.sha256"
-          test "$(cat "$RUNNER_TEMP/secrets-receipts/witness.sha256")" = d968a3b96a5aa8a478d3498b0becc46930f5e68dda1dea897fe09b84f8433088
+          test "$(cat "$RUNNER_TEMP/secrets-receipts/witness.sha256")" = 43ef7a544b735049aded2eff7ff30101e8f85fb7673393d06c49ec45818416b2
           cat > "$RUNNER_TEMP/secrets-private/run.py" <<'PYTHON'
           import hashlib, json, os, runpy, socket, sys
           from importlib.metadata import version
