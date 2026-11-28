@@ -9,7 +9,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7.0.1
         with:
-          ref: 88c85d9dcf36417a78081c59310911707207d670
+          ref: 74023df381664833dd17e5b92b8859dbd21a1d97
           persist-credentials: false
       - uses: actions/setup-go@v6.5.0
         with:
@@ -17,8 +17,8 @@ jobs:
           cache: true
       - name: Build clean immutable source before writing evidence
         run: |
-          test "$(git rev-parse HEAD)" = 88c85d9dcf36417a78081c59310911707207d670
-          test "$(git rev-parse HEAD^{tree})" = 961d0fe509133be253bc17a0f3e6940558cfa7d2
+          test "$(git rev-parse HEAD)" = 74023df381664833dd17e5b92b8859dbd21a1d97
+          test "$(git rev-parse HEAD^{tree})" = 1f12b0e14fd6abbefeb6eaa7960d3c17aa3b803b
           test -z "$(git status --porcelain)"
           test "$(go env GOVERSION)" = go1.26.11
           test "$(id -u)" -ne 0
@@ -26,7 +26,7 @@ jobs:
           mkdir -m 700 "$RUNNER_TEMP/pcs-receipts"
           git rev-parse HEAD HEAD^{tree} > "$RUNNER_TEMP/pcs-receipts/source.txt"
           go version -m dist/tenkacloud-simulator > "$RUNNER_TEMP/pcs-receipts/build.txt"
-          grep -F 'vcs.revision=88c85d9dcf36417a78081c59310911707207d670' "$RUNNER_TEMP/pcs-receipts/build.txt"
+          grep -F 'vcs.revision=74023df381664833dd17e5b92b8859dbd21a1d97' "$RUNNER_TEMP/pcs-receipts/build.txt"
           grep -F 'vcs.modified=false' "$RUNNER_TEMP/pcs-receipts/build.txt"
           sha256sum dist/tenkacloud-simulator > "$RUNNER_TEMP/pcs-receipts/binary.sha256"
       - name: Install original pinned SDK and actual full Chromium
@@ -63,7 +63,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v7.0.2
         with:
-          name: pcs-associations-88c85d9-${{ github.run_id }}
+          name: pcs-associations-74023df-${{ github.run_id }}
           path: ${{ runner.temp }}/pcs-receipts
           if-no-files-found: error
           retention-days: 14
