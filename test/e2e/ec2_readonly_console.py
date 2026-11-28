@@ -53,7 +53,8 @@ with running(authenticated=True) as (endpoint, operator), sync_playwright() as p
     association_row=page.get_by_role('row').filter(has=page.get_by_text(association['RouteTableAssociationId'],exact=True))
     expect(association_row).to_have_count(1)
     expect(association_row.get_by_text(association['SubnetId'],exact=True)).to_be_visible()
-    saved_subnet,=client('ec2').describe_subnets(SubnetIds=[association['SubnetId']])['Subnets']
+    saved_subnets=client('ec2').describe_subnets()['Subnets']
+    saved_subnet,=[subnet for subnet in saved_subnets if subnet['SubnetId']==association['SubnetId']]
     assert saved_subnet['SubnetId']==association['SubnetId'] and saved_subnet['VpcId']==vpc_id
     expect(page.get_by_role('table',name='Saved subnets',exact=True).get_by_text(saved_subnet['SubnetId'],exact=True)).to_be_visible()
     expect(page.get_by_role('button',name='Start instance',exact=True)).to_have_count(0)
