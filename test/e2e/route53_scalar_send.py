@@ -184,8 +184,8 @@ def run():
                         assert xml.findtext('{' + NS + '}RecordName') == NAME
                         assert xml.findtext('{' + NS + '}RecordType') == 'A'
                         assert [entry.text for entry in xml.findall('.//{' + NS + '}RecordDataEntry')] == [ADDRESS]
-                        body = dialog.locator('.response-section-content-body').filter(
-                            has=dialog.get_by_role('link', name='Download Response Body', exact=True))
+                        body = page.locator('.response-section-content-body').filter(
+                            has=page.get_by_role('link', name='Download Response Body', exact=True))
                         expect(body).to_have_count(1)
                         expect(body).to_contain_text(ADDRESS)
                         assert len(requests) == 1 and not outside and not errors
