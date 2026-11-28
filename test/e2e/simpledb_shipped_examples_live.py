@@ -1,4 +1,4 @@
-"""Actual Scalar Send for three existing SimpleDB form examples.
+"""Actual Scalar Send for five shipped SimpleDB form examples.
 
 Companion to simpledb_scalar_reference_live.py; its original three cases stay
 unchanged. Supply the independently verified SIMULATOR_BINARY and
@@ -11,6 +11,7 @@ import json
 import os
 import re
 from pathlib import Path
+from tempfile import TemporaryDirectory
 from xml.etree import ElementTree
 
 from simpledb_scalar_reference_live import (
@@ -24,6 +25,11 @@ DELETE = {'Action': 'DeleteAttributes', 'Version': VERSION, 'DomainName': 'examp
           'ItemName': 'example-item', 'Attribute.1.Name': 'example-attribute',
           'Attribute.1.Value': 'replace-with-current-value', 'Expected.Name': 'example-attribute',
           'Expected.Value': 'replace-with-current-value'}
+PUT = {'Action': 'PutAttributes', 'Version': VERSION, 'DomainName': 'scalar-practice-domain',
+       'ItemName': 'scalar-practice-item', 'Attribute.1.Name': 'practice-attribute',
+       'Attribute.1.Value': 'practice-value', 'Attribute.1.Replace': 'true'}
+DELETE_DOMAIN = {'Action': 'DeleteDomain', 'Version': VERSION, 'DomainName': 'scalar-practice-domain'}
+PRESETS = (CREATE, SELECT, DELETE, PUT, DELETE_DOMAIN)
 TARGET_VALUES = [('example-attribute', DELETE['Attribute.1.Value']), ('retained', 'committed + & 値')]
 PEER_VALUES = [('retained', 'independent peer item')]
 
@@ -45,25 +51,28 @@ def run():
     from playwright.sync_api import sync_playwright, expect
 
     assert BINARY == binary
-    with running(authenticated=True) as (endpoint, operator), sync_playwright() as p:
+    observed_statuses = {}
+    with (TemporaryDirectory() as directory,
+          running(db=Path(directory) / 'state.sqlite', authenticated=True) as (endpoint, operator),
+          sync_playwright() as p):
         native = p.request.new_context(extra_http_headers={
             'X-Simulator-Token': operator, 'X-Simulator-Service': 'sdb',
         })
 
-        def query(action, **fields):
+        def query(action, expected_status=200, **fields):
             response = native.post(endpoint + '/', form={'Action': action, 'Version': VERSION, **fields},
                                    max_redirects=0, timeout=10000)
-            assert response.status == 200
+            assert response.status == expected_status
             return response.body()
 
-        def values(item):
-            return item_values(query('GetAttributes', DomainName=DELETE['DomainName'],
+        def values(item, domain=DELETE['DomainName']):
+            return item_values(query('GetAttributes', DomainName=domain,
                                      ItemName=item, ConsistentRead='true'))
 
-        def seed(item, saved):
+        def seed(item, saved, domain=DELETE['DomainName']):
             fields = {f'Attribute.{i}.{key}': value for i, (name, text) in enumerate(saved, 1)
                       for key, value in [('Name', name), ('Value', text)]}
-            query('PutAttributes', DomainName=DELETE['DomainName'], ItemName=item, **fields)
+            query('PutAttributes', DomainName=domain, ItemName=item, **fields)
 
         try:
             assert listed_domains(query('ListDomains')) == []
@@ -89,7 +98,7 @@ def run():
                         page.on('request', lambda q: sends.append(q) if q.method == 'POST'
                                 and q.url.split('?', 1)[0] == endpoint + '/' else None)
                         reference = ScalarQueryReference(page, endpoint, {
-                            fields['Action']: fields for fields in (CREATE, SELECT, DELETE)
+                            fields['Action']: fields for fields in PRESETS
                         })
 
                         def send(fields):
@@ -99,6 +108,7 @@ def run():
                             response = reference.send()
                             checked_send(endpoint, sends[count:], response, fields)
                             assert response.headers['content-type'].split(';', 1)[0] == 'text/xml'
+                            observed_statuses[fields['Action']] = response.status
                             return response
 
                         def panel_text(text):
@@ -142,6 +152,41 @@ def run():
                         assert listed_domains(query('ListDomains')) == sorted([CREATE['DomainName'], DELETE['DomainName']])
                         checked_send(endpoint, sends[2:], deleted, DELETE)
                         assert len(sends) == 3 and not outside and not errors
+                        reference.close_client()
+
+                        practice_domain = PUT['DomainName']
+                        practice_item = PUT['ItemName']
+                        attribute = PUT['Attribute.1.Name']
+                        retained = ('retained', 'keep this practice value')
+                        before = [(attribute, 'old A'), (attribute, 'old B'), retained]
+                        seed(practice_item, before, practice_domain)
+                        seed('peer-item', PEER_VALUES, practice_domain)
+                        assert values(practice_item, practice_domain) == before
+                        assert values('peer-item', practice_domain) == PEER_VALUES
+
+                        written = send(PUT)
+                        mutation_xml(written.body(), 'PutAttributes')
+                        panel_text('PutAttributesResponse')
+                        expected_values = [(attribute, PUT['Attribute.1.Value']), retained]
+                        assert values(practice_item, practice_domain) == expected_values
+                        assert values('peer-item', practice_domain) == PEER_VALUES
+                        assert values(DELETE['ItemName']) == [TARGET_VALUES[1]]
+                        assert values('peer-item') == PEER_VALUES
+                        checked_send(endpoint, sends[3:], written, PUT)
+                        reference.close_client()
+
+                        removed = send(DELETE_DOMAIN)
+                        mutation_xml(removed.body(), 'DeleteDomain')
+                        panel_text('DeleteDomainResponse')
+                        assert listed_domains(query('ListDomains')) == [DELETE['DomainName']]
+                        missing = query('GetAttributes', expected_status=400, DomainName=practice_domain,
+                                        ItemName=practice_item, ConsistentRead='true')
+                        missing_code = ElementTree.fromstring(missing).findtext(NS + 'Errors/' + NS + 'Error/' + NS + 'Code')
+                        assert missing_code == 'NoSuchDomain'
+                        assert values(DELETE['ItemName']) == [TARGET_VALUES[1]]
+                        assert values('peer-item') == PEER_VALUES
+                        checked_send(endpoint, sends[4:], removed, DELETE_DOMAIN)
+                        assert len(sends) == len(PRESETS) and not outside and not errors
             finally:
                 # The subprocess is private: only these two shipped fixture domains can exist.
                 # Run even after an uncertain browser mutation or assertion failure.
@@ -156,10 +201,11 @@ def run():
         finally:
             native.dispose()
     (REPORTS / 'simpledb-shipped-examples-live.json').write_text(json.dumps({
-        'binary_sha256': expected, 'servedPresets': ['CreateDomain', 'Select', 'DeleteAttributes'],
-        'nativeStatuses': {'CreateDomain': 200, 'Select': 200, 'DeleteAttributes': 200},
+        'binary_sha256': expected, 'servedPresets': list(observed_statuses),
+        'nativeStatuses': observed_statuses,
         'oneCookieSendPerPreset': True, 'exactForm': True, 'liveXmlAndRenderedResult': True,
         'nativeReadback': True, 'targetedDeletePreservesPeerValue': True, 'freshDomainsDeleted': True,
+        'putReplacesAllOldValuesAndPreservesPeers': True, 'deleteDomainPreservesOtherDomainAndItems': True,
     }, indent=2) + '\n')
 
 
