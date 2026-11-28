@@ -681,7 +681,7 @@ var msk = &Service{
 		{Name: "CreateCluster", Kind: Create, Resource: "cluster", Check: mskCreateCluster},
 		{Name: "DescribeCluster", Kind: Read, Resource: "cluster", Lookup: "ClusterArn", Check: mskClusterARN},
 		{Name: "ListClusters", Kind: List, Resource: "cluster", ListRequiresWildcard: true},
-		{Name: "DeleteCluster", Kind: Delete, Resource: "cluster", Lookup: "ClusterArn", Accept: []string{"CurrentVersion"}, Check: mskCurrentVersion,
+		{Name: "DeleteCluster", Kind: Delete, Resource: "cluster", Lookup: "ClusterArn", Accept: []string{"CurrentVersion"}, Check: mskDeleteCluster,
 			Set: map[string]any{"State": "DELETING"}},
 		{Name: "CreateConfiguration", Kind: Create, Resource: "configuration", Check: mskConfigurationName},
 		{Name: "DescribeConfigurationRevision", Kind: Read, Resource: "configuration", Lookup: "Arn", Match: []string{"Revision"}, Check: mskConfigurationARN},
@@ -816,10 +816,14 @@ func mskClusterARN(input map[string]any) error {
 	return nil
 }
 
-func mskCurrentVersion(input map[string]any) error {
+func mskDeleteCluster(input map[string]any) error {
 	if err := mskClusterARN(input); err != nil {
 		return err
 	}
+	return mskCurrentVersion(input)
+}
+
+func mskCurrentVersion(input map[string]any) error {
 	if version, ok := input["CurrentVersion"]; ok && version != mskClusterVersion {
 		return Failure("BadRequestException", "CurrentVersion does not match the cluster's current version.")
 	}
