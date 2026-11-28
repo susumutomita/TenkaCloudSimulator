@@ -87,6 +87,16 @@ class Console:
             self.context.close()
 
 
+def audit(page):
+    script = Path(os.environ['AXE_SCRIPT'])
+    provenance = json.loads((script.parent / 'provenance.json').read_text())
+    assert hashlib.sha256(script.read_bytes()).hexdigest() == provenance['bundleSha256']
+    page.evaluate(script.read_text())
+    result = page.evaluate("async () => await axe.run(document,{runOnly:{type:'tag',values:['wcag2a','wcag2aa','wcag21a','wcag21aa']}})")
+    assert not result['violations'], [item['id'] for item in result['violations']]
+    assert page.evaluate('document.documentElement.scrollWidth <= innerWidth + 1')
+
+
 def run():
     # boto3.Session deliberately preserves inherited profile/configuration guards.
     boto3.Session()
@@ -110,6 +120,11 @@ def run():
                     page = view.page
                     expect(page.get_by_text('Published AWS default', exact=True)).to_be_visible()
                     expect(page.get_by_text('Applied account capacity', exact=True)).to_be_visible()
+                    audit(page)
+                    desired_control = page.get_by_role('spinbutton', name='Desired value', exact=True)
+                    desired_control.focus()
+                    page.keyboard.press('Tab')
+                    expect(page.get_by_role('checkbox', name='Allow support case (stored PENDING locally only)', exact=True)).to_be_focused()
                     assert sdk.get_service_quota(**KEY)['Quota']['Value'] == 5
                     ids = {preexisting}
                     for desired in ('8', '9'):
@@ -137,6 +152,13 @@ def run():
                     page.get_by_role('spinbutton', name='Desired value', exact=True).fill('8')
                     view.click('Submit increase request', 'RequestServiceQuotaIncrease')
                     expect(page.get_by_text('Request outcome unknown', exact=True)).to_be_visible()
+                    audit(page)
+                    page.get_by_role('combobox', name='Language', exact=True).select_option('ja')
+                    page.set_viewport_size({'width': 390, 'height': 1000})
+                    expect(page.get_by_text('リクエスト結果が不明です', exact=True)).to_be_visible()
+                    audit(page)
+                    page.get_by_role('combobox', name='言語', exact=True).select_option('en')
+                    page.set_viewport_size({'width': 1440, 'height': 1000})
                     expect(page.get_by_role('button', name='Submit increase request', exact=True)).to_be_disabled()
                     after = frame(owner)
                     assert len(after) == len(before) + 1
@@ -166,14 +188,45 @@ def run():
                     page.get_by_role('option', name='Service', exact=True).click()
                     view.click('Refresh history', 'ListRequestedServiceQuotaChangeHistory')
                     assert view.requests[-1][1]['Status'] == 'PENDING'
-
+                    # Hold the genuine native read's original Response while leaving
+                    # this selected service. Its real AbortSignal must be canceled;
+                    # neither late success nor its resulting AbortError may repaint.
+                    page.evaluate("""() => {
+                      const original=window.fetch;
+                      window.__quotaRead={original,ready:false,aborted:false};
+                      window.fetch=async function(input,options){
+                        const response=await original.apply(this,arguments);
+                        if(options?.headers?.['X-Amz-Target']==='ServiceQuotasV20190624.GetServiceQuota'){
+                          window.fetch=original;
+                          window.__quotaRead.status=response.status;
+                          window.__quotaRead.ready=true;
+                          options.signal.addEventListener('abort',()=>window.__quotaRead.aborted=true,{once:true});
+                          await new Promise(resolve=>window.__quotaRead.release=resolve);
+                          return response;
+                        }
+                        return response;
+                      };
+                    }""")
+                    page.get_by_role('button', name='Refresh quota', exact=True).click()
+                    page.wait_for_function('() => window.__quotaRead.ready')
+                    assert page.evaluate('window.__quotaRead.status') == 200
+                    page.get_by_role('button', name=re.compile('^Catalog service')).click()
+                    page.get_by_role('option', name=re.compile('^Amazon Elastic Container Registry')).click()
+                    page.wait_for_function('() => window.__quotaRead.aborted')
+                    page.evaluate('window.__quotaRead.release()')
+                    page.evaluate('() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))')
+                    expect(page.get_by_role('heading', name='Service Quotas', exact=True)).to_have_count(0)
+                    expect(page.get_by_text(pending[0]['Id'], exact=True)).to_have_count(0)
+                    page.get_by_role('button', name=re.compile('^Catalog service')).click()
+                    page.get_by_role('option', name=re.compile('^Service Quotas')).click()
+                    expect(page.get_by_role('button', name='Submit increase request', exact=True)).to_be_enabled()
                 finally:
                     view.close()
                 owner.stop(); owner.start()
                 reopened = Console(browser, owner, japanese=True)
                 try:
                     reopened.click('履歴を更新', 'ListRequestedServiceQuotaChangeHistoryByQuota')
-                    assert reopened.page.evaluate('document.documentElement.scrollWidth <= innerWidth + 1')
+                    audit(reopened.page)
                     expect(reopened.page.get_by_text('適用済みアカウント上限', exact=True)).to_be_visible()
                     assert sdk.get_requested_service_quota_change(RequestId=pending[0]['Id'])['RequestedQuota']['Status'] == 'PENDING'
                 finally:
@@ -188,6 +241,7 @@ def run():
                     restricted.click('Refresh quota', 'GetServiceQuota', 400)
                     expect(restricted.page.get_by_role('button', name='Submit increase request', exact=True)).to_be_disabled()
                     expect(restricted.page.get_by_text('Not loaded', exact=True)).to_have_count(2)
+                    audit(restricted.page)
                     expect(restricted.page.get_by_text(pending[0]['Id'], exact=True)).to_have_count(0)
                 finally:
                     restricted.close()

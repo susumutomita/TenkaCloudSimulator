@@ -264,7 +264,7 @@ export default function ServiceQuotas({ request, region, account }) {
   const disabled = loading || writing;
   return (
     <SpaceBetween size="l">
-      <Header variant="h2">Service Quotas</Header>
+      <Header variant="h1">Service Quotas</Header>
       <Alert type="info">
         {t(
           "Local account-level B2B Data Interchange Profiles capacity. Requests do not change capacity or open support cases.",
@@ -443,6 +443,12 @@ export default function ServiceQuotas({ request, region, account }) {
             </Button>
           </SpaceBetween>
           <Table
+            ariaLabels={{
+              tableLabel: t(
+                "Quota increase requests",
+                "上限引き上げリクエスト",
+              ),
+            }}
             loading={loading}
             items={rows}
             trackBy="Id"
