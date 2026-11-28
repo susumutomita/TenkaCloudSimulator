@@ -2,6 +2,8 @@ package cloudwatchmetrics
 
 import (
 	"encoding/xml"
+	"fmt"
+	"github.com/susumutomita/TenkaCloudSimulator/internal/core"
 	"net/http/httptest"
 	"net/url"
 	"path/filepath"
@@ -89,7 +91,11 @@ func TestAlarmExactAuthorizationAndRefusal(t *testing.T) {
 	now := time.Date(2026, 11, 28, 12, 0, 0, 0, time.UTC)
 	s.now = func() time.Time { return now }
 	arn := "arn:aws:cloudwatch:us-east-1:000000000000:alarm:owned"
-	allow := func(action, resource string) bool { return resource == arn }
+	policy, err := core.ParsePolicy([]byte(fmt.Sprintf(`{"Version":"2012-10-17","Statement":{"Effect":"Allow","Action":["cloudwatch:PutMetricAlarm","cloudwatch:DescribeAlarms","cloudwatch:DeleteAlarms"],"Resource":%q}}`, arn)))
+	if err != nil {
+		t.Fatal(err)
+	}
+	allow := func(action, resource string) bool { return core.Evaluate(policy, action, resource) == "allowed" }
 	alarmServe(t, s, "us-east-1", "PutMetricAlarm", alarmWire("owned"), allow, 200)
 	alarmServe(t, s, "us-east-1", "DescribeAlarms", url.Values{"AlarmNames.member.1": {"owned"}}, allow, 200)
 	alarmServe(t, s, "us-east-1", "DescribeAlarms", url.Values{}, allow, 403)
