@@ -79,7 +79,7 @@
     },
     {
       "path": "internal/aws/catalog/codecommit_content.go",
-      "sha256": "c15ad8e9c3fc2f10246cb85b957da845f770c3ce5b49a8b5117deaf3eb563424",
+      "sha256": "5e71796411b0afdd2216d1eddf590c25d7f660855959448a305b7a9a6c02baf3",
       "disposition": "modeled",
       "reason": "Resolve the concrete repository lifetime and atomically service six Git content and branch actions.",
       "models": [
@@ -99,7 +99,7 @@
     },
     {
       "path": "internal/aws/catalog/codecommit_content_test.go",
-      "sha256": "e5e2984927e33c83e22ad724f622bfa60052b755201eea4d09bf4454b6a0a409",
+      "sha256": "50bf11066387189d35b89cbe7e4fdbbb344dbb65d49aedd0c3da982d8c334801",
       "disposition": "test-support",
       "reason": "Exercise Git hashes, historical reads, authenticated scope, ref collisions, corruption and physical size bounds.",
       "models": []
@@ -150,7 +150,7 @@
     },
     {
       "path": "internal/aws/catalog/engine.go",
-      "sha256": "cc7b8820962b648b7331e377bcfe9f92dc977312f219e9aeedfe685fd0ad7ca3",
+      "sha256": "2a5eecdb56206644a5fb0751c83d6df7ce31ca18a9d313bab1c7a5109cf48274",
       "disposition": "modeled",
       "reason": "Install the two repository-owned Git tables in the catalog database.",
       "models": [
@@ -359,6 +359,23 @@
       ]
     },
     {
+      "path": "internal/aws/catalog/value.go",
+      "sha256": "4cda69b41697ae692c20a756d9741d37efc5899668ea722a49b8e70b73ed487e",
+      "disposition": "modeled",
+      "reason": "Preserve normal shape validation and attach optional declared exceptions to omitted top-level fields on CodeCommit Git operations.",
+      "models": [
+        {
+          "id": "CatalogResourceLifecycle",
+          "properties": [
+            "AuthorizationFirst",
+            "FailureFrame",
+            "PeerFrame"
+          ],
+          "limits": "The generic model covers abstract catalog admission, failure and ownership. It does not model canonical Git or CodeCommit request decoding."
+        }
+      ]
+    },
+    {
       "path": "internal/server/apidocs/catalog/codecommit.json",
       "sha256": "fc893116af4e52ea1357de2e1808ec4c8dde6750de684dcaa75ea02dcfbd844b",
       "disposition": "presentation",
@@ -391,6 +408,13 @@
       "sha256": "c472771465eaadecfc060be690e20232a3cd5f0d139095989213f0cba70f6a44",
       "disposition": "test-support",
       "reason": "Exercise all six new native operations alongside the eight original metadata and tag operations.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/check.py",
+      "sha256": "f53ccc6c59c13bdf7f18650f4eaea9365dd2e160b62f3f20ef47b72bbe63c070",
+      "disposition": "test-support",
+      "reason": "Run the dedicated real Git and two-authority CodeCommit regression through the normal opt-in native E2E suite.",
       "models": []
     },
     {
