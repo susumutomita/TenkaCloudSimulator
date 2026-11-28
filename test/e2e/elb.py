@@ -37,8 +37,7 @@ def running(directory):
         try:
             deadline = time.monotonic() + 25
             while time.monotonic() < deadline and process.poll() is None:
-                log.seek(0)
-                match = re.search(r"^AWS simulation endpoint (http://127\.0\.0\.1:[1-9][0-9]{0,4})$", log.read(), re.M)
+                match = re.search(r"^AWS simulation endpoint (http://127\.0\.0\.1:[1-9][0-9]{0,4})$", os.pread(log.fileno(), 32768, 0).decode(), re.M)
                 if match and token_file.is_file():
                     break
                 time.sleep(.05)

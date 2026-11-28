@@ -1,47 +1,273 @@
 {
   "version": 1,
-  "base_sha": "8a9be8bd5a2d56959e6cbc6b5e80fb9b57e5935e",
+  "base_sha": "110354ea421d576f12b9452e0d472eda2077cc11",
   "changes": [
     {
-      "path": "test/e2e/api_cloud_sections_contract.py",
-      "sha256": "27e55e07a9076773010a51c224f5af67bdd2649922e204fbe0398ff4f0e1b139",
-      "disposition": "test-support",
-      "reason": "Validate the current Sakura Server navigation and provider binding and preserve the historical method, path and operation inventory.",
+      "path": "README.ja.md",
+      "sha256": "86ee13b9fa7293dc89f8b02ba29c4d2d953de78036c806190076197b2dfab325",
+      "disposition": "documentation",
+      "reason": "Describe the regional native EC2 placement dependency in Japanese.",
       "models": []
     },
     {
-      "path": "test/e2e/cloudwatch_logs.py",
-      "sha256": "a3ab52eebd8130d18925559a31a1a3905cd445436c2e18494ff96eee070a2532",
-      "disposition": "test-support",
-      "reason": "Check the served inventory with the verified Sakura Server and Route 53 projections before running the existing eight native Logs examples.",
+      "path": "README.md",
+      "sha256": "3b35f193038d965cc53146eef91f64797ecb23a74ae42fe5c5d4f1ac572804c2",
+      "disposition": "documentation",
+      "reason": "Describe the supported local ALB placement workflow and legacy compatibility.",
       "models": []
     },
     {
-      "path": "test/e2e/dynamodb_docs.py",
-      "sha256": "ecbd976e404f69b19578964227c8a19846235de58416281fa96cefc2b15a59af",
-      "disposition": "test-support",
-      "reason": "Check the served historical inventory before executing the seven existing DynamoDB templates and SDK readbacks.",
+      "path": "docs/design/0001-go-standalone.md",
+      "sha256": "5f1b3f3fb69b64ff136c1bceed21ef0bea2e92138b5d393a24b373003c027759",
+      "disposition": "documentation",
+      "reason": "Document transactional placement and existing load-balancer compatibility in the standalone architecture.",
       "models": []
     },
     {
-      "path": "test/e2e/historical_reference_inventory.py",
-      "sha256": "292db852cd1fa1160a6ed69c2a319cc6827d4cae349f15d136096979da380ce3",
-      "disposition": "test-support",
-      "reason": "Pin the historical IDs to their HTTP methods and paths using the 66 routes from historical main and the existing multipart POST.",
+      "path": "docs/ec2-native-subnet.md",
+      "sha256": "ae3783e995dbce9bbb719fa04e12df6ccf215b22180e1076927d2d36612abe9b",
+      "disposition": "documentation",
+      "reason": "Record the native ALB dependency on existing subnets and its delete behavior.",
       "models": []
     },
     {
-      "path": "test/e2e/secrets_manager_docs.py",
-      "sha256": "5d04c99554f24855650d26703d41394de3ea899d451ef4022266f822aa3c95fd",
-      "disposition": "test-support",
-      "reason": "Check the served inventory with the verified Sakura Server and Route 53 projections before running the existing seven native Secrets Manager examples.",
+      "path": "docs/ec2-read-discovery.md",
+      "sha256": "1ea25e266bf57ff44759d9e90dcf0723979318f873f4ddcbfd6cba0d6ecef343",
+      "disposition": "documentation",
+      "reason": "Describe the explicit ALB security-group dependency and delete fence.",
       "models": []
     },
     {
-      "path": "test/e2e/test_storage_reference_sakura_projection.py",
-      "sha256": "f1bba14a42561d79e548dfdcc383a449b81a328f20b67a42d85f369d8bda38fc",
+      "path": "docs/elb.md",
+      "sha256": "1f5120d19b1a0be86f65850ae3cd28666e069fc1908feaab841453580115aa7d",
+      "disposition": "documentation",
+      "reason": "Document admitted placements, legacy rows, linked deletion and the scope of local networking.",
+      "models": []
+    },
+    {
+      "path": "formal/ALBNativePlacement.cfg",
+      "sha256": "44300823d05c014fffef0422885667590459892d89f3c36e64274887d9770cdb",
+      "disposition": "modeled",
+      "reason": "Run the finite normalized placement invariants over two new ALBs and one legacy row.",
+      "models": [
+        {
+          "id": "ALBNativePlacement",
+          "properties": [
+            "TypeOK",
+            "AdmittedPlacement",
+            "CanceledUnchanged",
+            "ReopenUnchanged",
+            "StageInvisible",
+            "LegacyUnbound",
+            "ProjectionExact",
+            "CompleteReferences",
+            "ReferencesExist"
+          ],
+          "limits": "Checks normalized placement admission, exact stored VPC/zone projection, complete per-ALB ownership, canceled staging, legacy replay, peer-owner retention during deletion, removal of unbound resources and reopen. The model serializes transaction boundaries and abstracts immutable resource metadata. It does not establish SQL or Go refinement, locking, HTTP or SDK behavior, process durability, concrete IAM, CloudFormation behavior, IP/ENI allocation, DNS or network reachability. Team/region are normalized ownership tags, not independent simulated processes."
+        }
+      ]
+    },
+    {
+      "path": "formal/ALBNativePlacement.tla",
+      "sha256": "ec2c6817925041436a4f6ef677f1f83b6e0f56e15f52ebb53274d04915c8fa89",
+      "disposition": "modeled",
+      "reason": "Model atomic placement admission, rollback, release, shared ownership and legacy replay.",
+      "models": [
+        {
+          "id": "ALBNativePlacement",
+          "properties": [
+            "TypeOK",
+            "AdmittedPlacement",
+            "CanceledUnchanged",
+            "ReopenUnchanged",
+            "StageInvisible",
+            "LegacyUnbound",
+            "ProjectionExact",
+            "CompleteReferences",
+            "ReferencesExist"
+          ],
+          "limits": "Checks normalized placement admission, exact stored VPC/zone projection, complete per-ALB ownership, canceled staging, legacy replay, peer-owner retention during deletion, removal of unbound resources and reopen. The model serializes transaction boundaries and abstracts immutable resource metadata. It does not establish SQL or Go refinement, locking, HTTP or SDK behavior, process durability, concrete IAM, CloudFormation behavior, IP/ENI allocation, DNS or network reachability. Team/region are normalized ownership tags, not independent simulated processes."
+        }
+      ]
+    },
+    {
+      "path": "formal/models.json",
+      "sha256": "db6d8d6bccbff2eae93e80630e68b5492286385cf51942af9296919e25f8e971",
+      "disposition": "formal-infrastructure",
+      "reason": "Register the native placement model, bounded claims and reason-specific mutation controls.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/cloudfront_vpc_origin_contract_test.go",
+      "sha256": "4c9712e48a8d5155a5865e12ce3b025d1936b1f678eabdae2ea3996708efd045",
       "disposition": "test-support",
-      "reason": "Exercise the historical fixture validators against changed native operations, paths, methods and the Sakura Server contract.",
+      "reason": "Create actual native placement for the existing CloudFront VPC origin contract checks.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/cloudfront_vpc_origin_test.go",
+      "sha256": "564adf75b360623a5b84eda607b3cf07f40330b9f4c40f397926b31f0ffc1bb6",
+      "disposition": "test-support",
+      "reason": "Bind existing origin lifecycle fixtures to actual regional load balancers.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/ec2_security_groups_native_store.go",
+      "sha256": "43a43b7816658e5acc557f1920c4bf4717235cfa118232012578d80bbceedb96",
+      "disposition": "modeled",
+      "reason": "Refuse deletion of an attached native security group in its transaction.",
+      "models": [
+        {
+          "id": "ALBNativePlacement",
+          "properties": [
+            "CompleteReferences",
+            "ReferencesExist"
+          ],
+          "limits": "Checks normalized placement admission, exact stored VPC/zone projection, complete per-ALB ownership, canceled staging, legacy replay, peer-owner retention during deletion, removal of unbound resources and reopen. The model serializes transaction boundaries and abstracts immutable resource metadata. It does not establish SQL or Go refinement, locking, HTTP or SDK behavior, process durability, concrete IAM, CloudFormation behavior, IP/ENI allocation, DNS or network reachability. Team/region are normalized ownership tags, not independent simulated processes."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/ec2_subnet_native.go",
+      "sha256": "bc0db54dc935532402c4ceed2ba78fecd5f9be182e7840ebe18bdae0bf0f877c",
+      "disposition": "modeled",
+      "reason": "Include native ALB references in the subnet deletion dependency decision.",
+      "models": [
+        {
+          "id": "ALBNativePlacement",
+          "properties": [
+            "CompleteReferences",
+            "ReferencesExist"
+          ],
+          "limits": "Checks normalized placement admission, exact stored VPC/zone projection, complete per-ALB ownership, canceled staging, legacy replay, peer-owner retention during deletion, removal of unbound resources and reopen. The model serializes transaction boundaries and abstracts immutable resource metadata. It does not establish SQL or Go refinement, locking, HTTP or SDK behavior, process durability, concrete IAM, CloudFormation behavior, IP/ENI allocation, DNS or network reachability. Team/region are normalized ownership tags, not independent simulated processes."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/elb_placement.go",
+      "sha256": "14fd6e0d0b1d4fe45bc13380da055353131602a6576ce13704ccdc5371bd8549",
+      "disposition": "modeled",
+      "reason": "Resolve actual native subnets, groups, zones and VPC, verifying the committed owner projection.",
+      "models": [
+        {
+          "id": "ALBNativePlacement",
+          "properties": [
+            "TypeOK",
+            "AdmittedPlacement",
+            "CanceledUnchanged",
+            "ReopenUnchanged",
+            "StageInvisible",
+            "LegacyUnbound",
+            "ProjectionExact",
+            "CompleteReferences",
+            "ReferencesExist"
+          ],
+          "limits": "Checks normalized placement admission, exact stored VPC/zone projection, complete per-ALB ownership, canceled staging, legacy replay, peer-owner retention during deletion, removal of unbound resources and reopen. The model serializes transaction boundaries and abstracts immutable resource metadata. It does not establish SQL or Go refinement, locking, HTTP or SDK behavior, process durability, concrete IAM, CloudFormation behavior, IP/ENI allocation, DNS or network reachability. Team/region are normalized ownership tags, not independent simulated processes."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/elb_placement_test.go",
+      "sha256": "acf8a889ef8e8ff7aad1f5af151c72b5dcbca227e0d0fcef767dc552a0c65e20",
+      "disposition": "test-support",
+      "reason": "Exercise native and historical placement, two owners, readback, partial writes, cancellation and concurrent dependency deletion.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/elb_query.go",
+      "sha256": "e05b20beee4d22163ab08ae698cb98f680b39921ec67c6c4bcf532f987f18b2b",
+      "disposition": "modeled",
+      "reason": "Project the bound VPC and zone for each native subnet in the existing ELB Query wire shape.",
+      "models": [
+        {
+          "id": "ALBNativePlacement",
+          "properties": [
+            "ProjectionExact",
+            "LegacyUnbound"
+          ],
+          "limits": "Checks normalized placement admission, exact stored VPC/zone projection, complete per-ALB ownership, canceled staging, legacy replay, peer-owner retention during deletion, removal of unbound resources and reopen. The model serializes transaction boundaries and abstracts immutable resource metadata. It does not establish SQL or Go refinement, locking, HTTP or SDK behavior, process durability, concrete IAM, CloudFormation behavior, IP/ENI allocation, DNS or network reachability. Team/region are normalized ownership tags, not independent simulated processes."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/elb_storage_faults_test.go",
+      "sha256": "cef5d6ec0a4654ad5a6ce160f63a8424b3dbe0fb0ce1990f872133ce0796ac19",
+      "disposition": "test-support",
+      "reason": "Retain real SQL fault sweeps using native placement resources.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/elb_store.go",
+      "sha256": "93a3f45a5e6338603c7faa66f9ca2b5fc161bf8c940d22c74991c3c05f67e373",
+      "disposition": "modeled",
+      "reason": "Commit and verify the allocated load balancer and complete indexed network references atomically.",
+      "models": [
+        {
+          "id": "ALBNativePlacement",
+          "properties": [
+            "TypeOK",
+            "AdmittedPlacement",
+            "CanceledUnchanged",
+            "ReopenUnchanged",
+            "StageInvisible",
+            "LegacyUnbound",
+            "ProjectionExact",
+            "CompleteReferences",
+            "ReferencesExist"
+          ],
+          "limits": "Checks normalized placement admission, exact stored VPC/zone projection, complete per-ALB ownership, canceled staging, legacy replay, peer-owner retention during deletion, removal of unbound resources and reopen. The model serializes transaction boundaries and abstracts immutable resource metadata. It does not establish SQL or Go refinement, locking, HTTP or SDK behavior, process durability, concrete IAM, CloudFormation behavior, IP/ENI allocation, DNS or network reachability. Team/region are normalized ownership tags, not independent simulated processes."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/elb_test.go",
+      "sha256": "9c51c8b103ae195620a0a34e83471cf56afdaa9d5ec541da748c69bfca2d0dd2",
+      "disposition": "test-support",
+      "reason": "Retain native ELB action, health, IAM and error assertions with verified placement resources.",
+      "models": []
+    },
+    {
+      "path": "internal/server/elb_composition_test.go",
+      "sha256": "8d6711e0b1dfdf77440b0b3f24566621be7d4f94b5de16b10739493defada64f",
+      "disposition": "test-support",
+      "reason": "Exercise native EC2 setup through the shared authenticated server before checking existing ELB behavior.",
+      "models": []
+    },
+    {
+      "path": "internal/server/server.go",
+      "sha256": "92508027e3df542d7f9a0aa447c3547ea2ea5bc3f28aae500cca7b41f0d5e247",
+      "disposition": "modeled",
+      "reason": "Describe the placement dependency in the existing ELB capability response.",
+      "models": [
+        {
+          "id": "ALBNativePlacement",
+          "properties": [
+            "AdmittedPlacement",
+            "LegacyUnbound"
+          ],
+          "limits": "Checks normalized placement admission, exact stored VPC/zone projection, complete per-ALB ownership, canceled staging, legacy replay, peer-owner retention during deletion, removal of unbound resources and reopen. The model serializes transaction boundaries and abstracts immutable resource metadata. It does not establish SQL or Go refinement, locking, HTTP or SDK behavior, process durability, concrete IAM, CloudFormation behavior, IP/ENI allocation, DNS or network reachability. Team/region are normalized ownership tags, not independent simulated processes."
+        }
+      ]
+    },
+    {
+      "path": "scripts/formal_model_gate.py",
+      "sha256": "c6f0fc8e431a7dbe9ce2d3e159b85dde0237902b1fed70408c85ca3f02b07553",
+      "disposition": "formal-infrastructure",
+      "reason": "Require the registered bounded placement model, its exact scope, invariants and mutation identities.",
+      "models": []
+    },
+    {
+      "path": "scripts/test-formal-gate.py",
+      "sha256": "543b0f50536dc21ed4b93cae0a42929d45ea70b105d85a921f3ef821f87bec24",
+      "disposition": "formal-infrastructure",
+      "reason": "Protect the complete model inventory after adding the placement model.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/elb.py",
+      "sha256": "fe1da78aa0a6004d965ae149dbd3e6b9a2c4092dc04e6f3aee2803c21bed5d2c",
+      "disposition": "test-support",
+      "reason": "Exercise the ordinary stock SDK on two authenticated loopback CLIs, held network dependencies, persisted placement, original Lambda lifecycle and actual cleanup.",
       "models": []
     }
   ]

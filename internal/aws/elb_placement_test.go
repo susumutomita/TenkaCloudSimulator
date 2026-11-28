@@ -6,6 +6,9 @@ import (
 	"encoding/json"
 	"errors"
 	"testing"
+
+	"github.com/ncruces/go-sqlite3"
+	"github.com/ncruces/go-sqlite3/driver"
 )
 
 type elbTestNetwork struct {
@@ -189,4 +192,86 @@ func TestELBPlacementSharedReleaseAndAtomicReadback(t *testing.T) {
 	}
 	h.fail("SubnetNotFound", 400, "CreateLoadBalancer", append([]string{"Name", "after-delete"}, n.form()...)...)
 	count(0, 0)
+}
+
+func TestELBPlacementCancelDuringReferenceInsert(t *testing.T) {
+	h := newELBHarness(t)
+	db, n := h.store.Database(), h.network
+	// WITHOUT ROWID reference tables do not emit SQLite update hooks. An
+	// ordinary rowid witness in the same transaction signals the first insert.
+	if _, err := db.Exec("CREATE TABLE placement_insert_event(id INTEGER PRIMARY KEY); CREATE TRIGGER placement_insert AFTER INSERT ON aws_elb_placement_refs BEGIN INSERT INTO placement_insert_event(id) VALUES(NULL); END"); err != nil {
+		t.Fatal(err)
+	}
+	ctx, cancel := context.WithCancel(t.Context())
+	defer cancel()
+	conn, err := db.Conn(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fired := false
+	err = conn.Raw(func(raw any) error {
+		raw.(driver.Conn).Raw().UpdateHook(func(action sqlite3.AuthorizerActionCode, _, table string, _ int64) {
+			if action == sqlite3.AUTH_INSERT && table == "placement_insert_event" && !fired {
+				fired = true
+				cancel()
+			}
+		})
+		return nil
+	})
+	conn.Close()
+	if err != nil {
+		t.Fatal(err)
+	}
+	lb := ELBLoadBalancer{Name: "cancel", Region: "us-east-1", Scheme: "internal", Subnets: []string{n.a, n.b}, SecurityGroups: []string{n.group}}
+	_, err = h.gateway.ELB.CreateLoadBalancer(ctx, lb, func(string, string) error { return nil })
+	if err == nil || !fired {
+		t.Fatal("late cancellation was not exercised", err)
+	}
+	var count int
+	if err = db.QueryRow("SELECT (SELECT count(*) FROM aws_elb_load_balancers)+(SELECT count(*) FROM aws_elb_placement_refs)+(SELECT count(*) FROM placement_insert_event)").Scan(&count); err != nil || count != 0 {
+		t.Fatal(count, err)
+	}
+	h.loadBalancer("cancel")
+}
+
+func TestELBPlacementConcurrentNetworkDelete(t *testing.T) {
+	for _, resource := range []string{"subnet", "group"} {
+		t.Run(resource, func(t *testing.T) {
+			h := newELBHarness(t)
+			n := h.network
+			ctx := t.Context()
+			name, region := "race", "us-east-1"
+			request := ELBLoadBalancer{Name: name, Region: region, Scheme: "internal", Subnets: []string{n.a, n.b}, SecurityGroups: []string{n.group}}
+			start := make(chan struct{})
+			result := make(chan error, 1)
+			go func() {
+				<-start
+				if resource == "subnet" {
+					result <- n.stacks.deleteNativeSubnet(ctx, region, n.a)
+				} else {
+					result <- n.stacks.deleteEC2NativeSecurityGroup(ctx, region, n.group)
+				}
+			}()
+			close(start)
+			created, createErr := h.gateway.ELB.CreateLoadBalancer(ctx, request, func(string, string) error { return nil })
+			deleteErr := <-result
+			if createErr == nil {
+				var dependency *ec2Failure
+				if !errors.As(deleteErr, &dependency) || dependency.code != "DependencyViolation" {
+					t.Fatal(deleteErr)
+				}
+				h.ok("DescribeLoadBalancers", "LoadBalancerArns.member.1", created.ARN)
+				return
+			}
+			want := "SubnetNotFound"
+			if resource == "group" {
+				want = "InvalidSecurityGroup"
+			}
+			var failed elbFailure
+			if deleteErr != nil || !errors.As(createErr, &failed) || failed.code != want {
+				t.Fatal(createErr, deleteErr)
+			}
+			h.fail("LoadBalancerNotFound", 400, "DescribeLoadBalancers", "Names.member.1", name)
+		})
+	}
 }

@@ -77,7 +77,7 @@ func checkELBPlacementRefs(ctx context.Context, tx *sql.Tx, lb ELBLoadBalancer) 
 	}
 	resolved := lb
 	if err := resolveELBPlacement(ctx, tx, &resolved); err != nil {
-		return errors.Join(errELBPlacement, err)
+		return errELBPlacement
 	}
 	if resolved.VPCID != lb.VPCID || !maps.Equal(resolved.SubnetZones, lb.SubnetZones) {
 		return errELBPlacement
