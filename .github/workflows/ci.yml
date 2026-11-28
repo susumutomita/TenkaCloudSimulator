@@ -9,12 +9,12 @@ jobs:
     runs-on: ubuntu-22.04
     timeout-minutes: 25
     env:
-      PRODUCT: 415027c9151b1514d694afeaeabe80f4e6cd0bd4
-      PRODUCT_TREE: 1e978c73660300f8ec931fdcfe3a6a0429e527ed
+      PRODUCT: a9da23b69a7b70f263fcfb5ffe183c3632af13f6
+      PRODUCT_TREE: 09a9d0c63d42242197bcabb1099b79605c3405d3
     steps:
       - uses: actions/checkout@v7.0.1
         with:
-          ref: 415027c9151b1514d694afeaeabe80f4e6cd0bd4
+          ref: a9da23b69a7b70f263fcfb5ffe183c3632af13f6
           path: product
           persist-credentials: false
       - uses: actions/checkout@v7.0.1
@@ -60,9 +60,19 @@ jobs:
             exec setpriv --inh-caps=-all --ambient-caps=-all --bounding-set=-all "$@"
           ' isolated sh -ec '
             python="$RUNNER_TEMP/metric-sdk/bin/python"
-            "$python" -B test/e2e/cloudwatch_metrics.py > "$1/stock.json"
-            "$python" -B "$2/tenka-58-independent-stock-witness.py" > "$1/independent.json"
-            "$python" -B "$2/tenka-58-independent-point-limit.py" > "$1/bounds.json"
+            failed=0
+            run_witness() {
+              if "$python" -B "$2" > "$1"; then
+                echo "Completed $2"
+              else
+                failed=1
+                echo "Failed $2" >&2
+              fi
+            }
+            run_witness "$1/stock.json" test/e2e/cloudwatch_metrics.py
+            run_witness "$1/independent.json" "$2/tenka-58-independent-stock-witness.py"
+            run_witness "$1/bounds.json" "$2/tenka-58-independent-point-limit.py"
+            exit "$failed"
           ' metrics "$receipts" "$witnesses"
           jq -se 'length == 1 and (.[0] | .operations == ["PutMetricData","GetMetricStatistics"]
             and .transport == "AWS Query 2010-08-01" and .counts.calls > 0
@@ -77,10 +87,11 @@ jobs:
             and .slotBoundary == 1440 and .slotExtra[0] == 1441 and .audit.call > 0
             and .audit.call == .audit.send and .audit.send == .audit.response and .cleanup)' "$receipts/bounds.json"
           sha256sum --check "$receipts/binary.sha256"
-      - name: Retain build identity and the three SDK observations
+      - name: Retain build identity and available SDK observations
+        if: always()
         uses: actions/upload-artifact@v7.0.2
         with:
-          name: cloudwatch-custom-metrics-415027c-${{ github.run_id }}
+          name: cloudwatch-custom-metrics-a9da23b-${{ github.run_id }}
           path: ${{ runner.temp }}/metric-receipts/
           retention-days: 14
           if-no-files-found: error
