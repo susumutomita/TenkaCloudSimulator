@@ -243,22 +243,21 @@ discovery subsets.
 
 ## Not served
 
-These open Google Cloud Issues have no catalog API. The reason is either the
-pinned corpus or the service itself. App Engine (#318) is not a catalog API:
-its single permanent application and code deployments are served by the native
-[App Engine provider](gcp-appengine.md), which runs Python versions.
+The table records why each product is outside the generic catalog and identifies
+its native provider when one exists. The native App Engine provider serves its
+single permanent application and runs Python code deployments. [App Engine guide](gcp-appengine.md)
 
 | Issue | Service | Reason |
 | --- | --- | --- |
 | #319 | Batch | The only create method, `jobs.create`, runs a workload |
-| #323 | Google Cloud Universal Ledger | No discovery document in the pinned corpus |
-| #325 | License Manager | No discovery document in the pinned corpus (`licensing.v1` is Workspace license assignment) |
+| #323 | Google Cloud Universal Ledger | The published v1 API lists and gets existing network endpoints. [P0 scope and discovery evidence](coverage-assessment.md#google-cloud-universal-ledger) |
+| #325 | License Manager | The v1 API manages regional license configurations. [P0 scope and service definition](coverage-assessment.md#license-manager) |
 | #330 | Cloud Managed Lustre | No discovery document in the pinned corpus |
 | #331 | Cloud Storage | Served by the native Cloud Storage provider ([guide](gcp-storage.md)), not the catalog |
 | #334 | Cloud Storage for Firebase | `firebasestorage.v1beta` only links Cloud Storage buckets to Firebase; those buckets belong to the native Cloud Storage provider |
 | #337 | Bigtable | `instances.create` creates an instance and its map of clusters in one request, which the one-resource create cannot represent |
 | #341 | Cloud SQL | `sqladmin.v1` flat paths have no `global`, `regions` or `zones` scope, which the flat conventions require, and many instance methods are lifecycle actions (`restart`, `failover`, `clone`, `import`, `executeSql`) |
-| #343 | Cloud DNS | `dns.v1` flat paths have no `global`, `regions` or `zones` scope, and a record set is named by two segments (`rrsets/{name}/{type}`) |
+| #343 | Cloud DNS | The native Cloud DNS provider serves public managed zones, change batches and record sets with the `dns.v1` paths. [Cloud DNS operations and limits](acceptance/gcp-cloud-dns.md) |
 | #346, #348, #349 | Dedicated, Cross-Cloud and Cross-Site Interconnect | `interconnects.insert` orders a physical circuit at an interconnect location, and Cross-Site Interconnect uses wire groups; only Partner Interconnect attachments are served |
 | #352 | Cloud Network Insights | No discovery document in the pinned corpus |
 | #360 | Media CDN | The `edgeCache*` resources of `networkservices.v1` expose only IAM policy methods |
@@ -275,7 +274,8 @@ its single permanent application and code deployments are served by the native
 | #387 | Google Device Cloud | No discovery document in the pinned corpus |
 | #389 | BigQuery | Datasets and tables hold row data (`tabledata.insertAll`) and jobs run queries (`jobs.insert`, `jobs.query`) |
 | #391 | Cloud Life Sciences | The only resource method, `pipelines.run`, runs a workload, and operations exist only for runs |
-| #392, #393 | Data Studio, Data Studio Pro | No discovery document in the pinned corpus |
+| #392 | Data Studio (formerly Looker Studio) | The API searches assets and manages their permissions for authorized organizations. [P0 scope and API reference](coverage-assessment.md#data-studio) |
+| #393 | Data Studio Pro | No discovery document in the pinned corpus |
 | #395 | Dataflow | Every resource-creating method runs or launches a pipeline, and the paths use `{projectId}` and `{location}` without AIP resource names |
 | #398 | Earth Engine | No discovery document in the pinned corpus |
 

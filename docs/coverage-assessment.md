@@ -50,15 +50,67 @@ Pinned sources:
 | #215 | AWS Well-Architected Agent | No separate API; the Well-Architected Tool (#216) is served. |
 | #285 | VMware Cloud on AWS | No AWS API; `evs` is Amazon Elastic VMware Service, a different product. |
 | #398 | Earth Engine | No discovery document among the 598 pinned documents. |
-| #392 | Data Studio | No discovery document. |
 | #393 | Data Studio Pro | No discovery document. |
 | #330 | Cloud Managed Lustre | No `lustre` discovery document; only references from other APIs. |
 | #370 | Telecom Network Automation | No `telcoautomation` discovery document. |
 | #380 | Assured Open Source Software | No discovery document. |
 | #387 | Google Device Cloud | No discovery document. |
-| #323 | Google Cloud Universal Ledger | No discovery document. |
-| #325 | Google Cloud License Manager | No discovery document; `licensing.v1` is the Workspace Enterprise License Manager. |
 | #352 | Cloud Network Insights | No discovery document names it. The closest, `networkmanagement` network monitoring providers, links an external platform and reports observed data. |
+
+## Google Cloud APIs outside the pinned discovery corpus
+
+The 2026-11-07 assessment found no discovery document for these three APIs in
+`google-api-python-client` 2.199.0. Google also publishes the contracts below.
+The simulator serves none of these APIs. Their P0 issues under
+[#317](https://github.com/susumutomita/TenkaCloudSimulator/issues/317) remain open.
+
+### Data Studio
+
+[#392](https://github.com/susumutomita/TenkaCloudSimulator/issues/392) covers
+Data Studio, the name Google gave Looker Studio on 2026-04-16. Data Studio Pro
+is the paid edition (#393). Looker (Google Cloud core) instances have a separate
+API (#402). [Release notes](https://docs.cloud.google.com/data-studio/release-notes#April_16_2026)
+and [Google Cloud services summary](https://cloud.google.com/terms/services).
+
+`GET https://datastudio.googleapis.com/v1/assets:search` searches existing
+assets of exactly one requested type. The API also reads and changes asset
+permissions. Access requires a Google Workspace or Cloud Identity organization
+whose administrator authorizes the app. P0 must identify how local assets and
+their owners would be established before defining search or sharing behavior.
+[Asset search](https://developers.google.com/data-studio/integrate/api/reference/assets/search),
+[API reference](https://developers.google.com/data-studio/integrate/api/reference)
+and [authorization guide](https://developers.google.com/data-studio/integrate/api).
+
+### License Manager
+
+[#325](https://github.com/susumutomita/TenkaCloudSimulator/issues/325) covers
+Google Cloud's per-user third-party licensing service, generally available since
+2025-08-13. The pinned `licensing.v1` document covers Workspace Enterprise
+License Manager. [Compute Engine release notes](https://docs.cloud.google.com/compute/docs/release-notes#August_13_2025).
+
+At `licensemanager.googleapis.com`, v1 lists configurations at
+`/v1/projects/{project}/locations/{location}/configurations`. Configuration
+creation and deletion return long-running operations. Google documents one
+configuration per product per region and a default limit of 5,000 licenses per
+configuration. P0 must distinguish locally stored counts and configuration
+state from VM-agent activation and the billing obligation that creating a
+configuration can incur. [v1 service definition](https://github.com/googleapis/googleapis/blob/4fdff74be5e1d12849d1650f6fb58bd3179fb13f/google/cloud/licensemanager/v1/licensemanager.proto)
+and [License Manager guide](https://docs.cloud.google.com/compute/docs/instances/windows/license-manager).
+
+### Google Cloud Universal Ledger
+
+[#323](https://github.com/susumutomita/TenkaCloudSimulator/issues/323) covers
+Google Cloud Universal Ledger (GCUL). Blockchain Node Engine has a separate
+node resource (#320). At `universalledger.googleapis.com`, v1
+lists endpoints at `/v1/projects/{project}/locations/{location}/endpoints` and
+gets an endpoint by name. The published discovery document (revision
+`20261120`) also defines transaction submission. P0 must identify a source for
+existing endpoints before serving these reads. Project IAM grants endpoint
+reads through `roles/universalledger.viewer`. Submitting signed transactions
+requires a ledger account created by a privileged ledger administrator. Ledger
+execution falls outside configuration metadata. [REST reference](https://docs.cloud.google.com/universal-ledger/reference/rest),
+[v1 discovery document](https://universalledger.googleapis.com/$discovery/rest?version=v1)
+and [onboarding guide](https://docs.cloud.google.com/universal-ledger/getting-started).
 
 ## Every operation performs real work or reads provider-owned data
 
