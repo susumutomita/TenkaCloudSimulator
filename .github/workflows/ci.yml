@@ -9,20 +9,20 @@ jobs:
     runs-on: ubuntu-22.04
     timeout-minutes: 40
     env:
-      NATIVE: 62d6b4a45900ead444b4cfa3f455ffd6a4623098
-      NATIVE_TREE: e9ac4c7a6bc8fb9cb2b0b01fa717fd4ab5157414
-      CONSOLE: dc6ed25c4f0295292c814996e29fb786f462fc34
-      CONSOLE_TREE: 5daa30b9bcf3975687da7e969b93ab527e303315
+      NATIVE: da4fa53a80b3e61ade21dc28bf480f973a94b278
+      NATIVE_TREE: 5152c14cc8536303063d9434bbe2dd1f5a82f18f
+      CONSOLE: b88d3d8dbe9b44a5ec0bd0cd25caeee395bfd32a
+      CONSOLE_TREE: 74fb57ed2bcd2fd4f3458b922bbdd2ae17644dca
     steps:
       - uses: actions/checkout@v7.0.1
         with:
           path: native
-          ref: 62d6b4a45900ead444b4cfa3f455ffd6a4623098
+          ref: da4fa53a80b3e61ade21dc28bf480f973a94b278
           persist-credentials: false
       - uses: actions/checkout@v7.0.1
         with:
           path: console
-          ref: dc6ed25c4f0295292c814996e29fb786f462fc34
+          ref: b88d3d8dbe9b44a5ec0bd0cd25caeee395bfd32a
           persist-credentials: false
       - uses: actions/setup-go@v6.5.0
         with:
