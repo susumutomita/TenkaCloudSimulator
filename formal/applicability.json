@@ -1,249 +1,427 @@
 {
   "version": 1,
-  "base_sha": "64e5dd28dbe43f43480dfab555ffdd9aff572eb0",
+  "base_sha": "fd803075c37af3faa377f550c8e1cd52b3cfbbb1",
   "changes": [
     {
       "path": "README.md",
-      "sha256": "91a6c671db2575ddbb915f161bcabf3e85da00bba867abe5f9ca738ca990dede",
+      "sha256": "47513170e6ddcc26aeac035880d7c7d81b2347117872ae7b5ec1a72301772c08",
       "disposition": "documentation",
-      "reason": "Document the stored ECR tag query, real membership and bounded native APIs.",
+      "reason": "Describe the six supported CodeCommit Git content and branch operations and their local limits.",
       "models": []
     },
     {
       "path": "docs/aws-catalog-services.md",
-      "sha256": "5a91be06b1db5b3ac2f5d185f91600cc2d8be443c50540a8aef683e09ad16077",
+      "sha256": "cc3bde999b8f8b07e19c17a1f499d37dada95b651b7e210400faa698d83250eb",
       "disposition": "documentation",
-      "reason": "Document the stored ECR tag query, real membership and bounded native APIs.",
+      "reason": "Regenerate the published CodeCommit operation inventory and bounds.",
       "models": []
     },
     {
-      "path": "docs/aws-catalog.md",
-      "sha256": "164ca728df92aeec3e1f6530fee74597a14e0af50d4b487cef52eb59e1dd6e42",
+      "path": "docs/aws-codecommit.md",
+      "sha256": "f11c7b8673e88a621abe1a57e491e7b31c2de6b65b5ab7b1e3dcf49df78b6991",
       "disposition": "documentation",
-      "reason": "Document the stored ECR tag query, real membership and bounded native APIs.",
+      "reason": "Document supported Git object types, revision behavior, authorization and storage limits.",
       "models": []
     },
     {
       "path": "docs/design/0001-go-standalone.md",
-      "sha256": "0b261b70b66ef976fa37a0b03411043ade931f3d903d7438f0eb23b3cfd64fdb",
+      "sha256": "de3602465a7e86e354c1230e23ab484457681db8042d483365aad41f683270bf",
       "disposition": "documentation",
-      "reason": "Document the stored ECR tag query, real membership and bounded native APIs.",
+      "reason": "Record the transactional native data model and runtime dependency boundary.",
       "models": []
+    },
+    {
+      "path": "formal/CodeCommitGitReferences.cfg",
+      "sha256": "1c7c2484546fc40216e13f85c807b5251e548d774a727d7c56c35d6aef051089",
+      "disposition": "modeled",
+      "reason": "Run the finite repository lifetime, competing-writer, fork, cancellation and historical-read scenarios.",
+      "models": [
+        {
+          "id": "CodeCommitGitReferences",
+          "properties": [
+            "AtomicVisibility",
+            "CASExpectedParent",
+            "LifetimeIsolation",
+            "ForkIsolation",
+            "HistoryRetained",
+            "PeerFrame"
+          ],
+          "limits": "Finite two-repository, two-branch schedules with abstract commit and blob identities. Actual Git serialization, SQLite, real HTTP cancellation, limits and IAM evaluation are tested separately."
+        }
+      ]
+    },
+    {
+      "path": "formal/CodeCommitGitReferences.tla",
+      "sha256": "2b4357b38ecdd15854aab708a5686f78f13a1880e7c7932f6e3d5ee55f31239b",
+      "disposition": "modeled",
+      "reason": "Describe staged Git ref advancement, immutable retained history and repository lifetime isolation.",
+      "models": [
+        {
+          "id": "CodeCommitGitReferences",
+          "properties": [
+            "AtomicVisibility",
+            "CASExpectedParent",
+            "LifetimeIsolation",
+            "ForkIsolation",
+            "HistoryRetained",
+            "PeerFrame"
+          ],
+          "limits": "Finite two-repository, two-branch schedules with abstract commit and blob identities. Actual Git serialization, SQLite, real HTTP cancellation, limits and IAM evaluation are tested separately."
+        }
+      ]
     },
     {
       "path": "formal/models.json",
-      "sha256": "f3d09efb10df838c9e9297378998ff088e18df22ce43d5ac6b6e4d68664bf6dc",
+      "sha256": "d13640be937ab73e23f5792a974e2f17421ed73b809bfb0e6211047c274b2be7",
       "disposition": "formal-infrastructure",
-      "reason": "Associate the query and membership implementation with the existing catalog lifecycle model.",
+      "reason": "Register the CodeCommit leaf and its independently specified safety properties and mutation controls.",
       "models": []
+    },
+    {
+      "path": "internal/aws/catalog/codecommit_content.go",
+      "sha256": "5e71796411b0afdd2216d1eddf590c25d7f660855959448a305b7a9a6c02baf3",
+      "disposition": "modeled",
+      "reason": "Resolve the concrete repository lifetime and atomically service six Git content and branch actions.",
+      "models": [
+        {
+          "id": "CodeCommitGitReferences",
+          "properties": [
+            "AtomicVisibility",
+            "CASExpectedParent",
+            "LifetimeIsolation",
+            "ForkIsolation",
+            "HistoryRetained",
+            "PeerFrame"
+          ],
+          "limits": "Finite two-repository, two-branch schedules with abstract commit and blob identities. Actual Git serialization, SQLite, real HTTP cancellation, limits and IAM evaluation are tested separately."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/catalog/codecommit_content_test.go",
+      "sha256": "50bf11066387189d35b89cbe7e4fdbbb344dbb65d49aedd0c3da982d8c334801",
+      "disposition": "test-support",
+      "reason": "Exercise Git hashes, historical reads, authenticated scope, ref collisions, corruption and physical size bounds.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/catalog/codecommit_objects.go",
+      "sha256": "57f47dfa83b1e9bc96604c276e7a7e49ea1e84ebef935d5e0894695c13952e75",
+      "disposition": "modeled",
+      "reason": "Persist and traverse canonical Git blobs, trees, commits and branch tips in the owning repository.",
+      "models": [
+        {
+          "id": "CodeCommitGitReferences",
+          "properties": [
+            "AtomicVisibility",
+            "CASExpectedParent",
+            "LifetimeIsolation",
+            "ForkIsolation",
+            "HistoryRetained",
+            "PeerFrame"
+          ],
+          "limits": "Finite two-repository, two-branch schedules with abstract commit and blob identities. Actual Git serialization, SQLite, real HTTP cancellation, limits and IAM evaluation are tested separately."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/catalog/codecommit_transactions_test.go",
+      "sha256": "b82665000893b2acc719b0df91687131fd14c4181ae0c573f1dfb9d6d93201ed",
+      "disposition": "test-support",
+      "reason": "Interrupt physically staged writes, race real writers, replace a repository during authorization and verify durable recovery after SQLite failures.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/catalog/describe.go",
+      "sha256": "744b6c3ae87cbae385f2c264253e819528559580381a39f05518abcba01f21db",
+      "disposition": "modeled",
+      "reason": "Keep dedicated Git data operations out of generic repository metadata forms.",
+      "models": [
+        {
+          "id": "CatalogResourceLifecycle",
+          "properties": [
+            "AuthorizationFirst",
+            "FailureFrame",
+            "PeerFrame"
+          ],
+          "limits": "The generic model covers abstract catalog admission, failure and ownership. It does not model canonical Git or CodeCommit request decoding."
+        }
+      ]
     },
     {
       "path": "internal/aws/catalog/engine.go",
-      "sha256": "85d6f6348c233118f6039c7cd6228f1f14a6988f98bf30a771054e9cab5dbbe6",
+      "sha256": "2a5eecdb56206644a5fb0751c83d6df7ce31ca18a9d313bab1c7a5109cf48274",
       "disposition": "modeled",
-      "reason": "Bind named ECR tag-query groups and their guarded regional collection read to the bounded catalog lifecycle.",
+      "reason": "Install the two repository-owned Git tables in the catalog database.",
       "models": [
         {
           "id": "CatalogResourceLifecycle",
           "properties": [
             "AuthorizationFirst",
             "FailureFrame",
-            "PeerFrame",
-            "StaleWriteRejected"
+            "PeerFrame"
           ],
-          "limits": "The model abstracts guarded reads/writes, failed writes and peer frames. It does not model serialized query syntax, ECR tag matching, multi-action IAM, pagination, HTTP or SQLite snapshots."
+          "limits": "The generic model covers abstract catalog admission, failure and ownership. It does not model canonical Git or CodeCommit request decoding."
+        },
+        {
+          "id": "SARPolicyAuthorizationTarget",
+          "properties": [
+            "NoUnpermittedEffects",
+            "ResolvedParentTarget"
+          ],
+          "limits": "Prior SAR target semantics are unchanged in shared catalog files. This model does not evaluate CodeCommit IAM decisions."
+        },
+        {
+          "id": "RDSPrivatePostgresTopology",
+          "properties": [
+            "OwnedTopologyBeforeWrite",
+            "AtomicRefusal"
+          ],
+          "limits": "The existing RDS topology path remains unchanged in this shared catalog file. PostgreSQL is outside the Git model."
+        },
+        {
+          "id": "RDSOwnedGenerationFence",
+          "properties": [
+            "AttachNeedsCurrent",
+            "FencedGenerationCannotChange"
+          ],
+          "limits": "The separate RDS process ownership contract remains unchanged. Its model does not execute CodeCommit transactions."
+        },
+        {
+          "id": "CodeCommitGitReferences",
+          "properties": [
+            "AtomicVisibility",
+            "CASExpectedParent",
+            "LifetimeIsolation",
+            "ForkIsolation",
+            "HistoryRetained",
+            "PeerFrame"
+          ],
+          "limits": "Finite two-repository, two-branch schedules with abstract commit and blob identities. Actual Git serialization, SQLite, real HTTP cancellation, limits and IAM evaluation are tested separately."
         }
       ]
     },
     {
-      "path": "internal/aws/catalog/models/resource-groups.json",
-      "sha256": "bfc3382f6504cbb80eb22deebdd1ad4b3b248f545c5b3a80fcd70127a0be4a01",
+      "path": "internal/aws/catalog/models/codecommit.json",
+      "sha256": "20673b093f8c265781f73e9d1f8a56a6ba7b7c6dfa1c993ab4f6eedffb828dd4",
       "disposition": "modeled",
-      "reason": "Bind named ECR tag-query groups and their guarded regional collection read to the bounded catalog lifecycle.",
+      "reason": "Retain official pinned CodeCommit shapes for the six supported Git operations.",
       "models": [
         {
           "id": "CatalogResourceLifecycle",
           "properties": [
             "AuthorizationFirst",
             "FailureFrame",
-            "PeerFrame",
-            "StaleWriteRejected"
+            "PeerFrame"
           ],
-          "limits": "The model abstracts guarded reads/writes, failed writes and peer frames. It does not model serialized query syntax, ECR tag matching, multi-action IAM, pagination, HTTP or SQLite snapshots."
+          "limits": "The generic model covers abstract catalog admission, failure and ownership. It does not model canonical Git or CodeCommit request decoding."
         }
       ]
-    },
-    {
-      "path": "internal/aws/catalog/openapi.go",
-      "disposition": "modeled",
-      "reason": "Expose the three new routes\u2019 native ForbiddenException denial name in their served reference.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst"
-          ],
-          "limits": "The catalog model abstracts authorization before observation. It does not represent policy revisions, specific dependent IAM actions, database reads or generated reference text."
-        }
-      ],
-      "sha256": "32e976fb1d84ca5494e693fb36eb6b6dbd1c6f48c78d75cd966402e9abd79885"
-    },
-    {
-      "path": "internal/aws/catalog/resource_group_query.go",
-      "sha256": "389ae1528fb8bd1a2d71d471639d75989111dd168c1f61be115be31a04b6b047",
-      "disposition": "modeled",
-      "reason": "Bind named ECR tag-query groups and their guarded regional collection read to the bounded catalog lifecycle.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "FailureFrame",
-            "PeerFrame",
-            "StaleWriteRejected"
-          ],
-          "limits": "The model abstracts guarded reads/writes, failed writes and peer frames. It does not model serialized query syntax, ECR tag matching, multi-action IAM, pagination, HTTP or SQLite snapshots."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/catalog/resource_group_query_test.go",
-      "sha256": "1c6ef61f14e122c61883d4051b8fb173c3326de960914ad6832c1f5602ae09a2",
-      "disposition": "test-support",
-      "reason": "Exercise real named-group query operations and preservation, authorization and ECR membership behavior through the relevant test entry point.",
-      "models": []
-    },
-    {
-      "path": "internal/aws/catalog/resource_group_transaction_test.go",
-      "sha256": "9d87494aade4d6105592c26c6692efa2db8efdaffeb89336425d7a6c8e4a77d0",
-      "disposition": "test-support",
-      "reason": "Observe actual SQLite writes before cancel or deadline, reopen both group and repository state, and verify a single successful retry.",
-      "models": []
     },
     {
       "path": "internal/aws/catalog/selection.json",
-      "sha256": "b90d4c0a08a7abae677a9d8d6ab5f102e98c69f0a95b5c59943a4684e4de3a1d",
+      "sha256": "dcd1f121bd0e27f8fd11e162577a2ed6574e7b1ec954580968bed1afbdf916d0",
       "disposition": "modeled",
-      "reason": "Bind named ECR tag-query groups and their guarded regional collection read to the bounded catalog lifecycle.",
+      "reason": "Select the six native operations from the pinned AWS service model.",
       "models": [
         {
           "id": "CatalogResourceLifecycle",
           "properties": [
             "AuthorizationFirst",
             "FailureFrame",
-            "PeerFrame",
-            "StaleWriteRejected"
+            "PeerFrame"
           ],
-          "limits": "The model abstracts guarded reads/writes, failed writes and peer frames. It does not model serialized query syntax, ECR tag matching, multi-action IAM, pagination, HTTP or SQLite snapshots."
+          "limits": "The generic model covers abstract catalog admission, failure and ownership. It does not model canonical Git or CodeCommit request decoding."
         }
       ]
     },
     {
       "path": "internal/aws/catalog/semantics.go",
-      "sha256": "ee9c353918cd40049530bce283eb93563c3171c12ec0c1bcecb03c1a30c009fd",
+      "sha256": "4631dffe8f1d1ca7f576d0f99012efb44ac090d22e4a02bc9ce0fcd074ca490e",
       "disposition": "modeled",
-      "reason": "Bind the guarded regional catalog reads and request-owned Resource Groups mutations to the bounded catalog lifecycle.",
+      "reason": "Dispatch an explicitly handled operation to its CodeCommit transaction implementation.",
       "models": [
         {
           "id": "CatalogResourceLifecycle",
           "properties": [
             "AuthorizationFirst",
             "FailureFrame",
-            "PeerFrame",
-            "StaleWriteRejected"
+            "PeerFrame"
           ],
-          "limits": "The model abstracts guarded reads/writes, failed writes and peer frames. It does not model serialized query syntax, ECR tag matching, multi-action IAM, pagination, HTTP or SQLite snapshots. Request lifetimes, SQL commit timing and physical runtime cleanup require native tests."
+          "limits": "The generic model covers abstract catalog admission, failure and ownership. It does not model canonical Git or CodeCommit request decoding."
+        },
+        {
+          "id": "ECSTaskRevisionLifecycle",
+          "properties": [
+            "HistoryImmutable",
+            "CommitRequiresAdmission"
+          ],
+          "limits": "The existing ECS task revision property remains applicable to separate ECS paths in this file. It does not characterize CodeCommit history."
+        },
+        {
+          "id": "SARPolicyAuthorizationTarget",
+          "properties": [
+            "NoUnpermittedEffects",
+            "ResolvedParentTarget"
+          ],
+          "limits": "Prior SAR target semantics are unchanged in shared catalog files. This model does not evaluate CodeCommit IAM decisions."
+        },
+        {
+          "id": "RDSPrivatePostgresTopology",
+          "properties": [
+            "OwnedTopologyBeforeWrite",
+            "AtomicRefusal"
+          ],
+          "limits": "The existing RDS topology path remains unchanged in this shared catalog file. PostgreSQL is outside the Git model."
+        },
+        {
+          "id": "RDSOwnedGenerationFence",
+          "properties": [
+            "AttachNeedsCurrent",
+            "FencedGenerationCannotChange"
+          ],
+          "limits": "The separate RDS process ownership contract remains unchanged. Its model does not execute CodeCommit transactions."
+        },
+        {
+          "id": "CodeCommitGitReferences",
+          "properties": [
+            "AtomicVisibility",
+            "CASExpectedParent",
+            "LifetimeIsolation",
+            "ForkIsolation",
+            "HistoryRetained",
+            "PeerFrame"
+          ],
+          "limits": "Finite two-repository, two-branch schedules with abstract commit and blob identities. Actual Git serialization, SQLite, real HTTP cancellation, limits and IAM evaluation are tested separately."
         }
       ]
     },
     {
-      "path": "internal/aws/catalog/services_management.go",
-      "sha256": "6647cf31b87191aee497b175a83e901a0113b3f875e0aee32fbc266fce8b4884",
+      "path": "internal/aws/catalog/services_compute.go",
+      "sha256": "8dc10a758c9d983cc07a985cd4955b55013cbc28904ba4e7bbf2c21a750a9c60",
       "disposition": "modeled",
-      "reason": "Bind named ECR tag-query groups and their guarded regional collection read to the bounded catalog lifecycle.",
+      "reason": "Register CodeCommit Git handlers and declare their simulator bounds.",
       "models": [
         {
           "id": "CatalogResourceLifecycle",
           "properties": [
             "AuthorizationFirst",
             "FailureFrame",
-            "PeerFrame",
-            "StaleWriteRejected"
+            "PeerFrame"
           ],
-          "limits": "The model abstracts guarded reads/writes, failed writes and peer frames. It does not model serialized query syntax, ECR tag matching, multi-action IAM, pagination, HTTP or SQLite snapshots."
+          "limits": "The generic model covers abstract catalog admission, failure and ownership. It does not model canonical Git or CodeCommit request decoding."
+        },
+        {
+          "id": "ECSTaskRevisionLifecycle",
+          "properties": [
+            "HistoryImmutable",
+            "CommitRequiresAdmission"
+          ],
+          "limits": "The existing ECS task revision property remains applicable to separate ECS paths in this file. It does not characterize CodeCommit history."
+        },
+        {
+          "id": "CodeCommitGitReferences",
+          "properties": [
+            "AtomicVisibility",
+            "CASExpectedParent",
+            "LifetimeIsolation",
+            "ForkIsolation",
+            "HistoryRetained",
+            "PeerFrame"
+          ],
+          "limits": "Finite two-repository, two-branch schedules with abstract commit and blob identities. Actual Git serialization, SQLite, real HTTP cancellation, limits and IAM evaluation are tested separately."
         }
       ]
     },
     {
-      "path": "internal/core/policy.go",
+      "path": "internal/aws/catalog/spec.go",
+      "sha256": "1c4619aa740f9385b7d11ab8c0e51fb7e84a6f2f7c5a6cf0158e195406c5d5d6",
       "disposition": "modeled",
-      "reason": "Capture the caller policy once so all related conditions use the same revision.",
+      "reason": "Represent the dedicated data-operation handler in existing catalog operation descriptions.",
       "models": [
         {
           "id": "CatalogResourceLifecycle",
           "properties": [
-            "AuthorizationFirst"
+            "AuthorizationFirst",
+            "FailureFrame",
+            "PeerFrame"
           ],
-          "limits": "The catalog model abstracts authorization before observation. It does not represent policy revisions, specific dependent IAM actions, database reads or generated reference text."
+          "limits": "The generic model covers abstract catalog admission, failure and ownership. It does not model canonical Git or CodeCommit request decoding."
+        },
+        {
+          "id": "SARPolicyAuthorizationTarget",
+          "properties": [
+            "NoUnpermittedEffects",
+            "ResolvedParentTarget"
+          ],
+          "limits": "Prior SAR target semantics are unchanged in shared catalog files. This model does not evaluate CodeCommit IAM decisions."
         }
-      ],
-      "sha256": "c19d712a2b971ccf12d295271bfd46d95703f6591c04cf277e9b2981a2488dcc"
+      ]
     },
     {
-      "path": "internal/core/policy_test.go",
-      "sha256": "ee8b3e44cf740a5e65d0b4ad7769d2d1cd7bd03215ca5a468962737fa1570043",
-      "disposition": "test-support",
-      "reason": "Check policy replacement, explicit deny, missing principals and administrator through real identity snapshots.",
+      "path": "internal/aws/catalog/value.go",
+      "sha256": "4cda69b41697ae692c20a756d9741d37efc5899668ea722a49b8e70b73ed487e",
+      "disposition": "modeled",
+      "reason": "Preserve normal shape validation and attach optional declared exceptions to omitted top-level fields on CodeCommit Git operations.",
+      "models": [
+        {
+          "id": "CatalogResourceLifecycle",
+          "properties": [
+            "AuthorizationFirst",
+            "FailureFrame",
+            "PeerFrame"
+          ],
+          "limits": "The generic model covers abstract catalog admission, failure and ownership. It does not model canonical Git or CodeCommit request decoding."
+        }
+      ]
+    },
+    {
+      "path": "internal/server/apidocs/catalog/codecommit.json",
+      "sha256": "fc893116af4e52ea1357de2e1808ec4c8dde6750de684dcaa75ea02dcfbd844b",
+      "disposition": "presentation",
+      "reason": "Regenerate the embedded CodeCommit request and response schemas and operation list.",
       "models": []
     },
     {
       "path": "internal/server/apidocs/catalog/index.json",
-      "sha256": "ef37ca4add0d86bf84370e8f6ee564d4743b3b6eb6dd2b6f2737683d6eaf72fd",
+      "sha256": "f6e6a626218c3231563b245fb8e44e00381834d57112acf960b5f19e9928b7ee",
       "disposition": "presentation",
-      "reason": "Ship the generated operation shapes and model index for Resource Groups query operations.",
+      "reason": "Regenerate the catalog reference count for CodeCommit.",
       "models": []
     },
     {
-      "path": "internal/server/apidocs/catalog/resource-groups.json",
-      "sha256": "15f26ed36e28cd1111654fbaec27f5399d1ce31605d345c04e5e5818fe703436",
-      "disposition": "presentation",
-      "reason": "Ship the generated operation shapes and model index for Resource Groups query operations.",
+      "path": "scripts/formal_model_gate.py",
+      "sha256": "55f2a2fa3bb09fb6e413b2cd540ed8ee7cd377c580b68a802ac81fb179b4b059",
+      "disposition": "formal-infrastructure",
+      "reason": "Protect the finite CodeCommit model identity, checked properties, mutation controls and production source mapping.",
       "models": []
     },
     {
-      "path": "internal/server/server.go",
-      "disposition": "modeled",
-      "reason": "Supply the existing identities store snapshot method to catalog membership requests.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst"
-          ],
-          "limits": "The catalog model abstracts authorization before observation. It does not represent policy revisions, specific dependent IAM actions, database reads or generated reference text."
-        }
-      ],
-      "sha256": "0cacfd941e66bc319cbee33dabff57b31997dd3d089fa576c4780ec2898d9123"
+      "path": "scripts/test-formal-gate.py",
+      "sha256": "1657d33a092d266745527eade06440200caf20ad081f8f9d77b46d9c9e718fec",
+      "disposition": "formal-infrastructure",
+      "reason": "Verify protected inventory and fail when a required CodeCommit property, control or source mapping is removed.",
+      "models": []
     },
     {
-      "path": "test/e2e/catalog_fixtures/resource-groups.json",
-      "sha256": "c0ca049b51977182d46e10fe21a7693581e562a5ef1aeb7f9c6feb1f5d9b8289",
+      "path": "test/e2e/catalog_fixtures/codecommit.json",
+      "sha256": "c472771465eaadecfc060be690e20232a3cd5f0d139095989213f0cba70f6a44",
       "disposition": "test-support",
-      "reason": "Exercise real named-group query operations and preservation, authorization and ECR membership behavior through the relevant test entry point.",
+      "reason": "Exercise all six new native operations alongside the eight original metadata and tag operations.",
       "models": []
     },
     {
       "path": "test/e2e/check.py",
-      "sha256": "520678b5da4cf2b4d794c6e39972eeb3be1c9ab0da4bda6b9bcf4008752cdf82",
+      "sha256": "f53ccc6c59c13bdf7f18650f4eaea9365dd2e160b62f3f20ef47b72bbe63c070",
       "disposition": "test-support",
-      "reason": "Exercise real named-group query operations and preservation, authorization and ECR membership behavior through the relevant test entry point.",
+      "reason": "Run the dedicated real Git and two-authority CodeCommit regression through the normal opt-in native E2E suite.",
       "models": []
     },
     {
-      "path": "test/e2e/resource_group_ecr_members.py",
-      "sha256": "e49681678463371e3cfb5c7359d9a8112ff3e290fac06efa58b575a2df943c0a",
+      "path": "test/e2e/codecommit_git.py",
+      "sha256": "59152efaa47a3dc0672620b7f6421f1391d3675d90522c6aaf0d502fcef16f3b",
       "disposition": "test-support",
-      "reason": "Exercise real named-group query operations and preservation, authorization and ECR membership behavior through the relevant test entry point.",
+      "reason": "Exercise pinned boto3 against two local authorities and validate canonical Git object identities with independent Git plumbing.",
       "models": []
     }
   ]

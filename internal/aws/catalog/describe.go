@@ -264,7 +264,7 @@ func (b *binding) describe() Descriptor {
 		}
 		for i := range b.spec.Ops {
 			op := &b.spec.Ops[i]
-			if op.Resource == res.Kind {
+			if op.Resource == res.Kind && op.Handle == nil {
 				od := b.describeOp(op, res, inputs)
 				if op.Kind == List && op.Names != "" {
 					od.Names = op.Names

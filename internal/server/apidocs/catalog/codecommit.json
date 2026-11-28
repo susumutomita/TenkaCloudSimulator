@@ -1,6 +1,74 @@
 {
  "components": {
   "schemas": {
+   "BranchInfo": {
+    "additionalProperties": false,
+    "properties": {
+     "branchName": {
+      "maxLength": 256,
+      "minLength": 1,
+      "type": "string"
+     },
+     "commitId": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "Commit": {
+    "additionalProperties": false,
+    "properties": {
+     "additionalData": {
+      "type": "string"
+     },
+     "author": {
+      "$ref": "#/components/schemas/UserInfo"
+     },
+     "commitId": {
+      "type": "string"
+     },
+     "committer": {
+      "$ref": "#/components/schemas/UserInfo"
+     },
+     "message": {
+      "type": "string"
+     },
+     "parents": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "treeId": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "CreateBranchInput": {
+    "additionalProperties": false,
+    "properties": {
+     "branchName": {
+      "maxLength": 256,
+      "minLength": 1,
+      "type": "string"
+     },
+     "commitId": {
+      "type": "string"
+     },
+     "repositoryName": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "repositoryName",
+     "branchName",
+     "commitId"
+    ],
+    "type": "object"
+   },
    "CreateRepositoryInput": {
     "additionalProperties": false,
     "properties": {
@@ -62,6 +130,120 @@
     },
     "type": "object"
    },
+   "GetBranchInput": {
+    "additionalProperties": false,
+    "properties": {
+     "branchName": {
+      "maxLength": 256,
+      "minLength": 1,
+      "type": "string"
+     },
+     "repositoryName": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "GetBranchOutput": {
+    "additionalProperties": false,
+    "properties": {
+     "branch": {
+      "$ref": "#/components/schemas/BranchInfo"
+     }
+    },
+    "type": "object"
+   },
+   "GetCommitInput": {
+    "additionalProperties": false,
+    "properties": {
+     "commitId": {
+      "type": "string"
+     },
+     "repositoryName": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "repositoryName",
+     "commitId"
+    ],
+    "type": "object"
+   },
+   "GetCommitOutput": {
+    "additionalProperties": false,
+    "properties": {
+     "commit": {
+      "$ref": "#/components/schemas/Commit"
+     }
+    },
+    "required": [
+     "commit"
+    ],
+    "type": "object"
+   },
+   "GetFileInput": {
+    "additionalProperties": false,
+    "properties": {
+     "commitSpecifier": {
+      "type": "string"
+     },
+     "filePath": {
+      "type": "string"
+     },
+     "repositoryName": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "repositoryName",
+     "filePath"
+    ],
+    "type": "object"
+   },
+   "GetFileOutput": {
+    "additionalProperties": false,
+    "properties": {
+     "blobId": {
+      "type": "string"
+     },
+     "commitId": {
+      "type": "string"
+     },
+     "fileContent": {
+      "contentEncoding": "base64",
+      "type": "string"
+     },
+     "fileMode": {
+      "enum": [
+       "EXECUTABLE",
+       "NORMAL",
+       "SYMLINK"
+      ],
+      "type": "string"
+     },
+     "filePath": {
+      "type": "string"
+     },
+     "fileSize": {
+      "type": "integer"
+     }
+    },
+    "required": [
+     "commitId",
+     "blobId",
+     "filePath",
+     "fileMode",
+     "fileSize",
+     "fileContent"
+    ],
+    "type": "object"
+   },
    "GetRepositoryInput": {
     "additionalProperties": false,
     "properties": {
@@ -81,6 +263,40 @@
     "properties": {
      "repositoryMetadata": {
       "$ref": "#/components/schemas/RepositoryMetadata"
+     }
+    },
+    "type": "object"
+   },
+   "ListBranchesInput": {
+    "additionalProperties": false,
+    "properties": {
+     "nextToken": {
+      "type": "string"
+     },
+     "repositoryName": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "repositoryName"
+    ],
+    "type": "object"
+   },
+   "ListBranchesOutput": {
+    "additionalProperties": false,
+    "properties": {
+     "branches": {
+      "items": {
+       "maxLength": 256,
+       "minLength": 1,
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "nextToken": {
+      "type": "string"
      }
     },
     "type": "object"
@@ -153,6 +369,75 @@
       "type": "object"
      }
     },
+    "type": "object"
+   },
+   "PutFileInput": {
+    "additionalProperties": false,
+    "properties": {
+     "branchName": {
+      "maxLength": 256,
+      "minLength": 1,
+      "type": "string"
+     },
+     "commitMessage": {
+      "type": "string"
+     },
+     "email": {
+      "type": "string"
+     },
+     "fileContent": {
+      "contentEncoding": "base64",
+      "type": "string"
+     },
+     "fileMode": {
+      "enum": [
+       "EXECUTABLE",
+       "NORMAL",
+       "SYMLINK"
+      ],
+      "type": "string"
+     },
+     "filePath": {
+      "type": "string"
+     },
+     "name": {
+      "type": "string"
+     },
+     "parentCommitId": {
+      "type": "string"
+     },
+     "repositoryName": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "repositoryName",
+     "branchName",
+     "fileContent",
+     "filePath"
+    ],
+    "type": "object"
+   },
+   "PutFileOutput": {
+    "additionalProperties": false,
+    "properties": {
+     "blobId": {
+      "type": "string"
+     },
+     "commitId": {
+      "type": "string"
+     },
+     "treeId": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "commitId",
+     "blobId",
+     "treeId"
+    ],
     "type": "object"
    },
    "RepositoryMetadata": {
@@ -280,11 +565,26 @@
      "repositoryName"
     ],
     "type": "object"
+   },
+   "UserInfo": {
+    "additionalProperties": false,
+    "properties": {
+     "date": {
+      "type": "string"
+     },
+     "email": {
+      "type": "string"
+     },
+     "name": {
+      "type": "string"
+     }
+    },
+    "type": "object"
    }
   }
  },
  "info": {
-  "description": "Bounded simulator subset of the official AWS CodeCommit API (2015-04-13). Every other official operation returns HTTP 501 UnknownOperationException. Repositories are configuration metadata without Git data: no Git endpoint is served at the official clone URLs, and branches, commits, files, pull requests, comments, merges and triggers return UnknownOperationException with HTTP 501. KMS key identifiers are stored without resolving them. Repositories cannot be renamed. Deleting a missing repository fails instead of returning an empty result, and sortBy/order are refused.",
+  "description": "Bounded simulator subset of the official AWS CodeCommit API (2015-04-13). Every other official operation returns HTTP 501 UnknownOperationException. PutFile stores binary files as Git blobs, trees and single-parent commits. The first commit creates the default branch. CreateBranch can fork another branch from a stored commit. GetFile accepts the default branch, a branch name, refs/heads/name or a full commit ID. GetCommit reads an immutable revision. The local subset accepts regular and executable files up to 64 KiB, paths up to 256 bytes and eight components, 32 branches and 512 objects per repository, and 32 MiB of objects per team. ListBranches returns up to ten branch names per page. Clone and push transports, tags as Git references, pull requests, comments, merges, triggers and notification delivery are outside this subset. Content operations refuse repositories configured with a customer KMS key. Repositories cannot be renamed. Deleting a missing repository fails instead of returning an empty result, and sortBy/order are refused.",
   "title": "AWS CodeCommit (simulator catalog)",
   "version": "2015-04-13"
  },
@@ -301,11 +601,17 @@
       "required": true,
       "schema": {
        "enum": [
+        "CodeCommit_20150413.CreateBranch",
         "CodeCommit_20150413.CreateRepository",
         "CodeCommit_20150413.DeleteRepository",
+        "CodeCommit_20150413.GetBranch",
+        "CodeCommit_20150413.GetCommit",
+        "CodeCommit_20150413.GetFile",
         "CodeCommit_20150413.GetRepository",
+        "CodeCommit_20150413.ListBranches",
         "CodeCommit_20150413.ListRepositories",
         "CodeCommit_20150413.ListTagsForResource",
+        "CodeCommit_20150413.PutFile",
         "CodeCommit_20150413.TagResource",
         "CodeCommit_20150413.UntagResource",
         "CodeCommit_20150413.UpdateRepositoryDescription"
@@ -318,6 +624,10 @@
      "content": {
       "application/x-amz-json-1.1": {
        "examples": {
+        "CreateBranch": {
+         "summary": "X-Amz-Target: CodeCommit_20150413.CreateBranch",
+         "value": {}
+        },
         "CreateRepository": {
          "summary": "X-Amz-Target: CodeCommit_20150413.CreateRepository",
          "value": {}
@@ -326,8 +636,24 @@
          "summary": "X-Amz-Target: CodeCommit_20150413.DeleteRepository",
          "value": {}
         },
+        "GetBranch": {
+         "summary": "X-Amz-Target: CodeCommit_20150413.GetBranch",
+         "value": {}
+        },
+        "GetCommit": {
+         "summary": "X-Amz-Target: CodeCommit_20150413.GetCommit",
+         "value": {}
+        },
+        "GetFile": {
+         "summary": "X-Amz-Target: CodeCommit_20150413.GetFile",
+         "value": {}
+        },
         "GetRepository": {
          "summary": "X-Amz-Target: CodeCommit_20150413.GetRepository",
+         "value": {}
+        },
+        "ListBranches": {
+         "summary": "X-Amz-Target: CodeCommit_20150413.ListBranches",
          "value": {}
         },
         "ListRepositories": {
@@ -336,6 +662,10 @@
         },
         "ListTagsForResource": {
          "summary": "X-Amz-Target: CodeCommit_20150413.ListTagsForResource",
+         "value": {}
+        },
+        "PutFile": {
+         "summary": "X-Amz-Target: CodeCommit_20150413.PutFile",
          "value": {}
         },
         "TagResource": {
@@ -394,7 +724,7 @@
  ],
  "tags": [
   {
-   "description": "Bounded simulator subset of the official AWS CodeCommit API (2015-04-13). Every other official operation returns HTTP 501 UnknownOperationException. Repositories are configuration metadata without Git data: no Git endpoint is served at the official clone URLs, and branches, commits, files, pull requests, comments, merges and triggers return UnknownOperationException with HTTP 501. KMS key identifiers are stored without resolving them. Repositories cannot be renamed. Deleting a missing repository fails instead of returning an empty result, and sortBy/order are refused.",
+   "description": "Bounded simulator subset of the official AWS CodeCommit API (2015-04-13). Every other official operation returns HTTP 501 UnknownOperationException. PutFile stores binary files as Git blobs, trees and single-parent commits. The first commit creates the default branch. CreateBranch can fork another branch from a stored commit. GetFile accepts the default branch, a branch name, refs/heads/name or a full commit ID. GetCommit reads an immutable revision. The local subset accepts regular and executable files up to 64 KiB, paths up to 256 bytes and eight components, 32 branches and 512 objects per repository, and 32 MiB of objects per team. ListBranches returns up to ten branch names per page. Clone and push transports, tags as Git references, pull requests, comments, merges, triggers and notification delivery are outside this subset. Content operations refuse repositories configured with a customer KMS key. Repositories cannot be renamed. Deleting a missing repository fails instead of returning an empty result, and sortBy/order are refused.",
    "name": "AWS CodeCommit"
   }
  ],

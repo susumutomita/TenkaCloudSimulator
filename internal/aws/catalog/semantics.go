@@ -44,6 +44,9 @@ func (q *request) execute() (map[string]any, error) {
 	if q.e.ownedPrivateRDS != nil && q.b.spec.Model == "rds" {
 		defer q.e.ownedPrivateRDS.lock(q.region, q.op.Kind)()
 	}
+	if q.op.Handle != nil {
+		return q.op.Handle(q)
+	}
 	switch q.op.Kind {
 	case Create:
 		if q.isECSTaskDefinition() {

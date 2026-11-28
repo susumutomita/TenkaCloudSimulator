@@ -70,6 +70,11 @@ func New(db *sql.DB, cfg Config, services []*Service) (*Engine, error) {
 			return nil, fmt.Errorf("catalog service %s is registered twice", spec.Model)
 		}
 		seen[spec.Model] = true
+		if spec.Model == "codecommit" {
+			if _, err := db.Exec(gitSchema); err != nil {
+				return nil, err
+			}
+		}
 		b, err := bind(spec)
 		if err != nil {
 			return nil, err
@@ -330,6 +335,9 @@ func (e *Engine) run(w http.ResponseWriter, r *http.Request, b *binding, op *Op,
 	input := map[string]any{}
 	if official.Input != "" {
 		d := &decoder{model: b.model}
+		if b.spec.Model == "codecommit" && op.Handle != nil {
+			d.requiredErrors = gitRequiredErrors
+		}
 		decoded, err := d.decode(official.Input, raw, official.Input, 0)
 		if err != nil {
 			e.fail(w, b, op, err)
