@@ -241,7 +241,7 @@ func TestSNSNotificationPolicyStagedInterrupt(t *testing.T) {
 				res := httptest.NewRecorder()
 				g.ServeHTTP(res, req)
 				if res.Code != 500 || !strings.Contains(res.Body.String(), "<Code>InternalError</Code>") || !errors.Is(ctx.Err(), cause) || observed != allow || stagedID <= 0 {
-					t.Fatalf("HTTP=%d physical generation=%d observed=%t err=%v", res.Code, stagedID, observed == allow, ctx.Err())
+					t.Errorf("HTTP=%d physical generation=%d observed=%t err=%v", res.Code, stagedID, observed == allow, ctx.Err())
 				}
 				if err = db.Close(); err != nil {
 					t.Fatal(err)
