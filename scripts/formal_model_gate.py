@@ -4889,6 +4889,7 @@ REQUIRED_SOURCE_SCOPES['KMSScheduledDeletion'] = {
     'internal/aws/kms_grants.go',
     'internal/aws/kms_http.go',
     'internal/aws/kms_store.go',
+    'internal/aws/kms_types.go',
 }
 KMS_DELETION_CONTROLS = [
     ('DefaultToMinimum', 'days == IF window = Omitted THEN 30', 'days == IF window = Omitted THEN 7', 'ScheduleContract'),
