@@ -41,8 +41,9 @@ def send(context, team, method, template, identifier, spec, expected_path, expec
         dialog = page.get_by_role('dialog').filter(has=page.get_by_role('button', name='Close Client', exact=True))
         for name, value in [('Id', identifier)] + ([('ObjectKey', KEY)] if template == LOCAL_TEMPLATE else []):
             include = dialog.get_by_role('checkbox', name=f'Include {name} in request', exact=True)
-            row = dialog.get_by_role('row').filter(has=include)
-            field = row.get_by_role('combobox', name=' Value', exact=True)
+            row = dialog.get_by_role('row').filter(
+                has=page.get_by_role('checkbox', name=f'Include {name} in request', exact=True))
+            field = row.get_by_role('combobox', name='Value', exact=True)
             expect(include).to_have_count(1)
             expect(field).to_have_count(1)
             include.check()
