@@ -10,7 +10,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7.0.1
         with:
-          ref: 7c3872b924fbedeb4942c00c1a9c6f44c61e0dfb
+          ref: 5faf8e53f3f0eecdfe7af5b3dd675385edf4228b
           persist-credentials: false
       - uses: actions/setup-go@v6.5.0
         with:
@@ -18,15 +18,15 @@ jobs:
       - name: Build the exact product and install pinned clients
         run: |
           set -euo pipefail
-          test "$(git rev-parse HEAD)" = 7c3872b924fbedeb4942c00c1a9c6f44c61e0dfb
-          test "$(git rev-parse 'HEAD^{tree}')" = 796faf1aebb735c8a4849e47a528843a71c95bbe
+          test "$(git rev-parse HEAD)" = 5faf8e53f3f0eecdfe7af5b3dd675385edf4228b
+          test "$(git rev-parse 'HEAD^{tree}')" = d74960fe4e8bfa17d98d3693a61dfac4a1522425
           test -z "$(git status --porcelain)"
           test "$(go env GOVERSION)" = go1.26.11
           make build
           mkdir "$RUNNER_TEMP/proof"
           go version -m dist/tenkacloud-simulator > "$RUNNER_TEMP/proof/build.txt"
           grep -F 'vcs.modified=false' "$RUNNER_TEMP/proof/build.txt"
-          grep -F 'vcs.revision=7c3872b924fbedeb4942c00c1a9c6f44c61e0dfb' "$RUNNER_TEMP/proof/build.txt"
+          grep -F 'vcs.revision=5faf8e53f3f0eecdfe7af5b3dd675385edf4228b' "$RUNNER_TEMP/proof/build.txt"
           sha256sum dist/tenkacloud-simulator > "$RUNNER_TEMP/proof/binary.sha256"
           python="$RUNNER_TOOL_CACHE/Python/3.12.16/x64/bin/python3.12"
           "$python" -m venv "$RUNNER_TEMP/venv"
@@ -37,12 +37,17 @@ jobs:
           export SIMULATOR_BINARY="$PWD/dist/tenkacloud-simulator"
           python="$RUNNER_TEMP/venv/bin/python"
           "$python" -IB -c 'import os; from pathlib import Path; assert not any(k.startswith(("AWS_","BOTO_")) for k in os.environ); assert not any(os.path.lexists(p) for p in [Path.home()/".aws",Path.home()/".boto","/etc/boto.cfg"])'
+          export ORIGINAL_UID="$(id -u)" ORIGINAL_NET="$(stat -Lc %i /proc/self/ns/net)" ORIGINAL_USER="$(stat -Lc %i /proc/self/ns/user)"
           unshare --user --map-current-user --net --keep-caps sh -ec '
             ip link set lo up
             exec setpriv --inh-caps=-all --ambient-caps=-all --bounding-set=-all "$@"
           ' neutral sh -ec '
+            set -x
+            test "$(id -u)" = "$ORIGINAL_UID"
             test "$(id -u)" -ne 0
-            test "$(ls /sys/class/net)" = lo
+            test "$(stat -Lc %i /proc/self/ns/net)" != "$ORIGINAL_NET"
+            test "$(stat -Lc %i /proc/self/ns/user)" != "$ORIGINAL_USER"
+            "$1" -IB -c "import socket; assert [name for _,name in socket.if_nameindex()] == [\"lo\"]"
             grep -Eq "^CapEff:[[:space:]]*0+$" /proc/self/status
             grep -Eq "^CapBnd:[[:space:]]*0+$" /proc/self/status
             "$1" -B -c "import boto3,botocore; assert (boto3.__version__,botocore.__version__) == (\"1.42.0\",\"1.41.6\")"
