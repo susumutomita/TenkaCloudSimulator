@@ -1,249 +1,437 @@
 {
   "version": 1,
-  "base_sha": "64e5dd28dbe43f43480dfab555ffdd9aff572eb0",
+  "base_sha": "fd803075c37af3faa377f550c8e1cd52b3cfbbb1",
   "changes": [
     {
+      "path": ".github/workflows/ci.yml",
+      "sha256": "a42d3c85d3460f5213f91fea27c41ec75043632c72793ef6a81f70cdf53e376a",
+      "disposition": "formal-infrastructure",
+      "reason": "The existing Node test job also runs the Support console client suite.",
+      "models": []
+    },
+    {
       "path": "README.md",
-      "sha256": "91a6c671db2575ddbb915f161bcabf3e85da00bba867abe5f9ca738ca990dede",
+      "sha256": "0d8ff37aef3882018a4ce70789107a6f2268e496c391c104b8d24223160dd2de",
       "disposition": "documentation",
-      "reason": "Document the stored ECR tag query, real membership and bounded native APIs.",
+      "reason": "Describe the publicly shipped local Support workflow and its limits.",
       "models": []
     },
     {
-      "path": "docs/aws-catalog-services.md",
-      "sha256": "5a91be06b1db5b3ac2f5d185f91600cc2d8be443c50540a8aef683e09ad16077",
+      "path": "docs/aws-support.md",
+      "sha256": "00552e1a581a2302bfc8d1b2e821da35880c9cfec132071b45ffd1acc5e38bd2",
       "disposition": "documentation",
-      "reason": "Document the stored ECR tag query, real membership and bounded native APIs.",
+      "reason": "Record the primary APIs, valid inputs, IAM, storage lifecycle, local quotas and workflow.",
       "models": []
     },
     {
-      "path": "docs/aws-catalog.md",
-      "sha256": "164ca728df92aeec3e1f6530fee74597a14e0af50d4b487cef52eb59e1dd6e42",
+      "path": "docs/coverage-assessment.md",
+      "sha256": "26a1a94becd34715d1e76ca87cfd819db82abae7f62c1aa660f7790d9cdde938",
       "disposition": "documentation",
-      "reason": "Document the stored ECR tag query, real membership and bounded native APIs.",
+      "reason": "Update the existing inventory to distinguish the local Support case flow from broader AWS Support.",
       "models": []
     },
     {
       "path": "docs/design/0001-go-standalone.md",
-      "sha256": "0b261b70b66ef976fa37a0b03411043ade931f3d903d7438f0eb23b3cfd64fdb",
+      "sha256": "b141e54476c563bc622e00cf0d63c2ef650c5213e2fda89005d86a86119e8683",
       "disposition": "documentation",
-      "reason": "Document the stored ECR tag query, real membership and bounded native APIs.",
+      "reason": "Describe the real per-team database, public entry points and bounded authority.",
       "models": []
+    },
+    {
+      "path": "formal/SupportCaseLifecycle.cfg",
+      "sha256": "8ed0616c28ef6c66d4a281c26c916cb6747d8ce0b3ac830e39b3d3d9ce171cc6",
+      "disposition": "modeled",
+      "reason": "Configure the finite case state, permissions, persistence and peer-frame invariants.",
+      "models": [
+        {
+          "id": "SupportCaseLifecycle",
+          "properties": [
+            "PeerFrame",
+            "StageContract",
+            "SubmissionContract",
+            "ResolutionContract",
+            "ReadProjection",
+            "RestartAndClock"
+          ],
+          "limits": "The checker projects finite transitions. Native tests cover actor resolution, SQL and transaction failures, full payloads, paging, actual transport and real clocks."
+        }
+      ]
+    },
+    {
+      "path": "formal/SupportCaseLifecycle.tla",
+      "sha256": "649d569021fb3721057efaec8ab840a67c0b8acb8e151dd969901bd83eff6382",
+      "disposition": "modeled",
+      "reason": "Define the finite service transitions, read projection and failure frames.",
+      "models": [
+        {
+          "id": "SupportCaseLifecycle",
+          "properties": [
+            "PeerFrame",
+            "StageContract",
+            "SubmissionContract",
+            "ResolutionContract",
+            "ReadProjection",
+            "RestartAndClock"
+          ],
+          "limits": "The checker projects finite transitions. Native tests cover actor resolution, SQL and transaction failures, full payloads, paging, actual transport and real clocks."
+        }
+      ]
     },
     {
       "path": "formal/models.json",
-      "sha256": "f3d09efb10df838c9e9297378998ff088e18df22ce43d5ac6b6e4d68664bf6dc",
+      "sha256": "60d0317a7cc715a2e29d4a053fbd5f91d8ec98f9bd7b85d08465c1f689c631cd",
       "disposition": "formal-infrastructure",
-      "reason": "Associate the query and membership implementation with the existing catalog lifecycle model.",
+      "reason": "Register the finite Support transition system, protected properties and negative controls.",
       "models": []
     },
     {
-      "path": "internal/aws/catalog/engine.go",
-      "sha256": "85d6f6348c233118f6039c7cd6228f1f14a6988f98bf30a771054e9cab5dbbe6",
+      "path": "internal/aws/s3.go",
+      "sha256": "92e41b935ba0647504004b36ad3579bdf14a01441d6a6174abc0c73d288ca40a",
       "disposition": "modeled",
-      "reason": "Bind named ECR tag-query groups and their guarded regional collection read to the bounded catalog lifecycle.",
+      "reason": "The shared AWS gateway retains its team-scoped Support store handle.",
       "models": [
         {
-          "id": "CatalogResourceLifecycle",
+          "id": "SupportCaseLifecycle",
           "properties": [
-            "AuthorizationFirst",
-            "FailureFrame",
-            "PeerFrame",
-            "StaleWriteRejected"
+            "PeerFrame"
           ],
-          "limits": "The model abstracts guarded reads/writes, failed writes and peer frames. It does not model serialized query syntax, ECR tag matching, multi-action IAM, pagination, HTTP or SQLite snapshots."
+          "limits": "The checker projects finite transitions. Native tests cover actor resolution, SQL and transaction failures, full payloads, paging, actual transport and real clocks."
         }
       ]
     },
     {
-      "path": "internal/aws/catalog/models/resource-groups.json",
-      "sha256": "bfc3382f6504cbb80eb22deebdd1ad4b3b248f545c5b3a80fcd70127a0be4a01",
+      "path": "internal/aws/ssm.go",
+      "sha256": "830d093fc7d4e6fef12b6d13c71de0c86bcb5091d759c099a30cbaffbed1ae00",
       "disposition": "modeled",
-      "reason": "Bind named ECR tag-query groups and their guarded regional collection read to the bounded catalog lifecycle.",
+      "reason": "Dispatch the Support protocol target to the actor-aware provider gateway.",
       "models": [
         {
-          "id": "CatalogResourceLifecycle",
+          "id": "SupportCaseLifecycle",
           "properties": [
-            "AuthorizationFirst",
-            "FailureFrame",
             "PeerFrame",
-            "StaleWriteRejected"
+            "SubmissionContract"
           ],
-          "limits": "The model abstracts guarded reads/writes, failed writes and peer frames. It does not model serialized query syntax, ECR tag matching, multi-action IAM, pagination, HTTP or SQLite snapshots."
+          "limits": "The checker projects finite transitions. Native tests cover actor resolution, SQL and transaction failures, full payloads, paging, actual transport and real clocks."
         }
       ]
     },
     {
-      "path": "internal/aws/catalog/openapi.go",
+      "path": "internal/aws/support_gateway.go",
+      "sha256": "f89c3fc69e4467803ed0ffffb3c9516180ef6f05a5debd2ed319ff4b48fa8102",
       "disposition": "modeled",
-      "reason": "Expose the three new routes\u2019 native ForbiddenException denial name in their served reference.",
+      "reason": "Authorize and route the selected operation on this team.",
       "models": [
         {
-          "id": "CatalogResourceLifecycle",
+          "id": "SupportCaseLifecycle",
           "properties": [
-            "AuthorizationFirst"
-          ],
-          "limits": "The catalog model abstracts authorization before observation. It does not represent policy revisions, specific dependent IAM actions, database reads or generated reference text."
-        }
-      ],
-      "sha256": "32e976fb1d84ca5494e693fb36eb6b6dbd1c6f48c78d75cd966402e9abd79885"
-    },
-    {
-      "path": "internal/aws/catalog/resource_group_query.go",
-      "sha256": "389ae1528fb8bd1a2d71d471639d75989111dd168c1f61be115be31a04b6b047",
-      "disposition": "modeled",
-      "reason": "Bind named ECR tag-query groups and their guarded regional collection read to the bounded catalog lifecycle.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "FailureFrame",
             "PeerFrame",
-            "StaleWriteRejected"
+            "StageContract",
+            "SubmissionContract",
+            "ResolutionContract",
+            "ReadProjection",
+            "RestartAndClock"
           ],
-          "limits": "The model abstracts guarded reads/writes, failed writes and peer frames. It does not model serialized query syntax, ECR tag matching, multi-action IAM, pagination, HTTP or SQLite snapshots."
+          "limits": "The checker projects finite transitions. Native tests cover actor resolution, SQL and transaction failures, full payloads, paging, actual transport and real clocks."
         }
       ]
     },
     {
-      "path": "internal/aws/catalog/resource_group_query_test.go",
-      "sha256": "1c6ef61f14e122c61883d4051b8fb173c3326de960914ad6832c1f5602ae09a2",
+      "path": "internal/aws/support_gateway_test.go",
+      "sha256": "87279fae501f910da4275abaf7b87e13626c9b1d7ff1f74ff091c54539cc6905",
       "disposition": "test-support",
-      "reason": "Exercise real named-group query operations and preservation, authorization and ECR membership behavior through the relevant test entry point.",
+      "reason": "Exercise native protocol, payload and request admission through the gateway.",
       "models": []
     },
     {
-      "path": "internal/aws/catalog/resource_group_transaction_test.go",
-      "sha256": "9d87494aade4d6105592c26c6692efa2db8efdaffeb89336425d7a6c8e4a77d0",
+      "path": "internal/aws/supportcases/mutate.go",
+      "sha256": "5667ea67e31dd1939131b623ed8b5e40dfa5e679d265984e0c06cab637424a99",
+      "disposition": "modeled",
+      "reason": "Perform atomic staging, submission and resolution in SQLite.",
+      "models": [
+        {
+          "id": "SupportCaseLifecycle",
+          "properties": [
+            "StageContract",
+            "SubmissionContract",
+            "ResolutionContract",
+            "PeerFrame"
+          ],
+          "limits": "The checker projects finite transitions. Native tests cover actor resolution, SQL and transaction failures, full payloads, paging, actual transport and real clocks."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/supportcases/quota_retention_test.go",
+      "sha256": "35a1ac51eaa27b3c7de6696b80e28ec0ada2b64f742658c69cb8498372a5d905",
       "disposition": "test-support",
-      "reason": "Observe actual SQLite writes before cancel or deadline, reopen both group and repository state, and verify a single successful retry.",
+      "reason": "Verify exact persisted team quotas and inclusive case retention with their real dependent rows.",
       "models": []
     },
     {
-      "path": "internal/aws/catalog/selection.json",
-      "sha256": "b90d4c0a08a7abae677a9d8d6ab5f102e98c69f0a95b5c59943a4684e4de3a1d",
+      "path": "internal/aws/supportcases/read.go",
+      "sha256": "130ce583e22a9dfff928b317c8497e8ec3159a951d7254ff7c890f0945ecf778",
       "disposition": "modeled",
-      "reason": "Bind named ECR tag-query groups and their guarded regional collection read to the bounded catalog lifecycle.",
+      "reason": "Project saved cases, communications, and immutable attachment bytes.",
       "models": [
         {
-          "id": "CatalogResourceLifecycle",
+          "id": "SupportCaseLifecycle",
           "properties": [
-            "AuthorizationFirst",
-            "FailureFrame",
+            "ReadProjection",
             "PeerFrame",
-            "StaleWriteRejected"
+            "RestartAndClock"
           ],
-          "limits": "The model abstracts guarded reads/writes, failed writes and peer frames. It does not model serialized query syntax, ECR tag matching, multi-action IAM, pagination, HTTP or SQLite snapshots."
+          "limits": "The checker projects finite transitions. Native tests cover actor resolution, SQL and transaction failures, full payloads, paging, actual transport and real clocks."
         }
       ]
     },
     {
-      "path": "internal/aws/catalog/semantics.go",
-      "sha256": "ee9c353918cd40049530bce283eb93563c3171c12ec0c1bcecb03c1a30c009fd",
-      "disposition": "modeled",
-      "reason": "Bind the guarded regional catalog reads and request-owned Resource Groups mutations to the bounded catalog lifecycle.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "FailureFrame",
-            "PeerFrame",
-            "StaleWriteRejected"
-          ],
-          "limits": "The model abstracts guarded reads/writes, failed writes and peer frames. It does not model serialized query syntax, ECR tag matching, multi-action IAM, pagination, HTTP or SQLite snapshots. Request lifetimes, SQL commit timing and physical runtime cleanup require native tests."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/catalog/services_management.go",
-      "sha256": "6647cf31b87191aee497b175a83e901a0113b3f875e0aee32fbc266fce8b4884",
-      "disposition": "modeled",
-      "reason": "Bind named ECR tag-query groups and their guarded regional collection read to the bounded catalog lifecycle.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst",
-            "FailureFrame",
-            "PeerFrame",
-            "StaleWriteRejected"
-          ],
-          "limits": "The model abstracts guarded reads/writes, failed writes and peer frames. It does not model serialized query syntax, ECR tag matching, multi-action IAM, pagination, HTTP or SQLite snapshots."
-        }
-      ]
-    },
-    {
-      "path": "internal/core/policy.go",
-      "disposition": "modeled",
-      "reason": "Capture the caller policy once so all related conditions use the same revision.",
-      "models": [
-        {
-          "id": "CatalogResourceLifecycle",
-          "properties": [
-            "AuthorizationFirst"
-          ],
-          "limits": "The catalog model abstracts authorization before observation. It does not represent policy revisions, specific dependent IAM actions, database reads or generated reference text."
-        }
-      ],
-      "sha256": "c19d712a2b971ccf12d295271bfd46d95703f6591c04cf277e9b2981a2488dcc"
-    },
-    {
-      "path": "internal/core/policy_test.go",
-      "sha256": "ee8b3e44cf740a5e65d0b4ad7769d2d1cd7bd03215ca5a468962737fa1570043",
+      "path": "internal/aws/supportcases/read_bounds_test.go",
+      "sha256": "f4ffbd8977ee933cf8910fcad91c6ac2d3c4b8cf589690bf05c5eea2044e146e",
       "disposition": "test-support",
-      "reason": "Check policy replacement, explicit deny, missing principals and administrator through real identity snapshots.",
+      "reason": "Verify empty file encoding and inclusive submicrosecond UTC timestamp filters against the real store.",
       "models": []
     },
     {
-      "path": "internal/server/apidocs/catalog/index.json",
-      "sha256": "ef37ca4add0d86bf84370e8f6ee564d4743b3b6eb6dd2b6f2737683d6eaf72fd",
+      "path": "internal/aws/supportcases/staged_files_test.go",
+      "sha256": "b229462959e5df158aa4f0bae0cc85c10df4a9b1a40ea5d4df9b6e7d1e015d75",
+      "disposition": "test-support",
+      "reason": "Verify real stage expiry and rollback plus canceled connection waits using persistent SQLite.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/supportcases/storage_faults_test.go",
+      "sha256": "d341949dd7dd85b766684ef5d5703d8042f74a79980ad753a268940f16e77979",
+      "disposition": "test-support",
+      "reason": "Verify the native store rejects each reached database error without a partial response or a durable change to cases, messages, attachment bytes, and identifier sequences.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/supportcases/store.go",
+      "sha256": "285e183545dbe7f5af845bdcdbdc7724012839675cf9571f61c8bc017118b50c",
+      "disposition": "modeled",
+      "reason": "Initialize team-scoped state and apply the case and staging clocks.",
+      "models": [
+        {
+          "id": "SupportCaseLifecycle",
+          "properties": [
+            "StageContract",
+            "SubmissionContract",
+            "RestartAndClock",
+            "PeerFrame"
+          ],
+          "limits": "The checker projects finite transitions. Native tests cover actor resolution, SQL and transaction failures, full payloads, paging, actual transport and real clocks."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/supportcases/store_test.go",
+      "sha256": "effdf8a0b8bb5a662772da1dbcefdc56af1b90c47e4845a64aae2726c8cf8493",
+      "disposition": "test-support",
+      "reason": "Exercise persistent case history, scoped pagination, resolution and atomic attachment admission.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/supportcases/transaction_interrupt_test.go",
+      "sha256": "3f006893d2db64e6500a44f9f7e4dc911d8fa93687ed01ecccf85aa58399b8a7",
+      "disposition": "test-support",
+      "reason": "Check real context cancellation or deadline after the second attachment is inserted and full rollback across reopen and retry.",
+      "models": []
+    },
+    {
+      "path": "internal/server/apidocs/aws-json-renderer.js",
+      "sha256": "9e67a5fcbe623d1ce5e21d1a3b0abb9b57eb9a72b3774f3de4f9f2e8cd2d50ed",
       "disposition": "presentation",
-      "reason": "Ship the generated operation shapes and model index for Resource Groups query operations.",
+      "reason": "Share the native AWS JSON byte-to-text Scalar display decoder across the root and Support pages.",
       "models": []
     },
     {
-      "path": "internal/server/apidocs/catalog/resource-groups.json",
-      "sha256": "15f26ed36e28cd1111654fbaec27f5399d1ce31605d345c04e5e5818fe703436",
+      "path": "internal/server/apidocs/index.html",
+      "sha256": "5c6e6f074ae0ff60d89560680ff08e4b237654bcaf7fa944fcea67e073156187",
       "disposition": "presentation",
-      "reason": "Ship the generated operation shapes and model index for Resource Groups query operations.",
+      "reason": "Load the shared AWS JSON display renderer before initializing the root API reference.",
+      "models": []
+    },
+    {
+      "path": "internal/server/apidocs/init.js",
+      "sha256": "da2a4413237d9b0f92c2a5433d3c4e975d60633f2efdb35c3edd5d9aead89d50",
+      "disposition": "presentation",
+      "reason": "Configure the existing shared AWS JSON renderer in the root Scalar UI.",
+      "models": []
+    },
+    {
+      "path": "internal/server/apidocs/support-init.js",
+      "sha256": "f8ee2c370708aeeb8eb9e75a7164133f01a4f7355e196b099b56d64532f9373e",
+      "disposition": "presentation",
+      "reason": "Restrict the reference to genuine supported requests on the local service and display the returned native AWS JSON.",
+      "models": []
+    },
+    {
+      "path": "internal/server/apidocs/support.html",
+      "sha256": "e6c22fa3fce188e19c9132b0c6a6cd06fd3896d737706a08a08b79fa523507e0",
+      "disposition": "presentation",
+      "reason": "Serve the local Support Scalar reference entry point.",
+      "models": []
+    },
+    {
+      "path": "internal/server/apidocs/support.json",
+      "sha256": "de474b5b9b76da1fb3ea6f3c737964265bd5f1dec8062ecd8bd6a75246908318",
+      "disposition": "presentation",
+      "reason": "Publish operation choices and examples for the real AWS JSON root POST.",
       "models": []
     },
     {
       "path": "internal/server/server.go",
+      "sha256": "44a0f5d17565c765c9b1de31a38f30df110a240b1853bae3f3bf7de2bbeabbba",
       "disposition": "modeled",
-      "reason": "Supply the existing identities store snapshot method to catalog membership requests.",
+      "reason": "Install one local Support store per team and advertise its scoped capability.",
       "models": [
         {
-          "id": "CatalogResourceLifecycle",
+          "id": "SupportCaseLifecycle",
           "properties": [
-            "AuthorizationFirst"
+            "PeerFrame",
+            "RestartAndClock"
           ],
-          "limits": "The catalog model abstracts authorization before observation. It does not represent policy revisions, specific dependent IAM actions, database reads or generated reference text."
+          "limits": "The checker projects finite transitions. Native tests cover actor resolution, SQL and transaction failures, full payloads, paging, actual transport and real clocks."
         }
-      ],
-      "sha256": "0cacfd941e66bc319cbee33dabff57b31997dd3d089fa576c4780ec2898d9123"
+      ]
     },
     {
-      "path": "test/e2e/catalog_fixtures/resource-groups.json",
-      "sha256": "c0ca049b51977182d46e10fe21a7693581e562a5ef1aeb7f9c6feb1f5d9b8289",
+      "path": "internal/server/support_api_test.go",
+      "sha256": "d54babb8aa696f52f76e99a8acbf1e239899d70de26654f3635d128f5152ca7a",
       "disposition": "test-support",
-      "reason": "Exercise real named-group query operations and preservation, authorization and ECR membership behavior through the relevant test entry point.",
+      "reason": "Exercise configured server dispatch, real identity, capabilities and failures through HTTP.",
       "models": []
     },
     {
-      "path": "test/e2e/check.py",
-      "sha256": "520678b5da4cf2b4d794c6e39972eeb3be1c9ab0da4bda6b9bcf4008752cdf82",
-      "disposition": "test-support",
-      "reason": "Exercise real named-group query operations and preservation, authorization and ECR membership behavior through the relevant test entry point.",
+      "path": "internal/server/web/app.js",
+      "sha256": "0f529696c46ddba99692162d7e2f49fd7241eb76f6be35258de2c32fdddfa616",
+      "disposition": "modeled",
+      "reason": "Integrate Support into the shared console shell while preserving existing capability-gated navigation.",
+      "models": [
+        {
+          "id": "SimpleDBConsoleEpoch",
+          "properties": [
+            "VisibleRequiresCapability",
+            "OnlyCurrentScopeVisible"
+          ],
+          "limits": "This invariant concerns the retained SimpleDB view on the shared shell. Independent browser and client tests exercise the added Support UI and its actions."
+        }
+      ]
+    },
+    {
+      "path": "scripts/formal_model_gate.py",
+      "sha256": "936cbdc3d35627f63e1f8348554657b7805c031c9e9d565aadf65a6b5c0b5789",
+      "disposition": "formal-infrastructure",
+      "reason": "Require the checked Support files, lifecycle properties and controls in the manifest.",
       "models": []
     },
     {
-      "path": "test/e2e/resource_group_ecr_members.py",
-      "sha256": "e49681678463371e3cfb5c7359d9a8112ff3e290fac06efa58b575a2df943c0a",
+      "path": "scripts/test-formal-gate.py",
+      "sha256": "0c99f70cb149d83bdfe9252817af3109860dc971a9589cbfac6524661ba5b806",
+      "disposition": "formal-infrastructure",
+      "reason": "Exercise the manifest gate against missing Support properties, paths and controls.",
+      "models": []
+    },
+    {
+      "path": "test/console/api-reference-json.test.mjs",
+      "sha256": "15590e665669c839c10eb72b22468f92d54fe68fe889176672d86f87dbc9033c",
       "disposition": "test-support",
-      "reason": "Exercise real named-group query operations and preservation, authorization and ECR membership behavior through the relevant test entry point.",
+      "reason": "Exercise the same AWS JSON rendering plugin loaded by the served root reference.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/support_cases.py",
+      "sha256": "0694d51f260466f3f2be96e1b3663854e468ef28910e763691bc881f5f3fe7c1",
+      "disposition": "test-support",
+      "reason": "Exercise all seven operations with the stock SDK, isolated team databases and process reopen.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/support_console.py",
+      "sha256": "88aa4317c6679b06330413749144de72c22c7c6cba2ded0c3472744274f5f09c",
+      "disposition": "test-support",
+      "reason": "Exercise genuine browser controls, SDK readback, lost acknowledgments, two-team scope and cleanup.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/support_scalar.py",
+      "sha256": "85b257984d1f087c87c0222f31036d6ee5d36a34121b7a7c9b02962464497b63",
+      "disposition": "test-support",
+      "reason": "Exercise real Scalar Sends, the visible native response, SDK readback and participant denial.",
+      "models": []
+    },
+    {
+      "path": "tools/console/bundle-digests.json",
+      "sha256": "b0a4d7214a08a7cc3b35cee996494059087ef858b553c8c97b014f9316ea368d",
+      "disposition": "presentation",
+      "reason": "Identify the generated console artifact which includes Support.",
+      "models": []
+    },
+    {
+      "path": "tools/console/bundle-inputs.json",
+      "sha256": "b5342340bbd5ebb753d163d58844c1f629379afd58d8e9ca82ab14feea2c13e2",
+      "disposition": "presentation",
+      "reason": "Record the console inputs for the generated Support-inclusive bundle.",
+      "models": []
+    },
+    {
+      "path": "tools/console/src/console-home.jsx",
+      "sha256": "0d84975b33ce61cdf3eca6bf9ec9bb59894eb0f9784790b58b81593df7cb01fe",
+      "disposition": "presentation",
+      "reason": "Render the navigation entry for the actual Support console.",
+      "models": []
+    },
+    {
+      "path": "tools/console/src/console-navigation.mjs",
+      "sha256": "63bbb32f20770382bd6cfb205a4dbeedc35cb60102b230ed42292f882a8ebdd8",
+      "disposition": "modeled",
+      "reason": "Integrate Support into the shared console shell while preserving existing capability-gated navigation.",
+      "models": [
+        {
+          "id": "SimpleDBConsoleEpoch",
+          "properties": [
+            "VisibleRequiresCapability",
+            "OnlyCurrentScopeVisible"
+          ],
+          "limits": "This invariant concerns the retained SimpleDB view on the shared shell. Independent browser and client tests exercise the added Support UI and its actions."
+        }
+      ]
+    },
+    {
+      "path": "tools/console/src/main.jsx",
+      "sha256": "2c2eb9ddfb65634c26ad938ff1541601c3b831a5f685cb6c1d9af06014356d1b",
+      "disposition": "modeled",
+      "reason": "Integrate Support into the shared console shell while preserving existing capability-gated navigation.",
+      "models": [
+        {
+          "id": "SimpleDBConsoleEpoch",
+          "properties": [
+            "VisibleRequiresCapability",
+            "OnlyCurrentScopeVisible"
+          ],
+          "limits": "This invariant concerns the retained SimpleDB view on the shared shell. Independent browser and client tests exercise the added Support UI and its actions."
+        }
+      ]
+    },
+    {
+      "path": "tools/console/src/support-client.mjs",
+      "sha256": "a931f02dfadac2b5f116c556eb5fe2da01d301d92eb7b70f6c6805518b0c7d6b",
+      "disposition": "presentation",
+      "reason": "Submit and validate the seven actual case operations for the browser.",
+      "models": []
+    },
+    {
+      "path": "tools/console/src/support-console.jsx",
+      "sha256": "4591cafcdcbddbb4e5711824dd24e88097a9859b1d7080f3e1e021f2e1f5f7b4",
+      "disposition": "presentation",
+      "reason": "Render scoped case history, participant actions, uncertainty and attachment readback.",
+      "models": []
+    },
+    {
+      "path": "tools/console/test/support-client.test.mjs",
+      "sha256": "2992ab4ea863547970072950880d47cab215853ad14e290fae7bcf0aecdd59a9",
+      "disposition": "presentation",
+      "reason": "Exercise the Support presentation client and its response and scope constraints.",
       "models": []
     }
   ]
