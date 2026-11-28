@@ -60,6 +60,11 @@ func TestNotificationRuleStorageFaultAndRecovery(t *testing.T) {
 		{"check current topology", "deliver", read, "aws_sns_subscriptions", "protocol", ""},
 		{"write delivery receipt", "deliver", insert, "aws_notification_deliveries", "", "aws_sqs_messages"},
 		{"remove confirmed pending record", "deliver", remove, "aws_notification_outbox", "", "aws_notification_deliveries"},
+		{"commit new rule and its destinations", "create", sqlite3.AUTH_TRANSACTION, "", "", "aws_notification_targets"},
+		{"commit replacement target generation", "update", sqlite3.AUTH_TRANSACTION, "", "", "aws_notification_rules"},
+		{"commit cascading rule deletion", "delete", sqlite3.AUTH_TRANSACTION, "", "", "aws_notification_rules"},
+		{"commit native Git and pending event", "capture", sqlite3.AUTH_TRANSACTION, "", "", "aws_notification_outbox"},
+		{"commit durable fanout and deduplication", "deliver", sqlite3.AUTH_TRANSACTION, "", "", "aws_notification_deliveries"},
 	} {
 		t.Run(fault.name, func(t *testing.T) {
 			f := branchFixture(t, filepath.Join(t.TempDir(), "fault.db"))
@@ -91,7 +96,17 @@ func TestNotificationRuleStorageFaultAndRecovery(t *testing.T) {
 				t.Fatal(err)
 			}
 			err = conn.Raw(func(raw any) error {
-				raw.(sqlitedriver.Conn).Raw().UpdateHook(func(_ sqlite3.AuthorizerActionCode, _, table string, _ int64) { staged[table] = true })
+				c := raw.(sqlitedriver.Conn).Raw()
+				c.UpdateHook(func(_ sqlite3.AuthorizerActionCode, _, table string, _ int64) { staged[table] = true })
+				if fault.action == sqlite3.AUTH_TRANSACTION {
+					c.CommitHook(func() bool {
+						if !fired && staged[fault.staged] {
+							fired = true
+							return false
+						}
+						return true
+					})
+				}
 				return nil
 			})
 			conn.Close()
@@ -147,7 +162,7 @@ func TestNotificationRuleStorageFaultAndRecovery(t *testing.T) {
 					return errors.New(code)
 				case "deliver":
 					ok, err := f.deliver(t.Context())
-					if ok && !healthy {
+					if ok && err == nil && !healthy {
 						t.Fatal("storage outage acknowledged native delivery")
 					}
 					return err

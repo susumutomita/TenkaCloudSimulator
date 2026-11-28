@@ -31,8 +31,12 @@ func (w ruleWire) post(actor, method, path string, body []byte, change func(*htt
 	request.Header.Set("Content-Type", "application/json")
 	request.Header.Set("X-Simulator-Service", notificationService)
 	if actor != "" {
+		role := provider.CredentialParticipant
+		if actor == core.Administrator {
+			role = provider.CredentialOperator
+		}
 		request = request.WithContext(provider.WithActor(request.Context(), provider.Actor{
-			CredentialRole: provider.CredentialParticipant, ExerciseIdentity: actor, CredentialIdentity: actor}))
+			CredentialRole: role, ExerciseIdentity: actor, CredentialIdentity: actor}))
 	}
 	if change != nil {
 		change(request)
@@ -145,7 +149,6 @@ func TestNotificationRegistrationBudgetsAndFilters(t *testing.T) {
 	if f.count("aws_notification_rules") != 1 || f.count("aws_notification_targets") != 1 {
 		t.Fatal("partial rejected registration")
 	}
-	one := 1
 	first := w.op(create, input(), 200, "")["Arn"].(string)
 	w.op("UpdateNotificationRule", map[string]any{"Arn": first, "Name": "Branches"}, 400, validation)
 	w.op("UpdateNotificationRule", map[string]any{"Arn": first, "Status": "invalid"}, 400, validation)
@@ -175,7 +178,7 @@ func TestNotificationRegistrationBudgetsAndFilters(t *testing.T) {
 	if rows := w.op(list, map[string]any{"Filters": []any{map[string]string{"Name": "EVENT_TYPE_ID", "Value": "unknown"}}}, 200, "")["NotificationRules"].([]any); len(rows) != 0 {
 		t.Fatal(rows)
 	}
-	page := w.op(list, map[string]any{"MaxResults": one}, 200, "")
+	page := w.op(list, map[string]any{"MaxResults": 1}, 200, "")
 	token := page["NextToken"].(string)
 	w.op(list, map[string]any{"NextToken": "unusable cursor"}, 400, "InvalidNextTokenException")
 	w.op(list, map[string]any{"NextToken": token, "Filters": []any{map[string]string{"Name": "RESOURCE", "Value": f.source}}}, 400, "InvalidNextTokenException")
