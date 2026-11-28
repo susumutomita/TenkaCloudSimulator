@@ -31798,7 +31798,7 @@
       "id": "NotificationRuleConsole",
       "model": "formal/NotificationRuleConsole.tla",
       "config": "formal/NotificationRuleConsole.cfg",
-      "bounds": "Two trusted mount scopes representing route/region/identity. The read trial permits two asynchronous requests, a first or continuation page and two distinct rule ARNs. The write trial permits two physical sends, three operation kinds, one opaque saved body and Create token, one scope switch and a retained old write reply. Each step distinguishes the specifically observed acknowledgement, authoritative saved/absent state or failed read.",
+      "bounds": "Two trusted mount scopes representing route/region/identity. The read trial permits three asynchronous requests, a first or continuation page and two distinct rule ARNs. The write trial permits two physical sends, three operation kinds, one opaque saved body and Create token, one scope switch and a retained old write reply. Each step distinguishes the specifically observed acknowledgement, authoritative saved/absent state or failed read.",
       "properties": [
         "TypeOK",
         "ReadFrame",
@@ -31811,7 +31811,7 @@
         "RecoveryState",
         "ExactReplay"
       ],
-      "limits": "Read and mutation trials separately check the shared component control rules; they do not enumerate concurrent browser tasks. Unknown Create can use only explicit replay with the original inputs in the same mount. An exact refresh of a known ARN resolves current state without proving the original write committed. Accepted response shapes and matching fields represent the native client decoder and Describe readback; a native Update acknowledgement is empty and retains the submitted ARN. Tokens and ARNs are symbolic: no proof of token generation, idempotent server storage, exact HTTP/React execution, CSS/keyboard accessibility, SDK interoperability, native queue delivery or wall-clock behavior. Navigation/capability and embedded bundle bindings cover only entry into and retirement of a scoped view.",
+      "limits": "Read and mutation trials separately check the shared component control rules; they do not enumerate concurrent browser tasks. Unknown Create can use only explicit replay with the original inputs in the same mount. An exact refresh of a known ARN resolves current state without proving the original write committed. Current denial on a list continuation clears both the previously visible page and its continuation. A retryable failure may retain the acknowledged page; a retired request cannot clear current state. A known-ARN read or definitive response unlocks a new user command; a new Create uses a fresh symbolic token. Accepted response shapes and matching fields represent the native client decoder and Describe readback; a native Update acknowledgement is empty and retains the submitted ARN. Tokens and ARNs are symbolic: no proof of token generation, idempotent server storage, exact HTTP/React execution, CSS/keyboard accessibility, SDK interoperability, native queue delivery or wall-clock behavior. Navigation/capability and embedded bundle bindings cover only entry into and retirement of a scoped view.",
       "source_scope": [
         "tools/console/src/codestar-notifications.jsx",
         "tools/console/src/codestar-notifications.mjs",
@@ -31848,7 +31848,7 @@
           "edits": [
             {
               "old": "publish == current /\\ status = \"ok\"",
-              "new": "publish == current /\\ status \\in {\"ok\",\"denied\"}",
+              "new": "publish == current /\\ (status = \"ok\" \\/ (status = \"denied\" /\\ q.kind \\in {\"detailA\",\"detailB\"}))",
               "count": 1
             }
           ],
@@ -31913,7 +31913,7 @@
           "id": "LeaveCanceledReadActive",
           "edits": [
             {
-              "old": "ui' = [ui EXCEPT !.active = 0]",
+              "old": "ui' = [ui EXCEPT !.active = 0, !.readState = \"idle\"]",
               "new": "ui' = ui",
               "count": 1
             }
@@ -31979,8 +31979,8 @@
           "id": "StartWhileWriteInFlight",
           "edits": [
             {
-              "old": "WriteOpen == ui.stage = \"idle\"",
-              "new": "WriteOpen == ui.stage \\in {\"idle\",\"sending\"}",
+              "old": "WriteOpen == ui.stage \\in {\"idle\",\"rejected\",\"done\",\"observed\"}",
+              "new": "WriteOpen == ui.stage \\in {\"idle\",\"rejected\",\"done\",\"observed\",\"sending\"}",
               "count": 1
             }
           ],
@@ -31990,8 +31990,8 @@
           "id": "StartBeforeDurableRead",
           "edits": [
             {
-              "old": "WriteOpen == ui.stage = \"idle\"",
-              "new": "WriteOpen == ui.stage \\in {\"idle\",\"checking\"}",
+              "old": "WriteOpen == ui.stage \\in {\"idle\",\"rejected\",\"done\",\"observed\"}",
+              "new": "WriteOpen == ui.stage \\in {\"idle\",\"rejected\",\"done\",\"observed\",\"checking\"}",
               "count": 1
             }
           ],
@@ -32001,8 +32001,8 @@
           "id": "StartDuringKnownUncertainty",
           "edits": [
             {
-              "old": "WriteOpen == ui.stage = \"idle\"",
-              "new": "WriteOpen == ui.stage \\in {\"idle\",\"known\"}",
+              "old": "WriteOpen == ui.stage \\in {\"idle\",\"rejected\",\"done\",\"observed\"}",
+              "new": "WriteOpen == ui.stage \\in {\"idle\",\"rejected\",\"done\",\"observed\",\"known\"}",
               "count": 1
             }
           ],
@@ -32012,8 +32012,8 @@
           "id": "StartDuringUnknownCreate",
           "edits": [
             {
-              "old": "WriteOpen == ui.stage = \"idle\"",
-              "new": "WriteOpen == ui.stage \\in {\"idle\",\"unknownCreate\"}",
+              "old": "WriteOpen == ui.stage \\in {\"idle\",\"rejected\",\"done\",\"observed\"}",
+              "new": "WriteOpen == ui.stage \\in {\"idle\",\"rejected\",\"done\",\"observed\",\"unknownCreate\"}",
               "count": 1
             }
           ],
@@ -32337,6 +32337,149 @@
             }
           ],
           "expect_invariant": "ExactReplay"
+        },
+        {
+          "id": "KeepPreviouslyAllowedPageAfterDenial",
+          "edits": [
+            {
+              "old": "deniedList == current /\\ q.kind \\in {\"firstPage\",\"nextPage\"} /\\ status = \"denied\"",
+              "new": "deniedList == current /\\ q.kind \\in {\"firstPage\"} /\\ status = \"denied\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadFrame"
+        },
+        {
+          "id": "ClearCurrentViewOnObsoletePageDenial",
+          "edits": [
+            {
+              "old": "deniedList == current /\\ q.kind \\in {\"firstPage\",\"nextPage\"} /\\ status = \"denied\"",
+              "new": "deniedList == q.kind \\in {\"firstPage\",\"nextPage\"} /\\ status = \"denied\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadFrame"
+        },
+        {
+          "id": "ClearAuthorizedPageOnRetryableError",
+          "edits": [
+            {
+              "old": "deniedList == current /\\ q.kind \\in {\"firstPage\",\"nextPage\"} /\\ status = \"denied\"",
+              "new": "deniedList == current /\\ q.kind \\in {\"firstPage\",\"nextPage\"} /\\ status \\in {\"denied\",\"failed\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadFrame"
+        },
+        {
+          "id": "RetainDeniedContinuationToken",
+          "edits": [
+            {
+              "old": "!.cursor = IF deniedList THEN FALSE ELSE IF publish",
+              "new": "!.cursor = IF deniedList THEN @ ELSE IF publish",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadFrame"
+        },
+        {
+          "id": "KeepObsoleteRowsButClearDeniedCursor",
+          "edits": [
+            {
+              "old": "!.view = IF deniedList THEN \"none\" ELSE IF publish",
+              "new": "!.view = IF deniedList THEN @ ELSE IF publish",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadFrame"
+        },
+        {
+          "id": "LeaveKnownRecoveryLocked",
+          "edits": [
+            {
+              "old": "WriteOpen == ui.stage \\in {\"idle\",\"rejected\",\"done\",\"observed\"}",
+              "new": "WriteOpen == ui.stage \\in {\"idle\",\"rejected\",\"done\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "WriteLock"
+        },
+        {
+          "id": "LeaveVerifiedWriteLocked",
+          "edits": [
+            {
+              "old": "WriteOpen == ui.stage \\in {\"idle\",\"rejected\",\"done\",\"observed\"}",
+              "new": "WriteOpen == ui.stage \\in {\"idle\",\"rejected\",\"observed\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "WriteLock"
+        },
+        {
+          "id": "LeaveDefiniteRejectionLocked",
+          "edits": [
+            {
+              "old": "WriteOpen == ui.stage \\in {\"idle\",\"rejected\",\"done\",\"observed\"}",
+              "new": "WriteOpen == ui.stage \\in {\"idle\",\"done\",\"observed\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "WriteLock"
+        },
+        {
+          "id": "ReuseOldCreateTokenForNewCommand",
+          "edits": [
+            {
+              "old": "IF ui.sends = 0 THEN \"T\" ELSE \"T2\"",
+              "new": "\"T\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "WriteLock"
+        },
+        {
+          "id": "ReuseOldBodyForNewCommand",
+          "edits": [
+            {
+              "old": "IF ui.sends = 0 THEN \"original\" ELSE \"newBody\"",
+              "new": "\"original\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "WriteLock"
+        },
+        {
+          "id": "RenderDeniedAsAuthoritativeEmpty",
+          "edits": [
+            {
+              "old": "IF deniedList THEN \"none\" ELSE IF publish",
+              "new": "IF deniedList THEN \"emptyPage\" ELSE IF publish",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadFrame"
+        },
+        {
+          "id": "TreatDeniedContinuationAsCompleted",
+          "edits": [
+            {
+              "old": "IF status \\in {\"empty\",\"ok\"} THEN \"ready\" ELSE \"unavailable\"",
+              "new": "IF status \\in {\"empty\",\"ok\"} \\/ deniedList THEN \"ready\" ELSE \"unavailable\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadFrame"
+        },
+        {
+          "id": "TreatAuthorizedEmptyAsUnavailable",
+          "edits": [
+            {
+              "old": "IF status \\in {\"empty\",\"ok\"} THEN \"ready\" ELSE \"unavailable\"",
+              "new": "IF status = \"ok\" THEN \"ready\" ELSE \"unavailable\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadFrame"
         }
       ]
     }

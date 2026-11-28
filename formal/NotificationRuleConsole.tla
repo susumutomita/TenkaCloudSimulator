@@ -2,7 +2,7 @@
 EXTENDS Naturals, FiniteSets
 
 \* The trusted scope combines principal, region and mounted service view.
-\* Read trials exercise two numbered requests; mutation trials exercise
+\* Read trials exercise three numbered requests; mutation trials exercise
 \* one user's command and at most one further physical write.
 ReadKinds == {"firstPage", "nextPage", "detailA", "detailB"}
 Ops == {"create", "update", "delete"}
@@ -11,7 +11,7 @@ Facts == {"fieldsMatch", "fieldsDiffer", "missing", "wrongARN", "denied", "faile
 Ticket(id, scope, kind) == [id |-> id, scope |-> scope, kind |-> kind]
 Fresh(lane) ==
  [lane |-> lane, scope |-> 0, issued |-> 0, readCount |-> 0, waiting |-> {}, active |-> 0,
-  view |-> "none", stage |-> "idle", op |-> "none", arn |-> "none",
+  view |-> "none", readState |-> "idle", cursor |-> FALSE, stage |-> "idle", op |-> "none", arn |-> "none",
   body |-> "none", token |-> "none", sends |-> 0, retried |-> FALSE,
   verified |-> FALSE, retired |-> FALSE]
 VARIABLE ui, last
@@ -21,25 +21,31 @@ Init == /\ ui \in {Fresh("read"), Fresh("write")}
         /\ last = Stamp("init","",0,"")
 ReadTicket == ui.issued+1
 BeginRead(k) ==
- /\ ui.lane = "read" /\ ui.active = 0 /\ ui.readCount < 2
- /\ k # "nextPage" \/ ui.view = "firstPage"
+ /\ ui.lane = "read" /\ ui.active = 0 /\ ui.readCount < 3
+ /\ k # "nextPage" \/ (ui.cursor /\ ui.view = "firstPage")
  /\ LET q == Ticket(ReadTicket, ui.scope, k)
-    IN ui' = [ui EXCEPT !.issued = q.id, !.readCount = @+1, !.waiting = @ \cup {q}, !.active = q.id,
-                       !.view = IF k = "nextPage" THEN @ ELSE "none"]
+    IN ui' = [ui EXCEPT !.issued = q.id, !.readState = "loading", !.readCount = @+1, !.waiting = @ \cup {q}, !.active = q.id,
+                       !.view = IF k = "nextPage" THEN @ ELSE "none",
+                       !.cursor = IF k = "nextPage" THEN @ ELSE FALSE]
  /\ last' = Stamp("beginRead",k,ReadTicket,"began")
 CancelRead ==
  /\ ui.lane = "read" /\ ui.active > 0
- /\ ui' = [ui EXCEPT !.active = 0]
+ /\ ui' = [ui EXCEPT !.active = 0, !.readState = "idle"]
  /\ last' = Stamp("cancelRead","",ui.active,"canceled")
 Current(q) == q.id = ui.active /\ q.scope = ui.scope
 ReadValue(q) == IF q.kind = "nextPage" THEN "bothPages" ELSE q.kind
 AnswerRead(q,status) ==
- /\ q \in ui.waiting /\ status \in {"ok","denied","malformed","failed","wrongARN"}
+ /\ q \in ui.waiting /\ status \in {"ok","empty","denied","malformed","failed","wrongARN"}
+ /\ status = "empty" => q.kind = "firstPage"
  /\ status = "wrongARN" => q.kind \in {"detailA","detailB"}
  /\ LET current == Current(q)
         publish == current /\ status = "ok"
+        deniedList == current /\ q.kind \in {"firstPage","nextPage"} /\ status = "denied"
     IN ui' = [ui EXCEPT !.waiting = @ \ {q}, !.active = IF current THEN 0 ELSE @,
-                       !.view = IF publish THEN ReadValue(q) ELSE @]
+                       !.view = IF deniedList THEN "none" ELSE IF publish THEN ReadValue(q)
+                                ELSE IF current /\ status = "empty" THEN "emptyPage" ELSE @,
+                       !.readState = IF ~current THEN @ ELSE IF status \in {"empty","ok"} THEN "ready" ELSE "unavailable",
+                       !.cursor = IF deniedList THEN FALSE ELSE IF publish THEN q.kind = "firstPage" ELSE @]
  /\ last' = Stamp("readReply",status,q,"settled")
 
 Switch ==
@@ -53,14 +59,15 @@ LateWriteReply ==
  /\ ui' = [ui EXCEPT !.retired = FALSE]
  /\ last' = Stamp("lateWrite","",0,"discarded")
 
-WriteOpen == ui.stage = "idle"
+WriteOpen == ui.stage \in {"idle","rejected","done","observed"}
 BeginWrite(k) ==
  /\ ui.lane = "write" /\ ui.sends < 2 /\ k \in Ops
  /\ LET go == WriteOpen
     IN /\ ui' = IF go THEN
         [ui EXCEPT !.sends = @+1, !.stage = "sending", !.op = k,
          !.arn = IF k = "create" THEN "none" ELSE "A",
-         !.body = "original", !.token = IF k = "create" THEN "T" ELSE "none",
+         !.body = IF ui.sends = 0 THEN "original" ELSE "newBody",
+         !.token = IF k # "create" THEN "none" ELSE IF ui.sends = 0 THEN "T" ELSE "T2",
          !.verified = FALSE, !.retried = FALSE, !.view = "none"] ELSE ui
        /\ last' = Stamp("beginWrite",k,0,IF go THEN "sent" ELSE "blocked")
 Uncertain == IF ui.arn = "none" THEN "unknownCreate" ELSE "known"
@@ -96,31 +103,36 @@ Replay(m) ==
                           !.retried = TRUE] ELSE ui
        /\ last' = Stamp("replay",m,ui.op,IF send THEN "sent" ELSE "blocked")
 Next == \/ (\E k \in ReadKinds : BeginRead(k)) \/ CancelRead
-        \/ (\E q \in ui.waiting, s \in {"ok","denied","malformed","failed","wrongARN"} : AnswerRead(q,s))
+        \/ (\E q \in ui.waiting, s \in {"ok","empty","denied","malformed","failed","wrongARN"} : AnswerRead(q,s))
         \/ Switch \/ LateWriteReply \/ (\E k \in Ops : BeginWrite(k))
         \/ (\E s \in ACKs : AnswerWrite(s)) \/ (\E f \in Facts : CheckSaved(f))
         \/ (\E f \in RecoveryFacts : Recover(f)) \/ (\E m \in ReplayModes : Replay(m))
 
 TypeOK ==
- /\ ui.scope \in 0..1 /\ ui.sends \in 0..2 /\ ui.issued \in 0..2 /\ ui.readCount \in 0..2 /\ ui.active \in 0..2
+ /\ ui.scope \in 0..1 /\ ui.sends \in 0..2 /\ ui.issued \in 0..3 /\ ui.readCount \in 0..3 /\ ui.active \in 0..3
  /\ ui.stage \in {"idle","sending","checking","rejected","known","unknownCreate","done","observed"}
- /\ ui.verified \in BOOLEAN /\ ui.retired \in BOOLEAN /\ Cardinality(ui.waiting) <= 2
+ /\ ui.readState \in {"idle","loading","ready","unavailable"} /\ ui.cursor \in BOOLEAN /\ ui.verified \in BOOLEAN /\ ui.retired \in BOOLEAN /\ Cardinality(ui.waiting) <= 3
 ReadFrame == last.step # "readReply" \/
   LET q == last.item
       now == q.scope = last.before.scope /\ q.id = last.before.active
+      cleared == now /\ last.mode = "denied" /\ q.kind \in {"firstPage","nextPage"}
       value == IF q.kind = "nextPage" THEN "bothPages" ELSE q.kind
   IN /\ ui.active = (IF now THEN 0 ELSE last.before.active)
-     /\ ui.view = (IF now /\ last.mode = "ok" THEN value ELSE last.before.view)
+     /\ ui.view = (IF cleared THEN "none" ELSE IF now /\ last.mode = "ok" THEN value ELSE IF now /\ last.mode = "empty" THEN "emptyPage" ELSE last.before.view)
+     /\ ui.readState = (IF ~now THEN last.before.readState ELSE IF last.mode \in {"ok","empty"} THEN "ready" ELSE "unavailable")
+     /\ ui.cursor = (IF cleared THEN FALSE ELSE IF now /\ last.mode = "ok" THEN q.kind = "firstPage" ELSE last.before.cursor)
      /\ ui.waiting = last.before.waiting \ {q}
 CanceledRead == last.step # "cancelRead" \/
-                (ui.active = 0 /\ ui.view = last.before.view /\ ui.waiting = last.before.waiting)
+                (ui.active = 0 /\ ui.readState = "idle" /\ ui.view = last.before.view /\ ui.cursor = last.before.cursor /\ ui.waiting = last.before.waiting)
 ScopeReset == last.step # "switch" \/
-              (ui.scope = 1 /\ ui.active = 0 /\ ui.view = "none" /\ ui.stage = "idle" /\
-               ~ui.verified /\ ui.arn = "none" /\ ui.token = "none" /\ ui.body = "none")
+              (ui.scope = 1 /\ ui.active = 0 /\ ui.view = "none" /\ ui.readState = "idle" /\ ui.stage = "idle" /\
+               ~ui.cursor /\ ~ui.verified /\ ui.arn = "none" /\ ui.token = "none" /\ ui.body = "none")
 LateWriteFrame == last.step # "lateWrite" \/ ui = [last.before EXCEPT !.retired = FALSE]
 WriteLock == last.step # "beginWrite" \/
- (IF last.before.stage = "idle" THEN
-     ui.sends = last.before.sends+1 /\ ui.stage = "sending" /\ ui.op = last.mode
+ (IF last.before.stage \in {"idle","rejected","done","observed"} THEN
+     ui.sends = last.before.sends+1 /\ ui.stage = "sending" /\ ui.op = last.mode /\ ~ui.verified
+     /\ ui.token = (IF last.mode # "create" THEN "none" ELSE IF last.before.sends = 0 THEN "T" ELSE "T2")
+     /\ ui.body = (IF last.before.sends = 0 THEN "original" ELSE "newBody")
   ELSE ui = last.before /\ last.outcome = "blocked")
 AckState == last.step # "writeReply" \/
  /\ ~ui.verified /\ ui.sends = last.before.sends
