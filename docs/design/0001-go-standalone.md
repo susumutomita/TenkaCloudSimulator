@@ -1,6 +1,6 @@
 # Go単一バイナリの設計
 
-[AWS CodeStar Notifications](../aws-codestar-notifications.md) は、CodeCommit のブランチ更新と配信待ち記録を同じチームの SQLite トランザクションに保存する。ワーカーは SNS トピックのサービスポリシーとルール作成者の現在のキュー権限を確認し、SNS 配信記録、SQS メッセージ、重複防止記録をまとめて確定する。再起動後は未配信の記録から再開する。
+[AWS CodeStar Notifications](../aws-codestar-notifications.md) は、CodeCommit のブランチ更新と配信待ち記録を同じチームの SQLite トランザクションに保存する。ワーカーは SNS トピックのサービスポリシーとルール作成者の現在のキュー権限を確認し、SNS 配信記録、SQS メッセージ、重複防止記録をまとめて確定する。再起動後は未配信の記録から再開する。Cloudscape と Scalar は同じ公開 REST JSON 操作を使用し、コンソールは書き込み後にルールの保存内容を再取得する。
 
 [AWS CodeCommit](../aws-codecommit.md) は、チーム別の SQLite にリポジトリごとの Git オブジェクトとブランチを保存する。ファイル更新では、親コミットの照合、オブジェクトの追加、ブランチ先端と既定ブランチの更新を同じトランザクションで行う。Go の実装が Git オブジェクトを直接符号化する。
 

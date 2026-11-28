@@ -14,6 +14,12 @@ Use `Content-Type: application/json` and sign for `codestar-notifications`. The 
 
 After signing in, open the local Scalar reference at `/_simulator/docs/codestar-notifications.html`. The request editor sends the selected operation to the current simulator. Copy a real returned rule ARN into the describe, update and delete requests.
 
+## Use the Cloudscape console
+
+In the English or Japanese console, open **AWS CodeStar Notifications** and select a rule ID to read its name, repository, creator, subscribed events, enabled state, and each stored target's current status. Choose **Create rule** to supply an existing local repository ARN and one SNS topic ARN per line. The edit form can change events, enabled state, and target topics. Delete requires the saved rule name. The console uses the same five regional operations as the SDK and the local Scalar reference.
+
+If a write loses its response, refresh the affected rule. For a create whose ARN is unknown, the explicit retry reuses the original request and client token. Verify branch activity by receiving the actual SNS notification from a subscribed SQS queue.
+
 ## Configure delivery
 
 1. Create a Standard topic and one or more Standard SQS queues in the repository region. Use the native SNS Subscribe operation with protocol `sqs` and each queue ARN.

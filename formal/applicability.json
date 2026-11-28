@@ -1,589 +1,227 @@
 {
   "version": 1,
-  "base_sha": "591298e6889ff15f85df789516a570eb6da25c1e",
+  "base_sha": "d0579d3f653298293049b13890b4ae1ec64ef91b",
   "changes": [
     {
       "path": "README.md",
-      "sha256": "bdd125c30c6ff8924e5a7f7c389af57587777f66ba770220565dff0788041824",
+      "sha256": "fc6ecb743ee621e36eb4bc586ef6bdefd35a774dea4551f9a7327d851f285eef",
       "disposition": "documentation",
-      "reason": "Link the standalone CodeCommit branch notification slice and its AWS SNS service policy.",
-      "models": []
-    },
-    {
-      "path": "docs/aws-catalog.md",
-      "sha256": "4710abbc8351f3d4c03162ea78270d2980027622c6cf7e521067b06067f4761a",
-      "disposition": "documentation",
-      "reason": "Identify the dedicated native CodeStar Notifications REST JSON behavior.",
+      "reason": "Expose the bilingual rule management console in the supported branch notification scope.",
       "models": []
     },
     {
       "path": "docs/aws-codestar-notifications.md",
-      "sha256": "e21629d5b22214e64731aa11649ac5d32a1aa7c3d48014c9cfb6a94066d301f9",
+      "sha256": "d8ad6505847848a85e0a386ff854e66ba8e3f120d0124854c6f93dc9dda90981",
       "disposition": "documentation",
-      "reason": "Specify the local branch producer, required identities, Standard destinations, operations, capacity and retry lifecycle.",
-      "models": []
-    },
-    {
-      "path": "docs/catalog-backlog-assessment.md",
-      "sha256": "f90b7e7ab585122dd0ad14f0911825ec6ff5ec60eb56e36468021e0572c9b721",
-      "disposition": "documentation",
-      "reason": "Record the implemented two-event branch slice and identify the remaining provider-dependent scope.",
+      "reason": "Document ordinary console rule management, original-token retry, known-ARN recovery and queue receipt verification.",
       "models": []
     },
     {
       "path": "docs/design/0001-go-standalone.md",
-      "sha256": "1d7a4e863484219ef2f493b35ef042a1ba7a7f10669f5ac6c4013246deaba1b0",
+      "sha256": "87183cf8dc708cb2a2e4639048d813d1f961c11d3f9e5bf7db333775b2b466a7",
       "disposition": "documentation",
-      "reason": "Explain same-transaction Git capture, separate durable publication and native topic policy composition.",
+      "reason": "Explain shared REST JSON operations and readback of saved rule state.",
       "models": []
     },
     {
-      "path": "docs/sns.md",
-      "sha256": "de2d1065dfed2d4035834ba4a3ff4b7dead4549a2cdec83f8c58fb5a3dc5f281",
-      "disposition": "documentation",
-      "reason": "Specify the Query operations, restricted statement grammar, storage and exact IAM checks.",
-      "models": []
-    },
-    {
-      "path": "formal/CodeStarBranchNotificationDelivery.cfg",
-      "sha256": "395f2cac74510c8761ff7d7f76aa17dffc867fc131701abf2c49a17fb7b1d3ad",
+      "path": "formal/NotificationRuleConsole.cfg",
+      "sha256": "6433e3f4222017dcafb41eaca1c129a9163a5bb758537efadac2dbd5606544d7",
       "disposition": "modeled",
-      "reason": "Check the bounded action and outcome invariants for Git, durable fanout, cancellation and list selection.",
+      "reason": "Run the actual finite checks for scoped reads, current request, explicit unknown-create replay and typed mutation verification.",
       "models": [
         {
-          "id": "CodeStarBranchNotificationDelivery",
+          "id": "NotificationRuleConsole",
           "properties": [
-            "GitAtomicFailure",
-            "WorkerDecision",
-            "PublicationAtomic",
-            "ListReadResult"
+            "CanceledRead",
+            "ScopeReset",
+            "AckState",
+            "RecoveryState",
+            "ExactReplay"
           ],
-          "limits": "Finite two-target branch/rule state and representative principals, operations, destinations and faults. Native SQLite, SDK headers, exact filter pagination, physical clocks, quota magnitudes and payload bytes are checked separately."
+          "limits": "Finite normalized scope, response and request identities, pages and payloads. Native HTTP, concrete timing, durable service state, event delivery and accessibility are verified separately."
         }
       ]
     },
     {
-      "path": "formal/CodeStarBranchNotificationDelivery.tla",
-      "sha256": "7db13fed3c12a534e9cbf8fd3f71db85789e8db10b1af81657de43d660b55ca9",
+      "path": "formal/NotificationRuleConsole.tla",
+      "sha256": "4d391eedd62bf730e628631333ea898bc0e934f808551631f9ec8c00134221b5",
       "disposition": "modeled",
-      "reason": "Model atomic Git capture, physical target lifetimes, current creator permissions, read-only projection, restart and at-most-once native fanout.",
+      "reason": "Model rule view, scoped session, read/write and verification states and their real finite failure and recovery transitions.",
       "models": [
         {
-          "id": "CodeStarBranchNotificationDelivery",
+          "id": "NotificationRuleConsole",
           "properties": [
-            "GitCommitExact",
-            "EventExact",
-            "WorkerDecision",
-            "AtMostOnce",
-            "ListReadFrame"
+            "ReadFrame",
+            "LateWriteFrame",
+            "WriteLock",
+            "AckState",
+            "SavedState",
+            "RecoveryState",
+            "ExactReplay"
           ],
-          "limits": "Finite two-target branch/rule state and representative principals, operations, destinations and faults. Native SQLite, SDK headers, exact filter pagination, physical clocks, quota magnitudes and payload bytes are checked separately."
-        }
-      ]
-    },
-    {
-      "path": "formal/SNSNotificationPolicyLifetime.cfg",
-      "sha256": "f5039c650d36ed1ae07e753e5a43235902599ffe4816719aff798ef7ca144294",
-      "disposition": "modeled",
-      "reason": "Select the concrete bounded settings and invariants for the policy lifecycle.",
-      "models": [
-        {
-          "id": "SNSNotificationPolicyLifetime",
-          "properties": [
-            "SetAdmission",
-            "SetRefusalPreservesStore",
-            "NewGeneration",
-            "EditKeepsGeneration",
-            "PolicyBytesExact",
-            "DeleteFrame",
-            "PeerFrame",
-            "GetReadback",
-            "ReadsPreserveStore",
-            "ResolverAdmission",
-            "ResolverGeneration",
-            "ResolverDecision",
-            "CapturedCurrentGrant",
-            "CaptureExact",
-            "RestartPreservesStore"
-          ],
-          "limits": "Finite topic and generation bounds project request outcomes. Actual SQL, Unicode, the SNS Query wire, SDK and timestamps require independent native checks."
-        }
-      ]
-    },
-    {
-      "path": "formal/SNSNotificationPolicyLifetime.tla",
-      "sha256": "7bbd220cff10d3c0b6039c4a7bc0a8f315b43d2da6baf855cb03f4e57674ed1c",
-      "disposition": "modeled",
-      "reason": "Model the finite private topic lifetimes, persistence, exact grant lookup and refusal frames.",
-      "models": [
-        {
-          "id": "SNSNotificationPolicyLifetime",
-          "properties": [
-            "SetAdmission",
-            "SetRefusalPreservesStore",
-            "NewGeneration",
-            "EditKeepsGeneration",
-            "PolicyBytesExact",
-            "DeleteFrame",
-            "PeerFrame",
-            "GetReadback",
-            "ReadsPreserveStore",
-            "ResolverAdmission",
-            "ResolverGeneration",
-            "ResolverDecision",
-            "CapturedCurrentGrant",
-            "CaptureExact",
-            "RestartPreservesStore"
-          ],
-          "limits": "Finite topic and generation bounds project request outcomes. Actual SQL, Unicode, the SNS Query wire, SDK and timestamps require independent native checks."
+          "limits": "Finite normalized scope, response and request identities, pages and payloads. Native HTTP, concrete timing, durable service state, event delivery and accessibility are verified separately."
         }
       ]
     },
     {
       "path": "formal/models.json",
-      "sha256": "931cfc4672b6b9c4e3237844049590cbd4e995e5725f140b9ce43447958395f9",
+      "sha256": "34117b8d88afa12e0afdb26d1f3a7afad1db3f001af553baa5517e83f2dcec60",
       "disposition": "formal-infrastructure",
-      "reason": "Register finite bounds, invariants, intended mutations and actual paths for both new models.",
+      "reason": "Register the finite UI admission, recovery, request identity, observations and mutation controls.",
       "models": []
     },
     {
-      "path": "internal/aws/catalog/codecommit_content.go",
-      "sha256": "e4d9b5cf9528e6633fa42e73aa930a3580f5561260f123ef410572b1245a6e1c",
-      "disposition": "modeled",
-      "reason": "Record the real old and new references after native object/branch staging and before the source commit.",
-      "models": [
-        {
-          "id": "CodeStarBranchNotificationDelivery",
-          "properties": [
-            "GitAdmission",
-            "GitCommitExact",
-            "GitAtomicFailure",
-            "EventExact"
-          ],
-          "limits": "Finite two-target branch/rule state and representative principals, operations, destinations and faults. Native SQLite, SDK headers, exact filter pagination, physical clocks, quota magnitudes and payload bytes are checked separately."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/catalog/engine.go",
-      "sha256": "e45caf9a8bc2e3df762629e9213be2bd2082e0daf22c7ed1142967ed5512c0c2",
-      "disposition": "modeled",
-      "reason": "Wire the trusted reference transition into the service-owned transaction and report inability to reserve pending-work capacity.",
-      "models": [
-        {
-          "id": "CodeStarBranchNotificationDelivery",
-          "properties": [
-            "GitAdmission",
-            "GitAtomicFailure",
-            "EventExact"
-          ],
-          "limits": "Finite two-target branch/rule state and representative principals, operations, destinations and faults. Native SQLite, SDK headers, exact filter pagination, physical clocks, quota magnitudes and payload bytes are checked separately."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/codestarnotifications/delivery.go",
-      "sha256": "ea6b16d9a811aa68230d1ed5f92933b3db7c60b98c9e3770841d19c752f4aa71",
-      "disposition": "modeled",
-      "reason": "Resolve durable grant and destination lifetimes, atomically publish, retry a failed sink and retire the matching intent.",
-      "models": [
-        {
-          "id": "CodeStarBranchNotificationDelivery",
-          "properties": [
-            "RetryEligibility",
-            "WorkerDecision",
-            "PublicationAtomic",
-            "FailureHasNoPublication",
-            "AtMostOnce"
-          ],
-          "limits": "Finite two-target branch/rule state and representative principals, operations, destinations and faults. Native SQLite, SDK headers, exact filter pagination, physical clocks, quota magnitudes and payload bytes are checked separately."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/codestarnotifications/list.go",
-      "sha256": "12c79c4a0f911ec04cb035fe4cade6b5a485ea1a85dc63d231a9e67b2c67f68a",
-      "disposition": "modeled",
-      "reason": "Read persisted regional rules under the wildcard List decision and scope filter and continuation traversal to the caller.",
-      "models": [
-        {
-          "id": "CodeStarBranchNotificationDelivery",
-          "properties": [
-            "ListReadFrame",
-            "ListReadResult"
-          ],
-          "limits": "Finite two-target branch/rule state and representative principals, operations, destinations and faults. Native SQLite, SDK headers, exact filter pagination, physical clocks, quota magnitudes and payload bytes are checked separately."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/codestarnotifications/outbox.go",
-      "sha256": "9969d457ea25bd26a110ee5580a11c1a91fa3030e2740dcfd08a5351b878597a",
-      "disposition": "modeled",
-      "reason": "Capture matched event/target pairs, freeze the queue/subscription lifetimes and reserve finite capacity in the Git transaction.",
-      "models": [
-        {
-          "id": "CodeStarBranchNotificationDelivery",
-          "properties": [
-            "GitAdmission",
-            "GitAtomicFailure",
-            "EventExact"
-          ],
-          "limits": "Finite two-target branch/rule state and representative principals, operations, destinations and faults. Native SQLite, SDK headers, exact filter pagination, physical clocks, quota magnitudes and payload bytes are checked separately."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/codestarnotifications/rules.go",
-      "sha256": "da700e32718fc7ac95126f822160fa4b1cb61911d0a6bfb8292e7c6a39709c3c",
-      "disposition": "modeled",
-      "reason": "Admit local rule registration, fence target lifetimes and retire pending work after reconfiguration.",
-      "models": [
-        {
-          "id": "CodeStarBranchNotificationDelivery",
-          "properties": [
-            "RuleChangeAtomic",
-            "TargetRetirement",
-            "WorkerDecision"
-          ],
-          "limits": "Finite two-target branch/rule state and representative principals, operations, destinations and faults. Native SQLite, SDK headers, exact filter pagination, physical clocks, quota magnitudes and payload bytes are checked separately."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/codestarnotifications/store.go",
-      "sha256": "747fdd10ee5d71c6a0f5dcf4e28a1f4aa52b46a1f30a51854adbaf7696dc71e7",
-      "disposition": "modeled",
-      "reason": "Persist scoped rules and target, queue, subscription, pending and delivery identities in the team database.",
-      "models": [
-        {
-          "id": "CodeStarBranchNotificationDelivery",
-          "properties": [
-            "AtMostOnce",
-            "TargetRetirement",
-            "RestartExact"
-          ],
-          "limits": "Finite two-target branch/rule state and representative principals, operations, destinations and faults. Native SQLite, SDK headers, exact filter pagination, physical clocks, quota magnitudes and payload bytes are checked separately."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/notification_delivery_test.go",
-      "sha256": "f85ed0c262fcb41710c822d9eeee122a4e2fa3d28e0244ad0627acfc07cc1120",
-      "disposition": "modeled",
-      "reason": "Exercise the native counterpart of atomic capture, current permission, queue lifetime, target rollback, read-only paging and deduplication.",
-      "models": [
-        {
-          "id": "CodeStarBranchNotificationDelivery",
-          "properties": [
-            "GitAtomicFailure",
-            "PublicationAtomic",
-            "TargetRetirement",
-            "ListReadFrame",
-            "AtMostOnce"
-          ],
-          "limits": "Finite two-target branch/rule state and representative principals, operations, destinations and faults. Native SQLite, SDK headers, exact filter pagination, physical clocks, quota magnitudes and payload bytes are checked separately."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/notification_gateway.go",
-      "sha256": "b65f40534754d677ad2aeb0b77d40a2f61a64ef8da773d6a38c8e3ed5367dd0c",
-      "disposition": "modeled",
-      "reason": "Normalize the native rule request and current exercise identity, then use the native SNS grant and publication adapters.",
-      "models": [
-        {
-          "id": "CodeStarBranchNotificationDelivery",
-          "properties": [
-            "ListReadResult",
-            "WorkerDecision",
-            "PublicationAtomic"
-          ],
-          "limits": "Finite two-target branch/rule state and representative principals, operations, destinations and faults. Native SQLite, SDK headers, exact filter pagination, physical clocks, quota magnitudes and payload bytes are checked separately."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/notification_gateway_test.go",
-      "sha256": "0e3af6299661205002dcd38f35a83bb65c29c46a14df728859f2423fbed5bf75",
-      "disposition": "modeled",
-      "reason": "Exercise actual local rule gateway admission, create/update/delete and read back normalized rule details.",
-      "models": [
-        {
-          "id": "CodeStarBranchNotificationDelivery",
-          "properties": [
-            "RuleChangeAtomic",
-            "ListReadFrame",
-            "ListReadResult"
-          ],
-          "limits": "Finite two-target branch/rule state and representative principals, operations, destinations and faults. Native SQLite, SDK headers, exact filter pagination, physical clocks, quota magnitudes and payload bytes are checked separately."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/notification_protocol_boundaries_test.go",
-      "sha256": "bebedc24d0593974fe8e2d16ce30be33960a7112d02c6b74a094c7d16f0ae608",
+      "path": "internal/server/notification_console_test.go",
+      "sha256": "6300e65c313be81bebe46433a7d8e50b16d89568c6967f075c118e9167e06130",
       "disposition": "test-support",
-      "reason": "Exercise native protocol validation, scoped access, registration limits and an ordinary worker that resumes accepted work after its destination recovers.",
-      "models": []
-    },
-    {
-      "path": "internal/aws/notification_storage_outages_test.go",
-      "sha256": "bb869587a66a3015a641bde0a5062352ba3d0266c2bbba7695bcf29a6e8ee23d",
-      "disposition": "test-support",
-      "reason": "Exercise failures in SQLite reads, staged writes and commits across rule, Git and fanout transactions and check the full durable database frame after repair.",
-      "models": []
-    },
-    {
-      "path": "internal/aws/notification_target_recovery_test.go",
-      "sha256": "86ace3b8348c290c072280002a30fbb8ed76eef456e4ac1acbf90bc0a4508cdc",
-      "disposition": "test-support",
-      "reason": "Exercise original creator and destination lifetimes, failed and repaired publications and savepoints, invalid stored values, physical replacement, restart and exact persisted acknowledgements.",
-      "models": []
-    },
-    {
-      "path": "internal/aws/s3.go",
-      "sha256": "ac682dc251fcc8dccd54da2c0a12f50bc000f847168253416c26ffc3ac6dce09",
-      "disposition": "modeled",
-      "reason": "Carry the optional standalone notification store into the existing AWS gateway composition.",
-      "models": [
-        {
-          "id": "CodeStarBranchNotificationDelivery",
-          "properties": [
-            "ListReadResult",
-            "WorkerDecision"
-          ],
-          "limits": "Finite two-target branch/rule state and representative principals, operations, destinations and faults. Native SQLite, SDK headers, exact filter pagination, physical clocks, quota magnitudes and payload bytes are checked separately."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/sns.go",
-      "sha256": "b4d953eebf6c83897f02ddcc3ca5e6e32f51841805646015384fb66a39bfb990",
-      "disposition": "modeled",
-      "reason": "Authorize each Query action and expose the policy through the actual topic attribute requests.",
-      "models": [
-        {
-          "id": "SNSNotificationPolicyLifetime",
-          "properties": [
-            "SetAdmission",
-            "GetReadback",
-            "SetRefusalPreservesStore"
-          ],
-          "limits": "Finite topic and generation bounds project request outcomes. Actual SQL, Unicode, the SNS Query wire, SDK and timestamps require independent native checks."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/sns_sqs_fanout.go",
-      "sha256": "bba1182387f37536b6bce70497ed265b5d1d2c1b630fe626cd8e0ab28fafb5f8",
-      "disposition": "modeled",
-      "reason": "Execute the same native SNS publication and authorized SQS enqueues under the caller-owned delivery transaction.",
-      "models": [
-        {
-          "id": "CodeStarBranchNotificationDelivery",
-          "properties": [
-            "PublicationAtomic",
-            "AtMostOnce",
-            "FailureHasNoPublication"
-          ],
-          "limits": "Finite two-target branch/rule state and representative principals, operations, destinations and faults. Native SQLite, SDK headers, exact filter pagination, physical clocks, quota magnitudes and payload bytes are checked separately."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/sns_store.go",
-      "sha256": "e3cb28dad864f59a8bf11362e0e1d5ae681c4c6389ea3b7d4765bfe6ccc5bc0a",
-      "disposition": "modeled",
-      "reason": "Install the sparse policy table and remove it with its owning topic.",
-      "models": [
-        {
-          "id": "SNSNotificationPolicyLifetime",
-          "properties": [
-            "DeleteFrame",
-            "NewGeneration",
-            "PeerFrame",
-            "RestartPreservesStore"
-          ],
-          "limits": "Finite topic and generation bounds project request outcomes. Actual SQL, Unicode, the SNS Query wire, SDK and timestamps require independent native checks."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/sns_test.go",
-      "sha256": "b511659dde0f3a13f8d5f833f96638696ab4dcff95eb0555f3761dfeaeb6908b",
-      "disposition": "modeled",
-      "reason": "Retain the unsupported Query-action regression and require native validation for malformed SetTopicAttributes.",
-      "models": [
-        {
-          "id": "SNSLifecycle",
-          "properties": [
-            "DeleteAckEmpty",
-            "DeleteRetryAcknowledged"
-          ],
-          "limits": "The native lifecycle regression checks that the deleted topic stays absent, an incomplete Set is refused, and another action remains unsupported."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/sns_topic_policy.go",
-      "sha256": "f83b4cec528f0069b1b8bb56d0493fe7a3e7307d1a6fce4691e0de5528f2046f",
-      "disposition": "modeled",
-      "reason": "Validate the policy, save exact bytes and resolve the current grant in the native database transaction.",
-      "models": [
-        {
-          "id": "SNSNotificationPolicyLifetime",
-          "properties": [
-            "SetAdmission",
-            "SetRefusalPreservesStore",
-            "NewGeneration",
-            "EditKeepsGeneration",
-            "PolicyBytesExact",
-            "DeleteFrame",
-            "PeerFrame",
-            "GetReadback",
-            "ReadsPreserveStore",
-            "ResolverAdmission",
-            "ResolverGeneration",
-            "ResolverDecision",
-            "CapturedCurrentGrant",
-            "CaptureExact",
-            "RestartPreservesStore"
-          ],
-          "limits": "Finite topic and generation bounds project request outcomes. Actual SQL, Unicode, the SNS Query wire, SDK and timestamps require independent native checks."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/sns_topic_policy_test.go",
-      "sha256": "e8088019305db5d03e9ff8585e9d16657e9166cde9b97db5a489021f56366115",
-      "disposition": "modeled",
-      "reason": "Test grammar, authority, physical storage, corrupt state, request cancellation, real deadlines and retry after reopen.",
-      "models": [
-        {
-          "id": "SNSNotificationPolicyLifetime",
-          "properties": [
-            "SetAdmission",
-            "SetRefusalPreservesStore",
-            "NewGeneration",
-            "EditKeepsGeneration",
-            "PolicyBytesExact",
-            "DeleteFrame",
-            "PeerFrame",
-            "GetReadback",
-            "ReadsPreserveStore",
-            "ResolverAdmission",
-            "ResolverGeneration",
-            "ResolverDecision",
-            "CapturedCurrentGrant",
-            "CaptureExact",
-            "RestartPreservesStore"
-          ],
-          "limits": "The Go suite exercises concrete database failures and real request clock interruptions in addition to the finite outcomes."
-        }
-      ]
-    },
-    {
-      "path": "internal/aws/ssm.go",
-      "sha256": "91a665040b03d6251e44480f3813165b7b92d93caace92a60034fdedafbac779",
-      "disposition": "modeled",
-      "reason": "Route the local notification service selector to the ordinary authenticated notification handler.",
-      "models": [
-        {
-          "id": "CodeStarBranchNotificationDelivery",
-          "properties": [
-            "ListReadResult",
-            "ListReadFrame"
-          ],
-          "limits": "Finite two-target branch/rule state and representative principals, operations, destinations and faults. Native SQLite, SDK headers, exact filter pagination, physical clocks, quota magnitudes and payload bytes are checked separately."
-        }
-      ]
-    },
-    {
-      "path": "internal/server/apidocs/codestar-notifications-init.js",
-      "sha256": "3854bb38fe2b890375d1ccfefbabde1ef2baa40460ec623c9c669c65b2c78874",
-      "disposition": "presentation",
-      "reason": "Submit a selected documented local operation through Scalar to the current authority and region.",
-      "models": []
-    },
-    {
-      "path": "internal/server/apidocs/codestar-notifications.html",
-      "sha256": "b3716f1dfb0ed23db4458da280d5a42d87426176f8c2baeb6559336c22f5af3d",
-      "disposition": "presentation",
-      "reason": "Load the local notification reference and its bundled Scalar renderer.",
-      "models": []
-    },
-    {
-      "path": "internal/server/apidocs/codestar-notifications.json",
-      "sha256": "8d273e51a41e449baac5aa61275bffbe27355a6d1d2d9b0088329acbc2999822",
-      "disposition": "presentation",
-      "reason": "Describe the five regional REST JSON routes, request types, native responses and supported local input scope.",
+      "reason": "Exercise actual trusted-session, bound handoff, anonymous and service-metadata capability behavior.",
       "models": []
     },
     {
       "path": "internal/server/server.go",
-      "sha256": "a8fa947f0e72b3aa8bf9163c9f00fc652d9cd202c434b799182d2857a60e76c3",
+      "sha256": "f91bef788ef5a90d9535797c0d45c1c56c52a2d3f92137f9d894c104a06282ca",
       "disposition": "modeled",
-      "reason": "Compose the normal standalone scoped store, trusted Git callback, worker lifecycle and existing SNS policy capabilities.",
+      "reason": "Expose the service entry only for ordinary authenticated browser sessions with the native store installed.",
       "models": [
         {
-          "id": "CodeStarBranchNotificationDelivery",
+          "id": "NotificationRuleConsole",
           "properties": [
-            "GitCommitExact",
-            "RestartExact",
-            "WorkerDecision"
+            "ScopeReset",
+            "ReadFrame"
           ],
-          "limits": "Finite two-target branch/rule state and representative principals, operations, destinations and faults. Native SQLite, SDK headers, exact filter pagination, physical clocks, quota magnitudes and payload bytes are checked separately."
+          "limits": "Finite normalized scope, response and request identities, pages and payloads. Native HTTP, concrete timing, durable service state, event delivery and accessibility are verified separately."
+        }
+      ]
+    },
+    {
+      "path": "internal/server/web/app.js",
+      "sha256": "9a67bd65709551e843ff4cd219e4cac610d24c491fb377bc2a6ea478f450e332",
+      "disposition": "modeled",
+      "reason": "Embed the same compiled UI state machine that submits and checks the actual REST JSON requests.",
+      "models": [
+        {
+          "id": "NotificationRuleConsole",
+          "properties": [
+            "ReadFrame",
+            "ScopeReset",
+            "SavedState",
+            "RecoveryState"
+          ],
+          "limits": "Finite normalized scope, response and request identities, pages and payloads. Native HTTP, concrete timing, durable service state, event delivery and accessibility are verified separately."
         }
       ]
     },
     {
       "path": "scripts/formal_model_gate.py",
-      "sha256": "fffa8fe2203be965830a04918b690e97f62c405fa3d02de0cbe506055698a4ec",
+      "sha256": "6a694a00cbcabe11b1085bcd859d46631e1875fd2206cd31a7ea990fb2c330a0",
       "disposition": "formal-infrastructure",
-      "reason": "Pin the two additive finite models and their individual obligations in the official gate.",
+      "reason": "Pin the UI invariant, mutation and scope inventory used by the normal model gate.",
       "models": []
     },
     {
       "path": "scripts/test-formal-gate.py",
-      "sha256": "dc1c2d0615a4cd22dc7d91dc2e857a8e2aa7fc520ba98a832d19cfe296097618",
+      "sha256": "f0f2ffb998747e9415d7576bd2eb997ecc51c651c3987d69eaf822607dd0e7b1",
       "disposition": "formal-infrastructure",
-      "reason": "Require preservation of the existing model inventory and both additive entries.",
+      "reason": "Require the UI model alongside every previously admitted model.",
       "models": []
     },
     {
-      "path": "test/e2e/check.py",
-      "sha256": "2a8e020e66f4eac34db2f83d7898477965640097f2a6b80079da5b8693ac6f1e",
+      "path": "test/e2e/codestar_notification_console.py",
+      "sha256": "5eeb65b26c0fa53f1c4a809528a85254bbc88a56914611834da7e741ce29ee03",
       "disposition": "test-support",
-      "reason": "Run the real CodeStar branch delivery and published SNS policy fixtures in the regular standalone E2E entry point, retaining the CodeCommit content coverage.",
+      "reason": "Exercise the existing standalone binary with UI, Scalar, SDK readback, post-write response loss, current grant revocation, real branch events and accessibility audits.",
       "models": []
     },
     {
-      "path": "test/e2e/codestar_notification_scalar.py",
-      "sha256": "eb50ac120de9d6406af476f0bcdb91841c1e79661aff885f8ebbad68783ab8b0",
-      "disposition": "test-support",
-      "reason": "Exercise user-triggered sends and rendered results from the real served notification-rule reference and independently read back persisted rules.",
+      "path": "tools/console/bundle-digests.json",
+      "sha256": "2e479f25d1fd0a32c9d5c0912cea54448e132185a4b58f25ebdf8970bb4380a2",
+      "disposition": "presentation",
+      "reason": "Bind the generated Cloudscape application with the existing build fingerprint.",
       "models": []
     },
     {
-      "path": "test/e2e/codestar_notifications.py",
-      "sha256": "56b4a14562313fa08e0ae955363b9470bcabb1b7ffc4adb9dfe17ee72788e301",
-      "disposition": "test-support",
-      "reason": "Exercise the normally built standalone authorities using actual CodeCommit, notification, SNS and SQS operations with restart and policy repair.",
+      "path": "tools/console/bundle-inputs.json",
+      "sha256": "0cd9797bd148c8d1f69b6d25e475aca75daf07cc7b7cef7e7b6f94d998d6f861",
+      "disposition": "presentation",
+      "reason": "Record canonical esbuild inputs and outputs for the compiled notification rule console.",
       "models": []
     },
     {
-      "path": "test/e2e/sns_notification_policy.py",
-      "sha256": "2f932c6f2bffd47e6cfd3ebc6e06760d7b8b2f68922c7cfb433731aff37a362f",
-      "disposition": "test-support",
-      "reason": "Drive actual authenticated CLI processes through the official boto3 SNS protocol, including readback, isolation and retry.",
-      "models": []
+      "path": "tools/console/src/codestar-notifications.jsx",
+      "sha256": "7234a3a3f84c2a176b0602110b309e7d8169740c8a0ab57938b3c6611264f820",
+      "disposition": "modeled",
+      "reason": "Own current request, region and principal generation, listing, known-ARN re-read, explicit same-token create replay and final observable saved state.",
+      "models": [
+        {
+          "id": "NotificationRuleConsole",
+          "properties": [
+            "ReadFrame",
+            "ScopeReset",
+            "LateWriteFrame",
+            "AckState",
+            "SavedState",
+            "RecoveryState",
+            "ExactReplay"
+          ],
+          "limits": "Finite normalized scope, response and request identities, pages and payloads. Native HTTP, concrete timing, durable service state, event delivery and accessibility are verified separately."
+        }
+      ]
     },
     {
-      "path": "test/e2e/test_codestar_notifications_environment.py",
-      "sha256": "962094efb721c27c4376903aa57fdef9871ffab2ce518c05800b699f77f9e3ef",
-      "disposition": "test-support",
-      "reason": "Verify the standalone SDK environment is empty and the canonical release runner accepts only its three established settings, rejecting all added SDK settings and altered values.",
+      "path": "tools/console/src/codestar-notifications.mjs",
+      "sha256": "ba36c506789a2e87b9455a3fc932e4e416a0745b9e0f8bedb4b9290d5f331c35",
+      "disposition": "modeled",
+      "reason": "Translate the real native rules API into scoped request/identity inputs and verified response types for UI acknowledgement.",
+      "models": [
+        {
+          "id": "NotificationRuleConsole",
+          "properties": [
+            "AckState",
+            "SavedState",
+            "ExactReplay"
+          ],
+          "limits": "Finite normalized scope, response and request identities, pages and payloads. Native HTTP, concrete timing, durable service state, event delivery and accessibility are verified separately."
+        }
+      ]
+    },
+    {
+      "path": "tools/console/src/console-navigation.mjs",
+      "sha256": "bd5e3277cef286702a4baa1fcd1ae213c22e4718bf43fdcd2ff1bf2e5e580e51",
+      "disposition": "modeled",
+      "reason": "Expose the AWS rule route with the declared protocol/operations in an ordinary session.",
+      "models": [
+        {
+          "id": "NotificationRuleConsole",
+          "properties": [
+            "ScopeReset",
+            "ReadFrame"
+          ],
+          "limits": "Finite normalized scope, response and request identities, pages and payloads. Native HTTP, concrete timing, durable service state, event delivery and accessibility are verified separately."
+        }
+      ]
+    },
+    {
+      "path": "tools/console/src/main.jsx",
+      "sha256": "6f03fab5ce1b2e6c48519ce9d305fd8add3b81400bfa7b60c5d84ebd9757b978",
+      "disposition": "modeled",
+      "reason": "Route the selected service, region and principal to a separate keyed rule component; stale completions cannot replace the new view.",
+      "models": [
+        {
+          "id": "NotificationRuleConsole",
+          "properties": [
+            "ScopeReset",
+            "LateWriteFrame",
+            "CanceledRead"
+          ],
+          "limits": "Finite normalized scope, response and request identities, pages and payloads. Native HTTP, concrete timing, durable service state, event delivery and accessibility are verified separately."
+        }
+      ]
+    },
+    {
+      "path": "tools/console/test/codestar-notifications.test.mjs",
+      "sha256": "c860fb61014a94a5e10ca777e5b19b77372666b95a9be9c65c4062a87d9fc742",
+      "disposition": "presentation",
+      "reason": "Check local request serialization, exact native acknowledgement fields and matched region and capability.",
       "models": []
     }
   ]
