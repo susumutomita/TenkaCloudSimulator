@@ -126,7 +126,7 @@ console, CloudFormation adapter or Challenge integration.
   [regional VPC console pages and saved-resource links](docs/ec2-vpc-console.md),
   [Elastic Load Balancing](docs/elb.md) (native VPC subnet placement and Lambda targets),
   [CloudFront VPC origins](docs/cloudfront-vpc-origin.md), [Route 53 public zones and one-PTR Console](docs/route53.md#console-browse-public-zones-and-create-one-ptr).
-- **Scaling:** [Auto Scaling plans for local DynamoDB tables](docs/autoscaling-plans.md).
+- **Scaling:** [Create a scaling plan in the Console and read back local DynamoDB table capacity](docs/autoscaling-plans.md).
 - **Infrastructure:** [CloudFormation](docs/cloudformation-rest.md),
   [EC2 template preview and opt-in local instance creation in the Console](docs/ec2-read-discovery.md#instance-launch-preview-is-not-a-launch),
   [SSM value parameters](docs/cloudformation-ssm-parameters.md),
@@ -179,6 +179,7 @@ console, CloudFormation adapter or Challenge integration.
   To delete a compute environment, disable it and remove it from every job queue in the same Region.
   Batch also stores and deregisters bounded EC2 single-container job definition
   revisions; it does not pull images, run containers, or submit jobs.
+  [Resource Groups](docs/aws-catalog.md#ecr-repository-group-membership) finds local ECR repositories matching a named group’s exact tag key and value.
   The AWS catalog console registers a name, image name, vCPUs and memory,
   and deregisters exact revision ARNs without deleting inactive history.
   Redshift can read tags on one existing stored resource ARN; it does not

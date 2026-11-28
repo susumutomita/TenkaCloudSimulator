@@ -1,24 +1,24 @@
 {
   "version": 1,
-  "base_sha": "110354ea421d576f12b9452e0d472eda2077cc11",
+  "base_sha": "fd803075c37af3faa377f550c8e1cd52b3cfbbb1",
   "changes": [
     {
       "path": "README.ja.md",
-      "sha256": "86ee13b9fa7293dc89f8b02ba29c4d2d953de78036c806190076197b2dfab325",
+      "sha256": "b6941d62d812795387029b8ac62582b023b445fb4de8f281585ccc5d60f3eb0a",
       "disposition": "documentation",
       "reason": "Describe the regional native EC2 placement dependency in Japanese.",
       "models": []
     },
     {
       "path": "README.md",
-      "sha256": "3b35f193038d965cc53146eef91f64797ecb23a74ae42fe5c5d4f1ac572804c2",
+      "sha256": "2294ec7c1fdd7b5d12735db19048d556768695b51964b2f4a1bef38a138e1409",
       "disposition": "documentation",
       "reason": "Describe the supported local ALB placement workflow and legacy compatibility.",
       "models": []
     },
     {
       "path": "docs/design/0001-go-standalone.md",
-      "sha256": "5f1b3f3fb69b64ff136c1bceed21ef0bea2e92138b5d393a24b373003c027759",
+      "sha256": "d051fdb55085ab58fdd310b4ac0e112b19a7124e09390f49375f1fe8043c0171",
       "disposition": "documentation",
       "reason": "Document transactional placement and existing load-balancer compatibility in the standalone architecture.",
       "models": []
@@ -92,7 +92,7 @@
     },
     {
       "path": "formal/models.json",
-      "sha256": "db6d8d6bccbff2eae93e80630e68b5492286385cf51942af9296919e25f8e971",
+      "sha256": "07ed33b8de21546936173111c1232fb2473c43d984677124f94b82ca14f0b88f",
       "disposition": "formal-infrastructure",
       "reason": "Register the native placement model, bounded claims and reason-specific mutation controls.",
       "models": []
@@ -235,7 +235,7 @@
     },
     {
       "path": "internal/server/server.go",
-      "sha256": "92508027e3df542d7f9a0aa447c3547ea2ea5bc3f28aae500cca7b41f0d5e247",
+      "sha256": "9c306eb79f2b00f6cdbff26153fbbbbb390a217198c4335b30db936ba89f2afb",
       "disposition": "modeled",
       "reason": "Describe the placement dependency in the existing ELB capability response.",
       "models": [
@@ -251,14 +251,14 @@
     },
     {
       "path": "scripts/formal_model_gate.py",
-      "sha256": "c6f0fc8e431a7dbe9ce2d3e159b85dde0237902b1fed70408c85ca3f02b07553",
+      "sha256": "7de9c174ab48d339e9dfa0076b284a9b71aa48c278cb848a439b920dd5ec104a",
       "disposition": "formal-infrastructure",
       "reason": "Require the registered bounded placement model, its exact scope, invariants and mutation identities.",
       "models": []
     },
     {
       "path": "scripts/test-formal-gate.py",
-      "sha256": "543b0f50536dc21ed4b93cae0a42929d45ea70b105d85a921f3ef821f87bec24",
+      "sha256": "1ebb0b79d7d26467e0c6e7f49fa37f7dbc5c9e68bf7decfac1261de9c80e586b",
       "disposition": "formal-infrastructure",
       "reason": "Protect the complete model inventory after adding the placement model.",
       "models": []

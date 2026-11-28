@@ -88,6 +88,9 @@ class Conformance(unittest.TestCase):
  def test_autoscaling_plans_native_sdk_capacity_isolation_and_restart(self):
   subprocess.run([sys.executable,str(Path(__file__).with_name("autoscaling_plans.py"))],check=True,timeout=180)
 
+ def test_autoscaling_plans_console_capacity_workflow(self):
+  subprocess.run([sys.executable,str(Path(__file__).with_name("autoscaling_plans_console.py")),"--sdk"],check=True,timeout=180)
+
  def test_route53_reference_contract_detectors(self):
   subprocess.run([sys.executable,str(Path(__file__).with_name("test_route53_openapi.py"))],check=True,timeout=60)
   subprocess.run([sys.executable,str(Path(__file__).with_name("test_route53_reference_adapters.py"))],check=True,timeout=60)
@@ -734,6 +737,9 @@ def handler(event,context):
 
  def test_aws_catalog_fixture_lifecycles_cover_every_bound_operation(self):
   subprocess.run([sys.executable, str(Path(__file__).with_name('aws_catalog_fixtures.py'))], check=True, timeout=900)
+
+ def test_named_resource_group_membership_tracks_live_ecr_tags(self):
+  subprocess.run([sys.executable, str(Path(__file__).with_name('resource_group_ecr_members.py'))], check=True, timeout=120)
 
  def test_gcp_catalog_discovery_client_two_teams_owner_restart_and_cleanup(self):
   subprocess.run([sys.executable, str(Path(__file__).with_name('gcp_catalog_fixtures.py'))], check=True, timeout=600)
