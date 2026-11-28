@@ -1,4 +1,4 @@
-name: Candidate Secrets Manager SDK and Console evidence
+name: Merged Secrets Manager SDK and Console evidence
 on:
   workflow_dispatch:
 permissions:
@@ -8,11 +8,11 @@ jobs:
     runs-on: ubuntu-22.04
     timeout-minutes: 35
     env:
-      PRODUCT: 7de43f8ae50a761d73fc7b72fbf76c48f0d96c51
+      PRODUCT: 110354ea421d576f12b9452e0d472eda2077cc11
     steps:
       - uses: actions/checkout@v7.0.1
         with:
-          ref: 7de43f8ae50a761d73fc7b72fbf76c48f0d96c51
+          ref: 110354ea421d576f12b9452e0d472eda2077cc11
           persist-credentials: false
       - uses: actions/setup-go@v6.5.0
         with:
@@ -21,7 +21,7 @@ jobs:
       - name: Build the fixed product and provision its pinned clients and accessibility bundle
         run: |
           test "$GITHUB_REPOSITORY" = susumutomita/TenkaCloudSimulator
-          test "$GITHUB_REF" = refs/heads/verify/266-secrets-candidate
+          test "$GITHUB_REF" = refs/heads/verify/266-secrets-merged-main
           test "$(git rev-parse HEAD)" = "$PRODUCT"
           test "$(git rev-parse 'HEAD^{tree}')" = 99d34741dff6bd560e36d7ebe45b5cf3a1aa1004
           test -z "$(git status --porcelain)"
