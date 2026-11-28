@@ -44,7 +44,7 @@ jobs:
           import sys
           import tempfile
           import boto3
-          
+
           # Preserve normal inherited SDK profile/config selection; do this before harness imports.
           boto3.Session()
           root = Path.cwd()
