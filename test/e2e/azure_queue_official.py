@@ -5,6 +5,7 @@ Use --capture to measure the installed SDK's prepared local URLs without network
 Actual two-CLI acceptance wiring is a separate root-owned integration step.
 """
 import argparse
+from base64 import b64encode
 import importlib.metadata
 from urllib.parse import urlsplit, parse_qs
 import xml.etree.ElementTree as ET
@@ -54,6 +55,13 @@ def run_lifecycle(client):
     require(seen == EXPECTED, 'operation set incomplete')
     return {'status': 'passed', 'operations': sorted(seen), 'scope': 'client lifecycle only; not two-team/restart/auth proof'}
 
+def local_sdk_credential(account):
+    # QueueClient requires a signer even on loopback. The simulator uses its
+    # own token for access. This fixed value is public fixture data.
+    from azure.core.credentials import AzureNamedKeyCredential
+    return AzureNamedKeyCredential(account, b64encode(b'local queue SDK fixture').decode('ascii'))
+
+
 class Captured(Exception):
     pass
 
@@ -101,7 +109,7 @@ def capture_sdk_paths():
         # Stop before transport: no socket or cloud access is performed.
         raise Captured()
     with QueueClient(account_url='http://127.0.0.1:1' + PREFIX,
-                     queue_name='sdk-queue', credential=None, api_version=VERSION,
+                     queue_name='sdk-queue', credential=local_sdk_credential('localaccount'), api_version=VERSION,
                      raw_request_hook=hook, retry_total=0) as client:
         operations = [lambda: client.create_queue(), lambda: client.send_message('synthetic & checked', visibility_timeout=0, time_to_live=60),
                       lambda: client.peek_messages(max_messages=1),
