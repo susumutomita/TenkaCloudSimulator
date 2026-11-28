@@ -29497,6 +29497,379 @@
           ]
         }
       ]
+    },
+    {
+      "id": "LocalSSOSyntheticLifecycle",
+      "model": "formal/LocalSSOSyntheticLifecycle.tla",
+      "config": "formal/LocalSSOSyntheticLifecycle.cfg",
+      "bounds": "One optional local run, two symbolic browser workflows with one start each, exact or single bad predicate per event, and at most twelve transitions; logical startup and complete normal retirement, not an observed filesystem schedule.",
+      "properties": [
+        "TypeOK",
+        "ExplicitOnly",
+        "ReadyAfterPrivateBootstrap",
+        "NoPublicCredentialValues",
+        "PinnedPromptOnly",
+        "OneShotPerFixture",
+        "IssuanceBoundToBrowserAndCode",
+        "ExactACSWitness",
+        "ACSConsumesPendingAndMarksReplay",
+        "BoundSingleExchange",
+        "AppRequiresVerifiedCallback",
+        "RetiredHasNoLiveState"
+      ],
+      "limits": "Symbolic correspondence only: not cryptography, parsers, OAuth/SAML platform parity, concrete time/quotas, cross-run subject stability, general Keycloak compatibility, TLS/browser/Linux/macOS execution, SQL/crash races, disclosure beyond modeled stdout fields, Battle dependency compatibility, or a Go refinement proof. An independent successful callback is not an app or operator session.",
+      "source_scope": [
+        "cmd/simulator/local_sso.go",
+        "cmd/simulator/local_sso_relying_party.go",
+        "cmd/simulator/main.go",
+        "go.mod",
+        "go.sum",
+        "internal/aws/cognitoidp/federation_config.go",
+        "internal/aws/cognitoidp/federation_metadata.go",
+        "internal/aws/cognitoidp/federation_publisher.go",
+        "internal/aws/cognitoidp/hosted_browser.go",
+        "internal/aws/cognitoidp/hosted_completion.go",
+        "internal/aws/cognitoidp/hosted_profile.go",
+        "internal/aws/cognitoidp/hosted_saml.go",
+        "internal/aws/cognitoidp/hosted_state.go",
+        "internal/azure/entraidp/directory.go",
+        "internal/azure/entraidp/fixture.go",
+        "internal/azure/entraidp/saml.go",
+        "internal/server/cognito_hosted.go",
+        "internal/server/server.go"
+      ],
+      "mutants": [
+        {
+          "id": "PublishByDefault",
+          "edits": [
+            {
+              "old": "InitOutput(local) == {}",
+              "new": "InitOutput(local) == IF local THEN {} ELSE Publication",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExplicitOnly"
+        },
+        {
+          "id": "PublishDuringBootstrap",
+          "edits": [
+            {
+              "old": "InitOutput(local) == {}",
+              "new": "InitOutput(local) == IF local THEN Publication ELSE {}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadyAfterPrivateBootstrap"
+        },
+        {
+          "id": "PublishUnverifiedBootstrap",
+          "edits": [
+            {
+              "old": "proof = \"verifiedBootstrap\"",
+              "new": "proof \\in {\"verifiedBootstrap\", \"wrongBootstrap\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadyAfterPrivateBootstrap"
+        },
+        {
+          "id": "PublishOperatorListener",
+          "edits": [
+            {
+              "old": "!.listeners = BrowserListeners,",
+              "new": "!.listeners = AllListeners,",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadyAfterPrivateBootstrap"
+        },
+        {
+          "id": "HideReadyEndpoints",
+          "edits": [
+            {
+              "old": "!.announcement = Publication]",
+              "new": "!.announcement = {}]",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadyAfterPrivateBootstrap"
+        },
+        {
+          "id": "PublishCodeValue",
+          "edits": [
+            {
+              "old": "!.announcement = Publication]",
+              "new": "!.announcement = Publication \\cup {\"privateCodeValue\"}]",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "NoPublicCredentialValues"
+        },
+        {
+          "id": "PromptForUnexpectedRequest",
+          "edits": [
+            {
+              "old": "request = \"pinnedRequest\" /\\ IdPCodeAvailable(s)",
+              "new": "request \\in {\"pinnedRequest\", \"unexpectedRequest\"} /\\ IdPCodeAvailable(s)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PinnedPromptOnly"
+        },
+        {
+          "id": "ReuseOneShotCode",
+          "edits": [
+            {
+              "old": "IdPCodeAvailable(s0) == s0.issues = 0",
+              "new": "IdPCodeAvailable(s0) == s0.issues <= 1",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "OneShotPerFixture"
+        },
+        {
+          "id": "AcceptDifferentCode",
+          "edits": [
+            {
+              "old": "actor = bound /\\ proof = \"oneShotCode\"",
+              "new": "actor = bound",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "IssuanceBoundToBrowserAndCode"
+        },
+        {
+          "id": "AcceptDifferentBrowser",
+          "edits": [
+            {
+              "old": "actor = bound /\\ proof = \"oneShotCode\"",
+              "new": "proof = \"oneShotCode\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "IssuanceBoundToBrowserAndCode"
+        },
+        {
+          "id": "OmitReplayReceipt",
+          "edits": [
+            {
+              "old": "!.replay = @ \\cup {b}]",
+              "new": "!.replay = @]",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ACSConsumesPendingAndMarksReplay"
+        },
+        {
+          "id": "RetainCognitoPending",
+          "edits": [
+            {
+              "old": "!.cogPending = @ \\ {b},",
+              "new": "!.cogPending = @,",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ACSConsumesPendingAndMarksReplay"
+        },
+        {
+          "id": "KeepAuthorizationCode",
+          "edits": [
+            {
+              "old": "!.step = @ + 1, !.codes = @ \\ {b},",
+              "new": "!.step = @ + 1, !.codes = @,",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "BoundSingleExchange"
+        },
+        {
+          "id": "SkipTokenExchange",
+          "edits": [
+            {
+              "old": "b \\in s.tokens /\\ witness \\in AllowedApp",
+              "new": "witness \\in AllowedApp",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AppRequiresVerifiedCallback"
+        },
+        {
+          "id": "RetainPrivateRunFiles",
+          "edits": [
+            {
+              "old": "!.listeners = {}, !.scratch = FALSE, !.privateCodeFile = FALSE,",
+              "new": "!.listeners = {}, !.scratch = TRUE, !.privateCodeFile = FALSE,",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "RetiredHasNoLiveState"
+        },
+        {
+          "id": "LeaveListenerOnRetirement",
+          "edits": [
+            {
+              "old": "!.listeners = {}, !.scratch = FALSE, !.privateCodeFile = FALSE,",
+              "new": "!.listeners = BrowserListeners, !.scratch = FALSE, !.privateCodeFile = FALSE,",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "RetiredHasNoLiveState"
+        },
+        {
+          "id": "AcceptDifferentSAMLOrigin",
+          "edits": [
+            {
+              "old": "AllowedACS == {\"exact\"}",
+              "new": "AllowedACS == {\"exact\", \"wrongOrigin\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExactACSWitness"
+        },
+        {
+          "id": "AcceptDifferentSigningPin",
+          "edits": [
+            {
+              "old": "AllowedACS == {\"exact\"}",
+              "new": "AllowedACS == {\"exact\", \"wrongPin\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExactACSWitness"
+        },
+        {
+          "id": "AcceptOtherRequest",
+          "edits": [
+            {
+              "old": "AllowedACS == {\"exact\"}",
+              "new": "AllowedACS == {\"exact\", \"wrongRequest\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExactACSWitness"
+        },
+        {
+          "id": "AcceptOtherACSBrowser",
+          "edits": [
+            {
+              "old": "AllowedACS == {\"exact\"}",
+              "new": "AllowedACS == {\"exact\", \"wrongBrowser\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExactACSWitness"
+        },
+        {
+          "id": "GrantWithStaleRegistration",
+          "edits": [
+            {
+              "old": "AllowedACS == {\"exact\"}",
+              "new": "AllowedACS == {\"exact\", \"staleRegistration\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExactACSWitness"
+        },
+        {
+          "id": "GrantWithUnusablePrincipal",
+          "edits": [
+            {
+              "old": "AllowedACS == {\"exact\"}",
+              "new": "AllowedACS == {\"exact\", \"unusablePrincipal\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExactACSWitness"
+        },
+        {
+          "id": "IgnorePKCE",
+          "edits": [
+            {
+              "old": "AllowedRedeem == {\"exact\"}",
+              "new": "AllowedRedeem == {\"exact\", \"wrongPKCE\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "BoundSingleExchange"
+        },
+        {
+          "id": "ExchangeForOtherClient",
+          "edits": [
+            {
+              "old": "AllowedRedeem == {\"exact\"}",
+              "new": "AllowedRedeem == {\"exact\", \"wrongClient\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "BoundSingleExchange"
+        },
+        {
+          "id": "ExchangeForOtherCallback",
+          "edits": [
+            {
+              "old": "AllowedRedeem == {\"exact\"}",
+              "new": "AllowedRedeem == {\"exact\", \"wrongCallback\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "BoundSingleExchange"
+        },
+        {
+          "id": "ExchangeWithoutAppBrowserState",
+          "edits": [
+            {
+              "old": "AllowedRedeem == {\"exact\"}",
+              "new": "AllowedRedeem == {\"exact\", \"wrongBrowserState\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "BoundSingleExchange"
+        },
+        {
+          "id": "ExchangeExpiredCode",
+          "edits": [
+            {
+              "old": "AllowedRedeem == {\"exact\"}",
+              "new": "AllowedRedeem == {\"exact\", \"expired\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "BoundSingleExchange"
+        },
+        {
+          "id": "AcceptWrongOIDCNonce",
+          "edits": [
+            {
+              "old": "AllowedApp == {\"exact\"}",
+              "new": "AllowedApp == {\"exact\", \"wrongNonce\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AppRequiresVerifiedCallback"
+        },
+        {
+          "id": "AcceptWrongOIDCIssuerOrAudience",
+          "edits": [
+            {
+              "old": "AllowedApp == {\"exact\"}",
+              "new": "AllowedApp == {\"exact\", \"wrongIssuerAudience\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AppRequiresVerifiedCallback"
+        },
+        {
+          "id": "AcceptInvalidAppTokenSignature",
+          "edits": [
+            {
+              "old": "AllowedApp == {\"exact\"}",
+              "new": "AllowedApp == {\"exact\", \"invalidJWS\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AppRequiresVerifiedCallback"
+        }
+      ]
     }
   ]
 }

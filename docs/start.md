@@ -86,6 +86,13 @@ GNU make; Windows users can use WSL or the standalone binary.
 In particular, `make dev` is not the new persistent-start alias: the CLI's direct
 `--state` default remains ephemeral memory.
 
+## Optional local SSO sample
+
+`./dist/tenkacloud-simulator local-sso` starts disposable numeric-loopback
+HTTPS listeners for local Entra SAML, Cognito and the sample app. It does
+not use the ordinary state database or operator token. Use the
+[local SSO guide](local-sso.md) to keep per-run browser trust private.
+
 ## Verification and finite model
 
 `make test-start` uses real source builds in a temporary checkout, then checks

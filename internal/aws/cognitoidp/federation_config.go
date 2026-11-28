@@ -13,14 +13,15 @@ import (
 )
 
 const (
-	federationConfigVersion = 1
-	maxFederationProviders  = 2
-	maxFederationClients    = 10
-	maxFederationCallbacks  = 5
-	maxFederationMapping    = 5
-	maxFederationScopes     = 3
-	maxFederationURL        = 1024
-	federationPKCE          = "S256"
+	federationConfigVersion     = 1
+	federationRegistrationBytes = 16
+	maxFederationProviders      = 2
+	maxFederationClients        = 10
+	maxFederationCallbacks      = 5
+	maxFederationMapping        = 5
+	maxFederationScopes         = 3
+	maxFederationURL            = 1024
+	federationPKCE              = "S256"
 )
 
 type federationOwner struct {
@@ -42,6 +43,9 @@ type federationProvider struct {
 	SigningCertDER  []byte
 	MetadataExpires time.Time
 	Mapping         map[string]string
+	// A new signed CreateIdentityProvider establishes a new trust registration.
+	// Older metadata-only rows omit this and remain readable for management.
+	RegistrationID string `json:",omitempty"`
 }
 
 // The only representable client is public, authorization code, S256. It
@@ -75,11 +79,15 @@ func readFederationConfig(raw []byte, owner federationOwner) (federationConfig, 
 		return federationConfig{}, errFederationState
 	}
 	providers := make(map[string]bool, len(cfg.Providers))
+	registrations := make(map[string]bool, len(cfg.Providers))
 	for _, p := range cfg.Providers {
-		if providers[p.Name] || !p.validStructure() {
+		if providers[p.Name] || !p.validStructure() || (p.RegistrationID != "" && registrations[p.RegistrationID]) {
 			return federationConfig{}, errFederationState
 		}
 		providers[p.Name] = true
+		if p.RegistrationID != "" {
+			registrations[p.RegistrationID] = true
+		}
 	}
 	clients := make(map[string]bool, len(cfg.Clients))
 	for _, c := range cfg.Clients {
@@ -99,7 +107,8 @@ func readFederationConfig(raw []byte, owner federationOwner) (federationConfig, 
 func providerName(name string) bool { return name == "Keycloak" || name == "Entra" }
 
 func (p federationProvider) validStructure() bool {
-	if !providerName(p.Name) || !printableNonSpace(p.EntityID, maxFederationURL) || !validFederationMapping(p.Mapping) {
+	if !providerName(p.Name) || !printableNonSpace(p.EntityID, maxFederationURL) || !validFederationMapping(p.Mapping) ||
+		(p.RegistrationID != "" && !validFederationRegistrationID(p.RegistrationID)) {
 		return false
 	}
 	if _, err := localFederationURL(p.RedirectURL, false); err != nil {
@@ -179,7 +188,15 @@ func uniqueBoundedStrings(xs []string, max int) bool {
 }
 
 func validFederationClientID(s string) bool {
-	if len(s) != 24 {
+	return federationLowerHex(s, 24)
+}
+
+func validFederationRegistrationID(s string) bool {
+	return federationLowerHex(s, 2*federationRegistrationBytes)
+}
+
+func federationLowerHex(s string, length int) bool {
+	if len(s) != length {
 		return false
 	}
 	for _, c := range s {
@@ -225,11 +242,12 @@ func (c federationClientInput) valid() bool {
 // callback, follow redirects, interpret remote metadata URLs or normalize path
 // aliases. The same defensive restrictions apply to local IdP destinations.
 func localFederationURL(raw string, callback bool) (*url.URL, error) {
-	if !printableNonSpace(raw, maxFederationURL) || !strings.HasPrefix(raw, "http://") || strings.ContainsAny(raw, "#\\") {
+	localScheme := strings.HasPrefix(raw, "http://") || strings.HasPrefix(raw, "https://")
+	if !localScheme || !printableNonSpace(raw, maxFederationURL) || strings.ContainsAny(raw, "#\\") {
 		return nil, errInvalid
 	}
 	u, err := url.Parse(raw)
-	if err != nil || u.Scheme != "http" || u.User != nil || u.Opaque != "" ||
+	if err != nil || (u.Scheme != "http" && u.Scheme != "https") || u.User != nil || u.Opaque != "" ||
 		u.RawPath != "" || u.EscapedPath() != u.Path || u.ForceQuery || u.Path == "" {
 		return nil, errInvalid
 	}

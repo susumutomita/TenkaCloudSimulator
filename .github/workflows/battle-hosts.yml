@@ -13,6 +13,10 @@ on:
       - 'internal/server/battle_*'
       - 'cmd/simulator/battle_*'
       - 'test/battle/**'
+      - 'guest/ssm-relay/**'
+      - 'internal/workload/guestsession/**'
+      - 'scripts/guest-image/session-overlay.py'
+      - 'LICENSE'
       - '.github/workflows/battle-hosts.yml'
   workflow_dispatch:
     inputs:
