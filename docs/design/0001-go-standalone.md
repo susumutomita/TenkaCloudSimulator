@@ -160,6 +160,13 @@ cleanup must target only a disposable domain owned by the caller.
 
 ### Application Load Balancer placement
 
+The compiled Elastic Load Balancing Console reads four native Query/XML
+Describe operations for the selected region and signed-in exercise identity.
+It verifies an updated Lambda target group's health check path with a fresh
+read of its ARN. A lost response leaves the update unresolved until a new
+native read. Owner and peer team processes keep separate ELB and EC2 state.
+
+
 The AWS regional ALB store resolves an authorized create against EC2-managed
 subnets and security groups in the team database. The selected subnets must
 share one VPC and use distinct local zones. One SQLite transaction stores the

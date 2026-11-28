@@ -22,7 +22,24 @@ this simulator. Instance, IP and ALB targets require target registration and for
 
 ## Resources
 
-### Use the API reference
+### Use the Console
+
+Open **Elastic Load Balancing** in the AWS Console and choose the region of
+your load balancer. Filter by its exact name or load another page. Its detail
+view reads the saved VPC, subnet IDs and Availability Zones, security groups,
+listeners and linked target groups. Older ID-only placements display the
+available IDs. Under a linked Lambda target group, the Console shows the
+registered function, target state and reason returned by `DescribeTargetHealth`.
+
+Edit **Health check path** to submit one `ModifyTargetGroup` request for that
+group. Saving requires the named target-group action on its ARN and the
+Describe permissions needed to read back the saved path and current health.
+If the acknowledgement is lost, choose **Refresh affected target group** to
+inspect its current state before making another change. A disabled health
+check can retain a path. Exercise the authenticated listener separately to
+observe the actual response. [ModifyTargetGroup](https://docs.aws.amazon.com/elasticloadbalancing/latest/APIReference/API_ModifyTargetGroup.html)
+
+## Use the API reference
 
 After signing in, open **API Reference → Shared AWS JSON/Query endpoint**.
 Select `application/x-www-form-urlencoded` and one of the thirteen **ELBv2**
@@ -196,7 +213,7 @@ SQLite database and token authority per team.
 | AWS WAF, Route 53 alias records, S3 access logs, CloudWatch metrics | Optional integrations | Not connected |
 | CloudFormation `AWS::ElasticLoadBalancingV2::*` | Optional provisioning | Not supported |
 
-There is no console page or API-reference page for this service yet.
+The Console and shared Query reference use the same regional ELBv2 endpoint and saved resources.
 
 ## References
 

@@ -89,7 +89,7 @@ Python 3.12のみ、ゲストメモリ128 MiB、タイムアウト1〜30秒で�
   [EC2 管理 VPC の名前とタグの設定 API](docs/ec2-read-discovery.md#native-vpc-tag-editing)、
   [保存済みの EC2 管理サブネットの名前とタグの設定 API](docs/ec2-native-subnet.md#native-subnet-tag-editing)、
   [未接続ネットワーク ACL と IPv4 ルールの設定 API](docs/ec2-detached-network-acls.md)、
-  [Elastic Load Balancing](docs/elb.md)（ネイティブ VPC のサブネット配置と Lambda ターゲット）、
+  [Elastic Load Balancing](docs/elb.md)（コンソールでの配置・リスナー・Lambda ターゲット状態の確認とヘルスチェックパスの編集）、
   [Route 53](docs/route53.md)。
 - **スケーリング：** [コンソールでスケーリングプランを作成し、DynamoDB テーブルの容量を確認する](docs/autoscaling-plans.md)。
 - **構成の作成：** [CloudFormation](docs/cloudformation-rest.md)、
