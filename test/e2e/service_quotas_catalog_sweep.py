@@ -40,6 +40,8 @@ def check_service_quotas_catalog_view(page, team, descriptor, database):
         label = descriptor['title'] + ' ' + str(len(descriptor['operations'])) + ' / ' + str(descriptor['officialOperations']) + ' official operations'
         page.get_by_role('option', name=label, exact=True).click()
         expect(page.get_by_role('heading', level=1, name='Service Quotas', exact=True)).to_be_visible()
+        expect(page.get_by_role('tab')).to_have_count(0)
+        expect(page.get_by_role('button', name=re.compile('^Create '))).to_have_count(0)
         expect(page.get_by_role('button', name='Submit increase request', exact=True)).to_be_enabled()
         expect(page.get_by_text('Published AWS default', exact=True)).to_be_visible()
         expect(page.get_by_text('Applied account capacity', exact=True)).to_be_visible()

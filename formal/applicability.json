@@ -528,8 +528,15 @@
       "models": []
     },
     {
+      "path": "internal/server/web/app.css",
+      "sha256": "d61caf35e92bf28490cec99139d02deea56ee21cc0b77864ec51d1e4c41c26e7",
+      "disposition": "presentation",
+      "reason": "Ship the regenerated Cloudscape application stylesheet including the quota warning region. Color contrast and layout are exercised with the real pinned browser and axe.",
+      "models": []
+    },
+    {
       "path": "internal/server/web/app.js",
-      "sha256": "41c6af9791e1c9ce5e7f894d66e1c4f782d654fb9def1713a368fdbf1aa2af7a",
+      "sha256": "f28995a565046f87eb37c3376c9ace492516097014cff81a21f828c15c1550c0",
       "disposition": "modeled",
       "reason": "Canonical embedded output of the reviewed actual Console sources, preserving prior catalog behavior and adding the dedicated mounted quota/default/request workflow. Concrete compiler/bundle correspondence is checked independently, not proved by TLA.",
       "models": [
@@ -611,15 +618,15 @@
     {
       "path": "test/e2e/service_quotas_catalog_sweep.py",
       "disposition": "test-support",
-      "reason": "Read five quota operations and request history via the actual dedicated view, check the catalog selector and native values, and compare the local database before and after the read-only navigation.",
+      "reason": "Read five quota operations and request history via the actual dedicated view, check the catalog selector and native values, and compare the local database before and after the read-only navigation. Verify the dedicated page has no generic creation action or resource tabs.",
       "models": [],
-      "sha256": "8b597acc3033b3c2e0cfca1ad5275bb3d3413fa1070305e933be9dbb0c69cc7e"
+      "sha256": "25a99ef5b78febbcf405a390fc711955f6a08744ffad84b198eeacea56acb92e"
     },
     {
       "path": "test/e2e/service_quotas_console.py",
-      "sha256": "0a8a05c59f28a8762bb6303261deb2bab764090e2ddc89adf8cca648b338a5fe",
+      "sha256": "9871b9f1f438a53c7501896985aeafb32e0460f2472e1b5c230c6c0be40b2352",
       "disposition": "test-support",
-      "reason": "Opt-in unchanged official SDK and real sandboxed Cloudscape/reciprocal Scalar fixture: distinct physical requests, real history tokens/filters, committed lost ACK without blind retry, successful-then-failed recovery and repair, read retirement, partial/denied permissions, pinned axe EN/JA390, two private stores/restart/full peer frame and owned cleanup. Source registration is not an execution receipt; SDK/profile and mandatory axe guards remain intact.",
+      "reason": "Opt-in unchanged official SDK and real sandboxed Cloudscape/reciprocal Scalar fixture: distinct physical requests, real history tokens/filters, committed lost ACK without blind retry, successful-then-failed recovery and repair, read retirement, partial/denied permissions, pinned axe EN/JA390, two private stores/restart/full peer frame and owned cleanup. Source registration is not an execution receipt; SDK/profile and mandatory axe guards remain intact. Check all enabled WCAG rules and retain only rule, control and contrast measurements for an accessibility failure.",
       "models": []
     },
     {
@@ -645,14 +652,14 @@
     },
     {
       "path": "tools/console/bundle-digests.json",
-      "sha256": "951af7d27ec2a9b4c62553d3eb3076fa22a1b98e91aaf83bb65663c08870d49b",
+      "sha256": "399fba8fb0040627290e5a7a0dce893043afa0a9cac9e674267710d36258f664",
       "disposition": "presentation",
       "reason": "Exact generated embedded asset digests checked against the canonical reviewed build; no claim of behavioral proof from hashes.",
       "models": []
     },
     {
       "path": "tools/console/bundle-inputs.json",
-      "sha256": "c86dc56ace0fc4ea51779d889d1c391348527db60652d569628f61c94cde7f7e",
+      "sha256": "e702b9f350c2591fa44e1e2f8a7f3cbe8dec1b202c168f7cd54e8bf5344dcdd1",
       "disposition": "presentation",
       "reason": "Canonical bundler input inventory for the exact reviewed Console source and pinned dependencies; metadata is not source-refinement proof.",
       "models": []
@@ -686,8 +693,15 @@
       ]
     },
     {
+      "path": "tools/console/src/service-quotas.css",
+      "sha256": "3fb9fceda8e908f07eb39d4913fc243d933ede13d6aa8b53966ebd4f6b1a0df3",
+      "disposition": "presentation",
+      "reason": "Style only the quota unknown-outcome warning and its heading so a possibly committed write and the recovery controls remain readable from first paint.",
+      "models": []
+    },
+    {
       "path": "tools/console/src/service-quotas.jsx",
-      "sha256": "c6c254b17eddec1254a12f729c6dc57f3e82c8141fe71300cbf66bc7037c1e0f",
+      "sha256": "d61d7d465b2da8d1d12caef9cdab21882fbdfa261395e00753714221957f972f",
       "disposition": "modeled",
       "reason": "Real native quota/default/history view with independent read authority, synchronous write ownership, exact acknowledged scope/fields, explicit unknown-outcome recovery, invalidation of stale approval/lookup and scope retirement; no automatic retry or ID attribution from history.",
       "models": [
