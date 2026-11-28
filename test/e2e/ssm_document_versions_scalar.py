@@ -51,28 +51,31 @@ def run():
                     page.goto(endpoint + '/_simulator/docs/')
                 operation = received.value.json()['paths']['/']['post']
                 preset = operation['requestBody']['content'][JSON11]['examples']['SSMListDocumentVersions']
+                assert operation['operationId'] == 'awsRegionalOperation'
                 assert preset['value'] == {'Name': 'local-definition', 'MaxResults': 1}
+                page.get_by_role('link', name='Shared AWS JSON/Query endpoint', exact=True).click()
+                expect(page.get_by_role('button', name='Selected Content Type: ' + JSON11, exact=True)).to_be_visible()
+                page.get_by_test_id('example-picker').click()
+                page.get_by_role('option', name=preset['summary'], exact=True).click()
                 page.get_by_role('button', name='Test Request (post /)', exact=True).click()
                 dialog = page.get_by_role('dialog').filter(
                     has=page.get_by_role('button', name='Close Client', exact=True))
-                dialog.get_by_role('button', name='Body', exact=True).click()
-                media = dialog.get_by_role('button', name=re.compile(
-                    r'^(application/x-amz-json-1\.[01]|application/x-www-form-urlencoded|Form URL Encoded)$'))
-                expect(media).to_have_count(1)
-                if media.inner_text().strip() != JSON11:
-                    media.click()
-                    page.get_by_role('option', name=JSON11, exact=True).click()
-                dialog.get_by_test_id('example-picker').click()
-                page.get_by_role('option', name=preset['summary'], exact=True).click()
-                dialog.get_by_role('button', name='Headers', exact=True).click()
-                target = dialog.get_by_label('X-Amz-Target Value', exact=True)
+                panel = dialog.get_by_role('region', name='Request: ' + operation['summary'], exact=True)
+                panel.get_by_role('tab', name='Body', exact=True).press('Enter')
+                expect(panel.get_by_role('button', name=JSON11, exact=True)).to_be_visible()
+                editor = panel.get_by_role('textbox')
+                expect(editor).to_contain_text(preset['value']['Name'])
+                assert json.loads(editor.inner_text()) == preset['value']
+                panel.get_by_role('tab', name='Headers', exact=True).press('Enter')
+                target_row = panel.get_by_role('row', name=re.compile(r'^Include X-Amz-Target in request '))
+                target = target_row.get_by_role('combobox', name='Value', exact=True)
                 target.fill(TARGET)
                 target.press('Tab')
-                include = dialog.get_by_role('checkbox', name='Include X-Amz-Target in request', exact=True)
+                include = target_row.get_by_role('checkbox', name='Include X-Amz-Target in request', exact=True)
                 if not include.is_checked():
                     include.check()
                 for name in ('X-Simulator-Service', 'X-Simulator-Region'):
-                    optional = dialog.get_by_role('checkbox', name=f'Include {name} in request', exact=True)
+                    optional = panel.get_by_role('checkbox', name=f'Include {name} in request', exact=True)
                     if optional.is_checked():
                         optional.uncheck()
                 assert not sends
@@ -85,7 +88,8 @@ def run():
                     headers = response.request.all_headers()
                     assert headers['x-amz-target'] == TARGET and headers['cookie']
                     assert headers['content-type'].split(';', 1)[0] == JSON11
-                    assert not {'authorization', 'x-simulator-token', 'x-simulator-principal'}.intersection(headers)
+                    assert not {'authorization', 'x-simulator-token', 'x-simulator-principal',
+                                'x-simulator-service', 'x-simulator-region'}.intersection(headers)
                     assert response.request.post_data_json == preset['value']
                     assert response.request.redirected_from is None and response.request.redirected_to is None
                     return response
@@ -100,13 +104,16 @@ def run():
                 body = dialog.locator('.response-section-content-body').filter(
                     has=page.get_by_role('link', name='Download Response Body', exact=True))
                 expect(body).to_have_count(1)
+                expect(body).to_be_visible()
                 expect(body).to_contain_text('NextToken')
                 expect(body).to_contain_text(preset['value']['Name'])
                 sdk.delete_document(Name='local-definition')
                 created = False
                 missing = send(2)
                 assert missing.status == 400 and missing.json()['__type'] == 'InvalidDocument'
+                expect(body).to_be_visible()
                 expect(body).to_contain_text('InvalidDocument')
+                assert len(sends) == 2
                 assert not outside and not errors, (outside, errors)
                 context.close()
         finally:
