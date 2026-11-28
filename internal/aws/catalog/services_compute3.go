@@ -58,7 +58,7 @@ var batch = &Service{
 		{Name: "DescribeComputeEnvironments", Kind: List, Resource: "computeEnvironment", Names: "computeEnvironments"},
 		{Name: "UpdateComputeEnvironment", Kind: Update, Resource: "computeEnvironment", Lookup: "computeEnvironment",
 			Fields: []string{"state", "unmanagedvCpus", "serviceRole", "updatePolicy", "context"}, Merged: batchUpdateComputeEnvironment},
-		{Name: "DeleteComputeEnvironment", Kind: Delete, Resource: "computeEnvironment", Lookup: "computeEnvironment"},
+		{Name: "DeleteComputeEnvironment", Kind: Delete, Resource: "computeEnvironment", Lookup: "computeEnvironment", CheckDelete: batchCheckDeleteComputeEnvironment},
 		{Name: "CreateJobQueue", Kind: Create, Resource: "jobQueue", Check: batchCreateJobQueue},
 		{Name: "DescribeJobQueues", Kind: List, Resource: "jobQueue", Names: "jobQueues"},
 		{Name: "UpdateJobQueue", Kind: Update, Resource: "jobQueue", Lookup: "jobQueue",
@@ -83,7 +83,7 @@ var batch = &Service{
 		"Job definitions are configuration records only. RegisterJobDefinition accepts an EC2 single-container definition with an inert image name (optional tag, no port or digest) and exactly one integer VCPU and MEMORY resource requirement; all other fields, including commands, roles, volumes, environment, and registration tags, are refused. It assigns successive name:revision ARNs starting at 1. DescribeJobDefinitions returns stored active and inactive revisions, filters by name or status, and supports pages of 1 to 100 or an exclusive list of exact revision identifiers. DeregisterJobDefinition marks an existing active revision INACTIVE; inactive revisions remain readable and count toward the 50-revision local per-region limit, with no timed purge or runtime. Existing tag operations use the exact stored revision ARN, including inactive revisions.",
 		"UpdateConsumableResource is not implemented: its SET, ADD and SUBTRACT quantity operations need the in-use accounting of running jobs, so total quantities are fixed at creation and availableQuantity always equals totalQuantity.",
 		"Describe operations fail with ClientException (HTTP 400) when a named compute environment, job queue, service environment or scheduling policy does not exist, where AWS omits it from the result; Describe by name accepts a name or an ARN. ListConsumableResources filters are refused, and createdAt of a consumable resource is not reported because the stored clock is not epoch milliseconds.",
-		"References are stored without being resolved: the compute environments and service environments of a job queue order, subnets, security groups, launch templates, instance roles, service roles, EKS clusters and Spot fleet roles are not checked, a queue is VALID at once even if its compute environments are not, and UpdateComputeEnvironment changes only state, unmanagedvCpus, serviceRole, updatePolicy and context (computeResources updates are refused). A schedulingPolicyArn must name a stored scheduling policy. A FIFO job queue cannot acquire a fair-share scheduling policy on update; a fair-share queue may replace its policy but not remove it. Deleting a scheduling policy still referenced by any job queue returns ClientException (HTTP 400) and leaves both records unchanged. Deleting a job queue requires DISABLED state; an ENABLED queue returns ClientException (HTTP 400) and is unchanged. Deleting a compute environment or service environment that a queue still uses succeeds, and a compute environment need not be DISABLED before deletion.",
+		"References are stored without being resolved: the compute environments and service environments of a job queue order, subnets, security groups, launch templates, instance roles, service roles, EKS clusters and Spot fleet roles are not checked, a queue is VALID at once even if its compute environments are not, and UpdateComputeEnvironment changes only state, unmanagedvCpus, serviceRole, updatePolicy and context (computeResources updates are refused). A schedulingPolicyArn must name a stored scheduling policy. A FIFO job queue cannot acquire a fair-share scheduling policy on update; a fair-share queue may replace its policy but not remove it. Deleting a scheduling policy still referenced by any job queue returns ClientException (HTTP 400) and leaves both records unchanged. Deleting a job queue requires DISABLED state; an ENABLED queue returns ClientException (HTTP 400) and is unchanged. Deleting a compute environment requires DISABLED state and removal from every local job queue in its Region. A refusal returns ClientException (HTTP 400) and preserves the configuration. A service environment can still be deleted while referenced.",
 		"Job queue time-limit actions are configuration only: each timeout must be 600 to 86400 seconds. For a nonempty action list, the queue type or its environment order must identify one family: container queues accept CANCEL and SageMaker Training queues accept TERMINATE. No action is executed.",
 		"Names are 1 to 128 letters, digits, hyphens or underscores. A compute environment's containerOrchestrationType is ECS, or EKS when eksConfiguration is given; MANAGED compute environments require computeResources, UNMANAGED creation requires a nonblank serviceRole reference, unmanagedvCpus applies only to UNMANAGED ones, and Fargate compute resources refuse ec2KeyPair and instanceRole. A job queue holds at most three compute environments and cannot use both order families. On update, an empty order can clear the old family while setting the other in the same request. Fair-share policies accept computeReservation 0 to 99 and shareDecaySeconds 0 to 604800. Each Region holds at most 50 resources of each kind (local limit). Tags apply to every kind by ARN.",
 	},
@@ -209,9 +209,29 @@ func batchPreserveJobQueuePolicyMode(previous, next map[string]any) error {
 	return nil
 }
 
+// Queue creation accepts unresolved compute environment identifiers. Match
+// the saved order by exact name or ARN without changing that write contract.
+func batchCheckDeleteComputeEnvironment(db querier, environment row) error {
+	if environment.Document["state"] != "DISABLED" {
+		return Failure("ClientException", "The compute environment must be DISABLED before it can be deleted.")
+	}
+	queues, err := list(db, environment.Service, environment.Region, "jobQueue", "")
+	if err != nil {
+		return err
+	}
+	for _, queue := range queues {
+		for _, reference := range refValues(queue.Document, "computeEnvironmentOrder[].computeEnvironment") {
+			if reference == environment.ARN || reference == environment.Name {
+				return Failure("ClientException", "The compute environment is still referenced by a job queue.")
+			}
+		}
+	}
+	return nil
+}
+
 // AWS Batch requires disabling submissions before deleting a job queue.
-func batchRequireDisabledJobQueue(document map[string]any) error {
-	if state, _ := document["state"].(string); state != "DISABLED" {
+func batchRequireDisabledJobQueue(_ querier, queue row) error {
+	if queue.Document["state"] != "DISABLED" {
 		return Failure("ClientException", "The job queue must be DISABLED before it can be deleted.")
 	}
 	return nil
