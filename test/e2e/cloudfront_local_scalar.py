@@ -24,7 +24,7 @@ LOCAL_TEMPLATE = '/_simulator/cloudfront/distributions/{Id}/objects/{ObjectKey}'
 
 
 def send(context, team, method, template, identifier, spec, expected_path, expected_status,
-         expected_text, directory=None):
+         expected_text, directory=None, *, object_key=KEY, expected_body=FRESH):
     operations = spec['paths'][template]
     operation = operations[method.lower()]
     tag = operation['tags'][0].lower().replace(' ', '-')
@@ -43,7 +43,7 @@ def send(context, team, method, template, identifier, spec, expected_path, expec
         sidebar.locator(f'a[href="#tag/{tag}/{method}{template}"]').click()
         page.get_by_role('button', name=f'Test Request ({method.lower()} {template})', exact=True).click()
         dialog = page.get_by_role('dialog').filter(has=page.get_by_role('button', name='Close Client', exact=True))
-        for name, value in [('Id', identifier)] + ([('ObjectKey', KEY)] if template == LOCAL_TEMPLATE else []):
+        for name, value in [('Id', identifier)] + ([('ObjectKey', object_key)] if template == LOCAL_TEMPLATE else []):
             include = dialog.get_by_role('checkbox', name=f'Include {name} in request', exact=True)
             row = dialog.get_by_role('row').filter(
                 has=page.get_by_role('checkbox', name=f'Include {name} in request', exact=True))
@@ -89,7 +89,7 @@ def send(context, team, method, template, identifier, spec, expected_path, expec
         expect(rendered).to_have_count(1)
         expect(rendered).to_contain_text(expected_text)
         if template == LOCAL_TEMPLATE:
-            assert body == FRESH
+            assert body == expected_body
             headers = response.headers
             assert headers['content-disposition'] == 'attachment'
             assert headers['x-content-type-options'] == 'nosniff'
@@ -99,7 +99,7 @@ def send(context, team, method, template, identifier, spec, expected_path, expec
                 rendered.get_by_role('link', name='Download Response Body', exact=True).click()
             saved = Path(directory) / 'scalar-response.txt'
             pending.value.save_as(saved)
-            assert saved.read_bytes() == FRESH
+            assert saved.read_bytes() == expected_body
         else:
             parsed = ET.fromstring(body)
             if method == 'GET':

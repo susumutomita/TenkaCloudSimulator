@@ -6,35 +6,35 @@
       "path": ".github/workflows/ci.yml",
       "sha256": "cff60535e43c626fea08ac5d850e0e0c7fe481c7e61e504eb5758cde9aab96ff",
       "disposition": "formal-infrastructure",
-      "reason": "Register independent literal model/property/mutant/source controls and run the focused Console checks in normal CI.",
+      "reason": "Independent fixed model controls, explicit inventory and normal focused Console test invocation.",
       "models": []
     },
     {
       "path": "README.md",
       "sha256": "2af6340e719a884aa7133b338f55c877ab25d6388761c14554e35cbc39f6ac11",
       "disposition": "documentation",
-      "reason": "Document the actual bounded Console and safe content/invalidation workflow without CDN or configuration-editor claims.",
+      "reason": "Describe real Console reads/safe downloads/invalidation and preserve the bounded native limitations.",
       "models": []
     },
     {
       "path": "docs/cloudfront-local-content.md",
       "sha256": "d1cfc631608be3ceafd63b5918b5e3900eb0fe64089b4033c5341fb11f681e18",
       "disposition": "documentation",
-      "reason": "Document the actual bounded Console and safe content/invalidation workflow without CDN or configuration-editor claims.",
+      "reason": "Describe real Console reads/safe downloads/invalidation and preserve the bounded native limitations.",
       "models": []
     },
     {
       "path": "docs/design/0001-go-standalone.md",
       "sha256": "fa71e930c8b49b6fa66578f7bd59d30d0c74f0943b15b6a8058ad8e38ad11be5",
       "disposition": "documentation",
-      "reason": "Document the actual bounded Console and safe content/invalidation workflow without CDN or configuration-editor claims.",
+      "reason": "Describe real Console reads/safe downloads/invalidation and preserve the bounded native limitations.",
       "models": []
     },
     {
       "path": "formal/CloudFrontConsoleEpoch.cfg",
       "sha256": "33e3b10974a87192cd3ce9f4d1e25016f4b23c59778376f9786c5a91965131b4",
       "disposition": "modeled",
-      "reason": "Bounded CloudFront Console request/identity ownership and explicit invalidation recovery; existing CloudFrontLocalCache also binds physically staged native interruption witnesses. Native backend semantics are unchanged except truthful Console advertisement.",
+      "reason": "Scoped CloudFront Console ownership, safe content and explicit invalidation acknowledgement/replay; the native staged cancellation/deadline witness uses the existing atomic cache model.",
       "models": [
         {
           "id": "CloudFrontConsoleEpoch",
@@ -48,15 +48,15 @@
             "ExplicitWriteConfirmation",
             "OneCurrentWrite"
           ],
-          "limits": "Models bounded asynchronous content reads and invalidation ownership, abstract protected content, confirmation, unknown acknowledgement and stable explicit replay of fixed /* paths. One abstract scope combines identity, region, route and distribution. Does not model XML/UTF-8/DOM/React, download or OS execution, actual HTTP abort effects, IAM policy evaluation, SQLite, native cache or JavaScript/Go refinement. CloudFrontLocalCache and real SDK/browser/native tests cover separate backend behavior."
+          "limits": "Models bounded asynchronous content reads and invalidation ownership, abstract protected content, confirmation, unknown acknowledgement and stable explicit replay of fixed /* paths. One abstract scope combines identity, region, route and distribution. Does not model XML/UTF-8/DOM/React, download or OS execution, actual HTTP abort effects, IAM policy evaluation, SQLite, native cache or JavaScript/Go refinement. CloudFrontLocalCache and real SDK/browser/native tests cover separate backend behavior. Known-receipt GET retry/lookup retention is checked by the real browser/storage-outage fixture, not represented in this model."
         }
       ]
     },
     {
       "path": "formal/CloudFrontConsoleEpoch.tla",
-      "sha256": "725f4350f7d2112b27df49faad60c2168ef0cdabf2ae65af9b57ab525850d411",
+      "sha256": "beda3d0b2d03905674cb47cc5d76b477721441d02357491ced1aa598f0b28c6a",
       "disposition": "modeled",
-      "reason": "Bounded CloudFront Console request/identity ownership and explicit invalidation recovery; existing CloudFrontLocalCache also binds physically staged native interruption witnesses. Native backend semantics are unchanged except truthful Console advertisement.",
+      "reason": "Scoped CloudFront Console ownership, safe content and explicit invalidation acknowledgement/replay; the native staged cancellation/deadline witness uses the existing atomic cache model.",
       "models": [
         {
           "id": "CloudFrontConsoleEpoch",
@@ -70,22 +70,22 @@
             "ExplicitWriteConfirmation",
             "OneCurrentWrite"
           ],
-          "limits": "Models bounded asynchronous content reads and invalidation ownership, abstract protected content, confirmation, unknown acknowledgement and stable explicit replay of fixed /* paths. One abstract scope combines identity, region, route and distribution. Does not model XML/UTF-8/DOM/React, download or OS execution, actual HTTP abort effects, IAM policy evaluation, SQLite, native cache or JavaScript/Go refinement. CloudFrontLocalCache and real SDK/browser/native tests cover separate backend behavior."
+          "limits": "Models bounded asynchronous content reads and invalidation ownership, abstract protected content, confirmation, unknown acknowledgement and stable explicit replay of fixed /* paths. One abstract scope combines identity, region, route and distribution. Does not model XML/UTF-8/DOM/React, download or OS execution, actual HTTP abort effects, IAM policy evaluation, SQLite, native cache or JavaScript/Go refinement. CloudFrontLocalCache and real SDK/browser/native tests cover separate backend behavior. Known-receipt GET retry/lookup retention is checked by the real browser/storage-outage fixture, not represented in this model."
         }
       ]
     },
     {
       "path": "formal/models.json",
-      "sha256": "a4980ad38f591d08056675bb1fe12df7c710b2dc09c22756e736621c442a87d1",
+      "sha256": "dd5508c1a00b4bb81382ae6a3cd277568b36cfe43e6b519c15ee239b2356b3d5",
       "disposition": "formal-infrastructure",
-      "reason": "Register independent literal model/property/mutant/source controls and run the focused Console checks in normal CI.",
+      "reason": "Independent fixed model controls, explicit inventory and normal focused Console test invocation.",
       "models": []
     },
     {
       "path": "internal/aws/cloudfront_distribution_http.go",
       "sha256": "d8b828129e5c5389586238ff0691ffe9106c8b1955993f0dab31e8cd1dfe0ed5",
       "disposition": "modeled",
-      "reason": "Bounded CloudFront Console request/identity ownership and explicit invalidation recovery; existing CloudFrontLocalCache also binds physically staged native interruption witnesses. Native backend semantics are unchanged except truthful Console advertisement.",
+      "reason": "Scoped CloudFront Console ownership, safe content and explicit invalidation acknowledgement/replay; the native staged cancellation/deadline witness uses the existing atomic cache model.",
       "models": [
         {
           "id": "CloudFrontConsoleEpoch",
@@ -99,7 +99,7 @@
             "ExplicitWriteConfirmation",
             "OneCurrentWrite"
           ],
-          "limits": "Models bounded asynchronous content reads and invalidation ownership, abstract protected content, confirmation, unknown acknowledgement and stable explicit replay of fixed /* paths. One abstract scope combines identity, region, route and distribution. Does not model XML/UTF-8/DOM/React, download or OS execution, actual HTTP abort effects, IAM policy evaluation, SQLite, native cache or JavaScript/Go refinement. CloudFrontLocalCache and real SDK/browser/native tests cover separate backend behavior."
+          "limits": "Models bounded asynchronous content reads and invalidation ownership, abstract protected content, confirmation, unknown acknowledgement and stable explicit replay of fixed /* paths. One abstract scope combines identity, region, route and distribution. Does not model XML/UTF-8/DOM/React, download or OS execution, actual HTTP abort effects, IAM policy evaluation, SQLite, native cache or JavaScript/Go refinement. CloudFrontLocalCache and real SDK/browser/native tests cover separate backend behavior. Known-receipt GET retry/lookup retention is checked by the real browser/storage-outage fixture, not represented in this model."
         }
       ]
     },
@@ -107,7 +107,7 @@
       "path": "internal/aws/cloudfront_distribution_interrupt_test.go",
       "sha256": "addb31f3f2ac39b8a493ba4f65beb4c275fe038e51cceee5cfdcfd6c51afabae",
       "disposition": "modeled",
-      "reason": "Bounded CloudFront Console request/identity ownership and explicit invalidation recovery; existing CloudFrontLocalCache also binds physically staged native interruption witnesses. Native backend semantics are unchanged except truthful Console advertisement.",
+      "reason": "Scoped CloudFront Console ownership, safe content and explicit invalidation acknowledgement/replay; the native staged cancellation/deadline witness uses the existing atomic cache model.",
       "models": [
         {
           "id": "CloudFrontLocalCache",
@@ -130,9 +130,9 @@
     },
     {
       "path": "internal/server/web/app.js",
-      "sha256": "13eadaecb1618eef31c3b0ebeb51771c7cd18236e96c4aed04ce9c3e50a0f5e3",
+      "sha256": "9ec00cfa79451ec7464fb850d6b2f833aa617c34dd9a1bc25061e11c7e99b8b2",
       "disposition": "modeled",
-      "reason": "Bounded CloudFront Console request/identity ownership and explicit invalidation recovery; existing CloudFrontLocalCache also binds physically staged native interruption witnesses. Native backend semantics are unchanged except truthful Console advertisement.",
+      "reason": "Scoped CloudFront Console ownership, safe content and explicit invalidation acknowledgement/replay; the native staged cancellation/deadline witness uses the existing atomic cache model.",
       "models": [
         {
           "id": "CloudFrontConsoleEpoch",
@@ -146,43 +146,57 @@
             "ExplicitWriteConfirmation",
             "OneCurrentWrite"
           ],
-          "limits": "Models bounded asynchronous content reads and invalidation ownership, abstract protected content, confirmation, unknown acknowledgement and stable explicit replay of fixed /* paths. One abstract scope combines identity, region, route and distribution. Does not model XML/UTF-8/DOM/React, download or OS execution, actual HTTP abort effects, IAM policy evaluation, SQLite, native cache or JavaScript/Go refinement. CloudFrontLocalCache and real SDK/browser/native tests cover separate backend behavior."
+          "limits": "Models bounded asynchronous content reads and invalidation ownership, abstract protected content, confirmation, unknown acknowledgement and stable explicit replay of fixed /* paths. One abstract scope combines identity, region, route and distribution. Does not model XML/UTF-8/DOM/React, download or OS execution, actual HTTP abort effects, IAM policy evaluation, SQLite, native cache or JavaScript/Go refinement. CloudFrontLocalCache and real SDK/browser/native tests cover separate backend behavior. Known-receipt GET retry/lookup retention is checked by the real browser/storage-outage fixture, not represented in this model."
         }
       ]
     },
     {
       "path": "scripts/formal_model_gate.py",
-      "sha256": "600fdbe3dc92aa3c4a1aff1b0612193a272ddb0901e3fe3d1d0c1d54cf5233bf",
+      "sha256": "9096fa1c7ce262db24ced5a264bcae2cd9873a6311d6de3189a02f7ffb9c2e79",
       "disposition": "formal-infrastructure",
-      "reason": "Register independent literal model/property/mutant/source controls and run the focused Console checks in normal CI.",
+      "reason": "Independent fixed model controls, explicit inventory and normal focused Console test invocation.",
       "models": []
     },
     {
       "path": "scripts/test-formal-gate.py",
       "sha256": "9d93efa5bcd2c4af2d746f8d6a692c54dbfeb72d2f55afb2d986063c8c22f305",
       "disposition": "formal-infrastructure",
-      "reason": "Register independent literal model/property/mutant/source controls and run the focused Console checks in normal CI.",
+      "reason": "Independent fixed model controls, explicit inventory and normal focused Console test invocation.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/cloudfront_local_console.py",
+      "sha256": "7b97c30891032e803654937d6db6980c188ea67f972cae7ad605af3187043409",
+      "disposition": "test-support",
+      "reason": "Actual unchanged browser requests and SDK/native readback, bounded response observation, storage failures, per-user/peer/restart and owned cleanup.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/cloudfront_local_scalar.py",
+      "sha256": "c60f49c1e9b6dbd039122cca343350808a60db93e7ce3e66505c24279138d88b",
+      "disposition": "test-support",
+      "reason": "Actual unchanged browser requests and SDK/native readback, bounded response observation, storage failures, per-user/peer/restart and owned cleanup.",
       "models": []
     },
     {
       "path": "tools/console/bundle-digests.json",
-      "sha256": "3c3d9420c4dc9eef204010252c3c9724b4d740ca439aed2c391eee5ce94f0283",
+      "sha256": "7eecf6062bc7a2ee14833c34b69d2599a314a025af26f798d115102ae5fd40d3",
       "disposition": "presentation",
-      "reason": "Canonical embedded Console build outputs and supporting metadata for the scoped CloudFront view.",
+      "reason": "Canonical generated Console assets and original package metadata.",
       "models": []
     },
     {
       "path": "tools/console/bundle-inputs.json",
-      "sha256": "c21563339c9b6294f3e1532c09b97c4b151c061d8a5c26df97b3f2739a180132",
+      "sha256": "d084dc9de225f64ff1a63f81826ebc57b6fd985c300c9cd59211ea5d4200a386",
       "disposition": "presentation",
-      "reason": "Canonical embedded Console build outputs and supporting metadata for the scoped CloudFront view.",
+      "reason": "Canonical generated Console assets and original package metadata.",
       "models": []
     },
     {
       "path": "tools/console/src/cloudfront-local.jsx",
-      "sha256": "45b09aeebd49da2a9881a90cc0587f64e2b8ddb8822af1e445c48fa06154d3a9",
+      "sha256": "39d598f976d9b397183d2e7030fd4b6e3b1e419f6f6dd4d2b17466609df39fbe",
       "disposition": "modeled",
-      "reason": "Bounded CloudFront Console request/identity ownership and explicit invalidation recovery; existing CloudFrontLocalCache also binds physically staged native interruption witnesses. Native backend semantics are unchanged except truthful Console advertisement.",
+      "reason": "Scoped CloudFront Console ownership, safe content and explicit invalidation acknowledgement/replay; the native staged cancellation/deadline witness uses the existing atomic cache model.",
       "models": [
         {
           "id": "CloudFrontConsoleEpoch",
@@ -196,7 +210,7 @@
             "ExplicitWriteConfirmation",
             "OneCurrentWrite"
           ],
-          "limits": "Models bounded asynchronous content reads and invalidation ownership, abstract protected content, confirmation, unknown acknowledgement and stable explicit replay of fixed /* paths. One abstract scope combines identity, region, route and distribution. Does not model XML/UTF-8/DOM/React, download or OS execution, actual HTTP abort effects, IAM policy evaluation, SQLite, native cache or JavaScript/Go refinement. CloudFrontLocalCache and real SDK/browser/native tests cover separate backend behavior."
+          "limits": "Models bounded asynchronous content reads and invalidation ownership, abstract protected content, confirmation, unknown acknowledgement and stable explicit replay of fixed /* paths. One abstract scope combines identity, region, route and distribution. Does not model XML/UTF-8/DOM/React, download or OS execution, actual HTTP abort effects, IAM policy evaluation, SQLite, native cache or JavaScript/Go refinement. CloudFrontLocalCache and real SDK/browser/native tests cover separate backend behavior. Known-receipt GET retry/lookup retention is checked by the real browser/storage-outage fixture, not represented in this model."
         }
       ]
     },
@@ -204,7 +218,7 @@
       "path": "tools/console/src/cloudfront-local.mjs",
       "sha256": "33d0a7cca215c6edcc6dc4bfb46a53cddca162942542eb30708548485971947a",
       "disposition": "modeled",
-      "reason": "Bounded CloudFront Console request/identity ownership and explicit invalidation recovery; existing CloudFrontLocalCache also binds physically staged native interruption witnesses. Native backend semantics are unchanged except truthful Console advertisement.",
+      "reason": "Scoped CloudFront Console ownership, safe content and explicit invalidation acknowledgement/replay; the native staged cancellation/deadline witness uses the existing atomic cache model.",
       "models": [
         {
           "id": "CloudFrontConsoleEpoch",
@@ -218,7 +232,29 @@
             "ExplicitWriteConfirmation",
             "OneCurrentWrite"
           ],
-          "limits": "Models bounded asynchronous content reads and invalidation ownership, abstract protected content, confirmation, unknown acknowledgement and stable explicit replay of fixed /* paths. One abstract scope combines identity, region, route and distribution. Does not model XML/UTF-8/DOM/React, download or OS execution, actual HTTP abort effects, IAM policy evaluation, SQLite, native cache or JavaScript/Go refinement. CloudFrontLocalCache and real SDK/browser/native tests cover separate backend behavior."
+          "limits": "Models bounded asynchronous content reads and invalidation ownership, abstract protected content, confirmation, unknown acknowledgement and stable explicit replay of fixed /* paths. One abstract scope combines identity, region, route and distribution. Does not model XML/UTF-8/DOM/React, download or OS execution, actual HTTP abort effects, IAM policy evaluation, SQLite, native cache or JavaScript/Go refinement. CloudFrontLocalCache and real SDK/browser/native tests cover separate backend behavior. Known-receipt GET retry/lookup retention is checked by the real browser/storage-outage fixture, not represented in this model."
+        }
+      ]
+    },
+    {
+      "path": "tools/console/src/console-home.jsx",
+      "sha256": "aeb4239100ab09aa77d1b850151ac4ec98077fc17d5019f760df8c61902b88a5",
+      "disposition": "modeled",
+      "reason": "Scoped CloudFront Console ownership, safe content and explicit invalidation acknowledgement/replay; the native staged cancellation/deadline witness uses the existing atomic cache model.",
+      "models": [
+        {
+          "id": "CloudFrontConsoleEpoch",
+          "properties": [
+            "TypeOK",
+            "CurrentContent",
+            "CurrentReceipt",
+            "ProtectedDownload",
+            "AcknowledgedReceipt",
+            "StableUnknownCaller",
+            "ExplicitWriteConfirmation",
+            "OneCurrentWrite"
+          ],
+          "limits": "Models bounded asynchronous content reads and invalidation ownership, abstract protected content, confirmation, unknown acknowledgement and stable explicit replay of fixed /* paths. One abstract scope combines identity, region, route and distribution. Does not model XML/UTF-8/DOM/React, download or OS execution, actual HTTP abort effects, IAM policy evaluation, SQLite, native cache or JavaScript/Go refinement. CloudFrontLocalCache and real SDK/browser/native tests cover separate backend behavior. Known-receipt GET retry/lookup retention is checked by the real browser/storage-outage fixture, not represented in this model."
         }
       ]
     },
@@ -226,7 +262,7 @@
       "path": "tools/console/src/console-navigation.mjs",
       "sha256": "7fb3da71ae462a0c6abc057435635d396c195e7501539a9fca160efe1287cd12",
       "disposition": "modeled",
-      "reason": "Bounded CloudFront Console request/identity ownership and explicit invalidation recovery; existing CloudFrontLocalCache also binds physically staged native interruption witnesses. Native backend semantics are unchanged except truthful Console advertisement.",
+      "reason": "Scoped CloudFront Console ownership, safe content and explicit invalidation acknowledgement/replay; the native staged cancellation/deadline witness uses the existing atomic cache model.",
       "models": [
         {
           "id": "CloudFrontConsoleEpoch",
@@ -240,7 +276,7 @@
             "ExplicitWriteConfirmation",
             "OneCurrentWrite"
           ],
-          "limits": "Models bounded asynchronous content reads and invalidation ownership, abstract protected content, confirmation, unknown acknowledgement and stable explicit replay of fixed /* paths. One abstract scope combines identity, region, route and distribution. Does not model XML/UTF-8/DOM/React, download or OS execution, actual HTTP abort effects, IAM policy evaluation, SQLite, native cache or JavaScript/Go refinement. CloudFrontLocalCache and real SDK/browser/native tests cover separate backend behavior."
+          "limits": "Models bounded asynchronous content reads and invalidation ownership, abstract protected content, confirmation, unknown acknowledgement and stable explicit replay of fixed /* paths. One abstract scope combines identity, region, route and distribution. Does not model XML/UTF-8/DOM/React, download or OS execution, actual HTTP abort effects, IAM policy evaluation, SQLite, native cache or JavaScript/Go refinement. CloudFrontLocalCache and real SDK/browser/native tests cover separate backend behavior. Known-receipt GET retry/lookup retention is checked by the real browser/storage-outage fixture, not represented in this model."
         }
       ]
     },
@@ -248,7 +284,7 @@
       "path": "tools/console/src/main.jsx",
       "sha256": "eea2f05df55538ce79c36aeff92cbeae853d54e601b97dcf10200d26e5465fca",
       "disposition": "modeled",
-      "reason": "Bounded CloudFront Console request/identity ownership and explicit invalidation recovery; existing CloudFrontLocalCache also binds physically staged native interruption witnesses. Native backend semantics are unchanged except truthful Console advertisement.",
+      "reason": "Scoped CloudFront Console ownership, safe content and explicit invalidation acknowledgement/replay; the native staged cancellation/deadline witness uses the existing atomic cache model.",
       "models": [
         {
           "id": "CloudFrontConsoleEpoch",
@@ -262,7 +298,7 @@
             "ExplicitWriteConfirmation",
             "OneCurrentWrite"
           ],
-          "limits": "Models bounded asynchronous content reads and invalidation ownership, abstract protected content, confirmation, unknown acknowledgement and stable explicit replay of fixed /* paths. One abstract scope combines identity, region, route and distribution. Does not model XML/UTF-8/DOM/React, download or OS execution, actual HTTP abort effects, IAM policy evaluation, SQLite, native cache or JavaScript/Go refinement. CloudFrontLocalCache and real SDK/browser/native tests cover separate backend behavior."
+          "limits": "Models bounded asynchronous content reads and invalidation ownership, abstract protected content, confirmation, unknown acknowledgement and stable explicit replay of fixed /* paths. One abstract scope combines identity, region, route and distribution. Does not model XML/UTF-8/DOM/React, download or OS execution, actual HTTP abort effects, IAM policy evaluation, SQLite, native cache or JavaScript/Go refinement. CloudFrontLocalCache and real SDK/browser/native tests cover separate backend behavior. Known-receipt GET retry/lookup retention is checked by the real browser/storage-outage fixture, not represented in this model."
         }
       ]
     },
@@ -270,7 +306,7 @@
       "path": "tools/console/test/cloudfront-local.test.mjs",
       "sha256": "05f7ecff0337e10b9312988edb2dec9dc0edfa0b14fd0382bec0b8ed4e4e7694",
       "disposition": "presentation",
-      "reason": "Canonical embedded Console build outputs and supporting metadata for the scoped CloudFront view.",
+      "reason": "Canonical generated Console assets and original package metadata.",
       "models": []
     }
   ]

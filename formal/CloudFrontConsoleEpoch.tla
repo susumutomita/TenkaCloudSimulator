@@ -81,7 +81,11 @@ Next == Switch \/ Read \/ Open(FALSE) \/ Open(TRUE) \/ Confirm \/ CancelModal \/
         \/ (\E r \in pending, safe \in BOOLEAN : ReadReply(r, safe))
         \/ (\E r \in pending, result \in {"ok", "refused", "unknown"} : WriteReply(r, result))
 Spec == Init /\ [][Next]_vars
-TypeOK == /\ scope \in 1..2 /\ epoch \in 0..2 /\ serial \in 0..3
+TypeOK == /\ pending \subseteq [kind : {"read", "write"}, scope : 1..2, epoch : 0..2,
+                              ticket : 1..3, caller : 0..2, confirmed : BOOLEAN]
+          /\ content \in [scope : 0..2, epoch : 0..2, ticket : 0..3, safe : BOOLEAN, ack : BOOLEAN]
+          /\ receipt \in [scope : 0..2, epoch : 0..2, ticket : 0..3, safe : BOOLEAN, ack : BOOLEAN]
+          /\ scope \in 1..2 /\ epoch \in 0..2 /\ serial \in 0..3
           /\ active \in 0..3 /\ activeKind \in {"idle", "read", "write"}
           /\ caller \in 0..2 /\ callerScope \in 0..2 /\ nextCaller \in 0..2
           /\ uncertain \in BOOLEAN /\ originalCaller \in 0..2

@@ -19,6 +19,7 @@ export default function CloudFrontLocal({request, onSaving}) {
   const {t} = useLocale();
   const api = useMemo(() => cloudFrontClient(request), [request]);
   const active = useMemo(() => cloudFrontTasks(), [api]);
+  const receiptLookup = useRef(null);
   const modalOpener = useRef(null), createButton = useRef(null), replayButton = useRef(null), previousModal = useRef(false);
   const [busy, setBusy] = useState('');
   const [error, setError] = useState('');
@@ -37,7 +38,7 @@ export default function CloudFrontLocal({request, onSaving}) {
   const [confirmed, setConfirmed] = useState(false);
   const title = t('Distributions', 'ディストリビューション');
   useLayoutEffect(() => () => {
-    active.abort(); onSaving(false);
+    active.abort(); receiptLookup.current = null; onSaving(false);
   }, [active, onSaving]);
   useEffect(() => {
     let frame;
@@ -73,6 +74,7 @@ export default function CloudFrontLocal({request, onSaving}) {
   async function browse(value = '', previous = []) {
     if (active.writing()) return;
     setSelected(''); setDetail(null); setObject(null); setKey(''); setReceipt(null); setAttempt(null); setModal(false);
+    receiptLookup.current = null;
     setRows([]); setKnown(false); setNext(''); setMarker(value); setHistory(previous);
     await read(signal => api.list(value, signal), result => { setRows(result.rows); setNext(result.next); setKnown(true); });
   }
@@ -80,7 +82,7 @@ export default function CloudFrontLocal({request, onSaving}) {
   async function select(id, reset = true) {
     if (active.writing()) return;
     setSelected(id); setDetail(null); setObject(null);
-    if (reset) { setKey(''); setReceipt(null); setAttempt(null); setModal(false); }
+    if (reset) { receiptLookup.current = null; setKey(''); setReceipt(null); setAttempt(null); setModal(false); }
     await read(signal => api.detail(id, signal), setDetail);
   }
   function changeKey(value) {
@@ -108,11 +110,11 @@ export default function CloudFrontLocal({request, onSaving}) {
     if (!confirmed || !attempt || attempt.distribution !== selected) return;
     const task = begin('write'); if (!task) return;
     const original = attempt;
-    setReceipt(null); setObject(null);
+    receiptLookup.current = null; setReceipt(null); setObject(null);
     try {
       const result = await api.invalidate(original.distribution, original.caller, task.signal);
       if (!current(task)) return;
-      setReceipt(result); setAttempt({...original, uncertain: false}); setModal(false);
+      receiptLookup.current = result; setReceipt(result); setAttempt({...original, uncertain: false}); setModal(false);
     } catch (e) {
       if (!current(task)) return;
       setAttempt({...original, uncertain: !confirmedRefusal(e)});
@@ -123,8 +125,10 @@ export default function CloudFrontLocal({request, onSaving}) {
     } finally { finish(task); }
   }
   async function refreshReceipt() {
-    const saved = receipt; setReceipt(null);
-    await read(signal => api.invalidation(saved, signal), setReceipt);
+    const saved = receiptLookup.current;
+    if (!saved || saved.distribution !== selected) return;
+    setReceipt(null);
+    await read(signal => api.invalidation(saved, signal), value => {receiptLookup.current = value;setReceipt(value);});
   }
   const controls = <SpaceBetween direction="horizontal" size="xs">
     {busy === 'read' && <Button onClick={cancelRead}>{t('Cancel read', '読み取りをキャンセル')}</Button>}
@@ -179,8 +183,8 @@ export default function CloudFrontLocal({request, onSaving}) {
                   {label:t('Invalidation ID', '無効化 ID'),value:receipt.id}, {label:t('Status', '状態'),value:receipt.status},
                   {label:t('Caller reference', '呼び出し元参照'),value:receipt.caller}, {label:t('Created', '作成日時'),value:receipt.created},
                 ]}/>
-                <Button disabled={!!busy} onClick={refreshReceipt}>{t('Refresh invalidation', '無効化の状態を更新')}</Button>
               </>}
+              {receiptLookup.current && <Button disabled={!!busy} onClick={refreshReceipt}>{t('Refresh invalidation', '無効化の状態を更新')}</Button>}
             </SpaceBetween>
           </Container>
         </>}

@@ -4856,6 +4856,7 @@ BASE_MODELS.add('CloudFrontConsoleEpoch')
 BASE_INVARIANTS['CloudFrontConsoleEpoch'] = {'StableUnknownCaller', 'ProtectedDownload', 'CurrentReceipt', 'TypeOK', 'OneCurrentWrite', 'ExplicitWriteConfirmation', 'CurrentContent', 'AcknowledgedReceipt'}
 REQUIRED_MUTANTS['CloudFrontConsoleEpoch'] = {'UnconfirmedWrite', 'PublishOldRead', 'RetainOldContent', 'ReplayDifferentCaller', 'OldReadUnlocksWrite', 'FreshCallerWhileUnknown', 'UnknownAcknowledged', 'UnsafeContent', 'PublishOldReceipt'}
 REQUIRED_SOURCE_SCOPES['CloudFrontConsoleEpoch'] = {'internal/aws/cloudfront_distribution_http.go', 'tools/console/src/cloudfront-local.jsx', 'tools/console/src/cloudfront-local.mjs', 'internal/server/web/app.js', 'tools/console/src/console-navigation.mjs', 'tools/console/src/main.jsx'}
+REQUIRED_SOURCE_SCOPES['CloudFrontConsoleEpoch'].add('tools/console/src/console-home.jsx')
 
 
 def load_registry(root, relative='formal/models.json'):

@@ -30186,14 +30186,15 @@
         "ExplicitWriteConfirmation",
         "OneCurrentWrite"
       ],
-      "limits": "Models bounded asynchronous content reads and invalidation ownership, abstract protected content, confirmation, unknown acknowledgement and stable explicit replay of fixed /* paths. One abstract scope combines identity, region, route and distribution. Does not model XML/UTF-8/DOM/React, download or OS execution, actual HTTP abort effects, IAM policy evaluation, SQLite, native cache or JavaScript/Go refinement. CloudFrontLocalCache and real SDK/browser/native tests cover separate backend behavior.",
+      "limits": "Models bounded asynchronous content reads and invalidation ownership, abstract protected content, confirmation, unknown acknowledgement and stable explicit replay of fixed /* paths. One abstract scope combines identity, region, route and distribution. Does not model XML/UTF-8/DOM/React, download or OS execution, actual HTTP abort effects, IAM policy evaluation, SQLite, native cache or JavaScript/Go refinement. CloudFrontLocalCache and real SDK/browser/native tests cover separate backend behavior. Known-receipt GET retry/lookup retention is checked by the real browser/storage-outage fixture, not represented in this model.",
       "source_scope": [
         "tools/console/src/cloudfront-local.mjs",
         "tools/console/src/cloudfront-local.jsx",
         "tools/console/src/console-navigation.mjs",
         "tools/console/src/main.jsx",
         "internal/aws/cloudfront_distribution_http.go",
-        "internal/server/web/app.js"
+        "internal/server/web/app.js",
+        "tools/console/src/console-home.jsx"
       ],
       "mutants": [
         {
