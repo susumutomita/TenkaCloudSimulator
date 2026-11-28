@@ -15,7 +15,7 @@ from xml.etree import ElementTree
 import boto3
 from playwright.sync_api import expect, sync_playwright
 
-from cloudwatch_logs import client as logs_client
+from botocore.config import Config
 from cloudwatch_metrics import BINARY, client, control, running
 from simpledb_scalar_reference_live import ScalarQueryReference
 
@@ -63,12 +63,14 @@ def measure(sdk, value, stamp):
         dict(MetricName=METRIC, Dimensions=DIMS, Unit='Count', Value=value, Timestamp=stamp)])
 
 
-def policy(team, list_allowed=True):
-    actions = [{'Effect': 'Allow', 'Action': ['cloudwatch:GetMetricStatistics', 'cloudwatch:PutMetricData',
+def policy(team, list_allowed=True, statistics_allowed=True):
+    actions = [{'Effect': 'Allow', 'Action': ['cloudwatch:PutMetricData',
                                               'logs:DescribeLogGroups', 'logs:DescribeLogStreams',
                                               'logs:GetLogEvents'], 'Resource': '*'},
                {'Effect': 'Allow', 'Action': ['cloudwatch:PutMetricAlarm', 'cloudwatch:DeleteAlarms',
                                               'cloudwatch:DescribeAlarms'], 'Resource': ARN + ALARM}]
+    if statistics_allowed:
+        actions.append({'Effect':'Allow', 'Action':'cloudwatch:GetMetricStatistics','Resource':'*'})
     if list_allowed:
         actions.append({'Effect': 'Allow', 'Action': 'cloudwatch:DescribeAlarms', 'Resource': '*'})
     control(team, '/_simulator/v1/iam/principals/' + ACTOR + '/policy', 'PUT',
@@ -162,6 +164,49 @@ def shown_log(page):
     expect(page.get_by_text(MESSAGE, exact=True)).to_be_visible()
 
 
+def verify_replaced_read(page, origin, sibling):
+    # Hold one actual outgoing read before the socket. Do not replay or synthesize a response.
+    pending = []
+    def hold_replaced(route):
+        request = route.request
+        fields = dict(parse_qsl(request.post_data or ''))
+        if not pending and fields.get('Action') == 'DescribeAlarms' and fields.get('AlarmNames.member.1') == sibling:
+            pending.append(route)
+        else:
+            route.fallback()
+    page.route(origin + '/', hold_replaced)
+    try:
+        page.get_by_label('Exact alarm name', exact=True).fill(sibling)
+        page.get_by_role('button', name='View alarm', exact=True).click()
+        until = time.monotonic() + 10
+        while not pending:
+            assert time.monotonic() < until, 'No original browser request reached the delay'
+            page.wait_for_timeout(20)
+        page.get_by_label('Exact alarm name', exact=True).fill(ALARM)
+        page.get_by_role('button', name='View alarm', exact=True).click()
+        expect(page.get_by_text(ARN + ALARM, exact=True)).to_be_visible()
+        pending[0].continue_()
+        # An ordinary additional native read drains the browser's event loop.
+        page.get_by_role('button', name='Refresh alarm', exact=True).click()
+        expect(page.get_by_text(ARN + ALARM, exact=True)).to_be_visible()
+        expect(page.get_by_role('heading', name=sibling, exact=True)).to_have_count(0)
+    finally:
+        page.unroute(origin + '/', hold_replaced)
+
+
+def audit_view(page):
+    path = Path(os.environ['AXE_SCRIPT'])
+    provenance = json.loads((path.parent / 'provenance.json').read_text())
+    assert hashlib.sha256(path.read_bytes()).hexdigest() == provenance['bundleSha256']
+    page.evaluate(path.read_text())
+    result = page.evaluate("""async () => {
+        const r = await axe.run(document, {runOnly:{type:'tag',values:['wcag2a','wcag2aa','wcag21aa']}});
+        return {violations:r.violations.map(v=>v.id), passed:r.passes.length,
+                reflow:document.documentElement.scrollWidth <= window.innerWidth};
+    }""")
+    assert result['passed'] and not result['violations'] and result['reflow'], result
+
+
 def owned_cleanup(sdk, logs, names):
     existing = {item['AlarmName'] for item in sdk.describe_alarms()['MetricAlarms']}
     assert existing.issubset(names)
@@ -176,7 +221,15 @@ def owned_cleanup(sdk, logs, names):
 
 def clients(stack, team, counts, *, region=REGION):
     sdk = client(stack, team, counts, set(), region=region)
-    logs = logs_client(team.origin, team.token, region)
+    logs = boto3.client('logs', endpoint_url=team.origin, region_name=region,
+                        aws_access_key_id='TCSIMLOGS', aws_secret_access_key='dummy-local-only',
+                        config=Config(proxies={}, retries={'total_max_attempts':1}, connect_timeout=3, read_timeout=10))
+    def bind_token(request, **_):
+        request.headers['X-Simulator-Token'] = team.token
+    def verify_endpoint(request, **_):
+        assert request.method == 'POST' and request.url == team.origin + '/'
+    logs.meta.events.register('before-sign', bind_token)
+    logs.meta.events.register('before-send', verify_endpoint)
     stack.callback(logs.close)
     return sdk, logs
 
@@ -273,6 +326,21 @@ def exercise(browser, directory):
                         expect(console.get_by_role('link', name=pages[0], exact=True)).to_be_visible()
                         assert all(dict(parse_qsl(r.post_data))['Action'] in ('DescribeAlarms','GetMetricStatistics')
                                    for r in seen if r.headers.get('x-simulator-service')=='monitoring')
+                        # Removing only the independent statistic permission keeps the legitimately read alarm.
+                        policy(owner, statistics_allowed=False)
+                        console.get_by_label('Exact alarm name', exact=True).fill(ALARM)
+                        with console.expect_response(lambda r: r.url==owner.origin+'/' and r.status==403):
+                            console.get_by_role('button', name='View alarm', exact=True).click()
+                        expect(console.get_by_text(ARN+ALARM, exact=True)).to_be_visible()
+                        expect(console.get_by_text(re.compile('AccessDenied'))).to_be_visible()
+                        expect(console.get_by_text('Measured statistic', exact=True)).to_have_count(0)
+                        expect(console.get_by_text('No datapoints', exact=True)).to_have_count(0)
+                        policy(owner)
+                        verify_replaced_read(console, owner.origin, pages[0])
+                        expect(console.get_by_text('Measured statistic', exact=True)).to_be_visible()
+                        audit_view(console)
+                        console.set_viewport_size({'width':390,'height':844})
+                        audit_view(console)
                         assert len(sends) == 5
                         peer_unchanged()
                         config_time = observation(sdk)['AlarmConfigurationUpdatedTimestamp']
@@ -304,7 +372,8 @@ def exercise(browser, directory):
     assert counts['sends'] == counts['responses'] == counts['calls'] and counts['sends'] > 40
     return {'monitoringSdkCalls':counts['sends'], 'scalarStatus':[200,200,200,200,403,200],
             'observedAlarmStates':['INSUFFICIENT_DATA','OK','ALARM'], 'logsRead':True,
-            'revokedContinuation':403, 'twoProcesses':True,'restart':True,'nativeCleanup':True}
+            'revokedContinuation':403, 'deniedStatistic':403, 'replacedRead':True,
+            'auditedWidths':[1300,390], 'twoProcesses':True,'restart':True,'nativeCleanup':True}
 
 
 def run():

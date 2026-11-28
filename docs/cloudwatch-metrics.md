@@ -17,7 +17,7 @@ A statistics query rounds its start down to the nearest UTC minute, includes tha
 
 Raw samples are queryable for 15 days. An authorized successful write prunes older rows in the same region and namespace. Queries, denied requests and failed batches preserve stored rows. Local limits are 10,000 stored samples per region/namespace and 100,000 stored samples per team database. Expired rows in other namespaces still occupy the team quota until a successful write prunes that scope. Teams can dispose of their own simulator database to clean up a practice run.
 
-The supported entry points are the Query SDK and HTTP API. ListMetrics, GetMetricData, dashboards, Insights, metric math, percentile and statistic-set ingestion, Values/Counts arrays, entities, high resolution, automatic collection and long-term rollups are outside this subset. CloudWatch Logs uses its own API and storage. [CloudWatch Logs](cloudwatch-logs.md)
+The native Query SDK and HTTP API support both publishing and reading samples. ListMetrics, GetMetricData, dashboards, Insights, metric math, percentile and statistic-set ingestion, Values/Counts arrays, entities, high resolution, automatic collection and long-term rollups are outside this subset. CloudWatch Logs uses its own API and storage. [CloudWatch Logs](cloudwatch-logs.md)
 
 ## Local metric alarms
 
@@ -34,7 +34,6 @@ The alarm ARN is `arn:aws:cloudwatch:{region}:000000000000:alarm:{AlarmName}`. E
 Limits are 100 alarms per Region and 1,000 per team. Delete removes the selected alarm, leaving metric observations intact. Two teams use separate processes, databases, policies and cursor authorities. Restart preserves configurations and recomputes their actual local state; it does not fabricate a delivery event or support case.
 
 The native increment does not by itself establish a new Console, Scalar Send or original-game acceptance. Those entry points and required whole-source gates are verified separately before a completion claim.
-
 
 ## Read metric alarms in the console and API reference
 
