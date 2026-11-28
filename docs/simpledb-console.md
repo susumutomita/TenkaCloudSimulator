@@ -111,7 +111,8 @@ python3 test/e2e/simpledb_shipped_examples_live.py
 ```
 
 The first fixture sends ListDomains, DomainMetadata and GetAttributes. The
-second sends CreateDomain, Select and DeleteAttributes. Both use the examples
+second sends CreateDomain, Select, DeleteAttributes, PutAttributes and
+DeleteDomain. Both use the examples
 served on the shared AWS endpoint page and check the requests sent by the
 browser. The second fixture verifies that deleting the selected attribute
 leaves the other attribute and a second item intact. Both clean up their
