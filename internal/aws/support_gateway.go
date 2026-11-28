@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"io"
+	"maps"
 	"mime"
 	"net/http"
 	"slices"
@@ -27,7 +28,7 @@ var supportFields = map[string][]string{
 }
 
 func SupportOperations() []string {
-	return []string{"AddAttachmentsToSet", "AddCommunicationToCase", "CreateCase", "DescribeAttachment", "DescribeCases", "DescribeCommunications", "ResolveCase"}
+	return slices.Sorted(maps.Keys(supportFields))
 }
 
 func isSupportRequest(r *http.Request) bool {

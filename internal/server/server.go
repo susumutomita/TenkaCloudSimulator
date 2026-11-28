@@ -308,7 +308,7 @@ func newWithProviders(path string, options ProviderConfig, prepareCognito func(*
 		addGCPDNSConsoleCapability(r, capabilities, cloudConfig)
 		capabilities["services"].(map[string]any)["support"] = map[string]any{
 			"operations": aws.SupportOperations(), "protocol": "AWS JSON 1.1", "region": "us-east-1",
-			"scope": "team", "console": false, "attachmentBytes": supportcases.MaxFileBytes,
+			"scope": "team", "console": false, "reference": "/_simulator/docs/support.html", "attachmentBytes": supportcases.MaxFileBytes,
 			"attachmentFilesPerSet": supportcases.MaxFilesPerSet,
 		}
 		addRoute53ConsoleCapability(w, r, capabilities)
