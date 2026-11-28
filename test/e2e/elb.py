@@ -10,6 +10,7 @@ import io
 import json
 import os
 import re
+import shutil
 import subprocess
 import tempfile
 import time
@@ -28,33 +29,42 @@ from botocore.exceptions import ClientError
 def running(directory):
     binary = Path(os.environ.get("SIMULATOR_BINARY", "dist/tenkacloud-simulator")).resolve(strict=True)
     directory.mkdir(exist_ok=True)
-    token_file = directory / "token"
-    args = [str(binary), "--listen", "127.0.0.1:0", "--state", str(directory / "state.db"),
-            "--token-file", str(token_file)]
-    # The CLI chooses the port while binding. Keep its ordinary inherited environment.
-    with tempfile.TemporaryFile(mode="w+") as log:
-        process = subprocess.Popen(args, cwd=directory, stdin=subprocess.DEVNULL, stdout=log, stderr=log)
-        try:
-            deadline = time.monotonic() + 25
-            while time.monotonic() < deadline and process.poll() is None:
-                match = re.search(r"^AWS simulation endpoint (http://127\.0\.0\.1:[1-9][0-9]{0,4})$", os.pread(log.fileno(), 32768, 0).decode(), re.M)
-                if match and token_file.is_file():
-                    break
-                time.sleep(.05)
-            else:
-                raise AssertionError("Owned ALB fixture CLI did not become ready")
-            token = token_file.read_text().strip()
-            assert token
-            yield match[1], token
-        finally:
-            if process.poll() is None:
-                process.terminate()
+    # Preserve the original standalone Lambda regression: a copied executable
+    # runs away from the repository with no runtime executables on PATH.
+    with tempfile.TemporaryDirectory(prefix="elb-cli-") as scratch:
+        standalone = Path(scratch) / "simulator"
+        shutil.copyfile(binary, standalone)
+        standalone.chmod(0o700)
+        token_file = Path(scratch) / "token"
+        args = [str(standalone), "--listen", "127.0.0.1:0", "--state", str(directory / "state.db"),
+                "--token-file", str(token_file)]
+        log_path = Path(scratch) / "cli.log"
+        with log_path.open("w") as log, log_path.open() as readiness:
+            process = subprocess.Popen(args, cwd=scratch, stdin=subprocess.DEVNULL, stdout=log, stderr=log,
+                                       env={**os.environ, "PATH": "/nonexistent"})
             try:
-                assert process.wait(timeout=10) == 0
-            except subprocess.TimeoutExpired:
-                process.kill()
-                process.wait()
-                raise
+                deadline = time.monotonic() + 25
+                while time.monotonic() < deadline and process.poll() is None:
+                    readiness.seek(0)
+                    match = re.search(r"^AWS simulation endpoint (http://127\.0\.0\.1:[1-9][0-9]{0,4})$",
+                                      readiness.read(32768), re.M)
+                    if match and token_file.is_file():
+                        break
+                    time.sleep(.05)
+                else:
+                    raise AssertionError("Owned ALB fixture CLI did not become ready")
+                token = token_file.read_text().strip()
+                assert token
+                yield match[1], token
+            finally:
+                if process.poll() is None:
+                    process.terminate()
+                try:
+                    assert process.wait(timeout=10) == 0
+                except subprocess.TimeoutExpired:
+                    process.kill()
+                    process.wait()
+                    raise
 
 
 counts = {"calls": 0, "sends": 0, "responses": 0}
@@ -272,5 +282,5 @@ assert {"CreateLoadBalancer", "DescribeLoadBalancers", "DeleteLoadBalancer"} <= 
 print(json.dumps({"elbNativeSDK": True, "counts": counts, "operations": sorted(operations),
     "placement": {"sameVpc": True, "distinctZones": 2, "explicitGroups": 1, "sharedOwnerDeleteProtected": True,
                   "crossRegionRejected": True, "crossTeamRejected": True, "restartVerified": True}, "lambdaTargetDataPlane": True, "periodicHealthChecks": True,
-    "twoAuthenticatedProcesses": True, "actualCLIReopen": True, "participantIAM": True,
+    "twoAuthenticatedProcesses": True, "copiedStandaloneWithoutExecutablesOnPath": True, "actualCLIReopen": True, "participantIAM": True,
     "teardown": "DELETED", "ec2Networking": False, "realAWS": False}))
