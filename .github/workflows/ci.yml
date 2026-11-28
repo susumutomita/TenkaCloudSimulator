@@ -8,11 +8,11 @@ jobs:
     runs-on: ubuntu-22.04
     timeout-minutes: 35
     env:
-      PRODUCT: e5d3869b8b4cda68e2f9b570515a6988cdd64f6c
+      PRODUCT: 35764830c4ba094e9067f67e7408cd680e994b07
     steps:
       - uses: actions/checkout@v7.0.1
         with:
-          ref: e5d3869b8b4cda68e2f9b570515a6988cdd64f6c
+          ref: 35764830c4ba094e9067f67e7408cd680e994b07
           persist-credentials: false
       - uses: actions/setup-go@v6.5.0
         with:
@@ -23,7 +23,7 @@ jobs:
           test "$GITHUB_REPOSITORY" = susumutomita/TenkaCloudSimulator
           test "$GITHUB_REF" = refs/heads/verify/207-group-console
           test "$(git rev-parse HEAD)" = "$PRODUCT"
-          test "$(git rev-parse 'HEAD^{tree}')" = 92576424f5d63b91204ba42d9497c3eb37cc2c13
+          test "$(git rev-parse 'HEAD^{tree}')" = 60151de03e62942ca232c94c3de29ff962645737
           test -z "$(git status --porcelain)"
           test "$(go env GOVERSION)" = go1.26.11
           test "$(id -u)" -ne 0
@@ -43,7 +43,7 @@ jobs:
           set -euo pipefail
           umask 077
           export SIMULATOR_BINARY="$PWD/dist/tenkacloud-simulator"
-          export SIMULATOR_BINARY_SHA256=04e651d266e309df654fee2d42677cc3f596b597ada3242f81262d85324f531b
+          export SIMULATOR_BINARY_SHA256=08d8d90051886b8b79c12616b897cf73b2a6fddcfe3d71642116b7195357ff96
           python="$RUNNER_TEMP/group-tools/bin/python"
           "$python" -I -c 'import os; from pathlib import Path; assert not any(k.startswith(("AWS_","BOTO_")) for k in os.environ); assert not any(os.path.lexists(p) for p in (Path.home()/".aws",Path.home()/".boto","/etc/boto.cfg"))'
           cat > "$RUNNER_TEMP/group-private/verify.py" <<'PYTHON'
