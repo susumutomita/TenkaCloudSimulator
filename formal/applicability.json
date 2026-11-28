@@ -246,6 +246,20 @@
       ]
     },
     {
+      "path": "internal/aws/cloudfront_distribution_recovery_test.go",
+      "sha256": "d50900989772d441323a296779fc2ab0ebf0c05c76b4fe4fe98e7fcee4278f38",
+      "disposition": "test-support",
+      "reason": "Verify native saved-content limits and recovery after genuine SQLite read, write and readback failures, including durable origin, cache and sibling frames after reopen.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/cloudfront_distribution_rest_contract_test.go",
+      "sha256": "303c13b4cb101576fbd5adcef1fdf780f5343ea6ea750a94213c89550d2e62aa",
+      "disposition": "test-support",
+      "reason": "Verify actual REST/XML validation, declared error envelopes and identity-scoped requests against saved distributions and invalidation state.",
+      "models": []
+    },
+    {
       "path": "internal/aws/cloudfront_distribution_store.go",
       "sha256": "91712000af6af47d6510f5a5897267a542b7a66af032821f9f6293e23bb9539f",
       "disposition": "modeled",
@@ -308,6 +322,13 @@
           "limits": "Checks an atomic abstract transaction and one immutable pair of policy decisions per delivery. A bucket lifetime fingerprint is assumed distinct for the single ordinary recreation; actual wall-clock buckets.created plus region does not prove ABA resistance under clock rollback. One abstract cache line does not model concrete multi-entry quotas, exact paths, TTL seconds, SQL/triggers/locking, authentication, HTTP/XML/S3 parsing, cache buffers, ETags or Go refinement. Restart preserves abstract committed state only, not crash durability. Native and SDK tests separately cover the real implementation."
         }
       ]
+    },
+    {
+      "path": "internal/aws/cloudfront_vpc_origin_readiness_test.go",
+      "sha256": "cfcc66a3a0e32b4a6429120a50ae7ec9b55b63b25a9907f8e9f357656006232c",
+      "disposition": "test-support",
+      "reason": "Verify native VPC origin initialization, stored version and endpoint recovery, exact successful replies, and refusal on unavailable authority or storage.",
+      "models": []
     },
     {
       "path": "internal/aws/ssm.go",
