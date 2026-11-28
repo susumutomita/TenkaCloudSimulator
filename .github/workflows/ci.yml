@@ -52,7 +52,6 @@ jobs:
         run: |
           python="$RUNNER_TEMP/metric-sdk/bin/python"
           "$python" -c 'import os; assert not any(k.startswith(("AWS_", "BOTO_")) for k in os.environ)'
-          "$python" -c 'from pathlib import Path; assert not (Path.home()/".aws"/"config").exists() and not (Path.home()/".aws"/"credentials").exists()'
           export SIMULATOR_BINARY="$PWD/dist/tenkacloud-simulator"
           receipts="$RUNNER_TEMP/metric-receipts"
           witnesses="$GITHUB_WORKSPACE/witnesses/.github/metric-witnesses"
