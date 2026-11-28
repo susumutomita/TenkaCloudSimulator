@@ -9,12 +9,12 @@ jobs:
     runs-on: ubuntu-22.04
     timeout-minutes: 30
     env:
-      PRODUCT: 2a0a7ad2afd4d2781367e4dbc294c829db58c316
-      PRODUCT_TREE: 25638d3b602c856f038023afa2967fcd3bfd0f18
+      PRODUCT: 995b0af28c2fc19db399a8a037a2f37601349a4a
+      PRODUCT_TREE: 6cbaf3070a2033e1b6ef17530be458cb5c696057
     steps:
       - uses: actions/checkout@v7.0.1
         with:
-          ref: 2a0a7ad2afd4d2781367e4dbc294c829db58c316
+          ref: 995b0af28c2fc19db399a8a037a2f37601349a4a
           persist-credentials: false
       - uses: actions/setup-go@v6.5.0
         with:
@@ -36,12 +36,17 @@ jobs:
           "$RUNNER_TOOL_CACHE/Python/3.12.16/x64/bin/python3.12" -m venv "$RUNNER_TEMP/sdk"
           "$RUNNER_TEMP/sdk/bin/pip" install -r scripts/requirements-test.txt
           "$RUNNER_TEMP/sdk/bin/pip" check
+          "$RUNNER_TEMP/sdk/bin/playwright" install --with-deps chromium
       - name: Create branches and receive deliveries in two local authorities
         run: |
           python="$RUNNER_TEMP/sdk/bin/python"
           "$python" -c 'import os; assert not any(k.startswith(("AWS_", "BOTO_")) for k in os.environ)'
           test "$(id -u)" -ne 0
           export SIMULATOR_BINARY="$PWD/dist/tenkacloud-simulator"
+          chromium=( "$HOME"/.cache/ms-playwright/chromium-*/chrome-linux64/chrome )
+          test "${#chromium[@]}" -eq 1
+          test -x "${chromium[0]}"
+          export CHROMIUM_EXECUTABLE="${chromium[0]}"
           unshare --user --map-current-user --net --keep-caps sh -ec '
             ip link set lo up
             exec setpriv --inh-caps=-all --ambient-caps=-all --bounding-set=-all "$@"
@@ -50,6 +55,8 @@ jobs:
             test "$(awk "/^CapEff:/{print \$2}" /proc/self/status)" = 0000000000000000
             "$1" -B test/e2e/codestar_notifications.py > "$RUNNER_TEMP/notification-receipts/sdk.json"
             cat "$RUNNER_TEMP/notification-receipts/sdk.json"
+            "$1" -B test/e2e/codestar_notification_scalar.py > "$RUNNER_TEMP/notification-receipts/scalar.json"
+            cat "$RUNNER_TEMP/notification-receipts/scalar.json"
           ' verify "$python"
       - uses: actions/upload-artifact@v7.0.2
         if: always()
