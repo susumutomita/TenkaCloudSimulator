@@ -122,6 +122,9 @@ func (b *binding) openAPI() map[string]any {
 			entry[strings.ToLower(official.HTTP.Method)] = operation
 		}
 	}
+	if b.spec.Model == "kinesisvideo" {
+		addKinesisVideoMediaReference(paths, tag)
+	}
 	pathsAny := map[string]any{}
 	for k, v := range paths {
 		pathsAny[k] = v

@@ -112,7 +112,7 @@ func (q *request) videoCreationTime(r *row) (int64, error) {
 		return 0, fmt.Errorf("invalid Kinesis creation clock")
 	}
 	ms := max(q.now().UnixMilli(), previous+1)
-	r.ARN = strings.TrimSuffix(r.ARN, "/1") + "/" + strconv.FormatInt(ms, 10)
+	r.ARN = strings.TrimSuffix(r.ARN, "/*") + "/" + strconv.FormatInt(ms, 10)
 	r.Document["StreamARN"] = r.ARN
 	r.Document["CreationTime"] = time.UnixMilli(ms).UTC().Format(time.RFC3339Nano)
 	if r.Document["KmsKeyId"] == "alias/aws/kinesisvideo" {

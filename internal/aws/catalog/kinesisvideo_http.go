@@ -1,6 +1,7 @@
 package catalog
 
 import (
+	"bytes"
 	"database/sql"
 	"encoding/json"
 	"errors"
@@ -139,7 +140,7 @@ func (e *Engine) videoRequest(w http.ResponseWriter, r *http.Request, b *binding
 	if err != nil {
 		return Failure("InvalidArgumentException", "Video request exceeds the local input limit.")
 	}
-	obj, err := decodeJSONObject(raw)
+	obj, err := decodeVideoRequest(raw)
 	if err != nil {
 		return err
 	}
@@ -214,6 +215,56 @@ func (e *Engine) videoRequest(w http.ResponseWriter, r *http.Request, b *binding
 		} // The peer stopped reading the already committed response.
 	}
 	return nil
+}
+
+// Discovery and media selectors contain only strings and one nested selector.
+// Reject duplicate members before a selector can determine the IAM resource.
+func decodeVideoRequest(raw []byte) (map[string]any, error) {
+	d := json.NewDecoder(bytes.NewReader(raw))
+	memberError := Failure("InvalidArgumentException", "Expected a single JSON object with unique video request members.")
+	var object func(nested bool) (map[string]any, error)
+	object = func(nested bool) (map[string]any, error) {
+		fields := map[string]any{}
+		for d.More() {
+			k, err := d.Token()
+			name, ok := k.(string)
+			if _, exists := fields[name]; err != nil || !ok || exists {
+				return nil, memberError
+			}
+			v, err := d.Token()
+			if err != nil {
+				return nil, memberError
+			}
+			switch {
+			case v == json.Delim('{') && !nested && name == "StartSelector":
+				fields[name], err = object(true)
+				if err != nil {
+					return nil, err
+				}
+			default:
+				s, ok := v.(string)
+				if !ok {
+					return nil, memberError
+				}
+				fields[name] = s
+			}
+		}
+		if close, err := d.Token(); err != nil || close != json.Delim('}') {
+			return nil, memberError
+		}
+		return fields, nil
+	}
+	if start, err := d.Token(); err != nil || start != json.Delim('{') {
+		return nil, memberError
+	}
+	fields, err := object(false)
+	if err != nil {
+		return nil, err
+	}
+	if _, err := d.Token(); err != io.EOF {
+		return nil, memberError
+	}
+	return fields, nil
 }
 
 func videoStringField(obj map[string]any, key string) (string, error) {
