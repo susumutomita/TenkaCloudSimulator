@@ -96,3 +96,23 @@ python3 test/e2e/simpledb_crosssurface.py \
 This runs offline with no cloud account, external endpoint, or installed
 browser required. It verifies Console DOM controls and real HTTP replies, not
 browser rendering, layout, or clicks in the Scalar API reference.
+
+## Browser checks for the served API examples
+
+Build the simulator with `make build`. In a local test environment with the
+pinned Playwright and Chromium from `scripts/requirements-test.txt`, set
+`SIMULATOR_BINARY` to the absolute path of the build, `SIMULATOR_BINARY_SHA256`
+to its verified SHA-256 and `CHROMIUM_EXECUTABLE` to the Chromium executable.
+Run each fixture against its own temporary simulator.
+
+```sh
+python3 test/e2e/simpledb_scalar_reference_live.py
+python3 test/e2e/simpledb_shipped_examples_live.py
+```
+
+The first fixture sends ListDomains, DomainMetadata and GetAttributes. The
+second sends CreateDomain, Select and DeleteAttributes. Both use the examples
+served on the shared AWS endpoint page and check the requests sent by the
+browser. The second fixture verifies that deleting the selected attribute
+leaves the other attribute and a second item intact. Both clean up their
+domains.
