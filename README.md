@@ -156,6 +156,8 @@ console, CloudFormation adapter or Challenge integration.
   The [local API reference](docs/simpledb-console.md#create-a-practice-domain-in-the-api-reference) can also create a practice domain with the native Query API.
 - **Configuration-only catalogs:** [AWS](docs/aws-catalog.md),
   [Google Cloud](docs/gcp-catalog.md), [Azure Resource Manager](docs/azure-catalog.md).
+  [PCS queue associations](docs/pcs-queue-associations.md) validate local group IDs
+  within their stored cluster and protect referenced group deletion.
   `--rds-private-postgres-topology` optionally validates private standalone
   PostgreSQL configuration against native EC2 on authenticated loopback. It
   starts no database and returns no endpoint.

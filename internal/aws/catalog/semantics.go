@@ -229,6 +229,9 @@ func (q *request) checkRefs(res *Resource, document map[string]any) error {
 }
 
 func (q *request) checkRefsIn(db querier, res *Resource, document map[string]any) error {
+	if err := q.checkPCSQueueReferences(db, res, document); err != nil {
+		return err
+	}
 	paths := make([]string, 0, len(res.Refs))
 	for path := range res.Refs {
 		paths = append(paths, path)
@@ -327,6 +330,20 @@ func (q *request) authorize(resource string) error {
 // authorizeTarget separates an identity policy's resource from the
 // private catalog row key only when the reviewed operation requires it.
 func (q *request) authorizeTarget(resource string, parent *row) error {
+	if q.b.spec.Model == "pcs" && q.op.Name == "CreateQueue" {
+		if parent == nil || parent.ARN == "" {
+			return fmt.Errorf("PCS queue creation lacks its resolved authorization cluster")
+		}
+		return q.authorize(parent.ARN)
+	}
+	if q.b.spec.Model == "pcs" && (q.op.Name == "UpdateQueue" || q.op.Name == "DeleteComputeNodeGroup") {
+		if parent == nil || parent.ARN == "" {
+			return fmt.Errorf("PCS operation lacks its resolved authorization cluster")
+		}
+		if err := q.authorize(parent.ARN); err != nil {
+			return err
+		}
+	}
 	if q.op.AuthorizeParent {
 		if parent == nil || parent.ARN == "" {
 			return fmt.Errorf("catalog %s/%s lacks a resolved authorization parent", q.b.spec.Model, q.op.Name)
@@ -838,6 +855,9 @@ func (q *request) create(ecsRevision int) (map[string]any, error) {
 			return nil, err
 		}
 	}
+	if err := q.pcsAssociationContext(); err != nil {
+		return nil, err
+	}
 	if err := tx.Commit(); err != nil {
 		return nil, err
 	}
@@ -994,6 +1014,9 @@ func (q *request) commit(change func(*sql.Tx) error) error {
 		if strings.Contains(err.Error(), "exactly one") {
 			return &fault{kind: "conflict", message: "The resource changed concurrently; read it again before retrying."}
 		}
+		return err
+	}
+	if err := q.pcsAssociationContext(); err != nil {
 		return err
 	}
 	return tx.Commit()

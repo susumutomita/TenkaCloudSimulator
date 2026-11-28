@@ -29970,6 +29970,84 @@
           "expect_invariant": "ConnectionPragmasApplied"
         }
       ]
+    },
+    {
+      "id": "PCSQueueAssociations",
+      "model": "formal/PCSQueueAssociations.tla",
+      "config": "formal/PCSQueueAssociations.cfg",
+      "bounds": "Two fixed scopes, two group IDs and two queue IDs, all reference subsets, Boolean authorization/cancellation, five atomic transitions.",
+      "properties": [
+        "TypeOK",
+        "DeletionGuard",
+        "NoDanglingReferences",
+        "SameScope",
+        "DeniedUnchanged",
+        "CanceledUnchanged",
+        "RejectedUnchanged"
+      ],
+      "limits": "Abstract committed metadata references and atomic admission only. No Go, SQLite isolation, HTTP/SDK codec, IAM ARN matching, cancellation timing, real PCS lifecycle, Slurm or implementation refinement proof.",
+      "source_scope": [
+        "internal/aws/catalog/pcs_queue_references.go",
+        "internal/aws/catalog/semantics.go",
+        "internal/aws/catalog/services_compute3.go"
+      ],
+      "mutants": [
+        {
+          "id": "MissingLiveReference",
+          "edits": [
+            {
+              "old": "Live(requested) /\\ Local(target, requested)",
+              "new": "TRUE /\\ Local(target, requested)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "NoDanglingReferences"
+        },
+        {
+          "id": "CrossClusterReference",
+          "edits": [
+            {
+              "old": "Live(requested) /\\ Local(target, requested)",
+              "new": "Live(requested) /\\ TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "SameScope"
+        },
+        {
+          "id": "DeleteReferencedGroup",
+          "edits": [
+            {
+              "old": "target \\in groups /\\ Unused(target)",
+              "new": "target \\in groups /\\ TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "DeletionGuard"
+        },
+        {
+          "id": "DeniedMutation",
+          "edits": [
+            {
+              "old": "allowed /\\ ~canceled /\\ admissible",
+              "new": "(allowed \\/ kind = \"PutQueue\") /\\ ~canceled /\\ admissible",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "DeniedUnchanged"
+        },
+        {
+          "id": "CanceledMutation",
+          "edits": [
+            {
+              "old": "allowed /\\ ~canceled /\\ admissible",
+              "new": "allowed /\\ (~canceled \\/ kind = \"PutQueue\") /\\ admissible",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CanceledUnchanged"
+        }
+      ]
     }
   ]
 }

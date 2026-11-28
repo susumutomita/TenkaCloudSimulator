@@ -148,3 +148,5 @@ with their group. SDK and Console share EC2 Query `DescribeSecurityGroups`
 readback. This separate detached state never modifies CloudFormation-owned
 ingress or feeds live network/instance attachment decisions. See the
 [security group subset](../ec2-read-discovery.md#security-group-readback).
+
+[PCS queue associations](../pcs-queue-associations.md) resolve local group IDs in the same persisted cluster and Region inside queue write transactions. Group deletion checks referring queues in its deletion transaction. Scoped IAM checks use the official parent and target resource types. These records remain configuration metadata in `CREATING`; no Slurm scheduler, instance provisioning or job execution is supplied.
