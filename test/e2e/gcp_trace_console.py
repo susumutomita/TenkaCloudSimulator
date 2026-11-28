@@ -170,14 +170,23 @@ def run():
                     caps = restricted.request.get(team.endpoint + '/_simulator/v1/capabilities').json()
                     assert 'gcpTrace' not in caps
                     page = restricted.new_page()
-                    page.goto(team.endpoint + '/_simulator/console/#/gcp-trace')
+                    restricted_native = []
+                    page.on('request', lambda request: restricted_native.append(True)
+                            if urlsplit(request.url).path.startswith('/_simulator/providers/') else None)
+                    with page.expect_response(lambda response: urlsplit(response.url).path == '/_simulator/v1/capabilities') as discovered:
+                        page.goto(team.endpoint + '/_simulator/console/#/gcp-trace')
+                    assert discovered.value.status == 200 and 'gcpTrace' not in discovered.value.json()
+                    expect(page.get_by_role('heading', name='Console unavailable', exact=True)).to_be_visible()
                     expect(page.get_by_role('heading', name='Trace explorer', exact=True)).to_have_count(0)
                     expect(page.get_by_text(ids[0], exact=True)).to_have_count(0)
+                    assert not restricted_native
                 team.stop()
                 team.start()
                 assert saved(api(team, team.token, project)) == before and saved(other) == peer_before
                 with context_for(team.token) as restarted:
                     page = restarted.new_page()
+                    page.on('request', observe)
+                    page.on('pageerror', lambda error: errors.append(type(error).__name__))
                     page.goto(team.endpoint + '/_simulator/console/#/gcp-trace')
                     page.get_by_role('button', name=ids[0], exact=True).click()
                     expect(page.get_by_role('heading', name='Trace details', exact=True)).to_be_visible()
