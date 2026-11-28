@@ -1,12 +1,35 @@
 {
   "version": 1,
-  "base_sha": "110354ea421d576f12b9452e0d472eda2077cc11",
+  "base_sha": "b97ddbd26f3e78905bd8e26a944fb7f0a28d8a42",
   "changes": [
     {
-      "path": "docs/secrets-manager.md",
-      "sha256": "61c84b933a6b637d63cf534f499c08e89fecc4a32b752c334d48b6ebdecd2e96",
+      "path": "docs/aws-catalog-services.md",
+      "sha256": "c2114126255c0572c9cd7fb5e35dc185ad00f2f256f6e3cf1a41b881563880ba",
       "disposition": "documentation",
-      "reason": "Reconcile the nine shipped Secrets Manager operations, served examples and Console fixtures, and document absent optional rotation metadata for never-configured local secrets.",
+      "reason": "Correct existing RDS documentation to separate metadata-only defaults from the already implemented opt-in owned PostgreSQL fixed-probe path, preserving snapshot/guest/public SQL/readiness limitations and every wire operation/schema.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/catalog/services_data.go",
+      "sha256": "67814ffb2e96f040215c86bec9b10cee0a0469c925a600fb17001c9569e898b3",
+      "disposition": "modeled",
+      "reason": "Correct existing RDS documentation to separate metadata-only defaults from the already implemented opt-in owned PostgreSQL fixed-probe path, preserving snapshot/guest/public SQL/readiness limitations and every wire operation/schema.",
+      "models": [
+        {
+          "id": "CatalogResourceLifecycle",
+          "properties": [
+            "AuthorizationFirst",
+            "FailureFrame"
+          ],
+          "limits": "Only Bounds descriptions and two refusal diagnostic strings change. Existing catalog transition model remains unchanged; it does not prove prose, PostgreSQL, RDS snapshots, CLI startup, guest connectivity, error messages or Go refinement. Native refusal/lifecycle and generated-spec preservation checks cover unchanged behavior."
+        }
+      ]
+    },
+    {
+      "path": "internal/server/apidocs/catalog/rds.json",
+      "sha256": "02e5bc1604a5bdd46732488ec71b52eaadcc2a7aff8fe56a89105be8b2c646ce",
+      "disposition": "presentation",
+      "reason": "Correct existing RDS documentation to separate metadata-only defaults from the already implemented opt-in owned PostgreSQL fixed-probe path, preserving snapshot/guest/public SQL/readiness limitations and every wire operation/schema.",
       "models": []
     }
   ]
