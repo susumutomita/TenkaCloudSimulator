@@ -4830,6 +4830,7 @@ BASE_INVARIANTS['SupportCaseLifecycle'] = {
     'RestartAndClock',
 }
 REQUIRED_SOURCE_SCOPES['SupportCaseLifecycle'] = {
+    'internal/aws/support_gateway.go',
     'internal/aws/supportcases/mutate.go',
     'internal/aws/supportcases/read.go',
     'internal/aws/supportcases/store.go',
