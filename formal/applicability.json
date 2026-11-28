@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "base_sha": "17e30e18d0eb2216961158ae48f8ef42a20225e8",
+  "base_sha": "64e5dd28dbe43f43480dfab555ffdd9aff572eb0",
   "changes": [
     {
       "path": ".github/workflows/ci.yml",
@@ -11,7 +11,7 @@
     },
     {
       "path": "README.md",
-      "sha256": "8cbff0e68721518b10d48375f3e8d5e21891b4698a23f3f6824e0795d3b54057",
+      "sha256": "0c6bd22f73bafc4d85e31a585659707debe272a94440f34ea83e6c008948989f",
       "disposition": "documentation",
       "reason": "Describe the publicly shipped local Support workflow and its limits.",
       "models": []
@@ -32,7 +32,7 @@
     },
     {
       "path": "docs/design/0001-go-standalone.md",
-      "sha256": "0bb4a753ae6ac84c8ab68a9eb64e15512670f6b40dc24533ea65bf36064b1b04",
+      "sha256": "375b82f0eca990f1c32d524ab8f52955b663677214923e87031b535cde15cd44",
       "disposition": "documentation",
       "reason": "Describe the real per-team database, public entry points and bounded authority.",
       "models": []
@@ -79,7 +79,7 @@
     },
     {
       "path": "formal/models.json",
-      "sha256": "659025ff00ef03527d88a0b1e2f2d3254ca3e9ab2489844c030ea55cabf81fab",
+      "sha256": "f5230d4789a3016ec31a0744db204176c77100d54bedd4a60ae23520ceffb565",
       "disposition": "formal-infrastructure",
       "reason": "Register the finite Support transition system, protected properties and negative controls.",
       "models": []
@@ -161,6 +161,13 @@
       ]
     },
     {
+      "path": "internal/aws/supportcases/quota_retention_test.go",
+      "sha256": "35a1ac51eaa27b3c7de6696b80e28ec0ada2b64f742658c69cb8498372a5d905",
+      "disposition": "test-support",
+      "reason": "Verify exact persisted team quotas and inclusive case retention with their real dependent rows.",
+      "models": []
+    },
+    {
       "path": "internal/aws/supportcases/read.go",
       "sha256": "130ce583e22a9dfff928b317c8497e8ec3159a951d7254ff7c890f0945ecf778",
       "disposition": "modeled",
@@ -217,6 +224,13 @@
       "models": []
     },
     {
+      "path": "internal/aws/supportcases/transaction_interrupt_test.go",
+      "sha256": "3f006893d2db64e6500a44f9f7e4dc911d8fa93687ed01ecccf85aa58399b8a7",
+      "disposition": "test-support",
+      "reason": "Check real context cancellation or deadline after the second attachment is inserted and full rollback across reopen and retry.",
+      "models": []
+    },
+    {
       "path": "internal/server/apidocs/aws-json-renderer.js",
       "sha256": "9e67a5fcbe623d1ce5e21d1a3b0abb9b57eb9a72b3774f3de4f9f2e8cd2d50ed",
       "disposition": "presentation",
@@ -260,7 +274,7 @@
     },
     {
       "path": "internal/server/server.go",
-      "sha256": "97b8b882d6988dd0411b08b2fe4a71f5b1f7ef0d3f48c1b7667072877e0f1572",
+      "sha256": "23deddb0e148bd95d5624054dc87ce3946b5e3f2019f71741285a16557618acb",
       "disposition": "modeled",
       "reason": "Install one local Support store per team and advertise its scoped capability.",
       "models": [
@@ -283,7 +297,7 @@
     },
     {
       "path": "internal/server/web/app.js",
-      "sha256": "5d13c88046d241629bcb7d89143108e9dc4ab549c66192c7fb267a44fcacc345",
+      "sha256": "0f529696c46ddba99692162d7e2f49fd7241eb76f6be35258de2c32fdddfa616",
       "disposition": "modeled",
       "reason": "Integrate Support into the shared console shell while preserving existing capability-gated navigation.",
       "models": [
@@ -299,14 +313,14 @@
     },
     {
       "path": "scripts/formal_model_gate.py",
-      "sha256": "53f096d53223e3a720c5ed6ca097c13819b7b21c9386d885816dcae53c69550f",
+      "sha256": "936cbdc3d35627f63e1f8348554657b7805c031c9e9d565aadf65a6b5c0b5789",
       "disposition": "formal-infrastructure",
       "reason": "Require the checked Support files, lifecycle properties and controls in the manifest.",
       "models": []
     },
     {
       "path": "scripts/test-formal-gate.py",
-      "sha256": "c08a0d3e9e42206b8c97ee946abcb73ee9e68974171fd88233e078a500b82ce5",
+      "sha256": "0c99f70cb149d83bdfe9252817af3109860dc971a9589cbfac6524661ba5b806",
       "disposition": "formal-infrastructure",
       "reason": "Exercise the manifest gate against missing Support properties, paths and controls.",
       "models": []
@@ -341,14 +355,14 @@
     },
     {
       "path": "tools/console/bundle-digests.json",
-      "sha256": "db6a2020010211051dd98a01504793a443be1eb2ba4612ae902e6967b08b4882",
+      "sha256": "b0a4d7214a08a7cc3b35cee996494059087ef858b553c8c97b014f9316ea368d",
       "disposition": "presentation",
       "reason": "Identify the generated console artifact which includes Support.",
       "models": []
     },
     {
       "path": "tools/console/bundle-inputs.json",
-      "sha256": "dab80c0539f1ff23a8fa36e0e5d09ae43f96fe99370a74f46ceb4fdc71725c23",
+      "sha256": "b5342340bbd5ebb753d163d58844c1f629379afd58d8e9ca82ab14feea2c13e2",
       "disposition": "presentation",
       "reason": "Record the console inputs for the generated Support-inclusive bundle.",
       "models": []
@@ -362,7 +376,7 @@
     },
     {
       "path": "tools/console/src/console-navigation.mjs",
-      "sha256": "e6f09a69e8f034e2343149f28835f5f9f29be0767031f3db8776195b05914687",
+      "sha256": "63bbb32f20770382bd6cfb205a4dbeedc35cb60102b230ed42292f882a8ebdd8",
       "disposition": "modeled",
       "reason": "Integrate Support into the shared console shell while preserving existing capability-gated navigation.",
       "models": [
@@ -378,7 +392,7 @@
     },
     {
       "path": "tools/console/src/main.jsx",
-      "sha256": "6d5dddf0140e8f7a9467def96731209d58470fef66c2d2a81eed4a71b1236b50",
+      "sha256": "2c2eb9ddfb65634c26ad938ff1541601c3b831a5f685cb6c1d9af06014356d1b",
       "disposition": "modeled",
       "reason": "Integrate Support into the shared console shell while preserving existing capability-gated navigation.",
       "models": [
