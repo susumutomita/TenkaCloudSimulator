@@ -6,6 +6,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"errors"
+	"net/http"
 	"net/http/httptest"
 	"path/filepath"
 	"slices"
@@ -98,8 +99,12 @@ func TestCodeCommitInterruptedGitWrite(t *testing.T) {
 						if cause == context.Canceled {
 							stop()
 						}
-						<-ctx.Done()
-						rc.ResultNull()
+						select {
+						case <-ctx.Done():
+							rc.ResultNull()
+						case <-time.After(5 * time.Second):
+							rc.ResultError(errors.New("real request lifetime did not expire"))
+						}
 					})
 				})
 				if err == nil {
@@ -115,24 +120,53 @@ SELECT interrupt_git_write(json_extract(NEW.document,'$.defaultBranch'),
 				if err != nil || closeErr != nil {
 					t.Fatal(err, closeErr)
 				}
-				if cause == context.Canceled {
-					ctx, stop = context.WithCancel(t.Context())
-				} else {
-					ctx, stop = context.WithTimeout(t.Context(), time.Second)
-				}
-				defer stop()
+				clientContext, cancelClient := context.WithCancel(t.Context())
+				defer cancelClient()
+				stop = cancelClient
+				finished := make(chan *httptest.ResponseRecorder, 1)
+				server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+					ctx = r.Context()
+					if cause == context.DeadlineExceeded {
+						var cancelDeadline context.CancelFunc
+						ctx, cancelDeadline = context.WithTimeout(ctx, time.Second)
+						defer cancelDeadline()
+					}
+					record := httptest.NewRecorder()
+					h.engine.ServeHTTP(record, r.WithContext(ctx))
+					w.WriteHeader(record.Code)
+					_, _ = w.Write(record.Body.Bytes())
+					finished <- record
+				}))
+				defer server.Close()
 				put["repositoryName"] = "target"
 				data, err := json.Marshal(put)
 				if err != nil {
 					t.Fatal(err)
 				}
-				req := httptest.NewRequestWithContext(ctx, "POST", "/", bytes.NewReader(data))
+				req, err := http.NewRequestWithContext(clientContext, "POST", server.URL+"/", bytes.NewReader(data))
+				if err != nil {
+					t.Fatal(err)
+				}
 				req.Header.Set("Content-Type", "application/x-amz-json-1.1")
 				req.Header.Set("X-Amz-Target", "CodeCommit_20150413.PutFile")
 				sign(req, "codecommit", "us-east-1")
-				got := h.do(req)
-				if hits != 1 || staged == "" || !errors.Is(ctx.Err(), cause) || got.status < 400 || got.body["commitId"] != nil {
-					t.Fatalf("interruption phase hits=%d staged=%q cause=%v status=%d", hits, staged, ctx.Err(), got.status)
+				response, sendErr := server.Client().Do(req)
+				if response != nil {
+					response.Body.Close()
+				}
+				record := <-finished
+				if cause == context.Canceled && !errors.Is(sendErr, context.Canceled) {
+					t.Fatal("client did not disconnect", sendErr)
+				}
+				if cause == context.DeadlineExceeded && (sendErr != nil || response.StatusCode != record.Code) {
+					t.Fatal("elapsed handler deadline did not reach client", sendErr)
+				}
+				var result map[string]any
+				if err := json.Unmarshal(record.Body.Bytes(), &result); err != nil {
+					t.Fatal(err)
+				}
+				if hits != 1 || staged == "" || !errors.Is(ctx.Err(), cause) || record.Code < 400 || result["__type"] == nil || result["commitId"] != nil {
+					t.Fatalf("interruption phase hits=%d staged=%q cause=%v status=%d", hits, staged, ctx.Err(), record.Code)
 				}
 				if err := host.Close(); err != nil {
 					t.Fatal(err)
