@@ -40,6 +40,14 @@ jobs:
           if any(os.environ.get(key) for key in ('GO_TEST_RUN_FILE', 'GO_TEST_PACKAGES', 'GOFLAGS', 'MAKEFLAGS')):
               raise SystemExit('Unexpected Go or Make override on the runner')
           PY
+      - name: Set up CPython for the pinned SDK and Chromium tools
+        id: python
+        if: ${{ !cancelled() && steps.source.outcome == 'success' }}
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6.3.0
+        with:
+          python-version: '3.12.16'
+          cache: pip
+          cache-dependency-path: scripts/requirements-test.txt
       - name: Run unfiltered make before-commit
         id: gate
         run: |
@@ -60,17 +68,9 @@ jobs:
           grep -Fq 'vcs.revision=1478bbacf026b2d5924dc6e20a1fe8f953d7c22f' "$RUNNER_TEMP/msk-batch-evidence/build.txt"
           grep -Fq 'vcs.modified=false' "$RUNNER_TEMP/msk-batch-evidence/build.txt"
           sha256sum dist/tenkacloud-simulator > "$RUNNER_TEMP/msk-batch-evidence/binary.sha256"
-      - name: Set up CPython for the pinned SDK and Chromium tools
-        id: python
-        if: ${{ !cancelled() && steps.binary.outcome == 'success' }}
-        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6.3.0
-        with:
-          python-version: '3.12.16'
-          cache: pip
-          cache-dependency-path: scripts/requirements-test.txt
       - name: Install the checked-in SDK requirements
         id: sdk_tools
-        if: ${{ !cancelled() && steps.python.outcome == 'success' }}
+        if: ${{ !cancelled() && steps.python.outcome == 'success' && steps.binary.outcome == 'success' }}
         run: |
           python3 -m venv "$RUNNER_TEMP/msk-batch-venv"
           "$RUNNER_TEMP/msk-batch-venv/bin/pip" install -r scripts/requirements-test.txt
