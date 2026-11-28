@@ -106,22 +106,33 @@ class ScalarReference:
             assert set(examples) == OPERATIONS
             target = PREFIX + operation
             assert target in next(p for p in spec['parameters'] if p['name'] == 'X-Amz-Target')['schema']['enum']
-            # Scalar decorates the operation's accessible name with its HTTP
-            # method. Bind both its exact native route and declared summary.
-            operation_link = page.locator('a[href="#tag/service-quotas/POST/"]').filter(has_text=spec['summary'])
+            # The endpoint link is visible on both desktop and Scalar's
+            # narrow-screen introduction; the desktop sidebar is hidden there.
+            operation_link = page.get_by_role('link', name='post /', exact=True)
             expect(operation_link).to_have_count(1)
+            expect(operation_link).to_have_attribute('href', '#tag/service-quotas/POST/')
             operation_link.click()
+            expect(page.get_by_test_id('example-picker')).to_have_count(1)
             page.get_by_test_id('example-picker').click()
             page.get_by_role('option', name=examples[operation]['summary'], exact=True).click()
             page.get_by_role('button', name='Test Request (post /)', exact=True).click()
             dialog = page.get_by_role('dialog').filter(has=page.get_by_role('button', name='Close Client', exact=True))
             request = dialog.get_by_role('region', name='Request: ' + spec['summary'], exact=True)
-            request.get_by_role('tab', name='Headers', exact=True).press('Enter')
+            headers_tab = request.get_by_role('tab', name='Headers', exact=True)
+            if page.viewport_size['width'] == 390:
+                # Scalar stacks the request sections at this narrow viewport.
+                expect(headers_tab).to_have_count(0)
+            else:
+                headers_tab.press('Enter')
             row = request.get_by_role('row', name=re.compile(r'^Include X-Amz-Target in request'))
             row.get_by_role('button', name=re.compile(r'^ServiceQuotasV20190624\.')).click()
             page.get_by_role('menuitem', name=target, exact=True).click()
             expect(row.get_by_role('checkbox')).to_be_checked()
-            request.get_by_role('tab', name='Body', exact=True).press('Enter')
+            body_tab = request.get_by_role('tab', name='Body', exact=True)
+            if page.viewport_size['width'] == 390:
+                expect(body_tab).to_have_count(0)
+            else:
+                body_tab.press('Enter')
             editor = request.locator('.cm-content[contenteditable=true]:visible')
             assert json.loads(editor.inner_text()) == examples[operation]['value']
             editor.click()
