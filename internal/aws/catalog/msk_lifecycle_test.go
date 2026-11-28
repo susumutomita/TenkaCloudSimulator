@@ -319,7 +319,7 @@ func TestMSKNineModeledIAMRefusals(t *testing.T) {
 	} {
 		denied := h.rest("kafka", tc.method, tc.path, tc.input)
 		expect(t, denied, 403, "ForbiddenException")
-		if len(denied.body) != 1 || str(denied.body["message"]) != "IAM evaluation: implicit-deny" {
+		if len(denied.body) != 1 || str(denied.body["message"]) != "IAM evaluation: implicitDeny" {
 			t.Fatalf("unexpected refusal %v", denied.body)
 		}
 	}
