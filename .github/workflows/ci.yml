@@ -54,12 +54,27 @@ jobs:
           test -x "$python"
           "$python" -c 'import sys; assert sys.version_info[:3] == (3, 12, 16)'
           "$python" --version > "$RUNNER_TEMP/msk-batch-evidence/python.txt"
-          dirname "$python" >> "$GITHUB_PATH"
       - name: Run unfiltered make before-commit
         id: gate
+        env:
+          # Use Ubuntu's interpreter and native trust store for the standard
+          # repository gate. The browser and SDK keep their separately pinned venv.
+          PYTHON: /usr/bin/python3
         run: |
           umask 077
-          python3 -c 'import sys; print(sys.version.split()[0], sys.executable)' > "$RUNNER_TEMP/msk-batch-evidence/gate-python.txt"
+          "$PYTHON" -c 'import sys; print(sys.version.split()[0], sys.executable)' > "$RUNNER_TEMP/msk-batch-evidence/gate-python.txt"
+          for interpreter in "$PYTHON" "$RUNNER_TOOL_CACHE/Python/3.12.16/x64/bin/python3.12"; do
+            "$interpreter" - <<'TRUST' >> "$RUNNER_TEMP/msk-batch-evidence/python-trust.jsonl"
+          import json, os, ssl, sys
+          context = ssl.create_default_context()
+          print(json.dumps({'interpreter': sys.executable, 'version': sys.version.split()[0],
+                            'ca_roots': len(context.get_ca_certs(binary_form=True)),
+                            'verify_required': context.verify_mode == ssl.CERT_REQUIRED,
+                            'hostname_check': context.check_hostname,
+                            'ca_file_override_present': 'SSL_CERT_FILE' in os.environ,
+                            'ca_dir_override_present': 'SSL_CERT_DIR' in os.environ}))
+          TRUST
+          done
           git rev-parse --is-shallow-repository > "$RUNNER_TEMP/msk-batch-evidence/shallow.txt"
           df -Pk . "$RUNNER_TEMP" | awk 'NR > 1 {print $4}' > "$RUNNER_TEMP/msk-batch-evidence/free-kib-before.txt"
           result=0
