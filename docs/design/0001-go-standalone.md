@@ -13,6 +13,12 @@ KMS のグラントはリージョン内の具体的なキーと IAM ロール�
 
 KMS の削除予約は SQLite に UTC の期限を保存する。期限前の取り消しはキーを Disabled に戻す。次のプロセス起動または KMS 操作時に、期限を過ぎたキーと残存するエイリアスおよびグラントを同じトランザクションで削除する。 [削除予約](../kms.md#scheduled-key-deletion)
 
+SES v2 の `TestRenderEmailTemplate` は、リージョン内の保存済みテンプレートを `ses:TestRenderEmailTemplate` とその ARN で認可して読み、件名と text/plain・text/html 本文を含む MIME を返す。`TemplateData` は文字列値を持つ JSON オブジェクトを文字列として送る。置換は英字または下線で始まる英数字・下線の単純な `{{name}}` に限り、HTML をエスケープせず一度だけ適用する。見つからない値、重複キー、未対応の構文、件名の制御文字、256 KiB を超える MIME は `BadRequestException` で拒否する。送信・配信・追跡や AWS の秒間呼び出し制限はシミュレートしない。 [公式 API](https://docs.aws.amazon.com/ses/latest/APIReference-V2/API_TestRenderEmailTemplate.html)・[置換の仕様](https://docs.aws.amazon.com/ses/latest/dg/send-personalized-email-advanced.html)・[IAM の対象リソース](https://docs.aws.amazon.com/service-authorization/latest/reference/list_amazonsimpleemailservicev2.html)
+
+SES v2 のドメイン確認では、リージョン別の identity に物理ゾーン ID と 3 個のトークンを保存する。Get と List は同一 SQLite トランザクションで Route 53 のゾーンと CNAME を再読する。レコードの欠落や同名ゾーンの再作成で以前の確認結果を失効させる。[ドメイン確認の操作と制約](../ses-domain-identities.md)
+
+SES v2 の `SendEmail` は送信者と参照テンプレートの権限を一回のポリシー評価基準で確認し、同じ SQLite トランザクションで DNS 所有権、テンプレート、受理記録、ローカル受信箱を処理する。受理 ID は実際に保存された要求を指す。存在しないローカル宛先の受信拒否を保存し、本文を配達済みとして返さない。チームの operator は受理記録と受信した MIME を参照し、個別に削除できる。[ローカル受信箱](../ses-domain-identities.md#send-and-inspect-a-local-message)
+
 Coreは問題ID/採点を知らない。SSM・stack/ownershipのschemaはAWS layerがcoreの共有DBを使用して初期化する。CFNはcompileで全リソースと参照を検証後、stack、ownership claim、parameter、identity、S3 bucket/config/tagsを単一transactionで作成。削除でも同一transaction。手動削除されたparameterのclaimを残し、他stackが再取得して旧stackのcleanupで消される事故を防ぐ。role/bucket namespaceはglobal、SSM/stackはregion別、Lambda claimはlambda:<region>。
 
 Lambda定義/ZIP/region/role/environment/revisionはAWS layerのprovider-owned SQLite tableに保存する。native APIのIAM・PassRoleを評価した後、provider-neutralなinternal/workload/pythonへコード/event/contextと明示したbounded capability・固定module FSを渡す。固定CPython/WASI・選択stdlib・原文rightsを埋め込み、host filesystem/environment/process/socketは渡さない。guest memory/時間/出力量/同時実行を制限する。限定inline Lambda CFNを同じ保存処理へ接続する。関数内SDKは保存role/regionに固定したnative SSM/S3 subsetのみ。問題固有のhandlerや任意HTTP proxyはない。[制限](../lambda.md)。

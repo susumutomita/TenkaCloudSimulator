@@ -163,6 +163,9 @@ console, CloudFormation adapter or Challenge integration.
   is rejected atomically. In the [SimpleDB console](docs/simpledb-console.md),
   find item names by an optional exact attribute value, read an item, then conditionally replace or delete a single attribute.
   The [local API reference](docs/simpledb-console.md#create-a-practice-domain-in-the-api-reference) can also create a practice domain with the native Query API.
+- **SES v2 template preview.** `TestRenderEmailTemplate` returns a MIME message from the stored subject and text or HTML body. Supply flat string values for `{{name}}` tags. The operation uses the template’s regional IAM ARN and sends no email. [AWS catalog service bounds](docs/aws-catalog-services.md)
+- **SES v2 local domain verification.** Register a regional domain under `.test`, publish its three verification CNAMEs in its local public hosted zone, and inspect the current verification status. [Domain identity workflow](docs/ses-domain-identities.md)
+- **SES v2 local mail.** `SendEmail` accepts simple UTF-8 messages and saved templates for a verified local sender. The operator can inspect a local receipt and download the MIME bytes that reached the team inbox. [Local mail workflow](docs/ses-domain-identities.md#send-and-inspect-a-local-message)
 - **Configuration-only catalogs:** [AWS](docs/aws-catalog.md),
   [Google Cloud](docs/gcp-catalog.md), [Azure Resource Manager](docs/azure-catalog.md).
   Amazon MSK stores custom configurations and attaches a compatible revision

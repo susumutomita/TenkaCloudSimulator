@@ -1,5 +1,6 @@
 import React,{useEffect,useMemo,useRef,useState} from 'react';
 import {useLocale} from './i18n.jsx';
+import SESMail from './ses-mail.jsx';
 import AppStreamAppBlockForm from './appstream-app-block.jsx';
 import ResourceGroupMembers from './resource-group-members.jsx';
 import BatchJobDefinitionForm from './batch-job-definition-form.jsx';
@@ -577,6 +578,7 @@ export default function CatalogView({region,request,catalog,onSaving}){
    actions={<Link external href="/_simulator/docs/catalog.html">{t('API reference','API リファレンス')}</Link>}>{t('AWS service catalog','AWS サービスカタログ')}</Header>}>
   <SpaceBetween size="l">
    <FormField label={t('Catalog service','カタログサービス')}><Select selectedOption={{value:model,label:service?.title}} filteringType="auto" disabled={busy} onChange={e=>{setModel(e.detail.selectedOption.value);setKind('');setParent('');setParents([])}} options={services.map(s=>({value:s.model,label:s.title,description:s.operations.length+' / '+s.officialOperations+' '+t('official operations','公式操作')}))}/></FormField>
+   {service.model==='sesv2' && service.operations.includes('SendEmail') && <SESMail key={region} region={region} request={request} onSaving={onSaving}/>}
    {/* Bounds stay complete but collapsed, so they do not push the list down. */}
    <ExpandableSection variant="container" headerText={t('Simulator scope','シミュレーターの範囲')} headerDescription={service.bounds.length+' '+t('notes on what this service implements and refuses','件の実装範囲と拒否する操作についての注記')}>
     <ul className="catalog-bounds">{service.bounds.map(b=><li key={b}>{b}</li>)}</ul>

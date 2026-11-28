@@ -2,6 +2,14 @@
  "client": "sesv2",
  "steps": [
   {"op": "create_configuration_set", "args": {"ConfigurationSetName": "transactional", "SendingOptions": {"SendingEnabled": true}, "Tags": [{"Key": "team", "Value": "a"}]}},
+  {"client": "route53", "op": "create_hosted_zone", "args": {"Name": "catalog-ses.test", "CallerReference": "ordinary-ses-profile"}, "save": {"zone": "HostedZone.Id"}},
+  {"op": "create_email_identity", "args": {"EmailIdentity": "catalog-ses.test"}, "save": {"k0": "DkimAttributes.Tokens[0]", "k1": "DkimAttributes.Tokens[1]", "k2": "DkimAttributes.Tokens[2]"}, "expect": {"DkimAttributes.Status": "PENDING"}},
+  {"client": "route53", "op": "change_resource_record_sets", "args": {"HostedZoneId": "${zone}", "ChangeBatch": {"Changes": [{"Action": "CREATE", "ResourceRecordSet": {"Name": "${k0}._domainkey.catalog-ses.test.", "Type": "CNAME", "TTL": 60, "ResourceRecords": [{"Value": "${k0}.dkim.amazonses.com."}]}}]}}, "expect": {"ChangeInfo.Status": "INSYNC"}},
+  {"client": "route53", "op": "change_resource_record_sets", "args": {"HostedZoneId": "${zone}", "ChangeBatch": {"Changes": [{"Action": "CREATE", "ResourceRecordSet": {"Name": "${k1}._domainkey.catalog-ses.test.", "Type": "CNAME", "TTL": 60, "ResourceRecords": [{"Value": "${k1}.dkim.amazonses.com."}]}}]}}, "expect": {"ChangeInfo.Status": "INSYNC"}},
+  {"client": "route53", "op": "change_resource_record_sets", "args": {"HostedZoneId": "${zone}", "ChangeBatch": {"Changes": [{"Action": "CREATE", "ResourceRecordSet": {"Name": "${k2}._domainkey.catalog-ses.test.", "Type": "CNAME", "TTL": 60, "ResourceRecords": [{"Value": "${k2}.dkim.amazonses.com."}]}}]}}, "expect": {"ChangeInfo.Status": "INSYNC"}},
+  {"op": "get_email_identity", "args": {"EmailIdentity": "catalog-ses.test"}, "expect": {"VerifiedForSendingStatus": true, "VerificationStatus": "SUCCESS"}},
+  {"op": "list_email_identities", "args": {}, "expect": {"EmailIdentities[0].IdentityName": "catalog-ses.test", "EmailIdentities[0].VerificationStatus": "SUCCESS"}},
+  {"op": "send_email", "args": {"FromEmailAddress": "sender@catalog-ses.test", "Destination": {"ToAddresses": ["inbox@inbox.ses.test"]}, "Content": {"Simple": {"Subject": {"Data": "Catalog message"}, "Body": {"Text": {"Data": "Real local sink"}}}}}, "save": {"sink_message": "MessageId"}},
   {"op": "get_configuration_set", "args": {"ConfigurationSetName": "transactional"}, "expect": {"SendingOptions.SendingEnabled": true, "Tags[0].Key": "team"}},
   {"op": "list_configuration_sets", "args": {}, "expect": {"ConfigurationSets": ["transactional"]}},
   {"op": "create_contact_list", "args": {"ContactListName": "newsletter", "Topics": [{"TopicName": "weekly", "DisplayName": "Weekly", "DefaultSubscriptionStatus": "OPT_OUT"}]}},
@@ -9,9 +17,13 @@
   {"op": "update_contact_list", "args": {"ContactListName": "newsletter", "Description": "Weekly news"}},
   {"op": "list_contact_lists", "args": {}, "expect": {"ContactLists#count": 1, "ContactLists[0].ContactListName": "newsletter"}},
   {"op": "create_contact_list", "args": {"ContactListName": "second"}, "error": "LimitExceededException"},
-  {"op": "create_email_template", "args": {"TemplateName": "welcome", "TemplateContent": {"Subject": "Hi {{name}}", "Text": "Hello"}}},
-  {"op": "get_email_template", "args": {"TemplateName": "welcome"}, "expect": {"TemplateContent.Subject": "Hi {{name}}"}},
-  {"op": "update_email_template", "args": {"TemplateName": "welcome", "TemplateContent": {"Subject": "Welcome", "Html": "<p>Hello</p>"}}},
+  {"op": "create_email_template", "args": {"TemplateName": "welcome", "TemplateContent": {"Subject": "Hi {{name}}", "Text": "Hello {{name}}", "Html": "<p>Hello {{name}}</p>"}}},
+  {"op": "get_email_template", "args": {"TemplateName": "welcome"}, "expect": {"TemplateContent": {"Subject": "Hi {{name}}", "Text": "Hello {{name}}", "Html": "<p>Hello {{name}}</p>"}}},
+  {"op": "test_render_email_template", "args": {"TemplateName": "welcome", "TemplateData": "{\"name\":\"友 & <practice> {{literal}}\"}"}, "expect_mime": {"subject": "Hi 友 & <practice> {{literal}}", "parts": [["text/plain", "Hello 友 & <practice> {{literal}}"], ["text/html", "<p>Hello 友 & <practice> {{literal}}</p>"]]}},
+  {"op": "test_render_email_template", "args": {"TemplateName": "welcome", "TemplateData": "{}"}, "error": "BadRequestException", "status": 400},
+  {"op": "get_email_template", "args": {"TemplateName": "welcome"}, "expect": {"TemplateContent": {"Subject": "Hi {{name}}", "Text": "Hello {{name}}", "Html": "<p>Hello {{name}}</p>"}}},
+  {"op": "update_email_template", "args": {"TemplateName": "welcome", "TemplateContent": {"Subject": "Welcome", "Html": "<p>Welcome {{name}}</p>"}}},
+  {"op": "test_render_email_template", "args": {"TemplateName": "welcome", "TemplateData": "{\"name\":\"友 & <practice> {{literal}}\"}"}, "expect_mime": {"subject": "Welcome", "parts": [["text/html", "<p>Welcome 友 & <practice> {{literal}}</p>"]]}},
   {"op": "list_email_templates", "args": {}, "expect": {"TemplatesMetadata#count": 1, "TemplatesMetadata[0].TemplateName": "welcome"}},
   {"op": "tag_resource", "args": {"ResourceArn": "arn:aws:ses:us-east-1:000000000000:contact-list/newsletter", "Tags": [{"Key": "stage", "Value": "dev"}]}},
   {"op": "untag_resource", "args": {"ResourceArn": "arn:aws:ses:us-east-1:000000000000:contact-list/newsletter", "TagKeys": ["stage"]}},
@@ -20,16 +32,28 @@
   {"op": "get_email_template", "args": {"TemplateName": "missing"}, "error": "NotFoundException"}
  ],
  "isolation": [
-  {"op": "list_configuration_sets", "args": {}, "expect": {"ConfigurationSets#count": 0}}
+  {"op": "list_email_identities", "args": {}, "expect": {"EmailIdentities#count": 0}},
+  {"op": "list_configuration_sets", "args": {}, "expect": {"ConfigurationSets#count": 0}},
+  {"op": "test_render_email_template", "args": {"TemplateName": "welcome", "TemplateData": "{\"name\":\"友 & <practice> {{literal}}\"}"}, "error": "NotFoundException", "status": 404}
  ],
  "after_restart": [
-  {"op": "get_email_template", "args": {"TemplateName": "welcome"}, "expect": {"TemplateContent.Subject": "Welcome"}},
-  {"op": "get_contact_list", "args": {"ContactListName": "newsletter"}, "expect": {"Description": "Weekly news"}}
+  {"op": "get_email_identity", "args": {"EmailIdentity": "catalog-ses.test"}, "expect": {"VerificationStatus": "SUCCESS"}},
+  {"op": "get_email_template", "args": {"TemplateName": "welcome"}, "expect": {"TemplateContent": {"Subject": "Welcome", "Html": "<p>Welcome {{name}}</p>"}}},
+  {"op": "get_contact_list", "args": {"ContactListName": "newsletter"}, "expect": {"Description": "Weekly news"}},
+  {"op": "test_render_email_template", "args": {"TemplateName": "welcome", "TemplateData": "{\"name\":\"友 & <practice> {{literal}}\"}"}, "expect_mime": {"subject": "Welcome", "parts": [["text/html", "<p>Welcome 友 & <practice> {{literal}}</p>"]]}}
  ],
  "cleanup": [
+  {"client": "route53", "op": "change_resource_record_sets", "args": {"HostedZoneId": "${zone}", "ChangeBatch": {"Changes": [{"Action": "DELETE", "ResourceRecordSet": {"Name": "${k0}._domainkey.catalog-ses.test.", "Type": "CNAME", "TTL": 60, "ResourceRecords": [{"Value": "${k0}.dkim.amazonses.com."}]}}]}}, "expect": {"ChangeInfo.Status": "INSYNC"}},
+  {"client": "route53", "op": "change_resource_record_sets", "args": {"HostedZoneId": "${zone}", "ChangeBatch": {"Changes": [{"Action": "DELETE", "ResourceRecordSet": {"Name": "${k1}._domainkey.catalog-ses.test.", "Type": "CNAME", "TTL": 60, "ResourceRecords": [{"Value": "${k1}.dkim.amazonses.com."}]}}]}}, "expect": {"ChangeInfo.Status": "INSYNC"}},
+  {"client": "route53", "op": "change_resource_record_sets", "args": {"HostedZoneId": "${zone}", "ChangeBatch": {"Changes": [{"Action": "DELETE", "ResourceRecordSet": {"Name": "${k2}._domainkey.catalog-ses.test.", "Type": "CNAME", "TTL": 60, "ResourceRecords": [{"Value": "${k2}.dkim.amazonses.com."}]}}]}}, "expect": {"ChangeInfo.Status": "INSYNC"}},
+  {"op": "get_email_identity", "args": {"EmailIdentity": "catalog-ses.test"}, "expect": {"VerificationStatus": "PENDING"}},
+  {"op": "delete_email_identity", "args": {"EmailIdentity": "catalog-ses.test"}},
+  {"op": "list_email_identities", "args": {}, "expect": {"EmailIdentities#count": 0}},
+  {"client": "route53", "op": "delete_hosted_zone", "args": {"Id": "${zone}"}},
   {"op": "delete_configuration_set", "args": {"ConfigurationSetName": "transactional"}},
   {"op": "delete_contact_list", "args": {"ContactListName": "newsletter"}},
   {"op": "delete_email_template", "args": {"TemplateName": "welcome"}},
-  {"op": "list_email_templates", "args": {}, "expect": {"TemplatesMetadata#count": 0}}
+  {"op": "list_email_templates", "args": {}, "expect": {"TemplatesMetadata#count": 0}},
+  {"op": "test_render_email_template", "args": {"TemplateName": "welcome", "TemplateData": "{}"}, "error": "NotFoundException", "status": 404}
  ]
 }

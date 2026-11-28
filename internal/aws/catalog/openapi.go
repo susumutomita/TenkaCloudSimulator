@@ -75,8 +75,8 @@ func (b *binding) openAPI() map[string]any {
 		routeSchema := map[string]any{"type": "string", "enum": []any{service}}
 		routeHeader := map[string]any{"name": "X-Simulator-Service", "in": "header", "required": false,
 			"description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.", "schema": routeSchema}
-		if b.spec.Model == "kafka" {
-			// Unsigned MSK requests need the service discriminator on shared REST paths.
+		if b.spec.Model == "kafka" || b.spec.Model == "sesv2" {
+			// Unsigned requests need the signing service on these shared REST paths.
 			routeHeader["required"] = true
 			routeHeader["example"] = service
 			routeSchema["default"] = service
@@ -136,7 +136,19 @@ func (b *binding) openAPI() map[string]any {
 					if required != nil {
 						body["required"] = required
 					}
-					operation["requestBody"] = map[string]any{"content": map[string]any{"application/json": map[string]any{"schema": body}}}
+					media := map[string]any{"schema": body}
+					if b.spec.Model == "sesv2" && op.Name == "SendEmail" {
+						operation["description"] = "Verify the local owned.test domain in this region first. Accepted messages addressed to inbox@inbox.ses.test can be downloaded from the team operator's local inbox."
+						media["example"] = map[string]any{
+							"FromEmailAddress": "sender@owned.test",
+							"Destination":      map[string]any{"ToAddresses": []string{"inbox@inbox.ses.test"}},
+							"Content": map[string]any{"Simple": map[string]any{
+								"Subject": map[string]string{"Data": "Local greeting"},
+								"Body":    map[string]any{"Text": map[string]string{"Data": "Hello from the local inbox."}},
+							}},
+						}
+					}
+					operation["requestBody"] = map[string]any{"content": map[string]any{"application/json": media}}
 				}
 			}
 			if official.Output != "" {

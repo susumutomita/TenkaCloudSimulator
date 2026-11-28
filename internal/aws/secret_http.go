@@ -8,9 +8,10 @@ import (
 	"mime"
 	"net/http"
 	"slices"
-	"strconv"
 	"strings"
 	"unicode/utf8"
+
+	"github.com/susumutomita/TenkaCloudSimulator/internal/aws/jsonwire"
 )
 
 type secretRequest struct {
@@ -58,56 +59,7 @@ func secretHTTPError(w http.ResponseWriter, err error) {
 	secretJSON(w, status, map[string]string{"__type": code, "message": message})
 }
 
-// Reject unpaired UTF-16 escapes before encoding/json can replace them. Valid
-// escaped pairs and literal UTF-8 must retain their exact decoded value bytes.
-func secretUnicodeScalars(data []byte) bool {
-	inside := false
-	for i := 0; i < len(data); i++ {
-		if !inside {
-			if data[i] == '"' {
-				inside = true
-			}
-			continue
-		}
-		if data[i] == '"' {
-			inside = false
-			continue
-		}
-		if data[i] != '\\' {
-			continue
-		}
-		i++
-		if i >= len(data) {
-			return false
-		}
-		if data[i] != 'u' {
-			continue
-		}
-		if i+4 >= len(data) {
-			return false
-		}
-		value, err := strconv.ParseUint(string(data[i+1:i+5]), 16, 16)
-		if err != nil {
-			return false
-		}
-		if value >= 0xd800 && value <= 0xdbff {
-			if i+10 >= len(data) || data[i+5] != '\\' || data[i+6] != 'u' {
-				return false
-			}
-			low, err := strconv.ParseUint(string(data[i+7:i+11]), 16, 16)
-			if err != nil || low < 0xdc00 || low > 0xdfff {
-				return false
-			}
-			i += 10
-		} else {
-			if value >= 0xdc00 && value <= 0xdfff {
-				return false
-			}
-			i += 4
-		}
-	}
-	return !inside
-}
+func secretUnicodeScalars(data []byte) bool { return jsonwire.ValidUnicodeEscapes(data) }
 
 func secretUniqueJSON(dec *json.Decoder, depth int) error {
 	if depth > 16 {

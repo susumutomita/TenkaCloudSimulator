@@ -6093,7 +6093,8 @@
         "tools/awsmodels/draft.py",
         "tools/awsmodels/extract.py",
         "tools/azuremodels/extract.py",
-        "tools/gcpmodels/extract.py"
+        "tools/gcpmodels/extract.py",
+        "internal/aws/catalog/ses_template_preview.go"
       ],
       "mutants": [
         {
@@ -37643,6 +37644,540 @@
             }
           ],
           "expect_invariant": "ActualSampleState"
+        }
+      ]
+    },
+    {
+      "id": "SESLocalDomainProof",
+      "model": "formal/SESLocalDomainProof.tla",
+      "config": "formal/SESLocalDomainProof.cfg",
+      "bounds": "Two teams, two regions for one team, one domain, two physical zones and identity generations, and three selector positions. Eight scheduled mutation histories allow any scoped Get/List and any of three grant classes between steps.",
+      "properties": [
+        "TypeOK",
+        "ReadCurrentProof",
+        "Rights",
+        "RefusalFrame",
+        "ReadRestartFrame",
+        "PeerIdentityFrame",
+        "FreshGeneration",
+        "DeleteFrame",
+        "AbortVisible",
+        "PhysicalZoneCapture",
+        "DNSWriteFrame"
+      ],
+      "limits": "Finite local DNS ownership projection over normalized values. Missing/wrong records revoke status at read time. Restart preserves the abstract frame. DNS syntax, TTL, UUID/selector generation and entropy, SDK encoding, signed requests, SQLite isolation/failure timing and durable I/O, IAM evaluation, pagination and Go refinement are tested separately or outside the model. No Internet DNS, DKIM signatures, address verification, email sending or delivery.",
+      "source_scope": [
+        "internal/aws/catalog/ses_domain_identity.go",
+        "internal/aws/catalog/engine.go",
+        "internal/aws/catalog/semantics.go",
+        "internal/aws/catalog/services_integration.go",
+        "internal/aws/catalog/models/sesv2.json",
+        "internal/aws/catalog/selection.json",
+        "internal/aws/route53_store.go",
+        "internal/aws/route53_http.go",
+        "internal/aws/route53_ses_identity.go",
+        "internal/server/server.go"
+      ],
+      "mutants": [
+        {
+          "id": "AcceptTwoRecords",
+          "edits": [
+            {
+              "old": "\\A k \\in Slots: \\E r \\in dns:",
+              "new": "\\A k \\in {1,2}: \\E r \\in dns:",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadCurrentProof"
+        },
+        {
+          "id": "IgnoreWrongTarget",
+          "edits": [
+            {
+              "old": "/\\ r.slot = k /\\ r.ownerOK /\\ r.targetOK",
+              "new": "/\\ r.slot = k /\\ r.ownerOK",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadCurrentProof"
+        },
+        {
+          "id": "IgnoreWrongOwner",
+          "edits": [
+            {
+              "old": "/\\ r.slot = k /\\ r.ownerOK /\\ r.targetOK",
+              "new": "/\\ r.slot = k /\\ r.targetOK",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadCurrentProof"
+        },
+        {
+          "id": "BorrowPeerDNS",
+          "edits": [
+            {
+              "old": "r.team = Team(s) /\\ r.zone = i.zone",
+              "new": "r.zone = i.zone",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadCurrentProof"
+        },
+        {
+          "id": "BorrowOtherRegionSelectors",
+          "edits": [
+            {
+              "old": "r.selectorScope = s /\\ r.gen = i.gen",
+              "new": "(r.selectorScope = s \\/ {r.selectorScope,s} = {\"east\",\"west\"}) /\\ r.gen = i.gen",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadCurrentProof"
+        },
+        {
+          "id": "AcceptDuplicateZone",
+          "edits": [
+            {
+              "old": "i.gen > 0 /\\ zones[Team(s)] = {i.zone}",
+              "new": "i.gen > 0 /\\ i.zone \\in zones[Team(s)]",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadCurrentProof"
+        },
+        {
+          "id": "AdoptReplacementZone",
+          "edits": [
+            {
+              "old": "i.gen > 0 /\\ zones[Team(s)] = {i.zone}",
+              "new": "i.gen > 0 /\\ Cardinality(zones[Team(s)]) = 1",
+              "count": 1
+            },
+            {
+              "old": "r.zone = i.zone",
+              "new": "r.zone \\in zones[Team(s)]",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadCurrentProof"
+        },
+        {
+          "id": "CacheAfterRecordRemoval",
+          "edits": [
+            {
+              "old": "ELSE IF Proof(a.scope) THEN \"success\"",
+              "new": "ELSE IF Proof(a.scope) \\/ (last.kind = \"Drop\" /\\ last.scope = a.scope) THEN \"success\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadCurrentProof"
+        },
+        {
+          "id": "NamedGrantLists",
+          "edits": [
+            {
+              "old": "a.grant = \"named\" /\\ a.kind # \"List\"",
+              "new": "a.grant = \"named\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "Rights"
+        },
+        {
+          "id": "DeniedDeleteChangesState",
+          "edits": [
+            {
+              "old": "ELSE IF allowed /\\ a.kind = \"Delete\" THEN",
+              "new": "ELSE IF a.live /\\ a.kind = \"Delete\" THEN",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "RefusalFrame"
+        },
+        {
+          "id": "CancelCreatesIdentity",
+          "edits": [
+            {
+              "old": "allowed == Can(a) /\\ a.live",
+              "new": "allowed == Can(a) /\\ (a.live \\/ a.kind = \"Create\")",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "RefusalFrame"
+        },
+        {
+          "id": "CanceledDeleteAcknowledged",
+          "edits": [
+            {
+              "old": "ELSE IF ~a.live THEN \"abort\"",
+              "new": "ELSE IF ~a.live THEN IF a.kind = \"Delete\" THEN \"ack\" ELSE \"abort\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AbortVisible"
+        },
+        {
+          "id": "ReissueTokensOnRestart",
+          "edits": [
+            {
+              "old": "= Empty] ELSE ids",
+              "new": "= Empty] ELSE IF a.kind = \"Restart\" THEN [ids EXCEPT ![s].gen = 2] ELSE ids",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadRestartFrame"
+        },
+        {
+          "id": "RecreateReusesTokens",
+          "edits": [
+            {
+              "old": "issued == generations[s]+1",
+              "new": "issued == 1",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "FreshGeneration"
+        },
+        {
+          "id": "AlwaysCaptureFirstZone",
+          "edits": [
+            {
+              "old": "zone |-> CHOOSE z \\in zones[team]: TRUE",
+              "new": "zone |-> 1",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PhysicalZoneCapture"
+        },
+        {
+          "id": "CreateAdoptsPeerIdentity",
+          "edits": [
+            {
+              "old": "[ids EXCEPT ![s] = [gen |-> issued, zone |-> CHOOSE z \\in zones[team]: TRUE]]",
+              "new": "[ids EXCEPT ![s] = [gen |-> issued, zone |-> CHOOSE z \\in zones[team]: TRUE], ![IF s = \"peer\" THEN \"east\" ELSE \"peer\"] = [gen |-> issued, zone |-> 1]]",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PeerIdentityFrame"
+        },
+        {
+          "id": "DeleteRemovesDNS",
+          "edits": [
+            {
+              "old": "THEN dns \\ key ELSE dns",
+              "new": "THEN dns \\ key ELSE IF allowed /\\ a.kind = \"Delete\" THEN {} ELSE dns",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "DeleteFrame"
+        }
+      ]
+    },
+    {
+      "id": "SESLocalMailbox",
+      "model": "formal/SESLocalMailbox.tla",
+      "config": "formal/SESLocalMailbox.cfg",
+      "bounds": "Two independently populated team/region scopes, two slots per scope, monotonically issued local identifiers, two MIME payload classes and one missing local mailbox. Six finite write schedules with arbitrary authorized/unauthorized read interleavings. Admission samples authorization and DNS booleans together. In production the policy snapshot precedes the SQLite transaction and the physical-zone proof is reread inside it; this leaf abstracts that ordering.",
+      "properties": [
+        "TypeOK",
+        "Publication",
+        "ContentBinding",
+        "UnpublishedFrame",
+        "Admission",
+        "NoFalseAck",
+        "Capacity",
+        "Deletion",
+        "ReadProjection"
+      ],
+      "limits": "Checks acceptance versus local delivery, exact receipt and symbolic payload membership, interrupted transactions, two-slot cap, operator access and acknowledgement loss under explicit histories. Does not model SMTP, AWS delivery, DNS encoding, SQLite implementation, MIME, randomness, IAM policy parsing, a client retry guarantee or arbitrary interleavings of writes.",
+      "source_scope": [
+        "internal/aws/catalog/ses_sink.go",
+        "internal/aws/catalog/ses_sink_receipts.go",
+        "internal/aws/catalog/ses_domain_identity.go",
+        "internal/aws/catalog/ses_template_preview.go",
+        "internal/aws/catalog/engine.go",
+        "internal/aws/catalog/semantics.go",
+        "internal/core/policy.go",
+        "internal/server/ses_sink.go",
+        "internal/server/server.go",
+        "internal/aws/catalog/ses_message_wire.go",
+        "internal/aws/jsonwire/unicode.go"
+      ],
+      "mutants": [
+        {
+          "id": "IgnoreAddress",
+          "edits": [
+            {
+              "old": "m # \"outside\"",
+              "new": "TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "Admission"
+        },
+        {
+          "id": "IgnoreDNS",
+          "edits": [
+            {
+              "old": "m # \"noProof\"",
+              "new": "TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "Admission"
+        },
+        {
+          "id": "IgnoreSender",
+          "edits": [
+            {
+              "old": "m # \"noSender\"",
+              "new": "TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "Admission"
+        },
+        {
+          "id": "IgnoreTemplate",
+          "edits": [
+            {
+              "old": "m # \"noTemplate\"",
+              "new": "TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "Admission"
+        },
+        {
+          "id": "AdmitThirdReceipt",
+          "edits": [
+            {
+              "old": "Cardinality(ForTeam(rows,a.team))<2",
+              "new": "Cardinality(ForTeam(rows,a.team))<=2",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "Admission"
+        },
+        {
+          "id": "PublishAtStage",
+          "edits": [
+            {
+              "old": "rows'=IF commit",
+              "new": "rows'=IF start /\\ eligible /\\ a.mode=\"missing\" THEN rows \\cup {Candidate(a.team,NextID(a.team,issued[a.team]),a.mode)} ELSE IF commit",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "UnpublishedFrame"
+        },
+        {
+          "id": "PublishOnCancel",
+          "edits": [
+            {
+              "old": "{\"commit\",\"lost\"} /\\ staged # None",
+              "new": "{\"commit\",\"lost\",\"cancel\"} /\\ staged # None",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "UnpublishedFrame"
+        },
+        {
+          "id": "PublishOnVeto",
+          "edits": [
+            {
+              "old": "{\"commit\",\"lost\"} /\\ staged # None",
+              "new": "{\"commit\",\"lost\",\"veto\"} /\\ staged # None",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "UnpublishedFrame"
+        },
+        {
+          "id": "DiscardLostSubmission",
+          "edits": [
+            {
+              "old": "{\"commit\",\"lost\"} /\\ staged # None",
+              "new": "{\"commit\"} /\\ staged # None",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "Publication"
+        },
+        {
+          "id": "EchoLostIdentifier",
+          "edits": [
+            {
+              "old": "THEN Reply(\"unknown\",{})",
+              "new": "THEN Reply(\"accepted\",{staged.id})",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "NoFalseAck"
+        },
+        {
+          "id": "ReturnStagedIdentifier",
+          "edits": [
+            {
+              "old": "IF eligible THEN \"staged\" ELSE \"refused\",{}",
+              "new": "IF eligible THEN \"staged\" ELSE \"refused\",IF eligible THEN {NextID(a.team,issued[a.team])} ELSE {}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "Admission"
+        },
+        {
+          "id": "InventMissingBytes",
+          "edits": [
+            {
+              "old": "commit /\\ staged.mode # \"missing\"",
+              "new": "commit",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ContentBinding"
+        },
+        {
+          "id": "StoreWrongTemplate",
+          "edits": [
+            {
+              "old": "{Content(staged)}",
+              "new": "{[Content(staged) EXCEPT !.bytes=\"literal-text\"]}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ContentBinding"
+        },
+        {
+          "id": "AttachPriorIdentifier",
+          "edits": [
+            {
+              "old": "{Content(staged)}",
+              "new": "{IF staged.team=\"A\" /\\ staged.mode=\"template\" /\\ At(bodies,\"A\",1)#{} THEN [Content(staged) EXCEPT !.id=1] ELSE Content(staged)}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ContentBinding"
+        },
+        {
+          "id": "PurgePeerBytes",
+          "edits": [
+            {
+              "old": "bodies \\ At(bodies,a.team,a.id)",
+              "new": "{}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ContentBinding"
+        },
+        {
+          "id": "AdmitUnprivilegedPurge",
+          "edits": [
+            {
+              "old": "a.kind=\"purge\" /\\ a.operator /\\ At(rows",
+              "new": "a.kind=\"purge\" /\\ At(rows",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "Deletion"
+        },
+        {
+          "id": "PurgeSameTeamSibling",
+          "edits": [
+            {
+              "old": "rows \\ At(rows,a.team,a.id)",
+              "new": "rows \\ ForTeam(rows,a.team)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "Deletion"
+        },
+        {
+          "id": "RestartDropsEntries",
+          "edits": [
+            {
+              "old": "ELSE rows\n    /\\ bodies'",
+              "new": "ELSE IF a.kind=\"restart\" THEN {} ELSE rows\n    /\\ bodies'",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ContentBinding"
+        },
+        {
+          "id": "InspectAsSender",
+          "edits": [
+            {
+              "old": "IF ~a.operator THEN Reply(\"denied\",{})",
+              "new": "IF ~a.operator /\\ ~(a.kind=\"content\" /\\ At(f.bodies,a.team,a.id)#{}) THEN Reply(\"denied\",{})",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadProjection"
+        },
+        {
+          "id": "ReadPeerContent",
+          "edits": [
+            {
+              "old": "At(f.bodies,a.team,a.id)",
+              "new": "{v \\in f.bodies:v.id=a.id}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadProjection"
+        },
+        {
+          "id": "ReturnDifferentBytes",
+          "edits": [
+            {
+              "old": "ELSE \"bytes\",saved",
+              "new": "ELSE \"bytes\",IF saved={} THEN {} ELSE ForTeam(f.bodies,a.team)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadProjection"
+        },
+        {
+          "id": "InventRejectedDownload",
+          "edits": [
+            {
+              "old": "IF saved={} THEN \"absent\" ELSE \"bytes\"",
+              "new": "IF saved={} /\\ At(f.rows,a.team,a.id)={} THEN \"absent\" ELSE \"bytes\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadProjection"
+        },
+        {
+          "id": "ExposeForeignReceipts",
+          "edits": [
+            {
+              "old": "Reply(\"listed\",ForTeam(f.rows,a.team))",
+              "new": "Reply(\"listed\",f.rows)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadProjection"
+        },
+        {
+          "id": "ListWithPendingRow",
+          "edits": [
+            {
+              "old": "ReadAnswer(Current,a)",
+              "new": "ReadAnswer(IF staged=None \\/ a.kind # \"list\" THEN Current ELSE [Current EXCEPT !.rows=@ \\cup {Envelope(staged)}],a)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadProjection"
+        },
+        {
+          "id": "ReissueOlderID",
+          "edits": [
+            {
+              "old": "Candidate(a.team,NextID(a.team,issued[a.team]),a.mode)",
+              "new": "Candidate(a.team,NextID(a.team,0),a.mode)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "Admission"
         }
       ]
     }

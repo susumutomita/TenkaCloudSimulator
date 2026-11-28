@@ -32,6 +32,8 @@ type Config struct {
 	// dependent IAM checks. Every membership page requests a fresh evaluator.
 	AuthorizeSnapshot func(context.Context, string) (func(action, resource string) string, error)
 	Now               func() time.Time
+	// SESDomainDNS reads the local public zone and its three CNAME proofs in the identity transaction.
+	SESDomainDNS func(context.Context, *sql.Tx, string, []string) (string, bool, error)
 	// ValidateRDSPrivatePostgres is optional trusted native EC2 composition.
 	// Run only for authorized, explicitly private standalone PostgreSQL writes.
 	ValidateRDSPrivatePostgres func(context.Context, *sql.Tx, RDSPrivatePostgresRefs) error
@@ -74,6 +76,11 @@ func New(db *sql.DB, cfg Config, services []*Service) (*Engine, error) {
 	e := &Engine{cfg: cfg, store: s, byTarget: map[string]*binding{}, bySigning: map[string][]*binding{}, byQuery: map[string]*binding{}}
 	seen := map[string]bool{}
 	for _, spec := range services {
+		if spec != nil && spec.Model == "sesv2" {
+			if _, err := db.Exec(sesIdentitySchema + "; " + sesSinkSchema); err != nil {
+				return nil, err
+			}
+		}
 		if seen[spec.Model] {
 			return nil, fmt.Errorf("catalog service %s is registered twice", spec.Model)
 		}
@@ -326,6 +333,12 @@ func (e *Engine) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if (b.spec.Model == "resource-groups" && op.Name == "CreateGroup" || b.isResourceGroupQueryOperation(op.Name)) && !uniqueGroupJSON(body) {
 		e.fail(w, b, op, invalid("Expected one JSON request without duplicate fields."))
 		return
+	}
+	if b.spec.Model == "sesv2" && op.Name == "SendEmail" {
+		if err := sesMessageWire(body); err != nil {
+			e.fail(w, b, op, err)
+			return
+		}
 	}
 	official := b.model.Operations[op.Name]
 	var raw map[string]any

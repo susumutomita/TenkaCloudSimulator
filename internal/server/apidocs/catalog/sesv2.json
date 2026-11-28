@@ -12,6 +12,65 @@
     },
     "type": "object"
    },
+   "Attachment": {
+    "additionalProperties": false,
+    "properties": {
+     "ContentDescription": {
+      "maxLength": 1000,
+      "type": "string"
+     },
+     "ContentDisposition": {
+      "enum": [
+       "ATTACHMENT",
+       "INLINE"
+      ],
+      "type": "string"
+     },
+     "ContentId": {
+      "maxLength": 78,
+      "minLength": 1,
+      "type": "string"
+     },
+     "ContentTransferEncoding": {
+      "enum": [
+       "BASE64",
+       "QUOTED_PRINTABLE",
+       "SEVEN_BIT"
+      ],
+      "type": "string"
+     },
+     "ContentType": {
+      "maxLength": 78,
+      "minLength": 1,
+      "type": "string"
+     },
+     "FileName": {
+      "maxLength": 255,
+      "type": "string"
+     },
+     "RawContent": {
+      "contentEncoding": "base64",
+      "type": "string"
+     }
+    },
+    "required": [
+     "RawContent",
+     "FileName"
+    ],
+    "type": "object"
+   },
+   "Body": {
+    "additionalProperties": false,
+    "properties": {
+     "Html": {
+      "$ref": "#/components/schemas/Content"
+     },
+     "Text": {
+      "$ref": "#/components/schemas/Content"
+     }
+    },
+    "type": "object"
+   },
    "ContactList": {
     "additionalProperties": false,
     "properties": {
@@ -26,6 +85,21 @@
       ]
      }
     },
+    "type": "object"
+   },
+   "Content": {
+    "additionalProperties": false,
+    "properties": {
+     "Charset": {
+      "type": "string"
+     },
+     "Data": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "Data"
+    ],
     "type": "object"
    },
    "DashboardOptions": {
@@ -58,6 +132,182 @@
        "OPTIONAL"
       ],
       "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "Destination": {
+    "additionalProperties": false,
+    "properties": {
+     "BccAddresses": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "CcAddresses": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "ToAddresses": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "DkimAttributes": {
+    "additionalProperties": false,
+    "properties": {
+     "CurrentSigningKeyLength": {
+      "enum": [
+       "RSA_1024_BIT",
+       "RSA_2048_BIT"
+      ],
+      "type": "string"
+     },
+     "LastKeyGenerationTimestamp": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "NextSigningKeyLength": {
+      "enum": [
+       "RSA_1024_BIT",
+       "RSA_2048_BIT"
+      ],
+      "type": "string"
+     },
+     "SigningAttributesOrigin": {
+      "enum": [
+       "AWS_SES",
+       "EXTERNAL",
+       "AWS_SES_AF_SOUTH_1",
+       "AWS_SES_EU_NORTH_1",
+       "AWS_SES_AP_SOUTH_1",
+       "AWS_SES_EU_WEST_3",
+       "AWS_SES_EU_WEST_2",
+       "AWS_SES_EU_SOUTH_1",
+       "AWS_SES_EU_WEST_1",
+       "AWS_SES_AP_NORTHEAST_3",
+       "AWS_SES_AP_NORTHEAST_2",
+       "AWS_SES_ME_SOUTH_1",
+       "AWS_SES_AP_NORTHEAST_1",
+       "AWS_SES_IL_CENTRAL_1",
+       "AWS_SES_SA_EAST_1",
+       "AWS_SES_CA_CENTRAL_1",
+       "AWS_SES_AP_SOUTHEAST_1",
+       "AWS_SES_AP_SOUTHEAST_2",
+       "AWS_SES_AP_SOUTHEAST_3",
+       "AWS_SES_EU_CENTRAL_1",
+       "AWS_SES_US_EAST_1",
+       "AWS_SES_US_EAST_2",
+       "AWS_SES_US_WEST_1",
+       "AWS_SES_US_WEST_2",
+       "AWS_SES_ME_CENTRAL_1",
+       "AWS_SES_AP_SOUTH_2",
+       "AWS_SES_EU_CENTRAL_2",
+       "AWS_SES_AP_SOUTHEAST_5",
+       "AWS_SES_CA_WEST_1"
+      ],
+      "type": "string"
+     },
+     "SigningEnabled": {
+      "type": "boolean"
+     },
+     "Status": {
+      "enum": [
+       "PENDING",
+       "SUCCESS",
+       "FAILED",
+       "TEMPORARY_FAILURE",
+       "NOT_STARTED"
+      ],
+      "type": "string"
+     },
+     "Tokens": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     }
+    },
+    "type": "object"
+   },
+   "DkimSigningAttributes": {
+    "additionalProperties": false,
+    "properties": {
+     "DomainSigningAttributesOrigin": {
+      "enum": [
+       "AWS_SES",
+       "EXTERNAL",
+       "AWS_SES_AF_SOUTH_1",
+       "AWS_SES_EU_NORTH_1",
+       "AWS_SES_AP_SOUTH_1",
+       "AWS_SES_EU_WEST_3",
+       "AWS_SES_EU_WEST_2",
+       "AWS_SES_EU_SOUTH_1",
+       "AWS_SES_EU_WEST_1",
+       "AWS_SES_AP_NORTHEAST_3",
+       "AWS_SES_AP_NORTHEAST_2",
+       "AWS_SES_ME_SOUTH_1",
+       "AWS_SES_AP_NORTHEAST_1",
+       "AWS_SES_IL_CENTRAL_1",
+       "AWS_SES_SA_EAST_1",
+       "AWS_SES_CA_CENTRAL_1",
+       "AWS_SES_AP_SOUTHEAST_1",
+       "AWS_SES_AP_SOUTHEAST_2",
+       "AWS_SES_AP_SOUTHEAST_3",
+       "AWS_SES_EU_CENTRAL_1",
+       "AWS_SES_US_EAST_1",
+       "AWS_SES_US_EAST_2",
+       "AWS_SES_US_WEST_1",
+       "AWS_SES_US_WEST_2",
+       "AWS_SES_ME_CENTRAL_1",
+       "AWS_SES_AP_SOUTH_2",
+       "AWS_SES_EU_CENTRAL_2",
+       "AWS_SES_AP_SOUTHEAST_5",
+       "AWS_SES_CA_WEST_1"
+      ],
+      "type": "string"
+     },
+     "DomainSigningPrivateKey": {
+      "maxLength": 20480,
+      "minLength": 1,
+      "type": "string"
+     },
+     "DomainSigningSelector": {
+      "maxLength": 63,
+      "minLength": 1,
+      "type": "string"
+     },
+     "NextSigningKeyLength": {
+      "enum": [
+       "RSA_1024_BIT",
+       "RSA_2048_BIT"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "EmailContent": {
+    "additionalProperties": false,
+    "properties": {
+     "Raw": {
+      "$ref": "#/components/schemas/RawMessage"
+     },
+     "Simple": {
+      "$ref": "#/components/schemas/Message"
+     },
+     "Template": {
+      "$ref": "#/components/schemas/Template"
      }
     },
     "type": "object"
@@ -107,6 +357,161 @@
     },
     "type": "object"
    },
+   "IdentityInfo": {
+    "additionalProperties": false,
+    "properties": {
+     "IdentityName": {
+      "minLength": 1,
+      "type": "string"
+     },
+     "IdentityType": {
+      "enum": [
+       "EMAIL_ADDRESS",
+       "DOMAIN",
+       "MANAGED_DOMAIN"
+      ],
+      "type": "string"
+     },
+     "SendingEnabled": {
+      "type": "boolean"
+     },
+     "VerificationStatus": {
+      "enum": [
+       "PENDING",
+       "SUCCESS",
+       "FAILED",
+       "TEMPORARY_FAILURE",
+       "NOT_STARTED"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ListManagementOptions": {
+    "additionalProperties": false,
+    "properties": {
+     "ContactListName": {
+      "type": "string"
+     },
+     "TopicName": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "ContactListName"
+    ],
+    "type": "object"
+   },
+   "MailFromAttributes": {
+    "additionalProperties": false,
+    "properties": {
+     "BehaviorOnMxFailure": {
+      "enum": [
+       "USE_DEFAULT_VALUE",
+       "REJECT_MESSAGE"
+      ],
+      "type": "string"
+     },
+     "MailFromDomain": {
+      "type": "string"
+     },
+     "MailFromDomainStatus": {
+      "enum": [
+       "PENDING",
+       "SUCCESS",
+       "FAILED",
+       "TEMPORARY_FAILURE"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "MailFromDomain",
+     "MailFromDomainStatus",
+     "BehaviorOnMxFailure"
+    ],
+    "type": "object"
+   },
+   "Message": {
+    "additionalProperties": false,
+    "properties": {
+     "Attachments": {
+      "items": {
+       "$ref": "#/components/schemas/Attachment"
+      },
+      "type": "array"
+     },
+     "Body": {
+      "$ref": "#/components/schemas/Body"
+     },
+     "Headers": {
+      "items": {
+       "$ref": "#/components/schemas/MessageHeader"
+      },
+      "maxItems": 15,
+      "minItems": 0,
+      "type": "array"
+     },
+     "Subject": {
+      "$ref": "#/components/schemas/Content"
+     }
+    },
+    "required": [
+     "Subject",
+     "Body"
+    ],
+    "type": "object"
+   },
+   "MessageHeader": {
+    "additionalProperties": false,
+    "properties": {
+     "Name": {
+      "maxLength": 126,
+      "minLength": 1,
+      "type": "string"
+     },
+     "Value": {
+      "maxLength": 870,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "Name",
+     "Value"
+    ],
+    "type": "object"
+   },
+   "MessageTag": {
+    "additionalProperties": false,
+    "properties": {
+     "Name": {
+      "type": "string"
+     },
+     "Value": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "Name",
+     "Value"
+    ],
+    "type": "object"
+   },
+   "RawMessage": {
+    "additionalProperties": false,
+    "properties": {
+     "Data": {
+      "contentEncoding": "base64",
+      "type": "string"
+     }
+    },
+    "required": [
+     "Data"
+    ],
+    "type": "object"
+   },
    "ReputationOptions": {
     "additionalProperties": false,
     "properties": {
@@ -119,6 +524,21 @@
      },
      "ReputationMetricsEnabled": {
       "type": "boolean"
+     }
+    },
+    "type": "object"
+   },
+   "SOARecord": {
+    "additionalProperties": false,
+    "properties": {
+     "AdminEmail": {
+      "type": "string"
+     },
+     "PrimaryNameServer": {
+      "type": "string"
+     },
+     "SerialNumber": {
+      "type": "integer"
      }
     },
     "type": "object"
@@ -162,6 +582,41 @@
      "Key",
      "Value"
     ],
+    "type": "object"
+   },
+   "Template": {
+    "additionalProperties": false,
+    "properties": {
+     "Attachments": {
+      "items": {
+       "$ref": "#/components/schemas/Attachment"
+      },
+      "type": "array"
+     },
+     "Headers": {
+      "items": {
+       "$ref": "#/components/schemas/MessageHeader"
+      },
+      "maxItems": 15,
+      "minItems": 0,
+      "type": "array"
+     },
+     "TemplateArn": {
+      "minLength": 1,
+      "type": "string"
+     },
+     "TemplateContent": {
+      "$ref": "#/components/schemas/EmailTemplateContent"
+     },
+     "TemplateData": {
+      "maxLength": 262144,
+      "type": "string"
+     },
+     "TemplateName": {
+      "minLength": 1,
+      "type": "string"
+     }
+    },
     "type": "object"
    },
    "Topic": {
@@ -222,11 +677,49 @@
      }
     },
     "type": "object"
+   },
+   "VerificationInfo": {
+    "additionalProperties": false,
+    "properties": {
+     "ErrorType": {
+      "enum": [
+       "SERVICE_ERROR",
+       "DNS_SERVER_ERROR",
+       "HOST_NOT_FOUND",
+       "TYPE_NOT_FOUND",
+       "INVALID_VALUE",
+       "REPLICATION_ACCESS_DENIED",
+       "REPLICATION_PRIMARY_NOT_FOUND",
+       "REPLICATION_PRIMARY_BYO_DKIM_NOT_SUPPORTED",
+       "REPLICATION_REPLICA_AS_PRIMARY_NOT_SUPPORTED",
+       "REPLICATION_PRIMARY_INVALID_REGION"
+      ],
+      "type": "string"
+     },
+     "LastCheckedTimestamp": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "LastSuccessTimestamp": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "SOARecord": {
+      "$ref": "#/components/schemas/SOARecord"
+     }
+    },
+    "type": "object"
    }
   }
  },
  "info": {
-  "description": "Bounded simulator subset of the official Amazon Simple Email Service API (2019-09-27). Every other official operation returns HTTP 501 UnknownOperationException. Configuration sets, one contact list and email templates are stored as configuration metadata: no email is sent, rendered, tracked or archived, and SendEmail, SendBulkEmail and the other sending APIs return UnknownOperationException with HTTP 501. Email identities, DKIM, dedicated IPs, contacts, suppression lists, event destinations, the Put*Options operations and account settings are not implemented. Configuration sets keep the options given at creation, and the PageSize member is refused.",
+  "description": "Bounded simulator subset of the official Amazon Simple Email Service API (2019-09-27). Every other official operation returns HTTP 501 UnknownOperationException. SES v2 domain identities are limited to lowercase names under .test with one existing exact local public Route 53 zone. Three Easy DKIM CNAME records in the captured zone establish local DNS control. Get and List recheck records. Verification uses the local database without external DNS or DKIM signing. Page sizes and live identities are limited to 100 per region. Configuration sets, one contact list and email templates are stored locally. TestRenderEmailTemplate previews stored subject, text and HTML as MIME using flat string replacements in simple {{name}} tags. Advanced Handlebars forms, missing values, header control characters and previews larger than 256 KiB are rejected. Template preview does not send a message. SendEmail accepts one current verified .test sender and one To recipient at inbox.ses.test. Use a UTF-8 Simple subject with Text and/or Html, or a stored TemplateName and flat TemplateData. The in-process mailbox inbox@inbox.ses.test stores the complete message, and other local mailboxes refuse it. One accepted submission receives one MessageId. The local operator may inspect or delete up to 100 saved receipts per region, with 256 KiB per MIME message. Raw email, SMTP, external destinations, bulk delivery and GetMessageInsights are unsupported. Individual email address identities, identity tags and configuration options, DKIM signing, dedicated IPs, contacts, suppression lists, event destinations, the Put*Options operations and account settings are unsupported. Configuration sets keep the options given at creation and refuse PageSize.",
   "title": "Amazon Simple Email Service (simulator catalog)",
   "version": "2019-09-27"
  },
@@ -238,10 +731,12 @@
     "parameters": [
      {
       "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "example": "ses",
       "in": "header",
       "name": "X-Simulator-Service",
-      "required": false,
+      "required": true,
       "schema": {
+       "default": "ses",
        "enum": [
         "ses"
        ],
@@ -305,10 +800,12 @@
     "parameters": [
      {
       "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "example": "ses",
       "in": "header",
       "name": "X-Simulator-Service",
-      "required": false,
+      "required": true,
       "schema": {
+       "default": "ses",
        "enum": [
         "ses"
        ],
@@ -394,10 +891,12 @@
     "parameters": [
      {
       "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "example": "ses",
       "in": "header",
       "name": "X-Simulator-Service",
-      "required": false,
+      "required": true,
       "schema": {
+       "default": "ses",
        "enum": [
         "ses"
        ],
@@ -445,10 +944,12 @@
     "parameters": [
      {
       "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "example": "ses",
       "in": "header",
       "name": "X-Simulator-Service",
-      "required": false,
+      "required": true,
       "schema": {
+       "default": "ses",
        "enum": [
         "ses"
        ],
@@ -529,10 +1030,12 @@
     "parameters": [
      {
       "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "example": "ses",
       "in": "header",
       "name": "X-Simulator-Service",
-      "required": false,
+      "required": true,
       "schema": {
+       "default": "ses",
        "enum": [
         "ses"
        ],
@@ -596,10 +1099,12 @@
     "parameters": [
      {
       "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "example": "ses",
       "in": "header",
       "name": "X-Simulator-Service",
-      "required": false,
+      "required": true,
       "schema": {
+       "default": "ses",
        "enum": [
         "ses"
        ],
@@ -673,10 +1178,12 @@
     "parameters": [
      {
       "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "example": "ses",
       "in": "header",
       "name": "X-Simulator-Service",
-      "required": false,
+      "required": true,
       "schema": {
+       "default": "ses",
        "enum": [
         "ses"
        ],
@@ -724,10 +1231,12 @@
     "parameters": [
      {
       "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "example": "ses",
       "in": "header",
       "name": "X-Simulator-Service",
-      "required": false,
+      "required": true,
       "schema": {
+       "default": "ses",
        "enum": [
         "ses"
        ],
@@ -808,10 +1317,12 @@
     "parameters": [
      {
       "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "example": "ses",
       "in": "header",
       "name": "X-Simulator-Service",
-      "required": false,
+      "required": true,
       "schema": {
+       "default": "ses",
        "enum": [
         "ses"
        ],
@@ -875,16 +1386,470 @@
     ]
    }
   },
+  "/v2/email/identities": {
+   "get": {
+    "operationId": "sesv2ListEmailIdentities",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "example": "ses",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": true,
+      "schema": {
+       "default": "ses",
+       "enum": [
+        "ses"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "NextToken",
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "PageSize",
+      "schema": {
+       "type": "integer"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "EmailIdentities": {
+           "items": {
+            "$ref": "#/components/schemas/IdentityInfo"
+           },
+           "type": "array"
+          },
+          "NextToken": {
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListEmailIdentities",
+    "tags": [
+     "Amazon Simple Email Service"
+    ]
+   },
+   "post": {
+    "operationId": "sesv2CreateEmailIdentity",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "example": "ses",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": true,
+      "schema": {
+       "default": "ses",
+       "enum": [
+        "ses"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "ConfigurationSetName": {
+          "type": "string"
+         },
+         "DkimSigningAttributes": {
+          "$ref": "#/components/schemas/DkimSigningAttributes"
+         },
+         "EmailIdentity": {
+          "minLength": 1,
+          "type": "string"
+         },
+         "Tags": {
+          "items": {
+           "$ref": "#/components/schemas/Tag"
+          },
+          "type": "array"
+         }
+        },
+        "required": [
+         "EmailIdentity"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "DkimAttributes": {
+           "$ref": "#/components/schemas/DkimAttributes"
+          },
+          "IdentityType": {
+           "enum": [
+            "EMAIL_ADDRESS",
+            "DOMAIN",
+            "MANAGED_DOMAIN"
+           ],
+           "type": "string"
+          },
+          "VerifiedForSendingStatus": {
+           "type": "boolean"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateEmailIdentity",
+    "tags": [
+     "Amazon Simple Email Service"
+    ]
+   }
+  },
+  "/v2/email/identities/{EmailIdentity}": {
+   "delete": {
+    "operationId": "sesv2DeleteEmailIdentity",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "example": "ses",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": true,
+      "schema": {
+       "default": "ses",
+       "enum": [
+        "ses"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "EmailIdentity",
+      "required": true,
+      "schema": {
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {},
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteEmailIdentity",
+    "tags": [
+     "Amazon Simple Email Service"
+    ]
+   },
+   "get": {
+    "operationId": "sesv2GetEmailIdentity",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "example": "ses",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": true,
+      "schema": {
+       "default": "ses",
+       "enum": [
+        "ses"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "EmailIdentity",
+      "required": true,
+      "schema": {
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "ConfigurationSetName": {
+           "type": "string"
+          },
+          "DkimAttributes": {
+           "$ref": "#/components/schemas/DkimAttributes"
+          },
+          "FeedbackForwardingStatus": {
+           "type": "boolean"
+          },
+          "IdentityType": {
+           "enum": [
+            "EMAIL_ADDRESS",
+            "DOMAIN",
+            "MANAGED_DOMAIN"
+           ],
+           "type": "string"
+          },
+          "MailFromAttributes": {
+           "$ref": "#/components/schemas/MailFromAttributes"
+          },
+          "Policies": {
+           "additionalProperties": {
+            "minLength": 1,
+            "type": "string"
+           },
+           "type": "object"
+          },
+          "Tags": {
+           "items": {
+            "$ref": "#/components/schemas/Tag"
+           },
+           "type": "array"
+          },
+          "VerificationInfo": {
+           "$ref": "#/components/schemas/VerificationInfo"
+          },
+          "VerificationStatus": {
+           "enum": [
+            "PENDING",
+            "SUCCESS",
+            "FAILED",
+            "TEMPORARY_FAILURE",
+            "NOT_STARTED"
+           ],
+           "type": "string"
+          },
+          "VerifiedForSendingStatus": {
+           "type": "boolean"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "GetEmailIdentity",
+    "tags": [
+     "Amazon Simple Email Service"
+    ]
+   }
+  },
+  "/v2/email/outbound-emails": {
+   "post": {
+    "description": "Verify the local owned.test domain in this region first. Accepted messages addressed to inbox@inbox.ses.test can be downloaded from the team operator's local inbox.",
+    "operationId": "sesv2SendEmail",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "example": "ses",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": true,
+      "schema": {
+       "default": "ses",
+       "enum": [
+        "ses"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "example": {
+        "Content": {
+         "Simple": {
+          "Body": {
+           "Text": {
+            "Data": "Hello from the local inbox."
+           }
+          },
+          "Subject": {
+           "Data": "Local greeting"
+          }
+         }
+        },
+        "Destination": {
+         "ToAddresses": [
+          "inbox@inbox.ses.test"
+         ]
+        },
+        "FromEmailAddress": "sender@owned.test"
+       },
+       "schema": {
+        "properties": {
+         "ConfigurationSetName": {
+          "type": "string"
+         },
+         "Content": {
+          "$ref": "#/components/schemas/EmailContent"
+         },
+         "Destination": {
+          "$ref": "#/components/schemas/Destination"
+         },
+         "EmailTags": {
+          "items": {
+           "$ref": "#/components/schemas/MessageTag"
+          },
+          "type": "array"
+         },
+         "EndpointId": {
+          "type": "string"
+         },
+         "FeedbackForwardingEmailAddress": {
+          "type": "string"
+         },
+         "FeedbackForwardingEmailAddressIdentityArn": {
+          "minLength": 1,
+          "type": "string"
+         },
+         "FromEmailAddress": {
+          "type": "string"
+         },
+         "FromEmailAddressIdentityArn": {
+          "minLength": 1,
+          "type": "string"
+         },
+         "ListManagementOptions": {
+          "$ref": "#/components/schemas/ListManagementOptions"
+         },
+         "ReplyToAddresses": {
+          "items": {
+           "type": "string"
+          },
+          "type": "array"
+         },
+         "TenantName": {
+          "minLength": 1,
+          "type": "string"
+         }
+        },
+        "required": [
+         "Content"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "MessageId": {
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "SendEmail",
+    "tags": [
+     "Amazon Simple Email Service"
+    ]
+   }
+  },
   "/v2/email/tags": {
    "delete": {
     "operationId": "sesv2UntagResource",
     "parameters": [
      {
       "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "example": "ses",
       "in": "header",
       "name": "X-Simulator-Service",
-      "required": false,
+      "required": true,
       "schema": {
+       "default": "ses",
        "enum": [
         "ses"
        ],
@@ -942,10 +1907,12 @@
     "parameters": [
      {
       "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "example": "ses",
       "in": "header",
       "name": "X-Simulator-Service",
-      "required": false,
+      "required": true,
       "schema": {
+       "default": "ses",
        "enum": [
         "ses"
        ],
@@ -1000,10 +1967,12 @@
     "parameters": [
      {
       "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "example": "ses",
       "in": "header",
       "name": "X-Simulator-Service",
-      "required": false,
+      "required": true,
       "schema": {
+       "default": "ses",
        "enum": [
         "ses"
        ],
@@ -1070,10 +2039,12 @@
     "parameters": [
      {
       "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "example": "ses",
       "in": "header",
       "name": "X-Simulator-Service",
-      "required": false,
+      "required": true,
       "schema": {
+       "default": "ses",
        "enum": [
         "ses"
        ],
@@ -1137,10 +2108,12 @@
     "parameters": [
      {
       "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "example": "ses",
       "in": "header",
       "name": "X-Simulator-Service",
-      "required": false,
+      "required": true,
       "schema": {
+       "default": "ses",
        "enum": [
         "ses"
        ],
@@ -1204,10 +2177,12 @@
     "parameters": [
      {
       "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "example": "ses",
       "in": "header",
       "name": "X-Simulator-Service",
-      "required": false,
+      "required": true,
       "schema": {
+       "default": "ses",
        "enum": [
         "ses"
        ],
@@ -1256,10 +2231,12 @@
     "parameters": [
      {
       "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "example": "ses",
       "in": "header",
       "name": "X-Simulator-Service",
-      "required": false,
+      "required": true,
       "schema": {
+       "default": "ses",
        "enum": [
         "ses"
        ],
@@ -1316,10 +2293,12 @@
     "parameters": [
      {
       "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "example": "ses",
       "in": "header",
       "name": "X-Simulator-Service",
-      "required": false,
+      "required": true,
       "schema": {
+       "default": "ses",
        "enum": [
         "ses"
        ],
@@ -1380,6 +2359,84 @@
      "Amazon Simple Email Service"
     ]
    }
+  },
+  "/v2/email/templates/{TemplateName}/render": {
+   "post": {
+    "operationId": "sesv2TestRenderEmailTemplate",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "example": "ses",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": true,
+      "schema": {
+       "default": "ses",
+       "enum": [
+        "ses"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "TemplateName",
+      "required": true,
+      "schema": {
+       "minLength": 1,
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "TemplateData": {
+          "maxLength": 262144,
+          "type": "string"
+         }
+        },
+        "required": [
+         "TemplateData"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "RenderedTemplate": {
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "TestRenderEmailTemplate",
+    "tags": [
+     "Amazon Simple Email Service"
+    ]
+   }
   }
  },
  "servers": [
@@ -1390,7 +2447,7 @@
  ],
  "tags": [
   {
-   "description": "Bounded simulator subset of the official Amazon Simple Email Service API (2019-09-27). Every other official operation returns HTTP 501 UnknownOperationException. Configuration sets, one contact list and email templates are stored as configuration metadata: no email is sent, rendered, tracked or archived, and SendEmail, SendBulkEmail and the other sending APIs return UnknownOperationException with HTTP 501. Email identities, DKIM, dedicated IPs, contacts, suppression lists, event destinations, the Put*Options operations and account settings are not implemented. Configuration sets keep the options given at creation, and the PageSize member is refused.",
+   "description": "Bounded simulator subset of the official Amazon Simple Email Service API (2019-09-27). Every other official operation returns HTTP 501 UnknownOperationException. SES v2 domain identities are limited to lowercase names under .test with one existing exact local public Route 53 zone. Three Easy DKIM CNAME records in the captured zone establish local DNS control. Get and List recheck records. Verification uses the local database without external DNS or DKIM signing. Page sizes and live identities are limited to 100 per region. Configuration sets, one contact list and email templates are stored locally. TestRenderEmailTemplate previews stored subject, text and HTML as MIME using flat string replacements in simple {{name}} tags. Advanced Handlebars forms, missing values, header control characters and previews larger than 256 KiB are rejected. Template preview does not send a message. SendEmail accepts one current verified .test sender and one To recipient at inbox.ses.test. Use a UTF-8 Simple subject with Text and/or Html, or a stored TemplateName and flat TemplateData. The in-process mailbox inbox@inbox.ses.test stores the complete message, and other local mailboxes refuse it. One accepted submission receives one MessageId. The local operator may inspect or delete up to 100 saved receipts per region, with 256 KiB per MIME message. Raw email, SMTP, external destinations, bulk delivery and GetMessageInsights are unsupported. Individual email address identities, identity tags and configuration options, DKIM signing, dedicated IPs, contacts, suppression lists, event destinations, the Put*Options operations and account settings are unsupported. Configuration sets keep the options given at creation and refuse PageSize.",
    "name": "Amazon Simple Email Service"
   }
  ],

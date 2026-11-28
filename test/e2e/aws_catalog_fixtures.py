@@ -13,6 +13,8 @@ binds, but is not required to call all of them: only a model's own fixture
 (no "model" key) carries the every-operation rule. Borrowing fixtures run in a
 separate pair of binaries so they cannot disturb the model's own fixture.
 """
+from email import policy
+from email.parser import Parser
 import json
 import os
 from pathlib import Path
@@ -46,25 +48,45 @@ def lookup(value, path):
     return value
 
 
+def check_rendered_email(rendered, expected):
+    message = Parser(policy=policy.default).parsestr(rendered)
+    assert message.get_all('Subject') == [expected['subject']]
+    assert message['MIME-Version'] == '1.0'
+    assert all(not part.defects for part in message.walk())
+    parts = list(message.iter_parts()) if message.is_multipart() else [message]
+    if len(expected['parts']) > 1:
+        assert message.get_content_type() == 'multipart/alternative'
+    received = [(part.get_content_type(), part.get_content()) for part in parts]
+    assert received == [tuple(part) for part in expected['parts']]
+
+
 def run_steps(team, fixture, steps, saved, called, token=None):
-    client = team.client(fixture['client'], token)
+    primary = team.client(fixture['client'], token)
+    clients = {fixture['client']: primary}
     if fixture.get('inject_host_prefix') is False:
         # Official host prefixes (for example MWAA "api.") cannot address loopback.
-        client.meta.config.inject_host_prefix = False
+        primary.meta.config.inject_host_prefix = False
     for step in steps:
+        name = step.get('client', fixture['client'])
+        if name not in clients:
+            clients[name] = team.client(name, token)
+        client = clients[name]
         args = substitute(step.get('args', {}), saved)
         operation = client.meta.method_to_api_mapping[step['op']]
         try:
             response = getattr(client, step['op'])(**args)
         except ClientError as error:
             if 'error' not in step:
-                raise AssertionError(f"{fixture['client']}.{step['op']} failed: {error.response['Error']}") from error
+                raise AssertionError(f"{name}.{step['op']} failed: {error.response['Error']}") from error
             assert error.response['Error']['Code'] == step['error'], (step, error.response['Error'])
             if 'status' in step:
                 assert error.response['ResponseMetadata']['HTTPStatusCode'] == step['status'], (step, error.response['ResponseMetadata'])
             continue
         assert 'error' not in step, f"{fixture['client']}.{step['op']} unexpectedly succeeded"
-        called.add(operation)
+        if client is primary:
+            called.add(operation)
+        if "expect_mime" in step:
+            check_rendered_email(response["RenderedTemplate"], step["expect_mime"])
         for name, path in step.get('save', {}).items():
             saved[name] = lookup(response, path)
         for path, expected in step.get('expect', {}).items():
@@ -119,6 +141,13 @@ def run_group(fixtures):
             for name, (fixture, saved, called) in states.items():
                 run_steps(a, fixture, fixture.get('after_restart', []), saved, called)
                 run_steps(a, fixture, fixture.get('cleanup', []), saved, called)
+                if name == 'sesv2':
+                    from ses_local_mail import SINK, direct
+                    ident = saved['sink_message']
+                    receipt = json.loads(direct(a, 'GET', SINK+'/'+ident))
+                    assert receipt['messageId'] == ident and receipt['outcome'] == 'delivered'
+                    direct(a, 'DELETE', SINK+'/'+ident, expected=204)
+                    direct(a, 'GET', SINK+'/'+ident, expected=404)
                 bound = set(services[fixture.get('model', name)]['operations'])
                 assert called <= bound, f'{name} called operations the model does not bind: {sorted(called - bound)}'
                 missing = bound - called

@@ -744,6 +744,13 @@ def handler(event,context):
  def test_aws_catalog_native_sdk_two_teams_policy_restart_and_cleanup(self):
   subprocess.run([sys.executable, str(Path(__file__).with_name('aws_catalog.py'))], check=True, timeout=240)
 
+ def test_ses_mail_delivery_sdk_console_and_reference(self):
+  import hashlib
+  with BINARY.open('rb') as source:
+   digest=hashlib.file_digest(source,'sha256').hexdigest()
+  subprocess.run([sys.executable,str(Path(__file__).with_name('ses_local_mail_console.py')),
+                  '--binary',str(BINARY),'--binary-sha256',digest,'--axe',os.environ['AXE_SCRIPT']],check=True,timeout=300)
+
  def test_aws_catalog_console_reference_and_shared_native_state(self):
   subprocess.run([sys.executable, str(Path(__file__).with_name('aws_catalog_console.py'))], check=True, timeout=900)
 

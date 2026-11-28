@@ -11,7 +11,10 @@ cloud connection is made. There is no standalone DNS server or public delegation
 Only public zones with at least two ASCII DNS labels are admitted. Labels are
 lowercased, a trailing dot is canonicalized, and labels are 1..63 bytes with a
 253-byte unqualified name limit. Wildcards, underscores, escapes and Unicode
-names are rejected. This is deliberately narrower than AWS. Different zones
+names are rejected for zone names. CNAME owners additionally accept the local
+SES verification form `<32-character selector>._domainkey.<domain>.test.`.
+Other underscore labels and CNAME targets retain the ordinary name rules.
+See [SES domain identities](ses-domain-identities.md). Different zones
 may have the same name, but CallerReference reuse returns HostedZoneAlreadyExists
 and never creates a second zone, including when name/comment differ.
 

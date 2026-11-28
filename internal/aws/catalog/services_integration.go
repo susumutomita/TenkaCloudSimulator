@@ -422,8 +422,14 @@ var sesV2 = &Service{
 			ARN:        "arn:{partition}:ses:{region}:{account}:template/{name}",
 			NameMember: "TemplateName", Unique: true, Limit: 100,
 			Generate: map[string]any{"CreatedTimestamp": "$now"}},
+		{Kind: "domainIdentity", Shape: "GetEmailIdentityResponse", Summary: "IdentityInfo", ID: "name", NameMember: "EmailIdentity", ARN: "arn:{partition}:ses:{region}:{account}:identity/{name}", Unique: true, Limit: 100},
 	},
 	Ops: []Op{
+		{Name: "SendEmail", Kind: Put, Resource: "domainIdentity", Lookup: "FromEmailAddress"},
+		{Name: "CreateEmailIdentity", Kind: Create, Resource: "domainIdentity"},
+		{Name: "GetEmailIdentity", Kind: Read, Resource: "domainIdentity", Lookup: "EmailIdentity"},
+		{Name: "ListEmailIdentities", Kind: List, Resource: "domainIdentity"},
+		{Name: "DeleteEmailIdentity", Kind: Delete, Resource: "domainIdentity", Lookup: "EmailIdentity"},
 		{Name: "CreateConfigurationSet", Kind: Create, Resource: "configurationSet"},
 		{Name: "GetConfigurationSet", Kind: Read, Resource: "configurationSet", Lookup: "ConfigurationSetName"},
 		{Name: "ListConfigurationSets", Kind: List, Resource: "configurationSet", ListValue: "ConfigurationSetName"},
@@ -435,6 +441,8 @@ var sesV2 = &Service{
 			Fields: []string{"Topics", "Description"}, Touch: []string{"LastUpdatedTimestamp"}},
 		{Name: "DeleteContactList", Kind: Delete, Resource: "contactList", Lookup: "ContactListName"},
 		{Name: "CreateEmailTemplate", Kind: Create, Resource: "emailTemplate"},
+		// Keep GetEmailTemplate as the Console's primary detail read.
+		{Name: "TestRenderEmailTemplate", Kind: Read, Resource: "emailTemplate", Lookup: "TemplateName", Accept: []string{"TemplateData"}},
 		{Name: "GetEmailTemplate", Kind: Read, Resource: "emailTemplate", Lookup: "TemplateName"},
 		{Name: "ListEmailTemplates", Kind: List, Resource: "emailTemplate"},
 		{Name: "UpdateEmailTemplate", Kind: Update, Resource: "emailTemplate", Lookup: "TemplateName", Fields: []string{"TemplateContent"}},
@@ -444,7 +452,9 @@ var sesV2 = &Service{
 		{Name: "ListTagsForResource", Kind: ListTags, Lookup: "ResourceArn"},
 	},
 	Bounds: []string{
-		"Configuration sets, one contact list and email templates are stored as configuration metadata: no email is sent, rendered, tracked or archived, and SendEmail, SendBulkEmail and the other sending APIs return UnknownOperationException with HTTP 501.",
-		"Email identities, DKIM, dedicated IPs, contacts, suppression lists, event destinations, the Put*Options operations and account settings are not implemented. Configuration sets keep the options given at creation, and the PageSize member is refused.",
+		"SES v2 domain identities are limited to lowercase names under .test with one existing exact local public Route 53 zone. Three Easy DKIM CNAME records in the captured zone establish local DNS control. Get and List recheck records. Verification uses the local database without external DNS or DKIM signing. Page sizes and live identities are limited to 100 per region.",
+		"Configuration sets, one contact list and email templates are stored locally. TestRenderEmailTemplate previews stored subject, text and HTML as MIME using flat string replacements in simple {{name}} tags. Advanced Handlebars forms, missing values, header control characters and previews larger than 256 KiB are rejected. Template preview does not send a message.",
+		"SendEmail accepts one current verified .test sender and one To recipient at inbox.ses.test. Use a UTF-8 Simple subject with Text and/or Html, or a stored TemplateName and flat TemplateData. The in-process mailbox inbox@inbox.ses.test stores the complete message, and other local mailboxes refuse it. One accepted submission receives one MessageId. The local operator may inspect or delete up to 100 saved receipts per region, with 256 KiB per MIME message. Raw email, SMTP, external destinations, bulk delivery and GetMessageInsights are unsupported.",
+		"Individual email address identities, identity tags and configuration options, DKIM signing, dedicated IPs, contacts, suppression lists, event destinations, the Put*Options operations and account settings are unsupported. Configuration sets keep the options given at creation and refuse PageSize.",
 	},
 }

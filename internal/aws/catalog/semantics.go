@@ -61,6 +61,12 @@ func (q *request) execute() (map[string]any, error) {
 			return q.listQuotaIncreaseHistory()
 		}
 	}
+	if q.b.spec.Model == "sesv2" && q.op.Resource == "domainIdentity" {
+		if q.op.Name == "SendEmail" {
+			return q.sendSESEmail()
+		}
+		return q.sesDomainIdentity()
+	}
 	switch q.op.Kind {
 	case Create:
 		if q.isECSTaskDefinition() {
@@ -937,6 +943,9 @@ func (q *request) read() (map[string]any, error) {
 	if err != nil {
 		return nil, err
 	}
+	if q.b.spec.Model == "sesv2" && q.op.Name == "TestRenderEmailTemplate" {
+		return renderSESTemplate(q.ctx, r.Document["TemplateContent"], q.input["TemplateData"])
+	}
 	return q.output(r, parent), nil
 }
 
@@ -1437,6 +1446,15 @@ func (m *Model) isTagShape(name string) bool {
 
 func (q *request) tagged() (row, error) {
 	arn, _ := q.input[q.op.Lookup].(string)
+	if resource := q.b.spec.resource("domainIdentity"); q.b.spec.Model == "sesv2" && resource != nil {
+		prefix := q.formatARN(resource, "", "", nil)
+		if domain, ok := strings.CutPrefix(arn, prefix); ok && sesDomainName(domain) {
+			if err := q.authorize(arn); err != nil {
+				return row{}, err
+			}
+			return row{}, invalid("Local SES domain identities do not support tags.")
+		}
+	}
 	found, err := findARN(q.e.store.db, q.b.spec.Model, arn)
 	if errors.Is(err, sql.ErrNoRows) {
 		if err := q.authorize(arn); err != nil {
