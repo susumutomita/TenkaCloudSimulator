@@ -8,11 +8,11 @@ jobs:
     runs-on: ubuntu-22.04
     timeout-minutes: 35
     env:
-      PRODUCT: 35764830c4ba094e9067f67e7408cd680e994b07
+      PRODUCT: 4690a44cc465d9e46c914bc936b719b407cfafc0
     steps:
       - uses: actions/checkout@v7.0.1
         with:
-          ref: 35764830c4ba094e9067f67e7408cd680e994b07
+          ref: 4690a44cc465d9e46c914bc936b719b407cfafc0
           persist-credentials: false
       - uses: actions/setup-go@v6.5.0
         with:
@@ -23,7 +23,7 @@ jobs:
           test "$GITHUB_REPOSITORY" = susumutomita/TenkaCloudSimulator
           test "$GITHUB_REF" = refs/heads/verify/207-group-console
           test "$(git rev-parse HEAD)" = "$PRODUCT"
-          test "$(git rev-parse 'HEAD^{tree}')" = 60151de03e62942ca232c94c3de29ff962645737
+          test "$(git rev-parse 'HEAD^{tree}')" = 2aa0187221064748d2056a389ec7119b45988551
           test -z "$(git status --porcelain)"
           test "$(go env GOVERSION)" = go1.26.11
           test "$(id -u)" -ne 0
@@ -43,7 +43,7 @@ jobs:
           set -euo pipefail
           umask 077
           export SIMULATOR_BINARY="$PWD/dist/tenkacloud-simulator"
-          export SIMULATOR_BINARY_SHA256=08d8d90051886b8b79c12616b897cf73b2a6fddcfe3d71642116b7195357ff96
+          export SIMULATOR_BINARY_SHA256=02349a2a0a8d02512e68e1e0d1c94e7464b7d3d7b2c24c24994c223645a97ed0
           python="$RUNNER_TEMP/group-tools/bin/python"
           "$python" -I -c 'import os; from pathlib import Path; assert not any(k.startswith(("AWS_","BOTO_")) for k in os.environ); assert not any(os.path.lexists(p) for p in (Path.home()/".aws",Path.home()/".boto","/etc/boto.cfg"))'
           cat > "$RUNNER_TEMP/group-private/verify.py" <<'PYTHON'
@@ -63,22 +63,34 @@ jobs:
           assert list(versions.values()) == ["1.42.0","1.41.6","1.62.0"]
           binary = Path(os.environ["SIMULATOR_BINARY"])
           fixture = tests / "resource_group_query_console.py"
+          scalar = tests / "resource_groups_scalar.py"
+          from playwright.sync_api import sync_playwright
+          with sync_playwright() as p:
+              os.environ["CHROMIUM_EXECUTABLE"] = p.chromium.executable_path
           def digest(path):
               with path.open("rb") as source:
                   return hashlib.file_digest(source, "sha256").hexdigest()
           assert digest(binary) == os.environ["SIMULATOR_BINARY_SHA256"]
-          assert digest(fixture) == "5246b44774110f5a9ff35b6ced9eeffba3cc2fe2071d3db3f7eddc107bb3fe9a"
+          assert digest(fixture) == "13d60bb1f19a09313560d16a4ad4e9bfdf9bfe513c975ca711954c8dee0d40b9"
+          assert digest(scalar) == "514c5e0303a3e8e3a456611ce7be55b285c2d395f971b6ddf95d6ee72ed28a22"
           result = subprocess.run([sys.executable, "-B", str(fixture), "--with-sdk"], capture_output=True, timeout=180)
           assert digest(binary) == os.environ["SIMULATOR_BINARY_SHA256"]
-          evidence = {"source":os.environ["PRODUCT"],"fixtureSha256":digest(fixture),"clients":versions,"exit":result.returncode}
+          sends = subprocess.run([sys.executable, "-B", str(scalar)], capture_output=True, timeout=180)
+          assert digest(binary) == os.environ["SIMULATOR_BINARY_SHA256"]
+          evidence = {"scalarFixtureSha256":digest(scalar),"scalarExit":sends.returncode,"source":os.environ["PRODUCT"],"fixtureSha256":digest(fixture),"clients":versions,"exit":result.returncode}
           if result.returncode == 0:
               measured = json.loads(result.stdout)
               assert measured == {"resourceGroupConsole":True,"binarySha256":digest(binary),"widths":[1440,390],"nativePages":2,
-                                  "deniedContinuation":403,"updatedThenEmpty":True,"regionChangeDuringRead":True,
+                                  "sameGroupScalarSends":2,"deniedContinuation":403,"updatedThenEmpty":True,"regionChangeDuringRead":True,
                                   "lostUpdateReconciled":True,"reopened":True,"teamsClean":2,"outsideRequests":0,"sdkSharedState":True}
               evidence["result"] = measured
+          if sends.returncode == 0:
+              measured = json.loads(sends.stdout)
+              assert measured == {"ok":True,"binarySha256":digest(binary),"scalarSends":6,"tagChangesVisible":True,
+                                  "partialPermissionDenied":True,"peerUnchangedAcrossReopen":True,"cleanup":True,"outsideRequests":0}
+              evidence["scalar"] = measured
           (Path(os.environ["RUNNER_TEMP"])/"group-receipts/result.json").write_text(json.dumps(evidence,indent=2)+"\n")
-          assert result.returncode == 0, "group browser+SDK failed; raw output withheld"
+          assert result.returncode == 0 and sends.returncode == 0, "group browser/SDK/Scalar failed; raw output withheld"
           PYTHON
           unshare --user --map-current-user --net --keep-caps sh -ec '
             ip link set lo up
