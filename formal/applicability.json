@@ -1,135 +1,190 @@
 {
   "version": 1,
-  "base_sha": "6eba31db4e017cdb1c591b0c5af1ca4426acc1cf",
+  "base_sha": "70695e3f5c040ea98b3132a6a097a4b7ebea31ab",
   "changes": [
     {
-      "path": ".github/workflows/ci.yml",
-      "sha256": "c5670b2b7453e27c3a362034adb81b9c25a9676017ff37cef2ed83ce7dd6fe38",
-      "disposition": "formal-infrastructure",
-      "reason": "Runs the ordinary local STS session checks against the CI build using the pinned boto3 environment and its captured binary digest.",
+      "path": "README.md",
+      "sha256": "2f31a269664072de30690cd0352e97178fb990509aa2a7879c499735b5299881",
+      "disposition": "documentation",
+      "reason": "Document the stored ECR tag query, real membership and bounded native APIs.",
       "models": []
     },
     {
-      "path": "README.md",
-      "sha256": "de0f9081477fd837e2d30b66741ac6114eee8b1ecb6389bca8b8b00abde51228",
+      "path": "docs/aws-catalog-services.md",
+      "sha256": "5a91be06b1db5b3ac2f5d185f91600cc2d8be443c50540a8aef683e09ad16077",
       "disposition": "documentation",
-      "reason": "Describe the shared local IAM role used by the Console, reference and signed STS SDK.",
+      "reason": "Document the stored ECR tag query, real membership and bounded native APIs.",
+      "models": []
+    },
+    {
+      "path": "docs/aws-catalog.md",
+      "sha256": "8275f44cb6db6bb07f308c4715de4ec53edab8f1fb3c0e58416263afe5767332",
+      "disposition": "documentation",
+      "reason": "Document the stored ECR tag query, real membership and bounded native APIs.",
       "models": []
     },
     {
       "path": "docs/design/0001-go-standalone.md",
-      "sha256": "a7a01346273cdf840557544f71a5e2bc9137eed00605ece20cffbf5be5a011ef",
+      "sha256": "b30552ac6710da186f95b49429aab1ae5433f7cc70c837c01b2c114d91c85f40",
       "disposition": "documentation",
-      "reason": "Describe the existing Console, IAM GetRole and signed STS trust boundary.",
+      "reason": "Document the stored ECR tag query, real membership and bounded native APIs.",
       "models": []
     },
     {
-      "path": "docs/iam.md",
-      "sha256": "c304fde2d4a79672862adc98a83cdcb10a0a70561966ca896399b83cb5f5ef4e",
-      "disposition": "documentation",
-      "reason": "Correct historical service-only trust descriptions to cover the existing native AWS principal and condition subset.",
+      "path": "formal/models.json",
+      "sha256": "b382fb65cc2b46edb4be8bfc795d77f62d159aa69c27999d6e6f11e2c939191a",
+      "disposition": "formal-infrastructure",
+      "reason": "Associate the query and membership implementation with the existing catalog lifecycle model.",
       "models": []
     },
     {
-      "path": "docs/sts-native.md",
-      "sha256": "91b3b32f075c8850f8ecc377a310302c5c925623ced7353fcd09f4a43b06e527",
-      "disposition": "documentation",
-      "reason": "Document the signed SDK restart and peer-isolation acceptance, and the IAM Console role trust, API reference and signed STS workflow.",
-      "models": []
-    },
-    {
-      "path": "internal/aws/sts.go",
-      "sha256": "bdcf05f345f77f2ea4bc3de294fe5eeec08d1274ec19002db53779a2395d1862",
+      "path": "internal/aws/catalog/engine.go",
+      "sha256": "9665b95092af3ad83b36e329ad3b6ab8c6ca244b3f3e4d68485582fa36e962a1",
       "disposition": "modeled",
-      "reason": "Pass the native AssumeRole request context to final role-generation validation and session issuance.",
+      "reason": "Bind named ECR tag-query groups and their guarded regional collection read to the bounded catalog lifecycle.",
       "models": [
         {
-          "id": "STSSessionLifecycle",
+          "id": "CatalogResourceLifecycle",
           "properties": [
-            "IssueRequiresAllGuards"
+            "AuthorizationFirst",
+            "FailureFrame",
+            "PeerFrame",
+            "StaleWriteRejected"
           ],
-          "limits": "The model covers abstract issuance guards. Native handler tests check request cancellation and deadlines; they are outside the model."
+          "limits": "The model abstracts guarded reads/writes, failed writes and peer frames. It does not model serialized query syntax, ECR tag matching, multi-action IAM, pagination, HTTP or SQLite snapshots."
         }
       ]
     },
     {
-      "path": "internal/aws/sts_credentials.go",
-      "sha256": "acf264a7076f10f893599b59354ab05681f3991c9c789f56ca57502d870b386a",
+      "path": "internal/aws/catalog/models/resource-groups.json",
+      "sha256": "bfc3382f6504cbb80eb22deebdd1ad4b3b248f545c5b3a80fcd70127a0be4a01",
       "disposition": "modeled",
-      "reason": "Use the issuing context for role validation and observe cancellation under the authority lock before publishing credentials.",
+      "reason": "Bind named ECR tag-query groups and their guarded regional collection read to the bounded catalog lifecycle.",
       "models": [
         {
-          "id": "STSSessionLifecycle",
+          "id": "CatalogResourceLifecycle",
           "properties": [
-            "IssueRequiresAllGuards"
+            "AuthorizationFirst",
+            "FailureFrame",
+            "PeerFrame",
+            "StaleWriteRejected"
           ],
-          "limits": "The model treats guarded issuance as an atomic transition. Go request cancellation, SQLite waits and mutex publication ordering are checked by implementation tests."
+          "limits": "The model abstracts guarded reads/writes, failed writes and peer frames. It does not model serialized query syntax, ECR tag matching, multi-action IAM, pagination, HTTP or SQLite snapshots."
         }
       ]
     },
     {
-      "path": "internal/aws/sts_issue_context_test.go",
-      "sha256": "ad0b3b512af2883f1640cf0f0328ee4d3c157b17a7e883daa3d3f41746f21a7a",
-      "disposition": "test-support",
-      "reason": "Check cancellation and expiry before issuance publication and while real role validation waits for SQLite, with peer preservation and subsequent issuance.",
-      "models": []
-    },
-    {
-      "path": "internal/server/web/app.js",
-      "sha256": "1c1516a3468cb2591ede197df038231495a315e49d2db31a4eaf6e02ea28c1a3",
+      "path": "internal/aws/catalog/resource_group_query.go",
+      "sha256": "586b697e702a31a56dbf6986da18c6e5c04504ed1c28515ba08d830189e4dd25",
       "disposition": "modeled",
-      "reason": "The rebuilt bundle includes the registered login form used to enter the IAM Console. Only IAM principal labels and help text changed in the bundle inputs.",
+      "reason": "Bind named ECR tag-query groups and their guarded regional collection read to the bounded catalog lifecycle.",
       "models": [
         {
-          "id": "LoginInputIntent",
+          "id": "CatalogResourceLifecycle",
           "properties": [
-            "NoEmptyPOST",
-            "SubmissionSelectionExact"
+            "AuthorizationFirst",
+            "FailureFrame",
+            "PeerFrame",
+            "StaleWriteRejected"
           ],
-          "limits": "The existing model describes login submission. It does not model IAM role rendering, trust evaluation or STS. The signed SDK and browser fixture exercise those operations."
+          "limits": "The model abstracts guarded reads/writes, failed writes and peer frames. It does not model serialized query syntax, ECR tag matching, multi-action IAM, pagination, HTTP or SQLite snapshots."
         }
       ]
     },
     {
-      "path": "test/e2e/sts_iam_console.py",
-      "sha256": "8957dda21eae6e7f510028d54fa697ac0eaa3c0ab259aa0092544e5b21dcfa55",
+      "path": "internal/aws/catalog/resource_group_query_test.go",
+      "sha256": "0512f07be75fb53d81e4311ad3a68f529a4f96627f458729c5cda1c113690784",
       "disposition": "test-support",
-      "reason": "Exercise the existing local IAM Console, cookie-authenticated Scalar GetRole and signed STS SDK against one private role, including refused writes and cleanup.",
+      "reason": "Exercise real named-group query operations and preservation, authorization and ECR membership behavior through the relevant test entry point.",
       "models": []
     },
     {
-      "path": "test/e2e/sts_session_lifecycle.py",
-      "sha256": "7d75ef091a0cd15844fde21f51fc938f168a8f9e9d89f7e80467920fc12ce80c",
+      "path": "internal/aws/catalog/selection.json",
+      "sha256": "b90d4c0a08a7abae677a9d8d6ab5f102e98c69f0a95b5c59943a4684e4de3a1d",
+      "disposition": "modeled",
+      "reason": "Bind named ECR tag-query groups and their guarded regional collection read to the bounded catalog lifecycle.",
+      "models": [
+        {
+          "id": "CatalogResourceLifecycle",
+          "properties": [
+            "AuthorizationFirst",
+            "FailureFrame",
+            "PeerFrame",
+            "StaleWriteRejected"
+          ],
+          "limits": "The model abstracts guarded reads/writes, failed writes and peer frames. It does not model serialized query syntax, ECR tag matching, multi-action IAM, pagination, HTTP or SQLite snapshots."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/catalog/semantics.go",
+      "sha256": "f33f6d7776abdd462579655cdcb33e18c12a2897208a477524f68c2a88690b19",
+      "disposition": "modeled",
+      "reason": "Bind named ECR tag-query groups and their guarded regional collection read to the bounded catalog lifecycle.",
+      "models": [
+        {
+          "id": "CatalogResourceLifecycle",
+          "properties": [
+            "AuthorizationFirst",
+            "FailureFrame",
+            "PeerFrame",
+            "StaleWriteRejected"
+          ],
+          "limits": "The model abstracts guarded reads/writes, failed writes and peer frames. It does not model serialized query syntax, ECR tag matching, multi-action IAM, pagination, HTTP or SQLite snapshots."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/catalog/services_management.go",
+      "sha256": "6647cf31b87191aee497b175a83e901a0113b3f875e0aee32fbc266fce8b4884",
+      "disposition": "modeled",
+      "reason": "Bind named ECR tag-query groups and their guarded regional collection read to the bounded catalog lifecycle.",
+      "models": [
+        {
+          "id": "CatalogResourceLifecycle",
+          "properties": [
+            "AuthorizationFirst",
+            "FailureFrame",
+            "PeerFrame",
+            "StaleWriteRejected"
+          ],
+          "limits": "The model abstracts guarded reads/writes, failed writes and peer frames. It does not model serialized query syntax, ECR tag matching, multi-action IAM, pagination, HTTP or SQLite snapshots."
+        }
+      ]
+    },
+    {
+      "path": "internal/server/apidocs/catalog/index.json",
+      "sha256": "ef37ca4add0d86bf84370e8f6ee564d4743b3b6eb6dd2b6f2737683d6eaf72fd",
+      "disposition": "presentation",
+      "reason": "Ship the generated operation shapes and model index for Resource Groups query operations.",
+      "models": []
+    },
+    {
+      "path": "internal/server/apidocs/catalog/resource-groups.json",
+      "sha256": "2a13627c30e4c8d27ec9e787e3034f74c87fa8c1990b79d12475a5e16bc40660",
+      "disposition": "presentation",
+      "reason": "Ship the generated operation shapes and model index for Resource Groups query operations.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/catalog_fixtures/resource-groups.json",
+      "sha256": "c0ca049b51977182d46e10fe21a7693581e562a5ef1aeb7f9c6feb1f5d9b8289",
       "disposition": "test-support",
-      "reason": "Runs two isolated local simulator authorities and verifies normal role assumption, session identity, owner restart, independent peer and cleanup.",
+      "reason": "Exercise real named-group query operations and preservation, authorization and ECR membership behavior through the relevant test entry point.",
       "models": []
     },
     {
-      "path": "test/e2e/test_sts_session_lifecycle.py",
-      "sha256": "cdbc69f44d87a71409078f1d3061589b3479795cb79ab58267e6d245d01c5419",
+      "path": "test/e2e/check.py",
+      "sha256": "419b9482f62f60eba3d58069870127b5df79a573de56e271607bd0cab577f51d",
       "disposition": "test-support",
-      "reason": "Checks the permitted methods, signed requests and fixed local endpoints for the development-only STS SDK fixture.",
+      "reason": "Exercise real named-group query operations and preservation, authorization and ECR membership behavior through the relevant test entry point.",
       "models": []
     },
     {
-      "path": "tools/console/bundle-digests.json",
-      "sha256": "5393d7159183e02760596148d0ce24144ff35e69ae950108a6dff3c5aa54260a",
-      "disposition": "presentation",
-      "reason": "Record the rebuilt embedded application digest.",
-      "models": []
-    },
-    {
-      "path": "tools/console/bundle-inputs.json",
-      "sha256": "3bb25b4999735a46ce86e6ef7426fc5f53336246e7a1506a0b9dff3dbd8dc2ea",
-      "disposition": "presentation",
-      "reason": "Bind the IAM component changes in the deterministic Console build inventory.",
-      "models": []
-    },
-    {
-      "path": "tools/console/src/iam.jsx",
-      "sha256": "9b5e45d33177a549aa91c20edde2974e5c71fbbbdb70684987546fe7084bf89d",
-      "disposition": "presentation",
-      "reason": "Render existing saved AWS or Service trust principal statements with their effect and condition status; correct bilingual help and maximum session duration wording.",
+      "path": "test/e2e/resource_group_ecr_members.py",
+      "sha256": "fdb1b4cbee4d25b2a54295cbad9bdcb9ed1a2e9297119b4ffcaaf194c79b92d4",
+      "disposition": "test-support",
+      "reason": "Exercise real named-group query operations and preservation, authorization and ECR membership behavior through the relevant test entry point.",
       "models": []
     }
   ]

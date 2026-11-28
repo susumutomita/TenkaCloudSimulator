@@ -185,6 +185,92 @@
     },
     "type": "object"
    },
+   "GroupQuery": {
+    "additionalProperties": false,
+    "properties": {
+     "GroupName": {
+      "maxLength": 300,
+      "minLength": 1,
+      "type": "string"
+     },
+     "ResourceQuery": {
+      "$ref": "#/components/schemas/ResourceQuery"
+     }
+    },
+    "required": [
+     "GroupName",
+     "ResourceQuery"
+    ],
+    "type": "object"
+   },
+   "ListGroupResourcesItem": {
+    "additionalProperties": false,
+    "properties": {
+     "Identifier": {
+      "$ref": "#/components/schemas/ResourceIdentifier"
+     },
+     "Status": {
+      "$ref": "#/components/schemas/ResourceStatus"
+     }
+    },
+    "type": "object"
+   },
+   "QueryError": {
+    "additionalProperties": false,
+    "properties": {
+     "ErrorCode": {
+      "enum": [
+       "CLOUDFORMATION_STACK_INACTIVE",
+       "CLOUDFORMATION_STACK_NOT_EXISTING",
+       "CLOUDFORMATION_STACK_UNASSUMABLE_ROLE",
+       "RESOURCE_TYPE_NOT_SUPPORTED"
+      ],
+      "type": "string"
+     },
+     "Message": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
+   "ResourceFilter": {
+    "additionalProperties": false,
+    "properties": {
+     "Name": {
+      "enum": [
+       "resource-type"
+      ],
+      "type": "string"
+     },
+     "Values": {
+      "items": {
+       "maxLength": 128,
+       "minLength": 1,
+       "type": "string"
+      },
+      "maxItems": 5,
+      "minItems": 1,
+      "type": "array"
+     }
+    },
+    "required": [
+     "Name",
+     "Values"
+    ],
+    "type": "object"
+   },
+   "ResourceIdentifier": {
+    "additionalProperties": false,
+    "properties": {
+     "ResourceArn": {
+      "type": "string"
+     },
+     "ResourceType": {
+      "type": "string"
+     }
+    },
+    "type": "object"
+   },
    "ResourceQuery": {
     "additionalProperties": false,
     "properties": {
@@ -207,11 +293,23 @@
      "Query"
     ],
     "type": "object"
+   },
+   "ResourceStatus": {
+    "additionalProperties": false,
+    "properties": {
+     "Name": {
+      "enum": [
+       "PENDING"
+      ],
+      "type": "string"
+     }
+    },
+    "type": "object"
    }
   }
  },
  "info": {
-  "description": "Bounded simulator subset of the official AWS Resource Groups API (2017-11-27). Every other official operation returns HTTP 501 UnknownOperationException. Groups are stored without membership: resource queries and service configurations are refused, and resource searches, group membership, tag-sync tasks and group lifecycle events return UnknownOperationException with HTTP 501. Groups are identified by the Group member; the deprecated GroupName member and ListGroups filters are refused. Tag, Untag and GetTags responses omit the echoed Arn and Keys members.",
+  "description": "Bounded simulator subset of the official AWS Resource Groups API (2017-11-27). Every other official operation returns HTTP 501 UnknownOperationException. TAG_FILTERS_1_0 groups can match AWS::ECR::Repository in the current Region by one exact tag key and value. GetGroupQuery and UpdateGroupQuery operate on these named queries; ListGroupResources pages through current stored repository tags. Plain groups retain their metadata-only operations. Other query types, explicit membership changes, search, service configuration and tag-sync tasks are unsupported. Groups are identified by the Group member; the deprecated GroupName member and ListGroups filters are refused. Tag, Untag and GetTags responses omit the echoed Arn and Keys members.",
   "title": "AWS Resource Groups (simulator catalog)",
   "version": "2017-11-27"
  },
@@ -352,6 +450,76 @@
      }
     },
     "summary": "GetGroup",
+    "tags": [
+     "AWS Resource Groups"
+    ]
+   }
+  },
+  "/get-group-query": {
+   "post": {
+    "operationId": "resource-groupsGetGroupQuery",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "resource-groups"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "Group": {
+          "maxLength": 1600,
+          "minLength": 1,
+          "type": "string"
+         },
+         "GroupName": {
+          "maxLength": 300,
+          "minLength": 1,
+          "type": "string"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "GroupQuery": {
+           "$ref": "#/components/schemas/GroupQuery"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "GetGroupQuery",
     "tags": [
      "AWS Resource Groups"
     ]
@@ -569,6 +737,112 @@
      }
     },
     "summary": "ListGroups",
+    "tags": [
+     "AWS Resource Groups"
+    ]
+   }
+  },
+  "/list-group-resources": {
+   "post": {
+    "operationId": "resource-groupsListGroupResources",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "resource-groups"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "Filters": {
+          "items": {
+           "$ref": "#/components/schemas/ResourceFilter"
+          },
+          "type": "array"
+         },
+         "Group": {
+          "maxLength": 1600,
+          "minLength": 1,
+          "type": "string"
+         },
+         "GroupName": {
+          "maxLength": 300,
+          "minLength": 1,
+          "type": "string"
+         },
+         "MaxResults": {
+          "maximum": 50,
+          "minimum": 1,
+          "type": "integer"
+         },
+         "NextToken": {
+          "maxLength": 8192,
+          "minLength": 0,
+          "type": "string"
+         }
+        },
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "NextToken": {
+           "maxLength": 8192,
+           "minLength": 0,
+           "type": "string"
+          },
+          "QueryErrors": {
+           "items": {
+            "$ref": "#/components/schemas/QueryError"
+           },
+           "type": "array"
+          },
+          "ResourceIdentifiers": {
+           "items": {
+            "$ref": "#/components/schemas/ResourceIdentifier"
+           },
+           "type": "array"
+          },
+          "Resources": {
+           "items": {
+            "$ref": "#/components/schemas/ListGroupResourcesItem"
+           },
+           "type": "array"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListGroupResources",
     "tags": [
      "AWS Resource Groups"
     ]
@@ -909,6 +1183,82 @@
      "AWS Resource Groups"
     ]
    }
+  },
+  "/update-group-query": {
+   "post": {
+    "operationId": "resource-groupsUpdateGroupQuery",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": false,
+      "schema": {
+       "enum": [
+        "resource-groups"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "Group": {
+          "maxLength": 1600,
+          "minLength": 1,
+          "type": "string"
+         },
+         "GroupName": {
+          "maxLength": 300,
+          "minLength": 1,
+          "type": "string"
+         },
+         "ResourceQuery": {
+          "$ref": "#/components/schemas/ResourceQuery"
+         }
+        },
+        "required": [
+         "ResourceQuery"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "GroupQuery": {
+           "$ref": "#/components/schemas/GroupQuery"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "AccessDeniedException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "UpdateGroupQuery",
+    "tags": [
+     "AWS Resource Groups"
+    ]
+   }
   }
  },
  "servers": [
@@ -919,7 +1269,7 @@
  ],
  "tags": [
   {
-   "description": "Bounded simulator subset of the official AWS Resource Groups API (2017-11-27). Every other official operation returns HTTP 501 UnknownOperationException. Groups are stored without membership: resource queries and service configurations are refused, and resource searches, group membership, tag-sync tasks and group lifecycle events return UnknownOperationException with HTTP 501. Groups are identified by the Group member; the deprecated GroupName member and ListGroups filters are refused. Tag, Untag and GetTags responses omit the echoed Arn and Keys members.",
+   "description": "Bounded simulator subset of the official AWS Resource Groups API (2017-11-27). Every other official operation returns HTTP 501 UnknownOperationException. TAG_FILTERS_1_0 groups can match AWS::ECR::Repository in the current Region by one exact tag key and value. GetGroupQuery and UpdateGroupQuery operate on these named queries; ListGroupResources pages through current stored repository tags. Plain groups retain their metadata-only operations. Other query types, explicit membership changes, search, service configuration and tag-sync tasks are unsupported. Groups are identified by the Group member; the deprecated GroupName member and ListGroups filters are refused. Tag, Untag and GetTags responses omit the echoed Arn and Keys members.",
    "name": "AWS Resource Groups"
   }
  ],

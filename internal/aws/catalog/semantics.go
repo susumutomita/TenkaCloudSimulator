@@ -54,6 +54,14 @@ func (q *request) execute() (map[string]any, error) {
 		}
 		return q.create(0)
 	case Read:
+		if q.b.spec.Model == "resource-groups" {
+			switch q.op.Name {
+			case "GetGroupQuery":
+				return q.getGroupQuery()
+			case "ListGroupResources":
+				return q.listGroupResources()
+			}
+		}
 		return q.read()
 	case List:
 		if q.isBatchJobDefinition() {
@@ -1317,6 +1325,9 @@ func (q *request) responseDocument(res *Resource, r row, shapeName string) map[s
 
 // output projects a resource onto the operation's official output shape.
 func (q *request) output(r row, parent *row) map[string]any {
+	if q.b.spec.Model == "resource-groups" && q.op.Name == "UpdateGroupQuery" {
+		return groupQueryOutput(r)
+	}
 	out := map[string]any{}
 	if q.official.Output == "" {
 		return out

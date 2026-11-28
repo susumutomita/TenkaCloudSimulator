@@ -302,6 +302,10 @@ func (e *Engine) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		e.fail(w, b, op, err)
 		return
 	}
+	if b.spec.Model == "resource-groups" && (op.Name == "CreateGroup" || op.Name == "GetGroupQuery" || op.Name == "UpdateGroupQuery" || op.Name == "ListGroupResources") && !uniqueGroupJSON(body) {
+		e.fail(w, b, op, invalid("Expected one JSON request without duplicate fields."))
+		return
+	}
 	official := b.model.Operations[op.Name]
 	var raw map[string]any
 	if b.model.Metadata.Protocol == "json" {
@@ -442,6 +446,9 @@ func (e *Engine) fail(w http.ResponseWriter, b *binding, op *Op, err error) {
 		name = op.Name
 	}
 	code, status := b.errorCode(name, f.kind)
+	if b.spec.Model == "resource-groups" && f.kind == "denied" && (name == "GetGroupQuery" || name == "UpdateGroupQuery" || name == "ListGroupResources") {
+		code, status = "ForbiddenException", http.StatusForbidden
+	}
 	if official := b.model.Operations[name]; f.code != "" && official != nil {
 		for _, name := range official.Errors {
 			if name == f.code {
