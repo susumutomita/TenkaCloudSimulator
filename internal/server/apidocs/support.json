@@ -1,0 +1,614 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Local AWS Support",
+    "version": "2013-04-15",
+    "description": "Create and resolve participant-authored cases in the current local team's database. Choose a target and its matching JSON example. Reuse an ID returned by an earlier local request."
+  },
+  "servers": [
+    {
+      "url": "/"
+    }
+  ],
+  "paths": {
+    "/": {
+      "post": {
+        "operationId": "sendSupportRequest",
+        "summary": "Send a local AWS Support request",
+        "parameters": [
+          {
+            "name": "X-Amz-Target",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "AWSSupport_20130415.DescribeCases",
+                "AWSSupport_20130415.AddAttachmentsToSet",
+                "AWSSupport_20130415.AddCommunicationToCase",
+                "AWSSupport_20130415.CreateCase",
+                "AWSSupport_20130415.DescribeAttachment",
+                "AWSSupport_20130415.DescribeCommunications",
+                "AWSSupport_20130415.ResolveCase"
+              ],
+              "default": "AWSSupport_20130415.DescribeCases"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/x-amz-json-1.1": {
+              "schema": {
+                "anyOf": [
+                  {
+                    "$ref": "#/components/schemas/CreateCaseRequest"
+                  },
+                  {
+                    "$ref": "#/components/schemas/DescribeCasesRequest"
+                  },
+                  {
+                    "$ref": "#/components/schemas/AddCommunicationToCaseRequest"
+                  },
+                  {
+                    "$ref": "#/components/schemas/DescribeCommunicationsRequest"
+                  },
+                  {
+                    "$ref": "#/components/schemas/ResolveCaseRequest"
+                  },
+                  {
+                    "$ref": "#/components/schemas/AddAttachmentsToSetRequest"
+                  },
+                  {
+                    "$ref": "#/components/schemas/DescribeAttachmentRequest"
+                  }
+                ]
+              },
+              "examples": {
+                "DescribeCases": {
+                  "value": {
+                    "maxResults": 10
+                  }
+                },
+                "AddAttachmentsToSet": {
+                  "value": {
+                    "attachments": [
+                      {
+                        "fileName": "sample.txt",
+                        "data": "TG9jYWw="
+                      }
+                    ]
+                  }
+                },
+                "AddCommunicationToCase": {
+                  "value": {
+                    "caseId": "case-from-create",
+                    "communicationBody": "Local follow-up"
+                  }
+                },
+                "CreateCase": {
+                  "value": {
+                    "subject": "Practice case",
+                    "communicationBody": "First local note"
+                  }
+                },
+                "DescribeAttachment": {
+                  "value": {
+                    "attachmentId": "attachment-from-communication"
+                  }
+                },
+                "DescribeCommunications": {
+                  "value": {
+                    "caseId": "case-from-create"
+                  }
+                },
+                "ResolveCase": {
+                  "value": {
+                    "caseId": "case-from-create"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The committed local result of the selected operation.",
+            "content": {
+              "application/x-amz-json-1.1": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "caseId": {
+                          "type": "string",
+                          "minLength": 1
+                        }
+                      },
+                      "additionalProperties": false,
+                      "required": [
+                        "caseId"
+                      ]
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "cases": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/Case"
+                          }
+                        },
+                        "nextToken": {
+                          "type": "string"
+                        }
+                      },
+                      "additionalProperties": false,
+                      "required": [
+                        "cases"
+                      ]
+                    },
+                    {
+                      "$ref": "#/components/schemas/CommunicationPage"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "result": {
+                          "type": "boolean"
+                        }
+                      },
+                      "additionalProperties": false,
+                      "required": [
+                        "result"
+                      ]
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "initialCaseStatus": {
+                          "type": "string"
+                        },
+                        "finalCaseStatus": {
+                          "type": "string"
+                        }
+                      },
+                      "additionalProperties": false,
+                      "required": [
+                        "initialCaseStatus",
+                        "finalCaseStatus"
+                      ]
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "attachmentSetId": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "expiryTime": {
+                          "type": "string",
+                          "format": "date-time"
+                        }
+                      },
+                      "additionalProperties": false,
+                      "required": [
+                        "attachmentSetId",
+                        "expiryTime"
+                      ]
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "attachment": {
+                          "$ref": "#/components/schemas/Attachment"
+                        }
+                      },
+                      "additionalProperties": false,
+                      "required": [
+                        "attachment"
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request, missing local resource, expired attachment set, or local limit.",
+            "content": {
+              "application/x-amz-json-1.1": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "__type": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "additionalProperties": false,
+                  "required": [
+                    "__type",
+                    "message"
+                  ]
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The selected identity lacks permission for this operation.",
+            "content": {
+              "application/x-amz-json-1.1": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "__type": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "additionalProperties": false,
+                  "required": [
+                    "__type",
+                    "message"
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "The local storage operation failed.",
+            "content": {
+              "application/x-amz-json-1.1": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "__type": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "additionalProperties": false,
+                  "required": [
+                    "__type",
+                    "message"
+                  ]
+                }
+              }
+            }
+          },
+          "501": {
+            "description": "This AWS Support operation is unsupported.",
+            "content": {
+              "application/x-amz-json-1.1": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "__type": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "additionalProperties": false,
+                  "required": [
+                    "__type",
+                    "message"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Attachment": {
+        "type": "object",
+        "properties": {
+          "fileName": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 255
+          },
+          "data": {
+            "type": "string",
+            "contentEncoding": "base64",
+            "description": "Up to 64 KiB of decoded bytes."
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "fileName",
+          "data"
+        ]
+      },
+      "CreateCaseRequest": {
+        "type": "object",
+        "properties": {
+          "subject": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "communicationBody": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 8000
+          },
+          "attachmentSetId": {
+            "type": "string",
+            "minLength": 1
+          },
+          "language": {
+            "type": "string",
+            "enum": [
+              "en",
+              "ja"
+            ]
+          },
+          "issueType": {
+            "type": "string",
+            "enum": [
+              "technical",
+              "customer-service"
+            ]
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "subject",
+          "communicationBody"
+        ]
+      },
+      "DescribeCasesRequest": {
+        "type": "object",
+        "properties": {
+          "caseIdList": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "maxItems": 100
+          },
+          "includeResolvedCases": {
+            "type": "boolean"
+          },
+          "includeCommunications": {
+            "type": "boolean"
+          },
+          "displayId": {
+            "type": "string",
+            "pattern": "^[1-9][0-9]*$"
+          },
+          "maxResults": {
+            "type": "integer",
+            "minimum": 10,
+            "maximum": 100
+          },
+          "nextToken": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "additionalProperties": false
+      },
+      "AddCommunicationToCaseRequest": {
+        "type": "object",
+        "properties": {
+          "caseId": {
+            "type": "string",
+            "minLength": 1
+          },
+          "communicationBody": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 8000
+          },
+          "attachmentSetId": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "caseId",
+          "communicationBody"
+        ]
+      },
+      "DescribeCommunicationsRequest": {
+        "type": "object",
+        "properties": {
+          "caseId": {
+            "type": "string",
+            "minLength": 1
+          },
+          "beforeTime": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "afterTime": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "maxResults": {
+            "type": "integer",
+            "minimum": 10,
+            "maximum": 100
+          },
+          "nextToken": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "caseId"
+        ]
+      },
+      "ResolveCaseRequest": {
+        "type": "object",
+        "properties": {
+          "caseId": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "caseId"
+        ]
+      },
+      "AddAttachmentsToSetRequest": {
+        "type": "object",
+        "properties": {
+          "attachmentSetId": {
+            "type": "string",
+            "minLength": 1
+          },
+          "attachments": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Attachment"
+            },
+            "minItems": 1,
+            "maxItems": 3
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "attachments"
+        ]
+      },
+      "DescribeAttachmentRequest": {
+        "type": "object",
+        "properties": {
+          "attachmentId": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "attachmentId"
+        ]
+      },
+      "Communication": {
+        "type": "object",
+        "properties": {
+          "caseId": {
+            "type": "string",
+            "minLength": 1
+          },
+          "body": {
+            "type": "string"
+          },
+          "submittedBy": {
+            "type": "string"
+          },
+          "timeCreated": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "attachmentSet": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "attachmentId": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "fileName": {
+                  "type": "string"
+                }
+              },
+              "additionalProperties": false,
+              "required": [
+                "attachmentId",
+                "fileName"
+              ]
+            }
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "caseId",
+          "body",
+          "submittedBy",
+          "timeCreated"
+        ]
+      },
+      "CommunicationPage": {
+        "type": "object",
+        "properties": {
+          "communications": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Communication"
+            }
+          },
+          "nextToken": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "communications"
+        ]
+      },
+      "Case": {
+        "type": "object",
+        "properties": {
+          "caseId": {
+            "type": "string",
+            "minLength": 1
+          },
+          "displayId": {
+            "type": "string"
+          },
+          "subject": {
+            "type": "string"
+          },
+          "language": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "opened",
+              "resolved"
+            ]
+          },
+          "timeCreated": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "recentCommunications": {
+            "$ref": "#/components/schemas/CommunicationPage"
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "caseId",
+          "displayId",
+          "subject",
+          "status",
+          "timeCreated",
+          "language"
+        ]
+      }
+    }
+  }
+}
