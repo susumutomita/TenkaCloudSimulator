@@ -59,6 +59,7 @@ class Console:
         self.page = self.context.new_page()
         self.page.set_default_timeout(15000)
         self.requests, self.errors, self.outside = [], [], []
+        selected_principal = [None]
         self.page.on('pageerror', lambda _: self.errors.append(True))
         def route(value):
             url = urlsplit(value.request.url)
@@ -75,12 +76,17 @@ class Console:
                 assert request.headers['content-type'] == 'application/x-amz-json-1.1'
                 assert request.headers['x-simulator-region'] == 'us-east-1'
                 assert request.headers.get('cookie')
+                assert selected_principal[0] and request.headers.get('x-simulator-principal') == selected_principal[0]
                 assert not {'authorization', 'x-simulator-token', 'x-simulator-access-role'} & request.headers.keys()
                 self.requests.append((target.split('.')[-1], request.post_data_json))
         self.page.on('request', wire)
         self.page.goto(team.endpoint + '/_simulator/console/#/catalog')
         self.page.get_by_label('Access token', exact=True).fill(token or team.token)
         self.page.get_by_role('button', name='Open sandbox', exact=True).click()
+        self.page.wait_for_url('**/_simulator/console/**')
+        capabilities = self.page.evaluate("async () => {const response=await fetch('/_simulator/v1/capabilities');if(!response.ok)throw Error('capabilities failed');return response.json();}")
+        selected_principal[0] = capabilities['principal'] or ('simulator-admin' if capabilities['identitySelection'] else None)
+        assert selected_principal[0]
         self.page.get_by_role('button', name='Services', exact=True).click()
         self.page.get_by_role('menuitem', name='Service catalog', exact=True).click()
         self.page.get_by_role('button', name=re.compile('^Catalog service')).click()
