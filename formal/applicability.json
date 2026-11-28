@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "base_sha": "62c4a2bc49fc0a80a8bf1bf1e4828c1d2082a17a",
+  "base_sha": "4c32b71522e4af2d1f49894befed2867774539ce",
   "changes": [
     {
       "path": "README.ja.md",
@@ -13,21 +13,21 @@
       "path": "README.md",
       "sha256": "5efbfbf07d96e946ab97f85f0607d2b5309e243aecd0a686212a9ded3150a20c",
       "disposition": "documentation",
-      "reason": "Document the compiled regional Console, saved health check path and shared native API scope.",
+      "reason": "Document shared regional ELBv2 resources, the authenticated Console health editor and the served Scalar Query examples.",
       "models": []
     },
     {
       "path": "docs/design/0001-go-standalone.md",
       "sha256": "c45419fcee2be66a7a4d9dabfc78aea23fb42040b61598e8fa67e107e154018a",
       "disposition": "documentation",
-      "reason": "Document the compiled regional Console, saved health check path and shared native API scope.",
+      "reason": "Document shared regional ELBv2 resources, the authenticated Console health editor and the served Scalar Query examples.",
       "models": []
     },
     {
       "path": "docs/elb.md",
       "sha256": "6bdebd93ef76d89f82314235330c3d925614654c8f55834297d34eddd099e60e",
       "disposition": "documentation",
-      "reason": "Document the compiled regional Console, saved health check path and shared native API scope.",
+      "reason": "Document shared regional ELBv2 resources, the authenticated Console health editor and the served Scalar Query examples.",
       "models": []
     },
     {
@@ -90,7 +90,14 @@
       "path": "formal/models.json",
       "sha256": "245c1f2217f6efba6902f5bb63a71375225217f3f724abb1b506d433602e580b",
       "disposition": "formal-infrastructure",
-      "reason": "Record the exact regression fixture or bundle metadata for the verified Console artifact.",
+      "reason": "Register the ALB Console state model, its required source decisions and the independent negative controls.",
+      "models": []
+    },
+    {
+      "path": "internal/server/apidocs/openapi.json",
+      "sha256": "fab52106572cb0f6e45d28af839e4b6ed72cc2a6600b016d2cb836b2295dab38",
+      "disposition": "presentation",
+      "reason": "Present thirteen ELBv2 Query templates for existing operations. The native transitions and authority are unchanged.",
       "models": []
     },
     {
@@ -141,14 +148,14 @@
       "path": "scripts/formal_model_gate.py",
       "sha256": "dc2bbe55715f9e0a6a0ac0c6931670e8d594eafbb837b6aeebc9ba3a7916c04e",
       "disposition": "formal-infrastructure",
-      "reason": "Record the exact regression fixture or bundle metadata for the verified Console artifact.",
+      "reason": "Register the ALB Console state model, its required source decisions and the independent negative controls.",
       "models": []
     },
     {
       "path": "scripts/test-formal-gate.py",
       "sha256": "22c6653d7f1a0207d837854be019ba690fcbfb101f04b0e258551331e0a1da24",
       "disposition": "formal-infrastructure",
-      "reason": "Record the exact regression fixture or bundle metadata for the verified Console artifact.",
+      "reason": "Register the ALB Console state model, its required source decisions and the independent negative controls.",
       "models": []
     },
     {
@@ -159,17 +166,38 @@
       "models": []
     },
     {
+      "path": "test/e2e/elb_scalar.py",
+      "sha256": "163f7064426f5763be4abdd20645b935b10c4a73b75db150c47024171816f3ad",
+      "disposition": "test-support",
+      "reason": "Exercise authenticated Scalar sends and compare the returned ELBv2 XML with independently read native SDK state.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/simpledb_scalar_reference_live.py",
+      "sha256": "1aac0b271c626918f98614ab7cc32583ae1177404fffd43d22b7672997c24478",
+      "disposition": "test-support",
+      "reason": "Select the desired native Query service and let tests edit an input using the actual Scalar form. The SimpleDB defaults remain intact.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/test_sakura_openapi.py",
+      "sha256": "308644044f12dd92a9ece130a40f776770b416018ae5a965938559038250cd98",
+      "disposition": "test-support",
+      "reason": "Validate the new Query templates and fields before projecting them out of the pre-existing historical reference assertions.",
+      "models": []
+    },
+    {
       "path": "tools/console/bundle-digests.json",
       "sha256": "a67eac82563c8bfbeb8ea1d5f901a9bbdad4f20de0fff21e0ab0c2fabc21987a",
       "disposition": "presentation",
-      "reason": "Record the exact regression fixture or bundle metadata for the verified Console artifact.",
+      "reason": "Record the source inputs and digests used to produce the shipped Console bundle.",
       "models": []
     },
     {
       "path": "tools/console/bundle-inputs.json",
       "sha256": "9889b11ce1b643cfc3e621a426b3b93a640003e342250235390f996814303b5a",
       "disposition": "presentation",
-      "reason": "Record the exact regression fixture or bundle metadata for the verified Console artifact.",
+      "reason": "Record the source inputs and digests used to produce the shipped Console bundle.",
       "models": []
     },
     {
