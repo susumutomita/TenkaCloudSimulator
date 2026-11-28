@@ -85,3 +85,18 @@ func TestPolicySnapshotIsStableAndEachNewSnapshotReadsCurrentPolicy(t *testing.T
 		t.Fatal("default principal decision changed")
 	}
 }
+
+func TestPolicySnapshotStorageFailureReturnsNoEvaluator(t *testing.T) {
+	store, err := New(filepath.Join(t.TempDir(), "closed.db"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	identities := NewIdentities(store)
+	if err = store.Close(); err != nil {
+		t.Fatal(err)
+	}
+	check, err := identities.DecisionSnapshot(t.Context(), "group-reader")
+	if err == nil || check != nil {
+		t.Fatal("unavailable identity store returned an evaluator")
+	}
+}

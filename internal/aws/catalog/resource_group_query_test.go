@@ -169,3 +169,45 @@ func TestResourceGroupMembershipRequiresWorkingPolicySnapshot(t *testing.T) {
 		}
 	}
 }
+
+func TestResourceGroupMembershipRefusesIncompleteReads(t *testing.T) {
+	h := newHarness(t, resourceGroups, ecr)
+	h.engine.cfg.AuthorizeSnapshot = func(context.Context, string) (func(string, string) string, error) {
+		return func(string, string) string { return "allowed" }, nil
+	}
+	query := repositoryTagQuery("Team", "blue")
+	input := map[string]any{"Group": "release"}
+	expect(t, h.rest("resource-groups", "POST", "/groups", map[string]any{"Name": "release", "ResourceQuery": query}), 200, "")
+	for _, name := range []string{"first", "second"} {
+		expect(t, h.json1("ecr", "CreateRepository", map[string]any{"repositoryName": name, "tags": []any{map[string]any{"Key": "Team", "Value": "blue"}}}), 200, "")
+	}
+	refused := func(want int) {
+		t.Helper()
+		got := h.rest("resource-groups", "POST", "/list-group-resources", input)
+		if got.status != want || got.body["Resources"] != nil || got.body["ResourceIdentifiers"] != nil || got.body["NextToken"] != nil {
+			t.Fatalf("incomplete projection returned status %d with body %v", got.status, got.body)
+		}
+	}
+	// Losing the ECR binding must not turn membership into an empty success.
+	const target = "AmazonEC2ContainerRegistry_V20150921"
+	binding := h.engine.byTarget[target]
+	delete(h.engine.byTarget, target)
+	refused(400)
+	h.engine.byTarget[target] = binding
+
+	// The first repository matches; an unreadable second row invalidates the whole page.
+	if _, err := h.db.Exec("UPDATE aws_catalog_resources SET tags='not-json' WHERE service='ecr' AND name='second'"); err != nil {
+		t.Fatal(err)
+	}
+	refused(500)
+	if _, err := h.db.Exec("UPDATE aws_catalog_resources SET document=json_set(document,'$.ResourceQuery.Query','[]') WHERE service='resource-groups' AND name='release'"); err != nil {
+		t.Fatal(err)
+	}
+	refused(500)
+	if _, err := h.db.Exec("UPDATE aws_catalog_resources SET arn='different' WHERE service='resource-groups' AND name='release'"); err != nil {
+		t.Fatal(err)
+	}
+	refused(500)
+	expect(t, h.rest("resource-groups", "POST", "/get-group-query", map[string]any{"Group": "absent"}), 404, "NotFoundException")
+	expect(t, h.rest("resource-groups", "POST", "/update-group-query", map[string]any{"GroupName": "release", "ResourceQuery": query}), 400, "BadRequestException")
+}
