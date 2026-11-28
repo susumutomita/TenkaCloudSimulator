@@ -362,8 +362,12 @@ func writeError(w http.ResponseWriter, model *Model, code string, status int, me
 	body := map[string]any{"message": message}
 	if model != nil {
 		if shape := model.Shapes[code]; shape != nil {
-			if _, upper := shape.Members["Message"]; upper {
-				body = map[string]any{"Message": message}
+			if member, upper := shape.Members["Message"]; upper {
+				key := "Message"
+				if model.Metadata.EndpointPrefix == "kafka" && member.LocationName != "" {
+					key = member.LocationName
+				}
+				body = map[string]any{key: message}
 			}
 		}
 	}

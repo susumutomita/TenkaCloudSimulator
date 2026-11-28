@@ -207,6 +207,54 @@
     },
     "type": "object"
    },
+   "Configuration": {
+    "additionalProperties": false,
+    "properties": {
+     "arn": {
+      "type": "string"
+     },
+     "creationTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "description": {
+      "type": "string"
+     },
+     "kafkaVersions": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     "latestRevision": {
+      "$ref": "#/components/schemas/ConfigurationRevision"
+     },
+     "name": {
+      "type": "string"
+     },
+     "state": {
+      "enum": [
+       "ACTIVE",
+       "DELETING",
+       "DELETE_FAILED"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "description",
+     "latestRevision",
+     "creationTime",
+     "kafkaVersions",
+     "arn",
+     "name",
+     "state"
+    ],
+    "type": "object"
+   },
    "ConfigurationInfo": {
     "additionalProperties": false,
     "properties": {
@@ -220,6 +268,29 @@
     "required": [
      "revision",
      "arn"
+    ],
+    "type": "object"
+   },
+   "ConfigurationRevision": {
+    "additionalProperties": false,
+    "properties": {
+     "creationTime": {
+      "description": "Epoch seconds in JSON protocols",
+      "type": [
+       "number",
+       "string"
+      ]
+     },
+     "description": {
+      "type": "string"
+     },
+     "revision": {
+      "type": "integer"
+     }
+    },
+    "required": [
+     "revision",
+     "creationTime"
     ],
     "type": "object"
    },
@@ -603,7 +674,7 @@
   }
  },
  "info": {
-  "description": "Bounded simulator subset of the official Managed Streaming for Kafka API (2018-11-14). Every other official operation returns HTTP 501 UnknownOperationException. Provisioned clusters are configuration records that stay CREATING: no broker, ZooKeeper or KRaft controller, topic, bootstrap endpoint or network interface exists, no record is produced or consumed, and GetBootstrapBrokers, topic, replicator, VPC connection and SCRAM secret APIs return UnknownOperationException with HTTP 501. The V2 and serverless APIs, configurations (whose server properties need revision storage), ConfigurationInfo, cluster policies and every cluster update operation are not implemented. CurrentVersion is the constant K1 because no update is possible, and DeleteCluster refuses any other version. NumberOfBrokerNodes must be a multiple of the number of client subnets; subnets, security groups, certificate authorities, KMS keys and log destinations are stored without being checked. ListClusters refuses ClusterNameFilter.",
+  "description": "Bounded simulator subset of the official Managed Streaming for Kafka API (2018-11-14). Every other official operation returns HTTP 501 UnknownOperationException. Provisioned clusters are configuration records that stay CREATING: no broker, ZooKeeper or KRaft controller, topic, bootstrap endpoint or network interface exists, no record is produced or consumed, and GetBootstrapBrokers, topic, replicator, VPC connection and SCRAM secret APIs return UnknownOperationException with HTTP 501. Custom configurations store one immutable revision. DescribeConfigurationRevision returns the original server.properties bytes. The 64 KiB catalog record limit includes the base64 content and metadata. CreateCluster can attach revision 1 of a compatible configuration in the same account and Region. DescribeCluster and ListClusters return its ARN and revision. DeleteConfiguration requires all attached clusters to be deleted first. UpdateConfiguration and ListConfigurationRevisions are unavailable. The V2 and serverless APIs, cluster policies and every cluster update operation are not implemented. CurrentVersion is the constant K1 because no update is possible, and DeleteCluster refuses any other version. Provisioned clusters require two or three distinct subnet identifiers in supported Regions and the same number of brokers per subnet. Subnet availability zones, security groups, certificate authorities, KMS keys and log destinations are not resolved. New encryption-in-transit metadata defaults to TLS and inCluster=true. ListClusters supports a name prefix.",
   "title": "Amazon Managed Streaming for Apache Kafka (simulator catalog)",
   "version": "2018-11-14"
  },
@@ -615,10 +686,12 @@
     "parameters": [
      {
       "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "example": "kafka",
       "in": "header",
       "name": "X-Simulator-Service",
-      "required": false,
+      "required": true,
       "schema": {
+       "default": "kafka",
        "enum": [
         "kafka"
        ],
@@ -675,7 +748,7 @@
       "description": "Modeled exception named by X-Amzn-ErrorType."
      },
      "403": {
-      "description": "AccessDeniedException."
+      "description": "ForbiddenException."
      },
      "404": {
       "description": "Not found or no matching official route."
@@ -691,10 +764,12 @@
     "parameters": [
      {
       "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "example": "kafka",
       "in": "header",
       "name": "X-Simulator-Service",
-      "required": false,
+      "required": true,
       "schema": {
+       "default": "kafka",
        "enum": [
         "kafka"
        ],
@@ -813,7 +888,7 @@
       "description": "Modeled exception named by X-Amzn-ErrorType."
      },
      "403": {
-      "description": "AccessDeniedException."
+      "description": "ForbiddenException."
      },
      "404": {
       "description": "Not found or no matching official route."
@@ -831,10 +906,12 @@
     "parameters": [
      {
       "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "example": "kafka",
       "in": "header",
       "name": "X-Simulator-Service",
-      "required": false,
+      "required": true,
       "schema": {
+       "default": "kafka",
        "enum": [
         "kafka"
        ],
@@ -890,7 +967,7 @@
       "description": "Modeled exception named by X-Amzn-ErrorType."
      },
      "403": {
-      "description": "AccessDeniedException."
+      "description": "ForbiddenException."
      },
      "404": {
       "description": "Not found or no matching official route."
@@ -906,10 +983,12 @@
     "parameters": [
      {
       "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "example": "kafka",
       "in": "header",
       "name": "X-Simulator-Service",
-      "required": false,
+      "required": true,
       "schema": {
+       "default": "kafka",
        "enum": [
         "kafka"
        ],
@@ -945,7 +1024,7 @@
       "description": "Modeled exception named by X-Amzn-ErrorType."
      },
      "403": {
-      "description": "AccessDeniedException."
+      "description": "ForbiddenException."
      },
      "404": {
       "description": "Not found or no matching official route."
@@ -957,16 +1036,430 @@
     ]
    }
   },
+  "/v1/configurations": {
+   "get": {
+    "operationId": "kafkaListConfigurations",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "example": "kafka",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": true,
+      "schema": {
+       "default": "kafka",
+       "enum": [
+        "kafka"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "maxResults",
+      "schema": {
+       "maximum": 100,
+       "minimum": 1,
+       "type": "integer"
+      }
+     },
+     {
+      "in": "query",
+      "name": "nextToken",
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "configurations": {
+           "items": {
+            "$ref": "#/components/schemas/Configuration"
+           },
+           "type": "array"
+          },
+          "nextToken": {
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "ForbiddenException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "ListConfigurations",
+    "tags": [
+     "Amazon Managed Streaming for Apache Kafka"
+    ]
+   },
+   "post": {
+    "operationId": "kafkaCreateConfiguration",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "example": "kafka",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": true,
+      "schema": {
+       "default": "kafka",
+       "enum": [
+        "kafka"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "description": {
+          "type": "string"
+         },
+         "kafkaVersions": {
+          "items": {
+           "type": "string"
+          },
+          "type": "array"
+         },
+         "name": {
+          "type": "string"
+         },
+         "serverProperties": {
+          "contentEncoding": "base64",
+          "type": "string"
+         }
+        },
+        "required": [
+         "name",
+         "serverProperties"
+        ],
+        "type": "object"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "arn": {
+           "type": "string"
+          },
+          "creationTime": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "latestRevision": {
+           "$ref": "#/components/schemas/ConfigurationRevision"
+          },
+          "name": {
+           "type": "string"
+          },
+          "state": {
+           "enum": [
+            "ACTIVE",
+            "DELETING",
+            "DELETE_FAILED"
+           ],
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "ForbiddenException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "CreateConfiguration",
+    "tags": [
+     "Amazon Managed Streaming for Apache Kafka"
+    ]
+   }
+  },
+  "/v1/configurations/{arn}": {
+   "delete": {
+    "operationId": "kafkaDeleteConfiguration",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "example": "kafka",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": true,
+      "schema": {
+       "default": "kafka",
+       "enum": [
+        "kafka"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "arn",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "arn": {
+           "type": "string"
+          },
+          "state": {
+           "enum": [
+            "ACTIVE",
+            "DELETING",
+            "DELETE_FAILED"
+           ],
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "ForbiddenException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DeleteConfiguration",
+    "tags": [
+     "Amazon Managed Streaming for Apache Kafka"
+    ]
+   },
+   "get": {
+    "operationId": "kafkaDescribeConfiguration",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "example": "kafka",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": true,
+      "schema": {
+       "default": "kafka",
+       "enum": [
+        "kafka"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "arn",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "arn": {
+           "type": "string"
+          },
+          "creationTime": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "description": {
+           "type": "string"
+          },
+          "kafkaVersions": {
+           "items": {
+            "type": "string"
+           },
+           "type": "array"
+          },
+          "latestRevision": {
+           "$ref": "#/components/schemas/ConfigurationRevision"
+          },
+          "name": {
+           "type": "string"
+          },
+          "state": {
+           "enum": [
+            "ACTIVE",
+            "DELETING",
+            "DELETE_FAILED"
+           ],
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "ForbiddenException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DescribeConfiguration",
+    "tags": [
+     "Amazon Managed Streaming for Apache Kafka"
+    ]
+   }
+  },
+  "/v1/configurations/{arn}/revisions/{revision}": {
+   "get": {
+    "operationId": "kafkaDescribeConfigurationRevision",
+    "parameters": [
+     {
+      "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "example": "kafka",
+      "in": "header",
+      "name": "X-Simulator-Service",
+      "required": true,
+      "schema": {
+       "default": "kafka",
+       "enum": [
+        "kafka"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "arn",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "in": "path",
+      "name": "revision",
+      "required": true,
+      "schema": {
+       "type": "integer"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "arn": {
+           "type": "string"
+          },
+          "creationTime": {
+           "description": "Epoch seconds in JSON protocols",
+           "type": [
+            "number",
+            "string"
+           ]
+          },
+          "description": {
+           "type": "string"
+          },
+          "revision": {
+           "type": "integer"
+          },
+          "serverProperties": {
+           "contentEncoding": "base64",
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "Projected official output shape."
+     },
+     "400": {
+      "description": "Modeled exception named by X-Amzn-ErrorType."
+     },
+     "403": {
+      "description": "ForbiddenException."
+     },
+     "404": {
+      "description": "Not found or no matching official route."
+     }
+    },
+    "summary": "DescribeConfigurationRevision",
+    "tags": [
+     "Amazon Managed Streaming for Apache Kafka"
+    ]
+   }
+  },
   "/v1/tags/{resourceArn}": {
    "delete": {
     "operationId": "kafkaUntagResource",
     "parameters": [
      {
       "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "example": "kafka",
       "in": "header",
       "name": "X-Simulator-Service",
-      "required": false,
+      "required": true,
       "schema": {
+       "default": "kafka",
        "enum": [
         "kafka"
        ],
@@ -1016,10 +1509,12 @@
     "parameters": [
      {
       "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "example": "kafka",
       "in": "header",
       "name": "X-Simulator-Service",
-      "required": false,
+      "required": true,
       "schema": {
+       "default": "kafka",
        "enum": [
         "kafka"
        ],
@@ -1074,10 +1569,12 @@
     "parameters": [
      {
       "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.",
+      "example": "kafka",
       "in": "header",
       "name": "X-Simulator-Service",
-      "required": false,
+      "required": true,
       "schema": {
+       "default": "kafka",
        "enum": [
         "kafka"
        ],
@@ -1142,7 +1639,7 @@
  ],
  "tags": [
   {
-   "description": "Bounded simulator subset of the official Managed Streaming for Kafka API (2018-11-14). Every other official operation returns HTTP 501 UnknownOperationException. Provisioned clusters are configuration records that stay CREATING: no broker, ZooKeeper or KRaft controller, topic, bootstrap endpoint or network interface exists, no record is produced or consumed, and GetBootstrapBrokers, topic, replicator, VPC connection and SCRAM secret APIs return UnknownOperationException with HTTP 501. The V2 and serverless APIs, configurations (whose server properties need revision storage), ConfigurationInfo, cluster policies and every cluster update operation are not implemented. CurrentVersion is the constant K1 because no update is possible, and DeleteCluster refuses any other version. NumberOfBrokerNodes must be a multiple of the number of client subnets; subnets, security groups, certificate authorities, KMS keys and log destinations are stored without being checked. ListClusters refuses ClusterNameFilter.",
+   "description": "Bounded simulator subset of the official Managed Streaming for Kafka API (2018-11-14). Every other official operation returns HTTP 501 UnknownOperationException. Provisioned clusters are configuration records that stay CREATING: no broker, ZooKeeper or KRaft controller, topic, bootstrap endpoint or network interface exists, no record is produced or consumed, and GetBootstrapBrokers, topic, replicator, VPC connection and SCRAM secret APIs return UnknownOperationException with HTTP 501. Custom configurations store one immutable revision. DescribeConfigurationRevision returns the original server.properties bytes. The 64 KiB catalog record limit includes the base64 content and metadata. CreateCluster can attach revision 1 of a compatible configuration in the same account and Region. DescribeCluster and ListClusters return its ARN and revision. DeleteConfiguration requires all attached clusters to be deleted first. UpdateConfiguration and ListConfigurationRevisions are unavailable. The V2 and serverless APIs, cluster policies and every cluster update operation are not implemented. CurrentVersion is the constant K1 because no update is possible, and DeleteCluster refuses any other version. Provisioned clusters require two or three distinct subnet identifiers in supported Regions and the same number of brokers per subnet. Subnet availability zones, security groups, certificate authorities, KMS keys and log destinations are not resolved. New encryption-in-transit metadata defaults to TLS and inCluster=true. ListClusters supports a name prefix.",
    "name": "Amazon Managed Streaming for Apache Kafka"
   }
  ],

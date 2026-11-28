@@ -71,6 +71,16 @@ func (b *binding) openAPI() map[string]any {
 			"responses":   responses,
 		}}
 	} else {
+		service := b.signingName()
+		routeSchema := map[string]any{"type": "string", "enum": []any{service}}
+		routeHeader := map[string]any{"name": "X-Simulator-Service", "in": "header", "required": false,
+			"description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.", "schema": routeSchema}
+		if b.spec.Model == "kafka" {
+			// Unsigned MSK requests need the service discriminator on shared REST paths.
+			routeHeader["required"] = true
+			routeHeader["example"] = service
+			routeSchema["default"] = service
+		}
 		for _, op := range ops {
 			official := m.Operations[op.Name]
 			pathPart, _, _ := strings.Cut(official.HTTP.RequestURI, "?")
@@ -81,9 +91,9 @@ func (b *binding) openAPI() map[string]any {
 				paths[pathPart] = entry
 			}
 			operation := map[string]any{"operationId": b.spec.Model + op.Name, "tags": []any{tag}, "summary": op.Name,
-				"parameters": []any{map[string]any{"name": "X-Simulator-Service", "in": "header", "required": false, "description": "Routes an unsigned first-party request; SDKs use the SigV4 credential scope instead.", "schema": map[string]any{"type": "string", "enum": []any{b.signingName()}}}},
+				"parameters": []any{routeHeader},
 				"responses":  map[string]any{"200": map[string]any{"description": "Projected official output shape."}, "400": map[string]any{"description": "Modeled exception named by X-Amzn-ErrorType."}, "403": map[string]any{"description": "AccessDeniedException."}, "404": map[string]any{"description": "Not found or no matching official route."}}}
-			if b.usesResourceGroupForbidden(op.Name) {
+			if b.usesModeledForbidden(op.Name) {
 				operation["responses"].(map[string]any)["403"] = map[string]any{"description": "ForbiddenException."}
 			}
 			if official.Input != "" {
