@@ -81,7 +81,7 @@ jobs:
         run: |
           set -euo pipefail
           test "$GITHUB_REPOSITORY" = susumutomita/TenkaCloudSimulator
-          test "$GITHUB_REF" = refs/heads/verify/207-group-console
+          test "$GITHUB_REF" = refs/heads/verify/286-real-git-clients
           test "$(git rev-parse HEAD)" = "$PRODUCT"
           test "$(git rev-parse 'HEAD^{tree}')" = 6f4a278d09a4d256ca937beb08affe0d11ac6e1f
           test -z "$(git status --porcelain)"
