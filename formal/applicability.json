@@ -1,54 +1,416 @@
 {
   "version": 1,
-  "base_sha": "b97ddbd26f3e78905bd8e26a944fb7f0a28d8a42",
+  "base_sha": "17e30e18d0eb2216961158ae48f8ef42a20225e8",
   "changes": [
     {
-      "path": "internal/server/apidocs/openapi.json",
-      "sha256": "6120545bfb231765db2a60ebb589674906289aeaeffa71732ee91db13450bb64",
+      "path": ".github/workflows/ci.yml",
+      "sha256": "a42d3c85d3460f5213f91fea27c41ec75043632c72793ef6a81f70cdf53e376a",
+      "disposition": "formal-infrastructure",
+      "reason": "The existing Node test job also runs the Support console client suite.",
+      "models": []
+    },
+    {
+      "path": "README.md",
+      "sha256": "8cbff0e68721518b10d48375f3e8d5e21891b4698a23f3f6824e0795d3b54057",
+      "disposition": "documentation",
+      "reason": "Describe the publicly shipped local Support workflow and its limits.",
+      "models": []
+    },
+    {
+      "path": "docs/aws-support.md",
+      "sha256": "00552e1a581a2302bfc8d1b2e821da35880c9cfec132071b45ffd1acc5e38bd2",
+      "disposition": "documentation",
+      "reason": "Record the primary APIs, valid inputs, IAM, storage lifecycle, local quotas and workflow.",
+      "models": []
+    },
+    {
+      "path": "docs/coverage-assessment.md",
+      "sha256": "26a1a94becd34715d1e76ca87cfd819db82abae7f62c1aa660f7790d9cdde938",
+      "disposition": "documentation",
+      "reason": "Update the existing inventory to distinguish the local Support case flow from broader AWS Support.",
+      "models": []
+    },
+    {
+      "path": "docs/design/0001-go-standalone.md",
+      "sha256": "0bb4a753ae6ac84c8ab68a9eb64e15512670f6b40dc24533ea65bf36064b1b04",
+      "disposition": "documentation",
+      "reason": "Describe the real per-team database, public entry points and bounded authority.",
+      "models": []
+    },
+    {
+      "path": "formal/SupportCaseLifecycle.cfg",
+      "sha256": "8ed0616c28ef6c66d4a281c26c916cb6747d8ce0b3ac830e39b3d3d9ce171cc6",
+      "disposition": "modeled",
+      "reason": "Configure the finite case state, permissions, persistence and peer-frame invariants.",
+      "models": [
+        {
+          "id": "SupportCaseLifecycle",
+          "properties": [
+            "PeerFrame",
+            "StageContract",
+            "SubmissionContract",
+            "ResolutionContract",
+            "ReadProjection",
+            "RestartAndClock"
+          ],
+          "limits": "The checker projects finite transitions. Native tests cover actor resolution, SQL and transaction failures, full payloads, paging, actual transport and real clocks."
+        }
+      ]
+    },
+    {
+      "path": "formal/SupportCaseLifecycle.tla",
+      "sha256": "649d569021fb3721057efaec8ab840a67c0b8acb8e151dd969901bd83eff6382",
+      "disposition": "modeled",
+      "reason": "Define the finite service transitions, read projection and failure frames.",
+      "models": [
+        {
+          "id": "SupportCaseLifecycle",
+          "properties": [
+            "PeerFrame",
+            "StageContract",
+            "SubmissionContract",
+            "ResolutionContract",
+            "ReadProjection",
+            "RestartAndClock"
+          ],
+          "limits": "The checker projects finite transitions. Native tests cover actor resolution, SQL and transaction failures, full payloads, paging, actual transport and real clocks."
+        }
+      ]
+    },
+    {
+      "path": "formal/models.json",
+      "sha256": "659025ff00ef03527d88a0b1e2f2d3254ca3e9ab2489844c030ea55cabf81fab",
+      "disposition": "formal-infrastructure",
+      "reason": "Register the finite Support transition system, protected properties and negative controls.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/s3.go",
+      "sha256": "92e41b935ba0647504004b36ad3579bdf14a01441d6a6174abc0c73d288ca40a",
+      "disposition": "modeled",
+      "reason": "The shared AWS gateway retains its team-scoped Support store handle.",
+      "models": [
+        {
+          "id": "SupportCaseLifecycle",
+          "properties": [
+            "PeerFrame"
+          ],
+          "limits": "The checker projects finite transitions. Native tests cover actor resolution, SQL and transaction failures, full payloads, paging, actual transport and real clocks."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/ssm.go",
+      "sha256": "830d093fc7d4e6fef12b6d13c71de0c86bcb5091d759c099a30cbaffbed1ae00",
+      "disposition": "modeled",
+      "reason": "Dispatch the Support protocol target to the actor-aware provider gateway.",
+      "models": [
+        {
+          "id": "SupportCaseLifecycle",
+          "properties": [
+            "PeerFrame",
+            "SubmissionContract"
+          ],
+          "limits": "The checker projects finite transitions. Native tests cover actor resolution, SQL and transaction failures, full payloads, paging, actual transport and real clocks."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/support_gateway.go",
+      "sha256": "f89c3fc69e4467803ed0ffffb3c9516180ef6f05a5debd2ed319ff4b48fa8102",
+      "disposition": "modeled",
+      "reason": "Authorize and route the selected operation on this team.",
+      "models": [
+        {
+          "id": "SupportCaseLifecycle",
+          "properties": [
+            "PeerFrame",
+            "StageContract",
+            "SubmissionContract",
+            "ResolutionContract",
+            "ReadProjection",
+            "RestartAndClock"
+          ],
+          "limits": "The checker projects finite transitions. Native tests cover actor resolution, SQL and transaction failures, full payloads, paging, actual transport and real clocks."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/support_gateway_test.go",
+      "sha256": "1d13ec8121fd2dad2cfa83c56be48bfd019e2101893388eec9a5976df253af91",
+      "disposition": "test-support",
+      "reason": "Exercise native protocol, payload and request admission through the gateway.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/supportcases/mutate.go",
+      "sha256": "5667ea67e31dd1939131b623ed8b5e40dfa5e679d265984e0c06cab637424a99",
+      "disposition": "modeled",
+      "reason": "Perform atomic staging, submission and resolution in SQLite.",
+      "models": [
+        {
+          "id": "SupportCaseLifecycle",
+          "properties": [
+            "StageContract",
+            "SubmissionContract",
+            "ResolutionContract",
+            "PeerFrame"
+          ],
+          "limits": "The checker projects finite transitions. Native tests cover actor resolution, SQL and transaction failures, full payloads, paging, actual transport and real clocks."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/supportcases/read.go",
+      "sha256": "130ce583e22a9dfff928b317c8497e8ec3159a951d7254ff7c890f0945ecf778",
+      "disposition": "modeled",
+      "reason": "Project saved cases, communications, and immutable attachment bytes.",
+      "models": [
+        {
+          "id": "SupportCaseLifecycle",
+          "properties": [
+            "ReadProjection",
+            "PeerFrame",
+            "RestartAndClock"
+          ],
+          "limits": "The checker projects finite transitions. Native tests cover actor resolution, SQL and transaction failures, full payloads, paging, actual transport and real clocks."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/supportcases/read_bounds_test.go",
+      "sha256": "f4ffbd8977ee933cf8910fcad91c6ac2d3c4b8cf589690bf05c5eea2044e146e",
+      "disposition": "test-support",
+      "reason": "Verify empty file encoding and inclusive submicrosecond UTC timestamp filters against the real store.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/supportcases/staged_files_test.go",
+      "sha256": "b229462959e5df158aa4f0bae0cc85c10df4a9b1a40ea5d4df9b6e7d1e015d75",
+      "disposition": "test-support",
+      "reason": "Verify real stage expiry and rollback plus canceled connection waits using persistent SQLite.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/supportcases/store.go",
+      "sha256": "285e183545dbe7f5af845bdcdbdc7724012839675cf9571f61c8bc017118b50c",
+      "disposition": "modeled",
+      "reason": "Initialize team-scoped state and apply the case and staging clocks.",
+      "models": [
+        {
+          "id": "SupportCaseLifecycle",
+          "properties": [
+            "StageContract",
+            "SubmissionContract",
+            "RestartAndClock",
+            "PeerFrame"
+          ],
+          "limits": "The checker projects finite transitions. Native tests cover actor resolution, SQL and transaction failures, full payloads, paging, actual transport and real clocks."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/supportcases/store_test.go",
+      "sha256": "effdf8a0b8bb5a662772da1dbcefdc56af1b90c47e4845a64aae2726c8cf8493",
+      "disposition": "test-support",
+      "reason": "Exercise persistent case history, scoped pagination, resolution and atomic attachment admission.",
+      "models": []
+    },
+    {
+      "path": "internal/server/apidocs/aws-json-renderer.js",
+      "sha256": "9e67a5fcbe623d1ce5e21d1a3b0abb9b57eb9a72b3774f3de4f9f2e8cd2d50ed",
       "disposition": "presentation",
-      "reason": "Correct only the Route53 tag exclusion to acknowledge the already shipped dedicated Console; all paths, queries, examples and schemas remain unchanged.",
+      "reason": "Share the native AWS JSON byte-to-text Scalar display decoder across the root and Support pages.",
       "models": []
     },
     {
-      "path": "test/e2e/route53_openapi.py",
-      "sha256": "54a383e898b33f26041278720e61e72e2554daeb4dd21e3903be2af6f3b91d8a",
-      "disposition": "test-support",
-      "reason": "Keep the exact current Route53 tag guard in sync with the corrected documentation while preserving the path contract hash and every historical projection.",
+      "path": "internal/server/apidocs/index.html",
+      "sha256": "5c6e6f074ae0ff60d89560680ff08e4b237654bcaf7fa944fcea67e073156187",
+      "disposition": "presentation",
+      "reason": "Load the shared AWS JSON display renderer before initializing the root API reference.",
       "models": []
     },
     {
-      "path": "test/e2e/route53_scalar_send.py",
-      "sha256": "179dd84f63a29311df9c43ce4f55b7f43c0649e63a939039e4524f4395b7fdd6",
-      "disposition": "test-support",
-      "reason": "One genuine cookie-only Scalar TestDNSAnswer GET derived from the served specification and actual owned native records, with read-only owner and peer snapshots and native cleanup. No external DNS or SDK compatibility claim.",
+      "path": "internal/server/apidocs/init.js",
+      "sha256": "da2a4413237d9b0f92c2a5433d3c4e975d60633f2efdb35c3edd5d9aead89d50",
+      "disposition": "presentation",
+      "reason": "Configure the existing shared AWS JSON renderer in the root Scalar UI.",
       "models": []
     },
     {
-      "path": "test/e2e/test_route53_openapi.py",
-      "sha256": "fb45a2580aad66f4f39ad6fd7854a9c944a24fac38b25a5c2b1a3c79a5f88a06",
-      "disposition": "test-support",
-      "reason": "Positive current-tag and negative stale or broadened-tag controls; explicitly retain the exact inherited path digest.",
+      "path": "internal/server/apidocs/support-init.js",
+      "sha256": "f8ee2c370708aeeb8eb9e75a7164133f01a4f7355e196b099b56d64532f9373e",
+      "disposition": "presentation",
+      "reason": "Restrict the reference to genuine supported requests on the local service and display the returned native AWS JSON.",
       "models": []
     },
     {
-      "path": "test/e2e/test_sakura_openapi.py",
-      "sha256": "3308354e92616185982e4e07e2083a3dcf42fe341a67ac30ca95348eea626c73",
-      "disposition": "test-support",
-      "reason": "Validate the current Route53 tag before projecting the one historical description on a copy for the unchanged whole-document hash.",
+      "path": "internal/server/apidocs/support.html",
+      "sha256": "e6c22fa3fce188e19c9132b0c6a6cd06fd3896d737706a08a08b79fa523507e0",
+      "disposition": "presentation",
+      "reason": "Serve the local Support Scalar reference entry point.",
       "models": []
     },
     {
-      "path": "test/e2e/test_ssm_command_reference.py",
-      "sha256": "de316ca3d89664ddd54d6afec29a9f6358c77d13e0ea4b8a88a837a2bf117e99",
-      "disposition": "test-support",
-      "reason": "Validate the current Route53 tag before projecting the one historical description on a copy for the unchanged whole-document hash.",
+      "path": "internal/server/apidocs/support.json",
+      "sha256": "de474b5b9b76da1fb3ea6f3c737964265bd5f1dec8062ecd8bd6a75246908318",
+      "disposition": "presentation",
+      "reason": "Publish operation choices and examples for the real AWS JSON root POST.",
       "models": []
     },
     {
-      "path": "test/e2e/test_ssm_document_reference.py",
-      "sha256": "fa4f5ddc2a0c286c1bd43cc9527357dd38c755e16fe2de4e7de34b8012f2178a",
+      "path": "internal/server/server.go",
+      "sha256": "97b8b882d6988dd0411b08b2fe4a71f5b1f7ef0d3f48c1b7667072877e0f1572",
+      "disposition": "modeled",
+      "reason": "Install one local Support store per team and advertise its scoped capability.",
+      "models": [
+        {
+          "id": "SupportCaseLifecycle",
+          "properties": [
+            "PeerFrame",
+            "RestartAndClock"
+          ],
+          "limits": "The checker projects finite transitions. Native tests cover actor resolution, SQL and transaction failures, full payloads, paging, actual transport and real clocks."
+        }
+      ]
+    },
+    {
+      "path": "internal/server/support_api_test.go",
+      "sha256": "d54babb8aa696f52f76e99a8acbf1e239899d70de26654f3635d128f5152ca7a",
       "disposition": "test-support",
-      "reason": "Validate the current Route53 tag before projecting the one historical description on a copy for the unchanged whole-document hash.",
+      "reason": "Exercise configured server dispatch, real identity, capabilities and failures through HTTP.",
+      "models": []
+    },
+    {
+      "path": "internal/server/web/app.js",
+      "sha256": "5d13c88046d241629bcb7d89143108e9dc4ab549c66192c7fb267a44fcacc345",
+      "disposition": "modeled",
+      "reason": "Integrate Support into the shared console shell while preserving existing capability-gated navigation.",
+      "models": [
+        {
+          "id": "SimpleDBConsoleEpoch",
+          "properties": [
+            "VisibleRequiresCapability",
+            "OnlyCurrentScopeVisible"
+          ],
+          "limits": "This invariant concerns the retained SimpleDB view on the shared shell. Independent browser and client tests exercise the added Support UI and its actions."
+        }
+      ]
+    },
+    {
+      "path": "scripts/formal_model_gate.py",
+      "sha256": "53f096d53223e3a720c5ed6ca097c13819b7b21c9386d885816dcae53c69550f",
+      "disposition": "formal-infrastructure",
+      "reason": "Require the checked Support files, lifecycle properties and controls in the manifest.",
+      "models": []
+    },
+    {
+      "path": "scripts/test-formal-gate.py",
+      "sha256": "c08a0d3e9e42206b8c97ee946abcb73ee9e68974171fd88233e078a500b82ce5",
+      "disposition": "formal-infrastructure",
+      "reason": "Exercise the manifest gate against missing Support properties, paths and controls.",
+      "models": []
+    },
+    {
+      "path": "test/console/api-reference-json.test.mjs",
+      "sha256": "15590e665669c839c10eb72b22468f92d54fe68fe889176672d86f87dbc9033c",
+      "disposition": "test-support",
+      "reason": "Exercise the same AWS JSON rendering plugin loaded by the served root reference.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/support_cases.py",
+      "sha256": "0694d51f260466f3f2be96e1b3663854e468ef28910e763691bc881f5f3fe7c1",
+      "disposition": "test-support",
+      "reason": "Exercise all seven operations with the stock SDK, isolated team databases and process reopen.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/support_console.py",
+      "sha256": "88aa4317c6679b06330413749144de72c22c7c6cba2ded0c3472744274f5f09c",
+      "disposition": "test-support",
+      "reason": "Exercise genuine browser controls, SDK readback, lost acknowledgments, two-team scope and cleanup.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/support_scalar.py",
+      "sha256": "85b257984d1f087c87c0222f31036d6ee5d36a34121b7a7c9b02962464497b63",
+      "disposition": "test-support",
+      "reason": "Exercise real Scalar Sends, the visible native response, SDK readback and participant denial.",
+      "models": []
+    },
+    {
+      "path": "tools/console/bundle-digests.json",
+      "sha256": "db6a2020010211051dd98a01504793a443be1eb2ba4612ae902e6967b08b4882",
+      "disposition": "presentation",
+      "reason": "Identify the generated console artifact which includes Support.",
+      "models": []
+    },
+    {
+      "path": "tools/console/bundle-inputs.json",
+      "sha256": "dab80c0539f1ff23a8fa36e0e5d09ae43f96fe99370a74f46ceb4fdc71725c23",
+      "disposition": "presentation",
+      "reason": "Record the console inputs for the generated Support-inclusive bundle.",
+      "models": []
+    },
+    {
+      "path": "tools/console/src/console-home.jsx",
+      "sha256": "0d84975b33ce61cdf3eca6bf9ec9bb59894eb0f9784790b58b81593df7cb01fe",
+      "disposition": "presentation",
+      "reason": "Render the navigation entry for the actual Support console.",
+      "models": []
+    },
+    {
+      "path": "tools/console/src/console-navigation.mjs",
+      "sha256": "e6f09a69e8f034e2343149f28835f5f9f29be0767031f3db8776195b05914687",
+      "disposition": "modeled",
+      "reason": "Integrate Support into the shared console shell while preserving existing capability-gated navigation.",
+      "models": [
+        {
+          "id": "SimpleDBConsoleEpoch",
+          "properties": [
+            "VisibleRequiresCapability",
+            "OnlyCurrentScopeVisible"
+          ],
+          "limits": "This invariant concerns the retained SimpleDB view on the shared shell. Independent browser and client tests exercise the added Support UI and its actions."
+        }
+      ]
+    },
+    {
+      "path": "tools/console/src/main.jsx",
+      "sha256": "6d5dddf0140e8f7a9467def96731209d58470fef66c2d2a81eed4a71b1236b50",
+      "disposition": "modeled",
+      "reason": "Integrate Support into the shared console shell while preserving existing capability-gated navigation.",
+      "models": [
+        {
+          "id": "SimpleDBConsoleEpoch",
+          "properties": [
+            "VisibleRequiresCapability",
+            "OnlyCurrentScopeVisible"
+          ],
+          "limits": "This invariant concerns the retained SimpleDB view on the shared shell. Independent browser and client tests exercise the added Support UI and its actions."
+        }
+      ]
+    },
+    {
+      "path": "tools/console/src/support-client.mjs",
+      "sha256": "a931f02dfadac2b5f116c556eb5fe2da01d301d92eb7b70f6c6805518b0c7d6b",
+      "disposition": "presentation",
+      "reason": "Submit and validate the seven actual case operations for the browser.",
+      "models": []
+    },
+    {
+      "path": "tools/console/src/support-console.jsx",
+      "sha256": "4591cafcdcbddbb4e5711824dd24e88097a9859b1d7080f3e1e021f2e1f5f7b4",
+      "disposition": "presentation",
+      "reason": "Render scoped case history, participant actions, uncertainty and attachment readback.",
+      "models": []
+    },
+    {
+      "path": "tools/console/test/support-client.test.mjs",
+      "sha256": "2992ab4ea863547970072950880d47cab215853ad14e290fae7bcf0aecdd59a9",
+      "disposition": "presentation",
+      "reason": "Exercise the Support presentation client and its response and scope constraints.",
       "models": []
     }
   ]
