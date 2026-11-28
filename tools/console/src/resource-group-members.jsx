@@ -15,12 +15,6 @@ import Table from '@cloudscape-design/components/table';
 const repositoryType = 'AWS::ECR::Repository';
 const pageSize = 10;
 
-export function resourceGroupDetail(service, resource, detail, region) {
-  if (service?.model !== 'resource-groups' || resource?.kind !== 'group' ||
-      !['GetGroupQuery', 'UpdateGroupQuery', 'ListGroupResources'].every(op => service.operations.includes(op))) return false;
-  return !!detail?.Name && detail.GroupArn === 'arn:aws:resource-groups:' + region + ':' + service.account + ':group/' + detail.Name;
-}
-
 function readFilter(groupQuery, name) {
   if (groupQuery?.GroupName !== name || groupQuery.ResourceQuery?.Type !== 'TAG_FILTERS_1_0') throw Error('Invalid group query response.');
   const query = JSON.parse(groupQuery.ResourceQuery.Query);

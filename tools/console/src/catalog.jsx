@@ -1,7 +1,7 @@
 import React,{useEffect,useMemo,useRef,useState} from 'react';
 import {useLocale} from './i18n.jsx';
 import AppStreamAppBlockForm from './appstream-app-block.jsx';
-import ResourceGroupMembers, {resourceGroupDetail} from './resource-group-members.jsx';
+import ResourceGroupMembers from './resource-group-members.jsx';
 import BatchJobDefinitionForm from './batch-job-definition-form.jsx';
 import {batchDefinitionARN,batchDefinitionOperations,isBatchJobDefinition} from './batch-job-definitions.mjs';
 import KinesisVideoRetention from './kinesis-video-retention.jsx';
@@ -144,6 +144,12 @@ export function fieldOrder(members,resource){
 // Each resource kind and member keeps its official name beside the derived
 // label wherever a user maps it to the API or an SDK.
 function Official({name}){return <Box variant="small" color="text-body-secondary"><span className="catalog-key">{name}</span></Box>}
+
+function resourceGroupDetail(service, resource, detail, region) {
+  if (service?.model !== 'resource-groups' || resource?.kind !== 'group' ||
+      !['GetGroupQuery', 'UpdateGroupQuery', 'ListGroupResources'].every(op => service.operations.includes(op))) return false;
+  return !!detail?.Name && detail.GroupArn === 'arn:aws:resource-groups:' + region + ':' + service.account + ':group/' + detail.Name;
+}
 
 export default function CatalogView({region,request,catalog,onSaving}){
  const {t}=useLocale();
