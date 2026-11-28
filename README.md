@@ -177,6 +177,7 @@ console, CloudFormation adapter or Challenge integration.
   A scheduling policy cannot be deleted while a saved job queue references it.
   An existing FIFO job queue cannot be assigned a fair-share scheduling policy.
   Disable a job queue before deleting it; a refused deletion leaves it unchanged.
+  To delete a compute environment, disable it and remove it from every job queue in the same Region.
   Batch also stores and deregisters bounded EC2 single-container job definition
   revisions; it does not pull images, run containers, or submit jobs.
   The AWS catalog console registers a name, image name, vCPUs and memory,

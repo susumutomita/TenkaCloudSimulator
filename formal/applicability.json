@@ -1,34 +1,54 @@
 {
   "version": 1,
-  "base_sha": "a287b812d1f6610963deb4181200ce3ea81a9e29",
+  "base_sha": "fa06c139f93ab1e32bf8c13809ca70434464994a",
   "changes": [
     {
       "path": "README.md",
-      "sha256": "a445ffaad8c949f824badaf4b059baf1701b288d6340b9ed1ede0432d89f517d",
+      "sha256": "887006cf595f4226c1b4e1f66138a8261c8a45ea34a506ca7da2b5f6cfef52fc",
       "disposition": "documentation",
-      "reason": "Describes the supported MSK cluster attachment lifecycle.",
+      "reason": "Documents custom MSK configurations, immutable revision readback and optional cluster attachment.",
       "models": []
     },
     {
       "path": "docs/aws-catalog-services.md",
-      "sha256": "0ca241306cb254fbebcaf9a055c597577c9b2b6e9a7051a7730ecced37aabd46",
+      "sha256": "0ec2cd6bc6d4e0474bf3ef771f14eea89b7554846bc922265fcb77fa344db438",
       "disposition": "documentation",
-      "reason": "Regenerates the bounded operations table with the supported attachment and dependency checks.",
+      "reason": "Regenerates the reviewed Kafka operations and bounds for configuration storage, attachment and deletion.",
       "models": []
     },
     {
       "path": "docs/aws-catalog.md",
-      "sha256": "353bc5d5cf8a2281166d50b0d1274d01ea2f7d5918ba0e0c0c093a56a0aa5f01",
+      "sha256": "7e51f6b5c7bb0089c38afd7af79c5a556adc52d6eb9a6fb2157ce55a99b0d152",
       "disposition": "documentation",
-      "reason": "Documents the accepted reference, IAM resources, version list semantics and cleanup order.",
+      "reason": "Documents configuration storage, error semantics, both create authorization targets, version matching and cleanup order.",
       "models": []
     },
     {
       "path": "docs/design/0001-go-standalone.md",
-      "sha256": "b09105340ca720fb348ddb7d4404853d3f6d9e838bbb9f62d0e4294a78d1a790",
+      "sha256": "1c1aac699dd0ef57938766f64523f450098a3e3e1edfe607adc5969b1b1745af",
       "disposition": "documentation",
-      "reason": "Records transactional validation and dependency-preserving deletion of MSK configurations.",
+      "reason": "Records immutable revision storage and the transactional dependency between a cluster and its selected configuration.",
       "models": []
+    },
+    {
+      "path": "internal/aws/catalog/models/kafka.json",
+      "sha256": "7815d92ee05be295c2b86f740347ea81c4f783432eb9351814b53d7acfc799cc",
+      "disposition": "modeled",
+      "reason": "Expands the pinned Kafka model subset to include five reviewed configuration operations.",
+      "models": [
+        {
+          "id": "CatalogResourceLifecycle",
+          "properties": [
+            "AuthorizationFirst",
+            "FailureFrame",
+            "PeerFrame",
+            "UniqueNames",
+            "QuotaBound",
+            "FreshIDs"
+          ],
+          "limits": "The finite catalog model covers authorization, failed writes, peer state, unique names, quota and distinct identities. Native tests check the MSK ARN, wire encoding, revision selector, REST projections and immutable bytes."
+        }
+      ]
     },
     {
       "path": "internal/aws/catalog/msk_attachment_test.go",
@@ -41,14 +61,14 @@
       "path": "internal/aws/catalog/msk_configuration_test.go",
       "sha256": "57b847f8a08b715cfec652693271f8921d8008b03aa44fea44f5cd247ec2ede9",
       "disposition": "test-support",
-      "reason": "Supersedes the unimplemented-attachment expectation with the dedicated lifecycle tests.",
+      "reason": "Covers immutable bytes and metadata projections, IAM resources, rejected writes, isolation, quota and cleanup.",
       "models": []
     },
     {
-      "path": "internal/aws/catalog/semantics.go",
-      "sha256": "c92efb0b39257dfd3e46bb0d45f81f8033120605c8d923386ca82a901484b67c",
+      "path": "internal/aws/catalog/selection.json",
+      "sha256": "332b79af20516ba07006c6f221a6819e451e2cb8ef3194e037506b14f7a3815e",
       "disposition": "modeled",
-      "reason": "Authorizes referenced configuration ARNs and runs the declared check before and within the catalog write transaction.",
+      "reason": "Registers the five supported configuration operations in the reviewed Kafka selection.",
       "models": [
         {
           "id": "CatalogResourceLifecycle",
@@ -56,10 +76,32 @@
             "AuthorizationFirst",
             "FailureFrame",
             "PeerFrame",
-            "ChildGuard",
+            "UniqueNames",
+            "QuotaBound",
             "FreshIDs"
           ],
-          "limits": "The finite model covers authorization, failed writes, dependency deletion and distinct identities. Native tests exercise multi-ARN authorization, MSK version and revision compatibility, region and account scope, and actual transaction interleavings."
+          "limits": "The finite catalog model covers authorization, failed writes, peer state, unique names, quota and distinct identities. Native tests check the MSK ARN, wire encoding, revision selector, REST projections and immutable bytes."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/catalog/semantics.go",
+      "sha256": "59cd704f2bbb5b1d054313b8284400a5450b2e5df6106e3af678b8458b6f494e",
+      "disposition": "modeled",
+      "reason": "Derives creation metadata, uses wildcard authorization for the configured list, authorizes related create resources and validates references transactionally.",
+      "models": [
+        {
+          "id": "CatalogResourceLifecycle",
+          "properties": [
+            "AuthorizationFirst",
+            "FailureFrame",
+            "PeerFrame",
+            "UniqueNames",
+            "QuotaBound",
+            "FreshIDs",
+            "ChildGuard"
+          ],
+          "limits": "The finite catalog model covers authorization, failed writes, peer state, dependency deletion, uniqueness, quota and fresh IDs. Native tests cover multi-ARN authorization, opaque bytes, projections, region and version matching and concrete SQLite interleavings."
         }
       ]
     },
@@ -67,7 +109,7 @@
       "path": "internal/aws/catalog/services_data.go",
       "sha256": "bc0ce56cd3bb25f694c959fa74f51442a1e5390e24ae456e0e44f0ddec29cccb",
       "disposition": "modeled",
-      "reason": "Binds CreateCluster revision and version validation and the attached configuration deletion guard.",
+      "reason": "Binds the five configuration operations, native attachment and revision validation, dependency guard and tag restrictions.",
       "models": [
         {
           "id": "CatalogResourceLifecycle",
@@ -75,18 +117,20 @@
             "AuthorizationFirst",
             "FailureFrame",
             "PeerFrame",
-            "ChildGuard",
-            "FreshIDs"
+            "UniqueNames",
+            "QuotaBound",
+            "FreshIDs",
+            "ChildGuard"
           ],
-          "limits": "The finite model covers authorization, failed writes, dependency deletion and distinct identities. Native tests exercise multi-ARN authorization, MSK version and revision compatibility, region and account scope, and actual transaction interleavings."
+          "limits": "The finite catalog model covers authorization, failed writes, peer state, dependency deletion, uniqueness, quota and fresh IDs. Native tests cover multi-ARN authorization, opaque bytes, projections, region and version matching and concrete SQLite interleavings."
         }
       ]
     },
     {
       "path": "internal/aws/catalog/spec.go",
-      "sha256": "d184d83f010e8857fa2f5dd29f06d65663063cd117f3c3722a307f58a51875a4",
+      "sha256": "d04da59995a1905c80acd1ae406ef21b2215c4233786c5ddb6cf14105173ed88",
       "disposition": "modeled",
-      "reason": "Declares opt-in create authorization on reference ARNs and per-service compatibility checks.",
+      "reason": "Declares opt-in creation metadata initialization, wildcard list authorization, create authorization on referenced ARNs and reference compatibility checks.",
       "models": [
         {
           "id": "CatalogResourceLifecycle",
@@ -94,25 +138,41 @@
             "AuthorizationFirst",
             "FailureFrame",
             "PeerFrame",
-            "ChildGuard",
-            "FreshIDs"
+            "UniqueNames",
+            "QuotaBound",
+            "FreshIDs",
+            "ChildGuard"
           ],
-          "limits": "The finite model covers authorization, failed writes, dependency deletion and distinct identities. Native tests exercise multi-ARN authorization, MSK version and revision compatibility, region and account scope, and actual transaction interleavings."
+          "limits": "The finite catalog model covers authorization, failed writes, peer state, dependency deletion, uniqueness, quota and fresh IDs. Native tests cover multi-ARN authorization, opaque bytes, projections, region and version matching and concrete SQLite interleavings."
         }
       ]
+    },
+    {
+      "path": "internal/server/apidocs/catalog/index.json",
+      "sha256": "a411a8b0eddb498242035722817df4296c34119b6ab3ff23bafa520563420eee",
+      "disposition": "presentation",
+      "reason": "Regenerates the native catalog reference index for the additional Kafka methods.",
+      "models": []
     },
     {
       "path": "internal/server/apidocs/catalog/kafka.json",
       "sha256": "4aa177bc9d8274c9c017a7088f7b5f6d1ff130be24aca3b87bf32b3355b41ec7",
       "disposition": "presentation",
-      "reason": "Regenerates the served catalog reference with the reviewed MSK attachment boundary.",
+      "reason": "Regenerates the served Kafka reference with the five configuration operations, attachment semantics and execution limits.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/aws_catalog_fixtures.py",
+      "sha256": "035146eb787e3bf1ab84c6ae57fbc96429b6a4de06f1a4c9a86ca4ece0236b54",
+      "disposition": "test-support",
+      "reason": "Adds an explicit byte comparison for a native SDK response in an existing fixture.",
       "models": []
     },
     {
       "path": "test/e2e/catalog_fixtures/kafka.json",
       "sha256": "a02e5342a5d1b3f1fc2a1d91bf03e1b29c88f2b6939b1ee2953fbe1c7f9817d3",
       "disposition": "test-support",
-      "reason": "Exercises CreateCluster with a configuration ARN, reads the persisted revision across restart, rejects deletion in use and removes the cluster before the configuration.",
+      "reason": "Runs native SDK configuration and attached and unattached cluster lifecycles across independent teams, restart, refusal in use and cleanup.",
       "models": []
     }
   ]

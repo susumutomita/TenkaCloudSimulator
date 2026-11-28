@@ -1059,7 +1059,7 @@ func (q *request) remove() (map[string]any, error) {
 			// A stale or missing row still receives deleteRow's existing CAS
 			// failure, rather than validating a different row than authorized.
 			if err == nil && current.Seq == r.Seq && current.Generation == r.Generation {
-				if err := q.op.CheckDelete(current.Document); err != nil {
+				if err := q.op.CheckDelete(tx, current); err != nil {
 					return err
 				}
 			}

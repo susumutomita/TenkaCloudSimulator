@@ -90,9 +90,9 @@ type Op struct {
 	// IdempotentDelete makes deleting a missing resource succeed, as the
 	// official operation documents.
 	IdempotentDelete bool
-	// CheckDelete validates a read-only view of the authorized row's matching
-	// generation inside the delete transaction, before changing stored state.
-	CheckDelete func(document map[string]any) error
+	// CheckDelete validates the authorized row's matching generation and can
+	// read related rows in the same delete transaction.
+	CheckDelete func(querier, row) error
 	// HasMore names a boolean output member that reports a further page.
 	HasMore string
 	// Token names the input member of an update, put or delete that carries
