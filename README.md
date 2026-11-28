@@ -183,6 +183,7 @@ console, CloudFormation adapter or Challenge integration.
   To delete a compute environment, disable it and remove it from every job queue in the same Region.
   Batch also stores and deregisters bounded EC2 single-container job definition
   revisions; it does not pull images, run containers, or submit jobs.
+  Service Quotas shows the AWS default and the enforced local limit for regional B2B Data Interchange Profiles. It stores account-level increase requests that you can retrieve by ID or filter by status. [Supported quota and request lifecycle](docs/aws-catalog.md#b2b-data-interchange-profile-quota).
   Resource Groups shows local ECR repository ARNs matching a named group’s tag key and value. Open the group in the service catalog to edit its saved filter.
   Policies for `CreateGroup` and `ListGroups` require `Resource: "*"`, including when all groups share an ARN pattern. All eleven supported operations return HTTP 403 `ForbiddenException` on IAM denial. Plain and tag-query groups omit `ApplicationTag`. [Resource Groups workflow and IAM requirements](docs/aws-catalog.md#ecr-repository-group-membership)
   The AWS catalog console registers a name, image name, vCPUs and memory,

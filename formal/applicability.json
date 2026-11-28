@@ -1,606 +1,755 @@
 {
   "version": 1,
-  "base_sha": "05373eeb6653ffa6a705f3d7308a3594c571750f",
+  "base_sha": "d8d866cbd6bd38dad5ac3dbd40f39c90c03502f0",
   "changes": [
     {
-      "path": ".github/workflows/ci.yml",
-      "sha256": "310182418f1ba9bf4d21891a73efac713a2ca1503bdba8895c509a0caa041246",
-      "disposition": "formal-infrastructure",
-      "reason": "Independently protect both CloudFront models and fixed controls; run focused reference and Console client checks in normal CI.",
-      "models": []
-    },
-    {
       "path": "README.md",
-      "sha256": "dbba5f95949f194593994ce7ca01b9779f060add70baab69aada92cc2b625944",
+      "sha256": "8ee664ad68fb965c5afaff92e543bed328d3331938185840b08053a5716392d8",
       "disposition": "documentation",
-      "reason": "Describe the complete bounded native and EN/JA Console workflow and retained unsupported origin/network/platform scope.",
+      "reason": "Document the published default, applied B2BI profile capacity, local increase requests and authorized history.",
       "models": []
     },
     {
-      "path": "docs/cloudfront-local-content.md",
-      "sha256": "9c2cf4f27202eb196076b15987427fcc426e14c8157f19813989bee206af3f12",
+      "path": "docs/aws-catalog-services.md",
+      "sha256": "71754765cf2eecb3c7161a876c09209916e1c235f6f797c1d13059738b056886",
       "disposition": "documentation",
-      "reason": "Describe the complete bounded native and EN/JA Console workflow and retained unsupported origin/network/platform scope.",
+      "reason": "Document the published default, applied B2BI profile capacity, local increase requests and authorized history.",
+      "models": []
+    },
+    {
+      "path": "docs/aws-catalog.md",
+      "sha256": "18fbc7e49b402f891ac74474376379f27a289903a34b8ad460efa66583edf66f",
+      "disposition": "documentation",
+      "reason": "Document the published default, applied B2BI profile capacity, local increase requests and authorized history.",
+      "models": []
+    },
+    {
+      "path": "docs/coverage-assessment.md",
+      "sha256": "13ec61fdaf11f0e8dd184777613f2f6722377514ade1971d52a2c21edcfdd1ba",
+      "disposition": "documentation",
+      "reason": "Document the published default, applied B2BI profile capacity, local increase requests and authorized history.",
       "models": []
     },
     {
       "path": "docs/design/0001-go-standalone.md",
-      "sha256": "70c344c2127ce214b0a64d33263494f9ea032ca7780597b8f85f7764af0c54df",
+      "sha256": "f3961e8c4e9c0f6f8d9e66168dac71b9ae35db6078ac014df7cc824cd70d0da7",
       "disposition": "documentation",
-      "reason": "Describe the complete bounded native and EN/JA Console workflow and retained unsupported origin/network/platform scope.",
+      "reason": "Document the published default, applied B2BI profile capacity, local increase requests and authorized history.",
       "models": []
     },
     {
-      "path": "formal/CloudFrontConsoleEpoch.cfg",
-      "sha256": "33e3b10974a87192cd3ce9f4d1e25016f4b23c59778376f9786c5a91965131b4",
+      "path": "formal/ServiceQuotaDiscovery.cfg",
+      "sha256": "29343c9ee7103f411aeca22b5d2dd1c10617b9be00dcc33c1bc49a151a5631e7",
       "disposition": "modeled",
-      "reason": "Bounded native CloudFront cache/authorization/atomicity and Console request ownership, protected content and explicit invalidation recovery. Concrete namespace and physically staged interruption tests cover wire/storage effects excluded from the finite models.",
+      "reason": "Four wildcard-authorized discovery reads and the retained quota-ARN read have independent default/applied/region/level/token projections and unchanged read frames.",
       "models": [
         {
-          "id": "CloudFrontConsoleEpoch",
+          "id": "ServiceQuotaDiscovery",
           "properties": [
-            "TypeOK",
-            "CurrentContent",
-            "CurrentReceipt",
-            "ProtectedDownload",
-            "AcknowledgedReceipt",
-            "StableUnknownCaller",
-            "ExplicitWriteConfirmation",
-            "OneCurrentWrite"
+            "ReadPreservesFrame",
+            "ReadProjectionCorrect",
+            "PeerPreserved",
+            "RestartPreservesFrame"
           ],
-          "limits": "Models bounded asynchronous content reads and invalidation ownership, abstract protected content, confirmation, unknown acknowledgement and stable explicit replay of fixed /* paths. One abstract scope combines identity, region, route and distribution. Does not model XML/UTF-8/DOM/React, download or OS execution, actual HTTP abort effects, IAM policy evaluation, SQLite, native cache or JavaScript/Go refinement. CloudFrontLocalCache and real SDK/browser/native tests cover separate backend behavior. Known-receipt GET retry/lookup retention is checked by the real browser/storage-outage fixture, not represented in this model."
+          "limits": "Finite two-team projection oracle only; numeric JSON bounds/types, literal endpoint regions, IAM parsing/ARN formatting, SQL and real process/SDK behavior are native/stock fixture checks, not proved by this model. Abstract prior Create/Delete do not add quota write APIs."
         }
       ]
     },
     {
-      "path": "formal/CloudFrontConsoleEpoch.tla",
-      "sha256": "beda3d0b2d03905674cb47cc5d76b477721441d02357491ced1aa598f0b28c6a",
+      "path": "formal/ServiceQuotaDiscovery.tla",
+      "sha256": "e1cefc02c38bbc66d6865bb17ac2e889e5ad8f027cba3a37de5128da9293062e",
       "disposition": "modeled",
-      "reason": "Bounded native CloudFront cache/authorization/atomicity and Console request ownership, protected content and explicit invalidation recovery. Concrete namespace and physically staged interruption tests cover wire/storage effects excluded from the finite models.",
+      "reason": "Four wildcard-authorized discovery reads and the retained quota-ARN read have independent default/applied/region/level/token projections and unchanged read frames.",
       "models": [
         {
-          "id": "CloudFrontConsoleEpoch",
+          "id": "ServiceQuotaDiscovery",
           "properties": [
-            "TypeOK",
-            "CurrentContent",
-            "CurrentReceipt",
-            "ProtectedDownload",
-            "AcknowledgedReceipt",
-            "StableUnknownCaller",
-            "ExplicitWriteConfirmation",
-            "OneCurrentWrite"
+            "ReadPreservesFrame",
+            "ReadProjectionCorrect",
+            "PeerPreserved",
+            "RestartPreservesFrame"
           ],
-          "limits": "Models bounded asynchronous content reads and invalidation ownership, abstract protected content, confirmation, unknown acknowledgement and stable explicit replay of fixed /* paths. One abstract scope combines identity, region, route and distribution. Does not model XML/UTF-8/DOM/React, download or OS execution, actual HTTP abort effects, IAM policy evaluation, SQLite, native cache or JavaScript/Go refinement. CloudFrontLocalCache and real SDK/browser/native tests cover separate backend behavior. Known-receipt GET retry/lookup retention is checked by the real browser/storage-outage fixture, not represented in this model."
+          "limits": "Finite two-team projection oracle only; numeric JSON bounds/types, literal endpoint regions, IAM parsing/ARN formatting, SQL and real process/SDK behavior are native/stock fixture checks, not proved by this model. Abstract prior Create/Delete do not add quota write APIs."
         }
       ]
     },
     {
-      "path": "formal/CloudFrontLocalCache.cfg",
-      "sha256": "cb43301b7e4c267dc478db98dd14e3f43de194faf5010bb56ef6311562d64419",
+      "path": "formal/ServiceQuotaRequestConsole.cfg",
+      "sha256": "9f2ff7f84f713418a6cd14f3d051727851970ed4e2e7576bd3b55605b72b1c4c",
       "disposition": "modeled",
-      "reason": "Bounded native CloudFront cache/authorization/atomicity and Console request ownership, protected content and explicit invalidation recovery. Concrete namespace and physically staged interruption tests cover wire/storage effects excluded from the finite models.",
+      "reason": "Bounded mounted Console write, unknown acknowledgement, explicit fresh same-scope recovery and separate user intent; property/mutant registration is not implementation or browser proof.",
       "models": [
         {
-          "id": "CloudFrontLocalCache",
+          "id": "ServiceQuotaRequestConsole",
           "properties": [
-            "TypeOK",
-            "FreshJointAuthority",
-            "ExactHitIdentity",
-            "MissReadsOrigin",
-            "FailureRollsBack",
-            "RefusalUnchanged",
-            "StaleETagUnchanged",
-            "UpdateClearsCache",
-            "InvalidationClearsCache",
-            "RestartPreserves",
-            "PeerUnchanged"
+            "SingleIntent",
+            "NoAutomaticWrite",
+            "NativeFrame",
+            "SavedExactlyOnce",
+            "Acknowledgement",
+            "FreshRecovery",
+            "ObservedOnly",
+            "SeparateIntent",
+            "RetiredRead",
+            "ScopeCleared",
+            "BlockedRetry",
+            "FreshCapacity",
+            "VisibleLookup",
+            "VisibleMount"
           ],
-          "limits": "Checks an atomic abstract transaction and one immutable pair of policy decisions per delivery. A bucket lifetime fingerprint is assumed distinct for the single ordinary recreation; actual wall-clock buckets.created plus region does not prove ABA resistance under clock rollback. One abstract cache line does not model concrete multi-entry quotas, exact paths, TTL seconds, SQL/triggers/locking, authentication, HTTP/XML/S3 parsing, cache buffers, ETags or Go refinement. Restart preserves abstract committed state only, not crash durability. Native and SDK tests separately cover the real implementation."
+          "limits": "Finite mounted quota-request control oracle only: explicit first unfiltered ACCOUNT ByQuota recovery disarms at start and rearms only on a fresh current successful observation; failed recovery/data invalidation clears approval and saved lookup. It does not identify a lost request by matching amount/time, infer persistence from arbitrary shape-valid replies, retry writes, or promise idempotency across tabs/new mounts. No JavaScript/React/DOM/HTTP/JSON/IAM/SQL/clock/refinement proof; real fixtures independently check bytes, scope, accessibility, restart, peer and cleanup. Leaving the mounted view ends its local unknown-outcome warning."
         }
       ]
     },
     {
-      "path": "formal/CloudFrontLocalCache.tla",
-      "sha256": "6c6b9cb2015d81c745883ec6d36ede60500a9ea579d6fd500ff9e4ade538e46a",
+      "path": "formal/ServiceQuotaRequestConsole.tla",
+      "sha256": "5339c8ef7b4640a84b761c8216881df19875113fc0ed96e6d6102c1fa4f4d79e",
       "disposition": "modeled",
-      "reason": "Bounded native CloudFront cache/authorization/atomicity and Console request ownership, protected content and explicit invalidation recovery. Concrete namespace and physically staged interruption tests cover wire/storage effects excluded from the finite models.",
+      "reason": "Bounded mounted Console write, unknown acknowledgement, explicit fresh same-scope recovery and separate user intent; property/mutant registration is not implementation or browser proof.",
       "models": [
         {
-          "id": "CloudFrontLocalCache",
+          "id": "ServiceQuotaRequestConsole",
           "properties": [
-            "TypeOK",
-            "FreshJointAuthority",
-            "ExactHitIdentity",
-            "MissReadsOrigin",
-            "FailureRollsBack",
-            "RefusalUnchanged",
-            "StaleETagUnchanged",
-            "UpdateClearsCache",
-            "InvalidationClearsCache",
-            "RestartPreserves",
-            "PeerUnchanged"
+            "SingleIntent",
+            "NoAutomaticWrite",
+            "NativeFrame",
+            "SavedExactlyOnce",
+            "Acknowledgement",
+            "FreshRecovery",
+            "ObservedOnly",
+            "SeparateIntent",
+            "RetiredRead",
+            "ScopeCleared",
+            "BlockedRetry",
+            "FreshCapacity",
+            "VisibleLookup",
+            "VisibleMount"
           ],
-          "limits": "Checks an atomic abstract transaction and one immutable pair of policy decisions per delivery. A bucket lifetime fingerprint is assumed distinct for the single ordinary recreation; actual wall-clock buckets.created plus region does not prove ABA resistance under clock rollback. One abstract cache line does not model concrete multi-entry quotas, exact paths, TTL seconds, SQL/triggers/locking, authentication, HTTP/XML/S3 parsing, cache buffers, ETags or Go refinement. Restart preserves abstract committed state only, not crash durability. Native and SDK tests separately cover the real implementation."
+          "limits": "Finite mounted quota-request control oracle only: explicit first unfiltered ACCOUNT ByQuota recovery disarms at start and rearms only on a fresh current successful observation; failed recovery/data invalidation clears approval and saved lookup. It does not identify a lost request by matching amount/time, infer persistence from arbitrary shape-valid replies, retry writes, or promise idempotency across tabs/new mounts. No JavaScript/React/DOM/HTTP/JSON/IAM/SQL/clock/refinement proof; real fixtures independently check bytes, scope, accessibility, restart, peer and cleanup. Leaving the mounted view ends its local unknown-outcome warning."
+        }
+      ]
+    },
+    {
+      "path": "formal/ServiceQuotaRequests.cfg",
+      "sha256": "6d7efb68660e863df8d0517194dc21e17c4d27bb3efe3c17d15cfcdcd6b3a5be",
+      "disposition": "modeled",
+      "reason": "Bind the Service Quotas operation or its model to request admission, saved state, failure outcomes and history visibility.",
+      "models": [
+        {
+          "id": "ServiceQuotaRequests",
+          "properties": [
+            "Admissions",
+            "CommitFrame",
+            "StoredFields",
+            "Capacity",
+            "Visibility",
+            "Lookup",
+            "PageScope",
+            "PrivateStage",
+            "ContenderFrame",
+            "RestartFrame"
+          ],
+          "limits": "Finite team and region scopes, admission, bounded request records and page cursors. Actual IAM targets, HTTP shape validation, persistent SQLite transactions, clock changes and cursor authentication are tested separately."
+        }
+      ]
+    },
+    {
+      "path": "formal/ServiceQuotaRequests.tla",
+      "sha256": "2bcebee936a032c98bd12f99a4000b627d211a01483c08645c9e9f7670c1cbb5",
+      "disposition": "modeled",
+      "reason": "Bind the Service Quotas operation or its model to request admission, saved state, failure outcomes and history visibility.",
+      "models": [
+        {
+          "id": "ServiceQuotaRequests",
+          "properties": [
+            "Admissions",
+            "CommitFrame",
+            "StoredFields",
+            "Capacity",
+            "Visibility",
+            "Lookup",
+            "PageScope",
+            "PrivateStage",
+            "ContenderFrame",
+            "RestartFrame"
+          ],
+          "limits": "Finite team and region scopes, admission, bounded request records and page cursors. Actual IAM targets, HTTP shape validation, persistent SQLite transactions, clock changes and cursor authentication are tested separately."
         }
       ]
     },
     {
       "path": "formal/models.json",
-      "sha256": "95bcd0b3d6cb738e399d625a8a372f939cfb72d8a773bc061e1fa750155656c0",
+      "sha256": "6a6e4f22a5c37b3aa50b592994587ec3c47ba5a86e1e334ea13c40a1812ff74f",
       "disposition": "formal-infrastructure",
-      "reason": "Independently protect both CloudFront models and fixed controls; run focused reference and Console client checks in normal CI.",
+      "reason": "Register and independently protect the native discovery, persisted request/history and mounted non-idempotent Console recovery models; retain all older model entries, properties, controls and source scopes.",
       "models": []
     },
     {
-      "path": "internal/aws/cloudfront_distribution.go",
-      "sha256": "9b7b4f4c6952d3542c6b4e1a658c42f341c7be96a5faa50bf449f9c30206dae4",
+      "path": "internal/aws/catalog/describe.go",
+      "sha256": "006da4e78ab08177f1cda74126e54fc35325f9185ec3df4f63db902134f1735c",
       "disposition": "modeled",
-      "reason": "Bounded native CloudFront cache/authorization/atomicity and Console request ownership, protected content and explicit invalidation recovery. Concrete namespace and physically staged interruption tests cover wire/storage effects excluded from the finite models.",
+      "reason": "Bind the regional, read-only B2BI Profiles quota and its enforced resource limit to the bounded catalog contract.",
       "models": [
         {
-          "id": "CloudFrontLocalCache",
+          "id": "CatalogResourceLifecycle",
           "properties": [
-            "TypeOK",
-            "FreshJointAuthority",
-            "ExactHitIdentity",
-            "MissReadsOrigin",
-            "FailureRollsBack",
-            "RefusalUnchanged",
-            "StaleETagUnchanged",
-            "UpdateClearsCache",
-            "InvalidationClearsCache",
-            "RestartPreserves",
-            "PeerUnchanged"
+            "AuthorizationFirst",
+            "FailureFrame",
+            "PeerFrame",
+            "QuotaBound"
           ],
-          "limits": "Checks an atomic abstract transaction and one immutable pair of policy decisions per delivery. A bucket lifetime fingerprint is assumed distinct for the single ordinary recreation; actual wall-clock buckets.created plus region does not prove ABA resistance under clock rollback. One abstract cache line does not model concrete multi-entry quotas, exact paths, TTL seconds, SQL/triggers/locking, authentication, HTTP/XML/S3 parsing, cache buffers, ETags or Go refinement. Restart preserves abstract committed state only, not crash durability. Native and SDK tests separately cover the real implementation."
+          "limits": "The finite model abstracts regional peers, authorization and capacity. It does not model this AWS quota code, ARN construction, Go binding, SQLite, SDK response or HTTP status."
         }
       ]
     },
     {
-      "path": "internal/aws/cloudfront_distribution_http.go",
-      "sha256": "e2ad0828b3c97f6899fb296060eb3f8fc6ef55678ffcfb8be07627d4f559dee4",
+      "path": "internal/aws/catalog/engine.go",
+      "sha256": "226c14940581b3d00785453f3b4b05861173d6613711fedf52113c3d0c2b1d96",
       "disposition": "modeled",
-      "reason": "Bounded native CloudFront cache/authorization/atomicity and Console request ownership, protected content and explicit invalidation recovery. Concrete namespace and physically staged interruption tests cover wire/storage effects excluded from the finite models.",
+      "reason": "Bind the Service Quotas operation or its model to request admission, saved state, failure outcomes and history visibility.",
       "models": [
         {
-          "id": "CloudFrontLocalCache",
+          "id": "CatalogResourceLifecycle",
           "properties": [
-            "TypeOK",
-            "FreshJointAuthority",
-            "ExactHitIdentity",
-            "MissReadsOrigin",
-            "FailureRollsBack",
-            "RefusalUnchanged",
-            "StaleETagUnchanged",
-            "UpdateClearsCache",
-            "InvalidationClearsCache",
-            "RestartPreserves",
-            "PeerUnchanged"
+            "AuthorizationFirst",
+            "FailureFrame",
+            "PeerFrame",
+            "QuotaBound"
           ],
-          "limits": "Checks an atomic abstract transaction and one immutable pair of policy decisions per delivery. A bucket lifetime fingerprint is assumed distinct for the single ordinary recreation; actual wall-clock buckets.created plus region does not prove ABA resistance under clock rollback. One abstract cache line does not model concrete multi-entry quotas, exact paths, TTL seconds, SQL/triggers/locking, authentication, HTTP/XML/S3 parsing, cache buffers, ETags or Go refinement. Restart preserves abstract committed state only, not crash durability. Native and SDK tests separately cover the real implementation."
+          "limits": "The finite model abstracts regional peers, authorization and capacity. It does not model this AWS quota code, ARN construction, Go binding, SQLite, SDK response or HTTP status."
         },
         {
-          "id": "CloudFrontConsoleEpoch",
+          "id": "ServiceQuotaDiscovery",
           "properties": [
-            "TypeOK",
-            "CurrentContent",
-            "CurrentReceipt",
-            "ProtectedDownload",
-            "AcknowledgedReceipt",
-            "StableUnknownCaller",
-            "ExplicitWriteConfirmation",
-            "OneCurrentWrite"
+            "ReadPreservesFrame",
+            "ReadProjectionCorrect",
+            "PeerPreserved",
+            "RestartPreservesFrame"
           ],
-          "limits": "Models bounded asynchronous content reads and invalidation ownership, abstract protected content, confirmation, unknown acknowledgement and stable explicit replay of fixed /* paths. One abstract scope combines identity, region, route and distribution. Does not model XML/UTF-8/DOM/React, download or OS execution, actual HTTP abort effects, IAM policy evaluation, SQLite, native cache or JavaScript/Go refinement. CloudFrontLocalCache and real SDK/browser/native tests cover separate backend behavior. Known-receipt GET retry/lookup retention is checked by the real browser/storage-outage fixture, not represented in this model."
+          "limits": "Finite two-team projection oracle only; numeric JSON bounds/types, literal endpoint regions, IAM parsing/ARN formatting, SQL and real process/SDK behavior are native/stock fixture checks, not proved by this model. Abstract prior Create/Delete do not add quota write APIs."
+        },
+        {
+          "id": "ServiceQuotaRequests",
+          "properties": [
+            "Admissions",
+            "CommitFrame",
+            "StoredFields",
+            "Capacity",
+            "Visibility",
+            "Lookup",
+            "PageScope",
+            "PrivateStage",
+            "ContenderFrame",
+            "RestartFrame"
+          ],
+          "limits": "Finite team and region scopes, admission, bounded request records and page cursors. Actual IAM targets, HTTP shape validation, persistent SQLite transactions, clock changes and cursor authentication are tested separately."
         }
       ]
     },
     {
-      "path": "internal/aws/cloudfront_distribution_interrupt_test.go",
-      "sha256": "addb31f3f2ac39b8a493ba4f65beb4c275fe038e51cceee5cfdcfd6c51afabae",
+      "path": "internal/aws/catalog/models/service-quotas.json",
+      "sha256": "b2eb4c3f862fd924f380d03da567c1dda0b501c3345548419ddad4203dabef96",
       "disposition": "modeled",
-      "reason": "Bounded native CloudFront cache/authorization/atomicity and Console request ownership, protected content and explicit invalidation recovery. Concrete namespace and physically staged interruption tests cover wire/storage effects excluded from the finite models.",
+      "reason": "Bind the Service Quotas operation or its model to request admission, saved state, failure outcomes and history visibility.",
       "models": [
         {
-          "id": "CloudFrontLocalCache",
+          "id": "CatalogResourceLifecycle",
           "properties": [
-            "TypeOK",
-            "FreshJointAuthority",
-            "ExactHitIdentity",
-            "MissReadsOrigin",
-            "FailureRollsBack",
-            "RefusalUnchanged",
-            "StaleETagUnchanged",
-            "UpdateClearsCache",
-            "InvalidationClearsCache",
-            "RestartPreserves",
-            "PeerUnchanged"
+            "AuthorizationFirst",
+            "FailureFrame",
+            "PeerFrame",
+            "QuotaBound"
           ],
-          "limits": "Checks an atomic abstract transaction and one immutable pair of policy decisions per delivery. A bucket lifetime fingerprint is assumed distinct for the single ordinary recreation; actual wall-clock buckets.created plus region does not prove ABA resistance under clock rollback. One abstract cache line does not model concrete multi-entry quotas, exact paths, TTL seconds, SQL/triggers/locking, authentication, HTTP/XML/S3 parsing, cache buffers, ETags or Go refinement. Restart preserves abstract committed state only, not crash durability. Native and SDK tests separately cover the real implementation."
+          "limits": "Covers finite operation admission, refusal/peer frames and declared capacity. The official schema, real configured backend limit, request history and regional IAM targets require native and SDK verification."
+        },
+        {
+          "id": "ServiceQuotaRequests",
+          "properties": [
+            "Admissions",
+            "CommitFrame",
+            "StoredFields",
+            "Capacity",
+            "Visibility",
+            "Lookup",
+            "PageScope",
+            "PrivateStage",
+            "ContenderFrame",
+            "RestartFrame"
+          ],
+          "limits": "Finite team and region scopes, admission, bounded request records and page cursors. Actual IAM targets, HTTP shape validation, persistent SQLite transactions, clock changes and cursor authentication are tested separately."
         }
       ]
     },
     {
-      "path": "internal/aws/cloudfront_distribution_list.go",
-      "sha256": "91e8e6fc791846cd91855ad33562c1ed3e2d172221a74a4388b3ab86efbca85c",
+      "path": "internal/aws/catalog/openapi.go",
+      "sha256": "64b793f7b5b47157f3d5b5eea195bbdc4a9c39313f226d4bd398f5b89c729060",
       "disposition": "modeled",
-      "reason": "Bounded native CloudFront cache/authorization/atomicity and Console request ownership, protected content and explicit invalidation recovery. Concrete namespace and physically staged interruption tests cover wire/storage effects excluded from the finite models.",
+      "reason": "Use the declared fixed JSON inputs and service-specific denial status in the generated native catalog reference.",
       "models": [
         {
-          "id": "CloudFrontLocalCache",
+          "id": "CatalogResourceLifecycle",
           "properties": [
-            "TypeOK",
-            "FreshJointAuthority",
-            "ExactHitIdentity",
-            "MissReadsOrigin",
-            "FailureRollsBack",
-            "RefusalUnchanged",
-            "StaleETagUnchanged",
-            "UpdateClearsCache",
-            "InvalidationClearsCache",
-            "RestartPreserves",
-            "PeerUnchanged"
+            "AuthorizationFirst",
+            "FailureFrame",
+            "PeerFrame",
+            "QuotaBound"
           ],
-          "limits": "Checks an atomic abstract transaction and one immutable pair of policy decisions per delivery. A bucket lifetime fingerprint is assumed distinct for the single ordinary recreation; actual wall-clock buckets.created plus region does not prove ABA resistance under clock rollback. One abstract cache line does not model concrete multi-entry quotas, exact paths, TTL seconds, SQL/triggers/locking, authentication, HTTP/XML/S3 parsing, cache buffers, ETags or Go refinement. Restart preserves abstract committed state only, not crash durability. Native and SDK tests separately cover the real implementation."
+          "limits": "Native HTTP status codes, JSON body examples, browser rendering and Go-to-model refinement are outside the finite lifecycle model."
         }
       ]
     },
     {
-      "path": "internal/aws/cloudfront_distribution_recovery_test.go",
-      "sha256": "d50900989772d441323a296779fc2ab0ebf0c05c76b4fe4fe98e7fcee4278f38",
+      "path": "internal/aws/catalog/selection.json",
+      "sha256": "4e5e895fe9f238ff9b68e084c3826ac51a02ce342f3d6c14ca50988b20092e1a",
+      "disposition": "modeled",
+      "reason": "Retain the five pinned official default/applied discovery reads and bind four persisted increase/history operations. Native contract tests verify copied shapes and nine-operation selection; computed projections and request admission retain their separate existing model bindings.",
+      "models": [
+        {
+          "id": "CatalogResourceLifecycle",
+          "properties": [
+            "AuthorizationFirst",
+            "FailureFrame",
+            "PeerFrame",
+            "QuotaBound"
+          ],
+          "limits": "Covers finite operation admission, refusal/peer frames and declared capacity. The official schema, real configured backend limit, request history and regional IAM targets require native and SDK verification."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/catalog/semantics.go",
+      "sha256": "a9bba8ff69292313dbd7228e9380a2dd78f2e63ff572319ec7a16f25c8f25e96",
+      "disposition": "modeled",
+      "reason": "Bind the Service Quotas operation or its model to request admission, saved state, failure outcomes and history visibility.",
+      "models": [
+        {
+          "id": "CatalogResourceLifecycle",
+          "properties": [
+            "AuthorizationFirst",
+            "FailureFrame",
+            "PeerFrame",
+            "QuotaBound"
+          ],
+          "limits": "The finite model abstracts regional peers, authorization and capacity. It does not model this AWS quota code, ARN construction, Go binding, SQLite, SDK response or HTTP status."
+        },
+        {
+          "id": "ServiceQuotaDiscovery",
+          "properties": [
+            "ReadPreservesFrame",
+            "ReadProjectionCorrect",
+            "PeerPreserved",
+            "RestartPreservesFrame"
+          ],
+          "limits": "Finite two-team projection oracle only; numeric JSON bounds/types, literal endpoint regions, IAM parsing/ARN formatting, SQL and real process/SDK behavior are native/stock fixture checks, not proved by this model. Abstract prior Create/Delete do not add quota write APIs."
+        },
+        {
+          "id": "ServiceQuotaRequests",
+          "properties": [
+            "Admissions",
+            "CommitFrame",
+            "StoredFields",
+            "Capacity",
+            "Visibility",
+            "Lookup",
+            "PageScope",
+            "PrivateStage",
+            "ContenderFrame",
+            "RestartFrame"
+          ],
+          "limits": "Finite team and region scopes, admission, bounded request records and page cursors. Actual IAM targets, HTTP shape validation, persistent SQLite transactions, clock changes and cursor authentication are tested separately."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/catalog/service_quota_interrupt_test.go",
+      "sha256": "d0ebd59714c49967c670a7d08408d86dd2ab682e297213a579b4ee03054e4356",
       "disposition": "test-support",
-      "reason": "Verify native saved-content limits and recovery after genuine SQLite read, write and readback failures, including durable origin, cache and sibling frames after reopen.",
+      "reason": "Verify real quota values, request history or an affected native, SDK, storage, isolation and restart contract.",
       "models": []
     },
     {
-      "path": "internal/aws/cloudfront_distribution_rest_contract_test.go",
-      "sha256": "303c13b4cb101576fbd5adcef1fdf780f5343ea6ea750a94213c89550d2e62aa",
-      "disposition": "test-support",
-      "reason": "Verify actual REST/XML validation, declared error envelopes and identity-scoped requests against saved distributions and invalidation state.",
-      "models": []
-    },
-    {
-      "path": "internal/aws/cloudfront_distribution_store.go",
-      "sha256": "91712000af6af47d6510f5a5897267a542b7a66af032821f9f6293e23bb9539f",
+      "path": "internal/aws/catalog/service_quota_requests.go",
+      "sha256": "83ffdfbfcc5b1951b641667bc88c8c0253245b59d426b187f8355b7647d3f4f5",
       "disposition": "modeled",
-      "reason": "Bounded native CloudFront cache/authorization/atomicity and Console request ownership, protected content and explicit invalidation recovery. Concrete namespace and physically staged interruption tests cover wire/storage effects excluded from the finite models.",
+      "reason": "Bind the Service Quotas operation or its model to request admission, saved state, failure outcomes and history visibility.",
       "models": [
         {
-          "id": "CloudFrontLocalCache",
+          "id": "ServiceQuotaRequests",
           "properties": [
-            "TypeOK",
-            "FreshJointAuthority",
-            "ExactHitIdentity",
-            "MissReadsOrigin",
-            "FailureRollsBack",
-            "RefusalUnchanged",
-            "StaleETagUnchanged",
-            "UpdateClearsCache",
-            "InvalidationClearsCache",
-            "RestartPreserves",
-            "PeerUnchanged"
+            "Admissions",
+            "CommitFrame",
+            "StoredFields",
+            "Capacity",
+            "Visibility",
+            "Lookup",
+            "PageScope",
+            "PrivateStage",
+            "ContenderFrame",
+            "RestartFrame"
           ],
-          "limits": "Checks an atomic abstract transaction and one immutable pair of policy decisions per delivery. A bucket lifetime fingerprint is assumed distinct for the single ordinary recreation; actual wall-clock buckets.created plus region does not prove ABA resistance under clock rollback. One abstract cache line does not model concrete multi-entry quotas, exact paths, TTL seconds, SQL/triggers/locking, authentication, HTTP/XML/S3 parsing, cache buffers, ETags or Go refinement. Restart preserves abstract committed state only, not crash durability. Native and SDK tests separately cover the real implementation."
+          "limits": "Finite team and region scopes, admission, bounded request records and page cursors. Actual IAM targets, HTTP shape validation, persistent SQLite transactions, clock changes and cursor authentication are tested separately."
         }
       ]
     },
     {
-      "path": "internal/aws/cloudfront_distribution_test.go",
-      "sha256": "a1b5ff703daf92721588d679154333e98c56b94c7c51ffbecd4c860a55ba462b",
+      "path": "internal/aws/catalog/service_quota_requests_test.go",
+      "sha256": "b38bb1b7b8d492808400c8c1f2d9c5480c48368425d4f87084b9134dfd4f3150",
       "disposition": "test-support",
-      "reason": "Verify genuine native/SDK/Scalar/Console results, official XML namespaces, original bounded response observations, refusal/storage/acknowledgement recovery, peer/restart and owned cleanup.",
+      "reason": "Verify real quota values, request history or an affected native, SDK, storage, isolation and restart contract.",
       "models": []
     },
     {
-      "path": "internal/aws/cloudfront_invalidation_wire_test.go",
-      "sha256": "062bba8856dfdb4982825304864522f2a32dd04a39f9c380af6932dc7bca38db",
-      "disposition": "test-support",
-      "reason": "Verify genuine native/SDK/Scalar/Console results, official XML namespaces, original bounded response observations, refusal/storage/acknowledgement recovery, peer/restart and owned cleanup.",
-      "models": []
-    },
-    {
-      "path": "internal/aws/cloudfront_vpc_origin.go",
-      "sha256": "6aeda5cf138daebbea4838be8c3825a4cacbd0cba43cd65f6184cfb57f056447",
+      "path": "internal/aws/catalog/service_quotas.go",
+      "sha256": "e711d86c7081343245c56420983e5f4c415781691f33cedca79a000aa47d6005",
       "disposition": "modeled",
-      "reason": "Bounded native CloudFront cache/authorization/atomicity and Console request ownership, protected content and explicit invalidation recovery. Concrete namespace and physically staged interruption tests cover wire/storage effects excluded from the finite models.",
+      "reason": "Bind the Service Quotas operation or its model to request admission, saved state, failure outcomes and history visibility.",
       "models": [
         {
-          "id": "CloudFrontLocalCache",
+          "id": "CatalogResourceLifecycle",
           "properties": [
-            "TypeOK",
-            "FreshJointAuthority",
-            "ExactHitIdentity",
-            "MissReadsOrigin",
-            "FailureRollsBack",
-            "RefusalUnchanged",
-            "StaleETagUnchanged",
-            "UpdateClearsCache",
-            "InvalidationClearsCache",
-            "RestartPreserves",
-            "PeerUnchanged"
+            "AuthorizationFirst",
+            "FailureFrame",
+            "PeerFrame",
+            "QuotaBound"
           ],
-          "limits": "Checks an atomic abstract transaction and one immutable pair of policy decisions per delivery. A bucket lifetime fingerprint is assumed distinct for the single ordinary recreation; actual wall-clock buckets.created plus region does not prove ABA resistance under clock rollback. One abstract cache line does not model concrete multi-entry quotas, exact paths, TTL seconds, SQL/triggers/locking, authentication, HTTP/XML/S3 parsing, cache buffers, ETags or Go refinement. Restart preserves abstract committed state only, not crash durability. Native and SDK tests separately cover the real implementation."
+          "limits": "The finite model abstracts regional peers, authorization and capacity. It does not model this AWS quota code, ARN construction, Go binding, SQLite, SDK response or HTTP status."
+        },
+        {
+          "id": "ServiceQuotaDiscovery",
+          "properties": [
+            "ReadPreservesFrame",
+            "ReadProjectionCorrect",
+            "PeerPreserved",
+            "RestartPreservesFrame"
+          ],
+          "limits": "Finite two-team projection oracle only; numeric JSON bounds/types, literal endpoint regions, IAM parsing/ARN formatting, SQL and real process/SDK behavior are native/stock fixture checks, not proved by this model. Abstract prior Create/Delete do not add quota write APIs."
+        },
+        {
+          "id": "ServiceQuotaRequests",
+          "properties": [
+            "Admissions",
+            "CommitFrame",
+            "StoredFields",
+            "Capacity",
+            "Visibility",
+            "Lookup",
+            "PageScope",
+            "PrivateStage",
+            "ContenderFrame",
+            "RestartFrame"
+          ],
+          "limits": "Finite team and region scopes, admission, bounded request records and page cursors. Actual IAM targets, HTTP shape validation, persistent SQLite transactions, clock changes and cursor authentication are tested separately."
         }
       ]
     },
     {
-      "path": "internal/aws/cloudfront_vpc_origin_readiness_test.go",
-      "sha256": "cfcc66a3a0e32b4a6429120a50ae7ec9b55b63b25a9907f8e9f357656006232c",
+      "path": "internal/aws/catalog/service_quotas_discovery_test.go",
+      "sha256": "f3acca2efa9cb644d88af486869b5e14eea344580a4cd913c41b9e2bf1044ce8",
       "disposition": "test-support",
-      "reason": "Verify native VPC origin initialization, stored version and endpoint recovery, exact successful replies, and refusal on unavailable authority or storage.",
+      "reason": "Verify real quota values, request history or an affected native, SDK, storage, isolation and restart contract.",
       "models": []
     },
     {
-      "path": "internal/aws/ssm.go",
-      "sha256": "31d7277fce1250d1a7784a1ecbfa428c05b06f11f53876468daf9f7a2584202f",
+      "path": "internal/aws/catalog/service_quotas_test.go",
+      "sha256": "264cbb7404620b1ffb275d23914656a1ef191ffa35fac0d3c7c48ae1d589c125",
+      "disposition": "test-support",
+      "reason": "Verify real quota values, request history or an affected native, SDK, storage, isolation and restart contract.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/catalog/services.go",
+      "sha256": "d4f2d822c4fafaac7db7df062609e3117402d5fd808f935133bc30dac391cb5c",
       "disposition": "modeled",
-      "reason": "Bounded native CloudFront cache/authorization/atomicity and Console request ownership, protected content and explicit invalidation recovery. Concrete namespace and physically staged interruption tests cover wire/storage effects excluded from the finite models.",
+      "reason": "Bind the regional, read-only B2BI Profiles quota and its enforced resource limit to the bounded catalog contract.",
       "models": [
         {
-          "id": "CloudFrontLocalCache",
+          "id": "CatalogResourceLifecycle",
           "properties": [
-            "TypeOK",
-            "FreshJointAuthority",
-            "ExactHitIdentity",
-            "MissReadsOrigin",
-            "FailureRollsBack",
-            "RefusalUnchanged",
-            "StaleETagUnchanged",
-            "UpdateClearsCache",
-            "InvalidationClearsCache",
-            "RestartPreserves",
-            "PeerUnchanged"
+            "AuthorizationFirst",
+            "FailureFrame",
+            "PeerFrame",
+            "QuotaBound"
           ],
-          "limits": "Checks an atomic abstract transaction and one immutable pair of policy decisions per delivery. A bucket lifetime fingerprint is assumed distinct for the single ordinary recreation; actual wall-clock buckets.created plus region does not prove ABA resistance under clock rollback. One abstract cache line does not model concrete multi-entry quotas, exact paths, TTL seconds, SQL/triggers/locking, authentication, HTTP/XML/S3 parsing, cache buffers, ETags or Go refinement. Restart preserves abstract committed state only, not crash durability. Native and SDK tests separately cover the real implementation."
+          "limits": "The finite model abstracts regional peers, authorization and capacity. It does not model this AWS quota code, ARN construction, Go binding, SQLite, SDK response or HTTP status."
         }
       ]
     },
     {
-      "path": "internal/server/apidocs/cloudfront-local-init.js",
-      "sha256": "2849ed01aaa656469a1976ccabbbe28daad63eb1a580f4ca9198c352d59a9173",
+      "path": "internal/aws/catalog/spec.go",
+      "sha256": "30cbb29dfcbc2d9a54c77c55bdee0424961d09312f5977d9b01900a846d970d8",
+      "disposition": "modeled",
+      "reason": "Bind the regional, read-only B2BI Profiles quota and its enforced resource limit to the bounded catalog contract.",
+      "models": [
+        {
+          "id": "CatalogResourceLifecycle",
+          "properties": [
+            "AuthorizationFirst",
+            "FailureFrame",
+            "PeerFrame",
+            "QuotaBound"
+          ],
+          "limits": "The finite model abstracts regional peers, authorization and capacity. It does not model this AWS quota code, ARN construction, Go binding, SQLite, SDK response or HTTP status."
+        }
+      ]
+    },
+    {
+      "path": "internal/server/apidocs/catalog/index.json",
+      "sha256": "8f97c44138f3f17bfdb6f60b63abef5bda899ca89216da1271df3a95621ac54e",
       "disposition": "presentation",
-      "reason": "Scoped CloudFront API reference and canonical generated assets; original protocol and content safety are retained.",
+      "reason": "Ship the generated Service Quotas schema, fixed B2BI example and catalog index from the reviewed service binding. Regenerate only the Service Quotas reference and its operation count from the reviewed definitions; all unrelated served API descriptions remain unchanged.",
       "models": []
     },
     {
-      "path": "internal/server/apidocs/cloudfront-local.html",
-      "sha256": "e32b2b882be408d2c43c90a8a1dabe0c8ae6acf77a4f4d081be38e8c1ac3a49e",
+      "path": "internal/server/apidocs/catalog/service-quotas.json",
+      "sha256": "baea27dfae1c302223a378f97896cbda3947298d48bae9e3a27aaa09daedd871",
       "disposition": "presentation",
-      "reason": "Scoped CloudFront API reference and canonical generated assets; original protocol and content safety are retained.",
+      "reason": "Expose real bounded example inputs, native error responses and operation targets for all nine Service Quotas operations.",
       "models": []
     },
     {
-      "path": "internal/server/apidocs/cloudfront-local.json",
-      "sha256": "51b777ef8f54b88fabf1b809e92110b9fe9949d371f6e737b94a9bd215d9b042",
+      "path": "internal/server/apidocs/service-quotas-init.js",
+      "sha256": "12e650d443e6394648d210a05efe4a46b80edf201eb0e310fd2208a0a3e810d9",
       "disposition": "presentation",
-      "reason": "Scoped CloudFront API reference and canonical generated assets; original protocol and content safety are retained.",
+      "reason": "Actual Scalar uses the unchanged generated nine-operation specification, explicit chosen target and body, fixed normal us-east-1 browser credential scope, exact same-origin POST and untouched original Response; reject routing/auth overrides before fetch. Native authority and wire behavior require real SDK/browser evidence.",
       "models": []
     },
     {
-      "path": "internal/server/cloudfront_local_content_test.go",
-      "sha256": "8c476c5d00f02edf66201fc217e9554043bc4a4efdd6ee03bea3bf054a374c5c",
-      "disposition": "test-support",
-      "reason": "Verify genuine native/SDK/Scalar/Console results, official XML namespaces, original bounded response observations, refusal/storage/acknowledgement recovery, peer/restart and owned cleanup.",
+      "path": "internal/server/apidocs/service-quotas-reference.css",
+      "sha256": "6bd3652692449df723939bfadd494a0244da21d6df66464cd3c9de6b740168ca",
+      "disposition": "presentation",
+      "reason": "Bounded local reference presentation/reflow only; no native behavior or authorization.",
       "models": []
     },
     {
-      "path": "internal/server/server.go",
-      "sha256": "6085207f5c416817fd45d655dba8212e4b699163e08d79a333159bb060f291f5",
-      "disposition": "modeled",
-      "reason": "Bounded native CloudFront cache/authorization/atomicity and Console request ownership, protected content and explicit invalidation recovery. Concrete namespace and physically staged interruption tests cover wire/storage effects excluded from the finite models.",
-      "models": [
-        {
-          "id": "CloudFrontLocalCache",
-          "properties": [
-            "TypeOK",
-            "FreshJointAuthority",
-            "ExactHitIdentity",
-            "MissReadsOrigin",
-            "FailureRollsBack",
-            "RefusalUnchanged",
-            "StaleETagUnchanged",
-            "UpdateClearsCache",
-            "InvalidationClearsCache",
-            "RestartPreserves",
-            "PeerUnchanged"
-          ],
-          "limits": "Checks an atomic abstract transaction and one immutable pair of policy decisions per delivery. A bucket lifetime fingerprint is assumed distinct for the single ordinary recreation; actual wall-clock buckets.created plus region does not prove ABA resistance under clock rollback. One abstract cache line does not model concrete multi-entry quotas, exact paths, TTL seconds, SQL/triggers/locking, authentication, HTTP/XML/S3 parsing, cache buffers, ETags or Go refinement. Restart preserves abstract committed state only, not crash durability. Native and SDK tests separately cover the real implementation."
-        }
-      ]
+      "path": "internal/server/apidocs/service-quotas.html",
+      "sha256": "5385b33118a887c378d8aed93c4098ee3063ab4bf8743f6dbee7906cda55416e",
+      "disposition": "presentation",
+      "reason": "Serve the dedicated local Service Quotas reference and explicit native subset/browser-credential scope; no external service endpoint or automatic write.",
+      "models": []
+    },
+    {
+      "path": "internal/server/web/app.css",
+      "sha256": "d61caf35e92bf28490cec99139d02deea56ee21cc0b77864ec51d1e4c41c26e7",
+      "disposition": "presentation",
+      "reason": "Ship the regenerated Cloudscape application stylesheet including the quota warning region. Color contrast and layout are exercised with the real pinned browser and axe.",
+      "models": []
     },
     {
       "path": "internal/server/web/app.js",
-      "sha256": "c9f0ed9ade79e01cd01cceaabcd6d88ac3061c9d15c8a937225d017e10bec8fd",
+      "sha256": "b4dd9700aadeafd2dfa0014cf635354fe969f8d211d065418f08aace1960d342",
       "disposition": "modeled",
-      "reason": "Bounded native CloudFront cache/authorization/atomicity and Console request ownership, protected content and explicit invalidation recovery. Concrete namespace and physically staged interruption tests cover wire/storage effects excluded from the finite models.",
+      "reason": "Canonical embedded output of the reviewed actual Console sources, preserving prior catalog behavior and adding the dedicated mounted quota/default/request workflow. Concrete compiler/bundle correspondence is checked independently, not proved by TLA.",
       "models": [
         {
-          "id": "CloudFrontConsoleEpoch",
+          "id": "CatalogConsoleEpoch",
           "properties": [
-            "TypeOK",
-            "CurrentContent",
-            "CurrentReceipt",
-            "ProtectedDownload",
-            "AcknowledgedReceipt",
-            "StableUnknownCaller",
-            "ExplicitWriteConfirmation",
-            "OneCurrentWrite"
+            "NoUnmountedAcceptance",
+            "OnlyCurrentReplies",
+            "SingleWriter",
+            "ReloadOnlyAfterAck",
+            "FailureVisible"
           ],
-          "limits": "Models bounded asynchronous content reads and invalidation ownership, abstract protected content, confirmation, unknown acknowledgement and stable explicit replay of fixed /* paths. One abstract scope combines identity, region, route and distribution. Does not model XML/UTF-8/DOM/React, download or OS execution, actual HTTP abort effects, IAM policy evaluation, SQLite, native cache or JavaScript/Go refinement. CloudFrontLocalCache and real SDK/browser/native tests cover separate backend behavior. Known-receipt GET retry/lookup retention is checked by the real browser/storage-outage fixture, not represented in this model."
+          "limits": "Preserved finite generic catalog epoch/write oracle only. It does not prove the dedicated Service Quotas workflow, React scheduling, DOM, request serialization, native authorization or actual browser behavior; the separate quota UI model and genuine fixtures cover distinct obligations."
+        },
+        {
+          "id": "ServiceQuotaRequestConsole",
+          "properties": [
+            "SingleIntent",
+            "NoAutomaticWrite",
+            "NativeFrame",
+            "SavedExactlyOnce",
+            "Acknowledgement",
+            "FreshRecovery",
+            "ObservedOnly",
+            "SeparateIntent",
+            "RetiredRead",
+            "ScopeCleared",
+            "BlockedRetry",
+            "FreshCapacity",
+            "VisibleLookup",
+            "VisibleMount"
+          ],
+          "limits": "Finite mounted quota-request control oracle only: explicit first unfiltered ACCOUNT ByQuota recovery disarms at start and rearms only on a fresh current successful observation; failed recovery/data invalidation clears approval and saved lookup. It does not identify a lost request by matching amount/time, infer persistence from arbitrary shape-valid replies, retry writes, or promise idempotency across tabs/new mounts. No JavaScript/React/DOM/HTTP/JSON/IAM/SQL/clock/refinement proof; real fixtures independently check bytes, scope, accessibility, restart, peer and cleanup. Leaving the mounted view ends its local unknown-outcome warning."
         }
       ]
     },
     {
       "path": "scripts/formal_model_gate.py",
-      "sha256": "db247ccdd8e393ed0df320278b82bb2cf81e64c732b07cb29c47e301be56f8d2",
+      "sha256": "a14827b1409b3a4c1fbc5db69ab5dfa021734e01780406935c9adbac94bbc00d",
       "disposition": "formal-infrastructure",
-      "reason": "Independently protect both CloudFront models and fixed controls; run focused reference and Console client checks in normal CI.",
+      "reason": "Register and independently protect the native discovery, persisted request/history and mounted non-idempotent Console recovery models; retain all older model entries, properties, controls and source scopes.",
       "models": []
     },
     {
       "path": "scripts/test-formal-gate.py",
-      "sha256": "fbdbc327933a50b09f02bf35ff21258ed1e42ce9beb07f5aa05e65eaae5ea202",
+      "sha256": "b7f86d26dae9173d10f35f6f2c4e3662df0943e9f956e8148b09231219474aeb",
       "disposition": "formal-infrastructure",
-      "reason": "Independently protect both CloudFront models and fixed controls; run focused reference and Console client checks in normal CI.",
+      "reason": "Register and independently protect the native discovery, persisted request/history and mounted non-idempotent Console recovery models; retain all older model entries, properties, controls and source scopes.",
       "models": []
     },
     {
-      "path": "test/console/cloudfront-local-reference.test.mjs",
-      "sha256": "10cf42555e3af01876511810d423e03d638c22e957dd76ed21f4db9f63d6f86c",
+      "path": "test/console/service-quotas-reference.test.mjs",
+      "sha256": "f62b817601952132f91cbdaf48e6fc09204e0175753c6ba94c0a92ae9d012844",
       "disposition": "test-support",
-      "reason": "Verify genuine native/SDK/Scalar/Console results, official XML namespaces, original bounded response observations, refusal/storage/acknowledgement recovery, peer/restart and owned cleanup.",
+      "reason": "Execute genuine customFetch guard source with exact native targets/body/origin/media/credentials negative controls; VM tests do not claim real Scalar execution.",
       "models": []
     },
     {
-      "path": "test/e2e/cloudfront_local_console.py",
-      "sha256": "a3a495961cffa8916e45ca37ad3dbf6813ff86896b125ea014ad07bfad045a2a",
+      "path": "test/e2e/aws_catalog_console.py",
       "disposition": "test-support",
-      "reason": "Verify genuine native/SDK/Scalar/Console results, official XML namespaces, original bounded response observations, refusal/storage/acknowledgement recovery, peer/restart and owned cleanup. Function predicates respect unchanged product CSP; the real Japanese narrow confirmation can be canceled without a write.",
+      "reason": "Preserve the reviewed Kinesis Video versioned retention and AppStream review/cancel acceptance while retaining the exact dedicated quota read-only sweep and all generic catalog inventory assertions. No product behavior changes.",
+      "models": [],
+      "sha256": "10f242361b5195e24c2b7883fb27efe7dc71e0bdc21f3f6e15b04571f79574c5"
+    },
+    {
+      "path": "test/e2e/catalog_fixtures/service-quotas.json",
+      "sha256": "944525c43d5e09b9e03a0414db6f568d6a3f9bdc22e4c717fb8b5e3f20b20358",
+      "disposition": "test-support",
+      "reason": "Verify real quota values, request history or an affected native, SDK, storage, isolation and restart contract.",
       "models": []
     },
     {
-      "path": "test/e2e/cloudfront_local_content.py",
-      "sha256": "0b686062bf796924df454e366f9fef060d634d3fa6582e22b9a3b9f6372852df",
+      "path": "test/e2e/check.py",
+      "sha256": "66a800a1079267315e2be11caaf868533aa6d1d63cd9db528f4ade0812bf7a58",
       "disposition": "test-support",
-      "reason": "Verify genuine native/SDK/Scalar/Console results, official XML namespaces, original bounded response observations, refusal/storage/acknowledgement recovery, peer/restart and owned cleanup.",
+      "reason": "Register the genuine native quota/default/request SDK fixtures and dedicated opt-in Console/Scalar browser entry points in the normal e2e dispatcher; execution and guards remain independent requirements.",
       "models": []
     },
     {
-      "path": "test/e2e/cloudfront_local_scalar.py",
-      "sha256": "187a7f87059d2e116b5c49927d6657bbd23a24d4b5dc5659c592071978105329",
+      "path": "test/e2e/service_quotas_catalog_sweep.py",
       "disposition": "test-support",
-      "reason": "Verify genuine native/SDK/Scalar/Console results, official XML namespaces, original bounded response observations, refusal/storage/acknowledgement recovery, peer/restart and owned cleanup.",
+      "reason": "Read five quota operations and request history via the actual dedicated view, check the catalog selector and native values, and compare the local database before and after the read-only navigation. Verify the dedicated page has no generic creation action or resource tabs.",
+      "models": [],
+      "sha256": "25a99ef5b78febbcf405a390fc711955f6a08744ffad84b198eeacea56acb92e"
+    },
+    {
+      "path": "test/e2e/service_quotas_console.py",
+      "sha256": "9871b9f1f438a53c7501896985aeafb32e0460f2472e1b5c230c6c0be40b2352",
+      "disposition": "test-support",
+      "reason": "Opt-in unchanged official SDK and real sandboxed Cloudscape/reciprocal Scalar fixture: distinct physical requests, real history tokens/filters, committed lost ACK without blind retry, successful-then-failed recovery and repair, read retirement, partial/denied permissions, pinned axe EN/JA390, two private stores/restart/full peer frame and owned cleanup. Source registration is not an execution receipt; SDK/profile and mandatory axe guards remain intact. Check all enabled WCAG rules and retain only rule, control and contrast measurements for an accessibility failure.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/service_quotas_discovery.py",
+      "sha256": "ae23eed4b0d83d0feb898b83da484d64ee30702f6bf5df9f95aa22a8a135c55b",
+      "disposition": "test-support",
+      "reason": "Verify real quota values, request history or an affected native, SDK, storage, isolation and restart contract.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/service_quotas_profiles.py",
+      "sha256": "9180106150088c15bc4cd10c4961462acb38177743da7ae3ca0ce4c814f70cd2",
+      "disposition": "test-support",
+      "reason": "Verify real quota values, request history or an affected native, SDK, storage, isolation and restart contract.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/service_quotas_scalar.py",
+      "sha256": "0302eb4babf950e120cf06ede746ec9206bbde6d289d321e01cf6b9df2b9534b",
+      "disposition": "test-support",
+      "reason": "Opt-in real authenticated Scalar Sends of the nine native operations with original target/body, distinct physical requests and page tokens, SDK same-record and reciprocal Console ID readback, native mismatch refusal, scoped credentials/peer/restart and owned cleanup; no response fabrication or SDK guard override. The narrow Japanese viewport uses the same endpoint link and directly edits the stacked headers and body.",
       "models": []
     },
     {
       "path": "tools/console/bundle-digests.json",
-      "sha256": "3b276d668501d1e9b38d1cfd523335dd683aa96d77ecc5239a4ca519bd225bf0",
+      "sha256": "ebaacb3a5945690662ce8b1f0ebd3c731aac26fa2db99901e9edbe81acf2492e",
       "disposition": "presentation",
-      "reason": "Scoped CloudFront API reference and canonical generated assets; original protocol and content safety are retained.",
+      "reason": "Exact generated embedded asset digests checked against the canonical reviewed build; no claim of behavioral proof from hashes.",
       "models": []
     },
     {
       "path": "tools/console/bundle-inputs.json",
-      "sha256": "521115e76aa8b7f774c6204025a47207f831ecb10ff21e466ced3b6d1c3cf783",
+      "sha256": "0f88f8f242cba5290d8455d68414642d4459670cf6126bc4468714c05309fff6",
       "disposition": "presentation",
-      "reason": "Scoped CloudFront API reference and canonical generated assets; original protocol and content safety are retained.",
+      "reason": "Canonical bundler input inventory for the exact reviewed Console source and pinned dependencies; metadata is not source-refinement proof.",
       "models": []
     },
     {
-      "path": "tools/console/src/cloudfront-local.jsx",
-      "sha256": "39d598f976d9b397183d2e7030fd4b6e3b1e419f6f6dd4d2b17466609df39fbe",
+      "path": "tools/console/src/catalog.jsx",
+      "sha256": "b31b14a8fb83a5804ec1a7f4520a08de45fd5e72e1665b1eb63252836fab2655",
       "disposition": "modeled",
-      "reason": "Bounded native CloudFront cache/authorization/atomicity and Console request ownership, protected content and explicit invalidation recovery. Concrete namespace and physically staged interruption tests cover wire/storage effects excluded from the finite models.",
+      "reason": "Retain ordinary catalog controls and select the quota-specific view only for its exact nine-operation descriptor; scope changes retire the mounted child and generic catalog reads are suppressed only for that selected model. All catalog service options retain their implemented and official operation counts when the selected view is Service Quotas.",
       "models": [
         {
-          "id": "CloudFrontConsoleEpoch",
+          "id": "CatalogConsoleEpoch",
           "properties": [
-            "TypeOK",
-            "CurrentContent",
-            "CurrentReceipt",
-            "ProtectedDownload",
-            "AcknowledgedReceipt",
-            "StableUnknownCaller",
-            "ExplicitWriteConfirmation",
-            "OneCurrentWrite"
+            "NoUnmountedAcceptance",
+            "OnlyCurrentReplies",
+            "SingleWriter",
+            "ReloadOnlyAfterAck",
+            "FailureVisible"
           ],
-          "limits": "Models bounded asynchronous content reads and invalidation ownership, abstract protected content, confirmation, unknown acknowledgement and stable explicit replay of fixed /* paths. One abstract scope combines identity, region, route and distribution. Does not model XML/UTF-8/DOM/React, download or OS execution, actual HTTP abort effects, IAM policy evaluation, SQLite, native cache or JavaScript/Go refinement. CloudFrontLocalCache and real SDK/browser/native tests cover separate backend behavior. Known-receipt GET retry/lookup retention is checked by the real browser/storage-outage fixture, not represented in this model."
+          "limits": "Preserved finite generic catalog epoch/write oracle only. It does not prove the dedicated Service Quotas workflow, React scheduling, DOM, request serialization, native authorization or actual browser behavior; the separate quota UI model and genuine fixtures cover distinct obligations."
+        },
+        {
+          "id": "ServiceQuotaRequestConsole",
+          "properties": [
+            "VisibleMount",
+            "ScopeCleared",
+            "RetiredRead"
+          ],
+          "limits": "Finite mounted quota-request control oracle only: explicit first unfiltered ACCOUNT ByQuota recovery disarms at start and rearms only on a fresh current successful observation; failed recovery/data invalidation clears approval and saved lookup. It does not identify a lost request by matching amount/time, infer persistence from arbitrary shape-valid replies, retry writes, or promise idempotency across tabs/new mounts. No JavaScript/React/DOM/HTTP/JSON/IAM/SQL/clock/refinement proof; real fixtures independently check bytes, scope, accessibility, restart, peer and cleanup. Leaving the mounted view ends its local unknown-outcome warning."
         }
       ]
     },
     {
-      "path": "tools/console/src/cloudfront-local.mjs",
-      "sha256": "33d0a7cca215c6edcc6dc4bfb46a53cddca162942542eb30708548485971947a",
-      "disposition": "modeled",
-      "reason": "Bounded native CloudFront cache/authorization/atomicity and Console request ownership, protected content and explicit invalidation recovery. Concrete namespace and physically staged interruption tests cover wire/storage effects excluded from the finite models.",
-      "models": [
-        {
-          "id": "CloudFrontConsoleEpoch",
-          "properties": [
-            "TypeOK",
-            "CurrentContent",
-            "CurrentReceipt",
-            "ProtectedDownload",
-            "AcknowledgedReceipt",
-            "StableUnknownCaller",
-            "ExplicitWriteConfirmation",
-            "OneCurrentWrite"
-          ],
-          "limits": "Models bounded asynchronous content reads and invalidation ownership, abstract protected content, confirmation, unknown acknowledgement and stable explicit replay of fixed /* paths. One abstract scope combines identity, region, route and distribution. Does not model XML/UTF-8/DOM/React, download or OS execution, actual HTTP abort effects, IAM policy evaluation, SQLite, native cache or JavaScript/Go refinement. CloudFrontLocalCache and real SDK/browser/native tests cover separate backend behavior. Known-receipt GET retry/lookup retention is checked by the real browser/storage-outage fixture, not represented in this model."
-        }
-      ]
-    },
-    {
-      "path": "tools/console/src/console-home.jsx",
-      "sha256": "8536542f39cebcfa772947e2a4c9b6ee5c4c1168622a6b6f399bcda2a9afda03",
-      "disposition": "modeled",
-      "reason": "Bounded native CloudFront cache/authorization/atomicity and Console request ownership, protected content and explicit invalidation recovery. Concrete namespace and physically staged interruption tests cover wire/storage effects excluded from the finite models.",
-      "models": [
-        {
-          "id": "CloudFrontConsoleEpoch",
-          "properties": [
-            "TypeOK",
-            "CurrentContent",
-            "CurrentReceipt",
-            "ProtectedDownload",
-            "AcknowledgedReceipt",
-            "StableUnknownCaller",
-            "ExplicitWriteConfirmation",
-            "OneCurrentWrite"
-          ],
-          "limits": "Models bounded asynchronous content reads and invalidation ownership, abstract protected content, confirmation, unknown acknowledgement and stable explicit replay of fixed /* paths. One abstract scope combines identity, region, route and distribution. Does not model XML/UTF-8/DOM/React, download or OS execution, actual HTTP abort effects, IAM policy evaluation, SQLite, native cache or JavaScript/Go refinement. CloudFrontLocalCache and real SDK/browser/native tests cover separate backend behavior. Known-receipt GET retry/lookup retention is checked by the real browser/storage-outage fixture, not represented in this model."
-        }
-      ]
-    },
-    {
-      "path": "tools/console/src/console-navigation.mjs",
-      "sha256": "bdd43055eea60a556adb0735a4df50eb771647c6f9aa8268e4b4a45d0aa27c3f",
-      "disposition": "modeled",
-      "reason": "Bounded native CloudFront cache/authorization/atomicity and Console request ownership, protected content and explicit invalidation recovery. Concrete namespace and physically staged interruption tests cover wire/storage effects excluded from the finite models.",
-      "models": [
-        {
-          "id": "CloudFrontConsoleEpoch",
-          "properties": [
-            "TypeOK",
-            "CurrentContent",
-            "CurrentReceipt",
-            "ProtectedDownload",
-            "AcknowledgedReceipt",
-            "StableUnknownCaller",
-            "ExplicitWriteConfirmation",
-            "OneCurrentWrite"
-          ],
-          "limits": "Models bounded asynchronous content reads and invalidation ownership, abstract protected content, confirmation, unknown acknowledgement and stable explicit replay of fixed /* paths. One abstract scope combines identity, region, route and distribution. Does not model XML/UTF-8/DOM/React, download or OS execution, actual HTTP abort effects, IAM policy evaluation, SQLite, native cache or JavaScript/Go refinement. CloudFrontLocalCache and real SDK/browser/native tests cover separate backend behavior. Known-receipt GET retry/lookup retention is checked by the real browser/storage-outage fixture, not represented in this model."
-        }
-      ]
-    },
-    {
-      "path": "tools/console/src/main.jsx",
-      "sha256": "07a6e52893ca0f63f131508f1c7b45e0efb7368f45162674e1be77a32b586e91",
-      "disposition": "modeled",
-      "reason": "Bounded native CloudFront cache/authorization/atomicity and Console request ownership, protected content and explicit invalidation recovery. Concrete namespace and physically staged interruption tests cover wire/storage effects excluded from the finite models.",
-      "models": [
-        {
-          "id": "CloudFrontConsoleEpoch",
-          "properties": [
-            "TypeOK",
-            "CurrentContent",
-            "CurrentReceipt",
-            "ProtectedDownload",
-            "AcknowledgedReceipt",
-            "StableUnknownCaller",
-            "ExplicitWriteConfirmation",
-            "OneCurrentWrite"
-          ],
-          "limits": "Models bounded asynchronous content reads and invalidation ownership, abstract protected content, confirmation, unknown acknowledgement and stable explicit replay of fixed /* paths. One abstract scope combines identity, region, route and distribution. Does not model XML/UTF-8/DOM/React, download or OS execution, actual HTTP abort effects, IAM policy evaluation, SQLite, native cache or JavaScript/Go refinement. CloudFrontLocalCache and real SDK/browser/native tests cover separate backend behavior. Known-receipt GET retry/lookup retention is checked by the real browser/storage-outage fixture, not represented in this model."
-        }
-      ]
-    },
-    {
-      "path": "tools/console/test/cloudfront-local.test.mjs",
-      "sha256": "05f7ecff0337e10b9312988edb2dec9dc0edfa0b14fd0382bec0b8ed4e4e7694",
+      "path": "tools/console/src/service-quotas.css",
+      "sha256": "3fb9fceda8e908f07eb39d4913fc243d933ede13d6aa8b53966ebd4f6b1a0df3",
       "disposition": "presentation",
-      "reason": "Scoped CloudFront API reference and canonical generated assets; original protocol and content safety are retained.",
+      "reason": "Style only the quota unknown-outcome warning and its heading so a possibly committed write and the recovery controls remain readable from first paint.",
+      "models": []
+    },
+    {
+      "path": "tools/console/src/service-quotas.jsx",
+      "sha256": "d61d7d465b2da8d1d12caef9cdab21882fbdfa261395e00753714221957f972f",
+      "disposition": "modeled",
+      "reason": "Real native quota/default/history view with independent read authority, synchronous write ownership, exact acknowledged scope/fields, explicit unknown-outcome recovery, invalidation of stale approval/lookup and scope retirement; no automatic retry or ID attribution from history.",
+      "models": [
+        {
+          "id": "ServiceQuotaRequestConsole",
+          "properties": [
+            "SingleIntent",
+            "NoAutomaticWrite",
+            "NativeFrame",
+            "SavedExactlyOnce",
+            "Acknowledgement",
+            "FreshRecovery",
+            "ObservedOnly",
+            "SeparateIntent",
+            "RetiredRead",
+            "ScopeCleared",
+            "BlockedRetry",
+            "FreshCapacity",
+            "VisibleLookup",
+            "VisibleMount"
+          ],
+          "limits": "Finite mounted quota-request control oracle only: explicit first unfiltered ACCOUNT ByQuota recovery disarms at start and rearms only on a fresh current successful observation; failed recovery/data invalidation clears approval and saved lookup. It does not identify a lost request by matching amount/time, infer persistence from arbitrary shape-valid replies, retry writes, or promise idempotency across tabs/new mounts. No JavaScript/React/DOM/HTTP/JSON/IAM/SQL/clock/refinement proof; real fixtures independently check bytes, scope, accessibility, restart, peer and cleanup. Leaving the mounted view ends its local unknown-outcome warning."
+        }
+      ]
+    },
+    {
+      "path": "tools/console/src/service-quotas.mjs",
+      "sha256": "a7d8faa50c5b7dfe92a332d31bd60b66d781bb4a39f6a5783aa5227d6914010c",
+      "disposition": "modeled",
+      "reason": "Exact supported JSON1.1 operation/region request construction, typed quota and physical-record validation, acknowledgement tuple checks without client/server clock synchronization, and abortable current-read ownership.",
+      "models": [
+        {
+          "id": "ServiceQuotaRequestConsole",
+          "properties": [
+            "Acknowledgement",
+            "FreshRecovery",
+            "ObservedOnly",
+            "RetiredRead"
+          ],
+          "limits": "Finite mounted quota-request control oracle only: explicit first unfiltered ACCOUNT ByQuota recovery disarms at start and rearms only on a fresh current successful observation; failed recovery/data invalidation clears approval and saved lookup. It does not identify a lost request by matching amount/time, infer persistence from arbitrary shape-valid replies, retry writes, or promise idempotency across tabs/new mounts. No JavaScript/React/DOM/HTTP/JSON/IAM/SQL/clock/refinement proof; real fixtures independently check bytes, scope, accessibility, restart, peer and cleanup. Leaving the mounted view ends its local unknown-outcome warning."
+        }
+      ]
+    },
+    {
+      "path": "tools/console/test/service-quotas.test.mjs",
+      "sha256": "edd91e23555ba3fb68f96534f761e60e998df04e5c684d96e340381b83cae624",
+      "disposition": "presentation",
+      "reason": "Development-only quota client/epoch/acknowledgement and strict-negative checks, including server timestamp skew and unsupported-operation refusal; canonical tools/console presentation classification, not runtime model implementation.",
       "models": []
     }
   ]

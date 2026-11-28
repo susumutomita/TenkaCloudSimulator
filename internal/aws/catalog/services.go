@@ -12,7 +12,7 @@ func Services() []*Service {
 		// Compute, containers and developer tools.
 		appRunner, autoScaling, codeArtifact, codeBuild, codeCommit, codeDeploy, codePipeline, ecs, eks, elasticBeanstalk, imageBuilder,
 		// Management and governance.
-		appConfig, awsConfig, cloudTrail, dataLifecycleManager, managedPrometheus, resourceGroups, serviceCatalog,
+		appConfig, awsConfig, cloudTrail, dataLifecycleManager, managedPrometheus, resourceGroups, serviceCatalog, serviceQuotas,
 		// Security, identity and compliance.
 		acm, acmPCA, detective, ram, securityHub, shield, signer, verifiedPermissions,
 		auditManager, cloudDirectory, firewallManager, guardDuty, identityCenter, inspector, macie, paymentCryptography,
