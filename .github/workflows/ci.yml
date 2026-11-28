@@ -45,13 +45,18 @@ jobs:
           test "$(id -u)" -ne 0
           export SIMULATOR_BINARY="$PWD/dist/tenkacloud-simulator"
           export AXE_SCRIPT="$RUNNER_TEMP/scaling-axe/axe.min.js"
-          export CHROMIUM_EXECUTABLE="$("$python" -c "from playwright.sync_api import sync_playwright; p=sync_playwright().start();print(p.chromium.executable_path);p.stop()")"
+          chromium=( "$HOME"/.cache/ms-playwright/chromium-*/chrome-linux64/chrome )
+          test "${#chromium[@]}" -eq 1
+          test -x "${chromium[0]}"
+          export CHROMIUM_EXECUTABLE="${chromium[0]}"
           unshare --user --map-current-user --net --keep-caps sh -ec '
             ip link set lo up
             exec setpriv --inh-caps=-all --ambient-caps=-all --bounding-set=-all "$@"
           ' verify sh -ec '
-            test "$(ls /sys/class/net)" = lo
+            actual_ifaces=$(awk -F: "NR>2 {gsub(/ /, \"\", \$1); print \$1}" /proc/net/dev)
+            test "$actual_ifaces" = lo
             test "$(awk "/^CapEff:/{print \$2}" /proc/self/status)" = 0000000000000000
+            echo "Private loopback and zero effective capabilities verified"
             status=0
             "$1" -B test/e2e/autoscaling_plans_console.py --sdk > "$2/console.json" || status=1
             "$1" -B test/e2e/autoscaling_plans.py > "$2/native.json" || status=1
