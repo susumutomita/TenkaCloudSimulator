@@ -9,12 +9,12 @@ jobs:
     runs-on: ubuntu-26.04
     timeout-minutes: 25
     env:
-      PRODUCT_REVISION: 6bdc530f0d62538ae844bd0889d4af33ebc32dc2
-      PRODUCT_TREE: 1bf31710130f7fed7d59d8211543ff0ae2fbf892
+      PRODUCT_REVISION: 79b477e5a8959692f096618a58db9b8f8fdf9126
+      PRODUCT_TREE: 7198f2856c4cb7f33071a0308d9730e337b55282
     steps:
       - uses: actions/checkout@v7.0.1
         with:
-          ref: 6bdc530f0d62538ae844bd0889d4af33ebc32dc2
+          ref: 79b477e5a8959692f096618a58db9b8f8fdf9126
           persist-credentials: false
       - uses: actions/setup-go@v6.5.0
         with:
@@ -82,7 +82,7 @@ jobs:
       - name: Retain source, build, SDK and Console DOM receipts
         uses: actions/upload-artifact@v7.0.2
         with:
-          name: simpledb-sdk-sessions-6bdc530-${{ github.run_id }}
+          name: simpledb-sdk-sessions-79b477e-${{ github.run_id }}
           path: ${{ runner.temp }}/simpledb-receipts/
           if-no-files-found: error
           retention-days: 14
