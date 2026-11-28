@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"maps"
 	"reflect"
+	"slices"
 	"strings"
 	"testing"
 	"time"
@@ -169,4 +170,112 @@ func TestCodeCommitErrorsIsolationAndPagination(t *testing.T) {
 	expect(t, gitCall(h, "one", "PutFile", put), 200, "")
 	// The original parent remains valid history, but is stale on this branch.
 	expect(t, gitCall(h, "one", "PutFile", put), 400, "ParentCommitIdOutdatedException")
+}
+
+func TestCodeCommitGitObjectAndTeamByteBudgets(t *testing.T) {
+	t.Run("objects", func(t *testing.T) {
+		h := newHarness(t, codeCommit)
+		expect(t, gitCall(h, "history", "CreateRepository", nil), 200, "")
+		input := map[string]any{"filePath": "a/b/c", "fileContent": "AA==", "branchName": "main"}
+		r := gitCall(h, "history", "PutFile", input)
+		expect(t, r, 200, "")
+		for n := 0; n < 169; n++ {
+			input["filePath"] = "root"
+			input["fileContent"] = base64.StdEncoding.EncodeToString([]byte(fmt.Sprint(n)))
+			input["parentCommitId"] = r.body["commitId"]
+			r = gitCall(h, "history", "PutFile", input)
+			expect(t, r, 200, "")
+		}
+		var n int
+		if err := h.db.QueryRow("SELECT count(*) FROM aws_codecommit_objects").Scan(&n); err != nil || n != gitMaxObjects {
+			t.Fatal(n, err)
+		}
+		saved := codeCommitSnapshot(t, h.db)
+		input["parentCommitId"] = r.body["commitId"]
+		input["fileContent"] = "bW9yZQ=="
+		failed := gitCall(h, "history", "PutFile", input)
+		if failed.status != 400 || failed.body["commitId"] != nil || !slices.Equal(saved, codeCommitSnapshot(t, h.db)) {
+			t.Fatal("object-limit write changed history", failed)
+		}
+	})
+	t.Run("bytes", func(t *testing.T) {
+		h := newHarness(t, codeCommit)
+		h.now = time.Unix(1700000000, 0)
+		for _, repo := range []string{"fill0", "fill1", "fill2", "fill3", "final"} {
+			expect(t, gitCall(h, repo, "CreateRepository", nil), 200, "")
+		}
+		physical := func() int {
+			var n int
+			if err := h.db.QueryRow("SELECT coalesce(sum(length(body)),0) FROM aws_codecommit_objects").Scan(&n); err != nil {
+				t.Fatal(err)
+			}
+			return n
+		}
+		// Measure the fixed-width tree and initial commit in an actual repository.
+		probe := gitCall(h, "final", "PutFile", map[string]any{"filePath": "f", "fileContent": "WA==", "branchName": "main"})
+		expect(t, probe, 200, "")
+		overhead := physical() - 1
+		expect(t, gitCall(h, "final", "DeleteRepository", nil), 200, "")
+		expect(t, gitCall(h, "final", "CreateRepository", nil), 200, "")
+		tips := map[string]any{}
+		for i := 0; gitMaxBytes-physical()-overhead > gitMaxFileBytes; i++ {
+			repo := fmt.Sprintf("fill%d", i%4)
+			binary := make([]byte, gitMaxFileBytes)
+			binary[0] = byte(i)
+			binary[1] = byte(i >> 8)
+			input := map[string]any{"filePath": "f", "fileContent": base64.StdEncoding.EncodeToString(binary), "branchName": "main"}
+			if tips[repo] != nil {
+				input["parentCommitId"] = tips[repo]
+			}
+			r := gitCall(h, repo, "PutFile", input)
+			expect(t, r, 200, "")
+			tips[repo] = r.body["commitId"]
+		}
+		count := gitMaxBytes - physical() - overhead
+		if count <= 0 || count > gitMaxFileBytes {
+			t.Fatal(count)
+		}
+		input := map[string]any{"filePath": "f", "branchName": "main", "fileContent": base64.StdEncoding.EncodeToString(bytes.Repeat([]byte{'Z'}, count))}
+		accepted := gitCall(h, "final", "PutFile", input)
+		expect(t, accepted, 200, "")
+		if physical() != gitMaxBytes {
+			t.Fatal("expected exact admitted byte boundary", physical())
+		}
+		input["parentCommitId"] = accepted.body["commitId"]
+		input["fileContent"] = "MQ=="
+		denied := gitCall(h, "final", "PutFile", input)
+		if denied.status != 400 || denied.body["commitId"] != nil || physical() != gitMaxBytes {
+			t.Fatal("team storage limit", denied)
+		}
+		read := gitCall(h, "final", "GetBranch", map[string]any{"branchName": "main"})
+		expect(t, read, 200, "")
+		if read.body["branch"].(map[string]any)["commitId"] != accepted.body["commitId"] {
+			t.Fatal(read.body)
+		}
+		expect(t, gitCall(h, "fill0", "DeleteRepository", nil), 200, "")
+		expect(t, gitCall(h, "final", "PutFile", input), 200, "")
+	})
+}
+
+func TestCodeCommitRefNamesAndCustomerKey(t *testing.T) {
+	h := newHarness(t, codeCommit)
+	expect(t, gitCall(h, "encrypted", "CreateRepository", map[string]any{"kmsKeyId": "alias/customer"}), 200, "")
+	protected := gitCall(h, "encrypted", "ListBranches", nil)
+	if protected.status < 400 || protected.body["branches"] != nil {
+		t.Fatal(protected)
+	}
+	expect(t, gitCall(h, "project", "CreateRepository", nil), 200, "")
+	first := gitCall(h, "project", "PutFile", map[string]any{"filePath": "f", "fileContent": "Cg==", "branchName": "main"})
+	expect(t, first, 200, "")
+	id := first.body["commitId"]
+	branch := func(name string) reply {
+		return gitCall(h, "project", "CreateBranch", map[string]any{"commitId": id, "branchName": name})
+	}
+	expect(t, branch("release"), 200, "")
+	expect(t, branch("release/v1"), 400, "BranchNameExistsException")
+	expect(t, branch("feature/v1"), 200, "")
+	expect(t, branch("feature"), 400, "BranchNameExistsException")
+	for _, name := range []string{"../escape", "refs/heads/extra", "bad.lock", "foo//bar", "x@{1}"} {
+		expect(t, branch(name), 400, "InvalidBranchNameException")
+	}
 }

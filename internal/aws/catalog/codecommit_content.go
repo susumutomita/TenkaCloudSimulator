@@ -9,6 +9,13 @@ import (
 	"unicode/utf8"
 )
 
+// The official decoder has already checked concrete wire types. An omitted
+// optional string is absent from the input map and reads as its zero value.
+func gitString(value any) string {
+	text, _ := value.(string)
+	return text
+}
+
 func gitPath(path string) ([]string, error) {
 	if path == "" {
 		return nil, Failure("PathRequiredException", "A file path is required.")
@@ -55,9 +62,16 @@ func (g gitStore) tip(name string) (string, error) {
 }
 
 func (g gitStore) createRef(name, id string) error {
-	var count int
-	if err := g.tx.QueryRowContext(g.ctx, "SELECT count(*) FROM aws_codecommit_branches WHERE repository=?", g.repo).Scan(&count); err != nil {
+	var count, conflicts int
+	// Git disallows a ref and its directory prefix coexisting, such as
+	// refs/heads/release and refs/heads/release/v1. Compare literal names.
+	if err := g.tx.QueryRowContext(g.ctx, `SELECT count(*),
+		count(CASE WHEN name=? OR instr(name,? || '/')=1 OR instr(?,name || '/')=1 THEN 1 END)
+		FROM aws_codecommit_branches WHERE repository=?`, name, name, name, g.repo).Scan(&count, &conflicts); err != nil {
 		return err
+	}
+	if conflicts != 0 {
+		return Failure("BranchNameExistsException", "The branch name conflicts with an existing branch.")
 	}
 	if count >= gitMaxBranches {
 		return &fault{kind: "limit", message: "The local repository supports at most 32 branches."}
@@ -66,7 +80,7 @@ func (g gitStore) createRef(name, id string) error {
 }
 
 func (q *request) codeCommitContent() (map[string]any, error) {
-	name := str(q.input["repositoryName"])
+	name := gitString(q.input["repositoryName"])
 	if name == "" {
 		return nil, Failure("RepositoryNameRequiredException", "A repository name is required.")
 	}
@@ -90,7 +104,7 @@ func (q *request) codeCommitContent() (map[string]any, error) {
 	if r.Region != q.region || r.Kind != "repository" || r.Name != name {
 		return nil, errGitStorage
 	}
-	if str(r.Document["kmsKeyId"]) != "" {
+	if gitString(r.Document["kmsKeyId"]) != "" {
 		return nil, &fault{kind: "unsupported", message: "Git content is unavailable for a customer-key repository."}
 	}
 	g := gitStore{q.ctx, tx, arn}
@@ -103,7 +117,7 @@ func (q *request) codeCommitContent() (map[string]any, error) {
 	case "ListBranches":
 		result, err = q.gitBranches(g, r)
 	case "GetBranch":
-		branch := str(q.input["branchName"])
+		branch := gitString(q.input["branchName"])
 		if err = gitBranchName(branch); err != nil {
 			return nil, err
 		}
@@ -116,7 +130,7 @@ func (q *request) codeCommitContent() (map[string]any, error) {
 	case "GetFile":
 		result, err = q.gitGetFile(g, r)
 	case "GetCommit":
-		id := str(q.input["commitId"])
+		id := gitString(q.input["commitId"])
 		if err = gitCommitID(id); err != nil {
 			return nil, err
 		}
@@ -146,7 +160,7 @@ func gitCommitID(id string) error {
 }
 
 func (q *request) gitCreateBranch(g gitStore) error {
-	name, id := str(q.input["branchName"]), str(q.input["commitId"])
+	name, id := gitString(q.input["branchName"]), gitString(q.input["commitId"])
 	if err := gitBranchName(name); err != nil {
 		return err
 	}
@@ -154,11 +168,6 @@ func (q *request) gitCreateBranch(g gitStore) error {
 		return err
 	}
 	if _, err := g.commit(id, "CommitDoesNotExistException"); err != nil {
-		return err
-	}
-	if _, err := g.tip(name); err == nil {
-		return Failure("BranchNameExistsException", "This branch already exists.")
-	} else if !errors.Is(err, sql.ErrNoRows) {
 		return err
 	}
 	return g.createRef(name, id)
@@ -170,7 +179,7 @@ func (q *request) gitBranches(g gitStore, r row) (map[string]any, error) {
 	after := int64(0)
 	if token, present := q.input["nextToken"]; present {
 		var valid bool
-		after, valid = pageAfter(str(token), q.op.Name, q.region, scope)
+		after, valid = pageAfter(gitString(token), q.op.Name, q.region, scope)
 		if !valid || after < 1 {
 			return nil, Failure("InvalidContinuationTokenException", "The branch continuation is invalid.")
 		}
@@ -208,14 +217,14 @@ func (q *request) gitBranches(g gitStore, r row) (map[string]any, error) {
 }
 
 func (q *request) gitGetFile(g gitStore, r row) (map[string]any, error) {
-	parts, err := gitPath(str(q.input["filePath"]))
+	parts, err := gitPath(gitString(q.input["filePath"]))
 	if err != nil {
 		return nil, err
 	}
 	spec, provided := q.input["commitSpecifier"]
-	ref := str(spec)
+	ref := gitString(spec)
 	if !provided {
-		ref = str(r.Document["defaultBranch"])
+		ref = gitString(r.Document["defaultBranch"])
 	}
 	id := ref
 	if !validGitOID(ref) {
@@ -254,11 +263,11 @@ func (q *request) gitGetFile(g gitStore, r row) (map[string]any, error) {
 }
 
 func (q *request) gitPut(g gitStore, r row) (map[string]any, error) {
-	branch := str(q.input["branchName"])
+	branch := gitString(q.input["branchName"])
 	if err := gitBranchName(branch); err != nil {
 		return nil, err
 	}
-	parts, err := gitPath(str(q.input["filePath"]))
+	parts, err := gitPath(gitString(q.input["filePath"]))
 	if err != nil {
 		return nil, err
 	}
@@ -280,12 +289,12 @@ func (q *request) gitPut(g gitStore, r row) (map[string]any, error) {
 			return nil, Failure("InvalidFileModeException", "Only regular and executable files are supported.")
 		}
 	}
-	c := gitCommit{name: "Local contributor", email: "local@simulator.invalid", date: gitDate(q.now().Unix()), message: str(q.input["commitMessage"])}
+	c := gitCommit{name: "Local contributor", email: "local@simulator.invalid", date: gitDate(q.now().Unix()), message: gitString(q.input["commitMessage"])}
 	if value, present := q.input["name"]; present {
-		c.name = str(value)
+		c.name = gitString(value)
 	}
 	if value, present := q.input["email"]; present {
-		c.email = str(value)
+		c.email = gitString(value)
 	}
 	if utf8.RuneCountInString(c.name) > 256 || strings.TrimSpace(c.name) == "" || strings.ContainsAny(c.name, "<>") || strings.IndexFunc(c.name, unicode.IsControl) >= 0 {
 		return nil, Failure("NameLengthExceededException", "Provide a nonempty Git author name of at most 256 characters without header delimiters.")
@@ -301,13 +310,13 @@ func (q *request) gitPut(g gitStore, r row) (map[string]any, error) {
 	if err != nil && !first {
 		return nil, err
 	}
-	if first && str(r.Document["defaultBranch"]) != "" {
+	if first && gitString(r.Document["defaultBranch"]) != "" {
 		return nil, Failure("BranchDoesNotExistException", "The branch does not exist.")
 	}
 	id, present := q.input["parentCommitId"]
 	base := ""
 	if present {
-		c.parent = str(id)
+		c.parent = gitString(id)
 		if !validGitOID(c.parent) {
 			return nil, Failure("InvalidParentCommitIdException", "A full 40-character lowercase parent commit ID is required.")
 		}
