@@ -5,8 +5,9 @@ const encoder = new TextEncoder();
 
 export function repositoryPath(value) {
   if (typeof value !== 'string') return false;
-  const parts = value.split('/');
-  return encoder.encode(value).length <= 256 && parts.length <= 8 && !/[\\\p{Cc}]/u.test(value)
+  const relative = value.replace(/^\//,'');
+  const parts = relative.split('/');
+  return encoder.encode(relative).length <= 256 && parts.length <= 8 && !/[\\\p{Cc}]/u.test(value)
     && parts.every(part => part && part !== '.' && part !== '..' && part.toLowerCase() !== '.git');
 }
 
@@ -64,7 +65,7 @@ export function contentClient(request, region, repositoryName, repositoryId) {
   }
   async function file(commitId, filePath, signal) {
     const result=await call('GetFile',{commitSpecifier:commitId,filePath},signal);
-    requireResult(result.commitId===commitId && objectId(result.blobId) && result.filePath===filePath &&
+    requireResult(result.commitId===commitId && objectId(result.blobId) && result.filePath===filePath.replace(/^\//,'') &&
       ['NORMAL','EXECUTABLE'].includes(result.fileMode) && Number.isInteger(result.fileSize) &&
       result.fileSize>=0 && result.fileSize<=maxFileSize && typeof result.fileContent==='string' &&
       result.fileContent.length===4*Math.ceil(result.fileSize/3));

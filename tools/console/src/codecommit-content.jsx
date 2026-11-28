@@ -75,7 +75,7 @@ export default function CodeCommitContent({request,region,repository,onSaving}) 
       if(name)Object.assign(data,await loadBranch(name,signal));
       if(affected?.path && affected.name===name) {
         try {data.file=await api.file(data.tip,affected.path,signal);}
-        catch(e){if(!/^400: .*file does not exist/i.test(e.message))throw e;}
+        catch(e){if(e.message!=='400: The specified commit contains no file at that path.')throw e;}
       }
       await api.identity(signal);return data;
     },data=>{setView(data);if(affected){setPath(affected.path||'');setUnknown(null);setMessage(t('Current repository state refreshed.','現在のリポジトリ状態を再取得しました。'));}});
@@ -107,7 +107,7 @@ export default function CodeCommitContent({request,region,repository,onSaving}) 
   }
   function nextPage() {
     run('read',async signal=>{await api.identity(signal);const page=await api.branches(view.next,signal);await api.identity(signal);return page;},
-      page=>setView(v=>({...v,names:[...v.names,...page.branches],next:page.nextToken||''})));
+      page=>setView(v=>({...v,names:[...new Set([...v.names,...page.branches])],next:page.nextToken||''})));
   }
   function edit() {
     setError('');setMessage('');
@@ -147,9 +147,9 @@ export default function CodeCommitContent({request,region,repository,onSaving}) 
   const button=(label,handler,disabled=false,props={})=><Button disabled={disabled} onClick={handler} {...props}>{label}</Button>;
   return <section data-testid="codecommit-contents"><Container header={<Header variant="h2">{t('Repository contents','リポジトリの内容')}</Header>}>
     <SpaceBetween size="m">
-      {error&&<Alert type="error">{error}</Alert>}
+      {error&&<Alert type="error" role="alert">{error}</Alert>}
       {message&&<StatusIndicator type="success">{message}</StatusIndicator>}
-      {unknown&&<Alert type="warning">{t('The write outcome is unknown. Refresh the affected branch before making another change.','書き込み結果を確認できません。次の変更の前に対象ブランチを再取得してください。')} <strong>{unknown.name}</strong></Alert>}
+      {unknown&&<Alert type="warning" role="alert">{t('The write outcome is unknown. Refresh the affected branch before making another change.','書き込み結果を確認できません。次の変更の前に対象ブランチを再取得してください。')} <strong>{unknown.name}</strong></Alert>}
       <SpaceBetween size="xs" direction="horizontal">
         {button(t('Refresh repository','リポジトリを再取得'),()=>refresh(unknown),working==='write')}
         {working==='read'&&button(t('Cancel read','読み込みをキャンセル'),()=>{const job=active.current;active.current=null;job?.controller.abort();setWorking('');})}
