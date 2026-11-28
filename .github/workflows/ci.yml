@@ -9,20 +9,20 @@ jobs:
     runs-on: ubuntu-22.04
     timeout-minutes: 40
     env:
-      NATIVE: da4fa53a80b3e61ade21dc28bf480f973a94b278
-      NATIVE_TREE: 5152c14cc8536303063d9434bbe2dd1f5a82f18f
-      CONSOLE: b88d3d8dbe9b44a5ec0bd0cd25caeee395bfd32a
-      CONSOLE_TREE: 74fb57ed2bcd2fd4f3458b922bbdd2ae17644dca
+      NATIVE: 7b61d72163e8d76bb7d405f8e196e3bd072d4b45
+      NATIVE_TREE: d126c8f249333991a2d6bb646e96361a572765fb
+      CONSOLE: 9c4a5d3e95414938a5329c2bb6d31eb6eb80d929
+      CONSOLE_TREE: 3229d93bb3fd268ac3841034a8a7997012ee740e
     steps:
       - uses: actions/checkout@v7.0.1
         with:
           path: native
-          ref: da4fa53a80b3e61ade21dc28bf480f973a94b278
+          ref: 7b61d72163e8d76bb7d405f8e196e3bd072d4b45
           persist-credentials: false
       - uses: actions/checkout@v7.0.1
         with:
           path: console
-          ref: b88d3d8dbe9b44a5ec0bd0cd25caeee395bfd32a
+          ref: 9c4a5d3e95414938a5329c2bb6d31eb6eb80d929
           persist-credentials: false
       - uses: actions/setup-go@v6.5.0
         with:
@@ -75,6 +75,7 @@ jobs:
             export SIMULATOR_BINARY="$PWD/dist/tenkacloud-simulator"
             "$python" -B test/e2e/codestar_notifications.py > "$RUNNER_TEMP/receipts/native-sdk.json" || status=1
             "$python" -B test/e2e/codestar_notification_scalar.py > "$RUNNER_TEMP/receipts/native-scalar.json" || status=1
+            "$python" -B test/e2e/check.py Conformance.test_codestar_notification_rules_and_git_delivery > "$RUNNER_TEMP/receipts/regular-e2e.log" 2>&1 || status=1
             cd ../console
             export SIMULATOR_BINARY="$PWD/dist/tenkacloud-simulator"
             "$python" -B test/e2e/codestar_notification_console.py > "$RUNNER_TEMP/receipts/console-sdk.json" || status=1
