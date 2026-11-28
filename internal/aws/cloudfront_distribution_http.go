@@ -220,6 +220,7 @@ func (s *CloudFrontStore) serveDistribution(g *Gateway, w http.ResponseWriter, r
 					err = errors.New("invalid saved invalidation")
 				} else {
 					value.XMLNS = cloudFrontNS
+					value.InvalidationBatch.XMLNS = cloudFrontNS
 					response = value
 				}
 			}

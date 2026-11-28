@@ -111,9 +111,9 @@
     },
     {
       "path": "internal/aws/cloudfront_distribution_http.go",
-      "sha256": "f2cc81697bee212c613d07f05f3966c87c7348d1cb6b629f472f4f7532592cb1",
+      "sha256": "8a1c57f9befe7b1dc8ac6dd40db5c8f676d6f368997ef24b2c81972f1e62cf05",
       "disposition": "modeled",
-      "reason": "Bound the local distribution/cache transaction, joint read authorization, ETag mutation, invalidation, rollback and committed restart state; native tests separately exercise concrete protocol and SQLite behavior.",
+      "reason": "Bound the local distribution/cache transaction, joint read authorization, ETag mutation, invalidation, rollback and committed restart state; native tests separately exercise concrete protocol and SQLite behavior. Stored invalidation reads/idempotent replay restore the nested native XML namespace without changing persisted rows; the concrete namespace-aware regression, not the finite cache model, checks this wire projection.",
       "models": [
         {
           "id": "CloudFrontLocalCache",
@@ -159,9 +159,9 @@
     },
     {
       "path": "internal/aws/cloudfront_distribution_store.go",
-      "sha256": "2970a1cb0c45ee34657d3e2b2c57f1328db547c3e2fc00079a6c4e808b69a7fa",
+      "sha256": "91712000af6af47d6510f5a5897267a542b7a66af032821f9f6293e23bb9539f",
       "disposition": "modeled",
-      "reason": "Bound the local distribution/cache transaction, joint read authorization, ETag mutation, invalidation, rollback and committed restart state; native tests separately exercise concrete protocol and SQLite behavior.",
+      "reason": "Bound the local distribution/cache transaction, joint read authorization, ETag mutation, invalidation, rollback and committed restart state; native tests separately exercise concrete protocol and SQLite behavior. Stored invalidation reads/idempotent replay restore the nested native XML namespace without changing persisted rows; the concrete namespace-aware regression, not the finite cache model, checks this wire projection.",
       "models": [
         {
           "id": "CloudFrontLocalCache",
@@ -186,6 +186,13 @@
       "sha256": "a1b5ff703daf92721588d679154333e98c56b94c7c51ffbecd4c860a55ba462b",
       "disposition": "test-support",
       "reason": "Exercise real bounded distribution/cache state, stock pinned SDK lifecycle, strict errors and owned cleanup; not a whole-service or real CDN claim.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/cloudfront_invalidation_wire_test.go",
+      "sha256": "062bba8856dfdb4982825304864522f2a32dd04a39f9c380af6932dc7bca38db",
+      "disposition": "test-support",
+      "reason": "Require every native XML element to retain the official namespace across create/read/idempotent replay and persistent reopen, exact caller/ID/paths, single stored receipt, conflict refusal and unchanged stored payload.",
       "models": []
     },
     {
@@ -311,9 +318,9 @@
     },
     {
       "path": "test/e2e/cloudfront_local_content.py",
-      "sha256": "80ad1c99a32411ea95979b8490654e2876a835d3381fd3f8c0eafb56b19fb47e",
+      "sha256": "0b686062bf796924df454e366f9fef060d634d3fa6582e22b9a3b9f6372852df",
       "disposition": "test-support",
-      "reason": "Exercise real bounded distribution/cache state, stock pinned SDK lifecycle, strict errors and owned cleanup; not a whole-service or real CDN claim.",
+      "reason": "Exercise real bounded distribution/cache state, stock pinned SDK lifecycle, strict errors and owned cleanup; not a whole-service or real CDN claim. Observe every original CloudFront SDK XML response with a namespace-aware parser, so the name-only SDK parser cannot conceal a reset child namespace.",
       "models": []
     },
     {

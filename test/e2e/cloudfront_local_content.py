@@ -14,6 +14,7 @@ from pathlib import Path
 import re
 import tempfile
 from urllib.parse import urlsplit
+from xml.etree import ElementTree as ET
 
 from sts_session_lifecycle import LocalSimulator
 
@@ -85,6 +86,10 @@ def client(session, service, team, stack, settings, stats, key=KEY):
 
     def received(http_response, **_):
         assert not 300 <= http_response.status_code < 400
+        if service == 'cloudfront' and http_response.content:
+            root = ET.fromstring(http_response.content)
+            assert all(node.tag.startswith('{http://cloudfront.amazonaws.com/doc/2020-05-31/}')
+                       for node in root.iter()), 'native CloudFront XML reset its namespace'
         stats['responses'] += 1
 
     result.meta.events.register('before-send.' + service, guard)
