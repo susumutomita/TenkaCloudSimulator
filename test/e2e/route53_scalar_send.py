@@ -153,12 +153,17 @@ def run():
                         dialog = page.get_by_role('dialog').filter(
                             has=page.get_by_role('button', name='Close Client', exact=True))
                         expect(dialog).to_have_count(1)
-                        dialog.get_by_role('button', name='Query', exact=True).click()
+                        dialog.get_by_role('button', name='Query Parameters', exact=True).click()
                         for parameter in parameters:
                             name = parameter['name']
-                            control = dialog.get_by_role('textbox', name=name + ' Value', exact=True)
+                            include = dialog.get_by_role('checkbox', name='Include ' + name + ' in request', exact=True)
+                            row = include.locator('xpath=ancestor::*[.//*[@role="combobox" and normalize-space(@aria-label)="Value"]][1]')
+                            expect(row.get_by_role('checkbox')).to_have_count(1)
+                            control = row.get_by_role('combobox', name='Value', exact=True)
+                            expect(control).to_have_count(1)
+                            include.check()
                             control.fill(values[name])
-                            expect(control).to_have_value(values[name])
+                            expect(control).to_have_text(values[name])
                         assert not requests, 'Native read occurred before Send'
                         snapshots = frame(owner.db), frame(peer.db)
                         with page.expect_response(lambda response: response.request.method == method
@@ -168,6 +173,7 @@ def run():
                         request = response.request
                         assert response.status == 200 and request.redirected_from is None
                         assert request.method == method and request.post_data is None
+                        assert (urlsplit(request.url).scheme, urlsplit(request.url).netloc) == (own.scheme, own.netloc)
                         assert sorted(parse_qsl(urlsplit(request.url).query, keep_blank_values=True)) == sorted(values.items())
                         assert request.header_value('cookie')
                         for name in ('authorization', 'x-simulator-token', 'x-simulator-principal',
