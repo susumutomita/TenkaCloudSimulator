@@ -8,11 +8,11 @@ jobs:
     runs-on: ubuntu-22.04
     timeout-minutes: 25
     env:
-      PRODUCT: be8e01389f187a576e3ddaf63d51834e9a070763
+      PRODUCT: fe58811d6a8750399bbf7f4945b9a7e4a24b2e3a
     steps:
       - uses: actions/checkout@v7.0.1
         with:
-          ref: be8e01389f187a576e3ddaf63d51834e9a070763
+          ref: fe58811d6a8750399bbf7f4945b9a7e4a24b2e3a
           persist-credentials: false
       - uses: actions/setup-go@v6.5.0
         with:
@@ -24,7 +24,7 @@ jobs:
           test "$GITHUB_REPOSITORY" = susumutomita/TenkaCloudSimulator
           test "$GITHUB_REF" = refs/heads/verify/207-ecr-membership
           test "$(git rev-parse HEAD)" = "$PRODUCT"
-          test "$(git rev-parse 'HEAD^{tree}')" = 2220f245c96c55cad584d211e08de5b0d51b02b7
+          test "$(git rev-parse 'HEAD^{tree}')" = b4c5b503c1fe5ea8c1f10926aa6c6f1b673a6ce4
           test -z "$(git status --porcelain)"
           test "$(go env GOVERSION)" = go1.26.11
           test "$(id -u)" -ne 0
@@ -162,11 +162,11 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 60
     env:
-      PRODUCT: be8e01389f187a576e3ddaf63d51834e9a070763
+      PRODUCT: fe58811d6a8750399bbf7f4945b9a7e4a24b2e3a
     steps:
       - uses: actions/checkout@v7.0.1
         with:
-          ref: be8e01389f187a576e3ddaf63d51834e9a070763
+          ref: fe58811d6a8750399bbf7f4945b9a7e4a24b2e3a
           fetch-depth: 0
           persist-credentials: false
       - uses: actions/setup-go@v6.5.0
@@ -179,12 +179,12 @@ jobs:
           test "$GITHUB_REPOSITORY" = susumutomita/TenkaCloudSimulator
           test "$GITHUB_REF" = refs/heads/verify/207-ecr-membership
           test "$(git rev-parse HEAD)" = "$PRODUCT"
-          test "$(git rev-parse 'HEAD^{tree}')" = 2220f245c96c55cad584d211e08de5b0d51b02b7
+          test "$(git rev-parse 'HEAD^{tree}')" = b4c5b503c1fe5ea8c1f10926aa6c6f1b673a6ce4
           test -z "$(git status --porcelain)"
           test "$(go env GOVERSION)" = go1.26.11
           test "$(id -u)" -ne 0
           mkdir "$RUNNER_TEMP/receipts"
-          PYTHONPYCACHEPREFIX="$RUNNER_TEMP/pycache" python3 scripts/check-formal-applicability.py check --base b97ddbd26f3e78905bd8e26a944fb7f0a28d8a42
+          PYTHONPYCACHEPREFIX="$RUNNER_TEMP/pycache" python3 scripts/check-formal-applicability.py check --base 64e5dd28dbe43f43480dfab555ffdd9aff572eb0
           make before-commit 2>&1 | tee "$RUNNER_TEMP/receipts/before-commit.log"
           test -z "$(git status --porcelain)"
           go version -m dist/tenkacloud-simulator > "$RUNNER_TEMP/receipts/build.txt"
