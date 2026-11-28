@@ -99,7 +99,8 @@ func TestSNSLifecycleFanoutAndErrors(t *testing.T) {
 	snsCall(t, g, "", url.Values{"Action": {"DeleteTopic"}, "TopicArn": {topicArn}}, 200, "")
 	snsCall(t, g, "", url.Values{"Action": {"ListSubscriptionsByTopic"}, "TopicArn": {topicArn}}, 404, "NotFound")
 	snsCall(t, g, "", url.Values{"Action": {"DeleteTopic"}, "TopicArn": {topicArn}}, 200, "DeleteTopicResponse")
-	snsCall(t, g, "", url.Values{"Action": {"SetTopicAttributes"}, "TopicArn": {topicArn}}, 400, "InvalidAction")
+	snsCall(t, g, "", url.Values{"Action": {"SetTopicAttributes"}, "TopicArn": {topicArn}}, 400, "InvalidParameter")
+	snsCall(t, g, "", url.Values{"Action": {"AddPermission"}, "TopicArn": {topicArn}}, 400, "InvalidAction")
 }
 
 func TestSNSAuthorization(t *testing.T) {
