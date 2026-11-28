@@ -9,12 +9,12 @@ jobs:
     runs-on: ubuntu-22.04
     timeout-minutes: 25
     env:
-      PRODUCT: 65be0b4929858c786a9b72d1e950f61fd2b407ad
-      PRODUCT_TREE: 15f682127c9403aec510a36edb29aea1fa0ac34c
+      PRODUCT: 009e838aecc6af574aa2357529fa267edd8686e0
+      PRODUCT_TREE: f3520b47be4793e8f861437f1aa20fd4ec88e116
     steps:
       - uses: actions/checkout@v7.0.1
         with:
-          ref: 65be0b4929858c786a9b72d1e950f61fd2b407ad
+          ref: 009e838aecc6af574aa2357529fa267edd8686e0
           path: product
           persist-credentials: false
       - uses: actions/setup-go@v6.5.0
@@ -53,7 +53,7 @@ jobs:
           ' isolated "$python" -B test/e2e/elb.py > "$receipts/stock.json"
           jq -se 'length == 1 and (.[0] | .elbNativeSDK and .lambdaTargetDataPlane
             and .periodicHealthChecks and .twoAuthenticatedProcesses and .actualCLIReopen
-            and .participantIAM and .teardown == "DELETED" and .placement.sameVpc
+            and .copiedStandaloneWithoutExecutablesOnPath and .participantIAM and .teardown == "DELETED" and .placement.sameVpc
             and .placement.distinctZones == 2 and .placement.explicitGroups == 1
             and .placement.sharedOwnerDeleteProtected and .placement.crossRegionRejected
             and .placement.crossTeamRejected and .placement.restartVerified and .counts.calls > 0
@@ -63,7 +63,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v7.0.2
         with:
-          name: alb-placement-65be0b4-${{ github.run_id }}
+          name: alb-placement-009e838-${{ github.run_id }}
           path: ${{ runner.temp }}/alb-receipts/
           retention-days: 14
           if-no-files-found: error
