@@ -12,7 +12,7 @@ import StatusIndicator from '@cloudscape-design/components/status-indicator';
 import Table from '@cloudscape-design/components/table';
 import Textarea from '@cloudscape-design/components/textarea';
 import {useLocale} from './i18n.jsx';
-import {localDownloadName, supportClient, validSupportFile} from './support-client.mjs';
+import {amsIncidentCode, localDownloadName, supportClient, validSupportFile} from './support-client.mjs';
 
 const textStyle = {whiteSpace:'pre-wrap', overflowWrap:'anywhere'};
 
@@ -69,11 +69,13 @@ function Cases({request, onSaving}) {
   const [resolved, setResolved] = useState(false), [notice, setNotice] = useState('');
   const [recovery, setRecovery] = useState(null), [inspectCreate, setInspectCreate] = useState(false);
   const [subject, setSubject] = useState(''), [body, setBody] = useState('');
+  const [incident, setIncident] = useState(false);
+  const incidentLabel = t('AMS Advanced incident', 'AMS Advanced インシデント');
   const [file, setFile] = useState(null), [fileVersion, setFileVersion] = useState(0);
   const staged = useRef(null), heading = useRef(null), previousView = useRef(view);
   const [confirm, setConfirm] = useState(false);
   const clearDraft = () => {
-    setSubject(''); setBody(''); setFile(null); setFileVersion(v => v + 1); staged.current = null;
+    setSubject(''); setBody(''); setIncident(false); setFile(null); setFileVersion(v => v + 1); staged.current = null;
   };
   const list = useCallback(async (showResolved, signal) => {
     const data = await api.cases(showResolved, '', signal);
@@ -157,13 +159,13 @@ function Cases({request, onSaving}) {
             setId = staged.current.id;
           }
           sending = true;
-          caseId = await api.send(caseId, subject, body, setId, locale, signal);
+          caseId = await api.send(caseId, subject, body, setId, locale, signal, incident);
         }
         acknowledged = true;
         const data = await api.detail(caseId, signal);
         signal.throwIfAborted();
         const matches = msg => msg.body === body && (!file || msg.attachmentSet?.some(f => f.fileName === file.name));
-        if (resolving ? data.item.status !== 'resolved' : ((!id && data.item.subject !== subject) || !data.history.rows.some(matches))) {
+        if (resolving ? data.item.status !== 'resolved' : ((!id && (data.item.subject !== subject || data.item.serviceCode !== (incident ? amsIncidentCode : undefined))) || !data.history.rows.some(matches))) {
           throw Error(t('The latest case details did not confirm the change.', '最新のケース詳細で変更を確認できませんでした。'));
         }
         setView('detail'); setId(caseId); setDetail(data); clearDraft(); setConfirm(false);
@@ -200,6 +202,8 @@ function Cases({request, onSaving}) {
         {view === 'create' && <FormField label={t('Subject', '件名')} constraintText={t('Up to 256 characters.', '256文字以内。')}>
           <Input value={subject} onChange={({detail}) => setSubject(detail.value)} disabled={locked}/>
         </FormField>}
+        {view === 'create' && <Checkbox checked={incident} disabled={locked} onChange={({detail}) => setIncident(detail.checked)}>
+          {incidentLabel}</Checkbox>}
         <FormField label={t('Message', 'メッセージ')} constraintText={t('Up to 8,000 characters.', '8,000文字以内。')}>
           <Textarea value={body} onChange={({detail}) => setBody(detail.value)} disabled={locked}/>
         </FormField>
@@ -251,6 +255,7 @@ function Cases({request, onSaving}) {
           </SpaceBetween>}>{t('Cases', 'ケース一覧')}</Header>}
           columnDefinitions={[
             {id:'subject', header:t('Subject', '件名'), cell: row => <Button variant="inline-link" disabled={!!recovery} onClick={() => choose(row.caseId)}>{row.subject}</Button>},
+            {id:'service', header:t('Service', 'サービス'), cell: row => row.serviceCode === amsIncidentCode ? incidentLabel : '—'},
             {id:'display', header:t('Case number', 'ケース番号'), cell: row => row.displayId},
             {id:'status', header:t('Status', 'ステータス'), cell: row => stateName(row.status)},
           ]}/>
@@ -263,6 +268,7 @@ function Cases({request, onSaving}) {
           <span style={textStyle}>{detail.item.subject}</span></Header>}>
           <dl><dt>{t('Case number', 'ケース番号')}</dt><dd>{detail.item.displayId}</dd>
             <dt>{t('Case ID', 'ケースID')}</dt><dd style={textStyle}>{id}</dd>
+            {detail.item.serviceCode === amsIncidentCode && <><dt>{t('Service', 'サービス')}</dt><dd>{incidentLabel}</dd></>}
             <dt>{t('Status', 'ステータス')}</dt><dd>{stateName(detail.item.status)}</dd>
             <dt>{t('Created', '作成日時')}</dt><dd>{detail.item.timeCreated}</dd></dl>
         </Container>

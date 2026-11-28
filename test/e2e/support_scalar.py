@@ -129,6 +129,8 @@ class ScalarSession:
                 expect(panel).to_contain_text(body["caseId"])
             if "cases" in body and body["cases"]:
                 expect(panel).to_contain_text(body["cases"][0]["subject"])
+            if "cases" in body and body["cases"] and "serviceCode" in body["cases"][0]:
+                expect(panel).to_contain_text(body["cases"][0]["serviceCode"])
             if "__type" in body:
                 expect(panel).to_contain_text(body["__type"])
             self.sends.append([operation, status])
@@ -144,11 +146,12 @@ def exercise(browser, team, peer, sdk, peer_sdk, stack):
     owner = ScalarSession(browser, team, team.token, stack)
     limited = ScalarSession(browser, team, provision_reader(team), stack)
     other = ScalarSession(browser, peer, peer.token, stack)
-    case_id = owner.send("CreateCase", {"subject": subject, "communicationBody": initial}, 200)["caseId"]
+    service = "sentinel-report-incident"
+    case_id = owner.send("CreateCase", {"subject": subject, "communicationBody": initial, "serviceCode": service}, 200)["caseId"]
     lookup = {"caseIdList": [case_id], "includeResolvedCases": True, "includeCommunications": False}
     case, = owner.send("DescribeCases", lookup, 200)["cases"]
     assert case["caseId"] == case_id and case["displayId"] != case_id and case["subject"] == subject
-    assert case["status"] == "opened" and "recentCommunications" not in case
+    assert case["serviceCode"] == service and case["status"] == "opened" and "recentCommunications" not in case
     assert sdk.describe_cases(**lookup)["cases"] == [case]
 
     def messages():

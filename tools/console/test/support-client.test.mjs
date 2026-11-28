@@ -101,3 +101,18 @@ test('server rejection preserves native status, transport uncertainty stays dist
   const api = supportClient(async () => {delayed.abort(); return Response.json({cases:[details]});});
   await assert.rejects(api.cases(true, '', delayed.signal), {name:'AbortError'});
 });
+
+test('send the AMS incident classification only on explicit creation and verify the returned case metadata', async () => {
+  const serviceCode = 'sentinel-report-incident';
+  const {api, sent} = stub({CreateCase:{caseId:details.caseId}, AddCommunicationToCase:{result:true},
+    DescribeCases:{cases:[{...details, serviceCode}]}});
+  await api.send('', 'Case', 'First message', undefined, 'ja', signal, true);
+  await api.send(details.caseId, '', 'Follow-up', undefined, 'ja', signal, true);
+  assert.deepEqual(sent, [
+    ['CreateCase', {subject:'Case', communicationBody:'First message', language:'ja', serviceCode}],
+    ['AddCommunicationToCase', {caseId:details.caseId, communicationBody:'Follow-up'}],
+  ]);
+  assert.equal((await api.cases(false, '', signal)).rows[0].serviceCode, serviceCode);
+  const bad = stub({DescribeCases:{cases:[{...details, serviceCode:'unknown-service'}]}});
+  await assert.rejects(bad.api.cases(false, '', signal), /Invalid local AWS Support response/);
+});

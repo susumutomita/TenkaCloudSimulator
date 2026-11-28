@@ -2,6 +2,7 @@ export const supportOperations = Object.freeze([
   'CreateCase', 'DescribeCases', 'AddCommunicationToCase', 'DescribeCommunications',
   'ResolveCase', 'AddAttachmentsToSet', 'DescribeAttachment',
 ]);
+export const amsIncidentCode = 'sentinel-report-incident';
 export const supportFileLimit = 65536;
 
 export function supportAdvertised(capabilities) {
@@ -16,6 +17,7 @@ const invalid = () => new Error('Invalid local AWS Support response.');
 const string = value => typeof value === 'string' && value.length > 0;
 const fileMeta = file => string(file?.fileName) && string(file.attachmentId);
 const caseRow = row => string(row?.caseId) && string(row.displayId) && string(row.subject)
+  && (row.serviceCode === undefined || row.serviceCode === amsIncidentCode)
   && ['opened', 'resolved'].includes(row.status) && string(row.timeCreated);
 
 function page(result, key, valid) {
@@ -76,8 +78,9 @@ export function supportClient(request) {
       if (!string(result.attachmentSetId) || !Number.isFinite(Date.parse(result.expiryTime))) throw invalid();
       return {file, id:result.attachmentSetId, expires:Date.parse(result.expiryTime)};
     },
-    async send(id, subject, body, setId, language, signal) {
+    async send(id, subject, body, setId, language, signal, incident = false) {
       const input = id ? {caseId:id, communicationBody:body} : {subject, communicationBody:body, language};
+      if (!id && incident) input.serviceCode = amsIncidentCode;
       if (setId) input.attachmentSetId = setId;
       const result = await call(id ? 'AddCommunicationToCase' : 'CreateCase', input, signal);
       if (id ? result.result !== true : !string(result.caseId)) throw invalid();

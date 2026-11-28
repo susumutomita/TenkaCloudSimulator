@@ -1,6 +1,6 @@
 # Go単一バイナリの設計
 
-[AWS Support の練習用ケース](../aws-support.md)は、チームの SQLite にメッセージ、解決状態、添付ファイルを保存する。参加者は通常のローカル認証を使い、7つの AWS JSON 操作ごとに IAM 権限を評価する。AWS やメールへの外部送信は行わない。
+[AWS Support の練習用ケース](../aws-support.md)は、チームの SQLite にメッセージ、解決状態、添付ファイルを保存する。参加者は通常のローカル認証を使い、7つの AWS JSON 操作ごとに IAM 権限を評価する。作成時に指定された AMS Advanced のインシデント分類はケースと同じトランザクションで保存し、過去のケースには補完しない。AWS やメールへの外部送信は行わない。
 
 `cmd/simulator`はCLI、numeric loopback listener、token-file、shutdownを所有する。`internal/server`は埋込Cloudscape/Scalar、local token境界、能力表、identity control APIを提供する。`internal/provider`はprovider dispatch、`internal/core`はprovider中立のSQLite object stateと限定identity-policy評価。`internal/aws`はS3 REST/XML、SSM JSON 1.1、CloudFormation Query/XMLとAWS所有テーブルを持つ。
 

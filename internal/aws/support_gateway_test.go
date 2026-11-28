@@ -13,6 +13,12 @@ import (
 
 func TestSupportRejectsAmbiguousOrUnimplementedFields(t *testing.T) {
 	for _, tc := range []struct{ operation, body string }{
+		{"CreateCase", `{"serviceCode":""}`},
+		{"CreateCase", `{"serviceCode":null}`},
+		{"CreateCase", `{"serviceCode":17}`},
+		{"CreateCase", `{"serviceCode":"sentinel-report-incident","serviceCode":"sentinel-report-incident"}`},
+		{"DescribeCases", `{"serviceCode":"sentinel-report-incident"}`},
+		{"AddCommunicationToCase", `{"serviceCode":"sentinel-report-incident"}`},
 		{"CreateCase", `{"subject":"a","subject":"b"}`},
 		{"CreateCase", `{"communicationBody":"\ud800"}`},
 		{"CreateCase", `{"subject":null}`},

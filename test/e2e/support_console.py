@@ -13,6 +13,7 @@ import json
 import os
 from pathlib import Path
 import shutil
+import sqlite3
 import tempfile
 import time
 from urllib.parse import urlsplit
@@ -80,12 +81,15 @@ def native(team, use_sdk, stack, receipt):
     return call
 
 
-def exercise(binary, use_sdk, axe):
+def exercise(binary, use_sdk, axe, previous_binary=None):
     receipt = {'stockSDK':use_sdk, 'sdkSends':0, 'sdkResponses':0, 'browser':[], 'audits':[]}
     outside, browser_errors = [], []
     with tempfile.TemporaryDirectory(prefix='support-console-') as temp, ExitStack() as stack:
         root = Path(temp)
         team, peer = (LocalSimulator(root / name, binary) for name in ('A', 'B'))
+        if previous_binary:
+            assert not previous_binary.samefile(binary)
+            team.binary = previous_binary
         for instance in (team, peer):
             stack.callback(instance.close)
             instance.start()
@@ -93,6 +97,19 @@ def exercise(binary, use_sdk, axe):
         peer_call = native(peer, use_sdk, stack, receipt)
         staged = call('AddAttachmentsToSet', attachments=[{'fileName':NAME, 'data':DATA}])
         first = call('CreateCase', subject=TOPIC, communicationBody=START, attachmentSetId=staged['attachmentSetId'])['caseId']
+        if previous_binary:
+            previous = call('DescribeCases', caseIdList=[first])['cases']
+            assert len(previous) == 1 and 'serviceCode' not in previous[0]
+            team.close()
+            with closing(sqlite3.connect(team.database.as_uri() + '?mode=ro', uri=True)) as old_db:
+                assert old_db.execute("SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='aws_support_case_services'").fetchone() == (0,)
+            team.binary = binary
+            team.start()
+            assert call('DescribeCases', caseIdList=[first])['cases'] == previous
+        receipt['historicalCaseUpgraded'] = previous_binary is not None
+        sdk_subject = 'Incident opened through the API'
+        sdk_incident = call('CreateCase', subject=sdk_subject, communicationBody='Classified on creation.',
+                            serviceCode='sentinel-report-incident')['caseId']
         def history(case_id):
             return call('DescribeCommunications', caseId=case_id)['communications']
         def selected(case_id):
@@ -145,7 +162,15 @@ def exercise(binary, use_sdk, axe):
                 receipt['audits'].append([view, page.viewport_size['width']])
 
         ctx, page = open_page(team.token)
+        incident_row = page.get_by_role('row').filter(has=page.get_by_role('button', name=sdk_subject, exact=True))
+        expect(incident_row.get_by_text('AMS Advanced incident', exact=True)).to_be_visible()
+        click(page, sdk_subject)
+        expect(page.get_by_text(sdk_incident, exact=True)).to_be_visible()
+        expect(page.get_by_text('AMS Advanced incident', exact=True)).to_be_visible()
+        click(page, 'Back to cases')
         click(page, TOPIC)
+        expect(page.get_by_text('AMS Advanced incident', exact=True)).to_have_count(0)
+        assert 'serviceCode' not in selected(first)
         expect(page.get_by_text(first, exact=True)).to_be_visible()
         expect(page.get_by_text(START, exact=True)).to_be_visible()
         expect(page.get_by_text(NAME, exact=True)).to_be_visible()
@@ -159,11 +184,14 @@ def exercise(binary, use_sdk, axe):
         click(page, 'Back to cases')
         click(page, 'Create case')
         page.get_by_label('Subject', exact=True).fill(CREATED)
+        page.get_by_role('checkbox', name='AMS Advanced incident').check()
         page.get_by_label('Message', exact=True).fill('Opened from console.')
         audit(page, 'create-en')
         click(page, 'Create case')
         expect(page.get_by_text('Case created.', exact=True)).to_be_visible()
         created = next(r['caseId'] for r in call('DescribeCases')['cases'] if r['subject'] == CREATED)
+        expect(page.get_by_text('AMS Advanced incident', exact=True)).to_be_visible()
+        assert selected(created)['serviceCode'] == 'sentinel-report-incident'
         assert selected(created)['displayId'] != created and len(history(created)) == 1
 
         # A live case change and download must enforce the participant's native policy.
@@ -193,7 +221,10 @@ def exercise(binary, use_sdk, axe):
         assert call('DescribeAttachment', attachmentId=metadata['attachmentId'])['attachment']['data'] == DATA
 
         narrow, japanese = open_page(team.token, 'ja', 390)
+        incident_row = japanese.get_by_role('row').filter(has=japanese.get_by_role('button', name=CREATED, exact=True))
+        expect(incident_row.get_by_text('AMS Advanced インシデント', exact=True)).to_be_visible()
         click(japanese, CREATED)
+        expect(japanese.get_by_text('AMS Advanced インシデント', exact=True)).to_be_visible()
         expect(japanese.get_by_role('heading', name='サポートケースの詳細')).to_be_visible()
         expect(japanese.get_by_text(created, exact=True)).to_be_visible()
         audit(japanese, 'detail-ja')
@@ -298,6 +329,7 @@ def exercise(binary, use_sdk, axe):
         assert selected(created)['status'] == 'resolved' and len(history(created)) == 3
         assert call('DescribeAttachment', attachmentId=metadata['attachmentId'])['attachment']['data'] == DATA
         call('ResolveCase', caseId=first)
+        call('ResolveCase', caseId=sdk_incident)
     assert not root.exists() and not outside and not browser_errors, (outside, browser_errors)
     for op in ('AddAttachmentsToSet', 'CreateCase', 'DescribeCases', 'DescribeCommunications', 'AddCommunicationToCase',
                'ResolveCase', 'DescribeAttachment'):
@@ -311,7 +343,9 @@ def exercise(binary, use_sdk, axe):
 if __name__ == '__main__':
     args = argparse.ArgumentParser()
     args.add_argument('--sdk', action='store_true')
+    args.add_argument('--previous-binary', type=Path, help='Earlier Support simulator used to create the first case and attachment before upgrading.')
     opts = args.parse_args()
     output = exercise(Path(os.environ.get('SIMULATOR_BINARY', 'dist/tenkacloud-simulator')).resolve(strict=True),
-                      opts.sdk, Path(os.environ['AXE_SCRIPT']) if os.environ.get('AXE_SCRIPT') else None)
+                      opts.sdk, Path(os.environ['AXE_SCRIPT']) if os.environ.get('AXE_SCRIPT') else None,
+                      opts.previous_binary.resolve(strict=True) if opts.previous_binary else None)
     print(json.dumps(output, ensure_ascii=False))

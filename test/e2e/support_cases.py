@@ -86,7 +86,13 @@ def main():
             second_set = owner.add_attachments_to_set(attachmentSetId=set_id, attachments=[{"fileName": "empty.txt", "data": b""}])
             assert second_set["attachmentSetId"] == set_id and second_set["expiryTime"] == staged["expiryTime"]
             expect_error("AttachmentSetSizeLimitExceeded", owner.add_attachments_to_set, attachmentSetId=set_id, attachments=files * 2)
-            case_id = owner.create_case(subject="Same subject", communicationBody="Owner's initial note", attachmentSetId=set_id)["caseId"]
+            code = "sentinel-report-incident"
+            case_id = owner.create_case(subject="Same subject", communicationBody="Owner's initial note", attachmentSetId=set_id, serviceCode=code)["caseId"]
+            assert details(owner, case_id)["serviceCode"] == code
+            assert "serviceCode" not in details(peer, peer_id)
+            for invalid_code in ("", "amazon-ec2", "sentinel-report-service-request"):
+                expect_error("ValidationException", owner.create_case, subject="Unaccepted", communicationBody="Local", serviceCode=invalid_code)
+            assert [row["caseId"] for row in owner.describe_cases()["cases"]] == [case_id]
             initial = details(owner, case_id)["recentCommunications"]["communications"][0]
             assert initial["body"] == "Owner's initial note"
             attached = initial["attachmentSet"]
@@ -112,6 +118,7 @@ def main():
             assert [len(page["cases"]) for page in pages] == [10, 1]
             assert set(other_ids + [case_id]) == {c["caseId"] for page in pages for c in page["cases"]}
             assert all("recentCommunications" not in c for page in pages for c in page["cases"])
+            assert [(c["caseId"], c["serviceCode"]) for page in pages for c in page["cases"] if "serviceCode" in c] == [(case_id, code)]
             expect_error("ValidationException", owner.describe_cases, includeResolvedCases=True, nextToken=pages[0]["nextToken"])
             expect_error("ValidationException", owner.describe_cases, nextToken=all_pages[0]["nextToken"])
 
@@ -119,7 +126,8 @@ def main():
             control(a, operator, "PUT", "/_simulator/v1/iam/principals/support-reader/policy", policy)
             reader_token = control(a, operator, "POST", "/_simulator/v1/access", {"Principal": "support-reader"})["AccessToken"]
             reader = scopes.enter_context(closing(client(a, reader_token)))
-            assert details(reader, case_id)["status"] == "opened"
+            assert details(reader, case_id)["status"] == "opened" and details(reader, case_id)["serviceCode"] == code
+            expect_error("AccessDeniedException", reader.create_case, subject="Denied", communicationBody="Local", serviceCode=code)
             expect_error("AccessDeniedException", reader.resolve_case, caseId=case_id)
             expect_error("AccessDeniedException", reader.describe_attachment, attachmentId=file_id)
             policy["Statement"].append({"Effect": "Deny", "Action": "support:DescribeCases", "Resource": "*"})
@@ -141,7 +149,9 @@ def main():
             resolved = owner.resolve_case(caseId=case_id)
             assert (resolved["initialCaseStatus"], resolved["finalCaseStatus"]) == ("opened", "resolved")
             assert owner.describe_cases()["cases"] == []
-            assert details(owner, case_id, resolved=True)["status"] == "resolved"
+            resolved_case = details(owner, case_id, resolved=True)
+            assert resolved_case["status"] == "resolved" and resolved_case["serviceCode"] == code
+            assert "serviceCode" not in details(peer, peer_id)
             expect_error("ValidationException", owner.add_communication_to_case, caseId=case_id, communicationBody="Closed case")
             assert [c["caseId"] for c in peer.describe_cases()["cases"]] == [peer_id]
             assert peer.resolve_case(caseId=peer_id)["finalCaseStatus"] == "resolved"

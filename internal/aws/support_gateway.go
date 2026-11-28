@@ -18,7 +18,7 @@ import (
 const supportTarget = "AWSSupport_20130415."
 
 var supportFields = map[string][]string{
-	"CreateCase":             {"subject", "communicationBody", "language", "issueType", "attachmentSetId"},
+	"CreateCase":             {"subject", "communicationBody", "serviceCode", "language", "issueType", "attachmentSetId"},
 	"DescribeCases":          {"caseIdList", "displayId", "includeResolvedCases", "includeCommunications", "nextToken", "maxResults"},
 	"DescribeCommunications": {"caseId", "beforeTime", "afterTime", "nextToken", "maxResults"},
 	"AddCommunicationToCase": {"caseId", "communicationBody", "attachmentSetId"},
@@ -101,7 +101,7 @@ func supportInput(data []byte, fields []string) (supportcases.Input, error) {
 	if err := json.Unmarshal(data, &in); err != nil {
 		return in, supportBad("A request field has an invalid value.")
 	}
-	for _, key := range []string{"caseId", "attachmentId", "attachmentSetId", "displayId", "nextToken", "afterTime", "beforeTime", "issueType", "language"} {
+	for _, key := range []string{"caseId", "attachmentId", "attachmentSetId", "displayId", "nextToken", "afterTime", "beforeTime", "issueType", "language", "serviceCode"} {
 		if raw, present := values[key]; present && string(raw) == `""` {
 			return in, supportBad("Provide a nonempty value for " + key + ".")
 		}

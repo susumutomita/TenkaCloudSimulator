@@ -21,6 +21,7 @@ func supportRows(t *testing.T, db *sql.DB) []string {
 	var frame []string
 	for _, query := range []string{
 		"SELECT json_array('case',display_id,case_id,subject,created_us,status,language,issue_type) FROM aws_support_cases ORDER BY display_id",
+		"SELECT json_array('service',case_id,service_code) FROM aws_support_case_services ORDER BY case_id",
 		"SELECT json_array('message',sequence,case_id,created_us,author,body) FROM aws_support_communications ORDER BY sequence",
 		"SELECT json_array('set',set_id,expires_us) FROM aws_support_attachment_sets ORDER BY set_id",
 		"SELECT json_array('staged',set_id,position,name,hex(data)) FROM aws_support_staged_files ORDER BY set_id,position",
@@ -58,7 +59,7 @@ func TestInterruptedCommunicationAndAttachmentsRollBack(t *testing.T) {
 			files := []Attachment{{Name: "first.bin", Data: []byte{0, 255}}, {Name: "second.bin", Data: []byte{2, 201}}}
 			setID := call(t, owner, "AddAttachmentsToSet", Input{Attachments: files})["attachmentSetId"].(string)
 			id := call(t, owner, "CreateCase", Input{Subject: "Target", Body: "Original"})["caseId"].(string)
-			sibling := call(t, owner, "CreateCase", Input{Subject: "Sibling", Body: "Retained", SetID: setID})["caseId"].(string)
+			sibling := call(t, owner, "CreateCase", Input{Subject: "Sibling", Body: "Retained", SetID: setID, ServiceCode: "sentinel-report-incident"})["caseId"].(string)
 			peerSet := call(t, peer, "AddAttachmentsToSet", Input{Attachments: files[:1]})["attachmentSetId"].(string)
 			call(t, peer, "CreateCase", Input{Subject: "Separate team", Body: "Retained", SetID: peerSet})
 			before := supportRows(t, host.Database())

@@ -51,6 +51,9 @@ func mutate(ctx context.Context, tx *sql.Tx, now time.Time, op, author string, i
 		if in.Subject == "" || utf8.RuneCountInString(in.Subject) > 256 {
 			return nil, invalid("A subject of 1 to 256 characters is required.")
 		}
+		if in.ServiceCode != "" && in.ServiceCode != amsIncidentCode {
+			return nil, invalid("The only supported local serviceCode is sentinel-report-incident.")
+		}
 		if in.Language == "" {
 			in.Language = "en"
 		}
@@ -78,6 +81,11 @@ func mutate(ctx context.Context, tx *sql.Tx, now time.Time, op, author string, i
 		}
 		if err := addCommunication(ctx, tx, now, author, in); err != nil {
 			return nil, err
+		}
+		if in.ServiceCode != "" {
+			if _, err := execOne(ctx, tx, "INSERT INTO aws_support_case_services(case_id,service_code) VALUES(?,?)", in.CaseID, in.ServiceCode); err != nil {
+				return nil, err
+			}
 		}
 		return map[string]any{"caseId": in.CaseID}, nil
 	}
