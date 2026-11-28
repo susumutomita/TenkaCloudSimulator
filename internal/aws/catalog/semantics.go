@@ -244,6 +244,11 @@ func (q *request) checkRefsIn(db querier, res *Resource, document map[string]any
 			if err != nil {
 				return err
 			}
+			if res.CheckRef != nil {
+				if err := res.CheckRef(q.region, q.e.cfg.Account, document, found); err != nil {
+					return err
+				}
+			}
 		}
 	}
 	return nil
@@ -758,6 +763,9 @@ func (q *request) prepareCreate(ecsRevision int) (row, *row, error) {
 	if err := q.rotateToken(res, document); err != nil {
 		return row{}, nil, err
 	}
+	if res.InitDocument != nil {
+		res.InitDocument(document)
+	}
 	r.Document = document
 	return r, parent, nil
 }
@@ -771,6 +779,15 @@ func (q *request) create(ecsRevision int) (map[string]any, error) {
 	tokenMember := idempotencyMember(q.b.model.shape(q.official.Input))
 	if err := q.authorizeTarget(r.ARN, parent); err != nil {
 		return nil, err
+	}
+	if q.op.AuthorizeCreateRefs {
+		for path := range res.Refs {
+			for _, arn := range refValues(r.Document, path) {
+				if err := q.authorize(arn); err != nil {
+					return nil, err
+				}
+			}
+		}
 	}
 	if ecsRevision > 0 {
 		if err := ecsRegistrationPermissions(q.e.cfg.Account, r, q.authorizeAction); err != nil {
@@ -1160,7 +1177,11 @@ func (q *request) list() (map[string]any, error) {
 			}
 		}
 	}
-	if err := q.authorize(q.formatARN(res, "*", "*", parent)); err != nil {
+	listResource := q.formatARN(res, "*", "*", parent)
+	if q.op.ListRequiresWildcard {
+		listResource = "*"
+	}
+	if err := q.authorize(listResource); err != nil {
 		return nil, err
 	}
 	rows, err := list(q.e.store.db, q.b.spec.Model, q.region, res.Kind, parentID(parent))
