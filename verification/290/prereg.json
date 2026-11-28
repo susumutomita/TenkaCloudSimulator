@@ -1,0 +1,10 @@
+{
+  "source": "64e5dd28dbe43f43480dfab555ffdd9aff572eb0",
+  "question": "#290 original P2 actual native cancellation and deadline while a plan and target transaction has staged writes. Ordinary storage-fault sweep injects driver failures and earlier Console lost network ack is postcommit; neither separately proves this.",
+  "oracles": [
+    "Four controls: Create and Update each under a real canceled request and under a genuinely elapsed request deadline. Use exact unmodified production Gateway/AutoScalingPlansStore and actual file-backed SQLite via external Go test overlay. Seed independent peer plus unrelated table.",
+    "Temporary AFTER INSERT trigger on new owned plan resource calls a native SQLite function in transaction, reads actual attempted plan name/source, exact owned target ID and capacity, and signals stage reached; genuine context cancellation or await actual deadline before callback returns. Mutations include both plan and clamped table; no direct writes to force rollback.",
+    "On cancellation use actual loopback client cancellation after stage. On deadline use bounded server-side context bound to normal handler to distinguish DeadlineExceeded (HTTP has no client deadline propagation); caller cannot receive a successful operation acknowledgment. After completing request close/reopen real DB; exact plan/resource/table row frame incl source/generation, table ID and both capacities identical. Unrelated row and peer DB also must match.",
+    "Repeat the identical input without cancellation and verify correct clamp plus persisted plan. Include transcript for phase, result, observed staged units and durable values. Production CLI+stock SDK is already evidenced separately; instrumented gateway/store harness is classified separately."
+  ]
+}
