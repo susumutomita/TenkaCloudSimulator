@@ -30739,6 +30739,768 @@
           "expect_invariant": "RestartPreservesStore"
         }
       ]
+    },
+    {
+      "id": "CodeStarBranchNotificationDelivery",
+      "model": "formal/CodeStarBranchNotificationDelivery.tla",
+      "config": "formal/CodeStarBranchNotificationDelivery.cfg",
+      "bounds": "One team database, one tracked Git branch initially missing or at its first commit, one existing commit usable by CreateBranch, one native or untrusted write request, and one matching rule with zero, one or two target topics. The model distinguishes zero, one or two remaining outbox slots, two per-target subscriptions/queues, initial and replacement generations, a stored rule creator and a distinct Git writer. The worker may retry either target independently across ticks or restarts.",
+      "properties": [
+        "RetryEligibility",
+        "TypeOK",
+        "GitAdmission",
+        "GitAtomicFailure",
+        "GitCommitExact",
+        "EventExact",
+        "WorkerDecision",
+        "AtMostOnce",
+        "PublicationAtomic",
+        "FailureHasNoPublication",
+        "TargetRetirement",
+        "PeerAndGitFrame",
+        "RestartExact",
+        "RuleChangeAtomic"
+      ],
+      "limits": "The model checks safety for one event and a finite set of single-condition observations per operation. One receipt per target represents one event identity. Matching and immutable identities abstract exact ARNs, repository UUIDs, subscription IDs, event JSON, Git objects and SQLite foreign keys. A captured publisher must use the same current rule-owner policy snapshot for both queues. Temporary denies defer a target; changed captured identities cannot publish it. A tick represents elapsed native retry time without a real clock or fairness guarantee. Local limits of 2,048 pending targets and 20 destinations are represented by capacity boundaries and two queues. Actual SDK, two team databases, concurrent SQLite writes, cancellation timing, cryptographic identities, rule request validation, full IAM and external delivery are outside this finite check.",
+      "source_scope": [
+        "internal/aws/catalog/codecommit_content.go",
+        "internal/aws/catalog/engine.go",
+        "internal/aws/codestarnotifications/rules.go",
+        "internal/aws/codestarnotifications/store.go",
+        "internal/aws/codestarnotifications/outbox.go",
+        "internal/aws/codestarnotifications/delivery.go",
+        "internal/aws/notification_gateway.go",
+        "internal/aws/sns_topic_policy.go",
+        "internal/aws/sns_sqs_fanout.go",
+        "internal/server/server.go",
+        "internal/aws/notification_delivery_test.go"
+      ],
+      "mutants": [
+        {
+          "id": "TrustSyntheticProducer",
+          "edits": [
+            {
+              "old": "Origin(op) == op \\in {\"PutFile\", \"CreateBranch\"}",
+              "new": "Origin(op) == TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "GitAdmission"
+        },
+        {
+          "id": "ReplaceExistingBranch",
+          "edits": [
+            {
+              "old": "CAS(op) == op # \"CreateBranch\" \\/ old = 0",
+              "new": "CAS(op) == TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "GitAdmission"
+        },
+        {
+          "id": "SkipGitWriterIAM",
+          "edits": [
+            {
+              "old": "GitAllowed(m) == m \\notin {\"iamDeny\", \"wrongCAS\", \"commitFault\", \"deadline\"}",
+              "new": "GitAllowed(m) == m \\notin {\"wrongCAS\", \"commitFault\", \"deadline\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "GitAdmission"
+        },
+        {
+          "id": "CommitStaleRef",
+          "edits": [
+            {
+              "old": "GitAllowed(m) == m \\notin {\"iamDeny\", \"wrongCAS\", \"commitFault\", \"deadline\"}",
+              "new": "GitAllowed(m) == m \\notin {\"iamDeny\", \"commitFault\", \"deadline\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "GitAdmission"
+        },
+        {
+          "id": "AcknowledgeFailedGitCommit",
+          "edits": [
+            {
+              "old": "GitAllowed(m) == m \\notin {\"iamDeny\", \"wrongCAS\", \"commitFault\", \"deadline\"}",
+              "new": "GitAllowed(m) == m \\notin {\"iamDeny\", \"wrongCAS\", \"deadline\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "GitAdmission"
+        },
+        {
+          "id": "AcknowledgeGitDeadline",
+          "edits": [
+            {
+              "old": "GitAllowed(m) == m \\notin {\"iamDeny\", \"wrongCAS\", \"commitFault\", \"deadline\"}",
+              "new": "GitAllowed(m) == m \\notin {\"iamDeny\", \"wrongCAS\", \"commitFault\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "GitAdmission"
+        },
+        {
+          "id": "RequireDeveloperQueuePermission",
+          "edits": [
+            {
+              "old": "/\\ GitAllowed(m) /\\ Cardinality",
+              "new": "/\\ GitAllowed(m) /\\ m # \"writerNoQueue\" /\\ Cardinality",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "GitAdmission"
+        },
+        {
+          "id": "IgnoreBacklogCapacity",
+          "edits": [
+            {
+              "old": "Cardinality(targets) <= Slots(m)",
+              "new": "TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "GitAdmission"
+        },
+        {
+          "id": "RejectExactlyFullAdmission",
+          "edits": [
+            {
+              "old": "Cardinality(targets) <= Slots(m)",
+              "new": "Cardinality(targets) < Slots(m)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "GitAdmission"
+        },
+        {
+          "id": "RequireCapacityWithoutMatchedRules",
+          "edits": [
+            {
+              "old": "Cardinality(targets) <= Slots(m)",
+              "new": "Cardinality(targets) <= Slots(m) /\\ Slots(m) > 0",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "GitAdmission"
+        },
+        {
+          "id": "IgnoreSourceRegion",
+          "edits": [
+            {
+              "old": "Source(m).region = \"east\"",
+              "new": "TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "GitCommitExact"
+        },
+        {
+          "id": "AdoptRecreatedSourceUUID",
+          "edits": [
+            {
+              "old": "Source(m).uuid = 1",
+              "new": "TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "GitCommitExact"
+        },
+        {
+          "id": "CaptureDisabledRule",
+          "edits": [
+            {
+              "old": "                  /\\ m \\notin {\"disabled\", \"filtered\", \"noTargets\", \"fullWithoutMatch\"}",
+              "new": "                  /\\ m \\notin {\"filtered\", \"noTargets\", \"fullWithoutMatch\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "GitCommitExact"
+        },
+        {
+          "id": "IgnoreRuleEventFilter",
+          "edits": [
+            {
+              "old": "                  /\\ m \\notin {\"disabled\", \"filtered\", \"noTargets\", \"fullWithoutMatch\"}",
+              "new": "                  /\\ m \\notin {\"disabled\", \"noTargets\", \"fullWithoutMatch\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "GitCommitExact"
+        },
+        {
+          "id": "PersistRefOnFailedGit",
+          "edits": [
+            {
+              "old": "ref' = IF ok THEN 2 ELSE ref",
+              "new": "ref' = IF ok \\/ m = \"commitFault\" THEN 2 ELSE ref",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "GitAtomicFailure"
+        },
+        {
+          "id": "LeaveContentAfterRefusal",
+          "edits": [
+            {
+              "old": "wroteObjects' = (ok /\\ op = \"PutFile\")",
+              "new": "wroteObjects' = ((ok \\/ m = \"deadline\") /\\ op = \"PutFile\")",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "GitAtomicFailure"
+        },
+        {
+          "id": "CreateBranchWritesNewContent",
+          "edits": [
+            {
+              "old": "wroteObjects' = (ok /\\ op = \"PutFile\")",
+              "new": "wroteObjects' = ok",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "GitCommitExact"
+        },
+        {
+          "id": "LoseSecondMatchedTarget",
+          "edits": [
+            {
+              "old": "pending' = IF ok THEN targets ELSE pending",
+              "new": "pending' = IF ok THEN targets \\cap {\"a\"} ELSE pending",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "GitCommitExact"
+        },
+        {
+          "id": "AppendAfterGitRefusal",
+          "edits": [
+            {
+              "old": "pending' = IF ok THEN targets ELSE pending",
+              "new": "pending' = IF ok \\/ m = \"commitFault\" THEN targets ELSE pending",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "GitAtomicFailure"
+        },
+        {
+          "id": "MislabelNewRef",
+          "edits": [
+            {
+              "old": "Kind == IF old = 0 THEN \"referenceCreated\" ELSE \"referenceUpdated\"",
+              "new": "Kind == \"referenceUpdated\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "EventExact"
+        },
+        {
+          "id": "MislabelAdvancedRef",
+          "edits": [
+            {
+              "old": "Kind == IF old = 0 THEN \"referenceCreated\" ELSE \"referenceUpdated\"",
+              "new": "Kind == \"referenceCreated\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "EventExact"
+        },
+        {
+          "id": "DropPreviousCommitFromUpdate",
+          "edits": [
+            {
+              "old": "kind |-> Kind, previous |-> old",
+              "new": "kind |-> Kind, previous |-> 0",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "EventExact"
+        },
+        {
+          "id": "AdoptNewQueueThroughStaleSubscription",
+          "edits": [
+            {
+              "old": "ValidBinding(m) == OriginalQueue(m) = QueueAtCapture(m)",
+              "new": "ValidBinding(m) == TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "EventExact"
+        },
+        {
+          "id": "RefuseRepairedNewSubscription",
+          "edits": [
+            {
+              "old": "ValidBinding(m) == OriginalQueue(m) = QueueAtCapture(m)",
+              "new": "ValidBinding(m) == OriginalQueue(m) = QueueAtCapture(m) /\\ QueueAtCapture(m) = 1",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "EventExact"
+        },
+        {
+          "id": "IgnoreRuleGeneration",
+          "edits": [
+            {
+              "old": "envelope.life[t].rule = Current(t,m).rule",
+              "new": "TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "WorkerDecision"
+        },
+        {
+          "id": "IgnoreSourceGenerationAtDelivery",
+          "edits": [
+            {
+              "old": "envelope.life[t].repo = Current(t,m).repo",
+              "new": "TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "WorkerDecision"
+        },
+        {
+          "id": "IgnoreTopicGeneration",
+          "edits": [
+            {
+              "old": "envelope.life[t].topicGen = Current(t,m).topicGen",
+              "new": "TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "WorkerDecision"
+        },
+        {
+          "id": "RebindRecreatedOwner",
+          "edits": [
+            {
+              "old": "envelope.life[t].owner = Current(t,m).owner",
+              "new": "TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "WorkerDecision"
+        },
+        {
+          "id": "IgnoreReplacedSubscription",
+          "edits": [
+            {
+              "old": "envelope.life[t].sub1 = Current(t,m).sub1",
+              "new": "TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "WorkerDecision"
+        },
+        {
+          "id": "AdoptFirstRecreatedQueue",
+          "edits": [
+            {
+              "old": "envelope.life[t].queue1 = Current(t,m).queue1",
+              "new": "TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "WorkerDecision"
+        },
+        {
+          "id": "AdoptSecondRecreatedQueue",
+          "edits": [
+            {
+              "old": "envelope.life[t].queue2 = Current(t,m).queue2",
+              "new": "TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "WorkerDecision"
+        },
+        {
+          "id": "KeepDisabledRule",
+          "edits": [
+            {
+              "old": "RuleCurrent(t,m) == /\\ m # \"ruleDisabled\"",
+              "new": "RuleCurrent(t,m) == /\\ TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "WorkerDecision"
+        },
+        {
+          "id": "PublishWithoutRecipients",
+          "edits": [
+            {
+              "old": "envelope.validTopology /\\ m # \"noRecipients\"",
+              "new": "envelope.validTopology",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "WorkerDecision"
+        },
+        {
+          "id": "IgnoreInvalidCapturedTopology",
+          "edits": [
+            {
+              "old": "envelope.validTopology /\\ m # \"noRecipients\"",
+              "new": "m # \"noRecipients\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "WorkerDecision"
+        },
+        {
+          "id": "BypassCurrentSNSServiceGrant",
+          "edits": [
+            {
+              "old": "ServiceAllows(m) == m # \"topicDeny\"",
+              "new": "ServiceAllows(m) == TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "WorkerDecision"
+        },
+        {
+          "id": "IgnoreFirstQueueDeny",
+          "edits": [
+            {
+              "old": "OwnerAllows(m) == {1,2} \\subseteq OwnerSnapshot(m)",
+              "new": "OwnerAllows(m) == {1,2} \\subseteq OwnerSnapshot(m) \\/ m = \"ownerDenyFirst\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "WorkerDecision"
+        },
+        {
+          "id": "IgnoreSecondQueueDeny",
+          "edits": [
+            {
+              "old": "OwnerAllows(m) == {1,2} \\subseteq OwnerSnapshot(m)",
+              "new": "OwnerAllows(m) == {1,2} \\subseteq OwnerSnapshot(m) \\/ m = \"ownerDenySecond\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "WorkerDecision"
+        },
+        {
+          "id": "UseGitWriterQueueAuthority",
+          "edits": [
+            {
+              "old": "OwnerAllows(m) == {1,2} \\subseteq OwnerSnapshot(m)",
+              "new": "OwnerAllows(m) == {1,2} \\subseteq OwnerSnapshot(m) \\/ m = \"writerOnly\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "WorkerDecision"
+        },
+        {
+          "id": "MixOwnerPolicyRevisions",
+          "edits": [
+            {
+              "old": "OwnerAllows(m) == {1,2} \\subseteq OwnerSnapshot(m)",
+              "new": "OwnerAllows(m) == {1,2} \\subseteq OwnerSnapshot(m) \\/ m = \"splitRevisions\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "WorkerDecision"
+        },
+        {
+          "id": "CancelInsteadOfDeferringDeniedGrant",
+          "edits": [
+            {
+              "old": "\"afterFirstQueue\" -> \"defer\"",
+              "new": "\"afterFirstQueue\" -> \"cancel\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "WorkerDecision"
+        },
+        {
+          "id": "AcceptReadFault",
+          "edits": [
+            {
+              "old": "CommitWorker(m) == m \\notin {\"readFault\", \"receiptFailure\", \"commitFailure\", \"deadline\"}",
+              "new": "CommitWorker(m) == m \\notin {\"receiptFailure\", \"commitFailure\", \"deadline\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "WorkerDecision"
+        },
+        {
+          "id": "IgnoreReceiptFailure",
+          "edits": [
+            {
+              "old": "CommitWorker(m) == m \\notin {\"readFault\", \"receiptFailure\", \"commitFailure\", \"deadline\"}",
+              "new": "CommitWorker(m) == m \\notin {\"readFault\", \"commitFailure\", \"deadline\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "WorkerDecision"
+        },
+        {
+          "id": "AcceptFailedWorkerCommit",
+          "edits": [
+            {
+              "old": "CommitWorker(m) == m \\notin {\"readFault\", \"receiptFailure\", \"commitFailure\", \"deadline\"}",
+              "new": "CommitWorker(m) == m \\notin {\"readFault\", \"receiptFailure\", \"deadline\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "WorkerDecision"
+        },
+        {
+          "id": "DeliverAfterWorkerDeadline",
+          "edits": [
+            {
+              "old": "CommitWorker(m) == m \\notin {\"readFault\", \"receiptFailure\", \"commitFailure\", \"deadline\"}",
+              "new": "CommitWorker(m) == m \\notin {\"readFault\", \"receiptFailure\", \"commitFailure\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "WorkerDecision"
+        },
+        {
+          "id": "SkipPublicationRollback",
+          "edits": [
+            {
+              "old": "first' = Bump(first, t, deliver)",
+              "new": "first' = Bump(first, t, deliver \\/ (m = \"afterFirstQueue\" /\\ result = \"defer\"))",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PublicationAtomic"
+        },
+        {
+          "id": "PublishOnGrantRefusal",
+          "edits": [
+            {
+              "old": "sns' = Bump(sns, t, deliver)",
+              "new": "sns' = Bump(sns, t, deliver \\/ (m = \"topicDeny\" /\\ result = \"defer\"))",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PublicationAtomic"
+        },
+        {
+          "id": "SkipSecondQueue",
+          "edits": [
+            {
+              "old": "second' = Bump(second, t, deliver)",
+              "new": "second' = second",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PublicationAtomic"
+        },
+        {
+          "id": "SkipSNSAudit",
+          "edits": [
+            {
+              "old": "sns' = Bump(sns, t, deliver)",
+              "new": "sns' = sns",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PublicationAtomic"
+        },
+        {
+          "id": "SkipDurableReceipt",
+          "edits": [
+            {
+              "old": "receipts' = IF deliver THEN receipts \\cup {t} ELSE receipts",
+              "new": "receipts' = receipts",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PublicationAtomic"
+        },
+        {
+          "id": "DropPendingAfterDeniedQueue",
+          "edits": [
+            {
+              "old": "remove == deliver \\/ result = \"cancel\"",
+              "new": "remove == deliver \\/ result = \"cancel\" \\/ (result = \"defer\" /\\ m = \"ownerDenySecond\")",
+              "count": 1
+            },
+            {
+              "old": "delayed' = IF result = \"defer\" THEN delayed \\cup {t} ELSE delayed",
+              "new": "delayed' = IF result = \"defer\" /\\ m # \"ownerDenySecond\" THEN delayed \\cup {t} ELSE delayed",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "TargetRetirement"
+        },
+        {
+          "id": "MarkPeerDelivered",
+          "edits": [
+            {
+              "old": "receipts' = IF deliver THEN receipts \\cup {t} ELSE receipts",
+              "new": "receipts' = IF deliver THEN Targets ELSE receipts",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PublicationAtomic"
+        },
+        {
+          "id": "ClearOtherPendingTarget",
+          "edits": [
+            {
+              "old": "pending' = IF remove THEN pending \\ {t} ELSE pending",
+              "new": "pending' = IF remove THEN {} ELSE pending",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PeerAndGitFrame"
+        },
+        {
+          "id": "LeaveDeliveredIntentPending",
+          "edits": [
+            {
+              "old": "remove == deliver \\/ result = \"cancel\"",
+              "new": "remove == result = \"cancel\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "TargetRetirement"
+        },
+        {
+          "id": "SkipRetryDelay",
+          "edits": [
+            {
+              "old": "delayed' = IF result = \"defer\" THEN delayed \\cup {t} ELSE delayed",
+              "new": "delayed' = delayed",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "TargetRetirement"
+        },
+        {
+          "id": "RetryImmediately",
+          "edits": [
+            {
+              "old": "t \\in pending \\ delayed",
+              "new": "t \\in pending",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "RetryEligibility"
+        },
+        {
+          "id": "ReplayPreviouslyDeliveredTarget",
+          "edits": [
+            {
+              "old": "t \\in pending \\ delayed",
+              "new": "t \\in (pending \\ delayed) \\cup receipts",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "RetryEligibility"
+        },
+        {
+          "id": "DropPendingOnRestart",
+          "edits": [
+            {
+              "old": "pending' = pending /\\ receipts' = receipts /\\ delayed' = delayed",
+              "new": "pending' = pending \\cap delayed /\\ receipts' = receipts /\\ delayed' = delayed",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "RestartExact"
+        },
+        {
+          "id": "ForgetReceiptOnRestart",
+          "edits": [
+            {
+              "old": "pending' = pending /\\ receipts' = receipts /\\ delayed' = delayed",
+              "new": "pending' = pending /\\ receipts' = {} /\\ delayed' = delayed",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PublicationAtomic"
+        },
+        {
+          "id": "DuplicateCommittedPublication",
+          "edits": [
+            {
+              "old": "IF yes THEN [count EXCEPT ![t] = @ + 1] ELSE count",
+              "new": "IF yes THEN [count EXCEPT ![t] = @ + 2] ELSE count",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AtMostOnce"
+        },
+        {
+          "id": "PublishCompleteFrameDespiteTemporaryDeny",
+          "edits": [
+            {
+              "old": "sns' = Bump(sns, t, deliver)",
+              "new": "sns' = Bump(sns, t, (deliver \\/ (m = \"topicDeny\" /\\ result = \"defer\")))",
+              "count": 1
+            },
+            {
+              "old": "first' = Bump(first, t, deliver)",
+              "new": "first' = Bump(first, t, (deliver \\/ (m = \"topicDeny\" /\\ result = \"defer\")))",
+              "count": 1
+            },
+            {
+              "old": "second' = Bump(second, t, deliver)",
+              "new": "second' = Bump(second, t, (deliver \\/ (m = \"topicDeny\" /\\ result = \"defer\")))",
+              "count": 1
+            },
+            {
+              "old": "receipts' = IF deliver THEN receipts \\cup {t} ELSE receipts",
+              "new": "receipts' = IF (deliver \\/ (m = \"topicDeny\" /\\ result = \"defer\")) THEN receipts \\cup {t} ELSE receipts",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "FailureHasNoPublication"
+        },
+        {
+          "id": "RetainPendingAfterRuleUpdate",
+          "edits": [
+            {
+              "old": "pending' = IF mode = \"changeFailed\" THEN pending ELSE {}",
+              "new": "pending' = IF mode \\in {\"changeFailed\", \"update\"} THEN pending ELSE {}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "RuleChangeAtomic"
+        },
+        {
+          "id": "RetainPendingAfterRuleDisable",
+          "edits": [
+            {
+              "old": "pending' = IF mode = \"changeFailed\" THEN pending ELSE {}",
+              "new": "pending' = IF mode \\in {\"changeFailed\", \"disable\"} THEN pending ELSE {}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "RuleChangeAtomic"
+        },
+        {
+          "id": "RetainPendingAfterRuleDelete",
+          "edits": [
+            {
+              "old": "pending' = IF mode = \"changeFailed\" THEN pending ELSE {}",
+              "new": "pending' = IF mode \\in {\"changeFailed\", \"delete\"} THEN pending ELSE {}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "RuleChangeAtomic"
+        },
+        {
+          "id": "LosePendingAfterFailedRuleChange",
+          "edits": [
+            {
+              "old": "pending' = IF mode = \"changeFailed\" THEN pending ELSE {}",
+              "new": "pending' = IF mode = \"changeFailed\" THEN delayed ELSE {}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "RuleChangeAtomic"
+        }
+      ]
     }
   ]
 }
