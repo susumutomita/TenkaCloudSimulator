@@ -1,5 +1,7 @@
 # Go単一バイナリの設計
 
+[AWS Support の練習用ケース](../aws-support.md)は、チームの SQLite にメッセージ、解決状態、添付ファイルを保存する。参加者は通常のローカル認証を使い、7つの AWS JSON 操作ごとに IAM 権限を評価する。AWS やメールへの外部送信は行わない。
+
 `cmd/simulator`はCLI、numeric loopback listener、token-file、shutdownを所有する。`internal/server`は埋込Cloudscape/Scalar、local token境界、能力表、identity control APIを提供する。`internal/provider`はprovider dispatch、`internal/core`はprovider中立のSQLite object stateと限定identity-policy評価。`internal/aws`はS3 REST/XML、SSM JSON 1.1、CloudFormation Query/XMLとAWS所有テーブルを持つ。
 
 `core.Store` はインメモリ起動時に専用の SQLite データベースを所有する。要求の取り消しで接続が入れ替わっても、コミット済みのプロバイダーのテーブルと行を次の接続から参照できる。未コミットの書き込みはロールバックされ、メモリ上のデータベースはストアを閉じた時点で解放される。メモリとファイルのどちらでも、接続ごとに外部キー制約と 5 秒のロック待機時間を設定する。
@@ -20,7 +22,9 @@ SNS の `SetTopicAttributes` は Standard トピックに CodeStar Notifications
 
 SNS の HTTP/HTTPS コンソールは native Query を呼び出し、通知先 URL をローカル SQLite に記録するだけで外部に接続しない。購読属性を読む際は ARN から親トピックを特定して IAM を先に評価し、購読と親の存在およびリージョンの一致を同じ読み取りで確認する。専用 Scalar は us-east-1 固定で通常のログインセッションを使い、コンソールの演習用 ID 選択を引き継がない。[対応範囲](../sns.md)。
 
-AWS Resource Groups のタグクエリは、同じリージョンの ECR repository の ARN とタグをカタログの SQLite から読み取る。グループ ARN と依存する読み取り権限の認可後、保存済みクエリとリポジトリを同じスナップショットで照合する。[対象と制限](../aws-catalog.md#ecr-repository-group-membership)
+AWS Resource Groups のタグクエリは、同じリージョンの ECR repository の ARN とタグをカタログの SQLite から読み取る。グループ ARN と依存する読み取り権限の認可後、保存済みクエリとリポジトリを同じスナップショットで照合する。管理画面のグループ詳細はネイティブ API から保存済みクエリとメンバーのページを取得し、タグ条件の編集も同じ API に送る。
+
+`CreateGroup` と `ListGroups` はリソースを指定できないため、ポリシーの `Resource` には `"*"` が必要になる。グループ ARN や `group/*` のみを許可する既存ポリシーでは、この2操作は拒否される。名前を指定する操作は対象グループの ARN を照合し、対応する11操作すべてで IAM 拒否を HTTP 403 の `ForbiddenException` として返す。通常グループとタグクエリグループの `Group` 応答はアプリケーショングループ用の `ApplicationTag` を省略し、利用者のタグは `GetTags` で取得できる。[対象と制限](../aws-catalog.md#ecr-repository-group-membership)
 
 AWS カタログの AppFlow は S3 間のフロー設定のみを保持する。[トリガー設定](https://docs.aws.amazon.com/appflow/1.0/APIReference/API_TriggerConfig.html)に従い、`CreateFlow` と `UpdateFlow` は、`OnDemand` に付けたスケジュール設定と、実行間隔の式がない（空白のみも含む）`Scheduled` の定義を `ValidationException` で拒否する。検証は保存前に行うため、拒否された要求で既存の設定は変わらない。スケジューラ、コネクタープロファイル、ジョブ実行およびオブジェクト転送は実装しない。
 
@@ -105,7 +109,7 @@ API Reference の EC2 用プリセットは、既存の Query API の `DescribeI
 
 EC2 インスタンス一覧の作成は、テンプレートプレビューと別の操作。認証済みループバックの管理者が管理者 ID を選択し、明示的な Battle VM 実行環境が作成を受け付ける場合だけ利用できる。同一スタックに受信ルールのないネットワークと IAM ロール／プロファイルを含む固定構成を生成し、設定済み AMI エイリアスで既存の `CreateStack` に送る。権限評価や実行経路は変えない。応答した Stack ID の `CREATE_COMPLETE` と対応するリージョンの EC2 保存行を照合し、未確認時に作成を再送しない。保存済みの状態はゲストの現在の稼働確認ではない。
 
-Protocol/API subsetと制限は[README](../../README.md)。限定的なGoogle Cloud Storage/Azure Blob Storageを独立providerとして接続し、認証済みActorから固定project/account所有者へ写像する。[Cloud DNS](../acceptance/gcp-cloud-dns.md) は同じproject所有者の範囲でSRVを含むRRsetの変更と参照を提供する。所有者コンソールではSRVの追加・置換・削除を変更受領証と再読で確認する。SRVの優先度・重み・ポートは保存するが、名前解決や接続先の選択は行わない。AWS IAMの権限を継承せず、owner-onlyローカル認可と公式SDKの検証範囲は[マルチクラウドストレージ](../multicloud-storage.md)に記す。旧Python world/deploy/grading protocolは復活させず、必要なSSM/CFNの知識だけGoへ移行。問題取り込み・採点はTenkaCloud/Challenge責務とする。
+Protocol/API subsetと制限は[README](../../README.md)。限定的なGoogle Cloud Storage/Azure Blob Storageを独立providerとして接続し、認証済みActorから固定project/account所有者へ写像する。[Cloud DNS](../acceptance/gcp-cloud-dns.md) は同じproject所有者の範囲でSRVを含むRRsetの変更と参照を提供する。所有者コンソールではSRVの追加・置換・削除を変更受領証と再読で確認する。SRVの優先度・重み・ポートは保存するが、名前解決や接続先の選択は行わない。[Cloud Trace v1](../gcp-trace.md) は固定projectの所有者にスパンの一括追記、traceの取得、期間指定の一覧を提供する。同じspan IDの観測もSQLiteに順序を保って保存し、公式SDK、Scalar、Google CloudコンソールのTrace explorerが同じデータを参照する。AWS IAMの権限を継承せず、owner-onlyローカル認可と公式SDKの検証範囲は[マルチクラウドストレージ](../multicloud-storage.md)に記す。旧Python world/deploy/grading protocolは復活させず、必要なSSM/CFNの知識だけGoへ移行。問題取り込み・採点はTenkaCloud/Challenge責務とする。
 
 Azure Blobの通常APIは `2023-11-03` に固定する。BlobのGET/HEADでは単一の `If-Modified-Since` を扱い、通常のGETには有界の単一範囲CRC64がある。明示的にネゴシエートした `2025-01-05` のGet Blobだけで、最大4 MiBの単一セグメントを構造化CRC64として返す。共通のローカル所有者・読み取り条件を適用し、通常の範囲チェックサムヘッダーと併用しない。それ以外の同バージョン操作やSDK全体の互換性は対象外。[Azure Blobの条件付き読み取りとチェックサムの詳細](../azure-blob.md#single-range-download-subset)。
 

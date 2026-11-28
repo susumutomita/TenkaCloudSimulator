@@ -24,6 +24,7 @@ export const SERVICE_PRESENTATION = Object.freeze({
   sqs: {category:'integration', color:'pink', icon:'queue', en:'Send and receive queue messages', ja:'キューのメッセージを送受信'},
   logs: {category:'management', color:'pink', icon:'logs', en:'Explore log groups and streams', ja:'ロググループとストリームを確認'},
   secretsmanager: {category:'security', color:'red', icon:'key', en:'Manage secrets and versions', ja:'シークレットとバージョンを管理'},
+  support: {category:'management', color:'blue', icon:'logs', en:'Manage local support cases', ja:'ローカルのサポートケースを管理'},
   catalog: {category:'management', color:'purple', icon:'stack', en:'Explore supported service APIs', ja:'対応するサービスAPIを確認'},
 });
 const paths = {
