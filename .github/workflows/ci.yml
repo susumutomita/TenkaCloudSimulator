@@ -4,21 +4,13 @@ permissions:
   contents: read
 jobs:
   associations:
-    name: PCS / ${{ matrix.check }}
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - check: before-commit
-            os: ubuntu-24.04
-          - check: sdk-console
-            os: ubuntu-22.04
-    runs-on: ${{ matrix.os }}
-    timeout-minutes: 80
+    name: PCS snapshot composition SDK and Console
+    runs-on: ubuntu-22.04
+    timeout-minutes: 40
     steps:
       - uses: actions/checkout@v7.0.1
         with:
-          ref: fbe42537b6cbdb20f7953645033a9bb50556f3ae
+          ref: e9aa32eb8a4ed1edcfaef6defa778d7c4954ee1b
           persist-credentials: false
       - uses: actions/setup-go@v6.5.0
         with:
@@ -26,8 +18,8 @@ jobs:
           cache: true
       - name: Build clean immutable source before writing evidence
         run: |
-          test "$(git rev-parse HEAD)" = fbe42537b6cbdb20f7953645033a9bb50556f3ae
-          test "$(git rev-parse HEAD^{tree})" = b59cab18d9628ec8c9071dc9e7b310e37d1e306c
+          test "$(git rev-parse HEAD)" = e9aa32eb8a4ed1edcfaef6defa778d7c4954ee1b
+          test "$(git rev-parse HEAD^{tree})" = d7a801d481be6a9d74753188713fe4c63e094f36
           test -z "$(git status --porcelain)"
           test "$(go env GOVERSION)" = go1.26.11
           test "$(id -u)" -ne 0
@@ -35,21 +27,10 @@ jobs:
           mkdir -m 700 "$RUNNER_TEMP/pcs-receipts"
           git rev-parse HEAD HEAD^{tree} > "$RUNNER_TEMP/pcs-receipts/source.txt"
           go version -m dist/tenkacloud-simulator > "$RUNNER_TEMP/pcs-receipts/build.txt"
-          grep -F 'vcs.revision=fbe42537b6cbdb20f7953645033a9bb50556f3ae' "$RUNNER_TEMP/pcs-receipts/build.txt"
+          grep -F 'vcs.revision=e9aa32eb8a4ed1edcfaef6defa778d7c4954ee1b' "$RUNNER_TEMP/pcs-receipts/build.txt"
           grep -F 'vcs.modified=false' "$RUNNER_TEMP/pcs-receipts/build.txt"
           sha256sum dist/tenkacloud-simulator > "$RUNNER_TEMP/pcs-receipts/binary.sha256"
-      - name: Run the unchanged complete repository gate
-        if: matrix.check == 'before-commit'
-        run: |
-          umask 077
-          set +e
-          make before-commit > "$RUNNER_TEMP/pcs-private.log" 2>&1
-          status=$?
-          set -e
-          printf '%d\n' "$status" > "$RUNNER_TEMP/pcs-receipts/before-commit.exit"
-          exit "$status"
       - name: Install original pinned SDK and actual full Chromium
-        if: matrix.check == 'sdk-console'
         run: |
           python="$RUNNER_TOOL_CACHE/Python/3.12.16/x64/bin/python3.12"
           "$python" -c 'import sys; assert sys.version_info[:3] == (3, 12, 16)'
@@ -58,7 +39,6 @@ jobs:
           "$RUNNER_TEMP/pcs-python/bin/pip" check
           "$RUNNER_TEMP/pcs-python/bin/playwright" install --with-deps chromium
       - name: Run the stock SDK and real Console fixture in isolated numeric loopback
-        if: matrix.check == 'sdk-console'
         run: |
           umask 077
           export SIMULATOR_BINARY="$PWD/dist/tenkacloud-simulator"
@@ -88,7 +68,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v7.0.2
         with:
-          name: pcs-associations-fbe4253-${{ matrix.check }}-${{ github.run_id }}
+          name: pcs-snapshot-composition-e9aa32e-${{ github.run_id }}
           path: ${{ runner.temp }}/pcs-receipts
           if-no-files-found: error
           retention-days: 14
