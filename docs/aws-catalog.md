@@ -142,6 +142,11 @@ The cluster record stays `CREATING` and its attachment is immutable.
 [Cluster API](https://docs.aws.amazon.com/msk/1.0/apireference/clusters.html) and
 [configuration deletion](https://docs.aws.amazon.com/msk/latest/developerguide/msk-configuration-operations-delete.html)
 
+In the [MSK API reference](/_simulator/docs/catalog.html?api=kafka), **Test Request**
+and **Send** use the console login cookie and the prefilled `X-Simulator-Service: kafka`
+header. `ListConfigurations` and `ListClusters` read the same regional records as
+the console and SDK. SDK requests select MSK through their SigV4 service scope.
+
 ## Console and API reference
 
 Choose **Services → Service catalog** in the console. The view follows the

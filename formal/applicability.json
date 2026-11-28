@@ -1,12 +1,12 @@
 {
   "version": 1,
-  "base_sha": "cb062654a5712be104c584b33f679c359c35134d",
+  "base_sha": "1478bbacf026b2d5924dc6e20a1fe8f953d7c22f",
   "changes": [
     {
       "path": ".github/workflows/ci.yml",
-      "sha256": "7bf06bd809608caf8447493cceec82fa444c0575fbbd904441ca7bdd9b88d994",
+      "sha256": "bb4a3b69a1ef5d06d69d77366461bb8c6e02a14a921d52753ec31f09f1e345ad",
       "disposition": "formal-infrastructure",
-      "reason": "A manual verification-only workflow checks out the immutable reviewed product tree, runs the original complete gate and stock Kafka and Batch SDK fixtures, and retains bounded outcome diagnostics.",
+      "reason": "Manual-only verification checks out the immutable reviewed MSK source, runs the complete default gate plus stock Kafka/Batch and sandboxed SDK/Cloudscape/Scalar lifecycles on Ubuntu 22.04, and retains classified evidence outside the product checkout.",
       "models": []
     }
   ]

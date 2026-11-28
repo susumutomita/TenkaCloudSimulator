@@ -5,13 +5,13 @@ permissions:
   contents: read
 jobs:
   complete-gate-and-stock-sdk:
-    name: Complete gate and stock Kafka and Batch fixtures at cb06265
-    runs-on: ubuntu-24.04
-    timeout-minutes: 100
+    name: Complete gate, Kafka and Batch SDK, and MSK Scalar at 1478bba
+    runs-on: ubuntu-22.04
+    timeout-minutes: 115
     steps:
       - uses: actions/checkout@v7.0.1
         with:
-          ref: cb062654a5712be104c584b33f679c359c35134d
+          ref: 1478bbacf026b2d5924dc6e20a1fe8f953d7c22f
           persist-credentials: false
       - uses: actions/setup-go@v6.5.0
         with:
@@ -20,8 +20,8 @@ jobs:
       - name: Verify the fixed source and isolated runner
         id: source
         run: |
-          test "$(git rev-parse HEAD)" = cb062654a5712be104c584b33f679c359c35134d
-          test "$(git rev-parse HEAD^{tree})" = ab8ad77bbaf32b11d52cb9b68d1db0725dee68be
+          test "$(git rev-parse HEAD)" = 1478bbacf026b2d5924dc6e20a1fe8f953d7c22f
+          test "$(git rev-parse HEAD^{tree})" = 2403d91da6395f54152d92eda62051d2f44827e4
           test -z "$(git status --porcelain)"
           test "$(go env GOVERSION)" = go1.26.11
           test "$(id -u)" -ne 0
@@ -57,12 +57,20 @@ jobs:
           # the SDK on a freshly built binary and preserve the original gate exit.
           if test ! -x dist/tenkacloud-simulator; then make build; fi
           go version -m dist/tenkacloud-simulator > "$RUNNER_TEMP/msk-batch-evidence/build.txt"
-          grep -Fq 'vcs.revision=cb062654a5712be104c584b33f679c359c35134d' "$RUNNER_TEMP/msk-batch-evidence/build.txt"
+          grep -Fq 'vcs.revision=1478bbacf026b2d5924dc6e20a1fe8f953d7c22f' "$RUNNER_TEMP/msk-batch-evidence/build.txt"
           grep -Fq 'vcs.modified=false' "$RUNNER_TEMP/msk-batch-evidence/build.txt"
           sha256sum dist/tenkacloud-simulator > "$RUNNER_TEMP/msk-batch-evidence/binary.sha256"
+      - name: Set up CPython for the pinned SDK and Chromium tools
+        id: python
+        if: ${{ !cancelled() && steps.binary.outcome == 'success' }}
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6.3.0
+        with:
+          python-version: '3.12.16'
+          cache: pip
+          cache-dependency-path: scripts/requirements-test.txt
       - name: Install the checked-in SDK requirements
         id: sdk_tools
-        if: ${{ !cancelled() && steps.binary.outcome == 'success' }}
+        if: ${{ !cancelled() && steps.python.outcome == 'success' }}
         run: |
           python3 -m venv "$RUNNER_TEMP/msk-batch-venv"
           "$RUNNER_TEMP/msk-batch-venv/bin/pip" install -r scripts/requirements-test.txt
@@ -85,6 +93,48 @@ jobs:
           grep -Fx 'Catalog fixture lifecycles passed for batch, kafka' "$RUNNER_TEMP/msk-batch-sdk.log" > "$RUNNER_TEMP/msk-batch-evidence/fixture-result.txt"
           sha256sum --check "$RUNNER_TEMP/msk-batch-evidence/binary.sha256"
           test -z "$(git status --porcelain)"
+      - name: Install the Chromium build pinned by Playwright
+        id: browser
+        if: ${{ !cancelled() && steps.sdk_tools.outcome == 'success' }}
+        env:
+          PLAYWRIGHT_BROWSERS_PATH: ${{ runner.temp }}/msk-chromium
+        run: |
+          "$RUNNER_TEMP/msk-batch-venv/bin/playwright" install --with-deps chromium
+          "$RUNNER_TEMP/msk-batch-venv/bin/python" - <<'PYCODE'
+          import importlib.metadata, json, os
+          from pathlib import Path
+          from playwright.sync_api import sync_playwright
+          import playwright
+          assert importlib.metadata.version('playwright') == '1.62.0'
+          pins = json.loads((Path(playwright.__file__).parent / 'driver/package/browsers.json').read_text())
+          pin = next(b for b in pins['browsers'] if b['name'] == 'chromium')
+          assert pin['revision'] == '1234' and pin['browserVersion'] == '151.0.7922.34'
+          with sync_playwright() as driver:
+              executable = Path(driver.chromium.executable_path).resolve(strict=True)
+          assert executable.is_relative_to(Path(os.environ['PLAYWRIGHT_BROWSERS_PATH']) / 'chromium-1234')
+          temp = Path(os.environ['RUNNER_TEMP'])
+          (temp / 'msk-chromium-executable').write_text(str(executable))
+          (temp / 'msk-batch-evidence/browser.json').write_text(json.dumps({'playwright': '1.62.0', 'chromium': pin['browserVersion'], 'revision': pin['revision']})+'\n')
+          PYCODE
+      - name: Run the two-team stock SDK, Console and Scalar fixture
+        id: scalar
+        if: ${{ !cancelled() && steps.browser.outcome == 'success' }}
+        env:
+          SIMULATOR_BINARY: ${{ github.workspace }}/dist/tenkacloud-simulator
+          HTTP_PROXY: http://127.0.0.1:9
+          HTTPS_PROXY: http://127.0.0.1:9
+          ALL_PROXY: http://127.0.0.1:9
+          NO_PROXY: 127.0.0.1
+        run: |
+          umask 077
+          export CHROMIUM_EXECUTABLE="$(cat "$RUNNER_TEMP/msk-chromium-executable")"
+          result=0
+          "$RUNNER_TEMP/msk-batch-venv/bin/python" test/e2e/msk_configuration_scalar.py > "$RUNNER_TEMP/msk-scalar.log" 2>&1 || result=$?
+          printf '%s\n' "$result" > "$RUNNER_TEMP/msk-batch-evidence/scalar-exit.txt"
+          test "$result" -eq 0
+          grep -Fx 'MSK stock SDK, Cloudscape, Scalar Send, restart, peer isolation and cleanup passed' "$RUNNER_TEMP/msk-scalar.log" > "$RUNNER_TEMP/msk-batch-evidence/scalar-result.txt"
+          sha256sum --check "$RUNNER_TEMP/msk-batch-evidence/binary.sha256"
+          test -z "$(git status --porcelain)"
       - name: Record phase outcomes and bounded diagnostics
         if: always()
         env:
@@ -93,6 +143,8 @@ jobs:
           BUILD_OUTCOME: ${{ steps.binary.outcome }}
           SDK_TOOLS_OUTCOME: ${{ steps.sdk_tools.outcome }}
           SDK_OUTCOME: ${{ steps.sdk.outcome }}
+          BROWSER_OUTCOME: ${{ steps.browser.outcome }}
+          SCALAR_OUTCOME: ${{ steps.scalar.outcome }}
         run: |
           python3 - <<'PY'
           import json, os, re
@@ -104,16 +156,21 @@ jobs:
           sdk = temp / 'msk-batch-sdk.log'
           text = gate.read_text(errors='replace') if gate.exists() else ''
           sdk_text = sdk.read_text(errors='replace') if sdk.exists() else ''
+          scalar = temp / 'msk-scalar.log'
+          scalar_text = scalar.read_text(errors='replace') if scalar.exists() else ''
+          def classified_failure(output):
+              return next((cls for cls in ('AssertionError','ClientError','ProfileNotFound','EndpointConnectionError','ReadTimeoutError','TimeoutError','Error')
+                           if re.search(r'^([\w.]+\.)?'+cls+r'(:|$)', output, re.M)), None)
           def exit_code(name):
               path = evidence / name
               return int(path.read_text()) if path.is_file() else None
           summary = {
-              'steps': {step: os.environ[step+'_OUTCOME'] for step in ('SOURCE','GATE','BUILD','SDK_TOOLS','SDK')},
-              'make_exit': exit_code('make-exit.txt'), 'sdk_exit': exit_code('sdk-exit.txt'),
+              'steps': {step: os.environ[step+'_OUTCOME'] for step in ('SOURCE','GATE','BUILD','SDK_TOOLS','SDK','BROWSER','SCALAR')},
+              'make_exit': exit_code('make-exit.txt'), 'sdk_exit': exit_code('sdk-exit.txt'), 'scalar_exit': exit_code('scalar-exit.txt'),
               'failed_packages': re.findall(r'^FAIL\s+(github\.com/susumutomita/TenkaCloudSimulator/[\w./-]+)', text, re.M),
               'failed_go_tests': re.findall(r'^--- FAIL: (Test[A-Za-z0-9_]+)', text, re.M),
               'go_package_passes': len(re.findall(r'^ok\s+github\.com/susumutomita/TenkaCloudSimulator/', text, re.M)),
-              'sdk_failure_class': next((cls for cls in ('AssertionError','ClientError','ProfileNotFound','EndpointConnectionError','ReadTimeoutError') if re.search(r'^([\w.]+\.)?'+cls+r'(:|$)', sdk_text, re.M)), None),
+              'sdk_failure_class': classified_failure(sdk_text), 'scalar_failure_class': classified_failure(scalar_text),
           }
           (evidence/'outcome.json').write_text(json.dumps(summary, indent=2)+'\n')
           print(json.dumps(summary))
