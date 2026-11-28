@@ -30763,7 +30763,7 @@
           "edits": [
             {
               "old": "!.w.phase = \"observed\", !.w.seenPath",
-              "new": "!.w.phase = \"observed\", !.w.verified = k = \"exact\" /\\ ui.target = \"desired\", !.w.seenPath",
+              "new": "!.w.phase = \"observed\", !.w.verified = k = \"exact\" /\\ ui.target = \"desired\" /\\ last.step = \"ack\" /\\ last.result = \"lost\", !.w.seenPath",
               "count": 1
             }
           ],
@@ -30796,7 +30796,7 @@
           "edits": [
             {
               "old": "                       ELSE ui\n /\\ last' = Mark(\"recover\"",
-              "new": "                       ELSE IF k = \"resend\" THEN [ui EXCEPT !.w.phase = \"sending\", !.w.sent = @+1] ELSE ui\n /\\ last' = Mark(\"recover\"",
+              "new": "                       ELSE IF k = \"resend\" /\\ last.step = \"ack\" /\\ last.result = \"lost\" THEN [ui EXCEPT !.w.phase = \"sending\", !.w.sent = @+1] ELSE ui\n /\\ last' = Mark(\"recover\"",
               "count": 1
             }
           ],
@@ -30807,7 +30807,7 @@
           "edits": [
             {
               "old": "                       ELSE ui\n /\\ last' = Mark(\"recover\"",
-              "new": "                       ELSE IF k = \"automatic\" THEN [ui EXCEPT !.w.phase = \"sending\", !.w.sent = @+1] ELSE ui\n /\\ last' = Mark(\"recover\"",
+              "new": "                       ELSE IF k = \"automatic\" /\\ last.step = \"ack\" /\\ last.result = \"lost\" THEN [ui EXCEPT !.w.phase = \"sending\", !.w.sent = @+1] ELSE ui\n /\\ last' = Mark(\"recover\"",
               "count": 1
             }
           ],
