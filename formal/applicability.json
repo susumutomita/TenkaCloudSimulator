@@ -290,6 +290,13 @@
       ]
     },
     {
+      "path": "internal/aws/ec2_launch_template_admission_test.go",
+      "sha256": "45e4d284c154c69a0024eb7029f7a4c4661bccdca30e4967ec8f2a1e8133ac08",
+      "disposition": "test-support",
+      "reason": "Trusted transaction-bound admission directly consumes actual native Query-created template and SG records; verifies current physical lifetime, same-name SG replacement, historical read, region/process isolation and retired template refusal. This component witness does not claim the existing PCS metadata route invokes admission.",
+      "models": []
+    },
+    {
       "path": "internal/aws/ec2_launch_template_query.go",
       "sha256": "c547fd90722fd18bc0b7cac50202f4e91fc81482864dca3c64e2a5be350565a8",
       "disposition": "modeled",
