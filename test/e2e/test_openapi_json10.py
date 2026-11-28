@@ -180,15 +180,35 @@ class SharedJSON10Schemas(unittest.TestCase):
             'CreateSecret', 'DescribeSecret', 'ListSecrets', 'PutSecretValue',
             'GetSecretValue', 'UpdateSecretVersionStage', 'DeleteSecret',
             'KMSCreateAlias', 'KMSListAliases', 'KMSUpdateAlias', 'KMSDeleteAlias',
+            'KMSCreateGrant', 'KMSListGrants', 'KMSRevokeGrant', 'KMSScheduleKeyDeletion', 'KMSCancelKeyDeletion',
             'ListSecretVersionIds', 'UpdateSecret', 'SSMCreateDocument', 'SSMGetDocument', 'SSMDescribeDocument', 'SSMListDocuments',
             'SSMListDocumentVersions', 'SSMUpdateDocument', 'SSMDeleteDocument',
             'AutoScalingCreateScalingPlan', 'AutoScalingDescribeScalingPlans',
             'AutoScalingDescribeScalingPlanResources', 'AutoScalingUpdateScalingPlan',
             'AutoScalingDeleteScalingPlan',
         })
-        self.assertEqual(len(media['examples']), 43)
+        self.assertEqual(len(media['examples']), 48)
         for example in media['examples'].values():
             shared.validate(example['value'])
+
+    def test_kms_grant_and_deletion_examples_match_their_native_targets(self):
+        post = self.spec['paths']['/']['post']
+        examples = post['requestBody']['content']['application/x-amz-json-1.1']['examples']
+        mapping = post['x-simulator-kms-operation-schemas']
+        request_shapes = {
+            'CreateGrant': 'KMSCreateGrantInput', 'ListGrants': 'KMSListGrantsInput',
+            'RevokeGrant': 'KMSRevokeGrantInput', 'ScheduleKeyDeletion': 'KMSScheduleKeyDeletionInput',
+            'CancelKeyDeletion': 'KMSKeyInput',
+        }
+        for action, schema in request_shapes.items():
+            with self.subTest(action=action):
+                self.assertEqual(mapping[action]['target'], 'TrentService.' + action)
+                self.assertEqual(mapping[action]['request'], {'$ref': '#/components/schemas/' + schema})
+                request = examples['KMS' + action]['value']
+                check = validator(self.spec, mapping[action]['request'])
+                check.validate(request)
+                with self.assertRaises(ValidationError):
+                    check.validate({**request, 'Unreviewed': True})
 
     def test_autoscaling_plan_templates_match_strict_target_schemas(self):
         validate_autoscaling_plans(self.spec)

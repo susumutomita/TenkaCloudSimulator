@@ -18,8 +18,8 @@ import (
 )
 
 // ELBStore owns bounded Application Load Balancer control-plane state in the
-// provider SQLite database. It performs no network placement: subnets and
-// security groups are syntactic references, and only Lambda targets can run.
+// provider SQLite database. Native EC2 placement is configuration metadata.
+// Only Lambda targets can run.
 // Hosts must allocate a separate database, process and token authority per team.
 type ELBStore struct{ db *sql.DB }
 
@@ -47,6 +47,8 @@ const (
 type ELBLoadBalancer struct {
 	ARN, Name, ID, Region, Scheme, DNSName, Created string
 	Subnets, SecurityGroups                         []string
+	VPCID                                           string            `json:",omitempty"`
+	SubnetZones                                     map[string]string `json:",omitempty"`
 }
 
 type ELBHealthCheck struct {
@@ -91,7 +93,16 @@ var (
 )
 
 func NewELBStore(db *sql.DB) (*ELBStore, error) {
+	if _, err := NewEC2NetworkStore(db); err != nil {
+		return nil, err
+	}
 	_, e := db.Exec(`CREATE TABLE IF NOT EXISTS aws_elb_load_balancers(arn TEXT PRIMARY KEY,region TEXT NOT NULL,name TEXT NOT NULL,document TEXT NOT NULL,UNIQUE(region,name));
+ CREATE TABLE IF NOT EXISTS aws_elb_placement_refs(
+    alb TEXT NOT NULL REFERENCES aws_elb_load_balancers(arn) ON DELETE CASCADE,
+    region TEXT NOT NULL, resource_id TEXT NOT NULL, PRIMARY KEY(alb,resource_id),
+    FOREIGN KEY(region,resource_id) REFERENCES aws_ec2_network_resources(region,id) ON DELETE RESTRICT
+ ) WITHOUT ROWID;
+ CREATE INDEX IF NOT EXISTS aws_elb_placement_by_network ON aws_elb_placement_refs(region,resource_id);
  CREATE TABLE IF NOT EXISTS aws_elb_target_groups(arn TEXT PRIMARY KEY,region TEXT NOT NULL,name TEXT NOT NULL,document TEXT NOT NULL,epoch INTEGER NOT NULL,checks INTEGER NOT NULL,UNIQUE(region,name));
  CREATE TABLE IF NOT EXISTS aws_elb_listeners(arn TEXT PRIMARY KEY,region TEXT NOT NULL,load_balancer TEXT NOT NULL REFERENCES aws_elb_load_balancers(arn) ON DELETE CASCADE,port INTEGER NOT NULL,target_group TEXT REFERENCES aws_elb_target_groups(arn),document TEXT NOT NULL,UNIQUE(load_balancer,port));
  CREATE TABLE IF NOT EXISTS aws_elb_targets(target_group TEXT PRIMARY KEY REFERENCES aws_elb_target_groups(arn) ON DELETE CASCADE,function_arn TEXT NOT NULL,epoch INTEGER NOT NULL,state TEXT NOT NULL,reason TEXT NOT NULL,description TEXT NOT NULL,successes INTEGER NOT NULL,failures INTEGER NOT NULL,due INTEGER NOT NULL);`)
@@ -296,7 +307,10 @@ func (s *ELBStore) CreateLoadBalancer(ctx context.Context, lb ELBLoadBalancer, a
 		if existing.Scheme != lb.Scheme || !elbSameSet(existing.Subnets, lb.Subnets) || !elbSameSet(existing.SecurityGroups, lb.SecurityGroups) {
 			return ELBLoadBalancer{}, elbErr("DuplicateLoadBalancerName", "A load balancer with the same name '"+lb.Name+"' exists, but with different settings.")
 		}
-		return existing, nil // Identical settings: the documented idempotent create.
+		if err = checkELBPlacementRefs(ctx, tx, existing); err != nil {
+			return ELBLoadBalancer{}, err
+		}
+		return existing, nil // Historical rows retain their original placement on a retry.
 	}
 	if !errors.Is(err, sql.ErrNoRows) {
 		return ELBLoadBalancer{}, err
@@ -315,6 +329,9 @@ func (s *ELBStore) CreateLoadBalancer(ctx context.Context, lb ELBLoadBalancer, a
 	if count >= elbLoadBalancerLimit {
 		return ELBLoadBalancer{}, elbErr("TooManyLoadBalancers", fmt.Sprintf("This local region supports at most %d load balancers.", elbLoadBalancerLimit))
 	}
+	if err = resolveELBPlacement(ctx, tx, &lb); err != nil {
+		return ELBLoadBalancer{}, err
+	}
 	number, _ := strconv.ParseUint(lb.ID[:8], 16, 64)
 	prefix := ""
 	if lb.Scheme == "internal" {
@@ -326,7 +343,21 @@ func (s *ELBStore) CreateLoadBalancer(ctx context.Context, lb ELBLoadBalancer, a
 	if _, err = tx.ExecContext(ctx, "INSERT INTO aws_elb_load_balancers(arn,region,name,document) VALUES(?,?,?,?)", lb.ARN, lb.Region, lb.Name, string(data)); err != nil {
 		return ELBLoadBalancer{}, err
 	}
-	return lb, tx.Commit()
+	for _, ids := range [][]string{lb.Subnets, lb.SecurityGroups} {
+		for _, id := range ids {
+			if _, err = tx.ExecContext(ctx, "INSERT INTO aws_elb_placement_refs(alb, region, resource_id) VALUES(?,?,?)", lb.ARN, lb.Region, id); err != nil {
+				return ELBLoadBalancer{}, err
+			}
+		}
+	}
+	stored, err := elbReadLoadBalancer(ctx, tx, "arn=? AND region=? AND name=? AND document=?", lb.ARN, lb.Region, lb.Name, string(data))
+	if err != nil {
+		return ELBLoadBalancer{}, err
+	}
+	if err = checkELBPlacementRefs(ctx, tx, stored); err != nil {
+		return ELBLoadBalancer{}, err
+	}
+	return stored, tx.Commit()
 }
 
 // DeleteLoadBalancer deletes the load balancer and its listeners atomically. A
@@ -360,6 +391,14 @@ func (s *ELBStore) DeleteLoadBalancer(ctx context.Context, region, arn string, a
 			return elbErr("ResourceInUse", "Remove origins associated with this load balancer before deleting it.")
 		}
 		return err
+	}
+	var survives bool
+	if err = tx.QueryRowContext(ctx, `SELECT EXISTS(SELECT 1 FROM aws_elb_load_balancers WHERE arn=?)
+		OR EXISTS(SELECT 1 FROM aws_elb_placement_refs WHERE alb=?)`, arn, arn).Scan(&survives); err != nil {
+		return err
+	}
+	if survives {
+		return errELBPlacement
 	}
 	for _, group := range groups {
 		if err = elbBump(ctx, tx, group, time.Now()); err != nil {
@@ -717,6 +756,11 @@ func (s *ELBStore) DescribeLoadBalancers(ctx context.Context, region string, arn
 	}
 	if err != nil {
 		return nil, err
+	}
+	for _, lb := range result {
+		if err = checkELBPlacementRefs(ctx, tx, lb); err != nil {
+			return nil, err
+		}
 	}
 	return result, tx.Commit()
 }

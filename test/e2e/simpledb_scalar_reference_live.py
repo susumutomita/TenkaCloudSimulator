@@ -99,7 +99,7 @@ class ScalarQueryReference:
             has=page.get_by_role('button', name='Close Client', exact=True))
         self.request_panel = self.client.get_by_role('region', name='Request: ' + root['summary'], exact=True)
 
-    def open_example(self, action):
+    def open_example(self, action, service='sdb', replacements=None):
         from playwright.sync_api import expect
 
         page, client, request_panel = self.page, self.client, self.request_panel
@@ -118,10 +118,15 @@ class ScalarQueryReference:
         # Scalar shows the served values with optional form fields unchecked.
         for field in self.examples[action]['value']:
             request_panel.get_by_role('checkbox', name=f'Include {field} in request', exact=True).check()
+        for field, value in (replacements or {}).items():
+            assert field in self.examples[action]['value']
+            checkbox = request_panel.get_by_role('checkbox', name=f'Include {field} in request', exact=True)
+            row = checkbox.locator('xpath=ancestor::tr[1]')
+            row.get_by_role('combobox', name='Value', exact=True).fill(value)
         request_panel.get_by_role('tab', name='Headers', exact=True).press('Enter')
         service_row = request_panel.get_by_role('row', name=re.compile(r'^Include X-Simulator-Service in request '))
-        service_row.get_by_role('button', name=re.compile(r'^(ssm|sdb)$')).click()
-        page.get_by_role('menuitem', name='sdb', exact=True).click()
+        service_row.get_by_role('button', name=re.compile(r'^(?:ssm|' + re.escape(service) + r')$')).click()
+        page.get_by_role('menuitem', name=service, exact=True).click()
         include = client.get_by_role('checkbox', name='Include X-Simulator-Service in request', exact=True)
         expect(include).to_have_count(1)
         if not include.is_checked():

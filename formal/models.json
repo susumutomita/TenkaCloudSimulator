@@ -5939,6 +5939,7 @@
         "internal/aws/catalog/models/securityhub.json",
         "internal/aws/catalog/models/securitylake.json",
         "internal/aws/catalog/models/serverlessrepo.json",
+        "internal/aws/catalog/models/service-quotas.json",
         "internal/aws/catalog/models/servicecatalog.json",
         "internal/aws/catalog/models/servicediscovery.json",
         "internal/aws/catalog/models/sesv2.json",
@@ -5969,6 +5970,7 @@
         "internal/aws/catalog/resource_group_query.go",
         "internal/aws/catalog/selection.json",
         "internal/aws/catalog/semantics.go",
+        "internal/aws/catalog/service_quotas.go",
         "internal/aws/catalog/services.go",
         "internal/aws/catalog/services_analytics.go",
         "internal/aws/catalog/services_analytics2.go",
@@ -30739,6 +30741,4092 @@
       ]
     },
     {
+      "id": "CloudFrontLocalCache",
+      "model": "formal/CloudFrontLocalCache.tla",
+      "config": "formal/CloudFrontLocalCache.cfg",
+      "bounds": "One distribution and object, two actors, a single abstract cache line, two byte values, two distinct origin lifetime fingerprints, three configuration revisions and at most four transitions.",
+      "properties": [
+        "TypeOK",
+        "FreshJointAuthority",
+        "ExactHitIdentity",
+        "MissReadsOrigin",
+        "FailureRollsBack",
+        "RefusalUnchanged",
+        "StaleETagUnchanged",
+        "UpdateClearsCache",
+        "InvalidationClearsCache",
+        "RestartPreserves",
+        "PeerUnchanged"
+      ],
+      "limits": "Checks an atomic abstract transaction and one immutable pair of policy decisions per delivery. A bucket lifetime fingerprint is assumed distinct for the single ordinary recreation; actual wall-clock buckets.created plus region does not prove ABA resistance under clock rollback. One abstract cache line does not model concrete multi-entry quotas, exact paths, TTL seconds, SQL/triggers/locking, authentication, HTTP/XML/S3 parsing, cache buffers, ETags or Go refinement. Restart preserves abstract committed state only, not crash durability. Native and SDK tests separately cover the real implementation.",
+      "source_scope": [
+        "internal/aws/cloudfront_distribution.go",
+        "internal/aws/cloudfront_distribution_store.go",
+        "internal/aws/cloudfront_distribution_http.go",
+        "internal/aws/cloudfront_distribution_list.go",
+        "internal/aws/cloudfront_vpc_origin.go",
+        "internal/aws/ssm.go",
+        "internal/server/server.go",
+        "internal/aws/cloudfront_distribution_interrupt_test.go"
+      ],
+      "mutants": [
+        {
+          "id": "MissingObjectGrant",
+          "edits": [
+            {
+              "old": "allowed == dg /\\ og /\\ enabled",
+              "new": "allowed == dg /\\ enabled",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "FreshJointAuthority"
+        },
+        {
+          "id": "MissingDistributionGrant",
+          "edits": [
+            {
+              "old": "allowed == dg /\\ og /\\ enabled",
+              "new": "allowed == og /\\ enabled",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "FreshJointAuthority"
+        },
+        {
+          "id": "WrongOriginLifetime",
+          "edits": [
+            {
+              "old": "origin = bound (* BothLiveGrants *)",
+              "new": "TRUE (* BothLiveGrants *)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "FreshJointAuthority"
+        },
+        {
+          "id": "CrossActorHit",
+          "edits": [
+            {
+              "old": "cacheActor = actor /\\ cacheOrigin = origin",
+              "new": "cacheOrigin = origin",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExactHitIdentity"
+        },
+        {
+          "id": "ExpiredHit",
+          "edits": [
+            {
+              "old": "valid /\\ ~expired /\\ cacheActor",
+              "new": "valid /\\ cacheActor",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExactHitIdentity"
+        },
+        {
+          "id": "IgnoreETag",
+          "edits": [
+            {
+              "old": "expected = config /\\ ok (* ExactETag *)",
+              "new": "ok (* ExactETag *)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "StaleETagUnchanged"
+        },
+        {
+          "id": "UpdateRetainsCache",
+          "edits": [
+            {
+              "old": "valid' = FALSE (* UpdateEvicts *)",
+              "new": "valid' = valid (* UpdateEvicts *)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "UpdateClearsCache"
+        },
+        {
+          "id": "InvalidationRetainsCache",
+          "edits": [
+            {
+              "old": "valid' = IF ok THEN FALSE ELSE valid (* InvalidationAtomic *)",
+              "new": "valid' = valid (* InvalidationAtomic *)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "InvalidationClearsCache"
+        },
+        {
+          "id": "FailedInvalidationEvicts",
+          "edits": [
+            {
+              "old": "valid' = IF ok THEN FALSE ELSE valid (* InvalidationAtomic *)",
+              "new": "valid' = FALSE (* InvalidationAtomic *)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "FailureRollsBack"
+        }
+      ]
+    },
+    {
+      "id": "CloudFrontConsoleEpoch",
+      "model": "formal/CloudFrontConsoleEpoch.tla",
+      "config": "formal/CloudFrontConsoleEpoch.cfg",
+      "bounds": "Two abstract actor/region/route/distribution scopes, three scope epochs, three native request tickets, two caller references and at most eight transitions.",
+      "properties": [
+        "TypeOK",
+        "CurrentContent",
+        "CurrentReceipt",
+        "ProtectedDownload",
+        "AcknowledgedReceipt",
+        "StableUnknownCaller",
+        "ExplicitWriteConfirmation",
+        "OneCurrentWrite"
+      ],
+      "limits": "Models bounded asynchronous content reads and invalidation ownership, abstract protected content, confirmation, unknown acknowledgement and stable explicit replay of fixed /* paths. One abstract scope combines identity, region, route and distribution. Does not model XML/UTF-8/DOM/React, download or OS execution, actual HTTP abort effects, IAM policy evaluation, SQLite, native cache or JavaScript/Go refinement. CloudFrontLocalCache and real SDK/browser/native tests cover separate backend behavior. Known-receipt GET retry/lookup retention is checked by the real browser/storage-outage fixture, not represented in this model.",
+      "source_scope": [
+        "tools/console/src/cloudfront-local.mjs",
+        "tools/console/src/cloudfront-local.jsx",
+        "tools/console/src/console-navigation.mjs",
+        "tools/console/src/main.jsx",
+        "internal/aws/cloudfront_distribution_http.go",
+        "internal/server/web/app.js",
+        "tools/console/src/console-home.jsx"
+      ],
+      "mutants": [
+        {
+          "id": "PublishOldRead",
+          "edits": [
+            {
+              "old": "IF Own(r) /\\ safe (* ProtectedContent *)",
+              "new": "IF safe (* ProtectedContent *)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CurrentContent"
+        },
+        {
+          "id": "RetainOldContent",
+          "edits": [
+            {
+              "old": "content' = Empty (* ClearScope *)",
+              "new": "content' = content (* ClearScope *)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CurrentContent"
+        },
+        {
+          "id": "PublishOldReceipt",
+          "edits": [
+            {
+              "old": "IF Own(r) /\\ result = \"ok\" (* Acknowledged *)",
+              "new": "IF result = \"ok\" (* Acknowledged *)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CurrentReceipt"
+        },
+        {
+          "id": "UnsafeContent",
+          "edits": [
+            {
+              "old": "Own(r) /\\ safe (* ProtectedContent *)",
+              "new": "Own(r) (* ProtectedContent *)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ProtectedDownload"
+        },
+        {
+          "id": "UnknownAcknowledged",
+          "edits": [
+            {
+              "old": "result = \"ok\" (* Acknowledged *)",
+              "new": "result \\in {\"ok\", \"unknown\"} (* Acknowledged *)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AcknowledgedReceipt"
+        },
+        {
+          "id": "FreshCallerWhileUnknown",
+          "edits": [
+            {
+              "old": "ELSE ~uncertain /\\ nextCaller < 2",
+              "new": "ELSE nextCaller < 2",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "StableUnknownCaller"
+        },
+        {
+          "id": "ReplayDifferentCaller",
+          "edits": [
+            {
+              "old": "caller' = (IF replay THEN caller ELSE nextCaller + 1)",
+              "new": "caller' = (IF replay THEN nextCaller + 1 ELSE nextCaller + 1)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "StableUnknownCaller"
+        },
+        {
+          "id": "UnconfirmedWrite",
+          "edits": [
+            {
+              "old": "modal /\\ confirmed (* AffirmativeConfirmation *)",
+              "new": "modal (* AffirmativeConfirmation *)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExplicitWriteConfirmation"
+        },
+        {
+          "id": "OldReadUnlocksWrite",
+          "edits": [
+            {
+              "old": "activeKind' = (IF r.ticket = active THEN \"idle\" ELSE activeKind) (* ReadFinish *)",
+              "new": "activeKind' = \"idle\" (* ReadFinish *)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "OneCurrentWrite"
+        }
+      ]
+    },
+    {
+      "id": "ServiceQuotaDiscovery",
+      "model": "formal/ServiceQuotaDiscovery.tla",
+      "config": "formal/ServiceQuotaDiscovery.cfg",
+      "bounds": "Two private team scopes, one representative supported-region class plus Tokyo, published default5 vs effective2/3 or absent binding, counts0..3, four grant classes, five reads, typed key/level/token cases, one restart and four steps. MaxResults bounds and the three literal region names are native-test obligations.",
+      "properties": [
+        "TypeOK",
+        "ReadPreservesFrame",
+        "ReadProjectionCorrect",
+        "PeerPreserved",
+        "RestartPreservesFrame"
+      ],
+      "limits": "Independent finite projection oracle only: no JSON/SDK/ARN-string/IAM-parser/evaluator/SQL/Go/process-concurrency/refinement proof. Create/Delete are bounded prior-state fixtures for the existing CatalogResourceLifecycle, not quota-increase or execution APIs. No liveness claim: the finite step budget terminates exploration. No real AWS comparison, general AWS quota inventory or pagination support.",
+      "source_scope": [
+        "internal/aws/catalog/service_quotas.go",
+        "internal/aws/catalog/engine.go",
+        "internal/aws/catalog/semantics.go",
+        "internal/aws/catalog/services_business.go"
+      ],
+      "mutants": [
+        {
+          "id": "DefaultUsesApplied",
+          "edits": [
+            {
+              "old": "QuotaValue(r,caps,used) == IF r.op \\in {\"DefaultGet\",\"DefaultList\"} THEN 5 ELSE caps[r.team]",
+              "new": "QuotaValue(r,caps,used) == IF r.op \\in {\"DefaultGet\",\"DefaultList\"} THEN IF caps[r.team]=None THEN 5 ELSE caps[r.team] ELSE caps[r.team]",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadProjectionCorrect"
+        },
+        {
+          "id": "AppliedUsesPublishedDefault",
+          "edits": [
+            {
+              "old": "QuotaValue(r,caps,used) == IF r.op \\in {\"DefaultGet\",\"DefaultList\"} THEN 5 ELSE caps[r.team]",
+              "new": "QuotaValue(r,caps,used) == IF r.op \\in {\"DefaultGet\",\"DefaultList\"} THEN 5 ELSE 5",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadProjectionCorrect"
+        },
+        {
+          "id": "AppliedReportsRemaining",
+          "edits": [
+            {
+              "old": "QuotaValue(r,caps,used) == IF r.op \\in {\"DefaultGet\",\"DefaultList\"} THEN 5 ELSE caps[r.team]",
+              "new": "QuotaValue(r,caps,used) == IF r.op \\in {\"DefaultGet\",\"DefaultList\"} THEN 5 ELSE caps[r.team]-used[r.team]",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadProjectionCorrect"
+        },
+        {
+          "id": "PeerCapacityReturned",
+          "edits": [
+            {
+              "old": "QuotaValue(r,caps,used) == IF r.op \\in {\"DefaultGet\",\"DefaultList\"} THEN 5 ELSE caps[r.team]",
+              "new": "QuotaValue(r,caps,used) == IF r.op \\in {\"DefaultGet\",\"DefaultList\"} THEN 5 ELSE IF caps[Other(r.team)]=None THEN caps[r.team] ELSE caps[Other(r.team)]",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadProjectionCorrect"
+        },
+        {
+          "id": "UnavailableRegionAdvertised",
+          "edits": [
+            {
+              "old": "Available(r) == r.region=Supported",
+              "new": "Available(r) == TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadProjectionCorrect"
+        },
+        {
+          "id": "WildcardReadsUseQuotaARN",
+          "edits": [
+            {
+              "old": "Authorized(r) == r.grant=\"Wildcard\" \\/ (r.grant=\"QuotaOnly\" /\\ r.op=\"AppliedGet\")",
+              "new": "Authorized(r) == r.grant=\"Wildcard\" \\/ r.grant=\"QuotaOnly\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadProjectionCorrect"
+        },
+        {
+          "id": "AppliedGetRequiresWildcard",
+          "edits": [
+            {
+              "old": "Authorized(r) == r.grant=\"Wildcard\" \\/ (r.grant=\"QuotaOnly\" /\\ r.op=\"AppliedGet\")",
+              "new": "Authorized(r) == r.grant=\"Wildcard\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadProjectionCorrect"
+        },
+        {
+          "id": "ExplicitDenyIgnored",
+          "edits": [
+            {
+              "old": "Authorized(r) == r.grant=\"Wildcard\" \\/ (r.grant=\"QuotaOnly\" /\\ r.op=\"AppliedGet\")",
+              "new": "Authorized(r) == r.grant=\"Wildcard\" \\/ (r.grant=\"QuotaOnly\" /\\ r.op=\"AppliedGet\") \\/ r.grant=\"Deny\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadProjectionCorrect"
+        },
+        {
+          "id": "UnrelatedActionAllowed",
+          "edits": [
+            {
+              "old": "Authorized(r) == r.grant=\"Wildcard\" \\/ (r.grant=\"QuotaOnly\" /\\ r.op=\"AppliedGet\")",
+              "new": "Authorized(r) == r.grant=\"Wildcard\" \\/ (r.grant=\"QuotaOnly\" /\\ r.op=\"AppliedGet\") \\/ r.grant=\"OtherAction\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadProjectionCorrect"
+        },
+        {
+          "id": "ResourceLevelIgnored",
+          "edits": [
+            {
+              "old": "Filtered(r) == r.op=\"AppliedList\" /\\ (~r.knownQuota \\/ r.level=\"RESOURCE\")",
+              "new": "Filtered(r) == r.op=\"AppliedList\" /\\ ~r.knownQuota",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadProjectionCorrect"
+        },
+        {
+          "id": "UnknownServiceProjected",
+          "edits": [
+            {
+              "old": "KnownService(r) == r.knownService",
+              "new": "KnownService(r) == TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadProjectionCorrect"
+        },
+        {
+          "id": "UnknownQuotaProjected",
+          "edits": [
+            {
+              "old": "(r.op \\in {\"DefaultGet\",\"AppliedGet\"} /\\ ~r.knownQuota) \\/",
+              "new": "FALSE \\/",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadProjectionCorrect"
+        },
+        {
+          "id": "ForeignTokenAccepted",
+          "edits": [
+            {
+              "old": "ForeignToken(r) == r.op \\in ListOps /\\ r.token",
+              "new": "ForeignToken(r) == FALSE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadProjectionCorrect"
+        },
+        {
+          "id": "SingleRowInventsCursor",
+          "edits": [
+            {
+              "old": "Cursor(r,rows) == FALSE",
+              "new": "Cursor(r,rows) == rows=1 /\\ r.op \\in ListOps",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadProjectionCorrect"
+        },
+        {
+          "id": "DefaultInventsQuotaARN",
+          "edits": [
+            {
+              "old": "rows=1 /\\ ~defaults /\\ r.op # \"Services\",Cursor(r,rows)",
+              "new": "rows=1 /\\ r.op # \"Services\",Cursor(r,rows)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadProjectionCorrect"
+        },
+        {
+          "id": "ReadChangesSelectedUsage",
+          "edits": [
+            {
+              "old": "/\\ counts'=counts (* read publication never changes the selected or peer state *)",
+              "new": "/\\ counts'=[counts EXCEPT ![r.team]=IF @=3 THEN 0 ELSE @+1]",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadPreservesFrame"
+        },
+        {
+          "id": "ReadChangesPeerUsage",
+          "edits": [
+            {
+              "old": "/\\ counts'=counts (* read publication never changes the selected or peer state *)",
+              "new": "/\\ counts'=[counts EXCEPT ![Other(r.team)]=IF @=3 THEN 0 ELSE @+1]",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadPreservesFrame"
+        },
+        {
+          "id": "AbsentBindingFallsBackToDefault",
+          "edits": [
+            {
+              "old": "HasBinding(r,caps) == caps[r.team] # None",
+              "new": "HasBinding(r,caps) == TRUE",
+              "count": 1
+            },
+            {
+              "old": "QuotaValue(r,caps,used) == IF r.op \\in {\"DefaultGet\",\"DefaultList\"} THEN 5 ELSE caps[r.team]",
+              "new": "QuotaValue(r,caps,used) == IF r.op \\in {\"DefaultGet\",\"DefaultList\"} THEN 5 ELSE IF caps[r.team]=None THEN 5 ELSE caps[r.team]",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadProjectionCorrect"
+        }
+      ]
+    },
+    {
+      "id": "ServiceQuotaRequests",
+      "model": "formal/ServiceQuotaRequests.tla",
+      "config": "formal/ServiceQuotaRequests.cfg",
+      "bounds": "Separate request and history trials for one B2BI account quota. Two physical team identities, two regions, a shared team budget of three rows for writes, two ordinary admissions, one waiting caller and at most four profile probes. The live profile ceiling of five is reduced to two for reachability. A second finite history trial constructs five scoped records from an empty sequence and permits one new pending record, two reads of size one or two, a restart, one-day advance across the inclusive cutoff and a clock rollback after an additional genuine insertion.",
+      "properties": [
+        "TypeOK",
+        "Admissions",
+        "CommitFrame",
+        "StoredFields",
+        "Capacity",
+        "Visibility",
+        "Lookup",
+        "PageScope",
+        "PrivateStage",
+        "ContenderFrame",
+        "RestartFrame"
+      ],
+      "limits": "The native per-team history bound is 1,000 records; the symbolic inputs distinguish admitted, invalid and refused categories rather than IEEE numeric values or exact HTTP errors. Native IAM evaluation is abstracted by the current action and target, a wildcard allow, a matching or foreign quota grant, a missing grant and explicit denial. General history and direct ID Get require the wildcard target; named request and ByQuota allow the exact quota grant. Two higher inputs symbolize 5.5 and 6.5, permitting separate saved desired values for the same quota. Global sequence represents physical insertion order with per-team sequence and identity; seeded fixture histories are appended in order from an empty sequence. General history accepts only the closed interval from 90 days before the current time through the current observation. Whole-day times permit equality at 90 days, aging over it, and a saved row in the future after the clock moves backward; Get and ByQuota may still read it. The write stage and waiting rival represent private SQLite staging and serialized admission; SQLite scheduling, real clocks, UUID generation, MAC cryptography, AWS reviewer actions and host execution are outside the graph. A committed record with a lost acknowledgement is distinct from a canceled transaction, and has no client-visible ID. The applied quota and actual profile capacity remain external native behaviors checked independently.",
+      "source_scope": [
+        "internal/aws/catalog/engine.go",
+        "internal/aws/catalog/models/service-quotas.json",
+        "internal/aws/catalog/semantics.go",
+        "internal/aws/catalog/service_quota_requests.go",
+        "internal/aws/catalog/service_quotas.go"
+      ],
+      "mutants": [
+        {
+          "id": "AdmitDenied",
+          "edits": [
+            {
+              "old": "g = \"denied\" -> \"denied\"",
+              "new": "g = \"denied\" -> \"stage\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "Admissions"
+        },
+        {
+          "id": "AdmitNonIncrease",
+          "edits": [
+            {
+              "old": "g # \"ok\" -> \"invalid\"",
+              "new": "g \\notin {\"ok\",\"notHigher\"} -> \"invalid\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "Admissions"
+        },
+        {
+          "id": "AdmitOversize",
+          "edits": [
+            {
+              "old": "g # \"ok\" -> \"invalid\"",
+              "new": "g \\notin {\"ok\",\"tooLarge\"} -> \"invalid\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "Admissions"
+        },
+        {
+          "id": "AdmitWrongLevel",
+          "edits": [
+            {
+              "old": "g # \"ok\" -> \"invalid\"",
+              "new": "g \\notin {\"ok\",\"wrongLevel\"} -> \"invalid\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "Admissions"
+        },
+        {
+          "id": "AdmitUnsupportedScope",
+          "edits": [
+            {
+              "old": "g # \"ok\" -> \"invalid\"",
+              "new": "g \\notin {\"ok\",\"unsupported\"} -> \"invalid\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "Admissions"
+        },
+        {
+          "id": "AllowAnotherPending",
+          "edits": [
+            {
+              "old": "HasPending(st0.db,s) -> \"pending\"",
+              "new": "FALSE -> \"pending\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "Admissions"
+        },
+        {
+          "id": "RefuseIndependentRegion",
+          "edits": [
+            {
+              "old": "HasPending(st0.db,s) -> \"pending\"",
+              "new": "(HasPending(st0.db,s) \\/ (s=\"AE\" /\\ HasPending(st0.db,\"AW\"))) -> \"pending\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "Admissions"
+        },
+        {
+          "id": "RefuseOtherTeamDueToPeer",
+          "edits": [
+            {
+              "old": "HasPending(st0.db,s) -> \"pending\"",
+              "new": "(HasPending(st0.db,s) \\/ (s=\"AE\" /\\ HasPending(st0.db,\"BE\"))) -> \"pending\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "Admissions"
+        },
+        {
+          "id": "CountOnlyThisRegion",
+          "edits": [
+            {
+              "old": "Len(TeamRows(st0.db,s)) >= 3",
+              "new": "Len(FilterSeq(st0.db,s)) >= 3",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "Admissions"
+        },
+        {
+          "id": "CountBothTeamDatabases",
+          "edits": [
+            {
+              "old": "Len(TeamRows(st0.db,s)) >= 3",
+              "new": "Len(st0.db) >= 3",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "Admissions"
+        },
+        {
+          "id": "MissAQueuedPendingWinner",
+          "edits": [
+            {
+              "old": "verdict == Admit(st,st.scope,\"ok\")",
+              "new": "verdict == IF HasPending(st.db,st.scope) THEN \"stage\" ELSE Admit(st,st.scope,\"ok\")",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "Admissions"
+        },
+        {
+          "id": "RejectContenderAfterRollback",
+          "edits": [
+            {
+              "old": "verdict == Admit(st,st.scope,\"ok\")",
+              "new": "verdict == IF ~HasPending(st.db,st.scope) THEN \"pending\" ELSE Admit(st,st.scope,\"ok\")",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "Admissions"
+        },
+        {
+          "id": "RivalErasesPrivateStage",
+          "edits": [
+            {
+              "old": "[st EXCEPT !.waiting=TRUE]",
+              "new": "[st EXCEPT !.waiting=TRUE, !.staged= <<>>]",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ContenderFrame"
+        },
+        {
+          "id": "PublishSpeculativeData",
+          "edits": [
+            {
+              "old": "Result(\"read\",FilterSeq(st.db,st.scope),{})",
+              "new": "Result(\"read\",Append(FilterSeq(st.db,st.scope),st.staged[1]),{})",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PrivateStage"
+        },
+        {
+          "id": "KeepCanceledRequest",
+          "edits": [
+            {
+              "old": "IF Published(m) THEN Append(@,r) ELSE @",
+              "new": "IF Published(m) \\/ m=\"cancel\" THEN Append(@,r) ELSE @",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CommitFrame"
+        },
+        {
+          "id": "KeepTimedOutRequest",
+          "edits": [
+            {
+              "old": "IF Published(m) THEN Append(@,r) ELSE @",
+              "new": "IF Published(m) \\/ m=\"deadline\" THEN Append(@,r) ELSE @",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CommitFrame"
+        },
+        {
+          "id": "KeepFaultedRequest",
+          "edits": [
+            {
+              "old": "IF Published(m) THEN Append(@,r) ELSE @",
+              "new": "IF Published(m) \\/ m=\"fault\" THEN Append(@,r) ELSE @",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CommitFrame"
+        },
+        {
+          "id": "KeepMismatchedReadback",
+          "edits": [
+            {
+              "old": "IF Published(m) THEN Append(@,r) ELSE @",
+              "new": "IF Published(m) \\/ m=\"wrongReadback\" THEN Append(@,r) ELSE @",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CommitFrame"
+        },
+        {
+          "id": "KeepFailedCommit",
+          "edits": [
+            {
+              "old": "IF Published(m) THEN Append(@,r) ELSE @",
+              "new": "IF Published(m) \\/ m=\"commitError\" THEN Append(@,r) ELSE @",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CommitFrame"
+        },
+        {
+          "id": "LoseCommittedButUnacknowledged",
+          "edits": [
+            {
+              "old": "IF Published(m) THEN Append(@,r) ELSE @",
+              "new": "IF m=\"confirmed\" THEN Append(@,r) ELSE @",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CommitFrame"
+        },
+        {
+          "id": "AcknowledgeWithoutRow",
+          "edits": [
+            {
+              "old": "IF Published(m) THEN Append(@,r) ELSE @",
+              "new": "IF m=\"lostReply\" THEN Append(@,r) ELSE @",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CommitFrame"
+        },
+        {
+          "id": "ReportIdAfterLostReply",
+          "edits": [
+            {
+              "old": "IF m=\"confirmed\" THEN Result(\"ok\",<<r>>,{})",
+              "new": "IF Published(m) THEN Result(\"ok\",<<r>>,{})",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CommitFrame"
+        },
+        {
+          "id": "KeepPrivateRowAfterCancellation",
+          "edits": [
+            {
+              "old": "!.staged= <<>>, !.out=IF m=\"confirmed\"",
+              "new": "!.staged=IF m=\"cancel\" THEN st.staged ELSE <<>>, !.out=IF m=\"confirmed\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CommitFrame"
+        },
+        {
+          "id": "DeletePeerHistoryWhenCommitting",
+          "edits": [
+            {
+              "old": "IF Published(m) THEN Append(@,r) ELSE @",
+              "new": "IF Published(m) THEN Append(SelectSeq(@, LAMBDA v : Team(v.scope)=Team(r.scope)),r) ELSE @",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CommitFrame"
+        },
+        {
+          "id": "RaiseAppliedQuotaOnRequest",
+          "edits": [
+            {
+              "old": "!.phase=\"ready\", !.db = IF Published(m)",
+              "new": "!.applied=IF Published(m) THEN 3 ELSE @, !.phase=\"ready\", !.db = IF Published(m)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "TypeOK"
+        },
+        {
+          "id": "RequestConsumesProfileSlot",
+          "edits": [
+            {
+              "old": "!.phase=\"ready\", !.db = IF Published(m)",
+              "new": "!.used=IF Published(m) THEN 0 ELSE @, !.phase=\"ready\", !.db = IF Published(m)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CommitFrame"
+        },
+        {
+          "id": "TurnFalseIntoPending",
+          "edits": [
+            {
+              "old": "IF option = \"false\" THEN \"NOT_APPROVED\" ELSE \"PENDING\"",
+              "new": "\"PENDING\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "StoredFields"
+        },
+        {
+          "id": "ApproveOmitted",
+          "edits": [
+            {
+              "old": "IF option = \"false\" THEN \"NOT_APPROVED\" ELSE \"PENDING\"",
+              "new": "IF option = \"false\" THEN \"NOT_APPROVED\" ELSE IF option=\"omitted\" THEN \"APPROVED\" ELSE \"PENDING\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "StoredFields"
+        },
+        {
+          "id": "CreateSyntheticSupportCase",
+          "edits": [
+            {
+              "old": "status |-> Status(option), hasCase |-> FALSE",
+              "new": "status |-> Status(option), hasCase |-> who=\"applicant\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "StoredFields"
+        },
+        {
+          "id": "StoreWrongApplicant",
+          "edits": [
+            {
+              "old": "requester |-> who, day |-> day",
+              "new": "requester |-> IF who=\"secondCaller\" THEN \"applicant\" ELSE who, day |-> day",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "StoredFields"
+        },
+        {
+          "id": "StoreAppliedInsteadOfDesired",
+          "edits": [
+            {
+              "old": "desired |-> want, status",
+              "new": "desired |-> IF who=\"applicant\" THEN 2 ELSE want, status",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "StoredFields"
+        },
+        {
+          "id": "ReturnAnotherTeamId",
+          "edits": [
+            {
+              "old": "id |-> <<Team(s),n>>",
+              "new": "id |-> <<IF who=\"applicant\" /\\ Team(s)=\"A\" THEN \"B\" ELSE Team(s), n>>",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "StoredFields"
+        },
+        {
+          "id": "ReturnOnlyAvailableSlots",
+          "edits": [
+            {
+              "old": "IF k=\"get\" THEN <<st.applied>> ELSE <<>>",
+              "new": "IF k=\"get\" THEN <<st.applied-st.used>> ELSE <<>>",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "Capacity"
+        },
+        {
+          "id": "BlockLastProfileSlot",
+          "edits": [
+            {
+              "old": "k=\"create\" /\\ st.used<st.applied",
+              "new": "k=\"create\" /\\ st.used+1<st.applied",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "Capacity"
+        },
+        {
+          "id": "CannotReuseReleasedProfile",
+          "edits": [
+            {
+              "old": "drop == k=\"delete\" /\\ st.used>0",
+              "new": "drop == FALSE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "Capacity"
+        },
+        {
+          "id": "OtherScopeGet",
+          "edits": [
+            {
+              "old": "row.scope=s /\\ row.id=id",
+              "new": "row.id=id",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "Lookup"
+        },
+        {
+          "id": "AgeOutDirectRequest",
+          "edits": [
+            {
+              "old": "row.scope=s /\\ row.id=id",
+              "new": "row.scope=s /\\ row.id=id /\\ row.day+90>=st.day",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "Lookup"
+        },
+        {
+          "id": "DiscloseDeniedLookup",
+          "edits": [
+            {
+              "old": "IF ~auth THEN Result(\"denied\",<<>>,{})\n                  ELSE IF r",
+              "new": "IF FALSE THEN Result(\"denied\",<<>>,{})\n                  ELSE IF r",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "Lookup"
+        },
+        {
+          "id": "ListOlderThanNinetyDays",
+          "edits": [
+            {
+              "old": "(q.op=\"byQuota\" \\/ (r.day<=day /\\ r.day+90>=day))",
+              "new": "(q.op=\"byQuota\" \\/ r.day<=day)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PageScope"
+        },
+        {
+          "id": "DropAtCurrentInstant",
+          "edits": [
+            {
+              "old": "(q.op=\"byQuota\" \\/ (r.day<=day /\\ r.day+90>=day))",
+              "new": "(q.op=\"byQuota\" \\/ (r.day<day /\\ r.day+90>=day))",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PageScope"
+        },
+        {
+          "id": "ReturnOldestFirst",
+          "edits": [
+            {
+              "old": "hay == SelectSeq(Reverse(st0.db), LAMBDA x : Eligible(x,q,st0.day,cut))",
+              "new": "hay == SelectSeq(st0.db, LAMBDA x : Eligible(x,q,st0.day,cut))",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PageScope"
+        },
+        {
+          "id": "DropExactNinetiethDay",
+          "edits": [
+            {
+              "old": "(q.op=\"byQuota\" \\/ (r.day<=day /\\ r.day+90>=day))",
+              "new": "(q.op=\"byQuota\" \\/ (r.day<=day /\\ r.day+90>day))",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PageScope"
+        },
+        {
+          "id": "AgeOutByQuota",
+          "edits": [
+            {
+              "old": "(q.op=\"byQuota\" \\/ (r.day<=day /\\ r.day+90>=day))",
+              "new": "((q.op=\"byQuota\" \\/ r.day<=day) /\\ r.day+90>=day)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PageScope"
+        },
+        {
+          "id": "LeakFutureGeneralAfterClockRollback",
+          "edits": [
+            {
+              "old": "(q.op=\"byQuota\" \\/ (r.day<=day /\\ r.day+90>=day))",
+              "new": "(q.op=\"byQuota\" \\/ r.day+90>=day)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PageScope"
+        },
+        {
+          "id": "DropFutureByQuotaAfterClockRollback",
+          "edits": [
+            {
+              "old": "(q.op=\"byQuota\" \\/ (r.day<=day /\\ r.day+90>=day))",
+              "new": "(r.day<=day /\\ (q.op=\"byQuota\" \\/ r.day+90>=day))",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PageScope"
+        },
+        {
+          "id": "HideFutureExactLookupAfterClockRollback",
+          "edits": [
+            {
+              "old": "row.scope=s /\\ row.id=id",
+              "new": "row.scope=s /\\ row.id=id /\\ row.day<=st.day",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "Lookup"
+        },
+        {
+          "id": "ListPeerRegion",
+          "edits": [
+            {
+              "old": "Eligible(r,q,day,before) ==\n /\\ r.scope=q.scope /\\ r.seq<before",
+              "new": "Eligible(r,q,day,before) ==\n /\\ Team(r.scope)=Team(q.scope) /\\ r.seq<before",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PageScope"
+        },
+        {
+          "id": "ListOtherDatabase",
+          "edits": [
+            {
+              "old": "Eligible(r,q,day,before) ==\n /\\ r.scope=q.scope /\\ r.seq<before",
+              "new": "Eligible(r,q,day,before) ==\n /\\ (r.scope=q.scope \\/ (q.scope=\"AE\" /\\ r.scope=\"BE\")) /\\ r.seq<before",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PageScope"
+        },
+        {
+          "id": "IgnoreTerminalFilter",
+          "edits": [
+            {
+              "old": "(q.filter # \"terminal\" \\/ r.status=\"NOT_APPROVED\")",
+              "new": "TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PageScope"
+        },
+        {
+          "id": "IgnorePendingFilter",
+          "edits": [
+            {
+              "old": "(q.filter # \"pending\" \\/ r.status=\"PENDING\")",
+              "new": "TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PageScope"
+        },
+        {
+          "id": "ReportUnobservedApproval",
+          "edits": [
+            {
+              "old": "q.filter \\notin {\"resource\",\"approved\",\"otherService\"}",
+              "new": "q.filter \\notin {\"resource\",\"otherService\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PageScope"
+        },
+        {
+          "id": "ReportResourceScopedQuota",
+          "edits": [
+            {
+              "old": "q.filter \\notin {\"resource\",\"approved\",\"otherService\"}",
+              "new": "q.filter \\notin {\"approved\",\"otherService\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PageScope"
+        },
+        {
+          "id": "ReportOtherServiceQuota",
+          "edits": [
+            {
+              "old": "q.filter \\notin {\"resource\",\"approved\",\"otherService\"}",
+              "new": "q.filter \\notin {\"resource\",\"approved\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PageScope"
+        },
+        {
+          "id": "IgnoreListAuthority",
+          "edits": [
+            {
+              "old": "CASE ~auth -> Result(\"denied\",<<>>,{})",
+              "new": "CASE (~auth /\\ supplied) -> Result(\"denied\",<<>>,{})",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PageScope"
+        },
+        {
+          "id": "ContinueWithoutFreshAuthority",
+          "edits": [
+            {
+              "old": "CASE ~auth -> Result(\"denied\",<<>>,{})",
+              "new": "CASE (~auth /\\ ~supplied) -> Result(\"denied\",<<>>,{})",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PageScope"
+        },
+        {
+          "id": "AcceptOtherScopeCursor",
+          "edits": [
+            {
+              "old": "supplied /\\ token # Cap(st0,q,cut)",
+              "new": "supplied /\\ [token EXCEPT !.scope = q.scope] # Cap(st0,q,cut)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PageScope"
+        },
+        {
+          "id": "AcceptOtherActorCursor",
+          "edits": [
+            {
+              "old": "supplied /\\ token # Cap(st0,q,cut)",
+              "new": "supplied /\\ [token EXCEPT !.actor = q.actor] # Cap(st0,q,cut)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PageScope"
+        },
+        {
+          "id": "AcceptOtherOperationCursor",
+          "edits": [
+            {
+              "old": "supplied /\\ token # Cap(st0,q,cut)",
+              "new": "supplied /\\ [token EXCEPT !.op = q.op] # Cap(st0,q,cut)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PageScope"
+        },
+        {
+          "id": "AcceptChangedFilterCursor",
+          "edits": [
+            {
+              "old": "supplied /\\ token # Cap(st0,q,cut)",
+              "new": "supplied /\\ [token EXCEPT !.filter = q.filter] # Cap(st0,q,cut)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PageScope"
+        },
+        {
+          "id": "AcceptPriorProcessCursor",
+          "edits": [
+            {
+              "old": "supplied /\\ token # Cap(st0,q,cut)",
+              "new": "supplied /\\ [token EXCEPT !.epoch = st0.epoch] # Cap(st0,q,cut)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PageScope"
+        },
+        {
+          "id": "AcceptBadToken",
+          "edits": [
+            {
+              "old": "IF token.before=0 /\\ auth THEN Result(\"token\",<<>>,{})",
+              "new": "IF token.before=0 /\\ auth THEN Result(\"ok\",<<>>,{})",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PageScope"
+        },
+        {
+          "id": "RepeatBoundaryRow",
+          "edits": [
+            {
+              "old": "Eligible(r,q,day,before) ==\n /\\ r.scope=q.scope /\\ r.seq<before",
+              "new": "Eligible(r,q,day,before) ==\n /\\ r.scope=q.scope /\\ r.seq<=before",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PageScope"
+        },
+        {
+          "id": "UseTimestampInCursor",
+          "edits": [
+            {
+              "old": "{Cap(st0,q,page[n].seq)}",
+              "new": "{Cap(st0,q,page[n].day)}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PageScope"
+        },
+        {
+          "id": "EmitLastPageCursor",
+          "edits": [
+            {
+              "old": "IF n<Len(hay) THEN {Cap(st0,q,page[n].seq)} ELSE {}",
+              "new": "IF n>0 THEN {Cap(st0,q,page[n].seq)} ELSE {}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PageScope"
+        },
+        {
+          "id": "LoseRealContinuation",
+          "edits": [
+            {
+              "old": "IF n<Len(hay) THEN {Cap(st0,q,page[n].seq)} ELSE {}",
+              "new": "{}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PageScope"
+        },
+        {
+          "id": "DiscardHistoryOnReopen",
+          "edits": [
+            {
+              "old": "[st EXCEPT !.epoch=1] /\\ last'=Note(\"reopen\"",
+              "new": "[st EXCEPT !.db= <<>>, !.epoch=1] /\\ last'=Note(\"reopen\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "Visibility"
+        },
+        {
+          "id": "RetainCursorAuthorityOnRestart",
+          "edits": [
+            {
+              "old": "[st EXCEPT !.epoch=1] /\\ last'=Note(\"reopen\"",
+              "new": "st /\\ last'=Note(\"reopen\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "RestartFrame"
+        },
+        {
+          "id": "PruneByGeneralAgeOnRead",
+          "edits": [
+            {
+              "old": "!.reads=@+1, !.out=PageResult(st,q,size,FALSE,{},Allowed(op,grant))",
+              "new": "!.db=IF op=\"general\" THEN SelectSeq(@,LAMBDA x : x.day+90>=st.day) ELSE @, !.reads=@+1, !.out=PageResult(st,q,size,FALSE,{},Allowed(op,grant))",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "Visibility"
+        },
+        {
+          "id": "RequireWildcardForRequest",
+          "edits": [
+            {
+              "old": "op \\in {\"request\",\"byQuota\"}",
+              "new": "op=\"byQuota\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "Admissions"
+        },
+        {
+          "id": "RequireWildcardForByquota",
+          "edits": [
+            {
+              "old": "op \\in {\"request\",\"byQuota\"}",
+              "new": "op=\"request\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PageScope"
+        },
+        {
+          "id": "UseNamedQuotaForGeneral",
+          "edits": [
+            {
+              "old": "op \\in {\"request\",\"byQuota\"}",
+              "new": "op \\in {\"request\",\"byQuota\",\"general\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PageScope"
+        },
+        {
+          "id": "UseNamedQuotaForGet",
+          "edits": [
+            {
+              "old": "op \\in {\"request\",\"byQuota\"}",
+              "new": "op \\in {\"request\",\"byQuota\",\"get\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "Lookup"
+        },
+        {
+          "id": "AdmitOtherQuotaARN",
+          "edits": [
+            {
+              "old": "verdict == Admit(st,s,RequestGuard(g))",
+              "new": "verdict == Admit(st,s,IF g=\"otherQuota\" THEN \"ok\" ELSE RequestGuard(g))",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "Admissions"
+        },
+        {
+          "id": "OverrideExplicitRequestDeny",
+          "edits": [
+            {
+              "old": "verdict == Admit(st,s,RequestGuard(g))",
+              "new": "verdict == Admit(st,s,IF g=\"explicitDeny\" THEN \"ok\" ELSE RequestGuard(g))",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "Admissions"
+        },
+        {
+          "id": "AcceptNamedGrantOnGenericContinuation",
+          "edits": [
+            {
+              "old": "auth == Allowed(q.op,grant)",
+              "new": "auth == Allowed(q.op,grant) \\/ (grant=\"sameQuota\" /\\ q.op=\"general\")",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PageScope"
+        }
+      ]
+    },
+    {
+      "id": "ServiceQuotaRequestConsole",
+      "model": "formal/ServiceQuotaRequestConsole.tla",
+      "config": "formal/ServiceQuotaRequestConsole.cfg",
+      "bounds": "One editable account quota with two eligible user submissions, up to four reads per mount, a preexisting equal-value terminal request and a private peer. A second trial allows one team/account/region/principal change, an equivalent remount, or a hidden section/capability followed by one fresh visible mount, with a retired native response. Initial quota availability and returning to an available editor abstract a successful applied-capacity read. A genuine server write may commit despite response loss.",
+      "properties": [
+        "SingleIntent",
+        "NoAutomaticWrite",
+        "NativeFrame",
+        "SavedExactlyOnce",
+        "Acknowledgement",
+        "FreshRecovery",
+        "ObservedOnly",
+        "SeparateIntent",
+        "RetiredRead",
+        "ScopeCleared",
+        "BlockedRetry",
+        "FreshCapacity",
+        "VisibleLookup",
+        "VisibleMount"
+      ],
+      "limits": "Finite mounted UI control and response semantics, complementing CatalogConsoleEpoch and the native request lifecycle. A valid recovery observes the first unfiltered ACCOUNT ByQuota page in the same current view. It neither supplies the lost submission ID nor retries it; only a separate user choice permits a fresh submission. A physical request/record and two result classes abstract native state. Historical pages and by-ID detail can show preexisting records without attributing their IDs to the latest write. The model does not define global idempotency across tabs, concurrent writes across new mounts, AWS policy evaluation, SQL rollback, actual DOM focus or response bytes. Current permission/prefix, account values, equality, and retained states are separately checked in native and browser fixtures.",
+      "source_scope": [
+        "tools/console/src/catalog.jsx",
+        "tools/console/src/main.jsx",
+        "tools/console/src/service-quotas.jsx",
+        "tools/console/src/service-quotas.mjs",
+        "internal/server/web/app.js"
+      ],
+      "mutants": [
+        {
+          "id": "SubmitUnknownAgain",
+          "edits": [
+            {
+              "old": "st.phase \\in {\"idle\",\"confirmed\",\"refused\"}",
+              "new": "st.phase \\in {\"idle\",\"confirmed\",\"refused\",\"unknown\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "SingleIntent"
+        },
+        {
+          "id": "SendWithoutAppliedCapacity",
+          "edits": [
+            {
+              "old": "/\\ st.quota /\\ st.sent<2",
+              "new": "/\\ st.sent<2",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "SingleIntent"
+        },
+        {
+          "id": "SubmitWithWrongPrincipal",
+          "edits": [
+            {
+              "old": "scope |-> st.scope,mount |-> st.mount,o |-> o",
+              "new": "scope |-> Move(st.scope,\"principal\"),mount |-> st.mount,o |-> o",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "SingleIntent"
+        },
+        {
+          "id": "SendFromWrongMountedGeneration",
+          "edits": [
+            {
+              "old": "scope |-> st.scope,mount |-> st.mount,o |-> o",
+              "new": "scope |-> st.scope,mount |-> st.mount+1,o |-> o",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "SingleIntent"
+        },
+        {
+          "id": "CommitToAnotherRegion",
+          "edits": [
+            {
+              "old": "Append(@,Row(w.scope,id,w.o))",
+              "new": "Append(@,Row(Move(w.scope,\"region\"),id,w.o))",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "SavedExactlyOnce"
+        },
+        {
+          "id": "CollapseTwoTerminalIDs",
+          "edits": [
+            {
+              "old": "id == IF saved THEN Len(st.db)+1 ELSE 0",
+              "new": "id == IF saved THEN IF st.sent=2 /\\ w.o=\"false\" /\\ Len(Owned(st.db,w.scope))>1 THEN Owned(st.db,w.scope)[Len(Owned(st.db,w.scope))].id ELSE Len(st.db)+1 ELSE 0",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "SavedExactlyOnce"
+        },
+        {
+          "id": "RepeatPendingAfterSeparateIntent",
+          "edits": [
+            {
+              "old": "saved == result=\"save\" /\\ ~Pending(st.db,w.scope)",
+              "new": "saved == result=\"save\" /\\ (~Pending(st.db,w.scope) \\/ st.separateUsed)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "SavedExactlyOnce"
+        },
+        {
+          "id": "LoseEarlierSameAmountHolder",
+          "edits": [
+            {
+              "old": "Append(@,Row(w.scope,id,w.o))",
+              "new": "Append(SelectSeq(@,LAMBDA z : z.owner#Key(w.scope)),Row(w.scope,id,w.o))",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "SavedExactlyOnce"
+        },
+        {
+          "id": "AcknowledgeAnUnstoredRow",
+          "edits": [
+            {
+              "old": "success => w.server=\"saved\"",
+              "new": "success => TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "Acknowledgement"
+        },
+        {
+          "id": "TreatSavedTransportLossAsConfirmed",
+          "edits": [
+            {
+              "old": "success == k=\"match\"",
+              "new": "success == k=\"match\" \\/ (k=\"lost\" /\\ w.server=\"saved\")",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "Acknowledgement"
+        },
+        {
+          "id": "TreatUnknownLossAsRefusal",
+          "edits": [
+            {
+              "old": "known == k \\in {\"knownRefusal\",\"forbidden\"}",
+              "new": "known == k \\in {\"knownRefusal\",\"forbidden\"} \\/ (k=\"lost\" /\\ w.server=\"refused\")",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "Acknowledgement"
+        },
+        {
+          "id": "TreatDefinitiveRefusalAsUnknown",
+          "edits": [
+            {
+              "old": "known == k \\in {\"knownRefusal\",\"forbidden\"}",
+              "new": "known == FALSE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "Acknowledgement"
+        },
+        {
+          "id": "ConfirmBadBody",
+          "edits": [
+            {
+              "old": "success == k=\"match\"",
+              "new": "success == k=\"match\" \\/ k=\"badBody\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "Acknowledgement"
+        },
+        {
+          "id": "ConfirmWrongAmount",
+          "edits": [
+            {
+              "old": "success == k=\"match\"",
+              "new": "success == k=\"match\" \\/ k=\"wrongAmount\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "Acknowledgement"
+        },
+        {
+          "id": "ConfirmWrongStatus",
+          "edits": [
+            {
+              "old": "success == k=\"match\"",
+              "new": "success == k=\"match\" \\/ k=\"wrongStatus\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "Acknowledgement"
+        },
+        {
+          "id": "ConfirmWrongArn",
+          "edits": [
+            {
+              "old": "success == k=\"match\"",
+              "new": "success == k=\"match\" \\/ k=\"wrongArn\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "Acknowledgement"
+        },
+        {
+          "id": "BindOldIdenticalRowToLostSubmit",
+          "edits": [
+            {
+              "old": "!.record=IF success THEN w.id ELSE 0",
+              "new": "!.record=IF k=\"lost\" /\\ Len(Owned(st.db,w.scope))>0 THEN Owned(st.db,w.scope)[1].id ELSE IF success THEN w.id ELSE 0",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "Acknowledgement"
+        },
+        {
+          "id": "PublishRetiredAckAcrossScope",
+          "edits": [
+            {
+              "old": "IF ~same THEN [st EXCEPT !.pending= <<>>]",
+              "new": "IF ~same /\\ k#\"match\" THEN [st EXCEPT !.pending= <<>>]",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "Acknowledgement"
+        },
+        {
+          "id": "PublishOldUnknownAcrossRemount",
+          "edits": [
+            {
+              "old": "IF ~same THEN [st EXCEPT !.pending= <<>>]",
+              "new": "IF ~same /\\ (k#\"lost\" \\/ w.scope#st.scope) THEN [st EXCEPT !.pending= <<>>]",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "Acknowledgement"
+        },
+        {
+          "id": "KeepArmedWhileNewRecoveryBegins",
+          "edits": [
+            {
+              "old": "k \\in {\"recover\",\"capacity\"} THEN FALSE",
+              "new": "k=\"capacity\" THEN FALSE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "FreshRecovery"
+        },
+        {
+          "id": "KeepArmedAcrossCapacityClear",
+          "edits": [
+            {
+              "old": "k \\in {\"recover\",\"capacity\"} THEN FALSE",
+              "new": "k=\"recover\" THEN FALSE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "FreshRecovery"
+        },
+        {
+          "id": "ArmFromOrdinaryByQuota",
+          "edits": [
+            {
+              "old": "recovered == t.kind=\"recover\" /\\ valid",
+              "new": "recovered == t.kind \\in {\"recover\",\"ordinaryByQuota\"} /\\ valid",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ObservedOnly"
+        },
+        {
+          "id": "ArmFromGeneral",
+          "edits": [
+            {
+              "old": "recovered == t.kind=\"recover\" /\\ valid",
+              "new": "recovered == t.kind \\in {\"recover\",\"general\"} /\\ valid",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ObservedOnly"
+        },
+        {
+          "id": "ArmFromFiltered",
+          "edits": [
+            {
+              "old": "recovered == t.kind=\"recover\" /\\ valid",
+              "new": "recovered == t.kind \\in {\"recover\",\"filtered\"} /\\ valid",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ObservedOnly"
+        },
+        {
+          "id": "ArmFromResource",
+          "edits": [
+            {
+              "old": "recovered == t.kind=\"recover\" /\\ valid",
+              "new": "recovered == t.kind \\in {\"recover\",\"resource\"} /\\ valid",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ObservedOnly"
+        },
+        {
+          "id": "ArmFromNext",
+          "edits": [
+            {
+              "old": "recovered == t.kind=\"recover\" /\\ valid",
+              "new": "recovered == t.kind \\in {\"recover\",\"next\"} /\\ valid",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ObservedOnly"
+        },
+        {
+          "id": "ArmFromAuto",
+          "edits": [
+            {
+              "old": "recovered == t.kind=\"recover\" /\\ valid",
+              "new": "recovered == t.kind \\in {\"recover\",\"auto\"} /\\ valid",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ObservedOnly"
+        },
+        {
+          "id": "ArmFromInspect",
+          "edits": [
+            {
+              "old": "recovered == t.kind=\"recover\" /\\ valid",
+              "new": "recovered == t.kind \\in {\"recover\",\"inspect\"} /\\ valid",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ObservedOnly"
+        },
+        {
+          "id": "ArmFromCapacity",
+          "edits": [
+            {
+              "old": "recovered == t.kind=\"recover\" /\\ valid",
+              "new": "recovered == t.kind \\in {\"recover\",\"capacity\"} /\\ valid",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ObservedOnly"
+        },
+        {
+          "id": "ArmAfterDenied",
+          "edits": [
+            {
+              "old": "[DropData(st) EXCEPT !.active= <<>>]",
+              "new": "[DropData(st) EXCEPT !.active= <<>>, !.armed=IF outcome=\"denied\" /\\ t.kind=\"recover\" THEN TRUE ELSE @]",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ObservedOnly"
+        },
+        {
+          "id": "ArmAfterFailed",
+          "edits": [
+            {
+              "old": "[DropData(st) EXCEPT !.active= <<>>]",
+              "new": "[DropData(st) EXCEPT !.active= <<>>, !.armed=IF outcome=\"failed\" /\\ t.kind=\"recover\" THEN TRUE ELSE @]",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ObservedOnly"
+        },
+        {
+          "id": "ArmAfterWrongOwner",
+          "edits": [
+            {
+              "old": "[DropData(st) EXCEPT !.active= <<>>]",
+              "new": "[DropData(st) EXCEPT !.active= <<>>, !.armed=IF outcome=\"wrongOwner\" /\\ t.kind=\"recover\" THEN TRUE ELSE @]",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ObservedOnly"
+        },
+        {
+          "id": "ArmAfterMalformed",
+          "edits": [
+            {
+              "old": "[DropData(st) EXCEPT !.active= <<>>]",
+              "new": "[DropData(st) EXCEPT !.active= <<>>, !.armed=IF outcome=\"malformed\" /\\ t.kind=\"recover\" THEN TRUE ELSE @]",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ObservedOnly"
+        },
+        {
+          "id": "RetainArmAfterPermissionLoss",
+          "edits": [
+            {
+              "old": "[DropData(st) EXCEPT !.active= <<>>]",
+              "new": "[DropData(st) EXCEPT !.active= <<>>, !.armed=IF outcome=\"denied\" THEN st.armed ELSE @]",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ObservedOnly"
+        },
+        {
+          "id": "InferFromCurrentMatchingAmount",
+          "edits": [
+            {
+              "old": "!.active= <<>>, !.data=observed",
+              "new": "!.active= <<>>, !.record=IF recovered /\\ Len(observed)>0 THEN observed[1].id ELSE @, !.data=observed",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ObservedOnly"
+        },
+        {
+          "id": "GroupReadShowsPeerRow",
+          "edits": [
+            {
+              "old": "Selected(db,t) == Owned(db,t.scope)",
+              "new": "Selected(db,t) == db",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ObservedOnly"
+        },
+        {
+          "id": "PermitEvenWhenExplicitReadFailed",
+          "edits": [
+            {
+              "old": "st.phase=\"unknown\" /\\ st.armed /\\ st.active= <<>>",
+              "new": "st.phase=\"unknown\" /\\ (st.armed \\/ (last.kind=\"receive\" /\\ last.arg=\"failed\")) /\\ st.active= <<>>",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "SeparateIntent"
+        },
+        {
+          "id": "SeparateClickSendsAgain",
+          "edits": [
+            {
+              "old": "[st EXCEPT !.phase=\"idle\", !.armed=FALSE, !.separateUsed=TRUE]",
+              "new": "[st EXCEPT !.phase=\"idle\", !.armed=FALSE, !.separateUsed=TRUE, !.sent=@+1]",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "NoAutomaticWrite"
+        },
+        {
+          "id": "RecoverySilentlyResends",
+          "edits": [
+            {
+              "old": "!.active= <<>>, !.data=observed",
+              "new": "!.active= <<>>, !.sent=IF recovered THEN @+1 ELSE @, !.data=observed",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "NoAutomaticWrite"
+        },
+        {
+          "id": "BackfillCaseDuringRecovery",
+          "edits": [
+            {
+              "old": "!.active= <<>>, !.data=observed",
+              "new": "!.active= <<>>, !.db=IF recovered THEN Append(@,Row(t.scope,Len(@)+1,\"false\")) ELSE @, !.data=observed",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "NativeFrame"
+        },
+        {
+          "id": "TreatSavedHistoryAsConfirmedOutcome",
+          "edits": [
+            {
+              "old": "!.active= <<>>, !.data=observed",
+              "new": "!.active= <<>>, !.phase=IF recovered THEN \"confirmed\" ELSE @, !.data=observed",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ObservedOnly"
+        },
+        {
+          "id": "BlindRetryAfterLostAck",
+          "edits": [
+            {
+              "old": "st'=st /\\ last'=Note(\"try\",\"\")",
+              "new": "st'=(IF st.phase=\"unknown\" THEN [st EXCEPT !.sent=@+1] ELSE st) /\\ last'=Note(\"try\",\"\")",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "NoAutomaticWrite"
+        },
+        {
+          "id": "ReleaseOnBlockedClick",
+          "edits": [
+            {
+              "old": "st'=st /\\ last'=Note(\"try\",\"\")",
+              "new": "st'=(IF st.phase=\"unknown\" THEN [st EXCEPT !.phase=\"idle\"] ELSE st) /\\ last'=Note(\"try\",\"\")",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "BlockedRetry"
+        },
+        {
+          "id": "CarryUnknownAcrossNewMount",
+          "edits": [
+            {
+              "old": "!.phase=IF a=\"hidden\" THEN \"off\" ELSE \"idle\"",
+              "new": "!.phase=IF a=\"hidden\" THEN \"off\" ELSE IF st.phase=\"unknown\" THEN \"unknown\" ELSE \"idle\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ScopeCleared"
+        },
+        {
+          "id": "SameTileRetiredSuccessArmsNewMount",
+          "edits": [
+            {
+              "old": "current == t.scope=st.scope /\\ t.mount=st.mount",
+              "new": "current == t.scope=st.scope /\\ (t.mount=st.mount \\/ (k=\"ok\" /\\ st.phase=\"unknown\" /\\ st.reads>0 /\\ ~st.armed))",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "RetiredRead"
+        },
+        {
+          "id": "StaleDenialErasesNewlyArmedView",
+          "edits": [
+            {
+              "old": "current == t.scope=st.scope /\\ t.mount=st.mount",
+              "new": "current == (t.scope=st.scope /\\ t.mount=st.mount) \\/ (k=\"denied\" /\\ st.armed)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "RetiredRead"
+        },
+        {
+          "id": "RetainAppliedCapacityAfter403",
+          "edits": [
+            {
+              "old": "!.quota=IF k=\"forbidden\" THEN FALSE ELSE @",
+              "new": "!.quota=@",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "Acknowledgement"
+        },
+        {
+          "id": "ReopenEditorWithoutFreshCapacity",
+          "edits": [
+            {
+              "old": "[st EXCEPT !.quota=TRUE] /\\ last'=Note(\"restore\",\"\")",
+              "new": "[st EXCEPT !.quota=TRUE, !.armed=TRUE] /\\ last'=Note(\"restore\",\"\")",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "FreshCapacity"
+        },
+        {
+          "id": "DisplayFirstPageAsRealContinuation",
+          "edits": [
+            {
+              "old": "i == IF t.kind=\"next\" THEN Len(rows)-1 ELSE Len(rows)",
+              "new": "i == Len(rows)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ObservedOnly"
+        },
+        {
+          "id": "KeepPriorLookupAfterNativeDenial",
+          "edits": [
+            {
+              "old": "[DropData(st) EXCEPT !.active= <<>>]",
+              "new": "[DropData(st) EXCEPT !.active= <<>>, !.lookup=IF outcome=\"denied\" THEN st.lookup ELSE @]",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "VisibleLookup"
+        },
+        {
+          "id": "GuessLostLookupFromHistory",
+          "edits": [
+            {
+              "old": "!.active= <<>>, !.data=observed",
+              "new": "!.active= <<>>, !.lookup=IF recovered /\\ Len(observed)>0 THEN observed[1].id ELSE @, !.data=observed",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "VisibleLookup"
+        },
+        {
+          "id": "ShowQuotaInHiddenView",
+          "edits": [
+            {
+              "old": "!.quota=a#\"hidden\", !.lookup=0",
+              "new": "!.quota=TRUE, !.lookup=0",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "VisibleMount"
+        },
+        {
+          "id": "ReturningToViewInheritsOldPermit",
+          "edits": [
+            {
+              "old": "st'=[st EXCEPT !.visible=TRUE, !.mount=2, !.phase=\"idle\", !.quota=TRUE]",
+              "new": "st'=[st EXCEPT !.visible=TRUE, !.armed=TRUE, !.mount=2, !.phase=\"idle\", !.quota=TRUE]",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "VisibleMount"
+        }
+      ]
+    },
+    {
+      "id": "KMSRoleGrantLifecycle",
+      "model": "formal/KMSRoleGrantLifecycle.tla",
+      "config": "formal/KMSRoleGrantLifecycle.cfg",
+      "bounds": "Two existing same-account regional keys, one representative DescribeKey grant per key, one grantee role that can be deleted and recreated once and one issued session slot. Other role, management limits, scope, targeting, signature, expiry, and policies are finite independent request choices.",
+      "properties": [
+        "TypeOK",
+        "ManagementAuthorized",
+        "CreateRequiresEnabled",
+        "GrantToLiveRole",
+        "PermittedManagementWorks",
+        "GrantWriteFrame",
+        "VerifiedDescribe",
+        "ExplicitDenyWins",
+        "DirectOrBoundGrant",
+        "PermittedDescribeWorks",
+        "RestartFrame"
+      ],
+      "limits": "Checks authorization, effective key/grantee/generation binding, explicit deny, revocation, restart and peer frames at atomic operation boundaries. It abstracts the underlying IAM policy, signed-request verification, role generation validation, storage transactions and commits as coherent inputs. Grant identifiers, tokens, name retry semantics, limits, list pagination, concurrency, wire formats, cryptography and user interactions require native tests. Existing KMS and STS models retain their separate guarantees.",
+      "source_scope": [
+        "internal/aws/kms_dispatch.go",
+        "internal/aws/kms_grants.go",
+        "internal/aws/kms_http.go",
+        "internal/aws/kms_store.go",
+        "internal/aws/sts_credentials.go",
+        "internal/aws/sts_signature.go",
+        "internal/server/access_sdk.go"
+      ],
+      "mutants": [
+        {
+          "id": "SkipManagementIAM",
+          "edits": [
+            {
+              "old": "authorized == manager = \"allowed\"",
+              "new": "authorized == TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ManagementAuthorized"
+        },
+        {
+          "id": "CreateOnDisabledKey",
+          "edits": [
+            {
+              "old": "canCreate == rolePresent /\\ k \\in enabled /\\ grants[k] = 0",
+              "new": "canCreate == rolePresent /\\ grants[k] = 0",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CreateRequiresEnabled"
+        },
+        {
+          "id": "CreateForMissingRole",
+          "edits": [
+            {
+              "old": "canCreate == rolePresent /\\ k \\in enabled /\\ grants[k] = 0",
+              "new": "canCreate == k \\in enabled /\\ grants[k] = 0",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "GrantToLiveRole"
+        },
+        {
+          "id": "UseDeletedRole",
+          "edits": [
+            {
+              "old": "sessionOK == rolePresent /\\ session # 0 /\\ session = generation",
+              "new": "sessionOK == session # 0 /\\ session = generation",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "VerifiedDescribe"
+        },
+        {
+          "id": "RejectDisabledRevocation",
+          "edits": [
+            {
+              "old": "canRevoke == grants[k] # 0",
+              "new": "canRevoke == grants[k] # 0 /\\ k \\in enabled",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PermittedManagementWorks"
+        },
+        {
+          "id": "RejectDisabledList",
+          "edits": [
+            {
+              "old": "[] op = \"revoke\" -> canRevoke\n                                   [] OTHER -> TRUE",
+              "new": "[] op = \"revoke\" -> canRevoke\n                                   [] OTHER -> k \\in enabled",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PermittedManagementWorks"
+        },
+        {
+          "id": "CreateWithWrongGeneration",
+          "edits": [
+            {
+              "old": "op = \"create\" -> [grants EXCEPT ![k] = generation]",
+              "new": "op = \"create\" -> [grants EXCEPT ![k] = 1]",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "GrantWriteFrame"
+        },
+        {
+          "id": "RevokeLeavesGrant",
+          "edits": [
+            {
+              "old": "op = \"revoke\" -> [grants EXCEPT ![k] = 0]",
+              "new": "op = \"revoke\" -> grants",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "GrantWriteFrame"
+        },
+        {
+          "id": "RevokeClearsPeer",
+          "edits": [
+            {
+              "old": "op = \"revoke\" -> [grants EXCEPT ![k] = 0]",
+              "new": "op = \"revoke\" -> Empty",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "GrantWriteFrame"
+        },
+        {
+          "id": "RefusalMutatesGrants",
+          "edits": [
+            {
+              "old": "IF ~success THEN grants",
+              "new": "IF ~success THEN Empty",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "GrantWriteFrame"
+        },
+        {
+          "id": "AcceptUnsignedDescribe",
+          "edits": [
+            {
+              "old": "signedOK == request = \"canonical\"",
+              "new": "signedOK == request \\in {\"canonical\",\"unsigned\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "VerifiedDescribe"
+        },
+        {
+          "id": "AcceptWrongKMSOperation",
+          "edits": [
+            {
+              "old": "signedOK == request = \"canonical\"",
+              "new": "signedOK == request \\in {\"canonical\",\"other target\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "VerifiedDescribe"
+        },
+        {
+          "id": "AcceptPeerScope",
+          "edits": [
+            {
+              "old": "signedOK == request = \"canonical\"",
+              "new": "signedOK == request \\in {\"canonical\",\"foreign scope\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "VerifiedDescribe"
+        },
+        {
+          "id": "AcceptExpiredSession",
+          "edits": [
+            {
+              "old": "signedOK == request = \"canonical\"",
+              "new": "signedOK == request \\in {\"canonical\",\"expired\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "VerifiedDescribe"
+        },
+        {
+          "id": "AcceptStaleSession",
+          "edits": [
+            {
+              "old": "sessionOK == rolePresent /\\ session # 0 /\\ session = generation",
+              "new": "sessionOK == rolePresent /\\ session # 0",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "VerifiedDescribe"
+        },
+        {
+          "id": "OverrideExplicitDeny",
+          "edits": [
+            {
+              "old": "success == sessionOK /\\ signedOK /\\ ~denied /\\ (direct \\/ bound)",
+              "new": "success == sessionOK /\\ signedOK /\\ (direct \\/ bound)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExplicitDenyWins"
+        },
+        {
+          "id": "RebindSameRoleName",
+          "edits": [
+            {
+              "old": "bound == sameRole /\\ grants[k] = generation",
+              "new": "bound == sameRole /\\ grants[k] # 0",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "DirectOrBoundGrant"
+        },
+        {
+          "id": "AllowOtherGrantee",
+          "edits": [
+            {
+              "old": "bound == sameRole /\\ grants[k] = generation",
+              "new": "bound == grants[k] = generation",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "DirectOrBoundGrant"
+        },
+        {
+          "id": "GrantAuthorizesPeerKey",
+          "edits": [
+            {
+              "old": "bound == sameRole /\\ grants[k] = generation",
+              "new": "bound == sameRole /\\ (grants[k] = generation \\/ grants[3-k] = generation)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "DirectOrBoundGrant"
+        },
+        {
+          "id": "IgnoreGrantedPermission",
+          "edits": [
+            {
+              "old": "~denied /\\ (direct \\/ bound)",
+              "new": "~denied /\\ direct",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PermittedDescribeWorks"
+        },
+        {
+          "id": "RequireGrantForDirectPermission",
+          "edits": [
+            {
+              "old": "~denied /\\ (direct \\/ bound)",
+              "new": "~denied /\\ bound",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PermittedDescribeWorks"
+        },
+        {
+          "id": "RestartDeletesGrants",
+          "edits": [
+            {
+              "old": "LET persisted == grants",
+              "new": "LET persisted == Empty",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "RestartFrame"
+        },
+        {
+          "id": "RestartRetainsSession",
+          "edits": [
+            {
+              "old": "retainedSession == 0",
+              "new": "retainedSession == session",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "RestartFrame"
+        }
+      ]
+    },
+    {
+      "id": "KMSScheduledDeletion",
+      "model": "formal/KMSScheduledDeletion.tla",
+      "config": "formal/KMSScheduledDeletion.cfg",
+      "bounds": "One local single-region key initially enabled or disabled, one permanent sibling, one movable and one sibling alias, and one grant on each key. Representative calendar days exercise pre-deadline, equality, later reads and clock rollback at the minimum and default window. Explicit 6, 7, 30 and 31 days and omission cover both bounds, adjacent invalid inputs and the default.",
+      "properties": [
+        "TypeOK",
+        "ScheduleContract",
+        "CancelContract",
+        "ExpiryBoundary",
+        "AtomicExpiry",
+        "OperationMatrix",
+        "RestartPreservesDeadline",
+        "TimePreservesStorage"
+      ],
+      "limits": "Checks persisted deadline, schedule/cancel state, serial boundary winners, ordered access after expiry, affected-only atomic removal, restart, rollback and representative pending operations. A storage failure abstracts transaction rollback. No real-time liveness, background job, wire timestamps, cryptographic erasure, all data sizes, authenticated identities, SQLite interleavings or AWS timing are proved. Native clock, database, signing, restart and SDK fixtures supply those observations.",
+      "source_scope": [
+        "internal/aws/kms_aliases.go",
+        "internal/aws/kms_crypto.go",
+        "internal/aws/kms_deletion.go",
+        "internal/aws/kms_grants.go",
+        "internal/aws/kms_http.go",
+        "internal/aws/kms_store.go",
+        "internal/aws/kms_types.go"
+      ],
+      "mutants": [
+        {
+          "id": "DefaultToMinimum",
+          "edits": [
+            {
+              "old": "days == IF window = Omitted THEN 30",
+              "new": "days == IF window = Omitted THEN 7",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ScheduleContract"
+        },
+        {
+          "id": "AcceptSixDays",
+          "edits": [
+            {
+              "old": "inputOK == days \\in 7..30",
+              "new": "inputOK == days \\in 6..30",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ScheduleContract"
+        },
+        {
+          "id": "AcceptThirtyOneDays",
+          "edits": [
+            {
+              "old": "inputOK == days \\in 7..30",
+              "new": "inputOK == days \\in 7..31",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ScheduleContract"
+        },
+        {
+          "id": "ScheduleWithoutPermission",
+          "edits": [
+            {
+              "old": "allowed == permitted /\\ inputOK",
+              "new": "allowed == inputOK",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ScheduleContract"
+        },
+        {
+          "id": "ReschedulePending",
+          "edits": [
+            {
+              "old": "inputOK /\\ db.state \\in {\"Enabled\",\"Disabled\"}",
+              "new": "inputOK /\\ db.state # \"Gone\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ScheduleContract"
+        },
+        {
+          "id": "RefuseDisabledSchedule",
+          "edits": [
+            {
+              "old": "inputOK /\\ db.state \\in {\"Enabled\",\"Disabled\"}",
+              "new": "inputOK /\\ db.state = \"Enabled\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ScheduleContract"
+        },
+        {
+          "id": "UseRelativeDeadline",
+          "edits": [
+            {
+              "old": "!.deadline = day + days",
+              "new": "!.deadline = days",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ScheduleContract"
+        },
+        {
+          "id": "ScheduleAfterFailedWrite",
+          "edits": [
+            {
+              "old": "IF success THEN written ELSE db",
+              "new": "IF allowed THEN written ELSE db",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ScheduleContract"
+        },
+        {
+          "id": "CancelWithoutPermission",
+          "edits": [
+            {
+              "old": "success == permitted /\\ Waiting /\\ ~fault",
+              "new": "success == Waiting /\\ ~fault",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CancelContract"
+        },
+        {
+          "id": "CancelWithoutPending",
+          "edits": [
+            {
+              "old": "success == permitted /\\ Waiting /\\ ~fault",
+              "new": "success == permitted /\\ db.state # \"Gone\" /\\ ~fault",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CancelContract"
+        },
+        {
+          "id": "AllowCancelAtExpiry",
+          "edits": [
+            {
+              "old": "IN /\\ ~Due\n    /\\ db' = IF success THEN changed ELSE db",
+              "new": "IN /\\ TRUE\n    /\\ db' = IF success THEN changed ELSE db",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CancelContract"
+        },
+        {
+          "id": "CancelEnablesCrypto",
+          "edits": [
+            {
+              "old": "changed == [db EXCEPT !.state = \"Disabled\", !.deadline = 0]",
+              "new": "changed == [db EXCEPT !.state = \"Enabled\", !.deadline = 0]",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CancelContract"
+        },
+        {
+          "id": "CancelRetainsDeadline",
+          "edits": [
+            {
+              "old": "changed == [db EXCEPT !.state = \"Disabled\", !.deadline = 0]",
+              "new": "changed == [db EXCEPT !.state = \"Disabled\"]",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CancelContract"
+        },
+        {
+          "id": "CancelDropsExistingGrant",
+          "edits": [
+            {
+              "old": "changed == [db EXCEPT !.state = \"Disabled\", !.deadline = 0]",
+              "new": "changed == [db EXCEPT !.state = \"Disabled\", !.deadline = 0, !.grant = FALSE]",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CancelContract"
+        },
+        {
+          "id": "CancelAfterFailedWrite",
+          "edits": [
+            {
+              "old": "IF success THEN changed ELSE db",
+              "new": "IF permitted /\\ Waiting THEN changed ELSE db",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CancelContract"
+        },
+        {
+          "id": "PurgeBeforeDeadline",
+          "edits": [
+            {
+              "old": "crossed == Waiting /\\ day >= db.deadline",
+              "new": "crossed == Waiting /\\ day + 1 >= db.deadline",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExpiryBoundary"
+        },
+        {
+          "id": "MissDeadlineEquality",
+          "edits": [
+            {
+              "old": "crossed == Waiting /\\ day >= db.deadline",
+              "new": "crossed == Waiting /\\ day > db.deadline",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExpiryBoundary"
+        },
+        {
+          "id": "PurgeCancelledKey",
+          "edits": [
+            {
+              "old": "crossed == Waiting /\\ day >= db.deadline",
+              "new": "crossed == (Waiting /\\ day >= db.deadline) \\/ (last.kind = \"cancel\" /\\ last.ok /\\ db.state = \"Disabled\")",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExpiryBoundary"
+        },
+        {
+          "id": "KeepExpiredKey",
+          "edits": [
+            {
+              "old": "purged == [db EXCEPT !.state = \"Gone\"",
+              "new": "purged == [db EXCEPT !.state = \"Disabled\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AtomicExpiry"
+        },
+        {
+          "id": "LeaveKeyMaterial",
+          "edits": [
+            {
+              "old": "!.deadline = 0, !.material = FALSE",
+              "new": "!.deadline = 0, !.material = TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AtomicExpiry"
+        },
+        {
+          "id": "LeaveGrant",
+          "edits": [
+            {
+              "old": "!.grant = FALSE, !.alias = IF @",
+              "new": "!.grant = TRUE, !.alias = IF @",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AtomicExpiry"
+        },
+        {
+          "id": "LeaveTargetAlias",
+          "edits": [
+            {
+              "old": "IF @ = \"target\" THEN \"none\" ELSE @",
+              "new": "@",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AtomicExpiry"
+        },
+        {
+          "id": "DeleteMovedAlias",
+          "edits": [
+            {
+              "old": "IF @ = \"target\" THEN \"none\" ELSE @",
+              "new": "\"none\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AtomicExpiry"
+        },
+        {
+          "id": "PurgePeerAlias",
+          "edits": [
+            {
+              "old": "!.grant = FALSE, !.alias = IF @",
+              "new": "!.grant = FALSE, !.peerAlias = FALSE, !.alias = IF @",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AtomicExpiry"
+        },
+        {
+          "id": "PurgePeerGrant",
+          "edits": [
+            {
+              "old": "!.grant = FALSE, !.alias = IF @",
+              "new": "!.grant = FALSE, !.peerGrant = FALSE, !.alias = IF @",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AtomicExpiry"
+        },
+        {
+          "id": "PurgePeerKeyMaterial",
+          "edits": [
+            {
+              "old": "!.deadline = 0, !.material = FALSE",
+              "new": "!.deadline = 0, !.material = FALSE, !.peerMaterial = FALSE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AtomicExpiry"
+        },
+        {
+          "id": "PartialFaultCommit",
+          "edits": [
+            {
+              "old": "IF commit THEN purged ELSE db",
+              "new": "IF commit THEN purged ELSE IF crossed THEN [db EXCEPT !.grant = FALSE] ELSE db",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AtomicExpiry"
+        },
+        {
+          "id": "ObserveExpiredMetadata",
+          "edits": [
+            {
+              "old": "IN /\\ ~Due\n    /\\ db' = IF allowed THEN change ELSE db",
+              "new": "IN /\\ (~Due \\/ op = \"read\")\n    /\\ db' = IF allowed THEN change ELSE db",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "OperationMatrix"
+        },
+        {
+          "id": "PendingCrypto",
+          "edits": [
+            {
+              "old": "op = \"crypto\" -> db.state = \"Enabled\"",
+              "new": "op = \"crypto\" -> db.state \\in {\"Enabled\",\"Pending\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "OperationMatrix"
+        },
+        {
+          "id": "EnablePending",
+          "edits": [
+            {
+              "old": "op \\in {\"enable\",\"disable\"} -> stable",
+              "new": "op \\in {\"enable\",\"disable\"} -> present",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "OperationMatrix"
+        },
+        {
+          "id": "CreateGrantWhilePending",
+          "edits": [
+            {
+              "old": "op = \"createGrant\" -> db.state = \"Enabled\" /\\ ~db.grant",
+              "new": "op = \"createGrant\" -> db.state \\in {\"Enabled\",\"Pending\"} /\\ ~db.grant",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "OperationMatrix"
+        },
+        {
+          "id": "DenyPendingSignedDescribe",
+          "edits": [
+            {
+              "old": "op = \"signedDescribe\" -> present /\\ db.grant",
+              "new": "op = \"signedDescribe\" -> stable /\\ db.grant",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "OperationMatrix"
+        },
+        {
+          "id": "DenyPendingRevocation",
+          "edits": [
+            {
+              "old": "op = \"revoke\" -> present /\\ db.grant",
+              "new": "op = \"revoke\" -> stable /\\ db.grant",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "OperationMatrix"
+        },
+        {
+          "id": "DenyMovingAway",
+          "edits": [
+            {
+              "old": "op = \"moveAway\" -> db.alias = \"target\"\n",
+              "new": "op = \"moveAway\" -> db.alias = \"target\" /\\ stable\n",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "OperationMatrix"
+        },
+        {
+          "id": "MoveOntoPending",
+          "edits": [
+            {
+              "old": "OTHER -> db.alias = \"peer\" /\\ stable",
+              "new": "OTHER -> db.alias = \"peer\" /\\ present",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "OperationMatrix"
+        },
+        {
+          "id": "CreateAliasWhilePending",
+          "edits": [
+            {
+              "old": "op = \"createAlias\" -> db.alias = \"none\" /\\ stable",
+              "new": "op = \"createAlias\" -> db.alias = \"none\" /\\ present",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "OperationMatrix"
+        },
+        {
+          "id": "RestartReplacesDeadline",
+          "edits": [
+            {
+              "old": "Restart ==\n /\\ db' = db",
+              "new": "Restart ==\n /\\ db' = IF Waiting THEN [db EXCEPT !.deadline = day + 7] ELSE db",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "RestartPreservesDeadline"
+        },
+        {
+          "id": "RollbackRevivesMissingKey",
+          "edits": [
+            {
+              "old": "/\\ day' = t\n /\\ UNCHANGED db",
+              "new": "/\\ day' = t\n /\\ db' = IF t < day /\\ db.state = \"Gone\" THEN Initial(\"Disabled\") ELSE db",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "TimePreservesStorage"
+        }
+      ]
+    },
+    {
+      "id": "ALBNativePlacement",
+      "model": "formal/ALBNativePlacement.tla",
+      "config": "formal/ALBNativePlacement.cfg",
+      "bounds": "Two new ALBs and one seeded legacy ALB, nine fixed resource IDs, one team/region making changes, one staged request, eight transitions. Two regional subnets and one security group can be shared by both new ALBs. Alternatives include a second native VPC, duplicate zone, absent group, stack owner and two out-of-scope IDs.",
+      "properties": [
+        "TypeOK",
+        "AdmittedPlacement",
+        "CanceledUnchanged",
+        "ReopenUnchanged",
+        "StageInvisible",
+        "LegacyUnbound",
+        "ProjectionExact",
+        "CompleteReferences",
+        "ReferencesExist"
+      ],
+      "limits": "Checks normalized placement admission, exact stored VPC/zone projection, complete per-ALB ownership, canceled staging, legacy replay, peer-owner retention during deletion, removal of unbound resources and reopen. The model serializes transaction boundaries and abstracts immutable resource metadata. It does not establish SQL or Go refinement, locking, HTTP or SDK behavior, process durability, concrete IAM, CloudFormation behavior, IP/ENI allocation, DNS or network reachability. Team/region are normalized ownership tags, not independent simulated processes.",
+      "source_scope": [
+        "internal/aws/elb_placement.go",
+        "internal/aws/elb_store.go",
+        "internal/aws/elb_query.go",
+        "internal/aws/ec2_subnet_native.go",
+        "internal/aws/ec2_security_groups_native_store.go",
+        "internal/server/server.go"
+      ],
+      "mutants": [
+        {
+          "id": "IgnoreAvailabilityZone",
+          "edits": [
+            {
+              "old": "Zone(1) # Zone(Subnet(k))",
+              "new": "TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AdmittedPlacement"
+        },
+        {
+          "id": "AcceptForeignSubnetVpc",
+          "edits": [
+            {
+              "old": "\\A i \\in Targets(k) : Vpc(i) = \"local\"",
+              "new": "(k = \"otherVpc\" \\/ (\\A i \\in Targets(k) : Vpc(i) = \"local\"))",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AdmittedPlacement"
+        },
+        {
+          "id": "AcceptForeignGroupVpc",
+          "edits": [
+            {
+              "old": "\\A i \\in Targets(k) : Vpc(i) = \"local\"",
+              "new": "(k = \"otherGroup\" \\/ (\\A i \\in Targets(k) : Vpc(i) = \"local\"))",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AdmittedPlacement"
+        },
+        {
+          "id": "AcceptForeignRegion",
+          "edits": [
+            {
+              "old": "\\A i \\in Targets(k) : Scope(i) = \"here\"",
+              "new": "(k = \"otherRegion\" \\/ (\\A i \\in Targets(k) : Scope(i) = \"here\"))",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AdmittedPlacement"
+        },
+        {
+          "id": "AcceptForeignTeam",
+          "edits": [
+            {
+              "old": "\\A i \\in Targets(k) : Scope(i) = \"here\"",
+              "new": "(k = \"otherTeam\" \\/ (\\A i \\in Targets(k) : Scope(i) = \"here\"))",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AdmittedPlacement"
+        },
+        {
+          "id": "AcceptStackResource",
+          "edits": [
+            {
+              "old": "\\A i \\in Targets(k) : IsNative(i)",
+              "new": "TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AdmittedPlacement"
+        },
+        {
+          "id": "InventDefaultGroup",
+          "edits": [
+            {
+              "old": "Groups(k) # {}",
+              "new": "TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AdmittedPlacement"
+        },
+        {
+          "id": "AdmitDeletedTarget",
+          "edits": [
+            {
+              "old": "Targets(k) \\subseteq live",
+              "new": "TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AdmittedPlacement"
+        },
+        {
+          "id": "PublishDuringStaging",
+          "edits": [
+            {
+              "old": "request' = k /\\ UNCHANGED durable",
+              "new": "request' = k /\\ rows' = [rows EXCEPT ![n] = NativeView] /\\ UNCHANGED <<live, refs>>",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "StageInvisible"
+        },
+        {
+          "id": "ReverseZoneProjection",
+          "edits": [
+            {
+              "old": "<<Vpc(1),Zone(1),Zone(Subnet(request))>>",
+              "new": "<<Vpc(1),Zone(Subnet(request)),Zone(1)>>",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ProjectionExact"
+        },
+        {
+          "id": "WrongVpcProjection",
+          "edits": [
+            {
+              "old": "<<Vpc(1),Zone(1),Zone(Subnet(request))>>",
+              "new": "<<\"other\",Zone(1),Zone(Subnet(request))>>",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ProjectionExact"
+        },
+        {
+          "id": "PartialReferences",
+          "edits": [
+            {
+              "old": "Edges(pending,Targets(request))",
+              "new": "Edges(pending,{1,2})",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CompleteReferences"
+        },
+        {
+          "id": "CanceledPartialReferences",
+          "edits": [
+            {
+              "old": "refs' = refs (* rollback partial references *)",
+              "new": "refs' = refs \\cup Edges(pending,{1}) (* rollback partial references *)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CanceledUnchanged"
+        },
+        {
+          "id": "CanceledRowCommitted",
+          "edits": [
+            {
+              "old": "rows' = rows /\\ refs' = refs (* rollback partial references *)",
+              "new": "rows' = [rows EXCEPT ![pending] = NativeView] /\\ refs' = refs (* rollback partial references *)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CanceledUnchanged"
+        },
+        {
+          "id": "DeleteBoundResource",
+          "edits": [
+            {
+              "old": "\\A n \\in Names : <<n,i>> \\notin refs",
+              "new": "TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReferencesExist"
+        },
+        {
+          "id": "ReleaseBothOwners",
+          "edits": [
+            {
+              "old": "refs \\ Edges(n,Resources)",
+              "new": "IF n \\in NewNames THEN {} ELSE refs \\ Edges(n,Resources)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CompleteReferences"
+        },
+        {
+          "id": "AdoptLegacyReferences",
+          "edits": [
+            {
+              "old": "refs' = refs (* historical retry acquires no ownership *)",
+              "new": "refs' = refs \\cup Edges(\"legacy\",Primary) (* historical retry acquires no ownership *)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "LegacyUnbound"
+        },
+        {
+          "id": "ReopenLosesOwnership",
+          "edits": [
+            {
+              "old": "rows' = rows (* reopen durable projection *)",
+              "new": "rows' = [n \\in Names |-> IF n = \"legacy\" THEN LegacyView ELSE Absent] (* reopen durable projection *)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReopenUnchanged"
+        }
+      ]
+    },
+    {
+      "id": "ALBConsoleWorkflow",
+      "model": "formal/ALBConsoleWorkflow.tla",
+      "config": "formal/ALBConsoleWorkflow.cfg",
+      "bounds": "Separate read and write trials. At most three read tasks, one active task and one retired result; one scope change may reuse a ticket number. Two symbolic balancer and group identifiers, with independently changing selections. A write trial begins at one selected saved Lambda target group. One explicit ModifyTargetGroup with two possible store outcomes, one independent group removal, one listener detach and reassignment to a second balancer, and arbitrary repeat observations within the finite graph.",
+      "properties": [
+        "TypeOK",
+        "ReadAdmission",
+        "TruthfulHealth",
+        "DeniedProjection",
+        "ScopeFrame",
+        "RetiredWriteFrame",
+        "SingleSend",
+        "NativeFrame",
+        "Acknowledgement",
+        "CompleteDetail",
+        "BoundReadback",
+        "CheckedHealth",
+        "ObservedOnly",
+        "LinkFrame",
+        "PreflightAdmission"
+      ],
+      "limits": "Scope and task identity abstract the request source, section, principal, region, selected ARN and mount. A detail is published only after its required native results are available. Path and health checks express logical requirements of one joined read; the model does not impose a transport completion order. A preflight on the group verifies the selected balancer before sending. Reassociation after that check can still affect the native request: ModifyTargetGroup has no atomic balancer precondition. Recovery may observe the current linked group, its loss of association, or its absence without verifying the previous write. The interlock belongs to that mounted scope. Placement, listener and target fields are represented by typed symbolic outcomes. Explicit reads seeded at a selected resource do not model navigation reachability, React, XML decoding, IAM, HTTP delivery, physical deployment, native concurrency or actual listener traffic. Routing and bundle bindings concern component selection and retirement only.",
+      "source_scope": [
+        "internal/server/server.go",
+        "internal/server/web/app.js",
+        "tools/console/src/console-navigation.mjs",
+        "tools/console/src/elb.jsx",
+        "tools/console/src/elb.mjs",
+        "tools/console/src/main.jsx"
+      ],
+      "mutants": [
+        {
+          "id": "ReuseTicketAcrossSource",
+          "edits": [
+            {
+              "old": "Current(q) == q \\in ui.active /\\ q.scope = ui.scope",
+              "new": "Current(q) == (q \\in ui.active /\\ q.scope = ui.scope) \\/ (\\E a \\in ui.active : a.id = q.id /\\ [a.scope EXCEPT !.source = q.scope.source] = q.scope)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadAdmission"
+        },
+        {
+          "id": "ReuseTicketAcrossRegion",
+          "edits": [
+            {
+              "old": "Current(q) == q \\in ui.active /\\ q.scope = ui.scope",
+              "new": "Current(q) == (q \\in ui.active /\\ q.scope = ui.scope) \\/ (\\E a \\in ui.active : a.id = q.id /\\ [a.scope EXCEPT !.region = q.scope.region] = q.scope)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadAdmission"
+        },
+        {
+          "id": "ReuseTicketAcrossPrincipal",
+          "edits": [
+            {
+              "old": "Current(q) == q \\in ui.active /\\ q.scope = ui.scope",
+              "new": "Current(q) == (q \\in ui.active /\\ q.scope = ui.scope) \\/ (\\E a \\in ui.active : a.id = q.id /\\ [a.scope EXCEPT !.principal = q.scope.principal] = q.scope)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadAdmission"
+        },
+        {
+          "id": "ReuseTicketAcrossSection",
+          "edits": [
+            {
+              "old": "Current(q) == q \\in ui.active /\\ q.scope = ui.scope",
+              "new": "Current(q) == (q \\in ui.active /\\ q.scope = ui.scope) \\/ (\\E a \\in ui.active : a.id = q.id /\\ [a.scope EXCEPT !.section = q.scope.section] = q.scope)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadAdmission"
+        },
+        {
+          "id": "ReuseTicketAcrossBalancerSelection",
+          "edits": [
+            {
+              "old": "Current(q) == q \\in ui.active /\\ q.scope = ui.scope",
+              "new": "Current(q) == (q \\in ui.active /\\ q.scope = ui.scope) \\/ (\\E a \\in ui.active : a.id = q.id /\\ [a.scope EXCEPT !.alb = q.scope.alb] = q.scope)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadAdmission"
+        },
+        {
+          "id": "ReuseTicketAcrossGroupSelection",
+          "edits": [
+            {
+              "old": "Current(q) == q \\in ui.active /\\ q.scope = ui.scope",
+              "new": "Current(q) == (q \\in ui.active /\\ q.scope = ui.scope) \\/ (\\E a \\in ui.active : a.id = q.id /\\ [a.scope EXCEPT !.group = q.scope.group] = q.scope)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadAdmission"
+        },
+        {
+          "id": "ReuseTicketAcrossMount",
+          "edits": [
+            {
+              "old": "Current(q) == q \\in ui.active /\\ q.scope = ui.scope",
+              "new": "Current(q) == (q \\in ui.active /\\ q.scope = ui.scope) \\/ (\\E a \\in ui.active : a.id = q.id /\\ [a.scope EXCEPT !.mount = q.scope.mount] = q.scope)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadAdmission"
+        },
+        {
+          "id": "PublishRetiredSuccess",
+          "edits": [
+            {
+              "old": "IF Current(q) THEN Projection(q.kind,r) ELSE @",
+              "new": "IF Current(q) \\/ (q \\in ui.retired /\\ r = \"ok\") THEN Projection(q.kind,r) ELSE @",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadAdmission"
+        },
+        {
+          "id": "EraseFreshResultWithRetiredDenial",
+          "edits": [
+            {
+              "old": "IF Current(q) THEN Projection(q.kind,r) ELSE @",
+              "new": "IF Current(q) \\/ (q \\in ui.retired /\\ r = \"denied\" /\\ ui.view.available) THEN Projection(q.kind,r) ELSE @",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadAdmission"
+        },
+        {
+          "id": "PublishDetailWithoutListeners",
+          "edits": [
+            {
+              "old": "   [] OTHER -> EmptyView",
+              "new": "   [] r = \"listenerFailed\" -> Ready(k,FALSE)\n   [] OTHER -> EmptyView",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CompleteDetail"
+        },
+        {
+          "id": "PublishDetailWithoutGroups",
+          "edits": [
+            {
+              "old": "   [] OTHER -> EmptyView",
+              "new": "   [] r = \"groupsFailed\" -> Ready(k,FALSE)\n   [] OTHER -> EmptyView",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CompleteDetail"
+        },
+        {
+          "id": "PublishGroupWithoutHealth",
+          "edits": [
+            {
+              "old": "   [] OTHER -> EmptyView",
+              "new": "   [] r = \"healthFailed\" -> Ready(k,FALSE)\n   [] OTHER -> EmptyView",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "TruthfulHealth"
+        },
+        {
+          "id": "PublishWrongARN",
+          "edits": [
+            {
+              "old": "   [] OTHER -> EmptyView",
+              "new": "   [] r = \"wrongArn\" -> Ready(k,FALSE)\n   [] OTHER -> EmptyView",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CompleteDetail"
+        },
+        {
+          "id": "DescribeEmptyHealthAsHealthy",
+          "edits": [
+            {
+              "old": "r = \"empty\" -> Ready(\"empty\",FALSE)",
+              "new": "r = \"empty\" -> Ready(IF k = \"groupDetail\" THEN \"healthy\" ELSE \"empty\",FALSE)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "TruthfulHealth"
+        },
+        {
+          "id": "DescribeUnhealthyAsHealthy",
+          "edits": [
+            {
+              "old": "r = \"unhealthy\" -> Ready(\"unhealthy\",FALSE)",
+              "new": "r = \"unhealthy\" -> Ready(\"healthy\",FALSE)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "TruthfulHealth"
+        },
+        {
+          "id": "DescribeDeniedHealthAsHealthy",
+          "edits": [
+            {
+              "old": "r = \"denied\" -> EmptyView",
+              "new": "r = \"denied\" -> IF k = \"groupDetail\" THEN Ready(\"healthy\",FALSE) ELSE EmptyView",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "TruthfulHealth"
+        },
+        {
+          "id": "RestorePageAndMarkerAfterDenial",
+          "edits": [
+            {
+              "old": "r = \"denied\" -> EmptyView",
+              "new": "r = \"denied\" -> IF k = \"nextPage\" THEN Ready(\"loadBalancers\",TRUE) ELSE EmptyView",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "DeniedProjection"
+        },
+        {
+          "id": "CarryPreviousRowsAndCursor",
+          "edits": [
+            {
+              "old": "!.view = EmptyView, !.w = Rest,",
+              "new": "!.view = @, !.w = Rest,",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ScopeFrame"
+        },
+        {
+          "id": "CarryUncertainWriteToNewScope",
+          "edits": [
+            {
+              "old": "!.view = EmptyView, !.w = Rest,",
+              "new": "!.view = EmptyView, !.w = IF ui.w.phase = \"uncertain\" THEN @ ELSE Rest,",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ScopeFrame"
+        },
+        {
+          "id": "PublishFormerWriteAfterSwitch",
+          "edits": [
+            {
+              "old": "[ui EXCEPT !.retiredWrite = FALSE]",
+              "new": "[ui EXCEPT !.w.verified = TRUE, !.retiredWrite = FALSE]",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "RetiredWriteFrame"
+        },
+        {
+          "id": "SubmitSiblingArn",
+          "edits": [
+            {
+              "old": "!.w.sent = 1, !.w.arn = ui.scope.group",
+              "new": "!.w.sent = 1, !.w.arn = \"B\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "SingleSend"
+        },
+        {
+          "id": "ChangePathOnRefusal",
+          "edits": [
+            {
+              "old": "IF outcome = \"applied\" THEN \"desired\" ELSE @",
+              "new": "\"desired\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "NativeFrame"
+        },
+        {
+          "id": "OverwriteSiblingPath",
+          "edits": [
+            {
+              "old": "!.w.outcome = outcome,",
+              "new": "!.w.outcome = outcome, !.sibling = IF outcome = \"applied\" THEN \"desired\" ELSE @,",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "NativeFrame"
+        },
+        {
+          "id": "AcknowledgeWithoutReread",
+          "edits": [
+            {
+              "old": "IN ui' = [ui EXCEPT !.w.phase = phase]",
+              "new": "IN ui' = [ui EXCEPT !.w.phase = phase, !.w.verified = r = \"matching\"]",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "Acknowledgement"
+        },
+        {
+          "id": "AcceptWrongAckARN",
+          "edits": [
+            {
+              "old": "r = \"matching\" -> \"checkingPath\"",
+              "new": "r \\in {\"matching\",\"wrongArn\"} -> \"checkingPath\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "Acknowledgement"
+        },
+        {
+          "id": "AcceptWrongAckPath",
+          "edits": [
+            {
+              "old": "r = \"matching\" -> \"checkingPath\"",
+              "new": "r \\in {\"matching\",\"wrongPath\"} -> \"checkingPath\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "Acknowledgement"
+        },
+        {
+          "id": "AcceptLostAcknowledgement",
+          "edits": [
+            {
+              "old": "r = \"matching\" -> \"checkingPath\"",
+              "new": "r \\in {\"matching\",\"lost\"} -> \"checkingPath\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "Acknowledgement"
+        },
+        {
+          "id": "TreatDeniedWriteAsUncertain",
+          "edits": [
+            {
+              "old": "r = \"denied\" -> \"refused\"",
+              "new": "r = \"denied\" -> \"uncertain\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "Acknowledgement"
+        },
+        {
+          "id": "IgnoreSavedPathMismatch",
+          "edits": [
+            {
+              "old": "IF r = \"matching\" THEN \"checkingHealth\" ELSE \"uncertain\"",
+              "new": "IF r \\in {\"matching\",\"different\"} THEN \"checkingHealth\" ELSE \"uncertain\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "BoundReadback"
+        },
+        {
+          "id": "ReadSiblingGroupAsSaved",
+          "edits": [
+            {
+              "old": "IF r = \"matching\" THEN \"checkingHealth\" ELSE \"uncertain\"",
+              "new": "IF r \\in {\"matching\",\"wrongArn\"} THEN \"checkingHealth\" ELSE \"uncertain\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "BoundReadback"
+        },
+        {
+          "id": "SkipDeniedSavedGroup",
+          "edits": [
+            {
+              "old": "IF r = \"matching\" THEN \"checkingHealth\" ELSE \"uncertain\"",
+              "new": "IF r \\in {\"matching\",\"denied\"} THEN \"checkingHealth\" ELSE \"uncertain\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "BoundReadback"
+        },
+        {
+          "id": "SkipUnavailableSavedGroup",
+          "edits": [
+            {
+              "old": "IF r = \"matching\" THEN \"checkingHealth\" ELSE \"uncertain\"",
+              "new": "IF r \\in {\"matching\",\"failed\"} THEN \"checkingHealth\" ELSE \"uncertain\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "BoundReadback"
+        },
+        {
+          "id": "CertifySavedPathBeforeHealth",
+          "edits": [
+            {
+              "old": "!.w.seenPath = IF r = \"matching\"",
+              "new": "!.w.verified = r = \"matching\", !.w.seenPath = IF r = \"matching\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "BoundReadback"
+        },
+        {
+          "id": "AcceptOtherGroupHealth",
+          "edits": [
+            {
+              "old": "LET typed == r \\in {\"healthy\",\"unhealthy\",\"empty\"}",
+              "new": "LET typed == r \\in {\"healthy\",\"unhealthy\",\"empty\",\"wrongArn\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CheckedHealth"
+        },
+        {
+          "id": "AcceptDeniedHealth",
+          "edits": [
+            {
+              "old": "LET typed == r \\in {\"healthy\",\"unhealthy\",\"empty\"}",
+              "new": "LET typed == r \\in {\"healthy\",\"unhealthy\",\"empty\",\"denied\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CheckedHealth"
+        },
+        {
+          "id": "AcceptUnavailableHealth",
+          "edits": [
+            {
+              "old": "LET typed == r \\in {\"healthy\",\"unhealthy\",\"empty\"}",
+              "new": "LET typed == r \\in {\"healthy\",\"unhealthy\",\"empty\",\"failed\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CheckedHealth"
+        },
+        {
+          "id": "PublishEmptyReadbackAsHealthy",
+          "edits": [
+            {
+              "old": "IF typed THEN r ELSE \"none\"",
+              "new": "IF r = \"empty\" THEN \"healthy\" ELSE IF typed THEN r ELSE \"none\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CheckedHealth"
+        },
+        {
+          "id": "ReleaseFromOtherArn",
+          "edits": [
+            {
+              "old": "LET exact == k \\in {\"exact\",\"absent\"}",
+              "new": "LET exact == k \\in {\"exact\",\"absent\",\"otherArn\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ObservedOnly"
+        },
+        {
+          "id": "ReleaseFromInventory",
+          "edits": [
+            {
+              "old": "LET exact == k \\in {\"exact\",\"absent\"}",
+              "new": "LET exact == k \\in {\"exact\",\"absent\",\"list\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ObservedOnly"
+        },
+        {
+          "id": "ReleaseFromDeniedRefresh",
+          "edits": [
+            {
+              "old": "LET exact == k \\in {\"exact\",\"absent\"}",
+              "new": "LET exact == k \\in {\"exact\",\"absent\",\"denied\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ObservedOnly"
+        },
+        {
+          "id": "ReleaseFromFailedRefresh",
+          "edits": [
+            {
+              "old": "LET exact == k \\in {\"exact\",\"absent\"}",
+              "new": "LET exact == k \\in {\"exact\",\"absent\",\"failed\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ObservedOnly"
+        },
+        {
+          "id": "ReleaseFromImplicitRefresh",
+          "edits": [
+            {
+              "old": "LET exact == k \\in {\"exact\",\"absent\"}",
+              "new": "LET exact == k \\in {\"exact\",\"absent\",\"automatic\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ObservedOnly"
+        },
+        {
+          "id": "ClaimLostWriteFromCurrentValue",
+          "edits": [
+            {
+              "old": "!.w.phase = \"observed\", !.w.seenPath",
+              "new": "!.w.phase = \"observed\", !.w.verified = k = \"exact\" /\\ ui.target = \"desired\" /\\ last.step = \"ack\" /\\ last.result = \"lost\", !.w.seenPath",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ObservedOnly"
+        },
+        {
+          "id": "ReportRequestedPathAfterRefusedLostAck",
+          "edits": [
+            {
+              "old": "IF k = \"absent\" THEN \"absent\" ELSE ui.target",
+              "new": "IF k = \"absent\" THEN \"absent\" ELSE \"desired\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ObservedOnly"
+        },
+        {
+          "id": "IgnoreConfirmedGroupAbsence",
+          "edits": [
+            {
+              "old": "LET exact == k \\in {\"exact\",\"absent\"}",
+              "new": "LET exact == k = \"exact\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ObservedOnly"
+        },
+        {
+          "id": "ResendAfterLostAck",
+          "edits": [
+            {
+              "old": "                       ELSE ui\n /\\ last' = Mark(\"recover\"",
+              "new": "                       ELSE IF k = \"resend\" /\\ last.step = \"ack\" /\\ last.result = \"lost\" THEN [ui EXCEPT !.w.phase = \"sending\", !.w.sent = @+1] ELSE ui\n /\\ last' = Mark(\"recover\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ObservedOnly"
+        },
+        {
+          "id": "RetryAutomaticallyAfterLostAck",
+          "edits": [
+            {
+              "old": "                       ELSE ui\n /\\ last' = Mark(\"recover\"",
+              "new": "                       ELSE IF k = \"automatic\" /\\ last.step = \"ack\" /\\ last.result = \"lost\" THEN [ui EXCEPT !.w.phase = \"sending\", !.w.sent = @+1] ELSE ui\n /\\ last' = Mark(\"recover\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ObservedOnly"
+        },
+        {
+          "id": "SendAfterDetachment",
+          "edits": [
+            {
+              "old": "LET linked == r = \"current\" /\\ ui.parent = ui.scope.alb",
+              "new": "LET linked == (r = \"current\" /\\ ui.parent = ui.scope.alb) \\/ (r = \"current\" /\\ ui.parent = \"detached\")",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PreflightAdmission"
+        },
+        {
+          "id": "SendAfterMoveToDifferentBalancer",
+          "edits": [
+            {
+              "old": "LET linked == r = \"current\" /\\ ui.parent = ui.scope.alb",
+              "new": "LET linked == (r = \"current\" /\\ ui.parent = ui.scope.alb) \\/ (r = \"current\" /\\ ui.parent = \"B\")",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PreflightAdmission"
+        },
+        {
+          "id": "PreflightWrongGroup",
+          "edits": [
+            {
+              "old": "LET linked == r = \"current\" /\\ ui.parent = ui.scope.alb",
+              "new": "LET linked == r \\in {\"current\",\"wrongArn\"} /\\ ui.parent = ui.scope.alb",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PreflightAdmission"
+        },
+        {
+          "id": "PreflightPermissionLoss",
+          "edits": [
+            {
+              "old": "LET linked == r = \"current\" /\\ ui.parent = ui.scope.alb",
+              "new": "LET linked == r \\in {\"current\",\"denied\"} /\\ ui.parent = ui.scope.alb",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PreflightAdmission"
+        },
+        {
+          "id": "PreflightUnavailable",
+          "edits": [
+            {
+              "old": "LET linked == r = \"current\" /\\ ui.parent = ui.scope.alb",
+              "new": "LET linked == r \\in {\"current\",\"failed\"} /\\ ui.parent = ui.scope.alb",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PreflightAdmission"
+        },
+        {
+          "id": "ConfirmResponseFromChangedParent",
+          "edits": [
+            {
+              "old": "r = \"matching\" -> \"checkingPath\"",
+              "new": "r \\in {\"matching\",\"wrongParent\"} -> \"checkingPath\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "Acknowledgement"
+        },
+        {
+          "id": "ReadReassociatedGroupAsLinked",
+          "edits": [
+            {
+              "old": "IF r = \"matching\" THEN \"checkingHealth\" ELSE \"uncertain\"",
+              "new": "IF r \\in {\"matching\",\"wrongParent\"} THEN \"checkingHealth\" ELSE \"uncertain\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "BoundReadback"
+        },
+        {
+          "id": "ExposeMismatchedLinkedRows",
+          "edits": [
+            {
+              "old": "   [] OTHER -> EmptyView",
+              "new": "   [] r = \"wrongParent\" /\\ k = \"balancerDetail\" -> Ready(k,FALSE)\n   [] OTHER -> EmptyView",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CompleteDetail"
+        },
+        {
+          "id": "ExposeMismatchedGroupDetail",
+          "edits": [
+            {
+              "old": "   [] OTHER -> EmptyView",
+              "new": "   [] r = \"wrongParent\" /\\ k = \"groupDetail\" -> Ready(\"healthy\",FALSE)\n   [] OTHER -> EmptyView",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "TruthfulHealth"
+        },
+        {
+          "id": "ExposeMovedGroupPathAfterLostAck",
+          "edits": [
+            {
+              "old": "!.w.phase = \"unavailable\", !.w.seenPath = \"none\", !.w.health = \"none\"",
+              "new": "!.w.phase = \"unavailable\", !.w.seenPath = IF ui.parent = \"B\" /\\ last.step = \"ack\" /\\ last.result = \"lost\" THEN ui.target ELSE \"none\", !.w.health = \"none\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ObservedOnly"
+        },
+        {
+          "id": "KeepDetachedGroupLockedAfterExactRefresh",
+          "edits": [
+            {
+              "old": "!.w.phase = \"unavailable\", !.w.seenPath = \"none\", !.w.health = \"none\"",
+              "new": "!.w.phase = IF ui.parent = \"detached\" THEN \"uncertain\" ELSE \"unavailable\", !.w.seenPath = \"none\", !.w.health = \"none\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ObservedOnly"
+        },
+        {
+          "id": "CallReassociationAConfirmedSave",
+          "edits": [
+            {
+              "old": "!.w.phase = \"unavailable\", !.w.seenPath = \"none\", !.w.health = \"none\"",
+              "new": "!.w.phase = \"unavailable\", !.w.seenPath = \"none\", !.w.health = \"none\", !.w.verified = TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ObservedOnly"
+        },
+        {
+          "id": "ChangeRequestedPathWhenMovingListener",
+          "edits": [
+            {
+              "old": "[ui EXCEPT !.parent = p]",
+              "new": "[ui EXCEPT !.parent = p, !.target = \"desired\"]",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "NativeFrame"
+        },
+        {
+          "id": "IgnoreReassociationToSecondBalancer",
+          "edits": [
+            {
+              "old": "[ui EXCEPT !.parent = p]",
+              "new": "[ui EXCEPT !.parent = IF p = \"B\" THEN @ ELSE p]",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "LinkFrame"
+        }
+      ]
+    },
+    {
+      "id": "SNSNotificationPolicyLifetime",
+      "model": "formal/SNSNotificationPolicyLifetime.tla",
+      "config": "formal/SNSNotificationPolicyLifetime.cfg",
+      "bounds": "One evolving logical ARN in one database, a populated same-ARN peer in another database (its generation is 1), missing/Standard/FIFO, generations 1 and 2 in the primary store, five representative accepted policy documents, seven write and five resolver outcomes, one previously captured local grant. New policy allocation beyond the finite bound is disabled; policy edits and all remaining operations remain available.",
+      "properties": [
+        "TypeOK",
+        "SetAdmission",
+        "SetRefusalPreservesStore",
+        "NewGeneration",
+        "EditKeepsGeneration",
+        "PolicyBytesExact",
+        "DeleteFrame",
+        "PeerFrame",
+        "GetReadback",
+        "ReadsPreserveStore",
+        "ResolverAdmission",
+        "ResolverGeneration",
+        "ResolverDecision",
+        "CapturedCurrentGrant",
+        "CaptureExact",
+        "RestartPreservesStore"
+      ],
+      "limits": "Representative policy strings distinguish exact readback, two different Allow encodings, Deny, and both Allow/Deny orders. The model abstracts the JSON grammar, SQL transaction, Query protocol, IAM and context into decisions. The peer is a fixed live scope. Captured-grant comparison describes a consuming worker obligation; delivery, outbox/retry, SQS, cancellation timing, raw SQL faults, unbounded identifier allocation and actual process/SDK behavior require separate implementation evidence.",
+      "source_scope": [
+        "internal/aws/sns.go",
+        "internal/aws/sns_store.go",
+        "internal/aws/sns_topic_policy.go",
+        "internal/aws/sns_topic_policy_test.go"
+      ],
+      "mutants": [
+        {
+          "id": "SetOnMissingTopic",
+          "edits": [
+            {
+              "old": "CanSet(m) == topic = \"standard\" /\\ m # \"denied\" /\\ m # \"invalid\" /\\ m # \"foreignARN\"",
+              "new": "CanSet(m) == topic # \"fifo\" /\\ m # \"denied\" /\\ m # \"invalid\" /\\ m # \"foreignARN\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "SetAdmission"
+        },
+        {
+          "id": "SetOnFIFOTopic",
+          "edits": [
+            {
+              "old": "CanSet(m) == topic = \"standard\" /\\ m # \"denied\" /\\ m # \"invalid\" /\\ m # \"foreignARN\"",
+              "new": "CanSet(m) == topic # \"missing\" /\\ m # \"denied\" /\\ m # \"invalid\" /\\ m # \"foreignARN\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "SetAdmission"
+        },
+        {
+          "id": "SkipSetIAM",
+          "edits": [
+            {
+              "old": "CanSet(m) == topic = \"standard\" /\\ m # \"denied\" /\\ m # \"invalid\" /\\ m # \"foreignARN\"",
+              "new": "CanSet(m) == topic = \"standard\" /\\ m # \"invalid\" /\\ m # \"foreignARN\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "SetAdmission"
+        },
+        {
+          "id": "AcceptInvalidInput",
+          "edits": [
+            {
+              "old": "CanSet(m) == topic = \"standard\" /\\ m # \"denied\" /\\ m # \"invalid\" /\\ m # \"foreignARN\"",
+              "new": "CanSet(m) == topic = \"standard\" /\\ m # \"denied\" /\\ m # \"foreignARN\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "SetAdmission"
+        },
+        {
+          "id": "AcceptForeignARN",
+          "edits": [
+            {
+              "old": "CanSet(m) == topic = \"standard\" /\\ m # \"denied\" /\\ m # \"invalid\" /\\ m # \"foreignARN\"",
+              "new": "CanSet(m) == topic = \"standard\" /\\ m # \"denied\" /\\ m # \"invalid\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "SetAdmission"
+        },
+        {
+          "id": "AcknowledgeFailedCommit",
+          "edits": [
+            {
+              "old": "Commit(m) == m \\notin {\"failedCommit\", \"canceled\", \"deadline\"}",
+              "new": "Commit(m) == m \\notin {\"canceled\", \"deadline\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "SetAdmission"
+        },
+        {
+          "id": "AcknowledgeCancellation",
+          "edits": [
+            {
+              "old": "Commit(m) == m \\notin {\"failedCommit\", \"canceled\", \"deadline\"}",
+              "new": "Commit(m) == m \\notin {\"failedCommit\", \"deadline\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "SetAdmission"
+        },
+        {
+          "id": "AcknowledgeElapsedDeadline",
+          "edits": [
+            {
+              "old": "Commit(m) == m \\notin {\"failedCommit\", \"canceled\", \"deadline\"}",
+              "new": "Commit(m) == m \\notin {\"failedCommit\", \"canceled\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "SetAdmission"
+        },
+        {
+          "id": "PersistRejectedInput",
+          "edits": [
+            {
+              "old": "row' = IF accepted THEN [gen |-> gen, doc |-> doc] ELSE row",
+              "new": "row' = IF accepted \\/ (m = \"invalid\" /\\ topic = \"standard\") THEN [gen |-> gen, doc |-> doc] ELSE row",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "SetRefusalPreservesStore"
+        },
+        {
+          "id": "ReuseAllocatorOnInsert",
+          "edits": [
+            {
+              "old": "THEN high + 1 ELSE row.gen",
+              "new": "THEN (IF high = 0 THEN 1 ELSE high) ELSE row.gen",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "NewGeneration"
+        },
+        {
+          "id": "ReplaceIdentityOnEdit",
+          "edits": [
+            {
+              "old": "THEN high + 1 ELSE row.gen",
+              "new": "THEN high + 1 ELSE (IF row.gen < MaxGen THEN row.gen + 1 ELSE row.gen)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "EditKeepsGeneration"
+        },
+        {
+          "id": "ReidentifySameBytes",
+          "edits": [
+            {
+              "old": "gen == NextGeneration",
+              "new": "gen == IF row.gen > 0 /\\ row.gen < MaxGen /\\ (doc = row.doc) THEN row.gen + 1 ELSE NextGeneration",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "EditKeepsGeneration"
+        },
+        {
+          "id": "ReidentifyRevocation",
+          "edits": [
+            {
+              "old": "gen == NextGeneration",
+              "new": "gen == IF row.gen > 0 /\\ row.gen < MaxGen /\\ (Grant(row.doc) /\\ ~Grant(doc)) THEN row.gen + 1 ELSE NextGeneration",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "EditKeepsGeneration"
+        },
+        {
+          "id": "ReidentifyRepair",
+          "edits": [
+            {
+              "old": "gen == NextGeneration",
+              "new": "gen == IF row.gen > 0 /\\ row.gen < MaxGen /\\ (~Grant(row.doc) /\\ Grant(doc)) THEN row.gen + 1 ELSE NextGeneration",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "EditKeepsGeneration"
+        },
+        {
+          "id": "NormalizeDistinctAllowBytes",
+          "edits": [
+            {
+              "old": "THEN [gen |-> gen, doc |-> doc] ELSE row",
+              "new": "THEN [gen |-> gen, doc |-> IF doc = \"allowB\" THEN \"allowA\" ELSE doc] ELSE row",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PolicyBytesExact"
+        },
+        {
+          "id": "LeavePolicyOnDelete",
+          "edits": [
+            {
+              "old": "row' = IF removed THEN Absent ELSE row",
+              "new": "row' = row",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "DeleteFrame"
+        },
+        {
+          "id": "ResetAllocatorOnDelete",
+          "edits": [
+            {
+              "old": "high' = high\n          /\\ last' = Notice(\"delete\"",
+              "new": "high' = IF removed THEN 0 ELSE high\n          /\\ last' = Notice(\"delete\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "DeleteFrame"
+        },
+        {
+          "id": "ClearPeerOnDelete",
+          "edits": [
+            {
+              "old": "peer' = peer",
+              "new": "peer' = IF removed THEN Absent ELSE peer",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "PeerFrame"
+        },
+        {
+          "id": "DeleteOnFailedCommit",
+          "edits": [
+            {
+              "old": "removed == m = \"ok\"",
+              "new": "removed == TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "DeleteFrame"
+        },
+        {
+          "id": "LeakDeniedGetPolicy",
+          "edits": [
+            {
+              "old": "visible == IF ok THEN row.doc ELSE \"none\"",
+              "new": "visible == row.doc",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "GetReadback"
+        },
+        {
+          "id": "LoseSecondAllowOnRead",
+          "edits": [
+            {
+              "old": "visible == IF ok THEN row.doc ELSE \"none\"",
+              "new": "visible == IF ok /\\ row.doc # \"allowB\" THEN row.doc ELSE \"none\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "GetReadback"
+        },
+        {
+          "id": "TreatCallerAsInternal",
+          "edits": [
+            {
+              "old": "Inspect(m) == topic = \"standard\" /\\ m = \"ok\"",
+              "new": "Inspect(m) == topic = \"standard\" /\\ m \\in {\"ok\", \"caller\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ResolverAdmission"
+        },
+        {
+          "id": "IgnoreLookupARN",
+          "edits": [
+            {
+              "old": "Inspect(m) == topic = \"standard\" /\\ m = \"ok\"",
+              "new": "Inspect(m) == topic = \"standard\" /\\ m \\in {\"ok\", \"foreignARN\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ResolverAdmission"
+        },
+        {
+          "id": "AcceptCorruptSavedRow",
+          "edits": [
+            {
+              "old": "Inspect(m) == topic = \"standard\" /\\ m = \"ok\"",
+              "new": "Inspect(m) == topic = \"standard\" /\\ (m = \"ok\" \\/ (m = \"badRow\" /\\ row.gen > 0))",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ResolverAdmission"
+        },
+        {
+          "id": "IgnoreReadFailure",
+          "edits": [
+            {
+              "old": "Inspect(m) == topic = \"standard\" /\\ m = \"ok\"",
+              "new": "Inspect(m) == topic = \"standard\" /\\ m \\in {\"ok\", \"readError\"}",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ResolverAdmission"
+        },
+        {
+          "id": "ResolveMissingTopic",
+          "edits": [
+            {
+              "old": "Inspect(m) == topic = \"standard\" /\\ m = \"ok\"",
+              "new": "Inspect(m) == topic # \"fifo\" /\\ m = \"ok\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ResolverAdmission"
+        },
+        {
+          "id": "ResolveFIFOTopic",
+          "edits": [
+            {
+              "old": "Inspect(m) == topic = \"standard\" /\\ m = \"ok\"",
+              "new": "Inspect(m) == topic # \"missing\" /\\ m = \"ok\"",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ResolverAdmission"
+        },
+        {
+          "id": "OmitDeniedRowGeneration",
+          "edits": [
+            {
+              "old": "IF readable THEN row.gen ELSE 0",
+              "new": "IF readable /\\ Grant(row.doc) THEN row.gen ELSE 0",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ResolverGeneration"
+        },
+        {
+          "id": "PreferLeadingAllow",
+          "edits": [
+            {
+              "old": "allowed == readable /\\ Grant(row.doc)",
+              "new": "allowed == readable /\\ (Grant(row.doc) \\/ row.doc = \"allowDeny\")",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ResolverDecision"
+        },
+        {
+          "id": "PreferTrailingAllow",
+          "edits": [
+            {
+              "old": "allowed == readable /\\ Grant(row.doc)",
+              "new": "allowed == readable /\\ (Grant(row.doc) \\/ row.doc = \"denyAllow\")",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ResolverDecision"
+        },
+        {
+          "id": "TreatDenyAsAllow",
+          "edits": [
+            {
+              "old": "allowed == readable /\\ Grant(row.doc)",
+              "new": "allowed == readable /\\ (Grant(row.doc) \\/ row.doc = \"deny\")",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ResolverDecision"
+        },
+        {
+          "id": "SynthesizeMissingGrant",
+          "edits": [
+            {
+              "old": "allowed == readable /\\ Grant(row.doc)",
+              "new": "allowed == readable /\\ (Grant(row.doc) \\/ row.doc = \"none\")",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ResolverDecision"
+        },
+        {
+          "id": "DenyMatchingServiceGrant",
+          "edits": [
+            {
+              "old": "allowed == readable /\\ Grant(row.doc)",
+              "new": "allowed == FALSE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ResolverDecision"
+        },
+        {
+          "id": "ClearPolicyOnCorruptRead",
+          "edits": [
+            {
+              "old": "/\\ UNCHANGED <<topic, row, high, peer, captured>>\n\nCapture ==",
+              "new": "/\\ row' = IF m = \"badRow\" THEN Absent ELSE row\n       /\\ UNCHANGED <<topic, high, peer, captured>>\n\nCapture ==",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ReadsPreserveStore"
+        },
+        {
+          "id": "CaptureWrongGeneration",
+          "edits": [
+            {
+              "old": "captured' = row.gen",
+              "new": "captured' = 0",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CaptureExact"
+        },
+        {
+          "id": "AcceptPeerWithEqualGeneration",
+          "edits": [
+            {
+              "old": "OwnTicket(source) == source = \"own\"",
+              "new": "OwnTicket(source) == TRUE",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CapturedCurrentGrant"
+        },
+        {
+          "id": "ReuseCaptureAcrossRecreation",
+          "edits": [
+            {
+              "old": "generation = row.gen /\\ Grant(row.doc)",
+              "new": "row.gen # 0 /\\ Grant(row.doc)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CapturedCurrentGrant"
+        },
+        {
+          "id": "UseRevokedCapture",
+          "edits": [
+            {
+              "old": "generation = row.gen /\\ Grant(row.doc)",
+              "new": "generation = row.gen",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CapturedCurrentGrant"
+        },
+        {
+          "id": "LosePolicyOnRestart",
+          "edits": [
+            {
+              "old": "Restart ==\n    /\\ row' = row",
+              "new": "Restart ==\n    /\\ row' = Absent",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "RestartPreservesStore"
+        },
+        {
+          "id": "LoseAllocatorOnRestart",
+          "edits": [
+            {
+              "old": "Restart ==\n    /\\ row' = row\n    /\\ high' = high",
+              "new": "Restart ==\n    /\\ row' = row\n    /\\ high' = 0",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "RestartPreservesStore"
+        }
+      ]
+    },
+    {
       "id": "CodeCommitGitReferences",
       "model": "formal/CodeCommitGitReferences.tla",
       "config": "formal/CodeCommitGitReferences.cfg",
@@ -31342,479 +35430,6 @@
             }
           ],
           "expect_invariant": "CurrentIsObservation"
-        }
-      ]
-    },
-    {
-      "id": "SNSNotificationPolicyLifetime",
-      "model": "formal/SNSNotificationPolicyLifetime.tla",
-      "config": "formal/SNSNotificationPolicyLifetime.cfg",
-      "bounds": "One evolving logical ARN in one database, a populated same-ARN peer in another database (its generation is 1), missing/Standard/FIFO, generations 1 and 2 in the primary store, five representative accepted policy documents, seven write and five resolver outcomes, one previously captured local grant. New policy allocation beyond the finite bound is disabled; policy edits and all remaining operations remain available.",
-      "properties": [
-        "TypeOK",
-        "SetAdmission",
-        "SetRefusalPreservesStore",
-        "NewGeneration",
-        "EditKeepsGeneration",
-        "PolicyBytesExact",
-        "DeleteFrame",
-        "PeerFrame",
-        "GetReadback",
-        "ReadsPreserveStore",
-        "ResolverAdmission",
-        "ResolverGeneration",
-        "ResolverDecision",
-        "CapturedCurrentGrant",
-        "CaptureExact",
-        "RestartPreservesStore"
-      ],
-      "limits": "Representative policy strings distinguish exact readback, two different Allow encodings, Deny, and both Allow/Deny orders. The model abstracts the JSON grammar, SQL transaction, Query protocol, IAM and context into decisions. The peer is a fixed live scope. Captured-grant comparison describes a consuming worker obligation; delivery, outbox/retry, SQS, cancellation timing, raw SQL faults, unbounded identifier allocation and actual process/SDK behavior require separate implementation evidence.",
-      "source_scope": [
-        "internal/aws/sns.go",
-        "internal/aws/sns_store.go",
-        "internal/aws/sns_topic_policy.go",
-        "internal/aws/sns_topic_policy_test.go"
-      ],
-      "mutants": [
-        {
-          "id": "SetOnMissingTopic",
-          "edits": [
-            {
-              "old": "CanSet(m) == topic = \"standard\" /\\ m # \"denied\" /\\ m # \"invalid\" /\\ m # \"foreignARN\"",
-              "new": "CanSet(m) == topic # \"fifo\" /\\ m # \"denied\" /\\ m # \"invalid\" /\\ m # \"foreignARN\"",
-              "count": 1
-            }
-          ],
-          "expect_invariant": "SetAdmission"
-        },
-        {
-          "id": "SetOnFIFOTopic",
-          "edits": [
-            {
-              "old": "CanSet(m) == topic = \"standard\" /\\ m # \"denied\" /\\ m # \"invalid\" /\\ m # \"foreignARN\"",
-              "new": "CanSet(m) == topic # \"missing\" /\\ m # \"denied\" /\\ m # \"invalid\" /\\ m # \"foreignARN\"",
-              "count": 1
-            }
-          ],
-          "expect_invariant": "SetAdmission"
-        },
-        {
-          "id": "SkipSetIAM",
-          "edits": [
-            {
-              "old": "CanSet(m) == topic = \"standard\" /\\ m # \"denied\" /\\ m # \"invalid\" /\\ m # \"foreignARN\"",
-              "new": "CanSet(m) == topic = \"standard\" /\\ m # \"invalid\" /\\ m # \"foreignARN\"",
-              "count": 1
-            }
-          ],
-          "expect_invariant": "SetAdmission"
-        },
-        {
-          "id": "AcceptInvalidInput",
-          "edits": [
-            {
-              "old": "CanSet(m) == topic = \"standard\" /\\ m # \"denied\" /\\ m # \"invalid\" /\\ m # \"foreignARN\"",
-              "new": "CanSet(m) == topic = \"standard\" /\\ m # \"denied\" /\\ m # \"foreignARN\"",
-              "count": 1
-            }
-          ],
-          "expect_invariant": "SetAdmission"
-        },
-        {
-          "id": "AcceptForeignARN",
-          "edits": [
-            {
-              "old": "CanSet(m) == topic = \"standard\" /\\ m # \"denied\" /\\ m # \"invalid\" /\\ m # \"foreignARN\"",
-              "new": "CanSet(m) == topic = \"standard\" /\\ m # \"denied\" /\\ m # \"invalid\"",
-              "count": 1
-            }
-          ],
-          "expect_invariant": "SetAdmission"
-        },
-        {
-          "id": "AcknowledgeFailedCommit",
-          "edits": [
-            {
-              "old": "Commit(m) == m \\notin {\"failedCommit\", \"canceled\", \"deadline\"}",
-              "new": "Commit(m) == m \\notin {\"canceled\", \"deadline\"}",
-              "count": 1
-            }
-          ],
-          "expect_invariant": "SetAdmission"
-        },
-        {
-          "id": "AcknowledgeCancellation",
-          "edits": [
-            {
-              "old": "Commit(m) == m \\notin {\"failedCommit\", \"canceled\", \"deadline\"}",
-              "new": "Commit(m) == m \\notin {\"failedCommit\", \"deadline\"}",
-              "count": 1
-            }
-          ],
-          "expect_invariant": "SetAdmission"
-        },
-        {
-          "id": "AcknowledgeElapsedDeadline",
-          "edits": [
-            {
-              "old": "Commit(m) == m \\notin {\"failedCommit\", \"canceled\", \"deadline\"}",
-              "new": "Commit(m) == m \\notin {\"failedCommit\", \"canceled\"}",
-              "count": 1
-            }
-          ],
-          "expect_invariant": "SetAdmission"
-        },
-        {
-          "id": "PersistRejectedInput",
-          "edits": [
-            {
-              "old": "row' = IF accepted THEN [gen |-> gen, doc |-> doc] ELSE row",
-              "new": "row' = IF accepted \\/ (m = \"invalid\" /\\ topic = \"standard\") THEN [gen |-> gen, doc |-> doc] ELSE row",
-              "count": 1
-            }
-          ],
-          "expect_invariant": "SetRefusalPreservesStore"
-        },
-        {
-          "id": "ReuseAllocatorOnInsert",
-          "edits": [
-            {
-              "old": "THEN high + 1 ELSE row.gen",
-              "new": "THEN (IF high = 0 THEN 1 ELSE high) ELSE row.gen",
-              "count": 1
-            }
-          ],
-          "expect_invariant": "NewGeneration"
-        },
-        {
-          "id": "ReplaceIdentityOnEdit",
-          "edits": [
-            {
-              "old": "THEN high + 1 ELSE row.gen",
-              "new": "THEN high + 1 ELSE (IF row.gen < MaxGen THEN row.gen + 1 ELSE row.gen)",
-              "count": 1
-            }
-          ],
-          "expect_invariant": "EditKeepsGeneration"
-        },
-        {
-          "id": "ReidentifySameBytes",
-          "edits": [
-            {
-              "old": "gen == NextGeneration",
-              "new": "gen == IF row.gen > 0 /\\ row.gen < MaxGen /\\ (doc = row.doc) THEN row.gen + 1 ELSE NextGeneration",
-              "count": 1
-            }
-          ],
-          "expect_invariant": "EditKeepsGeneration"
-        },
-        {
-          "id": "ReidentifyRevocation",
-          "edits": [
-            {
-              "old": "gen == NextGeneration",
-              "new": "gen == IF row.gen > 0 /\\ row.gen < MaxGen /\\ (Grant(row.doc) /\\ ~Grant(doc)) THEN row.gen + 1 ELSE NextGeneration",
-              "count": 1
-            }
-          ],
-          "expect_invariant": "EditKeepsGeneration"
-        },
-        {
-          "id": "ReidentifyRepair",
-          "edits": [
-            {
-              "old": "gen == NextGeneration",
-              "new": "gen == IF row.gen > 0 /\\ row.gen < MaxGen /\\ (~Grant(row.doc) /\\ Grant(doc)) THEN row.gen + 1 ELSE NextGeneration",
-              "count": 1
-            }
-          ],
-          "expect_invariant": "EditKeepsGeneration"
-        },
-        {
-          "id": "NormalizeDistinctAllowBytes",
-          "edits": [
-            {
-              "old": "THEN [gen |-> gen, doc |-> doc] ELSE row",
-              "new": "THEN [gen |-> gen, doc |-> IF doc = \"allowB\" THEN \"allowA\" ELSE doc] ELSE row",
-              "count": 1
-            }
-          ],
-          "expect_invariant": "PolicyBytesExact"
-        },
-        {
-          "id": "LeavePolicyOnDelete",
-          "edits": [
-            {
-              "old": "row' = IF removed THEN Absent ELSE row",
-              "new": "row' = row",
-              "count": 1
-            }
-          ],
-          "expect_invariant": "DeleteFrame"
-        },
-        {
-          "id": "ResetAllocatorOnDelete",
-          "edits": [
-            {
-              "old": "high' = high\n          /\\ last' = Notice(\"delete\"",
-              "new": "high' = IF removed THEN 0 ELSE high\n          /\\ last' = Notice(\"delete\"",
-              "count": 1
-            }
-          ],
-          "expect_invariant": "DeleteFrame"
-        },
-        {
-          "id": "ClearPeerOnDelete",
-          "edits": [
-            {
-              "old": "peer' = peer",
-              "new": "peer' = IF removed THEN Absent ELSE peer",
-              "count": 1
-            }
-          ],
-          "expect_invariant": "PeerFrame"
-        },
-        {
-          "id": "DeleteOnFailedCommit",
-          "edits": [
-            {
-              "old": "removed == m = \"ok\"",
-              "new": "removed == TRUE",
-              "count": 1
-            }
-          ],
-          "expect_invariant": "DeleteFrame"
-        },
-        {
-          "id": "LeakDeniedGetPolicy",
-          "edits": [
-            {
-              "old": "visible == IF ok THEN row.doc ELSE \"none\"",
-              "new": "visible == row.doc",
-              "count": 1
-            }
-          ],
-          "expect_invariant": "GetReadback"
-        },
-        {
-          "id": "LoseSecondAllowOnRead",
-          "edits": [
-            {
-              "old": "visible == IF ok THEN row.doc ELSE \"none\"",
-              "new": "visible == IF ok /\\ row.doc # \"allowB\" THEN row.doc ELSE \"none\"",
-              "count": 1
-            }
-          ],
-          "expect_invariant": "GetReadback"
-        },
-        {
-          "id": "TreatCallerAsInternal",
-          "edits": [
-            {
-              "old": "Inspect(m) == topic = \"standard\" /\\ m = \"ok\"",
-              "new": "Inspect(m) == topic = \"standard\" /\\ m \\in {\"ok\", \"caller\"}",
-              "count": 1
-            }
-          ],
-          "expect_invariant": "ResolverAdmission"
-        },
-        {
-          "id": "IgnoreLookupARN",
-          "edits": [
-            {
-              "old": "Inspect(m) == topic = \"standard\" /\\ m = \"ok\"",
-              "new": "Inspect(m) == topic = \"standard\" /\\ m \\in {\"ok\", \"foreignARN\"}",
-              "count": 1
-            }
-          ],
-          "expect_invariant": "ResolverAdmission"
-        },
-        {
-          "id": "AcceptCorruptSavedRow",
-          "edits": [
-            {
-              "old": "Inspect(m) == topic = \"standard\" /\\ m = \"ok\"",
-              "new": "Inspect(m) == topic = \"standard\" /\\ (m = \"ok\" \\/ (m = \"badRow\" /\\ row.gen > 0))",
-              "count": 1
-            }
-          ],
-          "expect_invariant": "ResolverAdmission"
-        },
-        {
-          "id": "IgnoreReadFailure",
-          "edits": [
-            {
-              "old": "Inspect(m) == topic = \"standard\" /\\ m = \"ok\"",
-              "new": "Inspect(m) == topic = \"standard\" /\\ m \\in {\"ok\", \"readError\"}",
-              "count": 1
-            }
-          ],
-          "expect_invariant": "ResolverAdmission"
-        },
-        {
-          "id": "ResolveMissingTopic",
-          "edits": [
-            {
-              "old": "Inspect(m) == topic = \"standard\" /\\ m = \"ok\"",
-              "new": "Inspect(m) == topic # \"fifo\" /\\ m = \"ok\"",
-              "count": 1
-            }
-          ],
-          "expect_invariant": "ResolverAdmission"
-        },
-        {
-          "id": "ResolveFIFOTopic",
-          "edits": [
-            {
-              "old": "Inspect(m) == topic = \"standard\" /\\ m = \"ok\"",
-              "new": "Inspect(m) == topic # \"missing\" /\\ m = \"ok\"",
-              "count": 1
-            }
-          ],
-          "expect_invariant": "ResolverAdmission"
-        },
-        {
-          "id": "OmitDeniedRowGeneration",
-          "edits": [
-            {
-              "old": "IF readable THEN row.gen ELSE 0",
-              "new": "IF readable /\\ Grant(row.doc) THEN row.gen ELSE 0",
-              "count": 1
-            }
-          ],
-          "expect_invariant": "ResolverGeneration"
-        },
-        {
-          "id": "PreferLeadingAllow",
-          "edits": [
-            {
-              "old": "allowed == readable /\\ Grant(row.doc)",
-              "new": "allowed == readable /\\ (Grant(row.doc) \\/ row.doc = \"allowDeny\")",
-              "count": 1
-            }
-          ],
-          "expect_invariant": "ResolverDecision"
-        },
-        {
-          "id": "PreferTrailingAllow",
-          "edits": [
-            {
-              "old": "allowed == readable /\\ Grant(row.doc)",
-              "new": "allowed == readable /\\ (Grant(row.doc) \\/ row.doc = \"denyAllow\")",
-              "count": 1
-            }
-          ],
-          "expect_invariant": "ResolverDecision"
-        },
-        {
-          "id": "TreatDenyAsAllow",
-          "edits": [
-            {
-              "old": "allowed == readable /\\ Grant(row.doc)",
-              "new": "allowed == readable /\\ (Grant(row.doc) \\/ row.doc = \"deny\")",
-              "count": 1
-            }
-          ],
-          "expect_invariant": "ResolverDecision"
-        },
-        {
-          "id": "SynthesizeMissingGrant",
-          "edits": [
-            {
-              "old": "allowed == readable /\\ Grant(row.doc)",
-              "new": "allowed == readable /\\ (Grant(row.doc) \\/ row.doc = \"none\")",
-              "count": 1
-            }
-          ],
-          "expect_invariant": "ResolverDecision"
-        },
-        {
-          "id": "DenyMatchingServiceGrant",
-          "edits": [
-            {
-              "old": "allowed == readable /\\ Grant(row.doc)",
-              "new": "allowed == FALSE",
-              "count": 1
-            }
-          ],
-          "expect_invariant": "ResolverDecision"
-        },
-        {
-          "id": "ClearPolicyOnCorruptRead",
-          "edits": [
-            {
-              "old": "/\\ UNCHANGED <<topic, row, high, peer, captured>>\n\nCapture ==",
-              "new": "/\\ row' = IF m = \"badRow\" THEN Absent ELSE row\n       /\\ UNCHANGED <<topic, high, peer, captured>>\n\nCapture ==",
-              "count": 1
-            }
-          ],
-          "expect_invariant": "ReadsPreserveStore"
-        },
-        {
-          "id": "CaptureWrongGeneration",
-          "edits": [
-            {
-              "old": "captured' = row.gen",
-              "new": "captured' = 0",
-              "count": 1
-            }
-          ],
-          "expect_invariant": "CaptureExact"
-        },
-        {
-          "id": "AcceptPeerWithEqualGeneration",
-          "edits": [
-            {
-              "old": "OwnTicket(source) == source = \"own\"",
-              "new": "OwnTicket(source) == TRUE",
-              "count": 1
-            }
-          ],
-          "expect_invariant": "CapturedCurrentGrant"
-        },
-        {
-          "id": "ReuseCaptureAcrossRecreation",
-          "edits": [
-            {
-              "old": "generation = row.gen /\\ Grant(row.doc)",
-              "new": "row.gen # 0 /\\ Grant(row.doc)",
-              "count": 1
-            }
-          ],
-          "expect_invariant": "CapturedCurrentGrant"
-        },
-        {
-          "id": "UseRevokedCapture",
-          "edits": [
-            {
-              "old": "generation = row.gen /\\ Grant(row.doc)",
-              "new": "generation = row.gen",
-              "count": 1
-            }
-          ],
-          "expect_invariant": "CapturedCurrentGrant"
-        },
-        {
-          "id": "LosePolicyOnRestart",
-          "edits": [
-            {
-              "old": "Restart ==\n    /\\ row' = row",
-              "new": "Restart ==\n    /\\ row' = Absent",
-              "count": 1
-            }
-          ],
-          "expect_invariant": "RestartPreservesStore"
-        },
-        {
-          "id": "LoseAllocatorOnRestart",
-          "edits": [
-            {
-              "old": "Restart ==\n    /\\ row' = row\n    /\\ high' = high",
-              "new": "Restart ==\n    /\\ row' = row\n    /\\ high' = 0",
-              "count": 1
-            }
-          ],
-          "expect_invariant": "RestartPreservesStore"
         }
       ]
     },

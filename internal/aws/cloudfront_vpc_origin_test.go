@@ -24,7 +24,7 @@ func cfHarnessFor(t *testing.T) *cfHarness {
 		t.Fatal(err)
 	}
 	h.gateway.CloudFront = s
-	lb := elbDecode(t, h.ok("CreateLoadBalancer", "Name", "origin-target", "Scheme", "internal", "Subnets.member.1", "subnet-0123456789abcdef0", "Subnets.member.2", "subnet-89abcdef")).LoadBalancers[0].LoadBalancerArn
+	lb := elbDecode(t, h.ok("CreateLoadBalancer", "Name", "origin-target", "Scheme", "internal", "Subnets.member.1", h.network.a, "Subnets.member.2", h.network.b, "SecurityGroups.member.1", h.network.group)).LoadBalancers[0].LoadBalancerArn
 	c := "<VpcOriginEndpointConfig><Name>origin-a</Name><Arn>" + lb + "</Arn><HTTPPort>80</HTTPPort><HTTPSPort>443</HTTPSPort><OriginProtocolPolicy>http-only</OriginProtocolPolicy></VpcOriginEndpointConfig>"
 	return &cfHarness{h, lb, c}
 }

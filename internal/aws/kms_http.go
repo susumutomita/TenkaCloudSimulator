@@ -12,6 +12,12 @@ import (
 )
 
 type kmsRequest struct {
+	PendingWindowInDays int
+	GranteePrincipal    string
+	Operations          []string
+	GrantId             string
+	Name                string
+	GrantTokens         []string
 	Description         string
 	KeySpec             string
 	KeyUsage            string
@@ -30,8 +36,12 @@ type kmsRequest struct {
 }
 
 var kmsFields = map[string][]string{
+	"ScheduleKeyDeletion": {"KeyId", "PendingWindowInDays"}, "CancelKeyDeletion": {"KeyId"},
 	"CreateKey":   {"Description", "KeySpec", "KeyUsage", "Origin", "MultiRegion"},
-	"DescribeKey": {"KeyId"}, "ListKeys": {"Limit", "Marker"}, "EnableKey": {"KeyId"}, "DisableKey": {"KeyId"},
+	"CreateGrant": {"KeyId", "GranteePrincipal", "Operations", "Name"},
+	"ListGrants":  {"KeyId", "Limit", "Marker", "GranteePrincipal", "GrantId"},
+	"RevokeGrant": {"KeyId", "GrantId"},
+	"DescribeKey": {"KeyId", "GrantTokens"}, "ListKeys": {"Limit", "Marker"}, "EnableKey": {"KeyId"}, "DisableKey": {"KeyId"},
 	"GetKeyPolicy": {"KeyId", "PolicyName"},
 	"Encrypt":      {"KeyId", "Plaintext", "EncryptionContext", "EncryptionAlgorithm"},
 	"Decrypt":      {"KeyId", "CiphertextBlob", "EncryptionContext", "EncryptionAlgorithm"},
@@ -213,7 +223,7 @@ func kmsDecode(data []byte, op string) (kmsRequest, error) {
 	if json.Unmarshal(data, &request) != nil {
 		return request, kmsInvalid()
 	}
-	for _, f := range []string{"KeySpec", "KeyUsage", "Origin", "PolicyName", "KeyId", "EncryptionAlgorithm", "Marker", "AliasName", "TargetKeyId"} {
+	for _, f := range []string{"KeySpec", "KeyUsage", "Origin", "PolicyName", "KeyId", "EncryptionAlgorithm", "Marker", "AliasName", "TargetKeyId", "Name", "GrantId", "GranteePrincipal"} {
 		if value, ok := raw[f]; ok {
 			var s string
 			if json.Unmarshal(value, &s) != nil || s == "" {
@@ -242,7 +252,15 @@ func kmsDecode(data []byte, op string) (kmsRequest, error) {
 			return request, kmsInvalid()
 		}
 	}
-	if op == "ListAliases" {
+	if op == "ScheduleKeyDeletion" {
+		if _, present := raw["PendingWindowInDays"]; !present {
+			request.PendingWindowInDays = 30
+		}
+		if request.PendingWindowInDays < 7 || request.PendingWindowInDays > 30 {
+			return request, kmsInvalid()
+		}
+	}
+	if op == "ListAliases" || op == "ListGrants" {
 		if _, present := raw["Limit"]; !present {
 			request.Limit = 50
 		}
@@ -289,6 +307,9 @@ func (s *KMSStore) ServeHTTP(w http.ResponseWriter, r *http.Request, region stri
 		kmsWriteError(w, err)
 		return
 	}
+	if s.serveGrantRequest(w, r, region, op, request, authorize) {
+		return
+	}
 	if s.serveAliasRequest(w, r, region, op, request, authorize) {
 		return
 	}
@@ -324,6 +345,12 @@ func (s *KMSStore) ServeHTTP(w http.ResponseWriter, r *http.Request, region stri
 		var key KMSKeyMetadata
 		key, err = s.DescribeKey(r.Context(), region, request.KeyId)
 		response = map[string]any{"KeyMetadata": key}
+	case "ScheduleKeyDeletion":
+		response, err = s.scheduleDeletion(r.Context(), region, request.KeyId, request.PendingWindowInDays)
+	case "CancelKeyDeletion":
+		var arn string
+		arn, err = s.cancelDeletion(r.Context(), region, request.KeyId)
+		response = map[string]string{"KeyId": arn}
 	case "ListKeys":
 		response, err = s.ListKeys(r.Context(), region, request.Limit, request.Marker)
 	case "EnableKey", "DisableKey":

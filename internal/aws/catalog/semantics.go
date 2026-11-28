@@ -47,6 +47,20 @@ func (q *request) execute() (map[string]any, error) {
 	if q.op.Handle != nil {
 		return q.op.Handle(q)
 	}
+	if q.b.spec.Model == "service-quotas" {
+		switch q.op.Name {
+		case "GetServiceQuota", "GetAWSDefaultServiceQuota":
+			return q.readQuota()
+		case "ListServices", "ListServiceQuotas", "ListAWSDefaultServiceQuotas":
+			return q.listQuotas()
+		case "RequestServiceQuotaIncrease":
+			return q.requestQuotaIncrease()
+		case "GetRequestedServiceQuotaChange":
+			return q.getQuotaIncrease()
+		case "ListRequestedServiceQuotaChangeHistory", "ListRequestedServiceQuotaChangeHistoryByQuota":
+			return q.listQuotaIncreaseHistory()
+		}
+	}
 	switch q.op.Kind {
 	case Create:
 		if q.isECSTaskDefinition() {
@@ -866,10 +880,7 @@ func (q *request) create(ecsRevision int) (map[string]any, error) {
 }
 
 func insertNewResource(tx *sql.Tx, res *Resource, r *row, parent *row) error {
-	limit := res.Limit
-	if limit == 0 {
-		limit = defaultKindLimit
-	}
+	limit := res.liveLimit()
 	count, err := countKind(tx, r.Service, r.Region, r.Kind, r.Parent)
 	if err != nil {
 		return err

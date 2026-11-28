@@ -118,7 +118,8 @@
                 "secretsmanager",
                 "dynamodb",
                 "sdb",
-                "ec2"
+                "ec2",
+                "elasticloadbalancing"
               ]
             },
             "description": "Optional native service hint; when supplied it must match the selected service target. iam selects IAM Query; cloudformation selects CloudFormation Query. SSM/Logs/KMS/Secrets Manager use JSON 1.1; SQS/DynamoDB use JSON 1.0. This routing hint grants no access."
@@ -186,6 +187,21 @@
                   },
                   {
                     "$ref": "#/components/schemas/KMSDeleteAliasInput"
+                  },
+                  {
+                    "$ref": "#/components/schemas/KMSDescribeKeyInput"
+                  },
+                  {
+                    "$ref": "#/components/schemas/KMSCreateGrantInput"
+                  },
+                  {
+                    "$ref": "#/components/schemas/KMSListGrantsInput"
+                  },
+                  {
+                    "$ref": "#/components/schemas/KMSRevokeGrantInput"
+                  },
+                  {
+                    "$ref": "#/components/schemas/KMSScheduleKeyDeletionInput"
                   },
                   {
                     "$ref": "#/components/schemas/SecretsListSecretVersionIdsInput"
@@ -496,6 +512,47 @@
                     "AliasName": "alias/practice"
                   }
                 },
+                "KMSCreateGrant": {
+                  "summary": "X-Amz-Target: TrentService.CreateGrant",
+                  "description": "Replace the example key ID, role ARN or grant ID with existing local resources. Grant management uses a concrete key ID or ARN.",
+                  "value": {
+                    "KeyId": "11111111-1111-4111-8111-111111111111",
+                    "GranteePrincipal": "arn:aws:iam::000000000000:role/practice",
+                    "Operations": [
+                      "DescribeKey"
+                    ]
+                  }
+                },
+                "KMSListGrants": {
+                  "summary": "X-Amz-Target: TrentService.ListGrants",
+                  "description": "Replace the example key ID, role ARN or grant ID with existing local resources. Grant management uses a concrete key ID or ARN.",
+                  "value": {
+                    "KeyId": "11111111-1111-4111-8111-111111111111"
+                  }
+                },
+                "KMSRevokeGrant": {
+                  "summary": "X-Amz-Target: TrentService.RevokeGrant",
+                  "description": "Replace the example key ID, role ARN or grant ID with existing local resources. Grant management uses a concrete key ID or ARN.",
+                  "value": {
+                    "KeyId": "11111111-1111-4111-8111-111111111111",
+                    "GrantId": "0000000000000000000000000000000000000000000000000000000000000000"
+                  }
+                },
+                "KMSScheduleKeyDeletion": {
+                  "summary": "X-Amz-Target: TrentService.ScheduleKeyDeletion",
+                  "description": "Replace KeyId with the ID or ARN of your own local practice key.",
+                  "value": {
+                    "KeyId": "11111111-1111-4111-8111-111111111111",
+                    "PendingWindowInDays": 7
+                  }
+                },
+                "KMSCancelKeyDeletion": {
+                  "summary": "X-Amz-Target: TrentService.CancelKeyDeletion",
+                  "description": "Replace KeyId with the ID or ARN of your own local practice key.",
+                  "value": {
+                    "KeyId": "11111111-1111-4111-8111-111111111111"
+                  }
+                },
                 "ListSecretVersionIds": {
                   "summary": "X-Amz-Target: secretsmanager.ListSecretVersionIds",
                   "description": "Static metadata-only request. Create training/version-list first or replace SecretId with the exact saved name/full ARN. Set JSON1.1 and this target explicitly; changing a body example does not change Scalar headers. IncludeDeprecated includes retained unlabeled versions. Continuation is live and scoped, not a snapshot.",
@@ -702,7 +759,20 @@
                       "DescribeRouteTables",
                       "CreateDomain",
                       "PutAttributes",
-                      "DeleteDomain"
+                      "DeleteDomain",
+                      "CreateLoadBalancer",
+                      "DescribeLoadBalancers",
+                      "DeleteLoadBalancer",
+                      "CreateTargetGroup",
+                      "DescribeTargetGroups",
+                      "ModifyTargetGroup",
+                      "DeleteTargetGroup",
+                      "RegisterTargets",
+                      "DeregisterTargets",
+                      "DescribeTargetHealth",
+                      "CreateListener",
+                      "DescribeListeners",
+                      "DeleteListener"
                     ]
                   },
                   "Version": {
@@ -711,7 +781,8 @@
                       "2010-05-15",
                       "2010-05-08",
                       "2009-04-15",
-                      "2016-11-15"
+                      "2016-11-15",
+                      "2015-12-01"
                     ]
                   },
                   "StackName": {
@@ -828,6 +899,78 @@
                       "false"
                     ],
                     "description": "PutAttributes: true replaces existing values of this attribute only; other attributes are preserved."
+                  },
+                  "Name": {
+                    "type": "string",
+                    "description": "Name of a local Application Load Balancer or Lambda target group."
+                  },
+                  "Subnets.member.1": {
+                    "type": "string",
+                    "description": "First EC2-managed subnet ID."
+                  },
+                  "Subnets.member.2": {
+                    "type": "string",
+                    "description": "Second EC2-managed subnet ID in a different zone of the same VPC."
+                  },
+                  "SecurityGroups.member.1": {
+                    "type": "string",
+                    "description": "EC2-managed security group ID in that VPC."
+                  },
+                  "Names.member.1": {
+                    "type": "string",
+                    "description": "Optional exact load balancer or target group name."
+                  },
+                  "PageSize": {
+                    "type": "integer",
+                    "description": "Maximum results in this ELBv2 page, from 1 to 400."
+                  },
+                  "LoadBalancerArns.member.1": {
+                    "type": "string",
+                    "description": "Optional exact LoadBalancerArn for a DescribeLoadBalancers query."
+                  },
+                  "LoadBalancerArn": {
+                    "type": "string",
+                    "description": "LoadBalancerArn returned by ELBv2 in this region."
+                  },
+                  "TargetType": {
+                    "type": "string",
+                    "description": "Use lambda for a local target group."
+                  },
+                  "TargetGroupArn": {
+                    "type": "string",
+                    "description": "TargetGroupArn returned by ELBv2 in this region."
+                  },
+                  "HealthCheckEnabled": {
+                    "type": "boolean",
+                    "description": "Enable periodic checks of the local Lambda target."
+                  },
+                  "HealthCheckPath": {
+                    "type": "string",
+                    "description": "Request path passed to the function for health checks."
+                  },
+                  "Targets.member.1.Id": {
+                    "type": "string",
+                    "description": "ARN of the local Lambda function."
+                  },
+                  "Protocol": {
+                    "type": "string",
+                    "description": "Use HTTP for a local listener."
+                  },
+                  "Port": {
+                    "type": "integer",
+                    "description": "Listener port, from 1 to 65535."
+                  },
+                  "DefaultActions.member.1.Type": {
+                    "type": "string",
+                    "description": "Use forward to send requests to the target group."
+                  },
+                  "DefaultActions.member.1.TargetGroupArn": {
+                    "type": "string",
+                    "description": "Returned ARN of the group receiving listener traffic."
+                  },
+                  "ListenerArn": {
+                    "type": "string",
+                    "description": "ListenerArn returned for this load balancer."
                   }
                 }
               },
@@ -1198,6 +1341,136 @@
                     "Action": "DeleteDomain",
                     "Version": "2009-04-15",
                     "DomainName": "scalar-practice-domain"
+                  }
+                },
+                "CreateLoadBalancer": {
+                  "summary": "ELBv2: Create an Application Load Balancer",
+                  "description": "Select the elasticloadbalancing service header and clear X-Amz-Target. Use EC2 to create one VPC, two subnets in different Availability Zones, and a security group in the same VPC. Paste their returned IDs. Retain the returned LoadBalancerArn for listener operations.",
+                  "value": {
+                    "Action": "CreateLoadBalancer",
+                    "Version": "2015-12-01",
+                    "Name": "scalar-practice-alb",
+                    "Subnets.member.1": "REPLACE_WITH_FIRST_SUBNET_ID",
+                    "Subnets.member.2": "REPLACE_WITH_SECOND_SUBNET_ID",
+                    "SecurityGroups.member.1": "REPLACE_WITH_SECURITY_GROUP_ID"
+                  }
+                },
+                "DescribeLoadBalancers": {
+                  "summary": "ELBv2: Look up an Application Load Balancer by ARN",
+                  "description": "Select the elasticloadbalancing service header and clear X-Amz-Target. Paste its ARN to see its VPC, security groups, subnets and zones. Omit LoadBalancerArns.member.1 to list all regional load balancers.",
+                  "value": {
+                    "Action": "DescribeLoadBalancers",
+                    "Version": "2015-12-01",
+                    "LoadBalancerArns.member.1": "REPLACE_WITH_LOAD_BALANCER_ARN",
+                    "PageSize": 20
+                  }
+                },
+                "DeleteLoadBalancer": {
+                  "summary": "ELBv2: Delete a local Application Load Balancer",
+                  "description": "Select the elasticloadbalancing service header and clear X-Amz-Target. Paste the ARN of your disposable load balancer. Deletion removes its listeners and releases its EC2 placement references.",
+                  "value": {
+                    "Action": "DeleteLoadBalancer",
+                    "Version": "2015-12-01",
+                    "LoadBalancerArn": "REPLACE_WITH_LOAD_BALANCER_ARN"
+                  }
+                },
+                "CreateTargetGroup": {
+                  "summary": "ELBv2: Create a Lambda target group",
+                  "description": "Select the elasticloadbalancing service header and clear X-Amz-Target. Choose a name for a disposable local target group. Copy the returned TargetGroupArn for subsequent operations. Newly created Lambda target groups have health checks disabled by default.",
+                  "value": {
+                    "Action": "CreateTargetGroup",
+                    "Version": "2015-12-01",
+                    "Name": "scalar-practice-targets",
+                    "TargetType": "lambda"
+                  }
+                },
+                "DescribeTargetGroups": {
+                  "summary": "ELBv2: Find a target group by name",
+                  "description": "Select the elasticloadbalancing service header and clear X-Amz-Target. Use the name of a saved target group. Omit Names.member.1 to list regional target groups.",
+                  "value": {
+                    "Action": "DescribeTargetGroups",
+                    "Version": "2015-12-01",
+                    "Names.member.1": "scalar-practice-targets"
+                  }
+                },
+                "ModifyTargetGroup": {
+                  "summary": "ELBv2: Enable health checks for a target group",
+                  "description": "Select the elasticloadbalancing service header and clear X-Amz-Target. Paste its returned ARN. The local health checker calls a registered Lambda function when the group is attached to a listener.",
+                  "value": {
+                    "Action": "ModifyTargetGroup",
+                    "Version": "2015-12-01",
+                    "TargetGroupArn": "REPLACE_WITH_TARGET_GROUP_ARN",
+                    "HealthCheckEnabled": true,
+                    "HealthCheckPath": "/health"
+                  }
+                },
+                "DeleteTargetGroup": {
+                  "summary": "ELBv2: Delete a local target group",
+                  "description": "Select the elasticloadbalancing service header and clear X-Amz-Target. First remove listeners that forward to this disposable group. Paste its actual ARN.",
+                  "value": {
+                    "Action": "DeleteTargetGroup",
+                    "Version": "2015-12-01",
+                    "TargetGroupArn": "REPLACE_WITH_TARGET_GROUP_ARN"
+                  }
+                },
+                "RegisterTargets": {
+                  "summary": "ELBv2: Register a local Lambda target",
+                  "description": "Select the elasticloadbalancing service header and clear X-Amz-Target. Paste the target group ARN and the ARN of your saved function. For invocation, the function policy must allow elasticloadbalancing.amazonaws.com to invoke it from this group.",
+                  "value": {
+                    "Action": "RegisterTargets",
+                    "Version": "2015-12-01",
+                    "TargetGroupArn": "REPLACE_WITH_TARGET_GROUP_ARN",
+                    "Targets.member.1.Id": "REPLACE_WITH_FUNCTION_ARN"
+                  }
+                },
+                "DeregisterTargets": {
+                  "summary": "ELBv2: Deregister a Lambda target",
+                  "description": "Select the elasticloadbalancing service header and clear X-Amz-Target. Paste the group and function ARNs used for registration.",
+                  "value": {
+                    "Action": "DeregisterTargets",
+                    "Version": "2015-12-01",
+                    "TargetGroupArn": "REPLACE_WITH_TARGET_GROUP_ARN",
+                    "Targets.member.1.Id": "REPLACE_WITH_FUNCTION_ARN"
+                  }
+                },
+                "DescribeTargetHealth": {
+                  "summary": "ELBv2: Read saved target health",
+                  "description": "Select the elasticloadbalancing service header and clear X-Amz-Target. Paste the target group ARN. The XML response identifies its registered function and the current health state and reason, when applicable.",
+                  "value": {
+                    "Action": "DescribeTargetHealth",
+                    "Version": "2015-12-01",
+                    "TargetGroupArn": "REPLACE_WITH_TARGET_GROUP_ARN"
+                  }
+                },
+                "CreateListener": {
+                  "summary": "ELBv2: Create an HTTP listener",
+                  "description": "Select the elasticloadbalancing service header and clear X-Amz-Target. Paste the ARN of your disposable load balancer and target group. The listener forwards requests on the specified port to that group.",
+                  "value": {
+                    "Action": "CreateListener",
+                    "Version": "2015-12-01",
+                    "LoadBalancerArn": "REPLACE_WITH_LOAD_BALANCER_ARN",
+                    "Protocol": "HTTP",
+                    "Port": 80,
+                    "DefaultActions.member.1.Type": "forward",
+                    "DefaultActions.member.1.TargetGroupArn": "REPLACE_WITH_TARGET_GROUP_ARN"
+                  }
+                },
+                "DescribeListeners": {
+                  "summary": "ELBv2: List the listeners of a load balancer",
+                  "description": "Select the elasticloadbalancing service header and clear X-Amz-Target. Paste its saved ARN to see listener ARNs, ports and configured actions.",
+                  "value": {
+                    "Action": "DescribeListeners",
+                    "Version": "2015-12-01",
+                    "LoadBalancerArn": "REPLACE_WITH_LOAD_BALANCER_ARN"
+                  }
+                },
+                "DeleteListener": {
+                  "summary": "ELBv2: Delete a local listener",
+                  "description": "Select the elasticloadbalancing service header and clear X-Amz-Target. Paste the ARN of the disposable listener returned by CreateListener or DescribeListeners.",
+                  "value": {
+                    "Action": "DeleteListener",
+                    "Version": "2015-12-01",
+                    "ListenerArn": "REPLACE_WITH_LISTENER_ARN"
                   }
                 }
               }
@@ -1572,6 +1845,18 @@
                     },
                     {
                       "$ref": "#/components/schemas/KMSAliasPage"
+                    },
+                    {
+                      "$ref": "#/components/schemas/KMSCreateGrantResponse"
+                    },
+                    {
+                      "$ref": "#/components/schemas/KMSGrantPage"
+                    },
+                    {
+                      "$ref": "#/components/schemas/KMSScheduledDeletion"
+                    },
+                    {
+                      "$ref": "#/components/schemas/KMSCanceledDeletion"
                     },
                     {
                       "type": "object"
@@ -1985,7 +2270,7 @@
           "DescribeKey": {
             "target": "TrentService.DescribeKey",
             "request": {
-              "$ref": "#/components/schemas/KMSKeyInput"
+              "$ref": "#/components/schemas/KMSDescribeKeyInput"
             },
             "response": {
               "$ref": "#/components/schemas/KMSKeyResponse"
@@ -2079,6 +2364,51 @@
             },
             "response": {
               "description": "empty HTTP200 body"
+            }
+          },
+          "CreateGrant": {
+            "target": "TrentService.CreateGrant",
+            "request": {
+              "$ref": "#/components/schemas/KMSCreateGrantInput"
+            },
+            "response": {
+              "$ref": "#/components/schemas/KMSCreateGrantResponse"
+            }
+          },
+          "ListGrants": {
+            "target": "TrentService.ListGrants",
+            "request": {
+              "$ref": "#/components/schemas/KMSListGrantsInput"
+            },
+            "response": {
+              "$ref": "#/components/schemas/KMSGrantPage"
+            }
+          },
+          "RevokeGrant": {
+            "target": "TrentService.RevokeGrant",
+            "request": {
+              "$ref": "#/components/schemas/KMSRevokeGrantInput"
+            },
+            "response": {
+              "description": "empty HTTP200 body"
+            }
+          },
+          "ScheduleKeyDeletion": {
+            "target": "TrentService.ScheduleKeyDeletion",
+            "request": {
+              "$ref": "#/components/schemas/KMSScheduleKeyDeletionInput"
+            },
+            "response": {
+              "$ref": "#/components/schemas/KMSScheduledDeletion"
+            }
+          },
+          "CancelKeyDeletion": {
+            "target": "TrentService.CancelKeyDeletion",
+            "request": {
+              "$ref": "#/components/schemas/KMSKeyInput"
+            },
+            "response": {
+              "$ref": "#/components/schemas/KMSCanceledDeletion"
             }
           }
         },
@@ -15894,6 +16224,10 @@
           "CreationDate": {
             "type": "number"
           },
+          "DeletionDate": {
+            "type": "number",
+            "description": "UTC deadline in seconds since the Unix epoch, present while PendingDeletion."
+          },
           "Enabled": {
             "type": "boolean"
           },
@@ -15908,7 +16242,8 @@
             "type": "string",
             "enum": [
               "Enabled",
-              "Disabled"
+              "Disabled",
+              "PendingDeletion"
             ]
           },
           "Origin": {
@@ -17612,6 +17947,277 @@
             }
           }
         ]
+      },
+      "KMSDescribeKeyInput": {
+        "type": "object",
+        "properties": {
+          "KeyId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2048,
+            "description": "Local UUID key ID or full same-region/account ARN. Replace example IDs with CreateKey output. Aliases and cross-account keys are unsupported."
+          },
+          "GrantTokens": {
+            "type": "array",
+            "maxItems": 10,
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 8192
+            },
+            "description": "Optional tokens for the verified grant grantee."
+          }
+        },
+        "required": [
+          "KeyId"
+        ],
+        "additionalProperties": false
+      },
+      "KMSCreateGrantInput": {
+        "type": "object",
+        "properties": {
+          "KeyId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2048,
+            "description": "Local UUID key ID or full same-region/account ARN. Replace example IDs with CreateKey output. Aliases and cross-account keys are unsupported."
+          },
+          "GranteePrincipal": {
+            "type": "string",
+            "pattern": "^arn:aws:iam::000000000000:role/[A-Za-z0-9_-]{1,64}$"
+          },
+          "Operations": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 1,
+            "items": {
+              "type": "string",
+              "enum": [
+                "DescribeKey"
+              ]
+            }
+          },
+          "Name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256,
+            "pattern": "^[a-zA-Z0-9:/_-]+$"
+          }
+        },
+        "required": [
+          "KeyId",
+          "GranteePrincipal",
+          "Operations"
+        ],
+        "additionalProperties": false
+      },
+      "KMSListGrantsInput": {
+        "type": "object",
+        "properties": {
+          "KeyId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2048,
+            "description": "Local UUID key ID or full same-region/account ARN. Replace example IDs with CreateKey output. Aliases and cross-account keys are unsupported."
+          },
+          "Limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100,
+            "default": 50
+          },
+          "Marker": {
+            "type": "string",
+            "minLength": 1
+          },
+          "GrantId": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "GranteePrincipal": {
+            "type": "string",
+            "pattern": "^arn:aws:iam::000000000000:role/[A-Za-z0-9_-]{1,64}$"
+          }
+        },
+        "required": [
+          "KeyId"
+        ],
+        "additionalProperties": false
+      },
+      "KMSRevokeGrantInput": {
+        "type": "object",
+        "properties": {
+          "KeyId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2048,
+            "description": "Local UUID key ID or full same-region/account ARN. Replace example IDs with CreateKey output. Aliases and cross-account keys are unsupported."
+          },
+          "GrantId": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          }
+        },
+        "required": [
+          "KeyId",
+          "GrantId"
+        ],
+        "additionalProperties": false
+      },
+      "KMSCreateGrantResponse": {
+        "type": "object",
+        "properties": {
+          "GrantId": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "GrantToken": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 8192
+          }
+        },
+        "required": [
+          "GrantId",
+          "GrantToken"
+        ],
+        "additionalProperties": false
+      },
+      "KMSGrantEntry": {
+        "type": "object",
+        "properties": {
+          "KeyId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2048,
+            "description": "Local UUID key ID or full same-region/account ARN. Replace example IDs with CreateKey output. Aliases and cross-account keys are unsupported."
+          },
+          "GrantId": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "Name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256,
+            "pattern": "^[a-zA-Z0-9:/_-]+$"
+          },
+          "CreationDate": {
+            "type": "number"
+          },
+          "GranteePrincipal": {
+            "type": "string",
+            "pattern": "^arn:aws:iam::000000000000:role/[A-Za-z0-9_-]{1,64}$"
+          },
+          "IssuingAccount": {
+            "type": "string"
+          },
+          "Operations": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 1,
+            "items": {
+              "type": "string",
+              "enum": [
+                "DescribeKey"
+              ]
+            }
+          }
+        },
+        "required": [
+          "KeyId",
+          "GrantId",
+          "CreationDate",
+          "GranteePrincipal",
+          "IssuingAccount",
+          "Operations"
+        ],
+        "additionalProperties": false
+      },
+      "KMSGrantPage": {
+        "type": "object",
+        "properties": {
+          "Grants": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/KMSGrantEntry"
+            }
+          },
+          "Truncated": {
+            "type": "boolean"
+          },
+          "NextMarker": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "Grants",
+          "Truncated"
+        ],
+        "additionalProperties": false
+      },
+      "KMSScheduleKeyDeletionInput": {
+        "type": "object",
+        "properties": {
+          "KeyId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2048,
+            "description": "Local UUID key ID or full same-region/account ARN. Replace example IDs with CreateKey output. Aliases and cross-account keys are unsupported."
+          },
+          "PendingWindowInDays": {
+            "type": "integer",
+            "minimum": 7,
+            "maximum": 30,
+            "default": 30
+          }
+        },
+        "required": [
+          "KeyId"
+        ],
+        "additionalProperties": false
+      },
+      "KMSScheduledDeletion": {
+        "type": "object",
+        "properties": {
+          "KeyId": {
+            "type": "string",
+            "description": "Full canonical ARN of the local KMS key."
+          },
+          "DeletionDate": {
+            "type": "number"
+          },
+          "KeyState": {
+            "type": "string",
+            "const": "PendingDeletion"
+          },
+          "PendingWindowInDays": {
+            "type": "integer",
+            "minimum": 7,
+            "maximum": 30,
+            "default": 30
+          }
+        },
+        "required": [
+          "KeyId",
+          "DeletionDate",
+          "KeyState",
+          "PendingWindowInDays"
+        ],
+        "additionalProperties": false
+      },
+      "KMSCanceledDeletion": {
+        "type": "object",
+        "properties": {
+          "KeyId": {
+            "type": "string",
+            "description": "Full canonical ARN of the local KMS key."
+          }
+        },
+        "required": [
+          "KeyId"
+        ],
+        "additionalProperties": false
       },
       "SecretsListSecretVersionIdsInput": {
         "type": "object",

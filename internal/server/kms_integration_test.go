@@ -104,7 +104,7 @@ func TestKMSRegularServerUsesLocalAccessAndPersistsRegionalKeys(t *testing.T) {
 	if err := json.Unmarshal(services["kms"], &kms); err != nil {
 		t.Fatal(err)
 	}
-	if !reflect.DeepEqual(kms.Operations, []string{"CreateKey", "DescribeKey", "ListKeys", "EnableKey", "DisableKey", "GetKeyPolicy", "Encrypt", "Decrypt", "CreateAlias", "ListAliases", "UpdateAlias", "DeleteAlias"}) {
+	if !reflect.DeepEqual(kms.Operations, []string{"CreateKey", "DescribeKey", "ListKeys", "EnableKey", "DisableKey", "GetKeyPolicy", "Encrypt", "Decrypt", "CreateAlias", "ListAliases", "UpdateAlias", "DeleteAlias", "CreateGrant", "ListGrants", "RevokeGrant", "ScheduleKeyDeletion", "CancelKeyDeletion"}) {
 		t.Fatal("capabilities advertised incorrect operation set", kms.Operations)
 	}
 	// Real default-server alias operations share this existing key/DB. No

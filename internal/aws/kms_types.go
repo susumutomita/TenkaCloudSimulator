@@ -29,6 +29,7 @@ type KMSKeyMetadata struct {
 	KeyID                string
 	Arn                  string
 	CreationDate         float64
+	DeletionDate         float64
 	Enabled              bool
 	Description          string
 	KeyUsage             string
@@ -49,6 +50,7 @@ func (key KMSKeyMetadata) MarshalJSON() ([]byte, error) {
 		awsOwnedWireField{"KeyId", key.KeyID, false},
 		awsOwnedWireField{"Arn", key.Arn, false},
 		awsOwnedWireField{"CreationDate", key.CreationDate, false},
+		awsOwnedWireField{"DeletionDate", key.DeletionDate, key.DeletionDate == 0},
 		awsOwnedWireField{"Enabled", key.Enabled, false},
 		awsOwnedWireField{"Description", key.Description, false},
 		awsOwnedWireField{"KeyUsage", key.KeyUsage, false},
@@ -116,6 +118,6 @@ func kmsAAD(region, id string, context map[string]string) ([]byte, error) {
 	}{"TCSIMKMS1", region, kmsARN(region, id), c})
 }
 func kmsMetadata(region, id, description, state string, created float64) KMSKeyMetadata {
-	return KMSKeyMetadata{kmsAccount, id, kmsARN(region, id), created, state == "Enabled", description, "ENCRYPT_DECRYPT", state, "AWS_KMS", "CUSTOMER", "SYMMETRIC_DEFAULT", []string{"SYMMETRIC_DEFAULT"}, false}
+	return KMSKeyMetadata{kmsAccount, id, kmsARN(region, id), created, 0, state == "Enabled", description, "ENCRYPT_DECRYPT", state, "AWS_KMS", "CUSTOMER", "SYMMETRIC_DEFAULT", []string{"SYMMETRIC_DEFAULT"}, false}
 }
 func kmsCorrupt(reason string) error { return fmt.Errorf("invalid persisted KMS %s", reason) }

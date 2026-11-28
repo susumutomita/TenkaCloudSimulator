@@ -9,6 +9,10 @@
 
 `core.Store` はインメモリ起動時に専用の SQLite データベースを所有する。要求の取り消しで接続が入れ替わっても、コミット済みのプロバイダーのテーブルと行を次の接続から参照できる。未コミットの書き込みはロールバックされ、メモリ上のデータベースはストアを閉じた時点で解放される。メモリとファイルのどちらでも、接続ごとに外部キー制約と 5 秒のロック待機時間を設定する。
 
+KMS のグラントはリージョン内の具体的なキーと IAM ロールの世代 ID を SQLite に保存する。署名済み STS セッションの `DescribeKey` が、その世代・ロールポリシー・グラントの実際の状態を検証する。失効したグラントによる読み取りは拒否する。 [KMS の範囲](../kms.md#grants-for-a-local-iam-role)
+
+KMS の削除予約は SQLite に UTC の期限を保存する。期限前の取り消しはキーを Disabled に戻す。次のプロセス起動または KMS 操作時に、期限を過ぎたキーと残存するエイリアスおよびグラントを同じトランザクションで削除する。 [削除予約](../kms.md#scheduled-key-deletion)
+
 Coreは問題ID/採点を知らない。SSM・stack/ownershipのschemaはAWS layerがcoreの共有DBを使用して初期化する。CFNはcompileで全リソースと参照を検証後、stack、ownership claim、parameter、identity、S3 bucket/config/tagsを単一transactionで作成。削除でも同一transaction。手動削除されたparameterのclaimを残し、他stackが再取得して旧stackのcleanupで消される事故を防ぐ。role/bucket namespaceはglobal、SSM/stackはregion別、Lambda claimはlambda:<region>。
 
 Lambda定義/ZIP/region/role/environment/revisionはAWS layerのprovider-owned SQLite tableに保存する。native APIのIAM・PassRoleを評価した後、provider-neutralなinternal/workload/pythonへコード/event/contextと明示したbounded capability・固定module FSを渡す。固定CPython/WASI・選択stdlib・原文rightsを埋め込み、host filesystem/environment/process/socketは渡さない。guest memory/時間/出力量/同時実行を制限する。限定inline Lambda CFNを同じ保存処理へ接続する。関数内SDKは保存role/regionに固定したnative SSM/S3 subsetのみ。問題固有のhandlerや任意HTTP proxyはない。[制限](../lambda.md)。
@@ -19,13 +23,23 @@ Consoleは公式Cloudscape/Reactを開発時にbundleし、fonts/assets/licenses
 
 [AWS Auto Scaling Plans のコンソール](../autoscaling-plans.md)は選択リージョンの共有 JSON API でプランを作成し、既存の DynamoDB テーブルに対する読み込みまたは書き込みの容量範囲を更新する。プラン状態は Scaling Plans から、実際の両方の容量は DynamoDB DescribeTable から読み戻す。プランの削除後もテーブルと容量は維持される。
 
+CloudFront の [ローカル distribution](../cloudfront-local-content.md) は、同じ SQLite の保存済み S3 オブジェクトだけを読み、DefaultTTL に従う有界キャッシュと native invalidation を提供する。専用の simulator GET/HEAD は、キャッシュの hit を含めて一つの新しい policy snapshot から distribution と S3 オブジェクトの権限を確認する。Cloudscape は native の一覧・詳細・ローカルデータの安全なダウンロード・無効化を同じ状態に対して行う。本文は実行せず、古いスコープの応答を破棄する。不確定な無効化は同じ caller reference と paths の明示的な再送だけで確認する。外部 origin・DNS・VPC Origin の通信、CDN edge、distribution の CloudFormation は追加しない。
+
 SSM の [ドキュメント履歴](../ssm-documents.md) はリージョンとドキュメント名で検索し、1 回の SQLite 読み取りで番号順のスナップショットを返す。ページごとに IAM を評価し、続きは対象・呼出者・スナップショットに結び付く。一覧に定義本文は含めず、Console の本文比較には別の GetDocument 権限が必要。ドキュメントは実行しない。
 
 SNS の `SetTopicAttributes` は Standard トピックに CodeStar Notifications 専用の発行ポリシーを保存する。取得時はトピックとポリシー、購読数を同じ SQLite スナップショットから読み取る。ポリシーの物理識別子は同じトピックの更新では保持し、削除後に同名で作り直すと新しくなる。[SNS ポリシー](../sns.md#codestar-notifications-topic-policies)。
 
 SNS の HTTP/HTTPS コンソールは native Query を呼び出し、通知先 URL をローカル SQLite に記録するだけで外部に接続しない。購読属性を読む際は ARN から親トピックを特定して IAM を先に評価し、購読と親の存在およびリージョンの一致を同じ読み取りで確認する。専用 Scalar は us-east-1 固定で通常のログインセッションを使い、コンソールの演習用 ID 選択を引き継がない。[対応範囲](../sns.md)。
 
-AWS Resource Groups のタグクエリは、同じリージョンの ECR repository の ARN とタグをカタログの SQLite から読み取る。グループ ARN と依存する読み取り権限の認可後、保存済みクエリとリポジトリを同じスナップショットで照合する。管理画面のグループ詳細はネイティブ API から保存済みクエリとメンバーのページを取得し、タグ条件の編集も同じ API に送る。[対象と制限](../aws-catalog.md#ecr-repository-group-membership)
+Service Quotas の5つの読み取りは、B2B Data Interchange の Profiles に限定する。公開デフォルト5と `CreateProfile` が実際に強制する総容量を区別し、使用済みの数を上限から差し引かない。`GetServiceQuota` は対象クォータ ARN、それ以外の4操作は各 action の Resource `*` を必要とする。実在するローカルの上限定義がなければ適用値を捏造しない。[対応リージョン・空の一覧・未対応範囲](../aws-catalog.md#b2b-data-interchange-profile-quota)
+
+上限引き上げ要求はチームの SQLite に保存し、リージョン別に ID と履歴を照会できる。`SupportCaseAllowed=false` は `NOT_APPROVED`、省略または true は `PENDING` として保存する。要求を受け付けた後も B2BI の適用上限は同じ値を返す。ローカルの要求に外部サポートケースの発行や自動承認の処理はない。
+
+Cloudscape は選択中のリージョンと演習用 ID で要求を送信する。応答を受け取れなかった場合は、同じクォータの履歴を再取得できる。専用 Scalar はログイン中の ID と `us-east-1` を使い、利用者が選んだ操作と本文をそのまま送信する。
+
+AWS Resource Groups のタグクエリは、同じリージョンの ECR repository の ARN とタグをカタログの SQLite から読み取る。グループ ARN と依存する読み取り権限の認可後、保存済みクエリとリポジトリを同じスナップショットで照合する。管理画面のグループ詳細はネイティブ API から保存済みクエリとメンバーのページを取得し、タグ条件の編集も同じ API に送る。
+
+`CreateGroup` と `ListGroups` はリソースを指定できないため、ポリシーの `Resource` には `"*"` が必要になる。グループ ARN や `group/*` のみを許可する既存ポリシーでは、この2操作は拒否される。名前を指定する操作は対象グループの ARN を照合し、対応する11操作すべてで IAM 拒否を HTTP 403 の `ForbiddenException` として返す。通常グループとタグクエリグループの `Group` 応答はアプリケーショングループ用の `ApplicationTag` を省略し、利用者のタグは `GetTags` で取得できる。[対象と制限](../aws-catalog.md#ecr-repository-group-membership)
 
 AWS カタログの AppFlow は S3 間のフロー設定のみを保持する。[トリガー設定](https://docs.aws.amazon.com/appflow/1.0/APIReference/API_TriggerConfig.html)に従い、`CreateFlow` と `UpdateFlow` は、`OnDemand` に付けたスケジュール設定と、実行間隔の式がない（空白のみも含む）`Scheduled` の定義を `ValidationException` で拒否する。検証は保存前に行うため、拒否された要求で既存の設定は変わらない。スケジューラ、コネクタープロファイル、ジョブ実行およびオブジェクト転送は実装しない。
 
@@ -163,3 +177,24 @@ ingress or feeds live network/instance attachment decisions. See the
 The local SimpleDB Query reference also offers explicit PutAttributes and
 DeleteDomain practice examples. Put replaces one named attribute; whole-domain
 cleanup must target only a disposable domain owned by the caller.
+
+
+### Application Load Balancer placement
+
+The compiled Elastic Load Balancing Console reads four native Query/XML
+Describe operations for the selected region and signed-in exercise identity.
+It verifies an updated Lambda target group's health check path with a fresh
+read of its ARN. A lost response leaves the update unresolved until a new
+native read. Owner and peer team processes keep separate ELB and EC2 state.
+
+
+The AWS regional ALB store resolves an authorized create against EC2-managed
+subnets and security groups in the team database. The selected subnets must
+share one VPC and use distinct local zones. One SQLite transaction stores the
+ALB and its references. EC2 enforces those dependencies until ALB deletion.
+Older ALBs retain their original ID-only representation. The placement describes
+configuration for the local HTTP/Lambda exercise. [ELB guide](../elb.md)
+
+The embedded Scalar reference submits ELBv2 Query forms to the regional AWS
+endpoint. The signed-in team and its existing IAM policy govern each request.
+Users can supply the subnet IDs and ARNs returned by their own simulator.

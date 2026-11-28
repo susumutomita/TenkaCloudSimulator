@@ -18,25 +18,73 @@ being ignored. State is provider-owned SQLite, one database per team process.
 The supported slice is an Application Load Balancer whose HTTP listeners
 either return a fixed response or forward to one target group holding one
 Python Lambda function. That is the only target with a real bounded backend in
-this simulator. Instance, IP and ALB targets need EC2 instances, VPC addressing
-and packet routing, which are not available, so `TargetType` other than
-`lambda` is refused with `InvalidConfigurationRequest`.
+this simulator. Instance, IP and ALB targets require target registration and forwarding integrations beyond this exercise. Other `TargetType` values return `InvalidConfigurationRequest`.
 
 ## Resources
 
+### Use the Console
+
+Open **Elastic Load Balancing** in the AWS Console and choose the region of
+your load balancer. Filter by its exact name or load another page. Its detail
+view reads the saved VPC, subnet IDs and Availability Zones, security groups,
+listeners and linked target groups. Older ID-only placements display the
+available IDs. Under a linked Lambda target group, the Console shows the
+registered function, target state and reason returned by `DescribeTargetHealth`.
+
+Edit **Health check path** to submit one `ModifyTargetGroup` request for that
+group. Saving requires the named target-group action on its ARN and the
+Describe permissions needed to verify the saved path and current health. The Console
+checks the selected load balancer association before sending the change and again
+in the returned group and fresh read. The native write addresses the target group
+ARN. Another caller can move the group between these requests.
+If the acknowledgement is lost, choose **Refresh affected target group** to
+inspect its current state before making another change. A disabled health
+check can retain a path. Exercise the authenticated listener separately to
+observe the actual response. [ModifyTargetGroup](https://docs.aws.amazon.com/elasticloadbalancing/latest/APIReference/API_ModifyTargetGroup.html)
+
+## Use the API reference
+
+After signing in, open **API Reference → Shared AWS JSON/Query endpoint**.
+Select `application/x-www-form-urlencoded` and one of the thirteen **ELBv2**
+examples. In **Test Request**, select the `elasticloadbalancing` value for
+`X-Simulator-Service`, clear `X-Amz-Target`, and choose the region that
+contains your resources. Include the form fields for that operation. All
+ELBv2 examples use `Version=2015-12-01`.
+
+`CreateTargetGroup` can create a disposable Lambda target group in an empty
+region. Copy its `TargetGroupArn` from the XML response, then use it in
+`DescribeTargetHealth`. A registered function and its listener let you
+inspect the target's actual status. For `CreateLoadBalancer`, paste two
+subnet IDs and a security group ID from the same VPC. Paste the returned
+load balancer ARN into `DescribeLoadBalancers` to inspect its zones and VPC.
+The `REPLACE_WITH_…` fields are editable placeholders. Clean up using the
+ARNs of your disposable resources, removing listeners before target groups.
+
 - **Load balancers** are `application` only, `internet-facing` (default) or
   `internal`, `ipv4` only. Names are 1 to 32 alphanumeric characters or
-  hyphens, unique per region. 2 to 6 distinct subnet IDs (`subnet-` plus 8 or
-  17 hex digits) and up to 5 security group IDs (`sg-`) are required/accepted.
-  **They are recorded as syntactic references only.** Amazon VPC (#56) is not
-  on main, so they are never resolved against EC2 state: `SubnetNotFound` is
-  never returned, the two-Availability-Zone rule is approximated by two
-  distinct subnets, and responses carry `SubnetId` without `ZoneName` or
-  `VpcId`. The state is immediately `active`. `DNSName` has the form
-  `name-NNNNNNNNNN.region.elb.simulator.invalid` and does not resolve; there is
-  no `CanonicalHostedZoneId`. Repeating a create with identical settings
-  returns the existing resource, as documented; different settings return
-  `DuplicateLoadBalancerName`.
+  hyphens, unique per region. Create the EC2 VPC, subnets and security groups
+  first. Select two or three native subnets, one per local Availability Zone,
+  and one to five explicit native security groups in that same regional VPC.
+  The simulator's VPC creation has no default security group. A missing subnet
+  returns `SubnetNotFound`. Repeated zones, mixed VPCs and CloudFormation-owned
+  subnets return `InvalidSubnet`. An unknown, omitted, foreign or stack-owned
+  security group returns `InvalidSecurityGroup`.
+
+  Create and Describe report the saved `VpcId` and each `SubnetId` with its
+  actual `ZoneName`. The placement and dependency rows commit together. EC2
+  returns `DependencyViolation` for deletion of a subnet or group still in
+  use. Delete the ALB first to release its references. ALBs created by older
+  simulator versions retain their original subnet IDs and ARN on read, identical
+  create retry and deletion. Their original records contain no verified VPC
+  or zone and acquire no EC2 references during upgrade.
+
+  The state is immediately `active`. The synthetic `DNSName` has the form
+  `name-NNNNNNNNNN.region.elb.simulator.invalid`. Exercise requests use the
+  local HTTP data-plane route. This placement records configuration only.
+  DNS resolution, ENIs, IP allocation, free-IP accounting, security-group
+  traffic decisions and external reachability are outside its scope. An
+  identical create returns the existing resource; different settings for the
+  same name return `DuplicateLoadBalancerName`.
 - **Target groups** use `TargetType=lambda`. `Protocol`, `Port`, `VpcId`,
   `ProtocolVersion`, `HealthCheckProtocol`, `HealthCheckPort` and
   `IpAddressType` do not apply and are refused. Lambda defaults: health checks
@@ -162,18 +210,16 @@ SQLite database and token authority per team.
 | Dependency | Use | Status |
 |---|---|---|
 | AWS Lambda (functions, resource policies, execution role, SDK bridge) | Required for forward targets and health checks | Implemented; reused unchanged except the ELB service principal |
-| Amazon VPC subnets and security groups (#56) | Required by AWS for load balancer placement | Not on main; IDs are syntactic only, no placement |
+| Amazon VPC subnets and security groups (#56) | Required for new regional ALB placement | Verified native subnet zones and explicit security groups in one VPC; deletion follows stored dependencies. |
 | Amazon EC2 instances, IP targets | Instance/IP target types | Not implemented; refused |
 | AWS Certificate Manager | HTTPS listeners | Not used; HTTPS refused |
 | AWS WAF, Route 53 alias records, S3 access logs, CloudWatch metrics | Optional integrations | Not connected |
 | CloudFormation `AWS::ElasticLoadBalancingV2::*` | Optional provisioning | Not supported |
-
-There is no console page or API-reference page for this service yet.
 
 ## References
 
 - [Elastic Load Balancing API Reference](https://docs.aws.amazon.com/elasticloadbalancing/latest/APIReference/Welcome.html); the operation, shape, error code and HTTP status contract was fixed from the official botocore 1.41.6 `elbv2/2015-12-01` model already pinned by this repository.
 - [Lambda functions as targets](https://docs.aws.amazon.com/elasticloadbalancing/latest/application/lambda-functions.html): event, response, permission and health check behavior.
 - [Target group health checks](https://docs.aws.amazon.com/elasticloadbalancing/latest/application/target-group-health-checks.html): states, reason codes and fail-open routing.
-- [Actions, resources and condition keys for Elastic Load Balancing](https://docs.aws.amazon.com/service-authorization/latest/reference/list_awselasticloadbalancing.html).
+- [Actions, resources and condition keys for Elastic Load Balancing V2](https://docs.aws.amazon.com/service-authorization/latest/reference/list_elb-v2.html).
 - [Elastic Load Balancing endpoints and quotas](https://docs.aws.amazon.com/general/latest/gr/elb.html).

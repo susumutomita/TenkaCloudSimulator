@@ -182,6 +182,13 @@ type Resource struct {
 	Beside []string
 }
 
+func (r *Resource) liveLimit() int {
+	if r.Limit == 0 {
+		return defaultKindLimit
+	}
+	return r.Limit
+}
+
 // Service is a reviewed bounded specification of one official AWS service.
 type Service struct {
 	// Model is the botocore service name of the embedded official model.

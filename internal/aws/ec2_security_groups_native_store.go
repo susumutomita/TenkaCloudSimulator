@@ -230,8 +230,14 @@ func (s *StackStore) deleteEC2NativeSecurityGroup(ctx context.Context, region, i
 	if err != nil {
 		return err
 	}
-	// The FK atomically removes detached rules only. Interfaces and instances
-	// remain unsupported; a future attachment operation needs its own guard.
+	var inUse bool
+	if err := tx.QueryRowContext(ctx, `SELECT EXISTS(SELECT 1 FROM aws_elb_placement_refs WHERE region=? AND resource_id=?)`, region, id).Scan(&inUse); err != nil {
+		return err
+	}
+	if inUse {
+		return ec2Invalid("DependencyViolation", "A load balancer still uses this security group.")
+	}
+	// The FK atomically removes detached rules after dependencies have cleared.
 	result, err := tx.ExecContext(ctx, `DELETE FROM aws_ec2_native_security_groups WHERE region=? AND id=? AND vpc_id=?`, region, id, g.VPCID)
 	if err != nil {
 		return err

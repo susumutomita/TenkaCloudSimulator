@@ -768,6 +768,18 @@ def handler(event,context):
                  env={**os.environ, 'SIMULATOR_BINARY': str(BINARY), 'SIMULATOR_BINARY_SHA256': digest,
                       'CHROMIUM_EXECUTABLE': chromium}, check=True, timeout=180)
 
+ def test_service_quotas_reads_applied_b2bi_profile_limit(self):
+  subprocess.run([sys.executable, str(Path(__file__).with_name('service_quotas_profiles.py'))], check=True, timeout=120)
+
+ def test_service_quotas_discovery_defaults_applied_and_wildcard_iam(self):
+  subprocess.run([sys.executable, str(Path(__file__).with_name('service_quotas_discovery.py'))], check=True, timeout=120)
+
+ def test_service_quotas_scalar_uses_the_same_native_request_history(self):
+  subprocess.run([sys.executable, str(Path(__file__).with_name('service_quotas_scalar.py'))], check=True, timeout=300)
+
+ def test_service_quotas_console_request_history_and_recovery(self):
+  subprocess.run([sys.executable, str(Path(__file__).with_name('service_quotas_console.py'))], check=True, timeout=300)
+
  def test_named_resource_group_membership_tracks_live_ecr_tags(self):
   subprocess.run([sys.executable, str(Path(__file__).with_name('resource_group_ecr_members.py'))], check=True, timeout=120)
 

@@ -13,10 +13,13 @@ import (
 )
 
 func elbComposedCall(h http.Handler, token string, fields url.Values) *httptest.ResponseRecorder {
-	fields.Set("Version", "2015-12-01")
+	return elbRegionalQuery(h, token, "elasticloadbalancing", "2015-12-01", fields)
+}
+func elbRegionalQuery(h http.Handler, token, service, version string, fields url.Values) *httptest.ResponseRecorder {
+	fields.Set("Version", version)
 	r := httptest.NewRequest("POST", "http://127.0.0.1/", strings.NewReader(fields.Encode()))
 	r.Header.Set("Content-Type", "application/x-www-form-urlencoded")
-	r.Header.Set("Authorization", "AWS4-HMAC-SHA256 Credential=TCSIMLOCAL/20261111/us-east-1/elasticloadbalancing/aws4_request, SignedHeaders=host, Signature=dummy")
+	r.Header.Set("Authorization", "AWS4-HMAC-SHA256 Credential=TCSIMLOCAL/20261111/us-east-1/"+service+"/aws4_request, SignedHeaders=host, Signature=dummy")
 	if token != "" {
 		r.Header.Set("X-Simulator-Token", token)
 	}
@@ -36,7 +39,31 @@ func TestELBCompositionTokenPersistenceDataPlaneAndCapabilities(t *testing.T) {
 	if e != nil {
 		t.Fatal(e)
 	}
-	create := url.Values{"Action": {"CreateLoadBalancer"}, "Name": {"composed"}, "Subnets.member.1": {"subnet-11111111"}, "Subnets.member.2": {"subnet-22222222"}}
+	ec2 := func(action string, fields url.Values, out any) {
+		t.Helper()
+		fields.Set("Action", action)
+		w := elbRegionalQuery(access, token, "ec2", "2016-11-15", fields)
+		if w.Code != 200 || xml.Unmarshal(w.Body.Bytes(), out) != nil {
+			t.Fatal(action, w.Code, w.Body.String())
+		}
+	}
+	var v struct {
+		ID string `xml:"vpc>vpcId"`
+	}
+	ec2("CreateVpc", url.Values{"CidrBlock": {"10.114.0.0/16"}}, &v)
+	subnet := func(zone, cidr string) string {
+		var r struct {
+			ID string `xml:"subnet>subnetId"`
+		}
+		ec2("CreateSubnet", url.Values{"VpcId": {v.ID}, "AvailabilityZone": {zone}, "CidrBlock": {cidr}}, &r)
+		return r.ID
+	}
+	a, b := subnet("us-east-1a", "10.114.1.0/24"), subnet("us-east-1b", "10.114.2.0/24")
+	var group struct {
+		ID string `xml:"groupId"`
+	}
+	ec2("CreateSecurityGroup", url.Values{"VpcId": {v.ID}, "GroupName": {"composed"}, "GroupDescription": {"local test"}}, &group)
+	create := url.Values{"Action": {"CreateLoadBalancer"}, "Name": {"composed"}, "Subnets.member.1": {a}, "Subnets.member.2": {b}, "SecurityGroups.member.1": {group.ID}}
 	if w := elbComposedCall(access, "", create); w.Code != 401 {
 		t.Fatal("unauthenticated ELB request was served", w.Code)
 	}
@@ -98,8 +125,8 @@ func TestELBCompositionTokenPersistenceDataPlaneAndCapabilities(t *testing.T) {
 		t.Fatal(e)
 	}
 	elb := caps.Services["elasticloadbalancing"]
-	if len(elb.Operations) != 13 || len(elb.TargetTypes) != 1 || elb.TargetTypes[0] != "lambda" || elb.Console {
-		t.Fatal(w.Body.String())
+	if len(elb.Operations) != 13 || len(elb.TargetTypes) != 1 || elb.TargetTypes[0] != "lambda" || !elb.Console {
+		t.Fatalf("unexpected ELBv2 capabilities: operations=%v targetTypes=%v console=%v", elb.Operations, elb.TargetTypes, elb.Console)
 	}
 	if w = elbComposedCall(access, token, url.Values{"Action": {"DeleteLoadBalancer"}, "LoadBalancerArn": {created.ARN}}); w.Code != 200 {
 		t.Fatal(w.Code, w.Body.String())

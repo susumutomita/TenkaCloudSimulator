@@ -5298,6 +5298,470 @@ REQUIRED_SOURCE_SCOPES['CodeCommitConsoleIntent'] = {
 }
 
 
+# Independent local CloudFront delivery and invalidation controls. Keep these
+# literal sets separate from the mutable model registry they protect.
+BASE_MODELS.add('CloudFrontLocalCache')
+BASE_INVARIANTS['CloudFrontLocalCache'] = {
+    'TypeOK', 'FreshJointAuthority', 'ExactHitIdentity', 'MissReadsOrigin',
+    'FailureRollsBack', 'RefusalUnchanged', 'StaleETagUnchanged',
+    'UpdateClearsCache', 'InvalidationClearsCache', 'RestartPreserves', 'PeerUnchanged',
+}
+REQUIRED_MUTANTS['CloudFrontLocalCache'] = {
+    'MissingObjectGrant', 'MissingDistributionGrant', 'WrongOriginLifetime',
+    'CrossActorHit', 'ExpiredHit', 'IgnoreETag', 'UpdateRetainsCache',
+    'InvalidationRetainsCache', 'FailedInvalidationEvicts',
+}
+REQUIRED_SOURCE_SCOPES['CloudFrontLocalCache'] = {
+    'internal/aws/cloudfront_distribution.go', 'internal/aws/cloudfront_distribution_store.go',
+    'internal/aws/cloudfront_distribution_http.go', 'internal/aws/cloudfront_distribution_list.go',
+    'internal/aws/cloudfront_vpc_origin.go', 'internal/aws/ssm.go', 'internal/server/server.go',
+    'internal/aws/cloudfront_distribution_interrupt_test.go',
+}
+
+BASE_MODELS.add('CloudFrontConsoleEpoch')
+BASE_INVARIANTS['CloudFrontConsoleEpoch'] = {'StableUnknownCaller', 'ProtectedDownload', 'CurrentReceipt', 'TypeOK', 'OneCurrentWrite', 'ExplicitWriteConfirmation', 'CurrentContent', 'AcknowledgedReceipt'}
+REQUIRED_MUTANTS['CloudFrontConsoleEpoch'] = {'UnconfirmedWrite', 'PublishOldRead', 'RetainOldContent', 'ReplayDifferentCaller', 'OldReadUnlocksWrite', 'FreshCallerWhileUnknown', 'UnknownAcknowledged', 'UnsafeContent', 'PublishOldReceipt'}
+REQUIRED_SOURCE_SCOPES['CloudFrontConsoleEpoch'] = {'internal/aws/cloudfront_distribution_http.go', 'tools/console/src/cloudfront-local.jsx', 'tools/console/src/cloudfront-local.mjs', 'internal/server/web/app.js', 'tools/console/src/console-navigation.mjs', 'tools/console/src/main.jsx'}
+REQUIRED_SOURCE_SCOPES['CloudFrontConsoleEpoch'].add('tools/console/src/console-home.jsx')
+
+
+# Native B2BI quota discovery uses a computed read projection, not stored CRUD.
+BASE_MODELS.add('ServiceQuotaDiscovery')
+BASE_INVARIANTS['ServiceQuotaDiscovery'] = {'TypeOK', 'RestartPreservesFrame', 'ReadPreservesFrame', 'PeerPreserved', 'ReadProjectionCorrect'}
+REQUIRED_MUTANTS['ServiceQuotaDiscovery'] = {'AppliedUsesPublishedDefault', 'AppliedGetRequiresWildcard', 'ResourceLevelIgnored', 'PeerCapacityReturned', 'UnavailableRegionAdvertised', 'UnknownServiceProjected', 'UnknownQuotaProjected', 'SingleRowInventsCursor', 'ReadChangesSelectedUsage', 'ReadChangesPeerUsage', 'AppliedReportsRemaining', 'ForeignTokenAccepted', 'DefaultUsesApplied', 'WildcardReadsUseQuotaARN', 'DefaultInventsQuotaARN', 'UnrelatedActionAllowed', 'ExplicitDenyIgnored', 'AbsentBindingFallsBackToDefault'}
+REQUIRED_SOURCE_SCOPES['ServiceQuotaDiscovery'] = {'internal/aws/catalog/engine.go', 'internal/aws/catalog/services_business.go', 'internal/aws/catalog/semantics.go', 'internal/aws/catalog/service_quotas.go'}
+
+
+BASE_MODELS.add('ServiceQuotaRequests')
+BASE_INVARIANTS['ServiceQuotaRequests'] = {
+    'TypeOK',
+    'Admissions',
+    'CommitFrame',
+    'StoredFields',
+    'Capacity',
+    'Visibility',
+    'Lookup',
+    'PageScope',
+    'PrivateStage',
+    'ContenderFrame',
+    'RestartFrame',
+}
+REQUIRED_MUTANTS['ServiceQuotaRequests'] = {
+    'AdmitDenied',
+    'AdmitNonIncrease',
+    'AdmitOversize',
+    'AdmitWrongLevel',
+    'AdmitUnsupportedScope',
+    'AllowAnotherPending',
+    'RefuseIndependentRegion',
+    'RefuseOtherTeamDueToPeer',
+    'CountOnlyThisRegion',
+    'CountBothTeamDatabases',
+    'MissAQueuedPendingWinner',
+    'RejectContenderAfterRollback',
+    'RivalErasesPrivateStage',
+    'PublishSpeculativeData',
+    'KeepCanceledRequest',
+    'KeepTimedOutRequest',
+    'KeepFaultedRequest',
+    'KeepMismatchedReadback',
+    'KeepFailedCommit',
+    'LoseCommittedButUnacknowledged',
+    'AcknowledgeWithoutRow',
+    'ReportIdAfterLostReply',
+    'KeepPrivateRowAfterCancellation',
+    'DeletePeerHistoryWhenCommitting',
+    'RaiseAppliedQuotaOnRequest',
+    'RequestConsumesProfileSlot',
+    'TurnFalseIntoPending',
+    'ApproveOmitted',
+    'CreateSyntheticSupportCase',
+    'StoreWrongApplicant',
+    'StoreAppliedInsteadOfDesired',
+    'ReturnAnotherTeamId',
+    'ReturnOnlyAvailableSlots',
+    'BlockLastProfileSlot',
+    'CannotReuseReleasedProfile',
+    'OtherScopeGet',
+    'AgeOutDirectRequest',
+    'DiscloseDeniedLookup',
+    'ListOlderThanNinetyDays',
+    'DropAtCurrentInstant',
+    'ReturnOldestFirst',
+    'DropExactNinetiethDay',
+    'AgeOutByQuota',
+    'LeakFutureGeneralAfterClockRollback',
+    'DropFutureByQuotaAfterClockRollback',
+    'HideFutureExactLookupAfterClockRollback',
+    'ListPeerRegion',
+    'ListOtherDatabase',
+    'IgnoreTerminalFilter',
+    'IgnorePendingFilter',
+    'ReportUnobservedApproval',
+    'ReportResourceScopedQuota',
+    'ReportOtherServiceQuota',
+    'IgnoreListAuthority',
+    'ContinueWithoutFreshAuthority',
+    'AcceptOtherScopeCursor',
+    'AcceptOtherActorCursor',
+    'AcceptOtherOperationCursor',
+    'AcceptChangedFilterCursor',
+    'AcceptPriorProcessCursor',
+    'AcceptBadToken',
+    'RepeatBoundaryRow',
+    'UseTimestampInCursor',
+    'EmitLastPageCursor',
+    'LoseRealContinuation',
+    'DiscardHistoryOnReopen',
+    'RetainCursorAuthorityOnRestart',
+    'PruneByGeneralAgeOnRead',
+    'RequireWildcardForRequest',
+    'RequireWildcardForByquota',
+    'UseNamedQuotaForGeneral',
+    'UseNamedQuotaForGet',
+    'AdmitOtherQuotaARN',
+    'OverrideExplicitRequestDeny',
+    'AcceptNamedGrantOnGenericContinuation',
+}
+REQUIRED_SOURCE_SCOPES['ServiceQuotaRequests'] = {
+    'internal/aws/catalog/engine.go',
+    'internal/aws/catalog/models/service-quotas.json',
+    'internal/aws/catalog/semantics.go',
+    'internal/aws/catalog/service_quota_requests.go',
+    'internal/aws/catalog/service_quotas.go',
+}
+
+
+BASE_MODELS.add('ServiceQuotaRequestConsole')
+BASE_INVARIANTS['ServiceQuotaRequestConsole'] = {
+    'SingleIntent',
+    'NoAutomaticWrite',
+    'NativeFrame',
+    'SavedExactlyOnce',
+    'Acknowledgement',
+    'FreshRecovery',
+    'ObservedOnly',
+    'SeparateIntent',
+    'RetiredRead',
+    'ScopeCleared',
+    'BlockedRetry',
+    'FreshCapacity',
+    'VisibleLookup',
+    'VisibleMount',
+}
+REQUIRED_MUTANTS['ServiceQuotaRequestConsole'] = {
+    'SubmitUnknownAgain',
+    'SendWithoutAppliedCapacity',
+    'SubmitWithWrongPrincipal',
+    'SendFromWrongMountedGeneration',
+    'CommitToAnotherRegion',
+    'CollapseTwoTerminalIDs',
+    'RepeatPendingAfterSeparateIntent',
+    'LoseEarlierSameAmountHolder',
+    'AcknowledgeAnUnstoredRow',
+    'TreatSavedTransportLossAsConfirmed',
+    'TreatUnknownLossAsRefusal',
+    'TreatDefinitiveRefusalAsUnknown',
+    'ConfirmBadBody',
+    'ConfirmWrongAmount',
+    'ConfirmWrongStatus',
+    'ConfirmWrongArn',
+    'BindOldIdenticalRowToLostSubmit',
+    'PublishRetiredAckAcrossScope',
+    'PublishOldUnknownAcrossRemount',
+    'KeepArmedWhileNewRecoveryBegins',
+    'KeepArmedAcrossCapacityClear',
+    'ArmFromOrdinaryByQuota',
+    'ArmFromGeneral',
+    'ArmFromFiltered',
+    'ArmFromResource',
+    'ArmFromNext',
+    'ArmFromAuto',
+    'ArmFromInspect',
+    'ArmFromCapacity',
+    'ArmAfterDenied',
+    'ArmAfterFailed',
+    'ArmAfterWrongOwner',
+    'ArmAfterMalformed',
+    'RetainArmAfterPermissionLoss',
+    'InferFromCurrentMatchingAmount',
+    'GroupReadShowsPeerRow',
+    'PermitEvenWhenExplicitReadFailed',
+    'SeparateClickSendsAgain',
+    'RecoverySilentlyResends',
+    'BackfillCaseDuringRecovery',
+    'TreatSavedHistoryAsConfirmedOutcome',
+    'BlindRetryAfterLostAck',
+    'ReleaseOnBlockedClick',
+    'CarryUnknownAcrossNewMount',
+    'SameTileRetiredSuccessArmsNewMount',
+    'StaleDenialErasesNewlyArmedView',
+    'RetainAppliedCapacityAfter403',
+    'ReopenEditorWithoutFreshCapacity',
+    'DisplayFirstPageAsRealContinuation',
+    'KeepPriorLookupAfterNativeDenial',
+    'GuessLostLookupFromHistory',
+    'ShowQuotaInHiddenView',
+    'ReturningToViewInheritsOldPermit',
+}
+REQUIRED_SOURCE_SCOPES['ServiceQuotaRequestConsole'] = {
+    'tools/console/src/catalog.jsx',
+    'tools/console/src/main.jsx',
+    'tools/console/src/service-quotas.jsx',
+    'tools/console/src/service-quotas.mjs',
+    'internal/server/web/app.js',
+}
+
+
+# Pin the KMS effective-grant controls independently of the editable registry.
+BASE_MODELS.add('KMSRoleGrantLifecycle')
+BASE_INVARIANTS['KMSRoleGrantLifecycle'] = {
+    'TypeOK',
+    'ManagementAuthorized',
+    'CreateRequiresEnabled',
+    'GrantToLiveRole',
+    'PermittedManagementWorks',
+    'GrantWriteFrame',
+    'VerifiedDescribe',
+    'ExplicitDenyWins',
+    'DirectOrBoundGrant',
+    'PermittedDescribeWorks',
+    'RestartFrame',
+}
+REQUIRED_SOURCE_SCOPES['KMSRoleGrantLifecycle'] = {
+    'internal/aws/kms_dispatch.go',
+    'internal/aws/kms_grants.go',
+    'internal/aws/kms_http.go',
+    'internal/aws/kms_store.go',
+    'internal/aws/sts_credentials.go',
+    'internal/aws/sts_signature.go',
+    'internal/server/access_sdk.go',
+}
+KMS_ROLE_GRANT_CONTROLS = [
+    ('SkipManagementIAM', 'authorized == manager = "allowed"', 'authorized == TRUE', 'ManagementAuthorized'),
+    ('CreateOnDisabledKey', 'canCreate == rolePresent /\\ k \\in enabled /\\ grants[k] = 0', 'canCreate == rolePresent /\\ grants[k] = 0', 'CreateRequiresEnabled'),
+    ('CreateForMissingRole', 'canCreate == rolePresent /\\ k \\in enabled /\\ grants[k] = 0', 'canCreate == k \\in enabled /\\ grants[k] = 0', 'GrantToLiveRole'),
+    ('UseDeletedRole', 'sessionOK == rolePresent /\\ session # 0 /\\ session = generation', 'sessionOK == session # 0 /\\ session = generation', 'VerifiedDescribe'),
+    ('RejectDisabledRevocation', 'canRevoke == grants[k] # 0', 'canRevoke == grants[k] # 0 /\\ k \\in enabled', 'PermittedManagementWorks'),
+    ('RejectDisabledList', '[] op = "revoke" -> canRevoke\n                                   [] OTHER -> TRUE', '[] op = "revoke" -> canRevoke\n                                   [] OTHER -> k \\in enabled', 'PermittedManagementWorks'),
+    ('CreateWithWrongGeneration', 'op = "create" -> [grants EXCEPT ![k] = generation]', 'op = "create" -> [grants EXCEPT ![k] = 1]', 'GrantWriteFrame'),
+    ('RevokeLeavesGrant', 'op = "revoke" -> [grants EXCEPT ![k] = 0]', 'op = "revoke" -> grants', 'GrantWriteFrame'),
+    ('RevokeClearsPeer', 'op = "revoke" -> [grants EXCEPT ![k] = 0]', 'op = "revoke" -> Empty', 'GrantWriteFrame'),
+    ('RefusalMutatesGrants', 'IF ~success THEN grants', 'IF ~success THEN Empty', 'GrantWriteFrame'),
+    ('AcceptUnsignedDescribe', 'signedOK == request = "canonical"', 'signedOK == request \\in {"canonical","unsigned"}', 'VerifiedDescribe'),
+    ('AcceptWrongKMSOperation', 'signedOK == request = "canonical"', 'signedOK == request \\in {"canonical","other target"}', 'VerifiedDescribe'),
+    ('AcceptPeerScope', 'signedOK == request = "canonical"', 'signedOK == request \\in {"canonical","foreign scope"}', 'VerifiedDescribe'),
+    ('AcceptExpiredSession', 'signedOK == request = "canonical"', 'signedOK == request \\in {"canonical","expired"}', 'VerifiedDescribe'),
+    ('AcceptStaleSession', 'sessionOK == rolePresent /\\ session # 0 /\\ session = generation', 'sessionOK == rolePresent /\\ session # 0', 'VerifiedDescribe'),
+    ('OverrideExplicitDeny', 'success == sessionOK /\\ signedOK /\\ ~denied /\\ (direct \\/ bound)', 'success == sessionOK /\\ signedOK /\\ (direct \\/ bound)', 'ExplicitDenyWins'),
+    ('RebindSameRoleName', 'bound == sameRole /\\ grants[k] = generation', 'bound == sameRole /\\ grants[k] # 0', 'DirectOrBoundGrant'),
+    ('AllowOtherGrantee', 'bound == sameRole /\\ grants[k] = generation', 'bound == grants[k] = generation', 'DirectOrBoundGrant'),
+    ('GrantAuthorizesPeerKey', 'bound == sameRole /\\ grants[k] = generation', 'bound == sameRole /\\ (grants[k] = generation \\/ grants[3-k] = generation)', 'DirectOrBoundGrant'),
+    ('IgnoreGrantedPermission', '~denied /\\ (direct \\/ bound)', '~denied /\\ direct', 'PermittedDescribeWorks'),
+    ('RequireGrantForDirectPermission', '~denied /\\ (direct \\/ bound)', '~denied /\\ bound', 'PermittedDescribeWorks'),
+    ('RestartDeletesGrants', 'LET persisted == grants', 'LET persisted == Empty', 'RestartFrame'),
+    ('RestartRetainsSession', 'retainedSession == 0', 'retainedSession == session', 'RestartFrame'),
+]
+REQUIRED_MUTANTS['KMSRoleGrantLifecycle'] = {entry[0] for entry in KMS_ROLE_GRANT_CONTROLS}
+
+
+# Fixed scenarios for the single-region scheduled deletion model.
+BASE_MODELS.add('KMSScheduledDeletion')
+BASE_INVARIANTS['KMSScheduledDeletion'] = {
+    'TypeOK',
+    'ScheduleContract',
+    'CancelContract',
+    'ExpiryBoundary',
+    'AtomicExpiry',
+    'OperationMatrix',
+    'RestartPreservesDeadline',
+    'TimePreservesStorage',
+}
+REQUIRED_SOURCE_SCOPES['KMSScheduledDeletion'] = {
+    'internal/aws/kms_aliases.go',
+    'internal/aws/kms_crypto.go',
+    'internal/aws/kms_deletion.go',
+    'internal/aws/kms_grants.go',
+    'internal/aws/kms_http.go',
+    'internal/aws/kms_store.go',
+    'internal/aws/kms_types.go',
+}
+KMS_DELETION_CONTROLS = [
+    ('DefaultToMinimum', 'days == IF window = Omitted THEN 30', 'days == IF window = Omitted THEN 7', 'ScheduleContract'),
+    ('AcceptSixDays', 'inputOK == days \\in 7..30', 'inputOK == days \\in 6..30', 'ScheduleContract'),
+    ('AcceptThirtyOneDays', 'inputOK == days \\in 7..30', 'inputOK == days \\in 7..31', 'ScheduleContract'),
+    ('ScheduleWithoutPermission', 'allowed == permitted /\\ inputOK', 'allowed == inputOK', 'ScheduleContract'),
+    ('ReschedulePending', 'inputOK /\\ db.state \\in {"Enabled","Disabled"}', 'inputOK /\\ db.state # "Gone"', 'ScheduleContract'),
+    ('RefuseDisabledSchedule', 'inputOK /\\ db.state \\in {"Enabled","Disabled"}', 'inputOK /\\ db.state = "Enabled"', 'ScheduleContract'),
+    ('UseRelativeDeadline', '!.deadline = day + days', '!.deadline = days', 'ScheduleContract'),
+    ('ScheduleAfterFailedWrite', 'IF success THEN written ELSE db', 'IF allowed THEN written ELSE db', 'ScheduleContract'),
+    ('CancelWithoutPermission', 'success == permitted /\\ Waiting /\\ ~fault', 'success == Waiting /\\ ~fault', 'CancelContract'),
+    ('CancelWithoutPending', 'success == permitted /\\ Waiting /\\ ~fault', 'success == permitted /\\ db.state # "Gone" /\\ ~fault', 'CancelContract'),
+    ('AllowCancelAtExpiry', "IN /\\ ~Due\n    /\\ db' = IF success THEN changed ELSE db", "IN /\\ TRUE\n    /\\ db' = IF success THEN changed ELSE db", 'CancelContract'),
+    ('CancelEnablesCrypto', 'changed == [db EXCEPT !.state = "Disabled", !.deadline = 0]', 'changed == [db EXCEPT !.state = "Enabled", !.deadline = 0]', 'CancelContract'),
+    ('CancelRetainsDeadline', 'changed == [db EXCEPT !.state = "Disabled", !.deadline = 0]', 'changed == [db EXCEPT !.state = "Disabled"]', 'CancelContract'),
+    ('CancelDropsExistingGrant', 'changed == [db EXCEPT !.state = "Disabled", !.deadline = 0]', 'changed == [db EXCEPT !.state = "Disabled", !.deadline = 0, !.grant = FALSE]', 'CancelContract'),
+    ('CancelAfterFailedWrite', 'IF success THEN changed ELSE db', 'IF permitted /\\ Waiting THEN changed ELSE db', 'CancelContract'),
+    ('PurgeBeforeDeadline', 'crossed == Waiting /\\ day >= db.deadline', 'crossed == Waiting /\\ day + 1 >= db.deadline', 'ExpiryBoundary'),
+    ('MissDeadlineEquality', 'crossed == Waiting /\\ day >= db.deadline', 'crossed == Waiting /\\ day > db.deadline', 'ExpiryBoundary'),
+    ('PurgeCancelledKey', 'crossed == Waiting /\\ day >= db.deadline', 'crossed == (Waiting /\\ day >= db.deadline) \\/ (last.kind = "cancel" /\\ last.ok /\\ db.state = "Disabled")', 'ExpiryBoundary'),
+    ('KeepExpiredKey', 'purged == [db EXCEPT !.state = "Gone"', 'purged == [db EXCEPT !.state = "Disabled"', 'AtomicExpiry'),
+    ('LeaveKeyMaterial', '!.deadline = 0, !.material = FALSE', '!.deadline = 0, !.material = TRUE', 'AtomicExpiry'),
+    ('LeaveGrant', '!.grant = FALSE, !.alias = IF @', '!.grant = TRUE, !.alias = IF @', 'AtomicExpiry'),
+    ('LeaveTargetAlias', 'IF @ = "target" THEN "none" ELSE @', '@', 'AtomicExpiry'),
+    ('DeleteMovedAlias', 'IF @ = "target" THEN "none" ELSE @', '"none"', 'AtomicExpiry'),
+    ('PurgePeerAlias', '!.grant = FALSE, !.alias = IF @', '!.grant = FALSE, !.peerAlias = FALSE, !.alias = IF @', 'AtomicExpiry'),
+    ('PurgePeerGrant', '!.grant = FALSE, !.alias = IF @', '!.grant = FALSE, !.peerGrant = FALSE, !.alias = IF @', 'AtomicExpiry'),
+    ('PurgePeerKeyMaterial', '!.deadline = 0, !.material = FALSE', '!.deadline = 0, !.material = FALSE, !.peerMaterial = FALSE', 'AtomicExpiry'),
+    ('PartialFaultCommit', 'IF commit THEN purged ELSE db', 'IF commit THEN purged ELSE IF crossed THEN [db EXCEPT !.grant = FALSE] ELSE db', 'AtomicExpiry'),
+    ('ObserveExpiredMetadata', "IN /\\ ~Due\n    /\\ db' = IF allowed THEN change ELSE db", 'IN /\\ (~Due \\/ op = "read")\n    /\\ db\' = IF allowed THEN change ELSE db', 'OperationMatrix'),
+    ('PendingCrypto', 'op = "crypto" -> db.state = "Enabled"', 'op = "crypto" -> db.state \\in {"Enabled","Pending"}', 'OperationMatrix'),
+    ('EnablePending', 'op \\in {"enable","disable"} -> stable', 'op \\in {"enable","disable"} -> present', 'OperationMatrix'),
+    ('CreateGrantWhilePending', 'op = "createGrant" -> db.state = "Enabled" /\\ ~db.grant', 'op = "createGrant" -> db.state \\in {"Enabled","Pending"} /\\ ~db.grant', 'OperationMatrix'),
+    ('DenyPendingSignedDescribe', 'op = "signedDescribe" -> present /\\ db.grant', 'op = "signedDescribe" -> stable /\\ db.grant', 'OperationMatrix'),
+    ('DenyPendingRevocation', 'op = "revoke" -> present /\\ db.grant', 'op = "revoke" -> stable /\\ db.grant', 'OperationMatrix'),
+    ('DenyMovingAway', 'op = "moveAway" -> db.alias = "target"\n', 'op = "moveAway" -> db.alias = "target" /\\ stable\n', 'OperationMatrix'),
+    ('MoveOntoPending', 'OTHER -> db.alias = "peer" /\\ stable', 'OTHER -> db.alias = "peer" /\\ present', 'OperationMatrix'),
+    ('CreateAliasWhilePending', 'op = "createAlias" -> db.alias = "none" /\\ stable', 'op = "createAlias" -> db.alias = "none" /\\ present', 'OperationMatrix'),
+    ('RestartReplacesDeadline', "Restart ==\n /\\ db' = db", "Restart ==\n /\\ db' = IF Waiting THEN [db EXCEPT !.deadline = day + 7] ELSE db", 'RestartPreservesDeadline'),
+    ('RollbackRevivesMissingKey', "/\\ day' = t\n /\\ UNCHANGED db", '/\\ day\' = t\n /\\ db\' = IF t < day /\\ db.state = "Gone" THEN Initial("Disabled") ELSE db', 'TimePreservesStorage'),
+]
+REQUIRED_MUTANTS['KMSScheduledDeletion'] = {entry[0] for entry in KMS_DELETION_CONTROLS}
+
+
+BASE_MODELS.add('ALBNativePlacement')
+BASE_INVARIANTS['ALBNativePlacement'] = {
+    'TypeOK',
+    'AdmittedPlacement',
+    'CanceledUnchanged',
+    'ReopenUnchanged',
+    'StageInvisible',
+    'LegacyUnbound',
+    'ProjectionExact',
+    'CompleteReferences',
+    'ReferencesExist',
+}
+REQUIRED_MUTANTS['ALBNativePlacement'] = {
+    'IgnoreAvailabilityZone',
+    'AcceptForeignSubnetVpc',
+    'AcceptForeignGroupVpc',
+    'AcceptForeignRegion',
+    'AcceptForeignTeam',
+    'AcceptStackResource',
+    'InventDefaultGroup',
+    'AdmitDeletedTarget',
+    'PublishDuringStaging',
+    'ReverseZoneProjection',
+    'WrongVpcProjection',
+    'PartialReferences',
+    'CanceledPartialReferences',
+    'CanceledRowCommitted',
+    'DeleteBoundResource',
+    'ReleaseBothOwners',
+    'AdoptLegacyReferences',
+    'ReopenLosesOwnership',
+}
+REQUIRED_SOURCE_SCOPES['ALBNativePlacement'] = {
+    'internal/aws/elb_placement.go',
+    'internal/aws/elb_store.go',
+    'internal/aws/elb_query.go',
+    'internal/aws/ec2_subnet_native.go',
+    'internal/aws/ec2_security_groups_native_store.go',
+    'internal/server/server.go',
+}
+
+
+BASE_MODELS.add('ALBConsoleWorkflow')
+BASE_INVARIANTS['ALBConsoleWorkflow'] = {
+    'TypeOK',
+    'ReadAdmission',
+    'TruthfulHealth',
+    'DeniedProjection',
+    'ScopeFrame',
+    'RetiredWriteFrame',
+    'SingleSend',
+    'NativeFrame',
+    'Acknowledgement',
+    'CompleteDetail',
+    'BoundReadback',
+    'CheckedHealth',
+    'ObservedOnly',
+    'LinkFrame',
+    'PreflightAdmission',
+}
+REQUIRED_MUTANTS['ALBConsoleWorkflow'] = {
+    'ReuseTicketAcrossSource',
+    'ReuseTicketAcrossRegion',
+    'ReuseTicketAcrossPrincipal',
+    'ReuseTicketAcrossSection',
+    'ReuseTicketAcrossBalancerSelection',
+    'ReuseTicketAcrossGroupSelection',
+    'ReuseTicketAcrossMount',
+    'PublishRetiredSuccess',
+    'EraseFreshResultWithRetiredDenial',
+    'PublishDetailWithoutListeners',
+    'PublishDetailWithoutGroups',
+    'PublishGroupWithoutHealth',
+    'PublishWrongARN',
+    'DescribeEmptyHealthAsHealthy',
+    'DescribeUnhealthyAsHealthy',
+    'DescribeDeniedHealthAsHealthy',
+    'RestorePageAndMarkerAfterDenial',
+    'CarryPreviousRowsAndCursor',
+    'CarryUncertainWriteToNewScope',
+    'PublishFormerWriteAfterSwitch',
+    'SubmitSiblingArn',
+    'ChangePathOnRefusal',
+    'OverwriteSiblingPath',
+    'AcknowledgeWithoutReread',
+    'AcceptWrongAckARN',
+    'AcceptWrongAckPath',
+    'AcceptLostAcknowledgement',
+    'TreatDeniedWriteAsUncertain',
+    'IgnoreSavedPathMismatch',
+    'ReadSiblingGroupAsSaved',
+    'SkipDeniedSavedGroup',
+    'SkipUnavailableSavedGroup',
+    'CertifySavedPathBeforeHealth',
+    'AcceptOtherGroupHealth',
+    'AcceptDeniedHealth',
+    'AcceptUnavailableHealth',
+    'PublishEmptyReadbackAsHealthy',
+    'ReleaseFromOtherArn',
+    'ReleaseFromInventory',
+    'ReleaseFromDeniedRefresh',
+    'ReleaseFromFailedRefresh',
+    'ReleaseFromImplicitRefresh',
+    'ClaimLostWriteFromCurrentValue',
+    'ReportRequestedPathAfterRefusedLostAck',
+    'IgnoreConfirmedGroupAbsence',
+    'ResendAfterLostAck',
+    'RetryAutomaticallyAfterLostAck',
+    'SendAfterDetachment',
+    'SendAfterMoveToDifferentBalancer',
+    'PreflightWrongGroup',
+    'PreflightPermissionLoss',
+    'PreflightUnavailable',
+    'ConfirmResponseFromChangedParent',
+    'ReadReassociatedGroupAsLinked',
+    'ExposeMismatchedLinkedRows',
+    'ExposeMismatchedGroupDetail',
+    'ExposeMovedGroupPathAfterLostAck',
+    'KeepDetachedGroupLockedAfterExactRefresh',
+    'CallReassociationAConfirmedSave',
+    'ChangeRequestedPathWhenMovingListener',
+    'IgnoreReassociationToSecondBalancer',
+}
+REQUIRED_SOURCE_SCOPES['ALBConsoleWorkflow'] = {
+    'internal/server/server.go',
+    'internal/server/web/app.js',
+    'tools/console/src/console-navigation.mjs',
+    'tools/console/src/elb.jsx',
+    'tools/console/src/elb.mjs',
+    'tools/console/src/main.jsx',
+}
+
+
 def load_registry(root, relative='formal/models.json'):
     root = Path(root)
     registry_path = asset(root, relative)
@@ -5360,6 +5824,14 @@ def load_registry(root, relative='formal/models.json'):
             expected = [{'id': mid, 'edits': [{'old': old, 'new': new, 'count': 1}], 'expect_invariant': inv}
                         for mid, old, new, inv in SUPPORT_CASE_CONTROLS]
             require(model['mutants'] == expected, 'Support case controls changed')
+        if name == 'KMSScheduledDeletion':
+            expected = [{'id': mid, 'edits': [{'old': old, 'new': new, 'count': 1}], 'expect_invariant': inv}
+                        for mid, old, new, inv in KMS_DELETION_CONTROLS]
+            require(model['mutants'] == expected, 'KMS deletion controls changed')
+        if name == 'KMSRoleGrantLifecycle':
+            expected = [{'id': mid, 'edits': [{'old': old, 'new': new, 'count': 1}], 'expect_invariant': inv}
+                        for mid, old, new, inv in KMS_ROLE_GRANT_CONTROLS]
+            require(model['mutants'] == expected, 'KMS role grant controls changed')
         if name == 'SARPolicyAuthorizationTarget':
             require(model['mutants'] == SAR_POLICY_TARGET_MUTATIONS, 'SAR policy target controls changed')
         if name == 'SakuraServerReadEpoch':
