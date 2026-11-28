@@ -4876,6 +4876,62 @@ REQUIRED_SOURCE_SCOPES['CodeCommitGitReferences'] = {
 }
 
 
+BASE_MODELS.add('CodeCommitConsoleIntent')
+BASE_INVARIANTS['CodeCommitConsoleIntent'] = {
+    'Acknowledged',
+    'ChoiceAndParent',
+    'ConflictKeepsEdit',
+    'CurrentIsObservation',
+    'NoReplay',
+    'PhysicalAdmission',
+    'RecoveryCompletes',
+    'RecoveryEvidence',
+    'SavedWhenVerified',
+    'TypeOK',
+    'UnknownLock',
+}
+REQUIRED_MUTANTS['CodeCommitConsoleIntent'] = {
+    'AcceptMalformedAck',
+    'AcceptRetiredRecovery',
+    'AttributeAppliedLossToThisCommand',
+    'AutomaticallyReplayLostWrite',
+    'ClaimMissingResponseIsSuccess',
+    'ClearOnUnavailableRead',
+    'CreditCurrentReadToPreviousWrite',
+    'DiscardDraftOnConflict',
+    'DropObservedParentOnUpdate',
+    'EditDetachedHistory',
+    'FailToRecognizeExhaustedBranchAbsence',
+    'ForkCurrentTipInsteadOfInspectedCommit',
+    'IgnoreChangedScopeAtRecoveryEnd',
+    'IgnoreChangedScopeAtRecoveryStart',
+    'IgnoreObservedBranchMovement',
+    'InferAbsenceFromPartialList',
+    'InferEmptyFromIncompletePage',
+    'LeaveVerifiedMissingFileLocked',
+    'LockAfterVerifiedReadback',
+    'ObserveUnrelatedBranch',
+    'ObserveUnrelatedFilePath',
+    'PublishAfterFinalScopeChanged',
+    'RecoverPutFromBranchOnly',
+    'ResendDuringSuccessfulRecovery',
+    'RetainObsoleteDraftAfterRecovery',
+    'SendAfterPreflightAbort',
+    'SendAfterRepositoryReplacement',
+    'SendParentOnFirstCommit',
+    'TreatLostResponseAsDefinitiveFailure',
+    'TrustMismatchedTreeOrParent',
+    'TrustWrongStoredFile',
+    'WriteAnotherBranch',
+}
+REQUIRED_SOURCE_SCOPES['CodeCommitConsoleIntent'] = {
+    'internal/server/web/app.js',
+    'tools/console/src/catalog.jsx',
+    'tools/console/src/codecommit-content.jsx',
+    'tools/console/src/codecommit-content.mjs',
+}
+
+
 def load_registry(root, relative='formal/models.json'):
     root = Path(root)
     registry_path = asset(root, relative)
