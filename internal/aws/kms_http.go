@@ -12,6 +12,11 @@ import (
 )
 
 type kmsRequest struct {
+	GranteePrincipal    string
+	Operations          []string
+	GrantId             string
+	Name                string
+	GrantTokens         []string
 	Description         string
 	KeySpec             string
 	KeyUsage            string
@@ -31,7 +36,10 @@ type kmsRequest struct {
 
 var kmsFields = map[string][]string{
 	"CreateKey":   {"Description", "KeySpec", "KeyUsage", "Origin", "MultiRegion"},
-	"DescribeKey": {"KeyId"}, "ListKeys": {"Limit", "Marker"}, "EnableKey": {"KeyId"}, "DisableKey": {"KeyId"},
+	"CreateGrant": {"KeyId", "GranteePrincipal", "Operations", "Name"},
+	"ListGrants":  {"KeyId", "Limit", "Marker", "GranteePrincipal", "GrantId"},
+	"RevokeGrant": {"KeyId", "GrantId"},
+	"DescribeKey": {"KeyId", "GrantTokens"}, "ListKeys": {"Limit", "Marker"}, "EnableKey": {"KeyId"}, "DisableKey": {"KeyId"},
 	"GetKeyPolicy": {"KeyId", "PolicyName"},
 	"Encrypt":      {"KeyId", "Plaintext", "EncryptionContext", "EncryptionAlgorithm"},
 	"Decrypt":      {"KeyId", "CiphertextBlob", "EncryptionContext", "EncryptionAlgorithm"},
@@ -213,7 +221,7 @@ func kmsDecode(data []byte, op string) (kmsRequest, error) {
 	if json.Unmarshal(data, &request) != nil {
 		return request, kmsInvalid()
 	}
-	for _, f := range []string{"KeySpec", "KeyUsage", "Origin", "PolicyName", "KeyId", "EncryptionAlgorithm", "Marker", "AliasName", "TargetKeyId"} {
+	for _, f := range []string{"KeySpec", "KeyUsage", "Origin", "PolicyName", "KeyId", "EncryptionAlgorithm", "Marker", "AliasName", "TargetKeyId", "Name", "GrantId", "GranteePrincipal"} {
 		if value, ok := raw[f]; ok {
 			var s string
 			if json.Unmarshal(value, &s) != nil || s == "" {
@@ -242,7 +250,7 @@ func kmsDecode(data []byte, op string) (kmsRequest, error) {
 			return request, kmsInvalid()
 		}
 	}
-	if op == "ListAliases" {
+	if op == "ListAliases" || op == "ListGrants" {
 		if _, present := raw["Limit"]; !present {
 			request.Limit = 50
 		}
@@ -287,6 +295,9 @@ func (s *KMSStore) ServeHTTP(w http.ResponseWriter, r *http.Request, region stri
 	request, err := kmsDecode(data, op)
 	if err != nil {
 		kmsWriteError(w, err)
+		return
+	}
+	if s.serveGrantRequest(w, r, region, op, request, authorize) {
 		return
 	}
 	if s.serveAliasRequest(w, r, region, op, request, authorize) {

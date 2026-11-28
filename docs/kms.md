@@ -1,7 +1,6 @@
 # KMS: local symmetric keys and customer aliases
 
-Twelve native JSON1.1 operations share the team's actual SQLite state with SDK
-clients and the embedded Cloudscape console. Use the authenticated [CLI](start.md).
+Fifteen native JSON 1.1 operations use the team's SQLite database. The embedded Cloudscape console and SDK share key and alias state. Use the SDK to manage grants. Use the authenticated [CLI](start.md).
 Embedding hosts must wrap the unauthenticated `server.New` composition API with
 `NewAccess`. Allocate a separate process/database/token authority per team.
 
@@ -9,7 +8,7 @@ POST to `/` or `/_simulator/providers/aws/` with Content-Type
 `application/x-amz-json-1.1` and X-Amz-Target `TrentService.<Operation>`.
 The four supported regions default to `us-east-1`. Local unsigned or dummy
 TCSIM-prefixed SDK credentials select protocol/region; they are not authentication.
-Real AWS credentials and session tokens are rejected. An exercise principal does
+The signed role-session exception for DescribeKey is described below. An exercise principal does
 not establish authentication or team isolation.
 
 This is an independent learning simulator. SQLite stores raw key material: it
@@ -37,7 +36,23 @@ Explicit Deny wins. An alias-metadata grant does not grant cryptographic access;
 resolving an alias does not require an invented DescribeKey/GetKey permission.
 The immutable account-root key-policy statement enables delegation through the
 local identity matcher, not access for every identity. Full AWS key-policy,
-condition/ABAC, grants and cross-account evaluation are not implemented.
+condition/ABAC and cross-account evaluation are not implemented.
+
+## Grants for a local IAM role
+
+Grant management uses the ordinary token-authenticated KMS SDK entry point and a concrete key ID or same-Region ARN. The grantee must be an existing root-path IAM role in account `000000000000`. Grant authority applies to that role's immutable role ID. Recreating the role with the same name requires a new grant.
+
+| Operation | Inputs and behavior | IAM permission |
+| --- | --- | --- |
+| CreateGrant | An Enabled key, exact `GranteePrincipal` ARN and `Operations=["DescribeKey"]`. Optional `Name` (1–256 characters) deduplicates the same request against the same role generation. An unnamed retry creates a separate grant. Returns a grant ID and a fresh opaque token. | `kms:CreateGrant` on the key ARN |
+| ListGrants | A concrete Enabled or Disabled key, optional exact `GrantId` and/or `GranteePrincipal`. Pages default to 50 entries, with `Limit` 1–100. A marker is bound to the issuing database, Region, key, filters and page size. | `kms:ListGrants` on the key ARN |
+| RevokeGrant | The concrete key and its grant ID. Confirmation follows the SQLite commit. A missing grant on that key returns `NotFoundException`. | `kms:RevokeGrant` on the key ARN |
+
+Assume the grantee role using local STS, then call the SDK's `kms.describe_key(KeyId=...)` against the same simulator. This native role path admits the signed JSON 1.1 root POST for `TrentService.DescribeKey` only. The local role policy and a matching grant can each allow the read. An explicit policy Deny wins. Optional `GrantTokens` must belong to live grants for that role and key. A Disable leaves grants readable and revocable. CreateGrant on a Disabled key returns `DisabledException`.
+
+Grants take effect immediately and persist when the simulator restarts with the same SQLite database. A restart requires a fresh STS session. Revoking the only matching grant removes that session's grant-derived read access. The simulator supports 50,000 grants per key, matching the published AWS default. Service principals, account principals, cross-account grants, constraints, dry runs, grant delegation, retiring principals and `RetireGrant` are outside this scope. Grant management is available in the SDK and served API reference. The key and alias console keeps its existing workflow.
+
+AWS documents the [grant workflow](https://docs.aws.amazon.com/kms/latest/developerguide/grants.html), [compatible key states](https://docs.aws.amazon.com/kms/latest/developerguide/key-state.html), [resource quotas](https://docs.aws.amazon.com/kms/latest/developerguide/resource-limits.html), [CreateGrant](https://docs.aws.amazon.com/kms/latest/APIReference/API_CreateGrant.html), [ListGrants](https://docs.aws.amazon.com/kms/latest/APIReference/API_ListGrants.html), [RevokeGrant](https://docs.aws.amazon.com/kms/latest/APIReference/API_RevokeGrant.html) and [DescribeKey](https://docs.aws.amazon.com/kms/latest/APIReference/API_DescribeKey.html).
 
 ## Keys, crypto and alias resolution
 
@@ -126,7 +141,7 @@ No Challenge problem is enabled merely by these operations.
 
 ## API reference and verification
 
-The embedded root POST has twelve named KMS request templates and per-target
+The embedded root POST has fifteen named KMS request templates and per-target
 schema mappings. The four alias templates require actual CreateKey output; Update
 needs a second real key. Static placeholders are not saved state. Selecting a
 body example does not automatically select routing headers. Native SDK children

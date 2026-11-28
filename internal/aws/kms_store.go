@@ -23,13 +23,27 @@ func NewKMSStore(db *sql.DB) (*KMSStore, error) {
 	if db == nil {
 		return nil, errors.New("KMS requires a SQLite database")
 	}
-	_, err := db.Exec(`CREATE TABLE IF NOT EXISTS aws_kms_keys (
+	tx, err := db.Begin()
+	if err != nil {
+		return nil, err
+	}
+	defer tx.Rollback()
+	_, err = tx.Exec(`CREATE TABLE IF NOT EXISTS aws_kms_keys (
  region TEXT NOT NULL,key_id TEXT NOT NULL,description TEXT NOT NULL,created REAL NOT NULL,
  state TEXT NOT NULL CHECK(state IN ('Enabled','Disabled')),
  material BLOB NOT NULL CHECK(typeof(material)='blob' AND length(material)=32),
  encryptions INTEGER NOT NULL CHECK(encryptions>=0 AND encryptions<=4294967296),policy TEXT NOT NULL,
  PRIMARY KEY(region,key_id));`)
-	return &KMSStore{db}, err
+	if err == nil {
+		_, err = tx.Exec(kmsGrantSchema)
+	}
+	if err == nil {
+		err = tx.Commit()
+	}
+	if err != nil {
+		return nil, err
+	}
+	return &KMSStore{db}, nil
 }
 func kmsRead(ctx context.Context, q interface {
 	QueryRowContext(context.Context, string, ...any) *sql.Row

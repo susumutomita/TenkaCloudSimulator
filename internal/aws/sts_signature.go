@@ -18,7 +18,7 @@ import (
 
 // NativeSDKServices are the signing services a TCSIMOPERATOR or assumed-role
 // session may use. Hosts read the same list from the capability document.
-var NativeSDKServices = []string{"sts", "iam", "cloudformation", "ssm", "lambda", cognitoUserPoolsSigningName}
+var NativeSDKServices = []string{"sts", "iam", "cloudformation", "ssm", "lambda", cognitoUserPoolsSigningName, "kms"}
 
 type sdkSignature struct {
 	key, date, region, service, scope, headers, signature string
@@ -61,6 +61,9 @@ func parseSDKSignature(r *http.Request) (sdkSignature, error) {
 	serviceSupported := false
 	for _, service := range NativeSDKServices {
 		serviceSupported = serviceSupported || service == parts[3]
+	}
+	if parts[3] == "kms" && !kmsSignedDescribeRequest(r, parts[0]) {
+		return fail()
 	}
 	if !serviceSupported {
 		return fail()
@@ -161,7 +164,7 @@ func verifySDKSignature(r *http.Request, s sdkSignature, secret string, now time
 	if !seen["host"] || !seen["x-amz-date"] || r.Header.Get("X-Amz-Security-Token") != "" && !seen["x-amz-security-token"] {
 		return fail()
 	}
-	if s.service == cognitoUserPoolsSigningName && !seen["content-type"] {
+	if (s.service == cognitoUserPoolsSigningName || s.service == "kms") && !seen["content-type"] {
 		return fail()
 	}
 	// Signed dispatch and identity selectors cannot be injected after signing.

@@ -13,7 +13,7 @@ from urllib.parse import urlsplit
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from check import running, boto3, Config
 
-EXPECTED = {'CreateKey', 'DescribeKey', 'ListKeys', 'EnableKey', 'DisableKey', 'GetKeyPolicy', 'Encrypt', 'Decrypt', 'CreateAlias', 'ListAliases', 'UpdateAlias', 'DeleteAlias'}
+EXPECTED = {'CreateKey', 'DescribeKey', 'ListKeys', 'EnableKey', 'DisableKey', 'GetKeyPolicy', 'Encrypt', 'Decrypt', 'CreateAlias', 'ListAliases', 'UpdateAlias', 'DeleteAlias', 'CreateGrant', 'ListGrants', 'RevokeGrant'}
 ALIASES = {'CreateAlias', 'ListAliases', 'UpdateAlias', 'DeleteAlias'}
 SCHEMAS = {'CreateAlias': 'KMSCreateAliasInput', 'ListAliases': 'KMSListAliasesInput', 'UpdateAlias': 'KMSUpdateAliasInput', 'DeleteAlias': 'KMSDeleteAliasInput'}
 COUNTERS, CLIENTS, RAW_LISTS = [], [], []
@@ -75,7 +75,7 @@ def main():
     with running(authenticated=True) as (endpoint, operator):
         spec = fetch(endpoint, '/_simulator/docs/openapi.json', operator)
         caps = fetch(endpoint, '/_simulator/v1/capabilities', operator)['services']['kms']
-        assert len(caps['operations']) == 12 and len(set(caps['operations'])) == 12 and set(caps['operations']) == EXPECTED
+        assert len(caps['operations']) == 15 and len(set(caps['operations'])) == 15 and set(caps['operations']) == EXPECTED
         assert caps['aliasLimit'] == 1000 and caps['aliasesPerKey'] == 50 and caps['aliasNameCharacters'] == 256
         assert caps['aliasListDefault'] == 50 and caps['aliasListMaximum'] == 100 and caps['aliasCryptoIdentifiers'] == ['Encrypt', 'Decrypt']
         assert {'AWS-managed/predefined aliases', 'alias-based policy conditions', 'grants'} <= set(caps['unsupported'])
@@ -124,7 +124,7 @@ def main():
             assert count['calls'] > 0 and count['calls'] == count['sends'] == count['responses']
         assert len(RAW_LISTS) >= 8
         assert {target for c in COUNTERS for target in c['targets']} >= {'TrentService.' + name for name in ALIASES}
-        print(json.dumps({'servedKMSOperationSet': 12, 'actualAliasExamples': 4, 'routes': ['/', '/_simulator/providers/aws/'], 'sameSQLiteNativeCrypto': True, 'emptyBodiesAndNumericTimestamps': True, 'guardedSDKCounts': {key: sum(c[key] for c in COUNTERS) for key in ['calls', 'sends', 'responses']}, 'staticExamplesAreNotSavedState': True}))
+        print(json.dumps({'servedKMSOperationSet': 15, 'actualAliasExamples': 4, 'routes': ['/', '/_simulator/providers/aws/'], 'sameSQLiteNativeCrypto': True, 'emptyBodiesAndNumericTimestamps': True, 'guardedSDKCounts': {key: sum(c[key] for c in COUNTERS) for key in ['calls', 'sends', 'responses']}, 'staticExamplesAreNotSavedState': True}))
 
 
 if __name__ == '__main__':

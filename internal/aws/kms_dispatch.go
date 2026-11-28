@@ -62,6 +62,18 @@ func (g *Gateway) serveKMS(w http.ResponseWriter, r *http.Request) {
 		kmsWriteError(w, err)
 		return
 	}
+	if _, signed := SDKIdentityFromContext(r.Context()); signed {
+		// A Console role binding can carry the same identity and policy. Only
+		// a verified native SDK request carries the credential reference.
+		key, verified := r.Context().Value(sdkSessionKeyContextKey{}).(string)
+		signature, parseErr := parseSDKSignature(r)
+		if !verified || parseErr != nil || signature.key != key || signature.service != "kms" {
+			kmsWriteError(w, kmsGrantDenied())
+			return
+		}
+		g.KMS.ServeHTTP(w, r, region, nil)
+		return
+	}
 	principal := r.Header.Get("X-Simulator-Principal")
 	if principal == "" {
 		principal = core.Administrator
