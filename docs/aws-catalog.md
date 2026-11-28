@@ -57,6 +57,39 @@ served.
 Products assessed as not servable at all, with evidence, are listed in the
 [coverage assessment](coverage-assessment.md).
 
+## ECR repository group membership
+
+`CreateGroup` accepts `ResourceQuery.Type` equal to `TAG_FILTERS_1_0` and a
+`Query` string containing this JSON object. It matches one exact tag key and
+one exact value on local private ECR repositories in the group's region.
+
+```json
+{"ResourceTypeFilters":["AWS::ECR::Repository"],"TagFilters":[{"Key":"Team","Values":["blue"]}]}
+```
+
+`GetGroupQuery` reads the stored definition by group name or ARN. `UpdateGroupQuery`
+replaces it on an existing query group. `ListGroupResources` returns the current
+matching repository ARNs in creation order. Creating, tagging, untagging and
+deleting a repository changes membership on the next read. `MaxResults` accepts
+1–50. Supply `NextToken` in the same region on the same group revision to continue.
+
+`CreateGroup` and `ListGroups` require their respective IAM actions with `Resource` set to `"*"`. A principal with only `ListGroups` can page through the groups in its own team and region. Permissions on a named group or a group ARN pattern apply to operations that support the group resource type. [AWS Resource Groups IAM action table](https://docs.aws.amazon.com/service-authorization/latest/reference/list_resource-groups.html) · [CreateGroup](https://docs.aws.amazon.com/ARG/latest/APIReference/API_CreateGroup.html) · [ListGroups](https://docs.aws.amazon.com/ARG/latest/APIReference/API_ListGroups.html)
+
+The eleven supported operations return the modeled HTTP `403 ForbiddenException` when the local IAM policy denies the request. The group-scoped operations check the target ARN before disclosing whether it exists. [AWS Resource Groups API](https://docs.aws.amazon.com/ARG/latest/APIReference/API_Operations.html)
+
+The group’s own tags appear in the creation response and in `GetTags`. `Tag` and `Untag` change these stored tags. The supported plain and query groups omit `Group.ApplicationTag`, which AWS reserves for application groups. [Group response shape](https://docs.aws.amazon.com/ARG/latest/APIReference/API_Group.html)
+
+Readers need `resource-groups:ListGroupResources` on the group ARN, along with
+`tag:GetResources`, `cloudformation:DescribeStacks` and `cloudformation:ListStackResources`
+on `*`. AWS lists these three additional permissions for the API. Each membership
+page checks all four against one fresh principal policy snapshot. Queryless groups retain their metadata and tag operations.
+In the Cloudscape service catalog, select **AWS Resource Groups** and open a group to view its saved filter, page through matching repository ARNs, or edit the tag key and value of an existing query. **Refresh query and members** reads current repository tags and permissions again.
+
+Search, explicit member management, CloudFormation queries, service configurations,
+extra tag filters and other resource types remain outside this slice. [AWS supported resource types](https://docs.aws.amazon.com/ARG/latest/userguide/supported-resources.html) ·
+[resource query formats](https://docs.aws.amazon.com/ARG/latest/userguide/gettingstarted-query.html) ·
+[ListGroupResources permissions and response](https://docs.aws.amazon.com/ARG/latest/APIReference/API_ListGroupResources.html).
+
 ## Routing and authorization
 
 - JSON protocols are routed by the official `X-Amz-Target` prefix.
