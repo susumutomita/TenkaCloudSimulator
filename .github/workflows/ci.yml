@@ -121,6 +121,9 @@ jobs:
       - name: Run the complete standard gate without test selection or skips
         run: |
           export PATH="/tmp/cloudfront-gate-tests/bin:$PATH"
+          export SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt
+          test -r "$SSL_CERT_FILE"
+          python -c 'import ssl; context = ssl.create_default_context(); assert context.get_ca_certs(); assert context.verify_mode == ssl.CERT_REQUIRED and context.check_hostname'
           set +e
           make before-commit > "$RUNNER_TEMP/cloudfront-whole-private.log" 2>&1
           result=$?
