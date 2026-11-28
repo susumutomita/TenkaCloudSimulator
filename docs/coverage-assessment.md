@@ -143,5 +143,7 @@ and [onboarding guide](https://docs.cloud.google.com/universal-ledger/getting-st
 ## Service Quotas
 
 [#210](https://github.com/susumutomita/TenkaCloudSimulator/issues/210) now serves
-`GetServiceQuota` for the [regional B2BI Profiles limit](aws-catalog.md#b2b-data-interchange-profile-quota).
-The wider inventory, AWS defaults, support requests and quota increases remain open.
+five read operations for the [regional B2BI Profiles limit](aws-catalog.md#b2b-data-interchange-profile-quota),
+including its published default and the actual local applied capacity. Four
+additional operations submit and read local increase requests. A request does
+not change the enforced B2BI limit or open an external Support case.

@@ -3,7 +3,6 @@ package catalog
 import (
 	"context"
 	"database/sql"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
@@ -334,13 +333,9 @@ func (e *Engine) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 // then authorizes, executes and encodes one operation in any protocol.
 func (e *Engine) run(w http.ResponseWriter, r *http.Request, b *binding, op *Op, region string, raw map[string]any) {
 	if b.spec.Model == "service-quotas" {
-		for _, field := range []string{"DesiredValue", "MaxResults"} {
-			if value, supplied := raw[field]; supplied {
-				if _, ok := value.(json.Number); !ok {
-					e.fail(w, b, op, invalid("%s must be a JSON number.", field))
-					return
-				}
-			}
+		if err := validateQuotaJSON(raw); err != nil {
+			e.fail(w, b, op, err)
+			return
 		}
 	}
 	official := b.model.Operations[op.Name]

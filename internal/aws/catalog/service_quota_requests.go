@@ -10,7 +10,6 @@ import (
 	"encoding/binary"
 	"errors"
 	"math"
-	"slices"
 	"time"
 )
 
@@ -55,7 +54,7 @@ func (q *request) quotaIncreaseOutput(rec quotaIncrease) map[string]any {
 	when := float64(rec.createdMS) / 1000
 	return map[string]any{
 		"Id": rec.id, "Requester": rec.requester, "ServiceCode": "b2bi", "QuotaCode": b2biProfilesQuota,
-		"QuotaName": "Profiles", "QuotaArn": "arn:aws:servicequotas:" + q.region + ":" + q.e.cfg.Account + ":b2bi/" + b2biProfilesQuota,
+		"QuotaName": "Profiles", "QuotaArn": q.profileQuotaARN(),
 		"GlobalQuota": false, "DesiredValue": rec.desired, "Created": when, "LastUpdated": when,
 		"Status": rec.status, "QuotaRequestedAtLevel": "ACCOUNT",
 	}
@@ -63,7 +62,7 @@ func (q *request) quotaIncreaseOutput(rec quotaIncrease) map[string]any {
 
 func (q *request) supportedIncreaseQuota() bool {
 	return q.input["ServiceCode"] == "b2bi" && q.input["QuotaCode"] == b2biProfilesQuota &&
-		slices.Contains([]string{"us-east-1", "us-west-2", "eu-west-1"}, q.region) && q.e.b2biProfileLimit() > 0
+		b2biQuotaRegion(q.region) && q.e.b2biProfileLimit() > 0
 }
 
 func (q *request) requestQuotaIncrease() (map[string]any, error) {
@@ -196,13 +195,14 @@ func (q *request) listQuotaIncreaseHistory() (map[string]any, error) {
 	if q.input["QuotaRequestedAtLevel"] == "RESOURCE" || (q.input["ServiceCode"] != nil && q.input["ServiceCode"] != "b2bi") {
 		return out, nil
 	}
-	cutoff := int64(math.MinInt64)
+	firstMS, lastMS := int64(math.MinInt64), int64(math.MaxInt64)
 	if !byQuota {
-		cutoff = q.now().Add(-90 * 24 * time.Hour).UnixMilli()
+		now := q.now()
+		firstMS, lastMS = now.Add(-90*24*time.Hour).UnixMilli(), now.UnixMilli()
 	}
 	status, _ := q.input["Status"].(string)
 	rows, err := q.e.store.db.QueryContext(q.ctx, "SELECT "+quotaIncreaseColumns+` FROM aws_b2bi_profile_quota_requests
-		WHERE region=? AND seq<? AND created_ms>=? AND (?='' OR status=?) ORDER BY seq DESC LIMIT ?`, q.region, before, cutoff, status, status, limit+1)
+		WHERE region=? AND seq<? AND created_ms BETWEEN ? AND ? AND (?='' OR status=?) ORDER BY seq DESC LIMIT ?`, q.region, before, firstMS, lastMS, status, status, limit+1)
 	if err != nil {
 		return nil, err
 	}

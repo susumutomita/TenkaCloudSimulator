@@ -58,6 +58,15 @@ func TestServiceQuotaIncreaseActualRequestsAndScopedLists(t *testing.T) {
 		return rec
 	}
 	old := save(6.5)
+	created := h.now
+	h.now = created.Add(-time.Millisecond)
+	if len(ok(list, map[string]any{})["RequestedQuotas"].([]any)) != 0 || len(ok(byQuota, target)["RequestedQuotas"].([]any)) != 1 {
+		t.Fatal("general history and retained quota history did not respect their distinct time windows")
+	}
+	h.now = created
+	if len(ok(list, map[string]any{})["RequestedQuotas"].([]any)) != 1 {
+		t.Fatal("a request created at the current instant was omitted")
+	}
 	h.now = h.now.Add(90 * 24 * time.Hour)
 	atCutoff := ok(list, map[string]any{})["RequestedQuotas"].([]any)
 	if len(atCutoff) != 1 {

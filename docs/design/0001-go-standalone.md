@@ -18,7 +18,7 @@ SSM の [ドキュメント履歴](../ssm-documents.md) はリージョンとド
 
 SNS の HTTP/HTTPS コンソールは native Query を呼び出し、通知先 URL をローカル SQLite に記録するだけで外部に接続しない。購読属性を読む際は ARN から親トピックを特定して IAM を先に評価し、購読と親の存在およびリージョンの一致を同じ読み取りで確認する。専用 Scalar は us-east-1 固定で通常のログインセッションを使い、コンソールの演習用 ID 選択を引き継がない。[対応範囲](../sns.md)。
 
-Service Quotas の `GetServiceQuota` は、B2B Data Interchange の `CreateProfile` がリージョン単位で強制している上限を同じ定義から読み取る。呼出元には対象リージョン・アカウントのクォータ ARN に対する `servicequotas:GetServiceQuota` が必要となる。[対応リージョンと API の範囲](../aws-catalog.md#b2b-data-interchange-profile-quota)
+Service Quotas の5つの読み取りは、B2B Data Interchange の Profiles に限定する。公開デフォルト5と `CreateProfile` が実際に強制する総容量を区別し、使用済みの数を上限から差し引かない。`GetServiceQuota` は対象クォータ ARN、それ以外の4操作は各 action の Resource `*` を必要とする。実在するローカルの上限定義がなければ適用値を捏造しない。[対応リージョン・空の一覧・未対応範囲](../aws-catalog.md#b2b-data-interchange-profile-quota)
 
 上限引き上げ要求はチームの SQLite に保存し、リージョン別に ID と履歴を照会できる。`SupportCaseAllowed=false` は `NOT_APPROVED`、省略または true は `PENDING` として保存する。要求を受け付けた後も B2BI の適用上限は同じ値を返す。ローカルの要求に外部サポートケースの発行や自動承認の処理はない。
 

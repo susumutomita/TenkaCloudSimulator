@@ -46,6 +46,10 @@ func (q *request) execute() (map[string]any, error) {
 	}
 	if q.b.spec.Model == "service-quotas" {
 		switch q.op.Name {
+		case "GetServiceQuota", "GetAWSDefaultServiceQuota":
+			return q.readQuota()
+		case "ListServices", "ListServiceQuotas", "ListAWSDefaultServiceQuotas":
+			return q.listQuotas()
 		case "RequestServiceQuotaIncrease":
 			return q.requestQuotaIncrease()
 		case "GetRequestedServiceQuotaChange":
@@ -64,9 +68,6 @@ func (q *request) execute() (map[string]any, error) {
 		}
 		return q.create(0)
 	case Read:
-		if q.b.spec.Model == "service-quotas" && q.op.Name == "GetServiceQuota" {
-			return q.getServiceQuota()
-		}
 		if q.b.spec.Model == "resource-groups" {
 			switch q.op.Name {
 			case "GetGroupQuery":

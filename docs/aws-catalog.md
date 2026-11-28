@@ -60,15 +60,41 @@ Products assessed as not servable at all, with evidence, are listed in the
 
 ## B2B Data Interchange profile quota
 
-`GetServiceQuota` accepts `ServiceCode=b2bi` and `QuotaCode=L-05F6A9EF` in
-`us-east-1`, `us-west-2` and `eu-west-1`. It reads the total number of profiles
-allowed per account in that region from the same limit that `CreateProfile`
-enforces. Five profiles fill the quota. Deleting one frees a slot. The response
-continues to report five throughout. The account-level read requires
-`servicequotas:GetServiceQuota` on
+Five read operations expose only the B2BI Profiles quota (`b2bi/L-05F6A9EF`)
+in `us-east-1`, `us-west-2` and `eu-west-1`:
+
+| Operation | Local response | IAM Resource |
+| --- | --- | --- |
+| ListServices | One B2B Data Interchange entry in the supported regions | `*` |
+| GetAWSDefaultServiceQuota | The published AWS default, five profiles | `*` |
+| ListAWSDefaultServiceQuotas | The same single published default | `*` |
+| ListServiceQuotas | The account-level capacity enforced by the local CreateProfile | `*` |
+| GetServiceQuota | The same applied capacity by service and quota code | Quota ARN |
+
+The default and applied values have different sources. The shipped profile
+limit is five; five existing profiles fill it, and deleting one frees a slot.
+Applied reads report total capacity, never remaining slots. An embedded engine
+with a different profile bound reports that bound while the published default
+stays five. If the profile operation is not bound, applied Get returns
+`NoSuchResourceException` and the applied list is empty; the default remains
+readable. No applied value is invented from the default.
+
+The named account-level read requires `servicequotas:GetServiceQuota` on
 `arn:aws:servicequotas:<region>:<account>:b2bi/L-05F6A9EF`. The local IAM
-policy supports action and resource matching for this operation. The
+policy supports action and resource matching. Each of the other four operations
+requires its own action on literal `*`; a quota-ARN-only grant does not authorize
+those operations. The
 `servicequotas:service` condition key is outside the local policy contract.
+
+The three lists accept `MaxResults` from 1 to 100. This singleton inventory never
+emits a `NextToken`; a supplied foreign token is `InvalidPaginationTokenException`,
+not a fabricated page. `ListServiceQuotas` accepts an exact `QuotaCode` filter
+and ACCOUNT/ALL/RESOURCE levels. ACCOUNT, ALL and omission return the same
+account-level row; RESOURCE returns `Quotas: []`. Unknown valid service names
+return `NoSuchResourceException` on quota reads. In Tokyo, `ListServices` returns
+`Services: []`, and the scoped quota lists and Gets return `NoSuchResourceException`.
+This does not assert a universal AWS service inventory. The separate local B2BI
+metadata catalog can still store profiles in Tokyo.
 
 AWS lists Profiles as adjustable. `RequestServiceQuotaIncrease` accepts a desired
 value above the enforced limit. With `SupportCaseAllowed=false` it saves a
@@ -89,13 +115,22 @@ request IDs survive restart. Creating a request and listing by quota require
 the operation's IAM action on the regional quota ARN. Looking up an ID and
 listing the general history require their respective actions on `*`.
 
-The local B2BI catalog also works in Tokyo, where
-AWS does not list a B2BI endpoint. The quota read returns `NoSuchResourceException`
-there. [B2BI endpoints and quotas](https://docs.aws.amazon.com/general/latest/gr/b2bi-service.html) ·
+Resource contexts, usage metrics and general quota inventory remain outside the supported scope.
+[B2BI endpoints and quotas](https://docs.aws.amazon.com/general/latest/gr/b2bi-service.html) ·
 [GetServiceQuota](https://docs.aws.amazon.com/servicequotas/2019-06-24/apireference/API_GetServiceQuota.html) ·
+[ListServices](https://docs.aws.amazon.com/servicequotas/2019-06-24/apireference/API_ListServices.html) ·
+[GetAWSDefaultServiceQuota](https://docs.aws.amazon.com/servicequotas/2019-06-24/apireference/API_GetAWSDefaultServiceQuota.html) ·
+[ListAWSDefaultServiceQuotas](https://docs.aws.amazon.com/servicequotas/2019-06-24/apireference/API_ListAWSDefaultServiceQuotas.html) ·
+[ListServiceQuotas](https://docs.aws.amazon.com/servicequotas/2019-06-24/apireference/API_ListServiceQuotas.html) ·
 [RequestServiceQuotaIncrease](https://docs.aws.amazon.com/servicequotas/2019-06-24/apireference/API_RequestServiceQuotaIncrease.html) ·
 [ListRequestedServiceQuotaChangeHistory](https://docs.aws.amazon.com/servicequotas/2019-06-24/apireference/API_ListRequestedServiceQuotaChangeHistory.html) ·
-[Service Quotas IAM](https://docs.aws.amazon.com/service-authorization/latest/reference/list_servicequotas.html).
+[Service Quotas IAM](https://docs.aws.amazon.com/service-authorization/latest/reference/list_service-quotas.html).
+
+`test/e2e/service_quotas_profiles.py` checks requests and history alongside the applied quota and actual B2BI profile admission. `service_quotas_discovery.py` adds the four reads through two real
+team processes, native IAM refusals, full-capacity replacement, reopening and
+cleanup. The finite `ServiceQuotaDiscovery` model checks read projections and
+unchanged abstract frames; native tests check JSON types, concrete region names
+and page-size bounds. Neither is an AWS comparison or implementation proof.
 
 ## ECR repository group membership
 

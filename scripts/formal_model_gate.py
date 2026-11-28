@@ -4832,6 +4832,13 @@ REQUIRED_SOURCE_SCOPES['StoreConnectionLifetime'] = {
 }
 
 
+# Native B2BI quota discovery uses a computed read projection, not stored CRUD.
+BASE_MODELS.add('ServiceQuotaDiscovery')
+BASE_INVARIANTS['ServiceQuotaDiscovery'] = {'TypeOK', 'RestartPreservesFrame', 'ReadPreservesFrame', 'PeerPreserved', 'ReadProjectionCorrect'}
+REQUIRED_MUTANTS['ServiceQuotaDiscovery'] = {'AppliedUsesPublishedDefault', 'AppliedGetRequiresWildcard', 'ResourceLevelIgnored', 'PeerCapacityReturned', 'UnavailableRegionAdvertised', 'UnknownServiceProjected', 'UnknownQuotaProjected', 'SingleRowInventsCursor', 'ReadChangesSelectedUsage', 'ReadChangesPeerUsage', 'AppliedReportsRemaining', 'ForeignTokenAccepted', 'DefaultUsesApplied', 'WildcardReadsUseQuotaARN', 'DefaultInventsQuotaARN', 'UnrelatedActionAllowed', 'ExplicitDenyIgnored', 'AbsentBindingFallsBackToDefault'}
+REQUIRED_SOURCE_SCOPES['ServiceQuotaDiscovery'] = {'internal/aws/catalog/engine.go', 'internal/aws/catalog/services_business.go', 'internal/aws/catalog/semantics.go', 'internal/aws/catalog/service_quotas.go'}
+
+
 def load_registry(root, relative='formal/models.json'):
     root = Path(root)
     registry_path = asset(root, relative)
