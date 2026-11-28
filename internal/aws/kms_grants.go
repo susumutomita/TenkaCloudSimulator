@@ -9,6 +9,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"errors"
+	"math"
 	"net/http"
 	"regexp"
 	"strings"
@@ -97,6 +98,25 @@ func kmsGrantUnseal(secret []byte, purpose, token string, value any) bool {
 	return err == nil && json.Unmarshal(decoded, value) == nil
 }
 
+// RowsAffected excludes changes made by triggers. A successful grant write
+// changes exactly its addressed row, including any changes made by triggers.
+func kmsGrantWrite(ctx context.Context, tx *sql.Tx, query string, args ...any) error {
+	var before, after int64
+	if err := tx.QueryRowContext(ctx, "SELECT total_changes()").Scan(&before); err != nil {
+		return err
+	}
+	if err := kmsRequireOne(tx.ExecContext(ctx, query, args...)); err != nil {
+		return err
+	}
+	if err := tx.QueryRowContext(ctx, "SELECT total_changes()").Scan(&after); err != nil {
+		return err
+	}
+	if after-before != 1 {
+		return kmsInternal()
+	}
+	return nil
+}
+
 func kmsCreateGrant(ctx context.Context, tx *sql.Tx, region, id string, request kmsRequest) (any, error) {
 	roleName, ok := kmsGrantRoleName(request.GranteePrincipal)
 	if !ok || len(request.Operations) != 1 || request.Operations[0] != "DescribeKey" || request.Name != "" && !kmsGrantName.MatchString(request.Name) {
@@ -118,8 +138,9 @@ func kmsCreateGrant(ctx context.Context, tx *sql.Tx, region, id string, request 
 		return nil, err
 	}
 	grantID := ""
+	var created float64
 	if request.Name != "" {
-		err = tx.QueryRowContext(ctx, `SELECT grant_id FROM aws_kms_grants WHERE region=? AND key_id=? AND role_id=? AND name=?`, region, id, role.RoleID, request.Name).Scan(&grantID)
+		err = tx.QueryRowContext(ctx, `SELECT grant_id,created FROM aws_kms_grants WHERE region=? AND key_id=? AND role_id=? AND name=?`, region, id, role.RoleID, request.Name).Scan(&grantID, &created)
 		if err != nil && !errors.Is(err, sql.ErrNoRows) {
 			return nil, err
 		}
@@ -136,10 +157,23 @@ func kmsCreateGrant(ctx context.Context, tx *sql.Tx, region, id string, request 
 		if err != nil {
 			return nil, err
 		}
-		err = kmsRequireOne(tx.ExecContext(ctx, `INSERT INTO aws_kms_grants(region,key_id,grant_id,role_arn,role_id,name,created) VALUES(?,?,?,?,?,?,?)`, region, id, grantID, role.Arn, role.RoleID, request.Name, float64(time.Now().UnixMilli())/1000))
+		created = float64(time.Now().UnixMilli()) / 1000
+		err = kmsGrantWrite(ctx, tx, `INSERT INTO aws_kms_grants(region,key_id,grant_id,role_arn,role_id,name,created) VALUES(?,?,?,?,?,?,?)`, region, id, grantID, role.Arn, role.RoleID, request.Name, created)
 		if err != nil {
 			return nil, err
 		}
+	}
+	// Confirm every immutable field for both fresh grants and named retries
+	// before minting a token. The encompassing transaction commits before reply.
+	if !kmsGrantID.MatchString(grantID) || created <= 0 || math.IsNaN(created) || math.IsInf(created, 0) {
+		return nil, kmsInternal()
+	}
+	var exact bool
+	if err := tx.QueryRowContext(ctx, `SELECT EXISTS(SELECT 1 FROM aws_kms_grants WHERE region=? AND key_id=? AND grant_id=? AND role_arn=? AND role_id=? AND name=? AND created=?)`, region, id, grantID, role.Arn, role.RoleID, request.Name, created).Scan(&exact); err != nil {
+		return nil, err
+	}
+	if !exact {
+		return nil, kmsInternal()
 	}
 	secret, err := kmsGrantSecret(ctx, tx)
 	if err != nil {
@@ -219,8 +253,14 @@ func kmsRevokeGrant(ctx context.Context, tx *sql.Tx, region, id, grantID string)
 	if !exists {
 		return nil, kmsFailure("NotFoundException", "The grant does not exist on this KMS key.")
 	}
-	if err := kmsRequireOne(tx.ExecContext(ctx, "DELETE FROM aws_kms_grants WHERE region=? AND key_id=? AND grant_id=?", region, id, grantID)); err != nil {
+	if err := kmsGrantWrite(ctx, tx, "DELETE FROM aws_kms_grants WHERE region=? AND key_id=? AND grant_id=?", region, id, grantID); err != nil {
 		return nil, err
+	}
+	if err := tx.QueryRowContext(ctx, "SELECT EXISTS(SELECT 1 FROM aws_kms_grants WHERE region=? AND key_id=? AND grant_id=?)", region, id, grantID).Scan(&exists); err != nil {
+		return nil, err
+	}
+	if exists {
+		return nil, kmsInternal()
 	}
 	return nil, nil
 }

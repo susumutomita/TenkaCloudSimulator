@@ -89,7 +89,7 @@
     },
     {
       "path": "internal/aws/kms_grants.go",
-      "sha256": "b49442d4f1fc3e751cdbac1962ba4ecfbc95b190cd1f33f8aad2586da0fb0501",
+      "sha256": "7428089db1a1f4906f6d2a7956713f86ae9d655181d45364d1b17652610ada26",
       "disposition": "modeled",
       "reason": "Validate, persist, list and revoke real KMS grants and evaluate role DescribeKey against a transactional key/grant snapshot.",
       "models": [
@@ -108,9 +108,9 @@
     },
     {
       "path": "internal/aws/kms_grants_test.go",
-      "sha256": "aa6ef7fef6637db7088278443c5719f98186765e478361aa03857bb045193dee",
+      "sha256": "eabbc3de6e2215d25d1b77e8cbd54d83ce07f9553ba83709abc45a515f952168",
       "disposition": "test-support",
-      "reason": "Exercise grant management, refusal frames, token and pagination bounds, IAM decisions and role recreation.",
+      "reason": "Exercise grant management, row/ledger readback, rollback, token and pagination bounds, IAM decisions and role recreation.",
       "models": []
     },
     {

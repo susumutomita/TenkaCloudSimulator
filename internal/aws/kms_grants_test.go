@@ -294,3 +294,74 @@ func TestKMSGrantManagementFramesAndKeyPermissions(t *testing.T) {
 		t.Fatal("failed revoke changed state")
 	}
 }
+
+func TestKMSGrantWriteReadbackAndSiblingFrame(t *testing.T) {
+	for _, scenario := range []string{"insert-removed", "insert-changed", "sibling-changed", "delete-restored", "named-retry-mismatch"} {
+		t.Run(scenario, func(t *testing.T) {
+			db, store := kmsTestStore(t, "")
+			roles, err := NewIAMRoleStore(db.Database())
+			if err != nil {
+				t.Fatal(err)
+			}
+			role, err := roles.Create(t.Context(), "reader", stsRootTrust, "", 3600)
+			if err != nil {
+				t.Fatal(err)
+			}
+			key, err := store.CreateKey(t.Context(), "us-east-1", "")
+			if err != nil {
+				t.Fatal(err)
+			}
+			g := &Gateway{KMS: store, Identities: core.NewIdentities(db)}
+			args := map[string]any{"KeyId": key.KeyID, "GranteePrincipal": role.Arn, "Operations": []string{"DescribeKey"}, "Name": "kept"}
+			kmsGrantCall(t, g, "CreateGrant", args, 200, "")
+			args["Name"] = "tested"
+			op := "CreateGrant"
+			sql := ""
+			switch scenario {
+			case "insert-removed":
+				sql = "CREATE TEMP TRIGGER change_grant AFTER INSERT ON aws_kms_grants BEGIN DELETE FROM aws_kms_grants WHERE grant_id=NEW.grant_id; END"
+			case "insert-changed":
+				sql = "CREATE TEMP TRIGGER change_grant AFTER INSERT ON aws_kms_grants BEGIN UPDATE aws_kms_grants SET created=NEW.created+1 WHERE grant_id=NEW.grant_id; END"
+			case "sibling-changed":
+				sql = "CREATE TEMP TRIGGER change_grant AFTER INSERT ON aws_kms_grants BEGIN UPDATE aws_kms_grants SET name='unexpected' WHERE name='kept'; END"
+			case "delete-restored":
+				original := kmsGrantCall(t, g, "CreateGrant", args, 200, "")
+				op = "RevokeGrant"
+				args = map[string]any{"KeyId": key.KeyID, "GrantId": original["GrantId"]}
+				sql = "CREATE TEMP TRIGGER change_grant AFTER DELETE ON aws_kms_grants BEGIN INSERT INTO aws_kms_grants VALUES(OLD.region,OLD.key_id,OLD.grant_id,OLD.role_arn,OLD.role_id,OLD.name,OLD.created); END"
+			case "named-retry-mismatch":
+				kmsGrantCall(t, g, "CreateGrant", args, 200, "")
+				if _, err := db.Database().Exec("UPDATE aws_kms_grants SET role_arn=? WHERE name='tested'", kmsGrantRolePrefix+"other"); err != nil {
+					t.Fatal(err)
+				}
+			}
+			read := func() string {
+				var snapshot string
+				if err := db.Database().QueryRow("SELECT json_group_array(json_array(region,key_id,grant_id,role_arn,role_id,name,created) ORDER BY grant_id) FROM aws_kms_grants").Scan(&snapshot); err != nil {
+					t.Fatal(err)
+				}
+				return snapshot
+			}
+			before := read()
+			if sql != "" {
+				if _, err := db.Database().Exec(sql); err != nil {
+					t.Fatal(err)
+				}
+			}
+			result := kmsGrantCall(t, g, op, args, 500, "KMSInternalException")
+			if result["GrantToken"] != nil || result["GrantId"] != nil || read() != before {
+				t.Fatal("failed mutation changed state or returned grant authority")
+			}
+			if sql != "" {
+				if _, err := db.Database().Exec("DROP TRIGGER change_grant"); err != nil {
+					t.Fatal(err)
+				}
+			} else {
+				if _, err := db.Database().Exec("UPDATE aws_kms_grants SET role_arn=? WHERE name='tested'", role.Arn); err != nil {
+					t.Fatal(err)
+				}
+			}
+			kmsGrantCall(t, g, op, args, 200, "")
+		})
+	}
+}
