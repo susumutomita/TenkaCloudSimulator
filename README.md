@@ -107,6 +107,7 @@ console, CloudFormation adapter or Challenge integration.
 - **Functions and messaging:** [Lambda](docs/lambda.md), [API Gateway](docs/apigateway.md),
   [SQS](docs/sqs.md), [SNS](docs/sns.md) (local HTTP/HTTPS subscription Console and reference; no external delivery),
   [CloudWatch Logs](docs/cloudwatch-logs.md).
+- [AWS Support](docs/aws-support.md) stores practice cases, follow-up messages and small attachments in the team's local database.
 - **Identity and secrets:** [IAM](docs/iam.md), [native SDK / STS](docs/sts-native.md),
   [Secrets Manager](docs/secrets-manager.md), [KMS](docs/kms.md), [WAFv2](docs/wafv2.md).
   Manage role trust in the IAM Console, read the role in the API reference and
@@ -138,6 +139,7 @@ console, CloudFormation adapter or Challenge integration.
   [Azure Blob conditional and CRC64 read limits](docs/azure-blob.md#single-range-download-subset),
   [App Engine (Python 3.12 WSGI versions, traffic splits, firewall)](docs/gcp-appengine.md),
   [Cloud DNS (bounded zone and record changes; Console SRV editor)](docs/acceptance/gcp-cloud-dns.md),
+  [Cloud Trace v1 ingestion, Trace explorer and paginated views](docs/gcp-trace.md),
   [Google Cloud console](docs/gcp-console.md), [Azure console](docs/azure-console.md),
   [Azure Queue Storage (bounded named-queue operations)](docs/acceptance/azure-queue.md),
   [local Entra OIDC verification fixture (not login or SAML)](docs/azure-entra-verification-fixture.md),

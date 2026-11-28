@@ -1,27 +1,34 @@
 {
   "version": 1,
-  "base_sha": "ffd2258ec28391a3607e06ecd5aaec3152b9a542",
+  "base_sha": "8c22f02f6b25a9897cdfbc6e8e4edd932e8bf4f7",
   "changes": [
     {
       "path": "README.md",
-      "sha256": "84ed64283e2fbefeb88353024c47c2580d4b182537dae877f63aef0e2ca1402a",
+      "sha256": "b7b69b3c6623cf9612c3bf9894be2a765b7bb91ed9b072be0063fdc4468a67c4",
       "models": [],
       "disposition": "documentation",
-      "reason": "Document the policy migration for service-wide CreateGroup/ListGroups, modeled IAM denial, and group-type response shape."
+      "reason": "Describe how to inspect and edit the supported saved ECR repository filter and verify current membership. Document the policy migration for service-wide CreateGroup/ListGroups, modeled IAM denial, and group-type response shape."
     },
     {
       "path": "docs/aws-catalog.md",
       "sha256": "6e35ebe6a556043166d3b4476c250d6ea38bc5008ed857400615aa0a9e9791d2",
       "models": [],
       "disposition": "documentation",
-      "reason": "Record the official service-wide IAM targets and the application-only tag member for the bounded local group types."
+      "reason": "Describe how to inspect and edit the supported saved ECR repository filter and verify current membership. Record the official service-wide IAM targets and the application-only tag member for the bounded local group types."
     },
     {
       "path": "docs/design/0001-go-standalone.md",
-      "sha256": "83434c9440ce3d5bd3c5c9362683f7c2205c65dd31f5dfa95db328e2e5330113",
+      "sha256": "99e75d08bbbf2b4c2e119d53f58116eb02e4c866aac9af0259f99d3057d3a0f4",
       "models": [],
       "disposition": "documentation",
-      "reason": "Describe group ARN authorization by operation, the uniform native ForbiddenException, and ApplicationTag and ordinary tag projections."
+      "reason": "Describe how to inspect and edit the supported saved ECR repository filter and verify current membership. Describe group ARN authorization by operation, the uniform native ForbiddenException, and ApplicationTag and ordinary tag projections."
+    },
+    {
+      "path": "formal/models.json",
+      "sha256": "17a43a7c5eaa50502d9784e8f6082bb2d4d758309ef8e634a61437129f19d640",
+      "models": [],
+      "disposition": "formal-infrastructure",
+      "reason": "Extend the source scope of the existing catalog console sequencing model to this group detail component."
     },
     {
       "path": "internal/aws/catalog/engine.go",
@@ -106,6 +113,25 @@
       "reason": "Publish the modeled ForbiddenException on all eleven supported Resource Groups operation references."
     },
     {
+      "path": "internal/server/web/app.js",
+      "sha256": "6dcf1c3e5d6c6713ffea469549d65f29548f3517cdf8c9cc46efaedbe76f6987",
+      "models": [
+        {
+          "id": "CatalogConsoleEpoch",
+          "properties": [
+            "NoUnmountedAcceptance",
+            "OnlyCurrentReplies",
+            "SingleWriter",
+            "ReloadOnlyAfterAck",
+            "FailureVisible"
+          ],
+          "limits": "The model covers bounded reply ownership, single-writer admission, success and failure handling. Actual browser cancellation, native query syntax, pagination, authorization, persisted state and rendering require separate runtime checks."
+        }
+      ],
+      "disposition": "modeled",
+      "reason": "Use scoped request lifetimes and the catalog single-writer latch when displaying and replacing the selected group query."
+    },
+    {
       "path": "test/e2e/catalog_fixtures/resource-groups.json",
       "sha256": "365b357be8f765365368ee8564617669e1cf4a002ce85f40b5794cfe90d2233a",
       "models": [],
@@ -113,11 +139,84 @@
       "reason": "The existing catalog fixture requires the modeled ForbiddenException from unauthorized CreateGroup; all stock lifecycle and HTTP status checks are retained."
     },
     {
+      "path": "test/e2e/check.py",
+      "sha256": "445ab7a1b53c37b04c950ec40956e9cc9ebc3584d4850855e298021bc5ce53c1",
+      "models": [],
+      "disposition": "test-support",
+      "reason": "Exercise the actual catalog detail and both real loopback teams, query writes, page projection, denials, late responses and cleanup."
+    },
+    {
       "path": "test/e2e/resource_group_ecr_members.py",
       "sha256": "7d5c6ae694f97226871f6b1b91bd4281cbb65edf36bdb23e9df8a29087bf3f4b",
       "models": [],
       "disposition": "test-support",
       "reason": "Use official boto3 over two private teams and two regions to check service-wide and group-scoped IAM/refusals, tag readbacks, revision-independent lists, membership, reopen and cleanup."
+    },
+    {
+      "path": "test/e2e/resource_group_query_console.py",
+      "sha256": "13d60bb1f19a09313560d16a4ad4e9bfdf9bfe513c975ca711954c8dee0d40b9",
+      "models": [],
+      "disposition": "test-support",
+      "reason": "Exercise the actual catalog detail and both real loopback teams, query writes, page projection, denials, late responses and cleanup."
+    },
+    {
+      "path": "test/e2e/resource_groups_scalar.py",
+      "disposition": "test-support",
+      "models": [],
+      "reason": "Send actual read requests from the shipped Scalar catalog and check stored matching tags, permissions, peer state, restart and cleanup.",
+      "sha256": "514c5e0303a3e8e3a456611ce7be55b285c2d395f971b6ddf95d6ee72ed28a22"
+    },
+    {
+      "path": "tools/console/bundle-digests.json",
+      "sha256": "47e0c5fd1a907f0532cb0c3f344a8729360a17b2f4d2774494a70601fd03be7c",
+      "models": [],
+      "disposition": "presentation",
+      "reason": "Record the reproducible Cloudscape bundle and its source graph for the group detail view."
+    },
+    {
+      "path": "tools/console/bundle-inputs.json",
+      "sha256": "aec8be2e8be40de7966fd58cb99d5e57b94cb133656762d7903e0c8895565740",
+      "models": [],
+      "disposition": "presentation",
+      "reason": "Record the reproducible Cloudscape bundle and its source graph for the group detail view."
+    },
+    {
+      "path": "tools/console/src/catalog.jsx",
+      "sha256": "941ddbde910ed2ce34424cacc25d2a026168853bf98facef608bc00f56542d3d",
+      "models": [
+        {
+          "id": "CatalogConsoleEpoch",
+          "properties": [
+            "NoUnmountedAcceptance",
+            "OnlyCurrentReplies",
+            "SingleWriter",
+            "ReloadOnlyAfterAck",
+            "FailureVisible"
+          ],
+          "limits": "The model covers bounded reply ownership, single-writer admission, success and failure handling. Actual browser cancellation, native query syntax, pagination, authorization, persisted state and rendering require separate runtime checks."
+        }
+      ],
+      "disposition": "modeled",
+      "reason": "Use scoped request lifetimes and the catalog single-writer latch when displaying and replacing the selected group query."
+    },
+    {
+      "path": "tools/console/src/resource-group-members.jsx",
+      "sha256": "9e0efd982d2e8009f748f0f3d8380ee08efe1b2d77062dae6f9aa439fe50a2d0",
+      "models": [
+        {
+          "id": "CatalogConsoleEpoch",
+          "properties": [
+            "NoUnmountedAcceptance",
+            "OnlyCurrentReplies",
+            "SingleWriter",
+            "ReloadOnlyAfterAck",
+            "FailureVisible"
+          ],
+          "limits": "The model covers bounded reply ownership, single-writer admission, success and failure handling. Actual browser cancellation, native query syntax, pagination, authorization, persisted state and rendering require separate runtime checks."
+        }
+      ],
+      "disposition": "modeled",
+      "reason": "Use scoped request lifetimes and the catalog single-writer latch when displaying and replacing the selected group query."
     }
   ]
 }

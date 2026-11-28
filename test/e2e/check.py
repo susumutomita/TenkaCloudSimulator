@@ -756,6 +756,9 @@ def handler(event,context):
  def test_named_resource_group_membership_tracks_live_ecr_tags(self):
   subprocess.run([sys.executable, str(Path(__file__).with_name('resource_group_ecr_members.py'))], check=True, timeout=120)
 
+ def test_gcp_trace_v1_official_client_two_teams_append_views_restart(self):
+  subprocess.run([sys.executable, str(Path(__file__).with_name('gcp_trace_sdk.py'))], check=True, timeout=180)
+
  def test_gcp_catalog_discovery_client_two_teams_owner_restart_and_cleanup(self):
   subprocess.run([sys.executable, str(Path(__file__).with_name('gcp_catalog_fixtures.py'))], check=True, timeout=600)
 
