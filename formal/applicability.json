@@ -1,40 +1,233 @@
 {
   "version": 1,
-  "base_sha": "fa06c139f93ab1e32bf8c13809ca70434464994a",
+  "base_sha": "d64ec74e4d9927b93bbb2f49e0ca03050eca7490",
   "changes": [
     {
-      "path": "docs/acceptance/gcp-cloud-dns.md",
-      "sha256": "cc53e8e4c2fcbb9a45ab811119cbf6153d4805e2f58f04410210bca36a49eaff",
+      "path": "README.md",
+      "sha256": "ddb025ad9e7279f02aa0dc3a83196a92afa003a0f1351e67fd6d28bda60767a3",
       "disposition": "documentation",
-      "reason": "Document the Cloud DNS provider root, official workflow and local scope, read-only Scalar request, and the observed SDK and browser results.",
+      "reason": "Link the native custom metric workflow from the AWS service list.",
       "models": []
     },
     {
-      "path": "test/e2e/gcp_dns_console_gui.py",
-      "sha256": "78c86d152033747d527d96d6e2df1fc56263929d63df0f69fbe461926c12f044",
-      "disposition": "test-support",
-      "reason": "Check the default operator context and identity-selection capability, then exercise the existing authenticated Cloud DNS Console flow.",
+      "path": "docs/cloudwatch-metrics.md",
+      "sha256": "addec533600b3f48c85f690ae14b03ee2fad43d4a9d1b517ac6dc990c8ac485f",
+      "disposition": "documentation",
+      "reason": "Document the actual native Query operations, IAM actions, scope, input bounds, storage and time-bucket behavior.",
       "models": []
     },
     {
-      "path": "test/e2e/gcp_dns_scalar_send.py",
-      "sha256": "841f7bf8da4b5715258d26e984dbb5e4cd3449e36957748d516dcb13699eab9a",
-      "disposition": "test-support",
-      "reason": "Run the real Chromium sandbox and check that the List action sends one cookie-authenticated GET from the served reference, with native state cleanup.",
+      "path": "docs/design/0001-go-standalone.md",
+      "sha256": "f50c920e8771827e39d4288d39dba6e4e9d08d285c8a3c568b1545879c60984f",
+      "disposition": "documentation",
+      "reason": "Describe the bounded metric ledger in the existing standalone simulator.",
       "models": []
     },
     {
-      "path": "test/e2e/gcp_dns_sdk.py",
-      "sha256": "520f58c0eb3c65cfed97a32414b7ea9fff412ddb0224e8f596036ab3c439eaa2",
-      "disposition": "test-support",
-      "reason": "Give the pinned discovery client the owned provider root. Its discovery document supplies the versioned method path. The existing loopback, request and response checks are preserved.",
+      "path": "formal/CloudWatchMetricTransaction.cfg",
+      "sha256": "dfe23637d8c23b72a03ffe77d1d1bf9a94c9a09eb945b95c2e02fb9a59babf25",
+      "disposition": "modeled",
+      "reason": "Check the metric transaction invariants and read correspondence within the declared finite bounds.",
+      "models": [
+        {
+          "id": "CloudWatchMetricTransaction",
+          "properties": [
+            "TypeOK",
+            "StagedInvisible",
+            "PeerPreserved",
+            "RepeatedObservationsCount",
+            "AtomicAccepted",
+            "RejectedUnchanged",
+            "ReadAndRestartPreserve",
+            "BoundedRows",
+            "ReadAggregates"
+          ],
+          "limits": "Finite normalized transaction/read contract only. Scope denotes trusted configured namespace/region isolation; one process/database is assumed. It does not prove HTTP/gzip/XML/SigV4 or IAM evaluation, input parsing/dimension canonicalization, real UTC rounding/retention durations, floating point accuracy, SQLite schema/SQL/locking/trigger behavior, actual quotas, cancellation timing, process recovery or Go refinement. Rational average comparisons model multiplicity weighting, not IEEE754. Read/restart cannot publish staged writes; independent expected aggregation uses committed oracle rows. Native SDK/database/fault tests remain required. Gateway dispatch, store initialization and server capability composition paths are mapped for integration evidence only; this model does not verify their concrete wiring."
+        }
+      ]
+    },
+    {
+      "path": "formal/CloudWatchMetricTransaction.tla",
+      "sha256": "4bfd8e85abfec4157bc7ccf7d7764989b137f6ddb42457af733263a9a47ebe90",
+      "disposition": "modeled",
+      "reason": "Specify atomic batch commit, retention, denial, cancellation, repeated observations and weighted aggregation over finite scopes.",
+      "models": [
+        {
+          "id": "CloudWatchMetricTransaction",
+          "properties": [
+            "TypeOK",
+            "StagedInvisible",
+            "PeerPreserved",
+            "RepeatedObservationsCount",
+            "AtomicAccepted",
+            "RejectedUnchanged",
+            "ReadAndRestartPreserve",
+            "BoundedRows",
+            "ReadAggregates"
+          ],
+          "limits": "Finite normalized transaction/read contract only. Scope denotes trusted configured namespace/region isolation; one process/database is assumed. It does not prove HTTP/gzip/XML/SigV4 or IAM evaluation, input parsing/dimension canonicalization, real UTC rounding/retention durations, floating point accuracy, SQLite schema/SQL/locking/trigger behavior, actual quotas, cancellation timing, process recovery or Go refinement. Rational average comparisons model multiplicity weighting, not IEEE754. Read/restart cannot publish staged writes; independent expected aggregation uses committed oracle rows. Native SDK/database/fault tests remain required. Gateway dispatch, store initialization and server capability composition paths are mapped for integration evidence only; this model does not verify their concrete wiring."
+        }
+      ]
+    },
+    {
+      "path": "formal/models.json",
+      "sha256": "6ca7eb8266af572edb71d579513062d13a841379b1dfd1a43f7e5cdfbc6cde2f",
+      "disposition": "formal-infrastructure",
+      "reason": "Register the bounded transaction and aggregation model and its individual behavioral controls.",
       "models": []
     },
     {
-      "path": "test/e2e/test_gcp_dns_sdk.py",
-      "sha256": "94a1d6fa2c1362cff660f57bae9afe54c7e74db9f153ebceae84a438a80a2c8b",
+      "path": "internal/aws/cloudwatch_metrics_gateway.go",
+      "sha256": "7b809957c2cc2b1466690ad317196ff386656f4c3ce50d40904645e5722915ae",
+      "disposition": "modeled",
+      "reason": "Select monitoring Query requests and apply the trusted actor’s separate action decision for the local resource.",
+      "models": [
+        {
+          "id": "CloudWatchMetricTransaction",
+          "properties": [
+            "RejectedUnchanged",
+            "PeerPreserved"
+          ],
+          "limits": "Scope and access are symbolic inputs. HTTP routing, token validation and concrete IAM evaluation require native tests."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/cloudwatchmetrics/form.go",
+      "sha256": "09fc460ce9285099ae384578e43a7db4b8ade4120f0e91ee00703f331dedff33",
+      "disposition": "modeled",
+      "reason": "Parse bounded raw sample batches and basic statistics parameters before admission.",
+      "models": [
+        {
+          "id": "CloudWatchMetricTransaction",
+          "properties": [
+            "RejectedUnchanged",
+            "PeerPreserved"
+          ],
+          "limits": "Well-formedness and normalized inputs are symbolic. The model does not verify field parsing, time formats, dimensions or limits on wire input."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/cloudwatchmetrics/http.go",
+      "sha256": "5f81f3d91ae5a4c7ca53357a49e034b519c167f89bf527651032983c7334160c",
+      "disposition": "modeled",
+      "reason": "Decode the Query envelope, route the two operations and emit native XML responses.",
+      "models": [
+        {
+          "id": "CloudWatchMetricTransaction",
+          "properties": [
+            "RejectedUnchanged",
+            "PeerPreserved"
+          ],
+          "limits": "Admission outcomes are symbolic. The model does not verify transport, gzip, action decoding, response formatting or IAM."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/cloudwatchmetrics/http_test.go",
+      "sha256": "cf4247b4a5918261991732a90a2f21fbe170ec5136915ecee276a3af8a6cd760",
       "disposition": "test-support",
-      "reason": "Check the prepared methods, target paths and queries for six calls without performing any network request.",
+      "reason": "Cover normal and rejected Query requests, gzip and malformed or out-of-bounds parameters.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/cloudwatchmetrics/store.go",
+      "sha256": "117f92ccfcf4d7cd8db4d41c3a22bdc40345b337cc0f39ff5ba82ba7b83fea6d",
+      "disposition": "modeled",
+      "reason": "Keep samples in SQLite, atomically prune scoped rows and admit batches, and aggregate committed observations.",
+      "models": [
+        {
+          "id": "CloudWatchMetricTransaction",
+          "properties": [
+            "TypeOK",
+            "StagedInvisible",
+            "PeerPreserved",
+            "RepeatedObservationsCount",
+            "AtomicAccepted",
+            "RejectedUnchanged",
+            "ReadAndRestartPreserve",
+            "BoundedRows",
+            "ReadAggregates"
+          ],
+          "limits": "Finite normalized transaction/read contract only. Scope denotes trusted configured namespace/region isolation; one process/database is assumed. It does not prove HTTP/gzip/XML/SigV4 or IAM evaluation, input parsing/dimension canonicalization, real UTC rounding/retention durations, floating point accuracy, SQLite schema/SQL/locking/trigger behavior, actual quotas, cancellation timing, process recovery or Go refinement. Rational average comparisons model multiplicity weighting, not IEEE754. Read/restart cannot publish staged writes; independent expected aggregation uses committed oracle rows. Native SDK/database/fault tests remain required. Gateway dispatch, store initialization and server capability composition paths are mapped for integration evidence only; this model does not verify their concrete wiring."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/cloudwatchmetrics/store_test.go",
+      "sha256": "d785b12a521abbabfe2ee05afea5e706af8bdf981360824f38dc7ea32cae2cb3",
+      "disposition": "test-support",
+      "reason": "Exercise actual transaction failures, cancellation, quota/retention boundaries, scope isolation, weighted statistics and restart.",
+      "models": []
+    },
+    {
+      "path": "internal/aws/s3.go",
+      "sha256": "8d1e769bdb27e3651aa809a6b594ff57eeda6dde2d89bf71eb95321566da07ab",
+      "disposition": "modeled",
+      "reason": "Add the metric store reference to the AWS gateway used by the existing provider registry.",
+      "models": [
+        {
+          "id": "CloudWatchMetricTransaction",
+          "properties": [
+            "PeerPreserved",
+            "ReadAndRestartPreserve"
+          ],
+          "limits": "The model assumes an owned store and a trusted scope. Go gateway field wiring is exercised by integration tests."
+        }
+      ]
+    },
+    {
+      "path": "internal/aws/ssm.go",
+      "sha256": "9823d3fb94487940f5bb488420f3ec03e3fea21e2b5dd4c73c3bad05a104ac0e",
+      "disposition": "modeled",
+      "reason": "Route monitoring requests at the shared AWS gateway to the CloudWatch Metrics adapter.",
+      "models": [
+        {
+          "id": "CloudWatchMetricTransaction",
+          "properties": [
+            "RejectedUnchanged",
+            "PeerPreserved"
+          ],
+          "limits": "The model assumes correct admission to the addressed scope. Actual service selection and inherited protocols require gateway tests."
+        }
+      ]
+    },
+    {
+      "path": "internal/server/cloudwatch_metrics_composition_test.go",
+      "sha256": "bfbf8075a3237d4b35c9608dc489ccc3bd0a96a3755ab6edc9eea8745d83fddd",
+      "disposition": "test-support",
+      "reason": "Exercise the authenticated provider alias, shared AWS root, routing and protocol checks.",
+      "models": []
+    },
+    {
+      "path": "internal/server/server.go",
+      "sha256": "a39a63856c36de05f8c48caa81f1457852e917eaf6ebdbd417d966bc5a650a9e",
+      "disposition": "modeled",
+      "reason": "Initialize the metric store for the team database and declare the two native operations in capabilities.",
+      "models": [
+        {
+          "id": "CloudWatchMetricTransaction",
+          "properties": [
+            "PeerPreserved",
+            "ReadAndRestartPreserve"
+          ],
+          "limits": "The model assumes one team database and configured scope. Construction, capability JSON and provider registration are outside its scope."
+        }
+      ]
+    },
+    {
+      "path": "test/e2e/check.py",
+      "sha256": "85f363fdd3cc243c8fb40b7c65fa07e2acad82dacfaf36ebfe28257558e6211b",
+      "disposition": "test-support",
+      "reason": "Include the stock custom metrics SDK fixture in the full E2E suite.",
+      "models": []
+    },
+    {
+      "path": "test/e2e/cloudwatch_metrics.py",
+      "sha256": "ada3e089bbaa7dbda0957d9b597a496c1692a3c2358e9ea0a588981fffe79ac3",
+      "disposition": "test-support",
+      "reason": "Exercise the two native operations with the pinned SDK, explicit local credentials, successful gzip ingest, two teams, IAM and restart.",
       "models": []
     }
   ]
