@@ -29972,6 +29972,136 @@
           "expect_invariant": "ConnectionPragmasApplied"
         }
       ]
+    },
+    {
+      "id": "CloudFrontLocalCache",
+      "model": "formal/CloudFrontLocalCache.tla",
+      "config": "formal/CloudFrontLocalCache.cfg",
+      "bounds": "One distribution and object, two actors, a single abstract cache line, two byte values, two distinct origin lifetime fingerprints, three configuration revisions and at most four transitions.",
+      "properties": [
+        "TypeOK",
+        "FreshJointAuthority",
+        "ExactHitIdentity",
+        "MissReadsOrigin",
+        "FailureRollsBack",
+        "RefusalUnchanged",
+        "StaleETagUnchanged",
+        "UpdateClearsCache",
+        "InvalidationClearsCache",
+        "RestartPreserves",
+        "PeerUnchanged"
+      ],
+      "limits": "Checks an atomic abstract transaction and one immutable pair of policy decisions per delivery. A bucket lifetime fingerprint is assumed distinct for the single ordinary recreation; actual wall-clock buckets.created plus region does not prove ABA resistance under clock rollback. One abstract cache line does not model concrete multi-entry quotas, exact paths, TTL seconds, SQL/triggers/locking, authentication, HTTP/XML/S3 parsing, cache buffers, ETags or Go refinement. Restart preserves abstract committed state only, not crash durability. Native and SDK tests separately cover the real implementation.",
+      "source_scope": [
+        "internal/aws/cloudfront_distribution.go",
+        "internal/aws/cloudfront_distribution_store.go",
+        "internal/aws/cloudfront_distribution_http.go",
+        "internal/aws/cloudfront_distribution_list.go",
+        "internal/aws/cloudfront_vpc_origin.go",
+        "internal/aws/ssm.go",
+        "internal/server/server.go"
+      ],
+      "mutants": [
+        {
+          "id": "MissingObjectGrant",
+          "edits": [
+            {
+              "old": "allowed == dg /\\ og /\\ enabled",
+              "new": "allowed == dg /\\ enabled",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "FreshJointAuthority"
+        },
+        {
+          "id": "MissingDistributionGrant",
+          "edits": [
+            {
+              "old": "allowed == dg /\\ og /\\ enabled",
+              "new": "allowed == og /\\ enabled",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "FreshJointAuthority"
+        },
+        {
+          "id": "WrongOriginLifetime",
+          "edits": [
+            {
+              "old": "origin = bound (* BothLiveGrants *)",
+              "new": "TRUE (* BothLiveGrants *)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "FreshJointAuthority"
+        },
+        {
+          "id": "CrossActorHit",
+          "edits": [
+            {
+              "old": "cacheActor = actor /\\ cacheOrigin = origin",
+              "new": "cacheOrigin = origin",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExactHitIdentity"
+        },
+        {
+          "id": "ExpiredHit",
+          "edits": [
+            {
+              "old": "valid /\\ ~expired /\\ cacheActor",
+              "new": "valid /\\ cacheActor",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExactHitIdentity"
+        },
+        {
+          "id": "IgnoreETag",
+          "edits": [
+            {
+              "old": "expected = config /\\ ok (* ExactETag *)",
+              "new": "ok (* ExactETag *)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "StaleETagUnchanged"
+        },
+        {
+          "id": "UpdateRetainsCache",
+          "edits": [
+            {
+              "old": "valid' = FALSE (* UpdateEvicts *)",
+              "new": "valid' = valid (* UpdateEvicts *)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "UpdateClearsCache"
+        },
+        {
+          "id": "InvalidationRetainsCache",
+          "edits": [
+            {
+              "old": "valid' = IF ok THEN FALSE ELSE valid (* InvalidationAtomic *)",
+              "new": "valid' = valid (* InvalidationAtomic *)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "InvalidationClearsCache"
+        },
+        {
+          "id": "FailedInvalidationEvicts",
+          "edits": [
+            {
+              "old": "valid' = IF ok THEN FALSE ELSE valid (* InvalidationAtomic *)",
+              "new": "valid' = FALSE (* InvalidationAtomic *)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "FailureRollsBack"
+        }
+      ]
     }
   ]
 }

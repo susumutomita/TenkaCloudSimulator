@@ -1,0 +1,570 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Local CloudFront distributions",
+    "version": "2020-05-31",
+    "description": "Bounded native REST/XML APIs for one saved local S3 origin. Seed the example bucket and object first. Static example IDs do not identify existing resources. DomainName uses .invalid and is never fetched. Use the separately documented authenticated simulator-only content route; no external origin traffic, edge network or live CDN."
+  },
+  "servers": [
+    {
+      "url": "/"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Distributions"
+    },
+    {
+      "name": "Invalidations"
+    }
+  ],
+  "paths": {
+    "/2020-05-31/distribution": {
+      "post": {
+        "operationId": "CreateDistribution",
+        "summary": "CreateDistribution",
+        "tags": [
+          "Distributions"
+        ],
+        "externalDocs": {
+          "url": "https://docs.aws.amazon.com/cloudfront/latest/APIReference/API_CreateDistribution.html"
+        },
+        "parameters": [
+          {
+            "name": "X-Simulator-Service",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "cloudfront"
+              ],
+              "default": "cloudfront"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Native committed response.",
+            "content": {
+              "application/xml": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "headers": {
+              "ETag": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Malformed or unsupported input."
+          },
+          "403": {
+            "description": "Denied exact CloudFront action/resource."
+          },
+          "404": {
+            "description": "No such saved distribution/origin/invalidation."
+          },
+          "500": {
+            "description": "State failure; transaction is rolled back."
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/xml": {
+              "schema": {
+                "type": "string"
+              },
+              "example": "<DistributionConfig xmlns=\"http://cloudfront.amazonaws.com/doc/2020-05-31/\"><CallerReference>local-content</CallerReference><Origins><Quantity>1</Quantity><Items><Origin><Id>saved</Id><DomainName>cloudfront-local-origin.s3.amazonaws.com</DomainName><S3OriginConfig><OriginAccessIdentity></OriginAccessIdentity></S3OriginConfig></Origin></Items></Origins><DefaultCacheBehavior><TargetOriginId>saved</TargetOriginId><ViewerProtocolPolicy>allow-all</ViewerProtocolPolicy><AllowedMethods><Quantity>2</Quantity><Items><Method>GET</Method><Method>HEAD</Method></Items><CachedMethods><Quantity>2</Quantity><Items><Method>GET</Method><Method>HEAD</Method></Items></CachedMethods></AllowedMethods><ForwardedValues><QueryString>false</QueryString><Cookies><Forward>none</Forward></Cookies></ForwardedValues><MinTTL>0</MinTTL><DefaultTTL>60</DefaultTTL><MaxTTL>86400</MaxTTL></DefaultCacheBehavior><Comment>local only</Comment><Enabled>true</Enabled></DistributionConfig>"
+            }
+          }
+        }
+      },
+      "get": {
+        "operationId": "ListDistributions",
+        "summary": "ListDistributions",
+        "tags": [
+          "Distributions"
+        ],
+        "externalDocs": {
+          "url": "https://docs.aws.amazon.com/cloudfront/latest/APIReference/API_ListDistributions.html"
+        },
+        "parameters": [
+          {
+            "name": "X-Simulator-Service",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "cloudfront"
+              ],
+              "default": "cloudfront"
+            }
+          },
+          {
+            "name": "Marker",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "pattern": "^D[a-f0-9]{24}$"
+            }
+          },
+          {
+            "name": "MaxItems",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50,
+              "default": 25
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Native committed response.",
+            "content": {
+              "application/xml": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Malformed or unsupported input."
+          },
+          "403": {
+            "description": "Denied exact CloudFront action/resource."
+          },
+          "404": {
+            "description": "No such saved distribution/origin/invalidation."
+          },
+          "500": {
+            "description": "State failure; transaction is rolled back."
+          }
+        }
+      }
+    },
+    "/2020-05-31/distribution/{Id}": {
+      "get": {
+        "operationId": "GetDistribution",
+        "summary": "GetDistribution",
+        "tags": [
+          "Distributions"
+        ],
+        "externalDocs": {
+          "url": "https://docs.aws.amazon.com/cloudfront/latest/APIReference/API_GetDistribution.html"
+        },
+        "parameters": [
+          {
+            "name": "X-Simulator-Service",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "cloudfront"
+              ],
+              "default": "cloudfront"
+            }
+          },
+          {
+            "name": "Id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^D[a-f0-9]{24}$"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Native committed response.",
+            "content": {
+              "application/xml": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "headers": {
+              "ETag": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Malformed or unsupported input."
+          },
+          "403": {
+            "description": "Denied exact CloudFront action/resource."
+          },
+          "404": {
+            "description": "No such saved distribution/origin/invalidation."
+          },
+          "500": {
+            "description": "State failure; transaction is rolled back."
+          }
+        }
+      },
+      "delete": {
+        "operationId": "DeleteDistribution",
+        "summary": "DeleteDistribution",
+        "tags": [
+          "Distributions"
+        ],
+        "externalDocs": {
+          "url": "https://docs.aws.amazon.com/cloudfront/latest/APIReference/API_DeleteDistribution.html"
+        },
+        "parameters": [
+          {
+            "name": "X-Simulator-Service",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "cloudfront"
+              ],
+              "default": "cloudfront"
+            }
+          },
+          {
+            "name": "Id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^D[a-f0-9]{24}$"
+            }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "required": true,
+            "description": "Exact ETag from the most recent GetDistribution or GetDistributionConfig.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Native committed response."
+          },
+          "400": {
+            "description": "Malformed or unsupported input."
+          },
+          "403": {
+            "description": "Denied exact CloudFront action/resource."
+          },
+          "404": {
+            "description": "No such saved distribution/origin/invalidation."
+          },
+          "500": {
+            "description": "State failure; transaction is rolled back."
+          }
+        }
+      }
+    },
+    "/2020-05-31/distribution/{Id}/config": {
+      "get": {
+        "operationId": "GetDistributionConfig",
+        "summary": "GetDistributionConfig",
+        "tags": [
+          "Distributions"
+        ],
+        "externalDocs": {
+          "url": "https://docs.aws.amazon.com/cloudfront/latest/APIReference/API_GetDistributionConfig.html"
+        },
+        "parameters": [
+          {
+            "name": "X-Simulator-Service",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "cloudfront"
+              ],
+              "default": "cloudfront"
+            }
+          },
+          {
+            "name": "Id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^D[a-f0-9]{24}$"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Native committed response.",
+            "content": {
+              "application/xml": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "headers": {
+              "ETag": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Malformed or unsupported input."
+          },
+          "403": {
+            "description": "Denied exact CloudFront action/resource."
+          },
+          "404": {
+            "description": "No such saved distribution/origin/invalidation."
+          },
+          "500": {
+            "description": "State failure; transaction is rolled back."
+          }
+        }
+      },
+      "put": {
+        "operationId": "UpdateDistribution",
+        "summary": "UpdateDistribution",
+        "tags": [
+          "Distributions"
+        ],
+        "externalDocs": {
+          "url": "https://docs.aws.amazon.com/cloudfront/latest/APIReference/API_UpdateDistribution.html"
+        },
+        "parameters": [
+          {
+            "name": "X-Simulator-Service",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "cloudfront"
+              ],
+              "default": "cloudfront"
+            }
+          },
+          {
+            "name": "Id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^D[a-f0-9]{24}$"
+            }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "required": true,
+            "description": "Exact ETag from the most recent GetDistribution or GetDistributionConfig.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Native committed response.",
+            "content": {
+              "application/xml": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "headers": {
+              "ETag": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Malformed or unsupported input."
+          },
+          "403": {
+            "description": "Denied exact CloudFront action/resource."
+          },
+          "404": {
+            "description": "No such saved distribution/origin/invalidation."
+          },
+          "500": {
+            "description": "State failure; transaction is rolled back."
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/xml": {
+              "schema": {
+                "type": "string"
+              },
+              "example": "<DistributionConfig xmlns=\"http://cloudfront.amazonaws.com/doc/2020-05-31/\"><CallerReference>local-content</CallerReference><Origins><Quantity>1</Quantity><Items><Origin><Id>saved</Id><DomainName>cloudfront-local-origin.s3.amazonaws.com</DomainName><S3OriginConfig><OriginAccessIdentity></OriginAccessIdentity></S3OriginConfig></Origin></Items></Origins><DefaultCacheBehavior><TargetOriginId>saved</TargetOriginId><ViewerProtocolPolicy>allow-all</ViewerProtocolPolicy><AllowedMethods><Quantity>2</Quantity><Items><Method>GET</Method><Method>HEAD</Method></Items><CachedMethods><Quantity>2</Quantity><Items><Method>GET</Method><Method>HEAD</Method></Items></CachedMethods></AllowedMethods><ForwardedValues><QueryString>false</QueryString><Cookies><Forward>none</Forward></Cookies></ForwardedValues><MinTTL>0</MinTTL><DefaultTTL>60</DefaultTTL><MaxTTL>86400</MaxTTL></DefaultCacheBehavior><Comment>local only</Comment><Enabled>true</Enabled></DistributionConfig>"
+            }
+          }
+        }
+      }
+    },
+    "/2020-05-31/distribution/{Id}/invalidation": {
+      "post": {
+        "operationId": "CreateInvalidation",
+        "summary": "CreateInvalidation",
+        "tags": [
+          "Invalidations"
+        ],
+        "externalDocs": {
+          "url": "https://docs.aws.amazon.com/cloudfront/latest/APIReference/API_CreateInvalidation.html"
+        },
+        "parameters": [
+          {
+            "name": "X-Simulator-Service",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "cloudfront"
+              ],
+              "default": "cloudfront"
+            }
+          },
+          {
+            "name": "Id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^D[a-f0-9]{24}$"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Native committed response.",
+            "content": {
+              "application/xml": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Malformed or unsupported input."
+          },
+          "403": {
+            "description": "Denied exact CloudFront action/resource."
+          },
+          "404": {
+            "description": "No such saved distribution/origin/invalidation."
+          },
+          "500": {
+            "description": "State failure; transaction is rolled back."
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/xml": {
+              "schema": {
+                "type": "string"
+              },
+              "example": "<InvalidationBatch xmlns=\"http://cloudfront.amazonaws.com/doc/2020-05-31/\"><CallerReference>refresh</CallerReference><Paths><Quantity>1</Quantity><Items><Path>/*</Path></Items></Paths></InvalidationBatch>"
+            }
+          }
+        }
+      }
+    },
+    "/2020-05-31/distribution/{Id}/invalidation/{InvalidationId}": {
+      "get": {
+        "operationId": "GetInvalidation",
+        "summary": "GetInvalidation",
+        "tags": [
+          "Invalidations"
+        ],
+        "externalDocs": {
+          "url": "https://docs.aws.amazon.com/cloudfront/latest/APIReference/API_GetInvalidation.html"
+        },
+        "parameters": [
+          {
+            "name": "X-Simulator-Service",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "cloudfront"
+              ],
+              "default": "cloudfront"
+            }
+          },
+          {
+            "name": "Id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^D[a-f0-9]{24}$"
+            }
+          },
+          {
+            "name": "InvalidationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^I[a-f0-9]{24}$"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Native committed response.",
+            "content": {
+              "application/xml": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Malformed or unsupported input."
+          },
+          "403": {
+            "description": "Denied exact CloudFront action/resource."
+          },
+          "404": {
+            "description": "No such saved distribution/origin/invalidation."
+          },
+          "500": {
+            "description": "State failure; transaction is rolled back."
+          }
+        }
+      }
+    }
+  }
+}

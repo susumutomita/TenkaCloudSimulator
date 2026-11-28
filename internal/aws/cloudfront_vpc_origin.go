@@ -65,10 +65,24 @@ func cfMissing() error           { return cfFailure{404, "EntityNotFound", "The 
 type CloudFrontStore struct{ db *sql.DB }
 
 func NewCloudFrontStore(db *sql.DB) (*CloudFrontStore, error) {
-	_, err := db.Exec(`CREATE TABLE IF NOT EXISTS aws_cloudfront_vpc_origins (
+	if db == nil {
+		return nil, errors.New("CloudFront requires a SQLite database")
+	}
+	tx, err := db.Begin()
+	if err != nil {
+		return nil, err
+	}
+	defer tx.Rollback()
+	_, err = tx.Exec(`CREATE TABLE IF NOT EXISTS aws_cloudfront_vpc_origins (
 		id TEXT PRIMARY KEY, name TEXT NOT NULL UNIQUE, alb TEXT NOT NULL REFERENCES aws_elb_load_balancers(arn) ON DELETE RESTRICT,
 		document TEXT NOT NULL)`)
 	if err != nil {
+		return nil, err
+	}
+	if _, err = tx.Exec(cfDistributionSchema); err != nil {
+		return nil, err
+	}
+	if err = tx.Commit(); err != nil {
 		return nil, err
 	}
 	return &CloudFrontStore{db}, nil
