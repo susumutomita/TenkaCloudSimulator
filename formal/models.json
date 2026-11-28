@@ -30741,6 +30741,264 @@
       ]
     },
     {
+      "id": "CloudFrontLocalCache",
+      "model": "formal/CloudFrontLocalCache.tla",
+      "config": "formal/CloudFrontLocalCache.cfg",
+      "bounds": "One distribution and object, two actors, a single abstract cache line, two byte values, two distinct origin lifetime fingerprints, three configuration revisions and at most four transitions.",
+      "properties": [
+        "TypeOK",
+        "FreshJointAuthority",
+        "ExactHitIdentity",
+        "MissReadsOrigin",
+        "FailureRollsBack",
+        "RefusalUnchanged",
+        "StaleETagUnchanged",
+        "UpdateClearsCache",
+        "InvalidationClearsCache",
+        "RestartPreserves",
+        "PeerUnchanged"
+      ],
+      "limits": "Checks an atomic abstract transaction and one immutable pair of policy decisions per delivery. A bucket lifetime fingerprint is assumed distinct for the single ordinary recreation; actual wall-clock buckets.created plus region does not prove ABA resistance under clock rollback. One abstract cache line does not model concrete multi-entry quotas, exact paths, TTL seconds, SQL/triggers/locking, authentication, HTTP/XML/S3 parsing, cache buffers, ETags or Go refinement. Restart preserves abstract committed state only, not crash durability. Native and SDK tests separately cover the real implementation.",
+      "source_scope": [
+        "internal/aws/cloudfront_distribution.go",
+        "internal/aws/cloudfront_distribution_store.go",
+        "internal/aws/cloudfront_distribution_http.go",
+        "internal/aws/cloudfront_distribution_list.go",
+        "internal/aws/cloudfront_vpc_origin.go",
+        "internal/aws/ssm.go",
+        "internal/server/server.go",
+        "internal/aws/cloudfront_distribution_interrupt_test.go"
+      ],
+      "mutants": [
+        {
+          "id": "MissingObjectGrant",
+          "edits": [
+            {
+              "old": "allowed == dg /\\ og /\\ enabled",
+              "new": "allowed == dg /\\ enabled",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "FreshJointAuthority"
+        },
+        {
+          "id": "MissingDistributionGrant",
+          "edits": [
+            {
+              "old": "allowed == dg /\\ og /\\ enabled",
+              "new": "allowed == og /\\ enabled",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "FreshJointAuthority"
+        },
+        {
+          "id": "WrongOriginLifetime",
+          "edits": [
+            {
+              "old": "origin = bound (* BothLiveGrants *)",
+              "new": "TRUE (* BothLiveGrants *)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "FreshJointAuthority"
+        },
+        {
+          "id": "CrossActorHit",
+          "edits": [
+            {
+              "old": "cacheActor = actor /\\ cacheOrigin = origin",
+              "new": "cacheOrigin = origin",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExactHitIdentity"
+        },
+        {
+          "id": "ExpiredHit",
+          "edits": [
+            {
+              "old": "valid /\\ ~expired /\\ cacheActor",
+              "new": "valid /\\ cacheActor",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExactHitIdentity"
+        },
+        {
+          "id": "IgnoreETag",
+          "edits": [
+            {
+              "old": "expected = config /\\ ok (* ExactETag *)",
+              "new": "ok (* ExactETag *)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "StaleETagUnchanged"
+        },
+        {
+          "id": "UpdateRetainsCache",
+          "edits": [
+            {
+              "old": "valid' = FALSE (* UpdateEvicts *)",
+              "new": "valid' = valid (* UpdateEvicts *)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "UpdateClearsCache"
+        },
+        {
+          "id": "InvalidationRetainsCache",
+          "edits": [
+            {
+              "old": "valid' = IF ok THEN FALSE ELSE valid (* InvalidationAtomic *)",
+              "new": "valid' = valid (* InvalidationAtomic *)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "InvalidationClearsCache"
+        },
+        {
+          "id": "FailedInvalidationEvicts",
+          "edits": [
+            {
+              "old": "valid' = IF ok THEN FALSE ELSE valid (* InvalidationAtomic *)",
+              "new": "valid' = FALSE (* InvalidationAtomic *)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "FailureRollsBack"
+        }
+      ]
+    },
+    {
+      "id": "CloudFrontConsoleEpoch",
+      "model": "formal/CloudFrontConsoleEpoch.tla",
+      "config": "formal/CloudFrontConsoleEpoch.cfg",
+      "bounds": "Two abstract actor/region/route/distribution scopes, three scope epochs, three native request tickets, two caller references and at most eight transitions.",
+      "properties": [
+        "TypeOK",
+        "CurrentContent",
+        "CurrentReceipt",
+        "ProtectedDownload",
+        "AcknowledgedReceipt",
+        "StableUnknownCaller",
+        "ExplicitWriteConfirmation",
+        "OneCurrentWrite"
+      ],
+      "limits": "Models bounded asynchronous content reads and invalidation ownership, abstract protected content, confirmation, unknown acknowledgement and stable explicit replay of fixed /* paths. One abstract scope combines identity, region, route and distribution. Does not model XML/UTF-8/DOM/React, download or OS execution, actual HTTP abort effects, IAM policy evaluation, SQLite, native cache or JavaScript/Go refinement. CloudFrontLocalCache and real SDK/browser/native tests cover separate backend behavior. Known-receipt GET retry/lookup retention is checked by the real browser/storage-outage fixture, not represented in this model.",
+      "source_scope": [
+        "tools/console/src/cloudfront-local.mjs",
+        "tools/console/src/cloudfront-local.jsx",
+        "tools/console/src/console-navigation.mjs",
+        "tools/console/src/main.jsx",
+        "internal/aws/cloudfront_distribution_http.go",
+        "internal/server/web/app.js",
+        "tools/console/src/console-home.jsx"
+      ],
+      "mutants": [
+        {
+          "id": "PublishOldRead",
+          "edits": [
+            {
+              "old": "IF Own(r) /\\ safe (* ProtectedContent *)",
+              "new": "IF safe (* ProtectedContent *)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CurrentContent"
+        },
+        {
+          "id": "RetainOldContent",
+          "edits": [
+            {
+              "old": "content' = Empty (* ClearScope *)",
+              "new": "content' = content (* ClearScope *)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CurrentContent"
+        },
+        {
+          "id": "PublishOldReceipt",
+          "edits": [
+            {
+              "old": "IF Own(r) /\\ result = \"ok\" (* Acknowledged *)",
+              "new": "IF result = \"ok\" (* Acknowledged *)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "CurrentReceipt"
+        },
+        {
+          "id": "UnsafeContent",
+          "edits": [
+            {
+              "old": "Own(r) /\\ safe (* ProtectedContent *)",
+              "new": "Own(r) (* ProtectedContent *)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ProtectedDownload"
+        },
+        {
+          "id": "UnknownAcknowledged",
+          "edits": [
+            {
+              "old": "result = \"ok\" (* Acknowledged *)",
+              "new": "result \\in {\"ok\", \"unknown\"} (* Acknowledged *)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "AcknowledgedReceipt"
+        },
+        {
+          "id": "FreshCallerWhileUnknown",
+          "edits": [
+            {
+              "old": "ELSE ~uncertain /\\ nextCaller < 2",
+              "new": "ELSE nextCaller < 2",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "StableUnknownCaller"
+        },
+        {
+          "id": "ReplayDifferentCaller",
+          "edits": [
+            {
+              "old": "caller' = (IF replay THEN caller ELSE nextCaller + 1)",
+              "new": "caller' = (IF replay THEN nextCaller + 1 ELSE nextCaller + 1)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "StableUnknownCaller"
+        },
+        {
+          "id": "UnconfirmedWrite",
+          "edits": [
+            {
+              "old": "modal /\\ confirmed (* AffirmativeConfirmation *)",
+              "new": "modal (* AffirmativeConfirmation *)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "ExplicitWriteConfirmation"
+        },
+        {
+          "id": "OldReadUnlocksWrite",
+          "edits": [
+            {
+              "old": "activeKind' = (IF r.ticket = active THEN \"idle\" ELSE activeKind) (* ReadFinish *)",
+              "new": "activeKind' = \"idle\" (* ReadFinish *)",
+              "count": 1
+            }
+          ],
+          "expect_invariant": "OneCurrentWrite"
+        }
+      ]
+    },
+    {
       "id": "ServiceQuotaDiscovery",
       "model": "formal/ServiceQuotaDiscovery.tla",
       "config": "formal/ServiceQuotaDiscovery.cfg",
